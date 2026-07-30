@@ -104,7 +104,8 @@
             },
             {
               "type": "theorem",
-              "id": "two-tangents-from-point",
+              "id": "BuRWesTIYiKA-BV2MAOvd",
+              "slug": "dve-tecny-z-bodu",
               "body": [
                 {
                   "type": "paragraph",
@@ -169,7 +170,8 @@
             },
             {
               "type": "theorem",
-              "id": "external-tangent-two-circles",
+              "id": "mrvQMDl5Le3AmRPmyn1nx",
+              "slug": "spolecne-vnejsi-tecny-dvou-kruznic",
               "body": [
                 {
                   "type": "paragraph",
@@ -315,7 +317,8 @@
             },
             {
               "type": "theorem",
-              "id": "internal-tangent-two-circles",
+              "id": "jf0TF7EIF2sGDujPAaJGG",
+              "slug": "spolecna-vnitrni-tecna-dvou-kruznic",
               "body": [
                 {
                   "type": "paragraph",
@@ -434,7 +437,8 @@
             },
             {
               "type": "theorem",
-              "id": "incircle-touch-points-triangle",
+              "id": "JhAKuB486cDd3AdwJYXkE",
+              "slug": "dotykove-body-vepsane-kruznice",
               "body": [
                 {
                   "type": "paragraph",
@@ -535,7 +539,8 @@
             },
             {
               "type": "theorem",
-              "id": "right-triangle-inradius-formula",
+              "id": "Ul1BcJ7hkSI2RgBb98Iik",
+              "slug": "polomer-vepsane-kruznice-pravouhleho-trojuhelniku",
               "body": [
                 {
                   "type": "paragraph",
@@ -596,7 +601,8 @@
             },
             {
               "type": "theorem",
-              "id": "excircle-opposite-vertex-tangent-length",
+              "id": "4h53hlgz3wSLk4lVp4pyd",
+              "slug": "pripsana-kruznice-proti-vrcholu",
               "body": [
                 {
                   "type": "paragraph",
@@ -706,7 +712,8 @@
             },
             {
               "type": "theorem",
-              "id": "excircle-remaining-vertices-tangent-lengths",
+              "id": "tIEpiTzploVkN1fSAAx_3",
+              "slug": "pripsana-kruznice-zbyle-vrcholy",
               "body": [
                 {
                   "type": "paragraph",
@@ -753,7 +760,8 @@
             },
             {
               "type": "theorem",
-              "id": "incircle-excircle-midpoint-symmetry",
+              "id": "G0QDSuOOrioc7nfucekbj",
+              "slug": "dotykove-body-symetricke-podle-stredu",
               "body": [
                 {
                   "type": "paragraph",
@@ -809,7 +817,8 @@
             },
             {
               "type": "definition",
-              "id": "tangential-quadrilateral-definition",
+              "id": "tER-vT4qkSmu9dw7bjhcr",
+              "slug": "tecnovy-ctyruhelnik",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -860,7 +869,8 @@
             },
             {
               "type": "theorem",
-              "id": "quadrilateral-opposite-side-sums",
+              "id": "xFM0xDDSoTaKN7_k-PGs6",
+              "slug": "pitotova-veta",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -913,7 +923,8 @@
           "content": [
             {
               "type": "problem",
-              "id": "altitude-foot-incircle-diameters",
+              "id": "bm_8cGwtgRY12WAGCrh_a",
+              "slug": "pata-vysky-a-vepsane-kruznice",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1120,7 +1131,8 @@
             },
             {
               "type": "problem",
-              "id": "parallelogram-midpoint-tangential-quadrilateral",
+              "id": "EMMxpx8fQHdf5k7deQlkg",
+              "slug": "stred-strany-rovnobezniku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1378,7 +1390,8 @@
             },
             {
               "type": "problem",
-              "id": "moving-tangent-point-on-arc",
+              "id": "YHoydnnN3mLvYu3xOFGHp",
+              "slug": "obvod-trojuhelniku-z-tecen",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1669,7 +1682,8 @@
             },
             {
               "type": "problem",
-              "id": "diagonal-common-touch-point",
+              "id": "njLBWjKeOLzDnXpHe7tic",
+              "slug": "vepsane-kruznice-na-uhlopricce",
               "difficulty": 0,
               "body": [
                 {
@@ -1839,7 +1853,8 @@
             },
             {
               "type": "problem",
-              "id": "three-excircle-points-on-line",
+              "id": "6y2W6I3lf5ayFgDaZme17",
+              "slug": "tri-body-pripsanych-kruznic",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2037,7 +2052,8 @@
             },
             {
               "type": "problem",
-              "id": "corner-triangles-incircle-tangents",
+              "id": "wqOmXDet2xLsFXXqSqqXr",
+              "slug": "tri-tecny-vepsane-kruznice",
               "difficulty": 0,
               "body": [
                 {
@@ -2248,8 +2264,19 @@
               "solution": []
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "parallelogram-diagonal-touch-points",
+              "id": "ywat5ogtaZvQd-symWXYX",
+              "slug": "dotykove-body-na-uhloprickach-rovnobezniku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2534,7 +2561,8 @@
             },
             {
               "type": "problem",
-              "id": "split-triangle-incircle-touch-points",
+              "id": "1rKRGiDDH6a1N3ui7-NIp",
+              "slug": "dotykove-body-v-rozdelenem-trojuhelniku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2942,7 +2970,8 @@
             },
             {
               "type": "problem",
-              "id": "excircle-quadrilateral-side-relation",
+              "id": "XY8K2xIEBBfNKdV7OHBv4",
+              "slug": "pripsana-kruznice-ctyruhelniku",
               "difficulty": 0,
               "body": [
                 {
@@ -3208,7 +3237,8 @@
             },
             {
               "type": "problem",
-              "id": "cevian-points-tangent-incircles",
+              "id": "4CAVBeHRTqtsMdY8jrKuX",
+              "slug": "vepsane-kruznice-dotykajici-se-zvenku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3531,7 +3561,8 @@
             },
             {
               "type": "problem",
-              "id": "checkerboard-quadrilateral-grid",
+              "id": "mm753DtWsC9P9vCKmpLmt",
+              "slug": "devet-mensich-ctyruhelniku",
               "difficulty": 0,
               "body": [
                 {
@@ -3851,7 +3882,8 @@
             },
             {
               "type": "problem",
-              "id": "inscribed-angle-circle-tangent-point",
+              "id": "EXLasGyo1ngIPJ1f2b0A2",
+              "slug": "kruznice-vepsana-do-uhla",
               "difficulty": 0,
               "body": [
                 {
@@ -4299,8 +4331,19 @@
               "solution": []
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "common-tangent-locus-point",
+              "id": "mZEAwZzSzf1cMcge-3Ovs",
+              "slug": "mnozina-pruseciku-spolecne-tecny",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4735,7 +4778,8 @@
             },
             {
               "type": "problem",
-              "id": "tangential-quadrilateral-incenter-circle",
+              "id": "WqLo9VdtCR-oLjiZTe-hJ",
+              "slug": "tecnovy-ctyruhelnik-a-opsana-kruznice",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -5190,7 +5234,8 @@
             },
             {
               "type": "problem",
-              "id": "touch-points-reflected-through-incenter",
+              "id": "zwCIF1ytYOGA5L7Ai1rsb",
+              "slug": "obrazy-dotykovych-bodu-podle-stredu",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -5568,7 +5613,8 @@
             },
             {
               "type": "problem",
-              "id": "unit-length-points-perimeter-split",
+              "id": "cqRxrMgyFJE7-aHA9USqB",
+              "slug": "rozdeleni-obvodu-trojuhelniku",
               "difficulty": 2,
               "body": [
                 {
@@ -5954,7 +6000,8 @@
             },
             {
               "type": "problem",
-              "id": "circumscribed-hexagon-diagonals-concurrent",
+              "id": "p_QDQdc3MiS1qjG5JIegA",
+              "slug": "brianchonova-veta",
               "difficulty": 2,
               "title": {
                 "type": "paragraph",

@@ -230,7 +230,8 @@
             },
             {
               "type": "exercise",
-              "id": "vertical-corresponding-alternate-supplementary",
+              "id": "E7dY7LX9YobFdS39tfDDR",
+              "slug": "vrcholove-souhlasne-stridave-uhly",
               "body": [
                 {
                   "type": "paragraph",
@@ -662,7 +663,8 @@
             },
             {
               "type": "theorem",
-              "id": "triangle-angle-sum",
+              "id": "G2fX3226MoyMyLEg7bCt3",
+              "slug": "soucet-uhlu-v-trojuhelniku",
               "body": [
                 {
                   "type": "paragraph",
@@ -870,7 +872,8 @@
             },
             {
               "type": "theorem",
-              "id": "convex-polygon-angle-sum",
+              "id": "H7yQvLt3VxyGlELBTgAJh",
+              "slug": "soucet-uhlu-konvexniho-mnohouhelniku",
               "body": [
                 {
                   "type": "paragraph",
@@ -1563,7 +1566,8 @@
             },
             {
               "type": "exercise",
-              "id": "parallel-lines-segment-angle-sum",
+              "id": "vUBGcz0IXvF69ZPtrH_4F",
+              "slug": "soucet-uhlu-na-obrazku",
               "body": [
                 {
                   "type": "paragraph",
@@ -1719,7 +1723,8 @@
             },
             {
               "type": "exercise",
-              "id": "triangle-exterior-remote-angles",
+              "id": "EMfGZzO5Ro3VypJ7caLES",
+              "slug": "uhel-s-otaznikem-na-obrazku",
               "body": [
                 {
                   "type": "paragraph",
@@ -2100,7 +2105,8 @@
             },
             {
               "type": "example",
-              "id": "triangle-from-three-sides",
+              "id": "YVYLXXXSL6OFFUuABkNDD",
+              "slug": "veta-sss-o-shodnosti",
               "body": [
                 {
                   "type": "paragraph",
@@ -2377,7 +2383,8 @@
             },
             {
               "type": "exercise",
-              "id": "triangle-from-two-sides-angle",
+              "id": "vMyC0sIAGJZq-NeOnkTWW",
+              "slug": "veta-sus-o-shodnosti",
               "body": [
                 {
                   "type": "paragraph",
@@ -2624,7 +2631,8 @@
             },
             {
               "type": "exercise",
-              "id": "triangle-from-side-two-angles",
+              "id": "PmP9xfoxbBUEnYfG89CCT",
+              "slug": "veta-usu-o-shodnosti",
               "body": [
                 {
                   "type": "paragraph",
@@ -2891,7 +2899,8 @@
             },
             {
               "type": "problem",
-              "id": "triangle-two-sides-opposite-angle",
+              "id": "G0TTdrAZrHu-Oip2mtDlP",
+              "slug": "shodnost-ssu",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3473,7 +3482,8 @@
             },
             {
               "type": "theorem",
-              "id": "isosceles-triangle-base-angles",
+              "id": "GMR2XuASqafLT4gCEpuRI",
+              "slug": "rovnoramenny-trojuhelnik-shodne-uhly",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -4111,7 +4121,8 @@
             },
             {
               "type": "exercise",
-              "id": "equilateral-triangle-angles",
+              "id": "rKssiyhl1D8AnznvYHFaN",
+              "slug": "uhly-rovnostranneho-trojuhelniku",
               "body": [
                 {
                   "type": "paragraph",
@@ -4232,7 +4243,8 @@
             },
             {
               "type": "exercise",
-              "id": "isosceles-right-triangle-angles",
+              "id": "Dh7EmG5yYRQD44zhd5YD6",
+              "slug": "rovnoramenny-pravouhly-trojuhelnik",
               "body": [
                 {
                   "type": "paragraph",
@@ -4387,7 +4399,8 @@
             },
             {
               "type": "problem",
-              "id": "right-triangle-double-hypotenuse",
+              "id": "PVssK3ww1Ww4_Lm3f4PrT",
+              "slug": "pravouhly-trojuhelnik-dvojnasobna-prepona",
               "difficulty": 0,
               "body": [
                 {
@@ -4920,7 +4933,8 @@
             },
             {
               "type": "theorem",
-              "id": "segment-perpendicular-bisector-locus",
+              "id": "kTzIqbV0OaJSgPvurjL5y",
+              "slug": "osa-usecky",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -5469,7 +5483,8 @@
             },
             {
               "type": "theorem",
-              "id": "triangle-circumcenter-existence",
+              "id": "FNKSPjq6yM0S5N_PL53GL",
+              "slug": "existence-stredu-kruznice-opsane",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -5921,7 +5936,8 @@
             },
             {
               "type": "theorem",
-              "id": "angle-bisector-locus-points",
+              "id": "PoEX7OH-T0op5IPL9DEhz",
+              "slug": "osa-uhlu",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -6494,7 +6510,8 @@
             },
             {
               "type": "exercise",
-              "id": "internal-external-bisector-perpendicular",
+              "id": "g42rGrZiZDuBQcCBvCKh8",
+              "slug": "vnitrni-a-vnejsi-osa-uhlu",
               "body": [
                 {
                   "type": "paragraph",
@@ -6670,7 +6687,8 @@
             },
             {
               "type": "theorem",
-              "id": "triangle-incenter-existence",
+              "id": "lHvoHwA3z301D2go6rtd5",
+              "slug": "existence-stredu-kruznice-vepsane",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -6980,7 +6998,8 @@
             },
             {
               "type": "theorem",
-              "id": "triangle-excenter-existence",
+              "id": "Mm527eX2RrorSGRJEbga4",
+              "slug": "existence-stredu-kruznice-pripsane",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -7643,7 +7662,8 @@
             },
             {
               "type": "problem",
-              "id": "isosceles-chain-configuration",
+              "id": "Vu5msR8YT8yuZ3zb8NeRJ",
+              "slug": "shodne-usecky-v-trojuhelniku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -8403,7 +8423,8 @@
             },
             {
               "type": "problem",
-              "id": "square-inscribed-equilateral-triangles",
+              "id": "SaOp1yOLr0T9xO-XywvHv",
+              "slug": "rovnostranne-trojuhelniky-ve-ctverci",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -8667,7 +8688,8 @@
             },
             {
               "type": "problem",
-              "id": "trapezoid-angle-bisectors-meet",
+              "id": "q5FKHnEWB5kfNu_ZGuq49",
+              "slug": "osy-uhlu-v-lichobezniku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -8991,7 +9013,8 @@
             },
             {
               "type": "problem",
-              "id": "pentagon-equal-sides-angles",
+              "id": "QyZrP8_I1-CPXFt7t7zed",
+              "slug": "rovnobeznost-v-konvexnim-petiuhelniku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -9375,7 +9398,8 @@
             },
             {
               "type": "problem",
-              "id": "quadrilateral-diagonal-angles-30-45",
+              "id": "my3-6U8Mr3piG2sLobH4A",
+              "slug": "delka-usecky-ve-ctyruhelniku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",

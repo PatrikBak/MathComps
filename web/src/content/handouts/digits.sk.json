@@ -221,7 +221,8 @@
           "content": [
             {
               "type": "problem",
-              "id": "digit-product-sum-70",
+              "id": "M_uB_nIoAD4XsWdDgD24w",
+              "slug": "cislo-plus-sucin-cifier",
               "difficulty": 0,
               "body": [
                 {
@@ -575,7 +576,8 @@
             },
             {
               "type": "problem",
-              "id": "inflatable-number-axxb",
+              "id": "QTZyuBlr4JJARL-BsUSPi",
+              "slug": "nafuknutelne-dvojciferne-cisla",
               "difficulty": 0,
               "body": [
                 {
@@ -852,7 +854,8 @@
             },
             {
               "type": "problem",
-              "id": "four-digit-halves-difference-one",
+              "id": "S9mOaQ0DZ0YbdtiJ0DD6M",
+              "slug": "ciferny-sucet-12-rozdiel-dvojcisli",
               "difficulty": 0,
               "body": [
                 {
@@ -1245,7 +1248,8 @@
             },
             {
               "type": "problem",
-              "id": "insert-between-20-and-16",
+              "id": "90DMgkLIpAKoLz31VbTyU",
+              "slug": "cislo-vlozene-medzi-20-16",
               "difficulty": 0,
               "body": [
                 {
@@ -1492,7 +1496,8 @@
             },
             {
               "type": "problem",
-              "id": "digit-factorial-sum",
+              "id": "5o19zqbbgbsQ-mIyypy33",
+              "slug": "sucet-faktorialov-cifier",
               "difficulty": 0,
               "body": [
                 {
@@ -2058,7 +2063,8 @@
             },
             {
               "type": "problem",
-              "id": "perfect-square-repeated-digit-pairs",
+              "id": "M2hAW0UhGrFFa9fvPlfq3",
+              "slug": "stvorciferny-stvorec-tvaru-aabb",
               "difficulty": 0,
               "body": [
                 {
@@ -2349,7 +2355,8 @@
             },
             {
               "type": "problem",
-              "id": "pandigital-prime-ten-digits",
+              "id": "KKh6fZHUhlmD5Z6MdjTkD",
+              "slug": "najvacsie-prvocislo-z-roznych-cifier",
               "difficulty": 0,
               "body": [
                 {
@@ -2455,7 +2462,8 @@
             },
             {
               "type": "problem",
-              "id": "even-length-palindrome-divisible-11",
+              "id": "thf_5gamTbDUYZ96i5eK6",
+              "slug": "palindrom-s-parnym-poctom-cifier",
               "difficulty": 0,
               "body": [
                 {
@@ -2567,7 +2575,8 @@
             },
             {
               "type": "problem",
-              "id": "digit-sum-of-concatenation",
+              "id": "oCrvA-6G_ng2beLVg_5Oc",
+              "slug": "opakovany-ciferny-sucet-dlheho-cisla",
               "difficulty": 0,
               "body": [
                 {
@@ -2721,7 +2730,8 @@
             },
             {
               "type": "problem",
-              "id": "digits-1-6-divisible-11",
+              "id": "kPFhZbvWRNtc1_X52rp4J",
+              "slug": "permutacia-cifier-delitelna-11",
               "difficulty": 0,
               "body": [
                 {
@@ -3019,8 +3029,19 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "reverse-subtract-reverse-add",
+              "id": "zyrVHB-UOHnAnwPbsWeQM",
+              "slug": "rozdiel-a-sucet-obratenych-cisel",
               "difficulty": 0,
               "body": [
                 {
@@ -3240,7 +3261,8 @@
             },
             {
               "type": "problem",
-              "id": "remove-leading-six-25x-smaller",
+              "id": "p_er0Qs-Y_iv3GxwWA_ie",
+              "slug": "odstranenie-uvodnej-sestky",
               "difficulty": 0,
               "body": [
                 {
@@ -3496,8 +3518,19 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "fours-eights-nine-perfect-square",
+              "id": "cpOokCbzU9XKnq5Si294a",
+              "slug": "stvorky-osmicky-a-deviatka",
               "difficulty": 0,
               "body": [
                 {
@@ -3782,8 +3815,19 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "last-digit-given-predecessor-seven",
+              "id": "HmZef6aCT19gonRzJndGH",
+              "slug": "posledna-cifra-stvorca",
               "difficulty": 0,
               "body": [
                 {
@@ -4171,7 +4215,8 @@
             },
             {
               "type": "problem",
-              "id": "powers-of-two-digit-rearrangement",
+              "id": "SiHIZXziGFRgQzQdb180j",
+              "slug": "preusporiadanie-cifier-mocnin-dvojky",
               "difficulty": 1,
               "body": [
                 {
@@ -4451,7 +4496,8 @@
             },
             {
               "type": "problem",
-              "id": "odd-digit-number-divisible-5n",
+              "id": "BbogXhbPaIvEP3zcKQo-l",
+              "slug": "neparne-cifry-a-mocniny-patky",
               "difficulty": 1,
               "body": [
                 {
@@ -4794,7 +4840,8 @@
             },
             {
               "type": "problem",
-              "id": "digit-appending-sequence-composites",
+              "id": "42Uo2Y8305kh_-pQQuTML",
+              "slug": "prilepanie-cifier-a-zlozene-cisla",
               "difficulty": 1,
               "body": [
                 {
@@ -5319,7 +5366,8 @@
             },
             {
               "type": "problem",
-              "id": "base-four-square-ones-twos",
+              "id": "3gPi6qLS_PwutgCgoS6zC",
+              "slug": "stvorce-v-stvorkovej-sustave",
               "difficulty": 2,
               "body": [
                 {

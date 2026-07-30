@@ -19,6 +19,16 @@ const index = handoutIndex as unknown as HandoutIndex
 const envIndex = envIndexData as unknown as HandoutEnvIndex
 
 /**
+ * Where to send a reader to reach one handout problem in a given language.
+ */
+type HandoutProblemLink = {
+  /** The handout's URL slug in that language. */
+  handoutSlug: string
+  /** The DOM anchor id of the problem within its handout page. */
+  anchorId: string
+}
+
+/**
  * Where a handout problem lives: the handout that holds it, and which environment within that handout it is.
  */
 export type HandoutProblemRef = {
@@ -28,10 +38,8 @@ export type HandoutProblemRef = {
   environmentType: HandoutEnvironmentType
   /** The environment's document-wide, per-type number. */
   environmentNumber: number
-  /** The handout's URL slug in the requested locale, or null when it isn't published in that language. */
-  handoutSlug: string | null
-  /** The DOM anchor id of the problem within its handout page. */
-  anchorId: string
+  /** How to link to the problem, or null when its handout isn't published in the requested locale. */
+  link: HandoutProblemLink | null
 }
 
 /**
@@ -79,12 +87,21 @@ export function resolveHandoutProblemRef(
     return null
   }
 
+  // What this language calls the environment
+  const environmentSlug = placement.slug[locale]
+
+  // A handout published in this language names both itself and its environments in it, so the two either
+  // travel together or there is no page to link to at all
+  const handoutSlug = supportsLocale(handout, locale) ? handout.slug[locale] : undefined
+
   // Everything the caller needs to name and link to this environment
   return {
     handoutTitle,
     environmentType: placement.type,
     environmentNumber: placement.number,
-    handoutSlug: supportsLocale(handout, locale) ? handout.slug[locale] : null,
-    anchorId: buildEnvironmentAnchorId(target.environmentId),
+    link:
+      handoutSlug !== undefined && environmentSlug !== undefined
+        ? { handoutSlug, anchorId: buildEnvironmentAnchorId(environmentSlug) }
+        : null,
   }
 }

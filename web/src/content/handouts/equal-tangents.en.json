@@ -104,7 +104,8 @@
             },
             {
               "type": "theorem",
-              "id": "two-tangents-from-point",
+              "id": "BuRWesTIYiKA-BV2MAOvd",
+              "slug": "two-tangents-from-a-point",
               "body": [
                 {
                   "type": "paragraph",
@@ -169,7 +170,8 @@
             },
             {
               "type": "theorem",
-              "id": "external-tangent-two-circles",
+              "id": "mrvQMDl5Le3AmRPmyn1nx",
+              "slug": "common-external-tangents-two-circles",
               "body": [
                 {
                   "type": "paragraph",
@@ -315,7 +317,8 @@
             },
             {
               "type": "theorem",
-              "id": "internal-tangent-two-circles",
+              "id": "jf0TF7EIF2sGDujPAaJGG",
+              "slug": "common-internal-tangent-two-circles",
               "body": [
                 {
                   "type": "paragraph",
@@ -434,7 +437,8 @@
             },
             {
               "type": "theorem",
-              "id": "incircle-touch-points-triangle",
+              "id": "JhAKuB486cDd3AdwJYXkE",
+              "slug": "incircle-touch-points-in-triangle",
               "body": [
                 {
                   "type": "paragraph",
@@ -535,7 +539,8 @@
             },
             {
               "type": "theorem",
-              "id": "right-triangle-inradius-formula",
+              "id": "Ul1BcJ7hkSI2RgBb98Iik",
+              "slug": "right-triangle-inradius",
               "body": [
                 {
                   "type": "paragraph",
@@ -596,7 +601,8 @@
             },
             {
               "type": "theorem",
-              "id": "excircle-opposite-vertex-tangent-length",
+              "id": "4h53hlgz3wSLk4lVp4pyd",
+              "slug": "excircle-tangent-length-opposite-vertex",
               "body": [
                 {
                   "type": "paragraph",
@@ -706,7 +712,8 @@
             },
             {
               "type": "theorem",
-              "id": "excircle-remaining-vertices-tangent-lengths",
+              "id": "tIEpiTzploVkN1fSAAx_3",
+              "slug": "excircle-remaining-vertex-tangent-lengths",
               "body": [
                 {
                   "type": "paragraph",
@@ -753,7 +760,8 @@
             },
             {
               "type": "theorem",
-              "id": "incircle-excircle-midpoint-symmetry",
+              "id": "G0QDSuOOrioc7nfucekbj",
+              "slug": "incircle-excircle-touch-points-symmetric",
               "body": [
                 {
                   "type": "paragraph",
@@ -809,7 +817,8 @@
             },
             {
               "type": "definition",
-              "id": "tangential-quadrilateral-definition",
+              "id": "tER-vT4qkSmu9dw7bjhcr",
+              "slug": "tangential-quadrilateral",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -860,7 +869,8 @@
             },
             {
               "type": "theorem",
-              "id": "quadrilateral-opposite-side-sums",
+              "id": "xFM0xDDSoTaKN7_k-PGs6",
+              "slug": "pitot-theorem",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -913,7 +923,8 @@
           "content": [
             {
               "type": "problem",
-              "id": "altitude-foot-incircle-diameters",
+              "id": "bm_8cGwtgRY12WAGCrh_a",
+              "slug": "altitude-foot-and-incircle-diameters",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1120,7 +1131,8 @@
             },
             {
               "type": "problem",
-              "id": "parallelogram-midpoint-tangential-quadrilateral",
+              "id": "EMMxpx8fQHdf5k7deQlkg",
+              "slug": "parallelogram-midpoint-incircle",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1377,8 +1389,19 @@
               "solution": []
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "moving-tangent-point-on-arc",
+              "id": "YHoydnnN3mLvYu3xOFGHp",
+              "slug": "perimeter-of-triangle-from-tangents",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1669,7 +1692,8 @@
             },
             {
               "type": "problem",
-              "id": "diagonal-common-touch-point",
+              "id": "njLBWjKeOLzDnXpHe7tic",
+              "slug": "incircles-touching-the-diagonal",
               "difficulty": 0,
               "body": [
                 {
@@ -1839,7 +1863,8 @@
             },
             {
               "type": "problem",
-              "id": "three-excircle-points-on-line",
+              "id": "6y2W6I3lf5ayFgDaZme17",
+              "slug": "three-excircle-points-on-line",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2037,7 +2062,8 @@
             },
             {
               "type": "problem",
-              "id": "corner-triangles-incircle-tangents",
+              "id": "wqOmXDet2xLsFXXqSqqXr",
+              "slug": "three-tangents-cutting-corner-triangles",
               "difficulty": 0,
               "body": [
                 {
@@ -2249,7 +2275,8 @@
             },
             {
               "type": "problem",
-              "id": "parallelogram-diagonal-touch-points",
+              "id": "ywat5ogtaZvQd-symWXYX",
+              "slug": "parallelogram-diagonal-touch-points",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2534,7 +2561,8 @@
             },
             {
               "type": "problem",
-              "id": "split-triangle-incircle-touch-points",
+              "id": "1rKRGiDDH6a1N3ui7-NIp",
+              "slug": "touch-points-in-split-triangle",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2942,7 +2970,8 @@
             },
             {
               "type": "problem",
-              "id": "excircle-quadrilateral-side-relation",
+              "id": "XY8K2xIEBBfNKdV7OHBv4",
+              "slug": "quadrilateral-with-an-excircle",
               "difficulty": 0,
               "body": [
                 {
@@ -3154,7 +3183,8 @@
             },
             {
               "type": "problem",
-              "id": "cevian-points-tangent-incircles",
+              "id": "4CAVBeHRTqtsMdY8jrKuX",
+              "slug": "externally-tangent-incircle-pairs",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3477,7 +3507,8 @@
             },
             {
               "type": "problem",
-              "id": "checkerboard-quadrilateral-grid",
+              "id": "mm753DtWsC9P9vCKmpLmt",
+              "slug": "nine-smaller-quadrilaterals",
               "difficulty": 0,
               "body": [
                 {
@@ -3797,7 +3828,8 @@
             },
             {
               "type": "problem",
-              "id": "inscribed-angle-circle-tangent-point",
+              "id": "EXLasGyo1ngIPJ1f2b0A2",
+              "slug": "circle-inscribed-in-an-angle",
               "difficulty": 0,
               "body": [
                 {
@@ -4246,7 +4278,8 @@
             },
             {
               "type": "problem",
-              "id": "common-tangent-locus-point",
+              "id": "mZEAwZzSzf1cMcge-3Ovs",
+              "slug": "locus-of-tangent-intersection",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4681,7 +4714,8 @@
             },
             {
               "type": "problem",
-              "id": "tangential-quadrilateral-incenter-circle",
+              "id": "WqLo9VdtCR-oLjiZTe-hJ",
+              "slug": "tangential-quadrilateral-and-circumcircle",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -5028,7 +5062,8 @@
             },
             {
               "type": "problem",
-              "id": "touch-points-reflected-through-incenter",
+              "id": "zwCIF1ytYOGA5L7Ai1rsb",
+              "slug": "touch-points-reflected-in-incenter",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -5406,7 +5441,8 @@
             },
             {
               "type": "problem",
-              "id": "unit-length-points-perimeter-split",
+              "id": "cqRxrMgyFJE7-aHA9USqB",
+              "slug": "splitting-the-triangle-perimeter",
               "difficulty": 2,
               "body": [
                 {
@@ -5792,7 +5828,8 @@
             },
             {
               "type": "problem",
-              "id": "circumscribed-hexagon-diagonals-concurrent",
+              "id": "p_QDQdc3MiS1qjG5JIegA",
+              "slug": "brianchon-theorem",
               "difficulty": 2,
               "title": {
                 "type": "paragraph",

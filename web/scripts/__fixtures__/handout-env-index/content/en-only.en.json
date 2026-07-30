@@ -10,6 +10,7 @@
             {
               "type": "problem",
               "id": "only-en-problem",
+              "slug": "the-only-problem",
               "difficulty": 1,
               "body": [],
               "hints": [],

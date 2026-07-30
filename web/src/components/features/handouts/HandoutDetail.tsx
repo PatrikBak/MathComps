@@ -294,14 +294,14 @@ function renderDocumentSections(
                 assertNever(contentBlock)
             }
 
-            // The environment as a collapsible card, anchored and keyed by its permanent id.
+            // The environment as a collapsible card, keyed by its permanent id and anchored by its name.
             return (
               <CollapsibleCard
                 key={contentBlock.id}
                 type={contentBlock.type}
                 title={mainTitle}
                 subtitle={subtitleBadge}
-                id={buildEnvironmentAnchorId(contentBlock.id)}
+                id={buildEnvironmentAnchorId(contentBlock.slug)}
                 disclosures={disclosures}
                 headerAction={defenseTrigger}
               >

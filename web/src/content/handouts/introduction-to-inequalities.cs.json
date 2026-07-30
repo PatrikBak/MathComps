@@ -93,7 +93,8 @@
             },
             {
               "type": "example",
-              "id": "ordering-paired-sums-products",
+              "id": "bPkLpBouOLKWsyJ2o4KB1",
+              "slug": "usporadani-soucinu-dvojic",
               "body": [
                 {
                   "type": "paragraph",
@@ -319,7 +320,8 @@
             },
             {
               "type": "exercise",
-              "id": "product-inequality-chain-smallest",
+              "id": "YZmrvYRhFg_8fHlZmZo3U",
+              "slug": "nejmensi-ze-ctyr-cisel",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -707,7 +709,8 @@
             },
             {
               "type": "example",
-              "id": "cubes-sum-vs-mixed-terms",
+              "id": "P4XBmJZTYVy4KIe2BPqbE",
+              "slug": "treti-mocniny-s-nezapornym-souctem",
               "body": [
                 {
                   "type": "paragraph",
@@ -896,7 +899,8 @@
             },
             {
               "type": "exercise",
-              "id": "power-sum-vs-mixed-powers",
+              "id": "JhZA_Dzle9gA4kV4lKv9q",
+              "slug": "soucet-mocnin-dvou-kladnych-cisel",
               "body": [
                 {
                   "type": "paragraph",
@@ -1168,7 +1172,8 @@
             },
             {
               "type": "exercise",
-              "id": "ordered-triple-square-difference",
+              "id": "mQOwqNMi8OAFVITQ-pAYo",
+              "slug": "nerovnost-pro-usporadanou-trojici",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1439,7 +1444,8 @@
             },
             {
               "type": "problem",
-              "id": "shifted-integer-product-inequality",
+              "id": "ED7SKfRlBMObihFgvGY7A",
+              "slug": "nerovnost-pro-dve-cela-cisla",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1986,7 +1992,8 @@
             },
             {
               "type": "example",
-              "id": "three-var-squares-vs-products",
+              "id": "vQhiaK4eolSqnaAA9cuHZ",
+              "slug": "mocniny-a-souciny-tri-cisel",
               "body": [
                 {
                   "type": "paragraph",
@@ -2278,8 +2285,19 @@
               "highligted": false
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "exercise",
-              "id": "two-var-squares-plus-constant",
+              "id": "418Wz9g6IWSugP49_tU-n",
+              "slug": "ctverce-plus-dva",
               "body": [
                 {
                   "type": "paragraph",
@@ -2433,7 +2451,8 @@
             },
             {
               "type": "exercise",
-              "id": "quartic-terms-vs-product-sum",
+              "id": "sdg3sRT7yvoIjDcMsErsE",
+              "slug": "ctvrte-mocniny-proti-soucinu",
               "body": [
                 {
                   "type": "paragraph",
@@ -2667,7 +2686,8 @@
             },
             {
               "type": "problem",
-              "id": "equal-cubic-shift-product-bounds",
+              "id": "COs_bAdXRwGbPeWyYKM3R",
+              "slug": "rovnost-vyrazu-a-odhad-soucinu",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -3069,7 +3089,8 @@
             },
             {
               "type": "example",
-              "id": "closer-numbers-larger-product",
+              "id": "m3P8RN63DfmSb-_H94B_n",
+              "slug": "blizsi-cisla-maji-vetsi-soucin",
               "body": [
                 {
                   "type": "paragraph",
@@ -3198,7 +3219,8 @@
             },
             {
               "type": "theorem",
-              "id": "n-term-mean-inequality",
+              "id": "hn826RYmOm1L-wYPENeAW",
+              "slug": "ag-nerovnost",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -3633,7 +3655,8 @@
             },
             {
               "type": "example",
-              "id": "three-pairwise-sums-product",
+              "id": "kAB49jcHXVg3uvkhrrteu",
+              "slug": "soucin-tri-dvojicovych-souctu",
               "body": [
                 {
                   "type": "paragraph",
@@ -3745,7 +3768,8 @@
             },
             {
               "type": "example",
-              "id": "open-box-max-volume",
+              "id": "KMckvz9BRCkFpylMDM-ZQ",
+              "slug": "problem-krabice",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -4022,7 +4046,8 @@
             },
             {
               "type": "exercise",
-              "id": "power-plus-n-vs-linear",
+              "id": "Fetv2ZpBpdSAL9VRNj6Bo",
+              "slug": "mocnina-a-linearni-vyraz",
               "body": [
                 {
                   "type": "paragraph",
@@ -4151,7 +4176,8 @@
             },
             {
               "type": "exercise",
-              "id": "unit-product-shifted-factors",
+              "id": "LRZ7mn998YqvFEP_vggGc",
+              "slug": "cisla-se-soucinem-jedna",
               "body": [
                 {
                   "type": "paragraph",
@@ -4326,7 +4352,8 @@
             },
             {
               "type": "exercise",
-              "id": "cyclic-fraction-sum-six",
+              "id": "7ptHVCux9v12DP7_YmSbY",
+              "slug": "soucet-zlomku-tri-cisel",
               "body": [
                 {
                   "type": "paragraph",
@@ -4461,7 +4488,8 @@
             },
             {
               "type": "exercise",
-              "id": "reciprocal-sum-pair-product-bound",
+              "id": "5Y8zEyYvhLa8dN3Q2sEoF",
+              "slug": "ctyri-cisla-a-prevracene-hodnoty",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -4827,7 +4855,8 @@
             },
             {
               "type": "example",
-              "id": "implied-cubic-inequality",
+              "id": "Y_rVM9PKRrNZ-xul7WWn5",
+              "slug": "dusledek-nerovnosti-s-mocninami",
               "body": [
                 {
                   "type": "paragraph",
@@ -5110,7 +5139,8 @@
             },
             {
               "type": "problem",
-              "id": "middle-value-square-condition",
+              "id": "lGgi2UDhTRt1I5AhB-CSX",
+              "slug": "rovnost-mocnin-a-nerovnost-soucinu",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5480,7 +5510,8 @@
             },
             {
               "type": "problem",
-              "id": "bounded-vars-sum-vs-squares",
+              "id": "tM0NUHzGN7ISuNnwGlXCf",
+              "slug": "soucet-vetsi-nez-mocniny",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6056,7 +6087,8 @@
             },
             {
               "type": "problem",
-              "id": "sqrt-product-quadratic-bound",
+              "id": "DQ2FUiK5hVPMXJL4mp2Pw",
+              "slug": "nerovnost-s-odmocninou-soucinu",
               "difficulty": 0,
               "body": [
                 {
@@ -6343,8 +6375,19 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "shifted-squares-product-bound",
+              "id": "h9XOWPr4I6tWgzd33zXK0",
+              "slug": "soucin-ctvercu-plus-jedna",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6824,7 +6867,8 @@
             },
             {
               "type": "problem",
-              "id": "last-term-product-bound",
+              "id": "He5FmTiAljgyhp8e3jrZT",
+              "slug": "soucet-mocnin-a-posledni-clen",
               "difficulty": 0,
               "body": [
                 {
@@ -7144,7 +7188,8 @@
             },
             {
               "type": "problem",
-              "id": "quartic-minus-mixed-cubic-min",
+              "id": "nTrt8isVP7d-IkZLcxcKy",
+              "slug": "minimum-vyrazu-se-ctvrtymi-mocninami",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7488,7 +7533,8 @@
             },
             {
               "type": "problem",
-              "id": "sixth-power-condition-bound",
+              "id": "A8uKeAcwG40bQUQcsLUwV",
+              "slug": "podminka-se-sestou-mocninou",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",

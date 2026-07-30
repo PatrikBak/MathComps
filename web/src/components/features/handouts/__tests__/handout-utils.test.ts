@@ -12,7 +12,7 @@ import { listDocumentEnvironments } from '../handout-utils'
  */
 function problemBlock(id: string): EnvironmentBlock {
   // The walk reads only `type` and `id`, so the rest stays empty
-  return { type: 'problem', id, difficulty: 1, body: [], hints: [], solution: [] }
+  return { type: 'problem', id, slug: id, difficulty: 1, body: [], hints: [], solution: [] }
 }
 
 /**

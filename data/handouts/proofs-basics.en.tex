@@ -39,7 +39,7 @@ In the following two sections, we will show specific interesting examples of pro
 
 Direct proofs are quite natural -- we combine assumptions from the problem statement with existing knowledge until we reach the statement to be proved. Every proof can therefore be written as a series of chains of implications:
 
-\EnvId{odd-squares-mod-8}
+\EnvId{6KrSLRVFvoy9OdoVfehCQ-odd-squares-mod-8}
 \Example{}{
     Prove that the squares of odd numbers leave a remainder of~1 when divided by~8.
 }{
@@ -66,7 +66,7 @@ Direct proofs are quite natural -- we combine assumptions from the problem state
     Poorly written solutions often fail because the implications are not clear from the text. Practical advice: for every statement, ask yourself the question: is it clear what the assumptions are and how something was derived from them? With such self-checking, one often realizes that their solution has a mistake.
 }
 
-\EnvId{prime-squared-minus-one}
+\EnvId{sftFVZqBaqREN0z-UcX-t-prime-squared-minus-one}
 \Exercise{}{
     Prove that for prime numbers $p \ge 5$, it holds that $p^2-1$ is a number divisible by 24.
 }{
@@ -83,7 +83,7 @@ Direct proofs are quite natural -- we combine assumptions from the problem state
 
 In harder problems, it may not be immediately obvious how to use the assumptions from the problem statement and it is necessary to analyze the situation.
 
-\EnvId{perfect-square-divisor-count}
+\EnvId{x5mL1lT3zcfYgisxPSA-W-square-has-odd-divisor-count}
 \Example{}{
     Prove that if a natural number $n$ is the square of an integer, then it has an odd number of divisors.
 }{
@@ -98,7 +98,7 @@ In harder problems, it may not be immediately obvious how to use the assumptions
 
 The previous example can also be solved using the generally useful formula for the number of divisors:
 
-\EnvId{divisor-count-formula}
+\EnvId{Kk7dZfMi6QJfF9r1Bwa8B-number-of-divisors-theorem}
 \Theorem{}{
     Let $n=p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$, where $p_1,p_2,\dots,p_k$ are distinct prime numbers and $a_1,a_2,\dots,a_k$ are integers. Then the number $n$ has exactly
     $$
@@ -114,14 +114,14 @@ The previous example can also be solved using the generally useful formula for t
     $$
 }
 
-\EnvId{divisor-count-square-converse}
+\EnvId{o4FSeK3jvHdTEakt1JnAY-divisor-count-and-converse}
 \Exercise{}{
     Prove the previous example, i.e., the theorem about the oddness of the number of divisors of perfect squares, using the theorem on the number of divisors. Also prove the reverse implication of this theorem.
 }{
     Let $n = p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$. Since $n$ is the square of an integer, all exponents $a_1, \dots, a_k$ must be even. According to the theorem, the number of divisors is equal to the product $(a_1+1)(a_2+1)\cdots(a_k+1)$. Since each $a_i$ is even, each parenthesis represents an odd number. The product of odd numbers is always odd, thus the number of divisors is odd.
 }
 
-\EnvId{small-prime-divisor-bound}
+\EnvId{K8Jhyizt5YvLRX463Ka_e-prime-divisor-below-square-root}
 \Problem{0}{}{
     Given a composite number $n > 1$. Prove that it is divisible by a prime number not exceeding $\sqrt{n}$.
 }{
@@ -133,7 +133,7 @@ The previous example can also be solved using the generally useful formula for t
     Since $p$ divides $a$ and $a$ divides $n$, then $p$ divides $n$, which we wanted to prove.
 }
 
-\EnvId{product-of-all-divisors}
+\EnvId{C0sb6mdImA-f9i_DF9ajq-product-of-all-divisors}
 \Problem{1}{}{
     A natural number $n$ has exactly $k$ divisors. Prove that the product of the divisors of $n$ is equal to $\sqrt{n^k}$.
 }{
@@ -157,7 +157,7 @@ The previous example can also be solved using the generally useful formula for t
 
 To conclude this section, one important note. When writing proofs, a common imprecision is \textit{omitting assumptions}, for example someone may write \uv{$x^2=1$, so necessarily $x=1$}. This can be a valid part of a solution, provided the problem statement tells us that $x$ is positive. However, if we do not include this assumption in the solution, it sounds suspicious because it is unclear whether the solver was aware of it, and therefore may lead to a loss of points. Correctly, we would write something like \uv{$x^2=1$ and $x$ is positive, so necessarily $x=1$}. Let us illustrate a~very common situation where this occurs:
 
-\EnvId{mutual-divisibility}
+\EnvId{YXqKtQowN8gPVViw4PWN4-mutual-divisibility-of-integers}
 \Example{}{
 	When does $a \mid b$ and $b \mid a$ hold for integers $a,b$?
 }{
@@ -179,7 +179,7 @@ To conclude this section, one important note. When writing proofs, a common impr
 
 This type of proof is particularly useful in cases where what is being proved is hard to \uv{grasp} and it is far simpler to say something about its negation. A very common example where this is illustrated:
 
-\EnvId{sqrt-two-irrational}
+\EnvId{pPJ8A14vh3r-vsHx4AMP1-irrationality-of-square-root-two}
 \Example{}{
     Prove that the number $\sqrt{2}$ is irrational.
 }{
@@ -189,7 +189,7 @@ This type of proof is particularly useful in cases where what is being proved is
     The numbers $p$ and $q$ are thus both divisible by two, which is a contradiction with the assumption that they are coprime.
 }
 
-\EnvId{why-sqrt-four-differs}
+\EnvId{64NL2y_73vGHKsm_iuBXS-proof-fails-for-root-four}
 \Exercise{}{
     This proof would not pass if we had $\sqrt{4}$. Where would it fail?
 }{
@@ -197,14 +197,14 @@ This type of proof is particularly useful in cases where what is being proved is
     We would have the equation $p^2=4q^2$, from which it follows that $p$ is even, i.e., $p=2k$. However, by substituting, we get $4k^2=4q^2$, which after canceling simplifies to $k^2=q^2$. From this equality, it does not follow that $q$ is even (nor divisible by 4). Thus, we do not get a contradiction with the coprimality of $p, q$.
 }
 
-\EnvId{sqrt-n-irrationality-criterion}
+\EnvId{MygIexYlJA93Zs1GKPipd-irrationality-criterion-for-root-n}
 \Exercise{}{
     Prove the generalization of the statement about the irrationality of $\sqrt{2}$: Let $n$ be a natural number. The number $\sqrt{n}$ is irrational if and only if there exists a prime number~$p$ which appears in the prime factorization of~$n$ with an odd power.
 }{
     We proceed by contradiction. Let $\sqrt{n} = \frac ab$ for coprime $a, b$. We rearrange the equation to $nb^2 = a^2$. In the prime factorization of a square ($a^2$ and $b^2$), every prime number has an even exponent.
     On the left side, the exponent of any prime number is the sum of its exponent in $n$ and in $b^2$. For equality to hold, this sum must be even, which means that the exponent of every prime number in $n$ must be even. Thus, if $n$ contains a prime number with an odd power, we get a contradiction. Conversely, if all exponents are even, $n$ is a square and $\sqrt{n}$ is a rational number.}
 
-\EnvId{rational-plus-irrational-sum}
+\EnvId{SselxmWyMFZXmodhe5HKW-sum-of-rational-and-irrational}
 \Problem{0}{}{
     Prove that the sum of a rational and an irrational number is an irrational number.
 }{    
@@ -214,7 +214,7 @@ This type of proof is particularly useful in cases where what is being proved is
     Since the difference of two rational numbers is always a rational number, $r'$ must also be rational. However, this is a contradiction with the assumption that $r'$ is irrational.
 }
 
-\EnvId{sqrt-two-plus-sqrt-three}
+\EnvId{lEtf_CHzL0kz2p9TGK5Ml-root-two-plus-root-three}
 \Problem{0}{}{
     Prove that the number $\sqrt{2}+\sqrt{3}$ is irrational.
 }{
@@ -231,7 +231,7 @@ This type of proof is particularly useful in cases where what is being proved is
 
 The following examples show that proof by contradiction is \uv{technically} used even when we are proving that something \textit{does not hold}.
 
-\EnvId{sum-of-three-odd-squares}
+\EnvId{y5MK6awUXD1Q21xcYhP-r-sum-of-three-odd-squares}
 \Problem{0}{}{
 	Prove that the sum of three squares of odd integers is never a square of an integer.
 }{
@@ -242,7 +242,7 @@ The following examples show that proof by contradiction is \uv{technically} used
 	According to the previously proven statement, the square of an odd number leaves a remainder of~1 when divided by~8. The sum of three such numbers therefore leaves a remainder of~3. But then it cannot be a square, since that would have to be odd and, again according to our statement, leave a remainder of~1.
 }
 
-\EnvId{alternating-cards-on-circle}
+\EnvId{YFmWOBiEPkcdH8w_XCCXq-numbers-on-cards-around-circle}
 \Problem{0}{73-CSMO-B-II-1}{
 	Patrik chose two distinct positive integers $a$, $b$, wrote each on 10 cards and placed all 20\,cards around the circumference of a circle. He noticed that each number is now a divisor of the sum of the two numbers on the adjacent cards. Prove that the numbers on the cards alternate.
 }{
@@ -267,7 +267,7 @@ The following examples show that proof by contradiction is \uv{technically} used
 
 Finally, we will show perhaps the most famous proof of this widely known fact, which Euclid\fnote{Euclid of Alexandria (approx. 300 BC) was an ancient Greek mathematician, often referred to as the \uv{father of geometry}.} was already able to prove.
 
-\EnvId{infinitude-of-primes}
+\EnvId{KvlppDtT0_6whJQhO-l8K-infinitely-many-primes}
 \Theorem{}{
     Prove that there are infinitely many prime numbers.
 }{
@@ -276,7 +276,7 @@ Finally, we will show perhaps the most famous proof of this widely known fact, w
 
 Try to solve the next two problems in a similar way:
 
-\EnvId{n-squared-plus-one-primes}
+\EnvId{xcyxtxvzStwwMDpYr7pv2-primes-dividing-n2-plus-1}
 \Problem{1}{}{
     Prove that there are infinitely many prime numbers $p$ that divide $n^2+1$ for a suitable natural $n$.
 }{
@@ -291,7 +291,7 @@ Try to solve the next two problems in a similar way:
     This number is greater than 1, therefore it has some prime divisor $q$. Since $q$ divides $N$, it divides a number of the form $n^2+1$, so $q$ must belong to our list $p_1, \dots, p_k$. But this means that $q$ divides the product $p_1 \cdots p_k$, and thus also divides its square. From this, it follows that $q$ divides the difference $N - (p_1 \cdots p_k)^2 = 1$, which is a contradiction.
 }
 
-\EnvId{primes-form-3n-plus-2}
+\EnvId{f8Ikrt3vc35M1w9ez9TsY-primes-form-3n-plus-2}
 \Problem{2}{}{
     Prove that there are infinitely many prime numbers of the form $3n+2$, where $n$ is a natural number.
 }{

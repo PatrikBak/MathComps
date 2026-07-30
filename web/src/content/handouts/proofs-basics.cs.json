@@ -304,8 +304,19 @@
               "highligted": false
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "example",
-              "id": "odd-squares-mod-8",
+              "id": "6KrSLRVFvoy9OdoVfehCQ",
+              "slug": "ctverce-lichych-cisel-modulo-8",
               "body": [
                 {
                   "type": "paragraph",
@@ -726,8 +737,19 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "exercise",
-              "id": "prime-squared-minus-one",
+              "id": "sftFVZqBaqREN0z-UcX-t",
+              "slug": "ctverec-prvocisla-minus-jedna",
               "body": [
                 {
                   "type": "paragraph",
@@ -951,8 +973,19 @@
               "highligted": false
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "example",
-              "id": "perfect-square-divisor-count",
+              "id": "x5mL1lT3zcfYgisxPSA-W",
+              "slug": "lichy-pocet-delitelu-ctverce",
               "body": [
                 {
                   "type": "paragraph",
@@ -1141,7 +1174,8 @@
             },
             {
               "type": "theorem",
-              "id": "divisor-count-formula",
+              "id": "Kk7dZfMi6QJfF9r1Bwa8B",
+              "slug": "veta-o-poctu-delitelu",
               "body": [
                 {
                   "type": "paragraph",
@@ -1469,7 +1503,8 @@
             },
             {
               "type": "exercise",
-              "id": "divisor-count-square-converse",
+              "id": "o4FSeK3jvHdTEakt1JnAY",
+              "slug": "pocet-delitelu-a-obracena-implikace",
               "body": [
                 {
                   "type": "paragraph",
@@ -1542,7 +1577,8 @@
             },
             {
               "type": "problem",
-              "id": "small-prime-divisor-bound",
+              "id": "K8Jhyizt5YvLRX463Ka_e",
+              "slug": "prvocislo-nepresahujici-odmocninu-n",
               "difficulty": 0,
               "body": [
                 {
@@ -1804,7 +1840,8 @@
             },
             {
               "type": "problem",
-              "id": "product-of-all-divisors",
+              "id": "C0sb6mdImA-f9i_DF9ajq",
+              "slug": "soucin-vsech-delitelu-cisla",
               "difficulty": 1,
               "body": [
                 {
@@ -2180,7 +2217,8 @@
             },
             {
               "type": "example",
-              "id": "mutual-divisibility",
+              "id": "YXqKtQowN8gPVViw4PWN4",
+              "slug": "vzajemna-delitelnost-dvou-cisel",
               "body": [
                 {
                   "type": "paragraph",
@@ -2728,7 +2766,8 @@
             },
             {
               "type": "example",
-              "id": "sqrt-two-irrational",
+              "id": "pPJ8A14vh3r-vsHx4AMP1",
+              "slug": "iracionalita-odmocniny-ze-dvou",
               "body": [
                 {
                   "type": "paragraph",
@@ -2883,7 +2922,8 @@
             },
             {
               "type": "exercise",
-              "id": "why-sqrt-four-differs",
+              "id": "64NL2y_73vGHKsm_iuBXS",
+              "slug": "selhani-dukazu-pro-odmocninu-4",
               "body": [
                 {
                   "type": "paragraph",
@@ -2992,7 +3032,8 @@
             },
             {
               "type": "exercise",
-              "id": "sqrt-n-irrationality-criterion",
+              "id": "MygIexYlJA93Zs1GKPipd",
+              "slug": "kriterium-iracionality-odmocniny-n",
               "body": [
                 {
                   "type": "paragraph",
@@ -3164,7 +3205,8 @@
             },
             {
               "type": "problem",
-              "id": "rational-plus-irrational-sum",
+              "id": "SselxmWyMFZXmodhe5HKW",
+              "slug": "soucet-racionalniho-a-iracionalniho-cisla",
               "difficulty": 0,
               "body": [
                 {
@@ -3288,7 +3330,8 @@
             },
             {
               "type": "problem",
-              "id": "sqrt-two-plus-sqrt-three",
+              "id": "lEtf_CHzL0kz2p9TGK5Ml",
+              "slug": "odmocnina-2-plus-odmocnina-3",
               "difficulty": 0,
               "body": [
                 {
@@ -3469,8 +3512,19 @@
               "highligted": false
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "sum-of-three-odd-squares",
+              "id": "y5MK6awUXD1Q21xcYhP-r",
+              "slug": "soucet-tri-lichych-ctvercu",
               "difficulty": 0,
               "body": [
                 {
@@ -3525,7 +3579,8 @@
             },
             {
               "type": "problem",
-              "id": "alternating-cards-on-circle",
+              "id": "YFmWOBiEPkcdH8w_XCCXq",
+              "slug": "karty-s-cisly-na-kruhu",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4303,7 +4358,8 @@
             },
             {
               "type": "theorem",
-              "id": "infinitude-of-primes",
+              "id": "KvlppDtT0_6whJQhO-l8K",
+              "slug": "nekonecne-mnoho-prvocisel",
               "body": [
                 {
                   "type": "paragraph",
@@ -4413,7 +4469,8 @@
             },
             {
               "type": "problem",
-              "id": "n-squared-plus-one-primes",
+              "id": "xcyxtxvzStwwMDpYr7pv2",
+              "slug": "prvocisla-delici-n2-plus-1",
               "difficulty": 1,
               "body": [
                 {
@@ -4627,7 +4684,8 @@
             },
             {
               "type": "problem",
-              "id": "primes-form-3n-plus-2",
+              "id": "f8Ikrt3vc35M1w9ez9TsY",
+              "slug": "prvocisla-tvaru-3n-plus-2",
               "difficulty": 2,
               "body": [
                 {

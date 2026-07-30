@@ -1,302 +1,2382 @@
 {
   "Kp2vR8mLqX3nYwTfJc6Db": {
-    "odd-squares-mod-8": { "type": "example", "number": 1 },
-    "prime-squared-minus-one": { "type": "exercise", "number": 1 },
-    "perfect-square-divisor-count": { "type": "example", "number": 2 },
-    "divisor-count-formula": { "type": "theorem", "number": 1 },
-    "divisor-count-square-converse": { "type": "exercise", "number": 2 },
-    "small-prime-divisor-bound": { "type": "problem", "number": 1 },
-    "product-of-all-divisors": { "type": "problem", "number": 2 },
-    "mutual-divisibility": { "type": "example", "number": 3 },
-    "sqrt-two-irrational": { "type": "example", "number": 4 },
-    "why-sqrt-four-differs": { "type": "exercise", "number": 3 },
-    "sqrt-n-irrationality-criterion": { "type": "exercise", "number": 4 },
-    "rational-plus-irrational-sum": { "type": "problem", "number": 3 },
-    "sqrt-two-plus-sqrt-three": { "type": "problem", "number": 4 },
-    "sum-of-three-odd-squares": { "type": "problem", "number": 5 },
-    "alternating-cards-on-circle": { "type": "problem", "number": 6 },
-    "infinitude-of-primes": { "type": "theorem", "number": 2 },
-    "n-squared-plus-one-primes": { "type": "problem", "number": 7 },
-    "primes-form-3n-plus-2": { "type": "problem", "number": 8 }
+    "6KrSLRVFvoy9OdoVfehCQ": {
+      "type": "example",
+      "number": 1,
+      "slug": {
+        "sk": "stvorce-neparnych-cisel-modulo-8",
+        "cs": "ctverce-lichych-cisel-modulo-8",
+        "en": "odd-squares-mod-8"
+      }
+    },
+    "sftFVZqBaqREN0z-UcX-t": {
+      "type": "exercise",
+      "number": 1,
+      "slug": {
+        "sk": "stvorec-prvocisla-minus-jedna",
+        "cs": "ctverec-prvocisla-minus-jedna",
+        "en": "prime-squared-minus-one"
+      }
+    },
+    "x5mL1lT3zcfYgisxPSA-W": {
+      "type": "example",
+      "number": 2,
+      "slug": {
+        "sk": "neparny-pocet-delitelov-stvorca",
+        "cs": "lichy-pocet-delitelu-ctverce",
+        "en": "square-has-odd-divisor-count"
+      }
+    },
+    "Kk7dZfMi6QJfF9r1Bwa8B": {
+      "type": "theorem",
+      "number": 1,
+      "slug": {
+        "sk": "veta-o-pocte-delitelov",
+        "cs": "veta-o-poctu-delitelu",
+        "en": "number-of-divisors-theorem"
+      }
+    },
+    "o4FSeK3jvHdTEakt1JnAY": {
+      "type": "exercise",
+      "number": 2,
+      "slug": {
+        "sk": "pocet-delitelov-a-obratena-implikacia",
+        "cs": "pocet-delitelu-a-obracena-implikace",
+        "en": "divisor-count-and-converse"
+      }
+    },
+    "K8Jhyizt5YvLRX463Ka_e": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "prvocislo-neprevysujuce-odmocninu-n",
+        "cs": "prvocislo-nepresahujici-odmocninu-n",
+        "en": "prime-divisor-below-square-root"
+      }
+    },
+    "C0sb6mdImA-f9i_DF9ajq": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "sucin-vsetkych-delitelov-cisla",
+        "cs": "soucin-vsech-delitelu-cisla",
+        "en": "product-of-all-divisors"
+      }
+    },
+    "YXqKtQowN8gPVViw4PWN4": {
+      "type": "example",
+      "number": 3,
+      "slug": {
+        "sk": "vzajomna-delitelnost-dvoch-cisel",
+        "cs": "vzajemna-delitelnost-dvou-cisel",
+        "en": "mutual-divisibility-of-integers"
+      }
+    },
+    "pPJ8A14vh3r-vsHx4AMP1": {
+      "type": "example",
+      "number": 4,
+      "slug": {
+        "sk": "iracionalita-odmocniny-z-dvoch",
+        "cs": "iracionalita-odmocniny-ze-dvou",
+        "en": "irrationality-of-square-root-two"
+      }
+    },
+    "64NL2y_73vGHKsm_iuBXS": {
+      "type": "exercise",
+      "number": 3,
+      "slug": {
+        "sk": "zlyhanie-dokazu-pre-odmocninu-4",
+        "cs": "selhani-dukazu-pro-odmocninu-4",
+        "en": "proof-fails-for-root-four"
+      }
+    },
+    "MygIexYlJA93Zs1GKPipd": {
+      "type": "exercise",
+      "number": 4,
+      "slug": {
+        "sk": "kriterium-iracionality-odmocniny-n",
+        "cs": "kriterium-iracionality-odmocniny-n",
+        "en": "irrationality-criterion-for-root-n"
+      }
+    },
+    "SselxmWyMFZXmodhe5HKW": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "sucet-racionalneho-a-iracionalneho-cisla",
+        "cs": "soucet-racionalniho-a-iracionalniho-cisla",
+        "en": "sum-of-rational-and-irrational"
+      }
+    },
+    "lEtf_CHzL0kz2p9TGK5Ml": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "odmocnina-2-plus-odmocnina-3",
+        "cs": "odmocnina-2-plus-odmocnina-3",
+        "en": "root-two-plus-root-three"
+      }
+    },
+    "y5MK6awUXD1Q21xcYhP-r": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "sucet-troch-neparnych-stvorcov",
+        "cs": "soucet-tri-lichych-ctvercu",
+        "en": "sum-of-three-odd-squares"
+      }
+    },
+    "YFmWOBiEPkcdH8w_XCCXq": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "karty-s-cislami-na-kruhu",
+        "cs": "karty-s-cisly-na-kruhu",
+        "en": "numbers-on-cards-around-circle"
+      }
+    },
+    "KvlppDtT0_6whJQhO-l8K": {
+      "type": "theorem",
+      "number": 2,
+      "slug": {
+        "sk": "nekonecne-vela-prvocisel",
+        "cs": "nekonecne-mnoho-prvocisel",
+        "en": "infinitely-many-primes"
+      }
+    },
+    "xcyxtxvzStwwMDpYr7pv2": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "prvocisla-deliace-n2-plus-1",
+        "cs": "prvocisla-delici-n2-plus-1",
+        "en": "primes-dividing-n2-plus-1"
+      }
+    },
+    "f8Ikrt3vc35M1w9ez9TsY": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "prvocisla-tvaru-3n-plus-2",
+        "cs": "prvocisla-tvaru-3n-plus-2",
+        "en": "primes-form-3n-plus-2"
+      }
+    }
   },
   "Wn4tLx7KqRm2YvPsJc8Fb": {
-    "sum-of-first-n-naturals": { "type": "example", "number": 1 },
-    "classic-summation-identities": { "type": "exercise", "number": 1 },
-    "progression-sum-formulas": { "type": "exercise", "number": 2 },
-    "fibonacci-partial-sums": { "type": "exercise", "number": 3 },
-    "power-of-two-vs-square": { "type": "example", "number": 2 },
-    "power-of-two-at-least-n": { "type": "exercise", "number": 4 },
-    "factorial-beats-power-of-two": { "type": "exercise", "number": 5 },
-    "harmonic-tail-sum-bound": { "type": "exercise", "number": 6 },
-    "bernoulli-inequality": { "type": "exercise", "number": 7 },
-    "divisibility-n-cubed-minus-n": { "type": "example", "number": 3 },
-    "divisibility-four-power-minus-one": { "type": "example", "number": 4 },
-    "divisibility-four-power-plus-six-n": { "type": "exercise", "number": 8 },
-    "five-and-six-power-divisibility": { "type": "exercise", "number": 9 },
-    "lines-through-common-point-fallacy": { "type": "problem", "number": 1 },
-    "prime-factorization-existence": { "type": "theorem", "number": 1 },
-    "binary-representation-existence": { "type": "example", "number": 5 },
-    "zeckendorf-representation": { "type": "problem", "number": 2 },
-    "factorial-number-system": { "type": "problem", "number": 3 },
-    "linear-recurrence-2n-minus-1": { "type": "example", "number": 6 },
-    "linear-recurrence-3n-minus-2n": { "type": "exercise", "number": 10 },
-    "fibonacci-golden-ratio-bound": { "type": "problem", "number": 4 },
-    "power-sum-reciprocal-rational": { "type": "problem", "number": 5 },
-    "sum-of-twos-and-threes": { "type": "example", "number": 7 },
-    "am-gm-inequality": { "type": "theorem", "number": 2 },
-    "power-of-one-plus-sqrt-two": { "type": "problem", "number": 6 },
-    "visiting-all-lightbulb-configurations": { "type": "problem", "number": 7 },
-    "chocolate-bar-breaking": { "type": "problem", "number": 8 },
-    "path-through-all-cities-oneway": { "type": "problem", "number": 9 },
-    "factorial-divides-consecutive-product": { "type": "problem", "number": 10 }
+    "9yBomXdDVp4gAuqC5xZ94": {
+      "type": "example",
+      "number": 1,
+      "slug": {
+        "sk": "sucet-prvych-prirodzenych-cisel",
+        "cs": "soucet-prvnich-prirozenych-cisel",
+        "en": "sum-of-first-natural-numbers"
+      }
+    },
+    "xw475fM0Prdxbg3iPPn61": {
+      "type": "exercise",
+      "number": 1,
+      "slug": {
+        "sk": "zakladne-suctove-identity",
+        "cs": "zakladni-souctove-identity",
+        "en": "basic-summation-identities"
+      }
+    },
+    "lmFOON6L7XWEpGkCusEMq": {
+      "type": "exercise",
+      "number": 2,
+      "slug": {
+        "sk": "sucty-znamych-postupnosti",
+        "cs": "soucty-znamych-posloupnosti",
+        "en": "sums-of-known-sequences"
+      }
+    },
+    "AMPVYuqSRbqUuUXzn9_IS": {
+      "type": "exercise",
+      "number": 3,
+      "slug": {
+        "sk": "sucty-fibonacciho-cisel",
+        "cs": "soucty-fibonacciho-cisel",
+        "en": "sums-of-fibonacci-numbers"
+      }
+    },
+    "KwQ34aGY1NEEYMmpdIR8S": {
+      "type": "example",
+      "number": 2,
+      "slug": {
+        "sk": "mocnina-dvojky-a-stvorec",
+        "cs": "mocnina-dvojky-a-ctverec",
+        "en": "power-of-two-versus-square"
+      }
+    },
+    "E96zQgO_uBsdfUmbYqN4y": {
+      "type": "exercise",
+      "number": 4,
+      "slug": {
+        "sk": "mocnina-dvojky-aspon-n",
+        "cs": "mocnina-dvojky-aspon-n",
+        "en": "power-of-two-at-least-n"
+      }
+    },
+    "7jCR29oi3vjBByiM3clFR": {
+      "type": "exercise",
+      "number": 5,
+      "slug": {
+        "sk": "faktorial-vacsi-ako-mocnina-dvojky",
+        "cs": "faktorial-vetsi-nez-mocnina-dvojky",
+        "en": "factorial-versus-power-of-two"
+      }
+    },
+    "w4OPsymocMM1lk5Ia7xFq": {
+      "type": "exercise",
+      "number": 6,
+      "slug": {
+        "sk": "odhad-suctu-prevratenych-hodnot",
+        "cs": "odhad-souctu-prevracenych-hodnot",
+        "en": "bound-for-reciprocal-sum"
+      }
+    },
+    "cHiNQzW3AKr_Q9Ntb5cPh": {
+      "type": "exercise",
+      "number": 7,
+      "slug": {
+        "sk": "bernoulliho-nerovnost",
+        "cs": "bernoulliho-nerovnost",
+        "en": "bernoulli-inequality"
+      }
+    },
+    "hSpjBceKEQHSY3G2NrPLi": {
+      "type": "example",
+      "number": 3,
+      "slug": {
+        "sk": "delitelnost-kubickeho-vyrazu-siestimi",
+        "cs": "delitelnost-kubickeho-vyrazu-sesti",
+        "en": "cubic-expression-divisible-by-six"
+      }
+    },
+    "XhlDVCU5CVsYXYrB4mI6K": {
+      "type": "example",
+      "number": 4,
+      "slug": {
+        "sk": "delitelnost-mocniny-styrky-tromi",
+        "cs": "delitelnost-mocniny-ctyrky-tremi",
+        "en": "power-of-four-minus-one"
+      }
+    },
+    "AUNeyfIng3RZYum42pwOp": {
+      "type": "exercise",
+      "number": 8,
+      "slug": {
+        "sk": "mocnina-styrky-s-linearnym-clenom",
+        "cs": "mocnina-ctyrky-s-linearnim-clenem",
+        "en": "four-power-plus-linear-term"
+      }
+    },
+    "2EK58JlVU4myp9booKhTI": {
+      "type": "exercise",
+      "number": 9,
+      "slug": {
+        "sk": "delitelnost-mocnin-patky-a-sestky",
+        "cs": "delitelnost-mocnin-petky-a-sestky",
+        "en": "powers-of-five-and-six"
+      }
+    },
+    "h6ycIeImzAxi3RDVg8aD1": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "chyba-v-dokaze-o-priamkach",
+        "cs": "chyba-v-dukazu-o-primkach",
+        "en": "mistake-in-proof-about-lines"
+      }
+    },
+    "rlqR-g6tYOodfK1y5j-U8": {
+      "type": "theorem",
+      "number": 1,
+      "slug": {
+        "sk": "veta-o-rozklade-na-prvocisla",
+        "cs": "veta-o-rozkladu-na-prvocisla",
+        "en": "prime-factorization-theorem"
+      }
+    },
+    "lpU0vCDnzTQTRkiZ-gYwD": {
+      "type": "example",
+      "number": 5,
+      "slug": {
+        "sk": "sucet-roznych-mocnin-dvojky",
+        "cs": "soucet-ruznych-mocnin-dvojky",
+        "en": "distinct-powers-of-two"
+      }
+    },
+    "L1ET1LWidLOCYBQ4aJ1kw": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "zeckendorfova-veta-existencia",
+        "cs": "zeckendorfova-veta-existence",
+        "en": "zeckendorf-theorem-existence"
+      }
+    },
+    "NzDlKblljqpwJsOKh_ODL": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "faktorialova-sustava",
+        "cs": "faktorialova-soustava",
+        "en": "factorial-number-system"
+      }
+    },
+    "ReBHJLfOuUnd8xlFb3p5j": {
+      "type": "example",
+      "number": 6,
+      "slug": {
+        "sk": "rekurencia-s-koeficientmi-tri-dva",
+        "cs": "rekurence-s-koeficienty-tri-dva",
+        "en": "recurrence-with-coefficients-three-two"
+      }
+    },
+    "GduF2yCIHHd2oO245jPN1": {
+      "type": "exercise",
+      "number": 10,
+      "slug": {
+        "sk": "rekurencia-s-koeficientmi-pat-sest",
+        "cs": "rekurence-s-koeficienty-pet-sest",
+        "en": "recurrence-with-coefficients-five-six"
+      }
+    },
+    "zV6SnGt6t0yB0y9PxFNLJ": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "odhad-fibonacciho-cisel-zlatym-rezom",
+        "cs": "odhad-fibonacciho-cisel-zlatym-rezem",
+        "en": "fibonacci-bound-by-golden-ratio"
+      }
+    },
+    "kRNEIUZ46xgUzn15tPDkD": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "racionalita-suctu-mocnin",
+        "cs": "racionalita-souctu-mocnin",
+        "en": "rationality-of-power-sums"
+      }
+    },
+    "9XkawMiwbE9B4Vlo7HwyS": {
+      "type": "example",
+      "number": 7,
+      "slug": {
+        "sk": "sucet-dvojok-a-trojok",
+        "cs": "soucet-dvojek-a-trojek",
+        "en": "sum-of-twos-and-threes"
+      }
+    },
+    "wuTq3DEasL-ITPjEfWNU8": {
+      "type": "theorem",
+      "number": 2,
+      "slug": { "sk": "ag-nerovnost", "cs": "ag-nerovnost", "en": "am-gm-inequality" }
+    },
+    "soy2X4j64tpg6mt-0WLLQ": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "mocnina-jedna-plus-odmocnina-dvoch",
+        "cs": "mocnina-jedna-plus-odmocnina-dvou",
+        "en": "one-plus-root-two-powers"
+      }
+    },
+    "ztW6mysuojPHF6HM4OeER": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "prechadzanie-vsetkych-konfiguracii-ziaroviek",
+        "cs": "prochazeni-vsech-konfiguraci-zarovek",
+        "en": "visiting-all-bulb-configurations"
+      }
+    },
+    "yEO7wwKj9y8ITTmqMfBLK": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "najmensi-pocet-zlomeni-cokolady",
+        "cs": "nejmensi-pocet-zlomeni-cokolady",
+        "en": "fewest-breaks-of-chocolate-bar"
+      }
+    },
+    "PKBDBCTDYAn-fOxL2CUvJ": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "cesta-cez-vsetky-mesta",
+        "cs": "cesta-pres-vsechna-mesta",
+        "en": "path-through-all-cities"
+      }
+    },
+    "VBtkEY5bHY_YPb58TtT3t": {
+      "type": "problem",
+      "number": 10,
+      "slug": {
+        "sk": "faktorial-deli-sucin-cisel",
+        "cs": "faktorial-deli-soucin-cisel",
+        "en": "factorial-divides-consecutive-product"
+      }
+    }
   },
   "RFj3E98fbinTsPJNbfBMm": {
-    "verifying-power-difference-pattern": { "type": "exercise", "number": 1 },
-    "guessing-odd-power-sum-pattern": { "type": "exercise", "number": 2 },
-    "general-power-difference-formula": { "type": "theorem", "number": 1 },
-    "general-odd-power-sum-formula": { "type": "theorem", "number": 2 },
-    "practice-factoring-power-expressions": { "type": "exercise", "number": 3 },
-    "n5-minus-n-divisible-30": { "type": "problem", "number": 1 },
-    "power-sum-divisible-by-seven": { "type": "problem", "number": 2 },
-    "sixth-power-minus-one-three-primes": { "type": "problem", "number": 3 },
-    "quartic-linear-difference-factoring": { "type": "example", "number": 1 },
-    "three-variable-polynomial-factoring": { "type": "exercise", "number": 4 },
-    "sum-of-squares-factor-pattern": { "type": "exercise", "number": 5 },
-    "symmetric-sums-divisibility": { "type": "problem", "number": 4 },
-    "quartic-with-square-middle-term": { "type": "example", "number": 2 },
-    "sophie-germain-identity": { "type": "exercise", "number": 6 },
-    "quartic-expression-prime-values": { "type": "problem", "number": 5 },
-    "factoring-sum-of-nth-powers": { "type": "problem", "number": 6 },
-    "heron-formula-factorization": { "type": "problem", "number": 7 },
-    "quartic-plus-power-of-four": { "type": "problem", "number": 8 },
-    "sum-of-cubes-identity": { "type": "example", "number": 3 },
-    "sum-of-cubes-inequality": { "type": "theorem", "number": 3 }
+    "zEf84OUo1PK7UmQoBCiOZ": {
+      "type": "exercise",
+      "number": 1,
+      "slug": {
+        "sk": "overenie-rozkladov-rozdielu-mocnin",
+        "cs": "overeni-rozkladu-rozdilu-mocnin",
+        "en": "verify-difference-of-powers-formulas"
+      }
+    },
+    "egnd2_iL4TGIEIcqPpm7d": {
+      "type": "exercise",
+      "number": 2,
+      "slug": {
+        "sk": "overenie-rozkladov-suctu-neparnych-mocnin",
+        "cs": "overeni-rozkladu-souctu-lichych-mocnin",
+        "en": "verify-sum-of-odd-powers"
+      }
+    },
+    "Q9g7InhFTYUEKEyLG9AQd": {
+      "type": "theorem",
+      "number": 1,
+      "slug": {
+        "sk": "vseobecny-vzorec-pre-rozdiel-mocnin",
+        "cs": "obecny-vzorec-pro-rozdil-mocnin",
+        "en": "general-formula-difference-of-powers"
+      }
+    },
+    "V56cGi02g0ne0oE1NMLC0": {
+      "type": "theorem",
+      "number": 2,
+      "slug": {
+        "sk": "vzorec-pre-sucet-neparnych-mocnin",
+        "cs": "vzorec-pro-soucet-lichych-mocnin",
+        "en": "formula-sum-of-odd-powers"
+      }
+    },
+    "C5LcWx5oCgn3w0obToHt3": {
+      "type": "exercise",
+      "number": 3,
+      "slug": {
+        "sk": "rozklad-mocninovych-vyrazov-na-sucin",
+        "cs": "rozklad-mocninnych-vyrazu-na-soucin",
+        "en": "factor-power-expressions-into-products"
+      }
+    },
+    "1WeUccrXfz1T4gtxJOfgZ": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "n5-minus-n-delitelne-tridsiatimi",
+        "cs": "n5-minus-n-delitelne-triceti",
+        "en": "n5-minus-n-divisible-30"
+      }
+    },
+    "X6dRSGrGRVxDQ0v7yQePz": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "dvojice-s-delitelnym-suctom-mocnin",
+        "cs": "dvojice-s-delitelnym-souctem-mocnin",
+        "en": "pairs-with-power-sum-divisible"
+      }
+    },
+    "Sbn2tu3JS3ii9qr4cOQ8C": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "n6-minus-1-sucin-prvocisel",
+        "cs": "n6-minus-1-soucin-prvocisel",
+        "en": "n6-minus-1-three-primes"
+      }
+    },
+    "z2sq5m0LtIq8tk-jBYnfT": {
+      "type": "example",
+      "number": 1,
+      "slug": {
+        "sk": "rozklad-stvrtych-a-prvych-mocnin",
+        "cs": "rozklad-ctvrtych-a-prvnich-mocnin",
+        "en": "factor-quartic-minus-linear-terms"
+      }
+    },
+    "DV0_ZMK4OLUU7QpEJhp2g": {
+      "type": "exercise",
+      "number": 4,
+      "slug": {
+        "sk": "rozklad-vyrazov-s-tromi-premennymi",
+        "cs": "rozklad-vyrazu-s-tremi-promennymi",
+        "en": "factor-three-variable-expressions"
+      }
+    },
+    "7tKvcGyzwQN50fXeKZZFA": {
+      "type": "exercise",
+      "number": 5,
+      "slug": {
+        "sk": "rozklad-suctu-zmiesanych-clenov",
+        "cs": "rozklad-souctu-smisenych-clenu",
+        "en": "factor-sums-of-mixed-terms"
+      }
+    },
+    "6Pz40KvMj-Z2KCtx_HwVy": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "cpsj-2018-delitelnost-symetrickych-suctov",
+        "cs": "cpsj-2018-delitelnost-symetrickych-souctu",
+        "en": "cpsj-2018-symmetric-sums-divisibility"
+      }
+    },
+    "bkNk8lf8VG9rFMi2pvgqT": {
+      "type": "example",
+      "number": 2,
+      "slug": {
+        "sk": "rozklad-vyrazu-so-stvrtymi-mocninami",
+        "cs": "rozklad-vyrazu-se-ctvrtymi-mocninami",
+        "en": "factor-quartic-with-mixed-term"
+      }
+    },
+    "JWzyzp2FArSoq1MTMNFNv": {
+      "type": "exercise",
+      "number": 6,
+      "slug": {
+        "sk": "sophie-germain-identita",
+        "cs": "sophie-germain-identita",
+        "en": "sophie-germain-identity"
+      }
+    },
+    "WtGT3o2FOm2uBrteEN3Zw": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "ckmo-2012-prvociselne-hodnoty-vyrazu",
+        "cs": "ckmo-2012-prvociselne-hodnoty-vyrazu",
+        "en": "ckmo-2012-quartic-prime-values"
+      }
+    },
+    "C8xIHzIo34hOf3ywn-A9c": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "rozlozitelnost-suctu-n-tych-mocnin",
+        "cs": "rozlozitelnost-souctu-n-tych-mocnin",
+        "en": "factoring-sum-of-nth-powers"
+      }
+    },
+    "5GOMMydtW7ogI97uOKrCC": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "rozklad-vyrazu-na-styri-zatvorky",
+        "cs": "rozklad-vyrazu-na-ctyri-zavorky",
+        "en": "factor-into-four-parentheses"
+      }
+    },
+    "6f5rmK2QlSwXl_RJIGoxt": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "prvocisla-tvaru-n4-plus-4n",
+        "cs": "prvocisla-tvaru-n4-plus-4n",
+        "en": "primes-among-n4-plus-4n"
+      }
+    },
+    "L8kGQr5vDWsJujU5xanZg": {
+      "type": "example",
+      "number": 3,
+      "slug": {
+        "sk": "rozklad-tretich-mocnin-minus-3abc",
+        "cs": "rozklad-tretich-mocnin-minus-3abc",
+        "en": "sum-of-cubes-minus-3abc"
+      }
+    },
+    "GHX8rHEBCjaxdhuXWD5lL": {
+      "type": "theorem",
+      "number": 3,
+      "slug": {
+        "sk": "nerovnost-pre-sucet-tretich-mocnin",
+        "cs": "nerovnost-pro-soucet-tretich-mocnin",
+        "en": "sum-of-cubes-inequality"
+      }
+    }
   },
   "_bNdll2TEiNb6fuho76K3": {
-    "square-plus-one-pair": { "type": "example", "number": 1 },
-    "square-minus-one-cyclic-triple": { "type": "example", "number": 2 },
-    "mixed-quadratic-pair": { "type": "exercise", "number": 1 },
-    "product-plus-sum-triple": { "type": "exercise", "number": 2 },
-    "three-variable-square-mix": { "type": "exercise", "number": 3 },
-    "square-plus-one-revisited": { "type": "example", "number": 3 },
-    "homogeneous-quadratic-triple": { "type": "example", "number": 4 },
-    "square-plus-shift-triple": { "type": "exercise", "number": 4 },
-    "square-equals-four-shift": { "type": "exercise", "number": 5 },
-    "common-sum-factor-triple": { "type": "exercise", "number": 6 },
-    "square-plus-one-once-more": { "type": "example", "number": 5 },
-    "absolute-difference-and-sum": { "type": "example", "number": 6 },
-    "cubic-plus-one-cyclic": { "type": "example", "number": 7 },
-    "square-root-swap-pair": { "type": "exercise", "number": 7 },
-    "fifth-power-sum-cyclic": { "type": "exercise", "number": 8 },
-    "quintic-cubic-cyclic-triple": { "type": "exercise", "number": 9 },
-    "quadratic-cross-term-triple": { "type": "problem", "number": 1 },
-    "cubic-quadratic-swap-pair": { "type": "problem", "number": 2 },
-    "absolute-value-cyclic-sum": { "type": "problem", "number": 3 },
-    "weighted-quadratic-cyclic-triple": { "type": "problem", "number": 4 },
-    "four-variable-cubic-cycle": { "type": "problem", "number": 5 },
-    "four-digit-cube-system": { "type": "problem", "number": 6 },
-    "cyclic-product-triple": { "type": "problem", "number": 7 }
+    "D0LGFK_pfJGjGSaEZ_Hke": {
+      "type": "example",
+      "number": 1,
+      "slug": {
+        "sk": "sustava-x2-plus-jedna",
+        "cs": "soustava-x2-plus-jedna",
+        "en": "system-x2-plus-one-by-subtracting"
+      }
+    },
+    "7z3zvIqJUW_wdFt8Zqo6w": {
+      "type": "example",
+      "number": 2,
+      "slug": {
+        "sk": "trojica-x2-minus-jedna",
+        "cs": "trojice-x2-minus-jedna",
+        "en": "triple-x2-minus-one"
+      }
+    },
+    "BdBaRHPtT8T2Gs6oQNEgC": {
+      "type": "exercise",
+      "number": 1,
+      "slug": { "sk": "dvojica-x2-plus-xy", "cs": "dvojice-x2-plus-xy", "en": "x2-plus-xy-pair" }
+    },
+    "Ir2UYgurHXAHWW8PuMK7v": {
+      "type": "exercise",
+      "number": 2,
+      "slug": {
+        "sk": "sucin-plus-sucet-je-tri",
+        "cs": "soucin-plus-soucet-je-tri",
+        "en": "product-plus-sum-equals-three"
+      }
+    },
+    "J0N3G-MqiqTpPzm2xn-k1": {
+      "type": "exercise",
+      "number": 3,
+      "slug": {
+        "sk": "dve-kvadraticke-rovnice-tri-nezname",
+        "cs": "dve-kvadraticke-rovnice-tri-nezname",
+        "en": "two-quadratics-three-unknowns"
+      }
+    },
+    "fJHAdZ9nOAf90RwGcVUgs": {
+      "type": "example",
+      "number": 3,
+      "slug": {
+        "sk": "sustava-x2-plus-jedna-znova",
+        "cs": "soustava-x2-plus-jedna-znovu",
+        "en": "system-x2-plus-one-by-adding"
+      }
+    },
+    "SKm6_EEO8ktWY6GLAWFK3": {
+      "type": "example",
+      "number": 4,
+      "slug": {
+        "sk": "mocniny-rovne-sucinom",
+        "cs": "mocniny-rovne-soucinum",
+        "en": "squares-equal-products-triple"
+      }
+    },
+    "ihFIU-Isi5rJX1DQF2FUp": {
+      "type": "exercise",
+      "number": 4,
+      "slug": {
+        "sk": "a2-plus-b-cyklicka-sustava",
+        "cs": "a2-plus-b-cyklicka-soustava",
+        "en": "a2-plus-b-cyclic-system"
+      }
+    },
+    "b1Qku8TQk_bISQjaLLwJt": {
+      "type": "exercise",
+      "number": 5,
+      "slug": {
+        "sk": "mocniny-rovne-stvornasobku",
+        "cs": "mocniny-rovne-ctyrnasobku",
+        "en": "squares-equal-four-times-one-less"
+      }
+    },
+    "N916Q1M7Al6Ajy1bBzB67": {
+      "type": "exercise",
+      "number": 6,
+      "slug": {
+        "sk": "nasobky-spolocneho-suctu",
+        "cs": "nasobky-spolecneho-souctu",
+        "en": "products-with-common-sum"
+      }
+    },
+    "BxI1A2IFhjVNRop0rnGmE": {
+      "type": "example",
+      "number": 5,
+      "slug": {
+        "sk": "sustava-x2-plus-jedna-tretikrat",
+        "cs": "soustava-x2-plus-jedna-potreti",
+        "en": "system-x2-plus-one-by-ordering"
+      }
+    },
+    "0P6L5xCu00XZL-YsyNO56": {
+      "type": "example",
+      "number": 6,
+      "slug": {
+        "sk": "absolutna-hodnota-rozdielu-a-sucet",
+        "cs": "absolutni-hodnota-rozdilu-a-soucet",
+        "en": "absolute-difference-and-sum"
+      }
+    },
+    "hBqsEZLiptRWTxkNslZYy": {
+      "type": "example",
+      "number": 7,
+      "slug": {
+        "sk": "tretie-mocniny-plus-jedna",
+        "cs": "treti-mocniny-plus-jedna",
+        "en": "cubes-plus-one-cyclic-triple"
+      }
+    },
+    "FA9H6PMOIW_BIsrkdNyJz": {
+      "type": "exercise",
+      "number": 7,
+      "slug": {
+        "sk": "dvojica-rovnic-s-odmocninami",
+        "cs": "dvojice-rovnic-s-odmocninami",
+        "en": "square-roots-swapped-pair"
+      }
+    },
+    "Er1LlMMLgP86yG2Cwg-A3": {
+      "type": "exercise",
+      "number": 8,
+      "slug": {
+        "sk": "piate-mocniny-suctu",
+        "cs": "pate-mocniny-souctu",
+        "en": "fifth-powers-of-sums"
+      }
+    },
+    "wQlWW_d8RkEMYEVhPnUgM": {
+      "type": "exercise",
+      "number": 9,
+      "slug": {
+        "sk": "piate-a-tretie-mocniny",
+        "cs": "pate-a-treti-mocniny",
+        "en": "fifth-and-third-powers-cyclic"
+      }
+    },
+    "J9y3n7IpfYrwv1MVEUpAH": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "kvadraticke-vyrazy-rovne-nule",
+        "cs": "kvadraticke-vyrazy-rovne-nule",
+        "en": "quadratic-expressions-equal-zero"
+      }
+    },
+    "zHb1mdkxX4xBnPceHR1ud": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "tretie-mocniny-a-stvorce-dvojice",
+        "cs": "treti-mocniny-a-ctverce-dvojice",
+        "en": "cubes-and-squares-swapped-pair"
+      }
+    },
+    "Zg7AaMLPVe_fPwcofqaP0": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "absolutne-hodnoty-a-mozny-sucet",
+        "cs": "absolutni-hodnoty-a-mozny-soucet",
+        "en": "possible-sums-with-absolute-values"
+      }
+    },
+    "B87yKpZVrHaDr_8L0DwEk": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "kvadraticke-rovnice-v-kladnych-cislach",
+        "cs": "kvadraticke-rovnice-v-kladnych-cislech",
+        "en": "quadratic-system-in-positive-reals"
+      }
+    },
+    "6Vehj56wbxnDxAQgqTzru": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "tretie-mocniny-styri-nezname",
+        "cs": "treti-mocniny-ctyri-nezname",
+        "en": "cubes-with-four-unknowns"
+      }
+    },
+    "6DbDwozTJMgehPjmcvRJ5": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "najmensie-stvormiestne-cislo-n",
+        "cs": "nejmensi-ctyrmistne-cislo-n",
+        "en": "smallest-four-digit-n"
+      }
+    },
+    "ABh2osL3yNL-ZxhlNa3IN": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "sustava-so-sucinmi-abc",
+        "cs": "soustava-se-souciny-abc",
+        "en": "cyclic-products-with-abc"
+      }
+    }
   },
   "u15f7GlQS2wKSsuIKCz0c": {
-    "ordering-paired-sums-products": { "type": "example", "number": 1 },
-    "product-inequality-chain-smallest": { "type": "exercise", "number": 1 },
-    "cubes-sum-vs-mixed-terms": { "type": "example", "number": 2 },
-    "power-sum-vs-mixed-powers": { "type": "exercise", "number": 2 },
-    "ordered-triple-square-difference": { "type": "exercise", "number": 3 },
-    "shifted-integer-product-inequality": { "type": "problem", "number": 1 },
-    "three-var-squares-vs-products": { "type": "example", "number": 3 },
-    "two-var-squares-plus-constant": { "type": "exercise", "number": 4 },
-    "quartic-terms-vs-product-sum": { "type": "exercise", "number": 5 },
-    "equal-cubic-shift-product-bounds": { "type": "problem", "number": 2 },
-    "closer-numbers-larger-product": { "type": "example", "number": 4 },
-    "n-term-mean-inequality": { "type": "theorem", "number": 1 },
-    "three-pairwise-sums-product": { "type": "example", "number": 5 },
-    "open-box-max-volume": { "type": "example", "number": 6 },
-    "power-plus-n-vs-linear": { "type": "exercise", "number": 6 },
-    "unit-product-shifted-factors": { "type": "exercise", "number": 7 },
-    "cyclic-fraction-sum-six": { "type": "exercise", "number": 8 },
-    "reciprocal-sum-pair-product-bound": { "type": "exercise", "number": 9 },
-    "implied-cubic-inequality": { "type": "example", "number": 7 },
-    "middle-value-square-condition": { "type": "problem", "number": 3 },
-    "bounded-vars-sum-vs-squares": { "type": "problem", "number": 4 },
-    "sqrt-product-quadratic-bound": { "type": "problem", "number": 5 },
-    "shifted-squares-product-bound": { "type": "problem", "number": 6 },
-    "last-term-product-bound": { "type": "problem", "number": 7 },
-    "quartic-minus-mixed-cubic-min": { "type": "problem", "number": 8 },
-    "sixth-power-condition-bound": { "type": "problem", "number": 9 }
+    "bPkLpBouOLKWsyJ2o4KB1": {
+      "type": "example",
+      "number": 1,
+      "slug": {
+        "sk": "usporiadanie-sucinov-dvojic",
+        "cs": "usporadani-soucinu-dvojic",
+        "en": "ordering-products-of-pairs"
+      }
+    },
+    "YZmrvYRhFg_8fHlZmZo3U": {
+      "type": "exercise",
+      "number": 1,
+      "slug": {
+        "sk": "najmensie-zo-styroch-cisel",
+        "cs": "nejmensi-ze-ctyr-cisel",
+        "en": "smallest-of-four-numbers"
+      }
+    },
+    "P4XBmJZTYVy4KIe2BPqbE": {
+      "type": "example",
+      "number": 2,
+      "slug": {
+        "sk": "tretie-mocniny-s-nezapornym-suctom",
+        "cs": "treti-mocniny-s-nezapornym-souctem",
+        "en": "cubes-with-nonnegative-sum"
+      }
+    },
+    "JhZA_Dzle9gA4kV4lKv9q": {
+      "type": "exercise",
+      "number": 2,
+      "slug": {
+        "sk": "sucet-mocnin-dvoch-kladnych-cisel",
+        "cs": "soucet-mocnin-dvou-kladnych-cisel",
+        "en": "sum-of-powers-of-two-positive-numbers"
+      }
+    },
+    "mQOwqNMi8OAFVITQ-pAYo": {
+      "type": "exercise",
+      "number": 3,
+      "slug": {
+        "sk": "nerovnost-pre-usporiadanu-trojicu",
+        "cs": "nerovnost-pro-usporadanou-trojici",
+        "en": "inequality-for-ordered-triple"
+      }
+    },
+    "ED7SKfRlBMObihFgvGY7A": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "nerovnost-pre-dve-cele-cisla",
+        "cs": "nerovnost-pro-dve-cela-cisla",
+        "en": "inequality-for-two-integers"
+      }
+    },
+    "vQhiaK4eolSqnaAA9cuHZ": {
+      "type": "example",
+      "number": 3,
+      "slug": {
+        "sk": "mocniny-a-suciny-troch-cisel",
+        "cs": "mocniny-a-souciny-tri-cisel",
+        "en": "squares-versus-pairwise-products"
+      }
+    },
+    "418Wz9g6IWSugP49_tU-n": {
+      "type": "exercise",
+      "number": 4,
+      "slug": { "sk": "stvorce-plus-dva", "cs": "ctverce-plus-dva", "en": "squares-plus-two" }
+    },
+    "sdg3sRT7yvoIjDcMsErsE": {
+      "type": "exercise",
+      "number": 5,
+      "slug": {
+        "sk": "stvrte-mocniny-proti-sucinu",
+        "cs": "ctvrte-mocniny-proti-soucinu",
+        "en": "quartic-terms-versus-product"
+      }
+    },
+    "COs_bAdXRwGbPeWyYKM3R": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "rovnost-vyrazov-a-odhad-sucinu",
+        "cs": "rovnost-vyrazu-a-odhad-soucinu",
+        "en": "equal-expressions-and-product-bounds"
+      }
+    },
+    "m3P8RN63DfmSb-_H94B_n": {
+      "type": "example",
+      "number": 4,
+      "slug": {
+        "sk": "blizsie-cisla-maju-vacsi-sucin",
+        "cs": "blizsi-cisla-maji-vetsi-soucin",
+        "en": "closer-numbers-have-larger-product"
+      }
+    },
+    "hn826RYmOm1L-wYPENeAW": {
+      "type": "theorem",
+      "number": 1,
+      "slug": { "sk": "ag-nerovnost", "cs": "ag-nerovnost", "en": "am-gm-inequality" }
+    },
+    "kAB49jcHXVg3uvkhrrteu": {
+      "type": "example",
+      "number": 5,
+      "slug": {
+        "sk": "sucin-troch-dvojicovych-suctov",
+        "cs": "soucin-tri-dvojicovych-souctu",
+        "en": "product-of-pairwise-sums"
+      }
+    },
+    "KMckvz9BRCkFpylMDM-ZQ": {
+      "type": "example",
+      "number": 6,
+      "slug": { "sk": "problem-krabice", "cs": "problem-krabice", "en": "the-box-problem" }
+    },
+    "Fetv2ZpBpdSAL9VRNj6Bo": {
+      "type": "exercise",
+      "number": 6,
+      "slug": {
+        "sk": "mocnina-a-linearny-vyraz",
+        "cs": "mocnina-a-linearni-vyraz",
+        "en": "power-and-linear-expression"
+      }
+    },
+    "LRZ7mn998YqvFEP_vggGc": {
+      "type": "exercise",
+      "number": 7,
+      "slug": {
+        "sk": "cisla-so-sucinom-jedna",
+        "cs": "cisla-se-soucinem-jedna",
+        "en": "numbers-with-product-one"
+      }
+    },
+    "7ptHVCux9v12DP7_YmSbY": {
+      "type": "exercise",
+      "number": 8,
+      "slug": {
+        "sk": "sucet-zlomkov-troch-cisel",
+        "cs": "soucet-zlomku-tri-cisel",
+        "en": "sum-of-three-fractions"
+      }
+    },
+    "5Y8zEyYvhLa8dN3Q2sEoF": {
+      "type": "exercise",
+      "number": 9,
+      "slug": {
+        "sk": "styri-cisla-a-prevratene-hodnoty",
+        "cs": "ctyri-cisla-a-prevracene-hodnoty",
+        "en": "four-numbers-with-reciprocals"
+      }
+    },
+    "Y_rVM9PKRrNZ-xul7WWn5": {
+      "type": "example",
+      "number": 7,
+      "slug": {
+        "sk": "dosledok-nerovnosti-s-mocninami",
+        "cs": "dusledek-nerovnosti-s-mocninami",
+        "en": "implied-inequality-with-powers"
+      }
+    },
+    "lGgi2UDhTRt1I5AhB-CSX": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "rovnost-mocnin-a-nerovnost-sucinov",
+        "cs": "rovnost-mocnin-a-nerovnost-soucinu",
+        "en": "squares-condition-and-product-inequality"
+      }
+    },
+    "tM0NUHzGN7ISuNnwGlXCf": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "sucet-vacsi-ako-mocniny",
+        "cs": "soucet-vetsi-nez-mocniny",
+        "en": "sum-greater-than-squares"
+      }
+    },
+    "DQ2FUiK5hVPMXJL4mp2Pw": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "nerovnost-s-odmocninou-sucinu",
+        "cs": "nerovnost-s-odmocninou-soucinu",
+        "en": "inequality-with-square-root"
+      }
+    },
+    "h9XOWPr4I6tWgzd33zXK0": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "sucin-stvorcov-plus-jedna",
+        "cs": "soucin-ctvercu-plus-jedna",
+        "en": "product-of-squares-plus-one"
+      }
+    },
+    "He5FmTiAljgyhp8e3jrZT": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "sucet-mocnin-a-posledny-clen",
+        "cs": "soucet-mocnin-a-posledni-clen",
+        "en": "squares-versus-last-term"
+      }
+    },
+    "nTrt8isVP7d-IkZLcxcKy": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "minimum-vyrazu-so-stvrtymi-mocninami",
+        "cs": "minimum-vyrazu-se-ctvrtymi-mocninami",
+        "en": "minimum-of-quartic-expression"
+      }
+    },
+    "A8uKeAcwG40bQUQcsLUwV": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "podmienka-so-siestou-mocninou",
+        "cs": "podminka-se-sestou-mocninou",
+        "en": "condition-with-sixth-power"
+      }
+    }
   },
   "dafdGYRouX2XuyrXK-5Xf": {
-    "nested-binary-operation": { "type": "problem", "number": 1 },
-    "zero-sum-fraction-identity": { "type": "problem", "number": 2 },
-    "constrained-fraction-sum": { "type": "problem", "number": 3 },
-    "unit-product-fraction-sum": { "type": "problem", "number": 4 },
-    "sum-one-triple-product": { "type": "problem", "number": 5 },
-    "reciprocal-sum-odd-powers": { "type": "problem", "number": 6 },
-    "cyclic-reciprocal-equalities": { "type": "problem", "number": 7 },
-    "cyclic-square-difference-system": { "type": "problem", "number": 8 },
-    "sum-of-eighth-powers": { "type": "problem", "number": 9 },
-    "real-quartic-equation": { "type": "problem", "number": 10 },
-    "triple-quadratic-product-equation": { "type": "problem", "number": 11 },
-    "square-differences-divisibility": { "type": "problem", "number": 12 }
+    "uD63SrC0DjlBiSlD8WN1i": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "vnorena-operacia-42-az-0",
+        "cs": "vnorena-operace-42-az-0",
+        "en": "nested-operation-42-to-0"
+      }
+    },
+    "r_xTFMkLNh1OKZqL4f6KP": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "zlomkova-identita-pri-sucte-nula",
+        "cs": "zlomkova-identita-pri-souctu-nula",
+        "en": "reciprocals-of-pairwise-sums-identity"
+      }
+    },
+    "T30uF67thgCpvHWXzfoqr": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "hodnoty-cyklickeho-suctu-zlomkov",
+        "cs": "hodnoty-cyklickeho-souctu-zlomku",
+        "en": "values-of-cyclic-fraction-sum"
+      }
+    },
+    "iD6Yxw2GEuWjliHpq83ij": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "sucet-zlomkov-pri-sucine-jedna",
+        "cs": "soucet-zlomku-pri-soucinu-jedna",
+        "en": "fraction-sum-with-product-one"
+      }
+    },
+    "ZaI7YVI7CM2Q9THxNgNIu": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "nezaporny-sucin-troch-cinitelov",
+        "cs": "nezaporny-soucin-tri-cinitelu",
+        "en": "nonnegative-product-of-three-factors"
+      }
+    },
+    "2aaFNpMFewtsuCcfuo_fD": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "prevratene-hodnoty-neparnych-mocnin",
+        "cs": "prevracene-hodnoty-lichych-mocnin",
+        "en": "reciprocal-equation-for-odd-powers"
+      }
+    },
+    "A_a1oWpvDYI-XyQHxUAwx": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "retazec-rovnosti-s-prevratenymi-hodnotami",
+        "cs": "retezec-rovnosti-s-prevracenymi-hodnotami",
+        "en": "chain-of-reciprocal-equalities"
+      }
+    },
+    "ezUe8vAa8glYER7DWNTS6": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "sustava-rozdielov-stvorcov",
+        "cs": "soustava-rozdilu-ctvercu",
+        "en": "system-of-square-differences"
+      }
+    },
+    "OHiG7BBuj0eu_jJB1Xcmq": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "sucin-dvoch-stvormiestnych-cisel",
+        "cs": "soucin-dvou-ctyrmistnych-cisel",
+        "en": "two-four-digit-factors"
+      }
+    },
+    "2ZxeP9uuZOf-7koaME3RI": {
+      "type": "problem",
+      "number": 10,
+      "slug": {
+        "sk": "rovnica-stvrteho-stupna",
+        "cs": "rovnice-ctvrteho-stupne",
+        "en": "quartic-equation-over-the-reals"
+      }
+    },
+    "Sno14U7w9Jv5l0joONjnr": {
+      "type": "problem",
+      "number": 11,
+      "slug": {
+        "sk": "sucin-troch-kvadratickych-vyrazov",
+        "cs": "soucin-tri-kvadratickych-vyrazu",
+        "en": "product-of-three-quadratics-equation"
+      }
+    },
+    "iwajcvpGTVmTHCDbGjT6a": {
+      "type": "problem",
+      "number": 12,
+      "slug": {
+        "sk": "delitelnost-suctu-tretich-mocnin",
+        "cs": "delitelnost-souctu-tretich-mocnin",
+        "en": "squared-differences-and-cube-divisibility"
+      }
+    }
   },
   "g1UHlmQc6GrEp0db0lGHs": {
-    "two-test-scores": { "type": "example", "number": 1 },
-    "rectangle-to-square-area": { "type": "example", "number": 2 },
-    "cyclist-average-speed": { "type": "example", "number": 3 },
-    "arithmetic-mean-two-numbers": { "type": "definition", "number": 1 },
-    "geometric-mean-two-numbers": { "type": "definition", "number": 2 },
-    "harmonic-mean-two-numbers": { "type": "definition", "number": 3 },
-    "cyclist-speed-harmonic-mean": { "type": "exercise", "number": 1 },
-    "compare-means-number-pairs": { "type": "exercise", "number": 2 },
-    "means-equal-pair": { "type": "exercise", "number": 3 },
-    "am-gm-two-numbers": { "type": "problem", "number": 1 },
-    "gm-hm-two-numbers": { "type": "problem", "number": 2 },
-    "arithmetic-mean-n-numbers": { "type": "definition", "number": 4 },
-    "geometric-mean-n-numbers": { "type": "definition", "number": 5 },
-    "harmonic-mean-n-numbers": { "type": "definition", "number": 6 },
-    "school-grades-means": { "type": "example", "number": 4 }
+    "5lVTVflzYIX-sj4-2bqEx": {
+      "type": "example",
+      "number": 1,
+      "slug": { "cs": "prumerny-pocet-bodu-dvou-studentu" }
+    },
+    "TN4dl0yqS7RISW-8ZV4Bu": {
+      "type": "example",
+      "number": 2,
+      "slug": { "cs": "strana-ctverce-s-obsahem-obdelnika" }
+    },
+    "oe3YYvEVymq4SsH63QUnG": {
+      "type": "example",
+      "number": 3,
+      "slug": { "cs": "prumerna-rychlost-cyklisty" }
+    },
+    "vTih_hh2F2tpJ6pKqYyal": {
+      "type": "definition",
+      "number": 1,
+      "slug": { "cs": "aritmeticky-prumer-dvou-cisel" }
+    },
+    "P1tYaXAyuOdteuzrlQFr3": {
+      "type": "definition",
+      "number": 2,
+      "slug": { "cs": "geometricky-prumer-dvou-cisel" }
+    },
+    "ThVI_lBO0FsGdivT12dSO": {
+      "type": "definition",
+      "number": 3,
+      "slug": { "cs": "harmonicky-prumer-dvou-cisel" }
+    },
+    "6b6v-mwMDJQLun5LOLiFd": {
+      "type": "exercise",
+      "number": 1,
+      "slug": { "cs": "vzorecek-v-prikladu-s-cyklistou" }
+    },
+    "80_Y1Hb5i5TDzLC-gJWHM": {
+      "type": "exercise",
+      "number": 2,
+      "slug": { "cs": "porovnani-prumeru-dvojic-cisel" }
+    },
+    "eisbAdJroxGl2QHbiIPvP": {
+      "type": "exercise",
+      "number": 3,
+      "slug": { "cs": "dvojice-s-rovnymi-prumery" }
+    },
+    "dyAmE3MykaxHvaQu_8SBc": {
+      "type": "problem",
+      "number": 1,
+      "slug": { "cs": "porovnani-aritmetickeho-a-geometrickeho-prumeru" }
+    },
+    "UV7IZNXLW_o8oeiE9t5jA": {
+      "type": "problem",
+      "number": 2,
+      "slug": { "cs": "porovnani-geometrickeho-a-harmonickeho-prumeru" }
+    },
+    "aBXQGb9XHMlf2UYpgn2ap": {
+      "type": "definition",
+      "number": 4,
+      "slug": { "cs": "aritmeticky-prumer-n-cisel" }
+    },
+    "2vR0LCy8VdNIKmBN1e7Vr": {
+      "type": "definition",
+      "number": 5,
+      "slug": { "cs": "geometricky-prumer-n-cisel" }
+    },
+    "RkjiONhHfMoT3_KECSx68": {
+      "type": "definition",
+      "number": 6,
+      "slug": { "cs": "harmonicky-prumer-n-cisel" }
+    },
+    "vUtBaQxWMNYAPcJPGjAhI": {
+      "type": "example",
+      "number": 4,
+      "slug": { "cs": "vypocet-prumeru-znamek" }
+    }
   },
   "ZgFNhI74gQeJl7cEMggw7": {
-    "vertical-corresponding-alternate-supplementary": { "type": "exercise", "number": 1 },
-    "triangle-angle-sum": { "type": "theorem", "number": 1 },
-    "convex-polygon-angle-sum": { "type": "theorem", "number": 2 },
-    "parallel-lines-segment-angle-sum": { "type": "exercise", "number": 2 },
-    "triangle-exterior-remote-angles": { "type": "exercise", "number": 3 },
-    "triangle-from-three-sides": { "type": "example", "number": 1 },
-    "triangle-from-two-sides-angle": { "type": "exercise", "number": 4 },
-    "triangle-from-side-two-angles": { "type": "exercise", "number": 5 },
-    "triangle-two-sides-opposite-angle": { "type": "problem", "number": 1 },
-    "isosceles-triangle-base-angles": { "type": "theorem", "number": 3 },
-    "equilateral-triangle-angles": { "type": "exercise", "number": 6 },
-    "isosceles-right-triangle-angles": { "type": "exercise", "number": 7 },
-    "right-triangle-double-hypotenuse": { "type": "problem", "number": 2 },
-    "segment-perpendicular-bisector-locus": { "type": "theorem", "number": 4 },
-    "triangle-circumcenter-existence": { "type": "theorem", "number": 5 },
-    "angle-bisector-locus-points": { "type": "theorem", "number": 6 },
-    "internal-external-bisector-perpendicular": { "type": "exercise", "number": 8 },
-    "triangle-incenter-existence": { "type": "theorem", "number": 7 },
-    "triangle-excenter-existence": { "type": "theorem", "number": 8 },
-    "isosceles-chain-configuration": { "type": "problem", "number": 3 },
-    "square-inscribed-equilateral-triangles": { "type": "problem", "number": 4 },
-    "trapezoid-angle-bisectors-meet": { "type": "problem", "number": 5 },
-    "pentagon-equal-sides-angles": { "type": "problem", "number": 6 },
-    "quadrilateral-diagonal-angles-30-45": { "type": "problem", "number": 7 }
+    "E7dY7LX9YobFdS39tfDDR": {
+      "type": "exercise",
+      "number": 1,
+      "slug": {
+        "sk": "vrcholove-suhlasne-striedave-uhly",
+        "cs": "vrcholove-souhlasne-stridave-uhly",
+        "en": "vertical-corresponding-alternate-angles"
+      }
+    },
+    "G2fX3226MoyMyLEg7bCt3": {
+      "type": "theorem",
+      "number": 1,
+      "slug": {
+        "sk": "sucet-uhlov-v-trojuholniku",
+        "cs": "soucet-uhlu-v-trojuhelniku",
+        "en": "sum-of-triangle-angles"
+      }
+    },
+    "H7yQvLt3VxyGlELBTgAJh": {
+      "type": "theorem",
+      "number": 2,
+      "slug": {
+        "sk": "sucet-uhlov-konvexneho-mnohouholnika",
+        "cs": "soucet-uhlu-konvexniho-mnohouhelniku",
+        "en": "convex-polygon-angle-sum"
+      }
+    },
+    "vUBGcz0IXvF69ZPtrH_4F": {
+      "type": "exercise",
+      "number": 2,
+      "slug": {
+        "sk": "sucet-uhlov-na-obrazku",
+        "cs": "soucet-uhlu-na-obrazku",
+        "en": "angle-sum-in-figure"
+      }
+    },
+    "EMfGZzO5Ro3VypJ7caLES": {
+      "type": "exercise",
+      "number": 3,
+      "slug": {
+        "sk": "uhol-s-otaznikom-na-obrazku",
+        "cs": "uhel-s-otaznikem-na-obrazku",
+        "en": "angle-marked-with-question-mark"
+      }
+    },
+    "YVYLXXXSL6OFFUuABkNDD": {
+      "type": "example",
+      "number": 1,
+      "slug": {
+        "sk": "veta-sss-o-zhodnosti",
+        "cs": "veta-sss-o-shodnosti",
+        "en": "sss-congruence-theorem"
+      }
+    },
+    "vMyC0sIAGJZq-NeOnkTWW": {
+      "type": "exercise",
+      "number": 4,
+      "slug": {
+        "sk": "veta-sus-o-zhodnosti",
+        "cs": "veta-sus-o-shodnosti",
+        "en": "sas-congruence-theorem"
+      }
+    },
+    "PmP9xfoxbBUEnYfG89CCT": {
+      "type": "exercise",
+      "number": 5,
+      "slug": {
+        "sk": "veta-usu-o-zhodnosti",
+        "cs": "veta-usu-o-shodnosti",
+        "en": "asa-congruence-theorem"
+      }
+    },
+    "G0TTdrAZrHu-Oip2mtDlP": {
+      "type": "problem",
+      "number": 1,
+      "slug": { "sk": "zhodnost-ssu", "cs": "shodnost-ssu", "en": "ssa-congruence" }
+    },
+    "GMR2XuASqafLT4gCEpuRI": {
+      "type": "theorem",
+      "number": 3,
+      "slug": {
+        "sk": "rovnoramenny-trojuholnik-zhodne-uhly",
+        "cs": "rovnoramenny-trojuhelnik-shodne-uhly",
+        "en": "isosceles-triangle-equal-angles"
+      }
+    },
+    "rKssiyhl1D8AnznvYHFaN": {
+      "type": "exercise",
+      "number": 6,
+      "slug": {
+        "sk": "uhly-rovnostranneho-trojuholnika",
+        "cs": "uhly-rovnostranneho-trojuhelniku",
+        "en": "equilateral-triangle-angles"
+      }
+    },
+    "Dh7EmG5yYRQD44zhd5YD6": {
+      "type": "exercise",
+      "number": 7,
+      "slug": {
+        "sk": "rovnoramenny-pravouhly-trojuholnik",
+        "cs": "rovnoramenny-pravouhly-trojuhelnik",
+        "en": "isosceles-right-triangle-angles"
+      }
+    },
+    "PVssK3ww1Ww4_Lm3f4PrT": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "pravouhly-trojuholnik-dvojnasobna-prepona",
+        "cs": "pravouhly-trojuhelnik-dvojnasobna-prepona",
+        "en": "right-triangle-double-hypotenuse"
+      }
+    },
+    "kTzIqbV0OaJSgPvurjL5y": {
+      "type": "theorem",
+      "number": 4,
+      "slug": { "sk": "os-usecky", "cs": "osa-usecky", "en": "perpendicular-bisector-of-segment" }
+    },
+    "FNKSPjq6yM0S5N_PL53GL": {
+      "type": "theorem",
+      "number": 5,
+      "slug": {
+        "sk": "existencia-stredu-opisanej-kruznice",
+        "cs": "existence-stredu-kruznice-opsane",
+        "en": "existence-of-circumcenter"
+      }
+    },
+    "PoEX7OH-T0op5IPL9DEhz": {
+      "type": "theorem",
+      "number": 6,
+      "slug": { "sk": "os-uhla", "cs": "osa-uhlu", "en": "angle-bisector" }
+    },
+    "g42rGrZiZDuBQcCBvCKh8": {
+      "type": "exercise",
+      "number": 8,
+      "slug": {
+        "sk": "vnutorna-a-vonkajsia-os-uhla",
+        "cs": "vnitrni-a-vnejsi-osa-uhlu",
+        "en": "internal-and-external-angle-bisectors"
+      }
+    },
+    "lHvoHwA3z301D2go6rtd5": {
+      "type": "theorem",
+      "number": 7,
+      "slug": {
+        "sk": "existencia-stredu-vpisanej-kruznice",
+        "cs": "existence-stredu-kruznice-vepsane",
+        "en": "existence-of-incenter"
+      }
+    },
+    "Mm527eX2RrorSGRJEbga4": {
+      "type": "theorem",
+      "number": 8,
+      "slug": {
+        "sk": "existencia-stredu-pripisanej-kruznice",
+        "cs": "existence-stredu-kruznice-pripsane",
+        "en": "existence-of-excenter"
+      }
+    },
+    "Vu5msR8YT8yuZ3zb8NeRJ": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "zhodne-usecky-v-trojuholniku",
+        "cs": "shodne-usecky-v-trojuhelniku",
+        "en": "equal-segments-in-triangle"
+      }
+    },
+    "SaOp1yOLr0T9xO-XywvHv": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "rovnostranne-trojuholniky-vo-stvorci",
+        "cs": "rovnostranne-trojuhelniky-ve-ctverci",
+        "en": "equilateral-triangles-in-square"
+      }
+    },
+    "q5FKHnEWB5kfNu_ZGuq49": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "osi-uhlov-v-lichobezniku",
+        "cs": "osy-uhlu-v-lichobezniku",
+        "en": "angle-bisectors-in-trapezoid"
+      }
+    },
+    "QyZrP8_I1-CPXFt7t7zed": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "rovnobeznost-v-konvexnom-patuholniku",
+        "cs": "rovnobeznost-v-konvexnim-petiuhelniku",
+        "en": "parallel-lines-in-convex-pentagon"
+      }
+    },
+    "my3-6U8Mr3piG2sLobH4A": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "dlzka-usecky-vo-stvoruholniku",
+        "cs": "delka-usecky-ve-ctyruhelniku",
+        "en": "segment-length-in-quadrilateral"
+      }
+    }
   },
   "lzP-IzGpwQ5igE6fNyZ6l": {
-    "two-tangents-from-point": { "type": "theorem", "number": 1 },
-    "external-tangent-two-circles": { "type": "theorem", "number": 2 },
-    "internal-tangent-two-circles": { "type": "theorem", "number": 3 },
-    "incircle-touch-points-triangle": { "type": "theorem", "number": 4 },
-    "right-triangle-inradius-formula": { "type": "theorem", "number": 5 },
-    "excircle-opposite-vertex-tangent-length": { "type": "theorem", "number": 6 },
-    "excircle-remaining-vertices-tangent-lengths": { "type": "theorem", "number": 7 },
-    "incircle-excircle-midpoint-symmetry": { "type": "theorem", "number": 8 },
-    "tangential-quadrilateral-definition": { "type": "definition", "number": 1 },
-    "quadrilateral-opposite-side-sums": { "type": "theorem", "number": 9 },
-    "altitude-foot-incircle-diameters": { "type": "problem", "number": 1 },
-    "parallelogram-midpoint-tangential-quadrilateral": { "type": "problem", "number": 2 },
-    "moving-tangent-point-on-arc": { "type": "problem", "number": 3 },
-    "diagonal-common-touch-point": { "type": "problem", "number": 4 },
-    "three-excircle-points-on-line": { "type": "problem", "number": 5 },
-    "corner-triangles-incircle-tangents": { "type": "problem", "number": 6 },
-    "parallelogram-diagonal-touch-points": { "type": "problem", "number": 7 },
-    "split-triangle-incircle-touch-points": { "type": "problem", "number": 8 },
-    "excircle-quadrilateral-side-relation": { "type": "problem", "number": 9 },
-    "cevian-points-tangent-incircles": { "type": "problem", "number": 10 },
-    "checkerboard-quadrilateral-grid": { "type": "problem", "number": 11 },
-    "inscribed-angle-circle-tangent-point": { "type": "problem", "number": 12 },
-    "common-tangent-locus-point": { "type": "problem", "number": 13 },
-    "tangential-quadrilateral-incenter-circle": { "type": "problem", "number": 14 },
-    "touch-points-reflected-through-incenter": { "type": "problem", "number": 15 },
-    "unit-length-points-perimeter-split": { "type": "problem", "number": 16 },
-    "circumscribed-hexagon-diagonals-concurrent": { "type": "problem", "number": 17 }
+    "BuRWesTIYiKA-BV2MAOvd": {
+      "type": "theorem",
+      "number": 1,
+      "slug": {
+        "sk": "dve-dotycnice-z-bodu",
+        "cs": "dve-tecny-z-bodu",
+        "en": "two-tangents-from-a-point"
+      }
+    },
+    "mrvQMDl5Le3AmRPmyn1nx": {
+      "type": "theorem",
+      "number": 2,
+      "slug": {
+        "sk": "spolocne-vonkajsie-dotycnice-dvoch-kruznic",
+        "cs": "spolecne-vnejsi-tecny-dvou-kruznic",
+        "en": "common-external-tangents-two-circles"
+      }
+    },
+    "jf0TF7EIF2sGDujPAaJGG": {
+      "type": "theorem",
+      "number": 3,
+      "slug": {
+        "sk": "spolocna-vnutorna-dotycnica-dvoch-kruznic",
+        "cs": "spolecna-vnitrni-tecna-dvou-kruznic",
+        "en": "common-internal-tangent-two-circles"
+      }
+    },
+    "JhAKuB486cDd3AdwJYXkE": {
+      "type": "theorem",
+      "number": 4,
+      "slug": {
+        "sk": "dotykove-body-vpisanej-kruznice",
+        "cs": "dotykove-body-vepsane-kruznice",
+        "en": "incircle-touch-points-in-triangle"
+      }
+    },
+    "Ul1BcJ7hkSI2RgBb98Iik": {
+      "type": "theorem",
+      "number": 5,
+      "slug": {
+        "sk": "polomer-vpisanej-kruznice-pravouhleho-trojuholnika",
+        "cs": "polomer-vepsane-kruznice-pravouhleho-trojuhelniku",
+        "en": "right-triangle-inradius"
+      }
+    },
+    "4h53hlgz3wSLk4lVp4pyd": {
+      "type": "theorem",
+      "number": 6,
+      "slug": {
+        "sk": "pripisana-kruznica-oproti-vrcholu",
+        "cs": "pripsana-kruznice-proti-vrcholu",
+        "en": "excircle-tangent-length-opposite-vertex"
+      }
+    },
+    "tIEpiTzploVkN1fSAAx_3": {
+      "type": "theorem",
+      "number": 7,
+      "slug": {
+        "sk": "pripisana-kruznica-zvysne-vrcholy",
+        "cs": "pripsana-kruznice-zbyle-vrcholy",
+        "en": "excircle-remaining-vertex-tangent-lengths"
+      }
+    },
+    "G0QDSuOOrioc7nfucekbj": {
+      "type": "theorem",
+      "number": 8,
+      "slug": {
+        "sk": "dotykove-body-symetricke-podla-stredu",
+        "cs": "dotykove-body-symetricke-podle-stredu",
+        "en": "incircle-excircle-touch-points-symmetric"
+      }
+    },
+    "tER-vT4qkSmu9dw7bjhcr": {
+      "type": "definition",
+      "number": 1,
+      "slug": {
+        "sk": "dotycnicovy-stvoruholnik",
+        "cs": "tecnovy-ctyruhelnik",
+        "en": "tangential-quadrilateral"
+      }
+    },
+    "xFM0xDDSoTaKN7_k-PGs6": {
+      "type": "theorem",
+      "number": 9,
+      "slug": { "sk": "pitotova-veta", "cs": "pitotova-veta", "en": "pitot-theorem" }
+    },
+    "bm_8cGwtgRY12WAGCrh_a": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "pata-vysky-a-vpisane-kruznice",
+        "cs": "pata-vysky-a-vepsane-kruznice",
+        "en": "altitude-foot-and-incircle-diameters"
+      }
+    },
+    "EMMxpx8fQHdf5k7deQlkg": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "stred-strany-rovnobeznika",
+        "cs": "stred-strany-rovnobezniku",
+        "en": "parallelogram-midpoint-incircle"
+      }
+    },
+    "YHoydnnN3mLvYu3xOFGHp": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "obvod-trojuholnika-z-dotycnic",
+        "cs": "obvod-trojuhelniku-z-tecen",
+        "en": "perimeter-of-triangle-from-tangents"
+      }
+    },
+    "njLBWjKeOLzDnXpHe7tic": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "vpisane-kruznice-na-uhlopriecke",
+        "cs": "vepsane-kruznice-na-uhlopricce",
+        "en": "incircles-touching-the-diagonal"
+      }
+    },
+    "6y2W6I3lf5ayFgDaZme17": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "tri-body-pripisanych-kruznic",
+        "cs": "tri-body-pripsanych-kruznic",
+        "en": "three-excircle-points-on-line"
+      }
+    },
+    "wqOmXDet2xLsFXXqSqqXr": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "tri-dotycnice-vpisanej-kruznice",
+        "cs": "tri-tecny-vepsane-kruznice",
+        "en": "three-tangents-cutting-corner-triangles"
+      }
+    },
+    "ywat5ogtaZvQd-symWXYX": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "dotykove-body-na-uhloprieckach-rovnobeznika",
+        "cs": "dotykove-body-na-uhloprickach-rovnobezniku",
+        "en": "parallelogram-diagonal-touch-points"
+      }
+    },
+    "1rKRGiDDH6a1N3ui7-NIp": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "dotykove-body-v-rozdelenom-trojuholniku",
+        "cs": "dotykove-body-v-rozdelenem-trojuhelniku",
+        "en": "touch-points-in-split-triangle"
+      }
+    },
+    "XY8K2xIEBBfNKdV7OHBv4": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "pripisana-kruznica-stvoruholnika",
+        "cs": "pripsana-kruznice-ctyruhelniku",
+        "en": "quadrilateral-with-an-excircle"
+      }
+    },
+    "4CAVBeHRTqtsMdY8jrKuX": {
+      "type": "problem",
+      "number": 10,
+      "slug": {
+        "sk": "vpisane-kruznice-dotykajuce-sa-zvonka",
+        "cs": "vepsane-kruznice-dotykajici-se-zvenku",
+        "en": "externally-tangent-incircle-pairs"
+      }
+    },
+    "mm753DtWsC9P9vCKmpLmt": {
+      "type": "problem",
+      "number": 11,
+      "slug": {
+        "sk": "devat-mensich-stvoruholnikov",
+        "cs": "devet-mensich-ctyruhelniku",
+        "en": "nine-smaller-quadrilaterals"
+      }
+    },
+    "EXLasGyo1ngIPJ1f2b0A2": {
+      "type": "problem",
+      "number": 12,
+      "slug": {
+        "sk": "kruznica-vpisana-do-uhla",
+        "cs": "kruznice-vepsana-do-uhla",
+        "en": "circle-inscribed-in-an-angle"
+      }
+    },
+    "mZEAwZzSzf1cMcge-3Ovs": {
+      "type": "problem",
+      "number": 13,
+      "slug": {
+        "sk": "mnozina-priesecnikov-spolocnej-dotycnice",
+        "cs": "mnozina-pruseciku-spolecne-tecny",
+        "en": "locus-of-tangent-intersection"
+      }
+    },
+    "WqLo9VdtCR-oLjiZTe-hJ": {
+      "type": "problem",
+      "number": 14,
+      "slug": {
+        "sk": "dotycnicovy-stvoruholnik-a-opisana-kruznica",
+        "cs": "tecnovy-ctyruhelnik-a-opsana-kruznice",
+        "en": "tangential-quadrilateral-and-circumcircle"
+      }
+    },
+    "zwCIF1ytYOGA5L7Ai1rsb": {
+      "type": "problem",
+      "number": 15,
+      "slug": {
+        "sk": "obrazy-dotykovych-bodov-podla-stredu",
+        "cs": "obrazy-dotykovych-bodu-podle-stredu",
+        "en": "touch-points-reflected-in-incenter"
+      }
+    },
+    "cqRxrMgyFJE7-aHA9USqB": {
+      "type": "problem",
+      "number": 16,
+      "slug": {
+        "sk": "rozdelenie-obvodu-trojuholnika",
+        "cs": "rozdeleni-obvodu-trojuhelniku",
+        "en": "splitting-the-triangle-perimeter"
+      }
+    },
+    "p_QDQdc3MiS1qjG5JIegA": {
+      "type": "problem",
+      "number": 17,
+      "slug": { "sk": "brianchonova-veta", "cs": "brianchonova-veta", "en": "brianchon-theorem" }
+    }
   },
   "RZtGbqo7HslApJ1qgkOOB": {
-    "triangle-centers-basic-angles": { "type": "theorem", "number": 1 },
-    "incenter-excenter-midpoint": { "type": "theorem", "number": 2 },
-    "two-excenters-midpoint": { "type": "theorem", "number": 3 },
-    "spiral-similarity-pairs": { "type": "theorem", "number": 4 },
-    "orthocenter-reflections": { "type": "theorem", "number": 5 },
-    "equiangular-pentagon-bisectors": { "type": "problem", "number": 1 },
-    "median-cevian-equal-lengths": { "type": "problem", "number": 2 },
-    "orthocenter-line-through-midpoint": { "type": "problem", "number": 3 },
-    "quadrilateral-midpoints-diagonals": { "type": "problem", "number": 4 },
-    "cyclic-quadrilateral-orthocenters": { "type": "problem", "number": 5 },
-    "isosceles-trapezoid-orthocenter": { "type": "problem", "number": 6 },
-    "midpoint-right-angle-cyclic-quad": { "type": "problem", "number": 7 },
-    "diagonal-intersection-feet-midpoint": { "type": "problem", "number": 8 },
-    "parallelogram-point-angle-sum": { "type": "problem", "number": 9 },
-    "hexagon-equal-sides-angle-sum": { "type": "problem", "number": 10 },
-    "quadrilateral-equal-angles-circumcenter": { "type": "problem", "number": 11 },
-    "triangle-altitude-circumcenter-midpoint": { "type": "problem", "number": 12 },
-    "tangent-line-midpoint-circle": { "type": "problem", "number": 13 },
-    "trapezoid-ratio-points-concyclic": { "type": "problem", "number": 14 },
-    "cyclic-quadrilateral-four-points-perpendicular": { "type": "problem", "number": 15 },
-    "quadrilateral-equal-sides-midpoints-concyclic": { "type": "problem", "number": 16 },
-    "trapezoid-diagonal-point-angles": { "type": "problem", "number": 17 },
-    "equal-segments-perpendicular-bisectors-arcs": { "type": "problem", "number": 18 },
-    "incircle-tangent-points-midpoints": { "type": "problem", "number": 19 },
-    "triangle-arc-midpoints-concyclic": { "type": "problem", "number": 20 },
-    "circle-tangent-reflection-point": { "type": "problem", "number": 21 },
-    "orthocenter-two-circles-collinear": { "type": "problem", "number": 22 },
-    "triangle-angle-points-circumcircle": { "type": "problem", "number": 23 },
-    "orthic-triangle-incenters-circumcenters": { "type": "problem", "number": 24 },
-    "angle-bisector-quadrilateral-circle": { "type": "problem", "number": 25 },
-    "circumcenter-concyclic-point-angles": { "type": "problem", "number": 26 },
-    "pentagon-circumcenters-line": { "type": "problem", "number": 27 },
-    "parallel-cevian-points-concyclic": { "type": "problem", "number": 28 },
-    "right-triangle-altitude-equal-lengths": { "type": "problem", "number": 29 },
-    "altitude-points-orthocenter-circle": { "type": "problem", "number": 30 },
-    "unit-segments-perimeter-split": { "type": "problem", "number": 31 },
-    "thales-circles-common-tangent": { "type": "problem", "number": 32 },
-    "hexagon-inscribed-circle-diagonals": { "type": "problem", "number": 33 }
+    "4G1lSZGp6WOW_d5PrWMRp": {
+      "type": "theorem",
+      "number": 1,
+      "slug": { "sk": "zakladne-uhly", "cs": "zakladni-uhly", "en": "basic-angles" }
+    },
+    "bvirmYCiJc6UXSLVpp95M": {
+      "type": "theorem",
+      "number": 2,
+      "slug": { "sk": "svrckov-bod", "cs": "svrckuv-bod", "en": "svrcek-point" }
+    },
+    "e3oWC42hI0-yUVRoB0_8O": {
+      "type": "theorem",
+      "number": 3,
+      "slug": { "sk": "anti-svrckov-bod", "cs": "anti-svrckuv-bod", "en": "anti-svrcek-point" }
+    },
+    "hXmQS3PNqrvP6cXDIywLj": {
+      "type": "theorem",
+      "number": 4,
+      "slug": {
+        "sk": "spiralna-podobnost-chodi-po-dvoch",
+        "cs": "spiralni-podobnost-chodi-po-dvou",
+        "en": "spiral-similarity-comes-in-pairs"
+      }
+    },
+    "xHpsKi1FxuaOE4TsQDYXt": {
+      "type": "theorem",
+      "number": 5,
+      "slug": {
+        "sk": "zrkadlenie-ortocentra",
+        "cs": "zrcadleni-ortocentra",
+        "en": "reflecting-the-orthocenter"
+      }
+    },
+    "yt0KVCE0mByjG0W5AhbYA": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "patuholnik-s-rovnakymi-uhlami",
+        "cs": "petiuhelnik-se-stejnymi-uhly",
+        "en": "pentagon-with-equal-angles"
+      }
+    },
+    "rIhQMrZeKZ2MH-PmkjT9D": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "bod-na-taznici-rovnoramenny-trojuholnik",
+        "cs": "bod-na-teznici-rovnoramenny-trojuhelnik",
+        "en": "point-on-median-isosceles-triangle"
+      }
+    },
+    "ull-eZWewTAOKLQHeu11Z": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "kolmica-na-mh-cez-ortocentrum",
+        "cs": "kolmice-k-mh-pres-ortocentrum",
+        "en": "perpendicular-to-mh-through-h"
+      }
+    },
+    "n2g_94VghWgVCIT8C-mse": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "spojnica-stredov-stran-a-uhlopriecky",
+        "cs": "spojnice-stredu-stran-a-uhlopricky",
+        "en": "midpoint-line-and-equal-diagonals"
+      }
+    },
+    "Z8MdAzTmbIxxpEyc-UnMy": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "ortocentra-tetivoveho-stvoruholnika",
+        "cs": "ortocentra-tetivoveho-ctyruhelniku",
+        "en": "orthocenters-in-a-cyclic-quadrilateral"
+      }
+    },
+    "alkX6MavufXBEbJ3d6M4z": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "ortocentrum-v-rovnoramennom-lichobezniku",
+        "cs": "ortocentrum-v-rovnoramennem-lichobezniku",
+        "en": "orthocenter-in-an-isosceles-trapezoid"
+      }
+    },
+    "WL5FFRrQH7pTblc3sQzBH": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "pravy-uhol-pri-strede-usecky",
+        "cs": "pravy-uhel-u-stredu-usecky",
+        "en": "midpoint-right-angle-cyclic-quadrilateral"
+      }
+    },
+    "Tax9-rYDqJvAbCiA0VqMC": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "paty-kolmic-a-stred-strany",
+        "cs": "paty-kolmic-a-stred-strany",
+        "en": "feet-of-perpendiculars-and-midpoint"
+      }
+    },
+    "0TlY8HJdJ_fVKGlkNgzpO": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "bod-vnutri-rovnobeznika",
+        "cs": "bod-uvnitr-rovnobezniku",
+        "en": "point-inside-a-parallelogram"
+      }
+    },
+    "RV54g2hn6AMdIasT4IODZ": {
+      "type": "problem",
+      "number": 10,
+      "slug": {
+        "sk": "konvexny-sestuholnik-so-zhodnymi-stranami",
+        "cs": "konvexni-sestiuhelnik-se-shodnymi-stranami",
+        "en": "convex-hexagon-with-equal-sides"
+      }
+    },
+    "L-IkptXbj4-UJ_vpMWLKS": {
+      "type": "problem",
+      "number": 11,
+      "slug": {
+        "sk": "bod-s-piatimi-zhodnymi-uhlami",
+        "cs": "bod-s-peti-shodnymi-uhly",
+        "en": "point-with-five-equal-angles"
+      }
+    },
+    "aI08awqy1yrLlCuEOFHJ7": {
+      "type": "problem",
+      "number": 12,
+      "slug": {
+        "sk": "pata-vysky-a-stred-oh",
+        "cs": "pata-vysky-a-stred-oh",
+        "en": "altitude-foot-and-oh-midpoint"
+      }
+    },
+    "M3FyEsmtSGx30V-INIVXw": {
+      "type": "problem",
+      "number": 13,
+      "slug": {
+        "sk": "dotycnica-a-stred-usecky-ap",
+        "cs": "tecna-a-stred-usecky-ap",
+        "en": "tangent-and-midpoint-of-ap"
+      }
+    },
+    "JDPS5QjvQROqZ2N6JEwq6": {
+      "type": "problem",
+      "number": 14,
+      "slug": {
+        "sk": "lichobeznik-a-body-na-kl",
+        "cs": "lichobeznik-a-body-na-kl",
+        "en": "trapezoid-with-points-on-kl"
+      }
+    },
+    "Kr9IKyGuib12QPGum8wz1": {
+      "type": "problem",
+      "number": 15,
+      "slug": {
+        "sk": "styri-body-na-stranach-stvoruholnika",
+        "cs": "ctyri-body-na-stranach-ctyruhelniku",
+        "en": "four-points-on-quadrilateral-sides"
+      }
+    },
+    "t8rjDz8xH7IC_FmnHz15z": {
+      "type": "problem",
+      "number": 16,
+      "slug": {
+        "sk": "stvoruholnik-s-tromi-zhodnymi-stranami",
+        "cs": "ctyruhelnik-se-tremi-shodnymi-stranami",
+        "en": "quadrilateral-with-three-equal-sides"
+      }
+    },
+    "unjF6AEffP5thl4GWrGD5": {
+      "type": "problem",
+      "number": 17,
+      "slug": {
+        "sk": "uhlopriecky-lichobeznika-a-vnutorny-bod",
+        "cs": "uhlopricky-lichobezniku-a-vnitrni-bod",
+        "en": "trapezoid-diagonals-and-inner-point"
+      }
+    },
+    "cvVqE4nT1JdVqFMok0P_I": {
+      "type": "problem",
+      "number": 18,
+      "slug": {
+        "sk": "osi-useciek-bd-a-ce",
+        "cs": "osy-usecek-bd-a-ce",
+        "en": "perpendicular-bisectors-and-shorter-arcs"
+      }
+    },
+    "Dk4xgZzPmhroFmRx3omVb": {
+      "type": "problem",
+      "number": 19,
+      "slug": {
+        "sk": "rovnobezne-dotycnice-k-vpisanej-kruznici",
+        "cs": "rovnobezne-tecny-k-vepsane-kruznici",
+        "en": "parallel-tangents-to-the-incircle"
+      }
+    },
+    "h_nSioAPSd9vwFsAInRyp": {
+      "type": "problem",
+      "number": 20,
+      "slug": {
+        "sk": "stredy-oblukov-dvoch-kruznic",
+        "cs": "stredy-oblouku-dvou-kruznic",
+        "en": "arc-midpoints-of-two-circles"
+      }
+    },
+    "aq53bc6NlKQWV07NwXRnF": {
+      "type": "problem",
+      "number": 21,
+      "slug": {
+        "sk": "dotycnica-a-obraz-bodu-r",
+        "cs": "tecna-a-obraz-bodu-r",
+        "en": "tangent-and-reflection-of-r"
+      }
+    },
+    "ZuNLEoEwr-J_fVOQWtSbR": {
+      "type": "problem",
+      "number": 22,
+      "slug": {
+        "sk": "dva-priemery-a-ortocentrum",
+        "cs": "dva-prumery-a-ortocentrum",
+        "en": "two-diameters-and-the-orthocenter"
+      }
+    },
+    "FhO0eO_oi-IndJmQ9N6Ql": {
+      "type": "problem",
+      "number": 23,
+      "slug": {
+        "sk": "dva-body-na-strane-bc",
+        "cs": "dva-body-na-strane-bc",
+        "en": "two-points-on-side-bc"
+      }
+    },
+    "3AK1oHdV1pF38vTXfQc41": {
+      "type": "problem",
+      "number": 24,
+      "slug": {
+        "sk": "stredy-kruznic-pri-patach-vysok",
+        "cs": "stredy-kruznic-u-pat-vysek",
+        "en": "incenters-and-two-circumcenters"
+      }
+    },
+    "a0vidDqjikMyjuIYb5vVc": {
+      "type": "problem",
+      "number": 25,
+      "slug": {
+        "sk": "stvoruholnik-z-osi-uhlov",
+        "cs": "ctyruhelnik-z-os-uhlu",
+        "en": "quadrilateral-formed-by-angle-bisectors"
+      }
+    },
+    "DzF1H7zPMIba3UVbwJoNr": {
+      "type": "problem",
+      "number": 26,
+      "slug": {
+        "sk": "bod-na-kruznici-apob",
+        "cs": "bod-na-kruznici-apob",
+        "en": "point-concyclic-with-the-circumcenter"
+      }
+    },
+    "GK8F64_JP-rSXryIXL_wp": {
+      "type": "problem",
+      "number": 27,
+      "slug": {
+        "sk": "patuholnik-a-dva-stredy-kruznic",
+        "cs": "petiuhelnik-a-dva-stredy-kruznic",
+        "en": "pentagon-and-two-circumcenters"
+      }
+    },
+    "NsM3t1SwEv7CD5wXQgwbU": {
+      "type": "problem",
+      "number": 28,
+      "slug": {
+        "sk": "usecka-pq-rovnobezna-s-bc",
+        "cs": "usecka-pq-rovnobezna-s-bc",
+        "en": "segment-pq-parallel-to-bc"
+      }
+    },
+    "sIGVitSRoddubnK736EUu": {
+      "type": "problem",
+      "number": 29,
+      "slug": {
+        "sk": "bod-na-vyske-pravouhleho-trojuholnika",
+        "cs": "bod-na-vysce-pravouhleho-trojuhelniku",
+        "en": "right-triangle-altitude-point"
+      }
+    },
+    "JLEqfNmB2Hw0P5oc4qFwQ": {
+      "type": "problem",
+      "number": 30,
+      "slug": {
+        "sk": "body-na-vyskach-a-obsahy",
+        "cs": "body-na-vyskach-a-obsahy",
+        "en": "points-on-altitudes-and-areas"
+      }
+    },
+    "V8qpCa8IyPgddyS2NJS8Y": {
+      "type": "problem",
+      "number": 31,
+      "slug": {
+        "sk": "trojuholnik-s-obvodom-styri",
+        "cs": "trojuhelnik-s-obvodem-ctyri",
+        "en": "triangle-with-perimeter-four"
+      }
+    },
+    "hWnbfKi7JKW34d1E7tUxF": {
+      "type": "problem",
+      "number": 32,
+      "slug": {
+        "sk": "kruznice-nad-stranami-stvoruholnika",
+        "cs": "kruznice-nad-stranami-ctyruhelniku",
+        "en": "circles-over-the-four-sides"
+      }
+    },
+    "KWvpK6SAI-wBt88-OpQjm": {
+      "type": "problem",
+      "number": 33,
+      "slug": {
+        "sk": "sestuholnik-s-vpisanou-kruznicou",
+        "cs": "sestiuhelnik-s-vepsanou-kruznici",
+        "en": "hexagon-with-an-inscribed-circle"
+      }
+    }
   },
   "xT7kWqNv3Lm8RpYfHs2Jg": {
-    "digit-product-sum-70": { "type": "problem", "number": 1 },
-    "inflatable-number-axxb": { "type": "problem", "number": 2 },
-    "four-digit-halves-difference-one": { "type": "problem", "number": 3 },
-    "insert-between-20-and-16": { "type": "problem", "number": 4 },
-    "digit-factorial-sum": { "type": "problem", "number": 5 },
-    "perfect-square-repeated-digit-pairs": { "type": "problem", "number": 6 },
-    "pandigital-prime-ten-digits": { "type": "problem", "number": 7 },
-    "even-length-palindrome-divisible-11": { "type": "problem", "number": 8 },
-    "digit-sum-of-concatenation": { "type": "problem", "number": 9 },
-    "digits-1-6-divisible-11": { "type": "problem", "number": 10 },
-    "reverse-subtract-reverse-add": { "type": "problem", "number": 11 },
-    "remove-leading-six-25x-smaller": { "type": "problem", "number": 12 },
-    "fours-eights-nine-perfect-square": { "type": "problem", "number": 13 },
-    "last-digit-given-predecessor-seven": { "type": "problem", "number": 14 },
-    "powers-of-two-digit-rearrangement": { "type": "problem", "number": 15 },
-    "odd-digit-number-divisible-5n": { "type": "problem", "number": 16 },
-    "digit-appending-sequence-composites": { "type": "problem", "number": 17 },
-    "base-four-square-ones-twos": { "type": "problem", "number": 18 }
+    "M_uB_nIoAD4XsWdDgD24w": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "cislo-plus-sucin-cifier",
+        "cs": "cislo-plus-soucin-cislic",
+        "en": "number-plus-digit-product"
+      }
+    },
+    "QTZyuBlr4JJARL-BsUSPi": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "nafuknutelne-dvojciferne-cisla",
+        "cs": "nafukovatelna-dvojciferna-cisla",
+        "en": "inflatable-two-digit-numbers"
+      }
+    },
+    "S9mOaQ0DZ0YbdtiJ0DD6M": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "ciferny-sucet-12-rozdiel-dvojcisli",
+        "cs": "ciferny-soucet-12-rozdil-dvojcisli",
+        "en": "digit-sum-12-block-difference"
+      }
+    },
+    "90DMgkLIpAKoLz31VbTyU": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "cislo-vlozene-medzi-20-16",
+        "cs": "cislo-vlozene-mezi-20-16",
+        "en": "number-inserted-between-20-16"
+      }
+    },
+    "5o19zqbbgbsQ-mIyypy33": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "sucet-faktorialov-cifier",
+        "cs": "soucet-faktorialu-cislic",
+        "en": "sum-of-digit-factorials"
+      }
+    },
+    "M2hAW0UhGrFFa9fvPlfq3": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "stvorciferny-stvorec-tvaru-aabb",
+        "cs": "ctyrciferny-ctverec-tvaru-aabb",
+        "en": "four-digit-square-aabb"
+      }
+    },
+    "KKh6fZHUhlmD5Z6MdjTkD": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "najvacsie-prvocislo-z-roznych-cifier",
+        "cs": "nejvetsi-prvocislo-z-ruznych-cislic",
+        "en": "largest-prime-with-distinct-digits"
+      }
+    },
+    "thf_5gamTbDUYZ96i5eK6": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "palindrom-s-parnym-poctom-cifier",
+        "cs": "palindrom-se-sudym-poctem-cislic",
+        "en": "even-digit-palindrome-and-11"
+      }
+    },
+    "oCrvA-6G_ng2beLVg_5Oc": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "opakovany-ciferny-sucet-dlheho-cisla",
+        "cs": "opakovany-ciferny-soucet-dlouheho-cisla",
+        "en": "repeated-digit-sum-of-concatenation"
+      }
+    },
+    "kPFhZbvWRNtc1_X52rp4J": {
+      "type": "problem",
+      "number": 10,
+      "slug": {
+        "sk": "permutacia-cifier-delitelna-11",
+        "cs": "permutace-cislic-delitelna-11",
+        "en": "digit-permutation-divisible-by-11"
+      }
+    },
+    "zyrVHB-UOHnAnwPbsWeQM": {
+      "type": "problem",
+      "number": 11,
+      "slug": {
+        "sk": "rozdiel-a-sucet-obratenych-cisel",
+        "cs": "rozdil-a-soucet-obracenych-cisel",
+        "en": "reverse-subtract-then-add"
+      }
+    },
+    "p_er0Qs-Y_iv3GxwWA_ie": {
+      "type": "problem",
+      "number": 12,
+      "slug": {
+        "sk": "odstranenie-uvodnej-sestky",
+        "cs": "odstraneni-uvodni-sestky",
+        "en": "removing-the-leading-six"
+      }
+    },
+    "cpOokCbzU9XKnq5Si294a": {
+      "type": "problem",
+      "number": 13,
+      "slug": {
+        "sk": "stvorky-osmicky-a-deviatka",
+        "cs": "ctyrky-osmicky-a-devitka",
+        "en": "fours-eights-and-nine"
+      }
+    },
+    "HmZef6aCT19gonRzJndGH": {
+      "type": "problem",
+      "number": 14,
+      "slug": {
+        "sk": "posledna-cifra-stvorca",
+        "cs": "posledni-cislice-ctverce",
+        "en": "last-digit-of-square"
+      }
+    },
+    "SiHIZXziGFRgQzQdb180j": {
+      "type": "problem",
+      "number": 15,
+      "slug": {
+        "sk": "preusporiadanie-cifier-mocnin-dvojky",
+        "cs": "preusporadani-cislic-mocnin-dvojky",
+        "en": "rearranged-digits-of-powers-of-two"
+      }
+    },
+    "BbogXhbPaIvEP3zcKQo-l": {
+      "type": "problem",
+      "number": 16,
+      "slug": {
+        "sk": "neparne-cifry-a-mocniny-patky",
+        "cs": "liche-cislice-a-mocniny-petky",
+        "en": "odd-digits-power-of-five"
+      }
+    },
+    "42Uo2Y8305kh_-pQQuTML": {
+      "type": "problem",
+      "number": 17,
+      "slug": {
+        "sk": "prilepanie-cifier-a-zlozene-cisla",
+        "cs": "prilepovani-cislic-a-slozena-cisla",
+        "en": "appending-digits-and-composite-numbers"
+      }
+    },
+    "3gPi6qLS_PwutgCgoS6zC": {
+      "type": "problem",
+      "number": 18,
+      "slug": {
+        "sk": "stvorce-v-stvorkovej-sustave",
+        "cs": "ctverce-ve-ctyrkove-soustave",
+        "en": "squares-in-base-four"
+      }
+    }
   },
   "FWv-ivSDvsiD7HuULfBmT": {
-    "unique-reciprocal-mod-p": { "type": "theorem", "number": 1 },
-    "sum-of-fractions-mod-p": { "type": "theorem", "number": 2 },
-    "product-of-fractions-mod-p": { "type": "theorem", "number": 3 },
-    "p-minus-1-factorial": { "type": "problem", "number": 1 },
-    "sum-two-squares-mod-p": { "type": "problem", "number": 2 },
-    "a2-ab-b2-mod-p": { "type": "problem", "number": 3 },
-    "binomial-p-1-choose-k": { "type": "problem", "number": 4 },
-    "harmonic-sum-mod-p": { "type": "problem", "number": 5 },
-    "2m-3m-6m-minus-1": { "type": "problem", "number": 6 },
-    "product-k2-k-1": { "type": "problem", "number": 7 },
-    "half-range-power-sum": { "type": "problem", "number": 8 },
-    "binomial-2p-choose-p": { "type": "problem", "number": 9 },
-    "power-e-reciprocal-sum": { "type": "problem", "number": 10 },
-    "harmonic-sum-mod-p-squared": { "type": "problem", "number": 11 }
+    "YsoLc1b4Fqes4Dd5A8svC": {
+      "type": "theorem",
+      "number": 1,
+      "slug": {
+        "sk": "existencia-a-jednoznacnost-inverzu",
+        "cs": "existence-a-jednoznacnost-inverzu",
+        "en": "existence-and-uniqueness-of-inverse"
+      }
+    },
+    "agpNrS7Gk-plIDAp2Xc0d": {
+      "type": "theorem",
+      "number": 2,
+      "slug": {
+        "sk": "inverzy-sa-scitavaju-ako-zlomky",
+        "cs": "inverzy-se-scitaji-jako-zlomky",
+        "en": "inverses-add-like-fractions"
+      }
+    },
+    "4FiBDjLCxOcmWRSNkUVRs": {
+      "type": "theorem",
+      "number": 3,
+      "slug": {
+        "sk": "inverzy-sa-nasobia-ako-zlomky",
+        "cs": "inverzy-se-nasobi-jako-zlomky",
+        "en": "inverses-multiply-like-fractions"
+      }
+    },
+    "xwufjUXqxotXL6cgvQ4gW": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "wilson-kongruencia-faktorialu",
+        "cs": "wilson-kongruence-faktorialu",
+        "en": "wilson-factorial-congruence"
+      }
+    },
+    "oZgQ3gdX2sSdnfW0T-I1N": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "prvocislo-deliace-sucet-dvoch-stvorcov",
+        "cs": "prvocislo-delici-soucet-dvou-ctvercu",
+        "en": "prime-dividing-sum-of-squares"
+      }
+    },
+    "iQkNpjFlIqY_8YqY2fOcG": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "delitelnost-vyrazu-a2-ab-b2",
+        "cs": "delitelnost-a2-ab-b2",
+        "en": "divisibility-of-a2-ab-b2"
+      }
+    },
+    "5dOxVJIKK4L9pkK7lsJb8": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "kombinacne-cislo-p-minus-1",
+        "cs": "kombinacni-cislo-p-minus-1",
+        "en": "binomial-coefficient-p-minus-1"
+      }
+    },
+    "QHLcqpD-GBM-mlx7Gk8Oa": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "citatel-suctu-prevratenych-hodnot",
+        "cs": "citatel-souctu-prevracenych-hodnot",
+        "en": "reciprocal-sum-numerator"
+      }
+    },
+    "4ctqjmewZ7WcyqJtpQrAp": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "imo-2005-nesudelitelne-s-postupnostou",
+        "cs": "imo-2005-nesoudelna-s-posloupnosti",
+        "en": "imo-2005-coprime-to-sequence"
+      }
+    },
+    "h6JPweRuH3hf9vtoEksW0": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "sucin-hodnot-k2-k-1",
+        "cs": "soucin-hodnot-k2-k-1",
+        "en": "product-of-k2-k-1"
+      }
+    },
+    "XmHaSAnFcLBJMQwLRRJu6": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "mocninny-sucet-do-polovice",
+        "cs": "mocninny-soucet-do-poloviny",
+        "en": "power-sum-over-half-range"
+      }
+    },
+    "FfwCijxt7LgTb4ro14tSW": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "kombinacne-cislo-2p-nad-p",
+        "cs": "kombinacni-cislo-2p-nad-p",
+        "en": "binomial-2p-choose-p"
+      }
+    },
+    "IyalyrEDv2e9srzrTKrZS": {
+      "type": "problem",
+      "number": 10,
+      "slug": {
+        "sk": "citatel-suctu-prevratenych-mocnin",
+        "cs": "citatel-souctu-prevracenych-mocnin",
+        "en": "reciprocal-power-sum-numerator"
+      }
+    },
+    "5GgUO9sDTBS1pWxire2HE": {
+      "type": "problem",
+      "number": 11,
+      "slug": {
+        "sk": "wolstenholme-sucet-prevratenych-hodnot",
+        "cs": "wolstenholme-soucet-prevracenych-hodnot",
+        "en": "wolstenholme-reciprocal-sum"
+      }
+    }
   },
   "_hM0pyx5ZnjFE9rcXKunr": {
-    "matchstick-removal-game": { "type": "problem", "number": 1 },
-    "date-naming-race": { "type": "problem", "number": 2 },
-    "chessboard-king-tour": { "type": "problem", "number": 3 },
-    "coins-on-round-table": { "type": "problem", "number": 4 },
-    "digit-fraction-game": { "type": "problem", "number": 5 },
-    "polygon-diagonal-drawing": { "type": "problem", "number": 6 },
-    "chomp-poisoned-chocolate": { "type": "problem", "number": 7 },
-    "chess-double-move-variant": { "type": "problem", "number": 8 },
-    "divisor-addition-race": { "type": "problem", "number": 9 },
-    "fraction-slot-filling-game": { "type": "problem", "number": 10 }
+    "ikV4h4eQGTCM24eSKwkC1": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "odoberanie-zapaliek-zo-stola",
+        "cs": "odebirani-zapalek-ze-stolu",
+        "en": "match-removal-game"
+      }
+    },
+    "yF4e5X5ipjS1AXw-5okTB": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "hra-s-pomenuvanim-datumov",
+        "cs": "hra-se-jmenovanim-dat",
+        "en": "date-naming-game"
+      }
+    },
+    "cioTaXLvsB4RKpjw3mj10": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "kral-na-sachovnici",
+        "cs": "kral-na-sachovnici",
+        "en": "king-on-a-chessboard"
+      }
+    },
+    "NfB2FTy-g6nXPXX4n_P3t": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "kladenie-minci-na-stol",
+        "cs": "pokladani-minci-na-stul",
+        "en": "placing-coins-on-a-table"
+      }
+    },
+    "qztZI1jhajMru2Kvzn7HN": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "nahradzovanie-pismen-ciframi",
+        "cs": "nahrazovani-pismen-ciframi",
+        "en": "replacing-letters-with-digits"
+      }
+    },
+    "R5TbE4UXBihVACGfxoOXa": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "kreslenie-uhlopriecok-v-mnohouholniku",
+        "cs": "kresleni-uhlopricek-v-mnohouhelniku",
+        "en": "drawing-diagonals-in-a-polygon"
+      }
+    },
+    "QJNBHZ0s2figNJLjBwVwG": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "chomp-otravena-cokolada",
+        "cs": "chomp-otravena-cokolada",
+        "en": "chomp-poisoned-chocolate"
+      }
+    },
+    "NTwg15IEI2dGY5FsQ0z1Y": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "sachy-s-dvojitym-tahom",
+        "cs": "sachy-s-dvojitym-tahem",
+        "en": "chess-with-double-moves"
+      }
+    },
+    "hc7s216xd8Q4wTzoITKrs": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "pripocitavanie-delitelov-k-cislu",
+        "cs": "pricitani-delitelu-k-cislu",
+        "en": "adding-divisors-to-a-number"
+      }
+    },
+    "0TURt8osDmLAHIvs9pfcZ": {
+      "type": "problem",
+      "number": 10,
+      "slug": {
+        "sk": "vyplnanie-policok-zlomku",
+        "cs": "vyplnovani-policek-zlomku",
+        "en": "filling-cells-of-a-fraction"
+      }
+    }
   }
 }

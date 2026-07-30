@@ -87,17 +87,36 @@ public static class TexStringParser
     private const string HighlightCommand = "Highlight";
 
     /// <summary>
-    /// The shape an <c>\EnvId</c> must have: lowercase alphanumeric words joined by single hyphens. An id travels
-    /// verbatim into a page anchor and a URL fragment, so an alphabet wider than this would ship a link that
-    /// resolves nowhere.
+    /// How many characters of an <c>\EnvId</c> are its identity: the same 21-character nanoid shape the site gives
+    /// a handout, drawn from an alphabet that includes the hyphen.
     /// </summary>
-    private static readonly Regex _envIdPattern = new("^[a-z0-9]+(-[a-z0-9]+)*$");
+    private const int EnvIdentityLength = 21;
 
     /// <summary>
-    /// The longest an <c>\EnvId</c> may be, in characters. A slug naming what an environment is about needs a small
-    /// fraction of this; the cap is there so an id can't outgrow what an anchor and a URL fragment carry.
+    /// The shape an <c>\EnvId</c> must have: an identity, a hyphen, then lowercase alphanumeric words joined by
+    /// single hyphens. The identity is taken by width rather than up to the first hyphen, because the alphabet it
+    /// is drawn from contains hyphens of its own. Only the second half travels into a page anchor and a URL
+    /// fragment, so only it is held to what a link can carry.
+    /// </summary>
+    private static readonly Regex _envIdPattern = new(
+        "^(?<id>[A-Za-z0-9_-]{" + EnvIdentityLength + "})-(?<slug>[a-z0-9]+(-[a-z0-9]+)*)$");
+
+    /// <summary>
+    /// The longest an <c>\EnvId</c> may be, in characters. A name saying what an environment is about needs a small
+    /// fraction of this; the cap is there so it can't outgrow what an anchor and a URL fragment carry.
     /// </summary>
     private const int MaxEnvIdLength = 200;
+
+    #endregion
+
+    #region Private Types
+
+    /// <summary>
+    /// What an <c>\EnvId{...}</c> marker holds, once its two halves are told apart.
+    /// </summary>
+    /// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
+    /// <param name="Slug"><inheritdoc cref="IIdentifiedEnvironment.Slug" path="/summary"/></param>
+    private record EnvIdMarker(string Id, string Slug);
 
     #endregion
 
@@ -255,8 +274,8 @@ public static class TexStringParser
         // Initialize the cursor for scanning the content string.
         var currentIndex = 0;
 
-        // The id read from the last \EnvId marker, waiting for the environment right under it to claim it.
-        string? pendingEnvId = null;
+        // The last \EnvId marker read, waiting for the environment right under it to claim it.
+        EnvIdMarker? pendingMarker = null;
 
         // Loop through the content as long as there are characters to process.
         while (currentIndex < rawContent.Length)
@@ -278,9 +297,9 @@ public static class TexStringParser
 
                     // A marker labels the environment directly beneath it, so anything wedged in between
                     // would hand its id to the wrong block.
-                    if (pendingEnvId is not null && !string.IsNullOrWhiteSpace(textSegment))
+                    if (pendingMarker is not null && !string.IsNullOrWhiteSpace(textSegment))
                         throw new TexParserException(
-                            $"\\{EnvIdCommand}{{{pendingEnvId}}} is separated from its environment by content "
+                            $"\\{EnvIdCommand} {pendingMarker.Id} is separated from its environment by content "
                             + $"at line {LineNumberAt(rawContent, currentIndex, firstLineNumber)}: {rawContent.PreviewAt(currentIndex)}");
 
                     // Process this text segment into paragraphs
@@ -293,7 +312,7 @@ public static class TexStringParser
                 // A marker describes what comes after it, so bank its id and keep scanning.
                 if (commandName == EnvIdCommand)
                 {
-                    (pendingEnvId, currentIndex) = ParseEnvIdMarker(rawContent, match.Index, firstLineNumber, pendingEnvId);
+                    (pendingMarker, currentIndex) = ParseEnvIdMarker(rawContent, match.Index, firstLineNumber, pendingMarker);
                     continue;
                 }
 
@@ -305,9 +324,9 @@ public static class TexStringParser
                 if (commandName == HighlightCommand)
                 {
                     // A marker above it would name a block that can't hold the id.
-                    if (pendingEnvId is not null)
+                    if (pendingMarker is not null)
                         throw new TexParserException(
-                            $"\\{EnvIdCommand}{{{pendingEnvId}}} sits above a \\{HighlightCommand}, which is a paragraph "
+                            $"\\{EnvIdCommand} {pendingMarker.Id} sits above a \\{HighlightCommand}, which is a paragraph "
                             + $"rather than an environment, at line {LineNumberAt(rawContent, match.Index, firstLineNumber)}: "
                             + rawContent.PreviewAt(match.Index));
 
@@ -316,7 +335,7 @@ public static class TexStringParser
                 }
                 // An environment nobody can address is an error, but banking the complaint lets the rest of the
                 // document parse.
-                else if (pendingEnvId is null)
+                else if (pendingMarker is null)
                 {
                     // Untitled environments look alike, so the preview runs long, squeezed onto a single line.
                     var preview = Regex.Replace(rawContent.PreviewAt(match.Index, maxLength: 80), @"\s+", " ");
@@ -327,12 +346,12 @@ public static class TexStringParser
                     // The environment has no id to be named by, so the report points at where it sits instead.
                     unmarkedEnvironments.Add($"line {line}, \\{commandName}: {preview}");
                 }
-                // Otherwise the environment claims the id written above it.
+                // Otherwise the environment claims the marker written above it.
                 else
-                    blocks.Add(BuildEnvironmentBlock(commandName, arguments, pendingEnvId));
+                    blocks.Add(BuildEnvironmentBlock(commandName, arguments, pendingMarker));
 
-                // The environment has taken the id; the next one needs a marker of its own.
-                pendingEnvId = null;
+                // The environment has taken the marker; the next one needs one of its own.
+                pendingMarker = null;
 
                 // Advance the cursor past the command and its arguments.
                 currentIndex = newIndex;
@@ -352,8 +371,8 @@ public static class TexStringParser
         }
 
         // A marker with no environment beneath it has drifted away from whatever it was written for.
-        if (pendingEnvId is not null)
-            throw new TexParserException($"\\{EnvIdCommand}{{{pendingEnvId}}} is not followed by an environment.");
+        if (pendingMarker is not null)
+            throw new TexParserException($"\\{EnvIdCommand} {pendingMarker.Id} is not followed by an environment.");
 
         // Return the complete list of parsed blocks.
         return blocks;
@@ -366,41 +385,45 @@ public static class TexStringParser
     /// <param name="sourceText">The TeX content to parse from.</param>
     /// <param name="startIndex">The index of the marker's backslash.</param>
     /// <param name="firstLineNumber"><inheritdoc cref="LineNumberAt" path="/param[@name='firstLineNumber']"/></param>
-    /// <param name="pendingEnvId">The id an earlier marker banked and no environment has claimed yet.</param>
-    /// <returns>A tuple containing the id and the index after the marker.</returns>
-    private static (string id, int endIndex) ParseEnvIdMarker(string sourceText, int startIndex, int firstLineNumber, string? pendingEnvId)
+    /// <param name="pendingMarker">The marker an earlier line banked and no environment has claimed yet.</param>
+    /// <returns>A tuple containing the marker's two halves and the index after it.</returns>
+    private static (EnvIdMarker marker, int endIndex) ParseEnvIdMarker(string sourceText, int startIndex, int firstLineNumber, EnvIdMarker? pendingMarker)
     {
         // The line the marker sits on, wanted by every complaint below.
         var line = LineNumberAt(sourceText, startIndex, firstLineNumber);
 
         // Two markers in a row means one of them lost its environment, and adopting either would label a
         // block with an identity that belongs elsewhere.
-        if (pendingEnvId is not null)
+        if (pendingMarker is not null)
             throw new TexParserException(
-                $"\\{EnvIdCommand}{{{pendingEnvId}}} is followed by another \\{EnvIdCommand} "
+                $"\\{EnvIdCommand} {pendingMarker.Id} is followed by another \\{EnvIdCommand} "
                 + $"at line {line}: {sourceText.PreviewAt(startIndex)}");
 
-        // The id is a single braced group right after the command name (+1 for the backslash).
-        if (!TryGetBracedContent(sourceText, startIndex + EnvIdCommand.Length + 1, out var id, out var endIndex))
+        // The marker is a single braced group right after the command name (+1 for the backslash).
+        if (!TryGetBracedContent(sourceText, startIndex + EnvIdCommand.Length + 1, out var envId, out var endIndex))
             throw new TexParserException($"\\{EnvIdCommand} is missing its braced id at line {line}: {sourceText.PreviewAt(startIndex)}");
 
         // An empty marker names nothing.
-        if (id.Length == 0)
+        if (envId.Length == 0)
             throw new TexParserException($"\\{EnvIdCommand} is empty at line {line}: {sourceText.PreviewAt(startIndex)}");
 
-        // An id the page can't turn into an anchor is worse than no id, so reject it where it's written.
-        if (!_envIdPattern.IsMatch(id))
-            throw new TexParserException(
-                $"\\{EnvIdCommand}{{{id}}} must be lowercase alphanumeric words joined by single hyphens "
-                + $"at line {line}: {sourceText.PreviewAt(startIndex)}");
+        // The marker's two halves.
+        var halves = _envIdPattern.Match(envId);
 
-        // A slug this long has stopped naming anything.
-        if (id.Length > MaxEnvIdLength)
+        // A marker the page can't turn into an anchor is worse than no marker at all, so reject it where
+        // it's written.
+        if (!halves.Success)
             throw new TexParserException(
-                $"\\{EnvIdCommand}{{{id}}} is longer than {MaxEnvIdLength} characters at line {line}: {sourceText.PreviewAt(startIndex)}");
+                $"\\{EnvIdCommand}{{{envId}}} must be a {EnvIdentityLength}-character id, a hyphen, then lowercase "
+                + $"alphanumeric words joined by single hyphens, at line {line}: {sourceText.PreviewAt(startIndex)}");
 
-        // Hand back the id for the next environment to claim.
-        return (id, endIndex);
+        // A name this long has stopped naming anything.
+        if (envId.Length > MaxEnvIdLength)
+            throw new TexParserException(
+                $"\\{EnvIdCommand}{{{envId}}} is longer than {MaxEnvIdLength} characters at line {line}: {sourceText.PreviewAt(startIndex)}");
+
+        // Hand the halves back for the next environment to claim.
+        return (new EnvIdMarker(halves.Groups["id"].Value, halves.Groups["slug"].Value), endIndex);
     }
 
     /// <summary>
@@ -451,27 +474,29 @@ public static class TexStringParser
     /// </summary>
     /// <param name="commandName">Already parsed name of the command (e.g. Theorem, Exercise)</param>
     /// <param name="arguments">The already parsed braced arguments of the command.</param>
-    /// <param name="envId">The identity the <c>\EnvId</c> marker above the command gave this environment.</param>
+    /// <param name="marker">What the <c>\EnvId</c> marker above the command gave this environment.</param>
     /// <returns>The parsed environment block.</returns>
-    private static ContentBlock BuildEnvironmentBlock(string commandName, List<string> arguments, string envId)
+    private static ContentBlock BuildEnvironmentBlock(string commandName, List<string> arguments, EnvIdMarker marker)
         // Create the specific content block based on the command type.
         => commandName switch
         {
             TheoremCommand => new Theorem(
-                Id: envId,
+                Id: marker.Id,
+                Slug: marker.Slug,
                 Title: ParseAtMostSingleRawBlock(arguments[0]),
                 Body: [.. ParseRawContent(arguments[1])],
                 Proof: [.. ParseRawContent(arguments[2])]
             ),
 
-            ExerciseCommand => BuildExercise(arguments, envId),
+            ExerciseCommand => BuildExercise(arguments, marker),
 
-            ProblemCommand => BuildProblem(arguments, envId),
+            ProblemCommand => BuildProblem(arguments, marker),
 
-            ExampleCommand => BuildExample(arguments, envId),
+            ExampleCommand => BuildExample(arguments, marker),
 
             DefinitionCommand => new Definition(
-                Id: envId,
+                Id: marker.Id,
+                Slug: marker.Slug,
                 Title: ParseAtMostSingleRawBlock(arguments[0]),
                 Body: [.. ParseRawContent(arguments[1])]
             ),
@@ -485,16 +510,17 @@ public static class TexStringParser
     /// <c>\Answer{...}</c> off the solution into the structured answer field.
     /// </summary>
     /// <param name="arguments">The raw braced arguments of the <c>\Problem</c> command.</param>
-    /// <param name="envId"><inheritdoc cref="BuildEnvironmentBlock" path="/param[@name='envId']"/></param>
+    /// <param name="marker"><inheritdoc cref="BuildEnvironmentBlock" path="/param[@name='marker']"/></param>
     /// <returns>The parsed problem block.</returns>
-    private static Problem BuildProblem(List<string> arguments, string envId)
+    private static Problem BuildProblem(List<string> arguments, EnvIdMarker marker)
     {
         // Pull the optional final answer off the front of the solution argument.
         var (answer, solution) = SplitLeadingAnswer(arguments[^1]);
 
         // Assemble the problem; hints are everything between body and solution.
         return new Problem(
-            Id: envId,
+            Id: marker.Id,
+            Slug: marker.Slug,
             Difficulty: int.Parse(arguments[0]),
             Title: ParseAtMostSingleRawBlock(arguments[1]),
             Body: [.. ParseRawContent(arguments[2])],
@@ -509,16 +535,17 @@ public static class TexStringParser
     /// <c>\Answer{...}</c> off the solution into the structured answer field.
     /// </summary>
     /// <param name="arguments">The raw braced arguments of the <c>\Exercise</c> command.</param>
-    /// <param name="envId"><inheritdoc cref="BuildEnvironmentBlock" path="/param[@name='envId']"/></param>
+    /// <param name="marker"><inheritdoc cref="BuildEnvironmentBlock" path="/param[@name='marker']"/></param>
     /// <returns>The parsed exercise block.</returns>
-    private static Exercise BuildExercise(List<string> arguments, string envId)
+    private static Exercise BuildExercise(List<string> arguments, EnvIdMarker marker)
     {
         // Pull the optional final answer off the front of the solution argument.
         var (answer, solution) = SplitLeadingAnswer(arguments[2]);
 
         // Assemble the exercise.
         return new Exercise(
-            Id: envId,
+            Id: marker.Id,
+            Slug: marker.Slug,
             Title: ParseAtMostSingleRawBlock(arguments[0]),
             Body: [.. ParseRawContent(arguments[1])],
             Answer: answer is null ? null : [.. ParseRawContent(answer)],
@@ -531,16 +558,17 @@ public static class TexStringParser
     /// <c>\Answer{...}</c> off the solution into the structured answer field.
     /// </summary>
     /// <param name="arguments">The raw braced arguments of the <c>\Example</c> command.</param>
-    /// <param name="envId"><inheritdoc cref="BuildEnvironmentBlock" path="/param[@name='envId']"/></param>
+    /// <param name="marker"><inheritdoc cref="BuildEnvironmentBlock" path="/param[@name='marker']"/></param>
     /// <returns>The parsed example block.</returns>
-    private static Example BuildExample(List<string> arguments, string envId)
+    private static Example BuildExample(List<string> arguments, EnvIdMarker marker)
     {
         // Pull the optional final answer off the front of the solution argument.
         var (answer, solution) = SplitLeadingAnswer(arguments[2]);
 
         // Assemble the example.
         return new Example(
-            Id: envId,
+            Id: marker.Id,
+            Slug: marker.Slug,
             Title: ParseAtMostSingleRawBlock(arguments[0]),
             Body: [.. ParseRawContent(arguments[1])],
             Answer: answer is null ? null : [.. ParseRawContent(answer)],

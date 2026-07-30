@@ -305,7 +305,8 @@
             },
             {
               "type": "example",
-              "id": "odd-squares-mod-8",
+              "id": "6KrSLRVFvoy9OdoVfehCQ",
+              "slug": "odd-squares-mod-8",
               "body": [
                 {
                   "type": "paragraph",
@@ -727,7 +728,8 @@
             },
             {
               "type": "exercise",
-              "id": "prime-squared-minus-one",
+              "id": "sftFVZqBaqREN0z-UcX-t",
+              "slug": "prime-squared-minus-one",
               "body": [
                 {
                   "type": "paragraph",
@@ -952,7 +954,8 @@
             },
             {
               "type": "example",
-              "id": "perfect-square-divisor-count",
+              "id": "x5mL1lT3zcfYgisxPSA-W",
+              "slug": "square-has-odd-divisor-count",
               "body": [
                 {
                   "type": "paragraph",
@@ -1141,7 +1144,8 @@
             },
             {
               "type": "theorem",
-              "id": "divisor-count-formula",
+              "id": "Kk7dZfMi6QJfF9r1Bwa8B",
+              "slug": "number-of-divisors-theorem",
               "body": [
                 {
                   "type": "paragraph",
@@ -1469,7 +1473,8 @@
             },
             {
               "type": "exercise",
-              "id": "divisor-count-square-converse",
+              "id": "o4FSeK3jvHdTEakt1JnAY",
+              "slug": "divisor-count-and-converse",
               "body": [
                 {
                   "type": "paragraph",
@@ -1542,7 +1547,8 @@
             },
             {
               "type": "problem",
-              "id": "small-prime-divisor-bound",
+              "id": "K8Jhyizt5YvLRX463Ka_e",
+              "slug": "prime-divisor-below-square-root",
               "difficulty": 0,
               "body": [
                 {
@@ -1804,7 +1810,8 @@
             },
             {
               "type": "problem",
-              "id": "product-of-all-divisors",
+              "id": "C0sb6mdImA-f9i_DF9ajq",
+              "slug": "product-of-all-divisors",
               "difficulty": 1,
               "body": [
                 {
@@ -2180,7 +2187,8 @@
             },
             {
               "type": "example",
-              "id": "mutual-divisibility",
+              "id": "YXqKtQowN8gPVViw4PWN4",
+              "slug": "mutual-divisibility-of-integers",
               "body": [
                 {
                   "type": "paragraph",
@@ -2732,7 +2740,8 @@
             },
             {
               "type": "example",
-              "id": "sqrt-two-irrational",
+              "id": "pPJ8A14vh3r-vsHx4AMP1",
+              "slug": "irrationality-of-square-root-two",
               "body": [
                 {
                   "type": "paragraph",
@@ -2887,7 +2896,8 @@
             },
             {
               "type": "exercise",
-              "id": "why-sqrt-four-differs",
+              "id": "64NL2y_73vGHKsm_iuBXS",
+              "slug": "proof-fails-for-root-four",
               "body": [
                 {
                   "type": "paragraph",
@@ -2996,7 +3006,8 @@
             },
             {
               "type": "exercise",
-              "id": "sqrt-n-irrationality-criterion",
+              "id": "MygIexYlJA93Zs1GKPipd",
+              "slug": "irrationality-criterion-for-root-n",
               "body": [
                 {
                   "type": "paragraph",
@@ -3168,7 +3179,8 @@
             },
             {
               "type": "problem",
-              "id": "rational-plus-irrational-sum",
+              "id": "SselxmWyMFZXmodhe5HKW",
+              "slug": "sum-of-rational-and-irrational",
               "difficulty": 0,
               "body": [
                 {
@@ -3292,7 +3304,8 @@
             },
             {
               "type": "problem",
-              "id": "sqrt-two-plus-sqrt-three",
+              "id": "lEtf_CHzL0kz2p9TGK5Ml",
+              "slug": "root-two-plus-root-three",
               "difficulty": 0,
               "body": [
                 {
@@ -3474,7 +3487,8 @@
             },
             {
               "type": "problem",
-              "id": "sum-of-three-odd-squares",
+              "id": "y5MK6awUXD1Q21xcYhP-r",
+              "slug": "sum-of-three-odd-squares",
               "difficulty": 0,
               "body": [
                 {
@@ -3529,7 +3543,8 @@
             },
             {
               "type": "problem",
-              "id": "alternating-cards-on-circle",
+              "id": "YFmWOBiEPkcdH8w_XCCXq",
+              "slug": "numbers-on-cards-around-circle",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4311,7 +4326,8 @@
             },
             {
               "type": "theorem",
-              "id": "infinitude-of-primes",
+              "id": "KvlppDtT0_6whJQhO-l8K",
+              "slug": "infinitely-many-primes",
               "body": [
                 {
                   "type": "paragraph",
@@ -4421,7 +4437,8 @@
             },
             {
               "type": "problem",
-              "id": "n-squared-plus-one-primes",
+              "id": "xcyxtxvzStwwMDpYr7pv2",
+              "slug": "primes-dividing-n2-plus-1",
               "difficulty": 1,
               "body": [
                 {
@@ -4635,7 +4652,8 @@
             },
             {
               "type": "problem",
-              "id": "primes-form-3n-plus-2",
+              "id": "f8Ikrt3vc35M1w9ez9TsY",
+              "slug": "primes-form-3n-plus-2",
               "difficulty": 2,
               "body": [
                 {

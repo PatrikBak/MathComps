@@ -31,21 +31,21 @@ We freely use the following standard facts about congruences modulo~$p$:
 
 \secc Inverses
 
-\EnvId{unique-reciprocal-mod-p}
+\EnvId{YsoLc1b4Fqes4Dd5A8svC-existence-and-uniqueness-of-inverse}
 \Theorem{Existence and Uniqueness of Inverse}{
     Let $a \not\equiv 0 \pmod{p}$. Then there exists a unique residue $a^{-1} \pmod{p}$ with
     $$a \cdot a^{-1} \equiv 1 \pmod{p}.$$
     We write $\frac{1}{a}$ for $a^{-1}$, and $\frac{b}{a}$ for $b \cdot a^{-1}$.
 }{}
 
-\EnvId{sum-of-fractions-mod-p}
+\EnvId{agpNrS7Gk-plIDAp2Xc0d-inverses-add-like-fractions}
 \Theorem{Inverses Add Like Fractions}{
     Let $b, d \not\equiv 0 \pmod{p}$. Then for any $a, c$, we have
     $$\frac{a}{b} + \frac{c}{d} \equiv a \cdot b^{-1} + c \cdot d^{-1} \equiv (ad + bc) \cdot (bd)^{-1} \equiv \frac{ad + bc}{bd} \pmod{p},$$
     just like normal fractions.
 }{}
 
-\EnvId{product-of-fractions-mod-p}
+\EnvId{4FiBDjLCxOcmWRSNkUVRs-inverses-multiply-like-fractions}
 \Theorem{Inverses Multiply Like Fractions}{
     Let $b, d \not\equiv 0 \pmod{p}$. Then for any $a, c$, we have
     $$\frac{a}{b} \cdot \frac{c}{d} \equiv (a \cdot b^{-1}) \cdot (c \cdot d^{-1}) \equiv (ac) \cdot (bd)^{-1} \equiv \frac{ac}{bd} \pmod{p},$$
@@ -56,7 +56,7 @@ We freely use the following standard facts about congruences modulo~$p$:
 
 The problems below all benefit from the theory above --- working with fractions modulo~$p$ as if they were ordinary numbers. They are ordered roughly by difficulty.
 
-\EnvId{p-minus-1-factorial}
+\EnvId{xwufjUXqxotXL6cgvQ4gW-wilson-factorial-congruence}
 \Problem{0}{Wilson}{
     Let $p$ be a prime. Prove that
     $$(p-1)! \equiv -1 \pmod{p}.$$
@@ -66,7 +66,7 @@ The problems below all benefit from the theory above --- working with fractions 
     The numbers without the pair are those satisfying $k \equiv 1/k \mod p$. Find them all.
 }{}
 
-\EnvId{sum-two-squares-mod-p}
+\EnvId{oZgQ3gdX2sSdnfW0T-I1N-prime-dividing-sum-of-squares}
 \Problem{0}{}{
     Let $p$ be a prime. Prove that there exist integers $a, b$, neither divisible by $p$, with $p \mid a^2 + b^2$ if and only if $p = 2$ or $p \equiv 1 \pmod{4}$.
 }{
@@ -81,7 +81,7 @@ The problems below all benefit from the theory above --- working with fractions 
     In the product $(p-1)!$, pair $k$ with $p - k \equiv -k$. What does the result look like for $p \equiv 1 \pmod{4}$?
 }{}
 
-\EnvId{a2-ab-b2-mod-p}
+\EnvId{iQkNpjFlIqY_8YqY2fOcG-divisibility-of-a2-ab-b2}
 \Problem{0}{}{
     Let $p \equiv 2 \pmod{3}$ be a prime. Show that if $p \mid a^2 + ab + b^2$, then $p \mid a$ and $p \mid b$.
 }{
@@ -92,7 +92,7 @@ The problems below all benefit from the theory above --- working with fractions 
     Multiply both sides by $a/b$ to get $(a/b)^{p-1} \equiv a/b \pmod{p}$. Apply Fermat's Little Theorem to conclude $a \equiv b \pmod{p}$. Substitute this back.
 }{}
 
-\EnvId{binomial-p-1-choose-k}
+\EnvId{5dOxVJIKK4L9pkK7lsJb8-binomial-coefficient-p-minus-1}
 \Problem{0}{}{
     Let $p$ be a prime and let $0 \leq k \leq p-1$ be an integer. Prove that
     $$\binom{p-1}{k} \equiv (-1)^k \pmod{p}.$$
@@ -102,7 +102,7 @@ The problems below all benefit from the theory above --- working with fractions 
     Reduce each factor in the numerator modulo $p$: $p - j \equiv -j \pmod{p}$. Aren't we left with something familiar?
 }{}
 
-\EnvId{harmonic-sum-mod-p}
+\EnvId{QHLcqpD-GBM-mlx7Gk8Oa-reciprocal-sum-numerator}
 \Problem{0}{}{
     Let $p \geq 3$ be a prime. Show that if
     $$\frac{1}{1} + \frac{1}{2} + \frac{1}{3} + \cdots + \frac{1}{p-1} = \frac{m}{n},$$
@@ -113,7 +113,7 @@ The problems below all benefit from the theory above --- working with fractions 
     Realize that this sum is actually the sum of all values from $1$ to $p-1$, not necessarily in this order.
 }{}
 
-\EnvId{2m-3m-6m-minus-1}
+\EnvId{4ctqjmewZ7WcyqJtpQrAp-imo-2005-coprime-to-sequence}
 \Problem{0}{IMO 2005}{
     Determine all positive integers $n$ that are coprime to every term of the sequence
     $$a_m = 2^m + 3^m + 6^m - 1, \quad m \geq 1.$$
@@ -125,7 +125,7 @@ The problems below all benefit from the theory above --- working with fractions 
     For $p \geq 5$, take $m = p - 2$. Then $2^m \equiv 1/2$, $3^m \equiv 1/3$, $6^m \equiv 1/6 \pmod{p}$. Compute $a_{p-2} \pmod{p}$.
 }{}
 
-\EnvId{product-k2-k-1}
+\EnvId{h6JPweRuH3hf9vtoEksW0-product-of-k2-k-1}
 \Problem{0}{Poland}{
     Let $p > 3$ be a prime with $p \equiv 2 \pmod{3}$, and let $a_k = k^2 + k + 1$ for $k = 1, 2, \ldots, p-1$. Prove that
     $$a_1 a_2 \cdots a_{p-1} \equiv 3 \pmod{p}.$$
@@ -137,7 +137,7 @@ The problems below all benefit from the theory above --- working with fractions 
     It would be great if the product of all the numbers $k^3-1$ was actually something we could calculate. 
 }{}
 
-\EnvId{half-range-power-sum}
+\EnvId{XmHaSAnFcLBJMQwLRRJu6-power-sum-over-half-range}
 \Problem{0}{Singapore 2012}{
     Let $p$ be an odd prime. Prove that
     $$\sum_{i=1}^{(p-1)/2} i^{p-2} \equiv \frac{2 - 2^p}{p} \pmod{p}.$$
@@ -153,7 +153,7 @@ The problems below all benefit from the theory above --- working with fractions 
     The right-hand side reduces to $-\sum_{k=1}^{p-1} (-1)^{k-1}/k \pmod{p}$. Split this into even and odd $k$, and use $\sum_{k=1}^{p-1} 1/k \equiv 0 \pmod{p}$ from a~previous problem.
 }{}
 
-\EnvId{binomial-2p-choose-p}
+\EnvId{FfwCijxt7LgTb4ro14tSW-binomial-2p-choose-p}
 \Problem{0}{}{
     Show that for every prime $p$,
     $$\binom{2p}{p} \equiv 2 \pmod{p^2}.$$
@@ -167,7 +167,7 @@ The problems below all benefit from the theory above --- working with fractions 
     By P4, $\sum_{k=1}^{p-1} 1/k \equiv 0 \pmod{p}$, so $p \sum 1/k \equiv 0 \pmod{p^2}$.
 }{}
 
-\EnvId{power-e-reciprocal-sum}
+\EnvId{IyalyrEDv2e9srzrTKrZS-reciprocal-power-sum-numerator}
 \Problem{0}{}{
     Let $p \geq 5$ be a prime and let $e$ be a positive integer with $(p-1) \nmid e$. Show that if
     $$\frac{1}{1^e} + \frac{1}{2^e} + \frac{1}{3^e} + \cdots + \frac{1}{(p-1)^e} = \frac{m}{n},$$
@@ -178,7 +178,7 @@ The problems below all benefit from the theory above --- working with fractions 
     Use the assumption $(p-1) \nmid e$ to find $a$ with $a^e \not\equiv 1 \pmod{p}$. The trick is to consider a primitive root.
 }{}
 
-\EnvId{harmonic-sum-mod-p-squared}
+\EnvId{5GgUO9sDTBS1pWxire2HE-wolstenholme-reciprocal-sum}
 \Problem{0}{Wolstenholme}{
     Let $p \geq 5$ be a prime. Show that if
     $$\frac{1}{1} + \frac{1}{2} + \frac{1}{3} + \cdots + \frac{1}{p-1} = \frac{m}{n},$$

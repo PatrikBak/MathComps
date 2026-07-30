@@ -76,7 +76,12 @@ Ignore all warnings — do not investigate, fix, or mention them — with one ex
 \Problem{#1 stars}{#2 source}{#3 statement}{#4 hint1}{#5 hint2}...{#n solution}
 ```
 
-**`\EnvId{id}`** — a permanent identity marker on the line directly above one of the five environment macros above. Every environment must carry one, and the build fails with a list of those that don't; when adding a brand-new environment, mint an id yourself: a readable slug (`[a-z0-9-]`) describing what the environment is visibly about, never its competition source and never its solution technique (the id lands in the page URL). **Never invent, drop, or rewrite an existing `\EnvId`** — it is permanent identity, not a display artifact, and a saved AI-examiner defense conversation is keyed on it. When translating or propagating a change to another language variant, copy the id verbatim (see `handout-translate`).
+**`\EnvId{<nanoid>-<name>}`** — a marker on the line directly above one of the five environment macros above, carrying two things at once. Every environment must have one, and the build fails with a list of those that don't.
+
+- The first 21 characters are the **id**: an opaque nanoid, drawn from `[A-Za-z0-9_-]`, exactly as a handout's own content id looks. It is permanent identity — a saved AI-examiner defense conversation is keyed on it, and it is the same in every language variant. **Never invent, drop, or rewrite an existing id.** When adding a brand-new environment, mint a fresh one with `npx nanoid` — never type one by hand.
+- Everything after the 21st character's following hyphen is the **name**: a readable lowercase slug (`[a-z0-9-]`, ASCII, no diacritics, 2-5 words) that lands in the page URL as `#env-<name>`. Each language variant writes its own, in its own language.
+
+Write the name from **what the statement visibly says** — the objects involved and what is asked. Never name the solution technique, the identity or theorem that cracks it, the key modulus, or the answer, even when you know them: a reader sees the name in the URL before they have solved anything. A title the environment already displays is fair game, since the reader sees that too. Renaming later is free and needs no database change; the id is what must never move.
 
 **`\Problem` stars argument** must be a non-negative integer (`0`, `1`, `2`, …). Never leave it empty (`{}`). Use `{0}` when the difficulty is unspecified.
 
@@ -95,7 +100,7 @@ When the user asks to **reformat or transcribe** (e.g. "convert this old format"
 ### Canonical `\Problem` example
 
 ```tex
-\EnvId{orthocenter-triangle-reflection}
+\EnvId{V8pQ2mZxK7nLrT4wYc1Db-acute-triangle-orthocenter}
 \Problem{1}{IMO 2013, G1}{
     Let $ABC$ be an acute triangle with orthocenter $H$ \dots
 }{

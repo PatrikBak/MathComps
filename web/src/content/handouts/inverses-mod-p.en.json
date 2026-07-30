@@ -375,7 +375,8 @@
           "content": [
             {
               "type": "theorem",
-              "id": "unique-reciprocal-mod-p",
+              "id": "YsoLc1b4Fqes4Dd5A8svC",
+              "slug": "existence-and-uniqueness-of-inverse",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -471,7 +472,8 @@
             },
             {
               "type": "theorem",
-              "id": "sum-of-fractions-mod-p",
+              "id": "agpNrS7Gk-plIDAp2Xc0d",
+              "slug": "inverses-add-like-fractions",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -531,7 +533,8 @@
             },
             {
               "type": "theorem",
-              "id": "product-of-fractions-mod-p",
+              "id": "4FiBDjLCxOcmWRSNkUVRs",
+              "slug": "inverses-multiply-like-fractions",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -618,7 +621,8 @@
             },
             {
               "type": "problem",
-              "id": "p-minus-1-factorial",
+              "id": "xwufjUXqxotXL6cgvQ4gW",
+              "slug": "wilson-factorial-congruence",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -704,7 +708,8 @@
             },
             {
               "type": "problem",
-              "id": "sum-two-squares-mod-p",
+              "id": "oZgQ3gdX2sSdnfW0T-I1N",
+              "slug": "prime-dividing-sum-of-squares",
               "difficulty": 0,
               "body": [
                 {
@@ -982,7 +987,8 @@
             },
             {
               "type": "problem",
-              "id": "a2-ab-b2-mod-p",
+              "id": "iQkNpjFlIqY_8YqY2fOcG",
+              "slug": "divisibility-of-a2-ab-b2",
               "difficulty": 0,
               "body": [
                 {
@@ -1155,7 +1161,8 @@
             },
             {
               "type": "problem",
-              "id": "binomial-p-1-choose-k",
+              "id": "5dOxVJIKK4L9pkK7lsJb8",
+              "slug": "binomial-coefficient-p-minus-1",
               "difficulty": 0,
               "body": [
                 {
@@ -1249,7 +1256,8 @@
             },
             {
               "type": "problem",
-              "id": "harmonic-sum-mod-p",
+              "id": "QHLcqpD-GBM-mlx7Gk8Oa",
+              "slug": "reciprocal-sum-numerator",
               "difficulty": 0,
               "body": [
                 {
@@ -1362,7 +1370,8 @@
             },
             {
               "type": "problem",
-              "id": "2m-3m-6m-minus-1",
+              "id": "4ctqjmewZ7WcyqJtpQrAp",
+              "slug": "imo-2005-coprime-to-sequence",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1604,7 +1613,8 @@
             },
             {
               "type": "problem",
-              "id": "product-k2-k-1",
+              "id": "h6JPweRuH3hf9vtoEksW0",
+              "slug": "product-of-k2-k-1",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1774,7 +1784,8 @@
             },
             {
               "type": "problem",
-              "id": "half-range-power-sum",
+              "id": "XmHaSAnFcLBJMQwLRRJu6",
+              "slug": "power-sum-over-half-range",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1968,7 +1979,8 @@
             },
             {
               "type": "problem",
-              "id": "binomial-2p-choose-p",
+              "id": "FfwCijxt7LgTb4ro14tSW",
+              "slug": "binomial-2p-choose-p",
               "difficulty": 0,
               "body": [
                 {
@@ -2167,7 +2179,8 @@
             },
             {
               "type": "problem",
-              "id": "power-e-reciprocal-sum",
+              "id": "IyalyrEDv2e9srzrTKrZS",
+              "slug": "reciprocal-power-sum-numerator",
               "difficulty": 0,
               "body": [
                 {
@@ -2325,7 +2338,8 @@
             },
             {
               "type": "problem",
-              "id": "harmonic-sum-mod-p-squared",
+              "id": "5GgUO9sDTBS1pWxire2HE",
+              "slug": "wolstenholme-reciprocal-sum",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",

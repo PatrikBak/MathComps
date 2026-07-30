@@ -1,8 +1,8 @@
 /**
  * Builds the generated `handout-env-index.json`: every handout environment on the site, keyed by its handout's
- * content id and then by its own permanent id, carrying its type and the document-wide number the page displays
- * for it. Numbers come from {@link listDocumentEnvironments}, the same function {@link HandoutDetail} renders
- * with, so the index can never disagree with the page about what "Úloha 4" means.
+ * content id and then by its own permanent id, carrying its type, the document-wide number the page displays for
+ * it, and what each language calls it. Numbers come from {@link listDocumentEnvironments}, the same function
+ * {@link HandoutDetail} renders with, so the index can never disagree with the page about what "Úloha 4" means.
  */
 
 import fs from 'fs'
@@ -17,9 +17,18 @@ import {
   type HandoutEnvIndex,
   type HandoutIndex,
   type HandoutMetadata,
+  supportsLocale,
 } from '../src/components/features/handouts/handout-metadata-types'
-import { listDocumentEnvironments } from '../src/components/features/handouts/handout-utils'
-import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES } from '../src/i18n/i18n'
+import {
+  type DocumentEnvironment,
+  listDocumentEnvironments,
+} from '../src/components/features/handouts/handout-utils'
+import {
+  DEFAULT_LOCALE,
+  type Locale,
+  type PartialLocalizedString,
+  SUPPORTED_LOCALES,
+} from '../src/i18n/i18n'
 
 /** Directory containing handout content files. */
 const CONTENT_DIR = path.join(process.cwd(), 'src/content/handouts')
@@ -40,6 +49,8 @@ export type CollectedEnvironment = {
   environmentType: HandoutEnvironmentType
   /** The document-wide, per-type number the page displays for it. */
   environmentNumber: number
+  /** The environment's name in each language its handout is published in. */
+  environmentSlugs: PartialLocalizedString
   /** The content file this environment was read from, for tracing an entry back to its source on disk. */
   source: string
 }
@@ -73,9 +84,41 @@ function canonicalLocale(handout: HandoutMetadata): Locale {
 }
 
 /**
- * Reads one content file and lists its environments, numbered the way the page numbers them.
+ * Reads one language variant of a handout and lists its environments, numbered the way the page numbers them.
  *
  * @param handout - The handout the content file belongs to.
+ * @param locale - The variant to read.
+ * @param contentDir - The directory content files are read from.
+ *
+ * @returns The variant's environments in document order, or null when it has no content file yet.
+ */
+function readVariantEnvironments(
+  handout: HandoutMetadata,
+  locale: Locale,
+  contentDir: string
+): DocumentEnvironment[] | null {
+  // The content file's path
+  const contentPath = path.join(contentDir, `${getContentFileBasename(handout)}.${locale}.json`)
+
+  // A variant with no content file yet has nothing to read; the content validator already reports the
+  // missing file, so this just yields nothing rather than duplicating that error.
+  if (!fs.existsSync(contentPath)) {
+    return null
+  }
+
+  // The variant's document, listed the way the page lists it
+  const { document }: { document: Document } = JSON.parse(fs.readFileSync(contentPath, 'utf-8'))
+
+  // Its environments, each already paired with its displayed number
+  return listDocumentEnvironments(document)
+}
+
+/**
+ * Reads every published variant of one handout and lists its environments. Type and number are read from the
+ * canonical variant alone, since {@link validateHandoutEnvironmentIds} refuses a handout whose variants disagree
+ * on their environment sequence; the names, which differ by design, are gathered from each variant in turn.
+ *
+ * @param handout - The handout to collect.
  * @param contentDir - The directory content files are read from; overridable so tests can point at a fixture
  *   directory instead of the site's real content.
  *
@@ -88,26 +131,42 @@ export function collectHandoutEnvironments(
   // The variant every environment number is read from
   const locale = canonicalLocale(handout)
 
-  // The content file's name and path
-  const contentFile = `${getContentFileBasename(handout)}.${locale}.json`
-  const contentPath = path.join(contentDir, contentFile)
+  // The file those numbers came from
+  const source = `${getContentFileBasename(handout)}.${locale}.json`
 
-  // A handout entry with no content file yet has nothing to collect; the content validator already reports
-  // the missing file, so this just yields nothing rather than duplicating that error.
-  if (!fs.existsSync(contentPath)) {
+  // The canonical variant's environments, which decide what this handout even contains
+  const canonical = readVariantEnvironments(handout, locale, contentDir)
+
+  // Without the canonical variant on disk there is nothing to index
+  if (canonical === null) {
     return []
   }
 
-  // Read the canonical variant's document
-  const { document }: { document: Document } = JSON.parse(fs.readFileSync(contentPath, 'utf-8'))
+  // What each published variant calls each of its environments, keyed by the id they share
+  const namesByLocale = SUPPORTED_LOCALES.filter((candidate) =>
+    supportsLocale(handout, candidate)
+  ).map((candidate) => ({
+    locale: candidate,
+    slugs: new Map(
+      (readVariantEnvironments(handout, candidate, contentDir) ?? []).map((environment) => [
+        environment.block.id,
+        environment.block.slug,
+      ])
+    ),
+  }))
 
-  // List its environments and pair each with the handout it belongs to
-  return listDocumentEnvironments(document).map((environment) => ({
+  // Pair every environment with the handout it belongs to and the names its variants give it
+  return canonical.map((environment) => ({
     handoutContentId: handout.id,
     environmentId: environment.block.id,
     environmentType: environment.block.type,
     environmentNumber: environment.number,
-    source: contentFile,
+    environmentSlugs: Object.fromEntries(
+      namesByLocale
+        .map((variant) => [variant.locale, variant.slugs.get(environment.block.id)])
+        .filter(([, slug]) => slug !== undefined)
+    ),
+    source,
   }))
 }
 
@@ -154,6 +213,7 @@ export function toHandoutEnvIndex(entries: CollectedEnvironment[]): HandoutEnvIn
     index[entry.handoutContentId][entry.environmentId] = {
       type: entry.environmentType,
       number: entry.environmentNumber,
+      slug: entry.environmentSlugs,
     }
   }
 

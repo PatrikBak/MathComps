@@ -30,12 +30,20 @@ public abstract record ContentBlock;
 public interface IIdentifiedEnvironment
 {
     /// <summary>
-    /// The environment's permanent identity, written above it as <c>\EnvId</c> and shared by every language
-    /// variant of the handout.
+    /// The environment's permanent identity: the opaque prefix of the <c>\EnvId</c> written above it, shared by
+    /// every language variant of the handout and never rewritten once assigned.
     /// </summary>
     // ReSharper disable once UnusedMember.Global — kept: the one documented home for an environment's id, pulled
     // into each record below by <inheritdoc/>.
     string Id { get; }
+
+    /// <summary>
+    /// The environment's name in the language of the file it was written in: the readable tail of the
+    /// <c>\EnvId</c>, which addresses it in a URL. Free to be reworded, and never an identity.
+    /// </summary>
+    // ReSharper disable once UnusedMember.Global — kept: the one documented home for an environment's name,
+    // pulled into each record below by <inheritdoc/>.
+    string Slug { get; }
 }
 
 /// <summary>
@@ -43,11 +51,13 @@ public interface IIdentifiedEnvironment
 /// Corresponds to the \Theorem{title}{body}{proof} command.
 /// </summary>
 /// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
+/// <param name="Slug"><inheritdoc cref="IIdentifiedEnvironment.Slug" path="/summary"/></param>
 /// <param name="Title">The optional title or name of the theorem.</param>
 /// <param name="Body">The content that constitutes the statement of the theorem.</param>
 /// <param name="Proof">The content that constitutes the proof of the theorem.</param>
 public record Theorem(
     string Id,
+    string Slug,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<RawContentBlock> Proof
@@ -58,12 +68,14 @@ public record Theorem(
 /// Corresponds to the \Exercise{title}{body}{solution} command.
 /// </summary>
 /// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
+/// <param name="Slug"><inheritdoc cref="IIdentifiedEnvironment.Slug" path="/summary"/></param>
 /// <param name="Title">The optional title or number of the exercise.</param>
 /// <param name="Body">The content that forms the question or problem statement.</param>
 /// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content that provides the solution to the exercise.</param>
 public record Exercise(
     string Id,
+    string Slug,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<RawContentBlock>? Answer,
@@ -75,6 +87,7 @@ public record Exercise(
 /// Corresponds to the \Problem{difficulty}{title}{body}{hint1}{hint2}...{hintn}{solution} command.
 /// </summary>
 /// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
+/// <param name="Slug"><inheritdoc cref="IIdentifiedEnvironment.Slug" path="/summary"/></param>
 /// <param name="Difficulty">A numerical value indicating the problem's difficulty.</param>
 /// <param name="Title">The optional title of the problem.</param>
 /// <param name="Body">The main content of the problem statement.</param>
@@ -83,6 +96,7 @@ public record Exercise(
 /// <param name="Solution">The content providing the solution to the problem.</param>
 public record Problem(
     string Id,
+    string Slug,
     int Difficulty,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
@@ -96,12 +110,14 @@ public record Problem(
 /// Corresponds to the \Example{title}{body}{solution} command.
 /// </summary>
 /// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
+/// <param name="Slug"><inheritdoc cref="IIdentifiedEnvironment.Slug" path="/summary"/></param>
 /// <param name="Title">The optional title of the example.</param>
 /// <param name="Body">The main content demonstrating the example.</param>
 /// <param name="Answer">The optional final answer. Null when absent.</param>
 /// <param name="Solution">The content providing a solution or further explanation.</param>
 public record Example(
     string Id,
+    string Slug,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body,
     ImmutableList<RawContentBlock>? Answer,
@@ -113,10 +129,12 @@ public record Example(
 /// Corresponds to the \Definition{title}{body} command.
 /// </summary>
 /// <param name="Id"><inheritdoc cref="IIdentifiedEnvironment.Id" path="/summary"/></param>
+/// <param name="Slug"><inheritdoc cref="IIdentifiedEnvironment.Slug" path="/summary"/></param>
 /// <param name="Title">The optional name of the concept being defined.</param>
 /// <param name="Body">The content of the definition.</param>
 public record Definition(
     string Id,
+    string Slug,
     RawContentBlock? Title,
     ImmutableList<RawContentBlock> Body
 ) : ContentBlock, IIdentifiedEnvironment;
