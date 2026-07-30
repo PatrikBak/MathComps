@@ -54,6 +54,12 @@ public class DefenseLimits
     public required int MaxEnvironmentIdChars { get; set; }
 
     /// <summary>
+    /// The longest a feedback comment may be, in characters. Feedback is a sentence or two of context, not an essay.
+    /// </summary>
+    [Range(1, int.MaxValue)]
+    public required int MaxFeedbackCommentChars { get; set; }
+
+    /// <summary>
     /// The most student turns one conversation may hold.
     /// </summary>
     [Range(1, int.MaxValue)]
@@ -62,6 +68,8 @@ public class DefenseLimits
     /// <summary>
     /// The most a single user may spend on defense turns per day (since UTC midnight), in credits (US dollars).
     /// </summary>
-    [Range(typeof(decimal), "0.01", "1000000")]
+    // The bounds are written with a dot, so they have to be read with one: left to the host's culture they
+    // fail to parse wherever the decimal separator differs, taking the whole startup down with them
+    [Range(typeof(decimal), "0.01", "1000000", ParseLimitsInInvariantCulture = true)]
     public required decimal DailySpendCeilingPerUser { get; set; }
 }

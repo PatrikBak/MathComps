@@ -102,7 +102,7 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
           {ordered.map((session) => {
             // The student's first message, absent while nothing has been said in the conversation yet
             const firstStudentMessage = session.turns.find(
-              (turn) => turn.role === 'student'
+              (turn) => turn.role === 'candidate'
             )?.content
 
             return (

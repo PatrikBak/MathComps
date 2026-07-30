@@ -87,6 +87,22 @@ public enum ApiErrorCode
     DefenseRewindTarget,
 
     /// <summary>
+    /// A report names a turn the conversation doesn't hold, or one the student authored.
+    /// </summary>
+    DefenseReportTarget,
+
+    /// <summary>
+    /// An outcome or report category is not one the contract defines, or a report names no way the reply went
+    /// wrong.
+    /// </summary>
+    DefenseFeedbackValue,
+
+    /// <summary>
+    /// A feedback comment is over its length cap.
+    /// </summary>
+    DefenseFeedbackCommentTooLong,
+
+    /// <summary>
     /// The request is authenticated but its caller could not be resolved to a user.
     /// </summary>
     UserNotResolved,

@@ -13,10 +13,10 @@ namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
 /// Integration tests for <see cref="DefenseSessionService"/> against a real PostgreSQL database, with a fake examiner
-/// (no live LLM): the conversation flow (start, continue, list, delete), that each turn writes an independent spend
-/// row that outlives the session, ownership isolation, the guardrails (message length, turn cap, per-user spend
-/// ceiling), and that a turn the client cancels still records the cost its calls billed so aborting can't dodge the
-/// ceiling.
+/// (no live LLM): the conversation flow (start, continue, list, delete), that what the student has said about a
+/// conversation comes back with it, that each turn writes an independent spend row that outlives the session,
+/// ownership isolation, the guardrails (message length, turn cap, per-user spend ceiling), and that a turn the
+/// client cancels still records the cost its calls billed so aborting can't dodge the ceiling.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture)
@@ -135,7 +135,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
 
         // The conversation is opener, student, examiner — in that order
-        Assert.Equal(["examiner", "student", "examiner"], session.Turns.Select(turn => turn.Role));
+        Assert.Equal(
+            [TranscriptRole.Examiner, TranscriptRole.Candidate, TranscriptRole.Examiner],
+            session.Turns.Select(turn => turn.Role));
         Assert.Equal("the opener", session.Turns[0].Content);
         Assert.Equal("my defense", session.Turns[1].Content);
         Assert.NotEmpty(session.Turns[2].Content);
@@ -168,7 +170,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // The two new turns are appended after the opening three
         Assert.Equal(
-            ["examiner", "student", "examiner", "student", "examiner"],
+            [
+                TranscriptRole.Examiner, TranscriptRole.Candidate, TranscriptRole.Examiner,
+                TranscriptRole.Candidate, TranscriptRole.Examiner,
+            ],
             continued.Turns.Select(turn => turn.Role));
         Assert.Equal("my next point", continued.Turns[3].Content);
 
@@ -182,6 +187,45 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // One row per turn — two in all
         Assert.Equal(2, spendCount);
+    });
+
+    /// <summary>
+    /// A continued conversation still carries what the student has already said about it. Both the answer and the
+    /// reports are absent-by-default on the entity, so a load that skips either hands back a conversation claiming
+    /// nothing was ever said about it, with nothing thrown to give it away.
+    /// </summary>
+    [Fact]
+    public Task Continue_carries_what_was_already_said_about_the_conversation() => RunTestAsync(async service =>
+    {
+        // Open a session
+        var started = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // The examiner's reply
+        var replyId = started.Turns[^1].Id;
+
+        // Everything the student has already said about the conversation
+        await QueryAsync(async context =>
+        {
+            // What they hold against that reply
+            context.DefenseTurnReports.Add(
+                NewReport(started.Id, replyId, DefenseReportCategory.SaidSomethingWrong, "which case?"));
+
+            // And their answer for the conversation as a whole
+            context.DefenseSessionFeedbacks.Add(NewFeedback(started.Id, DefenseOutcome.NotEnoughHelp));
+
+            // Commit the seed
+            await context.SaveChangesAsync();
+        });
+
+        // Take the conversation one turn further
+        var continued = await service.ContinueAsync(_ownerId, started.Id, "my next point");
+
+        // The answer for the conversation comes back with it
+        Assert.Equal(DefenseOutcome.NotEnoughHelp, continued.Feedback?.Outcome);
+
+        // And so does what is held against the earlier reply
+        var report = Assert.Single(continued.Reports);
+        Assert.Equal(replyId, report.TurnId);
     });
 
     /// <summary>
@@ -201,6 +245,66 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Only the owner's single prob-1 session comes back
         var listed = Assert.Single(sessions);
         Assert.Equal(first.Id, listed.Id);
+    });
+
+    /// <summary>
+    /// A listed session carries the whole conversation as the client reads it: every turn in order under its own
+    /// id, the answer for the conversation, and what the student holds against a reply — every enum among them
+    /// spelled as the string the client codes against. This read builds its own projection rather than sharing
+    /// the mapper the start and continue paths use, so nothing but this pins what it assembles.
+    /// </summary>
+    [Fact]
+    public Task List_returns_the_conversation_in_the_shape_the_client_reads() => RunTestAsync(async service =>
+    {
+        // A conversation: the opener, the student, and the reply
+        var started = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // The examiner's reply
+        var replyId = started.Turns[^1].Id;
+
+        // Everything the student has said about the conversation
+        await QueryAsync(async context =>
+        {
+            // One report naming every fault there is, so the whole category table is read back
+            context.DefenseTurnReports.Add(new DefenseTurnReport
+            {
+                SessionId = started.Id,
+                TurnId = replyId,
+                Categories = [.. Enum.GetValues<DefenseReportCategory>()],
+                Comment = "she just told me",
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow,
+            });
+
+            // And their answer for the conversation as a whole
+            context.DefenseSessionFeedbacks.Add(NewFeedback(started.Id, DefenseOutcome.FoundTheMistake));
+
+            // Commit the seed
+            await context.SaveChangesAsync();
+        });
+
+        // Re-read the conversation
+        var listed = Assert.Single(
+            await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1")));
+
+        // Its turns come back in order, each under its author
+        Assert.Equal(
+            [TranscriptRole.Examiner, TranscriptRole.Candidate, TranscriptRole.Examiner],
+            listed.Turns.Select(turn => turn.Role));
+
+        // Each carrying its own words and its own identity, which is what a report is against
+        Assert.Equal("my defense", listed.Turns[1].Content);
+        Assert.Equal(replyId, listed.Turns[^1].Id);
+
+        // What the student made of the conversation as a whole
+        Assert.Equal(DefenseOutcome.FoundTheMistake, listed.Feedback?.Outcome);
+
+        // And every way the reply went wrong, in the order the report holds them
+        var report = Assert.Single(listed.Reports);
+        Assert.Equal(Enum.GetValues<DefenseReportCategory>(), report.Categories);
+
+        // Along with what the student said in their own words
+        Assert.Equal("she just told me", report.Comment);
     });
 
     /// <summary>
@@ -394,7 +498,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // The redone turn is appended after the kept prefix
         Assert.Equal(
-            ["examiner", "student", "examiner", "student", "examiner"],
+            [
+                TranscriptRole.Examiner, TranscriptRole.Candidate, TranscriptRole.Examiner,
+                TranscriptRole.Candidate, TranscriptRole.Examiner,
+            ],
             continued.Turns.Select(turn => turn.Role));
         Assert.Equal("redo", continued.Turns[3].Content);
     });
@@ -557,9 +664,11 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             await context.SaveChangesAsync();
         });
 
-        // Starting a turn is refused before any conversation is created
+        // Starting a turn is refused
         await Assert.ThrowsAsync<DefenseSpendLimitException>(
             () => service.StartAsync(_ownerId, Request("prob-1", "my defense")));
+
+        // And refused early enough that no conversation was created
         Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
     });
 
@@ -591,8 +700,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             await context.SaveChangesAsync();
         });
 
-        // Yesterday's spend is outside today's window, so the turn is allowed and the session is created
+        // Start a turn with the whole ceiling's worth of spend already on the books
         var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // Yesterday sits outside today's window, so none of it counted and the turn ran
         Assert.NotEmpty(session.Turns);
     });
 
@@ -633,10 +744,13 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Exactly one got through; the other was refused by the ceiling the first turn's spend pushed it to
         Assert.Equal(1, outcomes.Count(started => started));
 
-        // And the state matches: one session created, and one new spend row on top of the seeded one
+        // And the stored state matches
         await QueryAsync(async context =>
         {
+            // Only the one that got through opened a conversation
             Assert.Equal(1, await context.DefenseSessions.CountAsync());
+
+            // Whose turn left a second spend row on top of the seeded one
             Assert.Equal(2, await context.DefenseSpends.CountAsync(spend => spend.UserId == _ownerId));
         });
     });
@@ -831,6 +945,44 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// <returns>The session start.</returns>
     private static DefenseSessionStart Request(string environmentId, string content, string handoutContentId = "handout-1") =>
         new(new HandoutEnvironmentTarget(handoutContentId, environmentId), "the statement", "the reference", "the opener", content);
+
+    /// <summary>
+    /// Builds a report against one of a conversation's replies, as the feedback service would write it.
+    /// </summary>
+    /// <param name="sessionId">The conversation the reported reply was given in.</param>
+    /// <param name="turnId">The reported reply.</param>
+    /// <param name="category">The way the reply went wrong.</param>
+    /// <param name="comment">The student's own account of it, or null when they gave none.</param>
+    /// <returns>The report, ready to add.</returns>
+    /// <remarks>
+    /// Built here rather than through the feedback service, which this suite doesn't register.
+    /// </remarks>
+    private static DefenseTurnReport NewReport(
+        Guid sessionId, Guid turnId, DefenseReportCategory category, string? comment) => new()
+        {
+            SessionId = sessionId,
+            TurnId = turnId,
+            Categories = [category],
+            Comment = comment,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow,
+        };
+
+    /// <summary>
+    /// Builds a student's answer for a whole conversation, as the feedback service would write it.
+    /// </summary>
+    /// <param name="sessionId">The conversation being answered for.</param>
+    /// <param name="outcome">What the examiner did for them.</param>
+    /// <returns>The answer, ready to add.</returns>
+    /// <inheritdoc cref="NewReport" path="/remarks"/>
+    private static DefenseSessionFeedback NewFeedback(Guid sessionId, DefenseOutcome outcome) => new()
+    {
+        SessionId = sessionId,
+        Outcome = outcome,
+        Comment = null,
+        CreatedAt = DateTimeOffset.UtcNow,
+        UpdatedAt = DateTimeOffset.UtcNow,
+    };
 
     /// <summary>
     /// An examiner that folds a fixed usage into the turn's accumulator, like a real call would, optionally cancels the

@@ -4,12 +4,14 @@ import type { HandoutEnvironmentTarget } from '@/components/features/handouts/ha
  * Who authored a turn in a defense conversation: the AI examiner probing the solution, or the student
  * defending it.
  */
-export type TurnRole = 'examiner' | 'student'
+export type TurnRole = 'examiner' | 'candidate'
 
 /**
  * A single message in a defense conversation: who authored it and its body.
  */
 export type Turn = {
+  /** Stable identifier; null while the message is a draft the backend hasn't taken yet. */
+  id: string | null
   /** Who authored the message. */
   role: TurnRole
   /** The message body as markdown/math source. */
@@ -17,11 +19,60 @@ export type Turn = {
 }
 
 /**
- * A {@link Turn} the backend has persisted, stamped with its authored time.
+ * A {@link Turn} the backend has persisted: identified for good, and stamped with its authored time.
  */
 export type StoredTurn = Turn & {
+  /** Stable identifier. */
+  id: string
   /** When the message was authored, as an ISO-8601 string. */
   createdAt: string
+}
+
+/**
+ * How one examiner reply went wrong, in the student's judgement. Each member names a different thing to go and
+ * fix, so a report says which way she went wrong rather than merely that she did. The last one says nothing on
+ * its own and so comes with the student's own account.
+ */
+export type DefenseReportCategory =
+  | 'misunderstood'
+  | 'saidSomethingWrong'
+  | 'gaveAway'
+  | 'missedTheMistake'
+  | 'tone'
+  | 'other'
+
+/**
+ * What the examiner did for the student over a whole conversation. An outcome rather than a rating: a defense
+ * that ends unpleasantly can be the one that worked. Every member sits on the one axis of what she did, and the
+ * last one closes the axis off so every conversation has a place to land.
+ */
+export type DefenseOutcome =
+  | 'foundTheMistake'
+  | 'confirmedTheSolution'
+  | 'notEnoughHelp'
+  | 'wasOff'
+  | 'somethingElse'
+
+/**
+ * What a student said about a whole defense conversation.
+ */
+export type DefenseFeedback = {
+  /** What the examiner did for them. */
+  outcome: DefenseOutcome
+  /** What they said in their own words; null when they let the outcome stand alone. */
+  comment: string | null
+}
+
+/**
+ * What a student holds against one examiner reply.
+ */
+export type DefenseTurnReport = {
+  /** The reported reply. */
+  turnId: string
+  /** Every way the reply went wrong. */
+  categories: DefenseReportCategory[]
+  /** The student's own account of what went wrong; null when they gave none. */
+  comment: string | null
 }
 
 /**
@@ -35,6 +86,10 @@ export type DefenseSession = {
   target: HandoutEnvironmentTarget
   /** The conversation so far, oldest first. */
   turns: StoredTurn[]
+  /** What the student said about the conversation; null until they say anything. */
+  feedback: DefenseFeedback | null
+  /** What the student holds against the conversation's replies, one entry per reported reply. */
+  reports: DefenseTurnReport[]
 }
 
 /**

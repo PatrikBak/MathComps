@@ -2,6 +2,8 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query'
 
 import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
 
+import type { DefenseSession } from '../model/defense-types'
+
 /** The root every defense query key hangs off, so one call can match them all. */
 const DEFENSE_QUERY_KEY = ['defense'] as const
 
@@ -49,4 +51,27 @@ export function defenseSessionsQueryKey(
 export function invalidateDefenseLists(queryClient: QueryClient): void {
   // Every defense list, whichever problem or user it belongs to
   void queryClient.invalidateQueries({ queryKey: DEFENSE_QUERY_KEY })
+}
+
+/**
+ * Rewrites one session wherever a cached list of a problem's defenses holds it. What a student says about a
+ * conversation is already on their screen, so the lists only have to agree with it rather than read every
+ * transcript back to find out what it now says.
+ *
+ * @param queryClient - The cache to rewrite.
+ * @param sessionId - The session whose entry changed.
+ * @param rewrite - Produces the session as it now stands.
+ */
+export function patchCachedDefenseSession(
+  queryClient: QueryClient,
+  sessionId: string,
+  rewrite: (session: DefenseSession) => DefenseSession
+): void {
+  // Only the per-problem lists: the cross-problem one carries none of what a student says, so there is
+  // nothing in it to keep in step
+  queryClient.setQueriesData<DefenseSession[]>(
+    { queryKey: [...DEFENSE_QUERY_KEY, 'sessions'] },
+    (sessions) =>
+      sessions?.map((session) => (session.id === sessionId ? rewrite(session) : session))
+  )
 }

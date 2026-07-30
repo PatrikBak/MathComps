@@ -3,8 +3,8 @@ namespace MathComps.Domain.EfCoreEntities;
 /// <summary>
 /// One user's defense conversation about one problem: the student argues a solution and the AI examiner probes it,
 /// turn by turn. Holds the problem statement and its reference solution so a follow-up turn can re-run the examiner
-/// without the client resending them. Deleting a session removes it and its turns outright (the spend record in
-/// <see cref="DefenseSpend"/> is independent and survives).
+/// without the client resending them. Deleting a session removes it, its turns, and everything the student said
+/// about it outright (the spend record in <see cref="DefenseSpend"/> is independent and survives).
 /// </summary>
 public class DefenseSession
 {
@@ -27,6 +27,11 @@ public class DefenseSession
     /// Which handout environment this session defends. Null when no environment is linked to this session.
     /// </summary>
     public HandoutEnvironmentDefense? EnvironmentTarget { get; set; }
+
+    /// <summary>
+    /// What the student said about the conversation. Null until they say anything.
+    /// </summary>
+    public DefenseSessionFeedback? Feedback { get; set; }
 
     /// <summary>
     /// The problem statement, seen by both sides.
@@ -61,4 +66,9 @@ public class DefenseSession
     /// The conversation's turns, in order.
     /// </summary>
     public ICollection<DefenseTurn> Turns { get; } = [];
+
+    /// <summary>
+    /// What the student holds against the conversation's replies, one entry per reported reply.
+    /// </summary>
+    public ICollection<DefenseTurnReport> Reports { get; } = [];
 }

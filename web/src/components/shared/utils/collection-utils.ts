@@ -29,6 +29,24 @@ export function invert<TKey extends string>(record: Record<TKey, string>): Map<s
 }
 
 /**
+ * Whether two lists name the same things, in whatever order each happens to list them and however often
+ * either repeats one.
+ *
+ * @param left - One list.
+ * @param right - The other list.
+ *
+ * @returns True when each list names exactly what the other does.
+ */
+export function namesTheSameItems<T>(left: readonly T[], right: readonly T[]): boolean {
+  // What each names, with the order and any repeats dropped
+  const named = new Set(left)
+  const others = new Set(right)
+
+  // Equal counts plus one-way containment settles it
+  return named.size === others.size && [...named].every((item) => others.has(item))
+}
+
+/**
  * Narrows a raw value to a member of an allowed set, or null when it matches none. Handy for trusting
  * an external string (a URL query, a stored value) as a literal-union member before using it.
  *

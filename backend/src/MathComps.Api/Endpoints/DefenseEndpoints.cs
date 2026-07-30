@@ -7,8 +7,9 @@ namespace MathComps.Api.Endpoints;
 
 /// <summary>
 /// Maps the defense endpoints: listing a user's defense conversations, for one problem or across every problem,
-/// starting one, continuing it with the next turn, rewinding one to an earlier point, and deleting one. Admin-gated,
-/// though built per-user; the turn routes are tightly rate-limited because each turn is several LLM calls.
+/// starting one, continuing it with the next turn, rewinding one to an earlier point, recording or taking back
+/// what the student thought of it, and deleting one. Admin-gated, though built per-user; the turn routes are
+/// tightly rate-limited because each turn is several LLM calls.
 /// </summary>
 public static class DefenseEndpoints
 {
@@ -119,10 +120,99 @@ public static class DefenseEndpoints
             // Resolve the calling user
             var userId = await userManager.RequireUserIdAsync(context);
 
+            // A body naming no cut point asks for nothing, which is the client's fault rather than ours
+            var keepThroughSequence = request.KeepThroughSequence ?? throw new DefenseRewindTargetException();
+
             // Truncate the conversation to the chosen point
-            await defenseService.RewindAsync(userId, id, request.KeepThroughSequence, context.RequestAborted);
+            await defenseService.RewindAsync(userId, id, keepThroughSequence, context.RequestAborted);
 
             // Nothing to return; the client already knows the kept prefix
+            return Results.NoContent();
+        })
+        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Record what the student holds against one examiner reply, replacing anything they said before
+        app.MapPut($"{SessionsPath}/{{sessionId:guid}}/turns/{{turnId:guid}}/report", async (
+            Guid sessionId,
+            Guid turnId,
+            ReportDefenseTurnRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IDefenseFeedbackService feedbackService) =>
+        {
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Record the report
+            await feedbackService.ReportTurnAsync(
+                userId, sessionId, turnId, request.Categories, request.Comment, context.RequestAborted);
+
+            // Nothing to return; the client already knows what it reported
+            return Results.NoContent();
+        })
+        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Record what the student says about the conversation, replacing anything they said before
+        app.MapPut($"{SessionsPath}/{{id:guid}}/feedback", async (
+            Guid id,
+            SubmitDefenseFeedbackRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IDefenseFeedbackService feedbackService) =>
+        {
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // A body naming no outcome answers nothing, which is the client's fault rather than ours
+            var outcome = request.Outcome ?? throw new DefenseFeedbackValueException();
+
+            // Record the answer
+            await feedbackService.SubmitFeedbackAsync(
+                userId, id, outcome, request.Comment, context.RequestAborted);
+
+            // Nothing to return; the client already knows what it answered
+            return Results.NoContent();
+        })
+        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Take back what the student held against one examiner reply
+        app.MapDelete($"{SessionsPath}/{{sessionId:guid}}/turns/{{turnId:guid}}/report", async (
+            Guid sessionId,
+            Guid turnId,
+            HttpContext context,
+            IUserManager userManager,
+            IDefenseFeedbackService feedbackService) =>
+        {
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Drop the report
+            await feedbackService.WithdrawTurnReportAsync(
+                userId, sessionId, turnId, context.RequestAborted);
+
+            // Nothing to return; the reply now carries nothing
+            return Results.NoContent();
+        })
+        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Take back what the student said the conversation came to
+        app.MapDelete($"{SessionsPath}/{{id:guid}}/feedback", async (
+            Guid id,
+            HttpContext context,
+            IUserManager userManager,
+            IDefenseFeedbackService feedbackService) =>
+        {
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Drop the answer
+            await feedbackService.WithdrawFeedbackAsync(userId, id, context.RequestAborted);
+
+            // Nothing to return; the conversation is unanswered again
             return Results.NoContent();
         })
         .RequireAuthorization(AuthorizationPolicies.Admin)

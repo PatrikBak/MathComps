@@ -93,12 +93,27 @@ export function Button({
     <button
       type={type}
       disabled={disabled || loading}
-      className={cn(buttonVariants({ variant, size, shape, fullWidth }), className)}
+      className={cn(
+        buttonVariants({ variant, size, shape, fullWidth }),
+        className,
+        // The spinner below is positioned against the button, so this wins over whatever the caller asked for
+        loading && 'relative'
+      )}
       {...rest}
     >
-      {/* Spinner takes the icon slot while loading */}
-      {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-      {children}
+      {/* The spinner sits over the label rather than beside it, and the label stays in place holding the
+          width it had, so a button doesn't jump the moment its action starts. It goes transparent rather than
+          hidden, which would take the button's name out of the accessibility tree along with it */}
+      {loading ? (
+        <>
+          <span className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          </span>
+          <span className="inline-flex items-center gap-2 opacity-0">{children}</span>
+        </>
+      ) : (
+        children
+      )}
     </button>
   )
 }

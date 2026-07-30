@@ -2,8 +2,10 @@ import { errorCodeOf } from '@/lib/api/api-error'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
 import type {
+  DefenseFeedback,
   DefenseProblem,
   DefenseSession,
+  DefenseTurnReport,
   DefenseTurnRequest,
   Turn,
   TurnRole,
@@ -104,6 +106,14 @@ export type DefenseConversationState = {
   readonly isThinking: boolean
   /** The id of the open session, or null while a fresh one is unsaved. */
   readonly currentSessionId: string | null
+  /** What the student said the open conversation came to, or null until they say. */
+  readonly currentFeedback: DefenseFeedback | null
+  /**
+   * What the student holds against the open conversation's replies, by reply. A rewound reply takes its
+   * entry out of reach for good rather than leaving it to be mismatched, since no later reply is ever
+   * identified by the same id.
+   */
+  readonly reports: ReadonlyMap<string, DefenseTurnReport>
   /** A conversation counter, distinct across conversations and stable within one. */
   readonly conversationEpoch: number
 }
@@ -146,8 +156,8 @@ type InFlight = {
 }
 
 /**
- * Builds a turn for immediate display. Carries no timestamp: the backend assigns one on save, and the
- * transcript reconciles to the stored turns once the round-trip resolves.
+ * Builds a turn for immediate display. Carries neither identity nor timestamp: the backend assigns both on
+ * save, and the transcript reconciles to the stored turns once the round-trip resolves.
  *
  * @param role - The turn's author.
  * @param content - The turn's markdown/math source.
@@ -156,7 +166,21 @@ type InFlight = {
  */
 function draftTurn(role: TurnRole, content: string): Turn {
   // The unsaved draft turn
-  return { role, content }
+  return { id: null, role, content }
+}
+
+/**
+ * Indexes a conversation's reports by the reply each one is against.
+ *
+ * @param reports - The reports to index.
+ *
+ * @returns The reports under their replies.
+ */
+function indexReports(
+  reports: readonly DefenseTurnReport[]
+): ReadonlyMap<string, DefenseTurnReport> {
+  // Each report under the reply it holds something against
+  return new Map(reports.map((report) => [report.turnId, report]))
 }
 
 /**
@@ -206,6 +230,8 @@ export class DefenseConversationModel {
       turns: [draftTurn('examiner', options.opener)],
       isThinking: false,
       currentSessionId: null,
+      currentFeedback: null,
+      reports: new Map(),
       conversationEpoch: 0,
     }
   }
@@ -266,7 +292,7 @@ export class DefenseConversationModel {
     this.currentRun = run
 
     // Show the student's turn and the examiner at work immediately
-    this.setState({ turns: [...priorTurns, draftTurn('student', content)], isThinking: true })
+    this.setState({ turns: [...priorTurns, draftTurn('candidate', content)], isThinking: true })
 
     // Open a new session (the backend mints its id), or append to the session already open
     const request: DefenseTurnRequest =
@@ -292,7 +318,9 @@ export class DefenseConversationModel {
         return { kind: 'stopped' }
       }
 
-      // Swap in the server-dated transcript, open the session, and drop the indicator
+      // Swap in the server-dated transcript, open the session, and drop the indicator. What the student has
+      // said about the conversation is left alone: this reply was composed against a snapshot taken before
+      // the turn began, so anything they said while it ran would be rolled back by folding it in.
       this.setState({
         turns: session.turns,
         currentSessionId: session.id,
@@ -360,6 +388,8 @@ export class DefenseConversationModel {
     // Reseed a blank conversation with just the examiner's opener
     this.setState({
       currentSessionId: null,
+      currentFeedback: null,
+      reports: new Map(),
       turns: [draftTurn('examiner', this.opener)],
       conversationEpoch: this.state.conversationEpoch + 1,
     })
@@ -379,12 +409,70 @@ export class DefenseConversationModel {
     // Cancel any turn still in flight for the conversation being left
     this.abandonInFlight()
 
-    // Show the chosen session's stored transcript
+    // Show the chosen session's stored transcript, whatever the student said it came to, and whatever they
+    // hold against its replies, so a reopened conversation reads exactly as they left it
     this.setState({
       currentSessionId: session.id,
+      currentFeedback: session.feedback,
+      reports: indexReports(session.reports),
       turns: session.turns,
       conversationEpoch: this.state.conversationEpoch + 1,
     })
+  }
+
+  /**
+   * Records what the student says a conversation came to, once the backend has taken it.
+   *
+   * @param sessionId - The session the answer was given for.
+   * @param feedback - The answer they gave, or null once they have taken it back.
+   */
+  setFeedback = (sessionId: string, feedback: DefenseFeedback | null): void => {
+    // The answer belongs to a conversation that is no longer on screen, so showing it here would
+    // report one conversation's answer against another
+    if (sessionId !== this.state.currentSessionId) {
+      return
+    }
+
+    // Hold it as what the conversation came to
+    this.setState({ currentFeedback: feedback })
+  }
+
+  /**
+   * Records what the student holds against one of a conversation's replies, once the backend has taken it.
+   *
+   * @param sessionId - The session the reported reply was given in.
+   * @param report - What they hold against it.
+   */
+  setReport = (sessionId: string, report: DefenseTurnReport): void => {
+    // The report belongs to a conversation that is no longer on screen, so showing it here would mark a
+    // reply the student never said anything about
+    if (sessionId !== this.state.currentSessionId) {
+      return
+    }
+
+    // Hold it against the reply, replacing anything said about that reply before
+    this.setState({ reports: new Map(this.state.reports).set(report.turnId, report) })
+  }
+
+  /**
+   * Stops holding anything against one of a conversation's replies, once the backend has taken it back.
+   *
+   * @param sessionId - The session the reply was given in.
+   * @param turnId - The reply to stop holding anything against.
+   */
+  clearReport = (sessionId: string, turnId: string): void => {
+    // The withdrawal belongs to a conversation that is no longer on screen, so acting on it here would clear a
+    // mark against some other conversation's reply
+    if (sessionId !== this.state.currentSessionId) {
+      return
+    }
+
+    // The reply carries nothing again
+    const remaining = new Map(this.state.reports)
+    remaining.delete(turnId)
+
+    // Show it unmarked
+    this.setState({ reports: remaining })
   }
 
   /**
@@ -462,7 +550,8 @@ export class DefenseConversationModel {
     // Drop any turn still in flight so a trailing reply can't repaint the shortened transcript
     this.abandonInFlight()
 
-    // Show only the kept prefix
+    // Show only the kept prefix. What the student held against the dropped replies goes with them, and the
+    // entries left behind here are unreachable, since no reply the conversation grows back is one of those
     this.setState({ turns: this.state.turns.slice(0, keepThroughSequence + 1) })
 
     // The stored session was truncated, so refresh the history to match

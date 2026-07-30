@@ -56,6 +56,8 @@ public static class ServiceCollectionExtensions
                     .MapEnum<Language>("language")
                     .MapEnum<CommentStatus>("comment_status")
                     .MapEnum<TranscriptRole>("transcript_role")
+                    .MapEnum<DefenseReportCategory>("defense_report_category")
+                    .MapEnum<DefenseOutcome>("defense_outcome")
             )
         );
 
@@ -348,6 +350,9 @@ public static class ServiceCollectionExtensions
 
         // The service that runs and persists defense conversations.
         services.TryAddScoped<IDefenseSessionService, DefenseSessionService>();
+
+        // The service that records what students thought of those conversations.
+        services.TryAddScoped<IDefenseFeedbackService, DefenseFeedbackService>();
 
         // Builder pattern
         return services;

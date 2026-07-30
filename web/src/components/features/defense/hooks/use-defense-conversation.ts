@@ -33,7 +33,10 @@ const NOT_READY_OUTCOME = { kind: 'failed' as const, errorCode: undefined }
  * {@link DefenseConversationModel}, plus this problem's session history.
  */
 type UseDefenseConversationResult = DefenseConversationState &
-  Pick<DefenseConversationModel, 'stop' | 'startNew' | 'resume'> & {
+  Pick<
+    DefenseConversationModel,
+    'stop' | 'startNew' | 'resume' | 'setFeedback' | 'setReport' | 'clearReport'
+  > & {
     /** This problem's persisted sessions, oldest first. */
     sessions: DefenseSession[]
     /**
@@ -240,6 +243,9 @@ export function useDefenseConversation(
     stop: model.stop,
     startNew: model.startNew,
     resume: model.resume,
+    setFeedback: model.setFeedback,
+    setReport: model.setReport,
+    clearReport: model.clearReport,
     deleteSession: removeSession,
     rewind,
   }

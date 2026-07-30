@@ -220,20 +220,31 @@ html {
 
   /* Form Checkbox */
   .form-checkbox {
-    @apply h-4 w-4 rounded border-muted/60 bg-surface/60 text-focus transition-colors duration-0;
+    @apply h-4 w-4 rounded border-muted/60 bg-surface/60 accent-focus text-focus transition-colors duration-0;
   }
 
   .form-checkbox:disabled {
     @apply cursor-default opacity-50;
   }
+
+  /* Form Radio */
+  .form-radio {
+    @apply h-4 w-4 border-muted/60 bg-surface/60 accent-focus text-focus transition-colors duration-0;
+  }
+
+  .form-radio:disabled {
+    @apply cursor-default opacity-50;
+  }
 }
 
 /* Override Tailwind Forms plugin focus styles - only show ring for keyboard navigation */
-input[type='checkbox']:focus-visible {
+input[type='checkbox']:focus-visible,
+input[type='radio']:focus-visible {
   @apply ring-2 ring-focus/40 ring-offset-0;
 }
 
-input[type='checkbox']:focus:not(:focus-visible) {
+input[type='checkbox']:focus:not(:focus-visible),
+input[type='radio']:focus:not(:focus-visible) {
   @apply ring-0 ring-offset-0 outline-none shadow-none;
 }
 

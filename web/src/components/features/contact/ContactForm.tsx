@@ -232,7 +232,7 @@ export default function ContactForm({ defaultReason, onSubmit }: ContactFormProp
 
       {/* Submit */}
       <Button variant="primary" fullWidth type="submit" loading={isSubmitting}>
-        {isSubmitting ? tContact('sending') : tContact('sendMessage')}
+        {tContact('sendMessage')}
       </Button>
     </form>
   )
