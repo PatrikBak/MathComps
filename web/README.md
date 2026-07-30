@@ -130,6 +130,7 @@ npm run preview
 - `npm run format:check` – Check code formatting
 - `npm run knip` – Find unused files, exports, and dependencies
 - `npm run knip:fix` – Remove unused code (be careful!)
+- `npm run e2e:session` – Sign in and save a browser session (see [Signed-in browser](#signed-in-browser))
 
 ### Combined Commands
 
@@ -162,6 +163,12 @@ The problem search feature is in [`src/components/features/problems/`](src/compo
 - Faceted search with tags and competitions
 - Virtual infinite scrolling
 - Similar problems integration
+
+### Signed-in browser
+
+`npm run e2e:session` produces a browser session for driving the app manually against local dev. It is not a test suite: it signs the E2E account in through Clerk's API (the sign-up form's Turnstile check deadlocks an automated browser) and writes `playwright/.clerk/user.json` plus a snippet at `.playwright-mcp/inject-session.mjs` that replays the session into a Playwright MCP browser. Both are git-ignored and hold live auth cookies.
+
+Needs `E2E_CLERK_USER_EMAIL` and `E2E_CLERK_USER_PASSWORD` in `.env.local`, a dev server on port 3000, and `npx playwright install chromium` once per machine. The account must have a first name set, or the backend refuses to create its user row.
 
 ### Webhooks
 

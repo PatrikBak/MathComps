@@ -3,6 +3,9 @@
 # Claude Code runtime lock files (scheduled tasks, etc.)
 .claude/*.lock
 
+# Playwright MCP scratch — screenshots, and a session injector holding live auth cookies
+.playwright-mcp/
+
 # Python caches (from .claude tooling scripts, ruff, pytest)
 __pycache__/
 *.pyc

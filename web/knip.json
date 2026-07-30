@@ -8,5 +8,9 @@
   ],
   "eslint": {
     "config": ["eslint.config.{js,mjs,cjs}"]
+  },
+  "playwright": {
+    "config": ["playwright.config.ts"],
+    "entry": ["e2e/**/*.setup.ts"]
   }
 }
