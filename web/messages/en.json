@@ -44,6 +44,7 @@
     "ListAccessDenied": "This list is private. If it is your list, log in first.",
     "ListNotFound": "List not found.",
     "ListReorderMismatch": "The list changed elsewhere. Refresh and try again.",
+    "MalformedRequest": "The request could not be read. Refresh and try again.",
     "MarkStatusRequiresAuthentication": "Log in to filter by your progress.",
     "NotCommentAuthor": "You can only edit or delete your own comments.",
     "ProblemNotFound": "Problem not found.",

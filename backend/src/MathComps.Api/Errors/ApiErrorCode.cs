@@ -103,6 +103,12 @@ public enum ApiErrorCode
     DefenseFeedbackCommentTooLong,
 
     /// <summary>
+    /// The request body could not be read into what the route expects: broken JSON, a field of the wrong
+    /// type, a value no member of an enumeration names, or no body at all.
+    /// </summary>
+    MalformedRequest,
+
+    /// <summary>
     /// The request is authenticated but its caller could not be resolved to a user.
     /// </summary>
     UserNotResolved,

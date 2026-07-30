@@ -22,6 +22,7 @@ export const BACKEND_ERROR_CODES = [
   'DefenseReportTarget',
   'DefenseFeedbackValue',
   'DefenseFeedbackCommentTooLong',
+  'MalformedRequest',
   'UserNotResolved',
   'Unauthenticated',
   'Forbidden',

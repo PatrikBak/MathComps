@@ -1,3 +1,4 @@
+using MathComps.Api.Errors;
 using MathComps.Api.Extensions;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +10,8 @@ namespace MathComps.Api.Tests;
 /// <summary>
 /// Guards that <see cref="GlobalExceptionHandler"/> recognizes every business exception the services can
 /// throw. A new exception without a classification arm would silently fall through to a 500, and this
-/// test catches that the moment the exception type is added.
+/// test catches that the moment the exception type is added. Also guards the one failure that never
+/// reaches a service: a request body the framework itself refused.
 /// </summary>
 public class GlobalExceptionHandlerTests
 {
@@ -50,6 +52,32 @@ public class GlobalExceptionHandlerTests
             var expectedCode = exceptionType.Name[..^nameof(Exception).Length];
             Assert.Equal(expectedCode, problemDetails.Written?.Extensions["errorCode"]);
         }
+    }
+
+    /// <summary>
+    /// A body the framework couldn't build the route's parameter from is the caller's fault, so it keeps the
+    /// status the framework already judged rather than being reported as a fault of ours.
+    /// </summary>
+    [Fact]
+    public async Task A_body_the_framework_refused_stays_the_callers_fault()
+    {
+        // Capture what the handler asks to write
+        var problemDetails = new CapturingProblemDetailsService();
+        var handler = new GlobalExceptionHandler(NullLogger<GlobalExceptionHandler>.Instance, problemDetails);
+        var httpContext = new DefaultHttpContext();
+
+        // This is what reading a malformed JSON body throws before any endpoint runs
+        var refusal = new BadHttpRequestException("Failed to read parameter from the request body as JSON.",
+            StatusCodes.Status400BadRequest);
+
+        // Handle it as the pipeline would
+        await handler.TryHandleAsync(httpContext, refusal, CancellationToken.None);
+
+        // The framework's own status carries through instead of being downgraded to an unexpected fault
+        Assert.Equal(StatusCodes.Status400BadRequest, httpContext.Response.StatusCode);
+
+        // ...under the code that says the body was the problem
+        Assert.Equal(nameof(ApiErrorCode.MalformedRequest), problemDetails.Written?.Extensions["errorCode"]);
     }
 
     /// <summary>
