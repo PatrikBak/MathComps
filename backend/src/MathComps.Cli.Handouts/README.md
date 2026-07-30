@@ -149,7 +149,7 @@ The tool preserves the original filename structure:
 
 ## Adding New Handouts
 
-1. Create `.tex` files in `data/handouts/` for each locale (e.g. `my-handout.sk.tex`, `my-handout.en.tex`, `my-handout.cs.tex`) — write an `\EnvId{...}` above every `\Problem`/`\Theorem`/`\Exercise`/`\Example`/`\Definition` as you go (see `_template.tex` and the `handout-editor` skill for the authoring rules)
+1. Create `.tex` files in `data/handouts/` for each locale (e.g. `my-handout.sk.tex`, `my-handout.en.tex`, `my-handout.cs.tex`) — write an `\EnvId{<nanoid>-<name>}` above every `\Problem`/`\Theorem`/`\Exercise`/`\Example`/`\Definition` as you go: the same 21-character nanoid in every locale, followed by that locale's own readable name (see `_template.tex` and the `handout-editor` skill for the authoring rules)
 2. Update `web/src/content/handouts.json` with localized `slug`, `title`, and `description`
 3. Run the build (it automatically discovers and processes new files)
 
@@ -157,7 +157,7 @@ Note: `TexEmitter` (used only for skeleton generation) does not carry `\EnvId`s 
 
 ## Validation
 
-The frontend includes a validation script to ensure all ready handouts have content files for all locales, every environment has an id unique within its handout, and every language variant agrees on the id sequence:
+The frontend includes a validation script to ensure all ready handouts have content files for all locales, every environment has an id unique within its handout, every language variant agrees on the id sequence, and every variant names each environment uniquely within itself:
 
 ```bash
 cd web && npm run handouts:validate

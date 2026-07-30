@@ -1,4 +1,4 @@
-import type { Locale, LocalizedString } from '@/i18n/i18n'
+import type { Locale, LocalizedString, PartialLocalizedString } from '@/i18n/i18n'
 
 import type { HandoutEnvironmentType } from './handout-content-types'
 
@@ -119,12 +119,14 @@ export type HandoutEnvironmentTarget = {
   environmentId: string
 }
 
-/** Where one environment sits in its handout. */
+/** Where one environment sits in its handout, and what each language calls it. */
 type HandoutEnvPlacement = {
   /** The environment's type. */
   type: HandoutEnvironmentType
   /** The document-wide, per-type number the page displays for it. */
   number: number
+  /** The environment's name in each language its handout is published in, which addresses it in a URL. */
+  slug: PartialLocalizedString
 }
 
 /** Every handout environment on the site, keyed by handout content id, then by environment id. */

@@ -23,7 +23,7 @@ In~combinatorial games we usually decide which of~the two players has a winning 
 
 \sec Problems
 
-\EnvId{matchstick-removal-game}
+\EnvId{ikV4h4eQGTCM24eSKwkC1-match-removal-game}
 \Problem{0}{}{
     There are 1000 matches on the table and~two players take turns. On each turn a player removes 1~or 2~matches. Whoever makes the last move wins. Who has a winning strategy?
 }{
@@ -44,7 +44,7 @@ In~combinatorial games we usually decide which of~the two players has a winning 
     Since $1000 = 3\cdot 333 + 1$ is not divisible by three, the first player wins. On the first move they remove one match and~leave 999, and~then to each removal of~$k$ matches by the opponent they reply by removing $3-k$. This always leaves the opponent a multiple of three, until finally~0.
 }
 
-\EnvId{date-naming-race}
+\EnvId{yF4e5X5ipjS1AXw-5okTB-date-naming-game}
 \Problem{0}{}{
     Two players alternately name dates within a single year, starting from January~1. On each turn a player increases either the month or the day, but not both at once (for example, from January~10 they may go to, say, March~10 or to January~15). Whoever says December~31 first wins. Which player has a winning strategy?
 }{
@@ -65,7 +65,7 @@ In~combinatorial games we usually decide which of~the two players has a winning 
     The starting position January~1 has difference 0, so it is winning and~the first player wins. On the first move they go to January~20 (difference 19) and~then after each move of the opponent they return the difference to~19. The opponent thus never says December~31 first -- that is finally done by the first player.
 }
 
-\EnvId{chessboard-king-tour}
+\EnvId{cioTaXLvsB4RKpjw3mj10-king-on-a-chessboard}
 \Problem{0}{}{
     In~the top-left corner of an $8 \times 8$ chessboard stands a king. Two players take turns, and~on each turn a player moves the piece (by a legal chess move) to a square on which it has not yet stood. Whoever has nowhere to move loses. Which player has a winning strategy?
 }{
@@ -80,7 +80,7 @@ In~combinatorial games we usually decide which of~the two players has a winning 
     Such a move is always possible: after each move of the first player the visited squares form complete dominoes, so when the opponent enters a new square, its partner in~the domino is still free and~adjacent to it (the king can move there). Sooner or later the opponent runs out of moves, and~thereby loses.
 }
 
-\EnvId{coins-on-round-table}
+\EnvId{NfB2FTy-g6nXPXX4n_P3t-placing-coins-on-a-table}
 \Problem{0}{}{
     Two players alternately place identical coins on a round table, where each must lie entirely on the table and~must not overlap any previously placed one (touching is allowed). Whoever has nowhere left to place another coin loses. Which of the players has a winning strategy?
 }{
@@ -95,7 +95,7 @@ In~combinatorial games we usually decide which of~the two players has a winning 
     This symmetric position is always free and~lies entirely on the table: the table is centrally symmetric, so the image of the opponent's correctly placed coin is again a correct position. Moreover it cannot overlap the opponent's coin: its center is at least one coin diameter away from~the center of the table (otherwise it would overlap the central coin), so it is at least two diameters away from~its own image, which is exactly twice as far -- yet a gap smaller than one diameter would already suffice to overlap. After each move of the opponent the first player therefore has somewhere to move, and~so the opponent loses.
 }
 
-\EnvId{digit-fraction-game}
+\EnvId{qztZI1jhajMru2Kvzn7HN-replacing-letters-with-digits}
 \Problem{0}{65-CSMO-C-II-4}{
     Adam and~Barbora play with the fraction
     $$
@@ -118,7 +118,7 @@ In~combinatorial games we usually decide which of~the two players has a winning 
     \textit{If Barbora starts.} A fraction has a terminating expansion exactly when it can be reduced to a denominator composed only of twos and~fives. Adam spoils this if he gets another prime divisor into the denominator that cannot be cancelled -- most simply a three. So we advise him to arrange for the denominator $10c+d$ to be divisible by three, but the numerator $10a+b$ not; such a fraction then has an infinite repeating expansion and~Adam wins. Because $10a+b$ and~its digit sum $a+b$ give the same remainder upon division by three (and~similarly $10c+d$ and~$c+d$), it suffices for Adam to arrange for $c+d$ to be divisible by three and~$a+b$ not. He achieves this by suitably filling in the numerator or denominator after each of Barbora's two moves -- for example he arranges $a+b=10$ (not divisible by three) and~$c+d=9$ or~$12$ (divisible by three).
 }
 
-\EnvId{polygon-diagonal-drawing}
+\EnvId{R5TbE4UXBihVACGfxoOXa-drawing-diagonals-in-a-polygon}
 \Problem{0}{}{
     Players $A$ and~$B$ alternately draw diagonals in a regular 2026-gon. A diagonal may be drawn only if it does not cross any of the previously drawn ones (a shared endpoint is not counted as a crossing). Whoever cannot move loses. Which of the players wins?
 }{
@@ -133,7 +133,7 @@ In~combinatorial games we usually decide which of~the two players has a winning 
     The strategy is correct: the opponent cannot draw a diagonal crossing the main one, because it is already drawn, so every diagonal of theirs lies entirely in one of the halves. In~particular none is symmetric with itself -- such a one would join a pair of mirror-conjugate vertices, would therefore lie in both halves and~cross the main diagonal. The mirror image of the opponent's diagonal therefore lies in the other half, is different from~it and~from~all previously drawn ones, and~crosses none of them (otherwise their images, that is the opponent's previous moves, would cross too). $A$ thus has a reply after each move of the opponent, and~so the opponent loses.
 }
 
-\EnvId{chomp-poisoned-chocolate}
+\EnvId{QJNBHZ0s2figNJLjBwVwG-chomp-poisoned-chocolate}
 \Problem{1}{Chomp}{
     Imagine a rectangular chocolate bar divided into at least two square pieces, with the top-left piece poisoned. Two players take turns. On each turn a player picks some piece and~eats it together with all pieces lying to the right and~below it -- that is, the whole rectangle whose top-left corner is the chosen piece. Whoever is forced to eat the poisoned top-left piece loses. Which player has a winning strategy?
 }{
@@ -150,7 +150,7 @@ In~combinatorial games we usually decide which of~the two players has a winning 
     But the very same resulting position can also be reached by the first player right on his first move -- after all, every bite includes the bottom-right corner too, so any reply of the second player is at the same time a legal first move. The first player could therefore have appropriated it and~won himself, which is a contradiction. The winning strategy is therefore the first player's.
 }
 
-\EnvId{chess-double-move-variant}
+\EnvId{NTwg15IEI2dGY5FsQ0z1Y-chess-with-double-moves}
 \Problem{1}{}{
     Two players play a game by the rules of classical chess, with a single difference: the player to move always makes two moves in a row. Prove that the first player has a non-losing strategy, that is, they can guarantee themselves at least a draw.
 }{
@@ -163,7 +163,7 @@ In~combinatorial games we usually decide which of~the two players has a winning 
     Player $A$ now steps into the role of the second player and~from this moment plays according to strategy $S$. But with it he would win himself, which contradicts the fact that $B$ was supposed to have the winning strategy. So the opponent does not have a winning strategy; and~since chess is a finite game without chance, $A$ can guarantee himself at least a draw.
 }
 
-\EnvId{divisor-addition-race}
+\EnvId{hc7s216xd8Q4wTzoITKrs-adding-divisors-to-a-number}
 \Problem{1}{}{
     Two players play a game in which they take turns. At the start we have the number 2. In~each step we add to it some proper divisor of it (a divisor smaller than itself). The goal is to obtain a number $\ge 2026$. Who has a winning strategy?
 }{
@@ -182,7 +182,7 @@ In~combinatorial games we usually decide which of~the two players has a winning 
     It remains to verify that $B$ does not win in the meantime. $A$ leaves the opponent only odd numbers smaller than 1352, that is at most 1351. To an odd $y$, $B$ can add at most its third (a proper divisor of an odd number is $\le y/3$), so he reaches at most $\frac43\cdot1351 = 1801 < 2026$. He therefore never reaches the goal.
 }
 
-\EnvId{fraction-slot-filling-game}
+\EnvId{0TURt8osDmLAHIvs9pfcZ-filling-cells-of-a-fraction}
 \Problem{1}{70-CSMO-A-III-1}{
     A fraction with 1010 cells in the numerator and~1011 cells in the denominator serves as the board for a two-player game.
     $$

@@ -81,7 +81,8 @@
             },
             {
               "type": "example",
-              "id": "sum-of-first-n-naturals",
+              "id": "9yBomXdDVp4gAuqC5xZ94",
+              "slug": "sum-of-first-natural-numbers",
               "body": [
                 {
                   "type": "paragraph",
@@ -264,7 +265,8 @@
             },
             {
               "type": "exercise",
-              "id": "classic-summation-identities",
+              "id": "xw475fM0Prdxbg3iPPn61",
+              "slug": "basic-summation-identities",
               "body": [
                 {
                   "type": "paragraph",
@@ -689,7 +691,8 @@
             },
             {
               "type": "exercise",
-              "id": "progression-sum-formulas",
+              "id": "lmFOON6L7XWEpGkCusEMq",
+              "slug": "sums-of-known-sequences",
               "body": [
                 {
                   "type": "paragraph",
@@ -1022,7 +1025,8 @@
             },
             {
               "type": "exercise",
-              "id": "fibonacci-partial-sums",
+              "id": "AMPVYuqSRbqUuUXzn9_IS",
+              "slug": "sums-of-fibonacci-numbers",
               "body": [
                 {
                   "type": "paragraph",
@@ -1352,7 +1356,8 @@
             },
             {
               "type": "example",
-              "id": "power-of-two-vs-square",
+              "id": "KwQ34aGY1NEEYMmpdIR8S",
+              "slug": "power-of-two-versus-square",
               "body": [
                 {
                   "type": "paragraph",
@@ -1708,8 +1713,19 @@
               "highligted": false
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "exercise",
-              "id": "power-of-two-at-least-n",
+              "id": "E96zQgO_uBsdfUmbYqN4y",
+              "slug": "power-of-two-at-least-n",
               "body": [
                 {
                   "type": "paragraph",
@@ -1824,7 +1840,8 @@
             },
             {
               "type": "exercise",
-              "id": "factorial-beats-power-of-two",
+              "id": "7jCR29oi3vjBByiM3clFR",
+              "slug": "factorial-versus-power-of-two",
               "body": [
                 {
                   "type": "paragraph",
@@ -1935,7 +1952,8 @@
             },
             {
               "type": "exercise",
-              "id": "harmonic-tail-sum-bound",
+              "id": "w4OPsymocMM1lk5Ia7xFq",
+              "slug": "bound-for-reciprocal-sum",
               "body": [
                 {
                   "type": "paragraph",
@@ -2058,7 +2076,8 @@
             },
             {
               "type": "exercise",
-              "id": "bernoulli-inequality",
+              "id": "cHiNQzW3AKr_Q9Ntb5cPh",
+              "slug": "bernoulli-inequality",
               "body": [
                 {
                   "type": "paragraph",
@@ -2212,7 +2231,8 @@
             },
             {
               "type": "example",
-              "id": "divisibility-n-cubed-minus-n",
+              "id": "hSpjBceKEQHSY3G2NrPLi",
+              "slug": "cubic-expression-divisible-by-six",
               "body": [
                 {
                   "type": "paragraph",
@@ -2327,7 +2347,8 @@
             },
             {
               "type": "example",
-              "id": "divisibility-four-power-minus-one",
+              "id": "XhlDVCU5CVsYXYrB4mI6K",
+              "slug": "power-of-four-minus-one",
               "body": [
                 {
                   "type": "paragraph",
@@ -2442,7 +2463,8 @@
             },
             {
               "type": "exercise",
-              "id": "divisibility-four-power-plus-six-n",
+              "id": "AUNeyfIng3RZYum42pwOp",
+              "slug": "four-power-plus-linear-term",
               "body": [
                 {
                   "type": "paragraph",
@@ -2548,7 +2570,8 @@
             },
             {
               "type": "exercise",
-              "id": "five-and-six-power-divisibility",
+              "id": "2EK58JlVU4myp9booKhTI",
+              "slug": "powers-of-five-and-six",
               "body": [
                 {
                   "type": "paragraph",
@@ -2778,7 +2801,8 @@
             },
             {
               "type": "problem",
-              "id": "lines-through-common-point-fallacy",
+              "id": "h6ycIeImzAxi3RDVg8aD1",
+              "slug": "mistake-in-proof-about-lines",
               "difficulty": 0,
               "body": [
                 {
@@ -3238,7 +3262,8 @@
             },
             {
               "type": "theorem",
-              "id": "prime-factorization-existence",
+              "id": "rlqR-g6tYOodfK1y5j-U8",
+              "slug": "prime-factorization-theorem",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -3463,7 +3488,8 @@
             },
             {
               "type": "example",
-              "id": "binary-representation-existence",
+              "id": "lpU0vCDnzTQTRkiZ-gYwD",
+              "slug": "distinct-powers-of-two",
               "body": [
                 {
                   "type": "paragraph",
@@ -3609,7 +3635,8 @@
             },
             {
               "type": "problem",
-              "id": "zeckendorf-representation",
+              "id": "L1ET1LWidLOCYBQ4aJ1kw",
+              "slug": "zeckendorf-theorem-existence",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3938,7 +3965,8 @@
             },
             {
               "type": "problem",
-              "id": "factorial-number-system",
+              "id": "NzDlKblljqpwJsOKh_ODL",
+              "slug": "factorial-number-system",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4432,7 +4460,8 @@
             },
             {
               "type": "example",
-              "id": "linear-recurrence-2n-minus-1",
+              "id": "ReBHJLfOuUnd8xlFb3p5j",
+              "slug": "recurrence-with-coefficients-three-two",
               "body": [
                 {
                   "type": "paragraph",
@@ -4615,7 +4644,8 @@
             },
             {
               "type": "exercise",
-              "id": "linear-recurrence-3n-minus-2n",
+              "id": "GduF2yCIHHd2oO245jPN1",
+              "slug": "recurrence-with-coefficients-five-six",
               "body": [
                 {
                   "type": "paragraph",
@@ -4798,7 +4828,8 @@
             },
             {
               "type": "problem",
-              "id": "fibonacci-golden-ratio-bound",
+              "id": "zV6SnGt6t0yB0y9PxFNLJ",
+              "slug": "fibonacci-bound-by-golden-ratio",
               "difficulty": 0,
               "body": [
                 {
@@ -5082,7 +5113,8 @@
             },
             {
               "type": "problem",
-              "id": "power-sum-reciprocal-rational",
+              "id": "kRNEIUZ46xgUzn15tPDkD",
+              "slug": "rationality-of-power-sums",
               "difficulty": 0,
               "body": [
                 {
@@ -5393,7 +5425,8 @@
             },
             {
               "type": "example",
-              "id": "sum-of-twos-and-threes",
+              "id": "9XkawMiwbE9B4Vlo7HwyS",
+              "slug": "sum-of-twos-and-threes",
               "body": [
                 {
                   "type": "paragraph",
@@ -5604,7 +5637,8 @@
             },
             {
               "type": "theorem",
-              "id": "am-gm-inequality",
+              "id": "wuTq3DEasL-ITPjEfWNU8",
+              "slug": "am-gm-inequality",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -6307,7 +6341,8 @@
             },
             {
               "type": "problem",
-              "id": "power-of-one-plus-sqrt-two",
+              "id": "soy2X4j64tpg6mt-0WLLQ",
+              "slug": "one-plus-root-two-powers",
               "difficulty": 0,
               "body": [
                 {
@@ -6491,7 +6526,8 @@
             },
             {
               "type": "problem",
-              "id": "visiting-all-lightbulb-configurations",
+              "id": "ztW6mysuojPHF6HM4OeER",
+              "slug": "visiting-all-bulb-configurations",
               "difficulty": 0,
               "body": [
                 {
@@ -6839,7 +6875,8 @@
             },
             {
               "type": "problem",
-              "id": "chocolate-bar-breaking",
+              "id": "yEO7wwKj9y8ITTmqMfBLK",
+              "slug": "fewest-breaks-of-chocolate-bar",
               "difficulty": 0,
               "body": [
                 {
@@ -7247,7 +7284,8 @@
             },
             {
               "type": "problem",
-              "id": "path-through-all-cities-oneway",
+              "id": "PKBDBCTDYAn-fOxL2CUvJ",
+              "slug": "path-through-all-cities",
               "difficulty": 1,
               "body": [
                 {
@@ -7845,7 +7883,8 @@
             },
             {
               "type": "problem",
-              "id": "factorial-divides-consecutive-product",
+              "id": "VBtkEY5bHY_YPb58TtT3t",
+              "slug": "factorial-divides-consecutive-product",
               "difficulty": 1,
               "body": [
                 {

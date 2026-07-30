@@ -52,14 +52,22 @@ vi.mock('@/content/handouts.json', () => {
 vi.mock('@/content/handout-env-index.json', () => ({
   default: {
     'AbC-123': {
-      'three-numbers-am-gm': { type: 'problem', number: 4 },
-      'am-gm-two-numbers': { type: 'theorem', number: 1 },
+      V8pQ2mZxK7nLrT4wYc1Db: {
+        type: 'problem',
+        number: 4,
+        slug: { en: 'three-numbers-mean', sk: 'priemer-troch-cisel', cs: 'prumer-tri-cisel' },
+      },
+      Rt6yH1sD9kL0pZxCvB3nM: {
+        type: 'theorem',
+        number: 1,
+        slug: { en: 'mean-of-two-numbers', sk: 'priemer-dvoch-cisel', cs: 'prumer-dvou-cisel' },
+      },
     },
     CzechOnly: {
-      'first-proof': { type: 'problem', number: 1 },
+      Nb4wK8mQ2xR7tY1uZ5aJc: { type: 'problem', number: 1, slug: { cs: 'prvni-dukaz' } },
     },
     GoneFromIndex: {
-      orphan: { type: 'problem', number: 1 },
+      Gx3vT9pL6nW2sB8dF4hKq: { type: 'problem', number: 1, slug: { en: 'orphan' } },
     },
   },
 }))
@@ -68,24 +76,23 @@ describe('resolveHandoutProblemRef', () => {
   it('resolves the title, type, number, slug, and anchor for the default locale', () => {
     // A problem in the fully-localized fixture handout, in English
     const ref = resolveHandoutProblemRef(
-      { handoutContentId: 'AbC-123', environmentId: 'three-numbers-am-gm' },
+      { handoutContentId: 'AbC-123', environmentId: 'V8pQ2mZxK7nLrT4wYc1Db' },
       'en'
     )
 
-    // The English title and slug, with the problem's placement and anchor
+    // The English title and slug, with the problem's placement and its English anchor
     expect(ref).toEqual({
       handoutTitle: 'Means',
       environmentType: 'problem',
       environmentNumber: 4,
-      handoutSlug: 'means',
-      anchorId: 'env-three-numbers-am-gm',
+      link: { handoutSlug: 'means', anchorId: 'env-three-numbers-mean' },
     })
   })
 
   it('names a handout published in another language, but offers no page in this one', () => {
     // A Czech-only handout, asked for in Slovak
     const ref = resolveHandoutProblemRef(
-      { handoutContentId: 'CzechOnly', environmentId: 'first-proof' },
+      { handoutContentId: 'CzechOnly', environmentId: 'Nb4wK8mQ2xR7tY1uZ5aJc' },
       'sk'
     )
 
@@ -94,43 +101,41 @@ describe('resolveHandoutProblemRef', () => {
       handoutTitle: 'Základy důkazů',
       environmentType: 'problem',
       environmentNumber: 1,
-      handoutSlug: null,
-      anchorId: 'env-first-proof',
+      link: null,
     })
   })
 
-  it('uses the localized title and slug for a non-default locale', () => {
+  it('uses the localized title, slug, and anchor for a non-default locale', () => {
     // The same problem, in Slovak
     const ref = resolveHandoutProblemRef(
-      { handoutContentId: 'AbC-123', environmentId: 'three-numbers-am-gm' },
+      { handoutContentId: 'AbC-123', environmentId: 'V8pQ2mZxK7nLrT4wYc1Db' },
       'sk'
     )
 
-    // The Slovak title and slug, with the same locale-stable anchor
+    // Slovak names the handout, the page, and the environment its own way
     expect(ref).toEqual({
       handoutTitle: 'Priemery',
       environmentType: 'problem',
       environmentNumber: 4,
-      handoutSlug: 'priemery',
-      anchorId: 'env-three-numbers-am-gm',
+      link: { handoutSlug: 'priemery', anchorId: 'env-priemer-troch-cisel' },
     })
   })
 
   it('links to the page in the one language a handout is published in', () => {
     // The Czech-only handout, asked for in its own language
     const ref = resolveHandoutProblemRef(
-      { handoutContentId: 'CzechOnly', environmentId: 'first-proof' },
+      { handoutContentId: 'CzechOnly', environmentId: 'Nb4wK8mQ2xR7tY1uZ5aJc' },
       'cs'
     )
 
-    // Czech has a page, so the slug is there to link with
-    expect(ref?.handoutSlug).toBe('dukazy')
+    // Czech has a page, so there is a link to make
+    expect(ref?.link).toEqual({ handoutSlug: 'dukazy', anchorId: 'env-prvni-dukaz' })
   })
 
   it('returns null when the handout is unknown', () => {
     // A content id that isn't in the index
     const ref = resolveHandoutProblemRef(
-      { handoutContentId: 'missing', environmentId: 'three-numbers-am-gm' },
+      { handoutContentId: 'missing', environmentId: 'V8pQ2mZxK7nLrT4wYc1Db' },
       'en'
     )
 
@@ -153,7 +158,7 @@ describe('resolveHandoutProblemRef', () => {
   it('returns null when the environment index names a handout the site no longer has', () => {
     // The environment index and the handout index have drifted apart
     const ref = resolveHandoutProblemRef(
-      { handoutContentId: 'GoneFromIndex', environmentId: 'orphan' },
+      { handoutContentId: 'GoneFromIndex', environmentId: 'Gx3vT9pL6nW2sB8dF4hKq' },
       'en'
     )
 

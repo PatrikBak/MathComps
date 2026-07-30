@@ -39,7 +39,7 @@ V~následujících dvou sekcích si ukážeme konkrétní zajímavé příklady 
 
 Přímé důkazy jsou vcelku přirozené -- kombinujeme předpoklady ze zadání s~existujícími znalostmi, dokud nedojdeme k~dokazovanému tvrzení. Každý důkaz se tedy dá zapsat jako série řetězců implikací:
 
-\EnvId{odd-squares-mod-8}
+\\EnvId{6KrSLRVFvoy9OdoVfehCQ-ctverce-lichych-cisel-modulo-8}
 \Example{}{
     Dokažte, že druhé mocniny lichých čísel dávají po dělení~8 zbytek~1.
 }{
@@ -65,7 +65,7 @@ Přímé důkazy jsou vcelku přirozené -- kombinujeme předpoklady ze zadání
     Slovní zápis je zjevně praktičtější než odrážkový. Jeho problémem může být, že se v~něm umí ztratit komplikovanější úlohy: Špatně sepsaná řešení často pohoří na tom, že z~textu nejsou jasné implikace. Praktická rada: při každém tvrzení si položit otázku: je jasné, jaké jsou předpoklady a~jak se z~nich něco odvodilo? Při takové sebekontrole si člověk nejednou uvědomí, že jeho řešení má chybu.
 }
 
-\EnvId{prime-squared-minus-one}
+\\EnvId{sftFVZqBaqREN0z-UcX-t-ctverec-prvocisla-minus-jedna}
 \Exercise{}{
     Dokažte, že pro prvočísla $p \ge 5$ platí, že $p^2-1$ je číslo dělitelné 24.
 }{
@@ -82,7 +82,7 @@ Přímé důkazy jsou vcelku přirozené -- kombinujeme předpoklady ze zadání
 
 V~těžších úlohách nemusí být hned zřejmé, jak předpoklady ze zadání využít a je potřeba analyzovat situaci.
 
-\EnvId{perfect-square-divisor-count}
+\\EnvId{x5mL1lT3zcfYgisxPSA-W-lichy-pocet-delitelu-ctverce}
 \Example{}{
     Dokažte, že pokud je přirozené číslo $n$ druhou mocninou celého čísla, tak má lichý počet dělitelů.
 }{
@@ -97,7 +97,7 @@ V~těžších úlohách nemusí být hned zřejmé, jak předpoklady ze zadání
 
 Předešlý příklad se dá vyřešit i~pomocí obecně užitečného vzorce pro počet dělitelů:
 
-\EnvId{divisor-count-formula}
+\EnvId{Kk7dZfMi6QJfF9r1Bwa8B-veta-o-poctu-delitelu}
 \Theorem{}{
     Nechť $n=p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$, kde $p_1,p_2,\dots,p_k$ jsou navzájem různá prvočísla a~$a_1,a_2,\dots,a_k$ jsou celá čísla. Potom má číslo $n$ právě 
     $$
@@ -113,14 +113,14 @@ Předešlý příklad se dá vyřešit i~pomocí obecně užitečného vzorce pr
     $$
 }
 
-\EnvId{divisor-count-square-converse}
+\EnvId{o4FSeK3jvHdTEakt1JnAY-pocet-delitelu-a-obracena-implikace}
 \Exercise{}{
     Dokažte předešlý příklad, tedy větu o~lichosti počtu dělitelů druhých mocnin, pomocí věty o~počtu dělitelů. Dokažte také obrácenou implikaci této věty.
 }{
     Nechť $n = p_1^{a_1} \cdot p_2^{a_2} \cdots p_k^{a_k}$. Jelikož $n$ je druhá mocnina celého čísla, všechny exponenty $a_1, \dots, a_k$ musí být sudé. Podle věty je počet dělitelů roven součinu $(a_1+1)(a_2+1)\cdots(a_k+1)$. Jelikož každé $a_i$ je sudé, každá závorka představuje liché číslo. Součin lichých čísel je vždy lichý, tedy počet dělitelů je lichý.
 }
 
-\EnvId{small-prime-divisor-bound}
+\EnvId{K8Jhyizt5YvLRX463Ka_e-prvocislo-nepresahujici-odmocninu-n}
 \Problem{0}{}{
     Je dáno složené číslo $n > 1$. Dokažte, že je dělitelné prvočíslem nepřevyšujícím $\sqrt{n}$.
 }{
@@ -132,7 +132,7 @@ Předešlý příklad se dá vyřešit i~pomocí obecně užitečného vzorce pr
     Jelikož $p$ dělí $a$ a~$a$ dělí $n$, tak $p$ dělí $n$, což jsme chtěli dokázat.
 }
 
-\EnvId{product-of-all-divisors}
+\EnvId{C0sb6mdImA-f9i_DF9ajq-soucin-vsech-delitelu-cisla}
 \Problem{1}{}{
     Přirozené číslo $n$ má právě $k$ dělitelů. Dokažte, že součin dělitelů $n$ je roven $\sqrt{n^k}$.
 }{
@@ -156,7 +156,7 @@ Předešlý příklad se dá vyřešit i~pomocí obecně užitečného vzorce pr
 
 Na závěr sekce si jedno upozornění. Při sepisování důkazů je často vidět nepřesnost typu \textit{vynechání předpokladů}, například někdo může napsat \uv{$x^2=1$, takže nutně $x=1$}. To může být správná část řešení, pokud v~zadání máme, že $x$ je kladné. Pokud však tento předpoklad do řešení nenapíšeme, tak to zní podezřele, protože není jasné, zda si to řešitel uvědomil, a~proto to může vést ke ztrátě bodů. Správně bychom psali něco jako \uv{$x^2=1$ a $x$ je kladné, takže nutně $x=1$}. Ukážeme si velmi běžnou situaci, kdy se toto stává:
 
-\EnvId{mutual-divisibility}
+\EnvId{YXqKtQowN8gPVViw4PWN4-vzajemna-delitelnost-dvou-cisel}
 \Example{}{
 	Kdy pro celá čísla $a,b$ platí, že $a \mid b$ a $b \mid a$?
 }{
@@ -178,7 +178,7 @@ Na závěr sekce si jedno upozornění. Při sepisování důkazů je často vid
 
 Takovýto typ důkazu je obzvláště užitečný v~případě, kdy je dokazované těžké \uv{uchopit} a~daleko jednodušší je něco říci o~jeho negaci. Velmi běžný příklad, kde se to ilustruje:
 
-\EnvId{sqrt-two-irrational}
+\EnvId{pPJ8A14vh3r-vsHx4AMP1-iracionalita-odmocniny-ze-dvou}
 \Example{}{
     Dokažte, že číslo $\sqrt{2}$ je iracionální.
 }{
@@ -188,7 +188,7 @@ Takovýto typ důkazu je obzvláště užitečný v~případě, kdy je dokazovan
     Čísla $p$ a~$q$ jsou tedy obě dělitelná dvěma, což je spor s~předpokladem, že jsou nesoudělná.
 }
 
-\EnvId{why-sqrt-four-differs}
+\EnvId{64NL2y_73vGHKsm_iuBXS-selhani-dukazu-pro-odmocninu-4}
 \Exercise{}{
     Tento důkaz by neprošel, pokud bychom měli $\sqrt{4}$. Kde by selhal?
 }{
@@ -196,14 +196,14 @@ Takovýto typ důkazu je obzvláště užitečný v~případě, kdy je dokazovan
     Měli bychom rovnici $p^2=4q^2$, ze které vyplývá, že $p$ je sudé, tedy $p=2k$. Dosazením však dostaneme $4k^2=4q^2$, což se po krácení upraví na $k^2=q^2$. Z~této rovnosti už nevyplývá, že $q$ je sudé (ani dělitelné 4). Nedostaneme tak spor s~nesoudělností $p, q$.
 }
 
-\EnvId{sqrt-n-irrationality-criterion}
+\EnvId{MygIexYlJA93Zs1GKPipd-kriterium-iracionality-odmocniny-n}
 \Exercise{}{
     Dokažte zobecnění tvrzení o~iracionalitě $\sqrt{2}$: Nechť $n$ je přirozené číslo. Číslo $\sqrt{n}$ je iracionální právě když existuje prvočíslo~$p$, které se v~prvočíselném rozkladu~$n$ nachází v~liché mocnině.
 }{
     Postupujeme sporem. Nechť $\sqrt{n} = \frac ab$ pro nesoudělná $a, b$. Rovnici upravíme na $nb^2 = a^2$. V~prvočíselném rozkladu čtverce ($a^2$ i $b^2$) má každé prvočíslo sudý exponent.
     Na levé straně je exponent libovolného prvočísla součtem jeho exponentu v~$n$ a~v~$b^2$. Aby nastala rovnost, musí být tento součet sudý, což znamená, že exponent každého prvočísla v~$n$ musí být sudý. Pokud tedy $n$ obsahuje prvočíslo v~liché mocnině, dostáváme spor. Naopak, pokud jsou všechny exponenty sudé, $n$ je druhou mocninou a~$\sqrt{n}$ je racionální číslo.}
 
-\EnvId{rational-plus-irrational-sum}
+\EnvId{SselxmWyMFZXmodhe5HKW-soucet-racionalniho-a-iracionalniho-cisla}
 \Problem{0}{}{
     Dokažte, že součet racionálního a iracionálního čísla je číslo iracionální.
 }{
@@ -213,7 +213,7 @@ Takovýto typ důkazu je obzvláště užitečný v~případě, kdy je dokazovan
     Jelikož rozdíl dvou racionálních čísel je vždy racionální číslo, musí být i $r'$ racionální. To je však spor s~předpokladem, že $r'$ je iracionální.
 }
 
-\EnvId{sqrt-two-plus-sqrt-three}
+\EnvId{lEtf_CHzL0kz2p9TGK5Ml-odmocnina-2-plus-odmocnina-3}
 \Problem{0}{}{
     Dokažte, že číslo $\sqrt{2}+\sqrt{3}$ je iracionální.
 }{
@@ -230,7 +230,7 @@ Takovýto typ důkazu je obzvláště užitečný v~případě, kdy je dokazovan
 
 Následující příklady ukazují, že důkaz sporem je \uv{technicky} i tehdy, pokud dokazujeme, že něco \textit{neplatí}. 
 
-\EnvId{sum-of-three-odd-squares}
+\\EnvId{y5MK6awUXD1Q21xcYhP-r-soucet-tri-lichych-ctvercu}
 \Problem{0}{}{
 	Dokažte, že součet tří druhých mocnin lichých celých čísel nikdy není druhou mocninou celého čísla.
 }{
@@ -241,7 +241,7 @@ Následující příklady ukazují, že důkaz sporem je \uv{technicky} i tehdy,
 	Podle předešlého dokázaného tvrzení dává druhá mocnina lichého čísla po dělení~8 zbytek~1. Součet tří takových čísel proto dává zbytek~3. Potom ale nemůže být čtvercem, jelikož to by musel být lichý a~znovu podle našeho tvrzení dávat zbytek~1.
 }
 
-\EnvId{alternating-cards-on-circle}
+\EnvId{YFmWOBiEPkcdH8w_XCCXq-karty-s-cisly-na-kruhu}
 \Problem{0}{73-CSMO-B-II-1}{
 	Patrik vybral dvě různá kladná celá čísla $a$, $b$, každé napsal na 10 karet a všech 20\,karet rozmístil po obvodu kruhu. Všiml si, že každé číslo je nyní dělitelem součtu dvou čísel na sousedních kartách. Dokažte, že čísla na kartách se ob jedno střídají.
 }{
@@ -266,7 +266,7 @@ Následující příklady ukazují, že důkaz sporem je \uv{technicky} i tehdy,
 
 Na závěr si ještě ukážeme snad nejznámější důkaz této všeobecně známé věci, kterou uměl dokázat už i Eukleides\fnote{Eukleides z~Alexandrie (cca 300 l. před n. l.) byl starořecký matematik, často označovaný jako \uv{otec geometrie}.}.
 
-\EnvId{infinitude-of-primes}
+\EnvId{KvlppDtT0_6whJQhO-l8K-nekonecne-mnoho-prvocisel}
 \Theorem{}{
     Dokažte, že prvočísel je nekonečně mnoho.
 }{
@@ -275,7 +275,7 @@ Na závěr si ještě ukážeme snad nejznámější důkaz této všeobecně zn
 
 Zkuste si podobným způsobem vyřešit další dvě úlohy:
 
-\EnvId{n-squared-plus-one-primes}
+\EnvId{xcyxtxvzStwwMDpYr7pv2-prvocisla-delici-n2-plus-1}
 \Problem{1}{}{
     Dokažte, že existuje nekonečně mnoho prvočísel $p$, která dělí $n^2+1$ pro vhodné přirozené $n$.
 }{
@@ -290,7 +290,7 @@ Zkuste si podobným způsobem vyřešit další dvě úlohy:
     Toto číslo je větší než 1, proto má nějakého prvočíselného dělitele $q$. Jelikož $q$ dělí $N$, dělí číslo tvaru $n^2+1$, takže $q$ musí patřit do našeho seznamu $p_1, \dots, p_k$. To ale znamená, že $q$ dělí součin $p_1 \cdots p_k$, a~tedy dělí i jeho druhou mocninu. Z~toho vyplývá, že $q$ dělí rozdíl $N - (p_1 \cdots p_k)^2 = 1$, což je spor.
 }
 
-\EnvId{primes-form-3n-plus-2}
+\EnvId{f8Ikrt3vc35M1w9ez9TsY-prvocisla-tvaru-3n-plus-2}
 \Problem{2}{}{
     Dokažte, že existuje nekonečně mnoho prvočísel tvaru $3n+2$, kde $n$ je přirozené číslo.
 }{

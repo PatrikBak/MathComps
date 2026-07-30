@@ -81,12 +81,12 @@ function MathildaDefenseRow({
   const ref = resolveHandoutProblemRef(defense.target, locale)
 
   // Whether the reader is already reading the handout this defense was about
-  const isOnThisHandout = useIsCurrentHandout(ref?.handoutSlug ?? null)
+  const isOnThisHandout = useIsCurrentHandout(ref?.link?.handoutSlug ?? null)
 
   // Sends a jump that stays on this page to the scroll, and lets every other one navigate
   const handleJumpClick = (event: MouseEvent<HTMLAnchorElement>) => {
     // Another handout, so the link is the one to carry the reader there
-    if (!isOnThisHandout || ref === null) {
+    if (!isOnThisHandout || ref?.link == null) {
       onClose()
       return
     }
@@ -95,7 +95,7 @@ function MathildaDefenseRow({
     event.preventDefault()
 
     // Hand the jump over to be made once the list has left
-    onJumpInPage(ref.anchorId)
+    onJumpInPage(ref.link.anchorId)
   }
 
   // The localized environment word per type, e.g. "Úloha" / "Theorem"
@@ -156,9 +156,9 @@ function MathildaDefenseRow({
         {/* Jump and delete */}
         <div className="-my-1 flex items-center text-muted">
           {/* Jump straight to the problem in its handout, offered only where that page exists */}
-          {ref?.handoutSlug && (
+          {ref?.link && (
             <AppLink
-              href={`${ROUTES.HANDOUTS}/${ref.handoutSlug}#${ref.anchorId}`}
+              href={`${ROUTES.HANDOUTS}/${ref.link.handoutSlug}#${ref.link.anchorId}`}
               plain
               aria-label={t('goToHandout')}
               onClick={handleJumpClick}

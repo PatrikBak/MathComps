@@ -37,7 +37,8 @@
             },
             {
               "type": "problem",
-              "id": "nested-binary-operation",
+              "id": "uD63SrC0DjlBiSlD8WN1i",
+              "slug": "vnorena-operacia-42-az-0",
               "difficulty": 0,
               "body": [
                 {
@@ -302,7 +303,8 @@
             },
             {
               "type": "problem",
-              "id": "zero-sum-fraction-identity",
+              "id": "r_xTFMkLNh1OKZqL4f6KP",
+              "slug": "zlomkova-identita-pri-sucte-nula",
               "difficulty": 0,
               "body": [
                 {
@@ -557,7 +559,8 @@
             },
             {
               "type": "problem",
-              "id": "constrained-fraction-sum",
+              "id": "T30uF67thgCpvHWXzfoqr",
+              "slug": "hodnoty-cyklickeho-suctu-zlomkov",
               "difficulty": 0,
               "body": [
                 {
@@ -782,7 +785,8 @@
             },
             {
               "type": "problem",
-              "id": "unit-product-fraction-sum",
+              "id": "iD6Yxw2GEuWjliHpq83ij",
+              "slug": "sucet-zlomkov-pri-sucine-jedna",
               "difficulty": 0,
               "body": [
                 {
@@ -985,7 +989,8 @@
             },
             {
               "type": "problem",
-              "id": "sum-one-triple-product",
+              "id": "ZaI7YVI7CM2Q9THxNgNIu",
+              "slug": "nezaporny-sucin-troch-cinitelov",
               "difficulty": 0,
               "body": [
                 {
@@ -1139,7 +1144,8 @@
             },
             {
               "type": "problem",
-              "id": "reciprocal-sum-odd-powers",
+              "id": "2aaFNpMFewtsuCcfuo_fD",
+              "slug": "prevratene-hodnoty-neparnych-mocnin",
               "difficulty": 0,
               "body": [
                 {
@@ -1343,7 +1349,8 @@
             },
             {
               "type": "problem",
-              "id": "cyclic-reciprocal-equalities",
+              "id": "A_a1oWpvDYI-XyQHxUAwx",
+              "slug": "retazec-rovnosti-s-prevratenymi-hodnotami",
               "difficulty": 0,
               "body": [
                 {
@@ -1580,8 +1587,19 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "cyclic-square-difference-system",
+              "id": "ezUe8vAa8glYER7DWNTS6",
+              "slug": "sustava-rozdielov-stvorcov",
               "difficulty": 0,
               "body": [
                 {
@@ -1786,7 +1804,8 @@
             },
             {
               "type": "problem",
-              "id": "sum-of-eighth-powers",
+              "id": "OHiG7BBuj0eu_jJB1Xcmq",
+              "slug": "sucin-dvoch-stvormiestnych-cisel",
               "difficulty": 1,
               "body": [
                 {
@@ -2118,7 +2137,8 @@
             },
             {
               "type": "problem",
-              "id": "real-quartic-equation",
+              "id": "2ZxeP9uuZOf-7koaME3RI",
+              "slug": "rovnica-stvrteho-stupna",
               "difficulty": 1,
               "body": [
                 {
@@ -2234,7 +2254,8 @@
             },
             {
               "type": "problem",
-              "id": "triple-quadratic-product-equation",
+              "id": "Sno14U7w9Jv5l0joONjnr",
+              "slug": "sucin-troch-kvadratickych-vyrazov",
               "difficulty": 2,
               "body": [
                 {
@@ -2559,7 +2580,8 @@
             },
             {
               "type": "problem",
-              "id": "square-differences-divisibility",
+              "id": "iwajcvpGTVmTHCDbGjT6a",
+              "slug": "delitelnost-suctu-tretich-mocnin",
               "difficulty": 2,
               "body": [
                 {

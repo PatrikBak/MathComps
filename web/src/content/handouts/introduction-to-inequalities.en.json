@@ -93,7 +93,8 @@
             },
             {
               "type": "example",
-              "id": "ordering-paired-sums-products",
+              "id": "bPkLpBouOLKWsyJ2o4KB1",
+              "slug": "ordering-products-of-pairs",
               "body": [
                 {
                   "type": "paragraph",
@@ -319,7 +320,8 @@
             },
             {
               "type": "exercise",
-              "id": "product-inequality-chain-smallest",
+              "id": "YZmrvYRhFg_8fHlZmZo3U",
+              "slug": "smallest-of-four-numbers",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -707,7 +709,8 @@
             },
             {
               "type": "example",
-              "id": "cubes-sum-vs-mixed-terms",
+              "id": "P4XBmJZTYVy4KIe2BPqbE",
+              "slug": "cubes-with-nonnegative-sum",
               "body": [
                 {
                   "type": "paragraph",
@@ -895,8 +898,19 @@
               "highligted": false
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "exercise",
-              "id": "power-sum-vs-mixed-powers",
+              "id": "JhZA_Dzle9gA4kV4lKv9q",
+              "slug": "sum-of-powers-of-two-positive-numbers",
               "body": [
                 {
                   "type": "paragraph",
@@ -1168,7 +1182,8 @@
             },
             {
               "type": "exercise",
-              "id": "ordered-triple-square-difference",
+              "id": "mQOwqNMi8OAFVITQ-pAYo",
+              "slug": "inequality-for-ordered-triple",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1439,7 +1454,8 @@
             },
             {
               "type": "problem",
-              "id": "shifted-integer-product-inequality",
+              "id": "ED7SKfRlBMObihFgvGY7A",
+              "slug": "inequality-for-two-integers",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -1986,7 +2002,8 @@
             },
             {
               "type": "example",
-              "id": "three-var-squares-vs-products",
+              "id": "vQhiaK4eolSqnaAA9cuHZ",
+              "slug": "squares-versus-pairwise-products",
               "body": [
                 {
                   "type": "paragraph",
@@ -2279,7 +2296,8 @@
             },
             {
               "type": "exercise",
-              "id": "two-var-squares-plus-constant",
+              "id": "418Wz9g6IWSugP49_tU-n",
+              "slug": "squares-plus-two",
               "body": [
                 {
                   "type": "paragraph",
@@ -2433,7 +2451,8 @@
             },
             {
               "type": "exercise",
-              "id": "quartic-terms-vs-product-sum",
+              "id": "sdg3sRT7yvoIjDcMsErsE",
+              "slug": "quartic-terms-versus-product",
               "body": [
                 {
                   "type": "paragraph",
@@ -2667,7 +2686,8 @@
             },
             {
               "type": "problem",
-              "id": "equal-cubic-shift-product-bounds",
+              "id": "COs_bAdXRwGbPeWyYKM3R",
+              "slug": "equal-expressions-and-product-bounds",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -3069,7 +3089,8 @@
             },
             {
               "type": "example",
-              "id": "closer-numbers-larger-product",
+              "id": "m3P8RN63DfmSb-_H94B_n",
+              "slug": "closer-numbers-have-larger-product",
               "body": [
                 {
                   "type": "paragraph",
@@ -3198,7 +3219,8 @@
             },
             {
               "type": "theorem",
-              "id": "n-term-mean-inequality",
+              "id": "hn826RYmOm1L-wYPENeAW",
+              "slug": "am-gm-inequality",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -3633,7 +3655,8 @@
             },
             {
               "type": "example",
-              "id": "three-pairwise-sums-product",
+              "id": "kAB49jcHXVg3uvkhrrteu",
+              "slug": "product-of-pairwise-sums",
               "body": [
                 {
                   "type": "paragraph",
@@ -3745,7 +3768,8 @@
             },
             {
               "type": "example",
-              "id": "open-box-max-volume",
+              "id": "KMckvz9BRCkFpylMDM-ZQ",
+              "slug": "the-box-problem",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -4022,7 +4046,8 @@
             },
             {
               "type": "exercise",
-              "id": "power-plus-n-vs-linear",
+              "id": "Fetv2ZpBpdSAL9VRNj6Bo",
+              "slug": "power-and-linear-expression",
               "body": [
                 {
                   "type": "paragraph",
@@ -4151,7 +4176,8 @@
             },
             {
               "type": "exercise",
-              "id": "unit-product-shifted-factors",
+              "id": "LRZ7mn998YqvFEP_vggGc",
+              "slug": "numbers-with-product-one",
               "body": [
                 {
                   "type": "paragraph",
@@ -4326,7 +4352,8 @@
             },
             {
               "type": "exercise",
-              "id": "cyclic-fraction-sum-six",
+              "id": "7ptHVCux9v12DP7_YmSbY",
+              "slug": "sum-of-three-fractions",
               "body": [
                 {
                   "type": "paragraph",
@@ -4461,7 +4488,8 @@
             },
             {
               "type": "exercise",
-              "id": "reciprocal-sum-pair-product-bound",
+              "id": "5Y8zEyYvhLa8dN3Q2sEoF",
+              "slug": "four-numbers-with-reciprocals",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -4827,7 +4855,8 @@
             },
             {
               "type": "example",
-              "id": "implied-cubic-inequality",
+              "id": "Y_rVM9PKRrNZ-xul7WWn5",
+              "slug": "implied-inequality-with-powers",
               "body": [
                 {
                   "type": "paragraph",
@@ -5110,7 +5139,8 @@
             },
             {
               "type": "problem",
-              "id": "middle-value-square-condition",
+              "id": "lGgi2UDhTRt1I5AhB-CSX",
+              "slug": "squares-condition-and-product-inequality",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5480,7 +5510,8 @@
             },
             {
               "type": "problem",
-              "id": "bounded-vars-sum-vs-squares",
+              "id": "tM0NUHzGN7ISuNnwGlXCf",
+              "slug": "sum-greater-than-squares",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6056,7 +6087,8 @@
             },
             {
               "type": "problem",
-              "id": "sqrt-product-quadratic-bound",
+              "id": "DQ2FUiK5hVPMXJL4mp2Pw",
+              "slug": "inequality-with-square-root",
               "difficulty": 0,
               "body": [
                 {
@@ -6344,7 +6376,8 @@
             },
             {
               "type": "problem",
-              "id": "shifted-squares-product-bound",
+              "id": "h9XOWPr4I6tWgzd33zXK0",
+              "slug": "product-of-squares-plus-one",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6824,7 +6857,8 @@
             },
             {
               "type": "problem",
-              "id": "last-term-product-bound",
+              "id": "He5FmTiAljgyhp8e3jrZT",
+              "slug": "squares-versus-last-term",
               "difficulty": 0,
               "body": [
                 {
@@ -7144,7 +7178,8 @@
             },
             {
               "type": "problem",
-              "id": "quartic-minus-mixed-cubic-min",
+              "id": "nTrt8isVP7d-IkZLcxcKy",
+              "slug": "minimum-of-quartic-expression",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7488,7 +7523,8 @@
             },
             {
               "type": "problem",
-              "id": "sixth-power-condition-bound",
+              "id": "A8uKeAcwG40bQUQcsLUwV",
+              "slug": "condition-with-sixth-power",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",

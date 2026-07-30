@@ -101,7 +101,8 @@
           "content": [
             {
               "type": "exercise",
-              "id": "verifying-power-difference-pattern",
+              "id": "zEf84OUo1PK7UmQoBCiOZ",
+              "slug": "overeni-rozkladu-rozdilu-mocnin",
               "body": [
                 {
                   "type": "paragraph",
@@ -202,7 +203,8 @@
             },
             {
               "type": "exercise",
-              "id": "guessing-odd-power-sum-pattern",
+              "id": "egnd2_iL4TGIEIcqPpm7d",
+              "slug": "overeni-rozkladu-souctu-lichych-mocnin",
               "body": [
                 {
                   "type": "paragraph",
@@ -300,7 +302,8 @@
             },
             {
               "type": "theorem",
-              "id": "general-power-difference-formula",
+              "id": "Q9g7InhFTYUEKEyLG9AQd",
+              "slug": "obecny-vzorec-pro-rozdil-mocnin",
               "body": [
                 {
                   "type": "paragraph",
@@ -394,7 +397,8 @@
             },
             {
               "type": "theorem",
-              "id": "general-odd-power-sum-formula",
+              "id": "V56cGi02g0ne0oE1NMLC0",
+              "slug": "vzorec-pro-soucet-lichych-mocnin",
               "body": [
                 {
                   "type": "paragraph",
@@ -554,7 +558,8 @@
             },
             {
               "type": "exercise",
-              "id": "practice-factoring-power-expressions",
+              "id": "C5LcWx5oCgn3w0obToHt3",
+              "slug": "rozklad-mocninnych-vyrazu-na-soucin",
               "body": [
                 {
                   "type": "paragraph",
@@ -743,7 +748,8 @@
             },
             {
               "type": "problem",
-              "id": "n5-minus-n-divisible-30",
+              "id": "1WeUccrXfz1T4gtxJOfgZ",
+              "slug": "n5-minus-n-delitelne-triceti",
               "difficulty": 0,
               "body": [
                 {
@@ -1074,7 +1080,8 @@
             },
             {
               "type": "problem",
-              "id": "power-sum-divisible-by-seven",
+              "id": "X6dRSGrGRVxDQ0v7yQePz",
+              "slug": "dvojice-s-delitelnym-souctem-mocnin",
               "difficulty": 0,
               "body": [
                 {
@@ -1276,7 +1283,8 @@
             },
             {
               "type": "problem",
-              "id": "sixth-power-minus-one-three-primes",
+              "id": "Sbn2tu3JS3ii9qr4cOQ8C",
+              "slug": "n6-minus-1-soucin-prvocisel",
               "difficulty": 1,
               "body": [
                 {
@@ -1466,7 +1474,8 @@
             },
             {
               "type": "example",
-              "id": "quartic-linear-difference-factoring",
+              "id": "z2sq5m0LtIq8tk-jBYnfT",
+              "slug": "rozklad-ctvrtych-a-prvnich-mocnin",
               "body": [
                 {
                   "type": "paragraph",
@@ -1652,7 +1661,8 @@
             },
             {
               "type": "exercise",
-              "id": "three-variable-polynomial-factoring",
+              "id": "DV0_ZMK4OLUU7QpEJhp2g",
+              "slug": "rozklad-vyrazu-s-tremi-promennymi",
               "body": [
                 {
                   "type": "paragraph",
@@ -1999,7 +2009,8 @@
             },
             {
               "type": "exercise",
-              "id": "sum-of-squares-factor-pattern",
+              "id": "7tKvcGyzwQN50fXeKZZFA",
+              "slug": "rozklad-souctu-smisenych-clenu",
               "body": [
                 {
                   "type": "paragraph",
@@ -2119,7 +2130,8 @@
             },
             {
               "type": "problem",
-              "id": "symmetric-sums-divisibility",
+              "id": "6Pz40KvMj-Z2KCtx_HwVy",
+              "slug": "cpsj-2018-delitelnost-symetrickych-souctu",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -2535,7 +2547,8 @@
             },
             {
               "type": "example",
-              "id": "quartic-with-square-middle-term",
+              "id": "bkNk8lf8VG9rFMi2pvgqT",
+              "slug": "rozklad-vyrazu-se-ctvrtymi-mocninami",
               "body": [
                 {
                   "type": "paragraph",
@@ -2637,7 +2650,8 @@
             },
             {
               "type": "exercise",
-              "id": "sophie-germain-identity",
+              "id": "JWzyzp2FArSoq1MTMNFNv",
+              "slug": "sophie-germain-identita",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -2725,7 +2739,8 @@
             },
             {
               "type": "problem",
-              "id": "quartic-expression-prime-values",
+              "id": "WtGT3o2FOm2uBrteEN3Zw",
+              "slug": "ckmo-2012-prvociselne-hodnoty-vyrazu",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2943,7 +2958,8 @@
             },
             {
               "type": "problem",
-              "id": "factoring-sum-of-nth-powers",
+              "id": "C8xIHzIo34hOf3ywn-A9c",
+              "slug": "rozlozitelnost-souctu-n-tych-mocnin",
               "difficulty": 1,
               "body": [
                 {
@@ -3213,7 +3229,8 @@
             },
             {
               "type": "problem",
-              "id": "heron-formula-factorization",
+              "id": "5GOMMydtW7ogI97uOKrCC",
+              "slug": "rozklad-vyrazu-na-ctyri-zavorky",
               "difficulty": 1,
               "body": [
                 {
@@ -3534,7 +3551,8 @@
             },
             {
               "type": "problem",
-              "id": "quartic-plus-power-of-four",
+              "id": "6f5rmK2QlSwXl_RJIGoxt",
+              "slug": "prvocisla-tvaru-n4-plus-4n",
               "difficulty": 1,
               "body": [
                 {
@@ -3923,7 +3941,8 @@
             },
             {
               "type": "example",
-              "id": "sum-of-cubes-identity",
+              "id": "L8kGQr5vDWsJujU5xanZg",
+              "slug": "rozklad-tretich-mocnin-minus-3abc",
               "body": [
                 {
                   "type": "paragraph",
@@ -3992,7 +4011,8 @@
             },
             {
               "type": "theorem",
-              "id": "sum-of-cubes-inequality",
+              "id": "GHX8rHEBCjaxdhuXWD5lL",
+              "slug": "nerovnost-pro-soucet-tretich-mocnin",
               "body": [
                 {
                   "type": "paragraph",

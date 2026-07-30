@@ -37,7 +37,8 @@
             },
             {
               "type": "problem",
-              "id": "nested-binary-operation",
+              "id": "uD63SrC0DjlBiSlD8WN1i",
+              "slug": "nested-operation-42-to-0",
               "difficulty": 0,
               "body": [
                 {
@@ -302,7 +303,8 @@
             },
             {
               "type": "problem",
-              "id": "zero-sum-fraction-identity",
+              "id": "r_xTFMkLNh1OKZqL4f6KP",
+              "slug": "reciprocals-of-pairwise-sums-identity",
               "difficulty": 0,
               "body": [
                 {
@@ -556,8 +558,19 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "constrained-fraction-sum",
+              "id": "T30uF67thgCpvHWXzfoqr",
+              "slug": "values-of-cyclic-fraction-sum",
               "difficulty": 0,
               "body": [
                 {
@@ -782,7 +795,8 @@
             },
             {
               "type": "problem",
-              "id": "unit-product-fraction-sum",
+              "id": "iD6Yxw2GEuWjliHpq83ij",
+              "slug": "fraction-sum-with-product-one",
               "difficulty": 0,
               "body": [
                 {
@@ -985,7 +999,8 @@
             },
             {
               "type": "problem",
-              "id": "sum-one-triple-product",
+              "id": "ZaI7YVI7CM2Q9THxNgNIu",
+              "slug": "nonnegative-product-of-three-factors",
               "difficulty": 0,
               "body": [
                 {
@@ -1139,7 +1154,8 @@
             },
             {
               "type": "problem",
-              "id": "reciprocal-sum-odd-powers",
+              "id": "2aaFNpMFewtsuCcfuo_fD",
+              "slug": "reciprocal-equation-for-odd-powers",
               "difficulty": 0,
               "body": [
                 {
@@ -1343,7 +1359,8 @@
             },
             {
               "type": "problem",
-              "id": "cyclic-reciprocal-equalities",
+              "id": "A_a1oWpvDYI-XyQHxUAwx",
+              "slug": "chain-of-reciprocal-equalities",
               "difficulty": 0,
               "body": [
                 {
@@ -1581,7 +1598,8 @@
             },
             {
               "type": "problem",
-              "id": "cyclic-square-difference-system",
+              "id": "ezUe8vAa8glYER7DWNTS6",
+              "slug": "system-of-square-differences",
               "difficulty": 0,
               "body": [
                 {
@@ -1786,7 +1804,8 @@
             },
             {
               "type": "problem",
-              "id": "sum-of-eighth-powers",
+              "id": "OHiG7BBuj0eu_jJB1Xcmq",
+              "slug": "two-four-digit-factors",
               "difficulty": 1,
               "body": [
                 {
@@ -2118,7 +2137,8 @@
             },
             {
               "type": "problem",
-              "id": "real-quartic-equation",
+              "id": "2ZxeP9uuZOf-7koaME3RI",
+              "slug": "quartic-equation-over-the-reals",
               "difficulty": 1,
               "body": [
                 {
@@ -2234,7 +2254,8 @@
             },
             {
               "type": "problem",
-              "id": "triple-quadratic-product-equation",
+              "id": "Sno14U7w9Jv5l0joONjnr",
+              "slug": "product-of-three-quadratics-equation",
               "difficulty": 2,
               "body": [
                 {
@@ -2559,7 +2580,8 @@
             },
             {
               "type": "problem",
-              "id": "square-differences-divisibility",
+              "id": "iwajcvpGTVmTHCDbGjT6a",
+              "slug": "squared-differences-and-cube-divisibility",
               "difficulty": 2,
               "body": [
                 {

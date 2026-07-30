@@ -128,7 +128,8 @@
           "content": [
             {
               "type": "problem",
-              "id": "matchstick-removal-game",
+              "id": "ikV4h4eQGTCM24eSKwkC1",
+              "slug": "match-removal-game",
               "difficulty": 0,
               "body": [
                 {
@@ -284,7 +285,8 @@
             },
             {
               "type": "problem",
-              "id": "date-naming-race",
+              "id": "yF4e5X5ipjS1AXw-5okTB",
+              "slug": "date-naming-game",
               "difficulty": 0,
               "body": [
                 {
@@ -424,7 +426,8 @@
             },
             {
               "type": "problem",
-              "id": "chessboard-king-tour",
+              "id": "cioTaXLvsB4RKpjw3mj10",
+              "slug": "king-on-a-chessboard",
               "difficulty": 0,
               "body": [
                 {
@@ -519,7 +522,8 @@
             },
             {
               "type": "problem",
-              "id": "coins-on-round-table",
+              "id": "NfB2FTy-g6nXPXX4n_P3t",
+              "slug": "placing-coins-on-a-table",
               "difficulty": 0,
               "body": [
                 {
@@ -596,7 +600,8 @@
             },
             {
               "type": "problem",
-              "id": "digit-fraction-game",
+              "id": "qztZI1jhajMru2Kvzn7HN",
+              "slug": "replacing-letters-with-digits",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -933,7 +938,8 @@
             },
             {
               "type": "problem",
-              "id": "polygon-diagonal-drawing",
+              "id": "R5TbE4UXBihVACGfxoOXa",
+              "slug": "drawing-diagonals-in-a-polygon",
               "difficulty": 0,
               "body": [
                 {
@@ -1077,7 +1083,8 @@
             },
             {
               "type": "problem",
-              "id": "chomp-poisoned-chocolate",
+              "id": "QJNBHZ0s2figNJLjBwVwG",
+              "slug": "chomp-poisoned-chocolate",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",
@@ -1198,7 +1205,8 @@
             },
             {
               "type": "problem",
-              "id": "chess-double-move-variant",
+              "id": "NTwg15IEI2dGY5FsQ0z1Y",
+              "slug": "chess-with-double-moves",
               "difficulty": 1,
               "body": [
                 {
@@ -1344,7 +1352,8 @@
             },
             {
               "type": "problem",
-              "id": "divisor-addition-race",
+              "id": "hc7s216xd8Q4wTzoITKrs",
+              "slug": "adding-divisors-to-a-number",
               "difficulty": 1,
               "body": [
                 {
@@ -1605,7 +1614,8 @@
             },
             {
               "type": "problem",
-              "id": "fraction-slot-filling-game",
+              "id": "0TURt8osDmLAHIvs9pfcZ",
+              "slug": "filling-cells-of-a-fraction",
               "difficulty": 1,
               "title": {
                 "type": "paragraph",

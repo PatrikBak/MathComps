@@ -59,7 +59,8 @@
             },
             {
               "type": "example",
-              "id": "two-test-scores",
+              "id": "5lVTVflzYIX-sj4-2bqEx",
+              "slug": "prumerny-pocet-bodu-dvou-studentu",
               "body": [
                 {
                   "type": "paragraph",
@@ -109,7 +110,8 @@
             },
             {
               "type": "example",
-              "id": "rectangle-to-square-area",
+              "id": "TN4dl0yqS7RISW-8ZV4Bu",
+              "slug": "strana-ctverce-s-obsahem-obdelnika",
               "body": [
                 {
                   "type": "paragraph",
@@ -211,7 +213,8 @@
             },
             {
               "type": "example",
-              "id": "cyclist-average-speed",
+              "id": "oe3YYvEVymq4SsH63QUnG",
+              "slug": "prumerna-rychlost-cyklisty",
               "body": [
                 {
                   "type": "paragraph",
@@ -408,7 +411,8 @@
             },
             {
               "type": "definition",
-              "id": "arithmetic-mean-two-numbers",
+              "id": "vTih_hh2F2tpJ6pKqYyal",
+              "slug": "aritmeticky-prumer-dvou-cisel",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -485,7 +489,8 @@
             },
             {
               "type": "definition",
-              "id": "geometric-mean-two-numbers",
+              "id": "P1tYaXAyuOdteuzrlQFr3",
+              "slug": "geometricky-prumer-dvou-cisel",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -566,7 +571,8 @@
             },
             {
               "type": "definition",
-              "id": "harmonic-mean-two-numbers",
+              "id": "ThVI_lBO0FsGdivT12dSO",
+              "slug": "harmonicky-prumer-dvou-cisel",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -619,7 +625,8 @@
             },
             {
               "type": "exercise",
-              "id": "cyclist-speed-harmonic-mean",
+              "id": "6b6v-mwMDJQLun5LOLiFd",
+              "slug": "vzorecek-v-prikladu-s-cyklistou",
               "body": [
                 {
                   "type": "paragraph",
@@ -680,7 +687,8 @@
             },
             {
               "type": "exercise",
-              "id": "compare-means-number-pairs",
+              "id": "80_Y1Hb5i5TDzLC-gJWHM",
+              "slug": "porovnani-prumeru-dvojic-cisel",
               "body": [
                 {
                   "type": "paragraph",
@@ -1026,7 +1034,8 @@
             },
             {
               "type": "exercise",
-              "id": "means-equal-pair",
+              "id": "eisbAdJroxGl2QHbiIPvP",
+              "slug": "dvojice-s-rovnymi-prumery",
               "body": [
                 {
                   "type": "paragraph",
@@ -1126,7 +1135,8 @@
           "content": [
             {
               "type": "problem",
-              "id": "am-gm-two-numbers",
+              "id": "dyAmE3MykaxHvaQu_8SBc",
+              "slug": "porovnani-aritmetickeho-a-geometrickeho-prumeru",
               "difficulty": 0,
               "body": [
                 {
@@ -1311,7 +1321,8 @@
             },
             {
               "type": "problem",
-              "id": "gm-hm-two-numbers",
+              "id": "UV7IZNXLW_o8oeiE9t5jA",
+              "slug": "porovnani-geometrickeho-a-harmonickeho-prumeru",
               "difficulty": 0,
               "body": [
                 {
@@ -1537,7 +1548,8 @@
             },
             {
               "type": "definition",
-              "id": "arithmetic-mean-n-numbers",
+              "id": "aBXQGb9XHMlf2UYpgn2ap",
+              "slug": "aritmeticky-prumer-n-cisel",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1599,7 +1611,8 @@
             },
             {
               "type": "definition",
-              "id": "geometric-mean-n-numbers",
+              "id": "2vR0LCy8VdNIKmBN1e7Vr",
+              "slug": "geometricky-prumer-n-cisel",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1661,7 +1674,8 @@
             },
             {
               "type": "definition",
-              "id": "harmonic-mean-n-numbers",
+              "id": "RkjiONhHfMoT3_KECSx68",
+              "slug": "harmonicky-prumer-n-cisel",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1731,7 +1745,8 @@
           "content": [
             {
               "type": "example",
-              "id": "school-grades-means",
+              "id": "vUtBaQxWMNYAPcJPGjAhI",
+              "slug": "vypocet-prumeru-znamek",
               "body": [
                 {
                   "type": "paragraph",

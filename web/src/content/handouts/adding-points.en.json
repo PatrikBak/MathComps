@@ -630,7 +630,8 @@
             },
             {
               "type": "theorem",
-              "id": "triangle-centers-basic-angles",
+              "id": "4G1lSZGp6WOW_d5PrWMRp",
+              "slug": "basic-angles",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -801,7 +802,8 @@
             },
             {
               "type": "theorem",
-              "id": "incenter-excenter-midpoint",
+              "id": "bvirmYCiJc6UXSLVpp95M",
+              "slug": "svrcek-point",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -918,7 +920,8 @@
             },
             {
               "type": "theorem",
-              "id": "two-excenters-midpoint",
+              "id": "e3oWC42hI0-yUVRoB0_8O",
+              "slug": "anti-svrcek-point",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1053,7 +1056,8 @@
             },
             {
               "type": "theorem",
-              "id": "spiral-similarity-pairs",
+              "id": "hXmQS3PNqrvP6cXDIywLj",
+              "slug": "spiral-similarity-comes-in-pairs",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1116,7 +1120,8 @@
             },
             {
               "type": "theorem",
-              "id": "orthocenter-reflections",
+              "id": "xHpsKi1FxuaOE4TsQDYXt",
+              "slug": "reflecting-the-orthocenter",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1527,7 +1532,8 @@
             },
             {
               "type": "problem",
-              "id": "equiangular-pentagon-bisectors",
+              "id": "yt0KVCE0mByjG0W5AhbYA",
+              "slug": "pentagon-with-equal-angles",
               "difficulty": 0,
               "body": [
                 {
@@ -1607,7 +1613,8 @@
             },
             {
               "type": "problem",
-              "id": "median-cevian-equal-lengths",
+              "id": "rIhQMrZeKZ2MH-PmkjT9D",
+              "slug": "point-on-median-isosceles-triangle",
               "difficulty": 0,
               "body": [
                 {
@@ -1804,7 +1811,8 @@
             },
             {
               "type": "problem",
-              "id": "orthocenter-line-through-midpoint",
+              "id": "ull-eZWewTAOKLQHeu11Z",
+              "slug": "perpendicular-to-mh-through-h",
               "difficulty": 0,
               "body": [
                 {
@@ -2037,7 +2045,8 @@
             },
             {
               "type": "problem",
-              "id": "quadrilateral-midpoints-diagonals",
+              "id": "n2g_94VghWgVCIT8C-mse",
+              "slug": "midpoint-line-and-equal-diagonals",
               "difficulty": 0,
               "body": [
                 {
@@ -2126,7 +2135,8 @@
             },
             {
               "type": "problem",
-              "id": "cyclic-quadrilateral-orthocenters",
+              "id": "Z8MdAzTmbIxxpEyc-UnMy",
+              "slug": "orthocenters-in-a-cyclic-quadrilateral",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2225,7 +2235,8 @@
             },
             {
               "type": "problem",
-              "id": "isosceles-trapezoid-orthocenter",
+              "id": "alkX6MavufXBEbJ3d6M4z",
+              "slug": "orthocenter-in-an-isosceles-trapezoid",
               "difficulty": 0,
               "body": [
                 {
@@ -2386,7 +2397,8 @@
             },
             {
               "type": "problem",
-              "id": "midpoint-right-angle-cyclic-quad",
+              "id": "WL5FFRrQH7pTblc3sQzBH",
+              "slug": "midpoint-right-angle-cyclic-quadrilateral",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2593,7 +2605,8 @@
             },
             {
               "type": "problem",
-              "id": "diagonal-intersection-feet-midpoint",
+              "id": "Tax9-rYDqJvAbCiA0VqMC",
+              "slug": "feet-of-perpendiculars-and-midpoint",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2782,7 +2795,8 @@
             },
             {
               "type": "problem",
-              "id": "parallelogram-point-angle-sum",
+              "id": "0TlY8HJdJ_fVKGlkNgzpO",
+              "slug": "point-inside-a-parallelogram",
               "difficulty": 0,
               "body": [
                 {
@@ -2916,7 +2930,8 @@
             },
             {
               "type": "problem",
-              "id": "hexagon-equal-sides-angle-sum",
+              "id": "RV54g2hn6AMdIasT4IODZ",
+              "slug": "convex-hexagon-with-equal-sides",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3069,7 +3084,8 @@
             },
             {
               "type": "problem",
-              "id": "quadrilateral-equal-angles-circumcenter",
+              "id": "L-IkptXbj4-UJ_vpMWLKS",
+              "slug": "point-with-five-equal-angles",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3219,7 +3235,8 @@
             },
             {
               "type": "problem",
-              "id": "triangle-altitude-circumcenter-midpoint",
+              "id": "aI08awqy1yrLlCuEOFHJ7",
+              "slug": "altitude-foot-and-oh-midpoint",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3453,7 +3470,8 @@
             },
             {
               "type": "problem",
-              "id": "tangent-line-midpoint-circle",
+              "id": "M3FyEsmtSGx30V-INIVXw",
+              "slug": "tangent-and-midpoint-of-ap",
               "difficulty": 0,
               "body": [
                 {
@@ -3650,7 +3668,8 @@
             },
             {
               "type": "problem",
-              "id": "trapezoid-ratio-points-concyclic",
+              "id": "JDPS5QjvQROqZ2N6JEwq6",
+              "slug": "trapezoid-with-points-on-kl",
               "difficulty": 0,
               "body": [
                 {
@@ -3955,7 +3974,8 @@
             },
             {
               "type": "problem",
-              "id": "cyclic-quadrilateral-four-points-perpendicular",
+              "id": "Kr9IKyGuib12QPGum8wz1",
+              "slug": "four-points-on-quadrilateral-sides",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4207,7 +4227,8 @@
             },
             {
               "type": "problem",
-              "id": "quadrilateral-equal-sides-midpoints-concyclic",
+              "id": "t8rjDz8xH7IC_FmnHz15z",
+              "slug": "quadrilateral-with-three-equal-sides",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4441,7 +4462,8 @@
             },
             {
               "type": "problem",
-              "id": "trapezoid-diagonal-point-angles",
+              "id": "unjF6AEffP5thl4GWrGD5",
+              "slug": "trapezoid-diagonals-and-inner-point",
               "difficulty": 0,
               "body": [
                 {
@@ -4602,7 +4624,8 @@
             },
             {
               "type": "problem",
-              "id": "equal-segments-perpendicular-bisectors-arcs",
+              "id": "cvVqE4nT1JdVqFMok0P_I",
+              "slug": "perpendicular-bisectors-and-shorter-arcs",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4863,7 +4886,8 @@
             },
             {
               "type": "problem",
-              "id": "incircle-tangent-points-midpoints",
+              "id": "Dk4xgZzPmhroFmRx3omVb",
+              "slug": "parallel-tangents-to-the-incircle",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5199,7 +5223,8 @@
             },
             {
               "type": "problem",
-              "id": "triangle-arc-midpoints-concyclic",
+              "id": "h_nSioAPSd9vwFsAInRyp",
+              "slug": "arc-midpoints-of-two-circles",
               "difficulty": 0,
               "body": [
                 {
@@ -5396,7 +5421,8 @@
             },
             {
               "type": "problem",
-              "id": "circle-tangent-reflection-point",
+              "id": "aq53bc6NlKQWV07NwXRnF",
+              "slug": "tangent-and-reflection-of-r",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5720,7 +5746,8 @@
             },
             {
               "type": "problem",
-              "id": "orthocenter-two-circles-collinear",
+              "id": "ZuNLEoEwr-J_fVOQWtSbR",
+              "slug": "two-diameters-and-the-orthocenter",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6089,7 +6116,8 @@
             },
             {
               "type": "problem",
-              "id": "triangle-angle-points-circumcircle",
+              "id": "FhO0eO_oi-IndJmQ9N6Ql",
+              "slug": "two-points-on-side-bc",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6413,7 +6441,8 @@
             },
             {
               "type": "problem",
-              "id": "orthic-triangle-incenters-circumcenters",
+              "id": "3AK1oHdV1pF38vTXfQc41",
+              "slug": "incenters-and-two-circumcenters",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6683,7 +6712,8 @@
             },
             {
               "type": "problem",
-              "id": "angle-bisector-quadrilateral-circle",
+              "id": "a0vidDqjikMyjuIYb5vVc",
+              "slug": "quadrilateral-formed-by-angle-bisectors",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7034,7 +7064,8 @@
             },
             {
               "type": "problem",
-              "id": "circumcenter-concyclic-point-angles",
+              "id": "DzF1H7zPMIba3UVbwJoNr",
+              "slug": "point-concyclic-with-the-circumcenter",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7277,7 +7308,8 @@
             },
             {
               "type": "problem",
-              "id": "pentagon-circumcenters-line",
+              "id": "GK8F64_JP-rSXryIXL_wp",
+              "slug": "pentagon-and-two-circumcenters",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7466,7 +7498,8 @@
             },
             {
               "type": "problem",
-              "id": "parallel-cevian-points-concyclic",
+              "id": "NsM3t1SwEv7CD5wXQgwbU",
+              "slug": "segment-pq-parallel-to-bc",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7880,7 +7913,8 @@
             },
             {
               "type": "problem",
-              "id": "right-triangle-altitude-equal-lengths",
+              "id": "sIGVitSRoddubnK736EUu",
+              "slug": "right-triangle-altitude-point",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -8231,7 +8265,8 @@
             },
             {
               "type": "problem",
-              "id": "altitude-points-orthocenter-circle",
+              "id": "JLEqfNmB2Hw0P5oc4qFwQ",
+              "slug": "points-on-altitudes-and-areas",
               "difficulty": 0,
               "body": [
                 {
@@ -8476,7 +8511,8 @@
             },
             {
               "type": "problem",
-              "id": "unit-segments-perimeter-split",
+              "id": "V8qpCa8IyPgddyS2NJS8Y",
+              "slug": "triangle-with-perimeter-four",
               "difficulty": 0,
               "body": [
                 {
@@ -8790,7 +8826,8 @@
             },
             {
               "type": "problem",
-              "id": "thales-circles-common-tangent",
+              "id": "hWnbfKi7JKW34d1E7tUxF",
+              "slug": "circles-over-the-four-sides",
               "difficulty": 0,
               "body": [
                 {
@@ -8873,7 +8910,8 @@
             },
             {
               "type": "problem",
-              "id": "hexagon-inscribed-circle-diagonals",
+              "id": "KWvpK6SAI-wBt88-OpQjm",
+              "slug": "hexagon-with-an-inscribed-circle",
               "difficulty": 0,
               "body": [
                 {

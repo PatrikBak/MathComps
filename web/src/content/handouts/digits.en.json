@@ -221,7 +221,8 @@
           "content": [
             {
               "type": "problem",
-              "id": "digit-product-sum-70",
+              "id": "M_uB_nIoAD4XsWdDgD24w",
+              "slug": "number-plus-digit-product",
               "difficulty": 0,
               "body": [
                 {
@@ -575,7 +576,8 @@
             },
             {
               "type": "problem",
-              "id": "inflatable-number-axxb",
+              "id": "QTZyuBlr4JJARL-BsUSPi",
+              "slug": "inflatable-two-digit-numbers",
               "difficulty": 0,
               "body": [
                 {
@@ -861,7 +863,8 @@
             },
             {
               "type": "problem",
-              "id": "four-digit-halves-difference-one",
+              "id": "S9mOaQ0DZ0YbdtiJ0DD6M",
+              "slug": "digit-sum-12-block-difference",
               "difficulty": 0,
               "body": [
                 {
@@ -1254,7 +1257,8 @@
             },
             {
               "type": "problem",
-              "id": "insert-between-20-and-16",
+              "id": "90DMgkLIpAKoLz31VbTyU",
+              "slug": "number-inserted-between-20-16",
               "difficulty": 0,
               "body": [
                 {
@@ -1501,7 +1505,8 @@
             },
             {
               "type": "problem",
-              "id": "digit-factorial-sum",
+              "id": "5o19zqbbgbsQ-mIyypy33",
+              "slug": "sum-of-digit-factorials",
               "difficulty": 0,
               "body": [
                 {
@@ -2067,7 +2072,8 @@
             },
             {
               "type": "problem",
-              "id": "perfect-square-repeated-digit-pairs",
+              "id": "M2hAW0UhGrFFa9fvPlfq3",
+              "slug": "four-digit-square-aabb",
               "difficulty": 0,
               "body": [
                 {
@@ -2358,7 +2364,8 @@
             },
             {
               "type": "problem",
-              "id": "pandigital-prime-ten-digits",
+              "id": "KKh6fZHUhlmD5Z6MdjTkD",
+              "slug": "largest-prime-with-distinct-digits",
               "difficulty": 0,
               "body": [
                 {
@@ -2464,7 +2471,8 @@
             },
             {
               "type": "problem",
-              "id": "even-length-palindrome-divisible-11",
+              "id": "thf_5gamTbDUYZ96i5eK6",
+              "slug": "even-digit-palindrome-and-11",
               "difficulty": 0,
               "body": [
                 {
@@ -2576,7 +2584,8 @@
             },
             {
               "type": "problem",
-              "id": "digit-sum-of-concatenation",
+              "id": "oCrvA-6G_ng2beLVg_5Oc",
+              "slug": "repeated-digit-sum-of-concatenation",
               "difficulty": 0,
               "body": [
                 {
@@ -2730,7 +2739,8 @@
             },
             {
               "type": "problem",
-              "id": "digits-1-6-divisible-11",
+              "id": "kPFhZbvWRNtc1_X52rp4J",
+              "slug": "digit-permutation-divisible-by-11",
               "difficulty": 0,
               "body": [
                 {
@@ -3029,7 +3039,8 @@
             },
             {
               "type": "problem",
-              "id": "reverse-subtract-reverse-add",
+              "id": "zyrVHB-UOHnAnwPbsWeQM",
+              "slug": "reverse-subtract-then-add",
               "difficulty": 0,
               "body": [
                 {
@@ -3249,7 +3260,8 @@
             },
             {
               "type": "problem",
-              "id": "remove-leading-six-25x-smaller",
+              "id": "p_er0Qs-Y_iv3GxwWA_ie",
+              "slug": "removing-the-leading-six",
               "difficulty": 0,
               "body": [
                 {
@@ -3506,7 +3518,8 @@
             },
             {
               "type": "problem",
-              "id": "fours-eights-nine-perfect-square",
+              "id": "cpOokCbzU9XKnq5Si294a",
+              "slug": "fours-eights-and-nine",
               "difficulty": 0,
               "body": [
                 {
@@ -3792,7 +3805,8 @@
             },
             {
               "type": "problem",
-              "id": "last-digit-given-predecessor-seven",
+              "id": "HmZef6aCT19gonRzJndGH",
+              "slug": "last-digit-of-square",
               "difficulty": 0,
               "body": [
                 {
@@ -4179,8 +4193,19 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "powers-of-two-digit-rearrangement",
+              "id": "SiHIZXziGFRgQzQdb180j",
+              "slug": "rearranged-digits-of-powers-of-two",
               "difficulty": 1,
               "body": [
                 {
@@ -4460,7 +4485,8 @@
             },
             {
               "type": "problem",
-              "id": "odd-digit-number-divisible-5n",
+              "id": "BbogXhbPaIvEP3zcKQo-l",
+              "slug": "odd-digits-power-of-five",
               "difficulty": 1,
               "body": [
                 {
@@ -4803,7 +4829,8 @@
             },
             {
               "type": "problem",
-              "id": "digit-appending-sequence-composites",
+              "id": "42Uo2Y8305kh_-pQQuTML",
+              "slug": "appending-digits-and-composite-numbers",
               "difficulty": 1,
               "body": [
                 {
@@ -5328,7 +5355,8 @@
             },
             {
               "type": "problem",
-              "id": "base-four-square-ones-twos",
+              "id": "3gPi6qLS_PwutgCgoS6zC",
+              "slug": "squares-in-base-four",
               "difficulty": 2,
               "body": [
                 {

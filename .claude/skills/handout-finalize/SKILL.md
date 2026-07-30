@@ -95,7 +95,9 @@ Re-run the CLI on the same scoped glob until exit 0.
 
 ### 5. Confirm every environment has an `\EnvId`
 
-Every `\Problem`, `\Theorem`, `\Exercise`, `\Example`, and `\Definition` needs a permanent `\EnvId` above it before this handout validates — the source you're finalizing should already carry one on each, written directly while authoring. If any is missing, it's a bug in the source, not something this skill backfills: stop and add it yourself (readable slug, describing what the environment is visibly about, never its competition source, never its solution technique), matching the same id across every language variant, then re-run the CLI (step 3), which also regenerates the environment index.
+Every `\Problem`, `\Theorem`, `\Exercise`, `\Example`, and `\Definition` needs an `\EnvId{<nanoid>-<name>}` above it before this handout validates — the source you're finalizing should already carry one on each, written directly while authoring. If any is missing, it's a bug in the source, not something this skill backfills: stop and add it yourself, then re-run the CLI (step 3), which also regenerates the environment index.
+
+The 21-character id must be identical in every language variant; the name after it is that language's own, must be unique within its file, and lands in the page URL. Name it from what the statement visibly says, never from the solution technique, the key modulus, or the answer.
 
 ### 6. Validate
 
@@ -115,7 +117,7 @@ One short summary: entry added/promoted, chosen category, generated JSONs in `we
 
 - **Never invent an `id`.** Always `npx nanoid`.
 - **Never declare a locale without a `<base>.{locale}.tex` file.**
-- **Never invent, drop, or rewrite an existing `\EnvId`.** A missing one on an environment the author is actively writing is theirs to add directly; never paper over it here.
+- **Never invent, drop, or rewrite an existing `\EnvId` id** (its leading 21 characters). A missing marker on an environment the author is actively writing is theirs to add directly; never paper over it here.
 - **Never touch other handout entries** in `handouts.json` beyond the one being finalized.
 - **Never run the CLI with an unscoped glob** unless the user explicitly asks for a full rebuild.
 - **Never edit `.tex` content** except to fix a typo/non-canonical command surfaced as unknown.

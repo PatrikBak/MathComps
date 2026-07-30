@@ -5,6 +5,8 @@
  * - All localized fields have values for all declared languages
  * - Every environment in a content file has a non-empty, unique-within-its-handout id, and every
  *   language variant of a handout carries the same ids, in the same order
+ * - Every environment carries a name in each of its handout's languages, shaped for a URL and unique
+ *   within that language variant
  * - The generated `handout-env-index.json` matches what the content files actually say
  *
  * Run with: tsx scripts/validate-handouts.ts
@@ -43,6 +45,12 @@ const CONTENT_DIR = path.join(process.cwd(), 'src/content/handouts')
 /** Path to handouts.json */
 const INDEX_PATH = path.join(CONTENT_DIR, '../handouts.json')
 
+/** The shape of an environment's permanent id: the same 21-character nanoid a handout itself is identified by. */
+const ENVIRONMENT_ID_PATTERN = /^[A-Za-z0-9_-]{21}$/
+
+/** The shape of an environment's name: lowercase alphanumeric words joined by single hyphens, as a URL wants. */
+const ENVIRONMENT_SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
+
 /**
  * An environment block as it appears in an untyped content JSON: only what the checks below read. A block is
  * narrowed to this shape by its `type` before `id` is trusted — an {@link ImageBlock} also carries an `id`, for
@@ -51,6 +59,8 @@ const INDEX_PATH = path.join(CONTENT_DIR, '../handouts.json')
 type ContentEnvironment = {
   /** The environment's permanent id, unnarrowed until checked. */
   id?: unknown
+  /** The environment's name in this variant's language, unnarrowed until checked. */
+  slug?: unknown
   /** The environment's type. */
   type: string
 }
@@ -150,15 +160,16 @@ function* validateNoNestedEnvironments(node: unknown, context: string): Generato
 }
 
 /**
- * Validates one handout's environment ids: every environment has one, none repeats within the handout, and every
- * declared language variant carries the same `[id, type]` sequence in the same order as the first. Along the way,
- * also runs the nesting guard over every top-level block's own fields.
+ * Validates one handout's environment ids and names: every environment has both, no id repeats within the
+ * handout, no name repeats within a language variant, and every declared variant carries the same `[id, type]`
+ * sequence in the same order as the first. Along the way, also runs the nesting guard over every top-level
+ * block's own fields.
  *
  * @param handout - The handout to validate.
  * @param requiredLocales - The locales this handout declares.
  * @param handoutContext - The handout's display label, for error messages.
  *
- * @yields An error for every id problem found.
+ * @yields An error for every id or name problem found.
  */
 function* validateHandoutEnvironmentIds(
   handout: HandoutMetadata,
@@ -227,6 +238,13 @@ function* validateHandoutEnvironmentIds(
 
     // Absent or blank reads as missing
     yield* validateRequiredField(environment.id, 'id', environmentContext)
+
+    // An id has to carry a minted one's width and alphabet, which catches the hand-typed ones that would
+    // otherwise outlive the mistake. A hand-typed id of exactly the right width still passes — width and
+    // alphabet are all an id reveals about where it came from.
+    if (typeof environment.id === 'string' && !ENVIRONMENT_ID_PATTERN.test(environment.id)) {
+      yield `❌ Malformed id "${environment.id}" for ${environmentContext}: expected a 21-character nanoid`
+    }
   }
 
   // No id may repeat within one handout
@@ -266,6 +284,41 @@ function* validateHandoutEnvironmentIds(
         `${divergence.reference.type} "${String(divergence.reference.id)}" but ${locale} has ` +
         `${divergence.variant.type} "${String(divergence.variant.id)}"`
     }
+  }
+
+  // Names are what a URL points at and each language writes its own, so unlike ids they are checked in every
+  // variant rather than in the reference alone
+  for (const [locale, environments] of environmentsByLocale) {
+    // Each environment's name has to be usable as an anchor on its own page
+    for (const [position, environment] of environments.entries()) {
+      // Where this environment sits, for whichever error the checks below produce
+      const environmentContext = `${handoutContext} ${environment.type} #${position + 1} (${slug}.${locale}.json)`
+
+      // A present-but-non-string name is a malformed file, not a missing field
+      if (environment.slug !== undefined && typeof environment.slug !== 'string') {
+        yield `❌ Non-string slug ${JSON.stringify(environment.slug)} for ${environmentContext}`
+        continue
+      }
+
+      // Absent or blank reads as missing
+      yield* validateRequiredField(environment.slug, 'slug', environmentContext)
+
+      // A name of any other shape would ship a link the browser can't resolve
+      if (
+        typeof environment.slug === 'string' &&
+        !ENVIRONMENT_SLUG_PATTERN.test(environment.slug)
+      ) {
+        yield `❌ Malformed slug "${environment.slug}" for ${environmentContext}: expected lowercase alphanumeric words joined by single hyphens`
+      }
+    }
+
+    // Two environments sharing a name would fight over one anchor, and only one of them would ever be reached
+    yield* validateUniqueness(
+      environments,
+      (environment) => environment.slug as string | undefined,
+      (_environment) => `${handoutContext} (${slug}.${locale}.json)`,
+      'environment slug'
+    )
   }
 }
 

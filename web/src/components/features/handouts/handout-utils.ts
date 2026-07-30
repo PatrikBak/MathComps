@@ -35,17 +35,18 @@ export function buildEnvironmentLabels(
 }
 
 /**
- * Builds the DOM anchor id for a handout environment (a problem, theorem, ...) from its permanent id: unlike a
- * position-derived anchor, it survives reordering, retyping, and locale switches.
+ * Builds the DOM anchor id for a handout environment (a problem, theorem, ...) from the name its language gives
+ * it: unlike a position-derived anchor, it survives reordering and retyping. Reading it never reveals more about
+ * the environment than the page already shows.
  *
- * @param environmentId - The environment's permanent id.
+ * @param environmentSlug - The environment's name in the language being read.
  *
  * @returns The anchor id, e.g. `env-tower-of-hanoi`.
  */
-export function buildEnvironmentAnchorId(environmentId: string): string {
+export function buildEnvironmentAnchorId(environmentSlug: string): string {
   // The `env-` prefix namespaces it against the section-slug anchors on the same page, and guarantees a
-  // leading letter so the anchor is a valid CSS selector whatever the id's first character is
-  return `env-${environmentId}`
+  // leading letter so the anchor is a valid CSS selector whatever the name starts with
+  return `env-${environmentSlug}`
 }
 
 /**

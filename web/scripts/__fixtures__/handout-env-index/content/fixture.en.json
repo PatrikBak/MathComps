@@ -10,7 +10,7 @@
             {
               "type": "problem",
               "id": "first-problem",
-              "slug": "prva-uloha",
+              "slug": "the-first-problem",
               "difficulty": 1,
               "body": [],
               "hints": [],
@@ -19,7 +19,7 @@
             {
               "type": "theorem",
               "id": "only-theorem",
-              "slug": "jedina-veta",
+              "slug": "the-only-theorem",
               "body": [],
               "proof": []
             },
@@ -39,7 +39,7 @@
             {
               "type": "problem",
               "id": "second-problem",
-              "slug": "druha-uloha",
+              "slug": "the-second-problem",
               "difficulty": 2,
               "body": [],
               "hints": [],
@@ -48,7 +48,7 @@
             {
               "type": "exercise",
               "id": "only-exercise",
-              "slug": "jedine-cvicenie",
+              "slug": "the-only-exercise",
               "body": [],
               "solution": []
             }

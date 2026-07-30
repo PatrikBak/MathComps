@@ -146,6 +146,8 @@ type TheoremBlock = {
   type: 'theorem'
   /** Permanent id minted in the TeX source, identical across the handout's language variants. Never reused. */
   id: string
+  /** This language's name for the environment, which addresses it in a URL. Free to be reworded. */
+  slug: string
   /** Optional inline title (can contain math/formatting, e.g., "Pythagorean Theorem") */
   title?: RawContentBlock | null
   /** The main statement of the theorem */
@@ -160,6 +162,8 @@ type ExerciseBlock = {
   type: 'exercise'
   /** Permanent id minted in the TeX source, identical across the handout's language variants. Never reused. */
   id: string
+  /** This language's name for the environment, which addresses it in a URL. Free to be reworded. */
+  slug: string
   /** Optional inline title (can contain math/formatting) */
   title?: RawContentBlock | null
   /** The exercise statement/question */
@@ -176,6 +180,8 @@ type ProblemBlock = {
   type: 'problem'
   /** Permanent id minted in the TeX source, identical across the handout's language variants. Never reused. */
   id: string
+  /** This language's name for the environment, which addresses it in a URL. Free to be reworded. */
+  slug: string
   /** Difficulty rating (typically 1-5 or similar scale) */
   difficulty: number
   /** Optional inline title (can contain math/formatting) */
@@ -196,6 +202,8 @@ type ExampleBlock = {
   type: 'example'
   /** Permanent id minted in the TeX source, identical across the handout's language variants. Never reused. */
   id: string
+  /** This language's name for the environment, which addresses it in a URL. Free to be reworded. */
+  slug: string
   /** Optional inline title (can contain math/formatting) */
   title?: RawContentBlock | null
   /** The example setup/problem */
@@ -212,6 +220,8 @@ type DefinitionBlock = {
   type: 'definition'
   /** Permanent id minted in the TeX source, identical across the handout's language variants. Never reused. */
   id: string
+  /** This language's name for the environment, which addresses it in a URL. Free to be reworded. */
+  slug: string
   /** Optional inline title naming the concept being defined */
   title?: RawContentBlock | null
   /** The definition statement */

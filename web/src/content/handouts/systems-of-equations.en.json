@@ -205,8 +205,19 @@
               "highligted": false
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "example",
-              "id": "square-plus-one-pair",
+              "id": "D0LGFK_pfJGjGSaEZ_Hke",
+              "slug": "system-x2-plus-one-by-subtracting",
               "body": [
                 {
                   "type": "paragraph",
@@ -420,7 +431,8 @@
             },
             {
               "type": "example",
-              "id": "square-minus-one-cyclic-triple",
+              "id": "7z3zvIqJUW_wdFt8Zqo6w",
+              "slug": "triple-x2-minus-one",
               "body": [
                 {
                   "type": "paragraph",
@@ -884,7 +896,8 @@
             },
             {
               "type": "exercise",
-              "id": "mixed-quadratic-pair",
+              "id": "BdBaRHPtT8T2Gs6oQNEgC",
+              "slug": "x2-plus-xy-pair",
               "body": [
                 {
                   "type": "paragraph",
@@ -1119,7 +1132,8 @@
             },
             {
               "type": "exercise",
-              "id": "product-plus-sum-triple",
+              "id": "Ir2UYgurHXAHWW8PuMK7v",
+              "slug": "product-plus-sum-equals-three",
               "body": [
                 {
                   "type": "paragraph",
@@ -1337,7 +1351,8 @@
             },
             {
               "type": "exercise",
-              "id": "three-variable-square-mix",
+              "id": "J0N3G-MqiqTpPzm2xn-k1",
+              "slug": "two-quadratics-three-unknowns",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1695,8 +1710,19 @@
               "highligted": false
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "example",
-              "id": "square-plus-one-revisited",
+              "id": "fJHAdZ9nOAf90RwGcVUgs",
+              "slug": "system-x2-plus-one-by-adding",
               "body": [
                 {
                   "type": "paragraph",
@@ -1813,7 +1839,8 @@
             },
             {
               "type": "example",
-              "id": "homogeneous-quadratic-triple",
+              "id": "SKm6_EEO8ktWY6GLAWFK3",
+              "slug": "squares-equal-products-triple",
               "body": [
                 {
                   "type": "paragraph",
@@ -1994,7 +2021,8 @@
             },
             {
               "type": "exercise",
-              "id": "square-plus-shift-triple",
+              "id": "ihFIU-Isi5rJX1DQF2FUp",
+              "slug": "a2-plus-b-cyclic-system",
               "body": [
                 {
                   "type": "paragraph",
@@ -2128,8 +2156,19 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "exercise",
-              "id": "square-equals-four-shift",
+              "id": "b1Qku8TQk_bISQjaLLwJt",
+              "slug": "squares-equal-four-times-one-less",
               "body": [
                 {
                   "type": "paragraph",
@@ -2245,7 +2284,8 @@
             },
             {
               "type": "exercise",
-              "id": "common-sum-factor-triple",
+              "id": "N916Q1M7Al6Ajy1bBzB67",
+              "slug": "products-with-common-sum",
               "body": [
                 {
                   "type": "paragraph",
@@ -2505,8 +2545,19 @@
               "highligted": false
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "example",
-              "id": "square-plus-one-once-more",
+              "id": "BxI1A2IFhjVNRop0rnGmE",
+              "slug": "system-x2-plus-one-by-ordering",
               "body": [
                 {
                   "type": "paragraph",
@@ -2845,7 +2896,8 @@
             },
             {
               "type": "example",
-              "id": "absolute-difference-and-sum",
+              "id": "0P6L5xCu00XZL-YsyNO56",
+              "slug": "absolute-difference-and-sum",
               "body": [
                 {
                   "type": "paragraph",
@@ -3088,7 +3140,8 @@
             },
             {
               "type": "example",
-              "id": "cubic-plus-one-cyclic",
+              "id": "hBqsEZLiptRWTxkNslZYy",
+              "slug": "cubes-plus-one-cyclic-triple",
               "body": [
                 {
                   "type": "paragraph",
@@ -3514,7 +3567,8 @@
             },
             {
               "type": "exercise",
-              "id": "square-root-swap-pair",
+              "id": "FA9H6PMOIW_BIsrkdNyJz",
+              "slug": "square-roots-swapped-pair",
               "body": [
                 {
                   "type": "paragraph",
@@ -3724,8 +3778,19 @@
               ]
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "exercise",
-              "id": "fifth-power-sum-cyclic",
+              "id": "Er1LlMMLgP86yG2Cwg-A3",
+              "slug": "fifth-powers-of-sums",
               "body": [
                 {
                   "type": "paragraph",
@@ -3996,7 +4061,8 @@
             },
             {
               "type": "exercise",
-              "id": "quintic-cubic-cyclic-triple",
+              "id": "wQlWW_d8RkEMYEVhPnUgM",
+              "slug": "fifth-and-third-powers-cyclic",
               "body": [
                 {
                   "type": "paragraph",
@@ -4660,8 +4726,19 @@
               "highligted": false
             },
             {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "\\"
+                }
+              ],
+              "highligted": false
+            },
+            {
               "type": "problem",
-              "id": "quadratic-cross-term-triple",
+              "id": "J9y3n7IpfYrwv1MVEUpAH",
+              "slug": "quadratic-expressions-equal-zero",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5042,7 +5119,8 @@
             },
             {
               "type": "problem",
-              "id": "cubic-quadratic-swap-pair",
+              "id": "zHb1mdkxX4xBnPceHR1ud",
+              "slug": "cubes-and-squares-swapped-pair",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5445,7 +5523,8 @@
             },
             {
               "type": "problem",
-              "id": "absolute-value-cyclic-sum",
+              "id": "Zg7AaMLPVe_fPwcofqaP0",
+              "slug": "possible-sums-with-absolute-values",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5921,7 +6000,8 @@
             },
             {
               "type": "problem",
-              "id": "weighted-quadratic-cyclic-triple",
+              "id": "B87yKpZVrHaDr_8L0DwEk",
+              "slug": "quadratic-system-in-positive-reals",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6257,7 +6337,8 @@
             },
             {
               "type": "problem",
-              "id": "four-variable-cubic-cycle",
+              "id": "6Vehj56wbxnDxAQgqTzru",
+              "slug": "cubes-with-four-unknowns",
               "difficulty": 0,
               "body": [
                 {
@@ -6713,7 +6794,8 @@
             },
             {
               "type": "problem",
-              "id": "four-digit-cube-system",
+              "id": "6DbDwozTJMgehPjmcvRJ5",
+              "slug": "smallest-four-digit-n",
               "difficulty": 0,
               "body": [
                 {
@@ -7341,7 +7423,8 @@
             },
             {
               "type": "problem",
-              "id": "cyclic-product-triple",
+              "id": "ABh2osL3yNL-ZxhlNa3IN",
+              "slug": "cyclic-products-with-abc",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",

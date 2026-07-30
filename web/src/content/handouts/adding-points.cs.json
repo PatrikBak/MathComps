@@ -630,7 +630,8 @@
             },
             {
               "type": "theorem",
-              "id": "triangle-centers-basic-angles",
+              "id": "4G1lSZGp6WOW_d5PrWMRp",
+              "slug": "zakladni-uhly",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -801,7 +802,8 @@
             },
             {
               "type": "theorem",
-              "id": "incenter-excenter-midpoint",
+              "id": "bvirmYCiJc6UXSLVpp95M",
+              "slug": "svrckuv-bod",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -918,7 +920,8 @@
             },
             {
               "type": "theorem",
-              "id": "two-excenters-midpoint",
+              "id": "e3oWC42hI0-yUVRoB0_8O",
+              "slug": "anti-svrckuv-bod",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1053,7 +1056,8 @@
             },
             {
               "type": "theorem",
-              "id": "spiral-similarity-pairs",
+              "id": "hXmQS3PNqrvP6cXDIywLj",
+              "slug": "spiralni-podobnost-chodi-po-dvou",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1116,7 +1120,8 @@
             },
             {
               "type": "theorem",
-              "id": "orthocenter-reflections",
+              "id": "xHpsKi1FxuaOE4TsQDYXt",
+              "slug": "zrcadleni-ortocentra",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -1527,7 +1532,8 @@
             },
             {
               "type": "problem",
-              "id": "equiangular-pentagon-bisectors",
+              "id": "yt0KVCE0mByjG0W5AhbYA",
+              "slug": "petiuhelnik-se-stejnymi-uhly",
               "difficulty": 0,
               "body": [
                 {
@@ -1607,7 +1613,8 @@
             },
             {
               "type": "problem",
-              "id": "median-cevian-equal-lengths",
+              "id": "rIhQMrZeKZ2MH-PmkjT9D",
+              "slug": "bod-na-teznici-rovnoramenny-trojuhelnik",
               "difficulty": 0,
               "body": [
                 {
@@ -1804,7 +1811,8 @@
             },
             {
               "type": "problem",
-              "id": "orthocenter-line-through-midpoint",
+              "id": "ull-eZWewTAOKLQHeu11Z",
+              "slug": "kolmice-k-mh-pres-ortocentrum",
               "difficulty": 0,
               "body": [
                 {
@@ -2037,7 +2045,8 @@
             },
             {
               "type": "problem",
-              "id": "quadrilateral-midpoints-diagonals",
+              "id": "n2g_94VghWgVCIT8C-mse",
+              "slug": "spojnice-stredu-stran-a-uhlopricky",
               "difficulty": 0,
               "body": [
                 {
@@ -2126,7 +2135,8 @@
             },
             {
               "type": "problem",
-              "id": "cyclic-quadrilateral-orthocenters",
+              "id": "Z8MdAzTmbIxxpEyc-UnMy",
+              "slug": "ortocentra-tetivoveho-ctyruhelniku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2225,7 +2235,8 @@
             },
             {
               "type": "problem",
-              "id": "isosceles-trapezoid-orthocenter",
+              "id": "alkX6MavufXBEbJ3d6M4z",
+              "slug": "ortocentrum-v-rovnoramennem-lichobezniku",
               "difficulty": 0,
               "body": [
                 {
@@ -2386,7 +2397,8 @@
             },
             {
               "type": "problem",
-              "id": "midpoint-right-angle-cyclic-quad",
+              "id": "WL5FFRrQH7pTblc3sQzBH",
+              "slug": "pravy-uhel-u-stredu-usecky",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2593,7 +2605,8 @@
             },
             {
               "type": "problem",
-              "id": "diagonal-intersection-feet-midpoint",
+              "id": "Tax9-rYDqJvAbCiA0VqMC",
+              "slug": "paty-kolmic-a-stred-strany",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -2782,7 +2795,8 @@
             },
             {
               "type": "problem",
-              "id": "parallelogram-point-angle-sum",
+              "id": "0TlY8HJdJ_fVKGlkNgzpO",
+              "slug": "bod-uvnitr-rovnobezniku",
               "difficulty": 0,
               "body": [
                 {
@@ -2916,7 +2930,8 @@
             },
             {
               "type": "problem",
-              "id": "hexagon-equal-sides-angle-sum",
+              "id": "RV54g2hn6AMdIasT4IODZ",
+              "slug": "konvexni-sestiuhelnik-se-shodnymi-stranami",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3069,7 +3084,8 @@
             },
             {
               "type": "problem",
-              "id": "quadrilateral-equal-angles-circumcenter",
+              "id": "L-IkptXbj4-UJ_vpMWLKS",
+              "slug": "bod-s-peti-shodnymi-uhly",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3219,7 +3235,8 @@
             },
             {
               "type": "problem",
-              "id": "triangle-altitude-circumcenter-midpoint",
+              "id": "aI08awqy1yrLlCuEOFHJ7",
+              "slug": "pata-vysky-a-stred-oh",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -3453,7 +3470,8 @@
             },
             {
               "type": "problem",
-              "id": "tangent-line-midpoint-circle",
+              "id": "M3FyEsmtSGx30V-INIVXw",
+              "slug": "tecna-a-stred-usecky-ap",
               "difficulty": 0,
               "body": [
                 {
@@ -3650,7 +3668,8 @@
             },
             {
               "type": "problem",
-              "id": "trapezoid-ratio-points-concyclic",
+              "id": "JDPS5QjvQROqZ2N6JEwq6",
+              "slug": "lichobeznik-a-body-na-kl",
               "difficulty": 0,
               "body": [
                 {
@@ -3955,7 +3974,8 @@
             },
             {
               "type": "problem",
-              "id": "cyclic-quadrilateral-four-points-perpendicular",
+              "id": "Kr9IKyGuib12QPGum8wz1",
+              "slug": "ctyri-body-na-stranach-ctyruhelniku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4207,7 +4227,8 @@
             },
             {
               "type": "problem",
-              "id": "quadrilateral-equal-sides-midpoints-concyclic",
+              "id": "t8rjDz8xH7IC_FmnHz15z",
+              "slug": "ctyruhelnik-se-tremi-shodnymi-stranami",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4441,7 +4462,8 @@
             },
             {
               "type": "problem",
-              "id": "trapezoid-diagonal-point-angles",
+              "id": "unjF6AEffP5thl4GWrGD5",
+              "slug": "uhlopricky-lichobezniku-a-vnitrni-bod",
               "difficulty": 0,
               "body": [
                 {
@@ -4602,7 +4624,8 @@
             },
             {
               "type": "problem",
-              "id": "equal-segments-perpendicular-bisectors-arcs",
+              "id": "cvVqE4nT1JdVqFMok0P_I",
+              "slug": "osy-usecek-bd-a-ce",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -4863,7 +4886,8 @@
             },
             {
               "type": "problem",
-              "id": "incircle-tangent-points-midpoints",
+              "id": "Dk4xgZzPmhroFmRx3omVb",
+              "slug": "rovnobezne-tecny-k-vepsane-kruznici",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5199,7 +5223,8 @@
             },
             {
               "type": "problem",
-              "id": "triangle-arc-midpoints-concyclic",
+              "id": "h_nSioAPSd9vwFsAInRyp",
+              "slug": "stredy-oblouku-dvou-kruznic",
               "difficulty": 0,
               "body": [
                 {
@@ -5423,7 +5448,8 @@
             },
             {
               "type": "problem",
-              "id": "circle-tangent-reflection-point",
+              "id": "aq53bc6NlKQWV07NwXRnF",
+              "slug": "tecna-a-obraz-bodu-r",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -5747,7 +5773,8 @@
             },
             {
               "type": "problem",
-              "id": "orthocenter-two-circles-collinear",
+              "id": "ZuNLEoEwr-J_fVOQWtSbR",
+              "slug": "dva-prumery-a-ortocentrum",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6116,7 +6143,8 @@
             },
             {
               "type": "problem",
-              "id": "triangle-angle-points-circumcircle",
+              "id": "FhO0eO_oi-IndJmQ9N6Ql",
+              "slug": "dva-body-na-strane-bc",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6440,7 +6468,8 @@
             },
             {
               "type": "problem",
-              "id": "orthic-triangle-incenters-circumcenters",
+              "id": "3AK1oHdV1pF38vTXfQc41",
+              "slug": "stredy-kruznic-u-pat-vysek",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -6710,7 +6739,8 @@
             },
             {
               "type": "problem",
-              "id": "angle-bisector-quadrilateral-circle",
+              "id": "a0vidDqjikMyjuIYb5vVc",
+              "slug": "ctyruhelnik-z-os-uhlu",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7061,7 +7091,8 @@
             },
             {
               "type": "problem",
-              "id": "circumcenter-concyclic-point-angles",
+              "id": "DzF1H7zPMIba3UVbwJoNr",
+              "slug": "bod-na-kruznici-apob",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7304,7 +7335,8 @@
             },
             {
               "type": "problem",
-              "id": "pentagon-circumcenters-line",
+              "id": "GK8F64_JP-rSXryIXL_wp",
+              "slug": "petiuhelnik-a-dva-stredy-kruznic",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7493,7 +7525,8 @@
             },
             {
               "type": "problem",
-              "id": "parallel-cevian-points-concyclic",
+              "id": "NsM3t1SwEv7CD5wXQgwbU",
+              "slug": "usecka-pq-rovnobezna-s-bc",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -7907,7 +7940,8 @@
             },
             {
               "type": "problem",
-              "id": "right-triangle-altitude-equal-lengths",
+              "id": "sIGVitSRoddubnK736EUu",
+              "slug": "bod-na-vysce-pravouhleho-trojuhelniku",
               "difficulty": 0,
               "title": {
                 "type": "paragraph",
@@ -8258,7 +8292,8 @@
             },
             {
               "type": "problem",
-              "id": "altitude-points-orthocenter-circle",
+              "id": "JLEqfNmB2Hw0P5oc4qFwQ",
+              "slug": "body-na-vyskach-a-obsahy",
               "difficulty": 0,
               "body": [
                 {
@@ -8516,7 +8551,8 @@
             },
             {
               "type": "problem",
-              "id": "unit-segments-perimeter-split",
+              "id": "V8qpCa8IyPgddyS2NJS8Y",
+              "slug": "trojuhelnik-s-obvodem-ctyri",
               "difficulty": 0,
               "body": [
                 {
@@ -8830,7 +8866,8 @@
             },
             {
               "type": "problem",
-              "id": "thales-circles-common-tangent",
+              "id": "hWnbfKi7JKW34d1E7tUxF",
+              "slug": "kruznice-nad-stranami-ctyruhelniku",
               "difficulty": 0,
               "body": [
                 {
@@ -8913,7 +8950,8 @@
             },
             {
               "type": "problem",
-              "id": "hexagon-inscribed-circle-diagonals",
+              "id": "KWvpK6SAI-wBt88-OpQjm",
+              "slug": "sestiuhelnik-s-vepsanou-kruznici",
               "difficulty": 0,
               "body": [
                 {
