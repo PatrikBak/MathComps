@@ -41,8 +41,8 @@ public interface IIdentifiedEnvironment
     /// The environment's name in the language of the file it was written in: the readable tail of the
     /// <c>\EnvId</c>, which addresses it in a URL. Free to be reworded, and never an identity.
     /// </summary>
-    // ReSharper disable once UnusedMemberInSuper.Global — kept: the one documented home for an environment's
-    // name, pulled into each record below by <inheritdoc/> and read off those rather than off the interface.
+    // ReSharper disable once UnusedMember.Global — kept: the one documented home for an environment's name,
+    // pulled into each record below by <inheritdoc/>.
     string Slug { get; }
 }
 
