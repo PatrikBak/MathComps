@@ -307,7 +307,7 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
         padded={!inConversation}
         tall={inConversation}
         className={inConversation ? undefined : 'max-w-2xl'}
-        afterLeave={runArmedJump}
+        onClosed={runArmedJump}
       >
         {selected !== null && conversationProblem !== null ? (
           // The real conversation, reopened to the chosen session and continue-only

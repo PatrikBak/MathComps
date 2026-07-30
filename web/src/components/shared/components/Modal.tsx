@@ -1,20 +1,18 @@
-import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react'
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { Fragment } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
+import { useOnClosed } from '@/hooks/use-on-closed'
 
 /**
- * A surface's arrival: an exponential ease-out, which spends most of its travel in the first frames
- * rather than spreading it evenly across the duration.
+ * A surface's arrival: an exponential ease-out, which spends most of its travel in the first frames rather
+ * than spreading it evenly across the duration. It runs as keyframes on mount, so the surface is up without
+ * waiting on anything. Dismissal carries no animation at all: the reader who asked for it already knows
+ * where it went.
  */
-const ENTER_TRANSITION = 'ease-[cubic-bezier(0.16,1,0.3,1)] duration-200 motion-reduce:duration-0'
-
-/**
- * A surface's exit, shorter than its arrival: leaving has less to follow than arriving does.
- */
-const LEAVE_TRANSITION = 'ease-in duration-150 motion-reduce:duration-0'
+const ENTER_ANIMATION =
+  'animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none'
 
 /**
  * Props for the {@link Modal} component.
@@ -43,8 +41,8 @@ type ModalProps = {
   tall?: boolean
   /** Accessible name for the dialog when it renders its own header rather than a `title` */
   ariaLabel?: string
-  /** Called once the modal has finished leaving and no longer holds the page */
-  afterLeave?: () => void
+  /** Called once the modal is gone and the page is the reader's again */
+  onClosed?: () => void
 }
 
 /**
@@ -61,82 +59,71 @@ export function Modal({
   padded = true,
   tall = false,
   ariaLabel,
-  afterLeave,
+  onClosed,
 }: ModalProps) {
   // Get translations for modal
   const tModal = useTranslations('ui.modal')
 
-  return (
-    <Transition appear show={isOpen} as={Fragment} afterLeave={afterLeave}>
-      <Dialog as="div" aria-label={ariaLabel} className="relative z-50" onClose={onClose}>
-        {/* Backdrop with blur */}
-        <TransitionChild
-          as={Fragment}
-          enter={ENTER_TRANSITION}
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave={LEAVE_TRANSITION}
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-background/50 backdrop-blur-sm transition-opacity" />
-        </TransitionChild>
+  // Hand the page back to whoever is waiting on it
+  useOnClosed(isOpen, onClosed)
 
-        {/* Modal container */}
-        <div className="fixed inset-0 overflow-y-auto">
-          <div
+  return (
+    <Dialog
+      open={isOpen}
+      as="div"
+      aria-label={ariaLabel}
+      className="relative z-50"
+      onClose={onClose}
+    >
+      {/* Backdrop with blur */}
+      <div className={cn('fixed inset-0 bg-background/50 backdrop-blur-sm', ENTER_ANIMATION)} />
+
+      {/* Modal container */}
+      <div className="fixed inset-0 overflow-y-auto">
+        <div
+          className={cn(
+            'flex min-h-full justify-center text-center p-0 sm:p-4',
+            align === 'center' ? 'items-center' : 'items-start sm:pt-16'
+          )}
+        >
+          <DialogPanel
             className={cn(
-              'flex min-h-full justify-center text-center p-0 sm:p-4',
-              align === 'center' ? 'items-center' : 'items-start sm:pt-16'
+              'w-full max-w-md transform overflow-hidden rounded-none sm:rounded-2xl bg-surface/95 backdrop-blur-sm border border-foreground/10 text-left align-middle shadow-xl',
+              'zoom-in-95',
+              ENTER_ANIMATION,
+              padded && 'p-3 sm:p-6',
+              tall && 'flex h-[100dvh] flex-col sm:h-[92vh] sm:max-w-4xl',
+              className
             )}
           >
-            <TransitionChild
-              as={Fragment}
-              enter={ENTER_TRANSITION}
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave={LEAVE_TRANSITION}
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <DialogPanel
-                className={cn(
-                  'w-full max-w-md transform overflow-hidden rounded-none sm:rounded-2xl bg-surface/95 backdrop-blur-sm border border-foreground/10 text-left align-middle shadow-xl transition-[opacity,transform]',
-                  padded && 'p-3 sm:p-6',
-                  tall && 'flex h-[100dvh] flex-col sm:h-[92vh] sm:max-w-4xl',
-                  className
+            {/* Optional header with title and close button */}
+            {(title || showCloseButton) && (
+              <div className="flex items-start justify-between gap-4 mb-3 sm:mb-6">
+                {title && (
+                  <DialogTitle
+                    as="h3"
+                    className="text-xl font-bold text-foreground flex items-start gap-2 min-w-0"
+                  >
+                    {title}
+                  </DialogTitle>
                 )}
-              >
-                {/* Optional header with title and close button */}
-                {(title || showCloseButton) && (
-                  <div className="flex items-start justify-between gap-4 mb-3 sm:mb-6">
-                    {title && (
-                      <DialogTitle
-                        as="h3"
-                        className="text-xl font-bold text-foreground flex items-start gap-2 min-w-0"
-                      >
-                        {title}
-                      </DialogTitle>
-                    )}
-                    {showCloseButton && (
-                      <button
-                        onClick={onClose}
-                        className="text-muted hover:text-foreground transition-colors duration-200 ml-auto flex-shrink-0"
-                        aria-label={tModal('close')}
-                      >
-                        <X size={24} />
-                      </button>
-                    )}
-                  </div>
+                {showCloseButton && (
+                  <button
+                    onClick={onClose}
+                    className="text-muted hover:text-foreground transition-colors duration-200 ml-auto flex-shrink-0"
+                    aria-label={tModal('close')}
+                  >
+                    <X size={24} />
+                  </button>
                 )}
+              </div>
+            )}
 
-                {/* Content */}
-                {children}
-              </DialogPanel>
-            </TransitionChild>
-          </div>
+            {/* Content */}
+            {children}
+          </DialogPanel>
         </div>
-      </Dialog>
-    </Transition>
+      </div>
+    </Dialog>
   )
 }
