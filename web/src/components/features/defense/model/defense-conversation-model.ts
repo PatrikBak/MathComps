@@ -108,11 +108,7 @@ export type DefenseConversationState = {
   readonly currentSessionId: string | null
   /** What the student said the open conversation came to, or null until they say. */
   readonly currentFeedback: DefenseFeedback | null
-  /**
-   * What the student holds against the open conversation's replies, by reply. A rewound reply takes its
-   * entry out of reach for good rather than leaving it to be mismatched, since no later reply is ever
-   * identified by the same id.
-   */
+  /** What the student holds against the open conversation's replies, by reply. */
   readonly reports: ReadonlyMap<string, DefenseTurnReport>
   /** A conversation counter, distinct across conversations and stable within one. */
   readonly conversationEpoch: number
@@ -319,7 +315,7 @@ export class DefenseConversationModel {
       }
 
       // Swap in the server-dated transcript, open the session, and drop the indicator. What the student has
-      // said about the conversation is left alone: this reply was composed against a snapshot taken before
+      // said about the conversation is left alone: the reply carries the session as the backend read it when
       // the turn began, so anything they said while it ran would be rolled back by folding it in.
       this.setState({
         turns: session.turns,
@@ -421,7 +417,7 @@ export class DefenseConversationModel {
   }
 
   /**
-   * Records what the student says a conversation came to, once the backend has taken it.
+   * Records what the student says a conversation came to.
    *
    * @param sessionId - The session the answer was given for.
    * @param feedback - The answer they gave, or null once they have taken it back.
@@ -455,14 +451,14 @@ export class DefenseConversationModel {
   }
 
   /**
-   * Stops holding anything against one of a conversation's replies, once the backend has taken it back.
+   * Stops holding anything against one of a conversation's replies.
    *
    * @param sessionId - The session the reply was given in.
    * @param turnId - The reply to stop holding anything against.
    */
   clearReport = (sessionId: string, turnId: string): void => {
-    // The withdrawal belongs to a conversation that is no longer on screen, so acting on it here would clear a
-    // mark against some other conversation's reply
+    // The withdrawal belongs to a conversation that is no longer on screen, so acting on it here would
+    // clear a mark against some other conversation's reply
     if (sessionId !== this.state.currentSessionId) {
       return
     }

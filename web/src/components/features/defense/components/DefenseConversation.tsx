@@ -20,7 +20,7 @@ import {
   OUTCOME_KEYS,
   REPORT_CATEGORY_KEYS,
 } from '../model/defense-feedback-options'
-import { type DefenseProblem, type TurnRole } from '../model/defense-types'
+import type { DefenseProblem, TurnRole } from '../model/defense-types'
 import { DefenseFeedbackPrompt } from './DefenseFeedbackPrompt'
 import { DefenseHistoryMenu } from './DefenseHistoryMenu'
 import { DefenseTranscript } from './DefenseTranscript'
@@ -89,7 +89,7 @@ function initialSessionIdOf(mode: DefenseConversationMode): string | undefined {
 }
 
 /**
- * The shortest conversation there is an outcome to report on: the examiner's opener, the student arguing
+ * The shortest conversation there is an outcome to answer for: the examiner's opener, the student arguing
  * something, and the reply to it. Anything shorter has not been a defense yet.
  */
 const TURNS_WORTH_ANSWERING_FOR = 3
@@ -180,8 +180,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
   const canAct = !isThinking && currentSessionId !== null
 
   // Whether the conversation has enough behind it to be worth summing up, or was already summed up, which
-  // keeps a standing answer reachable to revise however short a rewind has left the conversation. Held back
-  // mid-turn, like every other control here.
+  // keeps a standing answer reachable to revise however short a rewind has left the conversation.
   const canAnswer =
     canAct && (turns.length >= TURNS_WORTH_ANSWERING_FOR || currentFeedback !== null)
 
@@ -221,7 +220,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
 
   return (
     <>
-      {/* What's being defended + session controls + close */}
+      {/* Who's examining + session controls + close */}
       <div className="flex items-center gap-3 border-b border-foreground/10 px-4 py-2.5 sm:px-5">
         {/* Who the student is talking to, and what she is */}
         <div className="flex min-w-0 items-baseline gap-2">
@@ -326,8 +325,8 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
       />
 
       {/* Taking a report off a reply is the student dropping something they said, so it is asked about first.
-          It sits beside the question rather than within it: a confirmation over an open modal is how the rest
-          of the app asks, and keeping it a sibling stops the chat carrying three of them at once */}
+          It sits beside the question, the way a confirmation over an open modal is asked everywhere else in
+          the app */}
       <ConfirmDialog
         isOpen={report.isRemoving}
         onClose={report.cancelRemoval}

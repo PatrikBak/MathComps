@@ -92,8 +92,8 @@ public enum ApiErrorCode
     DefenseReportTarget,
 
     /// <summary>
-    /// An outcome or report category is not one the contract defines, or a report names no way the reply went
-    /// wrong.
+    /// Feedback the contract cannot take: a value outside the ones it names, or a report or answer that says
+    /// nothing.
     /// </summary>
     DefenseFeedbackValue,
 

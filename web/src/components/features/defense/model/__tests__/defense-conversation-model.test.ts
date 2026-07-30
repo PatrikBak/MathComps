@@ -180,7 +180,8 @@ class FakeBackend implements DefenseConversationServices {
   }
 
   /**
-   * Stamps turns with an identity and a fixed timestamp, standing in for what the backend assigns on save.
+   * Stamps turns with an identity and a fixed timestamp, standing in for what the backend assigns
+   * on save.
    *
    * @param turns - The turns to stamp.
    *
@@ -632,7 +633,7 @@ describe('DefenseConversationModel', () => {
   })
 
   it('rewinds the open conversation to the kept prefix', async () => {
-    // A model grown to two exchanges: examiner, student, examiner, student, examiner
+    // A model grown to two exchanges: examiner, candidate, examiner, candidate, examiner
     const { model, backend } = makeModel()
     const first = model.send('first', backend)
     await flush()
@@ -642,6 +643,7 @@ describe('DefenseConversationModel', () => {
     await flush()
     backend.submitCalls[1].gate.resolve()
     await second
+
     // Rewind to the first examiner reply, dropping the second exchange
     const outcome = await model.rewind(2, backend)
 
@@ -791,9 +793,11 @@ describe('DefenseConversationModel', () => {
     await first
     const sessionId = backend.store[0].id
 
-    // Answer for the conversation, then carry on with it. The reply the next turn is answered from was
-    // composed before the answer landed, so folding its view of the conversation in would undo it
+    // Answer for the conversation
     model.setFeedback(sessionId, { outcome: 'notEnoughHelp', comment: null })
+
+    // Carry on with it: the reply this turn brings back was composed before the answer landed, so
+    // folding its view of the conversation in would undo it
     const second = model.send('second', backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
@@ -813,13 +817,15 @@ describe('DefenseConversationModel', () => {
     const sessionId = backend.store[0].id
     const replyId = backend.store[0].turns[2].id
 
-    // Report the reply, then carry on with the conversation. The reply the turn is answered from was
-    // composed before the report landed, so folding its view of the conversation in would undo it
+    // Report the reply
     model.setReport(sessionId, {
       turnId: replyId,
       categories: ['saidSomethingWrong'],
       comment: 'which case?',
     })
+
+    // Carry on with the conversation: the reply this turn brings back was composed before the report
+    // landed, so folding its view of the conversation in would undo it
     const second = model.send('second', backend)
     await flush()
     backend.submitCalls[1].gate.resolve()
@@ -830,7 +836,7 @@ describe('DefenseConversationModel', () => {
   })
 
   it('keeps a surviving reply reported through a rewind', async () => {
-    // A model grown to two exchanges: examiner, student, examiner, student, examiner
+    // A model grown to two exchanges: examiner, candidate, examiner, candidate, examiner
     const { model, backend } = makeModel()
     const first = model.send('first', backend)
     await flush()
@@ -866,8 +872,10 @@ describe('DefenseConversationModel', () => {
       { turnId: replyId, categories: ['misunderstood'], comment: 'the bound is wrong' },
     ]
 
-    // Step away and come back to it
+    // Step away
     model.startNew()
+
+    // Come back to it
     model.resume(stored)
 
     // The reply is marked again, carrying what was said about it
@@ -915,7 +923,8 @@ describe('DefenseConversationModel', () => {
     // Revise what is held against it
     model.setReport(sessionId, { turnId: replyId, categories: ['tone'], comment: 'she was rude' })
 
-    // The reply carries the revision, and carries it in place of the first complaint rather than beside it
+    // The reply carries the revision, and carries it in place of the first complaint rather than
+    // beside it
     const { reports } = model.getSnapshot()
     expect(reports.size).toBe(1)
     expect(reports.get(replyId)).toEqual({
@@ -943,7 +952,8 @@ describe('DefenseConversationModel', () => {
     // The reply carries nothing again
     expect(model.getSnapshot().reports.has(replyId)).toBe(false)
 
-    // Under a map of its own, since subscribers are handed the state itself and compare it by identity
+    // Under a map of its own, since subscribers are handed the state itself and compare it by
+    // identity
     expect(model.getSnapshot().reports).not.toBe(before)
   })
 

@@ -138,6 +138,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         Assert.Equal(
             [TranscriptRole.Examiner, TranscriptRole.Candidate, TranscriptRole.Examiner],
             session.Turns.Select(turn => turn.Role));
+
+        // Each turn holds the text it was seeded with, and the examiner had something to say
         Assert.Equal("the opener", session.Turns[0].Content);
         Assert.Equal("my defense", session.Turns[1].Content);
         Assert.NotEmpty(session.Turns[2].Content);
@@ -175,6 +177,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 TranscriptRole.Candidate, TranscriptRole.Examiner,
             ],
             continued.Turns.Select(turn => turn.Role));
+
+        // The new student turn holds what was sent
         Assert.Equal("my next point", continued.Turns[3].Content);
 
         // Continue rebuilds the target from the stored rows rather than echoing a caller's copy, and its two
@@ -249,8 +253,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
     /// <summary>
     /// A listed session carries the whole conversation as the client reads it: every turn in order under its own
-    /// id, the answer for the conversation, and what the student holds against a reply — every enum among them
-    /// spelled as the string the client codes against. This read builds its own projection rather than sharing
+    /// id, the answer for the conversation, and what the student holds against a reply, every enum among them
+    /// round-tripping through its own database type. This read builds its own projection rather than sharing
     /// the mapper the start and continue paths use, so nothing but this pins what it assembles.
     /// </summary>
     [Fact]
@@ -265,7 +269,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Everything the student has said about the conversation
         await QueryAsync(async context =>
         {
-            // One report naming every fault there is, so the whole category table is read back
+            // One report naming every fault there is, so every category is read back
             context.DefenseTurnReports.Add(new DefenseTurnReport
             {
                 SessionId = started.Id,
@@ -292,8 +296,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             [TranscriptRole.Examiner, TranscriptRole.Candidate, TranscriptRole.Examiner],
             listed.Turns.Select(turn => turn.Role));
 
-        // Each carrying its own words and its own identity, which is what a report is against
+        // Each turn carries its own words
         Assert.Equal("my defense", listed.Turns[1].Content);
+
+        // And its own identity, which is what a report is held against
         Assert.Equal(replyId, listed.Turns[^1].Id);
 
         // What the student made of the conversation as a whole
@@ -503,6 +509,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 TranscriptRole.Candidate, TranscriptRole.Examiner,
             ],
             continued.Turns.Select(turn => turn.Role));
+
+        // The new student turn holds what was sent the second time
         Assert.Equal("redo", continued.Turns[3].Content);
     });
 
@@ -708,8 +716,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// Two concurrent starts for one user just under the spend ceiling can't both slip through: the turn gate serializes
-    /// them, so the second sees the first's committed spend and is refused. Without the gate, both would clear the check
+    /// Two concurrent starts for one user just under the spend ceiling can't both slip through: the turn gate
+    /// serializes them, so the second sees the first's committed spend and is refused. Without the gate, both
+    /// would clear the check
     /// against the same pre-write total and both would open a session.
     /// </summary>
     [Fact]
@@ -834,7 +843,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Cancel repeatedly and assert the accrued spend eventually trips the ceiling.
         return RunTestAsync(async service =>
         {
-            // Cancel enough turns to push the accrued spend over the ceiling; at 0.40 a turn, three reach 1.20 ≥ 1.00.
+            // Cancel enough turns to push the accrued spend over the ceiling; at 0.40 a turn, three reach 1.20.
             for (var attempt = 0; attempt < 3; attempt++)
             {
                 // A fresh token each turn, cancelled mid-turn by the examiner.
@@ -856,7 +865,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     }
 
     /// <summary>
-    /// An OperationCanceledException whose request token never fired — the shape an upstream HTTP/LLM timeout takes —
+    /// An OperationCanceledException whose request token never fired, the shape an upstream HTTP/LLM timeout
+    /// takes,
     /// isn't recorded: it's our fault, not the user's, even though its calls cost us.
     /// </summary>
     [Fact]
@@ -943,8 +953,11 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// <param name="content">The student's first message.</param>
     /// <param name="handoutContentId">The handout the environment belongs to.</param>
     /// <returns>The session start.</returns>
-    private static DefenseSessionStart Request(string environmentId, string content, string handoutContentId = "handout-1") =>
-        new(new HandoutEnvironmentTarget(handoutContentId, environmentId), "the statement", "the reference", "the opener", content);
+    private static DefenseSessionStart Request(
+        string environmentId, string content, string handoutContentId = "handout-1") =>
+        new(
+            new HandoutEnvironmentTarget(handoutContentId, environmentId),
+            "the statement", "the reference", "the opener", content);
 
     /// <summary>
     /// Builds a report against one of a conversation's replies, as the feedback service would write it.

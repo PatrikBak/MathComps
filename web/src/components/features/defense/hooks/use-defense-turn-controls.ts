@@ -129,7 +129,7 @@ export function useDefenseTurnControls(
 
     // Recover per outcome
     switch (outcome.kind) {
-      // The reply landed, or a stop already reclaimed the draft: nothing to do
+      // The reply landed, or the turn was stopped or superseded: nothing to put back
       case 'sent':
       case 'stopped':
         break
@@ -153,7 +153,7 @@ export function useDefenseTurnControls(
 
     // Recover per outcome
     switch (outcome.kind) {
-      // Gone: the history already refreshed to drop it
+      // Gone: nothing to tell the student
       case 'done':
         break
       // Still there: tell the student why the delete didn't take

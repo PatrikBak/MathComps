@@ -2,8 +2,7 @@ namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
 /// What a student found wrong with one examiner reply. Each member names a different thing to go and fix rather
-/// than a different way to be annoyed, so most of them point at one step of the examiner pipeline: whether she
-/// read the solution, whether the maths check ran too loose or too tight, whether the leak check held.
+/// than a different way to be annoyed.
 /// </summary>
 public enum DefenseReportCategory
 {

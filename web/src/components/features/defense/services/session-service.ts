@@ -145,7 +145,8 @@ export function reportTurn(
 }
 
 /**
- * Records what a student says about a whole defense conversation, replacing anything they said before.
+ * Records what a student says about a whole defense conversation, replacing anything they said
+ * before.
  *
  * @param apiCall - The authenticated API caller.
  * @param sessionId - The id of the session being answered for.

@@ -12,15 +12,11 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// the examiner engine.
 /// </summary>
 /// <remarks>
-/// Every operation takes the user's turn lock. The recording writes need it because what they check and what
-/// they write are separate statements: without it a conversation deleted, or a reply rewound away, between the
-/// check and the write turns a refusal the student would understand into a foreign-key failure. The withdrawals
-/// need it to stay in order against those writes, so that a recording already in flight can't outlive the
-/// withdrawal that was meant to take it back. Waiting costs nothing in practice — the surface offers none of
-/// these controls while a reply is in flight, which is the only thing that holds the lock for long.
+/// Every operation takes the user's turn lock, the withdrawals included, so that a recording already in flight
+/// can't outlive the withdrawal that was meant to take it back.
 /// </remarks>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
-/// <param name="limits">The input caps, of which only the comment length applies here.</param>
+/// <param name="limits">The input caps, of which the comment length is read here.</param>
 /// <param name="turnGate">Serializes a single user's turns.</param>
 public class DefenseFeedbackService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
@@ -38,9 +34,8 @@ public class DefenseFeedbackService(
         Guid userId, Guid sessionId, Guid turnId, IReadOnlyList<DefenseReportCategory> categories, string? comment,
         CancellationToken cancellationToken = default)
     {
-        // A report that holds nothing against the reply isn't a report, whether the client sent an empty list or
-        // (null through JSON) left it out. Either way that's a bad request, not a server fault.
-        if (categories is null or [])
+        // A report that holds nothing against the reply isn't a report, which is a bad request, not a server fault.
+        if (categories is [])
             throw new DefenseFeedbackValueException();
 
         // Naming the same way twice says nothing twice.
@@ -189,8 +184,7 @@ public class DefenseFeedbackService(
     }
 
     /// <summary>
-    /// Throws when a comment exceeds its length cap. It bounds the text that would be stored, so trailing
-    /// whitespace can't push an otherwise acceptable comment over.
+    /// Throws when a comment exceeds its length cap.
     /// </summary>
     /// <param name="comment">The comment to bound, null when none was given.</param>
     private void EnsureCommentWithinLength(string? comment)

@@ -144,9 +144,12 @@ public static class DefenseEndpoints
             // Resolve the calling user
             var userId = await userManager.RequireUserIdAsync(context);
 
+            // A body naming no fault holds nothing against the reply, which is the client's fault rather than ours
+            var categories = request.Categories ?? throw new DefenseFeedbackValueException();
+
             // Record the report
             await feedbackService.ReportTurnAsync(
-                userId, sessionId, turnId, request.Categories, request.Comment, context.RequestAborted);
+                userId, sessionId, turnId, categories, request.Comment, context.RequestAborted);
 
             // Nothing to return; the client already knows what it reported
             return Results.NoContent();

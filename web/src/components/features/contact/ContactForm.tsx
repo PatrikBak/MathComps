@@ -104,13 +104,14 @@ export default function ContactForm({ defaultReason, onSubmit }: ContactFormProp
   // Reason options carrying their translated labels
   const translatedReasonOptions = useMemo(() => getTranslatedReasonOptions(tContact), [tContact])
 
-  // Seed name + email from the signed-in user, if any. We repurpose Clerk's
-  // firstName as the user's single display name, so the name field seeds from it.
+  // The signed-in user, if any
   const { user, isLoaded } = useUser()
+
+  // Their display name, which Clerk keeps in firstName, and their email
   const displayName = user?.firstName ?? ''
   const email = user?.primaryEmailAddress?.emailAddress ?? ''
 
-  // Reactive seed: display name + email from Clerk, the rest empty until the user fills them.
+  // The form's seed values, with everything but the name and email empty until the user fills them
   const values = useMemo<ContactFormData>(
     () => ({
       name: displayName,
@@ -145,12 +146,12 @@ export default function ContactForm({ defaultReason, onSubmit }: ContactFormProp
   const focusName = isLoaded && !user
   const focusMessage = isLoaded && Boolean(user)
 
-  // Mirror the chosen reason so its matching icon shows in the field
+  // The reason currently chosen, and the icon that goes with it
   const selectedReason = watch('reason')
   const ReasonIcon = REASON_OPTIONS[selectedReason]?.icon ?? BookMarked
 
-  // A field's error, shown only once the user has touched it or tried to submit — so an
-  // untouched field (like the one focused on open) never flashes "required" on close.
+  // A field's error, shown only once the user has changed it or tried to submit, so a field
+  // left as it was (like the one focused on open) never flashes "required" on close.
   const fieldError = (name: keyof ContactFormData) =>
     dirtyFields[name] || isSubmitted ? errors[name]?.message : undefined
 
@@ -219,7 +220,7 @@ export default function ContactForm({ defaultReason, onSubmit }: ContactFormProp
           id="message"
           rows={3}
           data-autofocus={focusMessage ? '' : undefined}
-          className="form-input flex items-center justify-between gap-2 bg-surface/95 resize-vertical sm:rows-4 pl-10 sm:pl-11"
+          className="form-input flex items-center justify-between gap-2 bg-surface/95 resize-vertical pl-10 sm:pl-11"
           placeholder={tContact('messagePlaceholder')}
         />
       </ContactField>

@@ -237,7 +237,7 @@ html {
   }
 }
 
-/* Override Tailwind Forms plugin focus styles - only show ring for keyboard navigation */
+/* Show a focus ring on checkboxes and radios only for keyboard focus */
 input[type='checkbox']:focus-visible,
 input[type='radio']:focus-visible {
   @apply ring-2 ring-focus/40 ring-offset-0;

@@ -79,7 +79,7 @@ public sealed class GlobalExceptionHandler(
         ListNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ListNotFound),
         DefenseSessionNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.DefenseSessionNotFound),
 
-        // Defense guardrails — the request or the user's usage is over a cap
+        // Defense guardrails: the request doesn't hold up, or the user's usage is over a cap
         DefenseMessageTooLongException => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseMessageTooLong),
         DefenseMessageEmptyException => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseMessageEmpty),
         DefenseRewindTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseRewindTarget),
@@ -89,7 +89,8 @@ public sealed class GlobalExceptionHandler(
             => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseFeedbackCommentTooLong),
         // A maxed-out session permanently refuses more turns: a business-rule refusal, not a resolvable conflict
         DefenseTurnLimitException => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.DefenseTurnLimit),
-        // The per-user daily spend ceiling clears at the next midnight, so retrying later succeeds: retry-after semantics
+        // The per-user daily spend ceiling clears at the next midnight, so retrying later succeeds:
+        // retry-after semantics
         DefenseSpendLimitException => (StatusCodes.Status429TooManyRequests, ApiErrorCode.DefenseSpendLimit),
 
         // Forbidden actions — the caller is known, they're just not allowed
@@ -103,8 +104,10 @@ public sealed class GlobalExceptionHandler(
         ListReorderMismatchException => (StatusCodes.Status400BadRequest, ApiErrorCode.ListReorderMismatch),
 
         // Authentication required — the caller is anonymous and the view is gated
-        FavoritesRequireAuthenticationException => (StatusCodes.Status401Unauthorized, ApiErrorCode.FavoritesRequireAuthentication),
-        MarkStatusRequiresAuthenticationException => (StatusCodes.Status401Unauthorized, ApiErrorCode.MarkStatusRequiresAuthentication),
+        FavoritesRequireAuthenticationException
+            => (StatusCodes.Status401Unauthorized, ApiErrorCode.FavoritesRequireAuthentication),
+        MarkStatusRequiresAuthenticationException
+            => (StatusCodes.Status401Unauthorized, ApiErrorCode.MarkStatusRequiresAuthentication),
         UserNotResolvedException => (StatusCodes.Status401Unauthorized, ApiErrorCode.UserNotResolved),
 
         // A body the route can't be built from never reaches an endpoint, so the framework is the one that

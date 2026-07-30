@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace MathComps.Infrastructure.Options;
 
 /// <summary>
-/// Caps that bound what the defense endpoint can cost: per-message and per-problem input sizes, how many turns a
-/// conversation may grow to, and a per-user daily spend ceiling. Bound from the <c>DefenseLimits</c> configuration
-/// section. The range annotations make a missing or zeroed section fail validation
+/// Caps on a defense: how large its inputs may be, how many turns a conversation may grow to, how long a
+/// student's feedback comment may be, and how much one user may spend in a day. The range annotations make a
+/// missing or zeroed section fail validation
 /// at startup rather than silently rejecting every turn (a zero ceiling refuses everything).
 /// </summary>
 public class DefenseLimits
@@ -54,7 +54,7 @@ public class DefenseLimits
     public required int MaxEnvironmentIdChars { get; set; }
 
     /// <summary>
-    /// The longest a feedback comment may be, in characters. Feedback is a sentence or two of context, not an essay.
+    /// The longest a feedback comment may be, in characters.
     /// </summary>
     [Range(1, int.MaxValue)]
     public required int MaxFeedbackCommentChars { get; set; }
