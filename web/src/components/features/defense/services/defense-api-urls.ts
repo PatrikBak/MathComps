@@ -66,7 +66,7 @@ export function getDeleteDefenseSessionUrl(sessionId: string): string {
  * Builds the URL for rewinding a defense session to an earlier point.
  *
  * @param sessionId - The session to rewind.
- * @returns the rewind URL.
+ * @returns The rewind URL.
  */
 export function getRewindDefenseUrl(sessionId: string): string {
   // The truncate-conversation endpoint for the session
@@ -74,10 +74,10 @@ export function getRewindDefenseUrl(sessionId: string): string {
 }
 
 /**
- * Builds the URL for recording what the student holds against one examiner reply.
+ * Builds the URL for one examiner reply's report.
  *
- * @param sessionId - The session the reported reply was given in.
- * @param turnId - The reported reply.
+ * @param sessionId - The session the reply was given in.
+ * @param turnId - The reply the report is about.
  * @returns The report URL.
  */
 export function getReportDefenseTurnUrl(sessionId: string, turnId: string): string {
@@ -88,9 +88,9 @@ export function getReportDefenseTurnUrl(sessionId: string, turnId: string): stri
 }
 
 /**
- * Builds the URL for recording what a student says about a defense conversation.
+ * Builds the URL for a defense conversation's feedback.
  *
- * @param sessionId - The session being answered for.
+ * @param sessionId - The session the feedback is about.
  * @returns The feedback URL.
  */
 export function getDefenseFeedbackUrl(sessionId: string): string {

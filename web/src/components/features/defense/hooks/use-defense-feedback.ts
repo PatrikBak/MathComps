@@ -54,8 +54,7 @@ type SubmitFeedbackVariables = {
 }
 
 /**
- * The conversation being spoken about, and the writers that change what it shows. Each is documented at its
- * home on the conversation the caller is already holding.
+ * The conversation being spoken about, and the writers that change what it shows.
  */
 type DefenseFeedbackInput = {
   /** The open conversation, or null when none is saved yet. */
@@ -73,7 +72,7 @@ type DefenseFeedbackInput = {
 }
 
 /**
- * What one of these writes reports back to the flow that fired it.
+ * How a write reports back to the flow that fired it.
  */
 type WriteOutcome = {
   /** Called once the write has landed. */
@@ -140,10 +139,7 @@ type UseDefenseFeedbackResult = {
 /**
  * Everything a student saying something about a defense involves: which question is open, whether a removal
  * is awaiting their word, the write itself, and what both the transcript and the cached conversations show
- * once it lands. The conversation is the caller's; this is what the chat would otherwise hold to speak about
- * it.
- *
- * @param conversation - The conversation being spoken about, and the writers that change what it shows.
+ * once it lands. The conversation itself is the caller's.
  *
  * @returns The two flows, each ready to hand straight to a dialog.
  */
@@ -156,7 +152,7 @@ export function useDefenseFeedback(conversation: DefenseFeedbackInput): UseDefen
 
   // What the student is told when a write can't be made or doesn't land, which is the same whichever of the
   // four it was
-  const reporting = {
+  const failureCopy = {
     authReason: t('feedbackAuthReason'),
     errorMessage: t('feedbackError'),
   }
@@ -184,7 +180,7 @@ export function useDefenseFeedback(conversation: DefenseFeedbackInput): UseDefen
           },
         ],
       })),
-    ...reporting,
+    ...failureCopy,
   })
 
   // Takes the report back off the reply
@@ -197,7 +193,7 @@ export function useDefenseFeedback(conversation: DefenseFeedbackInput): UseDefen
         ...session,
         reports: session.reports.filter((report) => report.turnId !== variables.turnId),
       })),
-    ...reporting,
+    ...failureCopy,
   })
 
   // Records the answer
@@ -210,7 +206,7 @@ export function useDefenseFeedback(conversation: DefenseFeedbackInput): UseDefen
         ...session,
         feedback: { outcome: variables.outcome, comment: variables.comment || null },
       })),
-    ...reporting,
+    ...failureCopy,
   })
 
   // Takes the answer back off the conversation
@@ -222,7 +218,7 @@ export function useDefenseFeedback(conversation: DefenseFeedbackInput): UseDefen
         ...session,
         feedback: null,
       })),
-    ...reporting,
+    ...failureCopy,
   })
 
   // The reply being reported, or null when none is
@@ -231,8 +227,10 @@ export function useDefenseFeedback(conversation: DefenseFeedbackInput): UseDefen
   // Whether the student is answering for the conversation as a whole
   const [isAnswering, answering] = useDisclosure(false)
 
-  // Whether either removal is awaiting the student's word
+  // Whether the student is being asked to confirm taking a report back
   const [isRemovingReport, removingReport] = useDisclosure(false)
+
+  // Whether they are being asked to confirm taking the answer back
   const [isRemovingAnswer, removingAnswer] = useDisclosure(false)
 
   // What the student already holds against the reply being reported, so revising opens on what they said
@@ -247,6 +245,7 @@ export function useDefenseFeedback(conversation: DefenseFeedbackInput): UseDefen
     // Send it. The question stays up until it lands, so a failure leaves everything they picked and wrote in
     // place to send again rather than making them recall it
     send({
+      // It landed
       onSuccess: () => {
         // Let the transcript show what they said
         show()

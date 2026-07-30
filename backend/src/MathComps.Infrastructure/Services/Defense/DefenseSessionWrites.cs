@@ -7,17 +7,15 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
-/// What makes a defense session the caller's, and how a write against one is run: serialized against the user's
-/// turns, on a context of its own, and refused outright unless the session is theirs. Shared by every such
-/// write, so none of them can be written without the check and they all refuse another user's conversation
-/// identically.
+/// A helper for writes against a defense session: what makes one the caller's, and how such a write is run,
+/// serialized against the user's turns, on a context of its own, and refused outright unless the session is
+/// theirs. Shared by every such write, so they all refuse another user's conversation identically.
 /// </summary>
 internal static class DefenseSessionWrites
 {
     /// <summary>
     /// The condition a session meets when it is the caller's, as one expression so that every write spells it
-    /// the same way. Each of them establishes ownership differently, by probing for it, by folding it into the
-    /// statement that acts, or by loading nothing else; what they must not differ on is what it means.
+    /// the same way.
     /// </summary>
     /// <param name="userId">The user the session must belong to.</param>
     /// <param name="sessionId">The session in question.</param>

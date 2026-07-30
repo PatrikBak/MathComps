@@ -129,8 +129,7 @@ public class DefenseSessionService(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // The session with its turns (tracked, for the append below), the student's answer for it and what they
-        // hold against its replies, plus the two content ids of the environment it defends. The feedback rides
-        // along so a grown conversation still reports what the student already said about it. Split, because
+        // hold against its replies, plus the two content ids of the environment it defends. Split, because
         // turns and reports are two collections off one row: joined in a single query the database would return
         // every pairing of them, each repeating the session's statement, reference, and settings snapshot.
         // Another user's session never comes back from it, and a missing one reads the same.
@@ -185,8 +184,7 @@ public class DefenseSessionService(
 
         // The user's sessions against this environment, oldest first: each conversation in order, the student's
         // answer for it, and what they hold against its replies. Every session in this list defends the target
-        // the caller named, so it rides into each one. Split, because turns and reports are two collections off
-        // one row: joined in a single query the database would return every pairing of them.
+        // the caller named, so it rides into each one. Split, so the turns and the reports don't multiply out.
         return await dbContext.DefenseSessions
             .AsNoTracking()
             .AsSplitQuery()
@@ -245,8 +243,9 @@ public class DefenseSessionService(
     /// <inheritdoc/>
     public async Task DeleteAsync(Guid userId, Guid sessionId, CancellationToken cancellationToken = default)
     {
-        // Serialize against this user's turns: an in-flight continue or rewind saves at the very end, so without
-        // the gate a delete could remove the session first and turn that save into a foreign-key failure.
+        // Serialize against this user's turns: an in-flight continue builds its turn in memory and saves at the
+        // very end, so without the gate a delete could remove the session first and turn that save into a
+        // foreign-key failure.
         using var turnLock = await turnGate.AcquireAsync(userId, cancellationToken);
 
         // A fresh context for this operation.
@@ -352,9 +351,10 @@ public class DefenseSessionService(
         // user's, so it falls through this catch and propagates unrecorded.
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // The client aborted the turn, but its completed calls already cost us; record that against the user. A
-            // turn cancelled before any call ran accrued nothing, so there's nothing to write.
+            // The client aborted the turn, but its completed calls already cost us.
             var accrued = usage.Accrued;
+
+            // A turn cancelled before any call ran accrued nothing, so there's nothing to write.
             if (accrued != ModelUsage.Zero)
                 await WriteCancelledTurnSpendAsync(userId, accrued, (int)stopwatch.ElapsedMilliseconds);
 
@@ -401,7 +401,8 @@ public class DefenseSessionService(
     /// <param name="role">Who authored the turn.</param>
     /// <param name="content">The turn's text.</param>
     /// <param name="createdAt">When the turn was recorded.</param>
-    private static void AppendTurn(DefenseSession session, TranscriptRole role, string content, DateTimeOffset createdAt)
+    private static void AppendTurn(
+        DefenseSession session, TranscriptRole role, string content, DateTimeOffset createdAt)
         => session.Turns.Add(new DefenseTurn
         {
             SessionId = session.Id,
@@ -498,7 +499,8 @@ public class DefenseSessionService(
     }
 
     /// <summary>
-    /// Projects a session to its client shape, turns in order.
+    /// Projects a session to its client shape: its turns in order, what the student said about the conversation,
+    /// and what they hold against its replies.
     /// </summary>
     /// <param name="session">The session to project.</param>
     /// <param name="target">The environment the session defends.</param>

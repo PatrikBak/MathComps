@@ -14,7 +14,7 @@ export const FOCUS_RING_CLASS =
  * The app's button styles.
  *
  * `primary` fills with the brand (violet); the focus ring stays on `focus` (indigo). `outline` is
- * `subtle` minus the fill, for a surface that already carries a tint.
+ * `subtle` with the fill moved to hover, for a surface that already carries a tint.
  */
 export const buttonVariants = cva(
   [
@@ -96,14 +96,14 @@ export function Button({
       className={cn(
         buttonVariants({ variant, size, shape, fullWidth }),
         className,
-        // The spinner below is positioned against the button, so this wins over whatever the caller asked for
+        // The spinner below is positioned against the button, so this must beat the caller's class
         loading && 'relative'
       )}
       {...rest}
     >
-      {/* The spinner sits over the label rather than beside it, and the label stays in place holding the
-          width it had, so a button doesn't jump the moment its action starts. It goes transparent rather than
-          hidden, which would take the button's name out of the accessibility tree along with it */}
+      {/* The spinner overlays the label, which stays in place holding the width it had, so a
+          button doesn't jump the moment its action starts. It goes transparent rather than hidden,
+          which would take the button's name out of the accessibility tree along with it */}
       {loading ? (
         <>
           <span className="absolute inset-0 flex items-center justify-center">

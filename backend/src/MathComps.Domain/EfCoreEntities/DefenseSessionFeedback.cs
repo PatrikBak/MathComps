@@ -2,7 +2,7 @@ namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
 /// What a student said about one whole <see cref="DefenseSession"/>: where it left them, and whatever they wanted
-/// to add in their own words. At most one per session, replaced rather than accumulated when they answer again, so
+/// to add in their own words. At most one per session, revised rather than accumulated when they answer again, so
 /// it always reads as their current verdict on the conversation.
 /// </summary>
 /// <remarks>

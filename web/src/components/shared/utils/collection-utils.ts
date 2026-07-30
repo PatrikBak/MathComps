@@ -2,8 +2,8 @@
  * Toggles an item in a Set (immutably). If the item exists, it is removed;
  * if it doesn't exist, it is added.
  *
- * @param set The original Set
- * @param item The item to toggle
+ * @param set - The original Set
+ * @param item - The item to toggle
  *
  * @returns A new Set with the item toggled
  */
@@ -17,7 +17,7 @@ export function toggleSetItem<T>(set: Set<T>, item: T): Set<T> {
 }
 
 /**
- * Inverts a key → value record into a value → key Map.
+ * Inverts a key → value record into a value → key Map. When two keys share a value, the last one wins.
  *
  * @param record - The key/value pairs to reverse.
  *
@@ -30,7 +30,8 @@ export function invert<TKey extends string>(record: Record<TKey, string>): Map<s
 
 /**
  * Whether two lists name the same things, in whatever order each happens to list them and however often
- * either repeats one.
+ * either repeats one. Two items are the same one when they are the same value or the very same object, so a
+ * pair of look-alike objects is a pair of different things.
  *
  * @param left - One list.
  * @param right - The other list.

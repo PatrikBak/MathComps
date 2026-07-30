@@ -99,7 +99,7 @@ public sealed class DefenseTurnLimitException() : Exception("This defense has re
 public sealed class DefenseSpendLimitException() : Exception("You have reached your usage limit — try again later");
 
 /// <summary>
-/// Thrown when a rewind's cut point is out of range or is not an examiner turn (so the result would not
-/// await the student's next message).
+/// Thrown when a rewind names no cut point at all, or names one that is out of range or is not an examiner
+/// turn (so the result would not await the student's next message).
 /// </summary>
 public sealed class DefenseRewindTargetException() : Exception("The rewind point is not valid");

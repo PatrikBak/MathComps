@@ -6,7 +6,7 @@ namespace MathComps.Domain.EfCoreEntities;
 /// reads as what they currently hold against it.
 /// </summary>
 /// <remarks>
-/// A report lives exactly as long as the reply it is against: rewinding past that reply takes the report with it,
+/// A report never outlives the reply it is against: rewinding past that reply takes the report with it,
 /// as does deleting the whole conversation. What is held against a reply is only worth anything beside the reply
 /// itself, and a student who drops a reply has dropped what was said about it too.
 /// </remarks>
@@ -18,8 +18,7 @@ public class DefenseTurnReport
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
     /// <summary>
-    /// The session the reported reply was given in, which is what a conversation's reports are read from and
-    /// what holds the reply to being one of that conversation's own.
+    /// The session the reported reply was given in.
     /// </summary>
     public required Guid SessionId { get; set; }
 
@@ -44,7 +43,8 @@ public class DefenseTurnReport
     public required List<DefenseReportCategory> Categories { get; set; }
 
     /// <summary>
-    /// The student's own account of what went wrong, or null when they gave none.
+    /// The student's own account of what went wrong, or null when they gave none. Required alongside
+    /// <see cref="DefenseReportCategory.Other"/>, which says nothing on its own.
     /// </summary>
     public required string? Comment { get; set; }
 

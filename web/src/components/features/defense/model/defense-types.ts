@@ -44,7 +44,8 @@ export type DefenseReportCategory =
 /**
  * What the examiner did for the student over a whole conversation. An outcome rather than a rating: a defense
  * that ends unpleasantly can be the one that worked. Every member sits on the one axis of what she did, and the
- * last one closes the axis off so every conversation has a place to land.
+ * last one closes the axis off so every conversation has a place to land. It says nothing on its own and so
+ * comes with the student's own account.
  */
 export type DefenseOutcome =
   | 'foundTheMistake'
@@ -67,7 +68,7 @@ export type DefenseFeedback = {
  * What a student holds against one examiner reply.
  */
 export type DefenseTurnReport = {
-  /** The reported reply. */
+  /** The reported reply's id. */
   turnId: string
   /** Every way the reply went wrong. */
   categories: DefenseReportCategory[]
@@ -101,7 +102,7 @@ export type DefenseSessionListItem = {
   id: string
   /** The handout environment this defense is about. */
   target: HandoutEnvironmentTarget
-  /** The problem statement, seen by both sides. */
+  /** The problem statement as it stood when the session was started. */
   statement: string
   /** When the session was started, as an ISO-8601 string. */
   createdAt: string

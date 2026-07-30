@@ -36,7 +36,7 @@ export function toFeedbackOptions<TValue extends string, TKey extends string>(
   labelKeys: Record<TValue, TKey>,
   translate: (key: TKey) => string
 ): FeedbackOption<TValue>[] {
-  // The answers under their labels; the entries are the record's own keys
+  // Pair each answer with its label; the entries are the record's own keys
   return (Object.entries(labelKeys) as [TValue, TKey][]).map(([value, labelKey]) => ({
     value,
     label: translate(labelKey),
@@ -79,7 +79,7 @@ type MultipleChoice<TValue extends string> = {
 type FeedbackChoice<TValue extends string> = SingleChoice<TValue> | MultipleChoice<TValue>
 
 /**
- * How one selection mode renders its answers, which is the whole visible difference between the two.
+ * How one selection mode renders its answers.
  */
 type SelectionStyle = {
   /** The input each answer renders. */
@@ -115,10 +115,7 @@ type FeedbackQuestionProps<TValue extends string> = {
    * when every answer speaks for itself.
    */
   requiresComment: TValue | null
-  /**
-   * The aside marking that answer as one to write behind. It rides the list rather than the answer's own label
-   * so the label stays the plain thing the caller can echo back once the question has been answered.
-   */
+  /** The aside marking that answer as one to write behind. */
   requiresCommentHint: string
   /** Dismisses the question unanswered. */
   onClose: () => void
@@ -324,8 +321,6 @@ function FeedbackQuestion<TValue extends string>({
             key={option.value}
             className={cn(
               'flex cursor-pointer items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors',
-              // The input already carries the one accent this list needs, so a picked answer is lifted off
-              // the surface rather than tinted, leaving the send button the only coloured fill on screen
               picked.includes(option.value)
                 ? 'bg-foreground/10 text-foreground'
                 : 'text-muted-foreground hover:bg-foreground/5'
@@ -365,9 +360,8 @@ function FeedbackQuestion<TValue extends string>({
           className="form-input resize-none"
         />
 
-        {/* How much room is left, once there is little enough of it that the field going dead at the cap
-            would otherwise come out of nowhere. It hangs under the field rather than sitting below it, so
-            the first character past the threshold moves nothing */}
+        {/* How much room is left, once there is little enough of it to matter. It hangs under the field
+            rather than sitting below it, so the first character past the threshold moves nothing */}
         {isNearCap && (
           <p
             id={`${groupId}-comment-count`}
@@ -382,8 +376,7 @@ function FeedbackQuestion<TValue extends string>({
           while an answer is on its way, so the dialog can't be dismissed out from under the one it is about
           to land */}
       <div className="mt-5 flex items-center justify-end gap-2">
-        {/* Offered only where there is something to take back. It sits on the leading edge, away from the pair
-            that acts on what is on screen, and takes no room at all when nothing stands */}
+        {/* Offered only where there is something to take back */}
         {onRemove !== null && (
           <Button
             variant="ghost"
@@ -400,8 +393,8 @@ function FeedbackQuestion<TValue extends string>({
           {tActions('cancel')}
         </Button>
 
-        {/* An answer already on record is saved rather than sent, which is what says the thing beside it is
-            there to be removed. It is held back until the question stands somewhere other than where it opened:
+        {/* An answer already on record is saved rather than sent. It is held back until the question
+            stands somewhere other than where it opened:
             sending what already stands would restamp it as freshly said, and nothing on screen would move to
             show for it */}
         <Button
@@ -423,8 +416,8 @@ function FeedbackQuestion<TValue extends string>({
 
 /**
  * A dialog asking one question: a short list of answers to pick from, and a free-text line under it for whatever
- * the list can't say. Both what the answers are and what is done with them belong to the caller, so the same
- * dialog serves a fault being reported and a conversation being summed up.
+ * the list can't say. Both what the answers are and what is done with them belong to the caller, so one dialog
+ * serves any question with a short, fixed set of answers.
  *
  * Taking an answer back off the record belongs to the caller too: it hands the dialog a way out only when there
  * is something standing to take back, and owns whatever confirming it involves.
@@ -456,6 +449,7 @@ export function FeedbackDialog<TValue extends string>({
   // An answer on its way owns the dialog until it lands, so escape and the backdrop leave it standing the
   // same way the buttons do; whoever asked closes it themselves once they have the answer
   const handleClose = () => {
+    // Only a question with nothing in flight can be dismissed
     if (!isSending) {
       onClose()
     }

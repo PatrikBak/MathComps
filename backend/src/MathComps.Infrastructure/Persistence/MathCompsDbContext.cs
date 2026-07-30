@@ -164,14 +164,20 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         // Register custom database function for PostgreSQL's immutable_unaccent().
         // This allows EF Core to translate our C# method calls to SQL immutable_unaccent() function calls.
         // We use immutable_unaccent to match the index and ensure consistent behavior.
-        modelBuilder.HasDbFunction(typeof(Extensions.PostgresDbFunctions).GetMethod(nameof(Extensions.PostgresDbFunctions.Unaccent))!)
+        var unaccentMethod = typeof(Extensions.PostgresDbFunctions)
+            .GetMethod(nameof(Extensions.PostgresDbFunctions.Unaccent))!;
+
+        modelBuilder.HasDbFunction(unaccentMethod)
             .HasName("immutable_unaccent")
             .HasSchema("public");
 
         // IDs (Guid v7) are generated client-side in entities; tell EF the store does NOT generate them.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
+            // The entity's own id, if it has one
             var idProp = entityType.FindProperty("Id");
+
+            // Only the Guid ids the entities mint themselves
             if (idProp is { ClrType: var type } && type == typeof(Guid))
                 idProp.ValueGenerated = ValueGenerated.Never;
         }
@@ -500,7 +506,8 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .OnDelete(DeleteBehavior.Cascade);
 
             // Reject self-links.
-            e.ToTable(t => t.HasCheckConstraint("ck_problem_similarity_not_self", "\"source_problem_id\" <> \"similar_problem_id\""));
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_problem_similarity_not_self", "\"source_problem_id\" <> \"similar_problem_id\""));
 
             // Inbound lookup for "who points to this problem"
             e.HasIndex(x => x.SimilarProblemId).HasDatabaseName("ix_problem_similarity_similar_problem_id");
@@ -864,10 +871,8 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .HasForeignKey(report => report.SessionId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            // The reported reply itself, one report to a reply, cascading because a report is only worth anything
-            // beside the reply it is against: rewinding past that reply takes what was said about it too. The
-            // conversation rides in the key so the reply has to be one of that conversation's own, which is what
-            // stops a row claiming a reply another conversation holds.
+            // The reported reply, one report to a reply, cascading so a rewind past it takes the report too. The
+            // conversation rides in the key, so the reply has to be one of that conversation's own.
             e.HasOne(report => report.Turn)
              .WithOne()
              .HasPrincipalKey<DefenseTurn>(turn => new { turn.SessionId, turn.Id })
@@ -879,8 +884,7 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .IsUnique()
              .HasDatabaseName("ux_defense_turn_report_session_id_turn_id");
 
-            // The house name for the constraint holding a reply to one report, which the revising write
-            // conflicts on.
+            // One report per reply site-wide, which is also the conflict target a revised report is written on.
             e.HasIndex(report => report.TurnId)
              .IsUnique()
              .HasDatabaseName("ux_defense_turn_report_turn_id");

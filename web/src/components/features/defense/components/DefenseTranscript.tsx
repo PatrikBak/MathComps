@@ -153,7 +153,7 @@ export function DefenseTranscript({
               )
             })}
 
-            {/* The examiner working on its next reply */}
+            {/* The examiner working on her next reply */}
             {isThinking && <ThinkingIndicator label={thinkingLabel} />}
           </div>
 

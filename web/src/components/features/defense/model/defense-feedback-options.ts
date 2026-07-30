@@ -3,12 +3,12 @@ import type { Messages } from 'next-intl'
 import type { DefenseOutcome, DefenseReportCategory } from './defense-types'
 
 /**
- * Union of the valid `defense.outcomes.*` translation keys.
+ * Union of the `outcomes.*` message keys, valid inside the `defense` namespace.
  */
 type OutcomeLabelKey = `outcomes.${string & keyof Messages['defense']['outcomes']}`
 
 /**
- * Union of the valid `defense.reportCategories.*` translation keys.
+ * Union of the `reportCategories.*` message keys, valid inside the `defense` namespace.
  */
 type ReportCategoryLabelKey =
   `reportCategories.${string & keyof Messages['defense']['reportCategories']}`

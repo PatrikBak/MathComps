@@ -40,8 +40,8 @@ type UseDefenseConversationResult = DefenseConversationState &
     /** This problem's persisted sessions, oldest first. */
     sessions: DefenseSession[]
     /**
-     * Whether the conversation asked for on open has had its chance to be resumed: the history has loaded and the
-     * resume either happened or found nothing to resume.
+     * Whether the conversation asked for on open has had its chance to be resumed: the history has
+     * loaded and the resume has either happened or been passed over.
      */
     initialResumeSettled: boolean
     /** Whether loading this problem's session history failed. */
@@ -56,8 +56,8 @@ type UseDefenseConversationResult = DefenseConversationState &
 
 /**
  * Drives one defense conversation: the live transcript, sending a student turn and getting the
- * examiner's reply, and persisting the session as it grows. Also surfaces this problem's session
- * history.
+ * examiner's reply, persisting the session as it grows, and holding what the student says about it.
+ * Also surfaces this problem's session history.
  *
  * A thin React binding over {@link DefenseConversationModel}: the model owns the state machine and its
  * concurrency, this hook wires it to React and to the session-history query. The problem's identity
@@ -69,14 +69,15 @@ type UseDefenseConversationResult = DefenseConversationState &
  * @param initialSessionId - The id of a specific saved session to resume on open rather than the newest; when it
  *   isn't among this problem's sessions, none is resumed.
  *
- * @returns The live conversation, its send flow, and this problem's session history.
+ * @returns The live conversation, its send flow, what the student says about it, and this problem's
+ *   session history.
  */
 export function useDefenseConversation(
   problem: DefenseProblem,
   opener: string,
   initialSessionId: string | undefined
 ): UseDefenseConversationResult {
-  // Cache handle for the session history
+  // The query cache
   const queryClient = useQueryClient()
 
   // The authenticated API client
@@ -139,8 +140,8 @@ export function useDefenseConversation(
       })
   )
 
-  // Track the model's state; a fresh model's snapshot is deterministic, so the same read doubles as
-  // the server-render snapshot
+  // The model's current state; a fresh model's snapshot is deterministic, so the same read doubles
+  // as the server-render snapshot
   const state = useSyncExternalStore(model.subscribe, model.getSnapshot, model.getSnapshot)
 
   // Whether the one-time auto-resume has already run

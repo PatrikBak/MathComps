@@ -68,10 +68,10 @@ public interface IDefenseFeedbackService
 }
 
 /// <summary>
-/// Thrown when feedback says nothing the contract can take: a report naming no way the reply went wrong, a report
-/// blaming <see cref="DefenseReportCategory.Other"/> without saying what happened, an answer picking
-/// <see cref="DefenseOutcome.SomethingElse"/> without saying what it was, or an outcome or category outside the
-/// ones the contract defines.
+/// Thrown when feedback says nothing the contract can take: a report naming no way the reply went wrong, a
+/// report blaming <see cref="DefenseReportCategory.Other"/> without saying what happened, an answer naming no
+/// outcome at all or picking <see cref="DefenseOutcome.SomethingElse"/> without saying what it was, or an
+/// outcome or category outside the ones the contract defines.
 /// </summary>
 public sealed class DefenseFeedbackValueException() : Exception("The feedback says nothing");
 

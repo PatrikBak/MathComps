@@ -63,7 +63,7 @@ public class DefenseSession
     public required DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>
-    /// The conversation's turns, in order.
+    /// The conversation's turns.
     /// </summary>
     public ICollection<DefenseTurn> Turns { get; } = [];
 

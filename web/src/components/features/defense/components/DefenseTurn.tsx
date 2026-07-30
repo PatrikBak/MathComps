@@ -41,8 +41,8 @@ type DefenseTurnProps = TurnActionsAffordance & {
   /** Rewinds the conversation to this turn. */
   onRewind: () => void
   /**
-   * Says what went wrong with this reply, or revises what was already said; null on a turn there is nothing
-   * to report, which is what withholds the control.
+   * Says what went wrong with this reply, or revises what was already said; null on a turn with nothing to
+   * report.
    */
   onReport: (() => void) | null
 }

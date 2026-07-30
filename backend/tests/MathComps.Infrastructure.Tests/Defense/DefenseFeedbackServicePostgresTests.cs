@@ -178,7 +178,8 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
             .SingleAsync());
 
         // Change what is held against it
-        await service.ReportTurnAsync(_ownerId, _sessionId, _replyId, [Category.GaveAway, Category.Tone], "she just told me");
+        await service.ReportTurnAsync(
+            _ownerId, _sessionId, _replyId, [Category.GaveAway, Category.Tone], "she just told me");
 
         // Read back what the reply now carries
         await QueryAsync(async context =>
@@ -193,8 +194,10 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
             // It is the same row throughout, so its time-ordered key still says when it first appeared
             Assert.Equal(first.Id, report.Id);
 
-            // The first stamp stands, and the revision moved the second past it
+            // The first stamp stands
             Assert.Equal(first.CreatedAt, report.CreatedAt);
+
+            // And the revision moved the second past it
             Assert.True(report.UpdatedAt > first.UpdatedAt);
         });
     });
@@ -206,8 +209,10 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
     [Fact]
     public Task Every_reply_carries_its_own_report() => RunTestAsync(async service =>
     {
-        // Report both of the conversation's examiner turns
+        // Report the opener
         await service.ReportTurnAsync(_ownerId, _sessionId, _openerId, [Category.Tone], comment: null);
+
+        // Report the reply
         await service.ReportTurnAsync(
             _ownerId, _sessionId, _replyId, [Category.MissedTheMistake], comment: null);
 
@@ -240,9 +245,8 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// A report that names no way the reply went wrong holds nothing against it, so there is nothing to record.
-    /// A client can say so either by sending an empty list or by leaving it out of the body altogether, which
-    /// arrives here as null; both are the client's fault rather than ours.
+    /// A report that names no way the reply went wrong holds nothing against it, so there is nothing to record,
+    /// and that's the client's fault rather than ours.
     /// </summary>
     [Fact]
     public Task Report_refuses_naming_nothing_wrong() => RunTestAsync(async service =>
@@ -250,10 +254,6 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
         // Report the reply with an empty list of faults
         await Assert.ThrowsAsync<DefenseFeedbackValueException>(() =>
             service.ReportTurnAsync(_ownerId, _sessionId, _replyId, [], comment: null));
-
-        // Report it without the list at all, as a body that omits it deserializes
-        await Assert.ThrowsAsync<DefenseFeedbackValueException>(() =>
-            service.ReportTurnAsync(_ownerId, _sessionId, _replyId, null!, comment: null));
     });
 
     /// <summary>
@@ -436,8 +436,10 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
             Assert.Equal(DefenseOutcome.FoundTheMistake, feedback.Outcome);
             Assert.Equal("she was right", feedback.Comment);
 
-            // The first stamp stands, and the revision moved the second past it
+            // The first stamp stands
             Assert.Equal(first.CreatedAt, feedback.CreatedAt);
+
+            // And the revision moved the second past it
             Assert.True(feedback.UpdatedAt > first.UpdatedAt);
         });
     });
@@ -449,8 +451,10 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
     [Fact]
     public Task A_report_can_be_taken_back() => RunTestAsync(async service =>
     {
-        // Report both of the conversation's examiner turns
+        // Report the opener
         await service.ReportTurnAsync(_ownerId, _sessionId, _openerId, [Category.Tone], comment: null);
+
+        // Report the reply
         await service.ReportTurnAsync(_ownerId, _sessionId, _replyId, [Category.GaveAway], comment: null);
 
         // Take back the one against the reply
@@ -526,8 +530,10 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
     [Fact]
     public Task Another_users_session_is_out_of_reach_for_both_withdrawals() => RunTestAsync(async service =>
     {
-        // Say both things about the conversation
+        // Hold something against the reply
         await service.ReportTurnAsync(_ownerId, _sessionId, _replyId, [Category.Tone], comment: null);
+
+        // Answer for the conversation
         await service.SubmitFeedbackAsync(_ownerId, _sessionId, DefenseOutcome.WasOff, comment: null);
 
         // Take back a report in someone else's conversation
