@@ -21,7 +21,7 @@ import type { DefenseSession } from '../model/defense-types'
  * Props for the {@link DefenseHistoryMenu}.
  */
 type DefenseHistoryMenuProps = {
-  /** This problem's sessions, oldest first. */
+  /** This problem's sessions, most recently active first. */
   sessions: DefenseSession[]
   /** The id of the currently open session, if any. */
   currentSessionId: string | null
@@ -33,7 +33,7 @@ type DefenseHistoryMenuProps = {
 
 /**
  * The header's history control: a dropdown listing this problem's past defenses, each resumable or
- * deletable, newest first. `modal={false}` keeps it from fighting the surrounding dialog's focus trap.
+ * deletable. `modal={false}` keeps it from fighting the surrounding dialog's focus trap.
  * Memoized so composer keystrokes don't re-render the session rows.
  */
 export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
@@ -53,9 +53,6 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
 
   // The session awaiting delete confirmation, or null
   const [sessionToDelete, setSessionToDelete] = useState<DefenseSession | null>(null)
-
-  // Newest session first
-  const ordered = [...sessions].reverse()
 
   // Arms the confirmation for a session and steps out of the dropdown
   const askToDelete = (session: DefenseSession) => {
@@ -99,11 +96,14 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
         <DropdownMenuContent align="end" className="w-72">
           {/* One row per session: resume by selecting it, delete by the overlaid control or the
               Delete key on the focused row */}
-          {ordered.map((session) => {
+          {sessions.map((session) => {
             // The student's first message, absent while nothing has been said in the conversation yet
             const firstStudentMessage = session.turns.find(
               (turn) => turn.role === 'candidate'
             )?.content
+
+            // The turn that spoke last
+            const lastTurn = session.turns[session.turns.length - 1]
 
             return (
               <div key={session.id} className="relative">
@@ -123,9 +123,9 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
                     session.id === currentSessionId && 'bg-brand/10'
                   )}
                 >
-                  {/* When the session was started: its first turn's stamp */}
+                  {/* When the conversation last moved */}
                   <span className="text-[11px] text-muted">
-                    {format.dateTime(new Date(session.turns[0].createdAt), {
+                    {format.dateTime(new Date(lastTurn.createdAt), {
                       dateStyle: 'short',
                       timeStyle: 'short',
                     })}

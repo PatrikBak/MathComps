@@ -94,8 +94,8 @@ export type DefenseSession = {
 }
 
 /**
- * One of a user's defenses as it appears in their cross-problem list: a summary of what it was about and how it
- * opened. It carries no turns.
+ * One of a user's defenses as it appears in their cross-problem list: a summary of what it was about, when it
+ * last moved, and how it opened. It carries no turns.
  */
 export type DefenseSessionListItem = {
   /** Stable identifier. */
@@ -104,8 +104,8 @@ export type DefenseSessionListItem = {
   target: HandoutEnvironmentTarget
   /** The problem statement as it stood when the session was started. */
   statement: string
-  /** When the session was started, as an ISO-8601 string. */
-  createdAt: string
+  /** When something was last said in the conversation, as an ISO-8601 string. */
+  lastActivityAt: string
   /** The student's first message; null when the session has none. */
   firstStudentMessage: string | null
 }
