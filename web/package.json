@@ -9,6 +9,7 @@
     "preview": "next build && next start",
     "test": "vitest",
     "test:run": "vitest run",
+    "e2e:session": "playwright test && tsx scripts/write-mcp-session-injector.ts",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "type-check": "tsc --noEmit",
@@ -85,8 +86,10 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@clerk/testing": "^2.2.15",
     "@clerk/types": "^4.101.14",
     "@lingual/i18n-check": "^0.9.5",
+    "@playwright/test": "^1.62.0",
     "@tailwindcss/postcss": "^4",
     "@types/hast": "^3.0.4",
     "@types/node": "^25",
