@@ -107,6 +107,10 @@ public sealed class GlobalExceptionHandler(
         MarkStatusRequiresAuthenticationException => (StatusCodes.Status401Unauthorized, ApiErrorCode.MarkStatusRequiresAuthentication),
         UserNotResolvedException => (StatusCodes.Status401Unauthorized, ApiErrorCode.UserNotResolved),
 
+        // A body the route can't be built from never reaches an endpoint, so the framework is the one that
+        // judged it; carrying its own status through is what stops a caller's bad JSON reading as our fault
+        BadHttpRequestException badRequest => (badRequest.StatusCode, ApiErrorCode.MalformedRequest),
+
         // Not a known business failure — treat as an unexpected fault
         _ => null
     };

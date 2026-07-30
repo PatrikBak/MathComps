@@ -44,6 +44,7 @@
     "ListAccessDenied": "Tento seznam je soukromý. Pokud je to váš seznam, nejprve se přihlaste.",
     "ListNotFound": "Seznam nebyl nalezen.",
     "ListReorderMismatch": "Seznam se mezitím změnil. Obnovte stránku a zkuste to znovu.",
+    "MalformedRequest": "Požadavek se nepodařilo přečíst. Obnovte stránku a zkuste to znovu.",
     "MarkStatusRequiresAuthentication": "Pro filtrování podle svého pokroku se přihlaste.",
     "NotCommentAuthor": "Upravovat nebo mazat můžeš jen vlastní komentáře.",
     "ProblemNotFound": "Úloha nebyla nalezena.",
