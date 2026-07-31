@@ -52,6 +52,8 @@ type HandoutDetailProps = {
   contentId: string
   /** PDF filename stem for R2 downloads, e.g. "fun-algebra.sk" */
   pdfFilenameStem: string
+  /** Whether the handout's solutions, proofs and answers stay hidden */
+  hideSolutionsAndProofs: boolean
   /** Metadata for each section in the handout */
   sectionMetadata: SectionMetadata[]
   /** The current locale */
@@ -105,6 +107,7 @@ function renderDifficultyStars(difficulty: number): React.ReactNode {
  * @param t Translator bound to the handouts namespace.
  * @param imageMissingText Fallback text for missing images.
  * @param contentId The handout's content id.
+ * @param hideSolutionsAndProofs Whether solutions, proofs and answers stay hidden.
  * @returns The rendered document tree wrapped in a math-styled container.
  */
 function renderDocumentSections(
@@ -113,7 +116,8 @@ function renderDocumentSections(
   imagesById: Record<string, HandoutImage>,
   t: HandoutsTranslator,
   imageMissingText: string,
-  contentId: string
+  contentId: string,
+  hideSolutionsAndProofs: boolean
 ): React.ReactNode {
   // Translate the environment labels
   const localizedEnvironmentLabelByType = buildEnvironmentLabels(t)
@@ -221,14 +225,15 @@ function renderDocumentSections(
             // Subtitle badge: shown only when the author provided a title.
             const subtitleBadge = userProvidedTitle ? userProvidedTitle : undefined
 
-            // The collapsible parts of the environment
+            // The collapsible parts of the environment. Hiding leaves a problem with just its hints
+            // and every other kind of environment with nothing.
             const disclosures: DisclosurePanelProps[] = []
             switch (contentBlock.type) {
               case 'definition':
                 // Definitions are self-contained — no proof, solution, or hints.
                 break
               case 'theorem':
-                if (contentBlock.proof.length > 0) {
+                if (!hideSolutionsAndProofs && contentBlock.proof.length > 0) {
                   disclosures.push({
                     label: t('labels.proof'),
                     textColorClass: ENVIRONMENT_TEXT_COLOR.theorem,
@@ -242,7 +247,11 @@ function renderDocumentSections(
                 break
               case 'exercise':
               case 'example':
-                if (contentBlock.answer && contentBlock.answer.length > 0) {
+                if (
+                  !hideSolutionsAndProofs &&
+                  contentBlock.answer &&
+                  contentBlock.answer.length > 0
+                ) {
                   disclosures.push({
                     label: t('labels.answer'),
                     textColorClass: ANSWER_TEXT_COLOR,
@@ -251,7 +260,7 @@ function renderDocumentSections(
                     children: renderBlocks(contentBlock.answer, imagesById, imageMissingText),
                   })
                 }
-                if (contentBlock.solution.length > 0) {
+                if (!hideSolutionsAndProofs && contentBlock.solution.length > 0) {
                   disclosures.push({
                     label: t('labels.solution'),
                     textColorClass: ENVIRONMENT_TEXT_COLOR[contentBlock.type],
@@ -271,7 +280,11 @@ function renderDocumentSections(
                     children: renderBlocks(hint, imagesById, imageMissingText),
                   })
                 })
-                if (contentBlock.answer && contentBlock.answer.length > 0) {
+                if (
+                  !hideSolutionsAndProofs &&
+                  contentBlock.answer &&
+                  contentBlock.answer.length > 0
+                ) {
                   disclosures.push({
                     label: t('labels.answer'),
                     textColorClass: ANSWER_TEXT_COLOR,
@@ -280,7 +293,7 @@ function renderDocumentSections(
                     children: renderBlocks(contentBlock.answer, imagesById, imageMissingText),
                   })
                 }
-                if (contentBlock.solution.length > 0) {
+                if (!hideSolutionsAndProofs && contentBlock.solution.length > 0) {
                   disclosures.push({
                     label: t('labels.solution'),
                     textColorClass: ENVIRONMENT_TEXT_COLOR.problem,
@@ -334,6 +347,7 @@ export default function HandoutDetail({
   sectionMetadata,
   contentId,
   pdfFilenameStem,
+  hideSolutionsAndProofs,
   locale,
 }: HandoutDetailProps) {
   // The translations objects
@@ -389,7 +403,10 @@ export default function HandoutDetail({
           )}
 
           {/* Share / download actions — pills on sm+, three-dot dropdown on smaller screens */}
-          <HandoutActions pdfFilenameStem={pdfFilenameStem} />
+          <HandoutActions
+            pdfFilenameStem={pdfFilenameStem}
+            hideSolutionsAndProofs={hideSolutionsAndProofs}
+          />
         </div>
       </header>
 
@@ -400,7 +417,8 @@ export default function HandoutDetail({
         imagesById,
         t,
         imageMissingText,
-        contentId
+        contentId,
+        hideSolutionsAndProofs
       )}
 
       {/* Comments Section */}

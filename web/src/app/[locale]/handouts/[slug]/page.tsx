@@ -180,6 +180,7 @@ export default withLocale(async function RenderPage({
             slug={slug}
             contentId={handoutMeta.id}
             pdfFilenameStem={`${fileBasename}.${locale}`}
+            hideSolutionsAndProofs={handoutMeta.hideSolutionsAndProofs ?? false}
             locale={locale}
           />
         </Layout>

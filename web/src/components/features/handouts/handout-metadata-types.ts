@@ -42,6 +42,11 @@ export type HandoutMetadata = {
   updatedAt: string
   /** Whether the handout appears in the public listing (defaults to true when absent) */
   public?: boolean
+  /**
+   * Whether the handout's solutions, proofs, answers and full-solutions PDF stay hidden
+   * (defaults to false when absent). Hints stay visible either way.
+   */
+  hideSolutionsAndProofs?: boolean
 }
 
 /**
