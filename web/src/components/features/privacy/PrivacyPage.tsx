@@ -46,6 +46,9 @@ export default function PrivacyPage() {
             <li>
               {t.rich('sections.data.content', { strong: (chunks) => <strong>{chunks}</strong> })}
             </li>
+            <li>
+              {t.rich('sections.data.aiTutor', { strong: (chunks) => <strong>{chunks}</strong> })}
+            </li>
           </ul>
           <p>
             {t.rich('sections.data.processor', {
@@ -56,6 +59,7 @@ export default function PrivacyPage() {
               ),
             })}
           </p>
+          <p>{t('sections.data.aiProcessor')}</p>
         </section>
 
         {/* Cookies & storage */}
