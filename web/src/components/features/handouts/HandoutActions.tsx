@@ -24,6 +24,8 @@ import { useWakeLockContext } from './WakeLockProvider'
 type HandoutActionsProps = {
   /** PDF filename stem, e.g. "fun-algebra.sk" (without extension). */
   pdfFilenameStem: string
+  /** Whether the handout's solutions, proofs and answers stay hidden. */
+  hideSolutionsAndProofs: boolean
 }
 
 /**
@@ -138,7 +140,7 @@ function renderActionPill(action: HandoutAction) {
  * Both presentations consume the same action descriptors so the action list
  * stays defined exactly once.
  */
-export function HandoutActions({ pdfFilenameStem }: HandoutActionsProps) {
+export function HandoutActions({ pdfFilenameStem, hideSolutionsAndProofs }: HandoutActionsProps) {
   // Translation hooks
   const tActions = useTranslations('ui.actions')
   const tHandouts = useTranslations('handouts.labels')
@@ -174,15 +176,22 @@ export function HandoutActions({ pdfFilenameStem }: HandoutActionsProps) {
     },
   ]
 
+  // The full PDF carries the solutions, so a handout hiding them doesn't offer it
+  const fullPdfActions: HandoutAction[] = hideSolutionsAndProofs
+    ? []
+    : [
+        {
+          key: 'download-full',
+          kind: 'link',
+          icon: <Download className={iconClassName} aria-hidden />,
+          label: tHandouts('downloadPdf'),
+          href: getHandoutPdfUrl(`${pdfFilenameStem}.pdf`),
+        },
+      ]
+
   // Download actions — grouped together with a separator before them in the dropdown
   const downloadActions: HandoutAction[] = [
-    {
-      key: 'download-full',
-      kind: 'link',
-      icon: <Download className={iconClassName} aria-hidden />,
-      label: tHandouts('downloadPdf'),
-      href: getHandoutPdfUrl(`${pdfFilenameStem}.pdf`),
-    },
+    ...fullPdfActions,
     {
       key: 'download-skeleton',
       kind: 'link',

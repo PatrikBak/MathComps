@@ -490,6 +490,15 @@ function validate(): string[] {
       // Validate difficulty
       errors.push(...validateDifficulty(handout.difficulty, handoutContext))
 
+      // The handout's hide-solutions switch, as authored
+      const hideFlag = handout.hideSolutionsAndProofs
+
+      // A quoted "false" or a 0/1 reads as a boolean to the eye but not to a consumer
+      if (hideFlag !== undefined && typeof hideFlag !== 'boolean') {
+        // Record the mistyped value
+        errors.push(`❌ Non-boolean "hideSolutionsAndProofs" for ${handoutContext}`)
+      }
+
       // The content filename stem shared across locales
       const slug = getContentFileBasename(handout)
       // Every declared locale must have a matching content file

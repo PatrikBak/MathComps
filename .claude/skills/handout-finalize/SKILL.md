@@ -36,6 +36,7 @@ Then decide:
 - **`languages`** — set to the locales that have a `.tex` file only if that is a strict subset of `sk`, `cs`, `en`. If all three exist, omit.
 - **`fileSlug`** — set to `<base>` only if there is no English `.tex`; otherwise omit.
 - **`public`** — omit unless the user has said the handout is unlisted.
+- **`hideSolutionsAndProofs`** — ask the user whether to ship the solutions with it. `true` keeps solutions, proofs, answers and the full-solutions PDF off the page (hints and the skeleton PDF stay); omit to publish them. Worth asking whenever the solutions are unreviewed or the handout is about to be lectured.
 
 ### 2. Generate the `id` and edit `handouts.json`
 
@@ -55,7 +56,7 @@ Write the entry matching the field order, 2-space indent, and trailing-newline s
 }
 ```
 
-Optional fields, only when applicable, inserted in this order after `id`: `"public": false`, `"languages": [...]`, `"eventId": "..."`, `"fileSlug": "..."`.
+Optional fields, only when applicable, inserted in this order after `id`: `"public": false`, `"hideSolutionsAndProofs": true`, `"languages": [...]`, `"eventId": "..."`, `"fileSlug": "..."`.
 
 - **Planned → ready:** replace in place.
 - **New:** append to the chosen section's `handouts` array.
@@ -123,4 +124,4 @@ One short summary: entry added/promoted, chosen category, generated JSONs in `we
 - **Never edit `.tex` content** except to fix a typo/non-canonical command surfaced as unknown.
 - **Never commit or push, never configure R2 credentials, never modify `handout-metadata-types.ts` or the validation script.**
 - **Before editing the cleaner-rules file**, re-read it to preserve section order, comment style, and regex conventions. Never reorder or dedupe existing entries.
-- **Only ask the user when genuinely blocked** — e.g. `.tex` metadata (title/slug/author) disagrees across locales in a way that isn't a translation. Never ask for confirmation of derived values.
+- **Only ask the user when genuinely blocked** — e.g. `.tex` metadata (title/slug/author) disagrees across locales in a way that isn't a translation. Never ask for confirmation of derived values. The one standing question is `hideSolutionsAndProofs`: nothing in the `.tex` says whether the solutions are ready to be seen.
