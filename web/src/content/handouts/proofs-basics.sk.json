@@ -304,16 +304,6 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "example",
               "id": "6KrSLRVFvoy9OdoVfehCQ",
               "slug": "stvorce-neparnych-cisel-modulo-8",
@@ -737,16 +727,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "exercise",
               "id": "sftFVZqBaqREN0z-UcX-t",
               "slug": "stvorec-prvocisla-minus-jedna",
@@ -968,16 +948,6 @@
                 {
                   "type": "text",
                   "text": "V\u00A0ťažších úlohách nemusí byť hneď zrejmé, ako predpoklady zo zadania využiť a je potrebné analyzovať situáciu."
-                }
-              ],
-              "highligted": false
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
                 }
               ],
               "highligted": false
@@ -3507,16 +3477,6 @@
                 {
                   "type": "text",
                   "text": "."
-                }
-              ],
-              "highligted": false
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
                 }
               ],
               "highligted": false

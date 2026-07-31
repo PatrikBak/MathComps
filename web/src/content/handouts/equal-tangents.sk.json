@@ -2291,16 +2291,6 @@
               "solution": []
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "ywat5ogtaZvQd-symWXYX",
               "slug": "dotykove-body-na-uhloprieckach-rovnobeznika",
@@ -3913,7 +3903,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Každá dvojica susediacich rohových kružníc sa dotýka aj jednej zo štyroch vnútorných úsečiek — tej, ktorá ohraničuje okrajovú bunku zdieľanú týmito dvomi rohmi voči strednej bunke. Preneste každú zo štyroch vonkajších dotyčníc na zodpovedajúcu vnútornú úsečku pomocou rovnakých dotyčníc."
+                        "text": "Každá dvojica susediacich rohových kružníc sa dotýka aj jednej zo štyroch vnútorných úsečiek (tej, ktorá ohraničuje okrajovú bunku zdieľanú týmito dvomi rohmi voči strednej bunke). Preneste každú zo štyroch vonkajších dotyčníc na zodpovedajúcu vnútornú úsečku pomocou rovnakých dotyčníc."
                       }
                     ],
                     "highligted": false
@@ -4446,16 +4436,6 @@
                 ]
               ],
               "solution": []
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
             },
             {
               "type": "problem",
@@ -5854,6 +5834,24 @@
                       },
                       {
                         "type": "text",
+                        "text": " na priamkach "
+                      },
+                      {
+                        "type": "math",
+                        "text": "AB",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "AC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
                         "text": " je presne polovica obvodu, teda 2. A\u00A0"
                       },
                       {
@@ -5942,7 +5940,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "DE",
+                        "text": "XY",
                         "isDisplay": false
                       },
                       {

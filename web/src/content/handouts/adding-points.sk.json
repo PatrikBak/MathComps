@@ -4623,16 +4623,6 @@
               "solution": []
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "cvVqE4nT1JdVqFMok0P_I",
               "slug": "osi-useciek-bd-a-ce",

@@ -205,16 +205,6 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "example",
               "id": "D0LGFK_pfJGjGSaEZ_Hke",
               "slug": "system-x2-plus-one-by-subtracting",
@@ -1710,16 +1700,6 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "example",
               "id": "fJHAdZ9nOAf90RwGcVUgs",
               "slug": "system-x2-plus-one-by-adding",
@@ -2156,16 +2136,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "exercise",
               "id": "b1Qku8TQk_bISQjaLLwJt",
               "slug": "squares-equal-four-times-one-less",
@@ -2540,16 +2510,6 @@
                 {
                   "type": "text",
                   "text": "Without much talk, we will show this on our example:"
-                }
-              ],
-              "highligted": false
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
                 }
               ],
               "highligted": false
@@ -3778,16 +3738,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "exercise",
               "id": "Er1LlMMLgP86yG2Cwg-A3",
               "slug": "fifth-powers-of-sums",
@@ -4721,16 +4671,6 @@
                 {
                   "type": "text",
                   "text": "So that it's not too little, here are a few more problems. All combine in various ways the methods which we have learned or seen along the way (such as factorization, completing the square, case analysis, adding/subtracting equations, etc.). Problems are ordered approximately by difficulty."
-                }
-              ],
-              "highligted": false
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
                 }
               ],
               "highligted": false

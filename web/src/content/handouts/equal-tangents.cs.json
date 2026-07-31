@@ -2264,16 +2264,6 @@
               "solution": []
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "ywat5ogtaZvQd-symWXYX",
               "slug": "dotykove-body-na-uhloprickach-rovnobezniku",
@@ -4329,16 +4319,6 @@
                 ]
               ],
               "solution": []
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
             },
             {
               "type": "problem",

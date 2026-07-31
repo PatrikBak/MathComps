@@ -5058,16 +5058,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "zHb1mdkxX4xBnPceHR1ud",
               "slug": "tretie-mocniny-a-stvorce-dvojice",

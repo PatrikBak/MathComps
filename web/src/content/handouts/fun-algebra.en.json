@@ -558,16 +558,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "T30uF67thgCpvHWXzfoqr",
               "slug": "values-of-cyclic-fraction-sum",

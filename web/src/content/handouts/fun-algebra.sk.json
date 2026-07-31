@@ -1587,16 +1587,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "ezUe8vAa8glYER7DWNTS6",
               "slug": "sustava-rozdielov-stvorcov",

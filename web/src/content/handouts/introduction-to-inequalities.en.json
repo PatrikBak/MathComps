@@ -898,16 +898,6 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "exercise",
               "id": "JhZA_Dzle9gA4kV4lKv9q",
               "slug": "sum-of-powers-of-two-positive-numbers",
