@@ -590,13 +590,15 @@
     "replies": "{count, plural, =1 {# odpoveď} =2 {# odpovede} =3 {# odpovede} =4 {# odpovede} other {# odpovedí}}"
   },
   "privacy": {
-    "lastUpdated": "Posledná aktualizácia: 8. júla 2026",
+    "lastUpdated": "Posledná aktualizácia: 31. júla 2026",
     "sections": {
       "cookies": {
         "text": "Súbory cookies sú používané výhradne na funkcionality stránky (napr. udržanie prihlásenia). Nie sú postupované tretím stranám.",
         "title": "3. Cookies"
       },
       "data": {
+        "aiProcessor": "Odpovede Mathildy generuje externý poskytovateľ AI; obsah tvojej konverzácie sa mu posiela na spracovanie.",
+        "aiTutor": "<strong>Konverzácie s AI tútorkou:</strong> Mathilda je naša AI tútorka, s ktorou preberáš svoje riešenia alebo nápady k úlohám z materiálov. Ak ju používaš, tvoje správy aj jej odpovede sa ukladajú, aby konverzácia zostala zachovaná aj pri ďalšej návšteve. Ktorúkoľvek konverzáciu môžeš kedykoľvek zmazať z jej histórie. Konverzácie môžeme použiť aj na zlepšovanie Mathildy.",
         "content": "<strong>Obsah:</strong> Všetok tvoj obsah, ktorý vkladáš na stránku.",
         "intro": "Používame a ukladáme nasledujúce údaje:",
         "login": "<strong>Login:</strong> Email, meno, profilová fotka, prípadne prepojenie s Google/Discord/GitHub, ak sa prihlásiš cez ne.",

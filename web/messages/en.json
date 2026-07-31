@@ -590,13 +590,15 @@
     "replies": "{count, plural, =1 {# reply} other {# replies}}"
   },
   "privacy": {
-    "lastUpdated": "Last updated: July 8, 2026",
+    "lastUpdated": "Last updated: July 31, 2026",
     "sections": {
       "cookies": {
         "text": "Cookies are used exclusively for website functionality (e.g., maintaining login sessions). They are not shared with third parties.",
         "title": "3. Cookies"
       },
       "data": {
+        "aiProcessor": "Mathilda's replies are generated using a third-party AI provider; your conversation content is sent to them to produce a response.",
+        "aiTutor": "<strong>AI tutor conversations:</strong> Mathilda is our AI tutor who discusses your solutions or ideas for handout problems with you. If you use her, your messages and her replies are stored so the conversation persists across visits. You can delete any conversation at any time from its history menu. We may also use conversations to improve Mathilda.",
         "content": "<strong>Content:</strong> All content you submit to the website.",
         "intro": "We use and store the following data:",
         "login": "<strong>Login:</strong> Email, name, profile photo, and optionally connection with Google/Discord/GitHub if you sign in through them.",
