@@ -1160,16 +1160,6 @@
               "solution": []
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "5dOxVJIKK4L9pkK7lsJb8",
               "slug": "kombinacni-cislo-p-minus-1",
@@ -1986,16 +1976,6 @@
                 ]
               ],
               "solution": []
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
             },
             {
               "type": "problem",

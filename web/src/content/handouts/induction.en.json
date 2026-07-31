@@ -1713,16 +1713,6 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "exercise",
               "id": "E96zQgO_uBsdfUmbYqN4y",
               "slug": "power-of-two-at-least-n",

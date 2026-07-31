@@ -3029,16 +3029,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "zyrVHB-UOHnAnwPbsWeQM",
               "slug": "rozdil-a-soucet-obracenych-cisel",
@@ -3803,16 +3793,6 @@
                   "isDisplay": true
                 }
               ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
             },
             {
               "type": "problem",

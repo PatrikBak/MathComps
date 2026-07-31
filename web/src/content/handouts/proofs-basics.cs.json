@@ -304,16 +304,6 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "example",
               "id": "6KrSLRVFvoy9OdoVfehCQ",
               "slug": "ctverce-lichych-cisel-modulo-8",
@@ -737,16 +727,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "exercise",
               "id": "sftFVZqBaqREN0z-UcX-t",
               "slug": "ctverec-prvocisla-minus-jedna",
@@ -968,16 +948,6 @@
                 {
                   "type": "text",
                   "text": "V\u00A0těžších úlohách nemusí být hned zřejmé, jak předpoklady ze zadání využít a je potřeba analyzovat situaci."
-                }
-              ],
-              "highligted": false
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
                 }
               ],
               "highligted": false
@@ -3507,16 +3477,6 @@
                 {
                   "type": "text",
                   "text": "."
-                }
-              ],
-              "highligted": false
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
                 }
               ],
               "highligted": false

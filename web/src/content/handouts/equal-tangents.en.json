@@ -1389,16 +1389,6 @@
               "solution": []
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "YHoydnnN3mLvYu3xOFGHp",
               "slug": "perimeter-of-triangle-from-tangents",

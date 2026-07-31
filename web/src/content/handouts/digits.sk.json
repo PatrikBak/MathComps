@@ -3029,16 +3029,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "zyrVHB-UOHnAnwPbsWeQM",
               "slug": "rozdiel-a-sucet-obratenych-cisel",
@@ -3518,16 +3508,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "cpOokCbzU9XKnq5Si294a",
               "slug": "stvorky-osmicky-a-deviatka",
@@ -3813,16 +3793,6 @@
                   "isDisplay": true
                 }
               ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
             },
             {
               "type": "problem",

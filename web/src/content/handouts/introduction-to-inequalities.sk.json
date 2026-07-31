@@ -2285,16 +2285,6 @@
               "highligted": false
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "exercise",
               "id": "418Wz9g6IWSugP49_tU-n",
               "slug": "stvorce-plus-dva",
@@ -6373,16 +6363,6 @@
                   "highligted": false
                 }
               ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
             },
             {
               "type": "problem",

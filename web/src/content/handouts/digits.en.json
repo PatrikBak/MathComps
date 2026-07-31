@@ -4193,16 +4193,6 @@
               ]
             },
             {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "\\"
-                }
-              ],
-              "highligted": false
-            },
-            {
               "type": "problem",
               "id": "SiHIZXziGFRgQzQdb180j",
               "slug": "rearranged-digits-of-powers-of-two",
