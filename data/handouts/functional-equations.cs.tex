@@ -1,0 +1,886 @@
+\input _template
+
+\setlanguage{CS}
+
+\Title{Funkcionální rovnice}
+
+\MathcompsLink{funkcionalni-rovnice}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Seznam metod a~sbírka úloh na téma \textit{funkcionální rovnice}. Materiál předpokládá znalosti funkcí; představu, co je funkcionální rovnice a~jak se asi řeší. Úlohy jsou obtížnostně lehké až zhruba na úrovni dvojky z~IMO.
+
+\sec Dosazování
+
+Nejzákladnější a~nejobecnější metoda, bez které se neobejde žádná rovnice. Pár tipů, co a~jak dosazovat:
+
+\begitems \style a
+\i \textbf{Pěkné konstanty} jako $0$, $1$, $-1$, podle situace i~jiné. Snažíme se spočítat funkční hodnoty v~nich.
+\i \textbf{Zjednodušujeme funkce}, například když máme $f(f(x)+y)$, můžeme zkusit $y=-f(x)$.
+\i \textbf{Vyrovnáváme výrazy}, například pokud máme rovnice, kde na jedné straně je $f(x+2f(x))$ a~na druhé $f(y+f(x))$, tak volbou $y:=x+f(x)$ tyto výrazy eliminujeme.
+\enditems
+
+Na dosazování jsou vybudovány všechny další techniky, které vyžadují vhled do situace:
+
+\begitems \style a
+
+\i \textbf{Vyjadřování výrazu dvěma způsoby}, například máme vztah $f(x+y)=V(x,y)$, tak $f(4x)=V(3x,x)$, ale i~$f(4x)=V(2x,2x)$, takže $V(3x,x)=V(2x,2x)$.
+
+\i \textbf{Symetrická záměna proměnných}, například máme vztah $xyf(f(x)f(y))=f(x)+y$, tak záměnou $x,y$ se levá strana nezmění a~zůstane $f(x)+y=f(y)+x$, z~čehož máme okamžitě řešení.
+
+\i \textbf{Průběžně zjednodušujeme rovnice}, například pokud máme nějaký jednoduchý vztah jako $f(x^2)=xf(x)$ a~v~původní rovnici se nám objevuje něco tomu podobného, např. $f(f(x)^2)$. Tento výraz lze nahradit $f(x)f(f(x))$, což nám může pomoci při získání nového pohledu na rovnici.
+
+\i \textbf{Aplikujeme $f$ na rovnici}, například z~$f(f(x))=x+1$ umíme po aplikování $f$ dostat $f(x+1)=f(f(f(x)))=f(x)+1$, čímž jsme se dvojitého $f$ úplně zbavili.
+
+\enditems
+
+\sec Vlastnosti funkce
+
+U mnoha funkcionálních rovnic dosazování jako takové nestačí a~je třeba dělat nějaké úvahy o~vlastnostech hledané funkce. Následující z~nich jsou nejčastější a~nejpoužívanější:
+
+\begitems \style a
+\i \textbf{Sudost a~lichost funkce.} Umíme je dokázat například z~rovnic $f(x^2)=xf(x)$ resp. $f(x^2)=x^2f(x)$. Používá se tak, že díky ní stačí řešit úlohu pro kladná/nekladná/záporná/nezáporná čísla.
+
+\i \textbf{Injektivnost.} Dokázat se dá například v~$f(f(x))=x$. Hlavní výhoda je, že eliminuje $f$-ka -- například z~$f(f(x))=f(x)$ rovnou odvozuje $f(x)=x$.
+
+\i \textbf{Surjektivnost}, resp. znalost oboru hodnot funkce. Tato vlastnost se také dá vidět v~rovnici $f(f(x))=x$. Používá se např. tak, že v~$f(f(x))=f(x)^2$ dává hned $f(x)=x^2$. Také někdy stačí použít, že někde se nabývá $0$, a~tento bod si označit a~dosazovat ho.
+
+\i \textbf{Periodičnost}, pokud zvládneme dokázat např. $f(x+yf(x))=f(x)$, tedy že $f$ je periodická s~periodou $yf(x)$, což je buď identicky $0$, nebo nabývá jakékoli hodnoty, a~jediná taková funkce je konstantní.
+
+\i \textbf{Iterování}, např. $f(y+f(x))=f(y)$ dává $f(y+nf(x))=f(y)$ pro všechna kladná celá $n$.
+
+\i \textbf{Monotónnost}, pokud ji někde dokážeme, např. u~$f(x+y)=f(x)+f(y)$ na~$\R^+$, tak ji umíme použít např. v~$f(f(x))=x$, kde hned máme $f(x)=x$.
+
+\i \textbf{Nulové body}. Někdy neumíme dokázat surjektivnost/bijektivnost, ale umíme zjistit, že funkce je nulová právě v~bodě $0$, potom vztahy jako $f(f(x)-x)=0$ hned dávají $f(x)=x$.
+
+\i \textbf{Pevné body}. Překvapivě užitečné je podívat se na $p$ takové, že $f(p)=p$, např. když víme, že jediný pevný bod je $1$ a~také z~rovnice plyne, že $f(x)-x$ je pevný bod, tak nutně $f(x)=x+1$.
+
+\i \textbf{Nové funkce.} Když např. uhodneme, že $f(x)=x$ je řešení, někdy se vyplatí definovat $g(x)=f(x)-x$ a~ukazovat, že $g$ je nulová, umí to zpřehlednit vztahy.
+
+\enditems
+
+\sec Obecně dobře míněné rady
+
+\begitems \style a
+
+\i \textbf{Uhodněte řešení.} Vždy je dobré systematicky odhadnout řešení rovnice. Udělat si přehled o~lineárních,
+případně kvadratických řešeních. Netřeba se nechat unést tím, že máme jedno
+řešení, stává se, že pokud $f$ je řešení, tak i~$-f$ je řešení. Netřeba zapomínat na
+konstantní funkce.
+
+\i \textbf{Pozor na definiční obor.} Když dosazujeme, tak pozor na to, aby to, co dosazujeme, bylo z~definičního oboru, např. žádné nuly v~$\R^+$, nebo složené výrazy typu $x+y-1$ v~$\R^+$, které můžeme dosadit, jen když $x+y>1$.
+
+\i \textbf{Pozor na past.} Pokud máme, že $f(x)^2=x^2$, ještě to neznamená, že $f(x)\equiv x$ nebo $f(x)\equiv-x$, funkce totiž může někde být $x$ a~jinde zas $-x$. Typicky potřebujeme vyšetřit, zda se to může stát, nejčastěji tak, že předpokládejme, že ne, že $f(a)=a$, $f(b)=-b$, přičemž $a\neq b$, a~vhodně dosazujeme.
+
+\i \textbf{Dělejte zkoušku.} Prakticky vždy je nezbytné udělat zkoušku. Byla by velká škoda ztratit bod za to,
+že tam chybí.
+
+\enditems
+
+\sec Úlohy
+
+\EnvId{OsQvJm3J6CSc1RFSWJgKB-jednicka-plus-soucet-je-soucin}
+\Problem{0}{}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    1+f(x+y) = 2f(x)f(y).
+    $$
+}{
+    Dosaď nulu.
+}{
+    Po dosazení např. $y=0$ se dá přímo vyjádřit $f(x)$ (pozor však na dělení výrazem, který může být nula).
+}{
+    Měli bychom dostat, že $f(x)=1/(2f(0)-1)$. To samo o~sobě vypadá komplikovaně. Avšak pravá strana nezávisí na $x$, tak si ji můžeme jednoduše označit jako $c$. Potom $f(x)=c$. Zbývá dosadit do původní rovnice a~zjistit možné hodnoty $c$.
+}{
+    \Answer{Konstantní funkce $f(x)=1$ a~$f(x)=-1/2$.}
+
+    Volbou $y=0$ dostaneme $1+f(x)=2f(x)f(0)$, čili
+    $$
+    f(x)\bigl(2f(0)-1\bigr) = 1. \eqno(1)
+    $$
+    Kdyby $2f(0)-1=0$, dávala by (1) rovnost $0=1$. Proto $2f(0)-1\neq0$ a
+    $$
+    f(x) = \frac{1}{2f(0)-1},
+    $$
+    což vůbec nezávisí na $x$. Funkce $f$ je tedy konstantní, $f(x)=c$, a~dosazením do zadání máme $1+c=2c^2$, tedy $(2c+1)(c-1)=0$ a~$c=1$ nebo $c=-1/2$.
+
+    Zkouška: pro $f\equiv1$ je $1+f(x+y)=2=2f(x)f(y)$; pro $f\equiv-1/2$ je $1+f(x+y)=1/2$ a~$2\cdot(-1/2)^2=1/2$.
+}
+
+\EnvId{faLp7gelKJFrAnH080BUu-soucet-minus-rozdil-je-xy}
+\Problem{0}{}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f(x+y)-f(x-y) = xy.
+    $$
+}{
+    Vhodné dosazení vynuluje jeden z~argumentů funkce.
+}{
+    Zkusme položit $x=y$ (příp. i~$y=-x$), takto nám zůstane $f(\hbox{něco})$ a~nějaké konstanty. Stačí nám to na dokončení?
+}{
+    \Answer{$f(x)=\frac{x^2}{4}+c$, kde $c$ je libovolná reálná konstanta.}
+
+    Chceme se zbavit jednoho ze dvou argumentů, a~tak položme $x=y$. Argument $x-y$ se vynuluje a~zůstane $f(2x)-f(0)=x^2$. Každé reálné číslo je tvaru $2x$, takže volbou $x=t/2$ máme pro všechna $t\in\R$
+    $$
+    f(t) = \frac{t^2}{4}+f(0).
+    $$
+    Označme $c=f(0)$; o~této konstantě zatím nic nevíme, prověří ji až zkouška. Pro $f(x)=x^2/4+c$ je
+    $$
+    f(x+y)-f(x-y) = \frac{(x+y)^2-(x-y)^2}{4} = xy,
+    $$
+    takže $c$ může být opravdu libovolná.
+}
+
+\EnvId{i1mQ7q_nNCimt9fxBMQb4-soucin-plus-jedna-a-soucet}
+\Problem{0}{}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f(xy+1)+f(x+y) = (f(x)+1)(y+1).
+    $$
+}{
+    Dosaďme vhodnou nulu. Obě možnosti jsou lákavé.
+}{
+    $y=0$ nám překvapivě spočítá $f(1)$. S~tím se dá pracovat. Zkusme však $x=0$, co nám dá tohle?
+}{
+    Odpověď je, že $x=0$ úlohu prakticky řeší: spočítá nám $f(y)$ pomocí $y$ a~konstant. $f$ je tedy lineární.
+}{
+    Dokončit se to dá např. tak, že po spočítání $f(1)$ umíme dosazením $y=1$ spočítat $f(0)$ a~máme to. Jiná možnost je ubouchat to, když máme, že $f$ je lineární, položíme $f(x)=ax+b$ a~dosadíme do finální rovnice.
+}{
+    \Answer{$f(x)=x$.}
+
+    Dosazením $y=0$ se $f(x)$ na obou stranách vyruší a~zůstane $f(1)=1$. Stejně lákavá volba $x=0$ dává $f(1)+f(y)=(f(0)+1)(y+1)$, čili
+    $$
+    f(y) = (f(0)+1)(y+1)-1 \eqno(1)
+    $$
+    pro všechna reálná $y$. Funkce $f$ je tedy lineární a~plně určena jedinou konstantou $f(0)$. Tu dopočítáme dosazením $y=1$ do (1): z~$1=f(1)=2(f(0)+1)-1$ máme $f(0)+1=1$ a~(1) se zjednoduší na $f(y)=y$.
+
+    Zkouška: levá strana je $xy+1+x+y$ a~pravá $(x+1)(y+1)=xy+x+y+1$.
+}
+
+\EnvId{wdGc5sKRpCgIch2m3hs1O-mocnina-souctu-je-soucet-mocnin}
+\Problem{0}{}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f(x+y)^2 = f(x)^2+f(y)^2.
+    $$
+}{
+    Nuly jsou super.
+}{
+    Dvěma nulami spočítáme $f(0)=0$. Umíme to nějak použít?
+}{
+    Trik je položit $y=-x$. Stanou se pěkné věci.
+}{
+    \Answer{Jediným řešením je nulová funkce $f(x)=0$.}
+
+    Dosazením $x=y=0$ dostaneme $f(0)^2=2f(0)^2$, tedy $f(0)=0$. Aby na levé straně vzniklo právě $f(0)$, položme $y=-x$:
+    $$
+    0 = f(0)^2 = f(x)^2+f(-x)^2.
+    $$
+    Součet dvou druhých mocnin reálných čísel je nulový jedině tehdy, když jsou nulové obě, a~proto $f(x)=0$ pro každé reálné $x$.
+
+    Zkouška: pro nulovou funkci je $f(x+y)^2=0=f(x)^2+f(y)^2$.
+}
+
+\EnvId{rVXK6c4kP_jGaNdLry8CS-ctyrclenna-kombinace-posunu}
+\Problem{0}{}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f(x+y)-2f(x-y)+f(x)-2f(y) = y-2.
+    $$
+}{
+    Dosaďme nulu, to nám hned něco spočítá.
+}{
+    Po dosazení $y=0$ se skoro všechno vyruší a~zůstane $f(0)=1$. Co takhle další nula?
+}{
+    $x=0$ nám dává vztah pro $f(y)$ a~$f(-y)$. To nám ještě nespočítá $f(y)$. Chce to ještě jedno dosazení do tohoto vztahu.
+}{
+    Trik je v~této rovnici dosadit $y:=-y$. Takto máme soustavu dvou rovnic o~dvou neznámých $f(y)$ a~$f(-y)$.
+}{
+    \Answer{$f(x)=x+1$.}
+
+    Dosazením $y=0$ se levá strana téměř celá vyruší, zůstane z~ní $-2f(0)$, a~tak $f(0)=1$. Volba $x=0$ potom dává
+    $$
+    -f(y)-2f(-y) = y-3. \eqno(1)
+    $$
+    Tento vztah váže dvě neznámé hodnoty, $f(y)$ a~$f(-y)$, druhou rovnici pro tutéž dvojici však dostaneme zadarmo dosazením $y:=-y$ do (1):
+    $$
+    -f(-y)-2f(y) = -y-3. \eqno(2)
+    $$
+    Když od dvojnásobku (2) odečteme (1), člen s~$f(-y)$ se vyruší a~zbude $-3f(y)=-3y-3$, čili $f(y)=y+1$.
+
+    Zkouška: levá strana je $(x+y+1)-2(x-y+1)+(x+1)-2(y+1)=y-2$.
+}
+
+\EnvId{SinDYYQLU2-pKkM5koX4s-dvojite-slozeni-a-hledani-nuly}
+\Problem{0}{}{
+    Funkce $f\colon \R\to\R$ splňuje rovnici $f(f(x))=x+f(x)$ pro každé $x\in\R$. Najděte všechna řešení rovnice $f(f(x))=0$.
+}{
+    Máme rovnici jen jedné proměnné. Moc toho udělat nejde. Co ale jde, je dokázat nějakou dobrou šikovnou vlastnost $f$.
+}{
+    Ta vlastnost je injektivnost, ta se obecně nabízí, když máme samá rozumně vnořená $f(x)$ a~volně pohozené $x$ mimo $f$.
+}{
+    Po důkazu injektivnosti už umíme na jedno dosazení spočítat $f(0)$.
+}{
+    Když víme $f(0)=0$, víme i~$f(f(0))=0$. Může existovat i~jiné $x$, pro které $f(f(x))=0$? Nezapomeň, co už o~$f$ víme.
+}{
+    \Answer{$x=0$.}
+
+    Zadanou rovnost si upravme na $f(f(x))-f(x)=x$. Je-li nyní $f(x)=f(y)$, pak
+    $$
+    x=f(f(x))-f(x)=f(f(y))-f(y)=y,
+    $$
+    a~$f$ je prostá. Dosazením $x=0$ do zadání získáme $f(f(0))=f(0)$, a~z~prostoty tedy $f(0)=0$; tím máme i~$f(f(0))=0$. Je-li teď $x$ libovolné řešení rovnice $f(f(x))=0$, platí $f(f(x))=f(f(0))=f(0)$, a~tedy $x=0$. Jediným řešením je proto $x=0$.
+}
+
+\EnvId{Fi_6DpBzAvQSV5yHlerRQ-kvadrat-krat-soucet-hodnot}
+\Problem{0}{Czech-Slovak 2004}{
+    Najděte všechny funkce $f\colon \R^+\to\R^+$ takové, že pro všechna kladná reálná čísla $x,y$ platí
+    $$
+    x^2(f(x)+f(y)) = (x+y)f(f(x)y).
+    $$
+}{
+    Zjevně $f(x)=1/x$ funguje a~asi bude finálním řešením. Po dosazení $x=1$ úlohu skoro máme, až na výraz $f(f(1)y)$. Bylo by skvělé mít $f(1)$, označme si tuto hodnotu jako $a$, budeme hodně dosazovat.
+}{
+    Dvě jedničky dávají $f(a)=a$, což nás svádí k~tomu dosadit $x=a$. Takto máme rovnici, kde jediná špatná věc je $f(ay)$. Nemáme ale ještě jinou rovnici s~$f(ay)$?
+}{
+    Hledaná jiná rovnice je vlastně ta, kterou jsme zkoumání $f(1)$ motivovali, $x=1$. Porovnáním rovnic se hodně vytratí.
+}{
+    \Answer{$f(x)=1/x$.}
+
+    Označme $a=f(1)$ a~dosaďme $x=1$:
+    $$
+    a+f(y) = (1+y)f(ay). \eqno(1)
+    $$
+    Kdybychom znali $a$, vyřešil by vztah (1) úlohu rovnou; celé řešení je tedy honba za $f(1)$.
+
+    Volba $y=1$ v~(1) dává $2a=2f(a)$, tedy $f(a)=a$. Díky tomu se pro $x=a$ nepříjemný výraz $f(f(x)y)$ změní na $f(ay)$ a~zadání přejde na
+    $$
+    a^2\bigl(a+f(y)\bigr) = (a+y)f(ay). \eqno(2)
+    $$
+    Jediná špatná věc v~(2) je $f(ay)$, tu však z~(1) vyjádříme jako $\frac{a+f(y)}{1+y}$. Po dosazení do (2) a~vykrácení kladným činitelem $a+f(y)$ zůstane $a^2(1+y)=a+y$, čili $(a^2-1)y=a-a^2$ pro každé $y>0$. To si vynutí $a^2-1=0$ i~$a-a^2=0$, odkud $a=1$, a~vztah (1) přechází na $1+f(y)=(1+y)f(y)$, čili $f(y)=1/y$.
+
+    Zkouška: levá strana je $x^2\bigl(\frac{1}{x}+\frac{1}{y}\bigr)=x+\frac{x^2}{y}$ a~pravá $(x+y)f\bigl(\frac{y}{x}\bigr)=(x+y)\cdot\frac{x}{y}=\frac{x^2}{y}+x$.
+}
+
+\EnvId{BRqtjnssgMn1ibbjJfnAS-mocnina-rozdilu-a-soucin-hodnot}
+\Problem{0}{}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f^2(x-y) = x^2-2f(x)f(y)+y^2.
+    $$
+}{
+    Nejprve si pohraj s~nulami.
+}{
+    Dvěma nulami dostaneme $f(0)=0$ a~potom $y:=0$ dává $f(x)^2=x^2$. To je naše známá past, $f(x)=x$ nebo $f(x)=-x$ pro každé $x$. Můžeme nyní rozebrat, jestli se to může někdy pokazit. Existuje však i~jiné kratší řešení, které tento vztah $f(x)^2=x^2$ použije jinak.
+}{
+    Hluboký trik je, že levá strana rovnice je rovna $(x-y)^2$. Rovnice po úpravě a~otočení stran zůstane $f(x)f(y)=xy$. To už je lehké.
+}{
+    Z~této rovnice máme, že $f$ není nulová, protože pak by levá byla nulová a~pravá nenulová. Tím pádem pro nějaké $y$ je $f(y)$ různé od $0$, což nám umožní vydělit a~máme, že $f(x)$ je $cx$ pro vhodné $c$. Už to lehce doklepne s~původní rovnicí.
+}{
+    \Answer{$f(x)=x$ a~$f(x)=-x$.}
+
+    Dosazením $x=y=0$ máme $3f(0)^2=0$, tedy $f(0)=0$, a~volba $y=0$ potom dává
+    $$
+    f(x)^2 = x^2 \eqno(1)
+    $$
+    pro každé reálné $x$. To je naše známá past, sama o~sobě ještě nedává $f(x)\equiv x$ ani $f(x)\equiv-x$. Vztah (1) však platí pro libovolné číslo, tedy i~pro $x-y$, takže levá strana zadání je $(x-y)^2$ a~po odečtení stejných členů a~vydělení číslem $-2$ zůstane
+    $$
+    f(x)f(y) = xy. \eqno(2)
+    $$
+    Funkce $f$ není nulová, jinak by levá strana (2) byla vždy nulová, zatímco pravá pro $x=y=1$ nulová není. Nechť tedy $f(b)\neq0$ a~$c=b/f(b)$; volba $y=b$ v~(2) dává $f(x)f(b)=xb$, čili $f(x)=cx$. Dosazením zpět do (2) dostaneme $c^2xy=xy$, odkud $c^2=1$ a~$c=\pm1$.
+
+    Zkouška: pro $f(x)=\pm x$ platí $f(x)f(y)=xy$ i~$f(x-y)^2=(x-y)^2$, takže
+    $$
+    f(x-y)^2 = x^2-2xy+y^2 = x^2-2f(x)f(y)+y^2.
+    $$
+}
+
+\EnvId{0b7J2k9ZqK67mKlH8S1Sd-soucin-dvou-zavorek-je-jedna}
+\Problem{0}{}{
+    Najděte všechny funkce $f\colon \R^+\to\R^+$ takové, že pro všechna kladná reálná čísla $x,y$ platí
+    $$
+    \bigl(1+yf(x)\bigr)\bigl(1-yf(x+y)\bigr) = 1.
+    $$
+}{
+    Náhodné dosazování tu bohužel nefunguje, nemáme nuly \Sad. Trik je symetrie.
+}{
+    Vyjádřeme $f(x+y)$ pomocí zbylých proměnných, totiž to je náš symetrický výraz, následně v~něm vyměníme $x$ a~$y$.
+}{
+    V~získané rovnici zafixujeme $y$ a~viola, máme $f(x)$ pomocí $x$ a~konstant. Ošklivou část označíme jako $c$ a~dostaneme $f(x)=1/(x+c)$. Ještě zjistit, pro která $c$ je taková funkce opravdu řešením.
+}{
+    \Answer{$f(x)=\frac{1}{x+c}$ pro libovolnou konstantu $c\ge0$.}
+
+    Po roznásobení se jedničky vyruší a~po vydělení kladným $y$ zůstane
+    $$
+    f(x)-f(x+y) = yf(x)f(x+y). \eqno(1)
+    $$
+    Symetrickým výrazem je tu $f(x+y)$, protože při záměně $x$ a~$y$ se argument $x+y$ nezmění. Vyjádřeme si ho proto z~(1); díky kladnosti $1+yf(x)$ máme
+    $$
+    f(x+y) = \frac{f(x)}{1+yf(x)}. \eqno(2)
+    $$
+    Levá strana (2) se záměnou $x$ a~$y$ nezmění, a~tedy se nesmí změnit ani pravá. Po vynásobení křížem je $f(x)+xf(x)f(y)=f(y)+yf(x)f(y)$ a~po vydělení kladným $f(x)f(y)$
+    $$
+    \frac{1}{f(x)}-x = \frac{1}{f(y)}-y. \eqno(3)
+    $$
+    Zafixujme v~(3) $y$; pravá strana je konstanta, označme ji $c$. Potom $f(x)=1/(x+c)$ pro každé $x>0$. Z~$c=1/f(x)-x$ a~$f(x)>0$ máme $c>-x$ pro každé $x>0$, a~kdyby bylo $c<0$, volba $x=-c/2$ by dala $c>c/2$, spor. Proto $c\ge0$.
+
+    Zkouška: pro $c\ge0$ a~$x>0$ je $x+c>0$, takže $f$ je opravdu funkce z~$\R^+$ do $\R^+$, a
+    $$
+    \bigl(1+yf(x)\bigr)\bigl(1-yf(x+y)\bigr) = \frac{x+y+c}{x+c}\cdot\frac{x+c}{x+y+c} = 1.
+    $$
+}
+
+\EnvId{9dxPoUy6Euz9b_xY1X3PX-argument-y-minus-xy}
+\Problem{0}{Czech-Slovak 2017}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f(y-xy) = f(x)y+(x-1)^2f(y).
+    $$
+}{
+    Začněte dosazeními, která nulují různé části rovnice různými způsoby.
+}{
+    Dosazení vhodných nul a~jedniček nám spočítá $f(0)$ a~$f(1)$. Kromě jiného nám také dá vztah $f(1-x)=f(x)$. Umíme ho nějak vtipně použít, abychom zjednodušili rovnici?
+}{
+    Trik je dosadit $x:=1-x$ a~pomocí $f(1-x)=f(x)$ rovnici přepsat na $f(xy)=f(x)y+x^2f(y)$. Rozhodně je hezčí.
+}{
+    Co s~takovou rovnicí? Inu, $f(xy)$ je symetrické, takže trik se symetrií se nám silně nabízí.
+}{
+    Použitím symetrie máme rovnici, v~níž když zafixujeme $y$, tak umíme vyjádřit $f(x)$ pomocí $x$ a~konstant. Je tam ještě nějaká diskuse, ale už to padne.
+}{
+    \Answer{$f(x)=c(x^2-x)$ pro libovolnou reálnou konstantu $c$.}
+
+    Začněme dosazeními, která vynulují různé části rovnice. Volba $x=0$ dává $f(0)y=0$ pro každé $y$, tedy $f(0)=0$. Volba $x=1$ vynuluje levou stranu i~druhý sčítanec napravo, takže $0=f(1)y$ a~$f(1)=0$. Nakonec $y=1$ dává
+    $$
+    f(1-x) = f(x). \eqno(1)
+    $$
+    Vztah (1) přímo vybízí k~dosazení $x:=1-x$ do zadání: levá strana přejde na $f\bigl(y-(1-x)y\bigr)=f(xy)$ a~pravá podle (1) na $f(x)y+x^2f(y)$. Zadání se tak změnilo na mnohem hezčí rovnici
+    $$
+    f(xy) = f(x)y+x^2f(y). \eqno(2)
+    $$
+    Levá strana (2) je symetrická v~$x$ a~$y$, proto smíme proměnné vyměnit a~obě pravé strany porovnat; po úpravě
+    $$
+    f(x)\,y(1-y) = f(y)\,x(1-x). \eqno(3)
+    $$
+    Volby $y=0$ a~$y=1$ v~(3) jenom vynulují obě strany, vezměme tedy například $y=2$. Dostaneme $-2f(x)=f(2)\,x(1-x)$, čili po označení $c=f(2)/2$
+    $$
+    f(x) = c(x^2-x).
+    $$
+    Zkouška: levá strana zadání je
+    $$
+    c\bigl(y^2(1-x)^2-y(1-x)\bigr) = c\bigl((x-1)^2y^2+xy-y\bigr)
+    $$
+    a~pravá $c(x^2-x)y+(x-1)^2c(y^2-y)$, což je díky $-(x-1)^2y=-x^2y+2xy-y$ tentýž výraz.
+}
+
+\EnvId{LmumllMYytjLIVNBGOsuu-argument-xfy-a-xy}
+\Problem{0}{Czech-Slovak 2002}{
+    Najděte všechny funkce $f\colon \R^+\to\R^+$ takové, že pro všechna kladná reálná čísla $x,y$ platí
+    $$
+    f(xf(y)) = f(xy)+x.
+    $$
+}{
+    Trik je vyrobit něco symetrického. Netřeba se bát, že to může být vícekroková operace.
+}{
+    Trik je dosadit $x:=f(x)$ a~přepisujeme levou stranu.
+}{
+    Po dosazení $x:=f(x)$ máme na levé straně něco symetrického a~na pravé straně $f(f(x)y)$. To ale umíme vyjádřit ze samotné rovnice v~zadání.
+}{
+    Zůstalo nám $f(f(x)f(y))$ vyjádřené jako něco pěkného. Tam už symetrie pomůže a~dá něco opravdu pěkného.
+}{
+    \Answer{$f(x)=x+1$.}
+
+    Snažíme se vyrobit symetrický výraz, takový totiž umíme porovnat se sebou samým po záměně proměnných. Levá strana $f(xf(y))$ symetrická není, ale volba $x:=f(x)$ (legální, protože $f(x)>0$) z~ní udělá $f(f(x)f(y))$:
+    $$
+    f\bigl(f(x)f(y)\bigr) = f\bigl(f(x)y\bigr)+f(x). \eqno(1)
+    $$
+    Překážející $f(f(x)y)$ vyjádříme ze zadání, ve kterém vyměníme role proměnných: $f\bigl(yf(x)\bigr)=f(xy)+y$. Tím (1) přejde na
+    $$
+    f\bigl(f(x)f(y)\bigr) = f(xy)+y+f(x). \eqno(2)
+    $$
+    Levá strana (2) i~výraz $f(xy)$ se záměnou $x$ a~$y$ nezmění, takže porovnáním (2) s~rovností po takové záměně máme $y+f(x)=x+f(y)$. Výraz $f(x)-x$ je tedy konstantní, $f(x)=x+c$. Po dosazení do zadání je levá strana $f\bigl(x(y+c)\bigr)=xy+xc+c$ a~pravá $xy+c+x$, odkud $xc=x$ a~$c=1$.
+
+    Zkouška: $f\bigl(xf(y)\bigr)=x(y+1)+1=xy+x+1$ a~$f(xy)+x=xy+1+x$.
+}
+
+\EnvId{YWvnbpCFj9QCJ1R7xu-vb-soucin-hodnot-a-prevracena-hodnota}
+\Problem{0}{Czech-Slovak 2011}{
+    Najděte všechny funkce $f\colon \R^+\to\R^+$ takové, že pro všechna kladná reálná čísla $x,y$ platí
+    $$
+    f(x)\cdot f(y) = f(y)\cdot f(xf(y))+\frac{1}{xy}.
+    $$
+}{
+    Divný výraz je $f(xf(y))$, ten se vyplatí osamostatnit. Následně umíme dobrým dosazením vytvořit symetrii.
+}{
+    Klíčem je dosazení $x:=f(x)$ na vytvoření symetrického výrazu. Následně klasickou záměnou $x,y$ máme dobrý vztah.
+}{
+    V~dobrém vztahu nám zůstaly $f(f(x))$ a~$f(f(y))$. Po dosazení $y=1$ to vlastně dává vyjádření pro $f(f(x))$. Umíme ještě odněkud získat jiné vyjádření pro $f(f(x))$?
+}{
+    Odpověď je původní rovnice, kde $x=1$, $y=x$ rovnou takové vyjádření dává. Jejich porovnáním už dojdeme k~dobrému vztahu. Zbude dopočítat $f(1)$.
+}{
+    \Answer{$f(x)=\frac{x+1}{x}$.}
+
+    Divný výraz $f(xf(y))$ si osamostatníme vydělením kladným $f(y)$:
+    $$
+    f(xf(y)) = f(x)-\frac{1}{xyf(y)}. \eqno(1)
+    $$
+    Argument $xf(y)$ se stane symetrickým v~$x$ a~$y$, pokud za $x$ dosadíme $f(x)$. Volba $x:=f(x)$ v~(1) dává $f\bigl(f(x)f(y)\bigr)=f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)}$, kde se levá strana záměnou $x$ a~$y$ nezmění, takže
+    $$
+    f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)} = f\bigl(f(y)\bigr)-\frac{1}{xf(x)f(y)}. \eqno(2)
+    $$
+    Označme $a=f(1)$. Volba $y=1$ v~(2) dává první vyjádření
+    $$
+    f\bigl(f(x)\bigr) = f(a)+\frac{x-1}{axf(x)}, \eqno(3)
+    $$
+    zatímco původní rovnice pro $x=1$, $y:=x$ zní $af(x)=f(x)f\bigl(f(x)\bigr)+\frac1x$, čili
+    $$
+    f\bigl(f(x)\bigr) = a-\frac{1}{xf(x)}. \eqno(4)
+    $$
+    Speciálně $x=1$ v~(4) dává $f(a)=a-\frac1a$. Po dosazení do (3), porovnání s~(4) a~vynásobení výrazem $axf(x)$ máme
+    $$
+    \eqalign{
+        a^2xf(x)-a &= a^2xf(x)-xf(x)+x-1,\cr
+        xf(x) &= x-1+a,\cr
+    }
+    $$
+    čili $f(x)=1+\frac{a-1}{x}$ pro všechna $x>0$.
+
+    Zbývá dopočítat $a$. Označme $k=a-1$, takže $f(x)=1+\frac{k}{x}$. Jelikož $1-\frac{1}{f(y)}=\frac{k}{yf(y)}$, platí
+    $$
+    f(x)-f(xf(y)) = \frac{k}{x}\Bigl(1-\frac{1}{f(y)}\Bigr) = \frac{k^2}{xyf(y)},
+    $$
+    a~tedy $f(x)f(y)-f(y)f(xf(y))=\frac{k^2}{xy}$: zadání platí právě tehdy, když $k^2=1$. Volba $k=-1$ dává $f(x)=1-\frac1x$, což pro $x\le1$ není kladné, zbývá tedy $k=1$ a~$f(x)=\frac{x+1}{x}$. Tento výpočet je zároveň zkouškou.
+}
+
+\EnvId{xYE-jQfV3cgnedvharjJE-argument-xfx-plus-2y}
+\Problem{0}{MEMO 2013 T1}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f(xf(x)+2y) = f(x^2)+f(y)+x+y-1.
+    $$
+}{
+    Triviálně spočítáme $f(0)$. To nám pomůže odvodit nějaké vztahy. Celkově se snažíme odvodit co nejvíce fajn vztahů, které vypadají, že $f$ z~něčeho složitého je něco jednoduššího.
+}{
+    První hlavní dosazení je $x=0$, dávající $f(2y)=f(y)+y$, to je to lehčí. To ještě nestačí, další dobré dosazení používá trik s~vyrovnáním argumentů. Umíme nějak rozumně vyrovnat $f$-ko na levé s~nějakým $f$ na pravé?
+}{
+    Trik je vyrovnat $xf(x)+2y=y$, tedy položit $y=-xf(x)$. Z~toho nám zůstane vztah, který počítá $f(x^2)$ pomocí jednodušších věcí. To spolu se vztahem, který počítá $f(2x)$ pomocí jednodušších věcí, je už docela silné.
+}{
+    Další trik je vyjadřování dvěma způsoby, zkusme najít $f$ něčeho dobrého, co umíme přes naše $f(\text{něco}^2)$ resp. $f(2\cdot\text{něco})$ spočítat.
+}{
+    K~tomuto dvojímu vyjádření můžeme přijít takto: Víme, že dvojnásobky nám jdou, tak položme $\text{něco}=2x$ ve vztahu $f(\text{něco}^2)$. Tedy máme $f(4x^2)=\dots$ Zkusme levou stranu napsat ještě jinak. Máme všechno, co potřebujeme, už jen aplikovat naše vztahy, dokud to jen jde.
+}{
+    \Answer{$f(x)=x+1$.}
+
+    Dosazením $x=y=0$ dostaneme $f(0)=1$. Volbou $x=0$, $y=z$ získáme
+    $$
+    f(2z) = f(z)+z \eqno(1)
+    $$
+    a~pro $x=z$, $y=-z\cdot f(z)$ dostaneme
+    $$
+    f(z^2) = zf(z)-z+1. \eqno(2)
+    $$
+    Dosazením $2t$ za $z$ do (2) a~použitím (1) máme
+    $$
+    \eqalign{
+        f(4t^2) &= 2tf(2t)-2t+1 = 2t\bigl(f(t)+t\bigr)-2t+1 =\cr
+        &= 2tf(t)+2t^2-2t+1.\cr
+    } \eqno(3)
+    $$
+    Dosazením $2t^2$ za $z$ do (1) a~použitím (1) a~(2) dostaneme
+    $$
+    f(4t^2) = f(2t^2)+2t^2 = f(t^2)+t^2+2t^2 = tf(t)-t+1+3t^2. \eqno(4)
+    $$
+    Z~porovnání (3) a~(4) vyplývá
+    $$
+    \eqalign{
+        2tf(t)+2t^2-2t+1 &= tf(t)-t+1+3t^2,\cr
+        tf(t)-t^2-t &= 0,\cr
+        t\bigl(f(t)-t-1\bigr) &= 0.\cr
+    }
+    $$
+    Za předpokladu $t\neq0$ dostáváme $f(t)=t+1$. Pro $t=0$ jsme už dříve ukázali, že $f(0)=1$. Proto pro všechna $t\in\R$ platí
+    $$
+    f(t) = t+1.
+    $$
+
+    Zkouškou ověříme, že tato funkce vyhovuje: levá strana zadání je $f\bigl(x(x+1)+2y\bigr)=x^2+x+2y+1$ a~pravá $(x^2+1)+(y+1)+x+y-1=x^2+x+2y+1$.
+}
+
+\EnvId{a9qETGIWxvhD4V8j9p6Rp-argument-xfx-plus-fy}
+\Problem{0}{}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f(xf(x)+f(y)) = y+f^2(x).
+    $$
+}{
+    Nahlédněte nějaké z~našich známých dobrých vlastností $f$.
+}{
+    Klíčem je dokázat, že $f$ je bijekce na $\R$. K~tomu se vyplatí podívat se na pravou stranu. Důkaz probíhá podobně jako pro $f(f(x))=x$. Můžeme si pomoci dosazením, aby to bylo jasnější.
+}{
+    Po dosazení $x=0$ máme $f(f(y))=y+f^2(0)$, z~čehož dokážeme bijekci. Tento vztah je fajn, hodilo by se spočítat $f(0)$.
+}{
+    Klíčem ke spočítání $f(0)$ je trik: Podle tvaru rovnice tuším, že řešením bude $f(x)=x$, tedy $f(0)$ bude asi $0$. Ze surjektivity víme, že funkce je někde $0$, nechť $f(a)=0$. Zkusme vhodně dosadit.
+}{
+    Klíčem je $x=a$ do původní rovnice, to nám dává rovnou $f(f(y))=y$, což v~porovnání s~$f(f(y))=y+f^2(0)$ dává $f(0)=0$.
+}{
+    Zkuste vymyslet vtipné dosazení, které vtipně použije $f(f(x))=x$.
+}{
+    Klíčem je v~původní rovnici nahradit $x\to f(x)$. Po jeho aplikování a~vhodném porovnání se situace zázračně zjednoduší.
+}{
+    Mělo by nám zůstat $f(x)^2=x^2$ pro každé $x$. To je naše známá past. Už jen vyšetřit, jestli $f$ může být něco jiného než identická $x$ nebo identická $-x$.
+}{
+    Kdybychom měli někde $f(a)=a$ pro nenulové $a$ a~zároveň $f(b)=-b$ pro nenulové $b$, tak původní rovnice pro $x=a$, $y=b$ nebude dobře fungovat, což se dá doanalyzovat.
+}{
+    \Answer{$f(x)=x$ a~$f(x)=-x$.}
+
+    Zadanou rovnici si označme jako
+    $$
+    f\bigl(xf(x)+f(y)\bigr) = y+f(x)^2. \eqno(1)
+    $$
+    Volně pohozené $y$ napravo, zatímco nalevo se $y$ vyskytuje jen jako $f(y)$, je typická situace pro důkaz bijektivnosti. Dosazením $x=0$ do (1) dostaneme
+    $$
+    f\bigl(f(y)\bigr) = y+f(0)^2, \eqno(2)
+    $$
+    kde pravá strana nabývá každé reálné hodnoty, takže $f$ je surjektivní. Je-li $f(y_1)=f(y_2)$, je podle (2) $y_1=y_2$, takže $f$ je i~prostá.
+
+    Ze surjektivnosti existuje $r$ s~$f(r)=0$; takový bod vynuluje zároveň člen $xf(x)$ i~člen $f(x)^2$, takže volba $x=r$ v~(1) dává
+    $$
+    f\bigl(f(y)\bigr) = y, \eqno(3)
+    $$
+    a~porovnáním s~(2) je $f(0)=0$.
+
+    Vztah (3) říká, že $f$ je sama k~sobě inverzní, a~naplno ho využijeme volbou $x:=f(x)$ v~(1):
+    $$
+    f\Bigl(f(x)\cdot f\bigl(f(x)\bigr)+f(y)\Bigr) = y+f\bigl(f(x)\bigr)^2.
+    $$
+    Po použití (3) je levá strana přesně levou stranou (1) a~pravá $y+x^2$, takže
+    $$
+    f(x)^2 = x^2 \eqno(4)
+    $$
+    pro každé reálné $x$.
+
+    To je naše známá past, ze (4) ještě nevyplývá, že $f$ je identicky $x$ nebo identicky $-x$. Předpokládejme tedy, že existují nenulová $a$, $b$ taková, že $f(a)=a$ a~$f(b)=-b$. Volba $x=a$, $y=b$ v~(1) dává $f(a^2-b)=b+a^2$, zatímco podle (4) je $f(a^2-b)$ rovno $a^2-b$ nebo $-(a^2-b)$. V~prvním případě $b=0$, v~druhém $a=0$, obojí spor. Protože v~nule oba předpisy splývají, platí buď $f(x)=x$ pro všechna $x$, nebo $f(x)=-x$ pro všechna $x$.
+
+    Zkouška: pro $f(x)=x$ je levá strana (1) rovna $f(x^2+y)=x^2+y$ a~pravá $y+x^2$; pro $f(x)=-x$ je levá $f(-x^2-y)=x^2+y$ a~pravá $y+x^2$.
+}
+
+\EnvId{twoQCbBbWzFVHepEwIWV--podil-mocnin-s-podminkou}
+\Problem{0}{IMO 2008 P4}{
+    Najděte všechny funkce $f\colon \R^+\to\R^+$ takové, že pro všechna kladná reálná čísla $w,x,y,z$ splňující $wx=yz$ platí
+    $$
+    \frac{f^2(w)+f^2(x)}{f(y^2)+f(z^2)} = \frac{w^2+x^2}{y^2+z^2}.
+    $$
+}{
+    Už nejjednodušší dosazení, všechny stejné proměnné, dává něco užitečného a~inspirativního.
+}{
+    Máme $f(x^2)=f(x)^2$. To je jednak $f(1)$ zdarma, ale hlavně je to způsob a~inspirace k~dalšímu dosazení, protože se umíme zbavovat čtverců. Tak tam nějaké dosaďme.
+}{
+    Klíčem je $w=t^2$, $x=1$, $y=z=t$. S~pomocí $f(x^2)$ vztahu a~s~trochou algebry to vlastně dává rovnici jen s~$f(t)$ a~výrazy v~$t$, takže umíme přímo spočítat možné hodnoty $f(t)$.
+}{
+    Měli bychom dostat $f(t)=t$ nebo $f(t)=1/t$, pro každé $t$. To je naše známá past, potřebujeme domyslet, jestli pro nějaká $a,b$ může být $f(a)=a$, $f(b)=1/b$. Jisté pro $1$, takže nechť $a,b$ jsou různá od $1$. Past vyřešíme klasicky vhodným dosazením.
+}{
+    Klíčem je dosazení $w=a$, $x=b$, toto je přirozená část, a~$y=z=\sqrt{ab}$, aby to vyšlo a~nebylo dost zle. Po úpravě zůstane vyjádření $f(ab)$ pomocí $a,b$ a~z~něho při rozebírání případů bude spor.
+}{
+    \Answer{$f(x)=x$ a~$f(x)=1/x$.}
+
+    Volba $w=x=y=z=t$ podmínku $wx=yz$ splňuje a~dává $\frac{2f(t)^2}{2f(t^2)}=1$, čili pro každé $t>0$ platí
+    $$
+    f(t^2) = f(t)^2. \eqno(1)
+    $$
+    Speciálně $f(1)=f(1)^2$, a~protože $f(1)>0$, je $f(1)=1$.
+
+    Vztah (1) říká, že se umíme zbavovat čtverců; dosaďme tedy tak, aby nám nějaké vznikly. Volba $w=t^2$, $x=1$, $y=z=t$ je legální a~po použití (1) a~$f(1)=1$ v~ní vystupuje už jen $f(t)$:
+    $$
+    \frac{f(t)^4+1}{2f(t)^2} = \frac{t^4+1}{2t^2}.
+    $$
+    Pro $u=f(t)^2$ a~$v=t^2$ je to po vynásobení $2uv$ rovnost $v(u^2+1)=u(v^2+1)$, čili $(u-v)(uv-1)=0$. Z~kladnosti tak pro každé $t>0$ platí
+    $$
+    f(t) = t \qquad\text{nebo}\qquad f(t) = \frac1t. \eqno(2)
+    $$
+
+    Volba je zatím pro každé $t$ zvlášť, a~to je naše známá past. Pro $t=1$ obě možnosti splývají, předpokládejme tedy sporem, že existují $a\neq1$ a~$b\neq1$ taková, že $f(a)=a$ a~$f(b)=1/b$. Dosazení $w=a$, $x=b$ je přirozené a~volbou $y=z=\sqrt{ab}$ zaručíme podmínku $wx=yz$ i~to, že ve jmenovateli vznikne jediná neznámá hodnota $f(ab)$:
+    $$
+    \frac{a^2+1/b^2}{2f(ab)} = \frac{a^2+b^2}{2ab}, \qquad\text{tedy}\qquad f(ab) = \frac{ab\(a^2+1/b^2\)}{a^2+b^2}.
+    $$
+    Podle (2) je přitom $f(ab)$ rovno $ab$ nebo $1/(ab)$.
+
+    \begitems \style i
+    \i Pokud $f(ab)=ab$, pak po vydělení $ab$ zůstane $a^2+b^2=a^2+1/b^2$, čili $b^4=1$ a~$b=1$, spor.
+    \i Pokud $f(ab)=1/(ab)$, pak po vynásobení dostaneme $a^2+b^2=a^4b^2+a^2$, čili $a^4=1$ a~$a=1$, spor.
+    \enditems
+
+    Jedna z~možností v~(2) tedy platí současně pro všechna $t>0$.
+
+    Zkouška: pro $f(x)=x$ je levá strana rovna $(w^2+x^2)/(y^2+z^2)$, pro $f(x)=1/x$ máme
+    $$
+    \frac{\frac1{w^2}+\frac1{x^2}}{\frac1{y^2}+\frac1{z^2}} = \frac{(w^2+x^2)y^2z^2}{(y^2+z^2)w^2x^2} = \frac{w^2+x^2}{y^2+z^2},
+    $$
+    protože z~$wx=yz$ plyne $w^2x^2=y^2z^2$.
+}
+
+\EnvId{FN6k9THlUoMs8BOJUCaT8-argument-xfy-plus-2y}
+\Problem{0}{MEMO 2019 I1}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f(xf(y)+2y) = f(xy)+xf(y)+f(f(y)).
+    $$
+}{
+    První krok je zjistit, jak je to s~nulami. Dá se zjistit více než spočítat $f(0)$.
+}{
+    Pokud $f(0)=a$, tak dvě nuly nám dají $f(a)=0$. Další dosazování nám odhalí, že buď je $f$ identicky nulová (což je řešení), nebo je nulová právě v~nule; dále se věnujme druhé možnosti. To je obecně zajímavé. Také je zajímavé prostě jen tak dosadit vhodnou nulu, nedá to něco, co nám napoví další krok?
+}{
+    Nula za $x$ dává $f(2y)=f(f(y))$. Kdybychom měli injektivitu, tak se radujeme. Tak ji zkusme dokázat (není to ale tak triviální jako obvykle). Potřebujeme lepší rovnici, než je ta aktuální.
+}{
+    Standardní trik vyrovnání argumentů nám dá rovnici, která sice bude ošklivá, ale na injektivitu užitečná.
+}{
+    Trik je vyrovnat $xf(y)+2y$ a~$xy$. Pro jaká $x,y$ to vlastně můžeme udělat? A~co nám zůstane v~rovnici?
+}{
+    V~prvé řadě, po vyrovnání nám zůstane rovnice, ve které už bude jen $y$ a~$f(y)$, i~když v~dost náhodné kombinaci. Z~takové rovnice se ale injektivita dokazuje dobře. Těžší část je paradoxně prozkoumat, kdy je toto dosazení legální. A~to je jen když $f(y)$ není $y$, čili když $y$ není pevný bod. Pojďme tedy prozkoumat množinu pevných bodů funkce. Určitě existuje jeden pevný bod, $0$ díky $f(0)=0$. Když označíme $p$ nějaký pevný bod, tedy $f(p)=p$, tak dosazovat fixní body se obecně dělá dobře. Cíl bude ukázat, že $p=0$.
+}{
+    Náš vztah $f(f(y))=f(2y)$ nám něco poví o~$f(2p)$. Podobně umíme zjistit $f(4p)$ atd. Ve skutečnosti jsme jedno dosazení od důkazu $p=0$. Spolu s~předchozí injektivitou a~vším dalším budeme hotovi.
+}{
+    \Answer{Nulová funkce $f(x)=0$ a~funkce $f(x)=2x$.}
+
+    Označme $a=f(0)$. Dosazením $x=y=0$ dostaneme $f(a)=0$ a~volba $y=0$ dává $f(ax)=a+ax$ pro každé reálné $x$. Kdyby bylo $a\neq0$, dalo by $x=1$ rovnost $f(a)=2a$, což spolu s~$f(a)=0$ dává $a=0$, spor. Proto $f(0)=0$.
+
+    Má $f$ i~jiné nulové body? Nechť $f(y_0)=0$ pro nějaké $y_0\neq0$. Volbou $y=y_0$ se zadaná rovnice změní na $f(2y_0)=f(xy_0)$, kde $xy_0$ probíhá všechna reálná čísla, takže $f$ je konstantní, a~díky $f(0)=0$ dokonce identicky nulová. Nulová funkce zadání vyhovuje; dále proto předpokládejme, že $f$ nulová není, a~tedy $f(y)=0$ právě tehdy, když $y=0$.
+
+    Dosazení $x=0$ dává
+    $$
+    f(f(y)) = f(2y) \eqno(1)
+    $$
+    pro každé reálné $y$. Kdyby byla $f$ prostá, byli bychom okamžitě hotovi, zkusme to tedy dokázat. Nabízí se vyrovnání argumentů: chtěli bychom $xf(y)+2y=xy$, čili $x\bigl(f(y)-y\bigr)=-2y$, což smíme vydělit jen tehdy, když $f(y)\neq y$. Nejprve proto vyšetřeme pevné body.
+
+    Nechť $f(p)=p$. Vztah (1) pro $y=p$ dává $f(2p)=f(p)=p$ a~potom pro $y=2p$ dává $f(4p)=f(f(2p))=f(p)=p$. Naproti tomu volba $y=p$ v~zadání dává $f(xp+2p)=f(xp)+xp+p$; je-li $p\neq0$, probíhá $t=xp$ všechna reálná čísla, čili $f(t+2p)=f(t)+t+p$, a~volba $t=2p$ spolu s~$f(2p)=p$ dává $f(4p)=p+2p+p=4p$, spor s~$f(4p)=p$. Jediným pevným bodem je tedy $0$.
+
+    Argumenty už vyrovnat můžeme: pro $y\neq0$ je volba $x=\frac{2y}{y-f(y)}$ legální a~splňuje $xf(y)+2y=xy$, takže se členy $f(xf(y)+2y)$ a~$f(xy)$ vyruší a~zůstane $0=xf(y)+f(f(y))$. Podle (1) je $f(f(y))=f(2y)$, a~tak po vynásobení jmenovatelem $y-f(y)$ máme
+    $$
+    f(2y)\bigl(f(y)-y\bigr) = 2yf(y) \eqno(2)
+    $$
+    pro každé $y\neq0$.
+
+    Nechť nyní $f(u)=f(v)$ a~označme $c$ tuto společnou hodnotu; podle (1) je i~$f(2u)=f(2v)$, označme to $d$. Pokud je některé z~čísel $u$, $v$ nulové, je nulové i~druhé, protože $f$ je nulová jedině v~nule; nechť jsou tedy obě nenulová. Vztah (2) pro $y=u$ a~pro $y=v$ dává
+    $$
+    d(c-u) = 2uc, \qquad d(c-v) = 2vc,
+    $$
+    a~odečtením $(u-v)(d+2c)=0$. Kdyby $u\neq v$, pak $d=-2c$ a~první z~rovnic přechází na $-2c(c-u)=2uc$, tedy $c^2=0$; potom je ale $f(u)=0$ a~$u=0$, což jsme vyloučili. Funkce $f$ je proto prostá a~z~(1) už přímo plyne $f(y)=2y$.
+
+    Zkouška: pro nulovou funkci jsou obě strany nulové. Pro $f(x)=2x$ je levá strana $f(2xy+2y)=4xy+4y$ a~pravá $2xy+2xy+4y$.
+}
+
+\EnvId{O684Up6UyIhNsE7sZ87O0-kvadrat-plus-fy-jako-argument}
+\Problem{0}{IMO 1992 P2}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f(x^2+f(y)) = y+f^2(x).
+    $$
+}{
+    Všimni si, že $f$ má nulový bod a~najdi ho.
+}{
+    Proč má $f$ nulový bod? Inu, pro $y=-f^2(x)$ máme $f(\hbox{něco})=0$. Jak ale přesně spočítáme? Chce to pár dosazení. Nechť $f(a)=0$...
+}{
+    Klíčem jsou dvě dosazení, $[a,a]$ a~$[0,a^2]$, z~toho rovnou dostaneme $a=0$. Jako vždy, $f(0)=0$ nám hodně dává.
+}{
+    Snadno odvodíme přes $x=0$, že $f(f(y))=y$. To umíme použít po vhodném dosazování na různé úpravy rovnice. Každopádně, jsme v~bodě, kde standardní dosazování selhává a~chce to velkou myšlenku.
+}{
+    Trik je zkusit dokázat, že $f$ je rostoucí funkce.
+}{
+    Na důkaz rostoucnosti nejprve dosaďme $y:=f(y)$, což nám dá $f(x^2+y)=f(y)+f^2(x)$. Rostoucnost z~toho už plyne, i~když to není vidět.
+}{
+    Pokud máme dvě čísla $u>v$, tak umíme najít vhodné $(x,y)$, aby $x^2+y=u$ a~$y=v$. Máme potom v~naší rovnici $f(u)>f(v)$?
+}{
+    Finalizace je uvědomit si, že rostoucí funkce a~$f(f(x))=x$ je velmi podezřelé místo. Může být $f(x)$ jiná než identita?
+}{
+    \Answer{$f(x)=x$.}
+
+    Nejprve si všimněme, že $f$ má nulový bod: při volbě $y=-f^2(x)$ je pravá strana nulová, takže $f$ je nulová v~bodě $x^2+f(y)$. Nechť tedy $f(a)=0$ a~pokusme se $a$ spočítat. Dosazení $x=y=a$ dává
+    $$
+    f(a^2) = a, \eqno(1)
+    $$
+    a~volba $x=0$, $y=a^2$ dává $f\bigl(f(a^2)\bigr)=a^2+f^2(0)$, což je podle (1) rovnost $0=a^2+f^2(0)$. Oba sčítance jsou nezáporné, a~proto $a=0$ i~$f(0)=0$.
+
+    Nyní nám $x=0$ dává
+    $$
+    f\bigl(f(y)\bigr) = y \eqno(2)
+    $$
+    pro všechna reálná $y$, odkud je $f$ prostá, a~spolu s~$f(0)=0$ je tedy nulová jedině v~nule.
+
+    Tady už obyčejné dosazování končí a~chce to myšlenku: ukážeme, že $f$ je rostoucí. Vztah (2) nám dovoluje dosadit do zadání $y:=f(y)$, čímž se vnitřní dvojité $f$ zjednoduší a~zůstane
+    $$
+    f(x^2+y) = f(y)+f^2(x). \eqno(3)
+    $$
+    Nechť $u>v$. Při volbě $y=v$ a~$x=\sqrt{u-v}>0$ je $x^2+y=u$, takže (3) dává $f(u)=f(v)+f^2\bigl(\sqrt{u-v}\bigr)$, kde připočtený čtverec je kladný, protože $f$ je nulová jedině v~nule. Proto $f(u)>f(v)$.
+
+    Rostoucí funkce splňující (2) však už musí být identita: z~$f(x)>x$ by rostoucnost dala $f\bigl(f(x)\bigr)>f(x)>x$ a~z~$f(x)<x$ zase $x=f\bigl(f(x)\bigr)<f(x)<x$, obojí spor s~(2).
+
+    Zkouška: levá strana je $f(x^2+y)=x^2+y$ a~pravá $y+x^2$.
+}
+
+\EnvId{3FuiZ3Qxo2fO3HYiB1mm3-nenulova-cisla-a-argument-x2yfx}
+\Problem{0}{MEMO 2015 T2}{
+    Najděte všechny funkce $f\colon \R\setminus\{0\}\to\R\setminus\{0\}$ takové, že pro všechna nenulová reálná čísla $x,y$ platí
+    $$
+    f(x^2yf(x))+f(1) = x^2f(x)+f(y).
+    $$
+}{
+    Snadný krok je spočítat $f(1)=\pm1$, resp. odvodit $f(x^2f(x))=x^2f(x)$. Tady začíná zábava, co tato rovnice vlastně znamená.
+}{
+    Tato rovnice nám silně naznačuje, že se máme podívat na pevné body, totiž pro každé $x$ najednou platí, že $x^2f(x)$ je pevný bod. Kdybychom uměli najít všechny pevné body, ideálně kdyby byl jen jeden, tak rovnou máme $x^2f(x)=\text{něco pevného}$ a~jsme hotovi. Hledejme tedy pevné body, nechť $p$ je nějaký z~nich\dots
+}{
+    Základní pozorování jsou, že $p^3$ je také pevný bod, tím pádem i~$p^9$. Chce to dobré dosazení do rovnice, které toto využije. Je dobré se vrátit k~původní rovnici.
+}{
+    Dosadíme $x=p$ a~$y$ zatím necháme být. Budeme mít vyjádření $f(p^3y)$ pomocí $f(y)$. Takto umíme pěkně vyjádřit $p^6, p^9$. Počkat, to už ale umíme i~jinak. Měli bychom dojít k~rovnici devátého stupně (mňam), přičemž se v~ní ještě povaluje $f(1)$. Zní to děsivě, ale fakt není zlá.
+}{
+    Naše rovnice by měla vést k~tomu, že pro pevný bod $p$ je $p^3$ rovno $f(1)$ nebo $-2f(1)$. To první je logické, čekáme řešení $1/x^2$ a~$-1/x^2$. To druhé je nějaké divné, vypořádejme to a~jsme hotovi.
+}{
+    Jak vypořádat možnost $p^3=-2f(1)$? Inu, $p^3$ je také pevný bod, tak na něj použijme totéž tvrzení: i~jeho třetí mocnina musí být rovna $f(1)$ nebo $-2f(1)$.
+}{
+    \Answer{$f(x)=1/x^2$ a~$f(x)=-1/x^2$.}
+
+    Označme $b=f(1)$ a~nenulové číslo $p$ nazvěme \uv{pevným bodem}, pokud $f(p)=p$. Dosazovat můžeme libovolná nenulová $x,y$, protože výraz $x^2yf(x)$ je pak také nenulový.
+
+    Volbou $y=1$ se $f(1)$ na obou stranách vyruší a~zůstane
+    $$
+    f\bigl(x^2f(x)\bigr) = x^2f(x), \eqno(1)
+    $$
+    tedy $x^2f(x)$ je pevný bod pro \textit{každé} nenulové $x$. Kdyby byl pevný bod jediný, znali bychom z~(1) hodnotu $x^2f(x)$ a~bylo by hotovo. Hledejme tedy pevné body.
+
+    Volba $x=1$ dává
+    $$
+    f(by) = f(y) \eqno(2)
+    $$
+    pro všechna nenulová $y$, a~$x=1$ v~(1) dává $f(b)=b$, takže $b$ sám je pevný bod.
+
+    Nejprve spočítejme $b$. Volba $x=b$ v~(1) říká, že $b^2f(b)=b^3$ je pevný bod, čili $f(b^3)=b^3$, zatímco dvojnásobné použití (2) dává $f(b^3)=f(b^2)=f(b)=b$. Proto $b^3=b$ a~z~$b\neq0$ máme $b^2=1$.
+
+    Nechť je nyní $p$ libovolný pevný bod. Volba $x=p$ v~(1) říká, že pevným bodem je i~$p^3$, a~tatáž úvaha pro $p^3$ dává pevný bod $p^9$. Abychom tyto mocniny mohli porovnat, dosaďme do zadání $x=p$ při volném $y$; pomocí $f(p)=p$ dostaneme
+    $$
+    f(p^3y) = f(y)+p^3-b. \eqno(3)
+    $$
+    Vztah (3) použijeme třikrát za sebou, postupně pro $y=1$, $y=p^3$ a~$y=p^6$:
+    $$
+    f(p^3)=p^3,\qquad f(p^6)=2p^3-b,\qquad f(p^9)=3p^3-2b.
+    $$
+    Jenže $p^9$ je pevný bod, takže $p^9-3p^3+2b=0$. Pro $q=p^3$ a~s~použitím $b^2=1$, $b^3=b$ je to $q^3-3b^2q+2b^3=0$, což se rozkládá na
+    $$
+    (q-b)^2(q+2b) = 0.
+    $$
+    Pro každý pevný bod $p$ tedy platí $p^3=b$ nebo $p^3=-2b$. Druhou možnost vyloučíme tím, že $p^3$ je také pevný bod, takže i~$(p^3)^3$ musí být rovno $b$ nebo $-2b$: je-li $p^3=-2b$, je $(p^3)^3=-8b$ a~ani $-8b=b$, ani $-8b=-2b$ pro $b\neq0$ nenastane. Zůstává $p^3=b=b^3$, čili $p=b$.
+
+    Jediným pevným bodem je proto $b$ a~z~(1) máme $x^2f(x)=b$, tedy $f(x)=b/x^2$, kde $b=\pm1$.
+
+    Zkouška: pro $f(x)=b/x^2$ s~$b^2=1$ je $x^2f(x)=b$, takže levá strana je $f(by)+b=b/y^2+b$ a~pravá $b+b/y^2$.
+}
+
+\EnvId{2Rvuswj2jhDZockiBWyCu-posun-o-fy-a-dvojnasobek}
+\Problem{0}{}{
+    Najděte všechny funkce $f\colon \R\to\R$ takové, že pro všechna reálná čísla $x,y$ platí
+    $$
+    f(x+f(y)) = f(x)+f^2(y)+2xf(y).
+    $$
+}{
+    Zkusme uhodnout řešení a~podle toho udělat vhodnou substituci.
+}{
+    Všimněme si, že $f(x)=x^2$ je řešení, dokonce $f(x)=x^2+c$, kde $c$ je konstanta. Co takhle definovat $g(x)=f(x)-x^2$ a~přepsat rovnici pomocí funkce $g$?
+}{
+    Po substituci se překvapivě velmi mnoho věcí zruší a~zůstane jen $g(x+y^2+g(y))=g(x)$. Co zajímavého z~toho vyplývá pro $g$?
+}{
+    Vidíme, že $g$ vypadá jako periodická funkce. Kdyby pro každé $y$ platilo $y^2+g(y)=0$, tak $f$ je identicky nulová, což je řešení. Jinak je pro nějaké $y$ číslo $p:=y^2+g(y)$ nenulové, tedy perioda $g$, a~s~tím se dá pohrát.
+}{
+    Trik je položit $y:=y+p$, totiž $g(y+p)=g(y)$. Zkusme dosadit a~trochu poslepovat více vztahů.
+}{
+    Cílem je dojít k~úpravě
+    $$
+    \eqalign{
+        g(x)=g(x+y^2+g(y))&=g(x+(y+p)^2+g(y+p))=\cr
+        &=g(x+p(2y+p)+y^2+g(y)).\cr
+    }
+    $$
+    Když se dobře podíváme na vztah $g(x+y^2+g(y))=g(x)$, tak nám říká, jak dále toto upravit, abychom se zbavili $g(y)$.
+}{
+    Předposlední krok je dosadit $x:=x+p(2y+p)$, to nám dá dohromady s~předchozí rovnicí $g(x)=g(x+p(2y+p))$. A~to je opravdu dobrá rovnice.
+}{
+    Poslední trik je uvědomit si, že $p(2y+p)$ je také perioda $g$, a~díky volnosti v~$y$ a~nenulovosti $p$ nabývá arbitrárních hodnot. Běžné periodické funkce takové nejsou \SlightSmile{}
+}{
+    \Answer{Nulová funkce $f(x)=0$ a~funkce $f(x)=x^2+c$ pro libovolnou reálnou konstantu $c$.}
+
+    Zkusme si řešení nejprve uhodnout. Pravá strana nápadně připomíná rozvinutý čtverec $(x+f(y))^2$, a~opravdu $f(x)=x^2$ rovnici splňuje, stejně jako $f(x)=x^2+c$ pro libovolnou konstantu $c$. To nás vede k~tomu, abychom sledovali, jak moc se $f$ od čtverce liší, tedy k~označení $g(x)=f(x)-x^2$. Po dosazení $f(x)=g(x)+x^2$ je levá strana zadání rovna $g\bigl(x+f(y)\bigr)+x^2+2xf(y)+f^2(y)$ a~pravá $g(x)+x^2+f^2(y)+2xf(y)$. Skoro všechno se vyruší a~zůstane $g(x+f(y))=g(x)$, čili díky $f(y)=y^2+g(y)$
+    $$
+    g\bigl(x+y^2+g(y)\bigr) = g(x) \eqno(1)
+    $$
+    pro všechna reálná čísla $x,y$: funkce $g$ se nezmění, když její argument posuneme o~kterékoli číslo tvaru $y^2+g(y)$.
+
+    Je-li $y^2+g(y)=0$ pro každé $y$, je $f$ nulová funkce. V~opačném případě je pro nějaké $y_0$ číslo $p=y_0^2+g(y_0)$ nenulové, tedy perioda $g$. Tuto periodicitu využijeme tak, že v~(1) položíme $y:=y+p$. Z~$(y+p)^2=y^2+p(2y+p)$ a~$g(y+p)=g(y)$ máme
+    $$
+    g(x) = g\bigl(x+p(2y+p)+y^2+g(y)\bigr),
+    $$
+    kde pravou stranu zjednodušíme volbou $x:=x+p(2y+p)$ v~(1), čímž se zbavíme členu $y^2+g(y)$. Zůstává
+    $$
+    g(x) = g\bigl(x+p(2y+p)\bigr) \eqno(2)
+    $$
+    pro všechna reálná $x,y$. I~každé číslo tvaru $p(2y+p)$ je tedy perioda $g$, a~jelikož $p\neq0$, nabývá tento výraz úplně libovolné reálné hodnoty, když $y$ probíhá $\R$. Funkce $g$ se tedy nezmění po posunutí o~cokoli, čili je konstantní; označme $c=g(0)$, pak $f(x)=x^2+c$.
+
+    Zkouška: pro nulovou funkci jsou obě strany nulové, pro $f(x)=x^2+c$ je levá strana $\bigl(x+f(y)\bigr)^2+c=x^2+2xf(y)+f^2(y)+c$ a~pravá $x^2+c+f^2(y)+2xf(y)$.
+}
+
+\EnvId{kJJ4Hd66V4jiFP-sKLSFD-posun-o-fy-je-nasobek}
+\Problem{0}{MEMO 2012 I1}{
+    Najděte všechny funkce $f\colon \R^+\to\R^+$ takové, že pro všechna kladná reálná čísla $x,y$ platí
+    $$
+    f(x+f(y)) = yf(xy+1).
+    $$
+}{
+    Rovnice je na pohled těžko uchopitelná. Jediné smysluplné se zdá nastavení $x$ a~$y$ tak, aby se argumenty $f$ na levé a~pravé straně rovnaly. Dávalo by smysl, kdyby se to mohlo stát?
+}{
+    Inu, to by muselo znamenat, že $y=1$. Jenže co nám brání takové dosazení udělat? $x+f(y)=xy+1$ dává pro $y\neq1$ vztah $x=(f(y)-1)/(y-1)$. To ale můžeme dosadit, jen když je tento výraz kladný. Neodhalili jsme silnou vlastnost $f$?
+}{
+    Vlastně jsme odhalili, že pro $y>1$ je $f(y)\le1$ a~pro $y<1$ je $f(y)\ge1$. To je silné. Abychom to ale dobře použili, potřebujeme ještě šikovně dosadit.
+}{
+    Šikovné dosazení je $xy+1=y$, napravo vytváří $yf(y)$, což víme, že chceme, aby bylo $1$. Kdy takové dosazení vůbec můžeme udělat a~co dostaneme nalevo?
+}{
+    Dosazení funguje pro $y>1$, pak takové $x$ existuje a~zůstane nám $f(1-1/y+f(y))=yf(y)$. Z~toho se dá získat něco silného. Může $f(y)$ nebýt $1/y$?
+}{
+    Kdyby $f(y)$ bylo více než $1/y$, tak máme $f$ aplikované na něco více než $1$ rovno něčemu více než $1$, spor s~naším pozorováním. Podobně pro $f(y)$ méně než $1/y$ (zkuste si). Takže máme $f(y)=1/y$ pro $y>1$! Už jen $\le1$.
+}{
+    Uvědomme si, že se naše rovnice výrazně zjednodušila, už na $f(x+f(y))=y/(xy+1)$ díky $xy+1>1$. Takže už jen přijít na to, jak za $x+f(y)$ vlastně dosadit cokoli $\le1$. To už půjde.
+}{
+    Poslední trik je zvolit $y>1$, to nám dává $f(y)=1/y<1$. Pak $x+1/y$ může být cokoli $\le1$, formálně volbou $x:=x-1/y$ pro dané $x\le1$ rovnou spočítáme $f(x)$.
+}{
+    \Answer{$f(x)=1/x$.}
+
+    Rovnice je na první pohled těžko uchopitelná, zkusme proto dosadit tak, aby se argumenty $f$ na obou stranách rovnaly, tedy aby $x+f(y)=xy+1$. Obě strany by pak měly tvar $f(t)=yf(t)$ pro jisté $t>0$, a~protože $f(t)>0$, muselo by platit $y=1$. Pro $y\neq1$ tedy takové dosazení vůbec nesmí být možné, a~právě to nám o~$f$ prozradí hodně.
+
+    Podmínka $x+f(y)=xy+1$ znamená pro $y\neq1$ přesně $x=\frac{f(y)-1}{y-1}$, což smíme dosadit jen tehdy, když je to kladné. Kladné to tedy být nesmí a
+    $$
+    f(y)\le1 \ \text{ pro } y>1, \qquad f(y)\ge1 \ \text{ pro } y<1. \eqno(1)
+    $$
+
+    Abychom (1) mohli použít, potřebujeme dosazení, které napravo vyrobí $yf(y)$. To nastane při $xy+1=y$, tedy pro $x=1-1/y$, což je kladné právě tehdy, když $y>1$. Pro taková $y$ dostáváme
+    $$
+    f\Bigl(1-\frac1y+f(y)\Bigr) = yf(y). \eqno(2)
+    $$
+    Zafixujme $y>1$, porovnejme $f(y)$ s~$1/y$ a~argument nalevo v~(2) označme $s=1-\frac1y+f(y)$.
+    \begitems \style i
+    \i Pokud $f(y)>1/y$, pak $s>1$, a~podle (1) je $f(s)\le1$. Pravá strana (2) je přitom $yf(y)>1$, spor.
+    \i Pokud $f(y)<1/y$, pak $0<s<1$, a~podle (1) je $f(s)\ge1$. Pravá strana (2) je přitom $yf(y)<1$, opět spor.
+    \enditems
+    Zůstává jediná možnost
+    $$
+    f(y) = \frac1y \ \text{ pro všechna } y>1. \eqno(3)
+    $$
+
+    Hodnoty na intervalu $(0,1]$ už dopočítáme ze zadání. Pro $x>0$ a~$y>1$ je $xy+1>1$, takže podle (3) je $f(xy+1)=1/(xy+1)$ i~$f(y)=1/y$ a~rovnice se zjednoduší na
+    $$
+    f\Bigl(x+\frac1y\Bigr) = \frac{1}{x+\frac1y}. \eqno(4)
+    $$
+    Nechť je nyní $t\le1$ libovolné kladné číslo a~zvolme $y>1/t$; pak $y>1$ i~$1/y<t$, takže pro $x=t-1/y>0$ je $x+\frac1y=t$ a~(4) dává $f(t)=1/t$. Spolu s~(3) je tedy $f(x)=1/x$ pro všechna $x>0$.
+
+    Zkouška: levá strana je $\frac{1}{x+1/y}=\frac{y}{xy+1}$ a~pravá $y\cdot\frac{1}{xy+1}$.
+}
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

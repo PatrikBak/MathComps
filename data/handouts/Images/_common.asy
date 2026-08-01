@@ -224,6 +224,77 @@ pair EquilateralTriangle(
 }
 
 //
+// Returns the two points where line AB meets the circle (O, r), ordered along
+// the direction A -> B. Requires the line to actually cut the circle, i.e. the
+// distance from O to line AB to be smaller than r.
+//
+pair[] LineCircleIntersections(
+    pair A,
+    pair B,
+    pair O,
+    real r)
+{
+    // The chord is centred on the foot of O, and Pythagoras on the right
+    // triangle (r, distance from O to the line) gives its half-length.
+    pair F = Foot(O, A, B);
+    real centerDistance = abs(O - F);
+    real halfChord = sqrt(r * r - centerDistance * centerDistance);
+
+    // The direction the two points come out ordered along
+    pair u = unit(B - A);
+
+    // Step off the half-chord either way from the foot
+    return new pair[] { F - halfChord * u, F + halfChord * u };
+}
+
+//
+// Returns two points on the radical axis of the non-concentric circles
+// (O1, r1) and (O2, r2), placed symmetrically about the line O1O2 at distance
+// `halfLength` on either side of it.
+//
+pair[] RadicalAxis(
+    pair O1,
+    real r1,
+    pair O2,
+    real r2,
+    real halfLength = 1)
+{
+    // The axis is perpendicular to O1O2, and its foot sits at signed distance
+    // (D^2 + r1^2 - r2^2) / (2D) from O1 along O1 -> O2. That drops out of
+    // equating the two powers at the centerline point x away from O1:
+    // x^2 - r1^2 = (D - x)^2 - r2^2, i.e. 2Dx = D^2 + r1^2 - r2^2.
+    pair d = O2 - O1;
+    real D = abs(d);
+    pair dHat = d / D;
+    pair F = O1 + (D * D + r1 * r1 - r2 * r2) / (2 * D) * dHat;
+
+    // The axis itself runs perpendicular to the centerline through that foot
+    pair dPerp = (-dHat.y, dHat.x);
+
+    // Step off `halfLength` either way from the foot
+    return new pair[] { F + halfLength * dPerp, F - halfLength * dPerp };
+}
+
+//
+// Returns the centre of the circle through the non-collinear points A, B, C,
+// as the intersection of the perpendicular bisectors of AB and AC.
+//
+pair Circumcenter(
+    pair A,
+    pair B,
+    pair C)
+{
+    // The midpoints the two bisectors run through
+    pair Mab = Midpoint(A, B);
+    pair Mac = Midpoint(A, C);
+
+    // Each bisector leaves its midpoint perpendicular to its own chord
+    return extension(
+        Mab, Mab + rotate(90) * (B - A),
+        Mac, Mac + rotate(90) * (C - A));
+}
+
+//
 // Returns the two tangent points {T1, T2} of one external common tangent line
 // to circles (P1, r1) and (P2, r2): T1 sits on circle 1, T2 on circle 2, and
 // the segment T1T2 lies along the tangent. The two circles have two external

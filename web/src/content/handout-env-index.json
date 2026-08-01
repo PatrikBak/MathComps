@@ -1220,6 +1220,184 @@
       "slug": { "cs": "vypocet-prumeru-znamek" }
     }
   },
+  "T2HV7UhJT97go4PMzEGWN": {
+    "OsQvJm3J6CSc1RFSWJgKB": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "jednotka-plus-sucet-je-dvojnasobok",
+        "cs": "jednicka-plus-soucet-je-soucin",
+        "en": "one-plus-shift-equals-double-product"
+      }
+    },
+    "faLp7gelKJFrAnH080BUu": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "sucet-minus-rozdiel-je-xy",
+        "cs": "soucet-minus-rozdil-je-xy",
+        "en": "sum-minus-difference-equals-xy"
+      }
+    },
+    "i1mQ7q_nNCimt9fxBMQb4": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "sucin-plus-jedna-a-sucet",
+        "cs": "soucin-plus-jedna-a-soucet",
+        "en": "xy-plus-one-plus-sum-product"
+      }
+    },
+    "wdGc5sKRpCgIch2m3hs1O": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "mocnina-suctu-je-sucet-mocnin",
+        "cs": "mocnina-souctu-je-soucet-mocnin",
+        "en": "squared-sum-equals-sum-of-squares"
+      }
+    },
+    "rVXK6c4kP_jGaNdLry8CS": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "kombinacia-styroch-clenov",
+        "cs": "ctyrclenna-kombinace-posunu",
+        "en": "four-term-shift-combination"
+      }
+    },
+    "SinDYYQLU2-pKkM5koX4s": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "dvojite-zlozenie-a-nuly",
+        "cs": "dvojite-slozeni-a-hledani-nuly",
+        "en": "double-composition-shift-find-zero"
+      }
+    },
+    "Fi_6DpBzAvQSV5yHlerRQ": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "mocnina-krat-sucet-hodnot",
+        "cs": "kvadrat-krat-soucet-hodnot",
+        "en": "x-squared-times-sum-of-values"
+      }
+    },
+    "BRqtjnssgMn1ibbjJfnAS": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "mocnina-rozdielu-a-sucet-kvadratov",
+        "cs": "mocnina-rozdilu-a-soucin-hodnot",
+        "en": "squared-difference-quadratic-identity"
+      }
+    },
+    "0b7J2k9ZqK67mKlH8S1Sd": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "sucin-dvoch-zatvoriek-je-jedna",
+        "cs": "soucin-dvou-zavorek-je-jedna",
+        "en": "reciprocal-shift-product-equals-one"
+      }
+    },
+    "9dxPoUy6Euz9b_xY1X3PX": {
+      "type": "problem",
+      "number": 10,
+      "slug": {
+        "sk": "argument-y-minus-xy",
+        "cs": "argument-y-minus-xy",
+        "en": "y-minus-xy-argument"
+      }
+    },
+    "LmumllMYytjLIVNBGOsuu": {
+      "type": "problem",
+      "number": 11,
+      "slug": { "sk": "argument-xfy-a-xy", "cs": "argument-xfy-a-xy", "en": "xfy-argument-plus-x" }
+    },
+    "YWvnbpCFj9QCJ1R7xu-vb": {
+      "type": "problem",
+      "number": 12,
+      "slug": {
+        "sk": "sucin-hodnot-s-prevratenou-hodnotou",
+        "cs": "soucin-hodnot-a-prevracena-hodnota",
+        "en": "positive-reals-reciprocal-term"
+      }
+    },
+    "xYE-jQfV3cgnedvharjJE": {
+      "type": "problem",
+      "number": 13,
+      "slug": {
+        "sk": "argument-xfx-plus-2y",
+        "cs": "argument-xfx-plus-2y",
+        "en": "xfx-plus-2y-argument"
+      }
+    },
+    "a9qETGIWxvhD4V8j9p6Rp": {
+      "type": "problem",
+      "number": 14,
+      "slug": {
+        "sk": "y-plus-druha-mocnina-hodnoty",
+        "cs": "argument-xfx-plus-fy",
+        "en": "xfx-plus-fy-argument"
+      }
+    },
+    "twoQCbBbWzFVHepEwIWV-": {
+      "type": "problem",
+      "number": 15,
+      "slug": {
+        "sk": "podiel-mocnin-pri-rovnosti-sucinov",
+        "cs": "podil-mocnin-s-podminkou",
+        "en": "squares-ratio-equal-products-constraint"
+      }
+    },
+    "FN6k9THlUoMs8BOJUCaT8": {
+      "type": "problem",
+      "number": 16,
+      "slug": {
+        "sk": "argument-xfy-plus-2y",
+        "cs": "argument-xfy-plus-2y",
+        "en": "xfy-plus-2y-argument"
+      }
+    },
+    "O684Up6UyIhNsE7sZ87O0": {
+      "type": "problem",
+      "number": 17,
+      "slug": {
+        "sk": "druha-mocnina-plus-fy",
+        "cs": "kvadrat-plus-fy-jako-argument",
+        "en": "square-plus-fy-argument"
+      }
+    },
+    "3FuiZ3Qxo2fO3HYiB1mm3": {
+      "type": "problem",
+      "number": 18,
+      "slug": {
+        "sk": "rovnica-na-nenulovych-cislach",
+        "cs": "nenulova-cisla-a-argument-x2yfx",
+        "en": "nonzero-reals-x-squared-y-fx"
+      }
+    },
+    "2Rvuswj2jhDZockiBWyCu": {
+      "type": "problem",
+      "number": 19,
+      "slug": {
+        "sk": "argument-x-plus-fy",
+        "cs": "posun-o-fy-a-dvojnasobek",
+        "en": "x-plus-fy-quadratic-right-side"
+      }
+    },
+    "kJJ4Hd66V4jiFP-sKLSFD": {
+      "type": "problem",
+      "number": 20,
+      "slug": {
+        "sk": "argument-xy-plus-jedna",
+        "cs": "posun-o-fy-je-nasobek",
+        "en": "x-plus-fy-equals-y-times-f"
+      }
+    }
+  },
   "ZgFNhI74gQeJl7cEMggw7": {
     "E7dY7LX9YobFdS39tfDDR": {
       "type": "exercise",
@@ -1992,6 +2170,356 @@
         "sk": "sestuholnik-s-vpisanou-kruznicou",
         "cs": "sestiuhelnik-s-vepsanou-kruznici",
         "en": "hexagon-with-an-inscribed-circle"
+      }
+    }
+  },
+  "sO0QI7JxZwr94RBIhOD6j": {
+    "q5vKReaZh9YdoHl1lv6TN": {
+      "type": "definition",
+      "number": 1,
+      "slug": { "sk": "mocnost-bodu", "cs": "mocnost-bodu", "en": "power-of-a-point" }
+    },
+    "HmXxrFnftLoPVMg7DqFVc": {
+      "type": "theorem",
+      "number": 1,
+      "slug": {
+        "sk": "mocnost-a-dotycnica",
+        "cs": "mocnost-a-tecna",
+        "en": "power-equals-tangent-squared"
+      }
+    },
+    "qgGI99UW395o07NqbxGi2": {
+      "type": "theorem",
+      "number": 2,
+      "slug": {
+        "sk": "mocnost-a-secnica",
+        "cs": "mocnost-a-secna",
+        "en": "power-as-secant-product"
+      }
+    },
+    "nOsz2UjP-4wT_8FHcRl3r": {
+      "type": "theorem",
+      "number": 3,
+      "slug": {
+        "sk": "kriterium-tetivovosti",
+        "cs": "kriterium-tetivovosti",
+        "en": "cyclic-quadrilateral-criterion"
+      }
+    },
+    "a8dwZpGu9QODJC4M0DTN4": {
+      "type": "theorem",
+      "number": 4,
+      "slug": { "sk": "kriterium-dotycnice", "cs": "kriterium-tecny", "en": "tangent-criterion" }
+    },
+    "RzGZGM_MsN0RXoAbAbHR0": {
+      "type": "theorem",
+      "number": 5,
+      "slug": {
+        "sk": "euklidove-vety",
+        "cs": "euklidovy-vety",
+        "en": "euclid-right-triangle-relations"
+      }
+    },
+    "XBduUVr4Jdb3eJSZM1fVf": {
+      "type": "definition",
+      "number": 2,
+      "slug": { "sk": "chordala", "cs": "chordala", "en": "radical-axis" }
+    },
+    "-z84pNXmae4G3tWLgqWDC": {
+      "type": "theorem",
+      "number": 6,
+      "slug": {
+        "sk": "konstantny-rozdiel-mocnosti",
+        "cs": "konstantni-rozdil-mocnosti",
+        "en": "constant-power-difference-locus"
+      }
+    },
+    "zedTr6CBbabH3-Wv8DOjf": {
+      "type": "theorem",
+      "number": 7,
+      "slug": {
+        "sk": "chordala-v-zakladnych-pripadoch",
+        "cs": "chordala-zakladni-pripady",
+        "en": "radical-axis-basic-cases"
+      }
+    },
+    "ZUA58FjEepVvUI6GsXJUG": {
+      "type": "theorem",
+      "number": 8,
+      "slug": {
+        "sk": "potencny-stred",
+        "cs": "potencni-stred",
+        "en": "three-radical-axes-concurrent"
+      }
+    },
+    "K31lIglbW9TMnypXQGshL": {
+      "type": "theorem",
+      "number": 9,
+      "slug": {
+        "sk": "styri-body-a-chordala",
+        "cs": "body-na-kruznici-a-chordala",
+        "en": "concyclic-via-radical-axis"
+      }
+    },
+    "eFMS6b7LVyWPzibwagJaa": {
+      "type": "theorem",
+      "number": 10,
+      "slug": {
+        "sk": "linearna-kombinacia-mocnosti",
+        "cs": "linearni-kombinace-mocnosti",
+        "en": "power-combination-locus"
+      }
+    },
+    "_7WluTG8CdUBbbR8Jfq-j": {
+      "type": "theorem",
+      "number": 11,
+      "slug": {
+        "sk": "konstantny-sucet-mocnosti",
+        "cs": "konstantni-soucet-mocnosti",
+        "en": "constant-power-sum-locus"
+      }
+    },
+    "dvZ6Hj-IMjiwGiPBj4uVu": {
+      "type": "theorem",
+      "number": 12,
+      "slug": {
+        "sk": "konstantny-pomer-mocnosti",
+        "cs": "konstantni-pomer-mocnosti",
+        "en": "constant-power-ratio-locus"
+      }
+    },
+    "uV4t-dE4QfjMZzcs0NfmW": {
+      "type": "theorem",
+      "number": 13,
+      "slug": {
+        "sk": "linearita-rozdielu-mocnosti",
+        "cs": "linearita-rozdilu-mocnosti",
+        "en": "power-difference-linearity"
+      }
+    },
+    "kPi40K-bCppJkE2T9MBOd": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "dve-priamky-cez-stred-obluka",
+        "cs": "stred-oblouku-a-tetiva",
+        "en": "tangent-circle-chord-arc-midpoint"
+      }
+    },
+    "pFMmqluU3nmGZSYkm3efw": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "vzdialenost-stredov-vpisanej-a-opisanej",
+        "cs": "vzdalenost-stredu-vepsane-a-opsane",
+        "en": "euler-distance-formula"
+      }
+    },
+    "l-ttAWpWgczjW_ytdvUwj": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "dotykova-kruznica-a-stred-vpisanej",
+        "cs": "dotykova-kruznice-a-stred-vepsane",
+        "en": "mixtilinear-incircle-incenter-on-chord"
+      }
+    },
+    "lX0IqtQsPmLQrsLTUErzm": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "sestuholnik-s-vpisanou-kruznicou",
+        "cs": "sestiuhelnik-s-vepsanou-kruznici",
+        "en": "hexagon-inscribed-circle-diagonals"
+      }
+    },
+    "_435gwc1honpQ3ip386Bj": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "dva-stvorce-na-usecke",
+        "cs": "dva-ctverce-a-pevny-bod",
+        "en": "two-squares-fixed-point"
+      }
+    },
+    "aFIODdiosGAy_qg7WWTTO": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "kruznice-urcene-parabolami",
+        "cs": "paraboly-a-pruseciky-s-osami",
+        "en": "parabola-axis-intersections-circle"
+      }
+    },
+    "6qpbdQI93yTn0hmycKsVn": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "os-usecky-a-dotycnica-kruznice",
+        "cs": "osa-usecky-a-tecna",
+        "en": "perpendicular-bisector-tangent-locus"
+      }
+    },
+    "zo-ax3_7vlPEhcOuGXSIu": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "kolmice-cez-stred-vpisanej-kruznice",
+        "cs": "kolmice-ve-stredu-vepsane-kruznice",
+        "en": "incenter-perpendicular-line-collinear"
+      }
+    },
+    "9h3ho4k7ICipGlRhvqr7v": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "bod-v-trojuholniku-s-rovnymi-uhlami",
+        "cs": "bod-uvnitr-se-shodnymi-uhly",
+        "en": "interior-point-equal-angles-ratio"
+      }
+    },
+    "aHqlcuKfHDe0WslkoFmjr": {
+      "type": "problem",
+      "number": 10,
+      "slug": {
+        "sk": "jediny-bod-a-obvod-trojuholnika",
+        "cs": "jediny-bod-na-strane-bc",
+        "en": "unique-point-on-side-perimeter"
+      }
+    },
+    "t9RnR0uuv22NL3ceXZ8TP": {
+      "type": "problem",
+      "number": 11,
+      "slug": {
+        "sk": "rovnake-usecky-a-zhodne-uhly",
+        "cs": "shodne-usecky-a-ctyri-body",
+        "en": "equal-segments-four-points-concyclic"
+      }
+    },
+    "jTnUWvmphv4xcEYPAwQtG": {
+      "type": "problem",
+      "number": 12,
+      "slug": {
+        "sk": "minimalny-sucin-useciek-v-uhle",
+        "cs": "minimalni-soucin-v-uhlu",
+        "en": "point-in-angle-minimal-product"
+      }
+    },
+    "iQleAath6zbItb9zJE15L": {
+      "type": "problem",
+      "number": 13,
+      "slug": {
+        "sk": "mnozina-stredov-opisanych-kruznic",
+        "cs": "stredy-opsanych-kruznic-nad-prumerem",
+        "en": "circumcenters-locus-diameter-chord"
+      }
+    },
+    "LXEsnZBgkxot2nd2tvdA_": {
+      "type": "problem",
+      "number": 14,
+      "slug": {
+        "sk": "obvod-trojuholnika-a-jednotkove-usecky",
+        "cs": "trojuhelnik-s-obvodem-ctyri",
+        "en": "unit-segments-perimeter-split"
+      }
+    },
+    "7y0HAQ9sYFS9_vmJJ7wwH": {
+      "type": "problem",
+      "number": 15,
+      "slug": {
+        "sk": "rozdiel-sucinov-a-paty-kolmic",
+        "cs": "paty-kolmic-z-vnitrniho-bodu",
+        "en": "pedal-products-difference-identity"
+      }
+    },
+    "J6K8ku5QIYW3g8-gx_Qql": {
+      "type": "problem",
+      "number": 16,
+      "slug": {
+        "sk": "kruznice-cez-tazisko-a-prepona",
+        "cs": "teziste-a-dve-kruznice",
+        "en": "centroid-circles-meet-on-hypotenuse"
+      }
+    },
+    "N3RPdKDeLi_eQoXhWN92i": {
+      "type": "problem",
+      "number": 17,
+      "slug": {
+        "sk": "sest-bodov-na-jednej-kruznici",
+        "cs": "sest-bodu-na-jedne-kruznici",
+        "en": "six-points-on-one-circle"
+      }
+    },
+    "FsSRgKx51GgWUNGN22ZRu": {
+      "type": "problem",
+      "number": 18,
+      "slug": {
+        "sk": "priemery-kruznic-a-ortocentrum",
+        "cs": "dva-prumery-a-ortocentrum",
+        "en": "two-diameters-orthocenter-collinear"
+      }
+    },
+    "mcFgi9_8MevHOvQjTzgAs": {
+      "type": "problem",
+      "number": 19,
+      "slug": {
+        "sk": "stredy-useciek-a-dotyk-kruznice",
+        "cs": "kruznice-stredu-usecek-a-tecna",
+        "en": "midpoint-circle-tangent-equal-distances"
+      }
+    },
+    "io6dFPVubPUNaY7p_2ASn": {
+      "type": "problem",
+      "number": 20,
+      "slug": {
+        "sk": "paty-vysok-a-ich-stredy",
+        "cs": "stredy-usecek-a-paty-vysek",
+        "en": "altitude-feet-midpoints-equal-distances"
+      }
+    },
+    "6KKwSZBU9LHnCZvzW_j8y": {
+      "type": "problem",
+      "number": 21,
+      "slug": {
+        "sk": "dotykovy-bod-a-pripisana-kruznica",
+        "cs": "dotykovy-bod-a-stred-pripsane",
+        "en": "incircle-touch-excenter-midpoint-circle"
+      }
+    },
+    "WYnX1YPsI6GzBIczdKhtf": {
+      "type": "problem",
+      "number": 22,
+      "slug": {
+        "sk": "rovnobezniky-a-dotykove-body",
+        "cs": "rovnobezniky-a-dotykove-body",
+        "en": "incircle-parallelograms-equal-distances"
+      }
+    },
+    "q2XpT_uNI0AubWKr8OI6R": {
+      "type": "problem",
+      "number": 23,
+      "slug": {
+        "sk": "pravouhly-trojuholnik-a-dva-body",
+        "cs": "shodne-usecky-v-pravouhlem-trojuhelniku",
+        "en": "right-triangle-altitude-equal-segments"
+      }
+    },
+    "hRhMzmG8ahmmJycvrobIu": {
+      "type": "problem",
+      "number": 24,
+      "slug": {
+        "sk": "dve-ortocentra-a-spolocny-bod",
+        "cs": "dve-ortocentra-a-tri-primky",
+        "en": "two-orthocenters-concurrency"
+      }
+    },
+    "uC1mjjdLrHYavatAIrH_m": {
+      "type": "problem",
+      "number": 25,
+      "slug": {
+        "sk": "vpisane-kruznice-a-pevny-bod",
+        "cs": "pevny-bod-dvou-vepsanych-kruznic",
+        "en": "two-incircles-fixed-point"
       }
     }
   },

@@ -468,7 +468,123 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tvoří zbytky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a, 2a, \\ldots, (p-1)a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " permutaci čísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1, 2, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Právě jeden z\u00A0nich je tedy kongruentní s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což dává zbytek "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0vlastností"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a \\cdot a^{-1} \\equiv 1 \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jednoznačnost plyne z\u00A0krácení: pokud "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ax \\equiv 1 \\equiv ay \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pak z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ax \\equiv ay",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x \\equiv y \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "theorem",
@@ -529,7 +645,124 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "První a poslední kongruence jsou jen zápisem zlomkovou čarou, dokazujeme tedy tu prostřední. Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je prvočíslo a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b, d \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je i "
+                    },
+                    {
+                      "type": "math",
+                      "text": "bd \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a podle předchozí věty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(bd)^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " existuje."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vynásobením číslem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "bd",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a použitím "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b^{-1}b \\equiv 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d^{-1}d \\equiv 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\bigl(a b^{-1} + c d^{-1}\\bigr) \\cdot bd \\equiv ad + bc \\pmod{p},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "a po vynásobení číslem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(bd)^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a b^{-1} + c d^{-1} \\equiv (ad + bc) \\cdot (bd)^{-1} \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "theorem",
@@ -590,7 +823,65 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Krajní kongruence jsou jen zápisem zlomkovou čarou, dokazujeme tedy tu prostřední. Jako v\u00A0předchozí větě je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "bd \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(bd)^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " existuje. Přitom"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(bd) \\cdot \\bigl(b^{-1} d^{-1}\\bigr) \\equiv \\bigl(b b^{-1}\\bigr)\\bigl(d d^{-1}\\bigr) \\equiv 1 \\pmod{p},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "takže z\u00A0jednoznačnosti inverzu je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(bd)^{-1} \\equiv b^{-1} d^{-1} \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Odtud"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\bigl(a b^{-1}\\bigr) \\cdot \\bigl(c d^{-1}\\bigr) \\equiv (ac) \\cdot \\bigl(b^{-1} d^{-1}\\bigr) \\equiv (ac) \\cdot (bd)^{-1} \\pmod{p}.",
+                  "isDisplay": true
+                }
+              ]
             }
           ]
         }
@@ -605,7 +896,7 @@
               "content": [
                 {
                   "type": "text",
-                  "text": "Všechny níže uvedené úlohy využívají výše uvedenou teorii — práci se zlomky modulo\u00A0"
+                  "text": "Všechny níže uvedené úlohy využívají výše uvedenou teorii, práci se zlomky modulo\u00A0"
                 },
                 {
                   "type": "math",
@@ -704,7 +995,283 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p = 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-1)! = 1 \\equiv -1 \\pmod{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", dále tedy předpokládejme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je liché."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Každé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\in \\{1, 2, \\ldots, p-1\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je nenulové modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže má inverz "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1/k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a ten je rovněž nenulový, tedy je kongruentní s právě jedním prvkem množiny "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{1, 2, \\ldots, p-1\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Přiřazení "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\mapsto 1/k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je proto zobrazení této množiny do sebe a je samo sobě inverzní. Rozkládá ji tak na dvojice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{k, 1/k\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\not\\equiv 1/k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", jejichž součin je z definice inverzu kongruentní s "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a na pevné body, tedy na ta "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pro která"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "k \\equiv \\frac{1}{k} \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Po vynásobení číslem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je tato podmínka ekvivalentní podmínce "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k^2 \\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid (k-1)(k+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je prvočíslo, dělí jeden z činitelů, a tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\equiv 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\equiv -1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". V množině "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{1, 2, \\ldots, p-1\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tomu odpovídají právě "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", která jsou pro liché "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " různá."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zbývajících "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p-3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " čísel se proto rozpadne na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-3)/2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dvojic, z nichž každá má součin kongruentní s "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a tak"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(p-1)! \\equiv 1 \\cdot (p-1) \\cdot 1^{(p-3)/2} \\equiv -1 \\pmod{p}.",
+                  "isDisplay": true
+                }
+              ]
             },
             {
               "type": "problem",
@@ -983,7 +1550,525 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p = 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vyhovuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = b = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dále nechť je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " liché prvočíslo a označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m = \\frac{p-1}{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podmínku nejprve přepíšeme řečí zlomků modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pokud "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid a^2 + b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " znamená "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2 \\equiv -b^2 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což po vydělení "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dává"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\bigl(\\tfrac{a}{b}\\bigr)^2 \\equiv -1 \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Naopak, pokud nějaké celé číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " splňuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x^2 \\equiv -1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pak dvojice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vyhovuje, neboť z "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x^2 \\equiv -1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ihned plyne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Hledaná dvojice tedy existuje právě tehdy, když je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " druhou mocninou modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nechť taková dvojice existuje a položme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x = \\frac{a}{b}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x^2 \\equiv -1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Umocněním na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tou dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "x^{p-1} = \\bigl(x^2\\bigr)^m \\equiv (-1)^m \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Malá Fermatova věta použitá na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " i na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dává "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x^{p-1} = \\frac{a^{p-1}}{b^{p-1}} \\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(-1)^m \\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Kdyby bylo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " liché, měli bychom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "-1 \\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což pro liché "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " neplatí. Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je tedy sudé a to je přesně podmínka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\equiv 1 \\pmod{4}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nechť naopak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\equiv 1 \\pmod{4}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je sudé. Potřebujeme explicitní odmocninu z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a tu nám dodá Wilsonova věta "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-1)! \\equiv -1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " z předchozí úlohy. Dvojice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{k, p-k\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 1, 2, \\ldots, m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pokryjí každé z\u00A0čísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1, 2, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " právě jednou a přitom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p - k \\equiv -k \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(p-1)! = \\prod_{k=1}^{m} k(p-k) \\equiv (-1)^m (m!)^2 \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je sudé, je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(-1)^m = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a Wilsonova věta tak dává "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(m!)^2 \\equiv -1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Volba "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = m!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " proto vyhovuje: číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je součinem čísel menších než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a zároveň "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2 + b^2 \\equiv -1 + 1 \\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1093,7 +2178,7 @@
                       },
                       {
                         "type": "text",
-                        "text": "-tou, což je kladné celé číslo, neboť "
+                        "text": "-tou, což je nezáporné celé číslo, neboť "
                       },
                       {
                         "type": "math",
@@ -1157,7 +2242,365 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Předpokládejme pro spor, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pak ani "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " není dělitelné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": kdyby "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ze vztahu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid a^2 + ab + b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by ihned plynulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid b^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Klíčový je rozklad"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a^3 - b^3 = (a - b)(a^2 + ab + b^2),",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "ze kterého plyne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid a^3 - b^3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^3 \\equiv b^3 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", můžeme tuto kongruenci vydělit číslem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "b^3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0pro zbytek "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x = a/b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostáváme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "x^3 \\equiv 1 \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zde přichází na řadu předpoklad "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\equiv 2 \\pmod{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-2)/3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je nezáporné celé číslo, takže na něj smíme poslední kongruenci umocnit a\u00A0dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "x^{p-2} \\equiv \\bigl(x^3\\bigr)^{(p-2)/3} \\equiv 1 \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vynásobením číslem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " přejde tento vztah na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x^{p-1} \\equiv x \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Přitom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0Malá Fermatova věta dává "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x^{p-1} \\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Porovnáním obou vyjádření máme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{a}{b} = x \\equiv 1 \\pmod{p}, \\qquad\\text{tedy}\\qquad a \\equiv b \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dosaďme to zpět do předpokladu:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "0 \\equiv a^2 + ab + b^2 \\equiv 3b^2 \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", musí být "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p = 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". To je spor s\u00A0předpokladem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\equiv 2 \\pmod{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Proto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid b",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pak je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^2 = (a^2 + ab + b^2) - b(a + b)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dělitelné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je prvočíslo, platí i "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1252,7 +2695,208 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Kombinační číslo rozepíšeme jako zlomek a ten budeme číst modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 \\leq k \\leq p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", jsou všechny činitele "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1, 2, \\ldots, k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " menší než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a proto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k! \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; podle věty o\u00A0existenci inverzu je tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " invertovatelné a výraz"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\binom{p-1}{k} = \\frac{(p-1)(p-2)\\cdots(p-k)}{k!}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "má modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " smysl jako zlomek."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V\u00A0čitateli stojí právě "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " činitelů tvaru "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p - j",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "j = 1, 2, \\ldots, k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a každý z\u00A0nich splňuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p - j \\equiv -j \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Vytknutím znaménka z\u00A0každého z\u00A0nich dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(p-1)(p-2)\\cdots(p-k) \\equiv (-1)(-2)\\cdots(-k) = (-1)^k \\cdot k! \\pmod{p},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "neboli v\u00A0čitateli je až na znaménko tentýž faktoriál jako ve jmenovateli. Po vydělení tak dostáváme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\binom{p-1}{k} \\equiv \\frac{(-1)^k \\cdot k!}{k!} \\equiv (-1)^k \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou oba zmíněné součiny prázdné, tedy rovné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a tvrzení zní "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1366,7 +3010,406 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nejprve součet převedeme na společného jmenovatele "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N = (p-1)!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Všechna čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N/k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 1, 2, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou celá, takže pro celé číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M = \\sum_{k=1}^{p-1} N/k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{1} + \\frac{1}{2} + \\cdots + \\frac{1}{p-1} = \\frac{M}{N} = \\frac{m}{n},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "a tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "mN = nM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je součinem čísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1, 2, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", z nichž ani jedno není dělitelné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pokud tedy dokážeme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid nM = mN",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a z nesoudělnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " už "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je dokazované tvrzení. Všimněme si, že o tvaru zlomku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m/n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nic nepředpokládáme."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zbývá spočítat "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro každé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\cdot \\frac{N}{k} = N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže celé číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N/k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " právě "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N \\cdot k^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy zlomek "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N/k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ve smyslu inverzů. Proto"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "M \\equiv N \\sum_{k=1}^{p-1} \\frac{1}{k} \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Součet napravo je součtem inverzů všech nenulových zbytků modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zobrazení "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\mapsto k^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je přitom permutací těchto zbytků: ze vztahu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\cdot k^{-1} \\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je vidět, že inverzem k "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je opět "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", jde tedy o involuci, a proto o bijekci. Čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1^{-1}, 2^{-1}, \\ldots, (p-1)^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou tak v nějakém pořadí přesně čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1, 2, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\sum_{k=1}^{p-1} \\frac{1}{k} \\equiv 1 + 2 + \\cdots + (p-1) = \\frac{p(p-1)}{2} \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\geq 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je liché, je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-1)/2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " celé číslo a pravá strana je násobkem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dostáváme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sum_{k=1}^{p-1} 1/k \\equiv 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M \\equiv N \\cdot 0 \\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tj. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a podle úvodní úvahy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1609,7 +3652,428 @@
                   }
                 ]
               ],
-              "solution": []
+              "answer": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jediné takové "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ],
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ukážeme, že každé prvočíslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dělí nějaký člen posloupnosti. Tím bude důkaz hotov: pokud "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n > 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", má nějakého prvočíselného dělitele "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ten dělí nějaké "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nejsou nesoudělná."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Malá prvočísla vyřídíme přímo. Je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_1 = 2 + 3 + 6 - 1 = 10",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je dělitelné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " i "
+                    },
+                    {
+                      "type": "math",
+                      "text": "5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_2 = 4 + 9 + 36 - 1 = 48",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je dělitelné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nechť tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\geq 5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nejsou dělitelná "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže s nimi umíme modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pracovat jako se zlomky. Nápovědou pro volbu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je identita"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{2} + \\frac{1}{3} + \\frac{1}{6} = 1.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Kdyby se mocniny "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3^m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "6^m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " změnily právě na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1/2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1/3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1/6",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", celý člen "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by vyšel nulový. To zařídí volba "
+                    },
+                    {
+                      "type": "math",
+                      "text": "m = p - 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", která je díky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\geq 5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " kladná. Podle Malé Fermatovy věty je totiž"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "2 \\cdot 2^{p-2} = 2^{p-1} \\equiv 1 \\pmod{p},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^{p-2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je inverz čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^{p-2} \\equiv \\frac{1}{2} \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Stejně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3^{p-2} \\equiv \\frac{1}{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "6^{p-2} \\equiv \\frac{1}{6} \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Sečtením těchto inverzů jako zlomků dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\na_{p-2} \\equiv \\frac{1}{2} + \\frac{1}{3} + \\frac{1}{6} - 1 \\\\\n\\equiv \\frac{3 + 2 + 1}{6} - 1 \\equiv 1 - 1 \\equiv 0 \\pmod{p}.\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Každé prvočíslo tedy dělí nějaký člen posloupnosti a jediným kandidátem zůstává "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Zkouška: číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je nesoudělné s každým celým číslem, tedy i s každým "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1780,7 +4244,404 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vyčleňme člen "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a_1 = 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\geq 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k - 1 \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže tímto číslem smíme modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dělit, a\u00A0ze vzorce "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k^3 - 1 = (k-1)(k^2+k+1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a_k \\equiv \\frac{k^3 - 1}{k - 1} \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Vynásobením jmenovatelů přes všechna "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 2, 3, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\cdot 2 \\cdots (p-2) = (p-2)!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a_1 a_2 \\cdots a_{p-1} \\equiv 3 \\cdot \\frac{\\prod_{k=2}^{p-1} (k^3 - 1)}{(p-2)!} \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Čitatel vypadá beznadějně, ale součin "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "všech"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " čísel tvaru "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x - 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " přes nenulové zbytky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bychom spočítali snadno. Stačí tedy vědět, co proběhnou třetí mocniny, a\u00A0právě zde se použije předpoklad o\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Ukážeme, že zobrazení "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x \\mapsto x^3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je na nenulových zbytcích modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " bijekce. Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\equiv 2 \\pmod{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "t = \\frac{p-2}{3}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " kladné celé číslo. Nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x^3 \\equiv y^3 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pro nenulové zbytky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Umocněním na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "t",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "-tou dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x^{p-2} \\equiv y^{p-2} \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je podle Malé Fermatovy věty"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{x} \\equiv \\frac{1}{y} \\pmod{p},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "a\u00A0tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x \\equiv y \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prosté zobrazení konečné množiny do sebe je bijekce."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1^3, 2^3, \\ldots, (p-1)^3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou proto permutací čísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1, 2, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jediné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "k^3 \\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 2, 3, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " proběhnou hodnoty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k^3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " právě zbytky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2, 3, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " v\u00A0nějakém pořadí. Dostáváme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\prod_{k=2}^{p-1} (k^3 - 1) \\equiv \\prod_{j=2}^{p-1} (j - 1) = (p-2)! \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-2)!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " není dělitelné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže se ve zlomku vykrátí a\u00A0zbývá"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "a_1 a_2 \\cdots a_{p-1} \\equiv 3 \\pmod{p}.",
+                  "isDisplay": true
+                }
+              ]
             },
             {
               "type": "problem",
@@ -1975,7 +4836,387 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nejprve si všimněme, že pravá strana dává smysl: podle Malé Fermatovy věty je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^p \\equiv 2 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid 2^p - 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{2-2^p}{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je celé."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Levá strana se vyřídí okamžitě. Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\leq i \\leq p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "i \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a tak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "i^{p-2} \\equiv i^{p-1} \\cdot \\frac{1}{i} \\equiv \\frac{1}{i} \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Proto"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\sum_{i=1}^{(p-1)/2} i^{p-2} \\equiv \\sum_{i=1}^{(p-1)/2} \\frac{1}{i} \\pmod{p}. \\tag{1}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Veškerá práce je tedy na pravé straně a cílem je dostat z ní tentýž součet."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Binomická věta dává "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2^p = (1+1)^p = \\sum_{k=0}^{p} \\binom{p}{k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili po odečtení obou krajních členů"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{2^p-2}{p} = \\frac{1}{p} \\sum_{k=1}^{p-1} \\binom{p}{k}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Sumu umíme dělit číslem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " po jednotlivých sčítancích díky identitě "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\binom{p}{k} = \\frac{p}{k} \\binom{p-1}{k-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (obě strany jsou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{p!}{k!(p-k)!}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "), po jejímž dosazení se "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vykrátí:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{2^p-2}{p} = \\sum_{k=1}^{p-1} \\frac{\\binom{p-1}{k-1}}{k}. \\tag{2}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "To je rovnost racionálních čísel, ale všechny jmenovatele na pravé straně splňují "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\leq k \\leq p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy nejsou dělitelné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Rovnost (2) proto můžeme číst jako kongruenci modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{1}{k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " znamená inverz čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podle dřívější úlohy je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\binom{p-1}{k-1} \\equiv (-1)^{k-1} \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a tak se (2) po vynásobení "
+                    },
+                    {
+                      "type": "math",
+                      "text": "-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " změní na"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{2-2^p}{p} \\equiv \\sum_{k=1}^{p-1} \\frac{(-1)^k}{k} \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zbývá tento střídavý součet rozdělit podle parity "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je sudé, takže sudé indexy jsou přesně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 2j",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "j = 1, \\ldots, \\frac{p-1}{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; označme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "E = \\sum_{j=1}^{(p-1)/2} \\frac{1}{2j} \\equiv \\frac{1}{2} \\sum_{j=1}^{(p-1)/2} \\frac{1}{j} \\pmod{p}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S = \\sum_{k=1}^{p-1} \\frac{1}{k}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Součet přes lichá "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je pak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S - E",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a tedy"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\sum_{k=1}^{p-1} \\frac{(-1)^k}{k} = E - (S - E) = 2E - S.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podle dřívější úlohy je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S \\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{2-2^p}{p} \\equiv 2E \\equiv \\sum_{j=1}^{(p-1)/2} \\frac{1}{j} \\pmod{p},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "což spolu s (1) dává přesně dokazovanou kongruenci."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -2175,7 +5416,527 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p = 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ověříme tvrzení přímo: "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\binom{4}{2} = 6 = 4 + 2 \\equiv 2 \\pmod{4}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dále tedy nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\geq 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rozepišme kombinační číslo a vytkněme z něj násobky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\binom{2p}{p} = \\frac{(2p)(2p-1)\\cdots(p+1)}{p!}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "V čitateli je jediným násobkem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " první činitel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ostatní činitele jsou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p + k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 1, 2, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; ve jmenovateli je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p! = p \\cdot (p-1)!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Po vykrácení jednoho "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostáváme celočíselnou rovnost"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\binom{2p}{p} \\cdot (p-1)! = 2 \\prod_{k=1}^{p-1}(p+k). \\tag{1}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pravou stranu nyní spočítáme modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1 \\leq k \\leq p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nesoudělné s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže má inverz i modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a symbolem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac1k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " budeme značit právě tento inverz; důkazy obou vět o počítání se zlomky využívají jedině invertovatelnost jmenovatele, takže modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " fungují doslova stejně. Z rovnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\cdot \\frac{p}{k} = p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " máme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p + k \\equiv k\\bigl(1 + \\frac{p}{k}\\bigr) \\pmod{p^2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a tedy"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\prod_{k=1}^{p-1}(p+k) \\equiv (p-1)! \\prod_{k=1}^{p-1}\\bigl(1 + \\tfrac{p}{k}\\bigr) \\pmod{p^2}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Poslední součin roznásobme. Sčítanec příslušející podmnožině "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S \\subseteq \\{1, \\ldots, p-1\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^{|S|} \\prod_{k \\in S} \\frac1k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|S| \\geq 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dělitelné "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a tedy modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nulové. Přežije jen jednička a členy lineární v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\prod_{k=1}^{p-1}\\bigl(1 + \\tfrac{p}{k}\\bigr) \\equiv 1 + p \\sum_{k=1}^{p-1} \\frac1k \\pmod{p^2}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Stačí proto ukázat, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\sum_{k=1}^{p-1} \\frac1k \\equiv 0 \\pmod{p^2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", neboli že samotný součet "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sum_{k=1}^{p-1} \\frac1k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je dělitelný\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Tady už jde jen o informaci modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a inverz čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " se po redukci modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " stane inverzem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Náš součet je tak modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " obyčejným součtem inverzů modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a ten je pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\geq 3",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nulový: dokázali jsme to v\u00A0úloze o čitateli součtu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac11 + \\frac12 + \\cdots + \\frac1{p-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Právě zde selhává případ "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p = 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", neboť pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p = 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je tento součet roven "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Součin v posledním vztahu je tedy modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " roven "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a vztah (1) přejde na"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\binom{2p}{p} \\cdot (p-1)! \\equiv 2 \\cdot (p-1)! \\pmod{p^2}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-1)!",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je nesoudělné s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže jím smíme krátit, čímž dostáváme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\binom{2p}{p} \\equiv 2 \\pmod{p^2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -2334,7 +6095,642 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nejprve převeďme tvrzení o\u00A0čitateli na kongruenci. Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N = \\bigl((p-1)!\\bigr)^e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro každé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\in \\{1, 2, \\ldots, p-1\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k^e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dělitelem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže po rozšíření na společného jmenovatele "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " máme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{1^e} + \\frac{1}{2^e} + \\cdots + \\frac{1}{(p-1)^e} = \\frac{M}{N},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M = \\sum_{k=1}^{p-1} \\frac{N}{k^e}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je celé číslo. Z\u00A0rovnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{m}{n} = \\frac{M}{N}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " plyne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "mN = nM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", přičemž "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je součinem čísel menších než "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". K\u00A0důkazu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " proto stačí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Celé číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{N}{k^e}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " kongruentní se součinem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N \\cdot \\frac{1}{k^e}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{1}{k^e}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je inverz "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k^e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k^e \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je tato kongruence krácením ekvivalentní s\u00A0kongruencí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N \\equiv N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Označíme-li tedy"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "S = \\frac{1}{1^e} + \\frac{1}{2^e} + \\cdots + \\frac{1}{(p-1)^e},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "kde zlomky už chápeme jako inverzy modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M \\equiv N \\cdot S \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", stačí dokázat "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S \\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hledáme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\not\\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pro které nahrazení každého "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " číslem "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ak",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jen přeuspořádá členy součtu, ale celý součet přeškáluje. Přeuspořádání funguje pro libovolné takové "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": zbytky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a \\cdot 1, a \\cdot 2, \\ldots, a(p-1)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tvoří permutaci čísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1, 2, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a jelikož hodnota "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{1}{k^e}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " závisí jen na zbytku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "S \\equiv \\sum_{k=1}^{p-1} \\frac{1}{(ak)^e} \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Přeškálování plyne z\u00A0věty o\u00A0násobení zlomků použité na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(ak)^e = a^e k^e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\sum_{k=1}^{p-1} \\frac{1}{a^e k^e}\n\\equiv \\frac{1}{a^e} \\sum_{k=1}^{p-1} \\frac{1}{k^e}\n\\equiv \\frac{S}{a^e} \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Dohromady je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S \\equiv \\frac{S}{a^e}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže po vynásobení "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dostáváme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "(a^e - 1) \\cdot S \\equiv 0 \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Najdeme-li tedy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^e \\not\\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", bude činitel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a^e - 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nenulový a krácením vyjde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S \\equiv 0 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Právě k\u00A0tomu slouží předpoklad "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-1) \\nmid e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Nechť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "g",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je primitivní kořen modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", tedy prvek řádu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a položme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a = g",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Napišme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "e = q(p-1) + r",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", kde "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 \\leq r < p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; z\u00A0předpokladu je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r \\neq 0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podle Malé Fermatovy věty je"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "g^e = \\bigl(g^{p-1}\\bigr)^q \\cdot g^r \\equiv g^r \\pmod{p},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "takže z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "g^e \\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " by plynulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "g^r \\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0 < r < p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", což je spor s\u00A0tím, že řád "
+                    },
+                    {
+                      "type": "math",
+                      "text": "g",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Proto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "g^e \\not\\equiv 1 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a důkaz je hotov."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "problem",
@@ -2527,7 +6923,559 @@
                   }
                 ]
               ],
-              "solution": []
+              "solution": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "S = \\frac{1}{1} + \\frac{1}{2} + \\cdots + \\frac{1}{p-1}, \\qquad D = (p-1)!.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " chápeme po celou dobu jako obyčejný zlomek, nikoli jako zbytek modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; kongruence budeme používat jen pro pomocná celá čísla. Hned si všimněme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Sečtením členů "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1/k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1/(p-k)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vznikne v\u00A0čitateli "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ":"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\frac{1}{k} + \\frac{1}{p-k} = \\frac{p}{k(p-k)}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je liché, dvojice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{k, p-k\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k = 1, 2, \\ldots, \\frac{p-1}{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pokryjí každé z\u00A0čísel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "1, 2, \\ldots, p-1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " právě jednou, a tedy"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "S = p \\sum_{k=1}^{(p-1)/2} \\frac{1}{k(p-k)}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jeden činitel "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " máme zadarmo a stačí nám ukázat, že jeden dodá i zbylý součet. Je to tvrzení o\u00A0zlomku, dejme mu tedy společného jmenovatele "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k \\leq \\frac{p-1}{2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " jsou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p-k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dvě různá čísla z\u00A0množiny "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\{1, 2, \\ldots, p-1\\}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k(p-k) \\mid D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a číslo"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "A = \\sum_{k=1}^{(p-1)/2} \\frac{D}{k(p-k)}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "je celé, přičemž "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S = \\frac{pA}{D}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Chceme dokázat "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Teprve tady začneme počítat se zbytky. Každý sčítanec "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X = \\frac{D}{k(p-k)}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " splňuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X \\cdot k(p-k) = D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X \\equiv D \\cdot \\bigl(k(p-k)\\bigr)^{-1}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Přitom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k(p-k) \\equiv -k^2 \\pmod{p}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a proto"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "A \\equiv -D \\sum_{k=1}^{(p-1)/2} \\frac{1}{k^2} \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", zbývá už jen dokázat, že"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\sum_{k=1}^{(p-1)/2} \\frac{1}{k^2} \\equiv 0 \\pmod{p},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "kde jde o\u00A0součet zbytků, tedy o\u00A0inverzy ve smyslu výše uvedené teorie."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Tento poloviční součet doplníme na celý, pro který už tvrzení známe. Z\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p - k \\equiv -k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " plyne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-k)^2 \\equiv k^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a tedy i "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{1}{(p-k)^2} \\equiv \\frac{1}{k^2}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže druhá polovina členů je kopií první:"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\sum_{k=1}^{p-1} \\frac{1}{k^2} \\equiv 2 \\sum_{k=1}^{(p-1)/2} \\frac{1}{k^2} \\pmod{p}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pro "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\geq 5",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p - 1 \\geq 4",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "(p-1) \\nmid 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a podle předchozí úlohy s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "e = 2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je levá strana nulová modulo\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Číslo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je nesoudělné s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "p",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", proto je nulový i poloviční součet a skutečně "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\mid A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pišme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A = pB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pro celé "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čili "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S = \\frac{p^2 B}{D}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0rovnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\frac{m}{n} = \\frac{p^2 B}{D}",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " po vynásobení dostaneme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "mD = p^2 Bn",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2 \\mid mD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jelikož "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p \\nmid D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "p^2 \\mid m",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             }
           ]
         }
