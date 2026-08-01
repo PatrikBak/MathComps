@@ -1,6 +1,6 @@
 ---
 name: handout-figure
-description: Use this skill when editing or adding handout figures — Asymptote `.asy` files in `data/handouts/Images/`. Adding/modifying geometry, angle marks, fills, colors, labels, then re-rendering to PDF + SVG. Trigger phrases: "add a 60° angle to that figure", "change the color in the figure", "redraw", "fix the figure", "make X visible", anything touching a `.asy` under handouts. Do NOT use for editing the `.tex` that embeds the figure — that's `handout-editor`.
+description: Use this skill when editing or adding handout figures — Asymptote `.asy` files in `data/handouts/Images/`. Adding/modifying geometry, angle marks, fills, colors, labels, then re-rendering to PDF + SVG. Trigger phrases — "add a 60° angle to that figure", "change the color in the figure", "redraw", "fix the figure", "make X visible", anything touching a `.asy` under handouts. Do NOT use for editing the `.tex` that embeds the figure — that's `handout-editor`.
 ---
 
 # Handout Figure Editor
@@ -10,15 +10,30 @@ You edit Asymptote figures in `data/handouts/Images/`. Source is `.asy`; the `.s
 ## Workflow
 
 1. **Identify the figure.** The user may name the slug (e.g. `angles-pentagon`) or paste a `\Image{...}` line. The file is `data/handouts/Images/<slug>.asy`.
-2. **Primitives in `_common.asy`**: `Draw`, `Circle`, `AngleMark`, `RightAngleMark`, `LabeledDot`, `VertexDot`, `EdgeLabel`, `ParallelMark`, `EquilateralTriangle`, `Midpoint`, `Foot`, `ReflectAcross`, `Polar`, `ExtendPast`. Read `_common.asy` only for a signature this skill doesn't document.
+2. **Primitives in `_common.asy`**: `Draw`, `DashedDraw`, `DashDotDraw`, `DottedDraw`, `PatternDraw`, `Circle`, `Arc`, `AngleMark`, `RightAngleMark`, `LabeledDot`, `VertexDot`, `VertexDots`, `PointLabel`, `EdgeLabel`, `ParallelMark`, `EquilateralTriangle`, `Midpoint`, `Foot`, `ReflectAcross`, `Polar`, `ExtendPast`, `LineCircleIntersections`, `RadicalAxis`, `Circumcenter`, `TangentPointsFromExternal`, `CommonExternalTangent`, `CommonExternalTangentAwayFrom`, `CommonInternalTangent`. Read `_common.asy` only for a signature this skill doesn't document — and read the copy in **this** `Images/` directory, never `~/.asy/_common.asy`. That symlink points at the main checkout, so in a worktree it lags any unmerged library change; `export-asy.sh` passes `-cd`, so the local file is what actually compiles. Note `LineCircleIntersections` returns its two points **ordered along `A → B`**, so which one is "near" depends on the direction you passed — check before picking label compass directions.
 3. **Check for a shared module.** If `<topic>-shared.asy` exists, the figure is part of a statement/solution pair: geometry and base layers live in shared; individual files call `BaseFills() / BaseEdges() / BaseDots()` and add only their own marks.
 4. **Re-render** from `data/handouts/Images/`:
    ```
-   ./export-asy.sh <slug>.asy
+   bash export-asy.sh <slug>.asy
    ```
-   Produces the PDF (local preview / handout compile) and the `asy`-rendered SVG. Only the SVG is committed; the PDF is a gitignored build artifact.
-5. **Visually verify** the rendered PDF with the `Read` tool before reporting done — wrong-side angle marks, label collisions, and clipping issues are obvious in the image but invisible in the source. The render exit code only tells you the file compiled.
-6. **Report** one sentence — what changed in the figure.
+   The script is committed non-executable, so `./export-asy.sh` fails with permission denied — always go through `bash`. Produces the PDF (local preview / handout compile) and the `asy`-rendered SVG.
+5. **Check the natural width** against the budget below — `grep -o "width='[0-9.]*pt'" <slug>.svg`.
+6. **Visually verify** the rendered PDF with the `Read` tool before reporting done — wrong-side angle marks, label collisions, and clipping issues are obvious in the image but invisible in the source. The render exit code only tells you the file compiled.
+7. **Report** one sentence — what changed in the figure.
+
+## Figure size — the phone budget
+
+A figure's physical size *is* the magnitude of its coordinates (`unitsize(1pt)`, no `size()` clamp), while pens and fonts are absolute. Nothing downstream rescales it up: **a figure shrinks on a narrow screen but never grows**, and there is no tap-to-zoom. The phone is the binding constraint, never print.
+
+- **Cap natural width at 185pt** (≈246px) — the widest figure that never downscales, even on a 320px phone. A ceiling, not a target.
+- **Target 90–120pt tall.** Height is the constraint you actually get told about: it decides how big a bite the figure takes out of the page next to a one- or two-line statement. Past ~140pt needs a reason.
+- **A circle-dominated figure is roughly as tall as it is wide, so sizing it by width is the trap.** Hitting the height target puts such figures at ~110–150pt wide — deliberately under the width band, and correct. Wide-and-short figures (a triangle, a point-and-secant layout) can use the full width.
+- **Keep a handout's figures within a narrow band**, banded on whichever dimension dominates them. Below roughly 100pt across, 13pt labels start to dominate whatever the shape.
+- **Never pass `\Image` a `scale` argument to shrink a too-wide figure.** Scale multiplies the max-width, so it makes the phone case worse. Author at the target size instead.
+
+Measured viewport widths and the arithmetic behind these numbers: [figure-sizing.md](figure-sizing.md).
+
+**Never use `pattern()` / `HatchedFill`.** It forces Ghostscript rasterization of the whole figure: `equal-tangents-checkerboard.svg` is a 313 KB embedded JPEG with zero `<path>` elements, where every vector figure in the directory is ~1–25 KB of `<path>`. Use a `Light*` fill instead.
 
 ## Source layout
 
@@ -32,13 +47,15 @@ You edit Asymptote figures in `data/handouts/Images/`. Source is `.asy`; the `.s
   ```
   Retuning the figure is then a one-constant edit; geometry intent reads from the names. Established pattern — `angles-pentagon.asy` (`real alpha, lenBC, lenDE`), `angles-isosceles-triangle.asy` (`real base, height`), `angles-circumcenter.asy` (`real R, pastMidpoint, pastO`).
 - **Naming.** Prefer names that encode geometric role (`R`, `alpha`, `lenBC`, `pastO`, `bisectorLeft`, `Xprime`) over generic `x/y` or code-style abbreviations (`bis`, `aux`, `ext`, `eR`, `iZ`). Math-language names are fine — single-letter symbols (`R`), Greek words spelled out (`alpha`), compound math nouns (`lenBC`, `pastO`) — but clipped English reads like a half-deleted variable name. Bare `x/y` is acceptable only when the figure is genuinely Cartesian.
+- **Never put prose in a figure — labels are math symbols only.** The Handouts CLI uploads SVGs to `handouts/<slug>/<image>.svg` with the slug **language-stripped**, so every language variant shares one image set and there is no per-language override: a Slovak caption renders verbatim in the EN and CS variants. If a figure genuinely needs a caption, put it in the `.tex` between two `\Image` calls, where it translates.
 - **Use compass constants for label alignment.** `LabeledDot(A, "A", S)` not `LabeledDot(A, "A", (0, -1))`. The compass set is `N`, `S`, `E`, `W`, `NE`, `NW`, `SE`, `SW`. **Exception:** when a point variable shadows a compass letter (e.g. pentagon vertex `E` shadows east), pass an explicit vector for that one label: `LabeledDot(E, "E", (1, 0))`.
 
 ## Palette and styling
 
 - **6 hue families × 3 shades** in `_common.asy`: `LightBlue/Blue/DarkBlue`, `LightRed/Red/DarkRed`, `LightGreen/Green/DarkGreen`, `LightPurple/Purple/DarkPurple`, `LightPink/Pink/DarkPink`, `LightYellow/Yellow/DarkYellow`. Always pick a named pen — never inline `rgb(...)`.
 - **`AngleMark` / `RightAngleMark` take a `Light*` pen** — they fill a sector with no edge stroke, so a saturated pen reads heavy. For `labelPen` use a Normal/Dark pen or a `Font*` tier (e.g. `AngleMark(C, B, A, LightRed, "\alpha", labelPen = Red)`, `labelPen = Font2`).
-- **`AngleMark(X, Y, Z, color, ...)` — vertex is the MIDDLE arg, sweep is CCW from ray YX to ray YZ.** It does NOT auto-pick the smaller side. If the wedge fills the long way around, swap to `AngleMark(Z, Y, X, ...)` to reverse direction. Same for `RightAngleMark(A, O, B, ...)`.
+- **`AngleMark(X, Y, Z, color, ...)` — vertex is the MIDDLE arg, sweep is CCW from ray YX to ray YZ.** It does NOT auto-pick the smaller side (`while (d2 < d1) d2 += 360`). If the wedge fills the long way around, swap to `AngleMark(Z, Y, X, ...)` to reverse direction.
+- **`RightAngleMark(A, O, B, ...)` is the opposite: orientation-independent.** It always marks the corner between rays OA and OB, so swapping `A`/`B` renders the identical L. Don't try to flip it. Its signature is also `(A, O, B, radius, color, filled)` — `color` is the FIFTH argument, after `radius`, not the fourth as in `AngleMark`.
 - **Nested wedges sharing a vertex** (e.g. ∠YAB inside ∠XAB at A): draw the outer FIRST with a `Light*` pen at a larger radius, then the inner with the matching Normal pen at a smaller radius. Use this in place of `opacity()` for the "both angles visible despite overlap" case.
 - **Paired equal-angle wedges meeting at a bisector ray** (e.g. ∠XAZ and ∠ZAY where AZ bisects ∠XAY): two wedges at the same radius merge into one arc cut by the bisector. Pass plain `Radius*` to the first AngleMark and the matching `Radius*Nudged` to the second — it scales the outer wedge by `WedgeNudge` so the pair stair-steps at the bisector. Established pattern: `angles-bisector-definition.asy`, `angles-bisectors-perpendicular.asy`.
 - **Line widths**: three tiers — `ThinWidth = 0.5`, `NormalWidth = 1.0`, `ThickWidth = 1.5`. `Draw`/`Circle` apply `NormalWidth` automatically; `vertexPen` uses `ThinWidth`.
@@ -89,9 +106,11 @@ New `.asy` files start with `import _common;` directly — no preamble. Math der
 ```asy
 //
 // Fills the angle sector ∠XYZ with vertex Y, sweeping CCW from ray YX to ray YZ.
-// When `lab` is non-empty, it's placed on the angular bisector.
+// Pass a `Light*` pen for `color` so the filled sector reads softly. When `lab`
+// is non-empty, "$lab$" is placed on the angular bisector at distance
+// labelFraction * radius + labelOffset from Y.
 //
-// Used global variables: arcOpacity, Radius3
+// Used global variables: Radius3, angleMarkLabelFraction
 //
 void AngleMark(
     pair X,
@@ -99,7 +118,10 @@ void AngleMark(
     pair Z,
     pen color,
     string lab = "",
-    real radius = Radius3)
+    real radius = Radius3,
+    real labelFraction = angleMarkLabelFraction,
+    real labelOffset = 0,
+    pen labelPen = black)
 {
     ...
 }

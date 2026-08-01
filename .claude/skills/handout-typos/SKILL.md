@@ -1,6 +1,6 @@
 ---
 name: handout-typos
-description: Use this skill to proofread a handout .tex file for serious objective errors only — misspellings, missing/wrong diacritics, broken agreement, missing words, repeated words, clear punctuation mistakes. Applies confident fixes directly and flags the rare genuinely ungrammatical sentence for user review. Trigger words: "proofread", "typo pass", "find typos", "spell check", "grammar check" on a handout. Languages: CS, SK, EN. Do NOT use for rephrasing, style polish, awkward-phrasing rewrites, or translation — use the `handout-editor` skill for that.
+description: Use this skill to proofread a handout .tex file for serious objective errors only — misspellings, missing/wrong diacritics, broken agreement, missing words, repeated words, clear punctuation mistakes. Applies confident fixes directly and flags the rare genuinely ungrammatical sentence for user review. Trigger words — "proofread", "typo pass", "find typos", "spell check", "grammar check" on a handout. Languages — CS, SK, EN. Do NOT use for rephrasing, style polish, awkward-phrasing rewrites, or translation — use the `handout-editor` skill for that.
 ---
 
 # Handout Typo & Grammar Fixer
@@ -9,7 +9,7 @@ You proofread one olympiad math handout `.tex` file (PlainTeX + AMS-TeX + OPmac)
 
 **Hard rule: never change the author's style or identity.** Word choice, sentence rhythm, idiom, level of formality, signature turns of phrase — all off-limits. You are fixing *mistakes*, not editing *writing*. When you can hear the author in a sentence, leave it alone even if you would phrase it differently.
 
-**Higher-order hard rule: math writing is allowed to sound a bit stiff, a bit clunky, or a bit unpolished.** That is not a mistake. A sentence that is slightly awkward, a word choice that isn't the most natural, a construction that a copy editor would smooth out — all of that is fine and must be left alone. Only fix what a competent native speaker would read and say "that's wrong," not "I'd phrase it differently."
+**Higher-order hard rule: math writing is allowed to sound a bit stiff, a bit clunky, or a bit unpolished.** That is not a mistake. Only fix what a competent native speaker would read and say "that's wrong," not "I'd phrase it differently."
 
 ---
 
@@ -43,7 +43,7 @@ You proofread one olympiad math handout `.tex` file (PlainTeX + AMS-TeX + OPmac)
    Otherwise, for each Uncertain item print a short paragraph with: a line-number anchor (e.g. `L296`), the problematic clause with surrounding context, a minimal proposed fix, and a few-word reason (e.g. "missing verb", "wrong case ending", "doubled preposition"). Deduplicate — each distinct item once.
 
    Then call `AskUserQuestion` (batched up to 4 per call) with options per item: **Apply suggested fix** / **Leave alone**. Apply approved fixes via Edit and emit a final one-liner with what was applied. If you genuinely have no idea what the author meant for an item, leave it out of `AskUserQuestion` and ask in plain text instead.
-7. **No fan-out — proofread in the main session**, even for long handouts (the longest are ~850 lines, well within one context). Whole-file context is part of the detection toolkit (consistency evidence, referent tracking), and slice-based subagent proofreading has shown near-zero recall on real inflection errors while producing exactly the style false positives this skill forbids. On long multi-problem handouts, keep attention sharp by running pass 1 as sequential chunks — one `\Problem` block (or ~150-line window) at a time — instead of one continuous skim.
+7. **No fan-out — proofread in the main session**, even for long handouts (the longest run ~1500 lines, well within one context). Whole-file context is part of the detection toolkit (consistency evidence, referent tracking), and slice-based subagent proofreading has shown near-zero recall on real inflection errors while producing exactly the style false positives this skill forbids. On long multi-problem handouts, keep attention sharp by running pass 1 as sequential chunks — one `\Problem` block (or ~150-line window) at a time — instead of one continuous skim.
 
 Do not compile. Typo fixes in prose cannot break TeX. If the user wants a compile check afterwards, they will ask.
 
@@ -52,14 +52,15 @@ Do not compile. Typo fixes in prose cannot break TeX. If the user wants a compil
 ## Ignore zones (never inspect or edit)
 
 - **Comments:** from an **unescaped** `%` to end of line; lines starting with `%`; `\iffalse … \fi`; `\begin{comment} … \end{comment}`.
-- **Math:** `$…$`, `\(…\)`, `$$…$$`, `\[…\]`, and math envs (`equation`, `align`, `eqalign`, `cases`, `gather`, `matrix`, `pmatrix`, …).
-- **Verbatim / code:** `verbatim`, `lstlisting`, `minted`, `alltt`, `\verb|…|`.
-- **Control / IDs:** any token starting with `\`; contents of `\label{}`, `\ref{}`, `\cite{}`, `\url{}`, `\href{}`, `\path{}`, `\MathcompsLink{}`, `\setlanguage{}`, `\input`, filename-like arguments.
+- **Math:** `$…$`, `$$…$$`, and this stack's display environments — `\align`/`\endalign`, `\gather`/`\endgather`, `\eqalign{…}`. (LaTeX-isms like `equation`, `cases`, `matrix`, `verbatim`, `lstlisting` do not exist in this PlainTeX+AMS-TeX+OPmac stack; the general rule below covers anything unlisted.)
+- **Control / IDs:** any token starting with `\`; contents of `\url{}`, `\MathcompsLink{}`, `\setlanguage{}`, `\EnvId{}`, `\input`, filename-like arguments.
 
 ### Allowed prose wrappers (check **inside** the braces only)
 
 - In math: `\text{…}`, `\hbox{…}`, `\mbox{…}`.
 - In text: `\textit{…}`, `\textbf{…}`, `\emph{…}`, `\textrm{…}`, `\textsf{…}`.
+- **`\uv{…}` — the OPmac quotation macro, and the one most easily missed.** It wraps ordinary prose (`\uv{štandardné}`, `\uv{rozbalený}`) and there are 128 of them across the handouts. Under the "any token starting with `\` is control" rule above they read as skippable, so quoted words go unproofread unless you check inside them explicitly.
+- **`\Link[url]{text}` — prose in the SECOND argument only.** Never touch the bracketed URL.
 
 Never alter the macro name or its options — only the prose inside.
 
@@ -67,13 +68,13 @@ Never alter the macro name or its options — only the prose inside.
 
 ## TeX spaces
 
-`~` is a non-breaking space. Treat it as a normal space for tokenization and repeated-word detection (e.g. `k~nájdenému`). **Never** remove, insert, or flag `~` itself.
+`~` is a non-breaking space. Treat it as a normal space for tokenization and repeated-word detection (e.g. `k~nájdenému`). **Never adjust a tie here** — tie placement is `handout-editor`'s rule, not a typo, so don't remove or insert one even where its rule says the tie is wrong.
+
+**Dashes:** never introduce `—` or TeX `---`; `handout-editor` bans the em dash outright. An existing one is an objective error, but recasting the sentence is a rewrite, so flag it rather than fixing it here.
 
 ---
 
 ## High-frequency pitfalls (sweep explicitly)
-
-These errors leave the sentence parsing fine, so a prose read glides over them — check occurrences deliberately:
 
 - **SK singular inštrumentál needs `í`:** `svojím ťahom`, `ním`, `tvojím`; the short forms `svojim`/`nim` are plural datives.
 - **Inanimate math nouns decline inanimately:** SK `v čitateli`, `v menovateli` — `čitateľovi` is the animate form (a reader, not a numerator). CS: `v čitateli`, `ve jmenovateli`.

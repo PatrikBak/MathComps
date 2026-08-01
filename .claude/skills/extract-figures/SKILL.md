@@ -1,6 +1,6 @@
 ---
 name: extract-figures
-description: Use this skill to pull figures out of a vector competition PDF as small, faithful SVGs for the bulk-import pipeline — auto-detecting each diagram, cropping it (keeping the real glyph outlines, not retypeset text), and rendering a PNG preview of every crop to verify. Trigger phrases: "extract the figures from this PDF", "crop the diagrams out of a competition PDF as SVGs", "get the figure for problem N", "I need the images from this competition PDF". Hands the cropped SVGs to the add-problems skill for placement. Do NOT use for raster/scanned PDFs (it only handles vector drawings), or for handling problem text.
+description: Use this skill to pull figures out of a vector competition PDF as small, faithful SVGs for the bulk-import pipeline — auto-detecting each diagram, cropping it (keeping the real glyph outlines, not retypeset text), and rendering a PNG preview of every crop to verify. Trigger phrases — "extract the figures from this PDF", "crop the diagrams out of a competition PDF as SVGs", "get the figure for problem N", "I need the images from this competition PDF". Hands the cropped SVGs to the add-problems skill for placement. Do NOT use for raster/scanned PDFs (it only handles vector drawings), or for handling problem text.
 ---
 
 # Extract figures (PDF → small SVGs)
@@ -16,7 +16,7 @@ The hard discovery work is already baked into the bundled script — do not re-d
 uv run .claude/skills/extract-figures/extract_figures.py INPUT.pdf OUTDIR
 ```
 
-Writes into `OUTDIR`: `fig-p<page>-<x>-<y>.svg` (named by the box's top-left corner), a matching `.png` preview for each, and `figures.json` (manifest: page, bbox, label text, byte size). A re-run clears the prior `fig-p*` outputs first, so the directory always matches the latest `figures.json`. Sizes are typically 10–40 KB. Add `--no-preview` to skip PNGs (don't — the previews are the verification). Detection thresholds are flags (`--gap`, `--min-side`, `--row-gap`, …); a plain run uses the tuned defaults, so reach for them only when a paper's layout systematically defeats the defaults (see *Review*).
+Writes into `OUTDIR`: `fig-p<page>-<x>-<y>.svg` (named by the box's top-left corner; `<page>` is **0-based**, so `fig-p0` is the PDF's first page), a matching `.png` preview for each, and `figures.json` (manifest: page, bbox, label text, byte size). A re-run clears the prior `fig-p*` outputs first, so the directory always matches the latest `figures.json`. Sizes are typically 10–40 KB. Add `--no-preview` to skip PNGs (don't — the previews are the verification). Detection thresholds are flags (`--gap`, `--min-side`, `--row-gap`, …); a plain run uses the tuned defaults, so reach for them only when a paper's layout systematically defeats the defaults (see *Review*).
 
 ## Review (mandatory — the heuristics are tuned, not bulletproof)
 
@@ -42,5 +42,4 @@ Hand off to [add-problems](../add-problems/SKILL.md): copy the chosen `.svg` int
 
 - Vector PDFs only — `get_drawings()` finds nothing in a scanned/raster PDF (the run prints "none found").
 - This is the automated cousin of the **SvgSelect** app (manual PDF-region cropping).
-- Faithful-but-imperfect by design: the render-verify loop is the reliability, not the heuristics. Always look at the previews before trusting a crop.
 - The path/bbox parsing is the one subtle part — after editing the detection or cropping logic, re-run the tests: `uv run .claude/skills/extract-figures/test_extract_figures.py`.

@@ -451,7 +451,14 @@ def main():
     )
 
     # Open the source PDF first, so a bad path fails before we touch the output dir
-    with pymupdf.open(args.pdf) as doc:
+    try:
+        source = pymupdf.open(args.pdf)
+    except (pymupdf.FileNotFoundError, pymupdf.FileDataError) as error:
+        # A wrong path or a non-PDF is the one predictable user error — say so, don't traceback
+        print(f"cannot open {args.pdf}: {error}", file=sys.stderr)
+        return 1
+
+    with source as doc:
         # Make sure the output directory exists
         os.makedirs(args.outdir, exist_ok=True)
         # Clear figures a previous run left here, so the dir matches this manifest
@@ -483,12 +490,25 @@ def main():
                     svg_file.write(svg)
                 # Render a PNG preview (unless suppressed)
                 if not args.no_preview:
-                    # Re-open exactly what we wrote, so the preview shows the real output
-                    preview = pymupdf.open(stream=svg.encode(), filetype="svg")
-                    # Rasterize at 3x for a legible preview
-                    pixmap = preview.get_page_pixmap(0, matrix=pymupdf.Matrix(3, 3), alpha=False)
-                    pixmap.save(os.path.join(args.outdir, f"{name}.png"))
-                    preview.close()
+                    # A pruned SVG PyMuPDF can't re-parse must not kill the run. The previous
+                    # run's outputs are already deleted and figures.json isn't written until
+                    # the loop finishes, so raising here would strand a half-written figure
+                    # set next to the previous run's manifest.
+                    try:
+                        # Re-open exactly what we wrote, so the preview shows the real output
+                        preview = pymupdf.open(stream=svg.encode(), filetype="svg")
+
+                        # 3x so ~6pt label glyphs stay legible on a crop only ~100pt wide
+                        pixmap = preview.get_page_pixmap(0, matrix=pymupdf.Matrix(3, 3), alpha=False)
+
+                        # Save the preview beside its SVG
+                        pixmap.save(os.path.join(args.outdir, f"{name}.png"))
+
+                        # Release the in-memory document
+                        preview.close()
+                    except Exception as error:
+                        # Warn and carry on — the SVG itself is already written
+                        print(f"warning: no preview for {name}.svg ({error})", file=sys.stderr)
                 # Record the figure in the manifest
                 manifest.append(
                     {
