@@ -64,8 +64,8 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
     profile: {
       icon: User,
       label: tCommon('profile'),
-      bgColor: 'bg-foreground/10',
-      iconColor: 'text-muted-foreground',
+      bgColor: 'bg-info/10',
+      iconColor: 'text-info-light',
     },
     signOut: {
       icon: LogOut,
