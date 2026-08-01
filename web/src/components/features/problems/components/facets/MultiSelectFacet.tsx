@@ -583,7 +583,7 @@ export default function MultiSelectFacet({
         >
           <button
             type="button"
-            className={cn(baseBtn, value === 'or' && 'bg-focus text-focus-foreground')}
+            className={cn(baseBtn, value === 'or' && 'bg-foreground/10 text-foreground')}
             onClick={() => onChange('or')}
             aria-pressed={value === 'or'}
           >
@@ -591,7 +591,7 @@ export default function MultiSelectFacet({
           </button>
           <button
             type="button"
-            className={cn(baseBtn, value === 'and' && 'bg-focus text-focus-foreground')}
+            className={cn(baseBtn, value === 'and' && 'bg-foreground/10 text-foreground')}
             onClick={() => onChange('and')}
             aria-pressed={value === 'and'}
           >

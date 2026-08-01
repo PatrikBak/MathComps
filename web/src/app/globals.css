@@ -31,6 +31,7 @@
   --color-warning: var(--color-orange-500);
   --color-warning-foreground: white;
   --color-info: var(--color-sky-500);
+  --color-info-light: var(--color-sky-300);
   --color-info-foreground: white;
 
   /* 4. Accents & Effects */
