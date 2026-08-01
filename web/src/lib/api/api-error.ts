@@ -58,6 +58,29 @@ export function errorCodeOf(error: unknown): AppErrorCode | undefined {
 }
 
 /**
+ * Whether a failure is worth attempting again. An HTTP 4xx is the server's verdict that the request
+ * itself is wrong, so repeating it verbatim can only fail the same way; a 429 counts as permanent
+ * too, since hammering a rate limiter is what provoked it. Everything else (a 5xx, a dropped
+ * connection, an unclassified fault) may well succeed on the next attempt.
+ *
+ * @param error - The error a call threw.
+ *
+ * @returns Whether another attempt could plausibly succeed.
+ */
+export function isTransientFailure(error: unknown): boolean {
+  // Only a BackendApiError carries a status; anything else is an opaque fault, so assume transient
+  const status = error instanceof BackendApiError ? error.statusCode : undefined
+
+  // A status-less failure never reached the server, which is the most transient case of all
+  if (status === undefined) {
+    return true
+  }
+
+  // Anything outside the client-error range is worth another attempt
+  return status < 400 || status >= 500
+}
+
+/**
  * Reads the interpolation values off a caught error.
  *
  * @param error - The error a call threw.

@@ -10,6 +10,7 @@ import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 import { errorCodeOf } from '@/lib/api/api-error'
+import type { QueryUiState } from '@/lib/query-ui-state'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
@@ -30,16 +31,12 @@ import {
  * The problem search state: loading flags, active filters, and the current result page.
  */
 type ProblemSearchState = {
-  /** Whether the initial data or search results are currently loading. */
-  isPageLoading: boolean
   /** Whether a search is happening in the background (e.g., while typing or filtering). */
   isActiveSearchFetching: boolean
   /** Whether a search with genuinely new filters is in progress (first fetch, no cached data). */
   isBlankSlateLoading: boolean
   /** Whether more results are being loaded (infinite scroll). */
   isPaginationLoading: boolean
-  /** Whether the initial filter options and configuration have been loaded. */
-  hasInitialDataLoaded: boolean
 
   /** The current active filters. */
   filters: SearchFiltersState | null
@@ -57,8 +54,10 @@ type ProblemSearchState = {
   /** The current page number (always 1 in this infinite scroll implementation). */
   currentPage: number
 
-  /** Error message if the search or initial load failed. */
-  error: string | null
+  /** The state of the filter-options fetch, which the page cannot render without. */
+  pageState: QueryUiState
+  /** The state of the result fetch. */
+  searchState: QueryUiState
   /** When filtering by a list, the display name of that list. Null otherwise. */
   listName: string | null
 }
@@ -72,6 +71,10 @@ type UseProblemSearchReturn = {
   state: ProblemSearchState
   /** Handler for updating the search filters. */
   handleFiltersChange: (newFilters: SearchFiltersState) => void
+  /** Runs the page's own fetch again after it failed. */
+  retryPage: () => void
+  /** Runs the result fetch again after it failed. */
+  retrySearch: () => void
   /** Handler to load more results (infinite scroll). */
   loadMore: () => void
 }
@@ -82,8 +85,14 @@ type UseProblemSearchReturn = {
  * @returns An object containing the complete search state and handler functions.
  */
 export const useProblemSearch = (): UseProblemSearchReturn => {
+  // Translations for the problems section
+  const tProblems = useTranslations('problems')
+
   // Translations for problem-related errors
   const tErrors = useTranslations('problems.errors')
+
+  // Translations for the shared action labels
+  const tActions = useTranslations('ui.actions')
 
   // Navigation hooks for URL manipulation
   const router = useRouter()
@@ -240,7 +249,10 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     locale,
     queryFilters,
     safeUserId,
-    !problemId && queryFilters !== null && !initialDataQuery.isLoading && isUserDataLoaded
+    !problemId &&
+      queryFilters !== null &&
+      initialDataQuery.uiState.kind !== 'loading' &&
+      isUserDataLoaded
   )
 
   // Local filters for instant UI feedback (mirrors URL but updates immediately)
@@ -304,39 +316,65 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     useProblemStore.getState().setCurrentFilters(displayFilters)
   }, [displayFilters])
 
-  // Handle a settled error when fetching a single problem by ID (the query has spent its retries).
-  // - Not found: toast + redirect to the problem list
-  // - Anything else: toast the failure plainly
+  // A problem asked for by ID that turns out not to exist is worth saying out loud, because the
+  // answer is to leave the page rather than to try again. Every other failure keeps the reader here,
+  // where the page itself explains it.
   useEffect(() => {
     // Only handle once we're viewing a single problem by ID and the query settled into an error
-    if (!singleProblemQuery.error || !problemId) return
+    const failure = singleProblemQuery.uiState
+    if (failure.kind !== 'failed' || !problemId) return
+
+    // Only a missing problem is handled here
+    if (errorCodeOf(failure.error) !== 'ProblemNotFound') return
 
     // Truncate ID for display (to prevent long strings in toast messages)
     const maxIdLength = 20
     const truncatedId =
       problemId.length > maxIdLength ? `${problemId.slice(0, maxIdLength)}...` : problemId
 
-    // A missing problem is permanent: tell the user and return to the list
-    if (errorCodeOf(singleProblemQuery.error) === 'ProblemNotFound') {
-      toast.error(tErrors('problemNotFound', { problemId: truncatedId }))
-      router.replace(ROUTES.PROBLEMS, { scroll: false })
-      return
-    }
+    // Name the problem that is gone
+    toast.error(tErrors('problemNotFound', { problemId: truncatedId }))
 
-    // Any other settled failure: the retries are spent, so report it plainly
-    toast.error(tErrors('unexpectedError'))
-  }, [problemId, singleProblemQuery.error, router, tErrors])
+    // Return to the list it should have been in
+    router.replace(ROUTES.PROBLEMS, { scroll: false })
+  }, [problemId, singleProblemQuery.uiState, router, tErrors])
 
-  // Show a toast when search is retrying
+  // A function which runs the search again
+  const retrySearch = searchQuery.retry
+
+  // Which state the search is in
+  const searchStateKind = searchQuery.uiState.kind
+
+  // Whether the reader has rows in front of them
+  const hasVisibleResults = searchQuery.problems.length > 0
+
+  // Speak up about a search that is struggling underneath results the reader is already reading,
+  // since nothing about those results shows it. The notice carries the way to try again too: it
+  // floats above the page, so unlike anything in the list it cannot be scrolled away from, and it
+  // names the cause where the list names the consequence.
   useEffect(() => {
-    // Show when not viewing a single problem and search is retrying
-    // (either initial data or problem search results)
-    const shouldShowToast = !problemId && initialDataQuery.isSuccess && searchQuery.isRetrying
-    if (shouldShowToast) {
-      // Show loading toast while retrying
+    // The single problem view has its own error handling, and a boot that never got its filter
+    // options is covered by the page-level state
+    if (problemId || initialDataQuery.uiState.kind !== 'ready') return undefined
+
+    // A request genuinely is in flight after an earlier attempt failed
+    if (searchStateKind === 'retrying') {
       const toastId = toast.loading(tErrors('connectionProblem'), { duration: Infinity })
 
-      // Clear toast when search stops retrying
+      // Drop the notice the moment the search stops trying
+      return () => {
+        toast.dismiss(toastId)
+      }
+    }
+
+    // The attempts are spent, and the results on screen give no hint that they stop early
+    if (searchStateKind === 'failed' && hasVisibleResults) {
+      const toastId = toast.error(tProblems('connectionFailed'), {
+        duration: Infinity,
+        action: { label: tActions('retry'), onClick: () => retrySearch() },
+      })
+
+      // Drop the notice once the search leaves its failure behind
       return () => {
         toast.dismiss(toastId)
       }
@@ -344,16 +382,25 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
 
     // No cleanup needed
     return undefined
-  }, [problemId, initialDataQuery.isSuccess, searchQuery.isRetrying, tErrors])
+  }, [
+    problemId,
+    initialDataQuery.uiState,
+    searchStateKind,
+    hasVisibleResults,
+    retrySearch,
+    tActions,
+    tErrors,
+    tProblems,
+  ])
 
   // Handle a settled search error: an auth-gated filter needs a login, a bad list clears its URL param.
   useEffect(() => {
     // Only handle when the search query failed
-    const error = searchQuery.rawError
-    if (!error) return
+    const failure = searchQuery.uiState
+    if (failure.kind !== 'failed') return
 
     // The failure code, if any
-    const errorCode = errorCodeOf(error)
+    const errorCode = errorCodeOf(failure.error)
 
     // An auth-gated filter (favorites, mark status) reached the backend without a signed-in user:
     // send them to log in
@@ -377,7 +424,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
 
     // Redirect to /problems to clear the invalid list= URL param
     router.replace(ROUTES.PROBLEMS, { scroll: false })
-  }, [searchQuery.rawError, router, redirectToLogin, tErrors])
+  }, [searchQuery.uiState, router, redirectToLogin, tErrors])
 
   // Get the final filter options.
   // This is where we decide which options to show in the UI dropdowns.
@@ -387,13 +434,11 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   //   3. Initial data: use base options (before any search)
   const filterOptions = singleProblemQuery.data?.options ?? searchQuery.filterOptions ?? baseOptions
 
-  // Are we loading anything?
-  const isPageLoading = problemId
-    ? singleProblemQuery.isLoading && !singleProblemQuery.error
-    : initialDataQuery.isLoading
-
-  // Do we have the data with search filter options ready?
-  const hasInitialDataLoaded = initialDataQuery.isSuccess
+  // No view renders without the filter options, and the single-problem view needs that problem on
+  // top. Whichever is still missing is what the page's state is about, and what retrying it runs.
+  // Because the problem is only reached once the options are ready, a ready page means both are.
+  const needsSingleProblem = problemId !== null && initialDataQuery.uiState.kind === 'ready'
+  const pageState = needsSingleProblem ? singleProblemQuery.uiState : initialDataQuery.uiState
 
   // Are we loading new data, i.e. a new query key?
   const isBlankSlateLoading = !problemId && searchQuery.isPending
@@ -410,21 +455,12 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   const totalCount = problemId ? 1 : searchQuery.totalCount
   const hasMore = problemId ? false : searchQuery.hasMore
 
-  // The error message: the retrying notice while it retries, a plain failure once it settles
-  const error = initialDataQuery.isRetrying
-    ? tErrors('serverError')
-    : initialDataQuery.isError
-      ? tErrors('unexpectedError')
-      : null
-
   // State + actions to return
   return {
     state: {
-      isPageLoading,
       isActiveSearchFetching,
       isBlankSlateLoading,
       isPaginationLoading,
-      hasInitialDataLoaded,
       filters: displayFilters,
       filterOptions,
       baseOptions,
@@ -432,10 +468,13 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
       totalCount,
       hasMore,
       currentPage: 1,
-      error,
+      pageState,
+      searchState: searchQuery.uiState,
       listName: searchQuery.listName,
     },
     handleFiltersChange,
+    retryPage: needsSingleProblem ? singleProblemQuery.retry : initialDataQuery.retry,
+    retrySearch,
     loadMore: searchQuery.loadMore,
   }
 }
