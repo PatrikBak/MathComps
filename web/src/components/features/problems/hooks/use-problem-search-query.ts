@@ -3,7 +3,9 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
+import { useQueryUiState } from '@/hooks/use-query-ui-state'
 import { unwrap } from '@/lib/api/api-error'
+import type { QueryUiState } from '@/lib/query-ui-state'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
@@ -41,14 +43,10 @@ type ProblemSearchInfiniteData = {
 type UseInitialFilterDataReturn = {
   /** The data returned by the query (initial filter options and first batch of problems). */
   data: ProblemSearchInfiniteData | undefined
-  /** Whether the query is currently loading. */
-  isLoading: boolean
-  /** Whether the query was successful. */
-  isSuccess: boolean
-  /** Whether the query is currently retrying after a failure. */
-  isRetrying: boolean
-  /** Whether the query settled into an error after exhausting retries. */
-  isError: boolean
+  /** The state of the fetch. */
+  uiState: QueryUiState
+  /** Runs the query again after it failed. */
+  retry: () => void
 }
 
 /**
@@ -60,16 +58,10 @@ type UseSingleProblemReturn = {
    * excluding the problem itself (to be accessed from the global store).
    */
   data: Omit<SingleProblemResult, 'problem'> | undefined
-  /** Whether the query is currently loading (initial fetch). */
-  isLoading: boolean
-  /** Whether the query is currently fetching (initial or background). */
-  isFetching: boolean
-  /** Whether the query encountered an error. */
-  isError: boolean
-  /** The error object if the query failed. */
-  error: Error | null
-  /** The number of consecutive failures. */
-  failureCount: number
+  /** The state of the fetch. */
+  uiState: QueryUiState
+  /** Runs the query again after it failed. */
+  retry: () => void
 }
 
 /**
@@ -86,12 +78,8 @@ type UseProblemSearchInfiniteReturn = {
   isFetchingNextPage: boolean
   /** Whether there are more pages available to fetch. */
   hasNextPage: boolean
-  /** The error object if the query failed. */
-  error: Error | null
-  /** The number of consecutive failures. */
-  failureCount: number
-  /** The timestamp of the last successful data update. */
-  dataUpdatedAt: number
+  /** The state of the fetch. */
+  uiState: QueryUiState
   /** Function to fetch the next page of results. */
   fetchNextPage: () => void
   /** Function to manually refetch the query. */
@@ -176,14 +164,14 @@ export function useInitialFilterData(
     enabled: enabled && api.state === 'ready',
   })
 
+  // Reduce the raw flags to the one state that describes this fetch
+  const uiState = useQueryUiState(query)
+
   // Return only the data we need
   return {
     data: query.data,
-    isLoading: query.isLoading,
-    isSuccess: query.isSuccess,
-    // Expose retry state - failureCount > 0 means we're retrying after failure
-    isRetrying: query.failureCount > 0,
-    isError: query.isError,
+    uiState,
+    retry: query.refetch,
   }
 }
 
@@ -238,14 +226,14 @@ export function useSingleProblem(
     enabled: enabled && problemSlug !== null && api.state === 'ready',
   })
 
+  // Reduce the raw flags to the one state that describes this fetch
+  const uiState = useQueryUiState(query)
+
   // Return just the data we need
   return {
     data: query.data,
-    isLoading: query.isLoading,
-    isFetching: query.isFetching,
-    isError: query.isError,
-    error: query.error,
-    failureCount: query.failureCount,
+    uiState,
+    retry: query.refetch,
   }
 }
 
@@ -320,6 +308,9 @@ function useProblemSearchInfinite(
     enabled: enabled && filters !== null && api.state === 'ready',
   })
 
+  // Reduce the raw flags to the one state that describes this fetch
+  const uiState = useQueryUiState(query)
+
   // Return just the data we need
   return {
     data: query.data,
@@ -327,9 +318,7 @@ function useProblemSearchInfinite(
     isFetching: query.isFetching,
     isFetchingNextPage: query.isFetchingNextPage,
     hasNextPage: query.hasNextPage,
-    error: query.error,
-    failureCount: query.failureCount,
-    dataUpdatedAt: query.dataUpdatedAt,
+    uiState,
     fetchNextPage: query.fetchNextPage,
     refetch: query.refetch,
   }
@@ -355,10 +344,10 @@ type UseProblemSearchQueryReturn = {
   isFetchingNextPage: boolean
   /** When filtering by a list, the display name of that list. Null otherwise. */
   listName: string | null
-  /** The error the search failed with, or null. */
-  rawError: Error | null
-  /** Whether the search is currently retrying after a failure. */
-  isRetrying: boolean
+  /** The state of the fetch. */
+  uiState: QueryUiState
+  /** Runs the search again after it failed. */
+  retry: () => void
   /** Function to load the next page of results. */
   loadMore: () => void
 }
@@ -505,8 +494,10 @@ export function useProblemSearchQuery(
 
   // Function to load the next page when user scrolls near the bottom
   const loadMore = useCallback(() => {
-    // Guard against duplicate requests while already loading
-    if (hasMore && !infiniteQuery.isFetchingNextPage) {
+    // Guard against duplicate requests while already loading. A page that failed also stops the
+    // scroll from asking again, or every further scroll would spend a fresh burst of retries on a
+    // backend that just turned all of them down; resuming takes an explicit ask.
+    if (hasMore && !infiniteQuery.isFetchingNextPage && infiniteQuery.uiState.kind !== 'failed') {
       infiniteQuery.fetchNextPage()
     }
   }, [hasMore, infiniteQuery])
@@ -525,12 +516,11 @@ export function useProblemSearchQuery(
     isFetching: infiniteQuery.isFetching && !infiniteQuery.isFetchingNextPage,
     isFetchingNextPage: infiniteQuery.isFetchingNextPage,
 
-    // Error
-    rawError: infiniteQuery.error,
-    // Retry state - failureCount > 0 means we're retrying or have failed (show toast even between retries)
-    isRetrying: infiniteQuery.failureCount > 0,
+    // Fetch state
+    uiState: infiniteQuery.uiState,
 
     // Actions
+    retry: infiniteQuery.refetch,
     loadMore,
   }
 }

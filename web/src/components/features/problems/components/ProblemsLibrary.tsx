@@ -1,7 +1,7 @@
 'use client'
 
 import { useLocalStorage } from '@mantine/hooks'
-import { Loader2, WifiOff } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { VirtuosoHandle } from 'react-virtuoso'
@@ -10,8 +10,10 @@ import { Virtuoso } from 'react-virtuoso'
 import { ProblemCardSkeleton } from '@/components/features/problems/components/ProblemCardSkeleton'
 import { PREFETCH_THRESHOLD } from '@/components/features/problems/constants/pagination-constants'
 import { VIRTUOSO_INCREASE_VIEWPORT_BY } from '@/components/features/problems/constants/problem-list-constants'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 import { SHOW_TECHNIQUE_TAGS_STORAGE_KEY } from '@/constants/local-storage-constants'
+import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { usePendingProblemLike } from '../hooks/use-pending-problem-like'
 import { usePendingProblemMark } from '../hooks/use-pending-problem-mark'
@@ -19,7 +21,8 @@ import { useProblemSearch } from '../hooks/use-problem-search'
 import { countActiveFilters } from '../utils/filter-validation'
 import ActiveFiltersBar from './ActiveFilterBar'
 import { AnimatedProblemCard } from './AnimatedProblemCard'
-import { EmptyState } from './EmptyState'
+import { ConnectionStatePanel } from './ConnectionStatePanel'
+import { EmptyResultsState } from './EmptyResultsState'
 import { MobileFilterDrawer } from './MobileFilterDrawer'
 import { SearchFilters } from './SearchFilters'
 
@@ -29,6 +32,55 @@ const ActiveFiltersBarSkeleton = () => (
     <div className="h-5 w-24 rounded-md bg-foreground/10"></div>
   </div>
 )
+
+/**
+ * The props of {@link PaginationFooter}.
+ */
+type PaginationFooterProps = {
+  /** Whether the next page is on its way. */
+  isLoading: boolean
+  /** The state of the search the next page would come from. */
+  searchState: QueryUiState
+  /** Whether the list has further pages to extend into. */
+  hasMore: boolean
+}
+
+/**
+ * Closes the result list with whatever the infinite scroll is currently doing.
+ *
+ * It reports and nothing more: a control here rides the list, so it lands below the fold the moment
+ * this box appears, and the way to act on a failure lives in the notice floating above the page
+ * instead. Every state renders one centered line, so the box keeps its height under a reader parked
+ * at the end of the list.
+ */
+const PaginationFooter = ({ isLoading, searchState, hasMore }: PaginationFooterProps) => {
+  // Translations for the problems section
+  const t = useTranslations('problems')
+
+  // The next page is on its way, whether for the first time or after an attempt that failed
+  if (isLoading || searchState.kind === 'retrying') {
+    return (
+      <div className="py-4 sm:py-6 lg:py-8 flex justify-center">
+        <div className="flex items-center gap-3 text-muted">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="text-sm">{t('loadingMore')}</span>
+        </div>
+      </div>
+    )
+  }
+
+  // The loaded rows survived the failure, so only the way to extend them is missing
+  if (hasMore && searchState.kind === 'failed') {
+    return (
+      <div className="py-4 sm:py-6 lg:py-8 flex justify-center">
+        <span className="text-sm text-muted">{t('errors.loadMoreFailed')}</span>
+      </div>
+    )
+  }
+
+  // Nothing to say at the end of the list
+  return null
+}
 
 const FilterSkeleton = () => (
   <div className="flex flex-col space-y-4 animate-pulse">
@@ -40,13 +92,9 @@ const FilterSkeleton = () => (
 )
 
 export default function ProblemsLibrary() {
-  // Translations for section
-  const t = useTranslations('problems')
-
   // The hook to handle all difficult logic of problem search
   const {
     state: {
-      isPageLoading,
       isActiveSearchFetching,
       isBlankSlateLoading,
       isPaginationLoading,
@@ -56,11 +104,13 @@ export default function ProblemsLibrary() {
       problems,
       totalCount,
       hasMore,
-      error,
-      hasInitialDataLoaded,
+      pageState,
+      searchState,
       listName,
     },
     handleFiltersChange,
+    retryPage,
+    retrySearch,
     loadMore,
   } = useProblemSearch()
 
@@ -79,8 +129,9 @@ export default function ProblemsLibrary() {
   // Handle pending problem marks after user authentication
   usePendingProblemMark()
 
-  // We'll track whether we have the needed data. Before that, we show skeletons
-  const isPageReady = !isPageLoading && filters && filterOptions && hasInitialDataLoaded
+  // The fetch is settled by the time this is read (the switch below returns for every other state),
+  // so what is left to check is whether the data derived from it is here. Before that, skeletons.
+  const isPageReady = filters !== null && filterOptions !== null
 
   // Create a set of selected tag slugs for efficient lookup
   const selectedTagSlugs = useMemo(
@@ -229,63 +280,66 @@ export default function ProblemsLibrary() {
     }
   }, [])
 
-  // Handle critical initial load failures - only show error if we have no data at all
-  if (error && !hasInitialDataLoaded) {
-    return (
-      <div className="fixed inset-0 text-muted-foreground">
-        <div className="flex h-full flex-col">
-          <div className="h-14 sm:h-16 lg:h-20 flex-shrink-0" />
-          <main className="mx-auto w-full max-w-7xl flex-1 overflow-hidden p-2 sm:p-3 lg:p-8">
-            <div className="flex h-full items-center justify-center">
-              <div className="text-center">
-                <WifiOff className="mx-auto mb-4 h-16 w-16 text-error/60" />
-                <h2 className="mb-2 text-2xl font-bold text-foreground">{t('connectionFailed')}</h2>
-                <div className="flex items-center justify-center gap-3 text-muted">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="text-sm">{t('tryingToConnect')}</span>
-                </div>
-              </div>
-            </div>
-          </main>
+  // Whether the page can be drawn at all comes down to the state of the fetch it is built on
+  switch (pageState.kind) {
+    // Nothing to draw, and the connection is why. A retry in flight lands here too, which is the
+    // one place a spinner is telling the truth.
+    case 'failed':
+    case 'offline':
+    case 'retrying':
+      return (
+        <div className="fixed inset-0 text-muted-foreground">
+          <div className="flex h-full flex-col">
+            <div className="h-14 sm:h-16 lg:h-20 flex-shrink-0" />
+            <main className="mx-auto w-full max-w-7xl flex-1 overflow-hidden p-2 sm:p-3 lg:p-8">
+              <ConnectionStatePanel state={pageState} onRetry={retryPage} />
+            </main>
+          </div>
         </div>
-      </div>
-    )
-  }
+      )
 
-  // Early return to prevent rendering issues during loading
-  if (isPageLoading) {
-    return (
-      <div className="fixed inset-0 text-muted-foreground">
-        <div className="flex h-full flex-col">
-          <div className="h-14 sm:h-16 lg:h-20 flex-shrink-0" />
-          <main className="mx-auto w-full max-w-7xl flex-1 overflow-hidden p-2 sm:p-3 lg:p-8">
-            <div className="grid h-full grid-cols-1 gap-8 lg:grid-cols-[var(--problems-sidebar-width)_1fr]">
-              <aside className="hidden h-full flex-col overflow-y-auto shadow-lg lg:flex [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                <FilterSkeleton />
-              </aside>
-              <div className="flex flex-col overflow-hidden">
-                <div className="mb-2 sm:mb-4 lg:mb-6 flex-shrink-0">
-                  <ActiveFiltersBarSkeleton />
-                </div>
-                <div className="relative flex-1 overflow-y-auto">
-                  <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-                    <div className="py-2 sm:py-3 lg:py-4 first:pt-0 pr-2">
-                      <ProblemCardSkeleton />
-                    </div>
-                    <div className="py-2 sm:py-3 lg:py-4 first:pt-0 pr-2">
-                      <ProblemCardSkeleton />
+    // Still on its way, so hold the shape with skeletons
+    case 'loading':
+      return (
+        <div className="fixed inset-0 text-muted-foreground">
+          <div className="flex h-full flex-col">
+            <div className="h-14 sm:h-16 lg:h-20 flex-shrink-0" />
+            <main className="mx-auto w-full max-w-7xl flex-1 overflow-hidden p-2 sm:p-3 lg:p-8">
+              <div className="grid h-full grid-cols-1 gap-8 lg:grid-cols-[var(--problems-sidebar-width)_1fr]">
+                <aside className="hidden h-full flex-col overflow-y-auto shadow-lg lg:flex [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  <FilterSkeleton />
+                </aside>
+                <div className="flex flex-col overflow-hidden">
+                  <div className="mb-2 sm:mb-4 lg:mb-6 flex-shrink-0">
+                    <ActiveFiltersBarSkeleton />
+                  </div>
+                  <div className="relative flex-1 overflow-y-auto">
+                    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+                      <div className="py-2 sm:py-3 lg:py-4 first:pt-0 pr-2">
+                        <ProblemCardSkeleton />
+                      </div>
+                      <div className="py-2 sm:py-3 lg:py-4 first:pt-0 pr-2">
+                        <ProblemCardSkeleton />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex h-3 sm:h-4 lg:h-6 flex-shrink-0 items-end justify-center">
-                  <div className="h-1 w-8 rounded-full bg-foreground/10" />
+                  <div className="flex h-3 sm:h-4 lg:h-6 flex-shrink-0 items-end justify-center">
+                    <div className="h-1 w-8 rounded-full bg-foreground/10" />
+                  </div>
                 </div>
               </div>
-            </div>
-          </main>
+            </main>
+          </div>
         </div>
-      </div>
-    )
+      )
+
+    // The fetch is settled, so the library itself is what renders, below
+    case 'ready':
+      break
+
+    // Every state is handled above
+    default:
+      return assertNever(pageState)
   }
 
   return (
@@ -393,19 +447,17 @@ export default function ProblemsLibrary() {
                       }
                     }}
                     components={{
-                      Footer: () =>
-                        isPaginationLoading ? (
-                          <div className="py-4 sm:py-6 lg:py-8 flex justify-center">
-                            <div className="flex items-center gap-3 text-muted">
-                              <Loader2 className="h-5 w-5 animate-spin" />
-                              <span className="text-sm">{t('loadingMore')}</span>
-                            </div>
-                          </div>
-                        ) : null,
+                      Footer: () => (
+                        <PaginationFooter
+                          isLoading={isPaginationLoading}
+                          searchState={searchState}
+                          hasMore={hasMore}
+                        />
+                      ),
                     }}
                   />
                 ) : (
-                  <EmptyState />
+                  <EmptyResultsState searchState={searchState} onRetry={retrySearch} />
                 )}
               </div>
 

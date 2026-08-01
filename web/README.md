@@ -131,6 +131,7 @@ npm run preview
 - `npm run knip` – Find unused files, exports, and dependencies
 - `npm run knip:fix` – Remove unused code (be careful!)
 - `npm run e2e:session` – Sign in and save a browser session (see [Signed-in browser](#signed-in-browser))
+- `npm run e2e:test` – Run the Playwright specs against a dev server (not part of `ci`)
 
 ### Combined Commands
 
