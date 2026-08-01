@@ -77,7 +77,7 @@ From the repo root:
 dotnet run --project backend/src/MathComps.Cli.Handouts -- <base>.*.tex
 ```
 
-Scope the glob to this handout. **Pass `--skip-upload` for the build/validate loop** — R2 assets go live immediately with no deploy, so the upload is the user's call. Re-run without the flag only once they say to publish. Exit code 0 = success.
+Scope the glob to this handout. If `_common.asy` changed in a way that alters existing figures (a palette shade, a modified primitive), add `--force-asy` — the CLI keeps that file out of its staleness graph and otherwise reports every figure fresh. **Pass `--skip-upload` for the build/validate loop** — R2 assets go live immediately with no deploy, so the upload is the user's call. Re-run without the flag only once they say to publish. Exit code 0 = success.
 
 ### 4. Handle CLI failures
 
