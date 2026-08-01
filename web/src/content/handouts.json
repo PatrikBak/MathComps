@@ -168,6 +168,29 @@
           "authors": ["Káťa Danilina"],
           "publishedAt": "2026-03-24",
           "updatedAt": "2026-06-13"
+        },
+        {
+          "id": "T2HV7UhJT97go4PMzEGWN",
+          "hideSolutionsAndProofs": true,
+          "slug": {
+            "sk": "funkcionalne-rovnice",
+            "cs": "funkcionalni-rovnice",
+            "en": "functional-equations"
+          },
+          "title": {
+            "sk": "Funkcionálne rovnice",
+            "cs": "Funkcionální rovnice",
+            "en": "Functional Equations"
+          },
+          "description": {
+            "sk": "Metódy na riešenie funkcionálnych rovníc — dosadzovanie, vyjadrenie jednej veci dvomi spôsobmi a odvodzovanie injektivity, surjektivity, periodicity či monotónnosti hľadanej funkcie — doplnené úlohami z česko-slovenskej olympiády, MEMO a IMO.",
+            "cs": "Metody na řešení funkcionálních rovnic — dosazování, vyjádření jedné věci dvěma způsoby a odvozování injektivity, surjektivity, periodicity či monotónnosti hledané funkce — doplněné úlohami z česko-slovenské olympiády, MEMO a IMO.",
+            "en": "Methods for solving functional equations — substitution, expressing one thing in two ways, and deducing injectivity, surjectivity, periodicity or monotonicity of the unknown function — followed by problems from Czech-Slovak olympiads, MEMO, and the IMO."
+          },
+          "difficulty": 2,
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2026-08-01",
+          "updatedAt": "2026-08-01"
         }
       ]
     },
@@ -204,6 +227,7 @@
         },
         {
           "id": "lzP-IzGpwQ5igE6fNyZ6l",
+          "hideSolutionsAndProofs": true,
           "slug": {
             "sk": "rovnake-dotycnice",
             "cs": "stejne-tecny",
@@ -226,6 +250,7 @@
         },
         {
           "id": "RZtGbqo7HslApJ1qgkOOB",
+          "hideSolutionsAndProofs": true,
           "slug": {
             "sk": "pridavanie-bodov",
             "cs": "pridavani-bodu",
@@ -245,6 +270,29 @@
           "authors": ["Patrik Bak"],
           "publishedAt": "2026-04-21",
           "updatedAt": "2026-07-02"
+        },
+        {
+          "id": "sO0QI7JxZwr94RBIhOD6j",
+          "hideSolutionsAndProofs": true,
+          "slug": {
+            "sk": "mocnost-bodu-ku-kruznici",
+            "cs": "mocnost-bodu-ke-kruznici",
+            "en": "power-of-a-point"
+          },
+          "title": {
+            "sk": "Mocnosť bodu ku kružnici",
+            "cs": "Mocnost bodu ke kružnici",
+            "en": "Power of a point"
+          },
+          "description": {
+            "sk": "Teória mocnosti bodu ku kružnici a chordál — množiny bodov určené mocnosťami, linearita rozdielu mocností a známe lemmy — aplikovaná na olympiádne úlohy vrátane IMO 2008, IMO 2013, ISL, MEMO a česko-slovenskej olympiády.",
+            "cs": "Teorie mocnosti bodu ke kružnici a chordál — množiny bodů určené mocnostmi, linearita rozdílu mocností a známá lemmata — aplikovaná na olympiádní úlohy včetně IMO 2008, IMO 2013, ISL, MEMO a česko-slovenské olympiády.",
+            "en": "The theory of the power of a point with respect to a circle and of radical axes — loci given by powers, the linearity of the power difference, and the well-known lemmas — applied to olympiad problems including IMO 2008, IMO 2013, ISL, MEMO, and Czech-Slovak olympiads."
+          },
+          "difficulty": 3,
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2026-08-01",
+          "updatedAt": "2026-08-01"
         }
       ]
     },
@@ -280,6 +328,7 @@
         },
         {
           "id": "FWv-ivSDvsiD7HuULfBmT",
+          "hideSolutionsAndProofs": true,
           "slug": {
             "sk": "inverzy-modulo-p",
             "cs": "inverzy-modulo-p",

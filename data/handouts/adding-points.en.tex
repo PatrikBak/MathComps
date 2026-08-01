@@ -43,16 +43,16 @@ One of the things that can decide whether you solve a problem or not is a good d
 \i use drawing instruments,
 \i use well-sharpened pencils and an eraser,
 \i use colored pencils (e.g. to mark equal-length segments),
-\i do not draw circles until you have to --- if four points lie on a circle, it is enough to note it on the side, or to color the edges of the cyclic quadrilateral,
+\i do not draw circles until you have to; if four points lie on a circle, it is enough to note it on the side, or to color the edges of the cyclic quadrilateral,
 \i when drawing a perpendicular, use two circles instead of a set square (this always gave me more accurate results),
-\i do not draw lines and arcs longer than necessary --- more distracting elements mean you see less --- think twice before adding a line to the diagram (or before highlighting or coloring it),
+\i do not draw lines and arcs longer than necessary (more distracting elements mean you see less); think twice before adding a line to the diagram (or before highlighting or coloring it),
 \i erase auxiliary lines as you go,
 \i when drawing an accurate diagram you may use the statement you are trying to prove, or sub-claims you have already discovered,
 \i redraw frequently (e.g. after rephrasing), freely drawing the same diagram multiple times (e.g. to test hypotheses),
 \i if an accurate diagram cannot be drawn (e.g. the problem has tricky implicitly defined points), draw as large a part of it accurately as you can,
 \i when drawing triangle~$ABC$, place the top vertex so the situation looks visually symmetric (in well-posed problems this is vertex~$A$),
 \i it is sometimes useful to place an unusual line vertically or horizontally (e.g. a diagonal of a quadrilateral),
-\i draw a rough freehand sketch first and only start using instruments after a brief acquaintance with the situation (unless you solve the problem from the sketch) --- this gives you a feel for how large the diagram should be and where to start drawing.
+\i draw a rough freehand sketch first and only start using instruments after a brief acquaintance with the situation (unless you solve the problem from the sketch); this gives you a feel for how large the diagram should be and where to start drawing.
 \enditems
 
 \secc How to Think When Solving Problems
@@ -68,7 +68,7 @@ Once we receive a problem and draw the diagram, we start analyzing:
 \i Can we eliminate some point by rephrasing the situation?
 \enditems
 
-In practice, analysis alone does not always bring success --- otherwise it would be too easy~\SlightSmile{} We can still play with the situation:
+In practice, analysis alone does not always bring success, otherwise it would be too easy~\SlightSmile{} We can still play with the situation:
 \begitems
 \i Blindly chase some angles and see what happens. Notice whether we have accidentally found a cyclic quadrilateral or some other interesting configuration.
 \i Blindly write down some ratios (e.g. from similar triangles) and try to combine them with known length equalities. Notice whether the newly obtained relations can be interpreted as a similarity of two other triangles.
@@ -81,9 +81,9 @@ We can also form hypotheses. A good hypothesis is the key to solving hard proble
 \begitems
 \i Guess nice geometric properties, most often cyclic quadrilaterals.
 \i Once we have a guess, check whether it holds at least approximately in the drawn diagram.
-\i Then check whether we can prove it, even using the statement to be proved --- being certain is important.
+\i Then check whether we can prove it, even using the statement to be proved; being certain is important.
 \i Assume the guessed claim holds. What could we derive in our situation? Perhaps we would reach something that cannot hold in general? Perhaps the problem can be solved in a few steps using it?
-\i Use symmetric reasoning --- if this holds, then by symmetry something else must hold as well\dots
+\i Use symmetric reasoning: if this holds, then by symmetry something else must hold as well\dots
 \i If we can neither prove nor disprove a hypothesis, write it in the draft in words. If it holds and is essential, it may earn points.
 \enditems
 
@@ -138,7 +138,7 @@ There are some recurring situations where it is always worth considering adding 
 \i If there is an orthocenter in the problem, it is worth thinking about its images under reflection over a side or over the midpoint of a side of the given triangle.
 \i If there are parallel segments in the problem, it is worth considering the homotheties that map one segment onto the other, and reflecting further points through them.
 \i If two circles pass through a common point, an interesting point may be their second intersection. It produces at least a radical axis.
-\i Sometimes it suffices to intersect suitable lines, or a suitable line and circle. There can be several reasons for doing so --- for example, an isosceles triangle or a cyclic quadrilateral may emerge.
+\i Sometimes it suffices to intersect suitable lines, or a suitable line and circle. There can be several reasons for doing so, for example, an isosceles triangle or a cyclic quadrilateral may emerge.
 
 \enditems
 
@@ -163,19 +163,55 @@ The following problems are roughly ordered by difficulty and use roughly speakin
 \Problem{0}{}{
     A pentagon~$ABCDE$ has all interior angles equal. Prove that the perpendicular bisector of~$AB$, the perpendicular bisector of~$CD$, and the bisector of angle~$DEA$ meet at a single point.
 }{
-    A problem about five points --- what more could one ask for? Paradoxically it cannot be done without adding points. The equal angles ought to suggest something.
+    A problem about five points. What more could one ask for? Paradoxically it cannot be done without adding points. The equal angles ought to suggest something.
 }{
     The equal angles can be used by intersecting suitable pairs of extended sides, producing isosceles triangles. The perpendicular bisectors of sides suddenly have a completely different meaning.
-}{}
+}{
+    The key is to intersect the extended sides. Equal interior angles produce isosceles triangles in which the perpendicular bisectors of $AB$ and~$CD$ turn into angle bisectors.
+
+    The interior angles of a pentagon sum to $540^\circ$, so each of them measures $108^\circ$. All of them are less than $180^\circ$, hence the pentagon $ABCDE$ is convex, and since none of them is straight, for each side the remaining three vertices lie strictly in the same open half-plane determined by the line containing that side.
+
+    Extend side $EA$ beyond point $A$ and side $CB$ beyond point $B$. Points $E$ and~$C$ lie in the same half-plane determined by line $AB$, so both of these rays go into the opposite half-plane and make angles $180^\circ - 108^\circ = 72^\circ$ with segment $AB$. Their sum is less than $180^\circ$, and so the rays meet at a point~$P$. In triangle $ABP$ we have $\angle PAB = \angle PBA = 72^\circ$, hence $PA = PB$ and the perpendicular bisector of $AB$ is also the bisector of $\angle APB$.
+
+    Similarly, extend side $BC$ beyond point $C$ and side $ED$ beyond point $D$. Points $B$ and~$E$ lie in the same half-plane determined by line $CD$, so both rays go into the opposite one and make angles $72^\circ$ with segment $CD$. They therefore meet at a point~$Q$, for which $\angle QCD = \angle QDC = 72^\circ$, so $QC = QD$ and the perpendicular bisector of $CD$ is the bisector of $\angle CQD$.
+
+    Point $P$ lies on the ray opposite to ray $BC$ and point~$Q$ on the ray opposite to ray $CB$, so the points lie on line $BC$ in the order $P$, $B$, $C$, $Q$. Point $E$ does not lie on line $BC$, hence $EPQ$ is a triangle. Furthermore $A$ lies between $P$ and~$E$, and $D$ between $Q$ and~$E$.
+
+    From this ordering, ray $PA$ coincides with ray $PE$, and ray $PB$ with ray $PQ$, so the perpendicular bisector of $AB$ is the internal bisector of the angle of triangle $EPQ$ at vertex $P$. Likewise the rays $QD$, $QC$ are the rays $QE$, $QP$, and so the perpendicular bisector of $CD$ is the internal bisector of the angle at vertex $Q$. Finally $EA$ is the ray $EP$ and~$ED$ the ray $EQ$, so the bisector of $\angle DEA$ is the internal bisector of the angle at vertex $E$. All three lines are therefore internal angle bisectors of triangle $EPQ$ and meet at its incenter.
+}
 
 \EnvId{rIhQMrZeKZ2MH-PmkjT9D-point-on-median-isosceles-triangle}
 \Problem{0}{}{
     Inside triangle~$ABC$, on its median~$AM$, there is a point~$K$ such that $CK=AB$. Let~$L$ be the intersection of lines~$CK$ and~$AB$. Prove that triangle~$AKL$ is isosceles.
 }{
-    Point~$K$ on the median looks strange. In any case, we need to use the fact that it is a median, i.e. that~$M$ is a midpoint --- ideally in a way that helps us better understand the equality $AB=CK$.
+    Point~$K$ on the median looks strange. In any case, we need to use the fact that it is a median, i.e. that~$M$ is a midpoint, ideally in a way that helps us better understand the equality $AB=CK$.
 }{
     The key is to reflect~$A$ through~$M$ to~$A'$, which gives strong meaning to~$M$ since the equality~$AB=CK$ suddenly becomes~$A'C=CK$.
-}{}
+}{
+    The equality $CK = AB$ links two segments that share neither a point nor a direction, and all we know about the median is that $M$ is a midpoint. A midpoint of a segment calls for the central symmetry about it: let $A'$ be the image of~$A$ under the symmetry with center~$M$. The diagonals $AA'$ and~$BC$ of quadrilateral $ABA'C$ bisect each other, so it is a parallelogram, and therefore
+    $$
+    CA' = AB = CK, \qquad CA' \parallel AB.
+    $$
+    The given condition has thus moved into a single triangle.
+
+    Point~$K$ lies inside triangle $ABC$, hence inside segment $AM$, and since $M$ is the midpoint of $AA'$, it lies inside segment $AA'$ as well. The ray $CK$ starts at vertex $C$ and passes through an interior point of the triangle, so it meets the opposite side~$AB$ at an interior point; that point is exactly $L$, and $K$ lies between $C$ and~$L$.
+
+    Point $C$ does not lie on line $AM$, so triangle $CKA'$ is not degenerate; since $CA' = CK$, it is isosceles with base $KA'$. Since $K$ lies inside $AA'$, the ray $A'K$ coincides with $A'A$, hence
+    $$
+    \angle CKA' = \angle CA'K = \angle CA'A.
+    $$
+
+    Line $AA'$ meets segment $BC$ at its interior point $M$, so it separates $B$ from $C$. The angles $\angle CA'A$ and~$\angle BAA'$ are therefore alternate angles formed by the parallels $CA'$, $AB$ and the transversal $AA'$. The ray $AB$ contains $L$ and the ray $AA'$ contains $K$, so
+    $$
+    \angle CA'A = \angle BAA' = \angle LAK.
+    $$
+
+    Finally, the angles $\angle AKL$ and~$\angle A'KC$ are vertical angles: the rays $KA$, $KA'$ are opposite (as $K$ lies inside $AA'$) and so are the rays $KL$, $KC$ (as $K$ lies between $C$ and~$L$). Putting all of this together,
+    $$
+    \angle AKL = \angle A'KC = \angle LAK,
+    $$
+    so triangle $AKL$ is isosceles with base $AK$ and $LA = LK$.
+}
 
 \EnvId{ull-eZWewTAOKLQHeu11Z-perpendicular-to-mh-through-h}
 \Problem{0}{}{
@@ -184,7 +220,26 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     In the problem we have~$H$, the midpoint of~$BC$, and somehow line~$MH$ also plays a role. Well, what are we going to do with that orthocenter~\SlightSmile?
 }{
     If~$H'$ is the image of~$H$ under the point reflection through~$M$, then we know it lands on the circumcircle of~$ABC$ at the point opposite~$A$. Have some cyclic quadrilaterals appeared?
-}{}
+}{
+    Denote $\alpha = \angle BAC$. The problem features an orthocenter and the midpoint of a side, so we reflect the orthocenter through that midpoint: let $H'$ be the image of~$H$ under the point reflection through~$M$. By the theorem \uv{Reflecting the orthocenter}, $H'$ lies on the circumcircle of $ABC$, at the point diametrically opposite~$A$.
+
+    The triangle is acute, so $H$ lies inside it; it therefore does not lie on line $BC$, so $H \neq M$ and $H' \neq H$. The line $MH$ from the statement is thus the line $HH'$.
+
+    The segments $BC$ and $HH'$ have a common midpoint~$M$, so $BHCH'$ is a parallelogram. By the theorem \uv{Basic angles} we have $\angle BHC = 180^\circ - \alpha$, and adjacent angles of a parallelogram sum to $180^\circ$, so
+    $$
+    \angle HBH' = \angle HCH' = \alpha. \eqno(*)
+    $$
+
+    The point~$H$ does not lie on line $AB$, hence $P \neq H$. Neither does $H'$: that line meets the circumcircle only at $A$ and $B$; here $H' \neq A$, and $H' = B$ would mean that $AB$ is a diameter, i.e. $\angle ACB = 90^\circ$. So $P$ is different from both~$H$ and~$H'$ and we may consider the circle $\omega_1$ with diameter $PH'$.
+
+    The line $PQ$ passes through~$H$ and is perpendicular to $MH = HH'$, so $\angle PHH' = 90^\circ$ and the point~$H$ lies on~$\omega_1$. So does the point~$B$: for $P = B$ this is clear, and for $P \neq B$ the line $PB$ is the line $AB$, and and since $AH'$ is a diameter, Thales's theorem gives gives $\angle PBH' = \angle ABH' = 90^\circ$. So $PBHH'$ is a cyclic quadrilateral.
+
+    The angles $\angle HPH'$ and $\angle HBH'$ subtend the same chord $HH'$ of $\omega_1$, so they are equal or sum to $180^\circ$. The first is acute, since triangle $PHH'$ has a right angle at~$H$, and the second equals $\alpha < 90^\circ$ by $(*)$; hence they are equal, that is $\angle HPH' = \alpha$. (For $P = B$ they are literally the same angle.)
+
+    The same reasoning applies to~$Q$. The point $H'$ does not lie on line $AC$, since $H' = C$ would mean that $AC$ is a diameter, i.e. $\angle ABC = 90^\circ$. The circle $\omega_2$ with diameter $QH'$ passes through $H$ because $\angle QHH' = 90^\circ$ and through the point~$C$ because $\angle ACH' = 90^\circ$, so from the chord $HH'$ and $(*)$ we get $\angle HQH' = \angle HCH' = \alpha$.
+
+    Triangles $PHH'$ and $QHH'$ have a right angle at~$H$ and the angle $\alpha$ at $P$ and at $Q$ respectively, so from the angle sum $\angle PH'H = \angle QH'H = 90^\circ - \alpha$. They therefore agree in the side $HH'$ and in both angles at its endpoints, hence they are congruent by $ASA$. From this $HP = HQ$.
+}
 
 \EnvId{n2g_94VghWgVCIT8C-mse-midpoint-line-and-equal-diagonals}
 \Problem{0}{}{
@@ -193,7 +248,24 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The angle between the midline and a diagonal of the quadrilateral is not something I see every day. The key will be to focus on the midpoints themselves. What about adding one or more further midpoints?
 }{
     A good midpoint to add is the midpoint of~$AB$ or~$CD$. Thanks to the parallelism coming from the midlines we can neatly rephrase the condition from the statement. Then we finish it off.
-}{}
+}{
+    The statement gives two midpoints of sides, and that is exactly the situation where it pays to add one more midpoint and create midlines. Denote by $M$, $N$ the midpoints of sides~$BC$, $AD$ and add the midpoint~$P$ of side~$AB$. Points $P$, $M$ are the midpoints of sides~$AB$, $BC$ of triangle~$ABC$ and points $P$, $N$ are the midpoints of sides~$AB$, $AD$ of triangle~$ABD$, so both diagonals appear at once as midlines emanating from~$P$:
+    $$
+    \gather
+    PM \parallel AC, \qquad PM = \tfrac12 AC, \\
+    PN \parallel BD, \qquad PN = \tfrac12 BD.
+    \endgather
+    $$
+    The equality $AC = BD$ to be proved thus becomes $PM = PN$, that is, the claim that triangle~$PMN$ is isosceles, and the given condition is exactly about the angles that line~$MN$ makes with its legs.
+
+    Let us check that $PMN$ really is a triangle. Lines $AC$, $BD$ are not parallel: a convex quadrilateral has diagonals that meet inside, and in a non-convex one, one vertex lies inside the triangle determined by the other three, while the line joining this vertex to the opposite vertex (that is, one of the diagonals) crosses the opposite side of that triangle, i.e. the other diagonal. If~$P$ lay on line~$MN$, both lines $PM$ and $PN$ would coincide with line~$MN$ and we would get $AC \parallel MN \parallel BD$, a contradiction.
+
+    Let $\varphi \in [0^\circ, 90^\circ]$ be the common measure of the angle that line~$MN$ makes with both diagonals; by the parallels above it makes the same angle with lines $PM$ and~$PN$ as well. The interior angle $\angle PMN$ of triangle~$PMN$ is therefore $\varphi$ or $180^\circ - \varphi$, and the same holds for $\angle PNM$. The sum of two interior angles of a triangle is less than $180^\circ$, which rules out the pair $\varphi$, $180^\circ - \varphi$ with sum exactly $180^\circ$, and also the pair $180^\circ - \varphi$, $180^\circ - \varphi$ with sum $360^\circ - 2\varphi \geq 180^\circ$. Only one possibility remains,
+    $$
+    \angle PMN = \angle PNM = \varphi,
+    $$
+    so triangle~$PMN$ is isosceles, $PM = PN$ and hence $AC = 2PM = 2PN = BD$.
+}
 
 \EnvId{Z8MdAzTmbIxxpEyc-UnMy-orthocenters-in-a-cyclic-quadrilateral}
 \Problem{0}{Czech-Slovak Olympiad 2009}{
@@ -202,7 +274,19 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     Orthocentres are complicated points if we draw all the altitudes. Discard such a drawing immediately. Their images under suitable reflections give a better understanding of the situation. It also helps to rephrase what we are actually proving, so that after reflecting the orthocenters we can still state the claim clearly.
 }{
     First, it suffices to show that the segment connecting the orthocenters has the same length as~$CD$ (then we have a parallelogram). This realization gives us confidence that when we reflect these orthocenters over an axis, we still have a good statement to prove, namely the equality of two chords of the circle.
-}{}
+}{
+    Denote by $\omega$ the circumcircle of quadrilateral $ABCD$, by $O$ its center, by $M$ the midpoint of side $AB$, and by $H_1$, $H_2$ the orthocenters of triangles $ABC$ and~$ABD$ respectively. The points $A$, $B$, $C$, $D$ lie on $\omega$, so no three of them are collinear and both triangles are nondegenerate. What matters is that both have the same circumcircle $\omega$ and that they share the side $AB$.
+
+    We draw no altitudes; from the definition of the orthocenter all we need is $CH_1 \perp AB$ and $DH_2 \perp AB$, hence $CH_1 \parallel DH_2$. The proof would thus be finished if $CH_1H_2D$ were a parallelogram. We already have one pair of opposite sides parallel, so only the lengths remain: we need $H_1H_2 = CD$ with matching orientation. That is the whole gain from the rephrasing, since lengths do not change under reflection. We may now replace the orthocenters by their images, and the claim still takes a clean form.
+
+    We reflect through the midpoint of the common side, that is through the point~$M$; it is the same for both triangles, and that is the only reason the resulting images can be compared. By the theorem on reflecting the orthocenter, the image of $H_1$ under the point reflection through $M$ is the point $C_1$ of $\omega$ diametrically opposite to~$C$; the same theorem for triangle $ABD$ gives that the image of $H_2$ is the point $D_1 \in \omega$ diametrically opposite to~$D$. From $C \neq D$ we get $C_1 \neq D_1$, hence $H_1 \neq H_2$, so the line connecting the two orthocenters does exist.
+
+    The point reflection through $M$ maps line $H_1H_2$ to line $C_1D_1$, and the point reflection through $O$ maps line $CD$ to that same line $C_1D_1$, since $C_1$, $D_1$ are the images of $C$, $D$. The remaining claim is thus the equality of two chords of $\omega$, and after this observation it comes for free:
+    $$
+    H_1H_2 = C_1D_1 = CD.
+    $$
+    Moreover, a point reflection maps every line to a line parallel to it, so $H_1H_2 \parallel C_1D_1$ and $CD \parallel C_1D_1$, and therefore $H_1H_2 \parallel CD$. (For some positions of the vertices the two lines coincide, for example when $AB$ is a diameter of $\omega$, since then $H_1 = C$ and~$H_2 = D$; identical lines are counted as parallel.)
+}
 
 \EnvId{alkX6MavufXBEbJ3d6M4z-orthocenter-in-an-isosceles-trapezoid}
 \Problem{0}{}{
@@ -211,7 +295,19 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     We have an orthocenter. It may not be immediately obvious what to do, but what about reflecting it over something?
 }{
     Let~$H'$ be the image of~$H$ under reflection over~$AB$. It lands on the circumcircle of~$ABCD$. Now the diagram contains everything we need and it only remains to connect a few facts.
-}{}
+}{
+    The problem features an orthocenter, so let us look at its images under reflection over a side and over the midpoint of a side of triangle $ABD$. Denote by $\omega$ the circumcircle of quadrilateral $ABCD$ and by $H'$ the image of $H$ under the reflection over line $AB$. We show that $H'$ is the point diametrically opposite to~$C$; the rest will be a midline.
+
+    Line $DH$ is the altitude from~$D$ in triangle $ABD$, so it is perpendicular to $AB$ and $P$ is its foot. The reflection over $AB$ maps line $DH$ to itself, since that line is perpendicular to $AB$; hence $H'$ lies on line $DH$ and $P$ is the midpoint of segment $HH'$.
+
+    Let $M$ be the midpoint of $AB$ and $s$ its perpendicular bisector. The point $O$ lies on $s$, since it is equidistant from $A$ and~$B$. Line $s$ is perpendicular to $AB$, hence also to $CD$, and the perpendicular dropped from the center of the circle to a chord passes through the midpoint of that chord, so $s$ is also the perpendicular bisector of $CD$. The reflection over $s$ therefore maps $\omega$ to itself, fixes its center $O$, and swaps $A$ with~$B$ and $C$ with~$D$.
+
+    By the second part of the theorem \uv{Reflecting the orthocenter}, applied to triangle $ABD$ and its side $AB$, the image of $H$ under the point reflection through~$M$ is the point $E$ diametrically opposite to~$D$. The point reflection through~$M$ is the composition of the reflections over two perpendicular lines through $M$, namely $AB$ and $s$: reflecting $H$ first over $AB$ and then over $s$ gives $E$. The first step gives $H'$, so $H'$ is the image of $E$ under the reflection over $s$. That reflection maps $D$ to $C$ and $O$ to $O$, so it maps the point diametrically opposite to $D$ onto the point diametrically opposite to $C$. Hence $H'$ is diametrically opposite to~$C$; in particular it lies on $\omega$ and $O$ is the midpoint of segment $CH'$.
+
+    The point $C$ does not lie on line $DH$, since that line is perpendicular to $CD$ and therefore meets line $CD$ only at~$D$. The points $H$ and~$H'$ are distinct as well: if they coincided, $H$ would lie on $AB$, i.e. $H = P$, and at the same time on $\omega$, so $P$ would be one of the points $A$, $B$. But the reflection over $s$ maps the foot of the perpendicular from~$D$ to $AB$ onto the foot of the perpendicular from~$C$ to $AB$, so these feet would be exactly the points $A$ and~$B$. From $CD \parallel AB$ it would then follow that $CD = AB$ and $ABCD$ would be a parallelogram, not a trapezoid.
+
+    Points $H$, $H'$, $C$ therefore form a triangle, with $P$ the midpoint of its side $HH'$ and $O$ the midpoint of side $H'C$. Segment $OP$ is its midline, and therefore $OP \parallel CH$.
+}
 
 \EnvId{WL5FFRrQH7pTblc3sQzBH-midpoint-right-angle-cyclic-quadrilateral}
 \Problem{0}{Poland 2002}{
@@ -220,7 +316,31 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     We need to use the curious condition $\angle BMD=90^\circ$. Point~$M$ is the midpoint of a segment, which already suggests something, and the right angle only reinforces the hint. In any case it pays to use colored pencils to mark equal-length segments.
 }{
     The key is to reflect, say,~$D$ through~$M$. After marking all the equal segments arising from the resulting parallelogram and the isosceles triangle, something should catch your eye.
-}{}
+}{
+    Point $M$ is the midpoint of a segment, so it invites a reflection through it to produce a parallelogram; the assumption $\angle BMD=90^\circ$ hints at which point to apply it to. So let $D'$ be the image of $D$ under the point reflection through $M$ (the angle $\angle BMD$ is defined, so $M \neq D$, and hence also $D' \neq D$).
+
+    From the statement, $BP=BA<BC$ and $DQ=DA<DC$, so $P$ is an interior point of side $BC$ and~$Q$ an interior point of side $CD$. The quadrilateral $ABCD$ is convex, so no three of its vertices are collinear; the lines $BC$ and~$CD$ therefore meet only at~$C$ and $P \neq Q$.
+
+    The segments $PQ$ and~$DD'$ have common midpoint $M$, so $DPD'Q$ is a parallelogram, and hence
+    $$
+    PD' = QD = DA, \qquad \overline{PD'} = \overline{DQ}.
+    $$
+    The line $BM$ is perpendicular to $MD$, that is to $DD'$, and passes through the midpoint $M$ of this segment. It is therefore the perpendicular bisector of $DD'$, the triangle $BDD'$ is isosceles and
+    $$
+    BD' = BD.
+    $$
+
+    The triangles $BPD'$ and~$BAD$ thus have all three sides equal: $BP=BA$ from the statement, $PD'=AD$ from the parallelogram and $BD'=BD$ from the isosceles triangle. By $SSS$ they are congruent, with the sides $BP$, $PD'$ corresponding to the sides $BA$, $AD$, so the angles at the vertices $P$ and~$A$ are equal:
+    $$
+    \angle BPD' = \angle BAD.
+    $$
+
+    It remains to read the angle $\angle BPD'$ off the original diagram. The point $P$ lies inside segment $BC$, so $\overline{PB}$ is a positive multiple of $\overline{CB}$; the point $Q$ lies inside segment $DC$, so $\overline{PD'} = \overline{DQ}$ is a positive multiple of $\overline{DC}$, that is a negative multiple of $\overline{CD}$. The arms of the angles $\angle BPD'$ and~$\angle BCD$ are therefore parallel, one pair equally and the other oppositely oriented, from which
+    $$
+    \angle BAD + \angle BCD = \angle BPD' + \angle BCD = 180^\circ.
+    $$
+    A convex quadrilateral in which the sum of opposite angles is $180^\circ$ is cyclic, so $ABCD$ is a cyclic quadrilateral.
+}
 
 \EnvId{Tax9-rYDqJvAbCiA0VqMC-feet-of-perpendiculars-and-midpoint}
 \Problem{0}{USA TST 2000}{
@@ -228,8 +348,46 @@ The following problems are roughly ordered by difficulty and use roughly speakin
 }{
     It pays to draw segment~$AD$ horizontally (unconventionally so), giving the best diagram (redraw right now if you haven't). Even in the new diagram it may not be clear what should happen. The midpoint of~$AD$ does not look easy to handle. Perhaps it needs some further midpoints to cooperate with. Ideally ones that are also related to points~$K$ and~$L$.
 }{
-    The key is the remaining midpoints of the sides of triangle~$ABP$. Then magic happens and we are just a few easy arguments from the solution.
-}{}
+    The key is the remaining midpoints of the sides of triangle~$ADP$. Then magic happens and we are just a few easy arguments from the solution.
+}{
+    Point~$M$ is the midpoint of side~$AD$ and on its own it gives neither a nice angle nor a usable length. When a midpoint sits on its own like this in a problem, we add further midpoints: let us complete~$M$ to the triple of midpoints of the sides of triangle~$ADP$, that is, add the midpoint~$X$ of segment~$AP$ and the midpoint~$Y$ of segment~$DP$. The reward comes at once. Point~$K$ lies on line~$AB$ and $PK \perp AB$, so $\angle AKP = 90^\circ$, or possibly $K = A$; either way $K$ lies on the Thales circle with diameter~$AP$, whose center is exactly~$X$. Similarly $L$ lies on the Thales circle with diameter~$DP$ and center~$Y$. A single addition has thus tied $K$, $L$ and~$M$ together.
+
+    No three of the points $A$, $B$, $C$, $D$ are collinear, since they lie on a circle. Point~$P$ lies on both lines $AC$ and~$BD$, so $P \neq A$, $P \neq D$ and~$P$ lies on neither line~$AB$ nor line~$CD$ (otherwise line~$AB$ would coincide with~$AC$, or $CD$ with~$BD$). In particular $K \neq P$ and~$L \neq P$.
+
+    From the Thales circles we have
+    $$
+    XK = XP = \tfrac12 AP, \qquad YL = YP = \tfrac12 DP.
+    $$
+    The homothety with center~$A$ and coefficient~$\tfrac12$ maps $P$ to~$X$ and~$D$ to~$M$, so $MX = \tfrac12 DP$ and ray~$XM$ points in the same direction as~$PY$. The homothety with center~$D$ and coefficient~$\tfrac12$ maps $P$ to~$Y$ and~$A$ to~$M$, so $MY = \tfrac12 AP$ and ray~$YM$ points in the same direction as~$PX$. The lengths therefore correspond crosswise:
+    $$
+    MX = YL = \tfrac12 DP, \qquad XK = MY = \tfrac12 AP.
+    $$
+    Triangles $MXK$ and~$LYM$ thus agree in two pairs of sides, and if they agree in the angles enclosed by these sides as well, they will be congruent by~$SAS$ and $MK = LM$ follows. The problem has thereby been reduced to the equality $\angle MXK = \angle MYL$.
+
+    Here there is no avoiding directed angles: depending on the configuration the feet $K$, $L$ may fall outside segments $AB$, $CD$, and ray~$XP$ need not lie inside angle~$MXK$, whereas signs handle all positions at once. With a fixed orientation of the plane, for rays $p$, $q$ with a common origin, let $\angle(p \to q)$ denote the angle of the rotation carrying $p$ to~$q$, taken modulo $360^\circ$; for lines $p$, $q$ let $\angle(p,q)$ be the directed angle modulo $180^\circ$, so that its double is well defined modulo $360^\circ$.
+
+    Put $\omega = \angle(XP \to XK)$ and~$\omega' = \angle(YP \to YL)$; these are the angles of the rotations with centers $X$, $Y$ carrying $P$ to~$K$ and to~$L$ respectively. The key point is that $\omega' = -\omega$. Points $A$, $K$, $P$ lie on a circle with center~$X$, so the central angle is twice the inscribed one and
+    $$
+    \omega = 2\angle(AP,AK) = 2\angle(AC,AB),
+    $$
+    since $P$ lies on line~$AC$ and~$K$ on line~$AB$. (If $K = A$, which happens exactly when $AB \perp AC$, then~$X$ is the midpoint of segment~$KP$, so $\omega = 180^\circ$, and the equality holds as well.) Similarly $\omega' = 2\angle(DB,DC)$. Since the four points lie on one circle, $\angle(AB,AC) = \angle(DB,DC)$, and therefore
+    $$
+    \omega = -2\angle(AB,AC) = -2\angle(DB,DC) = -\omega'.
+    $$
+
+    It remains to put things together. Ray~$XM$ points in the same direction as~$PY$, hence opposite to~$YP$, and ray~$XP$ points in the same direction as~$MY$, hence opposite to~$YM$; rotating both arms by~$180^\circ$ does not change the angle, so
+    $$
+    \angle(XM \to XP) = \angle(YP \to YM) = -\angle(YM \to YP).
+    $$
+    Together with $\omega' = -\omega$ we get
+    $$
+    \eqalign{
+        \angle(XM \to XK) &= \angle(XM \to XP) + \omega \cr
+        &= -\angle(YM \to YP) - \omega' = -\angle(YM \to YL). \cr
+    }
+    $$
+    The directed angles $\angle(XM \to XK)$ and~$\angle(YM \to YL)$ are thus opposite, so the undirected angles $\angle MXK$ and~$\angle MYL$ are equal. By~$SAS$ the triangles $MXK$ and~$LYM$ are hence congruent, and therefore $MK = ML$.
+}
 
 \EnvId{0TlY8HJdJ_fVKGlkNgzpO-point-inside-a-parallelogram}
 \Problem{0}{}{
@@ -237,8 +395,28 @@ The following problems are roughly ordered by difficulty and use roughly speakin
 }{
     Try to shift point~$P$ so that the condition on the sum of angles makes sense.
 }{
-    The key point is the image~$P'$ of point~$P$ under the translation in the direction of~$AC$ (or~$BC$). Then we have a cyclic quadrilateral $CP'DP$ as well as plenty of parallelograms.
-}{}
+    The key point is the image~$P'$ of point~$P$ under the translation in the direction of~$BC$ (that is,~$AD$). Then we have a cyclic quadrilateral $CP'DP$ as well as plenty of parallelograms.
+}{
+    The condition $\angle APB + \angle CPD = 180^\circ$ ties two angles at the same vertex~$P$, so there is nothing we can do with it. A parallelogram, however, has two pairs of opposite sides that are parallel and equal, which calls for the translation taking one pair onto the other. If we move point~$P$ by it as well, one of the two angles travels to a new vertex and the sum of $180^\circ$ becomes the condition for a cyclic quadrilateral.
+
+    So let $\tau$ be the translation taking $B$ to~$C$, that is, the translation by the vector $BC = AD$, and let $P' = \tau(P)$. Since $\tau(A) = D$ and~$\tau(B) = C$, triangle $ABP$ maps to triangle $DCP'$, so
+    $$
+    \angle DP'C = \angle APB = 180^\circ - \angle CPD.
+    $$
+
+    First let us locate the point~$P'$. Point~$P$ is an interior point of the parallelogram, so the line through~$P$ parallel to~$BC$ meets side $AB$ at an interior point~$X$ and side $DC$ at an interior point~$Y$, with $P$ lying inside segment $XY$. The point $\tau(X)$ lies on line $\tau(AB) = DC$ as well as on line $XY$ (the translation is in the direction of $XY$), and these meet only at~$Y$, so $\tau(X) = Y$. Therefore $XP' = XP + XY > XY$, point~$P'$ lies on ray $XY$ beyond~$Y$, and the points $P$, $P'$ thus lie in opposite half-planes determined by line $CD$.
+
+    Points $C$, $D$, $P$ are not collinear; denote by $\omega$ the circumcircle of triangle $CDP$. The set of points of the half-plane not containing $P$ at which segment $CD$ subtends an angle of $180^\circ - \angle CPD$ is exactly the arc of $\omega$ in that half-plane. By the previous two paragraphs, point~$P'$ belongs to it, so it lies on~$\omega$ and $CP'DP$ is a cyclic quadrilateral. The chord $CD$ separates the points $P'$ and~$P$ on~$\omega$, so in cyclic order the points go $C$, $P'$, $D$, $P$; therefore $P'$ and~$D$ lie on the same arc determined by the chord $CP$.
+
+    It remains to carry the angle $\angle PBC$ over to the circle $\omega$. The translation $\tau$ takes $B$ to~$C$ and~$P$ to~$P'$, so segments $BP$ and~$CP'$ are parallel, of equal length and equally oriented; since $P$ does not lie on line $BC$, $BPP'C$ is a non-degenerate parallelogram. Its opposite angles at vertices $B$ and~$P'$ are equal:
+    $$
+    \angle PBC = \angle PP'C.
+    $$
+    The angles $\angle PP'C$ and~$\angle PDC$ are inscribed angles of $\omega$ subtending the chord $CP$ from the same arc, hence equal. Together
+    $$
+    \angle PBC = \angle PP'C = \angle PDC.
+    $$
+}
 
 \EnvId{RV54g2hn6AMdIasT4IODZ-convex-hexagon-with-equal-sides}
 \Problem{0}{Czech-Slovak Olympiad 2026}{
@@ -247,7 +425,51 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The angle sum condition is key. We need to introduce a~point that exploits the angle-sum condition and makes it a little more meaningful.
 }{
     The key point is the reflection of $C$ in $BD$, or analogously the reflection of $E$ in $DF$. It is the same point. And it is all we need.  Do not forget to use the inequality part of the condition $CD=DE \neq AD$. Without that, the problem does not hold.
-}{}
+}{
+    The condition $\angle BDC + \angle EDF = \angle FDB$ says that the angles $BDC$ and~$EDF$ fill up the angle $BDF$ exactly. That invites reflecting $C$ in line $BD$ and~$E$ in line $DF$: both images land inside the angle $BDF$, and the first step will be to show that they land on the same point.
+
+    Let us first settle the configuration. The diagonals from vertex~$D$ split the interior angle of the convex hexagon at $D$ in the order in which the vertices occur around the perimeter, so the rays $DC$, $DB$, $DA$, $DF$, $DE$ come in this angular order and
+    $$
+    \angle CDB + \angle BDF + \angle FDE = \angle CDE < 180^\circ.
+    $$
+    Line $BD$ therefore separates $C$ from the points $A$, $F$, $E$, and line $DF$ separates $E$ from the points $C$, $B$, $A$. Since both summands in the condition from the statement are positive, we also have $\angle BDC < \angle FDB$ and~$\angle FDE < \angle FDB$.
+
+    Denote by $P$ the reflection of $C$ in line $BD$ and by~$Q$ the reflection of $E$ in line $DF$. We show that $P = Q$. Point $P$ lies on the opposite side of line $BD$ from $C$, hence on the same side as $F$, and $\angle BDP = \angle BDC < \angle FDB$, so ray $DP$ lies inside the angle $BDF$. Symmetrically $\angle FDQ = \angle FDE < \angle FDB$, and ray $DQ$ lies inside the angle $BDF$ as well. From the statement, $\angle BDP = \angle FDB - \angle EDF$, hence
+    $$
+    \angle FDP = \angle FDB - \angle BDP = \angle EDF = \angle FDQ.
+    $$
+    Rays $DP$ and~$DQ$ make the same angle with line $DF$ and lie on the same side of it (both inside the angle $BDF$); therefore they coincide. Together with $DP = DC = DE = DQ$ this gives $P = Q$.
+
+    The single point $P$ thus satisfies all three length conditions from the statement at once:
+    $$
+    \gather
+    BP = BC = BA, \\
+    DP = DC = DE, \\
+    FP = FE = FA.
+    \endgather
+    $$
+
+    The first and the third of them say that $P$ lies on the circle $k_B$ with center $B$ and radius $BA$ as well as on the circle $k_F$ with center $F$ and radius $FA$. These have different centers, so they have at most two common points. The reflection in line $BF$ maps each of them onto itself, and since the interior angle of the hexagon at vertex $A$ is less than $180^\circ$, point $A$ does not lie on line $BF$ and its image $A'$ is different from $A$. The common points of the circles $k_B$, $k_F$ are therefore exactly $A$ and~$A'$, and point $P$ is one of them. The possibility $P = A$ is ruled out, however: it would give $AD = PD = CD$, contradicting the assumption $CD \neq AD$. Hence $P = A'$. This is the only place where the inequality part of the condition is used, and it is indispensable: if $P$ coincided with $A$, it would lie outside triangle $BDF$ and the final angle sum would fall apart.
+
+    In a convex hexagon the diagonal $BF$ cuts off triangle $ABF$, so line $BF$ separates $A$ from $D$. Point $P = A'$ therefore lies in the open half-plane with boundary line $BF$ containing $D$. At the same time ray $DP$ lies inside the angle $BDF$ and $P \neq D$. The intersection of the interior of the angle $BDF$ with this half-plane is exactly the interior of triangle $BDF$, so $P$ is an interior point of triangle $BDF$.
+
+    The reflection in $BD$ maps triangle $BCD$ onto $BPD$, the reflection in $DF$ maps $DEF$ onto $DPF$ and the reflection in $BF$ maps $BAF$ onto $BPF$, so
+    $$
+    \gather
+    \angle BPD = \angle BCD, \\
+    \angle DPF = \angle DEF, \\
+    \angle FPB = \angle FAB.
+    \endgather
+    $$
+    Point $P$ lies inside triangle $BDF$, so the angles at $P$ add up to $360^\circ$, hence
+    $$
+    \angle BCD + \angle DEF + \angle FAB = 360^\circ.
+    $$
+    The interior angles of a hexagon sum to $720^\circ$, from which
+    $$
+    \angle CBA + \angle EDC + \angle AFE = 720^\circ - 360^\circ = 360^\circ.
+    $$
+}
 
 \EnvId{L-IkptXbj4-UJ_vpMWLKS-point-with-five-equal-angles}
 \Problem{0}{Czech-Slovak Olympiad 2024}{
@@ -258,7 +480,24 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The angles imply parallel lines. They hint at the right move forward.
 }{
     The point to introduce is the intersection point $X$ of $BC$ and $AD$, as $PCXD$ is now a parallelogram. The problem can now be solved with the right view on what we have.
-}{}
+}{
+    Denote by $\varphi$ the common measure of the five angles from the statement. Triangle $APD$ (the point $P$ lies inside the quadrilateral, so it does not lie on line $AD$) has angles of size $\varphi$ at $A$ and~$D$, hence it is isosceles with $PA = PD$, and moreover $\varphi < 90^\circ$; similarly $PB = PC$.
+
+    The remaining two equalities are about angles at a transversal. Since $P$ lies inside the convex quadrilateral $ABCD$, the rays $PA$, $PB$, $PC$, $PD$ go around $P$ in this cyclic order and the angles $\angle APB$, $\angle BPC$, $\angle CPD$, $\angle DPA$ sum to $360^\circ$. Measuring angles from ray $PD$ in the direction $D \to A \to B \to C$, ray $PA$ therefore sits at angle $\angle DPA < 180^\circ$, while ray $PC$ sits at angle $360^\circ - \angle CPD > 180^\circ$, so line $PD$ separates $A$ from $C$. The angles $\angle ADP$ and~$\angle DPC$ are thus alternate angles formed by the lines $AD$ and~$PC$ and the transversal $DP$, and since they are equal, $AD \parallel PC$. Analogously line $PC$ separates $B$ from $D$, and from the equality of the angles $\angle PCB$ and~$\angle CPD$ we get $BC \parallel PD$.
+
+    Two pairs of parallel lines call for an intersection point. Lines $AD$ and~$BC$ are not parallel (otherwise $PC$ and~$PD$ would be parallel too, so $C$, $P$, $D$ would be collinear), hence they meet at a point $X$. From $PC \parallel XD$ and $CX \parallel PD$, $PCXD$ is a parallelogram. We prove even more than is asked:
+    $$
+    OA = OX = OB.
+    $$
+
+    The key is the observation that \textbf{the perpendicular bisector of $PC$ is also the perpendicular bisector of $AX$}.
+
+    Let $M$ be the midpoint of $PC$, $N$ the midpoint of $AD$ and~$Y$ the midpoint of $AX$. The translation taking $P$ to $C$ takes $D$ to $X$, thanks to the parallelogram $PCXD$, so the segment $AX$ arises from the segment $AD$ by translating one endpoint; its midpoint moves by half of that translation, so the translation taking $P$ to $M$ takes $N$ to $Y$. The segment $MY$ is thus the image of the segment $PN$ and has the same direction. Triangle $APD$ is isosceles, so its median $PN$ is also an altitude, that is $PN \perp AD$, and therefore $MY \perp AD$ as well.
+
+    Line $MY$ thus meets $PC$ perpendicularly at its midpoint $M$ (because $PC \parallel AD$): it is the perpendicular bisector of $PC$. At the same time it is perpendicular to line $AD$ at the point $Y$, the midpoint of the segment $AX$, both of whose endpoints lie on~$AD$, so it is also the perpendicular bisector of $AX$. (The points $A$ and~$X$ are distinct: $\angle ADP = \varphi$, while $\angle XDP = 180^\circ - \varphi$ as the angle of the parallelogram adjacent to $\angle DPC$, and $\varphi \neq 90^\circ$.)
+
+    The point $O$ is the center of the circumcircle of triangle $CPD$, so it lies on the perpendicular bisector of $PC$, and therefore $OA = OX$. The swap $A \leftrightarrow B$, $D \leftrightarrow C$ preserves all the assumptions (the quadrilateral $BADC$ is the same convex quadrilateral traversed in the opposite direction, and the five angles from the statement map onto themselves) as well as the points $P$, $X$, $O$, so by the same reasoning the perpendicular bisector of $PD$ is the perpendicular bisector of $BX$ and $OB = OX$.
+}
 
 \EnvId{aI08awqy1yrLlCuEOFHJ7-altitude-foot-and-oh-midpoint}
 \Problem{0}{Czech-Slovak Olympiad 2011}{
@@ -267,7 +506,35 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The situation is fairly involved and one cannot discover much that is interesting at first glance. However, there is a point~$H$ in it with which we can do all sorts of interesting things. Which of those is suitable here?
 }{
     Reflect~$H$ over~$BC$ to obtain~$H'$ lying on the circumcircle of~$ABC$. This means $OA = OH'$. The midpoint of~$OH$ also becomes more tractable.
-}{}
+}{
+    Denote by $\omega$ the circumcircle of triangle $ABC$, by $R$ its radius and by $N$ the midpoint of segment $OH$; the triangle is not equilateral, so $O \neq H$.
+
+    If $AB = AC$, then $A$, $H$ and $P$ lie on the perpendicular bisector of $BC$ along with $O$, so $D = P$ and line $EP$ is exactly this bisector. It contains both $O$ and $H$, hence also the midpoint of segment $OH$. From now on, therefore, assume that $AB \neq AC$; then line $AO$ is not perpendicular to $BC$.
+
+    The only point of the configuration we can handle freely is the orthocenter, and its reflection $H'$ over $BC$ does two things at once: by the theorem on reflecting the orthocenter, $H'$ lies on $\omega$, so
+    $$
+    OH' = OA = R,
+    $$
+    and at the same time $P$ is the midpoint of segment $HH'$, which brings the midpoint of $OH$ into play as well. Indeed, line $AP$ is perpendicular to $BC$, so this reflection maps it onto itself and $P$ stays fixed; hence $H'$ lies on line $AP$ and $P$ is the midpoint of $HH'$.
+
+    The triangle is acute, so $H$ lies inside it and therefore inside segment $AP$. The point $H'$ then lies on ray $AP$ beyond $P$, and on the altitude from~$A$ the points come in the order $A$, $H$, $P$, $H'$. In particular $P$ is an interior point of segment $AH'$ and $H'$ lies in the half-plane bounded by $BC$ opposite to $A$, so $H' \neq A$.
+
+    Let $A'$ be the point diametrically opposite to~$A$. If $H' = A'$, line $AA'$ would coincide with the altitude from~$A$ and be perpendicular to $BC$, which we have excluded. Hence $H' \neq A'$, and and since $AA'$ is a diameter, Thales's theorem gives gives $\angle AH'A' = 90^\circ$. Line $H'A'$ is therefore perpendicular to $AH'$, and since $AH' \perp BC$,
+    $$
+    H'A' \parallel BC.
+    $$
+
+    Consider the homothety $h$ with center $A$ taking $P$ to $H'$; its ratio $AH' \, / \, AP$ is positive, since $P$ lies inside segment $AH'$. It maps line $BC$ to the parallel to $BC$ through $H'$, which is exactly line $H'A'$, and maps line $AD$ onto itself. Line $AD$ is not parallel to $BC$ (it meets it at $D$), so it has a single common point with line $H'A'$, namely $A'$. Therefore $h(D) = A'$, and since a homothety preserves midpoints, the midpoint $E$ of segment $AD$ maps to the midpoint of segment $AA'$, that is, to $O$:
+    $$
+    h(P) = H', \qquad h(D) = A', \qquad h(E) = O.
+    $$
+
+    The point $E$ is an interior point of segment $AD$, so it does not lie on $BC$ and $E \neq P$. The image of line $EP$ under $h$ is line $OH'$, and a homothety maps a line to a line parallel to it (or onto the line itself). Line $EP$ is thus parallel to $OH'$ or identical with it.
+
+    We treat $N$ in the same way. The homothety with center $H$ and ratio $\frac12$ takes $H'$ to the midpoint of segment $HH'$, that is to $P$, and $O$ to the midpoint of segment $HO$, that is to $N$. From $OH' = R > 0$ we get $O \neq H'$, hence also $P \neq N$; line $PN$ is the image of line $OH'$, so it is parallel to it or identical with it.
+
+    Lines $EP$ and $PN$ both pass through $P$ and both are parallel to line $OH'$ or identical with it. Such a line is uniquely determined by $P$, so $EP$ and $PN$ coincide and the point $N$, the midpoint of segment $OH$, lies on line $EP$.
+}
 
 \EnvId{M3FyEsmtSGx30V-INIVXw-tangent-and-midpoint-of-ap}
 \Problem{0}{}{
@@ -276,16 +543,83 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The midpoint of~$AP$ is a strange point that does not quite fit. Unless we use it for a point reflection to transfer one of the angles whose equality we are proving.
 }{
     It makes sense to reflect~$Q$ through~$M$ to transfer angle~$PQA$; it suddenly equals~$PQ'A$. The statement to be proved will then, after a brief angle chase, tell us what it suffices to show.
-}{}
+}{
+    Point~$M$ enters the statement only as the midpoint of~$AP$, and a midpoint calls for a point reflection in it: that produces a parallelogram. Denote by~$Q'$ the image of~$Q$ under this reflection; it carries angle $PQA$ to the vertex~$Q'$.
+
+    Denote by~$t$ the tangent to~$k$ at~$A$, on which both $P$ and $M$ lie. Here $P \neq A$, since $A$ does not lie on line~$BC$; hence also $M \neq A$ and $M \neq P$. Line~$t$ meets line~$AB$ only at~$A$ and line~$BC$ only at~$P$, so $M$ lies on neither of them; since $Q$ lies on line~$MB$, we get $Q \neq A$ and $Q \neq C$. Point~$Q$ therefore does not lie on~$t$ (which has only the point~$A$ in common with~$k$), and since $M$ is the midpoint of segment~$AP$ and of segment~$QQ'$, $AQPQ'$ is a parallelogram. Its opposite angles give
+    $$
+    \angle PQA = \angle AQ'P.
+    $$
+
+    Since $M$ lies on~$t$ and $M \neq A$, it lies outside~$k$ and its power with respect to~$k$ is $MA^2 > 0$. The points $B$, $Q$ therefore lie on the same ray from~$M$ and $MB \cdot MQ = MA^2$. The reflection in~$M$ gives $MQ' = MQ$ and puts $Q'$ on the opposite ray, so $M$ lies inside segment~$BQ'$; it lies inside segment~$AP$ as well and $MA = MP$, that is,
+    $$
+    MA \cdot MP = MB \cdot MQ'.
+    $$
+    By the concyclicity criterion the points $A$, $B$, $P$, $Q'$ are concyclic. (They are four distinct points: $Q' = A$ would give $Q = P$, which does not lie on~$k$, $Q' = P$ would give $Q = A$, and $Q' \neq B$, since $M$ lies between them. The points $A$, $B$, $P$ are not collinear, since $B$ does not lie on~$t$.) The diagonals of quadrilateral~$ABPQ'$ meet at its interior point~$M$, so it is convex and its opposite angles at the vertices $B$ and~$Q'$ give
+    $$
+    \angle AQ'P = 180^\circ - \angle ABP.
+    $$
+    It remains to prove
+    $$
+    \angle AQC + \angle ABP = 180^\circ. \eqno(*)
+    $$
+
+    The point~$P$ lies outside~$k$, that is, outside chord~$BC$: either $B$ lies between $P$ and~$C$, or $C$ lies between $P$ and~$B$. The point~$P$ does not lie on line~$AC$, since that meets line~$BC$ only at~$C$ and $P \neq C$; the points $A$, $P$, $C$ thus form a triangle, $M$ is an interior point of its side~$AP$ and line~$BQ$ passes through none of its vertices (through $A$ or~$P$ it would be line~$t$, on which $B$ does not lie, through~$C$ it would be line~$BC$, on which $M$ does not lie). A line that enters a triangle through an interior point of one side and avoids the vertices meets the interior of exactly one of the two remaining sides. Line~$BQ$ has only the point~$B$ in common with line~$PC$, so if $B$ lies inside segment~$PC$, that is precisely the side crossed and line~$BQ$ leaves $A$ and~$C$ in the same half-plane; if $B$ does not lie inside segment~$PC$, that is, if $C$ lies between $P$ and~$B$, then line~$BQ$ meets the interior of segment~$AC$ and separates $A$, $C$.
+
+    Two chords of a circle meet at an interior point if and only if each of them separates the endpoints of the other. In the first case $Q$ and~$B$ therefore lie in the same half-plane with boundary line~$AC$, so $\angle AQC = \angle ABC$, and the rays $BP$, $BC$ are opposite, so $\angle ABP = 180^\circ - \angle ABC$. In the second case line~$AC$ separates $Q$ and~$B$, so $\angle AQC = 180^\circ - \angle ABC$, and the rays $BP$, $BC$ coincide, so $\angle ABP = \angle ABC$. Either way $(*)$ holds, hence
+    $$
+    \angle PQA = \angle AQ'P = 180^\circ - \angle ABP = \angle AQC.
+    $$
+}
 
 \EnvId{JDPS5QjvQROqZ2N6JEwq6-trapezoid-with-points-on-kl}
 \Problem{0}{}{
-    Let $ABCD$ be a trapezoid with $AB \parallel CD$. Points $K$ and~$L$ lie on~$AB$ and~$CD$ respectively such that $AK \cdot CL = BK \cdot DL$. Points $P$ and~$Q$ lie on~$KL$ such that $\angle APB = \angle DCB$ and $\angle CQD=\angle CBA$. Prove that $B$, $C$, $P$, $Q$ lie on a circle.
+    Let $ABCD$ be a trapezoid with $AB \parallel CD$. Points $K$ and~$L$ lie on~$AB$ and~$CD$ respectively such that $AK \cdot CL = BK \cdot DL$. Points $P$ and~$Q$ lie on segment~$KL$ such that $\angle APB = \angle DCB$ and $\angle CQD=\angle CBA$. Prove that $B$, $C$, $P$, $Q$ lie on a circle.
 }{
     The condition on the positions of~$K$ and~$L$ is interesting. Rewriting it in ratio form suggests that some homothety is at play. What about reflecting something further in it?
 }{
     Consider the homothety mapping~$AB$ to $DC$; under it, $K$ maps to~$L$. If we map~$P$ to~$P'$ under it, then points $K$, $L$, $P$, $Q$, $P'$ all lie on a line. The problem turns into a nice angle-chasing exercise.
-}{}
+}{
+    We take $K$ and~$L$ to be interior points of the sides $AB$ and~$CD$. If $K$ were an endpoint of the side $AB$, the given equality would force $L$ to be the corresponding endpoint of the side $CD$, and the segment $KL$ would coincide with a leg of the trapezoid. But every point $P$ of the leg $AD$ satisfies $\angle APB < 180^\circ - \angle DAB = \angle ADC$ and every point $Q$ of it satisfies $\angle CQD < \angle DAB$, so the prescribed equalities would give $\angle DCB < \angle ADC$ and $\angle ADC < \angle DCB$ at once. On the leg $BC$ neither of those two points works, since there $\angle APB < \angle DCB$ and $\angle CQD < \angle CBA$. So such a position cannot occur under the hypotheses. The given condition can then be rewritten as the ratio
+    $$
+    \frac{AK}{KB} = \frac{DL}{LC},
+    $$
+    which says that $K$ and~$L$ divide the parallel sides $AB$ and~$DC$ in the same ratio. That is exactly how points correspond under the homothety mapping $AB$ to $DC$, and when parallel segments offer us such a homothety, it pays to map one more point by it. We map the point $P$.
+
+    Since $ABCD$ is a trapezoid, the legs $AD$ and~$BC$ are not parallel and their lines meet at a point $S$. If $S$ lay inside the segment $AD$, it would lie strictly between the parallels $AB$ and~$CD$, hence also inside the segment $BC$, so opposite sides of the trapezoid would intersect. Therefore $S$ does not lie on the segment $AD$: the points $A$, $D$ lie on the same ray from $S$ and the segment $AD$ does not meet the line $BC$, so $A$ and~$D$ lie in the same half-plane determined by the line $BC$.
+
+    Let $h$ be the homothety with center $S$ and ratio $k = SD \, / \, SA > 0$, so that $h(A) = D$. It maps the line $AB$ to the parallel to~$AB$ through $D$, that is, to the line $CD$, and the line $SB = BC$ is fixed; hence the image $h(B)$ is the intersection of the lines $CD$ and~$BC$, that is, $h(B) = C$. The trapezoid is not a parallelogram, so $DC \neq AB$ and~$k \neq 1$. Moreover $S$ lies on neither of the parallels $AB$, $CD$: it is fixed and $h$ maps $AB$ to $CD$, so it would lie on both.
+
+    A homothety preserves ratios of division, so $h(K)$ is the point of the segment $DC$ that divides it in the ratio $AK : KB$. By the rewritten condition this is exactly $L$, that is,
+    $$
+    h(K) = L.
+    $$
+    Thus $L$ lies on the line $SK$: the line $\ell = KL$ passes through the center $S$, is fixed by $h$, and the image $P' = h(P)$ lies on it as well.
+
+    The ratio $k$ is positive, so $h$ maps every ray from $S$ onto itself. The points $K$, $L = h(K)$ and~$h(L)$ therefore lie on the same ray from $S$ and their distances from $S$ are $SK$, $k \cdot SK$ and $k^2 \cdot SK$ respectively. For $k > 1$ this triple increases and for $k < 1$ it decreases; in both cases the middle value is strictly between the outer ones, so $L$ lies between $K$ and~$h(L)$. Since both $K$ and~$L$ lie on the same ray from $S$ and are different from $S$, the point $S$ does not lie on the segment $KL$.
+
+    Since $0 < \angle APB = \angle DCB < 180^\circ$, the point $P$ does not lie on the line $AB$, in particular $P \neq K$. The image of the segment $KL$ is the segment $L\,h(L)$, so $P'$ lies on it and $P' \neq L$. Hence $L$ separates $P'$ from $K$, and since $\ell$ meets the line $CD$ only at~$L$, the points $P'$ and~$K$ (and with $K$ the whole of line $AB$) lie in opposite half-planes determined by the line $CD$.
+
+    The homothety $h$ maps the triangle $APB$ to the triangle $DP'C$, so
+    $$
+    \angle DP'C = \angle APB = \angle DCB.
+    $$
+    The point $P'$ lies on $\ell$ and $P' \neq L$, so it does not lie on the line $CD$; let $\gamma$ be the circumcircle of the triangle $DP'C$. By the tangent-chord angle theorem, the tangent to $\gamma$ at~$C$ the angle between the tangent to $\gamma$ at~$C$ and ray $CD$, in the half-plane not containing $P'$, equals $\angle DP'C$. The ray $CB$ lies in the same half-plane and makes with the ray $CD$ the angle $\angle DCB = \angle DP'C$; a ray from $C$ is, however, determined uniquely in a given half-plane by the angle it makes with~$CD$, so the line $BC$ is tangent to $\gamma$ at~$C$.
+
+    The line $BC$ is a transversal of the parallels $AB$ and~$CD$ and the points $A$, $D$ lie in the same half-plane with respect to it, so $\angle CBA + \angle BCD = 180^\circ$, that is,
+    $$
+    \angle DQC = \angle CBA = 180^\circ - \angle DCB = 180^\circ - \angle DP'C.
+    $$
+    Since $0 < \angle DQC < 180^\circ$, the point $Q$ does not lie on the line $CD$, that is, $Q \neq L$, and since the segment $KL$ meets the line $CD$ only at~$L$, the point $Q$ lies in the same half-plane as $K$, hence on the opposite side of the line $CD$ from $P'$. The arc of $\gamma$ lying in this half-plane is precisely the set of its points at which $DC$ subtends the angle $180^\circ - \angle DP'C$ (inscribed angles from opposite arcs add up to $180^\circ$), and such a set is unique. Therefore $Q$ lies on $\gamma$.
+
+    The lines $\ell$ and~$BC$ are distinct, since otherwise $K$ would be the intersection of the lines $AB$ and~$BC$, that is, the vertex $B$; both pass through $S$, so $\ell \cap BC = \{S\}$, and $S$ does not lie on the segment $KL$. The points $P$, $Q$ therefore do not lie on the line $BC$, and the points $B$, $C$, which are different from $S$, do not lie on $\ell$. Nor does $D$ lie on $\ell$, since $\ell$ meets the line $CD$ only at the interior point $L$ of the side $CD$. If $P = Q$, the claim holds (the points $B$, $C$, $P$ are not collinear, so it suffices to take the circumcircle of triangle $BCP$); so let $P \neq Q$, so that $B$, $C$, $P$, $Q$ are pairwise distinct.
+
+    From now on we work with directed angles between lines modulo $180^\circ$, which spares us the analysis of the relative positions of the points $P$, $Q$, $P'$ on the line $\ell$; the configuration facts the problem really rests on have already been used. The homothety $h$ maps the line $PB$ to the line $P'C$, so $PB \parallel P'C$, and the points $P$, $Q$, $P'$ lie on $\ell$. Therefore
+    $$
+    \angle(PB, PQ) = \angle(P'C, P'Q) = \angle(DC, DQ) = \angle(CB, CQ),
+    $$
+    where the second equality holds by inscribed angles subtending the chord $CQ$ of $\gamma$ from the points $P'$ and~$D$, and the third is the tangent-chord angle for the tangent $CB$ and the same chord. The equality $\angle(PB,PQ) = \angle(CB,CQ)$ means that the points $B$, $C$, $P$, $Q$ are concyclic or collinear; the line is excluded, since $B$ does not lie on $\ell$.
+}
 
 \EnvId{Kr9IKyGuib12QPGum8wz1-four-points-on-quadrilateral-sides}
 \Problem{0}{CPSJ 2019, Team Contest}{
@@ -293,8 +627,52 @@ The following problems are roughly ordered by difficulty and use roughly speakin
 }{
     Draw only one point, say~$K$, and try to better understand the strange angle condition by which it is defined. Adding further points will start to make sense only once you discover something.
 }{
-    In the diagram with only point~$K$ one can angle-chase $\angle BKC=\angle KDC$. Line~$AB$ is therefore tangent to the circumcircle of~$KCD$. This is reminiscent of the power of a point --- one just needs to add the point from which we compute it. Once this is clear, we can connect the remaining points~$L$, $M$, $N$.
-}{}
+    In the diagram with only point~$K$ one can angle-chase $\angle BKC=\angle KDC$. Line~$AB$ is therefore tangent to the circumcircle of~$KCD$. This is reminiscent of the power of a point: one just needs to add the point from which we compute it. Once this is clear, we can connect the remaining points~$L$, $M$, $N$.
+}{
+    Points $A$, $B$, $C$, $D$ lie in this order on a circle $\omega$, so the quadrilateral $ABCD$ is convex. All four conditions of the statement are one and the same: a point $X$ lies on side $A_1A_2$ of a quadrilateral $A_1A_2A_3A_4$ and~$\angle A_1A_4X = \angle A_2A_3X$, taken in turn for
+    $$
+    (A_1,A_2,A_3,A_4) = (A,B,C,D),\ (B,C,D,A),\ (C,D,A,B),\ (D,A,B,C).
+    $$
+    The cyclic shift of the labels $(A,B,C,D) \to (B,C,D,A)$ therefore preserves the statement and sends the quadruple $(K,L,M,N)$ to $(L,M,N,K)$. Every claim about the point $K$ thus needs to be proved only once.
+
+    As $X$ moves along side $AB$ from~$A$ to~$B$, the angle $\angle ADX$ increases from zero to $\angle ADB$ and the angle $\angle BCX$ decreases from $\angle BCA$ to zero. The point $K$ therefore exists, is unique and is an interior point of side $AB$; the same holds for $L$, $M$, $N$.
+
+    Let us first settle the case when some two opposite sides are parallel; thanks to the shift we may assume $AB \parallel CD$. Then $ABCD$ is an isosceles trapezoid and the perpendicular bisector $s$ of segment $AB$ is at the same time the perpendicular bisector of segment $CD$. The reflection in~$s$ swaps $A \leftrightarrow B$ and~$C \leftrightarrow D$, so it preserves the configuration with the relabeling $(A,B,C,D) \to (B,A,D,C)$, under which $(K,L,M,N)$ becomes $(K,N,M,L)$. By uniqueness this reflection therefore maps $K$ to $K$, $M$ to $M$ and~$L$ to $N$. The points $K$, $M$ hence lie on~$s$ and are distinct, so $KM = s$, while $LN$ is perpendicular to~$s$. From now on assume that no two opposite sides are parallel.
+
+    The key observation can be made in the diagram with a single new point. Denote $\varphi = \angle ADK = \angle BCK$, $\beta = \angle ABC$ and~$\delta = \angle CDA$. The ray $BK$ coincides with the ray $BA$, so from the angle sum in triangle $BCK$ and from~$\beta + \delta = 180^\circ$ we get
+    $$
+    \angle BKC = 180^\circ - \beta - \varphi = \delta - \varphi.
+    $$
+    The point $K$ is an interior point of side $AB$ of a convex quadrilateral, so the ray $DK$ lies inside angle $ADC$, and hence
+    $$
+    \angle KDC = \delta - \varphi = \angle BKC.
+    $$
+    Segment $KC$ splits the quadrilateral into triangle $KBC$ and quadrilateral $AKCD$, so the points $B$ and~$D$ lie in opposite half-planes determined by line $KC$. By the converse of the tangent-chord angle theorem, line $AB$ is therefore tangent to the circumcircle of triangle $KCD$ at~$K$.
+
+    A tangent is of no use until we have a point from which to compute the power. It suffices to intersect two suitable lines: let $P$ be the intersection of lines $AB$ and~$CD$. Since $ABCD$ is convex, $P$ lies outside both segments $AB$ and $CD$, hence outside $\omega$, and the power of~$P$ with respect to the circle $(KCD)$, taken once through the tangent $PK$ and once through the secant $CD$, gives
+    $$
+    PK^2 = PC \cdot PD = PA \cdot PB,
+    $$
+    where the second equality is the power of~$P$ with respect to $\omega$. The double shift $(A,B,C,D) \to (C,D,A,B)$ sends $K$ to $M$ and the point $P$ to the intersection of lines $CD$, $AB$, that is, to $P$ again. Therefore $PM^2 = PA \cdot PB$, and so
+    $$
+    PK = PM.
+    $$
+    After one shift, and after three, we similarly get $QL = QN$, where $Q$ is the intersection of lines $BC$ and~$DA$.
+
+    The points $K$, $M$ are distinct, since they lie on different lines $AB$, $CD$, whose only common point $P$ is not an interior point of any side; similarly $L \neq N$. Denote by $p$ the perpendicular bisector of segment $KM$ and by $q$ the perpendicular bisector of segment $LN$. From $PK = PM$ the point $P$ lies on~$p$, so the reflection in~$p$ fixes $P$ and swaps $K$ with~$M$, thereby mapping line $AB$ to line $CD$. Similarly the reflection in~$q$ maps $BC$ to $DA$.
+
+    It remains to compare the directions of $p$ and~$q$. Here we pass to directed angles between lines modulo $180^\circ$, written $\angle(g,h)$; the result comes out zero, so any discussion of relative positions drops out entirely. For the reflection in a line $p$ and an arbitrary line $g$ with image $g'$ we have $\angle(g,p) = \angle(p,g')$, which for $g = AB$, $g' = CD$ gives $\angle(AB,CD) = 2\angle(AB,p)$, and similarly $\angle(BC,DA) = 2\angle(BC,q)$. Therefore
+    $$
+    \eqalign{
+        2\angle(p,q) &= 2\angle(p,AB) + 2\angle(AB,BC) + 2\angle(BC,q) \cr
+        &= -\angle(AB,CD) + 2\angle(AB,BC) + \angle(BC,DA) \cr
+        &= \angle(AB,DA) - \angle(BC,CD). \cr
+    }
+    $$
+    That $ABCD$ is cyclic means exactly $\angle(AB,DA) = \angle(CB,CD)$, so the right-hand side is zero and~$\angle(p,q)$ is $0^\circ$ or $90^\circ$. Since $KM \perp p$ and~$LN \perp q$, the lines $KM$ and~$LN$ are parallel or perpendicular.
+
+    Parallelism is ruled out by the positions of the points. The intersection of line $KM$ with the convex quadrilateral $ABCD$ is the segment $KM$, and its interior points lie inside the quadrilateral, since $K$, $M$ are interior points of opposite sides. The point $L$ lies on the boundary of the quadrilateral and differs from both $K$ and~$M$, so it does not lie on line $KM$; similarly $N$. Moreover, segment $KM$ splits the quadrilateral into $KBCM$ and~$AKMD$, with $L$ an interior point of side $BC$ of the first and~$N$ an interior point of side $DA$ of the second. Thus $L$ and~$N$ lie in opposite open half-planes of line $KM$, so the lines $KM$ and~$LN$ are not parallel. Hence they are perpendicular.
+}
 
 \EnvId{t8rjDz8xH7IC_FmnHz15z-quadrilateral-with-three-equal-sides}
 \Problem{0}{CAPS 2024, P4}{
@@ -303,7 +681,40 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     We have many midpoints. Do we reflect or do we introduce even more? Here the latter makes more sense. 
 }{
     The key point to introduce is the midpoint of~$XY$, as it will create many midlines. And they will give a~clear path of what to use to prove the concyclicity.
-}{}
+}{
+    Points $P$, $R$ are the midpoints of the sides $XB$, $XD$ of triangle $XBD$, so $PR \parallel BD$; similarly $Q$, $S$ are the midpoints of the sides $YC$, $YA$ of triangle $YCA$, so $QS \parallel CA$ (from $B \neq D$ and $A \neq C$ we get $P \neq R$ and $Q \neq S$, so both lines are well defined). By themselves these two parallel relations say nothing about a circle; what we are missing is the intersection of the lines $PR$, $QS$ and the lengths measured from it. Since the problem features nothing but midpoints of segments, let us add one more that forms a midline with each of them: the midpoint~$M$ of segment $XY$.
+
+    Then $MP$ is a midline of triangle $XBY$, $MR$ of triangle $XDY$, $MQ$ of triangle $YCX$ and $MS$ of triangle $YAX$. All four can be written down at once: regarding the points as position vectors, from $M = \tfrac12(X+Y)$ and the definitions of $P$, $Q$, $R$, $S$ we get
+    $$
+    \gather
+    P - M = \tfrac12 (B - Y), \qquad R - M = \tfrac12 (D - Y), \\
+    Q - M = \tfrac12 (C - X), \qquad S - M = \tfrac12 (A - X).
+    \endgather
+    $$
+
+    Point $Y$ lies on line $BD$, so both $P - M$ and $R - M$ are parallel to~$BD$ and $M$ lies on line $PR$; similarly $X$ lies on line $CA$, so $M$ lies on line $QS$. The diagonals $AC$ and~$BD$ of quadrilateral $ABCD$ are not parallel; therefore $PR$ and~$QS$ are distinct lines and their only common point is $M$.
+
+    Let us now compute with directed lengths on lines: for collinear points the product $\overline{UV} \cdot \overline{UW}$ does not depend on the choice of orientation and spares us the analysis of whether $X$ lies inside segment $AC$ or outside it. If on line $PR$ we choose the same orientation as on $BD$ and on $QS$ the same as on $CA$, the previous equalities give
+    $$
+    \gather
+    \overline{MP} \cdot \overline{MR} = \tfrac14\, \overline{YB} \cdot \overline{YD}, \\
+    \overline{MQ} \cdot \overline{MS} = \tfrac14\, \overline{XC} \cdot \overline{XA}.
+    \endgather
+    $$
+    By the concyclicity criterion it thus suffices to prove the equality
+    $$
+    \overline{YB} \cdot \overline{YD} = \overline{XC} \cdot \overline{XA};
+    $$
+    if the common value is nonzero, the points $P$, $Q$, $R$, $S$ are all distinct from $M$ and the criterion gives the desired circle.
+
+    Each side is a power of a point; we only need to find the right circles. Denote $s = AB = BC = CD$. The equality $BA = BC = s$ says exactly that the circle $\omega_B$ with center $B$ and radius $s$ passes through $A$, $C$; similarly $CB = CD = s$ says that the circle $\omega_C$ with center $C$ and radius $s$ passes through $B$, $D$. Line $CA$ meets $\omega_B$ exactly at the points $A$ and~$C$, and $X$ lies on it, so
+    $$
+    \overline{XC} \cdot \overline{XA} = BX^2 - s^2,
+    $$
+    and similarly $\overline{YB} \cdot \overline{YD} = CY^2 - s^2$. The condition $BX = CY$ identifies these two powers, which proves the required equality.
+
+    It remains to settle the case when the common value $BX^2 - s^2$ is zero, that is, $BX = CY = s$. Then $X$ lies on $\omega_B$, so $X \in \{A, C\}$, and $Y$ lies on $\omega_C$, so $Y \in \{B, D\}$. In each of these four possibilities two of the four points coincide and the remaining three are the midpoints of three consecutive sides of quadrilateral $ABCD$: for instance for $X = A$, $Y = B$ we get $S = P$, the midpoint of side $AB$, and the other two points are the midpoints of sides $DA$ and~$BC$. These are three consecutive vertices of the Varignon parallelogram, whose adjacent sides are parallel to $AC$ and~$BD$; those are not parallel, so our three points are not collinear and a circle through them exists.
+}
 
 \EnvId{unjF6AEffP5thl4GWrGD5-trapezoid-diagonals-and-inner-point}
 \Problem{0}{}{
@@ -311,8 +722,38 @@ The following problems are roughly ordered by difficulty and use roughly speakin
 }{
     Point~$Q$ is defined in a fairly arbitrary way. There is nothing for it but to add some further point that brings meaningful structure. The trapezoid itself gives a fairly good hint.
 }{
-    Reflect~$Q$ under the homothety centred at~$P$ that maps~$AB$ to~$CD$. Suddenly the definition of~$Q$ changes into something meaningful and out of nowhere we have everything we need --- we just put it together.
-}{}
+    Reflect~$Q$ under the homothety centred at~$P$ that maps~$AB$ to~$CD$. Suddenly the definition of~$Q$ changes into something meaningful and out of nowhere we have everything we need; we just put it together.
+}{
+    The parallel sides $AB$, $CD$ offer a homothety with center $P$ taking one of them to the other. The condition $\angle AQB = \angle CQD$ ties the pair $A$, $B$ to the pair $C$, $D$ in exactly the way this homothety does, so let us map $Q$ by it as well.
+
+    The trapezoid $ABCD$ is convex, so $P$ is an interior point of both segments $AC$, $BD$. From $AB \parallel CD$ the triangles $PAB$ and $PCD$ are similar, hence
+    $$
+    \frac{PC}{PA} = \frac{PD}{PB}.
+    $$
+    The homothety $h$ with center $P$ and coefficient $k = -PC \, / \, PA < 0$ therefore maps $A \mapsto C$ and $B \mapsto D$ (the negative sign corresponds to $P$ lying inside both diagonals). Denote $Q_1 = h(Q)$.
+
+    A homothety preserves angles, so
+    $$
+    \angle CQ_1D = \angle AQB = \angle CQD.
+    $$
+
+    To get a cyclic quadrilateral out of this, we still need $Q$ and~$Q_1$ to lie on the same side of line $CD$. Let $\pi$ be the open half-plane with boundary line $CD$ containing the point $A$. Point $B$ lies on a line parallel to~$CD$ and distinct from it, so $B \in \pi$, and $P$ is an interior point of segment $AC$ with $A \in \pi$, so also $P \in \pi$. The interior of triangle $BCP$, whose only vertex on line $CD$ is $C$, thus lies entirely in~$\pi$; in particular $Q \in \pi$. Since $h(B) = D$, $h(C) = A$ and $h(P) = P$, triangle $BCP$ maps to triangle $DAP$ and $Q_1$ lies in its interior. By the same reasoning (the only one of its vertices on line $CD$ is $D$) also $Q_1 \in \pi$.
+
+    Points $Q$, $Q_1$ therefore lie on the same side of line $CD$ and segment $CD$ subtends equal angles at them, so by the converse of the inscribed angle theorem $C$, $D$, $Q$, $Q_1$ are concyclic; denote this circle by $\omega$.
+
+    The coefficient $k$ is negative and $Q \neq P$, so $P$ is an interior point of segment $QQ_1$. The rays $QP$ and~$QQ_1$ therefore coincide and $\angle DQP = \angle DQQ_1$.
+
+    Point $P$ is an interior point of the chord $QQ_1$, hence it lies inside $\omega$. For a point inside a circle, the cyclic order of the points on the circle agrees with the cyclic order of the rays from that point to them. Ray $PC$ is opposite to~$PA$, ray $PD$ is opposite to~$PB$, and line $AC$ separates $B$ from $D$, so around $P$ these four rays come in the order $PA$, $PB$, $PC$, $PD$. Point $Q$ lies inside triangle $BCP$, so ray $PQ$ lies inside angle $\angle BPC$ and the opposite ray $PQ_1$ inside angle $\angle DPA$. Around $P$ the rays thus come in the order
+    $$
+    PA, \quad PB, \quad PQ, \quad PC, \quad PD, \quad PQ_1,
+    $$
+    and the cyclic order of the points on $\omega$ is $Q$, $C$, $D$, $Q_1$.
+
+    The chord $DQ_1$ therefore leaves the points $C$ and~$Q$ on the same arc, and the inscribed angle theorem gives $\angle DQQ_1 = \angle DCQ_1$. Finally $h$ maps $A \mapsto C$, $B \mapsto D$, $Q \mapsto Q_1$, so $\angle BAQ = \angle DCQ_1$. Combining the three equalities
+    $$
+    \angle DQP = \angle DQQ_1 = \angle DCQ_1 = \angle BAQ.
+    $$
+}
 
 \EnvId{cvVqE4nT1JdVqFMok0P_I-perpendicular-bisectors-and-shorter-arcs}
 \Problem{0}{IMO 2018, P1}{
@@ -320,19 +761,133 @@ The following problems are roughly ordered by difficulty and use roughly speakin
 }{
     We have $FB = FD$, but it is not clear how to use this. It gives us equal angles $\angle FBD$ and $\angle FDB$. The second one in particular looks stranded. Try intersecting something with something to transfer these angles somewhere.
 }{
-    The key is to extend segment $FD$ to a chord of $\Gamma$, and similarly extend $GE$ on the other side. Suddenly we obtain isosceles triangles that interact well with the condition $AD = AE$. No further points are needed --- it becomes an angle-chasing exercise.
-}{}
+    The key is to extend segment $FD$ to a chord of $\Gamma$, and similarly extend $GE$ on the other side. Suddenly we obtain isosceles triangles that interact well with the condition $AD = AE$. No further points are needed; it becomes an angle-chasing exercise.
+}{
+    Denote by $\alpha$, $\beta$, $\gamma$ the interior angles of triangle~$ABC$. The triangle is acute, so the arc~$AB$ not containing~$C$ has measure $2\gamma < 180^\circ$ and is hence the shorter one; point~$F$ therefore lies on the arc~$AB$ not containing~$C$, and similarly~$G$ lies on the arc~$AC$ not containing~$B$.
+
+    From $FB = FD$ we have $\angle FDB = \angle FBD$, but the angle at~$D$ has nothing on line~$AB$ to interact with. We transfer it to the circle exactly in the spirit of the last of the situations in the list above: we extend $FD$ to a chord of~$\Gamma$. So let~$T$ be the second intersection of line~$FD$ with~$\Gamma$ and let~$S$ be the second intersection of line~$GE$ with~$\Gamma$.
+
+    Point~$D$ is an interior point of the chord~$AB$, hence it lies inside~$\Gamma$, and therefore on line~$FT$ it lies between $F$ and~$T$. Points $F$ and~$C$ lie in opposite half-planes determined by line~$AB$; since $D$ lies on line~$AB$ between $F$ and~$T$, point~$T$ lies in the same half-plane as~$C$, that is, on the arc~$AB$ containing~$C$. Similarly $E$ lies between $G$ and~$S$ and point~$S$ lies on the arc~$AC$ containing~$B$.
+
+    Denote $\varphi = \angle ABF$. Point~$D$ lies between $A$ and~$B$ as well as between $F$ and~$T$, so vertical angles give
+    $$
+    \angle ADT = \angle BDF = \angle DBF = \varphi.
+    $$
+    The arc~$AF$ not containing~$B$ is part of the arc~$AB$ not containing~$C$, so points $B$ and~$T$ lie on the same one of the arcs determined by the chord~$AF$, and inscribed angles over it give
+    $$
+    \angle ATD = \angle ATF = \angle ABF = \varphi.
+    $$
+    Triangle~$ADT$ is therefore isosceles and $AT = AD$. Swapping $B \leftrightarrow C$, $D \leftrightarrow E$, $F \leftrightarrow G$, $T \leftrightarrow S$ gives $AS = AE$ in the same way, and since $AD = AE$, we get
+    $$
+    AT = AS.
+    $$
+
+    Rays $AD$ and~$AB$ coincide, so the angle sum in triangle~$ADT$ gives $\angle BAT = 180^\circ - 2\varphi$. Point~$T$ lies on the arc~$AB$ containing~$C$, hence $\angle ATB = \gamma$, and the angle sum in triangle~$ABT$ gives
+    $$
+    \angle ABT = 180^\circ - (180^\circ - 2\varphi) - \gamma = 2\varphi - \gamma.
+    $$
+    Analogously, for $\psi = \angle ACG$ we get $\angle ACS = 2\psi - \beta$.
+
+    The angles $\angle ABT$ and~$\angle ACS$ are inscribed angles of~$\Gamma$ over the congruent chords $AT$ and~$AS$. Congruent chords cut off congruent arcs, and an inscribed angle over a chord is half of whichever of its two arcs does not contain the vertex of the angle; the angles $\angle ABT$ and~$\angle ACS$ are therefore equal, or their sum is $180^\circ$.
+
+    We show that both are acute, which rules out the second possibility. Points $B$ and~$C$ lie on the same one of the arcs determined by the chord~$AF$, so $\varphi = \angle ACF$, and since segment~$CF$ crosses the chord~$AB$, ray~$CF$ lies inside angle~$ACB$ and $\varphi < \gamma$. The number $2\varphi - \gamma$ is an angle of triangle~$ABT$, hence positive, so together $0 < 2\varphi - \gamma < \gamma < 90^\circ$; similarly $0 < 2\psi - \beta < \beta < 90^\circ$. The sum of two acute angles is less than $180^\circ$, so the first possibility occurs:
+    $$
+    2\varphi - \gamma = 2\psi - \beta. \eqno(*)
+    $$
+
+    Let~$M$ be the midpoint of the arc~$BC$ not containing~$A$, that is, the second intersection of the bisector of angle~$BAC$ with~$\Gamma$. Triangle~$ADE$ is isosceles, so the bisector of angle~$BAC$ is the perpendicular bisector of segment~$DE$ and $AM \perp DE$. It suffices to prove that $AM \perp FG$ as well.
+
+    The arc determined by chord~$FG$ that contains~$A$ consists only of points of arcs $FA$ and~$AG$, while $B$, $M$, $C$ lie on the other. The chord~$FG$ therefore separates $A$ from~$M$ and segment~$AM$ meets $FG$ at an interior point; denote it~$X$. Points $C$ and~$F$ lie on the same one of the arcs determined by the chord~$AG$ (the one containing~$B$), so $\angle AFG = \angle ACG = \psi$. Further, $\angle AFB = 180^\circ - \gamma$, because $F$ and~$C$ lie on opposite arcs determined by the chord~$AB$, and the angle sum in triangle~$ABF$ gives $\angle FAB = \gamma - \varphi$. Ray~$AM$ passes through the interior of angle~$BAC$, while $F$ lies in the opposite half-plane from~$C$ with respect to line~$AB$; ray~$AB$ therefore lies inside angle~$FAM$ and
+    $$
+    \angle FAX = \angle FAB + \angle BAM = \gamma - \varphi + \tfrac\alpha2.
+    $$
+    From $(*)$ we get $\varphi - \psi = \frac{\gamma - \beta}2$, that is, $\gamma - \varphi + \psi = \frac{\beta + \gamma}2$, and the angle sum in triangle~$AFX$ gives
+    $$
+    \gather
+    \angle AXF = 180^\circ - (\gamma - \varphi + \tfrac\alpha2) - \psi \\
+    = 180^\circ - \tfrac{\beta + \gamma}2 - \tfrac\alpha2 = 90^\circ.
+    \endgather
+    $$
+    Lines $DE$ and~$FG$ are thus both perpendicular to line~$AM$, so they are parallel or coincide.
+}
 
 \EnvId{Dk4xgZzPmhroFmRx3omVb-parallel-tangents-to-the-incircle}
-\Problem{0}{IMO 2024, P1}{
+\Problem{0}{IMO 2024, P4}{
     Let $ABC$ be a triangle such that $AB < AC < BC$. Let $\omega$ be the inscribed circle of triangle $ABC$ and $I$ its center. Let $X$ be a point on line $BC$ different from $C$ such that the line passing through $X$ parallel to $AC$ touches $\omega$. Similarly, let $Y$ be a point on line $BC$ different from $B$ such that the line passing through $Y$ parallel to $AB$ touches $\omega$. Line $AI$ intersects the circumcircle of triangle $ABC$ a second time at point $P \neq A$. Let $K$ and $L$ be the midpoints of sides $AC$ and $AB$ respectively. Prove that $\angle KIL + \angle YPX = 180^\circ$.
 }{
     We are almost given a parallelogram with those parallel lines.
 }{
-    Let~$Z$ be the intersection point of the parallel lines from the statement --- then using the homothety at~$A$ with coefficient~$2$ we have that $\angle KIL = \angle BZC$. We do not have those ugly midpoints anymore as we are proving just $\angle BZC + \angle YPX = 180^\circ$.
+    Let~$Z$ be the intersection point of the parallel lines from the statement; then using the homothety at~$A$ with coefficient~$2$ we have that $\angle KIL = \angle BZC$. We do not have those ugly midpoints anymore as we are proving just $\angle BZC + \angle YPX = 180^\circ$.
 }{
     The key to finish the problem is to find cyclic quadrilaterals. But at least we do not need to introduce more points.
-}{}
+}{
+    The tangents from the statement are parallel to sides $AC$ and~$AB$, and with parallel lines it pays to look for a map sending one of them to the other. One is right at hand: the central symmetry about~$I$ maps $\omega$ to itself, hence a tangent to a tangent, and every line to a line parallel to it. Let~$Z$ be the image of~$A$ under this symmetry, that is, the point for which $I$ is the midpoint of segment~$AZ$.
+
+    The line through~$X$ parallel to $AC$ is a tangent to $\omega$ different from line~$AC$: if it coincided with $AC$, the point~$X$ would lie on line $AC$ and on line $BC$, so $X = C$, which the statement excludes. But there are only two tangents to $\omega$ in a given direction, so this line is the image of line $AC$ under the symmetry about~$I$, and therefore it passes through the image of~$A$, that is, through~$Z$. Similarly the line through~$Y$ parallel to $AB$ is the image of line $AB$ and passes through~$Z$ as well. So $Z$ is the intersection of the two tangents from the statement.
+
+    The homothety centered at~$A$ with coefficient~$2$ maps $K$ to $C$, $L$ to $B$ and $I$ to $Z$, and it preserves angles. Hence $\angle KIL = \angle CZB$ and it remains to prove
+    $$
+    \angle BZC + \angle YPX = 180^\circ.
+    $$
+    The unpleasant midpoints $K$, $L$ have thereby vanished from the problem.
+
+    Denote $a = BC$, $b = CA$, $c = AB$, $\alpha = \angle BAC$, by~$s$ the semiperimeter, by~$S$ the area of triangle~$ABC$, by~$r$ the radius of~$\omega$ and by $v_a$, $v_b$, $v_c$ the altitudes of $ABC$. From $S = rs$ and $2S = a v_a = b v_b = c v_c$ we get
+    $$
+    \frac{2r}{v_a} = \frac{a}{s}, \qquad \frac{2r}{v_b} = \frac{b}{s}, \qquad \frac{2r}{v_c} = \frac{c}{s},
+    $$
+    where all three quotients are less than $1$, since the triangle inequalities give $a, b, c < s$.
+
+    Let us measure distances from line~$BC$ with a sign, positive on the side of~$A$. The point $I$ has distance $r$ and is the midpoint of segment~$AZ$, so the distance of $Z$ is $2r - v_a < 0$. Hence $Z$ lies in the opposite half-plane to~$A$ and segment $AZ$ meets line~$BC$; denote that intersection point by~$T$. It lies on the bisector of~$\angle BAC$, hence inside segment~$BC$.
+
+    The second tangent to $\omega$ parallel to $AC$ is at distance $2r$ from line~$AC$, on the side where $I$ lies, that is, where $B$ lies as well. From the inequality $2r < v_b$ it therefore separates $B$ from line~$AC$, in particular from the point $C$, and so it meets the interior of segment~$BC$: the point $X$ lies inside $BC$. Similarly, from $2r < v_c$ the point $Y$ lies inside $BC$ too.
+
+    Let~$h$ be the homothety centered at~$T$ that maps $A$ to $Z$. Its coefficient is negative, since $T$ lies inside segment~$AZ$. The map $h$ takes line~$BC$ to itself and line~$AC$ to the parallel to $AC$ through~$Z$, which is line~$ZX$; hence $h(C) = X$ and similarly $h(B) = Y$. From the negative coefficient, $X$ lies on the ray opposite to ray~$TC$ and $Y$ on the ray opposite to ray~$TB$, so on line~$BC$ we have the order $B$, $X$, $T$, $Y$, $C$. If we denote by~$k$ the absolute value of the coefficient of~$h$, then
+    $$
+    TZ = k \, TA, \qquad TX = k \, TC, \qquad TY = k \, TB.
+    $$
+
+    Line~$AI$ is the bisector of~$\angle BAC$, so $P$ is the midpoint of the arc $BC$ not containing~$A$; it therefore lies in the opposite half-plane to~$A$ and does not lie on line~$BC$. By hypothesis $AB \neq AC$, so by the Švrček point theorem $P$ is the circumcenter of quadrilateral $BICI_a$, where $I_a$ is the $A$-excenter; in particular $PI = PB$.
+
+    Let~$F$ be the tangency point of $\omega$ with side~$AB$ and let~$M$ be the midpoint of side~$BC$. The angle at~$F$ in triangle~$AFI$ is right and $AF = s - a$. The point $P$ is the midpoint of the arc $BC$, so $PB = PC$ and line~$PM$ is the perpendicular bisector of~$BC$; the angle at~$M$ in triangle~$BMP$ is therefore right as well and $BM = a/2$. Finally, inscribed angles over the chord $PC$ give $\angle PBC = \angle PAC = \alpha/2 = \angle FAI$. The right triangles $AFI$ and $BMP$ thus agree in an acute angle, hence they are similar (with $F \leftrightarrow M$, $I \leftrightarrow P$), and comparing a leg with the hypotenuse we get
+    $$
+    \frac{AI}{AF} = \frac{BP}{BM}, \qquad \text{hence} \qquad AI = \frac{2(s-a)}{a}\,PB.
+    $$
+    Since $PI = PB$, we therefore have
+    $$
+    \frac{AI}{PI} = \frac{2(s-a)}{a} = \frac{b+c-a}{a} < 1,
+    $$
+    because from the statement $b < a$ and $c < a$; this is exactly where we use that $BC$ is the longest side.
+
+    The point $I$ lies inside the circumcircle, hence inside the chord $AP$. The point $Z$ lies on ray~$AI$ and $AZ = 2\,AI < AI + IP = AP$, so $Z$ lies inside segment~$IP$. On line~$AP$ we thus have the order $A$, $T$, $Z$, $P$.
+
+    The chords $BC$ and $AP$ of the circumcircle meet at the point~$T$, so the power of the point~$T$ gives $TB \cdot TC = TA \cdot TP$; denote this common value by~$m$. From this
+    $$
+    \gather
+    TB \cdot TX = k \, m = TZ \cdot TP, \\
+    TC \cdot TY = k \, m = TZ \cdot TP.
+    \endgather
+    $$
+    The point~$T$ lies outside segment~$BX$ (the order is $B$, $X$, $T$), outside segment~$CY$ (the order is $T$, $Y$, $C$) and outside segment~$ZP$ (the order is $T$, $Z$, $P$), so by the concyclicity criterion the points $B$, $X$, $Z$, $P$ are concyclic and so are the points $C$, $Y$, $Z$, $P$.
+
+    The points $Z$ and~$P$ lie in the same half-plane determined by line~$BC$, hence on the same arc of the first circle determined by the chord $BX$. The inscribed angles over this chord are therefore equal, that is, $\angle BZX = \angle BPX$, and from the second circle similarly $\angle CZY = \angle CPY$.
+
+    The points $B$, $X$, $Y$, $C$ lie on line~$BC$ in this order and the points $Z$, $P$ do not lie on it, so the rays from $Z$ and the rays from $P$ reach them in the same order and
+    $$
+    \gather
+    \angle BZC = \angle BZX + \angle XZY + \angle YZC, \\
+    \angle BPC = \angle BPX + \angle XPY + \angle YPC.
+    \endgather
+    $$
+
+    The homothety $h$ maps triangle~$ABC$ to triangle~$ZYX$, so $\angle XZY = \alpha$. The points $A$ and~$P$ lie on the circumcircle on opposite sides of the chord $BC$, so $\angle BPC = 180^\circ - \alpha$. Substituting the two angle equalities proved above, we obtain
+    $$
+    \gather
+    \angle BZC = \angle BPX + \alpha + \angle YPC, \\
+    \angle YPX = 180^\circ - \alpha - \angle BPX - \angle YPC,
+    \endgather
+    $$
+    and the sum of these two angles is $180^\circ$. Since $\angle KIL = \angle BZC$, the claim is proved.
+}
 
 \EnvId{h_nSioAPSd9vwFsAInRyp-arc-midpoints-of-two-circles}
 \Problem{0}{}{
@@ -341,7 +896,53 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     The most problematic point is~$M$: as a midpoint it has no nice angles around it. It needs to be given better meaning. The statement to be proved also hints at what we want to do.
 }{
     The key is to reflect, say,~$R$ through~$M$. Then it pays to color equal-length segments; the goal is to color another pair. We are not far from the desired end.
-}{}
+}{
+    For the circles in the statement to exist, $P$ must be an interior point of side $BC$. Denote the angles of triangle $ABC$ as usual by $\alpha$, $\beta$, $\gamma$; the triangle is acute, so all of them are less than $90^\circ$. Put $2\varphi = \angle APB$, so $\angle APC = 180^\circ - 2\varphi$ and~$0^\circ < \varphi < 90^\circ$.
+
+    First let us settle the positions of $Q$ and~$R$. Point $R$ lies on the arc $AB$ not containing $P$, so the points on circle $(APB)$ come in the cyclic order $A$, $P$, $B$, $R$. Chord $PB$ lies on line $BC$ and points $A$, $R$ lie on the same arc cut off by this chord; therefore $A$ and~$R$ lie in the same half-plane determined by line $BC$. Chord $AB$, by contrast, separates $P$ from $R$, so $R$ and~$C$ lie in opposite half-planes determined by line $AB$ (point $C$ is on the same side of line $AB$ as $P$). The same reasoning for circle $(APC)$ with the cyclic order $A$, $P$, $C$, $Q$ gives that $Q$ lies in the same half-plane determined by line $BC$ as $A$, and that $Q$, $B$ lie in opposite half-planes determined by line $AC$. In particular, neither $Q$ nor $R$ lies on line $BC$.
+
+    Quadrilateral $APBR$ is convex, so ray $PR$ lies inside angle $APB$; from the equality of the arcs $AR$ and~$RB$ we get $\angle APR = \angle RPB = \varphi$ and~$RA = RB$. Analogously ray $PQ$ lies inside angle $APC$, $\angle QPC = 90^\circ - \varphi$ and~$QA = QC$. Rays $PB$ and~$PC$ are opposite and ray $PA$ splits the half-plane with boundary line $BC$ containing $A$ into the angles $APB$ and~$APC$, inside which lie the rays $PR$ and~$PQ$ respectively. Therefore
+    $$
+    \angle RPQ = 180^\circ - \varphi - (90^\circ - \varphi) = 90^\circ.
+    $$
+    Point $P$ thus lies on the circle with diameter $QR$ and it remains to prove that $M$ lies on it as well, i.e. that $\angle QMR = 90^\circ$.
+
+    So far $M$ is only the midpoint of a segment, and around the midpoint of a segment there are no angles to compute. We give it a better meaning by doing what a midpoint always invites: let $R_0$ be the image of $R$ under the central symmetry about $M$, so that $BRCR_0$ is a parallelogram. Since $R$ does not lie on line $BC$, we have $R_0 \neq R$, and since $Q$ does not lie on it either, we have $Q \neq M$. Point $M$ is the midpoint of segment $RR_0$, so the equality $\angle QMR = 90^\circ$ to be proved says exactly that $Q$ lies on the perpendicular bisector of $RR_0$, i.e.
+    $$
+    QR = QR_0.
+    $$
+
+    Now it pays to mark the equal-length segments. One pair is given by $Q$, namely $QA = QC$. Another is given by $R$: the central symmetry about $M$ maps $B$ to $C$ and~$R$ to $R_0$, so $CR_0 = BR = AR$. Triangles $QAR$ and~$QCR_0$ thus have two equal pairs of sides, and we get the third pair $QR$, $QR_0$ by SAS as soon as we verify
+    $$
+    \angle RAQ = \angle R_0CQ.
+    $$
+
+    In doing so we will repeatedly use the following observation. If points $X$, $Z$ lie in opposite half-planes determined by line $VY$, then exactly one of the two rays of this line with origin $V$ lies inside angle $XVZ$. In the first case $\angle XVZ = \angle XVY + \angle YVZ$, in the second $\angle XVZ = 360^\circ - \angle XVY - \angle YVZ$, and since $\angle XVZ \leq 180^\circ$, which case occurs is decided precisely by the sum $\angle XVY + \angle YVZ$.
+
+    The inscribed angles subtending chord $RB$ from the same arc give $\angle RAB = \angle RPB = \varphi$, and analogously $\angle QAC = \angle QPC = 90^\circ - \varphi$. Points $R$, $C$ lie in opposite half-planes determined by line $AB$ and~$\varphi + \alpha < 180^\circ$, so
+    $$
+    \angle RAC = \angle RAB + \angle BAC = \varphi + \alpha
+    $$
+    and ray $AB$ lies inside angle $RAC$. Points $R$, $B$ therefore lie in the same half-plane determined by line $AC$, and since $Q$, $B$ lie in opposite ones, line $AC$ separates $R$ and~$Q$. The sum $(\varphi + \alpha) + (90^\circ - \varphi) = 90^\circ + \alpha$ is less than $180^\circ$, i.e.
+    $$
+    \angle RAQ = \angle RAC + \angle CAQ = 90^\circ + \alpha.
+    $$
+
+    At vertex $C$ we compute in the same way. From~$QA = QC$ we get $\angle QCA = \angle QAC = 90^\circ - \varphi$, line $AC$ separates $Q$ from $B$ and~$(90^\circ - \varphi) + \gamma < 180^\circ$, so $\angle QCB = 90^\circ - \varphi + \gamma$. From~$RA = RB$ we get $\angle RBA = \angle RAB = \varphi$, line $AB$ separates $R$ from $C$ and~$\varphi + \beta < 180^\circ$, so $\angle RBC = \varphi + \beta$. The central symmetry about $M$ maps ray $BC$ to ray $CB$ and ray $BR$ to ray $CR_0$, therefore $\angle R_0CB = \angle RBC = \varphi + \beta$.
+
+    The same symmetry maps the half-plane determined by line $BC$ and containing $A$ onto the other one, so $R_0$ and~$Q$ lie in opposite half-planes determined by line $BC$. This time
+    $$
+    \angle QCB + \angle BCR_0 = 90^\circ + \beta + \gamma = 270^\circ - \alpha,
+    $$
+    which is more than $180^\circ$ because $\alpha < 90^\circ$. Hence the ray opposite to ray $CB$ lies inside angle $QCR_0$ and~
+    $$
+    \angle QCR_0 = 360^\circ - (270^\circ - \alpha) = 90^\circ + \alpha.
+    $$
+
+    Triangles $QAR$ and~$QCR_0$ are therefore congruent: $QA = QC$, $AR = CR_0$ and the angles between these sides are both $90^\circ + \alpha$. From this $QR = QR_0$, i.e. $\angle QMR = 90^\circ$ and point $M$ lies on the circle with diameter $QR$ as well.
+
+    It remains to check that these are four distinct points. From~$\angle RPQ = 90^\circ$ the points $Q$, $P$, $R$ are pairwise distinct, point $M$ differs from $P$ by hypothesis and from $Q$ and~$R$ because these do not lie on line $BC$. Points $Q$, $M$, $P$, $R$ thus lie on one circle, namely on the circle with diameter $QR$.
+}
 
 \EnvId{aq53bc6NlKQWV07NwXRnF-tangent-and-reflection-of-r}
 \Problem{0}{IMO 2017, P4}{
@@ -349,44 +950,227 @@ The following problems are roughly ordered by difficulty and use roughly speakin
 }{
     Point~$S$ is the midpoint of some segment and this makes angle chasing infeasible. Still, something can be angle-chased, which may suggest how to use midpoint~$S$ to define a new point.
 }{
-    The key is to discover $AR_0 \parallel RJ$. This gives a fairly clear hint: the image of~$J$ under the point reflection through~$S$ lands on~$AR_0$. We wrap it up from here --- we have everything needed for angle chasing.
-}{}
+    The key is to discover $AR_0 \parallel RJ$. This gives a fairly clear hint: the image of~$J$ under the point reflection through~$S$ lands on~$AR_0$. We wrap it up from here, we have everything needed for angle chasing.
+}{
+    Throughout the solution we work with directed angles between lines modulo $180^\circ$: the symbol $\angle(p, q)$ denotes the angle by which line $p$ has to be rotated to become parallel to line $q$. The configuration changes both with the position of $I$ on the arc and with which of the two intersections of line $t$ with $k_0$ is $A$, and directed angles rid us of these cases. We use two of their standard properties: four pairwise distinct points $P$, $Q$, $X$, $Y$ are concyclic or collinear if and only if $\angle(XP, XQ) = \angle(YP, YQ)$, and for the tangent $\tau$ to a circle at its point $P$ and further points $Q$, $X$ of that circle we have $\angle(\tau, PQ) = \angle(XP, XQ)$.
+
+    First let us check, once and for all, that all the points we work with are pairwise distinct. The circle $k_0$ exists, so $I$ does not lie on line $SR_0$, hence not on line $RS$ either; in particular $I \neq R$. Line $t$ has the single common point $R$ with~$k$, so neither $I$ nor $S$ lies on it; line $RS$ is therefore different from $t$ and the two meet only at~$R$, so $R_0$ does not lie on $t$ either. Thus $A$ is different from $I$, $S$ and~$R_0$. Further, $R$ does not lie on $k_0$, for otherwise $k_0$ would have three distinct common points $R$, $S$, $R_0$ with line $RS$; hence $A \neq R$. The point $R_0$ does not lie on $k$, for the midpoint of the chord $RR_0$ would lie inside $k$, while $S$ lies on $k$; hence $J \neq R_0$. Line $AI$ meets $k_0$ exactly at $A$ and~$I$, so $S$ does not lie on it and $J \neq S$; if $R$ lay on it, it would coincide with~$t$ (both would pass through the distinct points $A$ and~$R$) and $I$ would lie on $t$, so $J \neq R$ as well. Finally, by the statement line $AI$ has a second intersection with~$k$, so $J \neq I$.
+
+    Point $S$ is the midpoint of segment $RR_0$ and angles can do nothing with such a condition. Line $R_0S$ is, however, the same as $RS$, and that is enough for one observation. Points $A$, $I$, $S$, $R_0$ lie on $k_0$, points $R$, $S$, $I$, $J$ lie on $k$ and points $A$, $I$, $J$ are collinear, so
+    $$
+    \gather
+    \angle(R_0A, RS) = \angle(R_0A, R_0S) = \angle(IA, IS) \\
+    = \angle(IJ, IS) = \angle(RJ, RS),
+    \endgather
+    $$
+    and hence
+    $$
+    AR_0 \parallel RJ.
+    $$
+
+    The parallelism tells us outright how to use the midpoint $S$: the point reflection $\sigma$ through $S$ maps $R$ to $R_0$, so the image $J' = \sigma(J)$ lies on the line through $R_0$ parallel to~$RJ$, which is exactly line $AR_0$. This is the familiar situation where a midpoint in the statement calls for a point reflection, which produces the parallelogram $RJR_0J'$. Hence $A$, $R_0$, $J'$ are collinear.
+
+    We show that $A$, $R$, $S$, $J'$ are concyclic. Line $J'S$ is the same as $JS$, since $S$ is the midpoint of segment $JJ'$ and~$J \neq S$. Together with $AR_0 \parallel RJ$ and the tangent-chord angle for the tangent $t$ and the chord $RS$ of $k$ we get
+    $$
+    \angle(J'A, J'S) = \angle(JR, JS) = \angle(t, RS) = \angle(RA, RS).
+    $$
+    Our four points are pairwise distinct; only $J' \neq R$ (since $J \neq R_0$), $J' \neq S$ (since $J \neq S$) and~$J' \neq A$ (otherwise $S$, being the midpoint of segment $JJ'$, would lie on line $AJ$, that is on line $AI$) are non-trivial. They are not collinear, for otherwise $A$ would lie on line $RS$ and hence $A = R$. So they are concyclic.
+
+    It remains to carry this back to~$R_0$. The reflection $\sigma$ preserves directed angles, maps $J$ to $J'$, $R_0$ to $R$ and line $R_0S$, that is the line $RR_0$ through its center, to itself. Therefore
+    $$
+    \gather
+    \angle(JR_0, R_0S) = \angle(J'R, RS) \\
+    = \angle(AJ', AS) = \angle(AR_0, AS),
+    \endgather
+    $$
+    where the second equality follows from $A$, $R$, $S$, $J'$ being concyclic and the third from $A$, $R_0$, $J'$ being collinear. Points $A$, $S$, $R_0$ are three distinct points of $k_0$, so the right-hand side is the angle that the tangent to~$k_0$ at $R_0$ makes with the chord $R_0S$. A line through $R_0$ is determined uniquely by its directed angle with~$R_0S$, and therefore $JR_0$ is this tangent.
+}
 
 \EnvId{ZuNLEoEwr-J_fVOQWtSbR-two-diameters-and-the-orthocenter}
-\Problem{0}{IMO 2013, P1}{
+\Problem{0}{IMO 2013, P4}{
     Let~$ABC$ be an acute triangle with orthocenter~$H$ and let~$W$ be a point on side~$BC$. Denote by~$M$ and~$N$ the feet of the altitudes from~$B$ and~$C$ in triangle~$ABC$. Let~$k_1$ be the circumcircle of~$BWN$ and let~$X$ be the point on~$k_1$ such that~$XW$ is a diameter of~$k_1$. Analogously let~$k_2$ be the circumcircle of~$CWM$ and let~$Y$ be the point on~$k_2$ such that~$YW$ is a diameter of~$k_2$. Prove that $X$, $Y$, $H$ are collinear.
 }{
     The problem almost invites us to define the second intersection of circles~$k_1$ and~$k_2$. This naturally interweaves them, and we can also make good use of their diameters.
 }{
     If~$T$ is the second intersection of~$k_1$ and~$k_2$, then the diameters give us right angles, from which~$T$, $X$, $Y$ are collinear. The proof that~$H$ also lies on this line can be rephrased as a perpendicularity. Have we accidentally eliminated~$X$ and~$Y$?
-}{}
+}{
+    Since triangle $ABC$ is acute, the feet $N$, $M$ lie inside sides $AB$, $AC$ and the orthocenter $H$ lies inside the triangle, specifically inside segment $AA'$, where $A'$ is the foot of the altitude from~$A$. For the circles $k_1$, $k_2$ to exist, the point $W$ must be distinct from both $B$ and $C$; they are then two distinct circles, since three distinct collinear points $B$, $W$, $C$ cannot be concyclic.
+
+    The relative positions of the points in the picture depend on where $W$ lies on side $BC$, but this changes nothing essential in the argument. We therefore compute with directed angles modulo $180^\circ$: $\angle(p,q)$ denotes the angle by which line $p$ has to be rotated to become parallel to~$q$.
+
+    Circles $k_1$ and~$k_2$ pass through the common point $W$, and that is exactly the situation where it pays to add their second intersection; denote it $T$ (we prove its existence in a moment). Thanks to it we can use the diameters from the statement: from the diameter $WX$ and Thales's theorem, $\angle WTX = 90^\circ$ (trivially for $X = T$), so $X$ lies on the line $\ell$ through $T$ perpendicular to $TW$, and similarly from the diameter $WY$ so does $Y$. This removes $X$ and~$Y$ from the problem, and it remains to prove that $H$ lies on $\ell$ as well, which for $T \neq H$ means
+    $$
+    TH \perp TW.
+    $$
+    (If $T = H$, we are done, since $T$ lies on $\ell$.)
+
+    The key circle is $\omega$ with diameter $AH$. Point $H$ lies on the altitude $CN$ perpendicular to $AB$ and on the altitude $BM$ perpendicular to $AC$, so $\angle ANH = \angle AMH = 90^\circ$ and besides $A$ and~$H$, the feet $N$ and~$M$ lie on $\omega$ too. Moreover $\omega$ does not meet line $BC$: both $A$ and~$H$ project to $A'$, so the center of $\omega$, that is the midpoint of segment $AH$, is at distance $(AA' + HA')/2$ from $BC$, while the radius of $\omega$ is $AH/2 = (AA' - HA')/2$, which is less.
+
+    Now the existence of $T$. If $k_1$ and~$k_2$ were tangent at $W$, they would have a common tangent $t$ there and the tangent-chord angle theorem in both circles would give
+    $$
+    \gather
+    \angle(WN, WM) = \angle(WN, t) + \angle(t, WM) \\
+    = \angle(BN, BW) + \angle(CW, CM) \\
+    = \angle(AB, BC) + \angle(BC, AC) = \angle(AN, AM).
+    \endgather
+    $$
+    Point $W$ would then lie on the circumcircle of triangle $ANM$, that is on $\omega$, which does not meet line $BC$. That is a contradiction, so $k_1$ and~$k_2$ have a second common point $T$ besides $W$.
+
+    The same computation, only with inscribed angles instead of the tangent-chord one, shows that $T$ lies on $\omega$. First $T \neq N$: otherwise $C$, $M$, $N$ would lie on $k_2$, and these also lie on the circle $\gamma$ with diameter $BC$ (indeed $\angle BNC = \angle BMC = 90^\circ$), so $k_2 = \gamma$ and $W$, being a common point of $\gamma$ and line $BC$, would coincide with $B$ or $C$. Similarly $T \neq M$. The inscribed angles in $k_1$ and in $k_2$ thus give
+    $$
+    \gather
+    \angle(TN, TM) = \angle(TN, TW) + \angle(TW, TM) \\
+    = \angle(BN, BW) + \angle(CW, CM) = \angle(AN, AM),
+    \endgather
+    $$
+    so $A$, $N$, $M$, $T$ are concyclic and $T$ lies on $\omega$.
+
+    It remains to prove the perpendicularity; so let $T \neq H$. The points $T$, $B$, $W$, $N$ lie on $k_1$ and the points $T$, $A$, $N$, $H$ lie on $\omega$, so
+    $$
+    \gather
+    \angle(TW, TH) = \angle(TW, TN) + \angle(TN, TH) \\
+    = \angle(BW, BN) + \angle(AN, AH).
+    \endgather
+    $$
+    The first summand is $\angle(BC, AB)$ and the second $\angle(AB, AH)$, which, since $AH \perp BC$, is exactly $\angle(AB, BC) + 90^\circ$. The sum is therefore $90^\circ$, so $TH \perp TW$. Point $H$ therefore lies on the line $\ell$, on which $X$ and~$Y$ lie as well.
+}
 
 \EnvId{FhO0eO_oi-IndJmQ9N6Ql-two-points-on-side-bc}
-\Problem{0}{IMO 2014, P1}{
+\Problem{0}{IMO 2014, P4}{
     Points~$P$ and~$Q$ are chosen on side~$BC$ of an acute triangle $ABC$ such that $\angle PAB = \angle ACB$ and $\angle QAC = \angle CBA$. Points~$M$ and~$N$ lie on rays~$AP$ and~$AQ$ respectively such that $AP = PM$ and $AQ = QN$. Prove that lines~$BM$ and~$CN$ meet on the circumcircle of triangle~$ABC$.
 }{
     Points~$Q$ and~$P$ are midpoints of~$AN$ and~$AM$ respectively. This fact is hard to use on its own. The key is to define some further midpoints. At best these midpoints will help us eliminate the not-so-natural-looking points~$M$ and~$N$.
 }{
     Define midpoints~$J$ and~$K$ of~$AC$ and~$AB$ respectively. Midlines give us $BM \parallel KP$ and $CN \parallel QJ$. So what is required is to show that the angle between segments~$QJ$ and~$KP$ is $180^\circ - \alpha$. We seem to have made no progress, as angles at medians are generally ugly. However, there are many similar triangles in the configuration.
-}{}
+}{
+    Denote $\alpha = \angle BAC$, $\beta = \angle CBA$, $\gamma = \angle ACB$. The equalities $AP = PM$ and $AQ = QN$ say that $P$ is the midpoint of $AM$ and~$Q$ is the midpoint of $AN$.
+
+    First let us convert the angle conditions into lengths. Point $P$ lies on side $BC$, so $\angle ABP = \beta = \angle CBA$, and by hypothesis $\angle BAP = \gamma = \angle BCA$; by AA we get $\triangle BAP \sim \triangle BCA$ (in the order of vertices $B \leftrightarrow B$, $A \leftrightarrow C$, $P \leftrightarrow A$). Analogously $\triangle CAQ \sim \triangle CBA$, and from the ratios of sides
+    $$
+    \frac{BP}{BA} = \frac{BA}{BC}, \qquad \frac{CQ}{CA} = \frac{CA}{CB}. \eqno(*)
+    $$
+
+    Points $M$ and~$N$ enter the statement only through the midpoints $P$ and~$Q$ and cannot be grasped on their own. When a problem contains midpoints of segments, it pays to add further midpoints so that midlines arise: let $K$, $J$, $L$ be the midpoints of sides $AB$, $AC$, $BC$ respectively. In triangle $ABM$ the points $K$ and~$P$ are the midpoints of $AB$ and~$AM$, so $KP \parallel BM$; in triangle $ACN$ the points $J$ and~$Q$ are the midpoints of $AC$ and~$AN$, so $JQ \parallel CN$. Points $M$, $N$ have thereby disappeared from the diagram: the angle between lines $BM$ and~$CN$ is the same as the angle between lines $KP$ and~$JQ$, and it suffices to show that it equals $180^\circ - \alpha$.
+
+    Both lines meet $BC$, so let us measure the angles they make with it. Since $BK = \tfrac12 AB$ and $BL = \tfrac12 BC$, $(*)$ gives
+    $$
+    \frac{BK}{BL} = \frac{AB}{BC} = \frac{BP}{BA},
+    $$
+    while $\angle KBP$ and~$\angle LBA$ are the same angle $\beta$ (point $K$ lies on segment $AB$ and points $P$, $L$ on segment $BC$). By SAS, $\triangle BKP \sim \triangle BLA$ (in the order of vertices $B \leftrightarrow B$, $K \leftrightarrow L$, $P \leftrightarrow A$), hence $\angle BPK = \angle BAL$. Similarly, from $CJ : CL = AC : BC = CQ : CA$ and the common angle at $C$ we get $\triangle CJQ \sim \triangle CLA$ and $\angle CQJ = \angle CAL$. The angles at the median $AL$ are ugly, but we only need their sum: point $L$ lies inside side $BC$, so ray $AL$ lies inside angle $BAC$ and
+    $$
+    \angle BPK + \angle CQJ = \angle BAL + \angle LAC = \alpha.
+    $$
+
+    It remains to carry these two angles over to the vertices $B$ and~$C$. Point $M$ is the image of $A$ under the central symmetry about the point $P$ lying on $BC$, so it lies in the half-plane $\rho$ with boundary line $BC$ not containing $A$; the same holds for $N$. By contrast, $K$ and~$J$ lie inside segments $AB$ and~$AC$, hence outside $\rho$. Line $BC$ is a transversal of the parallels $KP$ and~$BM$; the points $K$, $M$ lie on opposite sides of it and the rays $PB$, $BC$ point in opposite directions (point $P$ lies on $BC$ and $P \neq B$), so these are alternate angles; similarly for the parallels $JQ$, $CN$. We obtain
+    $$
+    \angle MBC = \angle BPK, \qquad \angle NCB = \angle CQJ.
+    $$
+
+    Rays $BM$ and~$CN$ thus emanate from the endpoints of segment $BC$ into the same half-plane $\rho$ and make angles with $BC$ whose sum is $\alpha < 180^\circ$. They therefore meet at a point $X$ lying in $\rho$, and from the angle sum in triangle $BXC$
+    $$
+    \angle BXC = 180^\circ - \angle MBC - \angle NCB = 180^\circ - \alpha.
+    $$
+    Points $A$ and~$X$ lie in opposite half-planes determined by line $BC$ and $\angle BXC + \angle BAC = 180^\circ$, so $ABXC$ is a cyclic quadrilateral. The intersection $X$ of lines $BM$ and~$CN$ therefore lies on the circumcircle of triangle $ABC$.
+}
 
 \EnvId{3AK1oHdV1pF38vTXfQc41-incenters-and-two-circumcenters}
 \Problem{0}{ISL 2012, G3}{
     Let $ABC$ be an acute triangle. Denote by $D$, $E$, $F$ the feet of the altitudes from~$A$, $B$, $C$ respectively. Let~$I_1$ and~$I_2$ be the incenters of triangles~$BFD$ and~$CED$ respectively, and let~$O_1$ and~$O_2$ be the circumcenters of triangles~$AI_1B$ and~$AI_2C$ respectively. Prove that $I_1I_2 \parallel O_1O_2$.
 }{
-    Points~$O_1$ and~$O_2$ look genuinely artificial. Indeed they are. Both can be eliminated by defining a new point and rephrasing the parallelism into something else. Even without these strange points, more holds in the configuration than the problem states, and it is not very easy to see. It pays to guess it.
+    Points~$O_1$ and~$O_2$ look genuinely artificial. Indeed they are. Both can be eliminated by defining a new point and rephrasing the parallelism into something else. Even without these strange points, more holds in the configuration than the problem states, and it is not entirely easy to see. It pays to guess it.
 }{
     Let~$T$ be the second intersection of our two circles with centres~$O_1$ and~$O_2$. We want to show that~$AT$ is perpendicular to~$I_1I_2$. This is still not free. It helps to guess and prove that $BCI_2I_1$ is a cyclic quadrilateral.
-}{}
+}{
+    Denote by $\alpha$, $\beta$, $\gamma$ the interior angles of triangle $ABC$, by $I$ its incenter and by $r$ the radius of its incircle. Denote by $\omega_1$ and~$\omega_2$ the circumcircles of triangles $AI_1B$ and~$AI_2C$, that is, the circles with centers $O_1$ and~$O_2$.
+
+    The points $O_1$, $O_2$ enter the statement only through the line $O_1O_2$, and that line is the perpendicular bisector of the common chord $AT$, where $T$ is the second common point of the circles $\omega_1$, $\omega_2$. It therefore suffices to prove that $AT \perp I_1I_2$; we prove the existence of $T$ shortly, and it will turn out that the line $AT$ is nothing other than the bisector of the angle $\angle BAC$. From an accurate diagram one can guess that more holds in the configuration than the problem states: $BCI_2I_1$ is a cyclic quadrilateral. This is the heart of the solution and we begin with it.
+
+    The triangle $ABC$ is acute, so $D$, $E$, $F$ lie in the interiors of the sides $BC$, $CA$, $AB$ respectively. The angles $\angle AFC$ and~$\angle ADC$ are right, so $A$, $F$, $D$, $C$ lie on the circle with diameter $AC$, and the power of $B$ with respect to it gives $BF \cdot BA = BD \cdot BC$, that is,
+    $$
+    \frac{BF}{BC} = \frac{BD}{BA}.
+    $$
+    Denote this common ratio by $k$; since $BD$ is a leg and $BA$ the hypotenuse of the right triangle $ABD$, we have $0 < k < 1$. The angle $\angle FBD$ is the same as $\angle CBA$, so the triangles $BFD$ and~$BCA$ agree in the angle at $B$ and in the ratio of the sides enclosing it, hence they are similar with ratio $k$, with $F \leftrightarrow C$ and~$D \leftrightarrow A$.
+
+    The point $I_1$ is the incenter of triangle $BFD$, so the line $BI_1$ is the bisector of the angle $\angle FBD$, that is, of the angle $\angle ABC$, and $I_1$ lies on the ray $BI$. A similarity maps an incenter to an incenter, so $BI_1 = k \cdot BI$, and from $0 < k < 1$ it follows that $I_1$ lies inside the segment $BI$.
+
+    We measure the product $IB \cdot II_1$ using the image of $I$ under a reflection. Let $X$ be the tangency point of the incircle with side $BC$ and let $I'$ be the image of $I$ under the reflection in the line $BC$. The point $X$ is the foot of the perpendicular from $I$ to $BC$, hence the midpoint of the segment $II'$; therefore $IX = r$, $II' = 2r$ and the rays $IX$, $II'$ coincide. Furthermore $BI' = BI$ and $\angle IBI' = 2\angle IBC = \beta$.
+
+    Let $Q$ be the foot of the perpendicular from $I'$ to the line $BI$. The angle $\angle IBI'$ is nonzero and acute, so $I'$ does not lie on the line $BI$ and $Q$ lies on the ray $BI$. The right triangles $BQI'$ and~$BDA$ have right angles at $Q$ and~$D$ and agree in the angle at $B$, since $\angle QBI' = \beta = \angle DBA$. Hence they are similar and
+    $$
+    BQ = BI' \cdot \frac{BD}{BA} = k \cdot BI = BI_1,
+    $$
+    and since both $Q$ and~$I_1$ lie on the ray $BI$, we get $Q = I_1$. In particular $\angle II_1I' = 90^\circ$.
+
+    The point $I_1$ lies inside the segment $BI$, so the rays $II_1$ and~$IB$ coincide, and as we have seen, the rays $II'$ and~$IX$ coincide as well. The right triangles $II_1I'$ and~$IXB$ (with right angles at $I_1$ and~$X$) thus agree in the angle at $I$, hence they are similar, with $I_1 \leftrightarrow X$ and~$I' \leftrightarrow B$. From this
+    $$
+    IB \cdot II_1 = IX \cdot II' = 2r^2.
+    $$
+
+    At the vertex $C$ the situation is the same. The angles $\angle AEB$ and~$\angle ADB$ are right, so $A$, $E$, $D$, $B$ lie on the circle with diameter $AB$ and the power of $C$ gives $CE \cdot CA = CD \cdot CB$, that is,
+    $$
+    \frac{CE}{CB} = \frac{CD}{CA} = k',
+    $$
+    where $0 < k' < 1$, since $CD$ is a leg and $CA$ the hypotenuse of the right triangle $ACD$. The triangles $CED$ and~$CBA$ are therefore similar with ratio $k'$ (with $E \leftrightarrow B$ and~$D \leftrightarrow A$), since the angle $\angle ECD$ is the same as $\angle BCA$. The line $CI_2$ is therefore the bisector of the angle $\angle ACB$, the point $I_2$ lies inside the segment $CI$ and $CI_2 = k' \cdot CI$. The same point $I'$ satisfies $CI' = CI$ and $\angle ICI' = 2\angle ICB = \gamma$; the foot of the perpendicular from $I'$ to the line $CI$ thus lies on the ray $CI$, and by similarity with the right triangle $CDA$ its distance from $C$ equals $k' \cdot CI$, so it is the point $I_2$. The same pair of similar right triangles as at $B$ then gives $IC \cdot II_2 = IX \cdot II' = 2r^2$.
+
+    The lines $BI$ and~$CI$ are distinct and meet only at $I$, so the points $B$, $I_1$, $I_2$, $C$ (none of them is $I$) are pairwise distinct and are not collinear. The point $I$ lies outside the segment $BI_1$ and outside the segment $CI_2$, so from the equality $IB \cdot II_1 = IC \cdot II_2$ the concyclicity criterion shows that $B$, $I_1$, $I_2$, $C$ are concyclic.
+
+    The same equality also gives us the point $T$. The points $B$, $I_1$ lie on $\omega_1$ and the point $I$ lies on the line $BI_1$ outside the segment $BI_1$, so $I$ lies outside $\omega_1$ and its power with respect to $\omega_1$ is $IB \cdot II_1 = 2r^2$; similarly the power of $I$ with respect to $\omega_2$ is $IC \cdot II_2 = 2r^2$. Hence $I$ lies on the radical axis of the circles $\omega_1$, $\omega_2$, on which their common point $A$ lies as well.
+
+    Let $Z$ be the tangency point of the incircle with side $AB$. The triangle $AZI$ has a right angle at $Z$, the angle $\frac\alpha2$ at $A$ and hypotenuse $AI$. From $\alpha < 90^\circ$ the angle at $A$ is less than $45^\circ$, so the angle at $I$ is greater than $45^\circ$; the larger side lies opposite the larger angle, so $AZ > ZI = r$ and by the Pythagorean theorem
+    $$
+    IA^2 = r^2 + AZ^2 > 2r^2.
+    $$
+    If the line $AI$ were tangent to $\omega_1$, it would touch it at $A$ and the power of $I$ would be $IA^2 \neq 2r^2$. So the line $AI$ meets $\omega_1$ in a further point $T_1 \neq A$, and since $I$ lies outside $\omega_1$, the points $A$ and~$T_1$ lie on the same ray from $I$ and $IT_1 = 2r^2/IA$. The same with $\omega_2$ gives a point $T_2$ on that same ray with $IT_2 = 2r^2/IA$, so $T_1 = T_2$. The circles $\omega_1$, $\omega_2$ therefore have, besides $A$, a second common point $T = T_1$, and it lies on the line $AI$.
+
+    The point $I_1$ lies inside the segment $BI$, hence inside the triangle $ABC$. If $\omega_1 = \omega_2$, this circle would pass through $A$, $B$, $C$; it would be the circumcircle of triangle $ABC$ and the point $I_1$ would lie on it, not inside it. So the circles $\omega_1$, $\omega_2$ are distinct and have a common point, hence they are not concentric and $O_1 \neq O_2$. Both centers are equidistant from $A$ and from $T$, so the line $O_1O_2$ is the perpendicular bisector of the segment $AT$, and since the line $AT$ is the line $AI$, we get $O_1O_2 \perp AI$.
+
+    It remains to prove that $I_1I_2 \perp AI$. Let $I_a$ be the $A$-excenter. It lies on the bisector of the angle $\angle BAC$ on the opposite side of the line $BC$ from $A$, so $I$ lies inside the segment $AI_a$. The lines $BI$, $BI_a$ are the internal and the external bisector of the angle at $B$, so $\angle IBI_a = 90^\circ$, and similarly $\angle ICI_a = 90^\circ$. By the Basic angles theorem (after renaming the vertices),
+    $$
+    \angle AIB = 90^\circ + \tfrac\gamma2, \qquad \angle AIC = 90^\circ + \tfrac\beta2.
+    $$
+
+    Let $J$ be the foot of the perpendicular from $I_1$ to the line $AI$. The point $I_1$ lies on the line $BI$ and is different from $I$, so it does not lie on the line $AI$ and the angles of the triangle $IJI_1$ at $I$ and~$I_1$ are acute (in particular $J \neq I$). Since $I_1$ lies on the ray $IB$, we have $\angle AII_1 = \angle AIB > 90^\circ$, so $J$ does not lie on the ray $IA$ but on the ray opposite to it, that is, on the ray $II_a$. The angles $\angle JII_1$ and~$\angle I_aIB$ are thus one and the same angle, and the right triangles $IJI_1$, $IBI_a$ are similar (with $J \leftrightarrow B$, $I_1 \leftrightarrow I_a$), whence
+    $$
+    IJ \cdot II_a = II_1 \cdot IB = 2r^2.
+    $$
+    Similarly the foot $J'$ of the perpendicular from $I_2$ to $AI$ lies on the ray $II_a$, since $\angle AII_2 = \angle AIC > 90^\circ$, and from the similarity of the triangles $IJ'I_2$, $ICI_a$ we get
+    $$
+    IJ' \cdot II_a = II_2 \cdot IC = 2r^2.
+    $$
+
+    The points $J$, $J'$ therefore lie on the same ray from $I$ and $IJ = IJ'$, so $J = J'$. The lines $I_1J$ and~$I_2J$ are then both the perpendicular to $AI$ at $J$, and therefore they coincide. Thus the points $I_1$, $J$, $I_2$ are collinear and $I_1I_2 \perp AI$. Together with $O_1O_2 \perp AI$ this gives $I_1I_2 \parallel O_1O_2$.
+}
 
 \EnvId{a0vidDqjikMyjuIYb5vVc-quadrilateral-formed-by-angle-bisectors}
 \Problem{0}{MEMO 2012, T6}{
     Let~$ABCD$ be a convex quadrilateral with no two sides parallel and $\angle ABC = \angle CDA$. Suppose that the pairwise intersections of the angle bisectors at adjacent vertices of~$ABCD$ form a quadrilateral~$EFGH$. Let~$K$ be the intersection of the diagonals of~$EFGH$. Prove that the intersection of lines~$AB$ and~$CD$ lies on the circumcircle of triangle~$BKD$.
 }{
-    The problem is a little awkward to draw. Do not be intimidated. The non-standard angle condition looks like it could mean something nice. It does --- one just needs to intersect something. As for angle bisectors, do not be afraid of them; two often imply a third and here there are plenty.
+    The problem is a little awkward to draw. Do not be intimidated. The non-standard angle condition looks like it could mean something nice. It does: one just needs to intersect something. As for angle bisectors, do not be afraid of them; two often imply a third and here there are plenty.
 }{
     Let~$E$ lie on the bisectors at~$A$ and~$B$, $F$ on the bisectors at~$B$ and~$C$, $G$ on the bisectors at~$C$ and~$D$, and~$H$ on the bisectors at~$D$ and~$A$. All points~$E$, $F$, $G$, $H$ are incenters or excenters of some triangles thanks to the angle bisectors. In any case, points~$P$, $F$, $H$ and $Q$, $E$, $G$ are collinear, and these lines are the angle bisectors of~$\angle CPB$ and~$\angle CQD$. We are now very close.
-}{}
+}{
+    It suffices to intersect the right lines. Besides the intersection $P$ of lines $AB$ and~$CD$ from the statement, we add the intersection $Q$ of lines $BC$ and~$AD$; both exist since no two sides are parallel. Only this pair gives the condition $\angle ABC = \angle CDA$ a form one can work with.
+
+    Denote $\alpha = \angle DAB$, $\beta = \angle ABC$, $\gamma = \angle BCD$ and~$\delta = \angle CDA$, so $\beta = \delta$ and~$\alpha + 2\beta + \gamma = 360^\circ$.
+
+    The line of each side of a convex quadrilateral is a supporting line and the remaining two vertices lie strictly in one half-plane. Hence $A$, $B$ lie strictly on the same side of line $CD$, so $P$ does not lie on segment $AB$ and the rays $PA$, $PB$ coincide; symmetrically $PC$ coincides with~$PD$, $QB$ with~$QC$ and~$QA$ with~$QD$. The angles $\angle BPC$, $\angle APD$ and~$\angle BPD$ are therefore one and the same angle, and likewise $\angle AQB$, $\angle CQD$ and~$\angle BQD$.
+
+    Line $BC$ is a transversal of lines $AB$ and~$CD$ and the points $A$, $D$ lie on the same side of it, so $AB \parallel CD$ if and only if $\beta + \gamma = 180^\circ$; that is excluded. Relabeling $(A,B,C,D) \to (C,D,A,B)$ is a cyclic shift: it preserves the hypotheses as well as the points $P$ and~$Q$, swaps $E$ with~$G$ and $F$ with~$H$ (the diagonals of $EFGH$, and hence the point $K$ too, do not change) and swaps $B$ with~$D$, while $\beta + \gamma$ turns into $\alpha + \beta = 360^\circ - \beta - \gamma$. The statement to be proved is invariant under it, so we may assume $\beta + \gamma < 180^\circ$.
+
+    The points $B$, $C$ lie strictly on the same side of line $AD$, while $A$ and~$D$ lie on it. Therefore $A$ lies between $P$ and~$B$ if and only if $P$ and~$B$ are in opposite half-planes, which happens if and only if $P$ and~$C$ are in opposite half-planes, that is, if and only if $D$ lies between $P$ and~$C$. The angles of triangle $PBC$ at the vertices $B$ and~$C$ are thus either $\beta$ and~$\gamma$, or $180^\circ - \beta$ and~$180^\circ - \gamma$; the second option gives the sum $360^\circ - \beta - \gamma > 180^\circ$, so the first holds and $A$ lies between $P$ and~$B$ and $D$ between $P$ and~$C$. The same reasoning with line $AB$ gives that $B$ lies between $Q$ and~$C$ if and only if $A$ lies between $Q$ and~$D$, and the angles of triangle $QCD$ at~$C$ and~$D$ are $\gamma$ and~$\delta$, since $360^\circ - \gamma - \delta = 360^\circ - \gamma - \beta > 180^\circ$. From this
+    $$
+    \angle BPC = 180^\circ - \beta - \gamma = 180^\circ - \gamma - \delta = \angle CQD.
+    $$
+    That is the whole content of the condition $\beta = \delta$: the angles at~$P$ and~$Q$ are congruent.
+
+    Now the angle bisectors. In triangle $PBC$ the bisectors of the quadrilateral at~$B$ and~$C$ are its internal bisectors, so $F$ is its incenter. In triangle $PAD$ we have $\angle PAD = 180^\circ - \alpha$ and~$\angle PDA = 180^\circ - \delta$, so the bisectors of the quadrilateral at~$A$ and~$D$ are its external bisectors and $H$ is its $P$-excenter. Both points therefore lie on the internal bisector $p$ of the angle $\angle BPC$. Analogously $G$ is the incenter of triangle $QCD$ and~$E$ is the $Q$-excenter of triangle $QAB$, so both lie on the internal bisector $q$ of the angle $\angle CQD$. The diagonals of the quadrilateral $EFGH$ are thus the lines $EG = q$ and~$FH = p$, and $K$ is the intersection of the lines $p$ and~$q$.
+
+    From the rays found above: $BP$ is the ray $BA$ and~$BQ$ is opposite to~$BC$, so $\angle PBQ = 180^\circ - \beta$; similarly $DP$ is opposite to~$DC$ and~$DQ$ is the ray $DA$, so $\angle PDQ = 180^\circ - \delta$. These two angles are congruent. The point $A$ lies strictly between $P$ and~$B$ and strictly between $Q$ and~$D$, and it does not lie on line $PQ$ (otherwise the lines $AB$ and~$AD$ would coincide). The point $B$ lies on the ray from $P$ through $A$ beyond $A$, and since $P$ lies on line $PQ$, $B$ is strictly in the same half-plane as $A$; similarly $D$ lies on the ray from $Q$ through $A$ beyond $A$, so also in this half-plane. Thus segment $PQ$ subtends the same angle at $B$ and at~$D$, and they lie on the same side of it, so $P$, $B$, $D$, $Q$ lie on one circle $\omega$.
+
+    Since $B$ and~$D$ lie in the same half-plane with boundary line $PQ$, the chords $BD$ and~$PQ$ do not meet, hence $P$ and $Q$ lie on the same one of the arcs determined by $B$ and~$D$. The line $p$ is the internal bisector of the angle $\angle BPD$, so its second intersection $M$ with~$\omega$ splits the arc $BD$ not containing $P$ into two congruent arcs, because the inscribed angles $\angle BPM$ and~$\angle MPD$ are congruent. The point $Q$ lies on the same arc as $P$, so neither of the arcs $BM$, $MD$ contains $Q$; the inscribed angles over them give $\angle BQM = \angle MQD$, and by the position of $M$ on the arc $BD$ not containing $Q$ the ray $QM$ lies inside the angle $\angle BQD$. The line $QM$ is therefore the internal bisector of the angle $\angle BQD$, that is, $QM = q$.
+
+    The point $M$ lies on $p$ and on $q$, therefore $M = K$. The points $B$, $K$, $D$ are three distinct points of the circle $\omega$, so $\omega$ is the circumcircle of triangle $BKD$, and $P$ lies on it as well.
+}
 
 \EnvId{DzF1H7zPMIba3UVbwJoNr-point-concyclic-with-the-circumcenter}
 \Problem{0}{MEMO 2016, I3}{
@@ -395,7 +1179,43 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     It is obvious that something is missing from the problem. It therefore pays to first get a better picture of the situation by rephrasing the statement as an equality of some other angles, ideally ones expressible in terms of the basic angles of~$ABC$. This may inspire an addition. Let us not forget that the problem still contains the well-known indicator of potentially good additions: a right angle.
 }{
     The statement is equivalent to $\angle PCQ=\angle OCB$, which is equivalent to $\angle BAC=\angle CQP$. So if we reflect~$Q$ through~$P$ to~$Q'$, it suffices to prove concyclicity. That too is not obvious, but it can be finished at this point.
-}{}
+}{
+    Denote $\alpha = \angle BAC$ and~$\gamma = \angle BCA$, let $\omega$ be the circle through $A$, $P$, $O$, $B$, and let $k$ be the circle with diameter $BC$. Since $\angle BPC = 90^\circ$, the point $P$ lies on~$k$. Triangle $ABC$ is acute, so $O$ lies in its interior, and by the basic angles theorem $\angle BOC = 2\alpha$ and~$\angle AOB = 2\gamma$. The isosceles triangles $OBC$ and~$OAB$ then give
+    $$
+    \angle OCB = 90^\circ - \alpha, \qquad \angle OAB = 90^\circ - \gamma.
+    $$
+
+    We use the assumption $\alpha > 45^\circ$ only once, and right now: it gives $\angle BOC = 2\alpha > 90^\circ$, so $O$ lies inside the circle $k$, while $\alpha < 90^\circ$ puts $A$ outside $k$. The circle $\omega$ passes through the interior point $O$ of $k$, so $\omega \neq k$ and the two circles have exactly $B$ and~$P$ in common (these are distinct, since $P$ lies in the interior of the triangle). They split $\omega$ into two arcs, one inside $k$ and the other outside $k$, so $A$ and~$O$ lie on different arcs: on $\omega$ our four points come in the order $A$, $P$, $O$, $B$. In particular $P \neq O$, so line $PO$ exists at all; and since $A$, $P$, $O$ are three distinct points of a circle, they are not collinear, so $AQ \parallel PO$ gives $Q \neq P$.
+
+    We show that $\angle PCQ = 90^\circ - \alpha$, which already suffices. Indeed, $Q$ lies on segment $BP$, so the ray $CQ$ lies inside the angle $BCP$ and
+    $$
+    \angle BCP = \angle BCQ + \angle QCP \geq \angle QCP.
+    $$
+    So if $\angle QCP = 90^\circ - \alpha$, then $\angle BCO = 90^\circ - \alpha \leq \angle BCP$, and since both $O$ and~$P$ lie in the interior of the triangle, hence in the same half-plane with boundary line $BC$, the ray $CO$ lies inside the angle $BCP$ as well and
+    $$
+    \angle BCP = \angle BCO + \angle OCP.
+    $$
+    Comparing the two decompositions of the angle $BCP$ and canceling the equal angles $\angle QCP = \angle BCO$ gives $\angle BCQ = \angle OCP$, the equality to be proved.
+
+    Since $Q \neq P$ lies on segment $BP$, the rays $PQ$ and~$PB$ coincide, and so $\angle QPC = \angle BPC = 90^\circ$. In the right triangle $QPC$ the equality $\angle PCQ = 90^\circ - \alpha$ is therefore equivalent to $\angle CQP = \alpha$; hence it suffices to prove $\angle CQP = \angle BAC$.
+
+    The right angle at $P$ calls for completing the right triangle $QPC$ to an isosceles one: let $Q'$ be the reflection of $Q$ through $P$. The line $CP$ is the perpendicular bisector of segment $QQ'$, so $CQ = CQ'$ and $\angle CQP = \angle CQ'P$. The point $Q$ lies between $B$ and~$P$ and the point $P$ lies between $Q$ and~$Q'$, so on the ray $BP$ the points come in the order $Q$, $P$, $Q'$; the rays $Q'P$ and~$Q'B$ therefore coincide and $\angle CQ'P = \angle CQ'B$. The lines $AB$ and~$BC$ pass through $B$, so every point of the ray $BP$ other than $B$ lies on the same side of them as the interior point $P$: thus $Q'$ lies in the same half-plane as $C$ with respect to $AB$, and in the same one as $A$ with respect to $BC$. It therefore suffices to prove that $Q'$ lies on the circumcircle of triangle $ABC$: inscribed angles over the chord $BC$ then give $\angle CQ'B = \angle CAB = \alpha$, hence $\angle CQP = \alpha$.
+
+    From the order of the points on $\omega$, the chord $AB$ does not separate $P$ from $O$ and the chord $OB$ does not separate $P$ from $A$, so inscribed angles give
+    $$
+    \gather
+    \angle APB = \angle AOB = 2\gamma, \\
+    \angle OPB = \angle OAB = 90^\circ - \gamma.
+    \endgather
+    $$
+    The rays $PQ$ and~$PB$ coincide, so $\angle APQ = 2\gamma$. The line $BP$ is a transversal of the parallels $QA$ and~$PO$ and the points $A$, $O$ lie on opposite sides of it, so these are alternate angles and $\angle AQP = \angle OPB = 90^\circ - \gamma$. The angle sum in triangle $APQ$ gives
+    $$
+    \angle QAP = 180^\circ - 2\gamma - (90^\circ - \gamma) = 90^\circ - \gamma = \angle AQP,
+    $$
+    so triangle $APQ$ is isosceles and $PA = PQ = PQ'$.
+
+    Triangle $APQ'$ is therefore isosceles as well, and since $P$ lies between $Q$ and~$Q'$, its angle at $P$ is $\angle APQ' = 180^\circ - \angle APQ = 180^\circ - 2\gamma$. The remaining two angles are equal, so $\angle AQ'P = \gamma$. The rays $Q'P$ and~$Q'B$ coincide, and so $\angle AQ'B = \gamma = \angle ACB$. The points $Q'$ and~$C$ lie in the same half-plane with boundary line $AB$, therefore $Q'$ lies on the arc $AB$ of the circumcircle of triangle $ABC$ containing $C$.
+}
 
 \EnvId{GK8F64_JP-rSXryIXL_wp-pentagon-and-two-circumcenters}
 \Problem{0}{MEMO 2017, I3}{
@@ -404,29 +1224,184 @@ The following problems are roughly ordered by difficulty and use roughly speakin
     When we do not know what to do, chase angles for a bit. This should let us find a simple nice property in the diagram that may inspire what to add.
 }{
     The key is to discover $BC \parallel DE$. The diagram contains the intersection of~$CE$ and~$BD$. This may inspire adding the image of~$A$ under the homothety mapping~$BC$ to~$DE$. Suddenly everything becomes beautiful.
-}{}
+}{
+    Denote by $\omega_1$ and~$\omega_2$ the circumcircles of triangles $ABC$ and~$ADE$ respectively, and by $O_1$, $O_2$ their centers.
+
+    First let us settle the position of point $P$. Diagonal $AC$ separates $B$ from the points $D$, $E$ and diagonal $AD$ separates $E$ from the points $B$, $C$. Point $P$ is an interior point of segment $CE$, so it lies in the open half-plane determined by line $AC$ and point $E$, and at the same time it is an interior point of segment $BD$, so it lies in the open half-plane determined by line $AD$ and point $B$. Hence it lies inside angle $\angle CAD$ and
+    $$
+    \angle CAP + \angle PAD = \angle CAD.
+    $$
+
+    Diagonals $CA$ and~$DA$ lie inside the interior angles of the pentagon at vertices $C$ and~$D$, so
+    $$
+    \gather
+    \angle BCD = \angle BCA + \angle ACD, \\
+    \angle CDE = \angle CDA + \angle ADE.
+    \endgather
+    $$
+    By the statement, $\angle BCA = \angle PAD$ and~$\angle ADE = \angle CAP$, and the angle sum in triangle $ACD$ gives $\angle ACD + \angle CDA = 180^\circ - \angle CAD$, hence
+    $$
+    \angle BCD + \angle CDE = \angle CAD + 180^\circ - \angle CAD = 180^\circ.
+    $$
+    Points $B$ and~$E$ lie in the same half-plane with boundary line $CD$, so $\angle BCD$ and~$\angle CDE$ are co-interior angles on the same side of the transversal $CD$. Their sum $180^\circ$ gives
+    $$
+    BC \parallel DE.
+    $$
+
+    Two parallel segments are an invitation to consider the homothety mapping one onto the other, which also lets us transfer a further point. Its center is already in the diagram: lines $BD$ and~$CE$ meet exactly at $P$. Quadrilateral $BCDE$ is convex, so $P$ lies inside both segments $BD$ and $CE$, and the homothety $h$ with center $P$ and ratio $k = -PD \, / \, PB < 0$ maps $B$ to the point $D$. It maps line $BC$ to the parallel to it through $D$, that is to line $DE$, and line $CE$ to itself, since that one passes through the center $P$. Therefore $h(C) = E$.
+
+    The added point is the image $A' = h(A)$. If it lies on $\omega_2$, we are done: $\omega_2$ is then the circumcircle of triangle $A'DE$, the image of triangle $ABC$ under $h$, so $h(\omega_1) = \omega_2$, and a homothety maps center to center.
+
+    Since $k < 0$, the point $P$ lies between $A$ and~$A'$ and the rays $A'A$, $A'P$ coincide. The homothety $h$ maps triangle $APC$ to triangle $A'PE$ (the point $P$ is its fixed point), hence
+    $$
+    \angle AA'E = \angle PA'E = \angle PAC = \angle ADE,
+    $$
+    where the last equality is the second condition from the statement.
+
+    It remains to verify the position of $A'$. The point $P$ is an interior point of diagonal $BD$, so it lies inside the pentagon, that is in the open half-plane with boundary line $AE$ containing vertex $D$. Point $A'$ lies on ray $AP$ and differs from $A$, so it lies in the same half-plane. Segment $AE$ therefore subtends the same angle at $D$ and at~$A'$, and they lie on the same side of it, so $A$, $E$, $D$, $A'$ are concyclic. That circle is $\omega_2$, hence $A'$ does lie on $\omega_2$.
+
+    Triangle $A'DE$ is the image of triangle $ABC$, so its vertices are not collinear and the circle $h(\omega_1)$ is uniquely determined by them. All three lie on $\omega_2$, therefore $h(\omega_1) = \omega_2$ and~$h(O_1) = O_2$. If $O_1 = O_2$, then $O_1$ is a fixed point of a homothety with ratio $k \neq 1$, so $O_1 = O_2 = P$ and the line from the statement is not determined. Otherwise $O_1 \neq P$ and the points $P$, $O_1$, $O_2 = h(O_1)$ lie on one line by the definition of homothety.
+}
 
 \EnvId{NsM3t1SwEv7CD5wXQgwbU-segment-pq-parallel-to-bc}
 \Problem{0}{IMO 2019, P2}{
     In triangle~$ABC$, let~$B_1$ be a point on side~$AC$ and~$C_1$ a point on side~$AB$. Let $P$ and~$Q$ be points on segments~$BB_1$ and~$CC_1$ respectively such that line~$PQ$ is parallel to~$BC$. Let~$P_1$ be a point on line~$PC_1$ such that~$C_1$ lies strictly between~$P$ and~$P_1$ and $\angle PP_1A=\angle CBA$. Let~$Q_1$ be a point on line~$QB_1$ such that~$B_1$ lies strictly between~$Q$ and~$Q_1$ and $\angle AQ_1Q=\angle ACB$. Prove that $P$, $Q$, $P_1$, $Q_1$ lie on a common circle.
 }{
-    The goal is to add something that clarifies the strange angle condition for~$P_1$ and~$Q_1$. However the problem has too many points and various things that look promising can be added without much help --- for instance the intersection of~$P_1P$ with~$BC$ or of~$PQ$ with~$AB$ (try it). The trouble with these intersections is that while they do give a cyclic quadrilateral, it provides no further useful angles to transfer. It is therefore better to intersect some lines with a circle in a way that introduces one more angle into the equality~$\angle PP_1A=\angle CBA$.
+    The goal is to add something that clarifies the strange angle condition for~$P_1$ and~$Q_1$. However the problem has too many points and various things that look promising can be added without much help, for instance the intersection of~$P_1P$ with~$BC$ or of~$PQ$ with~$AB$ (try it). The trouble with these intersections is that while they do give a cyclic quadrilateral, it provides no further useful angles to transfer. It is therefore better to intersect some lines with a circle in a way that introduces one more angle into the equality~$\angle PP_1A=\angle CBA$.
 }{
-    The key magic point is the second intersection of line~$BB_1$ with the circumcircle of~$ABC$, call it~$C_2$. Thanks to it we get $\angle CBA=\angle CC_2A$, which magically gives the cyclic quadrilateral~$C_1C_2P_1A$. Analogously we define~$B_2$. And believe it or not, it is now only a moderately hard angle-chasing problem.
-}{}
+    The key magic point is the second intersection of line~$CC_1$ with the circumcircle of~$ABC$, call it~$C_2$. Thanks to it we get $\angle CBA=\angle CC_2A$, which magically gives the cyclic quadrilateral~$C_1C_2P_1A$. Analogously we define~$B_2$. And believe it or not, it is now only a moderately hard angle-chasing problem.
+}{
+    Denote by $\omega$ the circumcircle of triangle $ABC$, and put $\beta = \angle CBA$ and $\gamma = \angle ACB$.
+
+    The angle $\beta$ from the condition on point $P_1$ appears in the diagram at vertex $B$, hence far from the points $C_1$ and~$P_1$ that the condition concerns. At the same time it is an inscribed angle over the chord $AC$, so the same angle appears at every point of the arc $AC$ containing $B$. It therefore suffices to intersect a suitable line with~$\omega$. The right one is $CC_1$: both $C_1$ and $Q$ lie on it. So let $C_2$ be its second intersection with~$\omega$, and analogously let $B_2$ be the second intersection of line $BB_1$ with~$\omega$.
+
+    The points $B_1$, $C_1$ are interior points of the sides $AC$, $AB$ (for $C_1 = A$ the point $P_1$ would lie on line $PA$ and the angle $\angle PP_1A$ would be zero or straight, for $C_1 = B$ the point $Q$ would lie on line $BC$ and line $PQ$ would coincide with it; analogously for $B_1$), so they lie inside $\omega$. If $P = B$, line $PQ$ would be the parallel to $BC$ through $B$, that is, line $BC$ itself; hence $P \neq B$ and similarly $Q \neq C$. The segment $BB_1$ lies inside $\omega$ except for its endpoint $B$, so $P$ lies inside $\omega$, and similarly $Q$.
+
+    Line $CC_1$ meets line $AB$ only at its interior point $C_1$, which lies inside $\omega$; on line $CC_1$ the order of the points is therefore $C$, $C_1$, $C_2$, and $C_2$ lies on the open arc $AB$ not containing $C$. That arc is part of the arc $AC$ containing $B$, so from inscribed angles over the chord $AC$ we get
+    $$
+    \angle AC_2C = \angle ABC = \beta.
+    $$
+
+    Since $B_1$ is an interior point of side $AC$, the whole segment $BB_1$ except for the point $B$ lies in the open half-plane with boundary line $AB$ containing $C$; in particular $P$ lies there. The point $C_1$ lies on line $AB$ and between $P$ and~$P_1$, so $P_1$ lies in the opposite open half-plane, and so does $C_2$, because $C_1$ lies between $C$ and~$C_2$. Since $C_1$ lies on ray $P_1P$ as well as on ray $C_2C$, it further follows that
+    $$
+    \angle AP_1C_1 = \angle AP_1P = \beta = \angle AC_2C = \angle AC_2C_1.
+    $$
+    Segment $AC_1$ therefore subtends the same angle at $P_1$ and at~$C_2$, and they lie on the same side of line $AC_1$, so by the converse of the inscribed angle theorem $A$, $C_1$, $C_2$, $P_1$ are concyclic. Analogously, with the angle $\gamma$ instead of $\beta$, the points $A$, $B_1$, $B_2$, $Q_1$ are concyclic, where $B_2$ lies on the open arc $AC$ not containing $B$.
+
+    The point $Q$ lies on segment $CC_1$, hence in the closed half-plane of line $AB$ containing $C$; the same holds for $P$. The point $P_1$ lies in the opposite open half-plane, so $P_1 \neq P$ and $P_1 \neq Q$, and analogously $Q_1 \neq P$ and $Q_1 \neq Q$.
+
+    From here on we only chase angles. To avoid discussing relative positions, we pass to directed angles modulo $180^\circ$: $\angle(\ell,m)$ is the angle by which line $\ell$ has to be rotated to become parallel to line $m$. We use two standard properties: four pairwise distinct points $X$, $Y$, $Z$, $W$ lie on a common circle or line if and only if $\angle(XZ,XW) = \angle(YZ,YW)$, and parallel lines make the same directed angle with every other line.
+
+    Lines $BB_1$ and~$CC_1$ meet line $BC$, so they are not parallel to $PQ$ and have a single point in common with line $PQ$, namely $P$ and~$Q$ respectively. The points $B_2$, $C_2$ lie on $\omega$, whereas $P$ and~$Q$ lie inside it, so neither $B_2$ nor $C_2$ lies on line $PQ$; moreover the arcs they lie on are disjoint, so $B_2 \neq C_2$. Denote by $\Omega$ the circle through the points $P$, $Q$, $C_2$. In the following steps the option \uv{or on a line} is thus always excluded.
+
+    We first show that $B_2$ lies on $\Omega$ as well. The point $P$ lies on line $BB_2$, the point $Q$ on line $CC_2$ and $PQ \parallel BC$, so
+    $$
+    \eqalign{
+        \angle(B_2P, B_2C_2) &= \angle(B_2B, B_2C_2) = \angle(CB, CC_2) \cr
+        &= \angle(QP, QC_2),
+    }
+    $$
+    where the middle equality is inscribed angles over the chord $BC_2$ of $\omega$. Hence $P$, $Q$, $C_2$, $B_2$ lie on $\Omega$.
+
+    Now the point $P_1$; for $P_1 = C_2$ there is nothing to prove, so let $P_1 \neq C_2$. The point $C_1$ lies on line $P_1P$ as well as on line $AB$, and $A$, $C_1$, $C_2$, $P_1$ are concyclic, so
+    $$
+    \eqalign{
+        \angle(P_1P, P_1C_2) &= \angle(P_1C_1, P_1C_2) = \angle(AC_1, AC_2) \cr
+        &= \angle(AB, AC_2) = \angle(CB, CC_2) = \angle(QP, QC_2),
+    }
+    $$
+    where the second-to-last equality is inscribed angles over the chord $BC_2$ of $\omega$ and the last one comes from the previous computation. Therefore $P_1$ lies on the circle $\Omega$.
+
+    We treat the point $Q_1$ symmetrically, only using $B_2$ instead of $C_2$ (for $Q_1 = B_2$ there is again nothing to prove). The point $B_1$ lies on line $Q_1Q$ as well as on line $AC$, and $A$, $B_1$, $B_2$, $Q_1$ are concyclic, so
+    $$
+    \eqalign{
+        \angle(Q_1Q, Q_1B_2) &= \angle(Q_1B_1, Q_1B_2) = \angle(AB_1, AB_2) \cr
+        &= \angle(AC, AB_2) = \angle(BC, BB_2) = \angle(PQ, PB_2),
+    }
+    $$
+    where the second-to-last equality is inscribed angles over the chord $CB_2$ of $\omega$ and the last one uses $PQ \parallel BC$ and the fact that $P$ lies on line $BB_2$. So $Q_1$ lies on the circle through the points $P$, $Q$, $B_2$, which is $\Omega$.
+
+    The points $P$, $Q$, $B_2$, $C_2$, $P_1$ and~$Q_1$ therefore all lie on the circle $\Omega$; in particular $P$, $Q$, $P_1$ and~$Q_1$ are concyclic.
+}
 
 \EnvId{sIGVitSRoddubnK736EUu-right-triangle-altitude-point}
 \Problem{0}{IMO 2012, P5}{
     In a right triangle~$ABC$ with the right angle at vertex~$A$, let~$D$ be the foot of the altitude from~$A$. Let~$X$ be an arbitrary interior point of segment~$AD$. Let~$K$ be the point on segment~$BX$ such that $CK = CA$. Similarly, let~$L$ be the point on segment~$CX$ such that $BL = BA$. Denote by~$M$ the intersection of lines~$BL$ and~$CK$. Prove that $MK = ML$.
 }{
-    Nothing meaningful can be seen in the configuration. Something is hidden there --- but it is not easy to see exactly what. One option is to try to do something meaningful with lines~$BX$ and~$CX$. Points~$K$ and~$L$ lie on them and we do not see how to use that. One possibility is to intersect them with something meaningful.
+    Nothing meaningful can be seen in the configuration. Something is hidden there, but it is not easy to see exactly what. One option is to try to do something meaningful with lines~$BX$ and~$CX$. Points~$K$ and~$L$ lie on them and we do not see how to use that. One possibility is to intersect them with something meaningful.
 }{
-    The key points are the intersections~$E$ and~$F$ of lines~$BX$ and~$CX$ with the circle on diameter~$BC$. Even those alone do not suffice --- but the next point is quite natural: the intersection~$G$ of lines~$BF$ and~$CE$. It clearly lies on line~$AXD$ and~$X$ is the orthocenter of triangle~$GBC$. Although it may not seem so, the problem can now be finished --- by combining power of a point, inscribed angles and cyclic quadrilaterals. Even at this stage it is not an easy problem.
-}{}
+    The key points are the intersections~$E$ and~$F$ of lines~$BX$ and~$CX$ with the circle on diameter~$BC$. Even those alone do not suffice, but the next point is quite natural: the intersection~$G$ of lines~$BF$ and~$CE$. It clearly lies on line~$AXD$ and~$X$ is the orthocenter of triangle~$GBC$. Although it may not seem so, the problem can now be finished by combining power of a point, inscribed angles and cyclic quadrilaterals. Even at this stage it is not an easy problem.
+}{
+    Of the assumptions on the points~$K$ and~$L$ we use only this much: $K$ lies on line~$BX$ and $CK = CA$, so it lies on the circle~$\omega_c$ centered at~$C$ with radius $CA$; similarly $L$ lies on line~$CX$ and on the circle~$\omega_b$ centered at~$B$ with radius $BA$. Both circles pass through~$A$.
+
+    The only things holding~$K$ and~$L$ in the diagram are lines~$BX$ and~$CX$, and by themselves they cannot be grasped. So let us intersect them with a circle that knows something about the configuration: with the Thales circle~$\tau$ of diameter~$BC$. The point~$A$ lies on it too, since the angle at~$A$ is right.
+
+    Since the angles at~$B$ and~$C$ are acute, $D$ lies inside segment~$BC$; hence $X$ does not lie on line~$BC$ and the lines~$BX$, $CX$ are distinct. Neither of them is perpendicular to~$BC$: the perpendicular to~$BC$ through~$B$ is parallel to line~$AD$ and distinct from it ($B$ does not lie on~$AD$), so it does not contain~$X$, and similarly for~$C$. Line~$BX$ is therefore not tangent to~$\tau$ at~$B$ and meets $\tau$ again at a point $E \neq B$; moreover $E \neq C$, since otherwise $X$ would lie on~$BC$. Analogously let~$F$ be the second intersection of line~$CX$ with~$\tau$, again $F \neq B$ and $F \neq C$. By Thales's theorem,
+    $$
+    \angle BEC = \angle BFC = 90^\circ,
+    $$
+    so $CE \perp BX$ and $BF \perp CX$.
+
+    Line~$CE$ is the perpendicular from~$C$ to~$BX$, hence the perpendicular bisector of the chord that~$\omega_c$ cuts on line~$BX$; similarly $BF$ is the perpendicular bisector of the chord of~$\omega_b$ on line~$CX$. Their intersection is a natural candidate for the center of a circle through both~$K$ and~$L$, and that is the point which breaks the problem open. Denote it~$G$. It exists and is unique, since the lines~$BX$, $CX$ are distinct and meet at~$X$, so they are not parallel, and hence neither are the perpendiculars~$CE$, $BF$ to them.
+
+    The points~$G$, $B$, $C$ form a triangle. $E$ lies on~$\tau$ and is different from~$B$ and from~$C$, so it does not lie on line~$BC$ and the lines~$CE$, $BC$ meet only at~$C$; similarly $F$ does not lie on~$BC$, so $C$ does not lie on line~$BF$. If $G$ lay on~$BC$, the first would give $G = C$, which the second excludes.
+
+    Line~$BX$ passes through vertex~$B$ and is perpendicular to line $CG = CE$, so it is the altitude of triangle~$GBC$ from vertex~$B$; similarly $CX$ is its altitude from vertex~$C$. Therefore $X$ is the orthocenter of triangle~$GBC$ and the third altitude gives $GX \perp BC$. Moreover $G$ and~$X$ are distinct: if $G = X$, then $X$ would lie on line~$CE$ and on line~$BX$, which are perpendicular to each other and meet only at~$E$, so $X = E$; but $A$ lies on~$\tau$ and~$D$ inside it, so the whole segment~$AD$ except for~$A$ lies inside~$\tau$, whereas $E$ lies on~$\tau$. Thus the lines~$GX$ and~$AD$ are both perpendicular to~$BC$ and both pass through~$X$, so they coincide and~$G$ lies on line~$AD$.
+
+    Now we only compute, and always with the same tool: if a line~$p$ is perpendicular to a line~$q$ at a point~$T$, then for arbitrary points~$Y$ on~$p$ and~$Z$ on~$q$ we have $YZ^2 = YT^2 + TZ^2$ (trivially for $Y = T$ or $Z = T$). We use it at~$D$, $E$, $F$ and finally at~$K$ and~$L$.
+
+    Line~$AD$ is perpendicular to~$BC$ at~$D$ and both~$A$ and~$G$ lie on it. The differences for the pairs $(G,B)$, $(G,C)$ and for $(A,B)$, $(A,C)$ therefore give
+    $$
+    \gather
+    GB^2 - GC^2 = DB^2 - DC^2 = \\
+    = AB^2 - AC^2.
+    \endgather
+    $$
+    This is the key identity and it has two faces. First, it can be rewritten as
+    $$
+    GB^2 - BA^2 = GC^2 - CA^2,
+    $$
+    which says that the power of~$G$ with respect to~$\omega_b$ equals its power with respect to~$\omega_c$, that is, that $G$ lies on their radical axis (which is exactly line~$AD$). Denote the common value~$k$. Second, since the angle at~$A$ is right and hence $AB^2 + AC^2 = BC^2$, it can also be rewritten in the two forms
+    $$
+    \gather
+    GB^2 = GC^2 + BC^2 - 2CA^2, \\
+    GC^2 = GB^2 + BC^2 - 2BA^2.
+    \endgather
+    $$
+
+    Line~$CE$ is perpendicular to~$BX$ at~$E$, with both~$C$ and~$G$ on~$CE$ and both~$B$ and~$K$ on~$BX$. The differences for the pairs $(G,K)$, $(C,K)$ and for $(G,B)$, $(C,B)$ give
+    $$
+    \gather
+    GK^2 - CK^2 = GE^2 - CE^2 = \\
+    = GB^2 - CB^2,
+    \endgather
+    $$
+    since in the first pair $EK^2$ cancels and in the second $EB^2$. Substitute $CK = CA$ and the first of the two forms of the key identity:
+    $$
+    \gather
+    GK^2 = GB^2 - CB^2 + CA^2 = \\
+    = GC^2 - CA^2 = k.
+    \endgather
+    $$
+    The point~$F$ gives the same with the swap $B \leftrightarrow C$, $K \leftrightarrow L$, $E \leftrightarrow F$, which preserves the whole configuration: line~$BF$ is perpendicular to~$CX$ at~$F$, both~$B$ and~$G$ lie on~$BF$, both~$C$ and~$L$ lie on~$CX$, and from $BL = BA$ and the second form of the key identity we get
+    $$
+    GL^2 = GC^2 - BC^2 + BA^2 = k.
+    $$
+    So $G$ is at distance $\sqrt k$ from both~$K$ and~$L$.
+
+    If $k = 0$, then $K = G = L$ and the claim holds trivially. So let $k > 0$ and let~$\gamma$ be the circle with center~$G$ and radius $\sqrt k$; the points~$K$, $L$ lie on it. From $GK^2 = GC^2 - CA^2$ and $CK = CA$ we get
+    $$
+    GK^2 + CK^2 = GC^2,
+    $$
+    so by the converse of the Pythagorean theorem $\angle GKC = 90^\circ$ and line~$CK$ is tangent to~$\gamma$ at~$K$; similarly $BL$ is tangent to~$\gamma$ at~$L$. The point~$M$ lies on both tangents, so a final use of the same Pythagorean theorem, at~$K$ with the lines $GK \perp CK$ and then at~$L$ with the lines $GL \perp BL$, gives
+    $$
+    MK^2 = MG^2 - k = ML^2.
+    $$
+}
 
 \secc My Favorites
 
-A few constructions I particularly find very adorable. Not necessarily the hardest problems here \SlightSmile{}
+A few constructions I find particularly lovely. Not necessarily the hardest problems here \SlightSmile{}
 
 \EnvId{JLEqfNmB2Hw0P5oc4qFwQ-points-on-altitudes-and-areas}
 \Problem{0}{}{
@@ -437,7 +1412,36 @@ A few constructions I particularly find very adorable. Not necessarily the harde
     The trick is that if $X'$ is any point on the line through $X$ parallel to $BC$, then $A_{BCX}=A_{BCX'}$. What is this hinting us at?
 }{
     Apparently it makes sense to consider the lines parallel to sides, passing through our points, and intersect them, let us choose the line through $Y$ parallel to $AC$ and the line through $Z$ parallel to $AB$ and let them intersect at $T$. What is the area condition saying now? We are practically there.
-}{}
+}{
+    The symbol $S_{ABC}$ from the statement is the area of triangle $ABC$, that is $A_{ABC}$; from now on we consistently write $A_{PQR}$.
+
+    For a point $P$ in the plane, denote by $A_{BCP}$ the signed area of triangle $BCP$: the ordinary area with sign $+$ if $P$ lies in the same half-plane with boundary line $BC$ as the point $A$, with sign $-$ if it lies in the opposite one, and zero if $P$ lies on line $BC$. Analogously we define $A_{CAP}$ (sign according to~$B$) and~$A_{ABP}$ (according to~$C$). The points $X$, $Y$, $Z$ lie inside the triangle, so for them the signed area coincides with the ordinary one and the condition from the statement is unchanged.
+
+    We have $A_{BCP} = \frac12 BC \cdot d(P)$, where $d(P)$ is the signed distance of $P$ from line $BC$. Hence for two points $P$, $P'$ we have $A_{BCP} = A_{BCP'}$ if and only if $P$ and~$P'$ lie on the same parallel to line $BC$; analogously for $CA$ and~$AB$. Moreover, for every point $P$,
+    $$
+    A_{BCP} + A_{CAP} + A_{ABP} = A_{ABC}.
+    $$
+    The signed distance from a line is an affine function of the point, so the left-hand side is affine as well; at $A$, $B$, $C$ it takes the value $A_{ABC}$, and an affine function is determined uniquely by its values at three non-collinear points.
+
+    The three triangles from the condition overlap confusingly, but the area $A_{BCX}$ does not change when we move $X$ along the parallel to~$BC$. So we can move all three areas so that they all refer to a single point: it suffices to intersect suitable parallels.
+
+    Let $T$ be the intersection of the line through $Y$ parallel to~$CA$ and the line through $Z$ parallel to~$AB$; lines $CA$ and~$AB$ are not parallel, so $T$ exists and is unique. By the criterion above $A_{CAT} = A_{CAY}$ and $A_{ABT} = A_{ABZ}$, so
+    $$
+    \eqalign{
+        A_{BCT} &= A_{ABC} - A_{CAT} - A_{ABT} \cr
+        &= A_{ABC} - A_{CAY} - A_{ABZ} = A_{BCX},\cr
+    }
+    $$
+    where the last equality is exactly the condition from the statement. Hence $X$ and~$T$ lie on the same parallel to~$BC$.
+
+    Denote by $H$ the orthocenter of triangle $ABC$. Points $X$, $H$ lie on the altitude from~$A$, which is perpendicular to $BC$; similarly $Y$, $H$ lie on the altitude from~$B$, perpendicular to $CA$, and $Z$, $H$ on the altitude from~$C$, perpendicular to $AB$.
+
+    If $T = H$, then $H$ would lie on the same parallel to~$BC$ as~$X$ and at the same time on the altitude from~$A$; these two lines are perpendicular, so they have a unique common point and $X = H$. Similarly $Y = H$ and $Z = H$, contradicting that $XYZ$ is a triangle. Therefore $T \neq H$ and the circle $k$ with diameter $HT$ is well defined.
+
+    Point $X$ lies on $k$: for $X = H$ and $X = T$ this is clear, otherwise line $XH$ is the altitude from~$A$ and line $XT$ is a parallel to~$BC$, and these are perpendicular, so $\angle HXT = 90^\circ$ and $X$ lies on $k$ by Thales's theorem. Similarly $Y$ (the altitude from~$B$ is perpendicular to $CA$) and $Z$ (the altitude from~$C$ is perpendicular to $AB$) lie on $k$.
+
+    Circle $k$ passes through $X$, $Y$, $Z$, and since these form a triangle, $k$ is precisely its circumcircle. It therefore passes through $H$.
+}
 
 \EnvId{V8qpCa8IyPgddyS2NJS8Y-triangle-with-perimeter-four}
 \Problem{0}{}{
@@ -452,7 +1456,39 @@ A few constructions I particularly find very adorable. Not necessarily the harde
     Well, this line is the radical axis of $A$ and the $A$-excircle! And $F$ lies on it. We are closing in.
 }{
     The final point to draw is the tangency point of the excircle and $BC$. Using the fact that $F$ lies on this radical axis, we get some nice equal lengths. 
-}{}
+}{
+    The perimeter is 4, so the semiperimeter is 2, and $AP = AQ = 1$ is exactly half of it. The semiperimeter shows up in triangle geometry as the distance from a~vertex to the tangency points of the excircle opposite that vertex, so let us add that circle to the diagram.
+
+    Denote $a = BC$, $b = CA$, $c = AB$, so that $a + b + c = 4$, and let $\omega$ be the $A$-excircle of triangle~$ABC$. It touches side~$BC$ at~$U$ and the extensions of sides $AB$, $AC$ beyond $B$, $C$ at $V$, $W$ respectively. Write $p(M,\gamma)$ for the power of a~point $M$ with respect to a~circle $\gamma$.
+
+    Equal tangent lengths from a~point give $BV = BU$, $CW = CU$ and $AV = AW$, and since $U$ lies on segment~$BC$, we get
+    $$
+    AV + AW = (c + BU) + (b + CU) = a + b + c = 4.
+    $$
+    Therefore $AV = AW = 2$, and hence also $BU = BV = 2 - c$ and $CU = CW = 2 - b$.
+
+    Points $P$, $V$ lie on the same ray from~$A$ and $AP = 1 = \tfrac12 AV$, so $P$ is the midpoint of segment~$AV$; similarly $Q$ is the midpoint of segment~$AW$. Line~$PQ$ is thus the image of line~$VW$, the polar of~$A$ with respect to~$\omega$, under the homothety centered at~$A$ with coefficient $\tfrac12$. This is no coincidence, and it can be put much more usefully: line~$PQ$ is the radical axis of~$\omega$ and the circle of radius zero centered at~$A$.
+
+    The power of a~point $M$ with respect to this degenerate circle is $MA^2$, and the standard proof that the points of equal power with respect to two non-concentric circles form a~line perpendicular to the line of their centers works for radius zero as well. The point~$A$ lies outside~$\omega$, since $p(A,\omega) = AV^2 = 4 > 0$, so it is not the center of~$\omega$ and this radical axis really is a~line. Line~$AB$ is tangent to~$\omega$ at~$V$, therefore
+    $$
+    p(P,\omega) = PV^2 = PA^2,
+    $$
+    where the second equality holds precisely because $P$ is the midpoint of segment~$AV$; similarly $p(Q,\omega) = QW^2 = QA^2$. Points $P$, $Q$ are distinct, since they lie at distance 1 on different rays from~$A$, so the radical axis we want is exactly line~$PQ$.
+
+    Point~$X$ lies on line~$PQ$, so $XA^2 = p(X,\omega)$. It also lies on line~$BC$, which is tangent to~$\omega$ at~$U$, so $p(X,\omega) = XU^2$. We get
+    $$
+    XA = XU.
+    $$
+
+    Segment~$AX$ divides triangle~$ABC$ into triangles $ABX$ and $ACX$. Both $U$ and $X$ lie on segment~$BC$, so $X$ lies on segment~$BU$ or on segment~$UC$. In the first case $BX + XU = BU$ and the perimeter of triangle~$ABX$ is
+    $$
+    AB + BX + XA = c + BX + XU = c + BU = 2.
+    $$
+    In the second case $CX + XU = CU$ and the perimeter of triangle~$ACX$ is
+    $$
+    AC + CX + XA = b + CX + XU = b + CU = 2.
+    $$
+}
 
 \EnvId{hWnbfKi7JKW34d1E7tUxF-circles-over-the-four-sides}
 \Problem{0}{}{
@@ -460,10 +1496,50 @@ A few constructions I particularly find very adorable. Not necessarily the harde
 }{
     Imagine the desired magic circle and try to guess where its center might be. Think about where the centers of our four Thales circles are.
 }{
-    The center of the circle will be the midpoint of a diagonal --- only one of them works, so try both and do not give up. 
+    The center of the circle will be the midpoint of a diagonal; only one of them works, so try both and do not give up. 
 }{
     The distances from this center to the centers of the Thales circles follow from the midpoint theorem. It remains to compute the desired radius and verify that our magic condition guarantees it.
-}{}
+}{
+    Let $a = AB$, $b = BC$, $c = CD$, $d = DA$ and let $P$, $Q$, $R$, $S$ be the midpoints of sides $AB$, $BC$, $CD$, $DA$ respectively. The Thales circles from the statement are thus $\omega_P$ with center~$P$ and radius $a/2$, $\omega_Q$ with center~$Q$ and radius $b/2$, $\omega_R$ with center~$R$ and radius $c/2$ and $\omega_S$ with center~$S$ and radius $d/2$.
+
+    We have to build the center of the circle we are after out of something, and the only thing we know about the four given circles is where their centers are: they are midpoints of sides. When the picture is full of midpoints of segments, it is worth adding another midpoint to produce midlines, and the natural candidates are the midpoints of the diagonals. Diagonal~$AC$ moreover splits the sides into the pairs $\{AB, BC\}$ and $\{CD, DA\}$, exactly the way the assumption $a + b = c + d$ groups them. So let us try its midpoint.
+
+    Let $O$ be the midpoint of~$AC$. In triangle~$ABC$ the points $O$, $P$ are the midpoints of sides $CA$, $AB$ and $O$, $Q$ are the midpoints of sides $AC$, $CB$; in triangle~$ACD$ the points $O$, $R$ are the midpoints of sides $CA$, $CD$ and $O$, $S$ are the midpoints of sides $AC$, $AD$. The midpoint theorem thus gives
+    $$
+    \gather
+    OP = \tfrac12 BC = \tfrac b2, \qquad OQ = \tfrac12 AB = \tfrac a2, \\
+    OR = \tfrac12 DA = \tfrac d2, \qquad OS = \tfrac12 CD = \tfrac c2.
+    \endgather
+    $$
+    We assumed nothing about the shape of the quadrilateral, and everything from here on is just work with these four distances.
+
+    The crossing is what matters: the distance from~$O$ to the center of the circle with diameter~$AB$ is half the length of~$BC$ and vice versa. Therefore
+    $$
+    \gather
+    OP + \tfrac a2 = OQ + \tfrac b2 = \tfrac{a+b}2, \\
+    OR + \tfrac c2 = OS + \tfrac d2 = \tfrac{c+d}2,
+    \endgather
+    $$
+    and thanks to the assumption $a + b = c + d$ all four values are equal. Denote this common value $\rho = (a+b)/2 = (c+d)/2$ (it is a quarter of the perimeter of the quadrilateral) and let $\Omega$ be the circle with center~$O$ and radius~$\rho$.
+
+    It remains to verify the tangency. If two circles have radii $\rho > r > 0$ and their centers are at distance $\rho - r > 0$, they are internally tangent: the smaller one lies inside the larger one and the only common point is the intersection of the larger circle with the ray from the center of the larger one to the center of the smaller one. (External tangency would mean a distance of centers $\rho + r$, which is not the case here.) The previous equalities say exactly this:
+    $$
+    OP = \rho - \tfrac a2 = \tfrac b2 > 0, \qquad OQ = \rho - \tfrac b2 = \tfrac a2 > 0,
+    $$
+    $$
+    OR = \rho - \tfrac c2 = \tfrac d2 > 0, \qquad OS = \rho - \tfrac d2 = \tfrac c2 > 0,
+    $$
+    where all four radii $a/2$, $b/2$, $c/2$, $d/2$ are positive and smaller than~$\rho$. So circle~$\Omega$ is internally tangent to all four Thales circles, which lie in its interior.
+
+    Finally, why the other diagonal does not work. If $O'$ is the midpoint of~$BD$, the same reasoning in triangles~$ABD$ and~$CBD$ gives $O'P = d/2$, $O'S = a/2$, $O'Q = c/2$ and $O'R = b/2$, so this time
+    $$
+    \gather
+    O'P + \tfrac a2 = O'S + \tfrac d2 = \tfrac{a+d}2, \\
+    O'Q + \tfrac b2 = O'R + \tfrac c2 = \tfrac{b+c}2.
+    \endgather
+    $$
+    A circle with center~$O'$ internally tangent to all four would therefore require $a + d = b + c$, which is a different condition from the given one. Diagonal~$BD$ groups the sides into the pairs $\{AB, DA\}$ and $\{BC, CD\}$, and that is a grouping the assumption does not give us.
+}
 
 \EnvId{KWvpK6SAI-wBt88-OpQjm-hexagon-with-an-inscribed-circle}
 \Problem{0}{}{
@@ -472,7 +1548,46 @@ A few constructions I particularly find very adorable. Not necessarily the harde
     Draw three circles such that the diagonals $AD$, $BE$, $CF$ are radical axes. It is tricky.
 }{
     One of the circles is tangent to rays opposite to $BA$ and $DE$. Analogously the others. The only trick is to place them so that the radical axes work. For that, we definitely need to use the incircle of $ABCDEF$.
-}{}
+}{
+    Three concurrent lines call for a radical center, so we are looking for three circles whose radical axes are exactly $AD$, $BE$, $CF$; the only thing the problem gives us is the incircle, and the power of a vertex is something we can get hold of when a tangent passes through it.
+
+    Let $ABCDEF$ be convex and let its incircle~$\omega$ with center~$O$ and radius~$r$ touch the sides $AB$, $BC$, $CD$, $DE$, $EF$, $FA$ at the points $P$, $Q$, $R$, $S$, $T$, $U$ respectively; these points lie on~$\omega$ in this order as well, traversed in the same direction as the vertices. Denote the tangent lengths from the vertices
+    $$
+    \gather
+    a = AP = AU, \quad b = BP = BQ, \quad c = CQ = CR,\\
+    d = DR = DS, \quad e = ES = ET, \quad f = FT = FU.
+    \endgather
+    $$
+
+    For a point~$M$ on a tangent of a circle~$\omega'$ with tangency point~$Z$ we have $p(M,\omega') = MZ^2$, where $p(M,\omega')$ denotes the power of the point~$M$ with respect to the circle~$\omega'$. So let the circle~$\omega_1$ touch the lines of the opposite sides $AB$, $DE$ at the points $P_1$, $S_1$, the circle~$\omega_2$ the lines $BC$, $EF$ at the points $Q_1$, $T_1$ and the circle~$\omega_3$ the lines $CD$, $FA$ at the points $R_1$, $U_1$. Each vertex then lies on a tangent of exactly two of them, for instance~$B$ on the tangents $AB$, $BC$ of the circles $\omega_1$, $\omega_2$, and the line~$BE$ will be the radical axis of the circles $\omega_1$, $\omega_2$ as soon as $BP_1 = BQ_1$ and $ES_1 = ET_1$. So we want the two tangency points at each vertex to be equidistant from it.
+
+    The original tangency points satisfy this, but they give $\omega_1 = \omega_2 = \omega_3 = \omega$. We therefore slide them along the sides by the same length, alternately in the direction of the traversal and against it: exactly one of the vertices $B$, $D$, $F$ lies on each side, and we slide the tangency point toward it, and past it. Choose $t > \max(b,d,f)$ and let the points $P_1$, $Q_1$ lie on the rays opposite to $BA$, $BC$ at distance $t-b$ from~$B$, the points $R_1$, $S_1$ on the rays opposite to $DC$, $DE$ at distance $t-d$ from~$D$ and the points $T_1$, $U_1$ on the rays opposite to $FE$, $FA$ at distance $t-f$ from~$F$. Then
+    $$
+    \gather
+    AP_1 = AU_1 = a+t, \quad BP_1 = BQ_1 = t-b,\\
+    CQ_1 = CR_1 = c+t, \quad DR_1 = DS_1 = t-d,\\
+    ES_1 = ET_1 = e+t, \quad FT_1 = FU_1 = t-f,
+    \endgather
+    $$
+    for instance $AP_1 = AB + BP_1 = (a+b)+(t-b)$ and $CQ_1 = CB + BQ_1 = (b+c)+(t-b)$.
+
+    It remains to show that a circle touching $AB$ at~$P_1$ and $DE$ at~$S_1$ exists at all; this is exactly where the alternation of directions pays off. Let~$m_1$ be the perpendicular bisector of~$PS$ and~$\sigma$ the reflection in it. From $OP = OS = r$ the line~$m_1$ passes through~$O$, so~$\sigma$ maps~$\omega$ to itself, the point~$P$ to the point~$S$, and hence also the tangent~$AB$ to the tangent~$DE$. Since the hexagon is convex, as we traverse $A$, $B$, $C$, $D$, $E$, $F$ the center~$O$ stays on the same side of every side line, say on the left. A reflection is an orientation-reversing congruence and swaps left for right: the direction $A \to B$, which at~$P$ has the center~$O$ on the left, is therefore mapped to the direction of the line~$DE$ that at~$S$ has the center~$O$ on the right, that is, to the direction $E \to D$. And $P_1$, $S_1$ arose by sliding by~$t$ in exactly these two directions, so $\sigma(P_1) = S_1$.
+
+    The line~$m_1$ is not perpendicular to~$AB$: otherwise it would coincide with the line~$OP$, the only perpendicular to~$AB$ through~$O$, and~$\sigma$ would fix~$P$, that is, $P = S$. The perpendicular to~$AB$ at~$P_1$ therefore meets~$m_1$ at a unique point~$O_1$; $\sigma$ fixes it and maps this perpendicular to the perpendicular to~$DE$ at~$S_1$, so $O_1P_1 = O_1S_1$ and the circle~$\omega_1$ with center~$O_1$ and radius~$O_1P_1$ is the one we want. A zero radius would mean $O_1 = P_1 = S_1$, that is, that~$P_1$ is the intersection of the distinct lines $AB$, $DE$ (they are distinct, since they touch~$\omega$ at distinct points); for a given pair of opposite sides this rules out at most one value of~$t$, so at most three in total, and we choose~$t$ outside them. Finally $O_1 \neq O$, because~$O$ lies on the perpendicular to~$AB$ at~$P$ and~$O_1$ on the parallel perpendicular at $P_1 \neq P$. Similarly we construct~$\omega_2$ with center~$O_2$ on the perpendicular bisector~$m_2$ of~$QT$ and~$\omega_3$ with center~$O_3$ on the perpendicular bisector~$m_3$ of~$RU$.
+
+    The circles are pairwise non-concentric. The perpendicular bisectors $m_1$, $m_2$, $m_3$ pass through~$O$ and are pairwise distinct: the points $P$, $Q$, $S$, $T$ lie on~$\omega$ in this cyclic order, so the chords $PS$ and~$QT$ cross and are not parallel, hence neither do the perpendiculars to them through~$O$ coincide, that is,~$m_1$ and~$m_2$; analogously for the pairs $QT$, $RU$ and $RU$, $PS$. The lines $m_1$, $m_2$, $m_3$ thus have a unique common point~$O$, and since~$O_i$ lies on~$m_i$ and $O_i \neq O$, the centers $O_1$, $O_2$, $O_3$ are pairwise distinct.
+
+    The vertices lie on tangents of the respective circles, so
+    $$
+    \gather
+    p(B,\omega_1) = (t-b)^2 = p(B,\omega_2),\\
+    p(E,\omega_1) = (e+t)^2 = p(E,\omega_2).
+    \endgather
+    $$
+    The distinct points $B$, $E$ therefore lie on the radical axis of the circles $\omega_1$, $\omega_2$, which is thus the line~$BE$. Analogously the values $(c+t)^2$ at~$C$ and $(t-f)^2$ at~$F$ make $CF$ the radical axis of the circles $\omega_2$, $\omega_3$, and the values $(a+t)^2$ at~$A$ and $(t-d)^2$ at~$D$ make $AD$ the radical axis of the circles $\omega_1$, $\omega_3$.
+
+    Three pairwise non-concentric circles either have a radical center, through which all three radical axes pass, or their centers lie on one line, in which case all three radical axes are perpendicular to that line and hence parallel or identical. The second possibility is ruled out: the diagonal~$AD$ divides the convex hexagon into $ABCD$ and $ADEF$, so $B$ and~$E$ lie in opposite half-planes determined by the line~$AD$ and the segment~$BE$ meets it at a unique point. Hence the diagonals $AD$, $BE$, $CF$ pass through one point, the radical center of the circles $\omega_1$, $\omega_2$, $\omega_3$.
+}
 
 \DisplayHints
 

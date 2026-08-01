@@ -1,0 +1,1466 @@
+\input _template
+
+\let\angle\sphericalangle
+
+\setlanguage{EN}
+
+\Title{Power of a point}
+
+\MathcompsLink{power-of-a-point}
+
+\Author{Patrik Bak}
+
+\sec Introduction
+
+A short summary of the theory around the power of a point with respect to a circle and around radical axes, together with a collection of my favorite problems. In difficulty the problems are mostly around the level of IMO problems, so the collection is not entirely suitable for complete beginners in this topic.
+
+\sec Theory
+
+\secc Power of a point
+
+Throughout this handout, by the term \textit{circle} we will also mean a circle of \textbf{radius zero}; points will therefore be circles as well, and it will be very useful to view them this way. A tangent to such a point circle is any line that passes through it.
+
+\EnvId{q5vKReaZh9YdoHl1lv6TN-power-of-a-point}
+\Definition{Power of a point}{
+    A circle $\omega(O,r)$ with $r \geq 0$ is given. To every point $M$ we assign the number
+    $$
+    p(M,\omega)=MO^2-r^2,
+    $$
+    which we call the \textit{power of the point} $M$ with respect to the circle $\omega$.
+}
+
+A couple of obvious observations:
+
+\begitems \style a
+\i The power of a point with respect to a point is the square of their distance.
+\i Points on the circle have power zero, points outside the circle have positive power and points inside the circle have negative power.
+\enditems
+
+The definition above gives a useful criterion for whether two points are at the same distance from the center of such a circle: \textit{if and only if they have the same power}. That will be useful once we have other ways to compute the power, namely:
+
+\EnvId{HmXxrFnftLoPVMg7DqFVc-power-equals-tangent-squared}
+\Theorem{tangent connection}{
+    Let $M$ be a point lying outside a circle $\omega$. Denote by $T$ the point of tangency of the tangent from $M$ to $\omega$. Then $p(M,\omega)=MT^2$.
+
+    \Image{power-of-a-point-tangent-squared.pdf}
+}{
+    Let $O$ be the center and $r$ the radius of $\omega$. The tangent touches $\omega$ at $T$, so $OT \perp MT$, and by the Pythagorean theorem in the right triangle $\triangle MTO$ we have
+    $$
+    MT^2 = MO^2 - OT^2 = MO^2 - r^2 = p(M,\omega).
+    $$
+    For a point circle we have $T=O$, and the equality $MT^2 = MO^2 = p(M,\omega)$ follows directly from the definition.
+}
+
+\EnvId{qgGI99UW395o07NqbxGi2-power-as-secant-product}
+\Theorem{}{
+    A point $M$ not lying on a circle $\omega$ is given. A line passing through $M$ meets the circle at points $A$, $B$. Then we have:
+    \begitems \style i
+    \i $p(M,\omega)=MA \cdot MB$, if $M$ lies outside $\omega$,
+       \Image{power-of-a-point-secant-outside.pdf}
+    \i $p(M,\omega) = -MA \cdot MB$, if $M$ lies inside $\omega$.
+       \Image{power-of-a-point-secant-inside.pdf}
+    \enditems
+    For a tangent we have $A=B$, and in the limit we get the previous statement.
+}{
+    Let $O$, $r$ be the center and the radius of $\omega$, and let $S$ be the midpoint of the chord $AB$. Then $OS \perp AB$, so by the Pythagorean theorem $SA^2 = r^2 - SO^2$ and $MO^2 = MS^2 + SO^2$. Together
+    $$
+    p(M,\omega) = MO^2 - r^2 = MS^2 - SA^2.
+    $$
+    Moreover, the points of line $AB$ lying inside $\omega$ are exactly the interior points of segment $AB$.
+
+    (i) The point $M$ lies outside $\omega$, hence outside segment $AB$, and so $MA$, $MB$ are, in some order, the numbers $MS - SA$ and $MS + SA$. Their product is $MS^2 - SA^2 = p(M,\omega)$.
+
+    (ii) The point $M$ lies inside $\omega$, hence inside segment $AB$, and so $MA$, $MB$ are, in some order, the numbers $SA - MS$ and $SA + MS$. Their product is $SA^2 - MS^2 = -p(M,\omega)$.
+}
+
+Basic statements that show how to prove something and how to move the power around. Let us add that the equivalence is important here:
+
+\EnvId{nOsz2UjP-4wT_8FHcRl3r-cyclic-quadrilateral-criterion}
+\Theorem{concyclicity criterion}{
+    Let lines $AB$ and $CD$ meet at a point $P$ that lies outside both segments $AB$, $CD$, or inside both. Then the points $A$, $B$, $C$, $D$ are concyclic if and only if $PA \cdot PB = PC \cdot PD$.
+
+    \Image{power-of-a-point-cyclic-outside.pdf}
+
+    \Image{power-of-a-point-cyclic-inside.pdf}
+}{
+    \textit{($\Rightarrow$)} Let $A$, $B$, $C$, $D$ lie on a circle $\omega$. If $P$ lies outside both segments, it lies outside $\omega$ and by the previous theorem $PA \cdot PB = p(P,\omega) = PC \cdot PD$. If $P$ lies inside both segments, it lies inside $\omega$ and likewise $PA \cdot PB = -p(P,\omega) = PC \cdot PD$.
+
+    \textit{($\Leftarrow$)} The lines $AB$, $CD$ are distinct, so $C$ does not lie on $AB$ and the circle $\omega = (ABC)$ exists. Let $D'$ be the second intersection point of line $CD$ with $\omega$ (if this line is a tangent, we set $D'=C$). The point $P$ lies outside $\omega$ if it lies outside segment $AB$, and inside $\omega$ if it lies inside it. By the previous theorem the products $PC \cdot PD'$ and $PA \cdot PB$ are therefore both equal to $|p(P,\omega)|$, hence $PC \cdot PD' = PC \cdot PD$ and $PD' = PD$.
+
+    If $P$ lies outside $\omega$, it lies outside both segments $CD$ and $CD'$, so both $D$ and $D'$ lie on ray $PC$. If $P$ lies inside $\omega$, it lies inside both of these segments, so both $D$ and $D'$ lie on the ray opposite to ray $PC$. In both cases $D=D'$, hence $D$ lies on $\omega$.
+}
+
+\EnvId{a8dwZpGu9QODJC4M0DTN4-tangent-criterion}
+\Theorem{tangent criterion}{
+    Let $A$, $B$, $T$ not lie on one line and let $P$ be a point of line $AB$ lying outside segment $AB$. Then $PT$ is the tangent to the circle $(TAB)$ at $T$ if and only if $PT^2 = PA \cdot PB$.
+
+    \Image{power-of-a-point-tangent-criterion.pdf}
+}{
+    Denote by $\omega$ the circle $(TAB)$. The point $P$ lies on line $AB$ outside segment $AB$, hence outside $\omega$, and since $T$ does not lie on line $AB$, we have $P \neq T$.
+
+    \textit{($\Rightarrow$)} If $PT$ is the tangent to $\omega$ at $T$, then by the tangent connection theorem $PT^2 = p(P,\omega)$, and by the secant theorem $p(P,\omega) = PA \cdot PB$.
+
+    \textit{($\Leftarrow$)} Let $PT^2 = PA \cdot PB$ and let $T'$ be the second intersection point of line $PT$ with $\omega$ (in the case of tangency $T'=T$). Then $PT \cdot PT' = p(P,\omega) = PA \cdot PB = PT^2$, hence $PT' = PT$. The point $P$ lies outside $\omega$, hence outside segment $TT'$, so both $T$ and $T'$ lie on the same ray from $P$; therefore $T'=T$. Line $PT$ thus has a unique common point with $\omega$, so it is its tangent at $T$.
+}
+
+\Remark The last statement is in fact the previous one in the limiting case $C=D=T$.
+
+Let us add that a very well-known situation in a right triangle is in fact a power of a point, and it is very effective to view it this way:
+
+\EnvId{RzGZGM_MsN0RXoAbAbHR0-euclid-right-triangle-relations}
+\Theorem{Euclid's theorems}{
+    Let $ABC$ be a right triangle with the right angle at vertex $A$ and let $D$ be the foot of the altitude from vertex $A$. Then we have:
+    \begitems \style i
+    \i $BA^2 = BD \cdot BC$ and $CA^2 = CD \cdot CB$ (Euclid's leg theorems),
+    \i $DA^2 = DB \cdot DC$ (Euclid's altitude theorem).
+    \enditems
+
+    \Image{power-of-a-point-euclid.pdf}
+}{
+    (i) Let $\omega$ be the circle with diameter $AC$. Since $\angle ADC = 90^\circ$, the point $D$ lies on $\omega$, and since $\angle BAC = 90^\circ$, the line $BA$ is the tangent to $\omega$ at $A$; therefore $B$ lies outside $\omega$. The angles at $B$ and $C$ are acute, so $D$ lies inside segment $BC$ and line $BC$ meets $\omega$ at points $D$, $C$. We can thus compute the power of the point $B$ with respect to $\omega$ in two ways:
+    $$
+    BA^2 = p(B,\omega) = BD \cdot BC.
+    $$
+    We get the relation $CA^2 = CD \cdot CB$ analogously from the circle with diameter $AB$.
+
+    (ii) Let $\omega$ be the circle with diameter $BC$; from $\angle BAC = 90^\circ$ the point $A$ lies on $\omega$. The center of $\omega$ lies on line $BC$, so $\omega$ is symmetric about $BC$ and the image $A'$ of $A$ under this reflection also lies on $\omega$. The point $D$ lies inside segment $BC$, hence inside $\omega$, and the lines $AA'$ and $BC$ pass through it, so
+    $$
+    -DA \cdot DA' = p(D,\omega) = -DB \cdot DC.
+    $$
+    Since $DA' = DA$, we get $DA^2 = DB \cdot DC$.
+}
+
+\secc Radical axes
+
+The real strength of the power shows once we start adding circles.
+
+\EnvId{XBduUVr4Jdb3eJSZM1fVf-radical-axis}
+\Definition{Radical axis}{
+    Let $\omega_1$, $\omega_2$ be non-concentric circles. The \textit{radical axis} of the circles $\omega_1$, $\omega_2$ is the set of points that have the same power with respect to both.
+}
+
+The definition above could perfectly well be defining the empty set (convince yourself that this is what happens for concentric circles, for instance). The following statement says that it is not:
+
+\EnvId{-z84pNXmae4G3tWLgqWDC-constant-power-difference-locus}
+\Theorem{}{
+    Let non-concentric circles $\omega_1$, $\omega_2$ with centers $O_1$, $O_2$ and a real number $c$ be given. Then the locus of points $M$ for which $p(M,\omega_1)-p(M,\omega_2)=c$ is a line perpendicular to $O_1O_2$.
+}{
+    Choose coordinates with the $x$-axis on the line $O_1O_2$, so $O_1 = (0,0)$ and $O_2 = (d,0)$, where $d \neq 0$; let $r_1$, $r_2$ be the radii of the circles $\omega_1$, $\omega_2$. For a point $M = (x,y)$ we have
+    $$
+    \gather
+    p(M,\omega_1) - p(M,\omega_2) = \\ =
+    (x^2+y^2-r_1^2) - ((x-d)^2+y^2-r_2^2) = \\ =
+    2dx - d^2 - r_1^2 + r_2^2.
+    \endgather
+    $$
+    The condition under study is therefore equivalent to the equation
+    $$
+    x = \frac{c + d^2 + r_1^2 - r_2^2}{2d},
+    $$
+    which, thanks to $d \neq 0$, determines exactly one line, namely the line perpendicular to the $x$-axis, hence to $O_1O_2$.
+}
+
+The statement above opens up a technique for proving that three points are collinear: it is enough to find two circles for which the points have the same power difference. As a bonus we even get perpendicularity to the line through the centers. Conversely, when we are asked to prove a perpendicularity, maybe it is a hidden power difference.
+
+The following important statement says that in many common situations we in fact get the radical axis for free.
+
+\EnvId{zedTr6CBbabH3-Wv8DOjf-radical-axis-basic-cases}
+\Theorem{}{
+    Let $m$ be the radical axis of non-concentric circles $\omega_1$, $\omega_2$. Then:
+    \begitems \style i
+    \i If $\omega_1$, $\omega_2$ meet at points $A$, $B$, then $m$ is the line $AB$.
+       \Image{power-of-a-point-radical-axis.pdf}
+    \i If they are tangent at a point $T$, then $m$ is their common tangent at $T$.
+       \Image{power-of-a-point-radical-tangent.pdf}
+    \i If $\omega_1$ is a point circle, that is, a point $P$ lying outside $\omega_2$, then $m$ is the midline of triangle $PT_1T_2$ parallel to $T_1T_2$, where $T_1$, $T_2$ are the points of tangency of the tangents from $P$ to $\omega_2$.
+       \Image{power-of-a-point-radical-point-circle.pdf}
+    \i If both circles are point circles, that is, we have two distinct points, then $m$ is the perpendicular bisector of the segment joining them.
+       \Image{power-of-a-point-radical-two-points.pdf}
+    \enditems
+}{
+    The radical axis is the case $c = 0$ of the previous statement, so $m$ is a line perpendicular to $O_1O_2$. In the first three cases it therefore suffices to pin it down by two of its points.
+
+    (i) The points $A$, $B$ lie on both circles, so $p(A,\omega_1) = 0 = p(A,\omega_2)$ and likewise for $B$. Both therefore lie on $m$, and since $m$ is a line, $m = AB$.
+
+    (ii) The point $T$ lies on both circles, so as above $T \in m$. The tangent to $\omega_1$ at $T$ is perpendicular to $O_1T$ and the tangent to $\omega_2$ at $T$ is perpendicular to $O_2T$; since for a tangency $T$ lies on the line $O_1O_2$, in both cases this is the perpendicular to $O_1O_2$ at $T$, and so is $m$.
+
+    (iii) Let $r_2$ be the radius of $\omega_2$ and let $M_1$ be the midpoint of $PT_1$. Since $O_2T_1 \perp PT_1$, the Pythagorean theorem gives $p(M_1,\omega_2) = M_1O_2^2 - r_2^2 = M_1T_1^2$. At the same time $p(M_1,\omega_1) = M_1P^2 = M_1T_1^2$, because $\omega_1$ is the point $P$ and $M_1$ is the midpoint of $PT_1$. Hence $M_1 \in m$, and analogously the midpoint $M_2$ of $PT_2$ lies on $m$ as well. Thus $m = M_1M_2$, which is the midline of triangle $PT_1T_2$ parallel to $T_1T_2$.
+
+    (iv) If both circles are point circles, that is, we have points $P$, $Q$, then the condition $p(M,\omega_1) = p(M,\omega_2)$ reads $MP^2 = MQ^2$, that is, $MP = MQ$. This is exactly the perpendicular bisector of $PQ$.
+}
+
+Finally we come to a very strong and much used statement about how to prove that three lines meet at a single point: maybe they are radical axes.
+
+\EnvId{ZUA58FjEepVvUI6GsXJUG-three-radical-axes-concurrent}
+\Theorem{radical center}{
+    Three pairwise non-concentric circles are given, and for each pair of them we construct the radical axis. If the centers of the circles are not collinear, these three radical axes have a unique common point called the \textit{radical center}, and it is the only point of the plane with the same power with respect to all three circles. If the centers are collinear, the three radical axes are parallel, or else all three coincide.
+
+    \Image{power-of-a-point-radical-center.pdf}
+}{
+    Denote the given circles by $\omega_1$, $\omega_2$, $\omega_3$, their centers by $O_1$, $O_2$, $O_3$, and by $m_{ij}$ the radical axis of the circles $\omega_i$, $\omega_j$. By the statement about the locus of points with a given power difference, for $c=0$ each $m_{ij}$ is a line perpendicular to $O_iO_j$.
+
+    Suppose the centers are not collinear. Then the lines $O_1O_2$ and $O_1O_3$ are not parallel, hence neither are $m_{12}$ and $m_{13}$, and they have a unique common point $X$. For it we have $p(X,\omega_1)=p(X,\omega_2)$ as well as $p(X,\omega_1)=p(X,\omega_3)$, so $p(X,\omega_2)=p(X,\omega_3)$ and $X$ lies on $m_{23}$ too. Conversely, every point with the same power with respect to all three circles lies on both $m_{12}$ and $m_{13}$, hence it is the point $X$.
+
+    Suppose the centers lie on a line $\ell$. All three radical axes are perpendicular to $\ell$, so they are mutually parallel or they coincide. If two of them coincide, say $m_{12}=m_{13}$, then every point of this line has the same power with respect to all three circles, hence it lies on $m_{23}$ as well; since $m_{23}$ is also perpendicular to $\ell$, it coincides with them. So either all three radical axes are distinct and parallel, or all three coincide.
+}
+
+A practical application of our statement is the following concyclicity criterion.
+
+\EnvId{K31lIglbW9TMnypXQGshL-concyclic-via-radical-axis}
+\Theorem{}{
+    On non-concentric circles $\omega_1$, $\omega_2$ we are given pairwise distinct points $K_1$, $K_2$ (on $\omega_1$) and $L_1$, $L_2$ (on $\omega_2$), where the lines $K_1K_2$, $L_1L_2$ are distinct. Then the following statements are equivalent:
+    \begitems \style n
+    \i The points $K_1, K_2, L_1, L_2$ are concyclic.
+    \i The lines $K_1K_2$, $L_1L_2$ meet on the radical axis of the circles $\omega_1$ and $\omega_2$, or are parallel to it.
+    \enditems
+
+    \Image{power-of-a-point-concyclic.pdf}
+
+    \Image{power-of-a-point-concyclic-inside.pdf}
+}{
+    Denote by $m$ the radical axis of the circles $\omega_1$, $\omega_2$ and by $O_1$, $O_2$ their centers.
+
+    $(1) \Rightarrow (2)$: Let $\omega_3$ be the circle passing through all four points. If $\omega_3=\omega_1$, then $L_1$, $L_2$ lie on $\omega_1$ as well as on $\omega_2$, so $m$ is the line $L_1L_2$; the line $K_1K_2$ either meets it, and the intersection point lies on $m$, or is parallel to it, so (2) holds. Analogously for $\omega_3=\omega_2$. So suppose $\omega_3$ is different from both $\omega_1$ and $\omega_2$; since it has a common point with each of them, it is not concentric with it. The circles $\omega_1$, $\omega_3$ meet at the points $K_1$, $K_2$, so $K_1K_2$ is their radical axis, and likewise $L_1L_2$ is the radical axis of the circles $\omega_2$, $\omega_3$. If the centers $O_1$, $O_2$, $O_3$ are not collinear, these three radical axes pass through a single point, that is, $K_1K_2$ and $L_1L_2$ meet on $m$. If the centers are collinear, the three radical axes are parallel or all coincide; since $K_1K_2 \neq L_1L_2$, the first possibility occurs and both lines are parallel to $m$.
+
+    $(2) \Rightarrow (1)$: Suppose first that the lines meet at a point $P$ lying on $m$. If we had $p(P,\omega_1)=0$, then $P$ would lie on $\omega_1$ and on the line $K_1K_2$, so $P \in \{K_1,K_2\}$; from $p(P,\omega_2)=p(P,\omega_1)=0$ we get $P \in \{L_1,L_2\}$ in the same way, contradicting the fact that the given points are pairwise distinct. By the expression of the power through a secant, $p(P,\omega_1)=\varepsilon_1 PK_1 \cdot PK_2$ and $p(P,\omega_2)=\varepsilon_2 PL_1 \cdot PL_2$, where $\varepsilon_1=1$ if $P$ lies outside $\omega_1$, that is, outside segment $K_1K_2$, and $\varepsilon_1=-1$ if it lies inside $\omega_1$, that is, inside that segment; likewise for $\varepsilon_2$ and segment $L_1L_2$. Both powers are equal and nonzero, hence $\varepsilon_1=\varepsilon_2$ and $PK_1 \cdot PK_2 = PL_1 \cdot PL_2$. So $P$ lies outside both segments or inside both, and by the concyclicity criterion the points $K_1$, $K_2$, $L_1$, $L_2$ are concyclic.
+
+    Finally, suppose both lines are parallel to $m$, hence perpendicular to $O_1O_2$. The perpendicular bisector of $K_1K_2$ passes through $O_1$ and is perpendicular to $K_1K_2$, so it is the line $O_1O_2$; likewise $O_1O_2$ is the perpendicular bisector of $L_1L_2$. Choose coordinates so that $O_1O_2$ is the $x$-axis; then $K_{1,2}=(a,\pm h)$ and $L_{1,2}=(b,\pm k)$ for some $h,k>0$, where $a \neq b$, because the lines $K_1K_2$, $L_1L_2$ are distinct. For a point $S=(t,0)$ we have
+    $$
+    \gather
+    SK_1^2 = SK_2^2 = (a-t)^2+h^2, \\
+    SL_1^2 = SL_2^2 = (b-t)^2+k^2,
+    \endgather
+    $$
+    and since $a \neq b$, there exists $t$ with $2t(b-a) = b^2+k^2-a^2-h^2$, that is, with both right-hand sides equal. All four points then lie on the circle with center $S$.
+}
+
+\secc Further loci
+
+Let us state a generalization of our statement about the power difference.
+
+\EnvId{eFMS6b7LVyWPzibwagJaa-power-combination-locus}
+\Theorem{}{
+    Let non-concentric circles $\omega_1$, $\omega_2$ with centers $O_1$, $O_2$ and real numbers $\lambda$, $\mu$, $c$ be given, where $\lambda$, $\mu$ are not both zero; denote $s=\lambda+\mu$. Let us study the locus of points $M$ such that
+    $$
+    \lambda \cdot p(M,\omega_1) + \mu \cdot p(M,\omega_2) = c.
+    $$
+    If $s \neq 0$, it is a circle with center $S$ on the line $O_1O_2$ determined by $\overline{O_1S} = \frac{\mu}{s} \cdot \overline{O_1O_2}$; it may degenerate to a single point or to the empty set. If $s = 0$, it is a line perpendicular to $O_1O_2$, that is, the case from the previous subsection.
+}{
+    Choose coordinates so that $O_1=[0,0]$ and $O_2=[d,0]$, where $d=O_1O_2>0$; denote the radii by $r_1$, $r_2$. For a point $M=[x,y]$ the definition of the power gives the condition
+    $$
+    \lambda(x^2+y^2)+\mu\left((x-d)^2+y^2\right)=k,
+    $$
+    where $k=c+\lambda r_1^2+\mu r_2^2$ does not depend on $M$. Expanding, this is
+    $$
+    s(x^2+y^2)-2\mu d x+\mu d^2=k.
+    $$
+
+    Suppose $s \neq 0$. We divide by $s$ and complete the square:
+    $$
+    \left(x-\frac{\mu d}{s}\right)^2+y^2=\frac{k-\mu d^2}{s}+\frac{\mu^2 d^2}{s^2}.
+    $$
+    The point $S=\left[\frac{\mu d}{s},0\right]$ lies on the line $O_1O_2$ and satisfies $\overline{O_1S}=\frac{\mu}{s} \cdot \overline{O_1O_2}$. When the right-hand side is positive, the locus is a circle with center $S$; when it is zero, it is the single point $S$; and when it is negative, it is empty.
+
+    Suppose $s=0$. Then $\mu=-\lambda$, and since $\lambda$, $\mu$ are not both zero, $\mu \neq 0$. The quadratic terms cancel and we are left with $-2\mu d x=k-\mu d^2$, which for $\mu d \neq 0$ is the equation of a line perpendicular to the $x$-axis, hence to $O_1O_2$. The condition is then equivalent to $p(M,\omega_1)-p(M,\omega_2)=c/\lambda$, which is exactly the situation from the previous subsection.
+}
+
+Further remarkable consequences of this statement come from $\lambda=\mu=1$ and from $\lambda=1$, $\mu=-c$; here too the locus may degenerate to a single point or be empty:
+
+\EnvId{_7WluTG8CdUBbbR8Jfq-j-constant-power-sum-locus}
+\Theorem{}{
+    The locus of points $M$ such that $p(M,\omega_1)+p(M,\omega_2)=c$ is a circle with center at the midpoint of $O_1O_2$.
+}{
+    This is the previous statement for $\lambda=\mu=1$, where $s=2 \neq 0$. The center therefore satisfies $\overline{O_1S}=\frac{1}{2} \cdot \overline{O_1O_2}$, that is, $S$ is the midpoint of $O_1O_2$.
+}
+
+\EnvId{dvZ6Hj-IMjiwGiPBj4uVu-constant-power-ratio-locus}
+\Theorem{}{
+    For $c \neq 1$, the locus of points $M$ such that $p(M,\omega_1) = c \cdot p(M,\omega_2)$ is a circle with center on the line $O_1O_2$. For $c=1$ it is the radical axis of the circles $\omega_1$, $\omega_2$.
+}{
+    The condition $p(M,\omega_1)=c \cdot p(M,\omega_2)$ is exactly the condition of the previous general statement for $\lambda=1$, $\mu=-c$ and right-hand side $0$, so $s=1-c$.
+
+    For $c \neq 1$ we have $s \neq 0$ and the locus is a circle with center $S$ on the line $O_1O_2$, for which $\overline{O_1S}=\frac{c}{c-1} \cdot \overline{O_1O_2}$. For $c=1$ the condition reads $p(M,\omega_1)=p(M,\omega_2)$, which is the definition of the radical axis.
+}
+
+\secc Linearity of the power difference
+
+The difference of the powers of a point with respect to two circles can also be viewed as a function of the point, which sometimes comes in handy when computing our way through a problem.
+
+\EnvId{uV4t-dE4QfjMZzcs0NfmW-power-difference-linearity}
+\Theorem{linearity of the power difference}{
+    Let $\omega_1$, $\omega_2$ be circles and let $F(M) = p(M,\omega_1)-p(M,\omega_2)$. Then the function $F$ is affine: if a point $C$ lies on the line $AB$ and $\overline{AC} = t \cdot \overline{AB}$, then
+    $$
+    F(C) = (1-t) \cdot F(A) + t \cdot F(B).
+    $$
+}{
+    Choose arbitrary Cartesian coordinates and write $M=[x,y]$, $O_i=[a_i,b_i]$, where $r_i$ is the radius of $\omega_i$. In the difference
+    $$
+    F(M)=MO_1^2-r_1^2-MO_2^2+r_2^2
+    $$
+    the terms $x^2$ and $y^2$ cancel, so
+    $$
+    F(M)=2(a_2-a_1)x+2(b_2-b_1)y+e,
+    $$
+    where $e$ is a constant not depending on $M$. The function $F$ is therefore affine.
+
+    From $\overline{AC}=t \cdot \overline{AB}$ we get $x_C=(1-t)x_A+tx_B$ and $y_C=(1-t)y_A+ty_B$. Substituting into the formula for $F$ and using $(1-t)+t=1$ for the constant $e$, we obtain $F(C)=(1-t)F(A)+t \cdot F(B)$.
+}
+
+So once we know the power difference at two points of a line, we know it at every point of that line. For example, for the midpoint $M$ of $BC$ we have
+$$
+F(M) = \frac{F(B)+F(C)}{2}.
+$$
+
+It is commonly called the \uv{linearity of the power}, but I am not a fan. The first time I heard it, it confused me, because the power is quadratic. I think linearity of the power difference is more accurate \Laugh{}
+
+\sec Problems
+
+The collection of problems is divided into three sections:
+
+\begitems \style a
+\i useful lemmas that can be proved through power of a point, but whose proofs you do not need to know
+\i one-biters, problems with a relatively short but nice solution that is definitely not always easy to spot...personally these are my favorites
+\i tougher multi-step problems
+\enditems
+
+Within each section the problems are ordered by difficulty, but not across sections. Working through them straight in the listed order is not recommended. I recommend:
+
+\begitems
+\i knowing how to prove the shooting lemma and merely knowing the rest
+\i going through as many one-biters as you enjoy, or as many as you can manage; the difficulty grows there
+\i moving on to the multi-biters for tougher training
+\enditems
+
+\secc Well-known lemmas
+
+\EnvId{kPi40K-bCppJkE2T9MBOd-tangent-circle-chord-arc-midpoint}
+\Problem{0}{shooting lemma}{
+    Take a circle with a chord $AB$ and the midpoint $M$ of one of the arcs $AB$. Shoot two lines through $M$ meeting line $AB$ at $X$, $Y$ and the circle again at $X'$, $Y'$ respectively. Then $X$, $Y$, $X'$, $Y'$ are concyclic, or rather, in the degenerate case $X=X'=A$ this means that $MA$ is tangent to $(AYY')$.
+}{
+    The degenerate case is in fact a hint: angle-chase the tangency.
+}{
+    Once you have angle-chased the tangency, it is enough to use power of a point.
+}{
+    Denote by $\omega$ the given circle and by $O$ its center. From $MA=MB$ the line $OM$ is perpendicular to $AB$, so the tangent to $\omega$ at $M$ is parallel to $AB$: no shot line is a tangent, hence the second intersection point with $\omega$ always exists and is different from $M$.
+
+    \textbf{Lemma.} Let a line through $M$, different from $MA$ and $MB$, meet line $AB$ at $X$ and the circle $\omega$ again at $X'$. Then $MA$ is tangent to the circle $(AXX')$ at $A$.
+
+    The circle $(AXX')$ is well defined, because the only points of $\omega$ on line $AB$ are $A$ and $B$, which we have excluded. Let $X$ lie inside segment $AB$; then $X'$ lies on the arc $AB$ not containing $M$ and $X$ lies between $M$ and $X'$. We have
+    $$
+    \angle MAX = \angle MAB = \angle MBA = \angle MX'A = \angle XX'A,
+    $$
+    where the third equality is inscribed angles over the chord $AM$ (the order of the points on $\omega$ is $A$, $M$, $B$, $X'$, so $B$ and $X'$ lie on the same arc $AM$). Line $AM$ thus makes with the chord $AX$ an angle equal to the inscribed angle $\angle AX'X$, and the points $M$, $X'$ lie in opposite half-planes of line $AX$; by the converse of the tangent-chord angle theorem, $MA$ is the tangent to $(AXX')$ at $A$. For $X$ outside segment $AB$ the same chain runs in directed angles modulo $180^\circ$, only the isosceles step in it has to be read as $\angle(AM,AB) = \angle(BA,BM)$.
+
+    The point $M$ lies on the tangent and $M \neq A$, hence outside $(AXX')$, and the line $MXX'$ is a secant of it. Therefore
+    $$
+    MX \cdot MX' = p(M,(AXX')) = MA^2 = MB^2,
+    $$
+    and from the position of $M$ outside it follows that $X$, $X'$ lie on the same ray from $M$, hence $M$ lies outside segment $XX'$.
+
+    If neither shot line is $MA$ or $MB$, the lemma gives $MX \cdot MX' = MA^2 = MY \cdot MY'$, while $XX'$, $YY'$ meet at the point $M$ outside both segments; by the concyclicity criterion the points $X$, $X'$, $Y$, $Y'$ are concyclic. If one of the lines is $MA$, then $X=X'=A$ and the claim to be proved means exactly the tangency of $MA$ with $(AYY')$, which is the lemma for the other line; for $MB$ symmetrically.
+}
+
+\EnvId{pFMmqluU3nmGZSYkm3efw-euler-distance-formula}
+\Problem{0}{Euler's triangle formula}{
+    A triangle $ABC$ is given. Let $O$ be its circumcenter, with circumradius $R$, and $I$ its incenter, with inradius $r$. Prove that $OI^2 = R^2-2Rr$ (challenge: without trigonometry).
+}{
+    The relation to be proved should remind you of power of a point.
+}{
+    In fact we want to prove that the power of $I$ with respect to $(ABC)$ is $-2Rr$. For that it pays to have $I$ on a good line along which we measure the power. By the way, it can all be computed with zero trig \Wink{}.
+}{
+    The right step is to meet $AI$ with $(ABC)$ at $S$; we get the midpoint of an arc, which, as is well known, satisfies $SI=SB=SC$. We want $IA \cdot IS = 2Rr$, so we can change $IS$. We still need to figure out what to do with $R$ and $r$.
+}{
+    For $R$ we need the center $O$ of the circle $(ABC)$. Maybe one more point pays off, so that we get rid of the factor two in the relation to be proved.
+}{
+    The trick is to consider the midpoint $M$ of segment $BS$; then $IS/(2R)=BS/(2BO)=(2BM)/(2BO)=BM/BO$. That is some ratio in a right triangle. We want it to be $r/IA$. We are very close now.
+}{
+    Consider the projection of $I$ onto $AB$; that is the last point we need.
+}{
+    Denote $\alpha = \angle BAC$ and $\beta = \angle ABC$.
+
+    Rewrite the relation to be proved as $OI^2 - R^2 = -2Rr$. On the left stands exactly the power
+    $$
+    p(I,(ABC)) = IO^2 - R^2,
+    $$
+    so we are proving $p(I,(ABC)) = -2Rr$. Let $AI$ meet $(ABC)$ again at $S$. The point $I$ lies inside the circle, hence between $A$ and $S$, and so $p(I,(ABC)) = -IA \cdot IS$; it remains to prove the metric equality $IA \cdot IS = 2Rr$.
+
+    From $\angle BAS = \angle SAC = \alpha/2$, $S$ is the midpoint of arc $BC$ not containing $A$ and the arc-midpoint lemma $SI = SB = SC$ holds: the angle $BIS$ is the exterior angle of triangle $ABI$ at $I$, so $\angle BIS = \alpha/2 + \beta/2$, and at the same time $\angle IBS = \angle IBC + \angle CBS = \beta/2 + \alpha/2$, because the inscribed angles $CBS$ and $CAS$ belong to the same arc. Hence triangle $BIS$ is isosceles with base $BI$.
+
+    We therefore replace $IS$ by the length $BS$ and want $BS/(2R) = r/IA$. Denote by $M$ the midpoint of segment $BS$; then
+    $$
+    \frac{BS}{2R} = \frac{2BM}{2BO} = \frac{BM}{BO}.
+    $$
+    From $OB = OS = R$, the median $OM$ of the isosceles triangle $OBS$ is also an altitude and also the angle bisector at $O$, so $\angle BMO = 90^\circ$. (There is no degeneration: if $O$ were to lie on $BS$, then $BS$ would be a diameter and $\alpha/2 = \angle BAS = 90^\circ$.) By the inscribed angle theorem
+    $$
+    \angle MOB = \tfrac12 \angle BOS = \angle BAS = \frac{\alpha}{2},
+    $$
+    so the third angle is $\angle MBO = 90^\circ - \alpha/2$.
+
+    Let $P$ be the foot of the perpendicular from $I$ to $AB$, so $IP = r$. Triangle $PIA$ has a right angle at $P$, the angle $\alpha/2$ at $A$ and the angle $90^\circ - \alpha/2$ at $I$. Hence the triangles $MBO$ and $PIA$ are similar under the correspondence $M \leftrightarrow P$, $B \leftrightarrow I$, $O \leftrightarrow A$ (careful, the vertex $B$ corresponds to $I$, not to $A$), and so
+    $$
+    \frac{BM}{BO} = \frac{IP}{IA} = \frac{r}{IA}.
+    $$
+
+    Altogether $BS/(2R) = r/IA$, that is, $IA \cdot IS = IA \cdot BS = 2Rr$, and therefore
+    $$
+    OI^2 - R^2 = p(I,(ABC)) = -IA \cdot IS = -2Rr.
+    $$
+}
+
+\EnvId{l-ttAWpWgczjW_ytdvUwj-mixtilinear-incircle-incenter-on-chord}
+\Problem{0}{Mixtilinear incircle}{
+    A circle $\omega$ touches the sides $AB$ and $AC$ of triangle $ABC$ at the points $C_1$ and $B_1$ respectively, and touches the circumcircle of triangle $ABC$ internally at $T$. Prove that the incenter $I$ of triangle $ABC$ lies on line $B_1C_1$.
+}{
+    We need to figure out what to do with the tangency; a homothety will help with that.
+}{
+    $TB_1$ and $TC_1$ meet the circle again at the arc midpoints, which is a well-known lemma about a homothety of circles (its idea: if we picture $AC$ horizontal and $T$ at the bottom, then the homothety at $T$ taking the small circle to the big one sends the highest point of the small one, $B_1$, to the highest point of the big one, the midpoint of the arc).
+}{
+    Once we have the arc midpoints $B_1'$ and $C_1'$, another well-known lemma comes in: $A$ and $I$ are symmetric about $B_1'C_1'$, which follows easily from the arc-midpoint lemma. This gives us a great way to reformulate the statement to be proved.
+}{
+    We want $I$ to lie on $B_1C_1$. Shrinking by half toward $A$, that is the same as wanting the midpoint of $AI$ to lie on the midline $B_0C_0$ of triangle $AB_1C_1$, where $B_0$ and $C_0$ are the midpoints of $AB_1$ and $AC_1$. But what is the midline of $AB_1C_1$?
+}{
+    The answer is the radical axis of the point $A$ and $\omega$. So it is enough to check that $B_1'$ and $C_1'$ have the same power, and by symmetry only one of them. And that we can now finish by angle chasing.
+}{
+    Denote by $\Omega$ the circumcircle of triangle $ABC$ and by $\rho$, $R$ the radii of the circles $\omega$, $\Omega$ respectively.
+
+    The tangency at $T$ is internal, so there is a homothety $h$ centered at $T$ with positive ratio $R/\rho$ taking $\omega$ to $\Omega$. With $AC$ horizontal and $B$ above it, $B_1$ is the lowest point of $\omega$, and since $h$ has a positive ratio, it preserves directions, so $B_1' = h(B_1)$ is the lowest point of $\Omega$, that is, the midpoint of arc $AC$ not containing $B$. Likewise $C_1' = h(C_1)$ is the midpoint of arc $AB$ not containing $C$. The ratio is greater than $1$, so $B_1$ lies inside segment $TB_1'$ and $C_1$ inside $TC_1'$.
+
+    By the arc-midpoint lemma, $B_1'A = B_1'I$ and $C_1'A = C_1'I$, so the line $B_1'C_1'$ (the points are distinct) is the perpendicular bisector of $AI$.
+
+    Denote by $B_0$, $C_0$, $J$ the midpoints of the segments $AB_1$, $AC_1$, $AI$ respectively. The homothety centered at $A$ with ratio $1/2$ maps the line $B_1C_1$ to $B_0C_0$ and the point $I$ to $J$, so $I$ lies on $B_1C_1$ if and only if $J$ lies on $B_0C_0$. Moreover $J$ lies on the perpendicular bisector of $AI$, hence on $B_1'C_1'$; it is therefore enough to show that $B_0C_0$ and $B_1'C_1'$ coincide.
+
+    The line $B_0C_0$ is the midline of triangle $AB_1C_1$ parallel to $B_1C_1$, while $A$ lies outside $\omega$ and $AB_1$, $AC_1$ are exactly the two tangents from $A$ to $\omega$. So it is the radical axis $r$ of the point $A$ (understood as a point circle) and the circle $\omega$.
+
+    Let us show that $B_1'$ lies on $r$. We have $p(B_1',A) = B_1'A^2$, and since $B_1'$ lies on $\Omega$ and is different from $T$, it lies outside $\omega$, and along the secant $B_1'B_1T$ we have $p(B_1',\omega) = B_1'B_1 \cdot B_1'T$. So we want
+    $$
+    B_1'A^2 = B_1'B_1 \cdot B_1'T ,
+    $$
+    which is given by the similarity of triangles $B_1'AB_1$ and $B_1'TA$: they share the angle at $B_1'$, because $B_1$ and $T$ lie on the same ray from $B_1'$, and from the equal arcs $AB_1'$, $B_1'C$ we have $\angle B_1'TA = \angle B_1'AC = \angle B_1'AB_1$ (the point $T$ lies on arc $BC$ not containing $A$, hence outside both arcs, so both angles are inscribed over them, and $B_1$ lies on segment $AC$). From the ratio of sides $B_1'A : B_1'T = B_1'B_1 : B_1'A$ we get the desired equality. Analogously $C_1'A^2 = C_1'C_1 \cdot C_1'T = p(C_1',\omega)$, so $C_1'$ lies on $r$ as well.
+
+    The radical axis $r$ contains two distinct points $B_1'$, $C_1'$, hence $B_0C_0 = r = B_1'C_1'$. The point $J$ thus lies on the line $B_0C_0$, which is exactly the statement to be proved.
+}
+
+\EnvId{lX0IqtQsPmLQrsLTUErzm-hexagon-inscribed-circle-diagonals}
+\Problem{0}{Brianchon's theorem}{
+    Suppose a hexagon $ABCDEF$ has an inscribed circle. Then the diagonals $AD$, $BE$, $CF$ meet at one point.
+}{
+    Draw three circles such that the diagonals $AD$, $BE$, $CF$ are radical axes. It is tricky.
+}{
+    Each of the circles is tangent to the lines of two opposite sides, at points obtained by sliding the six points of tangency along the sides by the same length, alternately in one direction and in the other. The only trick is to place them so that the radical axes work. For that we certainly need to use the incircle of the hexagon $ABCDEF$.
+}{
+    Let $ABCDEF$ be convex and let its incircle $\omega(O,r)$ touch the sides $AB$, $BC$, $CD$, $DE$, $EF$, $FA$ at the points $P$, $Q$, $R$, $S$, $T$, $U$ respectively; we traverse them in this order as well, in the same direction as the vertices. From the equality of the tangent lengths from the vertices, denote
+    $$
+    \gather
+    a = AP = AU, \quad b = BP = BQ, \quad c = CQ = CR,\\
+    d = DR = DS, \quad e = ES = ET, \quad f = FT = FU.
+    \endgather
+    $$
+
+    For a point $M$ on a tangent of a circle $\omega'$ with point of tangency $Z$ we have $p(M,\omega') = MZ^2$, so let us look for circles tangent to the lines of the opposite sides: let $\omega_1$ touch the lines $AB$, $DE$ at the points $P_1$, $S_1$, the circle $\omega_2$ the lines $BC$, $EF$ at $Q_1$, $T_1$ and the circle $\omega_3$ the lines $CD$, $FA$ at $R_1$, $U_1$. Each vertex then lies on a tangent of exactly two of them, and $BE$ will be the radical axis of the circles $\omega_1$, $\omega_2$ as soon as $BP_1 = BQ_1$ and $ES_1 = ET_1$. So we want the two points of tangency at each vertex to be equidistant from it.
+
+    The original points satisfy this, but they give $\omega_1 = \omega_2 = \omega_3 = \omega$. We therefore slide them along the sides, alternately in both directions: choose $t$ with $0 < t < \min(b,d,f)$ and slide each point of tangency along its side by $t$ toward the nearer of the vertices $B$, $D$, $F$ (exactly one of them lies on each side), that is, $P$, $Q$ toward $B$, $R$, $S$ toward $D$ and $T$, $U$ toward $F$. Take the resulting points to be $P_1$, $Q_1$, $R_1$, $S_1$, $T_1$, $U_1$; the choice of $t$ keeps them inside the sides and gives
+    $$
+    \gather
+    AP_1 = AU_1 = a+t, \quad BP_1 = BQ_1 = b-t,\\
+    CQ_1 = CR_1 = c+t, \quad DR_1 = DS_1 = d-t,\\
+    ES_1 = ET_1 = e+t, \quad FT_1 = FU_1 = f-t.
+    \endgather
+    $$
+
+    It remains to show that a circle tangent to $AB$ at $P_1$ and to $DE$ at $S_1$ exists. Let $m_1$ be the perpendicular bisector of $PS$ and $\sigma$ the reflection in it. From $OP = OS = r$ the line $m_1$ passes through $O$, so $\sigma$ maps $\omega$ to itself, $P$ to $S$, and hence the tangent $AB$ to the tangent $DE$. As an orientation-reversing congruence it reverses the direction of the traversal: at $P$ the direction $A \to B$ is the forward direction of the traversal, so its image at $S$ is the backward direction of the traversal, that is, the direction $E \to D$. The points $P_1$, $S_1$ arose by sliding by $t$ in exactly these two directions (this is where the alternation was used), so $\sigma(P_1) = S_1$.
+
+    Furthermore $m_1$ is not perpendicular to $AB$: otherwise it would coincide with the line $OP$, the only perpendicular to $AB$ through $O$, and $\sigma$ would fix $P$, that is, $P = S$. The perpendicular to $AB$ at $P_1$ therefore meets $m_1$ at a unique point $O_1$; $\sigma$ fixes it and maps this perpendicular to the perpendicular to $DE$ at $S_1$, so $O_1P_1 = O_1S_1$ and the circle $\omega_1(O_1,O_1P_1)$ is the one we are looking for. Its radius is nonzero, because $P_1$, $S_1$ are interior points of different sides, and $O_1 \neq O$, because $O$ lies on the perpendicular to $AB$ at $P$ and $O_1$ on the parallel perpendicular at $P_1 \neq P$. Likewise we construct $\omega_2$ with center $O_2$ on the perpendicular bisector $m_2$ of $QT$ and $\omega_3$ with center $O_3$ on the perpendicular bisector $m_3$ of $RU$.
+
+    The circles are pairwise non-concentric. The perpendicular bisectors $m_1$, $m_2$, $m_3$ pass through $O$, so it is enough to show that they are distinct. The bisector $m_1$ meets $\omega$ at the midpoint $M_1$ of the arc $PS$ through $Q$, $R$, and $m_2$ at the midpoint $M_2$ of the arc $QT$ through $R$, $S$; when the endpoints of an arc are slid, its midpoint slides by the average of these slides, so the slide from $M_1$ to $M_2$ is by half the sum of the arcs $PQ$ and $ST$. That is positive and smaller than the whole circle, so $M_1$, $M_2$ are neither identical nor diametrically opposite and $m_1 \neq m_2$; analogously for the remaining pairs. The lines $m_i$ thus have a unique common point $O$, and since $O_i$ lies on $m_i$ and $O_i \neq O$, the centers are distinct.
+
+    The vertices lie on tangents of the respective circles, so $p(B,\omega_1) = (b-t)^2 = p(B,\omega_2)$ and $p(E,\omega_1) = (e+t)^2 = p(E,\omega_2)$: the distinct points $B$, $E$ lie on the radical axis of the circles $\omega_1$, $\omega_2$, which is therefore the line $BE$. Analogously $(c+t)^2$ at $C$ and $(f-t)^2$ at $F$ make $CF$ the radical axis of the circles $\omega_2$, $\omega_3$, and $(a+t)^2$ at $A$ and $(d-t)^2$ at $D$ make $AD$ the radical axis of the circles $\omega_1$, $\omega_3$.
+
+    By the statement about the radical center, these three radical axes meet at a unique point, or they are parallel or coincide. The second possibility is ruled out: $AD$ divides the convex hexagon into $ABCD$ and $ADEF$, so $B$, $E$ lie in opposite half-planes determined by the line $AD$ and $BE$ meets it at a unique point. Hence the diagonals $AD$, $BE$, $CF$ pass through one point, the radical center of the circles $\omega_1$, $\omega_2$, $\omega_3$.
+}
+
+\secc One-biters
+
+\EnvId{_435gwc1honpQ3ip386Bj-two-squares-fixed-point}
+\Problem{0}{}{
+    A point $M$ is given on segment $AB$. In the same half-plane determined by line $AB$, construct the squares $ACDM$ and $MEFB$. Their circumcircles meet again at a point $N$. Prove that line $MN$ passes through a point independent of the position of $M$.
+}{
+    In fact we are proving that the radical axis of the circumcircles of the squares passes through a fixed point. So what do we want to find?
+}{
+    We are looking for a point with the same power with respect to both circles. A good way in is to think about how the centers of the two circles move as we move $M$. What does it look like in the limiting cases?
+}{
+    In the limiting case line $MN$ turns into the tangent at $A$, respectively at $B$. That suggests the fixed point is the intersection point of these limiting tangents. All that is left is to prove it.
+}{
+    \Answer{It is the apex $P$ of the isosceles right triangle with hypotenuse $AB$ lying in the half-plane opposite to the squares, that is, the center of the square erected on $AB$ on the other side of line $AB$.}
+
+    Denote by $\omega_1$, $\omega_2$ the circumcircles of the squares $ACDM$ and $MEFB$ respectively, with centers $O_1$, $O_2$. Line $MN$ is their radical axis, so we are looking for a point with the same power with respect to both, and this independently of the position of $M$. The limit reveals the candidate: as $M \to A$, the circle $\omega_1$ degenerates into the point circle $A$ and $\omega_2$ into the circumcircle $\Omega$ of the square on the whole of $AB$, so the radical axis turns into the perpendicular to $AS$ at $A$, where $S$ is the center of $\Omega$, that is, into the tangent to $\Omega$ at $A$. Since $\angle SAB = 45^\circ$, this tangent makes an angle of $45^\circ$ with $AB$ and points into the half-plane opposite to the squares; symmetrically for $M \to B$.
+
+    So denote by $P$ the point in the half-plane opposite to the squares for which $\angle PAB = \angle PBA = 45^\circ$. Then $\angle APB = 90^\circ$ and $PA = PB$. We will show that $PA$ is tangent to $\omega_1$ and $PB$ is tangent to $\omega_2$ for \textit{every} position of $M$, not only in the limit.
+
+    The center $O_1$ lies on the diagonal $AD$ of the square $ACDM$, which bisects the right angle at the vertex $A$, so $\angle O_1AM = 45^\circ$ in the half-plane with the squares, while $\angle PAM = 45^\circ$ in the opposite one. Together $\angle O_1AP = 90^\circ$, and since $A$ lies on $\omega_1$, the line $PA$ is tangent to $\omega_1$ at $A$. Analogously $O_2$ lies on the diagonal $BE$ of the square $MEFB$, whence $\angle O_2BP = 90^\circ$ and $PB$ is tangent to $\omega_2$ at $B$.
+
+    By the tangent connection theorem we thus have
+    $$
+    p(P,\omega_1) = PA^2 = PB^2 = p(P,\omega_2),
+    $$
+    so $P$ lies on the radical axis of $\omega_1$, $\omega_2$, hence on line $MN$. Moreover, the position of $P$ does not depend on $M$ at all.
+}
+
+\EnvId{aFIODdiosGAy_qg7WWTTO-parabola-axis-intersections-circle}
+\Problem{0}{}{
+    An equation $x^2+px+q=0$ is given, where $p$ and $q$ are real numbers. Consider all parabolas determined by this equation that meet the $x$-axis and the $y$-axis in three distinct points. These points determine a circle. Prove that all such circles pass through one point, regardless of the values of $p$ and $q$.
+}{
+    It pays to guess the fixed point. Try a few concrete equations.
+}{
+    The form of the equation in the statement is deliberately misleading. A better one is $(x-a_1)(x-a_2)=0$. In this form we can also determine the coordinates of the intersection points. Maybe it will also help us a bit to see the fixed point. I will reveal it in the next hint, because I cannot give a better one.
+}{
+    The fixed point is the point $[0,1]$. How to prove it? Well, the topic of this handout hints at it rather a lot.
+}{
+    The key is the power of the point $[0,0]$.
+}{
+    \Answer{The fixed point is $[0,1]$.}
+
+    We study the parabola $y=x^2+px+q$. With the $y$-axis it always has exactly one intersection point, and with the $x$-axis we want two distinct ones, that is, $p^2>4q$; moreover, for $q=0$ the parabola would pass through the origin and the intersection point with the $y$-axis would coincide with one of the intersection points with the $x$-axis. So we assume $p^2>4q$ and $q \neq 0$.
+
+    Denote by $a_1$, $a_2$ the roots, so that $x^2+px+q=(x-a_1)(x-a_2)$ and $a_1a_2=q$. The intersection points are then directly visible: $A_1=[a_1,0]$, $A_2=[a_2,0]$ and $B=[0,q]$, and our conditions say exactly that $a_1 \neq a_2$ and $a_1, a_2 \neq 0$. The circle $\omega=(A_1A_2B)$ exists and is unique, because $A_1$, $A_2$ lie on the $x$-axis and $B$ does not.
+
+    The origin $O=[0,0]$ is the key: it lies on both axes, so we can compute its power with respect to $\omega$ in two ways and compare them. It does not lie on $\omega$, because the $x$-axis meets $\omega$ in at most two points, those are $A_1$, $A_2$, and $a_1, a_2 \neq 0$. The points of the $x$-axis inside $\omega$ are exactly those between $A_1$ and $A_2$, so the position of $O$ relative to $\omega$ depends on the signs of the roots:
+
+    \begitems \style i
+    \i For $q>0$ the numbers $a_1$, $a_2$ have the same sign, $O$ does not lie between them, hence it lies outside $\omega$ and $p(O,\omega)=OA_1 \cdot OA_2=|a_1| \cdot |a_2|=a_1a_2=q$.
+    \i For $q<0$ they have opposite signs, $O$ lies between them, hence inside $\omega$ and $p(O,\omega)=-OA_1 \cdot OA_2=-|a_1a_2|=a_1a_2=q$.
+    \enditems
+
+    So in both cases $p(O,\omega)=q$.
+
+    Now the $y$-axis. It passes through the point $B \in \omega$, so $\omega$ meets it in one more point, or is tangent to it at $B$; denote that point $B'=[0,y_0]$, where in the case of tangency we set $B'=B$, that is, $y_0=q$.
+
+    \begitems \style i
+    \i For $q>0$ the point $O$ lies outside $\omega$, hence outside segment $BB'$, so $q$ and $y_0$ have the same sign and $p(O,\omega)=OB \cdot OB'=|q| \cdot |y_0|=qy_0$.
+    \i For $q<0$ the point $O$ lies inside $\omega$, hence between $B$ and $B'$, so $q$ and $y_0$ have opposite signs and $p(O,\omega)=-OB \cdot OB'=-|q| \cdot |y_0|=qy_0$.
+    \enditems
+
+    In the case of tangency $B'=B$ and by the tangent connection theorem $p(O,\omega)=OB^2=q \cdot q=qy_0$, so the formula holds there too. Comparing the two computations we have $qy_0=q$, and since $q \neq 0$, we get $y_0=1$. The point $[0,1]$ thus lies on $\omega$ for every admissible $p$, $q$.
+
+    The signs were not cosmetics here: with absolute values we would only obtain $|y_0|=1$, and alongside the correct solution the false candidate $[0,-1]$ would survive as well.
+}
+
+\EnvId{6qpbdQI93yTn0hmycKsVn-perpendicular-bisector-tangent-locus}
+\Problem{0}{}{
+    A circle $\omega$ and a point $A$ lying outside it are given. For $X \in \omega$ denote by $Y$ the intersection point of the perpendicular bisector of $AX$ and the tangent to $\omega$ at $X$. Determine the locus of all such points $Y$.
+}{
+    The good points are those on the tangent that are equally distant from $A$ and from the point of tangency.
+}{
+    Namely, those are exactly the points with the same power with respect to the given point and with respect to the given circle. Can we use that somehow?
+}{
+    The final locus is a radical axis.
+}{
+    \Answer{The whole radical axis of the point $A$ and the circle $\omega$, that is, the midline of triangle $AT_1T_2$ parallel to $T_1T_2$, where $T_1$, $T_2$ are the points of tangency of the tangents from $A$ to $\omega$.}
+
+    Denote by $O$ the center and by $r$ the radius of $\omega$ and set $d=OA>r$.
+
+    When $Y$ exists: since $A \notin \omega$, we have $A \neq X$ and the perpendicular bisector of $AX$ makes sense. It is perpendicular to $AX$, the tangent at $X$ is perpendicular to $OX$, so they are parallel if and only if $A$ lies on line $OX$, that is, exactly for the intersection points $X_1$, $X_2$ of line $OA$ with $\omega$. There these parallels are distinct (the perpendicular bisector meets $OA$ at the midpoint of $AX_i$, the tangent at the point $X_i$, and a coincidence would give $A=X_i$), so $Y$ does not exist; for every other $X$ the point $Y$ is unique.
+
+    So let $Y$ exist. We have $Y \neq X$ (otherwise $XA=0$), so $Y$ lies on the tangent away from the point of tangency, hence outside $\omega$, and by the tangent connection theorem $p(Y,\omega)=YX^2$. A point is a point circle, so $p(Y,A)=YA^2$ and the condition $YA=YX$ reads
+    $$
+    p(Y,A)=p(Y,\omega).
+    $$
+    So the point $Y$ lies on the radical axis $m$ of the point $A$ and the circle $\omega$ (they are non-concentric, since $d>r\geq 0$), which by the basic cases is the midline of triangle $AT_1T_2$ parallel to $T_1T_2$.
+
+    The line $m$ is perpendicular to $OA$ and meets it at a point $D$ with coordinate $x$, where $O$ has coordinate $0$ and $A$ coordinate $d$. From $p(D,A)=p(D,\omega)$ we get $(x-d)^2 = x^2-r^2$, hence $x=\frac{d^2+r^2}{2d}$ and from that
+    $$
+    x - r = \frac{(d-r)^2}{2d} > 0, \qquad d - x = \frac{d^2-r^2}{2d} > 0.
+    $$
+    The distance from $O$ to $m$ is therefore greater than $r$: the line $m$ has no common point with $\omega$ and lies entirely outside it, while $D$ lies between $O$ and $A$.
+
+    Conversely, let $P$ be a point of the line $m$; it lies outside $\omega$, so there is a tangent from it to $\omega$ with point of tangency $X$. Then
+    $$
+    PX^2 = p(P,\omega) = p(P,A) = PA^2,
+    $$
+    and so $P$ lies on the perpendicular bisector of $AX$ as well as on the tangent to $\omega$ at $X$. These are distinct (otherwise $X$ would lie on the perpendicular bisector of $AX$, that is, $XA=0$), so they meet exactly at $P$ and $P$ is the point $Y$ belonging to this $X$.
+
+    The lost positions $X_1$, $X_2$ take nothing away from $m$: the tangents at them are perpendicular to $OA$, hence parallel to $m$, and they meet $OA$ at distance $r \neq x$ from $O$. The point $X$ from the previous paragraph is therefore never $X_1$ or $X_2$, and the locus we are looking for is the whole line $m$.
+}
+
+\EnvId{zo-ax3_7vlPEhcOuGXSIu-incenter-perpendicular-line-collinear}
+\Problem{0}{}{
+    Let $I$ be the incenter of a scalene triangle $ABC$. The perpendicular to $AI$ through $I$ meets line $BC$ at a point $A'$. The points $B'$ and $C'$ are defined analogously. Prove that the points $A'$, $B'$, $C'$ are collinear.
+}{
+    The trick is that the line we are looking for will be a good radical axis.
+}{
+    Some powers are easy to compute from the point $A'$, which ones? That will hint at which radical axis it will be.
+}{
+    In fact we do not have many options, one power is $A'B\cdot A'C$. The other one is, well, every point is a circle after all.
+}{
+    The goal is to prove that $A'$ lies on the radical axis of $(ABC)$ and the point $I$, that is, that $A'I^2 = A'B\cdot A'C$. But what does that actually mean?
+}{
+    It seems that it is enough for $A'I$ to be tangent to $(BIC)$. But where is the center of $(BIC)$? Just put the known facts together and we are done.
+}{
+    We need the triangle to be scalene for the points to exist: the perpendicular to $AI$ through $I$ is parallel to $BC$ if and only if $AI \perp BC$, that is, if and only if $AB = AC$. At the same time $A' \neq I$, because $I$ does not lie on $BC$.
+
+    We prove the collinearity through the radical axis of the circle $\omega = (ABC)$ and the point $I$ (for us a point is a circle of radius zero). The choice is symmetric in the vertices, so the same pair serves for $B'$, $C'$ as well, and it is enough to prove
+    $$
+    A'I^2 = A'B \cdot A'C
+    $$
+    and its analogues. By the tangent criterion this means that $A'I$ is tangent to the circle $(BIC)$ at $I$; since $A'I \perp AI$, it is enough for the center of $(BIC)$ to lie on line $AI$.
+
+    Let $M_A$ be the second intersection point of line $AI$ with $\omega$. Since $AI$ is the angle bisector at $A$, the point $M_A$ is the midpoint of arc $BC$ not containing $A$, so $M_AB = M_AC$. Further, $M_AI = M_AB$ (the arc-midpoint lemma): with $\alpha = \angle BAC$, $\beta = \angle ABC$ we have $\angle BIM_A = \alpha/2 + \beta/2$ as the exterior angle of triangle $ABI$ at the vertex $I$ (the point $I$ lies on segment $AM_A$) and $\angle IBM_A = \angle IBC + \angle CBM_A = \beta/2 + \alpha/2$, because the inscribed angles $CBM_A$ and $CAM_A$ belong to the arc $CM_A$. So triangle $BIM_A$ is isosceles and $M_AI = M_AB = M_AC$, that is, $M_A$ is the center of $(BIC)$. It lies on $AI$, so $A'I$ is perpendicular to the radius $M_AI$ at its endpoint, and is therefore tangent to $(BIC)$ at $I$.
+
+    The tangency settles the signs too. Every point of line $A'I$ other than $I$ lies outside $(BIC)$, in particular $A'$; the points $B$, $C$ lie on this circle, so the open segment $BC$ lies in its interior and $A'$ does not lie on it. Moreover, the points of line $BC$ outside segment $BC$ lie outside $\omega$, hence so does $A'$. We compute the power of $A'$ with respect to $(BIC)$ twice, along the tangent $A'I$ and along the secant $BC$; thanks to the position of $A'$ the right-hand side is at the same time the power with respect to $\omega$:
+    $$
+    p(A',\omega) = A'B \cdot A'C = A'I^2 = p(A',I).
+    $$
+
+    Relabeling the vertices, the same holds for $B'$ and $C'$. Finally $O \neq I$, where $O$ is the center of $\omega$: otherwise the chords $BC$, $CA$, $AB$ would be at the same distance from $O$, would be equally long and the triangle would be equilateral. So the radical axis of $\omega$ and the point $I$ is a line and the points $A'$, $B'$, $C'$ lie on it.
+}
+
+\EnvId{9h3ho4k7ICipGlRhvqr7v-interior-point-equal-angles-ratio}
+\Problem{0}{Moscow 2011}{
+    A point $O$ inside triangle $ABC$ satisfies $\angle BOC = 90^\circ$, $\angle OBA = \angle OAC$ and $\angle BAO = \angle OCB$. Determine $AC/OC$.
+}{
+    One of the angle equalities gives us a tangency and hints at some interesting circle being there.
+}{
+    We have that $CA$ is tangent to $(AOB)$. At the same time we are asked for something with $OC$. That calls for drawing in a good point.
+}{
+    The trick is to let line $OC$ meet $(AOB)$ at a point $X$. Suddenly all the conditions will make sense.
+}{
+    Since $AOBX$ is cyclic, $\angle OXB = \angle OAB$, so the other angle condition gives us $\angle OXB = \angle OCB$, and together with the right angle that gives an isosceles triangle. Equally long segments are nice, especially in a world where we are computing a ratio. And of course we also have that little thing called the power of a point.
+}{
+    \Answer{$AC/OC = \sqrt2$.}
+
+    Denote by $\omega$ the circle $(AOB)$ and $\alpha = \angle BAO = \angle OCB$.
+
+    Since $O$ lies inside triangle $ABC$, the points $B$ and $C$ are in opposite half-planes determined by line $AO$. So by the converse of the tangent-chord angle theorem the condition $\angle OAC = \angle OBA$ means that $AC$ is tangent to $\omega$ at $A$, in particular
+    $$
+    p(C,\omega) = CA^2 > 0.
+    $$
+
+    Line $OC$ is not tangent to $\omega$ at $O$: otherwise, because $OC \perp OB$, the segment $OB$ would be a diameter, that is, $\angle OAB = 90^\circ$, but $\angle OAB = \alpha = \angle OCB$ is an acute angle of the right triangle $BOC$. Denote by $X$ the second intersection point of line $OC$ with $\omega$.
+
+    The point $O$ lies between $C$ and $X$: the ray opposite to ray $OC$ meets segment $AB$ at an interior point of it, which lies inside $\omega$, so $X$ lies on that ray. Line $OB$ therefore separates $X$ from $C$, and since it separates $C$ from $A$ as well, the points $A$ and $X$ lie on the same arc over the chord $OB$:
+    $$
+    \angle BXC = \angle OXB = \angle OAB = \alpha = \angle BCX.
+    $$
+    So triangle $XBC$ is isosceles with base $XC$ and $BO$ is its altitude from the apex ($\angle BOC = 90^\circ$, $O$ lies on $XC$), hence also a median. Therefore $CX = 2CO$ and computing the power in two ways gives
+    $$
+    CA^2 = p(C,\omega) = CO \cdot CX = 2CO^2,
+    $$
+    whence $AC/OC = \sqrt2$.
+}
+
+\EnvId{aHqlcuKfHDe0WslkoFmjr-unique-point-on-side-perimeter}
+\Problem{0}{Czech-Slovak 2016}{
+    In a triangle $ABC$ we have $BC=1$ and at the same time there is exactly one point $D$ on side $BC$ such that $DA^2=DB\cdot DC$. Determine all possible values of the perimeter of triangle $ABC$.
+}{
+    The condition in the statement resembles the power of $D$ with respect to $(ABC)$, but something is missing.
+}{
+    What is missing is the second intersection point of $AD$ with $(ABC)$, denote it by $E$. What does the power give us then?
+}{
+    The power gives $DB\cdot DC=DA\cdot DE$, so together with the condition we have $DA=DE$. What do all the points $D$ look like for which the corresponding $E$ has this property?
+}{
+    The key to finding these points is the homothety centered at $A$ with ratio $2$.
+}{
+    This homothety maps $D$ to $E$, and hence the place where $D$ can lie, the line $BC$, to the place where $E$ can lie, the circle $(ABC)$. Our condition says that exactly one such point exists, what does that mean?
+}{
+    It means that this image of line $BC$ must be tangent to $(ABC)$. Where does it meet $(ABC)$ then?
+}{
+    At the midpoint of arc $BC$ not containing $A$. So necessarily $E$ is the midpoint of arc $BC$ and $D$ is the intersection point of $AE$ with $BC$. We are not done yet, we need to compute cleverly. It works out nicely.
+}{
+    At this point Stewart's theorem should already be usable. A nicer solution, though, continues with the homothety idea. It goes from $E$ to $D$. Where does the whole circle $(ABC)$ go? That is an interesting question, because it certainly goes to a circle whose tangent is $BC$, and even at $D$.
+}{
+    It goes to the circle $(AB'C')$, where $B'$ and $C'$ are the midpoints of $AB$ and $AC$. The fact that this circle is tangent to $BC$ at $D$ gives us splendid powers. The computation is now minimal.
+}{
+    \Answer{The perimeter is always $1+\sqrt2$.}
+
+    Denote $b=CA$, $c=AB$ and $\omega=(ABC)$.
+
+    The point $D$ lies inside segment $BC$ (for $D=B$ the condition would give $BA=0$), hence inside $\omega$. Let $E$ be the second intersection point of line $AD$ with $\omega$. The power of $D$ computed along both secants gives $-DB\cdot DC = p(D,\omega) = -DA\cdot DE$, so the condition $DA^2=DB\cdot DC$ means $DA=DE$: the point $D$ is the midpoint of segment $AE$.
+
+    That is exactly the description of a homothety: for the homothety $h$ centered at $A$ with ratio $2$ we have $E=h(D)$. As $D$ runs over the line $BC$, the point $E$ runs over the line $\ell=h(BC)$ and at the same time lies on $\omega$; since $h$ is a bijection, there are exactly as many admissible points $D$ as there are points in $\ell\cap\omega$. Each of them really does give a point $D$ inside side $BC$: the line $\ell$ is parallel to $BC$ and lies entirely on the opposite side of $BC$ from $A$, because it is twice as far from $A$ as $BC$ is, so every $E\in\ell\cap\omega$ lies on the arc $BC$ not containing $A$; the chords $AE$ and $BC$ therefore meet at an interior point of both, and that point is the midpoint of $AE$, that is, $D$. So the condition in the statement says exactly that $\ell$ is tangent to $\omega$.
+
+    A tangent to $\omega$ parallel to $BC$ touches it at the midpoint of one of the arcs $BC$, and since $\ell$ lies on the opposite side of $BC$ from $A$, the point $E$ is the midpoint of arc $BC$ not containing $A$ and $D$ is the intersection point of $AE$ with $BC$.
+
+    Let us stay with the homothety and look at where the inverse homothety $h^{-1}$ sends $\omega$. If $B'$, $C'$ are the midpoints of sides $AB$, $AC$, then $h^{-1}$ sends $A\mapsto A$, $B\mapsto B'$, $C\mapsto C'$, hence $\omega$ to $\omega'=(AB'C')$, and the line $\ell$ to the parallel to $BC$ through the point $h^{-1}(E)=D$, that is, to $BC$ itself. A homothety preserves tangency, so $BC$ is tangent to $\omega'$ at $D$.
+
+    The point $B$ lies on line $AB'$ outside segment $AB'$, so the tangent criterion gives
+    $$
+    BD^2 = BB'\cdot BA = \frac{c}{2}\cdot c = \frac{c^2}{2}
+    $$
+    and analogously $CD^2=b^2/2$. Since $BD+DC=BC=1$, we get $\frac{c}{\sqrt2}+\frac{b}{\sqrt2}=1$, that is, $b+c=\sqrt2$ and the perimeter is $1+b+c=1+\sqrt2$.
+
+    Check: let $ABC$ be an arbitrary triangle with $BC=1$ and $b+c=\sqrt2$. Since $0<c<\sqrt2$, there is a point $D_0$ on side $BC$ with $BD_0=c/\sqrt2$, and therefore $CD_0=1-c/\sqrt2=b/\sqrt2$. From the equality $BD_0^2=c^2/2=BB'\cdot BA$ the tangent criterion (now in the opposite direction) gives that $BC$ is tangent to the circle $(D_0AB')$ at $D_0$, and likewise it is tangent to $(D_0AC')$ at $D_0$. But the circle passing through $A$ and tangent to $BC$ at $D_0$ is unique, so both coincide with $\omega'=(AB'C')$ and $BC$ is tangent to it; by the homothety $h$ the line $\ell$ is then tangent to $\omega$ and by the proved equivalence there is exactly one $D$. Moreover, such triangles exist: the inequality $b+c>1$ holds automatically and the remaining triangle inequality $|b-c|<1$ gives the nonempty interval $c \in \(\frac{\sqrt2-1}{2}, \frac{\sqrt2+1}{2}\)$.
+}
+
+\EnvId{t9RnR0uuv22NL3ceXZ8TP-equal-segments-four-points-concyclic}
+\Problem{0}{USAJMO 2012, P1}{
+    Points $P$, $Q$ are given on sides $AB$, $AC$ of a triangle $ABC$ so that $AP = AQ$. Points $S$, $R$ are given on segment $BC$ so that $B$, $S$, $R$, $C$ lie on the line in this order and at the same time $\angle BPS = \angle PRS$ and $\angle CQR = \angle QSR$. Prove that $P$, $Q$, $R$, $S$ are concyclic.
+}{
+    We have tangent-chord angles, which give us tangencies to the circle we want. Moreover $AP=AQ$ gives something. It really does look like things work out. What if they did not?
+}{
+    The whole trick of the problem is to argue by contradiction\fnote{which is unexpected in geometry, but it really does work magically here and I am personally surprised myself}. If we had not one circle through those points but two suitably chosen ones, what strange things would happen?
+}{
+    The right circles to consider are $(SRP)$ and $(SRQ)$, since their radical axis is quite a meaningful line. Try to find what should hypothetically lie on it. Something will not make sense.
+}{
+    The points $P$, $Q$ lie in the interiors of the sides, so neither of them lies on line $BC$ and the circles $\omega_1 = (PSR)$, $\omega_2 = (QSR)$ exist. Proving the statement means proving that $\omega_1 = \omega_2$, which is hard to attack directly. So we argue by contradiction, a move unusual in geometry: suppose $\omega_1 \neq \omega_2$.
+
+    On line $BC$ the points $B$ and $R$ are separated by $S$, hence they lie in opposite half-planes determined by line $PS$, and the equality $\angle BPS = \angle PRS$ is therefore an equality of a tangent-chord angle and an inscribed angle over the chord $PS$ of the circle $\omega_1$. So line $AB$ is tangent to $\omega_1$ at $P$. Analogously (the chord $QR$, the points $C$, $S$ separated by $R$) the line $AC$ is tangent to $\omega_2$ at $Q$.
+
+    The point $A$ lies on a tangent to $\omega_1$ and is not its point of tangency, so it lies outside $\omega_1$, and likewise outside $\omega_2$. By the tangent connection theorem
+    $$
+    p(A,\omega_1) = AP^2 = AQ^2 = p(A,\omega_2),
+    $$
+    that is, $A$ lies on the radical axis of the circles $\omega_1$, $\omega_2$. Moreover, both pass through $S$ and through $R$ and they cannot be concentric, because concentric circles with a common point coincide, which we have excluded. So they meet in exactly the two points $S$, $R$ and their radical axis is line $SR$, that is, line $BC$.
+
+    The point $A$ thus lies on line $BC$, which is a contradiction for a triangle $ABC$. Therefore $\omega_1 = \omega_2$ and the points $P$, $Q$, $R$, $S$ are concyclic.
+}
+
+\EnvId{jTnUWvmphv4xcEYPAwQtG-point-in-angle-minimal-product}
+\Problem{0}{}{
+    A point $P$ is given inside the angle $AVB$. A line passing through $P$ meets $VA$, $VB$ at points $X$, $Y$. Construct the line for which the product $PX \cdot PY$ is minimal.
+}{
+    Let us try to guess what line it could be. I will reveal it in the next hint.
+}{
+    With a bit of playing around it should click that the key is the line cutting the arms of the angle at points $X'$, $Y'$ such that $VX' = VY'$.
+}{
+    To prove that it is the best one, we want to use the material of this handout. But for that we need a circle. So let us draw one in. I will reveal it in the next hint.
+}{
+    The key circle is the one through $X'$, $Y'$ that is tangent to the angle. Seeing it is no longer hard.
+}{
+    \Answer{The perpendicular from $P$ to the angle bisector of $AVB$, that is, the line that cuts the arms at points $X'$, $Y'$ with $VX' = VY'$.}
+
+    We regard as admissible only those lines that meet the arms $VA$, $VB$ at two \textbf{distinct} points, so not the line through $V$; this is not needless pedantry, for an obtuse angle $PV^2$ tends to be smaller than the minimum we will find. Denote by $o$ the angle bisector of $AVB$ and by $\ell^*$ the perpendicular from $P$ to $o$. Its foot lies on the bisector inside the angle, so $\ell^*$ meets both arms, say $VA$ at a point $X'$ and $VB$ at a point $Y'$. The reflection in $o$ swaps the arms and maps $\ell^*$ onto itself, so $VX' = VY'$; conversely, if an admissible line cuts the arms at points $X$, $Y$ with $VX = VY$, then $\triangle VXY$ is isosceles with base $XY$ and its axis of symmetry is $o$, that is, $XY \perp o$. So both descriptions in the answer determine the same line, and the perpendicular from $P$ to $o$ is unique.
+
+    A product of distances from a fixed point is a power, so we need a circle that has $P$ inside and is merely tangent to the arms. The perpendiculars to $VA$ at $X'$ and to $VB$ at $Y'$ meet, because the arms are not parallel; let $O$ be their intersection point. The reflection in $o$ swaps these perpendiculars, so it fixes $O$ and $OX' = OY' =: r$. The circle $\omega(O,r)$ is thus tangent to line $VA$ at $X'$ and to line $VB$ at $Y'$. The intersection of $\ell^*$ with the angle is the segment $X'Y'$ and $P$ is an interior point of the angle, so $P$ lies inside the chord $X'Y'$, hence inside $\omega$, and therefore
+    $$
+    PX' \cdot PY' = -p(P,\omega) = r^2 - PO^2.
+    $$
+    For an arbitrary point $Z$ of line $VA$ the Pythagorean theorem gives $ZO^2 = (ZX')^2 + r^2$, hence
+    $$
+    p(Z,\omega) = ZO^2 - r^2 = (ZX')^2 \ge 0.
+    $$
+    So no point of line $VA$ lies inside $\omega$ and the only one lying on it is $X'$; likewise for line $VB$ and the point $Y'$.
+
+    Let $\ell$ be an arbitrary admissible line through $P$, meeting $VA$ at a point $X$ and $VB$ at a point $Y$. The interior of the angle is convex, so $P$ lies between $X$ and $Y$. Since $P$ lies inside $\omega$, the line $\ell$ meets the circle at two points $M$ (on the same side of $P$ as $X$) and $N$ (on the side of $Y$), and the points of $\ell$ inside $\omega$ are exactly those between $M$ and $N$. The point $X$ does not lie inside $\omega$ and lies on ray $PM$, so $PX \ge PM$, likewise $PY \ge PN$, and multiplying
+    $$
+    PX \cdot PY \ge PM \cdot PN = -p(P,\omega) = PX' \cdot PY'.
+    $$
+    Equality forces $PX = PM$ and $PY = PN$, hence $X = M$ and $Y = N$, that is, both $X$ and $Y$ lie on $\omega$. But line $VA$ has a unique common point $X'$ with $\omega$ and line $VB$ a unique point $Y'$, so $\ell = \ell^*$. The minimum is $r^2 - PO^2$ and it is attained only for $\ell^*$.
+}
+
+\EnvId{iQleAath6zbItb9zJE15L-circumcenters-locus-diameter-chord}
+\Problem{0}{Czech-Slovak 2007}{
+    A circle $\omega$ and a point $A$ are given in the plane, where $A$ does not lie on $\omega$ and is not its center either. Determine the locus of the circumcenters of all triangles $ABC$ whose side $BC$ is a diameter of $\omega$.
+}{
+    Let us draw the center $O$ of this circle; it is naturally fixed and it is related to the moving points $B$ and $C$. We still need to draw in some connection to $(ABC)$.
+}{
+    When $O$ is fixed, so is $OB \cdot OC$. And $A$ is fixed too. What else is fixed and related to $(ABC)$?
+}{
+    Another fixed point is the point $A'$ on line $AO$, with $O$ lying between $A$ and $A'$, such that $OB \cdot OC=OA \cdot OA'$. Hold on, aren't we done?
+}{
+    \Answer{The whole perpendicular bisector of $AA'$, where $O$ is the center and $r$ the radius of $\omega$ and $A'$ is the point of line $AO$ for which $O$ lies between $A$ and $A'$ and $OA \cdot OA' = r^2$.}
+
+    Denote by $O$ the center and by $r$ the radius of the circle $\omega$. For a diameter $BC$ of $\omega$, a triangle $ABC$ arises if and only if $A$ does not lie on line $BC$, so exactly one diameter is excluded, namely the one on line $AO$. Let $k = (ABC)$.
+
+    The point $O$ is the midpoint of the chord $BC$ of $k$, hence it lies inside $k$ and
+    $$
+    p(O,k) = -OB \cdot OC = -r^2,
+    $$
+    which no longer depends on the position of $B$, $C$. Line $AO$ is a secant of $k$, because it passes through the point $A \in k$ and the interior point $O$; denote by $A'$ its second intersection point with $k$. The same power computed along this secant gives $-OA \cdot OA' = -r^2$, so $O$ lies between $A$ and $A'$ and $OA \cdot OA' = r^2$. This determines $A'$ uniquely: it lies on the ray opposite to ray $OA$ at distance $r^2/OA$ from $O$. Hence $A'$ is fixed and lies on every circle $(ABC)$.
+
+    Every circle under consideration thus passes through two fixed points $A$, $A'$, which are distinct because they lie on opposite rays from $O$. Its center is equidistant from both, hence it lies on the perpendicular bisector $o$ of $AA'$.
+
+    It remains to show that every point of $o$ is attained. First, $O$ does not lie on $o$: otherwise we would have $OA = OA'$, so $OA^2 = r^2$, and $A$ would lie on $\omega$.
+
+    Let $S$ be an arbitrary point of $o$, let $R = SA = SA'$ and let $k$ be the circle with center $S$ and radius $R$; the points $A$, $A'$ lie on it. Since $O$ lies between $A$ and $A'$, it is inside $k$ and $p(O,k) = -OA \cdot OA' = -r^2$. We know that $S \neq O$, so we may take the line $\ell$ through $O$ perpendicular to $OS$. The foot of the perpendicular from $S$ to $\ell$ is the point $O$ and
+    $$
+    R^2 - OS^2 = -p(O,k) = r^2 > 0,
+    $$
+    so $\ell$ meets $k$ at two points $B$, $C$ symmetric about $O$, with $OB = OC = r$. Hence $B$, $C$ lie on $\omega$ and $BC$ is a diameter of $\omega$.
+
+    The point $A$ does not lie on $\ell$: otherwise the line $OS$ would be perpendicular to $OA$, but the perpendicular bisector $o$ is perpendicular to $AA'$, hence also to $OA$, and it passes through $S$; the perpendicular to $OA$ through $S$ is unique, so $OS$ would coincide with $o$ and we would get $O \in o$. Therefore $k = (ABC)$ and the point $S$ belongs to the locus.
+
+    The locus is therefore the whole line $o$. The excluded diameter on line $AO$ takes nothing away from it: as $BC$ approaches line $AO$, the circumcenter runs off to infinity.
+}
+
+\EnvId{LXEsnZBgkxot2nd2tvdA_-unit-segments-perimeter-split}
+\Problem{0}{}{
+    Let $ABC$ be a triangle with perimeter $4$. Points $P$ and $Q$ lie on rays $AB$ and $AC$ respectively such that $AP = AQ = 1$ and segments $BC$ and $PQ$ meet at a point $X$. Prove that one of the two triangles into which $AX$ divides triangle $ABC$ has perimeter $2$.
+}{
+    The first trick is to remember one particularly nice place where the perimeter (or perhaps half of it) shows up in triangle geometry.
+}{
+    The distance from $A$ to the points of tangency of the $A$-excircle with lines $AB$ and $AC$ is exactly half the perimeter, so 2. And $AP=AQ=1$. Is it a coincidence?
+}{
+    It is not a coincidence (otherwise I would not have asked). Let the $A$-excircle touch $AB$ and $AC$ at $D$ and $E$. We have $AD=AE=2$ and $AP=AQ=1$. Line $PQ$ is the image of the $A$-polar of the $A$-excircle under the homothety centered at $A$ with ratio $1/2$. What do we know about this line?
+}{
+    Well, this line is the radical axis of $A$ and the $A$-excircle! And $X$ lies on it. We are closing in.
+}{
+    The final point to draw is the point of tangency of the excircle and $BC$. Using the fact that $X$ lies on this radical axis, we get some nice equal lengths.
+}{
+    The semiperimeter is $2$ and that is exactly the distance from $A$ to the points of tangency of the $A$-excircle; that is far too much to be a coincidence with $AP = AQ = 1$, so let us draw that circle in.
+
+    Denote $a = BC$, $b = CA$, $c = AB$, so that $a + b + c = 4$. Let the excircle $\omega$ opposite vertex $A$ touch lines $AB$, $AC$ at points $D$, $E$ respectively and side $BC$ at $F$; the point $D$ lies on ray $AB$ beyond $B$ and the point $E$ on ray $AC$ beyond $C$. From the tangent segments we have
+    $$
+    \gather
+    AD = AE = 2, \\
+    BF = BD = 2 - c, \qquad CF = CE = 2 - b.
+    \endgather
+    $$
+    The last two lengths are positive, because the triangle inequality gives $b < 2$ and $c < 2$; hence $F$ lies inside segment $BC$.
+
+    Since $AP = AD/2$ and $AQ = AE/2$, the points $P$, $Q$ are the midpoints of $AD$, $AE$ and line $PQ$ is the midline of triangle $ADE$ parallel to $DE$. But that is exactly the radical axis of the point $A$ (a circle of radius zero) and the circle $\omega$, because $D$, $E$ are the points of tangency of the tangents from $A$ to $\omega$.
+
+    The point $X$ lies on $PQ$, hence it has the same power with respect to $A$ as to $\omega$. Line $BC$ is tangent to $\omega$ at $F$, so
+    $$
+    XA^2 = p(X,A) = p(X,\omega) = XF^2,
+    $$
+    that is, $XA = XF$.
+
+    By the statement, $X$ lies inside segment $BC$, and $F$ lies inside it as well. If $X$ lies on segment $BF$, then $BX + XF = BF$ and the perimeter of triangle $ABX$ is
+    $$
+    c + BX + XA = c + BX + XF = c + BF = 2.
+    $$
+    If $X$ lies on segment $FC$, we analogously get the perimeter of triangle $ACX$ equal to $b + CF = 2$.
+}
+
+\secc Multi-biters
+
+\EnvId{7y0HAQ9sYFS9_vmJJ7wwH-pedal-products-difference-identity}
+\Problem{0}{}{
+    An acute triangle $ABC$ is given. Denote by $A'$ the foot of the altitude from $A$. Let $P$ be an arbitrary interior point of triangle $ABC$ and let $D, E, Q$ be respectively the feet of the perpendiculars from it to lines $AB$, $AC$, $AA'$. Prove that
+    $$
+    \bigl|\,AC \cdot AE - AB \cdot AD\,\bigr| = PQ \cdot BC.
+    $$
+    (challenge: find three different solutions, each of which uses the power of a point in a completely different way)
+}{
+    There are three possible approaches in which power can be used. I recommend trying all three. The hint series will run through all three in parallel.
+    \begitems \style a
+    \i $AB \cdot AD$ and $AC \cdot AE$ sound like we want the power from $A$. We have no circle for that yet, but I will naturally define one.
+    \i The expression inside the absolute value can be read as the difference of the powers of $A$ with respect to two circles. We have to come up with them. But if we had them, we do have that great theorem about the locus of points with the same difference of powers with respect to two circles. Try to come up with these circles.
+    \i We are interested in the difference of the powers of the point $A$ with respect to some two circles. Let us come up with these circles and then use the definition of power.
+    \enditems
+}{
+    \begitems \style a
+    \i The key is the intersection points of $DP$ and $PE$ with line $AA'$; denote them $R$ and $S$ respectively.
+    \i The key circles should pass through $B$, $D$ and through $C$, $E$ respectively. Occam's razor works here, the simplest choice is the right one.
+    \i The key circles are ideally ones whose center we know, because we need a distance we can compute.
+    \enditems
+}{
+    \begitems \style a
+    \i Thanks to the right angles we have a cyclic quadrilateral and we can rewrite $AB \cdot AD$ as $AR \cdot AA'$. What is then left to show will be much simpler.
+    \i Let us take the circles with diameters $BP$ and $CP$. They have good centers, which matters for determining the locus where the difference of powers equals a given number. Also, where do they meet?
+    \i The circles we want are those with diameters $BP$ and $CP$. If we denote their centers by $M$ and $N$, then the left-hand side is in fact equal to $\bigl(AN^2-CN^2\bigr)-\bigl(AM^2-BM^2\bigr)$. That looks scary, but it can be computed and it does not hurt (even I managed it).
+    \enditems
+}{
+    \begitems \style a
+    \i In the end it is enough to find a suitable similarity of triangles. The right angles give it to us quickly.
+    \i They meet at the projection of $P$ onto $BC$. Thanks to the magic just mentioned, we can now measure the difference of powers we care about from a different point. Which one?
+    \i The plan of the computation: $AM$ is a median in $ABP$, so let us express it. We are left with $AP^2$, which cancels, $AB^2$, which is fine, and $BP^2$, also fine, our diameter. Add the Pythagorean theorem along the way and it will work out.
+    \enditems
+}{
+    \begitems \style a
+    \i Reduce the identity to the altitude and then use the similarity of triangles $ABC$ and $PRS$ to get rid of the link between the values $PQ$, $AA'$.
+    \i The key is to measure from the point $A'$. Believe it or not, it gives up very quickly now. Watch the signs, they matter, points inside have negative power.
+    \i Denote also by $F$ the projection of $P$ onto $BC$. Then we can transfer the whole identity to segment $BC$, after a bit of computation.
+    \enditems
+}{
+    In all three solutions we use the foot $F$ of the perpendicular from $P$ to $BC$. Since $PQ \perp AA'$, $PF \perp BC$ and $AA' \perp BC$, the quadrilateral $A'FPQ$ is a rectangle, so
+    $$
+    PQ = A'F;
+    $$
+    in the second and third solutions we prove directly the form with $A'F \cdot BC$. Since $P$ is an interior point, we have $\angle PAB < \angle BAC < 90^\circ$ and similarly $\angle PBA < 90^\circ$, so $D$ lies inside $AB$; likewise $E$ inside $AC$ and the points $A'$, $F$ inside $BC$.
+
+    \textit{First solution (a).} The product $AB \cdot AD$ calls for a circle through $B$, $D$; we pick one that meets $AA'$ as well. Denote by $R$, $S$ the intersection points of lines $DP$, $EP$ with $AA'$ (they exist, because $DP \perp AB$, $AA' \perp BC$ and $AB \not\parallel BC$).
+
+    Both $D$ and $A'$ lie on the circle $\omega$ with diameter $RB$, because $\angle RDB = \angle RA'B = 90^\circ$. Lines $AB$, $AA'$ meet it in the pairs $D$, $B$ and $A'$, $R$, so both products are equal to $|p(A,\omega)|$:
+    $$
+    AB \cdot AD = AR \cdot AA'.
+    $$
+    (If $R = A'$, then $AA'$ is tangent to $\omega$ and the tangent criterion gives the same relation.) Likewise, from the circle with diameter $SC$ through $E$, $A'$:
+    $$
+    AC \cdot AE = AS \cdot AA'.
+    $$
+
+    The points $R$, $S$ lie on ray $AA'$: the angles $\angle DAR$ and $\angle BAA'$ are both acute (right triangles $ADR$, $ABA'$), while the opposite ray makes an obtuse angle with $AB$. Therefore
+    $$
+    \gather
+    \bigl|\,AC \cdot AE - AB \cdot AD\,\bigr| = \\
+    = AA' \cdot \bigl|\,AS - AR\,\bigr| = AA' \cdot RS
+    \endgather
+    $$
+    and it remains to show $RS \cdot AA' = PQ \cdot BC$. The sides satisfy $PR \perp AB$, $PS \perp AC$, $RS \perp BC$, so a rotation by $90^\circ$ takes $PRS$ to a triangle whose sides are parallel to the sides of $ABC$; hence $\triangle PRS \sim \triangle ABC$, $P \mapsto A$, $R \mapsto B$, $S \mapsto C$. The altitude from $P$ to $RS$ is $PQ$ (the point $Q$ lies on the line $RS = AA'$) and it corresponds to the altitude $AA'$, so
+    $$
+    \frac{PQ}{AA'} = \frac{RS}{BC}.
+    $$
+    (If $P$ lies on $AA'$, then $R = S = Q = P$ and both sides are zero.)
+
+    \textit{Second solution (b).} Let us read the expression inside the absolute value as the \textit{difference} of the powers of the point $A$ with respect to two circles. Since $\angle BDP = \angle CEP = 90^\circ$, the point $D$ lies on the circle $\omega_B$ with diameter $BP$ and $E$ on the circle $\omega_C$ with diameter $CP$. The point $A$ sees the diameter $BP$ under the angle $\angle BAP < 90^\circ$, hence it lies outside $\omega_B$, which $AB$ meets at $D$, $B$; likewise for $\omega_C$, so
+    $$
+    p(A,\omega_B) = AD \cdot AB, \quad p(A,\omega_C) = AE \cdot AC.
+    $$
+    Let $M$, $N$ be the centers of $\omega_B$, $\omega_C$, that is, the midpoints of $BP$, $CP$, and let $f(X) = p(X,\omega_C) - p(X,\omega_B)$; we are proving $|f(A)| = PQ \cdot BC$.
+
+    The segment $MN$ is the midline of triangle $PBC$ parallel to $BC$, so $MN \parallel BC$ and $M \neq N$. The level sets of $f$ are the lines perpendicular to $MN$, hence to $BC$, and $AA'$ is one of them:
+    $$
+    f(A) = f(A').
+    $$
+    Line $BC$ meets $\omega_B$ at $B$, $F$ and $\omega_C$ at $C$, $F$. Let $F$ lie on the same side of $A'$ as $C$ (the other case is symmetric, and for $F = A'$ both sides are zero), so the order on $BC$ is $B$, $A'$, $F$, $C$. The point $A'$ lies inside segment $BF$, hence inside $\omega_B$, but outside segment $FC$, hence outside $\omega_C$:
+    $$
+    \gather
+    p(A',\omega_B) = -A'B \cdot A'F, \\
+    p(A',\omega_C) = A'C \cdot A'F.
+    \endgather
+    $$
+    The signs are opposite, so the two terms of the difference \textit{add up}:
+    $$
+    \gather
+    f(A') = A'C \cdot A'F + A'B \cdot A'F = \\
+    = A'F \cdot \bigl(A'B + A'C\bigr) = A'F \cdot BC,
+    \endgather
+    $$
+    where in the last step we use that $A'$ lies inside $BC$.
+
+    \textit{Third solution (c).} The circles $\omega_B$, $\omega_C$ with centers $M$, $N$ are the same as in (b), and so are $AB \cdot AD = p(A,\omega_B)$ and $AC \cdot AE = p(A,\omega_C)$. Now, however, we compute them directly from the definition; the radii are $BM$, $CN$, so
+    $$
+    \gather
+    AC \cdot AE - AB \cdot AD = \\
+    = \bigl(AN^2 - CN^2\bigr) - \bigl(AM^2 - BM^2\bigr).
+    \endgather
+    $$
+    The segment $AM$ is a median of triangle $ABP$, hence $4AM^2 = 2AB^2 + 2AP^2 - BP^2$, and $4BM^2 = BP^2$; subtracting,
+    $$
+    AM^2 - BM^2 = \frac{AB^2 + AP^2 - BP^2}{2}
+    $$
+    and analogously
+    $$
+    AN^2 - CN^2 = \frac{AC^2 + AP^2 - CP^2}{2}.
+    $$
+    The term $AP^2$ cancels:
+    $$
+    \gather
+    AC \cdot AE - AB \cdot AD = \\
+    = \frac{AC^2 - CP^2 - AB^2 + BP^2}{2}.
+    \endgather
+    $$
+    The Pythagorean theorem via the feet $A'$ and $F$ gives
+    $$
+    \gather
+    AB^2 = (AA')^2 + A'B^2, \quad AC^2 = (AA')^2 + A'C^2, \\
+    BP^2 = PF^2 + FB^2, \quad CP^2 = PF^2 + FC^2,
+    \endgather
+    $$
+    so both $(AA')^2$ and $PF^2$ cancel and we are left with
+    $$
+    \gather
+    AC \cdot AE - AB \cdot AD = \\
+    = \frac{A'C^2 - A'B^2 - FC^2 + FB^2}{2}.
+    \endgather
+    $$
+    The identity is thereby transferred to segment $BC$. Denote $a = BC$, $t_1 = BA'$, $t_2 = BF$. For an interior point $X$ of segment $BC$ and $t = BX$ we have $XC^2 - XB^2 = (a-t)^2 - t^2 = a^2 - 2at$, so for $X = A'$ and $X = F$ the terms $a^2$ cancel:
+    $$
+    \gather
+    AC \cdot AE - AB \cdot AD = \\
+    = \frac{(a^2 - 2at_1) - (a^2 - 2at_2)}{2} = a \cdot (t_2 - t_1).
+    \endgather
+    $$
+    Finally $|t_2 - t_1| = A'F = PQ$, so in absolute value the right-hand side equals $BC \cdot PQ$.
+}
+
+\EnvId{J6K8ku5QIYW3g8-gx_Qql-centroid-circles-meet-on-hypotenuse}
+\Problem{0}{Canada 2013}{
+    In a right triangle $ABC$ with hypotenuse $AB$, denote by $G$ the centroid. Suppose that on ray $AG$ there is a point $P \neq G$ satisfying $\angle CPA = \angle CAB$ and on ray $BG$ a point $Q \neq G$ satisfying $\angle CQB = \angle ABC$. Prove that the circles $(AQG)$ and $(BPG)$ meet on $AB$.
+}{
+    The angles in those equalities live somewhere else in the figure too, and they say something nice.
+}{
+    $CG$ lies on a median, so it bisects $AB$ at $M$, and this midpoint is a pleasant one in a right triangle.
+}{
+    Of course $MAC$ is isosceles, because $MA=MC=MB$. Hence $\angle BAC = \angle ACM$, and therefore also $\angle ACG$. But what does that mean in view of the other place where this angle appears?
+}{
+    Equal angles give that $AC$ is tangent to $(CGP)$. That already looks like it is good for something. But we care about the circle $(BPG)$ from the statement. These two circles sound like they have something in common. We are close now.
+}{
+    The point $A$ clearly lies on the radical axis of $(CPG)$ and $(BPG)$, and its power with respect to the first of them is $AC^2$, hence also with respect to the second. So what will the second intersection point of the latter with $AB$ be? Let us recall the good theorems in a right triangle.
+}{
+    Denote by $M$ the midpoint of the hypotenuse $AB$, by $D$ the foot of the altitude from $C$, and put $\alpha = \angle CAB$ and $\beta = \angle ABC$. We will show that the common point we want is $D$.
+
+    By Thales' theorem we have $MA = MB = MC$, so triangle $AMC$ is isosceles and $\angle ACM = \angle MAC = \alpha$. The centroid $G$ lies on segment $CM$, so the rays $CG$ and $CM$ coincide and we get
+    $$
+    \angle ACG = \angle ACM = \alpha = \angle APC.
+    $$
+    The angle at $A$ is the same in triangles $ACG$ and $APC$, because $P$ lies on ray $AG$, so by the AA criterion $\triangle ACG \sim \triangle APC$ (in the order of vertices $A \leftrightarrow A$, $C \leftrightarrow P$, $G \leftrightarrow C$), from which
+    $$
+    AC^2 = AG \cdot AP.
+    $$
+    The similarity here avoids a case analysis: $P$ may lie between $A$ and $G$ or beyond $G$, but the angle at $A$ is one and the same in both triangles.
+
+    The points $G$, $P$ lie on the same ray from $A$, so $A$ lies outside segment $GP$ and by the tangent criterion $AC$ is tangent to the circle $(CGP)$ at $C$. The radical axis of the circles $(CGP)$ and $(BPG)$ is line $PG$, that is, line $AG$, and $A$ lies on it, hence
+    $$
+    p\bigl(A,(BPG)\bigr) = p\bigl(A,(CGP)\bigr) = AC^2 > 0.
+    $$
+    (If $B$ lies on $(CGP)$, which happens exactly when $CA^2 = 2CB^2$, the two are one and the same circle and the equality holds without the radical axis.)
+
+    The power is positive, so $A$ lies outside $(BPG)$. If $X$ is the second intersection point of line $AB$ with this circle, then $X$ and $B$ lie on the same ray from $A$, and hence $AX \cdot AB = AC^2$.
+
+    Analogously (with $A \leftrightarrow B$, $P \leftrightarrow Q$, $\alpha \leftrightarrow \beta$) we have $\angle BCG = \beta = \angle BQC$, whence $\triangle BCG \sim \triangle BQC$ and $BC^2 = BG \cdot BQ$. So line $BC$ is tangent to $(CGQ)$ at $C$, the radical axis of the circles $(CGQ)$ and $(AQG)$ is line $QG$, that is, line $BG$ passing through $B$, and for the second intersection point $Y$ of line $AB$ with the circle $(AQG)$ we have $BY \cdot BA = BC^2$.
+
+    Euclid's leg theorems give $AC^2 = AD \cdot AB$ and $BC^2 = BD \cdot BA$, so $AX = AD$ and $BY = BD$. The points $X$, $D$ lie on ray $AB$ and the points $Y$, $D$ on ray $BA$, therefore $X = D = Y$.
+}
+
+\EnvId{N3RPdKDeLi_eQoXhWN92i-six-points-on-one-circle}
+\Problem{0}{IMO 2008 P1}{
+    Denote by $H$ the orthocenter of an acute triangle $ABC$. The circle centered at the midpoint of $BC$ and passing through $H$ meets $BC$ at points $A_1,A_2$. Define the points $B_1,B_2,C_1,C_2$ analogously. Show that the points $A_1,A_2,B_1,B_2,C_1,C_2$ are concyclic.
+}{
+    We have circles here that share the point $H$. It is natural to think about their second common point. What is it going to be?
+}{
+    For instance, the circles $(B_1B_2H)$ and $(C_1C_2H)$ meet again on $AH$. Why? And what does that mean?
+}{
+    Since our circles are centered at the midpoints of the sides, the second intersection point of $(B_1B_2H)$ and $(C_1C_2H)$ is the image of $H$ under the reflection in the midline through their centers (the one parallel to $BC$), so it lies on $AH$. That is great, because it gives us that $AH$ is the radical axis of these circles. What does that give us?
+}{
+    Once we have that $AH$ is the radical axis, the power of a point gives us that $B_1$, $B_2$, $C_1$, $C_2$ are concyclic. Similarly for the rest. The last step is to realize why this is one and the same circle.
+}{
+    The trick for seeing why it is one and the same circle is to think about where the center of our \uv{three} circles could be.
+}{
+    Denote by $M_A$, $M_B$, $M_C$ the midpoints of the sides $BC$, $CA$, $AB$ and by $\omega_A$, $\omega_B$, $\omega_C$ the circles from the statement, so $\omega_A$ is centered at $M_A$ and passes through $H$. The triangle is acute, so $H$ lies in its interior, it is different from the midpoints of the sides and all three radii are positive. The center of $\omega_B$ lies on the line $CA$, so that line contains a diameter of it and meets it at points $B_1$, $B_2$ with midpoint $M_B$; analogously for the other two.
+
+    We will show that the radical axis of the circles $\omega_B$, $\omega_C$ is the line $AH$. The midline $M_BM_C$ contains the centers of both, so the reflection in it maps each of them to itself and the image $H'$ of $H$ lies on both. The line $M_BM_C$ is parallel to $BC$ and $AH$ is perpendicular to $BC$, so the perpendicular to $M_BM_C$ through $H$ is exactly $AH$, hence $H'$ lies on $AH$. If $H' \neq H$, the radical axis is the line $HH' = AH$. If $H' = H$, then $H$ lies on the line through the centers; the common points of two non-concentric circles are symmetric about that line, so $H$ is their unique common point, the circles are tangent at it and the radical axis is their common tangent at $H$, perpendicular to $M_BM_C$, that is, again $AH$. Either way the point $A$ lies on the radical axis.
+
+    It remains to check the signs. In an acute triangle we have $\angle AHC = 180^\circ - \angle ABC$, hence $\angle AHC > 90^\circ$, so $H$ lies inside the circle with diameter $AC$, whose center is $M_B$; the radius of $\omega_B$ therefore satisfies $M_BH < CA/2 = AM_B = CM_B$. So both $A$ and $C$ lie outside $\omega_B$ and $B_1$, $B_2$ lie inside segment $CA$. Likewise $A$, $B$ lie outside $\omega_C$ and $C_1$, $C_2$ lie inside segment $AB$.
+
+    Both powers of the point $A$ are positive, and since $A$ lies on the radical axis we get
+    $$
+    AB_1 \cdot AB_2 = p(A,\omega_B) = p(A,\omega_C) = AC_1 \cdot AC_2.
+    $$
+    The point $A$ lies outside both segments $B_1B_2$, $C_1C_2$, so by the concyclicity criterion the points $B_1$, $B_2$, $C_1$, $C_2$ lie on one circle $\gamma_A$. These are four distinct points ($B_1 \neq B_2$ and $C_1 \neq C_2$ thanks to the positive radii, and the lines $CA$, $AB$ meet only at $A$, which does not lie on the circles), and $B_1$, $B_2$, $C_1$ are not collinear, so $\gamma_A$ is unique. Cycling $A \to B \to C$ we get the circle $\gamma_B$ through $C_1$, $C_2$, $A_1$, $A_2$ and the circle $\gamma_C$ through $A_1$, $A_2$, $B_1$, $B_2$.
+
+    The center of $\gamma_A$ is equidistant from $B_1$, $B_2$, which lie on the line $CA$ and are symmetric about $M_B$, so it lies on the perpendicular to $CA$ at $M_B$, that is, on the perpendicular bisector of $CA$; likewise it lies on the perpendicular bisector of $AB$. These meet only at the circumcenter $O$ of triangle $ABC$, and the same argument gives the center $O$ for $\gamma_B$ and $\gamma_C$ as well. The circles $\gamma_A$, $\gamma_C$ have a common center and both pass through $B_1$, so they coincide; likewise $\gamma_B$ and $\gamma_C$ coincide thanks to the point $A_1$. Hence all six points lie on one circle centered at $O$.
+}
+
+\EnvId{FsSRgKx51GgWUNGN22ZRu-two-diameters-orthocenter-collinear}
+\Problem{0}{IMO 2013 P4}{
+    Let $ABC$ be an acute triangle with orthocenter $H$ and let $W$ be an interior point of side $BC$. The points $M$ and $N$ are the feet of the altitudes from $B$ and $C$ respectively. Denote by $\omega_1$ the circumcircle of triangle $BWN$ and let $X$ be the point on $\omega_1$ such that $WX$ is its diameter. Analogously, denote by $\omega_2$ the circumcircle of triangle $CWM$ and let $Y$ be the point on $\omega_2$ such that $WY$ is its diameter. Prove that the points $X,Y$ and $H$ are collinear.
+}{
+    Circles with two given diameters, it is very tempting to intersect them.
+}{
+    Denote by $Z$ their second intersection point (other than $W$). It is a good point, for instance it lies on the line $XY$. Wait, we are proving that $X$, $Y$, $H$ are collinear. That will be no coincidence. What would it suffice to prove?
+}{
+    Well, it would suffice that $ZH$ is perpendicular to $ZW$. But that is not obvious until we realize what $WZ$ really is.
+}{
+    $WZ$ is of course the radical axis of our circles. Is there anything else good lying on it?
+}{
+    $A$ lies on it! Why? Well, that sounds like the power of a point, it will work out. But how does this rephrase $ZH$ perpendicular to $ZW$?
+}{
+    It rephrases it nicely, we then only need $AZ$ perpendicular to $HZ$. And that is really within reach of the finish.
+}{
+    In an acute triangle $N$ lies inside $AB$, $M$ inside $AC$, and if we denote by $A'$ the foot of the altitude from $A$, then $A'$ lies inside $BC$ and $H$ inside segment $AA'$. So $N$ does not lie on $BC$, hence $B$, $W$, $N$ are not collinear and $\omega_1$ exists; likewise $\omega_2$. They are distinct circles, because otherwise the three points $B$, $W$, $C$ of the line $BC$ would lie on one circle. Distinct circles with the common point $W$ are not concentric, so their radical axis is a line.
+
+    Assume for now that $\omega_1$, $\omega_2$ have a second common point $Z$ besides $W$; we will prove this in a moment. From the diameter $WX$ and Thales' theorem we have $\angle WZX = 90^\circ$ (trivially for $X = Z$), so $X$ lies on the line $\ell$ through $Z$ perpendicular to $WZ$; likewise, from the diameter $WY$, the point $Y$ lies on $\ell$ as well. The whole problem thus reduces to $H$ lying on $\ell$ too, which for $Z \neq H$ means
+    $$
+    ZH \perp ZW.
+    $$
+
+    The line $WZ$ is the radical axis of the circles $\omega_1$, $\omega_2$ and the point $A$ lies on it as well. Indeed, the line $AB$ meets $\omega_1$ at the points $N$, $B$ lying on the same ray from $A$, so $A$ lies outside $\omega_1$ and $p(A,\omega_1) = AN \cdot AB$; analogously $p(A,\omega_2) = AM \cdot AC$. From $\angle BNC = \angle BMC = 90^\circ$ both $M$ and $N$ lie on the circle with diameter $BC$, and since $A$ lies outside the segments $NB$ and $MC$, the concyclicity criterion gives $AN \cdot AB = AM \cdot AC$.
+
+    Likewise $\angle BNH = 90^\circ$ (the point $H$ lies on the line $CN$ perpendicular to $AB$) and $\angle BA'H = 90^\circ$, so $N$, $A'$ lie on the circle with diameter $BH$; the point $A$ lies outside segment $NB$ and outside segment $HA'$ (the order is $A$, $H$, $A'$), and the concyclicity criterion gives $AN \cdot AB = AA' \cdot AH$. Denote the common value by $k$:
+    $$
+    p(A,\omega_1) = p(A,\omega_2) = k = AA' \cdot AH.
+    $$
+
+    Now the existence of $Z$. If the circles were tangent at $W$, their radical axis would be the common tangent at $W$, which by the above passes through $A$, and hence $k = AW^2$. But $AA'$ is the shortest segment from $A$ to the line $BC$, so $AH < AA' \leq AW$ and $k = AA' \cdot AH < AW^2$, a contradiction. Hence $Z$ exists and $Z \neq W$.
+
+    The points $A$, $Z$, $W$ are collinear, the line $AW$ meets $\omega_1$ exactly at $W$ and $Z$, and $A$ lies outside $\omega_1$, so $AZ \cdot AW = k < AW^2$. Hence $AZ < AW$, so $Z$ lies inside segment $AW$ (and therefore $A$ lies outside segment $ZW$). By the collinearity of $A$, $Z$, $W$, the perpendicularity $ZH \perp ZW$ we are proving is the same as $AZ \perp HZ$.
+
+    First let $W \neq A'$. The points $Z$, $W$ lie on the line $AW$, the points $H$, $A'$ on the line $AA'$; these lines are distinct and meet only at $A$, from which we see that all four points are pairwise distinct. The point $A$ lies outside segment $ZW$ and outside segment $HA'$, and moreover
+    $$
+    AZ \cdot AW = k = AA' \cdot AH,
+    $$
+    so by the concyclicity criterion the points $Z$, $W$, $A'$, $H$ are concyclic. That circle contains $W$, $A'$, $H$ with $\angle WA'H = 90^\circ$, so it is the circle with diameter $WH$, and from $Z \neq W$ we get $\angle WZH = 90^\circ$.
+
+    If $W = A'$, then from $AZ \cdot AW = AW \cdot AH$ we get $AZ = AH$, and since both $Z$ and $H$ lie inside segment $AW$, we have $Z = H$. In both cases $H$ therefore lies on the line $\ell$, on which $X$ and $Y$ lie as well.
+}
+
+\EnvId{mcFgi9_8MevHOvQjTzgAs-midpoint-circle-tangent-equal-distances}
+\Problem{0}{IMO 2009 P2}{
+    Let $ABC$ be a triangle with circumcenter $O$. Let $P$ and $Q$ be interior points of the sides $CA$ and $AB$ respectively. Denote by $K,L,M$ the midpoints of the segments $BP$, $CQ$, $PQ$ and by $\Gamma$ the circle passing through the points $K,L,M$. Suppose that the line $PQ$ is tangent to the circle $\Gamma$. Prove that $OP=OQ$.
+}{
+    The point $O$ is artificial. Can we rephrase our claim more sensibly through the power of a point?
+}{
+    We want to prove that $P$, $Q$ have the same power with respect to $(ABC)$. That sounds like a computation, but in reality we still need to observe a bit and it will be nice.
+}{
+    The midpoints give us midlines, which give us equal angles. The tangent-chord angle gives us equal angles too. With a bit of angle chasing we can find nice things.
+}{
+    By angle chasing we want to uncover the similarity of $MKL$ and $APQ$. That will help us proportionally (pun intended).
+}{
+    From the similarity of $MKL$ and $APQ$ we write down the right ratios, and the midlines, being halves of the sides, will finish it off.
+}{
+    The point $O$ appears in the statement only through the distances $OP$, $OQ$. Denote by $\omega$ the circumcircle of triangle $ABC$ and by $R$ its radius. Since $p(P,\omega) = OP^2 - R^2$ and $p(Q,\omega) = OQ^2 - R^2$, proving $OP=OQ$ is the same as proving $p(P,\omega) = p(Q,\omega)$.
+
+    The points $P$, $Q$ are interior points of the chords $CA$, $AB$, so they lie inside $\omega$, and the lines $CA$, $AB$ meet $\omega$ in the pairs $A$, $C$ and $A$, $B$ respectively. Therefore
+    $$
+    p(P,\omega) = -AP \cdot PC, \qquad p(Q,\omega) = -AQ \cdot QB,
+    $$
+    and after canceling the signs it remains to prove
+    $$
+    AP \cdot PC = AQ \cdot QB. \eqno(*)
+    $$
+    The point $O$ will not appear again in the rest of the solution.
+
+    The point $M$ lies on $PQ$ and on $\Gamma$, and a tangent has a unique common point with a circle, so $PQ$ is tangent to $\Gamma$ exactly at $M$.
+
+    Three midpoints call for midlines: in triangle $PQB$ the points $M$, $K$ are the midpoints of the sides $PQ$, $PB$, and in triangle $QPC$ the points $M$, $L$ are the midpoints of the sides $QP$, $QC$, so
+    $$
+    \gather
+    MK \parallel AB, \qquad MK = \tfrac12 QB, \\
+    ML \parallel CA, \qquad ML = \tfrac12 PC.
+    \endgather
+    $$
+    Notice the crossing: $MK$ is parallel to the side $AB$, on which $Q$ lies, and $ML$ to the side $CA$, on which $P$ lies.
+
+    The line $PQ$ meets the sides $CA$, $AB$ at their interior points, so it separates $A$ from $B$ and from $C$; the midpoints $K$ (of segment $BP$) and $L$ (of segment $CQ$) therefore lie in the half-plane with boundary line $PQ$ not containing $A$. The line $PQ$ is a transversal of the parallels $MK$, $QA$ and the points $K$, $A$ lie on opposite sides of it, so these are alternate angles; likewise for $ML$, $PA$:
+    $$
+    \angle QMK = \angle AQP, \qquad \angle PML = \angle APQ.
+    $$
+    Since $M$ lies between $P$ and $Q$, we have $\angle QML = 180^\circ - \angle APQ$, and from the angle sum in triangle $APQ$ we have $\angle AQP < 180^\circ - \angle APQ$. Hence $\angle QMK < \angle QML$, so the ray $MK$ lies inside the angle $QML$ and around $M$ the rays come in the order $MQ$, $MK$, $ML$, $MP$.
+
+    Only now do we use the tangency. By the tangent-chord angle theorem, for the tangent $MQ$ and the chord $MK$ the tangent-chord angle equals the inscribed angle subtending $MK$ from the arc on the other side of that chord, on which $L$ lies by the order of the rays; analogously for the tangent $MP$ and the chord $ML$ with the point $K$. We get
+    $$
+    \gather
+    \angle MLK = \angle QMK = \angle AQP, \\
+    \angle MKL = \angle PML = \angle APQ.
+    \endgather
+    $$
+    Two equal angles suffice:
+    $$
+    \triangle MKL \sim \triangle APQ, \qquad M \leftrightarrow A, \quad K \leftrightarrow P, \quad L \leftrightarrow Q.
+    $$
+    The correspondence of the vertices matters enormously here and the crossing mentioned above shows up in it: the side $MK$, parallel to $AB$, corresponds to the side $AP$ lying on $CA$, and not to $AQ$. The corresponding sides are therefore $MK$, $AP$ and $ML$, $AQ$, so
+    $$
+    \frac{MK}{ML} = \frac{AP}{AQ}.
+    $$
+    Now substitute $MK = \tfrac12 QB$ and $ML = \tfrac12 PC$. The halves cancel and we get $QB \, / \, PC = AP \, / \, AQ$, exactly $(*)$.
+}
+
+\EnvId{io6dFPVubPUNaY7p_2ASn-altitude-feet-midpoints-equal-distances}
+\Problem{0}{Iran TST 2011}{
+    In an acute triangle $ABC$ we have $\angle ABC > \angle ACB$. Denote by $M$ the midpoint of side $BC$ and by $D$, $E$ the feet of the altitudes from the vertices $C$ and $B$ respectively. Let $K$ and $L$ be the midpoints of the segments $ME$ and $MD$ respectively. The line $KL$ meets the line through $A$ parallel to $BC$ at a point $T$. Prove that $TA=TM$.
+}{
+    What do we know about the point $M$ with respect to the points $D$, $E$?
+}{
+    Well, we know that $M$ is the center of the circle with diameter $BC$, on which $D$ and $E$ lie as well, so $MD=ME$. And in our problem we have the midline of such an isosceles triangle. Is that not suspicious?
+}{
+    The trick is to realize that $MD$ and $ME$ are actually good segments, related to the triangle $ADE$ in a good way.
+}{
+    They are in fact tangents to its circumcircle. What is the line $KL$ then?
+}{
+    The line $KL$ is the radical axis of the point $M$ and this circle we just mentioned. And we know that some point $T$ lies on it and we have to prove $TA=TM$. We are a step from the finish.
+}{
+    Denote $a=BC$, let $\ell$ be the parallel to $BC$ through $A$ and $\omega$ the circumcircle of triangle $ADE$; acuteness puts $D$ inside $AB$ and $E$ inside $CA$, so $A$, $D$, $E$ are not collinear.
+
+    From $\angle BDC = \angle BEC = 90^\circ$ the points $D$, $E$ lie on the circle $k$ with diameter $BC$, whose center is $M$ and radius $a/2$. Hence $MD = ME = a/2$ and $KL$ is the midline of the isosceles triangle $MDE$ parallel to $DE$. This is exactly what the radical axis of a point and a circle looks like if $MD$, $ME$ are tangents to $\omega$ at $D$, $E$. So it suffices that
+    $$
+    p(M,\omega) = MD^2 = \frac{a^2}{4}.
+    $$
+
+    Put $F(X) = p(X,\omega) - p(X,k)$; from $B, C \in k$ we have $F(B) = p(B,\omega)$ and $F(C) = p(C,\omega)$. Since $D$ is inside $AB$, the point $B$ lies outside $\omega$ and $p(B,\omega) = BD \cdot BA$; likewise $p(C,\omega) = CE \cdot CA$. Let $A'$ be the foot of the altitude from $A$; it lies inside $BC$. From the right angles at $D$ and $A'$ the points $A$, $D$, $A'$, $C$ lie on the circle with diameter $AC$, whence $BD \cdot BA = BA' \cdot BC$, and analogously $CE \cdot CA = CA' \cdot CB$. Adding these,
+    $$
+    F(B) + F(C) = BC \cdot \bigl(BA' + A'C\bigr) = a^2.
+    $$
+    By the linearity of the power difference $F(M) = a^2/2$, and $M$ is the center of $k$, so $p(M,k) = -a^2/4$, and hence
+    $$
+    p(M,\omega) = F(M) + p(M,k) = \frac{a^2}{2} - \frac{a^2}{4} = \frac{a^2}{4}.
+    $$
+    This is a positive number, so $M$ really does lie outside $\omega$.
+
+    Let $N$ be the center and $r$ the radius of $\omega$. Then
+    $$
+    MN^2 = p(M,\omega) + r^2 = MD^2 + ND^2,
+    $$
+    so by the converse of the Pythagorean theorem $MD \perp ND$, that is, $MD$ is the tangent to $\omega$ at $D$; likewise $ME$ at $E$. The line $KL$ is therefore the radical axis of the point circle $M$ and $\omega$, and since $T$ lies on it, $TM^2 = p(T,\omega)$.
+
+    It remains to show that $\ell$ is the tangent to $\omega$ at $A$; the tangent connection theorem then gives $p(T,\omega) = TA^2$. Let $H$ be the orthocenter; it lies inside (so $H \neq A$) on both $CD$ and $BE$, hence $\angle ADH = \angle AEH = 90^\circ$ and the points $D$, $E$ lie on the circle with diameter $AH$. That circle passes through $A$ as well, so it is $\omega$ and $AH$ is its diameter. The tangent at $A$ is therefore perpendicular to $AH$, and since $AH \perp BC \parallel \ell$, it is exactly $\ell$. Hence $TA^2 = p(T,\omega) = TM^2$.
+
+    We did not use the assumption $\angle ABC > \angle ACB$, it only guarantees the existence of $T$: since $KL \parallel DE$, we need $DE$ not to be parallel to $BC$, that is, $AD/AB \neq AE/AC$. The power of the point $A$ with respect to $k$ gives $AD \cdot AB = AE \cdot AC$, that is, $AD/AE = AC/AB$, while parallelism would require $AD/AE = AB/AC$; both hold at once exactly when $AB = AC$.
+}
+
+\EnvId{6KKwSZBU9LHnCZvzW_j8y-incircle-touch-excenter-midpoint-circle}
+\Problem{0}{MEMO 2014 T6}{
+    The incircle $\omega$ of triangle $ABC$ touches $BC$ at a point $D$. Let $L \neq D$ be the intersection point of the line $AD$ and the circle $\omega$, and let $K$ be the center of the excircle tangent to side $BC$. Denote by $M$ and $N$ the midpoints of the segments $BC$ and $KM$ respectively. Prove that the points $B,C,N$ and $L$ are concyclic.
+}{
+    A problem on the classical configuration with an incircle and an excircle. Let us explore it a bit first. There are suspiciously many parallel bits and pieces in the problem.
+}{
+    For instance $AD$ and $KM$ are parallel, which sounds rather important, because our key points $L$ and $N$, the ones that should be on the circle, lie on them. Let us try to see this parallelism.
+}{
+    The trick for seeing it is to realize where $AD$ meets the excircle. One of those two points is really good.
+}{
+    Namely the \uv{lower} one (with $BC$ drawn horizontally), call it $D'$. The point $D$ is the lowest point of the incircle, so $D'$ will be the lowest point of the excircle.
+}{
+    Another important, less tricky point is the point of tangency of the excircle with $BC$, call it $P$. How is it related to $M$? And what about $D'$?
+}{
+    By a well-known lemma (see the Equal tangents handout) $M$ is the midpoint of $DP$. Our desired parallelism is almost there, we already have all the points.
+}{
+    It is in fact the midline of triangle $D'PD$. Anyway, that many hints for one parallelism, what was it good for? Well, the triangle $D'PD$ offers a lot, and we will use it to define the key point.
+}{
+    The key point should be one that helps us prove the final circle, so ideally it is related to the points on it. It would be nice to use the power of a point. And to use our deep insight. I will reveal it in the next hint.
+}{
+    The key is to think about where the second intersection point of $AD$ with the circle we are proving about will lie, call it $Q$. It has quite a few good properties. Purely assuming that the claim of the problem holds, what are they?
+}{
+    It is important to notice that $DMNQ$ form a parallelogram. And that is a strong way to define $Q$. Once we do it this way, it is not hard to justify that $B$, $C$, $Q$, $N$ are concyclic. The slightly harder part is then $B$, $C$, $Q$, $L$. Let us start with the first one.
+}{
+    To prove that $B$, $C$, $Q$, $N$ are concyclic, see that it is an isosceles trapezoid. With all our parallels and midlines that works out.
+}{
+    And to prove that $B$, $C$, $Q$, $L$ are concyclic we need the power of a point. So it suffices that $BD \cdot DC = DL \cdot DQ$. Is it easy? Not quite. What can give us confidence is that $BD$, $DC$ are nice segments. It is harder to figure out what to do with $DL$ and $DQ$. The answer is simple: similarities. We may need to draw in something for that. Let us try to get hold of $DL$ somehow and of $DQ$ somehow, since in the figure they are hidden among many segments (we have midlines, isosceles trapezoids, all sorts of things).
+}{
+    If we draw in the incenter $I$ of $ABC$, we can notice that thanks to the parallels the triangles $IDL$ and $NPK$ are similar. Through this we can simplify $DL \cdot DQ$ a great deal.
+}{
+    From the isosceles triangles and the similarity one can find $NP=DQ$, so the similarity gives $DL/PK=ID/NP$, hence after a few equalities $DL \cdot DQ = r \cdot r_a$, where $r$ is the inradius of $ABC$ and $r_a$ the radius of the excircle tangent to side $BC$. We need to prove that $DB \cdot DC = r \cdot r_a$. That can be computed, we have really got rid of all the points. But of course there is a nice way as well, try to find it.
+}{
+    The nice derivation of $DB \cdot DC = r \cdot r_a$ uses the similarity of $IBD$ and $BKF$, where $F$ is the point of tangency of the excircle with $AB$. It falls out right away.
+}{
+    Denote by $I$ the center of $\omega$, by $r$ its radius, by $\Omega$ the excircle tangent to side $BC$ (with center $K$), by $r_a$ its radius and by $P$ its point of tangency with $BC$; further $b=CA$, $c=AB$ and $s$ the semiperimeter. Imagine $BC$ horizontal with $A$ above it. First let $b \neq c$; the case $b=c$, when $D$, $M$, $P$ coincide, will be handled at the end.
+
+    The homothety centered at $A$ with ratio $r_a/r > 0$ maps $\omega$ to $\Omega$ and preserves directions, so the image of the lowest point $D$ of $\omega$ is the lowest point of $\Omega$, that is, the point $D'$ opposite to $P$; in particular $D'$ lies on the line $AD$. By equal tangents (see the Equal tangents handout) $BD = s-b = CP$, so $M$ is the midpoint of $DP$, and $K$ is the midpoint of $PD'$. The segment $KM$ is therefore the midline of triangle $D'PD$: we have $KM \parallel AD$ and $KM = \tfrac12 DD'$, and the ray $KM$ has the same direction as the ray $DA$. The point $N$ lies on $KM$, so $MN \parallel AD$ as well.
+
+    We want to use the concyclicity criterion at the point $D$, and we are missing a second point of the desired circle on the line $AD$; if the claim of the problem holds, it is the point $Q$ for which $DMNQ$ is a parallelogram, and that is a definition mentioning no circle. So let us define $Q$ by the relations $\overline{DQ} = \overline{MN}$ and $\overline{QN} = \overline{DM}$. Immediately: $Q$ lies on the line $AD$; $DQ = \tfrac12 KM$, and $\overline{MN}$ points toward $K$, that is, opposite to $\overline{DA}$, so $Q$ is on the other side of $BC$ than $A$; and $\overline{QN} \parallel BC$, so $Q$ has the same distance from $BC$ as $N$, namely $r_a/2$. In particular $B$, $C$, $Q$ are not collinear and determine a unique circle; we will show that both $N$ and $L$ lie on it.
+
+    Let $m$ be the perpendicular bisector of $BC$ and let $N_1$, $Q_1$ be the feet of the perpendiculars from $N$ and $Q$ to $BC$. The foot of the perpendicular from $K$ is $P$ and $N$ is the midpoint of $KM$, so $N_1$ is the midpoint of $MP$; projecting the equality $\overline{DQ} = \overline{MN}$ onto $BC$ gives
+    $$
+    \overline{DQ_1} = \overline{MN_1} = \tfrac12 \overline{MP} = \tfrac12 \overline{DM},
+    $$
+    so $Q_1$ is the midpoint of $DM$. The points $D$, $P$ are symmetric about $M$, hence so are $Q_1$ and $N_1$; moreover the points $N$, $Q$ have the same distance from $BC$ on the same side. They are therefore symmetric about $m$, and since the center of the circle through $B$, $C$, $N$ lies on $m$, the reflection in $m$ maps this circle to itself and $Q$ lies on it.
+
+    For the second concyclicity it suffices that
+    $$
+    DB \cdot DC = DL \cdot DQ
+    $$
+    (we will check the positions of the points at the end). In the right triangle $KPM$ ($KP \perp BC$) the segment $PN$ is the median to the hypotenuse, so
+    $$
+    NP = NK = NM = \tfrac12 KM = DQ.
+    $$
+    The triangle $NPK$ is therefore isosceles, and so is $IDL$, because $ID = IL = r$. The rays $DI$ and $KP$ are both perpendicular to $BC$ and point upward into the half-plane containing $A$, the rays $DL$ (that is, $DA$) and $KM$ have the same direction by the first part, and so
+    $$
+    \angle IDL = \angle PKM = \angle PKN = \angle NPK,
+    $$
+    where the last equality is the base angles in $NPK$. The isosceles triangles $IDL$ and $NPK$ are therefore similar ($I \to N$, $D \to P$, $L \to K$), whence $DL/PK = ID/NP$, so
+    $$
+    DL \cdot DQ = DL \cdot NP = ID \cdot PK = r \cdot r_a.
+    $$
+
+    It remains to prove $DB \cdot DC = r \cdot r_a$. Let $F$ be the point of tangency of $\Omega$ with the line $AB$; by equal tangents $AF = s > c$, so $F$ lies on the ray $AB$ beyond the point $B$ and $BF = s-c = DC$. The internal and external bisectors of the angle at $B$ are $BI$ and $BK$, hence $\angle IBK = 90^\circ$; $BD$ lies inside the angle $IBK$ and $BK$ is the bisector of the angle $DBF$, and so
+    $$
+    \angle IBD = 90^\circ - \angle DBK = 90^\circ - \angle KBF = \angle BKF,
+    $$
+    where the last equality is the angle sum in $BFK$ with the right angle at $F$ ($KF \perp AB$). Since also $\angle IDB = 90^\circ = \angle BFK$, the triangles $IBD$ and $BKF$ are similar ($I \to B$, $B \to K$, $D \to F$), so $BD/KF = DI/FB$ and $DB \cdot DC = DB \cdot BF = DI \cdot KF = r \cdot r_a$.
+
+    The point $L$ lies on $\omega$ and $L \neq D$, hence strictly in the half-plane containing $A$, while $Q$ is on the other side of $BC$; the point $D$ therefore lies inside segment $LQ$ and inside $BC$ (because $BD = s-b > 0$, $DC = s-c > 0$). From $DB \cdot DC = r \cdot r_a = DL \cdot DQ$ the concyclicity criterion gives that $B$, $C$, $L$, $Q$ lie on one circle, and that is the unique circle through $B$, $C$, $Q$, on which $N$ lies as well.
+
+    \textbf{The case $b=c$.} The points $D$, $M$, $P$ coincide, the point $Q$ coincides with $N$ and the configuration is symmetric about $AD$, which is the perpendicular bisector of $BC$ and contains $I$, $L$, $K$ and $N$. The segment $DL$ is a diameter of $\omega$, so $DL = 2r$, and $DN = \tfrac12 KM = \tfrac12 r_a$, because $KM = KP = r_a$. The derivation of $DB \cdot DC = r \cdot r_a$ holds unchanged, so
+    $$
+    DL \cdot DN = 2r \cdot \tfrac12 r_a = r \cdot r_a = DB \cdot DC,
+    $$
+    and since $D$ lies inside both segments $BC$ and $LN$, the concyclicity criterion gives the claim directly.
+}
+
+\EnvId{WYnX1YPsI6GzBIczdKhtf-incircle-parallelograms-equal-distances}
+\Problem{0}{ISL 2009 G3}{
+    The incircle of triangle $ABC$ touches the sides $AC, AB$ at points $D, E$. Denote by $G$ the intersection point of the lines $BD$ and $CE$. Construct points $U,V$ so that $BCUE$ and $BCDV$ are parallelograms. Prove that $GU=GV$.
+}{
+    The problem is weird. We need to draw something in for anything to make sense at all. The parallelograms give us equal lengths, so ideally we draw in something that adds them in more places.
+}{
+    The trick is to draw in the $A$-excircle. Its points of tangency with $AB$, $AC$ will give us good lengths.
+}{
+    Let $D'$ and $E'$ be the points of tangency of the $A$-excircle with $AC$, $AB$ respectively. Try to come up with as many pairs of equal segments as possible.
+}{
+    The key is to realize that $CD'$ is in fact $BE$ (the well-known properties of equal tangents), hence from the parallelogram $CD'=CU$, and of course analogously on the other side. Besides that, also $BC=EE'$, so from the parallelogram this is also $UE=EE'$. Now just one observation is left. Power is closing in.
+}{
+    The key observation is to find some good radical axes.
+}{
+    The trick is to look at some points as circles. I will reveal it in the next hint.
+}{
+    Think about the radical axis of the point $U$ and the excircle, analogously for $V$ and the excircle. Which points lie on them?
+}{
+    The whole problem is about proving that the radical axis of $U$ and the excircle is in fact $CE$, analogously on the other side. It only remains to realize that we are then done.
+}{
+    Denote $a=BC$, $b=CA$, $c=AB$ and $s=\tfrac{a+b+c}{2}$; by the triangle inequality the numbers $s-a$, $s-b$, $s-c$ are positive. From the well-known tangent lengths of the incircle we have
+    $$
+    AD=AE=s-a, \quad BE=s-b, \quad CD=s-c.
+    $$
+
+    Let us view points as point circles, so $p(M,U)=MU^2$ and the equality to be proved reads $p(G,U)=p(G,V)$. But the radical axis of the points $U$, $V$ is just the perpendicular bisector of $UV$, about which we know nothing; let us rather find an auxiliary circle $\omega$ with $p(G,U)=p(G,\omega)=p(G,V)$. We know a single thing about the point $G$: it lies on the lines $CE$ and $BD$. So we want the radical axis of the point $U$ and $\omega$ to be the line $CE$, and the radical axis of the point $V$ and $\omega$ to be the line $BD$. A radical axis is a line, so it suffices to check two points each time:
+    $$
+    \gather
+    p(C,U)=p(C,\omega), \quad p(E,U)=p(E,\omega), \\
+    p(B,V)=p(B,\omega), \quad p(D,V)=p(D,\omega).
+    \endgather
+    $$
+
+    The power is most conveniently computed as the square of the tangent length, and the points $C$, $E$ lie on the lines $AC$, $AB$, so let us look for $\omega$ among the circles tangent to both of these lines. It is not the incircle: that one touches $AB$ exactly at the point $E$, i.e. $p(E,\omega)=0$. That leaves the excircle.
+
+    Denote by $\omega_A(I_A,r_a)$ the $A$-excircle and let $D'$, $E'$ be its points of tangency with the lines $AC$, $AB$ respectively. The tangent from $A$ to $\omega_A$ has the well-known length $AD'=AE'=s$, where $D'$ lies beyond $C$ and $E'$ beyond $B$, and the points $D$, $E$ lie between $A$ and $D'$, and between $A$ and $E'$, respectively (because $s-a<s$). Therefore
+    $$
+    CD'=s-b, \quad BE'=s-c, \quad DD'=EE'=s-(s-a)=a.
+    $$
+
+    From the parallelogram $BCUE$ we have $CU=BE=s-b$ and $EU=BC=a$, from the parallelogram $BCDV$ mirror-wise $BV=CD=s-c$ and $DV=CB=a$.
+
+    The line $AC$ is tangent to $\omega_A$ at the point $D'$ and the points $C$, $D$ lie on it; the line $AB$ is tangent to it at the point $E'$ and the points $B$, $E$ lie on it. All four are distinct from the corresponding point of tangency (the lengths $s-b$, $s-c$, $a$ are positive), so they lie outside $\omega_A$ and their power is the square of the tangent length:
+    $$
+    \gather
+    p(C,\omega_A)=(CD')^2=(s-b)^2=CU^2=p(C,U), \\
+    p(E,\omega_A)=(EE')^2=a^2=EU^2=p(E,U), \\
+    p(B,\omega_A)=(BE')^2=(s-c)^2=BV^2=p(B,V), \\
+    p(D,\omega_A)=(DD')^2=a^2=DV^2=p(D,V).
+    \endgather
+    $$
+
+    The circles $U$ and $\omega_A$ are non-concentric: if $U=I_A$, the first line would give $CI_A^2=CI_A^2-r_a^2$, i.e. $r_a=0$; likewise for $V$. The first two lines thus say that both $C$ and $E$ lie on the radical axis of the point $U$ and the circle $\omega_A$, and since $C \neq E$, this radical axis is the line $CE$. The other two likewise give that the radical axis of the point $V$ and $\omega_A$ is the line $BD$.
+
+    The point $G$ lies on both $CE$ and $BD$, so
+    $$
+    GU^2 = p(G,U) = p(G,\omega_A) = p(G,V) = GV^2,
+    $$
+    i.e. $GU=GV$.
+}
+
+\EnvId{q2XpT_uNI0AubWKr8OI6R-right-triangle-altitude-equal-segments}
+\Problem{0}{IMO 2012 P5}{
+    In a given right triangle $ABC$ with the right angle at the vertex $A$, denote by $D$ the foot of the altitude from the vertex $A$. Let $X$ be an arbitrary interior point of the segment $AD$. Denote by $K$ the point on the segment $BX$ with $CK=CA$. Similarly denote by $L$ the point on the segment $CX$ with $BL=BA$. Denote by $M$ the intersection point of the lines $BL$ and $CK$. Prove that $MK=ML$.
+}{
+    We need to draw something in before we can use anything meaningfully at all. A good clue is given for example by the relations $CK=CA$, which work well with power because of Euclid's theorem. If only we had even more points.
+}{
+    When a problem has relations like $CK=CA$ in it, it sounds like there is some circle with a good center there, and maybe it is important.
+}{
+    Another good generally useful way of drawing things in is to intersect lines with circles. Especially weird lines. I will reveal the key points in the next hint.
+}{
+    The problem starts to make more sense once we draw in the second intersection points of $BX$ and $CX$ with the circles $\omega_c(C,CA)$ and $\omega_b(B,BA)$; let these points be $P$ and $Q$ respectively. Now we have all the points we need in the problem.
+}{
+    The important observation is to realize what the radical axis of our new circles is and what that means.
+}{
+    The radical axis of our circles is $AD$, the point $X$ lies on it, and we shot through $X$ and made new points. Do we not have a cyclic quadrilateral this way? And what to do with it?
+}{
+    The key is to realize via power that $P$, $Q$, $K$, $L$ are concyclic. But then there is still the point $M$. And that is where power comes in for the last time. We still have not made good use of $CK=CA$ and Euclid's theorems.
+}{
+    The trick is to prove via power that $BL$ is tangent to our newly found circle. Analogously so will be $CK$. Will we be done then?
+}{
+    The conditions $CK=CA$ and $BL=BA$ say that $K$ lies on the circle $\omega_c(C,CA)$ and $L$ on the circle $\omega_b(B,BA)$. Both pass through the point $A$ and are not concentric. Let $P$ be the second intersection point of the line $BX$ with $\omega_c$ and $Q$ the second intersection point of the line $CX$ with $\omega_b$; we will not need more points.
+
+    Let us compute the power at once for every point $Y$ of the line $AD$ and denote $y=YD$. Since $AD \perp BC$, the Pythagorean theorem in triangle $YDB$ gives $YB^2 = y^2 + DB^2$, and since $D$ lies inside the segment $BC$, Euclid's leg theorem gives $BA^2 = BD \cdot BC$. Together
+    $$
+    \gather
+    p(Y,\omega_b) = y^2 + DB^2 - BA^2 = \\
+    = y^2 + DB \cdot \bigl(DB - BC\bigr) = \\
+    = y^2 - DB \cdot DC = y^2 - AD^2,
+    \endgather
+    $$
+    where the last equality is Euclid's altitude theorem. The same computation with $CA^2 = CD \cdot CB$ gives $p(Y,\omega_c) = y^2 + DC^2 - CA^2 = y^2 - AD^2$. Hence the line $AD$ is the radical axis of the circles $\omega_b$ and $\omega_c$.
+
+    Let us clarify the positions of the points. For $x=XD$ we have $0 < x < AD$, so $p(X,\omega_b) = p(X,\omega_c) = x^2 - AD^2 < 0$ and $X$ lies inside both circles. Conversely, by the Pythagorean theorem $p(B,\omega_c) = BC^2 - CA^2 = AB^2 > 0$ and analogously $p(C,\omega_b) = AC^2 > 0$, i.e. $B$ lies outside $\omega_c$ and $C$ outside $\omega_b$. The line $BX$ thus goes from the exterior point $B$ inward through $X$ and out again, its first intersection point with $\omega_c$ is exactly $K$ (and $K$ is uniquely determined by that) and the second one is $P$. So the order on it is $B$, $K$, $X$, $P$, and analogously on the other line $C$, $L$, $X$, $Q$.
+
+    We shoot through $X$. It lies inside both circles, so the power via a secant has a negative sign, and from the equality of the powers
+    $$
+    -XK \cdot XP = p(X,\omega_c) = p(X,\omega_b) = -XL \cdot XQ.
+    $$
+    The lines $KP$ and $LQ$ are distinct (they are $BX$ and $CX$) and $X$ lies inside both segments $KP$, $LQ$, so by the concyclicity criterion $K$, $P$, $Q$, $L$ lie on one circle $\omega$.
+
+    Now we use the radii. The point $B$ lies on the line $KP$ outside the segment $KP$ and the points $K$, $P$ lie on $\omega_c$, so
+    $$
+    BK \cdot BP = p(B,\omega_c) = AB^2 = BL^2.
+    $$
+    The point $L$ does not lie on the line $KP$, i.e. $\omega$ is the circle $(LKP)$, and by the tangent criterion $BL$ is the tangent to $\omega$ at $L$. Likewise, from the order $C$, $L$, $X$, $Q$ and from the relation $CL \cdot CQ = p(C,\omega_b) = AC^2 = CK^2$, $CK$ is the tangent to $\omega$ at $K$.
+
+    If a line is tangent to $\omega$ at a point $T$, then for \textit{every} point $N$ of it we have $p(N,\omega) = NT^2$ (zero for $N=T$, otherwise $N$ lies outside $\omega$ and this is the tangent connection theorem). The point $M$ lies on both tangents, so
+    $$
+    ML^2 = p(M,\omega) = MK^2.
+    $$
+}
+
+\EnvId{hRhMzmG8ahmmJycvrobIu-two-orthocenters-concurrency}
+\Problem{0}{ISL 1995 G7}{
+    Let $ABC$ be an acute triangle. A circle passing through the points $B$, $C$ meets the sides $AB$, $AC$ again at points $C'$, $B'$. Let $H$, $H'$ be the orthocenters of triangles $ABC$ and $AB'C'$. Show that the lines $BB'$, $CC'$, $HH'$ pass through one point.
+}{
+    Orthocenters are related to altitudes. It helps to consider the feet of the perpendiculars from $B$, $B'$, $C$, $C'$ to the opposite sides; denote them by $B_0$, $B_0'$, $C_0$, $C_0'$. Those naturally give us the orthocenters.
+}{
+    Find suitable quadruples of points among the defined feet and the original points that are concyclic. There are plenty of circles there.
+}{
+    The trick is to notice for example that $B$, $B'$, $B_0$, $B_0'$ are concyclic. Similarly also $C$, $C'$, $C_0$, $C_0'$. How are these circles related to $H$ and $H'$?
+}{
+    The trick is to realize that all three of our points, that is $H$, $H'$ and the intersection point of $BB'$ with $CC'$, whose collinearity we are proving, lie on the radical axis of these two circles.
+}{
+    Denote by $\omega$ the given circle passing through the points $B$, $C$, $B'$, $C'$.
+
+    Let $B_0$, $C_0$ be the feet of the perpendiculars from $B$ to $AC$ and from $C$ to $AB$, so that $H = BB_0 \cap CC_0$. In triangle $AB'C'$ the side $AC'$ opposite $B'$ lies on the line $AB$ and the side $AB'$ opposite $C'$ lies on the line $AC$; so let $B_0'$ be the foot of the perpendicular from $B'$ to $AB$ and $C_0'$ the foot of the perpendicular from $C'$ to $AC$, so that $H' = B'B_0' \cap C'C_0'$.
+
+    The points $B_0$, $B'$ lie on $AC$ and $BB_0 \perp AC$, the points $B_0'$, $B$ lie on $AB$ and $B'B_0' \perp AB$, hence $\angle BB_0B' = \angle BB_0'B' = 90^\circ$ and by Thales' theorem $B_0$, $B_0'$ lie on the circle $\omega_B$ with diameter $BB'$. Analogously $C_0$, $C_0'$ lie on the circle $\omega_C$ with diameter $CC'$.
+
+    The segments $BB'$ and $CC'$ meet inside triangle $ABC$ (the point $B'$ is an interior point of the side $AC$ and $C'$ of the side $AB$); denote their intersection point by $X$. The circles $\omega_B$, $\omega_C$ are not concentric: a common center would bisect both $BB'$ and $CC'$, so $BCB'C'$ would be a parallelogram and $BC' \parallel CB'$ would hold, which is impossible because these lines are $AB$ and $AC$. Let $m$ be their radical axis; we will show that $H$, $H'$ and $X$ all lie on $m$.
+
+    We will use the same observation three times: \textit{if two circles meet a line in the same pair of points $P$, $Q$, then every point $M$ of this line has the same power with respect to both}: it is $\pm MP \cdot MQ$ in both cases and the sign depends only on whether $M$ lies between $P$ and $Q$.
+
+    The points $B_0$, $C_0$ see $BC$ at a right angle, so $B$, $C$, $B_0$, $C_0$ lie on the circle $\gamma$ with diameter $BC$. The line $BB_0$ meets both $\omega_B$ and $\gamma$ at the points $B$, $B_0$ and the line $CC_0$ meets both $\omega_C$ and $\gamma$ at the points $C$, $C_0$, therefore
+    $$
+    p(H,\omega_B) = p(H,\gamma) = p(H,\omega_C).
+    $$
+    Likewise $\angle B'B_0'C' = \angle B'C_0'C' = 90^\circ$, because we dropped the perpendiculars from $B'$, $C'$ onto the lines $AB$ and $AC$ respectively, on which $C'$ and $B'$ respectively lie; the points $B'$, $C'$, $B_0'$, $C_0'$ hence lie on the circle $\gamma'$ with diameter $B'C'$. The line $B'B_0'$ meets both $\omega_B$ and $\gamma'$ at the points $B'$, $B_0'$ and the line $C'C_0'$ meets both $\omega_C$ and $\gamma'$ at the points $C'$, $C_0'$, i.e.
+    $$
+    p(H',\omega_B) = p(H',\gamma') = p(H',\omega_C).
+    $$
+    Finally the line $BB'$ meets both $\omega_B$ and $\omega$ at the points $B$, $B'$ and the line $CC'$ meets both $\omega_C$ and $\omega$ at the points $C$, $C'$, so
+    $$
+    p(X,\omega_B) = p(X,\omega) = p(X,\omega_C).
+    $$
+
+    It remains to verify $H \neq H'$. The power of the point $A$ with respect to $\omega$ along two secants gives $AC' \cdot AB = AB' \cdot AC$, i.e. $AB'/AB = AC'/AC = k$. The composition of the homothety centered at $A$ with ratio $k$ with the reflection in the bisector of angle $BAC$ is a similarity $\varphi$ with $A \mapsto A$, $B \mapsto B'$, $C \mapsto C'$, hence it maps $\triangle ABC$ to $\triangle AB'C'$ and the orthocenter to the orthocenter, so $\varphi(H) = H'$. Moreover $k \neq 1$: from $k \cdot AB = AB' \leq AC$ and $k \cdot AC = AC' \leq AB$ we get $k^2 \leq 1$ by multiplying, and for $k = 1$ equality would have to occur in both inequalities, hence $B' = C$ and $C' = B$, which the statement excludes. A similarity with $k \neq 1$ has at most one fixed point, because the distance of two distinct fixed points would force $k = 1$; that point is $A$. So from $H = H'$ we would obtain $H = A$, which happens if and only if $\angle BAC = 90^\circ$, and that is excluded for an acute $ABC$.
+
+    The distinct points $H$, $H'$ lie on $m$, so the line $HH'$ is exactly $m$. The point $X$ lies on $m$ and by definition also on $BB'$ and $CC'$, so the lines $BB'$, $CC'$, $HH'$ pass through the point $X$. (Collinearity of the three points alone would not suffice; it works because two of them determine the third line and the third one is the intersection point of the remaining two.)
+}
+
+\EnvId{uC1mjjdLrHYavatAIrH_m-two-incircles-fixed-point}
+\Problem{0}{ISL 2004 G7}{
+    A triangle $ABC$ is given. Let $X$ be a variable point on the line $BC$ such that the point $C$ lies between $B$ and $X$. The incircles of triangles $ABX$ and $ACX$ meet at two distinct points $P$ and $Q$. Prove that the line $PQ$ passes through a point independent of the position of the point $X$.
+}{
+    The line $PQ$ looks hopeless. But it does have some nice simple properties related to the points in the figure. It pays to have the points of tangency at least lightly labeled. There are a lot of them, but it will not work without them.
+}{
+    Let us observe that it is parallel to suitable lines through points of tangency. And it has one more great property on top of that.
+}{
+    That property is that it lies in the middle of a strip, specifically the strip formed by two lines perpendicular to the bisector of angle $AXC$. It pays to see this.
+}{
+    One sees it via power: where does it meet the line $BC$?
+}{
+    Once we know that $PQ$ is in the middle of the strip, we are a millimeter closer to the solution. Namely, we still do not know what the fixed point is. Well, the big trick requires a certain well-known lemma related to the incircle.
+}{
+    The well-known lemma is usually called Iran's lemma. In general it reads as follows: \textit{In a triangle $ABC$ with incenter $I$, let $D$, $E$, $F$ be the points of tangency of the incircle with the sides $BC$, $CA$, $AB$ respectively. Then the orthogonal projection of the point $C$ onto the line $AI$ lies on the midline of triangle $ABC$ parallel to $AB$ and at the same time on the line $DF$.} It is proved by angle chasing, it is easy; if you do not know it, try it. Anyway, how to apply it?
+}{
+    Well, by this lemma the lines of the strip we are considering meet the midline parallel to $BC$ at good points. Why are they good and how does it relate to $PQ$? All that is left is to put it together.
+}{
+    Why are they good? Because they are fixed. Try to work it out from the lemma. How does it relate to $PQ$? Well, $PQ$ is in the middle of the strip, which is not fixed, but on each of its lines there is a fixed point. We are almost there.
+}{
+    \Answer{It is the midpoint of the segment $AS$, where $S$ is the point of the ray $BC$ with $BS = s$, that is the point of tangency of the $B$-excircle with the line $BC$.}
+
+    Denote $a=BC$, $b=CA$, $c=AB$, $s=\frac{a+b+c}{2}$ and let $\omega_1$, $\omega_2$ be the incircles of triangles $ABX$, $ACX$, with centers $O_1$, $O_2$ and points of tangency $T_1$, $T_2$ on $BC$, $U_1$, $U_2$ on $AX$.
+
+    Since $C$ lies between $B$ and $X$, the rays $XB$, $XC$ coincide: both circles are inscribed in the angle $AXC$, so $O_1$, $O_2$ lie on its bisector $o$. The tangent lengths from $X$ are
+    $$
+    \gather
+    XT_1 = XU_1 = \frac{XA + XB - c}{2}, \\
+    XT_2 = XU_2 = \frac{XA + XC - b}{2},
+    \endgather
+    $$
+    and since $XB - XC = a$, subtracting we get
+    $$
+    XT_1 - XT_2 = \frac{a+b-c}{2} = s - c > 0.
+    $$
+    In particular $T_1 \neq T_2$, and since $T_i$ is the foot of the perpendicular from $O_i$ to $BC$, also $O_1 \neq O_2$: the circles are non-concentric and $PQ$ is their radical axis, hence $PQ \perp o$. Since $o$ is the bisector of angle $T_1XU_1$ and $XT_1 = XU_1$, $o$ is the perpendicular bisector of $T_1U_1$, so $m_1 = T_1U_1 \perp o$; likewise $m_2 = T_2U_2$. We have three parallels $m_1 \parallel PQ \parallel m_2$.
+
+    For a point $M$ of the line $BC$ we have $O_iT_i \perp BC$, so by the Pythagorean theorem $p(M,\omega_i) = MT_i^2$; the point $M$ hence lies on the radical axis if and only if it is the midpoint of the segment $T_1T_2$. $PQ$ and $BC$ are not parallel, because $o$ makes an angle $\frac{\angle AXC}{2} < 90^\circ$ with $BC$, so $PQ$ meets $BC$ exactly at the midpoint of the segment $T_1T_2$. Three parallels cut segments in the same ratio on every transversal, so on \textit{every} transversal $PQ$ cuts out the midpoint of the points cut out by the lines $m_1$, $m_2$. It therefore suffices to have a transversal on which these two points are fixed.
+
+    \textit{Lemma.} In a triangle $UVW$ let the incircle touch the sides $VW$, $UV$ at $D$, $F$ respectively and let $K$ be the orthogonal projection of $W$ onto the bisector of the interior angle at the vertex $U$. Then $K$ lies on the line $DF$ and also on the midline of triangle $UVW$ parallel to $UV$. (The claim is about lines, $K$ may lie outside the segments.) The proof is angle chasing, we leave it to the reader.
+
+    Let $\ell$ be the image of $BC$ under the homothety centered at $A$ with ratio $\frac12$, that is the line through the midpoints of the segments $AB$, $AC$, $AX$: at the same time the midline of triangle $ABX$ parallel to $BX$ and of triangle $ACX$ parallel to $CX$. Let us apply the lemma to $(U,V,W) = (B,X,A)$ and to $(C,X,A)$: the line $DF$ is $m_1$ and $m_2$ respectively, and the midline is $\ell$ in both cases. The orthogonal projections of $A$ onto the bisectors of the angles $ABX$, $ACX$ hence lie at $m_1 \cap \ell$ and $m_2 \cap \ell$ respectively; denote them by $K_B$, $K_C$. The rays $BX$, $BC$ coincide, so the first bisector is the interior bisector of the angle at the vertex $B$ of triangle $ABC$; the ray $CX$ is the ray opposite to ray $CB$, i.e. $\angle ACX = 180^\circ - \angle ACB$ and the second bisector is the \textbf{external} bisector of the angle at the vertex $C$. Neither of them depends on $X$, hence neither do the points $K_B$, $K_C$. Moreover the line $\ell$ is parallel to $BC$, which meets all three parallels, so $\ell$ is a transversal of them and $PQ$ passes through the fixed midpoint of the segment $K_BK_C$.
+
+    The orthogonal projection of $A$ onto an angle bisector is the midpoint of $A$ and its image under the reflection in that bisector. The bisector of angle $ABC$ maps the ray $BA$ to $BC$, hence $A$ to the point $A_B$ with $BA_B = c$; the external bisector at the vertex $C$ maps the ray $CA$ to $CX$, hence $A$ to the point $A_C$ with $CA_C = b$, i.e. $BA_C = a+b$. The points $K_B$, $K_C$ are the images of $A_B$, $A_C$ under the same homothety, so the midpoint of $K_BK_C$ is the image of the midpoint $S$ of the segment $A_BA_C$, for which
+    $$
+    BS = \frac{c + (a+b)}{2} = s.
+    $$
+    The point $S$ is hence the point of tangency of the $B$-excircle with the line $BC$ and the sought fixed point is the midpoint of the segment $AS$.
+}
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

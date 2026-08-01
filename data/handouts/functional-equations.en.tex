@@ -1,0 +1,886 @@
+\input _template
+
+\setlanguage{EN}
+
+\Title{Functional Equations}
+
+\MathcompsLink{functional-equations}
+
+\Author{Patrik Bak}
+
+\sec Introduction
+
+A list of methods and a collection of problems on the topic of \textit{functional equations}. The material assumes you know functions, and that you have some idea what a functional equation is and roughly how one solves it. The problems range in difficulty from easy up to roughly the level of problem 2 at the IMO.
+
+\sec Substitution
+
+The most basic and most general method, one that no equation can do without. A few tips on what and how to substitute:
+
+\begitems \style a
+\i \textbf{Nice constants} like $0$, $1$, $-1$, and others depending on the situation. We try to compute the function values at them.
+\i \textbf{We simplify the functions}, for example when we have $f(f(x)+y)$, we can try $y=-f(x)$.
+\i \textbf{We match up the expressions}, for example if we have equations where one side has $f(x+2f(x))$ and the other $f(y+f(x))$, then by choosing $y:=x+f(x)$ we eliminate these expressions.
+\enditems
+
+All the other techniques are built on substitution, and they all require insight into the situation:
+
+\begitems \style a
+
+\i \textbf{Expressing something in two ways}, say we have a relation $f(x+y)=V(x,y)$; then $f(4x)=V(3x,x)$, but also $f(4x)=V(2x,2x)$, so $V(3x,x)=V(2x,2x)$.
+
+\i \textbf{Symmetric swap of the variables}, say we have $xyf(f(x)f(y))=f(x)+y$; swapping $x,y$ leaves the left-hand side unchanged and we are left with $f(x)+y=f(y)+x$, which gives the solution immediately.
+
+\i \textbf{We simplify the equations as we go}, for example if we have some simple relation like $f(x^2)=xf(x)$ and something similar to it shows up in the original equation, e.g. $f(f(x)^2)$. This expression can be replaced by $f(x)f(f(x))$, which may help us gain a new view of the equation.
+
+\i \textbf{We apply $f$ to the equation}, for example from $f(f(x))=x+1$ we can, after applying $f$, get $f(x+1)=f(f(f(x)))=f(x)+1$, by which we have gotten rid of the double $f$ entirely.
+
+\enditems
+
+\sec Properties of the function
+
+For many functional equations substitution as such is not enough and we need to make some deductions about the properties of the function we are looking for. The following ones are the most common and the most used:
+
+\begitems \style a
+\i \textbf{Evenness and oddness of the function.} We can prove them for example from the equations $f(x^2)=xf(x)$ and $f(x^2)=x^2f(x)$ respectively. Here is what it buys us: it is then enough to solve the problem only for positive/nonpositive/negative/nonnegative numbers.
+
+\i \textbf{Injectivity.} It can be proved for example in $f(f(x))=x$. The main advantage is that it eliminates the $f$'s -- for example, from $f(f(x))=f(x)$ we immediately get $f(x)=x$.
+
+\i \textbf{Surjectivity}, or rather knowing the range of the function. This property can also be seen in the equation $f(f(x))=x$. One typical use: in $f(f(x))=f(x)^2$ it immediately gives $f(x)=x^2$. Sometimes it is also enough to know that the function attains $0$ somewhere: name that point and substitute it.
+
+\i \textbf{Periodicity}, if we manage to prove something like $f(x+yf(x))=f(x)$. That says $f$ is periodic with period $yf(x)$, and that period is either identically $0$ or takes any value whatsoever; the only such function is a constant one.
+
+\i \textbf{Iterating}, e.g. $f(y+f(x))=f(y)$ gives $f(y+nf(x))=f(y)$ for all positive integers $n$.
+
+\i \textbf{Monotonicity}, if we can prove it somewhere, e.g. for $f(x+y)=f(x)+f(y)$ on $\R^+$, then we can use it e.g. in $f(f(x))=x$, where we immediately have $f(x)=x$.
+
+\i \textbf{Zeros}. Sometimes we cannot prove surjectivity/bijectivity, but we can find out that the function is zero exactly at the point $0$, and then relations like $f(f(x)-x)=0$ immediately give $f(x)=x$.
+
+\i \textbf{Fixed points}. It is surprisingly useful to look at $p$ such that $f(p)=p$, e.g. when we know that the only fixed point is $1$ and it also follows from the equation that $f(x)-x$ is a fixed point, then necessarily $f(x)=x+1$.
+
+\i \textbf{New functions.} When we guess e.g. that $f(x)=x$ is a solution, it is sometimes worth defining $g(x)=f(x)-x$ and showing that $g$ is the zero function; it can make the relations clearer.
+
+\enditems
+
+\sec General well-meant advice
+
+\begitems \style a
+
+\i \textbf{Guess the solution.} It is always good to guess the equation's solutions systematically, and to get an overview of the linear,
+possibly quadratic ones. Don't get carried away just because you have one
+solution. It happens that if $f$ is a solution, so is $-f$. Don't forget about
+constant functions.
+
+\i \textbf{Watch out for the domain.} When we substitute, we must be careful that what we substitute lies in the domain, e.g. no zeros in $\R^+$, or compound expressions like $x+y-1$ in $\R^+$, which we may substitute only when $x+y>1$.
+
+\i \textbf{Watch out for the trap.} If we have $f(x)^2=x^2$, that still does not mean that $f(x)\equiv x$ or $f(x)\equiv-x$, since the function can be $x$ somewhere and $-x$ elsewhere. Typically we need to investigate whether that can happen, most often by assuming that it is not so: that $f(a)=a$ and $f(b)=-b$ for some $a\neq b$, and then substituting suitably.
+
+\i \textbf{Do the check.} It is practically always necessary to do the check. It would be a great shame to lose a point
+because it is missing.
+
+\enditems
+
+\sec Problems
+
+\EnvId{OsQvJm3J6CSc1RFSWJgKB-one-plus-shift-equals-double-product}
+\Problem{0}{}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    1+f(x+y) = 2f(x)f(y).
+    $$
+}{
+    Substitute zero.
+}{
+    After substituting e.g. $y=0$ we can express $f(x)$ directly (but watch out for dividing by an expression that could be zero).
+}{
+    We should get that $f(x)=1/(2f(0)-1)$. On its own that looks complicated. But the right-hand side does not depend on $x$, so we can simply call it $c$. Then $f(x)=c$. It remains to substitute into the original equation and find the possible values of $c$.
+}{
+    \Answer{The constant functions $f(x)=1$ and $f(x)=-1/2$.}
+
+    Setting $y=0$ we get $1+f(x)=2f(x)f(0)$, or
+    $$
+    f(x)\bigl(2f(0)-1\bigr) = 1. \eqno(1)
+    $$
+    Were $2f(0)-1$ zero, (1) would read $0=1$. Hence $2f(0)-1\neq0$ and
+    $$
+    f(x) = \frac{1}{2f(0)-1},
+    $$
+    a value with no $x$ in it at all. So $f$ is constant, $f(x)=c$, and the given equation becomes $1+c=2c^2$, which factors as $(2c+1)(c-1)=0$, so $c=1$ or $c=-1/2$.
+
+    Check: for $f\equiv1$ we have $1+f(x+y)=2=2f(x)f(y)$; for $f\equiv-1/2$ we have $1+f(x+y)=1/2$ and $2\cdot(-1/2)^2=1/2$.
+}
+
+\EnvId{faLp7gelKJFrAnH080BUu-sum-minus-difference-equals-xy}
+\Problem{0}{}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f(x+y)-f(x-y) = xy.
+    $$
+}{
+    A suitable substitution makes one of the arguments of the function zero.
+}{
+    Let us try setting $x=y$ (or possibly $y=-x$); that way we are left with $f(\hbox{something})$ and some constants. Is that enough to finish?
+}{
+    \Answer{$f(x)=\frac{x^2}{4}+c$, where $c$ is an arbitrary real constant.}
+
+    We want to get rid of one of the two arguments, so let us set $x=y$. The argument $x-y$ becomes zero and we are left with $f(2x)-f(0)=x^2$. Every real number has the form $2x$, so writing $x=t/2$ we get, for all $t\in\R$,
+    $$
+    f(t) = \frac{t^2}{4}+f(0).
+    $$
+    Write $c=f(0)$. Nothing so far constrains this constant; only the check can settle it. For $f(x)=x^2/4+c$,
+    $$
+    f(x+y)-f(x-y) = \frac{(x+y)^2-(x-y)^2}{4} = xy,
+    $$
+    so $c$ really is arbitrary.
+}
+
+\EnvId{i1mQ7q_nNCimt9fxBMQb4-xy-plus-one-plus-sum-product}
+\Problem{0}{}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f(xy+1)+f(x+y) = (f(x)+1)(y+1).
+    $$
+}{
+    Let us substitute a suitable zero. Both options are tempting.
+}{
+    Surprisingly, $y=0$ computes $f(1)$ for us. We can work with that. But let us try $x=0$; what does that give us?
+}{
+    The answer is that $x=0$ practically solves the problem: it computes $f(y)$ for us in terms of $y$ and constants. So $f$ is linear.
+}{
+    One way to finish: once we have computed $f(1)$, substituting $y=1$ gives us $f(0)$ and we are done. Another option is to just bash it out: knowing that $f$ is linear, we set $f(x)=ax+b$ and substitute into the final equation.
+}{
+    \Answer{$f(x)=x$.}
+
+    Set $y=0$: the terms $f(x)$ on both sides cancel and $f(1)=1$. The equally tempting choice $x=0$ gives $f(1)+f(y)=(f(0)+1)(y+1)$, so
+    $$
+    f(y) = (f(0)+1)(y+1)-1 \eqno(1)
+    $$
+    for all real $y$. So $f$ is linear, determined by the single constant $f(0)$, which we get by putting $y=1$ in (1): from $1=f(1)=2(f(0)+1)-1$ we have $f(0)+1=1$, and (1) collapses to $f(y)=y$.
+
+    Check: the left-hand side is $xy+1+x+y$ and the right-hand side $(x+1)(y+1)=xy+x+y+1$.
+}
+
+\EnvId{wdGc5sKRpCgIch2m3hs1O-squared-sum-equals-sum-of-squares}
+\Problem{0}{}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f(x+y)^2 = f(x)^2+f(y)^2.
+    $$
+}{
+    Zeros are great.
+}{
+    With two zeros we compute $f(0)=0$. Can we use that somehow?
+}{
+    The trick is to set $y=-x$. Nice things will happen.
+}{
+    \Answer{The only solution is the zero function $f(x)=0$.}
+
+    Substituting $x=y=0$ gives $f(0)^2=2f(0)^2$, so $f(0)=0$. To force the left-hand side to be exactly $f(0)$, set $y=-x$:
+    $$
+    0 = f(0)^2 = f(x)^2+f(-x)^2.
+    $$
+    A sum of two squares of real numbers vanishes only when both of them vanish, so $f(x)=0$ for every real $x$.
+
+    Check: for the zero function we have $f(x+y)^2=0=f(x)^2+f(y)^2$.
+}
+
+\EnvId{rVXK6c4kP_jGaNdLry8CS-four-term-shift-combination}
+\Problem{0}{}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f(x+y)-2f(x-y)+f(x)-2f(y) = y-2.
+    $$
+}{
+    Let us substitute zero; that will compute something for us right away.
+}{
+    After substituting $y=0$ almost everything cancels and we are left with $f(0)=1$. How about another zero?
+}{
+    $x=0$ gives us a relation for $f(y)$ and $f(-y)$. That still does not compute $f(y)$. It takes one more substitution into this relation.
+}{
+    The trick is to substitute $y:=-y$ into this equation. That way we have a system of two equations in two unknowns $f(y)$ and $f(-y)$.
+}{
+    \Answer{$f(x)=x+1$.}
+
+    Put $y=0$: almost the whole left-hand side cancels, only $-2f(0)$ survives, and so $f(0)=1$. The choice $x=0$ then gives
+    $$
+    -f(y)-2f(-y) = y-3. \eqno(1)
+    $$
+    This ties together two unknown values, $f(y)$ and $f(-y)$, but a second equation for the same pair comes cheaply: substitute $y:=-y$ in (1),
+    $$
+    -f(-y)-2f(y) = -y-3. \eqno(2)
+    $$
+    Subtracting (1) from twice (2) kills the term with $f(-y)$ and leaves $-3f(y)=-3y-3$, so $f(y)=y+1$.
+
+    Check: the left-hand side is $(x+y+1)-2(x-y+1)+(x+1)-2(y+1)=y-2$.
+}
+
+\EnvId{SinDYYQLU2-pKkM5koX4s-double-composition-shift-find-zero}
+\Problem{0}{}{
+    The function $f\colon \R\to\R$ satisfies the equation $f(f(x))=x+f(x)$ for every $x\in\R$. Find all solutions of the equation $f(f(x))=0$.
+}{
+    We have an equation in only one variable. There is not much we can do. What we can do is prove some nice handy property of $f$.
+}{
+    That property is injectivity, which generally suggests itself when we have nothing but reasonably nested $f(x)$'s and a loose $x$ lying around outside $f$.
+}{
+    Once injectivity is proved, we can compute $f(0)$ with a single substitution.
+}{
+    Once we know $f(0)=0$, we also know $f(f(0))=0$. Can there be another $x$ with $f(f(x))=0$? Don't forget what we already know about $f$.
+}{
+    \Answer{$x=0$.}
+
+    Rewrite the given equation as $f(f(x))-f(x)=x$. If $f(x)=f(y)$, then
+    $$
+    x=f(f(x))-f(x)=f(f(y))-f(y)=y,
+    $$
+    so $f$ is injective. Putting $x=0$ in the given equation gives $f(f(0))=f(0)$, and injectivity turns that into $f(0)=0$. In particular $f(f(0))=0$. Any further solution of $f(f(x))=0$ would satisfy $f(f(x))=f(f(0))=f(0)$, and hence $x=0$. The only solution is therefore $x=0$.
+}
+
+\EnvId{Fi_6DpBzAvQSV5yHlerRQ-x-squared-times-sum-of-values}
+\Problem{0}{Czech-Slovak 2004}{
+    Find all functions $f\colon \R^+\to\R^+$ such that for all positive real numbers $x,y$,
+    $$
+    x^2(f(x)+f(y)) = (x+y)f(f(x)y).
+    $$
+}{
+    Clearly $f(x)=1/x$ works and will probably be the final answer. After substituting $x=1$ we have almost solved the problem, except for the expression $f(f(1)y)$. It would be great to know $f(1)$; let us denote this value by $a$; we will be substituting a lot.
+}{
+    Two ones give $f(a)=a$, which tempts us to substitute $x=a$. That way we get an equation in which the only bad thing is $f(ay)$. But don't we already have another equation with $f(ay)$?
+}{
+    The other equation we are looking for is in fact the one that motivated our investigation of $f(1)$, namely $x=1$. Comparing the equations makes a lot of things disappear.
+}{
+    \Answer{$f(x)=1/x$.}
+
+    Let $a=f(1)$ and substitute $x=1$:
+    $$
+    a+f(y) = (1+y)f(ay). \eqno(1)
+    $$
+    If we knew $a$, (1) would settle the problem outright, so the whole solution is a hunt for $f(1)$.
+
+    Setting $y=1$ in (1) gives $2a=2f(a)$, so $f(a)=a$. That makes the awkward expression $f(f(x)y)$ collapse to $f(ay)$ when $x=a$, and the given equation becomes
+    $$
+    a^2\bigl(a+f(y)\bigr) = (a+y)f(ay). \eqno(2)
+    $$
+    The only bad term in (2) is $f(ay)$, and we can solve (1) for it: $f(ay)=\frac{a+f(y)}{1+y}$. Substituting into (2) and canceling the positive factor $a+f(y)$ leaves $a^2(1+y)=a+y$, so $(a^2-1)y=a-a^2$ for every $y>0$. This forces both $a^2-1=0$ and $a-a^2=0$, so $a=1$, and (1) becomes $1+f(y)=(1+y)f(y)$, giving $f(y)=1/y$.
+
+    Check: the left-hand side is $x^2\bigl(\frac{1}{x}+\frac{1}{y}\bigr)=x+\frac{x^2}{y}$ and the right-hand side $(x+y)f\bigl(\frac{y}{x}\bigr)=(x+y)\cdot\frac{x}{y}=\frac{x^2}{y}+x$.
+}
+
+\EnvId{BRqtjnssgMn1ibbjJfnAS-squared-difference-quadratic-identity}
+\Problem{0}{}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f^2(x-y) = x^2-2f(x)f(y)+y^2.
+    $$
+}{
+    First play around with zeros.
+}{
+    Two zeros give $f(0)=0$ and then $y:=0$ gives $f(x)^2=x^2$. That is our familiar trap, $f(x)=x$ or $f(x)=-x$ for every $x$. We can now consider whether this can ever break down. But there is also another, shorter solution that uses the relation $f(x)^2=x^2$ differently.
+}{
+    The deep trick is that the left-hand side of the equation equals $(x-y)^2$. After simplifying and flipping the sides the equation becomes $f(x)f(y)=xy$. That is easy already.
+}{
+    From this equation, $f$ is not the zero function, because then the left-hand side would be zero and the right-hand side nonzero. Hence for some $y$ the value $f(y)$ is different from $0$, which lets us divide, giving $f(x)=cx$ for a suitable $c$. The original equation then finishes it off easily.
+}{
+    \Answer{$f(x)=x$ and $f(x)=-x$.}
+
+    Substituting $x=y=0$ gives $3f(0)^2=0$, so $f(0)=0$, and the choice $y=0$ then gives
+    $$
+    f(x)^2 = x^2 \eqno(1)
+    $$
+    for every real $x$. That is our familiar trap; on its own it yields neither $f(x)\equiv x$ nor $f(x)\equiv-x$. But (1) holds for every number, $x-y$ included, so the left-hand side of the given equation is $(x-y)^2$; canceling the equal terms and dividing by $-2$ leaves
+    $$
+    f(x)f(y) = xy. \eqno(2)
+    $$
+    Now $f$ is not the zero function, or else the left-hand side of (2) would always be zero, while for $x=y=1$ the right-hand side is not. So pick $b$ with $f(b)\neq0$ and set $c=b/f(b)$; the choice $y=b$ in (2) gives $f(x)f(b)=xb$, so $f(x)=cx$. Back in (2), $c^2xy=xy$, so $c^2=1$ and $c=\pm1$.
+
+    Check: for $f(x)=\pm x$ we have both $f(x)f(y)=xy$ and $f(x-y)^2=(x-y)^2$, so
+    $$
+    f(x-y)^2 = x^2-2xy+y^2 = x^2-2f(x)f(y)+y^2.
+    $$
+}
+
+\EnvId{0b7J2k9ZqK67mKlH8S1Sd-reciprocal-shift-product-equals-one}
+\Problem{0}{}{
+    Find all functions $f\colon \R^+\to\R^+$ such that for all positive real numbers $x,y$,
+    $$
+    \bigl(1+yf(x)\bigr)\bigl(1-yf(x+y)\bigr) = 1.
+    $$
+}{
+    Random substitution unfortunately does not work here; we have no zeros \Sad. The trick is symmetry.
+}{
+    Let us express $f(x+y)$ in terms of the remaining variables, since that is our symmetric expression, and then swap $x$ and $y$ in it.
+}{
+    In the resulting equation we fix $y$ and voila, we have $f(x)$ in terms of $x$ and constants. We call the ugly part $c$ and get $f(x)=1/(x+c)$. It remains to find out for which $c$ such a function really is a solution.
+}{
+    \Answer{$f(x)=\frac{1}{x+c}$ for an arbitrary constant $c\ge0$.}
+
+    Expanding, we see the $1$s cancel; dividing through by $y>0$ then leaves
+    $$
+    f(x)-f(x+y) = yf(x)f(x+y). \eqno(1)
+    $$
+    The symmetric expression here is $f(x+y)$, since swapping $x$ and $y$ leaves the argument $x+y$ alone. So let us solve (1) for it; as $1+yf(x)$ is positive,
+    $$
+    f(x+y) = \frac{f(x)}{1+yf(x)}. \eqno(2)
+    $$
+    Swapping $x$ and $y$ leaves the left-hand side of (2) alone, so it must leave the right-hand side alone too. Cross-multiplying gives $f(x)+xf(x)f(y)=f(y)+yf(x)f(y)$, and dividing by $f(x)f(y)>0$,
+    $$
+    \frac{1}{f(x)}-x = \frac{1}{f(y)}-y. \eqno(3)
+    $$
+    Fix $y$ in (3). The right-hand side is then a constant; call it $c$. So $f(x)=1/(x+c)$ for every $x>0$. From $c=1/f(x)-x$ and $f(x)>0$ we get $c>-x$ for every $x>0$, and if $c$ were negative, the choice $x=-c/2$ would give $c>c/2$, a contradiction. Hence $c\ge0$.
+
+    Check: for $c\ge0$ and $x>0$ we have $x+c>0$, so $f$ really is a function from $\R^+$ to $\R^+$, and
+    $$
+    \bigl(1+yf(x)\bigr)\bigl(1-yf(x+y)\bigr) = \frac{x+y+c}{x+c}\cdot\frac{x+c}{x+y+c} = 1.
+    $$
+}
+
+\EnvId{9dxPoUy6Euz9b_xY1X3PX-y-minus-xy-argument}
+\Problem{0}{Czech-Slovak 2017}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f(y-xy) = f(x)y+(x-1)^2f(y).
+    $$
+}{
+    Start with substitutions that zero out different parts of the equation in different ways.
+}{
+    Substituting suitable zeros and ones computes $f(0)$ and $f(1)$ for us. Among other things it also gives us the relation $f(1-x)=f(x)$. Can we use it in some clever way to simplify the equation?
+}{
+    The trick is to substitute $x:=1-x$ and, using $f(1-x)=f(x)$, rewrite the equation as $f(xy)=f(x)y+x^2f(y)$. It is definitely nicer.
+}{
+    What to do with such an equation? Well, $f(xy)$ is symmetric, so the symmetry trick strongly suggests itself.
+}{
+    Using symmetry we get an equation in which, once we fix $y$, we can express $f(x)$ in terms of $x$ and constants. There is still a bit of discussion, but then it's done.
+}{
+    \Answer{$f(x)=c(x^2-x)$ for an arbitrary real constant $c$.}
+
+    Let us start with substitutions that zero out different parts of the equation. The choice $x=0$ gives $f(0)y=0$ for every $y$, so $f(0)=0$. The choice $x=1$ kills the left-hand side along with the second term on the right, so $0=f(1)y$ and $f(1)=0$. Finally $y=1$ gives
+    $$
+    f(1-x) = f(x). \eqno(1)
+    $$
+    Relation (1) is begging us to put $x:=1-x$ in the given equation: the left-hand side becomes $f\bigl(y-(1-x)y\bigr)=f(xy)$ and the right-hand side, by (1), becomes $f(x)y+x^2f(y)$. The given equation has turned into the much nicer
+    $$
+    f(xy) = f(x)y+x^2f(y). \eqno(2)
+    $$
+    The left-hand side of (2) is symmetric in $x$ and $y$, so we may swap the variables and compare the two right-hand sides; rearranging,
+    $$
+    f(x)\,y(1-y) = f(y)\,x(1-x). \eqno(3)
+    $$
+    The choices $y=0$ and $y=1$ in (3) merely zero out both sides, so take $y=2$ instead. It gives $-2f(x)=f(2)\,x(1-x)$, and with $c=f(2)/2$,
+    $$
+    f(x) = c(x^2-x).
+    $$
+    Check: the left-hand side of the given equation is
+    $$
+    c\bigl(y^2(1-x)^2-y(1-x)\bigr) = c\bigl((x-1)^2y^2+xy-y\bigr)
+    $$
+    and the right-hand side $c(x^2-x)y+(x-1)^2c(y^2-y)$, the same expression once we expand $-(x-1)^2y=-x^2y+2xy-y$.
+}
+
+\EnvId{LmumllMYytjLIVNBGOsuu-xfy-argument-plus-x}
+\Problem{0}{Czech-Slovak 2002}{
+    Find all functions $f\colon \R^+\to\R^+$ such that for all positive real numbers $x,y$,
+    $$
+    f(xf(y)) = f(xy)+x.
+    $$
+}{
+    The trick is to produce something symmetric. Don't be afraid that it might take several steps.
+}{
+    The trick is to substitute $x:=f(x)$ and rewrite the left-hand side.
+}{
+    After substituting $x:=f(x)$ we have something symmetric on the left-hand side and $f(f(x)y)$ on the right-hand side. But we can solve the given equation itself for that.
+}{
+    We are left with $f(f(x)f(y))$ expressed as something nice. There the symmetry will help and give something really nice.
+}{
+    \Answer{$f(x)=x+1$.}
+
+    We are after a symmetric expression, since such an expression can be compared with itself after a swap of the variables. The left-hand side $f(xf(y))$ is not symmetric, but the choice $x:=f(x)$ (legal, since $f(x)>0$) turns it into $f(f(x)f(y))$:
+    $$
+    f\bigl(f(x)f(y)\bigr) = f\bigl(f(x)y\bigr)+f(x). \eqno(1)
+    $$
+    The term $f(f(x)y)$ is in the way, so let us solve for it using the given equation with the roles of the variables swapped, $f\bigl(yf(x)\bigr)=f(xy)+y$. Then (1) becomes
+    $$
+    f\bigl(f(x)f(y)\bigr) = f(xy)+y+f(x). \eqno(2)
+    $$
+    Swapping $x$ and $y$ leaves both the left-hand side of (2) and the term $f(xy)$ alone, so comparing (2) with its own swap gives $y+f(x)=x+f(y)$. So $f(x)-x$ is constant, $f(x)=x+c$. In the given equation the left-hand side is now $f\bigl(x(y+c)\bigr)=xy+xc+c$ and the right-hand side $xy+c+x$, so $xc=x$ and $c=1$.
+
+    Check: $f\bigl(xf(y)\bigr)=x(y+1)+1=xy+x+1$ and $f(xy)+x=xy+1+x$.
+}
+
+\EnvId{YWvnbpCFj9QCJ1R7xu-vb-positive-reals-reciprocal-term}
+\Problem{0}{Czech-Slovak 2011}{
+    Find all functions $f\colon \R^+\to\R^+$ such that for all positive real numbers $x,y$,
+    $$
+    f(x)\cdot f(y) = f(y)\cdot f(xf(y))+\frac{1}{xy}.
+    $$
+}{
+    The weird expression is $f(xf(y))$, and it is worth isolating it. Then a good substitution lets us create symmetry.
+}{
+    The key is the substitution $x:=f(x)$ to create a symmetric expression. Then, by the usual swap of $x,y$, we have a good relation.
+}{
+    In the good relation we are left with $f(f(x))$ and $f(f(y))$. After substituting $y=1$ this actually gives an expression for $f(f(x))$. Can we get another expression for $f(f(x))$ from somewhere else?
+}{
+    The answer is the original equation, where $x=1$, $y=x$ gives exactly such an expression. Comparing them we already arrive at a good relation. It remains to compute $f(1)$.
+}{
+    \Answer{$f(x)=\frac{x+1}{x}$.}
+
+    Let us isolate the weird expression $f(xf(y))$ by dividing by $f(y)>0$:
+    $$
+    f(xf(y)) = f(x)-\frac{1}{xyf(y)}. \eqno(1)
+    $$
+    The argument $xf(y)$ becomes symmetric in $x$ and $y$ if we put $f(x)$ in place of $x$. Indeed, $x:=f(x)$ in (1) gives $f\bigl(f(x)f(y)\bigr)=f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)}$, whose left-hand side survives a swap of $x$ and $y$ untouched. Hence
+    $$
+    f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)} = f\bigl(f(y)\bigr)-\frac{1}{xf(x)f(y)}. \eqno(2)
+    $$
+    Let $a=f(1)$. Putting $y=1$ in (2) yields one expression for $f(f(x))$,
+    $$
+    f\bigl(f(x)\bigr) = f(a)+\frac{x-1}{axf(x)}, \eqno(3)
+    $$
+    while the original equation with $x=1$, $y:=x$ reads $af(x)=f(x)f\bigl(f(x)\bigr)+\frac1x$ and yields a second,
+    $$
+    f\bigl(f(x)\bigr) = a-\frac{1}{xf(x)}. \eqno(4)
+    $$
+    In particular $x=1$ in (4) gives $f(a)=a-\frac1a$. Substituting that into (3), comparing with (4) and multiplying by $axf(x)$,
+    $$
+    \eqalign{
+        a^2xf(x)-a &= a^2xf(x)-xf(x)+x-1,\cr
+        xf(x) &= x-1+a,\cr
+    }
+    $$
+    so $f(x)=1+\frac{a-1}{x}$ for all $x>0$.
+
+    It remains to compute $a$. Write $k=a-1$, so that $f(x)=1+\frac{k}{x}$. Since $1-\frac{1}{f(y)}=\frac{k}{yf(y)}$,
+    $$
+    f(x)-f(xf(y)) = \frac{k}{x}\Bigl(1-\frac{1}{f(y)}\Bigr) = \frac{k^2}{xyf(y)},
+    $$
+    and hence $f(x)f(y)-f(y)f(xf(y))=\frac{k^2}{xy}$: the given equation holds exactly when $k^2=1$. The choice $k=-1$ gives $f(x)=1-\frac1x$, not positive for $x\le1$, so $k=1$ and $f(x)=\frac{x+1}{x}$. This computation doubles as the check.
+}
+
+\EnvId{xYE-jQfV3cgnedvharjJE-xfx-plus-2y-argument}
+\Problem{0}{MEMO 2013 T1}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f(xf(x)+2y) = f(x^2)+f(y)+x+y-1.
+    $$
+}{
+    We compute $f(0)$ trivially. That will help us derive some relations. Overall we are trying to derive as many nice relations as possible, relations of the shape: $f$ of something complicated equals something simpler.
+}{
+    The first main substitution is $x=0$; it gives $f(2y)=f(y)+y$, and it is the easier one. That is still not enough, another good substitution uses the trick of matching the arguments. Can we somehow reasonably match the $f$ on the left with some $f$ on the right?
+}{
+    The trick is to match $xf(x)+2y=y$, that is, to set $y=-xf(x)$. From that we are left with a relation that computes $f(x^2)$ using simpler things. Together with the relation that computes $f(2x)$ using simpler things, that is already quite powerful.
+}{
+    Another trick is expressing something in two ways. Let us try to find $f$ of something good that we can compute with our $f(\text{something}^2)$ or $f(2\cdot\text{something})$.
+}{
+    We can arrive at this double expression as follows: We know that doubles work for us, so let us set $\text{something}=2x$ in the relation $f(\text{something}^2)$. So we have $f(4x^2)=\dots$ Let us try to write the left-hand side differently as well. We have everything we need, all that is left is to keep applying our relations as long as we can.
+}{
+    \Answer{$f(x)=x+1$.}
+
+    Substituting $x=y=0$ gives $f(0)=1$. The choice $x=0$, $y=z$ yields
+    $$
+    f(2z) = f(z)+z \eqno(1)
+    $$
+    and $x=z$, $y=-z\cdot f(z)$ yields
+    $$
+    f(z^2) = zf(z)-z+1. \eqno(2)
+    $$
+    Putting $2t$ for $z$ in (2) and using (1),
+    $$
+    \eqalign{
+        f(4t^2) &= 2tf(2t)-2t+1 = 2t\bigl(f(t)+t\bigr)-2t+1 =\cr
+        &= 2tf(t)+2t^2-2t+1.\cr
+    } \eqno(3)
+    $$
+    Putting $2t^2$ for $z$ in (1) and using (1) and (2),
+    $$
+    f(4t^2) = f(2t^2)+2t^2 = f(t^2)+t^2+2t^2 = tf(t)-t+1+3t^2. \eqno(4)
+    $$
+    Comparing (3) and (4),
+    $$
+    \eqalign{
+        2tf(t)+2t^2-2t+1 &= tf(t)-t+1+3t^2,\cr
+        tf(t)-t^2-t &= 0,\cr
+        t\bigl(f(t)-t-1\bigr) &= 0.\cr
+    }
+    $$
+    For $t\neq0$ this gives $f(t)=t+1$, and $f(0)=1$ was settled at the start. So for all $t\in\R$,
+    $$
+    f(t) = t+1.
+    $$
+
+    Check: the left-hand side of the given equation is $f\bigl(x(x+1)+2y\bigr)=x^2+x+2y+1$ and the right-hand side $(x^2+1)+(y+1)+x+y-1=x^2+x+2y+1$.
+}
+
+\EnvId{a9qETGIWxvhD4V8j9p6Rp-xfx-plus-fy-argument}
+\Problem{0}{}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f(xf(x)+f(y)) = y+f^2(x).
+    $$
+}{
+    Spot some of our familiar good properties of $f$.
+}{
+    The key is to prove that $f$ is a bijection on $\R$. For that it is worth looking at the right-hand side. The proof goes the same way as for $f(f(x))=x$. A substitution can make it clearer.
+}{
+    After substituting $x=0$ we have $f(f(y))=y+f^2(0)$, from which we can prove the bijection. This relation is nice; it would be useful to compute $f(0)$.
+}{
+    The key to computing $f(0)$ is a trick: From the shape of the equation I suspect that the solution will be $f(x)=x$, so $f(0)$ will probably be $0$. From surjectivity we know that the function is $0$ somewhere; say $f(a)=0$. Let us try to substitute suitably.
+}{
+    The key is $x=a$ into the original equation; that gives us directly $f(f(y))=y$, which compared with $f(f(y))=y+f^2(0)$ gives $f(0)=0$.
+}{
+    Try to come up with a cute substitution that uses $f(f(x))=x$ in a cute way.
+}{
+    The key is to replace $x\to f(x)$ in the original equation. After applying it and comparing suitably, the situation simplifies miraculously.
+}{
+    We should be left with $f(x)^2=x^2$ for every $x$. That is our familiar trap. All that is left is to investigate whether $f$ can be anything other than identically $x$ or identically $-x$.
+}{
+    If we had $f(a)=a$ somewhere for a nonzero $a$ and at the same time $f(b)=-b$ for a nonzero $b$, then the original equation for $x=a$, $y=b$ would not work out well, and that can be pushed through to the end.
+}{
+    \Answer{$f(x)=x$ and $f(x)=-x$.}
+
+    Let us label the given equation
+    $$
+    f\bigl(xf(x)+f(y)\bigr) = y+f(x)^2. \eqno(1)
+    $$
+    A $y$ lying around freely on the right, while the left holds $y$ only inside $f(y)$, is the classic sign that $f$ is a bijection. Substituting $x=0$ in (1),
+    $$
+    f\bigl(f(y)\bigr) = y+f(0)^2, \eqno(2)
+    $$
+    and the right-hand side here runs over every real value, so $f$ is surjective. If $f(y_1)=f(y_2)$, then (2) forces $y_1=y_2$, so $f$ is injective as well.
+
+    By surjectivity there is an $r$ with $f(r)=0$; such a point kills the term $xf(x)$ and the term $f(x)^2$ simultaneously, so the choice $x=r$ in (1) gives
+    $$
+    f\bigl(f(y)\bigr) = y, \eqno(3)
+    $$
+    and comparison with (2) gives $f(0)=0$.
+
+    Relation (3) says that $f$ is its own inverse, and we exploit it fully with the choice $x:=f(x)$ in (1):
+    $$
+    f\Bigl(f(x)\cdot f\bigl(f(x)\bigr)+f(y)\Bigr) = y+f\bigl(f(x)\bigr)^2.
+    $$
+    Apply (3): the left-hand side is exactly the left-hand side of (1) and the right-hand side is $y+x^2$, so
+    $$
+    f(x)^2 = x^2 \eqno(4)
+    $$
+    for every real $x$.
+
+    That is our familiar trap; (4) does not yet make $f$ identically $x$ or identically $-x$. So suppose there are nonzero $a$, $b$ with $f(a)=a$ and $f(b)=-b$. The choice $x=a$, $y=b$ in (1) gives $f(a^2-b)=b+a^2$, while by (4) $f(a^2-b)$ equals $a^2-b$ or $-(a^2-b)$. The first case forces $b=0$, the second $a=0$, either way a contradiction. Since the two formulas agree at zero, either $f(x)=x$ for all $x$, or $f(x)=-x$ for all $x$.
+
+    Check: for $f(x)=x$ the left-hand side of (1) equals $f(x^2+y)=x^2+y$ and the right-hand side $y+x^2$; for $f(x)=-x$ the left-hand side is $f(-x^2-y)=x^2+y$ and the right-hand side $y+x^2$.
+}
+
+\EnvId{twoQCbBbWzFVHepEwIWV--squares-ratio-equal-products-constraint}
+\Problem{0}{IMO 2008 P4}{
+    Find all functions $f\colon \R^+\to\R^+$ such that for all positive real numbers $w,x,y,z$ satisfying $wx=yz$,
+    $$
+    \frac{f^2(w)+f^2(x)}{f(y^2)+f(z^2)} = \frac{w^2+x^2}{y^2+z^2}.
+    $$
+}{
+    Even the simplest substitution, all variables the same, gives something useful and inspiring.
+}{
+    We have $f(x^2)=f(x)^2$. On the one hand that is $f(1)$ for free, but mainly it is both a tool and a hint for the next substitution, since we can get rid of squares. So let us substitute some squares in there.
+}{
+    The key is $w=t^2$, $x=1$, $y=z=t$. Using the $f(x^2)$ relation and a bit of algebra, this actually gives an equation involving only $f(t)$ and expressions in $t$, so we can compute the possible values of $f(t)$ directly.
+}{
+    We should get $f(t)=t$ or $f(t)=1/t$, for every $t$. That is our familiar trap. We need to think through whether we can have $f(a)=a$ and $f(b)=1/b$ for some $a,b$. That certainly happens for $1$, so let $a,b$ be different from $1$. We solve the trap in the usual way, by a suitable substitution.
+}{
+    The key is the substitution $w=a$, $x=b$ (this is the natural part) and $y=z=\sqrt{ab}$, so that it works out and is not too bad. After rearranging we are left with an expression for $f(ab)$ in terms of $a,b$, and going through the cases then gives a contradiction.
+}{
+    \Answer{$f(x)=x$ and $f(x)=1/x$.}
+
+    The choice $w=x=y=z=t$ meets the condition $wx=yz$ and gives $\frac{2f(t)^2}{2f(t^2)}=1$, so for every $t>0$,
+    $$
+    f(t^2) = f(t)^2. \eqno(1)
+    $$
+    In particular $f(1)=f(1)^2$, and since $f(1)>0$, we get $f(1)=1$.
+
+    Relation (1) lets us strip off squares, so let us substitute in such a way that some arise. The choice $w=t^2$, $x=1$, $y=z=t$ is legal, and after (1) and $f(1)=1$ nothing but $f(t)$ is left in it:
+    $$
+    \frac{f(t)^4+1}{2f(t)^2} = \frac{t^4+1}{2t^2}.
+    $$
+    With $u=f(t)^2$ and $v=t^2$, multiplying by $2uv$ turns this into $v(u^2+1)=u(v^2+1)$, or $(u-v)(uv-1)=0$. Positivity then leaves, for every $t>0$,
+    $$
+    f(t) = t \qquad\text{or}\qquad f(t) = \frac1t. \eqno(2)
+    $$
+
+    So far the choice is made separately for each $t$, and that is our familiar trap. For $t=1$ the two possibilities coincide, so suppose for contradiction that there exist $a\neq1$ and $b\neq1$ with $f(a)=a$ and $f(b)=1/b$. The substitution $w=a$, $x=b$ is the natural one, and $y=z=\sqrt{ab}$ ensures both the condition $wx=yz$ and a denominator holding a single unknown value $f(ab)$:
+    $$
+    \frac{a^2+1/b^2}{2f(ab)} = \frac{a^2+b^2}{2ab}, \qquad\text{hence}\qquad f(ab) = \frac{ab\(a^2+1/b^2\)}{a^2+b^2}.
+    $$
+    By (2), meanwhile, $f(ab)$ equals $ab$ or $1/(ab)$.
+
+    \begitems \style i
+    \i If $f(ab)=ab$, dividing by $ab$ leaves $a^2+b^2=a^2+1/b^2$, so $b^4=1$ and $b=1$, a contradiction.
+    \i If $f(ab)=1/(ab)$, multiplying out gives $a^2+b^2=a^4b^2+a^2$, so $a^4=1$ and $a=1$, a contradiction.
+    \enditems
+
+    One of the possibilities in (2) therefore holds simultaneously for all $t>0$.
+
+    Check: for $f(x)=x$ the left-hand side is just $(w^2+x^2)/(y^2+z^2)$; for $f(x)=1/x$,
+    $$
+    \frac{\frac1{w^2}+\frac1{x^2}}{\frac1{y^2}+\frac1{z^2}} = \frac{(w^2+x^2)y^2z^2}{(y^2+z^2)w^2x^2} = \frac{w^2+x^2}{y^2+z^2},
+    $$
+    since $wx=yz$ gives $w^2x^2=y^2z^2$.
+}
+
+\EnvId{FN6k9THlUoMs8BOJUCaT8-xfy-plus-2y-argument}
+\Problem{0}{MEMO 2019 I1}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f(xf(y)+2y) = f(xy)+xf(y)+f(f(y)).
+    $$
+}{
+    The first step is to find out how things stand with the zeros. There is more to be found than just computing $f(0)$.
+}{
+    If $f(0)=a$, then two zeros give us $f(a)=0$. Further substitution reveals that either $f$ is identically zero (which is a solution), or it is zero exactly at zero; from now on let us pursue the second possibility. That is interesting in general. It is also interesting to just substitute a suitable zero; doesn't that give something that hints at the next step?
+}{
+    Zero for $x$ gives $f(2y)=f(f(y))$. If we had injectivity, we would be happy. So let us try to prove it (it is not as trivial as usual, though). We need a better equation than the current one.
+}{
+    The standard trick of matching the arguments gives us an equation that will be ugly, but useful for injectivity.
+}{
+    The trick is to match up $xf(y)+2y$ and $xy$. For which $x,y$ can we actually do that? And what will be left in the equation?
+}{
+    First of all, after matching we are left with an equation containing only $y$ and $f(y)$, even if in a fairly random combination. But such an equation is a good one to prove injectivity from. The harder part is, paradoxically, to investigate when this substitution is legal. And that is only when $f(y)$ is not $y$, that is, when $y$ is not a fixed point. So let us investigate the set of fixed points of the function. One fixed point certainly exists, $0$ thanks to $f(0)=0$. Denote by $p$ some fixed point, that is $f(p)=p$; substituting fixed points generally works well. The goal will be to show that $p=0$.
+}{
+    Our relation $f(f(y))=f(2y)$ tells us something about $f(2p)$. Similarly we can find out $f(4p)$ and so on. In fact we are one substitution away from proving $p=0$. Together with the injectivity from before and everything else we will be done.
+}{
+    \Answer{The zero function $f(x)=0$ and the function $f(x)=2x$.}
+
+    Let $a=f(0)$. Substituting $x=y=0$ gives $f(a)=0$, and the choice $y=0$ gives $f(ax)=a+ax$ for every real $x$. If $a$ were nonzero, $x=1$ would give $f(a)=2a$, which together with $f(a)=0$ forces $a=0$, a contradiction. Hence $f(0)=0$.
+
+    Does $f$ have other zeros? Suppose $f(y_0)=0$ for some $y_0\neq0$. The choice $y=y_0$ turns the given equation into $f(2y_0)=f(xy_0)$, and $xy_0$ ranges over all real numbers, so $f$ is constant, and since $f(0)=0$ it is identically zero. The zero function satisfies the given equation; from now on we therefore assume that $f$ is not the zero function, and hence $f(y)=0$ if and only if $y=0$.
+
+    Substituting $x=0$ gives
+    $$
+    f(f(y)) = f(2y) \eqno(1)
+    $$
+    for every real $y$. Injectivity would finish the problem on the spot, so let us try to prove it. The natural move is to match the arguments: we want $xf(y)+2y=xy$, or $x\bigl(f(y)-y\bigr)=-2y$, and we may divide only when $f(y)\neq y$. So the fixed points come first.
+
+    Suppose $f(p)=p$. Relation (1) with $y=p$ gives $f(2p)=f(p)=p$, and then with $y=2p$ it gives $f(4p)=f(f(2p))=f(p)=p$. On the other hand, the choice $y=p$ in the given equation gives $f(xp+2p)=f(xp)+xp+p$; if $p\neq0$, then $t=xp$ ranges over all real numbers, so $f(t+2p)=f(t)+t+p$, and the choice $t=2p$ together with $f(2p)=p$ gives $f(4p)=p+2p+p=4p$, contradicting $f(4p)=p$. The only fixed point is therefore $0$.
+
+    Now we can match the arguments: for $y\neq0$ the choice $x=\frac{2y}{y-f(y)}$ is legal and satisfies $xf(y)+2y=xy$, so the terms $f(xf(y)+2y)$ and $f(xy)$ cancel and $0=xf(y)+f(f(y))$ remains. By (1), $f(f(y))=f(2y)$, and multiplying by the denominator $y-f(y)$ gives
+    $$
+    f(2y)\bigl(f(y)-y\bigr) = 2yf(y) \eqno(2)
+    $$
+    for every $y\neq0$.
+
+    Now suppose $f(u)=f(v)$ and call this common value $c$; by (1) also $f(2u)=f(2v)$, call that $d$. If one of the numbers $u$, $v$ is zero, so is the other, since $f$ vanishes only at zero; assume therefore that both are nonzero. Relation (2) for $y=u$ and for $y=v$ gives
+    $$
+    d(c-u) = 2uc, \qquad d(c-v) = 2vc,
+    $$
+    and subtracting, $(u-v)(d+2c)=0$. If $u\neq v$, then $d=-2c$ and the first equation becomes $-2c(c-u)=2uc$, so $c^2=0$; but then $f(u)=0$ and $u=0$, which we ruled out. So $f$ is injective, and (1) gives $f(y)=2y$ directly.
+
+    Check: for the zero function both sides are zero. For $f(x)=2x$ the left-hand side is $f(2xy+2y)=4xy+4y$ and the right-hand side $2xy+2xy+4y$.
+}
+
+\EnvId{O684Up6UyIhNsE7sZ87O0-square-plus-fy-argument}
+\Problem{0}{IMO 1992 P2}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f(x^2+f(y)) = y+f^2(x).
+    $$
+}{
+    Notice that $f$ has a zero and find it.
+}{
+    Why does $f$ have a zero? Well, for $y=-f^2(x)$ we have $f(\hbox{something})=0$. But how exactly do we compute it? It takes a few substitutions. Let $f(a)=0$...
+}{
+    The key is two substitutions, $[a,a]$ and $[0,a^2]$; from those we get $a=0$ right away. As always, $f(0)=0$ gives us a lot.
+}{
+    Via $x=0$ we easily derive that $f(f(y))=y$. After suitable substitution we can use this for various manipulations of the equation. In any case, we are at the point where standard substitution fails and it takes a big idea.
+}{
+    The trick is to try to prove that $f$ is an increasing function.
+}{
+    To prove that it is increasing, let us first substitute $y:=f(y)$, which gives us $f(x^2+y)=f(y)+f^2(x)$. This already implies that it is increasing, even though we cannot see it yet.
+}{
+    If we have two numbers $u>v$, then we can find suitable $(x,y)$ so that $x^2+y=u$ and $y=v$. Do we then have $f(u)>f(v)$ in our equation?
+}{
+    The finish is to realize that an increasing function together with $f(f(x))=x$ is a very suspicious spot. Can $f(x)$ be anything other than the identity?
+}{
+    \Answer{$f(x)=x$.}
+
+    First notice that $f$ has a zero: the choice $y=-f^2(x)$ makes the right-hand side zero, so $f$ vanishes at the point $x^2+f(y)$. So let $f(a)=0$ and let us try to compute $a$. Substituting $x=y=a$ gives
+    $$
+    f(a^2) = a, \eqno(1)
+    $$
+    and the choice $x=0$, $y=a^2$ gives $f\bigl(f(a^2)\bigr)=a^2+f^2(0)$, which by (1) reads $0=a^2+f^2(0)$. Both terms are nonnegative, so $a=0$ and also $f(0)=0$.
+
+    Now $x=0$ gives us
+    $$
+    f\bigl(f(y)\bigr) = y \eqno(2)
+    $$
+    for all real $y$, so $f$ is injective, and together with $f(0)=0$ it vanishes only at zero.
+
+    Plain substitution takes us no further here, and an idea is needed: we show that $f$ is increasing. Relation (2) lets us put $y:=f(y)$ in the given equation, which unwinds the inner double $f$ and leaves
+    $$
+    f(x^2+y) = f(y)+f^2(x). \eqno(3)
+    $$
+    Let $u>v$. The choice $y=v$ and $x=\sqrt{u-v}>0$ makes $x^2+y=u$, so (3) gives $f(u)=f(v)+f^2\bigl(\sqrt{u-v}\bigr)$. The added square is positive, since $f$ vanishes only at zero. Therefore $f(u)>f(v)$.
+
+    But an increasing function satisfying (2) can only be the identity: if $f(x)>x$, monotonicity gives $f\bigl(f(x)\bigr)>f(x)>x$, and if $f(x)<x$ it gives $x=f\bigl(f(x)\bigr)<f(x)<x$, each contradicting (2).
+
+    Check: the left-hand side is $f(x^2+y)=x^2+y$ and the right-hand side $y+x^2$.
+}
+
+\EnvId{3FuiZ3Qxo2fO3HYiB1mm3-nonzero-reals-x-squared-y-fx}
+\Problem{0}{MEMO 2015 T2}{
+    Find all functions $f\colon \R\setminus\{0\}\to\R\setminus\{0\}$ such that for all nonzero real numbers $x,y$,
+    $$
+    f(x^2yf(x))+f(1) = x^2f(x)+f(y).
+    $$
+}{
+    An easy step is to compute $f(1)=\pm1$, or rather to derive $f(x^2f(x))=x^2f(x)$. Here the fun begins: what does this equation actually mean?
+}{
+    This equation strongly suggests that we should look at fixed points: for every $x$ we suddenly know that $x^2f(x)$ is a fixed point. If we could find all fixed points, ideally if there were only one, then we immediately have $x^2f(x)=\text{something fixed}$ and we are done. So let us look for fixed points, let $p$ be one of them\dots
+}{
+    The basic observations are that $p^3$ is also a fixed point, and therefore so is $p^9$. It takes a good substitution into the equation that makes use of this. It is a good idea to go back to the original equation.
+}{
+    We substitute $x=p$ and leave $y$ alone for now. We will have an expression for $f(p^3y)$ in terms of $f(y)$. This way we can nicely express $p^6, p^9$. Wait, but we already know those in another way. We should arrive at a ninth-degree equation (yum), with $f(1)$ still lying around in it. It sounds scary, but it really is not bad.
+}{
+    Our equation should lead to the fact that for a fixed point $p$ the value $p^3$ equals $f(1)$ or $-2f(1)$. The first is logical; we expect the solutions $1/x^2$ and $-1/x^2$. The second is somewhat weird, so let us deal with it and we are done.
+}{
+    How to deal with the possibility $p^3=-2f(1)$? Well, $p^3$ is also a fixed point, so let us apply the same statement to it: its cube must also equal $f(1)$ or $-2f(1)$.
+}{
+    \Answer{$f(x)=1/x^2$ and $f(x)=-1/x^2$.}
+
+    Write $b=f(1)$, and call a nonzero number $p$ a \uv{fixed point} if $f(p)=p$. We may substitute any nonzero $x,y$, since the expression $x^2yf(x)$ is then nonzero as well.
+
+    Set $y=1$: the terms $f(1)$ on both sides cancel and we are left with
+    $$
+    f\bigl(x^2f(x)\bigr) = x^2f(x), \eqno(1)
+    $$
+    so $x^2f(x)$ is a fixed point for \textit{every} nonzero $x$. Were the fixed point unique, (1) would hand us the value of $x^2f(x)$ and we would be done. So let us look for fixed points.
+
+    The choice $x=1$ gives
+    $$
+    f(by) = f(y) \eqno(2)
+    $$
+    for all nonzero $y$, and $x=1$ in (1) gives $f(b)=b$, so $b$ itself is a fixed point.
+
+    First let us compute $b$. The choice $x=b$ in (1) says that $b^2f(b)=b^3$ is a fixed point, so $f(b^3)=b^3$, while two applications of (2) give $f(b^3)=f(b^2)=f(b)=b$. Hence $b^3=b$, and since $b\neq0$, $b^2=1$.
+
+    Now let $p$ be an arbitrary fixed point. The choice $x=p$ in (1) says that $p^3$ is a fixed point too, and the same reasoning applied to $p^3$ produces the fixed point $p^9$. To compare these powers, let us substitute $x=p$ into the given equation, leaving $y$ free; using $f(p)=p$ we get
+    $$
+    f(p^3y) = f(y)+p^3-b. \eqno(3)
+    $$
+    Apply relation (3) three times in a row, successively for $y=1$, $y=p^3$ and $y=p^6$:
+    $$
+    f(p^3)=p^3,\qquad f(p^6)=2p^3-b,\qquad f(p^9)=3p^3-2b.
+    $$
+    But $p^9$ is a fixed point, so $p^9-3p^3+2b=0$. With $q=p^3$ and using $b^2=1$, $b^3=b$, this is $q^3-3b^2q+2b^3=0$, which factors as
+    $$
+    (q-b)^2(q+2b) = 0.
+    $$
+    So every fixed point $p$ satisfies $p^3=b$ or $p^3=-2b$. The second possibility is ruled out because $p^3$ is a fixed point as well, so $(p^3)^3$ must equal $b$ or $-2b$ too: for $p^3=-2b$ we have $(p^3)^3=-8b$, and neither $-8b=b$ nor $-8b=-2b$ is possible for $b\neq0$. That leaves $p^3=b=b^3$, so $p=b$.
+
+    The only fixed point is therefore $b$, and (1) gives $x^2f(x)=b$, so $f(x)=b/x^2$ with $b=\pm1$.
+
+    Check: for $f(x)=b/x^2$ with $b^2=1$ we have $x^2f(x)=b$, so the left-hand side is $f(by)+b=b/y^2+b$ and the right-hand side $b+b/y^2$.
+}
+
+\EnvId{2Rvuswj2jhDZockiBWyCu-x-plus-fy-quadratic-right-side}
+\Problem{0}{}{
+    Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
+    $$
+    f(x+f(y)) = f(x)+f^2(y)+2xf(y).
+    $$
+}{
+    Let us try to guess the solution and make a suitable substitution accordingly.
+}{
+    Notice that $f(x)=x^2$ is a solution, and even $f(x)=x^2+c$, where $c$ is a constant. How about defining $g(x)=f(x)-x^2$ and rewriting the equation in terms of the function $g$?
+}{
+    After the substitution, surprisingly a great many things cancel and only $g(x+y^2+g(y))=g(x)$ remains. What interesting thing does this imply about $g$?
+}{
+    We see that $g$ looks like a periodic function. If $y^2+g(y)=0$ for every $y$, then $f$ is identically zero, which is a solution. Otherwise, for some $y$ the number $p:=y^2+g(y)$ is nonzero, hence a period of $g$, and we can play with that.
+}{
+    The trick is to set $y:=y+p$, since $g(y+p)=g(y)$. Let us substitute and patch together a few more relations.
+}{
+    The goal is to arrive at the manipulation
+    $$
+    \eqalign{
+        g(x)=g(x+y^2+g(y))&=g(x+(y+p)^2+g(y+p))=\cr
+        &=g(x+p(2y+p)+y^2+g(y)).\cr
+    }
+    $$
+    If we look carefully at the relation $g(x+y^2+g(y))=g(x)$, it tells us how to manipulate this further so as to get rid of $g(y)$.
+}{
+    The second-to-last step is to substitute $x:=x+p(2y+p)$, which together with the previous equation gives us $g(x)=g(x+p(2y+p))$. And that is a really good equation.
+}{
+    The last trick is to realize that $p(2y+p)$ is also a period of $g$, and since $y$ is free and $p$ is nonzero, it takes arbitrary values. Ordinary periodic functions are not like this \SlightSmile{}
+}{
+    \Answer{The zero function $f(x)=0$ and the functions $f(x)=x^2+c$ for an arbitrary real constant $c$.}
+
+    Let us first try to guess the solution. The right-hand side looks a lot like the expansion of $(x+f(y))^2$, and indeed $f(x)=x^2$ satisfies the equation, as does $f(x)=x^2+c$ for an arbitrary constant $c$. That leads us to track how far $f$ is from the square, so write $g(x)=f(x)-x^2$. Substituting $f(x)=g(x)+x^2$, the left-hand side of the given equation becomes $g\bigl(x+f(y)\bigr)+x^2+2xf(y)+f^2(y)$ and the right-hand side $g(x)+x^2+f^2(y)+2xf(y)$. Almost everything cancels, leaving $g(x+f(y))=g(x)$, and since $f(y)=y^2+g(y)$,
+    $$
+    g\bigl(x+y^2+g(y)\bigr) = g(x) \eqno(1)
+    $$
+    for all real numbers $x,y$: shifting the argument of $g$ by any number of the form $y^2+g(y)$ changes nothing.
+
+    If $y^2+g(y)=0$ for every $y$, then $f$ is the zero function. Otherwise $p=y_0^2+g(y_0)$ is nonzero for some $y_0$, hence a period of $g$. We put this periodicity to use by setting $y:=y+p$ in (1). From $(y+p)^2=y^2+p(2y+p)$ and $g(y+p)=g(y)$ we have
+    $$
+    g(x) = g\bigl(x+p(2y+p)+y^2+g(y)\bigr),
+    $$
+    and the right-hand side simplifies under the choice $x:=x+p(2y+p)$ in (1), which strips off the term $y^2+g(y)$. What is left is
+    $$
+    g(x) = g\bigl(x+p(2y+p)\bigr) \eqno(2)
+    $$
+    for all real $x,y$. So every number of the form $p(2y+p)$ is a period of $g$ as well, and since $p\neq0$, this expression runs over all of $\R$ as $y$ does. Thus $g$ is unchanged by a shift of any size, so it is constant; write $c=g(0)$, and then $f(x)=x^2+c$.
+
+    Check: for the zero function both sides are zero; for $f(x)=x^2+c$ the left-hand side is $\bigl(x+f(y)\bigr)^2+c=x^2+2xf(y)+f^2(y)+c$ and the right-hand side $x^2+c+f^2(y)+2xf(y)$.
+}
+
+\EnvId{kJJ4Hd66V4jiFP-sKLSFD-x-plus-fy-equals-y-times-f}
+\Problem{0}{MEMO 2012 I1}{
+    Find all functions $f\colon \R^+\to\R^+$ such that for all positive real numbers $x,y$,
+    $$
+    f(x+f(y)) = yf(xy+1).
+    $$
+}{
+    At first sight the equation is hard to get a grip on. The only sensible thing seems to be setting $x$ and $y$ so that the arguments of $f$ on the left-hand and right-hand sides are equal. Would it even make sense for that to be possible?
+}{
+    Well, that would have to mean that $y=1$. But what stops us from making such a substitution? For $y\neq1$, $x+f(y)=xy+1$ gives the relation $x=(f(y)-1)/(y-1)$. But we can substitute that only when this expression is positive. Haven't we uncovered a strong property of $f$?
+}{
+    In fact we have uncovered that for $y>1$ we have $f(y)\le1$ and for $y<1$ we have $f(y)\ge1$. That is strong. But to use it well, we still need a clever substitution.
+}{
+    The clever substitution is $xy+1=y$; on the right it creates $yf(y)$, which we know we want to be $1$. When can we even make such a substitution and what do we get on the left?
+}{
+    The substitution works for $y>1$, then such an $x$ exists and we are left with $f(1-1/y+f(y))=yf(y)$. Something strong can be extracted from this. Can $f(y)$ fail to be $1/y$?
+}{
+    If $f(y)$ were more than $1/y$, then $f$ applied to something more than $1$ would equal something more than $1$, contradicting our observation. Similarly for $f(y)$ less than $1/y$ (try it). So we have $f(y)=1/y$ for $y>1$! Only $y\le1$ is left.
+}{
+    Notice that our equation has simplified considerably, already to $f(x+f(y))=y/(xy+1)$ thanks to $xy+1>1$. So all that is left is to figure out how to actually make $x+f(y)$ be anything $\le1$. That will work out.
+}{
+    The last trick is to choose $y>1$, which gives us $f(y)=1/y<1$. Then $x+1/y$ can be anything $\le1$, formally, by setting $x:=x-1/y$ for a given $x\le1$ we compute $f(x)$ right away.
+}{
+    \Answer{$f(x)=1/x$.}
+
+    At first sight the equation is hard to get a grip on, so let us try to substitute so that the arguments of $f$ on both sides agree: we want $x+f(y)=xy+1$. The equation would then read $f(t)=yf(t)$ for some $t>0$, and since $f(t)>0$, we would need $y=1$. So for $y\neq1$ no such substitution is legal, and precisely that tells us a lot about $f$.
+
+    For $y\neq1$ the condition $x+f(y)=xy+1$ says exactly that $x=\frac{f(y)-1}{y-1}$, which we may substitute only when it is positive. So it cannot be positive, and
+    $$
+    f(y)\le1 \ \text{ for } y>1, \qquad f(y)\ge1 \ \text{ for } y<1. \eqno(1)
+    $$
+
+    To use (1) we need a substitution that produces $yf(y)$ on the right. That happens for $xy+1=y$, that is for $x=1-1/y$, which is positive exactly when $y>1$. For such $y$ we get
+    $$
+    f\Bigl(1-\frac1y+f(y)\Bigr) = yf(y). \eqno(2)
+    $$
+    Let us fix $y>1$, compare $f(y)$ with $1/y$, and write $s=1-\frac1y+f(y)$ for the argument on the left of (2).
+    \begitems \style i
+    \i If $f(y)>1/y$, then $s>1$, and (1) gives $f(s)\le1$. But the right-hand side of (2) is $yf(y)>1$, a contradiction.
+    \i If $f(y)<1/y$, then $0<s<1$, and (1) gives $f(s)\ge1$. But the right-hand side of (2) is $yf(y)<1$, again a contradiction.
+    \enditems
+    The only possibility left is
+    $$
+    f(y) = \frac1y \ \text{ for all } y>1. \eqno(3)
+    $$
+
+    The values on the interval $(0,1]$ come from the given equation. For $x>0$ and $y>1$ we have $xy+1>1$, so (3) gives both $f(xy+1)=1/(xy+1)$ and $f(y)=1/y$, and the equation simplifies to
+    $$
+    f\Bigl(x+\frac1y\Bigr) = \frac{1}{x+\frac1y}. \eqno(4)
+    $$
+    Now let $t\le1$ be an arbitrary positive number and choose $y>1/t$; then $y>1$ and also $1/y<t$, so $x=t-1/y>0$ makes $x+\frac1y=t$ and (4) gives $f(t)=1/t$. Together with (3) we therefore have $f(x)=1/x$ for all $x>0$.
+
+    Check: the left-hand side is $\frac{1}{x+1/y}=\frac{y}{xy+1}$ and the right-hand side $y\cdot\frac{1}{xy+1}$.
+}
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

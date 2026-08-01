@@ -21,28 +21,74 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Let a circle be given, and let two tangents to it be drawn from a point $A$. Denote the points of tangency by $X$, $Y$. Then $AX = AY$.
 
     \Image{equal-tangents-two-from-point.pdf}
-}{}
+}{
+    Denote by $S$ the center and by $r$ the radius of the given circle. Two distinct tangents are drawn from $A$, so $A$ lies outside the circle and is distinct from both points of tangency. A tangent is perpendicular to the radius drawn to the point of tangency, hence $\angle AXS = \angle AYS = 90^\circ$ and the triangles $AXS$, $AYS$ are right-angled with common hypotenuse $AS$ and congruent legs $SX = SY = r$. The Pythagorean theorem applied to each gives
+    $$
+    AX^2 = AS^2 - r^2 = AY^2,
+    $$
+    and since both lengths are non-negative, $AX = AY$.
+}
 
 \EnvId{mrvQMDl5Le3AmRPmyn1nx-common-external-tangents-two-circles}
 \Theorem{}{
     Let $p$ and $q$ be common external tangents of two circles $k_1$ and $k_2$. Suppose $p$ touches $k_1$ at $A$ and $k_2$ at $B$, and $q$ touches them at $C$ and $D$. Then $AB = CD$.
 
     \Image{equal-tangents-external-equal.pdf}
-}{}
+}{
+    Assume first that the lines $p$, $q$ intersect, and denote their intersection point by $P$. The tangents from $P$ to $k_1$ are $p$ and $q$, with tangency points $A$, $C$, so by Theorem 1 we have $PA = PC$; similarly for $k_2$ with tangency points $B$, $D$ we have $PB = PD$.
+
+    Both circles lie in the same half-plane determined by an external tangent, so $k_1$ and $k_2$ lie in the same one of the regions into which the pair of lines $p$, $q$ divides the plane. The intersection of this region with the line $p$ is a ray with endpoint $P$, and it also contains $A$, $B$, since they lie on $p$ as well as on the circles. Hence $A$, $B$ lie on the same ray from $P$, and similarly $C$, $D$ lie on the same ray from $P$, whence
+    $$
+    AB = \bigl|\,PA - PB\,\bigr| = \bigl|\,PC - PD\,\bigr| = CD.
+    $$
+
+    If $p$, $q$ do not intersect, they are parallel. The perpendicular to $p$ through the center of $k_1$ is perpendicular to $q$ as well, and its feet on $p$, $q$ are exactly the tangency points, so $A$, $C$ lie on it and $AC \perp p$; moreover $AC$ is the distance between the lines $p$, $q$. Similarly $BD \perp p$. The translation taking $A$ to $C$ therefore takes the line $p$ to $q$ and the point $B$ to the foot of the perpendicular from $B$ to $q$, hence to $D$. A translation preserves distances, so $AB = CD$.
+}
 
 \EnvId{jf0TF7EIF2sGDujPAaJGG-common-internal-tangent-two-circles}
 \Theorem{}{
     In the setting above, suppose further that $k_1$ and $k_2$ are disjoint, and let $r$ be a common internal tangent of $k_1$ and $k_2$ meeting $p$ at $X$ and $q$ at $Y$. Then $XY = AB$.
 
     \Image{equal-tangents-internal-equals-external.pdf}
-}{}
+}{
+    Let the internal tangent $r$ touch $k_1$ at $E$ and $k_2$ at $F$.
+
+    The line $r$ is an internal tangent, so $k_1$ and $k_2$ lie in opposite half-planes with boundary $r$. The points $A \in k_1$ and $B \in k_2$ are therefore separated by $r$ and the segment $AB$ crosses it; since $AB$ lies on $p$ and the lines $p$, $r$ have a single common point $X$, the point $X$ lies on segment $AB$. Similarly $Y$ lies on segment $CD$.
+
+    Denote by $H_p$, $H_q$ the half-planes with boundaries $p$, $q$ containing both circles (these exist precisely because $p$, $q$ are external tangents). The endpoints of segment $AB$ lie in $H_q$, so $X \in H_q$, and similarly $Y \in H_p$. The intersection $r \cap H_p$ is a ray with endpoint $X$ containing the points $Y$, $E$, $F$; the intersection $r \cap H_q$ is a ray with endpoint $Y$ containing the points $X$, $E$, $F$. Two rays of the same line, each of which contains the endpoint of the other, intersect in the segment joining their endpoints, so both $E$ and $F$ lie on segment $XY$.
+
+    The tangents from $X$ to $k_1$ are $p$ and $r$, with tangency points $A$, $E$, so by Theorem 1 we have $XA = XE$; similarly $XB = XF$, $YC = YE$ and $YD = YF$. The points $E$, $F$ lie on segment $XY$, giving $XE + EY = XF + FY = XY$, and the points $X$, $Y$ lie on segments $AB$, $CD$, giving $XA + XB = AB$ and $YC + YD = CD$. Adding these gives
+    $$
+    \gather
+    2XY = (XE + EY) + (XF + FY) \\
+    = (XA + XB) + (YC + YD) = AB + CD.
+    \endgather
+    $$
+    By Theorem 2 we have $AB = CD$, so $2XY = 2AB$, hence $XY = AB$.
+}
 
 \EnvId{JhAKuB486cDd3AdwJYXkE-incircle-touch-points-in-triangle}
 \Theorem{}{
     The incircle of triangle $ABC$ touches sides $BC$, $CA$, $AB$ at points $D$, $E$, $F$ respectively. Then $AE = AF = s - a = \frac{b + c - a}{2}$, and similarly for the other two vertices.
 
     \Image{equal-tangents-incircle.pdf}
-}{}
+}{
+    The incircle lies entirely inside triangle $ABC$, so each tangency point lies inside the triangle as well; the intersection of the triangle with line $BC$ is segment $BC$, so $D$ lies between $B$ and $C$, and similarly $E$ lies between $C$ and $A$, and $F$ between $A$ and $B$.
+
+    Two tangents drawn to a circle from the same point have equal lengths, so we may set
+    $$
+    x = AE = AF, \qquad y = BF = BD, \qquad z = CD = CE.
+    $$
+    From the order of the points on the sides we get
+    $$
+    a = y + z, \qquad b = z + x, \qquad c = x + y.
+    $$
+    Adding these three equalities gives $2(x + y + z) = a + b + c$, hence $x + y + z = s$, and subtracting the first of them gives
+    $$
+    AE = AF = x = s - a = \frac{b + c - a}{2}.
+    $$
+    Similarly $BF = BD = y = s - b$ and $CD = CE = z = s - c$.
+}
 
 \EnvId{Ul1BcJ7hkSI2RgBb98Iik-right-triangle-inradius}
 \Theorem{}{
@@ -52,28 +98,58 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     $$
 
     \Image{equal-tangents-right-inradius.pdf}
-}{}
+}{
+    Let the incircle with center $I$ touch sides $BC$, $CA$ at points $D$, $E$. A tangency point is the foot of the perpendicular from the center, so $ID \perp BC$ and $IE \perp CA$; together with the right angle at $C$ this makes $CDIE$ a rectangle. Its sides $ID$ and $IE$ have length $r$, hence it is a square and
+    $$
+    CD = CE = r.
+    $$
+    By the previous theorem we also have $CD = CE = s - c$, so
+    $$
+    r = s - c = \frac{a + b - c}{2}.
+    $$
+}
 
 \EnvId{4h53hlgz3wSLk4lVp4pyd-excircle-tangent-length-opposite-vertex}
 \Theorem{}{
     Let the excircle of triangle $ABC$ opposite vertex $A$ touch lines $BC$, $CA$, $AB$ at points $D$, $E$, $F$ respectively. Then $AE = AF = s = \frac{a + b + c}{2}$.
 
     \Image{equal-tangents-excircle-from-a.pdf}
-}{}
+}{
+    First let us settle where the tangency points lie. The excenter $I_A$ lies on the internal angle bisector at $A$, hence inside angle $BAC$, and its distance to both lines $AB$, $AC$ equals the radius, so the whole circle lies inside angle $BAC$ and the points $E$, $F$ lie on rays $AC$, $AB$. At the same time, the excircle opposite $A$ is by definition the one lying in the half-plane with boundary line $BC$ not containing $A$. Ray $AC$ meets line $BC$ only at $C$, so $E$ lies on the extension of side $AC$ beyond $C$; similarly $F$ lies on the extension of side $AB$ beyond $B$. The point $D$ lies on line $BC$ and inside angle $BAC$, hence in the interior of side $BC$.
+
+    Two tangents from the same point have equal lengths, so $CE = CD$, $BF = BD$ and $AE = AF$. From the order of the points,
+    $$
+    AE = b + CD, \qquad AF = c + BD, \qquad BD + CD = a.
+    $$
+    Adding the first two equalities gives $2AE = a + b + c$, hence
+    $$
+    AE = AF = s = \frac{a + b + c}{2}.
+    $$
+}
 
 \EnvId{tIEpiTzploVkN1fSAAx_3-excircle-remaining-vertex-tangent-lengths}
 \Theorem{}{
     In the setting above, $BD = BF = s - c = \frac{a + b - c}{2}$ and $CD = CE = s - b = \frac{a + c - b}{2}$.
 
     \Image{equal-tangents-excircle-from-b-c.pdf}
-}{}
+}{
+    In the proof of the previous theorem we determined the positions of the tangency points: $F$ lies on ray $AB$ beyond $B$, $E$ lies on ray $AC$ beyond $C$, and $D$ lies in the interior of side $BC$. Therefore $AF = c + BF$ and $AE = b + CE$, and since $AE = AF = s$, we get
+    $$
+    BF = s - c = \frac{a + b - c}{2}, \qquad CE = s - b = \frac{a + c - b}{2}.
+    $$
+    The tangents from $B$ give $BD = BF$ and the tangents from $C$ give $CD = CE$, which is the claim.
+}
 
 \EnvId{G0QDSuOOrioc7nfucekbj-incircle-excircle-touch-points-symmetric}
 \Theorem{}{
     In the setting above, the points at which the incircle of $ABC$ and this excircle touch line $BC$ are symmetric about the midpoint of $BC$.
 
     \Image{equal-tangents-excircle-symmetry.pdf}
-}{}
+}{
+    Let the incircle of triangle $ABC$ touch side $BC$ at $P$ and let the excircle opposite vertex $A$ touch line $BC$ at $D$. By the theorem on the tangency points of the incircle, $BP = s - b$, and by the previous theorem $BD = s - c$, $CD = s - b$. Since $BD + CD = a = BC$, the point $D$ lies on segment $BC$; so does $P$.
+
+    Let $M$ be the midpoint of $BC$. The central symmetry about $M$ maps $B$ to $C$ and segment $BC$ onto itself, so it takes the point of this segment at distance $s - b$ from $B$ to the point of this segment at distance $s - b$ from $C$. The first of these is $P$ and the second, since $CD = s - b$, is $D$, hence $P$ and $D$ are symmetric about $M$.
+}
 
 \EnvId{tER-vT4qkSmu9dw7bjhcr-tangential-quadrilateral}
 \Definition{Tangential quadrilateral}{
@@ -85,7 +161,36 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
 \EnvId{xFM0xDDSoTaKN7_k-PGs6-pitot-theorem}
 \Theorem{Pitot's theorem}{
     A convex quadrilateral $ABCD$ is tangential if and only if $AB + CD = BC + AD$.
-}{}
+}{
+    Let $ABCD$ have an inscribed circle, touching sides $AB$, $BC$, $CD$, $DA$ at points $P$, $Q$, $R$, $S$ respectively. By equal tangents, $AP = AS$, $BP = BQ$, $CQ = CR$ and $DR = DS$, so
+    $$
+    \align
+    AB + CD &= AP + PB + CR + RD \\
+    &= SA + BQ + QC + DS \\
+    &= \bigl(BQ + QC\bigr) + \bigl(DS + SA\bigr) \\
+    &= BC + AD.
+    \endalign
+    $$
+
+    Conversely, let a convex quadrilateral $ABCD$ satisfy $AB + CD = BC + AD$, that is,
+    $$
+    AB - AD = BC - CD.
+    $$
+    Swapping the labels $B \leftrightarrow D$ preserves convexity as well as this condition, so we may assume $AB \geq AD$, and hence also $BC \geq CD$. Choose a point $P$ on side $AB$ with $AP = AD$ and a point $Q$ on side $CB$ with $CQ = CD$; then
+    $$
+    BP = AB - AD = BC - CD = BQ.
+    $$
+
+    Denote by $\alpha$, $\beta$ the interior angles at vertices $A$, $B$. Their internal bisectors emanate from the endpoints of segment $AB$ into the same half-plane and make angles $\alpha/2$ and $\beta/2$ with $AB$, both less than $90^\circ$, so they meet in a single point $I$.
+
+    The point $D$ does not lie on line $AB$, so $P \neq D$ and triangle $APD$ is isosceles with base $PD$; therefore the bisector of the angle at $A$ is the perpendicular bisector of $PD$ and $IP = ID$. Similarly the bisector of the angle at $B$ is the perpendicular bisector of $PQ$, so $IP = IQ$ (in the case $P = Q$, which happens only when $P = Q = B$, this is obvious). Together these give $ID = IQ$, so $I$ lies on the perpendicular bisector of $DQ$. The point $D$ does not lie on line $BC$ either, so $D \neq Q$, and since $CD = CQ$, the perpendicular bisector of $DQ$ is exactly the bisector of angle $DCB$.
+
+    Hence $I$ is equidistant from lines $AB$ and $AD$, from lines $AB$ and $BC$, and from lines $CB$ and $CD$, that is, from all four lines $AB$, $BC$, $CD$, $DA$; denote this common distance by $r$. If $r$ were $0$, then $I$ would lie on line $AB$ and on line $AD$, so $I = A$, but the point $A$ does not lie on the bisector of the angle at $B$. Therefore $r > 0$ and the circle $\omega$ with center $I$ and radius $r$ is tangent to all four lines.
+
+    It remains to check that the tangency points lie on the sides. The point $I$ lies inside the angles at $A$ and $B$, that is, in the interior half-plane of lines $AB$, $AD$ and $BC$. The point $I$ lies on the interior ray of the bisector of the angle at $C$: the opposite ray lies in the vertical angle, hence on the opposite side of line $BC$ from $A$. So $I$ lies in the interior half-plane for line $CD$ as well, that is, inside quadrilateral $ABCD$, and therefore also inside the angle at $D$; it is equidistant from lines $DA$ and $DC$, so it lies on the internal bisector of the angle at $D$.
+
+    Now let $V$ be any vertex with interior angle $\varphi < 180^\circ$. The point $I$ lies on the internal bisector of this angle, so it makes an angle $\varphi/2 < 90^\circ$ at $V$ with either arm of the angle. The foot of the perpendicular from $I$ to that arm is therefore different from $V$ and lies on it, not on the opposite ray: in the resulting right triangle, the opposite ray would give an obtuse angle at $V$. Therefore the point where $\omega$ touches line $AB$ lies on ray $AB$ and also on ray $BA$, hence on side $AB$, and similarly for the remaining three sides. Thus $\omega$ is the inscribed circle of quadrilateral $ABCD$.
+}
 
 \sec Problems
 
@@ -96,7 +201,27 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     One of the formulas to know is how to calculate the inradius of a right triangle; in our problem we have their doubles.
 }{
     If the inradius of $ACD$ is $r_1$ and the inradius of $BCD$ is $r_2$, then $2r_1=(AD+CD-AC)$ and $2r_2=(BD+CD-BC)$. Summing them up and a bit of manipulation should give us one last missing piece of the area calculation.
-}{}
+}{
+    \Answer{The area is $42$.}
+    Denote by $r_1$, $r_2$ the inradii of triangles $ADC$, $BDC$; the condition in the statement says that $AC + BC + 2r_1 + 2r_2 = 26$. Since $CD$ is an altitude, both of these triangles are right-angled at $D$: their legs are $AD$, $CD$ and $BD$, $CD$ respectively, and their hypotenuses are $AC$ and $BC$. The formula for the inradius of a right triangle therefore gives
+    $$
+    2r_1 = AD + CD - AC, \qquad 2r_2 = BD + CD - BC.
+    $$
+
+    Both triangles are non-degenerate, so $D$ is an interior point of segment $AB$ and $AD + BD = AB$. Adding the two equalities we get
+    $$
+    2r_1 + 2r_2 = AB + 2CD - AC - BC.
+    $$
+
+    After substitution into the condition from the statement, the terms $AC$ and $BC$ cancel and we are left with
+    $$
+    26 = AB + 2CD = AB + 12,
+    $$
+    hence $AB = 14$. The segment $CD$ is the altitude to side $AB$, and therefore
+    $$
+    S_{ABC} = \tfrac12 AB \cdot CD = \tfrac12 \cdot 14 \cdot 6 = 42.
+    $$
+}
 
 \EnvId{EMMxpx8fQHdf5k7deQlkg-parallelogram-midpoint-incircle}
 \Problem{0}{MO 61-C-II-3}{
@@ -109,7 +234,26 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Clearly $AD=BC=2a/3$ and $DE=CE=a/2$. We know all sides of $ADE$ in terms of $a$. Do they look sus? One nice trick generally useful when dealing with fractions is to get rid of 'em by scaling -- denote $a=6x$. What are the sides now?
 }{
     We should get that $AD=4x$, $DE=3x$ and $AE=5x$, a hidden 3-4-5 right triangle. So our parallelogram is basically a rectangle. Now it should be easy to finish the problem.
-}{}
+}{
+    Denote $a = AB$. From the statement $BC = AD = \frac{2a}{3}$, and since $ABCD$ is a parallelogram, $CD = a$, so for the midpoint $E$ of side $CD$ we have $CE = DE = \frac{a}{2}$.
+
+    Point $E$ lies in the interior of side $CD$, so the segments $AB$ and $CE$ lie on two distinct parallel lines and traversing them as $A \to B$ and $C \to E$ respectively gives opposite directions; hence $ABCE$ is a convex trapezoid with bases $AB$ and $CE$. Since it has an inscribed circle, Pitot's theorem gives $AB + CE = BC + AE$, so
+    $$
+    AE = a + \frac{a}{2} - \frac{2a}{3} = \frac{5a}{6}.
+    $$
+
+    This gives us all three sides of triangle $ADE$; they are $\frac{2a}{3}$, $\frac{a}{2}$ and $\frac{5a}{6}$. The fractions hide the relation between the sides, so let us scale them away: setting $a = 6x$ we get
+    $$
+    AD = 4x, \qquad DE = 3x, \qquad AE = 5x,
+    $$
+    and hence $AD^2 + DE^2 = 16x^2 + 9x^2 = 25x^2 = AE^2$. By the converse of the Pythagorean theorem, the angle of triangle $ADE$ at vertex $D$ is right.
+
+    Point $E$ lies in the interior of segment $DC$, so the rays $DE$ and $DC$ coincide and $\angle ADC = \angle ADE = 90^\circ$. A parallelogram with one right angle is a rectangle, so $ABCD$ is a rectangle; in particular $\angle ABC = 90^\circ$ and $\angle BCE = \angle BCD = 90^\circ$.
+
+    Let $\omega$ be the inscribed circle of quadrilateral $ABCE$ with center $I$ and radius $r$, and let it touch sides $AB$, $BC$, $CE$ at points $P$, $T$, $Q$ respectively. We have $IP \perp AB$ and $IT \perp BC$, and since the angle at $B$ is right, $IP \parallel BC$ and $IT \parallel AB$. Therefore $BPIT$ is a rectangle and $BT = IP = r$. Similarly, the right angle at $C$ gives $CT = IQ = r$.
+
+    Point $T$ lies on segment $BC$, so $BC = BT + CT = 2r$ and $BT = CT$. Hence the circle $\omega$ touches side $BC$ at its midpoint.
+}
 
 \EnvId{YHoydnnN3mLvYu3xOFGHp-perimeter-of-triangle-from-tangents}
 \Problem{0}{Náboj 2008}{
@@ -120,7 +264,24 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     It is its $P$-excircle. This should give us a good idea how the perimeter of $PXY$ can be interpreted.
 }{
     Recall in our common configurations we have that $PA=PB$, which is half the perimeter of $PXY$. So we only need to calculate $PA$.
-}{}
+}{
+    \Answer{The perimeter of triangle $PXY$ is $4\sqrt{2}$.}
+    The whole problem rests on what circle $k$ is for triangle $PXY$: it is the excircle of triangle $PXY$ opposite vertex $P$.
+
+    First the position of the points. If $T$ coincided with $A$ or with $B$, the tangent at $T$ would be line $AP$ or $BP$ respectively, and the points $X$, $Y$ would not be determined; hence $T$ is an interior point of the arc and $T \neq A$, $T \neq B$. Line $XY$ touches $k$ at $T$, so it has no other point in common with $k$, and therefore neither $A$ nor $B$ lies on it.
+
+    Circle $k$ touches lines $PX$, $PY$, $XY$ at points $A$, $B$, $T$ respectively. The tangency points $A$, $B$ lie on rays $PX$, $PY$ (in fact beyond $X$, $Y$, since $X$ lies on segment $AP$ and $Y$ on segment $BP$), so $k$ is inscribed in angle $XPY$. Further, $k$ lies entirely in one of the half-planes determined by line $XY$, namely the one not containing $P$: segment $PA$ meets line $XY$ at $X$, while neither $P$ nor $A$ lies on that line. A circle tangent to all three lines $PX$, $PY$, $XY$, inscribed in angle $XPY$ and lying on the opposite side of line $XY$ from $P$, is exactly the excircle of triangle $PXY$ opposite vertex $P$.
+
+    By the theorem on the excircle opposite a vertex, the distance from $P$ to its tangency points on lines $PX$, $PY$ equals half the perimeter of triangle $PXY$, that is,
+    $$
+    PA = PB = \frac{PX + XY + YP}{2}.
+    $$
+    Hence it suffices to compute $PA$. A tangent is perpendicular to the radius at the tangency point, so triangle $PAS$ has a right angle at $A$, and by the Pythagorean theorem
+    $$
+    PA = \sqrt{PS^2 - SA^2} = \sqrt{3^2 - 1^2} = 2\sqrt{2}.
+    $$
+    The perimeter of triangle $PXY$ is therefore $2 \cdot PA = 4\sqrt{2}$, regardless of the choice of $T$.
+}
 
 \EnvId{njLBWjKeOLzDnXpHe7tic-incircles-touching-the-diagonal}
 \Problem{0}{}{
@@ -129,7 +290,24 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Let $X$ be the touchpoint of the incircle of $ABC$ with $AC$, and $X'$ the touchpoint of the incircle of $ADC$ with $AC$. We only need to prove $AX=AX'$. Both are nice expressions.
 }{
     The only trick is to use $s-a$-type formulas in triangles $ABC$ and $ADC$. We should be left with something where we can use tangentiality.
-}{}
+}{
+    Let $X$ be the point where the incircle of triangle $ABC$ touches side $AC$, and let $X'$ be the point where the incircle of triangle $ADC$ touches the same segment. Both lie inside segment $AC$, hence on ray $AC$, so the claim $X = X'$ is the same as $AX = AX'$. And both these lengths are nice, since we have an $s - a$-type formula for them.
+
+    The distance from a vertex of a triangle to the point where its incircle touches an adjacent side is the semiperimeter minus the opposite side. In triangle $ABC$ the side opposite $A$ is $BC$, so
+    $$
+    AX = \frac{AB + AC - BC}{2},
+    $$
+    and in triangle $ADC$ the side opposite $A$ is $DC$, so
+    $$
+    AX' = \frac{AD + AC - DC}{2}.
+    $$
+
+    The term $AC$ is the same in both expressions, so it remains to prove $AB - BC = AD - DC$, that is,
+    $$
+    AB + DC = BC + AD.
+    $$
+    But for the tangential quadrilateral $ABCD$ this holds by Pitot's theorem, which finishes the proof.
+}
 
 \EnvId{6y2W6I3lf5ayFgDaZme17-three-excircle-points-on-line}
 \Problem{0}{MO 63-B-I-3}{
@@ -138,7 +316,25 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Let the $C$-excircle touch $BC$ at $D$, the $B$-excircle at $E$, and the $A$-excircle at $F$. Try to express some lengths using our $s-a$-type formulas.
 }{
     The trick is to realize $DB=CE=s-a$. What does this mean? And what do we know about $F$ and the incircle tangency point?
-}{}
+}{
+    \Answer{Exactly one of the three given points lies between the other two (it is the tangency point of the $A$-excircle). The point sought is its image under the central symmetry about the midpoint of the segment determined by the other two points.}
+    Let the $C$-excircle touch line $BC$ at $D$, the $B$-excircle at $E$ and the $A$-excircle at $F$, and denote by $T$ the tangency point of the incircle with line $BC$, the point we are looking for. We do not know $B$ and $C$, so we must do two things: recognize $D$, $E$, $F$ among the three given points, and then construct $T$ from them.
+
+    The tangent segment from a vertex to the excircle opposite that vertex has length $s$, so $CD = s$ and $BE = s$. The $C$-excircle is inscribed in angle $ACB$, so it touches line $BC$ at a point of ray $CB$; since $s - a = \frac{b + c - a}{2} > 0$, we have $CD = s > a = CB$, hence $D$ lies on this ray beyond $B$ and
+    $$
+    BD = CD - CB = s - a.
+    $$
+    Similarly $E$ lies on ray $BC$ beyond $C$ and $CE = s - a$.
+
+    For $F$ we have $BF = s - c$ and $CF = s - b$; both lengths are positive, so $F$ is an interior point of segment $BC$. On line $BC$ the points therefore lie in the order $D$, $B$, $F$, $C$, $E$. So $F$ is exactly the one of the three given points lying between the other two, and that identifies it; which of the other two is $D$ and which is $E$ does not matter, as we will see in a moment.
+
+    From $BD = CE = s - a$ it follows that $D$ and $E$ are symmetric about the midpoint $M$ of $BC$, in other words $M$ is the midpoint of $DE$. By the theorem on the symmetry of the tangency points of the incircle and the $A$-excircle on line $BC$, the points $F$ and $T$ are symmetric about the same point $M$.
+
+    Therefore $T$ is the image of $F$ under the central symmetry about the midpoint of $DE$, and that is a construction using only the three given points. Equivalently, $T$ is the point of segment $DE$ with
+    $$
+    DT = EF = (s - a) + (s - b).
+    $$
+}
 
 \EnvId{wqOmXDet2xLsFXXqSqqXr-three-tangents-cutting-corner-triangles}
 \Problem{0}{}{
@@ -151,7 +347,27 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     This is giving us that half the perimeter of $AXY$ is essentially the distance from $A$ to the incircle touch points on $AB, AC$, i.e. $s-a$.
 }{
     The last step is to solve $s-a=1/2$, $s-b=1$, $s-c=3/2$ for $a, b, c$.
-}{}
+}{
+    Let $ABC$ be our triangle, let $\omega$ be its incircle, and let $\omega$ touch sides $BC$, $CA$, $AB$ at points $D$, $E$, $F$.
+
+    We first show that the triangle cut off at vertex $A$ has perimeter $2(s-a)$ regardless of which tangent line we choose. So let a tangent line to $\omega$ meet segment $AB$ at $X$ and segment $AC$ at $Y$. The circle $\omega$ is inscribed in angle $XAY$, touches line $XY$, and lies in the half-plane bounded by line $XY$ that does not contain $A$. Hence it is the $A$-excircle of triangle $AXY$. Moreover, segment $AF$ meets line $XY$, so $X$ lies between $A$ and $F$, and analogously $Y$ lies between $A$ and $E$; the points $F$ and $E$ are therefore the tangency points of this excircle with the extensions of sides $AX$ and $AY$.
+
+    By the theorem on the excircle opposite a vertex, $AF = AE$ equals half the perimeter of triangle $AXY$. At the same time, by the formula for the incircle tangency points, $AF = s - a$, hence the perimeter of triangle $AXY$ equals $2(s-a)$.
+
+    So the perimeter of the cut-off triangle depends only on the vertex at which we cut. Label the vertices so that the triangle cut off at $A$ has perimeter $1$, the one at $B$ perimeter $2$, and the one at $C$ perimeter $3$. We get
+    $$
+    s - a = \tfrac12, \qquad s - b = 1, \qquad s - c = \tfrac32.
+    $$
+    The sum of the left-hand sides is $3s - (a+b+c) = s$, so $s = \tfrac12 + 1 + \tfrac32 = 3$, and from this
+    $$
+    a = \tfrac52, \qquad b = 2, \qquad c = \tfrac32.
+    $$
+    Such sides really do form a triangle, since $b + c = \tfrac72 > a$. Finally
+    $$
+    b^2 + c^2 = 4 + \tfrac94 = \tfrac{25}{4} = a^2,
+    $$
+    so by the converse of the Pythagorean theorem triangle $ABC$ has a right angle at vertex $A$, that is, at the vertex where the cut-off triangle has perimeter $1$.
+}
 
 \EnvId{ywat5ogtaZvQd-symWXYX-parallelogram-diagonal-touch-points}
 \Problem{0}{MO 54-A-S-2}{
@@ -164,7 +380,34 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     We have that $KLMN$ is a parallelogram. To show that it is indeed a rectangle, we only need to show its diagonals are equal.
 }{
     Let us look at $KM$. It is equal to $AC-AK-CM$. Due to symmetry, it is $AC-2AK$. But $AK$ can be expressed using our $s-a$-type formulae.
-}{}
+}{
+    Let $P$ be the intersection of the diagonals and let $\sigma$ be the central symmetry with center $P$. The diagonals of a parallelogram bisect each other, so $\sigma(A) = C$, $\sigma(B) = D$, $\sigma(C) = A$, $\sigma(D) = B$, hence $\sigma$ maps triangle $ACD$ to triangle $CAB$ and triangle $BCD$ to triangle $DAB$. It is a congruence, so it maps an incircle to an incircle; it also maps line $AC$ and line $BD$ each to itself, so a tangency point goes to a tangency point. We get $\sigma(K) = M$ and $\sigma(L) = N$, that is, $P$ is the midpoint of both segments $KM$ and $LN$.
+
+    The segments $KM$ and $LN$ thus bisect each other and lie on different lines $AC$, $BD$. If we show $KM = LN > 0$, all four points will be distinct and $KLMN$ will be a parallelogram with equal diagonals, hence a rectangle: the points $K$, $L$, $M$, $N$ then lie on a circle with center $P$ and radius $KM/2$, the segments $KM$, $LN$ are two distinct diameters of it, and Thales's theorem gives a right angle at each of the vertices $K$, $L$, $M$, $N$.
+
+    Denote $x = AB - BC > 0$ and note that in a parallelogram $AD = BC$ and $CD = AB$. The point $K$ is the tangency point of the incircle of triangle $ACD$ with side $AC$ and $M$ the tangency point of the incircle of triangle $ABC$ with the same side, so by the $s-a$ formula for incircle tangency points
+    $$
+    \gather
+    AK = \frac{AC + AD - CD}{2} = \frac{AC - x}{2}, \\
+    CM = \frac{CA + CB - AB}{2} = \frac{AC - x}{2}.
+    \endgather
+    $$
+    Both lengths are smaller than $AC/2$, so the points lie on segment $AC$ in the order $A$, $K$, $M$, $C$ and
+    $$
+    KM = AC - AK - CM = x.
+    $$
+
+    Similarly $L$ is the tangency point of the incircle of triangle $BCD$ with side $BD$ and $N$ the tangency point of the incircle of triangle $ABD$ with it, so
+    $$
+    \gather
+    BL = \frac{BD + BC - CD}{2} = \frac{BD - x}{2}, \\
+    DN = \frac{DB + DA - AB}{2} = \frac{BD - x}{2},
+    \endgather
+    $$
+    and for the same reason $LN = BD - BL - DN = x$.
+
+    Hence $KM = LN = x > 0$ and $KLMN$ is a rectangle.
+}
 
 \EnvId{1rKRGiDDH6a1N3ui7-NIp-touch-points-in-split-triangle}
 \Problem{0}{MO 64-A-I-5}{
@@ -181,11 +424,44 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     The final step is to prove $DM=DL$. But this will be easy with our $s-a$-type formula.
 }{    
     It's enough to show $(BD+AD-AB)/2=(CD+AD-AC)/2$. But we can compute $BD,CD$ in terms of $a,b,c$ easily.
-}{}
+}{
+    Denote by $I$ the incenter of triangle $ABC$ and by $r$ its inradius. The center of the circle we are looking for must lie on the perpendicular bisector of $KL$ and also on the perpendicular bisector of $MN$, and we can identify both of them: they are the angle bisectors at $B$ and $C$, so the center will be $I$.
+
+    First the position of $D$. By the formulas for the touch points of the incircle, $BD = s - b$ and $CD = s - c$, both of which are positive, so $D$ is an interior point of side $BC$. Triangles $ABD$ and $ADC$ are therefore nondegenerate; ray $BD$ is ray $BC$ and ray $CD$ is ray $CB$. In particular, $L$ lies on ray $BC$ and $M$ on ray $CB$.
+
+    The incircle of triangle $ABD$ touches sides $BA$ and $BD$ at $K$ and $L$, so $BK = BL$. The reflection in the bisector of angle $ABC$ maps ray $BA$ to ray $BC$, and since $K$, $L$ lie on these rays at the same distance from $B$, it maps $K$ to $L$. The points $K$, $L$ are distinct: $BK = (AB + BD - AD)/2 > 0$ by the triangle inequality in $ABD$, so neither of them coincides with $B$, and they lie on two different rays from $B$. Hence the bisector of angle $ABC$ is the perpendicular bisector of $KL$. Similarly $CM = CN$ and the reflection in the bisector of angle $ACB$ maps $N$ to $M$, so the bisector of angle $ACB$ is the perpendicular bisector of $MN$.
+
+    Both angle bisectors pass through $I$, and therefore
+    $$
+    IK = IL, \qquad IM = IN.
+    $$
+    It remains to prove $IL = IM$.
+
+    Here we use the fact that $D$ is the tangency point of the incircle of triangle $ABC$ with side $BC$: we have $ID \perp BC$ and $ID = r$. The points $L$, $M$ lie on line $BC$, so by the Pythagorean theorem
+    $$
+    IL^2 = r^2 + DL^2, \qquad IM^2 = r^2 + DM^2,
+    $$
+    and the equality to be proved is equivalent to $DL = DM$.
+
+    Both of these lengths are tangent segments from vertex $D$, so it suffices to use the $s - a$-type formula in triangle $ABD$ and in triangle $ADC$:
+    $$
+    \gather
+    DL = \frac{BD + AD - AB}{2}, \\
+    DM = \frac{CD + AD - AC}{2}.
+    \endgather
+    $$
+    The term $AD$ cancels in the difference, so $DL = DM$ is the same as
+    $$
+    BD - CD = AB - AC = c - b.
+    $$
+    And we already know this: $BD - CD = (s - b) - (s - c) = c - b$.
+
+    We obtain $IK = IL = IM = IN$, and this common value is at least $ID = r > 0$. Hence the points $K$, $L$, $M$, $N$ lie on the circle with center $I$ and radius $IL$.
+}
 
 \EnvId{XY8K2xIEBBfNKdV7OHBv4-quadrilateral-with-an-excircle}
 \Problem{0}{}{
-    We say that a quadrilateral $ABCD$ has an excircle opposite vertex $A$ if it is inscribed in angle $BAD$, tangent to lines $BC$ and $CD$, and lies outside the quadrilateral. Prove that for such a quadrilateral, $AB + CB = AD + CD$.
+    We say that a convex quadrilateral $ABCD$ has an excircle opposite vertex $A$ if it is inscribed in angle $BAD$, tangent to lines $BC$ and $CD$, and lies outside the quadrilateral. Prove that for such a quadrilateral, $AB + CB = AD + CD$.
 }{
     The tangency points of the circle with $AB, BC, CD, DA$, denote them by $A', B', C', D'$. Try to evaluate $AB+BC$ with equal tangents.
 }{
@@ -194,7 +470,37 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Let us keep $AA'$ intact and do something with $BA'$ that will help us use the $+BC$ term.
 }{
     Next step is $BA'=BB'=BC+CB'$. This gives $AB+BC=AA'-CB'$. Now $AD+CD$ should give something similar.
-}{}
+}{
+    Denote by $\omega$ the circle from the statement and by $A'$, $B'$, $C'$, $D'$ its tangency points with the lines $AB$, $BC$, $CD$, $DA$ respectively. Since $\omega$ is inscribed in angle $BAD$, the point $A'$ lies on ray $AB$ and the point $D'$ on ray $AD$.
+
+    None of the vertices $A$, $B$, $C$, $D$ lies on $\omega$: each of them is the intersection of two of the lines $AB$, $BC$, $CD$, $DA$, and if it lay on $\omega$, these two distinct lines would be tangent to $\omega$ at the same point. For the same reason the points $A'$, $B'$, $C'$, $D'$ are pairwise distinct. Every vertex therefore lies outside $\omega$ and the tangent lengths from it are equal:
+    $$
+    AA' = AD', \quad BA' = BB', \quad CB' = CC', \quad DC' = DD'.
+    $$
+
+    The whole computation rests on the positions of these tangency points, so let us settle them first.
+
+    The point $B$ lies between $A$ and $A'$. Indeed, $\omega$ is inscribed in angle $BAD$, so it lies in the half-plane determined by line $AB$ and containing $D$, and it is tangent to line $AB$ at $A'$; all of its points other than $A'$ therefore lie in the open half-plane, that is, off the line $AB$. If $A'$ were an interior point of side $AB$, the points of $\omega$ sufficiently close to $A'$ would lie inside the convex quadrilateral $ABCD$, which contradicts the fact that $\omega$ lies outside it. The point $A'$ lies on ray $AB$ and coincides with neither $A$ nor $B$, so on that ray it lies beyond $B$. Similarly $D$ lies between $A$ and $D'$.
+
+    From this we get the position of the whole of $\omega$. The segment $AA'$ meets line $BC$ at $B$, and neither of the points $A$, $A'$ lies on that line, so $A$ and $A'$ lie in opposite half-planes determined by line $BC$. The circle $\omega$ is tangent to line $BC$, hence it lies entirely in one of these half-planes, and since $A'$ lies on $\omega$, it is the one not containing $A$. From the fact that $D$ lies between $A$ and $D'$ we similarly get that $\omega$ lies in the half-plane determined by line $CD$ and not containing $A$.
+
+    Now we can locate $B'$ and $C'$ as well. By convexity the points $A$ and $B$ lie in the same half-plane determined by line $CD$, while $B'$ lies in the opposite one, off the line $CD$ (otherwise $B'$ would be a common point of $\omega$ and line $CD$, that is, $B' = C'$). The segment $BB'$ therefore crosses line $CD$; but it lies on line $BC$, which meets line $CD$ only at $C$. Hence $C$ lies between $B$ and $B'$, and the same argument with $B \leftrightarrow D$ swapped gives that $C$ lies between $D$ and $C'$.
+
+    The rest is a computation. Since $B$ lies between $A$ and $A'$ and $C$ between $B$ and $B'$, we have
+    $$
+    \eqalign{
+    AB + CB &= AA' - BA' + BC = \cr
+    &= AA' - BB' + BC = \cr
+    &= AA' - \bigl(BC + CB'\bigr) + BC = \cr
+    &= AA' - CB'. \cr
+    }
+    $$
+    In exactly the same way, with $D$ between $A$ and $D'$ and $C$ between $D$ and $C'$, we get
+    $$
+    AD + CD = AD' - CC'.
+    $$
+    The right-hand sides are equal, because $AA' = AD'$ and $CB' = CC'$.
+}
 
 \EnvId{4CAVBeHRTqtsMdY8jrKuX-externally-tangent-incircle-pairs}
 \Problem{0}{MO 49-A-I-2}{
@@ -208,7 +514,42 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Let~$D$ be the common tangency point. Length $AD$ can be expressed in both ways using the $s-a$-type formula in both $ABK$ and $AKC$. Compare these expressions.
 }{
     After comparing them we should get $AD=(c+AK-BK)/2$ from $ABK$ and $AD=(b+AK-CK)/2$ from the other. Equate them and also use $BK+CK$. What does it solve for $BK$?
-}{}
+}{
+    Let us forget about the points $L$ and $M$ for now and compute $BK$ in terms of $a$, $b$, $c$; that will finish the problem.
+
+    The point $K$ lies in the interior of side $BC$, so $B$ and $C$ lie in opposite half-planes with boundary line $AK$. The incircle of triangle $ABK$ lies in the first of them, the incircle of triangle $CAK$ in the second, and both are tangent to line $AK$. By assumption these two circles have a common point; it must lie in the intersection of the two half-planes, that is, on line $AK$. But each of the circles has a single common point with $AK$, namely its tangency point, so these two tangency points coincide. Denote it by $D$.
+
+    The distance from a vertex to the tangency point of the incircle on an adjacent side is given by an $s-a$-type formula, so from triangle $ABK$ we get
+    $$
+    AD = \frac{c + AK - BK}{2}
+    $$
+    and from triangle $CAK$
+    $$
+    AD = \frac{b + AK - CK}{2}.
+    $$
+    Comparing them, we see that $AK$ cancels, leaving $c - BK = b - CK$, that is, $CK - BK = b - c$. Since $K$ lies inside $BC$, we also have $BK + CK = a$, hence
+    $$
+    \gather
+    BK = \frac{a + c - b}{2} = s - b, \\
+    CK = \frac{a + b - c}{2} = s - c.
+    \endgather
+    $$
+
+    The statement is invariant under the cyclic relabelling $A \to B \to C \to A$, under which $K \to L \to M$: side $BC$ becomes $CA$, triangle $ABK$ becomes $BCL$ and triangle $CAK$ becomes $ABL$, which is exactly the condition imposed on $L$; one more application gives the condition on $M$. Under this relabelling $a \to b \to c \to a$, so $s$ stays the same. The previous computation therefore immediately gives
+    $$
+    \gather
+    CL = s - c, \qquad AL = s - a, \\
+    AM = s - a, \qquad BM = s - b.
+    \endgather
+    $$
+    Both sides of the equality to be proved are thus the same product:
+    $$
+    \eqalign{
+    BK \cdot CL \cdot AM &= (s-a)(s-b)(s-c) = \cr
+    &= CK \cdot AL \cdot BM. \cr
+    }
+    $$
+}
 
 \EnvId{mm753DtWsC9P9vCKmpLmt-nine-smaller-quadrilaterals}
 \Problem{0}{}{
@@ -224,10 +565,79 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
 }{
     Let $d(x,y)$ denote the external-tangent length of two corner circles along the side of $ABCD$ where they both touch. We are left to prove $d(w_a,w_b)+d(w_c,w_d)=d(w_b,w_c)+d(w_a,w_d)$. To do so, we need to find these lengths elsewhere than on the sides of $ABCD$. This is where $\omega$ comes in.
 }{
-    Each pair of adjacent corner circles is also tangent to one of the four inner segments --- the one bounding the edge cell shared by those two corners against the central cell. Transfer each of the four external tangents onto the corresponding inner segment using equal tangents.
+    Each pair of adjacent corner circles is also tangent to one of the four inner segments (the one bounding the edge cell shared by those two corners against the central cell). Transfer each of the four external tangents onto the corresponding inner segment using equal tangents.
 }{
     On each inner segment, the transferred tangent now passes through two vertices of the central cell, where $\omega$ is also tangent. Equal tangents from those vertices split each transferred piece into two halves that match halves on neighbouring inner segments, just like the corner tangents matched at $A, B, C, D$ on the outer boundary. The four pieces then cancel pairwise and we are done.
-}{}
+}{
+    Label the chosen points according to their order around the boundary: let $P_1$, $P_2$ lie on $AB$ in the order $A$, $P_1$, $P_2$, $B$, $Q_1$, $Q_2$ on $BC$ in the order $B$, $Q_1$, $Q_2$, $C$, $R_1$, $R_2$ on $CD$ in the order $C$, $R_1$, $R_2$, $D$, and $S_1$, $S_2$ on $DA$ in the order $D$, $S_1$, $S_2$, $A$. Opposite sides are joined, that is $AB$ with $CD$ and $BC$ with $DA$, and the condition that the joining segments do not cross gives exactly the pairs $P_1R_2$, $P_2R_1$ and $Q_1S_2$, $Q_2S_1$. The vertices of the central cell are
+    $$
+    \gather
+    E = P_1R_2 \cap Q_1S_2, \qquad F = P_2R_1 \cap Q_1S_2, \\
+    G = P_2R_1 \cap Q_2S_1, \qquad H = P_1R_2 \cap Q_2S_1,
+    \endgather
+    $$
+    so the nine cells are these: the corner ones $AP_1ES_2$, $P_2BQ_1F$, $Q_2CR_1G$, $R_2DS_1H$ (at the vertices $A$, $B$, $C$, $D$ respectively), the edge ones $P_1P_2FE$, $Q_1Q_2GF$, $R_1R_2HG$, $S_1S_2EH$, and the central one $EFGH$. Denote the inscribed circles of the corner cells by $w_a$, $w_b$, $w_c$, $w_d$, named after the nearest vertex, and the inscribed circle of the central cell by $\omega$.
+
+    The quadrilateral $ABCD$ is convex, so by Pitot's theorem it suffices to prove
+    $$
+    AB + CD = BC + AD. \eqno(*)
+    $$
+
+    Both circles $w_a$ and $w_b$ are tangent to the line $AB$, the first at an interior point $T_A$ of the segment $AP_1$ and the second at an interior point $T_B$ of the segment $P_2B$ (these are the sides of their cells lying on $AB$). Denote $d_{AB} = T_AT_B$, and analogously $d_{BC}$, $d_{CD}$, $d_{AD}$ for the remaining three sides and the corresponding pairs of adjacent corner circles. The circle $w_a$ is tangent to the line $AD$ as well, so by the theorem on two tangents from a point the length $AT_A$ equals the distance from $A$ to the tangency point on $AD$; denote this common value by $t_A$, and introduce $t_B$, $t_C$, $t_D$ similarly. From the order $A$, $T_A$, $T_B$, $B$ on the side $AB$ and from the same decompositions of the remaining sides we get
+    $$
+    \eqalign{
+    AB &= t_A + d_{AB} + t_B, \cr
+    BC &= t_B + d_{BC} + t_C, \cr
+    CD &= t_C + d_{CD} + t_D, \cr
+    AD &= t_A + d_{AD} + t_D. \cr
+    }
+    $$
+    Each of the four tangent lengths $t_A$, $t_B$, $t_C$, $t_D$ occurs once on each side of $(*)$, so $(*)$ is equivalent to the equality
+    $$
+    d_{AB} + d_{CD} = d_{BC} + d_{AD}. \eqno(**)
+    $$
+
+    The key step is to read the lengths $d$ off somewhere other than the sides of $ABCD$. Indeed, besides $AB$ the circles $w_a$, $w_b$ are also tangent to the line $Q_1S_2$: the first, as the inscribed circle of the cell $AP_1ES_2$, at an interior point $U_A$ of the segment $S_2E$; the second, as the inscribed circle of the cell $P_2BQ_1F$, at an interior point $U_B$ of the segment $FQ_1$. Both of these cells lie in the half-plane with boundary line $Q_1S_2$ that contains the side $AB$, so both $AB$ and $Q_1S_2$ are common external tangents of the circles $w_a$, $w_b$. By the theorem on the common external tangents of two circles we therefore have
+    $$
+    d_{AB} = T_AT_B = U_AU_B.
+    $$
+
+    The segment $Q_1S_2$ passes in turn through the three cells adjacent to the side $AB$, that is through $AP_1ES_2$, $P_1P_2FE$ and $P_2BQ_1F$, so the points on it lie in the order $S_2$, $E$, $F$, $Q_1$. Since $U_A$ lies inside $S_2E$ and $U_B$ inside $FQ_1$, we have
+    $$
+    d_{AB} = U_AE + EF + FU_B.
+    $$
+
+    Now we express each of these three pieces in terms of tangent lengths at the vertices of the central cell. The circle $w_a$ is tangent to the lines $P_1R_2$ and $Q_1S_2$, which meet at the point $E$; let $e$ be the length of the tangent from $E$ to the circle $w_a$, so that $U_AE = e$. Analogously, let $f$, $g$, $h$ be the lengths of the tangents from $F$, $G$, $H$ to the circles $w_b$, $w_c$, $w_d$; in each case we take a vertex of the central cell and the circle of the corner cell containing that vertex. Further, let $e_0$, $f_0$, $g_0$, $h_0$ be the lengths of the tangents from $E$, $F$, $G$, $H$ to $\omega$. The circle $\omega$ touches each side of the quadrilateral $EFGH$ at an interior point of that side, so
+    $$
+    \gather
+    EF = e_0 + f_0, \qquad FG = f_0 + g_0, \\
+    GH = g_0 + h_0, \qquad HE = h_0 + e_0.
+    \endgather
+    $$
+    Substituting, $d_{AB} = e + e_0 + f_0 + f$. Denote
+    $$
+    \gather
+    x_E = e + e_0, \qquad x_F = f + f_0, \\
+    x_G = g + g_0, \qquad x_H = h + h_0,
+    \endgather
+    $$
+    so that $d_{AB} = x_E + x_F$.
+
+    We settle the remaining three sides in the same way. The circles $w_b$, $w_c$ are tangent to the line $P_2R_1$ at interior points of the segments $P_2F$ and $GR_1$, and their cells lie in the half-plane determined by this line that contains the side $BC$; therefore both $BC$ and $P_2R_1$ are common external tangents of these two circles, and $d_{BC}$ equals the distance between their tangency points on $P_2R_1$. The points on $P_2R_1$ come in the order $P_2$, the tangency point of the circle $w_b$, $F$, $G$, the tangency point of the circle $w_c$, $R_1$, so this distance splits into the tangent from $F$ to the circle $w_b$, the length $FG$, and the tangent from $G$ to the circle $w_c$. The tangent from $F$ to the circle $w_b$ again has length $f$, since $w_b$ is tangent to both lines through the point $F$, and similarly for $G$ and $w_c$. Hence
+    $$
+    d_{BC} = f + f_0 + g_0 + g = x_F + x_G.
+    $$
+    Similarly, the line $Q_2S_1$ gives $d_{CD} = x_G + x_H$ and the line $P_1R_2$ gives $d_{AD} = x_H + x_E$.
+
+    Summing, we get
+    $$
+    \eqalign{
+    d_{AB} + d_{CD} &= x_E + x_F + x_G + x_H = \cr
+    &= d_{BC} + d_{AD}, \cr
+    }
+    $$
+    which is exactly $(**)$. This proves $(*)$ as well, and by Pitot's theorem the quadrilateral $ABCD$ has an inscribed circle.
+}
 
 \EnvId{EXLasGyo1ngIPJ1f2b0A2-circle-inscribed-in-an-angle}
 \Problem{0}{}{
@@ -242,7 +652,47 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     Notice $LN=CN-CL = CV-CP$. So we have $BP=BW-CV+CP$. We are closing in.
 }{
     Take $BW=AB-AW$, $CV=AC-AV$, $CP=BC-BP$. One simple step from finishing.
-}{}
+}{
+    Denote by $\omega_0$ the incircle of triangle $ABC$ with center $I$, by $O$ the center of $\omega$, and by $W$, $V$ the tangency points of $\omega$ with lines $AB$, $AC$, and by $M$, $N$ the tangency points of $\omega$ with lines $BX$, $CX$. Denote the incircle of triangle $BCX$ by $\omega_1$ and its tangency points with lines $BC$, $BX$, $CX$ by $P$, $K$, $L$ respectively. The whole solution rests on the equality $BP = s - b$: the incircle of triangle $ABC$ touches side $BC$ at distance $s - b$ from $B$, so it will follow that $\omega_0$ and $\omega_1$ touch line $BC$ at the same point.
+
+    First let us settle the position of $\omega$. The circles $\omega$ and $\omega_0$ are both inscribed in angle $BAC$, so their centers lie on the bisector of this angle, and if $W_0$ is the tangency point of $\omega_0$ with side $AB$, the right triangles $AWO$ and $AW_0I$ are similar. Therefore
+    $$
+    \frac{AO}{AI} = \frac{AW}{AW_0} = \frac{\rho}{r} < 1.
+    $$
+    Hence $O$ lies inside segment $AI$, and equal tangents from $A$ give
+    $$
+    AW = AV = \frac{\rho}{r}\,(s-a) < s-a.
+    $$
+    By the triangle inequality $s - a < b$ and $s - a < c$, so $W$ lies inside side $AB$ and $V$ inside side $AC$, that is, $BW = c - AW$ and $CV = b - AV$.
+
+    The whole triangle $ABC$ lies in the strip between line $BC$ and the parallel to it through $A$, so the distance of its interior point $I$ from $BC$, that is $r$, is smaller than the distance of $A$ from $BC$. The distance from line $BC$ changes linearly along segment $AI$, and therefore at its interior point $O$ it is larger than $r$, hence larger than $\rho$. So $\omega$ has no common point with line $BC$ and lies entirely in triangle $ABC$; here we used the assumption $\rho < r$.
+
+    Now the configuration. Line $BC$ is not tangent to $\omega$, so $BX \neq BC$ and $CX \neq BC$; at the same time $BX \neq AB$ and $CX \neq AC$. In particular $A$ lies on neither $BX$ nor $CX$; $C$ does not lie on $BX$ and $B$ does not lie on $CX$. The point $M$ lies on $\omega$, hence in triangle $ABC$, and therefore ray $BM$ lies in angle $ABC$; it coincides with neither ray $BA$ nor ray $BC$, so it lies in the interior of this angle and meets segment $AC$ at an interior point of it. Line $BX$ therefore separates $A$ from $C$, and analogously line $CX$ separates $A$ from $B$.
+
+    The circle $\omega$ lies inside the angle formed at vertex $B$ by its tangents, that is by rays $BW$ and $BM$, and that angle lies entirely in the half-plane with boundary line $BX$ containing $A$; similarly $\omega$ lies in the half-plane with boundary line $CX$ containing $A$. Lines $BX$ and $CX$ divide the plane into four regions, and by the previous paragraph the one containing $A$ is exactly the angle vertically opposite angle $BXC$. The tangency point $M$ lies on line $BX$ and also in the closure of this region, hence on the ray opposite to ray $XB$, with $M \neq X$, since otherwise the tangents $BX$ and $CX$ would coincide. So $X$ lies inside segment $BM$ and likewise inside segment $CN$. In particular $X$ lies in the interior of angle $ABC$ and of angle $ACB$, that is in the interior of triangle $ABC$.
+
+    The rest is a computation with equal tangents. From $X$ we have $XK = XL$ (tangents to $\omega_1$) and $XM = XN$ (tangents to $\omega$). The points $K$, $L$ lie inside segments $XB$, $XC$, while $M$, $N$ lie on the opposite rays, so
+    $$
+    KM = XK + XM = XL + XN = LN.
+    $$
+    From $B$ we have $BM = BW$ and $BK = BP$; from $C$ we have $CN = CV$ and $CL = CP$. The point $K$ lies inside segment $BM$ and the point $L$ inside segment $CN$, therefore
+    $$
+    \eqalign{
+    BP &= BK = BM - KM = BW - LN \cr
+       &= BW - CN + CL = BW - CV + CP. \cr
+    }
+    $$
+    We substitute $BW = c - AW$, $CV = b - AV$ and $CP = a - BP$; the equal terms $AW$ and $AV$ then cancel:
+    $$
+    \eqalign{
+    BP &= (c - AW) - (b - AV) + (a - BP) \cr
+       &= a + c - b - BP. \cr
+    }
+    $$
+    From this $2BP = a + c - b$, that is $BP = \frac{a+c-b}{2} = s - b$.
+
+    By the theorem on the touch points of the incircle, $\omega_0$ touches side $BC$ at a point $D$ with $BD = s - b$. Both $P$ and $D$ lie inside segment $BC$ at distance $s - b$ from $B$, so $P = D$ and both circles $\omega_0$, $\omega_1$ touch line $BC$ at the same point $P$. Their centers therefore lie on the perpendicular to $BC$ at $P$, and on the same ray: $\omega_0$ lies in triangle $ABC$ and $\omega_1$ in triangle $BCX$, which, since $X$ is an interior point of triangle $ABC$, lies in the same half-plane with boundary line $BC$. The circles are distinct, because $\omega_0$ touches $AB$ at an interior point $W_0$ of that side, which does not lie in triangle $BCX$; that triangle has only the single point $B$ in common with line $AB$. If we denote by $r_1$ the radius of $\omega_1$, the distance between the centers equals $|r - r_1|$, with $r \neq r_1$, and that is exactly the condition for internal tangency. So the circles $\omega_0$ and $\omega_1$ are tangent, and they touch at $P$.
+}
 
 \EnvId{mZEAwZzSzf1cMcge-3Ovs-locus-of-tangent-intersection}
 \Problem{0}{USAMO 1991}{
@@ -259,7 +709,31 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     We have $PQ = DP+DQ$, and so $AX = AD-DP-DQ$. But this is fine. What are $PD$ and $DQ$?
 }{
     Length $DP$ can be expressed using the $s-a$-type formula in $ABD$, similarly $QD$.
-}{}
+}{
+    \Answer{The locus is the open arc of the circle centered at $A$ with radius $s - a = \frac{b + c - a}{2}$ lying inside angle $BAC$. Its endpoints are the tangency points of the incircle of triangle $ABC$ with sides $AB$ and $AC$, but these do not belong to the locus.}
+    We guess the answer from the limiting cases. As $D$ approaches $B$, the incircle of triangle $ABD$ shrinks to the point $B$ and the incircle of triangle $ADC$ turns into the incircle of triangle $ABC$. In the limit the common external tangents thus become the two tangents from $B$ to the incircle of triangle $ABC$, that is, the lines $BC$ and $AB$, and $X$ tends to the tangency point of this circle with side $AB$. That point is at distance $s - a$ from $A$. Symmetrically, for $D \to C$ we get the tangency point on $AC$, again at distance $s - a$ from $A$. So our conjecture is $AX = s - a$ for every position of $D$.
+
+    From now on let $D$ be an interior point of side $BC$; for $D = B$ or $D = C$ one of the triangles from the statement degenerates. Denote the incircle of triangle $ABD$ by $k_1$, the incircle of triangle $ADC$ by $k_2$, and their tangency points with line $BC$ by $P$ and $Q$ respectively. Both circles touch line $BC$ and lie in the same half-plane, so $BC$ is their common external tangent; denote the other common external tangent by $q$. Both also touch line $AD$, and they lie in opposite half-planes determined by this line, so $AD$ is their common internal tangent (and the circles are disjoint, or possibly touch at a point lying on $AD$; in that case $AD$ is their only common internal tangent and the following theorem, whose proof uses only equal tangents from $D$ and $X$, holds unchanged). Line $AD$ meets $BC$ at $D$ and meets $q$ at $X$, so by the theorem on the common internal tangent of two circles,
+    $$
+    DX = PQ.
+    $$
+
+    The point $P$ lies inside segment $BD$ and the point $Q$ inside segment $DC$; therefore $PQ = DP + DQ$. The $s-a$-type formulas used at vertex $D$ in triangles $ABD$ and $ADC$ respectively (the opposite sides being $AB$ and $AC$) give
+    $$
+    DP = \frac{AD + BD - c}{2}, \qquad DQ = \frac{AD + CD - b}{2}.
+    $$
+    Since $BD + CD = a$, adding them gives
+    $$
+    DX = PQ = AD - \frac{b + c - a}{2} = AD - (s - a).
+    $$
+
+    It remains to check the position of $X$. The circles $k_1$, $k_2$ lie in the half-plane bounded by line $BC$ and containing $A$, so their tangency points with $q$ lie there as well. These two points are on opposite sides of line $AD$: each lies on one of the two circles and cannot lie on $AD$, since otherwise $q$ would touch that circle at its tangency point with $AD$, so $q = AD$, which is excluded (line $AD$ separates the two circles, whereas $q$ does not). Hence $X$, being the intersection of $q$ with line $AD$, lies between them and therefore in that half-plane, that is, on ray $DA$. Together with $0 < DX < AD$ this means that $X$ is an interior point of segment $AD$, and so
+    $$
+    AX = AD - DX = s - a.
+    $$
+
+    So $X$ always lies on the circle $\omega$ centered at $A$ with radius $s - a$, and since it is an interior point of segment $AD$ for an interior point $D$ of side $BC$, it lies inside angle $BAC$. Conversely, every point of this arc does occur: as $D$ runs over the interior of side $BC$, the ray $AD$ sweeps out exactly the rays from $A$ lying strictly between the rays $AB$ and $AC$, and it does so one-to-one. On each such ray there is a unique point at distance $s - a$ from $A$, and by what we proved it is exactly the point $X$ corresponding to that $D$. The endpoints of the arc are the tangency points of the incircle of triangle $ABC$ with sides $AB$ and $AC$, since those are at distance exactly $s - a$ from $A$; they correspond to the degenerate positions $D = B$ and $D = C$, and therefore do not belong to the locus.
+}
 
 \EnvId{WqLo9VdtCR-oLjiZTe-hJ-tangential-quadrilateral-and-circumcircle}
 \Problem{1}{IMO 2021, P4}{
@@ -277,7 +751,55 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     We can angle-chase the angle equality of the angles at $Z$ and $T$. The angles at $Q$ and $R$ are right, so the congruence follows. Is there a similar congruence like that elsewhere?
 }{
     In fact also $IPX$ and $ISY$ are congruent. These two congruences together give segment equalities needed to do the final computation.
-}{}
+}{
+    Denote by $r$ the radius of the incircle of $ABCD$, by $P$, $Q$, $R$, $S$ its tangency points on the sides $AB$, $BC$, $CD$, $DA$ respectively, and by $O$ the center of $\Omega$. The point $I$ is at distance $r > 0$ from each of the lines $AB$, $BC$, $CD$, $DA$, so it lies on none of them; in particular it is different from $X$, $Y$, $Z$, $T$.
+
+    The tangency points are interior points of the respective sides, and by assumption $X$, $Z$ lie beyond $A$ and $C$ respectively and $Y$, $T$ beyond $D$. So on the line $AB$ the points lie in the order $B$, $P$, $A$, $X$, on the line $BC$ in the order $B$, $Q$, $C$, $Z$, on the line $AD$ in the order $A$, $S$, $D$, $Y$ and on the line $CD$ in the order $C$, $R$, $D$, $T$. Every further step rests on these four orders.
+
+    Equal tangents alone do not suffice: most of the segments in the statement do not lie on the sides of the quadrilateral at all. The bridge is provided by two pairs of congruent right triangles with vertex $I$, in which the right angles are supplied by the tangency points of the incircle and the congruent acute angles by inscribed angles in $\Omega$.
+
+    \textbf{Triangles $IQZ$ and $IRT$.} The radius to a tangency point is perpendicular to the tangent, so $IQ \perp BC$ and $IR \perp CD$. The point $Z$ lies on the line $BC$ and $Z \neq Q$, the point $T$ lies on the line $CD$ and $T \neq R$, so $IQZ$ and $IRT$ are right triangles with right angles at $Q$ and $R$ respectively and with legs $IQ = IR = r$.
+
+    From the order $B$, $Q$, $C$, $Z$ the points $Q$ and $C$ lie on the same ray from $Z$, so $\angle IZQ = \angle IZC$; from the order $C$, $R$, $D$, $T$ the points $R$ and $C$ lie on the same ray from $T$, so $\angle ITR = \angle ITC$. Both angles are acute, being the non-right angles of right triangles. The points $I$, $C$, $Z$, $T$ lie on $\Omega$, so $\angle IZC$ and $\angle ITC$ are inscribed angles subtending the chord $IC$: either they are equal (when $Z$ and $T$ lie on the same arc determined by $I$, $C$), or their sum is $180^\circ$. The second possibility, however, would mean that at least one of them is not acute, hence
+    $$
+    \angle IZQ = \angle IZC = \angle ITC = \angle ITR.
+    $$
+
+    From this $\angle QIZ = 90^\circ - \angle IZQ = 90^\circ - \angle ITR = \angle RIT$. The triangles $IQZ$ and $IRT$ therefore have a congruent side $IQ = IR$ and congruent angles at both of its endpoints, so they are congruent, which gives
+    $$
+    QZ = RT, \qquad IZ = IT.
+    $$
+
+    \textbf{Triangles $IPX$ and $ISY$.} Similarly $IP \perp AB$, $IS \perp DA$ and $IP = IS = r$, with $X \neq P$ and $Y \neq S$, so $IPX$ and $ISY$ are right triangles with right angles at $P$ and $S$ respectively. From the order $B$, $P$, $A$, $X$ we have $\angle IXP = \angle IXA$ and from the order $A$, $S$, $D$, $Y$ we have $\angle IYS = \angle IYA$. Both of these angles are again acute and they are inscribed angles subtending the chord $IA$ of $\Omega$, so they are equal. By the same argument as above the triangles $IPX$ and $ISY$ are congruent and
+    $$
+    PX = SY, \qquad IX = IY.
+    $$
+
+    \textbf{Transfer to the chords $TX$ and $YZ$.} The point $I$ lies on $\Omega$, so $OI$ is a radius of $\Omega$ and $O \neq I$. Further $X \neq Y$: otherwise this point would lie on both lines $AB$ and $AD$, which have the single common point $A$, but $X \neq A$. Both $O$ and $I$ are equidistant from $X$ and from $Y$, so the line $OI$ is the perpendicular bisector of the segment $XY$. Similarly $Z \neq T$ (otherwise this point would lie on both lines $BC$ and $CD$, hence it would be the point $C$, while $T \neq C$) and since $OZ = OT$ and $IZ = IT$, the line $OI$ is the perpendicular bisector of the segment $ZT$ as well. The reflection across the line $OI$ therefore maps $X$ to $Y$ and $T$ to $Z$, whence
+    $$
+    TX = YZ.
+    $$
+
+    \textbf{Final computation.} By the theorem on two tangents from a point, $AP = AS$, $CQ = CR$ and $DR = DS$. From the four orders of points we further get
+    $$
+    \gather
+    AD = AS + SD, \qquad CD = CR + RD, \\
+    XA = PX - PA, \qquad ZC = QZ - QC, \\
+    DT = RT - RD, \qquad DY = SY - SD.
+    \endgather
+    $$
+    After substitution, the tangent segments at $A$ and at $C$ cancel because $AS = PA$ and $CR = QC$ respectively, and there remains
+    $$
+    \eqalign{
+        AD + DT + XA &= SD - RD + RT + PX,\cr
+        CD + DY + ZC &= RD - SD + QZ + SY.\cr
+    }
+    $$
+    The right-hand sides are equal, since $SD = RD$, $RT = QZ$ and $PX = SY$. Adding the equality $TX = YZ$ we get
+    $$
+    AD + DT + TX + XA = CD + DY + YZ + ZC.
+    $$
+}
 
 \EnvId{zwCIF1ytYOGA5L7Ai1rsb-touch-points-reflected-in-incenter}
 \Problem{1}{IMO Shortlist 2005, G1}{
@@ -285,14 +807,42 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
 }{
     The first clue will be given after we draw a perfect figure and realize $I$ is concyclic with $A,B,K,L$. And the circle through $AIB$ gives us a clue what to draw next: what else does it pass through?
 }{
-    Circle $A,I,B$ passes through the $A$-excenter $I_a$. Let us draw the $A$-excircle then.
+    Circle $A,I,B$ passes through the $C$-excenter $I_c$. Let us draw the $C$-excircle then.
 }{
-    The mysterious condition $AC+BC=3AB$ makes more sense once we introduce the $A$-excircle tangency points with $CB$ and $CA$. Time for a bit of equal tangent math.
+    The mysterious condition $AC+BC=3AB$ makes more sense once we introduce the $C$-excircle tangency points with $CB$ and $CA$. Time for a bit of equal tangent math.
 }{
     Show that our condition is equivalent to $D$ being the midpoint of $CD'$, similarly for $E$. What are the consequences in the figure?
 }{
-    Justify that $I_aD' = 2ID$. This finally gives a clue what to do with $K$. Now we are close to finishing.
-}{}
+    Justify that $I_cD' = 2ID$. This finally gives a clue what to do with $K$. Now we are close to finishing.
+}{
+    An accurate figure suggests that $I$ lies on the desired circle as well. That is a good lead: the circumcircle of triangle $AIB$ is part of a well-known configuration, since it passes through the $C$-excenter $I_c$ and $II_c$ is its diameter. We will therefore prove that $A$, $B$, $K$, $L$ lie on the circle $\omega$ with diameter $II_c$.
+
+    The point $I_c$ lies on the internal bisector of the angle at $C$ and on the external bisectors of the angles at $A$ and $B$. Lines $AI$ and $AI_c$ are therefore the internal and the external bisector at $A$, which are perpendicular, so $\angle IAI_c = 90^\circ$, and similarly $\angle IBI_c = 90^\circ$. By Thales's theorem both $A$ and $B$ lie on $\omega$.
+
+    Let the $C$-excircle touch lines $CB$ and $CA$ at $D'$ and $E'$. This circle touches side $AB$ and the extensions of sides $CB$ and $CA$ beyond $B$ and $A$, so $D'$ lies on ray $CB$ and $E'$ on ray $CA$; the tangency points $D$, $E$ of the incircle lie on the same rays. We know the distances of all four from $C$:
+    $$
+    CD' = CE' = s, \qquad CD = CE = s - c.
+    $$
+    The condition $AC + BC = 3AB$ says $b + a = 3c$, hence $a + b + c = 4c$, that is $s = 2c$. This is exactly the equality $s = 2(s - c)$, and therefore
+    $$
+    CD' = 2CD, \qquad CE' = 2CE.
+    $$
+    Since both $D$ and $D'$ lie on ray $CB$ and both $E$ and $E'$ lie on ray $CA$, this means that $D$ is the midpoint of segment $CD'$ and $E$ is the midpoint of segment $CE'$.
+
+    Points $I$ and $I_c$ both lie on the bisector of angle $ACB$, that is on ray $CI$, and segments $ID$, $I_cD'$ are perpendicular to $CB$. The right triangles $CDI$ and $CD'I_c$ therefore share the angle at $C$ and are similar with ratio $CD' / CD = 2$, whence
+    $$
+    I_cD' = 2ID, \qquad CI_c = 2CI.
+    $$
+    Points $I$, $I_c$ lie on the same ray from $C$, so the second equality says that $I$ is the midpoint of segment $CI_c$; in particular $I \neq I_c$ and $\omega$ really is a circle.
+
+    The reflection across $I$ maps $D$ to $K$, $E$ to $L$, and by the above also $C$ to $I_c$. Segment $KI_c$ is thus the image of segment $DC$, so
+    $$
+    KI_c \parallel CB, \qquad KI_c = CD = s - c > 0,
+    $$
+    and similarly $LI_c \parallel CA$ with $LI_c = CE > 0$. At the same time $I$ is the midpoint of $DK$, so line $IK$ is line $DK$, which is perpendicular to $CB$; moreover $IK = ID > 0$. Thus at $K$ a line perpendicular to $CB$ meets a line parallel to $CB$, which gives $\angle IKI_c = 90^\circ$; similarly $IL \perp CA$ and $LI_c \parallel CA$ give $\angle ILI_c = 90^\circ$.
+
+    By Thales's theorem, points $K$ and $L$ therefore lie on the circle $\omega$ with diameter $II_c$ as well, on which $A$ and $B$ already lie.
+}
 
 \EnvId{cqRxrMgyFJE7-aHA9USqB-splitting-the-triangle-perimeter}
 \Problem{2}{}{
@@ -300,14 +850,60 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
 }{
     The first trick is to remember one particularly nice place where the perimeter somehow shows up in triangle geometry. We sure have seen it in this handout.
 }{
-    The distance from $A$ to the tangency points of the $A$-excircle is exactly half the perimeter, so 2. And $AX=AY=1$. Is it a coincidence?
+    The distance from $A$ to the tangency points of the $A$-excircle on lines $AB$ and $AC$ is exactly half the perimeter, so 2. And $AX=AY=1$. Is it a coincidence?
 }{
-    Let the $A$-excircle touch $AB$ and $AC$ at $D$ and $E$. We have $AD=AE=2$, and $AX=AY=1$, and so line $DE$ is the image of the $A$-polar of the $A$-excircle under the homothety centred at $A$ with coefficient $1/2$. What do we know about this line?
+    Let the $A$-excircle touch $AB$ and $AC$ at $D$ and $E$. We have $AD=AE=2$, and $AX=AY=1$, and so line $XY$ is the image of the $A$-polar of the $A$-excircle under the homothety centred at $A$ with coefficient $1/2$. What do we know about this line?
 }{
     Line $XY$ is the radical axis of point $A$ and the $A$-excircle! And $F$ lies on it. We are closing in.
 }{
     The final point to draw is the tangency point of the excircle and $BC$. Using the fact that $F$ lies on this radical axis, we get some nice equal lengths. 
-}{}
+}{
+    The perimeter of $ABC$ is $4$, so $s = 2$. Half the perimeter shows up in a triangle as the distance from $A$ to the tangency points of the $A$-excircle, and the value $AX = AY = 1$ is exactly half of it. That tells us what to draw.
+
+    Denote by $\omega$ the excircle of triangle $ABC$ opposite vertex $A$, by $J$ its center and by $\rho$ its radius, and let $\omega$ touch the lines $AB$, $AC$, $BC$ at the points $D$, $E$, $T$ respectively. By the theorem on the excircle we have $AD = AE = s = 2$. The points $D$, $X$ lie on ray $AB$ and the points $E$, $Y$ on ray $AC$, so $AX = AY = 1$ makes $X$ the midpoint of $AD$ and $Y$ the midpoint of $AE$. Line $XY$ is therefore the image of line $DE$ under the homothety $h$ with center $A$ and coefficient $\frac12$.
+
+    The key claim is that every point $P$ of line $XY$ satisfies $PA^2 = PJ^2 - \rho^2$, that is, that $XY$ is the radical axis of the point $A$ (viewed as a circle of zero radius) and the circle $\omega$.
+
+    We prove it. The points $D$, $E$ are distinct, since otherwise they would lie on line $AB$ as well as on line $AC$ and hence coincide with $A$. Since $AD = AE$ and $JD = JE = \rho$, both $A$ and $J$ lie on the perpendicular bisector of $DE$, so $AJ \perp DE$. Let $H$ be the intersection of lines $DE$ and $AJ$ and let $G$ be the midpoint of $AH$. The homothety $h$ maps $H$ to $G$, so $G$ lies on $XY$; line $XY$ is parallel to $DE$, hence perpendicular to $AJ$, and meets it exactly at $G$.
+
+    The tangent $AD$ is perpendicular to the radius $JD$, so triangle $ADJ$ has a right angle at $D$ and $DH$ is its altitude to the hypotenuse $AJ$. The Pythagorean theorem gives $AJ^2 = AD^2 + \rho^2$ and Euclid's leg theorem gives
+    $$
+    AD^2 = AH \cdot AJ = 2AG \cdot AJ.
+    $$
+    The foot $H$ of the altitude lies in the interior of the hypotenuse $AJ$, so $G$ lies there too and $GJ = AJ - AG$. For a point $P$ on line $XY$ we have $PA^2 = PG^2 + GA^2$ and $PJ^2 = PG^2 + GJ^2$ (the Pythagorean theorem, trivially for $P = G$), and hence
+    $$
+    \eqalign{
+    PJ^2 - PA^2 &= GJ^2 - GA^2 = \cr
+    &= \bigl(AJ - AG\bigr)^2 - AG^2 = \cr
+    &= AJ^2 - 2AG \cdot AJ = AJ^2 - AD^2 = \rho^2, \cr
+    }
+    $$
+    which is exactly the claim.
+
+    The point $F$ lies on line $XY$, so $FA^2 = FJ^2 - \rho^2$. It also lies on line $BC$, which is tangent to $\omega$ at $T$, so $JT \perp BC$ and the Pythagorean theorem gives $FJ^2 = FT^2 + \rho^2$. Together
+    $$
+    FA = FT.
+    $$
+
+    By the theorem on the touch points of the excircle at the remaining two vertices we have $BT = s - c$ and $CT = s - b$. Both lengths are positive and their sum is $2s - b - c = a = BC$, so $T$ lies inside segment $BC$. The point $F$ is an interior point of segment $BC$, for otherwise $AF$ would not divide triangle $ABC$ into two triangles. So there are two cases.
+
+    \begitems
+    \i The point $F$ lies on segment $BT$. Then $BF + FT = BT$ and the perimeter of triangle $ABF$ is
+    $$
+    \eqalign{
+    AB + BF + FA &= c + BF + FT = \cr
+    &= c + BT = c + (s - c) = 2. \cr
+    }
+    $$
+    \i The point $F$ lies on segment $TC$. Then $CF + FT = CT$ and the perimeter of triangle $ACF$ is
+    $$
+    \eqalign{
+    AC + CF + FA &= b + CF + FT = \cr
+    &= b + CT = b + (s - b) = 2. \cr
+    }
+    $$
+    \enditems
+}
 
 \EnvId{p_QDQdc3MiS1qjG5JIegA-brianchon-theorem}
 \Problem{2}{Brianchon's theorem}{
@@ -318,7 +914,46 @@ In this handout we will demonstrate the usefulness of the problem-solving techni
     One of the circles is tangent to rays opposite to $BA$ and $DE$. Analogously the others. The only trick is to place them so that the radical axes work. 
 }{
     Try to place them so that lengths of external tangents to each circle and incircle of $ABCDEF$ are equal.
-}{}
+}{
+    Three lines through a single point call for a radical center: we are looking for three circles whose radical axes are exactly the diagonals $AD$, $BE$, $CF$. Denote the power of a point $M$ with respect to a circle $\omega'$ by $p(M,\omega')$, and recall that for $M$ on a tangent to $\omega'$ with tangency point $Z$ we have $p(M,\omega') = MZ^2$. So the powers of the vertices can be computed from tangent lengths, and tangents are the only thing the problem gives us.
+
+    Let the incircle $\omega$ with center $O$ and radius $r$ touch the sides $AB$, $BC$, $CD$, $DE$, $EF$, $FA$ at the points $P$, $Q$, $R$, $S$, $T$, $U$ respectively. At every vertex the two sides meeting there enclose an angle containing $\omega$, so all interior angles are smaller than $180^\circ$ and the hexagon is convex; hence $P$, $Q$, $R$, $S$, $T$, $U$ lie on $\omega$ in this order, in the same rotational order as the vertices. By Theorem 1 the two tangents from each vertex have equal length, so put
+    $$
+    \gather
+    a = AP = AU, \quad b = BP = BQ, \quad c = CQ = CR,\\
+    d = DR = DS, \quad e = ES = ET, \quad f = FT = FU.
+    \endgather
+    $$
+
+    The circles we want will be tangent to the lines of opposite sides: let $\omega_1$ touch the lines $AB$, $DE$ at $P_1$, $S_1$, let $\omega_2$ touch the lines $BC$, $EF$ at $Q_1$, $T_1$ and let $\omega_3$ touch the lines $CD$, $FA$ at $R_1$, $U_1$. Every vertex then lies on a tangent to exactly two of them, for instance $B$ on the tangents $AB$, $BC$ to $\omega_1$, $\omega_2$, and the line $BE$ will be their radical axis provided $BP_1 = BQ_1$ and $ES_1 = ET_1$. So we want the two new tangency points at each vertex to be equally far from it.
+
+    The original tangency points do satisfy this, but they give $\omega_1 = \omega_2 = \omega_3 = \omega$. We therefore shift them along the sides by the same length, alternately in the direction of traversal and against it: exactly one of the vertices $B$, $D$, $F$ lies on each side, and we shift the tangency point towards that vertex and past it. Choose $t > \max(b,d,f)$ and let $P_1$, $Q_1$ lie on the rays opposite to $BA$, $BC$ at distance $t-b$ from $B$, let $R_1$, $S_1$ lie on the rays opposite to $DC$, $DE$ at distance $t-d$ from $D$ and let $T_1$, $U_1$ lie on the rays opposite to $FE$, $FA$ at distance $t-f$ from $F$. Then
+    $$
+    \gather
+    AP_1 = AU_1 = a+t, \quad BP_1 = BQ_1 = t-b,\\
+    CQ_1 = CR_1 = c+t, \quad DR_1 = DS_1 = t-d,\\
+    ES_1 = ET_1 = e+t, \quad FT_1 = FU_1 = t-f,
+    \endgather
+    $$
+    for instance $AP_1 = AB + BP_1 = (a+b)+(t-b)$ and $CQ_1 = CB + BQ_1 = (b+c)+(t-b)$. At the same time each new point arose from the original one by a shift of exactly $t$ along its side, for instance $PP_1 = PB + BP_1 = t$.
+
+    It remains to show that a circle touching $AB$ at $P_1$ and $DE$ at $S_1$ exists at all; this is exactly where the alternation of directions is used. Let $m_1$ be the perpendicular bisector of $PS$ and let $\sigma$ be the reflection in it. Since $OP = OS = r$, the line $m_1$ passes through $O$, so $\sigma$ maps $\omega$ to itself, $P$ to $S$, and hence the tangent $AB$ to the tangent $DE$. Being an indirect isometry, it reverses the direction of traversal: at $P$ the direction $A \to B$ is the forward one, so its image at $S$ is the backward one, that is, the direction $E \to D$. And $P_1$, $S_1$ arose by a shift of $t$ in precisely these two directions, so $\sigma(P_1) = S_1$.
+
+    The line $m_1$ is not perpendicular to $AB$: otherwise it would coincide with the line $OP$, the only perpendicular to $AB$ through $O$, and $\sigma$ would fix $P$, that is, $P = S$. The perpendicular to $AB$ at $P_1$ therefore meets $m_1$ in a single point $O_1$; $\sigma$ fixes that point and maps this perpendicular to the perpendicular to $DE$ at $S_1$, so $O_1P_1 = O_1S_1$ and the circle $\omega_1$ with center $O_1$ and radius $O_1P_1$ is the one we want. A zero radius would mean $O_1 = P_1 = S_1$, that is, that $P_1$ is the intersection point of the lines $AB$ and $DE$ (which are distinct, since they touch $\omega$ at distinct points). But $P_1$ lies on $AB$ at distance $t$ from $P$ in a fixed direction, so it coincides with this single intersection point for at most one value of $t$; over the three pairs of opposite sides this rules out at most three values, and we choose $t$ different from all of them. Similarly we construct $\omega_2$ with center $O_2$ on the perpendicular bisector $m_2$ of $QT$ and $\omega_3$ with center $O_3$ on the perpendicular bisector $m_3$ of $RU$.
+
+    The centers are pairwise distinct. The point $O$ lies on the perpendicular to $AB$ at $P$, while $O_1$ lies on the parallel line perpendicular to $AB$ at $P_1 \neq P$, so $O_1 \neq O$, and similarly $O_2 \neq O$, $O_3 \neq O$. The lines $m_1$, $m_2$, $m_3$ all pass through $O$ and are pairwise distinct: the points $P$, $Q$, $S$, $T$ lie on $\omega$ in this cyclic order, so the chords $PS$ and $QT$ intersect, hence they are not parallel, and the perpendiculars to them through $O$ do not coincide either; analogously for the pairs $QT$, $RU$ and $RU$, $PS$. The lines $m_1$, $m_2$, $m_3$ thus have the single common point $O$, and since $O_i$ lies on $m_i$ and $O_i \neq O$, the centers $O_1$, $O_2$, $O_3$ are pairwise distinct.
+
+    Now for the powers. The vertices lie on tangents to the respective circles, so
+    $$
+    \gather
+    p(B,\omega_1) = (t-b)^2 = p(B,\omega_2),\\
+    p(E,\omega_1) = (e+t)^2 = p(E,\omega_2).
+    \endgather
+    $$
+    The distinct points $B$, $E$ therefore lie on the radical axis of the non-concentric circles $\omega_1$, $\omega_2$, so that axis is the line $BE$. Analogously the values $(c+t)^2$ at $C$ and $(t-f)^2$ at $F$ make $CF$ the radical axis of $\omega_2$, $\omega_3$, and the values $(a+t)^2$ at $A$ and $(t-d)^2$ at $D$ make $AD$ the radical axis of $\omega_1$, $\omega_3$.
+
+    Three pairwise non-concentric circles either have a radical center, through which all three radical axes pass, or their centers are collinear and then all three radical axes are perpendicular to that line, hence parallel or possibly coincident. The second option is ruled out: the diagonal $AD$ splits the convex hexagon into $ABCD$ and $ADEF$, so $B$ and $E$ lie in opposite half-planes determined by the line $AD$ and the segment $BE$ meets it in a single point. The diagonals $AD$, $BE$, $CF$ therefore pass through one point, the radical center of $\omega_1$, $\omega_2$, $\omega_3$.
+}
 
 \DisplayExerciseSolutions
 

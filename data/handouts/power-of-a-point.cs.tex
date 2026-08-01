@@ -1,0 +1,1466 @@
+\input _template
+
+\let\angle\sphericalangle
+
+\setlanguage{CS}
+
+\Title{Mocnost bodu ke kružnici}
+
+\MathcompsLink{mocnost-bodu-ke-kruznici}
+
+\Author{Patrik Bak}
+
+\sec Úvod
+
+Krátké shrnutí teorie okolo mocnosti bodu ke kružnici a~chordál a~sbírka mých oblíbených úloh. Úlohy jsou obtížností většinou okolo úrovně úloh z~IMO, sbírka tedy není zcela vhodná pro úplné začátečníky v~tomto tématu.
+
+\sec Teorie
+
+\secc Mocnost bodu
+
+V~celém materiálu budeme pod pojmem \textit{kružnice} rozumět i~kružnici s~\textbf{nulovým poloměrem}, body tedy budou také kružnice a~bude velmi užitečné takto se na ně dívat. Tečnou takové nulové kružnice je libovolná přímka, která jí prochází.
+
+\EnvId{q5vKReaZh9YdoHl1lv6TN-mocnost-bodu}
+\Definition{Mocnost bodu}{
+    Je dána kružnice $\omega(O,r)$, kde $r \geq 0$. Každému bodu $M$ přiřadíme číslo
+    $$
+    p(M,\omega)=|MO|^2-r^2,
+    $$
+    které nazýváme \textit{mocnost bodu} $M$ ke kružnici $\omega$.
+}
+
+Pár zřejmých pozorování:
+
+\begitems \style a
+\i Mocnost bodu k~bodu je druhá mocnina jejich vzdálenosti.
+\i Body na kružnici mají nulovou mocnost, body mimo kružnici kladnou a~body uvnitř kružnice zápornou.
+\enditems
+
+Výše uvedená definice dává užitečné kritérium na to, zda mají dva body stejnou vzdálenost od středu takové kružnice: \textit{právě tehdy, když mají stejnou mocnost}. To bude užitečné, když budeme mít jiné způsoby, jak mocnost spočítat, konkrétně:
+
+\EnvId{HmXxrFnftLoPVMg7DqFVc-mocnost-a-tecna}
+\Theorem{spojení s~tečnou}{
+    Nechť $M$ je bod ležící vně kružnice $\omega$. Označme $T$ bod dotyku tečny z~$M$ k~$\omega$. Pak $p(M,\omega)=|MT|^2$.
+
+    \Image{power-of-a-point-tangent-squared.pdf}
+}{
+    Nechť $O$ je střed a~$r$ poloměr $\omega$. Tečna se dotýká $\omega$ v~bodě $T$, takže $OT \perp MT$, a~z~Pythagorovy věty v~pravoúhlém $\triangle MTO$ je
+    $$
+    |MT|^2 = |MO|^2 - |OT|^2 = |MO|^2 - r^2 = p(M,\omega).
+    $$
+    Pro nulovou kružnici je $T=O$ a~rovnost $|MT|^2 = |MO|^2 = p(M,\omega)$ plyne přímo z~definice.
+}
+
+\EnvId{qgGI99UW395o07NqbxGi2-mocnost-a-secna}
+\Theorem{}{
+    Je dán bod $M$ neležící na kružnici $\omega$. Přímka procházející bodem $M$ protíná kružnici v~bodech $A$, $B$. Pak platí:
+    \begitems \style i
+    \i $p(M,\omega)=|MA| \cdot |MB|$, pokud $M$ leží vně $\omega$,
+       \Image{power-of-a-point-secant-outside.pdf}
+    \i $p(M,\omega) = -|MA| \cdot |MB|$, pokud $M$ leží uvnitř $\omega$.
+       \Image{power-of-a-point-secant-inside.pdf}
+    \enditems
+    Pro tečnu je $A=B$ a~limitně dostáváme předchozí tvrzení.
+}{
+    Nechť $O$, $r$ je střed a~poloměr $\omega$ a~nechť $S$ je střed tětivy $AB$. Pak $OS \perp AB$, takže z~Pythagorovy věty je $|SA|^2 = r^2 - |SO|^2$ a~$|MO|^2 = |MS|^2 + |SO|^2$. Dohromady
+    $$
+    p(M,\omega) = |MO|^2 - r^2 = |MS|^2 - |SA|^2.
+    $$
+    Body přímky $AB$ ležící uvnitř $\omega$ jsou přitom právě vnitřní body úsečky $AB$.
+
+    (i) Bod $M$ leží vně $\omega$, tedy mimo úsečku $AB$, a~tak $|MA|$, $|MB|$ jsou v~nějakém pořadí čísla $|MS| - |SA|$ a~$|MS| + |SA|$. Jejich součin je $|MS|^2 - |SA|^2 = p(M,\omega)$.
+
+    (ii) Bod $M$ leží uvnitř $\omega$, tedy uvnitř úsečky $AB$, a~tak $|MA|$, $|MB|$ jsou v~nějakém pořadí čísla $|SA| - |MS|$ a~$|SA| + |MS|$. Jejich součin je $|SA|^2 - |MS|^2 = -p(M,\omega)$.
+}
+
+Základní tvrzení, která ukazují, jak něco dokazovat a~jak přesouvat mocnost. Dodejme, že ekvivalence je zde důležitá:
+
+\EnvId{nOsz2UjP-4wT_8FHcRl3r-kriterium-tetivovosti}
+\Theorem{kritérium tětivovosti}{
+    Nechť se přímky $AB$ a~$CD$ protínají v~bodě $P$, který leží mimo obě úsečky $AB$, $CD$, nebo uvnitř obou. Pak body $A$, $B$, $C$, $D$ leží na jedné kružnici právě tehdy, když $|PA| \cdot |PB| = |PC| \cdot |PD|$.
+
+    \Image{power-of-a-point-cyclic-outside.pdf}
+
+    \Image{power-of-a-point-cyclic-inside.pdf}
+}{
+    \textit{($\Rightarrow$)} Nechť $A$, $B$, $C$, $D$ leží na kružnici $\omega$. Pokud $P$ leží mimo obě úsečky, leží vně $\omega$ a~podle předchozí věty je $|PA| \cdot |PB| = p(P,\omega) = |PC| \cdot |PD|$. Pokud $P$ leží uvnitř obou úseček, leží uvnitř $\omega$ a~stejně tak $|PA| \cdot |PB| = -p(P,\omega) = |PC| \cdot |PD|$.
+
+    \textit{($\Leftarrow$)} Přímky $AB$, $CD$ jsou různé, takže $C$ neleží na $AB$ a~existuje kružnice $\omega = (ABC)$. Nechť $D'$ je druhý průsečík přímky $CD$ s~$\omega$ (pokud je tato přímka tečnou, klademe $D'=C$). Bod $P$ leží vně $\omega$, pokud leží mimo úsečku $AB$, a~uvnitř $\omega$, pokud leží uvnitř ní. Podle předchozí věty jsou tedy součiny $|PC| \cdot |PD'|$ i~$|PA| \cdot |PB|$ rovny $|p(P,\omega)|$, čili $|PC| \cdot |PD'| = |PC| \cdot |PD|$ a~$|PD'| = |PD|$.
+
+    Pokud $P$ leží vně $\omega$, leží mimo úsečky $CD$ i~$CD'$, takže $D$ i~$D'$ leží na polopřímce $PC$. Pokud $P$ leží uvnitř $\omega$, leží uvnitř obou těchto úseček, takže $D$ i~$D'$ leží na polopřímce opačné k~$PC$. V~obou případech je $D=D'$, tedy $D$ leží na $\omega$.
+}
+
+\EnvId{a8dwZpGu9QODJC4M0DTN4-kriterium-tecny}
+\Theorem{kritérium tečny}{
+    Nechť $A$, $B$, $T$ neleží na jedné přímce a~nechť $P$ je bod přímky $AB$ ležící mimo úsečku $AB$. Pak je $PT$ tečnou kružnice $(TAB)$ v~bodě $T$ právě tehdy, když $|PT|^2 = |PA| \cdot |PB|$.
+
+    \Image{power-of-a-point-tangent-criterion.pdf}
+}{
+    Označme $\omega$ kružnici $(TAB)$. Bod $P$ leží na přímce $AB$ mimo úsečku $AB$, tedy vně $\omega$, a~jelikož $T$ na přímce $AB$ neleží, je $P \neq T$.
+
+    \textit{($\Rightarrow$)} Pokud je $PT$ tečnou $\omega$ v~bodě $T$, tak podle věty o~spojení s~tečnou je $|PT|^2 = p(P,\omega)$ a~podle věty o~sečně je $p(P,\omega) = |PA| \cdot |PB|$.
+
+    \textit{($\Leftarrow$)} Nechť $|PT|^2 = |PA| \cdot |PB|$ a~nechť $T'$ je druhý průsečík přímky $PT$ s~$\omega$ (při dotyku $T'=T$). Pak $|PT| \cdot |PT'| = p(P,\omega) = |PA| \cdot |PB| = |PT|^2$, tedy $|PT'| = |PT|$. Bod $P$ leží vně $\omega$, tedy mimo úsečku $TT'$, takže $T$ i~$T'$ leží na téže polopřímce z~$P$; proto $T'=T$. Přímka $PT$ má tak s~$\omega$ jediný společný bod, čili je její tečnou v~bodě $T$.
+}
+
+\Remark Poslední tvrzení je vlastně předchozí v~limitním případě $C=D=T$.
+
+Dodejme ještě, že velmi známá situace v~pravoúhlém trojúhelníku je vlastně mocnost a~je velmi účinné takto se na ni dívat:
+
+\EnvId{RzGZGM_MsN0RXoAbAbHR0-euklidovy-vety}
+\Theorem{Euklidovy věty}{
+    Nechť $ABC$ je pravoúhlý trojúhelník s~pravým úhlem při vrcholu $A$ a~nechť $D$ je pata výšky z~vrcholu $A$. Pak platí:
+    \begitems \style i
+    \i $|BA|^2 = |BD| \cdot |BC|$ a~$|CA|^2 = |CD| \cdot |CB|$ (Euklidovy věty o~odvěsně),
+    \i $|DA|^2 = |DB| \cdot |DC|$ (Euklidova věta o~výšce).
+    \enditems
+
+    \Image{power-of-a-point-euclid.pdf}
+}{
+    (i) Nechť $\omega$ je kružnice s~průměrem $AC$. Jelikož $|\angle ADC| = 90^\circ$, leží $D$ na $\omega$, a~jelikož $|\angle BAC| = 90^\circ$, je $BA$ tečnou $\omega$ v~bodě $A$; proto $B$ leží vně $\omega$. Úhly při $B$ a~$C$ jsou ostré, takže $D$ leží uvnitř úsečky $BC$ a~přímka $BC$ protíná $\omega$ v~bodech $D$, $C$. Mocnost bodu $B$ k~$\omega$ tak umíme spočítat dvěma způsoby:
+    $$
+    |BA|^2 = p(B,\omega) = |BD| \cdot |BC|.
+    $$
+    Vztah $|CA|^2 = |CD| \cdot |CB|$ dostaneme analogicky z~kružnice s~průměrem $AB$.
+
+    (ii) Nechť $\omega$ je kružnice s~průměrem $BC$; z~$|\angle BAC| = 90^\circ$ leží $A$ na $\omega$. Střed $\omega$ leží na přímce $BC$, takže $\omega$ je souměrná podle $BC$ a~obraz $A'$ bodu $A$ v~této osové souměrnosti leží také na $\omega$. Bod $D$ leží uvnitř úsečky $BC$, tedy uvnitř $\omega$, a~procházejí jím přímky $AA'$ a~$BC$, takže
+    $$
+    -|DA| \cdot |DA'| = p(D,\omega) = -|DB| \cdot |DC|.
+    $$
+    Jelikož $|DA'| = |DA|$, dostáváme $|DA|^2 = |DB| \cdot |DC|$.
+}
+
+\secc Chordály
+
+Skutečná síla mocnosti se projeví, když začneme přidávat kružnice.
+
+\EnvId{XBduUVr4Jdb3eJSZM1fVf-chordala}
+\Definition{Chordála}{
+    Nechť $\omega_1$, $\omega_2$ jsou nesoustředné kružnice. \textit{Chordálou} kružnic $\omega_1$, $\omega_2$ nazýváme množinu bodů, které mají k~oběma stejnou mocnost.
+}
+
+Výše uvedená definice by klidně mohla definovat prázdnou množinu (rozmyslete si, že pro soustředné kružnice to tak například je). Následující tvrzení říká, že to tak není:
+
+\EnvId{-z84pNXmae4G3tWLgqWDC-konstantni-rozdil-mocnosti}
+\Theorem{}{
+    Jsou dány nesoustředné kružnice $\omega_1$, $\omega_2$ se středy $O_1$, $O_2$ a~reálné číslo $c$. Pak množina bodů $M$, pro které $p(M,\omega_1)-p(M,\omega_2)=c$, je přímka kolmá na $O_1O_2$.
+}{
+    Zvolme souřadnice s~osou $x$ na přímce $O_1O_2$, tedy $O_1 = (0,0)$ a~$O_2 = (d,0)$, kde $d \neq 0$; nechť $r_1$, $r_2$ jsou poloměry kružnic $\omega_1$, $\omega_2$. Pro bod $M = (x,y)$ je
+    $$
+    \gather
+    p(M,\omega_1) - p(M,\omega_2) = \\ =
+    (x^2+y^2-r_1^2) - ((x-d)^2+y^2-r_2^2) = \\ =
+    2dx - d^2 - r_1^2 + r_2^2.
+    \endgather
+    $$
+    Zkoumaná podmínka je tedy ekvivalentní s~rovnicí
+    $$
+    x = \frac{c + d^2 + r_1^2 - r_2^2}{2d},
+    $$
+    která díky $d \neq 0$ určuje právě jednu přímku, a~to přímku kolmou na osu $x$, tedy na $O_1O_2$.
+}
+
+Výše uvedené tvrzení dává prostor technice důkazu, že tři body leží na jedné přímce: stačí najít dvě kružnice, ke kterým mají stejný rozdíl mocnosti. Takto dokonce získáme jako bonus kolmost na spojnici jejich středů. Případně když máme dokázat kolmost, možná je to skrytý rozdíl mocností.
+
+Následující důležité tvrzení říká, že v~mnoha běžných situacích vlastně máme chordálu zadarmo.
+
+\EnvId{zedTr6CBbabH3-Wv8DOjf-chordala-zakladni-pripady}
+\Theorem{}{
+    Nechť $m$ je chordála nesoustředných kružnic $\omega_1$, $\omega_2$. Pak platí:
+    \begitems \style i
+    \i Když se $\omega_1$, $\omega_2$ protínají v~bodech $A$, $B$, pak je $m$ přímka $AB$.
+       \Image{power-of-a-point-radical-axis.pdf}
+    \i Když se dotýkají v~bodě $T$, pak je $m$ jejich společná tečna v~$T$.
+       \Image{power-of-a-point-radical-tangent.pdf}
+    \i Když je $\omega_1$ nulová, tedy je to bod $P$ ležící vně $\omega_2$, pak je $m$ střední příčka trojúhelníku $PT_1T_2$ rovnoběžná s~$T_1T_2$, kde $T_1$, $T_2$ jsou body dotyku tečen z~$P$ k~$\omega_2$.
+       \Image{power-of-a-point-radical-point-circle.pdf}
+    \i Když jsou obě kružnice nulové, tedy jde o~dva různé body, pak je $m$ osa jejich spojnice.
+       \Image{power-of-a-point-radical-two-points.pdf}
+    \enditems
+}{
+    Chordála je případ $c = 0$ předchozího tvrzení, takže $m$ je přímka kolmá na $O_1O_2$. V~prvních třech případech ji proto stačí určit dvěma jejími body.
+
+    (i) Body $A$, $B$ leží na obou kružnicích, takže $p(A,\omega_1) = 0 = p(A,\omega_2)$ a~stejně tak pro $B$. Oba tedy leží na $m$, a~jelikož $m$ je přímka, je $m = AB$.
+
+    (ii) Bod $T$ leží na obou kružnicích, takže stejně jako výše $T \in m$. Tečna k~$\omega_1$ v~bodě $T$ je kolmá na $O_1T$ a~tečna k~$\omega_2$ v~bodě $T$ je kolmá na $O_2T$; jelikož při dotyku leží $T$ na přímce $O_1O_2$, jde v~obou případech o~kolmici na $O_1O_2$ v~bodě $T$, a~tou je i~$m$.
+
+    (iii) Nechť $r_2$ je poloměr $\omega_2$ a~nechť $M_1$ je střed úsečky $PT_1$. Jelikož $O_2T_1 \perp PT_1$, z~Pythagorovy věty je $p(M_1,\omega_2) = |M_1O_2|^2 - r_2^2 = |M_1T_1|^2$. Zároveň $p(M_1,\omega_1) = |M_1P|^2 = |M_1T_1|^2$, protože $\omega_1$ je bod $P$ a~$M_1$ je střed $PT_1$. Proto $M_1 \in m$ a~analogicky leží na $m$ i~střed $M_2$ úsečky $PT_2$. Tedy $m = M_1M_2$, což je střední příčka trojúhelníku $PT_1T_2$ rovnoběžná s~$T_1T_2$.
+
+    (iv) Pokud jsou obě kružnice nulové, tedy jde o~body $P$, $Q$, pak podmínka $p(M,\omega_1) = p(M,\omega_2)$ zní $|MP|^2 = |MQ|^2$, čili $|MP| = |MQ|$. To je přesně osa úsečky $PQ$.
+}
+
+Konečně přichází velmi silné a~používané tvrzení o~tom, jak dokázat, že se tři přímky protínají v~jednom bodě: možná jsou to chordály.
+
+\EnvId{ZUA58FjEepVvUI6GsXJUG-potencni-stred}
+\Theorem{potenční střed}{
+    Jsou dány tři po dvou nesoustředné kružnice a~ke každé dvojici z~nich sestrojíme chordálu. Pokud středy kružnic neleží na jedné přímce, mají tyto tři chordály jediný společný bod nazývaný \textit{potenční střed} a~je to jediný bod roviny se stejnou mocností ke všem třem kružnicím. Pokud středy na jedné přímce leží, jsou ty tři chordály rovnoběžné, případně všechny tři splynou.
+
+    \Image{power-of-a-point-radical-center.pdf}
+}{
+    Označme dané kružnice $\omega_1$, $\omega_2$, $\omega_3$, jejich středy $O_1$, $O_2$, $O_3$ a~$m_{ij}$ chordálu kružnic $\omega_i$, $\omega_j$. Podle tvrzení o~množině bodů s~daným rozdílem mocností je pro $c=0$ každá $m_{ij}$ přímka kolmá na $O_iO_j$.
+
+    Nechť středy neleží na jedné přímce. Pak přímky $O_1O_2$ a~$O_1O_3$ nejsou rovnoběžné, tedy ani $m_{12}$ a~$m_{13}$ nejsou rovnoběžné a~mají jediný společný bod $X$. Pro ten je $p(X,\omega_1)=p(X,\omega_2)$ i~$p(X,\omega_1)=p(X,\omega_3)$, takže $p(X,\omega_2)=p(X,\omega_3)$ a~$X$ leží i~na $m_{23}$. Naopak, každý bod se stejnou mocností ke všem třem kružnicím leží na $m_{12}$ i~na $m_{13}$, je to tedy bod $X$.
+
+    Nechť středy leží na přímce $\ell$. Všechny tři chordály jsou kolmé na $\ell$, jsou tedy navzájem rovnoběžné nebo splývají. Pokud splynou dvě z~nich, řekněme $m_{12}=m_{13}$, pak každý bod této přímky má stejnou mocnost ke všem třem kružnicím, leží tedy i~na $m_{23}$; jelikož i~$m_{23}$ je kolmá na $\ell$, splývá s~nimi. Buď jsou tedy všechny tři chordály různé a~rovnoběžné, nebo splynou všechny tři.
+}
+
+Praktickou aplikací našeho tvrzení je následující kritérium tětivovosti.
+
+\EnvId{K31lIglbW9TMnypXQGshL-body-na-kruznici-a-chordala}
+\Theorem{}{
+    Na nesoustředných kružnicích $\omega_1$, $\omega_2$ jsou dány navzájem různé body $K_1$, $K_2$ (na $\omega_1$) a~$L_1$, $L_2$ (na $\omega_2$), přičemž přímky $K_1K_2$, $L_1L_2$ jsou různé. Pak jsou následující tvrzení ekvivalentní:
+    \begitems \style n
+    \i Body $K_1, K_2, L_1, L_2$ leží na jedné kružnici.
+    \i Přímky $K_1K_2$, $L_1L_2$ se protínají na chordále kružnic $\omega_1$ a~$\omega_2$ nebo jsou s~ní rovnoběžné.
+    \enditems
+
+    \Image{power-of-a-point-concyclic.pdf}
+
+    \Image{power-of-a-point-concyclic-inside.pdf}
+}{
+    Označme $m$ chordálu kružnic $\omega_1$, $\omega_2$ a~$O_1$, $O_2$ jejich středy.
+
+    $(1) \Rightarrow (2)$: Nechť $\omega_3$ je kružnice procházející všemi čtyřmi body. Pokud $\omega_3=\omega_1$, leží $L_1$, $L_2$ na $\omega_1$ i~na $\omega_2$, takže $m$ je přímka $L_1L_2$; přímka $K_1K_2$ ji buď protíná, a~průsečík leží na $m$, nebo je s~ní rovnoběžná, takže (2) platí. Analogicky pro $\omega_3=\omega_2$. Nechť je tedy $\omega_3$ různá od $\omega_1$ i~$\omega_2$; jelikož s~každou z~nich má společný bod, není s~ní soustředná. Kružnice $\omega_1$, $\omega_3$ se protínají v~bodech $K_1$, $K_2$, takže $K_1K_2$ je jejich chordála, a~stejně tak $L_1L_2$ je chordála kružnic $\omega_2$, $\omega_3$. Pokud středy $O_1$, $O_2$, $O_3$ neleží na jedné přímce, procházejí tyto tři chordály jedním bodem, čili $K_1K_2$ a~$L_1L_2$ se protínají na $m$. Pokud na jedné přímce leží, jsou ty tři chordály rovnoběžné, nebo všechny splynou; jelikož $K_1K_2 \neq L_1L_2$, nastává první možnost a~obě přímky jsou rovnoběžné s~$m$.
+
+    $(2) \Rightarrow (1)$: Nechť se nejprve přímky protínají v~bodě $P$ ležícím na $m$. Kdyby bylo $p(P,\omega_1)=0$, ležel by $P$ na $\omega_1$ i~na přímce $K_1K_2$, tedy $P \in \{K_1,K_2\}$; z~$p(P,\omega_2)=p(P,\omega_1)=0$ stejně tak $P \in \{L_1,L_2\}$, což odporuje tomu, že dané body jsou navzájem různé. Podle vyjádření mocnosti pomocí sečny je $p(P,\omega_1)=\varepsilon_1 |PK_1| \cdot |PK_2|$ a~$p(P,\omega_2)=\varepsilon_2 |PL_1| \cdot |PL_2|$, kde $\varepsilon_1=1$, pokud $P$ leží vně $\omega_1$, čili mimo úsečku $K_1K_2$, a~$\varepsilon_1=-1$, pokud leží uvnitř $\omega_1$, čili uvnitř této úsečky; stejně tak pro $\varepsilon_2$ a~úsečku $L_1L_2$. Obě mocnosti se rovnají a~jsou nenulové, proto $\varepsilon_1=\varepsilon_2$ a~$|PK_1| \cdot |PK_2| = |PL_1| \cdot |PL_2|$. Bod $P$ tedy leží mimo obě úsečky nebo uvnitř obou a~podle kritéria tětivovosti leží body $K_1$, $K_2$, $L_1$, $L_2$ na jedné kružnici.
+
+    Nechť jsou nakonec obě přímky rovnoběžné s~$m$, tedy kolmé na $O_1O_2$. Osa úsečky $K_1K_2$ prochází bodem $O_1$ a~je kolmá na $K_1K_2$, je to tedy přímka $O_1O_2$; stejně tak je $O_1O_2$ osou úsečky $L_1L_2$. Zvolme souřadnice tak, aby $O_1O_2$ byla osa $x$; pak $K_{1,2}=(a,\pm h)$ a~$L_{1,2}=(b,\pm k)$ pro jistá $h,k>0$, přičemž $a \neq b$, protože přímky $K_1K_2$, $L_1L_2$ jsou různé. Pro bod $S=(t,0)$ je
+    $$
+    \gather
+    |SK_1|^2 = |SK_2|^2 = (a-t)^2+h^2, \\
+    |SL_1|^2 = |SL_2|^2 = (b-t)^2+k^2,
+    \endgather
+    $$
+    a~jelikož $a \neq b$, existuje $t$ s~$2t(b-a) = b^2+k^2-a^2-h^2$, tedy s~rovností obou pravých stran. Všechny čtyři body pak leží na kružnici se středem $S$.
+}
+
+\secc Další množiny bodů
+
+Uveďme zobecnění našeho tvrzení o~rozdílu mocností.
+
+\EnvId{eFMS6b7LVyWPzibwagJaa-linearni-kombinace-mocnosti}
+\Theorem{}{
+    Jsou dány nesoustředné kružnice $\omega_1$, $\omega_2$ se středy $O_1$, $O_2$ a~reálná čísla $\lambda$, $\mu$, $c$, přičemž $\lambda$, $\mu$ nejsou obě nulová; označme $s=\lambda+\mu$. Zkoumejme množinu bodů $M$ takových, že
+    $$
+    \lambda \cdot p(M,\omega_1) + \mu \cdot p(M,\omega_2) = c.
+    $$
+    Pokud $s \neq 0$, je to kružnice se středem $S$ na přímce $O_1O_2$ určeným vztahem $\overline{O_1S} = \frac{\mu}{s} \cdot \overline{O_1O_2}$; může degenerovat na jediný bod nebo prázdnou množinu. Pokud $s = 0$, je to přímka kolmá na $O_1O_2$, tedy případ z~předchozí podsekce.
+}{
+    Zvolme souřadnice tak, že $O_1=[0,0]$ a~$O_2=[d,0]$, kde $d=|O_1O_2|>0$; poloměry označme $r_1$, $r_2$. Pro bod $M=[x,y]$ dává definice mocnosti podmínku
+    $$
+    \lambda(x^2+y^2)+\mu\left((x-d)^2+y^2\right)=k,
+    $$
+    kde $k=c+\lambda r_1^2+\mu r_2^2$ nezávisí na $M$. Po roznásobení je to
+    $$
+    s(x^2+y^2)-2\mu d x+\mu d^2=k.
+    $$
+
+    Nechť $s \neq 0$. Vydělíme $s$ a~doplníme na čtverec:
+    $$
+    \left(x-\frac{\mu d}{s}\right)^2+y^2=\frac{k-\mu d^2}{s}+\frac{\mu^2 d^2}{s^2}.
+    $$
+    Bod $S=\left[\frac{\mu d}{s},0\right]$ leží na přímce $O_1O_2$ a~splňuje $\overline{O_1S}=\frac{\mu}{s} \cdot \overline{O_1O_2}$. Při kladné pravé straně je hledaná množina kružnice se středem $S$, při nulové je to jediný bod $S$ a~při záporné je prázdná.
+
+    Nechť $s=0$. Pak $\mu=-\lambda$, a~jelikož $\lambda$, $\mu$ nejsou obě nulová, je $\mu \neq 0$. Kvadratické členy se vyruší a~zbude $-2\mu d x=k-\mu d^2$, což je při $\mu d \neq 0$ rovnice přímky kolmé na osu $x$, tedy na $O_1O_2$. Podmínka je tehdy ekvivalentní s~$p(M,\omega_1)-p(M,\omega_2)=c/\lambda$, což je právě situace z~předchozí podsekce.
+}
+
+Další pozoruhodné důsledky tohoto tvrzení dostaneme pro $\lambda=\mu=1$ a~pro $\lambda=1$, $\mu=-c$; i~zde může hledaná množina degenerovat na jediný bod nebo být prázdná:
+
+\EnvId{_7WluTG8CdUBbbR8Jfq-j-konstantni-soucet-mocnosti}
+\Theorem{}{
+    Množina bodů $M$ takových, že $p(M,\omega_1)+p(M,\omega_2)=c$, je kružnice se středem ve středu úsečky $O_1O_2$.
+}{
+    Je to předchozí tvrzení pro $\lambda=\mu=1$, kde $s=2 \neq 0$. Střed tedy splňuje $\overline{O_1S}=\frac{1}{2} \cdot \overline{O_1O_2}$, čili $S$ je střed úsečky $O_1O_2$.
+}
+
+\EnvId{dvZ6Hj-IMjiwGiPBj4uVu-konstantni-pomer-mocnosti}
+\Theorem{}{
+    Pro $c \neq 1$ je množina bodů $M$ takových, že $p(M,\omega_1) = c \cdot p(M,\omega_2)$, kružnice se středem na přímce $O_1O_2$. Pro $c=1$ je to chordála kružnic $\omega_1$, $\omega_2$.
+}{
+    Podmínka $p(M,\omega_1)=c \cdot p(M,\omega_2)$ je právě podmínkou z~předchozího obecného tvrzení pro $\lambda=1$, $\mu=-c$ a~pravou stranu $0$, takže $s=1-c$.
+
+    Pro $c \neq 1$ je $s \neq 0$ a~hledaná množina je kružnice se středem $S$ na přímce $O_1O_2$, pro který $\overline{O_1S}=\frac{c}{c-1} \cdot \overline{O_1O_2}$. Pro $c=1$ podmínka zní $p(M,\omega_1)=p(M,\omega_2)$, což je definice chordály.
+}
+
+\secc Linearita rozdílu mocností
+
+Rozdíl mocností bodu ke dvěma kružnicím se dá vnímat i~jako funkci bodu, což se občas hodí při upočítávání úloh.
+
+\EnvId{uV4t-dE4QfjMZzcs0NfmW-linearita-rozdilu-mocnosti}
+\Theorem{linearita rozdílu mocností}{
+    Nechť $\omega_1$, $\omega_2$ jsou kružnice a~nechť $F(M) = p(M,\omega_1)-p(M,\omega_2)$. Pak funkce $F$ je afinní: pokud bod $C$ leží na přímce $AB$ a~$\overline{AC} = t \cdot \overline{AB}$, pak
+    $$
+    F(C) = (1-t) \cdot F(A) + t \cdot F(B).
+    $$
+}{
+    Zvolme libovolné kartézské souřadnice a~pišme $M=[x,y]$, $O_i=[a_i,b_i]$, přičemž $r_i$ je poloměr $\omega_i$. V~rozdílu
+    $$
+    F(M)=|MO_1|^2-r_1^2-|MO_2|^2+r_2^2
+    $$
+    se členy $x^2$ a~$y^2$ vyruší, takže
+    $$
+    F(M)=2(a_2-a_1)x+2(b_2-b_1)y+e,
+    $$
+    kde $e$ je konstanta nezávislá na $M$. Funkce $F$ je tedy afinní.
+
+    Z~$\overline{AC}=t \cdot \overline{AB}$ dostaneme $x_C=(1-t)x_A+tx_B$ a~$y_C=(1-t)y_A+ty_B$. Dosazením do vzorce pro $F$ a~použitím $(1-t)+t=1$ u~konstanty $e$ vyjde $F(C)=(1-t)F(A)+t \cdot F(B)$.
+}
+
+Když tedy známe rozdíl mocností ve dvou bodech přímky, známe ho v~každém jejím bodě. Například pro střed $M$ úsečky $BC$ je
+$$
+F(M) = \frac{F(B)+F(C)}{2}.
+$$
+
+Běžně se označuje jako \uv{linearita mocnosti}, já ale nejsem fanoušek. Poprvé, když jsem to slyšel, mě to zmátlo, protože mocnost je kvadratická. Myslím, že linearita rozdílu mocností je přesnější \Laugh{}
+
+\sec Úlohy
+
+Sbírka úloh je rozdělena na tři sekce:
+
+\begitems \style a
+\i užitečná lemmata, která se dají dokázat přes mocnost, ale jejich důkaz není nutné znát
+\i jednohubky, úlohy s~relativně krátkým, ale milým a~rozhodně ne vždy snadno objevitelným řešením...osobně mám takové nejraději
+\i drsnější vícekrokové úlohy
+\enditems
+
+Úlohy v~rámci sekcí jsou řazeny podle obtížnosti, globálně ale ne. Není doporučeno řešit je jako druhou úlohu v~pořadí. Doporučuji:
+
+\begitems
+\i umět dokázat shooting lemma a~zbylá jen znát
+\i z~jednohubek projít tolik, kolik bude bavit, resp. bude jít, obtížnost tam roste
+\i pro drsnější trénink přejít na vícehubky
+\enditems
+
+\secc Známá lemmata
+
+\EnvId{kPi40K-bCppJkE2T9MBOd-stred-oblouku-a-tetiva}
+\Problem{0}{shooting lemma}{
+    Mějme kružnici s~tětivou $AB$ a~středem $M$ jednoho z~oblouků $AB$. Skrz $M$ vystřelme dvě přímky, které protnou přímku $AB$ v~$X$, $Y$ a~kružnici po řadě znovu v~$X'$, $Y'$. Pak $X$, $Y$, $X'$, $Y'$ leží na kružnici, resp. v~degenerovaném případě, kdy $X=X'=A$, to znamená, že $MA$ se dotýká $(AYY')$.
+}{
+    Degenerovaný případ je vlastně hint, vyúhlete dotyk.
+}{
+    Po vyúhlení dotyku stačí použít mocnost.
+}{
+    Označme $\omega$ danou kružnici a~$O$ její střed. Z~$|MA|=|MB|$ je $OM$ kolmá na $AB$, takže tečna k~$\omega$ v~bodě $M$ je rovnoběžná s~$AB$: žádná vystřelená přímka není tečnou, druhý průsečík se $\omega$ tedy vždy existuje a~je různý od $M$.
+
+    \textbf{Lemma.} Nechť přímka skrz $M$, různá od $MA$ a~$MB$, protíná přímku $AB$ v~bodě $X$ a~kružnici $\omega$ znovu v~bodě $X'$. Pak se $MA$ dotýká kružnice $(AXX')$ v~bodě $A$.
+
+    Kružnice $(AXX')$ je dobře určená, protože jediné body $\omega$ na přímce $AB$ jsou $A$ a~$B$, které jsme vyloučili. Nechť $X$ leží uvnitř úsečky $AB$; tehdy $X'$ leží na oblouku $AB$ neobsahujícím $M$ a~bod $X$ leží mezi $M$ a~$X'$. Máme
+    $$
+    |\angle MAX| = |\angle MAB| = |\angle MBA| = |\angle MX'A| = |\angle XX'A|,
+    $$
+    kde třetí rovnost jsou obvodové úhly nad tětivou $AM$ (pořadí bodů na $\omega$ je $A$, $M$, $B$, $X'$, tedy $B$ a~$X'$ jsou na témž oblouku $AM$). Přímka $AM$ tak svírá s~tětivou $AX$ úhel rovný obvodovému úhlu $|\angle AX'X|$ a~body $M$, $X'$ leží v~opačných polorovinách přímky $AX$; podle obrácené věty o~úsekovém úhlu je $MA$ tečnou $(AXX')$ v~bodě $A$. Pro $X$ mimo úsečku $AB$ proběhne stejný řetězec v~orientovaných úhlech modulo $180^\circ$, jen rovnoramennost v~něm je třeba číst jako $\angle(AM,AB) = \angle(BA,BM)$.
+
+    Bod $M$ leží na tečně a~$M \neq A$, tedy vně $(AXX')$, a~přímka $MXX'$ je její sečnou. Proto
+    $$
+    |MX| \cdot |MX'| = p(M,(AXX')) = |MA|^2 = |MB|^2,
+    $$
+    a~z~polohy $M$ vně plyne, že $X$, $X'$ leží na téže polopřímce z~$M$, tedy $M$ leží mimo úsečku $XX'$.
+
+    Pokud ani jedna vystřelená přímka není $MA$ ani $MB$, dává lemma $|MX| \cdot |MX'| = |MA|^2 = |MY| \cdot |MY'|$, přičemž $XX'$, $YY'$ se protínají v~bodě $M$ mimo obě úsečky; podle kritéria tětivovosti leží $X$, $X'$, $Y$, $Y'$ na jedné kružnici. Pokud je jedna z~přímek $MA$, pak $X=X'=A$ a~dokazované tvrzení znamená právě dotyk $MA$ s~$(AYY')$, což je lemma pro druhou přímku; pro $MB$ symetricky.
+}
+
+\EnvId{pFMmqluU3nmGZSYkm3efw-vzdalenost-stredu-vepsane-a-opsane}
+\Problem{0}{Eulerova identita}{
+    Je dán trojúhelník $ABC$. Nechť $O$ je střed kružnice jemu opsané s~poloměrem $R$ a~$I$ střed kružnice jemu vepsané s~poloměrem $r$. Dokažte, že $|OI|^2 = R^2-2Rr$ (výzva: bez goniometrie).
+}{
+    Dokazovaný vztah by měl připomínat mocnost.
+}{
+    Vlastně chceme dokázat, že mocnost $I$ k~$(ABC)$ je $-2Rr$. K~tomu se vyplatí mít $I$ na dobré přímce, po které mocnost měříme. Dá se to jinak spočítat s~nula gonio \Wink{}.
+}{
+    Správný krok je protnout $AI$ s~$(ABC)$ v~$S$, máme střed oblouku, který, jak je známo, splňuje $|SI|=|SB|=|SC|$. My chceme $|IA|\cdot|IS| = 2Rr$, takže $|IS|$ umíme změnit. Ještě potřebujeme vymyslet, co s~$R$ a~$r$.
+}{
+    K~$R$ potřebujeme střed $O$ kružnice $(ABC)$. Možná se ještě jeden bod vyplatí, abychom se v~dokazovaném vztahu zbavili dvojky.
+}{
+    Trik je uvážit střed $M$ úsečky $BS$, pak $|IS|/(2R)=|BS|/(2|BO|)=(2|BM|)/(2|BO|)=|BM|/|BO|$. To je nějaký poměr v~pravoúhlém trojúhelníku. Chceme, že je to $r/|IA|$. Už jsme velmi blízko.
+}{
+    Uvažme kolmý průmět $I$ na $AB$, to je poslední bod, co potřebujeme.
+}{
+    Označme $\alpha = |\angle BAC|$ a~$\beta = |\angle ABC|$.
+
+    Dokazovaný vztah přepišme jako $|OI|^2 - R^2 = -2Rr$. Nalevo stojí přesně mocnost
+    $$
+    p(I,(ABC)) = |IO|^2 - R^2,
+    $$
+    takže dokazujeme $p(I,(ABC)) = -2Rr$. Nechť $AI$ protíná $(ABC)$ znovu v~bodě $S$. Bod $I$ leží uvnitř kružnice, tedy mezi $A$ a~$S$, a~tak $p(I,(ABC)) = -|IA| \cdot |IS|$; zbývá metrická rovnost $|IA| \cdot |IS| = 2Rr$.
+
+    Z~$|\angle BAS| = |\angle SAC| = \alpha/2$ je $S$ středem oblouku $BC$ neobsahujícího $A$ a~platí lemma o~středu oblouku $|SI| = |SB| = |SC|$: úhel $BIS$ je vnější úhel trojúhelníku $ABI$ při $I$, takže $|\angle BIS| = \alpha/2 + \beta/2$, a~současně $|\angle IBS| = |\angle IBC| + |\angle CBS| = \beta/2 + \alpha/2$, protože obvodové úhly $CBS$ a~$CAS$ přísluší témuž oblouku. Trojúhelník $BIS$ je tedy rovnoramenný se základnou $BI$.
+
+    Nahradíme proto $|IS|$ délkou $|BS|$ a~chceme $|BS|/(2R) = r/|IA|$. Označme $M$ střed úsečky $BS$; pak
+    $$
+    \frac{|BS|}{2R} = \frac{2|BM|}{2|BO|} = \frac{|BM|}{|BO|}.
+    $$
+    Z~$|OB| = |OS| = R$ je těžnice $OM$ rovnoramenného trojúhelníku $OBS$ i~výškou i~osou úhlu při $O$, takže $|\angle BMO| = 90^\circ$. (Nedegeneruje: kdyby $O$ leželo na $BS$, byla by $BS$ průměr a~$\alpha/2 = |\angle BAS| = 90^\circ$.) Podle věty o~obvodovém a~středovém úhlu
+    $$
+    |\angle MOB| = \tfrac12 |\angle BOS| = |\angle BAS| = \frac{\alpha}{2},
+    $$
+    takže třetí úhel je $|\angle MBO| = 90^\circ - \alpha/2$.
+
+    Nechť $P$ je pata kolmice z~$I$ na $AB$, tedy $|IP| = r$. Trojúhelník $PIA$ má pravý úhel při $P$, úhel $\alpha/2$ při $A$ a~úhel $90^\circ - \alpha/2$ při $I$. Trojúhelníky $MBO$ a~$PIA$ jsou tedy podobné s~přiřazením $M \leftrightarrow P$, $B \leftrightarrow I$, $O \leftrightarrow A$ (pozor, vrcholu $B$ odpovídá $I$, ne $A$), a~tak
+    $$
+    \frac{|BM|}{|BO|} = \frac{|IP|}{|IA|} = \frac{r}{|IA|}.
+    $$
+
+    Celkem tedy $|BS|/(2R) = r/|IA|$, čili $|IA| \cdot |IS| = |IA| \cdot |BS| = 2Rr$, a~proto
+    $$
+    |OI|^2 - R^2 = p(I,(ABC)) = -|IA| \cdot |IS| = -2Rr.
+    $$
+}
+
+\EnvId{l-ttAWpWgczjW_ytdvUwj-dotykova-kruznice-a-stred-vepsane}
+\Problem{0}{Mixtilineární kružnice}{
+    Kružnice $\omega$ se dotýká stran $AB$ a~$AC$ trojúhelníku $ABC$ po řadě v~bodech $C_1$ a~$B_1$ a~zevnitř se dotýká kružnice opsané trojúhelníku $ABC$ v~bodě $T$. Dokažte, že střed $I$ kružnice vepsané trojúhelníku $ABC$ leží na přímce $B_1C_1$.
+}{
+    Potřebujeme vymyslet, co s~dotykem, k~tomu pomůže stejnolehlost.
+}{
+    $TB_1$ a~$TC_1$ protínají kružnici znovu ve středech oblouků, to je známé lemma se stejnolehlostí kružnic (jeho idea: pokud si představíme $AC$ vodorovně a~$T$ dole, tak stejnolehlost v~$T$ zobrazující malou kružnici na velkou posílá nejvyšší bod malé, $B_1$, na nejvyšší bod velké, střed oblouku).
+}{
+    Jakmile máme středy oblouků $B_1'$ a~$C_1'$, přichází další známé lemma: $A$ a~$I$ jsou souměrné podle $B_1'C_1'$, to snadno plyne z~lemmatu o~středu oblouku. To nám dává super způsob, jak přeformulovat dokazované tvrzení.
+}{
+    My chceme, že $I$ leží na $B_1C_1$. Při přiblížení k~$A$ o~polovinu je to totéž jako chtít, že střed $AI$ leží na střední příčce $B_0C_0$ trojúhelníku $AB_1C_1$, kde $B_0$ a~$C_0$ jsou středy $AB_1$ a~$AC_1$. Jenže co je střední příčka $AB_1C_1$?
+}{
+    Odpověď je chordála bodu $A$ a~$\omega$. Stačí tedy ověřit, že $B_1'$ a~$C_1'$ mají stejnou mocnost, ze symetrie tedy jen jeden z~nich. A~to už půjde doúhlit.
+}{
+    Označme $\Omega$ kružnici opsanou trojúhelníku $ABC$ a~$\rho$, $R$ po řadě poloměry kružnic $\omega$, $\Omega$.
+
+    Dotyk v~$T$ je vnitřní, takže existuje stejnolehlost $h$ se středem $T$ a~kladným koeficientem $R/\rho$ zobrazující $\omega$ na $\Omega$. Při $AC$ vodorovné a~$B$ nad ní je $B_1$ nejnižším bodem $\omega$, a~jelikož $h$ má kladný koeficient, zachovává směry, takže $B_1' = h(B_1)$ je nejnižším bodem $\Omega$, tedy středem oblouku $AC$ neobsahujícího $B$. Stejně tak je $C_1' = h(C_1)$ střed oblouku $AB$ neobsahujícího $C$. Koeficient je větší než $1$, takže $B_1$ leží uvnitř úsečky $TB_1'$ a~$C_1$ uvnitř $TC_1'$.
+
+    Podle lemmatu o~středu oblouku je $|B_1'A| = |B_1'I|$ a~$|C_1'A| = |C_1'I|$, takže přímka $B_1'C_1'$ (body jsou různé) je osou úsečky $AI$.
+
+    Označme $B_0$, $C_0$, $J$ po řadě středy úseček $AB_1$, $AC_1$, $AI$. Stejnolehlost se středem $A$ a~koeficientem $1/2$ zobrazuje přímku $B_1C_1$ na $B_0C_0$ a~bod $I$ na $J$, takže $I$ leží na $B_1C_1$ právě tehdy, když $J$ leží na $B_0C_0$. Bod $J$ přitom leží na ose úsečky $AI$, tedy na $B_1'C_1'$; stačí nám proto ukázat, že $B_0C_0$ a~$B_1'C_1'$ splývají.
+
+    Přímka $B_0C_0$ je střední příčka trojúhelníku $AB_1C_1$ rovnoběžná s~$B_1C_1$, přičemž $A$ leží vně $\omega$ a~$AB_1$, $AC_1$ jsou právě dvě tečny z~$A$ k~$\omega$. Je to tedy chordála $r$ bodu $A$ (chápaného jako nulová kružnice) a~kružnice $\omega$.
+
+    Ukažme, že $B_1'$ leží na $r$. Je $p(B_1',A) = |B_1'A|^2$, a~jelikož $B_1'$ leží na $\Omega$ a~je různý od $T$, leží vně $\omega$ a~po sečně $B_1'B_1T$ je $p(B_1',\omega) = |B_1'B_1| \cdot |B_1'T|$. Chceme tedy
+    $$
+    |B_1'A|^2 = |B_1'B_1| \cdot |B_1'T| ,
+    $$
+    což dá podobnost trojúhelníků $B_1'AB_1$ a~$B_1'TA$: úhel při $B_1'$ mají společný, protože $B_1$ a~$T$ leží na téže polopřímce z~$B_1'$, a~ze shodných oblouků $AB_1'$, $B_1'C$ je $|\angle B_1'TA| = |\angle B_1'AC| = |\angle B_1'AB_1|$ (bod $T$ leží na oblouku $BC$ neobsahujícím $A$, tedy mimo oba oblouky, takže oba úhly jsou nad nimi obvodové, a~$B_1$ leží na úsečce $AC$). Z~poměru stran $|B_1'A| : |B_1'T| = |B_1'B_1| : |B_1'A|$ máme žádanou rovnost. Analogicky $|C_1'A|^2 = |C_1'C_1| \cdot |C_1'T| = p(C_1',\omega)$, takže na $r$ leží i~$C_1'$.
+
+    Chordála $r$ obsahuje dva různé body $B_1'$, $C_1'$, tedy $B_0C_0 = r = B_1'C_1'$. Bod $J$ tak leží na přímce $B_0C_0$, což je přesně dokazované tvrzení.
+}
+
+\EnvId{lX0IqtQsPmLQrsLTUErzm-sestiuhelnik-s-vepsanou-kruznici}
+\Problem{0}{Brianchonova věta}{
+    Pokud je do šestiúhelníku $ABCDEF$ vepsána kružnice, pak se úhlopříčky $AD$, $BE$, $CF$ protínají v~jednom bodě.
+}{
+    Nakreslete tři kružnice tak, aby úhlopříčky $AD$, $BE$, $CF$ byly chordálami. Je to záludné.
+}{
+    Každá z~kružnic se dotýká přímek dvou protilehlých stran, a~to v~bodech, které vzniknou posunutím šesti bodů dotyku po stranách o~tutéž délku, střídavě v~jednom a~ve druhém směru. Jediný trik je umístit je tak, aby chordály fungovaly. Na to určitě potřebujeme použít kružnici vepsanou šestiúhelníku $ABCDEF$.
+}{
+    Nechť je $ABCDEF$ konvexní a~nechť se jemu vepsaná kružnice $\omega(O,r)$ dotýká stran $AB$, $BC$, $CD$, $DE$, $EF$, $FA$ po řadě v~bodech $P$, $Q$, $R$, $S$, $T$, $U$; v~tomto pořadí je i~obíháme, v~témž směru jako vrcholy. Z~rovnosti délek tečen z~vrcholů označme
+    $$
+    \gather
+    a = |AP| = |AU|, \quad b = |BP| = |BQ|, \quad c = |CQ| = |CR|,\\
+    d = |DR| = |DS|, \quad e = |ES| = |ET|, \quad f = |FT| = |FU|.
+    \endgather
+    $$
+
+    Pro bod $M$ na tečně kružnice $\omega'$ s~bodem dotyku $Z$ je $p(M,\omega') = |MZ|^2$, hledejme proto kružnice dotýkající se přímek protilehlých stran: nechť se $\omega_1$ dotýká přímek $AB$, $DE$ v~bodech $P_1$, $S_1$, kružnice $\omega_2$ přímek $BC$, $EF$ v~$Q_1$, $T_1$ a~kružnice $\omega_3$ přímek $CD$, $FA$ v~$R_1$, $U_1$. Každý vrchol tak leží na tečně právě dvou z~nich a~$BE$ bude chordálou kružnic $\omega_1$, $\omega_2$, jakmile $|BP_1| = |BQ_1|$ a~$|ES_1| = |ET_1|$. Chceme tedy, aby v~každém vrcholu byly oba tamější body dotyku od něj stejně vzdálené.
+
+    Původní body to splňují, ale dávají $\omega_1 = \omega_2 = \omega_3 = \omega$. Posuneme je proto po stranách, střídavě v~obou směrech: zvolme $t$ s~$0 < t < \min(b,d,f)$ a~každý bod dotyku posuňme po své straně o~$t$ k~bližšímu z~vrcholů $B$, $D$, $F$ (na každé straně leží právě jeden z~nich), tedy $P$, $Q$ k~$B$, $R$, $S$ k~$D$ a~$T$, $U$ k~$F$. Vzniklé body vezměme za $P_1$, $Q_1$, $R_1$, $S_1$, $T_1$, $U_1$; volba $t$ je drží uvnitř stran a~dává
+    $$
+    \gather
+    |AP_1| = |AU_1| = a+t, \quad |BP_1| = |BQ_1| = b-t,\\
+    |CQ_1| = |CR_1| = c+t, \quad |DR_1| = |DS_1| = d-t,\\
+    |ES_1| = |ET_1| = e+t, \quad |FT_1| = |FU_1| = f-t.
+    \endgather
+    $$
+
+    Zbývá ukázat, že kružnice dotýkající se $AB$ v~$P_1$ a~$DE$ v~$S_1$ existuje. Nechť $m_1$ je osa úsečky $PS$ a~$\sigma$ souměrnost podle ní. Z~$|OP| = |OS| = r$ prochází $m_1$ bodem $O$, takže $\sigma$ zobrazuje $\omega$ na sebe, $P$ na $S$, a~tedy tečnu $AB$ na tečnu $DE$. Jako nepřímá shodnost obrací směr oběhu: směr $A \to B$ je v~$P$ směrem oběhu dopředu, jeho obrazem je proto v~$S$ směr oběhu dozadu, čili směr $E \to D$. Body $P_1$, $S_1$ vznikly posunem o~$t$ právě v~těchto dvou směrech (tady se spotřebovalo střídání), takže $\sigma(P_1) = S_1$.
+
+    Dále $m_1$ není kolmá na $AB$: jinak by splynula s~přímkou $OP$, jedinou kolmicí na $AB$ skrz $O$, a~$\sigma$ by nechala $P$ na místě, čili $P = S$. Kolmice na $AB$ v~bodě $P_1$ proto protíná $m_1$ v~jediném bodě $O_1$; ten $\sigma$ nechá na místě a~tuto kolmici zobrazí na kolmici na $DE$ v~$S_1$, takže $|O_1P_1| = |O_1S_1|$ a~kružnice $\omega_1(O_1,|O_1P_1|)$ je hledaná. Poloměr je nenulový, protože $P_1$, $S_1$ jsou vnitřní body různých stran, a~$O_1 \neq O$, protože $O$ leží na kolmici na $AB$ v~$P$ a~$O_1$ na rovnoběžné kolmici v~$P_1 \neq P$. Stejně tak sestrojíme $\omega_2$ se středem $O_2$ na ose $m_2$ úsečky $QT$ a~$\omega_3$ se středem $O_3$ na ose $m_3$ úsečky $RU$.
+
+    Kružnice jsou po dvou nesoustředné. Osy $m_1$, $m_2$, $m_3$ procházejí bodem $O$, stačí tedy ukázat, že jsou různé. Osa $m_1$ protíná $\omega$ ve středu $M_1$ oblouku $PS$ přes $Q$, $R$, a~$m_2$ ve středu $M_2$ oblouku $QT$ přes $R$, $S$; posunutím konců oblouku se jeho střed posune o~průměr těchto posunů, takže z~$M_1$ do $M_2$ vede posun o~polovinu součtu oblouků $PQ$ a~$ST$. Ten je kladný a~menší než celá kružnice, čili $M_1$, $M_2$ nejsou totožné ani protilehlé a~$m_1 \neq m_2$; analogicky pro zbylé dvojice. Přímky $m_i$ tak mají jediný společný bod $O$, a~jelikož $O_i$ leží na $m_i$ a~$O_i \neq O$, jsou středy různé.
+
+    Vrcholy leží na tečnách příslušných kružnic, takže $p(B,\omega_1) = (b-t)^2 = p(B,\omega_2)$ a~$p(E,\omega_1) = (e+t)^2 = p(E,\omega_2)$: různé body $B$, $E$ leží na chordále kružnic $\omega_1$, $\omega_2$, tou je tedy přímka $BE$. Analogicky $(c+t)^2$ v~$C$ a~$(f-t)^2$ v~$F$ dělají $CF$ chordálou kružnic $\omega_2$, $\omega_3$ a~$(a+t)^2$ v~$A$ a~$(d-t)^2$ v~$D$ dělají $AD$ chordálou kružnic $\omega_1$, $\omega_3$.
+
+    Podle tvrzení o~potenčním středu se tyto tři chordály protínají v~jediném bodě, nebo jsou rovnoběžné či splynou. Druhá možnost odpadá: $AD$ dělí konvexní šestiúhelník na $ABCD$ a~$ADEF$, takže $B$, $E$ leží v~opačných polorovinách určených přímkou $AD$ a~$BE$ ji protíná v~jediném bodě. Úhlopříčky $AD$, $BE$, $CF$ tedy procházejí jedním bodem, potenčním středem kružnic $\omega_1$, $\omega_2$, $\omega_3$.
+}
+
+\secc Jednohubky
+
+\EnvId{_435gwc1honpQ3ip386Bj-dva-ctverce-a-pevny-bod}
+\Problem{0}{}{
+    Na úsečce $AB$ je dán bod $M$. V~téže polorovině určené přímkou $AB$ sestrojme čtverce $ACDM$ a~$MEFB$. Kružnice jim opsané se protnou znovu v~bodě $N$. Dokažte, že přímka $MN$ prochází bodem nezávislým na poloze bodu $M$.
+}{
+    Vlastně dokazujeme, že chordála kružnic opsaných čtvercům prochází pevným bodem. Co tedy chceme najít?
+}{
+    Hledáme bod, který má stejnou mocnost k~oběma kružnicím. Dobrý vhled je zamyslet se, jak se hýbou středy zkoumaných kružnic, když hýbeme bodem $M$. Jak to vypadá v~limitních případech?
+}{
+    Přímka $MN$ se v~limitním případě mění na tečnu v~$A$, resp. $B$. To naznačuje, že pevný bod bude průsečík těchto limitních tečen. Už to jen dokázat.
+}{
+    \Answer{Je to vrchol $P$ pravoúhlého rovnoramenného trojúhelníku nad přeponou $AB$ ležící v~polorovině opačné než čtverce, tedy střed čtverce sestrojeného nad $AB$ na druhé straně přímky $AB$.}
+
+    Označme $\omega_1$, $\omega_2$ kružnice opsané čtvercům $ACDM$, resp. $MEFB$, se středy $O_1$, $O_2$. Přímka $MN$ je jejich chordálou, hledáme tedy bod se stejnou mocností k~oběma, a~to nezávisle na poloze $M$. Kandidáta prozradí limita: když $M \to A$, kružnice $\omega_1$ degeneruje na nulovou kružnici $A$ a~$\omega_2$ na kružnici $\Omega$ opsanou čtverci nad celým $AB$, takže chordála přejde na kolmici na $AS$ v~bodě $A$, kde $S$ je střed $\Omega$, čili na tečnu k~$\Omega$ v~$A$. Jelikož $|\angle SAB| = 45^\circ$, svírá tato tečna s~$AB$ úhel $45^\circ$ a~míří do poloroviny opačné než čtverce; symetricky pro $M \to B$.
+
+    Označme tedy $P$ bod v~polorovině opačné než čtverce, pro který $|\angle PAB| = |\angle PBA| = 45^\circ$. Pak $|\angle APB| = 90^\circ$ a~$|PA| = |PB|$. Ukážeme, že $PA$ je tečnou k~$\omega_1$ a~$PB$ tečnou k~$\omega_2$ pro \textit{každou} polohu bodu $M$, nejen v~limitě.
+
+    Střed $O_1$ leží na úhlopříčce $AD$ čtverce $ACDM$, která půlí pravý úhel při vrcholu $A$, takže $|\angle O_1AM| = 45^\circ$ v~polorovině se čtverci, kdežto $|\angle PAM| = 45^\circ$ v~opačné. Dohromady $|\angle O_1AP| = 90^\circ$, a~jelikož $A$ leží na $\omega_1$, je $PA$ tečnou k~$\omega_1$ v~bodě $A$. Analogicky $O_2$ leží na úhlopříčce $BE$ čtverce $MEFB$, odkud $|\angle O_2BP| = 90^\circ$ a~$PB$ je tečnou k~$\omega_2$ v~bodě $B$.
+
+    Z~věty o~spojení mocnosti s~tečnou tak
+    $$
+    p(P,\omega_1) = |PA|^2 = |PB|^2 = p(P,\omega_2),
+    $$
+    takže $P$ leží na chordále kružnic $\omega_1$, $\omega_2$, tedy na přímce $MN$. Poloha $P$ přitom vůbec nezávisí na $M$.
+}
+
+\EnvId{aFIODdiosGAy_qg7WWTTO-paraboly-a-pruseciky-s-osami}
+\Problem{0}{}{
+    Je dána rovnice $x^2+px+q=0$, kde $p$ a~$q$ jsou reálná čísla. Uvažujme všechny paraboly určené touto rovnicí takové, že protínají osy $x$ a~$y$ ve třech různých bodech. Tyto body určují kružnici. Dokažte, že všechny takové kružnice procházejí jedním bodem, bez ohledu na hodnoty $p$ a~$q$.
+}{
+    Vyplatí se uhádnout pevný bod. Zkuste si nějaké konkrétní rovnice.
+}{
+    Tvar rovnice ze zadání je schválně zavádějící. Lepší je $(x-a_1)(x-a_2)=0$. V~tomto tvaru také umíme určit souřadnice průsečíků. Možná nám to taky trochu pomůže vidět pevný bod. V~dalším hintu ho prozradím, protože neumím dát lepší.
+}{
+    Pevný bod je bod $[0,1]$. Jak to dokázat? Inu, téma tohoto materiálu trochu dost napovídá.
+}{
+    Klíčem je mocnost z~bodu $[0,0]$.
+}{
+    \Answer{Pevný bod je $[0,1]$.}
+
+    Zkoumáme parabolu $y=x^2+px+q$. S~osou $y$ má vždy právě jeden průsečík, s~osou $x$ chceme dva různé, tedy $p^2>4q$; navíc při $q=0$ by parabola procházela počátkem a~průsečík s~osou $y$ by splynul s~jedním z~průsečíků s~osou $x$. Předpokládáme tedy $p^2>4q$ a~$q \neq 0$.
+
+    Označme $a_1$, $a_2$ kořeny, čili $x^2+px+q=(x-a_1)(x-a_2)$ a~$a_1a_2=q$. Průsečíky jsou tak přímo vidět: $A_1=[a_1,0]$, $A_2=[a_2,0]$ a~$B=[0,q]$, přičemž naše podmínky říkají právě to, že $a_1 \neq a_2$ a~$a_1, a_2 \neq 0$. Kružnice $\omega=(A_1A_2B)$ existuje a~je jediná, protože $A_1$, $A_2$ leží na ose $x$ a~$B$ ne.
+
+    Klíčový je počátek $O=[0,0]$: leží na obou osách, takže jeho mocnost k~$\omega$ umíme spočítat dvěma způsoby a~porovnat je. Na $\omega$ neleží, protože osa $x$ protíná $\omega$ nejvýše ve dvou bodech, těmi jsou $A_1$, $A_2$, a~$a_1, a_2 \neq 0$. Body osy $x$ uvnitř $\omega$ jsou přesně ty mezi $A_1$ a~$A_2$, takže poloha $O$ vůči $\omega$ závisí na znaménkách kořenů:
+
+    \begitems \style i
+    \i Pro $q>0$ mají $a_1$, $a_2$ stejné znaménko, $O$ neleží mezi nimi, tedy leží vně $\omega$ a~$p(O,\omega)=|OA_1| \cdot |OA_2|=|a_1| \cdot |a_2|=a_1a_2=q$.
+    \i Pro $q<0$ mají opačné znaménko, $O$ leží mezi nimi, tedy uvnitř $\omega$ a~$p(O,\omega)=-|OA_1| \cdot |OA_2|=-|a_1a_2|=a_1a_2=q$.
+    \enditems
+
+    V~obou případech tedy $p(O,\omega)=q$.
+
+    Nyní osa $y$. Prochází bodem $B \in \omega$, takže ji $\omega$ protíná ještě v~jednom bodě, nebo se jí v~$B$ dotýká; označme ho $B'=[0,y_0]$, přičemž při dotyku klademe $B'=B$, tedy $y_0=q$.
+
+    \begitems \style i
+    \i Pro $q>0$ leží $O$ vně $\omega$, tedy mimo úsečku $BB'$, takže $q$ a~$y_0$ mají stejné znaménko a~$p(O,\omega)=|OB| \cdot |OB'|=|q| \cdot |y_0|=qy_0$.
+    \i Pro $q<0$ leží $O$ uvnitř $\omega$, tedy mezi $B$ a~$B'$, takže $q$ a~$y_0$ mají opačné znaménko a~$p(O,\omega)=-|OB| \cdot |OB'|=-|q| \cdot |y_0|=qy_0$.
+    \enditems
+
+    Při dotyku je $B'=B$ a~podle tvrzení o~spojení s~tečnou $p(O,\omega)=|OB|^2=q \cdot q=qy_0$, vzorec tedy platí i~tam. Porovnáním obou výpočtů máme $qy_0=q$, a~jelikož $q \neq 0$, dostáváme $y_0=1$. Bod $[0,1]$ tak leží na $\omega$ pro každé přípustné $p$, $q$.
+
+    Znaménka tu nebyla kosmetika: s~absolutními hodnotami by nám vyšlo jen $|y_0|=1$ a~vedle správného řešení by přežil i~falešný kandidát $[0,-1]$.
+}
+
+\EnvId{6qpbdQI93yTn0hmycKsVn-osa-usecky-a-tecna}
+\Problem{0}{}{
+    Je dána kružnice $\omega$ a~bod $A$ ležící vně ní. Pro $X \in \omega$ označme $Y$ průsečík osy úsečky $AX$ a~tečny k~$\omega$ v~bodě $X$. Určete množinu všech takových bodů $Y$.
+}{
+    Dobré jsou body na tečně, které jsou stejně vzdálené od $A$ a~od bodu dotyku.
+}{
+    Totiž, to jsou přesně body, které mají stejnou mocnost jak k~danému bodu, tak k~dané kružnici. Umíme to nějak využít?
+}{
+    Finální množina je chordála.
+}{
+    \Answer{Celá chordála bodu $A$ a~kružnice $\omega$, tedy střední příčka trojúhelníku $AT_1T_2$ rovnoběžná s~$T_1T_2$, kde $T_1$, $T_2$ jsou body dotyku tečen z~$A$ k~$\omega$.}
+
+    Označme $O$ střed a~$r$ poloměr $\omega$ a~položme $d=|OA|>r$.
+
+    Kdy $Y$ existuje: jelikož $A \notin \omega$, je $A \neq X$ a~osa úsečky $AX$ dává smysl. Ta je kolmá na $AX$, tečna v~$X$ je kolmá na $OX$, takže jsou rovnoběžné právě tehdy, když $A$ leží na přímce $OX$, čili právě pro průsečíky $X_1$, $X_2$ přímky $OA$ se $\omega$. Tam jsou ty rovnoběžky různé (osa protíná $OA$ ve středu úsečky $AX_i$, tečna v~bodě $X_i$, a~splynutí by dalo $A=X_i$), takže $Y$ neexistuje; pro každé jiné $X$ je $Y$ jednoznačný.
+
+    Nechť tedy $Y$ existuje. Je $Y \neq X$ (jinak $|XA|=0$), takže $Y$ leží na tečně mimo bod dotyku, tedy vně $\omega$, a~podle tvrzení o~spojení s~tečnou je $p(Y,\omega)=|YX|^2$. Bod je nulová kružnice, takže $p(Y,A)=|YA|^2$ a~podmínka $|YA|=|YX|$ zní
+    $$
+    p(Y,A)=p(Y,\omega).
+    $$
+    Bod $Y$ tedy leží na chordále $m$ bodu $A$ a~kružnice $\omega$ (nesoustředné jsou, vždyť $d>r\geq 0$), která je ze základních případů střední příčkou trojúhelníku $AT_1T_2$ rovnoběžnou s~$T_1T_2$.
+
+    Přímka $m$ je kolmá na $OA$ a~protíná ji v~bodě $D$ se souřadnicí $x$, kde $O$ má souřadnici $0$ a~$A$ souřadnici $d$. Z~$p(D,A)=p(D,\omega)$ je $(x-d)^2 = x^2-r^2$, tedy $x=\frac{d^2+r^2}{2d}$ a~odtud
+    $$
+    x - r = \frac{(d-r)^2}{2d} > 0, \qquad d - x = \frac{d^2-r^2}{2d} > 0.
+    $$
+    Vzdálenost $O$ od $m$ je tedy větší než $r$: přímka $m$ nemá se $\omega$ společný bod a~celá leží vně ní, přičemž $D$ leží mezi $O$ a~$A$.
+
+    Naopak, nechť $P$ je bod přímky $m$; leží vně $\omega$, takže z~něj vede k~$\omega$ tečna s~bodem dotyku $X$. Pak
+    $$
+    |PX|^2 = p(P,\omega) = p(P,A) = |PA|^2,
+    $$
+    a~tak $P$ leží na ose úsečky $AX$ i~na tečně k~$\omega$ v~$X$. Ty jsou různé (jinak by $X$ ležel na ose úsečky $AX$, čili $|XA|=0$), protínají se tedy právě v~$P$ a~$P$ je bod $Y$ příslušející k~tomuto $X$.
+
+    Ztracené polohy $X_1$, $X_2$ z~$m$ nic neuberou: tečny v~nich jsou kolmé na $OA$, tedy rovnoběžné s~$m$, a~protínají $OA$ ve vzdálenosti $r \neq x$ od $O$. Bod $X$ z~předchozího odstavce proto nikdy není $X_1$ ani $X_2$ a~hledanou množinou je celá přímka $m$.
+}
+
+\EnvId{zo-ax3_7vlPEhcOuGXSIu-kolmice-ve-stredu-vepsane-kruznice}
+\Problem{0}{}{
+    Nechť $I$ je střed vepsané kružnice různostranného trojúhelníku $ABC$. Kolmice na $AI$ vedená bodem $I$ protíná přímku $BC$ v~bodě $A'$. Body $B'$ a~$C'$ definujeme analogicky. Dokažte, že body $A'$, $B'$, $C'$ leží na jedné přímce.
+}{
+    Trik je, že hledaná přímka bude dobrá chordála.
+}{
+    Z~bodu $A'$ se nám dobře počítají nějaké mocnosti, jaké? To nám napoví, jaká chordála to bude.
+}{
+    Vlastně moc možností nemáme, jedna mocnost je $|A'B|\cdot|A'C|$. Druhá je, inu, každý bod je přece jen kružnice.
+}{
+    Cíl je dokázat, že $A'$ leží na chordále $(ABC)$ a~bodu $I$, tedy že $|A'I|^2 = |A'B|\cdot|A'C|$. Co to ale vlastně znamená?
+}{
+    Zdá se, že stačí, že $A'I$ je tečna $(BIC)$. Kde má ale $(BIC)$ střed? Už jen spojit známá fakta a~jsme doma.
+}{
+    Různostrannost potřebujeme k~existenci bodů: kolmice na $AI$ vedená bodem $I$ je rovnoběžná s~$BC$ právě tehdy, když $AI \perp BC$, čili když $|AB| = |AC|$. Zároveň $A' \neq I$, protože $I$ neleží na $BC$.
+
+    Kolinearitu dokážeme chordálou kružnice $\omega = (ABC)$ a~bodu $I$ (bod je pro nás kružnice s~nulovým poloměrem). Volba je symetrická ve vrcholech, takže tatáž dvojice poslouží i~pro $B'$, $C'$, a~stačí dokázat
+    $$
+    |A'I|^2 = |A'B| \cdot |A'C|
+    $$
+    a~její analogie. Podle kritéria tečny to znamená, že $A'I$ je tečnou kružnice $(BIC)$ v~bodě $I$; jelikož $A'I \perp AI$, stačí nám, aby střed $(BIC)$ ležel na přímce $AI$.
+
+    Nechť $M_A$ je druhý průsečík přímky $AI$ s~$\omega$. Jelikož $AI$ je osa úhlu při $A$, je $M_A$ středem oblouku $BC$ neobsahujícího $A$, takže $|M_AB| = |M_AC|$. Dále je $|M_AI| = |M_AB|$ (lemma o~středu oblouku): při $\alpha = |\angle BAC|$, $\beta = |\angle ABC|$ je $|\angle BIM_A| = \alpha/2 + \beta/2$ jako vnější úhel trojúhelníku $ABI$ při vrcholu $I$ (bod $I$ leží na úsečce $AM_A$) a~$|\angle IBM_A| = |\angle IBC| + |\angle CBM_A| = \beta/2 + \alpha/2$, protože obvodové úhly $CBM_A$ a~$CAM_A$ přísluší oblouku $CM_A$. Trojúhelník $BIM_A$ je tedy rovnoramenný a~$|M_AI| = |M_AB| = |M_AC|$, čili $M_A$ je středem $(BIC)$. Ten leží na $AI$, takže $A'I$ je kolmá na poloměr $M_AI$ v~jeho krajním bodě, a~je proto tečnou $(BIC)$ v~bodě $I$.
+
+    Dotyk vyřeší i~znaménka. Každý bod přímky $A'I$ kromě $I$ leží vně $(BIC)$, speciálně $A'$; body $B$, $C$ na této kružnici leží, takže otevřená úsečka $BC$ leží v~jejím vnitřku a~$A'$ na ní neleží. Body přímky $BC$ mimo úsečku $BC$ přitom leží vně $\omega$, tedy i~$A'$. Mocnost $A'$ k~$(BIC)$ spočítáme dvakrát, přes tečnu $A'I$ a~přes sečnu $BC$; pravá strana je díky poloze $A'$ zároveň mocností k~$\omega$:
+    $$
+    p(A',\omega) = |A'B| \cdot |A'C| = |A'I|^2 = p(A',I).
+    $$
+
+    Přepsáním vrcholů totéž platí pro $B'$ a~$C'$. Nakonec je $O \neq I$, kde $O$ je střed $\omega$: jinak by měly tětivy $BC$, $CA$, $AB$ od $O$ stejnou vzdálenost, byly by stejně dlouhé a~trojúhelník rovnostranný. Chordála $\omega$ a~bodu $I$ je tak přímka a~body $A'$, $B'$, $C'$ na ní leží.
+}
+
+\EnvId{9h3ho4k7ICipGlRhvqr7v-bod-uvnitr-se-shodnymi-uhly}
+\Problem{0}{Moskva 2011}{
+    Bod $O$ uvnitř trojúhelníku $ABC$ splňuje $|\angle BOC| = 90^\circ$, $|\angle OBA| = |\angle OAC|$ a~$|\angle BAO| = |\angle OCB|$. Určete $|AC|/|OC|$.
+}{
+    Jedna z~rovností úhlů nám dává dotyk a~napovídá, že tam bude nějaká zajímavá kružnice.
+}{
+    Máme, že $CA$ se dotýká $(AOB)$. Zároveň se po nás chce něco s~$OC$. To chce dokreslit dobrý bod.
+}{
+    Trik je protnout přímku $OC$ s~$(AOB)$ v~bodě $X$. Najednou všechny podmínky budou dávat smysl.
+}{
+    Jelikož $AOBX$ je tětivový, $|\angle OXB| = |\angle OAB|$, takže další úhlová podmínka nám dá $|\angle OXB| = |\angle OCB|$ a~to dává spolu s~pravým úhlem rovnoramennost. Stejně dlouhé úsečky jsou fajn, obzvlášť ve světě, kde počítáme poměr. Samozřejmě máme také takovou věcičku zvanou mocnost.
+}{
+    \Answer{$|AC|/|OC| = \sqrt2$.}
+
+    Označme $\omega$ kružnici $(AOB)$ a~$\alpha = |\angle BAO| = |\angle OCB|$.
+
+    Jelikož $O$ leží uvnitř trojúhelníku $ABC$, jsou $B$ a~$C$ v~opačných polorovinách určených přímkou $AO$. Podmínka $|\angle OAC| = |\angle OBA|$ tedy podle obrácené věty o~úsekovém úhlu znamená, že $AC$ je tečnou $\omega$ v~bodě $A$, speciálně
+    $$
+    p(C,\omega) = |CA|^2 > 0.
+    $$
+
+    Přímka $OC$ není tečnou $\omega$ v~$O$: jinak by kvůli $OC \perp OB$ bylo $OB$ průměrem, čili $|\angle OAB| = 90^\circ$, jenže $|\angle OAB| = \alpha = |\angle OCB|$ je ostrý úhel pravoúhlého trojúhelníku $BOC$. Označme $X$ druhý průsečík přímky $OC$ s~$\omega$.
+
+    Bod $O$ leží mezi $C$ a~$X$: polopřímka opačná k~polopřímce $OC$ protíná úsečku $AB$ v~jejím vnitřním bodě, který leží uvnitř $\omega$, takže $X$ leží na ní. Přímka $OB$ proto odděluje $X$ od $C$, a~jelikož odděluje i~$C$ od $A$, leží $A$ a~$X$ na tomtéž oblouku nad tětivou $OB$:
+    $$
+    |\angle BXC| = |\angle OXB| = |\angle OAB| = \alpha = |\angle BCX|.
+    $$
+    Trojúhelník $XBC$ je tedy rovnoramenný se základnou $XC$ a~$BO$ je v~něm výška z~hlavního vrcholu ($|\angle BOC| = 90^\circ$, $O$ leží na $XC$), čili i~těžnice. Proto $|CX| = 2|CO|$ a~dvojí výpočet mocnosti dává
+    $$
+    |CA|^2 = p(C,\omega) = |CO| \cdot |CX| = 2|CO|^2,
+    $$
+    odkud $|AC|/|OC| = \sqrt2$.
+}
+
+\EnvId{aHqlcuKfHDe0WslkoFmjr-jediny-bod-na-strane-bc}
+\Problem{0}{Czech-Slovak 2016}{
+    V~trojúhelníku $ABC$ platí $|BC|=1$ a~zároveň na straně $BC$ existuje právě jeden bod $D$ takový, že $|DA|^2=|DB|\cdot |DC|$. Určete všechny možné hodnoty obvodu trojúhelníku $ABC$.
+}{
+    Podmínka ze zadání připomíná mocnost $D$ k~$(ABC)$, ale něco tomu chybí.
+}{
+    Chybí tomu druhý průsečík $AD$ s~$(ABC)$, označme ho $E$. Co nám pak dává mocnost?
+}{
+    Mocnost dává $|DB|\cdot|DC|=|DA|\cdot|DE|$, tedy spolu s~podmínkou máme $|DA|=|DE|$. Jak vypadají všechny body $D$, pro které odpovídající $E$ má tuto vlastnost?
+}{
+    Klíčem k~nalezení těchto bodů je stejnolehlost se středem $A$ a~koeficientem $2$.
+}{
+    Tato stejnolehlost zobrazí $D$ na $E$, takže místo, kde může ležet $D$, přímku $BC$, na místo, kde může ležet $E$, kružnici $(ABC)$. Naše podmínka říká, že takový bod existuje právě jeden, co to znamená?
+}{
+    To znamená, že tato zobrazená přímka $BC$ musí být tečnou $(ABC)$. Kde pak protíná $(ABC)$?
+}{
+    Ve středu oblouku $BC$ neobsahujícího $A$. Nutně tedy $E$ je střed oblouku $BC$ a~$D$ je průsečík $AE$ s~$BC$. Ještě nejsme hotovi, je třeba chytře počítat. Jde to pěkně.
+}{
+    V~této chvíli by se už měla dát použít Stewartova věta. Hezčí řešení ale pokračuje v~ideji stejnolehlosti. Od $E$ jde na $D$. Kam jde celá kružnice $(ABC)$? Otázka je to zajímavá, protože určitě jde na kružnici, jejíž tečnou je $BC$, dokonce v~$D$.
+}{
+    Ta jde na kružnici $(AB'C')$, kde $B'$ a~$C'$ jsou středy $AB$ a~$AC$. To, že se tato kružnice dotýká $BC$ v~$D$, nám dává skvělé mocnosti. Počítání je teď minimální.
+}{
+    \Answer{Obvod je vždy $1+\sqrt2$.}
+
+    Označme $b=|CA|$, $c=|AB|$ a~$\omega=(ABC)$.
+
+    Bod $D$ leží uvnitř úsečky $BC$ (pro $D=B$ by podmínka dávala $|BA|=0$), tedy uvnitř $\omega$. Nechť $E$ je druhý průsečík přímky $AD$ se $\omega$. Mocnost $D$ počítaná po obou sečnách dává $-|DB|\cdot|DC| = p(D,\omega) = -|DA|\cdot|DE|$, takže podmínka $|DA|^2=|DB|\cdot|DC|$ znamená $|DA|=|DE|$: bod $D$ je střed úsečky $AE$.
+
+    To je přesně popis stejnolehlosti: pro stejnolehlost $h$ se středem $A$ a~koeficientem $2$ je $E=h(D)$. Když $D$ probíhá přímku $BC$, bod $E$ probíhá přímku $\ell=h(BC)$ a~současně leží na $\omega$; jelikož $h$ je bijekce, vyhovujících bodů $D$ je přesně tolik, kolik je bodů v~$\ell\cap\omega$. Každý z~nich opravdu dá bod $D$ uvnitř strany $BC$: přímka $\ell$ je rovnoběžná s~$BC$ a~leží celá na opačné straně $BC$ než $A$, protože od $A$ je dvakrát dál než $BC$, takže každé $E\in\ell\cap\omega$ leží na oblouku $BC$ neobsahujícím $A$; tětivy $AE$ a~$BC$ se proto protínají ve vnitřním bodě obou a~tím bodem je střed $AE$, čili $D$. Podmínka ze zadání tedy říká přesně to, že $\ell$ je tečnou $\omega$.
+
+    Tečna k~$\omega$ rovnoběžná s~$BC$ se dotýká ve středu jednoho z~oblouků $BC$, a~jelikož $\ell$ leží na opačné straně $BC$ než $A$, je $E$ středem oblouku $BC$ neobsahujícího $A$ a~$D$ je průsečík $AE$ s~$BC$.
+
+    Zůstaňme u~stejnolehlosti a~podívejme se, kam pošle $\omega$ inverzní stejnolehlost $h^{-1}$. Jsou-li $B'$, $C'$ středy stran $AB$, $AC$, pak $h^{-1}$ posílá $A\mapsto A$, $B\mapsto B'$, $C\mapsto C'$, tedy $\omega$ na $\omega'=(AB'C')$, a~přímku $\ell$ na rovnoběžku s~$BC$ přes bod $h^{-1}(E)=D$, čili na samotnou $BC$. Stejnolehlost zachovává dotyk, takže $BC$ je tečnou $\omega'$ v~bodě $D$.
+
+    Bod $B$ leží na přímce $AB'$ mimo úsečku $AB'$, takže kritérium tečny dává
+    $$
+    |BD|^2 = |BB'|\cdot|BA| = \frac{c}{2}\cdot c = \frac{c^2}{2}
+    $$
+    a~analogicky $|CD|^2=b^2/2$. Jelikož $|BD|+|DC|=|BC|=1$, dostaneme $\frac{c}{\sqrt2}+\frac{b}{\sqrt2}=1$, čili $b+c=\sqrt2$ a~obvod je $1+b+c=1+\sqrt2$.
+
+    Zkouška: nechť $ABC$ je libovolný trojúhelník s~$|BC|=1$ a~$b+c=\sqrt2$. Jelikož $0<c<\sqrt2$, leží na straně $BC$ bod $D_0$ s~$|BD_0|=c/\sqrt2$, a~proto $|CD_0|=1-c/\sqrt2=b/\sqrt2$. Z~rovnosti $|BD_0|^2=c^2/2=|BB'|\cdot|BA|$ dává kritérium tečny (nyní v~opačném směru), že $BC$ se dotýká kružnice $(D_0AB')$ v~bodě $D_0$, a~stejně tak se dotýká $(D_0AC')$ v~$D_0$. Kružnice procházející bodem $A$ a~dotýkající se $BC$ v~$D_0$ je však jediná, takže obě splývají s~$\omega'=(AB'C')$ a~$BC$ je její tečnou; stejnolehlostí $h$ je pak $\ell$ tečnou $\omega$ a~podle dokázané ekvivalence existuje právě jedno $D$. Takové trojúhelníky navíc existují: nerovnost $b+c>1$ platí automaticky a~zbývající trojúhelníková nerovnost $|b-c|<1$ dává neprázdný interval $c \in \(\frac{\sqrt2-1}{2}, \frac{\sqrt2+1}{2}\)$.
+}
+
+\EnvId{t9RnR0uuv22NL3ceXZ8TP-shodne-usecky-a-ctyri-body}
+\Problem{0}{USAJMO 2012, P1}{
+    Na stranách $AB$, $AC$ trojúhelníku $ABC$ jsou dány body $P$, $Q$ tak, že $|AP| = |AQ|$. Na úsečce $BC$ jsou dány body $S$, $R$ tak, že $B$, $S$, $R$, $C$ leží na přímce v~tomto pořadí a~zároveň platí $|\angle BPS| = |\angle PRS|$ a~$|\angle CQR| = |\angle QSR|$. Dokažte, že $P$, $Q$, $R$, $S$ leží na kružnici.
+}{
+    Máme úsekové úhly, které nám dávají dotyky k~naší kýžené kružnici. Navíc $|AP|=|AQ|$ něco dává. Ono to hrozně vypadá, že věci fungují. Co kdyby nefungovaly?
+}{
+    Celý trik úlohy je jít sporem\fnote{což je v~geometrii nečekané, ale opravdu to tu magicky funguje a~sám osobně jsem překvapený}. Kdybychom neměli z~těch bodů jednu kružnici, ale vhodně dvě, co všechno divného by se stalo?
+}{
+    Vhodné kružnice k~uvažování jsou $(SRP)$ a~$(SRQ)$, jejich chordála je totiž vcelku smysluplná přímka. Zkuste najít, co by na ní hypoteticky mělo ležet. Něco nebude dávat smysl.
+}{
+    Body $P$, $Q$ leží uvnitř stran, takže ani jeden neleží na přímce $BC$ a~kružnice $\omega_1 = (PSR)$, $\omega_2 = (QSR)$ existují. Dokázat zadání znamená dokázat, že $\omega_1 = \omega_2$, což se přímo chytá špatně. Jdeme tedy sporem, v~geometrii nezvyklým tahem: předpokládejme $\omega_1 \neq \omega_2$.
+
+    Body $B$ a~$R$ jsou na přímce $BC$ odděleny bodem $S$, tedy leží v~opačných polorovinách určených přímkou $PS$, a~rovnost $|\angle BPS| = |\angle PRS|$ je proto rovností úsekového a~obvodového úhlu nad tětivou $PS$ kružnice $\omega_1$. Přímka $AB$ je tak tečnou $\omega_1$ v~bodě $P$. Analogicky (tětiva $QR$, body $C$, $S$ odděleny bodem $R$) je $AC$ tečnou $\omega_2$ v~bodě $Q$.
+
+    Bod $A$ leží na tečně k~$\omega_1$ a~není jejím bodem dotyku, takže leží vně $\omega_1$, a~stejně tak vně $\omega_2$. Ze spojení mocnosti s~tečnou
+    $$
+    p(A,\omega_1) = |AP|^2 = |AQ|^2 = p(A,\omega_2),
+    $$
+    čili $A$ leží na chordále kružnic $\omega_1$, $\omega_2$. Obě přitom procházejí přes $S$ i~přes $R$ a~soustředné být nemohou, protože soustředné kružnice se společným bodem splynou, což jsme vyloučili. Protínají se tedy právě ve dvou bodech $S$, $R$ a~jejich chordála je přímka $SR$, čili přímka $BC$.
+
+    Bod $A$ tak leží na přímce $BC$, což je u~trojúhelníku $ABC$ spor. Proto $\omega_1 = \omega_2$ a~body $P$, $Q$, $R$, $S$ leží na jedné kružnici.
+}
+
+\EnvId{jTnUWvmphv4xcEYPAwQtG-minimalni-soucin-v-uhlu}
+\Problem{0}{}{
+    Uvnitř úhlu $AVB$ je dán bod $P$. Přímka procházející bodem $P$ protíná $VA$, $VB$ v~bodech $X$, $Y$. Sestrojte přímku, pro kterou je součin $|PX| \cdot |PY|$ minimální.
+}{
+    Zkusme uhádnout, co by to mohlo být za přímku. Prozradím v~dalším hintu.
+}{
+    Při troše hraní by mělo docvaknout, že klíčem je přímka, která na ramenech úhlu vytíná body $X'$, $Y'$ takové, že $|VX'| = |VY'|$.
+}{
+    K~důkazu, že je nejlepší, chceme použít učivo tohoto materiálu. Jenže na to potřebujeme kružnici. Tak tam nějakou dokreslíme. Prozradím v~dalším hintu.
+}{
+    Klíčová kružnice je ta přes $X'$, $Y'$, která se dotýká úhlu. Nahlédnout to už není těžké.
+}{
+    \Answer{Kolmice z~$P$ na osu úhlu $AVB$, tedy ta přímka, která na ramenech vytíná body $X'$, $Y'$ s~$|VX'| = |VY'|$.}
+
+    Za přípustné pokládáme jen ty přímky, které protínají ramena $VA$, $VB$ ve dvou \textbf{různých} bodech, přímku přes $V$ tedy ne; není to zbytečná pedanterie, pro tupý úhel bývá $|PV|^2$ menší než minimum, které najdeme. Označme $o$ osu úhlu $AVB$ a~$\ell^*$ kolmici z~$P$ na $o$. Její pata leží na ose uvnitř úhlu, takže $\ell^*$ protne obě ramena, řekněme $VA$ v~bodě $X'$ a~$VB$ v~bodě $Y'$. Souměrnost podle $o$ zaměňuje ramena a~$\ell^*$ zobrazuje na sebe, takže $|VX'| = |VY'|$; naopak, pokud přípustná přímka vytíná na ramenech body $X$, $Y$ s~$|VX| = |VY|$, je $\triangle VXY$ rovnoramenný se základnou $XY$ a~jeho osou souměrnosti je $o$, čili $XY \perp o$. Oba popisy z~odpovědi tedy určují tutéž přímku a~kolmice z~$P$ na $o$ je jediná.
+
+    Součin vzdáleností od pevného bodu je mocnost, potřebujeme tedy kružnici, která má $P$ uvnitř a~ramen se jen dotýká. Kolmice na $VA$ v~bodě $X'$ a~na $VB$ v~bodě $Y'$ se protnou, protože ramena nejsou rovnoběžná; nechť $O$ je jejich průsečík. Souměrnost podle $o$ tyto kolmice zaměňuje, takže $O$ nechává na místě a~$|OX'| = |OY'| =: r$. Kružnice $\omega(O,r)$ se tak dotýká přímky $VA$ v~bodě $X'$ a~přímky $VB$ v~bodě $Y'$. Průnik $\ell^*$ s~úhlem je úsečka $X'Y'$ a~$P$ je vnitřní bod úhlu, takže $P$ leží uvnitř tětivy $X'Y'$, čili uvnitř $\omega$, a~proto
+    $$
+    |PX'| \cdot |PY'| = -p(P,\omega) = r^2 - |PO|^2.
+    $$
+    Pro libovolný bod $Z$ přímky $VA$ je podle Pythagorovy věty $|ZO|^2 = |ZX'|^2 + r^2$, tedy
+    $$
+    p(Z,\omega) = |ZO|^2 - r^2 = |ZX'|^2 \ge 0.
+    $$
+    Žádný bod přímky $VA$ tedy neleží uvnitř $\omega$ a~jediný, který leží na ní, je $X'$; stejně tak pro přímku $VB$ a~bod $Y'$.
+
+    Nechť $\ell$ je libovolná přípustná přímka přes $P$, protínající $VA$ v~bodě $X$ a~$VB$ v~bodě $Y$. Vnitřek úhlu je konvexní, takže $P$ leží mezi $X$ a~$Y$. Jelikož $P$ leží uvnitř $\omega$, protíná $\ell$ kružnici ve dvou bodech $M$ (na téže straně od $P$ jako $X$) a~$N$ (na straně bodu $Y$), přičemž body $\ell$ uvnitř $\omega$ jsou právě ty mezi $M$ a~$N$. Bod $X$ uvnitř $\omega$ neleží a~leží na polopřímce $PM$, takže $|PX| \ge |PM|$, stejně tak $|PY| \ge |PN|$, a~vynásobením
+    $$
+    |PX| \cdot |PY| \ge |PM| \cdot |PN| = -p(P,\omega) = |PX'| \cdot |PY'|.
+    $$
+    Rovnost vynutí $|PX| = |PM|$ a~$|PY| = |PN|$, tedy $X = M$ a~$Y = N$, čili $X$ i~$Y$ leží na $\omega$. Jenže přímka $VA$ má s~$\omega$ jediný společný bod $X'$ a~přímka $VB$ jediný bod $Y'$, takže $\ell = \ell^*$. Minimum je $r^2 - |PO|^2$ a~dosahuje se jedině pro $\ell^*$.
+}
+
+\EnvId{iQleAath6zbItb9zJE15L-stredy-opsanych-kruznic-nad-prumerem}
+\Problem{0}{Czech-Slovak 2007}{
+    V~rovině je dána kružnice $\omega$ a~bod $A$, který na ní neleží a~není ani jejím středem. Určete množinu středů kružnic opsaných všem trojúhelníkům $ABC$, jejichž strana $BC$ je průměr $\omega$.
+}{
+    Nakresleme střed $O$ této kružnice, ten je přirozeně pevný a~souvisí s~pohybujícími se body $B$ a~$C$. Ještě potřebujeme nějak dokreslit souvislost s~$(ABC)$.
+}{
+    Když je $O$ pevný, tak i~$|OB|\cdot|OC|$ je pevné. $A$ je také pevný. Co je ještě pevné a~souvisí s~$(ABC)$?
+}{
+    Dalším pevným bodem je takový bod $A'$ na přímce $AO$, přičemž $O$ leží mezi $A$ a~$A'$, že $|OB|\cdot|OC|=|OA|\cdot|OA'|$. Počkat, nejsme hotovi?
+}{
+    \Answer{Celá osa úsečky $AA'$, kde $O$ je střed a~$r$ poloměr $\omega$ a~$A'$ je ten bod přímky $AO$, pro který $O$ leží mezi $A$ a~$A'$ a~$|OA| \cdot |OA'| = r^2$.}
+
+    Označme $O$ střed a~$r$ poloměr kružnice $\omega$. Pro průměr $BC$ kružnice $\omega$ vznikne trojúhelník $ABC$ právě tehdy, když $A$ neleží na přímce $BC$, vypadává tedy jediný průměr, a~to ten na přímce $AO$. Nechť $k = (ABC)$.
+
+    Bod $O$ je středem tětivy $BC$ kružnice $k$, leží tedy uvnitř $k$ a~
+    $$
+    p(O,k) = -|OB| \cdot |OC| = -r^2,
+    $$
+    což už na poloze $B$, $C$ nezávisí. Přímka $AO$ je sečnou $k$, protože prochází bodem $A \in k$ a~vnitřním bodem $O$; označme $A'$ její druhý průsečík s~$k$. Tatáž mocnost počítaná po této sečně dává $-|OA| \cdot |OA'| = -r^2$, čili $O$ leží mezi $A$ a~$A'$ a~$|OA| \cdot |OA'| = r^2$. To určuje $A'$ jednoznačně: leží na polopřímce opačné k~polopřímce $OA$ ve vzdálenosti $r^2/|OA|$ od $O$. Bod $A'$ je tedy pevný a~leží na každé kružnici $(ABC)$.
+
+    Každá zkoumaná kružnice tak prochází dvěma pevnými body $A$, $A'$, které jsou různé, protože leží na opačných polopřímkách z~$O$. Její střed je od obou stejně vzdálený, tedy leží na ose $o$ úsečky $AA'$.
+
+    Zbývá ukázat, že se dosáhne každý bod $o$. Nejprve $O$ na $o$ neleží: jinak by bylo $|OA| = |OA'|$, čili $|OA|^2 = r^2$, a~bod $A$ by ležel na $\omega$.
+
+    Nechť $S$ je libovolný bod $o$, $R = |SA| = |SA'|$ a~$k$ kružnice se středem $S$ a~poloměrem $R$; body $A$, $A'$ na ní leží. Jelikož $O$ leží mezi $A$ a~$A'$, je uvnitř $k$ a~$p(O,k) = -|OA| \cdot |OA'| = -r^2$. Víme, že $S \neq O$, takže můžeme vzít přímku $\ell$ vedenou bodem $O$ kolmo na $OS$. Patou kolmice z~$S$ na $\ell$ je bod $O$ a~
+    $$
+    R^2 - |OS|^2 = -p(O,k) = r^2 > 0,
+    $$
+    takže $\ell$ protíná $k$ ve dvou bodech $B$, $C$ souměrných podle $O$, přičemž $|OB| = |OC| = r$. Body $B$, $C$ tedy leží na $\omega$ a~$BC$ je průměr $\omega$.
+
+    Bod $A$ na $\ell$ neleží: jinak by přímka $OS$ byla kolmá na $OA$, jenže osa $o$ je kolmá na $AA'$, tedy také na $OA$, a~prochází bodem $S$; kolmice na $OA$ vedená bodem $S$ je jediná, takže by $OS$ splynula s~$o$ a~vyšlo by $O \in o$. Proto $k = (ABC)$ a~bod $S$ do hledané množiny patří.
+
+    Hledanou množinou je tedy celá přímka $o$. Vypadlý průměr na přímce $AO$ z~ní nic neubírá: když se $BC$ blíží k~přímce $AO$, střed opsané kružnice utíká do nekonečna.
+}
+
+\EnvId{LXEsnZBgkxot2nd2tvdA_-trojuhelnik-s-obvodem-ctyri}
+\Problem{0}{}{
+    Nechť $ABC$ je trojúhelník s~obvodem $4$. Body $P$ a~$Q$ leží po řadě na polopřímkách $AB$ a~$AC$ tak, že $|AP| = |AQ| = 1$ a~úsečky $BC$ a~$PQ$ se protínají v~bodě $X$. Dokažte, že jeden ze dvou trojúhelníků, na které $AX$ dělí trojúhelník $ABC$, má obvod $2$.
+}{
+    První trik je vzpomenout si na jedno obzvlášť pěkné místo, kde se v~geometrii trojúhelníku vyskytuje obvod (nebo snad jeho polovina)?
+}{
+    Vzdálenost z~$A$ do bodů dotyku kružnice připsané proti vrcholu $A$ na přímkách $AB$ a~$AC$ je přesně polovina obvodu, tedy 2. A~$|AP|=|AQ|=1$. Je to náhoda?
+}{
+    Není to náhoda (jinak bych se neptal). Nechť se kružnice připsaná proti vrcholu $A$ dotýká $AB$ a~$AC$ v~$D$ a~$E$. Máme $|AD|=|AE|=2$ a~$|AP|=|AQ|=1$. Přímka $PQ$ je obrazem $A$-poláry kružnice připsané proti vrcholu $A$ ve stejnolehlosti se středem $A$ a~koeficientem $1/2$. Co o~této přímce víme?
+}{
+    Inu, tato přímka je chordálou $A$ a~kružnice připsané proti vrcholu $A$! A~$X$ na ní leží. Blížíme se.
+}{
+    Posledním bodem k~nakreslení je bod dotyku připsané kružnice a~$BC$. Využitím faktu, že $X$ leží na této chordále, dostaneme nějaké pěkné rovnosti délek.
+}{
+    Polovina obvodu je $2$ a~přesně to je vzdálenost z~$A$ k~bodům dotyku kružnice připsané proti $A$; na náhodu s~$|AP| = |AQ| = 1$ je toho příliš mnoho, tak si tu kružnici dokreslíme.
+
+    Označme $a = |BC|$, $b = |CA|$, $c = |AB|$, takže $a + b + c = 4$. Nechť se kružnice $\omega$ připsaná proti vrcholu $A$ dotýká přímek $AB$, $AC$ po řadě v~bodech $D$, $E$ a~strany $BC$ v~bodě $F$; bod $D$ leží na polopřímce $AB$ za $B$ a~bod $E$ na polopřímce $AC$ za $C$. Z~tečnových úseků máme
+    $$
+    \gather
+    |AD| = |AE| = 2, \\
+    |BF| = |BD| = 2 - c, \qquad |CF| = |CE| = 2 - b.
+    \endgather
+    $$
+    Poslední dvě délky jsou kladné, protože z~trojúhelníkové nerovnosti je $b < 2$ i~$c < 2$; bod $F$ tedy leží uvnitř úsečky $BC$.
+
+    Jelikož $|AP| = |AD|/2$ a~$|AQ| = |AE|/2$, jsou $P$, $Q$ středy úseček $AD$, $AE$ a~přímka $PQ$ je střední příčka trojúhelníku $ADE$ rovnoběžná s~$DE$. To je ale přesně chordála bodu $A$ (kružnice s~nulovým poloměrem) a~kružnice $\omega$, protože $D$, $E$ jsou body dotyku tečen z~$A$ k~$\omega$.
+
+    Bod $X$ leží na $PQ$, má tedy stejnou mocnost k~$A$ i~k~$\omega$. Přímka $BC$ se dotýká $\omega$ v~bodě $F$, takže
+    $$
+    |XA|^2 = p(X,A) = p(X,\omega) = |XF|^2,
+    $$
+    čili $|XA| = |XF|$.
+
+    Podle zadání leží $X$ uvnitř úsečky $BC$ a~uvnitř ní leží i~$F$. Pokud $X$ leží na úsečce $BF$, je $|BX| + |XF| = |BF|$ a~obvod trojúhelníku $ABX$ je
+    $$
+    c + |BX| + |XA| = c + |BX| + |XF| = c + |BF| = 2.
+    $$
+    Pokud $X$ leží na úsečce $FC$, analogicky dostaneme obvod trojúhelníku $ACX$ rovný $b + |CF| = 2$.
+}
+
+\secc Vícehubky
+
+\EnvId{7y0HAQ9sYFS9_vmJJ7wwH-paty-kolmic-z-vnitrniho-bodu}
+\Problem{0}{}{
+    Je dán ostroúhlý trojúhelník $ABC$. Označme $A'$ patu výšky vedené z~vrcholu $A$. Nechť $P$ je libovolný vnitřní bod trojúhelníku $ABC$ a~nechť $D, E, Q$ jsou po řadě paty kolmic z~něho vedených na přímky $AB$, $AC$, $AA'$. Dokažte, že platí
+    $$
+    \bigl|\,|AC|\cdot|AE|-|AB|\cdot|AD|\,\bigr| = |PQ|\cdot|BC|.
+    $$
+    (výzva: najděte tři různé způsoby řešení, kde každý z~nich používá mocnost úplně jiným způsobem)
+}{
+    Jsou tři možné postupy, kde se dá použít mocnost. Doporučuji zkusit všechny tři. Série hintů budou postupně ke všem třem paralelně.
+    \begitems \style a
+    \i $|AB|\cdot|AD|$ a~$|AC|\cdot|AE|$ znějí, že chceme mocnost z~$A$. Na to zatím nemáme kružnici, ale přirozeně nějakou definuji.
+    \i Výraz v~absolutní hodnotě umíme interpretovat jako rozdíl mocnosti $A$ ke dvěma kružnicím. Ty musíme vymyslet. Kdybychom je ale měli, tak my máme super větu o~množině bodů, které mají stejný rozdíl mocnosti ke dvěma kružnicím. Zkuste tyto kružnice vymyslet.
+    \i Zajímá nás rozdíl mocnosti bodu $A$ k~nějakým dvěma kružnicím. Vymysleme tyto kružnice a~použijeme definici mocnosti.
+    \enditems
+}{
+    \begitems \style a
+    \i Klíčem jsou průsečíky $DP$ a~$PE$ s~přímkou $AA'$, ozn. je po řadě $R$ a~$S$.
+    \i Klíčové kružnice mají procházet body $B$, $D$, resp. $C$, $E$. Occamova břitva tu zafunguje, nejjednodušší volba je ta správná.
+    \i Klíčové kružnice jsou ideálně takové, kde známe střed, protože potřebujeme spočitatelnou vzdálenost.
+    \enditems
+}{
+    \begitems \style a
+    \i Díky pravým úhlům máme tětivový čtyřúhelník a~$|AB|\cdot|AD|$ umíme přepsat na $|AR|\cdot|AA'|$. Co nám zbude ukázat, bude mnohem jednodušší.
+    \i Vezměme si kružnice s~průměry $BP$ a~$CP$. Ty mají dobré středy, to je důležité pro určení množiny, která má rozdíl mocnosti rovný danému číslu. Také, kde se protínají?
+    \i Hledané kružnice jsou s~průměry $BP$ a~$CP$. Pokud jejich středy označíme jako $M$ a~$N$, tak levá strana je vlastně rovna $\bigl(|AN|^2-|CN|^2\bigr)-\bigl(|AM|^2-|BM|^2\bigr)$. To vypadá děsivě, ale dá se to spočítat a~nebolí to (i~já jsem to zvládl).
+    \enditems
+}{
+    \begitems \style a
+    \i Ve finále nám stačí najít vhodnou podobnost trojúhelníků. Z~pravých úhlů ji najdeme rychle.
+    \i Protínají se v~průmětu $P$ na $BC$. Díky řečené magii teď umíme měřit zkoumaný rozdíl mocnosti z~jiného bodu. Kterého?
+    \i Plán výpočtu: $|AM|$ je těžnice v~$ABP$, tu vyjádříme. Zbude nám $|AP|^2$, to se zruší, $|AB|^2$, to je fajn, a~$|BP|^2$, to je taky fajn, náš průměr. Když ještě přidáme Pythagorovu větu po cestě, půjde to.
+    \enditems
+}{
+    \begitems \style a
+    \i Převeďte identitu na výšku a~následně použijte ještě podobnost trojúhelníků $ABC$ a~$PRS$, abyste se zbavili spojení hodnot $|PQ|$, $|AA'|$.
+    \i Klíčem je měřit z~bodu $A'$. Věřte nevěřte, ale ono se to teď velmi rychle vzdá. Pozor na znaménka, jsou důležitá, body uvnitř mají zápornou mocnost.
+    \i Označte ještě $F$ kolmý průmět $P$ na $BC$. Pak umíme celou identitu převést na úsečku $BC$, po troše počítání.
+    \enditems
+}{
+    Ve všech třech řešeních použijeme patu $F$ kolmice z~$P$ na $BC$. Jelikož $PQ \perp AA'$, $PF \perp BC$ a~$AA' \perp BC$, je $A'FPQ$ obdélník, takže
+    $$
+    |PQ| = |A'F|;
+    $$
+    ve druhém a~třetím řešení dokazujeme přímo tvar s~$|A'F| \cdot |BC|$. Jelikož $P$ je vnitřní bod, je $|\angle PAB| < |\angle BAC| < 90^\circ$ a~podobně $|\angle PBA| < 90^\circ$, takže $D$ leží uvnitř $AB$; stejně tak $E$ uvnitř $AC$ a~body $A'$, $F$ uvnitř $BC$.
+
+    \textit{První způsob (a).} Součin $|AB| \cdot |AD|$ si žádá kružnici přes $B$, $D$; vybereme takovou, která protíná i~$AA'$. Označme $R$, $S$ průsečíky přímek $DP$, $EP$ s~$AA'$ (existují, protože $DP \perp AB$, $AA' \perp BC$ a~$AB \not\parallel BC$).
+
+    Na kružnici $\omega$ s~průměrem $RB$ leží $D$ i~$A'$, protože $|\angle RDB| = |\angle RA'B| = 90^\circ$. Přímky $AB$, $AA'$ ji protínají ve dvojicích $D$, $B$ a~$A'$, $R$, takže oba součiny jsou rovny $|p(A,\omega)|$:
+    $$
+    |AB| \cdot |AD| = |AR| \cdot |AA'|.
+    $$
+    (Pokud $R = A'$, je $AA'$ tečnou $\omega$ a~kritérium tečny dá tentýž vztah.) Stejně tak z~kružnice s~průměrem $SC$ přes $E$, $A'$:
+    $$
+    |AC| \cdot |AE| = |AS| \cdot |AA'|.
+    $$
+
+    Body $R$, $S$ leží na polopřímce $AA'$: úhly $|\angle DAR|$ i~$|\angle BAA'|$ jsou ostré (pravoúhlé trojúhelníky $ADR$, $ABA'$), zatímco opačná polopřímka svírá s~$AB$ úhel tupý. Proto
+    $$
+    \gather
+    \bigl|\,|AC| \cdot |AE| - |AB| \cdot |AD|\,\bigr| = \\
+    = |AA'| \cdot \bigl|\,|AS| - |AR|\,\bigr| = |AA'| \cdot |RS|
+    \endgather
+    $$
+    a~zbývá $|RS| \cdot |AA'| = |PQ| \cdot |BC|$. Strany $PR \perp AB$, $PS \perp AC$, $RS \perp BC$, takže otočením o~$90^\circ$ přejde $PRS$ na trojúhelník se stranami rovnoběžnými se stranami $ABC$; tedy $\triangle PRS \sim \triangle ABC$, $P \mapsto A$, $R \mapsto B$, $S \mapsto C$. Výška z~$P$ na $RS$ je $PQ$ (bod $Q$ leží na přímce $RS = AA'$) a~odpovídá výšce $AA'$, takže
+    $$
+    \frac{|PQ|}{|AA'|} = \frac{|RS|}{|BC|}.
+    $$
+    (Pokud $P$ leží na $AA'$, je $R = S = Q = P$ a~obě strany jsou nulové.)
+
+    \textit{Druhý způsob (b).} Výraz v~absolutní hodnotě čtěme jako \textit{rozdíl} mocností bodu $A$ ke dvěma kružnicím. Jelikož $|\angle BDP| = |\angle CEP| = 90^\circ$, leží $D$ na kružnici $\omega_B$ s~průměrem $BP$ a~$E$ na kružnici $\omega_C$ s~průměrem $CP$. Bod $A$ vidí průměr $BP$ pod úhlem $|\angle BAP| < 90^\circ$, leží tedy vně $\omega_B$, kterou $AB$ protíná v~$D$, $B$; stejně tak pro $\omega_C$, takže
+    $$
+    p(A,\omega_B) = |AD| \cdot |AB|, \quad p(A,\omega_C) = |AE| \cdot |AC|.
+    $$
+    Nechť $M$, $N$ jsou středy $\omega_B$, $\omega_C$, tedy středy $BP$, $CP$, a~nechť $f(X) = p(X,\omega_C) - p(X,\omega_B)$; dokazujeme $|f(A)| = |PQ| \cdot |BC|$.
+
+    Úsečka $MN$ je střední příčka trojúhelníku $PBC$, takže $MN \parallel BC$ a~$M \neq N$. Vrstevnice funkce $f$ jsou přímky kolmé na $MN$, tedy na $BC$, a~$AA'$ je jednou z~nich:
+    $$
+    f(A) = f(A').
+    $$
+    Přímka $BC$ protíná $\omega_B$ v~$B$, $F$ a~$\omega_C$ v~$C$, $F$. Nechť $F$ leží na téže straně od $A'$ jako $C$ (druhý případ je symetrický, pro $F = A'$ jsou obě strany nulové), pořadí na $BC$ je tedy $B$, $A'$, $F$, $C$. Bod $A'$ leží uvnitř úsečky $BF$, tedy uvnitř $\omega_B$, ale mimo úsečku $FC$, tedy vně $\omega_C$:
+    $$
+    \gather
+    p(A',\omega_B) = -|A'B| \cdot |A'F|, \\
+    p(A',\omega_C) = |A'C| \cdot |A'F|.
+    \endgather
+    $$
+    Znaménka jsou opačná, takže se oba členy rozdílu \textit{sčítají}:
+    $$
+    \gather
+    f(A') = |A'C| \cdot |A'F| + |A'B| \cdot |A'F| = \\
+    = |A'F| \cdot \bigl(|A'B| + |A'C|\bigr) = |A'F| \cdot |BC|,
+    \endgather
+    $$
+    kde v~posledním kroku využíváme, že $A'$ leží uvnitř $BC$.
+
+    \textit{Třetí způsob (c).} Kružnice $\omega_B$, $\omega_C$ se středy $M$, $N$ jsou tytéž jako v~(b), stejně tak $|AB| \cdot |AD| = p(A,\omega_B)$ a~$|AC| \cdot |AE| = p(A,\omega_C)$. Nyní je však spočítáme přímo z~definice; poloměry jsou $|BM|$, $|CN|$, takže
+    $$
+    \gather
+    |AC| \cdot |AE| - |AB| \cdot |AD| = \\
+    = \bigl(|AN|^2 - |CN|^2\bigr) - \bigl(|AM|^2 - |BM|^2\bigr).
+    \endgather
+    $$
+    Úsečka $AM$ je těžnice trojúhelníku $ABP$, tedy $4|AM|^2 = 2|AB|^2 + 2|AP|^2 - |BP|^2$, a~$4|BM|^2 = |BP|^2$; odečtením
+    $$
+    |AM|^2 - |BM|^2 = \frac{|AB|^2 + |AP|^2 - |BP|^2}{2}
+    $$
+    a~analogicky
+    $$
+    |AN|^2 - |CN|^2 = \frac{|AC|^2 + |AP|^2 - |CP|^2}{2}.
+    $$
+    Člen $|AP|^2$ se zruší:
+    $$
+    \gather
+    |AC| \cdot |AE| - |AB| \cdot |AD| = \\
+    = \frac{|AC|^2 - |CP|^2 - |AB|^2 + |BP|^2}{2}.
+    \endgather
+    $$
+    Pythagorova věta přes paty $A'$ a~$F$ dává
+    $$
+    \gather
+    |AB|^2 = |AA'|^2 + |A'B|^2, \quad |AC|^2 = |AA'|^2 + |A'C|^2, \\
+    |BP|^2 = |PF|^2 + |FB|^2, \quad |CP|^2 = |PF|^2 + |FC|^2,
+    \endgather
+    $$
+    takže $|AA'|^2$ i~$|PF|^2$ se zruší a~zbude
+    $$
+    \gather
+    |AC| \cdot |AE| - |AB| \cdot |AD| = \\
+    = \frac{|A'C|^2 - |A'B|^2 - |FC|^2 + |FB|^2}{2}.
+    \endgather
+    $$
+    Identita je tím přenesena na úsečku $BC$. Označme $a = |BC|$, $t_1 = |BA'|$, $t_2 = |BF|$. Pro vnitřní bod $X$ úsečky $BC$ a~$t = |BX|$ je $|XC|^2 - |XB|^2 = (a-t)^2 - t^2 = a^2 - 2at$, takže pro $X = A'$ a~$X = F$ se členy $a^2$ odečtou:
+    $$
+    \gather
+    |AC| \cdot |AE| - |AB| \cdot |AD| = \\
+    = \frac{(a^2 - 2at_1) - (a^2 - 2at_2)}{2} = a \cdot (t_2 - t_1).
+    \endgather
+    $$
+    Nakonec $|t_2 - t_1| = |A'F| = |PQ|$, takže v~absolutní hodnotě je pravá strana rovna $|BC| \cdot |PQ|$.
+}
+
+\EnvId{J6K8ku5QIYW3g8-gx_Qql-teziste-a-dve-kruznice}
+\Problem{0}{Kanada 2013}{
+    V~pravoúhlém trojúhelníku $ABC$ s~přeponou $AB$ označme $G$ těžiště. Předpokládejme, že na polopřímce $AG$ existuje bod $P \neq G$ splňující $|\angle CPA| = |\angle CAB|$ a~na polopřímce $BG$ bod $Q \neq G$ splňující $|\angle CQB| = |\angle ABC|$. Dokažte, že kružnice $(AQG)$ a~$(BPG)$ se protínají na $AB$.
+}{
+    Úhly v~rovnostech jsou ještě někde jinde v~obrázku a~něco pěkně říkají.
+}{
+    $CG$ leží na těžnici, takže půlí $AB$ v~$M$, tento střed je v~pravoúhlém trojúhelníku milý.
+}{
+    $MAC$ je přece rovnoramenný, protože $|MA|=|MC|=|MB|$. Tím pádem je $|\angle BAC| = |\angle ACM|$, tedy i~$|\angle ACG|$. Co to ale znamená vzhledem k~dalšímu místu, kde se tento úhel nachází?
+}{
+    Stejné úhly dávají, že $AC$ je tečna $(CGP)$. To už vypadá, že na něco je. My se ale zajímáme o~kružnici $(BPG)$ ze zadání. Tyto dvě kružnice znějí, že mají něco společného. Už jsme blízko.
+}{
+    Bod $A$ zřejmě leží na chordále $(CPG)$ a~$(BPG)$, přičemž jeho mocnost k~první z~nich je $|AC|^2$, tedy i~k~druhé. Co tedy bude druhý průsečík druhé z~nich s~$AB$? Vzpomeňme si na dobré věty v~pravoúhlém trojúhelníku.
+}{
+    Označme $M$ střed přepony $AB$, $D$ patu výšky z~vrcholu $C$, $\alpha = |\angle CAB|$ a~$\beta = |\angle ABC|$. Ukážeme, že hledaným společným bodem je $D$.
+
+    Podle Thaletovy věty je $|MA| = |MB| = |MC|$, takže trojúhelník $AMC$ je rovnoramenný a~$|\angle ACM| = |\angle MAC| = \alpha$. Těžiště $G$ leží na úsečce $CM$, čili polopřímky $CG$ a~$CM$ splývají a~dostáváme
+    $$
+    |\angle ACG| = |\angle ACM| = \alpha = |\angle APC|.
+    $$
+    Úhel při $A$ je v~trojúhelnících $ACG$ a~$APC$ tentýž, protože $P$ leží na polopřímce $AG$, takže podle věty $uu$ je $\triangle ACG \sim \triangle APC$ (v~pořadí vrcholů $A \leftrightarrow A$, $C \leftrightarrow P$, $G \leftrightarrow C$), z~čehož
+    $$
+    |AC|^2 = |AG| \cdot |AP|.
+    $$
+    Podobnost tu obchází rozbor případů: $P$ může ležet mezi $A$ a~$G$ i~za $G$, ale úhel při $A$ je v~obou trojúhelnících jeden a~tentýž.
+
+    Body $G$, $P$ leží na téže polopřímce z~$A$, takže $A$ leží mimo úsečku $GP$ a~podle kritéria tečny je $AC$ tečnou kružnice $(CGP)$ v~bodě $C$. Chordálou kružnic $(CGP)$ a~$(BPG)$ je přímka $PG$, tedy přímka $AG$, a~na té leží $A$, proto
+    $$
+    p\bigl(A,(BPG)\bigr) = p\bigl(A,(CGP)\bigr) = |AC|^2 > 0.
+    $$
+    (Pokud $B$ leží na $(CGP)$, což nastane právě pro $|CA|^2 = 2|CB|^2$, jde o~jednu a~tutéž kružnici a~rovnost platí bez chordály.)
+
+    Mocnost je kladná, takže $A$ leží vně $(BPG)$. Pokud je $X$ druhý průsečík přímky $AB$ s~touto kružnicí, leží $X$ i~$B$ na téže polopřímce z~$A$, a~tedy $|AX| \cdot |AB| = |AC|^2$.
+
+    Analogicky (s~$A \leftrightarrow B$, $P \leftrightarrow Q$, $\alpha \leftrightarrow \beta$) je $|\angle BCG| = \beta = |\angle BQC|$, odkud $\triangle BCG \sim \triangle BQC$ a~$|BC|^2 = |BG| \cdot |BQ|$. Přímka $BC$ je tak tečnou $(CGQ)$ v~bodě $C$, chordálou kružnic $(CGQ)$ a~$(AQG)$ je přímka $QG$, čili přímka $BG$ procházející bodem $B$, a~pro druhý průsečík $Y$ přímky $AB$ s~kružnicí $(AQG)$ máme $|BY| \cdot |BA| = |BC|^2$.
+
+    Euklidovy věty o~odvěsně dávají $|AC|^2 = |AD| \cdot |AB|$ a~$|BC|^2 = |BD| \cdot |BA|$, takže $|AX| = |AD|$ a~$|BY| = |BD|$. Body $X$, $D$ leží na polopřímce $AB$ a~body $Y$, $D$ na polopřímce $BA$, proto $X = D = Y$.
+}
+
+\EnvId{N3RPdKDeLi_eQoXhWN92i-sest-bodu-na-jedne-kruznici}
+\Problem{0}{IMO 2008 P1}{
+    Označme $H$ ortocentrum ostroúhlého trojúhelníku $ABC$. Kružnice se středem ve středu $BC$ procházející bodem $H$ protíná $BC$ v~bodech $A_1,A_2$. Body $B_1,B_2,C_1,C_2$ definujeme analogicky. Ukažte, že body $A_1,A_2,B_1,B_2,C_1,C_2$ leží na jedné kružnici.
+}{
+    Máme tu kružnice, které mají společný jeden bod $H$. Nabízí se přemýšlet o~jejich druhém společném bodě, co to bude zač?
+}{
+    Platí, že např. kružnice $(B_1B_2H)$ a~$(C_1C_2H)$ se znovu protínají na $AH$, proč? Co to znamená?
+}{
+    To, že naše kružnice mají středy ve středech stran, znamená, že druhý průsečík kružnic $(B_1B_2H)$ a~$(C_1C_2H)$ bude obraz $H$ v~osové souměrnosti podle střední příčky přes jejich středy (rovnoběžné s~$BC$), čili bude ležet na $AH$. To je úplně super, protože nám to dává, že $AH$ je chordála těchto kružnic. Co nám tohle dává?
+}{
+    Když máme, že $AH$ je chordála, tak z~mocnosti dostaneme, že $B_1$, $B_2$, $C_1$, $C_2$ leží na kružnici. Podobně zbylé. Poslední krok je uvědomit si, proč je tohle jediná kružnice.
+}{
+    Trikem k~tomu, abychom si uvědomili, proč je to jediná kružnice, je rozmyslet si, kde by mohl být střed našich \uv{tří} kružnic.
+}{
+    Označme $M_A$, $M_B$, $M_C$ středy stran $BC$, $CA$, $AB$ a~$\omega_A$, $\omega_B$, $\omega_C$ kružnice ze zadání, tedy $\omega_A$ má střed $M_A$ a~prochází bodem $H$. Trojúhelník je ostroúhlý, takže $H$ leží uvnitř něj, je různý od středů stran a~všechny tři poloměry jsou kladné. Střed kružnice $\omega_B$ leží na přímce $CA$, takže ta je jejím průměrem a~protíná ji v~bodech $B_1$, $B_2$ se středem $M_B$; analogicky pro zbylé dvě.
+
+    Ukážeme, že chordálou kružnic $\omega_B$, $\omega_C$ je přímka $AH$. Střední příčka $M_BM_C$ obsahuje středy obou, takže osová souměrnost podle ní zobrazí každou z~nich samu na sebe a~obraz $H'$ bodu $H$ leží na obou. Přímka $M_BM_C$ je rovnoběžná s~$BC$ a~$AH$ je kolmá na $BC$, takže kolmicí na $M_BM_C$ vedenou bodem $H$ je právě $AH$, čili $H'$ leží na $AH$. Pokud $H' \neq H$, je chordálou přímka $HH' = AH$. Pokud $H' = H$, leží $H$ na spojnici středů; společné body dvou nesoustředných kružnic jsou podle ní souměrné, takže $H$ je jejich jediný společný bod, kružnice se v~něm dotýkají a~chordálou je jejich společná tečna v~$H$, kolmá na $M_BM_C$, čili zase $AH$. Tak či onak bod $A$ leží na chordále.
+
+    Zbývá ověřit znaménka. V~ostroúhlém trojúhelníku je $|\angle AHC| = 180^\circ - |\angle ABC|$, čili $|\angle AHC| > 90^\circ$, takže $H$ leží uvnitř kružnice s~průměrem $AC$, jejímž středem je $M_B$; poloměr $\omega_B$ proto splňuje $|M_BH| < |CA|/2 = |AM_B| = |CM_B|$. Body $A$ i~$C$ tak leží vně $\omega_B$ a~$B_1$, $B_2$ uvnitř úsečky $CA$. Stejně tak $A$, $B$ leží vně $\omega_C$ a~$C_1$, $C_2$ uvnitř úsečky $AB$.
+
+    Obě mocnosti bodu $A$ jsou kladné a~z~toho, že $A$ leží na chordále, dostaneme
+    $$
+    |AB_1| \cdot |AB_2| = p(A,\omega_B) = p(A,\omega_C) = |AC_1| \cdot |AC_2|.
+    $$
+    Bod $A$ leží mimo obě úsečky $B_1B_2$, $C_1C_2$, takže podle kritéria tětivovosti leží $B_1$, $B_2$, $C_1$, $C_2$ na jedné kružnici $\gamma_A$. Jsou to čtyři různé body ($B_1 \neq B_2$ a~$C_1 \neq C_2$ díky kladným poloměrům a~přímky $CA$, $AB$ se protínají jen v~$A$, který na kružnicích neleží), přitom $B_1$, $B_2$, $C_1$ neleží na jedné přímce, takže $\gamma_A$ je jednoznačná. Cyklickou záměnou $A \to B \to C$ dostaneme kružnici $\gamma_B$ přes $C_1$, $C_2$, $A_1$, $A_2$ a~kružnici $\gamma_C$ přes $A_1$, $A_2$, $B_1$, $B_2$.
+
+    Střed kružnice $\gamma_A$ je stejně vzdálený od $B_1$, $B_2$, které leží na přímce $CA$ a~jsou souměrné podle $M_B$, takže leží na kolmici na $CA$ v~bodě $M_B$, čili na ose strany $CA$; stejně tak leží na ose strany $AB$. Ty se protínají jedině ve středu $O$ kružnice opsané trojúhelníku $ABC$, a~tentýž argument dává střed $O$ i~pro $\gamma_B$ a~$\gamma_C$. Kružnice $\gamma_A$, $\gamma_C$ mají společný střed a~obě procházejí bodem $B_1$, takže splývají; stejně tak splývají $\gamma_B$ a~$\gamma_C$ díky bodu $A_1$. Všech šest bodů tedy leží na jedné kružnici se středem $O$.
+}
+
+\EnvId{FsSRgKx51GgWUNGN22ZRu-dva-prumery-a-ortocentrum}
+\Problem{0}{IMO 2013 P4}{
+    Nechť $ABC$ je ostroúhlý trojúhelník s~ortocentrem $H$ a~nechť $W$ je vnitřní bod strany $BC$. Body $M$ a~$N$ jsou po řadě paty výšek z~bodů $B$ a~$C$. Označme $\omega_1$ kružnici opsanou trojúhelníku $BWN$ a~nechť $X$ je takový bod na $\omega_1$, že $WX$ je jejím průměrem. Analogicky označme $\omega_2$ kružnici opsanou trojúhelníku $CWM$ a~nechť $Y$ je takový bod na $\omega_2$, že $WY$ je jejím průměrem. Dokažte, že body $X,Y$ a~$H$ leží na jedné přímce.
+}{
+    Kružnice s~danými dvěma průměry, přímo se nabízí je protnout.
+}{
+    Jejich druhý průsečík (kromě $W$) označme $Z$, je to dobrý bod, např. leží na přímce $XY$. Počkat, my dokazujeme, že $X$, $Y$, $H$ jsou na přímce. To nebude náhoda. Co by stačilo dokázat?
+}{
+    Inu, stačilo by, že $ZH$ je kolmé na $ZW$. Není to ale evidentní, dokud si neuvědomíme, co vlastně je $WZ$.
+}{
+    $WZ$ je přece chordála našich kružnic. Neleží na ní něco dalšího dobrého?
+}{
+    Leží na ní $A$! Proč? Inu, to zní jako mocnost, to půjde. Jak nám tohle ale přeformuluje $ZH$ kolmé na $ZW$?
+}{
+    Přeformuluje nám to pěkně, stačí nám potom $AZ$ kolmé na $HZ$. A~to už je opravdu těsně v~cíli.
+}{
+    V~ostroúhlém trojúhelníku leží $N$ uvnitř $AB$, $M$ uvnitř $AC$, a~pokud označíme $A'$ patu výšky z~$A$, tak $A'$ leží uvnitř $BC$ a~$H$ uvnitř úsečky $AA'$. Bod $N$ tedy neleží na $BC$, takže $B$, $W$, $N$ nejsou kolineární a~$\omega_1$ existuje; stejně tak $\omega_2$. Jsou to různé kružnice, protože jinak by na jedné kružnici ležely tři body $B$, $W$, $C$ přímky $BC$. Různé kružnice se společným bodem $W$ nejsou soustředné, takže jejich chordála je přímka.
+
+    Předpokládejme prozatím, že $\omega_1$, $\omega_2$ mají kromě $W$ ještě druhý společný bod $Z$; dokážeme to za chvíli. Z~průměru $WX$ a~Thaletovy věty je $|\angle WZX| = 90^\circ$ (pro $X = Z$ triviálně), takže $X$ leží na přímce $\ell$ vedené bodem $Z$ kolmo na $WZ$; stejně tak z~průměru $WY$ leží na $\ell$ i~$Y$. Celá úloha se tím redukuje na to, že na $\ell$ leží i~bod $H$, což pro $Z \neq H$ znamená
+    $$
+    ZH \perp ZW.
+    $$
+
+    Přímka $WZ$ je chordála kružnic $\omega_1$, $\omega_2$ a~leží na ní i~bod $A$. Přímka $AB$ totiž protíná $\omega_1$ v~bodech $N$, $B$ ležících na téže polopřímce z~$A$, takže $A$ leží vně $\omega_1$ a~$p(A,\omega_1) = |AN| \cdot |AB|$; analogicky $p(A,\omega_2) = |AM| \cdot |AC|$. Z~$|\angle BNC| = |\angle BMC| = 90^\circ$ leží $M$ i~$N$ na Thaletově kružnici nad průměrem $BC$, a~jelikož $A$ leží mimo úsečky $NB$ i~$MC$, kritérium tětivovosti dává $|AN| \cdot |AB| = |AM| \cdot |AC|$.
+
+    Stejně tak $|\angle BNH| = 90^\circ$ (bod $H$ leží na přímce $CN$ kolmé na $AB$) a~$|\angle BA'H| = 90^\circ$, takže $N$, $A'$ leží na Thaletově kružnici nad průměrem $BH$; bod $A$ leží mimo úsečku $NB$ i~mimo úsečku $HA'$ (pořadí $A$, $H$, $A'$), a~kritérium tětivovosti dává $|AN| \cdot |AB| = |AA'| \cdot |AH|$. Společnou hodnotu označme $k$:
+    $$
+    p(A,\omega_1) = p(A,\omega_2) = k = |AA'| \cdot |AH|.
+    $$
+
+    Nyní existence $Z$. Kdyby se kružnice v~bodě $W$ dotýkaly, jejich chordálou by byla společná tečna v~$W$, která podle předchozího prochází bodem $A$, a~tedy $k = |AW|^2$. Jenže $AA'$ je nejkratší spojnice bodu $A$ s~přímkou $BC$, takže $|AH| < |AA'| \leq |AW|$ a~$k = |AA'| \cdot |AH| < |AW|^2$, spor. Bod $Z$ tedy existuje a~$Z \neq W$.
+
+    Body $A$, $Z$, $W$ jsou kolineární, přímka $AW$ protíná $\omega_1$ právě v~$W$ a~$Z$, a~$A$ leží vně $\omega_1$, takže $|AZ| \cdot |AW| = k < |AW|^2$. Odtud $|AZ| < |AW|$, čili $Z$ leží uvnitř úsečky $AW$ (a~tedy $A$ leží mimo úsečku $ZW$). Z~kolinearity $A$, $Z$, $W$ je dokazovaná kolmost $ZH \perp ZW$ totéž jako $AZ \perp HZ$.
+
+    Nechť nejprve $W \neq A'$. Body $Z$, $W$ leží na přímce $AW$, body $H$, $A'$ na přímce $AA'$; tyto přímky jsou různé a~protínají se pouze v~$A$, odkud je vidět, že všechny čtyři body jsou navzájem různé. Bod $A$ leží mimo úsečku $ZW$ i~mimo úsečku $HA'$ a~přitom
+    $$
+    |AZ| \cdot |AW| = k = |AA'| \cdot |AH|,
+    $$
+    takže podle kritéria tětivovosti leží $Z$, $W$, $A'$, $H$ na jedné kružnici. Ta obsahuje $W$, $A'$, $H$ s~$|\angle WA'H| = 90^\circ$, je to tedy Thaletova kružnice nad průměrem $WH$, a~z~$Z \neq W$ dostáváme $|\angle WZH| = 90^\circ$.
+
+    Pokud $W = A'$, tak z~$|AZ| \cdot |AW| = |AW| \cdot |AH|$ je $|AZ| = |AH|$, a~jelikož $Z$ i~$H$ leží uvnitř úsečky $AW$, je $Z = H$. V~obou případech tedy $H$ leží na přímce $\ell$, na které leží i~$X$ a~$Y$.
+}
+
+\EnvId{mcFgi9_8MevHOvQjTzgAs-kruznice-stredu-usecek-a-tecna}
+\Problem{0}{IMO 2009 P2}{
+    Dán je trojúhelník $ABC$ se středem opsané kružnice $O$. Nechť $P$ resp. $Q$ je vnitřní bod strany $CA$ resp. $AB$. Označme $K,L,M$ středy úseček $BP$, $CQ$, $PQ$ a~$\Gamma$ kružnici procházející body $K,L,M$. Předpokládejme, že přímka $PQ$ se dotýká kružnice $\Gamma$. Dokažte, že $|OP|=|OQ|$.
+}{
+    Bod $O$ je umělý. Neumíme přes mocnost naše tvrzení rozumněji přeformulovat?
+}{
+    Chceme dokázat, že $P$, $Q$ mají stejnou mocnost k~$(ABC)$. To zní jako výpočet, ale reálně ještě potřebujeme trochu pozorovat a~bude to pěkné.
+}{
+    Středy nám dávají střední příčky, které nám dávají stejné úhly. Rovněž úsekový úhel nám dává stejné úhly. Při troše úhlení umíme najít pěkné věci.
+}{
+    Přes úhlení chceme odhalit podobnost $MKL$ a~$APQ$. Ta nám poměrně pomůže (pun intended).
+}{
+    Z~podobnosti $MKL$ a~$APQ$ napíšeme vhodné poměry a~přes střední příčky, které jsou poloviny stran, to už doklepne.
+}{
+    Bod $O$ vystupuje v~zadání jedině přes vzdálenosti $|OP|$, $|OQ|$. Označme $\omega$ kružnici opsanou trojúhelníku $ABC$ a~$R$ její poloměr. Jelikož $p(P,\omega) = |OP|^2 - R^2$ a~$p(Q,\omega) = |OQ|^2 - R^2$, dokázat $|OP|=|OQ|$ je totéž jako dokázat $p(P,\omega) = p(Q,\omega)$.
+
+    Body $P$, $Q$ jsou vnitřními body tětiv $CA$, $AB$, leží tedy uvnitř $\omega$ a~přímky $CA$, $AB$ protínají $\omega$ v~dvojicích $A$, $C$ resp. $A$, $B$. Proto
+    $$
+    p(P,\omega) = -|AP| \cdot |PC|, \qquad p(Q,\omega) = -|AQ| \cdot |QB|,
+    $$
+    a~po vykrácení znamének zbývá dokázat
+    $$
+    |AP| \cdot |PC| = |AQ| \cdot |QB|. \eqno(*)
+    $$
+    Bod $O$ se už ve zbytku řešení neobjeví.
+
+    Bod $M$ leží na $PQ$ i~na $\Gamma$ a~tečna má s~kružnicí jediný společný bod, takže $PQ$ se dotýká $\Gamma$ právě v~$M$.
+
+    Tři středy volají po středních příčkách: v~trojúhelníku $PQB$ jsou $M$, $K$ středy stran $PQ$, $PB$ a~v~trojúhelníku $QPC$ jsou $M$, $L$ středy stran $QP$, $QC$, čili
+    $$
+    \gather
+    MK \parallel AB, \qquad |MK| = \tfrac12 |QB|, \\
+    ML \parallel CA, \qquad |ML| = \tfrac12 |PC|.
+    \endgather
+    $$
+    Všimněme si křížení: $MK$ je rovnoběžná se stranou $AB$, na které leží $Q$, a~$ML$ se stranou $CA$, na které leží $P$.
+
+    Přímka $PQ$ protíná strany $CA$, $AB$ v~jejich vnitřních bodech, takže odděluje $A$ od $B$ i~od $C$; středy $K$ (úsečky $BP$) i~$L$ (úsečky $CQ$) proto leží v~polorovině s~hraniční přímkou $PQ$ neobsahující $A$. Přímka $PQ$ je příčkou rovnoběžek $MK$, $QA$ a~body $K$, $A$ leží vůči ní na opačných stranách, takže jde o~střídavé úhly; stejně tak pro $ML$, $PA$:
+    $$
+    |\angle QMK| = |\angle AQP|, \qquad |\angle PML| = |\angle APQ|.
+    $$
+    Jelikož $M$ leží mezi $P$ a~$Q$, je $|\angle QML| = 180^\circ - |\angle APQ|$, a~ze součtu úhlů v~trojúhelníku $APQ$ je $|\angle AQP| < 180^\circ - |\angle APQ|$. Tedy $|\angle QMK| < |\angle QML|$, čili polopřímka $MK$ leží uvnitř úhlu $QML$ a~kolem $M$ jdou polopřímky v~pořadí $MQ$, $MK$, $ML$, $MP$.
+
+    Až teď použijeme dotyk. Podle věty o~úsekovém úhlu se pro tečnu $MQ$ a~tětivu $MK$ úsekový úhel rovná obvodovému úhlu nad $MK$ z~oblouku na druhé straně této tětivy, na kterém podle pořadí polopřímek leží $L$; analogicky pro tečnu $MP$ a~tětivu $ML$ s~bodem $K$. Dostáváme
+    $$
+    \gather
+    |\angle MLK| = |\angle QMK| = |\angle AQP|, \\
+    |\angle MKL| = |\angle PML| = |\angle APQ|.
+    \endgather
+    $$
+    Dva shodné úhly stačí:
+    $$
+    \triangle MKL \sim \triangle APQ, \qquad M \leftrightarrow A, \quad K \leftrightarrow P, \quad L \leftrightarrow Q.
+    $$
+    Na přiřazení vrcholů teď mimořádně záleží a~projeví se jím zmiňované křížení: straně $MK$, rovnoběžné s~$AB$, odpovídá strana $AP$ ležící na $CA$, a~ne $AQ$. Odpovídající si strany jsou tedy $MK$, $AP$ a~$ML$, $AQ$, takže
+    $$
+    \frac{|MK|}{|ML|} = \frac{|AP|}{|AQ|}.
+    $$
+    Po dosazení $|MK| = \tfrac12|QB|$ a~$|ML| = \tfrac12|PC|$ se poloviny vykrátí a~dostáváme $|QB| \, / \, |PC| = |AP| \, / \, |AQ|$, což je přesně $(*)$.
+}
+
+\EnvId{io6dFPVubPUNaY7p_2ASn-stredy-usecek-a-paty-vysek}
+\Problem{0}{Írán TST 2011}{
+    V~ostroúhlém trojúhelníku $ABC$ platí $|\angle ABC| > |\angle ACB|$. Označme $M$ střed strany $BC$ a~$D$, $E$ po řadě paty výšek z~vrcholů $C$ a~$B$. Nechť $K$ a~$L$ jsou po řadě středy úseček $ME$ a~$MD$. Přímka $KL$ protíná přímku vedenou bodem $A$ rovnoběžně s~$BC$ v~bodě $T$. Dokažte, že $|TA|=|TM|$.
+}{
+    Co víme o~bodě $M$ vzhledem k~bodům $D$, $E$?
+}{
+    Inu, víme, že $M$ je střed Thaletovky nad $BC$, kde leží i~$D$ a~$E$, tedy $|MD|=|ME|$. A~my máme v~naší úloze střední příčku takového rovnoramenného trojúhelníku. Není to podezřelé?
+}{
+    Trikem je si uvědomit, že $MD$ a~$ME$ jsou vlastně dobré úsečky, které souvisejí s~trojúhelníkem $ADE$ dobrým způsobem.
+}{
+    Jde totiž o~tečny ke kružnici jemu opsané. Co je potom přímka $KL$?
+}{
+    Přímka $KL$ je chordála bodu $M$ a~této zmiňované kružnice. A~my máme, že na ní leží jakýsi bod $T$ a~máme dokázat $|TA|=|TM|$. Jsme kousek od cíle.
+}{
+    Označme $a=|BC|$, $\ell$ rovnoběžku s~$BC$ vedenou bodem $A$ a~$\omega$ kružnici opsanou trojúhelníku $ADE$; ostroúhlost dává $D$ uvnitř $AB$ a~$E$ uvnitř $CA$, takže $A$, $D$, $E$ neleží na jedné přímce.
+
+    Z~$|\angle BDC| = |\angle BEC| = 90^\circ$ leží $D$, $E$ na Thaletově kružnici $k$ nad průměrem $BC$, která má střed $M$ a~poloměr $a/2$. Tedy $|MD| = |ME| = a/2$ a~$KL$ je střední příčka rovnoramenného trojúhelníku $MDE$ rovnoběžná s~$DE$. Přesně takhle vypadá chordála bodu a~kružnice, pokud jsou $MD$, $ME$ tečny k~$\omega$ v~$D$, $E$. Stačí tedy
+    $$
+    p(M,\omega) = |MD|^2 = \frac{a^2}{4}.
+    $$
+
+    Položme $F(X) = p(X,\omega) - p(X,k)$; z~$B, C \in k$ je $F(B) = p(B,\omega)$ a~$F(C) = p(C,\omega)$. Jelikož $D$ je uvnitř $AB$, leží $B$ vně $\omega$ a~$p(B,\omega) = |BD| \cdot |BA|$, stejně tak $p(C,\omega) = |CE| \cdot |CA|$. Nechť $A'$ je pata výšky z~$A$; leží uvnitř $BC$. Z~pravých úhlů při $D$ a~$A'$ leží $A$, $D$, $A'$, $C$ na kružnici s~průměrem $AC$, odkud $|BD| \cdot |BA| = |BA'| \cdot |BC|$, a~analogicky $|CE| \cdot |CA| = |CA'| \cdot |CB|$. Sečtením
+    $$
+    F(B) + F(C) = |BC| \cdot \bigl(|BA'| + |A'C|\bigr) = a^2.
+    $$
+    Z~linearity rozdílu mocností je $F(M) = a^2/2$, a~$M$ je střed $k$, takže $p(M,k) = -a^2/4$, a~tedy
+    $$
+    p(M,\omega) = F(M) + p(M,k) = \frac{a^2}{2} - \frac{a^2}{4} = \frac{a^2}{4}.
+    $$
+    Je to kladné číslo, takže $M$ opravdu leží vně $\omega$.
+
+    Nechť $N$ je střed a~$r$ poloměr $\omega$. Pak
+    $$
+    |MN|^2 = p(M,\omega) + r^2 = |MD|^2 + |ND|^2,
+    $$
+    takže podle obrácené Pythagorovy věty je $MD \perp ND$, čili $MD$ je tečna $\omega$ v~$D$; stejně tak $ME$ v~$E$. Přímka $KL$ je tedy chordálou nulové kružnice $M$ a~$\omega$, a~jelikož $T$ na ní leží, $|TM|^2 = p(T,\omega)$.
+
+    Zbývá ukázat, že $\ell$ je tečna $\omega$ v~$A$; pak spojení s~tečnou dá $p(T,\omega) = |TA|^2$. Nechť $H$ je ortocentrum; leží uvnitř (tedy $H \neq A$) na $CD$ i~$BE$, čili $|\angle ADH| = |\angle AEH| = 90^\circ$ a~body $D$, $E$ leží na Thaletově kružnici nad průměrem $AH$. Ta prochází i~bodem $A$, je to tedy $\omega$ a~$AH$ je její průměr. Tečna v~$A$ je proto kolmá na $AH$, a~jelikož $AH \perp BC \parallel \ell$, je jí právě $\ell$. Odtud $|TA|^2 = p(T,\omega) = |TM|^2$.
+
+    Předpoklad $|\angle ABC| > |\angle ACB|$ jsme nepoužili, zaručuje jen existenci $T$: jelikož $KL \parallel DE$, je třeba, aby $DE$ nebyla rovnoběžná s~$BC$, tedy $|AD|/|AB| \neq |AE|/|AC|$. Mocnost bodu $A$ ke $k$ dává $|AD| \cdot |AB| = |AE| \cdot |AC|$, čili $|AD|/|AE| = |AC|/|AB|$, kdežto rovnoběžnost žádá $|AD|/|AE| = |AB|/|AC|$; obojí naráz nastane právě pro $|AB| = |AC|$.
+}
+
+\EnvId{6KKwSZBU9LHnCZvzW_j8y-dotykovy-bod-a-stred-pripsane}
+\Problem{0}{MEMO 2014 T6}{
+    Kružnice $\omega$ vepsaná trojúhelníku $ABC$ se dotýká $BC$ v~bodě $D$. Nechť $L \neq D$ je průsečík přímky $AD$ a~kružnice $\omega$ a~nechť $K$ je střed kružnice připsané ke straně $BC$. Označme $M$ a~$N$ po řadě středy úseček $BC$ a~$KM$. Dokažte, že body $B,C,N$ a~$L$ leží na jedné kružnici.
+}{
+    Úloha na klasické situaci s~vepsanou a~připsanou kružnicí. Nejprve to tu trochu zkoumejme. V~úloze máme nápadně nějaké rovnoběžné věcičky.
+}{
+    Např. $AD$ a~$KM$ jsou rovnoběžné, což zní docela důležitě, protože na nich leží naše klíčové body $L$ a~$N$, které mají být na kružnici. Zkusme tuto rovnoběžnost nahlédnout.
+}{
+    Trik na její nahlédnutí je uvědomit si, kde $AD$ protíná připsanou kružnici. Jeden z~těchto dvou bodů je fakt dobrý.
+}{
+    Konkrétně ten \uv{nižší} (když je $BC$ vodorovně), označme $D'$. Bod $D$ je nejnižší na vepsané, tedy $D'$ bude nejnižší na připsané.
+}{
+    Další důležitý, méně trikový bod je dotyk připsané s~$BC$, označme ho $P$. Jaký je jeho vztah k~$M$? A~co $D'$?
+}{
+    Podle známého lemmatu (viz materiál Stejné tečny) je $M$ střed $DP$. Naše kýžená rovnoběžnost je skoro doma, už máme všechny body.
+}{
+    Je to vlastně střední příčka trojúhelníku $D'PD$. Každopádně, tolik hintů k~jedné rovnoběžnosti, na co to bylo dobré? Inu, on ten trojúhelník $D'PD$ toho hodně poskytuje, přes něj definujeme klíčový bod.
+}{
+    Klíčový bod by chtěl být takový, který nám pomůže dokázat finální kružnici, tedy ideálně aby souvisel s~body na ní. Bylo by fajn použít mocnost. A~využít náš hluboký vhled. V~dalším hintu prozradím.
+}{
+    Klíčem je zamyslet se, kde vlastně bude ležet druhý průsečík $AD$ a~naší dokazované kružnice, označme ho $Q$. On má dost hodně dobrých vlastností. Čistě za předpokladu, že tvrzení z~úlohy platí, jaké jsou?
+}{
+    Je důležité si všimnout, že $DMNQ$ tvoří rovnoběžník. A~to je silný způsob, jak definovat $Q$. Když to takhle uděláme, není těžké zdůvodnit, že $B$, $C$, $Q$, $N$ leží na kružnici. Trochu těžší část je potom $B$, $C$, $Q$, $L$. Začněme tou první.
+}{
+    K~důkazu $B$, $C$, $Q$, $N$ na kružnici nahlédněte, že je to rovnoramenný lichoběžník. Ze všech našich rovnoběžností a~středních příček to už jde.
+}{
+    No a~pro důkaz, že $B$, $C$, $Q$, $L$ jsou na kružnici, potřebujeme mocnost. Stačí tedy $|BD| \cdot |DC| = |DL| \cdot |DQ|$. Je to snadné? Ne úplně. Co nám ale může dát sebevědomí, je, že $BD$, $DC$ jsou pěkné úsečky. Těžší je vymyslet, co s~$DL$ a~$DQ$. Odpověď je jednoduchá: podobnosti. Možná k~tomu potřebujeme dokreslit. Snažme se nějak dostat $DL$ a~nějak taky $DQ$, které jsou na obrázku ukryté ve spoustě úseček (máme střední příčky, rovnoramenné lichoběžníky, kdeco).
+}{
+    Pokud si dokreslíme střed $I$ vepsané $ABC$, tak si lze všimnout, že díky rovnoběžnostem jsou trojúhelníky $IDL$ a~$NPK$ podobné. Přes tohle umíme velmi zjednodušit $|DL| \cdot |DQ|$.
+}{
+    Z~rovnoramennosti a~podobnosti lze najít $|NP|=|DQ|$, takže podobnost dává $|DL|/|PK|=|ID|/|NP|$, tedy po pár rovnostech $|DL| \cdot |DQ| = r \cdot r_a$, kde $r$ je poloměr vepsané $ABC$ a~$r_a$ poloměr připsané ke straně $BC$. My potřebujeme dokázat, že $|DB| \cdot |DC| = r \cdot r_a$. To už se spočítá, reálně jsme se zbavili všech bodů. Ale samozřejmě tohle jde i~pěkně, zkuste.
+}{
+    Pěkné odvození $|DB| \cdot |DC| = r \cdot r_a$ zahrnuje podobnost $IBD$ a~$BKF$, kde $F$ je bod dotyku připsané s~$AB$. Z~ní to rovnou padne.
+}{
+    Označme $I$ střed $\omega$, $r$ její poloměr, $\Omega$ kružnici připsanou ke straně $BC$ (se středem $K$), $r_a$ její poloměr a~$P$ její bod dotyku s~$BC$; dále $b=|CA|$, $c=|AB|$ a~$s$ polovina obvodu. Představme si $BC$ vodorovně a~$A$ nad ní. Nechť nejprve $b \neq c$; případ $b=c$, kdy splynou $D$, $M$, $P$, vyřídíme na konci.
+
+    Stejnolehlost se středem $A$ a~koeficientem $r_a/r > 0$ zobrazuje $\omega$ na $\Omega$ a~zachovává směry, takže obrazem nejnižšího bodu $D$ kružnice $\omega$ je nejnižší bod $\Omega$, čili bod $D'$ protilehlý k~$P$; zvláště $D'$ leží na přímce $AD$. Ze stejných tečen (viz materiál Stejné tečny) je $|BD| = s-b = |CP|$, takže $M$ je střed $DP$, a~$K$ je střed $PD'$. Úsečka $KM$ je proto střední příčka trojúhelníku $D'PD$: platí $KM \parallel AD$ a~$|KM| = \tfrac12|DD'|$, přitom polopřímka $KM$ má stejný směr jako polopřímka $DA$. Bod $N$ leží na $KM$, takže i~$MN \parallel AD$.
+
+    Kritérium tětivovosti chceme použít v~bodě $D$, chybí nám druhý bod hledané kružnice na přímce $AD$; pokud tvrzení úlohy platí, je jím bod $Q$, pro který je $DMNQ$ rovnoběžník, a~to je definice nezmiňující žádnou kružnici. Definujme tedy $Q$ vztahy $\overline{DQ} = \overline{MN}$ a~$\overline{QN} = \overline{DM}$. Odtud hned: $Q$ leží na přímce $AD$; $|DQ| = \tfrac12|KM|$, přitom $\overline{MN}$ míří ke $K$, tedy opačně než $\overline{DA}$, takže $Q$ je na opačné straně $BC$ než $A$; a~$\overline{QN} \parallel BC$, takže $Q$ má od $BC$ stejnou vzdálenost jako $N$, čili $r_a/2$. Zvláště $B$, $C$, $Q$ neleží na jedné přímce a~určují jedinou kružnici; ukážeme, že na ní leží $N$ i~$L$.
+
+    Nechť $m$ je osa úsečky $BC$ a~nechť $N_1$, $Q_1$ jsou paty kolmic z~$N$ a~$Q$ na $BC$. Pata kolmice z~$K$ je $P$ a~$N$ je střed $KM$, takže $N_1$ je střed $MP$; promítnutí rovnosti $\overline{DQ} = \overline{MN}$ na $BC$ dává
+    $$
+    \overline{DQ_1} = \overline{MN_1} = \tfrac12 \overline{MP} = \tfrac12 \overline{DM},
+    $$
+    čili $Q_1$ je střed $DM$. Body $D$, $P$ jsou souměrné podle $M$, tedy i~$Q_1$ a~$N_1$; body $N$, $Q$ mají navíc od $BC$ stejnou vzdálenost na téže straně. Jsou proto souměrné podle $m$, a~jelikož střed kružnice přes $B$, $C$, $N$ leží na $m$, tato souměrnost ji zobrazuje na sebe a~$Q$ na ní leží.
+
+    Pro druhou tětivovost nám stačí
+    $$
+    |DB| \cdot |DC| = |DL| \cdot |DQ|
+    $$
+    (polohy bodů ověříme na konci). V~pravoúhlém trojúhelníku $KPM$ ($KP \perp BC$) je $PN$ těžnice k~přeponě, takže
+    $$
+    |NP| = |NK| = |NM| = \tfrac12|KM| = |DQ|.
+    $$
+    Trojúhelník $NPK$ je tedy rovnoramenný a~rovnoramenný je i~$IDL$, protože $|ID| = |IL| = r$. Polopřímky $DI$ a~$KP$ jsou obě kolmé na $BC$ a~míří nahoru do poloroviny s~bodem $A$, polopřímky $DL$ (čili $DA$) a~$KM$ jsou stejně orientované podle první části, a~tak
+    $$
+    |\angle IDL| = |\angle PKM| = |\angle PKN| = |\angle NPK|,
+    $$
+    kde poslední rovnost jsou úhly při základně v~$NPK$. Rovnoramenné trojúhelníky $IDL$ a~$NPK$ jsou proto podobné ($I \to N$, $D \to P$, $L \to K$), odkud $|DL|/|PK| = |ID|/|NP|$, čili
+    $$
+    |DL| \cdot |DQ| = |DL| \cdot |NP| = |ID| \cdot |PK| = r \cdot r_a.
+    $$
+
+    Zbývá $|DB| \cdot |DC| = r \cdot r_a$. Nechť $F$ je bod dotyku $\Omega$ s~přímkou $AB$; ze stejných tečen je $|AF| = s > c$, takže $F$ leží na polopřímce $AB$ za bodem $B$ a~$|BF| = s-c = |DC|$. Osy vnitřního a~vnějšího úhlu při $B$ jsou $BI$ a~$BK$, tedy $|\angle IBK| = 90^\circ$; $BD$ leží uvnitř úhlu $IBK$ a~$BK$ je osou úhlu $DBF$, a~tak
+    $$
+    |\angle IBD| = 90^\circ - |\angle DBK| = 90^\circ - |\angle KBF| = |\angle BKF|,
+    $$
+    kde poslední rovnost je součet úhlů v~$BFK$ s~pravým úhlem při $F$ ($KF \perp AB$). Jelikož i~$|\angle IDB| = 90^\circ = |\angle BFK|$, jsou $IBD$ a~$BKF$ podobné ($I \to B$, $B \to K$, $D \to F$), takže $|BD|/|KF| = |DI|/|FB|$ a~$|DB| \cdot |DC| = |DB| \cdot |BF| = |DI| \cdot |KF| = r \cdot r_a$.
+
+    Bod $L$ leží na $\omega$ a~$L \neq D$, tedy striktně v~polorovině s~bodem $A$, kdežto $Q$ je na opačné straně $BC$; bod $D$ proto leží uvnitř úsečky $LQ$ i~uvnitř $BC$ (protože $|BD| = s-b > 0$, $|DC| = s-c > 0$). Z~$|DB| \cdot |DC| = r \cdot r_a = |DL| \cdot |DQ|$ tak podle kritéria tětivovosti leží $B$, $C$, $L$, $Q$ na jedné kružnici, a~to je ta jediná kružnice přes $B$, $C$, $Q$, na které leží i~$N$.
+
+    \textbf{Případ $b=c$.} Splynou body $D$, $M$, $P$, bod $Q$ splyne s~$N$ a~konfigurace je souměrná podle $AD$, což je osa $BC$ obsahující $I$, $L$, $K$ i~$N$. Úsečka $DL$ je průměr $\omega$, tedy $|DL| = 2r$, a~$|DN| = \tfrac12|KM| = \tfrac12 r_a$, protože $|KM| = |KP| = r_a$. Odvození $|DB| \cdot |DC| = r \cdot r_a$ platí beze změny, takže
+    $$
+    |DL| \cdot |DN| = 2r \cdot \tfrac12 r_a = r \cdot r_a = |DB| \cdot |DC|,
+    $$
+    a~jelikož $D$ leží uvnitř úseček $BC$ i~$LN$, kritérium tětivovosti dává tvrzení přímo.
+}
+
+\EnvId{WYnX1YPsI6GzBIczdKhtf-rovnobezniky-a-dotykove-body}
+\Problem{0}{ISL 2009 G3}{
+    Vepsaná kružnice trojúhelníku $ABC$ se dotýká stran $AC, AB$ v~bodech $D, E$. Průsečík přímek $BD$ a~$CE$ označme $G$. Sestrojme body $U,V$ tak, aby $BCUE$ a~$BCDV$ byly rovnoběžníky. Dokažte, že $|GU|=|GV|$.
+}{
+    Úloha je divná. Potřebujeme něco dokreslit, aby cokoli dávalo smysl. Rovnoběžníky nám dávají stejné délky, ideální je dokreslit něco, co nám je přidá na více míst.
+}{
+    Trik je dokreslit kružnici připsanou proti $A$. Její body dotyku s~$AB$, $AC$ nám dají dobré délky.
+}{
+    Nechť $D'$ a~$E'$ jsou body dotyku $A$-připsané po řadě s~$AC$, $AB$. Zkuste vymyslet co nejvíce dvojic stejných úseček.
+}{
+    Klíčem je uvědomit si, že $|CD'|$ je vlastně $|BE|$ (známé vlastnosti stejných tečen), tedy z~rovnoběžníku $|CD'|=|CU|$, samozřejmě na druhé straně analogicky. Kromě toho i~$|BC|=|EE'|$, takže z~rovnoběžníku je to i~$|UE|=|EE'|$. Teď už jen jedno pozorování. Mocnost se blíží.
+}{
+    Klíčové pozorování je najít nějaké dobré chordály.
+}{
+    Trikem je dívat se na některé body jako na kružnice. V~dalším hintu prozradím.
+}{
+    Zamyslete se nad chordálou bodu $U$ a~připsané kružnice, analogicky pro $V$ a~připsané kružnice. Co všechno na nich leží?
+}{
+    Celá úloha je o~tom dokázat, že chordála $U$ a~připsané kružnice je vlastně $CE$, analogicky na druhé straně. Už jen si uvědomit, že jsme pak hotovi.
+}{
+    Označme $a=|BC|$, $b=|CA|$, $c=|AB|$ a~$s=\tfrac{a+b+c}{2}$; z~trojúhelníkové nerovnosti jsou čísla $s-a$, $s-b$, $s-c$ kladná. Ze známých délek tečen vepsané kružnice je
+    $$
+    |AD|=|AE|=s-a, \quad |BE|=s-b, \quad |CD|=s-c.
+    $$
+
+    Na body nahlížejme jako na nulové kružnice, takže $p(M,U)=|MU|^2$ a~dokazovaná rovnost zní $p(G,U)=p(G,V)$. Chordálou bodů $U$, $V$ je ale jen osa úsečky $UV$, o~které nevíme nic; najděme raději pomocnou kružnici $\omega$ s~$p(G,U)=p(G,\omega)=p(G,V)$. O~bodě $G$ víme jedinou věc: leží na přímkách $CE$ a~$BD$. Chceme tedy, aby chordálou bodu $U$ a~$\omega$ byla přímka $CE$ a~chordálou bodu $V$ a~$\omega$ přímka $BD$. Chordála je přímka, takže na to stačí ověřit vždy dva body:
+    $$
+    \gather
+    p(C,U)=p(C,\omega), \quad p(E,U)=p(E,\omega), \\
+    p(B,V)=p(B,\omega), \quad p(D,V)=p(D,\omega).
+    \endgather
+    $$
+
+    Mocnost se nejpohodlněji počítá jako druhá mocnina délky tečny a~body $C$, $E$ leží na přímkách $AC$, $AB$, hledejme tedy $\omega$ mezi kružnicemi dotýkajícími se obou těchto přímek. Vepsaná to není, ta se $AB$ dotýká přímo v~bodě $E$, čili $p(E,\omega)=0$. Zbývá připsaná.
+
+    Označme $\omega_A(I_A,r_a)$ kružnici připsanou proti $A$ a~nechť $D'$, $E'$ jsou její body dotyku po řadě s~přímkami $AC$, $AB$. Tečna z~$A$ k~$\omega_A$ má známou délku $|AD'|=|AE'|=s$, přičemž $D'$ leží za $C$ a~$E'$ za $B$, a~body $D$, $E$ leží mezi $A$ a~$D'$, resp. $E'$ (protože $s-a<s$). Proto
+    $$
+    |CD'|=s-b, \quad |BE'|=s-c, \quad |DD'|=|EE'|=s-(s-a)=a.
+    $$
+
+    Z~rovnoběžníku $BCUE$ je $|CU|=|BE|=s-b$ a~$|EU|=|BC|=a$, z~rovnoběžníku $BCDV$ zrcadlově $|BV|=|CD|=s-c$ a~$|DV|=|CB|=a$.
+
+    Přímka $AC$ se dotýká $\omega_A$ v~bodě $D'$ a~leží na ní body $C$, $D$; přímka $AB$ se jí dotýká v~bodě $E'$ a~leží na ní body $B$, $E$. Všechny čtyři jsou od příslušného bodu dotyku různé (délky $s-b$, $s-c$, $a$ jsou kladné), takže leží vně $\omega_A$ a~jejich mocnost je druhá mocnina délky tečny:
+    $$
+    \gather
+    p(C,\omega_A)=|CD'|^2=(s-b)^2=|CU|^2=p(C,U), \\
+    p(E,\omega_A)=|EE'|^2=a^2=|EU|^2=p(E,U), \\
+    p(B,\omega_A)=|BE'|^2=(s-c)^2=|BV|^2=p(B,V), \\
+    p(D,\omega_A)=|DD'|^2=a^2=|DV|^2=p(D,V).
+    \endgather
+    $$
+
+    Kružnice $U$ a~$\omega_A$ jsou nesoustředné: kdyby $U=I_A$, z~prvního řádku by bylo $|CI_A|^2=|CI_A|^2-r_a^2$, čili $r_a=0$; stejně tak pro $V$. První dva řádky tak říkají, že $C$ i~$E$ leží na chordále bodu $U$ a~kružnice $\omega_A$, a~jelikož $C \neq E$, je touto chordálou přímka $CE$. Další dva stejně tak dávají, že chordálou bodu $V$ a~$\omega_A$ je přímka $BD$.
+
+    Bod $G$ leží na $CE$ i~na $BD$, takže
+    $$
+    |GU|^2 = p(G,U) = p(G,\omega_A) = p(G,V) = |GV|^2,
+    $$
+    čili $|GU|=|GV|$.
+}
+
+\EnvId{q2XpT_uNI0AubWKr8OI6R-shodne-usecky-v-pravouhlem-trojuhelniku}
+\Problem{0}{IMO 2012 P5}{
+    V~daném pravoúhlém trojúhelníku $ABC$ s~pravým úhlem při vrcholu $A$ označme $D$ patu výšky z~vrcholu $A$. Nechť $X$ je libovolný vnitřní bod úsečky $AD$. Označme $K$ takový bod na úsečce $BX$, že $|CK|=|CA|$. Podobně označme $L$ takový bod na úsečce $CX$, že $|BL|=|BA|$. Průsečík přímek $BL$ a~$CK$ označme $M$. Dokažte, že $|MK|=|ML|$.
+}{
+    Potřebujeme něco dokreslit, abychom vůbec uměli něco smysluplně použít. Dobrý náznak dávají např. vztahy $|CK|=|CA|$, ty fungují dobře s~mocností kvůli Euklidově větě. Kéž bychom měli ještě více bodů.
+}{
+    Když máme v~úloze vztahy jako $|CK|=|CA|$, tak to zní, že tam je nějaká kružnice s~dobrým středem, možná je důležitá.
+}{
+    Další dobrý obecně užitečný způsob dokreslování je protínat přímky s~kružnicemi. Obzvlášť divné přímky. V~dalším hintu prozradím klíčové body.
+}{
+    Úloha začne dávat větší smysl, když dokreslíme druhé průsečíky $BX$ a~$CX$ s~kružnicemi $\omega_c(C,|CA|)$ a~$\omega_b(B,|BA|)$, nechť jsou tyto body po řadě $P$ a~$Q$. Teď už máme všechny body, které v~úloze potřebujeme.
+}{
+    Důležité pozorování je uvědomit si, co je chordála našich nových kružnic a~co to znamená.
+}{
+    Chordála našich kružnic je $AD$, leží na ní $X$, a~přes $X$ jsme vystřelili a~udělali nové body. Nemáme takhle tětivový čtyřúhelník? A~co s~ním?
+}{
+    Klíčem je si přes mocnost uvědomit, že $P$, $Q$, $K$, $L$ jsou na kružnici. Pak je tu ale ještě bod $M$. A~to je místo, kde přichází mocnost naposledy. Stále jsme dobře nevyužili $|CK|=|CA|$ a~Euklidovy věty.
+}{
+    Trik je dokázat přes mocnost, že $BL$ je tečna naší nově objevené kružnice. Analogicky takto bude $CK$. Budeme pak hotovi?
+}{
+    Podmínky $|CK|=|CA|$ a~$|BL|=|BA|$ říkají, že $K$ leží na kružnici $\omega_c(C,|CA|)$ a~$L$ na kružnici $\omega_b(B,|BA|)$. Obě prochází bodem $A$ a~nejsou soustředné. Nechť $P$ je druhý průsečík přímky $BX$ s~$\omega_c$ a~$Q$ druhý průsečík přímky $CX$ s~$\omega_b$; více bodů nebudeme potřebovat.
+
+    Spočítejme mocnost naráz pro každý bod $Y$ přímky $AD$ a~označme $y=|YD|$. Jelikož $AD \perp BC$, Pythagorova věta v~trojúhelníku $YDB$ dává $|YB|^2 = y^2 + |DB|^2$, a~jelikož $D$ leží uvnitř úsečky $BC$, Euklidova věta o~odvěsně dává $|BA|^2 = |BD| \cdot |BC|$. Dohromady
+    $$
+    \gather
+    p(Y,\omega_b) = y^2 + |DB|^2 - |BA|^2 = \\
+    = y^2 + |DB| \cdot \bigl(|DB| - |BC|\bigr) = \\
+    = y^2 - |DB| \cdot |DC| = y^2 - |AD|^2,
+    \endgather
+    $$
+    kde poslední rovnost je Euklidova věta o~výšce. Tentýž výpočet s~$|CA|^2 = |CD| \cdot |CB|$ dává $p(Y,\omega_c) = y^2 + |DC|^2 - |CA|^2 = y^2 - |AD|^2$. Přímka $AD$ je tedy chordála kružnic $\omega_b$ a~$\omega_c$.
+
+    Ujasněme si polohy bodů. Pro $x=|XD|$ je $0 < x < |AD|$, takže $p(X,\omega_b) = p(X,\omega_c) = x^2 - |AD|^2 < 0$ a~$X$ leží uvnitř obou kružnic. Naopak podle Pythagorovy věty $p(B,\omega_c) = |BC|^2 - |CA|^2 = |AB|^2 > 0$ a~analogicky $p(C,\omega_b) = |AC|^2 > 0$, čili $B$ leží vně $\omega_c$ a~$C$ vně $\omega_b$. Přímka $BX$ tak jde z~vnějšího bodu $B$ dovnitř přes $X$ a~zase ven, její první průsečík s~$\omega_c$ je právě $K$ (a~je tím jednoznačně určený) a~druhý je $P$. Pořadí na ní je tedy $B$, $K$, $X$, $P$, analogicky na druhé přímce $C$, $L$, $X$, $Q$.
+
+    Vystřelíme přes $X$. Ten leží uvnitř obou kružnic, takže mocnost přes sečnu má záporné znaménko a~z~rovnosti mocností
+    $$
+    -|XK| \cdot |XP| = p(X,\omega_c) = p(X,\omega_b) = -|XL| \cdot |XQ|.
+    $$
+    Přímky $KP$ a~$LQ$ jsou různé (jsou to $BX$ a~$CX$) a~$X$ leží uvnitř obou úseček $KP$, $LQ$, takže podle kritéria tětivovosti leží $K$, $P$, $Q$, $L$ na jedné kružnici $\omega$.
+
+    Teď využijeme poloměry. Bod $B$ leží na přímce $KP$ mimo úsečku $KP$ a~body $K$, $P$ leží na $\omega_c$, takže
+    $$
+    |BK| \cdot |BP| = p(B,\omega_c) = |AB|^2 = |BL|^2.
+    $$
+    Bod $L$ neleží na přímce $KP$, čili $\omega$ je kružnice $(LKP)$, a~podle kritéria tečny je $BL$ tečna $\omega$ v~bodě $L$. Stejně tak z~pořadí $C$, $L$, $X$, $Q$ a~ze vztahu $|CL| \cdot |CQ| = p(C,\omega_b) = |AC|^2 = |CK|^2$ je $CK$ tečna $\omega$ v~bodě $K$.
+
+    Pokud se přímka dotýká $\omega$ v~bodě $T$, tak pro \textit{každý} její bod $N$ platí $p(N,\omega) = |NT|^2$ (pro $N=T$ nula, jinak leží $N$ vně $\omega$ a~je to věta o~spojení s~tečnou). Bod $M$ leží na obou tečnách, takže
+    $$
+    |ML|^2 = p(M,\omega) = |MK|^2.
+    $$
+}
+
+\EnvId{hRhMzmG8ahmmJycvrobIu-dve-ortocentra-a-tri-primky}
+\Problem{0}{ISL 1995 G7}{
+    Nechť $ABC$ je ostroúhlý trojúhelník. Kružnice procházející body $B$, $C$ protíná strany $AB$, $AC$ znovu v~bodech $C'$, $B'$. Nechť $H$, $H'$ jsou ortocentra trojúhelníků $ABC$ a~$AB'C'$. Ukažte, že přímky $BB'$, $CC'$, $HH'$ procházejí jedním bodem.
+}{
+    Ortocentra souvisí s~výškami. Pomůže nám uvážit paty kolmic z~$B$, $B'$, $C$, $C'$ na protější strany, ty označme jako $B_0$, $B_0'$, $C_0$, $C_0'$. Ty nám přirozeně dávají ortocentra.
+}{
+    Najděte vhodné čtveřice bodů mezi definovanými patami a~původními body, co jsou na kružnici. Kružnic je tam dost.
+}{
+    Trik je všimnout si např., že $B$, $B'$, $B_0$, $B_0'$ jsou na kružnici. Podobně i~$C$, $C'$, $C_0$, $C_0'$. Jak tyto kružnice souvisí s~$H$ a~$H'$?
+}{
+    Trik je uvědomit si, že všechny naše tři body, tedy $H$, $H'$ a~průsečík $BB'$ s~$CC'$, jejichž kolinearitu dokazujeme, leží na chordále těchto dvou kružnic.
+}{
+    Zadanou kružnici procházející body $B$, $C$, $B'$, $C'$ označme $\omega$.
+
+    Nechť $B_0$, $C_0$ jsou paty kolmic z~$B$ na $AC$ a~z~$C$ na $AB$, takže $H = BB_0 \cap CC_0$. V~trojúhelníku $AB'C'$ leží strana $AC'$ proti $B'$ na přímce $AB$ a~strana $AB'$ proti $C'$ na přímce $AC$; nechť tedy $B_0'$ je pata kolmice z~$B'$ na $AB$ a~$C_0'$ pata kolmice z~$C'$ na $AC$, takže $H' = B'B_0' \cap C'C_0'$.
+
+    Body $B_0$, $B'$ leží na $AC$ a~$BB_0 \perp AC$, body $B_0'$, $B$ leží na $AB$ a~$B'B_0' \perp AB$, tedy $|\angle BB_0B'| = |\angle BB_0'B'| = 90^\circ$ a~podle Thaletovy věty leží $B_0$, $B_0'$ na kružnici $\omega_B$ s~průměrem $BB'$. Analogicky $C_0$, $C_0'$ leží na kružnici $\omega_C$ s~průměrem $CC'$.
+
+    Úsečky $BB'$ a~$CC'$ se protínají uvnitř trojúhelníku $ABC$ (bod $B'$ je vnitřním bodem strany $AC$ a~$C'$ strany $AB$); jejich průsečík označme $X$. Kružnice $\omega_B$, $\omega_C$ nejsou soustředné: společný střed by půlil $BB'$ i~$CC'$, takže $BCB'C'$ by byl rovnoběžník a~platilo by $BC' \parallel CB'$, což nejde, protože tyto přímky jsou $AB$ a~$AC$. Nechť $m$ je jejich chordála; ukážeme, že $H$, $H'$ i~$X$ leží na $m$.
+
+    Třikrát použijeme totéž pozorování: \textit{pokud dvě kružnice protínají přímku v~téže dvojici bodů $P$, $Q$, má k~oběma každý bod $M$ této přímky stejnou mocnost} -- ta je v~obou případech $\pm|MP| \cdot |MQ|$ a~znaménko závisí jen na tom, zda $M$ leží mezi $P$ a~$Q$.
+
+    Body $B_0$, $C_0$ vidí $BC$ pod pravým úhlem, takže $B$, $C$, $B_0$, $C_0$ leží na kružnici $\gamma$ s~průměrem $BC$. Přímka $BB_0$ protíná $\omega_B$ i~$\gamma$ v~bodech $B$, $B_0$ a~přímka $CC_0$ protíná $\omega_C$ i~$\gamma$ v~bodech $C$, $C_0$, proto
+    $$
+    p(H,\omega_B) = p(H,\gamma) = p(H,\omega_C).
+    $$
+    Stejně tak $|\angle B'B_0'C'| = |\angle B'C_0'C'| = 90^\circ$, protože kolmice z~$B'$, $C'$ jsme spouštěli na přímky $AB$, resp. $AC$, na kterých leží $C'$, resp. $B'$; body $B'$, $C'$, $B_0'$, $C_0'$ tedy leží na kružnici $\gamma'$ s~průměrem $B'C'$. Přímka $B'B_0'$ protíná $\omega_B$ i~$\gamma'$ v~bodech $B'$, $B_0'$ a~přímka $C'C_0'$ protíná $\omega_C$ i~$\gamma'$ v~bodech $C'$, $C_0'$, čili
+    $$
+    p(H',\omega_B) = p(H',\gamma') = p(H',\omega_C).
+    $$
+    Nakonec přímka $BB'$ protíná $\omega_B$ i~$\omega$ v~bodech $B$, $B'$ a~přímka $CC'$ protíná $\omega_C$ i~$\omega$ v~bodech $C$, $C'$, takže
+    $$
+    p(X,\omega_B) = p(X,\omega) = p(X,\omega_C).
+    $$
+
+    Zbývá ověřit $H \neq H'$. Mocnost bodu $A$ k~$\omega$ po dvou sečnách dává $|AC'| \cdot |AB| = |AB'| \cdot |AC|$, čili $|AB'|/|AB| = |AC'|/|AC| = k$. Složení stejnolehlosti se středem $A$ a~koeficientem $k$ s~osovou souměrností podle osy úhlu $BAC$ je podobnost $\varphi$ s~$A \mapsto A$, $B \mapsto B'$, $C \mapsto C'$, tedy zobrazuje $\triangle ABC$ na $\triangle AB'C'$ a~ortocentrum na ortocentrum, takže $\varphi(H) = H'$. Přitom $k \neq 1$: z~$k|AB| = |AB'| \leq |AC|$ a~$k|AC| = |AC'| \leq |AB|$ vynásobením dostaneme $k^2 \leq 1$ a~při $k = 1$ by v~obou nerovnostech musela nastat rovnost, tedy $B' = C$ a~$C' = B$, což zadání vylučuje. Podobnost s~$k \neq 1$ má nejvýše jeden pevný bod, protože vzdálenost dvou různých pevných bodů by vynutila $k = 1$; tím bodem je $A$. Z~$H = H'$ by tedy vyšlo $H = A$, což nastává právě při $|\angle BAC| = 90^\circ$, a~to je při ostroúhlém $ABC$ vyloučeno.
+
+    Různé body $H$, $H'$ leží na $m$, takže přímka $HH'$ je právě $m$. Bod $X$ leží na $m$ a~z~definice i~na $BB'$ a~$CC'$, takže přímky $BB'$, $CC'$, $HH'$ procházejí bodem $X$. (Samotná kolinearita tří bodů by nestačila; funguje to proto, že dva z~nich určují třetí přímku a~třetí je průsečíkem zbývajících dvou.)
+}
+
+\EnvId{uC1mjjdLrHYavatAIrH_m-pevny-bod-dvou-vepsanych-kruznic}
+\Problem{0}{ISL 2004 G7}{
+    Je dán trojúhelník $ABC$. Nechť $X$ je pohyblivý bod na přímce $BC$ takový, že bod $C$ leží mezi $B$ a~$X$. Vepsané kružnice trojúhelníků $ABX$ a~$ACX$ se protínají ve dvou různých bodech $P$ a~$Q$. Dokažte, že přímka $PQ$ prochází bodem nezávislým na poloze bodu $X$.
+}{
+    Přímka $PQ$ vypadá beznadějně. Ona ale má nějaké pěkné jednoduché vlastnosti související s~body v~obrázku. Vyplatí se mít alespoň zlehka označené body dotyku. Je jich hodně, ale bez nich to nepůjde.
+}{
+    Odpozorujme, že je rovnoběžná s~vhodnými spojnicemi bodů dotyku. Ale nejen to, ještě má další super vlastnost.
+}{
+    Ta vlastnost je, že leží uprostřed pásu, konkrétně pásu tvořeného dvěma přímkami kolmými na osu úhlu $AXC$. To se vyplatí nahlédnout.
+}{
+    Nahlédne se to přes mocnost, totiž, kde protíná přímku $BC$?
+}{
+    Když už víme, že $PQ$ je ve středu pásu, tak jsme o~milimetr blíž k~řešení. Totiž, stále nevíme, co je pevný bod. Inu, velký trik vyžaduje jakési známé lemma, které souvisí s~vepsanou kružnicí.
+}{
+    Známé lemma se zvykne označovat jako Iran's lemma. Obecně zní takto: \textit{V~trojúhelníku $ABC$ se středem vepsané kružnice $I$ nechť $D$, $E$, $F$ jsou po řadě body dotyku vepsané kružnice se stranami $BC$, $CA$, $AB$. Pak kolmý průmět bodu $C$ na přímku $AI$ leží na střední příčce trojúhelníku $ABC$ rovnoběžné s~$AB$ a~zároveň na přímce $DF$.} Dokazuje se přes počítání úhlů, je to snadné, pokud neznáte, zkuste. Každopádně, jak to aplikovat?
+}{
+    Inu, přímky našeho uvažovaného pásu podle tohoto lemmatu protínají střední příčku rovnoběžnou s~$BC$ v~dobrých bodech. Proč jsou dobré a~jak to souvisí s~$PQ$? Už jen to spojit.
+}{
+    Proč jsou dobré? Protože jsou pevné. Zkuste to vymyslet z~lemmatu. Jak to souvisí s~$PQ$? Inu, $PQ$ je ve středu pásu, který sice není pevný, ale na každé z~jeho přímek leží pevný bod. Už jsme skoro tam.
+}{
+    \Answer{Je to střed úsečky $AS$, kde $S$ je bod polopřímky $BC$ s~$|BS| = s$, tedy bod dotyku kružnice připsané proti vrcholu $B$ s~přímkou $BC$.}
+
+    Označme $a=|BC|$, $b=|CA|$, $c=|AB|$, $s=\frac{a+b+c}{2}$ a~nechť $\omega_1$, $\omega_2$ jsou vepsané kružnice trojúhelníků $ABX$, $ACX$, se středy $O_1$, $O_2$ a~body dotyku $T_1$, $T_2$ na $BC$, $U_1$, $U_2$ na $AX$.
+
+    Jelikož $C$ leží mezi $B$ a~$X$, polopřímky $XB$, $XC$ splývají: obě kružnice jsou vepsány do úhlu $AXC$, takže $O_1$, $O_2$ leží na jeho ose $o$. Délky tečen z~$X$ jsou
+    $$
+    \gather
+    |XT_1| = |XU_1| = \frac{|XA| + |XB| - c}{2}, \\
+    |XT_2| = |XU_2| = \frac{|XA| + |XC| - b}{2},
+    \endgather
+    $$
+    a~jelikož $|XB| - |XC| = a$, odečtením dostaneme
+    $$
+    |XT_1| - |XT_2| = \frac{a+b-c}{2} = s - c > 0.
+    $$
+    Speciálně $T_1 \neq T_2$, a~jelikož $T_i$ je patou kolmice z~$O_i$ na $BC$, i~$O_1 \neq O_2$: kružnice jsou nesoustředné a~$PQ$ je jejich chordála, tedy $PQ \perp o$. Jelikož $o$ je osou úhlu $T_1XU_1$ a~$|XT_1| = |XU_1|$, je $o$ osou úsečky $T_1U_1$, takže $m_1 = T_1U_1 \perp o$; stejně tak $m_2 = T_2U_2$. Máme tři rovnoběžky $m_1 \parallel PQ \parallel m_2$.
+
+    Pro bod $M$ přímky $BC$ je $O_iT_i \perp BC$, takže z~Pythagorovy věty $p(M,\omega_i) = |MT_i|^2$; bod $M$ tedy leží na chordále právě tehdy, když je středem úsečky $T_1T_2$. Rovnoběžné $PQ$ a~$BC$ nejsou, protože $o$ svírá s~$BC$ úhel $\frac{|\angle AXC|}{2} < 90^\circ$, takže $PQ$ protíná $BC$ přesně ve středu úsečky $T_1T_2$. Tři rovnoběžky vytínají na každé příčce úseky ve stejném poměru, takže na \textit{každé} příčce vytne $PQ$ střed bodů vyťatých přímkami $m_1$, $m_2$. Stačí nám proto příčka, na které jsou tyto dva body pevné.
+
+    \textit{Lemma.} V~trojúhelníku $UVW$ nechť se vepsaná kružnice dotýká stran $VW$, $UV$ po řadě v~$D$, $F$ a~nechť $K$ je kolmý průmět $W$ na osu vnitřního úhlu při vrcholu $U$. Pak $K$ leží na přímce $DF$ i~na střední příčce trojúhelníku $UVW$ rovnoběžné s~$UV$. (Tvrzení je o~přímkách, $K$ může ležet mimo úsečky.) Důkazem je počítání úhlů, přenecháváme ho čtenáři.
+
+    Nechť $\ell$ je obraz $BC$ ve stejnolehlosti se středem $A$ a~koeficientem $\frac12$, tedy přímka přes středy úseček $AB$, $AC$, $AX$: naráz střední příčka trojúhelníku $ABX$ rovnoběžná s~$BX$ i~trojúhelníku $ACX$ rovnoběžná s~$CX$. Použijme lemma pro $(U,V,W) = (B,X,A)$ a~pro $(C,X,A)$: přímka $DF$ je $m_1$, resp. $m_2$, a~střední příčka je v~obou případech $\ell$. Kolmé průměty $A$ na osy úhlů $ABX$, $ACX$ tedy leží po řadě na $m_1 \cap \ell$ a~$m_2 \cap \ell$; označme je $K_B$, $K_C$. Polopřímky $BX$, $BC$ splývají, takže první osa je vnitřní osa úhlu při vrcholu $B$ trojúhelníku $ABC$; polopřímka $CX$ je opačná k~polopřímce $CB$, čili $|\angle ACX| = 180^\circ - |\angle ACB|$ a~druhá osa je \textbf{vnější} osa úhlu při vrcholu $C$. Ani jedna na $X$ nezávisí, tedy ani body $K_B$, $K_C$. Přímka $\ell$ je přitom rovnoběžná s~$BC$, která protíná všechny tři rovnoběžky, takže $\ell$ je jejich příčkou a~$PQ$ prochází pevným středem úsečky $K_BK_C$.
+
+    Kolmý průmět $A$ na osu úhlu je středem bodu $A$ a~jeho obrazu v~souměrnosti podle ní. Osa úhlu $ABC$ zobrazí polopřímku $BA$ na $BC$, tedy $A$ na bod $A_B$ s~$|BA_B| = c$; vnější osa při vrcholu $C$ zobrazí polopřímku $CA$ na $CX$, tedy $A$ na bod $A_C$ s~$|CA_C| = b$, čili $|BA_C| = a+b$. Body $K_B$, $K_C$ jsou obrazy $A_B$, $A_C$ v~téže stejnolehlosti, takže střed $K_BK_C$ je obrazem středu $S$ úsečky $A_BA_C$, pro který
+    $$
+    |BS| = \frac{c + (a+b)}{2} = s.
+    $$
+    Bod $S$ je tedy bod dotyku kružnice připsané proti vrcholu $B$ s~přímkou $BC$ a~hledaný pevný bod je střed úsečky $AS$.
+}
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

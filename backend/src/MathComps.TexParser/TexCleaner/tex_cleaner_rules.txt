@@ -75,7 +75,9 @@
 \\gathered(?![A-Za-z]) => \begin{gather*}
 \\endgathered(?![A-Za-z]) => \end{gather*}
 
-(?s)\$\$\s*\\eqalign\{\s*(.*?)\s*\}\s*\$\$ => $$$$ \begin{align*} $1 \end{align*} $$$$
+\\eqno\s*\(([^)]*)\) => \tag{$1}
+
+(?s)\$\$\s*\\eqalign\{\s*(.*?)\s*\}\s*(\\tag\{[^}]*\})?\s*\$\$ => $$$$ \begin{align*} $1 \end{align*} $2 $$$$
 
 \\root(.*?)\\of => \sqrt[$1]
 
@@ -98,6 +100,8 @@
 \\Laugh(?![A-Za-z]) => 😄
 \\SmileWithTear(?![A-Za-z]) => 🥲
 \\UpsideDownSmile(?![A-Za-z]) => 🙃
+\\Sad(?![A-Za-z]) => 🙁
+\\Wink(?![A-Za-z]) => 😉
 
 [remove]
 
@@ -192,10 +196,12 @@ ldots
 le
 left
 Leftarrow
+leftrightarrow
 leq
 leqslant
 lfloor
 log
+mapsto
 mathbb
 mathcal
 mathrm

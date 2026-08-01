@@ -36,25 +36,48 @@ We freely use the following standard facts about congruences modulo~$p$:
     Let $a \not\equiv 0 \pmod{p}$. Then there exists a unique residue $a^{-1} \pmod{p}$ with
     $$a \cdot a^{-1} \equiv 1 \pmod{p}.$$
     We write $\frac{1}{a}$ for $a^{-1}$, and $\frac{b}{a}$ for $b \cdot a^{-1}$.
-}{}
+}{
+    Since $a \not\equiv 0 \pmod{p}$, the residues $a, 2a, \ldots, (p-1)a$ are a permutation of $1, 2, \ldots, p-1$ modulo $p$. Hence exactly one of them is congruent to $1$, which gives a residue $a^{-1}$ with
+    $$
+    a \cdot a^{-1} \equiv 1 \pmod{p}.
+    $$
+    Uniqueness follows from cancellation: if $ax \equiv 1 \equiv ay \pmod{p}$, then $ax \equiv ay$ and $a \not\equiv 0 \pmod{p}$ give $x \equiv y \pmod{p}$.
+}
 
 \EnvId{agpNrS7Gk-plIDAp2Xc0d-inverses-add-like-fractions}
 \Theorem{Inverses Add Like Fractions}{
     Let $b, d \not\equiv 0 \pmod{p}$. Then for any $a, c$, we have
     $$\frac{a}{b} + \frac{c}{d} \equiv a \cdot b^{-1} + c \cdot d^{-1} \equiv (ad + bc) \cdot (bd)^{-1} \equiv \frac{ad + bc}{bd} \pmod{p},$$
     just like normal fractions.
-}{}
+}{
+    The first and last congruences are just fraction-bar notation, so we prove the middle one. Since $p$ is a prime and $b, d \not\equiv 0 \pmod{p}$, we also have $bd \not\equiv 0 \pmod{p}$, and hence $(bd)^{-1}$ exists by the previous theorem.
+
+    Multiplying by $bd$ and using $b^{-1}b \equiv 1$ and $d^{-1}d \equiv 1$ gives
+    $$
+    \bigl(a b^{-1} + c d^{-1}\bigr) \cdot bd \equiv ad + bc \pmod{p},
+    $$
+    and multiplying by $(bd)^{-1}$ gives $a b^{-1} + c d^{-1} \equiv (ad + bc) \cdot (bd)^{-1} \pmod{p}$.
+}
 
 \EnvId{4FiBDjLCxOcmWRSNkUVRs-inverses-multiply-like-fractions}
 \Theorem{Inverses Multiply Like Fractions}{
     Let $b, d \not\equiv 0 \pmod{p}$. Then for any $a, c$, we have
     $$\frac{a}{b} \cdot \frac{c}{d} \equiv (a \cdot b^{-1}) \cdot (c \cdot d^{-1}) \equiv (ac) \cdot (bd)^{-1} \equiv \frac{ac}{bd} \pmod{p},$$
     just like normal fractions.
-}{}
+}{
+    The outer congruences are just fraction-bar notation, so we prove the middle one. As in the previous theorem, $bd \not\equiv 0 \pmod{p}$, so $(bd)^{-1}$ exists. Moreover,
+    $$
+    (bd) \cdot \bigl(b^{-1} d^{-1}\bigr) \equiv \bigl(b b^{-1}\bigr)\bigl(d d^{-1}\bigr) \equiv 1 \pmod{p},
+    $$
+    so by uniqueness of the inverse, $(bd)^{-1} \equiv b^{-1} d^{-1} \pmod{p}$. From this,
+    $$
+    \bigl(a b^{-1}\bigr) \cdot \bigl(c d^{-1}\bigr) \equiv (ac) \cdot \bigl(b^{-1} d^{-1}\bigr) \equiv (ac) \cdot (bd)^{-1} \pmod{p}.
+    $$
+}
 
 \sec Problems
 
-The problems below all benefit from the theory above --- working with fractions modulo~$p$ as if they were ordinary numbers. They are ordered roughly by difficulty.
+The problems below all benefit from the theory above, working with fractions modulo~$p$ as if they were ordinary numbers. They are ordered roughly by difficulty.
 
 \EnvId{xwufjUXqxotXL6cgvQ4gW-wilson-factorial-congruence}
 \Problem{0}{Wilson}{
@@ -64,7 +87,20 @@ The problems below all benefit from the theory above --- working with fractions 
     In the product $1 \cdot 2 \cdots (p-1)$, try to pair factors with their inverse. Which numbers do not have a pair?
 }{
     The numbers without the pair are those satisfying $k \equiv 1/k \mod p$. Find them all.
-}{}
+}{
+    For $p = 2$ we have $(p-1)! = 1 \equiv -1 \pmod{2}$, so assume from now on that $p$ is odd.
+
+    Every $k \in \{1, 2, \ldots, p-1\}$ is nonzero modulo $p$, so it has an inverse $1/k$, which is nonzero as well and hence congruent to exactly one element of $\{1, 2, \ldots, p-1\}$. The assignment $k \mapsto 1/k$ is therefore a map from this set to itself and is its own inverse. It thus splits the set into pairs $\{k, 1/k\}$ with $k \not\equiv 1/k$, whose product is congruent to $1$ by the definition of the inverse, and into fixed points, that is, those $k$ with
+    $$
+    k \equiv \frac{1}{k} \pmod{p}.
+    $$
+    Multiplying by $k$, we see that this condition is equivalent to $k^2 \equiv 1 \pmod{p}$, that is, $p \mid (k-1)(k+1)$. Since $p$ is a prime, it divides one of the factors, hence $k \equiv 1$ or $k \equiv -1 \pmod{p}$. In $\{1, 2, \ldots, p-1\}$ these correspond exactly to $k = 1$ and $k = p-1$, which are distinct for odd $p$.
+
+    The remaining $p-3$ numbers therefore split into $(p-3)/2$ pairs, each with product congruent to $1$, and so
+    $$
+    (p-1)! \equiv 1 \cdot (p-1) \cdot 1^{(p-3)/2} \equiv -1 \pmod{p}.
+    $$
+}
 
 \EnvId{oZgQ3gdX2sSdnfW0T-I1N-prime-dividing-sum-of-squares}
 \Problem{0}{}{
@@ -79,7 +115,27 @@ The problems below all benefit from the theory above --- working with fractions 
     For the converse with $p \equiv 1 \pmod{4}$, you need an explicit square root of $-1$ modulo~$p$. A natural source: Wilson's theorem, $(p-1)! \equiv -1 \pmod{p}$.
 }{
     In the product $(p-1)!$, pair $k$ with $p - k \equiv -k$. What does the result look like for $p \equiv 1 \pmod{4}$?
-}{}
+}{
+    For $p = 2$, the pair $a = b = 1$ works. From now on let $p$ be an odd prime and put $m = \frac{p-1}{2}$.
+
+    We first rewrite the condition in the language of fractions modulo $p$. If $p \nmid b$, then $p \mid a^2 + b^2$ means $a^2 \equiv -b^2 \pmod{p}$, and dividing by $b^2$ gives
+    $$
+    \bigl(\tfrac{a}{b}\bigr)^2 \equiv -1 \pmod{p}.
+    $$
+    Conversely, if some integer $x$ satisfies $x^2 \equiv -1 \pmod{p}$, then the pair $a = x$, $b = 1$ works, since $x^2 \equiv -1$ immediately gives $p \nmid x$. So the pair we are looking for exists if and only if $-1$ is a square modulo $p$.
+
+    Suppose such a pair exists and put $x = \frac{a}{b}$, so that $x^2 \equiv -1 \pmod{p}$. Raising to the $m$-th power gives
+    $$
+    x^{p-1} = \bigl(x^2\bigr)^m \equiv (-1)^m \pmod{p}.
+    $$
+    Fermat's Little Theorem applied to $a$ and to $b$ gives $x^{p-1} = \frac{a^{p-1}}{b^{p-1}} \equiv 1 \pmod{p}$, hence $(-1)^m \equiv 1 \pmod{p}$. Were $m$ odd, we would get $-1 \equiv 1 \pmod{p}$, that is, $p \mid 2$, which fails for odd $p$. So $m$ is even, and that is exactly the condition $p \equiv 1 \pmod{4}$.
+
+    Conversely, let $p \equiv 1 \pmod{4}$, so that $m$ is even. We need an explicit square root of $-1$ modulo~$p$, and Wilson's theorem $(p-1)! \equiv -1 \pmod{p}$ from the previous problem supplies it. The pairs $\{k, p-k\}$ for $k = 1, 2, \ldots, m$ partition $1, 2, \ldots, p-1$, and $p - k \equiv -k \pmod{p}$, so
+    $$
+    (p-1)! = \prod_{k=1}^{m} k(p-k) \equiv (-1)^m (m!)^2 \pmod{p}.
+    $$
+    Since $m$ is even, $(-1)^m = 1$, and Wilson's theorem thus gives $(m!)^2 \equiv -1 \pmod{p}$. Hence the pair $a = m!$, $b = 1$ works: $a$ is a product of numbers smaller than $p$, so $p \nmid a$, and $a^2 + b^2 \equiv -1 + 1 \equiv 0 \pmod{p}$.
+}
 
 \EnvId{iQkNpjFlIqY_8YqY2fOcG-divisibility-of-a2-ab-b2}
 \Problem{0}{}{
@@ -87,10 +143,38 @@ The problems below all benefit from the theory above --- working with fractions 
 }{
     Note that $a^3 - b^3 = (a - b)(a^2 + ab + b^2)$, so $p \mid a^3 - b^3$. Assume for contradiction that $p \nmid b$. This is similar to the previous problem.
 }{
-    Raise to the $(p-2)/3$-th power, which is a positive integer since $p \equiv 2 \pmod{3}$. The left side becomes $(a/b)^{p-2}$.
+    Raise to the $(p-2)/3$-th power, which is a non-negative integer since $p \equiv 2 \pmod{3}$. The left side becomes $(a/b)^{p-2}$.
 }{
     Multiply both sides by $a/b$ to get $(a/b)^{p-1} \equiv a/b \pmod{p}$. Apply Fermat's Little Theorem to conclude $a \equiv b \pmod{p}$. Substitute this back.
-}{}
+}{
+    Assume for contradiction that $p \nmid b$. Then $a$ is not divisible by $p$ either: if $p \mid a$, then $p \mid a^2 + ab + b^2$ immediately gives $p \mid b^2$, hence $p \mid b$.
+
+    The key is the factorization
+    $$
+    a^3 - b^3 = (a - b)(a^2 + ab + b^2),
+    $$
+    which gives $p \mid a^3 - b^3$, that is, $a^3 \equiv b^3 \pmod{p}$. Since $p \nmid b$, we may divide this congruence by $b^3$, and for the residue $x = a/b$ we get
+    $$
+    x^3 \equiv 1 \pmod{p}.
+    $$
+
+    This is where the assumption $p \equiv 2 \pmod{3}$ comes in: the number $(p-2)/3$ is a non-negative integer, so we may raise the last congruence to that power and obtain
+    $$
+    x^{p-2} \equiv \bigl(x^3\bigr)^{(p-2)/3} \equiv 1 \pmod{p}.
+    $$
+    Multiplying by $x$ turns this relation into $x^{p-1} \equiv x \pmod{p}$. Moreover, $p \nmid a$, so $x \not\equiv 0 \pmod{p}$, and Fermat's Little Theorem gives $x^{p-1} \equiv 1 \pmod{p}$. Comparing the two congruences, we get
+    $$
+    \frac{a}{b} = x \equiv 1 \pmod{p}, \qquad\text{hence}\qquad a \equiv b \pmod{p}.
+    $$
+
+    Substituting this back into the assumption gives
+    $$
+    0 \equiv a^2 + ab + b^2 \equiv 3b^2 \pmod{p}.
+    $$
+    Since $p \nmid b$, we must have $p \mid 3$, that is, $p = 3$. This contradicts the assumption $p \equiv 2 \pmod{3}$.
+
+    Therefore $p \mid b$. Then $a^2 = (a^2 + ab + b^2) - b(a + b)$ is divisible by $p$, and since $p$ is a prime, $p \mid a$ as well.
+}
 
 \EnvId{5dOxVJIKK4L9pkK7lsJb8-binomial-coefficient-p-minus-1}
 \Problem{0}{}{
@@ -100,7 +184,23 @@ The problems below all benefit from the theory above --- working with fractions 
     Expand the binomial coefficient as $\binom{p-1}{k} = \frac{(p-1)(p-2) \cdots (p-k)}{k!}$. 
 }{
     Reduce each factor in the numerator modulo $p$: $p - j \equiv -j \pmod{p}$. Aren't we left with something familiar?
-}{}
+}{
+    We expand the binomial coefficient as a fraction and read it modulo~$p$. Since $0 \leq k \leq p-1$, all the factors $1, 2, \ldots, k$ are smaller than $p$, and therefore $k! \not\equiv 0 \pmod{p}$; by the theorem on the existence of the inverse, $k!$ is invertible modulo~$p$ and the expression
+    $$
+    \binom{p-1}{k} = \frac{(p-1)(p-2)\cdots(p-k)}{k!}
+    $$
+    makes sense modulo~$p$ as a fraction.
+
+    The numerator has exactly $k$ factors of the form $p - j$ for $j = 1, 2, \ldots, k$, and each of them satisfies $p - j \equiv -j \pmod{p}$. Pulling a minus sign out of each factor gives
+    $$
+    (p-1)(p-2)\cdots(p-k) \equiv (-1)(-2)\cdots(-k) = (-1)^k \cdot k! \pmod{p},
+    $$
+    so the numerator is, up to sign, the same factorial as the denominator. Dividing, we get
+    $$
+    \binom{p-1}{k} \equiv \frac{(-1)^k \cdot k!}{k!} \equiv (-1)^k \pmod{p}.
+    $$
+    For $k = 0$ both products above are empty, hence equal to $1$, and the claim reads $1 \equiv 1 \pmod{p}$.
+}
 
 \EnvId{QHLcqpD-GBM-mlx7Gk8Oa-reciprocal-sum-numerator}
 \Problem{0}{}{
@@ -111,7 +211,24 @@ The problems below all benefit from the theory above --- working with fractions 
     Looking at this modulo~$p$, we have the sum of inverses of all possible non-zero values mod $p$.
 }{
     Realize that this sum is actually the sum of all values from $1$ to $p-1$, not necessarily in this order.
-}{}
+}{
+    We first put the sum over the common denominator $N = (p-1)!$. All the numbers $N/k$ for $k = 1, 2, \ldots, p-1$ are integers, so the integer $M = \sum_{k=1}^{p-1} N/k$ satisfies
+    $$
+    \frac{1}{1} + \frac{1}{2} + \cdots + \frac{1}{p-1} = \frac{M}{N} = \frac{m}{n},
+    $$
+    hence $mN = nM$. The number $N$ is the product of $1, 2, \ldots, p-1$, none of which is divisible by $p$, so $p \nmid N$. Therefore, if we prove $p \mid M$, we get $p \mid nM = mN$, and since $N$ is coprime to $p$, $p \mid m$ as well, which is the claim. Note that we assume nothing about the form of the fraction $m/n$.
+
+    It remains to compute $M$ modulo $p$. For every $k$ we have $k \cdot \frac{N}{k} = N$, so modulo $p$ the integer $N/k$ is exactly $N \cdot k^{-1}$, that is, the fraction $N/k$ in the sense of inverses. Therefore
+    $$
+    M \equiv N \sum_{k=1}^{p-1} \frac{1}{k} \pmod{p}.
+    $$
+
+    The sum on the right is the sum of the inverses of all non-zero residues modulo $p$. The map $k \mapsto k^{-1}$ is a permutation of these residues: from $k \cdot k^{-1} \equiv 1 \pmod{p}$ we see that the inverse of $k^{-1}$ is again $k$, so it is an involution and hence a bijection. The numbers $1^{-1}, 2^{-1}, \ldots, (p-1)^{-1}$ are therefore, in some order, exactly the numbers $1, 2, \ldots, p-1$, and
+    $$
+    \sum_{k=1}^{p-1} \frac{1}{k} \equiv 1 + 2 + \cdots + (p-1) = \frac{p(p-1)}{2} \pmod{p}.
+    $$
+    Since $p \geq 3$ is odd, $(p-1)/2$ is an integer and the right-hand side is a multiple of $p$. We get $\sum_{k=1}^{p-1} 1/k \equiv 0$, hence $M \equiv N \cdot 0 \equiv 0 \pmod{p}$, so $p \mid M$, and by the opening argument $p \mid m$.
+}
 
 \EnvId{4ctqjmewZ7WcyqJtpQrAp-imo-2005-coprime-to-sequence}
 \Problem{0}{IMO 2005}{
@@ -123,7 +240,31 @@ The problems below all benefit from the theory above --- working with fractions 
     Small primes are easy: $a_1 = 10$ handles $p = 2, 5$ and $a_2 = 48$ handles $p = 3$. Focus on $p \geq 5$ and try to choose $m$ depending on $p$ so that the four terms collapse.
 }{
     For $p \geq 5$, take $m = p - 2$. Then $2^m \equiv 1/2$, $3^m \equiv 1/3$, $6^m \equiv 1/6 \pmod{p}$. Compute $a_{p-2} \pmod{p}$.
-}{}
+}{
+    \Answer{The only such $n$ is $n = 1$.}
+
+    We show that every prime $p$ divides some term of the sequence. That settles it: if $n > 1$, it has a prime divisor $p$, that divisor divides some $a_m$, and hence $n$ and $a_m$ are not coprime.
+
+    We handle the small primes directly. We have $a_1 = 2 + 3 + 6 - 1 = 10$, which is divisible by $2$ and by $5$, and $a_2 = 4 + 9 + 36 - 1 = 48$, which is divisible by $3$.
+
+    So let $p \geq 5$. The numbers $2$, $3$, $6$ are not divisible by $p$, so modulo $p$ we can work with them as fractions. The key to the choice of $m$ is the identity
+    $$
+    \frac{1}{2} + \frac{1}{3} + \frac{1}{6} = 1.
+    $$
+    If the powers $2^m$, $3^m$, $6^m$ turned into exactly $1/2$, $1/3$, $1/6$, the whole term $a_m$ would come out zero. The choice $m = p - 2$, which is positive since $p \geq 5$, does exactly that. Indeed, by Fermat's Little Theorem
+    $$
+    2 \cdot 2^{p-2} = 2^{p-1} \equiv 1 \pmod{p},
+    $$
+    so $2^{p-2}$ is the inverse of $2$, that is, $2^{p-2} \equiv \frac{1}{2} \pmod{p}$. Similarly $3^{p-2} \equiv \frac{1}{3}$ and $6^{p-2} \equiv \frac{1}{6} \pmod{p}$. Adding these inverses as fractions gives
+    $$
+    \gather
+    a_{p-2} \equiv \frac{1}{2} + \frac{1}{3} + \frac{1}{6} - 1 \\
+    \equiv \frac{3 + 2 + 1}{6} - 1 \equiv 1 - 1 \equiv 0 \pmod{p}.
+    \endgather
+    $$
+
+    Every prime therefore divides some term of the sequence, and $n = 1$ is the only candidate left. And indeed, the number $1$ is coprime to every integer, hence to every $a_m$.
+}
 
 \EnvId{h6JPweRuH3hf9vtoEksW0-product-of-k2-k-1}
 \Problem{0}{Poland}{
@@ -135,7 +276,33 @@ The problems below all benefit from the theory above --- working with fractions 
     The product becomes $3 \cdot \frac{\prod_{k=2}^{p-1}(k^3 - 1)}{(p-2)!}$. We need to calculate the numerator and denominator mod~$p$ separately.
 }{
     It would be great if the product of all the numbers $k^3-1$ was actually something we could calculate. 
-}{}
+}{
+    We isolate the term $a_1 = 3$. For $k \geq 2$ we have $k - 1 \not\equiv 0 \pmod{p}$, so we may divide by this number modulo $p$, and the identity $k^3 - 1 = (k-1)(k^2+k+1)$ gives
+    $$
+    a_k \equiv \frac{k^3 - 1}{k - 1} \pmod{p}.
+    $$
+    Over all $k = 2, 3, \ldots, p-1$ the denominators multiply to $1 \cdot 2 \cdots (p-2) = (p-2)!$, so
+    $$
+    a_1 a_2 \cdots a_{p-1} \equiv 3 \cdot \frac{\prod_{k=2}^{p-1} (k^3 - 1)}{(p-2)!} \pmod{p}.
+    $$
+
+    The numerator looks intractable, but the product of \textit{all} numbers of the form $x - 1$ over the non-zero residues $x$ would be easy to compute. It therefore suffices to know which residues the cubes run through, and this is exactly where the assumption on~$p$ modulo $3$ comes in.
+
+    We show that the map $x \mapsto x^3$ is a bijection on the non-zero residues modulo $p$. Since $p \equiv 2 \pmod{3}$, the number $t = \frac{p-2}{3}$ is a positive integer. Suppose $x^3 \equiv y^3 \pmod{p}$ for non-zero residues $x$, $y$. Raising to the $t$-th power gives $x^{p-2} \equiv y^{p-2} \pmod{p}$, which by Fermat's Little Theorem reads
+    $$
+    \frac{1}{x} \equiv \frac{1}{y} \pmod{p},
+    $$
+    hence $x \equiv y \pmod{p}$. An injective map of a finite set into itself is a bijection.
+
+    The numbers $1^3, 2^3, \ldots, (p-1)^3$ are therefore a permutation of $1, 2, \ldots, p-1$ modulo $p$. So the only $k$ with $k^3 \equiv 1 \pmod{p}$ is $k = 1$, and for $k = 2, 3, \ldots, p-1$ the values $k^3$ run through exactly the residues $2, 3, \ldots, p-1$ in some order. We get
+    $$
+    \prod_{k=2}^{p-1} (k^3 - 1) \equiv \prod_{j=2}^{p-1} (j - 1) = (p-2)! \pmod{p}.
+    $$
+    The number $(p-2)!$ is not divisible by $p$, so it cancels in the fraction and we are left with
+    $$
+    a_1 a_2 \cdots a_{p-1} \equiv 3 \pmod{p}.
+    $$
+}
 
 \EnvId{XmHaSAnFcLBJMQwLRRJu6-power-sum-over-half-range}
 \Problem{0}{Singapore 2012}{
@@ -151,7 +318,44 @@ The problems below all benefit from the theory above --- working with fractions 
     Apply $\binom{p-1}{k-1} \equiv (-1)^{k-1} \pmod{p}$ from a~previous problem to simplify.
 }{
     The right-hand side reduces to $-\sum_{k=1}^{p-1} (-1)^{k-1}/k \pmod{p}$. Split this into even and odd $k$, and use $\sum_{k=1}^{p-1} 1/k \equiv 0 \pmod{p}$ from a~previous problem.
-}{}
+}{
+    First note that the right-hand side makes sense: by Fermat's Little Theorem $2^p \equiv 2 \pmod{p}$, so $p \mid 2^p - 2$ and $\frac{2-2^p}{p}$ is an integer.
+
+    The left-hand side is immediate. For $1 \leq i \leq p-1$ we have $i \not\equiv 0 \pmod{p}$, so $i^{p-2} \equiv i^{p-1} \cdot \frac{1}{i} \equiv \frac{1}{i} \pmod{p}$. Therefore
+    $$
+    \sum_{i=1}^{(p-1)/2} i^{p-2} \equiv \sum_{i=1}^{(p-1)/2} \frac{1}{i} \pmod{p}. \eqno(1)
+    $$
+    All the work is on the right-hand side, and the goal is to extract that same sum from it.
+
+    The binomial theorem gives $2^p = (1+1)^p = \sum_{k=0}^{p} \binom{p}{k}$, so after removing the two end terms
+    $$
+    \frac{2^p-2}{p} = \frac{1}{p} \sum_{k=1}^{p-1} \binom{p}{k}.
+    $$
+    We can divide the sum by $p$ term by term thanks to the identity $\binom{p}{k} = \frac{p}{k} \binom{p-1}{k-1}$ (both sides equal $\frac{p!}{k!(p-k)!}$), after which $p$ cancels:
+    $$
+    \frac{2^p-2}{p} = \sum_{k=1}^{p-1} \frac{\binom{p-1}{k-1}}{k}. \eqno(2)
+    $$
+    This is an equality of rational numbers, but every denominator on the right-hand side satisfies $1 \leq k \leq p-1$, hence is not divisible by $p$. So we may read (2) as a congruence modulo~$p$, where $\frac{1}{k}$ means the inverse of $k$.
+
+    By an earlier problem, $\binom{p-1}{k-1} \equiv (-1)^{k-1} \pmod{p}$, so multiplying (2) by $-1$ turns it into
+    $$
+    \frac{2-2^p}{p} \equiv \sum_{k=1}^{p-1} \frac{(-1)^k}{k} \pmod{p}.
+    $$
+
+    It remains to split this alternating sum by the parity of $k$. The number $p-1$ is even, so the even indices are exactly $k = 2j$ for $j = 1, \ldots, \frac{p-1}{2}$; put
+    $$
+    E = \sum_{j=1}^{(p-1)/2} \frac{1}{2j} \equiv \frac{1}{2} \sum_{j=1}^{(p-1)/2} \frac{1}{j} \pmod{p}
+    $$
+    and $S = \sum_{k=1}^{p-1} \frac{1}{k}$. The sum over odd $k$ is then $S - E$, hence
+    $$
+    \sum_{k=1}^{p-1} \frac{(-1)^k}{k} = E - (S - E) = 2E - S.
+    $$
+    By an earlier problem, $S \equiv 0 \pmod{p}$, so
+    $$
+    \frac{2-2^p}{p} \equiv 2E \equiv \sum_{j=1}^{(p-1)/2} \frac{1}{j} \pmod{p},
+    $$
+    which together with (1) is exactly the congruence to be proved.
+}
 
 \EnvId{FfwCijxt7LgTb4ro14tSW-binomial-2p-choose-p}
 \Problem{0}{}{
@@ -165,7 +369,36 @@ The problems below all benefit from the theory above --- working with fractions 
     Expand $\prod\bigl(1 + \frac{p}{k}\bigr)$ modulo $p^2$: only the constant and linear-in-$p$ terms survive, giving $1 + p \sum_{k=1}^{p-1} 1/k$.
 }{
     By P4, $\sum_{k=1}^{p-1} 1/k \equiv 0 \pmod{p}$, so $p \sum 1/k \equiv 0 \pmod{p^2}$.
-}{}
+}{
+    For $p = 2$ we check the claim directly: $\binom{4}{2} = 6 = 4 + 2 \equiv 2 \pmod{4}$. So from now on let $p \geq 3$.
+
+    Expand the binomial coefficient and pull the multiples of $p$ out of it:
+    $$
+    \binom{2p}{p} = \frac{(2p)(2p-1)\cdots(p+1)}{p!}.
+    $$
+    In the numerator the only multiple of $p$ is the first factor $2p$, the remaining factors being $p + k$ for $k = 1, 2, \ldots, p-1$; the denominator is $p! = p \cdot (p-1)!$. Cancelling one $p$ gives the integer identity
+    $$
+    \binom{2p}{p} \cdot (p-1)! = 2 \prod_{k=1}^{p-1}(p+k). \eqno(1)
+    $$
+
+    We now compute the right-hand side modulo~$p^2$. For $1 \leq k \leq p-1$ the number $k$ is coprime to $p^2$, so it has an inverse modulo~$p^2$ as well, and we write $\frac1k$ for this inverse; the proofs of both theorems on computing with fractions use nothing but the invertibility of the denominator, so they go through verbatim modulo~$p^2$. From $k \cdot \frac{p}{k} = p$ we get $p + k \equiv k\bigl(1 + \frac{p}{k}\bigr) \pmod{p^2}$, hence
+    $$
+    \prod_{k=1}^{p-1}(p+k) \equiv (p-1)! \prod_{k=1}^{p-1}\bigl(1 + \tfrac{p}{k}\bigr) \pmod{p^2}.
+    $$
+
+    Expand the last product. The term corresponding to a subset $S \subseteq \{1, \ldots, p-1\}$ is $p^{|S|} \prod_{k \in S} \frac1k$, which for $|S| \geq 2$ is divisible by $p^2$ and hence zero modulo~$p^2$. Only the $1$ and the terms linear in~$p$ survive:
+    $$
+    \prod_{k=1}^{p-1}\bigl(1 + \tfrac{p}{k}\bigr) \equiv 1 + p \sum_{k=1}^{p-1} \frac1k \pmod{p^2}.
+    $$
+
+    It therefore suffices to show that $p \sum_{k=1}^{p-1} \frac1k \equiv 0 \pmod{p^2}$, that is, that the sum $\sum_{k=1}^{p-1} \frac1k$ itself is divisible by~$p$. Only information modulo~$p$ matters here, and the inverse of $k$ modulo~$p^2$ becomes the inverse of $k$ modulo~$p$ once reduced modulo~$p$. So modulo~$p$ our sum is an ordinary sum of inverses modulo~$p$, and that sum is zero for $p \geq 3$: we proved it in the problem on the numerator of the sum $\frac11 + \frac12 + \cdots + \frac1{p-1}$. This is exactly where $p = 2$ fails, because for $p = 2$ this sum equals $1$.
+
+    The product in the last relation is thus $1$ modulo~$p^2$, and (1) turns into
+    $$
+    \binom{2p}{p} \cdot (p-1)! \equiv 2 \cdot (p-1)! \pmod{p^2}.
+    $$
+    The number $(p-1)!$ is coprime to $p^2$, so we may cancel it, which gives $\binom{2p}{p} \equiv 2 \pmod{p^2}$.
+}
 
 \EnvId{IyalyrEDv2e9srzrTKrZS-reciprocal-power-sum-numerator}
 \Problem{0}{}{
@@ -176,7 +409,41 @@ The problems below all benefit from the theory above --- working with fractions 
     The claim is $\sum_{k=1}^{p-1} \frac{1}{k^e} \equiv 0 \pmod{p}$. The trick is to look for an $a$ such that multiplying every $k$ by $a$ shuffles the terms but rescales the whole sum.
 }{
     Use the assumption $(p-1) \nmid e$ to find $a$ with $a^e \not\equiv 1 \pmod{p}$. The trick is to consider a primitive root.
-}{}
+}{
+    First we turn the claim about the numerator into a congruence. Set $N = \bigl((p-1)!\bigr)^e$. For every $k \in \{1, 2, \ldots, p-1\}$, $k^e$ divides $N$, so putting the sum over the common denominator $N$ gives
+    $$
+    \frac{1}{1^e} + \frac{1}{2^e} + \cdots + \frac{1}{(p-1)^e} = \frac{M}{N},
+    $$
+    where $M = \sum_{k=1}^{p-1} \frac{N}{k^e}$ is an integer. The equality $\frac{m}{n} = \frac{M}{N}$ gives $mN = nM$, and $N$ is a product of numbers smaller than $p$, hence $p \nmid N$. To prove $p \mid m$ it therefore suffices to prove $p \mid M$.
+
+    The integer $\frac{N}{k^e}$ is congruent modulo~$p$ to the product $N \cdot \frac{1}{k^e}$, where $\frac{1}{k^e}$ is the inverse of $k^e$ modulo~$p$: since $k^e \not\equiv 0 \pmod{p}$, this congruence is equivalent by cancellation to $N \equiv N$. So if we denote
+    $$
+    S = \frac{1}{1^e} + \frac{1}{2^e} + \cdots + \frac{1}{(p-1)^e},
+    $$
+    where the fractions are now read as inverses modulo~$p$, then $M \equiv N \cdot S \pmod{p}$. Since $p \nmid N$, it suffices to prove $S \equiv 0 \pmod{p}$.
+
+    We look for an $a \not\equiv 0 \pmod{p}$ for which replacing every $k$ by $ak$ shuffles the terms but rescales the sum as a whole. The shuffling works for any such $a$: the residues $a \cdot 1, a \cdot 2, \ldots, a(p-1)$ are a permutation of $1, 2, \ldots, p-1$ modulo~$p$, and since the value of $\frac{1}{k^e}$ modulo~$p$ depends only on the residue of $k$,
+    $$
+    S \equiv \sum_{k=1}^{p-1} \frac{1}{(ak)^e} \pmod{p}.
+    $$
+    The rescaling comes from the theorem on multiplying fractions applied to $(ak)^e = a^e k^e$:
+    $$
+    \sum_{k=1}^{p-1} \frac{1}{a^e k^e}
+    \equiv \frac{1}{a^e} \sum_{k=1}^{p-1} \frac{1}{k^e}
+    \equiv \frac{S}{a^e} \pmod{p}.
+    $$
+    Putting the two together, we get $S \equiv \frac{S}{a^e}$, so multiplying by $a^e$ gives
+    $$
+    (a^e - 1) \cdot S \equiv 0 \pmod{p}.
+    $$
+    Hence if we find an $a$ with $a^e \not\equiv 1 \pmod{p}$, the factor $a^e - 1$ is non-zero and cancellation yields $S \equiv 0 \pmod{p}$.
+
+    This is exactly what the assumption $(p-1) \nmid e$ is for. Let $g$ be a primitive root modulo~$p$, that is, an element of order $p-1$, and set $a = g$. Write $e = q(p-1) + r$ with $0 \leq r < p-1$; the assumption gives $r \neq 0$. By Fermat's Little Theorem,
+    $$
+    g^e = \bigl(g^{p-1}\bigr)^q \cdot g^r \equiv g^r \pmod{p},
+    $$
+    so $g^e \equiv 1 \pmod{p}$ would force $g^r \equiv 1 \pmod{p}$ with $0 < r < p-1$, contradicting the fact that the order of $g$ is $p-1$. Hence $g^e \not\equiv 1 \pmod{p}$ and the proof is complete.
+}
 
 \EnvId{5GgUO9sDTBS1pWxire2HE-wolstenholme-reciprocal-sum}
 \Problem{0}{Wolstenholme}{
@@ -191,6 +458,45 @@ The problems below all benefit from the theory above --- working with fractions 
     Modulo $p$, $1/(k(p-k)) \equiv -1/k^2$. So it suffices that $\sum_{k=1}^{(p-1)/2} 1/k^2 \equiv 0 \pmod{p}$.
 }{
     Note $(p-k)^2 \equiv k^2 \pmod{p}$, so $\sum_{k=1}^{p-1} 1/k^2 = 2 \sum_{k=1}^{(p-1)/2} 1/k^2$. Can we now use a previous problem?
-}{}
+}{
+    Denote
+    $$
+    S = \frac{1}{1} + \frac{1}{2} + \cdots + \frac{1}{p-1}, \qquad D = (p-1)!.
+    $$
+    Throughout, $S$ is understood as an ordinary fraction, not as a residue modulo~$p$; congruences will only be applied to auxiliary integers. Note at the outset that $p \nmid D$.
+
+    Adding the terms $1/k$ and $1/(p-k)$ produces a $p$ in the numerator:
+    $$
+    \frac{1}{k} + \frac{1}{p-k} = \frac{p}{k(p-k)}.
+    $$
+    Since $p$ is odd, the pairs $\{k, p-k\}$ for $k = 1, 2, \ldots, \frac{p-1}{2}$ cover each of $1, 2, \ldots, p-1$ exactly once, hence
+    $$
+    S = p \sum_{k=1}^{(p-1)/2} \frac{1}{k(p-k)}.
+    $$
+
+    One factor of $p$ comes for free, and it suffices to show that the remaining sum contributes another one. This is a statement about a fraction, so let us put it over the common denominator $D$. For $k \leq \frac{p-1}{2}$, the numbers $k$ and $p-k$ are two distinct elements of $\{1, 2, \ldots, p-1\}$, so $k(p-k) \mid D$ and the number
+    $$
+    A = \sum_{k=1}^{(p-1)/2} \frac{D}{k(p-k)}
+    $$
+    is an integer, with $S = \frac{pA}{D}$. We want to prove $p \mid A$.
+
+    Only here do we start working with residues. Each summand $X = \frac{D}{k(p-k)}$ satisfies $X \cdot k(p-k) = D$, so modulo~$p$ we have $X \equiv D \cdot \bigl(k(p-k)\bigr)^{-1}$. Moreover $k(p-k) \equiv -k^2 \pmod{p}$, and therefore
+    $$
+    A \equiv -D \sum_{k=1}^{(p-1)/2} \frac{1}{k^2} \pmod{p}.
+    $$
+    Since $p \nmid D$, it remains to prove that
+    $$
+    \sum_{k=1}^{(p-1)/2} \frac{1}{k^2} \equiv 0 \pmod{p},
+    $$
+    where this is a sum of residues, that is, of inverses in the sense of the theory above.
+
+    We extend this half sum to the full one, for which we already know the claim. From $p - k \equiv -k$ we get $(p-k)^2 \equiv k^2$, hence also $\frac{1}{(p-k)^2} \equiv \frac{1}{k^2}$, so the second half of the terms is a copy of the first:
+    $$
+    \sum_{k=1}^{p-1} \frac{1}{k^2} \equiv 2 \sum_{k=1}^{(p-1)/2} \frac{1}{k^2} \pmod{p}.
+    $$
+    For $p \geq 5$ we have $p - 1 \geq 4$, so $(p-1) \nmid 2$, and by the previous problem with $e = 2$ the left-hand side is zero modulo~$p$. The number $2$ is coprime to $p$, so the half-range sum is zero as well, and indeed $p \mid A$.
+
+    Write $A = pB$ with $B$ an integer, so $S = \frac{p^2 B}{D}$. Multiplying out $\frac{m}{n} = \frac{p^2 B}{D}$ gives $mD = p^2 Bn$, so $p^2 \mid mD$. Since $p \nmid D$, we get $p^2 \mid m$.
+}
 
 \bye

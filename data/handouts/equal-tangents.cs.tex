@@ -21,28 +21,74 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Je dána kružnice a~z~bodu $A$ jsou k~ní vedeny dvě tečny. Body dotyku označme $X$, $Y$. Pak $|AX| = |AY|$.
 
     \Image{equal-tangents-two-from-point.pdf}
-}{}
+}{
+    Označme $S$ střed a~$r$ poloměr dané kružnice. Z~bodu $A$ vedou dvě různé tečny, takže $A$ leží vně kružnice a~je různý od obou bodů dotyku. Tečna je kolmá na poloměr vedený do bodu dotyku, tedy $|\angle AXS| = |\angle AYS| = 90^\circ$ a~trojúhelníky $AXS$, $AYS$ jsou pravoúhlé se společnou přeponou $AS$ a~shodnými odvěsnami $|SX| = |SY| = r$. Pythagorova věta v~nich dává
+    $$
+    |AX|^2 = |AS|^2 - r^2 = |AY|^2,
+    $$
+    a~jelikož jsou obě délky nezáporné, je $|AX| = |AY|$.
+}
 
 \EnvId{mrvQMDl5Le3AmRPmyn1nx-spolecne-vnejsi-tecny-dvou-kruznic}
 \Theorem{}{
     Nechť $p$ a~$q$ jsou společné vnější tečny dvou kružnic $k_1$ a~$k_2$. Předpokládejme, že $p$ se dotýká $k_1$ v~$A$ a~$k_2$ v~$B$ a~$q$ se jich dotýká v~$C$ a~$D$. Pak $|AB| = |CD|$.
 
     \Image{equal-tangents-external-equal.pdf}
-}{}
+}{
+    Předpokládejme nejprve, že se přímky $p$, $q$ protínají, a~jejich průsečík označme $P$. Z~bodu $P$ vedou ke kružnici $k_1$ tečny $p$ a~$q$ s~body dotyku $A$, $C$, takže podle Tvrzení 1 je $|PA| = |PC|$; stejně pro $k_2$ s~body dotyku $B$, $D$ je $|PB| = |PD|$.
+
+    U~vnější tečny leží obě kružnice v~téže polorovině, takže $k_1$ i~$k_2$ leží v~téže z~oblastí, na které dvojice přímek $p$, $q$ dělí rovinu. Průnikem této oblasti s~přímkou $p$ je polopřímka s~počátkem $P$ a~leží na ní i~body $A$, $B$, neboť ty leží na $p$ i~na kružnicích. Body $A$, $B$ tedy leží na téže polopřímce z~bodu $P$ a~podobně $C$, $D$ na téže polopřímce z~bodu $P$, odkud
+    $$
+    |AB| = \bigl| |PA| - |PB| \bigr| = \bigl| |PC| - |PD| \bigr| = |CD|.
+    $$
+
+    Pokud se $p$, $q$ neprotínají, jsou rovnoběžné. Kolmice na $p$ vedená středem kružnice $k_1$ je kolmá i~na $q$ a~její paty na $p$, $q$ jsou právě body dotyku, takže $A$, $C$ na ní leží a~$AC \perp p$, přičemž $|AC|$ je vzdálenost přímek $p$, $q$. Stejně $BD \perp p$. Posunutí, které zobrazí $A$ na $C$, proto zobrazí přímku $p$ na $q$ a~bod $B$ na patu kolmice z~$B$ na $q$, tedy na $D$. Posunutí zachovává vzdálenosti, takže $|AB| = |CD|$.
+}
 
 \EnvId{jf0TF7EIF2sGDujPAaJGG-spolecna-vnitrni-tecna-dvou-kruznic}
 \Theorem{}{
     V~předchozím nastavení navíc předpokládejme, že $k_1$ a~$k_2$ jsou disjunktní, a~nechť $r$ je společná vnitřní tečna kružnic $k_1$ a~$k_2$ protínající $p$ v~$X$ a~$q$ v~$Y$. Pak $|XY| = |AB|$.
 
     \Image{equal-tangents-internal-equals-external.pdf}
-}{}
+}{
+    Nechť se vnitřní tečna $r$ dotýká kružnice $k_1$ v~bodě $E$ a~kružnice $k_2$ v~bodě $F$.
+
+    Přímka $r$ je vnitřní tečna, takže $k_1$ a~$k_2$ leží v~opačných polorovinách s~hranicí $r$. Body $A \in k_1$ a~$B \in k_2$ jsou tedy přímkou $r$ odděleny a~úsečka $AB$ ji protíná; jelikož $AB$ leží na $p$ a~přímky $p$, $r$ mají jediný společný bod $X$, leží $X$ na úsečce $AB$. Stejně $Y$ leží na úsečce $CD$.
+
+    Označme $H_p$, $H_q$ poloroviny s~hranicemi $p$, $q$ obsahující obě kružnice (ty existují právě proto, že $p$, $q$ jsou vnější tečny). Krajní body úsečky $AB$ leží v~$H_q$, takže $X \in H_q$, a~stejně $Y \in H_p$. Průnik $r \cap H_p$ je polopřímka s~počátkem $X$ a~obsahuje body $Y$, $E$, $F$; průnik $r \cap H_q$ je polopřímka s~počátkem $Y$ a~obsahuje body $X$, $E$, $F$. Dvě polopřímky téže přímky, z~nichž každá obsahuje počátek té druhé, mají za průnik úsečku spojující jejich počátky, takže $E$ i~$F$ leží na úsečce $XY$.
+
+    Z~bodu $X$ jsou ke~kružnici $k_1$ vedeny tečny $p$ a~$r$ s~body dotyku $A$, $E$, takže podle Tvrzení 1 je $|XA| = |XE|$; stejně $|XB| = |XF|$, $|YC| = |YE|$ a~$|YD| = |YF|$. Body $E$, $F$ leží na úsečce $XY$, čili $|XE| + |EY| = |XF| + |FY| = |XY|$, a~body $X$, $Y$ leží na úsečkách $AB$, $CD$, čili $|XA| + |XB| = |AB|$ a~$|YC| + |YD| = |CD|$. Dohromady
+    $$
+    \gather
+    2|XY| = (|XE| + |EY|) + (|XF| + |FY|) \\
+    = (|XA| + |XB|) + (|YC| + |YD|) = |AB| + |CD|.
+    \endgather
+    $$
+    Podle Tvrzení 2 je $|AB| = |CD|$, takže $2|XY| = 2|AB|$, tedy $|XY| = |AB|$.
+}
 
 \EnvId{JhAKuB486cDd3AdwJYXkE-dotykove-body-vepsane-kruznice}
 \Theorem{}{
     Vepsaná kružnice trojúhelníku $ABC$ se dotýká stran $BC$, $CA$, $AB$ po řadě v~bodech $D$, $E$, $F$. Pak $|AE| = |AF| = s - a = \frac{b + c - a}{2}$ a~podobně pro zbylé dva vrcholy.
 
     \Image{equal-tangents-incircle.pdf}
-}{}
+}{
+    Vepsaná kružnice leží celá uvnitř trojúhelníku $ABC$, takže i~každý bod dotyku leží v~trojúhelníku; průnikem trojúhelníku s~přímkou $BC$ je úsečka $BC$, tedy $D$ leží mezi $B$ a~$C$, a~stejně $E$ leží mezi $C$ a~$A$ a~$F$ mezi $A$ a~$B$.
+
+    Dvě tečny vedené ke kružnici z~téhož bodu jsou stejně dlouhé, takže můžeme položit
+    $$
+    x = |AE| = |AF|, \qquad y = |BF| = |BD|, \qquad z = |CD| = |CE|.
+    $$
+    Z~uvedeného pořadí bodů na stranách dostáváme
+    $$
+    a = y + z, \qquad b = z + x, \qquad c = x + y.
+    $$
+    Sečtením těchto tří rovností dostaneme $2(x + y + z) = a + b + c$, tedy $x + y + z = s$, a~odečtením první z~nich
+    $$
+    |AE| = |AF| = x = s - a = \frac{b + c - a}{2}.
+    $$
+    Stejně $|BF| = |BD| = y = s - b$ a~$|CD| = |CE| = z = s - c$.
+}
 
 \EnvId{Ul1BcJ7hkSI2RgBb98Iik-polomer-vepsane-kruznice-pravouhleho-trojuhelniku}
 \Theorem{}{
@@ -52,28 +98,58 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     $$
 
     \Image{equal-tangents-right-inradius.pdf}
-}{}
+}{
+    Nechť $I$ je střed vepsané kružnice a~nechť se tato kružnice dotýká stran $BC$, $CA$ v~bodech $D$, $E$. Bod dotyku je patou kolmice ze středu, takže $ID \perp BC$ a~$IE \perp CA$; spolu s~pravým úhlem při $C$ z~toho plyne, že $CDIE$ je obdélník. Jeho strany $ID$ a~$IE$ mají délku $r$, jde tedy o~čtverec a
+    $$
+    |CD| = |CE| = r.
+    $$
+    Podle předchozí věty je zároveň $|CD| = |CE| = s - c$, čili
+    $$
+    r = s - c = \frac{a + b - c}{2}.
+    $$
+}
 
 \EnvId{4h53hlgz3wSLk4lVp4pyd-pripsana-kruznice-proti-vrcholu}
 \Theorem{}{
     Nechť se kružnice připsaná trojúhelníku $ABC$ proti vrcholu $A$ dotýká přímek $BC$, $CA$, $AB$ po řadě v~bodech $D$, $E$, $F$. Pak $|AE| = |AF| = s = \frac{a + b + c}{2}$.
 
     \Image{equal-tangents-excircle-from-a.pdf}
-}{}
+}{
+    Nejprve si ujasněme polohu bodů dotyku. Střed $I_A$ připsané kružnice leží na ose vnitřního úhlu při $A$, tedy uvnitř úhlu $BAC$, a~od obou přímek $AB$, $AC$ má vzdálenost rovnou poloměru, takže celá kružnice leží v~úhlu $BAC$ a~body $E$, $F$ leží na polopřímkách $AC$, $AB$. Kružnice připsaná proti $A$ je zároveň podle definice ta, která leží v~polorovině s~hraniční přímkou $BC$ neobsahující $A$. Polopřímka $AC$ protíná přímku $BC$ jedině v~bodě $C$, takže $E$ leží na prodloužení strany $AC$ za bodem $C$; stejně $F$ leží na prodloužení strany $AB$ za bodem $B$. Bod $D$ leží na přímce $BC$ a~uvnitř úhlu $BAC$, čili uvnitř strany $BC$.
+
+    Dvě tečny z~téhož bodu jsou stejně dlouhé, takže $|CE| = |CD|$, $|BF| = |BD|$ a~$|AE| = |AF|$. Z~pořadí bodů je
+    $$
+    |AE| = b + |CD|, \qquad |AF| = c + |BD|, \qquad |BD| + |CD| = a.
+    $$
+    Sečtením prvních dvou rovností dostaneme $2|AE| = a + b + c$, tedy
+    $$
+    |AE| = |AF| = s = \frac{a + b + c}{2}.
+    $$
+}
 
 \EnvId{tIEpiTzploVkN1fSAAx_3-pripsana-kruznice-zbyle-vrcholy}
 \Theorem{}{
     V~předchozím nastavení platí $|BD| = |BF| = s - c = \frac{a + b - c}{2}$ a~$|CD| = |CE| = s - b = \frac{a + c - b}{2}$.
 
     \Image{equal-tangents-excircle-from-b-c.pdf}
-}{}
+}{
+    V~důkazu předchozí věty jsme zjistili polohu bodů dotyku: $F$ leží na polopřímce $AB$ za bodem $B$, bod $E$ na polopřímce $AC$ za bodem $C$ a~$D$ uvnitř strany $BC$. Proto $|AF| = c + |BF|$ a~$|AE| = b + |CE|$, a~jelikož $|AE| = |AF| = s$, dostáváme
+    $$
+    |BF| = s - c = \frac{a + b - c}{2}, \qquad |CE| = s - b = \frac{a + c - b}{2}.
+    $$
+    Tečny z~bodu $B$ dávají $|BD| = |BF|$ a~tečny z~bodu $C$ dávají $|CD| = |CE|$, což je dokazované tvrzení.
+}
 
 \EnvId{G0QDSuOOrioc7nfucekbj-dotykove-body-symetricke-podle-stredu}
 \Theorem{}{
     V~předchozím nastavení jsou body, ve kterých se vepsaná kružnice trojúhelníku $ABC$ a~tato připsaná kružnice dotýkají přímky $BC$, symetrické vzhledem ke~středu $BC$.
 
     \Image{equal-tangents-excircle-symmetry.pdf}
-}{}
+}{
+    Nechť se vepsaná kružnice trojúhelníku $ABC$ dotýká strany $BC$ v~bodě $P$ a~připsaná kružnice proti vrcholu $A$ se dotýká přímky $BC$ v~bodě $D$. Podle věty o~bodech dotyku vepsané kružnice je $|BP| = s - b$ a~podle předchozí věty $|BD| = s - c$, $|CD| = s - b$. Jelikož $|BD| + |CD| = a = |BC|$, leží $D$ na úsečce $BC$; leží na ní i~bod $P$.
+
+    Nechť $M$ je střed strany $BC$. Středová souměrnost podle $M$ zobrazuje $B$ na $C$ a~úsečku $BC$ na sebe, takže bod této úsečky ve vzdálenosti $s - b$ od $B$ zobrazí na bod této úsečky ve vzdálenosti $s - b$ od $C$. Prvním z~nich je $P$ a~druhým je bod $D$, neboť $|CD| = s - b$, tedy $P$ a~$D$ jsou souměrné podle $M$.
+}
 
 \EnvId{tER-vT4qkSmu9dw7bjhcr-tecnovy-ctyruhelnik}
 \Definition{Tečnový čtyřúhelník}{
@@ -85,7 +161,36 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
 \EnvId{xFM0xDDSoTaKN7_k-PGs6-pitotova-veta}
 \Theorem{Pitotova věta}{
     Konvexní čtyřúhelník $ABCD$ je tečnový právě tehdy, když $|AB| + |CD| = |BC| + |AD|$.
-}{}
+}{
+    Nechť má $ABCD$ vepsanou kružnici, která se dotýká stran $AB$, $BC$, $CD$, $DA$ po řadě v~bodech $P$, $Q$, $R$, $S$. Ze stejných tečen je $|AP| = |AS|$, $|BP| = |BQ|$, $|CQ| = |CR|$ a~$|DR| = |DS|$, takže
+    $$
+    \align
+    |AB| + |CD| &= |AP| + |PB| + |CR| + |RD| \\
+    &= |SA| + |BQ| + |QC| + |DS| \\
+    &= \bigl(|BQ| + |QC|\bigr) + \bigl(|DS| + |SA|\bigr) \\
+    &= |BC| + |AD|.
+    \endalign
+    $$
+
+    Naopak nechť konvexní čtyřúhelník $ABCD$ splňuje $|AB| + |CD| = |BC| + |AD|$, tj.
+    $$
+    |AB| - |AD| = |BC| - |CD|.
+    $$
+    Záměna označení $B \leftrightarrow D$ zachovává konvexnost i~tuto podmínku, takže můžeme předpokládat $|AB| \geq |AD|$, a~tedy i~$|BC| \geq |CD|$. Zvolme bod $P$ na straně $AB$ s~$|AP| = |AD|$ a~bod $Q$ na straně $CB$ s~$|CQ| = |CD|$; potom
+    $$
+    |BP| = |AB| - |AD| = |BC| - |CD| = |BQ|.
+    $$
+
+    Označme $\alpha$, $\beta$ vnitřní úhly při vrcholech $A$, $B$. Jejich vnitřní osy vycházejí z~konců úsečky $AB$ do téže poloroviny a~svírají s~$AB$ úhly $\alpha/2$ a~$\beta/2$, oba menší než $90^\circ$, takže se protínají v~jediném bodě $I$.
+
+    Bod $D$ neleží na přímce $AB$, takže $P \neq D$ a~trojúhelník $APD$ je rovnoramenný se základnou $PD$; osa úhlu při $A$ je proto osou úsečky $PD$ a~$|IP| = |ID|$. Stejně je osa úhlu při $B$ osou úsečky $PQ$, takže $|IP| = |IQ|$ (v~případě $P = Q$, který nastane jen pro $P = Q = B$, je to zřejmé). Dohromady $|ID| = |IQ|$, tedy $I$ leží na ose úsečky $DQ$. Bod $D$ neleží ani na přímce $BC$, takže $D \neq Q$, a~jelikož $|CD| = |CQ|$, je osou úsečky $DQ$ právě osa úhlu $DCB$.
+
+    Bod $I$ má tedy stejnou vzdálenost od přímek $AB$ a~$AD$, od přímek $AB$ a~$BC$ i~od přímek $CB$ a~$CD$, tj. od všech čtyř přímek $AB$, $BC$, $CD$, $DA$; označme ji $r$. Kdyby bylo $r = 0$, ležel by $I$ na přímce $AB$ i~na přímce $AD$, tedy $I = A$, jenže bod $A$ na ose úhlu při $B$ neleží. Proto $r > 0$ a~kružnice $\omega$ se středem $I$ a~poloměrem $r$ se dotýká všech čtyř přímek.
+
+    Zbývá ověřit, že body dotyku leží na stranách. Bod $I$ leží uvnitř úhlů při $A$ a~$B$, tj. ve vnitřní polorovině přímek $AB$, $AD$ i~$BC$. Bod $I$ leží na vnitřní polopřímce osy úhlu při $C$: opačná polopřímka totiž leží ve vrcholovém úhlu, tedy na opačné straně přímky $BC$ než bod $A$. Bod $I$ tak leží ve vnitřní polorovině i~pro přímku $CD$, tj. uvnitř čtyřúhelníku $ABCD$, a~proto i~uvnitř úhlu při $D$; od přímek $DA$ a~$DC$ je stejně vzdálený, takže leží na vnitřní ose úhlu při $D$.
+
+    Nechť je nyní $V$ libovolný vrchol s~vnitřním úhlem $\varphi < 180^\circ$. Bod $I$ leží na vnitřní ose tohoto úhlu, takže tato osa svírá s~kterýmkoli jeho ramenem při $V$ úhel $\varphi/2 < 90^\circ$. Pata kolmice z~$I$ na toto rameno je proto od $V$ různá a~leží na něm, ne na opačné polopřímce: v~pravoúhlém trojúhelníku, který vznikne, by opačná polopřímka dala při $V$ tupý úhel. Bod dotyku kružnice $\omega$ s~přímkou $AB$ proto leží na polopřímce $AB$ i~na polopřímce $BA$, tedy na straně $AB$, a~stejně pro zbylé tři strany. Kružnice $\omega$ je tak vepsanou kružnicí čtyřúhelníku $ABCD$.
+}
 
 \sec Úlohy
 
@@ -93,10 +198,30 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
 \Problem{0}{DuoGeo 2025}{
     V~trojúhelníku $ABC$ nechť $D$ je pata výšky z~bodu $C$, přičemž $D$ leží na úsečce $AB$. Předpokládejme, že $|AC| + |BC|$ spolu s~průměry vepsaných kružnic trojúhelníků $ADC$ a~$BDC$ dávají v~součtu $26$ a~že $|CD| = 6$. Najděte obsah trojúhelníku $ABC$.
 }{
-    Jeden ze vzorců, které se hodí znát, je jak spočítat poloměr vepsané kružnice pravoúhlého trojúhelníku; v~naší úloze máme jejich dvojnásobky.
+    Jeden ze vzorců, které je třeba znát, je jak spočítat poloměr vepsané kružnice pravoúhlého trojúhelníku; v~naší úloze máme jejich dvojnásobky.
 }{
     Je-li poloměr vepsané kružnice $ACD$ roven $r_1$ a~poloměr vepsané kružnice $BCD$ roven $r_2$, pak $2r_1=(|AD|+|CD|-|AC|)$ a~$2r_2=(|BD|+|CD|-|BC|)$. Sečtení a~trocha úprav by nám měly dát poslední chybějící kousek k~výpočtu obsahu.
-}{}
+}{
+    \Answer{Hledaný obsah je $42$.}
+    Označme $r_1$, $r_2$ poloměry vepsaných kružnic trojúhelníků $ADC$, $BDC$; podmínka ze zadání říká, že $|AC| + |BC| + 2r_1 + 2r_2 = 26$. Jelikož $CD$ je výška, jsou oba tyto trojúhelníky pravoúhlé s~pravým úhlem při $D$: jejich odvěsny jsou $|AD|$, $|CD|$, resp. $|BD|$, $|CD|$, a~přepony $|AC|$, resp. $|BC|$. Vzorec pro poloměr vepsané kružnice pravoúhlého trojúhelníku proto dává
+    $$
+    2r_1 = |AD| + |CD| - |AC|, \qquad 2r_2 = |BD| + |CD| - |BC|.
+    $$
+
+    Oba trojúhelníky jsou nedegenerované, takže $D$ je vnitřní bod úsečky $AB$ a~platí $|AD| + |BD| = |AB|$. Sečtením obou rovností tak dostaneme
+    $$
+    2r_1 + 2r_2 = |AB| + 2|CD| - |AC| - |BC|.
+    $$
+
+    Po dosazení do podmínky ze zadání se členy $|AC|$ a~$|BC|$ vyruší a~zbude
+    $$
+    26 = |AB| + 2|CD| = |AB| + 12,
+    $$
+    tedy $|AB| = 14$. Úsečka $CD$ je výška na stranu $AB$, a~proto
+    $$
+    S_{ABC} = \tfrac12 |AB| \cdot |CD| = \tfrac12 \cdot 14 \cdot 6 = 42.
+    $$
+}
 
 \EnvId{EMMxpx8fQHdf5k7deQlkg-stred-strany-rovnobezniku}
 \Problem{0}{MO 61-C-II-3}{
@@ -106,10 +231,29 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
 }{
     Měli bychom dostat $|AE|=|AB|+|CE|-|BC|=a+a/2-2a/3=5a/6$. Co dalšího dokážeme vyjádřit pomocí $a$?
 }{
-    Zřejmě $|AD|=|BC|=2a/3$ a~$|DE|=|CE|=a/2$. Známe všechny strany $ADE$ pomocí $a$. Nevypadají podezřele? Jeden pěkný trik, který se hodí při práci se zlomky, je zbavit se jich škálováním -- označme $a=6x$. Jaké jsou teď strany?
+    Zřejmě $|AD|=|BC|=2a/3$ a~$|DE|=|CE|=a/2$. Známe všechny strany $ADE$ pomocí $a$. Nevypadají podezřele? Jeden pěkný trik, který je při práci se zlomky obecně užitečný, je zbavit se jich škálováním -- označme $a=6x$. Jaké jsou teď strany?
 }{
     Měli bychom dostat, že $|AD|=4x$, $|DE|=3x$ a~$|AE|=5x$, skrytý pravoúhlý trojúhelník se stranami 3-4-5. Takže náš rovnoběžník je v~podstatě obdélník. Teď by už mělo být snadné úlohu dokončit.
-}{}
+}{
+    Označme $a = |AB|$. Ze zadání je $|BC| = |AD| = \frac{2a}{3}$ a~z~rovnoběžníku $|CD| = a$, takže pro střed $E$ strany $CD$ máme $|CE| = |DE| = \frac{a}{2}$.
+
+    Bod $E$ leží uvnitř strany $CD$, takže úsečky $AB$ a~$CE$ leží na dvou různých rovnoběžných přímkách a~při oběhu $A \to B$, resp. $C \to E$ mají opačný směr; $ABCE$ je tedy konvexní lichoběžník se základnami $AB$ a~$CE$. Jelikož má vepsanou kružnici, dává Pitotova věta $|AB| + |CE| = |BC| + |AE|$, čili
+    $$
+    |AE| = a + \frac{a}{2} - \frac{2a}{3} = \frac{5a}{6}.
+    $$
+
+    Tím známe všechny tři strany trojúhelníku $ADE$: jsou to $\frac{2a}{3}$, $\frac{a}{2}$ a~$\frac{5a}{6}$. Zlomky vztah mezi nimi zakrývají, zbavme se jich tedy škálováním: při označení $a = 6x$ je
+    $$
+    |AD| = 4x, \qquad |DE| = 3x, \qquad |AE| = 5x,
+    $$
+    a~tedy $|AD|^2 + |DE|^2 = 16x^2 + 9x^2 = 25x^2 = |AE|^2$. Podle obrácené Pythagorovy věty je úhel trojúhelníku $ADE$ při vrcholu $D$ pravý.
+
+    Bod $E$ leží uvnitř úsečky $DC$, takže polopřímky $DE$ a~$DC$ splývají a~$|\angle ADC| = |\angle ADE| = 90^\circ$. Rovnoběžník s~jedním pravým úhlem je obdélník, takže $ABCD$ je obdélník; speciálně $|\angle ABC| = 90^\circ$ a~$|\angle BCE| = |\angle BCD| = 90^\circ$.
+
+    Nechť $\omega$ je vepsaná kružnice čtyřúhelníku $ABCE$ se středem $I$ a~poloměrem $r$ a~nechť se stran $AB$, $BC$, $CE$ dotýká po řadě v~bodech $P$, $T$, $Q$. Platí $IP \perp AB$ a~$IT \perp BC$, a~jelikož úhel při $B$ je pravý, je $IP \parallel BC$ a~$IT \parallel AB$. Čtyřúhelník $BPIT$ je proto obdélník a~$|BT| = |IP| = r$. Z~pravého úhlu při $C$ dostaneme stejně $|CT| = |IQ| = r$.
+
+    Bod $T$ leží na úsečce $BC$, takže $|BC| = |BT| + |CT| = 2r$ a~$|BT| = |CT|$. Kružnice $\omega$ se tedy dotýká strany $BC$ v~jejím středu.
+}
 
 \EnvId{YHoydnnN3mLvYu3xOFGHp-obvod-trojuhelniku-z-tecen}
 \Problem{0}{Náboj 2008}{
@@ -120,7 +264,24 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Je to jeho $P$-připsaná kružnice. To by nám mělo dát dobrou představu, jak lze obvod $PXY$ interpretovat.
 }{
     Připomeňme, že v~našich obvyklých konfiguracích platí $|PA|=|PB|$, což je polovina obvodu $PXY$. Stačí nám tedy spočítat $|PA|$.
-}{}
+}{
+    \Answer{Obvod trojúhelníku $PXY$ je $4\sqrt{2}$.}
+    Celá úloha stojí na tom, čím je kružnice $k$ pro trojúhelník $PXY$: je jeho kružnicí připsanou proti vrcholu $P$.
+
+    Nejprve poloha bodů. Kdyby bod $T$ splynul s~$A$ nebo s~$B$, tečna v~$T$ by byla přímka $AP$, resp. $BP$, a~body $X$, $Y$ by nebyly určeny; bod $T$ je tedy vnitřním bodem oblouku a~$T \neq A$, $T \neq B$. Přímka $XY$ se dotýká $k$ v~$T$, takže s~$k$ nemá jiný společný bod, a~proto na ní neleží ani bod $A$, ani bod $B$.
+
+    Kružnice $k$ se dotýká přímek $PX$, $PY$, $XY$ po řadě v~bodech $A$, $B$, $T$. Body dotyku $A$, $B$ leží na polopřímkách $PX$, $PY$ (dokonce za body $X$, $Y$, protože $X$ leží na úsečce $AP$ a~$Y$ na úsečce $BP$), takže $k$ je vepsaná do úhlu $XPY$. Dále $k$ leží celá v~jedné z~polorovin určených přímkou $XY$, a~to v~té, která neobsahuje $P$: úsečka $PA$ protíná přímku $XY$ v~bodě $X$, přičemž ani $P$, ani $A$ na této přímce neleží. Kružnice dotýkající se všech tří přímek $PX$, $PY$, $XY$, vepsaná do úhlu $XPY$ a~ležící na opačné straně přímky $XY$ než $P$, je právě kružnice připsaná trojúhelníku $PXY$ proti vrcholu $P$.
+
+    Podle věty o~připsané kružnici proti vrcholu se vzdálenost bodu $P$ od jejích bodů dotyku na přímkách $PX$, $PY$ rovná polovině obvodu trojúhelníku $PXY$, čili
+    $$
+    |PA| = |PB| = \frac{|PX| + |XY| + |YP|}{2}.
+    $$
+    Stačí tedy spočítat $|PA|$. Tečna je kolmá na poloměr v~bodě dotyku, takže trojúhelník $PAS$ má při vrcholu $A$ pravý úhel a~z~Pythagorovy věty
+    $$
+    |PA| = \sqrt{|PS|^2 - |SA|^2} = \sqrt{3^2 - 1^2} = 2\sqrt{2}.
+    $$
+    Obvod trojúhelníku $PXY$ je proto $2|PA| = 4\sqrt{2}$, nezávisle na volbě bodu $T$.
+}
 
 \EnvId{njLBWjKeOLzDnXpHe7tic-vepsane-kruznice-na-uhlopricce}
 \Problem{0}{}{
@@ -129,7 +290,24 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Nechť $X$ je bod dotyku vepsané kružnice $ABC$ s~$AC$ a~$X'$ bod dotyku vepsané kružnice $ADC$ s~$AC$. Stačí nám dokázat $|AX|=|AX'|$. Oba jsou pěkné výrazy.
 }{
     Jediný trik je použít vzorce typu $s-a$ v~trojúhelnících $ABC$ a~$ADC$. Mělo by nám zůstat něco, kde můžeme využít tečnovost.
-}{}
+}{
+    Nechť $X$ je bod, ve kterém se vepsaná kružnice trojúhelníku $ABC$ dotýká strany $AC$, a~nechť $X'$ je bod, ve kterém se téže úsečky dotýká vepsaná kružnice trojúhelníku $ADC$. Oba leží uvnitř úsečky $AC$, tedy na polopřímce $AC$, takže dokazované tvrzení $X = X'$ znamená totéž co $|AX| = |AX'|$. Obě tyto délky jsou přitom pěkné, protože pro ně máme vzorec typu $s - a$.
+
+    Vzdálenost vrcholu trojúhelníku od bodu dotyku jeho vepsané kružnice na přilehlé straně je polovina obvodu zmenšená o~protilehlou stranu. V~trojúhelníku $ABC$ leží proti vrcholu $A$ strana $BC$, čili
+    $$
+    |AX| = \frac{|AB| + |AC| - |BC|}{2},
+    $$
+    a~v~trojúhelníku $ADC$ leží proti $A$ strana $DC$, čili
+    $$
+    |AX'| = \frac{|AD| + |AC| - |DC|}{2}.
+    $$
+
+    Člen $|AC|$ je v~obou výrazech tentýž, takže po odečtení zbývá dokázat rovnost $|AB| - |BC| = |AD| - |DC|$, čili
+    $$
+    |AB| + |DC| = |BC| + |AD|.
+    $$
+    To ale pro tečnový čtyřúhelník $ABCD$ platí podle Pitotovy věty, čímž je důkaz hotov.
+}
 
 \EnvId{6y2W6I3lf5ayFgDaZme17-tri-body-pripsanych-kruznic}
 \Problem{0}{MO 63-B-I-3}{
@@ -138,7 +316,25 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Nechť se $C$-připsaná kružnice dotýká $BC$ v~$D$, $B$-připsaná v~$E$ a~$A$-připsaná v~$F$. Zkuste vyjádřit nějaké délky pomocí našich vzorců typu $s-a$.
 }{
     Trik je uvědomit si, že $|DB|=|CE|=s-a$. Co to znamená? A~co víme o~$F$ a~bodu dotyku vepsané kružnice?
-}{}
+}{
+    \Answer{Ze tří daných bodů leží právě jeden mezi zbylými dvěma (je to bod dotyku kružnice připsané proti $A$). Hledaný bod je jeho obrazem ve~středové souměrnosti podle středu úsečky určené zbylými dvěma body.}
+    Nechť se kružnice připsaná proti vrcholu $C$ dotýká přímky $BC$ v~bodě $D$, kružnice připsaná proti $B$ v~bodě $E$ a~kružnice připsaná proti $A$ v~bodě $F$; hledaný bod dotyku vepsané kružnice s~přímkou $BC$ označme $T$. Body $B$, $C$ neznáme, takže musíme udělat dvě věci: rozeznat $D$, $E$, $F$ mezi třemi danými body a~potom z~nich sestrojit $T$.
+
+    Tečnový úsek z~vrcholu ke~kružnici připsané proti tomuto vrcholu má délku $s$, takže $|CD| = s$ a~$|BE| = s$. Kružnice připsaná proti $C$ je vepsaná do úhlu $ACB$, takže se přímky $BC$ dotýká v~bodě polopřímky $CB$; jelikož $s - a = \frac{b + c - a}{2} > 0$, je $|CD| = s > a = |CB|$, a~tedy $D$ leží na této polopřímce za bodem $B$ a~
+    $$
+    |BD| = |CD| - |CB| = s - a.
+    $$
+    Stejně tak $E$ leží na polopřímce $BC$ za bodem $C$ a~$|CE| = s - a$.
+
+    Pro bod $F$ platí $|BF| = s - c$ a~$|CF| = s - b$; obě délky jsou kladné, takže $F$ je vnitřním bodem úsečky $BC$. Na přímce $BC$ tedy leží body v~pořadí $D$, $B$, $F$, $C$, $E$. Bod $F$ je tak právě ten ze tří daných bodů, který leží mezi zbylými dvěma, a~tím je určen; na rozlišení $D$ od $E$ nezáleží, jak hned uvidíme.
+
+    Z~rovnosti $|BD| = |CE| = s - a$ plyne, že $D$ a~$E$ jsou souměrné podle středu $M$ úsečky $BC$, jinými slovy, $M$ je středem úsečky $DE$. Podle věty o~souměrnosti bodů dotyku vepsané kružnice a~kružnice připsané proti $A$ na přímce $BC$ jsou podle téhož bodu $M$ souměrné i~body $F$ a~$T$.
+
+    Bod $T$ je proto obrazem bodu $F$ ve~středové souměrnosti podle středu úsečky $DE$, a~to už je konstrukce používající pouze tři dané body. Jinak řečeno, $T$ je ten bod úsečky $DE$, pro který
+    $$
+    |DT| = |EF| = (s - a) + (s - b).
+    $$
+}
 
 \EnvId{wqOmXDet2xLsFXXqSqqXr-tri-tecny-vepsane-kruznice}
 \Problem{0}{}{
@@ -151,7 +347,27 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     To nám dává, že polovina obvodu $AXY$ je v~podstatě vzdálenost z~$A$ k~bodům dotyku vepsané kružnice na $AB, AC$, tj. $s-a$.
 }{
     Poslední krok je vyřešit $s-a=1/2$, $s-b=1$, $s-c=3/2$ pro $a, b, c$.
-}{}
+}{
+    Nechť $ABC$ je náš trojúhelník, $\omega$ jeho vepsaná kružnice a~nechť se $\omega$ dotýká stran $BC$, $CA$, $AB$ v~bodech $D$, $E$, $F$.
+
+    Nejprve ukážeme, že trojúhelník odříznutý u~vrcholu $A$ má obvod $2(s-a)$ bez ohledu na to, kterou tečnu jsme zvolili. Nechť tedy tečna ke~kružnici $\omega$ protíná úsečku $AB$ v~bodě $X$ a~úsečku $AC$ v~bodě $Y$. Kružnice $\omega$ je vepsaná do úhlu $XAY$, dotýká se přímky $XY$ a~leží v~té polorovině s~hraniční přímkou $XY$, která neobsahuje $A$. Je tedy kružnicí připsanou trojúhelníku $AXY$ proti vrcholu $A$. Úsečka $AF$ přitom protíná přímku $XY$, takže $X$ leží mezi $A$ a~$F$, a~analogicky $Y$ leží mezi $A$ a~$E$; body $F$ a~$E$ jsou tak body dotyku této připsané kružnice s~prodlouženími stran $AX$ a~$AY$.
+
+    Podle věty o~připsané kružnici proti vrcholu je $|AF| = |AE|$ rovno polovině obvodu trojúhelníku $AXY$. Zároveň podle vzorce pro body dotyku vepsané kružnice je $|AF| = s - a$, a~tedy obvod trojúhelníku $AXY$ se rovná $2(s-a)$.
+
+    Obvod odříznutého trojúhelníku tedy závisí jen na vrcholu, u~kterého jsme řezali. Označme vrcholy tak, aby u~$A$ byl odříznutý trojúhelník s~obvodem $1$, u~$B$ s~obvodem $2$ a~u~$C$ s~obvodem $3$. Dostáváme
+    $$
+    s - a = \tfrac12, \qquad s - b = 1, \qquad s - c = \tfrac32.
+    $$
+    Součet levých stran je $3s - (a+b+c) = s$, takže $s = \tfrac12 + 1 + \tfrac32 = 3$ a~odtud
+    $$
+    a = \tfrac52, \qquad b = 2, \qquad c = \tfrac32.
+    $$
+    Takové strany opravdu tvoří trojúhelník, protože $b + c = \tfrac72 > a$. Nakonec
+    $$
+    b^2 + c^2 = 4 + \tfrac94 = \tfrac{25}{4} = a^2,
+    $$
+    takže podle obrácené Pythagorovy věty má trojúhelník $ABC$ pravý úhel při vrcholu $A$, tedy u~toho vrcholu, kde je odříznutý trojúhelník s~obvodem $1$.
+}
 
 \EnvId{ywat5ogtaZvQd-symWXYX-dotykove-body-na-uhloprickach-rovnobezniku}
 \Problem{0}{MO 54-A-S-2}{
@@ -164,7 +380,34 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Máme, že $KLMN$ je rovnoběžník. Abychom ukázali, že je to skutečně obdélník, stačí ukázat, že jeho úhlopříčky jsou stejné.
 }{
     Podívejme se na $KM$. Rovná se $|AC|-|AK|-|CM|$. Kvůli symetrii je to $|AC|-2|AK|$. Ale $|AK|$ lze vyjádřit pomocí našich vzorců typu $s-a$.
-}{}
+}{
+    Nechť $P$ je průsečík úhlopříček a~nechť $\sigma$ je středová souměrnost se středem $P$. Úhlopříčky rovnoběžníku se navzájem půlí, takže $\sigma(A) = C$, $\sigma(B) = D$, $\sigma(C) = A$, $\sigma(D) = B$, a~tedy $\sigma$ zobrazuje trojúhelník $ACD$ na trojúhelník $CAB$ a~trojúhelník $BCD$ na trojúhelník $DAB$. Je to shodnost, proto zobrazí vepsanou kružnici na vepsanou kružnici; přímku $AC$ i~přímku $BD$ přitom zobrazí každou na sebe samu, takže bod dotyku přejde na bod dotyku. Dostáváme $\sigma(K) = M$ a~$\sigma(L) = N$, čili $P$ je středem obou úseček $KM$ a~$LN$.
+
+    Úsečky $KM$ a~$LN$ se tedy navzájem půlí a~leží na různých přímkách $AC$, $BD$. Ukážeme-li $|KM| = |LN| > 0$, budou všechny čtyři body různé a~$KLMN$ bude rovnoběžník se stejně dlouhými úhlopříčkami, tedy obdélník: body $K$, $L$, $M$, $N$ pak leží na kružnici se středem $P$ a~poloměrem $|KM|/2$, úsečky $KM$, $LN$ jsou její různé průměry a~Thaletova věta dává u~každého z~vrcholů $K$, $L$, $M$, $N$ pravý úhel.
+
+    Označme $x = |AB| - |BC| > 0$ a~využijme, že v~rovnoběžníku platí $|AD| = |BC|$ a~$|CD| = |AB|$. Bod $K$ je bodem dotyku vepsané kružnice trojúhelníku $ACD$ se stranou $AC$ a~bod $M$ bodem dotyku vepsané kružnice trojúhelníku $ABC$ s~touž stranou, takže podle vzorce $s-a$ pro body dotyku vepsané kružnice
+    $$
+    \gather
+    |AK| = \frac{|AC| + |AD| - |CD|}{2} = \frac{|AC| - x}{2}, \\
+    |CM| = \frac{|CA| + |CB| - |AB|}{2} = \frac{|AC| - x}{2}.
+    \endgather
+    $$
+    Obě délky jsou menší než $|AC|/2$, proto body jdou na úsečce $AC$ v~pořadí $A$, $K$, $M$, $C$ a
+    $$
+    |KM| = |AC| - |AK| - |CM| = x.
+    $$
+
+    Stejně je $L$ bodem dotyku vepsané kružnice trojúhelníku $BCD$ se stranou $BD$ a~$N$ bodem dotyku vepsané kružnice trojúhelníku $ABD$ s~touž stranou, takže
+    $$
+    \gather
+    |BL| = \frac{|BD| + |BC| - |CD|}{2} = \frac{|BD| - x}{2}, \\
+    |DN| = \frac{|DB| + |DA| - |AB|}{2} = \frac{|BD| - x}{2},
+    \endgather
+    $$
+    a~ze stejného důvodu $|LN| = |BD| - |BL| - |DN| = x$.
+
+    Tedy $|KM| = |LN| = x > 0$ a~$KLMN$ je obdélník.
+}
 
 \EnvId{1rKRGiDDH6a1N3ui7-NIp-dotykove-body-v-rozdelenem-trojuhelniku}
 \Problem{0}{MO 64-A-I-5}{
@@ -181,11 +424,44 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Poslední krok je dokázat $|DM|=|DL|$. To ale bude snadné s~naším vzorcem typu $s-a$.
 }{
     Stačí ukázat $(|BD|+|AD|-|AB|)/2=(|CD|+|AD|-|AC|)/2$. Ale $|BD|,|CD|$ umíme snadno spočítat pomocí $a,b,c$.
-}{}
+}{
+    Označme $I$ střed vepsané kružnice trojúhelníku $ABC$ a~$r$ její poloměr. Střed hledané kružnice musí ležet na ose úsečky $KL$ i~na ose úsečky $MN$, a~právě tyto dvě osy umíme identifikovat: jsou to osy úhlů při $B$ a~$C$, takže středem bude $I$.
+
+    Nejprve poloha bodu $D$. Podle vzorců pro body dotyku vepsané kružnice je $|BD| = s - b$ a~$|CD| = s - c$; obě tato čísla jsou kladná, takže $D$ je vnitřním bodem strany $BC$. Trojúhelníky $ABD$ a~$ADC$ jsou tedy nedegenerované, polopřímka $BD$ je polopřímkou $BC$ a~polopřímka $CD$ je polopřímkou $CB$. Speciálně $L$ leží na polopřímce $BC$ a~$M$ na polopřímce $CB$.
+
+    Vepsaná kružnice trojúhelníku $ABD$ se dotýká stran $BA$ a~$BD$ v~bodech $K$ a~$L$, takže $|BK| = |BL|$. Osová souměrnost podle osy úhlu $ABC$ zobrazuje polopřímku $BA$ na polopřímku $BC$, a~jelikož $K$, $L$ leží na těchto polopřímkách ve~stejné vzdálenosti od $B$, zobrazuje $K$ na $L$. Body $K$, $L$ jsou různé: podle trojúhelníkové nerovnosti v~$ABD$ platí $|BK| = (|AB| + |BD| - |AD|)/2 > 0$, takže ani jeden z~nich nesplývá s~$B$, a~přitom leží na dvou různých polopřímkách z~$B$. Osa úhlu $ABC$ je tedy osou úsečky $KL$. Stejně $|CM| = |CN|$ a~souměrnost podle osy úhlu $ACB$ zobrazuje $N$ na $M$, čili osa úhlu $ACB$ je osou úsečky $MN$.
+
+    Obě osy úhlů procházejí bodem $I$, a~proto
+    $$
+    |IK| = |IL|, \qquad |IM| = |IN|.
+    $$
+    Zbývá dokázat $|IL| = |IM|$.
+
+    Tady využijeme, že $D$ je bodem dotyku vepsané kružnice trojúhelníku $ABC$ se stranou $BC$: platí $ID \perp BC$ a~$|ID| = r$. Body $L$, $M$ leží na přímce $BC$, takže z~Pythagorovy věty
+    $$
+    |IL|^2 = r^2 + |DL|^2, \qquad |IM|^2 = r^2 + |DM|^2,
+    $$
+    a~dokazovaná rovnost je ekvivalentní s~$|DL| = |DM|$.
+
+    Obě tyto délky jsou tečnové úseky z~vrcholu $D$, stačí tedy použít vzorec typu $s - a$ v~trojúhelníku $ABD$ a~v~trojúhelníku $ADC$:
+    $$
+    \gather
+    |DL| = \frac{|BD| + |AD| - |AB|}{2}, \\
+    |DM| = \frac{|CD| + |AD| - |AC|}{2}.
+    \endgather
+    $$
+    Člen $|AD|$ se v~rozdílu vyruší, takže $|DL| = |DM|$ je totéž jako
+    $$
+    |BD| - |CD| = |AB| - |AC| = c - b.
+    $$
+    A~to už víme: $|BD| - |CD| = (s - b) - (s - c) = c - b$.
+
+    Dostáváme $|IK| = |IL| = |IM| = |IN|$, přičemž tato společná hodnota je alespoň $|ID| = r > 0$. Body $K$, $L$, $M$, $N$ tedy leží na kružnici se středem $I$ a~poloměrem $|IL|$.
+}
 
 \EnvId{XY8K2xIEBBfNKdV7OHBv4-pripsana-kruznice-ctyruhelniku}
 \Problem{0}{}{
-    Řekneme, že čtyřúhelník $ABCD$ má připsanou kružnici proti vrcholu $A$, pokud je vepsána do úhlu $BAD$, dotýká se přímek $BC$ a~$CD$ a~leží vně čtyřúhelníku. Dokažte, že pro takový čtyřúhelník platí $|AB| + |CB| = |AD| + |CD|$.
+    Řekneme, že konvexní čtyřúhelník $ABCD$ má připsanou kružnici proti vrcholu $A$, pokud je vepsána do úhlu $BAD$, dotýká se přímek $BC$ a~$CD$ a~leží vně čtyřúhelníku. Dokažte, že pro takový čtyřúhelník platí $|AB| + |CB| = |AD| + |CD|$.
 }{
     Body dotyku kružnice s~$AB$, $BC$, $CD$, $DA$ označme $A'$, $B'$, $C'$, $D'$. Zkuste vyhodnotit $|AB|+|BC|$ pomocí stejných tečen.
 }{
@@ -194,7 +470,37 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Ponechme $|AA'|$ nedotčené a~udělejme něco s~$|BA'|$, co nám pomůže využít člen $+|BC|$.
 }{
     Další krok je $|BA'|=|BB'|=|BC|+|CB'|$. To dává $|AB|+|BC|=|AA'|-|CB'|$. Nyní by $|AD|+|CD|$ mělo dát něco podobného.
-}{}
+}{
+    Označme $\omega$ kružnici ze zadání a~její body dotyku s~přímkami $AB$, $BC$, $CD$, $DA$ po řadě $A'$, $B'$, $C'$, $D'$. Jelikož je $\omega$ vepsána do úhlu $BAD$, leží bod $A'$ na polopřímce $AB$ a~bod $D'$ na polopřímce $AD$.
+
+    Žádný z~vrcholů $A$, $B$, $C$, $D$ neleží na $\omega$: každý z~nich je průsečíkem dvou z~přímek $AB$, $BC$, $CD$, $DA$, a~kdyby ležel na $\omega$, byly by tyto dvě různé přímky tečnami $\omega$ v~tomtéž bodě. Ze stejného důvodu jsou body $A'$, $B'$, $C'$, $D'$ navzájem různé. Každý vrchol tedy leží vně $\omega$ a~délky tečen z~něj jsou stejné:
+    $$
+    |AA'| = |AD'|, \quad |BA'| = |BB'|, \quad |CB'| = |CC'|, \quad |DC'| = |DD'|.
+    $$
+
+    Celý výpočet stojí na poloze těchto bodů dotyku, proto si ji nejprve ujasníme.
+
+    Bod $B$ leží mezi $A$ a~$A'$. Kružnice $\omega$ je totiž vepsána do úhlu $BAD$, takže leží v~polorovině určené přímkou $AB$ a~obsahující $D$, a~přímky $AB$ se dotýká v~$A'$; všechny její body kromě $A'$ proto leží v~otevřené polorovině, tedy mimo přímku $AB$. Kdyby byl $A'$ vnitřním bodem strany $AB$, ležely by body kružnice $\omega$ dostatečně blízké bodu $A'$ uvnitř konvexního čtyřúhelníku $ABCD$, což odporuje tomu, že $\omega$ leží vně něj. Bod $A'$ leží na polopřímce $AB$ a~nesplývá ani s~$A$, ani s~$B$, takže na ní leží až za bodem $B$. Stejně tak $D$ leží mezi $A$ a~$D'$.
+
+    Odtud dostaneme polohu celé $\omega$. Úsečka $AA'$ protíná přímku $BC$ v~bodě $B$ a~ani jeden z~bodů $A$, $A'$ na této přímce neleží, takže $A$ a~$A'$ leží v~opačných polorovinách určených přímkou $BC$. Kružnice $\omega$ se přímky $BC$ dotýká, čili celá leží v~jedné z~těchto polorovin, a~jelikož $A'$ je jejím bodem, je to ta, která neobsahuje $A$. Stejně tak z~toho, že $D$ leží mezi $A$ a~$D'$, dostaneme, že $\omega$ leží v~polorovině určené přímkou $CD$ a~neobsahující $A$.
+
+    Nyní určíme polohu i~bodů $B'$ a~$C'$. Z~konvexnosti leží body $A$ a~$B$ v~téže polorovině určené přímkou $CD$, kdežto $B'$ leží v~té opačné, a~to mimo přímku $CD$ (jinak by $B'$ byl společným bodem $\omega$ a~přímky $CD$, čili $B' = C'$). Úsečka $BB'$ proto protíná přímku $CD$; leží však na přímce $BC$, která má s~přímkou $CD$ jediný společný bod $C$. Bod $C$ tak leží mezi $B$ a~$B'$ a~stejný argument se záměnou $B \leftrightarrow D$ dává, že $C$ leží mezi $D$ a~$C'$.
+
+    Zbytek je výpočet. Jelikož $B$ leží mezi $A$ a~$A'$ a~bod $C$ mezi $B$ a~$B'$, platí
+    $$
+    \eqalign{
+    |AB| + |CB| &= |AA'| - |BA'| + |BC| = \cr
+    &= |AA'| - |BB'| + |BC| = \cr
+    &= |AA'| - \bigl(|BC| + |CB'|\bigr) + |BC| = \cr
+    &= |AA'| - |CB'|. \cr
+    }
+    $$
+    Úplně stejně, s~$D$ mezi $A$ a~$D'$ a~s~bodem $C$ mezi $D$ a~$C'$, dostaneme
+    $$
+    |AD| + |CD| = |AD'| - |CC'|.
+    $$
+    Pravé strany se rovnají, protože $|AA'| = |AD'|$ a~$|CB'| = |CC'|$.
+}
 
 \EnvId{4CAVBeHRTqtsMdY8jrKuX-vepsane-kruznice-dotykajici-se-zvenku}
 \Problem{0}{MO 49-A-I-2}{
@@ -208,7 +514,42 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Nechť~$D$ je společný bod dotyku. Délku $|AD|$ lze vyjádřit dvěma způsoby pomocí vzorce typu $s-a$ v~$ABK$ i~$AKC$. Porovnejte tyto výrazy.
 }{
     Po porovnání bychom měli dostat $|AD|=(c+|AK|-|BK|)/2$ z~$ABK$ a~$|AD|=(b+|AK|-|CK|)/2$ z~toho druhého. Položte je sobě rovny a~využijte také $|BK|+|CK|$. Co to řeší pro $|BK|$?
-}{}
+}{
+    Zapomeňme prozatím na body $L$ a~$M$ a~spočítejme $|BK|$ pomocí $a$, $b$, $c$; tím bude úloha hotová.
+
+    Bod $K$ leží uvnitř strany $BC$, takže body $B$ a~$C$ leží v~opačných polorovinách s~hraniční přímkou $AK$. Vepsaná kružnice trojúhelníku $ABK$ leží v~první z~nich, vepsaná kružnice trojúhelníku $CAK$ ve~druhé a~obě se dotýkají přímky $AK$. Podle předpokladu mají tyto dvě kružnice společný bod; ten musí ležet v~průniku obou polorovin, tedy na přímce $AK$. Každá z~kružnic má však s~$AK$ jediný společný bod, a~to svůj bod dotyku, takže tyto dva body dotyku splývají. Označme je $D$.
+
+    Vzdálenost vrcholu od bodu dotyku vepsané kružnice na sousední straně se počítá vzorcem typu $s-a$, takže z~trojúhelníku $ABK$ dostáváme
+    $$
+    |AD| = \frac{c + |AK| - |BK|}{2}
+    $$
+    a~z trojúhelníku $CAK$
+    $$
+    |AD| = \frac{b + |AK| - |CK|}{2}.
+    $$
+    Porovnáním se $|AK|$ vyruší a~zbývá $c - |BK| = b - |CK|$, tedy $|CK| - |BK| = b - c$. Jelikož $K$ leží uvnitř $BC$, platí navíc $|BK| + |CK| = a$, a~tedy
+    $$
+    \gather
+    |BK| = \frac{a + c - b}{2} = s - b, \\
+    |CK| = \frac{a + b - c}{2} = s - c.
+    \endgather
+    $$
+
+    Zadání je invariantní vůči cyklické záměně $A \to B \to C \to A$, při níž $K \to L \to M$: strana $BC$ přejde na $CA$, trojúhelník $ABK$ na $BCL$ a~trojúhelník $CAK$ na $ABL$, což je přesně podmínka kladená na $L$; ještě jedno použití dá podmínku na $M$. Při této záměně přejde $a \to b \to c \to a$, takže $s$ zůstává stejné. Předchozí výpočet proto rovnou dává
+    $$
+    \gather
+    |CL| = s - c, \qquad |AL| = s - a, \\
+    |AM| = s - a, \qquad |BM| = s - b.
+    \endgather
+    $$
+    Obě strany dokazované rovnosti jsou tak tímtéž součinem:
+    $$
+    \eqalign{
+    |BK| \cdot |CL| \cdot |AM| &= (s-a)(s-b)(s-c) = \cr
+    &= |CK| \cdot |AL| \cdot |BM|. \cr
+    }
+    $$
+}
 
 \EnvId{mm753DtWsC9P9vCKmpLmt-devet-mensich-ctyruhelniku}
 \Problem{0}{}{
@@ -224,10 +565,79 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
 }{
     Nechť $d(x,y)$ značí délku vnější tečny dvou rohových kružnic podél té strany $ABCD$, kde se obě dotýkají. Zbývá nám dokázat $d(w_a,w_b)+d(w_c,w_d)=d(w_b,w_c)+d(w_a,w_d)$. K~tomu musíme tyto délky najít jinde než na stranách $ABCD$. Tady přichází ke~slovu $\omega$.
 }{
-    Každá dvojice sousedních rohových kružnic se také dotýká jedné ze čtyř vnitřních úseček --- té, která ohraničuje hranovou buňku sdílenou těmito dvěma rohy proti středové buňce. Přeneste každou ze čtyř vnějších tečen na odpovídající vnitřní úsečku pomocí stejných tečen.
+    Každá dvojice sousedních rohových kružnic se také dotýká jedné ze čtyř vnitřních úseček (té, která ohraničuje hranovou buňku sdílenou těmito dvěma rohy proti středové buňce). Přeneste každou ze čtyř vnějších tečen na odpovídající vnitřní úsečku pomocí stejných tečen.
 }{
     Na každé vnitřní úsečce nyní přenesená tečna prochází dvěma vrcholy středové buňky, kde se $\omega$ také dotýká. Stejné tečny z~těchto vrcholů rozdělí každý přenesený kousek na dvě poloviny, které se shodují s~polovinami na sousedních vnitřních úsečkách, přesně jako se rohové tečny shodovaly v~$A, B, C, D$ na vnější hranici. Tyto čtyři kousky se pak po dvojicích vyruší a~jsme hotovi.
-}{}
+}{
+    Zvolené body označme podle pořadí na obvodu: nechť $P_1$, $P_2$ leží na $AB$ v~pořadí $A$, $P_1$, $P_2$, $B$, body $Q_1$, $Q_2$ na $BC$ v~pořadí $B$, $Q_1$, $Q_2$, $C$, body $R_1$, $R_2$ na $CD$ v~pořadí $C$, $R_1$, $R_2$, $D$ a~body $S_1$, $S_2$ na $DA$ v~pořadí $D$, $S_1$, $S_2$, $A$. Spojují se protilehlé strany, tedy $AB$ s~$CD$ a~$BC$ s~$DA$, a~podmínka, že se spojnice nekříží, dává právě dvojice $P_1R_2$, $P_2R_1$ a~$Q_1S_2$, $Q_2S_1$. Vrcholy středové buňky jsou
+    $$
+    \gather
+    E = P_1R_2 \cap Q_1S_2, \qquad F = P_2R_1 \cap Q_1S_2, \\
+    G = P_2R_1 \cap Q_2S_1, \qquad H = P_1R_2 \cap Q_2S_1,
+    \endgather
+    $$
+    takže buňky jsou tyto: rohové $AP_1ES_2$, $P_2BQ_1F$, $Q_2CR_1G$, $R_2DS_1H$ (po řadě u~vrcholů $A$, $B$, $C$, $D$), hranové $P_1P_2FE$, $Q_1Q_2GF$, $R_1R_2HG$, $S_1S_2EH$ a~středová $EFGH$. Vepsané kružnice rohových buněk označme $w_a$, $w_b$, $w_c$, $w_d$ podle nejbližšího vrcholu a~vepsanou kružnici středové buňky $\omega$.
+
+    Čtyřúhelník $ABCD$ je konvexní, takže podle Pitotovy věty stačí dokázat
+    $$
+    |AB| + |CD| = |BC| + |AD|. \eqno(*)
+    $$
+
+    Kružnice $w_a$ a~$w_b$ se obě dotýkají přímky $AB$, první ve vnitřním bodě $T_A$ úsečky $AP_1$ a~druhá ve vnitřním bodě $T_B$ úsečky $P_2B$ (to jsou strany jejich buněk ležící na $AB$). Označme $d_{AB} = |T_AT_B|$ a~analogicky $d_{BC}$, $d_{CD}$, $d_{AD}$ pro zbylé tři strany a~příslušné dvojice sousedních rohových kružnic. Kružnice $w_a$ se dotýká i~přímky $AD$, takže podle věty o~dvou tečnách z~bodu je $|AT_A|$ rovno vzdálenosti bodu $A$ od bodu dotyku na $AD$; tuto společnou hodnotu označme $t_A$ a~podobně zaveďme $t_B$, $t_C$, $t_D$. Z~pořadí $A$, $T_A$, $T_B$, $B$ na straně $AB$ a~ze stejných rozkladů zbylých stran dostáváme
+    $$
+    \eqalign{
+    |AB| &= t_A + d_{AB} + t_B, \cr
+    |BC| &= t_B + d_{BC} + t_C, \cr
+    |CD| &= t_C + d_{CD} + t_D, \cr
+    |AD| &= t_A + d_{AD} + t_D. \cr
+    }
+    $$
+    Každá ze čtyř tečnových délek $t_A$, $t_B$, $t_C$, $t_D$ vystupuje jednou na levé a~jednou na pravé straně $(*)$, takže $(*)$ je ekvivalentní s~rovností
+    $$
+    d_{AB} + d_{CD} = d_{BC} + d_{AD}. \eqno(**)
+    $$
+
+    Klíčový krok je najít délky $d$ jinde než na stranách $ABCD$. Kružnice $w_a$, $w_b$ se totiž kromě $AB$ dotýkají i~přímky $Q_1S_2$: první jako vepsaná kružnice buňky $AP_1ES_2$ ve vnitřním bodě $U_A$ úsečky $S_2E$, druhá jako vepsaná kružnice buňky $P_2BQ_1F$ ve vnitřním bodě $U_B$ úsečky $FQ_1$. Obě tyto buňky leží v~té polorovině s~hraniční přímkou $Q_1S_2$, která obsahuje stranu $AB$, čili $AB$ i~$Q_1S_2$ jsou společné vnější tečny kružnic $w_a$, $w_b$. Podle věty o~společných vnějších tečnách dvou kružnic je proto
+    $$
+    d_{AB} = |T_AT_B| = |U_AU_B|.
+    $$
+
+    Úsečka $Q_1S_2$ prochází postupně třemi buňkami sousedícími se stranou $AB$, tedy buňkami $AP_1ES_2$, $P_1P_2FE$ a~$P_2BQ_1F$, takže na ní leží body v~pořadí $S_2$, $E$, $F$, $Q_1$. Jelikož $U_A$ leží uvnitř $S_2E$ a~$U_B$ uvnitř $FQ_1$, platí
+    $$
+    d_{AB} = |U_AE| + |EF| + |FU_B|.
+    $$
+
+    Nyní každý z~těchto tří kousků vyjádříme tečnovými délkami ve vrcholech středové buňky. Kružnice $w_a$ se dotýká přímek $P_1R_2$ a~$Q_1S_2$, které se protínají v~bodě $E$; nechť $e$ je délka tečny z~$E$ ke~kružnici $w_a$, takže $|U_AE| = e$. Analogicky nechť $f$, $g$, $h$ jsou délky tečen z~$F$, $G$, $H$ ke~kružnicím $w_b$, $w_c$, $w_d$; vždy jde o~vrchol středové buňky a~o~kružnici té rohové buňky, která tento vrchol obsahuje. Dále nechť $e_0$, $f_0$, $g_0$, $h_0$ jsou délky tečen z~$E$, $F$, $G$, $H$ ke~$\omega$. Kružnice $\omega$ se dotýká každé strany čtyřúhelníku $EFGH$ v~jejím vnitřním bodě, takže
+    $$
+    \gather
+    |EF| = e_0 + f_0, \qquad |FG| = f_0 + g_0, \\
+    |GH| = g_0 + h_0, \qquad |HE| = h_0 + e_0.
+    \endgather
+    $$
+    Po dosazení je $d_{AB} = e + e_0 + f_0 + f$. Označme
+    $$
+    \gather
+    x_E = e + e_0, \qquad x_F = f + f_0, \\
+    x_G = g + g_0, \qquad x_H = h + h_0,
+    \endgather
+    $$
+    čili $d_{AB} = x_E + x_F$.
+
+    Zbylé tři strany vyřídíme stejně. Kružnice $w_b$, $w_c$ se dotýkají přímky $P_2R_1$ ve vnitřních bodech úseček $P_2F$ a~$GR_1$, přičemž jejich buňky leží v~té polorovině určené touto přímkou, která obsahuje stranu $BC$; proto jsou $BC$ i~$P_2R_1$ společné vnější tečny těchto dvou kružnic a~$d_{BC}$ se rovná vzdálenosti jejich bodů dotyku na $P_2R_1$. Body na $P_2R_1$ jdou v~pořadí $P_2$, bod dotyku kružnice $w_b$, $F$, $G$, bod dotyku kružnice $w_c$, $R_1$, takže se tato vzdálenost rozkládá na tečnu z~$F$ ke~kružnici $w_b$, na $|FG|$ a~na tečnu z~$G$ ke~kružnici $w_c$. Tečna z~$F$ ke~kružnici $w_b$ má opět délku $f$, protože $w_b$ se dotýká obou přímek procházejících bodem $F$, a~podobně pro $G$ a~$w_c$. Tedy
+    $$
+    d_{BC} = f + f_0 + g_0 + g = x_F + x_G.
+    $$
+    Stejně přímka $Q_2S_1$ dává $d_{CD} = x_G + x_H$ a~přímka $P_1R_2$ dává $d_{AD} = x_H + x_E$.
+
+    Sečtením dostáváme
+    $$
+    \eqalign{
+    d_{AB} + d_{CD} &= x_E + x_F + x_G + x_H = \cr
+    &= d_{BC} + d_{AD}, \cr
+    }
+    $$
+    což je přesně $(**)$. Tím je dokázáno i~$(*)$ a~podle Pitotovy věty má čtyřúhelník $ABCD$ vepsanou kružnici.
+}
 
 \EnvId{EXLasGyo1ngIPJ1f2b0A2-kruznice-vepsana-do-uhla}
 \Problem{0}{}{
@@ -242,7 +652,47 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Všimněte si $|LN|=|CN|-|CL| = |CV|-|CP|$. Takže máme $|BP|=|BW|-|CV|+|CP|$. Blížíme se ke~konci.
 }{
     Vezměte $|BW|=|AB|-|AW|$, $|CV|=|AC|-|AV|$, $|CP|=|BC|-|BP|$. Jeden jednoduchý krok od dokončení.
-}{}
+}{
+    Označme $\omega_0$ vepsanou kružnici trojúhelníku $ABC$ se středem $I$, $O$ střed kružnice $\omega$, dále $W$, $V$ body dotyku $\omega$ s~přímkami $AB$, $AC$ a~$M$, $N$ body dotyku $\omega$ s~přímkami $BX$, $CX$. Vepsanou kružnici trojúhelníku $BCX$ označme $\omega_1$ a~její body dotyku s~přímkami $BC$, $BX$, $CX$ po řadě $P$, $K$, $L$. Celé řešení stojí na rovnosti $|BP| = s - b$: vepsaná kružnice trojúhelníku $ABC$ se dotýká strany $BC$ ve vzdálenosti $s - b$ od $B$, takže z~této rovnosti vyplyne, že $\omega_0$ a~$\omega_1$ se dotýkají přímky $BC$ v~tomtéž bodě.
+
+    Nejprve si ujasněme polohu $\omega$. Kružnice $\omega$ a~$\omega_0$ jsou obě vepsané do úhlu $BAC$, takže jejich středy leží na ose tohoto úhlu, a~je-li $W_0$ bod dotyku $\omega_0$ se stranou $AB$, jsou pravoúhlé trojúhelníky $AWO$ a~$AW_0I$ podobné. Proto
+    $$
+    \frac{|AO|}{|AI|} = \frac{|AW|}{|AW_0|} = \frac{\rho}{r} < 1.
+    $$
+    Bod $O$ tedy leží uvnitř úsečky $AI$ a~ze stejných tečen z~$A$ je
+    $$
+    |AW| = |AV| = \frac{\rho}{r}\,(s-a) < s-a.
+    $$
+    Z~trojúhelníkové nerovnosti je $s - a < b$ i~$s - a < c$, takže $W$ leží uvnitř strany $AB$ a~$V$ uvnitř strany $AC$, čili $|BW| = c - |AW|$ a~$|CV| = b - |AV|$.
+
+    Celý trojúhelník $ABC$ leží v~pásu mezi přímkou $BC$ a~rovnoběžkou s~ní vedenou bodem $A$, takže vzdálenost jeho vnitřního bodu $I$ od $BC$, tedy $r$, je menší než vzdálenost $A$ od $BC$. Vzdálenost od přímky $BC$ se podél úsečky $AI$ mění lineárně, a~proto je v~jejím vnitřním bodě $O$ větší než $r$, tedy větší než $\rho$. Kružnice $\omega$ tak nemá s~přímkou $BC$ společný bod a~celá leží v~trojúhelníku $ABC$; zde jsme použili předpoklad $\rho < r$.
+
+    Nyní konfigurace. Přímka $BC$ není tečnou $\omega$, takže $BX \neq BC$ a~$CX \neq BC$; zároveň $BX \neq AB$ a~$CX \neq AC$. Speciálně bod $A$ neleží na $BX$ ani na $CX$, bod $C$ neleží na $BX$ a~bod $B$ neleží na $CX$. Bod $M$ leží na $\omega$, tedy v~trojúhelníku $ABC$, a~proto polopřímka $BM$ leží v~úhlu $ABC$; nesplývá ani s~polopřímkou $BA$, ani s~polopřímkou $BC$, takže leží uvnitř tohoto úhlu a~protíná úsečku $AC$ v~jejím vnitřním bodě. Přímka $BX$ proto odděluje $A$ od $C$ a~analogicky přímka $CX$ odděluje $A$ od $B$.
+
+    Kružnice $\omega$ leží uvnitř úhlu, který při vrcholu $B$ svírají její tečny, čili polopřímky $BW$ a~$BM$, a~ten je celý v~polorovině s~hraniční přímkou $BX$ obsahující $A$; stejně tak $\omega$ leží v~polorovině s~hraniční přímkou $CX$ obsahující $A$. Přímky $BX$ a~$CX$ dělí rovinu na čtyři oblasti a~podle předchozího odstavce je ta, která obsahuje $A$, právě úhel vrcholově protilehlý k~úhlu $BXC$. Bod dotyku $M$ leží na přímce $BX$ i~v~uzávěru této oblasti, čili na polopřímce opačné k~polopřímce $XB$, přičemž $M \neq X$, neboť jinak by tečny $BX$ a~$CX$ splývaly. Bod $X$ tedy leží uvnitř úsečky $BM$ a~stejně tak uvnitř úsečky $CN$. Speciálně $X$ leží uvnitř úhlu $ABC$ i~úhlu $ACB$, čili uvnitř trojúhelníku $ABC$.
+
+    Zbytek je počítání se stejnými tečnami. Z~bodu $X$ máme $|XK| = |XL|$ (tečny k~$\omega_1$) a~$|XM| = |XN|$ (tečny k~$\omega$). Body $K$, $L$ leží uvnitř úseček $XB$, $XC$, zatímco $M$, $N$ leží na opačných polopřímkách, takže
+    $$
+    |KM| = |XK| + |XM| = |XL| + |XN| = |LN|.
+    $$
+    Z~bodu $B$ je $|BM| = |BW|$ a~$|BK| = |BP|$, z~bodu $C$ je $|CN| = |CV|$ a~$|CL| = |CP|$. Bod $K$ leží uvnitř úsečky $BM$ a~bod $L$ uvnitř úsečky $CN$, proto
+    $$
+    \eqalign{
+    |BP| &= |BK| = |BM| - |KM| = |BW| - |LN| \cr
+         &= |BW| - |CN| + |CL| = |BW| - |CV| + |CP|. \cr
+    }
+    $$
+    Dosadíme $|BW| = c - |AW|$, $|CV| = b - |AV|$ a~$|CP| = a - |BP|$, přičemž $|AW| = |AV|$ se vykrátí:
+    $$
+    \eqalign{
+    |BP| &= (c - |AW|) - (b - |AV|) + (a - |BP|) \cr
+         &= a + c - b - |BP|. \cr
+    }
+    $$
+    Odtud $2|BP| = a + c - b$, čili $|BP| = \frac{a+c-b}{2} = s - b$.
+
+    Podle věty o~bodech dotyku vepsané kružnice se $\omega_0$ dotýká strany $BC$ v~bodě $D$ s~$|BD| = s - b$. Body $P$ i~$D$ leží uvnitř úsečky $BC$ ve vzdálenosti $s - b$ od $B$, takže $P = D$ a~obě kružnice $\omega_0$, $\omega_1$ se dotýkají přímky $BC$ v~tomtéž bodě $P$. Jejich středy proto leží na kolmici k~$BC$ v~bodě $P$, a~to na téže polopřímce: $\omega_0$ leží v~trojúhelníku $ABC$ a~$\omega_1$ v~trojúhelníku $BCX$, který leží v~téže polorovině s~hraniční přímkou $BC$, neboť $X$ je vnitřní bod trojúhelníku $ABC$. Kružnice jsou různé, neboť $\omega_0$ se dotýká $AB$ ve vnitřním bodě $W_0$ této strany, který neleží v~trojúhelníku $BCX$; ten má totiž s~přímkou $AB$ společný jediný bod $B$. Označíme-li $r_1$ poloměr $\omega_1$, je vzdálenost středů rovna $|r - r_1|$, přičemž $r \neq r_1$, a~to je přesně podmínka vnitřního dotyku. Kružnice $\omega_0$ a~$\omega_1$ se tedy dotýkají, a~to v~bodě $P$.
+}
 
 \EnvId{mZEAwZzSzf1cMcge-3Ovs-mnozina-pruseciku-spolecne-tecny}
 \Problem{0}{USAMO 1991}{
@@ -259,7 +709,31 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Máme $|PQ| = |DP|+|DQ|$, a~tedy $|AX| = |AD|-|DP|-|DQ|$. To je ale v~pořádku. Čemu se rovnají $|PD|$ a~$|DQ|$?
 }{
     Délku $|DP|$ lze vyjádřit pomocí vzorce typu $s-a$ v~$ABD$, podobně $|QD|$.
-}{}
+}{
+    \Answer{Hledanou množinou je otevřený oblouk kružnice se středem $A$ a~poloměrem $s - a = \frac{b + c - a}{2}$ ležící uvnitř úhlu $BAC$. Jeho krajními body jsou body dotyku vepsané kružnice trojúhelníku $ABC$ se stranami $AB$ a~$AC$, ty však do hledané množiny nepatří.}
+    Odpověď uhodneme z~krajních případů. Když se $D$ blíží k~$B$, vepsaná kružnice trojúhelníku $ABD$ se smršťuje do bodu $B$ a~vepsaná kružnice trojúhelníku $ADC$ přechází ve vepsanou kružnici trojúhelníku $ABC$. Společnými vnějšími tečnami se tak v~limitě stávají dvě tečny z~bodu $B$ k~vepsané kružnici trojúhelníku $ABC$, tedy přímky $BC$ a~$AB$, a~bod $X$ dospěje do bodu dotyku této kružnice se stranou $AB$. Ten je od $A$ vzdálen $s - a$. Symetricky pro $D \to C$ vyjde bod dotyku na $AC$, opět ve vzdálenosti $s - a$ od $A$. Hypotéza tedy zní $|AX| = s - a$ pro každou polohu $D$.
+
+    Nechť je dále $D$ vnitřním bodem strany $BC$; pro $D = B$ nebo $D = C$ jeden z~trojúhelníků ze zadání degeneruje. Vepsanou kružnici trojúhelníku $ABD$ označme $k_1$, vepsanou kružnici trojúhelníku $ADC$ označme $k_2$ a~jejich body dotyku s~přímkou $BC$ po řadě $P$ a~$Q$. Obě kružnice se dotýkají přímky $BC$ a~leží v~téže polorovině, takže $BC$ je jejich společná vnější tečna; druhou společnou vnější tečnu označme $q$. Obě se dotýkají i~přímky $AD$, přičemž leží v~opačných polorovinách určených touto přímkou, takže $AD$ je jejich společná vnitřní tečna (a~kružnice jsou disjunktní, případně se dotýkají v~bodě ležícím na $AD$; v~tom případě je $AD$ jejich jedinou společnou vnitřní tečnou a~následující věta, jejíž důkaz pracuje pouze se stejnými tečnami z~$D$ a~z~$X$, platí beze změny). Přímka $AD$ protíná $BC$ v~bodě $D$ a~přímku $q$ v~bodě $X$, takže podle věty o~společné vnitřní tečně dvou kružnic je
+    $$
+    |DX| = |PQ|.
+    $$
+
+    Bod $P$ leží uvnitř úsečky $BD$ a~bod $Q$ uvnitř úsečky $DC$, proto $|PQ| = |DP| + |DQ|$. Vzorce typu $s - a$ použité při vrcholu $D$ v~trojúhelníku $ABD$, resp. $ADC$ (protilehlé strany jsou $AB$, resp. $AC$) dávají
+    $$
+    |DP| = \frac{|AD| + |BD| - c}{2}, \qquad |DQ| = \frac{|AD| + |CD| - b}{2}.
+    $$
+    Jelikož $|BD| + |CD| = a$, jejich sečtením dostaneme
+    $$
+    |DX| = |PQ| = |AD| - \frac{b + c - a}{2} = |AD| - (s - a).
+    $$
+
+    Zbývá ověřit polohu bodu $X$. Kružnice $k_1$, $k_2$ leží v~polorovině ohraničené přímkou $BC$ a~obsahující $A$, takže v~ní leží i~jejich body dotyku s~přímkou $q$. Ty leží na opačných stranách přímky $AD$: každý leží na své kružnici a~na přímce $AD$ ležet nemůže, protože jinak by se $q$ dotýkala této kružnice v~jejím bodě dotyku s~$AD$, tedy by bylo $q = AD$, což je vyloučeno (přímka $AD$ obě kružnice odděluje, $q$ nikoli). Bod $X$ jakožto průsečík přímky $q$ s~přímkou $AD$ proto leží mezi nimi, a~tedy ve zmíněné polorovině, tj. na polopřímce $DA$. Spolu s~$0 < |DX| < |AD|$ to znamená, že $X$ je vnitřním bodem úsečky $AD$, a~tak
+    $$
+    |AX| = |AD| - |DX| = s - a.
+    $$
+
+    Bod $X$ tedy vždy leží na kružnici $\omega$ se středem $A$ a~poloměrem $s - a$, a~jelikož je vnitřním bodem úsečky $AD$ pro vnitřní bod $D$ strany $BC$, leží uvnitř úhlu $BAC$. Naopak každý bod tohoto oblouku takto opravdu vznikne: když $D$ probíhá vnitřek strany $BC$, polopřímka $AD$ proběhne právě všechny polopřímky z~$A$ ležící mezi polopřímkami $AB$ a~$AC$ a~od obou různé, a~to vzájemně jednoznačně, přičemž na každé z~nich je jediný bod ve vzdálenosti $s - a$ od $A$ a~podle dokázaného je jím právě bod $X$ příslušející tomuto $D$. Krajními body oblouku jsou body dotyku vepsané kružnice trojúhelníku $ABC$ se stranami $AB$ a~$AC$, neboť ty jsou od $A$ vzdáleny přesně $s - a$; odpovídají degenerovaným polohám $D = B$ a~$D = C$, a~proto do hledané množiny nepatří.
+}
 
 \EnvId{WqLo9VdtCR-oLjiZTe-hJ-tecnovy-ctyruhelnik-a-opsana-kruznice}
 \Problem{1}{IMO 2021, P4}{
@@ -277,7 +751,55 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Rovnost úhlů při $Z$ a~$T$ můžeme dopočítat úhlením. Úhly při $Q$ a~$R$ jsou pravé, takže shodnost plyne. Je někde jinde podobná shodnost?
 }{
     Ve skutečnosti jsou shodné i~$IPX$ a~$ISY$. Tyto dvě shodnosti dohromady dávají rovnosti úseček potřebné k~závěrečnému výpočtu.
-}{}
+}{
+    Označme $r$ poloměr vepsané kružnice čtyřúhelníku $ABCD$, dále $P$, $Q$, $R$, $S$ její body dotyku po řadě na stranách $AB$, $BC$, $CD$, $DA$ a~$O$ střed kružnice $\Omega$. Bod $I$ má od každé z~přímek $AB$, $BC$, $CD$, $DA$ vzdálenost $r > 0$, takže na žádné z~nich neleží; speciálně je různý od bodů $X$, $Y$, $Z$, $T$.
+
+    Body dotyku jsou vnitřními body příslušných stran a~podle zadání leží $X$, $Z$ za body $A$, resp. $C$ a~body $Y$, $T$ za bodem $D$. Na přímce $AB$ tak leží body v~pořadí $B$, $P$, $A$, $X$, na přímce $BC$ v~pořadí $B$, $Q$, $C$, $Z$, na přímce $AD$ v~pořadí $A$, $S$, $D$, $Y$ a~na přímce $CD$ v~pořadí $C$, $R$, $D$, $T$. O~tato čtyři pořadí se opírá každý další krok.
+
+    Samotné stejné tečny nestačí: většina úseček ze zadání vůbec neleží na stranách čtyřúhelníku. Mostem k~nim jsou dvě dvojice shodných pravoúhlých trojúhelníků s~vrcholem $I$, ve kterých pravé úhly plynou z~bodů dotyku vepsané kružnice a~shodné ostré úhly z~obvodových úhlů v~$\Omega$.
+
+    \textbf{Trojúhelníky $IQZ$ a~$IRT$.} Poloměr do bodu dotyku je kolmý na tečnu, takže $IQ \perp BC$ a~$IR \perp CD$. Bod $Z$ leží na přímce $BC$ a~$Z \neq Q$, bod $T$ na přímce $CD$ a~$T \neq R$, takže $IQZ$ a~$IRT$ jsou pravoúhlé trojúhelníky s~pravými úhly při $Q$, resp. při $R$, a~s~odvěsnami $|IQ| = |IR| = r$.
+
+    Z~pořadí $B$, $Q$, $C$, $Z$ leží body $Q$ a~$C$ na téže polopřímce z~bodu $Z$, takže $|\angle IZQ| = |\angle IZC|$; z~pořadí $C$, $R$, $D$, $T$ leží body $R$ a~$C$ na téže polopřímce z~bodu $T$, takže $|\angle ITR| = |\angle ITC|$. Oba úhly jsou ostré, neboť zbylé dva úhly pravoúhlého trojúhelníku jsou ostré. Body $I$, $C$, $Z$, $T$ leží na $\Omega$, takže $|\angle IZC|$ a~$|\angle ITC|$ jsou obvodové úhly nad tětivou $IC$: buď jsou shodné (když $Z$ a~$T$ leží na tomtéž oblouku určeném body $I$, $C$), nebo je jejich součet $180^\circ$. Druhá možnost by však znamenala, že aspoň jeden z~nich není ostrý, a~tedy
+    $$
+    |\angle IZQ| = |\angle IZC| = |\angle ITC| = |\angle ITR|.
+    $$
+
+    Odtud $|\angle QIZ| = 90^\circ - |\angle IZQ| = 90^\circ - |\angle ITR| = |\angle RIT|$. Trojúhelníky $IQZ$ a~$IRT$ tedy mají shodnou stranu $|IQ| = |IR|$ a~shodné úhly při obou jejích krajních bodech, takže jsou shodné, což dává
+    $$
+    |QZ| = |RT|, \qquad |IZ| = |IT|.
+    $$
+
+    \textbf{Trojúhelníky $IPX$ a~$ISY$.} Stejně je $IP \perp AB$, $IS \perp DA$ a~$|IP| = |IS| = r$, přičemž $X \neq P$ a~$Y \neq S$, takže $IPX$ a~$ISY$ jsou pravoúhlé trojúhelníky s~pravými úhly při $P$, resp. při $S$. Z~pořadí $B$, $P$, $A$, $X$ je $|\angle IXP| = |\angle IXA|$ a~z~pořadí $A$, $S$, $D$, $Y$ je $|\angle IYS| = |\angle IYA|$. Oba tyto úhly jsou opět ostré a~jsou to obvodové úhly nad tětivou $IA$ kružnice $\Omega$, takže se rovnají. Týmž argumentem jako výše jsou trojúhelníky $IPX$ a~$ISY$ shodné a
+    $$
+    |PX| = |SY|, \qquad |IX| = |IY|.
+    $$
+
+    \textbf{Přenos na tětivy $TX$ a~$YZ$.} Bod $I$ leží na $\Omega$, takže $|OI|$ je poloměr $\Omega$ a~$O \neq I$. Dále $X \neq Y$: jinak by tento bod ležel na přímkách $AB$ i~$AD$, které mají jediný společný bod $A$, ale $X \neq A$. Body $O$ i~$I$ jsou stejně vzdálené od $X$ jako od $Y$, takže přímka $OI$ je osou úsečky $XY$. Podobně $Z \neq T$ (jinak by tento bod ležel na přímkách $BC$ i~$CD$, tedy by to byl bod $C$, přičemž $T \neq C$) a~z~$|OZ| = |OT|$, $|IZ| = |IT|$ je přímka $OI$ i~osou úsečky $ZT$. Osová souměrnost podle přímky $OI$ proto zobrazí $X$ na $Y$ a~$T$ na $Z$, odkud
+    $$
+    |TX| = |YZ|.
+    $$
+
+    \textbf{Závěrečný výpočet.} Podle věty o~dvou tečnách z~bodu je $|AP| = |AS|$, $|CQ| = |CR|$ a~$|DR| = |DS|$. Ze čtyř pořadí bodů dále dostáváme
+    $$
+    \gather
+    |AD| = |AS| + |SD|, \qquad |CD| = |CR| + |RD|, \\
+    |XA| = |PX| - |PA|, \qquad |ZC| = |QZ| - |QC|, \\
+    |DT| = |RT| - |RD|, \qquad |DY| = |SY| - |SD|.
+    \endgather
+    $$
+    Po dosazení se díky $|AS| = |PA|$, resp. $|CR| = |QC|$ vykrátí tečnové úseky při $A$, resp. při $C$ a~zbude
+    $$
+    \eqalign{
+        |AD| + |DT| + |XA| &= |SD| - |RD| + |RT| + |PX|,\cr
+        |CD| + |DY| + |ZC| &= |RD| - |SD| + |QZ| + |SY|.\cr
+    }
+    $$
+    Pravé strany jsou stejné, neboť $|SD| = |RD|$, $|RT| = |QZ|$ a~$|PX| = |SY|$. Přičtením rovnosti $|TX| = |YZ|$ dostáváme
+    $$
+    |AD| + |DT| + |TX| + |XA| = |CD| + |DY| + |YZ| + |ZC|.
+    $$
+}
 
 \EnvId{zwCIF1ytYOGA5L7Ai1rsb-obrazy-dotykovych-bodu-podle-stredu}
 \Problem{1}{IMO Shortlist 2005, G1}{
@@ -285,14 +807,42 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
 }{
     První nápověda přijde poté, co nakreslíme dokonalý obrázek a~uvědomíme si, že $I$ leží na kružnici s~$A,B,K,L$. A~kružnice procházející $AIB$ nám dává vodítko, co nakreslit dál: čím dalším prochází?
 }{
-    Kružnice $A,I,B$ prochází středem $A$-připsané kružnice $I_a$. Nakresleme tedy $A$-připsanou kružnici.
+    Kružnice $A,I,B$ prochází středem $C$-připsané kružnice $I_c$. Nakresleme tedy $C$-připsanou kružnici.
 }{
-    Záhadná podmínka $|AC|+|BC|=3|AB|$ dá větší smysl, jakmile zavedeme body dotyku $A$-připsané kružnice s~$CB$ a~$CA$. Čas na trochu počítání se stejnými tečnami.
+    Záhadná podmínka $|AC|+|BC|=3|AB|$ dá větší smysl, jakmile zavedeme body dotyku $C$-připsané kružnice s~$CB$ a~$CA$. Čas na trochu počítání se stejnými tečnami.
 }{
     Ukažte, že naše podmínka je ekvivalentní tomu, že $D$ je střed $CD'$, podobně pro $E$. Jaké to má důsledky v~obrázku?
 }{
-    Zdůvodněte, že $|I_aD'| = 2|ID|$. To konečně dává vodítko, co dělat s~$K$. Teď jsme blízko dokončení.
-}{}
+    Zdůvodněte, že $|I_cD'| = 2|ID|$. To konečně dává vodítko, co dělat s~$K$. Teď jsme blízko dokončení.
+}{
+    Přesný obrázek napovídá, že na hledané kružnici leží i~bod $I$. To je dobrá stopa: kružnice opsaná trojúhelníku $AIB$ je známá konfigurace, prochází totiž středem $I_c$ kružnice připsané proti vrcholu $C$ a~úsečka $II_c$ je jejím průměrem. Dokážeme proto, že $A$, $B$, $K$, $L$ leží na kružnici $\omega$ s~průměrem $II_c$.
+
+    Bod $I_c$ leží na ose vnitřního úhlu při vrcholu $C$ a~na osách vnějších úhlů při vrcholech $A$ a~$B$. Přímky $AI$ a~$AI_c$ jsou tedy osa vnitřního a~osa vnějšího úhlu při $A$, které jsou na sebe kolmé, takže $|\angle IAI_c| = 90^\circ$, a~stejně $|\angle IBI_c| = 90^\circ$. Podle Thaletovy věty leží $A$ i~$B$ na $\omega$.
+
+    Nechť se $C$-připsaná kružnice dotýká přímek $CB$ a~$CA$ v~bodech $D'$ a~$E'$. Tato kružnice se dotýká strany $AB$ a~prodloužení stran $CB$ a~$CA$ za body $B$ a~$A$, takže $D'$ leží na polopřímce $CB$ a~$E'$ na polopřímce $CA$; na týchž polopřímkách leží i~body dotyku $D$, $E$ vepsané kružnice. Vzdálenosti všech čtyř od vrcholu $C$ známe:
+    $$
+    |CD'| = |CE'| = s, \qquad |CD| = |CE| = s - c.
+    $$
+    Podmínka $|AC| + |BC| = 3|AB|$ říká $b + a = 3c$, tedy $a + b + c = 4c$, čili $s = 2c$. To je přesně rovnost $s = 2(s - c)$, a~tedy
+    $$
+    |CD'| = 2|CD|, \qquad |CE'| = 2|CE|.
+    $$
+    Jelikož $D$ i~$D'$ leží na polopřímce $CB$ a~$E$ i~$E'$ na polopřímce $CA$, znamená to, že $D$ je střed úsečky $CD'$ a~$E$ je střed úsečky $CE'$.
+
+    Body $I$ a~$I_c$ leží oba na ose úhlu $ACB$, čili na polopřímce $CI$, a~úsečky $ID$, $I_cD'$ jsou kolmé na $CB$. Pravoúhlé trojúhelníky $CDI$ a~$CD'I_c$ se proto shodují v~úhlu při vrcholu $C$ a~jsou podobné s~koeficientem $|CD'| / |CD| = 2$, odkud
+    $$
+    |I_cD'| = 2|ID|, \qquad |CI_c| = 2|CI|.
+    $$
+    Body $I$, $I_c$ leží na téže polopřímce z~$C$, takže druhá rovnost říká, že $I$ je střed úsečky $CI_c$; zvláště $I \neq I_c$ takže $\omega$ je opravdu kružnice.
+
+    Středová souměrnost podle $I$ zobrazuje $D$ na $K$, $E$ na $L$ a~podle předchozího také $C$ na $I_c$. Úsečka $KI_c$ je tedy obrazem úsečky $DC$, čili
+    $$
+    KI_c \parallel CB, \qquad |KI_c| = |CD| = s - c > 0,
+    $$
+    a~stejně $LI_c \parallel CA$ s~$|LI_c| = |CE| > 0$. Zároveň je $I$ střed úsečky $DK$, takže přímka $IK$ je přímka $DK$, která je kolmá na $CB$; přitom $|IK| = |ID| > 0$. V~bodě $K$ se tak setkává kolmice na $CB$ s~rovnoběžkou s~$CB$, což dává $|\angle IKI_c| = 90^\circ$; stejně z~$IL \perp CA$ a~$LI_c \parallel CA$ dostaneme $|\angle ILI_c| = 90^\circ$.
+
+    Podle Thaletovy věty tedy leží i~body $K$ a~$L$ na kružnici $\omega$ s~průměrem $II_c$, na které už leží $A$ a~$B$.
+}
 
 \EnvId{cqRxrMgyFJE7-aHA9USqB-rozdeleni-obvodu-trojuhelniku}
 \Problem{2}{}{
@@ -300,14 +850,60 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
 }{
     První trik je vzpomenout si na jedno obzvlášť pěkné místo, kde se v~geometrii trojúhelníku nějak objevuje obvod. Určitě jsme ho v~tomto materiálu viděli.
 }{
-    Vzdálenost z~$A$ k~bodům dotyku $A$-připsané kružnice je přesně polovina obvodu, tedy 2. A~$|AX|=|AY|=1$. Je to náhoda?
+    Vzdálenost z~$A$ k~bodům dotyku $A$-připsané kružnice s~přímkami $AB$ a~$AC$ je přesně polovina obvodu, tedy 2. A~$|AX|=|AY|=1$. Je to náhoda?
 }{
-    Nechť se $A$-připsaná kružnice dotýká $AB$ a~$AC$ v~$D$ a~$E$. Máme $|AD|=|AE|=2$ a~$|AX|=|AY|=1$, a~tedy přímka $DE$ je obraz $A$-poláry $A$-připsané kružnice ve stejnolehlosti se středem v~$A$ a~koeficientem $1/2$. Co víme o~této přímce?
+    Nechť se $A$-připsaná kružnice dotýká $AB$ a~$AC$ v~$D$ a~$E$. Máme $|AD|=|AE|=2$ a~$|AX|=|AY|=1$, a~tedy přímka $XY$ je obraz $A$-poláry $A$-připsané kružnice ve stejnolehlosti se středem v~$A$ a~koeficientem $1/2$. Co víme o~této přímce?
 }{
     Přímka $XY$ je chordála bodu $A$ a~$A$-připsané kružnice! A~$F$ na ní leží. Blížíme se ke~konci.
 }{
     Poslední bod, který nakreslíme, je bod dotyku připsané kružnice a~$BC$. Využitím faktu, že $F$ leží na této chordále, dostaneme nějaké pěkné stejné délky.
-}{}
+}{
+    Obvod trojúhelníku $ABC$ je $4$, takže $s = 2$. Polovina obvodu se v~trojúhelníku objevuje jako vzdálenost bodu $A$ od bodů dotyku $A$-připsané kružnice a~hodnota $|AX| = |AY| = 1$ je přesně její polovina. To napovídá, co dokreslit.
+
+    Označme $\omega$ kružnici připsanou trojúhelníku $ABC$ proti vrcholu $A$, její střed $J$ a~její poloměr $\rho$, a~nechť se $\omega$ dotýká přímek $AB$, $AC$, $BC$ po řadě v~bodech $D$, $E$, $T$. Podle věty o~připsané kružnici je $|AD| = |AE| = s = 2$. Body $D$, $X$ leží na polopřímce $AB$ a~body $E$, $Y$ na polopřímce $AC$, takže z~$|AX| = |AY| = 1$ je $X$ středem úsečky $AD$ a~$Y$ středem úsečky $AE$. Přímka $XY$ je tedy obrazem přímky $DE$ ve stejnolehlosti $h$ se středem $A$ a~koeficientem $\frac12$.
+
+    Klíčové tvrzení je, že pro každý bod $P$ přímky $XY$ platí $|PA|^2 = |PJ|^2 - \rho^2$, tedy že $XY$ je chordálou bodu $A$ (chápaného jako kružnice s~nulovým poloměrem) a~kružnice $\omega$.
+
+    Dokážeme to. Body $D$, $E$ jsou různé, jinak by ležely na přímce $AB$ i~na přímce $AC$, a~tedy by splynuly s~$A$. Z~$|AD| = |AE|$ a~$|JD| = |JE| = \rho$ leží $A$ i~$J$ na ose úsečky $DE$, takže $AJ \perp DE$. Nechť $H$ je průsečík přímek $DE$ a~$AJ$ a~nechť $G$ je střed úsečky $AH$. Stejnolehlost $h$ zobrazuje $H$ na $G$, takže $G$ leží na $XY$; přímka $XY$ je rovnoběžná s~$DE$, tedy kolmá na $AJ$, a~protíná ji právě v~bodě $G$.
+
+    Tečna $AD$ je kolmá na poloměr $JD$, takže trojúhelník $ADJ$ má při $D$ pravý úhel a~$DH$ je jeho výška na přeponu $AJ$. Pythagorova věta dává $|AJ|^2 = |AD|^2 + \rho^2$ a~Euklidova věta o~odvěsně dává
+    $$
+    |AD|^2 = |AH| \cdot |AJ| = 2|AG| \cdot |AJ|.
+    $$
+    Pata výšky $H$ leží uvnitř přepony $AJ$, takže tam leží i~$G$ a~platí $|GJ| = |AJ| - |AG|$. Pro bod $P$ na přímce $XY$ je $|PA|^2 = |PG|^2 + |GA|^2$ a~$|PJ|^2 = |PG|^2 + |GJ|^2$ (Pythagorova věta, pro $P = G$ triviálně), a~tedy
+    $$
+    \eqalign{
+    |PJ|^2 - |PA|^2 &= |GJ|^2 - |GA|^2 = \cr
+    &= \bigl(|AJ| - |AG|\bigr)^2 - |AG|^2 = \cr
+    &= |AJ|^2 - 2|AG| \cdot |AJ| = |AJ|^2 - |AD|^2 = \rho^2, \cr
+    }
+    $$
+    což je právě dokazované tvrzení.
+
+    Bod $F$ leží na přímce $XY$, takže $|FA|^2 = |FJ|^2 - \rho^2$. Zároveň leží na přímce $BC$, která je tečnou $\omega$ v~bodě $T$, takže $JT \perp BC$ a~z~Pythagorovy věty je $|FJ|^2 = |FT|^2 + \rho^2$. Dohromady
+    $$
+    |FA| = |FT|.
+    $$
+
+    Podle věty o~bodech dotyku připsané kružnice u~zbylých dvou vrcholů je $|BT| = s - c$ a~$|CT| = s - b$. Obě délky jsou kladné a~jejich součet je $2s - b - c = a = |BC|$, takže $T$ leží uvnitř úsečky $BC$. Bod $F$ leží na úsečce $BC$ a~je jejím vnitřním bodem, jinak by úsečka $AF$ nerozdělila trojúhelník $ABC$ na dva trojúhelníky. Nastává tedy jeden ze dvou případů.
+
+    \begitems
+    \i Bod $F$ leží na úsečce $BT$. Pak $|BF| + |FT| = |BT|$ a~obvod trojúhelníku $ABF$ je
+    $$
+    \eqalign{
+    |AB| + |BF| + |FA| &= c + |BF| + |FT| = \cr
+    &= c + |BT| = c + (s - c) = 2. \cr
+    }
+    $$
+    \i Bod $F$ leží na úsečce $TC$. Pak $|CF| + |FT| = |CT|$ a~obvod trojúhelníku $ACF$ je
+    $$
+    \eqalign{
+    |AC| + |CF| + |FA| &= b + |CF| + |FT| = \cr
+    &= b + |CT| = b + (s - b) = 2. \cr
+    }
+    $$
+    \enditems
+}
 
 \EnvId{p_QDQdc3MiS1qjG5JIegA-brianchonova-veta}
 \Problem{2}{Brianchonova věta}{
@@ -318,7 +914,46 @@ V~tomto materiálu si ukážeme užitečnost řešitelské techniky zvané \text
     Jedna z~kružnic se dotýká polopřímek opačných k~$BA$ a~$DE$. Analogicky ostatní. Jediný trik je umístit je tak, aby chordály fungovaly.
 }{
     Zkuste je umístit tak, aby délky vnějších tečen ke~každé kružnici a~vepsané kružnici $ABCDEF$ byly stejné.
-}{}
+}{
+    Tři přímky procházející jedním bodem volají po potenčním středu: hledáme tedy tři kružnice, jejichž chordálami jsou právě úhlopříčky $AD$, $BE$, $CF$. Mocnost bodu $M$ ke~kružnici $\omega'$ značme $p(M,\omega')$ a~připomeňme, že pro $M$ na tečně kružnice $\omega'$ s~bodem dotyku $Z$ je $p(M,\omega') = |MZ|^2$. Mocnosti vrcholů tedy umíme vyjádřit pomocí tečen, a~ty jsou to jediné, co v~úloze máme.
+
+    Nechť se vepsaná kružnice $\omega$ se středem $O$ a~poloměrem $r$ dotýká stran $AB$, $BC$, $CD$, $DE$, $EF$, $FA$ po řadě v~bodech $P$, $Q$, $R$, $S$, $T$, $U$. V~každém vrcholu svírají obě strany, které se v~něm setkávají, úhel, uvnitř něhož leží $\omega$, takže všechny vnitřní úhly jsou menší než $180^\circ$ a~šestiúhelník je konvexní; body $P$, $Q$, $R$, $S$, $T$, $U$ proto leží na $\omega$ v~tomto pořadí, ve~stejném směru oběhu jako vrcholy. Podle Tvrzení 1 jsou obě tečny z~každého vrcholu stejně dlouhé, položme
+    $$
+    \gather
+    a = |AP| = |AU|, \quad b = |BP| = |BQ|, \quad c = |CQ| = |CR|,\\
+    d = |DR| = |DS|, \quad e = |ES| = |ET|, \quad f = |FT| = |FU|.
+    \endgather
+    $$
+
+    Hledané kružnice se budou dotýkat přímek protilehlých stran: nechť se $\omega_1$ dotýká přímek $AB$, $DE$ v~bodech $P_1$, $S_1$, kružnice $\omega_2$ přímek $BC$, $EF$ v~bodech $Q_1$, $T_1$ a~kružnice $\omega_3$ přímek $CD$, $FA$ v~bodech $R_1$, $U_1$. Každý vrchol pak leží na tečně právě dvou z~nich, například $B$ na tečnách $AB$, $BC$ kružnic $\omega_1$, $\omega_2$, a~přímka $BE$ bude jejich chordálou, jakmile $|BP_1| = |BQ_1|$ a~$|ES_1| = |ET_1|$. Chceme tedy, aby v~každém vrcholu byly oba nové body dotyku na přilehlých stranách od tohoto vrcholu stejně vzdálené.
+
+    Původní body dotyku to splňují, jenže dávají $\omega_1 = \omega_2 = \omega_3 = \omega$. Posuneme je proto po stranách o~tutéž délku, střídavě ve~směru oběhu a~proti němu: na každé straně leží právě jeden z~vrcholů $B$, $D$, $F$ a~bod dotyku posuneme směrem k~němu, a~to až za něj. Zvolme $t > \max(b,d,f)$ a~nechť body $P_1$, $Q_1$ leží na polopřímkách opačných k~$BA$, $BC$ ve~vzdálenosti $t-b$ od $B$, body $R_1$, $S_1$ na polopřímkách opačných k~$DC$, $DE$ ve~vzdálenosti $t-d$ od $D$ a~body $T_1$, $U_1$ na polopřímkách opačných k~$FE$, $FA$ ve~vzdálenosti $t-f$ od $F$. Pak
+    $$
+    \gather
+    |AP_1| = |AU_1| = a+t, \quad |BP_1| = |BQ_1| = t-b,\\
+    |CQ_1| = |CR_1| = c+t, \quad |DR_1| = |DS_1| = t-d,\\
+    |ES_1| = |ET_1| = e+t, \quad |FT_1| = |FU_1| = t-f,
+    \endgather
+    $$
+    například $|AP_1| = |AB| + |BP_1| = (a+b)+(t-b)$ a~$|CQ_1| = |CB| + |BQ_1| = (b+c)+(t-b)$. Zároveň každý nový bod vznikl posunutím původního bodu po jeho straně o~délku právě $t$, například $|PP_1| = |PB| + |BP_1| = t$.
+
+    Zbývá ukázat, že kružnice dotýkající se $AB$ v~bodě $P_1$ a~$DE$ v~bodě $S_1$ vůbec existuje; právě tady se střídání směrů uplatní. Nechť $m_1$ je osa úsečky $PS$ a~$\sigma$ osová souměrnost podle ní. Z~$|OP| = |OS| = r$ prochází $m_1$ bodem $O$, takže $\sigma$ zobrazuje $\omega$ na sebe, bod $P$ na bod $S$, a~tedy tečnu $AB$ na tečnu $DE$. Jako nepřímá shodnost obrací směr oběhu: směr $A \to B$ je v~bodě $P$ směrem oběhu dopředu, jeho obrazem je proto v~bodě $S$ směr oběhu dozadu, čili směr $E \to D$. Body $P_1$, $S_1$ přitom vznikly posunutím o~$t$ právě v~těchto dvou směrech, takže $\sigma(P_1) = S_1$.
+
+    Přímka $m_1$ není kolmá na $AB$: jinak by splynula s~přímkou $OP$, jedinou kolmicí na $AB$ vedenou bodem $O$, a~$\sigma$ by nechala $P$ na místě, čili $P = S$. Kolmice na $AB$ v~bodě $P_1$ proto protne $m_1$ v~jediném bodě $O_1$; bod $O_1$ zůstane při $\sigma$ na místě a~tato kolmice se zobrazí na kolmici na $DE$ v~bodě $S_1$, takže $|O_1P_1| = |O_1S_1|$ a~kružnice $\omega_1$ se středem $O_1$ a~poloměrem $|O_1P_1|$ je hledaná. Nulový poloměr by znamenal $O_1 = P_1 = S_1$, tedy že $P_1$ je průsečíkem přímek $AB$ a~$DE$ (ty jsou různé, protože se $\omega$ dotýkají v~různých bodech). Bod $P_1$ však leží na $AB$ ve~vzdálenosti $t$ od $P$ v~pevném směru, takže s~tímto jediným průsečíkem splyne nejvýše pro jednu hodnotu $t$; při třech dvojicích protilehlých stran to vyloučí nejvýše tři hodnoty a~$t$ volíme mimo ně. Stejně sestrojíme $\omega_2$ se středem $O_2$ na ose $m_2$ úsečky $QT$ a~$\omega_3$ se středem $O_3$ na ose $m_3$ úsečky $RU$.
+
+    Středy jsou navzájem různé. Bod $O$ leží na kolmici na $AB$ v~bodě $P$, kdežto $O_1$ na rovnoběžné kolmici v~bodě $P_1 \neq P$, takže $O_1 \neq O$, a~stejně $O_2 \neq O$, $O_3 \neq O$. Osy $m_1$, $m_2$, $m_3$ přitom procházejí bodem $O$ a~jsou navzájem různé: body $P$, $Q$, $S$, $T$ leží na $\omega$ v~tomto cyklickém pořadí, takže se tětivy $PS$ a~$QT$ protínají, nejsou tedy rovnoběžné a~nesplývají ani kolmice k~nim vedené bodem $O$; analogicky pro dvojice $QT$, $RU$ a~$RU$, $PS$. Přímky $m_1$, $m_2$, $m_3$ tak mají jediný společný bod $O$, a~jelikož $O_i$ leží na $m_i$ a~$O_i \neq O$, jsou středy $O_1$, $O_2$, $O_3$ navzájem různé.
+
+    Teď už jen mocnosti. Vrcholy leží na tečnách příslušných kružnic, takže
+    $$
+    \gather
+    p(B,\omega_1) = (t-b)^2 = p(B,\omega_2),\\
+    p(E,\omega_1) = (e+t)^2 = p(E,\omega_2).
+    \endgather
+    $$
+    Různé body $B$, $E$ tedy leží na chordále nesoustředných kružnic $\omega_1$, $\omega_2$, tou je proto přímka $BE$. Analogicky hodnoty $(c+t)^2$ v~$C$ a~$(t-f)^2$ v~$F$ dělají z~$CF$ chordálu kružnic $\omega_2$, $\omega_3$ a~hodnoty $(a+t)^2$ v~$A$ a~$(t-d)^2$ v~$D$ dělají z~$AD$ chordálu kružnic $\omega_1$, $\omega_3$.
+
+    Tři po dvou nesoustředné kružnice mají buď potenční střed, kterým procházejí všechny tři chordály, nebo jejich středy leží na jedné přímce a~pak jsou všechny tři chordály na tuto přímku kolmé, tedy rovnoběžné, případně splynou. Druhá možnost odpadá: úhlopříčka $AD$ dělí konvexní šestiúhelník na $ABCD$ a~$ADEF$, takže $B$ a~$E$ leží v~opačných polorovinách určených přímkou $AD$ a~úsečka $BE$ ji protíná v~jediném bodě. Úhlopříčky $AD$, $BE$, $CF$ tedy procházejí jedním bodem, potenčním středem kružnic $\omega_1$, $\omega_2$, $\omega_3$.
+}
 
 \DisplayExerciseSolutions
 
