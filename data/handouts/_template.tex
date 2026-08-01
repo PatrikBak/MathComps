@@ -45,6 +45,8 @@
 \def\Laugh{:D}
 \def\SmileWithTear{:'-)}
 \def\UpsideDownSmile{(-:}
+\def\Sad{:-(}
+\def\Wink{;-)}
 
 % Prints a link to the MathComps website to the handout
 \def\MathcompsLink#1{%
@@ -72,26 +74,8 @@
     \def\captionHint{Návod}%
     \def\captionProblemSolutions{Řešení k úlohám}
     \def\captionExerciseSolutions{Řešení ke cvičením}
-    \def\captionHints##1{%
-      \ifcase##1
-        % Case 0: TeX starts counting at 0
-      \or
-        První%
-      \or 
-        Druhé%
-      \or 
-        Třetí%
-      \or 
-        Čtvrté%
-      \or 
-        Páté%
-      \or 
-        Šesté%
-      \else
-        \errmessage{Too many hints lol}%
-      \fi
-      \ návody k řešením%
-    }
+    % The level number is dropped when the handout has a single level of hints
+    \def\captionHints##1{Návody k řešením\ifnum\maxHints>1\relax\space##1\fi}%
     \def\link{cs/materialy}
     \def\linkCaption{interaktivní online verze}
 }
@@ -111,26 +95,8 @@
     \def\captionHint{Návod}%
     \def\captionProblemSolutions{Riešenia k úlohám}
     \def\captionExerciseSolutions{Riešenia k cvičeniam}
-    \def\captionHints##1{%
-      \ifcase##1
-        % Case 0: TeX starts counting at 0
-      \or
-        Prvé%
-      \or 
-        Druhé%
-      \or 
-        Tretie%
-      \or 
-        Štvrté%
-      \or 
-        Piate%
-      \or 
-        Šieste%
-      \else
-        \errmessage{Too many hints lol}%
-      \fi
-      \space návody k riešeniam%
-    }
+    % The level number is dropped when the handout has a single level of hints
+    \def\captionHints##1{Návody k riešeniam\ifnum\maxHints>1\relax\space##1\fi}%
     \def\link{sk/materialy}
     \def\linkCaption{interaktívna online verzia}
 }
@@ -150,26 +116,8 @@
     \def\captionHint{Hint}%
     \def\captionProblemSolutions{Solutions to problems}
     \def\captionExerciseSolutions{Solutions to exercises}
-    \def\captionHints##1{%
-      \ifcase##1
-        % Case 0: TeX starts counting at 0
-      \or
-        First%
-      \or 
-        Second%
-      \or 
-        Third%
-      \or 
-        Fourth%
-      \or 
-        Fifth%
-      \or 
-        Sixth%
-      \else
-        \errmessage{Too many hints lol}%
-      \fi
-      \space hints%
-    }
+    % The level number is dropped when the handout has a single level of hints
+    \def\captionHints##1{Hints\ifnum\maxHints>1\relax\space##1\fi}%
     \def\link{en/handouts}
     \def\linkCaption{interactive online version}
 }
@@ -279,22 +227,129 @@
 % default back to self-closing.
 \newif\ifLeftbarOpen
 
-% Prints a left-aligned bar with the given text.
+% Scratch registers for the leftbar page-splitting below.
+\newbox\leftbarBody
+\newbox\leftbarChunk
+\newbox\leftbarWrapped
+\newdimen\leftbarAvail
+\newdimen\leftbarWidth
+\newdimen\leftbarSavedSplittop
+\newcount\leftbarSavedVbadness
+\newif\ifLeftbarMore
+
+% Wraps one chunk of an already-split body in the vertical rule. \unvbox rather
+% than \box so the chunk's own top glue stays visible to the page builder.
+%
+% Used global variables: leftbarWidth, leftbarWrapped
+%
+% A \vtop carries almost all of its size as depth, and the page builder clamps
+% a box's depth to \maxdepth (4pt in plain) when it ends a page, spilling the
+% rest past the bottom margin. Re-boxing under \boxmaxdepth=0pt moves that depth
+% into height, so a chunk sized to the room left actually occupies that much.
+\def\leftbarWrap#1{%
+  \begingroup%
+    \boxmaxdepth=0pt%
+    \setbox\leftbarWrapped=\vbox{%
+      \hbox{%
+        \vrule width 2pt
+        \hskip 0.75em
+        \vtop{\hsize=\leftbarWidth \unvbox#1}%
+      }%
+    }%
+    \box\leftbarWrapped%
+  \endgroup%
+}
+
+% Ships \leftbarBody out, splitting it across pages when it is taller than the
+% room left. pdfTeX has no \localleftbox, so a bar that survives a page break
+% has to be redrawn per chunk: measure what fits, \vsplit that much off, wrap
+% it in its own rule, break, repeat. The leading penalty forces the page builder
+% to run, without which \pagegoal and \pagetotal are stale; it has to be
+% \penalty10000, because any smaller penalty is a legal breakpoint and would let
+% a page end between a section title and the block that follows it -- OPmac's
+% \printsecc protects the title with \nobreak plus removable glue, and only a
+% non-discardable breakpoint of ours can defeat that.
+%
+% Used global variables: leftbarBody, leftbarChunk, leftbarAvail,
+% leftbarSavedVbadness, ifLeftbarMore
+%
+\def\leftbarShip{%
+  \loop%
+    \penalty10000%
+    % The room left on the page, or a whole page when nothing sits on it yet
+    \ifdim\pagegoal=\maxdimen%
+      \leftbarAvail=\vsize%
+    \else%
+      \leftbarAvail=\dimexpr\pagegoal-\pagetotal\relax%
+    \fi%
+    % Does what is left of the body still fit there?
+    \ifdim\dimexpr\ht\leftbarBody+\dp\leftbarBody\relax>\leftbarAvail%
+      \ifdim\leftbarAvail<3\baselineskip%
+        % Too little room left to seed a chunk into. Forcing a break here would
+        % strand a section title that happens to sit just above us at the foot
+        % of the page, so where the block would fit on a page of its own, hand
+        % it over whole and let the page builder move it -- with no breakpoint
+        % of ours in between, a preceding title travels with it, exactly as it
+        % did when the block was one unbreakable box. Only a block taller than
+        % a whole page has to be split, and there the forced break is the only
+        % way forward.
+        \ifdim\dimexpr\ht\leftbarBody+\dp\leftbarBody\relax>\vsize%
+          \vfil\penalty-10000%
+          \LeftbarMoretrue%
+        \else%
+          \leftbarWrap\leftbarBody%
+          \LeftbarMorefalse%
+        \fi%
+      \else%
+        % \vsplit packs the chunk to exactly \leftbarAvail, which is reported as
+        % an Underfull \vbox whenever the content cannot stretch that far. The
+        % packing is discarded by \leftbarWrap's \unvbox, so the warning is
+        % noise -- silence it here only, to keep real bad boxes visible.
+        \leftbarSavedVbadness=\vbadness%
+        \vbadness=10000%
+        \setbox\leftbarChunk=\vsplit\leftbarBody to \leftbarAvail%
+        \vbadness=\leftbarSavedVbadness%
+        \leftbarWrap\leftbarChunk%
+        % \vsplit can swallow the whole body even when \ht+\dp said otherwise,
+        % since only \ht has to fit. Breaking the page then would strand an
+        % empty bar stub on the next one, so only break if something is left.
+        \ifvoid\leftbarBody%
+          \LeftbarMorefalse%
+        \else%
+          \penalty-10000%
+          \LeftbarMoretrue%
+        \fi%
+      \fi%
+    \else%
+      % It fits, so the rest goes out under one rule and the loop is done
+      \leftbarWrap\leftbarBody%
+      \LeftbarMorefalse%
+    \fi%
+  \ifLeftbarMore\repeat%
+}
+
+% Prints a left-aligned bar with the given text, splitting it over a page
+% boundary when it does not fit (see \leftbarShip).
 % Default tail: two breakable medskips (page break allowed between blocks).
 % When \LeftbarOpentrue was set first: a non-breakable kern of the same
 % size, so the closing \endblock diamond cannot land on a fresh page away
 % from its content.
 \long\def\leftbar#1{%
   \safepar\medskip\medskip%
-  \hbox{%
-    \vrule width 2pt
-    \hskip 0.75em
-    \vtop{%
-      \hsize=\dimexpr\hsize-1.5em-2pt\relax
-      \parindent=1em
-      \noindent #1\par
-    }%
+  % The text width inside the bar: the page less the rule and the gap after it
+  \leftbarWidth=\dimexpr\hsize-1.5em-2pt\relax%
+  % The whole body, typeset once at that width so \vsplit breaks it at real lines
+  \setbox\leftbarBody=\vbox{%
+    \hsize=\leftbarWidth
+    \parindent=1em
+    \noindent #1\par
   }%
+  % \vsplit reads \splittopskip when it runs, not when the box was built, so
+  % set it here and put it back for OPmac's own splitting in \output.
+  \leftbarSavedSplittop=\splittopskip%
+  \splittopskip=\baselineskip%
+  \leftbarShip%
+  \splittopskip=\leftbarSavedSplittop%
   \safepar%
   \ifLeftbarOpen%
     \nobreak\kern\medskipamount\nobreak%
