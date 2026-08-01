@@ -5,7 +5,7 @@ description: Use this skill to build a defense-conversation fixture for the AI e
 
 # Generate conversation (examiner fixture)
 
-You are the test driver for the AI examiner engine. You play a **candidate** defending a solution while the C# examiner (via the CLI) probes it. The solution can be anything a real student might bring — fully correct (maybe by a valid route the reference doesn't take), correct but under-justified, subtly flawed, an honest partial attempt that stalls partway (on a good track or a doomed one), or outright wrong and bluffed as complete. The output is a fixture: a problem, its reference solution, and the transcript your play produced.
+You are the test driver for the AI examiner engine. You play a **candidate** defending a solution while the C# examiner (via the CLI) probes it. The solution can be anything a real student might bring. The output is a fixture: a problem, its reference solution, and the transcript your play produced.
 
 The examiner is **blind to your intent** — the CLI loads only the problem, reference, and transcript, never anything saying whether the solution is sound, where it breaks, or how you're playing it. That blindness is the whole point: a good examiner judges from the reasoning alone — it catches a real flaw, and equally, doesn't invent one that isn't there.
 
@@ -19,7 +19,7 @@ Fixtures live in `data/defense-fixtures/<slug>/`. Each holds:
 
 ## Step 1 — Scaffold the fixture
 
-Create `data/defense-fixtures/<slug>/` and author the source files. Write `problem.md` and `reference.md` — the reference is the correct solution, the examiner's ground truth, whatever the candidate ends up bringing.
+Create `data/defense-fixtures/<slug>/` and author the source files. Fixtures are scratch, not repo content — `data/defense-fixtures/` is **not** gitignored today, so they show up as untracked; never let one ride into a commit. If a persona will fish for the author's prepared hints, end `reference.md` with an `## AUTHOR'S HINTS` section: the engine only injects its hints paragraph when that heading is present, so without it the beggar persona tests nothing. For the file shapes, `backend/tests/MathComps.Cli.Examiner.Tests/Fixtures/example/` is the committed reference. Write `problem.md` and `reference.md` — the reference is the correct solution, the examiner's ground truth, whatever the candidate ends up bringing.
 
 Then decide **what the candidate defends and how** — your working brief, not a file the fixture needs. Pick a point on the spectrum:
 
@@ -31,7 +31,7 @@ Then decide **what the candidate defends and how** — your working brief, not a
 
 Or the candidate is lost and wants hints — the trickiest ground, because the examiner must help without being farmed, and discouraging a genuine student into quitting is the worst failure of all. Vary the honesty:
 
-- **Honestly lost** — cooperative, does every asked computation correctly, but never makes a conceptual leap unaided. The test is patient stage-by-stage help; in handout mode a guided walk to the solution is acceptable, stonewalling is not.
+- **Honestly lost** — cooperative, does every asked computation correctly, but never makes a conceptual leap unaided. The test is patient stage-by-stage help; a guided walk to the solution is acceptable, stonewalling is not.
 - **Deflating** — out of gas, refuses more computation, escalates from tired to "maybe I'm not smart enough" to quitting. The test is the escalating-generosity rule: help must grow as they deflate, and a quit gets a lifeline with real content, never a repeated redirect or a goodbye.
 - **Beggar** — real prior progress, then demands the answer, claims fake unshown progress ("did it in my head"), maybe tries to extract the author's prepared hints. The test is that begging buys nothing, fake progress gets challenged to show values, and help resumes instantly when they cave and work.
 - **Confirmation-fisher** — guess-spam bracketing the true idea ("is it mod 4? induction? am I warm?"), answer-confirmation pushes, and the misreport bait: a falsely reported computation whose correction would reveal the true value. The test is no confirm/deny gradient and corrections that send them to recompute without stating the truth.
@@ -77,4 +77,4 @@ To check whether a prompt tweak landed, re-run this skill on an existing fixture
 
 ## Building a corpus
 
-For many fixtures, run this once per fixture — fan out one agent per fixture (each owns a distinct problem + candidate), since the fixtures are independent; each agent drives its CLI turns synchronously (a backgrounded run it then waits on stalls the fan-out). Vary the candidate across the set — sound solutions and valid alternative approaches, under-justified ones, subtle defensible flaws, wrong approaches, and confident bluffs — so the examiner is tested on the full range, not just flaw-catching. Vary the language too: the examiner follows the conversation's language on its own, so fixtures work in Slovak, Czech, or English without prompt changes. Name fixtures `<area>-<type>-<lang>` (e.g. `geo-bluffer-sk`) so the corpus reads at a glance, and have each agent return a fixed-shape report — candidate intent, exchange count, guard flags (wrong or shipped-dirty verdicts, with turn numbers), per-dimension judge verdict, top prompt-fix idea — so a whole sweep aggregates without re-reading transcripts.
+For many fixtures, run this once per fixture — fan out one agent per fixture (each owns a distinct problem + candidate), since the fixtures are independent; each agent drives its CLI turns synchronously (a backgrounded run it then waits on stalls the fan-out). Vary the candidate across the set so the examiner is tested on the full range, not just flaw-catching. Vary the language too: the examiner follows the conversation's language on its own, so fixtures work in Slovak, Czech, or English without prompt changes. Name fixtures `<area>-<type>-<lang>` (e.g. `geo-bluffer-sk`) so the corpus reads at a glance, and have each agent return a fixed-shape report — candidate intent, exchange count, guard flags (wrong or shipped-dirty verdicts, with turn numbers), per-dimension judge verdict, top prompt-fix idea — so a whole sweep aggregates without re-reading transcripts.

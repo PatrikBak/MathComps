@@ -1,11 +1,11 @@
 ---
 name: add-problems
-description: Use this skill when adding a competition's problems to the site database through the bulk-import draft pipeline — registering a brand-new competition in the taxonomy if it isn't there yet, authoring the draft folder (statements + solutions + images, one original language plus translations), and running the bulk-import CLI validate until it passes. Trigger phrases: "add a new competition", "import a contest's problems into the DB", "register a competition in the taxonomy", "create a bulk-import draft", "add a round/year of a competition". Do NOT use for editing handouts (use the handout-* skills). The skill ends at `validate`; `apply` runs only on the user's explicit say-so (see "Validate" below).
+description: Use this skill when adding a competition's problems to the site database through the bulk-import draft pipeline — registering a brand-new competition in the taxonomy if it isn't there yet, authoring the draft folder (statements + solutions + images, one original language plus translations), and running the bulk-import CLI validate until it passes. Trigger phrases — "add a new competition", "import a contest's problems into the DB", "register a competition in the taxonomy", "create a bulk-import draft", "add a round/year of a competition". Do NOT use for editing handouts (use the handout-* skills). The skill ends at `validate`; `apply` runs only on the user's explicit say-so.
 ---
 
 # Add problems (bulk-import draft)
 
-Turn a competition's problems into a validated **draft folder** under `data/problems/` that the bulk-import CLI can apply. **Done = `validate` passes (registry + DB preview running) with the wanted languages present.** A fresh problem needs its original language (plus any translations); a re-import onto problems already in the DB may carry any **subset** — correct one original, or drop translations only (see "What a draft can do" below). Stop at `validate` by default — only run `apply` when the user explicitly tells you to in that instruction.
+Turn a competition's problems into a validated **draft folder** under `data/problems/` that the bulk-import CLI can apply. **Done = `validate` passes (registry + DB preview running) with the wanted languages present.** Stop at `validate` by default — only run `apply` when the user explicitly tells you to in that instruction.
 
 `data/problems/` is **gitignored** (`data/problems/.gitignore` = `*`) — drafts are local staging input, never committed. The committable artifact is any taxonomy/code change.
 
@@ -109,7 +109,7 @@ Tag the problems before validating, so the preflight checks the slugs:
 dotnet run --project backend/src/MathComps.Cli.Tagging -- ./data/problems/my-draft
 ```
 
-This writes a `tags:` list into each `pN.yaml`. It skips any problem that already has a `tags:` key, so it's safe to re-run; to redo one, delete its `tags:` key. Names it proposes outside the approved vocabulary land in `tag-suggestions.json` for review, never in a `pN.yaml`. See the [Tagging CLI README](../../../backend/src/MathComps.Cli.Tagging/README.md). Needs `Llm:ApiKey` in that project's user secrets.
+This writes a `tags:` list into each `pN.yaml`. It skips any problem that already has a `tags:` key, so it's safe to re-run; to redo everything pass `--retag`, or to redo one problem delete its `tags:` key. Names it proposes outside the approved vocabulary land in `tag-suggestions.json` for review, never in a `pN.yaml`. See the [Tagging CLI README](../../../backend/src/MathComps.Cli.Tagging/README.md). Needs `Llm:ApiKey` in that project's user secrets.
 
 ## Step 6 — Validate (the goal)
 
