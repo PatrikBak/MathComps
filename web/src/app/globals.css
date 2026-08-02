@@ -337,6 +337,28 @@ input[type='radio']:focus:not(:focus-visible) {
   padding-left: 1.3em;
 }
 
+/* The same hanging treatment for the ::before markers, which list-style-position can't reach:
+   a generated marker is an ordinary inline box in the flow. Open the gutter on the list itself. */
+.math-typography .list-style-number-parens,
+.math-typography .list-style-lower-roman-parens,
+.math-typography .list-style-upper-roman,
+.math-typography .list-style-lower-alpha-parens,
+.math-typography .list-style-upper-alpha-parens {
+  padding-left: 1.6em;
+}
+
+/* Pull each marker into that gutter. min-width, so an overlong marker (viii) keeps growing and
+   pushes only its own first line; the trailing spaces in `content` keep it clear of the text. */
+.math-typography .list-style-number-parens > li::before,
+.math-typography .list-style-lower-roman-parens > li::before,
+.math-typography .list-style-upper-roman > li::before,
+.math-typography .list-style-lower-alpha-parens > li::before,
+.math-typography .list-style-upper-alpha-parens > li::before {
+  display: inline-block;
+  min-width: 1.6em;
+  margin-left: -1.6em;
+}
+
 /*
   Math/serif typography. Compact base size; the .math-prose modifier opts
   into the larger fluid size and prose-width cap for long-form reading.
