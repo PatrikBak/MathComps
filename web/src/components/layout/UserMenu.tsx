@@ -9,7 +9,6 @@ import { forwardRef, useEffect, useState } from 'react'
 
 import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { cn } from '@/components/shared/utils/css-utils'
-import { useIsAdmin } from '@/hooks/use-is-admin'
 import { ROUTES } from '@/i18n/i18n'
 import { usePathname } from '@/i18n/navigation'
 
@@ -70,9 +69,6 @@ export default function UserMenu({ isAuthenticated, onOpenDefenses }: UserMenuPr
 
   // Disable profile menu item if already on profile page
   const isProfileDisabled = usePathname() === ROUTES.PROFILE
-
-  // Whether the viewer is an admin
-  const isAdmin = useIsAdmin()
 
   // Get translations
   const tUserMenu = useTranslations('ui.userMenu')
@@ -149,10 +145,8 @@ export default function UserMenu({ isAuthenticated, onOpenDefenses }: UserMenuPr
 
           {/* Menu Items */}
           <div className="py-1.5">
-            {/* The user's defenses, admin-gated */}
-            {isAdmin && (
-              <UserMenuItem type="mathilda" variant="dropdown" onClick={onOpenDefenses} />
-            )}
+            {/* The user's defenses */}
+            <UserMenuItem type="mathilda" variant="dropdown" onClick={onOpenDefenses} />
             <UserMenuItem type="profile" variant="dropdown" disabled={isProfileDisabled} />
             <UserMenuItem type="signOut" variant="dropdown" />
           </div>

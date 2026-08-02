@@ -8,8 +8,8 @@ namespace MathComps.Api.Endpoints;
 /// <summary>
 /// Maps the defense endpoints: listing a user's defense conversations, for one problem or across every problem,
 /// starting one, continuing it with the next turn, rewinding one to an earlier point, recording or taking back
-/// what the student thought of it, and deleting one. Admin-gated, though built per-user; the turn routes are
-/// tightly rate-limited because each turn is several LLM calls.
+/// what the student thought of it, and deleting one. Open to any signed-in user, with every route scoped to the
+/// caller's own sessions; the turn routes are tightly rate-limited because each turn is several LLM calls.
 /// </summary>
 public static class DefenseEndpoints
 {
@@ -44,7 +44,7 @@ public static class DefenseEndpoints
             // Return them
             return Results.Ok(sessions);
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // List all of the user's sessions across every problem
@@ -62,7 +62,7 @@ public static class DefenseEndpoints
             // Return them
             return Results.Ok(sessions);
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Start a new session with the student's first message
@@ -86,7 +86,7 @@ public static class DefenseEndpoints
             // Return the created session at its location
             return Results.Created($"{SessionsPath}/{session.Id}", session);
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.DefenseTurnRateLimit);
 
         // Continue a session with the student's next message
@@ -106,7 +106,7 @@ public static class DefenseEndpoints
             // Return the updated session
             return Results.Ok(session);
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.DefenseTurnRateLimit);
 
         // Rewind a session to an earlier point, dropping every turn after it
@@ -129,7 +129,7 @@ public static class DefenseEndpoints
             // Nothing to return; the client already knows the kept prefix
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Record what the student holds against one examiner reply, replacing anything they said before
@@ -154,7 +154,7 @@ public static class DefenseEndpoints
             // Nothing to return; the client already knows what it reported
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Record what the student says about the conversation, replacing anything they said before
@@ -178,7 +178,7 @@ public static class DefenseEndpoints
             // Nothing to return; the client already knows what it answered
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Take back what the student held against one examiner reply
@@ -199,7 +199,7 @@ public static class DefenseEndpoints
             // Nothing to return; the reply now carries nothing
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Take back what the student said the conversation came to
@@ -218,7 +218,7 @@ public static class DefenseEndpoints
             // Nothing to return; the conversation is unanswered again
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Delete a session outright
@@ -237,7 +237,7 @@ public static class DefenseEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
     }
 }

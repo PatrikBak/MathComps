@@ -1,6 +1,6 @@
 # MathComps API
 
-The main .NET Web API for the MathComps application. Provides endpoints for browsing problems, filtering, similarity search, and serving problem metadata.
+The main .NET Web API for the MathComps application. Provides endpoints for browsing problems, filtering, similarity search, and serving problem metadata, plus the signed-in surfaces: comments, user lists, and the AI defense conversations described in the [Examiner CLI README](../MathComps.Cli.Examiner/README.md).
 
 ## Setup
 

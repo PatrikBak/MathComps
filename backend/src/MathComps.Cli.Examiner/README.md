@@ -6,6 +6,8 @@ The engine itself lives in `MathComps.Infrastructure` (`Services/Defense`) and i
 
 This CLI has no database of its own — it works entirely from fixture files. (Persistence is the API's concern, not the engine's.)
 
+The API's copy is open to any signed-in user, bounded by `DefenseLimits` in `appsettings.json`: a daily spend ceiling and a turn cap, both per user, plus length caps on everything the client sends. Nothing caps the day's total across all users. None of it applies here anyway — the CLI runs the engine directly and will spend whatever you ask it to.
+
 ## How It Works
 
 A turn is a small loop, not one call: the examiner writes a reply, two independent guards check it, and it's regenerated if either flags it. The guards don't trust the examiner to police itself — both run on every reply, and a fresh generate is re-checked the same way:

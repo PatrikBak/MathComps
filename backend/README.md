@@ -272,7 +272,9 @@ Per-environment `appsettings.{Production|Staging}.json` files, gitignored and bi
 baked-in config, so you can change a value without rebuilding the image. Each sits next to the base file it
 overrides and only needs the keys it changes:
 
-- `src/MathComps.Api/appsettings.{Env}.json` → `appsettings.json` (`Cors`, `DefenseLimits`, `Examiner:UseFake`, …)
+- `src/MathComps.Api/appsettings.{Env}.json` → `appsettings.json` (`Cors`, `DefenseLimits`, `Examiner:UseFake`, …).
+  `DefenseLimits` holds what bounds the defense feature: a daily spend ceiling in dollars and a turn cap, both
+  reckoned **per user**. There is no aggregate ceiling, so they bound one account, not the day's total.
 - `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models)
 - `src/MathComps.Infrastructure/appsettings.llm.{Env}.json` → `appsettings.llm.json` (LLM endpoint, retries)
 
