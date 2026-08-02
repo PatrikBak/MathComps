@@ -199,11 +199,11 @@ function renderDocumentSections(
                 assertNever(contentBlock)
             }
 
-            // Defense-chat trigger, offered wherever there's a solution to defend. The reference it
-            // carries reaches the browser, so a handout that withholds its solutions gets no trigger:
-            // the page is static, and a client prop on a static page is public.
+            // Defense-chat trigger, offered wherever there's a solution to defend. A handout that
+            // withholds its solutions on the page gets one too: defending to Mathilda is the point
+            // of withholding them.
             const defenseTrigger =
-              !hideSolutionsAndProofs && defenseReference.length > 0 ? (
+              defenseReference.length > 0 ? (
                 <DefenseChatTrigger
                   problem={{
                     target: { handoutContentId: contentId, environmentId: contentBlock.id },
