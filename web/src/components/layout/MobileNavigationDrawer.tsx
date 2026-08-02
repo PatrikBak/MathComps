@@ -13,7 +13,6 @@ import { UserMenuItem } from '@/components/layout/UserMenuItem'
 import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { Button, buttonVariants } from '@/components/shared/components/Button'
 import { NavLink } from '@/components/shared/components/NavLink'
-import { useIsAdmin } from '@/hooks/use-is-admin'
 import { ROUTES } from '@/i18n/i18n'
 import { usePathname } from '@/i18n/navigation'
 
@@ -41,9 +40,6 @@ export const MobileNavigationDrawer = ({
 }: MobileNavigationDrawerProps) => {
   // Get the logged-in user
   const { user, isLoaded } = useUser()
-
-  // Whether the viewer is an admin
-  const isAdmin = useIsAdmin()
 
   // Closes the drawer and opens the defenses
   const handleOpenDefenses = () => {
@@ -147,14 +143,12 @@ export const MobileNavigationDrawer = ({
                   <div>
                     {user ? (
                       <div className="flex flex-col -my-2">
-                        {/* The user's defenses, admin-gated */}
-                        {isAdmin && (
-                          <UserMenuItem
-                            type="mathilda"
-                            variant="mobile"
-                            onClick={handleOpenDefenses}
-                          />
-                        )}
+                        {/* The user's defenses */}
+                        <UserMenuItem
+                          type="mathilda"
+                          variant="mobile"
+                          onClick={handleOpenDefenses}
+                        />
                         <UserMenuItem type="profile" variant="mobile" onClick={onClose} />
                         <UserMenuItem type="signOut" variant="mobile" onClick={onClose} />
                       </div>

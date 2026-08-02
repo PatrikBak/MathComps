@@ -209,6 +209,7 @@
     "libraryEmpty": "Otevři libovolný <link>materiál</link>, vyber si úlohu, začni vysvětlovat své řešení nebo aspoň nápad, jak na něj přijít, a Mathilda si s tebou popovídá, posoudí, jak na tom jsi, a postrčí tě, když bude potřeba.",
     "libraryEmptyLead": "Mathilda je AI tutorka",
     "libraryLoading": "Načítám…",
+    "loginPrompt": "Mathilda si tvoje konverzace ukládá, takže potřebuje účet.",
     "name": "Mathilda",
     "newDefense": "Nová konverzace",
     "noReplyYet": "Zatím bez odpovědi",

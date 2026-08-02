@@ -7,7 +7,6 @@ import { useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
-import { useIsAdmin } from '@/hooks/use-is-admin'
 
 import type { DefenseProblem } from '../model/defense-types'
 import { DefenseConversation } from './DefenseConversation'
@@ -22,15 +21,12 @@ type DefenseChatTriggerProps = {
 
 /**
  * The per-problem entry point to the defense chat: a named button on the problem card that opens the
- * {@link DefenseConversation} in a modal. Admin-gated on the client (a visibility gate, not a real access boundary;
- * the endpoint enforces the admin policy itself).
+ * {@link DefenseConversation} in a modal. Shown to every visitor; a signed-out one reads the opener with a
+ * sign-in prompt where the composer would be.
  */
 export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
-
-  // Whether the viewer is an admin
-  const isAdmin = useIsAdmin()
 
   // Modal open state
   const [isOpen, { open, close }] = useDisclosure(false)
@@ -45,11 +41,6 @@ export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
 
     // Show it
     open()
-  }
-
-  // Non-admins never see the trigger, even if it somehow reached the client
-  if (!isAdmin) {
-    return null
   }
 
   return (

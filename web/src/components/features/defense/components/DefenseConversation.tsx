@@ -1,10 +1,12 @@
 'use client'
 
+import { useAuth } from '@clerk/nextjs'
 import { Plus, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 
+import { LoginButton } from '@/components/login/LoginButton'
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { FeedbackDialog, toFeedbackOptions } from '@/components/shared/components/FeedbackDialog'
@@ -123,6 +125,9 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
   // Shared modal chrome copy
   const tModal = useTranslations('ui.modal')
 
+  // Auth state
+  const { isLoaded: isAuthLoaded, isSignedIn } = useAuth()
+
   // The live conversation, its examiner-driven send flow, and this problem's session history
   const {
     turns,
@@ -175,8 +180,8 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
     }
   }, [isOpen, sessionsFailed, t])
 
-  // A turn's own controls are offered only on a saved conversation and never mid-turn; the whole feature is
-  // admin-gated at the trigger
+  // A turn's own controls are offered only on a saved conversation and never mid-turn; a session id only
+  // ever names one the signed-in viewer owns, so there's no one else's conversation to act on
   const canAct = !isThinking && currentSessionId !== null
 
   // Whether the conversation has enough behind it to be worth summing up, or was already summed up, which
@@ -368,7 +373,15 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
 
       {/* Composer, once there is a conversation for it to write into */}
       <div className="border-t border-foreground/10 px-4 py-3 sm:px-5">
-        {canCompose ? (
+        {!canCompose || !isAuthLoaded ? (
+          <p className="py-3 text-center text-sm text-muted">{t('libraryLoading')}</p>
+        ) : !isSignedIn ? (
+          <div className="flex flex-col items-center gap-3 py-3 text-center">
+            {/* Why the composer is missing */}
+            <p className="text-sm text-muted">{t('loginPrompt')}</p>
+            <LoginButton />
+          </div>
+        ) : (
           <RichMathEditor
             variant="card"
             toolbar={DEFENSE_TOOLBAR}
@@ -381,8 +394,6 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
             isLoading={isThinking}
             placeholder={t('placeholder')}
           />
-        ) : (
-          <p className="py-3 text-center text-sm text-muted">{t('libraryLoading')}</p>
         )}
       </div>
     </>

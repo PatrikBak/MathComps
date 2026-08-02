@@ -2,7 +2,7 @@
 
 A repository for the website https://mathcomps.fun.
 
-It is a platform for browsing and searching mathematical competition problems, built with Next.js and .NET.
+It is a platform for browsing and searching mathematical competition problems, reading study handouts, and defending a solution to an AI examiner, built with Next.js and .NET.
 
 ## Quick Start
 

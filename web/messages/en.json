@@ -209,6 +209,7 @@
     "libraryEmpty": "Open any <link>handout</link>, pick a problem, start explaining your solution or your ideas for one, and she'll talk it through with you, weigh up where it stands, and nudge you when you need it.",
     "libraryEmptyLead": "Mathilda is an AI tutor",
     "libraryLoading": "Loading…",
+    "loginPrompt": "Mathilda keeps your conversations, so she needs an account.",
     "name": "Mathilda",
     "newDefense": "New conversation",
     "noReplyYet": "No reply yet",

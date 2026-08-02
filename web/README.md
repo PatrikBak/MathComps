@@ -8,7 +8,7 @@ A Next.js application for browsing and searching mathematical competition proble
   - `[locale]/` – Localized routes (English canonical: `problems`, `handouts`, `news`, etc.)
   - `api/` – API routes (contact form, webhooks)
 - **`src/components/`** – React components organized by purpose
-  - `features/` – Page-specific feature components (problems, handouts, contact, etc.)
+  - `features/` – Page-specific feature components (problems, handouts, defense, contact, etc.)
   - `shared/` – Reusable components and utilities
   - `layout/` – Header, footer, navigation
   - `math/` – KaTeX rendering and math utilities
@@ -193,6 +193,15 @@ This will give you a public URL (e.g., `https://random-name.loca.lt`) that you c
 ### Handouts
 
 Educational handouts are parsed from TeX and stored as JSON in [`src/content/handouts/`](src/content/handouts/). See the [Handouts CLI tool](../backend/src/MathComps.Cli.Handouts/README.md) for parsing instructions.
+
+### Mathilda (AI defense)
+
+Mathilda is the AI examiner a student defends a handout solution to; the feature lives in [`src/components/features/defense/`](src/components/features/defense/) and talks to the .NET backend's `/defense/sessions` routes. Two things surprise people reading it for the first time:
+
+- **There is no defense route.** The whole feature is modals. A per-problem trigger sits on each handout environment card ([`HandoutDetail.tsx`](src/components/features/handouts/HandoutDetail.tsx)), and a cross-problem library opens from the user menu. A handout with `hideSolutionsAndProofs` gets no trigger — the trigger carries the reference solution as a client prop, and the handout pages are statically generated.
+- **The client sends the problem statement and reference solution** when starting a session; the backend snapshots them onto the session rather than looking them up, which is what lets handout problems work at all without a database row.
+
+Any signed-in user can use her. A turn is several LLM calls and takes roughly 40 seconds by design, so develop against `"Examiner:UseFake": true` in the backend config — it serves scripted replies for free.
 
 ### Contact Form
 
