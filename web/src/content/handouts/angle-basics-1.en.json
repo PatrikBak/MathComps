@@ -1214,7 +1214,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka."
+                          "text": "Remark."
                         }
                       ]
                     },
@@ -1381,7 +1381,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka (non-convex polygons)."
+                          "text": "Remark (non-convex polygons)."
                         }
                       ]
                     },
@@ -2351,7 +2351,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka."
+                          "text": "Remark."
                         }
                       ]
                     },
@@ -3459,7 +3459,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka."
+                          "text": "Remark."
                         }
                       ]
                     },
@@ -4062,7 +4062,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka."
+                          "text": "Remark."
                         }
                       ]
                     },
@@ -4857,7 +4857,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka."
+                          "text": "Remark."
                         }
                       ]
                     },
@@ -5735,7 +5735,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka (1)."
+                          "text": "Remark (1)."
                         }
                       ]
                     },
@@ -5781,7 +5781,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka (2)."
+                          "text": "Remark (2)."
                         }
                       ]
                     },
@@ -6925,7 +6925,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka (1)."
+                          "text": "Remark (1)."
                         }
                       ]
                     },
@@ -6962,7 +6962,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka (2)."
+                          "text": "Remark (2)."
                         }
                       ]
                     },
@@ -7349,7 +7349,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka (1)."
+                          "text": "Remark (1)."
                         }
                       ]
                     },
@@ -7422,7 +7422,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Poznámka (2)."
+                          "text": "Remark (2)."
                         }
                       ]
                     },
