@@ -92,7 +92,8 @@ The CLI exits 1 on compile failures, unknown commands, or a failed environment-i
 | Situation | Action |
 | --- | --- |
 | Standard command the source uses and KaTeX also understands (e.g. `\cosh`, `\arctan`, `\mathfrak`) | Add the bare name to `[leave]`. |
-| PlainTeX/OPmac/AMS-TeX or project-shorthand macro that doesn't exist in KaTeX but has a canonical KaTeX equivalent reusable across handouts (e.g. `\uhol` → `\angle`, `\Bbb` → `\mathbb`, `\root…\of` → `\sqrt[…]`) | Add a `[substitute]` rule using `PATTERN => REPLACEMENT`. Mirror existing regex style (`(?![A-Za-z])` lookahead). |
+| PlainTeX/OPmac/AMS-TeX or project-shorthand macro that doesn't exist in KaTeX but has a canonical KaTeX equivalent reusable across handouts (e.g. `\uhol` → `\angle`, `\Bbb` → `\mathbb`, `\root…\of` → `\sqrt[…]`) | Add a `[substitute]` rule using `PATTERN => REPLACEMENT`. Mirror existing regex style (`(?![A-Za-z])` lookahead). Language-free replacements only (see the caption rule below). |
+| Macro that expands to a **caption**, i.e. a word that differs per language, like `\Remark` | Add it to *every* `[substitute:<locale>]` section, each with that locale's own wording. |
 | PDF-only layout/spacing command with no meaning on the web (e.g. `\smallskip`, custom `\*skip` variants) | Add to `[remove]`. |
 | Typo, one-off non-standard macro, or a case where the source should just use a canonical KaTeX-friendly command directly | Fix the `.tex` file(s). |
 
@@ -119,4 +120,5 @@ One short summary: entry added, chosen section, generated JSONs in `web/src/cont
 - **Never touch other handout entries** in `handouts.json` beyond the one being finalized.
 - **Never commit or push, never configure R2 credentials, never modify `handout-metadata-types.ts` or the validation script.**
 - **Before editing the cleaner-rules file**, re-read it to preserve section order, comment style, and regex conventions. Never reorder or dedupe existing entries.
+- **A shared `[substitute]` replacement must be language-free.** The shared section cleans all three language variants, so a replacement holding a word writes that word into every language's JSON, while the PDF keeps rendering the caption from `\captionRemark` and friends. Only the web is wrong, and only in the languages nobody proofreads. Captions belong in the `[substitute:sk]` / `[substitute:cs]` / `[substitute:en]` sections, one entry per locale, worded as the matching `\definecaptions*` block in `data/handouts/_template.tex` words it. Those sections must declare the same patterns in the same order; the CLI refuses to run otherwise. Nothing checks the wording itself, so copy it from `_template.tex` instead of translating it yourself.
 - **Never ask for confirmation of a value you derived** — but **do** ask about a required schema field you couldn't derive, or one this skill doesn't document (step 1). Those are different things: the first is noise, the second is the skill admitting the schema moved out from under it. The one standing question is `hideSolutionsAndProofs`: nothing in the `.tex` says whether the solutions are ready to be seen.

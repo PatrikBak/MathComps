@@ -150,6 +150,27 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         => Regex.Replace(texFileName, @"\.([a-z]{2})(-skeleton)?\.tex$", "", RegexOptions.IgnoreCase);
 
     /// <summary>
+    /// Reads the language a handout is written in off its filename (e.g. "factorization.cs.tex" -> "cs").
+    /// Every handout names one, and a file that doesn't cannot be built.
+    /// </summary>
+    /// <param name="texFileName">The .tex filename (with extension).</param>
+    /// <returns>The two-letter language code, lowercased.</returns>
+    private static string ToHandoutLocale(string texFileName)
+    {
+        // The two-letter code sitting between the slug and the extension
+        var localeMatch = Regex.Match(texFileName, @"\.([a-z]{2})\.tex$", RegexOptions.IgnoreCase);
+
+        // Without one there is no telling which language's captions the handout wants
+        if (!localeMatch.Success)
+            throw new InvalidOperationException(
+                $"'{texFileName}' does not name a language. A handout is named <slug>.<language>.tex, "
+                + "e.g. factorization.cs.tex.");
+
+        // Hand back the code, normalized to lowercase
+        return localeMatch.Groups[1].Value.ToLowerInvariant();
+    }
+
+    /// <summary>
     /// Builds the full R2 key for a handout asset by prefixing its slug-relative path
     /// with <see cref="HandoutsR2Prefix"/>. Centralises the prefix so PDF and image
     /// upload paths stay in sync.
@@ -206,8 +227,8 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         AnsiConsole.MarkupLine($"[aqua]Found {inputFiles.Count} handout file(s)[/]");
         AnsiConsole.WriteLine();
 
-        // Load the TeX cleaning rules before processing files.
-        var rules = TeXCleanerRules.LoadRules();
+        // The TeX cleaning rules, per language, read the first time a handout in that language comes up.
+        var rulesByLocale = new Dictionary<string, TeXCleanerRules>();
 
         // Track unknown commands across all files for a final report.
         var allUnknownCommands = new Dictionary<string, IReadOnlyCollection<string>>();
@@ -231,6 +252,13 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
                 // Read the entire content of the .tex file into a string.
                 var texContent = File.ReadAllText(inputFile.FullName);
 
+                // The language this handout is written in, which decides how its captions are cleaned.
+                var locale = ToHandoutLocale(inputFile.Name);
+
+                // Its rules, loaded once per language and reused by every handout written in it.
+                if (!rulesByLocale.TryGetValue(locale, out var rules))
+                    rulesByLocale[locale] = rules = TeXCleanerRules.LoadRules(locale);
+
                 // Parse the TeX content into the structured Document object model.
                 var (document, unknownCommands) = TexStringParser.ParseDocument(texContent, rules);
 
@@ -249,7 +277,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
                 if (!settings.SkipCompile)
                 {
                     // Generate the skeleton .tex
-                    skeletonFile = GenerateSkeleton(inputFile, inputDirectory, rules);
+                    skeletonFile = GenerateSkeleton(inputFile, inputDirectory, rules, locale);
 
                     // Compile the main handout
                     await CompileTexFileAsync(inputFile, inputDirectory, settings.Compiler, errorLogPath);
@@ -388,8 +416,13 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
     /// <param name="inputFile">The source .tex file.</param>
     /// <param name="outputDirectory">The directory to write the skeleton file to.</param>
     /// <param name="rules">The <see cref="TeXCleanerRules"/> for normalizing TeX content.</param>
+    /// <param name="locale">The two-letter code of the language the source is written in.</param>
     /// <returns>The generated skeleton file.</returns>
-    private static FileInfo GenerateSkeleton(FileInfo inputFile, DirectoryInfo outputDirectory, TeXCleanerRules rules)
+    private static FileInfo GenerateSkeleton(
+        FileInfo inputFile,
+        DirectoryInfo outputDirectory,
+        TeXCleanerRules rules,
+        string locale)
     {
         // Read and parse the source TeX
         var texContent = File.ReadAllText(inputFile.FullName);
@@ -413,11 +446,6 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
             })
             .ToImmutableList();
 
-        // Detect language from filename (e.g., .sk.tex -> SK)
-        // Match the two-letter language code before the .tex extension
-        var languageMatch = Regex.Match(inputFile.Name, @"\.([a-z]{2})\.tex$", RegexOptions.IgnoreCase);
-        var languageCode = languageMatch.Success ? languageMatch.Groups[1].Value.ToUpperInvariant() : null;
-
         // Build the complete skeleton TeX.
         var builder = new StringBuilder();
 
@@ -432,12 +460,9 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         builder.AppendLine(@"\DisplayTextsfalse");
         builder.AppendLine();
 
-        // \setLanguage{XX}
-        if (languageCode is not null)
-        {
-            builder.AppendLine($@"\setlanguage{{{languageCode}}}");
-            builder.AppendLine();
-        }
+        // \setlanguage{XX}, which the template spells in capitals
+        builder.AppendLine($@"\setlanguage{{{locale.ToUpperInvariant()}}}");
+        builder.AppendLine();
 
         // Title
         if (!string.IsNullOrEmpty(document.Title))
