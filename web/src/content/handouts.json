@@ -187,7 +187,7 @@
             "cs": "Metody na řešení funkcionálních rovnic — dosazování, vyjádření jedné věci dvěma způsoby a odvozování injektivity, surjektivity, periodicity či monotónnosti hledané funkce — doplněné úlohami z česko-slovenské olympiády, MEMO a IMO.",
             "en": "Methods for solving functional equations — substitution, expressing one thing in two ways, and deducing injectivity, surjectivity, periodicity or monotonicity of the unknown function — followed by problems from Czech-Slovak olympiads, MEMO, and the IMO."
           },
-          "difficulty": 2,
+          "difficulty": 3,
           "authors": ["Patrik Bak"],
           "publishedAt": "2026-08-01",
           "updatedAt": "2026-08-01"
