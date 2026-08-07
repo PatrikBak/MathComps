@@ -31,41 +31,35 @@ import { MobileFilterButton } from './MobileFilterDrawer'
 import { ShareButton } from './ShareButton'
 
 /**
- * Props for the {@link ActiveFiltersBar} component.
+ * The props of {@link ActiveFiltersBar}.
  */
 type ActiveFiltersBarProps = {
-  /** Current user selections across all filter dimensions. */
+  /** The filters currently applied. */
   filters: SearchFiltersState
-  /** Available options with counts reflecting the current filtered result set. */
+  /** Option counts under the filters currently applied. */
   filterOptions: FilterOptionsWithCounts
-  /** Snapshot of all available options at page load. */
+  /** Every option the library can ever offer, whatever is filtered. */
   baseOptions: FilterOptionsWithCounts
-  /** Notifies parent of filter changes; type distinguishes UI updates (discrete vs text debouncing). */
-  onFiltersChange: (newFilters: SearchFiltersState, type: 'discrete' | 'text') => void
+  /** Applies a change the user made in the bar. */
+  onFiltersChange: (newFilters: SearchFiltersState) => void
   /** Total number of problems matching the active filters. */
   problemCount: number
-  /** Whether technique tags (e.g., substitution, factoring) are currently visible on problem cards. */
+  /** Whether technique tags (e.g. substitution, factoring) are showing. */
   showTechniqueTags: boolean
-  /** Toggles visibility of technique tags on problem cards. */
+  /** Toggles technique tags. */
   onShowTechniqueTagsChange: (show: boolean) => void
   /** Opens the mobile filter drawer; only provided on narrow viewports. */
   onMobileFilterClick?: () => void
-  /** Indicates that search results are currently being fetched; shows loading state for count. */
+  /** Whether search results are currently being fetched. */
   isSearching: boolean
 }
 
 /**
- * The component which displays:
- * 1. A count of the number of problems matching the active filters
- * 2. A list of active filters as removable chips
- * 3. A "Clear All" button to reset all filters
- * 4. A "Technique Tags" toggle (inside a menu) to show/hide technique tags on problem cards
- * 5. A "Contest Browser" button to open a modal for selecting competitions
- * 6. A "Share" button to share the current filters (visible on xl screens only)
- * 7. A "Mark Status" dropdown to filter by marked/unmarked problems
- * 8. A "Mobile Filter" button to open the mobile filter drawer on narrow viewports
- * 9. A button to expand/collapse the filter sidebar. If there are too many filters,
- *    the sidebar will always be collapsed automatically.
+ * The strip above the results: how many problems match, what is filtering them as
+ * removable chips, and the controls that act on the whole result set.
+ *
+ * The chips collapse themselves once there are enough of them to crowd the bar, and stay
+ * collapsed until the user says otherwise or clears the filters.
  */
 export default function ActiveFiltersBar({
   filters,
@@ -78,67 +72,56 @@ export default function ActiveFiltersBar({
   onMobileFilterClick,
   isSearching,
 }: ActiveFiltersBarProps) {
-  // Get default filters for reset functionality
+  // An unfiltered state, which is what clearing goes back to
   const defaultFilters = createDefaultFilters()
 
-  // Translations for plurals
+  // Plural translations
   const tPlurals = useTranslations('plurals')
 
-  // Translations for the filters bar
+  // Translations for the filter bar
   const tFilters = useTranslations('problems.filters')
 
-  // Sidebar is visible on the desktop viewports
-  // Visibility is needed for instance to show the button to open the sidebar
+  // The sidebar only exists on wide viewports, which decides what the bar has to offer
   const isSidebarVisible = useMinWidth('lg')
 
-  // Contest browser modal state - synced with URL
+  // Whether the contest browser is showing, held in the URL so the modal is linkable
   const contestBrowser = useContestBrowserModal()
 
-  // The prefetcher for the contest browser modal, used in on hover to start before click
+  // A function which warms the contest browser
   const prefetchContestBrowser = usePrefetchContestBrowser()
 
-  // This value is used to override the automatic expansion/collapse logic
-  // If it is set to true, the sidebar will always be expanded.
-  // If it is set to false, the sidebar will always be collapsed.
-  // If it is null, the sidebar will follow the automatic expansion/collapse logic.
+  // What the user said about the chips being expanded, or null while they have said nothing
   const [manualExpansionOverride, setManualExpansionOverride] = useState<boolean | null>(null)
 
-  // Handle contest selection from the browser modal
+  // A function which applies a competition the user picked in the contest browser
   const handleContestSelect = (selection: ContestBrowserSelection) => {
-    // Look up season display name from the base option...The result
-    // should be there, unless the season slug is somehow invalid or
-    // the base options are stale?
+    // The season reads under its own name, falling back to the slug if the options are stale
     const seasonDisplayName =
       baseOptions.seasons.find((season) => season.slug === selection.seasonSlug)?.displayName ??
       selection.seasonSlug
 
-    // Build selection parts for the function which will
-    // figure out the contest selection (based on the competition tree)
-    // Note: categorySlug and roundSlug can be null, so we filter them out
+    // The path down to what was picked, at whatever depth the browser reached
     const parts: string[] = [
       selection.competitionSlug,
       selection.categorySlug,
       selection.roundSlug,
     ].filter((part): part is string => part != null)
 
-    // Use existing utility to resolve display names from the competition tree
+    // The path resolved against the hierarchy, which is what supplies the names
     const contestSelections = interpretSelectionParts([parts], baseOptions.competitions)
 
-    // Update filters with the new selection
-    onFiltersChange(
-      {
-        ...defaultFilters,
-        seasons: [{ slug: selection.seasonSlug, displayName: seasonDisplayName }],
-        contestSelection: contestSelections ?? [],
-      },
-      'discrete'
-    )
+    // The browser picks one contest outright, so everything else is cleared rather than kept
+    onFiltersChange({
+      ...defaultFilters,
+      seasons: [{ slug: selection.seasonSlug, displayName: seasonDisplayName }],
+      contestSelection: contestSelections ?? [],
+    })
 
-    // Close modal UI state without a second URL update (filters already handled it)
+    // The filters already wrote the URL, so closing must not write it a second time
     contestBrowser.closeWithoutUrlUpdate()
   }
 
-  // Count total active filters across all dimensions
+  // How many filters are set
   const activeFilterCount =
     filters.seasons.length +
     filters.problemNumbers.length +
@@ -147,138 +130,152 @@ export default function ActiveFiltersBar({
     filters.contestSelection.length +
     (filters.searchText ? 1 : 0)
 
-  // Determine expansion state: manual override takes precedence, otherwise auto-decide based on filter count
+  // The user's say overrides the automatic decision, which otherwise goes on how many chips there are
   const areFiltersExpanded =
     manualExpansionOverride !== null
       ? manualExpansionOverride
       : isSidebarVisible && activeFilterCount <= ACTIVE_FILTERS_CONSTANTS.maxFiltersForAutoExpand
 
-  // Reset manual override when filters are cleared (let auto-behavior take over again)
+  // Clearing the filters hands the decision back to the automatic behaviour
   useEffect(() => {
+    // With nothing filtered there is no crowding to have had an opinion about
     if (activeFilterCount === 0) {
       setManualExpansionOverride(null)
     }
   }, [activeFilterCount])
 
-  // --- Handlers for clearing filters ---
+  // A function which takes the library back to showing everything
   const handleClearAll = () => {
-    onFiltersChange(
-      {
-        ...defaultFilters,
-      },
-      'discrete'
-    )
+    onFiltersChange({
+      ...defaultFilters,
+    })
   }
 
-  // --- Handlers for toggling filters (with Ctrl+Click support) ---
+  // A function which applies a click on a value chip, honouring the modifier that narrows to one
   const handleToggleMulti = (
     key: 'tags' | 'authors' | 'seasons' | 'problemNumbers',
     idToToggle: string | number,
     event: React.MouseEvent
   ) => {
-    // Handle problemNumbers separately (array of numbers)
+    // Problem numbers are held as bare numbers, so they cannot go through the slug path below
     if (key === 'problemNumbers') {
+      // The chip's own number
       const numToToggle = idToToggle as number
-      // Ctrl/Cmd+Click: exclusive selection (keep only this one)
+
+      // The modifier narrows the whole filter to this one number
       if (isExclusiveSelection(event)) {
-        onFiltersChange({ ...filters, problemNumbers: [numToToggle] }, 'discrete')
+        onFiltersChange({ ...filters, problemNumbers: [numToToggle] })
+
         return
       }
 
-      // Normal click: toggle this number
+      // Whether the chip stands for something already filtered on
       const isSelected = filters.problemNumbers.includes(numToToggle)
+
       if (isSelected) {
-        // Remove the number
+        // Everything but the one clicked survives
         const updated = filters.problemNumbers.filter((number) => number !== numToToggle)
-        onFiltersChange({ ...filters, problemNumbers: updated }, 'discrete')
+
+        onFiltersChange({ ...filters, problemNumbers: updated })
       } else {
-        // Add the number (sorted)
-        onFiltersChange(
-          {
-            ...filters,
-            problemNumbers: [...filters.problemNumbers, numToToggle].sort((a, b) => a - b),
-          },
-          'discrete'
-        )
+        // Numbers read as a sequence, so a new one takes its place in order
+        onFiltersChange({
+          ...filters,
+          problemNumbers: [...filters.problemNumbers, numToToggle].sort(
+            (first, second) => first - second
+          ),
+        })
       }
+
       return
     }
 
-    // Handle tags/authors/seasons (arrays of objects with slug)
+    // Every other filter is held as a slug carrying the name it reads under
     const slugToToggle = idToToggle as string
-    // Ctrl/Cmd+Click: exclusive selection (keep only this one)
+
+    // The modifier narrows the whole filter to this one value
     if (isExclusiveSelection(event)) {
+      // The value as it already sits in the filters, which is where its name comes from
       const item = filters[key].find((item) => item.slug === slugToToggle)
+
+      // A chip naming something no longer filtered on has nothing to narrow to
       if (item) {
-        onFiltersChange({ ...filters, [key]: [item] }, 'discrete')
+        onFiltersChange({ ...filters, [key]: [item] })
       }
+
       return
     }
 
-    // Normal click: toggle this item
+    // Whether the chip stands for something already filtered on
     const isSelected = filters[key].some((item) => item.slug === slugToToggle)
+
     if (isSelected) {
-      // Remove the item
+      // Everything but the one clicked survives
       const updatedValues = filters[key].filter((item) => item.slug !== slugToToggle)
-      onFiltersChange({ ...filters, [key]: updatedValues }, 'discrete')
+
+      onFiltersChange({ ...filters, [key]: updatedValues })
     } else {
-      // Add the item (find it from options)
+      // The value's name comes from the current counts, or from the full set if it has dropped out
       const itemToAdd =
         filterOptions[key].find((item) => item.slug === slugToToggle) ||
         baseOptions[key].find((item) => item.slug === slugToToggle)
+
+      // A value neither set knows cannot be named, so it is not worth filtering on
       if (itemToAdd) {
-        onFiltersChange({ ...filters, [key]: [...filters[key], itemToAdd] }, 'discrete')
+        onFiltersChange({ ...filters, [key]: [...filters[key], itemToAdd] })
       }
     }
   }
+
+  // A function which applies a click on the search-text chip
   const handleToggleSearchText = (event: React.MouseEvent) => {
-    // Ctrl/Cmd+Click: exclusive selection (keep only search, remove all other filters)
+    // The modifier keeps the search and drops every other filter
     if (isExclusiveSelection(event)) {
-      onFiltersChange(
-        {
-          ...defaultFilters,
-          searchText: filters.searchText,
-          searchInSolution: filters.searchInSolution,
-        },
-        'text'
-      )
+      onFiltersChange({
+        ...defaultFilters,
+        searchText: filters.searchText,
+        searchInSolution: filters.searchInSolution,
+      })
+
       return
     }
 
-    // Normal click: remove search text
-    onFiltersChange({ ...filters, searchText: '', searchInSolution: false }, 'text')
+    // A plain click drops the search, and its scope goes with it
+    onFiltersChange({ ...filters, searchText: '', searchInSolution: false })
   }
 
-  // Handler for changing the tag logic
+  // A function which flips the tag filter between matching any tag and matching all of them
   const handleToggleTagLogic = () => {
+    // The only other mode there is
     const newLogic = filters.tagLogic === 'and' ? 'or' : 'and'
-    onFiltersChange({ ...filters, tagLogic: newLogic }, 'discrete')
+
+    onFiltersChange({ ...filters, tagLogic: newLogic })
   }
 
-  // Handler for changing the author logic
+  // A function which flips the author filter between matching any author and all of them
   const handleToggleAuthorLogic = () => {
+    // The only other mode there is
     const newLogic = filters.authorLogic === 'and' ? 'or' : 'and'
-    onFiltersChange({ ...filters, authorLogic: newLogic }, 'discrete')
+
+    onFiltersChange({ ...filters, authorLogic: newLogic })
   }
 
-  // Handler for changing the mark status filter
+  // A function which applies the mark status the user picked, or clears the filter
   const handleMarkStatusChange = (status: MarkStatusFilter | null) => {
-    onFiltersChange({ ...filters, markStatus: status }, 'discrete')
+    onFiltersChange({ ...filters, markStatus: status })
   }
-
-  // --- Data Transformation and Grouping ---
 
   /**
-   * Simplified option structure for internal mapping.
-   * Transforms facet options into a minimal structure for label lookups.
+   * A value as the chips address it: what identifies it, and what it reads as.
    */
   type SingleOption = {
-    /** Unique identifier matching the original facet slug */
+    /** Identifies the value, matching the slug it is filtered by. */
     id: string
-    /** Human-readable display name for the option */
+    /** How the value reads on its chip. */
     displayName: string
   }
 
+  // The season names, under the current counts and in full
   const seasonOptions = filterOptions.seasons.map((facet) => ({
     id: facet.slug,
     displayName: facet.displayName,
@@ -288,6 +285,7 @@ export default function ActiveFiltersBar({
     displayName: facet.displayName,
   }))
 
+  // The tag names, under the current counts and in full
   const tagOptions = filterOptions.tags.map((facet) => ({
     id: facet.slug,
     displayName: facet.displayName,
@@ -296,6 +294,7 @@ export default function ActiveFiltersBar({
     id: facet.slug,
     displayName: facet.displayName,
   }))
+  // The author names, under the current counts and in full
   const authorOptions = filterOptions.authors.map((facet) => ({
     id: facet.slug,
     displayName: facet.displayName,
@@ -306,21 +305,31 @@ export default function ActiveFiltersBar({
   }))
 
   /**
-   * Returns a stable, human-readable label for the given id.
-   * Looks in current options first, then falls back to base options.
+   * Reads a value's name, holding it steady when filtering elsewhere drops the value out
+   * of the current counts. A value neither set knows falls back to its own id.
+   *
+   * @param options - The names under the current counts.
+   * @param id - The value to name.
+   * @param base - The names across everything, whatever is filtered.
+   * @returns The value's name.
    */
   const getLabel = (options: SingleOption[], id: string, base: SingleOption[]): string => {
+    // The name it reads under right now
     const current = options.find((option) => option.id === id)?.displayName
+
+    // Which is the answer whenever the value still shows up in the counts
     if (current) return current
+
+    // Otherwise the full set still knows it, and failing even that the id has to do
     return base.find((option) => option.id === id)?.displayName ?? id
   }
 
-  // Generate competition chips using shared utility
+  // The competition chips, folded up to the shallowest level that covers each selection
   const competitionChips = useMemo(() => {
     return generateCompetitionChips(filters, baseOptions, onFiltersChange)
   }, [filters, baseOptions, onFiltersChange])
 
-  // Create search text chip if there's an active search
+  // The search chip, which reads the term back with its scope, or nothing when there is no term
   const searchTextChip =
     filters.searchText && filters.searchText.trim().length > 0
       ? {
@@ -330,27 +339,36 @@ export default function ActiveFiltersBar({
         }
       : null
 
-  // Sort selected items by their position in the original options
+  // A function which puts selected values back into the order the facet offers them in
   const sortByOriginalOrder = <T extends { slug: string }>(selected: T[], originalOptions: T[]) => {
+    // Where each value sits in the facet, so ordering the chips is a lookup
     const positionMap = new Map<string, number>()
+
+    // The facet's own order is the index, read off as it is walked
     for (let index = 0; index < originalOptions.length; index++) {
       positionMap.set(originalOptions[index].slug, index)
     }
-    return [...selected].sort((a, b) => {
-      const positionA = positionMap.get(a.slug) ?? Number.MAX_SAFE_INTEGER
-      const positionB = positionMap.get(b.slug) ?? Number.MAX_SAFE_INTEGER
-      return positionA - positionB
+
+    // Ordered as the facet orders them, so the chips read the way the sidebar does
+    return [...selected].sort((firstItem, secondItem) => {
+      // A value the facet no longer offers sorts to the end
+      const firstPosition = positionMap.get(firstItem.slug) ?? Number.MAX_SAFE_INTEGER
+      const secondPosition = positionMap.get(secondItem.slug) ?? Number.MAX_SAFE_INTEGER
+
+      // Earlier in the facet means earlier in the bar
+      return firstPosition - secondPosition
     })
   }
 
-  // Sort all chips (competitions are already sorted)
+  // Each filter's chips in its facet's own order, with the competitions already sorted
   const sortedSeasons = sortByOriginalOrder(filters.seasons, baseOptions.seasons)
-  const sortedProblemNumbers = [...filters.problemNumbers].sort((a, b) => a - b)
+  const sortedProblemNumbers = [...filters.problemNumbers].sort((first, second) => first - second)
   const sortedTags = sortByOriginalOrder(filters.tags, baseOptions.tags)
   const sortedAuthors = sortByOriginalOrder(filters.authors, baseOptions.authors)
 
+  // The chips under their headings, in the order the bar reads them out
   const filterGroups = [
-    // Show search text first if active (most immediate/recent filter)
+    // The search chip, when there is a term
     ...(searchTextChip
       ? [
           {
@@ -359,7 +377,7 @@ export default function ActiveFiltersBar({
           },
         ]
       : []),
-    // Show mark status chip when filtering by marked/unmarked
+    // The mark-status chip, when the filter is set
     ...(filters.markStatus
       ? [
           {
@@ -373,7 +391,7 @@ export default function ActiveFiltersBar({
                     : filters.markStatus === 'unmarked'
                       ? tFilters('markStatusUnmarked')
                       : 'Invalid mark status',
-                onClick: () => onFiltersChange({ ...filters, markStatus: null }, 'discrete'),
+                onClick: () => onFiltersChange({ ...filters, markStatus: null }),
               },
             ],
           },
@@ -419,9 +437,14 @@ export default function ActiveFiltersBar({
         onClick: (event: React.MouseEvent) => handleToggleMulti('authors', author.slug, event),
       })),
     },
-  ].filter((group) => group.chips.length > 0)
+  ]
+    // A heading with no chips under it would be an empty row
+    .filter((group) => group.chips.length > 0)
 
-  const activeTokenCount = filterGroups.reduce((sum, g) => sum + g.chips.length, 0)
+  // How many chips there are altogether, across every heading
+  const activeTokenCount = filterGroups.reduce((sum, group) => sum + group.chips.length, 0)
+
+  // Whether anything is filtering at all, including the states that carry no chip of their own
   const hasAnyActive =
     activeTokenCount > 0 ||
     Boolean(filters.searchText && filters.searchText.trim().length > 0) ||
@@ -550,7 +573,7 @@ export default function ActiveFiltersBar({
             <DropdownMenuContent
               align="end"
               className="w-40"
-              onCloseAutoFocus={(e) => e.preventDefault()}
+              onCloseAutoFocus={(event) => event.preventDefault()}
             >
               <DropdownMenuItem
                 className="cursor-pointer"

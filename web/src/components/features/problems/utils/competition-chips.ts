@@ -1,162 +1,179 @@
 import type * as React from 'react'
 
+import { assertNever } from '@/components/shared/utils/assert-never'
+
 import { isExclusiveSelection } from '../../../shared/utils/event-utils'
+import type { ContestSelection } from '../types/problem-library-types'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
-import { buildSelectionsFromTreeIds } from './filter-ids'
+import {
+  buildSelectionsFromTreeIds,
+  categoryNodeId,
+  competitionNodeId,
+  DIRECT_ROUND_KEY,
+  roundNodeId,
+} from './filter-ids'
 
 /**
- * Represents a single competition filter chip displayed in the active filters bar.
- * Each chip corresponds to a competition, category, or round selection.
+ * One competition filter as it reads in the active-filter bar.
  */
 type CompetitionChip = {
-  /** Unique identifier matching the tree structure (e.g., "competition-imo", "category-csmo-a") */
+  /** Identifies the chip. */
   id: string
-  /** Short display text shown on the chip */
+  /** Short text shown on the chip. */
   displayName: string
-  /** Full descriptive name shown in tooltip when hovering over the chip */
+  /** The unabbreviated name. */
   fullName?: string
-  /** Callback invoked when user clicks the chip (supports Ctrl/Cmd+Click for exclusive selection) */
+  /** Removes the selection, or narrows the filter to it alone under a modifier. */
   onClick: (event: React.MouseEvent) => void
 }
 
 /**
- * Generates competition chips for the active filter bar.
- * Handles hierarchical compression: competition → category → individual rounds.
+ * Identifies a selection among the chips, in a namespace of its own.
  *
- * @param filters - Current filter state with selections
- * @param baseOptions - Base options for label resolution
- * @param onFiltersChange - Callback to update filters when chips are removed
- * @returns Array of chips to display
+ * @param selection - The selection to identify.
+ * @returns Its chip id.
+ */
+function chipId(selection: ContestSelection): string {
+  switch (selection.type) {
+    // A competition is identified by nothing but itself
+    case 'competition':
+      return `competition-${selection.competitionSlug}`
+
+    // A category needs its competition too, since category slugs repeat across them
+    case 'category':
+      return `category-${selection.competitionSlug}-${selection.categorySlug}`
+
+    // A round names the category it sits under, or that it sits under none
+    case 'round':
+      return `round-${selection.competitionSlug}-${selection.categorySlug || DIRECT_ROUND_KEY}-${selection.roundSlug}`
+
+    // A level outside the union, which the type system rules out
+    default:
+      return assertNever(selection)
+  }
+}
+
+/**
+ * Builds the chips for the competitions currently filtered on, each folded up to the
+ * shallowest level that covers it and ordered as the tree orders them.
+ *
+ * @param filters - The filters currently applied.
+ * @param baseOptions - The whole hierarchy, which supplies both the folding and the order.
+ * @param onFiltersChange - Applies the filter state a chip's click produces.
+ * @returns The chips to show, in the tree's own order.
  */
 export function generateCompetitionChips(
   filters: SearchFiltersState,
   baseOptions: FilterOptionsWithCounts,
-  onFiltersChange: (newFilters: SearchFiltersState, type: 'discrete' | 'text') => void
+  onFiltersChange: (newFilters: SearchFiltersState) => void
 ): CompetitionChip[] {
+  // Filled in once the selections have been folded
   const chips: CompetitionChip[] = []
 
-  // Early return for empty selections
+  // A selection can arrive from the URL, where it may be absent or malformed
   if (
     !filters.contestSelection ||
     !Array.isArray(filters.contestSelection) ||
     filters.contestSelection.length === 0
   ) {
+    // Nothing is filtered on, so there is nothing to show
     return chips
   }
 
-  // #region Convert Selections to Tree IDs
-
-  // Transform user selections into tree node IDs for processing.
-  // This allows us to leverage the compression logic that understands
-  // hierarchical relationships (e.g., selecting all rounds = selecting category).
+  // The folding works on node ids, so the selections are addressed the tree's way first
   const treeIds = filters.contestSelection.map((selection) => {
-    if (selection.type === 'competition') {
-      return `competition/${selection.competitionSlug}`
-    }
-    if (selection.type === 'category') {
-      return `competition/${selection.competitionSlug}/category/${selection.categorySlug}`
-    }
-    if (selection.categorySlug) {
-      // Round within a category
-      return `competition/${selection.competitionSlug}/category/${selection.categorySlug}/round/${selection.roundSlug}`
-    } else {
-      // Direct round (no category)
-      return `competition/${selection.competitionSlug}/round/${selection.roundSlug}`
+    switch (selection.type) {
+      // A whole competition is addressed by its slug alone
+      case 'competition':
+        return competitionNodeId(selection.competitionSlug)
+
+      // A category is addressed under its competition
+      case 'category':
+        return categoryNodeId(selection.competitionSlug, selection.categorySlug)
+
+      // A round is addressed under its category when it has one
+      case 'round':
+        return roundNodeId(selection.competitionSlug, selection.roundSlug, selection.categorySlug)
+
+      // A level outside the union, which the type system rules out
+      default:
+        return assertNever(selection)
     }
   })
 
-  // #endregion
+  // Folded back up, so a fully-selected category reads as one chip rather than every round
+  const processedSelections = buildSelectionsFromTreeIds(treeIds, baseOptions)
 
-  // #region Apply Compression and Generate Chips
-
-  // Use a helper method to compress selections intelligently:
-  // - If all rounds in a category are selected → compress to category
-  // - If all categories in a competition are selected → compress to competition
-  const { selections: processedSelections } = buildSelectionsFromTreeIds(treeIds, baseOptions)
-
-  // Generate a chip for each compressed selection
+  // One chip per selection that survived the folding
   for (const selection of processedSelections) {
-    // A unique id of a chip based on the selection type
-    // (e.g. whether we select an entire competition / category / round)
-    let chipId: string
-    switch (selection.type) {
-      case 'competition':
-        chipId = `competition-${selection.competitionSlug}`
-        break
-      case 'category':
-        chipId = `category-${selection.competitionSlug}-${selection.categorySlug}`
-        break
-      case 'round':
-        chipId = `round-${selection.competitionSlug}-${selection.categorySlug || 'direct'}-${selection.roundSlug}`
-        break
-    }
-
-    // Create the chip
     chips.push({
-      id: chipId,
+      id: chipId(selection),
       displayName: selection.displayName,
       fullName: selection.fullName,
       onClick: (event: React.MouseEvent) => {
-        // Ctrl/Cmd+Click: exclusive selection (remove all others, keep only this one)
+        // The modifier narrows the whole competition filter to this one selection
         if (isExclusiveSelection(event)) {
-          // Keep only this selection
-          const exclusiveSelection = [selection]
-          onFiltersChange({ ...filters, contestSelection: exclusiveSelection }, 'discrete')
+          onFiltersChange({ ...filters, contestSelection: [selection] })
+
+          // Nothing else to do, since the modifier already settled the whole filter
           return
         }
 
-        // Normal click: remove this specific selection
+        // A plain click drops whatever this chip stands for, leaving the rest alone
         const filteredSelections = filters.contestSelection.filter((filterSelection) => {
-          // The entire competition selection
           switch (selection.type) {
+            // The chip stands for the whole competition, so everything under it goes with it
             case 'competition':
-              // Remove all selections for this competition
               return filterSelection.competitionSlug !== selection.competitionSlug
+
+            // Only the selection naming this exact category goes
             case 'category':
-              // Remove the specific category selection
               return !(
                 filterSelection.type === 'category' &&
                 filterSelection.competitionSlug === selection.competitionSlug &&
                 filterSelection.categorySlug === selection.categorySlug
               )
+
+            // Only the selection naming this exact round goes
             case 'round':
-              // Remove the specific round selection
               return !(
                 filterSelection.type === 'round' &&
                 filterSelection.competitionSlug === selection.competitionSlug &&
                 filterSelection.categorySlug === selection.categorySlug &&
                 filterSelection.roundSlug === selection.roundSlug
               )
+
+            // A level outside the union, which the type system rules out
+            default:
+              return assertNever(selection)
           }
         })
-        onFiltersChange({ ...filters, contestSelection: filteredSelections }, 'discrete')
+
+        // What is left once this chip's selection is gone
+        onFiltersChange({ ...filters, contestSelection: filteredSelections })
       },
     })
   }
 
-  // #endregion
-
-  // #region Sort Chips by Tree Order
-
-  // Create a position map that reflects the hierarchical order of items in the tree.
-  // This ensures chips appear in the same order as they do in the TreeSelectFacet.
+  // Where each node sits when the hierarchy is read top to bottom
   const treeOrderMap = new Map<string, number>()
+
+  // Bumped for every node passed, so the numbers come out in reading order
   let orderIndex = 0
 
-  // Flatten the tree structure in depth-first order
+  // The walk is depth-first, which is the order the tree itself renders in
   for (const competition of baseOptions.competitions) {
-    // Competition level
+    // The competition leads, ahead of everything hanging off it
     treeOrderMap.set(`competition-${competition.competitionData.slug}`, orderIndex++)
 
-    // Categories within competition
+    // Then each category, with its own rounds following it
     for (const category of competition.categoryData) {
-      // Category level
       treeOrderMap.set(
         `category-${competition.competitionData.slug}-${category.categoryData.slug}`,
         orderIndex++
       )
 
-      // Rounds within category
+      // The category's rounds, which sit deepest
       for (const round of category.roundData) {
         treeOrderMap.set(
           `round-${competition.competitionData.slug}-${category.categoryData.slug}-${round.slug}`,
@@ -165,21 +182,22 @@ export function generateCompetitionChips(
       }
     }
 
-    // Direct rounds (competitions without categories)
+    // Then any rounds hanging straight off the competition, which have no category above them
     for (const round of competition.roundData) {
       treeOrderMap.set(
-        `round-${competition.competitionData.slug}-direct-${round.slug}`,
+        `round-${competition.competitionData.slug}-${DIRECT_ROUND_KEY}-${round.slug}`,
         orderIndex++
       )
     }
   }
 
-  // Sort chips by their position in the tree hierarchy
+  // Ordered as the tree orders them, so the chips read the same way the sidebar does
   return [...chips].sort((firstChip, secondChip) => {
+    // A chip the walk never reached sorts to the end
     const firstPosition = treeOrderMap.get(firstChip.id) ?? Number.MAX_SAFE_INTEGER
     const secondPosition = treeOrderMap.get(secondChip.id) ?? Number.MAX_SAFE_INTEGER
+
+    // Earlier in the walk means earlier in the bar
     return firstPosition - secondPosition
   })
-
-  // #endregion
 }

@@ -3,6 +3,8 @@ import { Lightbulb, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import React, { useEffect, useRef } from 'react'
 
+import { MultiSelectFacet } from '@/components/shared/components/facets/components/MultiSelectFacet'
+import { TreeSelectFacet } from '@/components/shared/components/facets/components/TreeSelectFacet'
 import { ManualHyphens } from '@/components/shared/components/ManualHyphens'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -13,29 +15,28 @@ import {
   type UseSearchFiltersLogicProps,
 } from '../hooks/use-search-filters-logic'
 import { createFilterUpdater } from '../utils/filter-update-utils'
-import MultiSelectFacet from './facets/MultiSelectFacet'
-import TreeSelectFacet from './facets/TreeSelectFacet'
 import { ListsDropdown } from './ListsDropdown'
 
 /**
- * A tooltip icon component that provides helpful information
- * about search functionality and selection shortcuts.
+ * The hint beside the search box, explaining what the filters can do that isn't visible:
+ * which languages a search covers, the modifier that narrows a facet to one value, and
+ * what the AND/OR toggle means.
  */
 function TipsAndTricks() {
-  // The translations
+  // Translations for the filter hints
   const t = useTranslations('problems.filters.tips')
 
-  // Get the intro text
+  // The lead-in both the touch and desktop wordings are built around
   const introText = t('intro')
 
-  // Figure out the device for proper key display
+  // The modifier is named differently per platform, and absent entirely on touch
   const { isMac, isTouchOnly } = useDeviceCapabilities()
 
-  // Get the modifier key and name
+  // The key as it is printed, and as it is spoken
   const modifierKey = isMac ? '⌘' : 'Ctrl'
   const modifierName = isMac ? 'Cmd' : 'Ctrl'
 
-  // The JSX displayed in the tooltip
+  // The hint's body
   const tooltipContent = (
     <div className="space-y-3 max-w-xs text-xs sm:text-sm">
       {/* Search languages */}
@@ -80,7 +81,6 @@ function TipsAndTricks() {
     </div>
   )
 
-  // Render the tooltip
   return (
     <Tooltip content={tooltipContent} placement="left">
       <span
@@ -94,7 +94,7 @@ function TipsAndTricks() {
 }
 
 /**
- * Props for the {@link SearchFilters} component
+ * The props of {@link SearchFilters}.
  */
 type SearchFiltersProps = UseSearchFiltersLogicProps & {
   /** When filtering by a shared list, the display name of that list. Null otherwise. */
@@ -102,7 +102,8 @@ type SearchFiltersProps = UseSearchFiltersLogicProps & {
 }
 
 /**
- * Sidebar filter UI for the problems library.
+ * The problem library's filter sidebar: full-text search, then the facets that narrow by
+ * where a problem came from and what it is about.
  */
 export const SearchFilters = ({
   filters,
@@ -111,16 +112,16 @@ export const SearchFilters = ({
   baseOptions,
   sharedListName,
 }: SearchFiltersProps) => {
-  // Translations
+  // Translations for the filter sidebar
   const t = useTranslations('problems.filters')
 
-  // Ref for the search input
+  // The search box
   const searchTextRef = useRef<HTMLInputElement | null>(null)
 
-  // Auth state
+  // Two filters are only meaningful to a signed-in user, so their sign-in state matters
   const { isLoaded, isSignedIn } = useAuth()
 
-  // Use a helper hook which provided the data needed to render the filters
+  // Everything the facets render from, and the one handler the tree writes back through
   const {
     competitionTreeOpts,
     defaultExpandedIds,
@@ -137,22 +138,23 @@ export const SearchFilters = ({
     baseOptions,
   })
 
-  // A helper function to update filters
+  // A function which writes one filter back, carrying the rules that tie filters together
   const updateFilter = createFilterUpdater(filters, onFiltersChange)
 
-  // Clear user-specific filters when user logs out
+  // Signing out has to take the filters that only mean something signed in with it
   useEffect(() => {
+    // Waiting for the auth state to load keeps a signed-in user's filters from being dropped
     if (isLoaded && !isSignedIn && (filters.favoritesOnly || filters.markStatus)) {
-      onFiltersChange({ ...filters, favoritesOnly: false, markStatus: null }, 'discrete')
+      onFiltersChange({ ...filters, favoritesOnly: false, markStatus: null })
     }
   }, [isLoaded, isSignedIn, filters, onFiltersChange])
 
   return (
     <div className="flex flex-col rounded-lg border border-foreground/10 bg-surface/95 shadow-lg lg:fixed lg:top-28 lg:bottom-8 lg:w-[var(--problems-sidebar-width)] lg:max-h-[calc(100vh-7rem)]">
-      {/* Filters Body */}
+      {/* Scrolling body, holding every facet */}
       <div className="flex-grow overflow-y-auto p-3 sm:p-4 lg:p-5 lg:min-h-0">
         <div className="space-y-3 sm:space-y-4">
-          {/* Section 0: Lists Dropdown — All / Liked / Custom lists */}
+          {/* List picker */}
           <div className="mb-6">
             <ListsDropdown
               filters={filters}
@@ -161,7 +163,7 @@ export const SearchFilters = ({
             />
           </div>
 
-          {/* Section 1: Full-text search */}
+          {/* Full-text search */}
           <div>
             <div className="mb-2 sm:mb-3 flex items-center justify-between gap-2">
               <label htmlFor="search" className="text-xs sm:text-sm font-semibold text-foreground">
@@ -175,7 +177,7 @@ export const SearchFilters = ({
                 type="text"
                 id="search"
                 value={filters.searchText}
-                onChange={(e) => updateFilter('searchText', e.target.value, 'text')}
+                onChange={(event) => updateFilter('searchText', event.target.value)}
                 className={cn('form-input', filters.searchText && 'pr-9')}
                 placeholder={t('search.placeholder')}
               />
@@ -183,7 +185,10 @@ export const SearchFilters = ({
                 <button
                   type="button"
                   onClick={() => {
-                    updateFilter('searchText', '', 'text')
+                    // Emptying the term also drops the search-in-solutions scope
+                    updateFilter('searchText', '')
+
+                    // Clearing by the button would otherwise leave the caret nowhere
                     searchTextRef.current?.focus()
                   }}
                   className="absolute right-2 top-1/2 -translate-y-1/2 rounded text-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
@@ -199,9 +204,7 @@ export const SearchFilters = ({
                 id="search-solution"
                 type="checkbox"
                 checked={filters.searchInSolution}
-                onChange={(event) =>
-                  updateFilter('searchInSolution', event.target.checked, 'discrete')
-                }
+                onChange={(event) => updateFilter('searchInSolution', event.target.checked)}
                 className="form-checkbox"
                 disabled={!filters.searchText}
               />
@@ -217,7 +220,7 @@ export const SearchFilters = ({
             </div>
           </div>
 
-          {/* Section 2: Contextual Filters */}
+          {/* Where a problem came from */}
           <div className="space-y-3 sm:space-y-4 border-t border-muted/40 pt-3 sm:pt-4 py-2">
             <TreeSelectFacet
               title={t('facets.competition')}
@@ -236,34 +239,29 @@ export const SearchFilters = ({
               onChange={(next) => {
                 updateFilter(
                   'seasons',
-                  next.map((slug: string) => ({ slug, displayName: slug })),
-                  'discrete'
+                  next.map((slug: string) => ({ slug, displayName: slug }))
                 )
               }}
               searchPlaceholder={t('facets.searchSeasons')}
               closedLabel={t('facets.allSeasons')}
             />
 
-            {/* Problem Numbers as a multi-select facet */}
             <MultiSelectFacet
               title={t('facets.problemNumber')}
               options={numberOpts}
               selected={filters.problemNumbers.map(String)}
               onChange={(next) => {
-                onFiltersChange(
-                  {
-                    ...filters,
-                    problemNumbers: next.map((id: string) => parseInt(id, 10)),
-                  },
-                  'discrete'
-                )
+                onFiltersChange({
+                  ...filters,
+                  problemNumbers: next.map((id: string) => parseInt(id, 10)),
+                })
               }}
               showSearch={false}
               closedLabel={t('facets.anyOrder')}
             />
           </div>
 
-          {/* Section 3: Attribute Filters (Multi-select) */}
+          {/* What a problem is about, and who wrote it */}
           <div className="space-y-3 sm:space-y-4 border-t border-muted/40 pt-3 sm:pt-4">
             <MultiSelectFacet
               title={t('facets.tags')}
@@ -274,14 +272,13 @@ export const SearchFilters = ({
               onChange={(next) => {
                 updateFilter(
                   'tags',
-                  next.map((slug: string) => ({ slug, displayName: slug })),
-                  'discrete'
+                  next.map((slug: string) => ({ slug, displayName: slug }))
                 )
               }}
               searchPlaceholder={t('facets.searchTags')}
               logic={{
                 mode: filters.tagLogic,
-                onChange: (mode) => updateFilter('tagLogic', mode, 'discrete'),
+                onChange: (mode) => updateFilter('tagLogic', mode),
                 labels: {
                   or: t('facets.logic.or'),
                   and: t('facets.logic.and'),
@@ -306,14 +303,13 @@ export const SearchFilters = ({
               onChange={(next) => {
                 updateFilter(
                   'authors',
-                  next.map((slug: string) => ({ slug, displayName: slug })),
-                  'discrete'
+                  next.map((slug: string) => ({ slug, displayName: slug }))
                 )
               }}
               searchPlaceholder={t('facets.searchAuthors')}
               logic={{
                 mode: filters.authorLogic,
-                onChange: (mode) => updateFilter('authorLogic', mode, 'discrete'),
+                onChange: (mode) => updateFilter('authorLogic', mode),
               }}
             />
           </div>

@@ -1,13 +1,20 @@
 import type { SearchFiltersState } from '../types/problem-library-types'
+import { contestSelectionSlugs } from './filter-ids'
+
+/** How short a search term may be before it needs another filter to justify a query. */
+const MIN_STANDALONE_SEARCH_LENGTH = 3
 
 /**
- * Determines if a search should be triggered based on the current filter state.
+ * Whether a filter state is worth querying for. A term of one or two characters matches
+ * most of the library, so it only earns a query once something else narrows the results.
  *
- * @param searchFilters - The current state of all search filters
- * @returns true if a search should be performed, false otherwise
+ * @param searchFilters - The filters currently applied.
+ * @returns True when the filters should produce a query.
  */
 export function shouldTriggerSearch(searchFilters: SearchFiltersState): boolean {
-  if (searchFilters.searchText && searchFilters.searchText.length < 3) {
+  // A term too short to narrow anything on its own
+  if (searchFilters.searchText && searchFilters.searchText.length < MIN_STANDALONE_SEARCH_LENGTH) {
+    // Whether anything else is set that would narrow the results instead
     const hasOtherFilters =
       searchFilters.seasons.length > 0 ||
       searchFilters.tags.length > 0 ||
@@ -17,20 +24,26 @@ export function shouldTriggerSearch(searchFilters: SearchFiltersState): boolean 
       searchFilters.favoritesOnly ||
       searchFilters.markStatus != null ||
       searchFilters.listContentId != null
+
+    // A short term standing alone would return most of the library
     if (!hasOtherFilters) return false
   }
+
+  // Everything else is worth querying for
   return true
 }
 
 /**
- * Determines if a filter change is text-only (searchText or searchInSolution).
- * Used to determine if changes should be debounced (text-only) or applied immediately (discrete).
+ * Whether the only thing that changed between two filter states is what the user typed.
+ * Typing arrives a character at a time, while picking a value from a list is one
+ * deliberate act.
  *
- * @param prev - The previous filter state
- * @param next - The new filter state
- * @returns true if only text-related fields changed, false if any discrete filters changed
+ * @param prev - The filters before the change.
+ * @param next - The filters after it.
+ * @returns True when nothing but the search text and its scope moved.
  */
 export function isTextOnlyChange(prev: SearchFiltersState, next: SearchFiltersState): boolean {
+  // Something about the text has to have moved, and everything else has to have stayed put
   return (
     (prev.searchText !== next.searchText || prev.searchInSolution !== next.searchInSolution) &&
     prev.seasons.length === next.seasons.length &&
@@ -47,22 +60,23 @@ export function isTextOnlyChange(prev: SearchFiltersState, next: SearchFiltersSt
 }
 
 /**
- * Determines if a filter change is a no-op, meaning it can't produce different search results.
- * Currently detects: toggling tagLogic or authorLogic when ≤1 item is selected
- * (because OR and AND are equivalent with a single operand).
+ * Whether a filter change cannot possibly change the results, and so is not worth a query.
  *
- * @param prev - The previous filter state
- * @param next - The new filter state
- * @returns true if the change is guaranteed to produce identical results
+ * The case worth catching is the AND/OR toggle: with one value selected or none, matching
+ * any of them and matching all of them ask the same question.
+ *
+ * @param prev - The filters before the change.
+ * @param next - The filters after it.
+ * @returns True when the two states are guaranteed to return the same problems.
  */
 export function isNoOpFilterChange(prev: SearchFiltersState, next: SearchFiltersState): boolean {
-  // Normalize: treat OR and AND as equivalent when ≤1 item is selected
+  // With at most one value selected the mode says nothing, so both modes read as one
   const normalizedPrevTagLogic = prev.tags.length <= 1 ? 'or' : prev.tagLogic
   const normalizedNextTagLogic = next.tags.length <= 1 ? 'or' : next.tagLogic
   const normalizedPrevAuthorLogic = prev.authors.length <= 1 ? 'or' : prev.authorLogic
   const normalizedNextAuthorLogic = next.authors.length <= 1 ? 'or' : next.authorLogic
 
-  // Compare everything using the normalized logic values
+  // Every filter has to ask the same question, the two modes under their normalized form
   return (
     prev.searchText === next.searchText &&
     prev.searchInSolution === next.searchInSolution &&
@@ -84,24 +98,38 @@ export function isNoOpFilterChange(prev: SearchFiltersState, next: SearchFilters
 }
 
 /**
- * Compares two selections arrays for equality
+ * Whether two competition filters name the same thing, position for position.
+ *
+ * @param previous - The selections before the change.
+ * @param next - The selections after it.
+ * @returns True when both name the same selections in the same order.
  */
 function equalSelectionsArrays(
   previous: SearchFiltersState['contestSelection'],
   next: SearchFiltersState['contestSelection']
 ): boolean {
+  // A selection arriving from the URL may be absent altogether
   const previousArray = previous || []
   const nextArray = next || []
 
+  // Differing counts settle it without any comparing
   if (previousArray.length !== nextArray.length) return false
 
+  // Order is meaningful here, so each position is compared against its own
   return previousArray.every((previousSelection, index) => {
+    // The selection sitting in the same place on the other side
     const nextSelection = nextArray[index]
+
+    // The names a selection reads under carry no filtering meaning, so only the slugs count
+    const previousSlugs = contestSelectionSlugs(previousSelection)
+    const nextSlugs = contestSelectionSlugs(nextSelection)
+
+    // The level and all three slugs have to agree
     return (
       previousSelection.type === nextSelection.type &&
-      previousSelection.competitionSlug === nextSelection.competitionSlug &&
-      previousSelection.categorySlug === nextSelection.categorySlug &&
-      previousSelection.roundSlug === nextSelection.roundSlug
+      previousSlugs.competitionSlug === nextSlugs.competitionSlug &&
+      previousSlugs.categorySlug === nextSlugs.categorySlug &&
+      previousSlugs.roundSlug === nextSlugs.roundSlug
     )
   })
 }

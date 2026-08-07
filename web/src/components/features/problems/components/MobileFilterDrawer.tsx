@@ -1,38 +1,42 @@
 'use client'
 
-import { Transition } from '@headlessui/react'
-import { useHotkeys } from '@mantine/hooks'
+import { Dialog, DialogBackdrop, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
 import { Filter, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { SearchFilters } from './SearchFilters'
 
+/**
+ * The props of {@link MobileFilterDrawer}.
+ */
 type MobileFilterDrawerProps = {
+  /** Whether the drawer is showing. */
   isOpen: boolean
+  /** Dismisses the drawer. */
   onClose: () => void
+  /** The filters currently applied. */
   filters: SearchFiltersState
-  onFiltersChange: (newFilters: SearchFiltersState, type: 'discrete' | 'text') => void
+  /** Applies a change the user made inside the drawer. */
+  onFiltersChange: (newFilters: SearchFiltersState) => void
+  /** Option counts under the current filters. */
   filterOptions: FilterOptionsWithCounts
+  /** Option counts before any filtering. */
   baseOptions: FilterOptionsWithCounts
+  /** How many filters are set. */
   activeFilterCount: number
   /** When filtering by a shared list, the display name of that list. Null otherwise. */
   sharedListName?: string | null
 }
 
 /**
- * Mobile-friendly filter drawer that slides out from the left side.
- * Contains the full SearchFilters component in a mobile-optimized layout.
+ * The filter sidebar as a slide-out drawer, for viewports too narrow to keep it beside
+ * the results.
  *
- * Features:
- * - Smooth slide animation from left
- * - Backdrop overlay with blur effect
- * - Escape key and backdrop click to close
- * - Prevents background scrolling when open
- * - Full-height layout optimized for mobile screens
+ * Its contents stay mounted while it is closed, so a half-built filter survives being
+ * dismissed and reopened.
  */
 export const MobileFilterDrawer = ({
   isOpen,
@@ -44,31 +48,14 @@ export const MobileFilterDrawer = ({
   activeFilterCount,
   sharedListName,
 }: MobileFilterDrawerProps) => {
-  // Prevent background scrolling when drawer is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
-
-  // Handle escape key to close drawer
-  useHotkeys([['Escape', onClose]], [], isOpen)
-
-  // Translations
+  // Translations for the shared filter controls
   const tFilters = useTranslations('ui.filters')
 
   return (
     <Transition show={isOpen} unmount={false}>
-      <div className="fixed inset-0 z-50 lg:hidden">
+      <Dialog onClose={onClose} className="relative z-50 lg:hidden" unmount={false}>
         {/* Backdrop */}
-        <Transition.Child
+        <TransitionChild
           unmount={false}
           enter="transition-opacity ease-out duration-200"
           enterFrom="opacity-0"
@@ -77,15 +64,11 @@ export const MobileFilterDrawer = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div
-            className="fixed inset-0 bg-surface/50 backdrop-blur-sm"
-            onClick={onClose}
-            aria-hidden="true"
-          />
-        </Transition.Child>
+          <DialogBackdrop className="fixed inset-0 bg-surface/50 backdrop-blur-sm" />
+        </TransitionChild>
 
         {/* Drawer Panel */}
-        <Transition.Child
+        <TransitionChild
           unmount={false}
           enter="transition-transform ease-out duration-200"
           enterFrom="-translate-x-full"
@@ -94,10 +77,7 @@ export const MobileFilterDrawer = ({
           leaveFrom="translate-x-0"
           leaveTo="-translate-x-full"
         >
-          <div className="fixed left-0 top-0 h-full w-full max-w-[320px] sm:w-96 sm:max-w-[85vw] bg-surface shadow-xl flex flex-col">
-            {/* Spacer for main header */}
-            <div className="h-14 sm:h-16 lg:h-20 bg-surface/50 flex-shrink-0"></div>
-
+          <DialogPanel className="fixed left-0 top-0 h-full w-full max-w-[320px] sm:w-96 sm:max-w-[85vw] bg-surface shadow-xl flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-foreground/10 p-3 sm:p-4 flex-shrink-0">
               <div className="flex items-center gap-2">
@@ -140,27 +120,31 @@ export const MobileFilterDrawer = ({
                 {tFilters('apply')}
               </Button>
             </div>
-          </div>
-        </Transition.Child>
-      </div>
+          </DialogPanel>
+        </TransitionChild>
+      </Dialog>
     </Transition>
   )
 }
 
 /**
- * Mobile filter trigger button with filter count indicator.
- * Shows prominently when sidebar is not visible (mobile screens).
+ * The props of {@link MobileFilterButton}.
  */
 type MobileFilterButtonProps = {
+  /** Opens the drawer. */
   onClick: () => void
+  /** How many filters are set. */
   activeFilterCount: number
 }
 
+/**
+ * The button that opens {@link MobileFilterDrawer}, standing in for the sidebar on
+ * viewports that have no room for it.
+ */
 export const MobileFilterButton = ({ onClick, activeFilterCount }: MobileFilterButtonProps) => {
-  // Get translations
+  // Translations for the shared filter controls
   const tFilters = useTranslations('ui.filters')
 
-  // Render the button
   return (
     <Button
       variant="secondary"

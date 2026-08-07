@@ -1,5 +1,5 @@
-// UI-specific types for the problem library
-// These types are designed for React components and state management in the problem library
+// Types for the problem library's filters, the options they are picked from, and the
+// responses they produce
 
 import type {
   CompetitionFilterOption,
@@ -9,29 +9,80 @@ import type {
 } from './problem-api-types'
 
 /**
- * The possible options to filter from in the problem library
+ * Everything the library can be filtered by, each option carrying how many problems it
+ * covers, either across the whole library or under a given filter.
  */
 export type FilterOptionsWithCounts = {
+  /** The competition hierarchy, with its categories and rounds nested inside it. */
   competitions: CompetitionFilterOption[]
+  /** The school years problems were set in. */
   seasons: FacetOption[]
+  /** The positions a problem can hold within its round. */
   problemNumbers: FacetOption[]
+  /** The topics and techniques problems are tagged with. */
   tags: FacetOption[]
+  /** The people who wrote the problems. */
   authors: FacetOption[]
 }
 
 /**
- * ContestSelection with UI-specific enhancements.
- * Adds type information and display labels for React components.
- * The API version only has slugs, but the UI needs type and label for rendering.
+ * A whole competition, standing for every problem in it.
  */
-export type ContestSelection = {
-  type: 'competition' | 'category' | 'round'
+type CompetitionContestSelection = {
+  /** Names this as a competition-level selection. */
+  type: 'competition'
+  /** The competition selected. */
   competitionSlug: string
-  categorySlug?: string // undefined for competition-level or direct rounds
-  roundSlug?: string // undefined for competition/category level selections
-  displayName: string // Display name (e.g., "IMO", "CSMO")
-  fullName?: string // Full display name (e.g., "International Mathematical Olympiad")
+  /** How the selection reads, e.g. "IMO". */
+  displayName: string
+  /** The unabbreviated name, e.g. "International Mathematical Olympiad". */
+  fullName?: string
 }
+
+/**
+ * One category of a competition, standing for every round in it.
+ */
+type CategoryContestSelection = {
+  /** Names this as a category-level selection. */
+  type: 'category'
+  /** The competition the category belongs to. */
+  competitionSlug: string
+  /** The category selected. */
+  categorySlug: string
+  /** How the selection reads, e.g. "SKMO - Kategória A". */
+  displayName: string
+  /** The unabbreviated name. */
+  fullName?: string
+}
+
+/**
+ * One round, which sits under a category in competitions that have that level and
+ * directly under the competition in those that do not.
+ */
+export type RoundContestSelection = {
+  /** Names this as a round-level selection. */
+  type: 'round'
+  /** The competition the round belongs to. */
+  competitionSlug: string
+  /** The category the round sits under, absent in competitions with no category level. */
+  categorySlug?: string
+  /** The round selected. */
+  roundSlug: string
+  /** How the selection reads, e.g. "SKMO - Kategória A - Školské kolo". */
+  displayName: string
+  /** The unabbreviated name. */
+  fullName?: string
+}
+
+/**
+ * One competition filter, held at whatever level of the hierarchy the user picked, so
+ * taking a whole competition records one entry rather than every round in it, carried
+ * alongside the names it reads under.
+ */
+export type ContestSelection =
+  | CompetitionContestSelection
+  | CategoryContestSelection
+  | RoundContestSelection
 
 /**
  * Filter values for problem mark status.
@@ -39,69 +90,85 @@ export type ContestSelection = {
 export type MarkStatusFilter = 'marked' | 'unmarked'
 
 /**
- * SearchFiltersState with enhanced ContestSelection.
- * Uses the UI ContestSelection type with display labels and type information.
- * This is the state managed by React components for the problem library UI.
+ * Everything the library is currently filtered by.
  */
 export type SearchFiltersState = {
+  /** The term searched for. */
   searchText: string
+  /** Whether the search reaches into solutions as well as statements. */
   searchInSolution: boolean
+  /** The school years filtered on. */
   seasons: LabeledSlug[]
+  /** The competitions filtered on, each held at the level the user picked. */
   contestSelection: ContestSelection[]
+  /** The positions within a round filtered on. */
   problemNumbers: number[]
+  /** The tags filtered on. */
   tags: LabeledSlug[]
+  /** Whether a problem has to carry any of the tags or all of them. */
   tagLogic: 'or' | 'and'
+  /** The authors filtered on. */
   authors: LabeledSlug[]
+  /** Whether a problem has to carry any of the authors or all of them. */
   authorLogic: 'or' | 'and'
+  /** Whether to show only the problems the user has liked. */
   favoritesOnly: boolean
+  /** Whether to show only marked or only unmarked problems, or not to care. */
   markStatus: MarkStatusFilter | null
+  /** The list being browsed, null when browsing everything. */
   listContentId: string | null
 }
 
 /**
- * Represents the state of filters as parsed directly from the URL.
+ * The filters as the URL holds them, before a competition filter's level is resolved.
  */
 export type UrlQueryState = Omit<SearchFiltersState, 'contestSelection'> & {
   /**
-   * Contains filter parameters parsed before context-aware interpretation.
-   * The `competitionSelectionParts` field exists to distinguish between
-   * ambiguous formats like competition-category vs competition-round, since we can't know
-   * whether the second part is a category or a round without context.
-   * This enables concise slugs like `csmo-a` or `cpsj-i`.
+   * The competition filters, each as its bare slug parts, since a slug like `csmo-a` does
+   * not say on its own whether the second part is a category or a round.
    */
   competitionSelectionParts: string[][]
 }
 
 /**
- * Response type for filter operations.
- * Uses UI FilterOptionsWithCounts instead of API SearchBarOptions.
+ * One page of problems, with the option counts that page implies.
  */
 export type FilterResponse = {
+  /** The page of matching problems. */
   problems: {
+    /** The problems on this page. */
     items: Problem[]
+    /** Which page this is. */
     page: number
+    /** How many problems a page holds. */
     pageSize: number
+    /** How many problems match in total, across every page. */
     totalCount: number
   }
+  /** The option counts under these filters, absent when they cannot have changed. */
   updatedOptions: FilterOptionsWithCounts | null
+  /** The name of the list being browsed, null when browsing everything. */
   listName: string | null
 }
 
 /**
- * Raw API response shape from the /problems/filter endpoint.
- * Wraps FilterResult inside a filterResult property alongside listName.
+ * A filter response as it arrives over the wire, before the nesting is flattened away.
  */
 export type RawProblemFilterResponse = {
+  /** The page of problems and the option counts. */
   filterResult: FilterResponse
+  /** The name of the list being browsed, null when browsing everything. */
   listName: string | null
 }
 
 /**
- * Result type for single problem pages.
- * Combines problem data with frontend filter state and options.
+ * A single problem alongside the filters that resolve to exactly it.
  */
 export type SingleProblemResult = {
+  /** The problem itself. */
   problem: Problem
+  /** Filters that resolve to exactly this problem. */
   filters: SearchFiltersState
+  /** The options those filters would be picked from. */
   options: FilterOptionsWithCounts
 }

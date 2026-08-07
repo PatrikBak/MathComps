@@ -24,100 +24,121 @@ import { ManageListsModal, type ManageListsModalRef } from './ManageListsModal'
 import { UserListMenuItems } from './UserListMenuItems'
 
 /**
- * Props for {@link ListsDropdown}
+ * The props of {@link ListsDropdown}.
  */
 type ListsDropdownProps = {
-  /** Current filter state */
+  /** The filters currently applied. */
   filters: SearchFiltersState
-  /** Callback to update filters with the type of change */
-  onFiltersChange: (filters: SearchFiltersState, filterType: 'text' | 'discrete') => void
+  /** Applies a change the user made in the dropdown. */
+  onFiltersChange: (filters: SearchFiltersState) => void
   /** When filtering by a shared list, the display name of that list. Null otherwise. */
   sharedListName?: string | null
 }
 
 /**
- * Dropdown for switching between All Problems, Liked, and custom user lists.
- * Replaces the previous two-button mode toggle (All / Favorites).
+ * Picks which body of problems the library is showing: everything, the ones the user has
+ * liked, or one of their lists.
  *
- * - Logged out: shows trigger button with login prompt on Liked/list items
- * - Logged in: fetches user lists and shows all options with counts
- * - Selection sets the appropriate URL param (favoritesOnly or listContentId)
+ * Everything but the first needs an account, so a signed-out user gets a sign-in prompt
+ * that carries the choice they were making, and lands back on it afterwards.
  */
 export function ListsDropdown({ filters, onFiltersChange, sharedListName }: ListsDropdownProps) {
-  // Translations
+  // Translations for the filter sidebar
   const t = useTranslations('problems.filters')
 
-  // Auth state
+  // Everything but "all problems" needs an account, so the sign-in state gates the choices
   const { isLoaded, isSignedIn } = useAuth()
 
-  // Login prompt
+  // A function which asks a signed-out user to sign in, carrying where to return to
   const showLoginPrompt = useLoginPromptToast()
 
-  // Dropdown open state
+  // Whether the dropdown is showing
   const [open, setOpen] = useState(false)
 
-  // Whether UserListMenuItems is in creation mode
+  // Whether the list menu has its new-list field open
   const [isCreating, setIsCreating] = useState(false)
 
-  // Fetch user lists (only when signed in)
+  // The user's own lists, which only exist once they are signed in
   const { lists, likedCount, isLoading: isListsLoading } = useUserLists()
 
-  // Ref for the manage lists modal
+  // The modal for renaming and deleting lists
   const manageRef = useRef<ManageListsModalRef>(null)
 
-  // Open manage modal (close dropdown first)
+  // A function which hands over to the manage-lists modal
   const handleManage = () => {
+    // The dropdown goes first, so it isn't left hanging behind the modal
     setOpen(false)
+
+    // Then the modal itself
     manageRef.current?.open()
   }
 
-  // Determine the current trigger label and icon (skip label resolution while loading)
+  // What the trigger reads, left blank until the lists it may name have arrived
   const currentLabel = isListsLoading
     ? ''
     : getCurrentLabel(filters, lists ?? [], sharedListName, t)
 
-  // Choose icon based on filter state: heart for liked, shared icon for non-owned lists, list icon otherwise
+  // A list the user is browsing but does not own, which someone shared with them
   const isSharedList =
     !!filters.listContentId && !lists?.some((list) => list.contentId === filters.listContentId)
+
+  // The icon standing for whichever body of problems is showing
   const CurrentIcon = filters.favoritesOnly ? Heart : isSharedList ? Share2 : List
 
-  // Select "All Problems" — clear both favoritesOnly and listContentId
+  // A function which goes back to showing the whole library
   const handleSelectAll = () => {
-    onFiltersChange({ ...filters, favoritesOnly: false, listContentId: null }, 'discrete')
+    // Both of the narrowing filters go, since neither applies to the whole library
+    onFiltersChange({ ...filters, favoritesOnly: false, listContentId: null })
+
+    // The choice is made, so the dropdown closes behind it
     setOpen(false)
   }
 
-  // Select "Liked" — set favoritesOnly, clear listContentId
+  // A function which shows only the problems the user has liked
   const handleSelectLiked = () => {
-    // Ensure auth state is loaded
+    // Nothing can be decided until the sign-in state is known
     if (!isLoaded) return
 
-    // Not signed in: show login prompt with redirect
+    // A signed-out user is asked to sign in, and is brought back to this same choice
     if (!isSignedIn) {
+      // The filters they were reaching for, which the return URL has to carry
       const nextFilters = { ...filters, favoritesOnly: true, listContentId: null }
+
+      // Those filters as they read in a URL
       const queryString = serializeFilters(nextFilters)
+
+      // Where to land once they are signed in
       const redirectUrl = getProblemsPageUrl(queryString)
+
+      // The prompt says why the account is needed
       showLoginPrompt({ reason: t('viewFavoritesAuthReason'), redirectUrl })
+
+      // The dropdown closes, since nothing has been chosen yet
       setOpen(false)
+
       return
     }
 
-    // Signed in: apply filter
-    onFiltersChange({ ...filters, favoritesOnly: true, listContentId: null }, 'discrete')
+    // Signed in, so the choice applies straight away, and any list filter gives way to it
+    onFiltersChange({ ...filters, favoritesOnly: true, listContentId: null })
+
+    // The choice is made, so the dropdown closes behind it
     setOpen(false)
   }
 
-  // Select a custom list — set listContentId, clear favoritesOnly
+  // A function which shows only the problems on one of the user's lists
   const handleSelectList = (contentId: string) => {
-    onFiltersChange({ ...filters, favoritesOnly: false, listContentId: contentId }, 'discrete')
+    // The liked filter gives way, since the two narrow the library differently
+    onFiltersChange({ ...filters, favoritesOnly: false, listContentId: contentId })
+
+    // The choice is made, so the dropdown closes behind it
     setOpen(false)
   }
 
-  // Whether this is the "all" view (no list filter active)
+  // Whether the whole library is showing, which is what neither filter being set means
   const isAllActive = !filters.favoritesOnly && !filters.listContentId
 
-  // Whether the trigger should show a loading state
-  // (signed in, lists loading, and a filter is active that needs list data to resolve its label)
+  // The trigger can only name a list once the lists have arrived, so until then it waits
   const isTriggerLoading = isListsLoading && (filters.favoritesOnly || !!filters.listContentId)
 
   return (
@@ -187,7 +208,7 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
             </div>
           </PopoverItem>
 
-          {/* Custom lists + new list creation (shared component) */}
+          {/* Custom lists and new-list creation */}
           <UserListMenuItems
             mode="filter"
             activeContentId={filters.listContentId}
@@ -206,12 +227,13 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
 }
 
 /**
- * Determines the trigger label based on current filter state.
+ * Names whatever the library is currently narrowed to.
  *
- * @param filters - The current filter state
- * @param lists - The user's lists
- * @param t - The translation function
- * @returns The trigger label
+ * @param filters - The current filter state.
+ * @param lists - The user's own lists.
+ * @param sharedListName - The name of a list someone shared with the user.
+ * @param t - The translation function.
+ * @returns The name the trigger reads under.
  */
 function getCurrentLabel(
   filters: SearchFiltersState,
@@ -219,24 +241,23 @@ function getCurrentLabel(
   sharedListName: string | null | undefined,
   t: ReturnType<typeof useTranslations<'problems.filters'>>
 ): string {
-  // Favorite problem have a translation key
+  // The liked view reads under a fixed name
   if (filters.favoritesOnly) return t('myFavorites')
 
-  // Custom lists have user-defined names
+  // A list narrows the library, and carries its own name
   if (filters.listContentId) {
-    // Find the list with the matching contentId
     const list = lists.find((list) => list.contentId === filters.listContentId)
 
-    // List found in user's own lists — return its name
+    // One of the user's own lists
     if (list) return list.name
 
-    // Shared list from another user — use the name from the API response if available
+    // A list someone shared, which carries its own name
     if (sharedListName) return sharedListName
 
-    // Fallback to generic label while data is loading
+    // Neither set knows the list, so it reads as a shared one
     return t('sharedListLabel')
   }
 
-  // If no custom list is selected, return "All Problems"
+  // Nothing narrows the library, so it reads as everything
   return t('allProblems')
 }
