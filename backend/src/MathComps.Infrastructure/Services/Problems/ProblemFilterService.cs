@@ -119,22 +119,23 @@ public class ProblemFilterService(
                             language,
                             data.problem.RoundInstance.Round.Competition.Slug)
                     ),
-                    // Round (may be null)
-                    new LabeledSlug(
-                        data.problem.RoundInstance.Round.Slug,
-                        localization.GetRoundShortName(
-                            language,
-                            data.problem.RoundInstance.Round.Competition.Slug,
-                            data.problem.RoundInstance.Round.Category != null ?
-                                data.problem.RoundInstance.Round.Category.Slug : null,
-                            !data.problem.RoundInstance.Round.IsDefault ? data.problem.RoundInstance.Round.Slug : null),
-                        localization.GetRoundFullName(
-                            language,
-                            data.problem.RoundInstance.Round.Competition.Slug,
-                            data.problem.RoundInstance.Round.Category != null ?
-                                data.problem.RoundInstance.Round.Category.Slug : null,
-                            !data.problem.RoundInstance.Round.IsDefault ? data.problem.RoundInstance.Round.Slug : null)
-                    ),
+                    // Round (null when the round is the competition's implicit default)
+                    data.problem.RoundInstance.Round.IsDefault ? null
+                        : new LabeledSlug(
+                            data.problem.RoundInstance.Round.Slug,
+                            localization.GetRoundShortName(
+                                language,
+                                data.problem.RoundInstance.Round.Competition.Slug,
+                                data.problem.RoundInstance.Round.Category != null ?
+                                    data.problem.RoundInstance.Round.Category.Slug : null,
+                                data.problem.RoundInstance.Round.Slug),
+                            localization.GetRoundFullName(
+                                language,
+                                data.problem.RoundInstance.Round.Competition.Slug,
+                                data.problem.RoundInstance.Round.Category != null ?
+                                    data.problem.RoundInstance.Round.Category.Slug : null,
+                                data.problem.RoundInstance.Round.Slug)
+                        ),
                     // Category (may be null)
                     data.problem.RoundInstance.Round.Category == null ? null
                         : new LabeledSlug(
@@ -205,30 +206,31 @@ public class ProblemFilterService(
                                     language,
                                     similarProblem.SimilarProblem.RoundInstance.Round.Competition.Slug)
                             ),
-                            // Round
-                            new LabeledSlug(
-                                similarProblem.SimilarProblem.RoundInstance.Round.Slug,
-                                // Round short name
-                                localization.GetRoundShortName(
-                                    language,
-                                    // Competition slug
-                                    similarProblem.SimilarProblem.RoundInstance.Round.Competition.Slug,
-                                    // Category slug (may be null)
-                                    similarProblem.SimilarProblem.RoundInstance.Round.Category != null ?
-                                        similarProblem.SimilarProblem.RoundInstance.Round.Category.Slug : null,
-                                    // Round slug
-                                    !similarProblem.SimilarProblem.RoundInstance.Round.IsDefault ? similarProblem.SimilarProblem.RoundInstance.Round.Slug : null),
-                                // Round full name
-                                localization.GetRoundFullName(
-                                    language,
-                                    // Competition slug
-                                    similarProblem.SimilarProblem.RoundInstance.Round.Competition.Slug,
-                                    // Category slug (may be null)
-                                    similarProblem.SimilarProblem.RoundInstance.Round.Category != null ?
-                                        similarProblem.SimilarProblem.RoundInstance.Round.Category.Slug : null,
-                                    // Round slug
-                                    !similarProblem.SimilarProblem.RoundInstance.Round.IsDefault ? similarProblem.SimilarProblem.RoundInstance.Round.Slug : null)
-                            ),
+                            // Round (null when the round is the competition's implicit default)
+                            similarProblem.SimilarProblem.RoundInstance.Round.IsDefault ? null
+                                : new LabeledSlug(
+                                    similarProblem.SimilarProblem.RoundInstance.Round.Slug,
+                                    // Round short name
+                                    localization.GetRoundShortName(
+                                        language,
+                                        // Competition slug
+                                        similarProblem.SimilarProblem.RoundInstance.Round.Competition.Slug,
+                                        // Category slug (may be null)
+                                        similarProblem.SimilarProblem.RoundInstance.Round.Category != null ?
+                                            similarProblem.SimilarProblem.RoundInstance.Round.Category.Slug : null,
+                                        // Round slug
+                                        similarProblem.SimilarProblem.RoundInstance.Round.Slug),
+                                    // Round full name
+                                    localization.GetRoundFullName(
+                                        language,
+                                        // Competition slug
+                                        similarProblem.SimilarProblem.RoundInstance.Round.Competition.Slug,
+                                        // Category slug (may be null)
+                                        similarProblem.SimilarProblem.RoundInstance.Round.Category != null ?
+                                            similarProblem.SimilarProblem.RoundInstance.Round.Category.Slug : null,
+                                        // Round slug
+                                        similarProblem.SimilarProblem.RoundInstance.Round.Slug)
+                                ),
                             // Category (may be null)
                             similarProblem.SimilarProblem.RoundInstance.Round.Category == null ? null
                                 : new LabeledSlug(

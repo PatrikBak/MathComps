@@ -68,6 +68,51 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// Verifies that a problem on a competition's implicit default round reports no round, while a problem
+    /// on a named round reports its slug. The option tree offers no node for a default round, so naming one
+    /// here would point at a contest nothing can select.
+    /// </summary>
+    [Fact]
+    public Task FilterOmitsTheRoundOfAProblemOnADefaultRound() => RunTestAsync(async service =>
+    {
+        // Arrange - ask for everything, so both the IMO (default round) and CSMO (named round) problems come back
+        var everythingQuery = new ProblemFilterOptions(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act - execute the unfiltered search
+        var everythingResult = await service.FilterAsync(everythingQuery);
+
+        // The IMO problem, whose round is the competition's implicit default
+        var imoProblem = everythingResult.Problems.Items.Single(problem => problem.Slug == "imo-2025-1");
+
+        // Assert - it names no round
+        Assert.Null(imoProblem.Source.Round);
+
+        // The CSMO problem, set in the named home round of category A
+        var csmoProblem = everythingResult.Problems.Items.Single(problem => problem.Slug == "75-a-i-1");
+
+        // Assert - it names the round it was set in
+        Assert.Equal("i", csmoProblem.Source.Round?.Slug);
+    });
+
+    /// <summary>
     /// Verifies that filtering by search text returns only problems containing the specified text.
     /// This test ensures the text search functionality works correctly by searching for a specific
     /// Slovak word that appears in one of our test problems.
