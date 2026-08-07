@@ -9,6 +9,7 @@ import type {
   SearchFiltersState,
   SingleProblemResult,
 } from '../types/problem-library-types'
+import { contestSelectionSlugs } from '../utils/filter-ids'
 import {
   getProblemBySlugApiUrl,
   getProblemsFilterApiUrl,
@@ -28,7 +29,7 @@ export async function getProblemBySlug(
   apiCall: ApiCaller,
   slug: string
 ): Promise<ApiResult<SingleProblemResult>> {
-  // Fetch the raw filter response (a single problem, pageSize 1)
+  // Fetch the problem
   const result = await apiCall<FilterResponse>(() => getProblemBySlugApiUrl(slug), {
     method: 'GET',
   })
@@ -36,11 +37,10 @@ export async function getProblemBySlug(
   // Pass a failure through untouched
   if (!result.success) return result
 
-  // On success the backend returns a filter response with exactly one problem (pageSize: 1)
+  // The one problem the slug names
   const problem = result.data.problems?.items.at(0)
 
-  // A success with no problem (empty result, or a malformed/non-JSON success body) means the slug
-  // matched nothing: report it as not-found
+  // No problem means the slug matched nothing
   if (!problem) {
     return {
       success: false,
@@ -52,11 +52,13 @@ export async function getProblemBySlug(
     }
   }
 
-  // We will create filters based on the specific problem's metadata
+  // Filled in at the deepest level the problem's source reaches
   let selection: ContestSelection | null = null
 
-  // The source information is key to determine the contest selection
+  // Where the problem came from, which is what the competition filter is built out of
   const source = problem.source
+
+  // A round is the deepest level, and names its category when it sits under one
   if (source.round) {
     selection = {
       type: 'round',
@@ -67,6 +69,7 @@ export async function getProblemBySlug(
       fullName: source.round.fullName,
     }
   } else if (source.category) {
+    // No round, so the category is as deep as the source goes
     selection = {
       type: 'category',
       competitionSlug: source.competition.slug,
@@ -75,6 +78,7 @@ export async function getProblemBySlug(
       fullName: source.category.fullName,
     }
   } else if (source.competition) {
+    // Neither level below it, leaving the competition standing alone
     selection = {
       type: 'competition',
       competitionSlug: source.competition.slug,
@@ -83,7 +87,7 @@ export async function getProblemBySlug(
     }
   }
 
-  // Create the filters that should resolve into this exact problem
+  // Season, contest and position together pin down this one problem, so the rest stay empty
   const filters: SearchFiltersState = {
     searchText: '',
     searchInSolution: false,
@@ -251,34 +255,33 @@ export async function toggleProblemMark(
 }
 
 /**
- * Converts SearchFiltersState to FilterParameters by extracting only the data needed for filtering.
- * Removes UI-specific LabeledSlug objects and converts them to the core identifiers.
+ * Converts a {@link SearchFiltersState} into the {@link FilterParameters} the API takes,
+ * with every {@link LabeledSlug} reduced to its identifier.
  *
  * @param state - The search filters to convert.
  *
  * @returns The converted filter parameters.
  */
 function searchFiltersStateToFilterParameters(state: SearchFiltersState): FilterParameters {
-  // Extract olympiad edition numbers from LabeledSlug objects
+  // The editions filtered on
   const olympiadYears = state.seasons
     .map((season) => {
+      // The edition the season's slug names
       const editionNumber = parseInt(season.slug, 10)
+
+      // Dropped when the slug is not an edition number
       return isNaN(editionNumber) ? null : editionNumber
     })
     .filter((editionNumber): editionNumber is number => editionNumber !== null)
 
-  // Extract tag slugs from LabeledSlug objects
+  // The tags filtered on
   const tagSlugs = state.tags.map((tag) => tag.slug)
 
-  // Extract author slugs from LabeledSlug objects
+  // The authors filtered on
   const authorSlugs = state.authors.map((author) => author.slug)
 
   // Convert frontend ContestSelection to backend ContestSelection
-  const contests: FilterParameters['contests'] = state.contestSelection.map((selection) => ({
-    competitionSlug: selection.competitionSlug,
-    categorySlug: selection.categorySlug,
-    roundSlug: selection.roundSlug,
-  }))
+  const contests: FilterParameters['contests'] = state.contestSelection.map(contestSelectionSlugs)
 
   // Return the converted filter parameters
   return {
