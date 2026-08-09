@@ -29,6 +29,12 @@ public static class EndpointExtensions
         // Admin-only endpoints, gated by the admin policy
         app.MapAdminEndpoints();
 
+        // Reading every student's defense conversations back for review
+        app.MapAdminDefenseReviewEndpoints();
+
+        // What gets written down while reviewing those conversations
+        app.MapAdminNoteEndpoints();
+
         // Add health check endpoint for monitoring
         app.MapHealthChecks("/health");
 

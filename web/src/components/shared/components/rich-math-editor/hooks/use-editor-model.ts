@@ -17,6 +17,8 @@ type UseEditorModelProps = {
   onChange: (value: string) => void
   /** Callback when Enter is pressed (if provided, enables submit on Enter). */
   onSend?: () => void
+  /** Whether a send is currently allowed; the editor's own validity gates on top of it. */
+  canSend?: boolean
   /** Callback when Escape is pressed (if provided, enables cancel on Escape). */
   onCancel?: () => void
   /** Optional configuration for editor limits (max characters, images, etc.). */
@@ -134,6 +136,7 @@ export function useEditorModel({
   value,
   onChange,
   onSend,
+  canSend = true,
   onCancel,
   config = {},
 }: UseEditorModelProps): EditorViewModel {
@@ -444,8 +447,8 @@ export function useEditorModel({
         (event.ctrlKey || event.metaKey) &&
         onSend
       ) {
-        // Check if content is valid before submitting
-        if (state.isValid) {
+        // Submit only when the content is valid and a send is allowed
+        if (state.isValid && canSend) {
           event.preventDefault()
           onSend()
         }
@@ -459,7 +462,7 @@ export function useEditorModel({
         return
       }
     },
-    [state.isValid, applyTransform, undo, redo, createEditContext, onSend, onCancel]
+    [state.isValid, canSend, applyTransform, undo, redo, createEditContext, onSend, onCancel]
   )
 
   return {

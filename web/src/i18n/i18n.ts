@@ -67,6 +67,7 @@ export const ROUTES = {
   SSO_CALLBACK: '/sso-callback',
   PRIVACY: '/privacy',
   NEWS: '/news',
+  ADMIN_DEFENSES: '/admin/defenses',
 } as const
 
 /** Union type of all possible route paths. */
@@ -91,6 +92,7 @@ const ROUTE_TRANSLATIONS: Record<RouteKey, NonCanonicalLocaleTranslations> = {
   '/sso-callback': { sk: '/sso-callback', cs: '/sso-callback' },
   '/privacy': { sk: '/ochrana-sukromia', cs: '/ochrana-soukromi' },
   '/news': { sk: '/novinky', cs: '/novinky' },
+  '/admin/defenses': { sk: '/admin/obhajoby', cs: '/admin/obhajoby' },
 }
 
 /** Common anchor fragments used for in-page navigation. English is canonical. */

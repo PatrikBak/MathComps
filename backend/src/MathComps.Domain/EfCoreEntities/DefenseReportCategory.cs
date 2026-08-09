@@ -1,8 +1,9 @@
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// What a student found wrong with one examiner reply. Each member names a different thing to go and fix rather
-/// than a different way to be annoyed.
+/// What went wrong with one examiner reply. Each member names a different thing to go and fix rather than a
+/// different way to be annoyed. Shared by the student's own <see cref="DefenseTurnReport"/> and the
+/// <see cref="AdminNote"/> written while reviewing, so both authors' findings count on one axis.
 /// </summary>
 public enum DefenseReportCategory
 {

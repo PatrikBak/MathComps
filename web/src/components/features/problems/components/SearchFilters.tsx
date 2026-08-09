@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from 'react'
 
 import { MultiSelectFacet } from '@/components/shared/components/facets/components/MultiSelectFacet'
 import { TreeSelectFacet } from '@/components/shared/components/facets/components/TreeSelectFacet'
+import { Kbd } from '@/components/shared/components/Kbd'
 import { ManualHyphens } from '@/components/shared/components/ManualHyphens'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -56,11 +57,7 @@ function TipsAndTricks() {
               modifierKey,
               modifierName,
               intro: introText,
-              kbd: (chunks: React.ReactNode) => (
-                <kbd className="px-1 py-0.5 rounded bg-foreground/10 text-xs font-mono">
-                  {chunks}
-                </kbd>
-              ),
+              kbd: (chunks: React.ReactNode) => <Kbd>{chunks}</Kbd>,
             })}
           </p>
         )}

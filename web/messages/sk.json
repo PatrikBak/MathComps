@@ -24,7 +24,127 @@
       "title": "Prečo MathComps začal"
     }
   },
+  "admin": {
+    "defenseReview": {
+      "clearFilters": "Zrušiť filtre",
+      "config": {
+        "maxOutputTokens": "Limit výstupu",
+        "maxRevisions": "Limit prepisov",
+        "model": "Model",
+        "modelDefault": "predvolené",
+        "prompt": "Prompt",
+        "promptChars": "{count, plural, one {# znak} few {# znaky} other {# znakov}}",
+        "reasoningEffort": "Uvažovanie",
+        "reasoningEffortNone": "žiadne",
+        "steps": {
+          "generate": "Odpoveď",
+          "leakCheck": "Kontrola prezradenia",
+          "mathCheck": "Kontrola matematiky"
+        },
+        "unknown": "Táto konverzácia prebehla skôr, než sa nastavenia zaznamenávali."
+      },
+      "deletedHandout": "Odstránený materiál",
+      "detailFailed": "Konverzáciu sa nepodarilo načítať",
+      "detailTitle": "Konverzácia",
+      "detailTitleFor": "Konverzácia: {student}",
+      "empty": "Zatiaľ žiadne konverzácie",
+      "emptyFiltered": "Týmto filtrom nezodpovedá žiadna konverzácia.",
+      "emptyHint": "Keď niekto začne obhajobu, objaví sa tu.",
+      "failed": "Konverzácie sa nepodarilo načítať",
+      "failedHint": "Skús to prosím znova.",
+      "feed": {
+        "empty": "Zatiaľ žiadne poznámky",
+        "open": "Otvoriť",
+        "openOnly": "Len nevyriešené",
+        "title": "Všetky poznámky"
+      },
+      "filters": {
+        "any": "Ľubovoľné",
+        "period": "Obdobie",
+        "periodDays": "{days, plural, =1 {Posledných 24 hodín} =365 {Posledný rok} few {Posledné # dni} other {Posledných # dní}}",
+        "problem": "Úloha",
+        "promptVersion": "Verzia nastavení",
+        "searchProblem": "Hľadať úlohu",
+        "searchUser": "Hľadať študenta",
+        "signals": "Signály",
+        "signalsFeedback": "Zhodnotená konverzácia",
+        "signalsHasNotes": "Má poznámky",
+        "signalsNoNotes": "Bez poznámok",
+        "signalsReported": "Nahlásená odpoveď",
+        "unread": "Neprečítané",
+        "user": "Študent"
+      },
+      "markAllRead": "Označiť všetky ako prečítané",
+      "markedRead": "{count, plural, =1 {1 konverzácia označená ako prečítaná} few {# konverzácie označené ako prečítané} other {# konverzácií označených ako prečítaných}}",
+      "markRead": "Označiť ako prečítané",
+      "markUnread": "Označiť ako neprečítané",
+      "newTurns": "+{count, plural, =1 {# nová} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
+      "next": "Nasledujúca",
+      "nextUnread": "Nasledujúca neprečítaná",
+      "noOpeningMessage": "Zatiaľ žiadna správa",
+      "noteCount": "Poznámky: {count}",
+      "notes": {
+        "byAuthor": "od {author}",
+        "categories": {
+          "gaveAway": "Prezradila priveľa",
+          "missedTheMistake": "Prehliadla chybu",
+          "misunderstood": "Nepochopila",
+          "other": "Iné",
+          "saidSomethingWrong": "Povedala nepravdu",
+          "tone": "Tón"
+        },
+        "category": "Téma",
+        "categoryNone": "Neuvedené",
+        "deleteMessage": "Poznámka sa zmaže natrvalo.",
+        "deleteTitle": "Zmazať poznámku",
+        "empty": "Zatiaľ žiadne poznámky",
+        "onConversation": "K celej konverzácii",
+        "onTurn": "K odpovedi č. {sequence}",
+        "placeholder": "Čo tu stojí za poznámku?",
+        "reopen": "Znova otvoriť",
+        "reply": "Odpoveď {sequence}",
+        "resolve": "Označiť ako vyriešené",
+        "resolved": "Vyriešené",
+        "resolvedOn": "Vyriešené {date}",
+        "target": "Odpoveď",
+        "wholeConversation": "Celá konverzácia",
+        "write": "Napísať poznámku",
+        "writeFailed": "Poznámku sa nepodarilo uložiť"
+      },
+      "openNotes": "Poznámky",
+      "position": "{index} / {total}",
+      "previous": "Predchádzajúca",
+      "readStateFailed": "Nepodarilo sa zaznamenať prečítanie",
+      "reference": {
+        "solution": "Referenčné riešenie a nápovedy",
+        "statement": "Zadanie"
+      },
+      "shortcuts": {
+        "next": "ďalšia",
+        "nextUnread": "ďalšia neprečítaná",
+        "previous": "predchádzajúca"
+      },
+      "student": "Študent",
+      "studentFeedbackMark": "Študent zhodnotil konverzáciu",
+      "studentNoComment": "Bez komentára",
+      "studentReportMark": "Študent nahlásil odpoveď",
+      "studentVerdict": "Čo povedal študent",
+      "tabs": {
+        "config": "Nastavenia",
+        "conversation": "Konverzácia",
+        "notes": "Poznámky",
+        "reference": "Riešenie"
+      },
+      "tabsLabel": "Časti konverzácie",
+      "title": "Prechádzať konverzácie",
+      "turnCount": "Odpovedí: {count}",
+      "unreadDivider": "Nové od vášho posledného čítania"
+    }
+  },
   "apiErrors": {
+    "AdminNoteNotFound": "Táto poznámka už neexistuje.",
+    "AdminNoteTarget": "Táto odpoveď už neexistuje.",
+    "AdminNoteValue": "Táto poznámka nie je platná.",
     "CannotLikeOwnComment": "Nemôžeš dať páči sa mi vlastnému komentáru.",
     "CommentNotFound": "Tento komentár už neexistuje.",
     "CommentTargetNotFound": "Obsah, ku ktorému komentár patrí, už neexistuje.",
@@ -46,6 +166,7 @@
     "ListReorderMismatch": "Zoznam sa medzičasom zmenil. Obnovte stránku a skúste to znova.",
     "MalformedRequest": "Požiadavku sa nepodarilo prečítať. Obnovte stránku a skúste to znova.",
     "MarkStatusRequiresAuthentication": "Ak chcete filtrovať podľa svojho pokroku, prihláste sa.",
+    "NotAdminNoteAuthor": "Upravovať alebo mazať môžeš len vlastné poznámky.",
     "NotCommentAuthor": "Upravovať alebo mazať môžeš len vlastné komentáre.",
     "ProblemNotFound": "Úloha nebola nájdená.",
     "RateLimited": "Príliš veľa požiadaviek. Chvíľu počkajte a skúste to znova.",
@@ -514,6 +635,10 @@
       "description": "Príbeh projektu MathComps: kto ho tvorí, prečo vznikol trojjazyčný archív olympiádnych úloh, študijných materiálov a sprievodcu zdrojmi, a na čom je postavený.",
       "title": "O projekte"
     },
+    "adminDefenses": {
+      "description": "Prehľad obhajob vedených s AI skúšajúcou.",
+      "title": "Konverzácie s Mathildou"
+    },
     "guide": {
       "description": "Zoznam informácií o súťažiach a odkazy na rôzne užitočné veci zo sveta súťažnej matematiky.",
       "title": "Sprievodca"
@@ -587,6 +712,7 @@
     "title": "Stránka sa nenašla"
   },
   "plurals": {
+    "conversations": "{count, plural, =1 {# konverzácia} =2 {# konverzácie} =3 {# konverzácie} =4 {# konverzácie} other {# konverzácií}}",
     "problems": "{count, plural, =1 {# úloha} =2 {# úlohy} =3 {# úlohy} =4 {# úlohy} other {# úloh}}",
     "replies": "{count, plural, =1 {# odpoveď} =2 {# odpovede} =3 {# odpovede} =4 {# odpovede} other {# odpovedí}}"
   },
@@ -908,9 +1034,7 @@
       "clearSearch": "Vymazať vyhľadávanie v {name}",
       "close": "Zavrieť filtre",
       "closePopover": "Zavrieť výber",
-      "collapseGroup": "Zbaliť skupinu {name}",
       "collapseNode": "Zbaliť {name}",
-      "expandGroup": "Rozbaliť skupinu {name}",
       "expandNode": "Rozbaliť {name}",
       "logic": "Logika",
       "logicAll": "Všetci",
@@ -936,7 +1060,15 @@
       "close": "Zavrieť"
     },
     "network": {
-      "offline": "Ste offline. Niektoré akcie nebudú fungovať, kým sa znovu nepripojíte."
+      "offline": "Ste offline. Niektoré akcie nebudú fungovať, kým sa znovu nepripojíte.",
+      "offlineHint": "Načítanie bude pokračovať, len čo sa pripojenie obnoví.",
+      "offlineTitle": "Bez pripojenia",
+      "retrying": "Skúšam znova…"
+    },
+    "pagination": {
+      "failed": "Ďalšie sa nepodarilo načítať.",
+      "loading": "Načítavam ďalšie…",
+      "loadMore": "Načítať ďalšie"
     },
     "userMenu": {
       "label": "Používateľské menu",

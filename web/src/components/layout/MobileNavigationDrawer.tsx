@@ -13,6 +13,7 @@ import { UserMenuItem } from '@/components/layout/UserMenuItem'
 import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { Button, buttonVariants } from '@/components/shared/components/Button'
 import { NavLink } from '@/components/shared/components/NavLink'
+import { useIsAdmin } from '@/hooks/use-is-admin'
 import { ROUTES } from '@/i18n/i18n'
 import { usePathname } from '@/i18n/navigation'
 
@@ -52,6 +53,9 @@ export const MobileNavigationDrawer = ({
 
   // Get the current pathname for active state detection
   const pathname = usePathname()
+
+  // Whether the user reviews defenses
+  const isAdmin = useIsAdmin()
 
   // Translations for navigation links
   const tNav = useTranslations('navigation')
@@ -93,7 +97,7 @@ export const MobileNavigationDrawer = ({
           <div className="fixed inset-0 bg-background/30" aria-hidden="true" />
         </TransitionChild>
 
-        {/* Drawer Panel */}
+        {/* Drawer panel */}
         <TransitionChild
           as={Fragment}
           enter="transition-transform ease-out duration-300"
@@ -117,17 +121,17 @@ export const MobileNavigationDrawer = ({
               </Button>
             </div>
 
-            {/* Scrollable Content */}
+            {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto">
               <div className="flex flex-col gap-4 px-6 pt-1">
-                {/* User Info Section */}
+                {/* Who is signed in */}
                 {isLoaded && user && (
                   <div className="mt-4 p-4 rounded-xl bg-foreground/5 border border-foreground/5">
                     <UserInfoHeader user={user} size="md" />
                   </div>
                 )}
 
-                {/* Main Navigation */}
+                {/* Main navigation */}
                 <nav className="flex flex-col">
                   <MobileLink href={ROUTES.PROBLEMS}>{tNav('problems')}</MobileLink>
                   <MobileLink href={ROUTES.HANDOUTS}>{tNav('handouts')}</MobileLink>
@@ -138,7 +142,7 @@ export const MobileNavigationDrawer = ({
                 {/* Separator — only when logged in */}
                 {isLoaded && user && <div className="-mx-6 -mt-2 border-t border-foreground/10" />}
 
-                {/* Auth Actions */}
+                {/* Auth actions */}
                 {isLoaded && (
                   <div>
                     {user ? (
@@ -149,7 +153,16 @@ export const MobileNavigationDrawer = ({
                           variant="mobile"
                           onClick={handleOpenDefenses}
                         />
+
+                        {/* Everyone's defenses */}
+                        {isAdmin && (
+                          <UserMenuItem type="defenseReview" variant="mobile" onClick={onClose} />
+                        )}
+
+                        {/* Their profile */}
                         <UserMenuItem type="profile" variant="mobile" onClick={onClose} />
+
+                        {/* And the way out */}
                         <UserMenuItem type="signOut" variant="mobile" onClick={onClose} />
                       </div>
                     ) : (
@@ -173,7 +186,7 @@ export const MobileNavigationDrawer = ({
                 {/* Separator — only when logged in */}
                 {isLoaded && user && <div className="-mx-6 border-t border-foreground/10" />}
 
-                {/* Language Switcher */}
+                {/* Language switcher */}
                 <div className="flex justify-center pb-4">
                   <MobileLanguageSwitcher onSelect={onClose} />
                 </div>

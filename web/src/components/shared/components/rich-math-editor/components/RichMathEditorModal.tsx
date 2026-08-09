@@ -28,6 +28,8 @@ type RichMathEditorExpandedModalProps = {
   placeholder: string
   /** Callback triggered when the send button is clicked */
   onSend?: () => void
+  /** Whether a send is currently allowed; the editor's own validity gates on top of it */
+  canSend?: boolean
   /** Callback triggered when the cancel button is clicked */
   onCancel?: () => void
   /** Callback that stops the in-flight submit. */
@@ -48,6 +50,7 @@ export function RichMathEditorExpandedModal({
   toolbarConfig,
   placeholder,
   onSend,
+  canSend = true,
   onCancel,
   onStop,
   isLoading = false,
@@ -82,7 +85,7 @@ export function RichMathEditorExpandedModal({
       className="flex flex-col max-h-[95vh] md:max-h-[90vh] md:max-w-6xl"
     >
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden -mx-6 -mb-6 px-4 md:px-6 pb-4 md:pb-6">
-        {/* Mobile: Tab switcher */}
+        {/* The editor/preview switcher, on mobile where the two can't stand side by side */}
         <div className="md:hidden flex border-b border-foreground/10 mb-2">
           <button
             type="button"
@@ -110,11 +113,11 @@ export function RichMathEditorExpandedModal({
           </button>
         </div>
 
-        {/* Editor and Preview container */}
+        {/* The editor and its preview */}
         <div className="flex-1 flex flex-col overflow-hidden border border-foreground/10 rounded-lg">
-          {/* Top row: Editor + Preview */}
+          {/* The two panels */}
           <div className="flex-1 grid grid-cols-1 grid-rows-1 md:flex md:flex-row min-h-0 overflow-hidden">
-            {/* Left: Editor panel */}
+            {/* The editor, on the left */}
             <div
               className={cn(
                 'col-start-1 row-start-1 flex flex-col min-h-0 md:flex-1 md:max-h-[calc(90vh-10rem)] overflow-hidden',
@@ -132,7 +135,7 @@ export function RichMathEditorExpandedModal({
                 onAttachmentClick={openAttachmentPicker}
               />
 
-              {/* Expanded Textarea - flex to match preview height */}
+              {/* The text itself, grown to match the preview's height */}
               <RichMathEditorInputArea
                 ref={inputAreaRef}
                 variant="card"
@@ -149,10 +152,10 @@ export function RichMathEditorExpandedModal({
               />
             </div>
 
-            {/* Vertical divider (desktop only) */}
+            {/* The line between them, where they stand side by side */}
             <div className="hidden md:block w-px bg-foreground/10 flex-shrink-0" />
 
-            {/* Right: Preview panel */}
+            {/* The preview, on the right */}
             <div
               className={cn(
                 'col-start-1 row-start-1 md:col-auto md:row-auto md:w-1/2 md:flex-shrink-0 md:max-h-[calc(90vh-8rem)] overflow-hidden flex flex-col',
@@ -161,11 +164,12 @@ export function RichMathEditorExpandedModal({
               )}
             >
               <div className="h-full flex flex-col overflow-y-auto">
-                {/* Header - desktop only */}
+                {/* Its heading, where the switcher above isn't already naming it */}
                 <div className="hidden md:block sticky top-0 z-10 px-4 pt-3 pb-2 bg-surface/80 text-xs text-muted uppercase tracking-wide font-medium">
                   {tEditor('preview')}
                 </div>
-                {/* Content */}
+
+                {/* What the text renders as */}
                 <div className="flex-1 px-4 py-3 text-sm text-muted-foreground leading-relaxed min-h-[200px] bg-surface-inset/50">
                   {state.hasContent && (
                     <RichMathEditorRenderer
@@ -202,7 +206,7 @@ export function RichMathEditorExpandedModal({
                 : undefined
             }
             onStop={onStop}
-            isValid={state.isValid}
+            isValid={state.isValid && canSend}
             isLoading={isLoading}
           />
         </div>

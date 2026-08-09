@@ -1,5 +1,6 @@
 using MathComps.Api.Endpoints;
 using MathComps.Api.Errors;
+using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Problems;
@@ -78,6 +79,7 @@ public sealed class GlobalExceptionHandler(
         ProblemNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ProblemNotFound),
         ListNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ListNotFound),
         DefenseSessionNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.DefenseSessionNotFound),
+        AdminNoteNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.AdminNoteNotFound),
 
         // Defense guardrails: the request doesn't hold up, or the user's usage is over a cap
         DefenseMessageTooLongException => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseMessageTooLong),
@@ -93,8 +95,13 @@ public sealed class GlobalExceptionHandler(
         // retry-after semantics
         DefenseSpendLimitException => (StatusCodes.Status429TooManyRequests, ApiErrorCode.DefenseSpendLimit),
 
+        // A review note the contract can't take: what it says, or the reply it stands against
+        AdminNoteValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminNoteValue),
+        AdminNoteTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminNoteTarget),
+
         // Forbidden actions — the caller is known, they're just not allowed
         NotCommentAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotCommentAuthor),
+        NotAdminNoteAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotAdminNoteAuthor),
         ListAccessDeniedException => (StatusCodes.Status403Forbidden, ApiErrorCode.ListAccessDenied),
 
         // State conflicts

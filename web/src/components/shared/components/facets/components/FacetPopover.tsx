@@ -10,6 +10,33 @@ import type { CSSProperties, ReactNode } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
+import type { FacetTriggerVariant } from './FacetTrigger'
+
+/**
+ * The fill each shape's panel takes, following the surface it floats over: a stacked facet opens inside the
+ * panel its column sits in, a pill opens over the page itself.
+ */
+const FACET_POPOVER_SURFACES: Record<FacetTriggerVariant, string> = {
+  stacked: '[--facet-surface:var(--color-surface)]',
+  pill: '[--facet-surface:var(--color-surface-raised)]',
+}
+
+/**
+ * The panel's own fill, which everything inside it shares. One unbroken surface, divided by hairlines
+ * rather than by tone, and opaque whatever the panel is given, so the rows never show through the
+ * chrome they scroll under.
+ */
+export const FACET_SURFACE_CLASS = 'bg-[var(--facet-surface)]'
+
+/**
+ * The panel itself.
+ */
+const FACET_PANEL_CLASS = cn(
+  FACET_SURFACE_CLASS,
+  // Everything in here is control text, which the hyphenation the document sets for prose would break mid-word
+  'hyphens-none'
+)
+
 /**
  * The props of {@link FacetPopover}.
  */
@@ -28,6 +55,8 @@ type FacetPopoverProps = {
   popoverId: string
   /** Id of the heading that names the popover. */
   labelId: string
+  /** How the trigger that opens it sits on the page, which decides what the panel floats over. */
+  variant?: FacetTriggerVariant
   /** The popover's contents. */
   children: ReactNode
 }
@@ -45,6 +74,7 @@ export function FacetPopover({
   getFloatingProps,
   popoverId,
   labelId,
+  variant = 'stacked',
   children,
 }: FacetPopoverProps) {
   // A closed facet has no panel at all
@@ -57,7 +87,11 @@ export function FacetPopover({
           ref={refs.setFloating}
           style={floatingStyles}
           {...getFloatingProps({ id: popoverId, 'aria-labelledby': labelId })}
-          className="z-[1000] flex flex-col overflow-hidden rounded-lg border border-foreground/10 bg-surface/95 shadow-2xl backdrop-blur"
+          className={cn(
+            'z-[1000] flex flex-col overflow-hidden rounded-lg border border-foreground/10 shadow-2xl',
+            FACET_POPOVER_SURFACES[variant],
+            FACET_PANEL_CLASS
+          )}
         >
           {children}
         </div>
@@ -72,6 +106,8 @@ export function FacetPopover({
 type FacetPopoverHeaderProps = {
   /** Name of what the facet filters by. */
   title: string
+  /** Id given to the name, absent where a heading outside the popover already carries it. */
+  titleId: string | undefined
   /** Empties the selection. */
   onClear: () => void
   /** How many options are selected. */
@@ -79,19 +115,36 @@ type FacetPopoverHeaderProps = {
 }
 
 /**
- * A header carrying the facet's name and a clear button, for a popover that has to
- * repeat the header inside itself.
+ * A header naming the facet and carrying the way to empty it.
+ *
+ * The clear button holds its space while there is nothing to clear, so picking the first option does not
+ * shift the list out from under the pointer that picked it.
  */
-export function FacetPopoverHeader({ title, onClear, count }: FacetPopoverHeaderProps) {
+export function FacetPopoverHeader({ title, titleId, onClear, count }: FacetPopoverHeaderProps) {
   // Translations for the shared filter controls
   const tFilters = useTranslations('ui.filters')
 
+  // How the button reads: the number is worth printing only from two options standing up, since below that
+  // the list under it says which one as plainly as a count would
+  const resetLabel = count > 1 ? `${tFilters('reset')} (${count})` : tFilters('reset')
+
   return (
-    <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-foreground/10 bg-surface/95 px-2.5 sm:px-3 py-1.5 sm:py-2">
-      <div className="min-w-0">
-        <span className="text-xs sm:text-sm font-medium text-foreground">{title}</span>
-      </div>
-      <div className="w-[80px] sm:w-[96px] flex justify-end">
+    <div
+      className={cn(
+        'sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-foreground/10 px-2.5 sm:px-3 py-1.5 sm:py-2',
+        FACET_SURFACE_CLASS
+      )}
+    >
+      {/* The facet's name */}
+      <span
+        id={titleId}
+        className="min-w-0 truncate text-xs sm:text-sm font-medium text-foreground"
+      >
+        {title}
+      </span>
+
+      {/* The way to clear it */}
+      <div className="ml-auto w-[80px] sm:w-[96px] flex justify-end">
         <button
           type="button"
           onClick={onClear}
@@ -103,9 +156,7 @@ export function FacetPopoverHeader({ title, onClear, count }: FacetPopoverHeader
           title={tFilters('reset')}
         >
           <FilterX className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
-          <span>
-            {tFilters('reset')} ({count})
-          </span>
+          <span>{resetLabel}</span>
         </button>
       </div>
     </div>

@@ -1,5 +1,7 @@
+import { useCallbackRef } from '@mantine/hooks'
 import { type MutateOptions, useMutation, type UseMutationResult } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
+import { useRef } from 'react'
 import { toast } from 'sonner'
 
 import { type ApiCaller, readyApiCall, useApi } from '@/hooks/use-api'
@@ -78,12 +80,18 @@ type UseOptimisticMutationResult<TData, TVariables, TContext> = Omit<
   UseMutationResult<TData, unknown, TVariables, TContext>,
   'mutate' | 'mutateAsync'
 > & {
-  /** Fires the mutation once the auth gate clears; a signed-out call prompts a login instead. */
+  /**
+   * Fires the mutation once the auth gate clears; a signed-out call prompts a login instead.
+   * Referentially stable for the hook's lifetime.
+   */
   mutate: (
     variables: TVariables,
     options?: MutateOptions<TData, unknown, TVariables, TContext>
   ) => void
-  /** The awaitable mutate, resolving to undefined when the auth gate blocked the call. */
+  /**
+   * The awaitable mutate, resolving to undefined when the auth gate blocked the call.
+   * Referentially stable for the hook's lifetime.
+   */
   mutateAsync: (
     variables: TVariables,
     options?: MutateOptions<TData, unknown, TVariables, TContext>
@@ -146,15 +154,24 @@ export function useOptimisticMutation<TData = unknown, TVariables = void, TConte
     onSettled: config.onSettled,
   })
 
+  // The client as it stands right now. Assigned during the render rather than from an effect, because the
+  // gate below is stable across renders and a caller firing it from a child's effect would otherwise decide
+  // on the client one render out of date, and turn away a call the live one would have let through.
+  const apiRef = useRef(api)
+  apiRef.current = api
+
   // Whether the client can fire the mutation; on the signed-out path it prompts a login instead
-  const canRun = (variables: TVariables): boolean => {
+  const canRun = useCallbackRef((variables: TVariables): boolean => {
+    // The client the decision is about
+    const currentApi = apiRef.current
+
     // Ready: the mutation can fire
-    if (api.state === 'ready') {
+    if (currentApi.state === 'ready') {
       return true
     }
 
     // Signed out: save any pending action
-    if (api.state === 'unauthenticated') {
+    if (currentApi.state === 'unauthenticated') {
       config.onBeforeLoginPrompt?.(variables)
 
       // Prompt a login
@@ -163,32 +180,36 @@ export function useOptimisticMutation<TData = unknown, TVariables = void, TConte
 
     // Signed out or still loading Clerk: nothing ran (the action's button is disabled while loading)
     return false
-  }
+  })
 
   // The auth-gated mutate: fires only once the gate clears
-  const mutate = (
-    variables: TVariables,
-    options?: MutateOptions<TData, unknown, TVariables, TContext>
-  ): void => {
-    // Run only when ready; otherwise the gate handled the auth state
-    if (canRun(variables)) {
-      mutation.mutate(variables, options)
+  const mutate = useCallbackRef(
+    (
+      variables: TVariables,
+      options?: MutateOptions<TData, unknown, TVariables, TContext>
+    ): void => {
+      // Run only when ready; otherwise the gate handled the auth state
+      if (canRun(variables)) {
+        mutation.mutate(variables, options)
+      }
     }
-  }
+  )
 
   // The awaitable variant, resolving to undefined when the auth gate blocked the call
-  const mutateAsync = (
-    variables: TVariables,
-    options?: MutateOptions<TData, unknown, TVariables, TContext>
-  ): Promise<TData | undefined> => {
-    // Run only when ready; otherwise resolve to nothing
-    if (canRun(variables)) {
-      return mutation.mutateAsync(variables, options)
-    }
+  const mutateAsync = useCallbackRef(
+    (
+      variables: TVariables,
+      options?: MutateOptions<TData, unknown, TVariables, TContext>
+    ): Promise<TData | undefined> => {
+      // Run only when ready; otherwise resolve to nothing
+      if (canRun(variables)) {
+        return mutation.mutateAsync(variables, options)
+      }
 
-    // The gate blocked the call
-    return Promise.resolve(undefined)
-  }
+      // The gate blocked the call
+      return Promise.resolve(undefined)
+    }
+  )
 
   // The mutation object with the auth-gated callers swapped in
   return { ...mutation, mutate, mutateAsync }

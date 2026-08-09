@@ -7,6 +7,7 @@ import type {
   DefenseSession,
   DefenseTurnReport,
   DefenseTurnRequest,
+  StoredTurn,
   Turn,
   TurnRole,
 } from './defense-types'
@@ -172,11 +173,38 @@ function draftTurn(role: TurnRole, content: string): Turn {
  *
  * @returns The reports under their replies.
  */
-function indexReports(
+export function indexReports(
   reports: readonly DefenseTurnReport[]
 ): ReadonlyMap<string, DefenseTurnReport> {
   // Each report under the reply it holds something against
   return new Map(reports.map((report) => [report.turnId, report]))
+}
+
+/**
+ * Finds the first turn to have arrived after a given moment, which is where a reader coming back to the
+ * conversation picks up.
+ *
+ * The moment itself belongs to what was already there, so a turn authored on it is not one of the new ones.
+ *
+ * @param turns - The conversation in order, oldest first.
+ * @param momentIso - The moment to measure against, as an ISO-8601 string; null when nothing marks one.
+ *
+ * @returns The first turn after that moment, or null when none of them is.
+ */
+export function findFirstTurnAfter(
+  turns: readonly StoredTurn[],
+  momentIso: string | null
+): StoredTurn | null {
+  // Nothing to measure against, so nothing counts as having arrived since
+  if (momentIso === null) {
+    return null
+  }
+
+  // That moment as a timestamp
+  const moment = new Date(momentIso).getTime()
+
+  // The first turn authored past it
+  return turns.find((turn) => new Date(turn.createdAt).getTime() > moment) ?? null
 }
 
 /**

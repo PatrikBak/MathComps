@@ -1,6 +1,8 @@
 // Types for the problem library's filters, the options they are picked from, and the
 // responses they produce
 
+import type { PagedList } from '@/lib/api/paged-list'
+
 import type {
   CompetitionFilterOption,
   FacetOption,
@@ -135,16 +137,7 @@ export type UrlQueryState = Omit<SearchFiltersState, 'contestSelection'> & {
  */
 export type FilterResponse = {
   /** The page of matching problems. */
-  problems: {
-    /** The problems on this page. */
-    items: Problem[]
-    /** Which page this is. */
-    page: number
-    /** How many problems a page holds. */
-    pageSize: number
-    /** How many problems match in total, across every page. */
-    totalCount: number
-  }
+  problems: PagedList<Problem>
   /** The option counts under these filters, absent when they cannot have changed. */
   updatedOptions: FilterOptionsWithCounts | null
   /** The name of the list being browsed, null when browsing everything. */

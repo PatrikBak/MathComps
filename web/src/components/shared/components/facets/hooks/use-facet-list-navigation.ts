@@ -1,16 +1,15 @@
 import { type KeyboardEvent, type RefObject, useRef } from 'react'
 
-/** How many parts the list is split into, one of which a page key jumps over. */
-const PAGE_FRACTION = 10
+import { isFacetNavigationKey, nextFocusedOptionIndex } from '../model/facet-logic'
 
-/** The keys this hook takes over from the browser. */
-const NAVIGATION_KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End', 'PageDown', 'PageUp']
+/** The row controls focus moves between, whichever of them the facet's selection mode draws. */
+const OPTION_INPUT_SELECTOR = 'input[type="checkbox"], input[type="radio"]'
 
 /**
  * The ref and handlers walking keyboard focus through a facet's option list.
  */
 export type UseFacetListNavigationResult = {
-  /** The scrolling list element, whose checkboxes are what focus moves between. */
+  /** The scrolling list element, whose row controls are what focus moves between. */
   listRef: RefObject<HTMLDivElement | null>
   /** Moves focus to the first option. */
   focusFirstItem: () => void
@@ -21,7 +20,7 @@ export type UseFacetListNavigationResult = {
 /**
  * Lets the arrow, home, end and page keys walk a facet's options.
  *
- * Focus lands on the real checkboxes rather than on a roving tabindex, which leaves
+ * Focus lands on the rows' real controls rather than on a roving tabindex, which leaves
  * Space and Enter to the browser and keeps the rows reachable by Tab.
  *
  * @returns The ref and handlers described by {@link UseFacetListNavigationResult}.
@@ -33,11 +32,11 @@ export function useFacetListNavigation(): UseFacetListNavigationResult {
   /**
    * Collects the options focus can move between.
    *
-   * @returns The rendered option checkboxes, in document order.
+   * @returns The rendered option controls, in document order.
    */
   function optionInputs(): HTMLInputElement[] {
-    // The checkboxes standing in for the rows, in document order
-    const inputs = listRef.current?.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+    // The controls standing in for the rows, in document order
+    const inputs = listRef.current?.querySelectorAll<HTMLInputElement>(OPTION_INPUT_SELECTOR)
 
     // A closed popover has no list, which is a legitimate empty result rather than an error
     return Array.from(inputs ?? [])
@@ -59,7 +58,7 @@ export function useFacetListNavigation(): UseFacetListNavigationResult {
     if (event.target instanceof HTMLInputElement && event.target.type === 'text') return
 
     // Anything outside the navigation set keeps whatever the browser does with it
-    if (!NAVIGATION_KEYS.includes(event.key)) return
+    if (!isFacetNavigationKey(event.key)) return
 
     // The hook moves focus itself, so the browser's own handling of the key is dropped
     event.preventDefault()
@@ -70,51 +69,11 @@ export function useFacetListNavigation(): UseFacetListNavigationResult {
     // An empty list has nowhere to move focus to
     if (items.length === 0) return
 
-    // Focus may sit outside the list, in which case movement starts from the top
+    // Which row holds focus, or -1 while it sits on something else inside the list
     const focusedIndex = items.findIndex((item) => item === document.activeElement)
-    const currentIndex = focusedIndex === -1 ? 0 : focusedIndex
-
-    // How far a page key travels, never less than a single row
-    const page = Math.max(1, Math.floor(items.length / PAGE_FRACTION))
-
-    // The far end of the list, which the downward keys clamp to
-    const lastIndex = items.length - 1
-
-    // Where the pressed key lands, clamped to the ends of the list
-    const nextIndex = (() => {
-      switch (event.key) {
-        // One row down, stopping at the last
-        case 'ArrowDown':
-          return Math.min(lastIndex, currentIndex + 1)
-
-        // One row up, stopping at the first
-        case 'ArrowUp':
-          return Math.max(0, currentIndex - 1)
-
-        // Straight to the top of the list
-        case 'Home':
-          return 0
-
-        // Straight to the bottom of it
-        case 'End':
-          return lastIndex
-
-        // A page further down, no further than the last row
-        case 'PageDown':
-          return Math.min(lastIndex, currentIndex + page)
-
-        // A page further up, no further than the first row
-        case 'PageUp':
-          return Math.max(0, currentIndex - page)
-
-        // Nothing else reaches here, since the guard above filtered the key set
-        default:
-          return currentIndex
-      }
-    })()
 
     // The row the key picked
-    const nextItem = items[nextIndex]
+    const nextItem = items[nextFocusedOptionIndex(event.key, focusedIndex, items.length)]
 
     // Scrolling is suppressed here too, since the row is brought into view deliberately below
     nextItem?.focus({ preventScroll: true })

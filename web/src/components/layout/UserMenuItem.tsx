@@ -1,6 +1,6 @@
 import { useClerk } from '@clerk/nextjs'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Bot, LogOut, User } from 'lucide-react'
+import { Bot, Inbox, LogOut, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
@@ -13,7 +13,7 @@ import { AppLink } from '../shared/components/AppLink'
 /**
  * Type of user menu item to render.
  */
-type UserMenuItemType = 'mathilda' | 'profile' | 'signOut'
+type UserMenuItemType = 'mathilda' | 'defenseReview' | 'profile' | 'signOut'
 
 /**
  * Props for the {@link UserMenuItem} component.
@@ -38,6 +38,7 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
   const tCommon = useTranslations('common')
   const tAuth = useTranslations('auth')
   const tDefense = useTranslations('defense')
+  const tDefenseReview = useTranslations('admin.defenseReview')
 
   // Get the current URL for logout redirect
   const { signOut } = useClerk()
@@ -60,6 +61,12 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
       label: tDefense('name'),
       bgColor: 'bg-brand/10',
       iconColor: 'text-brand-light',
+    },
+    defenseReview: {
+      icon: Inbox,
+      label: tDefenseReview('title'),
+      bgColor: 'bg-warning/10',
+      iconColor: 'text-warning',
     },
     profile: {
       icon: User,
@@ -97,6 +104,8 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
         'flex items-center gap-3 px-4 py-2.5 text-sm',
         'text-foreground/70 hover:text-foreground',
         'transition-colors duration-150',
+        // Radix focuses an item when the pointer enters it, so a focus ring would double as a hover
+        // style. The highlight is the indicator for both routes.
         'outline-none data-[highlighted]:bg-foreground/5 data-[highlighted]:text-foreground',
         disabled ? 'opacity-50 cursor-default pointer-events-none' : 'cursor-pointer'
       )
@@ -116,6 +125,14 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
               <button onClick={handleSignOut} className={cn('w-full', baseClasses)}>
                 {content}
               </button>
+            </DropdownMenu.Item>
+          )
+        case 'defenseReview':
+          return (
+            <DropdownMenu.Item asChild>
+              <AppLink href={ROUTES.ADMIN_DEFENSES} plain className={baseClasses}>
+                {content}
+              </AppLink>
             </DropdownMenu.Item>
           )
         case 'profile':
@@ -155,6 +172,12 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
             <button onClick={handleSignOut} className={mobileClasses}>
               {content}
             </button>
+          )
+        case 'defenseReview':
+          return (
+            <AppLink href={ROUTES.ADMIN_DEFENSES} plain onClick={onClick} className={mobileClasses}>
+              {content}
+            </AppLink>
           )
         case 'profile':
           return (

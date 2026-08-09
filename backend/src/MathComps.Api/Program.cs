@@ -135,6 +135,9 @@ builder.Services.AddUserServices();
 builder.Services.AddLlmChat(builder.Configuration);
 builder.Services.AddDefenseServices(builder.Configuration);
 
+// The admin-only review of defense conversations
+builder.Services.AddAdminServices();
+
 // The Clerk webhook handler
 builder.Services.AddClerkWebhook();
 

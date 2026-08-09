@@ -24,7 +24,127 @@
       "title": "Why MathComps started"
     }
   },
+  "admin": {
+    "defenseReview": {
+      "clearFilters": "Clear filters",
+      "config": {
+        "maxOutputTokens": "Output cap",
+        "maxRevisions": "Revision cap",
+        "model": "Model",
+        "modelDefault": "default",
+        "prompt": "Prompt",
+        "promptChars": "{count, plural, one {# character} other {# characters}}",
+        "reasoningEffort": "Reasoning",
+        "reasoningEffortNone": "none",
+        "steps": {
+          "generate": "Reply",
+          "leakCheck": "Leak check",
+          "mathCheck": "Math check"
+        },
+        "unknown": "This conversation ran before the settings were recorded."
+      },
+      "deletedHandout": "Deleted handout",
+      "detailFailed": "Couldn't load the conversation",
+      "detailTitle": "Conversation",
+      "detailTitleFor": "Conversation: {student}",
+      "empty": "No conversations yet",
+      "emptyFiltered": "No conversation matches these filters.",
+      "emptyHint": "One will show up here as soon as somebody starts a defense.",
+      "failed": "Couldn't load the conversations",
+      "failedHint": "Please try again.",
+      "feed": {
+        "empty": "No notes yet",
+        "open": "Open",
+        "openOnly": "Open only",
+        "title": "Every note"
+      },
+      "filters": {
+        "any": "Any",
+        "period": "Period",
+        "periodDays": "{days, plural, =1 {Last 24 hours} =365 {Last year} other {Last # days}}",
+        "problem": "Problem",
+        "promptVersion": "Settings version",
+        "searchProblem": "Search problems",
+        "searchUser": "Search students",
+        "signals": "Signals",
+        "signalsFeedback": "Rated the conversation",
+        "signalsHasNotes": "Has notes",
+        "signalsNoNotes": "No notes",
+        "signalsReported": "Reported a reply",
+        "unread": "Unread",
+        "user": "Student"
+      },
+      "markAllRead": "Mark all read",
+      "markedRead": "{count, plural, =1 {1 conversation marked read} other {# conversations marked read}}",
+      "markRead": "Mark as read",
+      "markUnread": "Mark as unread",
+      "newTurns": "+{count} new",
+      "next": "Next",
+      "nextUnread": "Next unread",
+      "noOpeningMessage": "Nothing said yet",
+      "noteCount": "Notes: {count}",
+      "notes": {
+        "byAuthor": "by {author}",
+        "categories": {
+          "gaveAway": "Gave away too much",
+          "missedTheMistake": "Missed the mistake",
+          "misunderstood": "Misunderstood",
+          "other": "Other",
+          "saidSomethingWrong": "Said something wrong",
+          "tone": "Tone"
+        },
+        "category": "About",
+        "categoryNone": "Unspecified",
+        "deleteMessage": "The note will be deleted for good.",
+        "deleteTitle": "Delete the note",
+        "empty": "No notes yet",
+        "onConversation": "On the whole conversation",
+        "onTurn": "On reply {sequence}",
+        "placeholder": "What did you notice?",
+        "reopen": "Reopen",
+        "reply": "Reply {sequence}",
+        "resolve": "Mark as resolved",
+        "resolved": "Resolved",
+        "resolvedOn": "Resolved {date}",
+        "target": "Reply",
+        "wholeConversation": "Whole conversation",
+        "write": "Write a note",
+        "writeFailed": "Couldn't save the note"
+      },
+      "openNotes": "Notes",
+      "position": "{index} of {total}",
+      "previous": "Previous",
+      "readStateFailed": "Couldn't record that it was read",
+      "reference": {
+        "solution": "Reference solution and hints",
+        "statement": "Statement"
+      },
+      "shortcuts": {
+        "next": "next",
+        "nextUnread": "next unread",
+        "previous": "previous"
+      },
+      "student": "Student",
+      "studentFeedbackMark": "The student rated the conversation",
+      "studentNoComment": "No comment",
+      "studentReportMark": "The student reported a reply",
+      "studentVerdict": "What the student said",
+      "tabs": {
+        "config": "Settings",
+        "conversation": "Conversation",
+        "notes": "Notes",
+        "reference": "Solution"
+      },
+      "tabsLabel": "Parts of the conversation",
+      "title": "Review conversations",
+      "turnCount": "Turns: {count}",
+      "unreadDivider": "New since you last read this"
+    }
+  },
   "apiErrors": {
+    "AdminNoteNotFound": "This note no longer exists.",
+    "AdminNoteTarget": "That reply is no longer there.",
+    "AdminNoteValue": "That note isn't valid.",
     "CannotLikeOwnComment": "You can't like your own comment.",
     "CommentNotFound": "This comment no longer exists.",
     "CommentTargetNotFound": "The item this comment belongs to no longer exists.",
@@ -46,6 +166,7 @@
     "ListReorderMismatch": "The list changed elsewhere. Refresh and try again.",
     "MalformedRequest": "The request could not be read. Refresh and try again.",
     "MarkStatusRequiresAuthentication": "Log in to filter by your progress.",
+    "NotAdminNoteAuthor": "You can only edit or delete notes you wrote yourself.",
     "NotCommentAuthor": "You can only edit or delete your own comments.",
     "ProblemNotFound": "Problem not found.",
     "RateLimited": "You're doing that too fast. Please wait a moment and try again.",
@@ -514,6 +635,10 @@
       "description": "The story behind MathComps: who builds it, why a trilingual archive of olympiad problems, study materials, and a resource guide exists, and how it's built.",
       "title": "About project"
     },
+    "adminDefenses": {
+      "description": "Every defense held with the AI examiner.",
+      "title": "Mathilda conversations"
+    },
     "guide": {
       "description": "A list of competition information and links to various useful resources from the world of competitive mathematics.",
       "title": "Guide"
@@ -587,6 +712,7 @@
     "title": "Page not found"
   },
   "plurals": {
+    "conversations": "{count, plural, =1 {# conversation} other {# conversations}}",
     "problems": "{count, plural, =1 {# problem} other {# problems}}",
     "replies": "{count, plural, =1 {# reply} other {# replies}}"
   },
@@ -908,9 +1034,7 @@
       "clearSearch": "Clear search in {name}",
       "close": "Close filters",
       "closePopover": "Close selection",
-      "collapseGroup": "Collapse group {name}",
       "collapseNode": "Collapse {name}",
-      "expandGroup": "Expand group {name}",
       "expandNode": "Expand {name}",
       "logic": "Logic",
       "logicAll": "All",
@@ -936,7 +1060,15 @@
       "close": "Close"
     },
     "network": {
-      "offline": "You're offline. Some actions won't work until you reconnect."
+      "offline": "You're offline. Some actions won't work until you reconnect.",
+      "offlineHint": "Loading will carry on once the connection is back.",
+      "offlineTitle": "No connection",
+      "retrying": "Trying again…"
+    },
+    "pagination": {
+      "failed": "Couldn't load more.",
+      "loading": "Loading more…",
+      "loadMore": "Load more"
     },
     "userMenu": {
       "label": "User menu",

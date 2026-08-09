@@ -133,9 +133,9 @@ describe('resolveHandoutProblemRef', () => {
   })
 
   it('returns null when the handout is unknown', () => {
-    // A content id that isn't in the index
+    // A handout id the environment index carries nothing at all for
     const ref = resolveHandoutProblemRef(
-      { handoutContentId: 'missing', environmentId: 'V8pQ2mZxK7nLrT4wYc1Db' },
+      { handoutContentId: 'missing', environmentId: 'Nb4wK8mQ2xR7tY1uZ5aJc' },
       'en'
     )
 
