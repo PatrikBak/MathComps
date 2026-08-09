@@ -95,6 +95,21 @@ public static class StringExtensions
     }
 
     /// <summary>
+    /// Reduces text to what it actually carries, so a whitespace-only value counts as no value at all.
+    /// </summary>
+    /// <param name="text">The text to reduce.</param>
+    /// <returns>The trimmed text, or null when it carries nothing.</returns>
+    public static string? TrimToNull(this string? text)
+    {
+        // An absent or blank value is the same thing: nothing was written.
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+
+        // Otherwise keep the text without its surrounding whitespace.
+        return text.Trim();
+    }
+
+    /// <summary>
     /// Extracts the first substring matching the given regex pattern.
     /// </summary>
     /// <param name="text">The source text to search.</param>

@@ -109,6 +109,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>What students said about their defense conversations.</summary>
     public DbSet<DefenseSessionFeedback> DefenseSessionFeedbacks => Set<DefenseSessionFeedback>();
 
+    /// <summary>What was written down while reviewing defense conversations.</summary>
+    public DbSet<AdminNote> AdminNotes => Set<AdminNote>();
+
+    /// <summary>When defense conversations were last read while reviewing.</summary>
+    public DbSet<AdminSessionReview> AdminSessionReviews => Set<AdminSessionReview>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -136,11 +142,13 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     #region OnModelCreating
 
     /// <summary>
-    /// The condition holding a <c>comment</c> column to text a reader could act on. It names every whitespace
-    /// character it strips, since the one-argument <c>btrim</c> strips only spaces and would take a tab for an
-    /// account, and coalesces because a check constraint lets a null through on its own.
+    /// Builds the condition holding a text column to something a reader could act on. It names every whitespace
+    /// character it strips, since the one-argument <c>btrim</c> strips only spaces and would let a lone tab pass
+    /// for text, and coalesces because a check constraint lets a null through on its own.
     /// </summary>
-    private const string CommentCarriesText = @"coalesce(btrim(comment, E' \t\n\r\f'), '') <> ''";
+    /// <param name="column">The column the condition holds.</param>
+    /// <returns>The check-constraint condition.</returns>
+    private static string CarriesText(string column) => $@"coalesce(btrim({column}, E' \t\n\r\f'), '') <> ''";
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -170,6 +178,19 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         modelBuilder.HasDbFunction(unaccentMethod)
             .HasName("immutable_unaccent")
             .HasSchema("public");
+
+        // Register the function keying a defense conversation to the examiner settings it ran on, so grouping
+        // conversations by their settings and filtering to one set of them come out as the same SQL expression.
+        var examinerConfigVersionMethod = typeof(Extensions.PostgresDbFunctions)
+            .GetMethod(nameof(Extensions.PostgresDbFunctions.ExaminerConfigVersion))!;
+
+        modelBuilder.HasDbFunction(examinerConfigVersionMethod)
+            .HasName("examiner_config_version")
+            .HasSchema("public")
+            // Postgres declares the argument as jsonb while the CLR side carries the snapshot as a string.
+            // A bare column argument needs no cast and resolves anyway; anything else renders as text and
+            // fails at runtime with no such function, so the store type is pinned rather than inferred.
+            .HasParameter("examinerConfig").HasStoreType("jsonb");
 
         // IDs (Guid v7) are generated client-side in entities; tell EF the store does NOT generate them.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -897,7 +918,7 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
             // of what happened.
             e.ToTable(t => t.HasCheckConstraint(
                 "ck_defense_turn_report_other_needs_comment",
-                $"NOT ('other' = ANY(categories)) OR {CommentCarriesText}"));
+                $"NOT ('other' = ANY(categories)) OR {CarriesText("comment")}"));
         });
 
         #endregion DefenseTurnReport
@@ -919,10 +940,70 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
             // conversation went instead.
             e.ToTable(t => t.HasCheckConstraint(
                 "ck_defense_session_feedback_something_else_needs_comment",
-                $"outcome <> 'something_else' OR {CommentCarriesText}"));
+                $"outcome <> 'something_else' OR {CarriesText("comment")}"));
         });
 
         #endregion DefenseSessionFeedback
+
+        #region AdminNote
+
+        modelBuilder.Entity<AdminNote>(entity =>
+        {
+            // Who wrote it, restricted so a finding can't lose the reviewer standing behind it.
+            entity.HasOne(note => note.Author)
+                  .WithMany()
+                  .HasForeignKey(note => note.AuthorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            // The reviewed conversation, cascading so deleting it drops what was written about it.
+            entity.HasOne(note => note.Session)
+                  .WithMany()
+                  .HasForeignKey(note => note.SessionId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // The reply it is against, cascading so a rewind past that reply takes the note too. The conversation
+            // rides in the key, so the reply has to be one of that conversation's own; a note against the whole
+            // conversation names no reply and skips the check entirely.
+            entity.HasOne(note => note.Turn)
+                  .WithMany()
+                  .HasPrincipalKey(turn => new { turn.SessionId, turn.Id })
+                  .HasForeignKey(note => new { note.SessionId, note.TurnId })
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // The feed reads newest first across every conversation.
+            entity.HasIndex(note => note.CreatedAt).HasDatabaseName("ix_admin_note_created_at");
+
+            // Everything one reviewer has written.
+            entity.HasIndex(note => note.AuthorId).HasDatabaseName("ix_admin_note_author_id");
+
+            // A note carrying no text is an empty row, not a quiet one.
+            entity.ToTable(table => table.HasCheckConstraint(
+                "ck_admin_note_content_not_blank", CarriesText("content")));
+        });
+
+        #endregion AdminNote
+
+        #region AdminSessionReview
+
+        modelBuilder.Entity<AdminSessionReview>(entity =>
+        {
+            // A conversation is read once per reviewer, so it takes both to name a stamp.
+            entity.HasKey(review => new { review.SessionId, review.ReviewerId });
+
+            // The conversation that was read, cascading so deleting it drops the stamps with it.
+            entity.HasOne(review => review.Session)
+                  .WithMany()
+                  .HasForeignKey(review => review.SessionId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Who read it, cascading because where a reviewer got to is bookkeeping that means nothing without them.
+            entity.HasOne(review => review.Reviewer)
+                  .WithMany()
+                  .HasForeignKey(review => review.ReviewerId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        #endregion AdminSessionReview
     }
 
     #endregion OnModelCreating

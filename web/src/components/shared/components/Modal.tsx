@@ -1,6 +1,7 @@
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useRef } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import { useOnClosed } from '@/hooks/use-on-closed'
@@ -41,6 +42,13 @@ type ModalProps = {
   tall?: boolean
   /** Accessible name for the dialog when it renders its own header rather than a `title` */
   ariaLabel?: string
+  /**
+   * Whether the dialog opens with focus on the panel itself rather than on the first control inside it.
+   *
+   * A control focused this way comes out ringed, since a browser reads a scripted focus arriving on an empty
+   * document as a keyboard one. The panel takes no ring, and a Tab from it still reaches the first control.
+   */
+  focusPanelOnOpen?: boolean
   /** Called once the modal is gone and the page is the reader's again */
   onClosed?: () => void
 }
@@ -59,6 +67,7 @@ export function Modal({
   padded = true,
   tall = false,
   ariaLabel,
+  focusPanelOnOpen = false,
   onClosed,
 }: ModalProps) {
   // Get translations for modal
@@ -67,12 +76,18 @@ export function Modal({
   // Hand the page back to whoever is waiting on it
   useOnClosed(isOpen, onClosed)
 
+  // The dialog's panel
+  const panelRef = useRef<HTMLDivElement>(null)
+
   return (
     <Dialog
       open={isOpen}
       as="div"
       aria-label={ariaLabel}
       className="relative z-50"
+      // A target given here is focused as it stands, which is what lets the panel take focus at all: the scan
+      // this falls back to skips anything the reader can't Tab to
+      initialFocus={focusPanelOnOpen ? panelRef : undefined}
       onClose={onClose}
     >
       {/* Backdrop with blur */}
@@ -87,12 +102,15 @@ export function Modal({
           )}
         >
           <DialogPanel
+            ref={panelRef}
+            tabIndex={focusPanelOnOpen ? -1 : undefined}
             className={cn(
               'w-full max-w-md transform overflow-hidden rounded-none sm:rounded-2xl bg-surface/95 backdrop-blur-sm border border-foreground/10 text-left align-middle shadow-xl',
               'zoom-in-95',
               ENTER_ANIMATION,
               padded && 'p-3 sm:p-6',
               tall && 'flex h-[100dvh] flex-col sm:h-[92vh] sm:max-w-4xl',
+              focusPanelOnOpen && 'focus:outline-none',
               className
             )}
           >

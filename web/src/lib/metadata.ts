@@ -190,6 +190,7 @@ type MetadataNamespace =
   | 'metadata.login'
   | 'metadata.privacy'
   | 'metadata.news'
+  | 'metadata.adminDefenses'
 
 /**
  * Options for creating page metadata with automatic translations.

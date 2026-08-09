@@ -19,7 +19,11 @@ type FacetListProps = {
 }
 
 /**
- * The scrolling body of a facet's popover, holding its option rows.
+ * The scrolling body of a facet's popover, holding its option rows. It takes whatever height the panel has
+ * left, so how tall a facet opens is decided by the popover's own sizing alone.
+ *
+ * Its scrollbar is forced to stay on screen: macOS hides overlay scrollbars at rest, so a list cut off at its
+ * height gives no sign there is more of it under the last row on show.
  */
 export function FacetList({
   labelId,
@@ -32,7 +36,10 @@ export function FacetList({
     <div
       ref={listRef}
       className={cn(
-        'max-h-[32vh] overflow-y-auto',
+        // Growing fills a panel taller than the rows and the zero floor lets it shrink into a shorter one.
+        // The utility's transparent right border sits outside the bar rather than in place of the padding,
+        // so the padding stays symmetric and the border is what holds the bar off the panel edge.
+        'scrollbar-visible grow min-h-0 overflow-y-auto',
         noTopPadding ? 'px-0.5 sm:px-1 pb-0.5 sm:pb-1' : 'p-0.5 sm:p-1'
       )}
       role="group"

@@ -225,9 +225,9 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
 
   return (
     <>
-      {/* Who's examining + session controls + close */}
+      {/* The header: who is examining, and the conversation's controls */}
       <div className="flex items-center gap-3 border-b border-foreground/10 px-4 py-2.5 sm:px-5">
-        {/* Who the student is talking to, and what she is */}
+        {/* Who the student is talking to */}
         <div className="flex min-w-0 items-baseline gap-2">
           <span className="shrink-0 text-base font-bold text-foreground sm:text-lg">
             {t('name')}
@@ -235,7 +235,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
           <span className="truncate text-xs text-muted">{t('role')}</span>
         </div>
 
-        {/* Push the controls to the trailing edge */}
+        {/* The conversation's controls, at the trailing edge */}
         <div className="ml-auto flex items-center gap-2">
           {/* Start a fresh defense */}
           {canStartNew && (
@@ -287,6 +287,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
         reportedLabel={t('reported')}
         onRewindTurn={turn.requestRewind}
         onReportTurn={report.open}
+        newSince={null}
         footer={
           canAnswer && (
             <DefenseFeedbackPrompt
@@ -329,9 +330,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
         isPending={report.isSubmitting}
       />
 
-      {/* Taking a report off a reply is the student dropping something they said, so it is asked about first.
-          It sits beside the question, the way a confirmation over an open modal is asked everywhere else in
-          the app */}
+      {/* The question before a report comes off, since taking it off drops something the student said */}
       <ConfirmDialog
         isOpen={report.isRemoving}
         onClose={report.cancelRemoval}
@@ -377,8 +376,10 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
           <p className="py-3 text-center text-sm text-muted">{t('libraryLoading')}</p>
         ) : !isSignedIn ? (
           <div className="flex flex-col items-center gap-3 py-3 text-center">
-            {/* Why the composer is missing */}
+            {/* Why there is nothing to write into */}
             <p className="text-sm text-muted">{t('loginPrompt')}</p>
+
+            {/* And the way to fix that */}
             <LoginButton />
           </div>
         ) : (

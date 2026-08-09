@@ -858,21 +858,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     #region GetContestsBySeasonAsync Tests
 
     /// <summary>
-    /// Verifies that GetContestsBySeasonAsync returns all seasons with their contests.
-    /// This test ensures the contest browser can display all available seasons.
-    /// </summary>
-    [Fact]
-    public Task GetContestsBySeasonReturnsAllSeasons() => RunTestAsync(async service =>
-    {
-        // Act
-        var result = await service.GetContestsBySeasonAsync(Language.SK);
-
-        // Assert - we have 2 seasons in test data (75. ročník and 74. ročník)
-        Assert.Equal(2, result.Seasons.Count);
-    });
-
-    /// <summary>
-    /// Verifies that seasons are ordered by edition number descending (newest first).
+    /// Verifies that both seeded seasons come back, ordered by edition number descending (newest first).
     /// This ensures the UI displays the most recent seasons at the top.
     /// </summary>
     [Fact]
@@ -880,6 +866,9 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Act
         var result = await service.GetContestsBySeasonAsync(Language.SK);
+
+        // Assert - both seeded seasons come back
+        Assert.Equal(2, result.Seasons.Count);
 
         // Assert - newest season (75) should come first
         Assert.Equal(75, result.Seasons[0].EditionNumber);
@@ -889,8 +878,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Verifies that each season contains its associated contests with correct display names.
-    /// Tests that contests are properly flattened with full path names.
+    /// Verifies that each season contains its associated contests with correct display names, and that a contest
+    /// sitting straight on its competition names no category while a categorised one names its round.
     /// </summary>
     [Fact]
     public Task GetContestsBySeasonReturnsContestsForEachSeason() => RunTestAsync(async service =>
@@ -903,12 +892,19 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(4, season75.Contests.Count);
 
         // Verify CSMO contests have category in display name
-        Assert.Contains(season75.Contests, contest => contest.CompetitionName.Contains("CSMO") && contest.CategoryName == "A");
+        var csmoA = season75.Contests.First(contest =>
+            contest.CompetitionName.Contains("CSMO") && contest.CategoryName == "A");
         Assert.Contains(season75.Contests, contest => contest.CompetitionName.Contains("CSMO") && contest.CategoryName == "B");
         Assert.Contains(season75.Contests, contest => contest.CompetitionName.Contains("CSMO") && contest.CategoryName == "C");
 
-        // Verify IMO is included (no category, default round)
-        Assert.Contains(season75.Contests, contest => contest.CompetitionName.Contains("IMO"));
+        // Verify the categorised contest names the round its problems were set in
+        Assert.NotNull(csmoA.RoundSlug);
+
+        // Verify IMO is included (default round)
+        var imo = season75.Contests.First(contest => contest.CompetitionName.Contains("IMO"));
+
+        // Verify it sits straight on the competition, with no category between them
+        Assert.Null(imo.CategorySlug);
     });
 
     /// <summary>
@@ -939,31 +935,6 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         // IMO in season 75 has 1 problem (p7)
         var imo = season75.Contests.First(contest => contest.CompetitionSlug == "imo");
         Assert.Equal(1, imo.ProblemCount);
-    });
-
-    /// <summary>
-    /// Verifies that contest slugs are correctly populated for filter integration.
-    /// This ensures clicking a contest will correctly set the filter parameters.
-    /// </summary>
-    [Fact]
-    public Task GetContestsBySeasonReturnsCorrectSlugs() => RunTestAsync(async service =>
-    {
-        // Act
-        var result = await service.GetContestsBySeasonAsync(Language.SK);
-
-        // Assert
-        var season75 = result.Seasons.First(season => season.EditionNumber == 75);
-
-        // CSMO A should have competition and category slugs
-        var csmoA = season75.Contests.First(contest => contest is { CompetitionSlug: "csmo", CategorySlug: "a" });
-        Assert.Equal("csmo", csmoA.CompetitionSlug);
-        Assert.Equal("a", csmoA.CategorySlug);
-        Assert.NotNull(csmoA.RoundSlug);
-
-        // IMO should have competition slug but no category (direct round)
-        var imo = season75.Contests.First(contest => contest.CompetitionSlug == "imo");
-        Assert.Equal("imo", imo.CompetitionSlug);
-        Assert.Null(imo.CategorySlug);
     });
 
     /// <summary>
@@ -2029,13 +2000,14 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// An out-of-range page request is clamped rather than trusted: the page size caps at the configured
-    /// maximum (the DoS guard) and a non-positive page number floors to the first page.
+    /// maximum (the DoS guard), a non-positive page number floors to the first page, and one past the ceiling
+    /// caps at it rather than being multiplied out into an offset the database is handed as a negative.
     /// </summary>
     [Fact]
     public Task OutOfRangePagingIsClamped() => RunTestAsync(async service =>
     {
         // Arrange - ask for a wildly oversized page and a non-positive page number
-        var query = new ProblemFilterOptions(
+        var flooredQuery = new ProblemFilterOptions(
             new ProblemFilterQuery(
                 new ProblemFilterCriteria(
                     SearchText: string.Empty,
@@ -2056,13 +2028,26 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Language: Language.SK
         );
 
+        // Arrange - and the same request as far into the results as a page number can reach
+        var cappedQuery = flooredQuery with
+        {
+            Query = flooredQuery.Query with { PageNumber = int.MaxValue }
+        };
+
         // Act - run the filter with the out-of-range paging
-        var result = await service.FilterAsync(query);
+        var flooredResult = await service.FilterAsync(flooredQuery);
+
+        // Act - and with the page number past the ceiling
+        var cappedResult = await service.FilterAsync(cappedQuery);
 
         // Assert - the page size is capped at the configured maximum
-        Assert.Equal(100, result.Problems.PageSize);
+        Assert.Equal(100, flooredResult.Problems.PageSize);
 
         // Assert - the page number floors to the first page
-        Assert.Equal(1, result.Problems.Page);
+        Assert.Equal(1, flooredResult.Problems.Page);
+
+        // Assert - and the far page reached the database at all, which is the whole point of bounding it: the
+        // unbounded skip overflows to a negative offset that Postgres refuses outright
+        Assert.Empty(cappedResult.Problems.Items);
     });
 }

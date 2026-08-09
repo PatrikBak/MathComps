@@ -196,10 +196,11 @@ Educational handouts are parsed from TeX and stored as JSON in [`src/content/han
 
 ### Mathilda (AI defense)
 
-Mathilda is the AI examiner a student defends a handout solution to; the feature lives in [`src/components/features/defense/`](src/components/features/defense/) and talks to the .NET backend's `/defense/sessions` routes. Two things surprise people reading it for the first time:
+Mathilda is the AI examiner a student defends a handout solution to; the feature lives in [`src/components/features/defense/`](src/components/features/defense/) and talks to the .NET backend's `/defense/sessions` routes. Three things surprise people reading it for the first time:
 
 - **There is no defense route.** The whole feature is modals. A per-problem trigger sits on each handout environment card ([`HandoutDetail.tsx`](src/components/features/handouts/HandoutDetail.tsx)), and a cross-problem library opens from the user menu. Every environment with a solution or proof gets one, `hideSolutionsAndProofs` handouts included — the trigger carries the reference solution as a client prop, so it rides along in the page source there too.
 - **The client sends the problem statement and reference solution** when starting a session; the backend snapshots them onto the session rather than looking them up, which is what lets handout problems work at all without a database row.
+- **Reading those conversations back is a route**, unlike the feature itself: [`/admin/defenses`](src/app/[locale]/admin/defenses/page.tsx) lists every student's, most recently spoken to first, for finding what keeps going wrong with the examiner. It lives in [`src/components/features/admin/defense-review/`](src/components/features/admin/defense-review/) and is gated by the Clerk admin role on both the page and every endpoint behind it.
 
 Any signed-in user can use her. A turn is several LLM calls and takes roughly 40 seconds by design, so develop against `"Examiner:UseFake": true` in the backend config — it serves scripted replies for free.
 

@@ -12,8 +12,8 @@ import type { Turn, TurnRole } from '../model/defense-types'
 
 /**
  * The controls a turn carries and their accessible labels. Shared by the transcript, which offers them on every
- * turn, and each turn, which renders the ones it was told to offer. Both controls answer the same question,
- * whether the conversation is saved and settled, so one flag governs them.
+ * turn, and each turn, which renders the ones it was told to offer. Both controls act on the conversation,
+ * so one flag governs them.
  */
 export type TurnActionsAffordance = {
   /** Whether to offer the turn's own controls. */
@@ -22,7 +22,7 @@ export type TurnActionsAffordance = {
   rewindLabel: string
   /** The accessible label for the report control. */
   reportLabel: string
-  /** The accessible label the report control takes once the reply has been reported. */
+  /** The accessible label a reply carries once it has been reported. */
   reportedLabel: string
 }
 
@@ -32,6 +32,10 @@ export type TurnActionsAffordance = {
 type DefenseTurnProps = TurnActionsAffordance & {
   /** The message this turn renders. */
   turn: Turn
+  /** Its 1-based place in the conversation, shown beside the role; null where nothing counts turns. */
+  position: number | null
+  /** Whether something outside the conversation currently points at this turn. */
+  isPointedAt: boolean
   /** The localized role label shown above the message. */
   label: string
   /** Whether this turn just arrived and should fade in. */
@@ -55,6 +59,8 @@ type DefenseTurnProps = TurnActionsAffordance & {
 type TurnStyle = {
   /** Classes for the turn's outer container. */
   container: string
+  /** Whether the turn draws a box of its own, rather than sitting bare in the transcript. */
+  hasOwnBox: boolean
   /** Classes for the role label. */
   label: string
   /** Classes for the message body: the examiner speaks in the serif math voice, the student in sans. */
@@ -67,12 +73,14 @@ type TurnStyle = {
 const TURN_STYLES: Record<TurnRole, TurnStyle> = {
   examiner: {
     container: '',
+    hasOwnBox: false,
     label: 'text-brand-light',
     body: 'math-typography',
     actionsInset: '',
   },
   candidate: {
     container: 'rounded-lg bg-brand/10 px-4 py-3',
+    hasOwnBox: true,
     label: 'text-muted',
     body: 'text-[15px] leading-relaxed',
     actionsInset: '-mr-4',
@@ -82,9 +90,18 @@ const TURN_STYLES: Record<TurnRole, TurnStyle> = {
 /**
  * Renders one message of a defense conversation, styled by who authored it, with its body rendered as
  * read-only rich math.
+ *
+ * Its controls are never hover-revealed, and kept low-emphasis instead: a hover- or focus-toggled control
+ * fights a Safari bug where the modal's `backdrop-filter` panel leaves hidden descendants painted as stale
+ * ghosts, and a persistent control sidesteps it entirely.
+ *
+ * A standing report shows whichever way round, since acting on the conversation and seeing what was said
+ * about it are two different things: a reader who can't change a report still has to see it.
  */
 export function DefenseTurn({
   turn,
+  position,
+  isPointedAt,
   label,
   animate,
   isReported,
@@ -109,6 +126,10 @@ export function DefenseTurn({
       className={cn(
         'space-y-1.5',
         style.container,
+        // A ring, not a tint: the tint is what says who authored the turn
+        isPointedAt && 'rounded-lg ring-2 ring-inset ring-focus/60',
+        // A role with no box of its own needs the padding for the ring to clear the text
+        isPointedAt && !style.hasOwnBox && 'px-4 py-3',
         entranceAnimation &&
           !reducedMotion &&
           'animate-in fade-in slide-in-from-bottom-2 duration-300'
@@ -117,19 +138,23 @@ export function DefenseTurn({
       {/* The author label, with the turn's controls at the row's trailing edge so they never cover the
           message body */}
       <div className="flex items-center justify-between gap-2">
-        {/* Who authored the turn */}
-        <div className={cn('text-[11px] font-bold uppercase tracking-wide', style.label)}>
-          {label}
+        {/* Where the turn sits and who authored it */}
+        <div className="flex min-w-0 items-baseline gap-2">
+          {position !== null && (
+            <span className="text-[11px] font-bold tabular-nums text-muted">{position}</span>
+          )}
+
+          <div className={cn('text-[11px] font-bold uppercase tracking-wide', style.label)}>
+            {label}
+          </div>
         </div>
 
-        {/* The turn's controls. Always shown, kept low-emphasis: a hover- or focus-toggled control fights a
-            Safari bug where the modal's `backdrop-filter` panel leaves hidden descendants painted as stale
-            ghosts, and a persistent control sidesteps it entirely */}
-        {canAct && (
+        {/* The turn's controls, and whatever has already been said about it */}
+        {(canAct || isReported) && (
           <div className={cn('flex shrink-0 items-center gap-0.5', style.actionsInset)}>
             {/* Say what went wrong with a reply. A reported one keeps the control and carries a filled flag,
                 so the student can see what they said and change it */}
-            {onReport !== null && (
+            {canAct && onReport !== null && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -144,16 +169,29 @@ export function DefenseTurn({
               </Button>
             )}
 
+            {/* The same mark with nothing to click, for a reader who is only reading */}
+            {!canAct && isReported && (
+              <span
+                role="img"
+                aria-label={reportedLabel}
+                className="flex size-7 items-center justify-center text-muted-foreground"
+              >
+                <Flag size={14} className="fill-current" aria-hidden="true" />
+              </span>
+            )}
+
             {/* Rewind the conversation to this turn */}
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={rewindLabel}
-              onClick={onRewind}
-              className="size-7 text-muted/60 hover:text-foreground"
-            >
-              <Undo2 size={14} />
-            </Button>
+            {canAct && (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={rewindLabel}
+                onClick={onRewind}
+                className="size-7 text-muted/60 hover:text-foreground"
+              >
+                <Undo2 size={14} />
+              </Button>
+            )}
           </div>
         )}
       </div>

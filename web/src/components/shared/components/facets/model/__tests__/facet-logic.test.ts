@@ -5,8 +5,11 @@ import {
   facetOptionAccessibleName,
   filterOptionsBySearch,
   groupOptionsByKey,
+  nextFocusedOptionIndex,
   orderFlatOptions,
   orderGroupedOptions,
+  sectionsWorthSorting,
+  soleSelectionLabel,
   toVisibleSections,
 } from '../facet-logic'
 import type { FacetGrouping, FacetOption, FacetSortMode } from '../facet-types'
@@ -90,6 +93,35 @@ describe('facet-logic', () => {
       // Act on terms that are both miscased and unaccented
       expect(matchedIds('CISLA')).toEqual(['1'])
       expect(matchedIds('StAtIsTiKa')).toEqual(['3'])
+    })
+
+    it('ignores whitespace the user left around the term', () => {
+      // Act on a word typed with a trailing space, as a term being extended reads mid-typing
+      const result = matchedIds('rovnice ')
+
+      // The space narrows nothing, so the option is still there to pick
+      expect(result).toEqual(['2'])
+    })
+
+    it('returns every option for a term of nothing but whitespace', () => {
+      // Act on the space bar pressed into an empty search box
+      const result = filterOptionsBySearch(accentedOptions, '   ')
+
+      // Nothing was asked for, so nothing is narrowed
+      expect(result).toEqual(accentedOptions)
+    })
+
+    it('matches on what the fuller name says and the label leaves out', () => {
+      // An option named only as much as its section heading leaves to say
+      const options: FacetOption[] = [
+        { id: 'problem-4', displayName: 'Problem 4', fullName: 'Problem 4 (Proofs Basics)' },
+      ]
+
+      // Act on the part of the name only the fuller one carries
+      const result = filterOptionsBySearch(options, 'proofs')
+
+      // The fuller name found it, though nothing on the row says that part
+      expect(result.map((option) => option.id)).toEqual(['problem-4'])
     })
 
     it('matches on a prefix of the name, accented or not', () => {
@@ -238,20 +270,20 @@ describe('facet-logic', () => {
       { id: 'd', displayName: 'Beta', count: 3 },
     ]
 
+    it('leaves the incoming order of each half intact', () => {
+      // Act with nothing selected, which is what a single-select facet passes on every render
+      const result = orderFlatOptions(options, [])
+
+      // The authored order stands, rather than the comparator imposing one of its own
+      expect(result.map((option) => option.id)).toEqual(['a', 'b', 'c', 'd'])
+    })
+
     it('moves the selected options to the front', () => {
       // Act with two options selected out of the middle and the end
       const result = orderFlatOptions(options, ['c', 'd'])
 
       // Both lead, and the rest follow
       expect(result.map((option) => option.id)).toEqual(['c', 'd', 'a', 'b'])
-    })
-
-    it('leaves the incoming order of each half intact', () => {
-      // Act with nothing selected, so only the incoming order can decide
-      const result = orderFlatOptions(options, [])
-
-      // Neither name nor count reordered anything
-      expect(result.map((option) => option.id)).toEqual(['a', 'b', 'c', 'd'])
     })
 
     it('returns a new array rather than sorting the incoming one in place', () => {
@@ -359,6 +391,141 @@ describe('facet-logic', () => {
 
       // No section is offered, rather than three empty ones
       expect(result).toEqual([])
+    })
+  })
+
+  describe('sectionsWorthSorting', () => {
+    // Two sections, so a facet can have one long and one short
+    const grouping: FacetGrouping = {
+      keys: ['area', 'technique'],
+      labels: { area: 'Oblasť', technique: 'Technika' },
+    }
+
+    /**
+     * Fills a section with as many options as asked for.
+     *
+     * @param groupKey - The section they belong to.
+     * @param howMany - How many to make.
+     * @returns The options, named apart within their section.
+     */
+    function sectionOf(groupKey: string, howMany: number): FacetOption[] {
+      return Array.from({ length: howMany }, (_unused, index) => ({
+        id: `${groupKey}-${index}`,
+        displayName: `${groupKey} ${index}`,
+        groupKey,
+      }))
+    }
+
+    it('offers no ordering while every section is short', () => {
+      // Act on sections a reader takes in whole
+      const result = sectionsWorthSorting(
+        [...sectionOf('area', 4), ...sectionOf('technique', 2)],
+        grouping
+      )
+
+      // Reordering four options tells the reader nothing they cannot already see
+      expect(result).toBe(false)
+    })
+
+    it('offers ordering once one section reaches the threshold', () => {
+      // Act on a facet where a single section has grown long
+      const result = sectionsWorthSorting(
+        [...sectionOf('area', 5), ...sectionOf('technique', 1)],
+        grouping
+      )
+
+      // The long section decides it, and the control then reads the same on every heading
+      expect(result).toBe(true)
+    })
+
+    it('ignores options belonging to no configured section', () => {
+      // Act on a facet whose only long run sits outside the grouping
+      const result = sectionsWorthSorting(sectionOf('mystery', 20), grouping)
+
+      // Nothing landed in a section that has a heading to carry the control
+      expect(result).toBe(false)
+    })
+  })
+
+  describe('nextFocusedOptionIndex', () => {
+    it('walks one option at a time, stopping at either end of the list', () => {
+      // Act from the middle of a six-option list, in both directions
+      expect(nextFocusedOptionIndex('ArrowDown', 1, 6)).toBe(2)
+      expect(nextFocusedOptionIndex('ArrowUp', 1, 6)).toBe(0)
+
+      // Act from each end, where there is nowhere further to travel
+      expect(nextFocusedOptionIndex('ArrowDown', 5, 6)).toBe(5)
+      expect(nextFocusedOptionIndex('ArrowUp', 0, 6)).toBe(0)
+    })
+
+    it('leaves focus where it stands in a list of one', () => {
+      // Act on the single option a search can leave behind, which is both ends at once
+      expect(nextFocusedOptionIndex('ArrowDown', 0, 1)).toBe(0)
+      expect(nextFocusedOptionIndex('PageDown', 0, 1)).toBe(0)
+    })
+
+    it('sends the home and end keys straight to the ends of the list', () => {
+      // Act from a middle option, where neither key has anything to do with where focus stands
+      expect(nextFocusedOptionIndex('Home', 4, 6)).toBe(0)
+      expect(nextFocusedOptionIndex('End', 1, 6)).toBe(5)
+    })
+
+    it('moves a page key by a whole option on a list shorter than a page', () => {
+      // Act on nine options, a tenth of which rounds down to no movement at all
+      expect(nextFocusedOptionIndex('PageDown', 0, 9)).toBe(1)
+      expect(nextFocusedOptionIndex('PageUp', 4, 9)).toBe(3)
+    })
+
+    it('moves a page key by a tenth of a long list', () => {
+      // Act on a list long enough for a page to be worth more than a row
+      expect(nextFocusedOptionIndex('PageDown', 0, 50)).toBe(5)
+      expect(nextFocusedOptionIndex('PageUp', 20, 50)).toBe(15)
+    })
+
+    it('enters the list when focus sits on none of the options', () => {
+      // Act with focus on a section heading or its ordering button, which stand among the options
+      expect(nextFocusedOptionIndex('ArrowDown', -1, 6)).toBe(0)
+      expect(nextFocusedOptionIndex('ArrowUp', -1, 6)).toBe(5)
+    })
+  })
+
+  describe('soleSelectionLabel', () => {
+    // A facet whose options have arrived
+    const options: FacetOption[] = [
+      { id: '1', displayName: 'Čísla' },
+      { id: '2', displayName: 'Rovnice' },
+    ]
+
+    it('names the one option standing', () => {
+      // Act on a single selection the facet has an option for
+      const result = soleSelectionLabel(['2'], options, 'Téma')
+
+      // The trigger carries that option's name
+      expect(result).toBe('Rovnice')
+    })
+
+    it('names nothing while the facet is untouched', () => {
+      // Act on an empty selection
+      const result = soleSelectionLabel([], options, 'Téma')
+
+      // There is no selection to name, so the trigger speaks for the facet instead
+      expect(result).toBeNull()
+    })
+
+    it('names nothing once several options stand', () => {
+      // Act on a selection no single name could state
+      const result = soleSelectionLabel(['1', '2'], options, 'Téma')
+
+      // The count beside the facet's name is what says how far it was narrowed
+      expect(result).toBeNull()
+    })
+
+    it('still reads as narrowed when the facet has no option to name', () => {
+      // Act on a selection restored from the URL before the options naming it arrived
+      const result = soleSelectionLabel(['2'], [], 'Téma')
+
+      // The facet's name stands in, marked as a narrowing rather than passing for an untouched facet
+      expect(result).toBe('Téma …')
     })
   })
 })

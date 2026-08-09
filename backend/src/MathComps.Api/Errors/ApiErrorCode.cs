@@ -103,6 +103,27 @@ public enum ApiErrorCode
     DefenseFeedbackCommentTooLong,
 
     /// <summary>
+    /// A review note the contract cannot take: no text at all, more text than a note may carry, or a category
+    /// outside the ones it names.
+    /// </summary>
+    AdminNoteValue,
+
+    /// <summary>
+    /// A review note stands against a reply the conversation doesn't hold.
+    /// </summary>
+    AdminNoteTarget,
+
+    /// <summary>
+    /// No review note exists under the id.
+    /// </summary>
+    AdminNoteNotFound,
+
+    /// <summary>
+    /// The caller is not the reviewer who wrote the note they tried to revise or drop.
+    /// </summary>
+    NotAdminNoteAuthor,
+
+    /// <summary>
     /// The request body could not be read into what the route expects: broken JSON, a field of the wrong
     /// type, a value no member of an enumeration names, or no body at all.
     /// </summary>

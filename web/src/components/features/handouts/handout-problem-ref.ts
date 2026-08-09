@@ -8,6 +8,7 @@ import type {
   HandoutEnvIndex,
   HandoutEnvironmentTarget,
   HandoutIndex,
+  HandoutMetadata,
 } from './handout-metadata-types'
 import { supportsLocale } from './handout-metadata-types'
 import { buildEnvironmentAnchorId } from './handout-utils'
@@ -17,6 +18,26 @@ const index = handoutIndex as unknown as HandoutIndex
 
 /** The generated environment index — see {@link HandoutEnvIndex}. */
 const envIndex = envIndexData as unknown as HandoutEnvIndex
+
+/** Every handout on the site, by its permanent content id. */
+const handoutsByContentId = new Map(
+  index.sections.flatMap((section) => section.handouts).map((handout) => [handout.id, handout])
+)
+
+/**
+ * Finds the handout carrying a permanent content id.
+ *
+ * Read off a map built once with the module, since a problem is named many times over on one screen and a
+ * fresh flatten of every handout on the site per lookup is a lot of nothing.
+ *
+ * @param handoutContentId - The handout's permanent content id.
+ *
+ * @returns The handout, or undefined once the site no longer carries it.
+ */
+export function findHandoutByContentId(handoutContentId: string): HandoutMetadata | undefined {
+  // A problem outlives the handout it was held against, so a miss is an ordinary answer
+  return handoutsByContentId.get(handoutContentId)
+}
 
 /**
  * Where to send a reader to reach one handout problem in a given language.
@@ -65,9 +86,7 @@ export function resolveHandoutProblemRef(
   }
 
   // The handout itself, by its permanent content id
-  const handout = index.sections
-    .flatMap((section) => section.handouts)
-    .find((candidate) => candidate.id === target.handoutContentId)
+  const handout = findHandoutByContentId(target.handoutContentId)
 
   // A target can outlive the handout it points at
   if (handout === undefined) {

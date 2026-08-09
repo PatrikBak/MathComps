@@ -64,6 +64,9 @@ export const cachePolicy = {
   counts: { staleTime: 60 * SECOND, gcTime: 10 * MINUTE },
 } as const
 
+/** One tier of {@link cachePolicy}. */
+export type CachePolicyTier = (typeof cachePolicy)[keyof typeof cachePolicy]
+
 /**
  * The {@link DefaultOptions} for the app's {@link QueryClient}: the near-static freshness
  * baseline plus cross-cutting fetch behavior.

@@ -37,6 +37,86 @@ namespace MathComps.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.AdminNote", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_id");
+
+                    b.Property<DefenseReportCategory?>("Category")
+                        .HasColumnType("defense_report_category")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_id");
+
+                    b.Property<Guid?>("TurnId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("turn_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_admin_notes");
+
+                    b.HasIndex("AuthorId")
+                        .HasDatabaseName("ix_admin_note_author_id");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_admin_note_created_at");
+
+                    b.HasIndex("SessionId", "TurnId")
+                        .HasDatabaseName("ix_admin_notes_session_id_turn_id");
+
+                    b.ToTable("admin_notes", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_admin_note_content_not_blank", "coalesce(btrim(content, E' \\t\\n\\r\\f'), '') <> ''");
+                        });
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.AdminSessionReview", b =>
+                {
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_id");
+
+                    b.Property<Guid>("ReviewerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reviewer_id");
+
+                    b.Property<DateTimeOffset>("ReadAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("read_at");
+
+                    b.HasKey("SessionId", "ReviewerId")
+                        .HasName("pk_admin_session_reviews");
+
+                    b.HasIndex("ReviewerId")
+                        .HasDatabaseName("ix_admin_session_reviews_reviewer_id");
+
+                    b.ToTable("admin_session_reviews", (string)null);
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Author", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1145,6 +1225,57 @@ namespace MathComps.Infrastructure.Migrations
                         .HasDatabaseName("ix_user_problem_list_item_problem_id");
 
                     b.ToTable("user_problem_list_items", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.AdminNote", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_admin_notes_users_author_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.DefenseSession", "Session")
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_admin_notes_defense_sessions_session_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.DefenseTurn", "Turn")
+                        .WithMany()
+                        .HasForeignKey("SessionId", "TurnId")
+                        .HasPrincipalKey("SessionId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_admin_notes_defense_turns_session_id_turn_id");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Session");
+
+                    b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.AdminSessionReview", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "Reviewer")
+                        .WithMany()
+                        .HasForeignKey("ReviewerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_admin_session_reviews_users_reviewer_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.DefenseSession", "Session")
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_admin_session_reviews_defense_sessions_session_id");
+
+                    b.Navigation("Reviewer");
+
+                    b.Navigation("Session");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Comment", b =>

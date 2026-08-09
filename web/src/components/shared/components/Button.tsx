@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Loader2 } from 'lucide-react'
-import type { ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes, Ref } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -9,6 +9,15 @@ import { cn } from '@/components/shared/utils/css-utils'
  */
 export const FOCUS_RING_CLASS =
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+
+/**
+ * The focus ring for a control sitting inside a scroll container, drawn within the control's own box.
+ *
+ * A container that scrolls on either axis clips on both, so {@link FOCUS_RING_CLASS} loses its top and
+ * bottom edges to the clip and comes out as two disconnected stubs.
+ */
+export const FOCUS_RING_INSET_CLASS =
+  'focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus'
 
 /**
  * The app's button styles.
@@ -71,6 +80,8 @@ export type ButtonProps = VariantProps<typeof buttonVariants> &
   ButtonHTMLAttributes<HTMLButtonElement> & {
     /** Show a spinner and disable the button while an action is in flight. */
     loading?: boolean
+    /** Handle onto the underlying button. */
+    ref?: Ref<HTMLButtonElement>
   }
 
 /**

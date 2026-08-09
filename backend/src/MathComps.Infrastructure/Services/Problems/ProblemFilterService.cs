@@ -4,6 +4,7 @@ using MathComps.Domain.Contracts.SearchBar;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
+using MathComps.Infrastructure.Pagination;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -35,12 +36,8 @@ public class ProblemFilterService(
         // Convenient deconstruct
         var ((parameters, pageSize, pageNumber, favoritesOnly, listContentId, markStatus), userId, language) = options;
 
-        // Clamp paging rather than trusting the client — a defensive backstop; no legitimate caller sends
-        // out-of-range values, so a tampered request stays harmless. Page numbers start at 1
-        pageNumber = Math.Max(pageNumber, 1);
-
-        // Page size stays within [1, configured max]
-        pageSize = Math.Clamp(pageSize, 1, paginationOptions.Value.MaxPageSize);
+        // The page as it will be served, which is how much of the filtered set one request can ask for.
+        var bounds = PageBounds.ForRequestedPage(paginationOptions.Value, pageSize, pageNumber);
 
         // PERFORMANCE OPTIMIZATION: Materialize text search results once
         // This ensures the expensive text search executes exactly once, not multiple times across facets
@@ -291,20 +288,20 @@ public class ProblemFilterService(
 
         // Retrieve the current page of DTOs
         var currentPageDtos = await dtoQuery
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
+            .Skip(bounds.Skip)
+            .Take(bounds.PageSize)
             .ToListAsync();
 
         // Create paginated result set
         var pagedResults = new PagedList<ProblemDto>(
             [.. currentPageDtos],
-            pageNumber,
-            pageSize,
+            bounds.PageNumber,
+            bounds.PageSize,
             totalCount
         );
 
         // Build search bar options only for the first page to avoid unnecessary computation
-        var searchBarOptions = pageNumber != 1 ? null :
+        var searchBarOptions = bounds.PageNumber != 1 ? null :
              // Build search bar options with faceting on the text-filtered base query
              // Most facets use disjunctive faceting, while tags and authors use conjunctive faceting
              // when AND logic is selected with at least one item

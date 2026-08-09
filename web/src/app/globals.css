@@ -7,6 +7,7 @@
   /* 1. Core & Surfaces */
   --color-background: var(--color-slate-950);
   --color-foreground: var(--color-slate-50);
+  --color-surface-raised: var(--color-slate-900);
   --color-surface: var(--color-slate-800);
   --color-surface-hover: var(--color-slate-700);
   --color-surface-inset: var(--color-slate-700);
@@ -554,13 +555,13 @@ input[type='radio']:focus:not(:focus-visible) {
   font-weight: 600;
 }
 
-/* Display math on small screens: avoid overflow clipping */
-@media (max-width: 640px) {
-  .katex-display {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 0.25rem;
-  }
+/* Display math scrolls rather than clipping. What makes an equation too wide is the column it sits in and
+   not the size of the screen: a narrow pane on a large display is the tighter case. */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.25rem;
 }
 
 /* Footnote refs don’t stretch line height */

@@ -1,6 +1,7 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -47,7 +48,7 @@ public class DefenseFeedbackService(
             throw new DefenseFeedbackValueException();
 
         // The student's own account of the fault, reduced to the text it carries.
-        var reportedComment = NormalizeComment(comment);
+        var reportedComment = comment.TrimToNull();
 
         // Blaming something off the list without saying what it was leaves nothing to act on.
         if (reportedCategories.Contains(DefenseReportCategory.Other) && reportedComment is null)
@@ -99,7 +100,7 @@ public class DefenseFeedbackService(
             throw new DefenseFeedbackValueException();
 
         // What the student wrote, reduced to the text it carries.
-        var answeredComment = NormalizeComment(comment);
+        var answeredComment = comment.TrimToNull();
 
         // Saying the conversation went somewhere off the list without saying where leaves nothing to read.
         if (outcome == DefenseOutcome.SomethingElse && answeredComment is null)
@@ -192,20 +193,5 @@ public class DefenseFeedbackService(
         // Over the cap is a bad request, not a server error.
         if (comment is not null && comment.Length > _limits.MaxFeedbackCommentChars)
             throw new DefenseFeedbackCommentTooLongException();
-    }
-
-    /// <summary>
-    /// Reduces a comment to the text it carries, so a whitespace-only one is stored as no comment at all.
-    /// </summary>
-    /// <param name="comment">The comment as the client sent it.</param>
-    /// <returns>The trimmed comment, or null when it carries nothing.</returns>
-    private static string? NormalizeComment(string? comment)
-    {
-        // An absent or blank comment is the same thing: the student said nothing.
-        if (string.IsNullOrWhiteSpace(comment))
-            return null;
-
-        // Otherwise keep the text without its surrounding whitespace.
-        return comment.Trim();
     }
 }

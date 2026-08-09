@@ -4,6 +4,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Clerk;
 using MathComps.Infrastructure.Services.Comments;
@@ -88,6 +89,42 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers the bounds every paged read cuts its page by, which is what keeps one request from asking for a
+    /// whole table. Registered on its own because several features page and each of them needs the same bounds.
+    /// </summary>
+    /// <param name="services">The service collection to add the pagination options to.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddPaginationOptions(this IServiceCollection services)
+    {
+        // The options for pagination, checked at startup so a bad bound fails fast
+        services.AddOptions<PaginationOptions>()
+            .BindConfiguration(PaginationOptions.ConfigurationSectionName)
+            .Validate(
+                options => options.DefaultPageSize > 0,
+                $"{nameof(PaginationOptions.DefaultPageSize)} must be > 0.")
+            .Validate(options => options.MaxPageSize > 0, $"{nameof(PaginationOptions.MaxPageSize)} must be > 0.")
+            .Validate(
+                options => options.MaxPageNumber > 0,
+                $"{nameof(PaginationOptions.MaxPageNumber)} must be > 0.")
+            // A default the server itself couldn't ask for is a contradiction between the two bounds
+            .Validate(
+                options => options.DefaultPageSize <= options.MaxPageSize,
+                $"{nameof(PaginationOptions.DefaultPageSize)} must be <= "
+                + $"{nameof(PaginationOptions.MaxPageSize)}.")
+            // The furthest page these bounds allow still has to land on an offset a skip can hold, which is the
+            // whole reason a page number is bounded at all. Worked out in long so the check itself can't be the
+            // thing that overflows.
+            .Validate(
+                options => ((long)options.MaxPageNumber - 1) * options.MaxPageSize <= int.MaxValue,
+                $"({nameof(PaginationOptions.MaxPageNumber)} - 1) * {nameof(PaginationOptions.MaxPageSize)} "
+                + $"must be <= {int.MaxValue}.")
+            .ValidateOnStart();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
     /// Registers the problem catalog query services — filtering, lookup and images — plus the pagination and
     /// similarity options the filter reads. Pulls in <see cref="AddLocalization"/> since the filter reads the metadata
     /// registry. Expects the DbContext from <see cref="AddMathCompsDbContext"/>.
@@ -96,11 +133,8 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddProblemServices(this IServiceCollection services)
     {
-        // The options for pagination, checked at startup so a bad max fails fast
-        services.AddOptions<PaginationOptions>()
-            .BindConfiguration(PaginationOptions.ConfigurationSectionName)
-            .Validate(options => options.MaxPageSize > 0, $"{nameof(PaginationOptions.MaxPageSize)} must be > 0.")
-            .ValidateOnStart();
+        // The filter cuts its page by the server's bounds
+        services.AddPaginationOptions();
 
         // The options for similarity, checked at startup so bad thresholds fail fast
         services.AddOptions<SimilarityOptions>()
@@ -366,6 +400,27 @@ public static class ServiceCollectionExtensions
 
         // The service that records what students thought of those conversations.
         services.TryAddScoped<IDefenseFeedbackService, DefenseFeedbackService>();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Adds the admin-only review of defense conversations: reading every student's conversations back,
+    /// recording which have been read, and keeping the notes written about them.
+    /// </summary>
+    /// <param name="services">The service collection to add the review feature to.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddAdminServices(this IServiceCollection services)
+    {
+        // Both the queue and the notes feed are read a page at a time, by the server's bounds.
+        services.AddPaginationOptions();
+
+        // The service that reads every student's conversations back and records which have been read.
+        services.TryAddScoped<IAdminDefenseReviewService, AdminDefenseReviewService>();
+
+        // The service that keeps what gets written down about them.
+        services.TryAddScoped<IAdminNoteService, AdminNoteService>();
 
         // Builder pattern
         return services;

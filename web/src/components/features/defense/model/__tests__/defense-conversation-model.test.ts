@@ -5,6 +5,7 @@ import { BackendApiError } from '@/lib/api/api-error'
 import {
   DefenseConversationModel,
   type DefenseConversationServices,
+  findFirstTurnAfter,
 } from '../defense-conversation-model'
 import type {
   DefenseProblem,
@@ -1055,5 +1056,40 @@ describe('DefenseConversationModel', () => {
 
     // The detached listener stayed silent
     expect(notifications).toBe(seen)
+  })
+})
+
+describe('findFirstTurnAfter', () => {
+  // A conversation whose three turns are a minute apart
+  const TURNS: StoredTurn[] = [
+    { id: 't1', role: 'examiner', content: 'Hello.', createdAt: '2026-08-01T10:00:00.000Z' },
+    { id: 't2', role: 'candidate', content: 'My proof.', createdAt: '2026-08-01T10:01:00.000Z' },
+    { id: 't3', role: 'examiner', content: 'Go on.', createdAt: '2026-08-01T10:02:00.000Z' },
+  ]
+
+  it('finds where a reader coming back left off', () => {
+    // Read as far as the first turn
+    const first = findFirstTurnAfter(TURNS, '2026-08-01T10:00:30.000Z')
+
+    // The turn right after that moment is where the reader picks up
+    expect(first?.id).toBe('t2')
+  })
+
+  it('counts a turn authored on the boundary as already read', () => {
+    // Read up to the very moment the second turn was authored
+    const first = findFirstTurnAfter(TURNS, '2026-08-01T10:01:00.000Z')
+
+    // That turn counts as already read, so the one after it is the first new one
+    expect(first?.id).toBe('t3')
+  })
+
+  it('finds nothing once the whole conversation has been read', () => {
+    // Read past the last turn, so nothing arrived since
+    expect(findFirstTurnAfter(TURNS, '2026-08-01T11:00:00.000Z')).toBeNull()
+  })
+
+  it('marks nothing new when nobody has read it', () => {
+    // No moment to measure against, so nothing counts as new
+    expect(findFirstTurnAfter(TURNS, null)).toBeNull()
   })
 })

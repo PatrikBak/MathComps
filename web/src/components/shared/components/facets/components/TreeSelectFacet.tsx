@@ -272,6 +272,7 @@ export function TreeSelectFacet({
     // The node's own row, with its children beneath it when it stands open
     return (
       <Fragment key={node.id}>
+        {/* The node's own row */}
         <TreeNodeRow
           node={node}
           level={level}
@@ -295,6 +296,7 @@ export function TreeSelectFacet({
 
   return (
     <div className="w-full">
+      {/* The heading naming the facet */}
       <FacetHeader
         title={title}
         labelId={facet.labelId}
@@ -303,15 +305,18 @@ export function TreeSelectFacet({
         titleTooltip={titleTooltip}
       />
 
+      {/* The button that opens it */}
       <FacetTrigger
         open={facet.open}
         refs={facet.refs}
         getReferenceProps={facet.getReferenceProps}
         closedLabel={closedLabel}
+        selectedLabel={null}
         count={selected.length}
         title={title}
       />
 
+      {/* And what it opens */}
       <FacetPopover
         open={facet.open}
         context={facet.context}
@@ -333,6 +338,7 @@ export function TreeSelectFacet({
           />
         )}
 
+        {/* The hierarchy itself */}
         <FacetList labelId={facet.labelId} listRef={list.listRef} onKeyDown={list.onListKeyDown}>
           {/* Empty state, for a search term nothing matched */}
           {tree.visibleTree.length === 0 && facet.query && (

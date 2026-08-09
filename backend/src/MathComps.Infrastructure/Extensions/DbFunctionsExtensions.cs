@@ -24,5 +24,24 @@ public static class PostgresDbFunctions
     public static string Unaccent(string text) =>
         // This method body will never execute; EF Core translates it to SQL.
         throw new NotSupportedException("This method is for use in EF Core queries only.");
+
+    /// <summary>
+    /// Identifies which examiner settings a conversation ran on, by hashing the whole recorded snapshot. Two
+    /// conversations share a version when every setting behind them matched, which is what makes "did changing the
+    /// prompt help" answerable.
+    /// </summary>
+    /// <param name="examinerConfig">The recorded settings snapshot.</param>
+    /// <returns>The settings' version key.</returns>
+    /// <remarks>
+    /// This method is translated to SQL by EF Core and should only be used in LINQ queries on database columns.
+    /// It hashes the database's own jsonb rendering of the snapshot, so two snapshots the database considers
+    /// equal hash alike however their keys were ordered or spaced on the way in.
+    /// </remarks>
+    [DbFunction("examiner_config_version", "public")]
+    // The argument is used in the translated SQL, not in this throwing body.
+    // ReSharper disable once UnusedParameter.Global
+    public static string ExaminerConfigVersion(string examinerConfig) =>
+        // This method body will never execute; EF Core translates it to SQL.
+        throw new NotSupportedException("This method is for use in EF Core queries only.");
 }
 

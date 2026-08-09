@@ -50,8 +50,12 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
     /// <summary>
     /// Creates a service provider configured with the test database connection string.
     /// </summary>
+    /// <param name="overrides">
+    /// What one test needs registered differently from the rest of its class, applied after
+    /// <see cref="ConfigureServices"/> so it wins.
+    /// </param>
     /// <returns>A configured service provider ready for dependency injection.</returns>
-    protected ServiceProvider CreateServiceProvider()
+    protected ServiceProvider CreateServiceProvider(Action<IServiceCollection>? overrides = null)
     {
         // Create in-memory configuration with the test database connection string
         var configuration = new ConfigurationBuilder()
@@ -69,6 +73,9 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
 
         // Let a derived class add or replace registrations (e.g. a fake for an external dependency).
         ConfigureServices(services);
+
+        // And let one test differ from its class, e.g. in the options the service under test reads.
+        overrides?.Invoke(services);
 
         // Build the provider.
         return services.BuildServiceProvider();
@@ -97,11 +104,13 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
     /// executes the test action, and ensures key resources are disposed.
     /// </summary>
     /// <param name="testAction">The test action to execute with the resolved service.</param>
+    /// <param name="overrides"><inheritdoc cref="CreateServiceProvider" path="/param[@name='overrides']"/></param>
     /// <returns>A task representing the asynchronous test operation.</returns>
-    protected async Task RunTestAsync(Func<TService, Task> testAction)
+    protected async Task RunTestAsync(
+        Func<TService, Task> testAction, Action<IServiceCollection>? overrides = null)
     {
         // Get the service provider
-        await using var serviceProvider = CreateServiceProvider();
+        await using var serviceProvider = CreateServiceProvider(overrides);
 
         // Services are scoped to ensure they are disposed after the test
         await using var scope = serviceProvider.CreateAsyncScope();

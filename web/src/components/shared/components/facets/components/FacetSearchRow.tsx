@@ -4,6 +4,8 @@ import { type RefObject, useCallback } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
+import { FACET_SURFACE_CLASS } from './FacetPopover'
+
 /** How many options a facet has to offer before searching them is worth the row it costs. */
 export const SEARCH_THRESHOLD = 12
 
@@ -50,7 +52,12 @@ export function FacetSearchRow({
   }, [setQuery, searchRef])
 
   return (
-    <div className="relative flex items-center gap-2 border-b border-foreground/10 bg-surface/95 px-2.5 sm:px-3 py-1.5 sm:py-2">
+    <div
+      className={cn(
+        'relative flex items-center gap-2 border-b border-foreground/10 px-2.5 sm:px-3 py-1.5 sm:py-2',
+        FACET_SURFACE_CLASS
+      )}
+    >
       <div className="relative flex-1">
         <input
           ref={searchRef}

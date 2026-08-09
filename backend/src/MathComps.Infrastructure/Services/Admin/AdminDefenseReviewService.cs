@@ -1,0 +1,473 @@
+using System.Text.Json;
+using MathComps.Domain.Contracts.Admin;
+using MathComps.Domain.Contracts.Defense;
+using MathComps.Domain.Contracts.Helpers;
+using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Extensions;
+using MathComps.Infrastructure.Options;
+using MathComps.Infrastructure.Pagination;
+using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Defense;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+
+namespace MathComps.Infrastructure.Services.Admin;
+
+/// <summary>
+/// Implements <see cref="IAdminDefenseReviewService"/> over the database. The queue is read off one filtered query,
+/// so that whether a conversation counts as unread is written once and the queue's filter and each row's own mark
+/// can't drift apart.
+/// </summary>
+/// <param name="dbContextFactory">The factory minting each operation's database context.</param>
+/// <param name="paginationOptions">The bounds a page of the queue is cut by.</param>
+public class AdminDefenseReviewService(
+    IDbContextFactory<MathCompsDbContext> dbContextFactory,
+    IOptions<PaginationOptions> paginationOptions)
+    : IAdminDefenseReviewService
+{
+    /// <summary>
+    /// How much of a student's opening message a queue row carries. A row shows one line of it, and the whole
+    /// message can run to thousands of characters across a page of them.
+    /// </summary>
+    private const int OpeningMessageChars = 300;
+
+    /// <summary>
+    /// The furthest back a period may reach, in days. Bounded rather than merely floored because the date the
+    /// period is measured from is today less that many days, and a large enough one falls off the calendar.
+    /// </summary>
+    private const int MaxWithinDays = 3650;
+
+    /// <inheritdoc/>
+    public async Task<PagedList<AdminDefenseConversationDto>> GetQueueAsync(
+        Guid reviewerId,
+        AdminDefenseQueueFilter filter,
+        int pageNumber,
+        CancellationToken cancellationToken = default)
+    {
+        // The page as it will be served, which is how much of the queue one request can ask for.
+        var bounds = PageBounds.ForServerPage(paginationOptions.Value, pageNumber);
+
+        // This read's own context, since reading a page of the queue is a unit of work in itself.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Conversations held against a problem, narrowed by every filter the stored data can answer on its own.
+        var sessions = ApplySessionFilters(dbContext, filter);
+
+        // Each of them paired with when it last moved and when this reviewer last read it, left-joined so one they
+        // have never read still comes through. Whether it counts as unread is worked out here, once, and read back
+        // by both the filter below and each row's own mark. The shape is anonymous because the page below joins
+        // back to the conversation it came from, which a projection into the response's own type doesn't survive.
+        var joined =
+            from session in sessions
+            join review in dbContext.AdminSessionReviews.Where(review => review.ReviewerId == reviewerId)
+                on session.Id equals review.SessionId into reviews
+            from review in reviews.DefaultIfEmpty()
+            let lastActivityAt = session.Turns.Max(turn => turn.CreatedAt)
+            // The cast is what carries a missed join through as no stamp rather than a default one.
+            let readAt = (DateTimeOffset?)review.ReadAt
+            select new
+            {
+                SessionId = session.Id,
+                session.EnvironmentTarget!.HandoutEnvironmentId,
+                HandoutContentId = session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
+                EnvironmentId = session.EnvironmentTarget!.HandoutEnvironment.ContentId,
+                LastActivityAt = lastActivityAt,
+                ReadAt = readAt,
+                IsUnread = readAt == null || lastActivityAt > readAt,
+            };
+
+        // Conversations carrying turns this reviewer hasn't read.
+        var rows = filter.Unread ? joined.Where(row => row.IsUnread) : joined;
+
+        // How recently a conversation has to have moved. Measured from the last thing said rather than from when it
+        // started, since one carried on today is a today conversation however long ago it opened.
+        if (filter.WithinDays is { } withinDays)
+        {
+            // Anything under a day is a request for nothing, and anything past the ceiling reaches back further
+            // than the arithmetic can go, so hold it to the range a period actually means something over.
+            var since = DateTimeOffset.UtcNow.AddDays(-Math.Clamp(withinDays, 1, MaxWithinDays));
+
+            // Keep the ones that have moved since then.
+            rows = rows.Where(row => row.LastActivityAt >= since);
+        }
+
+        // How many conversations the filters match in all, which is what the pages are counted in.
+        var totalCount = await rows.CountAsync(cancellationToken);
+
+        // The sets the projection below reads. Held as their own values so the expression tree captures a set
+        // rather than the context around it, which the analyzer reads as disposed by the time the tree runs.
+        var allSessions = dbContext.DefenseSessions;
+        var allNotes = dbContext.AdminNotes;
+
+        // The page itself, the conversations spoken to most recently first. The ids break ties so that two last
+        // spoken to in the same instant can't swap places between one page and the next. Cutting the page before
+        // the join is what keeps the per-row extras paid for on the page rather than on everything matched.
+        var page = await rows
+            .OrderByDescending(row => row.LastActivityAt)
+            .ThenBy(row => row.SessionId)
+            .Skip(bounds.Skip)
+            .Take(bounds.PageSize)
+            .Join(
+                allSessions,
+                row => row.SessionId,
+                session => session.Id,
+                (row, session) => new AdminDefenseConversationDto(
+                    session.Id,
+                    new HandoutEnvironmentTarget(row.HandoutContentId, row.EnvironmentId),
+                    new AdminDefenseUserDto(session.User.Id, session.User.DisplayName, session.User.Email),
+                    session.Turns
+                        .Where(turn => turn.Role == TranscriptRole.Candidate)
+                        .OrderBy(turn => turn.Sequence)
+                        .Select(turn => turn.Content.Substring(0, OpeningMessageChars))
+                        .FirstOrDefault(),
+                    session.Turns.Count,
+                    row.LastActivityAt,
+                    row.ReadAt,
+                    session.Turns.Count(turn => row.ReadAt == null || turn.CreatedAt > row.ReadAt),
+                    allNotes.Count(note => note.SessionId == session.Id),
+                    session.Reports.Any(),
+                    session.Feedback != null))
+            .ToListAsync(cancellationToken);
+
+        // Put the page back in order, which the join above is under no obligation to have kept: most recently
+        // spoken to first, ties broken by id. The id is compared as the ordinal text of its canonical form, which
+        // is the order the database cut the page by, since Postgres compares a uuid as its sixteen bytes and that
+        // text spells those bytes out in order. Comparing the ids themselves is a different order, and one that
+        // disagrees, so a conversation could sit on one side of a page boundary in the database and the other here.
+        var conversations = page
+            .OrderByDescending(conversation => conversation.LastActivityAt)
+            .ThenBy(conversation => conversation.Id.ToString(), StringComparer.Ordinal)
+            .ToList();
+
+        // Hand it back.
+        return new PagedList<AdminDefenseConversationDto>(
+            [.. conversations], bounds.PageNumber, bounds.PageSize, totalCount);
+    }
+
+    /// <inheritdoc/>
+    public async Task<AdminDefenseFilterOptionsDto> GetFilterOptionsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        // This read's own context, since reading what the filters can be set to is a unit of work in itself.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Everyone who has held a conversation, the busiest first. A student with none never appears. The grouped
+        // rows come back anonymous and take their contract's shape afterwards, since a projection straight into
+        // one doesn't survive being grouped over.
+        var userRows = await dbContext.DefenseSessions
+            .AsNoTracking()
+            .Where(session => session.EnvironmentTarget != null)
+            .GroupBy(session => new { session.UserId, session.User.DisplayName, session.User.Email })
+            .Select(group => new
+            {
+                group.Key.UserId,
+                group.Key.DisplayName,
+                group.Key.Email,
+                ConversationCount = group.Count(),
+            })
+            .OrderByDescending(row => row.ConversationCount)
+            .ThenBy(row => row.DisplayName)
+            .ToListAsync(cancellationToken);
+
+        // Every problem one has been held against, carrying the content ids the reader's side names them by.
+        var problemRows = await dbContext.HandoutEnvironmentDefenses
+            .AsNoTracking()
+            .GroupBy(defense => new
+            {
+                HandoutContentId = defense.HandoutEnvironment.Handout.ContentId,
+                EnvironmentId = defense.HandoutEnvironment.ContentId,
+            })
+            .Select(group => new
+            {
+                group.Key.HandoutContentId,
+                group.Key.EnvironmentId,
+                ConversationCount = group.Count(),
+            })
+            .OrderByDescending(row => row.ConversationCount)
+            .ThenBy(row => row.HandoutContentId)
+            .ToListAsync(cancellationToken);
+
+        // The students, each with how many conversations they hold.
+        var users = userRows
+            .Select(row => new AdminDefenseUserOptionDto(
+                new AdminDefenseUserDto(row.UserId, row.DisplayName, row.Email), row.ConversationCount))
+            .ToList();
+
+        // The problems, each with how many conversations were held against it.
+        var problems = problemRows
+            .Select(row => new AdminDefenseProblemOptionDto(
+                new HandoutEnvironmentTarget(row.HandoutContentId, row.EnvironmentId), row.ConversationCount))
+            .ToList();
+
+        // And every set of settings one has run on.
+        var promptVersions = await GetPromptVersionOptionsAsync(dbContext, cancellationToken);
+
+        // Hand back all three, since the queue needs them together the moment it opens.
+        return new AdminDefenseFilterOptionsDto(users, problems, promptVersions);
+    }
+
+    /// <inheritdoc/>
+    public async Task<AdminDefenseDetailDto> GetDetailAsync(
+        Guid reviewerId, Guid sessionId, CancellationToken cancellationToken = default)
+    {
+        // This read's own context, since reading one conversation is a unit of work in itself.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The sets the projection below reads, held apart from the context for the same reason as above.
+        var notes = dbContext.AdminNotes;
+        var reviews = dbContext.AdminSessionReviews;
+
+        // The whole conversation, everything the examiner held, and what has been said about it since. Split,
+        // because turns, reports and notes are three collections off one row: joined in a single query the
+        // database would return every pairing of them, each repeating the statement and the settings snapshot.
+        var loaded = await dbContext.DefenseSessions
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(session => session.Id == sessionId && session.EnvironmentTarget != null)
+            .Select(session => new
+            {
+                session.Id,
+                Target = new HandoutEnvironmentTarget(
+                    session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
+                    session.EnvironmentTarget.HandoutEnvironment.ContentId),
+                User = new AdminDefenseUserDto(session.User.Id, session.User.DisplayName, session.User.Email),
+                session.ProblemStatement,
+                session.ProblemReference,
+                session.ExaminerConfig,
+                Turns = session.Turns
+                    .OrderBy(turn => turn.Sequence)
+                    .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))
+                    .ToList(),
+                Reports = session.Reports
+                    .Select(report => new DefenseTurnReportDto(report.TurnId, report.Categories, report.Comment))
+                    .ToList(),
+                Feedback = session.Feedback == null
+                    ? null
+                    : new DefenseFeedbackDto(session.Feedback.Outcome, session.Feedback.Comment),
+                Notes = notes
+                    .Where(note => note.SessionId == session.Id)
+                    .OrderByDescending(note => note.CreatedAt)
+                    .Select(note => new AdminNoteDto(
+                        note.Id,
+                        note.SessionId,
+                        note.TurnId,
+                        new AdminDefenseUserDto(
+                            note.Author.Id, note.Author.DisplayName, note.Author.Email),
+                        note.AuthorId == reviewerId,
+                        note.Content,
+                        note.Category,
+                        note.ResolvedAt,
+                        note.CreatedAt,
+                        note.UpdatedAt))
+                    .ToList(),
+                ReadAt = reviews
+                    .Where(review => review.SessionId == session.Id && review.ReviewerId == reviewerId)
+                    .Select(review => (DateTimeOffset?)review.ReadAt)
+                    .FirstOrDefault(),
+                session.CreatedAt,
+            })
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new DefenseSessionNotFoundException();
+
+        // Read the blob as json without committing to a shape for it, which is the whole point of storing it the
+        // way it was written. Cloning detaches the element, so the document itself is done with here.
+        using var examinerConfig = JsonDocument.Parse(loaded.ExaminerConfig);
+
+        // Hand it back with the settings parsed into the response rather than double-encoded into it.
+        return new AdminDefenseDetailDto(
+            loaded.Id,
+            loaded.Target,
+            loaded.User,
+            loaded.ProblemStatement,
+            loaded.ProblemReference,
+            examinerConfig.RootElement.Clone(),
+            loaded.Turns,
+            loaded.Reports,
+            loaded.Feedback,
+            loaded.Notes,
+            loaded.ReadAt,
+            loaded.CreatedAt);
+    }
+
+    /// <inheritdoc/>
+    public async Task MarkReadAsync(
+        Guid reviewerId, Guid sessionId, CancellationToken cancellationToken = default)
+    {
+        // This write's own context, since stamping a conversation is a unit of work in itself.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // A conversation that isn't there can't have been read.
+        await AdminDefenseSessions.EnsureExistsAsync(dbContext, sessionId, cancellationToken);
+
+        // Stamp it as read now, over whatever this reviewer's last pass left.
+        await dbContext.AdminSessionReviews
+            .Upsert(new AdminSessionReview
+            {
+                SessionId = sessionId,
+                ReviewerId = reviewerId,
+                ReadAt = DateTimeOffset.UtcNow,
+            })
+            .On(review => new { review.SessionId, review.ReviewerId })
+            .RunAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task MarkUnreadAsync(
+        Guid reviewerId, Guid sessionId, CancellationToken cancellationToken = default)
+    {
+        // This write's own context, since taking a stamp back is a unit of work in itself.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Same reasoning as marking one read: there is nothing to leave unread if it isn't there.
+        await AdminDefenseSessions.EnsureExistsAsync(dbContext, sessionId, cancellationToken);
+
+        // Drop the stamp rather than blanking it, so never read and put back to unread are one state and the
+        // queue only ever has the one rule to apply.
+        await dbContext.AdminSessionReviews
+            .Where(review => review.SessionId == sessionId && review.ReviewerId == reviewerId)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task MarkManyAsync(
+        Guid reviewerId,
+        IReadOnlyCollection<Guid> sessionIds,
+        bool read,
+        CancellationToken cancellationToken = default)
+    {
+        // The same conversation named twice is one conversation, and it would be one row either way.
+        var distinctIds = sessionIds.Distinct().ToList();
+
+        // A set naming nothing has nothing to write.
+        if (distinctIds.Count == 0)
+            return;
+
+        // This write's own context, since marking a set is a unit of work in itself.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Taking the stamps back reaches only rows this reviewer already has, so an id naming no conversation
+        // matches nothing and needs no checking first.
+        if (!read)
+        {
+            // Drop them, for the same reason marking one unread drops rather than blanks.
+            await dbContext.AdminSessionReviews
+                .Where(review => distinctIds.Contains(review.SessionId) && review.ReviewerId == reviewerId)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            // Nothing left.
+            return;
+        }
+
+        // Which of them the database still holds, since a stamp is keyed to a conversation and one gone since
+        // the queue was read would take the whole set down with it.
+        var knownIds = await dbContext.DefenseSessions
+            .Where(session => distinctIds.Contains(session.Id))
+            .Select(session => session.Id)
+            .ToListAsync(cancellationToken);
+
+        // Every one of them is gone, so there is nothing left to stamp.
+        if (knownIds.Count == 0)
+            return;
+
+        // One moment for the set, so a whole backlog cleared in one go reads as one pass rather than as a
+        // spread of stamps a later boundary check would tell apart.
+        var readAt = DateTimeOffset.UtcNow;
+
+        // Stamp them all, over whatever this reviewer's last pass left on any of them.
+        await dbContext.AdminSessionReviews
+            .UpsertRange(knownIds.Select(sessionId => new AdminSessionReview
+            {
+                SessionId = sessionId,
+                ReviewerId = reviewerId,
+                ReadAt = readAt,
+            }))
+            .On(review => new { review.SessionId, review.ReviewerId })
+            .RunAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Narrows the conversations to those the database can pick out from what is stored against them, which is
+    /// every filter except the two over when a conversation last moved and when it was last read. Those two are
+    /// stored nowhere and so are applied further along, once both values have been worked out.
+    /// </summary>
+    /// <param name="dbContext">The context the query is built against.</param>
+    /// <param name="filter">Which conversations to keep.</param>
+    /// <returns>The conversations these filters leave.</returns>
+    private static IQueryable<DefenseSession> ApplySessionFilters(
+        MathCompsDbContext dbContext, AdminDefenseQueueFilter filter)
+    {
+        // Conversations held against a problem. One held against nothing has no problem to name in the queue,
+        // so it never reaches it.
+        var sessions = dbContext.DefenseSessions
+            .AsNoTracking()
+            .Where(session => session.EnvironmentTarget != null);
+
+        // Whose conversations to read.
+        if (filter.UserId is { } userId)
+            sessions = sessions.Where(session => session.UserId == userId);
+
+        // Which handout they were held against.
+        if (filter.HandoutContentId is { } handoutContentId)
+            sessions = sessions.Where(session =>
+                session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId == handoutContentId);
+
+        // And which problem within it, whose id only means anything alongside its handout's.
+        if (filter.EnvironmentId is { } environmentId)
+            sessions = sessions.Where(session =>
+                session.EnvironmentTarget!.HandoutEnvironment.ContentId == environmentId);
+
+        // Conversations somebody has written about, or the ones nobody has.
+        if (filter.HasNotes is { } hasNotes)
+            sessions = hasNotes
+                ? sessions.Where(session => dbContext.AdminNotes.Any(note => note.SessionId == session.Id))
+                : sessions.Where(session => !dbContext.AdminNotes.Any(note => note.SessionId == session.Id));
+
+        // Conversations where the student called out a reply.
+        if (filter.StudentReported)
+            sessions = sessions.Where(session => session.Reports.Any());
+
+        // Conversations the student said something about.
+        if (filter.StudentFeedback)
+            sessions = sessions.Where(session => session.Feedback != null);
+
+        // Conversations run on one set of examiner settings.
+        if (filter.PromptVersion is { } promptVersion)
+            sessions = sessions.Where(session =>
+                PostgresDbFunctions.ExaminerConfigVersion(session.ExaminerConfig) == promptVersion);
+
+        // Hand back the query, still unrun, for the projection that reads it.
+        return sessions;
+    }
+
+    /// <summary>
+    /// Reads every set of examiner settings a conversation has run on, keyed by the version the database hashes
+    /// out of the snapshot, so grouping here and filtering to one set are the same expression.
+    /// </summary>
+    /// <param name="dbContext">The context the query is built against.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The settings, most recently used first.</returns>
+    private static async Task<IReadOnlyList<AdminDefensePromptVersionOptionDto>> GetPromptVersionOptionsAsync(
+        MathCompsDbContext dbContext, CancellationToken cancellationToken)
+    {
+        // Group the conversations by their settings and measure each group's span. The rows come back anonymous
+        // and take their contract's shape afterwards, since a projection straight into one doesn't survive being
+        // grouped over.
+        var rows = await dbContext.DefenseSessions
+            .AsNoTracking()
+            .Where(session => session.EnvironmentTarget != null)
+            .GroupBy(session => PostgresDbFunctions.ExaminerConfigVersion(session.ExaminerConfig))
+            .Select(group => new
+            {
+                Version = group.Key,
+                FirstSeenAt = group.Min(session => session.CreatedAt),
+                LastSeenAt = group.Max(session => session.CreatedAt),
+                ConversationCount = group.Count(),
+            })
+            .OrderByDescending(row => row.LastSeenAt)
+            .ToListAsync(cancellationToken);
+
+        // Each set of settings, with its span and how many conversations ran on it.
+        return [.. rows.Select(row => new AdminDefensePromptVersionOptionDto(
+            row.Version, row.FirstSeenAt, row.LastSeenAt, row.ConversationCount))];
+    }
+}

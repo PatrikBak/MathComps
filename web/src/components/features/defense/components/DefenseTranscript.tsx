@@ -2,6 +2,7 @@
 
 import { useIsomorphicEffect, usePrevious } from '@mantine/hooks'
 import { ArrowDown } from 'lucide-react'
+import { Fragment } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { useFollowTail } from '@/hooks/use-follow-tail'
@@ -17,13 +18,45 @@ const IS_REPORTABLE_ROLE: Record<TurnRole, boolean> = {
 }
 
 /**
+ * Props for the {@link NewSinceMark}.
+ */
+type NewSinceMarkProps = {
+  /** What the mark says. */
+  label: string
+}
+
+/**
+ * The line across the transcript where a reader's last pass stopped.
+ */
+function NewSinceMark({ label }: NewSinceMarkProps) {
+  return (
+    <div className="flex items-center gap-3" role="separator" aria-label={label}>
+      <span className="h-px flex-1 bg-foreground/20" aria-hidden="true" />
+      <span className="text-[11px] font-medium uppercase tracking-wide text-muted">{label}</span>
+      <span className="h-px flex-1 bg-foreground/20" aria-hidden="true" />
+    </div>
+  )
+}
+
+/**
+ * Where a reader's last pass through the conversation stopped, so the turns that arrived since it can be told
+ * apart from the ones they have already worked through.
+ */
+type TranscriptNewSinceMark = {
+  /** The first turn that arrived after the last pass. */
+  turnId: string
+  /** What the mark says. */
+  label: string
+}
+
+/**
  * Props for the {@link DefenseTranscript}.
  */
 type DefenseTranscriptProps = TurnActionsAffordance & {
   /** The conversation so far, oldest first. */
   turns: readonly Turn[]
   /** An id for the current conversation, distinct across conversations. */
-  conversationKey: number
+  conversationKey: string | number
   /** The localized label for each role. */
   roleLabels: Record<TurnRole, string>
   /** The accessible name for the conversation log region. */
@@ -40,14 +73,21 @@ type DefenseTranscriptProps = TurnActionsAffordance & {
   onRewindTurn: (index: number) => void
   /** Says what went wrong with the named reply, or revises what was already said. */
   onReportTurn: (turnId: string) => void
+  /** Where the reader's last pass stopped; null when nothing marks one. */
+  newSince: TranscriptNewSinceMark | null
+  /** Whether to number the turns, so something outside the conversation can refer to one by its place. */
+  showPositions?: boolean
+  /** The turn something outside the conversation currently points at; null when nothing does. */
+  pointedAtTurnId?: string | null
   /** Rendered under the last turn, where the conversation ends. */
   footer: React.ReactNode
 }
 
 /**
- * The scrolling conversation: every turn in order, the thinking indicator while the examiner replies, and the
- * caller's footer under the whole exchange. Keeps the newest content in view while the reader is at the bottom,
- * but yields control (and offers a jump-back affordance) once they scroll up to re-read.
+ * The scrolling conversation: every turn in order, the mark where a reader's last pass stopped, the thinking
+ * indicator while the examiner replies, and the caller's footer under the whole exchange. Keeps the newest
+ * content in view while the reader is at the bottom, but yields control (and offers a jump-back affordance)
+ * once they scroll up to re-read.
  */
 export function DefenseTranscript({
   turns,
@@ -64,6 +104,9 @@ export function DefenseTranscript({
   reportedLabel,
   onRewindTurn,
   onReportTurn,
+  newSince,
+  showPositions = false,
+  pointedAtTurnId = null,
   footer,
 }: DefenseTranscriptProps) {
   // The scroll region, kept pinned to the newest turn while the reader sits at the bottom
@@ -136,20 +179,32 @@ export function DefenseTranscript({
               // opener, or a draft the backend hasn't taken yet
               const reportableId = IS_REPORTABLE_ROLE[turn.role] && index > 0 ? turn.id : null
 
+              // Whether the reader's last pass stopped just before this turn
+              const startsWhatIsNew = newSince !== null && turn.id === newSince.turnId
+
+              // Whether whatever points into the conversation points at this turn. A draft the backend
+              // hasn't taken yet is no turn in particular, so nothing can be pointing at it
+              const isPointedAt = turn.id !== null && turn.id === pointedAtTurnId
+
               return (
-                <DefenseTurn
-                  key={index}
-                  turn={turn}
-                  label={roleLabels[turn.role]}
-                  animate={index === justArrivedIndex}
-                  isReported={reportableId !== null && reports.has(reportableId)}
-                  canAct={canAct}
-                  rewindLabel={rewindLabel}
-                  reportLabel={reportLabel}
-                  reportedLabel={reportedLabel}
-                  onRewind={() => onRewindTurn(index)}
-                  onReport={reportableId === null ? null : () => onReportTurn(reportableId)}
-                />
+                <Fragment key={index}>
+                  {startsWhatIsNew && <NewSinceMark label={newSince.label} />}
+
+                  <DefenseTurn
+                    turn={turn}
+                    position={showPositions ? index + 1 : null}
+                    isPointedAt={isPointedAt}
+                    label={roleLabels[turn.role]}
+                    animate={index === justArrivedIndex}
+                    isReported={reportableId !== null && reports.has(reportableId)}
+                    canAct={canAct}
+                    rewindLabel={rewindLabel}
+                    reportLabel={reportLabel}
+                    reportedLabel={reportedLabel}
+                    onRewind={() => onRewindTurn(index)}
+                    onReport={reportableId === null ? null : () => onReportTurn(reportableId)}
+                  />
+                </Fragment>
               )
             })}
 

@@ -73,13 +73,15 @@ type RichMathEditorProps = {
   variant?: RichMathEditorVariant
   /** Which toolbar entries to show; every entry defaults to on */
   toolbar?: ToolbarConfig
+  /** The editor's minimum height in px */
+  minHeightPx?: number
   /** Current text value */
   value: string
   /** Callback when the text changes */
   onChange: (value: string) => void
-  /** Placeholder text (default: empty) */
+  /** Placeholder text */
   placeholder?: string
-  /** Whether to auto-focus (default: false) */
+  /** Whether to auto-focus */
   autoFocus?: boolean
   /** Additional className for the wrapper */
   className?: string
@@ -87,6 +89,8 @@ type RichMathEditorProps = {
   onValidChange?: (isValid: boolean) => void
   /** Callback when send button is clicked (shows send button when provided) */
   onSend?: () => void
+  /** Whether a send is currently allowed; the editor's own validity gates on top of it */
+  canSend?: boolean
   /** Callback when cancel button is clicked (shows cancel button when provided) */
   onCancel?: () => void
   /** Callback that stops the in-flight submit. */
@@ -105,6 +109,7 @@ type RichMathEditorProps = {
 export function RichMathEditor({
   variant = 'card',
   toolbar,
+  minHeightPx = 200,
   value,
   onChange,
   placeholder = '',
@@ -112,6 +117,7 @@ export function RichMathEditor({
   className,
   onValidChange,
   onSend,
+  canSend = true,
   onCancel,
   onStop,
   autoExpandOnMobile,
@@ -119,7 +125,7 @@ export function RichMathEditor({
   ref,
 }: RichMathEditorProps) {
   // All the logic is in the view-model and provided to the view
-  const viewModel = useEditorModel({ value, onChange, onSend, onCancel })
+  const viewModel = useEditorModel({ value, onChange, onSend, canSend, onCancel })
   const {
     state,
     textareaRef,
@@ -143,7 +149,7 @@ export function RichMathEditor({
 
   // Auto-expand to modal on mobile
   useEffect(() => {
-    if (autoExpandOnMobile && isMobile === true) {
+    if (autoExpandOnMobile && isMobile) {
       setIsModalOpen(true)
     }
   }, [autoExpandOnMobile, isMobile])
@@ -162,79 +168,76 @@ export function RichMathEditor({
 
   return (
     <>
-      {/* Wrapper for inline editor - hidden on mobile when using modal-only mode */}
+      {/* The inline editor, absent on mobile in modal-only mode */}
       {!isMobileModalOnly && (
         <div className={cn('flex-1 flex flex-col w-full max-w-4xl', className)}>
-          {/* Editor container - hidden on mobile when autoExpandOnMobile is active */}
-          {!(autoExpandOnMobile && isMobile !== false) && (
-            <Resizable
-              defaultSize={{ width: '100%', height: 'auto' }}
-              minHeight={200}
-              enable={{
-                top: false,
-                right: false,
-                bottom: true,
-                left: false,
-                topRight: false,
-                bottomRight: false,
-                bottomLeft: false,
-                topLeft: false,
-              }}
-              handleComponent={{
-                bottom: (
-                  <div className="relative w-full h-1.5 cursor-ns-resize group/resizer flex justify-center -mb-1">
-                    <div className="w-12 h-1 bg-foreground/10 rounded-full transition-colors group-hover/resizer:bg-brand/50 mt-0.5" />
-                  </div>
-                ),
-              }}
-              className="flex flex-col relative"
-            >
-              {/* Toolbar */}
-              <RichMathEditorToolbar
-                variant={variant}
-                config={toolbar}
-                onEdit={applyTransform}
-                onInsert={insertAtCursor}
-                onImageClick={openImagePicker}
-                onAttachmentClick={openAttachmentPicker}
-              />
+          <Resizable
+            defaultSize={{ width: '100%', height: 'auto' }}
+            minHeight={minHeightPx}
+            enable={{
+              top: false,
+              right: false,
+              bottom: true,
+              left: false,
+              topRight: false,
+              bottomRight: false,
+              bottomLeft: false,
+              topLeft: false,
+            }}
+            handleComponent={{
+              bottom: (
+                <div className="relative w-full h-1.5 cursor-ns-resize group/resizer flex justify-center -mb-1">
+                  <div className="w-12 h-1 bg-foreground/10 rounded-full transition-colors group-hover/resizer:bg-brand/50 mt-0.5" />
+                </div>
+              ),
+            }}
+            className="flex flex-col relative"
+          >
+            {/* Toolbar */}
+            <RichMathEditorToolbar
+              variant={variant}
+              config={toolbar}
+              onEdit={applyTransform}
+              onInsert={insertAtCursor}
+              onImageClick={openImagePicker}
+              onAttachmentClick={openAttachmentPicker}
+            />
 
-              {/* Editor Input Area */}
-              <RichMathEditorInputArea
-                variant={variant}
-                ref={inputAreaRef}
-                viewModel={viewModel}
-                onChange={handleChange}
-                onKeyDown={handleKeyDown}
-                placeholder={placeholder}
-                autoFocus={autoFocus}
-                allowImageUpload={allowImageUpload}
-                allowAttachmentUpload={allowAttachmentUpload}
-                containerClassName="flex-1 min-h-0"
-                className={cn('h-full', onSend && 'rounded-b-none')}
-              />
+            {/* Editor input area */}
+            <RichMathEditorInputArea
+              variant={variant}
+              ref={inputAreaRef}
+              viewModel={viewModel}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              autoFocus={autoFocus}
+              allowImageUpload={allowImageUpload}
+              allowAttachmentUpload={allowAttachmentUpload}
+              containerClassName="flex-1 min-h-0"
+              className={cn('h-full', onSend && 'rounded-b-none')}
+            />
 
-              {/* Footer bar */}
-              {onSend && (
-                <RichMathEditorFooter
-                  variant={variant}
-                  modeConfig={{ mode: 'inline', onExpand: () => setIsModalOpen(true) }}
-                  charCount={state.metrics.charCount}
-                  imageCount={state.metrics.imageCount}
-                  attachmentCount={state.metrics.attachmentCount}
-                  onSend={onSend}
-                  onCancel={onCancel}
-                  onStop={onStop}
-                  isValid={state.isValid}
-                  isLoading={isLoading}
-                />
-              )}
-            </Resizable>
-          )}
+            {/* Footer bar */}
+            {onSend && (
+              <RichMathEditorFooter
+                variant={variant}
+                modeConfig={{ mode: 'inline', onExpand: () => setIsModalOpen(true) }}
+                charCount={state.metrics.charCount}
+                imageCount={state.metrics.imageCount}
+                attachmentCount={state.metrics.attachmentCount}
+                onSend={onSend}
+                onCancel={onCancel}
+                onStop={onStop}
+                isValid={state.isValid && canSend}
+                isLoading={isLoading}
+              />
+            )}
+          </Resizable>
         </div>
       )}
 
-      {/* Expanded Modal - always rendered for portal to work */}
+      {/* The expanded modal, always mounted so its portal works */}
       <RichMathEditorExpandedModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -242,6 +245,7 @@ export function RichMathEditor({
         toolbarConfig={toolbar}
         placeholder={placeholder}
         onSend={onSend}
+        canSend={canSend}
         onCancel={onCancel}
         onStop={onStop}
         isLoading={isLoading}

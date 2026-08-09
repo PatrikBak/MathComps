@@ -6,6 +6,8 @@ export type FacetOption = {
   id: string
   /** The option's label. */
   displayName: string
+  /** The option's name in full, where its label is only as much of it as its surroundings leave to say. */
+  fullName?: string
   /** How many results carry this option. */
   count?: number
   /** The section this option belongs to, one of {@link FacetGrouping.keys}. */
@@ -16,8 +18,6 @@ export type FacetOption = {
  * A node in a hierarchical facet, where selecting a node stands for its whole subtree.
  */
 export type TreeNode = FacetOption & {
-  /** The node's unabbreviated name. */
-  fullName?: string
   /** The nodes one level below this one. */
   children?: TreeNode[]
 }
@@ -32,6 +32,12 @@ export type TreeCheckState = 'checked' | 'indeterminate' | 'unchecked'
  * How a facet section orders its options.
  */
 export type FacetSortMode = 'alpha' | 'count-desc' | 'count-asc'
+
+/**
+ * How many of a facet's options may stand at once, which is what the rows are drawn as: a facet whose field
+ * holds one value gets radios, one that takes several gets checkboxes.
+ */
+export type FacetSelectionMode = 'single' | 'multiple'
 
 /**
  * The labelled sections a facet's options are split into.

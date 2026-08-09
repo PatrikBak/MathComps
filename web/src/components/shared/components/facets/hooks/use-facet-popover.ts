@@ -37,6 +37,42 @@ const POPOVER_MIN_HEIGHT = 360
 /** The height no popover may exceed. */
 const POPOVER_MAX_HEIGHT = 520
 
+/** The width a popover claims when its trigger is too narrow to hand it a usable one. */
+const POPOVER_MIN_WIDTH = 260
+
+/**
+ * Where a popover takes its width from: its trigger, for a facet standing in a column as wide as the list it
+ * opens, or its own content, for one whose trigger is only as wide as its label.
+ */
+export type FacetPopoverWidth = 'trigger' | 'content'
+
+/**
+ * The width declarations one sizing rule writes onto the popover. Both properties are always set, since the
+ * element is styled in place and whichever the other rule used has to be cleared rather than left standing.
+ */
+type PopoverWidthStyle = {
+  /** The width to hold, or empty to grow to what it holds. */
+  width: string
+  /** The width to grow from, or empty to claim none. */
+  minWidth: string
+}
+
+/**
+ * How each rule sizes the popover, against the width of the trigger it hangs under and the room the
+ * viewport leaves beside it.
+ */
+const POPOVER_WIDTH_STYLES: Record<
+  FacetPopoverWidth,
+  (referenceWidth: number, availableWidth: number) => PopoverWidthStyle
+> = {
+  trigger: (referenceWidth) => ({ width: `${referenceWidth}px`, minWidth: '' }),
+  content: (referenceWidth, availableWidth) => ({
+    width: '',
+    // Never past what the viewport offers, since a minimum outranks a maximum in CSS
+    minWidth: `${Math.min(availableWidth, Math.max(POPOVER_MIN_WIDTH, referenceWidth))}px`,
+  }),
+}
+
 /** How long to let the popover mount before reaching into it for the search box. */
 const FOCUS_DELAY_MS = 10
 
@@ -77,13 +113,17 @@ export type UseFacetPopoverResult<T extends FacetOption> = {
 }
 
 /**
- * Runs a facet's popover: whether it is open, where it sits, how tall it may be, and
+ * Runs a facet's popover: whether it is open, where it sits, how wide and tall it may be, and
  * the search term narrowing its options.
  *
  * @param options - Every option the facet can offer, before searching.
+ * @param width - Whether the popover takes its trigger's width, or a width of its own.
  * @returns The state and bindings described by {@link UseFacetPopoverResult}.
  */
-export function useFacetPopover<T extends FacetOption>(options: T[]): UseFacetPopoverResult<T> {
+export function useFacetPopover<T extends FacetOption>(
+  options: T[],
+  width: FacetPopoverWidth = 'trigger'
+): UseFacetPopoverResult<T> {
   // Whether the popover is showing
   const [open, setOpen] = useState(false)
 
@@ -141,9 +181,9 @@ export function useFacetPopover<T extends FacetOption>(options: T[]): UseFacetPo
       // Nudged along the viewport rather than allowed to hang off its edge
       shift({ padding: 8 }),
 
-      // Sized to the trigger's width, and to whatever height the viewport allows
+      // Sized to the trigger, or to its own content, and to whatever height the viewport allows
       size({
-        apply({ availableHeight, rects, elements }) {
+        apply({ availableHeight, availableWidth, rects, elements }) {
           // Written straight onto the element, since these change as the page moves
           Object.assign(elements.floating.style, {
             // Never past what the viewport offers, since a minimum outranks a maximum in CSS
@@ -151,7 +191,11 @@ export function useFacetPopover<T extends FacetOption>(options: T[]): UseFacetPo
               ? `${Math.min(POPOVER_MIN_HEIGHT, availableHeight)}px`
               : 'auto',
             maxHeight: `${Math.min(POPOVER_MAX_HEIGHT, availableHeight)}px`,
-            width: `${rects.reference.width}px`,
+            // Growing to what it holds still has to stop at the viewport's edge: nudging it along can move an
+            // over-wide panel but never shrink it, and its rows only start truncating once something does.
+            maxWidth: `${availableWidth}px`,
+            // Sized by the rule this popover was set up with
+            ...POPOVER_WIDTH_STYLES[width](rects.reference.width, availableWidth),
           })
         },
         padding: 8,

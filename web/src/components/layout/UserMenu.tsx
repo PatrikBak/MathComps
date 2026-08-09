@@ -9,6 +9,7 @@ import { forwardRef, useEffect, useState } from 'react'
 
 import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { cn } from '@/components/shared/utils/css-utils'
+import { useIsAdmin } from '@/hooks/use-is-admin'
 import { ROUTES } from '@/i18n/i18n'
 import { usePathname } from '@/i18n/navigation'
 
@@ -70,6 +71,9 @@ export default function UserMenu({ isAuthenticated, onOpenDefenses }: UserMenuPr
   // Disable profile menu item if already on profile page
   const isProfileDisabled = usePathname() === ROUTES.PROFILE
 
+  // Whether the user reviews defenses
+  const isAdmin = useIsAdmin()
+
   // Get translations
   const tUserMenu = useTranslations('ui.userMenu')
   const tProfile = useTranslations('profile')
@@ -100,7 +104,7 @@ export default function UserMenu({ isAuthenticated, onOpenDefenses }: UserMenuPr
 
   return (
     <DropdownMenu.Root modal={false}>
-      {/* Trigger Button */}
+      {/* Trigger button */}
       <DropdownMenu.Trigger asChild>
         <UserMenuTrigger id="user-menu-trigger" aria-label={tUserMenu('label')}>
           <UserAvatarImage
@@ -119,7 +123,7 @@ export default function UserMenu({ isAuthenticated, onOpenDefenses }: UserMenuPr
         </UserMenuTrigger>
       </DropdownMenu.Trigger>
 
-      {/* Dropdown Content */}
+      {/* Dropdown content */}
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           id="user-menu-content"
@@ -138,16 +142,23 @@ export default function UserMenu({ isAuthenticated, onOpenDefenses }: UserMenuPr
           align="end"
           onCloseAutoFocus={(event) => event.preventDefault()}
         >
-          {/* User Info */}
+          {/* Who is signed in */}
           <div className="px-4 py-3 border-b border-foreground/10">
             <UserInfoHeader user={user} size="sm" />
           </div>
 
-          {/* Menu Items */}
+          {/* Menu items */}
           <div className="py-1.5">
             {/* The user's defenses */}
             <UserMenuItem type="mathilda" variant="dropdown" onClick={onOpenDefenses} />
+
+            {/* Everyone's defenses */}
+            {isAdmin && <UserMenuItem type="defenseReview" variant="dropdown" />}
+
+            {/* Their profile */}
             <UserMenuItem type="profile" variant="dropdown" disabled={isProfileDisabled} />
+
+            {/* And the way out */}
             <UserMenuItem type="signOut" variant="dropdown" />
           </div>
         </DropdownMenu.Content>
