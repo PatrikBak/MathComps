@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { TreeNode } from '../facet-types'
 import {
   calculateParentState,
+  drawnRowIds,
   filterTreeBySearch,
   getAllAncestorIds,
   getAllDescendantIds,
@@ -450,6 +451,48 @@ describe('tree-logic', () => {
       expect(withoutDiacritics.tree[0].children![0].children!.map((node) => node.id)).toEqual([
         A_HOME.id,
       ])
+    })
+  })
+
+  describe('drawnRowIds', () => {
+    it('draws the roots alone while every branch is closed', () => {
+      // Act with nothing open
+      const drawn = drawnRowIds(mockTree, new Set())
+
+      // Only the two competitions have rows, whatever hangs beneath them
+      expect(drawn).toEqual([CSMO.id, mockTree[1].id])
+    })
+
+    it('draws the children of an open branch directly under it', () => {
+      // Act with one competition open and its categories still closed
+      const drawn = drawnRowIds(mockTree, new Set([CSMO.id]))
+
+      // Its categories come between it and the next root, in the order they are declared
+      expect(drawn).toEqual([CSMO.id, CATEGORY_A.id, CATEGORY_B.id, mockTree[1].id])
+    })
+
+    it('follows a chain of open branches to the leaves', () => {
+      // Act with a whole path down to the rounds open
+      const drawn = drawnRowIds(mockTree, new Set([CSMO.id, CATEGORY_A.id]))
+
+      // The open category's rounds are drawn, while the closed sibling stays a single row
+      expect(drawn).toEqual([
+        CSMO.id,
+        CATEGORY_A.id,
+        A_HOME.id,
+        A_SCHOOL.id,
+        A_REGIONAL.id,
+        CATEGORY_B.id,
+        mockTree[1].id,
+      ])
+    })
+
+    it('draws a leaf marked open as the single row it is', () => {
+      // Act with a childless node named among the open branches
+      const drawn = drawnRowIds([MEMO_INDIVIDUAL], new Set([MEMO_INDIVIDUAL.id]))
+
+      // Nothing hangs off it, so being open changes nothing
+      expect(drawn).toEqual([MEMO_INDIVIDUAL.id])
     })
   })
 })

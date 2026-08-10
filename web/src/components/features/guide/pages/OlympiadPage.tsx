@@ -182,7 +182,10 @@ export function OlympiadPage() {
               tHighSchool('point2'),
               <>
                 {tHighSchool.rich('point3', { strong: (chunks) => <strong>{chunks}</strong> })}{' '}
-                <HelpTooltip content={<>{tHighSchool('selectionNote')}</>} />
+                <HelpTooltip
+                  label={tHighSchool('title')}
+                  content={<>{tHighSchool('selectionNote')}</>}
+                />
               </>,
             ]}
           />

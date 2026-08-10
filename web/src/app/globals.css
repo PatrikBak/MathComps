@@ -207,13 +207,13 @@ html {
   .form-input:hover {
     @apply border-muted/80 bg-surface/70;
   }
-  .form-input:focus {
+  .form-input:focus-visible {
     @apply border-focus/70 bg-surface/80 shadow-[0_0_0_2px_rgba(99,102,241,0.3)];
   }
   .form-input[aria-invalid='true'] {
     @apply border-error/60 shadow-[0_0_0_2px_rgba(239,68,68,0.3)];
   }
-  .form-input[aria-invalid='true']:focus {
+  .form-input[aria-invalid='true']:focus-visible {
     @apply border-error/60 shadow-[0_0_0_2px_rgba(239,68,68,0.4)];
   }
   .form-input.disabled {
@@ -237,17 +237,16 @@ html {
   .form-radio:disabled {
     @apply cursor-default opacity-50;
   }
-}
 
-/* Show a focus ring on checkboxes and radios only for keyboard focus */
-input[type='checkbox']:focus-visible,
-input[type='radio']:focus-visible {
-  @apply ring-2 ring-focus/40 ring-offset-0;
-}
-
-input[type='checkbox']:focus:not(:focus-visible),
-input[type='radio']:focus:not(:focus-visible) {
-  @apply ring-0 ring-offset-0 outline-none shadow-none;
+  /* Keyboard focus on a control the browser draws itself, marked with an outline rather than a ring:
+     a ring is a box-shadow, and WebKit paints none at all on a native checkbox or radio, while an
+     outline is painted by every engine.
+     It lives in this layer so a utility can still lift it off a control whose row carries the mark. */
+  input[type='checkbox']:focus-visible,
+  input[type='radio']:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
 }
 
 /*

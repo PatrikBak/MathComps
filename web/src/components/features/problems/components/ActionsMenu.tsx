@@ -1,4 +1,4 @@
-import { Eye, EyeOff, HelpCircle, MoreVertical, Share2 } from 'lucide-react'
+import { Eye, EyeOff, MoreVertical, Share2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 
@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../../../shared/components/DropdownMenu'
-import { Tooltip } from '../../../shared/components/Tooltip'
+import { HelpTooltip } from '../../../shared/components/HelpTooltip'
 import type { SearchFiltersState } from '../types/problem-library-types'
 import { ShareButton } from './ShareButton'
 
@@ -96,11 +96,10 @@ export function ActionsMenu({ showTechniqueTags, onShowTagsChange, filters }: Ac
                 {showTechniqueTags ? tProblems('hideTechniques') : tProblems('showTechniques')}
               </span>
             </div>
-            <Tooltip placement="top" content={tProblems('techniquesHelpTooltip')}>
-              <div className="p-1">
-                <HelpCircle className="h-4 w-4 cursor-help text-muted hover:text-muted" />
-              </div>
-            </Tooltip>
+            <HelpTooltip
+              label={tProblems('techniquesHelpLabel')}
+              content={tProblems('techniquesHelpTooltip')}
+            />
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>

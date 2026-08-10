@@ -330,6 +330,22 @@ export function indexTreeById(nodes: TreeNode[]): Map<string, TreeNode> {
 }
 
 /**
+ * Walks the rows a hierarchy currently draws, a closed branch standing for itself alone.
+ *
+ * @param nodes - The nodes at this depth, already narrowed by whatever a search left.
+ * @param expandedIds - Which branches stand open.
+ * @returns The ids of the drawn rows, in the order they appear.
+ */
+export function drawnRowIds(nodes: TreeNode[], expandedIds: Set<string>): string[] {
+  // A node draws its own row, and an open branch draws everything under it as well
+  return nodes.flatMap((node) =>
+    expandedIds.has(node.id) && node.children?.length
+      ? [node.id, ...drawnRowIds(node.children, expandedIds)]
+      : [node.id]
+  )
+}
+
+/**
  * Locates a node anywhere in a tree.
  *
  * @param nodes - The roots to search.

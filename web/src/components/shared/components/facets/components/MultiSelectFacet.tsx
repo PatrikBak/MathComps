@@ -9,14 +9,20 @@ import {
 import { useLocale, useTranslations } from 'next-intl'
 import { memo, type MouseEvent, type ReactNode, useCallback, useMemo, useRef } from 'react'
 
+import { FOCUS_RING_ROW_CLASS } from '@/components/shared/components/Button'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 
 import { useFacetGroups } from '../hooks/use-facet-groups'
-import { useFacetListNavigation } from '../hooks/use-facet-list-navigation'
 import { type FacetPopoverWidth, useFacetPopover } from '../hooks/use-facet-popover'
+import {
+  type FacetRowAction,
+  headingKeyOf,
+  headingRowId,
+  useFacetRowNavigation,
+} from '../hooks/use-facet-row-navigation'
 import { useRevealSelectedOption } from '../hooks/use-reveal-selected-option'
 import {
   facetOptionAccessibleName,
@@ -60,6 +66,8 @@ type SelectionModeBehavior = {
   controlClass: string
   /** Whether picking an option unseats whatever stood before, rather than joining it. */
   replacesSelection: boolean
+  /** Whether the rows' controls answer to one shared name, which makes the browser treat them as one group. */
+  groupsUnderOneName: boolean
   /** Whether the options standing float to the top of their section while the popover sits idle. */
   floatsSelectedFirst: boolean
   /** Whether the list scrolls to the option standing as it appears. */
@@ -74,6 +82,7 @@ const SELECTION_MODE_BEHAVIORS: Record<FacetSelectionMode, SelectionModeBehavior
     inputType: 'radio',
     controlClass: 'form-radio',
     replacesSelection: true,
+    groupsUnderOneName: true,
     floatsSelectedFirst: false,
     revealsStandingOption: true,
     countsPerSection: false,
@@ -82,6 +91,7 @@ const SELECTION_MODE_BEHAVIORS: Record<FacetSelectionMode, SelectionModeBehavior
     inputType: 'checkbox',
     controlClass: 'form-checkbox',
     replacesSelection: false,
+    groupsUnderOneName: false,
     floatsSelectedFirst: true,
     revealsStandingOption: false,
     countsPerSection: true,
@@ -118,6 +128,10 @@ type OptionItemProps = {
   isZeroCount: boolean
   /** How many of the facet's options may stand at once. */
   selectionMode: FacetSelectionMode
+  /** The name every row of this one facet answers to, unique to it across the page. */
+  groupName: string
+  /** Whether this row is the one the panel offers the tab order. */
+  isTabStop: boolean
   /** Applies a change to the whole selection. */
   onChange: (next: (previous: string[]) => string[]) => void
 }
@@ -131,10 +145,13 @@ const OptionItem = memo(function OptionItem({
   checked,
   isZeroCount,
   selectionMode,
+  groupName,
+  isTabStop,
   onChange,
 }: OptionItemProps) {
   // How this row is drawn, and what a click on it does
-  const { inputType, controlClass, replacesSelection } = SELECTION_MODE_BEHAVIORS[selectionMode]
+  const { inputType, controlClass, replacesSelection, groupsUnderOneName } =
+    SELECTION_MODE_BEHAVIORS[selectionMode]
 
   // A function which adds this option to the selection, or takes it back out; where only one option may
   // stand it unseats whatever stood before instead
@@ -195,6 +212,8 @@ const OptionItem = memo(function OptionItem({
       className={cn(
         'flex items-center gap-2 sm:gap-3 rounded-md px-2.5 sm:px-3 py-1.5 sm:py-2 transition-colors',
         checked ? 'bg-focus/15' : 'hover:bg-foreground/5',
+        // Drawn as an edge rather than a fill, so it reads apart from the tint saying it is standing
+        FOCUS_RING_ROW_CLASS,
         isZeroCount && 'opacity-50',
         'select-none'
       )}
@@ -207,10 +226,16 @@ const OptionItem = memo(function OptionItem({
       >
         <input
           type={inputType}
+          // Radios only stand for one choice between them once they answer to the same name, which is
+          // what has a reader told it is on the third of five rather than on a switch of its own
+          name={groupsUnderOneName ? groupName : undefined}
           checked={checked}
           onChange={onToggle}
           className={cn(controlClass, 'shrink-0')}
           aria-label={facetOptionAccessibleName(option.displayName, option.count)}
+          // Which row this is, so the walk down the list knows what it has landed on
+          data-facet-row-id={option.id}
+          tabIndex={isTabStop ? 0 : -1}
         />
         <FacetItemLabel>{option.displayName}</FacetItemLabel>
 
@@ -266,6 +291,8 @@ function GroupSortButton({ sortMode, onCycle }: GroupSortButtonProps) {
     <button
       type="button"
       onClick={onCycle}
+      // Out of the tab order, the same ordering being cycled from the keyboard on the heading itself
+      tabIndex={-1}
       className="shrink-0 p-1 rounded hover:bg-foreground/5 text-muted hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       title={label}
       aria-label={label}
@@ -354,6 +381,10 @@ type GroupSectionProps = {
   sortMode: FacetSortMode
   /** Whether the section offers a control over that ordering. */
   showSortButton: boolean
+  /** The section, which is what its heading answers to as a row. */
+  groupKey: string
+  /** Whether the heading is the row the panel offers the tab order. */
+  isTabStop: boolean
   /** Rolls the section up, or unrolls it. */
   onToggleCollapsed: () => void
   /** Advances the section to the next ordering. */
@@ -372,6 +403,8 @@ function GroupSection({
   isCollapsed,
   sortMode,
   showSortButton,
+  groupKey,
+  isTabStop,
   onToggleCollapsed,
   onCycleSortMode,
   renderOption,
@@ -395,6 +428,9 @@ function GroupSection({
           type="button"
           onClick={onToggleCollapsed}
           aria-expanded={!isCollapsed}
+          // The heading is a row of the list in its own right, so the arrows reach it like any option
+          data-facet-row-id={headingRowId(groupKey)}
+          tabIndex={isTabStop ? 0 : -1}
           className="flex flex-1 min-w-0 items-center gap-2 rounded-sm text-left text-[11px] sm:text-xs font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         >
           <ChevronDown
@@ -493,11 +529,69 @@ export function MultiSelectFacet({
   // The popover and the search term narrowing what it shows
   const facet = useFacetPopover(options, popoverWidth)
 
-  // Keyboard focus moving down the option rows
-  const list = useFacetListNavigation()
-
   // Per-section ordering and collapse, left idle by a flat facet
   const groups = useFacetGroups(grouping, facet.query, facet.filtered)
+
+  /**
+   * Applies a key pressed on a section's heading, every other row having nothing of its own to do.
+   *
+   * @param rowId - The row focus is on.
+   * @param action - What the key asked of it.
+   * @returns Whether the section acted.
+   */
+  function onRowAction(rowId: string, action: FacetRowAction) {
+    // The section the row heads, absent on an option
+    const groupKey = headingKeyOf(rowId)
+
+    // Only a heading has any of this to offer
+    if (!groupKey) return false
+
+    // Whether the section is currently rolled up, which decides what the two arrows do
+    const isCollapsed = groups.collapsed[groupKey] || false
+
+    // What the key asked for, each answering whether the section was in a state to do it
+    switch (action) {
+      // Left rolls an open section up
+      case 'collapse':
+        // One already rolled up leaves the key to the browser
+        if (isCollapsed) return false
+
+        // Roll it up
+        groups.toggleCollapsed(groupKey)
+
+        // The key is spoken for
+        return true
+
+      // Right unrolls a closed one
+      case 'expand':
+        // One already showing leaves the key to the browser
+        if (!isCollapsed) return false
+
+        // Unroll it
+        groups.toggleCollapsed(groupKey)
+
+        // The key is spoken for
+        return true
+
+      // And the ordering advances, where the facet offers one at all
+      case 'cycle-sort':
+        // A facet whose sections are too short to be worth reordering has nothing to advance
+        if (!showSortButtons) return false
+
+        // On to the next ordering
+        groups.cycleSortMode(groupKey)
+
+        // The key is spoken for
+        return true
+
+      // An action outside the union, which the type system rules out
+      default:
+        return assertNever(action)
+    }
+  }
+
+  // Keyboard focus moving down the rows
+  const list = useFacetRowNavigation({ onRowAction })
 
   // The standing option scrolled to as the list appears
   useRevealSelectedOption(
@@ -536,6 +630,36 @@ export function MultiSelectFacet({
     locale,
   ])
 
+  // The sections that currently have something to show, empty for a flat facet
+  const visibleSections: VisibleSection[] = useMemo(
+    () => (grouping ? toVisibleSections(displayOptions, grouping) : []),
+    [grouping, displayOptions]
+  )
+
+  // The one row the panel offers the page's tab order: the option standing, so a reopened facet lands on
+  // what it is already filtered by, and the top of the list where nothing stands. Read off the rows
+  // actually drawn, since an option inside a rolled-up section is not there to be focused.
+  const tabStopRowId = useMemo(() => {
+    // The options on show, which under a grouped facet excludes whatever the rolled-up sections hold
+    const drawnOptions = grouping
+      ? visibleSections
+          .filter((section) => !groups.collapsed[section.groupKey])
+          .flatMap((section) => section.sectionOptions)
+      : displayOptions
+
+    // The first of them standing, which is the row worth landing on
+    const standing = drawnOptions.find((option) => selected.includes(option.id))
+
+    // Which is where the tab order goes when there is one
+    if (standing) return standing.id
+
+    // Otherwise the top of a grouped list, which is its first section's heading
+    if (grouping) return visibleSections[0] && headingRowId(visibleSections[0].groupKey)
+
+    // And the first option of a flat one
+    return displayOptions[0]?.id
+  }, [displayOptions, grouping, groups.collapsed, selected, visibleSections])
+
   // The newest selection, held in a ref so the row callbacks stay stable
   const selectedRef = useRef(selected)
   selectedRef.current = selected
@@ -558,10 +682,12 @@ export function MultiSelectFacet({
         checked={selected.includes(option.id)}
         isZeroCount={typeof option.count === 'number' && option.count <= 0}
         selectionMode={selectionMode}
+        groupName={facet.popoverId}
+        isTabStop={option.id === tabStopRowId}
         onChange={applySelectionChange}
       />
     ),
-    [applySelectionChange, selected, selectionMode]
+    [applySelectionChange, facet.popoverId, selected, selectionMode, tabStopRowId]
   )
 
   /** Empties the selection and the search box, and returns to the top of the list. */
@@ -580,12 +706,6 @@ export function MultiSelectFacet({
       list.listRef.current.scrollTop = 0
     }
   }
-
-  // The sections that currently have something to show, empty for a flat facet
-  const visibleSections: VisibleSection[] = useMemo(
-    () => (grouping ? toVisibleSections(displayOptions, grouping) : []),
-    [grouping, displayOptions]
-  )
 
   // Whether the section headings offer a control over their ordering, read off every option the facet has
   // rather than the ones a search left standing, so the control doesn't come and go as the user types
@@ -633,6 +753,8 @@ export function MultiSelectFacet({
         popoverId={facet.popoverId}
         labelId={facet.labelId}
         variant={variant}
+        initialFocus={facet.initialFocus}
+        onKeyDown={list.onListKeyDown}
       >
         {/* The header, always where no heading stands above the trigger to name the facet, and otherwise
             only where that heading has been flipped off-screen */}
@@ -653,7 +775,7 @@ export function MultiSelectFacet({
             searchRef={facet.searchRef}
             title={title}
             placeholder={searchPlaceholder ?? tFilters('searchPlaceholder')}
-            onArrowDownToList={list.focusFirstItem}
+            onArrowDownToList={list.focusFirstRow}
           />
         )}
 
@@ -663,12 +785,7 @@ export function MultiSelectFacet({
         )}
 
         {/* The options themselves */}
-        <FacetList
-          labelId={facet.labelId}
-          listRef={list.listRef}
-          onKeyDown={list.onListKeyDown}
-          noTopPadding={!!grouping}
-        >
+        <FacetList labelId={facet.labelId} listRef={list.listRef} noTopPadding={!!grouping}>
           {/* Empty state, when there is nothing left to show */}
           {facet.filtered.length === 0 && (
             <div className="px-3 py-3 text-sm text-muted">{tFilters('noResults')}</div>
@@ -690,6 +807,8 @@ export function MultiSelectFacet({
                   isCollapsed={groups.collapsed[groupKey] || false}
                   sortMode={groups.sortModes[groupKey]}
                   showSortButton={showSortButtons}
+                  groupKey={groupKey}
+                  isTabStop={headingRowId(groupKey) === tabStopRowId}
                   onToggleCollapsed={() => groups.toggleCollapsed(groupKey)}
                   onCycleSortMode={() => groups.cycleSortMode(groupKey)}
                   renderOption={renderOption}

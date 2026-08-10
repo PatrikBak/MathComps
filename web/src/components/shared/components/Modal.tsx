@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
 
+import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useOnClosed } from '@/hooks/use-on-closed'
 
@@ -127,8 +128,15 @@ export function Modal({
                 )}
                 {showCloseButton && (
                   <button
+                    type="button"
                     onClick={onClose}
-                    className="text-muted hover:text-foreground transition-colors duration-200 ml-auto flex-shrink-0"
+                    className={cn(
+                      'text-muted hover:text-foreground transition-colors duration-200 ml-auto flex-shrink-0 rounded-md',
+                      // The panel is a raised surface, so the ring's offset has to be drawn in that
+                      // rather than in the page colour behind it
+                      FOCUS_RING_CLASS,
+                      'focus-visible:ring-offset-surface'
+                    )}
                     aria-label={tModal('close')}
                   >
                     <X size={24} />

@@ -909,6 +909,7 @@
     "similarProblems": "Podobné úlohy",
     "solution": "Riešenie",
     "solutionLink": "Odkaz na riešenie (otvorí sa v novom okne)",
+    "techniquesHelpLabel": "Techniky",
     "techniquesHelpTooltip": "Ovláda viditeľnosť tagov označujúcich techniky riešenia (napr. substitúcia, rozklad, úprava výrazu). Tieto tagy pomáhajú identifikovať matematické metódy použité v úlohách.",
     "title": "Úlohy",
     "toggleSimilar": "Zobraziť/skryť podobné úlohy",
@@ -927,6 +928,7 @@
   },
   "ui": {
     "actions": {
+      "busy": "Pracuje sa…",
       "cancel": "Zrušiť",
       "close": "Zavrieť",
       "confirm": "Potvrdiť",
@@ -939,6 +941,7 @@
       "keepScreenOn": "Nechať obrazovku zapnutú",
       "keepScreenOnUnavailable": "Obrazovku nemožno nechať zapnutú (úsporný režim?)",
       "linkCopied": "Odkaz bol skopírovaný do schránky",
+      "moreInformationAbout": "Viac informácií: {subject}",
       "open": "Otvoriť",
       "or": "ALEBO",
       "problemLinkCopied": "Odkaz na úlohu bol skopírovaný do schránky",

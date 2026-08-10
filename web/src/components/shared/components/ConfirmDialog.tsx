@@ -1,6 +1,7 @@
 import { AlertTriangle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -111,7 +112,12 @@ export function ConfirmDialog({
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 text-sm font-medium text-muted-foreground bg-foreground/5 hover:bg-foreground/10 rounded-lg transition-colors"
+          className={cn(
+            'px-4 py-2 text-sm font-medium text-muted-foreground bg-foreground/5 hover:bg-foreground/10 rounded-lg transition-colors',
+            FOCUS_RING_CLASS,
+            // The dialog panel is a raised surface, which the ring's offset has to be drawn in
+            'focus-visible:ring-offset-surface'
+          )}
         >
           {resolvedCancelText}
         </button>
@@ -120,6 +126,8 @@ export function ConfirmDialog({
           onClick={handleConfirm}
           className={cn(
             'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+            FOCUS_RING_CLASS,
+            'focus-visible:ring-offset-surface',
             style.confirmButton
           )}
         >

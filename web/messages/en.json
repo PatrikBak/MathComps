@@ -909,6 +909,7 @@
     "similarProblems": "Similar problems",
     "solution": "Solution",
     "solutionLink": "Link to solution (opens in new window)",
+    "techniquesHelpLabel": "Techniques",
     "techniquesHelpTooltip": "Controls visibility of tags marking solution techniques (e.g., substitution, factoring, expression manipulation). These tags help identify mathematical methods used in problems.",
     "title": "Problems",
     "toggleSimilar": "Show/hide similar problems",
@@ -927,6 +928,7 @@
   },
   "ui": {
     "actions": {
+      "busy": "Working…",
       "cancel": "Cancel",
       "close": "Close",
       "confirm": "Confirm",
@@ -939,6 +941,7 @@
       "keepScreenOn": "Keep screen on",
       "keepScreenOnUnavailable": "Can't keep screen on (battery saver?)",
       "linkCopied": "Link copied to clipboard",
+      "moreInformationAbout": "More information: {subject}",
       "open": "Open",
       "or": "OR",
       "problemLinkCopied": "Problem link copied to clipboard",

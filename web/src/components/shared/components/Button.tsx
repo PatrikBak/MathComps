@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { ButtonHTMLAttributes, Ref } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -18,6 +19,19 @@ export const FOCUS_RING_CLASS =
  */
 export const FOCUS_RING_INSET_CLASS =
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus'
+
+/**
+ * The focus ring a row draws on behalf of the control inside it.
+ *
+ * A 16px checkbox's own outline is a hard thing to follow down a list of forty, so the row it sits in
+ * carries the mark instead and the control gives its own up. Keyed on the row's input alone: a row
+ * holding a second control of its own, like a tree node's expander, leaves that one to ring itself
+ * rather than reading as a box inside a box.
+ */
+export const FOCUS_RING_ROW_CLASS = cn(
+  'has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-inset has-[input:focus-visible]:ring-focus',
+  '[&_input:focus-visible]:outline-none'
+)
 
 /**
  * The app's button styles.
@@ -100,10 +114,15 @@ export function Button({
   type = 'button',
   ...rest
 }: ButtonProps) {
+  // Translations for the shared action labels
+  const tActions = useTranslations('ui.actions')
+
   return (
     <button
       type={type}
       disabled={disabled || loading}
+      // Paired with the live region below, which is what actually speaks the state
+      aria-busy={loading || undefined}
       className={cn(
         buttonVariants({ variant, size, shape, fullWidth }),
         className,
@@ -112,14 +131,20 @@ export function Button({
       )}
       {...rest}
     >
-      {/* The spinner overlays the label, which stays in place holding the width it had, so a
-          button doesn't jump the moment its action starts. It goes transparent rather than hidden,
-          which would take the button's name out of the accessibility tree along with it */}
+      {/* The spinner overlays the label, which stays in place holding the width it had. It goes
+          transparent rather than hidden, which would take the button's name out of the a11y tree */}
       {loading ? (
         <>
           <span className="absolute inset-0 flex items-center justify-center">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           </span>
+
+          {/* What the spinner says, for readers it says nothing to. A button disabled the moment it
+              is pressed drops out of the tab order, taking any word of its own state with it */}
+          <span role="status" className="sr-only">
+            {tActions('busy')}
+          </span>
+
           <span className="inline-flex items-center gap-2 opacity-0">{children}</span>
         </>
       ) : (

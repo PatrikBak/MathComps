@@ -2,17 +2,20 @@ import { ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Fragment, memo, type MouseEvent, type TouchEvent, useMemo } from 'react'
 
+import { FOCUS_RING_INSET_CLASS, FOCUS_RING_ROW_CLASS } from '@/components/shared/components/Button'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 
-import { useFacetListNavigation } from '../hooks/use-facet-list-navigation'
 import { useFacetPopover } from '../hooks/use-facet-popover'
+import { type FacetRowAction, useFacetRowNavigation } from '../hooks/use-facet-row-navigation'
 import { useTreeExpansion } from '../hooks/use-tree-expansion'
 import { facetOptionAccessibleName } from '../model/facet-logic'
 import type { TreeCheckState, TreeNode } from '../model/facet-types'
 import {
   calculateParentState,
+  drawnRowIds,
   indexTreeById,
   isNodeEffectivelyChecked,
   toggleNodeSelection,
@@ -43,6 +46,8 @@ type TreeNodeRowProps = {
   showChevron: boolean
   /** Whether the selection covers it, in its own right or through an ancestor. */
   isChecked: boolean
+  /** Whether this row is the one the panel offers the tab order. */
+  isTabStop: boolean
   /** How its checkbox should read. */
   parentState: TreeCheckState
   /** Applies a click on the row. */
@@ -64,6 +69,7 @@ const TreeNodeRow = memo(function TreeNodeRow({
   hasChildren,
   showChevron,
   isChecked,
+  isTabStop,
   parentState,
   onToggle,
   onExclusiveSelect,
@@ -79,6 +85,7 @@ const TreeNodeRow = memo(function TreeNodeRow({
     <div
       className={cn(
         'flex items-center rounded-md px-3 py-2 transition-colors hover:bg-foreground/5 cursor-pointer',
+        FOCUS_RING_ROW_CLASS,
         node.count === 0 && 'opacity-50',
         'select-none'
       )}
@@ -100,7 +107,12 @@ const TreeNodeRow = memo(function TreeNodeRow({
               // Only the branch opens or closes
               onToggleExpansion()
             }}
-            className="w-5 h-5 hover:bg-foreground/10 rounded flex items-center justify-center"
+            className={cn(
+              'w-5 h-5 hover:bg-foreground/10 rounded flex items-center justify-center',
+              FOCUS_RING_INSET_CLASS
+            )}
+            // Out of the tab order, the same branch being opened and closed from the keyboard on the row
+            tabIndex={-1}
             aria-expanded={isExpanded}
             aria-label={
               isExpanded
@@ -110,6 +122,7 @@ const TreeNodeRow = memo(function TreeNodeRow({
           >
             <ChevronRight
               className={cn('h-4 w-4 transition-transform text-muted', isExpanded && 'rotate-90')}
+              aria-hidden="true"
             />
           </button>
         )}
@@ -120,6 +133,10 @@ const TreeNodeRow = memo(function TreeNodeRow({
         <input
           type="checkbox"
           className="form-checkbox pointer-events-none"
+          // Which row this is, so the walk down the tree knows what it has landed on and which branch
+          // the arrows opening and closing one are aimed at
+          data-facet-row-id={node.id}
+          tabIndex={isTabStop ? 0 : -1}
           checked={isChecked}
           aria-label={facetOptionAccessibleName(node.displayName, node.count)}
           ref={(element) => {
@@ -197,11 +214,72 @@ export function TreeSelectFacet({
   // The popover and the search term the tree is narrowed by
   const facet = useFacetPopover(options)
 
-  // Keyboard focus moving down the option rows
-  const list = useFacetListNavigation()
-
   // Which branches stand open, and what the search term has left of the hierarchy
   const tree = useTreeExpansion(options, facet.query, defaultExpandedIds)
+
+  /**
+   * Applies a key pressed on a row, which for a hierarchy means opening and closing its branches.
+   *
+   * @param rowId - The node focus is on.
+   * @param action - What the key asked of it.
+   * @returns Whether the branch acted.
+   */
+  function onRowAction(rowId: string, action: FacetRowAction) {
+    // The node in the unfiltered tree, which is what its branch is judged on
+    const node = nodesById.get(rowId)
+
+    // A leaf has no branch to open or close
+    if (!node?.children?.length) return false
+
+    // Whether the branch already stands open, which is what decides which key does anything
+    const isExpanded = tree.expandedIds.has(rowId)
+
+    // What the key asked for, each answering whether the branch was in a state to do it
+    switch (action) {
+      // Left closes an open branch
+      case 'collapse':
+        // One already closed leaves the key to the browser
+        if (!isExpanded) return false
+
+        // Close it
+        tree.collapseNode(rowId)
+
+        // The key is spoken for
+        return true
+
+      // Right opens a closed one
+      case 'expand':
+        // One already open leaves the key to the browser
+        if (isExpanded) return false
+
+        // Open it
+        tree.expandNode(rowId)
+
+        // The key is spoken for
+        return true
+
+      // A hierarchy has no orderings to cycle, its rows standing where the tree puts them
+      case 'cycle-sort':
+        return false
+
+      // An action outside the union, which the type system rules out
+      default:
+        return assertNever(action)
+    }
+  }
+
+  // Keyboard focus moving down the rows
+  const list = useFacetRowNavigation({ onRowAction })
+
+  // The rows the tree currently draws, in the order they appear
+  const drawnNodeIds = useMemo(
+    () => drawnRowIds(tree.visibleTree, tree.expandedIds),
+    [tree.visibleTree, tree.expandedIds]
+  )
+
+  // The one row the panel offers the page's tab order: the node standing, so a reopened facet lands on
+  // what it is already filtered by, and the top of the tree where nothing stands
+  const tabStopRowId = drawnNodeIds.find((nodeId) => selected.includes(nodeId)) ?? drawnNodeIds[0]
 
   /** Empties the selection. */
   function clearAll() {
@@ -280,6 +358,7 @@ export function TreeSelectFacet({
           hasChildren={hasChildren}
           showChevron={showChevron}
           isChecked={isChecked}
+          isTabStop={node.id === tabStopRowId}
           parentState={parentState}
           onToggle={handleToggle}
           onExclusiveSelect={() => onChange([node.id])}
@@ -325,6 +404,8 @@ export function TreeSelectFacet({
         getFloatingProps={facet.getFloatingProps}
         popoverId={facet.popoverId}
         labelId={facet.labelId}
+        initialFocus={facet.initialFocus}
+        onKeyDown={list.onListKeyDown}
       >
         {/* Search row, offered once the hierarchy as a whole is big enough */}
         {allNodes.length >= SEARCH_THRESHOLD && (
@@ -334,12 +415,12 @@ export function TreeSelectFacet({
             searchRef={facet.searchRef}
             title={title}
             placeholder={searchPlaceholder ?? tFilters('searchPlaceholder')}
-            onArrowDownToList={list.focusFirstItem}
+            onArrowDownToList={list.focusFirstRow}
           />
         )}
 
         {/* The hierarchy itself */}
-        <FacetList labelId={facet.labelId} listRef={list.listRef} onKeyDown={list.onListKeyDown}>
+        <FacetList labelId={facet.labelId} listRef={list.listRef}>
           {/* Empty state, for a search term nothing matched */}
           {tree.visibleTree.length === 0 && facet.query && (
             <div className="px-3 py-3 text-sm text-muted">{tFilters('noResults')}</div>

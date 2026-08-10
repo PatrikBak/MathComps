@@ -1,12 +1,13 @@
 import {
   FloatingFocusManager,
+  type FloatingFocusManagerProps,
   FloatingPortal,
   type useFloating,
   type useInteractions,
 } from '@floating-ui/react'
 import { FilterX } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, KeyboardEvent, ReactNode } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -57,14 +58,25 @@ type FacetPopoverProps = {
   labelId: string
   /** How the trigger that opens it sits on the page, which decides what the panel floats over. */
   variant?: FacetTriggerVariant
+  /** Where focus lands as the panel opens. */
+  initialFocus: FloatingFocusManagerProps['initialFocus']
+  /** Handles the navigation keys, wherever inside the panel they are pressed. */
+  onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void
   /** The popover's contents. */
   children: ReactNode
 }
 
 /**
- * The panel a facet opens: a focus-trapped surface portalled to the body, so it can
- * overflow whatever scrolling container the facet sits in and stack above the rest of
- * the page.
+ * The panel a facet opens: a surface portalled to the body, so it can overflow whatever
+ * scrolling container the facet sits in and stack above the rest of the page.
+ *
+ * Non-modal, since a filter is something the page is read alongside rather than instead of. The
+ * modal reading hides every other control on the page from assistive tech for as long as one
+ * dropdown is open, which is a heavier claim than a filter has any business making.
+ *
+ * The panel owns the navigation keys rather than the list inside it, because a facet too short to
+ * draw a search row opens on the panel itself: a handler any deeper than this never sees the arrows
+ * pressed the moment it opens.
  */
 export function FacetPopover({
   open,
@@ -75,6 +87,8 @@ export function FacetPopover({
   popoverId,
   labelId,
   variant = 'stacked',
+  initialFocus,
+  onKeyDown,
   children,
 }: FacetPopoverProps) {
   // A closed facet has no panel at all
@@ -82,12 +96,20 @@ export function FacetPopover({
 
   return (
     <FloatingPortal>
-      <FloatingFocusManager context={context} modal={true} returnFocus={false}>
+      <FloatingFocusManager
+        context={context}
+        modal={false}
+        returnFocus={false}
+        initialFocus={initialFocus}
+      >
         <div
           ref={refs.setFloating}
           style={floatingStyles}
-          {...getFloatingProps({ id: popoverId, 'aria-labelledby': labelId })}
+          {...getFloatingProps({ id: popoverId, 'aria-labelledby': labelId, onKeyDown })}
           className={cn(
+            // The panel takes focus itself as it opens, being a surface rather than a control, so it
+            // draws no ring: the mark belongs on whichever row the arrows move to from there
+            'focus:outline-none',
             'z-[1000] flex flex-col overflow-hidden rounded-lg border border-foreground/10 shadow-2xl',
             FACET_POPOVER_SURFACES[variant],
             FACET_PANEL_CLASS
