@@ -1,5 +1,6 @@
 import { type Ref } from 'react'
 
+import { FOCUS_RING_INSET_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { GUIDE_PAGES } from '../content/guide-content-types'
@@ -67,9 +68,14 @@ export function GuideTabStrip({
                 type="button"
                 onClick={() => onSelect(index)}
                 aria-current={active ? 'page' : undefined}
+                // The strip is one stop rather than one per page: ◀/▶ already page the deck from
+                // anywhere, so tabbing through every pill only puts distance between the reader and
+                // whatever comes after the bar
+                tabIndex={active ? 0 : -1}
                 className={cn(
                   'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm transition-colors',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+                  // The strip scrolls sideways on a phone, so the ring has to stay inside the pill
+                  FOCUS_RING_INSET_CLASS,
                   active
                     ? 'border-brand bg-brand/15 font-semibold text-foreground'
                     : 'border-foreground/15 text-muted hover:text-foreground'

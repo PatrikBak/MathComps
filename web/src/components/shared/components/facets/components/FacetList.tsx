@@ -1,4 +1,4 @@
-import type { KeyboardEvent, ReactNode, RefObject } from 'react'
+import type { ReactNode, RefObject } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -10,8 +10,6 @@ type FacetListProps = {
   labelId: string
   /** The scrolling list element. */
   listRef: RefObject<HTMLDivElement | null>
-  /** Handles the navigation keys. */
-  onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void
   /** The option rows. */
   children: ReactNode
   /** Drops the list's top padding. */
@@ -25,13 +23,7 @@ type FacetListProps = {
  * Its scrollbar is forced to stay on screen: macOS hides overlay scrollbars at rest, so a list cut off at its
  * height gives no sign there is more of it under the last row on show.
  */
-export function FacetList({
-  labelId,
-  listRef,
-  onKeyDown,
-  children,
-  noTopPadding = false,
-}: FacetListProps) {
+export function FacetList({ labelId, listRef, children, noTopPadding = false }: FacetListProps) {
   return (
     <div
       ref={listRef}
@@ -44,7 +36,9 @@ export function FacetList({
       )}
       role="group"
       aria-labelledby={labelId}
-      onKeyDown={onKeyDown}
+      // Firefox hands a scrolling box its own place in the tab order, which would put a stop on the list
+      // itself in front of the row that is meant to carry one
+      tabIndex={-1}
     >
       {children}
     </div>

@@ -49,7 +49,7 @@ export function Select({ options, value, onChange, placeholder, className }: Sel
         <>
           <ListboxButton
             className={cn(
-              'w-full flex items-center justify-between gap-2 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-lg border border-muted/30 bg-surface/95 text-xs sm:text-sm text-muted-foreground outline-none transition-all hover:border-muted/60 focus:border-focus/60 focus:ring-2 focus:ring-focus/35',
+              'w-full flex items-center justify-between gap-2 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-lg border border-muted/30 bg-surface/95 text-xs sm:text-sm text-muted-foreground outline-none transition-all hover:border-muted/60 focus-visible:border-focus/60 focus-visible:ring-2 focus-visible:ring-focus/35',
               className
             )}
           >

@@ -33,6 +33,7 @@ import { useTranslations } from 'next-intl'
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { FOCUS_RING_ROW_CLASS } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import {
   DropdownMenu,
@@ -501,8 +502,13 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
           {/* Separator */}
           <div className="border-t border-foreground/10 mt-3 pt-3">
             {isCreating ? (
-              /* Inline input for new list */
-              <div className="flex items-center gap-2 px-2 py-1.5">
+              /* Inline input for new list, whose row is the field: the input carries no edge of its own */
+              <div
+                className={cn(
+                  'flex items-center gap-2 rounded-sm px-2 py-1.5',
+                  FOCUS_RING_ROW_CLASS
+                )}
+              >
                 <Plus className="h-4 w-4 shrink-0 text-muted" />
                 <input
                   ref={inputRef}

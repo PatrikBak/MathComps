@@ -15,6 +15,8 @@ export type UseTreeExpansionResult = {
   toggleNode: (nodeId: string) => void
   /** Opens a node, leaving an already-open one alone. */
   expandNode: (nodeId: string) => void
+  /** Closes a node the reader opened, leaving one a search forced open alone. */
+  collapseNode: (nodeId: string) => void
 }
 
 /**
@@ -74,6 +76,20 @@ export function useTreeExpansion(
     setUserExpandedIds((current) => new Set([...current, nodeId]))
   }
 
-  // What to render, and the two ways the caller can open a node
-  return { visibleTree: tree, expandedIds, toggleNode, expandNode }
+  /**
+   * Closes one node, as far as the reader's own expansions go.
+   *
+   * A node standing open only because the search reached under it is left alone: it is open on the
+   * search's account rather than the reader's, and recording a close against it would put it in the
+   * set that survives the search being cleared, leaving the tree sprawled open instead of closed.
+   *
+   * @param nodeId - The node to close.
+   */
+  function collapseNode(nodeId: string) {
+    // Dropping a node the reader never opened changes nothing
+    setUserExpandedIds((current) => new Set([...current].filter((id) => id !== nodeId)))
+  }
+
+  // What to render, and the three ways the caller can move a node
+  return { visibleTree: tree, expandedIds, toggleNode, expandNode, collapseNode }
 }

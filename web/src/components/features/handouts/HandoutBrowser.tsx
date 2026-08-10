@@ -34,6 +34,7 @@ export function HandoutBrowser({ sections, locale }: HandoutBrowserProps) {
         <span>{tDifficulty('label')}</span>
         {/* The three levels, revealed on hover */}
         <HelpTooltip
+          label={tDifficulty('label')}
           content={
             <ul className="space-y-1.5">
               {HANDOUT_DIFFICULTY_LEVELS.map((level) => (

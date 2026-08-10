@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { FOCUS_RING_ROW_CLASS } from '@/components/shared/components/Button'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { PopoverItem, PopoverSeparator } from '@/components/shared/components/Popover'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
@@ -188,6 +189,8 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
             <div
               className={cn(
                 'relative flex select-none items-center rounded-sm px-2 py-1.5 text-sm gap-2 col-start-1 row-start-1',
+                // The row is the field, since the input inside it carries no edge of its own
+                FOCUS_RING_ROW_CLASS,
                 !isCreating && 'invisible'
               )}
             >

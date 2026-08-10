@@ -40,6 +40,18 @@ export function useTabStripScroll(selectedIndex: number): TabStripScroll {
     })
   }, [selectedIndex, reduceMotion])
 
+  // Carry focus along with the active tab, for a reader who is standing in the strip
+  useEffect(() => {
+    // The tab that just became active, which is the only one the strip offers to Tab
+    const activeTab = activeTabRef.current
+
+    // A reader paging from somewhere else on the page has not asked to be moved into the strip
+    if (!activeTab?.parentElement?.contains(document.activeElement)) return
+
+    // The tab that held focus is no longer a tab stop, so leaving focus on it would strand it
+    activeTab.focus()
+  }, [selectedIndex])
+
   // Hand back the refs and the fade mask for the strip to render
   return { scrollerRef, activeTabRef, maskStyle }
 }

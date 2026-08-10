@@ -15,6 +15,7 @@ import {
   useFocus,
   useHover,
   useInteractions,
+  useMergeRefs,
   useRole,
 } from '@floating-ui/react'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -33,6 +34,15 @@ type TooltipProps = {
   placement: Placement
   /** Optional additional class names for custom styling of the tooltip popover. */
   className?: string
+}
+
+/**
+ * A trigger element's own props, as far as the tooltip has to read them: the handlers it composes
+ * with its own, and the handle it shares with the positioning.
+ */
+type TooltipTriggerProps = React.HTMLAttributes<HTMLElement> & {
+  /** The handle the trigger's owner put on it. */
+  ref?: React.Ref<HTMLElement>
 }
 
 /**
@@ -97,20 +107,48 @@ export function Tooltip({ children, content, placement, className = '' }: Toolti
     useFocus(context),
   ])
 
+  // The trigger, read as an element so its own props can be handed back to it
+  const triggerElement = children as React.ReactElement<TooltipTriggerProps>
+
+  // Its own click and handle, the two the tooltip has something of its own to put in place of
+  const { onClick: triggerOnClick, ref: triggerRef, ...triggerProps } = triggerElement.props
+
+  // Its remaining handlers. Only these need forwarding: cloning leaves every other prop where it
+  // is, while floating-ui's own handlers overwrite whichever of these it also declares.
+  const triggerHandlers = Object.fromEntries(
+    Object.entries(triggerProps).filter(([propName]) => propName.startsWith('on'))
+  )
+
+  // One handle serving the trigger's owner and the positioning both
+  const referenceRef = useMergeRefs([refs.setReference, triggerRef ?? null])
+
   return (
     <>
       {/* The trigger element. We clone the child to attach the necessary props and ref. */}
       {React.cloneElement(
-        children as React.ReactElement,
+        triggerElement,
         getReferenceProps({
-          ref: refs.setReference,
-          // This is to ensure that clicking on the trigger wouldn't trigger parent's on click handlers
-          onClick(event) {
+          // Handed to floating-ui rather than applied on top of it, since it composes what it is given
+          // with its own handlers while cloning would drop whichever it also declares
+          ...triggerHandlers,
+          ref: referenceRef,
+          /**
+           * Runs the trigger's own click and keeps it off everything around it.
+           *
+           * The default action is cancelled: a trigger is regularly an inert zone inside a label or
+           * a link, where revealing what a truncated name says must not also tick the checkbox that
+           * label stands for.
+           *
+           * @param event - The click on the trigger.
+           */
+          onClick(event: React.MouseEvent<HTMLElement>) {
+            // What the child was going to do about being clicked
+            triggerOnClick?.(event)
+
+            // Whatever the trigger sits inside is not what the click was for
             event.preventDefault()
             event.stopPropagation()
           },
-          // When doing keyboard navigation, open the tooltip
-          onFocus: () => setOpen(true),
         })
       )}
 

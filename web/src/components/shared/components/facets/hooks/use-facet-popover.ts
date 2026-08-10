@@ -1,7 +1,9 @@
 import {
   autoUpdate,
   flip,
+  type FloatingFocusManagerProps,
   offset,
+  type OpenChangeReason,
   type Placement,
   shift,
   size,
@@ -11,7 +13,6 @@ import {
   useInteractions,
   useRole,
 } from '@floating-ui/react'
-import { useIsomorphicEffect } from '@mantine/hooks'
 import {
   type CSSProperties,
   type RefObject,
@@ -73,8 +74,25 @@ const POPOVER_WIDTH_STYLES: Record<
   }),
 }
 
-/** How long to let the popover mount before reaching into it for the search box. */
-const FOCUS_DELAY_MS = 10
+/**
+ * Whether the trigger takes focus back after a popover closes this way.
+ *
+ * Escape and a second click on the trigger both leave the reader standing where they started, which
+ * is where focus belongs. The rest close a popover by pointing somewhere else or tabbing past it,
+ * and there the reader has already said where their attention is going.
+ */
+const FOCUS_RETURNS_TO_TRIGGER = {
+  'escape-key': true,
+  click: true,
+  'outside-press': false,
+  'reference-press': false,
+  'ancestor-scroll': false,
+  'focus-out': false,
+  hover: false,
+  focus: false,
+  'list-navigation': false,
+  'safe-polygon': false,
+} satisfies Record<OpenChangeReason, boolean>
 
 /**
  * The popover machinery a facet needs.
@@ -108,7 +126,9 @@ export type UseFacetPopoverResult<T extends FacetOption> = {
   getReferenceProps: ReturnType<typeof useInteractions>['getReferenceProps']
   /** Props the popover has to spread. */
   getFloatingProps: ReturnType<typeof useInteractions>['getFloatingProps']
-  /** Puts the caret in the search box, or drops focus entirely on a phone. */
+  /** Where focus lands as the popover opens. */
+  initialFocus: FloatingFocusManagerProps['initialFocus']
+  /** Puts the caret in the search box, where the device has a keyboard to type on. */
   focusSearchBox: () => void
 }
 
@@ -142,21 +162,15 @@ export function useFacetPopover<T extends FacetOption>(
 
   // A function which puts the caret where it belongs once the popover is up
   const focusSearchBox = useCallback(() => {
-    // On a phone the keyboard costs more room than the search box saves, so drop focus instead
-    if (isMobileOS) {
-      ;(document.activeElement as HTMLElement)?.blur()
-      return
-    }
+    // A phone answers a caret with a soft keyboard covering the list that just opened
+    if (isMobileOS) return
 
     // Everywhere else the caret starts in the search box, ready to type
     searchRef.current?.focus()
   }, [isMobileOS])
 
-  // Settle focus once the device is known, since the mobile branch decides the other way
-  useIsomorphicEffect(() => {
-    // Put the caret where this device wants it
-    focusSearchBox()
-  }, [focusSearchBox])
+  // Why the popover last closed, which is what decides whether the trigger takes focus back
+  const closeReason = useRef<OpenChangeReason | undefined>(undefined)
 
   // The options left once the search term has been applied
   const filtered = useMemo(() => filterOptionsBySearch(options, query), [options, query])
@@ -167,7 +181,14 @@ export function useFacetPopover<T extends FacetOption>(
   // Positioning: anchored under the trigger, flipping above it when the page runs out below
   const { refs, floatingStyles, context, placement } = useFloating({
     open,
-    onOpenChange: setOpen,
+    onOpenChange: (nextOpen, _event, reason) => {
+      // Only a close has a reason worth keeping, and recording an opening one would leave it standing
+      // as the answer for whatever closes the popover next
+      closeReason.current = nextOpen ? undefined : reason
+
+      // What the interaction asked for
+      setOpen(nextOpen)
+    },
     placement: 'bottom-start',
     strategy: 'fixed',
     whileElementsMounted: autoUpdate,
@@ -215,24 +236,47 @@ export function useFacetPopover<T extends FacetOption>(
   // The three behaviours merged into one set of props per element
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role])
 
-  // Move focus in as the popover appears, and out again as it goes
+  // Whether the popover was up on the render before, which is what makes a close a close rather than
+  // the state it has sat in since the page loaded
+  const wasOpen = useRef(false)
+
+  // Hand focus back to the trigger as the popover goes
   useEffect(() => {
-    // Opening: let the popover mount before reaching into it
+    // An open popover has nothing to hand back yet
     if (open) {
-      const focusTimer = window.setTimeout(focusSearchBox, FOCUS_DELAY_MS)
-
-      // Closing before the timer fires must not steal focus from wherever it went next
-      return () => window.clearTimeout(focusTimer)
+      // Record it, so the next closed render reads as a close
+      wasOpen.current = true
+      return
     }
 
-    // Closing: drop focus so no ring flashes as the popover goes
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur()
-    }
+    // Closed without ever having been open, which every render before the first click is
+    if (!wasOpen.current) return
+
+    // The close is being handled here, so it isn't handled again
+    wasOpen.current = false
 
     // A reopened facet starts from its full option list rather than the last search
     setQuery('')
-  }, [open, focusSearchBox])
+
+    // Whether the way it closed asks for the trigger to take focus back. A close with no reason to it
+    // is one nothing interactive drove, so it is treated as asking.
+    const returnsFocus = closeReason.current ? FOCUS_RETURNS_TO_TRIGGER[closeReason.current] : true
+
+    // Pointing at something else has already put focus where the reader wants it, but pointing at bare
+    // page leaves it nowhere, and a popover that drops focus leaves the next Tab at the top of the page
+    if (!returnsFocus && document.activeElement !== document.body) return
+
+    // The trigger, which is where the reader was standing before the popover took over
+    const trigger = refs.domReference.current
+
+    // Focus is moved rather than restored: Safari never focuses a button on click, so there is
+    // nothing to restore to
+    if (trigger instanceof HTMLElement) trigger.focus()
+  }, [open, refs])
+
+  // Where focus lands as the popover opens: on a phone nowhere inside it, and everywhere else the
+  // search box, falling back to the panel itself where the facet is too short to draw one
+  const initialFocus = isMobileOS ? -1 : searchRef
 
   // The popover's state, plus everything the trigger and panel have to spread
   return {
@@ -250,6 +294,7 @@ export function useFacetPopover<T extends FacetOption>(
     context,
     getReferenceProps,
     getFloatingProps,
+    initialFocus,
     focusSearchBox,
   }
 }
