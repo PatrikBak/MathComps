@@ -31,7 +31,7 @@ public class ExaminerTests
     {
         // A reply cleared by both guards.
         var caller = new Mock<ILlmChatCaller>();
-        SetupStep(caller, new ExaminerReply("a reply."));
+        SetupTextStep(caller, "a reply.");
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
 
@@ -39,12 +39,32 @@ public class ExaminerTests
         var outcome = await RunAsync(caller);
 
         // Generate and both guards each ran once; nothing was revised.
-        VerifyStepCalled<ExaminerReply>(caller, Times.Once());
+        VerifyTextStepCalled(caller, Times.Once());
         VerifyStepCalled<MathCheckResult>(caller, Times.Once());
         VerifyStepCalled<LeakCheckResult>(caller, Times.Once());
         Assert.True(outcome.MathCheck.Holds);
         Assert.False(outcome.LeakCheck.Leaks);
         Assert.Equal(0, outcome.Revisions);
+    }
+
+    /// <summary>
+    /// A reply written with bracket math delimiters ships in dollars: the generator is free to reach for
+    /// <c>\(…\)</c>, and what leaves the loop is what a reader's renderer can display.
+    /// </summary>
+    [Fact]
+    public async Task A_reply_ships_with_its_bracket_math_normalized()
+    {
+        // A reply whose math is bracket-delimited, cleared by both guards.
+        var caller = new Mock<ILlmChatCaller>();
+        SetupTextStep(caller, @"Why is \(p^2+1\) not divisible by \[q\]?");
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // Both delimiter shapes came out in dollars.
+        Assert.Equal("Why is $p^2+1$ not divisible by $$q$$?", outcome.Reply);
     }
 
     /// <summary>
@@ -56,14 +76,12 @@ public class ExaminerTests
     {
         // A first reply the math-check rejects, then a regenerated one the loop should emit.
         var caller = new Mock<ILlmChatCaller>();
-        caller.SetupSequence(mock => mock.CompleteAsync<ExaminerReply>(
-                It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new ExaminerReply("first reply.")))
-            .ReturnsAsync(Result(new ExaminerReply("revised reply.")));
+        caller.SetupSequence(mock => mock.CompleteTextAsync(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("first reply."))
+            .ReturnsAsync(Result("revised reply."));
         caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
-                It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(new MathCheckResult(Holds: false, Correction: "the bound is at most 1/2, not strictly less")))
             .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
         SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
@@ -73,7 +91,7 @@ public class ExaminerTests
 
         // Generate and math-check each ran twice (the re-verify), the emitted reply is the regenerated one, and it
         // ships with one revision and a now-clean verdict.
-        VerifyStepCalled<ExaminerReply>(caller, Times.Exactly(2));
+        VerifyTextStepCalled(caller, Times.Exactly(2));
         VerifyStepCalled<MathCheckResult>(caller, Times.Exactly(2));
         Assert.Equal(1, outcome.Revisions);
         Assert.Equal("revised reply.", outcome.Reply);
@@ -92,11 +110,10 @@ public class ExaminerTests
     {
         // A reply the leak-check catches leaking, then clears on the fresh attempt; the math-check stays clean.
         var caller = new Mock<ILlmChatCaller>();
-        SetupStep(caller, new ExaminerReply("a reply."));
+        SetupTextStep(caller, "a reply.");
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
-                It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample", WithholdsClose: false, Established: "")))
             .ReturnsAsync(Result(new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: "")));
 
@@ -104,7 +121,7 @@ public class ExaminerTests
         var outcome = await RunAsync(caller);
 
         // Generate, leak-check, and math-check each ran twice; the reply ships clean after one revision.
-        VerifyStepCalled<ExaminerReply>(caller, Times.Exactly(2));
+        VerifyTextStepCalled(caller, Times.Exactly(2));
         VerifyStepCalled<LeakCheckResult>(caller, Times.Exactly(2));
         VerifyStepCalled<MathCheckResult>(caller, Times.Exactly(2));
         Assert.Equal(1, outcome.Revisions);
@@ -120,13 +137,12 @@ public class ExaminerTests
     public async Task A_persistent_leak_ships_the_constrained_fallback_after_the_cap()
     {
         // A reply that always leaks, no matter how many times it's regenerated; the math-check stays clean
-        // throughout. Each generate call's system prompt is captured as it lands.
-        var generatePrompts = new List<string>();
+        // throughout. Each generate call's request is captured as it lands.
+        var generateRequests = new List<ChatCallRequest>();
         var caller = new Mock<ILlmChatCaller>();
-        caller.Setup(mock => mock.CompleteAsync<ExaminerReply>(
-                Capture.In(generatePrompts), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new ExaminerReply("a reply.")));
+        caller.Setup(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("a reply."));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, new LeakCheckResult(Leaks: true, WhatLeaked: "still gives away the counterexample", WithholdsClose: false, Established: ""));
 
@@ -134,7 +150,7 @@ public class ExaminerTests
         var outcome = await RunAsync(caller);
 
         // Generate ran the initial attempt, the capped revisions, and the fallback on top.
-        VerifyStepCalled<ExaminerReply>(caller, Times.Exactly(RevisionCap + 2));
+        VerifyTextStepCalled(caller, Times.Exactly(RevisionCap + 2));
 
         // The fallback shipped, counted like a regeneration and still carrying the flagged verdict.
         Assert.Equal(RevisionCap + 1, outcome.Revisions);
@@ -142,7 +158,7 @@ public class ExaminerTests
         Assert.True(outcome.LeakCheck.Leaks);
 
         // The last generate ran under the safe note, not another correction.
-        Assert.Contains("minimal holding reply", generatePrompts[^1]);
+        Assert.Contains("minimal holding reply", generateRequests[^1].SystemPrompt);
     }
 
     /// <summary>
@@ -153,20 +169,18 @@ public class ExaminerTests
     [Fact]
     public async Task A_withheld_close_regenerates_until_the_reply_concedes()
     {
-        // Capture each generate call's system prompt as it lands.
-        var generatePrompts = new List<string>();
+        // Capture each generate call's request as it lands.
+        var generateRequests = new List<ChatCallRequest>();
         var caller = new Mock<ILlmChatCaller>();
-        caller.SetupSequence(mock => mock.CompleteAsync<ExaminerReply>(
-                Capture.In(generatePrompts), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new ExaminerReply("keeps pressing.")))
-            .ReturnsAsync(Result(new ExaminerReply("conceding reply.")));
+        caller.SetupSequence(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("keeps pressing."))
+            .ReturnsAsync(Result("conceding reply."));
 
         // The math stays clean; the leak-check flags the first attempt as withholding an earned close, then clears.
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
-                It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(new LeakCheckResult(
                 Leaks: false, WhatLeaked: "", WithholdsClose: true, Established: "the full divisor-pairing chain")))
             .ReturnsAsync(Result(new LeakCheckResult(
@@ -181,7 +195,7 @@ public class ExaminerTests
         Assert.False(outcome.LeakCheck.WithholdsClose);
 
         // The regenerate's prompt carried what the candidate established, so the generator knows the exam is over.
-        Assert.Contains("the full divisor-pairing chain", generatePrompts[1]);
+        Assert.Contains("the full divisor-pairing chain", generateRequests[1].SystemPrompt);
     }
 
     /// <summary>
@@ -193,13 +207,12 @@ public class ExaminerTests
     public async Task A_persistent_withheld_close_ships_the_constrained_fallback_after_the_cap()
     {
         // A reply that always withholds the close, no matter how many times it's regenerated; the math-check stays
-        // clean throughout. Each generate call's system prompt is captured as it lands.
-        var generatePrompts = new List<string>();
+        // clean throughout. Each generate call's request is captured as it lands.
+        var generateRequests = new List<ChatCallRequest>();
         var caller = new Mock<ILlmChatCaller>();
-        caller.Setup(mock => mock.CompleteAsync<ExaminerReply>(
-                Capture.In(generatePrompts), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new ExaminerReply("keeps pressing.")));
+        caller.Setup(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("keeps pressing."));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, new LeakCheckResult(
             Leaks: false, WhatLeaked: "", WithholdsClose: true, Established: "the full divisor-pairing chain"));
@@ -208,7 +221,7 @@ public class ExaminerTests
         var outcome = await RunAsync(caller);
 
         // Generate ran the initial attempt, the capped revisions, and the fallback on top.
-        VerifyStepCalled<ExaminerReply>(caller, Times.Exactly(RevisionCap + 2));
+        VerifyTextStepCalled(caller, Times.Exactly(RevisionCap + 2));
 
         // The fallback shipped, counted like a regeneration and still carrying the withheld-close verdict.
         Assert.Equal(RevisionCap + 1, outcome.Revisions);
@@ -217,7 +230,7 @@ public class ExaminerTests
 
         // The last generate ran under the closing note — a withheld close is the surviving fault, so the fallback
         // ends the exam instead of retreating to a holding question.
-        Assert.Contains("closing reply", generatePrompts[^1]);
+        Assert.Contains("closing reply", generateRequests[^1].SystemPrompt);
     }
 
     /// <summary>
@@ -227,24 +240,21 @@ public class ExaminerTests
     [Fact]
     public async Task A_reply_tripping_both_guards_feeds_both_corrections_into_the_regeneration()
     {
-        // Capture each generate call's system prompt as it lands.
-        var generatePrompts = new List<string>();
+        // Capture each generate call's request as it lands.
+        var generateRequests = new List<ChatCallRequest>();
         var caller = new Mock<ILlmChatCaller>();
-        caller.SetupSequence(mock => mock.CompleteAsync<ExaminerReply>(
-                Capture.In(generatePrompts), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new ExaminerReply("first reply.")))
-            .ReturnsAsync(Result(new ExaminerReply("revised reply.")));
+        caller.SetupSequence(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("first reply."))
+            .ReturnsAsync(Result("revised reply."));
 
         // The first attempt fails the math-check and leaks; the regenerate clears both.
         caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
-                It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(new MathCheckResult(Holds: false, Correction: "the bound is at most 1/2")))
             .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
-                It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample", WithholdsClose: false, Established: "")))
             .ReturnsAsync(Result(new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: "")));
 
@@ -255,12 +265,12 @@ public class ExaminerTests
         Assert.Equal(1, outcome.Revisions);
 
         // The first generate carried no revision note.
-        Assert.Equal(2, generatePrompts.Count);
-        Assert.DoesNotContain("REVISION REQUIRED", generatePrompts[0]);
+        Assert.Equal(2, generateRequests.Count);
+        Assert.DoesNotContain("REVISION REQUIRED", generateRequests[0].SystemPrompt);
 
         // The regenerate carried both the math correction and the leak, so the generator knows every flaw to fix.
-        Assert.Contains("the bound is at most 1/2", generatePrompts[1]);
-        Assert.Contains("named the two-corners counterexample", generatePrompts[1]);
+        Assert.Contains("the bound is at most 1/2", generateRequests[1].SystemPrompt);
+        Assert.Contains("named the two-corners counterexample", generateRequests[1].SystemPrompt);
     }
 
     /// <summary>
@@ -274,13 +284,12 @@ public class ExaminerTests
         var problem = "Show that the token {reference} appears verbatim in this statement.";
         var reference = "SECRET-REFERENCE-TEXT";
 
-        // Capture the generate call's system prompt as it lands.
-        var generatePrompts = new List<string>();
+        // Capture the generate call's request as it lands.
+        var generateRequests = new List<ChatCallRequest>();
         var caller = new Mock<ILlmChatCaller>();
-        caller.Setup(mock => mock.CompleteAsync<ExaminerReply>(
-                Capture.In(generatePrompts), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new ExaminerReply("a reply.")));
+        caller.Setup(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("a reply."));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
 
@@ -301,10 +310,10 @@ public class ExaminerTests
         });
 
         // The literal token inside the problem's own text survives untouched...
-        Assert.Contains("the token {reference} appears verbatim", generatePrompts[0]);
+        Assert.Contains("the token {reference} appears verbatim", generateRequests[0].SystemPrompt);
 
         // ...while the template's real {reference} placeholder still got filled with the reference solution.
-        Assert.Contains(reference, generatePrompts[0]);
+        Assert.Contains(reference, generateRequests[0].SystemPrompt);
     }
 
     /// <summary>
@@ -316,7 +325,7 @@ public class ExaminerTests
     {
         // Each of the three calls a clean turn makes reports its own cost and token usage.
         var caller = new Mock<ILlmChatCaller>();
-        SetupStep(caller, new ExaminerReply("a reply."), cost: 0.01m, promptTokens: 100, completionTokens: 20);
+        SetupTextStep(caller, "a reply.", cost: 0.01m, promptTokens: 100, completionTokens: 20);
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""), cost: 0.02m, promptTokens: 200, completionTokens: 30);
         SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""), cost: 0.03m, promptTokens: 300, completionTokens: 40);
 
@@ -416,10 +425,10 @@ public class ExaminerTests
     }
 
     /// <summary>
-    /// Wraps a bound value in a chat-call result carrying the given cost and tokens, the shape the caller now returns.
+    /// Wraps a value in a chat-call result carrying the given cost and tokens, the shape a caller hands back.
     /// </summary>
-    /// <typeparam name="TResponse">The response type the reply binds into.</typeparam>
-    /// <param name="value">The bound reply.</param>
+    /// <typeparam name="TResponse">The shape the reply is read into.</typeparam>
+    /// <param name="value">The reply.</param>
     /// <param name="cost">The cost the call reports.</param>
     /// <param name="promptTokens">The prompt tokens the call reports.</param>
     /// <param name="completionTokens">The completion tokens the call reports.</param>
@@ -442,8 +451,7 @@ public class ExaminerTests
         Mock<ILlmChatCaller> caller, TResponse response,
         decimal cost = 0m, int promptTokens = 0, int completionTokens = 0) =>
         caller.Setup(mock => mock.CompleteAsync<TResponse>(
-                It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(response, cost, promptTokens, completionTokens));
 
     /// <summary>
@@ -454,6 +462,30 @@ public class ExaminerTests
     /// <param name="times">The expected number of calls.</param>
     private static void VerifyStepCalled<TResponse>(Mock<ILlmChatCaller> caller, Times times) =>
         caller.Verify(mock => mock.CompleteAsync<TResponse>(
-                It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), times);
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()), times);
+
+    /// <summary>
+    /// Sets the fake caller to answer any plain-text call — the generate step — with the given reply, carrying the
+    /// given cost and tokens.
+    /// </summary>
+    /// <param name="caller">The fake caller to configure.</param>
+    /// <param name="reply">The reply text it should return.</param>
+    /// <param name="cost">The cost the call reports.</param>
+    /// <param name="promptTokens">The prompt tokens the call reports.</param>
+    /// <param name="completionTokens">The completion tokens the call reports.</param>
+    private static void SetupTextStep(
+        Mock<ILlmChatCaller> caller, string reply,
+        decimal cost = 0m, int promptTokens = 0, int completionTokens = 0) =>
+        caller.Setup(mock => mock.CompleteTextAsync(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(reply, cost, promptTokens, completionTokens));
+
+    /// <summary>
+    /// Asserts how many times the fake caller was asked for a plain-text completion — the generate step.
+    /// </summary>
+    /// <param name="caller">The fake caller to check.</param>
+    /// <param name="times">The expected number of calls.</param>
+    private static void VerifyTextStepCalled(Mock<ILlmChatCaller> caller, Times times) =>
+        caller.Verify(mock => mock.CompleteTextAsync(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()), times);
 }
