@@ -6,7 +6,7 @@ namespace MathComps.Infrastructure.Storage;
 public class UploadLedgerOptions
 {
     /// <summary>
-    /// Path to the JSON ledger that records, per storage key, the source-file mtime last pushed under it.
+    /// Path to the JSON ledger that records, per storage key, the hash of the bytes last pushed under it.
     /// </summary>
     public required string LedgerPath { get; init; }
 }

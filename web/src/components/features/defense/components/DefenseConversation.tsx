@@ -127,7 +127,9 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
   // Auth state
   const { isLoaded: isAuthLoaded, isSignedIn } = useAuth()
 
-  // The live conversation, its examiner-driven send flow, and this problem's session history
+  // The live conversation, its examiner-driven send flow, and this problem's session history. The greeting is
+  // read here so the chat opens on it before a session exists; the backend seeds its own copy as the saved
+  // conversation's first turn, so `defense.opener` and the backend's `defense-copy.json` must stay in step.
   const {
     turns,
     isThinking,

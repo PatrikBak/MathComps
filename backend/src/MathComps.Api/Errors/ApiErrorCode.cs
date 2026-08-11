@@ -62,6 +62,12 @@ public enum ApiErrorCode
     DefenseSessionNotFound,
 
     /// <summary>
+    /// The handout environment a defense was started against has no content on the site, in the language asked
+    /// for. Covers every defendable kind, not just problems — a theorem or exercise resolves the same way.
+    /// </summary>
+    DefenseEnvironmentNotFound,
+
+    /// <summary>
     /// A defense message or problem text exceeded its length cap.
     /// </summary>
     DefenseMessageTooLong,

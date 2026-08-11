@@ -22,24 +22,6 @@ public class DefenseLimits
     public required int MaxCandidateChars { get; set; }
 
     /// <summary>
-    /// The longest the problem statement sent on start may be, in characters.
-    /// </summary>
-    [Range(1, int.MaxValue)]
-    public required int MaxStatementChars { get; set; }
-
-    /// <summary>
-    /// The longest the reference solution sent on start may be, in characters.
-    /// </summary>
-    [Range(1, int.MaxValue)]
-    public required int MaxReferenceChars { get; set; }
-
-    /// <summary>
-    /// The longest the examiner's opening greeting sent on start may be, in characters.
-    /// </summary>
-    [Range(1, int.MaxValue)]
-    public required int MaxOpenerChars { get; set; }
-
-    /// <summary>
     /// The longest a handout's content id may be, in characters. Kept in step with the anchor column it is
     /// stored in, so an over-long id is refused as a bad request rather than failing the write.
     /// </summary>

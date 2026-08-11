@@ -131,6 +131,9 @@ builder.Services.AddProblemServices();
 // User accounts and comments
 builder.Services.AddUserServices();
 
+// Object storage, which the defense feature reads its problem content back out of
+builder.Services.AddStorage();
+
 // The shared chat stack and the AI-examiner defense feature
 builder.Services.AddLlmChat(builder.Configuration);
 builder.Services.AddDefenseServices(builder.Configuration);

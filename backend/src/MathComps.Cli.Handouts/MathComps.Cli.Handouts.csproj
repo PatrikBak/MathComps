@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <UserSecretsId>MathComps.Cli.Handouts</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

@@ -20,8 +20,6 @@ import type {
 const SAMPLE_PROBLEM: DefenseProblem = {
   target: { handoutContentId: 'handout-1', environmentId: 'p1' },
   statement: 'Prove it.',
-  reference: 'Because.',
-  hints: [],
 }
 
 /** The examiner's opening line. */
@@ -108,16 +106,14 @@ class FakeBackend implements DefenseConversationServices {
     // Both new turns, stamped as the backend would
     const newTurns = this.stampTurns([studentTurn, replyTurn])
 
-    // A first turn creates the session, opening on the examiner's greeting
+    // A first turn creates the session, opening on the examiner's greeting — which the backend owns, so the
+    // fake seeds its own rather than echoing anything the request carried
     if (request.kind === 'start') {
       // Assemble the new session under a server-minted id
       const session: DefenseSession = {
         id: `session-${(this.sessionCount += 1)}`,
         target: request.target,
-        turns: [
-          ...this.stampTurns([{ id: null, role: 'examiner', content: request.opener }]),
-          ...newTurns,
-        ],
+        turns: [...this.stampTurns([{ id: null, role: 'examiner', content: OPENER }]), ...newTurns],
         feedback: null,
         reports: [],
       }

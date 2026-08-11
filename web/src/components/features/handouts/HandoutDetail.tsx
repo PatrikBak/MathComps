@@ -36,6 +36,7 @@ import {
 } from './handout-colors'
 import { renderBlocks, renderRawContentBlock } from './handout-content-renderer'
 import { blockSequenceToMarkdown } from './handout-content-source'
+import { hasDefenseReference } from './handout-defense-content'
 import { HandoutActions } from './HandoutActions'
 
 /**
@@ -170,49 +171,19 @@ function renderDocumentSections(
                 ? renderDifficultyStars(contentBlock.difficulty)
                 : null
 
-            // The hidden reasoning a defense is argued against: the worked solution for a problem, exercise,
-            // or example, and the proof for a theorem. Definitions yield none.
-            let defenseReference: RawContentBlock[]
-            // The author's step-by-step hints: only a problem has them, so the other types yield none.
-            let defenseHints: RawContentBlock[][] = []
-            switch (contentBlock.type) {
-              case 'exercise':
-              case 'example':
-                // Exercises and examples are defended against their worked solution.
-                defenseReference = contentBlock.solution
-                break
-              case 'problem':
-                // A problem is defended against its solution.
-                defenseReference = contentBlock.solution
-                // It also carries the author's hints.
-                defenseHints = contentBlock.hints
-                break
-              case 'theorem':
-                // A theorem is defended against its proof.
-                defenseReference = contentBlock.proof
-                break
-              case 'definition':
-                // Definitions have nothing hidden to defend.
-                defenseReference = []
-                break
-              default:
-                assertNever(contentBlock)
-            }
-
             // Defense-chat trigger, offered wherever there's a solution to defend. A handout that
             // withholds its solutions on the page gets one too: defending to Mathilda is the point
-            // of withholding them.
-            const defenseTrigger =
-              defenseReference.length > 0 ? (
-                <DefenseChatTrigger
-                  problem={{
-                    target: { handoutContentId: contentId, environmentId: contentBlock.id },
-                    statement: blockSequenceToMarkdown(contentBlock.body),
-                    reference: blockSequenceToMarkdown(defenseReference),
-                    hints: defenseHints.map(blockSequenceToMarkdown),
-                  }}
-                />
-              ) : undefined
+            // of withholding them. The reasoning she measures against never travels from here — she
+            // reads it off the environment the target names — so only the statement the chat shows
+            // alongside the conversation goes with it.
+            const defenseTrigger = hasDefenseReference(contentBlock) ? (
+              <DefenseChatTrigger
+                problem={{
+                  target: { handoutContentId: contentId, environmentId: contentBlock.id },
+                  statement: blockSequenceToMarkdown(contentBlock.body),
+                }}
+              />
+            ) : undefined
 
             // Composed card heading, e.g. "Theorem 3" or "Úloha 4**".
             const mainTitle = (

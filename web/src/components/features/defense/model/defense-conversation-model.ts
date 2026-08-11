@@ -133,7 +133,7 @@ export type DefenseConversationServices = {
 export type DefenseConversationModelOptions = {
   /** The problem being defended. */
   problem: DefenseProblem
-  /** The examiner's opening line. */
+  /** The examiner's opening line, shown while the conversation is still unsaved. */
   opener: string
   /** Called after any write to the session store. */
   onSessionsChanged: () => void
@@ -273,7 +273,10 @@ export class DefenseConversationModel {
   /** The problem being defended. */
   private readonly problem: DefenseProblem
 
-  /** The examiner's opening line. */
+  /**
+   * The examiner's opening line, shown while the conversation is still unsaved. The backend seeds its own
+   * copy as the saved conversation's first turn, so the two are translations of the same greeting.
+   */
   private readonly opener: string
 
   /** Called after any write to the session store. */
@@ -371,16 +374,7 @@ export class DefenseConversationModel {
     // Open a new session (the backend mints its id), or append to the session already open
     const request: DefenseTurnRequest =
       sessionId === null
-        ? {
-            kind: 'start',
-            target: this.problem.target,
-            statement: this.problem.statement,
-            reference: this.problem.reference,
-            hints: this.problem.hints,
-            opener: this.opener,
-            content,
-            signal: run.controller.signal,
-          }
+        ? { kind: 'start', target: this.problem.target, content, signal: run.controller.signal }
         : { kind: 'continue', sessionId, content, signal: run.controller.signal }
 
     try {

@@ -64,19 +64,12 @@ export function submitTurn(
   request: DefenseTurnRequest
 ): Promise<ApiResult<DefenseSession>> {
   switch (request.kind) {
-    // Open a new session with the problem, its reference, the opener, and the student's first message
+    // Open a new session against a problem, naming it rather than describing it
     case 'start':
       return apiCall<DefenseSession>(() => getStartDefenseUrl(), {
         method: 'POST',
         signal: request.signal,
-        body: JSON.stringify({
-          target: request.target,
-          statement: request.statement,
-          reference: request.reference,
-          hints: request.hints,
-          opener: request.opener,
-          content: request.content,
-        }),
+        body: JSON.stringify({ target: request.target, content: request.content }),
       })
     // Append the student's message to the open session
     case 'continue':

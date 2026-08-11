@@ -4,6 +4,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
+using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -22,9 +23,12 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// <param name="examinerConfigSnapshotProvider">The examiner engine's config snapshot, stamped onto each new
 /// session.</param>
 /// <param name="turnGate">Serializes a single user's turns.</param>
+/// <param name="contentResolver">Looks up what a new session's examiner is told about the problem.</param>
+/// <param name="defenseCopy">The examiner's own lines, in the student's language.</param>
 public class DefenseSessionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory, IExaminer examiner, IOptions<DefenseLimits> limits,
-    IExaminerConfigSnapshotProvider examinerConfigSnapshotProvider, IDefenseUserTurnGate turnGate)
+    IExaminerConfigSnapshotProvider examinerConfigSnapshotProvider, IDefenseUserTurnGate turnGate,
+    IDefenseContentResolver contentResolver, IDefenseCopy defenseCopy)
     : IDefenseSessionService
 {
     /// <summary>
@@ -44,21 +48,24 @@ public class DefenseSessionService(
         // Every field a start needs must be present and non-blank; a missing one (null through JSON) or a blank one
         // is a bad request, not a server fault.
         EnsureTargetPresent(start.Target);
-        EnsureNotBlank(start.Statement);
-        EnsureNotBlank(start.Reference);
-        EnsureNotBlank(start.Opener);
         EnsureNotBlank(start.Content);
 
-        // Fold the author's hints into the reference so the examiner reads them as staged, earned-only help.
-        var reference = AuthorHintsSection.BuildReference(start.Reference, start.Hints);
-
-        // Bound each input before doing anything with it; the reference is bounded with its hints folded in.
+        // Bound what the caller sent before it is used to look anything up.
         EnsureWithinLength(start.Target.HandoutContentId, _limits.MaxHandoutContentIdChars);
         EnsureWithinLength(start.Target.EnvironmentId, _limits.MaxEnvironmentIdChars);
-        EnsureWithinLength(start.Statement, _limits.MaxStatementChars);
-        EnsureWithinLength(reference, _limits.MaxReferenceChars);
-        EnsureWithinLength(start.Opener, _limits.MaxOpenerChars);
         EnsureWithinLength(start.Content, _limits.MaxCandidateChars);
+
+        // The problem itself comes from the site's own content, so a caller can only choose which environment to
+        // defend, never what the examiner is told about it. A target naming an environment nothing is published
+        // for is a 404 rather than a rejected input: the request was well formed, the content just isn't there.
+        var problem = await contentResolver.ResolveAsync(start.Target, start.Language, cancellationToken)
+            ?? throw new DefenseEnvironmentNotFoundException();
+
+        // Fold the author's hints into the reference so the examiner reads them as staged, earned-only help.
+        var reference = AuthorHintsSection.BuildReference(problem.Reference, problem.Hints);
+
+        // The examiner's own greeting, in the language the student is working in.
+        var opener = defenseCopy.GetOpener(start.Language);
 
         // Serialize this user's turns for the rest of the operation, so concurrent starts each see the other's spend.
         using var turnLock = await turnGate.AcquireAsync(userId, cancellationToken);
@@ -79,14 +86,14 @@ public class DefenseSessionService(
         var session = new DefenseSession
         {
             UserId = userId,
-            ProblemStatement = start.Statement,
+            ProblemStatement = problem.Statement,
             ProblemReference = reference,
             ExaminerConfig = _examinerConfigJson,
             CreatedAt = seededAt,
         };
 
         // Seed the examiner's opener, a canned greeting rather than an LLM turn.
-        AppendTurn(session, TranscriptRole.Examiner, start.Opener, seededAt);
+        AppendTurn(session, TranscriptRole.Examiner, opener, seededAt);
 
         // Seed the student's first message.
         AppendTurn(session, TranscriptRole.Candidate, start.Content, seededAt);

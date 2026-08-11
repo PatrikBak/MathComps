@@ -83,14 +83,15 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         public bool ForceAsy { get; set; }
 
         /// <summary>
-        /// Whether to skip regenerating the committed environment-id index. For CI, where the
-        /// frontend's generator script needs <c>web/</c> dependencies that job never installs —
-        /// the index's own freshness is instead verified independently by the frontend job's
-        /// <c>handouts:validate</c> check.
+        /// Whether to skip regenerating the artefacts derived from the content JSONs: the committed
+        /// environment-id index and the examiner's defense-content blobs. Both are built by the frontend's own
+        /// generator scripts, so this is really "skip the steps needing <c>web/</c>'s dependencies" — which is
+        /// what CI wants, that job never installing them. The frontend job's <c>handouts:validate</c> check
+        /// covers both artefacts independently.
         /// </summary>
-        [CommandOption("--skip-index")]
-        [Description("Skip regenerating handout-env-index.json")]
-        public bool SkipIndex { get; set; }
+        [CommandOption("--skip-derived")]
+        [Description("Skip regenerating handout-env-index.json and the defense content (needs web/ dependencies)")]
+        public bool SkipDerived { get; set; }
 
         /// <summary>
         /// Path to the error log file for compiler output on failure.
@@ -116,15 +117,9 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
     private record HandoutImageResult(Document ProcessedDocument, ImmutableList<ImageData> DiscoveredImages);
 
     /// <summary>
-    /// The R2 prefix under which every handout artefact (PDFs, images) lives.
-    /// </summary>
-    private const string HandoutsR2Prefix = "handouts";
-
-    /// <summary>
     /// The top-level R2 prefix under which handout-referenced documents (downloadable
-    /// PDFs linked via <c>\Link[file.pdf]{...}</c>) live. Deliberately a sibling of
-    /// <see cref="HandoutsR2Prefix"/> rather than nested under it, matching the flat
-    /// per-type layout shared by problems, handouts, and user uploads.
+    /// PDFs linked via <c>\Link[file.pdf]{...}</c>) live. Deliberately a sibling of the handout prefix rather
+    /// than nested under it, matching the flat per-type layout shared by problems, handouts, and user uploads.
     /// </summary>
     private const string DocumentsR2Prefix = "documents";
 
@@ -169,15 +164,6 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         // Hand back the code, normalized to lowercase
         return localeMatch.Groups[1].Value.ToLowerInvariant();
     }
-
-    /// <summary>
-    /// Builds the full R2 key for a handout asset by prefixing its slug-relative path
-    /// with <see cref="HandoutsR2Prefix"/>. Centralises the prefix so PDF and image
-    /// upload paths stay in sync.
-    /// </summary>
-    /// <param name="slugRelativeKey">The slug-prefixed asset path (e.g. "factorization/box.svg").</param>
-    /// <returns>The full R2 key (e.g. "handouts/factorization/box.svg").</returns>
-    private static string ToHandoutR2Key(string slugRelativeKey) => $"{HandoutsR2Prefix}/{slugRelativeKey}";
 
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
@@ -279,11 +265,17 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
                     // Generate the skeleton .tex
                     skeletonFile = GenerateSkeleton(inputFile, inputDirectory, rules, locale);
 
+                    // The date both PDFs carry, taken from the handout even for the skeleton, which was written
+                    // moments ago and would otherwise date itself to this run
+                    var sourceEdited = inputFile.LastWriteTimeUtc;
+
                     // Compile the main handout
-                    await CompileTexFileAsync(inputFile, inputDirectory, settings.Compiler, errorLogPath);
+                    await CompileTexFileAsync(
+                        inputFile, inputDirectory, settings.Compiler, errorLogPath, sourceEdited);
 
                     // Compile the skeleton
-                    await CompileTexFileAsync(skeletonFile, inputDirectory, settings.Compiler, errorLogPath);
+                    await CompileTexFileAsync(
+                        skeletonFile, inputDirectory, settings.Compiler, errorLogPath, sourceEdited);
                 }
 
                 // Process images and prepare uploads (images + linked documents share this queue)
@@ -366,14 +358,34 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
 
         // All handout files processed. The upload ledger persists itself when the uploader is disposed at exit.
 
-        // Keep the generated environment-id index in sync with whatever content JSONs this run just wrote. Always
-        // a full rebuild rather than one scoped to this run's handouts — it's cheap (274 environments, ~20 KB
-        // today), and a scoped update would risk leaving some other handout's numbers stale.
-        var indexRegenerationFailed = false;
-        if (!settings.SkipIndex)
-            indexRegenerationFailed = !await RegenerateEnvironmentIndexAsync();
+        // Whether either generator below failed, which the run's exit code answers for
+        var derivedRegenerationFailed = false;
+
+        // Rebuild what the content JSONs derive: the environment-id index the site ships, and the defense-content
+        // blobs the examiner is served from. Always the whole site rather than just this run's handouts, since it's
+        // cheap and a scoped update would leave some other handout's numbers or problem text stale.
+        if (!settings.SkipDerived)
+        {
+            // The index the site labels a saved conversation from
+            derivedRegenerationFailed =
+                !await RegenerateDerivedArtefactAsync("handouts:index", "handout-env-index.json");
+
+            // Separate the two artefact sections in the output
+            AnsiConsole.WriteLine();
+
+            // The blobs, worth rebuilding even after the index failed, since neither generator reads the other
+            derivedRegenerationFailed |=
+                !await RegenerateDerivedArtefactAsync("handouts:defense-content", "defense content");
+
+            // Push them, so the examiner sees an edited problem without a backend deploy
+            if (uploader is not null)
+                await UploadDefenseContentAsync(uploader);
+        }
         else
-            AnsiConsole.MarkupLine("[yellow]⚠ Environment index regeneration skipped (--skip-index)[/]");
+        {
+            // Say so, since a skipped rebuild leaves both artefacts describing whatever the last full run wrote
+            AnsiConsole.MarkupLine("[yellow]⚠ Derived artefact regeneration skipped (--skip-derived)[/]");
+        }
 
         // Report unknown commands if any were found.
         if (allUnknownCommands.Count != 0)
@@ -399,7 +411,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         }
 
         // Determine if there were any failures
-        var hasErrors = failedFiles.Count > 0 || allUnknownCommands.Count > 0 || indexRegenerationFailed;
+        var hasErrors = failedFiles.Count > 0 || allUnknownCommands.Count > 0 || derivedRegenerationFailed;
 
         // Final success message if no errors or unknown commands were found.
         if (!hasErrors)
@@ -515,13 +527,26 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
     /// <param name="workingDirectory">The working directory for the compiler.</param>
     /// <param name="compiler">The compiler command to use.</param>
     /// <param name="errorLog">Path to the error log file for compiler output on failure.</param>
+    /// <param name="sourceEdited">When the handout this PDF renders was last edited, which is the date it gets
+    /// stamped with.</param>
     /// <returns>A task representing the asynchronous compilation.</returns>
+    /// <remarks>Pinning the stamp is what lets a rebuild that changed nothing produce the same PDF twice, so the
+    /// upload ledger recognises it: pdfTeX otherwise writes the current time into <c>/CreationDate</c>,
+    /// <c>/ModDate</c> and the file <c>/ID</c> on every compile, and every handout PDF goes back up to R2. TeX's own
+    /// <c>\year</c> and <c>\today</c> still read the real clock.</remarks>
     private static async Task CompileTexFileAsync(
         FileInfo texFile,
         DirectoryInfo workingDirectory,
         string compiler,
-        string errorLog)
+        string errorLog,
+        DateTime sourceEdited)
     {
+        // The date in the form pdfTeX reads it
+        var sourceDateEnvironment = new Dictionary<string, string>
+        {
+            ["SOURCE_DATE_EPOCH"] = new DateTimeOffset(sourceEdited).ToUnixTimeSeconds().ToString()
+        };
+
         // Run two passes as required by TeX for cross-references
         for (var pass = 1; pass <= 2; pass++)
         {
@@ -539,7 +564,8 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
             string[] arguments = [.. compilerParts.Skip(1), $@"\def\PUBLISH{{}}\input {texFile.Name}"];
 
             // Run the compiler; ProcessRunner drains stdout/stderr and reports the exit code
-            var result = await ProcessRunner.RunAsync(compilerExecutable, arguments, workingDirectory.FullName);
+            var result = await ProcessRunner.RunAsync(
+                compilerExecutable, arguments, workingDirectory.FullName, sourceDateEnvironment);
 
             // Check if compilation failed
             if (result.ExitCode != 0)
@@ -558,33 +584,81 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
     }
 
     /// <summary>
-    /// Regenerates the committed <c>handout-env-index.json</c> by running the frontend's own generator script.
-    /// Shelling out (rather than reimplementing the walk in C#) keeps the environment's display number defined in
-    /// exactly one place: <c>listDocumentEnvironments</c>, the same TypeScript function <c>HandoutDetail</c> renders
-    /// with, so the index can never drift from what the page actually shows.
+    /// Regenerates one of the artefacts derived from the handout content JSONs by running the frontend's own
+    /// generator script. Shelling out (rather than reimplementing the walk in C#) keeps each derived value defined in
+    /// exactly one place: the environment's display number in <c>listDocumentEnvironments</c> and the examiner's view
+    /// of a problem in <c>toDefenseContent</c>, both the same TypeScript the page itself uses, so neither artefact can
+    /// drift from what the page shows.
     /// </summary>
-    /// <returns>True when the index was regenerated; false when the script failed, in which case its output has
+    /// <param name="npmScript">The npm script that regenerates the artefact.</param>
+    /// <param name="artefactName">What the artefact is called in the run's output.</param>
+    /// <returns>True when the artefact was regenerated; false when the script failed, in which case its output has
     /// already been printed.</returns>
-    private static async Task<bool> RegenerateEnvironmentIndexAsync()
+    private static async Task<bool> RegenerateDerivedArtefactAsync(string npmScript, string artefactName)
     {
         // Status message
-        AnsiConsole.MarkupLine("[aqua]━━━ Environment index ━━━[/]");
+        AnsiConsole.MarkupLine($"[aqua]━━━ {Markup.Escape(artefactName)} ━━━[/]");
 
         // Run the frontend's generator from its own project directory
         var webDirectory = RepoPaths.Resolve("web");
-        var result = await ProcessRunner.RunAsync("npm", ["run", "handouts:index"], webDirectory);
+        var result = await ProcessRunner.RunAsync("npm", ["run", npmScript], webDirectory);
 
         // A non-zero exit means the generator itself failed; surface its output for debugging
         if (result.ExitCode != 0)
         {
-            AnsiConsole.MarkupLine($"[red]✗ Failed to regenerate handout-env-index.json (exit {result.ExitCode}).[/]");
+            AnsiConsole.MarkupLine($"[red]✗ Failed to regenerate {Markup.Escape(artefactName)} (exit {result.ExitCode}).[/]");
             AnsiConsole.WriteLine($"{result.Stdout}\n{result.Stderr}");
             return false;
         }
 
         // Success message
-        AnsiConsole.MarkupLine("[green]✓ Regenerated handout-env-index.json[/]");
+        AnsiConsole.MarkupLine($"[green]✓ Regenerated {Markup.Escape(artefactName)}[/]");
         return true;
+    }
+
+    /// <summary>
+    /// Pushes the generated defense-content blobs to R2, where the API reads a problem's statement and reference
+    /// from rather than taking a caller's word for them. Every blob goes up in one pass after the run's handouts are
+    /// parsed, since a blob is built from the whole site's content rather than from one .tex.
+    /// </summary>
+    /// <param name="uploader">The uploader the blobs go through.</param>
+    private static async Task UploadDefenseContentAsync(ITrackedFileUploader uploader)
+    {
+        // The generator's output directory, gitignored build output like the compiled PDFs beside it
+        var defenseDirectory = new DirectoryInfo(RepoPaths.Resolve("data/handouts/defense"));
+
+        // The directory only exists once a generator run has written into it
+        if (!defenseDirectory.Exists)
+        {
+            // Say why nothing went out, so a silent step doesn't read as a successful push
+            AnsiConsole.MarkupLine("  [yellow]⚠ No defense content generated, nothing to upload[/]");
+
+            // There is nothing to push
+            return;
+        }
+
+        // Every blob this run produced, in name order so the log reads the same way twice
+        var blobs = defenseDirectory
+            .EnumerateFiles("*.json")
+            .OrderBy(file => file.Name, StringComparer.Ordinal)
+            .ToList();
+
+        // How many actually left the machine, as opposed to being recognised by the ledger
+        var uploadedCount = 0;
+
+        // Offer each to the tracker, which pushes only the ones whose bytes R2 doesn't already have
+        foreach (var blob in blobs)
+        {
+            // Count the ones it decided to send
+            if (await uploader.UploadIfChangedAsync(blob.FullName, HandoutStorage.DefenseContentKeyForFile(blob.Name)))
+                uploadedCount++;
+        }
+
+        // What stayed put, which is the whole set on a run that changed no handout
+        var skippedCount = blobs.Count - uploadedCount;
+
+        // Report both, so an unchanged run reads as deliberate rather than as a step that did nothing
+        AnsiConsole.MarkupLine($"  [green]✓ {uploadedCount} defense blob(s) uploaded[/][dim], {skippedCount} unchanged[/]");
     }
 
     /// <summary>
@@ -609,7 +683,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
         }
 
         // All handout PDFs share the flat handouts/pdfs/ folder
-        var r2Key = ToHandoutR2Key($"pdfs/{pdfFileName}");
+        var r2Key = HandoutStorage.PdfKey(pdfFileName);
 
         // Do the upload
         await fileUploader.UploadAsync(sourcePdfPath, r2Key);
@@ -646,7 +720,7 @@ public class BuildCommand(Lazy<ITrackedFileUploader> trackedUploader) : AsyncCom
             PersistImage: (sourcePath, contentId) =>
             {
                 // Queue the image upload for async execution after processing completes
-                pendingUploads?.Add(new PendingUpload(sourcePath, ToHandoutR2Key(contentId)));
+                pendingUploads?.Add(new PendingUpload(sourcePath, HandoutStorage.AssetKey(contentId)));
             },
             OnMissingImage: imageId => AnsiConsole.MarkupLine($"[yellow]Warning:[/] Handout [yellow]{handoutSlug}[/] has a missing image: {imageId}")
         );

@@ -197,7 +197,27 @@ API → authority; Secret keys → secret key) — the same values deployed as
 `CLERK_AUTHORITY` and `CLERK_SECRET_KEY`. For the real webhook secret and instructions on
 testing webhooks locally, see the [API README](src/MathComps.Api/README.md#webhooks).
 
-### 6. Run the API
+### 6. Configure Cloudflare R2
+
+The API reads the AI examiner's problem content from R2, the per-handout blobs the
+[Handouts CLI](src/MathComps.Cli.Handouts/README.md) publishes, so a defense against a handout problem
+needs these settings. Everything else works without them.
+
+```bash
+# From the API directory
+cd backend/src/MathComps.Api
+
+dotnet user-secrets set "CloudflareR2:AccountId" "..."
+dotnet user-secrets set "CloudflareR2:BucketName" "..."
+dotnet user-secrets set "CloudflareR2:AccessKeyId" "..."
+dotnet user-secrets set "CloudflareR2:SecretAccessKey" "..."
+```
+
+Every project shares one user-secrets store, so setting these once also covers the Handouts and Bulk
+Import CLIs; they all talk to the same bucket. Deployments pass the same values as the `R2_*`
+variables in `.env` (see [Environment Setup](#environment-setup)).
+
+### 7. Run the API
 
 See the [API README](src/MathComps.Api/README.md) for running instructions.
 
@@ -255,7 +275,7 @@ Migrations are applied automatically on every deploy: a migration bundle (`efbun
    cp .env.example .env
    ```
 
-2. Edit `.env` with your shared values
+2. Edit `.env` with your shared values. The `R2_*` block feeds the API's `CloudflareR2` settings; without them every route works except opening a defense.
 
 3. Create environment-specific overrides:
 
