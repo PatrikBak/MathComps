@@ -78,7 +78,7 @@ export const DefenseReviewCard = memo(function DefenseReviewCard({
       {/* Which problem it was held against, and when it last moved */}
       <span className="flex items-baseline gap-3">
         <span className="flex min-w-0 flex-1 items-baseline gap-2 text-sm">
-          <HandoutProblemRefLabel label={problemLabel} />
+          <HandoutProblemRefLabel label={problemLabel} emphasis="muted" />
         </span>
 
         <time

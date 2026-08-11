@@ -1,14 +1,13 @@
 'use client'
 
 import { ArrowUpRight, Bot, Trash2 } from 'lucide-react'
-import { useFormatter, useLocale, useTranslations } from 'next-intl'
+import { useFormatter, useTranslations } from 'next-intl'
 import type { MouseEvent, RefObject } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import { ENVIRONMENT_TEXT_COLOR } from '@/components/features/handouts/handout-colors'
-import { resolveHandoutProblemRef } from '@/components/features/handouts/handout-problem-ref'
-import { buildEnvironmentLabels } from '@/components/features/handouts/handout-utils'
+import { HandoutProblemRefLabel } from '@/components/features/handouts/HandoutProblemRefLabel'
+import { useHandoutProblemLabel } from '@/components/features/handouts/use-handout-problem-label'
 import { useIsCurrentHandout } from '@/components/features/handouts/use-is-current-handout'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
@@ -17,7 +16,7 @@ import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
 import { toPlainTextPreview } from '@/components/shared/utils/string-utils'
 import { useDeferredAnchorJump } from '@/hooks/use-deferred-anchor-jump'
-import { type Locale, ROUTES } from '@/i18n/i18n'
+import { ROUTES } from '@/i18n/i18n'
 
 import { useMyDefenses } from '../hooks/use-my-defenses'
 import type { DefenseProblem, DefenseSessionListItem } from '../model/defense-types'
@@ -53,9 +52,8 @@ type MathildaDefenseRowProps = {
 
 /**
  * One row in the list of a user's defenses: which handout and problem it was about, a glimpse of the conversation,
- * its date, and trailing controls. The problem's label carries its environment's color, the same one the handout
- * gives that heading. Clicking the row opens the conversation; the trailing jump goes to the problem in its handout,
- * and the trash removes the defense.
+ * its date, and trailing controls. Clicking the row opens the conversation; the trailing jump goes to the problem
+ * in its handout, and the trash removes the defense.
  */
 function MathildaDefenseRow({
   defense,
@@ -71,22 +69,19 @@ function MathildaDefenseRow({
   // Handout-surface copy
   const tHandouts = useTranslations('handouts')
 
-  // The active locale
-  const locale = useLocale() as Locale
-
   // Locale-aware value formatter
   const format = useFormatter()
 
-  // The handout location this defense was about, or null when its handout is unknown in this locale
-  const ref = resolveHandoutProblemRef(defense.target, locale)
+  // Which problem of which handout this defense was about
+  const problemLabel = useHandoutProblemLabel(defense.target, t('libraryDeletedHandout'))
 
   // Whether the reader is already reading the handout this defense was about
-  const isOnThisHandout = useIsCurrentHandout(ref?.link?.handoutSlug ?? null)
+  const isOnThisHandout = useIsCurrentHandout(problemLabel.link?.handoutSlug ?? null)
 
   // Sends a jump that stays on this page to the scroll, and lets every other one navigate
   const handleJumpClick = (event: MouseEvent<HTMLAnchorElement>) => {
     // Another handout, so the link is the one to carry the reader there
-    if (!isOnThisHandout || ref?.link == null) {
+    if (!isOnThisHandout || problemLabel.link === null) {
       onClose()
       return
     }
@@ -95,18 +90,8 @@ function MathildaDefenseRow({
     event.preventDefault()
 
     // Hand the jump over to be made once the list has left
-    onJumpInPage(ref.link.anchorId)
+    onJumpInPage(problemLabel.link.anchorId)
   }
-
-  // The localized environment word per type, e.g. "Úloha" / "Theorem"
-  const environmentLabels = buildEnvironmentLabels(tHandouts)
-
-  // The handout name, or a marker that it's gone from the site: the conversation outlives its handout
-  const handoutTitle = ref?.handoutTitle ?? t('libraryDeletedHandout')
-
-  // Which environment within that handout
-  const environmentLabel =
-    ref === null ? null : `${environmentLabels[ref.environmentType]} ${ref.environmentNumber}`
 
   // A glimpse of the conversation: the student's first message, stripped to plain text. Null while
   // nothing has been said in it yet.
@@ -133,12 +118,7 @@ function MathildaDefenseRow({
       >
         {/* Which handout, and which problem within it */}
         <span className="flex w-full items-baseline gap-2">
-          <span className="truncate font-medium text-foreground">{handoutTitle}</span>
-          {environmentLabel && ref !== null && (
-            <span className={cn('shrink-0', ENVIRONMENT_TEXT_COLOR[ref.environmentType])}>
-              {environmentLabel}
-            </span>
-          )}
+          <HandoutProblemRefLabel label={problemLabel} emphasis="strong" />
         </span>
 
         {/* A glimpse of the conversation, or that nothing has been said in it yet */}
@@ -156,11 +136,11 @@ function MathildaDefenseRow({
         {/* Jump and delete */}
         <div className="-my-1 flex items-center text-muted">
           {/* Jump straight to the problem in its handout, offered only where that page exists */}
-          {ref?.link && (
+          {problemLabel.link !== null && (
             <AppLink
-              href={`${ROUTES.HANDOUTS}/${ref.link.handoutSlug}#${ref.link.anchorId}`}
+              href={problemLabel.link.href}
               plain
-              aria-label={t('goToHandout')}
+              aria-label={tHandouts('labels.goToHandout')}
               onClick={handleJumpClick}
               className={cn(
                 'flex size-11 items-center justify-center rounded-md transition-colors hover:bg-foreground/10 hover:text-foreground',

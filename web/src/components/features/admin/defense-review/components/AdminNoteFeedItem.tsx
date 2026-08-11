@@ -51,7 +51,7 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
           <p className="flex min-w-0 items-baseline gap-2 text-sm">
             <span className="truncate font-medium text-foreground">{item.user.displayName}</span>
 
-            <HandoutProblemRefLabel label={problemLabel} />
+            <HandoutProblemRefLabel label={problemLabel} emphasis="muted" />
           </p>
 
           {/* Where in that conversation it hangs, and who wrote it */}

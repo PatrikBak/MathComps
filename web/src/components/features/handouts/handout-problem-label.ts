@@ -3,6 +3,7 @@ import { SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 import type { HandoutEnvironmentType } from './handout-content-types'
 import type { HandoutEnvironmentTarget } from './handout-metadata-types'
+import type { HandoutProblemLink } from './handout-problem-ref'
 import { findHandoutByContentId, resolveHandoutProblemRef } from './handout-problem-ref'
 
 /**
@@ -38,6 +39,8 @@ export type HandoutProblemLabel = {
   isHandoutOnSite: boolean
   /** Which environment of that handout it is; null once the problem is gone and nothing names it. */
   environment: HandoutEnvironmentLabel | null
+  /** Where to go to read it, or null when nothing on the site holds it in the reader's language. */
+  link: HandoutProblemLink | null
 }
 
 /**
@@ -97,6 +100,7 @@ export function describeHandoutProblem(
       handoutTitle: remainingTitle ?? labeller.deletedHandoutLabel,
       isHandoutOnSite: remainingTitle !== null,
       environment: null,
+      link: null,
     }
   }
 
@@ -108,5 +112,6 @@ export function describeHandoutProblem(
       label: `${labeller.environmentLabels[problemRef.environmentType]} ${problemRef.environmentNumber}`,
       type: problemRef.environmentType,
     },
+    link: problemRef.link,
   }
 }
