@@ -83,7 +83,7 @@ export const MobileNavigationDrawer = ({
 
   return (
     <Transition show={isOpen} as={Fragment}>
-      <Dialog onClose={onClose} className="relative z-50 lg:hidden">
+      <Dialog onClose={onClose} className="relative z-overlay lg:hidden">
         {/* Backdrop */}
         <TransitionChild
           as={Fragment}

@@ -4,6 +4,26 @@ import * as React from 'react'
 
 import { cn } from '../utils/css-utils'
 
+/**
+ * What a panel anchored to a trigger is made of: a translucent slab that blurs whatever it covers,
+ * on the ladder's floating rung so it clears the dialog it may have been opened from.
+ */
+export const FLOATING_PANEL_CLASS =
+  'z-floating rounded-lg border border-foreground/10 bg-surface/25 text-foreground shadow-lg backdrop-blur-md'
+
+/**
+ * How an anchored panel arrives and leaves: fading and growing out of the edge it hangs from, and
+ * back the same way.
+ *
+ * Keyed off the `data-state` and `data-side` attributes Radix writes, so it fits any of its panels.
+ */
+export const FLOATING_PANEL_MOTION_CLASS = cn(
+  'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
+  'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
+  'data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2',
+  'data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2'
+)
+
 /** Root component that manages open/close state of the dropdown. */
 const DropdownMenu = DropdownMenuPrimitive.Root
 
@@ -12,7 +32,7 @@ const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
 
 /**
  * Positioned content panel rendered inside a portal.
- * Provides the dark-slate theme chrome, border, shadow, and slide-in animations.
+ * Provides the house panel chrome, its motion, and the padding its rows sit in.
  */
 const DropdownMenuContent = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.Content>,
@@ -23,8 +43,9 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        'z-50 min-w-[8rem] overflow-hidden rounded-md border border-foreground/10 bg-surface p-1 text-foreground shadow-md',
-        'animate-in data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+        FLOATING_PANEL_CLASS,
+        FLOATING_PANEL_MOTION_CLASS,
+        'min-w-[8rem] overflow-hidden p-1',
         className
       )}
       {...props}

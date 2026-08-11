@@ -10,6 +10,10 @@ import prettierConfig from 'eslint-config-prettier'
 import jsoncPlugin from 'eslint-plugin-jsonc'
 import * as jsoncParser from 'jsonc-eslint-parser'
 
+/** What to reach for instead of a z-index of one's own. */
+const Z_LADDER_MESSAGE =
+  'Pick a rung of the stacking ladder instead of a z-index: z-sticky, z-sheet, z-header, z-overlay, z-floating, z-notification or z-tooltip, all defined in globals.css.'
+
 const config = [
   {
     ignores: [
@@ -98,6 +102,21 @@ const config = [
       '@typescript-eslint/switch-exhaustiveness-check': [
         'error',
         { considerDefaultExhaustiveForUnions: false },
+      ],
+
+      // Keep the stacking ladder in globals.css the only place that picks a z-index; it says why.
+      // Page content stays on z-0 / z-10 / z-20, below the ladder's floor. A class list reaches the
+      // rule as a plain string or as a piece of a template literal, hence the pair.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Literal[value=/\\bz-(?!0\\b|10\\b|20\\b)(\\d|\\[)/]',
+          message: Z_LADDER_MESSAGE,
+        },
+        {
+          selector: 'TemplateElement[value.raw=/\\bz-(?!0\\b|10\\b|20\\b)(\\d|\\[)/]',
+          message: Z_LADDER_MESSAGE,
+        },
       ],
     },
   },

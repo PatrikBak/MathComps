@@ -145,7 +145,7 @@ export function DefenseReviewQueue() {
       <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
 
       {/* The filter bar, stuck under the site header */}
-      <div className="sticky top-[var(--header-height)] z-20 -mx-1 px-1 py-2 backdrop-blur">
+      <div className="sticky-below-header -mx-1 px-1 py-2 backdrop-blur">
         <DefenseReviewFilterBar
           filter={filter}
           onFieldChange={setField}

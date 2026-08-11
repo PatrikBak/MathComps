@@ -41,6 +41,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  FLOATING_PANEL_CLASS,
 } from '@/components/shared/components/DropdownMenu'
 import { EditableTextField } from '@/components/shared/components/EditableTextField'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
@@ -287,7 +288,7 @@ function SortableListRow({
           </PopoverButton>
           <PopoverPanel
             anchor="bottom"
-            className="z-50 mt-1 rounded-lg border border-foreground/10 bg-surface shadow-xl p-1 min-w-[160px]"
+            className={cn(FLOATING_PANEL_CLASS, 'mt-1 p-1 min-w-[160px]')}
           >
             {({ close }) => (
               <>

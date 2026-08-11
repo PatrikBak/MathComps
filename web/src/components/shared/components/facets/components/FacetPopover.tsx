@@ -110,7 +110,7 @@ export function FacetPopover({
             // The panel takes focus itself as it opens, being a surface rather than a control, so it
             // draws no ring: the mark belongs on whichever row the arrows move to from there
             'focus:outline-none',
-            'z-[1000] flex flex-col overflow-hidden rounded-lg border border-foreground/10 shadow-2xl',
+            'z-floating flex flex-col overflow-hidden rounded-lg border border-foreground/10 shadow-2xl',
             FACET_POPOVER_SURFACES[variant],
             FACET_PANEL_CLASS
           )}

@@ -2,6 +2,7 @@ import * as PopoverPrimitive from '@radix-ui/react-popover'
 import * as React from 'react'
 
 import { cn } from '../utils/css-utils'
+import { FLOATING_PANEL_CLASS, FLOATING_PANEL_MOTION_CLASS } from './DropdownMenu'
 
 /** Root component that manages open/close state of the popover. */
 const Popover = PopoverPrimitive.Root
@@ -11,7 +12,7 @@ const PopoverTrigger = PopoverPrimitive.Trigger
 
 /**
  * Positioned content panel rendered inside a portal.
- * Provides the dark-slate theme chrome, border, shadow, and slide-in animations.
+ * Provides the house panel chrome, its motion, and the padding its rows sit in.
  */
 const PopoverContent = React.forwardRef<
   React.ComponentRef<typeof PopoverPrimitive.Content>,
@@ -23,8 +24,9 @@ const PopoverContent = React.forwardRef<
       align={align}
       sideOffset={sideOffset}
       className={cn(
-        'z-50 min-w-[8rem] rounded-md border border-foreground/10 bg-surface p-1 text-foreground shadow-md',
-        'animate-in data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+        FLOATING_PANEL_CLASS,
+        FLOATING_PANEL_MOTION_CLASS,
+        'min-w-[8rem] p-1',
         className
       )}
       {...props}
