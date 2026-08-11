@@ -1,7 +1,7 @@
 'use client'
 
 import { useReducedMotion } from '@mantine/hooks'
-import { Flag, Undo2 } from 'lucide-react'
+import { Flag, Mail, Undo2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
@@ -27,6 +27,18 @@ export type TurnActionsAffordance = {
 }
 
 /**
+ * The control offering to pick the conversation up again from a turn, and what it is called. Held apart from the
+ * affordance above because it answers a different question: not whether the conversation can still be acted on,
+ * but whether whoever is reading it keeps their own place in it.
+ */
+export type TurnUnreadMark = {
+  /** The accessible label for the control. */
+  label: string
+  /** Leaves the named turn unread, along with every turn after it. */
+  onMark: (turnId: string) => void
+}
+
+/**
  * Props for a single {@link DefenseTurn}.
  */
 type DefenseTurnProps = TurnActionsAffordance & {
@@ -36,6 +48,8 @@ type DefenseTurnProps = TurnActionsAffordance & {
   position: number | null
   /** Whether something outside the conversation currently points at this turn. */
   isPointedAt: boolean
+  /** Picking the conversation up again from here; null where the reader keeps no place in it. */
+  unreadMark: TurnUnreadMark | null
   /** The localized role label shown above the message. */
   label: string
   /** Whether this turn just arrived and should fade in. */
@@ -111,6 +125,7 @@ export function DefenseTurn({
   reportedLabel,
   onRewind,
   onReport,
+  unreadMark,
 }: DefenseTurnProps) {
   // The look for this turn's author
   const style = TURN_STYLES[turn.role]
@@ -120,6 +135,10 @@ export function DefenseTurn({
 
   // The entrance animation as decided at mount, so a transcript reconcile mid-fade can't cut it short
   const [entranceAnimation] = useState(animate)
+
+  // The turn itself, which a draft the backend hasn't taken yet doesn't have. Pulled out because narrowing it
+  // away doesn't survive into the control's own handler.
+  const turnId = turn.id
 
   return (
     <div
@@ -150,7 +169,7 @@ export function DefenseTurn({
         </div>
 
         {/* The turn's controls, and whatever has already been said about it */}
-        {(canAct || isReported) && (
+        {(canAct || isReported || (unreadMark !== null && turnId !== null)) && (
           <div className={cn('flex shrink-0 items-center gap-0.5', style.actionsInset)}>
             {/* Say what went wrong with a reply. A reported one keeps the control and carries a filled flag,
                 so the student can see what they said and change it */}
@@ -190,6 +209,20 @@ export function DefenseTurn({
                 className="size-7 text-muted/60 hover:text-foreground"
               >
                 <Undo2 size={14} />
+              </Button>
+            )}
+
+            {/* Pick the conversation up again from here. Every turn's reads the same: the line drawn across
+                the transcript is what says where the reading currently stops */}
+            {unreadMark !== null && turnId !== null && (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={unreadMark.label}
+                onClick={() => unreadMark.onMark(turnId)}
+                className="size-7 text-muted/60 hover:text-foreground"
+              >
+                <Mail size={14} />
               </Button>
             )}
           </div>

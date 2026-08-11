@@ -124,6 +124,11 @@ public enum ApiErrorCode
     NotAdminNoteAuthor,
 
     /// <summary>
+    /// A reviewer's reading is moved back to a turn the conversation doesn't hold.
+    /// </summary>
+    AdminReviewTarget,
+
+    /// <summary>
     /// The request body could not be read into what the route expects: broken JSON, a field of the wrong
     /// type, a value no member of an enumeration names, or no body at all.
     /// </summary>

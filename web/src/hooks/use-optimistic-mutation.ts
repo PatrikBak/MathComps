@@ -1,5 +1,10 @@
 import { useCallbackRef } from '@mantine/hooks'
-import { type MutateOptions, useMutation, type UseMutationResult } from '@tanstack/react-query'
+import {
+  type MutateOptions,
+  type MutationScope,
+  useMutation,
+  type UseMutationResult,
+} from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
 import { toast } from 'sonner'
@@ -67,6 +72,12 @@ export type OptimisticMutationConfig<TData, TVariables, TContext> = {
    * Fallback error toast copy for a failure that carried no recognized error code.
    */
   errorMessage: string
+  /**
+   * Runs the mutation's calls one at a time alongside every other mutation sharing the id, in the order they
+   * were fired. For calls that write the same thing, where landing out of order would leave the last one
+   * issued and the last one stored disagreeing. Left off, calls run concurrently.
+   */
+  scope?: MutationScope
 }
 
 /**
@@ -132,6 +143,9 @@ export function useOptimisticMutation<TData = unknown, TVariables = void, TConte
       // Call the API with the ready caller and unwrap it to data (throwing a coded failure on error)
       return unwrap(await config.apiFn(readyApiCall(api), variables))
     },
+
+    // Whether the caller's calls queue behind each other
+    scope: config.scope,
 
     // Run the caller's optimistic update
     onMutate: config.onMutate,

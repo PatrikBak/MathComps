@@ -74,7 +74,6 @@ type DefenseConversationProps = {
  * The id of the saved session a mode reopens on, or undefined when it opens on the problem's newest defense.
  *
  * @param mode - How the conversation was reached.
- *
  * @returns The id of the session to reopen, or undefined.
  */
 function initialSessionIdOf(mode: DefenseConversationMode): string | undefined {
@@ -288,6 +287,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
         onRewindTurn={turn.requestRewind}
         onReportTurn={report.open}
         newSince={null}
+        unreadMark={null}
         footer={
           canAnswer && (
             <DefenseFeedbackPrompt

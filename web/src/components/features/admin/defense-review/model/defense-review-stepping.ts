@@ -35,8 +35,8 @@ function resolveOpenIndex(
  * by a filter or named from elsewhere, has no place to step from, and stepping into the queue's first
  * conversation from it would be a move nobody asked for.
  *
- * @param orderedConversationIds - Every loaded conversation's id, in the order the queue shows them.
- * @param openId - The conversation being read, or null while none is.
+ * @param orderedConversationIds - As in {@link resolveOpenIndex}.
+ * @param openId - As in {@link resolveOpenIndex}.
  * @param delta - How many places along to look, forwards or backwards.
  *
  * @returns Whether the move is there to make.
@@ -65,8 +65,8 @@ export function canStepFrom(
 /**
  * Finds the conversation that many places along.
  *
- * @param orderedConversationIds - Every loaded conversation's id, in the order the queue shows them.
- * @param openId - The conversation being read, or null while none is.
+ * @param orderedConversationIds - As in {@link resolveOpenIndex}.
+ * @param openId - As in {@link resolveOpenIndex}.
  * @param delta - How many places along to move, forwards or backwards.
  *
  * @returns The conversation to move to, or null when there is none to move to.
@@ -93,8 +93,8 @@ export function stepTarget(
  * Only forward: a backlog is worked from where the reader is towards the end, not back over what they passed.
  * One open from outside the queue names no place to work forward from, so it offers no next.
  *
- * @param orderedConversationIds - Every loaded conversation's id, in the order the queue shows them.
- * @param openId - The conversation being read, or null while none is.
+ * @param orderedConversationIds - As in {@link resolveOpenIndex}.
+ * @param openId - As in {@link resolveOpenIndex}.
  * @param unreadConversationIds - Which of them are still unread.
  *
  * @returns The next unread conversation, or null when the rest of the loaded queue has been read.
@@ -121,8 +121,8 @@ export function findNextUnreadId(
 /**
  * Counts where the open conversation sits, for the reader to be told how far through the queue they are.
  *
- * @param orderedConversationIds - Every loaded conversation's id, in the order the queue shows them.
- * @param openId - The conversation being read, or null while none is.
+ * @param orderedConversationIds - As in {@link resolveOpenIndex}.
+ * @param openId - As in {@link resolveOpenIndex}.
  *
  * @returns Its place, or null when nothing is open and when the one that is sits outside the loaded queue.
  */

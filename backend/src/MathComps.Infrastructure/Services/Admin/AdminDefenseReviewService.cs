@@ -329,6 +329,66 @@ public class AdminDefenseReviewService(
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// The stamp lands on the turn before the one named, rather than on a moment cut just under it, so that it goes
+    /// on meaning a moment somebody's reading actually stopped. Two turns recorded in the same moment can't be told
+    /// apart by one, so a conversation's opening pair, saved together, moves as one.
+    /// </remarks>
+    public async Task MarkUnreadFromAsync(
+        Guid reviewerId, Guid sessionId, Guid turnId, CancellationToken cancellationToken = default)
+    {
+        // This write's own context, since moving where a reader picks up is a unit of work in itself.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // There is nothing to pick up in a conversation that isn't there.
+        await AdminDefenseSessions.EnsureExistsAsync(dbContext, sessionId, cancellationToken);
+
+        // That conversation's turns. The turn to pick up from has to be one of its own, or the boundary below
+        // would be read off turns it says nothing about.
+        var turns = dbContext.DefenseTurns.Where(turn => turn.SessionId == sessionId);
+
+        // How far the reading now reaches: the last turn recorded before the one to pick up from. Read in the
+        // same statement as the turn itself, so a conversation carried on or rewound in between can't leave the
+        // two disagreeing about which turns were there. The row stands for the turn, so a missing one reads as
+        // no row while a turn nothing precedes reads as a row holding no moment.
+        // A turn the conversation doesn't hold is a bad request.
+        var found = await turns
+            .Where(turn => turn.Id == turnId)
+            .Select(turn => new
+            {
+                ReadAt = turns
+                    .Where(earlier => earlier.CreatedAt < turn.CreatedAt)
+                    .Max(earlier => (DateTimeOffset?)earlier.CreatedAt),
+            })
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new AdminReviewTargetException();
+
+        // Nothing precedes it, so the reading reaches nothing and the stamp goes the way marking one unread
+        // outright drops it.
+        if (found.ReadAt is not { } boundary)
+        {
+            // Drop it.
+            await dbContext.AdminSessionReviews
+                .Where(review => review.SessionId == sessionId && review.ReviewerId == reviewerId)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            // Nothing left.
+            return;
+        }
+
+        // Move the stamp back to it, over whatever this reviewer's last pass left.
+        await dbContext.AdminSessionReviews
+            .Upsert(new AdminSessionReview
+            {
+                SessionId = sessionId,
+                ReviewerId = reviewerId,
+                ReadAt = boundary,
+            })
+            .On(review => new { review.SessionId, review.ReviewerId })
+            .RunAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task MarkManyAsync(
         Guid reviewerId,
         IReadOnlyCollection<Guid> sessionIds,

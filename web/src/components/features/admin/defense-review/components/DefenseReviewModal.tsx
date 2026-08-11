@@ -14,6 +14,7 @@ import { useKeyedState } from '@/hooks/use-keyed-state'
 import { useDefenseReviewDetail } from '../hooks/use-defense-review-detail'
 import { useDefenseReviewPanels } from '../hooks/use-defense-review-panels'
 import { useDefenseReviewReadMarking } from '../hooks/use-defense-review-read-marking'
+import type { MarkUnreadFrom } from '../hooks/use-defense-review-read-state'
 import type { UseDefenseReviewSelectionResult } from '../hooks/use-defense-review-selection'
 import type { DefenseReviewDetail } from '../model/defense-review-types'
 import { ActionLabel } from './ActionLabel'
@@ -31,6 +32,8 @@ type DefenseReviewModalProps = {
   onMarkRead: (sessionId: string) => void
   /** Leaves a conversation unread. */
   onMarkUnread: (sessionId: string) => void
+  /** {@link MarkUnreadFrom}. */
+  onMarkUnreadFrom: MarkUnreadFrom
   /** Runs once the dialog has finished leaving. */
   onClosed: () => void
 }
@@ -56,6 +59,7 @@ export function DefenseReviewModal({
   landingNoteId,
   onMarkRead,
   onMarkUnread,
+  onMarkUnreadFrom,
   onClosed,
 }: DefenseReviewModalProps) {
   // Review-surface copy
@@ -75,12 +79,11 @@ export function DefenseReviewModal({
     detail,
     selection.openId,
     onMarkRead,
-    onMarkUnread
+    onMarkUnread,
+    onMarkUnreadFrom
   )
 
-  // Which reply a new note will stand against, which the reply picked in the conversation just left says
-  // nothing about. Held above the notes tab because the transcript marks the reply being written about, and on
-  // a wide enough screen the two panels sit side by side.
+  // Which reply a new note will stand against, held above the notes tab because the transcript marks it too
   const [noteTurnId, setNoteTurnId] = useKeyedState<string | null>(selection.openId, null)
 
   return (
@@ -204,9 +207,10 @@ export function DefenseReviewModal({
         <DefenseReviewModalBody
           detail={detail}
           panels={panels}
-          firstNewTurn={readMarking.firstNewTurn}
+          firstNewTurnId={readMarking.firstNewTurnId}
           noteTurnId={noteTurnId}
           landingNoteId={landingNoteId}
+          onMarkUnreadFrom={readMarking.markUnreadFrom}
           onNoteTurnIdChange={setNoteTurnId}
         />
       )}
