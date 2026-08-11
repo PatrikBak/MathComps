@@ -27,7 +27,9 @@ public static class AuthorHintsSection
         "the next, or to clarify one they've half-understood. " +
         "It is reference material, not a script — the candidate may be on a genuinely different route, so adapt to " +
         "the argument in front of you rather than reciting a hint. And each hint is a whole solution step, so it " +
-        "does not loosen the rule above: never hand them a stage beyond where they've reached.";
+        "does not loosen the rule above: never hand them a stage beyond where they've reached. Give at most one " +
+        "stage in a reply, as a question about their own work rather than a statement of what the stage says, and " +
+        "without laying the bridge into it that they haven't laid themselves.";
 
     /// <summary>
     /// Appends the author's hints to a reference as a <see cref="Heading"/> section, so an examiner reads them as the
