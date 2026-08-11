@@ -7,6 +7,7 @@ using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using MathComps.Shared.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MsOptions = Microsoft.Extensions.Options.Options;
 
@@ -73,6 +74,16 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// A conversation held against no problem at all, which every read is meant to leave out.
     /// </summary>
     private static readonly Guid _targetlessSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a4");
+
+    /// <summary>
+    /// The turn the oldest conversation opens on, which belongs to no other conversation.
+    /// </summary>
+    private static readonly Guid _oldestOpenerId = Guid.Parse("00000000-0000-0000-0000-0000000000b1");
+
+    /// <summary>
+    /// The turn the newest conversation opens on, which nothing in it precedes.
+    /// </summary>
+    private static readonly Guid _newestOpenerId = Guid.Parse("00000000-0000-0000-0000-0000000000b2");
 
     /// <summary>
     /// The reply the newest conversation ends on, which a note and the student's report are written against.
@@ -159,11 +170,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // twenty days ago and was carried on yesterday, so when it last moved and when it opened disagree and only
         // one of the two puts it at the head of the queue.
         context.DefenseTurns.AddRange(
-            NewTurn(_oldestSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-10)),
+            NewTurn(_oldestSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-10), _oldestOpenerId),
             NewTurn(_oldestSessionId, TranscriptRole.Candidate, "my oldest defense", 1, _now.AddDays(-10)),
             NewTurn(_newerSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-5)),
             NewTurn(_newerSessionId, TranscriptRole.Candidate, "my newer defense", 1, _now.AddDays(-5)),
-            NewTurn(_newestSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-20)),
+            NewTurn(_newestSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-20), _newestOpenerId),
             NewTurn(_newestSessionId, TranscriptRole.Candidate, "my newest defense", 1, _now.AddDays(-1)),
             NewTurn(_newestSessionId, TranscriptRole.Examiner, "her reply", 2, _now.AddDays(-1), _newestReplyId),
             NewTurn(_targetlessSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-2)),
@@ -313,6 +324,127 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Which makes all four turns new again, and leaves no stamp behind
         Assert.Equal(4, unread.UnreadTurnCount);
         Assert.Null(unread.ReadAt);
+    });
+
+    /// <summary>
+    /// Picking a conversation up from one of its turns leaves that turn and everything after it new, and settles
+    /// the ones before it. Naming a turn further down settles what stood unread above it, since where a reader
+    /// picks up is one place rather than a run of them.
+    /// </summary>
+    [Fact]
+    public Task Picking_a_conversation_up_from_a_turn_leaves_it_and_the_rest_new() => RunTestAsync(async service =>
+    {
+        // The student's follow-up and the reply to it
+        var followUpId = Guid.Parse("00000000-0000-0000-0000-0000000000b4");
+        var lastReplyId = Guid.Parse("00000000-0000-0000-0000-0000000000b5");
+
+        // Carry the conversation on with them, each recorded in its own moment so a stamp can fall between them
+        await QueryAsync(async context =>
+        {
+            // Two more turns
+            context.DefenseTurns.AddRange(
+                NewTurn(
+                    _newestSessionId, TranscriptRole.Candidate, "one more thing", 3,
+                    _now.AddHours(-12), followUpId),
+                NewTurn(
+                    _newestSessionId, TranscriptRole.Examiner, "her last word", 4,
+                    _now.AddHours(-6), lastReplyId));
+
+            // Commit them
+            await context.SaveChangesAsync();
+        });
+
+        // Read the whole thing
+        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+
+        // Pick it back up from the student's follow-up
+        await service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, followUpId);
+
+        // The conversation as it stands after that
+        var fromFollowUp = await GetConversationAsync(service, _newestSessionId);
+
+        // Which leaves the follow-up and the reply after it new
+        Assert.Equal(2, fromFollowUp.UnreadTurnCount);
+
+        // When the turn before the follow-up was recorded, read back rather than compared against the seeded
+        // stamp, which carries finer ticks than the column keeps
+        var precedingAt = await QueryValueAsync(context =>
+            context.DefenseTurns
+                .Where(turn => turn.Id == _newestReplyId)
+                .Select(turn => turn.CreatedAt)
+                .SingleAsync());
+
+        // Which is where the reading stops, rather than a moment cut just under the follow-up: that is what
+        // keeps the stamp meaning a moment somebody's reading actually stopped
+        Assert.Equal(precedingAt, fromFollowUp.ReadAt);
+
+        // Pick it up from the reply instead
+        await service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, lastReplyId);
+
+        // Which moves where the reading stops down to it, leaving only it new
+        Assert.Equal(1, (await GetConversationAsync(service, _newestSessionId)).UnreadTurnCount);
+    });
+
+    /// <summary>
+    /// Picking a conversation up from the turn it opens on leaves nothing read at all, which is the state a
+    /// conversation nobody has opened is already in.
+    /// </summary>
+    [Fact]
+    public Task Picking_a_conversation_up_from_its_opener_leaves_no_stamp() => RunTestAsync(async service =>
+    {
+        // Read the whole thing
+        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+
+        // Pick it back up from the opener, which nothing precedes
+        await service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, _newestOpenerId);
+
+        // The conversation as it stands after that
+        var reopened = await GetConversationAsync(service, _newestSessionId);
+
+        // Which makes every turn new again and drops the stamp rather than leaving one nothing sits before
+        Assert.Equal(3, reopened.UnreadTurnCount);
+        Assert.Null(reopened.ReadAt);
+    });
+
+    /// <summary>
+    /// Two turns recorded in one moment move as one, since a stamp is a moment and cannot fall between them. The
+    /// student's opening message and the reply it draws are saved together, so picking a conversation up from the
+    /// reply leaves the message before it new as well.
+    /// </summary>
+    [Fact]
+    public Task Two_turns_recorded_in_one_moment_are_picked_up_together() => RunTestAsync(async service =>
+    {
+        // Read the whole thing
+        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+
+        // Pick it up from the reply, which the message before it shares a moment with
+        await service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, _newestReplyId);
+
+        // Both of them stand new, the stamp having landed on the opener before the pair
+        Assert.Equal(2, (await GetConversationAsync(service, _newestSessionId)).UnreadTurnCount);
+    });
+
+    /// <summary>
+    /// A reader picks a conversation up from one of its own turns. One belonging to another conversation is
+    /// refused rather than dropping the stamp for want of anything before it.
+    /// </summary>
+    [Fact]
+    public Task Picking_up_from_another_conversations_turn_is_refused() => RunTestAsync(async service =>
+    {
+        // Read the newest conversation
+        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+
+        // Picking it up from a turn the oldest one holds
+        await Assert.ThrowsAsync<AdminReviewTargetException>(
+            () => service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, _oldestOpenerId));
+
+        // And from a turn nothing was seeded under at all
+        await Assert.ThrowsAsync<AdminReviewTargetException>(
+            () => service.MarkUnreadFromAsync(
+                _reviewerId, _newestSessionId, Guid.Parse("00000000-0000-0000-0000-0000000000bf")));
+
+        // Neither of which moved the stamp the conversation already had
+        Assert.Equal(0, (await GetConversationAsync(service, _newestSessionId)).UnreadTurnCount);
     });
 
     /// <summary>
@@ -678,9 +810,13 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
             () => service.MarkReadAsync(_reviewerId, missingId));
 
-        // And putting it back to unread
+        // Putting it back to unread
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
             () => service.MarkUnreadAsync(_reviewerId, missingId));
+
+        // And picking it up from a turn, which is refused for the conversation before the turn is looked at
+        await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
+            () => service.MarkUnreadFromAsync(_reviewerId, missingId, _newestReplyId));
     });
 
     /// <summary>

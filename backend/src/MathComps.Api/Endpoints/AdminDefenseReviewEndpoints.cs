@@ -143,6 +143,28 @@ public static class AdminDefenseReviewEndpoints
         .RequireAuthorization(AuthorizationPolicies.Admin)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
+        // Move where a reviewer picks the conversation up again, leaving the named turn and everything after it to
+        // be read a second time
+        app.MapPut($"{ReviewPath}/sessions/{{id:guid}}/review/from/{{turnId:guid}}", async (
+            Guid id,
+            Guid turnId,
+            HttpContext context,
+            IUserManager userManager,
+            IAdminDefenseReviewService reviewService,
+            CancellationToken cancellationToken) =>
+        {
+            // The reviewer whose reading is being moved
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
+            // Move it back to just before that turn
+            await reviewService.MarkUnreadFromAsync(reviewerId, id, turnId, cancellationToken);
+
+            // Nothing to return
+            return Results.NoContent();
+        })
+        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
         // Put a conversation back to unread
         app.MapDelete($"{ReviewPath}/sessions/{{id:guid}}/review", async (
             Guid id,

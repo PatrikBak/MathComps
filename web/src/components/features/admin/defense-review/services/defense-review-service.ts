@@ -21,6 +21,7 @@ import {
   getDefenseReviewFilterOptionsUrl,
   getDefenseReviewQueueUrl,
   getDefenseReviewReadStateUrl,
+  getDefenseReviewUnreadFromUrl,
 } from './defense-review-api-urls'
 
 /**
@@ -95,6 +96,23 @@ export function setDefenseReviewReadState(
   return apiCall<void>(() => getDefenseReviewReadStateUrl(sessionId), {
     method: read ? 'PUT' : 'DELETE',
   })
+}
+
+/**
+ * Moves where a reviewer picks a conversation up back to just before one of its turns, leaving that turn and
+ * everything after it to be read again.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param sessionId - The conversation.
+ * @param turnId - The turn to leave unread, along with every turn after it.
+ * @returns Nothing on success.
+ */
+export function setDefenseReviewUnreadFromTurn(
+  apiCall: ApiCaller,
+  sessionId: string,
+  turnId: string
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getDefenseReviewUnreadFromUrl(sessionId, turnId), { method: 'PUT' })
 }
 
 /**

@@ -99,6 +99,9 @@ public sealed class GlobalExceptionHandler(
         AdminNoteValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminNoteValue),
         AdminNoteTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminNoteTarget),
 
+        // A reviewer's reading moved back to a turn its conversation doesn't hold
+        AdminReviewTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminReviewTarget),
+
         // Forbidden actions — the caller is known, they're just not allowed
         NotCommentAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotCommentAuthor),
         NotAdminNoteAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotAdminNoteAuthor),

@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl'
 import { DefenseTranscript } from '@/components/features/defense/components/DefenseTranscript'
 import { ProblemStrip } from '@/components/features/defense/components/ProblemStrip'
 import { indexReports } from '@/components/features/defense/model/defense-conversation-model'
-import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { Tabs } from '@/components/shared/components/Tabs'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -25,8 +24,10 @@ type DefenseReviewModalBodyProps = {
   detail: DefenseReviewDetail
   /** How much of it stands on screen at once, and which part the reader is looking at. */
   panels: UseDefenseReviewPanelsResult
-  /** The first turn to have arrived since the reader's last pass; null while nothing marks one. */
-  firstNewTurn: StoredTurn | null
+  /** The first turn left to read since the reader's last pass; null while nothing marks one. */
+  firstNewTurnId: string | null
+  /** Picks the conversation up again from one of its turns. */
+  onMarkUnreadFrom: (turnId: string) => void
   /** Which reply a new note will stand against; null for the conversation as a whole. */
   noteTurnId: string | null
   /** The note the reader was sent to; null when they came in for the conversation itself. */
@@ -47,9 +48,10 @@ type DefenseReviewModalBodyProps = {
 export function DefenseReviewModalBody({
   detail,
   panels,
-  firstNewTurn,
+  firstNewTurnId,
   noteTurnId,
   landingNoteId,
+  onMarkUnreadFrom,
   onNoteTurnIdChange,
 }: DefenseReviewModalBodyProps) {
   // Review-surface copy
@@ -57,6 +59,13 @@ export function DefenseReviewModalBody({
 
   // Defense-surface copy, for what the conversation's own parts are called
   const tDefense = useTranslations('defense')
+
+  // Where the reading stops, drawn only where it has read turns above it: over the whole conversation it
+  // would separate nothing, and it would land where a rule between the statement and the transcript goes
+  const newSince =
+    firstNewTurnId === null || firstNewTurnId === detail.turns[0]?.id
+      ? null
+      : { turnId: firstNewTurnId, label: t('unreadDivider') }
 
   // The conversation itself
   const transcriptPane = (
@@ -80,9 +89,9 @@ export function DefenseReviewModalBody({
         reportedLabel={tDefense('reported')}
         onRewindTurn={() => undefined}
         onReportTurn={() => undefined}
-        newSince={
-          firstNewTurn === null ? null : { turnId: firstNewTurn.id, label: t('unreadDivider') }
-        }
+        newSince={newSince}
+        // Where the next pass through it starts is the reviewer's to move, reply by reply
+        unreadMark={{ label: t('markUnreadFromTurn'), onMark: onMarkUnreadFrom }}
         // Notes hang off a reply by its place, so the reader needs the places to be there to read
         showPositions
         // And the one a note is being written against is marked, but only while that is what the

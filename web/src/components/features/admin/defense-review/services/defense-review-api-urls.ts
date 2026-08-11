@@ -63,6 +63,21 @@ export function getDefenseReviewReadStateUrl(sessionId: string): string {
 }
 
 /**
+ * Builds the URL for where a reviewer picks a conversation up again.
+ *
+ * @param sessionId - The conversation the stamp is about.
+ * @param turnId - The turn to leave unread, along with every turn after it.
+ * @returns The URL for moving the stamp back to just before that turn.
+ */
+export function getDefenseReviewUnreadFromUrl(sessionId: string, turnId: string): string {
+  // The conversation's own review endpoint, narrowed to the turn the reading picks up from
+  const path = `${REVIEW_PATH}/sessions/${encodeURIComponent(sessionId)}/review/from`
+
+  // Under the turn itself
+  return buildApiUrl(`${path}/${encodeURIComponent(turnId)}`)
+}
+
+/**
  * Builds the URL for reading notes across every conversation.
  *
  * @param openOnly - Whether to leave out the notes already settled.

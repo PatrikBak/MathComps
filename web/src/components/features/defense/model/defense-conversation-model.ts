@@ -208,6 +208,56 @@ export function findFirstTurnAfter(
 }
 
 /**
+ * Where a reader's pass through a conversation stops, and how much of it is left to read.
+ */
+export type ReadPassBoundary = {
+  /** When the pass stopped, as an ISO-8601 string; null when nothing counts as read. */
+  readAt: string | null
+  /**
+   * The first turn left to read; null only in a conversation with no turns at all. Named rather than derived
+   * from the moment above, which has nothing to name when the pass stops short of every turn.
+   */
+  firstNewTurnId: string | null
+  /** How many turns arrived after it. */
+  unreadTurnCount: number
+}
+
+/**
+ * Works out where a pass through a conversation would stop for a given turn to be the first one left to read.
+ *
+ * The stop is a moment rather than a place in the conversation, so it lands on the last turn recorded before that
+ * one. Two turns recorded in the same moment can't be told apart by one, so a turn sharing its moment with the one
+ * before it takes that one with it.
+ *
+ * @param turns - As in {@link findFirstTurnAfter}.
+ * @param turnId - The turn to be left as the first one unread.
+ *
+ * @returns Where the pass stops, and what stands past it.
+ */
+export function findReadPassBefore(turns: readonly StoredTurn[], turnId: string): ReadPassBoundary {
+  // When the turn to pick up from was recorded
+  const pickUpAt = turns.find((turn) => turn.id === turnId)?.createdAt
+
+  // A turn the conversation doesn't hold leaves the pass where a conversation nobody has read has it
+  if (pickUpAt === undefined) {
+    return { readAt: null, firstNewTurnId: turns[0]?.id ?? null, unreadTurnCount: turns.length }
+  }
+
+  // That moment as a timestamp
+  const pickUpMoment = new Date(pickUpAt).getTime()
+
+  // Everything recorded before it, which is as far as the pass reaches
+  const read = turns.filter((turn) => new Date(turn.createdAt).getTime() < pickUpMoment)
+
+  // Where it stops, which is the last of them; nothing precedes the turn when there are none
+  return {
+    readAt: read.at(-1)?.createdAt ?? null,
+    firstNewTurnId: turns[read.length]?.id ?? null,
+    unreadTurnCount: turns.length - read.length,
+  }
+}
+
+/**
  * The state machine behind one problem's defense conversation: the live transcript, sending a student
  * turn and folding in the examiner's reply, and the stop / session-switch flows around an in-flight
  * turn.

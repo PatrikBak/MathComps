@@ -6,6 +6,7 @@ import {
   DefenseConversationModel,
   type DefenseConversationServices,
   findFirstTurnAfter,
+  findReadPassBefore,
 } from '../defense-conversation-model'
 import type {
   DefenseProblem,
@@ -1091,5 +1092,56 @@ describe('findFirstTurnAfter', () => {
   it('marks nothing new when nobody has read it', () => {
     // No moment to measure against, so nothing counts as new
     expect(findFirstTurnAfter(TURNS, null)).toBeNull()
+  })
+})
+
+describe('findReadPassBefore', () => {
+  // A conversation opening on a pair saved together, carried on a minute later and again after that
+  const TURNS: StoredTurn[] = [
+    { id: 't1', role: 'examiner', content: 'Hello.', createdAt: '2026-08-01T10:00:00.000Z' },
+    { id: 't2', role: 'candidate', content: 'My proof.', createdAt: '2026-08-01T10:00:00.000Z' },
+    { id: 't3', role: 'examiner', content: 'Go on.', createdAt: '2026-08-01T10:01:00.000Z' },
+    {
+      id: 't4',
+      role: 'candidate',
+      content: 'Then k is even.',
+      createdAt: '2026-08-01T10:02:00.000Z',
+    },
+  ]
+
+  it('stops the pass on the turn before the one to pick up from', () => {
+    // Pick the conversation up from the last turn
+    const boundary = findReadPassBefore(TURNS, 't4')
+
+    // The pass stops on the turn before it, leaving that one turn to read
+    expect(boundary).toEqual({
+      readAt: '2026-08-01T10:01:00.000Z',
+      firstNewTurnId: 't4',
+      unreadTurnCount: 1,
+    })
+  })
+
+  it('takes a turn saved in the same moment along with it', () => {
+    // Pick it up from the reply the opening message shares a moment with
+    const boundary = findReadPassBefore(TURNS, 't2')
+
+    // Which no moment can fall between, so the opener goes back to being unread too and names where to pick up
+    expect(boundary).toEqual({ readAt: null, firstNewTurnId: 't1', unreadTurnCount: 4 })
+  })
+
+  it('leaves nothing read when the conversation opens on the turn', () => {
+    // Pick it up from the very first turn
+    const boundary = findReadPassBefore(TURNS, 't1')
+
+    // Nothing precedes it, so the pass reaches nothing and the whole conversation is left to read
+    expect(boundary).toEqual({ readAt: null, firstNewTurnId: 't1', unreadTurnCount: 4 })
+  })
+
+  it('leaves nothing read for a turn the conversation does not hold', () => {
+    // Pick it up from a turn belonging to no conversation on screen
+    const boundary = findReadPassBefore(TURNS, 'gone')
+
+    // Which names no moment to stop on
+    expect(boundary).toEqual({ readAt: null, firstNewTurnId: 't1', unreadTurnCount: 4 })
   })
 })

@@ -60,6 +60,19 @@ public interface IAdminDefenseReviewService
     Task MarkUnreadAsync(Guid reviewerId, Guid sessionId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Moves one reviewer's record of having read a conversation to just before one of its turns, leaving that turn
+    /// and everything after it to be read again. A turn is named rather than a moment, so where the record lands is
+    /// the conversation's own to decide. Where it stood before doesn't hold it back: naming a turn it already sits
+    /// past settles everything up to that turn. Naming the earliest turn leaves nothing read.
+    /// </summary>
+    /// <param name="reviewerId">The reviewer moving their record.</param>
+    /// <param name="sessionId">The conversation to move it in.</param>
+    /// <param name="turnId">The turn to leave unread, along with every turn after it.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    Task MarkUnreadFromAsync(
+        Guid reviewerId, Guid sessionId, Guid turnId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Marks a whole set of conversations at once, which is what clearing a backlog and taking that back are.
     /// An id naming no conversation is skipped rather than refused, since a set is marked for the sake of the
     /// conversations in it and one gone since the queue was read says nothing about the rest. Marking the same
@@ -75,3 +88,8 @@ public interface IAdminDefenseReviewService
         bool read,
         CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Thrown when a reviewer's reading is moved back to a turn the conversation it is about doesn't hold.
+/// </summary>
+public sealed class AdminReviewTargetException() : Exception("The turn to pick up from is not valid");

@@ -50,7 +50,6 @@ const STEP_SHORTCUTS: StepShortcut[] = [
 
 /**
  * How many dialogs currently stand over the page, counted off the document itself.
- *
  * @returns The number of dialogs on screen.
  */
 function countOpenDialogs(): number {
@@ -95,7 +94,7 @@ export function DefenseReviewQueue() {
   const hasConversations = queue.conversations.length > 0
 
   // Which conversations have been read
-  const { markRead, markUnread, markMany } = useDefenseReviewReadState()
+  const { markRead, markUnread, markUnreadFrom, markMany } = useDefenseReviewReadState()
 
   // Which of the loaded ones are still unread, and the way to clear the lot of them
   const { unreadConversationIds, markLoadedRead } = useDefenseReviewUnread(
@@ -239,6 +238,7 @@ export function DefenseReviewQueue() {
         landingNoteId={landingNoteId}
         onMarkRead={markRead}
         onMarkUnread={markUnread}
+        onMarkUnreadFrom={markUnreadFrom}
         onClosed={() => {
           // Whatever the reader was sent to has been read by now, so the next open is nobody's note
           setLandingNoteId(null)
