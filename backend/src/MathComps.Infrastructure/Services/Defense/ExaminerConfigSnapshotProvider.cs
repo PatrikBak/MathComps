@@ -25,6 +25,7 @@ public class ExaminerConfigSnapshotProvider(IOptions<ExaminerSettings> settings)
         BuildStepSnapshot(settings.Generate),
         BuildStepSnapshot(settings.MathCheck),
         BuildStepSnapshot(settings.LeakCheck),
+        BuildStepSnapshot(settings.LanguageCheck),
         settings.MaxRevisions);
 
     /// <summary>

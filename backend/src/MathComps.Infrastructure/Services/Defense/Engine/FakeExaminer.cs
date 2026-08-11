@@ -55,8 +55,14 @@ public class FakeExaminer(ModelUsage usage = default)
         // Fold the configured usage in like a real call would, so the accumulator matches the reported outcome.
         turnUsage.Add(usage);
 
-        // A fake reply always holds and never leaks; report the configured usage.
+        // A fake reply always holds, never leaks, and stays in the candidate's language; report the configured usage.
         return Task.FromResult(new ExaminerTurnOutcome(
-            reply, new MathCheckResult(true, ""), new LeakCheckResult(false, "", false, ""), 0, false, usage));
+            reply,
+            new MathCheckResult(true, ""),
+            new LeakCheckResult(false, "", false, ""),
+            new LanguageCheckResult(false, ""),
+            0,
+            false,
+            usage));
     }
 }

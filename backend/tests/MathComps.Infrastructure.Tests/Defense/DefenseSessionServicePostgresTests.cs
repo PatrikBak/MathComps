@@ -88,6 +88,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             examiner.Generate = new ChatStepSettings { Prompt = "Prompts/generate.txt", Model = "fake/model" };
             examiner.MathCheck = new ChatStepSettings { Prompt = "Prompts/math-check.txt", Model = "fake/model" };
             examiner.LeakCheck = new ChatStepSettings { Prompt = "Prompts/leak-check.txt", Model = "fake/model" };
+            examiner.LanguageCheck =
+                new ChatStepSettings { Prompt = "Prompts/language-check.txt", Model = "fake/model" };
             examiner.MaxRevisions = 3;
         });
 
