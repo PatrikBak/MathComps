@@ -238,6 +238,35 @@ public class AdminDefenseReviewService(
                     .OrderBy(turn => turn.Sequence)
                     .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))
                     .ToList(),
+                Attempts = session.Turns
+                    .SelectMany(turn => turn.Attempts)
+                    .OrderBy(attempt => attempt.TurnId)
+                    .ThenBy(attempt => attempt.AttemptIndex)
+                    .Select(attempt => new AdminDefenseAttemptDto(
+                        attempt.TurnId,
+                        attempt.AttemptIndex,
+                        attempt.Reply,
+                        attempt.RevisionNote,
+                        attempt.MathHolds,
+                        attempt.MathCorrection,
+                        attempt.Leaks,
+                        attempt.WhatLeaked,
+                        attempt.WithholdsClose,
+                        attempt.Established,
+                        attempt.SwitchesLanguage,
+                        attempt.CandidateLanguage,
+                        attempt.IsSafeFallback,
+                        attempt.Calls
+                            .Select(call => new AdminDefenseAttemptCallDto(
+                                call.Step,
+                                call.Model,
+                                call.ReasoningEffort,
+                                call.Cost,
+                                call.PromptTokens,
+                                call.CompletionTokens,
+                                call.ReasoningTokens))
+                            .ToList()))
+                    .ToList(),
                 Reports = session.Reports
                     .Select(report => new DefenseTurnReportDto(report.TurnId, report.Categories, report.Comment))
                     .ToList(),
@@ -282,6 +311,7 @@ public class AdminDefenseReviewService(
             loaded.ProblemReference,
             examinerConfig.RootElement.Clone(),
             loaded.Turns,
+            loaded.Attempts,
             loaded.Reports,
             loaded.Feedback,
             loaded.Notes,

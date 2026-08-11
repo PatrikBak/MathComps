@@ -4,6 +4,7 @@ using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense;
+using MathComps.Infrastructure.Services.Defense.Dtos;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +15,10 @@ namespace MathComps.Infrastructure.Tests.Defense;
 /// <summary>
 /// Integration tests for <see cref="DefenseSessionService"/> against a real PostgreSQL database, with a fake examiner
 /// (no live LLM): the conversation flow (start, continue, list, delete), that what the student has said about a
-/// conversation comes back with it, that each turn writes an independent spend row that outlives the session,
-/// ownership isolation, the guardrails (message length, turn cap, per-user spend ceiling), and that a turn the
-/// client cancels still records the cost its calls billed so aborting can't dodge the ceiling.
+/// conversation comes back with it, that each turn writes an independent spend row that outlives the session, that a
+/// turn records every draft it went through and drops them when the turn is rewound past, ownership isolation, the
+/// guardrails (message length, turn cap, per-user spend ceiling), and that a turn the client cancels still records the
+/// cost its calls billed so aborting can't dodge the ceiling.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture)
@@ -41,6 +43,31 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// What each cancelled turn costs before it throws.
     /// </summary>
     private const decimal CancelCost = 0.40m;
+
+    /// <summary>
+    /// What one call of a drafted turn bills, small enough that a whole run of drafts stays under the ceiling.
+    /// </summary>
+    private const decimal DraftCallCost = 0.01m;
+
+    /// <summary>
+    /// The note the leak on a drafted turn's first attempt sends back to the generator.
+    /// </summary>
+    private const string DraftRevisionNote = "REVISION REQUIRED — you gave away the counterexample.";
+
+    /// <summary>
+    /// The note a drafted turn's fallback runs under, once the leak has outlasted the revision cap.
+    /// </summary>
+    private const string DraftHoldNote = "REVISION REQUIRED — write a minimal holding reply instead.";
+
+    /// <summary>
+    /// The one call each drafted attempt makes, standing in for a real turn's per-step breakdown.
+    /// </summary>
+    private static readonly ExaminerStepCall _draftCall = new(
+        ExaminerStep.Generate,
+        "fake/model",
+        ReasoningEffort: null,
+        new ModelUsage(DraftCallCost, PromptTokens: 10, CompletionTokens: 2, ReasoningTokens: 0,
+            CachedPromptTokens: 0));
 
     /// <summary>
     /// The usage — cost and tokens — each cancelled turn runs up before it throws.
@@ -415,6 +442,64 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var listed = Assert.Single(sessions);
         Assert.Null(listed.FirstStudentMessage);
     });
+
+    /// <summary>
+    /// A turn records every draft the examiner made and every call each one billed, so a reviewer can read what the
+    /// guards sent back and what each step cost. A turn that ran out of revisions marks its fallback, and marks only
+    /// that one: the flag describes the draft it replaced the flagged one with, not the run it came out of.
+    /// Rewinding past the turn takes the drafts with it, which is the composite key's whole job — they hang off the
+    /// turn rather than off the session.
+    /// </summary>
+    [Fact]
+    public Task Continue_records_every_draft_and_its_calls()
+    {
+        // An examiner that leaks its way through the cap and retreats to the fallback.
+        _examiner = new DraftingExaminer();
+
+        // Run the turn and read back what it recorded.
+        return RunTestAsync(async service =>
+    {
+        // A session whose reply took three drafts
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // The drafts landed against the examiner's reply, in the order they were made
+        await QueryAsync(async context =>
+        {
+            // Everything recorded for this session, calls included
+            var attempts = await context.DefenseTurnAttempts
+                .Include(attempt => attempt.Calls)
+                .Where(attempt => attempt.SessionId == session.Id)
+                .OrderBy(attempt => attempt.AttemptIndex)
+                .ToListAsync();
+
+            // Every draft is there, the first rejection at the front
+            Assert.Equal(3, attempts.Count);
+            Assert.Equal("a leaky draft.", attempts[0].Reply);
+            Assert.True(attempts[0].Leaks);
+            Assert.Equal("the counterexample", attempts[0].WhatLeaked);
+
+            // The second ran under the note the leak produced, and leaked all the same
+            Assert.Equal(DraftRevisionNote, attempts[1].RevisionNote);
+            Assert.True(attempts[1].Leaks);
+
+            // Which left the last as the fallback, and it alone
+            Assert.Equal([false, false, true], attempts.Select(attempt => attempt.IsSafeFallback));
+            Assert.Equal(DraftHoldNote, attempts[2].RevisionNote);
+
+            // Each draft carries the calls it made, attributed per step
+            var call = Assert.Single(attempts[2].Calls);
+            Assert.Equal(ExaminerStep.Generate, call.Step);
+            Assert.Equal(DraftCallCost, call.Cost);
+        });
+
+        // Rewind past the examiner's reply, dropping the turn the drafts hang off
+        await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 0);
+
+        // The drafts went with it, rather than outliving the reply they were made for
+        await QueryAsync(async context =>
+            Assert.Equal(0, await context.DefenseTurnAttempts.CountAsync()));
+    });
+    }
 
     /// <summary>
     /// Deleting a session removes it and its turns, but the independent spend rows remain.
@@ -1028,9 +1113,50 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     };
 
     /// <summary>
-    /// An examiner that folds a fixed usage into the turn's accumulator, like a real call would, optionally cancels the
-    /// request, then throws — standing in for a turn that fails partway (a client abort, or another fault the test
-    /// picks).
+    /// An examiner whose turn keeps leaking until the revision cap runs out and the constrained fallback ships, so a
+    /// test has a real run to read back rather than the single clean attempt the plain fake produces.
+    /// </summary>
+    private sealed class DraftingExaminer : IExaminer
+    {
+        /// <inheritdoc/>
+        public Task<ExaminerTurnOutcome> NextReplyAsync(
+            string problem, string reference, Transcript transcript, ModelUsageAccumulator turnUsage,
+            CancellationToken cancellationToken)
+        {
+            // The turn's cost, folded the way the real engine folds each call as it lands.
+            turnUsage.Add(new ModelUsage(
+                DraftCallCost * 3, PromptTokens: 30, CompletionTokens: 6, ReasoningTokens: 0,
+                CachedPromptTokens: 0));
+
+            // The first draft, sent back for handing over the counterexample.
+            var rejected = new ExaminerAttempt(
+                "a leaky draft.",
+                RevisionNote: "",
+                new MathCheckResult(true, ""),
+                new LeakCheckResult(true, "the counterexample", false, ""),
+                new LanguageCheckResult(false, "English"),
+                [_draftCall]);
+
+            // The second, written under the note that leak produced and giving the same thing away again.
+            var revised = rejected with { Reply = "another leaky draft.", RevisionNote = DraftRevisionNote };
+
+            // The fallback the exhausted cap retreats to, which is what ships.
+            var fallback = new ExaminerAttempt(
+                "so what makes that step work?",
+                DraftHoldNote,
+                new MathCheckResult(true, ""),
+                new LeakCheckResult(false, "", false, ""),
+                new LanguageCheckResult(false, "English"),
+                [_draftCall]);
+
+            // The turn, ending on the fallback rather than on a draft that came back clean.
+            return Task.FromResult(new ExaminerTurnOutcome(
+                [rejected, revised, fallback], SafeFallback: true, turnUsage.Accrued));
+        }
+    }
+
+    /// <summary>
+    /// An examiner that runs up cost and then fails, standing in for a turn that dies mid-flight.
     /// </summary>
     /// <param name="usage">The cost to run up before failing.</param>
     /// <param name="failure">Builds the exception thrown after the cost is run up, fresh for each call.</param>

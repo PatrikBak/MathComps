@@ -1,7 +1,7 @@
 'use client'
 
 import { useReducedMotion } from '@mantine/hooks'
-import { Flag, Mail, Undo2 } from 'lucide-react'
+import { Flag, Layers, Mail, Undo2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
@@ -39,6 +39,23 @@ export type TurnUnreadMark = {
 }
 
 /**
+ * The way into the drafts a reply went through before it was sent. Only a reviewer gets this: a rejected draft
+ * is the leak or the wrong claim a guard caught, so a turn only offers it where the reader is allowed to see
+ * what the student was kept from.
+ */
+export type TurnDraftsMark = {
+  /**
+   * The accessible label for the control, given how many drafts it opens. It takes the count because the
+   * label is the control's whole accessible name, and the count it shows would otherwise go unannounced.
+   */
+  label: (draftCount: number) => string
+  /** How many drafts each turn kept; a turn absent from it offers nothing. */
+  draftCounts: ReadonlyMap<string, number>
+  /** Opens the named turn's drafts. */
+  onOpen: (turnId: string) => void
+}
+
+/**
  * Props for a single {@link DefenseTurn}.
  */
 type DefenseTurnProps = TurnActionsAffordance & {
@@ -50,6 +67,8 @@ type DefenseTurnProps = TurnActionsAffordance & {
   isPointedAt: boolean
   /** Picking the conversation up again from here; null where the reader keeps no place in it. */
   unreadMark: TurnUnreadMark | null
+  /** Reading the drafts behind this reply; null where the reader isn't allowed to see them. */
+  draftsMark: TurnDraftsMark | null
   /** The localized role label shown above the message. */
   label: string
   /** Whether this turn just arrived and should fade in. */
@@ -126,6 +145,7 @@ export function DefenseTurn({
   onRewind,
   onReport,
   unreadMark,
+  draftsMark,
 }: DefenseTurnProps) {
   // The look for this turn's author
   const style = TURN_STYLES[turn.role]
@@ -139,6 +159,10 @@ export function DefenseTurn({
   // The turn itself, which a draft the backend hasn't taken yet doesn't have. Pulled out because narrowing it
   // away doesn't survive into the control's own handler.
   const turnId = turn.id
+
+  // How many drafts this reply went through, or null on one held before they were kept
+  const draftCount =
+    draftsMark === null || turnId === null ? null : (draftsMark.draftCounts.get(turnId) ?? null)
 
   return (
     <div
@@ -169,7 +193,10 @@ export function DefenseTurn({
         </div>
 
         {/* The turn's controls, and whatever has already been said about it */}
-        {(canAct || isReported || (unreadMark !== null && turnId !== null)) && (
+        {(canAct ||
+          isReported ||
+          draftCount !== null ||
+          (unreadMark !== null && turnId !== null)) && (
           <div className={cn('flex shrink-0 items-center gap-0.5', style.actionsInset)}>
             {/* Say what went wrong with a reply. A reported one keeps the control and carries a filled flag,
                 so the student can see what they said and change it */}
@@ -209,6 +236,25 @@ export function DefenseTurn({
                 className="size-7 text-muted/60 hover:text-foreground"
               >
                 <Undo2 size={14} />
+              </Button>
+            )}
+
+            {/* Read the drafts this reply went through before it was sent. A reply that took more than one
+                carries how many, since a run that had to be sent back is the one worth opening */}
+            {draftCount !== null && turnId !== null && draftsMark !== null && (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={draftsMark.label(draftCount)}
+                onClick={() => draftsMark.onOpen(turnId)}
+                className="relative size-7 text-muted/60 hover:text-foreground"
+              >
+                <Layers size={14} />
+                {draftCount > 1 && (
+                  <span className="absolute right-0 top-0 text-[9px] font-semibold leading-none">
+                    {draftCount}
+                  </span>
+                )}
               </Button>
             )}
 

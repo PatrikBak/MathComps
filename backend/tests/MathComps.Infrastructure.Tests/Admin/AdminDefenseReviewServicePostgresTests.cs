@@ -180,6 +180,14 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             NewTurn(_targetlessSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-2)),
             NewTurn(_targetlessSessionId, TranscriptRole.Candidate, "my untargeted defense", 1, _now.AddDays(-2)));
 
+        // The drafts behind the newest conversation's last reply: one the leak-check sent back, and the one that
+        // went out. They hang off that reply alone, so the conversations held before the drafts were kept have
+        // somewhere to read back empty from. Written in the reverse of the order they were drafted, so a read that
+        // takes the database's own order for the run's order has something to get wrong.
+        context.DefenseTurnAttempts.AddRange(
+            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 1, "her reply", leaks: false),
+            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 0, "her leaky draft", leaks: true));
+
         // What each conversation was held against, the targetless one deliberately naming nothing.
         context.HandoutEnvironmentDefenses.AddRange(
             NewTarget(_oldestSessionId, _sharedProblemId),
@@ -709,6 +717,53 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
+    /// The detail carries every draft behind a reply, attributed to the reply it was made for and in the order it was
+    /// drafted, each with the calls that wrote and judged it. The review surface groups them by reply and reads the
+    /// last of a group as the one the student saw, so an attribution or an order that slipped would tell a false
+    /// story about what the examiner did.
+    /// </summary>
+    [Fact]
+    public Task The_detail_carries_every_draft_behind_a_reply() => RunTestAsync(async service =>
+    {
+        // Read the conversation whose last reply took two drafts
+        var detail = await service.GetDetailAsync(_reviewerId, _newestSessionId);
+
+        // Both came back in the order they were drafted
+        Assert.Equal(["her leaky draft", "her reply"], detail.Attempts.Select(attempt => attempt.Reply));
+
+        // Each against the reply it was made for, which is what the surface groups them by
+        Assert.All(detail.Attempts, attempt => Assert.Equal(_newestReplyId, attempt.TurnId));
+
+        // The rejected one carries what the guard caught, the part the student never saw
+        Assert.True(detail.Attempts[0].Leaks);
+        Assert.Equal("the counterexample", detail.Attempts[0].WhatLeaked);
+
+        // And each carries the calls it made, which the turn's single figure can't break down
+        Assert.All(
+            detail.Attempts,
+            attempt => Assert.Equal(
+                [ExaminerStep.Generate, ExaminerStep.LeakCheck],
+                attempt.Calls.Select(call => call.Step).Order()));
+    });
+
+    /// <summary>
+    /// A conversation held before the drafts were kept reads back holding none, rather than failing on their absence.
+    /// Every conversation already in the database is one of those, so the empty case is the ordinary one for a while
+    /// yet, and it has to reach the review surface as "nothing to show" rather than as an error.
+    /// </summary>
+    [Fact]
+    public Task The_detail_holds_no_drafts_for_a_conversation_from_before_they_were_kept() =>
+        RunTestAsync(async service =>
+    {
+        // Read a conversation seeded with turns and nothing recorded behind them
+        var detail = await service.GetDetailAsync(_reviewerId, _oldestSessionId);
+
+        // Its turns came back, and it simply holds no drafts
+        Assert.NotEmpty(detail.Turns);
+        Assert.Empty(detail.Attempts);
+    });
+
+    /// <summary>
     /// The detail carries the notes written about that conversation and no others, newest first, each marked as the
     /// reading reviewer's own or somebody else's.
     /// </summary>
@@ -925,4 +980,62 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             Sequence = sequence,
             CreatedAt = createdAt,
         };
+
+    /// <summary>
+    /// Builds one seeded draft, carrying the calls that wrote and judged it.
+    /// </summary>
+    /// <param name="sessionId">The conversation the draft was made in.</param>
+    /// <param name="turnId">The reply it was drafted for.</param>
+    /// <param name="attemptIndex">Its place in that reply's run.</param>
+    /// <param name="reply">The drafted text.</param>
+    /// <param name="leaks">Whether the leak-check flagged it, which is what sends a draft back.</param>
+    /// <returns>The draft, ready to add.</returns>
+    private static DefenseTurnAttempt NewAttempt(
+        Guid sessionId, Guid turnId, int attemptIndex, string reply, bool leaks)
+    {
+        // The draft and every verdict passed on it, clean but for the leak the test asks for.
+        var attempt = new DefenseTurnAttempt
+        {
+            SessionId = sessionId,
+            TurnId = turnId,
+            AttemptIndex = attemptIndex,
+            Reply = reply,
+            RevisionNote = attemptIndex == 0 ? "" : "REVISION REQUIRED — you gave away the counterexample.",
+            MathHolds = true,
+            MathCorrection = "",
+            Leaks = leaks,
+            WhatLeaked = leaks ? "the counterexample" : "",
+            WithholdsClose = false,
+            Established = "",
+            SwitchesLanguage = false,
+            CandidateLanguage = "English",
+            IsSafeFallback = false,
+            CreatedAt = _now,
+        };
+
+        // The calls behind it, keyed off the draft's own client-side id.
+        attempt.Calls = [NewCall(attempt.Id, ExaminerStep.Generate), NewCall(attempt.Id, ExaminerStep.LeakCheck)];
+
+        // Hand it back with them attached.
+        return attempt;
+    }
+
+    /// <summary>
+    /// Builds one seeded model call.
+    /// </summary>
+    /// <param name="attemptId">The draft that made it.</param>
+    /// <param name="step">The step it ran.</param>
+    /// <returns>The call, ready to hang off a draft.</returns>
+    private static DefenseAttemptCall NewCall(Guid attemptId, ExaminerStep step) => new()
+    {
+        AttemptId = attemptId,
+        Step = step,
+        Model = "fake/model",
+        ReasoningEffort = "low",
+        Cost = 0.01m,
+        PromptTokens = 100,
+        CompletionTokens = 20,
+        ReasoningTokens = 5,
+        CachedPromptTokens = 0,
+    };
 }

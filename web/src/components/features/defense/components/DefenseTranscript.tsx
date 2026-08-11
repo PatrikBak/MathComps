@@ -8,7 +8,12 @@ import { Button } from '@/components/shared/components/Button'
 import { useFollowTail } from '@/hooks/use-follow-tail'
 
 import type { DefenseTurnReport, Turn, TurnRole } from '../model/defense-types'
-import { DefenseTurn, type TurnActionsAffordance, type TurnUnreadMark } from './DefenseTurn'
+import {
+  DefenseTurn,
+  type TurnActionsAffordance,
+  type TurnDraftsMark,
+  type TurnUnreadMark,
+} from './DefenseTurn'
 import { ThinkingIndicator } from './ThinkingIndicator'
 
 /** Which authors' messages can be reported. */
@@ -77,6 +82,8 @@ type DefenseTranscriptProps = TurnActionsAffordance & {
   newSince: TranscriptNewSinceMark | null
   /** Moving where the reader picks the conversation up; null where nobody keeps a place in it. */
   unreadMark: TurnUnreadMark | null
+  /** Reading the drafts behind a reply; null where the reader isn't allowed to see them. */
+  draftsMark: TurnDraftsMark | null
   /** Whether to number the turns, so something outside the conversation can refer to one by its place. */
   showPositions?: boolean
   /** The turn something outside the conversation currently points at; null when nothing does. */
@@ -108,6 +115,7 @@ export function DefenseTranscript({
   onReportTurn,
   newSince,
   unreadMark,
+  draftsMark,
   showPositions = false,
   pointedAtTurnId = null,
   footer,
@@ -207,6 +215,7 @@ export function DefenseTranscript({
                     onRewind={() => onRewindTurn(index)}
                     onReport={reportableId === null ? null : () => onReportTurn(reportableId)}
                     unreadMark={unreadMark}
+                    draftsMark={draftsMark}
                   />
                 </Fragment>
               )

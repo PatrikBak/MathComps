@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { useMemo, useState } from 'react'
 
 import { DefenseTranscript } from '@/components/features/defense/components/DefenseTranscript'
 import { ProblemStrip } from '@/components/features/defense/components/ProblemStrip'
@@ -11,10 +12,11 @@ import { cn } from '@/components/shared/utils/css-utils'
 
 import type { UseDefenseReviewPanelsResult } from '../hooks/use-defense-review-panels'
 import type { DefenseReviewTabId } from '../model/defense-review-tabs'
-import type { DefenseReviewDetail } from '../model/defense-review-types'
+import type { DefenseReviewDetail, DefenseTurnAttempt } from '../model/defense-review-types'
 import { DefenseReviewConfigTab } from './DefenseReviewConfigTab'
 import { DefenseReviewNotesTab } from './DefenseReviewNotesTab'
 import { StudentVerdict } from './StudentVerdict'
+import { TurnAttemptsModal } from './TurnAttemptsModal'
 
 /**
  * Props for the {@link DefenseReviewModalBody} component.
@@ -57,6 +59,27 @@ export function DefenseReviewModalBody({
   // Review-surface copy
   const t = useTranslations('admin.defenseReview')
 
+  // Whose drafts are being read; null while none are
+  const [draftsTurnId, setDraftsTurnId] = useState<string | null>(null)
+
+  // The drafts kept per reply, grouped once rather than filtered on every turn's render. Hand-folded rather
+  // than through Map.groupBy, which no browser older than Safari 17.4 has and nothing here polyfills
+  const attemptsByTurn = useMemo(
+    () =>
+      detail.attempts.reduce(
+        (groups, attempt) =>
+          groups.set(attempt.turnId, [...(groups.get(attempt.turnId) ?? []), attempt]),
+        new Map<string, DefenseTurnAttempt[]>()
+      ),
+    [detail.attempts]
+  )
+
+  // How many each reply kept, which is what the transcript needs of them
+  const draftCounts = useMemo(
+    () => new Map([...attemptsByTurn].map(([turnId, attempts]) => [turnId, attempts.length])),
+    [attemptsByTurn]
+  )
+
   // Defense-surface copy, for what the conversation's own parts are called
   const tDefense = useTranslations('defense')
 
@@ -92,6 +115,12 @@ export function DefenseReviewModalBody({
         newSince={newSince}
         // Where the next pass through it starts is the reviewer's to move, reply by reply
         unreadMark={{ label: t('markUnreadFromTurn'), onMark: onMarkUnreadFrom }}
+        // How each reply was arrived at, offered only on the replies that kept their drafts
+        draftsMark={{
+          label: (draftCount) => t('attempts.open', { draftCount }),
+          draftCounts: draftCounts,
+          onOpen: setDraftsTurnId,
+        }}
         // Notes hang off a reply by its place, so the reader needs the places to be there to read
         showPositions
         // And the one a note is being written against is marked, but only while that is what the
@@ -185,49 +214,63 @@ export function DefenseReviewModalBody({
     },
   ]
 
+  // Whichever reply's drafts are being read, over whatever layout is underneath
+  const attemptsModal = (
+    <TurnAttemptsModal
+      attempts={draftsTurnId === null ? null : (attemptsByTurn.get(draftsTurnId) ?? null)}
+      onClose={() => setDraftsTurnId(null)}
+    />
+  )
+
   // Narrow: everything is a tab, since a split would leave neither half readable
   if (!panels.isSplit) {
     return (
-      <Tabs<DefenseReviewTabId>
-        ariaLabel={t('tabsLabel')}
-        selectedId={panels.selectedTabId}
-        onSelect={panels.selectTab}
-        items={[
-          {
-            id: 'conversation',
-            label: t('tabs.conversation'),
-            count: null,
-            panel: transcriptPane,
-          },
-          ...sidePanels,
-        ]}
-      />
+      <>
+        <Tabs<DefenseReviewTabId>
+          ariaLabel={t('tabsLabel')}
+          selectedId={panels.selectedTabId}
+          onSelect={panels.selectTab}
+          items={[
+            {
+              id: 'conversation',
+              label: t('tabs.conversation'),
+              count: null,
+              panel: transcriptPane,
+            },
+            ...sidePanels,
+          ]}
+        />
+        {attemptsModal}
+      </>
     )
   }
 
   // Wide: the transcript and whatever is being read or written against it, side by side
   return (
-    <div className="flex min-h-0 flex-1 flex-row">
-      {/* The conversation */}
-      {transcriptPane}
+    <>
+      <div className="flex min-h-0 flex-1 flex-row">
+        {/* The conversation */}
+        {transcriptPane}
 
-      {/* The solution in a column of its own, once there is room for one. The pane inside carries the name,
+        {/* The solution in a column of its own, once there is room for one. The pane inside carries the name,
           so the column around it is layout and nothing else */}
-      {panels.hasReferenceColumn && (
-        <div className="flex min-h-0 w-[26rem] shrink-0 flex-col border-l border-foreground/10">
-          {referencePane}
-        </div>
-      )}
+        {panels.hasReferenceColumn && (
+          <div className="flex min-h-0 w-[26rem] shrink-0 flex-col border-l border-foreground/10">
+            {referencePane}
+          </div>
+        )}
 
-      {/* Everything else read or written against it */}
-      <div className="flex min-h-0 w-[28rem] shrink-0 flex-col border-l border-foreground/10">
-        <Tabs<DefenseReviewTabId>
-          ariaLabel={t('tabsLabel')}
-          selectedId={panels.sideTabId}
-          onSelect={panels.selectTab}
-          items={sidePanels}
-        />
+        {/* Everything else read or written against it */}
+        <div className="flex min-h-0 w-[28rem] shrink-0 flex-col border-l border-foreground/10">
+          <Tabs<DefenseReviewTabId>
+            ariaLabel={t('tabsLabel')}
+            selectedId={panels.sideTabId}
+            onSelect={panels.selectTab}
+            items={sidePanels}
+          />
+        </div>
       </div>
-    </div>
+      {attemptsModal}
+    </>
   )
 }

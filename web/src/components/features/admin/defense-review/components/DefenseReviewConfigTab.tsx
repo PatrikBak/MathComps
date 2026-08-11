@@ -6,18 +6,13 @@ import { useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 
-import type { ExaminerConfigSnapshot, ExaminerStepSnapshot } from '../model/defense-review-types'
+import type {
+  ExaminerConfigSnapshot,
+  ExaminerStep,
+  ExaminerStepSnapshot,
+} from '../model/defense-review-types'
+import { EXAMINER_STEPS } from '../model/defense-review-types'
 import { PromptTextModal } from './PromptTextModal'
-
-/**
- * The examiner's steps, in the order they run.
- */
-const STEPS = ['generate', 'mathCheck', 'leakCheck', 'languageCheck'] as const
-
-/**
- * One of the examiner's steps.
- */
-type ExaminerStep = (typeof STEPS)[number]
 
 /**
  * Props for the {@link DefenseReviewConfigTab} component.
@@ -60,7 +55,7 @@ export function DefenseReviewConfigTab({ config }: DefenseReviewConfigTabProps) 
 
       {/* What each step ran on, and the way into what it was told */}
       <div className="mt-5 flex flex-col gap-5">
-        {STEPS.map((step) => (
+        {EXAMINER_STEPS.map((step) => (
           <StepSettings key={step} step={step} snapshot={config[step]} onOpenPrompt={setOpenStep} />
         ))}
       </div>

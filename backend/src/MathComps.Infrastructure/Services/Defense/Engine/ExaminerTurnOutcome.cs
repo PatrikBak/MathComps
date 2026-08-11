@@ -1,28 +1,29 @@
 using MathComps.Infrastructure.Services.Ai;
-using MathComps.Infrastructure.Services.Defense.Dtos;
 
 namespace MathComps.Infrastructure.Services.Defense.Engine;
 
 /// <summary>
-/// The result of one examiner turn: the reply that ships, every guard's verdict on it, how many times the reply
-/// was regenerated, whether the shipped reply is the constrained fallback, and the turn's usage (the summed spend
-/// and token counts of every model call it made: the first attempt, every guard, and every revision). The verdicts
-/// are the ones on the shipped reply.
+/// The result of one examiner turn: every attempt it made, whether it ended on the constrained fallback, and the
+/// turn's usage summed over every model call. The attempt that ships is the last one, so the shipped reply and the
+/// verdicts it shipped under are read off <see cref="Shipped"/> rather than repeated here.
 /// </summary>
-/// <param name="Reply">The examiner's shipped reply.</param>
-/// <param name="MathCheck">The math-check verdict on the shipped reply.</param>
-/// <param name="LeakCheck">The leak-check verdict on the shipped reply.</param>
-/// <param name="LanguageCheck">The language-check verdict on the shipped reply.</param>
-/// <param name="Revisions">How many times the reply was regenerated because a check flagged it, the fallback
-/// generation included (0 when clean first try).</param>
+/// <param name="Attempts">Every attempt the turn made, in the order they were generated; never empty.</param>
 /// <param name="SafeFallback">Whether the revision cap ran out with a wrong claim or a mis-paid step still on the
-/// reply, so the shipped reply is the constrained fallback rather than a normal attempt.</param>
+/// reply, so the last attempt is the constrained fallback rather than a normal one.</param>
 /// <param name="Usage">The turn's total spend and token counts, summed over every model call it made.</param>
 public record ExaminerTurnOutcome(
-    string Reply,
-    MathCheckResult MathCheck,
-    LeakCheckResult LeakCheck,
-    LanguageCheckResult LanguageCheck,
-    int Revisions,
+    IReadOnlyList<ExaminerAttempt> Attempts,
     bool SafeFallback,
-    ModelUsage Usage);
+    ModelUsage Usage)
+{
+    /// <summary>
+    /// The attempt that ships, which is the last one the turn generated.
+    /// </summary>
+    public ExaminerAttempt Shipped => Attempts[^1];
+
+    /// <summary>
+    /// How many times the reply was regenerated because a guard flagged it, the fallback generation included
+    /// (0 when the first attempt shipped clean).
+    /// </summary>
+    public int Revisions => Attempts.Count - 1;
+}

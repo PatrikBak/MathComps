@@ -100,6 +100,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Turns within a defense conversation.</summary>
     public DbSet<DefenseTurn> DefenseTurns => Set<DefenseTurn>();
 
+    /// <summary>Replies the examiner drafted on its way to a turn.</summary>
+    public DbSet<DefenseTurnAttempt> DefenseTurnAttempts => Set<DefenseTurnAttempt>();
+
+    /// <summary>Model calls the drafts were made by.</summary>
+    public DbSet<DefenseAttemptCall> DefenseAttemptCalls => Set<DefenseAttemptCall>();
+
     /// <summary>Per-turn examiner spend.</summary>
     public DbSet<DefenseSpend> DefenseSpends => Set<DefenseSpend>();
 
@@ -870,6 +876,38 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion DefenseTurn
+
+        #region DefenseTurnAttempt
+
+        modelBuilder.Entity<DefenseTurnAttempt>(e =>
+        {
+            // The conversation the draft was made in, cascading so deleting a session drops what it tried.
+            e.HasOne(attempt => attempt.Session)
+             .WithMany()
+             .HasForeignKey(attempt => attempt.SessionId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The turn the draft was made for, cascading so a rewind past that turn takes its drafts too. The
+            // conversation rides in the key, so the turn has to be one of that conversation's own.
+            e.HasOne(attempt => attempt.Turn)
+             .WithMany(turn => turn.Attempts)
+             .HasPrincipalKey(turn => new { turn.SessionId, turn.Id })
+             .HasForeignKey(attempt => new { attempt.SessionId, attempt.TurnId })
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Calls belong to the draft that made them, cascading so dropping a draft drops its calls.
+            e.HasMany(attempt => attempt.Calls)
+             .WithOne(call => call.Attempt)
+             .HasForeignKey(call => call.AttemptId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Drafts read back in the order they were made; unique so a turn can't record two at one index.
+            e.HasIndex(attempt => new { attempt.TurnId, attempt.AttemptIndex })
+             .IsUnique()
+             .HasDatabaseName("ux_defense_turn_attempt_turn_id_attempt_index");
+        });
+
+        #endregion DefenseTurnAttempt
 
         #region DefenseSpend
 

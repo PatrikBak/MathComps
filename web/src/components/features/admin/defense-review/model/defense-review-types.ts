@@ -166,6 +166,8 @@ export type DefenseReviewDetail = {
   examinerConfig: ExaminerConfigSnapshot
   /** The conversation in order. */
   turns: StoredTurn[]
+  /** Every reply the examiner drafted on its way to each turn; turns held before the drafts were kept carry none. */
+  attempts: DefenseTurnAttempt[]
   /** What the student holds against individual replies. */
   reports: DefenseTurnReport[]
   /** What the student said about the whole conversation; null when they said nothing. */
@@ -176,6 +178,73 @@ export type DefenseReviewDetail = {
   readAt: string | null
   /** When it was started, as an ISO-8601 string. */
   createdAt: string
+}
+
+/**
+ * The examiner's steps, in the order they run.
+ */
+export const EXAMINER_STEPS = ['generate', 'mathCheck', 'leakCheck', 'languageCheck'] as const
+
+/**
+ * One step of the examiner's turn: the call that writes the reply, or one of the guards that judges it. Each routes
+ * to its own model and reasoning level, so this is the axis a turn's cost breaks down along.
+ */
+export type ExaminerStep = (typeof EXAMINER_STEPS)[number]
+
+/**
+ * One model call an attempt made, and what it billed.
+ */
+export type DefenseAttemptCall = {
+  /** The step that made the call. */
+  step: ExaminerStep
+  /** The model it routed to. */
+  model: string
+  /** The reasoning-effort level it ran at; null when none was sent. */
+  reasoningEffort: string | null
+  /** The call's billed cost in credits. */
+  cost: number
+  /** The call's prompt tokens. */
+  promptTokens: number
+  /** The call's completion tokens, the reasoning ones counted among them. */
+  completionTokens: number
+  /** The reasoning portion of the completion tokens. */
+  reasoningTokens: number
+}
+
+/**
+ * One reply the examiner drafted on its way to a turn, every guard's verdict on it, and what it cost. Only the last
+ * attempt of a turn is the reply the student read; the rest are drafts a guard sent back, so they carry exactly the
+ * leaks and wrong claims the loop exists to keep from the student.
+ */
+export type DefenseTurnAttempt = {
+  /** The turn it was drafted for. */
+  turnId: string
+  /** Its place in the turn's run, 0-based. */
+  attemptIndex: number
+  /** The drafted reply. */
+  reply: string
+  /** The flaw the generator was told to fix; empty on the first attempt. */
+  revisionNote: string
+  /** Whether every claim the reply asserts held. */
+  mathHolds: boolean
+  /** Which claim was wrong and the correct statement; empty when they all held. */
+  mathCorrection: string
+  /** Whether the reply handed over unearned progress. */
+  leaks: boolean
+  /** The step or idea given away; empty when nothing was. */
+  whatLeaked: string
+  /** Whether the reply pressed on although the solution was already complete. */
+  withholdsClose: boolean
+  /** What the student had assembled, when the close was withheld; empty otherwise. */
+  established: string
+  /** Whether the reply drifted out of the student's language. */
+  switchesLanguage: boolean
+  /** The language the student's latest turn was written in. */
+  candidateLanguage: string
+  /** Whether this attempt is the constrained fallback the revision cap fell back to. */
+  isSafeFallback: boolean
+  /** The model calls this attempt made. */
+  calls: DefenseAttemptCall[]
 }
 
 /**
