@@ -77,6 +77,11 @@ describe('describeHandoutProblem', () => {
       handoutTitle: 'Means',
       isHandoutOnSite: true,
       environment: { label: 'Problem 4', type: 'problem' },
+      link: {
+        handoutSlug: 'means',
+        anchorId: 'env-three-numbers-mean',
+        href: '/handouts/means#env-three-numbers-mean',
+      },
     })
   })
 
@@ -92,6 +97,7 @@ describe('describeHandoutProblem', () => {
       handoutTitle: 'Deleted handout',
       isHandoutOnSite: false,
       environment: null,
+      link: null,
     })
   })
 
@@ -103,6 +109,11 @@ describe('describeHandoutProblem', () => {
     )
 
     // The handout is still on the site and still names itself, and only which problem it was is lost
-    expect(label).toEqual({ handoutTitle: 'Means', isHandoutOnSite: true, environment: null })
+    expect(label).toEqual({
+      handoutTitle: 'Means',
+      isHandoutOnSite: true,
+      environment: null,
+      link: null,
+    })
   })
 })

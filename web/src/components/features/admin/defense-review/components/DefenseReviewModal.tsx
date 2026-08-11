@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight, Mail, MailOpen, MailPlus, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { HandoutProblemRefLabel } from '@/components/features/handouts/HandoutProblemRefLabel'
+import { HandoutProblemRefLink } from '@/components/features/handouts/HandoutProblemRefLink'
 import { useHandoutProblemLabel } from '@/components/features/handouts/use-handout-problem-label'
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
@@ -111,7 +111,7 @@ export function DefenseReviewModal({
         {/* Who held it, and what it was about */}
         <div className="min-w-0 flex-1" aria-live="polite">
           <p className="truncate font-bold text-foreground">{detail?.user.displayName ?? ' '}</p>
-          <p className="flex items-baseline gap-2 truncate text-xs text-muted">
+          <p className="flex items-baseline gap-2 text-xs text-muted">
             {detail === null ? <span>&nbsp;</span> : <ConversationProblemRef detail={detail} />}
           </p>
         </div>
@@ -227,7 +227,7 @@ type ConversationProblemRefProps = {
 }
 
 /**
- * Which problem of which handout the open conversation was held against.
+ * Which problem of which handout the open conversation was held against, and the way to go and read it.
  *
  * A component of its own so that naming the problem, which reads handout content, happens only once there is a
  * conversation to name one for.
@@ -239,5 +239,5 @@ function ConversationProblemRef({ detail }: ConversationProblemRefProps) {
   // Which problem of which handout it was held against
   const problemLabel = useHandoutProblemLabel(detail.target, t('deletedHandout'))
 
-  return <HandoutProblemRefLabel label={problemLabel} />
+  return <HandoutProblemRefLink label={problemLabel} emphasis="muted" />
 }

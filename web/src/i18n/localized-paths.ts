@@ -1,5 +1,5 @@
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
-import type { Locale } from '@/i18n/i18n'
+import type { Locale, PartialLocalizedString } from '@/i18n/i18n'
 import { DEFAULT_LOCALE, pathnames, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 /**
@@ -15,7 +15,7 @@ import { DEFAULT_LOCALE, pathnames, SUPPORTED_LOCALES } from '@/i18n/i18n'
 export function resolveLocalizedPath(
   canonicalPath: string,
   locale: Locale,
-  slugTranslations?: Record<Locale, string>
+  slugTranslations?: PartialLocalizedString
 ): string | undefined {
   // Get the pathname mapping for this route (if it exists)
   const pathnameMapping = pathnames[canonicalPath]
@@ -78,7 +78,7 @@ export function toLocaleUrlSuffix(localizedPath: string): string {
  */
 export function buildAlternateLanguages(
   canonicalPath: string,
-  slugTranslations?: Record<Locale, string>
+  slugTranslations?: PartialLocalizedString
 ): Record<string, string> {
   // We need to include real site url
   const siteUrl = getRequiredEnv('NEXT_PUBLIC_SITE_URL')

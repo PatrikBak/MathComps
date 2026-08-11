@@ -85,7 +85,11 @@ describe('resolveHandoutProblemRef', () => {
       handoutTitle: 'Means',
       environmentType: 'problem',
       environmentNumber: 4,
-      link: { handoutSlug: 'means', anchorId: 'env-three-numbers-mean' },
+      link: {
+        handoutSlug: 'means',
+        anchorId: 'env-three-numbers-mean',
+        href: '/handouts/means#env-three-numbers-mean',
+      },
     })
   })
 
@@ -117,7 +121,11 @@ describe('resolveHandoutProblemRef', () => {
       handoutTitle: 'Priemery',
       environmentType: 'problem',
       environmentNumber: 4,
-      link: { handoutSlug: 'priemery', anchorId: 'env-priemer-troch-cisel' },
+      link: {
+        handoutSlug: 'priemery',
+        anchorId: 'env-priemer-troch-cisel',
+        href: '/materialy/priemery#env-priemer-troch-cisel',
+      },
     })
   })
 
@@ -129,7 +137,11 @@ describe('resolveHandoutProblemRef', () => {
     )
 
     // Czech has a page, so there is a link to make
-    expect(ref?.link).toEqual({ handoutSlug: 'dukazy', anchorId: 'env-prvni-dukaz' })
+    expect(ref?.link).toEqual({
+      handoutSlug: 'dukazy',
+      anchorId: 'env-prvni-dukaz',
+      href: '/materialy/dukazy#env-prvni-dukaz',
+    })
   })
 
   it('returns null when the handout is unknown', () => {

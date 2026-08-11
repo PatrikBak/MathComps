@@ -1,7 +1,8 @@
 import envIndexData from '@/content/handout-env-index.json'
 import handoutIndex from '@/content/handouts.json'
 import type { Locale, PartialLocalizedString } from '@/i18n/i18n'
-import { SUPPORTED_LOCALES } from '@/i18n/i18n'
+import { ROUTES, SUPPORTED_LOCALES } from '@/i18n/i18n'
+import { resolveLocalizedPath } from '@/i18n/localized-paths'
 
 import type { HandoutEnvironmentType } from './handout-content-types'
 import type {
@@ -42,11 +43,45 @@ export function findHandoutByContentId(handoutContentId: string): HandoutMetadat
 /**
  * Where to send a reader to reach one handout problem in a given language.
  */
-type HandoutProblemLink = {
+export type HandoutProblemLink = {
   /** The handout's URL slug in that language. */
   handoutSlug: string
   /** The DOM anchor id of the problem within its handout page. */
   anchorId: string
+  /** The path to it in that language, before the language prefix. */
+  href: string
+}
+
+/**
+ * Works out where a link should send a reader to reach one handout problem.
+ *
+ * Each language spells the handout route its own way, so the path is taken from the route: one written out by
+ * hand lands on the English spelling, which is served only through a redirect.
+ *
+ * @param handoutSlug - The handout's URL slug in the language it is read in.
+ * @param environmentSlug - What that language calls the environment.
+ * @param locale - The language it is read in.
+ *
+ * @returns Where the problem is read, or null when the route can't be spelt out in that language.
+ */
+function resolveProblemLink(
+  handoutSlug: string,
+  environmentSlug: string,
+  locale: Locale
+): HandoutProblemLink | null {
+  // The handout's own page, as this language spells it
+  const path = resolveLocalizedPath(ROUTES.HANDOUT_DETAIL, locale, { [locale]: handoutSlug })
+
+  // A route left with its slug unfilled points at no page at all
+  if (path === undefined) {
+    return null
+  }
+
+  // Where on that page the problem sits
+  const anchorId = buildEnvironmentAnchorId(environmentSlug)
+
+  // The page, and the problem on it
+  return { handoutSlug, anchorId, href: `${path}#${anchorId}` }
 }
 
 /**
@@ -120,7 +155,7 @@ export function resolveHandoutProblemRef(
     environmentNumber: placement.number,
     link:
       handoutSlug !== undefined && environmentSlug !== undefined
-        ? { handoutSlug, anchorId: buildEnvironmentAnchorId(environmentSlug) }
+        ? resolveProblemLink(handoutSlug, environmentSlug, locale)
         : null,
   }
 }
