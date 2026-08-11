@@ -18,6 +18,7 @@
     "news:validate": "tsx scripts/validate-news.ts",
     "handouts:validate": "tsx scripts/validate-handouts.ts",
     "handouts:index": "tsx scripts/generate-handout-env-index.ts",
+    "handouts:defense-content": "tsx scripts/generate-handout-defense-content.ts",
     "guide:validate": "tsx scripts/validate-guide.ts",
     "draft:preflight": "tsx scripts/preflight-draft.ts",
     "check": "npm run type-check && npm run lint && npm run format:check && npm run knip && npm run i18n:validate && npm run news:validate && npm run handouts:validate && npm run guide:validate",

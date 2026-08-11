@@ -58,9 +58,9 @@ jobs:
       - name: Regenerate handout JSONs
         working-directory: backend/src/MathComps.Cli.Handouts
         # --skip-asy/compile/upload: Hard to ensure in CI, the author better run the CLI manually 😬
-        # --skip-index: its generator needs web/ deps this job never installs; the frontend job's
+        # --skip-derived: both generators need web/ deps this job never installs; the frontend job's
         # handouts:validate check verifies the committed index's freshness independently.
-        run: dotnet run --configuration Release --no-build -- --skip-compile --skip-upload --skip-asy --skip-index '*.sk.tex' '*.en.tex' '*.cs.tex'
+        run: dotnet run --configuration Release --no-build -- --skip-compile --skip-upload --skip-asy --skip-derived '*.sk.tex' '*.en.tex' '*.cs.tex'
 
       - name: Verify handout skeletons and JSONs unchanged (run Handouts CLI locally if this fails)
         run: |

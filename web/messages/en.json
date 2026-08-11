@@ -178,6 +178,7 @@
     "CannotLikeOwnComment": "You can't like your own comment.",
     "CommentNotFound": "This comment no longer exists.",
     "CommentTargetNotFound": "The item this comment belongs to no longer exists.",
+    "DefenseEnvironmentNotFound": "This statement is no longer available.",
     "DefenseFeedbackCommentTooLong": "Your comment is too long.",
     "DefenseFeedbackValue": "That feedback doesn't say anything.",
     "DefenseMessageEmpty": "Your message is empty.",

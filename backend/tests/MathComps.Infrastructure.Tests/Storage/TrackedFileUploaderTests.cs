@@ -8,8 +8,8 @@ namespace MathComps.Infrastructure.Tests.Storage;
 /// <summary>
 /// Unit tests for <see cref="TrackedFileUploader"/>: the change detection that skips files unchanged since their
 /// last upload, the in-run dedup, and the ledger persistence (on dispose) that lets a later run skip files already
-/// on remote storage. The inner uploader is faked and real temp files supply real mtimes, so no network or database
-/// is involved.
+/// on remote storage. The inner uploader is faked and real temp files supply real bytes to hash, so no network or
+/// database is involved.
 /// </summary>
 public sealed class TrackedFileUploaderTests : IDisposable
 {
@@ -57,13 +57,13 @@ public sealed class TrackedFileUploaderTests : IDisposable
 
         // Disposing persists the key for the next run to compare against.
         tracker.Dispose();
-        var ledger = File.ReadAllText(_ledgerPath).FromJson<Dictionary<string, DateTime>>();
+        var ledger = File.ReadAllText(_ledgerPath).FromJson<Dictionary<string, string>>();
         Assert.True(ledger.ContainsKey("problems/fig"));
     }
 
     /// <summary>
-    /// A later run skips a file whose bytes are already on remote storage — its mtime hasn't advanced past the
-    /// recorded one — and the inner uploader sees no second call.
+    /// A later run skips a file whose bytes are already on remote storage — it hashes to the recorded value — and
+    /// the inner uploader sees no second call.
     /// </summary>
     [Fact]
     public async Task A_reloaded_unchanged_file_is_skipped()
@@ -83,10 +83,10 @@ public sealed class TrackedFileUploaderTests : IDisposable
     }
 
     /// <summary>
-    /// A file whose mtime has advanced past the recorded one is re-uploaded — its bytes may have changed.
+    /// A file whose bytes have changed is re-uploaded, however its timestamps read.
     /// </summary>
     [Fact]
-    public async Task A_file_with_a_newer_mtime_is_re_uploaded()
+    public async Task A_file_with_changed_bytes_is_re_uploaded()
     {
         // Push a file and persist the ledger by disposing.
         var source = WriteSource("fig.svg", "<svg/>");
@@ -95,14 +95,65 @@ public sealed class TrackedFileUploaderTests : IDisposable
         await firstRun.UploadIfChangedAsync(source, "problems/fig");
         firstRun.Dispose();
 
-        // Bump the file's mtime an hour into the future, as a rewrite would.
-        File.SetLastWriteTimeUtc(source, File.GetLastWriteTimeUtc(source).AddHours(1));
+        // Edit the file, then wind its mtime back before the recorded push — the bytes alone must decide.
+        var pushedAt = File.GetLastWriteTimeUtc(source);
+        WriteSource("fig.svg", "<svg><circle/></svg>");
+        File.SetLastWriteTimeUtc(source, pushedAt.AddHours(-1));
 
-        // A second run sees the fresher file and pushes it again — the inner uploader saw the second call.
+        // A second run sees different bytes and pushes them — the inner uploader saw the second call.
         var secondRun = Tracker(inner);
         var uploaded = await secondRun.UploadIfChangedAsync(source, "problems/fig");
         Assert.True(uploaded);
         Assert.Equal(2, inner.Uploads.Count);
+    }
+
+    /// <summary>
+    /// A file rewritten with the same bytes is skipped, which is what lets a regenerated artefact — rewritten on
+    /// every build — take part in the ledger at all.
+    /// </summary>
+    [Fact]
+    public async Task A_file_rewritten_with_identical_bytes_is_skipped()
+    {
+        // Push a file and persist the ledger by disposing.
+        var source = WriteSource("defense.json", "{}");
+        var inner = new RecordingFileUploader();
+        var firstRun = Tracker(inner);
+        await firstRun.UploadIfChangedAsync(source, "handouts/defense/x.sk.json");
+        firstRun.Dispose();
+
+        // Rewrite it with the same content and a fresher mtime, as a generator re-run would.
+        WriteSource("defense.json", "{}");
+        File.SetLastWriteTimeUtc(source, File.GetLastWriteTimeUtc(source).AddHours(1));
+
+        // A second run recognises the bytes and skips — nothing new left the process.
+        var secondRun = Tracker(inner);
+        var uploaded = await secondRun.UploadIfChangedAsync(source, "handouts/defense/x.sk.json");
+        Assert.False(uploaded);
+        Assert.Single(inner.Uploads);
+    }
+
+    /// <summary>
+    /// A ledger left behind in an older format is treated as empty rather than failing the run: everything is pushed
+    /// once and the current format is written back.
+    /// </summary>
+    [Fact]
+    public async Task A_ledger_in_an_older_format_is_ignored()
+    {
+        // A ledger holding the timestamps an earlier version recorded.
+        File.WriteAllText(
+            _ledgerPath, /*lang=json,strict*/ """{"problems/fig":"2026-01-01T00:00:00Z"}""");
+
+        // A run over that ledger pushes the key anyway, since it can make no sense of what was recorded.
+        var source = WriteSource("fig.svg", "<svg/>");
+        var inner = new RecordingFileUploader();
+        var tracker = Tracker(inner);
+        var uploaded = await tracker.UploadIfChangedAsync(source, "problems/fig");
+        Assert.True(uploaded);
+
+        // The persisted ledger now holds the hash, so the next run can skip.
+        tracker.Dispose();
+        var ledger = File.ReadAllText(_ledgerPath).FromJson<Dictionary<string, string>>();
+        Assert.Equal(64, ledger["problems/fig"].Length);
     }
 
     /// <summary>
@@ -111,15 +162,12 @@ public sealed class TrackedFileUploaderTests : IDisposable
     [Fact]
     public async Task The_same_key_twice_in_one_run_uploads_once()
     {
-        // Two sources both targeting the same key, within one run.
+        // Two sources both targeting the same key, within one run. Their contents differ, so the hash check alone
+        // would push the second — the only thing that can skip it is the in-run dedup we're actually testing.
         var first = WriteSource("a.svg", "<svg/>");
-        var second = WriteSource("b.svg", "<svg/>");
+        var second = WriteSource("b.svg", "<svg><rect/></svg>");
         var inner = new RecordingFileUploader();
         var tracker = Tracker(inner);
-
-        // Make the second source unambiguously newer than the first, so the mtime check alone would re-upload it —
-        // the only thing that can skip it is the in-run dedup we're actually testing.
-        File.SetLastWriteTimeUtc(second, File.GetLastWriteTimeUtc(first).AddHours(1));
 
         // The first push goes out; the second to the same key is skipped, so only the first reached the inner.
         var firstUploaded = await tracker.UploadIfChangedAsync(first, "problems/shared");

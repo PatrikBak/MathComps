@@ -75,10 +75,10 @@ public static class DefenseEndpoints
             // Resolve the calling user
             var userId = await userManager.RequireUserIdAsync(context);
 
-            // Map the request onto the service's own input shape
+            // Map the request onto the service's own input shape, adding the language the handout is being read
+            // in — the request never names it, since it is the one the whole call is already localized to
             var start = new DefenseSessionStart(
-                request.Target, request.Statement, request.Reference, request.Opener, request.Content,
-                request.Hints);
+                request.Target, request.Content, EndpointHelpers.GetRequestLanguage());
 
             // Run the opening turn
             var session = await defenseService.StartAsync(userId, start, context.RequestAborted);

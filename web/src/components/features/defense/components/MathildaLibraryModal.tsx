@@ -263,18 +263,10 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
     refresh()
   }
 
-  // The problem to hand the conversation when a defense is open: only its target and the statement snapshotted
-  // onto the session. The reference solution stays with the problem, which is why the conversation may only
-  // continue this session and never open a fresh one.
+  // The problem to hand the conversation when a defense is open: its target and the statement snapshotted onto
+  // the session, which is what the chat shows alongside the transcript.
   const conversationProblem: DefenseProblem | null =
-    selected === null
-      ? null
-      : {
-          target: selected.target,
-          statement: selected.statement,
-          reference: '',
-          hints: [],
-        }
+    selected === null ? null : { target: selected.target, statement: selected.statement }
 
   return (
     <>

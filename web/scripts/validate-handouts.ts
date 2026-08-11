@@ -8,6 +8,7 @@
  * - Every environment carries a name in each of its handout's languages, shaped for a URL and unique
  *   within that language variant
  * - The generated `handout-env-index.json` matches what the content files actually say
+ * - The AI examiner's defense-content blobs build from that content, each under the name the API resolves to
  *
  * Run with: tsx scripts/validate-handouts.ts
  */
@@ -16,6 +17,7 @@ import fs from 'fs'
 import path from 'path'
 
 import { HANDOUT_ENVIRONMENT_TYPES } from '../src/components/features/handouts/handout-content-types'
+import type { DefenseContent } from '../src/components/features/handouts/handout-defense-content'
 import {
   getContentFileBasename,
   HANDOUT_DIFFICULTY_LEVELS,
@@ -32,6 +34,7 @@ import {
   validateRequiredField,
   validateUniqueness,
 } from '../src/lib/content-validation'
+import { collectAllDefenseContentBlobs } from './handout-defense-content'
 import {
   collectAllHandoutEnvironments,
   ENV_INDEX_PATH,
@@ -338,6 +341,105 @@ function readTopLevelEnvironments(document: ContentDocument): ContentEnvironment
   )
 }
 
+/** The shape a defense-content blob's name must have for the API to resolve a target to it. */
+const DEFENSE_BLOB_NAME_PATTERN = /^[^.]+\.(sk|cs|en)\.json$/
+
+/**
+ * The most a statement may run to before it stops being a problem and starts being a document. An environment
+ * over the bound is a handout to edit, which is why the bound sits with the content it governs.
+ */
+const MAX_DEFENSE_STATEMENT_CHARS = 8000
+
+/** The same bound for the reference solution, hints included, since the examiner is handed them together. */
+const MAX_DEFENSE_REFERENCE_CHARS = 20000
+
+/** One environment's defense content, with the blob it was collected from. */
+type CollectedDefenseEnvironment = {
+  /** The blob's file name. */
+  blob: string
+  /** The environment's permanent id. */
+  id: string
+  /** What the examiner would be told about it. */
+  content: DefenseContent
+}
+
+/**
+ * Flags one piece of an environment's defense content for running past its bound.
+ *
+ * @param length - The text's length in characters.
+ * @param maxLength - The most characters allowed.
+ * @param part - Which piece of the environment this is.
+ * @param environment - The environment it belongs to.
+ *
+ * @yields An error when the text is over the bound.
+ */
+function* checkDefenseTextLength(
+  length: number,
+  maxLength: number,
+  part: string,
+  environment: CollectedDefenseEnvironment
+): Generator<string> {
+  // Report the actual length against the bound, so the edit needed is obvious
+  if (length > maxLength) {
+    yield `❌ The ${part} of environment "${environment.id}" in ${environment.blob} runs to ${length} characters, over the ${maxLength} the examiner is given`
+  }
+}
+
+/**
+ * Checks that the defense-content blobs can be built from the current content, that each lands under the name
+ * the API resolves a target to, and that no environment carries more text than the examiner should be handed.
+ * The blobs aren't committed, so this collection pass is what stands in for the diff check the environment
+ * index gets.
+ *
+ * @returns Every error found; empty when the blobs build cleanly.
+ */
+function validateDefenseContent(): string[] {
+  try {
+    // Building them is most of the check: a content shape the generator can't read throws here
+    const blobs = collectAllDefenseContentBlobs()
+
+    // The API derives this name from a defense target alone, so a blob published under any other name is a
+    // problem it can never resolve. Kept in step with HandoutStorage.DefenseContentKey.
+    const misnamed = blobs
+      .filter((blob) => !DEFENSE_BLOB_NAME_PATTERN.test(blob.fileName))
+      .map(
+        (blob) =>
+          `❌ Defense content blob "${blob.fileName}" is not named <handout content id>.<locale>.json, so the API cannot resolve it`
+      )
+
+    // Every environment across every blob, paired with where it came from so an error can name it
+    const environments = blobs.flatMap((blob) =>
+      Object.entries(blob.content).map(([id, content]) => ({ blob: blob.fileName, id, content }))
+    )
+
+    // An environment past either bound, which the examiner would be sent verbatim on every turn
+    const oversized = environments.flatMap((environment) => [
+      ...checkDefenseTextLength(
+        environment.content.statement.length,
+        MAX_DEFENSE_STATEMENT_CHARS,
+        'statement',
+        environment
+      ),
+      // Hints reach the examiner folded into the reference, so they are bounded together
+      ...checkDefenseTextLength(
+        environment.content.reference.length +
+          environment.content.hints.reduce((total, hint) => total + hint.length, 0),
+        MAX_DEFENSE_REFERENCE_CHARS,
+        'reference and hints',
+        environment
+      ),
+    ])
+
+    // Both kinds of problem, each naming the environment to go and edit
+    return [...misnamed, ...oversized]
+  } catch (error: unknown) {
+    // A generator that threw says nothing about which handout did it, so pass its own message through
+    return [
+      `❌ Defense content could not be built: ${error instanceof Error ? error.message : String(error)}`,
+    ]
+  }
+}
+
 /**
  * Validates the handout content, collecting every error.
  *
@@ -556,6 +658,13 @@ function validate(): string[] {
         '❌ handout-env-index.json is stale — run `npm run handouts:index` and commit the result'
       )
     }
+  }
+
+  // The examiner's blobs are build output rather than a committed artifact, so nothing else here would notice
+  // content their generator chokes on until a handout build ran. Collecting them costs a pass over the same
+  // files and is the only check standing between broken content and a defense that 404s in production.
+  if (errors.length === 0) {
+    errors.push(...validateDefenseContent())
   }
 
   // Hand back every collected error

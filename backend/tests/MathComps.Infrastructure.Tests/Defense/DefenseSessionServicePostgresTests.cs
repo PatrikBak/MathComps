@@ -3,7 +3,9 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
+using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Services.Defense;
+using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Dtos;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
@@ -101,6 +103,12 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// </summary>
     private CancellationTokenSource? _abort;
 
+    /// <summary>
+    /// The handout content every start resolves against. Read by <see cref="ConfigureServices"/>, so a test
+    /// swapping it must do so before the service is built.
+    /// </summary>
+    private readonly FakeDefenseContentResolver _content = new();
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
@@ -111,9 +119,6 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         services.Configure<DefenseLimits>(limits =>
         {
             limits.MaxCandidateChars = 100;
-            limits.MaxStatementChars = 1000;
-            limits.MaxReferenceChars = 1000;
-            limits.MaxOpenerChars = 1000;
             limits.MaxHandoutContentIdChars = 30;
             limits.MaxEnvironmentIdChars = 200;
             limits.MaxTurnsPerSession = 2;
@@ -135,6 +140,12 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Builds the session snapshot from the config above; this test bypasses AddExaminer, so it's registered
         // directly.
         services.AddSingleton<IExaminerConfigSnapshotProvider, ExaminerConfigSnapshotProvider>();
+
+        // Stands in for the published handout content the examiner is served from.
+        services.AddSingleton<IDefenseContentResolver>(_ => _content);
+
+        // The examiner's own lines, read from the real resource so a missing translation shows up here.
+        services.AddSingleton<IDefenseCopy, DefenseCopy>();
 
         // Serializes a user's concurrent turns.
         services.AddSingleton<IDefenseUserTurnGate, DefenseUserTurnGate>();
@@ -180,8 +191,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             [TranscriptRole.Examiner, TranscriptRole.Candidate, TranscriptRole.Examiner],
             session.Turns.Select(turn => turn.Role));
 
-        // Each turn holds the text it was seeded with, and the examiner had something to say
-        Assert.Equal("the opener", session.Turns[0].Content);
+        // The opener is the examiner's own line rather than anything the caller sent, the student turn is what
+        // they wrote, and the examiner had something to say
+        Assert.StartsWith("Hi, I'm Mathilda", session.Turns[0].Content, StringComparison.Ordinal);
         Assert.Equal("my defense", session.Turns[1].Content);
         Assert.NotEmpty(session.Turns[2].Content);
 
@@ -427,7 +439,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // It carries its target, snapshotted statement, and the student's first message
         Assert.Equal(new HandoutEnvironmentTarget("handout-1", "prob-1"), continued.Target);
-        Assert.Equal("the statement", continued.Statement);
+        Assert.Equal(FakeDefenseContentResolver.Statement, continued.Statement);
         Assert.Equal("first", continued.FirstStudentMessage);
 
         // And its stamp came from that appended turn, later than every other session's
@@ -709,7 +721,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     public Task Missing_target_is_refused() => RunTestAsync(async service =>
     {
         // A start whose target never made it through the wire
-        var start = new DefenseSessionStart(null!, "the statement", "the reference", "the opener", "my defense");
+        var start = new DefenseSessionStart(null!, "my defense", Language.EN);
 
         // Starting with it is refused the same way a blank field is
         await Assert.ThrowsAsync<DefenseMessageEmptyException>(
@@ -717,6 +729,25 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Nothing was written
         Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+    });
+
+    /// <summary>
+    /// A start naming an environment the site has no content for is refused, and costs nothing: the lookup happens
+    /// before the examiner runs, so a caller can't spend the model's budget on a problem that doesn't exist.
+    /// </summary>
+    [Fact]
+    public Task Unknown_problem_is_refused() => RunTestAsync(async service =>
+    {
+        // An environment the published content doesn't carry
+        _content.UnknownEnvironmentIds.Add("prob-gone");
+
+        // Starting against it is refused
+        await Assert.ThrowsAsync<DefenseEnvironmentNotFoundException>(
+            () => service.StartAsync(_ownerId, Request("prob-gone", "my defense")));
+
+        // No session, and no spend either
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSpends.CountAsync()));
     });
 
     /// <summary>
@@ -1076,9 +1107,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     }
 
     /// <summary>
-    /// Builds a session start for an environment and student message, with throwaway statement, reference, and
-    /// opener. Every call shares one throwaway handout unless <paramref name="handoutContentId"/> is overridden, so
-    /// <paramref name="environmentId"/> alone is enough to tell targets apart across most of these tests.
+    /// Builds a session start for an environment and student message. Every call shares one throwaway handout
+    /// unless <paramref name="handoutContentId"/> is overridden, so <paramref name="environmentId"/> alone is
+    /// enough to tell targets apart across most of these tests.
     /// </summary>
     /// <param name="environmentId">The environment's id within its handout.</param>
     /// <param name="content">The student's first message.</param>
@@ -1086,9 +1117,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// <returns>The session start.</returns>
     private static DefenseSessionStart Request(
         string environmentId, string content, string handoutContentId = "handout-1") =>
-        new(
-            new HandoutEnvironmentTarget(handoutContentId, environmentId),
-            "the statement", "the reference", "the opener", content);
+        new(new HandoutEnvironmentTarget(handoutContentId, environmentId), content, Language.EN);
 
     /// <summary>
     /// Builds a report against one of a conversation's replies, as the feedback service would write it.
@@ -1127,6 +1156,41 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         CreatedAt = DateTimeOffset.UtcNow,
         UpdatedAt = DateTimeOffset.UtcNow,
     };
+
+    /// <summary>
+    /// A test double for <see cref="IDefenseContentResolver"/> standing in for the site's published handout
+    /// content: every environment resolves to the same fixed problem, except the ones a test withholds.
+    /// </summary>
+    private sealed class FakeDefenseContentResolver : IDefenseContentResolver
+    {
+        /// <summary>
+        /// The statement every resolved problem carries.
+        /// </summary>
+        public const string Statement = "the statement";
+
+        /// <summary>
+        /// The reference every resolved problem carries.
+        /// </summary>
+        private const string Reference = "the reference";
+
+        /// <summary>
+        /// Environment ids that resolve to nothing, standing in for a target the site has no content for.
+        /// </summary>
+        public HashSet<string> UnknownEnvironmentIds { get; } = new(StringComparer.Ordinal);
+
+        /// <inheritdoc/>
+        public Task<DefenseProblemContent?> ResolveAsync(
+            HandoutEnvironmentTarget target, Language language, CancellationToken cancellationToken)
+        {
+            // A withheld environment resolves to nothing, as an unpublished or deleted one would
+            if (UnknownEnvironmentIds.Contains(target.EnvironmentId))
+                return Task.FromResult<DefenseProblemContent?>(null);
+
+            // Otherwise the same fixed problem, whichever environment was asked for
+            return Task.FromResult<DefenseProblemContent?>(
+                new DefenseProblemContent(Statement, Reference, []));
+        }
+    }
 
     /// <summary>
     /// An examiner whose turn keeps leaking until the revision cap runs out and the constrained fallback ships, so a

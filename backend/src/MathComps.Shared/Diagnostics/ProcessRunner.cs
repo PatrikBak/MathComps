@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 
 namespace MathComps.Shared.Diagnostics;
@@ -31,8 +32,14 @@ public static class ProcessRunner
     /// <param name="fileName">The executable name (resolved against PATH) or absolute path.</param>
     /// <param name="arguments">Arguments passed to the child, one argv entry per element.</param>
     /// <param name="workingDirectory">The working directory the child inherits.</param>
+    /// <param name="environment">Variables set on the child on top of the ones it inherits, for a tool steered by
+    /// its environment.</param>
     /// <returns>A task producing the exit code plus everything the process wrote to stdout and stderr.</returns>
-    public static async Task<Result> RunAsync(string fileName, IReadOnlyList<string> arguments, string workingDirectory)
+    public static async Task<Result> RunAsync(
+        string fileName,
+        IReadOnlyList<string> arguments,
+        string workingDirectory,
+        IReadOnlyDictionary<string, string>? environment = null)
     {
         // Configure the spawn: redirect both streams so we can capture them, no console window, no shell.
         var processInfo = new ProcessStartInfo
@@ -48,6 +55,10 @@ public static class ProcessRunner
         // ArgumentList lets the runtime quote each argv entry correctly for the platform
         foreach (var argument in arguments)
             processInfo.ArgumentList.Add(argument);
+
+        // Layer the caller's variables over the inherited ones, which ProcessStartInfo has pre-populated
+        foreach (var (name, value) in environment ?? ImmutableDictionary<string, string>.Empty)
+            processInfo.Environment[name] = value;
 
         // Start the child; a null return here is unusual but documented for Process.Start
         using var process = Process.Start(processInfo)

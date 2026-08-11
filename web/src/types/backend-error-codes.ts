@@ -14,6 +14,7 @@ export const BACKEND_ERROR_CODES = [
   'FavoritesRequireAuthentication',
   'MarkStatusRequiresAuthentication',
   'DefenseSessionNotFound',
+  'DefenseEnvironmentNotFound',
   'DefenseMessageTooLong',
   'DefenseMessageEmpty',
   'DefenseTurnLimit',

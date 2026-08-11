@@ -12,6 +12,11 @@ public static class ResourcePaths
     public const string ApprovedTags = "Resources/approved-tags.json";
 
     /// <summary>
+    /// Path to the defense-copy.json file holding the AI examiner's own localized lines.
+    /// </summary>
+    public const string DefenseCopy = "Resources/defense-copy.json";
+
+    /// <summary>
     /// The metadata.shared.json file name — the language-neutral taxonomy structure (competitions, their
     /// categories and rounds, and the sort order of all three).
     /// </summary>

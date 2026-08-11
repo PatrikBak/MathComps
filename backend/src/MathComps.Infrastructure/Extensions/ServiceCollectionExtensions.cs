@@ -9,6 +9,7 @@ using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Clerk;
 using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Defense;
+using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Problems;
@@ -237,8 +238,8 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the R2 object-storage uploader and its settings. Settings are validated lazily so config is only
-    /// required when an upload actually runs.
+    /// Registers the R2 object-storage uploader and reader with their shared settings. Settings are validated
+    /// lazily so config is only required when storage is actually reached for.
     /// </summary>
     /// <param name="services">The service collection to add the uploader to.</param>
     /// <returns>The service collection for chaining.</returns>
@@ -251,6 +252,9 @@ public static class ServiceCollectionExtensions
 
         // R2 uploader backing image uploads
         services.TryAddSingleton<IFileUploader, R2Uploader>();
+
+        // R2 reader backing the content the API serves itself from
+        services.TryAddSingleton<IObjectReader, R2ObjectReader>();
 
         // Builder pattern
         return services;
@@ -375,12 +379,14 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers the defense feature: the examiner engine, the input/turn/spend caps, the per-user turn gate, the
-    /// service that runs and persists defense conversations, and the service that records the students' feedback
-    /// on them. Assumes the chat stack is registered (see <see cref="AddLlmChat"/>).
+    /// lookup of what the examiner is told about a problem, her own localized lines, the service that runs and
+    /// persists defense conversations, and the service that records the students' feedback on them. Assumes the
+    /// chat stack is registered (see <see cref="AddLlmChat"/>) and, since the problem content is read back out of
+    /// object storage, that <see cref="AddStorage"/> has run.
     /// </summary>
     /// <param name="services">The service collection to add the defense feature to.</param>
-    /// <param name="configuration">The application configuration carrying the <c>Examiner</c> and
-    /// <c>DefenseLimits</c> sections.</param>
+    /// <param name="configuration">The application configuration carrying the <c>Examiner</c>,
+    /// <c>DefenseLimits</c> and <c>DefenseContent</c> sections.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddDefenseServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -392,6 +398,21 @@ public static class ServiceCollectionExtensions
             .Bind(configuration.GetSection(DefenseLimits.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        // How long the published handout content is trusted between revalidations.
+        services.AddOptions<DefenseContentOptions>()
+            .Bind(configuration.GetSection(DefenseContentOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // The app's in-memory cache, pulled in here because the resolver below caches its reads in one.
+        services.AddMemoryCache();
+
+        // Resolves a problem from the handout environment it lives in.
+        services.TryAddSingleton<IDefenseContentResolver, StoredDefenseContentResolver>();
+
+        // The examiner's own lines, read from disk once; a singleton for the same reason.
+        services.TryAddSingleton<IDefenseCopy, DefenseCopy>();
 
         // Serializes a user's concurrent turns; shared process-wide, so a singleton.
         services.TryAddSingleton<IDefenseUserTurnGate, DefenseUserTurnGate>();

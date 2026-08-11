@@ -1,6 +1,6 @@
 # Handouts CLI
 
-A .NET tool that orchestrates the full handout build pipeline: generates skeleton worksheets, compiles TeX to PDF, parses structured JSON for the frontend, and uploads PDFs and images to Cloudflare R2.
+A .NET tool that orchestrates the full handout build pipeline: generates skeleton worksheets, compiles TeX to PDF, parses structured JSON for the frontend, and uploads PDFs, images and the AI examiner's problem content to Cloudflare R2.
 
 ## Pipeline
 
@@ -10,24 +10,19 @@ For each matched `.tex` file, the tool runs these steps in order:
 2. **Generate skeleton** — strips solutions/proofs/hints, produces a `-skeleton.tex` worksheet
 3. **Compile TeX** — runs the configured compiler (2 passes) on both main + skeleton files
 4. **Parse to JSON** — converts the TeX document structure into `RawContentBlock[]` JSON (saved locally to `web/src/content/handouts/`)
-5. **Upload images** — pushes SVGs to R2 under `handouts/<slug>/<image>.svg`, where `<slug>` is the language-stripped handout id (so all language variants share one image set). Only SVGs whose on-disk mtime differs from the value recorded in `data/handouts/.r2-uploads.json` are pushed — unchanged figures are skipped.
+5. **Upload images** — pushes SVGs to R2 under `handouts/<slug>/<image>.svg`, where `<slug>` is the language-stripped handout id (so all language variants share one image set). Only SVGs whose bytes differ from what `data/handouts/.r2-uploads.json` records are pushed — unchanged figures are skipped.
 6. **Upload PDFs** — uploads compiled main + skeleton PDFs to R2 under `handouts/pdfs/<file>.pdf` (flat layout; every handout's PDFs share one folder)
 
-Once every matched file is processed, the tool regenerates `web/src/content/handout-env-index.json` once for the whole run (see [Validation](#validation) below), unless run with `--skip-index`.
+Once every matched file is processed, the tool regenerates the two artefacts derived from the whole site's content, unless run with `--skip-derived`:
+
+- `web/src/content/handout-env-index.json`, the committed environment index (see [Validation](#validation) below).
+- The defense-content blobs under `data/handouts/defense/` (gitignored), one per handout per language, holding each defendable environment's statement, reference solution and hints as markdown. They are uploaded to R2 under `handouts/defense/<handout content id>.<locale>.json`, and the API reads a problem from them when a student opens a defense, which is what lets it look the problem up from the environment being defended instead of taking a caller's word for the text.
 
 ## Prerequisites
 
 ### R2 Credentials
 
-The tool uploads assets to Cloudflare R2. Configure credentials via user secrets (only needed when uploading — use `--skip-upload` to skip):
-
-```bash
-cd backend/src/MathComps.Cli.Handouts
-dotnet user-secrets set "CloudflareR2:AccountId" "<your-account-id>"
-dotnet user-secrets set "CloudflareR2:BucketName" "<your-bucket-name>"
-dotnet user-secrets set "CloudflareR2:AccessKeyId" "<your-access-key>"
-dotnet user-secrets set "CloudflareR2:SecretAccessKey" "<your-secret-key>"
-```
+The tool uploads assets to Cloudflare R2, so it needs the `CloudflareR2` settings (see the [main backend README](../../README.md#6-configure-cloudflare-r2)). They live in the solution-wide user-secrets store, so setting them for any one project covers this one too. Only needed when uploading — use `--skip-upload` to skip.
 
 ## How to Run
 
@@ -92,10 +87,10 @@ dotnet run -- --compiler pdfcsplain *.sk.tex
 | `<patterns>`     | required                                             | File pattern(s) to match (e.g. `*.sk.tex`)                                                        |
 | `--compiler`     | `pdfcsplain -interaction=nonstopmode -halt-on-error` | TeX compiler command (full string, including flags)                                               |
 | `--skip-compile` | `false`                                              | Skip TeX compilation, only parse and upload existing PDFs                                         |
-| `--skip-upload`  | `false`                                              | Skip uploading PDFs and images to R2                                                              |
+| `--skip-upload`  | `false`                                              | Skip uploading PDFs, images and defense content to R2                                             |
 | `--skip-asy`     | `false`                                              | Skip the Asymptote staleness check + recompilation entirely                                       |
 | `--force-asy`    | `false`                                              | Recompile every `.asy`-backed figure regardless of staleness (used after a semantic `_common.asy` edit) |
-| `--skip-index`   | `false`                                              | Skip regenerating `handout-env-index.json` (used in CI, which never installs `web/`'s dependencies) |
+| `--skip-derived` | `false`                                              | Skip regenerating `handout-env-index.json` and the defense content (used in CI, which never installs `web/`'s dependencies) |
 | `--error-log`    | `errors.log`                                         | Path to the error log appended to on compiler failure                                             |
 
 ## Image pipeline (Asymptote)
@@ -114,19 +109,21 @@ Stale figures are batched into a single invocation of `Images/export-asy.sh` per
 
 ### Upload ledger
 
-R2 uploads are gated by `data/handouts/.r2-uploads.json` (gitignored). It maps each R2 key to the SVG mtime that was last successfully pushed under that key. On every run:
+R2 uploads are gated by `data/handouts/.r2-uploads.json` (gitignored). It maps each R2 key to the SHA-256 of the bytes last successfully pushed under that key. On every run:
 
-- An image is pushed only when its current on-disk mtime is newer than the recorded value (or no entry exists).
+- A file is pushed only when its current bytes hash differently from the recorded value (or no entry exists).
 - After each successful upload the ledger is updated and persisted at the end of the run.
 
-This works the same regardless of how the SVG came to be on disk — pipeline-recompiled, `--force-asy`'d, hand-rendered with `asy`, or generated by another tool. Wiping the ledger forces a fresh upload of everything.
+Hashing rather than timestamping is what lets the regenerated defense-content blobs take part: a generator rewrites its output every run, so any mtime comparison would push the whole set every time. It also keeps a fresh checkout, whose files all carry a current mtime, from re-pushing everything. This works the same regardless of how a file came to be on disk — pipeline-recompiled, `--force-asy`'d, hand-rendered with `asy`, or generated by another tool. Wiping the ledger forces a fresh upload of everything.
 
 ## Deployment Workflow
 
 After running the CLI:
 
 1. **JSONs** are saved to `web/src/content/handouts/` — commit and push to trigger a frontend redeploy
-2. **PDFs and images** are uploaded directly to R2 — available immediately, no backend deploy needed
+2. **PDFs, images and defense content** are uploaded directly to R2 — available immediately, no backend deploy needed
+
+Note the ordering that follows from those two tracks: the examiner reads its problem text from R2 and so sees an edit as soon as the build finishes, while the page the student reads only changes once the JSONs are pushed and the frontend redeploys.
 
 ```bash
 # 1. Build handouts (generates JSONs locally + uploads PDFs/images to R2)
@@ -163,4 +160,4 @@ The frontend includes a validation script to ensure all ready handouts have cont
 cd web && npm run handouts:validate
 ```
 
-It also checks that the generated `web/src/content/handout-env-index.json` — the `envId → {type, number}` lookup the site's defense library uses to label a saved conversation — is up to date. A local build regenerates it automatically; CI runs the build with `--skip-index` (its generator needs `web/`'s dependencies, which the backend CI job never installs) and relies on this check to catch drift instead.
+It also checks that the generated `web/src/content/handout-env-index.json` — the `envId → {type, number}` lookup the site's defense library uses to label a saved conversation — is up to date. A local build regenerates it automatically; CI runs the build with `--skip-derived` (both generators need `web/`'s dependencies, which the backend CI job never installs) and relies on this check to catch drift instead.

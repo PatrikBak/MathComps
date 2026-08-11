@@ -79,6 +79,11 @@ public interface IDefenseSessionService
 public sealed class DefenseSessionNotFoundException() : Exception("Defense session not found");
 
 /// <summary>
+/// Thrown when a start names a handout environment the site has no content for, in the language asked for.
+/// </summary>
+public sealed class DefenseEnvironmentNotFoundException() : Exception("Statement not found");
+
+/// <summary>
 /// Thrown when a submitted message or problem text exceeds its configured length cap.
 /// </summary>
 public sealed class DefenseMessageTooLongException() : Exception("The message is too long");

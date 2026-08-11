@@ -178,6 +178,7 @@
     "CannotLikeOwnComment": "Nemůžeš dát to se mi líbí vlastnímu komentáři.",
     "CommentNotFound": "Tento komentář už neexistuje.",
     "CommentTargetNotFound": "Obsah, ke kterému komentář patří, už neexistuje.",
+    "DefenseEnvironmentNotFound": "Toto zadání už není k dispozici.",
     "DefenseFeedbackCommentTooLong": "Tvůj komentář je příliš dlouhý.",
     "DefenseFeedbackValue": "Tato zpětná vazba nic neříká.",
     "DefenseMessageEmpty": "Tvoje zpráva je prázdná.",

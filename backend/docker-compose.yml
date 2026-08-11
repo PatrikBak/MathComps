@@ -51,6 +51,11 @@ services:
       Clerk__SecretKey: ${CLERK_SECRET_KEY}
       Clerk__WebhookSecret: ${CLERK_WEBHOOK_SECRET}
       Llm__ApiKey: ${LLM_API_KEY}
+      # Read-only access to the bucket the handouts CLI publishes the examiner's problem content to.
+      CloudflareR2__AccountId: ${R2_ACCOUNT_ID}
+      CloudflareR2__BucketName: ${R2_BUCKET_NAME}
+      CloudflareR2__AccessKeyId: ${R2_ACCESS_KEY_ID}
+      CloudflareR2__SecretAccessKey: ${R2_SECRET_ACCESS_KEY}
     depends_on:
       postgres:
         condition: service_healthy

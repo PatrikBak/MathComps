@@ -111,37 +111,28 @@ export type DefenseSessionListItem = {
 }
 
 /**
- * The problem a defense is held against, including the reference solution the examiner reasons from.
+ * The problem a defense is held against. The reasoning it is measured against never reaches the client:
+ * the backend resolves the statement, reference and hints from the handout environment itself, and the
+ * statement here is only the copy the chat shows alongside the conversation.
  */
 export type DefenseProblem = {
   /** The handout environment this problem is. */
   target: HandoutEnvironmentTarget
   /** The problem statement as markdown/math source. */
   statement: string
-  /** The reference solution the examiner reasons from, as markdown/math source. */
-  reference: string
-  /** The author's step-by-step hints, each as markdown/math source; empty when the problem has none. */
-  hints: string[]
 }
 
 /**
  * A request to open a brand-new defense session with the student's first turn: the backend mints the
  * session (its id comes back on the response), seeds it with the examiner's greeting, saves the turn,
- * and answers it in one round-trip. The problem and its reference ride along so the examiner can reason.
+ * and answers it in one round-trip. Only the target rides along — the backend looks the problem itself
+ * up from it.
  */
 type StartDefenseTurnRequest = {
   /** Marks the request that opens a new session. */
   kind: 'start'
   /** The handout environment the new session is about. */
   target: HandoutEnvironmentTarget
-  /** The problem statement, seen by both sides. */
-  statement: string
-  /** The reference solution the examiner reasons from. */
-  reference: string
-  /** The author's step-by-step hints, each as markdown/math source; empty when the problem has none. */
-  hints: string[]
-  /** The examiner's opening line, saved as the new session's first turn. */
-  opener: string
   /** The student's turn as markdown/math source. */
   content: string
   /** Aborts the in-flight round-trip when the student stops the turn. */

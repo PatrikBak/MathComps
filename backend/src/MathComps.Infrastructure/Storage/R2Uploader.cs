@@ -31,19 +31,8 @@ public sealed class R2Uploader : IFileUploader, IDisposable
         // Store the bucket name
         _bucketName = settings.BucketName;
 
-        // Build the Cloudflare R2 endpoint URL
-        var serviceUrl = $"https://{settings.AccountId}.r2.cloudflarestorage.com";
-
-        // Configure the S3 client for R2 compatibility
-        var config = new AmazonS3Config
-        {
-            ServiceURL = serviceUrl,
-            // R2 requires path-style addressing
-            ForcePathStyle = true,
-        };
-
-        // Create the S3 client with explicit credentials
-        _client = new AmazonS3Client(settings.AccessKeyId, settings.SecretAccessKey, config);
+        // The client every R2 call goes through
+        _client = R2ClientFactory.Create(settings);
     }
 
     /// <summary>

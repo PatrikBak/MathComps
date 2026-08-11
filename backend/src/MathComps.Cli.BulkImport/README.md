@@ -63,12 +63,6 @@ Each folder is validated then applied in turn; a folder that fails validation wr
 
 - **Node + npm** — the preflight runs the `web/` project's `draft:preflight` script, so `npm` must be on your PATH with `web/` dependencies installed.
 - **Database** — set the connection string in user secrets (see the [main backend README](../../README.md)). Both commands need a reachable DB: the safety checks (contiguity, problem existence, second-original) are DB-aware, so `validate` fails — not just warns — when it can't reach one, and `apply` requires it.
-- **Cloudflare R2** (`apply` only) — image uploads need the `CloudflareR2` settings:
-
-  ```bash
-  cd backend/src/MathComps.Cli.BulkImport
-  dotnet user-secrets set "CloudflareR2:AccountId" "..."
-  dotnet user-secrets set "CloudflareR2:BucketName" "..."
-  dotnet user-secrets set "CloudflareR2:AccessKeyId" "..."
-  dotnet user-secrets set "CloudflareR2:SecretAccessKey" "..."
-  ```
+- **Cloudflare R2** (`apply` only) — image uploads need the `CloudflareR2` settings (see the
+  [main backend README](../../README.md#6-configure-cloudflare-r2)). They live in the solution-wide user-secrets
+  store, so setting them for any one project covers this one too.

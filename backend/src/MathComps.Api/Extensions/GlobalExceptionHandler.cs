@@ -79,6 +79,7 @@ public sealed class GlobalExceptionHandler(
         ProblemNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ProblemNotFound),
         ListNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ListNotFound),
         DefenseSessionNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.DefenseSessionNotFound),
+        DefenseEnvironmentNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.DefenseEnvironmentNotFound),
         AdminNoteNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.AdminNoteNotFound),
 
         // Defense guardrails: the request doesn't hold up, or the user's usage is over a cap
