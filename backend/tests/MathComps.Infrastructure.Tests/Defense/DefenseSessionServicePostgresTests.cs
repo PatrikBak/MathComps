@@ -60,6 +60,17 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     private const string DraftHoldNote = "REVISION REQUIRED — write a minimal holding reply instead.";
 
     /// <summary>
+    /// How long the one call of a drafted attempt takes.
+    /// </summary>
+    private const int DraftCallDurationMs = 1_200;
+
+    /// <summary>
+    /// How long each of a drafted turn's three attempts takes, in the order they're made. Distinct per attempt, so a
+    /// mapping that wrote one attempt's time onto all of them would show.
+    /// </summary>
+    private static readonly int[] _draftDurationsMs = [2_100, 1_900, 800];
+
+    /// <summary>
     /// The one call each drafted attempt makes, standing in for a real turn's per-step breakdown.
     /// </summary>
     private static readonly ExaminerStepCall _draftCall = new(
@@ -67,7 +78,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         "fake/model",
         ReasoningEffort: null,
         new ModelUsage(DraftCallCost, PromptTokens: 10, CompletionTokens: 2, ReasoningTokens: 0,
-            CachedPromptTokens: 0));
+            CachedPromptTokens: 0),
+        DraftCallDurationMs);
 
     /// <summary>
     /// The usage — cost and tokens — each cancelled turn runs up before it throws.
@@ -490,6 +502,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             var call = Assert.Single(attempts[2].Calls);
             Assert.Equal(ExaminerStep.Generate, call.Step);
             Assert.Equal(DraftCallCost, call.Cost);
+
+            // And how long it all took, per draft and per call, which is what a slow turn is traced through
+            Assert.Equal(_draftDurationsMs, attempts.Select(attempt => attempt.DurationMs));
+            Assert.Equal(DraftCallDurationMs, call.DurationMs);
         });
 
         // Rewind past the examiner's reply, dropping the turn the drafts hang off
@@ -1135,10 +1151,16 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 new MathCheckResult(true, ""),
                 new LeakCheckResult(true, "the counterexample", false, ""),
                 new LanguageCheckResult(false, "English"),
-                [_draftCall]);
+                [_draftCall],
+                _draftDurationsMs[0]);
 
             // The second, written under the note that leak produced and giving the same thing away again.
-            var revised = rejected with { Reply = "another leaky draft.", RevisionNote = DraftRevisionNote };
+            var revised = rejected with
+            {
+                Reply = "another leaky draft.",
+                RevisionNote = DraftRevisionNote,
+                DurationMs = _draftDurationsMs[1],
+            };
 
             // The fallback the exhausted cap retreats to, which is what ships.
             var fallback = new ExaminerAttempt(
@@ -1147,7 +1169,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 new MathCheckResult(true, ""),
                 new LeakCheckResult(false, "", false, ""),
                 new LanguageCheckResult(false, "English"),
-                [_draftCall]);
+                [_draftCall],
+                _draftDurationsMs[2]);
 
             // The turn, ending on the fallback rather than on a draft that came back clean.
             return Task.FromResult(new ExaminerTurnOutcome(

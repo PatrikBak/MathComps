@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
@@ -137,6 +138,9 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         string problem, string reference, string conversation, string candidateTurn, string revisionNote,
         ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
+        // Time the whole attempt: writing the draft, then judging it.
+        var stopwatch = Stopwatch.StartNew();
+
         // Generate the reply.
         var (reply, generateCall) = await GenerateAsync(
             problem, reference, conversation, revisionNote, usage, cancellationToken);
@@ -145,14 +149,18 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         var guards = await RunGuardsAsync(
             problem, reference, conversation, candidateTurn, reply, usage, cancellationToken);
 
-        // The attempt, carrying the reply, every verdict, and the calls that produced them.
+        // Stop the clock now that the attempt is judged.
+        stopwatch.Stop();
+
+        // The attempt, carrying the reply, every verdict, the calls that produced them, and how long it all took.
         return new ExaminerAttempt(
             reply,
             revisionNote,
             guards.Math.Verdict,
             guards.Leak.Verdict,
             guards.Language.Verdict,
-            [generateCall, guards.Math.Call, guards.Leak.Call, guards.Language.Call]);
+            [generateCall, guards.Math.Call, guards.Leak.Call, guards.Language.Call],
+            (int)stopwatch.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -232,10 +240,16 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
                 ["revision_note"] = revisionNote,
             });
 
+        // Time the call, so a slow turn can be traced to the step that spent it.
+        var stopwatch = Stopwatch.StartNew();
+
         // The conversation so far is what the examiner responds to; the reply comes back as plain text, the one shape
         // that carries the LaTeX the examiner writes through unaltered.
         var result = await chatCaller.CompleteTextAsync(
             ChatCallRequest.For(_settings.Generate, systemPrompt, conversation), cancellationToken);
+
+        // Stop the clock before the bookkeeping below.
+        stopwatch.Stop();
 
         // Fold what this call cost into the turn's running total.
         usage.Add(result.Usage);
@@ -243,7 +257,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // Hand the message back with its math in the project's dollar delimiters, alongside what writing it cost.
         return (
             MathDelimiterNormalizer.Normalize(result.Value),
-            BuildStepCall(ExaminerStep.Generate, _settings.Generate, result.Usage));
+            BuildStepCall(ExaminerStep.Generate, _settings.Generate, result.Usage, stopwatch.ElapsedMilliseconds));
     }
 
     /// <summary>
@@ -320,16 +334,24 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         ExaminerStep stepKind, ChatStepSettings step, string systemPrompt, string userPrompt,
         ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
+        // Time the call. The guards run concurrently, so this is what says which of them a slow attempt was
+        // waiting on.
+        var stopwatch = Stopwatch.StartNew();
+
         // Call the model for its structured verdict.
         var result = await chatCaller.CompleteAsync<TResult>(
             ChatCallRequest.For(step, systemPrompt, userPrompt), cancellationToken);
+
+        // Stop the clock before the bookkeeping below.
+        stopwatch.Stop();
 
         // Fold what this guard call cost into the turn's running total, so a guard that completed still counts
         // even when its concurrent sibling's cancel unwinds the attempt.
         usage.Add(result.Usage);
 
         // Hand back the verdict alongside what asking for it cost.
-        return new GuardRun<TResult>(result.Value, BuildStepCall(stepKind, step, result.Usage));
+        return new GuardRun<TResult>(
+            result.Value, BuildStepCall(stepKind, step, result.Usage, stopwatch.ElapsedMilliseconds));
     }
 
     /// <summary>
@@ -340,10 +362,11 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="stepKind">Which step made the call.</param>
     /// <param name="step">The step's model and reasoning configuration.</param>
     /// <param name="usage">What the call billed.</param>
+    /// <param name="elapsedMs">How long the call took, in milliseconds.</param>
     /// <returns>The recorded call.</returns>
     private static ExaminerStepCall BuildStepCall(
-        ExaminerStep stepKind, ChatStepSettings step, ModelUsage usage) =>
-        new(stepKind, step.Model, step.ReasoningEffort, usage);
+        ExaminerStep stepKind, ChatStepSettings step, ModelUsage usage, long elapsedMs) =>
+        new(stepKind, step.Model, step.ReasoningEffort, usage, (int)elapsedMs);
 
     /// <summary>
     /// Fills a prompt template's <c>{token}</c> placeholders from a value map in a single pass, so a filled-in
@@ -389,7 +412,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     private static string? BuildRevisionNote(ExaminerAttempt attempt)
     {
         // Pull the verdicts the note reads.
-        var (_, _, mathCheck, leakCheck, languageCheck, _) = attempt;
+        var (_, _, mathCheck, leakCheck, languageCheck, _, _) = attempt;
 
         // Gather a note per flag raised; a turn can trip more than one.
         var notes = new List<string>();

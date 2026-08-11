@@ -28,13 +28,16 @@
     "defenseReview": {
       "attempts": {
         "attempt": "Draft {index}",
-        "call": "{model}, reasoning {effort}, ${cost}, {promptTokens} in, {completionTokens} out ({reasoningTokens} reasoning)",
-        "effortDefault": "unset",
+        "cost": "Cost",
         "fallback": "fallback",
         "open": "Read the drafts behind this reply ({draftCount})",
         "rejected": "sent back",
         "shipped": "sent",
+        "time": "Time",
         "title": "How the reply was arrived at",
+        "tokenCounts": "{promptTokens} in, {completionTokens} out ({reasoningTokens} reasoning)",
+        "tokens": "Tokens",
+        "total": "In total",
         "verdicts": {
           "close": "Close",
           "closeClean": "not yet earned",

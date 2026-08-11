@@ -109,6 +109,13 @@ public class DefenseTurnAttempt
     public required DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>
+    /// How long the attempt took end to end, in milliseconds: drafting the reply, then judging it. The guards judge
+    /// concurrently, so this is shorter than its calls add up to. 0 on an attempt recorded before the timings were
+    /// kept.
+    /// </summary>
+    public required int DurationMs { get; set; }
+
+    /// <summary>
     /// The model calls this attempt made.
     /// </summary>
     public List<DefenseAttemptCall> Calls { get; set; } = [];

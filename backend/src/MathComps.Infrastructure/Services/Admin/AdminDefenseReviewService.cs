@@ -264,8 +264,10 @@ public class AdminDefenseReviewService(
                                 call.Cost,
                                 call.PromptTokens,
                                 call.CompletionTokens,
-                                call.ReasoningTokens))
-                            .ToList()))
+                                call.ReasoningTokens,
+                                call.DurationMs))
+                            .ToList(),
+                        attempt.DurationMs))
                     .ToList(),
                 Reports = session.Reports
                     .Select(report => new DefenseTurnReportDto(report.TurnId, report.Categories, report.Comment))

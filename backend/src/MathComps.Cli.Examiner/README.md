@@ -31,7 +31,7 @@ Each step sets its own `Model`, `ReasoningEffort`, and `MaxOutputTokens` in `app
 
 Each run prints the reply, each guard's verdict, and how many times it revised. It prices itself from the cost the provider attaches to every reply, summed over the turn's calls (`This turn cost $0.0042`) — retried attempts included.
 
-Above that it prints the breakdown the total can't give you: every draft the turn made, and per draft one line per call naming the step, the model and reasoning level it ran on, what it billed, and how many of its output tokens were thinking. That is what a model or reasoning-effort change is judged on, and on a revised turn it also shows what the rejected drafts were spent on. The API records the same breakdown per turn, where the review surface reads it back.
+Above that it prints the breakdown the total can't give you: every draft the turn made and how long it took, and per draft one line per call naming the step, the model and reasoning level it ran on, what it billed, how many of its output tokens were thinking, and how long it took. That is what a model or reasoning-effort change is judged on, and on a revised turn it also shows what the rejected drafts were spent on. The guards judge concurrently, so their times overlap rather than adding up to the draft's. The API records the same breakdown per turn, where the review surface reads it back.
 
 ## Command Reference
 

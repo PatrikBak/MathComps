@@ -13,10 +13,15 @@ namespace MathComps.Infrastructure.Services.Defense.Engine;
 /// <param name="LeakCheck">The leak-check verdict on the reply.</param>
 /// <param name="LanguageCheck">The language-check verdict on the reply.</param>
 /// <param name="Calls">The model calls this attempt made, in the order they were started.</param>
+/// <param name="DurationMs">
+/// How long the attempt took end to end, in milliseconds. The guards judge concurrently, so this is shorter than its
+/// calls add up to and can't be recovered from them.
+/// </param>
 public record ExaminerAttempt(
     string Reply,
     string RevisionNote,
     MathCheckResult MathCheck,
     LeakCheckResult LeakCheck,
     LanguageCheckResult LanguageCheck,
-    IReadOnlyList<ExaminerStepCall> Calls);
+    IReadOnlyList<ExaminerStepCall> Calls,
+    int DurationMs);

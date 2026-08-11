@@ -80,6 +80,18 @@ export function DefenseReviewModalBody({
     [attemptsByTurn]
   )
 
+  // How long each reply took, which is its drafts added up: they are drafted one after another
+  const turnDurationsMs = useMemo(
+    () =>
+      new Map(
+        [...attemptsByTurn].map(([turnId, attempts]) => [
+          turnId,
+          attempts.reduce((total, attempt) => total + attempt.durationMs, 0),
+        ])
+      ),
+    [attemptsByTurn]
+  )
+
   // Defense-surface copy, for what the conversation's own parts are called
   const tDefense = useTranslations('defense')
 
@@ -121,6 +133,8 @@ export function DefenseReviewModalBody({
           draftCounts: draftCounts,
           onOpen: setDraftsTurnId,
         }}
+        // And how long each took, on the replies that kept their drafts
+        turnDurationsMs={turnDurationsMs}
         // Notes hang off a reply by its place, so the reader needs the places to be there to read
         showPositions
         // And the one a note is being written against is marked, but only while that is what the

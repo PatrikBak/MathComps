@@ -12,6 +12,7 @@ namespace MathComps.Domain.Contracts.Admin;
 /// <param name="PromptTokens"><inheritdoc cref="DefenseAttemptCall.PromptTokens" path="/summary"/></param>
 /// <param name="CompletionTokens"><inheritdoc cref="DefenseAttemptCall.CompletionTokens" path="/summary"/></param>
 /// <param name="ReasoningTokens"><inheritdoc cref="DefenseAttemptCall.ReasoningTokens" path="/summary"/></param>
+/// <param name="DurationMs"><inheritdoc cref="DefenseAttemptCall.DurationMs" path="/summary"/></param>
 public record AdminDefenseAttemptCallDto(
     ExaminerStep Step,
     string Model,
@@ -19,7 +20,8 @@ public record AdminDefenseAttemptCallDto(
     decimal Cost,
     int PromptTokens,
     int CompletionTokens,
-    int ReasoningTokens);
+    int ReasoningTokens,
+    int DurationMs);
 
 /// <summary>
 /// One reply the examiner drafted on its way to a turn, every guard's verdict on it, and what drafting and judging
@@ -44,6 +46,7 @@ public record AdminDefenseAttemptCallDto(
 /// <param name="CandidateLanguage"><inheritdoc cref="DefenseTurnAttempt.CandidateLanguage" path="/summary"/></param>
 /// <param name="IsSafeFallback"><inheritdoc cref="DefenseTurnAttempt.IsSafeFallback" path="/summary"/></param>
 /// <param name="Calls"><inheritdoc cref="DefenseTurnAttempt.Calls" path="/summary"/></param>
+/// <param name="DurationMs"><inheritdoc cref="DefenseTurnAttempt.DurationMs" path="/summary"/></param>
 public record AdminDefenseAttemptDto(
     Guid TurnId,
     int AttemptIndex,
@@ -58,4 +61,5 @@ public record AdminDefenseAttemptDto(
     bool SwitchesLanguage,
     string CandidateLanguage,
     bool IsSafeFallback,
-    IReadOnlyList<AdminDefenseAttemptCallDto> Calls);
+    IReadOnlyList<AdminDefenseAttemptCallDto> Calls,
+    int DurationMs);

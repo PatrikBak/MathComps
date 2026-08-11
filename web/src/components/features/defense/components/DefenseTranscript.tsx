@@ -84,6 +84,8 @@ type DefenseTranscriptProps = TurnActionsAffordance & {
   unreadMark: TurnUnreadMark | null
   /** Reading the drafts behind a reply; null where the reader isn't allowed to see them. */
   draftsMark: TurnDraftsMark | null
+  /** How long each reply took the examiner, by reply; null where the reader isn't shown timings. */
+  turnDurationsMs: ReadonlyMap<string, number> | null
   /** Whether to number the turns, so something outside the conversation can refer to one by its place. */
   showPositions?: boolean
   /** The turn something outside the conversation currently points at; null when nothing does. */
@@ -116,6 +118,7 @@ export function DefenseTranscript({
   newSince,
   unreadMark,
   draftsMark,
+  turnDurationsMs,
   showPositions = false,
   pointedAtTurnId = null,
   footer,
@@ -216,6 +219,7 @@ export function DefenseTranscript({
                     onReport={reportableId === null ? null : () => onReportTurn(reportableId)}
                     unreadMark={unreadMark}
                     draftsMark={draftsMark}
+                    durationMs={turn.id === null ? null : (turnDurationsMs?.get(turn.id) ?? null)}
                   />
                 </Fragment>
               )
