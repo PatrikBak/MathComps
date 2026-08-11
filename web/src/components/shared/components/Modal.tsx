@@ -85,7 +85,7 @@ export function Modal({
       open={isOpen}
       as="div"
       aria-label={ariaLabel}
-      className="relative z-50"
+      className="relative z-overlay"
       // A target given here is focused as it stands, which is what lets the panel take focus at all: the scan
       // this falls back to skips anything the reader can't Tab to
       initialFocus={focusPanelOnOpen ? panelRef : undefined}

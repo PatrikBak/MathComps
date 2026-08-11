@@ -57,6 +57,22 @@
   /* Scroll offset for anchor links - the header height plus breathing room, derived so it can't drift */
   --scroll-offset: calc(var(--header-height) + 12px);
 
+  /*
+   * The stacking ladder. Every layer that can cover another one names its rung here, and reaches it
+   * through the utility of the same name below. Two layers left on the same rung are ordered by where
+   * they happen to sit in the document, and Safari has been seen resolving that the other way round
+   * after a tab sits idle.
+   *
+   * Page content stays under the ladder's floor on plain z-0 / z-10 / z-20.
+   */
+  --z-sticky: 30; /* Page chrome pinned beneath the header, and the scrim a mobile sheet dims with */
+  --z-sheet: 35; /* The mobile sheet that scrim belongs to */
+  --z-header: 40; /* The site header */
+  --z-overlay: 50; /* Dialogs and drawers, backdrop included */
+  --z-floating: 60; /* Menus, popovers and selects anchored to a trigger, a dialog's own included */
+  --z-notification: 70; /* The offline banner */
+  --z-tooltip: 80; /* Tooltips */
+
   /* Toast base colors */
   --toast-success-bg: rgb(22 163 74 / 0.9);
   --toast-success-border: rgb(34 197 94 / 0.3);
@@ -187,6 +203,36 @@
     ):not([onclick]) {
     cursor: default;
   }
+}
+
+/* One utility per rung of the ladder declared above, so a layer states which one it is on by name */
+@utility z-sticky {
+  z-index: var(--z-sticky);
+}
+@utility z-sheet {
+  z-index: var(--z-sheet);
+}
+@utility z-header {
+  z-index: var(--z-header);
+}
+@utility z-overlay {
+  z-index: var(--z-overlay);
+}
+@utility z-floating {
+  z-index: var(--z-floating);
+}
+@utility z-notification {
+  z-index: var(--z-notification);
+}
+@utility z-tooltip {
+  z-index: var(--z-tooltip);
+}
+
+/* A bar that comes to rest against the underside of the header */
+@utility sticky-below-header {
+  position: sticky;
+  top: var(--header-height);
+  z-index: var(--z-sticky);
 }
 
 html {

@@ -73,7 +73,7 @@ export function Select({ options, value, onChange, placeholder, className }: Sel
           {/* Matched to the button's width, and capped at whatever the viewport allows */}
           <ListboxOptions
             anchor="bottom start"
-            className="z-[1000] w-[var(--button-width)] max-h-[min(32vh,var(--anchor-max-height))] overflow-y-auto rounded-lg border border-foreground/10 bg-surface/95 p-0.5 sm:p-1 shadow-2xl backdrop-blur [--anchor-gap:8px]"
+            className="z-floating w-[var(--button-width)] max-h-[min(32vh,var(--anchor-max-height))] overflow-y-auto rounded-lg border border-foreground/10 bg-surface/95 p-0.5 sm:p-1 shadow-2xl backdrop-blur [--anchor-gap:8px]"
           >
             {options.map((option) => {
               // The choice's own icon, if it carries one

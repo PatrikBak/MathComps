@@ -53,7 +53,7 @@ export const MobileFilterDrawer = ({
 
   return (
     <Transition show={isOpen} unmount={false}>
-      <Dialog onClose={onClose} className="relative z-50 lg:hidden" unmount={false}>
+      <Dialog onClose={onClose} className="relative z-overlay lg:hidden" unmount={false}>
         {/* Backdrop */}
         <TransitionChild
           unmount={false}

@@ -8,6 +8,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { forwardRef, useEffect, useState } from 'react'
 
 import { LoginNavItem } from '@/components/login/LoginNavItem'
+import { DropdownMenuContent } from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useIsAdmin } from '@/hooks/use-is-admin'
 import { ROUTES } from '@/i18n/i18n'
@@ -123,46 +124,34 @@ export default function UserMenu({ isAuthenticated, onOpenDefenses }: UserMenuPr
         </UserMenuTrigger>
       </DropdownMenu.Trigger>
 
-      {/* Dropdown content */}
-      <DropdownMenu.Portal>
-        <DropdownMenu.Content
-          id="user-menu-content"
-          className={cn(
-            'w-full rounded-lg',
-            'bg-surface/25 backdrop-blur-md border border-foreground/10',
-            'shadow-lg',
-            'overflow-hidden z-50',
-            'data-[state=open]:animate-in data-[state=closed]:animate-out',
-            'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-            'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-            'data-[side=bottom]:slide-in-from-top-2',
-            'data-[side=top]:slide-in-from-bottom-2'
-          )}
-          sideOffset={16}
-          align="end"
-          onCloseAutoFocus={(event) => event.preventDefault()}
-        >
-          {/* Who is signed in */}
-          <div className="px-4 py-3 border-b border-foreground/10">
-            <UserInfoHeader user={user} size="sm" />
-          </div>
+      {/* Dropdown content, laid out edge to edge so its divider spans the panel */}
+      <DropdownMenuContent
+        id="user-menu-content"
+        className="w-full p-0"
+        sideOffset={16}
+        align="end"
+        onCloseAutoFocus={(event) => event.preventDefault()}
+      >
+        {/* Who is signed in */}
+        <div className="px-4 py-3 border-b border-foreground/10">
+          <UserInfoHeader user={user} size="sm" />
+        </div>
 
-          {/* Menu items */}
-          <div className="py-1.5">
-            {/* The user's defenses */}
-            <UserMenuItem type="mathilda" variant="dropdown" onClick={onOpenDefenses} />
+        {/* Menu items */}
+        <div className="py-1.5">
+          {/* The user's defenses */}
+          <UserMenuItem type="mathilda" variant="dropdown" onClick={onOpenDefenses} />
 
-            {/* Everyone's defenses */}
-            {isAdmin && <UserMenuItem type="defenseReview" variant="dropdown" />}
+          {/* Everyone's defenses */}
+          {isAdmin && <UserMenuItem type="defenseReview" variant="dropdown" />}
 
-            {/* Their profile */}
-            <UserMenuItem type="profile" variant="dropdown" disabled={isProfileDisabled} />
+          {/* Their profile */}
+          <UserMenuItem type="profile" variant="dropdown" disabled={isProfileDisabled} />
 
-            {/* And the way out */}
-            <UserMenuItem type="signOut" variant="dropdown" />
-          </div>
-        </DropdownMenu.Content>
-      </DropdownMenu.Portal>
+          {/* And the way out */}
+          <UserMenuItem type="signOut" variant="dropdown" />
+        </div>
+      </DropdownMenuContent>
     </DropdownMenu.Root>
   )
 }

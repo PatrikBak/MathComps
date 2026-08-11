@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 import { FlagIcon } from '@/components/features/guide/layout/FlagIcon'
+import { DropdownMenuContent } from '@/components/shared/components/DropdownMenu'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { ACCENT_COLOR_MAP } from '@/components/shared/utils/accent-colors'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -63,56 +64,45 @@ export function LanguageSwitcher() {
         />
       </DropdownMenu.Trigger>
 
-      {/* Dropdown Content */}
-      <DropdownMenu.Portal>
-        <DropdownMenu.Content
-          id="language-switcher-content"
-          className={cn(
-            'min-w-[140px] rounded-lg py-1.5',
-            'bg-surface/25 backdrop-blur-md border border-foreground/10',
-            'shadow-lg z-50',
-            'data-[state=open]:animate-in data-[state=closed]:animate-out',
-            'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-            'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-            'data-[side=bottom]:slide-in-from-top-2',
-            'data-[side=top]:slide-in-from-bottom-2'
-          )}
-          sideOffset={8}
-          align="end"
-          onCloseAutoFocus={(event) => event.preventDefault()}
-        >
-          {SUPPORTED_LOCALES.map((locale) => {
-            // We will highlight the currently active locale
-            const isActive = locale === currentLocale
+      {/* Dropdown Content, its rows running the full width of the panel */}
+      <DropdownMenuContent
+        id="language-switcher-content"
+        className="min-w-[140px] p-0 py-1.5"
+        sideOffset={8}
+        align="end"
+        onCloseAutoFocus={(event) => event.preventDefault()}
+      >
+        {SUPPORTED_LOCALES.map((locale) => {
+          // We will highlight the currently active locale
+          const isActive = locale === currentLocale
 
-            // Get the country flag data for the locale being rendered
-            const country = LOCALE_TO_COUNTRY[locale]
+          // Get the country flag data for the locale being rendered
+          const country = LOCALE_TO_COUNTRY[locale]
 
-            return (
-              <DropdownMenu.Item
-                key={locale}
-                className={cn(
-                  'flex items-center gap-2.5 px-3 py-2 text-sm',
-                  'outline-none cursor-pointer transition-colors',
-                  isActive
-                    ? 'bg-brand/20 text-foreground'
-                    : 'text-muted-foreground hover:bg-surface/60 hover:text-foreground'
-                )}
-                onSelect={() => {
-                  if (locale !== currentLocale) {
-                    setIsChanging(true)
-                    changeLocale(locale)
-                  }
-                }}
-              >
-                <FlagIcon country={country} flagHeight={14} flagWidth={20} />
-                <span>{LOCALE_NAMES[locale]}</span>
-                {isActive && <span className="ml-auto text-brand-light text-xs">✓</span>}
-              </DropdownMenu.Item>
-            )
-          })}
-        </DropdownMenu.Content>
-      </DropdownMenu.Portal>
+          return (
+            <DropdownMenu.Item
+              key={locale}
+              className={cn(
+                'flex items-center gap-2.5 px-3 py-2 text-sm',
+                'outline-none cursor-pointer transition-colors',
+                isActive
+                  ? 'bg-brand/20 text-foreground'
+                  : 'text-muted-foreground hover:bg-surface/60 hover:text-foreground'
+              )}
+              onSelect={() => {
+                if (locale !== currentLocale) {
+                  setIsChanging(true)
+                  changeLocale(locale)
+                }
+              }}
+            >
+              <FlagIcon country={country} flagHeight={14} flagWidth={20} />
+              <span>{LOCALE_NAMES[locale]}</span>
+              {isActive && <span className="ml-auto text-brand-light text-xs">✓</span>}
+            </DropdownMenu.Item>
+          )
+        })}
+      </DropdownMenuContent>
     </DropdownMenu.Root>
   )
 }

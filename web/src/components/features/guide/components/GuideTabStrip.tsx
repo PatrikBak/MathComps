@@ -43,10 +43,7 @@ export function GuideTabStrip({
   const { scrollerRef, activeTabRef, maskStyle } = useTabStripScroll(selectedIndex)
 
   return (
-    <div
-      ref={rootRef}
-      className="sticky top-[var(--header-height)] z-30 -mx-4 backdrop-blur sm:-mx-6 md:-mx-8"
-    >
+    <div ref={rootRef} className="sticky-below-header -mx-4 backdrop-blur sm:-mx-6 md:-mx-8">
       <div className="flex items-center gap-2 px-4 py-2.5 sm:items-start sm:px-6 md:px-8">
         {/* The tab group: a single horizontal scroll strip on mobile, a wrapping row from sm up */}
         <div

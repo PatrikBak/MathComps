@@ -90,7 +90,7 @@ export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
 
   return (
     <>
-      <header className="sticky top-0 left-0 right-0 bg-background/95 z-50">
+      <header className="sticky top-0 left-0 right-0 bg-background/95 z-header">
         <nav className="max-w-7xl mx-auto flex items-center px-3 sm:px-4 md:px-6 h-[var(--header-height)]">
           {/* Left: Logo */}
           <MathCompsLogo />

@@ -69,14 +69,14 @@ export function MobileTableOfContents({ items }: TableOfContentsProps) {
       {/* Backdrop overlay - only visible when menu is open */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-background/30 lg:hidden"
+          className="fixed inset-0 z-sticky bg-background/30 lg:hidden"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
         />
       )}
 
       {/* Bottom navigation bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-sheet lg:hidden">
         <div className="bg-surface/40 backdrop-blur-xl border-t border-foreground/10">
           <div className="px-4 py-3">
             <button

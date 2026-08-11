@@ -49,7 +49,7 @@ export function RichMathEditorPicker({
             anchor="bottom start"
             transition
             className={cn(
-              'z-[9999] mt-1 shadow-2xl border border-foreground/10 rounded-xl overflow-hidden',
+              'z-floating mt-1 shadow-2xl border border-foreground/10 rounded-xl overflow-hidden',
               'origin-top-left transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0',
               popupClassName
             )}

@@ -25,7 +25,7 @@ export function OfflineIndicator() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-4"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-notification flex justify-center px-4 pb-4"
     >
       <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-muted/50 bg-surface px-4 py-2 text-sm text-foreground shadow-lg">
         <WifiOff className="h-4 w-4 shrink-0 text-muted" aria-hidden />
