@@ -110,6 +110,25 @@ public static class StringExtensions
     }
 
     /// <summary>
+    /// Closes text with a full stop unless it already ends in one, so a fragment written by somebody else reads as
+    /// a sentence when another one is appended after it.
+    /// </summary>
+    /// <param name="text">The text to close.</param>
+    /// <returns>The text ending in sentence punctuation; unchanged when it already did, or when it is blank.</returns>
+    public static string EnsureSentenceEnd(this string text)
+    {
+        // Trailing whitespace would sit between the text and the stop, so it goes first.
+        var trimmed = text.TrimEnd();
+
+        // Nothing written needs nothing closed.
+        if (trimmed.Length == 0)
+            return trimmed;
+
+        // Otherwise add the stop, unless the last character is already one.
+        return trimmed[^1] is '.' or '!' or '?' ? trimmed : $"{trimmed}.";
+    }
+
+    /// <summary>
     /// Extracts the first substring matching the given regex pattern.
     /// </summary>
     /// <param name="text">The source text to search.</param>

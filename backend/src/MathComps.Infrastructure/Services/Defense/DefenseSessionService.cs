@@ -333,7 +333,11 @@ public class DefenseSessionService(
             var repliedAt = DateTimeOffset.UtcNow;
 
             // Append the examiner's reply as the next turn.
-            AppendTurn(session, TranscriptRole.Examiner, outcome.Reply, repliedAt);
+            var turn = AppendTurn(session, TranscriptRole.Examiner, outcome.Shipped.Reply, repliedAt);
+
+            // Hang every draft it went through off that turn, so what the guards rejected is readable beside what
+            // shipped. The caller's save writes them along with the turn.
+            turn.Attempts = BuildAttempts(session.Id, turn.Id, outcome, repliedAt);
 
             // Record what the turn spent and how long it ran, independent of the session so it survives a delete.
             dbContext.DefenseSpends.Add(new DefenseSpend
@@ -404,16 +408,99 @@ public class DefenseSessionService(
     /// <param name="role">Who authored the turn.</param>
     /// <param name="content">The turn's text.</param>
     /// <param name="createdAt">When the turn was recorded.</param>
-    private static void AppendTurn(
+    /// <returns>The appended turn, whose key is assigned client-side and so is usable before the save.</returns>
+    private static DefenseTurn AppendTurn(
         DefenseSession session, TranscriptRole role, string content, DateTimeOffset createdAt)
-        => session.Turns.Add(new DefenseTurn
+    {
+        // The turn at the next position in the conversation.
+        var turn = new DefenseTurn
         {
             SessionId = session.Id,
             Role = role,
             Content = content,
             Sequence = session.Turns.Count,
             CreatedAt = createdAt,
-        });
+        };
+
+        // Hold it on the session so the caller's save writes it.
+        session.Turns.Add(turn);
+
+        // Hand it back for anything that hangs off it.
+        return turn;
+    }
+
+    /// <summary>
+    /// Maps a turn's engine attempts onto rows against the turn they were drafted for. The fallback flag belongs to
+    /// the turn rather than to an attempt, so it lands on the last one, which is the attempt it describes.
+    /// </summary>
+    /// <param name="sessionId">The session the attempts were drafted in.</param>
+    /// <param name="turnId">The turn they were drafted for.</param>
+    /// <param name="outcome">The turn's outcome, carrying its attempts in order.</param>
+    /// <param name="createdAt">When the turn was recorded.</param>
+    /// <returns>The attempt rows, in the order they were drafted.</returns>
+    private static List<DefenseTurnAttempt> BuildAttempts(
+        Guid sessionId, Guid turnId, ExaminerTurnOutcome outcome, DateTimeOffset createdAt) =>
+    [
+        .. outcome.Attempts.Select((attempt, index) => BuildAttempt(
+            sessionId, turnId, index, attempt,
+            isSafeFallback: outcome.SafeFallback && index == outcome.Attempts.Count - 1,
+            createdAt)),
+    ];
+
+    /// <summary>
+    /// Maps one engine attempt onto its row and the rows for the calls it made.
+    /// </summary>
+    /// <param name="sessionId">The session the attempt was drafted in.</param>
+    /// <param name="turnId">The turn it was drafted for.</param>
+    /// <param name="index">Its place in the turn's run.</param>
+    /// <param name="attempt">The attempt itself.</param>
+    /// <param name="isSafeFallback">Whether this attempt is the turn's constrained fallback.</param>
+    /// <param name="createdAt">When the turn was recorded.</param>
+    /// <returns>The attempt row, carrying its calls.</returns>
+    private static DefenseTurnAttempt BuildAttempt(
+        Guid sessionId, Guid turnId, int index, ExaminerAttempt attempt, bool isSafeFallback,
+        DateTimeOffset createdAt)
+    {
+        // The draft and every verdict passed on it.
+        var row = new DefenseTurnAttempt
+        {
+            SessionId = sessionId,
+            TurnId = turnId,
+            AttemptIndex = index,
+            Reply = attempt.Reply,
+            RevisionNote = attempt.RevisionNote,
+            MathHolds = attempt.MathCheck.Holds,
+            MathCorrection = attempt.MathCheck.Correction,
+            Leaks = attempt.LeakCheck.Leaks,
+            WhatLeaked = attempt.LeakCheck.WhatLeaked,
+            WithholdsClose = attempt.LeakCheck.WithholdsClose,
+            Established = attempt.LeakCheck.Established,
+            SwitchesLanguage = attempt.LanguageCheck.SwitchesLanguage,
+            CandidateLanguage = attempt.LanguageCheck.CandidateLanguage,
+            IsSafeFallback = isSafeFallback,
+            CreatedAt = createdAt,
+        };
+
+        // The calls it made, keyed off the row's client-side id.
+        row.Calls =
+        [
+            .. attempt.Calls.Select(call => new DefenseAttemptCall
+            {
+                AttemptId = row.Id,
+                Step = call.Step,
+                Model = call.Model,
+                ReasoningEffort = call.ReasoningEffort,
+                Cost = call.Usage.Cost,
+                PromptTokens = call.Usage.PromptTokens,
+                CompletionTokens = call.Usage.CompletionTokens,
+                ReasoningTokens = call.Usage.ReasoningTokens,
+                CachedPromptTokens = call.Usage.CachedPromptTokens,
+            }),
+        ];
+
+        // Hand back the row with its calls attached.
+        return row;
+    }
 
     /// <summary>
     /// Builds the engine's transcript from a session's stored turns, in sequence order.

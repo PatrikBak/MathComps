@@ -288,6 +288,8 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
         onReportTurn={report.open}
         newSince={null}
         unreadMark={null}
+        // A rejected draft is what a guard kept from the student, so their own view never offers one
+        draftsMark={null}
         footer={
           canAnswer && (
             <DefenseFeedbackPrompt

@@ -65,7 +65,7 @@ public class ExaminerTurnCommand(IExaminer examiner)
         stopwatch.Stop();
 
         // Append the reply so the next candidate turn builds on it.
-        var updated = fixture.Transcript.Append(TranscriptRole.Examiner, outcome.Reply);
+        var updated = fixture.Transcript.Append(TranscriptRole.Examiner, outcome.Shipped.Reply);
 
         // Write the transcript back, keeping a trailing newline on the file.
         await File.WriteAllTextAsync(Path.Combine(folder, "transcript.md"), updated.ToMarkdown() + "\n");
@@ -87,20 +87,23 @@ public class ExaminerTurnCommand(IExaminer examiner)
     /// <param name="elapsed">How long the model work took.</param>
     private static void Render(ExaminerTurnOutcome outcome, TimeSpan elapsed)
     {
+        // What each step of each attempt cost, which the turn's own total can't break down.
+        RenderCallTrail(outcome);
+
         // Header for the reply.
         AnsiConsole.MarkupLine("\n[bold]Examiner reply[/]");
 
         // The reply itself — printed plainly since it's arbitrary model text, not markup.
-        AnsiConsole.WriteLine(outcome.Reply);
+        AnsiConsole.WriteLine(outcome.Shipped.Reply);
 
         // The math-check line: holds, or fails with the correction.
-        RenderMathCheck(outcome.MathCheck);
+        RenderMathCheck(outcome.Shipped.MathCheck);
 
         // The leak-check line: clean, or a leak with what leaked.
-        RenderLeakCheck(outcome.LeakCheck);
+        RenderLeakCheck(outcome.Shipped.LeakCheck);
 
         // The language-check line: the candidate's language, and whether the reply held it.
-        RenderLanguageCheck(outcome.LanguageCheck);
+        RenderLanguageCheck(outcome.Shipped.LanguageCheck);
 
         // How many times a flagged check forced a regeneration.
         AnsiConsole.MarkupLine(outcome.Revisions == 0
@@ -113,6 +116,39 @@ public class ExaminerTurnCommand(IExaminer examiner)
 
         // How long the whole turn took.
         AnsiConsole.MarkupLineInterpolated($"[grey]Turn took {elapsed.TotalSeconds:0.0}s.[/]");
+    }
+
+    /// <summary>
+    /// Writes what each attempt's calls cost, one line per call. A turn reports a single figure, which is what the
+    /// spend ceiling charges against and useless for tuning a step: this is the breakdown a reasoning-level or model
+    /// change is judged on, and on a revised turn it also shows what the rejected drafts were spent on.
+    /// </summary>
+    /// <param name="outcome">The turn's attempts and the calls behind them.</param>
+    private static void RenderCallTrail(ExaminerTurnOutcome outcome)
+    {
+        // Walk the attempts in the order they were drafted.
+        foreach (var (index, attempt) in outcome.Attempts.Index())
+        {
+            // Head each attempt with its place in the run, naming the one that shipped.
+            var label = index == outcome.Attempts.Count - 1 ? "shipped" : "rejected";
+            AnsiConsole.MarkupLineInterpolated($"\n[bold]Attempt {index + 1}[/] [grey]({label})[/]");
+
+            // One line per call: the step, how it was routed, and what it billed.
+            foreach (var call in attempt.Calls)
+            {
+                // The reasoning level, or a marker for a call that sent no reasoning field at all.
+                var effort = call.ReasoningEffort ?? "default";
+
+                // The counts, with the reasoning ones called out since they're what a level change moves.
+                var tokens =
+                    $"{call.Usage.PromptTokens} in, {call.Usage.CompletionTokens} out " +
+                    $"({call.Usage.ReasoningTokens} reasoning)";
+
+                // The call's line.
+                AnsiConsole.MarkupLineInterpolated(
+                    $"[grey]  {call.Step} — {call.Model}, reasoning {effort}, ${call.Usage.Cost:0.00000}, {tokens}[/]");
+            }
+        }
     }
 
     /// <summary>

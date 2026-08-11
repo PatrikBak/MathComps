@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense.Dtos;
@@ -86,59 +87,38 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // handing the checker the earlier turns would only give it grounds to flag the examiner for following.
         var candidateTurn = transcript.Turns[^1].Text;
 
-        // Generate and verify the first reply.
-        var attempt = await GenerateAndVerifyAsync(
-            problem, reference, conversation, candidateTurn, revisionNote: "", usage, cancellationToken);
-
-        // No revisions yet.
-        var revisions = 0;
+        // Every attempt the turn makes, kept in order: the last one ships and the rest are the record of what was
+        // tried and why it was sent back.
+        var attempts = new List<ExaminerAttempt>
+        {
+            await GenerateAndVerifyAsync(
+                problem, reference, conversation, candidateTurn, revisionNote: "", usage, cancellationToken),
+        };
 
         // Regenerate while a check flags the reply, re-verifying each fresh attempt, until the cap runs out.
-        while (BuildRevisionNote(attempt) is { } note && revisions < _settings.MaxRevisions)
+        while (BuildRevisionNote(attempts[^1]) is { } note && attempts.Count <= _settings.MaxRevisions)
         {
-            // Count this revision.
-            revisions++;
-
             // Regenerate with the specific flaw called out, re-verifying the fresh attempt.
-            attempt = await GenerateAndVerifyAsync(
-                problem, reference, conversation, candidateTurn, note, usage, cancellationToken);
+            attempts.Add(await GenerateAndVerifyAsync(
+                problem, reference, conversation, candidateTurn, note, usage, cancellationToken));
         }
 
         // Whether the loop ended on a fault the fallback exists for — a draft that must not ship.
-        var safeFallback = NeedsSafeFallback(attempt);
+        var safeFallback = NeedsSafeFallback(attempts[^1]);
 
         // A still-flagged draft is replaced by a constrained fallback, re-verified for the record and shipped
         // regardless of its verdicts — the least-bad turn left when no clean draft came.
         if (safeFallback)
         {
-            // Count the fallback like any other regeneration.
-            revisions++;
-
             // Generate the fallback under the note that fits the surviving fault.
-            attempt = await GenerateAndVerifyAsync(
-                problem, reference, conversation, candidateTurn, SelectFallbackNote(attempt), usage,
-                cancellationToken);
+            attempts.Add(await GenerateAndVerifyAsync(
+                problem, reference, conversation, candidateTurn, SelectFallbackNote(attempts[^1]), usage,
+                cancellationToken));
         }
 
-        // Ship what we ended on, carrying its verdicts, how many regenerations it took, whether it's the fallback,
-        // and the turn's accrued cost.
-        return new ExaminerTurnOutcome(
-            attempt.Reply, attempt.MathCheck, attempt.LeakCheck, attempt.LanguageCheck, revisions, safeFallback,
-            usage.Accrued);
+        // Ship the trail, whether it ended on the fallback, and the turn's accrued cost.
+        return new ExaminerTurnOutcome(attempts, safeFallback, usage.Accrued);
     }
-
-    /// <summary>
-    /// One generated reply with the guard verdicts the loop judges it by.
-    /// </summary>
-    /// <param name="Reply">The generated reply.</param>
-    /// <param name="MathCheck">The math-check verdict on the reply.</param>
-    /// <param name="LeakCheck">The leak-check verdict on the reply.</param>
-    /// <param name="LanguageCheck">The language-check verdict on the reply.</param>
-    private sealed record TurnAttempt(
-        string Reply,
-        MathCheckResult MathCheck,
-        LeakCheckResult LeakCheck,
-        LanguageCheckResult LanguageCheck);
 
     /// <summary>
     /// Generates one reply and runs every guard over it. The turn's first pass and each revision run this same step,
@@ -153,19 +133,26 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="usage">The running spend each call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the calls.</param>
     /// <returns>The judged attempt.</returns>
-    private async Task<TurnAttempt> GenerateAndVerifyAsync(
+    private async Task<ExaminerAttempt> GenerateAndVerifyAsync(
         string problem, string reference, string conversation, string candidateTurn, string revisionNote,
         ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // Generate the reply.
-        var reply = await GenerateAsync(problem, reference, conversation, revisionNote, usage, cancellationToken);
+        var (reply, generateCall) = await GenerateAsync(
+            problem, reference, conversation, revisionNote, usage, cancellationToken);
 
         // Verify it with every guard.
-        var (math, leak, language) = await RunGuardsAsync(
+        var guards = await RunGuardsAsync(
             problem, reference, conversation, candidateTurn, reply, usage, cancellationToken);
 
-        // The judged attempt carrying the reply and every verdict.
-        return new TurnAttempt(reply, math, leak, language);
+        // The attempt, carrying the reply, every verdict, and the calls that produced them.
+        return new ExaminerAttempt(
+            reply,
+            revisionNote,
+            guards.Math.Verdict,
+            guards.Leak.Verdict,
+            guards.Language.Verdict,
+            [generateCall, guards.Math.Call, guards.Leak.Call, guards.Language.Call]);
     }
 
     /// <summary>
@@ -180,18 +167,21 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="reply">The proposed examiner reply under scrutiny.</param>
     /// <param name="usage">The running spend each guard call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the calls.</param>
-    /// <returns>Every guard's verdict.</returns>
-    private async Task<(MathCheckResult Math, LeakCheckResult Leak, LanguageCheckResult Language)> RunGuardsAsync(
+    /// <returns>Every guard's verdict, each paired with the call that produced it.</returns>
+    private async Task<(GuardRun<MathCheckResult> Math, GuardRun<LeakCheckResult> Leak,
+        GuardRun<LanguageCheckResult> Language)> RunGuardsAsync(
         string problem, string reference, string conversation, string candidateTurn, string reply,
         ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // Start the math-check, letting the checker find the reply's claims itself.
         var mathCheckTask = RunGuardAsync<MathCheckResult>(
-            _settings.MathCheck, problem, reference, conversation, reply, usage, cancellationToken);
+            ExaminerStep.MathCheck, _settings.MathCheck, problem, reference, conversation, reply, usage,
+            cancellationToken);
 
         // Start the leak-check against the whole transcript, concurrent with the math-check.
         var leakCheckTask = RunGuardAsync<LeakCheckResult>(
-            _settings.LeakCheck, problem, reference, conversation, reply, usage, cancellationToken);
+            ExaminerStep.LeakCheck, _settings.LeakCheck, problem, reference, conversation, reply, usage,
+            cancellationToken);
 
         // Start the language check against the candidate's latest turn, concurrent with the others.
         var languageCheckTask = RunLanguageGuardAsync(candidateTurn, reply, usage, cancellationToken);
@@ -199,9 +189,18 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // Await them all before reading their results.
         await Task.WhenAll(mathCheckTask, leakCheckTask, languageCheckTask);
 
-        // Hand back every verdict.
+        // Hand back every guard's run.
         return (mathCheckTask.Result, leakCheckTask.Result, languageCheckTask.Result);
     }
+
+    /// <summary>
+    /// One guard's verdict paired with the call that produced it, so an attempt can record what each guard said and
+    /// what asking it cost.
+    /// </summary>
+    /// <typeparam name="TVerdict">The guard's structured verdict type.</typeparam>
+    /// <param name="Verdict">What the guard decided.</param>
+    /// <param name="Call">The model call it made.</param>
+    private sealed record GuardRun<TVerdict>(TVerdict Verdict, ExaminerStepCall Call);
 
     /// <summary>
     /// Runs the generate step: the persona prompt (problem, reference, the author's-hints guidance when the reference
@@ -214,8 +213,8 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="revisionNote">The flaw to fix on a regenerate, or empty on the first pass.</param>
     /// <param name="usage">The running spend this call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
-    /// <returns>The generated reply.</returns>
-    private async Task<string> GenerateAsync(
+    /// <returns>The generated reply, and the call that wrote it.</returns>
+    private async Task<(string Reply, ExaminerStepCall Call)> GenerateAsync(
         string problem, string reference, string conversation, string revisionNote, ModelUsageAccumulator usage,
         CancellationToken cancellationToken)
     {
@@ -241,8 +240,10 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // Fold what this call cost into the turn's running total.
         usage.Add(result.Usage);
 
-        // Hand the message back with its math in the project's dollar delimiters.
-        return MathDelimiterNormalizer.Normalize(result.Value);
+        // Hand the message back with its math in the project's dollar delimiters, alongside what writing it cost.
+        return (
+            MathDelimiterNormalizer.Normalize(result.Value),
+            BuildStepCall(ExaminerStep.Generate, _settings.Generate, result.Usage));
     }
 
     /// <summary>
@@ -251,6 +252,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// and the leak-check are the same call — they differ only in prompt, model, and verdict type.
     /// </summary>
     /// <typeparam name="TResult">The guard's structured verdict type.</typeparam>
+    /// <param name="stepKind">Which step this guard is, for the record of what the attempt called.</param>
     /// <param name="step">The guard step's prompt, model, and reasoning configuration.</param>
     /// <param name="problem">The problem the guard judges against.</param>
     /// <param name="reference">The reference solution the guard judges against.</param>
@@ -258,10 +260,10 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="reply">The proposed examiner reply under scrutiny.</param>
     /// <param name="usage">The running spend this guard call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
-    /// <returns>The guard's structured verdict.</returns>
-    private async Task<TResult> RunGuardAsync<TResult>(
-        ChatStepSettings step, string problem, string reference, string conversation, string reply,
-        ModelUsageAccumulator usage, CancellationToken cancellationToken)
+    /// <returns>The guard's verdict and the call that produced it.</returns>
+    private async Task<GuardRun<TResult>> RunGuardAsync<TResult>(
+        ExaminerStep stepKind, ChatStepSettings step, string problem, string reference, string conversation,
+        string reply, ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // The guard judges against the problem and its reference solution.
         var systemPrompt = FillTemplate(await ReadPromptAsync(step.Prompt, cancellationToken),
@@ -274,8 +276,8 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // The whole conversation followed by the proposed reply under scrutiny.
         var userPrompt = $"{conversation}\n\n{ProposedReplyHeading}\n\n{reply}";
 
-        // Make the call and hand back the verdict.
-        return await CallGuardAsync<TResult>(step, systemPrompt, userPrompt, usage, cancellationToken);
+        // Make the call and hand back the run.
+        return await CallGuardAsync<TResult>(stepKind, step, systemPrompt, userPrompt, usage, cancellationToken);
     }
 
     /// <summary>
@@ -287,8 +289,8 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="reply">The proposed examiner reply under scrutiny.</param>
     /// <param name="usage">The running spend this call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
-    /// <returns>The language-check verdict.</returns>
-    private async Task<LanguageCheckResult> RunLanguageGuardAsync(
+    /// <returns>The language-check verdict and the call that produced it.</returns>
+    private async Task<GuardRun<LanguageCheckResult>> RunLanguageGuardAsync(
         string candidateTurn, string reply, ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // The check's instructions, which stand on their own.
@@ -297,9 +299,9 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // The candidate's latest turn followed by the proposed reply under scrutiny.
         var userPrompt = $"## Candidate\n\n{candidateTurn}\n\n{ProposedReplyHeading}\n\n{reply}";
 
-        // Make the call and hand back the verdict.
+        // Make the call and hand back the run.
         return await CallGuardAsync<LanguageCheckResult>(
-            _settings.LanguageCheck, systemPrompt, userPrompt, usage, cancellationToken);
+            ExaminerStep.LanguageCheck, _settings.LanguageCheck, systemPrompt, userPrompt, usage, cancellationToken);
     }
 
     /// <summary>
@@ -307,15 +309,16 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// two messages are built.
     /// </summary>
     /// <typeparam name="TResult">The guard's structured verdict type.</typeparam>
+    /// <param name="stepKind">Which step this guard is, for the record of what the attempt called.</param>
     /// <param name="step">The guard step's model and reasoning configuration.</param>
     /// <param name="systemPrompt">The guard's instructions.</param>
     /// <param name="userPrompt">What the guard reads the reply in.</param>
     /// <param name="usage">The running spend this guard call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
-    /// <returns>The guard's structured verdict.</returns>
-    private async Task<TResult> CallGuardAsync<TResult>(
-        ChatStepSettings step, string systemPrompt, string userPrompt, ModelUsageAccumulator usage,
-        CancellationToken cancellationToken)
+    /// <returns>The guard's verdict and the call that produced it.</returns>
+    private async Task<GuardRun<TResult>> CallGuardAsync<TResult>(
+        ExaminerStep stepKind, ChatStepSettings step, string systemPrompt, string userPrompt,
+        ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // Call the model for its structured verdict.
         var result = await chatCaller.CompleteAsync<TResult>(
@@ -325,9 +328,22 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // even when its concurrent sibling's cancel unwinds the attempt.
         usage.Add(result.Usage);
 
-        // Hand back the verdict.
-        return result.Value;
+        // Hand back the verdict alongside what asking for it cost.
+        return new GuardRun<TResult>(result.Value, BuildStepCall(stepKind, step, result.Usage));
     }
+
+    /// <summary>
+    /// Records one call: which step made it, how it was routed, and what it billed. The routing comes off the step's
+    /// settings rather than the request, so a session's trail can be read against the config snapshot taken when it
+    /// started.
+    /// </summary>
+    /// <param name="stepKind">Which step made the call.</param>
+    /// <param name="step">The step's model and reasoning configuration.</param>
+    /// <param name="usage">What the call billed.</param>
+    /// <returns>The recorded call.</returns>
+    private static ExaminerStepCall BuildStepCall(
+        ExaminerStep stepKind, ChatStepSettings step, ModelUsage usage) =>
+        new(stepKind, step.Model, step.ReasoningEffort, usage);
 
     /// <summary>
     /// Fills a prompt template's <c>{token}</c> placeholders from a value map in a single pass, so a filled-in
@@ -370,31 +386,31 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// </summary>
     /// <param name="attempt">The judged attempt.</param>
     /// <returns>The revision note to feed the generator, or null when nothing flagged.</returns>
-    private static string? BuildRevisionNote(TurnAttempt attempt)
+    private static string? BuildRevisionNote(ExaminerAttempt attempt)
     {
         // Pull the verdicts the note reads.
-        var (_, mathCheck, leakCheck, languageCheck) = attempt;
+        var (_, _, mathCheck, leakCheck, languageCheck, _) = attempt;
 
         // Gather a note per flag raised; a turn can trip more than one.
         var notes = new List<string>();
 
         // A wrong claim is unrecoverable, so lead the revision with the correction.
         if (!mathCheck.Holds)
-            notes.Add($"One of your claims is wrong: {mathCheck.Correction} Fix it.");
+            notes.Add($"One of your claims is wrong: {mathCheck.Correction.EnsureSentenceEnd()} Fix it.");
 
         // A leak hands away earned progress, so tell the generator exactly what to withhold.
         if (leakCheck.Leaks)
             notes.Add(
-                $"You gave away too much: {leakCheck.WhatLeaked} Redo the reply without revealing it — " +
-                "and don't just rephrase the same hint more gently; move up a level and ask a broader, " +
-                "strategy-level question that leaves the discovery to the candidate.");
+                $"You gave away too much: {leakCheck.WhatLeaked.EnsureSentenceEnd()} Redo the reply without " +
+                "revealing it — and don't just rephrase the same hint more gently; move up a level and ask a " +
+                "broader, strategy-level question that leaves the discovery to the candidate.");
 
         // A withheld close ratchets the exam past its end, so tell the generator the exam is over.
         if (leakCheck.WithholdsClose)
             notes.Add(
                 $"The candidate's solution is complete — nothing at the problem's level remains: " +
-                $"{leakCheck.Established} Stop pressing; concede plainly, confirm what they established, " +
-                "and close the exam.");
+                $"{leakCheck.Established.EnsureSentenceEnd()} Stop pressing; concede plainly, confirm what they " +
+                "established, and close the exam.");
 
         // A switched language leaves the candidate reading a reply they may not understand, so send it back. The note
         // points at their latest turn instead of naming the language the checker reported: between two close
@@ -418,7 +434,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// </summary>
     /// <param name="attempt">The judged attempt.</param>
     /// <returns>True when the attempt must not ship as it stands.</returns>
-    private static bool NeedsSafeFallback(TurnAttempt attempt) =>
+    private static bool NeedsSafeFallback(ExaminerAttempt attempt) =>
         !attempt.MathCheck.Holds || attempt.LeakCheck.Leaks || attempt.LeakCheck.WithholdsClose;
 
     /// <summary>
@@ -428,7 +444,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// </summary>
     /// <param name="attempt">The still-flagged attempt the fallback replaces.</param>
     /// <returns>The revision note the fallback generates under.</returns>
-    private static string SelectFallbackNote(TurnAttempt attempt) =>
+    private static string SelectFallbackNote(ExaminerAttempt attempt) =>
         attempt is { LeakCheck: { WithholdsClose: true, Leaks: false }, MathCheck.Holds: true }
             ? SafeCloseNote
             : SafeHoldNote;

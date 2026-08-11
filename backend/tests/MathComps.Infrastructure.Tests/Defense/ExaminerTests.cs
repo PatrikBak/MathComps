@@ -44,9 +44,9 @@ public class ExaminerTests
         VerifyStepCalled<MathCheckResult>(caller, Times.Once());
         VerifyStepCalled<LeakCheckResult>(caller, Times.Once());
         VerifyStepCalled<LanguageCheckResult>(caller, Times.Once());
-        Assert.True(outcome.MathCheck.Holds);
-        Assert.False(outcome.LeakCheck.Leaks);
-        Assert.False(outcome.LanguageCheck.SwitchesLanguage);
+        Assert.True(outcome.Shipped.MathCheck.Holds);
+        Assert.False(outcome.Shipped.LeakCheck.Leaks);
+        Assert.False(outcome.Shipped.LanguageCheck.SwitchesLanguage);
         Assert.Equal(0, outcome.Revisions);
     }
 
@@ -68,7 +68,7 @@ public class ExaminerTests
         var outcome = await RunAsync(caller);
 
         // Both delimiter shapes came out in dollars.
-        Assert.Equal("Why is $p^2+1$ not divisible by $$q$$?", outcome.Reply);
+        Assert.Equal("Why is $p^2+1$ not divisible by $$q$$?", outcome.Shipped.Reply);
     }
 
     /// <summary>
@@ -99,8 +99,8 @@ public class ExaminerTests
         VerifyTextStepCalled(caller, Times.Exactly(2));
         VerifyStepCalled<MathCheckResult>(caller, Times.Exactly(2));
         Assert.Equal(1, outcome.Revisions);
-        Assert.Equal("revised reply.", outcome.Reply);
-        Assert.True(outcome.MathCheck.Holds);
+        Assert.Equal("revised reply.", outcome.Shipped.Reply);
+        Assert.True(outcome.Shipped.MathCheck.Holds);
 
         // A recovered revision is a normal ship, not the cap's fallback.
         Assert.False(outcome.SafeFallback);
@@ -131,7 +131,7 @@ public class ExaminerTests
         VerifyStepCalled<LeakCheckResult>(caller, Times.Exactly(2));
         VerifyStepCalled<MathCheckResult>(caller, Times.Exactly(2));
         Assert.Equal(1, outcome.Revisions);
-        Assert.False(outcome.LeakCheck.Leaks);
+        Assert.False(outcome.Shipped.LeakCheck.Leaks);
     }
 
     /// <summary>
@@ -162,7 +162,7 @@ public class ExaminerTests
         // The fallback shipped, counted like a regeneration and still carrying the flagged verdict.
         Assert.Equal(RevisionCap + 1, outcome.Revisions);
         Assert.True(outcome.SafeFallback);
-        Assert.True(outcome.LeakCheck.Leaks);
+        Assert.True(outcome.Shipped.LeakCheck.Leaks);
 
         // The last generate ran under the safe note, not another correction.
         Assert.Contains("minimal holding reply", generateRequests[^1].SystemPrompt);
@@ -201,8 +201,8 @@ public class ExaminerTests
 
         // It regenerated exactly once and shipped the conceding reply with a clean verdict.
         Assert.Equal(1, outcome.Revisions);
-        Assert.Equal("conceding reply.", outcome.Reply);
-        Assert.False(outcome.LeakCheck.WithholdsClose);
+        Assert.Equal("conceding reply.", outcome.Shipped.Reply);
+        Assert.False(outcome.Shipped.LeakCheck.WithholdsClose);
 
         // The regenerate's prompt carried what the candidate established, so the generator knows the exam is over.
         Assert.Contains("the full divisor-pairing chain", generateRequests[1].SystemPrompt);
@@ -240,7 +240,7 @@ public class ExaminerTests
         // The fallback shipped, counted like a regeneration and still carrying the withheld-close verdict.
         Assert.Equal(RevisionCap + 1, outcome.Revisions);
         Assert.True(outcome.SafeFallback);
-        Assert.True(outcome.LeakCheck.WithholdsClose);
+        Assert.True(outcome.Shipped.LeakCheck.WithholdsClose);
 
         // The last generate ran under the closing note — a withheld close is the surviving fault, so the fallback
         // ends the exam instead of retreating to a holding question.
@@ -278,8 +278,8 @@ public class ExaminerTests
 
         // It regenerated exactly once and shipped the attempt that came back in the right language.
         Assert.Equal(1, outcome.Revisions);
-        Assert.Equal("a question.", outcome.Reply);
-        Assert.False(outcome.LanguageCheck.SwitchesLanguage);
+        Assert.Equal("a question.", outcome.Shipped.Reply);
+        Assert.False(outcome.Shipped.LanguageCheck.SwitchesLanguage);
 
         // The regenerate's prompt sent it back to the candidate's latest turn for the language...
         Assert.Contains("the language of their latest turn", generateRequests[1].SystemPrompt);
@@ -312,8 +312,8 @@ public class ExaminerTests
         // The drifted reply itself shipped, still carrying the flagged verdict.
         Assert.Equal(RevisionCap, outcome.Revisions);
         Assert.False(outcome.SafeFallback);
-        Assert.True(outcome.LanguageCheck.SwitchesLanguage);
-        Assert.Equal("eine Frage.", outcome.Reply);
+        Assert.True(outcome.Shipped.LanguageCheck.SwitchesLanguage);
+        Assert.Equal("eine Frage.", outcome.Shipped.Reply);
     }
 
     /// <summary>
@@ -353,9 +353,11 @@ public class ExaminerTests
         Assert.Equal(2, generateRequests.Count);
         Assert.DoesNotContain("REVISION REQUIRED", generateRequests[0].SystemPrompt);
 
-        // The regenerate carried both the math correction and the leak, so the generator knows every flaw to fix.
-        Assert.Contains("the bound is at most 1/2", generateRequests[1].SystemPrompt);
-        Assert.Contains("named the two-corners counterexample", generateRequests[1].SystemPrompt);
+        // The regenerate carried both the math correction and the leak, so the generator knows every flaw to fix,
+        // each closed off from the instruction that follows it — a guard writes a phrase and punctuates it or not
+        // as it pleases, so the note can't assume it did.
+        Assert.Contains("the bound is at most 1/2. Fix it.", generateRequests[1].SystemPrompt);
+        Assert.Contains("named the two-corners counterexample. Redo the reply", generateRequests[1].SystemPrompt);
     }
 
     /// <summary>

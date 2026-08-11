@@ -19,6 +19,10 @@ namespace MathComps.Domain.Contracts.Admin;
 /// into a shape, so the settings can change without this becoming wrong.
 /// </param>
 /// <param name="Turns">The conversation in order.</param>
+/// <param name="Attempts">
+/// Every reply the examiner drafted on its way to each of its turns, in order. Turns held before the drafts were
+/// kept carry none.
+/// </param>
 /// <param name="Reports">What the student holds against individual replies.</param>
 /// <param name="Feedback">What the student said about the whole conversation, or null when they said nothing.</param>
 /// <param name="Notes">What has been written about it while reviewing, newest first.</param>
@@ -35,6 +39,7 @@ public record AdminDefenseDetailDto(
     string Reference,
     JsonElement ExaminerConfig,
     IReadOnlyList<DefenseTurnDto> Turns,
+    IReadOnlyList<AdminDefenseAttemptDto> Attempts,
     IReadOnlyList<DefenseTurnReportDto> Reports,
     DefenseFeedbackDto? Feedback,
     IReadOnlyList<AdminNoteDto> Notes,

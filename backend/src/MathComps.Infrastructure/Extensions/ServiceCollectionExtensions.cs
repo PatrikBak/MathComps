@@ -62,6 +62,7 @@ public static class ServiceCollectionExtensions
                     .MapEnum<TranscriptRole>("transcript_role")
                     .MapEnum<DefenseReportCategory>("defense_report_category")
                     .MapEnum<DefenseOutcome>("defense_outcome")
+                    .MapEnum<ExaminerStep>("examiner_step")
             )
         );
 

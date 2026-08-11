@@ -26,6 +26,30 @@
   },
   "admin": {
     "defenseReview": {
+      "attempts": {
+        "attempt": "Návrh {index}",
+        "call": "{model}, reasoning {effort}, ${cost}, {promptTokens} vstup, {completionTokens} výstup ({reasoningTokens} uvažovanie)",
+        "effortDefault": "nenastavené",
+        "fallback": "náhrada",
+        "open": "Zobraziť návrhy, z ktorých táto odpoveď vzišla ({draftCount})",
+        "rejected": "vrátené",
+        "shipped": "odoslané",
+        "title": "Ako odpoveď vznikla",
+        "verdicts": {
+          "close": "Uzavretie",
+          "closeClean": "zatiaľ nie je zaslúžené",
+          "language": "Jazyk",
+          "languageUnknown": "neurčený",
+          "leak": "Prezradenie",
+          "leakClean": "nič neprezradené",
+          "leaks": "prezradené: {whatLeaked}",
+          "math": "Matematika",
+          "mathFails": "chyba: {correction}",
+          "mathHolds": "všetky tvrdenia platia",
+          "switchesLanguage": "odchýlila sa; študent písal jazykom {language}",
+          "withholdsClose": "už je hotové: {established}"
+        }
+      },
       "clearFilters": "Zrušiť filtre",
       "config": {
         "maxOutputTokens": "Limit výstupu",

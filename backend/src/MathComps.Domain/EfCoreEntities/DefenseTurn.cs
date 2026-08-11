@@ -1,8 +1,9 @@
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// One turn of a <see cref="DefenseSession"/>: who spoke and what they said. Content only — a turn carries no cost or
-/// telemetry (that lives in the independent <see cref="DefenseSpend"/> ledger, so it survives a session's deletion).
+/// One turn of a <see cref="DefenseSession"/>: who spoke and what they said, plus the drafts an examiner turn went
+/// through to get there. A turn carries no cost of its own — that lives in the independent <see cref="DefenseSpend"/>
+/// ledger, so it survives a session's deletion, where the drafts are content and go with it.
 /// </summary>
 public class DefenseTurn
 {
@@ -35,6 +36,12 @@ public class DefenseTurn
     /// The turn's position in the conversation, 0-based, giving a deterministic order.
     /// </summary>
     public required int Sequence { get; set; }
+
+    /// <summary>
+    /// Every reply the examiner drafted on its way to this turn; empty on a candidate's turn, and on an examiner turn
+    /// recorded before the drafts were kept.
+    /// </summary>
+    public List<DefenseTurnAttempt> Attempts { get; set; } = [];
 
     /// <summary>
     /// When the turn was recorded.

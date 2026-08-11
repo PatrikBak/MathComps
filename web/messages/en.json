@@ -26,6 +26,30 @@
   },
   "admin": {
     "defenseReview": {
+      "attempts": {
+        "attempt": "Draft {index}",
+        "call": "{model}, reasoning {effort}, ${cost}, {promptTokens} in, {completionTokens} out ({reasoningTokens} reasoning)",
+        "effortDefault": "unset",
+        "fallback": "fallback",
+        "open": "Read the drafts behind this reply ({draftCount})",
+        "rejected": "sent back",
+        "shipped": "sent",
+        "title": "How the reply was arrived at",
+        "verdicts": {
+          "close": "Close",
+          "closeClean": "not yet earned",
+          "language": "Language",
+          "languageUnknown": "not named",
+          "leak": "Leak",
+          "leakClean": "nothing given away",
+          "leaks": "gave away {whatLeaked}",
+          "math": "Maths",
+          "mathFails": "wrong: {correction}",
+          "mathHolds": "every claim holds",
+          "switchesLanguage": "drifted; the student wrote in {language}",
+          "withholdsClose": "already complete: {established}"
+        }
+      },
       "clearFilters": "Clear filters",
       "config": {
         "maxOutputTokens": "Output cap",
