@@ -170,6 +170,7 @@ export function DefenseTurn({
 
   return (
     <div
+      data-turn-id={turnId ?? undefined}
       className={cn(
         'space-y-1.5',
         style.container,

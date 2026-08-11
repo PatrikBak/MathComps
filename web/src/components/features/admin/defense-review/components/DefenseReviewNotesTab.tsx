@@ -2,7 +2,7 @@
 
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useId, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import { Button } from '@/components/shared/components/Button'
@@ -14,8 +14,7 @@ import { useRevealLandingNote } from '../hooks/use-reveal-landing-note'
 import type { AdminNote } from '../model/defense-review-types'
 import { AdminNoteCard } from './AdminNoteCard'
 import { AdminNoteComposer } from './AdminNoteComposer'
-import { NoteChoiceChip } from './NoteChoiceChip'
-import { NoteChoiceRow } from './NoteChoiceRow'
+import { NoteTargetRow } from './NoteTargetRow'
 
 /**
  * Props for the {@link DefenseReviewNotesTab} component.
@@ -42,9 +41,6 @@ type DefenseReviewNotesTabProps = {
  * here rather than from the transcript, so the reply the note is about stays on screen while it is written.
  * Which one is picked lives above this tab, since the transcript marks it as the reply being written about.
  *
- * The target chips past the first are bare numbers on screen, since a column of them spelled out in full says
- * the same four words eight times over; each still announces itself in full to assistive tech.
- *
  * One note is written at a time: opening an old one for revision stands the composer down to the way back out
  * of it, since a second editor identical to the first says nothing about which note either belongs to.
  *
@@ -65,9 +61,6 @@ export function DefenseReviewNotesTab({
   // The writes themselves
   const { create, update, remove, setResolved } = useAdminNotes(sessionId)
 
-  // The name tying this tab's reply chips into one radio group, kept off any other group on screen
-  const targetGroupName = useId()
-
   // Which note is being revised, and which is being dropped
   const editing = useAdminNoteEditing(update, remove)
 
@@ -76,8 +69,11 @@ export function DefenseReviewNotesTab({
 
   // The replies a note can stand against: the examiner's turns rather than the student's own, and not the
   // opener, which is a canned greeting reading the same in every conversation
-  const replies = useMemo(
-    () => turns.filter((turn, index) => turn.role === 'examiner' && index > 0),
+  const targets = useMemo(
+    () =>
+      turns.flatMap((turn, index) =>
+        turn.role === 'examiner' && index > 0 ? [{ id: turn.id, sequence: index + 1 }] : []
+      ),
     [turns]
   )
 
@@ -92,26 +88,8 @@ export function DefenseReviewNotesTab({
       {/* Where a new note gets written, which a revision open on an old one takes the place of */}
       {editing.editingId === null ? (
         <div className="flex flex-col gap-2">
-          {/* The target chips: which reply the note stands against */}
-          <NoteChoiceRow label={t('target')}>
-            {[null, ...replies.map((reply) => reply.id)].map((candidateId) => {
-              // Where the reply sits in the conversation, which is what names its chip
-              const sequence = candidateId === null ? null : (turnPlaces.get(candidateId) ?? 0) + 1
-
-              return (
-                <NoteChoiceChip
-                  key={candidateId ?? 'conversation'}
-                  groupName={targetGroupName}
-                  label={sequence === null ? t('wholeConversation') : String(sequence)}
-                  accessibleLabel={
-                    sequence === null ? t('onConversation') : t('onTurn', { sequence })
-                  }
-                  isSelected={turnId === candidateId}
-                  onSelect={() => onTurnIdChange(candidateId)}
-                />
-              )
-            })}
-          </NoteChoiceRow>
+          {/* Which reply the note stands against */}
+          <NoteTargetRow targets={targets} turnId={turnId} onTurnIdChange={onTurnIdChange} />
 
           {/* The composer itself */}
           <AdminNoteComposer onSubmit={(content, category) => create(turnId, content, category)} />

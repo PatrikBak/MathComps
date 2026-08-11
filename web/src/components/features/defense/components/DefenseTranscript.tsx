@@ -1,12 +1,13 @@
 'use client'
 
-import { useIsomorphicEffect, usePrevious } from '@mantine/hooks'
+import { useIsomorphicEffect, useMergedRef, usePrevious } from '@mantine/hooks'
 import { ArrowDown } from 'lucide-react'
-import { Fragment } from 'react'
+import { Fragment, useRef } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { useFollowTail } from '@/hooks/use-follow-tail'
 
+import { useRevealPointedTurn } from '../hooks/use-reveal-pointed-turn'
 import type { DefenseTurnReport, Turn, TurnRole } from '../model/defense-types'
 import {
   DefenseTurn,
@@ -126,6 +127,15 @@ export function DefenseTranscript({
   // The scroll region, kept pinned to the newest turn while the reader sits at the bottom
   const { scrollRef, contentRef, isScrolledUp, scrollToBottom } = useFollowTail()
 
+  // A handle on that same region
+  const paneRef = useRef<HTMLDivElement>(null)
+
+  // The one ref the region can take, standing for both of them
+  const setPane = useMergedRef(scrollRef, paneRef)
+
+  // Move to whichever turn is being pointed at
+  useRevealPointedTurn(paneRef, pointedAtTurnId)
+
   // The transcript length on the previous render
   const previousLength = usePrevious(turns.length)
 
@@ -174,7 +184,7 @@ export function DefenseTranscript({
           without re-announcing the whole swapped-in transcript */}
       <div
         key={conversationKey}
-        ref={scrollRef}
+        ref={setPane}
         className="flex-1 overflow-y-auto overscroll-contain [mask-image:linear-gradient(to_bottom,transparent,#000_1.5rem,#000_calc(100%-1.5rem),transparent)]"
       >
         {/* The growing content the region follows */}
