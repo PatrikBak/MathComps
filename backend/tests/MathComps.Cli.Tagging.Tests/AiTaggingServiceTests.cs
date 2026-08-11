@@ -63,10 +63,9 @@ public class AiTaggingServiceTests
             var chatCaller = new Mock<ILlmChatCaller>();
             chatCaller
                 .Setup(caller => caller.CompleteAsync<GeneratePassResponse>(
-                    It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-                .Callback<string, string, string, string?, int?, CancellationToken>(
-                    (system, user, _, _, _, _) => (capturedSystem, capturedUser) = (system, user))
+                    It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+                .Callback<ChatCallRequest, CancellationToken>(
+                    (request, _) => (capturedSystem, capturedUser) = (request.SystemPrompt, request.UserPrompt))
                 .ReturnsAsync(new ChatCallResult<GeneratePassResponse>(
                     new GeneratePassResponse([new TagFitnessEntry("Algebra", 0.9f, "clearly algebra")]), ModelUsage.Zero));
 
@@ -161,8 +160,7 @@ public class AiTaggingServiceTests
             var chatCaller = new Mock<ILlmChatCaller>();
             chatCaller
                 .Setup(caller => caller.CompleteAsync<TResponse>(
-                    It.IsAny<string>(), It.IsAny<string>(),
-                    It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                    It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ChatCallResult<TResponse>(cannedResponse, ModelUsage.Zero));
 
             // Run the pass against the configured service.

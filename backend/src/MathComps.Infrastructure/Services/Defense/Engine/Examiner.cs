@@ -210,17 +210,16 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
                 ["revision_note"] = revisionNote,
             });
 
-        // The conversation so far is what the examiner responds to; the reply rides a single-field structured
-        // response, so the model fills the message slot and its scaffolding stays out of the shipped turn.
-        var result = await chatCaller.CompleteAsync<ExaminerReply>(
-            systemPrompt, conversation, _settings.Generate.Model, _settings.Generate.ReasoningEffort,
-            _settings.Generate.MaxOutputTokens, cancellationToken);
+        // The conversation so far is what the examiner responds to; the reply comes back as plain text, the one shape
+        // that carries the LaTeX the examiner writes through unaltered.
+        var result = await chatCaller.CompleteTextAsync(
+            ChatCallRequest.For(_settings.Generate, systemPrompt, conversation), cancellationToken);
 
         // Fold what this call cost into the turn's running total.
         usage.Add(result.Usage);
 
-        // Hand back the model's message.
-        return result.Value.Message;
+        // Hand the message back with its math in the project's dollar delimiters.
+        return MathDelimiterNormalizer.Normalize(result.Value);
     }
 
     /// <summary>
@@ -247,7 +246,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
 
         // Call the model for its structured verdict.
         var result = await chatCaller.CompleteAsync<TResult>(
-            systemPrompt, userPrompt, step.Model, step.ReasoningEffort, step.MaxOutputTokens, cancellationToken);
+            ChatCallRequest.For(step, systemPrompt, userPrompt), cancellationToken);
 
         // Fold what this guard call cost into the turn's running total, so a guard that completed still counts
         // even when its concurrent sibling's cancel unwinds the attempt.
