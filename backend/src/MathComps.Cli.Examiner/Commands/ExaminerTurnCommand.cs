@@ -18,8 +18,9 @@ namespace MathComps.Cli.Examiner.Commands;
 /// <param name="examiner">The engine that runs the per-turn loop.</param>
 [Description("""
     Produce the examiner's next reply for a fixture folder and append it to transcript.md. The fixture's problem,
-    reference, and transcript feed the loop; the reply is math-checked and leak-checked, and regenerated up to a cap
-    if a check flags it. The transcript's last turn must be a '## Candidate' turn — the examiner replies to the candidate.
+    reference, and transcript feed the loop; the reply is math-checked, leak-checked and language-checked, and
+    regenerated up to a cap if a check flags it. The transcript's last turn must be a '## Candidate' turn — the
+    examiner replies to the candidate.
 """)]
 public class ExaminerTurnCommand(IExaminer examiner)
     : AsyncCommand<ExaminerTurnCommand.Settings>
@@ -98,6 +99,9 @@ public class ExaminerTurnCommand(IExaminer examiner)
         // The leak-check line: clean, or a leak with what leaked.
         RenderLeakCheck(outcome.LeakCheck);
 
+        // The language-check line: the candidate's language, and whether the reply held it.
+        RenderLanguageCheck(outcome.LanguageCheck);
+
         // How many times a flagged check forced a regeneration.
         AnsiConsole.MarkupLine(outcome.Revisions == 0
             ? "[green]Revised:[/] no"
@@ -150,5 +154,23 @@ public class ExaminerTurnCommand(IExaminer examiner)
         if (leakCheck.WithholdsClose)
             AnsiConsole.MarkupLineInterpolated(
                 $"[red]Leak-check:[/] withholds the close — {leakCheck.Established}");
+    }
+
+    /// <summary>
+    /// Renders the language-check line: the language the candidate wrote in, and whether the reply drifted out of it.
+    /// </summary>
+    /// <param name="languageCheck">The language-check verdict on the reply.</param>
+    private static void RenderLanguageCheck(LanguageCheckResult languageCheck)
+    {
+        // Drifted — the reply landed in some other language than the candidate's.
+        if (languageCheck.SwitchesLanguage)
+        {
+            AnsiConsole.MarkupLineInterpolated(
+                $"[red]Language-check:[/] switched — the candidate wrote in {languageCheck.CandidateLanguage}");
+            return;
+        }
+
+        // Matched — name the language it stayed in.
+        AnsiConsole.MarkupLineInterpolated($"[green]Language-check:[/] {languageCheck.CandidateLanguage}");
     }
 }

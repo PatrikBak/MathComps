@@ -38,6 +38,7 @@
         "reasoningEffortNone": "none",
         "steps": {
           "generate": "Reply",
+          "languageCheck": "Language check",
           "leakCheck": "Leak check",
           "mathCheck": "Math check"
         },

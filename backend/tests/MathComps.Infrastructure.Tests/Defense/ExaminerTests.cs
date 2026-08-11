@@ -10,10 +10,10 @@ using ExaminerEngine = MathComps.Infrastructure.Services.Defense.Engine.Examiner
 namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
-/// Tests the examiner loop's guard dispatch through its public entry point with a fake chat caller: both guards run on
+/// Tests the examiner loop's guard dispatch through its public entry point with a fake chat caller: every guard runs on
 /// every reply, a flagged guard triggers regeneration — re-verified each time and capped, so a persistent flaw ships
-/// after the cap — a revision carries the specific correction back to the generator, and the turn sums the cost and
-/// tokens of every call it made.
+/// after the cap — a revision carries the specific correction back to the generator, a language switch is sent back for
+/// a rewrite but never costs the reply its content, and the turn sums the cost and tokens of every call it made.
 /// </summary>
 public class ExaminerTests
 {
@@ -23,27 +23,30 @@ public class ExaminerTests
     private const int RevisionCap = 2;
 
     /// <summary>
-    /// Every turn runs both guards independently: a clean reply is math-checked and leak-checked once each, with
-    /// nothing revised.
+    /// Every turn runs each guard independently: a clean reply is math-checked, leak-checked and language-checked once
+    /// each, with nothing revised.
     /// </summary>
     [Fact]
-    public async Task Both_guards_run_on_every_turn()
+    public async Task Every_guard_runs_on_every_turn()
     {
-        // A reply cleared by both guards.
+        // A reply cleared by every guard.
         var caller = new Mock<ILlmChatCaller>();
         SetupTextStep(caller, "a reply.");
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
-        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
 
-        // Generate and both guards each ran once; nothing was revised.
+        // Generate and every guard each ran once; nothing was revised.
         VerifyTextStepCalled(caller, Times.Once());
         VerifyStepCalled<MathCheckResult>(caller, Times.Once());
         VerifyStepCalled<LeakCheckResult>(caller, Times.Once());
+        VerifyStepCalled<LanguageCheckResult>(caller, Times.Once());
         Assert.True(outcome.MathCheck.Holds);
         Assert.False(outcome.LeakCheck.Leaks);
+        Assert.False(outcome.LanguageCheck.SwitchesLanguage);
         Assert.Equal(0, outcome.Revisions);
     }
 
@@ -54,11 +57,12 @@ public class ExaminerTests
     [Fact]
     public async Task A_reply_ships_with_its_bracket_math_normalized()
     {
-        // A reply whose math is bracket-delimited, cleared by both guards.
+        // A reply whose math is bracket-delimited, cleared by every guard.
         var caller = new Mock<ILlmChatCaller>();
         SetupTextStep(caller, @"Why is \(p^2+1\) not divisible by \[q\]?");
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
-        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -84,7 +88,8 @@ public class ExaminerTests
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(new MathCheckResult(Holds: false, Correction: "the bound is at most 1/2, not strictly less")))
             .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
-        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -114,8 +119,9 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample", WithholdsClose: false, Established: "")))
-            .ReturnsAsync(Result(new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: "")));
+            .ReturnsAsync(Result(CleanLeak() with { Leaks = true, WhatLeaked = "named the two-corners counterexample" }))
+            .ReturnsAsync(Result(CleanLeak()));
+        SetupStep(caller, CleanLanguage());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -144,7 +150,8 @@ public class ExaminerTests
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result("a reply."));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
-        SetupStep(caller, new LeakCheckResult(Leaks: true, WhatLeaked: "still gives away the counterexample", WithholdsClose: false, Established: ""));
+        SetupStep(caller, CleanLeak() with { Leaks = true, WhatLeaked = "still gives away the counterexample" });
+        SetupStep(caller, CleanLanguage());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -181,10 +188,13 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new LeakCheckResult(
-                Leaks: false, WhatLeaked: "", WithholdsClose: true, Established: "the full divisor-pairing chain")))
-            .ReturnsAsync(Result(new LeakCheckResult(
-                Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: "")));
+            .ReturnsAsync(Result(CleanLeak() with
+            {
+                WithholdsClose = true,
+                Established = "the full divisor-pairing chain",
+            }))
+            .ReturnsAsync(Result(CleanLeak()));
+        SetupStep(caller, CleanLanguage());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -214,8 +224,12 @@ public class ExaminerTests
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result("keeps pressing."));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
-        SetupStep(caller, new LeakCheckResult(
-            Leaks: false, WhatLeaked: "", WithholdsClose: true, Established: "the full divisor-pairing chain"));
+        SetupStep(caller, CleanLeak() with
+        {
+            WithholdsClose = true,
+            Established = "the full divisor-pairing chain",
+        });
+        SetupStep(caller, CleanLanguage());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -234,8 +248,78 @@ public class ExaminerTests
     }
 
     /// <summary>
-    /// A reply that trips both guards at once feeds both corrections back into the regeneration: the first attempt
-    /// carries no revision note, and the regenerate's prompt names the wrong claim and the leak together.
+    /// A reply that drifted out of the candidate's language regenerates under a note pointing the generator back at
+    /// their latest turn, and the loop stops once the fresh attempt comes back in it. The note withholds the language
+    /// the checker named on purpose: between two close languages that label can be wrong, and feeding a wrong one
+    /// back would push the generator into the very switch the note exists to undo.
+    /// </summary>
+    [Fact]
+    public async Task A_switched_language_regenerates_under_a_note_pointing_at_the_candidates_latest_turn()
+    {
+        // Capture each generate call's request as it lands.
+        var generateRequests = new List<ChatCallRequest>();
+        var caller = new Mock<ILlmChatCaller>();
+        caller.SetupSequence(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("eine Frage."))
+            .ReturnsAsync(Result("a question."));
+
+        // The reference guards stay clean; the language check catches the first attempt in the wrong language, then
+        // clears.
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanLeak());
+        caller.SetupSequence(mock => mock.CompleteAsync<LanguageCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanLanguage() with { SwitchesLanguage = true, CandidateLanguage = "Slovak" }))
+            .ReturnsAsync(Result(CleanLanguage()));
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // It regenerated exactly once and shipped the attempt that came back in the right language.
+        Assert.Equal(1, outcome.Revisions);
+        Assert.Equal("a question.", outcome.Reply);
+        Assert.False(outcome.LanguageCheck.SwitchesLanguage);
+
+        // The regenerate's prompt sent it back to the candidate's latest turn for the language...
+        Assert.Contains("the language of their latest turn", generateRequests[1].SystemPrompt);
+
+        // ...and carried none of the checker's own guess at what that language is.
+        Assert.DoesNotContain("Slovak", generateRequests[1].SystemPrompt);
+    }
+
+    /// <summary>
+    /// A reply that keeps drifting out of the candidate's language burns through the revision cap and then ships as it
+    /// stands. The fallback would trade a sharp question for a claim-less holding one, and a challenge in the wrong
+    /// language still carries the exam forward where a content-free retreat doesn't.
+    /// </summary>
+    [Fact]
+    public async Task A_persistent_language_switch_ships_the_drifted_reply_without_the_fallback()
+    {
+        // A reply that always comes back in another language, clean on every other count.
+        var caller = new Mock<ILlmChatCaller>();
+        SetupTextStep(caller, "eine Frage.");
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage() with { SwitchesLanguage = true, CandidateLanguage = "Slovak" });
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // Generate ran the initial attempt and the capped revisions, with no fallback generation on top.
+        VerifyTextStepCalled(caller, Times.Exactly(RevisionCap + 1));
+
+        // The drifted reply itself shipped, still carrying the flagged verdict.
+        Assert.Equal(RevisionCap, outcome.Revisions);
+        Assert.False(outcome.SafeFallback);
+        Assert.True(outcome.LanguageCheck.SwitchesLanguage);
+        Assert.Equal("eine Frage.", outcome.Reply);
+    }
+
+    /// <summary>
+    /// A reply that trips the math-check and the leak-check at once feeds both corrections back into the
+    /// regeneration: the first attempt carries no revision note, and the regenerate's prompt names the wrong claim
+    /// and the leak together.
     /// </summary>
     [Fact]
     public async Task A_reply_tripping_both_guards_feeds_both_corrections_into_the_regeneration()
@@ -255,13 +339,14 @@ public class ExaminerTests
             .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new LeakCheckResult(Leaks: true, WhatLeaked: "named the two-corners counterexample", WithholdsClose: false, Established: "")))
-            .ReturnsAsync(Result(new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: "")));
+            .ReturnsAsync(Result(CleanLeak() with { Leaks = true, WhatLeaked = "named the two-corners counterexample" }))
+            .ReturnsAsync(Result(CleanLeak()));
+        SetupStep(caller, CleanLanguage());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
 
-        // It regenerated exactly once, ending clean on both guards.
+        // It regenerated exactly once, ending clean on both of them.
         Assert.Equal(1, outcome.Revisions);
 
         // The first generate carried no revision note.
@@ -291,7 +376,8 @@ public class ExaminerTests
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result("a reply."));
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
-        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
 
         // A minimal transcript ending on a candidate turn.
         var transcript = Transcript.Parse("## Candidate\n\nmy defense");
@@ -317,25 +403,26 @@ public class ExaminerTests
     }
 
     /// <summary>
-    /// The turn's outcome sums the cost and tokens of every model call it made — the generate step and both guards on a
-    /// clean turn — so a caller can price the turn from a single figure.
+    /// The turn's outcome sums the cost and tokens of every model call it made — the generate step and every guard on
+    /// a clean turn — so a caller can price the turn from a single figure.
     /// </summary>
     [Fact]
     public async Task Turn_sums_cost_and_tokens_across_all_calls()
     {
-        // Each of the three calls a clean turn makes reports its own cost and token usage.
+        // Each call a clean turn makes reports its own cost and token usage.
         var caller = new Mock<ILlmChatCaller>();
         SetupTextStep(caller, "a reply.", cost: 0.01m, promptTokens: 100, completionTokens: 20);
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""), cost: 0.02m, promptTokens: 200, completionTokens: 30);
-        SetupStep(caller, new LeakCheckResult(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: ""), cost: 0.03m, promptTokens: 300, completionTokens: 40);
+        SetupStep(caller, CleanLeak(), cost: 0.03m, promptTokens: 300, completionTokens: 40);
+        SetupStep(caller, CleanLanguage(), cost: 0.04m, promptTokens: 400, completionTokens: 50);
 
         // Run the turn.
         var outcome = await RunAsync(caller);
 
-        // The outcome carries the summed spend and tokens of all three calls.
-        Assert.Equal(0.06m, outcome.Usage.Cost);
-        Assert.Equal(600, outcome.Usage.PromptTokens);
-        Assert.Equal(90, outcome.Usage.CompletionTokens);
+        // The outcome carries the summed spend and tokens of every call.
+        Assert.Equal(0.10m, outcome.Usage.Cost);
+        Assert.Equal(1000, outcome.Usage.PromptTokens);
+        Assert.Equal(140, outcome.Usage.CompletionTokens);
     }
 
     /// <summary>
@@ -411,6 +498,7 @@ public class ExaminerTests
                 Generate = Step("generate.txt"),
                 MathCheck = Step("math-check.txt"),
                 LeakCheck = Step("leak-check.txt"),
+                LanguageCheck = Step("language-check.txt"),
                 MaxRevisions = RevisionCap,
             };
 
@@ -423,6 +511,20 @@ public class ExaminerTests
             directory.Delete(recursive: true);
         }
     }
+
+    /// <summary>
+    /// A leak-check verdict with nothing flagged, which each test bends into the one fault it exercises.
+    /// </summary>
+    /// <returns>The clean verdict.</returns>
+    private static LeakCheckResult CleanLeak() =>
+        new(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: "");
+
+    /// <summary>
+    /// A language-check verdict on a reply that stayed in the candidate's language.
+    /// </summary>
+    /// <returns>The clean verdict.</returns>
+    private static LanguageCheckResult CleanLanguage() =>
+        new(SwitchesLanguage: false, CandidateLanguage: "English");
 
     /// <summary>
     /// Wraps a value in a chat-call result carrying the given cost and tokens, the shape a caller hands back.

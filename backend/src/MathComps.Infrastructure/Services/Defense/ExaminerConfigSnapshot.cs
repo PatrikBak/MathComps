@@ -20,7 +20,8 @@ public sealed record ChatStepConfigSnapshot(
 /// <param name="Generate">The recorded generate step.</param>
 /// <param name="MathCheck">The recorded math-check step.</param>
 /// <param name="LeakCheck">The recorded leak-check step.</param>
+/// <param name="LanguageCheck">The recorded language-check step.</param>
 /// <param name="MaxRevisions">The revision cap in force.</param>
 public sealed record ExaminerConfigSnapshot(
     ChatStepConfigSnapshot Generate, ChatStepConfigSnapshot MathCheck, ChatStepConfigSnapshot LeakCheck,
-    int MaxRevisions);
+    ChatStepConfigSnapshot LanguageCheck, int MaxRevisions);

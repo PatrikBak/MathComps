@@ -10,9 +10,9 @@ import type { ExaminerConfigSnapshot, ExaminerStepSnapshot } from '../model/defe
 import { PromptTextModal } from './PromptTextModal'
 
 /**
- * The examiner's three steps, in the order they run.
+ * The examiner's steps, in the order they run.
  */
-const STEPS = ['generate', 'mathCheck', 'leakCheck'] as const
+const STEPS = ['generate', 'mathCheck', 'leakCheck', 'languageCheck'] as const
 
 /**
  * One of the examiner's steps.
@@ -31,10 +31,10 @@ type DefenseReviewConfigTabProps = {
  * What the examiner was running on: the models and limits per step, and the prompt template each ran.
  *
  * The settings read down the steps rather than across them. Across is the shape that invites comparison, but
- * the panel this sits in is narrower than three model names, so that shape could only ever be reached through
- * a sideways scrollbar, and the labels beside it were losing their own column to hyphenation. Each step's
- * label and value columns hold a fixed width so three steps read as one column of values rather than three
- * ragged ones.
+ * the panel this sits in is narrower than a row of model names, so that shape could only ever be reached
+ * through a sideways scrollbar, and the labels beside it were losing their own column to hyphenation. Each
+ * step's label and value columns hold a fixed width so the steps read as one column of values rather than
+ * several ragged ones.
  *
  * A template runs to thousands of characters, so it is fetched on asking and read in a dialog rather than
  * filling a panel it would have to be read sideways in.

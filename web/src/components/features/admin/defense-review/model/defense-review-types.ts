@@ -205,6 +205,8 @@ export type ExaminerConfigSnapshot = {
   mathCheck?: ExaminerStepSnapshot
   /** The step that checks the reply gives nothing away. */
   leakCheck?: ExaminerStepSnapshot
+  /** The step that checks the reply is in the student's language. */
+  languageCheck?: ExaminerStepSnapshot
   /** How many times a flagged reply may be regenerated. */
   maxRevisions?: number
 }

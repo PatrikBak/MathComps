@@ -38,6 +38,7 @@
         "reasoningEffortNone": "žiadne",
         "steps": {
           "generate": "Odpoveď",
+          "languageCheck": "Kontrola jazyka",
           "leakCheck": "Kontrola prezradenia",
           "mathCheck": "Kontrola matematiky"
         },
