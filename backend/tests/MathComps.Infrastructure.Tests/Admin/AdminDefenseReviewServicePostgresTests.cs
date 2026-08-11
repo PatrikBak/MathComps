@@ -119,9 +119,20 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         /*lang=json,strict*/ """{ "generate" : { "promptText" : "be fair", "model" : "gemini-3.6-flash" } }""";
 
     /// <summary>
+    /// How long every seeded model call took.
+    /// </summary>
+    private const int CallDurationMs = 900;
+
+    /// <summary>
     /// When the seed was written, which every seeded time is measured back from.
     /// </summary>
     private static readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
+
+    /// <summary>
+    /// How long each of the seeded drafts took, in the order they were drafted. Distinct per draft, so a projection
+    /// that carried one draft's time onto the rest would show.
+    /// </summary>
+    private static readonly int[] _attemptDurationsMs = [2_400, 1_600];
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
@@ -185,8 +196,10 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // somewhere to read back empty from. Written in the reverse of the order they were drafted, so a read that
         // takes the database's own order for the run's order has something to get wrong.
         context.DefenseTurnAttempts.AddRange(
-            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 1, "her reply", leaks: false),
-            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 0, "her leaky draft", leaks: true));
+            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 1, "her reply", leaks: false,
+                _attemptDurationsMs[1]),
+            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 0, "her leaky draft", leaks: true,
+                _attemptDurationsMs[0]));
 
         // What each conversation was held against, the targetless one deliberately naming nothing.
         context.HandoutEnvironmentDefenses.AddRange(
@@ -744,6 +757,12 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             attempt => Assert.Equal(
                 [ExaminerStep.Generate, ExaminerStep.LeakCheck],
                 attempt.Calls.Select(call => call.Step).Order()));
+
+        // Along with how long each draft and each of its calls took, the axis a slow reply is traced along
+        Assert.Equal(_attemptDurationsMs, detail.Attempts.Select(attempt => attempt.DurationMs));
+        Assert.All(
+            detail.Attempts.SelectMany(attempt => attempt.Calls),
+            call => Assert.Equal(CallDurationMs, call.DurationMs));
     });
 
     /// <summary>
@@ -989,9 +1008,10 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// <param name="attemptIndex">Its place in that reply's run.</param>
     /// <param name="reply">The drafted text.</param>
     /// <param name="leaks">Whether the leak-check flagged it, which is what sends a draft back.</param>
+    /// <param name="durationMs">How long the draft took end to end.</param>
     /// <returns>The draft, ready to add.</returns>
     private static DefenseTurnAttempt NewAttempt(
-        Guid sessionId, Guid turnId, int attemptIndex, string reply, bool leaks)
+        Guid sessionId, Guid turnId, int attemptIndex, string reply, bool leaks, int durationMs)
     {
         // The draft and every verdict passed on it, clean but for the leak the test asks for.
         var attempt = new DefenseTurnAttempt
@@ -1011,6 +1031,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             CandidateLanguage = "English",
             IsSafeFallback = false,
             CreatedAt = _now,
+            DurationMs = durationMs,
         };
 
         // The calls behind it, keyed off the draft's own client-side id.
@@ -1037,5 +1058,6 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         CompletionTokens = 20,
         ReasoningTokens = 5,
         CachedPromptTokens = 0,
+        DurationMs = CallDurationMs,
     };
 }

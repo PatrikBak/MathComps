@@ -28,13 +28,16 @@
     "defenseReview": {
       "attempts": {
         "attempt": "Návrh {index}",
-        "call": "{model}, reasoning {effort}, ${cost}, {promptTokens} vstup, {completionTokens} výstup ({reasoningTokens} uvažovanie)",
-        "effortDefault": "nenastavené",
+        "cost": "Cena",
         "fallback": "náhrada",
         "open": "Zobraziť návrhy, z ktorých táto odpoveď vzišla ({draftCount})",
         "rejected": "vrátené",
         "shipped": "odoslané",
+        "time": "Čas",
         "title": "Ako odpoveď vznikla",
+        "tokenCounts": "{promptTokens} vstup, {completionTokens} výstup ({reasoningTokens} uvažovanie)",
+        "tokens": "Tokeny",
+        "total": "Celkovo",
         "verdicts": {
           "close": "Uzavretie",
           "closeClean": "zatiaľ nie je zaslúžené",

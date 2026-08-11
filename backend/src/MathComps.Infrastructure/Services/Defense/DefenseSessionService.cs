@@ -479,6 +479,7 @@ public class DefenseSessionService(
             CandidateLanguage = attempt.LanguageCheck.CandidateLanguage,
             IsSafeFallback = isSafeFallback,
             CreatedAt = createdAt,
+            DurationMs = attempt.DurationMs,
         };
 
         // The calls it made, keyed off the row's client-side id.
@@ -495,6 +496,7 @@ public class DefenseSessionService(
                 CompletionTokens = call.Usage.CompletionTokens,
                 ReasoningTokens = call.Usage.ReasoningTokens,
                 CachedPromptTokens = call.Usage.CachedPromptTokens,
+                DurationMs = call.DurationMs,
             }),
         ];
 

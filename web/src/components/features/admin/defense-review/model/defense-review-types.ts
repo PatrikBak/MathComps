@@ -192,7 +192,7 @@ export const EXAMINER_STEPS = ['generate', 'mathCheck', 'leakCheck', 'languageCh
 export type ExaminerStep = (typeof EXAMINER_STEPS)[number]
 
 /**
- * One model call an attempt made, and what it billed.
+ * One model call an attempt made, what it billed and how long it took.
  */
 export type DefenseAttemptCall = {
   /** The step that made the call. */
@@ -209,6 +209,8 @@ export type DefenseAttemptCall = {
   completionTokens: number
   /** The reasoning portion of the completion tokens. */
   reasoningTokens: number
+  /** How long the call took, in milliseconds; 0 on one made before the timings were kept. */
+  durationMs: number
 }
 
 /**
@@ -245,6 +247,11 @@ export type DefenseTurnAttempt = {
   isSafeFallback: boolean
   /** The model calls this attempt made. */
   calls: DefenseAttemptCall[]
+  /**
+   * How long the attempt took end to end, in milliseconds; 0 on one made before the timings were kept. The guards
+   * judge concurrently, so this is shorter than its calls add up to.
+   */
+  durationMs: number
 }
 
 /**

@@ -12,4 +12,6 @@ namespace MathComps.Infrastructure.Services.Defense.Engine;
 /// <param name="Model">The model it routed to.</param>
 /// <param name="ReasoningEffort">The reasoning-effort level it ran at, or null when none was sent.</param>
 /// <param name="Usage">What the call billed: its spend and token counts.</param>
-public record ExaminerStepCall(ExaminerStep Step, string Model, string? ReasoningEffort, ModelUsage Usage);
+/// <param name="DurationMs">How long the call took, in milliseconds, retries included.</param>
+public record ExaminerStepCall(
+    ExaminerStep Step, string Model, string? ReasoningEffort, ModelUsage Usage, int DurationMs);

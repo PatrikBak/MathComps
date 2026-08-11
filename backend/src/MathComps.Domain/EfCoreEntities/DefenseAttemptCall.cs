@@ -65,4 +65,10 @@ public class DefenseAttemptCall
     /// The call's prompt tokens served from the provider's cache, a subset of <see cref="PromptTokens"/>.
     /// </summary>
     public required int CachedPromptTokens { get; set; }
+
+    /// <summary>
+    /// How long the call took, in milliseconds, the retries behind it included. 0 on a call recorded before the
+    /// timings were kept.
+    /// </summary>
+    public required int DurationMs { get; set; }
 }

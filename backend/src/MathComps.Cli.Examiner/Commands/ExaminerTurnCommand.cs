@@ -119,9 +119,10 @@ public class ExaminerTurnCommand(IExaminer examiner)
     }
 
     /// <summary>
-    /// Writes what each attempt's calls cost, one line per call. A turn reports a single figure, which is what the
-    /// spend ceiling charges against and useless for tuning a step: this is the breakdown a reasoning-level or model
-    /// change is judged on, and on a revised turn it also shows what the rejected drafts were spent on.
+    /// Writes what each attempt's calls cost and how long they took, one line per call. A turn reports a single figure
+    /// of each, which is what the spend ceiling charges against and useless for tuning a step: this is the breakdown a
+    /// reasoning-level or model change is judged on, and on a revised turn it also shows what the rejected drafts were
+    /// spent on.
     /// </summary>
     /// <param name="outcome">The turn's attempts and the calls behind them.</param>
     private static void RenderCallTrail(ExaminerTurnOutcome outcome)
@@ -129,24 +130,26 @@ public class ExaminerTurnCommand(IExaminer examiner)
         // Walk the attempts in the order they were drafted.
         foreach (var (index, attempt) in outcome.Attempts.Index())
         {
-            // Head each attempt with its place in the run, naming the one that shipped.
+            // Head each attempt with its place in the run, naming the one that shipped and how long it took.
             var label = index == outcome.Attempts.Count - 1 ? "shipped" : "rejected";
-            AnsiConsole.MarkupLineInterpolated($"\n[bold]Attempt {index + 1}[/] [grey]({label})[/]");
+            AnsiConsole.MarkupLineInterpolated(
+                $"\n[bold]Attempt {index + 1}[/] [grey]({label}, {attempt.DurationMs / 1000.0:0.0}s)[/]");
 
-            // One line per call: the step, how it was routed, and what it billed.
+            // One line per call: the step, how it was routed, what it billed, and what it kept the attempt waiting.
             foreach (var call in attempt.Calls)
             {
                 // The reasoning level, or a marker for a call that sent no reasoning field at all.
                 var effort = call.ReasoningEffort ?? "default";
 
-                // The counts, with the reasoning ones called out since they're what a level change moves.
-                var tokens =
+                // The counts, with the reasoning ones called out since they're what a level change moves, and how
+                // long the call took.
+                var spent =
                     $"{call.Usage.PromptTokens} in, {call.Usage.CompletionTokens} out " +
-                    $"({call.Usage.ReasoningTokens} reasoning)";
+                    $"({call.Usage.ReasoningTokens} reasoning), {call.DurationMs / 1000.0:0.0}s";
 
                 // The call's line.
                 AnsiConsole.MarkupLineInterpolated(
-                    $"[grey]  {call.Step} — {call.Model}, reasoning {effort}, ${call.Usage.Cost:0.00000}, {tokens}[/]");
+                    $"[grey]  {call.Step} — {call.Model}, reasoning {effort}, ${call.Usage.Cost:0.00000}, {spent}[/]");
             }
         }
     }

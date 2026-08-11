@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { Button } from '@/components/shared/components/Button'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
+import { formatDurationMs } from '@/components/shared/utils/duration-utils'
 
 import type { Turn, TurnRole } from '../model/defense-types'
 
@@ -69,6 +70,8 @@ type DefenseTurnProps = TurnActionsAffordance & {
   unreadMark: TurnUnreadMark | null
   /** Reading the drafts behind this reply; null where the reader isn't allowed to see them. */
   draftsMark: TurnDraftsMark | null
+  /** How long the examiner took over this reply, in milliseconds; null where the reader is shown no timings. */
+  durationMs: number | null
   /** The localized role label shown above the message. */
   label: string
   /** Whether this turn just arrived and should fade in. */
@@ -146,6 +149,7 @@ export function DefenseTurn({
   onReport,
   unreadMark,
   draftsMark,
+  durationMs,
 }: DefenseTurnProps) {
   // The look for this turn's author
   const style = TURN_STYLES[turn.role]
@@ -181,7 +185,7 @@ export function DefenseTurn({
       {/* The author label, with the turn's controls at the row's trailing edge so they never cover the
           message body */}
       <div className="flex items-center justify-between gap-2">
-        {/* Where the turn sits and who authored it */}
+        {/* Where the turn sits, who authored it, and how long it took them */}
         <div className="flex min-w-0 items-baseline gap-2">
           {position !== null && (
             <span className="text-[11px] font-bold tabular-nums text-muted">{position}</span>
@@ -190,6 +194,12 @@ export function DefenseTurn({
           <div className={cn('text-[11px] font-bold uppercase tracking-wide', style.label)}>
             {label}
           </div>
+
+          {durationMs !== null && (
+            <span className="text-[11px] tabular-nums text-muted">
+              {formatDurationMs(durationMs)}
+            </span>
+          )}
         </div>
 
         {/* The turn's controls, and whatever has already been said about it */}
