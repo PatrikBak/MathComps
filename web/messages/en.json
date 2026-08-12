@@ -342,6 +342,11 @@
     "SK": "Slovakia"
   },
   "defense": {
+    "consentAccept": "Got it",
+    "consentAuthReason": "talking to Mathilda",
+    "consentBody": "We save your conversations with Mathilda and might read them to make her better. We also ask you to use her fairly, every reply she gives costs us something. Click through if you're fine with that 🙂",
+    "consentError": "Your confirmation couldn't be saved.",
+    "consentPolicyLink": "Privacy and terms",
     "deleteError": "The conversation couldn't be removed.",
     "deleteSession": "Remove from history",
     "deleteSessionMessage": "This conversation will be permanently removed.",

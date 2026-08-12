@@ -35,11 +35,12 @@ public class UserManager(
             UpdatedAt = now
         };
 
-        // This cool little library compiles this onto a native upsert
+        // This cool little library compiles this onto a native upsert. The excluded columns are the ones the
+        // upstream user carries nothing for, so writing them from this entity would blank whatever is there.
         await dbContext.Users
             .Upsert(userEntity)
             .On(user => user.ExternalId)
-            .Exclude(user => new { user.CreatedAt, user.Id })
+            .Exclude(user => new { user.CreatedAt, user.Id, user.ConsentedToAiAt })
             .RunAsync(cancellationToken);
 
         // Return the user ID
@@ -127,5 +128,28 @@ public class UserManager(
 
         // Log the soft deletion of the user.
         logger.LogInformation("Soft-deleted user: {ExternalId}", externalId);
+    }
+
+    /// <inheritdoc />
+    public async Task<DateTimeOffset?> GetAiConsentAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        // Narrow to the one user's stamp. An id with no row behind it answers the same null, since whoever is
+        // behind it has never been told either.
+        return await dbContext.Users
+            .Where(user => user.Id == userId)
+            .Select(user => user.ConsentedToAiAt)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task RecordAiConsentAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        // Stamp the moment, filtering on it still being unset so acknowledging a second time leaves the first
+        // one standing rather than rewriting when they were told
+        await dbContext.Users
+            .Where(user => user.Id == userId && user.ConsentedToAiAt == null)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(user => user.ConsentedToAiAt, DateTimeOffset.UtcNow),
+                cancellationToken);
     }
 }

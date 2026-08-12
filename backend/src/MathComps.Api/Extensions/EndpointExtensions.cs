@@ -23,6 +23,9 @@ public static class EndpointExtensions
         // The authenticated user's problem lists
         app.MapUserListEndpoints();
 
+        // The authenticated user's own account
+        app.MapUserEndpoints();
+
         // AI-examiner defense conversations
         app.MapDefenseEndpoints();
 
