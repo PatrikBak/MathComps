@@ -1,6 +1,4 @@
-using MathComps.Shared.Serialization;
 using System.Collections.Immutable;
-using System.Text.Json.Serialization;
 
 namespace MathComps.Domain.Taxonomy;
 
@@ -8,49 +6,25 @@ namespace MathComps.Domain.Taxonomy;
 
 /// <summary>
 /// Display names (short and full) for localized metadata entities.
-/// Used for both competitions and rounds.
+/// Used for every contest node, whatever depth it sits at.
 /// </summary>
 /// <param name="ShortName">Abbreviated name for compact displays (e.g., "MO" for "Matematická olympiáda").</param>
 /// <param name="FullName">Complete official name for formal contexts.</param>
 public record LocalizedNames(string ShortName, string FullName);
-
-/// <summary>
-/// Lookup of competition slugs to their localized names.
-/// </summary>
-/// <param name="Data">Dictionary mapping competition slug to display names.</param>
-[JsonConverter(typeof(GenericDictionaryWrapperConverter<CompetitionNamesBySlug>))]
-public record CompetitionNamesBySlug(ImmutableDictionary<string, LocalizedNames> Data);
-
-/// <summary>
-/// Lookup of composite round slugs to their localized names.
-/// </summary>
-/// <param name="Data">Dictionary mapping composite round slug (e.g. "csmo-a-iii", "memo-i") to display names.</param>
-[JsonConverter(typeof(GenericDictionaryWrapperConverter<RoundNamesBySlug>))]
-public record RoundNamesBySlug(ImmutableDictionary<string, LocalizedNames> Data);
-
-/// <summary>
-/// Lookup of category slugs to their localized display names.
-/// </summary>
-/// <param name="Data">Dictionary mapping category slug to display name.</param>
-[JsonConverter(typeof(GenericDictionaryWrapperConverter<CategoryNamesBySlug>))]
-public record CategoryNamesBySlug(ImmutableDictionary<string, string> Data);
 
 #endregion
 
 #region Composite Types
 
 /// <summary>
-/// Localized display names for one locale, deserialized directly from a metadata.{locale}.json file:
-/// names for competitions, rounds, and categories, plus the season-label template.
+/// Localized display names for one locale, deserialized directly from a metadata.{locale}.json file: a name
+/// for every contest node at any depth, plus the season-label template.
 /// </summary>
-/// <param name="Competitions">Competition slug to localized names mapping.</param>
-/// <param name="Rounds">Composite round slug (e.g. "csmo-a-iii", "memo-i") to localized names mapping.</param>
-/// <param name="Categories">Category slug to localized display name mapping.</param>
+/// <param name="Nodes">Localized names of every contest node, keyed by its path
+/// (e.g. "csmo", "csmo-a", "csmo-a-iii").</param>
 /// <param name="SeasonFormat">Template for season labels with {number}, {start}, {end} placeholders.</param>
 public record PerLocaleMetadata(
-    CompetitionNamesBySlug Competitions,
-    RoundNamesBySlug Rounds,
-    CategoryNamesBySlug Categories,
+    ImmutableDictionary<string, LocalizedNames> Nodes,
     string SeasonFormat)
 {
     /// <summary>
@@ -67,23 +41,13 @@ public record PerLocaleMetadata(
             .Replace("{end}", endYear.ToString());
 
     /// <summary>
-    /// Gets the round names (short and full) for the specified competition, category, and round. Composes the
-    /// composite round slug (e.g. "csmo-a-iii", "memo-i") and looks it up. A null round slug means the
-    /// competition's single default round, which uses the competition's own name (e.g. IMO -> IMO).
+    /// Gets the names (short and full) of the contest node a path addresses, whatever depth it sits at.
     /// </summary>
-    /// <param name="competitionSlug">The competition identifier (e.g., "csmo", "imo").</param>
-    /// <param name="categorySlug">The category identifier (e.g., "a", "b"), or null when the competition has no categories.</param>
-    /// <param name="roundSlug">The round identifier (e.g., "iii", "i", "d1"), or null for a default round.</param>
-    /// <returns>Localized round names, or null if not found.</returns>
-    public LocalizedNames? GetRoundNames(string competitionSlug, string? categorySlug, string? roundSlug)
-    {
-        // A default round (null slug) has no round name of its own — use the competition's own name.
-        if (roundSlug == null)
-            return Competitions.Data.GetValueOrDefault(competitionSlug);
-
-        // Look up the round under its composite slug; null when the locale has no entry for it.
-        return Rounds.Data.GetValueOrDefault(TaxonomySlugs.ComposeRoundSlug(competitionSlug, categorySlug, roundSlug));
-    }
+    /// <param name="path">The node's path (e.g. "csmo", "csmo-a", "csmo-a-iii", "memo-i").</param>
+    /// <returns>Localized node names, or null if not found.</returns>
+    public LocalizedNames? GetNodeNames(string path) =>
+        // One map at any depth, a competition's own path included.
+        Nodes.GetValueOrDefault(path);
 }
 
 #endregion

@@ -52,29 +52,14 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     #region IMetadataLocalizationService implementation
 
     /// <inheritdoc />
-    public string GetCompetitionShortName(Language language, string slug) =>
-        GetMetadata(language).Competitions.Data.GetValueOrDefault(slug)?.ShortName
-            ?? throw MissingLocalization("competition", slug, language);
+    public string GetNodeShortName(Language language, string path) =>
+        GetMetadata(language).GetNodeNames(path)?.ShortName
+            ?? throw MissingLocalization("contest", path, language);
 
     /// <inheritdoc />
-    public string GetCompetitionFullName(Language language, string slug) =>
-        GetMetadata(language).Competitions.Data.GetValueOrDefault(slug)?.FullName
-            ?? throw MissingLocalization("competition", slug, language);
-
-    /// <inheritdoc />
-    public string GetRoundShortName(Language language, string competitionSlug, string? categorySlug, string? roundSlug) =>
-        GetMetadata(language).GetRoundNames(competitionSlug, categorySlug, roundSlug)?.ShortName
-            ?? throw MissingLocalization("round", $"{competitionSlug}/{categorySlug ?? "null"}/{roundSlug ?? "null"}", language);
-
-    /// <inheritdoc />
-    public string GetRoundFullName(Language language, string competitionSlug, string? categorySlug, string? roundSlug) =>
-        GetMetadata(language).GetRoundNames(competitionSlug, categorySlug, roundSlug)?.FullName
-            ?? throw MissingLocalization("round", $"{competitionSlug}/{categorySlug ?? "null"}/{roundSlug ?? "null"}", language);
-
-    /// <inheritdoc />
-    public string GetCategoryName(Language language, string slug) =>
-        GetMetadata(language).Categories.Data.GetValueOrDefault(slug)
-            ?? throw MissingLocalization("category", slug, language);
+    public string GetNodeFullName(Language language, string path) =>
+        GetMetadata(language).GetNodeNames(path)?.FullName
+            ?? throw MissingLocalization("contest", path, language);
 
     /// <inheritdoc />
     public string GetTagName(Language language, string slug) =>
@@ -98,9 +83,9 @@ public class MetadataLocalizationService : IMetadataLocalizationService
         // Competition: its structural entry in the shared backbone …
         var competitionEntry = Shared.Competitions.FirstOrDefault(competition => competition.Slug == competitionSlug);
 
-        // Check if competition missing in some locale 
+        // Check if competition missing in some locale
         var competitionMissingLocales = LocalesMissing(metadata =>
-            metadata.Competitions.Data.ContainsKey(competitionSlug));
+            HasBothNames(metadata, competitionSlug));
 
         // Report the competition only when something's actually missing.
         if (competitionEntry is null || competitionMissingLocales.Length > 0)
@@ -118,34 +103,37 @@ public class MetadataLocalizationService : IMetadataLocalizationService
                 !Shared.Categories.Contains(categorySlug) ||
                 (competitionEntry?.Categories is { } competitionCategories && !competitionCategories.Contains(categorySlug));
 
+            // A category is named per competition, so its path is what a locale keys its name by.
+            var categoryPath = TaxonomySlugs.ComposeRoundSlug(competitionSlug, categorySlug, round: null);
+
             // Check if category missing in some locale
             var categoryMissingLocales = LocalesMissing(metadata =>
-                metadata.Categories.Data.ContainsKey(categorySlug));
+                HasBothNames(metadata, categoryPath));
 
             // Report only on a real gap.
             if (categoryMissingFromShared || categoryMissingLocales.Length > 0)
                 issues.Add(new TaxonomyRegistryIssue(
                     TaxonomyEntityKind.Category,
-                    categorySlug,
+                    categoryPath,
                     categoryMissingFromShared,
                     categoryMissingLocales));
         }
 
-        // Round is referenced as the (competition, category, round) composite.
+        // Round is referenced as the (competition, category, round) triple.
         // Structural: the competition lists this round (a null round is the default round, i.e. no listed rounds).
         var roundMissingFromShared = roundSlug is null
             ? competitionEntry is not null && competitionEntry.Rounds.Length > 0
             : competitionEntry is null || !competitionEntry.Rounds.Contains(roundSlug);
 
-        // Check if round missing in some locale
-        var roundMissingLocales = LocalesMissing(metadata =>
-            metadata.GetRoundNames(competitionSlug, categorySlug, roundSlug) is not null);
-
-        // Identify the round by its composite slug (e.g. "csmo-a-iii") — a round's canonical key form, so the gap
-        // names the exact key to look for. A default round (null slug) is keyed under the competition itself.
+        // Identify the round by its path (e.g. "csmo-a-iii"), so the gap names the exact key to look for. A
+        // default round stands for its whole competition, whose path is the competition slug on its own.
         var roundIdentifier = roundSlug is null
             ? competitionSlug
             : TaxonomySlugs.ComposeRoundSlug(competitionSlug, categorySlug, roundSlug);
+
+        // Check if round missing in some locale
+        var roundMissingLocales = LocalesMissing(metadata =>
+            HasBothNames(metadata, roundIdentifier));
 
         // Report only on a real gap.
         if (roundMissingFromShared || roundMissingLocales.Length > 0)
@@ -162,6 +150,17 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     #endregion
 
     #region Private Helpers
+
+    /// <summary>
+    /// Whether a locale names a node at all — both names, since a reader asks for either one and an
+    /// entry carrying only a short name resolves right up until something reads the full one.
+    /// </summary>
+    /// <param name="metadata">The locale's loaded metadata.</param>
+    /// <param name="path">The node's path.</param>
+    /// <returns>True when the locale carries both names for it.</returns>
+    private static bool HasBothNames(PerLocaleMetadata metadata, string path) =>
+        // A name the JSON omits deserializes to null, which no key check would catch.
+        metadata.GetNodeNames(path) is { ShortName.Length: > 0, FullName.Length: > 0 };
 
     /// <summary>
     /// Returns the locales a slug is missing from — those whose loaded metadata fails the given presence
@@ -189,8 +188,8 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     /// <summary>
     /// Creates an exception for missing localization data.
     /// </summary>
-    /// <param name="entityType">The type of the entity, e.g. "competition", "round", "category", "tag", "seasonFormat".</param>
-    /// <param name="identifier">The identifier of the entity, e.g. IMO, CSMO/A/I, MEMO-I.</param>
+    /// <param name="entityType">The type of the entity, e.g. "contest", "tag".</param>
+    /// <param name="identifier">The identifier of the entity, e.g. imo, csmo-a-iii, memo-i.</param>
     /// <param name="language">The language.</param>
     /// <returns>An exception for missing localization data.</returns>
     private static InvalidOperationException MissingLocalization(

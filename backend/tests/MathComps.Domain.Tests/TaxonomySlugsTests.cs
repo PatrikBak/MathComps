@@ -80,4 +80,27 @@ public class TaxonomySlugsTests
     [InlineData("a b", false)]
     public void Path_segments_are_lowercase_alphanumeric(string slug, bool expected) =>
         Assert.Equal(expected, TaxonomySlugs.IsPathSegment(slug));
+
+    /// <summary>
+    /// Selecting a branch takes the branch itself and everything under it, at any depth — and nothing whose
+    /// slug merely starts with the same characters, which is how a two-digit category would otherwise be swept in.
+    /// </summary>
+    /// <param name="path">The node's path.</param>
+    /// <param name="branchPath">The branch being selected.</param>
+    /// <param name="expected">Whether the node is covered by that selection.</param>
+    [Theory]
+    // A branch covers itself.
+    [InlineData("csmo-a", "csmo-a", true)]
+    // And everything below it, however deep.
+    [InlineData("csmo-a-iii", "csmo-a", true)]
+    [InlineData("csmo-a-i-n", "csmo-a", true)]
+    [InlineData("csmo-a-iii", "csmo", true)]
+    // A sibling sharing a prefix is not a descendant, which is what the separator decides.
+    [InlineData("csmo-z10", "csmo-z1", false)]
+    [InlineData("csmoa", "csmo", false)]
+    // Nor is anything above it or beside it.
+    [InlineData("csmo", "csmo-a", false)]
+    [InlineData("csmo-b-i", "csmo-a", false)]
+    public void A_branch_covers_itself_and_its_descendants(string path, string branchPath, bool expected) =>
+        Assert.Equal(expected, TaxonomySlugs.IsAtOrUnder(path, branchPath));
 }

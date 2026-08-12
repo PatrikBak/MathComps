@@ -30,55 +30,23 @@ public interface IMetadataLocalizationService
         string? roundSlug);
 
     /// <summary>
-    /// Gets the localized short name for a competition.
+    /// Gets the localized short name of the contest node a path addresses, at whatever depth it sits — a whole
+    /// competition, a category within one, or a round.
     /// </summary>
     /// <param name="lang">The language to get the name for.</param>
-    /// <param name="slug">The competition slug (e.g., "csmo", "imo").</param>
+    /// <param name="path">The node's path (e.g., "imo", "csmo-a", "csmo-a-iii").</param>
     /// <returns>The localized short name.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the competition is not found.</exception>
-    string GetCompetitionShortName(Language lang, string slug);
+    /// <exception cref="InvalidOperationException">Thrown if the node is not found.</exception>
+    string GetNodeShortName(Language lang, string path);
 
     /// <summary>
-    /// Gets the localized full name for a competition.
+    /// Gets the localized full name of the contest node a path addresses.
     /// </summary>
     /// <param name="lang">The language to get the name for.</param>
-    /// <param name="slug">The competition slug (e.g., "csmo", "imo").</param>
+    /// <param name="path">The node's path (e.g., "imo", "csmo-a", "csmo-a-iii").</param>
     /// <returns>The localized full name.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the competition is not found.</exception>
-    string GetCompetitionFullName(Language lang, string slug);
-
-    /// <summary>
-    /// Gets the localized short name for a round.
-    /// Round names are context-dependent based on competition and category.
-    /// </summary>
-    /// <param name="lang">The language to get the name for.</param>
-    /// <param name="competitionSlug">The competition slug (e.g., "csmo").</param>
-    /// <param name="categorySlug">The category slug (e.g., "a", "z5"), or null if for rounds with no category.</param>
-    /// <param name="roundSlug">The round slug (e.g., "i", "ii", "iii").</param>
-    /// <returns>The localized round short name.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the round is not found.</exception>
-    string GetRoundShortName(Language lang, string competitionSlug, string? categorySlug, string? roundSlug);
-
-    /// <summary>
-    /// Gets the localized full name for a round.
-    /// Round names are context-dependent based on competition and category.
-    /// </summary>
-    /// <param name="lang">The language to get the name for.</param>
-    /// <param name="competitionSlug">The competition slug (e.g., "csmo").</param>
-    /// <param name="categorySlug">The category slug (e.g., "a", "z5"), or null if not applicable.</param>
-    /// <param name="roundSlug">The round slug (e.g., "i", "ii", "iii"), or null for default/only round.</param>
-    /// <returns>The localized round full name.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the round is not found.</exception>
-    string GetRoundFullName(Language lang, string competitionSlug, string? categorySlug, string? roundSlug);
-
-    /// <summary>
-    /// Gets the localized name for a category.
-    /// </summary>
-    /// <param name="lang">The language to get the name for.</param>
-    /// <param name="slug">The category slug (e.g., "a", "b", "z5").</param>
-    /// <returns>The localized category name.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the category is not found.</exception>
-    string GetCategoryName(Language lang, string slug);
+    /// <exception cref="InvalidOperationException">Thrown if the node is not found.</exception>
+    string GetNodeFullName(Language lang, string path);
 
     /// <summary>
     /// Gets the localized name for a tag.

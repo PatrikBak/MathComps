@@ -54,8 +54,7 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
             select new
             {
                 problem.Id,
-                problem.RoundInstance.Round.CompetitionId,
-                problem.RoundInstance.Round.CompositeSlug,
+                problem.RoundInstance.Competition.Path,
 
                 // Get tag ids
                 TagIds = problem.ProblemTagsAll.AsQueryable()
@@ -100,8 +99,7 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
         return new ProblemSimilarityData(
             data.Id,
             data.TagIds,
-            data.CompetitionId,
-            data.CompositeSlug,
+            data.Path,
             statementEmbedding,
             solutionEmbedding
         );

@@ -1,47 +1,13 @@
 {
-  "competitions": {
+  "nodes": {
     "csmo": {
       "shortName": "CSMO",
       "fullName": "Česko-slovenská Matematická olympiáda"
     },
-    "tst": {
-      "shortName": "Výberko IMO/MEMO",
-      "fullName": "Výberové sústredenie pred IMO a MEMO"
+    "csmo-a": {
+      "shortName": "A",
+      "fullName": "Kategória A"
     },
-    "memo": {
-      "shortName": "MEMO",
-      "fullName": "Middle European Mathematical Olympiad"
-    },
-    "imo": {
-      "shortName": "IMO",
-      "fullName": "International Mathematical Olympiad"
-    },
-    "caps": {
-      "shortName": "CAPS",
-      "fullName": "Czech-Austrian-Polish-Slovak Match"
-    },
-    "egmo": {
-      "shortName": "EGMO",
-      "fullName": "European Girl's Mathematical Olympiad"
-    },
-    "emo": {
-      "shortName": "EMO",
-      "fullName": "European Mathematical Olympiad"
-    },
-    "tstc": {
-      "shortName": "Výberko CPSJ",
-      "fullName": "Výberové sústredenie pred CPSJ"
-    },
-    "cpsj": {
-      "shortName": "CPSJ",
-      "fullName": "Czech-Polish-Slovak Junior Match"
-    },
-    "duogeo": {
-      "shortName": "DuoGeo",
-      "fullName": "DuoGeo"
-    }
-  },
-  "rounds": {
     "csmo-a-i": {
       "shortName": "Domáce kolo",
       "fullName": "Domáce kolo"
@@ -57,6 +23,10 @@
     "csmo-a-iii": {
       "shortName": "Celoštátne kolo",
       "fullName": "Celoštátne kolo"
+    },
+    "csmo-b": {
+      "shortName": "B",
+      "fullName": "Kategória B"
     },
     "csmo-b-i": {
       "shortName": "Domáce kolo",
@@ -74,6 +44,10 @@
       "shortName": "Celoštátne kolo",
       "fullName": "Celoštátne kolo"
     },
+    "csmo-c": {
+      "shortName": "C",
+      "fullName": "Kategória C"
+    },
     "csmo-c-i": {
       "shortName": "Domáce kolo",
       "fullName": "Domáce kolo"
@@ -90,61 +64,9 @@
       "shortName": "Celoštátne kolo",
       "fullName": "Celoštátne kolo"
     },
-    "csmo-z4-i": {
-      "shortName": "Domáce kolo",
-      "fullName": "Domáce kolo"
-    },
-    "csmo-z4-ii": {
-      "shortName": "Školské kolo",
-      "fullName": "Školské kolo"
-    },
-    "csmo-z5-i": {
-      "shortName": "Domáce kolo",
-      "fullName": "Domáce kolo"
-    },
-    "csmo-z5-ii": {
-      "shortName": "Okresné kolo",
-      "fullName": "Okresné kolo"
-    },
-    "csmo-z5-iii": {
-      "shortName": "Krajské kolo",
-      "fullName": "Krajské kolo"
-    },
-    "csmo-z6-i": {
-      "shortName": "Domáce kolo",
-      "fullName": "Domáce kolo"
-    },
-    "csmo-z6-ii": {
-      "shortName": "Okresné kolo",
-      "fullName": "Okresné kolo"
-    },
-    "csmo-z6-iii": {
-      "shortName": "Krajské kolo",
-      "fullName": "Krajské kolo"
-    },
-    "csmo-z7-i": {
-      "shortName": "Domáce kolo",
-      "fullName": "Domáce kolo"
-    },
-    "csmo-z7-ii": {
-      "shortName": "Okresné kolo",
-      "fullName": "Okresné kolo"
-    },
-    "csmo-z7-iii": {
-      "shortName": "Krajské kolo",
-      "fullName": "Krajské kolo"
-    },
-    "csmo-z8-i": {
-      "shortName": "Domáce kolo",
-      "fullName": "Domáce kolo"
-    },
-    "csmo-z8-ii": {
-      "shortName": "Okresné kolo",
-      "fullName": "Okresné kolo"
-    },
-    "csmo-z8-iii": {
-      "shortName": "Krajské kolo",
-      "fullName": "Krajské kolo"
+    "csmo-z9": {
+      "shortName": "Z9",
+      "fullName": "Kategória Z9"
     },
     "csmo-z9-i": {
       "shortName": "Domáce kolo",
@@ -158,21 +80,85 @@
       "shortName": "Krajské kolo",
       "fullName": "Krajské kolo"
     },
-    "memo-i": {
-      "shortName": "Individual",
-      "fullName": "Individuálna časť"
+    "csmo-z8": {
+      "shortName": "Z8",
+      "fullName": "Kategória Z8"
     },
-    "memo-t": {
-      "shortName": "Team",
-      "fullName": "Tímová časť"
+    "csmo-z8-i": {
+      "shortName": "Domáce kolo",
+      "fullName": "Domáce kolo"
     },
-    "cpsj-i": {
-      "shortName": "Individual",
-      "fullName": "Individuálna časť"
+    "csmo-z8-ii": {
+      "shortName": "Okresné kolo",
+      "fullName": "Okresné kolo"
     },
-    "cpsj-t": {
-      "shortName": "Team",
-      "fullName": "Tímová časť"
+    "csmo-z8-iii": {
+      "shortName": "Krajské kolo",
+      "fullName": "Krajské kolo"
+    },
+    "csmo-z7": {
+      "shortName": "Z7",
+      "fullName": "Kategória Z7"
+    },
+    "csmo-z7-i": {
+      "shortName": "Domáce kolo",
+      "fullName": "Domáce kolo"
+    },
+    "csmo-z7-ii": {
+      "shortName": "Okresné kolo",
+      "fullName": "Okresné kolo"
+    },
+    "csmo-z7-iii": {
+      "shortName": "Krajské kolo",
+      "fullName": "Krajské kolo"
+    },
+    "csmo-z6": {
+      "shortName": "Z6",
+      "fullName": "Kategória Z6"
+    },
+    "csmo-z6-i": {
+      "shortName": "Domáce kolo",
+      "fullName": "Domáce kolo"
+    },
+    "csmo-z6-ii": {
+      "shortName": "Okresné kolo",
+      "fullName": "Okresné kolo"
+    },
+    "csmo-z6-iii": {
+      "shortName": "Krajské kolo",
+      "fullName": "Krajské kolo"
+    },
+    "csmo-z5": {
+      "shortName": "Z5",
+      "fullName": "Kategória Z5"
+    },
+    "csmo-z5-i": {
+      "shortName": "Domáce kolo",
+      "fullName": "Domáce kolo"
+    },
+    "csmo-z5-ii": {
+      "shortName": "Okresné kolo",
+      "fullName": "Okresné kolo"
+    },
+    "csmo-z5-iii": {
+      "shortName": "Krajské kolo",
+      "fullName": "Krajské kolo"
+    },
+    "csmo-z4": {
+      "shortName": "Z4",
+      "fullName": "Kategória Z4"
+    },
+    "csmo-z4-i": {
+      "shortName": "Domáce kolo",
+      "fullName": "Domáce kolo"
+    },
+    "csmo-z4-ii": {
+      "shortName": "Školské kolo",
+      "fullName": "Školské kolo"
+    },
+    "tst": {
+      "shortName": "Výberko IMO/MEMO",
+      "fullName": "Výberové sústredenie pred IMO a MEMO"
     },
     "tst-d1": {
       "shortName": "1. deň",
@@ -194,6 +180,54 @@
       "shortName": "5. deň",
       "fullName": "5. deň"
     },
+    "memo": {
+      "shortName": "MEMO",
+      "fullName": "Middle European Mathematical Olympiad"
+    },
+    "memo-i": {
+      "shortName": "Individual",
+      "fullName": "Individuálna časť"
+    },
+    "memo-t": {
+      "shortName": "Team",
+      "fullName": "Tímová časť"
+    },
+    "imo": {
+      "shortName": "IMO",
+      "fullName": "International Mathematical Olympiad"
+    },
+    "caps": {
+      "shortName": "CAPS",
+      "fullName": "Czech-Austrian-Polish-Slovak Match"
+    },
+    "emo": {
+      "shortName": "EMO",
+      "fullName": "European Mathematical Olympiad"
+    },
+    "egmo": {
+      "shortName": "EGMO",
+      "fullName": "European Girl's Mathematical Olympiad"
+    },
+    "tstc": {
+      "shortName": "Výberko CPSJ",
+      "fullName": "Výberové sústredenie pred CPSJ"
+    },
+    "cpsj": {
+      "shortName": "CPSJ",
+      "fullName": "Czech-Polish-Slovak Junior Match"
+    },
+    "cpsj-i": {
+      "shortName": "Individual",
+      "fullName": "Individuálna časť"
+    },
+    "cpsj-t": {
+      "shortName": "Team",
+      "fullName": "Tímová časť"
+    },
+    "duogeo": {
+      "shortName": "DuoGeo",
+      "fullName": "DuoGeo"
+    },
     "duogeo-zs": {
       "shortName": "ZŠ",
       "fullName": "Kategória ZŠ"
@@ -202,17 +236,6 @@
       "shortName": "SŠ",
       "fullName": "Kategória SŠ"
     }
-  },
-  "categories": {
-    "a": "A",
-    "b": "B",
-    "c": "C",
-    "z4": "Z4",
-    "z5": "Z5",
-    "z6": "Z6",
-    "z7": "Z7",
-    "z8": "Z8",
-    "z9": "Z9"
   },
   "seasonFormat": "{number}. ročník ({start}/{end})"
 }
