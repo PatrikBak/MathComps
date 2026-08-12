@@ -17,6 +17,7 @@ import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { SEARCH_TIMING } from '../constants/timing-constants'
 import { getProblemsPageUrl, hasProblemId } from '../services/problem-routes'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
+import { buildContestTree } from '../utils/contest-tree'
 import { countActiveFilters } from '../utils/filter-validation'
 import { isNoOpFilterChange, isTextOnlyChange } from '../utils/search-logic'
 import { serializeFilters } from '../utils/search-url-serialization'
@@ -42,7 +43,7 @@ type ProblemSearchState = {
   filters: SearchFiltersState | null
   /** The available options for filtering. */
   filterOptions: FilterOptionsWithCounts | null
-  /** The base filter options loaded initially (without search adjustments). */
+  /** Every option the library can ever offer, whatever is filtered. */
   baseOptions: FilterOptionsWithCounts | null
 
   /** The list of problem slugs currently displayed. */
@@ -51,8 +52,6 @@ type ProblemSearchState = {
   totalCount: number
   /** Whether there are more pages of results available. */
   hasMore: boolean
-  /** The current page number (always 1 in this infinite scroll implementation). */
-  currentPage: number
 
   /** The state of the filter-options fetch, which the page cannot render without. */
   pageState: QueryUiState
@@ -80,9 +79,10 @@ type UseProblemSearchReturn = {
 }
 
 /**
- * The primary hook for managing all problem search functionality.
+ * Drives the problem library: the filters the URL holds, the results or the single problem they
+ * ask for, and the notices a failed fetch calls for.
  *
- * @returns An object containing the complete search state and handler functions.
+ * @returns The state and handlers described by {@link UseProblemSearchReturn}.
  */
 export const useProblemSearch = (): UseProblemSearchReturn => {
   // Translations for the problems section
@@ -94,220 +94,204 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // Translations for the shared action labels
   const tActions = useTranslations('ui.actions')
 
-  // Navigation hooks for URL manipulation
+  // The router the URL is rewritten through
   const router = useRouter()
+
+  // The URL's query parameters, which is where the filters live
   const searchParams = useSearchParams()
 
-  // Transition for non-blocking URL updates
+  // A function which marks the update handed to it as low priority
   const [, startTransition] = useTransition()
 
-  // Check if we're viewing a single problem by its slug (URL: /problems?id=problem-slug)
-  // When viewing a single problem, we skip the search flow entirely
+  // The problem the URL singles out, null while the library is being browsed
   const problemId = hasProblemId(searchParams) ? searchParams.get('id') : null
 
-  // Get authentication state from Clerk
-  // - userId: the current user's ID, or null/undefined if not signed in
-  // - isLoaded: whether the auth state has been determined (important for SSR)
+  // Who is signed in, and whether that is settled yet
   const { userId, isLoaded: isUserDataLoaded } = useAuth()
 
-  // Hook to redirect to login page (used when user tries to access favorites without auth)
+  // A function which sends the reader off to sign in
   const { redirectToLogin } = useLoginRedirect()
 
-  // Safely extract userId for React Query cache keys
-  // Type assertion: when isLoaded is true, userId is guaranteed to be string | null (never undefined)
-  const safeUserId = isUserDataLoaded ? (userId ?? null) : null
+  // The signed-in user's id, null while auth is unsettled or nobody is signed in
+  const signedInUserId = isUserDataLoaded ? (userId ?? null) : null
 
-  // Current locale for localized API responses
+  // The locale the library reads in
   const locale = useLocale()
 
-  // Fetch initial filter options from the API.
-  // This returns the base options (all competitions, tags, authors, seasons, etc.)
-  // that populate the filter dropdowns. The counts reflect totals without any filters.
-  const initialDataQuery = useInitialFilterData(locale, safeUserId, isUserDataLoaded)
+  // The fetch of every option the library offers, each counted across the whole library
+  const initialDataQuery = useInitialFilterData(locale, signedInUserId, isUserDataLoaded)
 
-  // Extract the options for convenient access throughout the hook
+  // Every option the library can ever offer, once they have arrived
   const baseOptions = initialDataQuery.data?.updatedOptions ?? null
 
-  // Fetch a single problem when the URL has ?id=problem-slug
-  // This bypasses the search flow entirely and shows just that one problem.
-  // Only fetch when we have a problem ID and auth is ready (because problem
-  // data have isLiked field, which is user-specific)
+  // The fetch of the problem the URL singles out, held until auth settles because a problem
+  // carries whether the reader liked it
   const singleProblemQuery = useSingleProblem(
     locale,
     problemId,
-    safeUserId,
+    signedInUserId,
     !!problemId && isUserDataLoaded
   )
 
-  // Parse filters from URL (the single source of truth)
-  // Returns both filters and metadata about parsing issues
+  // The filters as read off the URL, the one place they are kept
   const urlParsingResult = useMemo(() => {
-    // Can't parse without base options (need competition tree for validation)
+    // A contest path can only be resolved once the taxonomy has arrived
     if (!baseOptions) return null
 
     // Single problem view doesn't use URL filters
     if (problemId) return null
 
-    // A helper pure function does the job
-    return initializeFiltersFromUrlOrDefaults(searchParams, baseOptions.competitions)
+    // Each contest path resolved against the taxonomy it was written for
+    return initializeFiltersFromUrlOrDefaults(
+      searchParams,
+      buildContestTree(baseOptions.competitions, baseOptions.competitions)
+    )
   }, [searchParams, baseOptions, problemId])
 
-  // Extract filters for convenience
+  // The filters the URL asked for
   const urlFilters = urlParsingResult?.filters ?? null
 
-  // Show toast for invalid URL params
+  // Say so when the URL asked for filters that could not be honoured
   useEffect(() => {
-    // URL needs to be parsed
+    // The URL has yet to be read
     if (!urlParsingResult) return
 
-    // Show toast for invalid URL params
+    // The URL could not be read, so the defaults took over
     if (urlParsingResult.hasInvalidParams) {
+      // Warn that the URL's filters were dropped
       toast.warning(tErrors('urlFiltersIgnored'))
     }
-    // Show toast for too many filters
+    // The URL named more filters than are allowed
     else if (urlParsingResult.hasTooManyFilters) {
+      // Warn that the limit is what dropped them
       toast.warning(tErrors('urlTooManyFilters', { max: ACTIVE_FILTERS_CONSTANTS.maxFilterLimit }))
     }
   }, [urlParsingResult, tErrors])
 
-  // Redirect to login if favorites were requested but user is not logged in
-  // Note: lists are NOT guarded here because they can be publicly shared —
-  // the backend handles access control (200 for public, 403 for private)
+  // Favorites are a reader's own, so asking for them signed out means signing in first
   useEffect(() => {
-    // URL needs to be parsed and an auth-required feature was requested
+    // Nothing to do until the URL asks for favorites
     if (!urlParsingResult?.favoritesRequested) return
 
-    // We must wait for auth data to be loaded
+    // Whether anyone is signed in is not known until auth settles
     if (!isUserDataLoaded) return
 
-    // User is not logged in, we should redirect to login
+    // Nobody is signed in
     if (!userId) {
+      // Send the reader to sign in
       redirectToLogin()
     }
   }, [urlParsingResult?.favoritesRequested, isUserDataLoaded, userId, redirectToLogin])
 
-  // Track the query filters separately from UI filters.
-  // This prevents React Query from creating cache entries for every keystroke.
-  // The separation is crucial for a responsive user experience:
-  // - UI filters update instantly when user changes a filter
-  // - Query filters update after debounce (for text) or immediately (for discrete)
-  // - React Query only fetches based on queryFilters, not every UI change
+  // The filters the results are fetched for, which lag what the reader is typing
   const [queryFilters, setQueryFilters] = useState<SearchFiltersState | null>(null)
 
-  // The ref is needed to check if there has been only text changes to the filters
+  // The filters the last sync ran on
   const prevUrlFiltersRef = useRef<SearchFiltersState | null>(null)
 
-  // Sync queryFilters from urlFilters whenever URL changes.
-  // Uses isTextOnlyChange to determine debounce behavior:
-  //   - Text-only changes: debounce to avoid API spam while typing
-  //   - Discrete changes: sync immediately for responsive feedback
+  // Carry a filter change through to the fetch, letting typing settle first
   useEffect(() => {
-    // Handle when we have not loaded the filters yet
+    // Nothing has been read off the URL yet
     if (!urlFilters) {
+      // Drop whatever was being fetched for
       setQueryFilters(null)
       prevUrlFiltersRef.current = null
       return
     }
 
-    // If this is the first load (no previous filters), sync immediately
+    // The first filters to arrive have nothing to be compared against
     if (!prevUrlFiltersRef.current) {
+      // Fetch for them at once
       setQueryFilters(urlFilters)
       prevUrlFiltersRef.current = urlFilters
       return
     }
 
-    // Skip no-op changes (e.g. toggling OR↔AND with ≤1 item selected)
-    // These can't produce different results, so don't trigger a new fetch
+    // A change that cannot produce different results, such as flipping OR↔AND on a single value
     if (isNoOpFilterChange(prevUrlFiltersRef.current, urlFilters)) {
+      // Remember it without spending a fetch on it
       prevUrlFiltersRef.current = urlFilters
       return
     }
 
-    // If we had previous filters, check if this is a text-only change
+    // Only the search text moved
     if (isTextOnlyChange(prevUrlFiltersRef.current, urlFilters)) {
-      // Text-only change: debounce to avoid API spam
+      // Let the typing settle before fetching for it
       const timer = setTimeout(() => {
         setQueryFilters(urlFilters)
         prevUrlFiltersRef.current = urlFilters
       }, SEARCH_TIMING.textDebounceMs)
+
+      // Another keystroke calls the pending fetch off
       return () => clearTimeout(timer)
-    } else {
-      // Discrete change: sync immediately
+    }
+    // A value picked deliberately
+    else {
+      // Fetch for it at once
       setQueryFilters(urlFilters)
       prevUrlFiltersRef.current = urlFilters
     }
   }, [urlFilters])
 
-  // Search for problems based on queryFilters.
-  // Note: we use queryFilters (not displayFilters) to prevent React Query cache
-  // pollution from every keystroke. The query will only run when:
-  //   1. We're not viewing a single problem by ID
-  //   2. queryFilters is set (not null)
-  //   3. Initial data has finished loading
-  //   4. User auth state is loaded (to ensure correct favorites/likes context)
+  // The fetch of the problems the filters ask for. It waits on the options, the filters and the
+  // reader all being known, and stands down entirely when the URL singles out one problem.
   const searchQuery = useProblemSearchQuery(
     locale,
     queryFilters,
-    safeUserId,
+    signedInUserId,
     !problemId &&
       queryFilters !== null &&
       initialDataQuery.uiState.kind !== 'loading' &&
       isUserDataLoaded
   )
 
-  // Local filters for instant UI feedback (mirrors URL but updates immediately)
-  // Why do we need local state?
-  // - router.replace() is async - URL doesn't update until next render
-  // - We want UI to feel INSTANT when user clicks or types
-  // - So we: update local state immediately, then update URL in background
-  // - displayFilters uses localFilters for instant feedback
+  // The filters as the reader sees them, moving the moment they click, ahead of the URL catching up
   const [localFilters, setLocalFilters] = useState<SearchFiltersState | null>(null)
 
-  // Sync local filters with URL (on page load or when URL changes externally)
-  // This handles: initial load, browser back/forward, external link navigation
+  // A URL arriving from elsewhere, such as the back button or a shared link, takes the filters over
   useEffect(() => {
     setLocalFilters(urlFilters)
   }, [urlFilters])
 
-  // The main function exposed to the UI for handling filter changes.
-  // This is the ONLY way filter state should be modified - it ensures:
-  //   1. URL is always updated (the source of truth)
-  //   2. Local filters update immediately for responsive feedback
-  //   3. Query filters update via the sync effect (debounced for text, immediate for discrete)
+  // A function which records a filter change: the reader sees it at once, the URL catches up after
   const handleFiltersChange = useCallback(
     (newFilters: SearchFiltersState) => {
-      // Validate filter count - prevent users from adding too many filters
-      // which would create excessively long URLs
+      // How many filters the change would leave active
       const filterCount = countActiveFilters(newFilters)
+
+      // More filters than the limit allows
       if (filterCount > ACTIVE_FILTERS_CONSTANTS.maxFilterLimit) {
+        // Say the limit out loud and leave the filters as they were
         toast.warning(
           tErrors('maxFiltersExceeded', { max: ACTIVE_FILTERS_CONSTANTS.maxFilterLimit })
         )
         return
       }
 
-      // Update local filters immediately for instant UI feedback
-      // This makes the UI feel snappy while URL/queryFilters update
+      // Show the change at once, ahead of the URL
       setLocalFilters(newFilters)
 
-      // Update URL in a low-priority transition
-      // This prevents blocking the main thread
+      // Write the change to the URL without holding up what the reader is doing
       startTransition(() => {
+        // The filters as the URL spells them
         const queryString = serializeFilters(newFilters)
+
+        // The problems page carrying them
         const url = getProblemsPageUrl(queryString)
+
+        // Swap it in without moving the page
         router.replace(url, { scroll: false })
       })
     },
     [router, tErrors]
   )
 
-  // Compute the filters to display in the UI.
-  // We use local filters for instant feedback.
+  // The filters the reader sees
   const displayFilters = useMemo((): SearchFiltersState | null => {
-    // Single problem view: use problem's own filters
+    // A single problem carries the filters that resolve to exactly it
     if (problemId) return singleProblemQuery.data?.filters ?? null
 
-    // Search view: use local filters
+    // Otherwise whatever the reader last picked
     return localFilters
   }, [problemId, singleProblemQuery.data?.filters, localFilters])
 
@@ -320,15 +304,19 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // answer is to leave the page rather than to try again. Every other failure keeps the reader here,
   // where the page itself explains it.
   useEffect(() => {
-    // Only handle once we're viewing a single problem by ID and the query settled into an error
-    const failure = singleProblemQuery.uiState
-    if (failure.kind !== 'failed' || !problemId) return
+    // The state the single-problem fetch settled into
+    const singleProblemState = singleProblemQuery.uiState
+
+    // Only a failure while the URL singles out a problem is this effect's business
+    if (singleProblemState.kind !== 'failed' || !problemId) return
 
     // Only a missing problem is handled here
-    if (errorCodeOf(failure.error) !== 'ProblemNotFound') return
+    if (errorCodeOf(singleProblemState.error) !== 'ProblemNotFound') return
 
-    // Truncate ID for display (to prevent long strings in toast messages)
+    // How much of a slug a notice can carry
     const maxIdLength = 20
+
+    // The slug, cut short when it runs past that
     const truncatedId =
       problemId.length > maxIdLength ? `${problemId.slice(0, maxIdLength)}...` : problemId
 
@@ -359,6 +347,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
 
     // A request genuinely is in flight after an earlier attempt failed
     if (searchStateKind === 'retrying') {
+      // Tell the reader the connection is being worked on
       const toastId = toast.loading(tErrors('connectionProblem'), { duration: Infinity })
 
       // Drop the notice the moment the search stops trying
@@ -369,6 +358,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
 
     // The attempts are spent, and the results on screen give no hint that they stop early
     if (searchStateKind === 'failed' && hasVisibleResults) {
+      // Tell the reader the results stop here, and offer to run the search again
       const toastId = toast.error(tProblems('connectionFailed'), {
         duration: Infinity,
         action: { label: tActions('retry'), onClick: () => retrySearch() },
@@ -380,7 +370,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
       }
     }
 
-    // No cleanup needed
+    // Nothing went up, so there is nothing to take back down
     return undefined
   }, [
     problemId,
@@ -395,43 +385,48 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
 
   // Handle a settled search error: an auth-gated filter needs a login, a bad list clears its URL param.
   useEffect(() => {
-    // Only handle when the search query failed
-    const failure = searchQuery.uiState
-    if (failure.kind !== 'failed') return
+    // The state the search settled into
+    const searchState = searchQuery.uiState
+
+    // Only a failure is this effect's business
+    if (searchState.kind !== 'failed') return
 
     // The failure code, if any
-    const errorCode = errorCodeOf(failure.error)
+    const errorCode = errorCodeOf(searchState.error)
 
-    // An auth-gated filter (favorites, mark status) reached the backend without a signed-in user:
-    // send them to log in
+    // An auth-gated filter (favorites, mark status) reached the backend without a signed-in reader
     if (
       errorCode === 'FavoritesRequireAuthentication' ||
       errorCode === 'MarkStatusRequiresAuthentication'
     ) {
+      // Signing in is what makes such a filter mean anything
       redirectToLogin()
       return
     }
 
-    // Show a descriptive toast for a bad or forbidden list
+    // A list the URL names that no longer exists
     if (errorCode === 'ListNotFound') {
+      // Say the list is gone
       toast.error(tErrors('listNotFound'))
-    } else if (errorCode === 'ListAccessDenied') {
+    }
+    // A list this reader may not read, which only the backend can tell, since a list is shareable
+    // and the URL alone says nothing about who may open it
+    else if (errorCode === 'ListAccessDenied') {
+      // Say the list is not theirs to read
       toast.error(tErrors('listAccessDenied'))
-    } else {
-      // Not an error we redirect for, nothing to handle here
+    }
+    // Any other failure
+    else {
+      // The page itself explains it, so nothing to do here
       return
     }
 
-    // Redirect to /problems to clear the invalid list= URL param
+    // Back to the library, which takes the bad list out of the URL
     router.replace(ROUTES.PROBLEMS, { scroll: false })
   }, [searchQuery.uiState, router, redirectToLogin, tErrors])
 
-  // Get the final filter options.
-  // This is where we decide which options to show in the UI dropdowns.
-  // Priority order:
-  //   1. Single problem view: use problem's own options
-  //   2. Search results: use filtered options with updated counts
-  //   3. Initial data: use base options (before any search)
+  // The options to pick from: a single problem's own, otherwise the counts the current results
+  // leave behind, otherwise the whole library's
   const filterOptions = singleProblemQuery.data?.options ?? searchQuery.filterOptions ?? baseOptions
 
   // No view renders without the filter options, and the single-problem view needs that problem on
@@ -440,22 +435,28 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   const needsSingleProblem = problemId !== null && initialDataQuery.uiState.kind === 'ready'
   const pageState = needsSingleProblem ? singleProblemQuery.uiState : initialDataQuery.uiState
 
-  // Are we loading new data, i.e. a new query key?
+  // Are we waiting on a search with nothing on screen yet?
   const isBlankSlateLoading = !problemId && searchQuery.isPending
 
-  // Is any search query currently running?
+  // Is any search running at all?
   const isActiveSearchFetching = !problemId && searchQuery.isFetching
 
   // Are we loading more pages?
   const isPaginationLoading = !problemId && searchQuery.isFetchingNextPage
 
-  // Problems from global store
+  // The problems the last search put on screen
   const displayedProblems = useProblemStore((state) => state.displayedProblems)
+
+  // The problems on screen: the one the URL names, or whatever the search returned
   const problems = problemId ? [problemId] : displayedProblems
+
+  // How many problems match, which the problem the URL names answers on its own
   const totalCount = problemId ? 1 : searchQuery.totalCount
+
+  // Whether another page can be scrolled into, which a single problem never has
   const hasMore = problemId ? false : searchQuery.hasMore
 
-  // State + actions to return
+  // Everything the library renders from, and the handlers it acts through
   return {
     state: {
       isActiveSearchFetching,
@@ -467,7 +468,6 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
       problems,
       totalCount,
       hasMore,
-      currentPage: 1,
       pageState,
       searchState: searchQuery.uiState,
       listName: searchQuery.listName,
