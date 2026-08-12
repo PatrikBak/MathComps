@@ -189,6 +189,7 @@ export function RichMathEditorExpandedModal({
             borderless
             modeConfig={{ mode: 'expanded' }}
             charCount={state.metrics.charCount}
+            maxCharacters={state.maxCharacters}
             imageCount={state.metrics.imageCount}
             attachmentCount={state.metrics.attachmentCount}
             onSend={() => {

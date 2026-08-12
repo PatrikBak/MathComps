@@ -16,7 +16,7 @@ import {
   type RewindOutcome,
   type SendOutcome,
 } from '../model/defense-conversation-model'
-import type { DefenseProblem, DefenseSession } from '../model/defense-types'
+import type { DefenseLimits, DefenseProblem, DefenseSession } from '../model/defense-types'
 import { deleteSession, listSessions, rewindTurns, submitTurn } from '../services/session-service'
 import { defenseSessionsQueryKey, invalidateDefenseLists } from './defense-cache'
 
@@ -39,6 +39,8 @@ type UseDefenseConversationResult = DefenseConversationState &
   > & {
     /** This problem's persisted sessions, oldest first. */
     sessions: DefenseSession[]
+    /** The caps a defense here is held to, or null until the history has been read. */
+    limits: DefenseLimits | null
     /**
      * Whether the conversation asked for on open has had its chance to be resumed: the history has
      * loaded and the resume has either happened or been passed over.
@@ -164,8 +166,8 @@ export function useDefenseConversation(
     // The chosen saved defense to open, or the most recently active when none was named
     const target =
       initialSessionId !== undefined
-        ? sessionsQuery.data.find((session) => session.id === initialSessionId)
-        : sessionsQuery.data[0]
+        ? sessionsQuery.data.sessions.find((session) => session.id === initialSessionId)
+        : sessionsQuery.data.sessions[0]
 
     // A named session missing from a list that is still being refreshed may yet arrive with it, so wait for the
     // refreshed list rather than settling on a stale one
@@ -238,7 +240,8 @@ export function useDefenseConversation(
   // The conversation state, this problem's history, and the controls that drive it
   return {
     ...state,
-    sessions: sessionsQuery.data ?? [],
+    sessions: sessionsQuery.data?.sessions ?? [],
+    limits: sessionsQuery.data?.limits ?? null,
     initialResumeSettled,
     sessionsFailed: sessionsQuery.isError,
     send,

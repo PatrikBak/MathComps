@@ -183,7 +183,7 @@ public class DefenseSessionService(
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<DefenseSessionDto>> ListAsync(
+    public async Task<DefenseSessionListDto> ListAsync(
         Guid userId, HandoutEnvironmentTarget target, CancellationToken cancellationToken = default)
     {
         // A fresh context for this operation.
@@ -193,7 +193,7 @@ public class DefenseSessionService(
         // the student's answer for it, and what they hold against its replies. Every session in this list defends
         // the target the caller named, so it rides into each one. Split, so the turns and the reports don't
         // multiply out.
-        return await dbContext.DefenseSessions
+        var sessions = await dbContext.DefenseSessions
             .AsNoTracking()
             .AsSplitQuery()
             .Where(session => session.UserId == userId
@@ -218,6 +218,12 @@ public class DefenseSessionService(
                         report.TurnId, report.Categories, report.Comment))
                     .ToList()))
             .ToListAsync(cancellationToken);
+
+        // Hand them back with the caps a further turn is held to.
+        return new DefenseSessionListDto(
+            sessions,
+            new DefenseLimitsDto(
+                _limits.MaxCandidateChars, _limits.MaxFeedbackCommentChars, _limits.MaxTurnsPerSession));
     }
 
     /// <inheritdoc/>

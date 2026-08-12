@@ -347,6 +347,7 @@
     "consentBody": "We save your conversations with Mathilda and might read them to make her better. We also ask you to use her fairly, every reply she gives costs us something. Click through if you're fine with that 🙂",
     "consentError": "Your confirmation couldn't be saved.",
     "consentPolicyLink": "Privacy and terms",
+    "conversationFull": "This conversation has reached its limit. Start a new one, or rewind this one (the messages you drop are gone for good).",
     "deleteError": "The conversation couldn't be removed.",
     "deleteSession": "Remove from history",
     "deleteSessionMessage": "This conversation will be permanently removed.",
@@ -383,6 +384,7 @@
     "removeFeedbackTitle": "Remove this answer?",
     "removeReportMessage": "Your feedback on this reply will be permanently removed.",
     "removeReportTitle": "Remove this feedback?",
+    "repliesLeft": "{count, plural, one {# reply left in this conversation} other {# replies left in this conversation}}",
     "report": "Something went wrong here",
     "reportCategories": {
       "gaveAway": "She gave away too much",

@@ -7,6 +7,7 @@ import type {
   DefenseOutcome,
   DefenseReportCategory,
   DefenseSession,
+  DefenseSessionList,
   DefenseSessionListItem,
   DefenseTurnRequest,
 } from '../model/defense-types'
@@ -27,17 +28,18 @@ import {
  */
 
 /**
- * Lists a handout environment's defense sessions, most recently active first.
+ * Lists a handout environment's defense sessions, most recently active first, with the caps a defense
+ * against it is held to.
  *
  * @param apiCall - The authenticated API caller.
  * @param target - The handout environment whose sessions these are.
- * @returns The sessions held against the given environment.
+ * @returns The sessions held against the given environment, and the caps they are held to.
  */
 export function listSessions(
   apiCall: ApiCaller,
   target: HandoutEnvironmentTarget
-): Promise<ApiResult<DefenseSession[]>> {
-  return apiCall<DefenseSession[]>(() => getDefenseSessionsUrl(target))
+): Promise<ApiResult<DefenseSessionList>> {
+  return apiCall<DefenseSessionList>(() => getDefenseSessionsUrl(target))
 }
 
 /**

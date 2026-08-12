@@ -7,7 +7,6 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
 
 import { MAX_ATTACHMENTS_PER_COMMENT, MAX_IMAGES_PER_COMMENT } from '../utils/attachment-utils'
-import { MAX_CHARACTERS_PER_COMMENT } from '../utils/content-metrics'
 import type { RichMathEditorVariant } from './RichMathEditor'
 
 /**
@@ -96,6 +95,8 @@ type RichMathEditorFooterProps = {
   modeConfig: ModeConfig
   /** Current number of characters in the editor */
   charCount: number
+  /** The most characters the content may hold */
+  maxCharacters: number
   /** Current number of uploaded images */
   imageCount: number
   /** Current number of uploaded file attachments */
@@ -121,6 +122,7 @@ export function RichMathEditorFooter({
   borderless = false,
   modeConfig,
   charCount,
+  maxCharacters,
   imageCount,
   attachmentCount,
   onSend,
@@ -139,12 +141,12 @@ export function RichMathEditorFooter({
   const { isMobileOS, isMac } = useDeviceCapabilities()
 
   // Compute whether we're over limits
-  const isOverCharLimit = charCount > MAX_CHARACTERS_PER_COMMENT
+  const isOverCharLimit = charCount > maxCharacters
   const isOverImageLimit = imageCount > MAX_IMAGES_PER_COMMENT
   const isOverAttachmentLimit = attachmentCount > MAX_ATTACHMENTS_PER_COMMENT
 
   // Compute whether we're close to limits
-  const isNearCharLimit = charCount / MAX_CHARACTERS_PER_COMMENT >= 0.8 && !isOverCharLimit
+  const isNearCharLimit = charCount / maxCharacters >= 0.8 && !isOverCharLimit
   const isNearImageLimit = imageCount >= MAX_IMAGES_PER_COMMENT - 1 && !isOverImageLimit
   const isNearAttachmentLimit =
     attachmentCount >= MAX_ATTACHMENTS_PER_COMMENT - 1 && !isOverAttachmentLimit
@@ -208,10 +210,10 @@ export function RichMathEditorFooter({
                 <CounterBadge
                   icon={Type}
                   count={charCount}
-                  max={MAX_CHARACTERS_PER_COMMENT}
+                  max={maxCharacters}
                   isOver={isOverCharLimit}
                   isNear={isNearCharLimit}
-                  title={tEditor('maxCharacters', { max: MAX_CHARACTERS_PER_COMMENT })}
+                  title={tEditor('maxCharacters', { max: maxCharacters })}
                   tabular
                 />
               )}

@@ -1,7 +1,7 @@
 'use client'
 
 import { Resizable } from 're-resizable'
-import { useEffect, useImperativeHandle, useState } from 'react'
+import { useEffect, useImperativeHandle, useMemo, useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import { useIsMobile } from '@/hooks/use-breakpoint'
@@ -75,6 +75,8 @@ type RichMathEditorProps = {
   toolbar?: ToolbarConfig
   /** The editor's minimum height in px */
   minHeightPx?: number
+  /** The most characters the content may hold; defaults to the comment cap */
+  maxCharacters?: number
   /** Current text value */
   value: string
   /** Callback when the text changes */
@@ -110,6 +112,7 @@ export function RichMathEditor({
   variant = 'card',
   toolbar,
   minHeightPx = 200,
+  maxCharacters,
   value,
   onChange,
   placeholder = '',
@@ -124,8 +127,12 @@ export function RichMathEditor({
   isLoading = false,
   ref,
 }: RichMathEditorProps) {
+  // The limits the model measures the content against, held stable so it rebuilds its state only when the
+  // text or a limit actually changes
+  const config = useMemo(() => ({ maxCharacters }), [maxCharacters])
+
   // All the logic is in the view-model and provided to the view
-  const viewModel = useEditorModel({ value, onChange, onSend, canSend, onCancel })
+  const viewModel = useEditorModel({ value, onChange, onSend, canSend, onCancel, config })
   const {
     state,
     textareaRef,
@@ -224,6 +231,7 @@ export function RichMathEditor({
                 variant={variant}
                 modeConfig={{ mode: 'inline', onExpand: () => setIsModalOpen(true) }}
                 charCount={state.metrics.charCount}
+                maxCharacters={state.maxCharacters}
                 imageCount={state.metrics.imageCount}
                 attachmentCount={state.metrics.attachmentCount}
                 onSend={onSend}

@@ -33,13 +33,14 @@ public interface IDefenseSessionService
         Guid userId, Guid sessionId, string content, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Lists a user's sessions against one handout environment, most recently active first, each with its turns.
+    /// Lists a user's sessions against one handout environment, most recently active first, each with its turns,
+    /// alongside the caps a further turn against it has to stay within.
     /// </summary>
     /// <param name="userId">The user whose sessions to list.</param>
     /// <param name="target">The handout environment to filter to.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The user's sessions against that environment.</returns>
-    Task<IReadOnlyList<DefenseSessionDto>> ListAsync(
+    /// <returns>The user's sessions against that environment, and the caps they are held to.</returns>
+    Task<DefenseSessionListDto> ListAsync(
         Guid userId, HandoutEnvironmentTarget target, CancellationToken cancellationToken = default);
 
     /// <summary>

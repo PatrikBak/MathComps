@@ -2,7 +2,7 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query'
 
 import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
 
-import type { DefenseSession } from '../model/defense-types'
+import type { DefenseSession, DefenseSessionList } from '../model/defense-types'
 
 /** The root every defense query key hangs off, so one call can match them all. */
 const DEFENSE_QUERY_KEY = ['defense'] as const
@@ -69,9 +69,14 @@ export function patchCachedDefenseSession(
 ): void {
   // Only the per-problem lists: the cross-problem one carries none of what a student says, so there is
   // nothing in it to keep in step
-  queryClient.setQueriesData<DefenseSession[]>(
+  queryClient.setQueriesData<DefenseSessionList>(
     { queryKey: [...DEFENSE_QUERY_KEY, 'sessions'] },
-    (sessions) =>
-      sessions?.map((session) => (session.id === sessionId ? rewrite(session) : session))
+    (list) =>
+      list && {
+        ...list,
+        sessions: list.sessions.map((session) =>
+          session.id === sessionId ? rewrite(session) : session
+        ),
+      }
   )
 }

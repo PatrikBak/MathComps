@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MathComps.Domain.Contracts.Defense;
 
 namespace MathComps.Infrastructure.Options;
 
@@ -15,9 +16,7 @@ public class DefenseLimits
     /// </summary>
     public const string SectionName = "DefenseLimits";
 
-    /// <summary>
-    /// The longest a single student message may be, in characters.
-    /// </summary>
+    /// <inheritdoc cref="DefenseLimitsDto.MaxCandidateChars" path="/summary"/>
     [Range(1, int.MaxValue)]
     public required int MaxCandidateChars { get; set; }
 
@@ -35,15 +34,11 @@ public class DefenseLimits
     [Range(1, int.MaxValue)]
     public required int MaxEnvironmentIdChars { get; set; }
 
-    /// <summary>
-    /// The longest a feedback comment may be, in characters.
-    /// </summary>
+    /// <inheritdoc cref="DefenseLimitsDto.MaxFeedbackCommentChars" path="/summary"/>
     [Range(1, int.MaxValue)]
     public required int MaxFeedbackCommentChars { get; set; }
 
-    /// <summary>
-    /// The most student turns one conversation may hold.
-    /// </summary>
+    /// <inheritdoc cref="DefenseLimitsDto.MaxTurnsPerSession" path="/summary"/>
     [Range(1, int.MaxValue)]
     public required int MaxTurnsPerSession { get; set; }
 
