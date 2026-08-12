@@ -839,10 +839,9 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         await QueryAsync(async context =>
         {
             // The pre-insertion rows, at the orders the registry then dictated.
-            context.Competitions.AddRange(
-                new Competition { Slug = "csmo", SortOrder = 1 },
-                new Competition { Slug = "memo", SortOrder = 2 },
-                new Competition { Slug = "imo", SortOrder = 3 });
+            CompetitionTreeSeed.Root(context, "csmo", 1);
+            CompetitionTreeSeed.Root(context, "memo", 2);
+            CompetitionTreeSeed.Root(context, "imo", 3);
 
             // Persist the seed.
             await context.SaveChangesAsync();
@@ -883,9 +882,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         await QueryAsync(async context =>
         {
             // The swapped rows.
-            context.Competitions.AddRange(
-                new Competition { Slug = "csmo", SortOrder = 3 },
-                new Competition { Slug = "memo", SortOrder = 1 });
+            CompetitionTreeSeed.Root(context, "csmo", 3);
+            CompetitionTreeSeed.Root(context, "memo", 1);
 
             // Persist the seed.
             await context.SaveChangesAsync();
@@ -909,6 +907,113 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// Applying a draft into an empty database raises the whole chain of competitions its target names, each
+    /// addressed by the path its slugs spell and positioned among its siblings.
+    /// </summary>
+    [Fact]
+    public Task Applying_a_draft_raises_the_competition_chain() => RunTestAsync(async service =>
+    {
+        // Import a csmo/a/iii problem into a database carrying no taxonomy at all.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // The three levels the target names now stand as competitions.
+        await QueryAsync(async context =>
+        {
+            // The whole tree, shallowest first.
+            var tree = await context.Competitions.OrderBy(entity => entity.SortPath).ToListAsync();
+
+            // One row per level, each extending the path above it.
+            Assert.Equal(["csmo", "csmo-a", "csmo-a-iii"], tree.Select(entity => entity.Path));
+
+            // The brand heads the tree, so nothing sits above it.
+            Assert.Null(tree[0].ParentId);
+
+            // Each level below hangs off the one before it.
+            Assert.Equal(tree[0].Id, tree[1].ParentId);
+            Assert.Equal(tree[1].Id, tree[2].ParentId);
+
+            // The sort path reads down the chain: csmo first among the brands, a first among its categories,
+            // iii fourth among its rounds.
+            Assert.Equal("0001.0001.0004", tree[2].SortPath);
+
+            // The round instance hangs off the deepest level, which is where its problems sit in the tree.
+            var roundInstance = await context.RoundInstances
+                .Include(entity => entity.Competition)
+                .SingleAsync();
+            Assert.Equal("csmo-a-iii", roundInstance.Competition.Path);
+        });
+    });
+
+    /// <summary>
+    /// A default round names no competition of its own: it stands for its whole brand, so the chain stops at
+    /// the root and that is what its problems hang under.
+    /// </summary>
+    [Fact]
+    public Task A_default_round_stands_for_its_whole_competition() => RunTestAsync(async service =>
+    {
+        // Import an imo problem, imo being a competition the registry gives no rounds at all.
+        await service.ApplyAsync(
+            new DraftTarget("imo", null, null, 2024), RoundDate,
+            [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // The brand is the only row, and the round instance hangs off it.
+        await QueryAsync(async context =>
+        {
+            // The whole tree.
+            var tree = await context.Competitions.ToListAsync();
+
+            // Nothing sits below the brand, since the default round is the brand itself.
+            Assert.Equal(["imo"], tree.Select(entity => entity.Path));
+
+            // The stored round, which carries no slug of its own.
+            var round = await context.Rounds.SingleAsync(entity => entity.CompositeSlug == "imo");
+            Assert.True(round.IsDefault);
+
+            // Its instance still resolves to a competition, the brand.
+            var roundInstance = await context.RoundInstances
+                .Include(entity => entity.Competition)
+                .SingleAsync();
+            Assert.Equal("imo", roundInstance.Competition.Path);
+        });
+    });
+
+    /// <summary>
+    /// A competition holds its absolute registry position rather than being packed against its siblings, so
+    /// one joining ahead of another slots in without disturbing it and the rounds a category never ran leave
+    /// their slots empty.
+    /// </summary>
+    [Fact]
+    public Task A_competition_holds_its_absolute_registry_position() => RunTestAsync(async service =>
+    {
+        // Import csmo/a/iii first, which leaves it the only round under its category.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // Then import csmo/a/i, which the registry orders ahead of iii.
+        await service.ApplyAsync(
+            new DraftTarget("csmo", "a", "i", 2024), RoundDate,
+            [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // Both sit where csmo's round list puts them, the unused s and ii slots left open between them.
+        await QueryAsync(async context =>
+        {
+            // The category's children, in the order they sort.
+            var rounds = await context.Competitions
+                .Where(entity => entity.Parent!.Path == "csmo-a")
+                .OrderBy(entity => entity.SortOrder)
+                .ToListAsync();
+
+            // The newcomer took the front, and iii kept the position it already held.
+            Assert.Equal(["csmo-a-i", "csmo-a-iii"], rounds.Select(entity => entity.Path));
+            Assert.Equal([1, 4], rounds.Select(entity => entity.SortOrder));
+
+            // The sort paths carry the same positions, and are what the tree is read in order by.
+            Assert.Equal(["0001.0001.0001", "0001.0001.0004"], rounds.Select(entity => entity.SortPath));
+        });
+    });
+
+    /// <summary>
     /// Re-sequencing generalizes to a competition's rounds: a round shifted up in the registry is renumbered on apply.
     /// </summary>
     [Fact]
@@ -918,9 +1023,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         await QueryAsync(async context =>
         {
             // The owning competition and category.
-            var csmo = new Competition { Slug = "csmo", SortOrder = 1 };
+            var csmo = CompetitionTreeSeed.Root(context, "csmo", 1);
             var categoryA = new Category { Slug = "a", SortOrder = 1 };
-            context.Competitions.Add(csmo);
             context.Categories.Add(categoryA);
 
             // The two rounds at their pre-insertion orders.
@@ -1010,7 +1114,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         await QueryAsync(async context =>
         {
             // The registry-consistent row.
-            context.Competitions.Add(new Competition { Slug = "csmo", SortOrder = 1 });
+            CompetitionTreeSeed.Root(context, "csmo", 1);
 
             // Persist the seed.
             await context.SaveChangesAsync();

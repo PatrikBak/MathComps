@@ -46,8 +46,11 @@ public class DraftApplyService(
         // Upsert the taxonomy chain, collecting the create-vs-reuse outcome of each entity for the report.
         var entities = ImmutableArray.CreateBuilder<EntityResolution>();
 
-        // Competition by slug.
-        var (competition, competitionAction) = await GetOrCreateCompetitionAsync(context, target.CompetitionSlug);
+        // The chain of competitions the target names, from its brand down to the depth the round sits at.
+        var competitionChain = await CompetitionTreeSynchronizer.EnsureChainAsync(context, metadata.Shared, target);
+
+        // The brand heads the chain, and is what a round belongs to.
+        var (competition, competitionAction) = competitionChain[0];
         entities.Add(new EntityResolution("competition", target.CompetitionSlug, competitionAction));
 
         // Category by slug, only when the competition carries one.
@@ -68,9 +71,10 @@ public class DraftApplyService(
         var (season, seasonAction) = await GetOrCreateSeasonAsync(context, target.SeasonYear);
         entities.Add(new EntityResolution("season", target.SeasonYear.ToString(), seasonAction));
 
-        // Round-instance by (round, season), carrying the draft's date when freshly created.
+        // Round-instance by (round, season), carrying the draft's date when freshly created. It hangs off the
+        // deepest competition the chain reached, which is where its problems sit in the tree.
         var (roundInstance, roundInstanceAction) = await GetOrCreateRoundInstanceAsync(
-            context, round.Id, season.Id, date);
+            context, round.Id, competitionChain[^1].Competition.Id, season.Id, date);
         entities.Add(new EntityResolution(
             "round-instance", $"{compositeRoundSlug} {target.SeasonYear}", roundInstanceAction));
 
@@ -152,8 +156,10 @@ public class DraftApplyService(
         var (competitionOrderOf, categoryOrderOf, roundOrderOf) =
             TaxonomyResequencer.RegistryOrders(metadata.Shared, target.CompetitionSlug);
 
-        // The tracked rows in each family this draft can shift; a net-new competition has no rounds yet.
-        var competitions = await context.Competitions.ToListAsync();
+        // The tracked rows in each family this draft can shift; a net-new competition has no rounds yet. Only
+        // the roots answer to the registry's competition list, everything deeper to its own generation.
+        var competitions = await context.Competitions
+            .Where(competition => competition.ParentId == null).ToListAsync();
         var categories = await context.Categories.ToListAsync();
         var rounds = await context.Rounds
             .Where(round => round.Competition.Slug == target.CompetitionSlug).ToListAsync();
@@ -175,26 +181,6 @@ public class DraftApplyService(
 
         // A round slug repeats across categories, so collapse equal changes for the report.
         return [.. changes.Distinct()];
-    }
-
-    /// <summary>
-    /// Get-or-creates the competition by slug, sourcing a new row's sort order from the registry.
-    /// </summary>
-    /// <param name="context">The write context.</param>
-    /// <param name="slug">The competition slug.</param>
-    /// <returns>The entity and whether it was reused or created.</returns>
-    private async Task<(Competition Entity, ResolutionAction Action)> GetOrCreateCompetitionAsync(
-        MathCompsDbContext context, string slug)
-    {
-        // Reuse the existing row when present.
-        var existing = await context.Competitions.FirstOrDefaultAsync(competition => competition.Slug == slug);
-        if (existing is not null)
-            return (existing, ResolutionAction.Reuse);
-
-        // Otherwise create it, the sort order taken from its position in the registry.
-        var created = new Competition { Slug = slug, SortOrder = metadata.Shared.CompetitionSortOrder(slug) };
-        await context.Competitions.AddAsync(created);
-        return (created, ResolutionAction.Create);
     }
 
     /// <summary>
@@ -298,11 +284,12 @@ public class DraftApplyService(
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="roundId">The round's id.</param>
+    /// <param name="competitionId">The id of the competition whose problems these are.</param>
     /// <param name="seasonId">The season's id.</param>
     /// <param name="date">The round-instance date from <c>_meta</c>.</param>
     /// <returns>The entity and whether it was reused unchanged, updated in place, or created.</returns>
     private static async Task<(RoundInstance Entity, ResolutionAction Action)> GetOrCreateRoundInstanceAsync(
-        MathCompsDbContext context, Guid roundId, Guid seasonId, DateOnly date)
+        MathCompsDbContext context, Guid roundId, Guid competitionId, Guid seasonId, DateOnly date)
     {
         // The existing round-instance for this (round, season), or null when net-new.
         var existing = await context.RoundInstances.FirstOrDefaultAsync(
@@ -321,7 +308,13 @@ public class DraftApplyService(
         }
 
         // Otherwise create it with the draft's date.
-        var created = new RoundInstance { RoundId = roundId, SeasonId = seasonId, Date = date };
+        var created = new RoundInstance
+        {
+            RoundId = roundId,
+            CompetitionId = competitionId,
+            SeasonId = seasonId,
+            Date = date
+        };
         await context.RoundInstances.AddAsync(created);
         return (created, ResolutionAction.Create);
     }

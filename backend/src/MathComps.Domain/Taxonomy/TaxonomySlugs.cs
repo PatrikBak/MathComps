@@ -34,4 +34,33 @@ public static class TaxonomySlugs
     public static string ProblemSlug(int editionNumber, string compositeRoundSlug, int order) =>
         // The composite slug is already canonical, so just bracket it with the edition number and order.
         $"{editionNumber}-{compositeRoundSlug}-{order}";
+
+    /// <summary>
+    /// Joins a taxonomy node's own slug to its parent's path.
+    /// </summary>
+    /// <param name="parentPath">The parent's path, or null at a root.</param>
+    /// <param name="slug">The node's own slug, which must carry no hyphen.</param>
+    /// <returns>The node's path (e.g. <c>csmo-a-iii</c>).</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the slug is not a single path segment.</exception>
+    public static string ComposePath(string? parentPath, string slug)
+    {
+        // A slug carrying the separator would make the path it lands in ambiguous, so refuse it at the source.
+        if (!IsPathSegment(slug))
+            throw new InvalidOperationException(
+                $"Taxonomy slug '{slug}' is not a single path segment (lowercase letters and digits only).");
+
+        // A root has nothing above it to join to.
+        return parentPath is null ? slug : $"{parentPath}-{slug}";
+    }
+
+    /// <summary>
+    /// Whether a slug is a single path segment, i.e. lowercase alphanumeric with no separator in it. A segment
+    /// carrying the separator would collide with the branch its prefix names: <c>a-b</c> under <c>csmo</c>
+    /// reads as a node of the <c>csmo-a</c> branch.
+    /// </summary>
+    /// <param name="slug">The slug to check.</param>
+    /// <returns>True when the slug is a single segment.</returns>
+    public static bool IsPathSegment(string slug) =>
+        // Non-empty, and every character drawn from the canonical slug alphabet minus the separator.
+        slug.Length > 0 && slug.All(character => character is (>= 'a' and <= 'z') or (>= '0' and <= '9'));
 }

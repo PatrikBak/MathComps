@@ -215,11 +215,35 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         modelBuilder.Entity<Competition>(e =>
         {
-            e.HasIndex(x => x.Slug).IsUnique().HasDatabaseName("ux_competition_slug");
-            e.HasIndex(x => x.SortOrder).IsUnique().HasDatabaseName("ux_competition_sort_order");
+            // The path addresses a competition across the whole tree, so it also carries sibling-slug uniqueness.
+            e.HasIndex(x => x.Path).IsUnique().HasDatabaseName("ux_competition_path");
 
-            // DB-side invariant mirror of [Range] attributes in code.
-            e.ToTable(t => t.HasCheckConstraint("ck_competition_sort_order_positive", "\"sort_order\" > 0"));
+            // Siblings occupy distinct positions under their parent.
+            e.HasIndex(x => new { x.ParentId, x.SortOrder })
+             .IsUnique()
+             .HasFilter("\"parent_id\" IS NOT NULL")
+             .HasDatabaseName("ux_competition_parent_sort_order");
+
+            // The roots need their own index: a null parent groups no rows, so the pair above never binds them.
+            e.HasIndex(x => x.SortOrder)
+             .IsUnique()
+             .HasFilter("\"parent_id\" IS NULL")
+             .HasDatabaseName("ux_competition_root_sort_order");
+
+            e.ToTable(t =>
+            {
+                // DB-side invariant mirror of [Range] attributes in code.
+                t.HasCheckConstraint("ck_competition_sort_order_positive", "\"sort_order\" > 0");
+
+                // A hyphen joins a slug to its parent's path, so one inside a slug would make a path ambiguous:
+                // `a-b` under `csmo` reads as the `csmo-a` branch.
+                t.HasCheckConstraint("ck_competition_slug_has_no_hyphen", "position('-' in \"slug\") = 0");
+            });
+
+            e.HasMany(x => x.Children)
+             .WithOne(x => x.Parent)
+             .HasForeignKey(x => x.ParentId)
+             .OnDelete(DeleteBehavior.Restrict);
 
             e.HasMany(x => x.Rounds)
              .WithOne(r => r.Competition)
@@ -293,6 +317,16 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
             e.HasIndex(x => new { x.RoundId, x.SeasonId })
              .IsUnique()
              .HasDatabaseName("ux_round_instance_round_season");
+
+            // One sitting per competition and season, at whatever depth the competition sits.
+            e.HasIndex(x => new { x.CompetitionId, x.SeasonId })
+             .IsUnique()
+             .HasDatabaseName("ux_round_instance_competition_season");
+
+            e.HasOne(x => x.Competition)
+             .WithMany()
+             .HasForeignKey(x => x.CompetitionId)
+             .OnDelete(DeleteBehavior.Restrict);
 
             e.HasOne(x => x.Round)
              .WithMany(r => r.RoundInstances)

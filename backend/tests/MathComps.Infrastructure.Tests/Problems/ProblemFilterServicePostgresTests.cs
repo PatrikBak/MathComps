@@ -1493,19 +1493,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Competitions - Create both domestic (CSMO) and international (IMO) competitions
         // to test filtering by different competition types
-        var csmo = new Competition
-        {
-            Id = Guid.NewGuid(),
-            Slug = "csmo",
-            SortOrder = 100
-        };
-        var imo = new Competition
-        {
-            Id = Guid.NewGuid(),
-            Slug = "imo",
-            SortOrder = 200
-        };
-        context.Competitions.AddRange(csmo, imo);
+        var csmo = CompetitionTreeSeed.Root(context, "csmo", 100);
+        var imo = CompetitionTreeSeed.Root(context, "imo", 200);
 
         // Categories - Create different age/grade categories to test category filtering
         // Categories A, B, C represent different age groups, Z9 represents 9th grade
@@ -1597,6 +1586,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             RoundId = roundCsmoDomesticA.Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-a-i").Id,
             SeasonId = season2025.Id,
             Date = new DateOnly(2025, 9, 1)  // Estimated: September (home round)
         };
@@ -1604,6 +1594,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             RoundId = roundCsmoDomesticB.Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-b-i").Id,
             SeasonId = season2025.Id,
             Date = new DateOnly(2025, 9, 1)  // Estimated: September (home round)
         };
@@ -1611,6 +1602,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             RoundId = roundCsmoDomesticC.Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-c-i").Id,
             SeasonId = season2025.Id,
             Date = new DateOnly(2025, 9, 1)
         };
@@ -1618,6 +1610,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             RoundId = roundCsmoDomesticZ9.Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-z9-i").Id,
             SeasonId = season2024.Id,
             Date = new DateOnly(2024, 9, 1)
         };
@@ -1625,6 +1618,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             RoundId = roundCsmoRegionalZ9.Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-z9-iii").Id,
             SeasonId = season2024.Id,
             Date = new DateOnly(2025, 4, 1)
         };
@@ -1633,6 +1627,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             Id = Guid.NewGuid(),
             SeasonId = season2025.Id,
             RoundId = roundImo.Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "imo").Id,
             Date = new DateOnly(2026, 7, 15)
         };
         context.RoundInstances.AddRange(ri_2025_csmo_domestic_A, ri_2025_csmo_domestic_B, ri_2025_csmo_domestic_C, ri_2024_csmo_domestic_Z9, ri_2024_csmo_regional_Z9, ri_2025_imo);

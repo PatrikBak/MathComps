@@ -54,15 +54,10 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
-        // Competition → Season → Round → RoundInstance chain the problem hangs off
-        var competition = new Competition
-        {
-            Id = Guid.NewGuid(),
-            Slug = "test-comp",
-            SortOrder = 1
-        };
-        context.Competitions.Add(competition);
+        // The competition everything below hangs off, a brand with nothing above it.
+        var competition = CompetitionTreeSeed.Root(context, "testcomp", 1);
 
+        // The season the round ran in.
         var season = new Season
         {
             Id = Guid.NewGuid(),
@@ -71,21 +66,24 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
         };
         context.Seasons.Add(season);
 
+        // The round, a named one rather than the competition's default.
         var round = new Round
         {
             Id = Guid.NewGuid(),
             CompetitionId = competition.Id,
-            Slug = "test-round",
-            CompositeSlug = "test-comp-test-round",
+            Slug = "testround",
+            CompositeSlug = "testcomp-testround",
             SortOrder = 1,
             IsDefault = false
         };
         context.Rounds.Add(round);
 
+        // The sitting of that round in that season, under the competition its composite slug spells out.
         var roundInstance = new RoundInstance
         {
             Id = Guid.NewGuid(),
             RoundId = round.Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "testcomp-testround").Id,
             SeasonId = season.Id,
             Date = DateOnly.FromDateTime(DateTime.Today)
         };

@@ -21,6 +21,17 @@ public class RoundInstance
     public Round Round { get; set; } = null!;
 
     /// <summary>
+    /// Foreign key to the competition whose problems these are, at the depth the round sits: a default round
+    /// resolves to its whole competition, every other round to its own place in the tree.
+    /// </summary>
+    public required Guid CompetitionId { get; set; }
+
+    /// <summary>
+    /// Navigation to the competition whose problems these are.
+    /// </summary>
+    public Competition Competition { get; set; } = null!;
+
+    /// <summary>
     /// Foreign key to the season.
     /// </summary>
     public required Guid SeasonId { get; set; }

@@ -643,13 +643,7 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         });
 
         // Create Competition
-        var competition = new Competition
-        {
-            Id = Guid.NewGuid(),
-            Slug = "test-comp",
-            SortOrder = 1
-        };
-        context.Competitions.Add(competition);
+        var competition = CompetitionTreeSeed.Root(context, "testcomp", 1);
 
         // Create Season
         var season = new Season
@@ -665,8 +659,8 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             CompetitionId = competition.Id,
-            Slug = "test-round",
-            CompositeSlug = "test-comp-test-round",
+            Slug = "testround",
+            CompositeSlug = "testcomp-testround",
             SortOrder = 1,
             IsDefault = false
         };
@@ -677,6 +671,7 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             RoundId = round.Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "testcomp-testround").Id,
             SeasonId = season.Id,
             Date = DateOnly.FromDateTime(DateTime.Today)
         };

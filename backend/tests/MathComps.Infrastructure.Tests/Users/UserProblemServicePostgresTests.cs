@@ -272,13 +272,7 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
         context.Seasons.Add(season);
 
         // Competition — CSMO is the domestic competition
-        var competition = new Competition
-        {
-            Id = Guid.NewGuid(),
-            Slug = "csmo",
-            SortOrder = 100
-        };
-        context.Competitions.Add(competition);
+        var competition = CompetitionTreeSeed.Root(context, "csmo", 100);
 
         // Category — category A (highest age group)
         var category = new Category
@@ -306,6 +300,7 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             RoundId = round.Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-a-i").Id,
             SeasonId = season.Id,
             Date = new DateOnly(2025, 9, 1)
         };
