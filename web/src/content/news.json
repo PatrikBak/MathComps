@@ -1,5 +1,20 @@
 [
   {
+    "id": "pCChaO8I-OEWUz53EsBhx",
+    "slug": "mathilda",
+    "title": {
+      "sk": "Predstavujeme Mathildu",
+      "en": "Meet Mathilda",
+      "cs": "Představujeme Mathildu"
+    },
+    "date": "2026-08-12",
+    "category": "development",
+    "cover": {
+      "kind": "icon",
+      "name": "bot"
+    }
+  },
+  {
     "id": "qR7mVx2LpK9dNzB4tWsHc",
     "slug": "qed-handouts",
     "title": {
