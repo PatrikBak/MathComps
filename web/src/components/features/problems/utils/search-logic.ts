@@ -1,61 +1,30 @@
+import type { LabeledSlug } from '../types/problem-api-types'
 import type { SearchFiltersState } from '../types/problem-library-types'
-import { contestSelectionSlugs } from './filter-ids'
-
-/** How short a search term may be before it needs another filter to justify a query. */
-const MIN_STANDALONE_SEARCH_LENGTH = 3
-
-/**
- * Whether a filter state is worth querying for. A term of one or two characters matches
- * most of the library, so it only earns a query once something else narrows the results.
- *
- * @param searchFilters - The filters currently applied.
- * @returns True when the filters should produce a query.
- */
-export function shouldTriggerSearch(searchFilters: SearchFiltersState): boolean {
-  // A term too short to narrow anything on its own
-  if (searchFilters.searchText && searchFilters.searchText.length < MIN_STANDALONE_SEARCH_LENGTH) {
-    // Whether anything else is set that would narrow the results instead
-    const hasOtherFilters =
-      searchFilters.seasons.length > 0 ||
-      searchFilters.tags.length > 0 ||
-      searchFilters.authors.length > 0 ||
-      searchFilters.problemNumbers.length > 0 ||
-      (searchFilters.contestSelection && searchFilters.contestSelection.length > 0) ||
-      searchFilters.favoritesOnly ||
-      searchFilters.markStatus != null ||
-      searchFilters.listContentId != null
-
-    // A short term standing alone would return most of the library
-    if (!hasOtherFilters) return false
-  }
-
-  // Everything else is worth querying for
-  return true
-}
 
 /**
  * Whether the only thing that changed between two filter states is what the user typed.
  * Typing arrives a character at a time, while picking a value from a list is one
  * deliberate act.
  *
- * @param prev - The filters before the change.
+ * @param previous - The filters before the change.
  * @param next - The filters after it.
- * @returns True when nothing but the search text and its scope moved.
+ * @returns True when the text moved and every other filter stayed where it was.
  */
-export function isTextOnlyChange(prev: SearchFiltersState, next: SearchFiltersState): boolean {
-  // Something about the text has to have moved, and everything else has to have stayed put
+export function isTextOnlyChange(previous: SearchFiltersState, next: SearchFiltersState): boolean {
+  // Something about the text has to have moved, while every other filter names what it named
   return (
-    (prev.searchText !== next.searchText || prev.searchInSolution !== next.searchInSolution) &&
-    prev.seasons.length === next.seasons.length &&
-    prev.problemNumbers.length === next.problemNumbers.length &&
-    prev.tags.length === next.tags.length &&
-    prev.tagLogic === next.tagLogic &&
-    prev.authors.length === next.authors.length &&
-    prev.authorLogic === next.authorLogic &&
-    prev.favoritesOnly === next.favoritesOnly &&
-    prev.markStatus === next.markStatus &&
-    prev.listContentId === next.listContentId &&
-    equalSelectionsArrays(prev.contestSelection, next.contestSelection)
+    (previous.searchText !== next.searchText ||
+      previous.searchInSolution !== next.searchInSolution) &&
+    equalSlugs(previous.seasons, next.seasons) &&
+    equalProblemNumbers(previous.problemNumbers, next.problemNumbers) &&
+    equalSlugs(previous.tags, next.tags) &&
+    previous.tagLogic === next.tagLogic &&
+    equalSlugs(previous.authors, next.authors) &&
+    previous.authorLogic === next.authorLogic &&
+    previous.favoritesOnly === next.favoritesOnly &&
+    previous.markStatus === next.markStatus &&
+    previous.listContentId === next.listContentId &&
+    equalContestSelections(previous.contestSelection, next.contestSelection)
   )
 }
 
@@ -65,50 +34,81 @@ export function isTextOnlyChange(prev: SearchFiltersState, next: SearchFiltersSt
  * The case worth catching is the AND/OR toggle: with one value selected or none, matching
  * any of them and matching all of them ask the same question.
  *
- * @param prev - The filters before the change.
+ * @param previous - The filters before the change.
  * @param next - The filters after it.
  * @returns True when the two states are guaranteed to return the same problems.
  */
-export function isNoOpFilterChange(prev: SearchFiltersState, next: SearchFiltersState): boolean {
-  // With at most one value selected the mode says nothing, so both modes read as one
-  const normalizedPrevTagLogic = prev.tags.length <= 1 ? 'or' : prev.tagLogic
+export function isNoOpFilterChange(
+  previous: SearchFiltersState,
+  next: SearchFiltersState
+): boolean {
+  // With at most one tag selected the mode says nothing, so both modes read as one
+  const normalizedPreviousTagLogic = previous.tags.length <= 1 ? 'or' : previous.tagLogic
   const normalizedNextTagLogic = next.tags.length <= 1 ? 'or' : next.tagLogic
-  const normalizedPrevAuthorLogic = prev.authors.length <= 1 ? 'or' : prev.authorLogic
+
+  // The same for the authors
+  const normalizedPreviousAuthorLogic = previous.authors.length <= 1 ? 'or' : previous.authorLogic
   const normalizedNextAuthorLogic = next.authors.length <= 1 ? 'or' : next.authorLogic
 
   // Every filter has to ask the same question, the two modes under their normalized form
   return (
-    prev.searchText === next.searchText &&
-    prev.searchInSolution === next.searchInSolution &&
-    prev.seasons.length === next.seasons.length &&
-    prev.problemNumbers.length === next.problemNumbers.length &&
-    prev.tags.length === next.tags.length &&
-    normalizedPrevTagLogic === normalizedNextTagLogic &&
-    prev.authors.length === next.authors.length &&
-    normalizedPrevAuthorLogic === normalizedNextAuthorLogic &&
-    prev.favoritesOnly === next.favoritesOnly &&
-    prev.markStatus === next.markStatus &&
-    prev.listContentId === next.listContentId &&
-    equalSelectionsArrays(prev.contestSelection, next.contestSelection) &&
-    prev.seasons.every((season, index) => season.slug === next.seasons[index].slug) &&
-    prev.tags.every((tag, index) => tag.slug === next.tags[index].slug) &&
-    prev.authors.every((author, index) => author.slug === next.authors[index].slug) &&
-    prev.problemNumbers.every((number, index) => number === next.problemNumbers[index])
+    previous.searchText === next.searchText &&
+    previous.searchInSolution === next.searchInSolution &&
+    equalSlugs(previous.seasons, next.seasons) &&
+    equalProblemNumbers(previous.problemNumbers, next.problemNumbers) &&
+    equalSlugs(previous.tags, next.tags) &&
+    normalizedPreviousTagLogic === normalizedNextTagLogic &&
+    equalSlugs(previous.authors, next.authors) &&
+    normalizedPreviousAuthorLogic === normalizedNextAuthorLogic &&
+    previous.favoritesOnly === next.favoritesOnly &&
+    previous.markStatus === next.markStatus &&
+    previous.listContentId === next.listContentId &&
+    equalContestSelections(previous.contestSelection, next.contestSelection)
   )
 }
 
 /**
- * Whether two competition filters name the same thing, position for position.
+ * Whether two lists of facet values name the same slugs, position for position.
+ *
+ * @param previous - The values before the change.
+ * @param next - The values after it.
+ * @returns True when both name the same values in the same order.
+ */
+function equalSlugs(previous: LabeledSlug[], next: LabeledSlug[]): boolean {
+  // Differing counts settle it without any comparing
+  if (previous.length !== next.length) return false
+
+  // The label a value reads under carries no filtering meaning, so only its slug counts
+  return previous.every((value, index) => value.slug === next[index].slug)
+}
+
+/**
+ * Whether two lists of positions within a round hold the same numbers, in the same order.
+ *
+ * @param previous - The positions before the change.
+ * @param next - The positions after it.
+ * @returns True when both hold the same numbers in the same order.
+ */
+function equalProblemNumbers(previous: number[], next: number[]): boolean {
+  // Differing counts settle it without any comparing
+  if (previous.length !== next.length) return false
+
+  // Order is meaningful here, so each position is compared against its own
+  return previous.every((problemNumber, index) => problemNumber === next[index])
+}
+
+/**
+ * Whether two lists of contest filters name the same nodes, position for position.
  *
  * @param previous - The selections before the change.
  * @param next - The selections after it.
  * @returns True when both name the same selections in the same order.
  */
-function equalSelectionsArrays(
+function equalContestSelections(
   previous: SearchFiltersState['contestSelection'],
   next: SearchFiltersState['contestSelection']
 ): boolean {
-  // A selection arriving from the URL may be absent altogether
+  // Nothing handed over reads as nothing selected
   const previousArray = previous || []
   const nextArray = next || []
 
@@ -117,19 +117,7 @@ function equalSelectionsArrays(
 
   // Order is meaningful here, so each position is compared against its own
   return previousArray.every((previousSelection, index) => {
-    // The selection sitting in the same place on the other side
-    const nextSelection = nextArray[index]
-
-    // The names a selection reads under carry no filtering meaning, so only the slugs count
-    const previousSlugs = contestSelectionSlugs(previousSelection)
-    const nextSlugs = contestSelectionSlugs(nextSelection)
-
-    // The level and all three slugs have to agree
-    return (
-      previousSelection.type === nextSelection.type &&
-      previousSlugs.competitionSlug === nextSlugs.competitionSlug &&
-      previousSlugs.categorySlug === nextSlugs.categorySlug &&
-      previousSlugs.roundSlug === nextSlugs.roundSlug
-    )
+    // How the backend is told about a node follows from the node, so the path settles it alone
+    return previousSelection.path === nextArray[index].path
   })
 }

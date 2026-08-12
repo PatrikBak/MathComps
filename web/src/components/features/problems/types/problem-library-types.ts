@@ -3,6 +3,7 @@
 
 import type { PagedList } from '@/lib/api/paged-list'
 
+import type { LegacyApiContest } from '../utils/contest-api-legacy'
 import type {
   CompetitionFilterOption,
   FacetOption,
@@ -28,66 +29,19 @@ export type FilterOptionsWithCounts = {
 }
 
 /**
- * A whole competition, standing for every problem in it.
+ * One competition filter, held at whatever depth of the taxonomy the user picked, so taking a
+ * whole competition records one entry rather than every round in it. It carries no names of its
+ * own: whatever shows the filter reads those off the node its path resolves to.
  */
-type CompetitionContestSelection = {
-  /** Names this as a competition-level selection. */
-  type: 'competition'
-  /** The competition selected. */
-  competitionSlug: string
-  /** How the selection reads, e.g. "IMO". */
-  displayName: string
-  /** The unabbreviated name, e.g. "International Mathematical Olympiad". */
-  fullName?: string
+export type ContestSelection = {
+  /** The node the filter names, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
+  path: string
+  /** How the backend names that same node. */
+  apiSelection: LegacyApiContest
 }
 
 /**
- * One category of a competition, standing for every round in it.
- */
-type CategoryContestSelection = {
-  /** Names this as a category-level selection. */
-  type: 'category'
-  /** The competition the category belongs to. */
-  competitionSlug: string
-  /** The category selected. */
-  categorySlug: string
-  /** How the selection reads, e.g. "SKMO - Kategória A". */
-  displayName: string
-  /** The unabbreviated name. */
-  fullName?: string
-}
-
-/**
- * One round, which sits under a category in competitions that have that level and
- * directly under the competition in those that do not.
- */
-export type RoundContestSelection = {
-  /** Names this as a round-level selection. */
-  type: 'round'
-  /** The competition the round belongs to. */
-  competitionSlug: string
-  /** The category the round sits under, absent in competitions with no category level. */
-  categorySlug?: string
-  /** The round selected. */
-  roundSlug: string
-  /** How the selection reads, e.g. "SKMO - Kategória A - Školské kolo". */
-  displayName: string
-  /** The unabbreviated name. */
-  fullName?: string
-}
-
-/**
- * One competition filter, held at whatever level of the hierarchy the user picked, so
- * taking a whole competition records one entry rather than every round in it, carried
- * alongside the names it reads under.
- */
-export type ContestSelection =
-  | CompetitionContestSelection
-  | CategoryContestSelection
-  | RoundContestSelection
-
-/**
- * Filter values for problem mark status.
+ * The mark state a problem can be in.
  */
 export type MarkStatusFilter = 'marked' | 'unmarked'
 
@@ -122,14 +76,11 @@ export type SearchFiltersState = {
 }
 
 /**
- * The filters as the URL holds them, before a competition filter's level is resolved.
+ * The filters as the URL holds them, before a competition filter is resolved against the taxonomy.
  */
 export type UrlQueryState = Omit<SearchFiltersState, 'contestSelection'> & {
-  /**
-   * The competition filters, each as its bare slug parts, since a slug like `csmo-a` does
-   * not say on its own whether the second part is a category or a round.
-   */
-  competitionSelectionParts: string[][]
+  /** The competition filters, each as the bare path it was written as, resolved or not. */
+  contestPaths: string[]
 }
 
 /**
@@ -138,7 +89,7 @@ export type UrlQueryState = Omit<SearchFiltersState, 'contestSelection'> & {
 export type FilterResponse = {
   /** The page of matching problems. */
   problems: PagedList<Problem>
-  /** The option counts under these filters, absent when they cannot have changed. */
+  /** The option counts under these filters, null when they cannot have changed. */
   updatedOptions: FilterOptionsWithCounts | null
   /** The name of the list being browsed, null when browsing everything. */
   listName: string | null
@@ -155,7 +106,7 @@ export type RawProblemFilterResponse = {
 }
 
 /**
- * A single problem alongside the filters that resolve to exactly it.
+ * A single problem, together with the filter state the library would show it under.
  */
 export type SingleProblemResult = {
   /** The problem itself. */

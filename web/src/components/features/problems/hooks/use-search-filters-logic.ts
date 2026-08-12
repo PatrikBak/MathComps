@@ -1,3 +1,4 @@
+import { useLocale } from 'next-intl'
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 
 import type {
@@ -8,12 +9,13 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 
 import type { FacetOption } from '../types/problem-api-types'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
+import { foldPickedPaths } from '../utils/contest-selection-fold'
 import {
-  buildSelectionsFromTreeIds,
-  categoryNodeId,
-  competitionNodeId,
-  roundNodeId,
-} from '../utils/filter-ids'
+  buildContestTree,
+  contestSelectionFor,
+  expandedByDefault,
+  toFacetNodes,
+} from '../utils/contest-tree'
 
 /**
  * How a facet's options are ordered before they reach the UI.
@@ -27,12 +29,14 @@ type OptionSortMode = 'count-desc-alpha' | 'numeric-asc'
  * @param baseOptions - Every option the facet offers, whatever is filtered.
  * @param filterOptions - The options surviving the other filters, which is where the counts come from.
  * @param sortMode - The ordering to apply.
+ * @param locale - The locale the names are collated under.
  * @returns The options a facet renders, ordered.
  */
 function buildFacetOptions(
   baseOptions: FacetOption[],
   filterOptions: FacetOption[],
-  sortMode: OptionSortMode
+  sortMode: OptionSortMode,
+  locale: string
 ): FacetUiOption[] {
   // Counts keyed by slug, so restating an option is a lookup
   const countBySlug = new Map(filterOptions.map((option) => [option.slug, option.count]))
@@ -52,11 +56,12 @@ function buildFacetOptions(
       case 'count-desc-alpha':
         // Differing counts decide it on their own
         if (second.count !== first.count) {
+          // The bigger count comes first
           return second.count - first.count
         }
 
-        // Equal counts carry no ordering, so defer to the name
-        return first.displayName.localeCompare(second.displayName)
+        // Equal counts carry no ordering, so defer to the name, collated as the reader's language does
+        return first.displayName.localeCompare(second.displayName, locale)
 
       // Names that are numbers, ordered as numbers and not as text
       case 'numeric-asc':
@@ -84,7 +89,8 @@ export type UseSearchFiltersLogicProps = {
 }
 
 /**
- * Everything the filter sidebar renders from.
+ * The facet options carrying their current counts, the competition tree's expanded and selected
+ * nodes, and the handler that records a selection made in the tree.
  */
 export type UseSearchFiltersLogicResult = {
   /** The competition hierarchy, its counts brought up to date. */
@@ -109,9 +115,9 @@ export type UseSearchFiltersLogicResult = {
  * Turns the filter state and the option counts into what the sidebar's facets render,
  * and turns a facet's selection back into filter state.
  *
- * The competition facet is the awkward one: the filters record a selection at whatever
- * level the user picked, while the tree addresses everything by node id, so the two
- * representations have to be mapped onto each other in both directions.
+ * The competition facet is the awkward one: the tree hands back every node ticked in its own
+ * right, while the filters hold the shallowest nodes covering exactly those, so a click has to
+ * be folded up before it is recorded.
  *
  * @param props - The filter state and option counts, per {@link UseSearchFiltersLogicProps}.
  * @returns The options, state and handlers described by {@link UseSearchFiltersLogicResult}.
@@ -122,110 +128,35 @@ export function useSearchFiltersLogic({
   filterOptions,
   baseOptions,
 }: UseSearchFiltersLogicProps): UseSearchFiltersLogicResult {
+  // The reader's locale, which decides how the facet names collate against each other
+  const locale = useLocale()
+
+  // The taxonomy as the filters address it. It turns only on which nodes exist, so it stays put while
+  // the counts move and a count arriving never disturbs a selection the user just made.
+  const contestTree = useMemo(
+    () => buildContestTree(baseOptions.competitions, baseOptions.competitions),
+    [baseOptions.competitions]
+  )
+
   // The filters' contest selection, addressed the way the tree addresses its nodes
   const selectionTreeNodeIds = useMemo(() => {
-    // A selection can arrive from the URL, where it may be absent or malformed
+    // No list of selections, nothing to address
     if (!filters.contestSelection || !Array.isArray(filters.contestSelection)) {
+      // Nothing for the tree to tick
       return []
     }
 
-    // Each selection names one node, and anything unresolvable drops out below
-    return (
-      filters.contestSelection
-        .map((selection) => {
-          switch (selection.type) {
-            // A whole competition is addressed by its slug alone
-            case 'competition':
-              return competitionNodeId(selection.competitionSlug)
-
-            // A category is addressed by its competition and itself, once both are found to exist
-            case 'category': {
-              // The competition the selection sits under
-              const competition = baseOptions.competitions.find(
-                (competition) => competition.competitionData.slug === selection.competitionSlug
-              )
-
-              // The category the selection names
-              const categorySlug = selection.categorySlug
-
-              // Without the competition there is nothing to resolve the category against
-              if (competition) {
-                // The straightforward case: the competition really has that category
-                const hasCategory = competition.categoryData?.some(
-                  (category) => category.categoryData.slug === categorySlug
-                )
-
-                // Addressed at the category level, the way it was picked
-                if (hasCategory) {
-                  return categoryNodeId(selection.competitionSlug, categorySlug)
-                }
-
-                // Competitions without a category level hang their rounds where a category would be
-                const hasDirectRound = competition.roundData?.some(
-                  (round) => round.slug === categorySlug
-                )
-
-                // Addressed as a round instead, since that is what the slug turned out to name
-                if (hasDirectRound) {
-                  return roundNodeId(selection.competitionSlug, categorySlug)
-                }
-              }
-
-              // The taxonomy has moved on since the selection was made
-              console.warn(
-                `Invalid category selection: competition "${selection.competitionSlug}" not found or category "${categorySlug}" not found in competition data. This may indicate stale state.`
-              )
-
-              // An empty id, which is filtered out below
-              return ''
-            }
-
-            // A round names its own category, so only the competition has to be checked
-            case 'round': {
-              // The competition the round sits under
-              const competition = baseOptions.competitions.find(
-                (competition) => competition.competitionData.slug === selection.competitionSlug
-              )
-
-              // The taxonomy has moved on since the selection was made
-              if (!competition) {
-                console.warn(
-                  `Invalid round selection: competition "${selection.competitionSlug}" not found. This may indicate stale state.`
-                )
-
-                // An empty id, which is filtered out below
-                return ''
-              }
-
-              // A round is addressed by its competition, its category when it has one, and itself
-              return roundNodeId(
-                selection.competitionSlug,
-                selection.roundSlug,
-                selection.categorySlug
-              )
-            }
-
-            // A level the app does not know, which only a corrupted URL can produce
-            default:
-              console.warn(
-                `Unknown contest selection type: "${(selection as { type: string }).type}". This may indicate corrupted state.`
-              )
-
-              // An empty id, which is filtered out below
-              return ''
-          }
-        })
-        // The empty ids stood for selections nothing in the hierarchy answers to
-        .filter((id) => id !== '')
-    )
-  }, [filters.contestSelection, baseOptions.competitions])
+    // A selection naming a node the taxonomy no longer holds drops out
+    return filters.contestSelection
+      .map((selection) => selection.path)
+      .filter((path) => contestTree.byPath.has(path))
+  }, [filters.contestSelection, contestTree])
 
   // The tree's own selection, held locally so a click lands on the checkbox at once
   const [selectedTreeIds, setSelectedTreeIds] = useState<string[]>(selectionTreeNodeIds)
 
-  // A selection arriving from anywhere else, such as the URL, overrides the local copy
+  // The filters lead, so a selection made anywhere else takes the local copy over
   useEffect(() => {
-    // The filters are the source of truth, so the tree follows them rather than the reverse
     setSelectedTreeIds(selectionTreeNodeIds)
   }, [selectionTreeNodeIds])
 
@@ -238,8 +169,8 @@ export function useSearchFiltersLogic({
     // Show it immediately, ahead of the round trip through the filters
     setSelectedTreeIds(nextSelectedIds)
 
-    // The same selection expressed at whatever level covers it
-    const selections = buildSelectionsFromTreeIds(nextSelectedIds, baseOptions)
+    // The same selection expressed at whatever depth covers it
+    const selections = foldPickedPaths(nextSelectedIds, contestTree).map(contestSelectionFor)
 
     // Only the competition filter moves; everything else stays as it was
     onFiltersChange({
@@ -253,131 +184,54 @@ export function useSearchFiltersLogic({
 
   // The whole hierarchy, since a competition never disappears from the tree, only its count changes
   const competitionTreeOpts: TreeNode[] = useMemo(() => {
-    // Counts keyed by competition slug, so restating a competition is a lookup
-    const competitionDataBySlug = new Map(
-      deferredFilterOptions.competitions.map((competition) => [
-        competition.competitionData.slug,
-        competition,
-      ])
+    // The same nodes as the tree above, carrying the counts the current filters leave them
+    const countedTree = buildContestTree(
+      baseOptions.competitions,
+      deferredFilterOptions.competitions
     )
 
-    // One root per competition, each carrying whatever hangs off it
-    return baseOptions.competitions.map((baseCompetition) => {
-      // The competition's own slug
-      const competitionSlug = baseCompetition.competitionData.slug
-
-      // What this competition looks like under the current filters
-      const currentCompetition = competitionDataBySlug.get(competitionSlug)
-
-      // The category level, where the competition has one
-      const categoryChildren = baseCompetition.categoryData.map((baseCategory) => {
-        // The category's own slug
-        const categorySlug = baseCategory.categoryData.slug
-
-        // What this category looks like under the current filters
-        const currentCategory = currentCompetition?.categoryData.find(
-          (category) => category.categoryData.slug === categorySlug
-        )
-
-        // The rounds sitting under the category
-        const roundChildren = baseCategory.roundData.map((baseRound) => {
-          // What this round looks like under the current filters
-          const currentRound = currentCategory?.roundData.find(
-            (round) => round.slug === baseRound.slug
-          )
-
-          // A leaf, since nothing hangs off a round
-          return {
-            id: roundNodeId(competitionSlug, baseRound.slug, categorySlug),
-            displayName: baseRound.displayName,
-            fullName: baseRound.fullName,
-            count: currentRound?.count ?? 0,
-          }
-        })
-
-        // A branch, unless the category turns out to hold no rounds
-        return {
-          id: categoryNodeId(competitionSlug, categorySlug),
-          displayName: baseCategory.categoryData.displayName,
-          fullName: baseCategory.categoryData.fullName,
-          count: currentCategory?.categoryData.count ?? 0,
-          children: roundChildren.length > 0 ? roundChildren : undefined,
-        }
-      })
-
-      // Some competitions have no category level and hang their rounds off the root
-      const directRoundChildren = baseCompetition.roundData.map((baseRound) => {
-        // What this round looks like under the current filters
-        const currentRound = currentCompetition?.roundData.find(
-          (round) => round.slug === baseRound.slug
-        )
-
-        // A leaf, since nothing hangs off a round
-        return {
-          id: roundNodeId(competitionSlug, baseRound.slug),
-          displayName: baseRound.displayName,
-          fullName: baseRound.fullName,
-          count: currentRound?.count ?? 0,
-        }
-      })
-
-      // A competition can carry both levels at once
-      const children = [...categoryChildren, ...directRoundChildren]
-
-      // The root, left childless when the competition has nothing under it
-      return {
-        id: competitionNodeId(competitionSlug),
-        displayName: baseCompetition.competitionData.displayName,
-        fullName: baseCompetition.competitionData.fullName,
-        count: currentCompetition?.competitionData.count ?? 0,
-        children: children.length > 0 ? children : undefined,
-      }
-    })
+    // Handed over in the shape the shared facet renders
+    return toFacetNodes(countedTree.roots)
   }, [baseOptions.competitions, deferredFilterOptions])
 
   // Every branch starts open, so the whole hierarchy is visible without any clicking
-  const defaultExpandedIds = baseOptions.competitions.flatMap((competition) => [
-    // The competition itself
-    competitionNodeId(competition.competitionData.slug),
-
-    // Every category under it
-    ...competition.categoryData.map((category) =>
-      categoryNodeId(competition.competitionData.slug, category.categoryData.slug)
-    ),
-
-    // Rounds have no children (just like me)
-  ])
+  const defaultExpandedIds = useMemo(() => expandedByDefault(contestTree), [contestTree])
 
   // The seasons, which are already in the order they should render
   const seasonOpts: FacetUiOption[] = useMemo(() => {
     // Counts keyed by season slug, so restating a season is a lookup
-    const slugToCount = new Map(filterOptions.seasons.map((season) => [season.slug, season.count]))
+    const countBySlug = new Map(filterOptions.seasons.map((season) => [season.slug, season.count]))
 
     // Every season the library holds, carrying whatever count it has right now
     return baseOptions.seasons.map((season) => ({
       id: season.slug,
       displayName: season.displayName,
-      count: slugToCount.get(season.slug) ?? 0,
+      count: countBySlug.get(season.slug) ?? 0,
     }))
   }, [baseOptions.seasons, filterOptions.seasons])
 
   // The tags, with the ones carrying the most results leading
   const tagOpts: FacetUiOption[] = useMemo(
-    () => buildFacetOptions(baseOptions.tags, filterOptions.tags, 'count-desc-alpha'),
-    [baseOptions.tags, filterOptions.tags]
+    () => buildFacetOptions(baseOptions.tags, filterOptions.tags, 'count-desc-alpha', locale),
+    [baseOptions.tags, filterOptions.tags, locale]
   )
 
   // The authors, with the most prolific leading
   const authorOpts: FacetUiOption[] = useMemo(
-    () => buildFacetOptions(baseOptions.authors, filterOptions.authors, 'count-desc-alpha'),
-    [baseOptions.authors, filterOptions.authors]
+    () => buildFacetOptions(baseOptions.authors, filterOptions.authors, 'count-desc-alpha', locale),
+    [baseOptions.authors, filterOptions.authors, locale]
   )
 
   // The problem numbers, which read as a sequence and so stay in numeric order
   const numberOpts: FacetUiOption[] = useMemo(
     () =>
-      buildFacetOptions(baseOptions.problemNumbers, filterOptions.problemNumbers, 'numeric-asc'),
-    [baseOptions.problemNumbers, filterOptions.problemNumbers]
+      buildFacetOptions(
+        baseOptions.problemNumbers,
+        filterOptions.problemNumbers,
+        'numeric-asc',
+        locale
+      ),
+    [baseOptions.problemNumbers, filterOptions.problemNumbers, locale]
   )
 
   // Everything the sidebar renders from, plus the one handler it writes back through
