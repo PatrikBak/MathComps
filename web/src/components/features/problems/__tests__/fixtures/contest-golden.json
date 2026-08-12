@@ -1,0 +1,6422 @@
+{
+  "allPaths": [
+    "csmo",
+    "csmo-a",
+    "csmo-a-i",
+    "csmo-a-s",
+    "csmo-a-ii",
+    "csmo-a-iii",
+    "csmo-b",
+    "csmo-b-i",
+    "csmo-b-s",
+    "csmo-b-ii",
+    "csmo-c",
+    "csmo-c-i",
+    "csmo-c-s",
+    "csmo-c-ii",
+    "csmo-z9",
+    "csmo-z9-i",
+    "csmo-z9-ii",
+    "csmo-z9-iii",
+    "csmo-z8",
+    "csmo-z8-i",
+    "csmo-z8-ii",
+    "csmo-z7",
+    "csmo-z7-i",
+    "csmo-z7-ii",
+    "csmo-z6",
+    "csmo-z6-i",
+    "csmo-z6-ii",
+    "csmo-z5",
+    "csmo-z5-i",
+    "csmo-z5-ii",
+    "csmo-z4",
+    "csmo-z4-i",
+    "csmo-z4-ii",
+    "tst",
+    "tst-d1",
+    "tst-d2",
+    "tst-d3",
+    "tst-d4",
+    "tst-d5",
+    "memo",
+    "memo-i",
+    "memo-t",
+    "imo",
+    "caps",
+    "emo",
+    "egmo",
+    "tstc",
+    "cpsj",
+    "cpsj-i",
+    "cpsj-t",
+    "duogeo",
+    "duogeo-zs",
+    "duogeo-ss"
+  ],
+  "tree": {
+    "unfiltered": [
+      {
+        "id": "competition/csmo",
+        "displayName": "CSMO",
+        "fullName": "Česko-slovenská Matematická olympiáda",
+        "count": 2354,
+        "children": [
+          {
+            "id": "competition/csmo/category/a",
+            "displayName": "A",
+            "fullName": null,
+            "count": 614,
+            "children": [
+              {
+                "id": "competition/csmo/category/a/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 198
+              },
+              {
+                "id": "competition/csmo/category/a/round/s",
+                "displayName": "Školské kolo",
+                "fullName": "Školské kolo",
+                "count": 96
+              },
+              {
+                "id": "competition/csmo/category/a/round/ii",
+                "displayName": "Krajské kolo",
+                "fullName": "Krajské kolo",
+                "count": 128
+              },
+              {
+                "id": "competition/csmo/category/a/round/iii",
+                "displayName": "Celoštátne kolo",
+                "fullName": "Celoštátne kolo",
+                "count": 192
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/b",
+            "displayName": "B",
+            "fullName": null,
+            "count": 416,
+            "children": [
+              {
+                "id": "competition/csmo/category/b/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 192
+              },
+              {
+                "id": "competition/csmo/category/b/round/s",
+                "displayName": "Školské kolo",
+                "fullName": "Školské kolo",
+                "count": 96
+              },
+              {
+                "id": "competition/csmo/category/b/round/ii",
+                "displayName": "Krajské kolo",
+                "fullName": "Krajské kolo",
+                "count": 128
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/c",
+            "displayName": "C",
+            "fullName": null,
+            "count": 416,
+            "children": [
+              {
+                "id": "competition/csmo/category/c/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 192
+              },
+              {
+                "id": "competition/csmo/category/c/round/s",
+                "displayName": "Školské kolo",
+                "fullName": "Školské kolo",
+                "count": 96
+              },
+              {
+                "id": "competition/csmo/category/c/round/ii",
+                "displayName": "Krajské kolo",
+                "fullName": "Krajské kolo",
+                "count": 128
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z9",
+            "displayName": "Z9",
+            "fullName": null,
+            "count": 251,
+            "children": [
+              {
+                "id": "competition/csmo/category/z9/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 102
+              },
+              {
+                "id": "competition/csmo/category/z9/round/ii",
+                "displayName": "Okresné kolo",
+                "fullName": "Okresné kolo",
+                "count": 79
+              },
+              {
+                "id": "competition/csmo/category/z9/round/iii",
+                "displayName": "Krajské kolo",
+                "fullName": "Krajské kolo",
+                "count": 70
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z8",
+            "displayName": "Z8",
+            "fullName": null,
+            "count": 158,
+            "children": [
+              {
+                "id": "competition/csmo/category/z8/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 102
+              },
+              {
+                "id": "competition/csmo/category/z8/round/ii",
+                "displayName": "Okresné kolo",
+                "fullName": "Okresné kolo",
+                "count": 56
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z7",
+            "displayName": "Z7",
+            "fullName": null,
+            "count": 149,
+            "children": [
+              {
+                "id": "competition/csmo/category/z7/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 96
+              },
+              {
+                "id": "competition/csmo/category/z7/round/ii",
+                "displayName": "Okresné kolo",
+                "fullName": "Okresné kolo",
+                "count": 53
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z6",
+            "displayName": "Z6",
+            "fullName": null,
+            "count": 149,
+            "children": [
+              {
+                "id": "competition/csmo/category/z6/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 102
+              },
+              {
+                "id": "competition/csmo/category/z6/round/ii",
+                "displayName": "Okresné kolo",
+                "fullName": "Okresné kolo",
+                "count": 47
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z5",
+            "displayName": "Z5",
+            "fullName": null,
+            "count": 165,
+            "children": [
+              {
+                "id": "competition/csmo/category/z5/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 105
+              },
+              {
+                "id": "competition/csmo/category/z5/round/ii",
+                "displayName": "Okresné kolo",
+                "fullName": "Okresné kolo",
+                "count": 60
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z4",
+            "displayName": "Z4",
+            "fullName": null,
+            "count": 36,
+            "children": [
+              {
+                "id": "competition/csmo/category/z4/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 24
+              },
+              {
+                "id": "competition/csmo/category/z4/round/ii",
+                "displayName": "Školské kolo",
+                "fullName": "Školské kolo",
+                "count": 12
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "competition/tst",
+        "displayName": "Výberko IMO/MEMO",
+        "fullName": "Výberové sústredenie pred IMO a MEMO",
+        "count": 454,
+        "children": [
+          {
+            "id": "competition/tst/round/d1",
+            "displayName": "1. deň",
+            "fullName": "1. deň",
+            "count": 97
+          },
+          {
+            "id": "competition/tst/round/d2",
+            "displayName": "2. deň",
+            "fullName": "2. deň",
+            "count": 88
+          },
+          {
+            "id": "competition/tst/round/d3",
+            "displayName": "3. deň",
+            "fullName": "3. deň",
+            "count": 92
+          },
+          {
+            "id": "competition/tst/round/d4",
+            "displayName": "4. deň",
+            "fullName": "4. deň",
+            "count": 94
+          },
+          {
+            "id": "competition/tst/round/d5",
+            "displayName": "5. deň",
+            "fullName": "5. deň",
+            "count": 83
+          }
+        ]
+      },
+      {
+        "id": "competition/memo",
+        "displayName": "MEMO",
+        "fullName": "Middle European Mathematical Olympiad",
+        "count": 212,
+        "children": [
+          {
+            "id": "competition/memo/round/i",
+            "displayName": "Individual",
+            "fullName": "Individuálna časť",
+            "count": 76
+          },
+          {
+            "id": "competition/memo/round/t",
+            "displayName": "Team",
+            "fullName": "Tímová časť",
+            "count": 136
+          }
+        ]
+      },
+      {
+        "id": "competition/imo",
+        "displayName": "IMO",
+        "fullName": "International Mathematical Olympiad",
+        "count": 156
+      },
+      {
+        "id": "competition/caps",
+        "displayName": "CAPS",
+        "fullName": "Czech-Austrian-Polish-Slovak Match",
+        "count": 163
+      },
+      {
+        "id": "competition/emo",
+        "displayName": "EMO",
+        "fullName": "European Mathematical Olympiad",
+        "count": 8
+      },
+      {
+        "id": "competition/egmo",
+        "displayName": "EGMO",
+        "fullName": "European Girl's Mathematical Olympiad",
+        "count": 92
+      },
+      {
+        "id": "competition/tstc",
+        "displayName": "Výberko CPSJ",
+        "fullName": "Výberové sústredenie pred CPSJ",
+        "count": 30
+      },
+      {
+        "id": "competition/cpsj",
+        "displayName": "CPSJ",
+        "fullName": "Czech-Polish-Slovak Junior Match",
+        "count": 154,
+        "children": [
+          {
+            "id": "competition/cpsj/round/i",
+            "displayName": "Individual",
+            "fullName": "Individuálna časť",
+            "count": 70
+          },
+          {
+            "id": "competition/cpsj/round/t",
+            "displayName": "Team",
+            "fullName": "Tímová časť",
+            "count": 84
+          }
+        ]
+      },
+      {
+        "id": "competition/duogeo",
+        "displayName": "DuoGeo",
+        "fullName": "DuoGeo",
+        "count": 24,
+        "children": [
+          {
+            "id": "competition/duogeo/round/zs",
+            "displayName": "ZŠ",
+            "fullName": "Kategória ZŠ",
+            "count": 12
+          },
+          {
+            "id": "competition/duogeo/round/ss",
+            "displayName": "SŠ",
+            "fullName": "Kategória SŠ",
+            "count": 12
+          }
+        ]
+      }
+    ],
+    "yearFiltered": [
+      {
+        "id": "competition/csmo",
+        "displayName": "CSMO",
+        "fullName": "Česko-slovenská Matematická olympiáda",
+        "count": 95,
+        "children": [
+          {
+            "id": "competition/csmo/category/a",
+            "displayName": "A",
+            "fullName": null,
+            "count": 19,
+            "children": [
+              {
+                "id": "competition/csmo/category/a/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 6
+              },
+              {
+                "id": "competition/csmo/category/a/round/s",
+                "displayName": "Školské kolo",
+                "fullName": "Školské kolo",
+                "count": 3
+              },
+              {
+                "id": "competition/csmo/category/a/round/ii",
+                "displayName": "Krajské kolo",
+                "fullName": "Krajské kolo",
+                "count": 4
+              },
+              {
+                "id": "competition/csmo/category/a/round/iii",
+                "displayName": "Celoštátne kolo",
+                "fullName": "Celoštátne kolo",
+                "count": 6
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/b",
+            "displayName": "B",
+            "fullName": null,
+            "count": 13,
+            "children": [
+              {
+                "id": "competition/csmo/category/b/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 6
+              },
+              {
+                "id": "competition/csmo/category/b/round/s",
+                "displayName": "Školské kolo",
+                "fullName": "Školské kolo",
+                "count": 3
+              },
+              {
+                "id": "competition/csmo/category/b/round/ii",
+                "displayName": "Krajské kolo",
+                "fullName": "Krajské kolo",
+                "count": 4
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/c",
+            "displayName": "C",
+            "fullName": null,
+            "count": 13,
+            "children": [
+              {
+                "id": "competition/csmo/category/c/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 6
+              },
+              {
+                "id": "competition/csmo/category/c/round/s",
+                "displayName": "Školské kolo",
+                "fullName": "Školské kolo",
+                "count": 3
+              },
+              {
+                "id": "competition/csmo/category/c/round/ii",
+                "displayName": "Krajské kolo",
+                "fullName": "Krajské kolo",
+                "count": 4
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z9",
+            "displayName": "Z9",
+            "fullName": null,
+            "count": 14,
+            "children": [
+              {
+                "id": "competition/csmo/category/z9/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 6
+              },
+              {
+                "id": "competition/csmo/category/z9/round/ii",
+                "displayName": "Okresné kolo",
+                "fullName": "Okresné kolo",
+                "count": 4
+              },
+              {
+                "id": "competition/csmo/category/z9/round/iii",
+                "displayName": "Krajské kolo",
+                "fullName": "Krajské kolo",
+                "count": 4
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z8",
+            "displayName": "Z8",
+            "fullName": null,
+            "count": 9,
+            "children": [
+              {
+                "id": "competition/csmo/category/z8/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 6
+              },
+              {
+                "id": "competition/csmo/category/z8/round/ii",
+                "displayName": "Okresné kolo",
+                "fullName": "Okresné kolo",
+                "count": 3
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z7",
+            "displayName": "Z7",
+            "fullName": null,
+            "count": 9,
+            "children": [
+              {
+                "id": "competition/csmo/category/z7/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 6
+              },
+              {
+                "id": "competition/csmo/category/z7/round/ii",
+                "displayName": "Okresné kolo",
+                "fullName": "Okresné kolo",
+                "count": 3
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z6",
+            "displayName": "Z6",
+            "fullName": null,
+            "count": 9,
+            "children": [
+              {
+                "id": "competition/csmo/category/z6/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 6
+              },
+              {
+                "id": "competition/csmo/category/z6/round/ii",
+                "displayName": "Okresné kolo",
+                "fullName": "Okresné kolo",
+                "count": 3
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z5",
+            "displayName": "Z5",
+            "fullName": null,
+            "count": 9,
+            "children": [
+              {
+                "id": "competition/csmo/category/z5/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 6
+              },
+              {
+                "id": "competition/csmo/category/z5/round/ii",
+                "displayName": "Okresné kolo",
+                "fullName": "Okresné kolo",
+                "count": 3
+              }
+            ]
+          },
+          {
+            "id": "competition/csmo/category/z4",
+            "displayName": "Z4",
+            "fullName": null,
+            "count": 0,
+            "children": [
+              {
+                "id": "competition/csmo/category/z4/round/i",
+                "displayName": "Domáce kolo",
+                "fullName": "Domáce kolo",
+                "count": 0
+              },
+              {
+                "id": "competition/csmo/category/z4/round/ii",
+                "displayName": "Školské kolo",
+                "fullName": "Školské kolo",
+                "count": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "competition/tst",
+        "displayName": "Výberko IMO/MEMO",
+        "fullName": "Výberové sústredenie pred IMO a MEMO",
+        "count": 0,
+        "children": [
+          {
+            "id": "competition/tst/round/d1",
+            "displayName": "1. deň",
+            "fullName": "1. deň",
+            "count": 0
+          },
+          {
+            "id": "competition/tst/round/d2",
+            "displayName": "2. deň",
+            "fullName": "2. deň",
+            "count": 0
+          },
+          {
+            "id": "competition/tst/round/d3",
+            "displayName": "3. deň",
+            "fullName": "3. deň",
+            "count": 0
+          },
+          {
+            "id": "competition/tst/round/d4",
+            "displayName": "4. deň",
+            "fullName": "4. deň",
+            "count": 0
+          },
+          {
+            "id": "competition/tst/round/d5",
+            "displayName": "5. deň",
+            "fullName": "5. deň",
+            "count": 0
+          }
+        ]
+      },
+      {
+        "id": "competition/memo",
+        "displayName": "MEMO",
+        "fullName": "Middle European Mathematical Olympiad",
+        "count": 0,
+        "children": [
+          {
+            "id": "competition/memo/round/i",
+            "displayName": "Individual",
+            "fullName": "Individuálna časť",
+            "count": 0
+          },
+          {
+            "id": "competition/memo/round/t",
+            "displayName": "Team",
+            "fullName": "Tímová časť",
+            "count": 0
+          }
+        ]
+      },
+      {
+        "id": "competition/imo",
+        "displayName": "IMO",
+        "fullName": "International Mathematical Olympiad",
+        "count": 0
+      },
+      {
+        "id": "competition/caps",
+        "displayName": "CAPS",
+        "fullName": "Czech-Austrian-Polish-Slovak Match",
+        "count": 6
+      },
+      {
+        "id": "competition/emo",
+        "displayName": "EMO",
+        "fullName": "European Mathematical Olympiad",
+        "count": 8
+      },
+      {
+        "id": "competition/egmo",
+        "displayName": "EGMO",
+        "fullName": "European Girl's Mathematical Olympiad",
+        "count": 6
+      },
+      {
+        "id": "competition/tstc",
+        "displayName": "Výberko CPSJ",
+        "fullName": "Výberové sústredenie pred CPSJ",
+        "count": 5
+      },
+      {
+        "id": "competition/cpsj",
+        "displayName": "CPSJ",
+        "fullName": "Czech-Polish-Slovak Junior Match",
+        "count": 11,
+        "children": [
+          {
+            "id": "competition/cpsj/round/i",
+            "displayName": "Individual",
+            "fullName": "Individuálna časť",
+            "count": 5
+          },
+          {
+            "id": "competition/cpsj/round/t",
+            "displayName": "Team",
+            "fullName": "Tímová časť",
+            "count": 6
+          }
+        ]
+      },
+      {
+        "id": "competition/duogeo",
+        "displayName": "DuoGeo",
+        "fullName": "DuoGeo",
+        "count": 12,
+        "children": [
+          {
+            "id": "competition/duogeo/round/zs",
+            "displayName": "ZŠ",
+            "fullName": "Kategória ZŠ",
+            "count": 6
+          },
+          {
+            "id": "competition/duogeo/round/ss",
+            "displayName": "SŠ",
+            "fullName": "Kategória SŠ",
+            "count": 6
+          }
+        ]
+      }
+    ],
+    "defaultExpandedIds": [
+      "competition/csmo",
+      "competition/csmo/category/a",
+      "competition/csmo/category/b",
+      "competition/csmo/category/c",
+      "competition/csmo/category/z9",
+      "competition/csmo/category/z8",
+      "competition/csmo/category/z7",
+      "competition/csmo/category/z6",
+      "competition/csmo/category/z5",
+      "competition/csmo/category/z4",
+      "competition/tst",
+      "competition/memo",
+      "competition/imo",
+      "competition/caps",
+      "competition/emo",
+      "competition/egmo",
+      "competition/tstc",
+      "competition/cpsj",
+      "competition/duogeo"
+    ]
+  },
+  "expand": [
+    {
+      "label": "single:csmo",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "csmo",
+          "displayName": "CSMO"
+        }
+      ],
+      "roundTripIds": ["competition/csmo"]
+    },
+    {
+      "label": "single:csmo-a",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/a"]
+    },
+    {
+      "label": "allRounds:csmo-a",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/a"]
+    },
+    {
+      "label": "roundsMinusOne:csmo-a",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "s",
+          "displayName": "CSMO - A - Školské kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "ii",
+          "displayName": "CSMO - A - Krajské kolo"
+        }
+      ],
+      "roundTripIds": [
+        "competition/csmo/category/a/round/i",
+        "competition/csmo/category/a/round/s",
+        "competition/csmo/category/a/round/ii"
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/a/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/a/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/a/round/s",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "s",
+          "displayName": "CSMO - A - Školské kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/a/round/s"]
+    },
+    {
+      "label": "single:competition/csmo/category/a/round/ii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "ii",
+          "displayName": "CSMO - A - Krajské kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/a/round/ii"]
+    },
+    {
+      "label": "single:competition/csmo/category/a/round/iii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "iii",
+          "displayName": "CSMO - A - Celoštátne kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/a/round/iii"]
+    },
+    {
+      "label": "single:csmo-b",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/b"]
+    },
+    {
+      "label": "allRounds:csmo-b",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/b"]
+    },
+    {
+      "label": "roundsMinusOne:csmo-b",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i",
+          "displayName": "CSMO - B - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "s",
+          "displayName": "CSMO - B - Školské kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/b/round/i", "competition/csmo/category/b/round/s"]
+    },
+    {
+      "label": "single:competition/csmo/category/b/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i",
+          "displayName": "CSMO - B - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/b/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/b/round/s",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "s",
+          "displayName": "CSMO - B - Školské kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/b/round/s"]
+    },
+    {
+      "label": "single:competition/csmo/category/b/round/ii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "ii",
+          "displayName": "CSMO - B - Krajské kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/b/round/ii"]
+    },
+    {
+      "label": "single:csmo-c",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/c"]
+    },
+    {
+      "label": "allRounds:csmo-c",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/c"]
+    },
+    {
+      "label": "roundsMinusOne:csmo-c",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "i",
+          "displayName": "CSMO - C - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "s",
+          "displayName": "CSMO - C - Školské kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/c/round/i", "competition/csmo/category/c/round/s"]
+    },
+    {
+      "label": "single:competition/csmo/category/c/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "i",
+          "displayName": "CSMO - C - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/c/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/c/round/s",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "s",
+          "displayName": "CSMO - C - Školské kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/c/round/s"]
+    },
+    {
+      "label": "single:competition/csmo/category/c/round/ii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "ii",
+          "displayName": "CSMO - C - Krajské kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/c/round/ii"]
+    },
+    {
+      "label": "single:csmo-z9",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z9"]
+    },
+    {
+      "label": "allRounds:csmo-z9",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z9"]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z9",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z9 - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z9 - Okresné kolo"
+        }
+      ],
+      "roundTripIds": [
+        "competition/csmo/category/z9/round/i",
+        "competition/csmo/category/z9/round/ii"
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z9/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z9 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z9/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z9/round/ii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z9 - Okresné kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z9/round/ii"]
+    },
+    {
+      "label": "single:competition/csmo/category/z9/round/iii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "iii",
+          "displayName": "CSMO - Z9 - Krajské kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z9/round/iii"]
+    },
+    {
+      "label": "single:csmo-z8",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z8"]
+    },
+    {
+      "label": "allRounds:csmo-z8",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z8"]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z8",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z8 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z8/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z8/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z8 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z8/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z8/round/ii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z8 - Okresné kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z8/round/ii"]
+    },
+    {
+      "label": "single:csmo-z7",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z7"]
+    },
+    {
+      "label": "allRounds:csmo-z7",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z7"]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z7",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z7 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z7/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z7/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z7 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z7/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z7/round/ii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z7 - Okresné kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z7/round/ii"]
+    },
+    {
+      "label": "single:csmo-z6",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z6"]
+    },
+    {
+      "label": "allRounds:csmo-z6",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z6"]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z6",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z6 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z6/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z6/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z6 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z6/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z6/round/ii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z6 - Okresné kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z6/round/ii"]
+    },
+    {
+      "label": "single:csmo-z5",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z5"]
+    },
+    {
+      "label": "allRounds:csmo-z5",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z5"]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z5",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z5 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z5/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z5/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z5 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z5/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z5/round/ii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z5 - Okresné kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z5/round/ii"]
+    },
+    {
+      "label": "single:csmo-z4",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "displayName": "CSMO - Z4"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z4"]
+    },
+    {
+      "label": "allRounds:csmo-z4",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "displayName": "CSMO - Z4"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z4"]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z4",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z4/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z4/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z4/round/i"]
+    },
+    {
+      "label": "single:competition/csmo/category/z4/round/ii",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z4 - Školské kolo"
+        }
+      ],
+      "roundTripIds": ["competition/csmo/category/z4/round/ii"]
+    },
+    {
+      "label": "allCategories:csmo",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "csmo",
+          "displayName": "CSMO"
+        }
+      ],
+      "roundTripIds": ["competition/csmo"]
+    },
+    {
+      "label": "categoriesMinusOne:csmo",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        }
+      ],
+      "roundTripIds": [
+        "competition/csmo/category/a",
+        "competition/csmo/category/b",
+        "competition/csmo/category/c",
+        "competition/csmo/category/z9",
+        "competition/csmo/category/z8",
+        "competition/csmo/category/z7",
+        "competition/csmo/category/z6",
+        "competition/csmo/category/z5"
+      ]
+    },
+    {
+      "label": "everyRound:csmo",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "csmo",
+          "displayName": "CSMO"
+        }
+      ],
+      "roundTripIds": ["competition/csmo"]
+    },
+    {
+      "label": "everyRoundMinusOne:csmo",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ],
+      "roundTripIds": [
+        "competition/csmo/category/a",
+        "competition/csmo/category/b",
+        "competition/csmo/category/c",
+        "competition/csmo/category/z9",
+        "competition/csmo/category/z8",
+        "competition/csmo/category/z7",
+        "competition/csmo/category/z6",
+        "competition/csmo/category/z5",
+        "competition/csmo/category/z4/round/i"
+      ]
+    },
+    {
+      "label": "categoriesPlusStrayRound:csmo",
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z4 - Školské kolo"
+        }
+      ],
+      "roundTripIds": [
+        "competition/csmo/category/a",
+        "competition/csmo/category/b",
+        "competition/csmo/category/c",
+        "competition/csmo/category/z9",
+        "competition/csmo/category/z8",
+        "competition/csmo/category/z7",
+        "competition/csmo/category/z6",
+        "competition/csmo/category/z5",
+        "competition/csmo/category/z4/round/ii"
+      ]
+    },
+    {
+      "label": "single:tst",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "tst",
+          "displayName": "Výberko IMO/MEMO"
+        }
+      ],
+      "roundTripIds": ["competition/tst"]
+    },
+    {
+      "label": "allDirectRounds:tst",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "tst",
+          "displayName": "Výberko IMO/MEMO"
+        }
+      ],
+      "roundTripIds": ["competition/tst"]
+    },
+    {
+      "label": "directRoundsMinusOne:tst",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d1",
+          "displayName": "Výberko IMO/MEMO - 1. deň"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d2",
+          "displayName": "Výberko IMO/MEMO - 2. deň"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d3",
+          "displayName": "Výberko IMO/MEMO - 3. deň"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d4",
+          "displayName": "Výberko IMO/MEMO - 4. deň"
+        }
+      ],
+      "roundTripIds": [
+        "competition/tst/round/d1",
+        "competition/tst/round/d2",
+        "competition/tst/round/d3",
+        "competition/tst/round/d4"
+      ]
+    },
+    {
+      "label": "single:competition/tst/round/d1",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d1",
+          "displayName": "Výberko IMO/MEMO - 1. deň"
+        }
+      ],
+      "roundTripIds": ["competition/tst/round/d1"]
+    },
+    {
+      "label": "single:competition/tst/round/d2",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d2",
+          "displayName": "Výberko IMO/MEMO - 2. deň"
+        }
+      ],
+      "roundTripIds": ["competition/tst/round/d2"]
+    },
+    {
+      "label": "single:competition/tst/round/d3",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d3",
+          "displayName": "Výberko IMO/MEMO - 3. deň"
+        }
+      ],
+      "roundTripIds": ["competition/tst/round/d3"]
+    },
+    {
+      "label": "single:competition/tst/round/d4",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d4",
+          "displayName": "Výberko IMO/MEMO - 4. deň"
+        }
+      ],
+      "roundTripIds": ["competition/tst/round/d4"]
+    },
+    {
+      "label": "single:competition/tst/round/d5",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d5",
+          "displayName": "Výberko IMO/MEMO - 5. deň"
+        }
+      ],
+      "roundTripIds": ["competition/tst/round/d5"]
+    },
+    {
+      "label": "single:memo",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "memo",
+          "displayName": "MEMO"
+        }
+      ],
+      "roundTripIds": ["competition/memo"]
+    },
+    {
+      "label": "allDirectRounds:memo",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "memo",
+          "displayName": "MEMO"
+        }
+      ],
+      "roundTripIds": ["competition/memo"]
+    },
+    {
+      "label": "directRoundsMinusOne:memo",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "i",
+          "displayName": "MEMO - Individual"
+        }
+      ],
+      "roundTripIds": ["competition/memo/round/i"]
+    },
+    {
+      "label": "single:competition/memo/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "i",
+          "displayName": "MEMO - Individual"
+        }
+      ],
+      "roundTripIds": ["competition/memo/round/i"]
+    },
+    {
+      "label": "single:competition/memo/round/t",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "t",
+          "displayName": "MEMO - Team"
+        }
+      ],
+      "roundTripIds": ["competition/memo/round/t"]
+    },
+    {
+      "label": "single:imo",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        }
+      ],
+      "roundTripIds": ["competition/imo"]
+    },
+    {
+      "label": "single:caps",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "caps",
+          "displayName": "CAPS"
+        }
+      ],
+      "roundTripIds": ["competition/caps"]
+    },
+    {
+      "label": "single:emo",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "emo",
+          "displayName": "EMO"
+        }
+      ],
+      "roundTripIds": ["competition/emo"]
+    },
+    {
+      "label": "single:egmo",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "egmo",
+          "displayName": "EGMO"
+        }
+      ],
+      "roundTripIds": ["competition/egmo"]
+    },
+    {
+      "label": "single:tstc",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "tstc",
+          "displayName": "Výberko CPSJ"
+        }
+      ],
+      "roundTripIds": ["competition/tstc"]
+    },
+    {
+      "label": "single:cpsj",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "cpsj",
+          "displayName": "CPSJ"
+        }
+      ],
+      "roundTripIds": ["competition/cpsj"]
+    },
+    {
+      "label": "allDirectRounds:cpsj",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "cpsj",
+          "displayName": "CPSJ"
+        }
+      ],
+      "roundTripIds": ["competition/cpsj"]
+    },
+    {
+      "label": "directRoundsMinusOne:cpsj",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "cpsj",
+          "roundSlug": "i",
+          "displayName": "CPSJ - Individual"
+        }
+      ],
+      "roundTripIds": ["competition/cpsj/round/i"]
+    },
+    {
+      "label": "single:competition/cpsj/round/i",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "cpsj",
+          "roundSlug": "i",
+          "displayName": "CPSJ - Individual"
+        }
+      ],
+      "roundTripIds": ["competition/cpsj/round/i"]
+    },
+    {
+      "label": "single:competition/cpsj/round/t",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "cpsj",
+          "roundSlug": "t",
+          "displayName": "CPSJ - Team"
+        }
+      ],
+      "roundTripIds": ["competition/cpsj/round/t"]
+    },
+    {
+      "label": "single:duogeo",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "duogeo",
+          "displayName": "DuoGeo"
+        }
+      ],
+      "roundTripIds": ["competition/duogeo"]
+    },
+    {
+      "label": "allDirectRounds:duogeo",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "duogeo",
+          "displayName": "DuoGeo"
+        }
+      ],
+      "roundTripIds": ["competition/duogeo"]
+    },
+    {
+      "label": "directRoundsMinusOne:duogeo",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "duogeo",
+          "roundSlug": "zs",
+          "displayName": "DuoGeo - ZŠ"
+        }
+      ],
+      "roundTripIds": ["competition/duogeo/round/zs"]
+    },
+    {
+      "label": "single:competition/duogeo/round/zs",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "duogeo",
+          "roundSlug": "zs",
+          "displayName": "DuoGeo - ZŠ"
+        }
+      ],
+      "roundTripIds": ["competition/duogeo/round/zs"]
+    },
+    {
+      "label": "single:competition/duogeo/round/ss",
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "duogeo",
+          "roundSlug": "ss",
+          "displayName": "DuoGeo - SŠ"
+        }
+      ],
+      "roundTripIds": ["competition/duogeo/round/ss"]
+    },
+    {
+      "label": "crossCompetitionMix",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i",
+          "displayName": "CSMO - B - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "t",
+          "displayName": "MEMO - Team"
+        }
+      ],
+      "roundTripIds": [
+        "competition/imo",
+        "competition/csmo/category/a",
+        "competition/csmo/category/b/round/i",
+        "competition/memo/round/t"
+      ]
+    },
+    {
+      "label": "empty",
+      "selections": [],
+      "roundTripIds": []
+    },
+    {
+      "label": "malformed",
+      "selections": [],
+      "roundTripIds": []
+    },
+    {
+      "label": "malformedMixedWithValid",
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        }
+      ],
+      "roundTripIds": ["competition/imo"]
+    }
+  ],
+  "fold": [
+    {
+      "label": "single:csmo",
+      "ids": ["competition/csmo"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "csmo",
+          "displayName": "CSMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo"
+        }
+      ],
+      "serialized": "competitions=csmo",
+      "chips": [
+        {
+          "id": "competition-csmo",
+          "displayName": "CSMO"
+        }
+      ]
+    },
+    {
+      "label": "single:csmo-a",
+      "ids": ["competition/csmo/category/a"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a"
+        }
+      ],
+      "serialized": "competitions=csmo-a",
+      "chips": [
+        {
+          "id": "category-csmo-a",
+          "displayName": "CSMO - A"
+        }
+      ]
+    },
+    {
+      "label": "allRounds:csmo-a",
+      "ids": [
+        "competition/csmo/category/a/round/i",
+        "competition/csmo/category/a/round/s",
+        "competition/csmo/category/a/round/ii",
+        "competition/csmo/category/a/round/iii"
+      ],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a"
+        }
+      ],
+      "serialized": "competitions=csmo-a",
+      "chips": [
+        {
+          "id": "category-csmo-a",
+          "displayName": "CSMO - A"
+        }
+      ]
+    },
+    {
+      "label": "roundsMinusOne:csmo-a",
+      "ids": [
+        "competition/csmo/category/a/round/i",
+        "competition/csmo/category/a/round/s",
+        "competition/csmo/category/a/round/ii"
+      ],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "s",
+          "displayName": "CSMO - A - Školské kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "ii",
+          "displayName": "CSMO - A - Krajské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "s"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-a-i,csmo-a-s,csmo-a-ii",
+      "chips": [
+        {
+          "id": "round-csmo-a-i",
+          "displayName": "CSMO - A - Domáce kolo"
+        },
+        {
+          "id": "round-csmo-a-s",
+          "displayName": "CSMO - A - Školské kolo"
+        },
+        {
+          "id": "round-csmo-a-ii",
+          "displayName": "CSMO - A - Krajské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/a/round/i",
+      "ids": ["competition/csmo/category/a/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-a-i",
+      "chips": [
+        {
+          "id": "round-csmo-a-i",
+          "displayName": "CSMO - A - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/a/round/s",
+      "ids": ["competition/csmo/category/a/round/s"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "s",
+          "displayName": "CSMO - A - Školské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "s"
+        }
+      ],
+      "serialized": "competitions=csmo-a-s",
+      "chips": [
+        {
+          "id": "round-csmo-a-s",
+          "displayName": "CSMO - A - Školské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/a/round/ii",
+      "ids": ["competition/csmo/category/a/round/ii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "ii",
+          "displayName": "CSMO - A - Krajské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-a-ii",
+      "chips": [
+        {
+          "id": "round-csmo-a-ii",
+          "displayName": "CSMO - A - Krajské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/a/round/iii",
+      "ids": ["competition/csmo/category/a/round/iii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "iii",
+          "displayName": "CSMO - A - Celoštátne kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "iii"
+        }
+      ],
+      "serialized": "competitions=csmo-a-iii",
+      "chips": [
+        {
+          "id": "round-csmo-a-iii",
+          "displayName": "CSMO - A - Celoštátne kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:csmo-b",
+      "ids": ["competition/csmo/category/b"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b"
+        }
+      ],
+      "serialized": "competitions=csmo-b",
+      "chips": [
+        {
+          "id": "category-csmo-b",
+          "displayName": "CSMO - B"
+        }
+      ]
+    },
+    {
+      "label": "allRounds:csmo-b",
+      "ids": [
+        "competition/csmo/category/b/round/i",
+        "competition/csmo/category/b/round/s",
+        "competition/csmo/category/b/round/ii"
+      ],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b"
+        }
+      ],
+      "serialized": "competitions=csmo-b",
+      "chips": [
+        {
+          "id": "category-csmo-b",
+          "displayName": "CSMO - B"
+        }
+      ]
+    },
+    {
+      "label": "roundsMinusOne:csmo-b",
+      "ids": ["competition/csmo/category/b/round/i", "competition/csmo/category/b/round/s"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i",
+          "displayName": "CSMO - B - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "s",
+          "displayName": "CSMO - B - Školské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "s"
+        }
+      ],
+      "serialized": "competitions=csmo-b-i,csmo-b-s",
+      "chips": [
+        {
+          "id": "round-csmo-b-i",
+          "displayName": "CSMO - B - Domáce kolo"
+        },
+        {
+          "id": "round-csmo-b-s",
+          "displayName": "CSMO - B - Školské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/b/round/i",
+      "ids": ["competition/csmo/category/b/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i",
+          "displayName": "CSMO - B - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-b-i",
+      "chips": [
+        {
+          "id": "round-csmo-b-i",
+          "displayName": "CSMO - B - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/b/round/s",
+      "ids": ["competition/csmo/category/b/round/s"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "s",
+          "displayName": "CSMO - B - Školské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "s"
+        }
+      ],
+      "serialized": "competitions=csmo-b-s",
+      "chips": [
+        {
+          "id": "round-csmo-b-s",
+          "displayName": "CSMO - B - Školské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/b/round/ii",
+      "ids": ["competition/csmo/category/b/round/ii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "ii",
+          "displayName": "CSMO - B - Krajské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-b-ii",
+      "chips": [
+        {
+          "id": "round-csmo-b-ii",
+          "displayName": "CSMO - B - Krajské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:csmo-c",
+      "ids": ["competition/csmo/category/c"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "c"
+        }
+      ],
+      "serialized": "competitions=csmo-c",
+      "chips": [
+        {
+          "id": "category-csmo-c",
+          "displayName": "CSMO - C"
+        }
+      ]
+    },
+    {
+      "label": "allRounds:csmo-c",
+      "ids": [
+        "competition/csmo/category/c/round/i",
+        "competition/csmo/category/c/round/s",
+        "competition/csmo/category/c/round/ii"
+      ],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "c"
+        }
+      ],
+      "serialized": "competitions=csmo-c",
+      "chips": [
+        {
+          "id": "category-csmo-c",
+          "displayName": "CSMO - C"
+        }
+      ]
+    },
+    {
+      "label": "roundsMinusOne:csmo-c",
+      "ids": ["competition/csmo/category/c/round/i", "competition/csmo/category/c/round/s"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "i",
+          "displayName": "CSMO - C - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "s",
+          "displayName": "CSMO - C - Školské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "i"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "s"
+        }
+      ],
+      "serialized": "competitions=csmo-c-i,csmo-c-s",
+      "chips": [
+        {
+          "id": "round-csmo-c-i",
+          "displayName": "CSMO - C - Domáce kolo"
+        },
+        {
+          "id": "round-csmo-c-s",
+          "displayName": "CSMO - C - Školské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/c/round/i",
+      "ids": ["competition/csmo/category/c/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "i",
+          "displayName": "CSMO - C - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-c-i",
+      "chips": [
+        {
+          "id": "round-csmo-c-i",
+          "displayName": "CSMO - C - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/c/round/s",
+      "ids": ["competition/csmo/category/c/round/s"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "s",
+          "displayName": "CSMO - C - Školské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "s"
+        }
+      ],
+      "serialized": "competitions=csmo-c-s",
+      "chips": [
+        {
+          "id": "round-csmo-c-s",
+          "displayName": "CSMO - C - Školské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/c/round/ii",
+      "ids": ["competition/csmo/category/c/round/ii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "ii",
+          "displayName": "CSMO - C - Krajské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-c-ii",
+      "chips": [
+        {
+          "id": "round-csmo-c-ii",
+          "displayName": "CSMO - C - Krajské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:csmo-z9",
+      "ids": ["competition/csmo/category/z9"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z9"
+        }
+      ],
+      "serialized": "competitions=csmo-z9",
+      "chips": [
+        {
+          "id": "category-csmo-z9",
+          "displayName": "CSMO - Z9"
+        }
+      ]
+    },
+    {
+      "label": "allRounds:csmo-z9",
+      "ids": [
+        "competition/csmo/category/z9/round/i",
+        "competition/csmo/category/z9/round/ii",
+        "competition/csmo/category/z9/round/iii"
+      ],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z9"
+        }
+      ],
+      "serialized": "competitions=csmo-z9",
+      "chips": [
+        {
+          "id": "category-csmo-z9",
+          "displayName": "CSMO - Z9"
+        }
+      ]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z9",
+      "ids": ["competition/csmo/category/z9/round/i", "competition/csmo/category/z9/round/ii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z9 - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z9 - Okresné kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "i"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-z9-i,csmo-z9-ii",
+      "chips": [
+        {
+          "id": "round-csmo-z9-i",
+          "displayName": "CSMO - Z9 - Domáce kolo"
+        },
+        {
+          "id": "round-csmo-z9-ii",
+          "displayName": "CSMO - Z9 - Okresné kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z9/round/i",
+      "ids": ["competition/csmo/category/z9/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z9 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z9-i",
+      "chips": [
+        {
+          "id": "round-csmo-z9-i",
+          "displayName": "CSMO - Z9 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z9/round/ii",
+      "ids": ["competition/csmo/category/z9/round/ii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z9 - Okresné kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-z9-ii",
+      "chips": [
+        {
+          "id": "round-csmo-z9-ii",
+          "displayName": "CSMO - Z9 - Okresné kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z9/round/iii",
+      "ids": ["competition/csmo/category/z9/round/iii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "iii",
+          "displayName": "CSMO - Z9 - Krajské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "iii"
+        }
+      ],
+      "serialized": "competitions=csmo-z9-iii",
+      "chips": [
+        {
+          "id": "round-csmo-z9-iii",
+          "displayName": "CSMO - Z9 - Krajské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:csmo-z8",
+      "ids": ["competition/csmo/category/z8"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z8"
+        }
+      ],
+      "serialized": "competitions=csmo-z8",
+      "chips": [
+        {
+          "id": "category-csmo-z8",
+          "displayName": "CSMO - Z8"
+        }
+      ]
+    },
+    {
+      "label": "allRounds:csmo-z8",
+      "ids": ["competition/csmo/category/z8/round/i", "competition/csmo/category/z8/round/ii"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z8"
+        }
+      ],
+      "serialized": "competitions=csmo-z8",
+      "chips": [
+        {
+          "id": "category-csmo-z8",
+          "displayName": "CSMO - Z8"
+        }
+      ]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z8",
+      "ids": ["competition/csmo/category/z8/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z8 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z8-i",
+      "chips": [
+        {
+          "id": "round-csmo-z8-i",
+          "displayName": "CSMO - Z8 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z8/round/i",
+      "ids": ["competition/csmo/category/z8/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z8 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z8-i",
+      "chips": [
+        {
+          "id": "round-csmo-z8-i",
+          "displayName": "CSMO - Z8 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z8/round/ii",
+      "ids": ["competition/csmo/category/z8/round/ii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z8 - Okresné kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-z8-ii",
+      "chips": [
+        {
+          "id": "round-csmo-z8-ii",
+          "displayName": "CSMO - Z8 - Okresné kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:csmo-z7",
+      "ids": ["competition/csmo/category/z7"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z7"
+        }
+      ],
+      "serialized": "competitions=csmo-z7",
+      "chips": [
+        {
+          "id": "category-csmo-z7",
+          "displayName": "CSMO - Z7"
+        }
+      ]
+    },
+    {
+      "label": "allRounds:csmo-z7",
+      "ids": ["competition/csmo/category/z7/round/i", "competition/csmo/category/z7/round/ii"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z7"
+        }
+      ],
+      "serialized": "competitions=csmo-z7",
+      "chips": [
+        {
+          "id": "category-csmo-z7",
+          "displayName": "CSMO - Z7"
+        }
+      ]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z7",
+      "ids": ["competition/csmo/category/z7/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z7 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z7-i",
+      "chips": [
+        {
+          "id": "round-csmo-z7-i",
+          "displayName": "CSMO - Z7 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z7/round/i",
+      "ids": ["competition/csmo/category/z7/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z7 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z7-i",
+      "chips": [
+        {
+          "id": "round-csmo-z7-i",
+          "displayName": "CSMO - Z7 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z7/round/ii",
+      "ids": ["competition/csmo/category/z7/round/ii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z7 - Okresné kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-z7-ii",
+      "chips": [
+        {
+          "id": "round-csmo-z7-ii",
+          "displayName": "CSMO - Z7 - Okresné kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:csmo-z6",
+      "ids": ["competition/csmo/category/z6"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z6"
+        }
+      ],
+      "serialized": "competitions=csmo-z6",
+      "chips": [
+        {
+          "id": "category-csmo-z6",
+          "displayName": "CSMO - Z6"
+        }
+      ]
+    },
+    {
+      "label": "allRounds:csmo-z6",
+      "ids": ["competition/csmo/category/z6/round/i", "competition/csmo/category/z6/round/ii"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z6"
+        }
+      ],
+      "serialized": "competitions=csmo-z6",
+      "chips": [
+        {
+          "id": "category-csmo-z6",
+          "displayName": "CSMO - Z6"
+        }
+      ]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z6",
+      "ids": ["competition/csmo/category/z6/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z6 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z6-i",
+      "chips": [
+        {
+          "id": "round-csmo-z6-i",
+          "displayName": "CSMO - Z6 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z6/round/i",
+      "ids": ["competition/csmo/category/z6/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z6 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z6-i",
+      "chips": [
+        {
+          "id": "round-csmo-z6-i",
+          "displayName": "CSMO - Z6 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z6/round/ii",
+      "ids": ["competition/csmo/category/z6/round/ii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z6 - Okresné kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-z6-ii",
+      "chips": [
+        {
+          "id": "round-csmo-z6-ii",
+          "displayName": "CSMO - Z6 - Okresné kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:csmo-z5",
+      "ids": ["competition/csmo/category/z5"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z5"
+        }
+      ],
+      "serialized": "competitions=csmo-z5",
+      "chips": [
+        {
+          "id": "category-csmo-z5",
+          "displayName": "CSMO - Z5"
+        }
+      ]
+    },
+    {
+      "label": "allRounds:csmo-z5",
+      "ids": ["competition/csmo/category/z5/round/i", "competition/csmo/category/z5/round/ii"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z5"
+        }
+      ],
+      "serialized": "competitions=csmo-z5",
+      "chips": [
+        {
+          "id": "category-csmo-z5",
+          "displayName": "CSMO - Z5"
+        }
+      ]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z5",
+      "ids": ["competition/csmo/category/z5/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z5 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z5-i",
+      "chips": [
+        {
+          "id": "round-csmo-z5-i",
+          "displayName": "CSMO - Z5 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z5/round/i",
+      "ids": ["competition/csmo/category/z5/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z5 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z5-i",
+      "chips": [
+        {
+          "id": "round-csmo-z5-i",
+          "displayName": "CSMO - Z5 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z5/round/ii",
+      "ids": ["competition/csmo/category/z5/round/ii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z5 - Okresné kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-z5-ii",
+      "chips": [
+        {
+          "id": "round-csmo-z5-ii",
+          "displayName": "CSMO - Z5 - Okresné kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:csmo-z4",
+      "ids": ["competition/csmo/category/z4"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "displayName": "CSMO - Z4"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z4"
+        }
+      ],
+      "serialized": "competitions=csmo-z4",
+      "chips": [
+        {
+          "id": "category-csmo-z4",
+          "displayName": "CSMO - Z4"
+        }
+      ]
+    },
+    {
+      "label": "allRounds:csmo-z4",
+      "ids": ["competition/csmo/category/z4/round/i", "competition/csmo/category/z4/round/ii"],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "displayName": "CSMO - Z4"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z4"
+        }
+      ],
+      "serialized": "competitions=csmo-z4",
+      "chips": [
+        {
+          "id": "category-csmo-z4",
+          "displayName": "CSMO - Z4"
+        }
+      ]
+    },
+    {
+      "label": "roundsMinusOne:csmo-z4",
+      "ids": ["competition/csmo/category/z4/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z4-i",
+      "chips": [
+        {
+          "id": "round-csmo-z4-i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z4/round/i",
+      "ids": ["competition/csmo/category/z4/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-z4-i",
+      "chips": [
+        {
+          "id": "round-csmo-z4-i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/csmo/category/z4/round/ii",
+      "ids": ["competition/csmo/category/z4/round/ii"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z4 - Školské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-z4-ii",
+      "chips": [
+        {
+          "id": "round-csmo-z4-ii",
+          "displayName": "CSMO - Z4 - Školské kolo"
+        }
+      ]
+    },
+    {
+      "label": "allCategories:csmo",
+      "ids": [
+        "competition/csmo/category/a",
+        "competition/csmo/category/b",
+        "competition/csmo/category/c",
+        "competition/csmo/category/z9",
+        "competition/csmo/category/z8",
+        "competition/csmo/category/z7",
+        "competition/csmo/category/z6",
+        "competition/csmo/category/z5",
+        "competition/csmo/category/z4"
+      ],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "csmo",
+          "displayName": "CSMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo"
+        }
+      ],
+      "serialized": "competitions=csmo",
+      "chips": [
+        {
+          "id": "competition-csmo",
+          "displayName": "CSMO"
+        }
+      ]
+    },
+    {
+      "label": "categoriesMinusOne:csmo",
+      "ids": [
+        "competition/csmo/category/a",
+        "competition/csmo/category/b",
+        "competition/csmo/category/c",
+        "competition/csmo/category/z9",
+        "competition/csmo/category/z8",
+        "competition/csmo/category/z7",
+        "competition/csmo/category/z6",
+        "competition/csmo/category/z5"
+      ],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "c"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z9"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z8"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z7"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z6"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z5"
+        }
+      ],
+      "serialized": "competitions=csmo-a,csmo-b,csmo-c,csmo-z9,csmo-z8,csmo-z7,csmo-z6,csmo-z5",
+      "chips": [
+        {
+          "id": "category-csmo-a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "id": "category-csmo-b",
+          "displayName": "CSMO - B"
+        },
+        {
+          "id": "category-csmo-c",
+          "displayName": "CSMO - C"
+        },
+        {
+          "id": "category-csmo-z9",
+          "displayName": "CSMO - Z9"
+        },
+        {
+          "id": "category-csmo-z8",
+          "displayName": "CSMO - Z8"
+        },
+        {
+          "id": "category-csmo-z7",
+          "displayName": "CSMO - Z7"
+        },
+        {
+          "id": "category-csmo-z6",
+          "displayName": "CSMO - Z6"
+        },
+        {
+          "id": "category-csmo-z5",
+          "displayName": "CSMO - Z5"
+        }
+      ]
+    },
+    {
+      "label": "everyRound:csmo",
+      "ids": [
+        "competition/csmo/category/a/round/i",
+        "competition/csmo/category/a/round/s",
+        "competition/csmo/category/a/round/ii",
+        "competition/csmo/category/a/round/iii",
+        "competition/csmo/category/b/round/i",
+        "competition/csmo/category/b/round/s",
+        "competition/csmo/category/b/round/ii",
+        "competition/csmo/category/c/round/i",
+        "competition/csmo/category/c/round/s",
+        "competition/csmo/category/c/round/ii",
+        "competition/csmo/category/z9/round/i",
+        "competition/csmo/category/z9/round/ii",
+        "competition/csmo/category/z9/round/iii",
+        "competition/csmo/category/z8/round/i",
+        "competition/csmo/category/z8/round/ii",
+        "competition/csmo/category/z7/round/i",
+        "competition/csmo/category/z7/round/ii",
+        "competition/csmo/category/z6/round/i",
+        "competition/csmo/category/z6/round/ii",
+        "competition/csmo/category/z5/round/i",
+        "competition/csmo/category/z5/round/ii",
+        "competition/csmo/category/z4/round/i",
+        "competition/csmo/category/z4/round/ii"
+      ],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "csmo",
+          "displayName": "CSMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo"
+        }
+      ],
+      "serialized": "competitions=csmo",
+      "chips": [
+        {
+          "id": "competition-csmo",
+          "displayName": "CSMO"
+        }
+      ]
+    },
+    {
+      "label": "everyRoundMinusOne:csmo",
+      "ids": [
+        "competition/csmo/category/a/round/i",
+        "competition/csmo/category/a/round/s",
+        "competition/csmo/category/a/round/ii",
+        "competition/csmo/category/a/round/iii",
+        "competition/csmo/category/b/round/i",
+        "competition/csmo/category/b/round/s",
+        "competition/csmo/category/b/round/ii",
+        "competition/csmo/category/c/round/i",
+        "competition/csmo/category/c/round/s",
+        "competition/csmo/category/c/round/ii",
+        "competition/csmo/category/z9/round/i",
+        "competition/csmo/category/z9/round/ii",
+        "competition/csmo/category/z9/round/iii",
+        "competition/csmo/category/z8/round/i",
+        "competition/csmo/category/z8/round/ii",
+        "competition/csmo/category/z7/round/i",
+        "competition/csmo/category/z7/round/ii",
+        "competition/csmo/category/z6/round/i",
+        "competition/csmo/category/z6/round/ii",
+        "competition/csmo/category/z5/round/i",
+        "competition/csmo/category/z5/round/ii",
+        "competition/csmo/category/z4/round/i"
+      ],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "c"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z9"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z8"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z7"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z6"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z5"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=csmo-a,csmo-b,csmo-c,csmo-z9,csmo-z8,csmo-z7,csmo-z6,csmo-z5,csmo-z4-i",
+      "chips": [
+        {
+          "id": "category-csmo-a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "id": "category-csmo-b",
+          "displayName": "CSMO - B"
+        },
+        {
+          "id": "category-csmo-c",
+          "displayName": "CSMO - C"
+        },
+        {
+          "id": "category-csmo-z9",
+          "displayName": "CSMO - Z9"
+        },
+        {
+          "id": "category-csmo-z8",
+          "displayName": "CSMO - Z8"
+        },
+        {
+          "id": "category-csmo-z7",
+          "displayName": "CSMO - Z7"
+        },
+        {
+          "id": "category-csmo-z6",
+          "displayName": "CSMO - Z6"
+        },
+        {
+          "id": "category-csmo-z5",
+          "displayName": "CSMO - Z5"
+        },
+        {
+          "id": "round-csmo-z4-i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ]
+    },
+    {
+      "label": "categoriesPlusStrayRound:csmo",
+      "ids": [
+        "competition/csmo/category/a",
+        "competition/csmo/category/b",
+        "competition/csmo/category/c",
+        "competition/csmo/category/z9",
+        "competition/csmo/category/z8",
+        "competition/csmo/category/z7",
+        "competition/csmo/category/z6",
+        "competition/csmo/category/z5",
+        "competition/csmo/category/z4/round/ii"
+      ],
+      "selections": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z4 - Školské kolo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "c"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z9"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z8"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z7"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z6"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z5"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "ii"
+        }
+      ],
+      "serialized": "competitions=csmo-a,csmo-b,csmo-c,csmo-z9,csmo-z8,csmo-z7,csmo-z6,csmo-z5,csmo-z4-ii",
+      "chips": [
+        {
+          "id": "category-csmo-a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "id": "category-csmo-b",
+          "displayName": "CSMO - B"
+        },
+        {
+          "id": "category-csmo-c",
+          "displayName": "CSMO - C"
+        },
+        {
+          "id": "category-csmo-z9",
+          "displayName": "CSMO - Z9"
+        },
+        {
+          "id": "category-csmo-z8",
+          "displayName": "CSMO - Z8"
+        },
+        {
+          "id": "category-csmo-z7",
+          "displayName": "CSMO - Z7"
+        },
+        {
+          "id": "category-csmo-z6",
+          "displayName": "CSMO - Z6"
+        },
+        {
+          "id": "category-csmo-z5",
+          "displayName": "CSMO - Z5"
+        },
+        {
+          "id": "round-csmo-z4-ii",
+          "displayName": "CSMO - Z4 - Školské kolo"
+        }
+      ]
+    },
+    {
+      "label": "single:tst",
+      "ids": ["competition/tst"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "tst",
+          "displayName": "Výberko IMO/MEMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "tst"
+        }
+      ],
+      "serialized": "competitions=tst",
+      "chips": [
+        {
+          "id": "competition-tst",
+          "displayName": "Výberko IMO/MEMO"
+        }
+      ]
+    },
+    {
+      "label": "allDirectRounds:tst",
+      "ids": [
+        "competition/tst/round/d1",
+        "competition/tst/round/d2",
+        "competition/tst/round/d3",
+        "competition/tst/round/d4",
+        "competition/tst/round/d5"
+      ],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "tst",
+          "displayName": "Výberko IMO/MEMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "tst"
+        }
+      ],
+      "serialized": "competitions=tst",
+      "chips": [
+        {
+          "id": "competition-tst",
+          "displayName": "Výberko IMO/MEMO"
+        }
+      ]
+    },
+    {
+      "label": "directRoundsMinusOne:tst",
+      "ids": [
+        "competition/tst/round/d1",
+        "competition/tst/round/d2",
+        "competition/tst/round/d3",
+        "competition/tst/round/d4"
+      ],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d1",
+          "displayName": "Výberko IMO/MEMO - 1. deň"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d2",
+          "displayName": "Výberko IMO/MEMO - 2. deň"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d3",
+          "displayName": "Výberko IMO/MEMO - 3. deň"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d4",
+          "displayName": "Výberko IMO/MEMO - 4. deň"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "tst",
+          "roundSlug": "d1"
+        },
+        {
+          "competitionSlug": "tst",
+          "roundSlug": "d2"
+        },
+        {
+          "competitionSlug": "tst",
+          "roundSlug": "d3"
+        },
+        {
+          "competitionSlug": "tst",
+          "roundSlug": "d4"
+        }
+      ],
+      "serialized": "competitions=tst-d1,tst-d2,tst-d3,tst-d4",
+      "chips": [
+        {
+          "id": "round-tst-direct-d1",
+          "displayName": "Výberko IMO/MEMO - 1. deň"
+        },
+        {
+          "id": "round-tst-direct-d2",
+          "displayName": "Výberko IMO/MEMO - 2. deň"
+        },
+        {
+          "id": "round-tst-direct-d3",
+          "displayName": "Výberko IMO/MEMO - 3. deň"
+        },
+        {
+          "id": "round-tst-direct-d4",
+          "displayName": "Výberko IMO/MEMO - 4. deň"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/tst/round/d1",
+      "ids": ["competition/tst/round/d1"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d1",
+          "displayName": "Výberko IMO/MEMO - 1. deň"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "tst",
+          "roundSlug": "d1"
+        }
+      ],
+      "serialized": "competitions=tst-d1",
+      "chips": [
+        {
+          "id": "round-tst-direct-d1",
+          "displayName": "Výberko IMO/MEMO - 1. deň"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/tst/round/d2",
+      "ids": ["competition/tst/round/d2"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d2",
+          "displayName": "Výberko IMO/MEMO - 2. deň"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "tst",
+          "roundSlug": "d2"
+        }
+      ],
+      "serialized": "competitions=tst-d2",
+      "chips": [
+        {
+          "id": "round-tst-direct-d2",
+          "displayName": "Výberko IMO/MEMO - 2. deň"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/tst/round/d3",
+      "ids": ["competition/tst/round/d3"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d3",
+          "displayName": "Výberko IMO/MEMO - 3. deň"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "tst",
+          "roundSlug": "d3"
+        }
+      ],
+      "serialized": "competitions=tst-d3",
+      "chips": [
+        {
+          "id": "round-tst-direct-d3",
+          "displayName": "Výberko IMO/MEMO - 3. deň"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/tst/round/d4",
+      "ids": ["competition/tst/round/d4"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d4",
+          "displayName": "Výberko IMO/MEMO - 4. deň"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "tst",
+          "roundSlug": "d4"
+        }
+      ],
+      "serialized": "competitions=tst-d4",
+      "chips": [
+        {
+          "id": "round-tst-direct-d4",
+          "displayName": "Výberko IMO/MEMO - 4. deň"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/tst/round/d5",
+      "ids": ["competition/tst/round/d5"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d5",
+          "displayName": "Výberko IMO/MEMO - 5. deň"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "tst",
+          "roundSlug": "d5"
+        }
+      ],
+      "serialized": "competitions=tst-d5",
+      "chips": [
+        {
+          "id": "round-tst-direct-d5",
+          "displayName": "Výberko IMO/MEMO - 5. deň"
+        }
+      ]
+    },
+    {
+      "label": "single:memo",
+      "ids": ["competition/memo"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "memo",
+          "displayName": "MEMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "memo"
+        }
+      ],
+      "serialized": "competitions=memo",
+      "chips": [
+        {
+          "id": "competition-memo",
+          "displayName": "MEMO"
+        }
+      ]
+    },
+    {
+      "label": "allDirectRounds:memo",
+      "ids": ["competition/memo/round/i", "competition/memo/round/t"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "memo",
+          "displayName": "MEMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "memo"
+        }
+      ],
+      "serialized": "competitions=memo",
+      "chips": [
+        {
+          "id": "competition-memo",
+          "displayName": "MEMO"
+        }
+      ]
+    },
+    {
+      "label": "directRoundsMinusOne:memo",
+      "ids": ["competition/memo/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "i",
+          "displayName": "MEMO - Individual"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "memo",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=memo-i",
+      "chips": [
+        {
+          "id": "round-memo-direct-i",
+          "displayName": "MEMO - Individual"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/memo/round/i",
+      "ids": ["competition/memo/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "i",
+          "displayName": "MEMO - Individual"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "memo",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=memo-i",
+      "chips": [
+        {
+          "id": "round-memo-direct-i",
+          "displayName": "MEMO - Individual"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/memo/round/t",
+      "ids": ["competition/memo/round/t"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "t",
+          "displayName": "MEMO - Team"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "memo",
+          "roundSlug": "t"
+        }
+      ],
+      "serialized": "competitions=memo-t",
+      "chips": [
+        {
+          "id": "round-memo-direct-t",
+          "displayName": "MEMO - Team"
+        }
+      ]
+    },
+    {
+      "label": "single:imo",
+      "ids": ["competition/imo"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "imo"
+        }
+      ],
+      "serialized": "competitions=imo",
+      "chips": [
+        {
+          "id": "competition-imo",
+          "displayName": "IMO"
+        }
+      ]
+    },
+    {
+      "label": "single:caps",
+      "ids": ["competition/caps"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "caps",
+          "displayName": "CAPS"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "caps"
+        }
+      ],
+      "serialized": "competitions=caps",
+      "chips": [
+        {
+          "id": "competition-caps",
+          "displayName": "CAPS"
+        }
+      ]
+    },
+    {
+      "label": "single:emo",
+      "ids": ["competition/emo"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "emo",
+          "displayName": "EMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "emo"
+        }
+      ],
+      "serialized": "competitions=emo",
+      "chips": [
+        {
+          "id": "competition-emo",
+          "displayName": "EMO"
+        }
+      ]
+    },
+    {
+      "label": "single:egmo",
+      "ids": ["competition/egmo"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "egmo",
+          "displayName": "EGMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "egmo"
+        }
+      ],
+      "serialized": "competitions=egmo",
+      "chips": [
+        {
+          "id": "competition-egmo",
+          "displayName": "EGMO"
+        }
+      ]
+    },
+    {
+      "label": "single:tstc",
+      "ids": ["competition/tstc"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "tstc",
+          "displayName": "Výberko CPSJ"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "tstc"
+        }
+      ],
+      "serialized": "competitions=tstc",
+      "chips": [
+        {
+          "id": "competition-tstc",
+          "displayName": "Výberko CPSJ"
+        }
+      ]
+    },
+    {
+      "label": "single:cpsj",
+      "ids": ["competition/cpsj"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "cpsj",
+          "displayName": "CPSJ"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "cpsj"
+        }
+      ],
+      "serialized": "competitions=cpsj",
+      "chips": [
+        {
+          "id": "competition-cpsj",
+          "displayName": "CPSJ"
+        }
+      ]
+    },
+    {
+      "label": "allDirectRounds:cpsj",
+      "ids": ["competition/cpsj/round/i", "competition/cpsj/round/t"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "cpsj",
+          "displayName": "CPSJ"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "cpsj"
+        }
+      ],
+      "serialized": "competitions=cpsj",
+      "chips": [
+        {
+          "id": "competition-cpsj",
+          "displayName": "CPSJ"
+        }
+      ]
+    },
+    {
+      "label": "directRoundsMinusOne:cpsj",
+      "ids": ["competition/cpsj/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "cpsj",
+          "roundSlug": "i",
+          "displayName": "CPSJ - Individual"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "cpsj",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=cpsj-i",
+      "chips": [
+        {
+          "id": "round-cpsj-direct-i",
+          "displayName": "CPSJ - Individual"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/cpsj/round/i",
+      "ids": ["competition/cpsj/round/i"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "cpsj",
+          "roundSlug": "i",
+          "displayName": "CPSJ - Individual"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "cpsj",
+          "roundSlug": "i"
+        }
+      ],
+      "serialized": "competitions=cpsj-i",
+      "chips": [
+        {
+          "id": "round-cpsj-direct-i",
+          "displayName": "CPSJ - Individual"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/cpsj/round/t",
+      "ids": ["competition/cpsj/round/t"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "cpsj",
+          "roundSlug": "t",
+          "displayName": "CPSJ - Team"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "cpsj",
+          "roundSlug": "t"
+        }
+      ],
+      "serialized": "competitions=cpsj-t",
+      "chips": [
+        {
+          "id": "round-cpsj-direct-t",
+          "displayName": "CPSJ - Team"
+        }
+      ]
+    },
+    {
+      "label": "single:duogeo",
+      "ids": ["competition/duogeo"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "duogeo",
+          "displayName": "DuoGeo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "duogeo"
+        }
+      ],
+      "serialized": "competitions=duogeo",
+      "chips": [
+        {
+          "id": "competition-duogeo",
+          "displayName": "DuoGeo"
+        }
+      ]
+    },
+    {
+      "label": "allDirectRounds:duogeo",
+      "ids": ["competition/duogeo/round/zs", "competition/duogeo/round/ss"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "duogeo",
+          "displayName": "DuoGeo"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "duogeo"
+        }
+      ],
+      "serialized": "competitions=duogeo",
+      "chips": [
+        {
+          "id": "competition-duogeo",
+          "displayName": "DuoGeo"
+        }
+      ]
+    },
+    {
+      "label": "directRoundsMinusOne:duogeo",
+      "ids": ["competition/duogeo/round/zs"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "duogeo",
+          "roundSlug": "zs",
+          "displayName": "DuoGeo - ZŠ"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "duogeo",
+          "roundSlug": "zs"
+        }
+      ],
+      "serialized": "competitions=duogeo-zs",
+      "chips": [
+        {
+          "id": "round-duogeo-direct-zs",
+          "displayName": "DuoGeo - ZŠ"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/duogeo/round/zs",
+      "ids": ["competition/duogeo/round/zs"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "duogeo",
+          "roundSlug": "zs",
+          "displayName": "DuoGeo - ZŠ"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "duogeo",
+          "roundSlug": "zs"
+        }
+      ],
+      "serialized": "competitions=duogeo-zs",
+      "chips": [
+        {
+          "id": "round-duogeo-direct-zs",
+          "displayName": "DuoGeo - ZŠ"
+        }
+      ]
+    },
+    {
+      "label": "single:competition/duogeo/round/ss",
+      "ids": ["competition/duogeo/round/ss"],
+      "selections": [
+        {
+          "type": "round",
+          "competitionSlug": "duogeo",
+          "roundSlug": "ss",
+          "displayName": "DuoGeo - SŠ"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "duogeo",
+          "roundSlug": "ss"
+        }
+      ],
+      "serialized": "competitions=duogeo-ss",
+      "chips": [
+        {
+          "id": "round-duogeo-direct-ss",
+          "displayName": "DuoGeo - SŠ"
+        }
+      ]
+    },
+    {
+      "label": "crossCompetitionMix",
+      "ids": [
+        "competition/imo",
+        "competition/csmo/category/a",
+        "competition/csmo/category/b/round/i",
+        "competition/memo/round/t"
+      ],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i",
+          "displayName": "CSMO - B - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "t",
+          "displayName": "MEMO - Team"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "imo"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "a"
+        },
+        {
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i"
+        },
+        {
+          "competitionSlug": "memo",
+          "roundSlug": "t"
+        }
+      ],
+      "serialized": "competitions=imo,csmo-a,csmo-b-i,memo-t",
+      "chips": [
+        {
+          "id": "category-csmo-a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "id": "round-csmo-b-i",
+          "displayName": "CSMO - B - Domáce kolo"
+        },
+        {
+          "id": "round-memo-direct-t",
+          "displayName": "MEMO - Team"
+        },
+        {
+          "id": "competition-imo",
+          "displayName": "IMO"
+        }
+      ]
+    },
+    {
+      "label": "empty",
+      "ids": [],
+      "selections": [],
+      "apiContests": [],
+      "serialized": "",
+      "chips": []
+    },
+    {
+      "label": "malformed",
+      "ids": ["invalid/id", "comp/mo/cat/a", "", "competition/", "competition/nope"],
+      "selections": [],
+      "apiContests": [],
+      "serialized": "",
+      "chips": []
+    },
+    {
+      "label": "malformedMixedWithValid",
+      "ids": ["invalid/id", "competition/imo", "competition/ghost/category/x"],
+      "selections": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        }
+      ],
+      "apiContests": [
+        {
+          "competitionSlug": "imo"
+        }
+      ],
+      "serialized": "competitions=imo",
+      "chips": [
+        {
+          "id": "competition-imo",
+          "displayName": "IMO"
+        }
+      ]
+    }
+  ],
+  "url": [
+    {
+      "value": "csmo",
+      "competitionSelectionParts": [["csmo"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "csmo",
+          "displayName": "CSMO"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "csmo",
+          "displayName": "CSMO"
+        }
+      ],
+      "reserialized": "competitions=csmo"
+    },
+    {
+      "value": "csmo-a",
+      "competitionSelectionParts": [["csmo", "a"]],
+      "interpreted": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        }
+      ],
+      "reserialized": "competitions=csmo-a"
+    },
+    {
+      "value": "csmo-a-i",
+      "competitionSelectionParts": [["csmo", "a", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-a-i"
+    },
+    {
+      "value": "csmo-a-s",
+      "competitionSelectionParts": [["csmo", "a", "s"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "s",
+          "displayName": "CSMO - A - Školské kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "s",
+          "displayName": "CSMO - A - Školské kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-a-s"
+    },
+    {
+      "value": "csmo-a-ii",
+      "competitionSelectionParts": [["csmo", "a", "ii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "ii",
+          "displayName": "CSMO - A - Krajské kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "ii",
+          "displayName": "CSMO - A - Krajské kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-a-ii"
+    },
+    {
+      "value": "csmo-a-iii",
+      "competitionSelectionParts": [["csmo", "a", "iii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "iii",
+          "displayName": "CSMO - A - Celoštátne kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "iii",
+          "displayName": "CSMO - A - Celoštátne kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-a-iii"
+    },
+    {
+      "value": "csmo-b",
+      "competitionSelectionParts": [["csmo", "b"]],
+      "interpreted": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "displayName": "CSMO - B"
+        }
+      ],
+      "reserialized": "competitions=csmo-b"
+    },
+    {
+      "value": "csmo-b-i",
+      "competitionSelectionParts": [["csmo", "b", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i",
+          "displayName": "CSMO - B - Domáce kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "i",
+          "displayName": "CSMO - B - Domáce kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-b-i"
+    },
+    {
+      "value": "csmo-b-s",
+      "competitionSelectionParts": [["csmo", "b", "s"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "s",
+          "displayName": "CSMO - B - Školské kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "s",
+          "displayName": "CSMO - B - Školské kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-b-s"
+    },
+    {
+      "value": "csmo-b-ii",
+      "competitionSelectionParts": [["csmo", "b", "ii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "ii",
+          "displayName": "CSMO - B - Krajské kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "b",
+          "roundSlug": "ii",
+          "displayName": "CSMO - B - Krajské kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-b-ii"
+    },
+    {
+      "value": "csmo-c",
+      "competitionSelectionParts": [["csmo", "c"]],
+      "interpreted": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "displayName": "CSMO - C"
+        }
+      ],
+      "reserialized": "competitions=csmo-c"
+    },
+    {
+      "value": "csmo-c-i",
+      "competitionSelectionParts": [["csmo", "c", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "i",
+          "displayName": "CSMO - C - Domáce kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "i",
+          "displayName": "CSMO - C - Domáce kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-c-i"
+    },
+    {
+      "value": "csmo-c-s",
+      "competitionSelectionParts": [["csmo", "c", "s"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "s",
+          "displayName": "CSMO - C - Školské kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "s",
+          "displayName": "CSMO - C - Školské kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-c-s"
+    },
+    {
+      "value": "csmo-c-ii",
+      "competitionSelectionParts": [["csmo", "c", "ii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "ii",
+          "displayName": "CSMO - C - Krajské kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "c",
+          "roundSlug": "ii",
+          "displayName": "CSMO - C - Krajské kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-c-ii"
+    },
+    {
+      "value": "csmo-z9",
+      "competitionSelectionParts": [["csmo", "z9"]],
+      "interpreted": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "displayName": "CSMO - Z9"
+        }
+      ],
+      "reserialized": "competitions=csmo-z9"
+    },
+    {
+      "value": "csmo-z9-i",
+      "competitionSelectionParts": [["csmo", "z9", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z9 - Domáce kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z9 - Domáce kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z9-i"
+    },
+    {
+      "value": "csmo-z9-ii",
+      "competitionSelectionParts": [["csmo", "z9", "ii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z9 - Okresné kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z9 - Okresné kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z9-ii"
+    },
+    {
+      "value": "csmo-z9-iii",
+      "competitionSelectionParts": [["csmo", "z9", "iii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "iii",
+          "displayName": "CSMO - Z9 - Krajské kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z9",
+          "roundSlug": "iii",
+          "displayName": "CSMO - Z9 - Krajské kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z9-iii"
+    },
+    {
+      "value": "csmo-z8",
+      "competitionSelectionParts": [["csmo", "z8"]],
+      "interpreted": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "displayName": "CSMO - Z8"
+        }
+      ],
+      "reserialized": "competitions=csmo-z8"
+    },
+    {
+      "value": "csmo-z8-i",
+      "competitionSelectionParts": [["csmo", "z8", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z8 - Domáce kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z8 - Domáce kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z8-i"
+    },
+    {
+      "value": "csmo-z8-ii",
+      "competitionSelectionParts": [["csmo", "z8", "ii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z8 - Okresné kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z8",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z8 - Okresné kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z8-ii"
+    },
+    {
+      "value": "csmo-z7",
+      "competitionSelectionParts": [["csmo", "z7"]],
+      "interpreted": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "displayName": "CSMO - Z7"
+        }
+      ],
+      "reserialized": "competitions=csmo-z7"
+    },
+    {
+      "value": "csmo-z7-i",
+      "competitionSelectionParts": [["csmo", "z7", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z7 - Domáce kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z7 - Domáce kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z7-i"
+    },
+    {
+      "value": "csmo-z7-ii",
+      "competitionSelectionParts": [["csmo", "z7", "ii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z7 - Okresné kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z7",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z7 - Okresné kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z7-ii"
+    },
+    {
+      "value": "csmo-z6",
+      "competitionSelectionParts": [["csmo", "z6"]],
+      "interpreted": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "displayName": "CSMO - Z6"
+        }
+      ],
+      "reserialized": "competitions=csmo-z6"
+    },
+    {
+      "value": "csmo-z6-i",
+      "competitionSelectionParts": [["csmo", "z6", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z6 - Domáce kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z6 - Domáce kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z6-i"
+    },
+    {
+      "value": "csmo-z6-ii",
+      "competitionSelectionParts": [["csmo", "z6", "ii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z6 - Okresné kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z6",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z6 - Okresné kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z6-ii"
+    },
+    {
+      "value": "csmo-z5",
+      "competitionSelectionParts": [["csmo", "z5"]],
+      "interpreted": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "displayName": "CSMO - Z5"
+        }
+      ],
+      "reserialized": "competitions=csmo-z5"
+    },
+    {
+      "value": "csmo-z5-i",
+      "competitionSelectionParts": [["csmo", "z5", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z5 - Domáce kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z5 - Domáce kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z5-i"
+    },
+    {
+      "value": "csmo-z5-ii",
+      "competitionSelectionParts": [["csmo", "z5", "ii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z5 - Okresné kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z5",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z5 - Okresné kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z5-ii"
+    },
+    {
+      "value": "csmo-z4",
+      "competitionSelectionParts": [["csmo", "z4"]],
+      "interpreted": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "displayName": "CSMO - Z4"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "displayName": "CSMO - Z4"
+        }
+      ],
+      "reserialized": "competitions=csmo-z4"
+    },
+    {
+      "value": "csmo-z4-i",
+      "competitionSelectionParts": [["csmo", "z4", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "i",
+          "displayName": "CSMO - Z4 - Domáce kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z4-i"
+    },
+    {
+      "value": "csmo-z4-ii",
+      "competitionSelectionParts": [["csmo", "z4", "ii"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z4 - Školské kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "z4",
+          "roundSlug": "ii",
+          "displayName": "CSMO - Z4 - Školské kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo-z4-ii"
+    },
+    {
+      "value": "tst",
+      "competitionSelectionParts": [["tst"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "tst",
+          "displayName": "Výberko IMO/MEMO"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "tst",
+          "displayName": "Výberko IMO/MEMO"
+        }
+      ],
+      "reserialized": "competitions=tst"
+    },
+    {
+      "value": "tst-d1",
+      "competitionSelectionParts": [["tst", "d1"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d1",
+          "displayName": "Výberko IMO/MEMO - 1. deň"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d1",
+          "displayName": "Výberko IMO/MEMO - 1. deň"
+        }
+      ],
+      "reserialized": "competitions=tst-d1"
+    },
+    {
+      "value": "tst-d2",
+      "competitionSelectionParts": [["tst", "d2"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d2",
+          "displayName": "Výberko IMO/MEMO - 2. deň"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d2",
+          "displayName": "Výberko IMO/MEMO - 2. deň"
+        }
+      ],
+      "reserialized": "competitions=tst-d2"
+    },
+    {
+      "value": "tst-d3",
+      "competitionSelectionParts": [["tst", "d3"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d3",
+          "displayName": "Výberko IMO/MEMO - 3. deň"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d3",
+          "displayName": "Výberko IMO/MEMO - 3. deň"
+        }
+      ],
+      "reserialized": "competitions=tst-d3"
+    },
+    {
+      "value": "tst-d4",
+      "competitionSelectionParts": [["tst", "d4"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d4",
+          "displayName": "Výberko IMO/MEMO - 4. deň"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d4",
+          "displayName": "Výberko IMO/MEMO - 4. deň"
+        }
+      ],
+      "reserialized": "competitions=tst-d4"
+    },
+    {
+      "value": "tst-d5",
+      "competitionSelectionParts": [["tst", "d5"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d5",
+          "displayName": "Výberko IMO/MEMO - 5. deň"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "tst",
+          "roundSlug": "d5",
+          "displayName": "Výberko IMO/MEMO - 5. deň"
+        }
+      ],
+      "reserialized": "competitions=tst-d5"
+    },
+    {
+      "value": "memo",
+      "competitionSelectionParts": [["memo"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "memo",
+          "displayName": "MEMO"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "memo",
+          "displayName": "MEMO"
+        }
+      ],
+      "reserialized": "competitions=memo"
+    },
+    {
+      "value": "memo-i",
+      "competitionSelectionParts": [["memo", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "i",
+          "displayName": "MEMO - Individual"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "i",
+          "displayName": "MEMO - Individual"
+        }
+      ],
+      "reserialized": "competitions=memo-i"
+    },
+    {
+      "value": "memo-t",
+      "competitionSelectionParts": [["memo", "t"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "t",
+          "displayName": "MEMO - Team"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "t",
+          "displayName": "MEMO - Team"
+        }
+      ],
+      "reserialized": "competitions=memo-t"
+    },
+    {
+      "value": "imo",
+      "competitionSelectionParts": [["imo"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        }
+      ],
+      "reserialized": "competitions=imo"
+    },
+    {
+      "value": "caps",
+      "competitionSelectionParts": [["caps"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "caps",
+          "displayName": "CAPS"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "caps",
+          "displayName": "CAPS"
+        }
+      ],
+      "reserialized": "competitions=caps"
+    },
+    {
+      "value": "emo",
+      "competitionSelectionParts": [["emo"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "emo",
+          "displayName": "EMO"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "emo",
+          "displayName": "EMO"
+        }
+      ],
+      "reserialized": "competitions=emo"
+    },
+    {
+      "value": "egmo",
+      "competitionSelectionParts": [["egmo"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "egmo",
+          "displayName": "EGMO"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "egmo",
+          "displayName": "EGMO"
+        }
+      ],
+      "reserialized": "competitions=egmo"
+    },
+    {
+      "value": "tstc",
+      "competitionSelectionParts": [["tstc"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "tstc",
+          "displayName": "Výberko CPSJ"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "tstc",
+          "displayName": "Výberko CPSJ"
+        }
+      ],
+      "reserialized": "competitions=tstc"
+    },
+    {
+      "value": "cpsj",
+      "competitionSelectionParts": [["cpsj"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "cpsj",
+          "displayName": "CPSJ"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "cpsj",
+          "displayName": "CPSJ"
+        }
+      ],
+      "reserialized": "competitions=cpsj"
+    },
+    {
+      "value": "cpsj-i",
+      "competitionSelectionParts": [["cpsj", "i"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "cpsj",
+          "roundSlug": "i",
+          "displayName": "CPSJ - Individual"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "cpsj",
+          "roundSlug": "i",
+          "displayName": "CPSJ - Individual"
+        }
+      ],
+      "reserialized": "competitions=cpsj-i"
+    },
+    {
+      "value": "cpsj-t",
+      "competitionSelectionParts": [["cpsj", "t"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "cpsj",
+          "roundSlug": "t",
+          "displayName": "CPSJ - Team"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "cpsj",
+          "roundSlug": "t",
+          "displayName": "CPSJ - Team"
+        }
+      ],
+      "reserialized": "competitions=cpsj-t"
+    },
+    {
+      "value": "duogeo",
+      "competitionSelectionParts": [["duogeo"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "duogeo",
+          "displayName": "DuoGeo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "duogeo",
+          "displayName": "DuoGeo"
+        }
+      ],
+      "reserialized": "competitions=duogeo"
+    },
+    {
+      "value": "duogeo-zs",
+      "competitionSelectionParts": [["duogeo", "zs"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "duogeo",
+          "roundSlug": "zs",
+          "displayName": "DuoGeo - ZŠ"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "duogeo",
+          "roundSlug": "zs",
+          "displayName": "DuoGeo - ZŠ"
+        }
+      ],
+      "reserialized": "competitions=duogeo-zs"
+    },
+    {
+      "value": "duogeo-ss",
+      "competitionSelectionParts": [["duogeo", "ss"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "duogeo",
+          "roundSlug": "ss",
+          "displayName": "DuoGeo - SŠ"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "duogeo",
+          "roundSlug": "ss",
+          "displayName": "DuoGeo - SŠ"
+        }
+      ],
+      "reserialized": "competitions=duogeo-ss"
+    },
+    {
+      "value": "csmo,csmo-a,csmo-a-i,csmo-a-s,csmo-a-ii",
+      "competitionSelectionParts": [
+        ["csmo"],
+        ["csmo", "a"],
+        ["csmo", "a", "i"],
+        ["csmo", "a", "s"],
+        ["csmo", "a", "ii"]
+      ],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "csmo",
+          "displayName": "CSMO"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "s",
+          "displayName": "CSMO - A - Školské kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "ii",
+          "displayName": "CSMO - A - Krajské kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "csmo",
+          "displayName": "CSMO"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "s",
+          "displayName": "CSMO - A - Školské kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "ii",
+          "displayName": "CSMO - A - Krajské kolo"
+        }
+      ],
+      "reserialized": "competitions=csmo,csmo-a,csmo-a-i,csmo-a-s,csmo-a-ii"
+    },
+    {
+      "value": "csmo-a-i,memo-i,imo",
+      "competitionSelectionParts": [["csmo", "a", "i"], ["memo", "i"], ["imo"]],
+      "interpreted": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "i",
+          "displayName": "MEMO - Individual"
+        },
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "memo",
+          "roundSlug": "i",
+          "displayName": "MEMO - Individual"
+        },
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        }
+      ],
+      "reserialized": "competitions=csmo-a-i,memo-i,imo"
+    },
+    {
+      "value": "imo,csmo-a,csmo-a-i",
+      "competitionSelectionParts": [["imo"], ["csmo", "a"], ["csmo", "a", "i"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        },
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        },
+        {
+          "type": "round",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "roundSlug": "i",
+          "displayName": "CSMO - A - Domáce kolo"
+        }
+      ],
+      "reserialized": "competitions=imo,csmo-a,csmo-a-i"
+    },
+    {
+      "value": "ghost",
+      "competitionSelectionParts": [["ghost"]],
+      "interpreted": [],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [],
+      "reserialized": ""
+    },
+    {
+      "value": "ghost,imo",
+      "competitionSelectionParts": [["ghost"], ["imo"]],
+      "interpreted": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "competition",
+          "competitionSlug": "imo",
+          "displayName": "IMO"
+        }
+      ],
+      "reserialized": "competitions=imo"
+    },
+    {
+      "value": "csmo-zz",
+      "competitionSelectionParts": [["csmo", "zz"]],
+      "interpreted": null,
+      "hasInvalidParams": true,
+      "hasTooManyFilters": false,
+      "contestSelection": [],
+      "reserialized": ""
+    },
+    {
+      "value": "csmo-a-zz",
+      "competitionSelectionParts": [["csmo", "a", "zz"]],
+      "interpreted": null,
+      "hasInvalidParams": true,
+      "hasTooManyFilters": false,
+      "contestSelection": [],
+      "reserialized": ""
+    },
+    {
+      "value": "csmo-a-i-extra",
+      "competitionSelectionParts": [["csmo", "a", "i", "extra"]],
+      "interpreted": [],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [],
+      "reserialized": ""
+    },
+    {
+      "value": "csmo--a",
+      "competitionSelectionParts": [["csmo", "a"]],
+      "interpreted": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        }
+      ],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [
+        {
+          "type": "category",
+          "competitionSlug": "csmo",
+          "categorySlug": "a",
+          "displayName": "CSMO - A"
+        }
+      ],
+      "reserialized": "competitions=csmo-a"
+    },
+    {
+      "value": "-",
+      "competitionSelectionParts": [[]],
+      "interpreted": [],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [],
+      "reserialized": ""
+    },
+    {
+      "value": "",
+      "competitionSelectionParts": [],
+      "interpreted": [],
+      "hasInvalidParams": false,
+      "hasTooManyFilters": false,
+      "contestSelection": [],
+      "reserialized": ""
+    },
+    {
+      "value": "imo,csmo-zz",
+      "competitionSelectionParts": [["imo"], ["csmo", "zz"]],
+      "interpreted": null,
+      "hasInvalidParams": true,
+      "hasTooManyFilters": false,
+      "contestSelection": [],
+      "reserialized": ""
+    }
+  ]
+}

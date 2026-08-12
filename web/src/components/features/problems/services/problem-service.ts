@@ -1,7 +1,7 @@
 import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
-import type { FilterParameters } from '../types/problem-api-types'
+import type { FilterParameters, LabeledSlug } from '../types/problem-api-types'
 import type {
   ContestSelection,
   FilterResponse,
@@ -9,7 +9,6 @@ import type {
   SearchFiltersState,
   SingleProblemResult,
 } from '../types/problem-library-types'
-import { contestSelectionSlugs } from '../utils/filter-ids'
 import {
   getProblemBySlugApiUrl,
   getProblemsFilterApiUrl,
@@ -38,10 +37,11 @@ export async function getProblemBySlug(
   if (!result.success) return result
 
   // The one problem the slug names
-  const problem = result.data.problems?.items.at(0)
+  const problem = result.data.problems.items.at(0)
 
-  // No problem means the slug matched nothing
+  // An empty page means the slug matched no problem
   if (!problem) {
+    // Fail as a missing problem
     return {
       success: false,
       error: {
@@ -52,39 +52,23 @@ export async function getProblemBySlug(
     }
   }
 
-  // Filled in at the deepest level the problem's source reaches
-  let selection: ContestSelection | null = null
-
-  // Where the problem came from, which is what the competition filter is built out of
+  // Where the problem came from
   const source = problem.source
 
-  // A round is the deepest level, and names its category when it sits under one
-  if (source.round) {
-    selection = {
-      type: 'round',
+  // The levels the source names, shallowest first, with the ones it stops short of left out
+  const sourceLevels = [
+    source.competition,
+    ...[source.category, source.round].filter((level): level is LabeledSlug => level != null),
+  ]
+
+  // The filter stands at the deepest level the source reaches, addressed by the whole path down to it
+  const selection: ContestSelection = {
+    path: sourceLevels.map((level) => level.slug).join('-'),
+    apiSelection: {
       competitionSlug: source.competition.slug,
       categorySlug: source.category?.slug,
-      roundSlug: source.round.slug,
-      displayName: source.round.displayName,
-      fullName: source.round.fullName,
-    }
-  } else if (source.category) {
-    // No round, so the category is as deep as the source goes
-    selection = {
-      type: 'category',
-      competitionSlug: source.competition.slug,
-      categorySlug: source.category.slug,
-      displayName: source.category.displayName,
-      fullName: source.category.fullName,
-    }
-  } else if (source.competition) {
-    // Neither level below it, leaving the competition standing alone
-    selection = {
-      type: 'competition',
-      competitionSlug: source.competition.slug,
-      displayName: source.competition.displayName,
-      fullName: source.competition.fullName,
-    }
+      roundSlug: source.round?.slug,
+    },
   }
 
   // Season, contest and position together pin down this one problem, so the rest stay empty
@@ -92,7 +76,7 @@ export async function getProblemBySlug(
     searchText: '',
     searchInSolution: false,
     seasons: [problem.source.season],
-    contestSelection: selection ? [selection] : [],
+    contestSelection: [selection],
     problemNumbers: [problem.source.number],
     tags: [],
     tagLogic: 'or',
@@ -103,7 +87,7 @@ export async function getProblemBySlug(
     listContentId: null,
   }
 
-  // Return the single problem with its derived filters
+  // The problem, its filters, and whatever options came back alongside them
   return {
     success: true,
     data: {
@@ -142,7 +126,7 @@ export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResul
         tagLogic: 'or',
         authorSlugs: [],
         authorLogic: 'or',
-      },
+      } satisfies FilterParameters,
       pageSize: 20,
       pageNumber: 1,
       favoritesOnly: false,
@@ -154,18 +138,12 @@ export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResul
   // Pass a failure through untouched
   if (!result.success) return result
 
-  // Flatten the nested response into the frontend FilterResponse shape
+  // The first page of problems, alongside the options and the list it was browsed under
   return {
     success: true,
     data: {
       problems: result.data.filterResult.problems,
-      updatedOptions: result.data.filterResult.updatedOptions || {
-        competitions: [],
-        seasons: [],
-        problemNumbers: [],
-        tags: [],
-        authors: [],
-      },
+      updatedOptions: result.data.filterResult.updatedOptions,
       listName: result.data.listName,
     },
   }
@@ -189,7 +167,7 @@ export async function searchProblems(
   pageNumber: number,
   signal: AbortSignal
 ): Promise<ApiResult<FilterResponse>> {
-  // Convert frontend filters to backend format
+  // The filters as the API takes them
   const filterParameters = searchFiltersStateToFilterParameters(filters)
 
   // Fetch the raw filter response
@@ -209,7 +187,7 @@ export async function searchProblems(
   // Pass a failure through untouched
   if (!result.success) return result
 
-  // Flatten the nested response into the frontend FilterResponse shape
+  // The matching page of problems, alongside the options and the list it was browsed under
   return {
     success: true,
     data: {
@@ -263,7 +241,7 @@ export async function toggleProblemMark(
  * @returns The converted filter parameters.
  */
 function searchFiltersStateToFilterParameters(state: SearchFiltersState): FilterParameters {
-  // The editions filtered on
+  // The editions filtered on, which the API knows as olympiad years
   const olympiadYears = state.seasons
     .map((season) => {
       // The edition the season's slug names
@@ -280,10 +258,12 @@ function searchFiltersStateToFilterParameters(state: SearchFiltersState): Filter
   // The authors filtered on
   const authorSlugs = state.authors.map((author) => author.slug)
 
-  // Convert frontend ContestSelection to backend ContestSelection
-  const contests: FilterParameters['contests'] = state.contestSelection.map(contestSelectionSlugs)
+  // The contests as the API names them, which each selection already carries
+  const contests: FilterParameters['contests'] = state.contestSelection.map(
+    (selection) => selection.apiSelection
+  )
 
-  // Return the converted filter parameters
+  // The reduced lists alongside the fields that pass through untouched
   return {
     searchText: state.searchText,
     searchInSolution: state.searchInSolution,

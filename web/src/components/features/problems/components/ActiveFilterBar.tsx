@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../../shared/components/DropdownMenu'
+import { cn } from '../../../shared/utils/css-utils'
 import { isExclusiveSelection } from '../../../shared/utils/event-utils'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { usePrefetchContestBrowser } from '../hooks/use-contest-browser'
@@ -21,7 +22,7 @@ import type {
   SearchFiltersState,
 } from '../types/problem-library-types'
 import { generateCompetitionChips } from '../utils/competition-chips'
-import { interpretSelectionParts } from '../utils/selection-interpreter'
+import { buildContestTree, resolveContestPaths } from '../utils/contest-tree'
 import { createDefaultFilters } from '../utils/url-initialization'
 import { ActionsMenu } from './ActionsMenu'
 import type { ChipData } from './CollapsibleChipGroup'
@@ -29,6 +30,24 @@ import { CollapsibleChipGroup } from './CollapsibleChipGroup'
 import { ContestBrowserModal, type ContestBrowserSelection } from './ContestBrowserModal'
 import { MobileFilterButton } from './MobileFilterDrawer'
 import { ShareButton } from './ShareButton'
+
+/**
+ * The panel the filter rows scroll inside.
+ */
+const FILTER_ROWS_CLASS = cn(
+  'max-h-[40vh] overflow-y-auto pr-1',
+  'border-t border-foreground/10 mt-3 pt-3 lg:mt-4 lg:pt-4',
+  'animate-in fade-in slide-in-from-top-2 duration-200'
+)
+
+/**
+ * One filter row: its heading beside its chips, once there is width for the two of them.
+ */
+const FILTER_ROW_CLASS = cn(
+  'grid grid-cols-1 gap-y-1.5',
+  'sm:grid-cols-[5.5rem_1fr] sm:items-baseline sm:gap-x-4 sm:gap-y-0',
+  'md:grid-cols-[6rem_1fr] lg:grid-cols-[6.5rem_1fr] xl:grid-cols-[7rem_1fr]'
+)
 
 /**
  * The props of {@link ActiveFiltersBar}.
@@ -58,8 +77,9 @@ type ActiveFiltersBarProps = {
  * The strip above the results: how many problems match, what is filtering them as
  * removable chips, and the controls that act on the whole result set.
  *
- * The chips collapse themselves once there are enough of them to crowd the bar, and stay
- * collapsed until the user says otherwise or clears the filters.
+ * The chips fold themselves up below the sidebar breakpoint always, and above it once there are
+ * enough of them to crowd the bar. The user's own expanding or collapsing then holds until
+ * nothing is filtered any more.
  */
 export default function ActiveFiltersBar({
   filters,
@@ -72,7 +92,7 @@ export default function ActiveFiltersBar({
   onMobileFilterClick,
   isSearching,
 }: ActiveFiltersBarProps) {
-  // An unfiltered state, which is what clearing goes back to
+  // The unfiltered state
   const defaultFilters = createDefaultFilters()
 
   // Plural translations
@@ -81,10 +101,10 @@ export default function ActiveFiltersBar({
   // Translations for the filter bar
   const tFilters = useTranslations('problems.filters')
 
-  // The sidebar only exists on wide viewports, which decides what the bar has to offer
+  // Whether the viewport is wide enough for the sidebar
   const isSidebarVisible = useMinWidth('lg')
 
-  // Whether the contest browser is showing, held in the URL so the modal is linkable
+  // The contest browser's open state and the controls that change it
   const contestBrowser = useContestBrowserModal()
 
   // A function which warms the contest browser
@@ -92,6 +112,12 @@ export default function ActiveFiltersBar({
 
   // What the user said about the chips being expanded, or null while they have said nothing
   const [manualExpansionOverride, setManualExpansionOverride] = useState<boolean | null>(null)
+
+  // The contest taxonomy
+  const contestTree = useMemo(
+    () => buildContestTree(baseOptions.competitions, baseOptions.competitions),
+    [baseOptions.competitions]
+  )
 
   // A function which applies a competition the user picked in the contest browser
   const handleContestSelect = (selection: ContestBrowserSelection) => {
@@ -101,14 +127,12 @@ export default function ActiveFiltersBar({
       selection.seasonSlug
 
     // The path down to what was picked, at whatever depth the browser reached
-    const parts: string[] = [
-      selection.competitionSlug,
-      selection.categorySlug,
-      selection.roundSlug,
-    ].filter((part): part is string => part != null)
+    const path = [selection.competitionSlug, selection.categorySlug, selection.roundSlug]
+      .filter((slug): slug is string => slug != null)
+      .join('-')
 
-    // The path resolved against the hierarchy, which is what supplies the names
-    const contestSelections = interpretSelectionParts([parts], baseOptions.competitions)
+    // The path resolved against the taxonomy, which is what supplies the names
+    const contestSelections = resolveContestPaths([path], contestTree)
 
     // The browser picks one contest outright, so everything else is cleared rather than kept
     onFiltersChange({
@@ -140,6 +164,7 @@ export default function ActiveFiltersBar({
   useEffect(() => {
     // With nothing filtered there is no crowding to have had an opinion about
     if (activeFilterCount === 0) {
+      // So the bar goes back to deciding for itself
       setManualExpansionOverride(null)
     }
   }, [activeFilterCount])
@@ -172,10 +197,12 @@ export default function ActiveFiltersBar({
       // Whether the chip stands for something already filtered on
       const isSelected = filters.problemNumbers.includes(numToToggle)
 
+      // A number already filtered on comes back out on a click, and any other one goes in
       if (isSelected) {
         // Everything but the one clicked survives
         const updated = filters.problemNumbers.filter((number) => number !== numToToggle)
 
+        // And the survivors become the filter
         onFiltersChange({ ...filters, problemNumbers: updated })
       } else {
         // Numbers read as a sequence, so a new one takes its place in order
@@ -196,33 +223,37 @@ export default function ActiveFiltersBar({
     // The modifier narrows the whole filter to this one value
     if (isExclusiveSelection(event)) {
       // The value as it already sits in the filters, which is where its name comes from
-      const item = filters[key].find((item) => item.slug === slugToToggle)
+      const selectedValue = filters[key].find((value) => value.slug === slugToToggle)
 
       // A chip naming something no longer filtered on has nothing to narrow to
-      if (item) {
-        onFiltersChange({ ...filters, [key]: [item] })
+      if (selectedValue) {
+        // So it is the only one left standing
+        onFiltersChange({ ...filters, [key]: [selectedValue] })
       }
 
       return
     }
 
     // Whether the chip stands for something already filtered on
-    const isSelected = filters[key].some((item) => item.slug === slugToToggle)
+    const isSelected = filters[key].some((value) => value.slug === slugToToggle)
 
+    // A value already filtered on comes back out on a click, and any other one goes in
     if (isSelected) {
       // Everything but the one clicked survives
-      const updatedValues = filters[key].filter((item) => item.slug !== slugToToggle)
+      const updatedValues = filters[key].filter((value) => value.slug !== slugToToggle)
 
+      // And the survivors become the filter
       onFiltersChange({ ...filters, [key]: updatedValues })
     } else {
       // The value's name comes from the current counts, or from the full set if it has dropped out
-      const itemToAdd =
-        filterOptions[key].find((item) => item.slug === slugToToggle) ||
-        baseOptions[key].find((item) => item.slug === slugToToggle)
+      const valueToAdd =
+        filterOptions[key].find((value) => value.slug === slugToToggle) ||
+        baseOptions[key].find((value) => value.slug === slugToToggle)
 
       // A value neither set knows cannot be named, so it is not worth filtering on
-      if (itemToAdd) {
-        onFiltersChange({ ...filters, [key]: [...filters[key], itemToAdd] })
+      if (valueToAdd) {
+        // So it joins the ones already there
+        onFiltersChange({ ...filters, [key]: [...filters[key], valueToAdd] })
       }
     }
   }
@@ -249,6 +280,7 @@ export default function ActiveFiltersBar({
     // The only other mode there is
     const newLogic = filters.tagLogic === 'and' ? 'or' : 'and'
 
+    // Which the tag filter runs under from here
     onFiltersChange({ ...filters, tagLogic: newLogic })
   }
 
@@ -257,6 +289,7 @@ export default function ActiveFiltersBar({
     // The only other mode there is
     const newLogic = filters.authorLogic === 'and' ? 'or' : 'and'
 
+    // Which the author filter runs under from here
     onFiltersChange({ ...filters, authorLogic: newLogic })
   }
 
@@ -294,6 +327,7 @@ export default function ActiveFiltersBar({
     id: facet.slug,
     displayName: facet.displayName,
   }))
+
   // The author names, under the current counts and in full
   const authorOptions = filterOptions.authors.map((facet) => ({
     id: facet.slug,
@@ -326,8 +360,8 @@ export default function ActiveFiltersBar({
 
   // The competition chips, folded up to the shallowest level that covers each selection
   const competitionChips = useMemo(() => {
-    return generateCompetitionChips(filters, baseOptions, onFiltersChange)
-  }, [filters, baseOptions, onFiltersChange])
+    return generateCompetitionChips(filters, contestTree, onFiltersChange)
+  }, [filters, contestTree, onFiltersChange])
 
   // The search chip, which reads the term back with its scope, or nothing when there is no term
   const searchTextChip =
@@ -339,7 +373,14 @@ export default function ActiveFiltersBar({
         }
       : null
 
-  // A function which puts selected values back into the order the facet offers them in
+  /**
+   * Puts the values filtered on back into the order the facet offers them in. A value the facet
+   * no longer offers goes to the end.
+   *
+   * @param selected - The values filtered on.
+   * @param originalOptions - The facet's options, in the order it offers them.
+   * @returns The same values, in the facet's order.
+   */
   const sortByOriginalOrder = <T extends { slug: string }>(selected: T[], originalOptions: T[]) => {
     // Where each value sits in the facet, so ordering the chips is a lookup
     const positionMap = new Map<string, number>()
@@ -360,9 +401,13 @@ export default function ActiveFiltersBar({
     })
   }
 
-  // Each filter's chips in its facet's own order, with the competitions already sorted
+  // The seasons in the order their facet offers them in
   const sortedSeasons = sortByOriginalOrder(filters.seasons, baseOptions.seasons)
+
+  // The numbers read as a sequence, so they go in numeric order
   const sortedProblemNumbers = [...filters.problemNumbers].sort((first, second) => first - second)
+
+  // The tags and the authors, each in its own facet's order
   const sortedTags = sortByOriginalOrder(filters.tags, baseOptions.tags)
   const sortedAuthors = sortByOriginalOrder(filters.authors, baseOptions.authors)
 
@@ -421,10 +466,10 @@ export default function ActiveFiltersBar({
       label: tFilters('facets.tags'),
       logic: filters.tagLogic,
       onLogicToggle: handleToggleTagLogic,
-      chips: sortedTags.map((keyword) => ({
-        id: `tag-${keyword.slug}`,
-        displayName: getLabel(tagOptions, keyword.slug, tagOptionsBase),
-        onClick: (event: React.MouseEvent) => handleToggleMulti('tags', keyword.slug, event),
+      chips: sortedTags.map((tag) => ({
+        id: `tag-${tag.slug}`,
+        displayName: getLabel(tagOptions, tag.slug, tagOptionsBase),
+        onClick: (event: React.MouseEvent) => handleToggleMulti('tags', tag.slug, event),
       })),
     },
     {
@@ -442,14 +487,22 @@ export default function ActiveFiltersBar({
     .filter((group) => group.chips.length > 0)
 
   // How many chips there are altogether, across every heading
-  const activeTokenCount = filterGroups.reduce((sum, group) => sum + group.chips.length, 0)
+  const activeChipCount = filterGroups.reduce((sum, group) => sum + group.chips.length, 0)
 
   // Whether anything is filtering at all, including the states that carry no chip of their own
-  const hasAnyActive =
-    activeTokenCount > 0 ||
+  const hasAnyActiveFilter =
+    activeChipCount > 0 ||
     Boolean(filters.searchText && filters.searchText.trim().length > 0) ||
     Boolean(filters.searchInSolution) ||
     Boolean(filters.markStatus)
+
+  // The colour the mark status reads in
+  const markStatusColorClass =
+    filters.markStatus === 'marked'
+      ? 'text-success'
+      : filters.markStatus === 'unmarked'
+        ? 'text-warning'
+        : 'text-muted hover:text-muted-foreground'
 
   return (
     <div className="rounded-xl border border-foreground/10 bg-surface p-3 lg:p-4">
@@ -465,18 +518,19 @@ export default function ActiveFiltersBar({
           .label-custom-show { display: none !important; }
         }
       `}</style>
-      {/* Header Row */}
+      {/* Header row */}
       <div className="flex flex-nowrap items-center justify-between gap-x-0.5 min-[400px]:gap-x-1.5 gap-custom-expand min-w-0">
-        {/* STATUS (Left Side) */}
+        {/* Status */}
         <div className="flex items-center gap-0.5 min-[400px]:gap-1.5 gap-custom-expand text-sm flex-shrink min-w-0">
+          {/* Active-filters heading, or the drawer trigger where there is no sidebar */}
           {isSidebarVisible ? (
             <div className="flex items-center gap-2 flex-shrink-0">
               <h2 className="font-semibold text-foreground whitespace-nowrap">
                 {tFilters('activeFilters')}
               </h2>
-              {activeTokenCount > 0 && (
+              {activeChipCount > 0 && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-focus text-xs font-medium text-focus-foreground">
-                  {activeTokenCount}
+                  {activeChipCount}
                 </span>
               )}
             </div>
@@ -484,7 +538,7 @@ export default function ActiveFiltersBar({
             onMobileFilterClick && (
               <MobileFilterButton
                 onClick={onMobileFilterClick}
-                activeFilterCount={activeTokenCount}
+                activeFilterCount={activeChipCount}
               />
             )
           )}
@@ -525,7 +579,7 @@ export default function ActiveFiltersBar({
           )}
         </div>
 
-        {/* ACTION (Right Side) */}
+        {/* Actions */}
         <div className="flex flex-nowrap items-center justify-end gap-x-0 min-[400px]:gap-x-1 sm:gap-x-2 flex-shrink-0">
           {/* Contest browser button */}
           <button
@@ -555,7 +609,7 @@ export default function ActiveFiltersBar({
               <button
                 className={`inline-flex h-7 items-center gap-1 rounded-md px-2.5 text-xs whitespace-nowrap
                   hover:bg-foreground/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
-                  ${filters.markStatus === 'marked' ? 'text-success' : filters.markStatus === 'unmarked' ? 'text-warning' : 'text-muted hover:text-muted-foreground'}`}
+                  ${markStatusColorClass}`}
                 aria-label={tFilters('markStatus')}
                 title={tFilters('markStatus')}
               >
@@ -605,7 +659,7 @@ export default function ActiveFiltersBar({
           {/* Reset button */}
           <button
             onClick={handleClearAll}
-            disabled={!hasAnyActive}
+            disabled={!hasAnyActiveFilter}
             className="inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-muted
                hover:bg-foreground/5 hover:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
                disabled:opacity-30 disabled:pointer-events-none whitespace-nowrap"
@@ -616,7 +670,7 @@ export default function ActiveFiltersBar({
             <span className="hidden sm:inline">{tFilters('reset')}</span>
           </button>
 
-          {/* Actions Menu */}
+          {/* Overflow menu */}
           <ActionsMenu
             showTechniqueTags={showTechniqueTags}
             onShowTagsChange={onShowTechniqueTagsChange}
@@ -625,10 +679,10 @@ export default function ActiveFiltersBar({
         </div>
       </div>
 
-      {/* Filter Rows - only show when filters are active and expanded */}
+      {/* Filter rows */}
       {filterGroups.length > 0 && areFiltersExpanded && (
         <div
-          className="max-h-[40vh] overflow-y-auto border-t border-foreground/10 pt-3 mt-3 lg:mt-4 lg:pt-4 animate-in fade-in slide-in-from-top-2 duration-200 pr-1"
+          className={FILTER_ROWS_CLASS}
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: 'rgb(71 85 105) transparent',
@@ -638,13 +692,14 @@ export default function ActiveFiltersBar({
             {filterGroups.map((group, groupIndex) => {
               return (
                 <div key={group.label}>
-                  <div className="grid grid-cols-1 gap-y-1.5 sm:grid-cols-[5.5rem_1fr] sm:items-baseline sm:gap-x-4 sm:gap-y-0 md:grid-cols-[6rem_1fr] lg:grid-cols-[6.5rem_1fr] xl:grid-cols-[7rem_1fr]">
-                    {/* Group header (what we're filtering by) */}
+                  {/* Group row */}
+                  <div className={FILTER_ROW_CLASS}>
+                    {/* Group header */}
                     <span className="whitespace-nowrap text-sm font-medium text-muted">
                       {group.label}:
                     </span>
 
-                    {/* Chip Group (the actual filters) */}
+                    {/* Chips */}
                     <CollapsibleChipGroup
                       chips={group.chips as ChipData[]}
                       logicalChipsProps={
@@ -658,7 +713,7 @@ export default function ActiveFiltersBar({
                     />
                   </div>
 
-                  {/* Divider between groups on mobile only (not after the last one) */}
+                  {/* Divider between groups on mobile */}
                   {groupIndex < filterGroups.length - 1 && (
                     <div className="mt-3 border-t border-foreground/5 sm:hidden" />
                   )}
@@ -669,7 +724,7 @@ export default function ActiveFiltersBar({
         </div>
       )}
 
-      {/* Contest Browser Modal */}
+      {/* Contest browser */}
       <ContestBrowserModal
         isOpen={contestBrowser.isOpen}
         onClose={contestBrowser.closeWithUrlUpdate}

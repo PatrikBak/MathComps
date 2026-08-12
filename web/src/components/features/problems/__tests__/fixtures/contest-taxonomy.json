@@ -1,0 +1,401 @@
+[
+  {
+    "competitionData": {
+      "slug": "csmo",
+      "displayName": "CSMO",
+      "fullName": "Česko-slovenská Matematická olympiáda",
+      "count": 2354
+    },
+    "categoryData": [
+      {
+        "categoryData": {
+          "slug": "a",
+          "displayName": "A",
+          "fullName": null,
+          "count": 614
+        },
+        "roundData": [
+          {
+            "slug": "i",
+            "displayName": "Domáce kolo",
+            "fullName": "Domáce kolo",
+            "count": 198
+          },
+          {
+            "slug": "s",
+            "displayName": "Školské kolo",
+            "fullName": "Školské kolo",
+            "count": 96
+          },
+          {
+            "slug": "ii",
+            "displayName": "Krajské kolo",
+            "fullName": "Krajské kolo",
+            "count": 128
+          },
+          {
+            "slug": "iii",
+            "displayName": "Celoštátne kolo",
+            "fullName": "Celoštátne kolo",
+            "count": 192
+          }
+        ]
+      },
+      {
+        "categoryData": {
+          "slug": "b",
+          "displayName": "B",
+          "fullName": null,
+          "count": 416
+        },
+        "roundData": [
+          {
+            "slug": "i",
+            "displayName": "Domáce kolo",
+            "fullName": "Domáce kolo",
+            "count": 192
+          },
+          {
+            "slug": "s",
+            "displayName": "Školské kolo",
+            "fullName": "Školské kolo",
+            "count": 96
+          },
+          {
+            "slug": "ii",
+            "displayName": "Krajské kolo",
+            "fullName": "Krajské kolo",
+            "count": 128
+          }
+        ]
+      },
+      {
+        "categoryData": {
+          "slug": "c",
+          "displayName": "C",
+          "fullName": null,
+          "count": 416
+        },
+        "roundData": [
+          {
+            "slug": "i",
+            "displayName": "Domáce kolo",
+            "fullName": "Domáce kolo",
+            "count": 192
+          },
+          {
+            "slug": "s",
+            "displayName": "Školské kolo",
+            "fullName": "Školské kolo",
+            "count": 96
+          },
+          {
+            "slug": "ii",
+            "displayName": "Krajské kolo",
+            "fullName": "Krajské kolo",
+            "count": 128
+          }
+        ]
+      },
+      {
+        "categoryData": {
+          "slug": "z9",
+          "displayName": "Z9",
+          "fullName": null,
+          "count": 251
+        },
+        "roundData": [
+          {
+            "slug": "i",
+            "displayName": "Domáce kolo",
+            "fullName": "Domáce kolo",
+            "count": 102
+          },
+          {
+            "slug": "ii",
+            "displayName": "Okresné kolo",
+            "fullName": "Okresné kolo",
+            "count": 79
+          },
+          {
+            "slug": "iii",
+            "displayName": "Krajské kolo",
+            "fullName": "Krajské kolo",
+            "count": 70
+          }
+        ]
+      },
+      {
+        "categoryData": {
+          "slug": "z8",
+          "displayName": "Z8",
+          "fullName": null,
+          "count": 158
+        },
+        "roundData": [
+          {
+            "slug": "i",
+            "displayName": "Domáce kolo",
+            "fullName": "Domáce kolo",
+            "count": 102
+          },
+          {
+            "slug": "ii",
+            "displayName": "Okresné kolo",
+            "fullName": "Okresné kolo",
+            "count": 56
+          }
+        ]
+      },
+      {
+        "categoryData": {
+          "slug": "z7",
+          "displayName": "Z7",
+          "fullName": null,
+          "count": 149
+        },
+        "roundData": [
+          {
+            "slug": "i",
+            "displayName": "Domáce kolo",
+            "fullName": "Domáce kolo",
+            "count": 96
+          },
+          {
+            "slug": "ii",
+            "displayName": "Okresné kolo",
+            "fullName": "Okresné kolo",
+            "count": 53
+          }
+        ]
+      },
+      {
+        "categoryData": {
+          "slug": "z6",
+          "displayName": "Z6",
+          "fullName": null,
+          "count": 149
+        },
+        "roundData": [
+          {
+            "slug": "i",
+            "displayName": "Domáce kolo",
+            "fullName": "Domáce kolo",
+            "count": 102
+          },
+          {
+            "slug": "ii",
+            "displayName": "Okresné kolo",
+            "fullName": "Okresné kolo",
+            "count": 47
+          }
+        ]
+      },
+      {
+        "categoryData": {
+          "slug": "z5",
+          "displayName": "Z5",
+          "fullName": null,
+          "count": 165
+        },
+        "roundData": [
+          {
+            "slug": "i",
+            "displayName": "Domáce kolo",
+            "fullName": "Domáce kolo",
+            "count": 105
+          },
+          {
+            "slug": "ii",
+            "displayName": "Okresné kolo",
+            "fullName": "Okresné kolo",
+            "count": 60
+          }
+        ]
+      },
+      {
+        "categoryData": {
+          "slug": "z4",
+          "displayName": "Z4",
+          "fullName": null,
+          "count": 36
+        },
+        "roundData": [
+          {
+            "slug": "i",
+            "displayName": "Domáce kolo",
+            "fullName": "Domáce kolo",
+            "count": 24
+          },
+          {
+            "slug": "ii",
+            "displayName": "Školské kolo",
+            "fullName": "Školské kolo",
+            "count": 12
+          }
+        ]
+      }
+    ],
+    "roundData": []
+  },
+  {
+    "competitionData": {
+      "slug": "tst",
+      "displayName": "Výberko IMO/MEMO",
+      "fullName": "Výberové sústredenie pred IMO a MEMO",
+      "count": 454
+    },
+    "categoryData": [],
+    "roundData": [
+      {
+        "slug": "d1",
+        "displayName": "1. deň",
+        "fullName": "1. deň",
+        "count": 97
+      },
+      {
+        "slug": "d2",
+        "displayName": "2. deň",
+        "fullName": "2. deň",
+        "count": 88
+      },
+      {
+        "slug": "d3",
+        "displayName": "3. deň",
+        "fullName": "3. deň",
+        "count": 92
+      },
+      {
+        "slug": "d4",
+        "displayName": "4. deň",
+        "fullName": "4. deň",
+        "count": 94
+      },
+      {
+        "slug": "d5",
+        "displayName": "5. deň",
+        "fullName": "5. deň",
+        "count": 83
+      }
+    ]
+  },
+  {
+    "competitionData": {
+      "slug": "memo",
+      "displayName": "MEMO",
+      "fullName": "Middle European Mathematical Olympiad",
+      "count": 212
+    },
+    "categoryData": [],
+    "roundData": [
+      {
+        "slug": "i",
+        "displayName": "Individual",
+        "fullName": "Individuálna časť",
+        "count": 76
+      },
+      {
+        "slug": "t",
+        "displayName": "Team",
+        "fullName": "Tímová časť",
+        "count": 136
+      }
+    ]
+  },
+  {
+    "competitionData": {
+      "slug": "imo",
+      "displayName": "IMO",
+      "fullName": "International Mathematical Olympiad",
+      "count": 156
+    },
+    "categoryData": [],
+    "roundData": []
+  },
+  {
+    "competitionData": {
+      "slug": "caps",
+      "displayName": "CAPS",
+      "fullName": "Czech-Austrian-Polish-Slovak Match",
+      "count": 163
+    },
+    "categoryData": [],
+    "roundData": []
+  },
+  {
+    "competitionData": {
+      "slug": "emo",
+      "displayName": "EMO",
+      "fullName": "European Mathematical Olympiad",
+      "count": 8
+    },
+    "categoryData": [],
+    "roundData": []
+  },
+  {
+    "competitionData": {
+      "slug": "egmo",
+      "displayName": "EGMO",
+      "fullName": "European Girl's Mathematical Olympiad",
+      "count": 92
+    },
+    "categoryData": [],
+    "roundData": []
+  },
+  {
+    "competitionData": {
+      "slug": "tstc",
+      "displayName": "Výberko CPSJ",
+      "fullName": "Výberové sústredenie pred CPSJ",
+      "count": 30
+    },
+    "categoryData": [],
+    "roundData": []
+  },
+  {
+    "competitionData": {
+      "slug": "cpsj",
+      "displayName": "CPSJ",
+      "fullName": "Czech-Polish-Slovak Junior Match",
+      "count": 154
+    },
+    "categoryData": [],
+    "roundData": [
+      {
+        "slug": "i",
+        "displayName": "Individual",
+        "fullName": "Individuálna časť",
+        "count": 70
+      },
+      {
+        "slug": "t",
+        "displayName": "Team",
+        "fullName": "Tímová časť",
+        "count": 84
+      }
+    ]
+  },
+  {
+    "competitionData": {
+      "slug": "duogeo",
+      "displayName": "DuoGeo",
+      "fullName": "DuoGeo",
+      "count": 24
+    },
+    "categoryData": [],
+    "roundData": [
+      {
+        "slug": "zs",
+        "displayName": "ZŠ",
+        "fullName": "Kategória ZŠ",
+        "count": 12
+      },
+      {
+        "slug": "ss",
+        "displayName": "SŠ",
+        "fullName": "Kategória SŠ",
+        "count": 12
+      }
+    ]
+  }
+]

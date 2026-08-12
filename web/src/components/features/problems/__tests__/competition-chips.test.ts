@@ -1,588 +1,215 @@
-import { describe, expect, it } from 'vitest'
+// The chips the active-filter bar shows for the competition filter. The folding they are built on is
+// pinned against the live taxonomy in contest-equivalence.test.ts and exercised at depth in
+// contest-selection-fold.test.ts, the order it reports in included, so what is left here is how the chips
+// read and what a click does.
 
-import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
+import type * as React from 'react'
+import { describe, expect, it, vi } from 'vitest'
+
+import type { ContestSelection, SearchFiltersState } from '../types/problem-library-types'
 import { generateCompetitionChips } from '../utils/competition-chips'
+import { DEEP_TAXONOMY, makeContestTree } from './contest-tree-fixture'
 
-// Mock onFiltersChange function for testing
-const mockOnFiltersChange = () => {}
+/** The taxonomy the chips are folded and named against, five levels at its deepest. */
+const tree = makeContestTree(DEEP_TAXONOMY)
 
-describe('Competition Chips Logic', () => {
-  // Real data structure from your API with categories
-  const mockBaseOptions: FilterOptionsWithCounts = {
-    competitions: [
-      {
-        competitionData: { slug: 'csmo', displayName: 'Matematická Olympiáda', count: 100 },
-        categoryData: [
-          {
-            categoryData: { slug: 'a', displayName: 'A', count: 50 },
-            roundData: [
-              { slug: 'i', displayName: 'Domáce kolo', count: 25 },
-              { slug: 's', displayName: 'Školské kolo', count: 25 },
-              { slug: 'ii', displayName: 'Krajské kolo', count: 25 },
-              { slug: 'iii', displayName: 'Celoštátne kolo', count: 25 },
-            ],
-          },
-          {
-            categoryData: { slug: 'b', displayName: 'B', count: 50 },
-            roundData: [
-              { slug: 'i', displayName: 'Domáce kolo', count: 25 },
-              { slug: 's', displayName: 'Školské kolo', count: 25 },
-              { slug: 'ii', displayName: 'Krajské kolo', count: 25 },
-            ],
-          },
-          {
-            categoryData: { slug: 'c', displayName: 'C', count: 50 },
-            roundData: [
-              { slug: 'i', displayName: 'Domáce kolo', count: 25 },
-              { slug: 's', displayName: 'Školské kolo', count: 25 },
-              { slug: 'ii', displayName: 'Krajské kolo', count: 25 },
-            ],
-          },
-          {
-            categoryData: { slug: 'z9', displayName: 'Z9', count: 50 },
-            roundData: [
-              { slug: 'i', displayName: 'Domáce kolo', count: 25 },
-              { slug: 'ii', displayName: 'Okresné kolo', count: 25 },
-              { slug: 'iii', displayName: 'Krajské kolo', count: 25 },
-            ],
-          },
-          {
-            categoryData: { slug: 'z8', displayName: 'Z8', count: 50 },
-            roundData: [
-              { slug: 'i', displayName: 'Domáce kolo', count: 25 },
-              { slug: 'ii', displayName: 'Okresné kolo', count: 25 },
-            ],
-          },
-        ],
-        roundData: [],
-      },
-      {
-        competitionData: { slug: 'tst', displayName: 'Výberové sústredenie', count: 100 },
-        categoryData: [],
-        roundData: [
-          { slug: 'd1', displayName: '1. deň', count: 20 },
-          { slug: 'd2', displayName: '2. deň', count: 20 },
-          { slug: 'd3', displayName: '3. deň', count: 20 },
-          { slug: 'd4', displayName: '4. deň', count: 20 },
-          { slug: 'd5', displayName: '5. deň', count: 20 },
-        ],
-      },
-      {
-        competitionData: {
-          slug: 'memo',
-          displayName: 'Middle European Mathematical Olympiad',
-          count: 150,
-        },
-        categoryData: [],
-        roundData: [
-          { slug: 'i', displayName: 'Individuálna súťaž', count: 75 },
-          { slug: 't', displayName: 'Tímová súťaž', count: 75 },
-        ],
-      },
-      {
-        competitionData: {
-          slug: 'imo',
-          displayName: 'International Mathematical Olympiad',
-          count: 200,
-        },
-        categoryData: [],
-        roundData: [{ slug: '', displayName: '', count: 0 }], // Empty slug/data as in real API
-      },
-    ],
+/**
+ * Builds a contest filter naming the node at the given path.
+ *
+ * @param path - The node's path.
+ * @returns The selection.
+ */
+function contestAt(path: string): ContestSelection {
+  // The node named, addressed by its path
+  return {
+    path,
+    apiSelection: { competitionSlug: path.split('-')[0] },
+  }
+}
+
+/**
+ * Builds filters carrying nothing but the given contest selections.
+ *
+ * @param paths - The paths filtered on.
+ * @returns The filter state.
+ */
+function filtersWith(paths: string[]): SearchFiltersState {
+  // The contests filtered on, with every other filter left where it starts
+  return {
+    searchText: '',
+    searchInSolution: false,
     seasons: [],
     problemNumbers: [],
     tags: [],
+    tagLogic: 'or',
     authors: [],
+    authorLogic: 'or',
+    contestSelection: paths.map(contestAt),
+    favoritesOnly: false,
+    markStatus: null,
+    listContentId: null,
   }
+}
 
-  describe('Competition chip generation scenarios', () => {
-    it('should show "MO - A - školské kolo" when user selects MO - A - školské kolo', () => {
-      const filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            roundSlug: 's',
-            displayName: 'Matematická Olympiáda - A - Školské kolo',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
+/** A plain left click, carrying neither modifier. */
+const PLAIN_CLICK = { ctrlKey: false, metaKey: false } as React.MouseEvent
 
-      const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
+/** A click asking for the filter to be narrowed to one chip. */
+const EXCLUSIVE_CLICK = { ctrlKey: true, metaKey: false } as React.MouseEvent
 
-      expect(chips).toHaveLength(1)
-      expect(chips[0].displayName).toBe('Matematická Olympiáda - A - Školské kolo')
-    })
+describe('which chips are shown', () => {
+  it('shows nothing when no competition is filtered on', () => {
+    // Nothing to stand for, so no chip stands for it
+    expect(generateCompetitionChips(filtersWith([]), tree, () => {})).toEqual([])
+  })
 
-    it('should show both chips when user selects both školské A and školské B', () => {
-      const filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            roundSlug: 's',
-            displayName: 'Matematická Olympiáda - A - Školské kolo',
-          },
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'b',
-            roundSlug: 's',
-            displayName: 'Matematická Olympiáda - B - Školské kolo',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
+  it('shows one chip per node, labelled with every level above it', () => {
+    // A node four levels down, whose own name says nothing about where it sits
+    const filters = filtersWith(['mo-a-i-navodne'])
 
-      const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
+    // The chips that node produces
+    const chips = generateCompetitionChips(filters, tree, () => {})
 
-      expect(chips).toHaveLength(2)
-      expect(chips.map((c) => c.displayName)).toContain('Matematická Olympiáda - A - Školské kolo')
-      expect(chips.map((c) => c.displayName)).toContain('Matematická Olympiáda - B - Školské kolo')
-    })
+    // One chip, reading under the whole branch above it
+    expect(chips).toHaveLength(1)
+    expect(chips[0].id).toBe('mo-a-i-navodne')
+    expect(chips[0].displayName).toBe('MO - A - I - NAVODNE')
+  })
 
-    it('should show only "MO" when user selects entire MO competition', () => {
-      const filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          {
-            type: 'competition',
-            competitionSlug: 'csmo',
-            displayName: 'Matematická Olympiáda',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
+  it('folds a complete set of siblings into the one chip that covers them', () => {
+    // Both subrounds of a round, which between them are everything it holds
+    const filters = filtersWith(['mo-a-i-navodne-x', 'mo-a-i-navodne-y'])
 
-      const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
+    // The chips the pair produces
+    const chips = generateCompetitionChips(filters, tree, () => {})
 
-      expect(chips).toHaveLength(1)
-      expect(chips[0].displayName).toBe('Matematická Olympiáda')
-    })
+    // The round above them, rather than one chip apiece
+    expect(chips.map((chip) => chip.id)).toEqual(['mo-a-i-navodne'])
+  })
 
-    it('should show only "MO - A" when user selects entire category A', () => {
-      const filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            displayName: 'Matematická Olympiáda - A',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
+  it('drops a selection naming a node the taxonomy no longer holds', () => {
+    // A stale filter alongside a live one
+    const filters = filtersWith(['ghost', 'flat'])
 
-      const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
+    // The chips the two of them produce
+    const chips = generateCompetitionChips(filters, tree, () => {})
 
-      expect(chips).toHaveLength(1)
-      expect(chips[0].displayName).toBe('Matematická Olympiáda - A')
-    })
+    // Only the one the taxonomy still holds
+    expect(chips.map((chip) => chip.id)).toEqual(['flat'])
+  })
 
-    it('should show "MO - A" and "MO - B - školské kolo" when user selects category A + one round from B', () => {
-      const filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            displayName: 'Matematická Olympiáda - A',
-          },
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'b',
-            roundSlug: 's',
-            displayName: 'Matematická Olympiáda - B - Školské kolo',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
+  it('reads the tree top to bottom, whatever order the filters hold', () => {
+    // Filters written from the last root backwards
+    const filters = filtersWith(['flat', 'mid-t', 'mo-a-ii'])
 
-      const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
+    // The chips they produce
+    const chips = generateCompetitionChips(filters, tree, () => {})
 
-      expect(chips).toHaveLength(2)
-      expect(chips.map((c) => c.displayName)).toContain('Matematická Olympiáda - A')
-      expect(chips.map((c) => c.displayName)).toContain('Matematická Olympiáda - B - Školské kolo')
-    })
+    // Handed back in the tree's own order rather than the filters'
+    expect(chips.map((chip) => chip.id)).toEqual(['mo-a-ii', 'mid-t', 'flat'])
+  })
+})
 
-    it('should handle category → individual rounds → category transitions', () => {
-      // Step 1: Select entire category A
-      const step1Filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            displayName: 'Matematická Olympiáda - A',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
+describe('clicking a chip', () => {
+  it('drops what the chip stands for and leaves the rest', () => {
+    // Where the filter state a click produces lands
+    const onFiltersChange = vi.fn()
 
-      const step1Chips = generateCompetitionChips(
-        step1Filters,
-        mockBaseOptions,
-        mockOnFiltersChange
+    // Two unrelated filters, one of which is about to go
+    const chips = generateCompetitionChips(filtersWith(['mo-a-ii', 'flat']), tree, onFiltersChange)
+
+    // The first chip clicked without any modifier
+    chips[0].onClick(PLAIN_CLICK)
+
+    // Only the other filter survives
+    expect(onFiltersChange).toHaveBeenCalledTimes(1)
+    expect(
+      onFiltersChange.mock.calls[0][0].contestSelection.map(
+        (selection: ContestSelection) => selection.path
       )
-      expect(step1Chips).toHaveLength(1)
-      expect(step1Chips[0].displayName).toBe('Matematická Olympiáda - A')
+    ).toEqual(['flat'])
+  })
 
-      // Step 2: Unselect one round (školské kolo), should show individual rounds
-      const step2Filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            roundSlug: 'i',
-            displayName: 'Matematická Olympiáda - A - Domáce kolo',
-          },
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            roundSlug: 'ii',
-            displayName: 'Matematická Olympiáda - A - Krajské kolo',
-          },
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            roundSlug: 'iii',
-            displayName: 'Matematická Olympiáda - A - Celoštátne kolo',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
+  it('drops the whole subtree the chip stands for, however it came to stand for it', () => {
+    // Where the filter state a click produces lands
+    const onFiltersChange = vi.fn()
 
-      const step2Chips = generateCompetitionChips(
-        step2Filters,
-        mockBaseOptions,
-        mockOnFiltersChange
+    // A chip folded up out of its children, so the filters hold the children rather than the chip
+    const chips = generateCompetitionChips(
+      filtersWith(['mo-a-i-navodne-x', 'mo-a-i-navodne-y', 'flat']),
+      tree,
+      onFiltersChange
+    )
+
+    // The folded chip clicked, which has to take both children with it
+    chips[0].onClick(PLAIN_CLICK)
+
+    // Nothing under it is left behind to keep the chip alive
+    expect(
+      onFiltersChange.mock.calls[0][0].contestSelection.map(
+        (selection: ContestSelection) => selection.path
       )
-      expect(step2Chips).toHaveLength(3)
-      expect(step2Chips.map((c) => c.displayName)).toContain(
-        'Matematická Olympiáda - A - Domáce kolo'
+    ).toEqual(['flat'])
+  })
+
+  it('leaves a sibling alone whose slug merely extends the one clicked', () => {
+    // Two competitions whose slugs share a prefix, which the taxonomy is full of
+    const prefixTree = makeContestTree([{ slug: 'tst' }, { slug: 'tstc' }])
+
+    // Where the filter state a click produces lands
+    const onFiltersChange = vi.fn()
+
+    // Both of them filtered on at once
+    const chips = generateCompetitionChips(
+      filtersWith(['tst', 'tstc']),
+      prefixTree,
+      onFiltersChange
+    )
+
+    // The shorter of the two clicked
+    chips[0].onClick(PLAIN_CLICK)
+
+    // The longer one is a competition in its own right rather than something below the one dropped
+    expect(
+      onFiltersChange.mock.calls[0][0].contestSelection.map(
+        (selection: ContestSelection) => selection.path
       )
-      expect(step2Chips.map((c) => c.displayName)).toContain(
-        'Matematická Olympiáda - A - Krajské kolo'
+    ).toEqual(['tstc'])
+  })
+
+  it('narrows the whole competition filter to one chip under the modifier', () => {
+    // Where the filter state a click produces lands
+    const onFiltersChange = vi.fn()
+
+    // Three filters, of which the modifier will keep exactly one
+    const chips = generateCompetitionChips(
+      filtersWith(['mo-a-ii', 'mid-t', 'flat']),
+      tree,
+      onFiltersChange
+    )
+
+    // The middle chip, ctrl-clicked
+    chips[1].onClick(EXCLUSIVE_CLICK)
+
+    // Everything else goes, including the filters that were not part of this chip
+    expect(
+      onFiltersChange.mock.calls[0][0].contestSelection.map(
+        (selection: ContestSelection) => selection.path
       )
-      expect(step2Chips.map((c) => c.displayName)).toContain(
-        'Matematická Olympiáda - A - Celoštátne kolo'
-      )
+    ).toEqual(['mid-t'])
+  })
 
-      // Step 3: Select the missing round back, should compress back to category
-      const step3Filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            displayName: 'Matematická Olympiáda - A',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
+  it('leaves the search term alone', () => {
+    // Where the filter state a click produces lands
+    const onFiltersChange = vi.fn()
 
-      const step3Chips = generateCompetitionChips(
-        step3Filters,
-        mockBaseOptions,
-        mockOnFiltersChange
-      )
-      expect(step3Chips).toHaveLength(1)
-      expect(step3Chips[0].displayName).toBe('Matematická Olympiáda - A')
-    })
+    // A search term riding alongside the competition filter
+    const filters = { ...filtersWith(['flat']), searchText: 'algebra' }
 
-    it('should handle multi-level compression: all categories → entire competition', () => {
-      // Test selecting all categories individually, should compress to entire competition
-      const filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          // All categories selected (A, B, C, Z9, Z8, Z7, Z6, Z5, Z4)
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            displayName: 'Matematická Olympiáda - A',
-          },
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'b',
-            displayName: 'Matematická Olympiáda - B',
-          },
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'c',
-            displayName: 'Matematická Olympiáda - C',
-          },
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'z9',
-            displayName: 'Matematická Olympiáda - Z9',
-          },
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'z8',
-            displayName: 'Matematická Olympiáda - Z8',
-          },
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'z7',
-            displayName: 'Matematická Olympiáda - Z7',
-          },
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'z6',
-            displayName: 'Matematická Olympiáda - Z6',
-          },
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'z5',
-            displayName: 'Matematická Olympiáda - Z5',
-          },
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'z4',
-            displayName: 'Matematická Olympiáda - Z4',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
+    // The only chip there is, clicked away
+    generateCompetitionChips(filters, tree, onFiltersChange)[0].onClick(PLAIN_CLICK)
 
-      const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
-
-      expect(chips).toHaveLength(1)
-      expect(chips[0].displayName).toBe('Matematická Olympiáda')
-    })
-
-    it('should handle partial multi-level compression: some categories + individual rounds', () => {
-      // Test selecting some categories + individual rounds from other categories
-      const filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          // Category A fully selected
-          {
-            type: 'category',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            displayName: 'Matematická Olympiáda - A',
-          },
-          // Only some rounds from category B
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'b',
-            roundSlug: 'i',
-            displayName: 'Matematická Olympiáda - B - Domáce kolo',
-          },
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'b',
-            roundSlug: 's',
-            displayName: 'Matematická Olympiáda - B - Školské kolo',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
-
-      const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
-
-      expect(chips).toHaveLength(3)
-      expect(chips.map((c) => c.displayName)).toContain('Matematická Olympiáda - A')
-      expect(chips.map((c) => c.displayName)).toContain('Matematická Olympiáda - B - Domáce kolo')
-      expect(chips.map((c) => c.displayName)).toContain('Matematická Olympiáda - B - Školské kolo')
-    })
-
-    it('should handle competitions with direct rounds (no categories)', () => {
-      const filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          {
-            type: 'round',
-            competitionSlug: 'memo',
-            roundSlug: 't',
-            displayName: 'Middle European Mathematical Olympiad - Tímová súťaž',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
-
-      const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
-
-      expect(chips).toHaveLength(1)
-      expect(chips[0].displayName).toBe('Middle European Mathematical Olympiad - Tímová súťaž')
-    })
-
-    it('should order chips according to tree hierarchy', () => {
-      // Create selections in reverse order to test that chips appear in tree order
-      const filters: SearchFiltersState = {
-        searchText: '',
-        searchInSolution: false,
-        seasons: [],
-        contestSelection: [
-          // Select CSMO Final first (should appear second in chips - after CSMO)
-          {
-            type: 'round',
-            competitionSlug: 'tst',
-            roundSlug: 'd5',
-            displayName: 'Výberové sústredenie - 5. deň',
-          },
-          // Select IMO Senior Round 2 second (should appear third in chips)
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'b',
-            roundSlug: 'ii',
-            displayName: 'Matematická Olympiáda - B - Krajské kolo',
-          },
-          // Select IMO Senior Round 1 third (should appear second in chips)
-          {
-            type: 'round',
-            competitionSlug: 'csmo',
-            categorySlug: 'a',
-            roundSlug: 'i',
-            displayName: 'Matematická Olympiáda - A - Domáce kolo',
-          },
-        ],
-        problemNumbers: [],
-        tags: [],
-        tagLogic: 'and',
-        authors: [],
-        authorLogic: 'and',
-        favoritesOnly: false,
-        markStatus: null,
-        listContentId: null,
-      }
-
-      const chips = generateCompetitionChips(filters, mockBaseOptions, mockOnFiltersChange)
-
-      // Verify the order matches the tree structure:
-      // 1. CSMO A Domáce kolo (first in CSMO tree)
-      // 2. CSMO B Krajské kolo (second in CSMO tree)
-      // 3. TST 5. deň (first in TST tree)
-      expect(chips).toHaveLength(3)
-      expect(chips[0].displayName).toBe('Matematická Olympiáda - A - Domáce kolo')
-      expect(chips[1].displayName).toBe('Matematická Olympiáda - B - Krajské kolo')
-      expect(chips[2].displayName).toBe('Výberové sústredenie - 5. deň')
-    })
+    // The term comes back exactly as it went in
+    expect(onFiltersChange.mock.calls[0][0].searchText).toBe('algebra')
   })
 })
