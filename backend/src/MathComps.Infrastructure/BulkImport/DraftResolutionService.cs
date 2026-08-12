@@ -29,9 +29,9 @@ public class DraftResolutionService(
         // Read-only context; nothing here writes.
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        // Competition resolves by slug
+        // Competition resolves by slug, among the roots — a slug repeats freely further down the tree.
         var competitionExists = await context.Competitions.AsNoTracking()
-            .AnyAsync(competition => competition.Slug == target.CompetitionSlug);
+            .AnyAsync(competition => competition.ParentId == null && competition.Slug == target.CompetitionSlug);
 
         // Season resolves by start year
         var seasonExists = await context.Seasons.AsNoTracking()
@@ -118,8 +118,10 @@ public class DraftResolutionService(
         var (competitionOrderOf, categoryOrderOf, roundOrderOf) =
             TaxonomyResequencer.RegistryOrders(metadata.Shared, target.CompetitionSlug);
 
-        // The stored competition and category rows, global sort-order spaces.
+        // The stored competition and category rows, global sort-order spaces. Only the roots answer to the
+        // registry's competition list; everything deeper is ordered against its own generation.
         var competitions = await context.Competitions.AsNoTracking()
+            .Where(competition => competition.ParentId == null)
             .Select(competition => new { competition.Slug, competition.SortOrder }).ToListAsync();
         var categories = await context.Categories.AsNoTracking()
             .Select(category => new { category.Slug, category.SortOrder }).ToListAsync();

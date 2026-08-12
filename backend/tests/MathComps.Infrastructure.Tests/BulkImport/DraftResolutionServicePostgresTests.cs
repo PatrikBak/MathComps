@@ -66,8 +66,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
         // One existing CSMO category-A national round in the 2024 season, carrying its problems.
-        var competition = new Competition { Id = Guid.NewGuid(), Slug = "csmo", SortOrder = 1 };
-        context.Competitions.Add(competition);
+        var competition = CompetitionTreeSeed.Root(context, "csmo", 1);
 
         // Season keyed on its start year.
         var season = new Season { Id = Guid.NewGuid(), StartYear = 2024, EditionNumber = 74 };
@@ -85,11 +84,12 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         };
         context.Rounds.Add(round);
 
-        // The round-instance the problems hang off.
+        // The round-instance the problems hang off, under the competition the composite slug spells out.
         var roundInstance = new RoundInstance
         {
             Id = Guid.NewGuid(),
             RoundId = round.Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-a-iii").Id,
             SeasonId = season.Id,
             Date = new DateOnly(2024, 3, 15)
         };
@@ -138,8 +138,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
             SeedText(imageProblem.Id, DocumentType.Statement, Language.SK, isOriginal: true, markdown: imageBody));
 
         // A category-less competition and round, so the null-category composite slug ("memo-i") gets exercised.
-        var memo = new Competition { Id = Guid.NewGuid(), Slug = "memo", SortOrder = 2 };
-        context.Competitions.Add(memo);
+        var memo = CompetitionTreeSeed.Root(context, "memo", 2);
         context.Rounds.Add(new Round
         {
             Id = Guid.NewGuid(),
@@ -524,7 +523,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         await QueryAsync(async context =>
         {
             // The unregistered row.
-            context.Competitions.Add(new Competition { Id = Guid.NewGuid(), Slug = "notacomp", SortOrder = 99 });
+            CompetitionTreeSeed.Root(context, "notacomp", 99);
 
             // Persist the seed.
             await context.SaveChangesAsync();
@@ -547,8 +546,9 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         // Seed a round under the seeded csmo competition whose slug is absent from csmo's registry round list.
         await QueryAsync(async context =>
         {
-            // The owning competition.
-            var csmo = await context.Competitions.SingleAsync(competition => competition.Slug == "csmo");
+            // The owning competition, which is a root.
+            var csmo = await context.Competitions.SingleAsync(
+                competition => competition.ParentId == null && competition.Slug == "csmo");
 
             // The unregistered round hanging off it.
             context.Rounds.Add(new Round
