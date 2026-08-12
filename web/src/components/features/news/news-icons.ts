@@ -1,5 +1,6 @@
 import {
   ArrowDownUp,
+  Bot,
   Languages,
   ListPlus,
   type LucideIcon,
@@ -30,6 +31,7 @@ export type NewsIconName =
   | 'route'
   | 'tent'
   | 'messages-square'
+  | 'bot'
 
 /**
  * Maps each {@link NewsIconName} to its Lucide component.
@@ -47,4 +49,5 @@ export const NEWS_ICONS: Record<NewsIconName, LucideIcon> = {
   route: Route,
   tent: Tent,
   'messages-square': MessagesSquare,
+  bot: Bot,
 }

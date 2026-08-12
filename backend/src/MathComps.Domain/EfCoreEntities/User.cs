@@ -42,6 +42,12 @@ public class User
     public bool IsDeleted { get; set; }
 
     /// <summary>
+    /// When the user acknowledged that the AI tutor is not a person and that conversations with her are stored
+    /// and read, or null while they have yet to be told.
+    /// </summary>
+    public DateTimeOffset? ConsentedToAiAt { get; set; }
+
+    /// <summary>
     /// Timestamp when the user was created in our system.
     /// </summary>
     public DateTimeOffset CreatedAt { get; set; }

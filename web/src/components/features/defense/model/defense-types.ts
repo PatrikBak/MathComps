@@ -159,3 +159,12 @@ type ContinueDefenseTurnRequest = {
  * new session, or {@link ContinueDefenseTurnRequest} to grow an open one.
  */
 export type DefenseTurnRequest = StartDefenseTurnRequest | ContinueDefenseTurnRequest
+
+/**
+ * Frontend mirror of AiConsentDto from the backend: where the student stands on acknowledging that
+ * Mathilda is not a person and that conversations with her are stored and read.
+ */
+export type MathildaConsent = {
+  /** When they acknowledged it, as an ISO-8601 string; null while they have yet to. */
+  consentedAt: string | null
+}

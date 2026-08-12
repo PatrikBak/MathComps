@@ -17,6 +17,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { useDefenseConversation } from '../hooks/use-defense-conversation'
 import { useDefenseFeedback } from '../hooks/use-defense-feedback'
 import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
+import { useMathildaConsent } from '../hooks/use-mathilda-consent'
 import {
   FEEDBACK_COMMENT_MAX_LENGTH,
   OUTCOME_KEYS,
@@ -26,6 +27,7 @@ import type { DefenseProblem, TurnRole } from '../model/defense-types'
 import { DefenseFeedbackPrompt } from './DefenseFeedbackPrompt'
 import { DefenseHistoryMenu } from './DefenseHistoryMenu'
 import { DefenseTranscript } from './DefenseTranscript'
+import { MathildaConsentGate } from './MathildaConsentGate'
 import { ProblemStrip } from './ProblemStrip'
 
 /**
@@ -126,6 +128,9 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
 
   // Auth state
   const { isLoaded: isAuthLoaded, isSignedIn } = useAuth()
+
+  // The student's standing acknowledgement of what talking to Mathilda entails, and the call that records it
+  const consent = useMathildaConsent()
 
   // The live conversation, its examiner-driven send flow, and this problem's session history. The greeting is
   // read here so the chat opens on it before a session exists; the backend seeds its own copy as the saved
@@ -378,7 +383,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
 
       {/* Composer, once there is a conversation for it to write into */}
       <div className="border-t border-foreground/10 px-4 py-3 sm:px-5">
-        {!canCompose || !isAuthLoaded ? (
+        {!canCompose || !isAuthLoaded || consent.isLoading ? (
           <p className="py-3 text-center text-sm text-muted">{t('libraryLoading')}</p>
         ) : !isSignedIn ? (
           <div className="flex flex-col items-center gap-3 py-3 text-center">
@@ -388,6 +393,8 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
             {/* And the way to fix that */}
             <LoginButton />
           </div>
+        ) : !consent.hasConsented ? (
+          <MathildaConsentGate onAccept={consent.accept} isAccepting={consent.isAccepting} />
         ) : (
           <RichMathEditor
             variant="card"

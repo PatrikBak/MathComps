@@ -31,4 +31,20 @@ public interface IUserManager
     /// <param name="externalId">The external provider ID (e.g., Clerk ID).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     Task DeleteUserAsync(string externalId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reads when the user acknowledged what talking to the AI tutor entails.
+    /// </summary>
+    /// <param name="userId">The internal user ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The moment they acknowledged it, or null while they have yet to.</returns>
+    Task<DateTimeOffset?> GetAiConsentAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Records that the user acknowledged what talking to the AI tutor entails. Acknowledging again leaves the
+    /// original moment standing, so the record says when they were first told.
+    /// </summary>
+    /// <param name="userId">The internal user ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    Task RecordAiConsentAsync(Guid userId, CancellationToken cancellationToken = default);
 }
