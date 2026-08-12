@@ -121,6 +121,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             limits.MaxCandidateChars = 100;
             limits.MaxHandoutContentIdChars = 30;
             limits.MaxEnvironmentIdChars = 200;
+            limits.MaxFeedbackCommentChars = 50;
             limits.MaxTurnsPerSession = 2;
             limits.DailySpendCeilingPerUser = 1.00m;
         });
@@ -300,7 +301,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await service.ContinueAsync(_ownerId, older.Id, "back to this one");
 
         // List the problem's sessions
-        var sessions = await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"));
+        var sessions = (await service.ListAsync(
+            _ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"))).Sessions;
 
         // The continued one leads, ahead of the one started after it
         Assert.Equal([older.Id, newer.Id], sessions.Select(session => session.Id));
@@ -318,7 +320,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await service.StartAsync(_otherId, Request("prob-1", "someone else"));
 
         // List the owner's sessions for problem 1
-        var sessions = await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"));
+        var sessions = (await service.ListAsync(
+            _ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"))).Sessions;
 
         // Only the owner's single prob-1 session comes back
         var listed = Assert.Single(sessions);
@@ -363,7 +366,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Re-read the conversation
         var listed = Assert.Single(
-            await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1")));
+            (await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"))).Sessions);
 
         // Its turns come back in order, each under its author
         Assert.Equal(
@@ -399,7 +402,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await service.StartAsync(_ownerId, Request("prob-1", "second handout", "handout-2"));
 
         // List against handout-1's prob-1
-        var sessions = await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"));
+        var sessions = (await service.ListAsync(
+            _ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"))).Sessions;
 
         // Only that handout's session comes back
         var listed = Assert.Single(sessions);
@@ -408,6 +412,23 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // And it names the environment the right way round. The two halves are same-typed strings, so a swapped
         // projection would otherwise sail past every filter assertion above.
         Assert.Equal(new HandoutEnvironmentTarget("handout-1", "prob-1"), listed.Target);
+    });
+
+    /// <summary>
+    /// The caps a defense is held to come back with the list, since they are configuration the server can be
+    /// given a new value for at any time.
+    /// </summary>
+    [Fact]
+    public Task List_reports_the_caps_a_client_is_held_to() => RunTestAsync(async service =>
+    {
+        // Read a problem nothing has been defended against yet, since the caps stand whatever the history holds
+        var listing = await service.ListAsync(_ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"));
+
+        // Every cap comes back as configured. All three are ints, so the values are kept distinct: a projection
+        // handing them over in the wrong order would otherwise sail past.
+        Assert.Equal(100, listing.Limits.MaxCandidateChars);
+        Assert.Equal(50, listing.Limits.MaxFeedbackCommentChars);
+        Assert.Equal(2, listing.Limits.MaxTurnsPerSession);
     });
 
     /// <summary>

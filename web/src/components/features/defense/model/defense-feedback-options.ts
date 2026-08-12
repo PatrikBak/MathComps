@@ -14,12 +14,6 @@ type ReportCategoryLabelKey =
   `reportCategories.${string & keyof Messages['defense']['reportCategories']}`
 
 /**
- * The most characters a report or an answer may add in the student's own words. Mirrors the backend's cap, so an
- * over-long comment is stopped at the keyboard rather than bounced by the API with the text already typed.
- */
-export const FEEDBACK_COMMENT_MAX_LENGTH = 2000
-
-/**
  * The message key naming each way an examiner reply can go wrong, in the order they are offered.
  */
 export const REPORT_CATEGORY_KEYS = {

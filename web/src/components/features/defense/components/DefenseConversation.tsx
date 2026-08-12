@@ -18,11 +18,7 @@ import { useDefenseConversation } from '../hooks/use-defense-conversation'
 import { useDefenseFeedback } from '../hooks/use-defense-feedback'
 import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
 import { useMathildaConsent } from '../hooks/use-mathilda-consent'
-import {
-  FEEDBACK_COMMENT_MAX_LENGTH,
-  OUTCOME_KEYS,
-  REPORT_CATEGORY_KEYS,
-} from '../model/defense-feedback-options'
+import { OUTCOME_KEYS, REPORT_CATEGORY_KEYS } from '../model/defense-feedback-options'
 import type { DefenseProblem, TurnRole } from '../model/defense-types'
 import { DefenseFeedbackPrompt } from './DefenseFeedbackPrompt'
 import { DefenseHistoryMenu } from './DefenseHistoryMenu'
@@ -98,6 +94,11 @@ function initialSessionIdOf(mode: DefenseConversationMode): string | undefined {
 const TURNS_WORTH_ANSWERING_FOR = 3
 
 /**
+ * How few replies a conversation has to have left before the composer says so.
+ */
+const REPLIES_LEFT_TO_WARN_AT = 5
+
+/**
  * The composer's toolbar for a defense turn: only the math tools are kept, so a turn stays plain text
  * and mathematics.
  */
@@ -139,6 +140,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
     turns,
     isThinking,
     sessions,
+    limits,
     initialResumeSettled,
     sessionsFailed,
     currentSessionId,
@@ -187,8 +189,9 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
   }, [isOpen, sessionsFailed, t])
 
   // A turn's own controls are offered only on a saved conversation and never mid-turn; a session id only
-  // ever names one the signed-in viewer owns, so there's no one else's conversation to act on
-  const canAct = !isThinking && currentSessionId !== null
+  // ever names one the signed-in viewer owns, so there's no one else's conversation to act on. Unknown caps
+  // mean the history hasn't arrived, and a report would have no cap to hold its comment to
+  const canAct = !isThinking && currentSessionId !== null && limits !== null
 
   // Whether the conversation has enough behind it to be worth summing up, or was already summed up, which
   // keeps a standing answer reachable to revise however short a rewind has left the conversation.
@@ -201,6 +204,13 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
   // Whether a turn has somewhere to go: an open session to append to, or the standing to open one. A reopened
   // conversation has neither until its session resumes, so it composes nothing in the meantime.
   const canCompose = canOpenFresh || currentSessionId !== null
+
+  // How many more replies the conversation has room for, or null while the caps are unknown. A reply still in
+  // flight counts against it: it is written the moment it's sent, whatever the examiner then makes of it
+  const repliesLeft =
+    limits === null
+      ? null
+      : limits.maxTurnsPerSession - turns.filter((turn) => turn.role === 'candidate').length
 
   // Whether there's a conversation worth resetting: an open session, or a fresh one the student has
   // already started (a sent or in-flight turn past the examiner's opener). A pristine blank chat has
@@ -322,24 +332,26 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
       />
 
       {/* Every way one of the examiner's replies went wrong */}
-      <FeedbackDialog
-        isOpen={report.isOpen}
-        onClose={report.close}
-        onRemove={report.standing === undefined ? null : report.requestRemoval}
-        choice={{
-          selection: 'multiple',
-          initialValues: report.standing?.categories ?? [],
-          onSubmit: report.submit,
-        }}
-        requiresComment="other"
-        requiresCommentHint={t('requiresCommentHint')}
-        title={t('reportTitle')}
-        options={toFeedbackOptions(REPORT_CATEGORY_KEYS, t)}
-        initialComment={report.standing?.comment ?? ''}
-        commentLabel={t('reportCommentLabel')}
-        commentMaxLength={FEEDBACK_COMMENT_MAX_LENGTH}
-        isPending={report.isSubmitting}
-      />
+      {limits !== null && (
+        <FeedbackDialog
+          isOpen={report.isOpen}
+          onClose={report.close}
+          onRemove={report.standing === undefined ? null : report.requestRemoval}
+          choice={{
+            selection: 'multiple',
+            initialValues: report.standing?.categories ?? [],
+            onSubmit: report.submit,
+          }}
+          requiresComment="other"
+          requiresCommentHint={t('requiresCommentHint')}
+          title={t('reportTitle')}
+          options={toFeedbackOptions(REPORT_CATEGORY_KEYS, t)}
+          initialComment={report.standing?.comment ?? ''}
+          commentLabel={t('reportCommentLabel')}
+          commentMaxLength={limits.maxFeedbackCommentChars}
+          isPending={report.isSubmitting}
+        />
+      )}
 
       {/* The question before a report comes off, since taking it off drops something the student said */}
       <ConfirmDialog
@@ -352,24 +364,26 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
       />
 
       {/* What the student makes of the conversation as a whole */}
-      <FeedbackDialog
-        isOpen={answer.isOpen}
-        onClose={answer.close}
-        onRemove={currentFeedback === null ? null : answer.requestRemoval}
-        choice={{
-          selection: 'single',
-          initialValue: currentFeedback?.outcome ?? null,
-          onSubmit: answer.submit,
-        }}
-        requiresComment="somethingElse"
-        requiresCommentHint={t('requiresCommentHint')}
-        title={t('feedbackTitle')}
-        options={toFeedbackOptions(OUTCOME_KEYS, t)}
-        initialComment={currentFeedback?.comment ?? ''}
-        commentLabel={t('feedbackCommentLabel')}
-        commentMaxLength={FEEDBACK_COMMENT_MAX_LENGTH}
-        isPending={answer.isSubmitting}
-      />
+      {limits !== null && (
+        <FeedbackDialog
+          isOpen={answer.isOpen}
+          onClose={answer.close}
+          onRemove={currentFeedback === null ? null : answer.requestRemoval}
+          choice={{
+            selection: 'single',
+            initialValue: currentFeedback?.outcome ?? null,
+            onSubmit: answer.submit,
+          }}
+          requiresComment="somethingElse"
+          requiresCommentHint={t('requiresCommentHint')}
+          title={t('feedbackTitle')}
+          options={toFeedbackOptions(OUTCOME_KEYS, t)}
+          initialComment={currentFeedback?.comment ?? ''}
+          commentLabel={t('feedbackCommentLabel')}
+          commentMaxLength={limits.maxFeedbackCommentChars}
+          isPending={answer.isSubmitting}
+        />
+      )}
 
       {/* And the same for the answer the conversation as a whole carries */}
       <ConfirmDialog
@@ -395,19 +409,32 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
           </div>
         ) : !consent.hasConsented ? (
           <MathildaConsentGate onAccept={consent.accept} isAccepting={consent.isAccepting} />
+        ) : repliesLeft !== null && repliesLeft <= 0 && !isThinking ? (
+          <p className="py-3 text-center text-sm text-muted">{t('conversationFull')}</p>
         ) : (
-          <RichMathEditor
-            variant="card"
-            toolbar={DEFENSE_TOOLBAR}
-            value={turn.draft}
-            onChange={turn.setDraft}
-            onSend={() => void turn.sendDraft()}
-            onStop={turn.stopReply}
-            autoFocus
-            ref={turn.editorRef}
-            isLoading={isThinking}
-            placeholder={t('placeholder')}
-          />
+          <>
+            {/* How much room is left, once there is little of it */}
+            {repliesLeft !== null && repliesLeft > 0 && repliesLeft <= REPLIES_LEFT_TO_WARN_AT && (
+              <p className="mb-1.5 text-xs text-muted">
+                {t('repliesLeft', { count: repliesLeft })}
+              </p>
+            )}
+
+            {/* Where the next reply is written */}
+            <RichMathEditor
+              variant="card"
+              toolbar={DEFENSE_TOOLBAR}
+              maxCharacters={limits?.maxCandidateChars}
+              value={turn.draft}
+              onChange={turn.setDraft}
+              onSend={() => void turn.sendDraft()}
+              onStop={turn.stopReply}
+              autoFocus
+              ref={turn.editorRef}
+              isLoading={isThinking}
+              placeholder={t('placeholder')}
+            />
+          </>
         )}
       </div>
     </>

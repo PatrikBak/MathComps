@@ -347,6 +347,7 @@
     "consentBody": "Konverzácie s Mathildou ukladáme a prípadne čítame, aby sme ju vylepšili. Zároveň prosíme o fér používanie, každá jej reakcia nás niečo stojí. Odklikni, ak si s tým v pohode 🙂",
     "consentError": "Tvoje potvrdenie sa nepodarilo uložiť.",
     "consentPolicyLink": "Súkromie a podmienky",
+    "conversationFull": "Táto konverzácia dosiahla svoj limit. Začni novú alebo sa v tejto vráť späť (prídeš však o správy, tie sa natrvalo zmažú).",
     "deleteError": "Konverzáciu sa nepodarilo odstrániť.",
     "deleteSession": "Odstrániť z histórie",
     "deleteSessionMessage": "Táto konverzácia sa natrvalo odstráni.",
@@ -383,6 +384,7 @@
     "removeFeedbackTitle": "Odstrániť túto odpoveď?",
     "removeReportMessage": "Tvoja spätná väzba k tejto odpovedi sa natrvalo odstráni.",
     "removeReportTitle": "Odstrániť túto spätnú väzbu?",
+    "repliesLeft": "{count, plural, one {V tejto konverzácii ti zostáva # odpoveď} few {V tejto konverzácii ti zostávajú # odpovede} other {V tejto konverzácii ti zostáva # odpovedí}}",
     "report": "Niečo sa tu nepodarilo",
     "reportCategories": {
       "gaveAway": "Prezradila toho priveľa",

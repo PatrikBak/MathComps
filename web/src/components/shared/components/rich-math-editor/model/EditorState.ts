@@ -83,6 +83,15 @@ export class EditorState {
   }
 
   /**
+   * The character limit in force, whether it was configured or left at the default.
+   *
+   * @returns The most characters the content may hold.
+   */
+  get maxCharacters(): number {
+    return this.config.maxCharacters
+  }
+
+  /**
    * Whether the character limit has been exceeded.
    *
    * Uses the "smart" character count from {@link metrics}, which excludes

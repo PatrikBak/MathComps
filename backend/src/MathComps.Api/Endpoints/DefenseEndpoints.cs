@@ -24,7 +24,7 @@ public static class DefenseEndpoints
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapDefenseEndpoints(this IEndpointRouteBuilder app)
     {
-        // List the user's sessions against one handout environment
+        // List the user's sessions against one handout environment, with the caps its defenses are held to
         app.MapGet(SessionsPath, async (
             string handoutContentId,
             string environmentId,
@@ -38,11 +38,11 @@ public static class DefenseEndpoints
             // The environment the sessions are held against
             var target = new HandoutEnvironmentTarget(handoutContentId, environmentId);
 
-            // Fetch the user's sessions against it
-            var sessions = await defenseService.ListAsync(userId, target, context.RequestAborted);
+            // Fetch the user's sessions against it, and the caps a further turn is held to
+            var list = await defenseService.ListAsync(userId, target, context.RequestAborted);
 
             // Return them
-            return Results.Ok(sessions);
+            return Results.Ok(list);
         })
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);

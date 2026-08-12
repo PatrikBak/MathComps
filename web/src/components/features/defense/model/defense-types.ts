@@ -94,6 +94,30 @@ export type DefenseSession = {
 }
 
 /**
+ * The caps a defense is held to: what a student may type, and how far a conversation may go. They are the
+ * backend's own configuration, so they can change without a deploy.
+ */
+export type DefenseLimits = {
+  /** The longest a single student message may be, in characters. */
+  maxCandidateChars: number
+  /** The longest a feedback comment may be, in characters. */
+  maxFeedbackCommentChars: number
+  /** The most student turns one conversation may hold. */
+  maxTurnsPerSession: number
+}
+
+/**
+ * What a problem's defense surface opens on: the conversations held against it, and the caps a further one
+ * is held to.
+ */
+export type DefenseSessionList = {
+  /** The conversations, most recently active first. */
+  sessions: DefenseSession[]
+  /** The caps they are held to. */
+  limits: DefenseLimits
+}
+
+/**
  * One of a user's defenses as it appears in their cross-problem list: a summary of what it was about, when it
  * last moved, and how it opened. It carries no turns.
  */
