@@ -6,9 +6,8 @@ namespace MathComps.Domain.EfCoreEntities;
 public static class ProblemQueryableExtensions
 {
     /// <summary>
-    /// Applies the default sorting for problems: newest seasons first, then
-    /// chronologically by event date, then by category (if any, otherwise by
-    /// competition), then by round order, and finally problem number.
+    /// Applies the default sorting for problems: newest seasons first, then chronologically by event date,
+    /// then down the contest tree, and finally problem number.
     /// </summary>
     /// <param name="source">The source queryable of problems.</param>
     /// <returns>The queryable with default sorting applied.</returns>
@@ -17,14 +16,9 @@ public static class ProblemQueryableExtensions
         .OrderByDescending(problem => problem.RoundInstance.Season.StartYear)
         // Chronologically within season: newest events first
         .ThenByDescending(problem => problem.RoundInstance.Date)
-        // For same-date rounds (e.g., home rounds), higher categories get priority
-        .ThenBy(problem => problem.RoundInstance.Round.Category != null
-            ? problem.RoundInstance.Round.Category.SortOrder
-            // And when there is no category, just take the competition sort order
-            : problem.RoundInstance.Round.Competition.SortOrder)
-        // Then by round order, so rounds sharing a date stay grouped instead of interleaving
-        .ThenBy(problem => problem.RoundInstance.Round.SortOrder)
-        // Problem number within the round
+        // For contests sharing a date (e.g. the home rounds), the tree's own order decides, at any depth
+        .ThenBy(problem => problem.RoundInstance.Competition.SortPath)
+        // Problem number within the contest
         .ThenBy(problem => problem.Number);
 }
 

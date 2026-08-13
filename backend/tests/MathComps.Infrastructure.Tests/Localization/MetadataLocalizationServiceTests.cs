@@ -7,7 +7,7 @@ namespace MathComps.Infrastructure.Tests.Localization;
 /// <summary>
 /// Tests <see cref="MetadataLocalizationService"/> against the real on-disk resource files
 /// (metadata.shared.json + metadata.{sk,cs,en}.json), which the test project copies to its output.
-/// Covers the shared-metadata loader and composite-key round-name resolution.
+/// Covers the shared-metadata loader and path-keyed node-name resolution.
 /// </summary>
 public class MetadataLocalizationServiceTests
 {
@@ -100,98 +100,76 @@ public class MetadataLocalizationServiceTests
 
     #endregion
 
-    #region Round-name resolution — exact strings (regression guard)
+    #region Node-name resolution — exact strings (regression guard)
 
     /// <summary>
-    /// Round names must resolve to the exact strings the locale files carry, across every taxonomy shape and
+    /// Node names must resolve to the exact strings the locale files carry, at every depth of the tree and in
     /// all three languages.
     /// </summary>
     /// <param name="language">The locale to resolve in.</param>
-    /// <param name="competitionSlug">The competition slug.</param>
-    /// <param name="categorySlug">The category slug, or null for a category-less competition.</param>
-    /// <param name="roundSlug">The round slug.</param>
-    /// <param name="expectedShort">The expected short round name.</param>
-    /// <param name="expectedFull">The expected full round name.</param>
+    /// <param name="path">The node's path.</param>
+    /// <param name="expectedShort">The expected short name.</param>
+    /// <param name="expectedFull">The expected full name.</param>
     [Theory]
-    // CSMO category A — the full four-round shape.
-    [InlineData(Language.EN, "csmo", "a", "i", "Home Round", "Home Round")]
-    [InlineData(Language.EN, "csmo", "a", "s", "School Round", "School Round")]
-    [InlineData(Language.EN, "csmo", "a", "ii", "Regional Round", "Regional Round")]
-    [InlineData(Language.EN, "csmo", "a", "iii", "National Round", "National Round")]
-    // Category-dependent names: Z-categories rename round II to "District" and III to "Regional".
-    [InlineData(Language.EN, "csmo", "z5", "ii", "District Round", "District Round")]
-    [InlineData(Language.EN, "csmo", "z5", "iii", "Regional Round", "Regional Round")]
-    // Z4 is the odd one out: round II is "School Round" and it has no round III.
-    [InlineData(Language.EN, "csmo", "z4", "ii", "School Round", "School Round")]
-    // Category-less competitions (round slug, null category).
-    [InlineData(Language.EN, "memo", null, "i", "Individual", "Individual Round")]
-    [InlineData(Language.EN, "memo", null, "t", "Team", "Team Round")]
-    [InlineData(Language.EN, "tst", null, "d1", "Day 1", "Day 1")]
-    // DuoGeo's two school-level rounds.
-    [InlineData(Language.EN, "duogeo", null, "zs", "Elementary", "Elementary School")]
-    [InlineData(Language.SK, "duogeo", null, "ss", "SŠ", "Kategória SŠ")]
-    // Slovak — category-dependent difference (Krajské vs Okresné kolo).
-    [InlineData(Language.SK, "csmo", "a", "ii", "Krajské kolo", "Krajské kolo")]
-    [InlineData(Language.SK, "csmo", "z5", "ii", "Okresné kolo", "Okresné kolo")]
-    [InlineData(Language.SK, "csmo", "z4", "ii", "Školské kolo", "Školské kolo")]
-    [InlineData(Language.SK, "csmo", "a", "iii", "Celoštátne kolo", "Celoštátne kolo")]
-    [InlineData(Language.SK, "memo", null, "i", "Individual", "Individuálna časť")]
-    [InlineData(Language.SK, "tst", null, "d1", "1. deň", "1. deň")]
-    // Czech — same composite keys, Czech strings.
-    [InlineData(Language.CS, "csmo", "z5", "ii", "Okresní kolo", "Okresní kolo")]
-    [InlineData(Language.CS, "csmo", "z4", "ii", "Školní kolo", "Školní kolo")]
-    [InlineData(Language.CS, "csmo", "a", "iii", "Celostátní kolo", "Celostátní kolo")]
-    [InlineData(Language.CS, "memo", null, "i", "Individual", "Individuální část")]
-    [InlineData(Language.CS, "tst", null, "d1", "1. den", "1. den")]
-    public void Round_names_resolve_for_every_shape(
-        Language language,
-        string competitionSlug,
-        string? categorySlug,
-        string roundSlug,
-        string expectedShort,
-        string expectedFull)
-    {
-        // Short and full names both come from the composed composite key.
-        Assert.Equal(expectedShort, _service.GetRoundShortName(language, competitionSlug, categorySlug, roundSlug));
-        Assert.Equal(expectedFull, _service.GetRoundFullName(language, competitionSlug, categorySlug, roundSlug));
-    }
-
-    /// <summary>
-    /// A default round (null round slug) carries no name of its own and must fall back to the competition's
-    /// own short/full name.
-    /// </summary>
-    /// <param name="language">The locale to resolve in.</param>
-    /// <param name="competitionSlug">The default-round competition slug.</param>
-    /// <param name="expectedShort">The competition's expected short name.</param>
-    /// <param name="expectedFull">The competition's expected full name.</param>
-    [Theory]
+    // A whole competition, which is also what a default-round competition's problems resolve to.
     [InlineData(Language.EN, "imo", "IMO", "International Mathematical Olympiad")]
     [InlineData(Language.EN, "egmo", "EGMO", "European Girl's Mathematical Olympiad")]
     [InlineData(Language.EN, "emo", "EMO", "European Mathematical Olympiad")]
     [InlineData(Language.SK, "caps", "CAPS", "Czech-Austrian-Polish-Slovak Match")]
-    public void Default_round_falls_back_to_competition_name(
+    // A category, which is named per competition rather than globally.
+    [InlineData(Language.SK, "csmo-a", "A", "Kategória A")]
+    [InlineData(Language.CS, "csmo-z9", "Z9", "Kategorie Z9")]
+    [InlineData(Language.EN, "csmo-z4", "Z4", "Category Z4")]
+    // CSMO category A — the full four-round shape.
+    [InlineData(Language.EN, "csmo-a-i", "Home Round", "Home Round")]
+    [InlineData(Language.EN, "csmo-a-s", "School Round", "School Round")]
+    [InlineData(Language.EN, "csmo-a-ii", "Regional Round", "Regional Round")]
+    [InlineData(Language.EN, "csmo-a-iii", "National Round", "National Round")]
+    // Category-dependent names: Z-categories rename round II to "District" and III to "Regional".
+    [InlineData(Language.EN, "csmo-z5-ii", "District Round", "District Round")]
+    [InlineData(Language.EN, "csmo-z5-iii", "Regional Round", "Regional Round")]
+    // Z4 is the odd one out: round II is "School Round" and it has no round III.
+    [InlineData(Language.EN, "csmo-z4-ii", "School Round", "School Round")]
+    // Rounds hanging straight off a category-less competition.
+    [InlineData(Language.EN, "memo-i", "Individual", "Individual Round")]
+    [InlineData(Language.EN, "memo-t", "Team", "Team Round")]
+    [InlineData(Language.EN, "tst-d1", "Day 1", "Day 1")]
+    // DuoGeo's two school-level rounds.
+    [InlineData(Language.EN, "duogeo-zs", "Elementary", "Elementary School")]
+    [InlineData(Language.SK, "duogeo-ss", "SŠ", "Kategória SŠ")]
+    // Slovak — category-dependent difference (Krajské vs Okresné kolo).
+    [InlineData(Language.SK, "csmo-a-ii", "Krajské kolo", "Krajské kolo")]
+    [InlineData(Language.SK, "csmo-z5-ii", "Okresné kolo", "Okresné kolo")]
+    [InlineData(Language.SK, "csmo-z4-ii", "Školské kolo", "Školské kolo")]
+    [InlineData(Language.SK, "csmo-a-iii", "Celoštátne kolo", "Celoštátne kolo")]
+    [InlineData(Language.SK, "memo-i", "Individual", "Individuálna časť")]
+    [InlineData(Language.SK, "tst-d1", "1. deň", "1. deň")]
+    // Czech — same paths, Czech strings.
+    [InlineData(Language.CS, "csmo-z5-ii", "Okresní kolo", "Okresní kolo")]
+    [InlineData(Language.CS, "csmo-z4-ii", "Školní kolo", "Školní kolo")]
+    [InlineData(Language.CS, "csmo-a-iii", "Celostátní kolo", "Celostátní kolo")]
+    [InlineData(Language.CS, "memo-i", "Individual", "Individuální část")]
+    [InlineData(Language.CS, "tst-d1", "1. den", "1. den")]
+    public void Node_names_resolve_at_every_depth(
         Language language,
-        string competitionSlug,
+        string path,
         string expectedShort,
         string expectedFull)
     {
-        // The default round's short name equals the competition's short name …
-        Assert.Equal(expectedShort, _service.GetRoundShortName(language, competitionSlug, null, null));
-        Assert.Equal(expectedShort, _service.GetCompetitionShortName(language, competitionSlug));
-
-        // … and likewise for the full name.
-        Assert.Equal(expectedFull, _service.GetRoundFullName(language, competitionSlug, null, null));
+        // Short and full names are both keyed by the node's own path.
+        Assert.Equal(expectedShort, _service.GetNodeShortName(language, path));
+        Assert.Equal(expectedFull, _service.GetNodeFullName(language, path));
     }
 
     /// <summary>
-    /// A combination that doesn't exist in the locale files must throw rather than return a blank.
+    /// A path that doesn't exist in the locale files must throw rather than return a blank.
     /// </summary>
     [Fact]
-    public void Missing_round_combination_throws()
+    public void Missing_node_throws()
     {
         // Z4 has no national round (no csmo-z4-iii key), so resolution must fail.
         Assert.Throws<InvalidOperationException>(
-            () => _service.GetRoundShortName(Language.EN, "csmo", "z4", "iii"));
+            () => _service.GetNodeShortName(Language.EN, "csmo-z4-iii"));
     }
 
     #endregion
@@ -199,64 +177,66 @@ public class MetadataLocalizationServiceTests
     #region Exhaustive parity sweep
 
     /// <summary>
-    /// Every real taxonomy combination must resolve to a non-empty short and full label in every language.
+    /// Every real contest node must resolve to a non-empty short and full label in every language.
     /// </summary>
     /// <param name="language">The locale to sweep.</param>
     [Theory]
     [InlineData(Language.SK)]
     [InlineData(Language.CS)]
     [InlineData(Language.EN)]
-    public void Every_real_taxonomy_combination_resolves_to_a_non_empty_label(Language language)
+    public void Every_real_contest_node_resolves_to_a_non_empty_label(Language language)
     {
-        // Walk every real (competition, category, round) triple …
-        foreach (var (competitionSlug, categorySlug, roundSlug) in RealTaxonomyCombinations())
+        // Walk every real node path …
+        foreach (var path in RealContestPaths())
         {
             // … and assert both names resolve to something non-blank.
-            Assert.False(string.IsNullOrWhiteSpace(
-                _service.GetRoundShortName(language, competitionSlug, categorySlug, roundSlug)));
-            Assert.False(string.IsNullOrWhiteSpace(
-                _service.GetRoundFullName(language, competitionSlug, categorySlug, roundSlug)));
+            Assert.False(string.IsNullOrWhiteSpace(_service.GetNodeShortName(language, path)));
+            Assert.False(string.IsNullOrWhiteSpace(_service.GetNodeFullName(language, path)));
         }
     }
 
     /// <summary>
-    /// Every (competition, category, round) triple that exists in the taxonomy — including the per-category
-    /// round differences (e.g. Z4 has only rounds I and II). A null category means a category-less
-    /// competition; a null round means the competition's default round.
+    /// Every node path that exists in the taxonomy — each competition, each category within one, and each
+    /// round, including the per-category round differences (e.g. Z4 has only rounds I and II).
     /// </summary>
-    /// <returns>Every valid taxonomy triple.</returns>
-    private static IEnumerable<(string Competition, string? Category, string? Round)> RealTaxonomyCombinations()
+    /// <returns>Every valid node path.</returns>
+    private static IEnumerable<string> RealContestPaths()
     {
+        // Every competition is a node in its own right, default-round ones included.
+        foreach (var competition in new[]
+                 { "csmo", "tst", "memo", "imo", "caps", "emo", "egmo", "tstc", "cpsj", "duogeo" })
+            yield return competition;
+
         // CSMO high-school categories get all four rounds.
         foreach (var category in new[] { "a", "b", "c" })
             foreach (var round in new[] { "i", "s", "ii", "iii" })
-                yield return ("csmo", category, round);
+                yield return $"csmo-{category}-{round}";
 
         // Z4 only has the home and school rounds.
         foreach (var round in new[] { "i", "ii" })
-            yield return ("csmo", "z4", round);
+            yield return $"csmo-z4-{round}";
 
         // Z5–Z9 have home, district and regional rounds.
         foreach (var category in new[] { "z5", "z6", "z7", "z8", "z9" })
             foreach (var round in new[] { "i", "ii", "iii" })
-                yield return ("csmo", category, round);
+                yield return $"csmo-{category}-{round}";
+
+        // Each of those categories is itself a named node between the competition and its rounds.
+        foreach (var category in new[] { "a", "b", "c", "z4", "z5", "z6", "z7", "z8", "z9" })
+            yield return $"csmo-{category}";
 
         // Individual / team competitions.
         foreach (var competition in new[] { "memo", "cpsj" })
             foreach (var round in new[] { "i", "t" })
-                yield return (competition, null, round);
+                yield return $"{competition}-{round}";
 
         // TST runs over numbered days.
         foreach (var round in new[] { "d1", "d2", "d3", "d4", "d5" })
-            yield return ("tst", null, round);
+            yield return $"tst-{round}";
 
         // DuoGeo runs two school-level rounds.
         foreach (var round in new[] { "zs", "ss" })
-            yield return ("duogeo", null, round);
-
-        // Default-round competitions resolve via the null-round fallback.
-        foreach (var competition in new[] { "imo", "caps", "egmo", "emo", "tstc" })
-            yield return (competition, null, null);
+            yield return $"duogeo-{round}";
     }
 
     #endregion

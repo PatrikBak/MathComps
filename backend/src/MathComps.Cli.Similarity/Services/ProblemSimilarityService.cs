@@ -70,7 +70,7 @@ public class ProblemSimilarityService(
         if (!settings.Value.CompetitionClusterMap.TryGetValue(sourceProblemData.CompetitionClusteringKey, out var sourceClusterId))
             throw new InvalidOperationException($"Competition clustering key '{sourceProblemData.CompetitionClusteringKey}' not found in CompetitionClusterMap.");
 
-        // Identify all slugs that belong to the relevant competition clusters.
+        // Identify all contest paths that belong to the relevant clusters.
         var relevantCompetitionSlug = settings.Value.CompetitionClusterMap
             .Where(pair => Math.Abs(pair.Value - sourceClusterId) <= settings.Value.CompetitionTolerance)
             .Select(pair => pair.Key)
@@ -89,7 +89,7 @@ public class ProblemSimilarityService(
                 && text.DocumentType == DocumentType.Statement
                 && embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalDocument
                 // The candidate must be from a relevant competition.
-                && relevantCompetitionSlug.Contains(problem.RoundInstance.Round.CompositeSlug)
+                && relevantCompetitionSlug.Contains(problem.RoundInstance.Competition.Path)
                 // The candidate must have at least one tag in common with the source problem
                 && problem.ProblemTagsAll.AsQueryable()
                     .Where(ProblemTag.IsGoodEnoughTag)
@@ -166,8 +166,8 @@ public class ProblemSimilarityService(
                     // In a set
                     .ToImmutableHashSet(),
 
-                // The 'competition-category-round' slug
-                Slug = candidate.Problem.RoundInstance.Round.CompositeSlug,
+                // The path of the contest it was set in
+                Slug = candidate.Problem.RoundInstance.Competition.Path,
             })
             // Evaluate
             .ToListAsync(cancellationToken))

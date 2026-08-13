@@ -15,7 +15,8 @@ public static class TaxonomySlugs
     /// </summary>
     /// <param name="competition">Competition slug or name (e.g. <c>csmo</c>).</param>
     /// <param name="category">Category slug or name (e.g. <c>a</c>), or null when there's no category.</param>
-    /// <param name="round">Round slug or name (e.g. <c>iii</c>), or null for a competition's default round.</param>
+    /// <param name="round">Round slug or name (e.g. <c>iii</c>), or null to stop at the competition
+    /// or category.</param>
     /// <returns>The composite round slug (e.g. <c>csmo-a-iii</c>, <c>memo-i</c>).</returns>
     public static string ComposeRoundSlug(string competition, string? category, string? round) =>
         // Join the present segments with hyphens, then slugify to the canonical lowercase form.
@@ -52,6 +53,18 @@ public static class TaxonomySlugs
         // A root has nothing above it to join to.
         return parentPath is null ? slug : $"{parentPath}-{slug}";
     }
+
+    /// <summary>
+    /// Whether a path names a node inside another node's branch — the node itself, or anything below it. The
+    /// separator has to be part of the match: without it <c>csmo-z1</c> would claim <c>csmo-z10</c>, which is a
+    /// sibling and not a descendant.
+    /// </summary>
+    /// <param name="path">The node's path (e.g. <c>csmo-a-iii</c>).</param>
+    /// <param name="branchPath">The path of the branch to test against (e.g. <c>csmo-a</c>).</param>
+    /// <returns>True when the path is the branch or sits under it.</returns>
+    public static bool IsAtOrUnder(string path, string branchPath) =>
+        // Either it is the branch, or it extends the branch across the separator.
+        path == branchPath || path.StartsWith($"{branchPath}-", StringComparison.Ordinal);
 
     /// <summary>
     /// Whether a slug is a single path segment, i.e. lowercase alphanumeric with no separator in it. A segment

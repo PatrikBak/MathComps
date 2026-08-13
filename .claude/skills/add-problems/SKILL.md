@@ -47,14 +47,14 @@ The preflight checks **format only**; the DB-aware `validate` is the gate (so it
 Check `backend/src/MathComps.Infrastructure/Resources/metadata.shared.json`. If the competition slug isn't there, add it to **all four** metadata files, or the registry check fails with "no structural entry":
 
 - `metadata.shared.json` — structure: `{ "slug": "...", "categories": [...] | null, "rounds": [...] }`. Array position = sort order.
-- `metadata.{cs,sk,en}.json` — `competitions["slug"] = { shortName, fullName }`, plus a `rounds["<composite>"]` entry per round, and a `categories["x"]` entry per category.
+- `metadata.{cs,sk,en}.json` — one `nodes["<path>"] = { shortName, fullName }` entry per node, a path being the slugs from the competition down, hyphen-joined: the competition (`csmo`), each of its categories (`csmo-a`), and each round (`csmo-a-iii`, `memo-i`).
 
 Decide the shape:
-- **Categories** (age/level bands like `a`,`b`,`z9`) → list them in `shared.categories` for the competition; omit `category:` in drafts that don't use them.
-- **Rounds** (`i`,`ii`,`iii`, `d1`…) → list them; the composite round slug is `{competition}[-{category}]-{round}` and needs a localized name in every locale.
-- **Default round** — a competition that is one flat sitting (no sub-rounds, like IMO/EGMO) takes `"rounds": []`. Then `_meta.yaml` **omits `round:`** entirely, the round resolves to the competition's own name, and no `rounds[...]` locale entry is needed. (Gotcha below.)
+- **Categories** (age/level bands like `a`,`b`,`z9`) → list them in `shared.categories` for the competition; omit `category:` in drafts that don't use them. Each carries its own `nodes["{competition}-{category}"]` name.
+- **Rounds** (`i`,`ii`,`iii`, `d1`…) → list them; a round's path is `{competition}[-{category}]-{round}` and needs a localized name in every locale.
+- **Default round** — a competition that is one flat sitting (no sub-rounds, like IMO/EGMO) takes `"rounds": []`. Then `_meta.yaml` **omits `round:`** entirely, its problems hang off the competition itself, and its own `nodes` entry is the only name needed. (Gotcha below.)
 
-Add a test row for any new competition/round/name to `MetadataLocalizationServiceTests` (display order, default-round/category shape, name resolution, `Registered_taxonomy_has_no_issues`).
+Add a test row for any new competition/round/name to `MetadataLocalizationServiceTests` (display order, default-round/category shape, name resolution, `Registered_taxonomy_has_no_issues`). A new competition needs its slug in two places there: `Shared_competitions_are_in_display_order` and `RealContestPaths`.
 
 ## Step 2 — Author `_meta.yaml`
 
@@ -70,7 +70,7 @@ language: sk         # the draft's original language: sk | cs | en
 
 Season year is the academic start, not the event year: a March-2026 event ⇒ `year: 2025` (ročník = year − 1950, shared across competitions by design — it is not each competition's own edition count).
 
-**Single-occasion competitions — give every round the same `date`.** When a competition runs all its rounds as one event (MEMO Individual + Team, CPSJ I + T, TST d1–d5), every round's `_meta.yaml` must carry the **same date**. The problem list sorts by event **date first** (newest first), then by round order (`OrderByDefaultProblemSort`: season → date → category-else-competition sort → round sort order → problem number). Because date outranks round order, distinct per-paper dates scatter one occasion's papers by date — the later paper sorts ahead of the earlier one (Team before Individual). A shared date collapses the date key so the round-order key takes over and the papers group in round order (Individual before Team). This is a deliberate data-side convention — don't "correct" the shared date to the real distinct per-paper days, it re-breaks the ordering.
+**Single-occasion competitions — give every round the same `date`.** When a competition runs all its rounds as one event (MEMO Individual + Team, CPSJ I + T, TST d1–d5), every round's `_meta.yaml` must carry the **same date**. The problem list sorts by event **date first** (newest first), then by round order (`OrderByDefaultProblemSort`: season → date → the contest's sort path → problem number). Because date outranks round order, distinct per-paper dates scatter one occasion's papers by date — the later paper sorts ahead of the earlier one (Team before Individual). A shared date collapses the date key so the round-order key takes over and the papers group in round order (Individual before Team). This is a deliberate data-side convention — don't "correct" the shared date to the real distinct per-paper days, it re-breaks the ordering.
 
 ## Step 3 — Write the problems
 
