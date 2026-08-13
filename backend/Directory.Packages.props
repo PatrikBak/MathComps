@@ -51,6 +51,10 @@
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Spectre.Console.Cli.Extensions.DependencyInjection" Version="0.14.0" />
     <PackageVersion Include="Spectre.Console.Registrars.Microsoft-Di" Version="0.5.0" />
+    <!-- Transitive through Testcontainers, which still declares 2025.1.0 as of 4.13. Everything up to and
+         including that is vulnerable (GHSA-q939-rpr3-3284, high), and NuGet audit warnings are errors here,
+         so the graph is pinned past it. Drop this line once Testcontainers moves to a patched SSH.NET. -->
+    <PackageVersion Include="SSH.NET" Version="2026.0.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.6.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
