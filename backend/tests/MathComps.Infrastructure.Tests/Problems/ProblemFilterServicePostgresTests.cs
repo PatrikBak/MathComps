@@ -283,15 +283,15 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         // Arrange - add a problem whose statement is markdown-only and whose solution is raw-only
         await QueryAsync(async context =>
         {
-            // Any seeded round instance satisfies the foreign key
-            var roundInstanceId = (await context.RoundInstances.FirstAsync()).Id;
+            // Any seeded round satisfies the foreign key
+            var roundId = (await context.Rounds.FirstAsync()).Id;
 
             // The problem carrying the two half-populated texts
             var problem = new Problem
             {
                 Id = Guid.NewGuid(),
                 Slug = "coalesce-search-1",
-                RoundInstanceId = roundInstanceId,
+                RoundId = roundId,
                 Number = 9
             };
 
@@ -1491,146 +1491,56 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         };
         context.Seasons.AddRange(season2025, season2024);
 
-        // Competitions - Create both domestic (CSMO) and international (IMO) competitions
-        // to test filtering by different competition types
-        var csmo = CompetitionTreeSeed.Root(context, "csmo", 100);
-        var imo = CompetitionTreeSeed.Root(context, "imo", 200);
+        // Competition tree - Create both domestic (CSMO, which runs age categories) and international (IMO, which
+        // runs as one flat sitting) branches, to test filtering across different tree shapes
+        CompetitionTreeSeed.Root(context, "csmo", 100);
+        CompetitionTreeSeed.Root(context, "imo", 200);
 
-        // Categories - Create different age/grade categories to test category filtering
-        // Categories A, B, C represent different age groups, Z9 represents 9th grade
-        var catA = new Category
+        // Rounds - each competition node's sitting in one season. Categories A, B, C represent different age
+        // groups and Z9 the 9th grade, each a node between the competition and its rounds.
+        var ri_2025_csmo_domestic_A = new Round
         {
             Id = Guid.NewGuid(),
-            Slug = "a",
-            SortOrder = 100
-        };
-        var catB = new Category
-        {
-            Id = Guid.NewGuid(),
-            Slug = "b",
-            SortOrder = 200
-        };
-        var catC = new Category
-        {
-            Id = Guid.NewGuid(),
-            Slug = "c",
-            SortOrder = 300
-        };
-        var catZ9 = new Category
-        {
-            Id = Guid.NewGuid(),
-            Slug = "z9",
-            SortOrder = 400
-        };
-        context.Categories.AddRange(catA, catB, catC, catZ9);
-
-        // Rounds
-        var roundCsmoDomesticA = new Round
-        {
-            Id = Guid.NewGuid(),
-            CompetitionId = csmo.Id,
-            CategoryId = catA.Id,
-            Slug = "i",
-            CompositeSlug = "csmo-a-i",
-            SortOrder = 100
-        };
-        var roundCsmoDomesticB = new Round
-        {
-            Id = Guid.NewGuid(),
-            CompetitionId = csmo.Id,
-            CategoryId = catB.Id,
-            Slug = "i",
-            CompositeSlug = "csmo-b-i",
-            SortOrder = 100
-        };
-        var roundCsmoDomesticC = new Round
-        {
-            Id = Guid.NewGuid(),
-            CompetitionId = csmo.Id,
-            CategoryId = catC.Id,
-            Slug = "i",
-            CompositeSlug = "csmo-c-i",
-            SortOrder = 100
-        };
-        var roundCsmoDomesticZ9 = new Round
-        {
-            Id = Guid.NewGuid(),
-            CompetitionId = csmo.Id,
-            CategoryId = catZ9.Id,
-            Slug = "i",
-            CompositeSlug = "csmo-z9-i",
-            SortOrder = 100
-        };
-        var roundCsmoRegionalZ9 = new Round
-        {
-            Id = Guid.NewGuid(),
-            CompetitionId = csmo.Id,
-            CategoryId = catZ9.Id,
-            Slug = "iii",
-            CompositeSlug = "csmo-z9-iii",
-            SortOrder = 200
-        };
-        var roundImo = new Round
-        {
-            Id = Guid.NewGuid(),
-            CompetitionId = imo.Id,
-            Slug = "",
-            CompositeSlug = "imo",
-            SortOrder = 1,
-            IsDefault = true
-        };
-        context.Rounds.AddRange(roundCsmoDomesticA, roundCsmoDomesticB, roundCsmoDomesticC, roundCsmoDomesticZ9, roundCsmoRegionalZ9, roundImo);
-
-        // Round Instances
-        var ri_2025_csmo_domestic_A = new RoundInstance
-        {
-            Id = Guid.NewGuid(),
-            RoundId = roundCsmoDomesticA.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-a-i").Id,
             SeasonId = season2025.Id,
             Date = new DateOnly(2025, 9, 1)  // Estimated: September (home round)
         };
-        var ri_2025_csmo_domestic_B = new RoundInstance
+        var ri_2025_csmo_domestic_B = new Round
         {
             Id = Guid.NewGuid(),
-            RoundId = roundCsmoDomesticB.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-b-i").Id,
             SeasonId = season2025.Id,
             Date = new DateOnly(2025, 9, 1)  // Estimated: September (home round)
         };
-        var ri_2025_csmo_domestic_C = new RoundInstance
+        var ri_2025_csmo_domestic_C = new Round
         {
             Id = Guid.NewGuid(),
-            RoundId = roundCsmoDomesticC.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-c-i").Id,
             SeasonId = season2025.Id,
             Date = new DateOnly(2025, 9, 1)
         };
-        var ri_2024_csmo_domestic_Z9 = new RoundInstance
+        var ri_2024_csmo_domestic_Z9 = new Round
         {
             Id = Guid.NewGuid(),
-            RoundId = roundCsmoDomesticZ9.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-z9-i").Id,
             SeasonId = season2024.Id,
             Date = new DateOnly(2024, 9, 1)
         };
-        var ri_2024_csmo_regional_Z9 = new RoundInstance
+        var ri_2024_csmo_regional_Z9 = new Round
         {
             Id = Guid.NewGuid(),
-            RoundId = roundCsmoRegionalZ9.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-z9-iii").Id,
             SeasonId = season2024.Id,
             Date = new DateOnly(2025, 4, 1)
         };
-        var ri_2025_imo = new RoundInstance
+        var ri_2025_imo = new Round
         {
             Id = Guid.NewGuid(),
             SeasonId = season2025.Id,
-            RoundId = roundImo.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "imo").Id,
             Date = new DateOnly(2026, 7, 15)
         };
-        context.RoundInstances.AddRange(ri_2025_csmo_domestic_A, ri_2025_csmo_domestic_B, ri_2025_csmo_domestic_C, ri_2024_csmo_domestic_Z9, ri_2024_csmo_regional_Z9, ri_2025_imo);
+        context.Rounds.AddRange(ri_2025_csmo_domestic_A, ri_2025_csmo_domestic_B, ri_2025_csmo_domestic_C, ri_2024_csmo_domestic_Z9, ri_2024_csmo_regional_Z9, ri_2025_imo);
 
         // Authors - Create multiple authors to test author filtering functionality
         // Patrik Bak will have the most problems (4) to test author result counts
@@ -1684,7 +1594,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             Slug = "75-a-i-1",
-            RoundInstanceId = ri_2025_csmo_domestic_A.Id,
+            RoundId = ri_2025_csmo_domestic_A.Id,
             Number = 1
         };
         p1.Texts.Add(new ProblemText
@@ -1723,7 +1633,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             Slug = "75-b-i-1",
-            RoundInstanceId = ri_2025_csmo_domestic_B.Id,
+            RoundId = ri_2025_csmo_domestic_B.Id,
             Number = 1
         };
         p2.Texts.Add(new ProblemText
@@ -1749,7 +1659,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             Slug = "75-c-i-1",
-            RoundInstanceId = ri_2025_csmo_domestic_C.Id,
+            RoundId = ri_2025_csmo_domestic_C.Id,
             Number = 1
         };
         p3.Texts.Add(new ProblemText
@@ -1775,7 +1685,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             Slug = "75-a-i-2",
-            RoundInstanceId = ri_2025_csmo_domestic_A.Id,
+            RoundId = ri_2025_csmo_domestic_A.Id,
             Number = 2
         };
         p4.Texts.Add(new ProblemText
@@ -1802,7 +1712,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             Slug = "74-z9-i-1",
-            RoundInstanceId = ri_2024_csmo_domestic_Z9.Id,
+            RoundId = ri_2024_csmo_domestic_Z9.Id,
             Number = 1
         };
         p5.Texts.Add(new ProblemText
@@ -1829,7 +1739,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             Slug = "74-z9-iii-1",
-            RoundInstanceId = ri_2024_csmo_regional_Z9.Id,
+            RoundId = ri_2024_csmo_regional_Z9.Id,
             Number = 1
         };
         p6.Texts.Add(new ProblemText
@@ -1855,7 +1765,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             Slug = "imo-2025-1",
-            RoundInstanceId = ri_2025_imo.Id,
+            RoundId = ri_2025_imo.Id,
             Number = 1
         };
         p7.Texts.Add(new ProblemText

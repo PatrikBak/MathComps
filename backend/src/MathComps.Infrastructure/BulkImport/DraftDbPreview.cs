@@ -23,9 +23,8 @@ public enum ResolutionAction
 /// <summary>
 /// The resolution outcome for a single taxonomy entity the draft references.
 /// </summary>
-/// <param name="EntityKind">The kind of entity (<c>competition</c>, <c>category</c>, <c>round</c>, <c>season</c>,
-/// <c>round-instance</c>).</param>
-/// <param name="Identifier">The lookup key — a slug, composite slug, or year.</param>
+/// <param name="EntityKind">The kind of entity (<c>competition</c>, <c>season</c>, <c>round</c>).</param>
+/// <param name="Identifier">The lookup key — a competition path, a year, or a path and season together.</param>
 /// <param name="Action">What resolving it does — reuse unchanged, update in place, or create.</param>
 public record EntityResolution(
     string EntityKind,
@@ -92,45 +91,28 @@ public record ProblemTextResolution(
     DraftTextAction Action);
 
 /// <summary>
-/// A taxonomy family whose sort order the registry defines and apply reconciles.
-/// </summary>
-public enum TaxonomyKind
-{
-    /// <summary>A competition — a global sort-order space.</summary>
-    Competition,
-
-    /// <summary>A category — a global sort-order space.</summary>
-    Category,
-
-    /// <summary>A round — a per-competition sort-order space.</summary>
-    Round
-}
-
-/// <summary>
-/// One existing taxonomy row whose stored sort order no longer matches its registry position — applying the draft
+/// One existing competition node whose stored sort order no longer matches its registry position — applying the draft
 /// renumbers it from <see cref="FromOrder"/> to <see cref="ToOrder"/> to bring the DB back in line with
 /// <c>metadata.shared.json</c>.
 /// </summary>
-/// <param name="Kind">The kind of taxonomy entity.</param>
-/// <param name="Slug">The entity's slug (a round's plain slug).</param>
+/// <param name="Path">The node's path (e.g. <c>csmo-a-iii</c>).</param>
 /// <param name="FromOrder">The sort order currently stored.</param>
 /// <param name="ToOrder">The sort order the registry dictates.</param>
-public record SortOrderChange(TaxonomyKind Kind, string Slug, int FromOrder, int ToOrder);
+public record SortOrderChange(string Path, int FromOrder, int ToOrder);
 
 /// <summary>
-/// An existing taxonomy row whose slug is absent from <c>metadata.shared.json</c> — the registry can't place it,
+/// An existing competition node whose path is absent from <c>metadata.shared.json</c> — the registry can't place it,
 /// so its sort order can't be reconciled and apply would risk a collision. A hard error.
 /// </summary>
-/// <param name="Kind">The kind of taxonomy entity.</param>
-/// <param name="Slug">The unregistered slug.</param>
-public record TaxonomyOrphan(TaxonomyKind Kind, string Slug);
+/// <param name="Path">The unregistered path.</param>
+public record TaxonomyOrphan(string Path);
 
 /// <summary>
 /// A read-only snapshot of how a draft would land in the database: which taxonomy entities already exist versus
 /// would need creating, and — for every text variant whose problem slug already exists — what the import would do
 /// to it given that text's language and originality. Produced by querying only — no rows written.
 /// </summary>
-/// <param name="Entities">Exists-or-not for the competition, season and round, in that order.</param>
+/// <param name="Entities">Exists-or-not for the competition node, season and round, in that order.</param>
 /// <param name="TextResolutions">
 /// One entry per draft text variant that lands on an already-existing problem slug, classifying the outcome
 /// (clean add, in-place overwrite, or a second-original conflict). A net-new problem slug contributes nothing —
@@ -143,12 +125,12 @@ public record TaxonomyOrphan(TaxonomyKind Kind, string Slug);
 /// import that would leave (or create) a gap-numbered round.
 /// </param>
 /// <param name="SortOrderChanges">
-/// The existing competition, category and round rows whose stored sort order applying the draft would renumber to
-/// match the registry — empty when the DB already agrees with <c>metadata.shared.json</c>.
+/// The existing competition nodes whose stored sort order applying the draft would renumber to match the registry —
+/// empty when the DB already agrees with <c>metadata.shared.json</c>.
 /// </param>
 /// <param name="Orphans">
-/// The existing competition, category and round rows whose slug is absent from <c>metadata.shared.json</c> — empty
-/// in the normal case; non-empty blocks the import.
+/// The existing competition nodes whose path is absent from <c>metadata.shared.json</c> — empty in the normal case;
+/// non-empty blocks the import.
 /// </param>
 public record DraftDbPreview(
     ImmutableArray<EntityResolution> Entities,

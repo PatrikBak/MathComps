@@ -54,7 +54,7 @@ public class ProblemDataService(IDbContextFactory<MathCompsDbContext> databaseCo
             select new
             {
                 problem.Id,
-                problem.RoundInstance.Competition.Path,
+                problem.Round.Competition.Path,
 
                 // Get tag ids
                 TagIds = problem.ProblemTagsAll.AsQueryable()

@@ -1,9 +1,9 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// Represents a round that belongs to exactly one competition.
+/// One sitting of a <see cref="EfCoreEntities.Competition"/> in one season — the row every problem hangs off.
+/// The competition sits at whatever depth it does, so a brand running as one flat event and a round nested
+/// three levels below one are the same shape here.
 /// </summary>
 public class Round
 {
@@ -13,53 +13,33 @@ public class Round
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
     /// <summary>
-    /// Foreign key to the owning competition.
+    /// Foreign key to the competition whose problems these are.
     /// </summary>
     public required Guid CompetitionId { get; set; }
 
     /// <summary>
-    /// Navigation to the owning competition.
+    /// Navigation to the competition whose problems these are.
     /// </summary>
     public Competition Competition { get; set; } = null!;
 
     /// <summary>
-    /// Foreign key to the problem's grade (age/level category). Null if grades are not used.
+    /// Foreign key to the season.
     /// </summary>
-    public Guid? CategoryId { get; set; }
+    public required Guid SeasonId { get; set; }
 
     /// <summary>
-    /// Navigation to the problem's grade.
+    /// Navigation to the season.
     /// </summary>
-    public Category? Category { get; set; }
-
-
+    public Season Season { get; set; } = null!;
 
     /// <summary>
-    /// URL-safe slug unique within the round (lowercase, hyphenated). Empty if <see cref="IsDefault"/> is true.
+    /// The date this round ran. May be estimated if the actual date is unknown.
+    /// Used for chronological sorting of problems.
     /// </summary>
-    [MaxLength(100)]
-    public required string Slug { get; set; }
+    public required DateOnly Date { get; set; }
 
     /// <summary>
-    /// The slug that combined the competition, category and round, for example csmo-a-iii (the national round) or 
-    /// cpsj-i (the individual round of cpsj) or just imo (which has no category or subrounds).
+    /// Problems that belong to this specific round.
     /// </summary>
-    [MaxLength(100)]
-    public required string CompositeSlug { get; set; }
-
-    /// <summary>
-    /// Sort order within the competition.
-    /// </summary>
-    [Range(1, int.MaxValue)]
-    public required int SortOrder { get; set; }
-
-    /// <summary>
-    /// If true, this is the default round for a competition that has only one round.
-    /// </summary>
-    public bool IsDefault { get; set; }
-
-    /// <summary>
-    /// Round instances (combinations of this round with different seasons).
-    /// </summary>
-    public ICollection<RoundInstance> RoundInstances { get; } = [];
+    public ICollection<Problem> Problems { get; } = [];
 }

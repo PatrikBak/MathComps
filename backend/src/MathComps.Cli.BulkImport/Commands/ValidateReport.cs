@@ -72,8 +72,7 @@ public static class ValidateReport
         // The sort-order reconciliation apply would perform to match the registry — informational, never blocking.
         foreach (var change in preview.SortOrderChanges)
             AnsiConsole.MarkupLine(
-                $"  [blue]re-sequence[/] {change.Kind.ToString().ToLowerInvariant()} {Escape(change.Slug)} "
-                + $"{change.FromOrder}→{change.ToOrder}");
+                $"  [blue]re-sequence[/] {Escape(change.Path)} {change.FromOrder}→{change.ToOrder}");
     }
 
     /// <summary>

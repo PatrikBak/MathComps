@@ -12,13 +12,13 @@ namespace MathComps.Infrastructure.BulkImport;
 
 /// <summary>
 /// EF Core implementation of <see cref="IDraftApplyService"/>. Spins up one tracking
-/// <see cref="MathCompsDbContext"/>, get-or-creates each taxonomy entity by slug (structural fields sourced from
-/// <see cref="IMetadataLocalizationService"/>), uploads images through the <see cref="ITrackedFileUploader"/> (which
-/// skips ones already on remote storage) and rewrites their refs, then inserts or overwrites the problems and saves
-/// once at the end.
+/// <see cref="MathCompsDbContext"/>, raises the competition node the draft's path names (ordering each generation by
+/// <see cref="IMetadataLocalizationService"/>'s registry), uploads images through the
+/// <see cref="ITrackedFileUploader"/> (which skips ones already on remote storage) and rewrites their refs, then
+/// inserts or overwrites the problems and saves once at the end.
 /// </summary>
 /// <param name="dbContextFactory">Factory for the tracking write context.</param>
-/// <param name="metadata">The registry, source of the structural sort-order / default-round fields.</param>
+/// <param name="metadata">The registry, which orders every generation of the competition tree.</param>
 /// <param name="uploader">Remote storage for the problem images, skipping ones unchanged since their last upload.</param>
 public class DraftApplyService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
@@ -35,48 +35,26 @@ public class DraftApplyService(
         // One tracking context for the whole run.
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        // Reconcile the taxonomy sort orders with the registry before creating anything, so a mid-list insertion
-        // frees the slot the new entity will claim instead of colliding with an existing row's stored order.
-        var sortOrderChanges = await ResequenceTaxonomyAsync(context, target);
-
-        // The composite slug keys both the round lookup and every problem slug, so derive it once.
-        var compositeRoundSlug = TaxonomySlugs.ComposeRoundSlug(
+        // The path the three slugs name addresses the competition node the problems hang under, and keys every problem
+        // slug, so derive it once. A draft that omits the round lands on its competition's own path.
+        var competitionPath = TaxonomySlugs.ComposeCompetitionPath(
             target.CompetitionSlug, target.CategorySlug, target.RoundSlug);
 
         // Upsert the taxonomy chain, collecting the create-vs-reuse outcome of each entity for the report.
         var entities = ImmutableArray.CreateBuilder<EntityResolution>();
 
-        // The chain of competitions the target names, from its brand down to the depth the round sits at.
-        var competitionChain = await CompetitionTreeSynchronizer.EnsureChainAsync(context, metadata.Shared, target);
-
-        // The brand heads the chain, and is what a round belongs to.
-        var (competition, competitionAction) = competitionChain[0];
-        entities.Add(new EntityResolution("competition", target.CompetitionSlug, competitionAction));
-
-        // Category by slug, only when the competition carries one.
-        Guid? categoryId = null;
-        if (target.CategorySlug is { } categorySlug)
-        {
-            var (category, categoryAction) = await GetOrCreateCategoryAsync(context, categorySlug);
-            categoryId = category.Id;
-            entities.Add(new EntityResolution("category", categorySlug, categoryAction));
-        }
-
-        // Round by composite slug, with the structural fields off the registry.
-        var (round, roundAction) = await GetOrCreateRoundAsync(
-            context, target, compositeRoundSlug, competition.Id, categoryId);
-        entities.Add(new EntityResolution("round", compositeRoundSlug, roundAction));
+        // Raise every node on that path, renumbering each generation to the registry on the way down. The
+        // renumbering runs before anything is created, so a mid-list insertion frees the slot the newcomer claims.
+        var (competition, chain, sortOrderChanges) = await ResolveNodeAsync(context, competitionPath);
+        entities.AddRange(chain);
 
         // Season by start year.
         var (season, seasonAction) = await GetOrCreateSeasonAsync(context, target.SeasonYear);
         entities.Add(new EntityResolution("season", target.SeasonYear.ToString(), seasonAction));
 
-        // Round-instance by (round, season), carrying the draft's date when freshly created. It hangs off the
-        // deepest competition the chain reached, which is where its problems sit in the tree.
-        var (roundInstance, roundInstanceAction) = await GetOrCreateRoundInstanceAsync(
-            context, round.Id, competitionChain[^1].Competition.Id, season.Id, date);
-        entities.Add(new EntityResolution(
-            "round-instance", $"{compositeRoundSlug} {target.SeasonYear}", roundInstanceAction));
+        // The round — this competition's sitting in this season — carrying the draft's date when freshly created.
+        var (round, roundAction) = await GetOrCreateRoundAsync(context, competition.Id, season.Id, date);
+        entities.Add(new EntityResolution("round", $"{competitionPath} {target.SeasonYear}", roundAction));
 
         // Write the problems, tallying the per-text outcomes and the insert/update/image counts.
         var appliedTexts = ImmutableArray.CreateBuilder<AppliedText>();
@@ -93,7 +71,7 @@ public class DraftApplyService(
         {
             // The stable slug this problem upserts on — its leading token is the season's edition (ročník), e.g. 75.
             var slug = TaxonomySlugs.ProblemSlug(
-                Season.EditionFromStartYear(target.SeasonYear), compositeRoundSlug, problem.Order);
+                Season.EditionFromStartYear(target.SeasonYear), competitionPath, problem.Order);
 
             // Upload the problem's images and build the relative-ref → media-ref map the markdown rewrite consumes.
             var (replacements, uploaded, skipped) = await UploadProblemImagesAsync(problem, slug, draftFolder);
@@ -112,7 +90,7 @@ public class DraftApplyService(
             {
                 // Insert the new problem with its texts, authors, and tags.
                 await InsertProblemAsync(
-                    context, problem, slug, roundInstance.Id, replacements, authorsCache, tagsCache, appliedTexts);
+                    context, problem, slug, round.Id, replacements, authorsCache, tagsCache, appliedTexts);
 
                 // Count it as an insert.
                 problemsInserted++;
@@ -142,118 +120,81 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Brings the taxonomy sort orders this draft can shift back in line with the registry before any new row is
-    /// created: the global competition and category spaces, plus the target competition's rounds. Each family is
-    /// renumbered with the two-phase, never-transiently-colliding update in <see cref="TaxonomyResequencer"/>.
+    /// Raises every competition node on a path — the competition, whatever sits between, and the node itself — each
+    /// created if missing, and renumbers each generation it descends through to its registry positions first, so a
+    /// mid-list insertion frees the slot the newcomer claims instead of colliding with a stored order. A node is
+    /// born with its sort path already stamped: the walk runs root-down, so its parent's is known, and a row
+    /// committed without one would be a node the readers throw on.
     /// </summary>
     /// <param name="context">The tracking write context.</param>
-    /// <param name="target">The draft taxonomy, which scopes the round renumbering to its competition.</param>
-    /// <returns>Every row renumbered, collapsed so a round slug shared across categories reports once.</returns>
-    private async Task<ImmutableArray<SortOrderChange>> ResequenceTaxonomyAsync(
-        MathCompsDbContext context, DraftTarget target)
+    /// <param name="path">The competition path the draft names.</param>
+    /// <returns>The node the path addresses, one resolution per node on it, and every node renumbered.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the registry can't place a node on the path.</exception>
+    private async Task<(Competition Node, ImmutableArray<EntityResolution> Chain,
+        ImmutableArray<SortOrderChange> Changes)> ResolveNodeAsync(MathCompsDbContext context, string path)
     {
-        // The registry order lookups for each family, returning null for a slug the registry doesn't carry.
-        var (competitionOrderOf, categoryOrderOf, roundOrderOf) =
-            TaxonomyResequencer.RegistryOrders(metadata.Shared, target.CompetitionSlug);
-
-        // The tracked rows in each family this draft can shift; a net-new competition has no rounds yet. Only
-        // the roots answer to the registry's competition list, everything deeper to its own generation.
-        var competitions = await context.Competitions
-            .Where(competition => competition.ParentId == null).ToListAsync();
-        var categories = await context.Categories.ToListAsync();
-        var rounds = await context.Rounds
-            .Where(round => round.Competition.Slug == target.CompetitionSlug).ToListAsync();
-
-        // Renumber each family to the registry, collecting what moved.
+        // The chain and the renumbering, filled in as the walk descends.
+        var chain = ImmutableArray.CreateBuilder<EntityResolution>();
         var changes = ImmutableArray.CreateBuilder<SortOrderChange>();
-        changes.AddRange(await TaxonomyResequencer.ResequenceAsync(
-            context, TaxonomyKind.Competition, competitions,
-            competition => competition.Slug, competition => competition.SortOrder,
-            (competition, order) => competition.SortOrder = order, competitionOrderOf));
-        changes.AddRange(await TaxonomyResequencer.ResequenceAsync(
-            context, TaxonomyKind.Category, categories,
-            category => category.Slug, category => category.SortOrder,
-            (category, order) => category.SortOrder = order, categoryOrderOf));
-        changes.AddRange(await TaxonomyResequencer.ResequenceAsync(
-            context, TaxonomyKind.Round, rounds,
-            round => round.Slug, round => round.SortOrder,
-            (round, order) => round.SortOrder = order, roundOrderOf));
 
-        // A round slug repeats across categories, so collapse equal changes for the report.
-        return [.. changes.Distinct()];
-    }
+        // The node the walk has reached, still null above the roots.
+        Competition? parent = null;
 
-    /// <summary>
-    /// Get-or-creates the category by slug, sourcing a new row's sort order from the registry.
-    /// </summary>
-    /// <param name="context">The write context.</param>
-    /// <param name="slug">The category slug.</param>
-    /// <returns>The entity and whether it was reused or created.</returns>
-    private async Task<(Category Entity, ResolutionAction Action)> GetOrCreateCategoryAsync(
-        MathCompsDbContext context, string slug)
-    {
-        // Reuse the existing row when present.
-        var existing = await context.Categories.FirstOrDefaultAsync(category => category.Slug == slug);
-        if (existing is not null)
-            return (existing, ResolutionAction.Reuse);
-
-        // Otherwise create it, the sort order taken from the registry's global category list.
-        var created = new Category { Slug = slug, SortOrder = metadata.Shared.CategorySortOrder(slug) };
-        await context.Categories.AddAsync(created);
-        return (created, ResolutionAction.Create);
-    }
-
-    /// <summary>
-    /// Get-or-creates the round by composite slug, sourcing a new row's structural fields (slug, sort order,
-    /// default flag) from the registry.
-    /// </summary>
-    /// <param name="context">The write context.</param>
-    /// <param name="target">The draft taxonomy.</param>
-    /// <param name="compositeRoundSlug">The round's composite slug, its lookup key.</param>
-    /// <param name="competitionId">The owning competition's id.</param>
-    /// <param name="categoryId">The owning category's id, or null when the competition has no categories.</param>
-    /// <returns>The entity and whether it was reused or created.</returns>
-    private async Task<(Round Entity, ResolutionAction Action)> GetOrCreateRoundAsync(
-        MathCompsDbContext context,
-        DraftTarget target,
-        string compositeRoundSlug,
-        Guid competitionId,
-        Guid? categoryId)
-    {
-        // Reuse the existing round when present.
-        var existing = await context.Rounds.FirstOrDefaultAsync(round => round.CompositeSlug == compositeRoundSlug);
-        if (existing is not null)
-            return (existing, ResolutionAction.Reuse);
-
-        // The competition's registry entry — its round list is what decides default-vs-explicit below.
-        var competition = metadata.Shared.Competition(target.CompetitionSlug);
-
-        // No explicit rounds means the one round is the synthetic default (e.g. IMO).
-        var isDefault = competition.HasDefaultRound;
-
-        // The explicit round's slug, or null for the default round. A competition that carries rounds always
-        // arrives here with a slug — registry validation rejects a draft that omits one — so a missing slug is
-        // a guarded invariant breach, not a routine case.
-        var roundSlug = isDefault
-            ? null
-            : target.RoundSlug ?? throw new InvalidOperationException(
-                $"Competition '{target.CompetitionSlug}' carries explicit rounds but the draft specified no round.");
-
-        // Build the row. A default round takes an empty slug and sorts first; an explicit one takes the draft's
-        // slug and its position among the competition's rounds. The rest are the foreign keys and lookup key.
-        var created = new Round
+        // One generation per segment, from the root down.
+        foreach (var (parentPath, slug, nodePath) in CompetitionTree.Descend(path))
         {
-            CompetitionId = competitionId,
-            CategoryId = categoryId,
-            Slug = roundSlug ?? "",
-            CompositeSlug = compositeRoundSlug,
-            SortOrder = competition.RoundSortOrder(roundSlug),
-            IsDefault = isDefault
-        };
+            // Every node already sitting in this generation, the wanted one possibly among them.
+            var parentId = parent?.Id;
+            var siblings = await context.Competitions
+                .Where(candidate => candidate.ParentId == parentId).ToListAsync();
 
-        // Track the new row and report it as created.
-        await context.Rounds.AddAsync(created);
-        return (created, ResolutionAction.Create);
+            // Bring the generation in line with the registry before the newcomer claims a slot in it.
+            var registryOrderOf = TaxonomyResequencer.ChildOrder(metadata.Shared, parentPath);
+            changes.AddRange(await TaxonomyResequencer.ResequenceAsync(context, siblings, registryOrderOf));
+
+            // A node the registry doesn't carry can't be placed among its siblings at all.
+            var order = registryOrderOf(nodePath)
+                ?? throw new InvalidOperationException(
+                    $"Competition '{nodePath}' has no structural entry to order it by.");
+
+            // The node this generation already carries for the slug, null until some draft introduces it.
+            var existing = siblings.FirstOrDefault(candidate => candidate.Slug == slug);
+
+            // Reuse what's already standing, or raise it at the position just computed.
+            parent = existing ?? new Competition
+            {
+                ParentId = parentId,
+                Slug = slug,
+                Path = nodePath,
+                SortPath = CompetitionTree.ComposeSortPath(parent?.SortPath, order),
+                SortOrder = order
+            };
+            chain.Add(new EntityResolution(
+                "competition", nodePath, existing is null ? ResolutionAction.Create : ResolutionAction.Reuse));
+
+            // A newcomer has to land before the next generation can hang off its identity.
+            if (existing is null)
+                await context.Competitions.AddAsync(parent);
+
+            // Flush either way: the reuse path may still be carrying this generation's renumbering.
+            await context.SaveChangesAsync();
+        }
+
+        // A sort path reads down the whole chain, so a renumbering above invalidates every path below it.
+        if (changes.Count > 0)
+        {
+            // The whole tree, which is small enough to restamp in memory.
+            var nodes = await context.Competitions.ToListAsync();
+
+            // Rebuild every path from the orders the renumbering left behind.
+            CompetitionTree.RestampSortPaths(nodes);
+
+            // Persist the rewritten paths.
+            await context.SaveChangesAsync();
+        }
+
+        // The deepest node, the chain that reached it, and what moved on the way.
+        return (parent!, chain.ToImmutable(), changes.ToImmutable());
     }
 
     /// <summary>
@@ -278,22 +219,21 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Get-or-creates the round-instance by (round, season), setting the draft's date on a fresh row and refreshing a
-    /// stale one: an existing instance whose stored date differs from the draft's is updated in place so a corrected
+    /// Get-or-creates the round by (competition node, season), setting the draft's date on a fresh row and refreshing a
+    /// stale one: an existing round whose stored date differs from the draft's is updated in place so a corrected
     /// <c>_meta</c> date actually lands, matching how the authors/tags reconcilers bring stored rows into line.
     /// </summary>
     /// <param name="context">The write context.</param>
-    /// <param name="roundId">The round's id.</param>
-    /// <param name="competitionId">The id of the competition whose problems these are.</param>
+    /// <param name="competitionId">The id of the competition node whose problems these are.</param>
     /// <param name="seasonId">The season's id.</param>
-    /// <param name="date">The round-instance date from <c>_meta</c>.</param>
+    /// <param name="date">The round date from <c>_meta</c>.</param>
     /// <returns>The entity and whether it was reused unchanged, updated in place, or created.</returns>
-    private static async Task<(RoundInstance Entity, ResolutionAction Action)> GetOrCreateRoundInstanceAsync(
-        MathCompsDbContext context, Guid roundId, Guid competitionId, Guid seasonId, DateOnly date)
+    private static async Task<(Round Entity, ResolutionAction Action)> GetOrCreateRoundAsync(
+        MathCompsDbContext context, Guid competitionId, Guid seasonId, DateOnly date)
     {
-        // The existing round-instance for this (round, season), or null when net-new.
-        var existing = await context.RoundInstances.FirstOrDefaultAsync(
-            instance => instance.RoundId == roundId && instance.SeasonId == seasonId);
+        // The existing round for this (competition node, season), or null when net-new.
+        var existing = await context.Rounds.FirstOrDefaultAsync(
+            round => round.CompetitionId == competitionId && round.SeasonId == seasonId);
 
         // Found it — reuse it when the date already matches, otherwise refresh the stale date in place.
         if (existing is not null)
@@ -308,14 +248,13 @@ public class DraftApplyService(
         }
 
         // Otherwise create it with the draft's date.
-        var created = new RoundInstance
+        var created = new Round
         {
-            RoundId = roundId,
             CompetitionId = competitionId,
             SeasonId = seasonId,
             Date = date
         };
-        await context.RoundInstances.AddAsync(created);
+        await context.Rounds.AddAsync(created);
         return (created, ResolutionAction.Create);
     }
 
@@ -361,7 +300,7 @@ public class DraftApplyService(
     /// <param name="context">The write context.</param>
     /// <param name="problem">The draft problem content.</param>
     /// <param name="slug">The problem slug.</param>
-    /// <param name="roundInstanceId">The round-instance the problem hangs off.</param>
+    /// <param name="roundId">The round the problem hangs off.</param>
     /// <param name="replacements">The image-ref replacements to apply to each body.</param>
     /// <param name="authorsCache">The run-scoped author cache.</param>
     /// <param name="tagsCache">The run-scoped tag cache.</param>
@@ -370,7 +309,7 @@ public class DraftApplyService(
         MathCompsDbContext context,
         DraftProblemContent problem,
         string slug,
-        Guid roundInstanceId,
+        Guid roundId,
         IReadOnlyDictionary<string, ResolvedImageRef> replacements,
         IDictionary<string, Author> authorsCache,
         IDictionary<string, Tag> tagsCache,
@@ -386,7 +325,7 @@ public class DraftApplyService(
         var newProblem = new Problem
         {
             Number = problem.Order,
-            RoundInstanceId = roundInstanceId,
+            RoundId = roundId,
             Slug = slug,
             SolutionLink = problem.SolutionLink
         };

@@ -380,9 +380,7 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
             UpdatedAt = DateTimeOffset.UtcNow
         });
 
-        // Create Competition → Season → Round → RoundInstance → Problem chain
-        var competition = CompetitionTreeSeed.Root(context, "testcomp", 1);
-
+        // Create Competition → Season → Round → Problem chain
         var season = new Season
         {
             Id = Guid.NewGuid(),
@@ -391,31 +389,20 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
         };
         context.Seasons.Add(season);
 
+        // The round both problems hang off, placed under a two-level competition
         var round = new Round
         {
             Id = Guid.NewGuid(),
-            CompetitionId = competition.Id,
-            Slug = "testround",
-            CompositeSlug = "testcomp-testround",
-            SortOrder = 1,
-            IsDefault = false
-        };
-        context.Rounds.Add(round);
-
-        var roundInstance = new RoundInstance
-        {
-            Id = Guid.NewGuid(),
-            RoundId = round.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "testcomp-testround").Id,
             SeasonId = season.Id,
             Date = DateOnly.FromDateTime(DateTime.Today)
         };
-        context.RoundInstances.Add(roundInstance);
+        context.Rounds.Add(round);
 
         // Problem 1
         var problem1 = new Problem
         {
-            RoundInstanceId = roundInstance.Id,
+            RoundId = round.Id,
             Number = 1,
             Slug = "p1"
         };
@@ -424,7 +411,7 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
         // Problem 2
         var problem2 = new Problem
         {
-            RoundInstanceId = roundInstance.Id,
+            RoundId = round.Id,
             Number = 2,
             Slug = "p2"
         };

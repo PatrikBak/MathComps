@@ -11,8 +11,9 @@ namespace MathComps.Infrastructure.Tests.BulkImport;
 
 /// <summary>
 /// Integration tests for <see cref="DraftResolutionService"/> against a real Postgres database. These pin the EF
-/// query field mappings a pure slug test can't reach — the round lookup keys on <c>CompositeSlug</c> (category
-/// included), the season on <c>StartYear</c>, the per-text check on <c>Problem.Slug</c> plus each text's
+/// query field mappings a pure slug test can't reach — the competition lookup keys on
+/// <see cref="Competition.Path"/>, the season on <see cref="Season.StartYear"/>, the per-text check on
+/// <see cref="Problem.Slug"/> plus each text's
 /// <c>(DocumentType, Language, IsOriginal, MarkdownText)</c> — and that each entity resolves independently, so a
 /// draft can reuse some of its taxonomy while creating the rest, and that the import outcome for each existing text
 /// variant is classified from that text's language, originality and whether its stored body actually differs.
@@ -65,41 +66,26 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
-        // One existing CSMO category-A national round in the 2024 season, carrying its problems.
-        var competition = CompetitionTreeSeed.Root(context, "csmo", 1);
-
         // Season keyed on its start year.
         var season = new Season { Id = Guid.NewGuid(), StartYear = 2024, EditionNumber = 74 };
         context.Seasons.Add(season);
 
-        // Round keyed on its composite slug; category is irrelevant to the lookup, so leave it null.
+        // One existing sitting of CSMO's category-A national round in the 2024 season, carrying its problems,
+        // under the competition node its path spells out.
         var round = new Round
         {
             Id = Guid.NewGuid(),
-            CompetitionId = competition.Id,
-            Slug = "iii",
-            CompositeSlug = "csmo-a-iii",
-            SortOrder = 1,
-            IsDefault = false
-        };
-        context.Rounds.Add(round);
-
-        // The round-instance the problems hang off, under the competition the composite slug spells out.
-        var roundInstance = new RoundInstance
-        {
-            Id = Guid.NewGuid(),
-            RoundId = round.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-a-iii").Id,
             SeasonId = season.Id,
             Date = new DateOnly(2024, 3, 15)
         };
-        context.RoundInstances.Add(roundInstance);
+        context.Rounds.Add(round);
 
         // The text problem a re-import of problem 1 lands on.
         var problem = new Problem
         {
             Id = Guid.NewGuid(),
-            RoundInstanceId = roundInstance.Id,
+            RoundId = round.Id,
             Number = 1,
             Slug = SeededProblemSlug
         };
@@ -127,7 +113,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         var imageProblem = new Problem
         {
             Id = Guid.NewGuid(),
-            RoundInstanceId = roundInstance.Id,
+            RoundId = round.Id,
             Number = 2,
             Slug = ImageProblemSlug
         };
@@ -137,16 +123,14 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         context.ProblemTexts.Add(
             SeedText(imageProblem.Id, DocumentType.Statement, Language.SK, isOriginal: true, markdown: imageBody));
 
-        // A category-less competition and round, so the null-category composite slug ("memo-i") gets exercised.
-        var memo = CompetitionTreeSeed.Root(context, "memo", 2);
+        // A category-less competition and its own sitting, so a two-segment path ("memo-i") gets exercised alongside
+        // the three-segment one.
         context.Rounds.Add(new Round
         {
             Id = Guid.NewGuid(),
-            CompetitionId = memo.Id,
-            Slug = "i",
-            CompositeSlug = "memo-i",
-            SortOrder = 1,
-            IsDefault = false
+            CompetitionId = CompetitionTreeSeed.Chain(context, "memo-i").Id,
+            SeasonId = season.Id,
+            Date = new DateOnly(2024, 8, 20)
         });
 
         // Persist the chain.
@@ -190,54 +174,54 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// Each entity resolves independently: a draft reusing the seeded competition and round but in a brand-new
-    /// season reports the season alone as a create, and the new year's slug is net-new (no resolution).
+    /// Each entity resolves independently: a draft naming the seeded competition in a brand-new season reuses the
+    /// competition but creates both the season and that season's sitting of it, and the new year's slug is net-new.
     /// </summary>
     [Fact]
-    public Task A_new_season_under_an_existing_competition_and_round_creates_only_the_season() => RunTestAsync(async service =>
+    public Task A_new_season_under_an_existing_competition_creates_the_season_and_its_round() => RunTestAsync(async service =>
     {
-        // Same csmo/a/iii round, but the 2025 season doesn't exist yet.
+        // Same csmo/a/iii competition, but the 2025 season doesn't exist yet.
         var preview = await PreviewAsync(
             service, new DraftTarget("csmo", "a", "iii", 2025), Problem(1, Original(Language.SK)));
 
-        // Competition and round are reused; only the season is new.
+        // The competition is reused; the season and the round it would run are both new.
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
         Assert.Equal(ResolutionAction.Create, ActionFor(preview, "season"));
-        Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "round"));
+        Assert.Equal(ResolutionAction.Create, ActionFor(preview, "round"));
 
         // The 2025 slug is distinct from the seeded 2024 one, so there's no existing text to resolve.
         Assert.Empty(preview.TextResolutions);
     });
 
     /// <summary>
-    /// The category is part of the round key: the same competition and round under a different category resolves
-    /// to a different composite slug, so the round reads as a create.
+    /// The category is part of the competition's path: the same competition and round under a different category
+    /// addresses a different node, so both the competition and its round read as creates.
     /// </summary>
     [Fact]
-    public Task A_different_category_resolves_to_a_new_round() => RunTestAsync(async service =>
+    public Task A_different_category_resolves_to_a_new_competition() => RunTestAsync(async service =>
     {
         // csmo/b/iii composes to "csmo-b-iii", which isn't the seeded "csmo-a-iii".
         var preview = await PreviewAsync(
             service, new DraftTarget("csmo", "b", "iii", 2024), Problem(1, Original(Language.SK)));
 
-        // The competition and season still exist; the differently-keyed round does not.
-        Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
+        // The season still exists; the differently-addressed competition and its round do not.
+        Assert.Equal(ResolutionAction.Create, ActionFor(preview, "competition"));
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "season"));
         Assert.Equal(ResolutionAction.Create, ActionFor(preview, "round"));
     });
 
     /// <summary>
-    /// A category-less competition's round resolves by the category-less composite slug ("memo-i"), so the
-    /// seeded round is reused.
+    /// A category-less competition's round resolves by its two-segment path ("memo-i"), so the seeded competition
+    /// and its sitting are both reused.
     /// </summary>
     [Fact]
-    public Task A_category_less_round_resolves_by_its_composite_slug() => RunTestAsync(async service =>
+    public Task A_category_less_round_resolves_by_its_path() => RunTestAsync(async service =>
     {
         // memo/(no category)/i composes to "memo-i", which is seeded.
         var preview = await PreviewAsync(
             service, new DraftTarget("memo", null, "i", 2024), Problem(1, Original(Language.SK)));
 
-        // All three exist, so all reuse — proving the null-category composite matched the stored slug.
+        // All three exist, so all reuse — proving the null-category path matched the stored node.
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "season"));
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "round"));
@@ -506,10 +490,10 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
 
         // The seeded memo competition sits at 2 but the registry puts it at 3.
-        Assert.Contains(new SortOrderChange(TaxonomyKind.Competition, "memo", 2, 3), preview.SortOrderChanges);
+        Assert.Contains(new SortOrderChange("memo", 2, 3), preview.SortOrderChanges);
 
-        // The seeded csmo round iii sits at 1 but the registry puts it at 4.
-        Assert.Contains(new SortOrderChange(TaxonomyKind.Round, "iii", 1, 4), preview.SortOrderChanges);
+        // The seeded csmo round iii sits at 1 but the registry puts it at 4, behind i, s and ii.
+        Assert.Contains(new SortOrderChange("csmo-a-iii", 1, 4), preview.SortOrderChanges);
     });
 
     /// <summary>
@@ -533,7 +517,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
 
         // The unregistered competition is reported as an orphan.
-        Assert.Contains(new TaxonomyOrphan(TaxonomyKind.Competition, "notacomp"), preview.Orphans);
+        Assert.Contains(new TaxonomyOrphan("notacomp"), preview.Orphans);
     });
 
     /// <summary>
@@ -543,33 +527,33 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     [Fact]
     public Task An_unregistered_round_is_flagged_as_an_orphan() => RunTestAsync(async service =>
     {
-        // Seed a round under the seeded csmo competition whose slug is absent from csmo's registry round list.
+        // Seed a round under the seeded csmo category A whose slug is absent from the registry's list for it.
         await QueryAsync(async context =>
         {
-            // The owning competition, which is a root.
-            var csmo = await context.Competitions.SingleAsync(
-                competition => competition.ParentId == null && competition.Slug == "csmo");
+            // The category the unregistered round hangs off.
+            var categoryA = await context.Competitions.SingleAsync(
+                competition => competition.Path == "csmo-a");
 
-            // The unregistered round hanging off it.
-            context.Rounds.Add(new Round
+            // The unregistered round itself.
+            context.Competitions.Add(new Competition
             {
                 Id = Guid.NewGuid(),
-                CompetitionId = csmo.Id,
+                ParentId = categoryA.Id,
                 Slug = "zz",
-                CompositeSlug = "csmo-a-zz",
-                SortOrder = 9,
-                IsDefault = false
+                Path = "csmo-a-zz",
+                SortPath = $"{categoryA.SortPath}.0009",
+                SortOrder = 9
             });
 
             // Persist the seed.
             await context.SaveChangesAsync();
         });
 
-        // Preview a csmo draft — the round orphan scan is scoped to the target competition.
+        // Preview a csmo draft — the orphan scan covers every generation the chain descends through.
         var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
 
         // The unregistered round is reported as an orphan.
-        Assert.Contains(new TaxonomyOrphan(TaxonomyKind.Round, "zz"), preview.Orphans);
+        Assert.Contains(new TaxonomyOrphan("csmo-a-zz"), preview.Orphans);
     });
 
     /// <summary>

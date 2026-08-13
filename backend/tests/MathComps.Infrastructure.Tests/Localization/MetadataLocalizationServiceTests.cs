@@ -1,6 +1,9 @@
+using System.Collections.Immutable;
+using MathComps.Infrastructure.Constants;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
+using MathComps.Shared.Serialization;
 
 namespace MathComps.Infrastructure.Tests.Localization;
 
@@ -19,46 +22,45 @@ public class MetadataLocalizationServiceTests
     #region Shared metadata (structural backbone)
 
     /// <summary>
-    /// Competitions must come back in display order — array position is what encodes that order.
+    /// The roots must come back in display order — array position is what encodes that order.
     /// </summary>
     [Fact]
-    public void Shared_competitions_are_in_display_order()
-    {
-        // Pull just the slugs in their declared order.
-        var slugs = _service.Shared.Competitions.Select(competition => competition.Slug);
-
+    public void Shared_roots_are_in_display_order() =>
         // CSMO first … DuoGeo last.
-        Assert.Equal(["csmo", "tst", "memo", "imo", "caps", "emo", "egmo", "tstc", "cpsj", "duogeo"], slugs);
-    }
+        Assert.Equal(
+            ["csmo", "tst", "memo", "imo", "caps", "emo", "egmo", "tstc", "cpsj", "duogeo"],
+            [.. _service.Shared.ChildSlugs(parentPath: null)]);
 
     /// <summary>
-    /// Categories must come back in sort order — array position is the sort order.
+    /// CSMO's children are its categories, and each category's children are its own rounds.
     /// </summary>
     [Fact]
-    public void Shared_categories_are_in_sort_order() =>
-        // A, B, C first, then Z de-chronologically (Z9 before Z4).
-        Assert.Equal(["a", "b", "c", "z9", "z8", "z7", "z6", "z5", "z4"], [.. _service.Shared.Categories]);
-
-    /// <summary>
-    /// CSMO is the only competition that carries categories; its categories and rounds must both be present
-    /// and ordered.
-    /// </summary>
-    [Fact]
-    public void Shared_csmo_carries_categories_and_rounds()
+    public void Shared_csmo_carries_its_categories_which_carry_their_rounds()
     {
-        // Grab the one CSMO entry.
-        var csmo = GetCompetition("csmo");
+        // Categories in sort order — A, B, C first, then Z de-chronologically (Z9 before Z4).
+        Assert.Equal(
+            ["a", "b", "c", "z9", "z8", "z7", "z6", "z5", "z4"], [.. _service.Shared.ChildSlugs("csmo")]);
 
-        // Categories present and in sort order …
-        Assert.NotNull(csmo.Categories);
-        Assert.Equal(["a", "b", "c", "z9", "z8", "z7", "z6", "z5", "z4"], [.. csmo.Categories.Value]);
-
-        // … and the union of rounds in round-sort order.
-        Assert.Equal(["i", "s", "ii", "iii"], [.. csmo.Rounds]);
+        // And a category's own rounds hang one level below it.
+        Assert.Equal(["i", "s", "ii", "iii"], [.. _service.Shared.ChildSlugs("csmo-a")]);
     }
 
     /// <summary>
-    /// Category-less competitions still carry rounds but no categories.
+    /// Which rounds a CSMO category runs differs per category, which is exactly what the flat registry could
+    /// not say: it gave one round list to the whole competition and left the truth implicit in which locale
+    /// keys happened to exist.
+    /// </summary>
+    /// <param name="categoryPath">The category node's path.</param>
+    /// <param name="rounds">The rounds that category actually runs, in sort order.</param>
+    [Theory]
+    [InlineData("csmo-a", new[] { "i", "s", "ii", "iii" })]
+    [InlineData("csmo-z9", new[] { "i", "ii", "iii" })]
+    [InlineData("csmo-z4", new[] { "i", "ii" })]
+    public void Shared_expresses_the_per_category_round_differences(string categoryPath, string[] rounds) =>
+        Assert.Equal(rounds, _service.Shared.ChildSlugs(categoryPath));
+
+    /// <summary>
+    /// A competition with no categories carries its rounds as its own children.
     /// </summary>
     /// <param name="slug">The competition slug under test.</param>
     /// <param name="rounds">The rounds expected for that competition, in sort order.</param>
@@ -67,36 +69,22 @@ public class MetadataLocalizationServiceTests
     [InlineData("cpsj", new[] { "i", "t" })]
     [InlineData("tst", new[] { "d1", "d2", "d3", "d4", "d5" })]
     [InlineData("duogeo", new[] { "zs", "ss" })]
-    public void Shared_category_less_competitions_have_rounds_but_no_categories(string slug, string[] rounds)
-    {
-        // Look up the competition by slug.
-        var competition = GetCompetition(slug);
-
-        // No categories, but the expected rounds in order.
-        Assert.Null(competition.Categories);
-        Assert.Equal(rounds, competition.Rounds);
-    }
+    public void Shared_category_less_competitions_carry_their_rounds_directly(string slug, string[] rounds) =>
+        Assert.Equal(rounds, _service.Shared.ChildSlugs(slug));
 
     /// <summary>
-    /// Default-round competitions (a single implicit round) carry neither categories nor rounds — the empty
-    /// rounds array is what makes <c>IsDefault</c> derivable.
+    /// A competition that runs as one flat sitting is a leaf — no children at all, which is what its problems
+    /// hanging off the competition itself looks like.
     /// </summary>
-    /// <param name="slug">The default-round competition slug under test.</param>
+    /// <param name="slug">The flat competition slug under test.</param>
     [Theory]
     [InlineData("imo")]
     [InlineData("caps")]
     [InlineData("egmo")]
     [InlineData("emo")]
     [InlineData("tstc")]
-    public void Shared_default_round_competitions_have_no_categories_and_no_rounds(string slug)
-    {
-        // Look up the competition by slug.
-        var competition = GetCompetition(slug);
-
-        // Both collections are empty/absent for a default-round competition.
-        Assert.Null(competition.Categories);
-        Assert.Empty(competition.Rounds);
-    }
+    public void Shared_flat_competitions_are_leaves(string slug) =>
+        Assert.Empty(_service.Shared.ChildSlugs(slug));
 
     #endregion
 
@@ -177,17 +165,17 @@ public class MetadataLocalizationServiceTests
     #region Exhaustive parity sweep
 
     /// <summary>
-    /// Every real contest node must resolve to a non-empty short and full label in every language.
+    /// Every real competition node must resolve to a non-empty short and full label in every language.
     /// </summary>
     /// <param name="language">The locale to sweep.</param>
     [Theory]
     [InlineData(Language.SK)]
     [InlineData(Language.CS)]
     [InlineData(Language.EN)]
-    public void Every_real_contest_node_resolves_to_a_non_empty_label(Language language)
+    public void Every_real_competition_node_resolves_to_a_non_empty_label(Language language)
     {
         // Walk every real node path …
-        foreach (var path in RealContestPaths())
+        foreach (var path in RealCompetitionPaths())
         {
             // … and assert both names resolve to something non-blank.
             Assert.False(string.IsNullOrWhiteSpace(_service.GetNodeShortName(language, path)));
@@ -196,48 +184,60 @@ public class MetadataLocalizationServiceTests
     }
 
     /// <summary>
-    /// Every node path that exists in the taxonomy — each competition, each category within one, and each
-    /// round, including the per-category round differences (e.g. Z4 has only rounds I and II).
+    /// No locale may name a node the registry doesn't carry. Together with the sweep above this pins the two
+    /// halves of the registry to each other: the structure lists exactly the nodes the name maps name, so a
+    /// node can never be added to one and forgotten in the other.
+    /// </summary>
+    /// <param name="language">The locale to check.</param>
+    [Theory]
+    [InlineData(Language.SK)]
+    [InlineData(Language.CS)]
+    [InlineData(Language.EN)]
+    public void Every_locale_name_belongs_to_a_registered_node(Language language)
+    {
+        // The paths the structure carries.
+        var registered = RealCompetitionPaths().ToHashSet();
+
+        // The ones this locale names.
+        var named = LoadLocale(language).Nodes.Keys;
+
+        // A name with no structure behind it is dead weight that no reader can ever reach.
+        Assert.Empty(named.Where(path => !registered.Contains(path)));
+    }
+
+    /// <summary>
+    /// Every node path the registry carries, root-first, at every depth.
     /// </summary>
     /// <returns>Every valid node path.</returns>
-    private static IEnumerable<string> RealContestPaths()
+    private IEnumerable<string> RealCompetitionPaths()
     {
-        // Every competition is a node in its own right, default-round ones included.
-        foreach (var competition in new[]
-                 { "csmo", "tst", "memo", "imo", "caps", "emo", "egmo", "tstc", "cpsj", "duogeo" })
-            yield return competition;
+        // Each node contributes its own path, then everything below it.
+        static IEnumerable<string> Walk(ImmutableArray<SharedNode> nodes, string? parentPath) =>
+            nodes.SelectMany(node =>
+            {
+                // Where this node sits, which is how a locale keys its names.
+                var path = TaxonomySlugs.ComposePath(parentPath, node.Slug);
 
-        // CSMO high-school categories get all four rounds.
-        foreach (var category in new[] { "a", "b", "c" })
-            foreach (var round in new[] { "i", "s", "ii", "iii" })
-                yield return $"csmo-{category}-{round}";
+                // Its own path, ahead of everything descending from it.
+                return Walk(node.Children ?? [], path).Prepend(path);
+            });
 
-        // Z4 only has the home and school rounds.
-        foreach (var round in new[] { "i", "ii" })
-            yield return $"csmo-z4-{round}";
-
-        // Z5–Z9 have home, district and regional rounds.
-        foreach (var category in new[] { "z5", "z6", "z7", "z8", "z9" })
-            foreach (var round in new[] { "i", "ii", "iii" })
-                yield return $"csmo-{category}-{round}";
-
-        // Each of those categories is itself a named node between the competition and its rounds.
-        foreach (var category in new[] { "a", "b", "c", "z4", "z5", "z6", "z7", "z8", "z9" })
-            yield return $"csmo-{category}";
-
-        // Individual / team competitions.
-        foreach (var competition in new[] { "memo", "cpsj" })
-            foreach (var round in new[] { "i", "t" })
-                yield return $"{competition}-{round}";
-
-        // TST runs over numbered days.
-        foreach (var round in new[] { "d1", "d2", "d3", "d4", "d5" })
-            yield return $"tst-{round}";
-
-        // DuoGeo runs two school-level rounds.
-        foreach (var round in new[] { "zs", "ss" })
-            yield return $"duogeo-{round}";
+        // Start at the roots, which extend nothing.
+        return Walk(_service.Shared.Nodes, parentPath: null);
     }
+
+    /// <summary>
+    /// Deserializes one locale's name map from the same resource file the service loads, so the parity sweep
+    /// can compare the two halves of the registry directly.
+    /// </summary>
+    /// <param name="language">The locale to load.</param>
+    /// <returns>That locale's metadata.</returns>
+    private static PerLocaleMetadata LoadLocale(Language language) =>
+        File.ReadAllText(Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                LocalizationConstants.MetadataDirectory,
+                $"metadata.{language.ToString().ToLowerInvariant()}.json"))
+            .FromJson<PerLocaleMetadata>();
 
     #endregion
 
@@ -318,15 +318,4 @@ public class MetadataLocalizationServiceTests
 
     #endregion
 
-    #region Helpers
-
-    /// <summary>
-    /// Finds the single shared-metadata competition entry with the given slug.
-    /// </summary>
-    /// <param name="slug">The competition slug to look up.</param>
-    /// <returns>The matching competition entry.</returns>
-    private SharedCompetition GetCompetition(string slug) =>
-        _service.Shared.Competitions.Single(competition => competition.Slug == slug);
-
-    #endregion
 }

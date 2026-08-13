@@ -101,11 +101,11 @@ public class ProblemFilterService(
                 // Problem Source
                 BuildSource(
                     localization,
-                    data.problem.RoundInstance.Season.EditionNumber,
-                    data.problem.RoundInstance.Season.StartYear,
-                    data.problem.RoundInstance.Season.EndYear,
-                    data.problem.RoundInstance.Competition.Path,
-                    data.problem.RoundInstance.Competition.SortPath,
+                    data.problem.Round.Season.EditionNumber,
+                    data.problem.Round.Season.StartYear,
+                    data.problem.Round.Season.EndYear,
+                    data.problem.Round.Competition.Path,
+                    data.problem.Round.Competition.SortPath,
                     data.problem.Number,
                     language),
 
@@ -148,11 +148,11 @@ public class ProblemFilterService(
                         similarProblem.SimilarProblem.Slug,
                         BuildSource(
                             localization,
-                            similarProblem.SimilarProblem.RoundInstance.Season.EditionNumber,
-                            similarProblem.SimilarProblem.RoundInstance.Season.StartYear,
-                            similarProblem.SimilarProblem.RoundInstance.Season.EndYear,
-                            similarProblem.SimilarProblem.RoundInstance.Competition.Path,
-                            similarProblem.SimilarProblem.RoundInstance.Competition.SortPath,
+                            similarProblem.SimilarProblem.Round.Season.EditionNumber,
+                            similarProblem.SimilarProblem.Round.Season.StartYear,
+                            similarProblem.SimilarProblem.Round.Season.EndYear,
+                            similarProblem.SimilarProblem.Round.Competition.Path,
+                            similarProblem.SimilarProblem.Round.Competition.SortPath,
                             similarProblem.SimilarProblem.Number,
                             language),
 
@@ -297,7 +297,7 @@ public class ProblemFilterService(
         {
             // Filter by those seasons
             problems = problems.Where(problem =>
-                parameters.OlympiadYears.Contains(problem.RoundInstance.Season.EditionNumber)
+                parameters.OlympiadYears.Contains(problem.Round.Season.EditionNumber)
             );
         }
 
@@ -305,7 +305,7 @@ public class ProblemFilterService(
         if (parameters.Contests is { Count: > 0 })
         {
             // Keep the problems sitting anywhere under one of them, which is what the resolved ids stand for
-            problems = problems.Where(problem => contestIds.Contains(problem.RoundInstance.CompetitionId));
+            problems = problems.Where(problem => contestIds.Contains(problem.Round.CompetitionId));
         }
 
         // If specific problem numbers are given...
@@ -446,8 +446,8 @@ public class ProblemFilterService(
             // Group by unique seasons
             .GroupBy(problem => new
             {
-                problem.RoundInstance.Season.EditionNumber,
-                problem.RoundInstance.Season.StartYear
+                problem.Round.Season.EditionNumber,
+                problem.Round.Season.StartYear
             })
             // Project to intermediate structure with counts
             .Select(seasonGroup => new
@@ -638,7 +638,7 @@ public class ProblemFilterService(
     /// <param name="editionNumber">The season's edition number.</param>
     /// <param name="startYear">The calendar year the season started.</param>
     /// <param name="endYear">The calendar year the season ended.</param>
-    /// <param name="contestPath">The path of the contest the problem sits in.</param>
+    /// <param name="competitionPath">The path of the contest the problem sits in.</param>
     /// <param name="contestSortPath">The sort path of that contest.</param>
     /// <param name="number">The problem's number within its contest.</param>
     /// <param name="language">The language to label everything in.</param>
@@ -648,13 +648,13 @@ public class ProblemFilterService(
         int editionNumber,
         int startYear,
         int endYear,
-        string contestPath,
+        string competitionPath,
         string contestSortPath,
         int number,
         Language language)
     {
         // Where the contest sits, which decides which of the levels below it is named at all.
-        var levels = ContestLevels.From(contestPath, contestSortPath);
+        var levels = ContestLevels.From(competitionPath, contestSortPath);
 
         // The labelled slug of one level, whose path is what its localized names are keyed by.
         LabeledSlug Label(ContestLevel level) => new(
@@ -694,8 +694,8 @@ public class ProblemFilterService(
             // Group by the contest the problems belong to, which its two paths identify and order
             .GroupBy(problem => new
             {
-                problem.RoundInstance.Competition.Path,
-                problem.RoundInstance.Competition.SortPath,
+                problem.Round.Competition.Path,
+                problem.Round.Competition.SortPath,
             })
             // Project to intermediate structure with counts
             .Select(contestGroup => new
@@ -738,7 +738,7 @@ public class ProblemFilterService(
 
         // The path each selection addresses, which is how a contest is named across the whole system.
         var selectedPaths = selections
-            .Select(selection => TaxonomySlugs.ComposeRoundSlug(
+            .Select(selection => TaxonomySlugs.ComposeCompetitionPath(
                 selection.CompetitionSlug, selection.CategorySlug, selection.RoundSlug))
             .ToList();
 
@@ -803,10 +803,10 @@ public class ProblemFilterService(
         var contestData = await dbContext.Problems
             .GroupBy(problem => new
             {
-                problem.RoundInstance.Season.EditionNumber,
-                problem.RoundInstance.Season.StartYear,
-                problem.RoundInstance.Competition.Path,
-                problem.RoundInstance.Competition.SortPath,
+                problem.Round.Season.EditionNumber,
+                problem.Round.Season.StartYear,
+                problem.Round.Competition.Path,
+                problem.Round.Competition.SortPath,
             })
             .Select(group => new
             {

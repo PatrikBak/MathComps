@@ -38,8 +38,8 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     #region Public properties
 
     /// <summary>
-    /// The language-neutral taxonomy structure: competitions, their categories and rounds, and the sort
-    /// order of all three. Loaded from <see cref="ResourcePaths.SharedMetadataFileName"/>.
+    /// The language-neutral taxonomy structure: the tree of competition nodes and the sort order of each generation.
+    /// Loaded from <see cref="ResourcePaths.SharedMetadataFileName"/>.
     /// </summary>
     public SharedMetadata Shared { get; } = File.ReadAllText(
             Path.Combine(
@@ -54,12 +54,12 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     /// <inheritdoc />
     public string GetNodeShortName(Language language, string path) =>
         GetMetadata(language).GetNodeNames(path)?.ShortName
-            ?? throw MissingLocalization("contest", path, language);
+            ?? throw MissingLocalization("competition", path, language);
 
     /// <inheritdoc />
     public string GetNodeFullName(Language language, string path) =>
         GetMetadata(language).GetNodeNames(path)?.FullName
-            ?? throw MissingLocalization("contest", path, language);
+            ?? throw MissingLocalization("competition", path, language);
 
     /// <inheritdoc />
     public string GetTagName(Language language, string slug) =>
@@ -80,8 +80,8 @@ public class MetadataLocalizationService : IMetadataLocalizationService
         // Collect every gap across the referenced competition / category / round slugs.
         var issues = new List<TaxonomyRegistryIssue>();
 
-        // Competition: its structural entry in the shared backbone …
-        var competitionEntry = Shared.Competitions.FirstOrDefault(competition => competition.Slug == competitionSlug);
+        // The competition is a root, and its own path is its slug.
+        var competitionEntry = Shared.Node(competitionSlug);
 
         // Check if competition missing in some locale
         var competitionMissingLocales = LocalesMissing(metadata =>
@@ -98,13 +98,10 @@ public class MetadataLocalizationService : IMetadataLocalizationService
         // Category is only referenced when the competition carries categories.
         if (categorySlug is not null)
         {
-            // Structural: in the global category list, and listed under this competition when the competition exists.
-            var categoryMissingFromShared =
-                !Shared.Categories.Contains(categorySlug) ||
-                (competitionEntry?.Categories is { } competitionCategories && !competitionCategories.Contains(categorySlug));
-
-            // A category is named per competition, so its path is what a locale keys its name by.
-            var categoryPath = TaxonomySlugs.ComposeRoundSlug(competitionSlug, categorySlug, round: null);
+            // A category is a node under its competition, so its path is both what places it structurally and
+            // what a locale keys its name by.
+            var categoryPath = TaxonomySlugs.ComposeCompetitionPath(competitionSlug, categorySlug, round: null);
+            var categoryMissingFromShared = Shared.Node(categoryPath) is null;
 
             // Check if category missing in some locale
             var categoryMissingLocales = LocalesMissing(metadata =>
@@ -119,17 +116,17 @@ public class MetadataLocalizationService : IMetadataLocalizationService
                     categoryMissingLocales));
         }
 
-        // Round is referenced as the (competition, category, round) triple.
-        // Structural: the competition lists this round (a null round is the default round, i.e. no listed rounds).
-        var roundMissingFromShared = roundSlug is null
-            ? competitionEntry is not null && competitionEntry.Rounds.Length > 0
-            : competitionEntry is null || !competitionEntry.Rounds.Contains(roundSlug);
+        // The round is the node the whole triple names — its path (e.g. "csmo-a-iii"), which for a draft that
+        // omits the round is the competition's own path, so the gap names the exact key to look for.
+        var roundIdentifier = TaxonomySlugs.ComposeCompetitionPath(competitionSlug, categorySlug, roundSlug);
 
-        // Identify the round by its path (e.g. "csmo-a-iii"), so the gap names the exact key to look for. A
-        // default round stands for its whole competition, whose path is the competition slug on its own.
-        var roundIdentifier = roundSlug is null
-            ? competitionSlug
-            : TaxonomySlugs.ComposeRoundSlug(competitionSlug, categorySlug, roundSlug);
+        // The node that path addresses, null when the registry doesn't carry it.
+        var roundEntry = Shared.Node(roundIdentifier);
+
+        // Structural: that node has to exist. A draft omitting the round additionally has to land on a node that
+        // runs as one flat sitting — one carrying children has rounds the draft was supposed to pick from.
+        var roundMissingFromShared = roundEntry is null
+            || (roundSlug is null && roundEntry.Children is { IsDefaultOrEmpty: false });
 
         // Check if round missing in some locale
         var roundMissingLocales = LocalesMissing(metadata =>
@@ -188,7 +185,7 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     /// <summary>
     /// Creates an exception for missing localization data.
     /// </summary>
-    /// <param name="entityType">The type of the entity, e.g. "contest", "tag".</param>
+    /// <param name="entityType">The type of the entity, e.g. "competition", "tag".</param>
     /// <param name="identifier">The identifier of the entity, e.g. imo, csmo-a-iii, memo-i.</param>
     /// <param name="language">The language.</param>
     /// <returns>An exception for missing localization data.</returns>

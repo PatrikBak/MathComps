@@ -13,11 +13,11 @@ public static class ProblemQueryableExtensions
     /// <returns>The queryable with default sorting applied.</returns>
     public static IQueryable<Problem> OrderByDefaultProblemSort(this IQueryable<Problem> source) => source
         // Newest seasons first
-        .OrderByDescending(problem => problem.RoundInstance.Season.StartYear)
+        .OrderByDescending(problem => problem.Round.Season.StartYear)
         // Chronologically within season: newest events first
-        .ThenByDescending(problem => problem.RoundInstance.Date)
+        .ThenByDescending(problem => problem.Round.Date)
         // For contests sharing a date (e.g. the home rounds), the tree's own order decides, at any depth
-        .ThenBy(problem => problem.RoundInstance.Competition.SortPath)
+        .ThenBy(problem => problem.Round.Competition.SortPath)
         // Problem number within the contest
         .ThenBy(problem => problem.Number);
 }

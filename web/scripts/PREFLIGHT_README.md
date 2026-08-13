@@ -28,7 +28,7 @@ category: a # category slug — omit for competitions with no categories
 round: iii # round slug
 season:
   year: 2024 # calendar year the season starts
-date: 2024-03-15 # round-instance date, YYYY-MM-DD
+date: 2024-03-15 # round date, YYYY-MM-DD
 language: sk # the draft's original language: sk | cs | en
 ```
 
