@@ -642,9 +642,6 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
             UpdatedAt = DateTimeOffset.UtcNow
         });
 
-        // Create Competition
-        var competition = CompetitionTreeSeed.Root(context, "testcomp", 1);
-
         // Create Season
         var season = new Season
         {
@@ -658,29 +655,16 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         var round = new Round
         {
             Id = Guid.NewGuid(),
-            CompetitionId = competition.Id,
-            Slug = "testround",
-            CompositeSlug = "testcomp-testround",
-            SortOrder = 1,
-            IsDefault = false
-        };
-        context.Rounds.Add(round);
-
-        // Create RoundInstance
-        var roundInstance = new RoundInstance
-        {
-            Id = Guid.NewGuid(),
-            RoundId = round.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "testcomp-testround").Id,
             SeasonId = season.Id,
             Date = DateOnly.FromDateTime(DateTime.Today)
         };
-        context.RoundInstances.Add(roundInstance);
+        context.Rounds.Add(round);
 
         // Create Problem
         var problem = new Problem
         {
-            RoundInstanceId = roundInstance.Id,
+            RoundId = round.Id,
             Number = 1,
             Slug = _testProblemSlug
         };

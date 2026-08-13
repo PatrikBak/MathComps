@@ -22,14 +22,14 @@ public class Problem
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
     /// <summary>
-    /// Foreign key to the round instance (round + season combination).
+    /// Foreign key to the round (competition + season combination).
     /// </summary>
-    public required Guid RoundInstanceId { get; set; }
+    public required Guid RoundId { get; set; }
 
     /// <summary>
-    /// Navigation to the round instance (round + season combination).
+    /// Navigation to the round (competition + season combination).
     /// </summary>
-    public RoundInstance RoundInstance { get; set; } = null!;
+    public Round Round { get; set; } = null!;
 
     /// <summary>
     /// Position of the problem within its round  (1-indexed).

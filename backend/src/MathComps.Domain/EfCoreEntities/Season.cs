@@ -51,7 +51,7 @@ public class Season
     public string Name => $"{StartYear}/{StartYear + 1}";
 
     /// <summary>
-    /// Round instances that occur in this season.
+    /// Rounds that occur in this season.
     /// </summary>
-    public ICollection<RoundInstance> RoundInstances { get; } = [];
+    public ICollection<Round> Rounds { get; } = [];
 }

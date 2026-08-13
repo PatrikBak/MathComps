@@ -54,9 +54,4 @@ public class Competition
     /// The competitions one level below, empty at a leaf.
     /// </summary>
     public ICollection<Competition> Children { get; } = [];
-
-    /// <summary>
-    /// Rounds that belong exclusively to this competition.
-    /// </summary>
-    public ICollection<Round> Rounds { get; } = [];
 }

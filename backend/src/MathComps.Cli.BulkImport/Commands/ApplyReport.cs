@@ -64,11 +64,10 @@ public static class ApplyReport
             // The re-sequencing header.
             AnsiConsole.MarkupLine("\n[bold]Re-sequenced[/]:");
 
-            // One line per renumbered row.
+            // One line per renumbered node.
             foreach (var change in result.Applied.SortOrderChanges)
                 AnsiConsole.MarkupLine(
-                    $"  [yellow]{change.Kind.ToString().ToLowerInvariant()} {Escape(change.Slug)}[/] "
-                    + $"{change.FromOrder}→{change.ToOrder}");
+                    $"  [yellow]{Escape(change.Path)}[/] {change.FromOrder}→{change.ToOrder}");
         }
 
         // Any non-blocking warnings the run proceeded through (e.g. overwrites of live texts).

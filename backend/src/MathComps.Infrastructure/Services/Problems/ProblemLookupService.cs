@@ -43,9 +43,9 @@ public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContex
             .Where(candidate => candidate.Slug == problemSlug)
             .Select(candidate => new
             {
-                candidate.RoundInstance.Season.EditionNumber,
-                candidate.RoundInstance.Competition.Path,
-                candidate.RoundInstance.Competition.SortPath,
+                candidate.Round.Season.EditionNumber,
+                candidate.Round.Competition.Path,
+                candidate.Round.Competition.SortPath,
                 candidate.Number,
             })
             .FirstOrDefaultAsync(cancellationToken);

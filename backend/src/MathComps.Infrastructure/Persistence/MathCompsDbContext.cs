@@ -16,16 +16,13 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Problems (core content).</summary>
     public DbSet<Problem> Problems => Set<Problem>();
 
-    /// <summary>Competitions (like CZ/SK MO, IMO).</summary>
+    /// <summary>The competition tree — a whole brand (CZ/SK MO, IMO), or anything nested below one.</summary>
     public DbSet<Competition> Competitions => Set<Competition>();
-
-    /// <summary>Round instances (combinations of rounds with seasons).</summary>
-    public DbSet<RoundInstance> RoundInstances => Set<RoundInstance>();
 
     /// <summary>Universal seasons (e.g., 2024/2025) used as the primary timeline.</summary>
     public DbSet<Season> Seasons => Set<Season>();
 
-    /// <summary>Rounds owned by a competition, ordered within that competition.</summary>
+    /// <summary>Rounds (sittings of one competition in one season), which problems hang off.</summary>
     public DbSet<Round> Rounds => Set<Round>();
 
     /// <summary>Authors of problems (ordered per problem via join).</summary>
@@ -36,9 +33,6 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
     /// <summary>Freeform tags for problems (topic/technique).</summary>
     public DbSet<Tag> Tags => Set<Tag>();
-
-    /// <summary>Grades for problems (age/level categories like A/B/C).</summary>
-    public DbSet<Category> Categories => Set<Category>();
 
     /// <summary>Tags for problems.</summary>
     public DbSet<ProblemTag> ProblemTags => Set<ProblemTag>();
@@ -244,47 +238,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .WithOne(x => x.Parent)
              .HasForeignKey(x => x.ParentId)
              .OnDelete(DeleteBehavior.Restrict);
-
-            e.HasMany(x => x.Rounds)
-             .WithOne(r => r.Competition)
-             .HasForeignKey(r => r.CompetitionId)
-             .OnDelete(DeleteBehavior.Restrict);
         });
 
         #endregion Competition
-
-        #region Round (owned by Competition)
-
-        modelBuilder.Entity<Round>(e =>
-        {
-            e.HasIndex(r => new { r.CompetitionId, r.CategoryId, r.Slug })
-             .IsUnique()
-             .HasDatabaseName("ux_round_competition_category_slug");
-
-            e.HasIndex(r => r.CompositeSlug)
-             .IsUnique()
-             .HasDatabaseName("ux_round_composite_slug");
-
-            // Unique when CategoryId IS NOT NULL
-            e.HasIndex(r => new { r.CompetitionId, r.CategoryId, r.SortOrder })
-              .IsUnique()
-              .HasFilter("\"category_id\" IS NOT NULL")
-              .HasDatabaseName("ux_round_competition_category_sort_order_when_category_not_null");
-
-            // Unique when CategoryId IS NULL
-            e.HasIndex(r => new { r.CompetitionId, r.SortOrder })
-            .IsUnique()
-            .HasFilter("\"category_id\" IS NULL")
-            .HasDatabaseName("ux_round_competition_category_sort_order_when_category_null");
-
-            e.ToTable(t => t.HasCheckConstraint("ck_round_sort_order_positive", "\"sort_order\" > 0"));
-
-            e.HasOne(p => p.Category)
-             .WithMany(c => c.Rounds)
-             .HasForeignKey(p => p.CategoryId);
-        });
-
-        #endregion Round (owned by Competition)
 
         #region Season
 
@@ -310,49 +266,27 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         #endregion Season
 
-        #region RoundInstance (Round x Season)
+        #region Round (Competition x Season)
 
-        modelBuilder.Entity<RoundInstance>(e =>
+        modelBuilder.Entity<Round>(e =>
         {
-            e.HasIndex(x => new { x.RoundId, x.SeasonId })
-             .IsUnique()
-             .HasDatabaseName("ux_round_instance_round_season");
-
             // One sitting per competition and season, at whatever depth the competition sits.
             e.HasIndex(x => new { x.CompetitionId, x.SeasonId })
              .IsUnique()
-             .HasDatabaseName("ux_round_instance_competition_season");
+             .HasDatabaseName("ux_round_competition_season");
 
             e.HasOne(x => x.Competition)
              .WithMany()
              .HasForeignKey(x => x.CompetitionId)
              .OnDelete(DeleteBehavior.Restrict);
 
-            e.HasOne(x => x.Round)
-             .WithMany(r => r.RoundInstances)
-             .HasForeignKey(x => x.RoundId)
-             .OnDelete(DeleteBehavior.Restrict);
-
             e.HasOne(x => x.Season)
-             .WithMany(s => s.RoundInstances)
+             .WithMany(s => s.Rounds)
              .HasForeignKey(x => x.SeasonId)
              .OnDelete(DeleteBehavior.Restrict);
         });
 
-        #endregion RoundInstance (Competition x Season)
-
-        #region Category
-
-        modelBuilder.Entity<Category>(e =>
-        {
-            e.HasIndex(x => x.Slug).IsUnique().HasDatabaseName("ux_category_slug");
-            e.HasIndex(x => x.SortOrder).IsUnique().HasDatabaseName("ux_category_sort_order");
-
-            // DB-side invariant mirror of [Range] attributes in code.
-            e.ToTable(t => t.HasCheckConstraint("ck_category_sort_order_positive", "\"sort_order\" > 0"));
-        });
-
-        #endregion Category
+        #endregion Round (Competition x Season)
 
         #region Tag
 
@@ -376,10 +310,10 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         modelBuilder.Entity<Problem>(e =>
         {
-            // Problem belongs to exactly one round instance.
-            e.HasOne(p => p.RoundInstance)
-             .WithMany(ri => ri.Problems)
-             .HasForeignKey(p => p.RoundInstanceId);
+            // Problem belongs to exactly one round.
+            e.HasOne(p => p.Round)
+             .WithMany(r => r.Problems)
+             .HasForeignKey(p => p.RoundId);
 
             e.HasMany(p => p.Likes)
              .WithOne(l => l.Problem)
@@ -391,10 +325,10 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .HasForeignKey(ms => ms.ProblemId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            // Within the same round instance, problem numbers must be unique.
-            e.HasIndex(p => new { p.RoundInstanceId, p.Number })
+            // Within the same round, problem numbers must be unique.
+            e.HasIndex(p => new { p.RoundId, p.Number })
              .IsUnique()
-             .HasDatabaseName("ux_problem_round_instance_number");
+             .HasDatabaseName("ux_problem_round_number");
 
             // DB-side guard mirroring [Range]
             e.ToTable(t => t.HasCheckConstraint("ck_problem_number_positive", "\"number\" > 0"));

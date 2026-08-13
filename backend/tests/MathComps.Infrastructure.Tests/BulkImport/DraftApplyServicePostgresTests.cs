@@ -56,6 +56,9 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // The apply service also reads the metadata registry for taxonomy structure
         services.AddLocalization();
 
+        // The read-only preview, so a test can check the dry run against what applying then does.
+        services.AddBulkImport();
+
         // The tested service
         services.AddScoped<IDraftApplyService, DraftApplyService>();
     }
@@ -83,26 +86,20 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // Every created row carries the fields the registry and draft dictate.
         await QueryAsync<IMetadataLocalizationService>(async (context, metadata) =>
         {
-            // The competition carries its registry sort order.
-            var competition = await context.Competitions.SingleAsync(entity => entity.Slug == "csmo");
-            Assert.Equal(metadata.Shared.CompetitionSortOrder("csmo"), competition.SortOrder);
-
-            // The category carries its registry sort order.
-            var category = await context.Categories.SingleAsync(entity => entity.Slug == "a");
-            Assert.Equal(metadata.Shared.CategorySortOrder("a"), category.SortOrder);
-
-            // The round carries its registry sort order and composite slug, and isn't the default.
-            var round = await context.Rounds.SingleAsync(entity => entity.CompositeSlug == "csmo-a-iii");
-            Assert.Equal(metadata.Shared.Competition("csmo").RoundSortOrder("iii"), round.SortOrder);
-            Assert.False(round.IsDefault);
+            // Every node on the path carries its registry sort order.
+            foreach (var path in new[] { "csmo", "csmo-a", "csmo-a-iii" })
+            {
+                var node = await context.Competitions.SingleAsync(entity => entity.Path == path);
+                Assert.Equal(metadata.Shared.SortOrder(path), node.SortOrder);
+            }
 
             // The season's edition is the shared ročník derived from its start year.
             var season = await context.Seasons.SingleAsync(entity => entity.StartYear == 2024);
             Assert.Equal(2024 - 1950, season.EditionNumber);
 
-            // The round-instance carries the draft's date.
-            var roundInstance = await context.RoundInstances.SingleAsync();
-            Assert.Equal(RoundDate, roundInstance.Date);
+            // The round carries the draft's date.
+            var round = await context.Rounds.SingleAsync();
+            Assert.Equal(RoundDate, round.Date);
 
             // The problem is numbered and slugged.
             var problem = await context.Problems.SingleAsync();
@@ -242,12 +239,12 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             CsmoTarget(), correctedDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
 
         // The round-instance reports the date update distinctly from the quiet reuse path.
-        var roundInstance = second.Entities.Single(entity => entity.EntityKind == "round-instance");
-        Assert.Equal(ResolutionAction.Update, roundInstance.Action);
+        var round = second.Entities.Single(entity => entity.EntityKind == "round");
+        Assert.Equal(ResolutionAction.Update, round.Action);
 
         // The stored date actually moved to the corrected value.
         await QueryAsync(async context =>
-            Assert.Equal(correctedDate, (await context.RoundInstances.SingleAsync()).Date));
+            Assert.Equal(correctedDate, (await context.Rounds.SingleAsync()).Date));
     });
 
     /// <summary>
@@ -862,13 +859,13 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
                 var competition = await context.Competitions.SingleAsync(entity => entity.Slug == slug);
 
                 // It sits at its registry position.
-                Assert.Equal(metadata.Shared.CompetitionSortOrder(slug), competition.SortOrder);
+                Assert.Equal(metadata.Shared.SortOrder(slug), competition.SortOrder);
             }
         });
 
         // The renumbering is reported, memo and imo each shifted up by one.
-        Assert.Contains(new SortOrderChange(TaxonomyKind.Competition, "memo", 2, 3), result.SortOrderChanges);
-        Assert.Contains(new SortOrderChange(TaxonomyKind.Competition, "imo", 3, 4), result.SortOrderChanges);
+        Assert.Contains(new SortOrderChange("memo", 2, 3), result.SortOrderChanges);
+        Assert.Contains(new SortOrderChange("imo", 3, 4), result.SortOrderChanges);
     });
 
     /// <summary>
@@ -898,11 +895,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         {
             // csmo dropped to its registry order.
             var csmo = await context.Competitions.SingleAsync(entity => entity.Slug == "csmo");
-            Assert.Equal(metadata.Shared.CompetitionSortOrder("csmo"), csmo.SortOrder);
+            Assert.Equal(metadata.Shared.SortOrder("csmo"), csmo.SortOrder);
 
             // memo rose to its registry order.
             var memo = await context.Competitions.SingleAsync(entity => entity.Slug == "memo");
-            Assert.Equal(metadata.Shared.CompetitionSortOrder("memo"), memo.SortOrder);
+            Assert.Equal(metadata.Shared.SortOrder("memo"), memo.SortOrder);
         });
     });
 
@@ -934,14 +931,14 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             Assert.Equal(tree[1].Id, tree[2].ParentId);
 
             // The sort path reads down the chain: csmo first among the brands, a first among its categories,
-            // iii fourth among its rounds.
-            Assert.Equal("0001.0001.0004", tree[2].SortPath);
+            // iii fourth among its rounds. A root extends nothing, so it carries its own position alone.
+            Assert.Equal(["0001", "0001.0001", "0001.0001.0004"], tree.Select(entity => entity.SortPath));
 
             // The round instance hangs off the deepest level, which is where its problems sit in the tree.
-            var roundInstance = await context.RoundInstances
+            var round = await context.Rounds
                 .Include(entity => entity.Competition)
                 .SingleAsync();
-            Assert.Equal("csmo-a-iii", roundInstance.Competition.Path);
+            Assert.Equal("csmo-a-iii", round.Competition.Path);
         });
     });
 
@@ -957,24 +954,20 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             new DraftTarget("imo", null, null, 2024), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
-        // The brand is the only row, and the round instance hangs off it.
+        // The brand is the only row, and the round hangs off it.
         await QueryAsync(async context =>
         {
             // The whole tree.
             var tree = await context.Competitions.ToListAsync();
 
-            // Nothing sits below the brand, since the default round is the brand itself.
+            // Nothing sits below the brand, since the flat sitting is the brand itself.
             Assert.Equal(["imo"], tree.Select(entity => entity.Path));
 
-            // The stored round, which carries no slug of its own.
-            var round = await context.Rounds.SingleAsync(entity => entity.CompositeSlug == "imo");
-            Assert.True(round.IsDefault);
-
-            // Its instance still resolves to a competition, the brand.
-            var roundInstance = await context.RoundInstances
+            // The round resolves to that brand, with no node of its own in between.
+            var round = await context.Rounds
                 .Include(entity => entity.Competition)
                 .SingleAsync();
-            Assert.Equal("imo", roundInstance.Competition.Path);
+            Assert.Equal("imo", round.Competition.Path);
         });
     });
 
@@ -1014,94 +1007,75 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Re-sequencing generalizes to a competition's rounds: a round shifted up in the registry is renumbered on apply.
+    /// Re-sequencing reaches every generation the chain descends through, not just the roots: a round shifted up
+    /// in the registry is renumbered on apply.
     /// </summary>
     [Fact]
-    public Task Inserting_a_round_mid_array_resequences_the_competition_rounds() => RunTestAsync(async service =>
+    public Task Inserting_a_round_mid_array_resequences_the_sibling_rounds() => RunTestAsync(async service =>
     {
-        // Seed csmo with two category-a rounds as they stood before "s"/"ii" entered — i and iii as a contiguous block.
+        // Seed csmo/a with two rounds as they stood before "s"/"ii" entered — i and iii as a contiguous block.
         await QueryAsync(async context =>
         {
-            // The owning competition and category.
-            var csmo = CompetitionTreeSeed.Root(context, "csmo", 1);
-            var categoryA = new Category { Slug = "a", SortOrder = 1 };
-            context.Categories.Add(categoryA);
-
-            // The two rounds at their pre-insertion orders.
-            context.Rounds.AddRange(
-                new Round
-                {
-                    CompetitionId = csmo.Id,
-                    CategoryId = categoryA.Id,
-                    Slug = "i",
-                    CompositeSlug = "csmo-a-i",
-                    SortOrder = 1
-                },
-                new Round
-                {
-                    CompetitionId = csmo.Id,
-                    CategoryId = categoryA.Id,
-                    Slug = "iii",
-                    CompositeSlug = "csmo-a-iii",
-                    SortOrder = 2
-                });
+            // Chain places each round at the next free slot, so they land contiguously at 1 and 2.
+            CompetitionTreeSeed.Chain(context, "csmo-a-i");
+            CompetitionTreeSeed.Chain(context, "csmo-a-iii");
 
             // Persist the seed.
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo/a/iii problem — apply reconciles csmo's rounds before reusing the round.
+        // Import a csmo/a/iii problem — apply reconciles the generation before reusing the node.
         var result = await service.ApplyAsync(
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Round iii now carries its registry order, shifted up from the stored 2.
         await QueryAsync<IMetadataLocalizationService>(async (context, metadata) =>
         {
-            // The stored round.
-            var roundIii = await context.Rounds.SingleAsync(entity => entity.CompositeSlug == "csmo-a-iii");
+            // The stored node.
+            var roundIii = await context.Competitions.SingleAsync(entity => entity.Path == "csmo-a-iii");
 
-            // It sits at its registry position among csmo's rounds.
-            Assert.Equal(metadata.Shared.Competition("csmo").RoundSortOrder("iii"), roundIii.SortOrder);
+            // It sits at its registry position among its siblings.
+            Assert.Equal(metadata.Shared.SortOrder("csmo-a-iii"), roundIii.SortOrder);
         });
 
         // The renumbering is reported.
-        Assert.Contains(new SortOrderChange(TaxonomyKind.Round, "iii", 2, 4), result.SortOrderChanges);
+        Assert.Contains(new SortOrderChange("csmo-a-iii", 2, 4), result.SortOrderChanges);
     });
 
     /// <summary>
-    /// Re-sequencing generalizes to categories: a category shifted up in the registry is renumbered on apply.
+    /// Re-sequencing reaches the middle generation too: a category shifted up in the registry is renumbered on
+    /// apply, and the sort paths below it are rewritten to match.
     /// </summary>
     [Fact]
     public Task Inserting_a_category_mid_array_resequences_the_later_categories() => RunTestAsync(async service =>
     {
-        // Seed categories a and c as they stood before "b" entered — a contiguous a/c block.
+        // Seed csmo's categories a and c as they stood before "b" entered — a contiguous a/c block.
         await QueryAsync(async context =>
         {
-            // The two categories at their pre-insertion orders.
-            context.Categories.AddRange(
-                new Category { Slug = "a", SortOrder = 1 },
-                new Category { Slug = "c", SortOrder = 2 });
+            // Chain places each category at the next free slot under csmo, so they land at 1 and 2.
+            CompetitionTreeSeed.Chain(context, "csmo-a");
+            CompetitionTreeSeed.Chain(context, "csmo-c");
 
             // Persist the seed.
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo/a/iii problem — apply reconciles the whole category space before reusing category a.
+        // Import a csmo/a/iii problem — apply reconciles csmo's children before reusing category a.
         var result = await service.ApplyAsync(
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Category c now carries its registry order, shifted up from the stored 2.
         await QueryAsync<IMetadataLocalizationService>(async (context, metadata) =>
         {
-            // The stored category.
-            var categoryC = await context.Categories.SingleAsync(entity => entity.Slug == "c");
+            // The stored node.
+            var categoryC = await context.Competitions.SingleAsync(entity => entity.Path == "csmo-c");
 
             // It sits at its registry position.
-            Assert.Equal(metadata.Shared.CategorySortOrder("c"), categoryC.SortOrder);
+            Assert.Equal(metadata.Shared.SortOrder("csmo-c"), categoryC.SortOrder);
         });
 
         // The renumbering is reported.
-        Assert.Contains(new SortOrderChange(TaxonomyKind.Category, "c", 2, 3), result.SortOrderChanges);
+        Assert.Contains(new SortOrderChange("csmo-c", 2, 3), result.SortOrderChanges);
     });
 
     /// <summary>
@@ -1126,6 +1100,145 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // Nothing drifted, so nothing was re-sequenced.
         Assert.Empty(result.SortOrderChanges);
+    });
+
+    /// <summary>
+    /// A generation that both drifted out of order and gained siblings above it: the two stored rounds swap
+    /// relative to each other while moving into slots the registry only grew later, so their targets sit above
+    /// every order the generation currently holds. Parking has to clear the highest target, not just the highest
+    /// stored order, or one mover lands on the slot another is still parked in.
+    /// </summary>
+    [Fact]
+    public Task A_swapped_pair_moving_into_new_slots_is_resequenced() => RunTestAsync(async service =>
+    {
+        // Seed csmo/a with iii and ii inverted, as a two-round block from before "i" and "s" entered the registry.
+        await QueryAsync(async context =>
+        {
+            // Chain places each round at the next free slot, so iii lands at 1 and ii at 2.
+            CompetitionTreeSeed.Chain(context, "csmo-a-iii");
+            CompetitionTreeSeed.Chain(context, "csmo-a-ii");
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Import a csmo/a/iii problem — apply reconciles the generation before reusing the node.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // Both rounds now sit at their registry orders, the inversion untangled.
+        await QueryAsync<IMetadataLocalizationService>(async (context, metadata) =>
+        {
+            // Each stored round in turn.
+            foreach (var path in new[] { "csmo-a-ii", "csmo-a-iii" })
+            {
+                // The stored node.
+                var node = await context.Competitions.SingleAsync(entity => entity.Path == path);
+
+                // It sits at its registry position among its siblings.
+                Assert.Equal(metadata.Shared.SortOrder(path), node.SortOrder);
+            }
+        });
+    });
+
+    /// <summary>
+    /// A sort path reads down the whole chain, so renumbering a node has to restamp everything below it — not
+    /// just the node that moved. The tree is read in order by those paths, so a descendant left holding its old
+    /// one would sort against a position its ancestor no longer occupies.
+    /// </summary>
+    [Fact]
+    public Task Resequencing_a_node_restamps_the_sort_paths_below_it() => RunTestAsync(async service =>
+    {
+        // Seed csmo's categories a and c as a contiguous block from before "b" entered, c carrying a round of its own.
+        await QueryAsync(async context =>
+        {
+            // Chain places category a at 1 and its round iii at 1 below it.
+            CompetitionTreeSeed.Chain(context, "csmo-a-iii");
+
+            // Category c follows at 2, its round i landing at 1 below it.
+            CompetitionTreeSeed.Chain(context, "csmo-c-i");
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // Import a csmo/a/iii problem — apply reconciles csmo's children, which shifts category c up.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
+
+        // Both moved nodes and their descendants carry paths built from the new positions.
+        await QueryAsync(async context =>
+        {
+            // Category c moved from 2 to its registry order 3, and its round rode along.
+            var categoryRound = await context.Competitions.SingleAsync(entity => entity.Path == "csmo-c-i");
+            Assert.Equal("0001.0003.0001", categoryRound.SortPath);
+
+            // Round iii moved from 1 to its registry order 4 under a category that stayed put.
+            var nationalRound = await context.Competitions.SingleAsync(entity => entity.Path == "csmo-a-iii");
+            Assert.Equal("0001.0001.0004", nationalRound.SortPath);
+        });
+    });
+
+    /// <summary>
+    /// A node the registry can't place has no position to give it, so apply refuses the draft outright rather
+    /// than writing a row whose sort order is invented.
+    /// </summary>
+    [Fact]
+    public Task A_draft_naming_an_unregistered_competition_is_refused() => RunTestAsync(async service =>
+    {
+        // Import a draft whose competition the registry doesn't carry.
+        var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ApplyAsync(
+            new DraftTarget("notacomp", null, "i", 2024), RoundDate,
+            [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath()));
+
+        // The refusal names the path it couldn't place.
+        Assert.Contains("notacomp", refusal.Message);
+
+        // Nothing was written on the way to the throw.
+        await QueryAsync(async context => Assert.Empty(await context.Competitions.ToListAsync()));
+    });
+
+    /// <summary>
+    /// The dry run and the write walk the same generations, so what the preview reports as re-sequencing has to
+    /// be exactly what applying then performs — the two walks living in different services is what would let
+    /// them drift, leaving the preview quietly lying about what the import is about to renumber.
+    /// </summary>
+    [Fact]
+    public Task The_preview_predicts_the_resequencing_apply_performs() => RunTestAsync(async service =>
+    {
+        // Seed drift at two different depths: memo sits a slot early among the roots, and iii a slot early
+        // among its category's rounds.
+        await QueryAsync(async context =>
+        {
+            // csmo takes the first root slot, iii the first round slot under category a.
+            CompetitionTreeSeed.Chain(context, "csmo-a-iii");
+
+            // memo follows csmo at the second root slot, where the registry now puts tst.
+            CompetitionTreeSeed.Root(context, "memo", 2);
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // The draft both the dry run and the write are given.
+        var target = CsmoTarget();
+        var problems = new[] { Problem(1, Original(Language.SK, "statement")) };
+
+        // What the dry run says the import would renumber.
+        var predicted = ImmutableArray<SortOrderChange>.Empty;
+        await QueryAsync<IDraftResolutionService>(async (_, resolution) =>
+            predicted = (await resolution.PreviewAsync(target, problems, Path.GetTempPath())).SortOrderChanges);
+
+        // The dry run has something to predict, or the comparison below would pass on two empty sets.
+        Assert.NotEmpty(predicted);
+
+        // What applying actually renumbers.
+        var result = await service.ApplyAsync(target, RoundDate, problems, Path.GetTempPath());
+
+        // The two agree, path by path.
+        Assert.Equal(
+            predicted.OrderBy(change => change.Path),
+            result.SortOrderChanges.OrderBy(change => change.Path));
     });
 
     /// <summary>

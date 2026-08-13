@@ -46,25 +46,27 @@ The preflight checks **format only**; the DB-aware `validate` is the gate (so it
 
 Check `backend/src/MathComps.Infrastructure/Resources/metadata.shared.json`. If the competition slug isn't there, add it to **all four** metadata files, or the registry check fails with "no structural entry":
 
-- `metadata.shared.json` — structure: `{ "slug": "...", "categories": [...] | null, "rounds": [...] }`. Array position = sort order.
+- `metadata.shared.json` — a tree of nodes, `{ "nodes": [ { "slug": "csmo", "children": [ … ] } ] }`. Array position = sort order **at every level**, and `children` is omitted at a leaf.
 - `metadata.{cs,sk,en}.json` — one `nodes["<path>"] = { shortName, fullName }` entry per node, a path being the slugs from the competition down, hyphen-joined: the competition (`csmo`), each of its categories (`csmo-a`), and each round (`csmo-a-iii`, `memo-i`).
 
-Decide the shape:
-- **Categories** (age/level bands like `a`,`b`,`z9`) → list them in `shared.categories` for the competition; omit `category:` in drafts that don't use them. Each carries its own `nodes["{competition}-{category}"]` name.
-- **Rounds** (`i`,`ii`,`iii`, `d1`…) → list them; a round's path is `{competition}[-{category}]-{round}` and needs a localized name in every locale.
-- **Default round** — a competition that is one flat sitting (no sub-rounds, like IMO/EGMO) takes `"rounds": []`. Then `_meta.yaml` **omits `round:`** entirely, its problems hang off the competition itself, and its own `nodes` entry is the only name needed. (Gotcha below.)
+**The two files must list exactly the same paths** — a test asserts it in both directions, so a node added to one and forgotten in the other fails the suite.
 
-Add a test row for any new competition/round/name to `MetadataLocalizationServiceTests` (display order, default-round/category shape, name resolution, `Registered_taxonomy_has_no_issues`). A new competition needs its slug in two places there: `Shared_competitions_are_in_display_order` and `RealContestPaths`.
+Decide the shape:
+- **Categories** (age/level bands like `a`,`b`,`z9`) → the competition's `children`; omit `category:` in drafts that don't use them. Each carries its own `nodes["{competition}-{category}"]` name.
+- **Rounds** (`i`,`ii`,`iii`, `d1`…) → the `children` of whatever they hang under, which is the category when there is one and the competition otherwise. **Each parent lists only the rounds it actually runs**, so CSMO's Z4 carries just `i`, `ii` while its A carries `i`, `s`, `ii`, `iii`.
+- **One flat sitting** — a competition with no sub-rounds (IMO/EGMO) omits `children` entirely. Then `_meta.yaml` **omits `round:`**, its problems hang off the competition itself, and its own `nodes` entry is the only name needed. (Gotcha below.)
+
+Add a test row for any new competition/round/name to `MetadataLocalizationServiceTests` (display order, leaf/child shape, name resolution, `Registered_taxonomy_has_no_issues`). A new root also needs its slug in `Shared_roots_are_in_display_order`; the parity sweep walks the registry itself, so it needs no edit.
 
 ## Step 2 — Author `_meta.yaml`
 
 ```yaml
 competition: csmo   # competition slug
 category: b         # omit for category-less competitions
-round: ii           # omit for a default-round competition
+round: ii           # omit for a competition that runs as one flat sitting
 season:
   year: 2025        # academic season START year — a SPRING event belongs to the previous autumn's season
-date: 2026-03-31    # the round-instance date, YYYY-MM-DD
+date: 2026-03-31    # the round date, YYYY-MM-DD
 language: sk         # the draft's original language: sk | cs | en
 ```
 

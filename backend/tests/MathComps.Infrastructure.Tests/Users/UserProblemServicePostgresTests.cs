@@ -271,40 +271,15 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
         };
         context.Seasons.Add(season);
 
-        // Competition — CSMO is the domestic competition
-        var competition = CompetitionTreeSeed.Root(context, "csmo", 100);
-
-        // Category — category A (highest age group)
-        var category = new Category
-        {
-            Id = Guid.NewGuid(),
-            Slug = "a",
-            SortOrder = 100
-        };
-        context.Categories.Add(category);
-
-        // Round — domestic round for category A
+        // Round — season 75's sitting of CSMO's domestic round for category A
         var round = new Round
         {
             Id = Guid.NewGuid(),
-            CompetitionId = competition.Id,
-            CategoryId = category.Id,
-            Slug = "i",
-            CompositeSlug = "csmo-a-i",
-            SortOrder = 100
-        };
-        context.Rounds.Add(round);
-
-        // Round instance — season 75, domestic round A
-        var roundInstance = new RoundInstance
-        {
-            Id = Guid.NewGuid(),
-            RoundId = round.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-a-i").Id,
             SeasonId = season.Id,
             Date = new DateOnly(2025, 9, 1)
         };
-        context.RoundInstances.Add(roundInstance);
+        context.Rounds.Add(round);
 
         // Problems — two problems are sufficient for isolation tests
         _problem1Id = Guid.NewGuid();
@@ -314,14 +289,14 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = _problem1Id,
             Slug = "75-a-i-1",
-            RoundInstanceId = roundInstance.Id,
+            RoundId = round.Id,
             Number = 1
         });
         context.Problems.Add(new Problem
         {
             Id = _problem2Id,
             Slug = "75-a-i-2",
-            RoundInstanceId = roundInstance.Id,
+            RoundId = round.Id,
             Number = 2
         });
 

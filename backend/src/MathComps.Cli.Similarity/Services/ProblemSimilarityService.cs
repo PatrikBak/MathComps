@@ -89,7 +89,7 @@ public class ProblemSimilarityService(
                 && text.DocumentType == DocumentType.Statement
                 && embedding.EmbeddingType == EmbeddingConstants.Types.RetrievalDocument
                 // The candidate must be from a relevant competition.
-                && relevantCompetitionSlug.Contains(problem.RoundInstance.Competition.Path)
+                && relevantCompetitionSlug.Contains(problem.Round.Competition.Path)
                 // The candidate must have at least one tag in common with the source problem
                 && problem.ProblemTagsAll.AsQueryable()
                     .Where(ProblemTag.IsGoodEnoughTag)
@@ -167,7 +167,7 @@ public class ProblemSimilarityService(
                     .ToImmutableHashSet(),
 
                 // The path of the contest it was set in
-                Slug = candidate.Problem.RoundInstance.Competition.Path,
+                Slug = candidate.Problem.Round.Competition.Path,
             })
             // Evaluate
             .ToListAsync(cancellationToken))

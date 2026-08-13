@@ -54,9 +54,6 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
-        // The competition everything below hangs off, a brand with nothing above it.
-        var competition = CompetitionTreeSeed.Root(context, "testcomp", 1);
-
         // The season the round ran in.
         var season = new Season
         {
@@ -66,33 +63,20 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
         };
         context.Seasons.Add(season);
 
-        // The round, a named one rather than the competition's default.
+        // The sitting of that competition in that season, under the node its path spells out.
         var round = new Round
         {
             Id = Guid.NewGuid(),
-            CompetitionId = competition.Id,
-            Slug = "testround",
-            CompositeSlug = "testcomp-testround",
-            SortOrder = 1,
-            IsDefault = false
-        };
-        context.Rounds.Add(round);
-
-        // The sitting of that round in that season, under the competition its composite slug spells out.
-        var roundInstance = new RoundInstance
-        {
-            Id = Guid.NewGuid(),
-            RoundId = round.Id,
             CompetitionId = CompetitionTreeSeed.Chain(context, "testcomp-testround").Id,
             SeasonId = season.Id,
             Date = DateOnly.FromDateTime(DateTime.Today)
         };
-        context.RoundInstances.Add(roundInstance);
+        context.Rounds.Add(round);
 
-        // One problem in the round instance
+        // One problem in the round
         context.Problems.Add(new Problem
         {
-            RoundInstanceId = roundInstance.Id,
+            RoundId = round.Id,
             Number = 1,
             Slug = ProblemSlug
         });

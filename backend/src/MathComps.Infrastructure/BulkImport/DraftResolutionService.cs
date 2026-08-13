@@ -29,32 +29,33 @@ public class DraftResolutionService(
         // Read-only context; nothing here writes.
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        // Competition resolves by slug, among the roots — a slug repeats freely further down the tree.
+        // The competition node the draft's three slugs name, which resolves by its path.
+        var competitionPath = TaxonomySlugs.ComposeCompetitionPath(
+            target.CompetitionSlug, target.CategorySlug, target.RoundSlug);
         var competitionExists = await context.Competitions.AsNoTracking()
-            .AnyAsync(competition => competition.ParentId == null && competition.Slug == target.CompetitionSlug);
+            .AnyAsync(competition => competition.Path == competitionPath);
 
         // Season resolves by start year
         var seasonExists = await context.Seasons.AsNoTracking()
             .AnyAsync(season => season.StartYear == target.SeasonYear);
 
-        // Round resolves by composite slug.
-        var compositeRoundSlug = TaxonomySlugs.ComposeRoundSlug(
-            target.CompetitionSlug, target.CategorySlug, target.RoundSlug);
+        // The round is that competition's sitting in that season.
         var roundExists = await context.Rounds.AsNoTracking()
-            .AnyAsync(round => round.CompositeSlug == compositeRoundSlug);
+            .AnyAsync(round => round.Competition.Path == competitionPath
+                               && round.Season.StartYear == target.SeasonYear);
 
         // Order matters for the preview: competition, then season, then round.
         var resolutions = ImmutableArray.Create(
-            new EntityResolution("competition", target.CompetitionSlug, ToAction(competitionExists)),
+            new EntityResolution("competition", competitionPath, ToAction(competitionExists)),
             new EntityResolution("season", target.SeasonYear.ToString(), ToAction(seasonExists)),
-            new EntityResolution("round", compositeRoundSlug, ToAction(roundExists)));
+            new EntityResolution("round", $"{competitionPath} {target.SeasonYear}", ToAction(roundExists)));
 
         // Map each draft problem to its would-be slug so we can both probe the DB and report against it. The slug is
         // keyed by the season's edition (ročník); derive it so the probe matches the persisted slug.
         var editionNumber = Season.EditionFromStartYear(target.SeasonYear);
         var slugByOrder = problems.ToDictionary(
             problem => problem.Order,
-            problem => TaxonomySlugs.ProblemSlug(editionNumber, compositeRoundSlug, problem.Order));
+            problem => TaxonomySlugs.ProblemSlug(editionNumber, competitionPath, problem.Order));
 
         // Load the existing texts for the slugs that already exist — keyed by slug for the per-half lookup below.
         var candidateSlugs = slugByOrder.Values.ToList();
@@ -83,8 +84,8 @@ public class DraftResolutionService(
         // draft's candidate slugs) is what lets a fresh import that skipped a problem, or a subset re-import onto a
         // slug that doesn't exist yet, be told apart from a legitimate correction or append.
         var existingOrders = await context.Problems.AsNoTracking()
-            .Where(problem => problem.RoundInstance.Round.CompositeSlug == compositeRoundSlug
-                              && problem.RoundInstance.Season.StartYear == target.SeasonYear)
+            .Where(problem => problem.Round.Competition.Path == competitionPath
+                              && problem.Round.Season.StartYear == target.SeasonYear)
             .Select(problem => problem.Number)
             .ToListAsync();
 
@@ -96,7 +97,7 @@ public class DraftResolutionService(
             .ToImmutableArray();
 
         // The taxonomy rows apply would renumber to match the registry, plus any row the registry can't place.
-        var (sortOrderChanges, orphans) = await PreviewSortOrderAsync(context, target);
+        var (sortOrderChanges, orphans) = await PreviewSortOrderAsync(context, competitionPath);
 
         // Hand back the create-vs-reuse picture, the per-text resolutions for colliding slugs, the round's gaps,
         // and the sort-order reconciliation apply would perform.
@@ -105,55 +106,42 @@ public class DraftResolutionService(
     }
 
     /// <summary>
-    /// Previews the sort-order reconciliation apply would perform: which stored competition, category and round rows
-    /// the registry would renumber, and which rows carry a slug the registry no longer knows. Read-only.
+    /// Previews the sort-order reconciliation apply would perform: which stored competition nodes the registry would
+    /// renumber, and which carry a path the registry no longer knows. Read-only, and scoped to exactly the
+    /// generations apply descends through — those are the ones whose renumbering a stray row could collide with.
     /// </summary>
     /// <param name="context">The read-only context.</param>
-    /// <param name="target">The draft taxonomy, which scopes the round comparison to its competition.</param>
+    /// <param name="competitionPath">The competition path the draft names, whose chain is the scope.</param>
     /// <returns>The renumbering apply would perform, and the unregistered (orphan) rows blocking it.</returns>
     private async Task<(ImmutableArray<SortOrderChange> Changes, ImmutableArray<TaxonomyOrphan> Orphans)>
-        PreviewSortOrderAsync(MathCompsDbContext context, DraftTarget target)
+        PreviewSortOrderAsync(MathCompsDbContext context, string competitionPath)
     {
-        // The registry order lookups for each family, returning null for a slug the registry doesn't carry.
-        var (competitionOrderOf, categoryOrderOf, roundOrderOf) =
-            TaxonomyResequencer.RegistryOrders(metadata.Shared, target.CompetitionSlug);
+        // Accumulate across the generations the walk would touch.
+        var changes = ImmutableArray.CreateBuilder<SortOrderChange>();
+        var orphans = ImmutableArray.CreateBuilder<TaxonomyOrphan>();
 
-        // The stored competition and category rows, global sort-order spaces. Only the roots answer to the
-        // registry's competition list; everything deeper is ordered against its own generation.
-        var competitions = await context.Competitions.AsNoTracking()
-            .Where(competition => competition.ParentId == null)
-            .Select(competition => new { competition.Slug, competition.SortOrder }).ToListAsync();
-        var categories = await context.Categories.AsNoTracking()
-            .Select(category => new { category.Slug, category.SortOrder }).ToListAsync();
+        // Each generation the path runs through, named by the parent whose children it is — the roots first,
+        // then every node above the target. Descending the same way apply does is what keeps the two in step.
+        foreach (var (parentPath, _, _) in CompetitionTree.Descend(competitionPath))
+        {
+            // The nodes already sitting in it. A root has no parent path to match on.
+            var siblings = await context.Competitions.AsNoTracking()
+                .Where(node => parentPath == null ? node.ParentId == null : node.Parent!.Path == parentPath)
+                .Select(node => new { node.Path, node.SortOrder }).ToListAsync();
 
-        // The target competition's stored rounds, the only round space this draft can shift.
-        var rounds = await context.Rounds.AsNoTracking()
-            .Where(round => round.Competition.Slug == target.CompetitionSlug)
-            .Select(round => new { round.Slug, round.SortOrder }).ToListAsync();
+            // Where the registry puts each of them, null for one it can't place.
+            var registryOrderOf = TaxonomyResequencer.ChildOrder(metadata.Shared, parentPath);
 
-        // The renumbering each family needs; rounds repeat a slug across categories, so collapse equal changes.
-        var changes = TaxonomyResequencer.ComputeChanges(
-                TaxonomyKind.Competition, [.. competitions.Select(row => (row.Slug, row.SortOrder))], competitionOrderOf)
-            .Concat(TaxonomyResequencer.ComputeChanges(
-                TaxonomyKind.Category, [.. categories.Select(row => (row.Slug, row.SortOrder))], categoryOrderOf))
-            .Concat(TaxonomyResequencer.ComputeChanges(
-                TaxonomyKind.Round, [.. rounds.Select(row => (row.Slug, row.SortOrder))], roundOrderOf))
-            .Distinct()
-            .ToImmutableArray();
-
-        // The rows the registry can't place — a non-empty slug (the default round's empty slug is legitimate) with no
-        // registry position. Reported by kind; the round slug repeats across categories, so collapse equal orphans.
-        var orphans = competitions.Where(row => competitionOrderOf(row.Slug) is null)
-            .Select(row => new TaxonomyOrphan(TaxonomyKind.Competition, row.Slug))
-            .Concat(categories.Where(row => categoryOrderOf(row.Slug) is null)
-                .Select(row => new TaxonomyOrphan(TaxonomyKind.Category, row.Slug)))
-            .Concat(rounds.Where(row => row.Slug != "" && roundOrderOf(row.Slug) is null)
-                .Select(row => new TaxonomyOrphan(TaxonomyKind.Round, row.Slug)))
-            .Distinct()
-            .ToImmutableArray();
+            // The renumbering this generation needs, and the rows that block it.
+            changes.AddRange(TaxonomyResequencer.ComputeChanges(
+                [.. siblings.Select(row => (row.Path, row.SortOrder))], registryOrderOf));
+            orphans.AddRange(siblings
+                .Where(row => registryOrderOf(row.Path) is null)
+                .Select(row => new TaxonomyOrphan(row.Path)));
+        }
 
         // The reconciliation preview.
-        return (changes, orphans);
+        return (changes.ToImmutable(), orphans.ToImmutable());
     }
 
     /// <summary>

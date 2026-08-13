@@ -5,118 +5,81 @@ namespace MathComps.Domain.Taxonomy;
 
 /// <summary>
 /// Language-neutral structure of the competition taxonomy, deserialized from
-/// <see cref="ResourcePaths.SharedMetadataFileName"/>: which competitions exist, which carry categories, which
-/// rounds each has, and the sort order of all three (encoded as array position).
+/// <see cref="ResourcePaths.SharedMetadataFileName"/>: the tree of competition nodes, at any depth, where a node's
+/// position among its siblings is its sort order.
 /// </summary>
-/// <param name="Competitions">All competitions, in display order.</param>
-/// <param name="Categories">All category slugs, in sort order.</param>
-public record SharedMetadata(
-    ImmutableArray<SharedCompetition> Competitions,
-    ImmutableArray<string> Categories)
+/// <param name="Nodes">The roots — whole competitions — in display order.</param>
+public record SharedMetadata(ImmutableArray<SharedNode> Nodes)
 {
     /// <summary>
-    /// Looks up a competition's structural entry by slug.
+    /// The node a path addresses, at whatever depth it sits.
     /// </summary>
-    /// <param name="slug">The competition slug (e.g. "csmo", "imo").</param>
-    /// <returns>The structural entry.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the competition has no structural entry.</exception>
-    public SharedCompetition Competition(string slug) =>
-        Competitions.FirstOrDefault(competition => competition.Slug == slug)
-            ?? throw StructuralOrder.Missing("competition", slug);
-
-    /// <summary>
-    /// A competition's sort order — its 1-based position in the taxonomy.
-    /// </summary>
-    /// <param name="slug">The competition slug (e.g. "csmo", "imo").</param>
-    /// <returns>The 1-based sort order.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the competition has no structural entry.</exception>
-    public int CompetitionSortOrder(string slug) =>
-        StructuralOrder.PositionOrThrow(Competitions, competition => competition.Slug == slug, "competition", slug);
-
-    /// <summary>
-    /// A category's sort order — its 1-based position in the global category list.
-    /// </summary>
-    /// <param name="slug">The category slug (e.g. "a", "z5").</param>
-    /// <returns>The 1-based sort order.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the category has no structural entry.</exception>
-    public int CategorySortOrder(string slug) =>
-        StructuralOrder.PositionOrThrow(Categories, candidate => candidate == slug, "category", slug);
-}
-
-/// <summary>
-/// Structural entry for a single competition.
-/// </summary>
-/// <param name="Slug">The competition slug (e.g. "csmo", "imo").</param>
-/// <param name="Categories">
-/// Category slugs this competition uses, in sort order, or null when the competition has no categories.
-/// </param>
-/// <param name="Rounds">
-/// Round slugs this competition has, in sort order. Empty means the competition has a single default round
-/// (the derived <c>IsDefault</c> case), e.g. IMO.
-/// </param>
-public record SharedCompetition(
-    string Slug,
-    ImmutableArray<string>? Categories,
-    ImmutableArray<string> Rounds)
-{
-    /// <summary>
-    /// Whether this competition carries no explicit rounds — i.e. its single round is the synthetic default
-    /// round (the derived <c>IsDefault</c> case, e.g. IMO).
-    /// </summary>
-    public bool HasDefaultRound => Rounds.IsEmpty;
-
-    /// <summary>
-    /// A round's sort order — its 1-based position among this competition's rounds. A default round (no slug,
-    /// or a competition with no explicit rounds) sorts first.
-    /// </summary>
-    /// <param name="roundSlug">The round slug (e.g. "iii"), or null for a default round.</param>
-    /// <returns>The 1-based sort order.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the round has no structural entry.</exception>
-    public int RoundSortOrder(string? roundSlug)
+    /// <param name="path">The node's path (e.g. "csmo", "csmo-a", "csmo-a-iii").</param>
+    /// <returns>The structural entry, or null when the registry doesn't carry it.</returns>
+    public SharedNode? Node(string path)
     {
-        // A default round — no slug, or a competition with no explicit rounds — always sorts first.
-        if (roundSlug is null || Rounds.IsEmpty)
-            return 1;
+        // The node the descent has reached, still null above the roots.
+        SharedNode? current = null;
 
-        // Otherwise the round's position among its competition's rounds is the sort order.
-        return StructuralOrder.PositionOrThrow(
-            Rounds, candidate => candidate == roundSlug, "round", $"{Slug}/{roundSlug}");
+        // One generation per segment, from the root down.
+        foreach (var slug in path.Split('-'))
+        {
+            // The generation to look in — the roots at the first segment, the current node's children after that.
+            var generation = current is null ? Nodes : current.Children ?? [];
+
+            // The node this segment names, if that generation carries one.
+            current = generation.FirstOrDefault(candidate => candidate.Slug == slug);
+
+            // A segment naming nothing means the whole path names nothing.
+            if (current is null)
+                return null;
+        }
+
+        // The node the last segment landed on.
+        return current;
+    }
+
+    /// <summary>
+    /// The slugs a node can carry one level down, in registry order — which is what numbers that generation.
+    /// A slug listed here need not have a row yet: position is absolute, so a node the registry lists but no
+    /// draft has introduced leaves its slot empty rather than packing the rest down.
+    /// </summary>
+    /// <param name="parentPath">The parent's path, or null for the roots.</param>
+    /// <returns>The child slugs in order; empty at a leaf, or when the registry doesn't carry the parent.</returns>
+    public ImmutableArray<string> ChildSlugs(string? parentPath) =>
+        [.. (parentPath is null ? Nodes : Node(parentPath)?.Children ?? []).Select(node => node.Slug)];
+
+    /// <summary>
+    /// A node's sort order — its 1-based position among its siblings.
+    /// </summary>
+    /// <param name="path">The node's path (e.g. "csmo-a-iii").</param>
+    /// <returns>The 1-based sort order.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the node has no structural entry.</exception>
+    public int SortOrder(string path)
+    {
+        // A node is ordered among the children of whatever sits above it; a root has nothing above it.
+        var separator = path.LastIndexOf('-');
+        var siblings = ChildSlugs(separator < 0 ? null : path[..separator]);
+        var slug = separator < 0 ? path : path[(separator + 1)..];
+
+        // Position in that generation is the sort order — a hit returns a 1-based order, a miss returns 0.
+        var order = siblings.Select((candidate, index) => candidate == slug ? index + 1 : 0)
+            .FirstOrDefault(found => found > 0);
+
+        // A node the registry can't place has no order to give it.
+        return order > 0
+            ? order
+            : throw new InvalidOperationException(
+                $"No structural entry for competition '{path}' in {ResourcePaths.SharedMetadataFileName}.");
     }
 }
 
 /// <summary>
-/// Helpers for reading sort order out of the taxonomy's array-position encoding.
+/// Structural entry for a single competition node.
 /// </summary>
-file static class StructuralOrder
-{
-    /// <summary>
-    /// Returns the 1-based position of the first item matching the predicate, throwing when none matches.
-    /// </summary>
-    /// <typeparam name="T">The array element type.</typeparam>
-    /// <param name="items">The ordered array to scan.</param>
-    /// <param name="match">The predicate identifying the wanted item.</param>
-    /// <param name="entityKind">The kind of entity (e.g. "competition", "round"), for the error message.</param>
-    /// <param name="identifier">The slug or composite key being resolved, for the error message.</param>
-    /// <returns>The 1-based position.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when no item matches.</exception>
-    public static int PositionOrThrow<T>(
-        ImmutableArray<T> items,
-        Func<T, bool> match,
-        string entityKind,
-        string identifier)
-    {
-        // Position in the array is the sort order — a hit returns a 1-based order, a miss returns 0.
-        var order = items.Select((item, index) => match(item) ? index + 1 : 0).FirstOrDefault(found => found > 0);
-        return order > 0 ? order : throw Missing(entityKind, identifier);
-    }
-
-    /// <summary>
-    /// Creates an exception for a taxonomy slug missing its structural entry in
-    /// <see cref="ResourcePaths.SharedMetadataFileName"/>.
-    /// </summary>
-    /// <param name="entityKind">The kind of entity (e.g. "competition", "round").</param>
-    /// <param name="identifier">The slug or composite key that wasn't found.</param>
-    /// <returns>An exception describing the gap.</returns>
-    public static InvalidOperationException Missing(string entityKind, string identifier) =>
-        new($"No structural entry for {entityKind} '{identifier}' in {ResourcePaths.SharedMetadataFileName}.");
-}
+/// <param name="Slug">The node's own slug, one path segment (e.g. "csmo", "a", "iii").</param>
+/// <param name="Children">
+/// The nodes one level down, in sort order, or null at a leaf — which is what a competition running as one flat
+/// sitting (IMO, EGMO) looks like, and what a round looks like until something nests below it.
+/// </param>
+public record SharedNode(string Slug, ImmutableArray<SharedNode>? Children);

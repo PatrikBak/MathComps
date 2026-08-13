@@ -1,95 +1,72 @@
 {
-  "competitions": [
+  "nodes": [
     {
       "slug": "csmo",
-      "categories": [
-        "a",
-        "b",
-        "c",
-        "z9",
-        "z8",
-        "z7",
-        "z6",
-        "z5",
-        "z4"
-      ],
-      "rounds": [
-        "i",
-        "s",
-        "ii",
-        "iii"
+      "children": [
+        {
+          "slug": "a",
+          "children": [{ "slug": "i" }, { "slug": "s" }, { "slug": "ii" }, { "slug": "iii" }]
+        },
+        {
+          "slug": "b",
+          "children": [{ "slug": "i" }, { "slug": "s" }, { "slug": "ii" }, { "slug": "iii" }]
+        },
+        {
+          "slug": "c",
+          "children": [{ "slug": "i" }, { "slug": "s" }, { "slug": "ii" }, { "slug": "iii" }]
+        },
+        {
+          "slug": "z9",
+          "children": [{ "slug": "i" }, { "slug": "ii" }, { "slug": "iii" }]
+        },
+        {
+          "slug": "z8",
+          "children": [{ "slug": "i" }, { "slug": "ii" }, { "slug": "iii" }]
+        },
+        {
+          "slug": "z7",
+          "children": [{ "slug": "i" }, { "slug": "ii" }, { "slug": "iii" }]
+        },
+        {
+          "slug": "z6",
+          "children": [{ "slug": "i" }, { "slug": "ii" }, { "slug": "iii" }]
+        },
+        {
+          "slug": "z5",
+          "children": [{ "slug": "i" }, { "slug": "ii" }, { "slug": "iii" }]
+        },
+        {
+          "slug": "z4",
+          "children": [{ "slug": "i" }, { "slug": "ii" }]
+        }
       ]
     },
     {
       "slug": "tst",
-      "categories": null,
-      "rounds": [
-        "d1",
-        "d2",
-        "d3",
-        "d4",
-        "d5"
+      "children": [
+        { "slug": "d1" },
+        { "slug": "d2" },
+        { "slug": "d3" },
+        { "slug": "d4" },
+        { "slug": "d5" }
       ]
     },
     {
       "slug": "memo",
-      "categories": null,
-      "rounds": [
-        "i",
-        "t"
-      ]
+      "children": [{ "slug": "i" }, { "slug": "t" }]
     },
-    {
-      "slug": "imo",
-      "categories": null,
-      "rounds": []
-    },
-    {
-      "slug": "caps",
-      "categories": null,
-      "rounds": []
-    },
-    {
-      "slug": "emo",
-      "categories": null,
-      "rounds": []
-    },
-    {
-      "slug": "egmo",
-      "categories": null,
-      "rounds": []
-    },
-    {
-      "slug": "tstc",
-      "categories": null,
-      "rounds": []
-    },
+    { "slug": "imo" },
+    { "slug": "caps" },
+    { "slug": "emo" },
+    { "slug": "egmo" },
+    { "slug": "tstc" },
     {
       "slug": "cpsj",
-      "categories": null,
-      "rounds": [
-        "i",
-        "t"
-      ]
+      "children": [{ "slug": "i" }, { "slug": "t" }]
     },
     {
       "slug": "duogeo",
-      "categories": null,
-      "rounds": [
-        "zs",
-        "ss"
-      ]
+      "children": [{ "slug": "zs" }, { "slug": "ss" }]
     }
-  ],
-  "categories": [
-    "a",
-    "b",
-    "c",
-    "z9",
-    "z8",
-    "z7",
-    "z6",
-    "z5",
-    "z4"
   ]
 }
