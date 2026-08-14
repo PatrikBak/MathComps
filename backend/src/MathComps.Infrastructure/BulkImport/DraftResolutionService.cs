@@ -29,33 +29,31 @@ public class DraftResolutionService(
         // Read-only context; nothing here writes.
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        // The competition node the draft's three slugs name, which resolves by its path.
-        var competitionPath = TaxonomySlugs.ComposeCompetitionPath(
-            target.CompetitionSlug, target.CategorySlug, target.RoundSlug);
+        // Whether the contest path already addresses a stored competition.
         var competitionExists = await context.Competitions.AsNoTracking()
-            .AnyAsync(competition => competition.Path == competitionPath);
+            .AnyAsync(competition => competition.Path == target.ContestPath);
 
         // Season resolves by start year
         var seasonExists = await context.Seasons.AsNoTracking()
             .AnyAsync(season => season.StartYear == target.SeasonYear);
 
-        // The round is that competition's sitting in that season.
+        // Whether that competition already has a sitting in that season.
         var roundExists = await context.Rounds.AsNoTracking()
-            .AnyAsync(round => round.Competition.Path == competitionPath
+            .AnyAsync(round => round.Competition.Path == target.ContestPath
                                && round.Season.StartYear == target.SeasonYear);
 
         // Order matters for the preview: competition, then season, then round.
         var resolutions = ImmutableArray.Create(
-            new EntityResolution("competition", competitionPath, ToAction(competitionExists)),
+            new EntityResolution("competition", target.ContestPath, ToAction(competitionExists)),
             new EntityResolution("season", target.SeasonYear.ToString(), ToAction(seasonExists)),
-            new EntityResolution("round", $"{competitionPath} {target.SeasonYear}", ToAction(roundExists)));
+            new EntityResolution("round", $"{target.ContestPath} {target.SeasonYear}", ToAction(roundExists)));
 
         // Map each draft problem to its would-be slug so we can both probe the DB and report against it. The slug is
         // keyed by the season's edition (ročník); derive it so the probe matches the persisted slug.
         var editionNumber = Season.EditionFromStartYear(target.SeasonYear);
         var slugByOrder = problems.ToDictionary(
             problem => problem.Order,
-            problem => TaxonomySlugs.ProblemSlug(editionNumber, competitionPath, problem.Order));
+            problem => TaxonomySlugs.ProblemSlug(editionNumber, target.ContestPath, problem.Order));
 
         // Load the existing texts for the slugs that already exist — keyed by slug for the per-half lookup below.
         var candidateSlugs = slugByOrder.Values.ToList();
@@ -84,7 +82,7 @@ public class DraftResolutionService(
         // draft's candidate slugs) is what lets a fresh import that skipped a problem, or a subset re-import onto a
         // slug that doesn't exist yet, be told apart from a legitimate correction or append.
         var existingOrders = await context.Problems.AsNoTracking()
-            .Where(problem => problem.Round.Competition.Path == competitionPath
+            .Where(problem => problem.Round.Competition.Path == target.ContestPath
                               && problem.Round.Season.StartYear == target.SeasonYear)
             .Select(problem => problem.Number)
             .ToListAsync();
@@ -97,7 +95,7 @@ public class DraftResolutionService(
             .ToImmutableArray();
 
         // The taxonomy rows apply would renumber to match the registry, plus any row the registry can't place.
-        var (sortOrderChanges, orphans) = await PreviewSortOrderAsync(context, competitionPath);
+        var (sortOrderChanges, orphans) = await PreviewSortOrderAsync(context, target.ContestPath);
 
         // Hand back the create-vs-reuse picture, the per-text resolutions for colliding slugs, the round's gaps,
         // and the sort-order reconciliation apply would perform.
@@ -111,10 +109,10 @@ public class DraftResolutionService(
     /// generations apply descends through — those are the ones whose renumbering a stray row could collide with.
     /// </summary>
     /// <param name="context">The read-only context.</param>
-    /// <param name="competitionPath">The competition path the draft names, whose chain is the scope.</param>
+    /// <param name="contestPath">The path the draft names its contest by, whose chain is the scope.</param>
     /// <returns>The renumbering apply would perform, and the unregistered (orphan) rows blocking it.</returns>
     private async Task<(ImmutableArray<SortOrderChange> Changes, ImmutableArray<TaxonomyOrphan> Orphans)>
-        PreviewSortOrderAsync(MathCompsDbContext context, string competitionPath)
+        PreviewSortOrderAsync(MathCompsDbContext context, string contestPath)
     {
         // Accumulate across the generations the walk would touch.
         var changes = ImmutableArray.CreateBuilder<SortOrderChange>();
@@ -122,7 +120,7 @@ public class DraftResolutionService(
 
         // Each generation the path runs through, named by the parent whose children it is — the roots first,
         // then every node above the target. Descending the same way apply does is what keeps the two in step.
-        foreach (var (parentPath, _, _) in CompetitionTree.Descend(competitionPath))
+        foreach (var (parentPath, _, _) in CompetitionTree.Descend(contestPath))
         {
             // The nodes already sitting in it. A root has no parent path to match on.
             var siblings = await context.Competitions.AsNoTracking()

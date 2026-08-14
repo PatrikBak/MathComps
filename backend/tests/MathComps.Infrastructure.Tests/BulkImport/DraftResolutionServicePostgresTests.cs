@@ -123,8 +123,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         context.ProblemTexts.Add(
             SeedText(imageProblem.Id, DocumentType.Statement, Language.SK, isOriginal: true, markdown: imageBody));
 
-        // A category-less competition and its own sitting, so a two-segment path ("memo-i") gets exercised alongside
-        // the three-segment one.
+        // A competition whose rounds hang straight off it, plus its 2024 sitting — the two-segment path "memo-i".
         context.Rounds.Add(new Round
         {
             Id = Guid.NewGuid(),
@@ -144,7 +143,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     [Fact]
     public Task Existing_taxonomy_is_reused() => RunTestAsync(async service =>
     {
-        // Preview a one-problem original draft against the seeded csmo/a/iii · 2024 round.
+        // Preview a one-problem original draft against the seeded csmo-a-iii · 2024 round.
         var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
 
         // All three taxonomy entities already exist, so all reuse.
@@ -162,7 +161,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // Preview a draft whose competition, round and season are all absent.
         var preview = await PreviewAsync(
-            service, new DraftTarget("newcomp", null, "i", 2099), Problem(1, Original(Language.SK)));
+            service, new DraftTarget("newcomp-i", 2099), Problem(1, Original(Language.SK)));
 
         // Nothing exists yet, so all three would be created.
         Assert.Equal(ResolutionAction.Create, ActionFor(preview, "competition"));
@@ -180,9 +179,9 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     [Fact]
     public Task A_new_season_under_an_existing_competition_creates_the_season_and_its_round() => RunTestAsync(async service =>
     {
-        // Same csmo/a/iii competition, but the 2025 season doesn't exist yet.
+        // Same csmo-a-iii contest, but the 2025 season doesn't exist yet.
         var preview = await PreviewAsync(
-            service, new DraftTarget("csmo", "a", "iii", 2025), Problem(1, Original(Language.SK)));
+            service, new DraftTarget("csmo-a-iii", 2025), Problem(1, Original(Language.SK)));
 
         // The competition is reused; the season and the round it would run are both new.
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
@@ -194,15 +193,15 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// The category is part of the competition's path: the same competition and round under a different category
-    /// addresses a different node, so both the competition and its round read as creates.
+    /// A path differing anywhere along its length addresses a different competition, so a draft naming the same
+    /// round under a sibling category reads as a create for both the competition and its round.
     /// </summary>
     [Fact]
-    public Task A_different_category_resolves_to_a_new_competition() => RunTestAsync(async service =>
+    public Task A_sibling_contest_resolves_to_a_new_competition() => RunTestAsync(async service =>
     {
-        // csmo/b/iii composes to "csmo-b-iii", which isn't the seeded "csmo-a-iii".
+        // "csmo-b-iii" differs from the seeded "csmo-a-iii" one segment in.
         var preview = await PreviewAsync(
-            service, new DraftTarget("csmo", "b", "iii", 2024), Problem(1, Original(Language.SK)));
+            service, new DraftTarget("csmo-b-iii", 2024), Problem(1, Original(Language.SK)));
 
         // The season still exists; the differently-addressed competition and its round do not.
         Assert.Equal(ResolutionAction.Create, ActionFor(preview, "competition"));
@@ -211,17 +210,17 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// A category-less competition's round resolves by its two-segment path ("memo-i"), so the seeded competition
-    /// and its sitting are both reused.
+    /// A contest sitting two levels down resolves by its own two-segment path, so the seeded competition and its
+    /// sitting are both reused — depth is nothing the lookup knows about.
     /// </summary>
     [Fact]
-    public Task A_category_less_round_resolves_by_its_path() => RunTestAsync(async service =>
+    public Task A_two_level_contest_resolves_by_its_path() => RunTestAsync(async service =>
     {
-        // memo/(no category)/i composes to "memo-i", which is seeded.
+        // "memo-i" is seeded, one level shallower than the csmo rounds beside it.
         var preview = await PreviewAsync(
-            service, new DraftTarget("memo", null, "i", 2024), Problem(1, Original(Language.SK)));
+            service, new DraftTarget("memo-i", 2024), Problem(1, Original(Language.SK)));
 
-        // All three exist, so all reuse — proving the null-category path matched the stored node.
+        // All three exist, so all reuse — proving the shorter path matched the stored node.
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "competition"));
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "season"));
         Assert.Equal(ResolutionAction.Reuse, ActionFor(preview, "round"));
@@ -557,10 +556,10 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// Builds a draft target for the seeded csmo/a/iii · 2024 round.
+    /// Builds a draft target for the seeded csmo-a-iii · 2024 round.
     /// </summary>
     /// <returns>The configured target.</returns>
-    private static DraftTarget SeededTarget() => new("csmo", "a", "iii", 2024);
+    private static DraftTarget SeededTarget() => new("csmo-a-iii", 2024);
 
     /// <summary>
     /// Previews a single-problem draft against the seeded round, with no on-disk images.

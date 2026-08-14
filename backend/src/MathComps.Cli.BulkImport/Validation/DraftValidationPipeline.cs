@@ -75,9 +75,7 @@ public class DraftValidationPipeline(
         try
         {
             // Map the manifest's taxonomy onto the Infrastructure contract.
-            var target = new DraftTarget(
-                manifest.Meta.Competition, manifest.Meta.Category, manifest.Meta.Round,
-                manifest.Meta.Season.Year);
+            var target = new DraftTarget(manifest.Meta.ContestPath, manifest.Meta.Season.Year);
 
             // Carry each problem's full content — the preview reproduces the bodies the import would store, so it
             // needs the markdown and images, not just the shape.

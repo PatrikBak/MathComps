@@ -1,5 +1,3 @@
-using MathComps.Shared.Extensions;
-
 namespace MathComps.Domain.Taxonomy;
 
 /// <summary>
@@ -10,28 +8,10 @@ namespace MathComps.Domain.Taxonomy;
 public static class TaxonomySlugs
 {
     /// <summary>
-    /// Composes a competition path from the three slugs a draft names it by —
-    /// <c>{competition}[-{category}][-{round}]</c>, slugified. A null category or round drops its segment, so a
-    /// competition running as one flat sitting lands on its own path.
-    /// </summary>
-    /// <param name="competition">Competition slug or name (e.g. <c>csmo</c>).</param>
-    /// <param name="category">Category slug or name (e.g. <c>a</c>), or null when there's no category.</param>
-    /// <param name="round">Round slug or name (e.g. <c>iii</c>), or null to stop at the competition
-    /// or category.</param>
-    /// <returns>The competition path (e.g. <c>csmo-a-iii</c>, <c>memo-i</c>, <c>imo</c>).</returns>
-    public static string ComposeCompetitionPath(string competition, string? category, string? round) =>
-        // Join the present segments with hyphens, then slugify to the canonical lowercase form.
-        string.Concat(
-            competition,
-            category is null ? "" : $"-{category}",
-            round is null ? "" : $"-{round}").ToSlug();
-
-    /// <summary>
     /// Derives a problem's slug — <c>{editionNumber}-{competitionPath}-{order}</c>.
     /// </summary>
     /// <param name="editionNumber">The season's edition number (ročník), e.g. 75.</param>
-    /// <param name="competitionPath">The competition node's path, e.g. from
-    /// <see cref="ComposeCompetitionPath"/>.</param>
+    /// <param name="competitionPath">The competition node's path, e.g. <c>csmo-a-iii</c>.</param>
     /// <param name="order">The problem's 1-based position within the competition.</param>
     /// <returns>The problem slug (e.g. <c>75-csmo-a-iii-1</c>).</returns>
     public static string ProblemSlug(int editionNumber, string competitionPath, int order) =>

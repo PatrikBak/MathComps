@@ -12,11 +12,15 @@ import type { ManifestMeta, Season, VerdictError } from './preflight-draft-types
 /** Filename of the folder-level taxonomy file. */
 export const META_FILENAME = '_meta.yaml'
 
+/** The key `_meta.yaml` names the contest by. */
+const CONTEST_FIELD = 'contest'
+
+/** The only shape a contest is addressed in: lowercase alphanumeric segments joined by hyphens. */
+const CONTEST_PATH_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
+
 /** Meta values substituted for any field that can't be read. */
 export const FALLBACK_META: ManifestMeta = {
-  competition: '',
-  category: null,
-  round: null,
+  contestPath: '',
   season: { year: 0 },
   date: '',
   language: DEFAULT_LOCALE,
@@ -69,56 +73,36 @@ export function narrowMeta(parsed: unknown): MetaResult {
 
   // Narrow each field independently so every problem is reported at once
   const errors: VerdictError[] = []
-  const competition = requireSlug(parsed.competition, 'competition', errors)
-  const round = optionalSlug(parsed.round, 'round', errors)
-  const category = optionalSlug(parsed.category, 'category', errors)
+  const contestPath = requireContestPath(parsed[CONTEST_FIELD], errors)
   const season = narrowSeason(parsed.season, errors)
   const date = narrowDate(parsed.date, errors)
   const language = narrowLanguage(parsed.language, errors)
 
   // Assemble the best-effort meta alongside the collected issues
-  return { meta: { competition, category, round, season, date, language }, errors }
+  return { meta: { contestPath, season, date, language }, errors }
 }
 
 /**
- * Reads a required slug field, recording an error and returning `''` when it is
- * missing or not a non-empty string.
+ * Reads the required contest path, recording an error and returning `''` when it is missing or not a
+ * well-formed path. The shape check is what keeps a malformed segment out of the C# half, which walks
+ * the path segment by segment and refuses anything outside the slug alphabet.
  *
- * @param value - The raw field value from the parsed document.
- * @param field - The field name, used in the error message.
+ * @param value - The raw `contest` value from the parsed document.
  * @param errors - Accumulator the issue is pushed onto.
  *
- * @returns The slug, or `''` when missing or malformed.
+ * @returns The contest path, or `''` when missing or malformed.
  */
-function requireSlug(value: unknown, field: string, errors: VerdictError[]): string {
-  // A non-empty string is a usable slug
-  if (typeof value === 'string' && value.trim() !== '') return value
+function requireContestPath(value: unknown, errors: VerdictError[]): string {
+  // A string whose every segment is drawn from the slug alphabet addresses a contest
+  if (typeof value === 'string' && CONTEST_PATH_PATTERN.test(value)) return value
 
   // Anything else is missing or malformed
-  errors.push(metaIssue(`${field} is required and must be a non-empty string`))
+  errors.push(
+    metaIssue(
+      `${CONTEST_FIELD} is required and must be a path of lowercase alphanumeric segments joined by "-" (e.g. csmo-a-iii)`
+    )
+  )
   return ''
-}
-
-/**
- * Reads an optional slug field, returning `null` when absent and recording an
- * error when present but not a non-empty string.
- *
- * @param value - The raw field value from the parsed document.
- * @param field - The field name, used in the error message.
- * @param errors - Accumulator the issue is pushed onto.
- *
- * @returns The slug, or `null` when absent or malformed.
- */
-function optionalSlug(value: unknown, field: string, errors: VerdictError[]): string | null {
-  // An absent optional slug is simply null
-  if (value === undefined || value === null) return null
-
-  // When present it must still be a non-empty string
-  if (typeof value === 'string' && value.trim() !== '') return value
-
-  // Present but malformed
-  errors.push(metaIssue(`${field} must be a non-empty string when present`))
-  return null
 }
 
 /**

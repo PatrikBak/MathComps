@@ -18,13 +18,10 @@ public static class ValidateReport
     /// <param name="result">The aggregated validation result.</param>
     public static void Render(ManifestMeta meta, ValidateResult result)
     {
-        // Lead with what's being validated — the taxonomy the rest of the report is about. A default round (no
-        // slug) contributes no segment, the same way a category-less competition omits its slash.
-        var category = meta.Category is null ? "" : $"/{Escape(meta.Category)}";
-        var round = meta.Round is null ? "" : $"/{Escape(meta.Round)}";
-        var taxonomy = $"{Escape(meta.Competition)}{category}{round}";
+        // Lead with what's being validated — the contest the rest of the report is about.
         var language = meta.Language.ToString().ToLowerInvariant();
-        AnsiConsole.MarkupLine($"[bold]Validating[/] {taxonomy} · season {meta.Season.Year} · {language}");
+        AnsiConsole.MarkupLine(
+            $"[bold]Validating[/] {Escape(meta.ContestPath)} · season {meta.Season.Year} · {language}");
 
         // The DB preview, when we have one — what would be created vs reused, and what would be overwritten.
         if (result.DbPreview is { } preview)

@@ -17,9 +17,9 @@ namespace MathComps.Infrastructure.Tests.BulkImport;
 /// <summary>
 /// Integration tests for <see cref="DraftApplyService"/> against a real Postgres database, starting from an empty
 /// schema so every run exercises the create path. These pin the behaviours a pure test can't reach: the taxonomy
-/// chain is created with structural fields (sort order, edition number, composite slug) sourced from the registry,
-/// a re-import is idempotent (overwrite in place, no duplicate rows), a translation attaches without disturbing the
-/// original, and images are uploaded under the slug-based key with their refs rewritten into the stored markdown.
+/// chain is created with structural fields (path, sort order, sort path) sourced from the registry, a re-import is
+/// idempotent (overwrite in place, no duplicate rows), a translation attaches without disturbing the original, and
+/// images are uploaded under the slug-based key with their refs rewritten into the stored markdown.
 /// The R2 uploader is faked — no network — so the test asserts the keys and rewritten refs instead.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
@@ -27,7 +27,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IDraftApplyService>(fixture)
 {
     /// <summary>
-    /// The slug the csmo/a/iii · 2024 problem 1 upserts on — keyed by the season's edition (2024 − 1950 = 74).
+    /// The slug the csmo-a-iii · 2024 problem 1 upserts on — keyed by the season's edition (2024 − 1950 = 74).
     /// </summary>
     private const string ProblemSlug = "74-csmo-a-iii-1";
 
@@ -223,11 +223,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Re-applying a draft whose <c>_meta</c> date was corrected updates the round-instance's stored date in place:
-    /// the round-instance reports the update action and the row's date moves to the draft's new value.
+    /// Re-applying a draft whose <c>_meta</c> date was corrected updates the round's stored date in place: the
+    /// round reports the update action and the row's date moves to the draft's new value.
     /// </summary>
     [Fact]
-    public Task Re_applying_with_a_changed_date_updates_the_round_instance() => RunTestAsync(async service =>
+    public Task Re_applying_with_a_changed_date_updates_the_round() => RunTestAsync(async service =>
     {
         // Import the problem under the original round date.
         await service.ApplyAsync(
@@ -238,7 +238,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         var second = await service.ApplyAsync(
             CsmoTarget(), correctedDate, [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
 
-        // The round-instance reports the date update distinctly from the quiet reuse path.
+        // The round reports the date update distinctly from the quiet reuse path.
         var round = second.Entities.Single(entity => entity.EntityKind == "round");
         Assert.Equal(ResolutionAction.Update, round.Action);
 
@@ -846,7 +846,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // Import a tst problem — tst sits at registry order 2, the slot memo currently holds.
         var result = await service.ApplyAsync(
-            new DraftTarget("tst", null, "d1", 2024), RoundDate,
+            new DraftTarget("tst-d1", 2024), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Every competition, the new one included, now carries its registry order.
@@ -910,11 +910,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task Applying_a_draft_raises_the_competition_chain() => RunTestAsync(async service =>
     {
-        // Import a csmo/a/iii problem into a database carrying no taxonomy at all.
+        // Import a csmo-a-iii problem into a database carrying no taxonomy at all.
         await service.ApplyAsync(
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
-        // The three levels the target names now stand as competitions.
+        // Every level the path names now stands as a competition.
         await QueryAsync(async context =>
         {
             // The whole tree, shallowest first.
@@ -934,7 +934,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             // iii fourth among its rounds. A root extends nothing, so it carries its own position alone.
             Assert.Equal(["0001", "0001.0001", "0001.0001.0004"], tree.Select(entity => entity.SortPath));
 
-            // The round instance hangs off the deepest level, which is where its problems sit in the tree.
+            // The round hangs off the deepest level, which is where its problems sit in the tree.
             var round = await context.Rounds
                 .Include(entity => entity.Competition)
                 .SingleAsync();
@@ -943,15 +943,15 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A default round names no competition of its own: it stands for its whole brand, so the chain stops at
-    /// the root and that is what its problems hang under.
+    /// A single-segment contest path stops the chain at the root, so a whole brand running as one sitting is
+    /// what its problems hang under.
     /// </summary>
     [Fact]
-    public Task A_default_round_stands_for_its_whole_competition() => RunTestAsync(async service =>
+    public Task A_root_contest_stands_for_its_whole_competition() => RunTestAsync(async service =>
     {
         // Import an imo problem, imo being a competition the registry gives no rounds at all.
         await service.ApplyAsync(
-            new DraftTarget("imo", null, null, 2024), RoundDate,
+            new DraftTarget("imo", 2024), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // The brand is the only row, and the round hangs off it.
@@ -979,13 +979,13 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task A_competition_holds_its_absolute_registry_position() => RunTestAsync(async service =>
     {
-        // Import csmo/a/iii first, which leaves it the only round under its category.
+        // Import csmo-a-iii first, which leaves it the only round under its category.
         await service.ApplyAsync(
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
-        // Then import csmo/a/i, which the registry orders ahead of iii.
+        // Then import csmo-a-i, which the registry orders ahead of iii.
         await service.ApplyAsync(
-            new DraftTarget("csmo", "a", "i", 2024), RoundDate,
+            new DraftTarget("csmo-a-i", 2024), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
         // Both sit where csmo's round list puts them, the unused s and ii slots left open between them.
@@ -1013,7 +1013,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task Inserting_a_round_mid_array_resequences_the_sibling_rounds() => RunTestAsync(async service =>
     {
-        // Seed csmo/a with two rounds as they stood before "s"/"ii" entered — i and iii as a contiguous block.
+        // Seed csmo-a with two rounds as they stood before "s"/"ii" entered — i and iii as a contiguous block.
         await QueryAsync(async context =>
         {
             // Chain places each round at the next free slot, so they land contiguously at 1 and 2.
@@ -1024,7 +1024,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo/a/iii problem — apply reconciles the generation before reusing the node.
+        // Import a csmo-a-iii problem — apply reconciles the generation before reusing the node.
         var result = await service.ApplyAsync(
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
@@ -1060,7 +1060,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo/a/iii problem — apply reconciles csmo's children before reusing category a.
+        // Import a csmo-a-iii problem — apply reconciles csmo's children before reusing category a.
         var result = await service.ApplyAsync(
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
@@ -1111,7 +1111,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task A_swapped_pair_moving_into_new_slots_is_resequenced() => RunTestAsync(async service =>
     {
-        // Seed csmo/a with iii and ii inverted, as a two-round block from before "i" and "s" entered the registry.
+        // Seed csmo-a with iii and ii inverted, as a two-round block from before "i" and "s" entered the registry.
         await QueryAsync(async context =>
         {
             // Chain places each round at the next free slot, so iii lands at 1 and ii at 2.
@@ -1122,7 +1122,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo/a/iii problem — apply reconciles the generation before reusing the node.
+        // Import a csmo-a-iii problem — apply reconciles the generation before reusing the node.
         await service.ApplyAsync(
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
@@ -1162,7 +1162,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Import a csmo/a/iii problem — apply reconciles csmo's children, which shifts category c up.
+        // Import a csmo-a-iii problem — apply reconciles csmo's children, which shifts category c up.
         await service.ApplyAsync(
             CsmoTarget(), RoundDate, [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath());
 
@@ -1188,7 +1188,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Import a draft whose competition the registry doesn't carry.
         var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ApplyAsync(
-            new DraftTarget("notacomp", null, "i", 2024), RoundDate,
+            new DraftTarget("notacomp-i", 2024), RoundDate,
             [Problem(1, Original(Language.SK, "statement"))], Path.GetTempPath()));
 
         // The refusal names the path it couldn't place.
@@ -1274,15 +1274,15 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         (await context.Tags.SingleAsync(tag => tag.Slug == slug)).TagType;
 
     /// <summary>
-    /// The round-instance date every draft in these tests imports under.
+    /// The round date every draft in these tests imports under.
     /// </summary>
     private static DateOnly RoundDate => new(2024, 3, 15);
 
     /// <summary>
-    /// Builds the draft target for the csmo/a/iii · 2024 round.
+    /// Builds the draft target for the csmo-a-iii · 2024 round.
     /// </summary>
     /// <returns>The configured target.</returns>
-    private static DraftTarget CsmoTarget() => new("csmo", "a", "iii", 2024);
+    private static DraftTarget CsmoTarget() => new("csmo-a-iii", 2024);
 
     /// <summary>
     /// Builds a draft problem with a single author and no images.

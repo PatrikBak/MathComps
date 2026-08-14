@@ -1,38 +1,26 @@
 using System.Collections.Immutable;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Resources;
 
 namespace MathComps.Domain.Taxonomy;
 
 /// <summary>
-/// Which kind of taxonomy slug a registry-link issue concerns.
+/// One competition on the path a draft names its contest by that the registry doesn't back as somewhere problems
+/// can land: it's absent from the structural backbone (<see cref="ResourcePaths.SharedMetadataFileName"/>),
+/// missing a localized name in one or more locale files, or — for the contest the path ends at — carrying a
+/// generation below it. A competition must be present in both files for it to render in production, and a
+/// contest carrying others below it is a container rather than a sitting, so each gap is a preflight failure.
 /// </summary>
-public enum TaxonomyEntityKind
-{
-    /// <summary>A competition slug (e.g. <c>csmo</c>).</summary>
-    Competition,
-
-    /// <summary>A category slug (e.g. <c>a</c>).</summary>
-    Category,
-
-    /// <summary>A round, referenced as the (competition, category, round) composite.</summary>
-    Round
-}
-
-/// <summary>
-/// One taxonomy slug that a draft references but the registry doesn't fully back: it's either absent from the
-/// structural backbone (<see cref="ResourcePaths.SharedMetadataFileName"/>) or missing a localized name in one
-/// or more locale files.
-/// A slug must be present in both for it to render in production, so either gap is a preflight failure.
-/// </summary>
-/// <param name="EntityKind">Which kind of slug this is.</param>
-/// <param name="Identifier">The slug, or for a round the composite description (e.g. <c>csmo-a-iii</c>).</param>
-/// <param name="MissingFromSharedStructure">True when the slug has no structural entry in
+/// <param name="Path"><inheritdoc cref="Competition.Path" path="/summary"/></param>
+/// <param name="MissingFromSharedStructure">True when the competition has no structural entry in
 /// <see cref="ResourcePaths.SharedMetadataFileName"/>.</param>
 /// <param name="MissingLocales">Locales whose <c>metadata.{locale}.json</c> carries no localized name for the
-/// slug.</param>
+/// competition.</param>
+/// <param name="CarriesNestedContests">True when the draft names this competition as its contest and the
+/// registry gives it competitions below it, which are the ones the draft was supposed to pick from.</param>
 public record TaxonomyRegistryIssue(
-    TaxonomyEntityKind EntityKind,
-    string Identifier,
+    string Path,
     bool MissingFromSharedStructure,
-    ImmutableArray<Language> MissingLocales);
+    ImmutableArray<Language> MissingLocales,
+    bool CarriesNestedContests);

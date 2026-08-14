@@ -26,7 +26,7 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
     private const string ProblemSlug = "lookup-problem";
 
     /// <summary>
-    /// Slug of the seeded problem sitting four levels down, deeper than the three slugs can spell.
+    /// Slug of the seeded problem sitting four levels down.
     /// </summary>
     private const string DeepProblemSlug = "deep-lookup-problem";
 
@@ -65,13 +65,13 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
         // A contest two levels down
         var shallow = await service.GetProblemLookupDataAsync(ProblemSlug);
 
-        // Assert - the path names it whole
+        // The path names it whole
         Assert.Equal("testcomp-testround", shallow?.ContestPath);
 
         // One sitting four levels down
         var deep = await service.GetProblemLookupDataAsync(DeepProblemSlug);
 
-        // Assert - the path keeps every level of it, including the one the three slugs used to drop
+        // The path keeps every level of it, at whatever depth the contest sits
         Assert.Equal("deep-mid-low-round", deep?.ContestPath);
     });
 

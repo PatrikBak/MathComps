@@ -20,7 +20,7 @@ public class SimilarityCalculationSettings
     public int TotalCandidateLimit { get; set; }
 
     /// <summary>
-    /// Maps competition composite slugs to a numeric cluster ID for grouping similar competitions.
+    /// Maps contest paths to numeric cluster IDs for grouping similar competitions.
     /// </summary>
     [Required]
     // Populated by the configuration binder, never mutated in code.

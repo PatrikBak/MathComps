@@ -15,7 +15,7 @@ The format spec is the single source of truth — read it first: `web/scripts/PR
 
 ```
 my-draft/
-  _meta.yaml        # round taxonomy: competition / category? / round? / season / date / language (the original language, e.g. sk)
+  _meta.yaml        # the contest's path + season / date / language (the original language, e.g. sk)
   p1.sk.md          # problem 1 in its original language (the locale matching _meta's language): statement, optional "<!-- solution -->", solution
   p1.cs.md          # problem 1 in another locale (cs, en, …) — a translation; statement-only ok, solution only if the original has one
   p1.yaml           # problem 1's authors / solutionLink / tags — all optional; the file itself is required only for a newly-created problem
@@ -26,7 +26,7 @@ Filenames are `p<number>.<locale>.md`, locale one of `sk` / `cs` / `en`. The fil
 
 ## What a draft can do
 
-Each problem is matched to the DB by slug (`{edition}-{round}-{order}`). The one fork is **does it already exist?**
+Each problem is matched to the DB by slug (`{edition}-{contestPath}-{order}`). The one fork is **does it already exist?**
 
 - **New problem** → the import _creates_ it: it needs its original-language body **and** a `pN.yaml`; translations optional.
 - **Existing problem** → the import _patches_ it: ship only the bodies you're changing, and `pN.yaml` is optional (omit = leave authors/tags/link untouched). Statement and solution are independent halves, so adding just a solution is fine.
@@ -51,24 +51,29 @@ Check `backend/src/MathComps.Infrastructure/Resources/metadata.shared.json`. If 
 
 **The two files must list exactly the same paths** — a test asserts it in both directions, so a node added to one and forgotten in the other fails the suite.
 
-Decide the shape:
-- **Categories** (age/level bands like `a`,`b`,`z9`) → the competition's `children`; omit `category:` in drafts that don't use them. Each carries its own `nodes["{competition}-{category}"]` name.
+Decide the shape. The tree nests as deep as the competition really does — three levels is the deepest anything runs today, not a ceiling:
+- **Categories** (age/level bands like `a`,`b`,`z9`) → the competition's `children`, when it has them at all. Each carries its own `nodes["{competition}-{category}"]` name.
 - **Rounds** (`i`,`ii`,`iii`, `d1`…) → the `children` of whatever they hang under, which is the category when there is one and the competition otherwise. **Each parent lists only the rounds it actually runs**, so CSMO's Z4 carries just `i`, `ii` while its A carries `i`, `s`, `ii`, `iii`.
-- **One flat sitting** — a competition with no sub-rounds (IMO/EGMO) omits `children` entirely. Then `_meta.yaml` **omits `round:`**, its problems hang off the competition itself, and its own `nodes` entry is the only name needed. (Gotcha below.)
+- **One flat sitting** — a competition with no sub-rounds (IMO/EGMO) omits `children` entirely; its problems hang off the competition itself, and its own `nodes` entry is the only name needed.
+
+Every slug is lowercase alphanumeric with **no hyphen in it** — a hyphen is what joins a slug to its parent's path, so one inside a slug would make the path ambiguous. Path composition throws on it, and a check constraint refuses the row underneath.
 
 Add a test row for any new competition/round/name to `MetadataLocalizationServiceTests` (display order, leaf/child shape, name resolution, `Registered_taxonomy_has_no_issues`). A new root also needs its slug in `Shared_roots_are_in_display_order`; the parity sweep walks the registry itself, so it needs no edit.
 
 ## Step 2 — Author `_meta.yaml`
 
 ```yaml
-competition: csmo   # competition slug
-category: b         # omit for category-less competitions
-round: ii           # omit for a competition that runs as one flat sitting
+contest: csmo-b-ii  # the contest's path
 season:
   year: 2025        # academic season START year — a SPRING event belongs to the previous autumn's season
 date: 2026-03-31    # the round date, YYYY-MM-DD
-language: sk         # the draft's original language: sk | cs | en
+language: sk        # the draft's original language: sk | cs | en
 ```
+
+`contest` is the path from Step 1: the slugs from the root of the taxonomy down to the contest the problems were set in, hyphen-joined, however many that is. `csmo-b-ii` is round II of category B; `memo-i` is a round of a competition with no categories; `imo` is a competition that runs as one flat sitting. Two rules the registry check enforces:
+
+- **Every competition on the path must be registered** — `csmo-b-ii` needs `csmo`, `csmo-b` and `csmo-b-ii` all present in the shared tree and named in all three locales, or you get one error per missing one.
+- **The contest must be a leaf.** Naming `csmo-b` when it carries rounds fails with "has contests nested below it" — those rounds are what a draft picks from, since problems hang off a sitting, not off a container.
 
 Season year is the academic start, not the event year: a March-2026 event ⇒ `year: 2025` (ročník = year − 1950, shared across competitions by design — it is not each competition's own edition count).
 

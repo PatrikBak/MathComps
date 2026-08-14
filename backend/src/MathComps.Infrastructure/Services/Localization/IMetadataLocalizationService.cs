@@ -1,4 +1,5 @@
 
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Taxonomy;
 using MathComps.Domain.Localization;
 namespace MathComps.Infrastructure.Services.Localization;
@@ -9,25 +10,21 @@ namespace MathComps.Infrastructure.Services.Localization;
 public interface IMetadataLocalizationService
 {
     /// <summary>
-    /// The language-neutral taxonomy structure: competitions, their categories and rounds, and the sort order of
-    /// all three.
+    /// The language-neutral taxonomy structure: the tree of competition nodes and the sort order of each
+    /// generation.
     /// </summary>
     SharedMetadata Shared { get; }
 
     /// <summary>
-    /// Checks that the taxonomy a draft references is fully registered: every competition, category and round
-    /// slug must carry a structural entry in the shared taxonomy and a localized name in every locale. Returns
-    /// one <see cref="TaxonomyRegistryIssue"/> per slug with either gap, so a typo'd or unregistered slug is
-    /// caught up front rather than slipping through as a missing name; an empty list means it's fully registered.
+    /// Checks that a draft's contest is somewhere problems can land: every competition its path runs through
+    /// must carry a structural entry in the shared taxonomy and a localized name in every locale, and the
+    /// contest itself must run as a sitting rather than carry a generation below it. Returns one
+    /// <see cref="TaxonomyRegistryIssue"/> per competition with a gap, so a typo'd or unregistered path is
+    /// caught up front rather than slipping through as a missing name; an empty list means it all resolves.
     /// </summary>
-    /// <param name="competitionSlug">The competition slug the draft references.</param>
-    /// <param name="categorySlug">The category slug, or null when the competition has no categories.</param>
-    /// <param name="roundSlug">The round slug, or null for a competition's default round.</param>
+    /// <param name="contestPath"><inheritdoc cref="Competition.Path" path="/summary"/></param>
     /// <returns>The registry-link issues found, or an empty list when everything resolves.</returns>
-    IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(
-        string competitionSlug,
-        string? categorySlug,
-        string? roundSlug);
+    IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(string contestPath);
 
     /// <summary>
     /// Gets the localized short name of the contest node a path addresses, at whatever depth it sits — a whole
