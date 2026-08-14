@@ -3,7 +3,15 @@
 
 import type { PagedList } from '@/lib/api/paged-list'
 
-import type { CompetitionNodeOption, FacetOption, LabeledSlug, Problem } from './problem-api-types'
+import type {
+  CompetitionNodeOption,
+  FacetOption,
+  LabeledSlug,
+  LogicToggle,
+  MarkStatusFilter,
+  Problem,
+  TagFacetOption,
+} from './problem-api-types'
 
 /**
  * Everything the library can be filtered by, each option carrying how many problems it
@@ -17,7 +25,7 @@ export type FilterOptionsWithCounts = {
   /** The positions a problem can hold within its round. */
   problemNumbers: FacetOption[]
   /** The topics and techniques problems are tagged with. */
-  tags: FacetOption[]
+  tags: TagFacetOption[]
   /** The people who wrote the problems. */
   authors: FacetOption[]
 }
@@ -36,11 +44,6 @@ export type CompetitionSelection = {
 }
 
 /**
- * The mark state a problem can be in.
- */
-export type MarkStatusFilter = 'marked' | 'unmarked'
-
-/**
  * Everything the library is currently filtered by.
  */
 export type SearchFiltersState = {
@@ -57,11 +60,11 @@ export type SearchFiltersState = {
   /** The tags filtered on. */
   tags: LabeledSlug[]
   /** Whether a problem has to carry any of the tags or all of them. */
-  tagLogic: 'or' | 'and'
+  tagLogic: LogicToggle
   /** The authors filtered on. */
   authors: LabeledSlug[]
   /** Whether a problem has to carry any of the authors or all of them. */
-  authorLogic: 'or' | 'and'
+  authorLogic: LogicToggle
   /** Whether to show only the problems the user has liked. */
   favoritesOnly: boolean
   /** Whether to show only marked or only unmarked problems, or not to care. */
@@ -79,23 +82,35 @@ export type UrlQueryState = Omit<SearchFiltersState, 'competitionSelection'> & {
 }
 
 /**
- * One page of problems, with the option counts that page implies.
+ * One page of problems and the option counts it implies, as the archive endpoints put it on the wire.
  */
-export type FilterResponse = {
+export type FilterResult = {
   /** The page of matching problems. */
   problems: PagedList<Problem>
-  /** The option counts under these filters, null when they cannot have changed. */
+  /** The option counts under these filters, null on every page after the first, which cannot change them. */
   updatedOptions: FilterOptionsWithCounts | null
+}
+
+/**
+ * A search's answer, as the filter endpoint puts it on the wire: the page, plus what the search itself
+ * was made of that the page cannot say.
+ */
+export type ProblemFilterResponse = {
+  /** The page of problems and the option counts. */
+  filterResult: FilterResult
   /** The name of the list being browsed, null when browsing everything. */
   listName: string | null
 }
 
 /**
- * A filter response as it arrives over the wire, before the nesting is flattened away.
+ * One page of problems as the service hands it on, which is a {@link ProblemFilterResponse} with the
+ * nesting flattened away so a caller reads one object rather than reaching through two.
  */
-export type RawProblemFilterResponse = {
-  /** The page of problems and the option counts. */
-  filterResult: FilterResponse
+export type FilterResponse = {
+  /** The page of matching problems. */
+  problems: PagedList<Problem>
+  /** The option counts under these filters, null on every page after the first, which cannot change them. */
+  updatedOptions: FilterOptionsWithCounts | null
   /** The name of the list being browsed, null when browsing everything. */
   listName: string | null
 }

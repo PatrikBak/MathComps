@@ -26,17 +26,20 @@ type OptionSortMode = 'count-desc-alpha' | 'numeric-asc'
  * Restates the options a facet always offers with the counts they carry under the current
  * filters, and puts them in the order the facet wants them.
  *
+ * @template TOption - What the facet offers, which is a facet option or a kind of one.
  * @param baseOptions - Every option the facet offers, whatever is filtered.
  * @param filterOptions - The options surviving the other filters, which is where the counts come from.
  * @param sortMode - The ordering to apply.
  * @param locale - The locale the names are collated under.
+ * @param groupKeyOf - What to gather an option under, left off by a facet that renders one flat run.
  * @returns The options a facet renders, ordered.
  */
-function buildFacetOptions(
-  baseOptions: FacetOption[],
-  filterOptions: FacetOption[],
+function buildFacetOptions<TOption extends FacetOption>(
+  baseOptions: TOption[],
+  filterOptions: TOption[],
   sortMode: OptionSortMode,
-  locale: string
+  locale: string,
+  groupKeyOf?: (option: TOption) => string
 ): FacetUiOption[] {
   // Counts keyed by slug, so restating an option is a lookup
   const countBySlug = new Map(filterOptions.map((option) => [option.slug, option.count]))
@@ -46,7 +49,7 @@ function buildFacetOptions(
     id: option.slug,
     displayName: option.displayName,
     count: countBySlug.get(option.slug) ?? 0,
-    groupKey: option.tagType,
+    groupKey: groupKeyOf?.(option),
   }))
 
   // Ordered under the requested mode
@@ -212,9 +215,16 @@ export function useSearchFiltersLogic({
     }))
   }, [baseOptions.seasons, filterOptions.seasons])
 
-  // The tags, with the ones carrying the most results leading
+  // The tags, with the ones carrying the most results leading, gathered by what kind of tag they are
   const tagOpts: FacetUiOption[] = useMemo(
-    () => buildFacetOptions(baseOptions.tags, filterOptions.tags, 'count-desc-alpha', locale),
+    () =>
+      buildFacetOptions(
+        baseOptions.tags,
+        filterOptions.tags,
+        'count-desc-alpha',
+        locale,
+        (tag) => tag.tagType
+      ),
     [baseOptions.tags, filterOptions.tags, locale]
   )
 

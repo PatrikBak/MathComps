@@ -1,9 +1,5 @@
-import type { LabeledSlug } from '../types/problem-api-types'
-import type {
-  MarkStatusFilter,
-  SearchFiltersState,
-  UrlQueryState,
-} from '../types/problem-library-types'
+import type { LabeledSlug, MarkStatusFilter } from '../types/problem-api-types'
+import type { SearchFiltersState, UrlQueryState } from '../types/problem-library-types'
 
 /**
  * The keys the search filters are written under in the URL.
@@ -203,7 +199,7 @@ const parseSlugArray = (value: string | null): LabeledSlug[] => {
   return value
     .split(SEPARATORS.LIST)
     .filter(Boolean)
-    .map((slug) => ({ slug, displayName: slug }))
+    .map((slug) => ({ slug, displayName: slug, fullName: null }))
 }
 
 /**

@@ -32,14 +32,14 @@ describe('Search URL Serialization', () => {
       const filters = createFilters({
         searchText: 'algebra',
         searchInSolution: true,
-        seasons: [{ displayName: '2023', slug: '2023' }],
+        seasons: [{ displayName: '2023', slug: '2023', fullName: null }],
         problemNumbers: [1, 5, 10],
         tags: [
-          { displayName: 'Combinatorics', slug: 'combinatorics' },
-          { displayName: 'Geometry', slug: 'geometry' },
+          { displayName: 'Combinatorics', slug: 'combinatorics', fullName: null },
+          { displayName: 'Geometry', slug: 'geometry', fullName: null },
         ],
         tagLogic: 'and',
-        authors: [{ displayName: 'John Doe', slug: 'john-doe' }],
+        authors: [{ displayName: 'John Doe', slug: 'john-doe', fullName: null }],
         competitionSelection: [{ path: 'imo-a-finals' }],
         favoritesOnly: true,
       })
@@ -151,7 +151,7 @@ describe('Search URL Serialization', () => {
     it('should omit logic param when single item selected', () => {
       // One tag, under a mode that says nothing until a second tag joins it
       const filters = createFilters({
-        tags: [{ slug: 'algebra', displayName: 'Algebra' }],
+        tags: [{ slug: 'algebra', displayName: 'Algebra', fullName: null }],
         tagLogic: 'and',
       })
 
@@ -167,8 +167,8 @@ describe('Search URL Serialization', () => {
       // Two tags, matched all or nothing
       const filters = createFilters({
         tags: [
-          { slug: 'algebra', displayName: 'Algebra' },
-          { slug: 'geometry', displayName: 'Geometry' },
+          { slug: 'algebra', displayName: 'Algebra', fullName: null },
+          { slug: 'geometry', displayName: 'Geometry', fullName: null },
         ],
         tagLogic: 'and',
       })

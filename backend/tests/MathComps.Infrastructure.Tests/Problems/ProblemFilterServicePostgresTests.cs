@@ -1147,7 +1147,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Single(result.Problems.Items);
         var problem = result.Problems.Items[0];
         Assert.Equal("75-a-i-1", problem.Slug);
-        Assert.Equal(Language.SK, problem.StatementLanguage);
+        Assert.Equal("Ostrov je rozdelený na niekoľko kráľovstiev.", problem.StatementMarkdown);
     });
 
     /// <summary>
@@ -1185,9 +1185,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Single(result.Problems.Items);
         var problem = result.Problems.Items[0];
         Assert.Equal("75-a-i-1", problem.Slug);
-        Assert.Equal(Language.EN, problem.StatementLanguage);
-        // Verify we got the English content (parsed as JSON, just check it's there)
-        Assert.NotEmpty(problem.StatementMarkdown);
+        Assert.Equal("The island is divided into several kingdoms.", problem.StatementMarkdown);
     });
 
     /// <summary>
@@ -1225,7 +1223,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Single(result.Problems.Items);
         var problem = result.Problems.Items[0];
         Assert.Equal("75-b-i-1", problem.Slug);
-        Assert.Equal(Language.SK, problem.StatementLanguage);  // Fallback to original
+        Assert.Equal("Každej hrane štvorstena priradíme jedno reálne číslo.", problem.StatementMarkdown);
     });
 
     #endregion

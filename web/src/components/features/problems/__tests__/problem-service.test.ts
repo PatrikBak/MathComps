@@ -9,7 +9,7 @@ import type { ApiCaller } from '@/hooks/use-api'
 
 import { getProblemBySlug } from '../services/problem-service'
 import type { CompetitionNodeOption, LabeledSlug, Problem } from '../types/problem-api-types'
-import type { FilterResponse } from '../types/problem-library-types'
+import type { FilterResult } from '../types/problem-library-types'
 import { buildCompetitionTree } from '../utils/competition-tree'
 import taxonomyFixture from './fixtures/competition-taxonomy.json'
 
@@ -27,7 +27,7 @@ const tree = buildCompetitionTree(competitions, competitions)
  */
 function labeledSlug(path: string): LabeledSlug {
   // The path standing as its own name
-  return { slug: path, displayName: path }
+  return { slug: path, displayName: path, fullName: null }
 }
 
 /**
@@ -56,6 +56,7 @@ function apiCallReturning(source: Problem['source']): ApiCaller {
   const problem: Problem = {
     slug: 'a-problem',
     statementMarkdown: '',
+    solutionLink: null,
     source,
     tags: [],
     authors: [],
@@ -68,10 +69,9 @@ function apiCallReturning(source: Problem['source']): ApiCaller {
   }
 
   // The one-problem page the endpoint would serve
-  const response: FilterResponse = {
+  const response: FilterResult = {
     problems: { items: [problem], page: 1, pageSize: 1, totalCount: 1 },
     updatedOptions: null,
-    listName: null,
   }
 
   // Every call lands on that page, whichever slug it asks for

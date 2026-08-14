@@ -16,11 +16,8 @@ import { isExclusiveSelection } from '../../../shared/utils/event-utils'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { usePrefetchCompetitionBrowser } from '../hooks/use-competition-browser'
 import { useCompetitionBrowserModal } from '../hooks/use-competition-browser-modal'
-import type {
-  FilterOptionsWithCounts,
-  MarkStatusFilter,
-  SearchFiltersState,
-} from '../types/problem-library-types'
+import type { MarkStatusFilter } from '../types/problem-api-types'
+import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { generateCompetitionChips } from '../utils/competition-chips'
 import { buildCompetitionTree, resolveCompetitionPaths } from '../utils/competition-tree'
 import { createDefaultFilters } from '../utils/url-initialization'
@@ -135,7 +132,7 @@ export default function ActiveFiltersBar({
     // The browser picks one competition outright, so everything else is cleared rather than kept
     onFiltersChange({
       ...defaultFilters,
-      seasons: [{ slug: selection.seasonSlug, displayName: seasonDisplayName }],
+      seasons: [{ slug: selection.seasonSlug, displayName: seasonDisplayName, fullName: null }],
       competitionSelection: competitionSelections ?? [],
     })
 

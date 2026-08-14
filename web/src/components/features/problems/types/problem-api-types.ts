@@ -1,6 +1,5 @@
-// The problem archive's wire shapes, one per backend DTO. They are hand-written rather than generated,
-// so a member added or renamed on the C# side has to be mirrored here by hand — a mismatch compiles
-// cleanly and only surfaces as an undefined field at runtime.
+// The problem archive's wire shapes: what the archive endpoints put on the wire, spelled out to the
+// field the archive reads. A field the backend serves and nothing here consumes is deliberately absent.
 
 /**
  * A thing named by a slug, carrying the names it reads under, both already in the requested language.
@@ -11,7 +10,7 @@ export type LabeledSlug = {
   /** The short name it is shown by (e.g. `IMO`). */
   displayName: string
   /** The name in full, for a tooltip or a heading (e.g. `International Mathematical Olympiad`). */
-  fullName?: string
+  fullName: string | null
 }
 
 /**
@@ -24,11 +23,26 @@ export type FacetOption = {
   /** The short name it is shown by. */
   displayName: string
   /** The name in full, for a tooltip or a heading. */
-  fullName?: string
+  fullName: string | null
   /** How many problems this option covers under the current filter. */
   count: number
-  /** What kind of tag it is, present only on the tag facet. */
-  tagType?: TagType
+}
+
+/**
+ * One tag a facet can be filtered by, which also says what kind of tag it is. Only the tag facet is
+ * offered this way, since nothing else groups its options.
+ */
+export type TagFacetOption = {
+  /** URL-safe identifier for the tag. */
+  slug: string
+  /** The short name it is shown by. */
+  displayName: string
+  /** The name in full, for a tooltip or a heading. */
+  fullName: string | null
+  /** How many problems this tag covers under the current filter. */
+  count: number
+  /** Its conceptual role, which the facet groups its options by. */
+  tagType: TagType
 }
 
 /** What a tag says about a problem: its field, its shape, what it asks for, or how it is solved. */
@@ -45,7 +59,7 @@ export type TagDto = {
 }
 
 /** How several picks within one facet combine: any of them, or all of them at once. */
-type LogicToggle = 'or' | 'and'
+export type LogicToggle = 'or' | 'and'
 
 /**
  * Where a problem comes from: the season it ran in, the competition it was set in, and its position there.
@@ -84,8 +98,8 @@ export type Problem = {
    * translation, and in the original otherwise.
    */
   statementMarkdown: string
-  /** The key of its published solution, absent while none has been published. */
-  solutionLink?: string | null
+  /** The key of its published solution, null while none has been published. */
+  solutionLink: string | null
   /** Where it comes from. */
   source: ProblemSource
   /** What it is about, and how it is solved. */
@@ -132,6 +146,29 @@ export type FilterParameters = {
   authorSlugs: string[]
   /** Whether a problem must be by any of those authors or by all of them. */
   authorLogic: LogicToggle
+}
+
+/** Which side of the reader's mark a problem has to be on. */
+export type MarkStatusFilter = 'marked' | 'unmarked'
+
+/**
+ * A whole search request: what to match, and which slice of the matches to serve. The narrowings that
+ * need a reader behind them sit out here rather than in {@link FilterParameters}, which is the part a
+ * signed-out visitor can ask for in full.
+ */
+export type FilterQuery = {
+  /** What a problem has to look like to match. */
+  parameters: FilterParameters
+  /** How many problems the page holds, capped server-side. */
+  pageSize: number
+  /** Which page to serve, counting from 1. Only the first carries the recounted facet options. */
+  pageNumber: number
+  /** Whether to keep only the problems the reader has liked. */
+  favoritesOnly: boolean
+  /** The reader's list to search inside, null to search the whole archive. */
+  listContentId: string | null
+  /** The mark state to keep, null to keep both. */
+  markStatus: MarkStatusFilter | null
 }
 
 /**

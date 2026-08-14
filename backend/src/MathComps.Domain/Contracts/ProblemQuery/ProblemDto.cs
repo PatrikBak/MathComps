@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using MathComps.Domain.Contracts.Helpers;
-using MathComps.Domain.Localization;
 
 namespace MathComps.Domain.Contracts.ProblemQuery;
 
@@ -8,9 +7,8 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 /// A single problem presented to the UI.
 /// </summary>
 /// <param name="Slug">URL-safe unique identifier for the problem.</param>
-/// <param name="StatementMarkdown">Problem statement as a Markdown+TeX string.</param>
-/// <param name="StatementLanguage">Language of the returned statement
-/// (may differ from requested language when fallback to original occurs).</param>
+/// <param name="StatementMarkdown">Problem statement as a Markdown+TeX string, in the requested language
+/// where a translation exists and in the original otherwise.</param>
 /// <param name="Source"><inheritdoc cref="ProblemSource" path="/summary"/></param>
 /// <param name="Tags">Associated tags with type categorization.</param>
 /// <param name="Authors">Associated authors.</param>
@@ -24,7 +22,6 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 public record ProblemDto(
     string Slug,
     string StatementMarkdown,
-    Language StatementLanguage,
     ProblemSource Source,
     ImmutableList<TagDto> Tags,
     ImmutableList<LabeledSlug> Authors,
