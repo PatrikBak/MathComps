@@ -11,7 +11,7 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 /// <param name="StatementMarkdown">Problem statement as a Markdown+TeX string.</param>
 /// <param name="StatementLanguage">Language of the returned statement
 /// (may differ from requested language when fallback to original occurs).</param>
-/// <param name="Source">Competition/season/round/category metadata.</param>
+/// <param name="Source"><inheritdoc cref="ProblemSource" path="/summary"/></param>
 /// <param name="Tags">Associated tags with type categorization.</param>
 /// <param name="Authors">Associated authors.</param>
 /// <param name="SimilarProblems">Recommended similar problems and their similarity scores.</param>

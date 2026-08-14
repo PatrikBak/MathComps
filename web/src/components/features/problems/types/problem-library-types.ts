@@ -3,21 +3,13 @@
 
 import type { PagedList } from '@/lib/api/paged-list'
 
-import type {
-  CompetitionFilterOption,
-  ContestNodeOption,
-  FacetOption,
-  LabeledSlug,
-  Problem,
-} from './problem-api-types'
+import type { ContestNodeOption, FacetOption, LabeledSlug, Problem } from './problem-api-types'
 
 /**
  * Everything the library can be filtered by, each option carrying how many problems it
  * covers, either across the whole library or under a given filter.
  */
 export type FilterOptionsWithCounts = {
-  /** The competition hierarchy, with its categories and rounds nested inside it. */
-  competitions: CompetitionFilterOption[]
   /** The contests as the tree they form, each carrying everything below it. */
   contests: ContestNodeOption[]
   /** The school years problems were set in. */

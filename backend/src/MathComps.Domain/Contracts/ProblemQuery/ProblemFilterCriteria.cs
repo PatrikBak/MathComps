@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using MathComps.Domain.Contracts.Helpers;
-using MathComps.Domain.Contracts.SearchBar;
 
 namespace MathComps.Domain.Contracts.ProblemQuery;
 
@@ -8,7 +7,7 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 /// <param name="SearchText"><inheritdoc cref="FilterParameters" path="/param[@name='SearchText']"/></param>
 /// <param name="SearchInSolution"><inheritdoc cref="FilterParameters" path="/param[@name='SearchInSolution']"/></param>
 /// <param name="OlympiadYears"><inheritdoc cref="FilterParameters" path="/param[@name='OlympiadYears']"/></param>
-/// <param name="Contests"><inheritdoc cref="FilterParameters" path="/param[@name='Contests']"/></param>
+/// <param name="ContestPaths"><inheritdoc cref="FilterParameters" path="/param[@name='ContestPaths']"/></param>
 /// <param name="ProblemNumbers"><inheritdoc cref="FilterParameters" path="/param[@name='ProblemNumbers']"/></param>
 /// <param name="TagSlugs"><inheritdoc cref="FilterParameters" path="/param[@name='TagSlugs']"/></param>
 /// <param name="TagLogic"><inheritdoc cref="FilterParameters" path="/param[@name='TagLogic']"/></param>
@@ -18,7 +17,7 @@ public record ProblemFilterCriteria(
     string SearchText,
     bool SearchInSolution,
     ImmutableList<int> OlympiadYears,
-    ImmutableList<ContestSelection> Contests,
+    ImmutableList<string> ContestPaths,
     ImmutableList<int> ProblemNumbers,
     ImmutableList<string> TagSlugs,
     LogicToggle TagLogic,

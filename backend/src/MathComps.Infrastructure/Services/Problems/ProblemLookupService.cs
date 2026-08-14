@@ -1,5 +1,4 @@
 using MathComps.Domain.Contracts.ProblemQuery;
-using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,7 +44,6 @@ public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContex
             {
                 candidate.Round.Season.EditionNumber,
                 candidate.Round.Competition.Path,
-                candidate.Round.Competition.SortPath,
                 candidate.Number,
             })
             .FirstOrDefaultAsync(cancellationToken);
@@ -54,16 +52,7 @@ public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContex
         if (problem is null)
             return null;
 
-        // Where the contest sits, which decides which levels it names at all
-        var levels = ContestLevels.From(problem.Path, problem.SortPath);
-
-        // The season, the contest read both as its levels and as the path naming it whole, and the number
-        return new ProblemLookupResult(
-            problem.EditionNumber,
-            levels.Competition.Slug,
-            levels.Category?.Slug,
-            levels.Round?.Slug,
-            problem.Path,
-            problem.Number);
+        // The season, the contest as the path naming it whole, and the number
+        return new ProblemLookupResult(problem.EditionNumber, problem.Path, problem.Number);
     }
 }

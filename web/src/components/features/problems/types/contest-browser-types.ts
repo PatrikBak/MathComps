@@ -30,18 +30,6 @@ export type ContestWithCount = {
   path: string
   /** The display name of every contest down to this one, root-first. */
   labels: string[]
-  /** The slug of the competition. */
-  competitionSlug: string
-  /** The slug of the category, if the selected competition has categories (e.g. home rounds have, IMO does not). */
-  categorySlug: string | null
-  /** The slug of the round, if the selected category has rounds (e.g. MEMO has (individual & team), IMO does not). */
-  roundSlug: string | null
-  /** The display name of the competition. */
-  competitionName: string
-  /** The display name of the category, if applicable. */
-  categoryName: string | null
-  /** The display name of the round, if applicable. */
-  roundName: string | null
   /** The number of problems in the contest. */
   problemCount: number
 }

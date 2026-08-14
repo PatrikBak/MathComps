@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using MathComps.Domain.Contracts.Helpers;
-using MathComps.Domain.Contracts.SearchBar;
 
 namespace MathComps.Domain.Contracts.ProblemQuery;
 
@@ -13,7 +12,8 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 /// <param name="SearchText">Free-text query for problem statement and solution. Length is limited to prevent DoS attacks.</param>
 /// <param name="SearchInSolution">Whether to include solution text in search.</param>
 /// <param name="OlympiadYears">Selected olympiad edition numbers as integers (e.g., 75 for 75th edition).</param>
-/// <param name="Contests">Selected competitions/categories/rounds.</param>
+/// <param name="ContestPaths">Selected contests, each addressed by its
+/// <see cref="EfCoreEntities.Competition.Path"/> and standing for itself and everything under it.</param>
 /// <param name="ProblemNumbers">Specific problem numbers to filter by.</param>
 /// <param name="TagSlugs">Selected tag slugs for filtering.</param>
 /// <param name="TagLogic">Logical operator for combining tag filters.</param>
@@ -24,7 +24,7 @@ public record FilterParameters(
     string SearchText,
     bool SearchInSolution,
     ImmutableList<int> OlympiadYears,
-    ImmutableList<ContestSelection> Contests,
+    ImmutableList<string> ContestPaths,
     ImmutableList<int> ProblemNumbers,
     ImmutableList<string> TagSlugs,
     LogicToggle TagLogic,

@@ -37,13 +37,10 @@ function labeledSlug(path: string): LabeledSlug {
  * @returns The source.
  */
 function sourceOf(contestPaths: string[]): Problem['source'] {
-  // The chain named, with the season, position and legacy levels the derivation never reads
+  // The contest chain under test, with a season and position nothing reads
   return {
     season: labeledSlug('2023'),
     contest: contestPaths.map(labeledSlug),
-    competition: labeledSlug(contestPaths.at(0) ?? ''),
-    category: null,
-    round: null,
     number: 1,
   }
 }

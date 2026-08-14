@@ -60,8 +60,8 @@ public class ProblemFilterService(
         // No text search - start with all problems
         else textFilteredQuery = dbContext.Problems;
 
-        // The contests the selections name, each standing for its whole subtree; empty when nothing is selected
-        var contestIds = await ResolveContestIdsAsync(parameters.Contests);
+        // The contests the selected paths name, each standing for its whole subtree; empty when none is selected
+        var contestIds = await ResolveContestIdsAsync(parameters.ContestPaths);
 
         // Apply remaining filters (years, contests, tags, authors, etc.) on top of text filter
         var filteredQuery = ApplyFilters(textFilteredQuery, parameters,
@@ -105,7 +105,6 @@ public class ProblemFilterService(
                     data.problem.Round.Season.StartYear,
                     data.problem.Round.Season.EndYear,
                     data.problem.Round.Competition.Path,
-                    data.problem.Round.Competition.SortPath,
                     data.problem.Number,
                     language),
 
@@ -152,7 +151,6 @@ public class ProblemFilterService(
                             similarProblem.SimilarProblem.Round.Season.StartYear,
                             similarProblem.SimilarProblem.Round.Season.EndYear,
                             similarProblem.SimilarProblem.Round.Competition.Path,
-                            similarProblem.SimilarProblem.Round.Competition.SortPath,
                             similarProblem.SimilarProblem.Number,
                             language),
 
@@ -302,7 +300,7 @@ public class ProblemFilterService(
         }
 
         // If contests are specified..
-        if (parameters.Contests is { Count: > 0 })
+        if (parameters.ContestPaths is { Count: > 0 })
         {
             // Keep the problems sitting anywhere under one of them, which is what the resolved ids stand for
             problems = problems.Where(problem => contestIds.Contains(problem.Round.CompetitionId));
@@ -424,7 +422,7 @@ public class ProblemFilterService(
             contestIds, favoritesOnly, listContentId, markStatus, userId);
         var problemNumbersScope = ApplyFilters(baseQuery, parameters with { ProblemNumbers = [] },
             contestIds, favoritesOnly, listContentId, markStatus, userId);
-        var competitionsAndRoundsScope = ApplyFilters(baseQuery, parameters with { Contests = [] },
+        var contestsScope = ApplyFilters(baseQuery, parameters with { ContestPaths = [] },
             contestIds, favoritesOnly, listContentId, markStatus, userId);
 
         // For tags: use conjunctive counting when AND logic is selected with at least one tag
@@ -523,71 +521,7 @@ public class ProblemFilterService(
             .ToListAsync();
 
         // Count the problems each contest holds, which is all the tree needs to be folded back up
-        var contestCounts = await CountByContestAsync(competitionsAndRoundsScope);
-
-        // Organize the contests into the three levels the search bar reads
-        var competitions = contestCounts
-            // Group by the competition each contest descends from
-            .GroupBy(contest => contest.Levels.Competition)
-            // Sort competitions by their place in the registry
-            .OrderBy(competitionGroup => competitionGroup.Key.SortKey, StringComparer.Ordinal)
-            // Project to CompetitionFilterOption with nested categories and rounds
-            .Select(competitionGroup =>
-            {
-                // Group rounds by category within this competition
-                var roundsByCategory = competitionGroup
-                    // Only consider rounds sitting under a category
-                    .Where(contest => contest.Levels.Category is not null)
-                    // Group by category
-                    .GroupBy(contest => contest.Levels.Category!)
-                    // Sort categories by their place in the registry
-                    .OrderBy(categoryGroup => categoryGroup.Key.SortKey, StringComparer.Ordinal)
-                    // Project to CategoryFilterOption with nested rounds
-                    .Select(categoryGroup => new CategoryFilterOption(
-                        // Category option with aggregated count and localized name
-                        new FacetOption(
-                            categoryGroup.Key.Slug,
-                            localization.GetNodeShortName(language, categoryGroup.Key.Path),
-                            localization.GetNodeFullName(language, categoryGroup.Key.Path),
-                            categoryGroup.Sum(contest => contest.Count)
-                        ),
-                        // Rounds within this category with localized names
-                        [.. categoryGroup
-                            // Sort rounds by their place in the registry
-                            .OrderBy(contest => contest.Levels.Round!.SortKey, StringComparer.Ordinal)
-                            // Project to FacetOption with localized round name
-                            .Select(contest => RoundFacet(contest, language)),
-                        ]
-                    ))
-                    // In-memory collection
-                    .ToImmutableList();
-
-                // Handle rounds hanging straight off the competition. A contest that IS its competition has no
-                // round to offer — it stands for the whole thing — so it only contributes its count.
-                var roundsWithoutCategory = competitionGroup
-                    // Only consider rounds one level under the competition
-                    .Where(contest => contest.Levels is { Category: null, Round: not null })
-                    // Sort rounds by their place in the registry
-                    .OrderBy(contest => contest.Levels.Round!.SortKey, StringComparer.Ordinal)
-                    // Project to FacetOption with localized round name
-                    .Select(contest => RoundFacet(contest, language))
-                    // In-memory collection
-                    .ToImmutableList();
-
-                // Create the final CompetitionFilterOption with localized names
-                return new CompetitionFilterOption(
-                    new FacetOption(
-                        competitionGroup.Key.Slug,
-                        localization.GetNodeShortName(language, competitionGroup.Key.Path),
-                        localization.GetNodeFullName(language, competitionGroup.Key.Path),
-                        competitionGroup.Sum(contest => contest.Count)
-                    ),
-                    roundsByCategory,
-                    roundsWithoutCategory
-                );
-            })
-            // In-memory collection
-            .ToImmutableList();
+        var contestCounts = await CountByContestAsync(contestsScope);
 
         // The same contests as the tree they actually form, each carrying its whole subtree's count
         var contests = BuildContestTree(contestCounts, language);
@@ -620,7 +554,6 @@ public class ProblemFilterService(
 
         // Return the fully constructed search bar options
         return new SearchBarOptions(
-            competitions,
             contests,
             [.. seasonGroups],
             [.. problemNumbers],
@@ -630,8 +563,7 @@ public class ProblemFilterService(
     }
 
     /// <summary>
-    /// Names the season a problem was set in and the contest it belongs to, at each of the levels the archive
-    /// shows: the competition, the category within it when there is one, and the round.
+    /// Names the season a problem was set in and the contest it belongs to, given as every contest down to it.
     /// </summary>
     /// <remarks>
     /// Static, and handed the localization service instead of reading the field, because the projection that
@@ -643,7 +575,6 @@ public class ProblemFilterService(
     /// <param name="startYear">The calendar year the season started.</param>
     /// <param name="endYear">The calendar year the season ended.</param>
     /// <param name="competitionPath">The path of the contest the problem sits in.</param>
-    /// <param name="contestSortPath">The sort path of that contest.</param>
     /// <param name="number">The problem's number within its contest.</param>
     /// <param name="language">The language to label everything in.</param>
     /// <returns>The problem's source.</returns>
@@ -653,19 +584,9 @@ public class ProblemFilterService(
         int startYear,
         int endYear,
         string competitionPath,
-        string contestSortPath,
         int number,
         Language language)
     {
-        // Where the contest sits, which decides which of the levels below it is named at all.
-        var levels = ContestLevels.From(competitionPath, contestSortPath);
-
-        // The labelled slug of one level, whose path is what its localized names are keyed by.
-        LabeledSlug Label(ContestLevel level) => new(
-            level.Slug,
-            localization.GetNodeShortName(language, level.Path),
-            localization.GetNodeFullName(language, level.Path));
-
         // The season, labelled from its own template.
         var season = new LabeledSlug(
             editionNumber.ToString(),
@@ -680,14 +601,8 @@ public class ProblemFilterService(
                 localization.GetNodeFullName(language, node.Path)))
             .ToImmutableList();
 
-        // A whole competition names no round, and a contest outside a category names no category.
-        return new ProblemSource(
-            season,
-            contest,
-            Label(levels.Competition),
-            levels.Round is null ? null : Label(levels.Round),
-            levels.Category is null ? null : Label(levels.Category),
-            number);
+        // The three together pin the problem down: when it ran, what it ran in, and where in that.
+        return new ProblemSource(season, contest, number);
     }
 
     /// <summary>
@@ -696,14 +611,7 @@ public class ProblemFilterService(
     /// <param name="Path"><inheritdoc cref="Competition.Path" path="/summary"/></param>
     /// <param name="SortPath"><inheritdoc cref="Competition.SortPath" path="/summary"/></param>
     /// <param name="Count">How many problems it holds.</param>
-    private record ContestCount(string Path, string SortPath, int Count)
-    {
-        /// <summary>
-        /// The contest projected onto the competition / category / round levels, which is what the frozen
-        /// three-level contracts are still built from.
-        /// </summary>
-        public ContestLevels Levels { get; } = ContestLevels.From(Path, SortPath);
-    }
+    private record ContestCount(string Path, string SortPath, int Count);
 
     /// <summary>
     /// Counts the problems of a scope per contest. Problems hang off a contest at whatever depth it sits, so
@@ -728,21 +636,8 @@ public class ProblemFilterService(
             })
             // Execute the query
             .ToListAsync())
-            // Wrap each into a counted contest, which reads its levels off its own two paths
+            // Wrap each into a counted contest
             .Select(contest => new ContestCount(contest.Path, contest.SortPath, contest.Count))];
-
-    /// <summary>
-    /// Builds the facet option for a contest that is a round, i.e. one that sits below its competition.
-    /// </summary>
-    /// <param name="contest">The counted contest, whose round level carries the name and the slug.</param>
-    /// <param name="language">The language to label it in.</param>
-    /// <returns>The round's facet option.</returns>
-    private FacetOption RoundFacet(ContestCount contest, Language language) =>
-        // The round's own path is what its localized names are keyed by.
-        new(contest.Levels.Round!.Slug,
-            localization.GetNodeShortName(language, contest.Levels.Round.Path),
-            localization.GetNodeFullName(language, contest.Levels.Round.Path),
-            contest.Count);
 
     /// <summary>
     /// One contest on the chain down to a counted one — how the tree addresses it, and where it sits.
@@ -812,25 +707,17 @@ public class ProblemFilterService(
     }
 
     /// <summary>
-    /// Resolves contest selections to every contest they cover: each selected node and everything below it,
-    /// since selecting a competition means selecting the rounds inside it. A selection naming a contest that
+    /// Resolves selected contest paths to every contest they cover: each selected node and everything below
+    /// it, since selecting a competition means selecting the rounds inside it. A path naming a contest that
     /// isn't there resolves to nothing and so matches nothing.
     /// </summary>
-    /// <param name="selections">The contest selections to resolve, possibly none.</param>
+    /// <param name="selectedPaths">The paths of the selected contests, possibly none.</param>
     /// <returns>The ids of every covered contest.</returns>
-    private async Task<IReadOnlyCollection<Guid>> ResolveContestIdsAsync(ImmutableList<ContestSelection> selections)
+    private async Task<IReadOnlyCollection<Guid>> ResolveContestIdsAsync(ImmutableList<string> selectedPaths)
     {
         // Nothing selected means no lookup to do, and the filter skips the term entirely.
-        if (selections.Count == 0)
+        if (selectedPaths.Count == 0)
             return [];
-
-        // The path each selection addresses, which is how a contest is named across the whole system. One
-        // carrying its path names its contest outright; the three slugs spell out the same path, as far down
-        // as they reach.
-        var selectedPaths = selections
-            .Select(selection => selection.Path ?? TaxonomySlugs.ComposeCompetitionPath(
-                selection.CompetitionSlug, selection.CategorySlug, selection.RoundSlug))
-            .ToList();
 
         // The whole tree, which is small enough to walk in memory.
         var contests = await dbContext.Competitions.AsNoTracking()
@@ -919,31 +806,17 @@ public class ProblemFilterService(
             {
                 // Build flattened contest list for this season with localized display names
                 var contests = seasonGroup
-                    // Order down the tree, which orders competitions, then categories, then rounds
+                    // Order down the tree, which takes each level in its registry order, however deep it runs
                     .OrderBy(group => group.SortPath, StringComparer.Ordinal)
                     .Select(group =>
                     {
-                        // Where the contest sits, which decides which levels it names at all
-                        var levels = ContestLevels.From(group.Path, group.SortPath);
-
                         // Every contest down to this one, named as it is shown, root-first
                         var labels = CompetitionTree.Descend(group.Path)
                             .Select(node => localization.GetNodeShortName(language, node.Path))
                             .ToImmutableList();
 
-                        // A whole competition names no category and no round; a round outside a category names one
-                        return new ContestWithCount(
-                            group.Path,
-                            labels,
-                            levels.Competition.Slug,
-                            levels.Category?.Slug,
-                            levels.Round?.Slug,
-                            localization.GetNodeShortName(language, levels.Competition.Path),
-                            levels.Category is null ? null
-                                : localization.GetNodeShortName(language, levels.Category.Path),
-                            levels.Round is null ? null
-                                : localization.GetNodeShortName(language, levels.Round.Path),
-                            group.ProblemCount);
+                        // Addressed by its path and named by its labels, at whatever depth it sits
+                        return new ContestWithCount(group.Path, labels, group.ProblemCount);
                     });
 
                 // Return season-specific data with localized label
