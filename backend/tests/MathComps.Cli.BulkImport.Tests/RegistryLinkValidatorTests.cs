@@ -19,7 +19,7 @@ public class RegistryLinkValidatorTests
     {
         // A competition absent from the shared backbone, present in every locale.
         var issue = new TaxonomyRegistryIssue(
-            TaxonomyEntityKind.Competition, "csmo", MissingFromSharedStructure: true, MissingLocales: []);
+            "csmo", MissingFromSharedStructure: true, MissingLocales: [], CarriesNestedContests: false);
 
         // Map it.
         var error = RegistryLinkValidator.ToVerdictError(issue);
@@ -29,7 +29,7 @@ public class RegistryLinkValidatorTests
         Assert.Null(error.Half);
         Assert.Equal("registry", error.Rule);
         Assert.Equal(VerdictSeverity.Error, error.Severity);
-        Assert.Equal("competition 'csmo' has no structural entry in metadata.shared.json", error.Message);
+        Assert.Equal("contest 'csmo' has no structural entry in metadata.shared.json", error.Message);
     }
 
     /// <summary>
@@ -38,32 +38,51 @@ public class RegistryLinkValidatorTests
     [Fact]
     public void Locale_gap_lists_the_missing_locales()
     {
-        // A round structurally present but missing Czech and English names.
+        // A contest structurally present but missing Czech and English names.
         var issue = new TaxonomyRegistryIssue(
-            TaxonomyEntityKind.Round, "csmo-a-iii", MissingFromSharedStructure: false,
-            MissingLocales: [Language.CS, Language.EN]);
+            "csmo-a-iii", MissingFromSharedStructure: false, MissingLocales: [Language.CS, Language.EN],
+            CarriesNestedContests: false);
 
         // The message names just the missing locales.
         Assert.Equal(
-            "round 'csmo-a-iii' has no localized name in cs, en",
+            "contest 'csmo-a-iii' has no localized name in cs, en",
             RegistryLinkValidator.ToVerdictError(issue).Message);
     }
 
     /// <summary>
-    /// When a slug is missing both structurally and in some locales, both gaps appear, joined.
+    /// A registered contest that turns out to carry a generation below it says so, since the draft has to name
+    /// one of those instead.
+    /// </summary>
+    [Fact]
+    public void Nested_contests_gap_says_to_name_one_of_them()
+    {
+        // A category, fully registered, named as though it were a sitting.
+        var issue = new TaxonomyRegistryIssue(
+            "csmo-a", MissingFromSharedStructure: false, MissingLocales: [], CarriesNestedContests: true);
+
+        // The message points at the generation below rather than at a missing entry.
+        Assert.Equal(
+            "contest 'csmo-a' has contests nested below it, so a draft names one of those instead",
+            RegistryLinkValidator.ToVerdictError(issue).Message);
+    }
+
+    /// <summary>
+    /// When a competition is missing both structurally and in some locales, both gaps appear, joined.
     /// </summary>
     [Fact]
     public void Combined_gap_reports_both_halves()
     {
-        // A category absent everywhere.
+        // A competition with no shared entry and no Slovak name.
         var issue = new TaxonomyRegistryIssue(
-            TaxonomyEntityKind.Category, "x", MissingFromSharedStructure: true,
-            MissingLocales: [Language.SK]);
+            "x", MissingFromSharedStructure: true, MissingLocales: [Language.SK],
+            CarriesNestedContests: false);
+
+        // Map it.
+        var message = RegistryLinkValidator.ToVerdictError(issue).Message;
 
         // Both phrasings present, structural first.
-        var message = RegistryLinkValidator.ToVerdictError(issue).Message;
         Assert.Equal(
-            "category 'x' has no structural entry in metadata.shared.json; no localized name in sk",
+            "contest 'x' has no structural entry in metadata.shared.json; no localized name in sk",
             message);
     }
 }

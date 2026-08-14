@@ -19,13 +19,10 @@ public static class ApplyReport
     /// <param name="result">The apply result to render.</param>
     public static void Render(ManifestMeta meta, ApplyResult result)
     {
-        // Lead with what was imported — the taxonomy the rest of the report is about. A default round (no slug)
-        // contributes no segment, the same way a category-less competition omits its slash.
-        var category = meta.Category is null ? "" : $"/{Escape(meta.Category)}";
-        var round = meta.Round is null ? "" : $"/{Escape(meta.Round)}";
-        var taxonomy = $"{Escape(meta.Competition)}{category}{round}";
+        // Lead with what was imported — the contest the rest of the report is about.
         var language = meta.Language.ToString().ToLowerInvariant();
-        AnsiConsole.MarkupLine($"[bold]Imported[/] {taxonomy} · season {meta.Season.Year} · {language}");
+        AnsiConsole.MarkupLine(
+            $"[bold]Imported[/] {Escape(meta.ContestPath)} · season {meta.Season.Year} · {language}");
 
         // The taxonomy entities, each coloured by whether it was created or reused.
         AnsiConsole.MarkupLine("\n[bold]Taxonomy[/]:");

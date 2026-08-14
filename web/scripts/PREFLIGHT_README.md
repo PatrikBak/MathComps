@@ -6,7 +6,7 @@ How competition problems are authored for bulk import. A **draft folder** holds 
 
 ```
 my-draft/
-  _meta.yaml        # round-level taxonomy (one per folder)
+  _meta.yaml        # which contest, season and date the problems belong to, plus their original language
   p1.sk.md          # problem 1 body, in language "sk"
   p1.en.md          # optional translations of problem 1
   p1.yaml           # problem 1 metadata (one per problem, shared across languages)
@@ -20,17 +20,17 @@ Problems are numbered from 1. A full fresh import numbers them `p1`, `p2`, … w
 
 ## `_meta.yaml`
 
-Round-level taxonomy, all slugs (display names live in the registry, not here):
+Which contest the problems were set in, and when (display names live in the registry, not here):
 
 ```yaml
-competition: csmo # competition slug
-category: a # category slug — omit for competitions with no categories
-round: iii # round slug
+contest: csmo-a-iii # the contest's path
 season:
   year: 2024 # calendar year the season starts
 date: 2024-03-15 # round date, YYYY-MM-DD
 language: sk # the draft's original language: sk | cs | en
 ```
+
+The path is the contest's slugs from the root of the taxonomy down to it, hyphen-joined, and it runs as deep as the taxonomy does: `csmo-a-iii` is round III of category A of the Czech-Slovak MO, `imo` is a competition that runs as one flat sitting, and however deep a contest sits, the path names every level. Every segment is lowercase alphanumeric — a path outside that alphabet is refused here. Each node on the path has to be registered in the taxonomy, which the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md)'s `validate` step checks; the contest itself must be a leaf, since a contest carrying others below it is a container rather than a sitting problems belong to.
 
 ## Problem body — `pN.<lang>.md`
 
@@ -110,4 +110,4 @@ Exit `0` when clean, `1` on any error. Warnings (e.g. orphan images) don't fail 
 
 ## Examples
 
-`scripts/__fixtures__/preflight-draft/` holds runnable examples — `valid-basic`, `valid-multilang`, `valid-no-category`, and many `invalid-*` folders that each demonstrate one error.
+`scripts/__fixtures__/preflight-draft/` holds runnable examples — `valid-basic`, `valid-multilang`, `valid-root-contest`, and many `invalid-*` folders that each demonstrate one error.

@@ -72,81 +72,45 @@ public class MetadataLocalizationService : IMetadataLocalizationService
         GetMetadata(language).GetSeasonLabel(editionNumber, startYear, endYear);
 
     /// <inheritdoc />
-    public IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(
-        string competitionSlug,
-        string? categorySlug,
-        string? roundSlug)
-    {
-        // Collect every gap across the referenced competition / category / round slugs.
-        var issues = new List<TaxonomyRegistryIssue>();
-
-        // The competition is a root, and its own path is its slug.
-        var competitionEntry = Shared.Node(competitionSlug);
-
-        // Check if competition missing in some locale
-        var competitionMissingLocales = LocalesMissing(metadata =>
-            HasBothNames(metadata, competitionSlug));
-
-        // Report the competition only when something's actually missing.
-        if (competitionEntry is null || competitionMissingLocales.Length > 0)
-            issues.Add(new TaxonomyRegistryIssue(
-                TaxonomyEntityKind.Competition,
-                competitionSlug,
-                MissingFromSharedStructure: competitionEntry is null,
-                competitionMissingLocales));
-
-        // Category is only referenced when the competition carries categories.
-        if (categorySlug is not null)
-        {
-            // A category is a node under its competition, so its path is both what places it structurally and
-            // what a locale keys its name by.
-            var categoryPath = TaxonomySlugs.ComposeCompetitionPath(competitionSlug, categorySlug, round: null);
-            var categoryMissingFromShared = Shared.Node(categoryPath) is null;
-
-            // Check if category missing in some locale
-            var categoryMissingLocales = LocalesMissing(metadata =>
-                HasBothNames(metadata, categoryPath));
-
-            // Report only on a real gap.
-            if (categoryMissingFromShared || categoryMissingLocales.Length > 0)
-                issues.Add(new TaxonomyRegistryIssue(
-                    TaxonomyEntityKind.Category,
-                    categoryPath,
-                    categoryMissingFromShared,
-                    categoryMissingLocales));
-        }
-
-        // The round is the node the whole triple names — its path (e.g. "csmo-a-iii"), which for a draft that
-        // omits the round is the competition's own path, so the gap names the exact key to look for.
-        var roundIdentifier = TaxonomySlugs.ComposeCompetitionPath(competitionSlug, categorySlug, roundSlug);
-
-        // The node that path addresses, null when the registry doesn't carry it.
-        var roundEntry = Shared.Node(roundIdentifier);
-
-        // Structural: that node has to exist. A draft omitting the round additionally has to land on a node that
-        // runs as one flat sitting — one carrying children has rounds the draft was supposed to pick from.
-        var roundMissingFromShared = roundEntry is null
-            || (roundSlug is null && roundEntry.Children is { IsDefaultOrEmpty: false });
-
-        // Check if round missing in some locale
-        var roundMissingLocales = LocalesMissing(metadata =>
-            HasBothNames(metadata, roundIdentifier));
-
-        // Report only on a real gap.
-        if (roundMissingFromShared || roundMissingLocales.Length > 0)
-            issues.Add(new TaxonomyRegistryIssue(
-                TaxonomyEntityKind.Round,
-                roundIdentifier,
-                roundMissingFromShared,
-                roundMissingLocales));
-
-        // Hand back every gap found (possibly none).
-        return issues;
-    }
+    public IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(string contestPath) =>
+        // Every competition the path runs through, root-down and the contest itself last, each reported when the
+        // registry doesn't back it. OfType drops the ones that came back clean.
+        [.. CompetitionTree.Descend(contestPath)
+            .Select(node => GapAt(node.Path, isContest: node.Path == contestPath))
+            .OfType<TaxonomyRegistryIssue>()];
 
     #endregion
 
     #region Private Helpers
+
+    /// <summary>
+    /// The registry gap at one competition on a contest's path, or null when the registry fully backs it.
+    /// </summary>
+    /// <param name="path">The competition's path.</param>
+    /// <param name="isContest">Whether the path ends here, i.e. this competition is the one the draft
+    /// names.</param>
+    /// <returns>The gap found, or null when there is none.</returns>
+    private TaxonomyRegistryIssue? GapAt(string path, bool isContest)
+    {
+        // The structural entry placing it, null when the registry carries none.
+        var entry = Shared.Node(path);
+
+        // The locales that don't name it.
+        var missingLocales = LocalesMissing(metadata => HasBothNames(metadata, path));
+
+        // The contest a draft names has to be a sitting: one carrying a generation below it holds the contests the
+        // draft was supposed to pick from. Everything above the contest is expected to carry one.
+        var carriesNestedContests = isContest && entry?.Children is { IsDefaultOrEmpty: false };
+
+        // Report only on a real gap.
+        return entry is null || missingLocales.Length > 0 || carriesNestedContests
+            ? new TaxonomyRegistryIssue(
+                path,
+                MissingFromSharedStructure: entry is null,
+                missingLocales,
+                carriesNestedContests)
+            : null;
+    }
 
     /// <summary>
     /// Whether a locale names a node at all — both names, since a reader asks for either one and an

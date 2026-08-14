@@ -17,17 +17,16 @@ export type Season = {
   year: number
 }
 
-/** Folder-level taxonomy, slugs verbatim from `_meta.yaml`. */
+/** Folder-level taxonomy, verbatim from `_meta.yaml`. */
 export type ManifestMeta = {
-  /** Competition slug (e.g. `csmo`). */
-  competition: string
-  /** Category slug (e.g. `a`), or `null` when the competition has no categories. */
-  category: string | null
-  /** Round slug (e.g. `iii`), or `null` for a competition whose single round is the default (e.g. IMO). */
-  round: string | null
+  /**
+   * Path of the contest the problems were set in — its slugs from the root down,
+   * hyphen-joined (e.g. `csmo-a-iii`, `imo`).
+   */
+  contestPath: string
   /** Season the draft belongs to. */
   season: Season
-  /** Round-instance date as `YYYY-MM-DD`. */
+  /** Round date as `YYYY-MM-DD`. */
   date: string
   /** The original language of this draft — the body whose `pN.<lang>.md` matches it is the original. */
   language: Locale

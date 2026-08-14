@@ -158,9 +158,7 @@ describe('valid drafts — parsed manifest content', () => {
     expect(firstOriginal.statementMarkdown).toContain('images/incircle.svg')
 
     // Taxonomy is carried through verbatim
-    expect(manifest.meta.competition).toBe('csmo')
-    expect(manifest.meta.category).toBe('a')
-    expect(manifest.meta.round).toBe('iii')
+    expect(manifest.meta.contestPath).toBe('csmo-a-iii')
     expect(manifest.meta.season).toEqual({ year: 2024 })
     expect(manifest.meta.date).toBe('2024-03-15')
     expect(manifest.meta.language).toBe('sk')
@@ -170,10 +168,27 @@ describe('valid drafts — parsed manifest content', () => {
     expect(manifest.verdict.errors).toEqual([])
   })
 
-  it('treats an absent category as null', async () => {
-    const manifest = await loadFixture('valid-no-category')
-    expect(manifest.meta.category).toBeNull()
-    expect(manifest.meta.competition).toBe('imo')
+  it('accepts a competition that runs as one flat sitting, named by its own path', async () => {
+    const manifest = await loadFixture('valid-root-contest')
+
+    // A single-segment path (e.g. IMO) is a contest like any other, not a meta error.
+    expect(findError(manifest, (entry) => entry.rule === 'meta')).toBeUndefined()
+    expect(manifest.meta.contestPath).toBe('imo')
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+
+  it('carries a two-level contest path', async () => {
+    const manifest = await loadFixture('valid-two-level-contest')
+    expect(manifest.meta.contestPath).toBe('imo-i')
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+
+  it('carries a contest path four levels deep', async () => {
+    const manifest = await loadFixture('valid-deep-contest')
+
+    // Every segment survives into the manifest
+    expect(manifest.meta.contestPath).toBe('deep-mid-low-round')
+    expect(findError(manifest, (entry) => entry.rule === 'meta')).toBeUndefined()
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
@@ -382,13 +397,11 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.half).toBe('statement')
   })
 
-  it('accepts a draft with no round as a default-round competition (round is null)', async () => {
-    const manifest = await loadFixture('valid-default-round')
+  it('flags a contest path outside the slug alphabet', async () => {
+    const manifest = await loadFixture('invalid-bad-contest-path')
 
-    // A missing round is the default round (e.g. IMO), not a meta error, and is carried through as null.
-    expect(findError(manifest, (entry) => entry.rule === 'meta')).toBeUndefined()
-    expect(manifest.meta.round).toBeNull()
-    expect(isOk(manifest.verdict.errors)).toBe(true)
+    const error = findError(manifest, (entry) => entry.rule === 'meta')
+    expect(error?.message).toContain('contest')
   })
 
   it('flags an unsupported language slug', async () => {
@@ -607,61 +620,62 @@ describe('parseProblemMeta', () => {
 describe('narrowMeta', () => {
   it('accepts a complete meta document', () => {
     const { meta, errors } = narrowMeta({
-      competition: 'csmo',
-      category: 'a',
-      round: 'iii',
+      contest: 'csmo-a-iii',
       season: { year: 2024 },
       date: '2024-03-15',
       language: 'sk',
     })
     expect(errors).toEqual([])
     expect(meta).toEqual({
-      competition: 'csmo',
-      category: 'a',
-      round: 'iii',
+      contestPath: 'csmo-a-iii',
       season: { year: 2024 },
       date: '2024-03-15',
       language: 'sk',
     })
   })
 
-  it('treats an absent category as null without erroring', () => {
-    const { meta, errors } = narrowMeta({
-      competition: 'imo',
-      round: 'i',
-      season: { year: 2024 },
-      date: '2024-03-15',
-      language: 'en',
-    })
-    expect(meta.category).toBeNull()
-    expect(errors).toEqual([])
-  })
+  it.each(['imo', 'imo-i', 'deep-mid-low-round', 'csmo-z10-ii'])(
+    'accepts the contest path %s at whatever depth it sits',
+    (contest) => {
+      const { meta, errors } = narrowMeta({
+        contest,
+        season: { year: 2024 },
+        date: '2024-03-15',
+        language: 'en',
+      })
+      expect(meta.contestPath).toBe(contest)
+      expect(errors).toEqual([])
+    }
+  )
 
-  it('treats an absent round as null without erroring (default-round competition)', () => {
-    const { meta, errors } = narrowMeta({
-      competition: 'imo',
-      season: { year: 2024 },
-      date: '2024-03-15',
-      language: 'en',
-    })
-    expect(meta.round).toBeNull()
-    expect(errors).toEqual([])
-  })
-
-  it('errors on a missing competition', () => {
+  it('errors on a missing contest', () => {
     const { errors } = narrowMeta({
-      round: 'iii',
       season: { year: 2024 },
       date: '2024-03-15',
       language: 'sk',
     })
-    expect(errors.some((error) => error.message.includes('competition'))).toBe(true)
+    expect(errors.some((error) => error.message.includes('contest'))).toBe(true)
   })
+
+  it.each(['CSMO-A', 'csmo--a', '-csmo', 'csmo-', 'csmo a', 'csmo/a', ''])(
+    'errors on the malformed contest path %j',
+    (contest) => {
+      const { meta, errors } = narrowMeta({
+        contest,
+        season: { year: 2024 },
+        date: '2024-03-15',
+        language: 'sk',
+      })
+
+      // A rejected path narrows to the blank fallback
+      expect(meta.contestPath).toBe('')
+      expect(errors.some((error) => error.message.includes('contest'))).toBe(true)
+    }
+  )
 
   it('errors on a missing season', () => {
     const { errors } = narrowMeta({
-      competition: 'csmo',
-      round: 'iii',
+      contest: 'csmo-a-iii',
       date: '2024-03-15',
       language: 'sk',
     })
@@ -670,8 +684,7 @@ describe('narrowMeta', () => {
 
   it('errors on a missing date', () => {
     const { errors } = narrowMeta({
-      competition: 'csmo',
-      round: 'iii',
+      contest: 'csmo-a-iii',
       season: { year: 2024 },
       language: 'sk',
     })
@@ -680,8 +693,7 @@ describe('narrowMeta', () => {
 
   it('errors on a date that is not a real calendar date', () => {
     const { errors } = narrowMeta({
-      competition: 'csmo',
-      round: 'iii',
+      contest: 'csmo-a-iii',
       season: { year: 2024 },
       date: '2024-13-01',
       language: 'sk',
@@ -691,8 +703,7 @@ describe('narrowMeta', () => {
 
   it('errors on a misshapen date string', () => {
     const { errors } = narrowMeta({
-      competition: 'csmo',
-      round: 'iii',
+      contest: 'csmo-a-iii',
       season: { year: 2024 },
       date: 'not-a-date',
       language: 'sk',
@@ -702,8 +713,7 @@ describe('narrowMeta', () => {
 
   it('errors on an unsupported language', () => {
     const { errors } = narrowMeta({
-      competition: 'csmo',
-      round: 'iii',
+      contest: 'csmo-a-iii',
       season: { year: 2024 },
       date: '2024-03-15',
       language: 'de',

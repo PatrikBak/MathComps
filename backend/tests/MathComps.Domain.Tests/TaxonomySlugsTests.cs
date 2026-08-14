@@ -9,42 +9,14 @@ namespace MathComps.Domain.Tests;
 public class TaxonomySlugsTests
 {
     /// <summary>
-    /// A categorized round composes to <c>{competition}-{category}-{round}</c>.
+    /// A problem slug is <c>{editionNumber}-{competitionPath}-{order}</c>.
     /// </summary>
     [Fact]
-    public void Composite_round_slug_includes_the_category_when_present() =>
-        Assert.Equal("csmo-a-iii", TaxonomySlugs.ComposeCompetitionPath("csmo", "a", "iii"));
-
-    /// <summary>
-    /// A category-less round drops the category segment.
-    /// </summary>
-    [Fact]
-    public void Composite_round_slug_omits_the_category_when_absent() =>
-        Assert.Equal("memo-i", TaxonomySlugs.ComposeCompetitionPath("memo", null, "i"));
-
-    /// <summary>
-    /// A default round (null slug) drops the round segment, leaving the competition (and category, if any).
-    /// </summary>
-    [Fact]
-    public void Composite_round_slug_omits_the_round_when_absent() =>
-        Assert.Equal("imo", TaxonomySlugs.ComposeCompetitionPath("imo", null, null));
-
-    /// <summary>
-    /// Raw, unslugified inputs are normalized — casing and spacing collapse to the canonical slug form.
-    /// </summary>
-    [Fact]
-    public void Composite_round_slug_slugifies_raw_inputs() =>
-        Assert.Equal("csmo-a-iii", TaxonomySlugs.ComposeCompetitionPath("CSMO", "A", "III"));
-
-    /// <summary>
-    /// A problem slug is <c>{editionNumber}-{compositeRoundSlug}-{order}</c>.
-    /// </summary>
-    [Fact]
-    public void Problem_slug_combines_edition_round_and_order() =>
+    public void Problem_slug_combines_edition_contest_path_and_order() =>
         Assert.Equal("75-csmo-a-iii-1", TaxonomySlugs.ProblemSlug(75, "csmo-a-iii", 1));
 
     /// <summary>
-    /// A node's path extends its parent's, which is what makes the composed round slug a path too.
+    /// A node's path extends its parent's, which is what makes a contest's path a chain of its ancestors' slugs.
     /// </summary>
     [Fact]
     public void Path_extends_the_parent() =>

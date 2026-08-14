@@ -5,8 +5,8 @@ using MathComps.Infrastructure.Persistence;
 namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
 /// <summary>
-/// Seeds competitions with the tree fields filled in, keyed the way a seed already spells its rounds: by the
-/// composite slug, whose segments are the chain of competitions down to it.
+/// Seeds competitions with the tree fields filled in, keyed the way a contest is addressed everywhere else: by
+/// its path, whose segments are the chain of competitions down to it.
 /// </summary>
 public static class CompetitionTreeSeed
 {
@@ -29,19 +29,19 @@ public static class CompetitionTreeSeed
         });
 
     /// <summary>
-    /// Tracks the chain a composite slug names, reusing whatever is already there, and hands back the deepest
-    /// one — the competition a seeded round instance hangs under.
+    /// Tracks the chain a path names, reusing whatever is already there, and hands back the deepest one — the
+    /// competition a seeded round hangs under.
     /// </summary>
     /// <param name="context">The seeding context.</param>
-    /// <param name="compositeSlug">The round's composite slug (e.g. <c>csmo-a-i</c>, <c>imo</c>).</param>
+    /// <param name="contestPath">The contest's path (e.g. <c>csmo-a-i</c>, <c>imo</c>).</param>
     /// <returns>The deepest competition on the chain.</returns>
-    public static Competition Chain(MathCompsDbContext context, string compositeSlug)
+    public static Competition Chain(MathCompsDbContext context, string contestPath)
     {
         // The competition the walk has reached, still null before the root is placed.
         Competition? competition = null;
 
         // Each segment hangs off the one before it, the first being a root.
-        foreach (var (_, slug, path) in CompetitionTree.Descend(compositeSlug))
+        foreach (var (_, slug, path) in CompetitionTree.Descend(contestPath))
         {
             // The parent this segment hangs off, captured before the local is reassigned.
             var parent = competition;
@@ -73,7 +73,7 @@ public static class CompetitionTreeSeed
             context.Competitions.Add(competition);
         }
 
-        // The deepest segment, which the round instance hangs under.
+        // The deepest segment, which the round hangs under.
         return competition!;
     }
 
