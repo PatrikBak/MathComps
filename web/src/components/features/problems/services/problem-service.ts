@@ -1,20 +1,28 @@
 import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
-import type { FilterParameters } from '../types/problem-api-types'
+import type { FilterParameters, FilterQuery } from '../types/problem-api-types'
 import type {
   CompetitionSelection,
   FilterResponse,
-  RawProblemFilterResponse,
+  FilterResult,
+  ProblemFilterResponse,
   SearchFiltersState,
   SingleProblemResult,
 } from '../types/problem-library-types'
+import { createDefaultFilters } from '../utils/url-initialization'
 import {
   getProblemBySlugApiUrl,
   getProblemsFilterApiUrl,
   getToggleProblemLikeApiUrl,
   getToggleProblemMarkApiUrl,
 } from './problem-api-urls'
+
+/**
+ * How many problems the library asks for while booting. It reads the facet counts off that answer,
+ * and hands the page itself to the problem store.
+ */
+const INITIAL_PAGE_SIZE = 20
 
 /**
  * Fetches a single problem by its slug from the API.
@@ -29,7 +37,7 @@ export async function getProblemBySlug(
   slug: string
 ): Promise<ApiResult<SingleProblemResult>> {
   // Fetch the problem
-  const result = await apiCall<FilterResponse>(() => getProblemBySlugApiUrl(slug), {
+  const result = await apiCall<FilterResult>(() => getProblemBySlugApiUrl(slug), {
     method: 'GET',
   })
 
@@ -42,30 +50,17 @@ export async function getProblemBySlug(
   // An empty page means the slug matched no problem
   if (!problem) {
     // Fail as a missing problem
-    return {
-      success: false,
-      error: {
-        message: 'Problem response contained no items',
-        statusCode: 404,
-        errorCode: 'ProblemNotFound',
-      },
-    }
+    return problemNotFound('the response held no problem')
   }
 
   // The competition the problem was set in, which is the deepest one on the chain down to it
   const competition = problem.source.competition.at(-1)
 
-  // A problem hanging off no competition at all cannot be placed in the library
+  // A problem hangs off a competition at whatever depth it sits, so an empty chain is a payload the
+  // archive cannot produce. Refused rather than trusted, since this is where the wire is read.
   if (!competition) {
     // Fail as a problem that cannot be shown
-    return {
-      success: false,
-      error: {
-        message: 'Problem source named no competition',
-        statusCode: 404,
-        errorCode: 'ProblemNotFound',
-      },
-    }
+    return problemNotFound('the problem source named no competition')
   }
 
   // The filter stands at that competition, whose slug is the whole path down to it
@@ -73,18 +68,10 @@ export async function getProblemBySlug(
 
   // Season, competition and position together pin down this one problem, so the rest stay empty
   const filters: SearchFiltersState = {
-    searchText: '',
-    searchInSolution: false,
+    ...createDefaultFilters(),
     seasons: [problem.source.season],
     competitionSelection: [selection],
     problemNumbers: [problem.source.number],
-    tags: [],
-    tagLogic: 'or',
-    authors: [],
-    authorLogic: 'or',
-    favoritesOnly: false,
-    markStatus: null,
-    listContentId: null,
   }
 
   // The problem, its filters, and whatever options came back alongside them
@@ -112,41 +99,8 @@ export async function getProblemBySlug(
  * @returns A promise resolving to the base filter options and first page of problems, or an error.
  */
 export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResult<FilterResponse>> {
-  // Fetch the raw filter response
-  const result = await apiCall<RawProblemFilterResponse>(() => getProblemsFilterApiUrl(), {
-    method: 'POST',
-    body: JSON.stringify({
-      parameters: {
-        searchText: '',
-        searchInSolution: false,
-        olympiadYears: [],
-        competitionPaths: [],
-        problemNumbers: [],
-        tagSlugs: [],
-        tagLogic: 'or',
-        authorSlugs: [],
-        authorLogic: 'or',
-      } satisfies FilterParameters,
-      pageSize: 20,
-      pageNumber: 1,
-      favoritesOnly: false,
-      markStatus: null,
-      listContentId: null,
-    }),
-  })
-
-  // Pass a failure through untouched
-  if (!result.success) return result
-
-  // The first page of problems, alongside the options and the list it was browsed under
-  return {
-    success: true,
-    data: {
-      problems: result.data.filterResult.problems,
-      updatedOptions: result.data.filterResult.updatedOptions,
-      listName: result.data.listName,
-    },
-  }
+  // The whole archive, unnarrowed, which is what the library opens on
+  return fetchFilterPage(apiCall, buildFilterQuery(createDefaultFilters(), INITIAL_PAGE_SIZE, 1))
 }
 
 /**
@@ -167,35 +121,8 @@ export async function searchProblems(
   pageNumber: number,
   signal: AbortSignal
 ): Promise<ApiResult<FilterResponse>> {
-  // The filters as the API takes them
-  const filterParameters = searchFiltersStateToFilterParameters(filters)
-
-  // Fetch the raw filter response
-  const result = await apiCall<RawProblemFilterResponse>(() => getProblemsFilterApiUrl(), {
-    method: 'POST',
-    body: JSON.stringify({
-      parameters: filterParameters,
-      pageSize,
-      pageNumber,
-      favoritesOnly: filters.favoritesOnly,
-      markStatus: filters.markStatus,
-      listContentId: filters.listContentId,
-    }),
-    signal,
-  })
-
-  // Pass a failure through untouched
-  if (!result.success) return result
-
-  // The matching page of problems, alongside the options and the list it was browsed under
-  return {
-    success: true,
-    data: {
-      problems: result.data.filterResult.problems,
-      updatedOptions: result.data.filterResult.updatedOptions || null,
-      listName: result.data.listName,
-    },
-  }
+  // The page those filters narrow to
+  return fetchFilterPage(apiCall, buildFilterQuery(filters, pageSize, pageNumber), signal)
 }
 
 /**
@@ -233,6 +160,68 @@ export async function toggleProblemMark(
 }
 
 /**
+ * Runs one search against the filter endpoint and flattens the nesting off its answer, so a caller
+ * reads the page, the option counts and the list name as one object.
+ *
+ * @param apiCall - The API caller function.
+ * @param query - The search to run.
+ * @param signal - The signal to abort the request, left off by a search nothing supersedes.
+ *
+ * @returns A promise resolving to the matching page of problems and updated options, or an error.
+ */
+async function fetchFilterPage(
+  apiCall: ApiCaller,
+  query: FilterQuery,
+  signal?: AbortSignal
+): Promise<ApiResult<FilterResponse>> {
+  // Ask for the page the query names
+  const result = await apiCall<ProblemFilterResponse>(() => getProblemsFilterApiUrl(), {
+    method: 'POST',
+    body: JSON.stringify(query),
+    signal,
+  })
+
+  // Pass a failure through untouched
+  if (!result.success) return result
+
+  // The page and its options, with the list they were browsed under lifted up beside them
+  return {
+    success: true,
+    data: {
+      problems: result.data.filterResult.problems,
+      updatedOptions: result.data.filterResult.updatedOptions,
+      listName: result.data.listName,
+    },
+  }
+}
+
+/**
+ * Converts a {@link SearchFiltersState} and the slice being asked for into the {@link FilterQuery}
+ * the API takes.
+ *
+ * @param state - The search filters to convert.
+ * @param pageSize - The number of problems to return per page.
+ * @param pageNumber - The page number to return.
+ *
+ * @returns The converted query.
+ */
+function buildFilterQuery(
+  state: SearchFiltersState,
+  pageSize: number,
+  pageNumber: number
+): FilterQuery {
+  // The narrowings a signed-out visitor can ask for, alongside the ones that need a reader behind them
+  return {
+    parameters: searchFiltersStateToFilterParameters(state),
+    pageSize,
+    pageNumber,
+    favoritesOnly: state.favoritesOnly,
+    listContentId: state.listContentId,
+    markStatus: state.markStatus,
+  }
+}
+
+/**
  * Converts a {@link SearchFiltersState} into the {@link FilterParameters} the API takes,
  * with every named value reduced to the identifier the API knows it by.
  *
@@ -241,16 +230,9 @@ export async function toggleProblemMark(
  * @returns The converted filter parameters.
  */
 function searchFiltersStateToFilterParameters(state: SearchFiltersState): FilterParameters {
-  // The editions filtered on, which the API knows as olympiad years
-  const olympiadYears = state.seasons
-    .map((season) => {
-      // The edition the season's slug names
-      const editionNumber = parseInt(season.slug, 10)
-
-      // Dropped when the slug is not an edition number
-      return isNaN(editionNumber) ? null : editionNumber
-    })
-    .filter((editionNumber): editionNumber is number => editionNumber !== null)
+  // The editions filtered on, which the API knows as olympiad years. A season's slug is its edition
+  // number, and a URL naming anything else is refused before it ever becomes a filter.
+  const olympiadYears = state.seasons.map((season) => Number(season.slug))
 
   // The tags filtered on
   const tagSlugs = state.tags.map((tag) => tag.slug)
@@ -272,5 +254,25 @@ function searchFiltersStateToFilterParameters(state: SearchFiltersState): Filter
     tagLogic: state.tagLogic,
     authorSlugs,
     authorLogic: state.authorLogic,
+  }
+}
+
+/**
+ * The failure the archive answers with when it cannot show the problem a slug named. What the reader
+ * is told is resolved from the code; the detail only ever reaches a console.
+ *
+ * @param detail - What was missing.
+ *
+ * @returns The failure.
+ */
+function problemNotFound(detail: string): ApiResult<never> {
+  // A slug the archive cannot show is the same outcome however it fell short
+  return {
+    success: false,
+    error: {
+      message: `Cannot show the problem: ${detail}`,
+      statusCode: 404,
+      errorCode: 'ProblemNotFound',
+    },
   }
 }

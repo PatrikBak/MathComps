@@ -1,6 +1,4 @@
-/**
- * Types for the competition browser API response, matching the C# backend.
- */
+// The competition browser's wire shapes: the seasons it opens on, and the competitions each one ran.
 
 /**
  * Result for the competition browser, grouping competitions by season with problem counts.

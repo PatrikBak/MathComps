@@ -25,7 +25,7 @@ describe('deciding when to search', () => {
       // A state carrying discrete filters that none of the changes below touch
       const baseFilters = {
         ...defaultFilters,
-        tags: [{ slug: 'algebra', displayName: 'Algebra' }],
+        tags: [{ slug: 'algebra', displayName: 'Algebra', fullName: null }],
         competitionSelection: [{ path: 'mo-a' }],
       }
 
@@ -53,7 +53,10 @@ describe('deciding when to search', () => {
       const baseFilters = { ...defaultFilters, searchText: 'existing search' }
 
       // A tag picked, with the term left alone
-      const tagChange = { ...baseFilters, tags: [{ slug: 'new-tag', displayName: 'New Tag' }] }
+      const tagChange = {
+        ...baseFilters,
+        tags: [{ slug: 'new-tag', displayName: 'New Tag', fullName: null }],
+      }
 
       // Not typing, so nothing to wait out
       expect(isTextOnlyChange(baseFilters, tagChange)).toBe(false)
@@ -62,7 +65,7 @@ describe('deciding when to search', () => {
       const mixedChange = {
         ...baseFilters,
         searchText: 'different search',
-        tags: [{ slug: 'algebra', displayName: 'Algebra' }],
+        tags: [{ slug: 'algebra', displayName: 'Algebra', fullName: null }],
       }
 
       // The tag decides it, whatever the term did
@@ -74,14 +77,14 @@ describe('deciding when to search', () => {
       const baseFilters = {
         ...defaultFilters,
         searchText: 'existing search',
-        tags: [{ slug: 'algebra', displayName: 'Algebra' }],
+        tags: [{ slug: 'algebra', displayName: 'Algebra', fullName: null }],
       }
 
       // The term rewritten and the tag swapped for a different one, leaving the count where it was
       const swappedTag = {
         ...baseFilters,
         searchText: 'different search',
-        tags: [{ slug: 'geometry', displayName: 'Geometry' }],
+        tags: [{ slug: 'geometry', displayName: 'Geometry', fullName: null }],
       }
 
       // The tag asks a different question, so its results cannot wait out the typing
@@ -93,14 +96,14 @@ describe('deciding when to search', () => {
       const baseFilters = {
         ...defaultFilters,
         searchText: 'existing search',
-        seasons: [{ slug: '2023', displayName: '2023' }],
+        seasons: [{ slug: '2023', displayName: '2023', fullName: null }],
       }
 
       // The term rewritten and the year swapped, leaving the count where it was
       const swappedSeason = {
         ...baseFilters,
         searchText: 'different search',
-        seasons: [{ slug: '2024', displayName: '2024' }],
+        seasons: [{ slug: '2024', displayName: '2024', fullName: null }],
       }
 
       // A different year entirely, so its results cannot wait out the typing
@@ -188,14 +191,14 @@ describe('deciding when to search', () => {
       // One tag, matched under either mode
       const before = {
         ...defaultFilters,
-        tags: [{ slug: 'algebra', displayName: 'Algebra' }],
+        tags: [{ slug: 'algebra', displayName: 'Algebra', fullName: null }],
         tagLogic: 'or' as const,
       }
 
       // The same tag, with the mode flipped
       const after = {
         ...defaultFilters,
-        tags: [{ slug: 'algebra', displayName: 'Algebra' }],
+        tags: [{ slug: 'algebra', displayName: 'Algebra', fullName: null }],
         tagLogic: 'and' as const,
       }
 
@@ -206,8 +209,8 @@ describe('deciding when to search', () => {
     it('stops covering it once a second tag is picked', () => {
       // Two tags, which give the mode something to say
       const twoTags = [
-        { slug: 'algebra', displayName: 'Algebra' },
-        { slug: 'geometry', displayName: 'Geometry' },
+        { slug: 'algebra', displayName: 'Algebra', fullName: null },
+        { slug: 'geometry', displayName: 'Geometry', fullName: null },
       ]
 
       // Problems carrying either tag
@@ -234,8 +237,8 @@ describe('deciding when to search', () => {
     it('stops covering it once a second author is picked', () => {
       // Two authors, which give the mode something to say
       const twoAuthors = [
-        { slug: 'alice', displayName: 'Alice' },
-        { slug: 'bob', displayName: 'Bob' },
+        { slug: 'alice', displayName: 'Alice', fullName: null },
+        { slug: 'bob', displayName: 'Bob', fullName: null },
       ]
 
       // Problems by either of them
@@ -255,7 +258,7 @@ describe('deciding when to search', () => {
       // The first tag picked
       const after = {
         ...defaultFilters,
-        tags: [{ slug: 'algebra', displayName: 'Algebra' }],
+        tags: [{ slug: 'algebra', displayName: 'Algebra', fullName: null }],
       }
 
       // A narrower question than before, so it has to be asked
@@ -277,13 +280,16 @@ describe('deciding when to search', () => {
       // A state already narrowed by a school year, a position within the round and one competition
       const picked = {
         ...defaultFilters,
-        seasons: [{ slug: '2023', displayName: '2023' }],
+        seasons: [{ slug: '2023', displayName: '2023', fullName: null }],
         problemNumbers: [1],
         competitionSelection: [{ path: 'mo-a-i' }],
       }
 
       // The year traded for another, leaving every count where it was
-      const seasonMoved = { ...picked, seasons: [{ slug: '2024', displayName: '2024' }] }
+      const seasonMoved = {
+        ...picked,
+        seasons: [{ slug: '2024', displayName: '2024', fullName: null }],
+      }
 
       // A different year entirely, so the query has to go out again
       expect(isNoOpFilterChange(picked, seasonMoved)).toBe(false)

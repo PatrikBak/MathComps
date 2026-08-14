@@ -18,6 +18,7 @@ import type { QueryUiState } from '@/lib/query-ui-state'
 import { usePendingProblemLike } from '../hooks/use-pending-problem-like'
 import { usePendingProblemMark } from '../hooks/use-pending-problem-mark'
 import { useProblemSearch } from '../hooks/use-problem-search'
+import type { LabeledSlug } from '../types/problem-api-types'
 import { countActiveFilters } from '../utils/filter-validation'
 import ActiveFiltersBar from './ActiveFilterBar'
 import { AnimatedProblemCard } from './AnimatedProblemCard'
@@ -160,9 +161,12 @@ export default function ProblemsLibrary() {
   const handleTagClick = (tag: { displayName: string; slug: string }, event: React.MouseEvent) => {
     if (!filters) return
 
+    // The tag as a filter names it, which reads under its short name alone
+    const picked: LabeledSlug = { ...tag, fullName: null }
+
     // Ctrl/Cmd+Click: exclusive selection (keep only this tag)
     if (isExclusiveSelection(event)) {
-      handleFiltersChange({ ...filters, tags: [tag] })
+      handleFiltersChange({ ...filters, tags: [picked] })
       return
     }
 
@@ -176,7 +180,7 @@ export default function ProblemsLibrary() {
         ? // Remove the tag if it's already selected
           filters.tags.filter((existingTag) => existingTag.slug !== tag.slug)
         : // Add the tag if it's not selected
-          [...filters.tags, tag],
+          [...filters.tags, picked],
     })
   }
 
@@ -187,9 +191,12 @@ export default function ProblemsLibrary() {
   ) => {
     if (!filters) return
 
+    // The author as a filter names them, which reads under their credited name alone
+    const picked: LabeledSlug = { ...author, fullName: null }
+
     // Ctrl/Cmd+Click: exclusive selection (keep only this author)
     if (isExclusiveSelection(event)) {
-      handleFiltersChange({ ...filters, authors: [author] })
+      handleFiltersChange({ ...filters, authors: [picked] })
       return
     }
 
@@ -205,7 +212,7 @@ export default function ProblemsLibrary() {
         ? // Remove the author if it's already selected
           filters.authors.filter((existingAuthor) => existingAuthor.slug !== author.slug)
         : // Add the author if it's not selected
-          [...filters.authors, author],
+          [...filters.authors, picked],
     })
   }
 

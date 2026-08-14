@@ -236,7 +236,7 @@ export const SearchFilters = ({
               onChange={(next) => {
                 updateFilter(
                   'seasons',
-                  next.map((slug: string) => ({ slug, displayName: slug }))
+                  next.map((slug: string) => ({ slug, displayName: slug, fullName: null }))
                 )
               }}
               searchPlaceholder={t('facets.searchSeasons')}
@@ -269,7 +269,7 @@ export const SearchFilters = ({
               onChange={(next) => {
                 updateFilter(
                   'tags',
-                  next.map((slug: string) => ({ slug, displayName: slug }))
+                  next.map((slug: string) => ({ slug, displayName: slug, fullName: null }))
                 )
               }}
               searchPlaceholder={t('facets.searchTags')}
@@ -300,7 +300,7 @@ export const SearchFilters = ({
               onChange={(next) => {
                 updateFilter(
                   'authors',
-                  next.map((slug: string) => ({ slug, displayName: slug }))
+                  next.map((slug: string) => ({ slug, displayName: slug, fullName: null }))
                 )
               }}
               searchPlaceholder={t('facets.searchAuthors')}

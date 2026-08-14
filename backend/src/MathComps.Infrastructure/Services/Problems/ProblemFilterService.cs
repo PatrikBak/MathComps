@@ -83,20 +83,19 @@ public class ProblemFilterService(
                 problem,
 
                 // Language-aware statement selection: prefer requested language, fallback to original
-                // Select both text and language together to avoid query duplication
                 Statement = problem.Texts
                     .Where(text =>
                         text.DocumentType == DocumentType.Statement &&
                         text.MarkdownText != null)
                     .OrderBy(text => text.Language == language ? 0 : (text.IsOriginal ? 1 : 2))
+                    .Select(text => text.MarkdownText!)
                     .First()
             })
             // Which projects results to DTOs directly in the database query
             .Select(data => new ProblemDto(
                 // Simple properties
                 data.problem.Slug,
-                data.Statement.MarkdownText!,
-                data.Statement.Language,
+                data.Statement,
 
                 // Problem Source
                 BuildSource(
@@ -161,15 +160,6 @@ public class ProblemFilterService(
                                 text.MarkdownText != null)
                             .OrderBy(text => text.Language == language ? 0 : (text.IsOriginal ? 1 : 2))
                             .Select(text => text.MarkdownText!)
-                            .First(),
-
-                        // Language of the similar problem statement
-                        similarProblem.SimilarProblem.Texts
-                            .Where(text =>
-                                text.DocumentType == DocumentType.Statement &&
-                                text.MarkdownText != null)
-                            .OrderBy(text => text.Language == language ? 0 : (text.IsOriginal ? 1 : 2))
-                            .Select(text => text.Language)
                             .First(),
 
                         similarProblem.SimilarityScore
