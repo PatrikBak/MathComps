@@ -9,7 +9,7 @@ import type { ApiCaller } from '@/hooks/use-api'
 
 import { getProblemBySlug } from '../services/problem-service'
 import type { CompetitionNodeOption, LabeledSlug, Problem } from '../types/problem-api-types'
-import type { FilterResult } from '../types/problem-library-types'
+import type { FilterOptionsWithCounts, FilterResult } from '../types/problem-library-types'
 import { buildCompetitionTree } from '../utils/competition-tree'
 import taxonomyFixture from './fixtures/competition-taxonomy.json'
 
@@ -31,6 +31,16 @@ function labeledSlug(path: string): LabeledSlug {
 }
 
 /**
+ * Stands in for an option block, since nothing here reads a facet count.
+ *
+ * @returns Options offering nothing.
+ */
+function emptyOptions(): FilterOptionsWithCounts {
+  // Every facet, each offering no rows
+  return { competitions: [], seasons: [], problemNumbers: [], tags: [], authors: [] }
+}
+
+/**
  * Builds the source of one problem out of the competitions it hangs from.
  *
  * @param competitionPaths - Every competition down to the one the problem was set in, root-first.
@@ -49,9 +59,13 @@ function sourceOf(competitionPaths: string[]): Problem['source'] {
  * Stands up an API caller answering with one problem carrying the given source.
  *
  * @param source - Where that problem came from.
+ * @param withoutOptions - Which option blocks to leave out, both being carried by default.
  * @returns The caller, which answers whatever it is asked.
  */
-function apiCallReturning(source: Problem['source']): ApiCaller {
+function apiCallReturning(
+  source: Problem['source'],
+  withoutOptions: Partial<Pick<FilterResult, 'baseOptions' | 'updatedOptions'>> = {}
+): ApiCaller {
   // The problem the response holds, bare everywhere the derivation does not read it
   const problem: Problem = {
     slug: 'a-problem',
@@ -68,10 +82,12 @@ function apiCallReturning(source: Problem['source']): ApiCaller {
     listContentIds: [],
   }
 
-  // The one-problem page the endpoint would serve
+  // The one-problem page the endpoint would serve, carrying both option blocks bar those left out
   const response: FilterResult = {
     problems: { items: [problem], page: 1, pageSize: 1, totalCount: 1 },
-    updatedOptions: null,
+    baseOptions: emptyOptions(),
+    updatedOptions: emptyOptions(),
+    ...withoutOptions,
   }
 
   // Every call lands on that page, whichever slug it asks for
@@ -87,7 +103,7 @@ function apiCallReturning(source: Problem['source']): ApiCaller {
  */
 async function resolvedCompetitionPath(source: Problem['source']): Promise<string | undefined> {
   // The problem and the filters showing it, as the single-problem view asks for them
-  const result = await getProblemBySlug(apiCallReturning(source), 'a-problem')
+  const result = await getProblemBySlug(apiCallReturning(source), 'a-problem', true)
 
   // A failure derives no filters, so there is no competition to resolve
   if (!result.success) return undefined
@@ -135,9 +151,31 @@ describe('deriving the filters showing one problem', () => {
 
   it('shows no problem at all for a source hanging from no competition', async () => {
     // A payload naming where the problem came from and then naming nothing
-    const result = await getProblemBySlug(apiCallReturning(sourceOf([])), 'a-problem')
+    const result = await getProblemBySlug(apiCallReturning(sourceOf([])), 'a-problem', true)
 
     // Refused outright rather than filtered to a competition nobody named
     expect(result.success).toBe(false)
+  })
+
+  it('shows no problem at all when the answer carried no counts for it', async () => {
+    // An answer whose problem is fine but whose own option counts never came
+    const apiCall = apiCallReturning(sourceOf(['imo']), { updatedOptions: null })
+
+    // The problem, as the single-problem view asks for it
+    const result = await getProblemBySlug(apiCall, 'a-problem', true)
+
+    // Refused, since the sidebar would otherwise read nought against every filter on offer
+    expect(result.success).toBe(false)
+  })
+
+  it('shows the problem without the library options when it did not ask for them', async () => {
+    // The answer a reader gets clicking through from an archive that already holds them
+    const apiCall = apiCallReturning(sourceOf(['imo']), { baseOptions: null })
+
+    // The problem, as the single-problem view asks for it having them already
+    const result = await getProblemBySlug(apiCall, 'a-problem', false)
+
+    // Served, with only the counts the problem itself narrows to
+    expect(result.success).toBe(true)
   })
 })

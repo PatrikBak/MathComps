@@ -7,6 +7,10 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 /// <param name="PageSize">Requested number of results per page. Limited by server configuration to prevent DoS attacks.</param>
 /// <param name="PageNumber">1-based page index to retrieve; values below 1 are clamped to the first page.</param>
 /// <param name="FavoritesOnly">Whether to show only problems liked by the user.</param>
+/// <param name="IncludeBaseOptions">
+/// Whether the answer carries the whole library's options alongside the query's own. A caller that
+/// already holds them, having asked once, says no and is answered without them.
+/// </param>
 /// <param name="ListContentId">Optional ContentId of a user list to filter by.</param>
 /// <param name="MarkStatus">Optional mark status filter to show only marked or unmarked problems.</param>
 public record FilterQuery(
@@ -14,6 +18,7 @@ public record FilterQuery(
     int PageSize,
     int PageNumber,
     bool FavoritesOnly,
+    bool IncludeBaseOptions,
     string? ListContentId = null,
     MarkStatusFilter? MarkStatus = null
 );

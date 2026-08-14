@@ -14,6 +14,7 @@ import { serializeFilters } from '../utils/search-url-serialization'
 import {
   createDefaultFilters,
   initializeFiltersFromUrlOrDefaults,
+  namesOnlyKnownCompetitions,
 } from '../utils/url-initialization'
 import goldenFixture from './fixtures/competition-golden.json'
 import taxonomyFixture from './fixtures/competition-taxonomy.json'
@@ -115,6 +116,21 @@ function idToPath(id: string): string {
     .split('/')
     .filter((segment, index) => index % 2 === 1)
     .join('-')
+}
+
+/**
+ * Reads a `competitions=` value the way the URL reader does, so a parse can be held against the raw
+ * text the capture recorded.
+ *
+ * @param value - The parameter's value.
+ * @returns The paths it names, with the empty segments a separator run leaves dropped.
+ */
+function parseCompetitionsValue(value: string): string[] {
+  // Each path in turn, with its own empty levels squeezed out the way the reader squeezes them
+  return value
+    .split(',')
+    .map((path) => path.split('-').filter(Boolean).join('-'))
+    .filter(Boolean)
 }
 
 /**
@@ -243,40 +259,43 @@ describe('reading filters back out of a URL', () => {
 
       // The whole URL pipeline, from query string to filter state
       const result = initializeFiltersFromUrlOrDefaults(
-        new URLSearchParams(`competitions=${goldenCase.value}`),
-        tree
+        new URLSearchParams(`competitions=${goldenCase.value}`)
       )
+
+      // A path the taxonomy has since dropped costs the URL just as an unreadable key does, only it
+      // is found out later, once the archive has answered with the taxonomy to check against
+      const isInvalid = result.hasInvalidParams || !namesOnlyKnownCompetitions(result.filters, tree)
 
       // An approved deviation reads as a broken URL, whatever the capture recorded
       const expectInvalid =
         APPROVED_URL_DEVIATIONS.has(goldenCase.value) || goldenCase.hasInvalidParams
 
       // Whether the URL was understood at all
-      expect(result.hasInvalidParams).toBe(expectInvalid)
+      expect(isInvalid).toBe(expectInvalid)
 
-      // A broken URL falls back to no filters, whichever way it broke
-      const expectedPaths = expectInvalid
-        ? []
-        : goldenCase.competitionSelection.map(selectionToPath)
+      // The paths the parse carried through
+      const parsedPaths = result.filters.competitionSelection.map((selection) => selection.path)
 
-      // The same nodes filtered on, in the same order
-      expect(result.filters.competitionSelection.map((selection) => selection.path)).toEqual(
-        expectedPaths
-      )
+      // Nothing here names an unreadable key or season, so the parse itself always understands the URL
+      expect(result.hasInvalidParams).toBe(false)
+
+      // The parse carries every path the URL named, in order, whether or not the taxonomy still
+      // answers to them
+      expect(parsedPaths).toEqual(parseCompetitionsValue(goldenCase.value))
+
+      // A URL that survives the taxonomy too is held to the capture in full
+      if (!isInvalid) {
+        // Filtering on exactly the nodes the capture recorded
+        expect(parsedPaths).toEqual(goldenCase.competitionSelection.map(selectionToPath))
+      }
     })
   }
 
   it('writes back exactly the URL it read, for every path in the taxonomy', () => {
-    // The taxonomy the paths are resolved against
-    const tree = buildCompetitionTree(competitions, competitions)
-
     // Every node, so a link to any level survives a round trip through the filters unchanged
     for (const path of golden.allPaths) {
       // The filters the URL reads as
-      const result = initializeFiltersFromUrlOrDefaults(
-        new URLSearchParams(`competitions=${path}`),
-        tree
-      )
+      const result = initializeFiltersFromUrlOrDefaults(new URLSearchParams(`competitions=${path}`))
 
       // Written back exactly as it arrived
       expect(serializeFilters({ ...createDefaultFilters(), ...result.filters })).toBe(

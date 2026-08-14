@@ -21,12 +21,15 @@ import { buildCompetitionTree } from '../utils/competition-tree'
 import { countActiveFilters } from '../utils/filter-validation'
 import { isNoOpFilterChange, isTextOnlyChange } from '../utils/search-logic'
 import { serializeFilters } from '../utils/search-url-serialization'
-import { initializeFiltersFromUrlOrDefaults } from '../utils/url-initialization'
 import {
-  useInitialFilterData,
-  useProblemSearchQuery,
-  useSingleProblem,
-} from './use-problem-search-query'
+  createDefaultFilters,
+  initializeFiltersFromUrlOrDefaults,
+  namesOnlyKnownCompetitions,
+} from '../utils/url-initialization'
+import { useBaseOptions, useProblemSearchQuery, useSingleProblem } from './use-problem-search-query'
+
+/** How much of a slug a notice can carry. */
+const MAX_NOTICE_SLUG_LENGTH = 20
 
 /**
  * The problem search state: loading flags, active filters, and the current result page.
@@ -38,21 +41,18 @@ type ProblemSearchState = {
   isBlankSlateLoading: boolean
   /** Whether more results are being loaded (infinite scroll). */
   isPaginationLoading: boolean
-
   /** The current active filters. */
   filters: SearchFiltersState | null
   /** The available options for filtering. */
   filterOptions: FilterOptionsWithCounts | null
   /** Every option the library can ever offer, whatever is filtered. */
   baseOptions: FilterOptionsWithCounts | null
-
   /** The list of problem slugs currently displayed. */
   problems: string[]
   /** The total number of problems matching the current criteria. */
   totalCount: number
   /** Whether there are more pages of results available. */
   hasMore: boolean
-
   /** The state of the filter-options fetch, which the page cannot render without. */
   pageState: QueryUiState
   /** The state of the result fetch. */
@@ -118,11 +118,8 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // The locale the library reads in
   const locale = useLocale()
 
-  // The fetch of every option the library offers, each counted across the whole library
-  const initialDataQuery = useInitialFilterData(locale, signedInUserId, isUserDataLoaded)
-
-  // Every option the library can ever offer, once they have arrived
-  const baseOptions = initialDataQuery.data?.updatedOptions ?? null
+  // Every option the library can ever offer, once the first answer has carried them
+  const baseOptions = useBaseOptions(locale) ?? null
 
   // The fetch of the problem the URL singles out, held until auth settles because a problem
   // carries whether the reader liked it
@@ -133,31 +130,45 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     !!problemId && isUserDataLoaded
   )
 
-  // The filters as read off the URL, the one place they are kept
+  // The filters as read off the URL, the one place they are kept. The competitions they name are
+  // still unproven: only the taxonomy can say whether they are real, and it rides on the answer this
+  // very state is about to ask for.
   const urlParsingResult = useMemo(() => {
-    // A competition path can only be resolved once the taxonomy has arrived
-    if (!baseOptions) return null
-
     // Single problem view doesn't use URL filters
     if (problemId) return null
 
-    // Each competition path resolved against the taxonomy it was written for
-    return initializeFiltersFromUrlOrDefaults(
-      searchParams,
+    // The URL as filters, taken at its word
+    return initializeFiltersFromUrlOrDefaults(searchParams)
+  }, [searchParams, problemId])
+
+  // Whether the taxonomy, once it arrived, disowned a competition the URL named
+  const namesAGoneCompetition = useMemo(() => {
+    // Nothing to hold the URL against until the archive has answered
+    if (!baseOptions || !urlParsingResult) return false
+
+    // Every competition the URL named, held against the taxonomy as it stands now
+    return !namesOnlyKnownCompetitions(
+      urlParsingResult.filters,
       buildCompetitionTree(baseOptions.competitions, baseOptions.competitions)
     )
-  }, [searchParams, baseOptions, problemId])
+  }, [baseOptions, urlParsingResult])
 
-  // The filters the URL asked for
-  const urlFilters = urlParsingResult?.filters ?? null
+  // The filters the URL asked for, which a competition the taxonomy has since dropped costs entirely
+  const urlFilters = useMemo(() => {
+    // The URL has yet to be read
+    if (!urlParsingResult) return null
+
+    // A competition nothing answers to leaves the library on its defaults
+    return namesAGoneCompetition ? createDefaultFilters() : urlParsingResult.filters
+  }, [urlParsingResult, namesAGoneCompetition])
 
   // Say so when the URL asked for filters that could not be honoured
   useEffect(() => {
     // The URL has yet to be read
     if (!urlParsingResult) return
 
-    // The URL could not be read, so the defaults took over
-    if (urlParsingResult.hasInvalidParams) {
+    // The URL could not be read, or named a competition the taxonomy has since dropped
+    if (urlParsingResult.hasInvalidParams || namesAGoneCompetition) {
       // Warn that the URL's filters were dropped
       toast.warning(tErrors('urlFiltersIgnored'))
     }
@@ -166,7 +177,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
       // Warn that the limit is what dropped them
       toast.warning(tErrors('urlTooManyFilters', { max: ACTIVE_FILTERS_CONSTANTS.maxFilterLimit }))
     }
-  }, [urlParsingResult, tErrors])
+  }, [urlParsingResult, namesAGoneCompetition, tErrors])
 
   // Favorites are a reader's own, so asking for them signed out means signing in first
   useEffect(() => {
@@ -239,10 +250,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     locale,
     queryFilters,
     signedInUserId,
-    !problemId &&
-      queryFilters !== null &&
-      initialDataQuery.uiState.kind !== 'loading' &&
-      isUserDataLoaded
+    !problemId && queryFilters !== null && isUserDataLoaded
   )
 
   // The filters as the reader sees them, moving the moment they click, ahead of the URL catching up
@@ -313,12 +321,11 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     // Only a missing problem is handled here
     if (errorCodeOf(singleProblemState.error) !== 'ProblemNotFound') return
 
-    // How much of a slug a notice can carry
-    const maxIdLength = 20
-
-    // The slug, cut short when it runs past that
+    // The slug, cut short when it runs past what a notice can carry
     const truncatedId =
-      problemId.length > maxIdLength ? `${problemId.slice(0, maxIdLength)}...` : problemId
+      problemId.length > MAX_NOTICE_SLUG_LENGTH
+        ? `${problemId.slice(0, MAX_NOTICE_SLUG_LENGTH)}...`
+        : problemId
 
     // Name the problem that is gone
     toast.error(tErrors('problemNotFound', { problemId: truncatedId }))
@@ -341,9 +348,9 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // floats above the page, so unlike anything in the list it cannot be scrolled away from, and it
   // names the cause where the list names the consequence.
   useEffect(() => {
-    // The single problem view has its own error handling, and a boot that never got its filter
-    // options is covered by the page-level state
-    if (problemId || initialDataQuery.uiState.kind !== 'ready') return undefined
+    // The single problem view has its own error handling, and a first search that never got the
+    // library's options is covered by the page-level state
+    if (problemId || !baseOptions) return undefined
 
     // A request genuinely is in flight after an earlier attempt failed
     if (searchStateKind === 'retrying') {
@@ -374,7 +381,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     return undefined
   }, [
     problemId,
-    initialDataQuery.uiState,
+    baseOptions,
     searchStateKind,
     hasVisibleResults,
     retrySearch,
@@ -429,11 +436,16 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // leave behind, otherwise the whole library's
   const filterOptions = singleProblemQuery.data?.options ?? searchQuery.filterOptions ?? baseOptions
 
-  // No view renders without the filter options, and the single-problem view needs that problem on
-  // top. Whichever is still missing is what the page's state is about, and what retrying it runs.
-  // Because the problem is only reached once the options are ready, a ready page means both are.
-  const needsSingleProblem = problemId !== null && initialDataQuery.uiState.kind === 'ready'
-  const pageState = needsSingleProblem ? singleProblemQuery.uiState : initialDataQuery.uiState
+  // Whether the page is the one the URL singles a problem out for
+  const needsSingleProblem = problemId !== null
+
+  // The archive stands on its first search until that search has handed over the library's options
+  const archiveState = baseOptions ? { kind: 'ready' as const } : searchQuery.uiState
+
+  // No view renders without the filter options, and each gets them off its own first answer: the
+  // archive off its search, the single-problem view off that problem. Whichever answer is still
+  // outstanding is what the page's state is about, and what retrying it runs.
+  const pageState = needsSingleProblem ? singleProblemQuery.uiState : archiveState
 
   // Are we waiting on a search with nothing on screen yet?
   const isBlankSlateLoading = !problemId && searchQuery.isPending
@@ -473,7 +485,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
       listName: searchQuery.listName,
     },
     handleFiltersChange,
-    retryPage: needsSingleProblem ? singleProblemQuery.retry : initialDataQuery.retry,
+    retryPage: needsSingleProblem ? singleProblemQuery.retry : searchQuery.retry,
     retrySearch,
     loadMore: searchQuery.loadMore,
   }

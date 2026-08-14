@@ -34,7 +34,8 @@ public class ProblemFilterService(
     public async Task<FilterResult> FilterAsync(ProblemFilterOptions options)
     {
         // Convenient deconstruct
-        var ((parameters, pageSize, pageNumber, favoritesOnly, listContentId, markStatus), userId, language) = options;
+        var ((parameters, pageSize, pageNumber, favoritesOnly, includeBaseOptions, listContentId, markStatus),
+            userId, language) = options;
 
         // The page as it will be served, which is how much of the filtered set one request can ask for.
         var bounds = PageBounds.ForRequestedPage(paginationOptions.Value, pageSize, pageNumber);
@@ -204,15 +205,23 @@ public class ProblemFilterService(
             totalCount
         );
 
-        // Build search bar options only for the first page to avoid unnecessary computation
-        var searchBarOptions = bounds.PageNumber != 1 ? null :
-             // Build search bar options with faceting on the text-filtered base query
-             // Most facets use disjunctive faceting, while tags and authors use conjunctive faceting
-             // when AND logic is selected with at least one item
-             await BuildSearchOptionsAsync(textFilteredQuery, parameters, terms, language);
+        // Later pages narrow to the same set as the first, so their options would only repeat it
+        var isFirstPage = bounds.PageNumber == 1;
+
+        // The whole library's options, counted over every problem rather than over what the query leaves
+        var baseOptions = isFirstPage && includeBaseOptions
+            ? await BuildSearchOptionsAsync(dbContext.Problems, _everythingInPlay, _noTerms, language)
+            : null;
+
+        // The query's own options, worth counting only where they can differ from the library's.
+        // Most facets are counted disjunctively, tags and authors conjunctively when AND is selected
+        // alongside at least one of them.
+        var updatedOptions = isFirstPage && NarrowsAnything(parameters, terms)
+            ? await BuildSearchOptionsAsync(textFilteredQuery, parameters, terms, language)
+            : null;
 
         // Return the complete filter result
-        return new FilterResult(pagedResults, searchBarOptions);
+        return new FilterResult(pagedResults, baseOptions, updatedOptions);
     }
 
     /// <summary>
@@ -236,6 +245,50 @@ public class ProblemFilterService(
         Guid? UserId);
 
     /// <summary>
+    /// Criteria that ask for the library whole. The logic toggles have no bearing without slugs beside them,
+    /// so the value either carries is arbitrary.
+    /// </summary>
+    private static readonly FilterParameters _everythingInPlay = new(
+        SearchText: "",
+        SearchInSolution: false,
+        OlympiadYears: [],
+        CompetitionPaths: [],
+        ProblemNumbers: [],
+        TagSlugs: [],
+        TagLogic: LogicToggle.Or,
+        AuthorSlugs: [],
+        AuthorLogic: LogicToggle.Or);
+
+    /// <summary>
+    /// Terms that narrow to nobody in particular, which is what counting the whole library asks for.
+    /// </summary>
+    private static readonly FilterTerms _noTerms = new([], FavoritesOnly: false, ListContentId: null,
+        MarkStatus: null, UserId: null);
+
+    /// <summary>
+    /// Whether a query leaves any of the library out.
+    /// </summary>
+    /// <remarks>
+    /// Each condition here is one the run narrows by: the search text ahead of <see cref="ApplyFilters"/>,
+    /// the rest inside it. The two have to move together, since a filter applied without being named here
+    /// would be counted as though it were never applied. A logic toggle and reaching into solutions narrow
+    /// nothing on their own, which is why neither appears.
+    /// </remarks>
+    /// <param name="parameters">The criteria the query names.</param>
+    /// <param name="terms"><inheritdoc cref="FilterTerms" path="/summary"/></param>
+    /// <returns>Whether anything is filtered out.</returns>
+    private static bool NarrowsAnything(FilterParameters parameters, FilterTerms terms) =>
+        !string.IsNullOrWhiteSpace(parameters.SearchText)
+        || parameters.OlympiadYears is { Count: > 0 }
+        || parameters.CompetitionPaths is { Count: > 0 }
+        || parameters.ProblemNumbers is { Count: > 0 }
+        || parameters.TagSlugs is { Count: > 0 }
+        || parameters.AuthorSlugs is { Count: > 0 }
+        || terms.FavoritesOnly
+        || terms.ListContentId is not null
+        || terms.MarkStatus is not null;
+
+    /// <summary>
     /// Applies all active filters to the base query based on user's selections.
     /// </summary>
     /// <param name="problems">Base queryable to apply filters to</param>
@@ -244,7 +297,7 @@ public class ProblemFilterService(
     /// <returns>Filtered queryable with all applicable conditions applied</returns>
     private static IQueryable<Problem> ApplyFilters(
         IQueryable<Problem> problems,
-        ProblemFilterCriteria parameters,
+        FilterParameters parameters,
         FilterTerms terms)
     {
         // Convenient deconstruct
@@ -409,7 +462,7 @@ public class ProblemFilterService(
     /// <returns>Complete search bar options with facet counts and metadata</returns>
     private async Task<SearchBarOptions> BuildSearchOptionsAsync(
         IQueryable<Problem> baseQuery,
-        ProblemFilterCriteria parameters,
+        FilterParameters parameters,
         FilterTerms terms,
         Language language)
     {

@@ -169,6 +169,11 @@ export type FilterQuery = {
   listContentId: string | null
   /** The mark state to keep, null to keep both. */
   markStatus: MarkStatusFilter | null
+  /**
+   * Whether the answer carries the whole library's options alongside this search's own. A caller that
+   * already holds them, having asked once, says no and is answered without them.
+   */
+  includeBaseOptions: boolean
 }
 
 /**
