@@ -589,6 +589,9 @@ public class ProblemFilterService(
             // In-memory collection
             .ToImmutableList();
 
+        // The same contests as the tree they actually form, each carrying its whole subtree's count
+        var contests = BuildContestTree(contestCounts, language);
+
         // Build problem number facet options (exclude invalid/problematic numbers)
         var problemNumberGroups = await problemNumbersScope
             // Group by problem number
@@ -618,6 +621,7 @@ public class ProblemFilterService(
         // Return the fully constructed search bar options
         return new SearchBarOptions(
             competitions,
+            contests,
             [.. seasonGroups],
             [.. problemNumbers],
             [.. localizedTagGroups],
@@ -667,9 +671,19 @@ public class ProblemFilterService(
             editionNumber.ToString(),
             localization.GetSeasonLabel(language, editionNumber, startYear, endYear));
 
+        // The contest spelled out as every contest down to it, each addressed by its own path, which is what
+        // its localized names are keyed by.
+        var contest = CompetitionTree.Descend(competitionPath)
+            .Select(node => new LabeledSlug(
+                node.Path,
+                localization.GetNodeShortName(language, node.Path),
+                localization.GetNodeFullName(language, node.Path)))
+            .ToImmutableList();
+
         // A whole competition names no round, and a contest outside a category names no category.
         return new ProblemSource(
             season,
+            contest,
             Label(levels.Competition),
             levels.Round is null ? null : Label(levels.Round),
             levels.Category is null ? null : Label(levels.Category),
@@ -679,9 +693,17 @@ public class ProblemFilterService(
     /// <summary>
     /// One contest and how many problems of the current scope sit in it.
     /// </summary>
-    /// <param name="Levels">The contest projected onto the competition / category / round levels.</param>
+    /// <param name="Path"><inheritdoc cref="Competition.Path" path="/summary"/></param>
+    /// <param name="SortPath"><inheritdoc cref="Competition.SortPath" path="/summary"/></param>
     /// <param name="Count">How many problems it holds.</param>
-    private record ContestCount(ContestLevels Levels, int Count);
+    private record ContestCount(string Path, string SortPath, int Count)
+    {
+        /// <summary>
+        /// The contest projected onto the competition / category / round levels, which is what the frozen
+        /// three-level contracts are still built from.
+        /// </summary>
+        public ContestLevels Levels { get; } = ContestLevels.From(Path, SortPath);
+    }
 
     /// <summary>
     /// Counts the problems of a scope per contest. Problems hang off a contest at whatever depth it sits, so
@@ -706,9 +728,8 @@ public class ProblemFilterService(
             })
             // Execute the query
             .ToListAsync())
-            // Read the levels off each path
-            .Select(contest => new ContestCount(
-                ContestLevels.From(contest.Path, contest.SortPath), contest.Count))];
+            // Wrap each into a counted contest, which reads its levels off its own two paths
+            .Select(contest => new ContestCount(contest.Path, contest.SortPath, contest.Count))];
 
     /// <summary>
     /// Builds the facet option for a contest that is a round, i.e. one that sits below its competition.
@@ -724,6 +745,73 @@ public class ProblemFilterService(
             contest.Count);
 
     /// <summary>
+    /// One contest on the chain down to a counted one — how the tree addresses it, and where it sits.
+    /// </summary>
+    /// <param name="ParentPath">The path of the contest one level up, null at a competition.</param>
+    /// <param name="Path"><inheritdoc cref="Competition.Path" path="/summary"/></param>
+    /// <param name="SortKey">Its zero-padded position among its siblings, which sorts as it reads.</param>
+    private record ContestPlace(string? ParentPath, string Path, string SortKey);
+
+    /// <summary>
+    /// The contests a counted contest hangs from, root-first, itself last. Its two paths spell out the same
+    /// chain — the slugs down to it, and their sibling positions — so each contest on it takes its own path
+    /// from the one and its position from the other.
+    /// </summary>
+    /// <param name="contest">The counted contest to walk down to.</param>
+    /// <returns>One place per segment of its path.</returns>
+    private static IEnumerable<ContestPlace> ChainOf(ContestCount contest)
+    {
+        // The sibling positions down to the contest, which pair up with its slugs index by index. Indexing
+        // rather than zipping, so two paths of different depths fail loudly instead of yielding half a chain.
+        var sortKeys = contest.SortPath.Split('.');
+
+        // One place per segment, each taking the position its own generation is ordered by.
+        return CompetitionTree.Descend(contest.Path)
+            .Select((node, depth) => new ContestPlace(node.ParentPath, node.Path, sortKeys[depth]));
+    }
+
+    /// <summary>
+    /// Folds counted contests back into the tree they came from: every contest holding problems, and every
+    /// contest above it, each carrying what its whole subtree holds. A contest nothing was counted under never
+    /// appears, so the tree offers exactly what the current scope can still be narrowed to.
+    /// </summary>
+    /// <param name="contests">The counted contests, one per contest holding problems.</param>
+    /// <param name="language">The language to label the contests in.</param>
+    /// <returns>The competitions, each carrying everything below it.</returns>
+    private ImmutableList<ContestNodeOption> BuildContestTree(
+        IReadOnlyCollection<ContestCount> contests,
+        Language language)
+    {
+        // Each count landing on every contest on the chain down to it, since a contest's total is its whole
+        // subtree's and not just what hangs off it directly
+        var counted = contests.SelectMany(contest =>
+            ChainOf(contest).Select(place => (Place: place, contest.Count)));
+
+        // The contests to offer, totalled per contest and gathered under the one they hang from — a competition
+        // under the null one, since nothing hangs above it
+        var byParent = counted
+            .GroupBy(entry => entry.Place, entry => entry.Count)
+            .Select(group => (Place: group.Key, Count: group.Sum()))
+            .ToLookup(total => total.Place.ParentPath);
+
+        // Offers one generation, each contest carrying everything the fold left below it.
+        ImmutableList<ContestNodeOption> Offer(string? parentPath) =>
+            [.. byParent[parentPath]
+                // Siblings read in the order the registry places them
+                .OrderBy(total => total.Place.SortKey, StringComparer.Ordinal)
+                // Each contest is named by its own path, and carries the generation below it
+                .Select(total => new ContestNodeOption(
+                    total.Place.Path,
+                    localization.GetNodeShortName(language, total.Place.Path),
+                    localization.GetNodeFullName(language, total.Place.Path),
+                    total.Count,
+                    Offer(total.Place.Path)))];
+
+        // The competitions, which nothing hangs above
+        return Offer(parentPath: null);
+    }
+
+    /// <summary>
     /// Resolves contest selections to every contest they cover: each selected node and everything below it,
     /// since selecting a competition means selecting the rounds inside it. A selection naming a contest that
     /// isn't there resolves to nothing and so matches nothing.
@@ -736,9 +824,11 @@ public class ProblemFilterService(
         if (selections.Count == 0)
             return [];
 
-        // The path each selection addresses, which is how a contest is named across the whole system.
+        // The path each selection addresses, which is how a contest is named across the whole system. One
+        // carrying its path names its contest outright; the three slugs spell out the same path, as far down
+        // as they reach.
         var selectedPaths = selections
-            .Select(selection => TaxonomySlugs.ComposeCompetitionPath(
+            .Select(selection => selection.Path ?? TaxonomySlugs.ComposeCompetitionPath(
                 selection.CompetitionSlug, selection.CategorySlug, selection.RoundSlug))
             .ToList();
 
@@ -836,8 +926,15 @@ public class ProblemFilterService(
                         // Where the contest sits, which decides which levels it names at all
                         var levels = ContestLevels.From(group.Path, group.SortPath);
 
+                        // Every contest down to this one, named as it is shown, root-first
+                        var labels = CompetitionTree.Descend(group.Path)
+                            .Select(node => localization.GetNodeShortName(language, node.Path))
+                            .ToImmutableList();
+
                         // A whole competition names no category and no round; a round outside a category names one
                         return new ContestWithCount(
+                            group.Path,
+                            labels,
                             levels.Competition.Slug,
                             levels.Category?.Slug,
                             levels.Round?.Slug,
