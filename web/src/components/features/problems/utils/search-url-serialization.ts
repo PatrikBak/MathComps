@@ -27,7 +27,7 @@ const FILTER_PARAMS = {
  * The keys the library's chrome is written under in the URL, apart from the filters.
  */
 const UI_STATE_PARAMS = {
-  /** The key the open contest browser is recorded under. */
+  /** The key the open competition browser is recorded under. */
   BROWSE_COMPETITIONS: 'browseCompetitions',
 } as const
 
@@ -51,11 +51,11 @@ const SEPARATORS = {
  * Serializes competition selections into a compact string format.
  * A selection is written as its path, and several are joined by commas.
  *
- * @param selections - The contest filters to write.
+ * @param selections - The competition filters to write.
  *
  * @returns The paths, comma-separated.
  */
-const serializeSelections = (selections: SearchFiltersState['contestSelection']): string => {
+const serializeSelections = (selections: SearchFiltersState['competitionSelection']): string => {
   // A path apiece, in the order they were picked
   return selections.map((selection) => selection.path).join(SEPARATORS.LIST)
 }
@@ -120,8 +120,8 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
     }
 
     // The competitions, each as the path of the node it names
-    if (filters.contestSelection.length > 0) {
-      const selectionsValue = serializeSelections(filters.contestSelection)
+    if (filters.competitionSelection.length > 0) {
+      const selectionsValue = serializeSelections(filters.competitionSelection)
       params.push(`${URL_PARAMS.COMPETITIONS}=${selectionsValue}`)
     }
 
@@ -150,11 +150,11 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
 }
 
 /**
- * Reads the URL's query string into the filters, with the contest paths left as written.
+ * Reads the URL's query string into the filters, with the competition paths left as written.
  * Validates that all URL parameters are recognized.
  *
  * @param queryString - URL query string to parse
- * @returns Parsed URL query state with the contest paths left unresolved, or null if a param is unrecognized
+ * @returns Parsed URL query state with the competition paths left unresolved, or null if a param is unrecognized
  */
 export const deserializeFilters = (queryString: string): UrlQueryState | null => {
   // The URL read as the keys it names
@@ -172,7 +172,7 @@ export const deserializeFilters = (queryString: string): UrlQueryState | null =>
     return null
   }
 
-  // The filters as the URL names them, contest paths still unresolved
+  // The filters as the URL names them, competition paths still unresolved
   return {
     searchText: params.get(URL_PARAMS.SEARCH_TEXT) || '',
     searchInSolution: params.get(URL_PARAMS.SEARCH_IN_SOLUTION) === 'true',
@@ -182,7 +182,7 @@ export const deserializeFilters = (queryString: string): UrlQueryState | null =>
     tagLogic: parseFilterLogic(params.get(URL_PARAMS.TAG_LOGIC)),
     authors: parseSlugArray(params.get(URL_PARAMS.AUTHORS)),
     authorLogic: parseFilterLogic(params.get(URL_PARAMS.AUTHOR_LOGIC)),
-    contestPaths: parseContestPaths(params.get(URL_PARAMS.COMPETITIONS)),
+    competitionPaths: parseCompetitionPaths(params.get(URL_PARAMS.COMPETITIONS)),
     favoritesOnly: params.get(URL_PARAMS.FAVORITES_ONLY) === 'true',
     markStatus: parseMarkStatus(params.get(URL_PARAMS.MARK_STATUS)),
     listContentId: params.get(URL_PARAMS.LIST) || null,
@@ -240,14 +240,14 @@ const parseFilterLogic = (value: string | null): SearchFiltersState['tagLogic'] 
 }
 
 /**
- * Parses contest paths from a URL parameter value, without resolving any of them against the taxonomy.
+ * Parses competition paths from a URL parameter value, without resolving any of them against the taxonomy.
  * A path is taken whole, so nothing here has to know how deep the taxonomy runs; empty segments are
  * dropped so a hand-edited `csmo--a` still names `csmo-a`.
  *
- * @param value - URL parameter value containing the comma-separated contest paths
+ * @param value - URL parameter value containing the comma-separated competition paths
  * @returns The paths, with anything that emptied out left off
  */
-const parseContestPaths = (value: string | null): string[] => {
+const parseCompetitionPaths = (value: string | null): string[] => {
   // Nothing in the URL means nothing filtered on
   if (!value) return []
 

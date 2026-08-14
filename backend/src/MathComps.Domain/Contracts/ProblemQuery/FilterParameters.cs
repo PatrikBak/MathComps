@@ -12,7 +12,7 @@ namespace MathComps.Domain.Contracts.ProblemQuery;
 /// <param name="SearchText">Free-text query for problem statement and solution. Length is limited to prevent DoS attacks.</param>
 /// <param name="SearchInSolution">Whether to include solution text in search.</param>
 /// <param name="OlympiadYears">Selected olympiad edition numbers as integers (e.g., 75 for 75th edition).</param>
-/// <param name="ContestPaths">Selected contests, each addressed by its
+/// <param name="CompetitionPaths">Selected competitions, each addressed by its
 /// <see cref="EfCoreEntities.Competition.Path"/> and standing for itself and everything under it.</param>
 /// <param name="ProblemNumbers">Specific problem numbers to filter by.</param>
 /// <param name="TagSlugs">Selected tag slugs for filtering.</param>
@@ -24,7 +24,7 @@ public record FilterParameters(
     string SearchText,
     bool SearchInSolution,
     ImmutableList<int> OlympiadYears,
-    ImmutableList<string> ContestPaths,
+    ImmutableList<string> CompetitionPaths,
     ImmutableList<int> ProblemNumbers,
     ImmutableList<string> TagSlugs,
     LogicToggle TagLogic,

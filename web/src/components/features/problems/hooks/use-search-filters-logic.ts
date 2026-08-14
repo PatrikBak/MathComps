@@ -9,13 +9,13 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 
 import type { FacetOption } from '../types/problem-api-types'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
-import { foldPickedPaths } from '../utils/contest-selection-fold'
+import { foldPickedPaths } from '../utils/competition-selection-fold'
 import {
-  buildContestTree,
-  contestSelectionFor,
+  buildCompetitionTree,
+  competitionSelectionFor,
   expandedByDefault,
   toFacetNodes,
-} from '../utils/contest-tree'
+} from '../utils/competition-tree'
 
 /**
  * How a facet's options are ordered before they reach the UI.
@@ -133,24 +133,24 @@ export function useSearchFiltersLogic({
 
   // The taxonomy as the filters address it. It turns only on which nodes exist, so it stays put while
   // the counts move and a count arriving never disturbs a selection the user just made.
-  const contestTree = useMemo(
-    () => buildContestTree(baseOptions.contests, baseOptions.contests),
-    [baseOptions.contests]
+  const competitionTree = useMemo(
+    () => buildCompetitionTree(baseOptions.competitions, baseOptions.competitions),
+    [baseOptions.competitions]
   )
 
-  // The filters' contest selection, addressed the way the tree addresses its nodes
+  // The filters' competition selection, addressed the way the tree addresses its nodes
   const selectionTreeNodeIds = useMemo(() => {
     // No list of selections, nothing to address
-    if (!filters.contestSelection || !Array.isArray(filters.contestSelection)) {
+    if (!filters.competitionSelection || !Array.isArray(filters.competitionSelection)) {
       // Nothing for the tree to tick
       return []
     }
 
     // A selection naming a node the taxonomy no longer holds drops out
-    return filters.contestSelection
+    return filters.competitionSelection
       .map((selection) => selection.path)
-      .filter((path) => contestTree.byPath.has(path))
-  }, [filters.contestSelection, contestTree])
+      .filter((path) => competitionTree.byPath.has(path))
+  }, [filters.competitionSelection, competitionTree])
 
   // The tree's own selection, held locally so a click lands on the checkbox at once
   const [selectedTreeIds, setSelectedTreeIds] = useState<string[]>(selectionTreeNodeIds)
@@ -170,12 +170,14 @@ export function useSearchFiltersLogic({
     setSelectedTreeIds(nextSelectedIds)
 
     // The same selection expressed at whatever depth covers it
-    const selections = foldPickedPaths(nextSelectedIds, contestTree).map(contestSelectionFor)
+    const selections = foldPickedPaths(nextSelectedIds, competitionTree).map(
+      competitionSelectionFor
+    )
 
     // Only the competition filter moves; everything else stays as it was
     onFiltersChange({
       ...filters,
-      contestSelection: selections,
+      competitionSelection: selections,
     })
   }
 
@@ -185,14 +187,17 @@ export function useSearchFiltersLogic({
   // The whole hierarchy, since a competition never disappears from the tree, only its count changes
   const competitionTreeOpts: TreeNode[] = useMemo(() => {
     // The same nodes as the tree above, carrying the counts the current filters leave them
-    const countedTree = buildContestTree(baseOptions.contests, deferredFilterOptions.contests)
+    const countedTree = buildCompetitionTree(
+      baseOptions.competitions,
+      deferredFilterOptions.competitions
+    )
 
     // Handed over in the shape the shared facet renders
     return toFacetNodes(countedTree.roots)
-  }, [baseOptions.contests, deferredFilterOptions])
+  }, [baseOptions.competitions, deferredFilterOptions])
 
   // Every branch starts open, so the whole hierarchy is visible without any clicking
-  const defaultExpandedIds = useMemo(() => expandedByDefault(contestTree), [contestTree])
+  const defaultExpandedIds = useMemo(() => expandedByDefault(competitionTree), [competitionTree])
 
   // The seasons, which are already in the order they should render
   const seasonOpts: FacetUiOption[] = useMemo(() => {

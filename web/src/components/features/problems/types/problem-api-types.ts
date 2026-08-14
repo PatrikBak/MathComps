@@ -48,18 +48,18 @@ export type TagDto = {
 type LogicToggle = 'or' | 'and'
 
 /**
- * Where a problem comes from: the season it ran in, the contest it was set in, and its position there.
+ * Where a problem comes from: the season it ran in, the competition it was set in, and its position there.
  */
 type ProblemSource = {
   /** The season it was set in, whose slug is the edition number. */
   season: LabeledSlug
   /**
-   * Every contest down to the one it was set in, root-first, so the last entry is the contest itself.
-   * Each entry's `slug` is that contest's whole path rather than its own segment, which is what names a
-   * contest at whatever depth it sits.
+   * Every competition down to the one it was set in, root-first, so the last entry is the competition itself.
+   * Each entry's `slug` is that competition's whole path rather than its own segment, which is what names a
+   * competition at whatever depth it sits.
    */
-  contest: LabeledSlug[]
-  /** Its position within its contest, i.e. the 3rd problem. */
+  competition: LabeledSlug[]
+  /** Its position within its competition, i.e. the 3rd problem. */
   number: number
 }
 
@@ -118,10 +118,10 @@ export type FilterParameters = {
   /** The edition numbers picked, e.g. 75 for the 75th. */
   olympiadYears: number[]
   /**
-   * The contests picked, each addressed by the slugs leading down to it (e.g. `csmo-a-i`) and standing
-   * for that contest and everything under it.
+   * The competitions picked, each addressed by the slugs leading down to it (e.g. `csmo-a-i`) and standing
+   * for that competition and everything under it.
    */
-  contestPaths: string[]
+  competitionPaths: string[]
   /** The positions picked, i.e. every 3rd problem. */
   problemNumbers: number[]
   /** The tags picked. */
@@ -135,11 +135,11 @@ export type FilterParameters = {
 }
 
 /**
- * One contest as the search bar offers it, carrying the contests below it. The tree runs to whatever
+ * One competition as the search bar offers it, carrying the competitions below it. The tree runs to whatever
  * depth the taxonomy does.
  */
-export type ContestNodeOption = {
-  /** The contest, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
+export type CompetitionNodeOption = {
+  /** The competition, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
   path: string
   /** The short name it is shown by (e.g. `Domáce kolo`). */
   displayName: string
@@ -147,6 +147,6 @@ export type ContestNodeOption = {
   fullName: string
   /** How many problems sit anywhere under it, itself included. */
   count: number
-  /** The contests one level below it, empty at a leaf. */
-  children: ContestNodeOption[]
+  /** The competitions one level below it, empty at a leaf. */
+  children: CompetitionNodeOption[]
 }

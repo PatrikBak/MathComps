@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`preflight-draft fixtures (verdict + snapshot) > invalid-bad-contest-path 1`] = `
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-bad-competition-path 1`] = `
 {
   "errors": [
     {
@@ -497,7 +497,7 @@ exports[`preflight-draft fixtures (verdict + snapshot) > valid-basic 1`] = `
 }
 `;
 
-exports[`preflight-draft fixtures (verdict + snapshot) > valid-deep-contest 1`] = `
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-deep-competition 1`] = `
 {
   "errors": [],
   "ok": true,
@@ -650,7 +650,7 @@ exports[`preflight-draft fixtures (verdict + snapshot) > valid-raster-image 1`] 
 }
 `;
 
-exports[`preflight-draft fixtures (verdict + snapshot) > valid-root-contest 1`] = `
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-root-competition 1`] = `
 {
   "errors": [],
   "ok": true,
@@ -824,7 +824,7 @@ exports[`preflight-draft fixtures (verdict + snapshot) > valid-translation-state
 }
 `;
 
-exports[`preflight-draft fixtures (verdict + snapshot) > valid-two-level-contest 1`] = `
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-two-level-competition 1`] = `
 {
   "errors": [],
   "ok": true,

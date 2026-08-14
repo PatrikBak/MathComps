@@ -38,9 +38,9 @@ public class DraftApplyService(
         // Upsert the taxonomy chain, collecting the create-vs-reuse outcome of each entity for the report.
         var entities = ImmutableArray.CreateBuilder<EntityResolution>();
 
-        // Raise every node on the contest's path, renumbering each generation to the registry on the way down. The
+        // Raise every node on the competition's path, renumbering each generation to the registry on the way down. The
         // renumbering runs before anything is created, so a mid-list insertion frees the slot the newcomer claims.
-        var (competition, chain, sortOrderChanges) = await ResolveNodeAsync(context, target.ContestPath);
+        var (competition, chain, sortOrderChanges) = await ResolveNodeAsync(context, target.CompetitionPath);
         entities.AddRange(chain);
 
         // Season by start year.
@@ -49,7 +49,7 @@ public class DraftApplyService(
 
         // The round — this competition's sitting in this season — carrying the draft's date when freshly created.
         var (round, roundAction) = await GetOrCreateRoundAsync(context, competition.Id, season.Id, date);
-        entities.Add(new EntityResolution("round", $"{target.ContestPath} {target.SeasonYear}", roundAction));
+        entities.Add(new EntityResolution("round", $"{target.CompetitionPath} {target.SeasonYear}", roundAction));
 
         // Write the problems, tallying the per-text outcomes and the insert/update/image counts.
         var appliedTexts = ImmutableArray.CreateBuilder<AppliedText>();
@@ -66,7 +66,7 @@ public class DraftApplyService(
         {
             // The stable slug this problem upserts on — its leading token is the season's edition (ročník), e.g. 75.
             var slug = TaxonomySlugs.ProblemSlug(
-                Season.EditionFromStartYear(target.SeasonYear), target.ContestPath, problem.Order);
+                Season.EditionFromStartYear(target.SeasonYear), target.CompetitionPath, problem.Order);
 
             // Upload the problem's images and build the relative-ref → media-ref map the markdown rewrite consumes.
             var (replacements, uploaded, skipped) = await UploadProblemImagesAsync(problem, slug, draftFolder);

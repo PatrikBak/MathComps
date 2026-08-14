@@ -20,7 +20,7 @@ public class SimilarityCalculationSettings
     public int TotalCandidateLimit { get; set; }
 
     /// <summary>
-    /// Maps contest paths to numeric cluster IDs for grouping similar competitions.
+    /// Maps competition paths to numeric cluster IDs for grouping similar competitions.
     /// </summary>
     [Required]
     // Populated by the configuration binder, never mutated in code.

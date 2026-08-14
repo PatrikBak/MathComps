@@ -1,6 +1,6 @@
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import type { SearchFiltersState } from '../types/problem-library-types'
-import { type ContestTree, resolveContestPaths } from './contest-tree'
+import { type CompetitionTree, resolveCompetitionPaths } from './competition-tree'
 import { countActiveFilters } from './filter-validation'
 import { deserializeFilters, URL_PARAMS } from './search-url-serialization'
 
@@ -18,7 +18,7 @@ export const createDefaultFilters = (): SearchFiltersState => ({
   tagLogic: 'or',
   authors: [],
   authorLogic: 'or',
-  contestSelection: [],
+  competitionSelection: [],
   favoritesOnly: false,
   markStatus: null,
   listContentId: null,
@@ -44,13 +44,13 @@ type UrlInitializationResult = {
  * to the defaults.
  *
  * @param searchParams - The URL search parameters
- * @param contestTree - The taxonomy the contest paths are resolved against
+ * @param competitionTree - The taxonomy the competition paths are resolved against
  *
  * @returns The starting filters, alongside what the URL asked for and what it got wrong
  */
 export function initializeFiltersFromUrlOrDefaults(
   searchParams: URLSearchParams,
-  contestTree: ContestTree
+  competitionTree: CompetitionTree
 ): UrlInitializationResult {
   // Nothing in the URL to read
   if (searchParams.toString().length === 0) {
@@ -67,7 +67,7 @@ export function initializeFiltersFromUrlOrDefaults(
   const favoritesRequested = searchParams.get(URL_PARAMS.FAVORITES_ONLY) === 'true'
 
   // The URL as filters, null when any part of it could not be read
-  const parsedFilters = parseAndInterpretFilters(searchParams, contestTree)
+  const parsedFilters = parseAndInterpretFilters(searchParams, competitionTree)
 
   // A URL the library could not read in full
   if (parsedFilters === null) {
@@ -101,20 +101,20 @@ export function initializeFiltersFromUrlOrDefaults(
 }
 
 /**
- * Reads a URL into the filters it names, with every contest path resolved against the taxonomy.
+ * Reads a URL into the filters it names, with every competition path resolved against the taxonomy.
  * A key the library does not recognize, a season no edition answers to, and a path no node answers
  * to each cost the whole URL.
  *
  * @param searchParams - The URL search parameters.
- * @param contestTree - The taxonomy the contest paths are resolved against.
+ * @param competitionTree - The taxonomy the competition paths are resolved against.
  *
  * @returns The {@link SearchFiltersState} the URL names, or null when any part of it could not be read.
  */
 function parseAndInterpretFilters(
   searchParams: URLSearchParams,
-  contestTree: ContestTree
+  competitionTree: CompetitionTree
 ): SearchFiltersState | null {
-  // The filters as the URL names them, contest paths still unresolved
+  // The filters as the URL names them, competition paths still unresolved
   const rawUrlState = deserializeFilters(searchParams.toString())
 
   // A key the library does not recognize costs the whole URL
@@ -124,17 +124,17 @@ function parseAndInterpretFilters(
   if (rawUrlState.seasons.some((season) => !/^[0-9]+$/.test(season.slug))) return null
 
   // The paths resolved against the taxonomy as it stands now
-  const selections = resolveContestPaths(rawUrlState.contestPaths, contestTree)
+  const selections = resolveCompetitionPaths(rawUrlState.competitionPaths, competitionTree)
 
   // A path no node answers to costs it just the same
   if (selections === null) return null
 
   // The state the URL named, with the paths it was written with left behind
-  const { contestPaths: _, ...finalState } = rawUrlState
+  const { competitionPaths: _, ...finalState } = rawUrlState
 
   // The filters, now naming the nodes the paths resolved to
   return {
     ...finalState,
-    contestSelection: selections,
+    competitionSelection: selections,
   }
 }

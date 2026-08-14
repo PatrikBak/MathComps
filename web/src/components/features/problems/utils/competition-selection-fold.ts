@@ -1,6 +1,6 @@
 // Folding the picked paths up to the shallowest nodes that cover exactly them, at any depth.
 
-import type { ContestNode, ContestTree } from './contest-tree'
+import type { CompetitionNode, CompetitionTree } from './competition-tree'
 
 /**
  * Whether a node is wholly covered: picked in its own right, or a branch every one of whose children is
@@ -10,7 +10,7 @@ import type { ContestNode, ContestTree } from './contest-tree'
  * @param picked - The paths picked in their own right.
  * @returns Whether the node's whole subtree is covered.
  */
-function isWhollyCovered(node: ContestNode, picked: Set<string>): boolean {
+function isWhollyCovered(node: CompetitionNode, picked: Set<string>): boolean {
   // Picked outright, so nothing below it needs looking at
   if (picked.has(node.path)) return true
 
@@ -31,7 +31,7 @@ function isWhollyCovered(node: ContestNode, picked: Set<string>): boolean {
  * @param tree - The taxonomy, which says what a complete set of siblings is.
  * @returns The covering nodes, in the order the tree draws them.
  */
-export function foldPickedPaths(pickedPaths: string[], tree: ContestTree): ContestNode[] {
+export function foldPickedPaths(pickedPaths: string[], tree: CompetitionTree): CompetitionNode[] {
   // The picked paths that still name a node, which is what the cover test asks after
   const picked = new Set(pickedPaths.filter((path) => tree.byPath.has(path)))
 
@@ -44,7 +44,7 @@ export function foldPickedPaths(pickedPaths: string[], tree: ContestTree): Conte
    * @param nodes - The nodes to collect from.
    * @returns The covering nodes among them and their descendants.
    */
-  function collect(nodes: ContestNode[]): ContestNode[] {
+  function collect(nodes: CompetitionNode[]): CompetitionNode[] {
     // A covered node stands for its whole subtree, so it is emitted and not descended into
     return nodes.flatMap((node) =>
       isWhollyCovered(node, picked) ? [node] : collect(node.children)

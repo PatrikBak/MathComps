@@ -3,8 +3,8 @@
 
 import type { TreeNode } from '@/components/shared/components/facets/model/facet-types'
 
-import type { ContestNodeOption } from '../types/problem-api-types'
-import type { ContestSelection } from '../types/problem-library-types'
+import type { CompetitionNodeOption } from '../types/problem-api-types'
+import type { CompetitionSelection } from '../types/problem-library-types'
 
 /** Sits between the ancestor names in a node's path label. */
 const LABEL_SEPARATOR = ' - '
@@ -12,7 +12,7 @@ const LABEL_SEPARATOR = ' - '
 /**
  * A node in the competition taxonomy, addressed by the path of slugs leading down to it.
  */
-export type ContestNode = {
+export type CompetitionNode = {
   /** The slugs from the root down to this node, joined, e.g. `csmo-a-i`. */
   path: string
   /** The node's own label. */
@@ -24,18 +24,18 @@ export type ContestNode = {
   /** How many problems sit under this node, counting its whole subtree. */
   count: number
   /** The nodes one level below, empty at a leaf. */
-  children: ContestNode[]
+  children: CompetitionNode[]
 }
 
 /**
  * The taxonomy, both as the tree it is and as a lookup, so a path resolves to its node without guessing
  * which level a segment belongs to.
  */
-export type ContestTree = {
+export type CompetitionTree = {
   /** The competitions, in the taxonomy's own order. */
-  roots: ContestNode[]
+  roots: CompetitionNode[]
   /** Every node in the tree, at whatever depth, keyed by its path. */
-  byPath: Map<string, ContestNode>
+  byPath: Map<string, CompetitionNode>
 }
 
 /**
@@ -57,14 +57,14 @@ function joinLabel(parentLabel: string, displayName: string): string {
  *
  * @param base - The whole hierarchy, which decides which nodes exist and how they are ordered.
  * @param filtered - The hierarchy under the current filters, which supplies the counts.
- * @returns The tree and its lookup, per {@link ContestTree}.
+ * @returns The tree and its lookup, per {@link CompetitionTree}.
  */
-export function buildContestTree(
-  base: ContestNodeOption[],
-  filtered: ContestNodeOption[]
-): ContestTree {
+export function buildCompetitionTree(
+  base: CompetitionNodeOption[],
+  filtered: CompetitionNodeOption[]
+): CompetitionTree {
   // Every node built so far, keyed by its path
-  const byPath = new Map<string, ContestNode>()
+  const byPath = new Map<string, CompetitionNode>()
 
   // What the filters left of each node, keyed by path so a node finds its twin at any depth
   const filteredByPath = new Map(flattenOptions(filtered).map((option) => [option.path, option]))
@@ -76,14 +76,14 @@ export function buildContestTree(
    * @param parentLabel - The label of the node above, empty at a root.
    * @returns The nodes, in the order the hierarchy offers them.
    */
-  function buildNodes(options: ContestNodeOption[], parentLabel: string): ContestNode[] {
+  function buildNodes(options: CompetitionNodeOption[], parentLabel: string): CompetitionNode[] {
     // One node per option, each carrying whatever hangs off it
     return options.map((option) => {
       // Every ancestor's label and this node's
       const pathLabel = joinLabel(parentLabel, option.displayName)
 
       // Built bottom-up, so a node knows its children before anything can look it up
-      const node: ContestNode = {
+      const node: CompetitionNode = {
         path: option.path,
         displayName: option.displayName,
         fullName: option.fullName,
@@ -113,7 +113,7 @@ export function buildContestTree(
  * @param options - The nodes to read out, at any depth.
  * @returns The same nodes, one level deep.
  */
-function flattenOptions(options: ContestNodeOption[]): ContestNodeOption[] {
+function flattenOptions(options: CompetitionNodeOption[]): CompetitionNodeOption[] {
   // Every node at every depth, each ahead of the ones under it
   return options.flatMap((option) => [option, ...flattenOptions(option.children)])
 }
@@ -125,7 +125,7 @@ function flattenOptions(options: ContestNodeOption[]): ContestNodeOption[] {
  * @param nodes - The nodes to render, at any depth.
  * @returns The same nodes as {@link TreeNode}s.
  */
-export function toFacetNodes(nodes: ContestNode[]): TreeNode[] {
+export function toFacetNodes(nodes: CompetitionNode[]): TreeNode[] {
   // The path is unique across the tree, so it serves as the facet's id unchanged
   return nodes.map((node) => ({
     id: node.path,
@@ -142,7 +142,7 @@ export function toFacetNodes(nodes: ContestNode[]): TreeNode[] {
  * @param node - The node the filter names.
  * @returns The selection standing for it.
  */
-export function contestSelectionFor(node: ContestNode): ContestSelection {
+export function competitionSelectionFor(node: CompetitionNode): CompetitionSelection {
   // The selection, which addresses the node at whatever depth it sits
   return { path: node.path }
 }
@@ -156,9 +156,12 @@ export function contestSelectionFor(node: ContestNode): ContestSelection {
  * @param tree - The taxonomy to resolve them against.
  * @returns The selections, or null when any path names no node.
  */
-export function resolveContestPaths(paths: string[], tree: ContestTree): ContestSelection[] | null {
+export function resolveCompetitionPaths(
+  paths: string[],
+  tree: CompetitionTree
+): CompetitionSelection[] | null {
   // The selections the paths resolve to
-  const selections: ContestSelection[] = []
+  const selections: CompetitionSelection[] = []
 
   // Every path has to land, since a partly understood filter is worse than an obviously broken one
   for (const path of paths) {
@@ -169,7 +172,7 @@ export function resolveContestPaths(paths: string[], tree: ContestTree): Contest
     if (!node) return null
 
     // The node stands as a filter at whatever depth it sits
-    selections.push(contestSelectionFor(node))
+    selections.push(competitionSelectionFor(node))
   }
 
   // Every path landed
@@ -183,14 +186,14 @@ export function resolveContestPaths(paths: string[], tree: ContestTree): Contest
  * @param tree - The taxonomy.
  * @returns Their paths.
  */
-export function expandedByDefault(tree: ContestTree): string[] {
+export function expandedByDefault(tree: CompetitionTree): string[] {
   /**
    * Collects a node and everything below it worth opening.
    *
    * @param nodes - The nodes to collect from.
    * @returns Their paths, in the order the tree draws them.
    */
-  function collect(nodes: ContestNode[]): string[] {
+  function collect(nodes: CompetitionNode[]): string[] {
     // A node with nothing under it opens onto nothing, so only branches are worth naming
     return nodes.flatMap((node) =>
       node.children.length > 0 ? [node.path, ...collect(node.children)] : []

@@ -60,12 +60,12 @@ public class ProblemFilterService(
         // No text search - start with all problems
         else textFilteredQuery = dbContext.Problems;
 
-        // The contests the selected paths name, each standing for its whole subtree; empty when none is selected
-        var contestIds = await ResolveContestIdsAsync(parameters.ContestPaths);
+        // The competitions the selected paths name, each standing for its whole subtree; empty when none is selected
+        var competitionIds = await ResolveCompetitionIdsAsync(parameters.CompetitionPaths);
 
-        // Apply remaining filters (years, contests, tags, authors, etc.) on top of text filter
+        // Apply remaining filters (years, competitions, tags, authors, etc.) on top of text filter
         var filteredQuery = ApplyFilters(textFilteredQuery, parameters,
-            contestIds, favoritesOnly, listContentId, markStatus, userId);
+            competitionIds, favoritesOnly, listContentId, markStatus, userId);
 
         // Get total count
         var totalCount = await filteredQuery.CountAsync();
@@ -219,7 +219,7 @@ public class ProblemFilterService(
              // Build search bar options with faceting on the text-filtered base query
              // Most facets use disjunctive faceting, while tags and authors use conjunctive faceting
              // when AND logic is selected with at least one item
-             await BuildSearchOptionsAsync(textFilteredQuery, parameters, contestIds,
+             await BuildSearchOptionsAsync(textFilteredQuery, parameters, competitionIds,
                  favoritesOnly, listContentId, markStatus, userId, language);
 
         // Return the complete filter result
@@ -231,7 +231,7 @@ public class ProblemFilterService(
     /// </summary>
     /// <param name="problems">Base queryable to apply filters to</param>
     /// <param name="parameters">Filter parameters containing user selections and search criteria</param>
-    /// <param name="contestIds">Every contest the selections resolve to, subtrees included</param>
+    /// <param name="competitionIds">Every competition the selections resolve to, subtrees included</param>
     /// <param name="favoritesOnly">Whether to filter only favorited problems</param>
     /// <param name="listContentId">Optional ContentId of a user list to filter by</param>
     /// <param name="markStatus">Optional mark status filter</param>
@@ -240,7 +240,7 @@ public class ProblemFilterService(
     private static IQueryable<Problem> ApplyFilters(
         IQueryable<Problem> problems,
         ProblemFilterCriteria parameters,
-        IReadOnlyCollection<Guid> contestIds,
+        IReadOnlyCollection<Guid> competitionIds,
         bool favoritesOnly,
         string? listContentId,
         MarkStatusFilter? markStatus,
@@ -299,11 +299,11 @@ public class ProblemFilterService(
             );
         }
 
-        // If contests are specified..
-        if (parameters.ContestPaths is { Count: > 0 })
+        // If competitions are specified..
+        if (parameters.CompetitionPaths is { Count: > 0 })
         {
             // Keep the problems sitting anywhere under one of them, which is what the resolved ids stand for
-            problems = problems.Where(problem => contestIds.Contains(problem.Round.CompetitionId));
+            problems = problems.Where(problem => competitionIds.Contains(problem.Round.CompetitionId));
         }
 
         // If specific problem numbers are given...
@@ -399,7 +399,7 @@ public class ProblemFilterService(
     /// </summary>
     /// <param name="baseQuery">Base queryable with all necessary includes</param>
     /// <param name="parameters">Current filter parameters used to determine facet counting behavior</param>
-    /// <param name="contestIds"><inheritdoc cref="ApplyFilters" path="/param[@name='contestIds']"/></param>
+    /// <param name="competitionIds"><inheritdoc cref="ApplyFilters" path="/param[@name='competitionIds']"/></param>
     /// <param name="favoritesOnly">Whether to filter only favorited problems</param>
     /// <param name="listContentId">Optional ContentId of a user list to filter by</param>
     /// <param name="markStatus">Optional mark status filter</param>
@@ -409,7 +409,7 @@ public class ProblemFilterService(
     private async Task<SearchBarOptions> BuildSearchOptionsAsync(
         IQueryable<Problem> baseQuery,
         ProblemFilterCriteria parameters,
-        IReadOnlyCollection<Guid> contestIds,
+        IReadOnlyCollection<Guid> competitionIds,
         bool favoritesOnly,
         string? listContentId,
         MarkStatusFilter? markStatus,
@@ -419,25 +419,25 @@ public class ProblemFilterService(
         // Create facet-specific scopes by excluding each facet's own selections
         // This ensures counts reflect available options rather than current selections
         var seasonsScope = ApplyFilters(baseQuery, parameters with { OlympiadYears = [] },
-            contestIds, favoritesOnly, listContentId, markStatus, userId);
+            competitionIds, favoritesOnly, listContentId, markStatus, userId);
         var problemNumbersScope = ApplyFilters(baseQuery, parameters with { ProblemNumbers = [] },
-            contestIds, favoritesOnly, listContentId, markStatus, userId);
-        var contestsScope = ApplyFilters(baseQuery, parameters with { ContestPaths = [] },
-            contestIds, favoritesOnly, listContentId, markStatus, userId);
+            competitionIds, favoritesOnly, listContentId, markStatus, userId);
+        var competitionsScope = ApplyFilters(baseQuery, parameters with { CompetitionPaths = [] },
+            competitionIds, favoritesOnly, listContentId, markStatus, userId);
 
         // For tags: use conjunctive counting when AND logic is selected with at least one tag
         // This shows "how many results if I add this tag" instead of "how many results are available"
         // Otherwise, use disjunctive counting (exclude selected tags)
         var tagsScope = parameters is { TagLogic: LogicToggle.And, TagSlugs.Count: > 0 }
-            ? ApplyFilters(baseQuery, parameters, contestIds, favoritesOnly, listContentId, markStatus, userId)
+            ? ApplyFilters(baseQuery, parameters, competitionIds, favoritesOnly, listContentId, markStatus, userId)
             : ApplyFilters(baseQuery, parameters with { TagSlugs = [] },
-                contestIds, favoritesOnly, listContentId, markStatus, userId);
+                competitionIds, favoritesOnly, listContentId, markStatus, userId);
 
         // For authors: Analogous logic to that of with tags
         var authorsScope = parameters is { AuthorLogic: LogicToggle.And, AuthorSlugs.Count: > 0 }
-            ? ApplyFilters(baseQuery, parameters, contestIds, favoritesOnly, listContentId, markStatus, userId)
+            ? ApplyFilters(baseQuery, parameters, competitionIds, favoritesOnly, listContentId, markStatus, userId)
             : ApplyFilters(baseQuery, parameters with { AuthorSlugs = [] },
-                contestIds, favoritesOnly, listContentId, markStatus, userId);
+                competitionIds, favoritesOnly, listContentId, markStatus, userId);
 
         // Build season facet options with problem counts
         var seasonGroups = (await seasonsScope
@@ -520,11 +520,11 @@ public class ProblemFilterService(
             // Execute the query
             .ToListAsync();
 
-        // Count the problems each contest holds, which is all the tree needs to be folded back up
-        var contestCounts = await CountByContestAsync(contestsScope);
+        // Count the problems each competition holds, which is all the tree needs to be folded back up
+        var competitionCounts = await CountByCompetitionAsync(competitionsScope);
 
-        // The same contests as the tree they actually form, each carrying its whole subtree's count
-        var contests = BuildContestTree(contestCounts, language);
+        // The same competitions as the tree they actually form, each carrying its whole subtree's count
+        var competitions = BuildCompetitionTree(competitionCounts, language);
 
         // Build problem number facet options (exclude invalid/problematic numbers)
         var problemNumberGroups = await problemNumbersScope
@@ -554,7 +554,7 @@ public class ProblemFilterService(
 
         // Return the fully constructed search bar options
         return new SearchBarOptions(
-            contests,
+            competitions,
             [.. seasonGroups],
             [.. problemNumbers],
             [.. localizedTagGroups],
@@ -563,7 +563,7 @@ public class ProblemFilterService(
     }
 
     /// <summary>
-    /// Names the season a problem was set in and the contest it belongs to, given as every contest down to it.
+    /// Names the season a problem was set in and the competition it belongs to, given as every competition down to it.
     /// </summary>
     /// <remarks>
     /// Static, and handed the localization service instead of reading the field, because the projection that
@@ -574,8 +574,8 @@ public class ProblemFilterService(
     /// <param name="editionNumber">The season's edition number.</param>
     /// <param name="startYear">The calendar year the season started.</param>
     /// <param name="endYear">The calendar year the season ended.</param>
-    /// <param name="competitionPath">The path of the contest the problem sits in.</param>
-    /// <param name="number">The problem's number within its contest.</param>
+    /// <param name="competitionPath">The path of the competition the problem sits in.</param>
+    /// <param name="number">The problem's number within its competition.</param>
     /// <param name="language">The language to label everything in.</param>
     /// <returns>The problem's source.</returns>
     private static ProblemSource BuildSource(
@@ -592,9 +592,9 @@ public class ProblemFilterService(
             editionNumber.ToString(),
             localization.GetSeasonLabel(language, editionNumber, startYear, endYear));
 
-        // The contest spelled out as every contest down to it, each addressed by its own path, which is what
+        // The competition spelled out as every competition down to it, each addressed by its own path, which is what
         // its localized names are keyed by.
-        var contest = CompetitionTree.Descend(competitionPath)
+        var competition = CompetitionTree.Descend(competitionPath)
             .Select(node => new LabeledSlug(
                 node.Path,
                 localization.GetNodeShortName(language, node.Path),
@@ -602,100 +602,100 @@ public class ProblemFilterService(
             .ToImmutableList();
 
         // The three together pin the problem down: when it ran, what it ran in, and where in that.
-        return new ProblemSource(season, contest, number);
+        return new ProblemSource(season, competition, number);
     }
 
     /// <summary>
-    /// One contest and how many problems of the current scope sit in it.
+    /// One competition and how many problems of the current scope sit in it.
     /// </summary>
     /// <param name="Path"><inheritdoc cref="Competition.Path" path="/summary"/></param>
     /// <param name="SortPath"><inheritdoc cref="Competition.SortPath" path="/summary"/></param>
     /// <param name="Count">How many problems it holds.</param>
-    private record ContestCount(string Path, string SortPath, int Count);
+    private record CompetitionCount(string Path, string SortPath, int Count);
 
     /// <summary>
-    /// Counts the problems of a scope per contest. Problems hang off a contest at whatever depth it sits, so
-    /// one group per contest is the finest split there is; every roll-up above it is a fold over these.
+    /// Counts the problems of a scope per competition. Problems hang off a competition at whatever depth it sits, so
+    /// one group per competition is the finest split there is; every roll-up above it is a fold over these.
     /// </summary>
     /// <param name="scope">The problems to count.</param>
-    /// <returns>One entry per contest holding at least one problem.</returns>
-    private static async Task<List<ContestCount>> CountByContestAsync(IQueryable<Problem> scope) =>
+    /// <returns>One entry per competition holding at least one problem.</returns>
+    private static async Task<List<CompetitionCount>> CountByCompetitionAsync(IQueryable<Problem> scope) =>
         [.. (await scope
-            // Group by the contest the problems belong to, which its two paths identify and order
+            // Group by the competition the problems belong to, which its two paths identify and order
             .GroupBy(problem => new
             {
                 problem.Round.Competition.Path,
                 problem.Round.Competition.SortPath,
             })
             // Project to intermediate structure with counts
-            .Select(contestGroup => new
+            .Select(competitionGroup => new
             {
-                contestGroup.Key.Path,
-                contestGroup.Key.SortPath,
-                Count = contestGroup.Count(),
+                competitionGroup.Key.Path,
+                competitionGroup.Key.SortPath,
+                Count = competitionGroup.Count(),
             })
             // Execute the query
             .ToListAsync())
-            // Wrap each into a counted contest
-            .Select(contest => new ContestCount(contest.Path, contest.SortPath, contest.Count))];
+            // Wrap each into a counted competition
+            .Select(competition => new CompetitionCount(competition.Path, competition.SortPath, competition.Count))];
 
     /// <summary>
-    /// One contest on the chain down to a counted one — how the tree addresses it, and where it sits.
+    /// One competition on the chain down to a counted one — how the tree addresses it, and where it sits.
     /// </summary>
-    /// <param name="ParentPath">The path of the contest one level up, null at a competition.</param>
+    /// <param name="ParentPath">The path of the competition one level up, null at a root one.</param>
     /// <param name="Path"><inheritdoc cref="Competition.Path" path="/summary"/></param>
     /// <param name="SortKey">Its zero-padded position among its siblings, which sorts as it reads.</param>
-    private record ContestPlace(string? ParentPath, string Path, string SortKey);
+    private record CompetitionPlace(string? ParentPath, string Path, string SortKey);
 
     /// <summary>
-    /// The contests a counted contest hangs from, root-first, itself last. Its two paths spell out the same
-    /// chain — the slugs down to it, and their sibling positions — so each contest on it takes its own path
+    /// The competitions a counted competition hangs from, root-first, itself last. Its two paths spell out the same
+    /// chain — the slugs down to it, and their sibling positions — so each competition on it takes its own path
     /// from the one and its position from the other.
     /// </summary>
-    /// <param name="contest">The counted contest to walk down to.</param>
+    /// <param name="competition">The counted competition to walk down to.</param>
     /// <returns>One place per segment of its path.</returns>
-    private static IEnumerable<ContestPlace> ChainOf(ContestCount contest)
+    private static IEnumerable<CompetitionPlace> ChainOf(CompetitionCount competition)
     {
-        // The sibling positions down to the contest, which pair up with its slugs index by index. Indexing
+        // The sibling positions down to the competition, which pair up with its slugs index by index. Indexing
         // rather than zipping, so two paths of different depths fail loudly instead of yielding half a chain.
-        var sortKeys = contest.SortPath.Split('.');
+        var sortKeys = competition.SortPath.Split('.');
 
         // One place per segment, each taking the position its own generation is ordered by.
-        return CompetitionTree.Descend(contest.Path)
-            .Select((node, depth) => new ContestPlace(node.ParentPath, node.Path, sortKeys[depth]));
+        return CompetitionTree.Descend(competition.Path)
+            .Select((node, depth) => new CompetitionPlace(node.ParentPath, node.Path, sortKeys[depth]));
     }
 
     /// <summary>
-    /// Folds counted contests back into the tree they came from: every contest holding problems, and every
-    /// contest above it, each carrying what its whole subtree holds. A contest nothing was counted under never
+    /// Folds counted competitions back into the tree they came from: every competition holding problems, and every
+    /// competition above it, each carrying what its whole subtree holds. A competition nothing was counted under never
     /// appears, so the tree offers exactly what the current scope can still be narrowed to.
     /// </summary>
-    /// <param name="contests">The counted contests, one per contest holding problems.</param>
-    /// <param name="language">The language to label the contests in.</param>
+    /// <param name="competitions">The counted competitions, one per competition holding problems.</param>
+    /// <param name="language">The language to label the competitions in.</param>
     /// <returns>The competitions, each carrying everything below it.</returns>
-    private ImmutableList<ContestNodeOption> BuildContestTree(
-        IReadOnlyCollection<ContestCount> contests,
+    private ImmutableList<CompetitionNodeOption> BuildCompetitionTree(
+        IReadOnlyCollection<CompetitionCount> competitions,
         Language language)
     {
-        // Each count landing on every contest on the chain down to it, since a contest's total is its whole
+        // Each count landing on every competition on the chain down to it, since a competition's total is its whole
         // subtree's and not just what hangs off it directly
-        var counted = contests.SelectMany(contest =>
-            ChainOf(contest).Select(place => (Place: place, contest.Count)));
+        var counted = competitions.SelectMany(competition =>
+            ChainOf(competition).Select(place => (Place: place, competition.Count)));
 
-        // The contests to offer, totalled per contest and gathered under the one they hang from — a competition
-        // under the null one, since nothing hangs above it
+        // The competitions to offer, totalled per competition and gathered under the one they hang from — a root
+        // one under the null path, since nothing hangs above it
         var byParent = counted
             .GroupBy(entry => entry.Place, entry => entry.Count)
             .Select(group => (Place: group.Key, Count: group.Sum()))
             .ToLookup(total => total.Place.ParentPath);
 
-        // Offers one generation, each contest carrying everything the fold left below it.
-        ImmutableList<ContestNodeOption> Offer(string? parentPath) =>
+        // Offers one generation, each competition carrying everything the fold left below it.
+        ImmutableList<CompetitionNodeOption> Offer(string? parentPath) =>
             [.. byParent[parentPath]
                 // Siblings read in the order the registry places them
                 .OrderBy(total => total.Place.SortKey, StringComparer.Ordinal)
-                // Each contest is named by its own path, and carries the generation below it
-                .Select(total => new ContestNodeOption(
+                // Each competition is named by its own path, and carries the generation below it
+                .Select(total => new CompetitionNodeOption(
                     total.Place.Path,
                     localization.GetNodeShortName(language, total.Place.Path),
                     localization.GetNodeFullName(language, total.Place.Path),
@@ -707,27 +707,27 @@ public class ProblemFilterService(
     }
 
     /// <summary>
-    /// Resolves selected contest paths to every contest they cover: each selected node and everything below
-    /// it, since selecting a competition means selecting the rounds inside it. A path naming a contest that
+    /// Resolves selected competition paths to every competition they cover: each selected node and everything below
+    /// it, since selecting a competition means selecting the rounds inside it. A path naming a competition that
     /// isn't there resolves to nothing and so matches nothing.
     /// </summary>
-    /// <param name="selectedPaths">The paths of the selected contests, possibly none.</param>
-    /// <returns>The ids of every covered contest.</returns>
-    private async Task<IReadOnlyCollection<Guid>> ResolveContestIdsAsync(ImmutableList<string> selectedPaths)
+    /// <param name="selectedPaths">The paths of the selected competitions, possibly none.</param>
+    /// <returns>The ids of every covered competition.</returns>
+    private async Task<IReadOnlyCollection<Guid>> ResolveCompetitionIdsAsync(ImmutableList<string> selectedPaths)
     {
         // Nothing selected means no lookup to do, and the filter skips the term entirely.
         if (selectedPaths.Count == 0)
             return [];
 
         // The whole tree, which is small enough to walk in memory.
-        var contests = await dbContext.Competitions.AsNoTracking()
+        var competitions = await dbContext.Competitions.AsNoTracking()
             .Select(competition => new { competition.Id, competition.Path })
             .ToListAsync();
 
-        // A contest is covered when it is selected itself or descends from something that is.
-        return [.. contests
-            .Where(contest => selectedPaths.Any(selected => TaxonomySlugs.IsAtOrUnder(contest.Path, selected)))
-            .Select(contest => contest.Id)];
+        // A competition is covered when it is selected itself or descends from something that is.
+        return [.. competitions
+            .Where(competition => selectedPaths.Any(selected => TaxonomySlugs.IsAtOrUnder(competition.Path, selected)))
+            .Select(competition => competition.Id)];
     }
 
     /// <summary>
@@ -773,11 +773,11 @@ public class ProblemFilterService(
     }
 
     /// <inheritdoc/>
-    public async Task<SeasonContestBrowserResult> GetContestsBySeasonAsync(Language language)
+    public async Task<SeasonCompetitionBrowserResult> GetCompetitionsBySeasonAsync(Language language)
     {
-        // Group all problems by the season and the contest they belong to
+        // Group all problems by the season and the competition they belong to
         // We will then take only these data + problem count to build the result
-        var contestData = await dbContext.Problems
+        var competitionData = await dbContext.Problems
             .GroupBy(problem => new
             {
                 problem.Round.Season.EditionNumber,
@@ -796,7 +796,7 @@ public class ProblemFilterService(
             .ToListAsync();
 
         // Build the hierarchical result in memory
-        var seasonGroups = contestData
+        var seasonGroups = competitionData
             // Group by season
             .GroupBy(data => new { data.EditionNumber, data.StartYear })
             // Order by newest first
@@ -804,23 +804,23 @@ public class ProblemFilterService(
             // Create a season object for each group
             .Select(seasonGroup =>
             {
-                // Build flattened contest list for this season with localized display names
-                var contests = seasonGroup
+                // Build flattened competition list for this season with localized display names
+                var competitions = seasonGroup
                     // Order down the tree, which takes each level in its registry order, however deep it runs
                     .OrderBy(group => group.SortPath, StringComparer.Ordinal)
                     .Select(group =>
                     {
-                        // Every contest down to this one, named as it is shown, root-first
+                        // Every competition down to this one, named as it is shown, root-first
                         var labels = CompetitionTree.Descend(group.Path)
                             .Select(node => localization.GetNodeShortName(language, node.Path))
                             .ToImmutableList();
 
                         // Addressed by its path and named by its labels, at whatever depth it sits
-                        return new ContestWithCount(group.Path, labels, group.ProblemCount);
+                        return new CompetitionWithCount(group.Path, labels, group.ProblemCount);
                     });
 
                 // Return season-specific data with localized label
-                return new SeasonContestsGroup(
+                return new SeasonCompetitionsGroup(
                     seasonGroup.Key.EditionNumber,
                     localization.GetSeasonLabel(
                         language,
@@ -828,12 +828,12 @@ public class ProblemFilterService(
                         seasonGroup.Key.StartYear,
                         seasonGroup.Key.StartYear + 1
                     ),
-                    [.. contests]
+                    [.. competitions]
                 );
             });
 
         // Build the result with all seasons
-        return new SeasonContestBrowserResult([.. seasonGroups]);
+        return new SeasonCompetitionBrowserResult([.. seasonGroups]);
     }
 }
 

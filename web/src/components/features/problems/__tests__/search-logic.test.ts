@@ -14,7 +14,7 @@ describe('deciding when to search', () => {
     tagLogic: 'or',
     authors: [],
     authorLogic: 'or',
-    contestSelection: [],
+    competitionSelection: [],
     favoritesOnly: false,
     markStatus: null,
     listContentId: null,
@@ -26,7 +26,7 @@ describe('deciding when to search', () => {
       const baseFilters = {
         ...defaultFilters,
         tags: [{ slug: 'algebra', displayName: 'Algebra' }],
-        contestSelection: [{ path: 'mo-a' }],
+        competitionSelection: [{ path: 'mo-a' }],
       }
 
       // The term rewritten
@@ -152,22 +152,22 @@ describe('deciding when to search', () => {
       expect(isTextOnlyChange(baseFilters, listChange)).toBe(false)
     })
 
-    it('never covers a contest traded for another while the term moves', () => {
-      // A term already typed, with one contest behind it
+    it('never covers a competition traded for another while the term moves', () => {
+      // A term already typed, with one competition behind it
       const withSelections = {
         ...defaultFilters,
         searchText: 'existing search',
-        contestSelection: [{ path: 'mo-a-i' }],
+        competitionSelection: [{ path: 'mo-a-i' }],
       }
 
-      // The term rewritten and another contest put in its place, leaving the count where it was
+      // The term rewritten and another competition put in its place, leaving the count where it was
       const differentSelections = {
         ...withSelections,
         searchText: 'different search',
-        contestSelection: [{ path: 'imo' }],
+        competitionSelection: [{ path: 'imo' }],
       }
 
-      // A different contest entirely, so its results cannot wait out the typing
+      // A different competition entirely, so its results cannot wait out the typing
       expect(isTextOnlyChange(withSelections, differentSelections)).toBe(false)
     })
   })
@@ -273,13 +273,13 @@ describe('deciding when to search', () => {
       expect(isNoOpFilterChange(before, after)).toBe(false)
     })
 
-    it('never covers a season, a position, a contest, favourites or a mark moving', () => {
-      // A state already narrowed by a school year, a position within the round and one contest
+    it('never covers a season, a position, a competition, favourites or a mark moving', () => {
+      // A state already narrowed by a school year, a position within the round and one competition
       const picked = {
         ...defaultFilters,
         seasons: [{ slug: '2023', displayName: '2023' }],
         problemNumbers: [1],
-        contestSelection: [{ path: 'mo-a-i' }],
+        competitionSelection: [{ path: 'mo-a-i' }],
       }
 
       // The year traded for another, leaving every count where it was
@@ -294,11 +294,11 @@ describe('deciding when to search', () => {
       // A different position entirely
       expect(isNoOpFilterChange(picked, numberMoved)).toBe(false)
 
-      // The contest traded for another
-      const contestMoved = { ...picked, contestSelection: [{ path: 'imo' }] }
+      // The competition traded for another
+      const competitionMoved = { ...picked, competitionSelection: [{ path: 'imo' }] }
 
-      // A different contest entirely
-      expect(isNoOpFilterChange(picked, contestMoved)).toBe(false)
+      // A different competition entirely
+      expect(isNoOpFilterChange(picked, competitionMoved)).toBe(false)
 
       // The user narrowing to their own likes
       const favoritesOn = { ...picked, favoritesOnly: true }

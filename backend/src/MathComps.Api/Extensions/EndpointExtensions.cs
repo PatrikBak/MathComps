@@ -14,7 +14,7 @@ public static class EndpointExtensions
     /// <returns>The configured web application for chaining.</returns>
     public static WebApplication MapApiEndpoints(this WebApplication app)
     {
-        // Problem catalog: filtering, contest browser, lookup, like/mark
+        // Problem catalog: filtering, competition browser, lookup, like/mark
         app.MapProblemEndpoints();
 
         // Threaded comments on problems, handouts and news

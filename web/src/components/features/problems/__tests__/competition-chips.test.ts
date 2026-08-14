@@ -1,26 +1,26 @@
 // The chips the active-filter bar shows for the competition filter. The folding they are built on is
-// pinned against the live taxonomy in contest-equivalence.test.ts and exercised at depth in
-// contest-selection-fold.test.ts, the order it reports in included, so what is left here is how the chips
+// pinned against the live taxonomy in competition-equivalence.test.ts and exercised at depth in
+// competition-selection-fold.test.ts, the order it reports in included, so what is left here is how the chips
 // read and what a click does.
 
 import type * as React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import type { ContestSelection, SearchFiltersState } from '../types/problem-library-types'
+import type { CompetitionSelection, SearchFiltersState } from '../types/problem-library-types'
 import { generateCompetitionChips } from '../utils/competition-chips'
-import { DEEP_TAXONOMY, makeContestTree } from './contest-tree-fixture'
+import { DEEP_TAXONOMY, makeCompetitionTree } from './competition-tree-fixture'
 
 /** The taxonomy the chips are folded and named against, five levels at its deepest. */
-const tree = makeContestTree(DEEP_TAXONOMY)
+const tree = makeCompetitionTree(DEEP_TAXONOMY)
 
 /**
- * Builds filters carrying nothing but the given contest selections.
+ * Builds filters carrying nothing but the given competition selections.
  *
  * @param paths - The paths filtered on.
  * @returns The filter state.
  */
 function filtersWith(paths: string[]): SearchFiltersState {
-  // The contests filtered on, with every other filter left where it starts
+  // The competitions filtered on, with every other filter left where it starts
   return {
     searchText: '',
     searchInSolution: false,
@@ -30,7 +30,7 @@ function filtersWith(paths: string[]): SearchFiltersState {
     tagLogic: 'or',
     authors: [],
     authorLogic: 'or',
-    contestSelection: paths.map((path) => ({ path })),
+    competitionSelection: paths.map((path) => ({ path })),
     favoritesOnly: false,
     markStatus: null,
     listContentId: null,
@@ -110,8 +110,8 @@ describe('clicking a chip', () => {
     // Only the other filter survives
     expect(onFiltersChange).toHaveBeenCalledTimes(1)
     expect(
-      onFiltersChange.mock.calls[0][0].contestSelection.map(
-        (selection: ContestSelection) => selection.path
+      onFiltersChange.mock.calls[0][0].competitionSelection.map(
+        (selection: CompetitionSelection) => selection.path
       )
     ).toEqual(['flat'])
   })
@@ -132,15 +132,15 @@ describe('clicking a chip', () => {
 
     // Nothing under it is left behind to keep the chip alive
     expect(
-      onFiltersChange.mock.calls[0][0].contestSelection.map(
-        (selection: ContestSelection) => selection.path
+      onFiltersChange.mock.calls[0][0].competitionSelection.map(
+        (selection: CompetitionSelection) => selection.path
       )
     ).toEqual(['flat'])
   })
 
   it('leaves a sibling alone whose slug merely extends the one clicked', () => {
     // Two competitions whose slugs share a prefix, which the taxonomy is full of
-    const prefixTree = makeContestTree([{ slug: 'tst' }, { slug: 'tstc' }])
+    const prefixTree = makeCompetitionTree([{ slug: 'tst' }, { slug: 'tstc' }])
 
     // Where the filter state a click produces lands
     const onFiltersChange = vi.fn()
@@ -157,8 +157,8 @@ describe('clicking a chip', () => {
 
     // The longer one is a competition in its own right rather than something below the one dropped
     expect(
-      onFiltersChange.mock.calls[0][0].contestSelection.map(
-        (selection: ContestSelection) => selection.path
+      onFiltersChange.mock.calls[0][0].competitionSelection.map(
+        (selection: CompetitionSelection) => selection.path
       )
     ).toEqual(['tstc'])
   })
@@ -179,8 +179,8 @@ describe('clicking a chip', () => {
 
     // Everything else goes, including the filters that were not part of this chip
     expect(
-      onFiltersChange.mock.calls[0][0].contestSelection.map(
-        (selection: ContestSelection) => selection.path
+      onFiltersChange.mock.calls[0][0].competitionSelection.map(
+        (selection: CompetitionSelection) => selection.path
       )
     ).toEqual(['mid-t'])
   })

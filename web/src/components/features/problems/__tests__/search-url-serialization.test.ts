@@ -18,7 +18,7 @@ const createFilters = (overrides: Partial<SearchFiltersState>): SearchFiltersSta
   tagLogic: 'or',
   authors: [],
   authorLogic: 'or',
-  contestSelection: [],
+  competitionSelection: [],
   favoritesOnly: false,
   markStatus: null,
   listContentId: null,
@@ -40,7 +40,7 @@ describe('Search URL Serialization', () => {
         ],
         tagLogic: 'and',
         authors: [{ displayName: 'John Doe', slug: 'john-doe' }],
-        contestSelection: [{ path: 'imo-a-finals' }],
+        competitionSelection: [{ path: 'imo-a-finals' }],
         favoritesOnly: true,
       })
 
@@ -62,7 +62,7 @@ describe('Search URL Serialization', () => {
       expect(deserialized).not.toBeNull()
       expect(deserialized?.searchText).toBe('algebra')
       expect(deserialized?.tags.map((tag) => tag.slug)).toEqual(['combinatorics', 'geometry'])
-      expect(deserialized?.contestPaths).toEqual(['imo-a-finals'])
+      expect(deserialized?.competitionPaths).toEqual(['imo-a-finals'])
     })
 
     it('should omit default values from URL', () => {
@@ -121,9 +121,9 @@ describe('Search URL Serialization', () => {
 
   describe('Competition hierarchy serialization', () => {
     it('should serialize a selection at any depth as its bare path', () => {
-      // Three contests, each naming a node at a different depth
+      // Three competitions, each naming a node at a different depth
       const filters = createFilters({
-        contestSelection: [{ path: 'imo' }, { path: 'imo-a' }, { path: 'imo-a-i-navodne-x' }],
+        competitionSelection: [{ path: 'imo' }, { path: 'imo-a' }, { path: 'imo-a-i-navodne-x' }],
       })
 
       // Each written as the path it names, however deep that runs
@@ -135,7 +135,7 @@ describe('Search URL Serialization', () => {
       const deserialized = deserializeFilters('competitions=imo,imo-a,imo-a-i-navodne-x')
 
       // Each path carried through whole, with nothing read into how deep it runs
-      expect(deserialized?.contestPaths).toEqual(['imo', 'imo-a', 'imo-a-i-navodne-x'])
+      expect(deserialized?.competitionPaths).toEqual(['imo', 'imo-a', 'imo-a-i-navodne-x'])
     })
 
     it('should drop empty segments so a hand-edited path still names its node', () => {
@@ -143,7 +143,7 @@ describe('Search URL Serialization', () => {
       const deserialized = deserializeFilters('competitions=imo--a,-,imo-')
 
       // Squeezed back to the nodes they were reaching for, and the empty one left off
-      expect(deserialized?.contestPaths).toEqual(['imo-a', 'imo'])
+      expect(deserialized?.competitionPaths).toEqual(['imo-a', 'imo'])
     })
   })
 

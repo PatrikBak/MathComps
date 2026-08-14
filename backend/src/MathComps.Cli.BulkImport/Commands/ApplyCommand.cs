@@ -71,7 +71,7 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
         var meta = outcome.Manifest.Meta;
 
         // Build the apply target from that taxonomy.
-        var target = new DraftTarget(meta.ContestPath, meta.Season.Year);
+        var target = new DraftTarget(meta.CompetitionPath, meta.Season.Year);
 
         // The folder date is a validated YYYY-MM-DD; parse it for the round.
         var date = DateOnly.ParseExact(meta.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture);

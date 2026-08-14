@@ -6,7 +6,7 @@ namespace MathComps.Domain.Taxonomy;
 
 /// <summary>
 /// Display names (short and full) for localized metadata entities.
-/// Used for every contest node, whatever depth it sits at.
+/// Used for every competition node, whatever depth it sits at.
 /// </summary>
 /// <param name="ShortName">Abbreviated name for compact displays (e.g., "MO" for "Matematická olympiáda").</param>
 /// <param name="FullName">Complete official name for formal contexts.</param>
@@ -18,9 +18,9 @@ public record LocalizedNames(string ShortName, string FullName);
 
 /// <summary>
 /// Localized display names for one locale, deserialized directly from a metadata.{locale}.json file: a name
-/// for every contest node at any depth, plus the season-label template.
+/// for every competition node at any depth, plus the season-label template.
 /// </summary>
-/// <param name="Nodes">Localized names of every contest node, keyed by its path
+/// <param name="Nodes">Localized names of every competition node, keyed by its path
 /// (e.g. "csmo", "csmo-a", "csmo-a-iii").</param>
 /// <param name="SeasonFormat">Template for season labels with {number}, {start}, {end} placeholders.</param>
 public record PerLocaleMetadata(
@@ -41,7 +41,7 @@ public record PerLocaleMetadata(
             .Replace("{end}", endYear.ToString());
 
     /// <summary>
-    /// Gets the names (short and full) of the contest node a path addresses, whatever depth it sits at.
+    /// Gets the names (short and full) of the competition node a path addresses, whatever depth it sits at.
     /// </summary>
     /// <param name="path">The node's path (e.g. "csmo", "csmo-a", "csmo-a-iii", "memo-i").</param>
     /// <returns>Localized node names, or null if not found.</returns>

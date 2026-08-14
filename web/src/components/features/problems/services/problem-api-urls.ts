@@ -47,10 +47,10 @@ export function getToggleProblemMarkApiUrl(slug: string): string {
 }
 
 /**
- * Builds the API URL for fetching contests grouped by season.
+ * Builds the API URL for fetching competitions grouped by season.
  *
- * @returns The API URL path for the contests-by-season endpoint
+ * @returns The API URL path for the competitions-by-season endpoint
  */
-export function getContestsBySeasonApiUrl(): string {
-  return buildApiUrl(`${PROBLEMS_PATH}/contests-by-season`)
+export function getCompetitionsBySeasonApiUrl(): string {
+  return buildApiUrl(`${PROBLEMS_PATH}/competitions-by-season`)
 }

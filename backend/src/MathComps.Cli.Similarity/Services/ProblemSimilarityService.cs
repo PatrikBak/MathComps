@@ -70,7 +70,7 @@ public class ProblemSimilarityService(
         if (!settings.Value.CompetitionClusterMap.TryGetValue(sourceProblemData.CompetitionClusteringKey, out var sourceClusterId))
             throw new InvalidOperationException($"Competition clustering key '{sourceProblemData.CompetitionClusteringKey}' not found in CompetitionClusterMap.");
 
-        // Identify all contest paths that belong to the relevant clusters.
+        // Identify all competition paths that belong to the relevant clusters.
         var relevantCompetitionSlug = settings.Value.CompetitionClusterMap
             .Where(pair => Math.Abs(pair.Value - sourceClusterId) <= settings.Value.CompetitionTolerance)
             .Select(pair => pair.Key)
@@ -166,7 +166,7 @@ public class ProblemSimilarityService(
                     // In a set
                     .ToImmutableHashSet(),
 
-                // The path of the contest it was set in
+                // The path of the competition it was set in
                 Slug = candidate.Problem.Round.Competition.Path,
             })
             // Evaluate

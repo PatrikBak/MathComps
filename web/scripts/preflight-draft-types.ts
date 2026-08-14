@@ -20,10 +20,10 @@ export type Season = {
 /** Folder-level taxonomy, verbatim from `_meta.yaml`. */
 export type ManifestMeta = {
   /**
-   * Path of the contest the problems were set in — its slugs from the root down,
+   * Path of the competition the problems were set in — its slugs from the root down,
    * hyphen-joined (e.g. `csmo-a-iii`, `imo`).
    */
-  contestPath: string
+  competitionPath: string
   /** Season the draft belongs to. */
   season: Season
   /** Round date as `YYYY-MM-DD`. */

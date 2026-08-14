@@ -99,7 +99,7 @@ public class MetadataLocalizationServiceTests
     /// <param name="expectedShort">The expected short name.</param>
     /// <param name="expectedFull">The expected full name.</param>
     [Theory]
-    // A whole competition — how a contest that runs as one flat sitting is addressed.
+    // A root competition — how one that runs as a single flat sitting is addressed.
     [InlineData(Language.EN, "imo", "IMO", "International Mathematical Olympiad")]
     [InlineData(Language.EN, "egmo", "EGMO", "European Girl's Mathematical Olympiad")]
     [InlineData(Language.EN, "emo", "EMO", "European Mathematical Olympiad")]
@@ -244,18 +244,18 @@ public class MetadataLocalizationServiceTests
     #region Registry-link validation
 
     /// <summary>
-    /// A fully-registered contest — every competition on its path present in the shared backbone and named in
-    /// every locale, and the contest itself a sitting — produces no registry-link issues, at any depth.
+    /// A fully-registered competition — every competition on its path present in the shared backbone and named in
+    /// every locale, and the one it names a sitting — produces no registry-link issues, at any depth.
     /// </summary>
-    /// <param name="contestPath">The path the draft names its contest by.</param>
+    /// <param name="competitionPath">The path the draft names its competition by.</param>
     [Theory]
     [InlineData("csmo-a-iii")]
     [InlineData("csmo-z5-ii")]
     [InlineData("memo-i")]
     [InlineData("tst-d1")]
     [InlineData("imo")]
-    public void Registered_contest_has_no_issues(string contestPath) =>
-        Assert.Empty(_service.ValidateTaxonomyRegistration(contestPath));
+    public void Registered_competition_has_no_issues(string competitionPath) =>
+        Assert.Empty(_service.ValidateTaxonomyRegistration(competitionPath));
 
     /// <summary>
     /// An unknown competition is reported as absent from the shared structure and from every locale.
@@ -305,11 +305,11 @@ public class MetadataLocalizationServiceTests
     }
 
     /// <summary>
-    /// Naming a competition that carries a generation below it is caught: those are the contests the draft was
+    /// Naming a competition that carries a generation below it is caught: those are the competitions the draft was
     /// supposed to pick from, so the problems have no sitting to hang off.
     /// </summary>
     [Fact]
-    public void Contest_that_carries_nested_contests_is_reported()
+    public void Competition_that_carries_nested_competitions_is_reported()
     {
         // CSMO category A carries its rounds, so it is a container rather than a sitting.
         var issues = _service.ValidateTaxonomyRegistration("csmo-a");
@@ -317,7 +317,7 @@ public class MetadataLocalizationServiceTests
         // It is registered and localized, so the nesting is the only gap.
         var issue = Assert.Single(issues);
         Assert.Equal("csmo-a", issue.Path);
-        Assert.True(issue.CarriesNestedContests);
+        Assert.True(issue.CarriesNestedCompetitions);
         Assert.False(issue.MissingFromSharedStructure);
         Assert.Empty(issue.MissingLocales);
     }

@@ -7,7 +7,7 @@ public static class ProblemQueryableExtensions
 {
     /// <summary>
     /// Applies the default sorting for problems: newest seasons first, then chronologically by event date,
-    /// then down the contest tree, and finally problem number.
+    /// then down the competition tree, and finally problem number.
     /// </summary>
     /// <param name="source">The source queryable of problems.</param>
     /// <returns>The queryable with default sorting applied.</returns>
@@ -16,9 +16,9 @@ public static class ProblemQueryableExtensions
         .OrderByDescending(problem => problem.Round.Season.StartYear)
         // Chronologically within season: newest events first
         .ThenByDescending(problem => problem.Round.Date)
-        // For contests sharing a date (e.g. the home rounds), the tree's own order decides, at any depth
+        // For competitions sharing a date (e.g. the home rounds), the tree's own order decides, at any depth
         .ThenBy(problem => problem.Round.Competition.SortPath)
-        // Problem number within the contest
+        // Problem number within the competition
         .ThenBy(problem => problem.Number);
 }
 

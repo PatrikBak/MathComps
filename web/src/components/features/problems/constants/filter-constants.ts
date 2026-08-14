@@ -13,7 +13,7 @@ export const ACTIVE_FILTERS_CONSTANTS = {
   /**
    * Maximum number of filters that can be selected simultaneously.
    * This limit prevents excessive URL length and maintains reasonable performance.
-   * Counts tags, authors, seasons, problemNumbers, contestSelection, and searchText.
+   * Counts tags, authors, seasons, problemNumbers, competitionSelection, and searchText.
    */
   maxFilterLimit: 20,
   /** Maximum number of active filters before the bar auto-collapses on desktop */

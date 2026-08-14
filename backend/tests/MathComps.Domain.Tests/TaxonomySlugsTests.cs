@@ -12,11 +12,11 @@ public class TaxonomySlugsTests
     /// A problem slug is <c>{editionNumber}-{competitionPath}-{order}</c>.
     /// </summary>
     [Fact]
-    public void Problem_slug_combines_edition_contest_path_and_order() =>
+    public void Problem_slug_combines_edition_competition_path_and_order() =>
         Assert.Equal("75-csmo-a-iii-1", TaxonomySlugs.ProblemSlug(75, "csmo-a-iii", 1));
 
     /// <summary>
-    /// A node's path extends its parent's, which is what makes a contest's path a chain of its ancestors' slugs.
+    /// A node's path extends its parent's, which is what makes a competition's path a chain of its ancestors' slugs.
     /// </summary>
     [Fact]
     public void Path_extends_the_parent() =>

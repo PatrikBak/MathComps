@@ -19,10 +19,10 @@ public static class ApplyReport
     /// <param name="result">The apply result to render.</param>
     public static void Render(ManifestMeta meta, ApplyResult result)
     {
-        // Lead with what was imported — the contest the rest of the report is about.
+        // Lead with what was imported — the competition the rest of the report is about.
         var language = meta.Language.ToString().ToLowerInvariant();
         AnsiConsole.MarkupLine(
-            $"[bold]Imported[/] {Escape(meta.ContestPath)} · season {meta.Season.Year} · {language}");
+            $"[bold]Imported[/] {Escape(meta.CompetitionPath)} · season {meta.Season.Year} · {language}");
 
         // The taxonomy entities, each coloured by whether it was created or reused.
         AnsiConsole.MarkupLine("\n[bold]Taxonomy[/]:");

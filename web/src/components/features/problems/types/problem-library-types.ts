@@ -3,15 +3,15 @@
 
 import type { PagedList } from '@/lib/api/paged-list'
 
-import type { ContestNodeOption, FacetOption, LabeledSlug, Problem } from './problem-api-types'
+import type { CompetitionNodeOption, FacetOption, LabeledSlug, Problem } from './problem-api-types'
 
 /**
  * Everything the library can be filtered by, each option carrying how many problems it
  * covers, either across the whole library or under a given filter.
  */
 export type FilterOptionsWithCounts = {
-  /** The contests as the tree they form, each carrying everything below it. */
-  contests: ContestNodeOption[]
+  /** The competitions as the tree they form, each carrying everything below it. */
+  competitions: CompetitionNodeOption[]
   /** The school years problems were set in. */
   seasons: FacetOption[]
   /** The positions a problem can hold within its round. */
@@ -30,7 +30,7 @@ export type FilterOptionsWithCounts = {
  * A path only becomes one of these by resolving against the taxonomy, so a selection always names a
  * node the tree holds.
  */
-export type ContestSelection = {
+export type CompetitionSelection = {
   /** The node the filter names, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
   path: string
 }
@@ -51,7 +51,7 @@ export type SearchFiltersState = {
   /** The school years filtered on. */
   seasons: LabeledSlug[]
   /** The competitions filtered on, each held at the level the user picked. */
-  contestSelection: ContestSelection[]
+  competitionSelection: CompetitionSelection[]
   /** The positions within a round filtered on. */
   problemNumbers: number[]
   /** The tags filtered on. */
@@ -73,9 +73,9 @@ export type SearchFiltersState = {
 /**
  * The filters as the URL holds them, before a competition filter is resolved against the taxonomy.
  */
-export type UrlQueryState = Omit<SearchFiltersState, 'contestSelection'> & {
+export type UrlQueryState = Omit<SearchFiltersState, 'competitionSelection'> & {
   /** The competition filters, each as the bare path it was written as, resolved or not. */
-  contestPaths: string[]
+  competitionPaths: string[]
 }
 
 /**

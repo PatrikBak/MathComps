@@ -179,7 +179,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     [Fact]
     public Task A_new_season_under_an_existing_competition_creates_the_season_and_its_round() => RunTestAsync(async service =>
     {
-        // Same csmo-a-iii contest, but the 2025 season doesn't exist yet.
+        // Same csmo-a-iii competition, but the 2025 season doesn't exist yet.
         var preview = await PreviewAsync(
             service, new DraftTarget("csmo-a-iii", 2025), Problem(1, Original(Language.SK)));
 
@@ -197,7 +197,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     /// round under a sibling category reads as a create for both the competition and its round.
     /// </summary>
     [Fact]
-    public Task A_sibling_contest_resolves_to_a_new_competition() => RunTestAsync(async service =>
+    public Task A_sibling_path_resolves_to_a_new_competition() => RunTestAsync(async service =>
     {
         // "csmo-b-iii" differs from the seeded "csmo-a-iii" one segment in.
         var preview = await PreviewAsync(
@@ -210,11 +210,11 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// A contest sitting two levels down resolves by its own two-segment path, so the seeded competition and its
+    /// A competition sitting two levels down resolves by its own two-segment path, so the seeded competition and its
     /// sitting are both reused — depth is nothing the lookup knows about.
     /// </summary>
     [Fact]
-    public Task A_two_level_contest_resolves_by_its_path() => RunTestAsync(async service =>
+    public Task A_two_level_competition_resolves_by_its_path() => RunTestAsync(async service =>
     {
         // "memo-i" is seeded, one level shallower than the csmo rounds beside it.
         var preview = await PreviewAsync(

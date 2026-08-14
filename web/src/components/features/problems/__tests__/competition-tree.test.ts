@@ -1,15 +1,19 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  buildContestTree,
+  buildCompetitionTree,
   expandedByDefault,
-  resolveContestPaths,
+  resolveCompetitionPaths,
   toFacetNodes,
-} from '../utils/contest-tree'
-import { DEEP_TAXONOMY, makeContestOptions, makeContestTree } from './contest-tree-fixture'
+} from '../utils/competition-tree'
+import {
+  DEEP_TAXONOMY,
+  makeCompetitionOptions,
+  makeCompetitionTree,
+} from './competition-tree-fixture'
 
 /** The taxonomy every case here runs against, five levels at its deepest. */
-const tree = makeContestTree(DEEP_TAXONOMY)
+const tree = makeCompetitionTree(DEEP_TAXONOMY)
 
 describe('addressing a node by its path', () => {
   it('indexes every node at every depth', () => {
@@ -34,7 +38,7 @@ describe('addressing a node by its path', () => {
 
   it('resolves paths at any depth', () => {
     // Three paths resolved at once, one per depth from a root down to the deepest leaf
-    const resolved = resolveContestPaths(['flat', 'mo-a', 'mo-a-i-navodne-y'], tree)
+    const resolved = resolveCompetitionPaths(['flat', 'mo-a', 'mo-a-i-navodne-y'], tree)
 
     // Each lands on the node it names
     expect(resolved?.map((selection) => selection.path)).toEqual([
@@ -46,18 +50,18 @@ describe('addressing a node by its path', () => {
 
   it('rejects the whole URL when a path names no node, at any depth', () => {
     // A path that names nothing condemns the URL whether it is one segment long or five
-    expect(resolveContestPaths(['ghost'], tree)).toBeNull()
-    expect(resolveContestPaths(['mo-zz'], tree)).toBeNull()
-    expect(resolveContestPaths(['mo-a-i-navodne-zz'], tree)).toBeNull()
-    expect(resolveContestPaths(['mo-a-i-navodne-x-deeper'], tree)).toBeNull()
+    expect(resolveCompetitionPaths(['ghost'], tree)).toBeNull()
+    expect(resolveCompetitionPaths(['mo-zz'], tree)).toBeNull()
+    expect(resolveCompetitionPaths(['mo-a-i-navodne-zz'], tree)).toBeNull()
+    expect(resolveCompetitionPaths(['mo-a-i-navodne-x-deeper'], tree)).toBeNull()
 
     // Including when it arrives alongside paths that would have resolved
-    expect(resolveContestPaths(['flat', 'ghost'], tree)).toBeNull()
+    expect(resolveCompetitionPaths(['flat', 'ghost'], tree)).toBeNull()
   })
 
   it('resolves nothing to nothing rather than to a broken URL', () => {
     // No paths at all is what an absent parameter looks like, which is not an error
-    expect(resolveContestPaths([], tree)).toEqual([])
+    expect(resolveCompetitionPaths([], tree)).toEqual([])
   })
 })
 
@@ -101,14 +105,14 @@ describe('which branches start open', () => {
 })
 
 /** The whole taxonomy as the API sends it, which decides which nodes exist and how they are ordered. */
-const baseOptions = makeContestOptions(DEEP_TAXONOMY)
+const baseOptions = makeCompetitionOptions(DEEP_TAXONOMY)
 
 /**
  * The same taxonomy under a filter that leaves one branch standing all the way down and one root
  * beside it. A node the filter empties never comes back in this payload at all, which is what the
  * merge has to survive.
  */
-const filteredOptions = makeContestOptions([
+const filteredOptions = makeCompetitionOptions([
   {
     slug: 'mo',
     count: 7,
@@ -130,7 +134,7 @@ const filteredOptions = makeContestOptions([
 ])
 
 /** The two payloads merged, which is how the facet is drawn under a live filter. */
-const mergedTree = buildContestTree(baseOptions, filteredOptions)
+const mergedTree = buildCompetitionTree(baseOptions, filteredOptions)
 
 describe('taking counts from the filtered hierarchy', () => {
   it('counts a node five levels down off its filtered twin', () => {

@@ -2,13 +2,13 @@
 // does not have to spell out every path the payload carries. The real builder turns that payload into
 // the tree.
 
-import type { ContestNodeOption } from '../types/problem-api-types'
-import { buildContestTree, type ContestTree } from '../utils/contest-tree'
+import type { CompetitionNodeOption } from '../types/problem-api-types'
+import { buildCompetitionTree, type CompetitionTree } from '../utils/competition-tree'
 
 /**
  * A node to build, carrying only what the build cannot work out for itself.
  */
-export type ContestNodeSpec = {
+export type CompetitionNodeSpec = {
   /** The node's own slug, unique among its siblings. */
   slug: string
   /** The node's own label, defaulting to the slug in upper case. */
@@ -16,7 +16,7 @@ export type ContestNodeSpec = {
   /** How many problems sit under it, defaulting to zero. */
   count?: number
   /** The nodes one level below. */
-  children?: ContestNodeSpec[]
+  children?: CompetitionNodeSpec[]
 }
 
 /**
@@ -26,7 +26,10 @@ export type ContestNodeSpec = {
  * @param parentPath - The path of the node above, left off at a root.
  * @returns The same nodes, each addressed by its path.
  */
-export function makeContestOptions(specs: ContestNodeSpec[], parentPath = ''): ContestNodeOption[] {
+export function makeCompetitionOptions(
+  specs: CompetitionNodeSpec[],
+  parentPath = ''
+): CompetitionNodeOption[] {
   // One option per spec, each carrying everything below it
   return specs.map((spec) => {
     // The path down to this node, which is what addresses it everywhere
@@ -41,7 +44,7 @@ export function makeContestOptions(specs: ContestNodeSpec[], parentPath = ''): C
       displayName,
       fullName: displayName,
       count: spec.count ?? 0,
-      children: makeContestOptions(spec.children ?? [], path),
+      children: makeCompetitionOptions(spec.children ?? [], path),
     }
   })
 }
@@ -52,12 +55,12 @@ export function makeContestOptions(specs: ContestNodeSpec[], parentPath = ''): C
  * @param specs - The roots to build.
  * @returns The tree and its lookup.
  */
-export function makeContestTree(specs: ContestNodeSpec[]): ContestTree {
+export function makeCompetitionTree(specs: CompetitionNodeSpec[]): CompetitionTree {
   // The payload both sides of the merge read, so every node keeps the count the literal wrote
-  const options = makeContestOptions(specs)
+  const options = makeCompetitionOptions(specs)
 
   // The tree the real builder makes of it
-  return buildContestTree(options, options)
+  return buildCompetitionTree(options, options)
 }
 
 /**
@@ -67,7 +70,7 @@ export function makeContestTree(specs: ContestNodeSpec[]): ContestTree {
  * `mo` runs the full five levels, `flat` has none below itself, and `mid` stops at two, so a single
  * tree covers a leaf at every depth.
  */
-export const DEEP_TAXONOMY: ContestNodeSpec[] = [
+export const DEEP_TAXONOMY: CompetitionNodeSpec[] = [
   {
     slug: 'mo',
     children: [

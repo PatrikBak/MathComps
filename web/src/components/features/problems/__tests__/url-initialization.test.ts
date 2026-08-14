@@ -1,15 +1,15 @@
 // How a URL becomes filter state. Every path in the live taxonomy is run through this same pipeline in
-// contest-equivalence.test.ts, so what is left here is one case per shape a URL comes in rather than one
-// per path: what it carries alongside the contests, and the ways it can be a URL the app cannot honour.
+// competition-equivalence.test.ts, so what is left here is one case per shape a URL comes in rather than one
+// per path: what it carries alongside the competitions, and the ways it can be a URL the app cannot honour.
 
 import { describe, expect, it } from 'vitest'
 
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { initializeFiltersFromUrlOrDefaults } from '../utils/url-initialization'
-import { DEEP_TAXONOMY, makeContestTree } from './contest-tree-fixture'
+import { DEEP_TAXONOMY, makeCompetitionTree } from './competition-tree-fixture'
 
 /** The taxonomy the paths in this file resolve against, five levels at its deepest. */
-const tree = makeContestTree(DEEP_TAXONOMY)
+const tree = makeCompetitionTree(DEEP_TAXONOMY)
 
 /**
  * Builds a URL naming the given number of tags, which is the cheapest filter to count out one by one.
@@ -35,13 +35,13 @@ describe('a URL carrying nothing', () => {
     // Nothing filtered on, and nothing to complain about
     expect(result.hasInvalidParams).toBe(false)
     expect(result.filters.searchText).toBe('')
-    expect(result.filters.contestSelection).toEqual([])
+    expect(result.filters.competitionSelection).toEqual([])
   })
 })
 
-describe('a URL carrying contests', () => {
+describe('a URL carrying competitions', () => {
   it('resolves a path at any depth alongside the other filters', () => {
-    // A search term and two contests, one of them four levels down
+    // A search term and two competitions, one of them four levels down
     const params = new URLSearchParams({ q: 'algebra', competitions: 'mo-a-i-navodne,flat' })
 
     // The whole URL read at once
@@ -50,7 +50,7 @@ describe('a URL carrying contests', () => {
     // Every part of it understood
     expect(result.hasInvalidParams).toBe(false)
     expect(result.filters.searchText).toBe('algebra')
-    expect(result.filters.contestSelection.map((selection) => selection.path)).toEqual([
+    expect(result.filters.competitionSelection.map((selection) => selection.path)).toEqual([
       'mo-a-i-navodne',
       'flat',
     ])
@@ -77,7 +77,7 @@ describe('a URL carrying contests', () => {
 
     // Reported broken rather than half-applied
     expect(result.hasInvalidParams).toBe(true)
-    expect(result.filters.contestSelection).toEqual([])
+    expect(result.filters.competitionSelection).toEqual([])
   })
 })
 
