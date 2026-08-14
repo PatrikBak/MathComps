@@ -57,12 +57,13 @@ public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContex
         // Where the contest sits, which decides which levels it names at all
         var levels = ContestLevels.From(problem.Path, problem.SortPath);
 
-        // The season, the contest levels and the number the slug resolves to
+        // The season, the contest read both as its levels and as the path naming it whole, and the number
         return new ProblemLookupResult(
             problem.EditionNumber,
             levels.Competition.Slug,
             levels.Category?.Slug,
             levels.Round?.Slug,
+            problem.Path,
             problem.Number);
     }
 }

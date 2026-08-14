@@ -855,6 +855,188 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal("74. ročník (2024/2025)", season74.DisplayName);
     });
 
+    #region Contest Tree Tests
+
+    /// <summary>
+    /// Verifies that the contest facets also come back as the tree the contests actually form: every contest
+    /// holding problems and every contest above it, each addressed by its own path, ordered as the registry
+    /// places it among its siblings, and carrying what its whole subtree holds rather than only what hangs off
+    /// it directly.
+    /// </summary>
+    [Fact]
+    public Task FilterOffersTheContestsAsTheTreeTheyForm() => RunTestAsync(async service =>
+    {
+        // Arrange - ask for everything, so every seeded contest reaches the facets
+        var everythingQuery = new ProblemFilterOptions(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(everythingQuery);
+
+        // The contests as the tree they form
+        var contests = result.UpdatedOptions!.Contests;
+
+        // Assert - the competitions, in the order their sort orders place them
+        Assert.Equal(["csmo", "imo"], contests.Select(contest => contest.Path));
+
+        // The CSMO branch
+        var csmo = contests[0];
+
+        // Assert - it totals every problem under it, six across its four categories
+        Assert.Equal(6, csmo.Count);
+
+        // Assert - and it is named at its own path
+        Assert.Equal("CSMO", csmo.DisplayName);
+        Assert.Equal("Česko-slovenská Matematická olympiáda", csmo.FullName);
+
+        // Assert - its categories, each addressed by its own path
+        Assert.Equal(["csmo-a", "csmo-b", "csmo-c", "csmo-z9"], csmo.Children.Select(child => child.Path));
+
+        // Assert - each totalling its own rounds
+        Assert.Equal([2, 1, 1, 2], csmo.Children.Select(child => child.Count));
+
+        // The Z9 category, the one seeded with two rounds
+        var z9 = csmo.Children.Single(child => child.Path == "csmo-z9");
+
+        // Assert - its rounds, which are the level the problems it totalled actually hang off
+        Assert.Equal(["csmo-z9-i", "csmo-z9-iii"], z9.Children.Select(child => child.Path));
+        Assert.Equal([1, 1], z9.Children.Select(child => child.Count));
+
+        // Assert - and they carry their own localized names
+        Assert.Equal(["Domáce kolo", "Krajské kolo"], z9.Children.Select(child => child.DisplayName));
+
+        // Assert - a round has nothing below it
+        Assert.Empty(z9.Children[0].Children);
+
+        // A competition running as one flat sitting, which stands for itself and offers nothing under it
+        var imo = contests[1];
+
+        // Assert - it carries its own problem and no children
+        Assert.Equal(1, imo.Count);
+        Assert.Empty(imo.Children);
+    });
+
+    /// <summary>
+    /// Verifies that a selection carrying its contest's path resolves off that path alone — matching what the
+    /// three slugs resolve to, standing for the whole subtree when it names a branch, and winning outright when
+    /// the slugs beside it name a different contest.
+    /// </summary>
+    [Fact]
+    public Task FilterResolvesAContestByItsPath() => RunTestAsync(async service =>
+    {
+        // The slugs of everything one selection matches, which is what two ways of naming a contest must agree on
+        async Task<string[]> MatchedSlugsAsync(ContestSelection selection)
+        {
+            // Filter by that one selection alone, leaving every other facet open
+            var result = await service.FilterAsync(new ProblemFilterOptions(
+                new ProblemFilterQuery(
+                    new ProblemFilterCriteria(
+                        SearchText: string.Empty,
+                        SearchInSolution: false,
+                        OlympiadYears: [],
+                        Contests: [selection],
+                        ProblemNumbers: [],
+                        TagSlugs: [],
+                        TagLogic: LogicToggle.Or,
+                        AuthorSlugs: [],
+                        AuthorLogic: LogicToggle.Or),
+                    PageSize: 10,
+                    PageNumber: 1,
+                    FavoritesOnly: false
+                ),
+                UserId: null,
+                Language: Language.SK
+            ));
+
+            // Ordered, so two ways of naming the same contest compare as sets rather than as pages
+            return [.. result.Problems.Items.Select(problem => problem.Slug).Order()];
+        }
+
+        // A path names the same category the three slugs do, with the slugs genuinely absent from the
+        // selection rather than merely ignored
+        Assert.Equal(
+            await MatchedSlugsAsync(new ContestSelection("csmo", "a", null)),
+            await MatchedSlugsAsync(new ContestSelection(null!, null, null, "csmo-a")));
+
+        // A path naming a branch stands for everything under it, exactly as selecting that branch does
+        Assert.Equal(
+            await MatchedSlugsAsync(new ContestSelection("csmo", null, null)),
+            await MatchedSlugsAsync(new ContestSelection(null!, null, null, "csmo")));
+
+        // And where the two disagree, the path is what resolves
+        Assert.Equal(
+            await MatchedSlugsAsync(new ContestSelection("csmo", "b", "i")),
+            await MatchedSlugsAsync(new ContestSelection("csmo", "a", "i", "csmo-b-i")));
+    });
+
+    /// <summary>
+    /// Verifies that a problem names every contest down to the one it was set in, root-first, each entry
+    /// addressed by its full path — including a competition running as one flat sitting, whose chain is the
+    /// competition alone.
+    /// </summary>
+    [Fact]
+    public Task FilterNamesEveryContestDownToTheProblemsOwn() => RunTestAsync(async service =>
+    {
+        // Arrange - ask for everything, so both a categorised problem and a flat-sitting one come back
+        var everythingQuery = new ProblemFilterOptions(
+            new ProblemFilterQuery(
+                new ProblemFilterCriteria(
+                    SearchText: string.Empty,
+                    SearchInSolution: false,
+                    OlympiadYears: [],
+                    Contests: [],
+                    ProblemNumbers: [],
+                    TagSlugs: [],
+                    TagLogic: LogicToggle.Or,
+                    AuthorSlugs: [],
+                    AuthorLogic: LogicToggle.Or),
+                PageSize: 10,
+                PageNumber: 1,
+                FavoritesOnly: false
+            ),
+            UserId: null,
+            Language: Language.SK
+        );
+
+        // Act
+        var result = await service.FilterAsync(everythingQuery);
+
+        // The CSMO problem, set three levels down in the home round of category A
+        var csmoProblem = result.Problems.Items.Single(problem => problem.Slug == "75-a-i-1");
+
+        // Assert - it names all three, each entry addressed by its whole path rather than its own segment
+        Assert.Equal(["csmo", "csmo-a", "csmo-a-i"], csmoProblem.Source.Contest.Select(contest => contest.Slug));
+
+        // Assert - and each carries the names it reads under
+        Assert.Equal(["CSMO", "A", "Domáce kolo"], csmoProblem.Source.Contest.Select(contest => contest.DisplayName));
+        Assert.Equal("Kategória A", csmoProblem.Source.Contest[1].FullName);
+
+        // The IMO problem, whose competition runs as one flat sitting
+        var imoProblem = result.Problems.Items.Single(problem => problem.Slug == "imo-2025-1");
+
+        // Assert - its chain is that competition and nothing else
+        Assert.Equal(["imo"], imoProblem.Source.Contest.Select(contest => contest.Slug));
+    });
+
+    #endregion
+
     #region GetContestsBySeasonAsync Tests
 
     /// <summary>
@@ -955,6 +1137,36 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Both should be Z9 category
         Assert.All(season74.Contests, contest => Assert.Equal("z9", contest.CategorySlug));
+    });
+
+    /// <summary>
+    /// Verifies that each browsed contest also names itself by its path and reads as the chain of display names
+    /// down to it, including a competition running as one flat sitting, whose chain is a single label.
+    /// </summary>
+    [Fact]
+    public Task GetContestsBySeasonNamesEachContestByItsPathAndChain() => RunTestAsync(async service =>
+    {
+        // Act
+        var result = await service.GetContestsBySeasonAsync(Language.SK);
+
+        // The newest season, which holds both a three-level contest and a flat one
+        var season75 = result.Seasons.First(season => season.EditionNumber == 75);
+
+        // The home round of category A, which sits three levels down
+        var csmoA = season75.Contests.First(contest => contest is { CompetitionSlug: "csmo", CategorySlug: "a" });
+
+        // Assert - the path names it whole
+        Assert.Equal("csmo-a-i", csmoA.Path);
+
+        // Assert - and the labels read down to it
+        Assert.Equal(["CSMO", "A", "Domáce kolo"], csmoA.Labels);
+
+        // The IMO sitting, which is its own competition
+        var imo = season75.Contests.First(contest => contest.CompetitionSlug == "imo");
+
+        // Assert - a one-level contest is named by a bare slug and reads as one label
+        Assert.Equal("imo", imo.Path);
+        Assert.Equal(["IMO"], imo.Labels);
     });
 
     #endregion

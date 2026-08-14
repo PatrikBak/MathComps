@@ -110,7 +110,11 @@ public static class ProblemEndpoints
                 SearchText: string.Empty,
                 SearchInSolution: false,
                 OlympiadYears: [lookupResult.Season],
-                Contests: [new ContestSelection(lookupResult.CompetitionSlug, lookupResult.CategorySlug, lookupResult.RoundSlug)],
+                Contests: [new ContestSelection(
+                    lookupResult.CompetitionSlug,
+                    lookupResult.CategorySlug,
+                    lookupResult.RoundSlug,
+                    lookupResult.ContestPath)],
                 ProblemNumbers: [lookupResult.ProblemNumber],
                 TagSlugs: [],
                 TagLogic: LogicToggle.Or,

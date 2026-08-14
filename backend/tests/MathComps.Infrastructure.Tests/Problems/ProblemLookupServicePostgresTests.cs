@@ -26,6 +26,11 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
     private const string ProblemSlug = "lookup-problem";
 
     /// <summary>
+    /// Slug of the seeded problem sitting four levels down, deeper than the three slugs can spell.
+    /// </summary>
+    private const string DeepProblemSlug = "deep-lookup-problem";
+
+    /// <summary>
     /// Verifies that slug-to-id resolution returns the row for a known slug and null for an unknown one.
     /// </summary>
     [Fact]
@@ -49,6 +54,32 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
 
         // An unknown slug yields null
         Assert.Null(await service.GetProblemLookupDataAsync("does-not-exist"));
+    });
+
+    /// <summary>
+    /// Verifies that the lookup names the contest by its whole path, which is what survives a contest sitting
+    /// deeper than the three slugs reach: they keep the outermost two levels and the contest itself, dropping
+    /// everything between, so recomposing a path out of them would address a contest that isn't there.
+    /// </summary>
+    [Fact]
+    public Task GetProblemLookupDataNamesTheContestByItsWholePath() => RunTestAsync(async service =>
+    {
+        // A contest shallow enough for the three slugs to spell
+        var shallow = await service.GetProblemLookupDataAsync(ProblemSlug);
+
+        // Assert - it reads the same either way
+        Assert.Equal("testcomp-testround", shallow?.ContestPath);
+
+        // One sitting four levels down
+        var deep = await service.GetProblemLookupDataAsync(DeepProblemSlug);
+
+        // Assert - the path keeps every level of it
+        Assert.Equal("deep-mid-low-round", deep?.ContestPath);
+
+        // Assert - while the slugs, reading the contest as three levels, drop the one in the middle
+        Assert.Equal("deep", deep?.CompetitionSlug);
+        Assert.Equal("mid", deep?.CategorySlug);
+        Assert.Equal("round", deep?.RoundSlug);
     });
 
     /// <inheritdoc />
@@ -79,6 +110,24 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
             RoundId = round.Id,
             Number = 1,
             Slug = ProblemSlug
+        });
+
+        // A second sitting, four levels down — a depth the three taxonomy slugs cannot spell between them.
+        var deepRound = new Round
+        {
+            Id = Guid.NewGuid(),
+            CompetitionId = CompetitionTreeSeed.Chain(context, "deep-mid-low-round").Id,
+            SeasonId = season.Id,
+            Date = DateOnly.FromDateTime(DateTime.Today)
+        };
+        context.Rounds.Add(deepRound);
+
+        // One problem in it
+        context.Problems.Add(new Problem
+        {
+            RoundId = deepRound.Id,
+            Number = 1,
+            Slug = DeepProblemSlug
         });
 
         // Submit changes
