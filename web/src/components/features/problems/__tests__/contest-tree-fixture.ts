@@ -1,11 +1,9 @@
-// Builds a taxonomy of any depth for the tests. buildContestTree reads the API's three levels and so
-// can never emit deeper than that, which leaves the recursion below them untested; this constructs the
-// tree directly instead.
+// Writes a taxonomy of any depth as a terse nested literal, so a test naming a node five levels down
+// does not have to spell out every path the payload carries. The real builder turns that payload into
+// the tree.
 
-import type { ContestNode, ContestTree } from '../utils/contest-tree'
-
-/** How deep the legacy projection can reach before it runs out of levels to name. */
-const LEGACY_LEVELS = 3
+import type { ContestNodeOption } from '../types/problem-api-types'
+import { buildContestTree, type ContestTree } from '../utils/contest-tree'
 
 /**
  * A node to build, carrying only what the build cannot work out for itself.
@@ -22,56 +20,44 @@ export type ContestNodeSpec = {
 }
 
 /**
- * Builds a taxonomy from a nested literal, filling in each node's path, label and lookup entry.
+ * Writes the specs out as the payload the API sends, filling in each node's path.
+ *
+ * @param specs - The nodes to write out, at any depth.
+ * @param parentPath - The path of the node above, left off at a root.
+ * @returns The same nodes, each addressed by its path.
+ */
+export function makeContestOptions(specs: ContestNodeSpec[], parentPath = ''): ContestNodeOption[] {
+  // One option per spec, each carrying everything below it
+  return specs.map((spec) => {
+    // The path down to this node, which is what addresses it everywhere
+    const path = parentPath === '' ? spec.slug : `${parentPath}-${spec.slug}`
+
+    // The node's own label, which stands as its full name too
+    const displayName = spec.displayName ?? spec.slug.toUpperCase()
+
+    // The node, with the generation below it written out under it
+    return {
+      path,
+      displayName,
+      fullName: displayName,
+      count: spec.count ?? 0,
+      children: makeContestOptions(spec.children ?? [], path),
+    }
+  })
+}
+
+/**
+ * Builds a taxonomy from a nested literal, every node counting only what the literal gives it.
  *
  * @param specs - The roots to build.
  * @returns The tree and its lookup.
  */
 export function makeContestTree(specs: ContestNodeSpec[]): ContestTree {
-  // Filled in as the build walks down
-  const byPath = new Map<string, ContestNode>()
+  // The payload both sides of the merge read, so every node keeps the count the literal wrote
+  const options = makeContestOptions(specs)
 
-  /**
-   * Builds one node and everything below it.
-   *
-   * @param spec - The node to build.
-   * @param parentPath - The path of the node above, empty at a root.
-   * @param parentLabel - The label of the node above, empty at a root.
-   * @returns The node.
-   */
-  function build(spec: ContestNodeSpec, parentPath: string, parentLabel: string): ContestNode {
-    // The path down to this node, which is what addresses it everywhere
-    const path = parentPath === '' ? spec.slug : `${parentPath}-${spec.slug}`
-
-    // The node's own label
-    const displayName = spec.displayName ?? spec.slug.toUpperCase()
-
-    // Every ancestor's label and this node's
-    const pathLabel = parentLabel === '' ? displayName : `${parentLabel} - ${displayName}`
-
-    // The first segments read positionally as the legacy three levels. Position alone cannot tell a
-    // round hanging straight off a competition from a category, so nothing may assert on this
-    const [competitionSlug, categorySlug, roundSlug] = path.split('-').slice(0, LEGACY_LEVELS)
-
-    // Built bottom-up, so a node knows its children before it is recorded
-    const node: ContestNode = {
-      path,
-      displayName,
-      pathLabel,
-      count: spec.count ?? 0,
-      children: (spec.children ?? []).map((child) => build(child, path, pathLabel)),
-      apiSelection: { competitionSlug, categorySlug, roundSlug },
-    }
-
-    // Recorded once complete, so the lookup never holds a half-built node
-    byPath.set(path, node)
-
-    // The node, with everything below it already built
-    return node
-  }
-
-  // One root per top-level spec
-  return { roots: specs.map((spec) => build(spec, '', '')), byPath }
+  // The tree the real builder makes of it
+  return buildContestTree(options, options)
 }
 
 /**

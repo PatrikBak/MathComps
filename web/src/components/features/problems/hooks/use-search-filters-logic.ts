@@ -134,8 +134,8 @@ export function useSearchFiltersLogic({
   // The taxonomy as the filters address it. It turns only on which nodes exist, so it stays put while
   // the counts move and a count arriving never disturbs a selection the user just made.
   const contestTree = useMemo(
-    () => buildContestTree(baseOptions.competitions, baseOptions.competitions),
-    [baseOptions.competitions]
+    () => buildContestTree(baseOptions.contests, baseOptions.contests),
+    [baseOptions.contests]
   )
 
   // The filters' contest selection, addressed the way the tree addresses its nodes
@@ -185,14 +185,11 @@ export function useSearchFiltersLogic({
   // The whole hierarchy, since a competition never disappears from the tree, only its count changes
   const competitionTreeOpts: TreeNode[] = useMemo(() => {
     // The same nodes as the tree above, carrying the counts the current filters leave them
-    const countedTree = buildContestTree(
-      baseOptions.competitions,
-      deferredFilterOptions.competitions
-    )
+    const countedTree = buildContestTree(baseOptions.contests, deferredFilterOptions.contests)
 
     // Handed over in the shape the shared facet renders
     return toFacetNodes(countedTree.roots)
-  }, [baseOptions.competitions, deferredFilterOptions])
+  }, [baseOptions.contests, deferredFilterOptions])
 
   // Every branch starts open, so the whole hierarchy is visible without any clicking
   const defaultExpandedIds = useMemo(() => expandedByDefault(contestTree), [contestTree])

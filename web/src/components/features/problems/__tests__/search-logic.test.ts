@@ -1,18 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import type { ContestSelection, SearchFiltersState } from '../types/problem-library-types'
+import type { SearchFiltersState } from '../types/problem-library-types'
 import { isNoOpFilterChange, isTextOnlyChange } from '../utils/search-logic'
-
-/**
- * Builds a contest filter naming the node at the given path.
- *
- * @param path - The node's path.
- * @returns The selection.
- */
-const contestAt = (path: string): ContestSelection => ({
-  path,
-  apiSelection: { competitionSlug: path.split('-')[0] },
-})
 
 describe('deciding when to search', () => {
   /** Nothing filtered on, which every case below moves one thing away from. */
@@ -37,7 +26,7 @@ describe('deciding when to search', () => {
       const baseFilters = {
         ...defaultFilters,
         tags: [{ slug: 'algebra', displayName: 'Algebra' }],
-        contestSelection: [contestAt('mo-a')],
+        contestSelection: [{ path: 'mo-a' }],
       }
 
       // The term rewritten
@@ -168,14 +157,14 @@ describe('deciding when to search', () => {
       const withSelections = {
         ...defaultFilters,
         searchText: 'existing search',
-        contestSelection: [contestAt('mo-a-i')],
+        contestSelection: [{ path: 'mo-a-i' }],
       }
 
       // The term rewritten and another contest put in its place, leaving the count where it was
       const differentSelections = {
         ...withSelections,
         searchText: 'different search',
-        contestSelection: [contestAt('imo')],
+        contestSelection: [{ path: 'imo' }],
       }
 
       // A different contest entirely, so its results cannot wait out the typing
@@ -290,7 +279,7 @@ describe('deciding when to search', () => {
         ...defaultFilters,
         seasons: [{ slug: '2023', displayName: '2023' }],
         problemNumbers: [1],
-        contestSelection: [contestAt('mo-a-i')],
+        contestSelection: [{ path: 'mo-a-i' }],
       }
 
       // The year traded for another, leaving every count where it was
@@ -306,7 +295,7 @@ describe('deciding when to search', () => {
       expect(isNoOpFilterChange(picked, numberMoved)).toBe(false)
 
       // The contest traded for another
-      const contestMoved = { ...picked, contestSelection: [contestAt('imo')] }
+      const contestMoved = { ...picked, contestSelection: [{ path: 'imo' }] }
 
       // A different contest entirely
       expect(isNoOpFilterChange(picked, contestMoved)).toBe(false)

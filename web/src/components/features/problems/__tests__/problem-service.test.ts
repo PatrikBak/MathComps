@@ -1,54 +1,49 @@
-// Pins the contest path a single problem's filters stand on, derived from its source. The path is a
-// plain join of slugs that nothing type-checks, and the levels it joins are declared in the other
-// order by both the source type and the backend record it mirrors, so every case here resolves the
-// derived path against the live taxonomy: a path built in the wrong order names no node at all.
+// Pins the contest a single problem's filters stand on, taken off the chain its source carries. The
+// chain runs root-first, so reading it from the wrong end still yields a path the taxonomy holds and
+// still filters the archive, just to a whole competition instead of the round the reader asked for.
+// Every case therefore names the exact node it expects, resolved against the live taxonomy.
 
 import { describe, expect, it } from 'vitest'
 
 import type { ApiCaller } from '@/hooks/use-api'
 
 import { getProblemBySlug } from '../services/problem-service'
-import type { CompetitionFilterOption, LabeledSlug, Problem } from '../types/problem-api-types'
+import type { ContestNodeOption, LabeledSlug, Problem } from '../types/problem-api-types'
 import type { FilterResponse } from '../types/problem-library-types'
 import { buildContestTree } from '../utils/contest-tree'
 import taxonomyFixture from './fixtures/contest-taxonomy.json'
 
 /** The whole live taxonomy, which decides which paths name a node. */
-const competitions = taxonomyFixture as unknown as CompetitionFilterOption[]
+const contests = taxonomyFixture as unknown as ContestNodeOption[]
 
 /** The taxonomy the derived paths are resolved against. */
-const tree = buildContestTree(competitions, competitions)
+const tree = buildContestTree(contests, contests)
 
 /**
- * Names one level of a source.
+ * Names one contest on a source's chain.
  *
- * @param slug - The level's slug, which is what the path is built out of.
- * @returns The level, reading under its own slug since nothing here reads a label.
+ * @param path - The contest's path, which is what a chain entry's slug carries.
+ * @returns The entry, reading under its own path since nothing here reads a label.
  */
-function labeledSlug(slug: string): LabeledSlug {
-  // The slug standing as its own name
-  return { slug, displayName: slug }
+function labeledSlug(path: string): LabeledSlug {
+  // The path standing as its own name
+  return { slug: path, displayName: path }
 }
 
 /**
- * Builds the source of one problem out of the levels it reaches.
+ * Builds the source of one problem out of the contests it hangs from.
  *
- * @param competition - The competition the problem was set in.
- * @param category - The category, absent in a competition with no category level.
- * @param round - The round, absent where the backend leaves an implicit one out.
+ * @param contestPaths - Every contest down to the one the problem was set in, root-first.
  * @returns The source.
  */
-function sourceOf(
-  competition: string,
-  category: string | null,
-  round: string | null
-): Problem['source'] {
-  // The levels named, with the season and position the derivation carries through untouched
+function sourceOf(contestPaths: string[]): Problem['source'] {
+  // The chain named, with the season, position and legacy levels the derivation never reads
   return {
     season: labeledSlug('2023'),
-    competition: labeledSlug(competition),
-    category: category === null ? null : labeledSlug(category),
-    round: round === null ? null : labeledSlug(round),
+    contest: contestPaths.map(labeledSlug),
+    competition: labeledSlug(contestPaths.at(0) ?? ''),
+    category: null,
+    round: null,
     number: 1,
   }
 }
@@ -103,41 +98,49 @@ async function resolvedContestPath(source: Problem['source']): Promise<string | 
   // The one contest the derived filters stand on
   const derived = result.data.filters.contestSelection.at(0)?.path
 
-  // The node it names, which the taxonomy holds only for a path joined in the taxonomy's own order
+  // The node it names, which the taxonomy holds only for a path the derivation read off whole
   return derived === undefined ? undefined : tree.byPath.get(derived)?.path
 }
 
 describe('deriving the filters showing one problem', () => {
-  it('addresses a source reaching no further than its competition by the competition alone', async () => {
+  it('stands on the competition itself when nothing hangs under it', async () => {
     // A competition the backend serves with its only round left implicit
-    const source = sourceOf('imo', null, null)
+    const source = sourceOf(['imo'])
 
     // The contest the derived filters name, resolved against the taxonomy
     const path = await resolvedContestPath(source)
 
-    // The competition node itself
+    // The competition node itself, which is the whole of the chain
     expect(path).toBe('imo')
   })
 
-  it('addresses a round hanging off its competition by both the levels it reaches', async () => {
+  it('stands on the round rather than the competition above it', async () => {
     // A competition with no category level, whose rounds sit directly under it
-    const source = sourceOf('memo', null, 't')
+    const source = sourceOf(['memo', 'memo-t'])
 
     // The contest the derived filters name, resolved against the taxonomy
     const path = await resolvedContestPath(source)
 
-    // The round, under the competition holding it
+    // The round, not the competition heading the chain, which would resolve just as happily
     expect(path).toBe('memo-t')
   })
 
-  it('addresses a round under a category by all three levels, category first', async () => {
-    // The one competition carrying both levels at once, where the join order is decided
-    const source = sourceOf('csmo', 'a', 'i')
+  it('stands on the deepest contest however long the chain runs', async () => {
+    // The one competition carrying a level between its rounds and itself
+    const source = sourceOf(['csmo', 'csmo-a', 'csmo-a-i'])
 
     // The contest the derived filters name, resolved against the taxonomy
     const path = await resolvedContestPath(source)
 
-    // Category above round, which is the order the taxonomy nests them in
+    // The end of the chain, whatever depth that turns out to be
     expect(path).toBe('csmo-a-i')
+  })
+
+  it('shows no problem at all for a source hanging from no contest', async () => {
+    // A payload naming where the problem came from and then naming nothing
+    const result = await getProblemBySlug(apiCallReturning(sourceOf([])), 'a-problem')
+
+    // Refused outright rather than filtered to a contest nobody named
+    expect(result.success).toBe(false)
   })
 })

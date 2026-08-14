@@ -3,9 +3,9 @@
 
 import type { PagedList } from '@/lib/api/paged-list'
 
-import type { LegacyApiContest } from '../utils/contest-api-legacy'
 import type {
   CompetitionFilterOption,
+  ContestNodeOption,
   FacetOption,
   LabeledSlug,
   Problem,
@@ -18,6 +18,8 @@ import type {
 export type FilterOptionsWithCounts = {
   /** The competition hierarchy, with its categories and rounds nested inside it. */
   competitions: CompetitionFilterOption[]
+  /** The contests as the tree they form, each carrying everything below it. */
+  contests: ContestNodeOption[]
   /** The school years problems were set in. */
   seasons: FacetOption[]
   /** The positions a problem can hold within its round. */
@@ -32,12 +34,13 @@ export type FilterOptionsWithCounts = {
  * One competition filter, held at whatever depth of the taxonomy the user picked, so taking a
  * whole competition records one entry rather than every round in it. It carries no names of its
  * own: whatever shows the filter reads those off the node its path resolves to.
+ *
+ * A path only becomes one of these by resolving against the taxonomy, so a selection always names a
+ * node the tree holds.
  */
 export type ContestSelection = {
   /** The node the filter names, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
   path: string
-  /** How the backend names that same node. */
-  apiSelection: LegacyApiContest
 }
 
 /**

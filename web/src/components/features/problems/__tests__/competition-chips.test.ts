@@ -14,20 +14,6 @@ import { DEEP_TAXONOMY, makeContestTree } from './contest-tree-fixture'
 const tree = makeContestTree(DEEP_TAXONOMY)
 
 /**
- * Builds a contest filter naming the node at the given path.
- *
- * @param path - The node's path.
- * @returns The selection.
- */
-function contestAt(path: string): ContestSelection {
-  // The node named, addressed by its path
-  return {
-    path,
-    apiSelection: { competitionSlug: path.split('-')[0] },
-  }
-}
-
-/**
  * Builds filters carrying nothing but the given contest selections.
  *
  * @param paths - The paths filtered on.
@@ -44,7 +30,7 @@ function filtersWith(paths: string[]): SearchFiltersState {
     tagLogic: 'or',
     authors: [],
     authorLogic: 'or',
-    contestSelection: paths.map(contestAt),
+    contestSelection: paths.map((path) => ({ path })),
     favoritesOnly: false,
     markStatus: null,
     listContentId: null,

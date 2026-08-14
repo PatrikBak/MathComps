@@ -115,8 +115,8 @@ export default function ActiveFiltersBar({
 
   // The contest taxonomy
   const contestTree = useMemo(
-    () => buildContestTree(baseOptions.competitions, baseOptions.competitions),
-    [baseOptions.competitions]
+    () => buildContestTree(baseOptions.contests, baseOptions.contests),
+    [baseOptions.contests]
   )
 
   // A function which applies a competition the user picked in the contest browser
@@ -126,13 +126,8 @@ export default function ActiveFiltersBar({
       baseOptions.seasons.find((season) => season.slug === selection.seasonSlug)?.displayName ??
       selection.seasonSlug
 
-    // The path down to what was picked, at whatever depth the browser reached
-    const path = [selection.competitionSlug, selection.categorySlug, selection.roundSlug]
-      .filter((slug): slug is string => slug != null)
-      .join('-')
-
-    // The path resolved against the taxonomy, which is what supplies the names
-    const contestSelections = resolveContestPaths([path], contestTree)
+    // What was picked, resolved against the taxonomy the chips are drawn from
+    const contestSelections = resolveContestPaths([selection.path], contestTree)
 
     // The browser picks one contest outright, so everything else is cleared rather than kept
     onFiltersChange({

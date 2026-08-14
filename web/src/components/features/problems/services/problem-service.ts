@@ -1,7 +1,7 @@
 import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
-import type { FilterParameters, LabeledSlug } from '../types/problem-api-types'
+import type { FilterParameters } from '../types/problem-api-types'
 import type {
   ContestSelection,
   FilterResponse,
@@ -52,24 +52,24 @@ export async function getProblemBySlug(
     }
   }
 
-  // Where the problem came from
-  const source = problem.source
+  // The contest the problem was set in, which is the deepest one on the chain down to it
+  const contest = problem.source.contest.at(-1)
 
-  // The levels the source names, shallowest first, with the ones it stops short of left out
-  const sourceLevels = [
-    source.competition,
-    ...[source.category, source.round].filter((level): level is LabeledSlug => level != null),
-  ]
-
-  // The filter stands at the deepest level the source reaches, addressed by the whole path down to it
-  const selection: ContestSelection = {
-    path: sourceLevels.map((level) => level.slug).join('-'),
-    apiSelection: {
-      competitionSlug: source.competition.slug,
-      categorySlug: source.category?.slug,
-      roundSlug: source.round?.slug,
-    },
+  // A problem hanging off no contest at all cannot be placed in the library
+  if (!contest) {
+    // Fail as a problem that cannot be shown
+    return {
+      success: false,
+      error: {
+        message: 'Problem source named no contest',
+        statusCode: 404,
+        errorCode: 'ProblemNotFound',
+      },
+    }
   }
+
+  // The filter stands at that contest, whose slug is the whole path down to it
+  const selection: ContestSelection = { path: contest.slug }
 
   // Season, contest and position together pin down this one problem, so the rest stay empty
   const filters: SearchFiltersState = {
@@ -95,6 +95,7 @@ export async function getProblemBySlug(
       filters,
       options: result.data.updatedOptions || {
         competitions: [],
+        contests: [],
         seasons: [],
         problemNumbers: [],
         tags: [],
@@ -234,7 +235,7 @@ export async function toggleProblemMark(
 
 /**
  * Converts a {@link SearchFiltersState} into the {@link FilterParameters} the API takes,
- * with every {@link LabeledSlug} reduced to its identifier.
+ * with every named value reduced to the identifier the API knows it by.
  *
  * @param state - The search filters to convert.
  *
@@ -258,10 +259,10 @@ function searchFiltersStateToFilterParameters(state: SearchFiltersState): Filter
   // The authors filtered on
   const authorSlugs = state.authors.map((author) => author.slug)
 
-  // The contests as the API names them, which each selection already carries
-  const contests: FilterParameters['contests'] = state.contestSelection.map(
-    (selection) => selection.apiSelection
-  )
+  // The contests filtered on, each named by the path standing for it and everything under it
+  const contests: FilterParameters['contests'] = state.contestSelection.map((selection) => ({
+    path: selection.path,
+  }))
 
   // The reduced lists alongside the fields that pass through untouched
   return {
