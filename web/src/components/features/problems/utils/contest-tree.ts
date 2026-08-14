@@ -3,17 +3,8 @@
 
 import type { TreeNode } from '@/components/shared/components/facets/model/facet-types'
 
-import type { CompetitionFilterOption, FacetOption } from '../types/problem-api-types'
+import type { ContestNodeOption } from '../types/problem-api-types'
 import type { ContestSelection } from '../types/problem-library-types'
-import {
-  type LegacyApiContest,
-  legacyCategory,
-  legacyCompetition,
-  legacyRound,
-} from './contest-api-legacy'
-
-/** Joins a node's slug to its parent's path. */
-const PATH_SEPARATOR = '-'
 
 /** Sits between the ancestor names in a node's path label. */
 const LABEL_SEPARATOR = ' - '
@@ -34,8 +25,6 @@ export type ContestNode = {
   count: number
   /** The nodes one level below, empty at a leaf. */
   children: ContestNode[]
-  /** How the backend names this node. */
-  apiSelection: LegacyApiContest
 }
 
 /**
@@ -47,18 +36,6 @@ export type ContestTree = {
   roots: ContestNode[]
   /** Every node in the tree, at whatever depth, keyed by its path. */
   byPath: Map<string, ContestNode>
-}
-
-/**
- * Joins a parent's path to a child's slug.
- *
- * @param parentPath - The parent's path, empty at a root.
- * @param slug - The child's own slug.
- * @returns The child's path.
- */
-function joinPath(parentPath: string, slug: string): string {
-  // A root has nothing above it to join to
-  return parentPath === '' ? slug : `${parentPath}${PATH_SEPARATOR}${slug}`
 }
 
 /**
@@ -83,131 +60,62 @@ function joinLabel(parentLabel: string, displayName: string): string {
  * @returns The tree and its lookup, per {@link ContestTree}.
  */
 export function buildContestTree(
-  base: CompetitionFilterOption[],
-  filtered: CompetitionFilterOption[]
+  base: ContestNodeOption[],
+  filtered: ContestNodeOption[]
 ): ContestTree {
   // Every node built so far, keyed by its path
   const byPath = new Map<string, ContestNode>()
 
-  // The filtered competitions keyed by slug
-  const filteredBySlug = new Map(
-    filtered.map((competition) => [competition.competitionData.slug, competition])
-  )
+  // What the filters left of each node, keyed by path so a node finds its twin at any depth
+  const filteredByPath = new Map(flattenOptions(filtered).map((option) => [option.path, option]))
 
   /**
-   * Records a node in the lookup and hands it back.
+   * Builds one generation and everything below it, with each node's count taken from its filtered twin.
    *
-   * @param node - The node to record.
-   * @returns The same node.
-   */
-  function record(node: ContestNode): ContestNode {
-    // Paths are unique across the whole tree, so one map holds every depth at once
-    byPath.set(node.path, node)
-
-    // The node, now recorded
-    return node
-  }
-
-  /**
-   * Builds one node from a facet option, with the count taken from its filtered twin.
-   *
-   * @param option - The option in the whole hierarchy, which supplies identity and label.
-   * @param filteredOption - The same option under the current filters, absent when it has nothing left.
-   * @param parentPath - The path of the node above, empty at a root.
+   * @param options - The options in the whole hierarchy, which supply identity, label and order.
    * @param parentLabel - The label of the node above, empty at a root.
-   * @param apiSelection - How the backend names this node.
-   * @param children - The nodes one level below.
-   * @returns The node.
+   * @returns The nodes, in the order the hierarchy offers them.
    */
-  function buildNode(
-    option: FacetOption,
-    filteredOption: FacetOption | undefined,
-    parentPath: string,
-    parentLabel: string,
-    apiSelection: LegacyApiContest,
-    children: ContestNode[]
-  ): ContestNode {
-    // The node, with a count of zero when the filters left nothing under it
-    return record({
-      path: joinPath(parentPath, option.slug),
-      displayName: option.displayName,
-      fullName: option.fullName,
-      pathLabel: joinLabel(parentLabel, option.displayName),
-      count: filteredOption?.count ?? 0,
-      children,
-      apiSelection,
+  function buildNodes(options: ContestNodeOption[], parentLabel: string): ContestNode[] {
+    // One node per option, each carrying whatever hangs off it
+    return options.map((option) => {
+      // Every ancestor's label and this node's
+      const pathLabel = joinLabel(parentLabel, option.displayName)
+
+      // Built bottom-up, so a node knows its children before anything can look it up
+      const node: ContestNode = {
+        path: option.path,
+        displayName: option.displayName,
+        fullName: option.fullName,
+        pathLabel,
+        count: filteredByPath.get(option.path)?.count ?? 0,
+        children: buildNodes(option.children, pathLabel),
+      }
+
+      // Paths are unique across the whole tree, so one map holds every depth at once
+      byPath.set(node.path, node)
+
+      // The node, now recorded
+      return node
     })
   }
 
-  // One root per competition, each carrying whatever hangs off it
-  const roots = base.map((baseCompetition) => {
-    // The competition's own slug
-    const competitionSlug = baseCompetition.competitionData.slug
-
-    // The competition's label
-    const competitionLabel = baseCompetition.competitionData.displayName
-
-    // What this competition looks like under the current filters
-    const filteredCompetition = filteredBySlug.get(competitionSlug)
-
-    // The category level, in competitions that have one
-    const categoryChildren = baseCompetition.categoryData.map((baseCategory) => {
-      // The category's own slug
-      const categorySlug = baseCategory.categoryData.slug
-
-      // What this category looks like under the current filters
-      const filteredCategory = filteredCompetition?.categoryData.find(
-        (category) => category.categoryData.slug === categorySlug
-      )
-
-      // The rounds sitting under the category, which carry nothing below them
-      const roundChildren = baseCategory.roundData.map((baseRound) =>
-        buildNode(
-          baseRound,
-          filteredCategory?.roundData.find((round) => round.slug === baseRound.slug),
-          joinPath(competitionSlug, categorySlug),
-          joinLabel(competitionLabel, baseCategory.categoryData.displayName),
-          legacyRound(competitionSlug, baseRound.slug, categorySlug),
-          []
-        )
-      )
-
-      // The category itself, standing for every round under it
-      return buildNode(
-        baseCategory.categoryData,
-        filteredCategory?.categoryData,
-        competitionSlug,
-        competitionLabel,
-        legacyCategory(competitionSlug, categorySlug),
-        roundChildren
-      )
-    })
-
-    // Some competitions have no category level and hang their rounds off the root
-    const directRoundChildren = baseCompetition.roundData.map((baseRound) =>
-      buildNode(
-        baseRound,
-        filteredCompetition?.roundData.find((round) => round.slug === baseRound.slug),
-        competitionSlug,
-        competitionLabel,
-        legacyRound(competitionSlug, baseRound.slug),
-        []
-      )
-    )
-
-    // A competition can carry both levels at once, categories first
-    return buildNode(
-      baseCompetition.competitionData,
-      filteredCompetition?.competitionData,
-      '',
-      '',
-      legacyCompetition(competitionSlug),
-      [...categoryChildren, ...directRoundChildren]
-    )
-  })
+  // The competitions, each carrying everything below it
+  const roots = buildNodes(base, '')
 
   // The tree and its lookup
   return { roots, byPath }
+}
+
+/**
+ * Reads a hierarchy out as a flat list of every node in it, at whatever depth.
+ *
+ * @param options - The nodes to read out, at any depth.
+ * @returns The same nodes, one level deep.
+ */
+function flattenOptions(options: ContestNodeOption[]): ContestNodeOption[] {
+  // Every node at every depth, each ahead of the ones under it
+  return options.flatMap((option) => [option, ...flattenOptions(option.children)])
 }
 
 /**
@@ -235,11 +143,8 @@ export function toFacetNodes(nodes: ContestNode[]): TreeNode[] {
  * @returns The selection standing for it.
  */
 export function contestSelectionFor(node: ContestNode): ContestSelection {
-  // The selection, which addresses the node and names it for the backend
-  return {
-    path: node.path,
-    apiSelection: node.apiSelection,
-  }
+  // The selection, which addresses the node at whatever depth it sits
+  return { path: node.path }
 }
 
 /**

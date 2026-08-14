@@ -1,18 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import type { ContestSelection, SearchFiltersState } from '../types/problem-library-types'
+import type { SearchFiltersState } from '../types/problem-library-types'
 import { deserializeFilters, serializeFilters } from '../utils/search-url-serialization'
-
-/**
- * Builds a contest filter naming the node at the given path.
- *
- * @param path - The node's path.
- * @returns The selection.
- */
-const contestAt = (path: string): ContestSelection => ({
-  path,
-  apiSelection: { competitionSlug: path.split('-')[0] },
-})
 
 /**
  * Builds a {@link SearchFiltersState} with nothing filtered on beyond the given overrides.
@@ -51,7 +40,7 @@ describe('Search URL Serialization', () => {
         ],
         tagLogic: 'and',
         authors: [{ displayName: 'John Doe', slug: 'john-doe' }],
-        contestSelection: [contestAt('imo-a-finals')],
+        contestSelection: [{ path: 'imo-a-finals' }],
         favoritesOnly: true,
       })
 
@@ -134,7 +123,7 @@ describe('Search URL Serialization', () => {
     it('should serialize a selection at any depth as its bare path', () => {
       // Three contests, each naming a node at a different depth
       const filters = createFilters({
-        contestSelection: [contestAt('imo'), contestAt('imo-a'), contestAt('imo-a-i-navodne-x')],
+        contestSelection: [{ path: 'imo' }, { path: 'imo-a' }, { path: 'imo-a-i-navodne-x' }],
       })
 
       // Each written as the path it names, however deep that runs

@@ -27,6 +27,7 @@ type LogicToggle = 'or' | 'and'
 
 type ProblemSource = {
   season: LabeledSlug
+  contest: LabeledSlug[]
   competition: LabeledSlug
   round?: LabeledSlug | null
   category?: LabeledSlug | null
@@ -68,9 +69,7 @@ export type FilterParameters = {
 }
 
 type ContestSelection = {
-  competitionSlug: string
-  categorySlug?: string
-  roundSlug?: string
+  path: string
 }
 
 type CategoryFilterOption = {
@@ -82,4 +81,12 @@ export type CompetitionFilterOption = {
   competitionData: FacetOption
   categoryData: CategoryFilterOption[]
   roundData: FacetOption[]
+}
+
+export type ContestNodeOption = {
+  path: string
+  displayName: string
+  fullName: string
+  count: number
+  children: ContestNodeOption[]
 }

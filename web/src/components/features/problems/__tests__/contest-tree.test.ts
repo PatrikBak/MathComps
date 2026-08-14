@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import type { CompetitionFilterOption } from '../types/problem-api-types'
 import {
   buildContestTree,
   expandedByDefault,
   resolveContestPaths,
   toFacetNodes,
 } from '../utils/contest-tree'
-import { DEEP_TAXONOMY, makeContestTree } from './contest-tree-fixture'
+import { DEEP_TAXONOMY, makeContestOptions, makeContestTree } from './contest-tree-fixture'
 
 /** The taxonomy every case here runs against, five levels at its deepest. */
 const tree = makeContestTree(DEEP_TAXONOMY)
@@ -101,58 +100,66 @@ describe('which branches start open', () => {
   })
 })
 
+/** The whole taxonomy as the API sends it, which decides which nodes exist and how they are ordered. */
+const baseOptions = makeContestOptions(DEEP_TAXONOMY)
+
 /**
- * A competition carrying both levels at once: a category with a round under it, and a round hanging
- * straight off the competition. The API's shape allows the mix, so the tree has to draw both under the
- * one competition.
+ * The same taxonomy under a filter that leaves one branch standing all the way down and one root
+ * beside it. A node the filter empties never comes back in this payload at all, which is what the
+ * merge has to survive.
  */
-const MIXED_COMPETITION: CompetitionFilterOption[] = [
+const filteredOptions = makeContestOptions([
   {
-    competitionData: { slug: 'mixed', displayName: 'MIXED', count: 9 },
-    categoryData: [
+    slug: 'mo',
+    count: 7,
+    children: [
       {
-        categoryData: { slug: 'a', displayName: 'A', count: 6 },
-        roundData: [{ slug: 'i', displayName: 'I', count: 6 }],
+        slug: 'a',
+        count: 7,
+        children: [
+          {
+            slug: 'i',
+            count: 7,
+            children: [{ slug: 'navodne', count: 7, children: [{ slug: 'y', count: 7 }] }],
+          },
+        ],
       },
     ],
-    roundData: [{ slug: 'finale', displayName: 'FINALE', count: 3 }],
   },
-]
+  { slug: 'flat', count: 2 },
+])
 
-/** That payload as the real builder reads it, with its counts taken from the payload itself. */
-const mixedTree = buildContestTree(MIXED_COMPETITION, MIXED_COMPETITION)
+/** The two payloads merged, which is how the facet is drawn under a live filter. */
+const mergedTree = buildContestTree(baseOptions, filteredOptions)
 
-describe('naming a node to the backend', () => {
-  it('names each node by the levels reaching down to it', () => {
-    // A competition stands for everything under it, so no level below it is named
-    expect(mixedTree.byPath.get('mixed')?.apiSelection).toEqual({ competitionSlug: 'mixed' })
-
-    // A category stands for every round in it
-    expect(mixedTree.byPath.get('mixed-a')?.apiSelection).toEqual({
-      competitionSlug: 'mixed',
-      categorySlug: 'a',
-    })
-
-    // A round under a category names all three levels
-    expect(mixedTree.byPath.get('mixed-a-i')?.apiSelection).toEqual({
-      competitionSlug: 'mixed',
-      categorySlug: 'a',
-      roundSlug: 'i',
-    })
-
-    // A round hanging off the competition leaves the category unnamed, which is what tells the backend
-    // there is no category level to match on
-    expect(mixedTree.byPath.get('mixed-finale')?.apiSelection).toEqual({
-      competitionSlug: 'mixed',
-      roundSlug: 'finale',
-    })
+describe('taking counts from the filtered hierarchy', () => {
+  it('counts a node five levels down off its filtered twin', () => {
+    // The deepest node the filter left standing
+    expect(mergedTree.byPath.get('mo-a-i-navodne-y')?.count).toBe(7)
   })
 
-  it('hangs both levels off a competition carrying each, categories first', () => {
-    // The competition's children, which are its one category and its one direct round
-    expect(mixedTree.roots[0].children.map((child) => child.path)).toEqual([
-      'mixed-a',
-      'mixed-finale',
+  it('keeps a node the filter emptied, reading zero', () => {
+    // Its sibling, which the filtered payload leaves out entirely
+    const emptied = mergedTree.byPath.get('mo-a-i-navodne-x')
+
+    // Still in the tree, so the facet never loses a row mid-filter
+    expect(emptied?.count).toBe(0)
+
+    // As is everything under the one root the filter dropped outright
+    expect(mergedTree.byPath.get('mid-t')?.count).toBe(0)
+  })
+
+  it('takes identity, order and labels from the whole hierarchy', () => {
+    // The roots, including the one the filtered payload never mentions
+    expect(mergedTree.roots.map((root) => root.path)).toEqual(['mo', 'mid', 'flat'])
+
+    // A branch the filter cut short still offers everything below it, in the order it always did
+    expect(mergedTree.byPath.get('mo-a')?.children.map((child) => child.path)).toEqual([
+      'mo-a-i',
+      'mo-a-ii',
     ])
+
+    // And a node reads under the ancestors the whole hierarchy gives it, not the filtered one
+    expect(mergedTree.byPath.get('mo-a-i-navodne-x')?.pathLabel).toBe('MO - A - I - NAVODNE - X')
   })
 })

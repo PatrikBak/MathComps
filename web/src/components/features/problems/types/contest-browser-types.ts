@@ -26,6 +26,10 @@ export type SeasonContestsGroup = {
  * A flattened contest entry with full display name and problem count.
  */
 export type ContestWithCount = {
+  /** The contest, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
+  path: string
+  /** The display name of every contest down to this one, root-first. */
+  labels: string[]
   /** The slug of the competition. */
   competitionSlug: string
   /** The slug of the category, if the selected competition has categories (e.g. home rounds have, IMO does not). */

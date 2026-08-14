@@ -16,7 +16,7 @@ const GOLDEN_ANGLE = 137.508
 
 /**
  * Builds a color map for a list of seasons, assigning a distinct HSL color
- * to each unique competition+category combination using golden angle distribution.
+ * to each group of sibling contests using golden angle distribution.
  *
  * @param seasons The seasons to build the color map for.
  *
@@ -33,17 +33,22 @@ function buildHueMap(seasons: SeasonContestsGroup[]): Map<string, number> {
 }
 
 /**
- * Returns the color key for a contest, based on its competition and category.
- * Contests with the same competition and category share the same color.
+ * Returns the color key for a contest, which is the contest one level above it. Siblings therefore
+ * share a color, and a competition whose contests hang straight off it keeps them all under one.
+ *
+ * The key is taken off the path rather than the labels because labels are localized, and two
+ * competitions reading alike in one language would silently share a hue.
  *
  * @param contest The contest to get the color key for.
  *
  * @returns The color key string.
  */
 function getContestColorKey(contest: ContestWithCount): string {
-  return contest.categorySlug
-    ? `${contest.competitionSlug}-${contest.categorySlug}`
-    : contest.competitionSlug
+  // What the contest hangs from, which is nothing at all for a whole competition
+  const parentPath = contest.path.split('-').slice(0, -1).join('-')
+
+  // A competition stands under its own name, since there is nothing above it to group it with
+  return parentPath || contest.path
 }
 
 /**
@@ -76,17 +81,13 @@ function Chip({ children, truncate }: { children: React.ReactNode; truncate?: bo
 
 /**
  * The data passed when a contest is selected from the browser.
- * Contains only slugs - the parent is responsible for building the filter state.
+ * Names what was picked and nothing more - the parent is responsible for building the filter state.
  */
 export type ContestBrowserSelection = {
   /** Season slug (the edition number as string) */
   seasonSlug: string
-  /** The competition slug */
-  competitionSlug: string
-  /** The category slug, if applicable */
-  categorySlug: string | null
-  /** The round slug, if applicable */
-  roundSlug: string | null
+  /** The contest, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
+  path: string
 }
 
 /**
@@ -109,7 +110,7 @@ type FlattenedContest = {
   season: SeasonContestsGroup
   /** The contest */
   contest: ContestWithCount
-  /** The hue (0-360) for the competition+category chip */
+  /** The hue (0-360) the contest shares with its siblings */
   hue: number
 }
 
@@ -117,7 +118,7 @@ type FlattenedContest = {
  * Modal for browsing competitions organized by year. Features:
  * 1. Search box at the top
  * 2. Virtualized list of seasons with contests
- * 3. Color-coded dots for visual grouping by competition+category
+ * 3. Color-coded dots for visual grouping of sibling contests
  * 4. Clicking on a contest sets the filters and closes the modal
  */
 export function ContestBrowserModal({
@@ -159,9 +160,7 @@ export function ContestBrowserModal({
         ...season,
         contests: season.contests.filter(
           (contest) =>
-            contest.competitionName.toLowerCase().includes(normalizedSearchQuery) ||
-            contest.categoryName?.toLowerCase().includes(normalizedSearchQuery) ||
-            contest.roundName?.toLowerCase().includes(normalizedSearchQuery) ||
+            contest.labels.some((label) => label.toLowerCase().includes(normalizedSearchQuery)) ||
             season.editionLabel.toLowerCase().includes(normalizedSearchQuery)
         ),
       }))
@@ -196,9 +195,7 @@ export function ContestBrowserModal({
     // Set filters for this contest + season
     onSelectContest({
       seasonSlug: String(season.editionNumber),
-      competitionSlug: contest.competitionSlug,
-      categorySlug: contest.categorySlug,
-      roundSlug: contest.roundSlug,
+      path: contest.path,
     })
   }
 
@@ -278,14 +275,12 @@ export function ContestBrowserModal({
                       style={{ backgroundColor: `hsl(${hue}, 55%, 62%)` }}
                     />
 
-                    {/* Competition chip */}
-                    <Chip>{contest.competitionName}</Chip>
-
-                    {/* Category chip */}
-                    {contest.categoryName && <Chip>{contest.categoryName}</Chip>}
-
-                    {/* Round chip */}
-                    {contest.roundName && <Chip truncate>{contest.roundName}</Chip>}
+                    {/* Contest chips, one per level down to the contest */}
+                    {contest.labels.map((label, labelIndex) => (
+                      <Chip key={labelIndex} truncate={labelIndex === contest.labels.length - 1}>
+                        {label}
+                      </Chip>
+                    ))}
                   </span>
                   <span className="text-xs text-muted tabular-nums flex-shrink-0">
                     {contest.problemCount}

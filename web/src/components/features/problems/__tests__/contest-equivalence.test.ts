@@ -1,11 +1,13 @@
 // Pins the depth-agnostic contest code against a golden capture of the three-level behaviour, taken
 // over a corpus from the live taxonomy. The capture addresses a node by the
 // `competition/<c>/category/<cat>` grammar, so its ids are read as paths before anything is compared.
+//
+// The two taxonomy fixtures hold that same corpus in the tree shape the API sends, value for value,
+// so what is compared here is the code and never the data underneath it.
 
 import { describe, expect, it } from 'vitest'
 
-import type { CompetitionFilterOption } from '../types/problem-api-types'
-import type { LegacyApiContest } from '../utils/contest-api-legacy'
+import type { ContestNodeOption } from '../types/problem-api-types'
 import { foldPickedPaths } from '../utils/contest-selection-fold'
 import { buildContestTree, expandedByDefault, toFacetNodes } from '../utils/contest-tree'
 import { serializeFilters } from '../utils/search-url-serialization'
@@ -18,13 +20,13 @@ import taxonomyFixture from './fixtures/contest-taxonomy.json'
 import filteredTaxonomyFixture from './fixtures/contest-taxonomy-filtered.json'
 
 /** The whole live taxonomy, which decides which nodes exist and how they are ordered. */
-const competitions = taxonomyFixture as unknown as CompetitionFilterOption[]
+const competitions = taxonomyFixture as unknown as ContestNodeOption[]
 
 /**
  * The same taxonomy narrowed to one edition, which drops some competitions outright and empties
  * others.
  */
-const filteredCompetitions = filteredTaxonomyFixture as unknown as CompetitionFilterOption[]
+const filteredCompetitions = filteredTaxonomyFixture as unknown as ContestNodeOption[]
 
 /** One node as the golden capture holds it. */
 type GoldenNode = {
@@ -129,22 +131,6 @@ function selectionToPath(selection: GoldenSelection): string {
 }
 
 /**
- * Reads a captured selection as the contest the backend names that node by, which is the whole of what
- * a selection sends anywhere.
- *
- * @param selection - The captured selection.
- * @returns Its contest, with the levels it stops short of left unnamed.
- */
-function selectionToApiContest(selection: GoldenSelection): LegacyApiContest {
-  // Taken level by level, since the capture carries a label and a level name alongside these
-  return {
-    competitionSlug: selection.competitionSlug,
-    categorySlug: selection.categorySlug,
-    roundSlug: selection.roundSlug,
-  }
-}
-
-/**
  * Restates a captured node with its id normalised to a path, so it can be compared to a built one.
  *
  * @param nodes - The captured nodes.
@@ -212,20 +198,9 @@ describe('folding picked nodes', () => {
       const expected =
         APPROVED_ORDER_DEVIATIONS[goldenCase.label] ?? goldenCase.selections.map(selectionToPath)
 
-      // The same covering nodes, in the same order
+      // The same covering nodes, in the same order, which is also the whole of what a selection
+      // sends the backend
       expect(folded.map((node) => node.path)).toEqual(expected)
-
-      // The captured selection each covering node stands for, keyed by path so a reordered case still
-      // lines its nodes up with the capture's
-      const capturedByPath = new Map(
-        goldenCase.selections.map((selection) => [selectionToPath(selection), selection])
-      )
-
-      // Every covering node is asked on its own, since the path is what pairs it with the capture
-      for (const node of folded) {
-        // The same contest named to the backend, which is the whole of what a selection sends
-        expect(node.apiSelection).toEqual(selectionToApiContest(capturedByPath.get(node.path)!))
-      }
     })
   }
 

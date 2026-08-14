@@ -1,400 +1,386 @@
 [
   {
-    "competitionData": {
-      "slug": "csmo",
-      "displayName": "CSMO",
-      "fullName": "Česko-slovenská Matematická olympiáda",
-      "count": 2354
-    },
-    "categoryData": [
+    "path": "csmo",
+    "displayName": "CSMO",
+    "fullName": "Česko-slovenská Matematická olympiáda",
+    "count": 2354,
+    "children": [
       {
-        "categoryData": {
-          "slug": "a",
-          "displayName": "A",
-          "fullName": null,
-          "count": 614
-        },
-        "roundData": [
+        "path": "csmo-a",
+        "displayName": "A",
+        "fullName": null,
+        "count": 614,
+        "children": [
           {
-            "slug": "i",
+            "path": "csmo-a-i",
             "displayName": "Domáce kolo",
             "fullName": "Domáce kolo",
-            "count": 198
+            "count": 198,
+            "children": []
           },
           {
-            "slug": "s",
+            "path": "csmo-a-s",
             "displayName": "Školské kolo",
             "fullName": "Školské kolo",
-            "count": 96
+            "count": 96,
+            "children": []
           },
           {
-            "slug": "ii",
+            "path": "csmo-a-ii",
             "displayName": "Krajské kolo",
             "fullName": "Krajské kolo",
-            "count": 128
+            "count": 128,
+            "children": []
           },
           {
-            "slug": "iii",
+            "path": "csmo-a-iii",
             "displayName": "Celoštátne kolo",
             "fullName": "Celoštátne kolo",
-            "count": 192
+            "count": 192,
+            "children": []
           }
         ]
       },
       {
-        "categoryData": {
-          "slug": "b",
-          "displayName": "B",
-          "fullName": null,
-          "count": 416
-        },
-        "roundData": [
+        "path": "csmo-b",
+        "displayName": "B",
+        "fullName": null,
+        "count": 416,
+        "children": [
           {
-            "slug": "i",
+            "path": "csmo-b-i",
             "displayName": "Domáce kolo",
             "fullName": "Domáce kolo",
-            "count": 192
+            "count": 192,
+            "children": []
           },
           {
-            "slug": "s",
+            "path": "csmo-b-s",
             "displayName": "Školské kolo",
             "fullName": "Školské kolo",
-            "count": 96
+            "count": 96,
+            "children": []
           },
           {
-            "slug": "ii",
+            "path": "csmo-b-ii",
             "displayName": "Krajské kolo",
             "fullName": "Krajské kolo",
-            "count": 128
+            "count": 128,
+            "children": []
           }
         ]
       },
       {
-        "categoryData": {
-          "slug": "c",
-          "displayName": "C",
-          "fullName": null,
-          "count": 416
-        },
-        "roundData": [
+        "path": "csmo-c",
+        "displayName": "C",
+        "fullName": null,
+        "count": 416,
+        "children": [
           {
-            "slug": "i",
+            "path": "csmo-c-i",
             "displayName": "Domáce kolo",
             "fullName": "Domáce kolo",
-            "count": 192
+            "count": 192,
+            "children": []
           },
           {
-            "slug": "s",
+            "path": "csmo-c-s",
             "displayName": "Školské kolo",
             "fullName": "Školské kolo",
-            "count": 96
+            "count": 96,
+            "children": []
           },
           {
-            "slug": "ii",
+            "path": "csmo-c-ii",
             "displayName": "Krajské kolo",
             "fullName": "Krajské kolo",
-            "count": 128
+            "count": 128,
+            "children": []
           }
         ]
       },
       {
-        "categoryData": {
-          "slug": "z9",
-          "displayName": "Z9",
-          "fullName": null,
-          "count": 251
-        },
-        "roundData": [
+        "path": "csmo-z9",
+        "displayName": "Z9",
+        "fullName": null,
+        "count": 251,
+        "children": [
           {
-            "slug": "i",
+            "path": "csmo-z9-i",
             "displayName": "Domáce kolo",
             "fullName": "Domáce kolo",
-            "count": 102
+            "count": 102,
+            "children": []
           },
           {
-            "slug": "ii",
+            "path": "csmo-z9-ii",
             "displayName": "Okresné kolo",
             "fullName": "Okresné kolo",
-            "count": 79
+            "count": 79,
+            "children": []
           },
           {
-            "slug": "iii",
+            "path": "csmo-z9-iii",
             "displayName": "Krajské kolo",
             "fullName": "Krajské kolo",
-            "count": 70
+            "count": 70,
+            "children": []
           }
         ]
       },
       {
-        "categoryData": {
-          "slug": "z8",
-          "displayName": "Z8",
-          "fullName": null,
-          "count": 158
-        },
-        "roundData": [
+        "path": "csmo-z8",
+        "displayName": "Z8",
+        "fullName": null,
+        "count": 158,
+        "children": [
           {
-            "slug": "i",
+            "path": "csmo-z8-i",
             "displayName": "Domáce kolo",
             "fullName": "Domáce kolo",
-            "count": 102
+            "count": 102,
+            "children": []
           },
           {
-            "slug": "ii",
+            "path": "csmo-z8-ii",
             "displayName": "Okresné kolo",
             "fullName": "Okresné kolo",
-            "count": 56
+            "count": 56,
+            "children": []
           }
         ]
       },
       {
-        "categoryData": {
-          "slug": "z7",
-          "displayName": "Z7",
-          "fullName": null,
-          "count": 149
-        },
-        "roundData": [
+        "path": "csmo-z7",
+        "displayName": "Z7",
+        "fullName": null,
+        "count": 149,
+        "children": [
           {
-            "slug": "i",
+            "path": "csmo-z7-i",
             "displayName": "Domáce kolo",
             "fullName": "Domáce kolo",
-            "count": 96
+            "count": 96,
+            "children": []
           },
           {
-            "slug": "ii",
+            "path": "csmo-z7-ii",
             "displayName": "Okresné kolo",
             "fullName": "Okresné kolo",
-            "count": 53
+            "count": 53,
+            "children": []
           }
         ]
       },
       {
-        "categoryData": {
-          "slug": "z6",
-          "displayName": "Z6",
-          "fullName": null,
-          "count": 149
-        },
-        "roundData": [
+        "path": "csmo-z6",
+        "displayName": "Z6",
+        "fullName": null,
+        "count": 149,
+        "children": [
           {
-            "slug": "i",
+            "path": "csmo-z6-i",
             "displayName": "Domáce kolo",
             "fullName": "Domáce kolo",
-            "count": 102
+            "count": 102,
+            "children": []
           },
           {
-            "slug": "ii",
+            "path": "csmo-z6-ii",
             "displayName": "Okresné kolo",
             "fullName": "Okresné kolo",
-            "count": 47
+            "count": 47,
+            "children": []
           }
         ]
       },
       {
-        "categoryData": {
-          "slug": "z5",
-          "displayName": "Z5",
-          "fullName": null,
-          "count": 165
-        },
-        "roundData": [
+        "path": "csmo-z5",
+        "displayName": "Z5",
+        "fullName": null,
+        "count": 165,
+        "children": [
           {
-            "slug": "i",
+            "path": "csmo-z5-i",
             "displayName": "Domáce kolo",
             "fullName": "Domáce kolo",
-            "count": 105
+            "count": 105,
+            "children": []
           },
           {
-            "slug": "ii",
+            "path": "csmo-z5-ii",
             "displayName": "Okresné kolo",
             "fullName": "Okresné kolo",
-            "count": 60
+            "count": 60,
+            "children": []
           }
         ]
       },
       {
-        "categoryData": {
-          "slug": "z4",
-          "displayName": "Z4",
-          "fullName": null,
-          "count": 36
-        },
-        "roundData": [
+        "path": "csmo-z4",
+        "displayName": "Z4",
+        "fullName": null,
+        "count": 36,
+        "children": [
           {
-            "slug": "i",
+            "path": "csmo-z4-i",
             "displayName": "Domáce kolo",
             "fullName": "Domáce kolo",
-            "count": 24
+            "count": 24,
+            "children": []
           },
           {
-            "slug": "ii",
+            "path": "csmo-z4-ii",
             "displayName": "Školské kolo",
             "fullName": "Školské kolo",
-            "count": 12
+            "count": 12,
+            "children": []
           }
         ]
       }
-    ],
-    "roundData": []
+    ]
   },
   {
-    "competitionData": {
-      "slug": "tst",
-      "displayName": "Výberko IMO/MEMO",
-      "fullName": "Výberové sústredenie pred IMO a MEMO",
-      "count": 454
-    },
-    "categoryData": [],
-    "roundData": [
+    "path": "tst",
+    "displayName": "Výberko IMO/MEMO",
+    "fullName": "Výberové sústredenie pred IMO a MEMO",
+    "count": 454,
+    "children": [
       {
-        "slug": "d1",
+        "path": "tst-d1",
         "displayName": "1. deň",
         "fullName": "1. deň",
-        "count": 97
+        "count": 97,
+        "children": []
       },
       {
-        "slug": "d2",
+        "path": "tst-d2",
         "displayName": "2. deň",
         "fullName": "2. deň",
-        "count": 88
+        "count": 88,
+        "children": []
       },
       {
-        "slug": "d3",
+        "path": "tst-d3",
         "displayName": "3. deň",
         "fullName": "3. deň",
-        "count": 92
+        "count": 92,
+        "children": []
       },
       {
-        "slug": "d4",
+        "path": "tst-d4",
         "displayName": "4. deň",
         "fullName": "4. deň",
-        "count": 94
+        "count": 94,
+        "children": []
       },
       {
-        "slug": "d5",
+        "path": "tst-d5",
         "displayName": "5. deň",
         "fullName": "5. deň",
-        "count": 83
+        "count": 83,
+        "children": []
       }
     ]
   },
   {
-    "competitionData": {
-      "slug": "memo",
-      "displayName": "MEMO",
-      "fullName": "Middle European Mathematical Olympiad",
-      "count": 212
-    },
-    "categoryData": [],
-    "roundData": [
+    "path": "memo",
+    "displayName": "MEMO",
+    "fullName": "Middle European Mathematical Olympiad",
+    "count": 212,
+    "children": [
       {
-        "slug": "i",
+        "path": "memo-i",
         "displayName": "Individual",
         "fullName": "Individuálna časť",
-        "count": 76
+        "count": 76,
+        "children": []
       },
       {
-        "slug": "t",
+        "path": "memo-t",
         "displayName": "Team",
         "fullName": "Tímová časť",
-        "count": 136
+        "count": 136,
+        "children": []
       }
     ]
   },
   {
-    "competitionData": {
-      "slug": "imo",
-      "displayName": "IMO",
-      "fullName": "International Mathematical Olympiad",
-      "count": 156
-    },
-    "categoryData": [],
-    "roundData": []
+    "path": "imo",
+    "displayName": "IMO",
+    "fullName": "International Mathematical Olympiad",
+    "count": 156,
+    "children": []
   },
   {
-    "competitionData": {
-      "slug": "caps",
-      "displayName": "CAPS",
-      "fullName": "Czech-Austrian-Polish-Slovak Match",
-      "count": 163
-    },
-    "categoryData": [],
-    "roundData": []
+    "path": "caps",
+    "displayName": "CAPS",
+    "fullName": "Czech-Austrian-Polish-Slovak Match",
+    "count": 163,
+    "children": []
   },
   {
-    "competitionData": {
-      "slug": "emo",
-      "displayName": "EMO",
-      "fullName": "European Mathematical Olympiad",
-      "count": 8
-    },
-    "categoryData": [],
-    "roundData": []
+    "path": "emo",
+    "displayName": "EMO",
+    "fullName": "European Mathematical Olympiad",
+    "count": 8,
+    "children": []
   },
   {
-    "competitionData": {
-      "slug": "egmo",
-      "displayName": "EGMO",
-      "fullName": "European Girl's Mathematical Olympiad",
-      "count": 92
-    },
-    "categoryData": [],
-    "roundData": []
+    "path": "egmo",
+    "displayName": "EGMO",
+    "fullName": "European Girl's Mathematical Olympiad",
+    "count": 92,
+    "children": []
   },
   {
-    "competitionData": {
-      "slug": "tstc",
-      "displayName": "Výberko CPSJ",
-      "fullName": "Výberové sústredenie pred CPSJ",
-      "count": 30
-    },
-    "categoryData": [],
-    "roundData": []
+    "path": "tstc",
+    "displayName": "Výberko CPSJ",
+    "fullName": "Výberové sústredenie pred CPSJ",
+    "count": 30,
+    "children": []
   },
   {
-    "competitionData": {
-      "slug": "cpsj",
-      "displayName": "CPSJ",
-      "fullName": "Czech-Polish-Slovak Junior Match",
-      "count": 154
-    },
-    "categoryData": [],
-    "roundData": [
+    "path": "cpsj",
+    "displayName": "CPSJ",
+    "fullName": "Czech-Polish-Slovak Junior Match",
+    "count": 154,
+    "children": [
       {
-        "slug": "i",
+        "path": "cpsj-i",
         "displayName": "Individual",
         "fullName": "Individuálna časť",
-        "count": 70
+        "count": 70,
+        "children": []
       },
       {
-        "slug": "t",
+        "path": "cpsj-t",
         "displayName": "Team",
         "fullName": "Tímová časť",
-        "count": 84
+        "count": 84,
+        "children": []
       }
     ]
   },
   {
-    "competitionData": {
-      "slug": "duogeo",
-      "displayName": "DuoGeo",
-      "fullName": "DuoGeo",
-      "count": 24
-    },
-    "categoryData": [],
-    "roundData": [
+    "path": "duogeo",
+    "displayName": "DuoGeo",
+    "fullName": "DuoGeo",
+    "count": 24,
+    "children": [
       {
-        "slug": "zs",
+        "path": "duogeo-zs",
         "displayName": "ZŠ",
         "fullName": "Kategória ZŠ",
-        "count": 12
+        "count": 12,
+        "children": []
       },
       {
-        "slug": "ss",
+        "path": "duogeo-ss",
         "displayName": "SŠ",
         "fullName": "Kategória SŠ",
-        "count": 12
+        "count": 12,
+        "children": []
       }
     ]
   }

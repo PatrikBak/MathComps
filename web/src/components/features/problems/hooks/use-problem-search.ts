@@ -144,7 +144,7 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     // Each contest path resolved against the taxonomy it was written for
     return initializeFiltersFromUrlOrDefaults(
       searchParams,
-      buildContestTree(baseOptions.competitions, baseOptions.competitions)
+      buildContestTree(baseOptions.contests, baseOptions.contests)
     )
   }, [searchParams, baseOptions, problemId])
 
