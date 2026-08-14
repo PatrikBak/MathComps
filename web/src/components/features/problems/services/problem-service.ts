@@ -94,7 +94,6 @@ export async function getProblemBySlug(
       problem,
       filters,
       options: result.data.updatedOptions || {
-        competitions: [],
         contests: [],
         seasons: [],
         problemNumbers: [],
@@ -121,7 +120,7 @@ export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResul
         searchText: '',
         searchInSolution: false,
         olympiadYears: [],
-        contests: [],
+        contestPaths: [],
         problemNumbers: [],
         tagSlugs: [],
         tagLogic: 'or',
@@ -260,16 +259,14 @@ function searchFiltersStateToFilterParameters(state: SearchFiltersState): Filter
   const authorSlugs = state.authors.map((author) => author.slug)
 
   // The contests filtered on, each named by the path standing for it and everything under it
-  const contests: FilterParameters['contests'] = state.contestSelection.map((selection) => ({
-    path: selection.path,
-  }))
+  const contestPaths = state.contestSelection.map((selection) => selection.path)
 
   // The reduced lists alongside the fields that pass through untouched
   return {
     searchText: state.searchText,
     searchInSolution: state.searchInSolution,
     olympiadYears,
-    contests,
+    contestPaths,
     problemNumbers: state.problemNumbers,
     tagSlugs,
     tagLogic: state.tagLogic,

@@ -1,7 +1,6 @@
 using MathComps.Api.Constants;
 using MathComps.Domain.Contracts.Helpers;
 using MathComps.Domain.Contracts.ProblemQuery;
-using MathComps.Domain.Contracts.SearchBar;
 using MathComps.Domain.Contracts.UserLists;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Users;
@@ -65,7 +64,7 @@ public static class ProblemEndpoints
             var serviceQuery = new ProblemFilterQuery(
                 new ProblemFilterCriteria(
                     query.Parameters.SearchText, query.Parameters.SearchInSolution, query.Parameters.OlympiadYears,
-                    query.Parameters.Contests, query.Parameters.ProblemNumbers, query.Parameters.TagSlugs,
+                    query.Parameters.ContestPaths, query.Parameters.ProblemNumbers, query.Parameters.TagSlugs,
                     query.Parameters.TagLogic, query.Parameters.AuthorSlugs, query.Parameters.AuthorLogic),
                 query.PageSize, query.PageNumber, query.FavoritesOnly, query.ListContentId, query.MarkStatus);
 
@@ -110,11 +109,7 @@ public static class ProblemEndpoints
                 SearchText: string.Empty,
                 SearchInSolution: false,
                 OlympiadYears: [lookupResult.Season],
-                Contests: [new ContestSelection(
-                    lookupResult.CompetitionSlug,
-                    lookupResult.CategorySlug,
-                    lookupResult.RoundSlug,
-                    lookupResult.ContestPath)],
+                ContestPaths: [lookupResult.ContestPath],
                 ProblemNumbers: [lookupResult.ProblemNumber],
                 TagSlugs: [],
                 TagLogic: LogicToggle.Or,

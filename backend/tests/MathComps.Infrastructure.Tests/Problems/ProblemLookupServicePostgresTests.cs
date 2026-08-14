@@ -57,29 +57,22 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Verifies that the lookup names the contest by its whole path, which is what survives a contest sitting
-    /// deeper than the three slugs reach: they keep the outermost two levels and the contest itself, dropping
-    /// everything between, so recomposing a path out of them would address a contest that isn't there.
+    /// Verifies that the lookup names the contest by its whole path, at whatever depth it sits.
     /// </summary>
     [Fact]
     public Task GetProblemLookupDataNamesTheContestByItsWholePath() => RunTestAsync(async service =>
     {
-        // A contest shallow enough for the three slugs to spell
+        // A contest two levels down
         var shallow = await service.GetProblemLookupDataAsync(ProblemSlug);
 
-        // Assert - it reads the same either way
+        // Assert - the path names it whole
         Assert.Equal("testcomp-testround", shallow?.ContestPath);
 
         // One sitting four levels down
         var deep = await service.GetProblemLookupDataAsync(DeepProblemSlug);
 
-        // Assert - the path keeps every level of it
+        // Assert - the path keeps every level of it, including the one the three slugs used to drop
         Assert.Equal("deep-mid-low-round", deep?.ContestPath);
-
-        // Assert - while the slugs, reading the contest as three levels, drop the one in the middle
-        Assert.Equal("deep", deep?.CompetitionSlug);
-        Assert.Equal("mid", deep?.CategorySlug);
-        Assert.Equal("round", deep?.RoundSlug);
     });
 
     /// <inheritdoc />
