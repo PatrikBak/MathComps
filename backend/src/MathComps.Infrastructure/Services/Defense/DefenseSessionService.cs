@@ -47,18 +47,18 @@ public class DefenseSessionService(
     {
         // Every field a start needs must be present and non-blank; a missing one (null through JSON) or a blank one
         // is a bad request, not a server fault.
-        EnsureTargetPresent(start.Target);
-        EnsureNotBlank(start.Content);
+        EnsureTargetPresent(start.Request.Target);
+        EnsureNotBlank(start.Request.Content);
 
         // Bound what the caller sent before it is used to look anything up.
-        EnsureWithinLength(start.Target.HandoutContentId, _limits.MaxHandoutContentIdChars);
-        EnsureWithinLength(start.Target.EnvironmentId, _limits.MaxEnvironmentIdChars);
-        EnsureWithinLength(start.Content, _limits.MaxCandidateChars);
+        EnsureWithinLength(start.Request.Target.HandoutContentId, _limits.MaxHandoutContentIdChars);
+        EnsureWithinLength(start.Request.Target.EnvironmentId, _limits.MaxEnvironmentIdChars);
+        EnsureWithinLength(start.Request.Content, _limits.MaxCandidateChars);
 
         // The problem itself comes from the site's own content, so a caller can only choose which environment to
         // defend, never what the examiner is told about it. A target naming an environment nothing is published
         // for is a 404 rather than a rejected input: the request was well formed, the content just isn't there.
-        var problem = await contentResolver.ResolveAsync(start.Target, start.Language, cancellationToken)
+        var problem = await contentResolver.ResolveAsync(start.Request.Target, start.Language, cancellationToken)
             ?? throw new DefenseEnvironmentNotFoundException();
 
         // Fold the author's hints into the reference so the examiner reads them as staged, earned-only help.
@@ -77,7 +77,8 @@ public class DefenseSessionService(
         await EnsureUnderSpendCeilingAsync(dbContext, userId, cancellationToken);
 
         // The anchor row for the environment being defended, upserted on demand.
-        var handoutEnvironmentId = await UpsertHandoutEnvironmentAsync(dbContext, start.Target, cancellationToken);
+        var handoutEnvironmentId =
+            await UpsertHandoutEnvironmentAsync(dbContext, start.Request.Target, cancellationToken);
 
         // One timestamp for the session and its seed turns.
         var seededAt = DateTimeOffset.UtcNow;
@@ -96,7 +97,7 @@ public class DefenseSessionService(
         AppendTurn(session, TranscriptRole.Examiner, opener, seededAt);
 
         // Seed the student's first message.
-        AppendTurn(session, TranscriptRole.Candidate, start.Content, seededAt);
+        AppendTurn(session, TranscriptRole.Candidate, start.Request.Content, seededAt);
 
         // Run the engine over the seed and stage its reply and spend row.
         await RunExaminerAndStageAsync(dbContext, session, userId, cancellationToken);
@@ -115,7 +116,7 @@ public class DefenseSessionService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Hand back the full conversation.
-        return ToSessionDto(session, start.Target);
+        return ToSessionDto(session, start.Request.Target);
     }
 
     /// <inheritdoc/>
