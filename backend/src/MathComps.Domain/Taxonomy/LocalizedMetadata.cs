@@ -28,17 +28,17 @@ public record PerLocaleMetadata(
     string SeasonFormat)
 {
     /// <summary>
-    /// Gets the formatted season label by replacing placeholders in the season format template.
+    /// Gets the formatted season label by replacing placeholders in the season format template. A season runs
+    /// across two calendar years, so the one it ends in follows from the one it started in.
     /// </summary>
     /// <param name="editionNumber">The edition/year number of the competition.</param>
     /// <param name="startYear">The calendar year when the season started.</param>
-    /// <param name="endYear">The calendar year when the season ended.</param>
     /// <returns>Formatted season label.</returns>
-    public string GetSeasonLabel(int editionNumber, int startYear, int endYear) =>
+    public string GetSeasonLabel(int editionNumber, int startYear) =>
         SeasonFormat
             .Replace("{number}", editionNumber.ToString())
             .Replace("{start}", startYear.ToString())
-            .Replace("{end}", endYear.ToString());
+            .Replace("{end}", (startYear + 1).ToString());
 
     /// <summary>
     /// Gets the names (short and full) of the competition node a path addresses, whatever depth it sits at.

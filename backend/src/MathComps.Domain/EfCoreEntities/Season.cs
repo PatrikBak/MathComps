@@ -20,12 +20,6 @@ public class Season
     public required int StartYear { get; set; }
 
     /// <summary>
-    /// Season end year (computed as StartYear + 1).
-    /// </summary>
-    [NotMapped]
-    public int EndYear => StartYear + 1;
-
-    /// <summary>
     /// Numeric edition for easier numeric filtering (e.g., 75).
     /// </summary>
     public required int EditionNumber { get; set; }
