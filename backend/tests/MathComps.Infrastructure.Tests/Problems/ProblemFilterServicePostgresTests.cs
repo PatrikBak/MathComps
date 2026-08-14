@@ -1,6 +1,8 @@
+using System.Text.Json;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using MathComps.Domain.Contracts.Helpers;
 using MathComps.Domain.Contracts.ProblemQuery;
+using MathComps.Domain.Contracts.SearchBar;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
@@ -35,8 +37,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - create a query with no filters to test the baseline behavior
         var initialQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -49,7 +51,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 ),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -60,11 +63,96 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Assert - verify we get all problems and all available filter options
         Assert.Equal(7, initialResult.Problems.TotalCount);
-        Assert.NotNull(initialResult.UpdatedOptions);
-        Assert.Equal(2, initialResult.UpdatedOptions.Seasons.Count);
-        Assert.Equal(2, initialResult.UpdatedOptions.Competitions.Count);
-        Assert.Equal(3, initialResult.UpdatedOptions.Authors.Count);
-        Assert.Equal(3, initialResult.UpdatedOptions.Tags.Count);
+        Assert.NotNull(initialResult.BaseOptions);
+        Assert.Equal(2, initialResult.BaseOptions.Seasons.Count);
+        Assert.Equal(2, initialResult.BaseOptions.Competitions.Count);
+        Assert.Equal(3, initialResult.BaseOptions.Authors.Count);
+        Assert.Equal(3, initialResult.BaseOptions.Tags.Count);
+
+        // Nothing was filtered out, so the library's own options are the whole answer
+        Assert.Null(initialResult.UpdatedOptions);
+    });
+
+    /// <summary>
+    /// The library's own options read the same whoever asks for them, signed in or not.
+    /// </summary>
+    /// <remarks>
+    /// They are cached without anyone's name against them, and every count in the archive's sidebar is
+    /// drawn from them, so a term that quietly narrowed by the reader would shift all of them at once.
+    /// The property holds only because the reader is read solely inside the favorites, list and mark
+    /// branches, which a query asking for the library whole never enters.
+    /// </remarks>
+    [Fact]
+    public Task TheLibrarysOptionsReadTheSameWhoeverAsks() => RunTestAsync(async service =>
+    {
+        // Someone with likes of their own
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+        // The library as nobody in particular sees it, which is what the other answer is held against
+        var asAnonymous = await service.FilterAsync(EverythingQuery());
+
+        // The same question narrowed hard by the reader themselves, down to what they liked
+        var favorites = EverythingQuery();
+        favorites = favorites with
+        {
+            UserId = user1Id,
+            Query = favorites.Query with { FavoritesOnly = true }
+        };
+
+        // The library as that reader sees it
+        var asOwnFavorites = await service.FilterAsync(favorites);
+
+        // Every one of them was answered with the library's options
+        Assert.NotNull(asAnonymous.BaseOptions);
+        Assert.NotNull(asOwnFavorites.BaseOptions);
+
+        // Identically, down to every count, even where the reader narrowed the results to a handful
+        // of their own. Asking as two readers who narrow nothing would prove less: the reader is only
+        // ever read inside the branches such a query never enters.
+        Assert.Equal(Shape(asAnonymous.BaseOptions), Shape(asOwnFavorites.BaseOptions));
+
+        // That reader's own counts then part company with the library's, being the point of sending them
+        Assert.NotNull(asOwnFavorites.UpdatedOptions);
+        Assert.NotEqual(Shape(asOwnFavorites.BaseOptions), Shape(asOwnFavorites.UpdatedOptions));
+    });
+
+    /// <summary>
+    /// A query that leaves part of the library out is answered with its own counts beside the library's,
+    /// and the library's stay put however it narrows.
+    /// </summary>
+    /// <remarks>
+    /// The sidebar lists its rows from the library's options and takes the numbers on them from the
+    /// query's, so a query narrowing the first would drop the rows it filtered away rather than show
+    /// them at nought.
+    /// </remarks>
+    [Fact]
+    public Task ANarrowingQueryIsAnsweredWithBothItsOwnOptionsAndTheLibrarys() => RunTestAsync(async service =>
+    {
+        // One competition out of the two the library holds
+        var narrowed = EverythingQuery();
+        narrowed = narrowed with
+        {
+            Query = narrowed.Query with
+            {
+                Parameters = narrowed.Query.Parameters with { CompetitionPaths = ["imo"] }
+            }
+        };
+
+        // What that query is answered with
+        var narrowedResult = await service.FilterAsync(narrowed);
+
+        // And what the library whole is answered with, to hold it against
+        var wholeResult = await service.FilterAsync(EverythingQuery());
+
+        // Both blocks came back, since the query does leave something out
+        Assert.NotNull(narrowedResult.BaseOptions);
+        Assert.NotNull(narrowedResult.UpdatedOptions);
+
+        // The library's options are untouched by what the query narrowed to
+        Assert.Equal(Shape(wholeResult.BaseOptions!), Shape(narrowedResult.BaseOptions));
+
+        // And the query's own options say something different, which is why they were worth sending
+        Assert.NotEqual(Shape(narrowedResult.BaseOptions), Shape(narrowedResult.UpdatedOptions));
     });
 
     /// <summary>
@@ -77,8 +165,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - search for "štvorstena" (tetrahedron in Slovak) which appears in problem 75-b-i-1
         var textSearchQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: "štvorstena",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -90,7 +178,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -120,8 +209,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         // Arrange - test various text normalization scenarios that users might encounter
         // Test 1: lowercase without accents should match "štvorstena" (with accents)
         var lowercaseQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: "stvorstena",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -133,7 +222,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -141,8 +231,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Test 2: UPPERCASE without accents should match "štvorstena" (lowercase with accents)
         var uppercaseQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: "STVORSTENA",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -154,7 +244,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -162,8 +253,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Test 3: UPPERCASE without accents should match "Prirodzené" (different case with accents)
         var mixedCaseQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: "PRIRODZENE",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -175,7 +266,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -183,8 +275,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Test 4: lowercase without accents should match "Prirodzené" (different case with accents)
         var lowerToTitleQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: "prirodzene",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -196,7 +288,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -285,8 +378,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             // A term living only in the markdown statement, spelled without accents
             var statementQuery = new ProblemFilterOptions(
-                new ProblemFilterQuery(
-                    new ProblemFilterCriteria(
+                new FilterQuery(
+                    new FilterParameters(
                         SearchText: "markdaunovom",
                         SearchInSolution: false,
                         OlympiadYears: [],
@@ -298,14 +391,15 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                         AuthorLogic: LogicToggle.Or),
                     PageSize: 10,
                     PageNumber: 1,
-                    FavoritesOnly: false),
+                    FavoritesOnly: false,
+                    IncludeBaseOptions: true),
                 UserId: null,
                 Language: Language.SK);
 
             // A term living only in the raw-text solution, with solution search enabled
             var solutionQuery = new ProblemFilterOptions(
-                new ProblemFilterQuery(
-                    new ProblemFilterCriteria(
+                new FilterQuery(
+                    new FilterParameters(
                         SearchText: "rawtextovu",
                         SearchInSolution: true,
                         OlympiadYears: [],
@@ -317,7 +411,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                         AuthorLogic: LogicToggle.Or),
                     PageSize: 10,
                     PageNumber: 1,
-                    FavoritesOnly: false),
+                    FavoritesOnly: false,
+                    IncludeBaseOptions: true),
                 UserId: null,
                 Language: Language.SK);
 
@@ -343,8 +438,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - filter by Patrik Bak, who authored 5 problems in our test data
         var authorQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -356,7 +451,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -380,8 +476,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - filter by algebra OR number-theory tags (should return 2 problems)
         var tagsOrQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -393,7 +489,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -416,8 +513,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - filter by algebra AND number-theory tags (no problems have both in our test data)
         var tagsAndQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -429,7 +526,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -452,8 +550,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - filter by season 75 AND geometry tag (should return 2 problems)
         var complexQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [75],
@@ -465,7 +563,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -493,8 +592,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - create queries for page 1 (4 items) and page 2 (remaining items)
         var page1Query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -506,14 +605,15 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 4,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
         );
         var page2Query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -525,7 +625,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 4,
                 PageNumber: 2,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -540,6 +641,53 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(7, page1Result.Problems.TotalCount);
         Assert.Equal(3, page2Result.Problems.Items.Count);
         Assert.Equal(7, page2Result.Problems.TotalCount);
+
+        // A later page repeats none of the first's options, and this query narrows nothing to count anyway
+        Assert.Null(page2Result.BaseOptions);
+        Assert.Null(page2Result.UpdatedOptions);
+    });
+
+    /// <summary>
+    /// A later page of a query that does filter something out still carries no options.
+    /// </summary>
+    /// <remarks>
+    /// Paging through an unfiltered library is the case where nothing narrows anyway, so it cannot tell
+    /// whether the page or the narrowing is what withholds the options. Here the two disagree, which is
+    /// what makes this the page that would keep serving options if the first-page condition were dropped.
+    /// </remarks>
+    [Fact]
+    public Task ALaterPageOfANarrowingQueryCarriesNoOptionsEither() => RunTestAsync(async service =>
+    {
+        // One competition out of the two, paged small enough to have a second page behind it
+        var narrowed = EverythingQuery();
+        narrowed = narrowed with
+        {
+            Query = narrowed.Query with
+            {
+                Parameters = narrowed.Query.Parameters with { CompetitionPaths = ["csmo"] },
+                PageSize = 2
+            }
+        };
+
+        // Its first page, which is the one owed both blocks
+        var firstPage = await service.FilterAsync(narrowed);
+
+        // And the page behind it
+        var laterPage = await service.FilterAsync(narrowed with
+        {
+            Query = narrowed.Query with { PageNumber = 2 }
+        });
+
+        // The query does filter something out, so its first page was answered with both blocks
+        Assert.NotNull(firstPage.BaseOptions);
+        Assert.NotNull(firstPage.UpdatedOptions);
+
+        // There is a second page to ask for
+        Assert.NotEmpty(laterPage.Problems.Items);
+
+        // That later page repeats neither block, having narrowed to the very same set as the first
+        Assert.Null(laterPage.BaseOptions);
+        Assert.Null(laterPage.UpdatedOptions);
     });
 
     /// <summary>
@@ -552,8 +700,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - search for text that doesn't exist in any problem statement
         var noResultsQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: "non_existent_text_gibrish",
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -565,7 +713,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -595,8 +744,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Act 1: Query as User 1
         var baseQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -608,7 +757,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -672,8 +822,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
         // Create base query with FavoritesOnly = true
         var favoritesQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -686,7 +836,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 ),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: true
+                FavoritesOnly: true,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -731,8 +882,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange
         var baseQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -744,7 +895,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -774,8 +926,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - create a query with no filters to get all season options
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -788,7 +940,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 ),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -798,12 +951,12 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var result = await service.FilterAsync(query);
 
         // Assert - verify season labels have correct format with full calendar years
-        Assert.NotNull(result.UpdatedOptions);
-        Assert.Equal(2, result.UpdatedOptions.Seasons.Count);
+        Assert.NotNull(result.BaseOptions);
+        Assert.Equal(2, result.BaseOptions.Seasons.Count);
 
         // Seasons should be ordered descending (newest first)
-        var season75 = result.UpdatedOptions.Seasons.First(season => season.Slug == "75");
-        var season74 = result.UpdatedOptions.Seasons.First(season => season.Slug == "74");
+        var season75 = result.BaseOptions.Seasons.First(season => season.Slug == "75");
+        var season74 = result.BaseOptions.Seasons.First(season => season.Slug == "74");
 
         // Verify the labels contain full 4-digit years (2025/2026 and 2024/2025)
         Assert.Equal("75. ročník (2025/2026)", season75.DisplayName);
@@ -823,8 +976,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - ask for everything, so every seeded competition reaches the facets
         var everythingQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -836,7 +989,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -846,7 +1000,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var result = await service.FilterAsync(everythingQuery);
 
         // The competitions as the tree they form
-        var competitions = result.UpdatedOptions!.Competitions;
+        var competitions = result.BaseOptions!.Competitions;
 
         // Assert - the competitions, in the order their sort orders place them
         Assert.Equal(["csmo", "imo"], competitions.Select(competition => competition.Path));
@@ -900,8 +1054,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         {
             // Filter by that one selection alone, leaving every other facet open
             var result = await service.FilterAsync(new ProblemFilterOptions(
-                new ProblemFilterQuery(
-                    new ProblemFilterCriteria(
+                new FilterQuery(
+                    new FilterParameters(
                         SearchText: string.Empty,
                         SearchInSolution: false,
                         OlympiadYears: [],
@@ -913,7 +1067,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                         AuthorLogic: LogicToggle.Or),
                     PageSize: 10,
                     PageNumber: 1,
-                    FavoritesOnly: false
+                    FavoritesOnly: false,
+                    IncludeBaseOptions: true
                 ),
                 UserId: null,
                 Language: Language.SK
@@ -947,8 +1102,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - ask for everything, so both a categorised problem and a flat-sitting one come back
         var everythingQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -960,7 +1115,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -1121,8 +1277,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - query for Slovak (original language for most CSMO problems)
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: "Ostrov",  // Unique text in 75-a-i-1
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1134,7 +1290,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -1159,8 +1316,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - query for English (translation exists for 75-a-i-1)
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [75],
@@ -1172,7 +1329,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.EN
@@ -1197,8 +1355,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - query for English (no translation exists for 75-b-i-1)
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [75],
@@ -1210,7 +1368,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.EN
@@ -1240,8 +1399,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1254,6 +1413,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageSize: 10,
                 PageNumber: 1,
                 FavoritesOnly: false,
+                IncludeBaseOptions: true,
                 ListContentId: "test-list-1"
             ),
             UserId: user1Id,
@@ -1279,8 +1439,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1293,6 +1453,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageSize: 10,
                 PageNumber: 1,
                 FavoritesOnly: false,
+                IncludeBaseOptions: true,
                 ListContentId: "test-list-empty"
             ),
             UserId: user2Id,
@@ -1318,8 +1479,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1332,6 +1493,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageSize: 10,
                 PageNumber: 1,
                 FavoritesOnly: false,
+                IncludeBaseOptions: true,
                 ListContentId: "test-list-1"
             ),
             UserId: user1Id,
@@ -1363,8 +1525,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1376,7 +1538,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: user1Id,
             Language: Language.SK
@@ -1411,8 +1574,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange — no user ID
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1424,7 +1587,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -1449,8 +1613,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1462,7 +1626,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: user2Id,
             Language: Language.SK
@@ -1495,8 +1660,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
         var baseQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1508,7 +1673,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     AuthorLogic: LogicToggle.Or),
                 PageSize: 10,
                 PageNumber: 1,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -1549,8 +1715,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1563,6 +1729,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageSize: 10,
                 PageNumber: 1,
                 FavoritesOnly: false,
+                IncludeBaseOptions: true,
                 MarkStatus: MarkStatusFilter.Marked
             ),
             UserId: user1Id,
@@ -1589,8 +1756,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         var query = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -1603,6 +1770,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 PageSize: 10,
                 PageNumber: 1,
                 FavoritesOnly: false,
+                IncludeBaseOptions: true,
                 MarkStatus: MarkStatusFilter.Unmarked
             ),
             UserId: user1Id,
@@ -2062,8 +2230,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Arrange - ask for a wildly oversized page and a non-positive page number
         var flooredQuery = new ProblemFilterOptions(
-            new ProblemFilterQuery(
-                new ProblemFilterCriteria(
+            new FilterQuery(
+                new FilterParameters(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
@@ -2076,7 +2244,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 ),
                 PageSize: 100_000,
                 PageNumber: 0,
-                FavoritesOnly: false
+                FavoritesOnly: false,
+                IncludeBaseOptions: true
             ),
             UserId: null,
             Language: Language.SK
@@ -2104,4 +2273,35 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         // unbounded skip overflows to a negative offset that Postgres refuses outright
         Assert.Empty(cappedResult.Problems.Items);
     });
+
+    /// <summary>
+    /// A query that asks the library for everything it holds.
+    /// </summary>
+    /// <returns>The query.</returns>
+    private static ProblemFilterOptions EverythingQuery() => new(
+        new FilterQuery(
+            new FilterParameters(
+                SearchText: string.Empty,
+                SearchInSolution: false,
+                OlympiadYears: [],
+                CompetitionPaths: [],
+                ProblemNumbers: [],
+                TagSlugs: [],
+                TagLogic: LogicToggle.Or,
+                AuthorSlugs: [],
+                AuthorLogic: LogicToggle.Or),
+            PageSize: 10,
+            PageNumber: 1,
+            FavoritesOnly: false,
+            IncludeBaseOptions: true),
+        UserId: null,
+        Language: Language.SK);
+
+    /// <summary>
+    /// Renders options as the values they carry, since the lists inside them compare by reference and two
+    /// separately built blocks holding the very same counts would otherwise never be equal.
+    /// </summary>
+    /// <param name="options">The options to render.</param>
+    /// <returns>The options as text.</returns>
+    private static string Shape(SearchBarOptions options) => JsonSerializer.Serialize(options);
 }

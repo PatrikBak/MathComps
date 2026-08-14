@@ -19,27 +19,24 @@ import {
 } from './problem-api-urls'
 
 /**
- * How many problems the library asks for while booting. It reads the facet counts off that answer,
- * and hands the page itself to the problem store.
- */
-const INITIAL_PAGE_SIZE = 20
-
-/**
  * Fetches a single problem by its slug from the API.
  *
  * @param apiCall - The API caller function.
  * @param slug - The slug of the problem to fetch.
+ * @param includeBaseOptions - Whether to ask for the whole library's options alongside the problem's own.
  *
  * @returns A promise resolving to the single problem with its derived filters, or an error.
  */
 export async function getProblemBySlug(
   apiCall: ApiCaller,
-  slug: string
+  slug: string,
+  includeBaseOptions: boolean
 ): Promise<ApiResult<SingleProblemResult>> {
   // Fetch the problem
-  const result = await apiCall<FilterResult>(() => getProblemBySlugApiUrl(slug), {
-    method: 'GET',
-  })
+  const result = await apiCall<FilterResult>(
+    () => getProblemBySlugApiUrl(slug, includeBaseOptions),
+    { method: 'GET' }
+  )
 
   // Pass a failure through untouched
   if (!result.success) return result
@@ -51,6 +48,12 @@ export async function getProblemBySlug(
   if (!problem) {
     // Fail as a missing problem
     return problemNotFound('the response held no problem')
+  }
+
+  // The filters below pin down this one problem, so its own counts are always owed
+  if (!result.data.updatedOptions) {
+    // Refused rather than shown with every count reading nought
+    return problemNotFound('the answer carried no option counts')
   }
 
   // The competition the problem was set in, which is the deepest one on the chain down to it
@@ -74,42 +77,27 @@ export async function getProblemBySlug(
     problemNumbers: [problem.source.number],
   }
 
-  // The problem, its filters, and whatever options came back alongside them
+  // The problem, its filters, and the options they are picked from
   return {
     success: true,
     data: {
       problem,
       filters,
-      options: result.data.updatedOptions || {
-        competitions: [],
-        seasons: [],
-        problemNumbers: [],
-        tags: [],
-        authors: [],
-      },
+      baseOptions: result.data.baseOptions,
+      options: result.data.updatedOptions,
     },
   }
 }
 
 /**
- * Fetches initial filter data for the problem library.
- *
- * @param apiCall - The API caller function.
- *
- * @returns A promise resolving to the base filter options and first page of problems, or an error.
- */
-export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResult<FilterResponse>> {
-  // The whole archive, unnarrowed, which is what the library opens on
-  return fetchFilterPage(apiCall, buildFilterQuery(createDefaultFilters(), INITIAL_PAGE_SIZE, 1))
-}
-
-/**
- * Searches for problems based on the provided filters.
+ * Searches for problems based on the provided filters, flattening the nesting off the answer so a
+ * caller reads the page, the option counts and the list name as one object.
  *
  * @param apiCall - The API caller function.
  * @param filters - The filters to apply to the search.
  * @param pageSize - The number of problems to return per page.
  * @param pageNumber - The page number to return.
+ * @param includeBaseOptions - Whether to ask for the whole library's options alongside this search's own.
  * @param signal - The signal to abort the request.
  *
  * @returns A promise resolving to the matching page of problems and updated options, or an error.
@@ -119,10 +107,41 @@ export async function searchProblems(
   filters: SearchFiltersState,
   pageSize: number,
   pageNumber: number,
+  includeBaseOptions: boolean,
   signal: AbortSignal
 ): Promise<ApiResult<FilterResponse>> {
-  // The page those filters narrow to
-  return fetchFilterPage(apiCall, buildFilterQuery(filters, pageSize, pageNumber), signal)
+  // The search as the API takes it: the narrowings a signed-out visitor can ask for, the ones that
+  // need a reader behind them, and the slice of the matches to serve
+  const query: FilterQuery = {
+    parameters: searchFiltersStateToFilterParameters(filters),
+    pageSize,
+    pageNumber,
+    favoritesOnly: filters.favoritesOnly,
+    listContentId: filters.listContentId,
+    markStatus: filters.markStatus,
+    includeBaseOptions,
+  }
+
+  // Ask for the page those filters narrow to
+  const result = await apiCall<ProblemFilterResponse>(() => getProblemsFilterApiUrl(), {
+    method: 'POST',
+    body: JSON.stringify(query),
+    signal,
+  })
+
+  // Pass a failure through untouched
+  if (!result.success) return result
+
+  // The page and its options, with the list they were browsed under lifted up beside them
+  return {
+    success: true,
+    data: {
+      problems: result.data.filterResult.problems,
+      baseOptions: result.data.filterResult.baseOptions,
+      updatedOptions: result.data.filterResult.updatedOptions,
+      listName: result.data.listName,
+    },
+  }
 }
 
 /**
@@ -157,68 +176,6 @@ export async function toggleProblemMark(
   return apiCall<void>(() => getToggleProblemMarkApiUrl(slug), {
     method: 'POST',
   })
-}
-
-/**
- * Runs one search against the filter endpoint and flattens the nesting off its answer, so a caller
- * reads the page, the option counts and the list name as one object.
- *
- * @param apiCall - The API caller function.
- * @param query - The search to run.
- * @param signal - The signal to abort the request, left off by a search nothing supersedes.
- *
- * @returns A promise resolving to the matching page of problems and updated options, or an error.
- */
-async function fetchFilterPage(
-  apiCall: ApiCaller,
-  query: FilterQuery,
-  signal?: AbortSignal
-): Promise<ApiResult<FilterResponse>> {
-  // Ask for the page the query names
-  const result = await apiCall<ProblemFilterResponse>(() => getProblemsFilterApiUrl(), {
-    method: 'POST',
-    body: JSON.stringify(query),
-    signal,
-  })
-
-  // Pass a failure through untouched
-  if (!result.success) return result
-
-  // The page and its options, with the list they were browsed under lifted up beside them
-  return {
-    success: true,
-    data: {
-      problems: result.data.filterResult.problems,
-      updatedOptions: result.data.filterResult.updatedOptions,
-      listName: result.data.listName,
-    },
-  }
-}
-
-/**
- * Converts a {@link SearchFiltersState} and the slice being asked for into the {@link FilterQuery}
- * the API takes.
- *
- * @param state - The search filters to convert.
- * @param pageSize - The number of problems to return per page.
- * @param pageNumber - The page number to return.
- *
- * @returns The converted query.
- */
-function buildFilterQuery(
-  state: SearchFiltersState,
-  pageSize: number,
-  pageNumber: number
-): FilterQuery {
-  // The narrowings a signed-out visitor can ask for, alongside the ones that need a reader behind them
-  return {
-    parameters: searchFiltersStateToFilterParameters(state),
-    pageSize,
-    pageNumber,
-    favoritesOnly: state.favoritesOnly,
-    listContentId: state.listContentId,
-    markStatus: state.markStatus,
-  }
 }
 
 /**

@@ -35,8 +35,8 @@ export type FilterOptionsWithCounts = {
  * whole competition records one entry rather than every round in it. It carries no names of its
  * own: whatever shows the filter reads those off the node its path resolves to.
  *
- * A path only becomes one of these by resolving against the taxonomy, so a selection always names a
- * node the tree holds.
+ * One read off a URL names whatever that URL was written against, which a taxonomy that has moved on
+ * since may no longer hold. Anything reading a node out of a selection has to allow for its absence.
  */
 export type CompetitionSelection = {
   /** The node the filter names, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
@@ -87,7 +87,16 @@ export type UrlQueryState = Omit<SearchFiltersState, 'competitionSelection'> & {
 export type FilterResult = {
   /** The page of matching problems. */
   problems: PagedList<Problem>
-  /** The option counts under these filters, null on every page after the first, which cannot change them. */
+  /**
+   * Every option the library offers, counted across the whole archive rather than across what these
+   * filters narrow to. Present when the caller asked for it and this is the first page.
+   */
+  baseOptions: FilterOptionsWithCounts | null
+  /**
+   * The options of {@link FilterResult.baseOptions}, counted across what these filters narrow to
+   * instead. Present on the first page of a search that narrows anything; a search that narrows
+   * nothing is already answered by the counts across the whole archive.
+   */
   updatedOptions: FilterOptionsWithCounts | null
 }
 
@@ -106,11 +115,7 @@ export type ProblemFilterResponse = {
  * One page of problems as the service hands it on, which is a {@link ProblemFilterResponse} with the
  * nesting flattened away so a caller reads one object rather than reaching through two.
  */
-export type FilterResponse = {
-  /** The page of matching problems. */
-  problems: PagedList<Problem>
-  /** The option counts under these filters, null on every page after the first, which cannot change them. */
-  updatedOptions: FilterOptionsWithCounts | null
+export type FilterResponse = FilterResult & {
   /** The name of the list being browsed, null when browsing everything. */
   listName: string | null
 }
@@ -123,6 +128,11 @@ export type SingleProblemResult = {
   problem: Problem
   /** Filters that resolve to exactly this problem. */
   filters: SearchFiltersState
-  /** The options those filters would be picked from. */
+  /** {@link FilterResult.baseOptions}. */
+  baseOptions: FilterOptionsWithCounts | null
+  /**
+   * {@link FilterResult.updatedOptions}, which {@link SingleProblemResult.filters} narrows to this
+   * problem alone, so the archive always owes them.
+   */
   options: FilterOptionsWithCounts
 }

@@ -1,20 +1,22 @@
-import type { InfiniteData } from '@tanstack/react-query'
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import type { InfiniteData, QueryClient } from '@tanstack/react-query'
+import { skipToken, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
 import { useQueryUiState } from '@/hooks/use-query-ui-state'
 import { unwrap } from '@/lib/api/api-error'
+import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { DEFAULT_PAGE_SIZE } from '../constants/pagination-constants'
-import { getInitialFilterData, getProblemBySlug, searchProblems } from '../services/problem-service'
+import { getProblemBySlug, searchProblems } from '../services/problem-service'
 import type {
   FilterOptionsWithCounts,
   SearchFiltersState,
   SingleProblemResult,
 } from '../types/problem-library-types'
+import { countActiveFilters } from '../utils/filter-validation'
 
 /**
  * The data shape returned by the infinite search query.
@@ -35,18 +37,6 @@ type ProblemSearchInfiniteData = {
   updatedOptions: FilterOptionsWithCounts | null
   /** When filtering by a list, the display name of that list. Null otherwise. */
   listName: string | null
-}
-
-/**
- * The return type of the `useInitialFilterData` hook.
- */
-type UseInitialFilterDataReturn = {
-  /** The data returned by the query (initial filter options and first batch of problems). */
-  data: ProblemSearchInfiniteData | undefined
-  /** The state of the fetch. */
-  uiState: QueryUiState
-  /** Runs the query again after it failed. */
-  retry: () => void
 }
 
 /**
@@ -93,9 +83,8 @@ export const problemQueryKeys = {
   // Base key for all problem-related queries
   all: ['problems'] as const,
 
-  // Key for initial filter data (all available options)
-  initialData: (locale: string, userId: string | null) =>
-    [...problemQueryKeys.all, 'initial', locale, userId] as const,
+  // Key for every option the library offers, which nobody's own state moves
+  baseOptions: (locale: string) => [...problemQueryKeys.all, 'base-options', locale] as const,
 
   // Prefix covering all search queries
   allSearches: () => [...problemQueryKeys.all, 'search'] as const,
@@ -110,69 +99,49 @@ export const problemQueryKeys = {
 }
 
 /**
- * Hook to fetch initial filter data, i.e. filter options + the first batch of problems
- * Used during the initial page load to populate filter dropdowns.
+ * Every option the library offers, which is where the search bar's rows come from.
+ *
+ * Nothing fetches these on their own: they ride along with the first answer the archive gives, and
+ * whichever query receives them parks them here for the rest of the session. They are keyed by
+ * language alone, since what the library holds is the same whoever is reading.
  *
  * @param locale - The current locale for localized metadata
- * @param userId - The current user's ID (or null if anonymous)
- * @param enabled - Whether the query should run
  *
- * @returns The query result containing initial filter options
+ * @returns The options, or undefined until the first answer has arrived
  */
-export function useInitialFilterData(
-  locale: string,
-  userId: string | null,
-  enabled: boolean
-): UseInitialFilterDataReturn {
-  // Get the API caller
-  const api = useApi({ requireAuth: false })
-
-  // Get the function to update problems in the global store
-  const upsertProblems = useProblemStore((state) => state.upsertProblems)
-
-  // Construct the React Query
-  const query = useQuery({
-    queryKey: problemQueryKeys.initialData(locale, userId),
-    queryFn: async () => {
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
-
-      // Fetch the initial filter options from the server
-      const data = unwrap(await getInitialFilterData(apiCall))
-
-      // Ensure we received valid filter options before proceeding
-      if (!data.updatedOptions) {
-        throw new Error('No filter options received from server')
-      }
-
-      // Sync problems to global store
-      upsertProblems(data.problems.items)
-
-      // Destructure to separate 'items' from the rest of the data
-      const { items, ...problemMetadata } = data.problems
-
-      // Return structure with 'slugs' instead of 'items'
-      return {
-        ...data,
-        problems: {
-          ...problemMetadata,
-          slugs: items.map((problem) => problem.slug),
-        },
-      }
-    },
-    // Only run once enabled and the API is ready
-    enabled: enabled && api.state === 'ready',
+export function useBaseOptions(locale: string): FilterOptionsWithCounts | undefined {
+  // Read the entry the searches fill, re-rendering whenever one of them does. It has no fetcher of
+  // its own, so it is kept for good: a search entry outliving it would be served from cache without
+  // running the query that refills it, leaving the search bar with no rows to draw.
+  const query = useQuery<FilterOptionsWithCounts>({
+    queryKey: problemQueryKeys.baseOptions(locale),
+    queryFn: skipToken,
+    gcTime: Infinity,
   })
 
-  // Reduce the raw flags to the one state that describes this fetch
-  const uiState = useQueryUiState(query)
+  // The options, absent until an answer has carried them
+  return query.data
+}
 
-  // Return only the data we need
-  return {
-    data: query.data,
-    uiState,
-    retry: query.refetch,
-  }
+/**
+ * Whether the library's options are worth asking for, which they are until one answer has carried
+ * them, and again once what that answer carried has gone stale. An import is the only thing that
+ * moves them, so they age on the same terms as the rest of the archive's content.
+ *
+ * @param queryClient - The cache the options are parked in.
+ * @param locale - The current locale for localized metadata.
+ *
+ * @returns Whether to ask for them.
+ */
+function shouldAskForBaseOptions(queryClient: QueryClient, locale: string): boolean {
+  // When the options were last written, absent while nothing has ever carried them
+  const lastWritten = queryClient.getQueryState(problemQueryKeys.baseOptions(locale))?.dataUpdatedAt
+
+  // Nothing holds them yet
+  if (lastWritten === undefined) return true
+
+  // What is held has gone stale, so an import since then would otherwise never be seen
+  return Date.now() - lastWritten > cachePolicy.content.staleTime
 }
 
 /**
@@ -198,6 +167,9 @@ export function useSingleProblem(
   // Get the function to update a single problem in the global store
   const upsertProblem = useProblemStore((state) => state.upsertProblem)
 
+  // The cache the library's own options are parked in
+  const queryClient = useQueryClient()
+
   // Construct the React Query
   const query = useQuery({
     queryKey: problemQueryKeys.single(locale, problemSlug, userId),
@@ -210,8 +182,17 @@ export function useSingleProblem(
       // Narrow to the ready caller
       const apiCall = readyApiCall(api)
 
-      // Fetch the problem details from the server
-      const data = unwrap(await getProblemBySlug(apiCall, problemSlug))
+      // Fetch the problem details from the server, asking for the library's options only when the
+      // reader arrived here cold rather than clicking through an archive that already holds them
+      const data = unwrap(
+        await getProblemBySlug(apiCall, problemSlug, shouldAskForBaseOptions(queryClient, locale))
+      )
+
+      // The library's options parked, so a reader arriving on a link has the search bar the archive
+      // would have given them
+      if (data.baseOptions) {
+        queryClient.setQueryData(problemQueryKeys.baseOptions(locale), data.baseOptions)
+      }
 
       // Sync to global store
       upsertProblem(data.problem)
@@ -259,6 +240,9 @@ function useProblemSearchInfinite(
   // Get the function to update problems in the global store
   const upsertProblems = useProblemStore((state) => state.upsertProblems)
 
+  // The cache the library's own options are parked in
+  const queryClient = useQueryClient()
+
   // Construct the React Query
   const query = useInfiniteQuery({
     queryKey: problemQueryKeys.search(locale, filters, userId),
@@ -271,21 +255,46 @@ function useProblemSearchInfinite(
       // Narrow to the ready caller
       const apiCall = readyApiCall(api)
 
+      // Whether this search is the one to carry the library's options back. Only a first page can:
+      // the archive counts them once per search and says nothing of them on the pages behind it.
+      const askForBaseOptions = pageParam === 1 && shouldAskForBaseOptions(queryClient, locale)
+
       // Fetch the page of problems from the server with abort support for request cancellation
       const data = unwrap(
-        await searchProblems(apiCall, filters, DEFAULT_PAGE_SIZE, pageParam, signal)
+        await searchProblems(
+          apiCall,
+          filters,
+          DEFAULT_PAGE_SIZE,
+          pageParam,
+          askForBaseOptions,
+          signal
+        )
       )
 
+      // The library's options, lifted off the page they rode in on
+      const { baseOptions, ...page } = data
+
+      // An answer asked for the library's options and carrying none leaves the search bar nothing to
+      // draw, so it is refused here rather than rendered as a page that never finishes loading
+      if (askForBaseOptions && !baseOptions) {
+        throw new Error('The archive answered the first search without the library options')
+      }
+
+      // The library's options parked for every later search to read, when this answer carried them
+      if (baseOptions) {
+        queryClient.setQueryData(problemQueryKeys.baseOptions(locale), baseOptions)
+      }
+
       // Sync to global store
-      upsertProblems(data.problems.items)
+      upsertProblems(page.problems.items)
 
       // Separate the problems from the rest of the data so we can
       // just return the slugs (problems have been added to the global store)
-      const { items: problems, ...rest } = data.problems
+      const { items: problems, ...rest } = page.problems
 
       // On the result, replace the problems with slugs
       return {
-        ...data,
+        ...page,
         problems: {
           ...rest,
           slugs: problems.map((problem) => problem.slug),
@@ -413,16 +422,12 @@ export function useProblemSearchQuery(
     setDisplayedProblems(finalProblems)
   }, [finalProblems, setDisplayedProblems])
 
-  // Get the most recent filter options (from the last page) to keep filter dropdowns in sync
-  const filterOptions = useMemo(() => {
-    // Ensure we even have any data
-    const pages = infiniteQuery.data?.pages
-    if (!pages || pages.length === 0) return null
-
-    // Use last page because server updates options based on most recent filter state
-    const lastPage = pages[pages.length - 1]
-    return lastPage?.updatedOptions ?? null
-  }, [infiniteQuery.data])
+  // The counts this search narrows to, which the archive sends with the first page alone since every
+  // page behind it narrows to the very same set
+  const filterOptions = useMemo(
+    () => infiniteQuery.data?.pages[0]?.updatedOptions ?? null,
+    [infiniteQuery.data]
+  )
 
   // Keep previous filter options during loading so sidebar counts remain steady while new results load
   const stableFilterOptionsRef = useRef<FilterOptionsWithCounts | null>(null)
@@ -434,60 +439,34 @@ export function useProblemSearchQuery(
     stableFilterOptionsRef.current = filterOptions
     stableFiltersRef.current = filters
   }
-
-  const isResetState = (filters: SearchFiltersState | null): boolean => {
-    if (!filters) return true
-    return (
-      filters.tags.length === 0 &&
-      filters.authors.length === 0 &&
-      filters.competitionSelection.length === 0 &&
-      filters.seasons.length === 0 &&
-      filters.problemNumbers.length === 0 &&
-      !filters.searchText
-    )
+  // A search that narrows nothing is answered with no counts of its own, and holding on to an older
+  // search's would show them beside the next set of filters entirely
+  else if (infiniteQuery.data) {
+    stableFilterOptionsRef.current = null
+    stableFiltersRef.current = null
   }
 
-  // Helper to check if filters are "similar enough" to use stable ref
-  // Similar = not a reset, and we're just refining filters (not a major change)
-  const areFiltersSimilar = (
-    current: SearchFiltersState | null,
-    stable: SearchFiltersState | null
-  ): boolean => {
-    // If either is null, they're not similar
-    if (!current || !stable) return false
-    // If current is a reset, they're not similar
-    if (isResetState(current)) return false
-    // If stable was a reset but current isn't, not similar
-    if (isResetState(stable)) return false
-    // Otherwise, consider them similar enough to prevent flicker during loading
-    return true
-  }
+  // A function which says whether a set of filters narrows nothing at all
+  const isResetState = (filters: SearchFiltersState | null): boolean =>
+    filters === null || countActiveFilters(filters) === 0
 
-  // Check if we're using stale ref with mismatched filters
-  const filtersMatchStable =
-    filters && stableFiltersRef.current
-      ? JSON.stringify(filters) === JSON.stringify(stableFiltersRef.current)
-      : false
-  const filtersAreSimilar = areFiltersSimilar(filters, stableFiltersRef.current)
-
-  // Use the stable ref if:
-  // 1. We have new filter options (use them)
-  // 2. OR we're loading and filters match exactly (same query, just loading more)
-  // 3. OR we're loading and filters are similar (refining, prevent flicker)
-  // 4. Otherwise return null (forces fallback to baseOptions, especially on reset)
+  // The counts the search bar shows. A search still in flight has none of its own yet, so the last
+  // narrowing search's stand in and the numbers hold still while a filter is being refined. A search
+  // that narrows nothing wants the whole library's, which the null here falls through to.
   const effectiveFilterOptions =
-    filterOptions ??
-    (filtersMatchStable || filtersAreSimilar ? stableFilterOptionsRef.current : null)
+    filterOptions ?? (isResetState(filters) ? null : stableFilterOptionsRef.current)
 
-  // Get total count from the first page (stays constant across pagination)
-  const totalCount = useMemo(() => {
-    return infiniteQuery.data?.pages[0]?.problems.totalCount ?? 0
-  }, [infiniteQuery.data])
+  // How many problems this search matches in total, which the pages behind the first only repeat
+  const totalCount = useMemo(
+    () => infiniteQuery.data?.pages[0]?.problems.totalCount ?? 0,
+    [infiniteQuery.data]
+  )
 
-  // Get list name from the first page (consistent across all pages for the same list)
-  const listName = useMemo(() => {
-    return infiniteQuery.data?.pages[0]?.listName ?? null
-  }, [infiniteQuery.data])
+  // The list being browsed, named once on the first page and the same on every page behind it
+  const listName = useMemo(
+    () => infiniteQuery.data?.pages[0]?.listName ?? null,
+    [infiniteQuery.data]
+  )
 
   // Check if there are more pages to load for infinite scroll
   const hasMore = infiniteQuery.hasNextPage

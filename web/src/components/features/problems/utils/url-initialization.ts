@@ -1,6 +1,6 @@
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import type { SearchFiltersState } from '../types/problem-library-types'
-import { type CompetitionTree, resolveCompetitionPaths } from './competition-tree'
+import type { CompetitionTree } from './competition-tree'
 import { countActiveFilters } from './filter-validation'
 import { deserializeFilters, URL_PARAMS } from './search-url-serialization'
 
@@ -39,18 +39,20 @@ type UrlInitializationResult = {
 }
 
 /**
- * Reads a URL into the filters the library starts under. A URL that is empty, that the library
- * cannot read in full, or that carries more filters than it will apply at once all fall back
- * to the defaults.
+ * Reads a URL into the filters the library starts under, without a taxonomy to hand. A URL that is
+ * empty, that the library cannot read in full, or that carries more filters than it will apply at
+ * once all fall back to the defaults.
+ *
+ * The competition paths it returns are the ones the URL was written with, still unproven: only
+ * {@link namesOnlyKnownCompetitions} can say whether the taxonomy still answers to them, and it needs
+ * the taxonomy that arrives with the first answer from the archive.
  *
  * @param searchParams - The URL search parameters
- * @param competitionTree - The taxonomy the competition paths are resolved against
  *
  * @returns The starting filters, alongside what the URL asked for and what it got wrong
  */
 export function initializeFiltersFromUrlOrDefaults(
-  searchParams: URLSearchParams,
-  competitionTree: CompetitionTree
+  searchParams: URLSearchParams
 ): UrlInitializationResult {
   // Nothing in the URL to read
   if (searchParams.toString().length === 0) {
@@ -67,7 +69,7 @@ export function initializeFiltersFromUrlOrDefaults(
   const favoritesRequested = searchParams.get(URL_PARAMS.FAVORITES_ONLY) === 'true'
 
   // The URL as filters, null when any part of it could not be read
-  const parsedFilters = parseAndInterpretFilters(searchParams, competitionTree)
+  const parsedFilters = parseAndInterpretFilters(searchParams)
 
   // A URL the library could not read in full
   if (parsedFilters === null) {
@@ -101,20 +103,15 @@ export function initializeFiltersFromUrlOrDefaults(
 }
 
 /**
- * Reads a URL into the filters it names, with every competition path resolved against the taxonomy.
- * A key the library does not recognize, a season no edition answers to, and a path no node answers
- * to each cost the whole URL.
+ * Reads a URL into the filters it names. A key the library does not recognize and a season no edition
+ * answers to each cost the whole URL.
  *
  * @param searchParams - The URL search parameters.
- * @param competitionTree - The taxonomy the competition paths are resolved against.
  *
  * @returns The {@link SearchFiltersState} the URL names, or null when any part of it could not be read.
  */
-function parseAndInterpretFilters(
-  searchParams: URLSearchParams,
-  competitionTree: CompetitionTree
-): SearchFiltersState | null {
-  // The filters as the URL names them, competition paths still unresolved
+function parseAndInterpretFilters(searchParams: URLSearchParams): SearchFiltersState | null {
+  // The filters as the URL names them
   const rawUrlState = deserializeFilters(searchParams.toString())
 
   // A key the library does not recognize costs the whole URL
@@ -123,18 +120,35 @@ function parseAndInterpretFilters(
   // A school year is named by its edition number, so anything else names no season at all
   if (rawUrlState.seasons.some((season) => !/^[0-9]+$/.test(season.slug))) return null
 
-  // The paths resolved against the taxonomy as it stands now
-  const selections = resolveCompetitionPaths(rawUrlState.competitionPaths, competitionTree)
+  // The state the URL named, with the paths lifted out of it
+  const { competitionPaths, ...finalState } = rawUrlState
 
-  // A path no node answers to costs it just the same
-  if (selections === null) return null
-
-  // The state the URL named, with the paths it was written with left behind
-  const { competitionPaths: _, ...finalState } = rawUrlState
-
-  // The filters, now naming the nodes the paths resolved to
+  // The filters, each competition standing as the path the URL addressed it by
   return {
     ...finalState,
-    competitionSelection: selections,
+    competitionSelection: competitionPaths.map((path) => ({ path })),
   }
+}
+
+/**
+ * Whether every competition a URL's filters name still answers to a node in the taxonomy, which only
+ * arrives once the archive has answered.
+ *
+ * A path no node answers to costs the whole URL rather than only itself, since a filter honoured in
+ * part is worse than one obviously refused. The archive has by then already been asked for those
+ * filters, so what a refusal here throws away is the state, not the request spent on it.
+ *
+ * @param filters - The filters the URL named.
+ * @param competitionTree - The taxonomy to hold them against.
+ *
+ * @returns Whether the taxonomy still knows all of them.
+ */
+export function namesOnlyKnownCompetitions(
+  filters: SearchFiltersState,
+  competitionTree: CompetitionTree
+): boolean {
+  // Every competition named has to still be there, since the URL was written against an older taxonomy
+  return filters.competitionSelection.every((selection) =>
+    competitionTree.byPath.has(selection.path)
+  )
 }

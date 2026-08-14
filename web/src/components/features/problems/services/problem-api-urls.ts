@@ -10,10 +10,13 @@ const PROBLEMS_PATH = '/problems'
  * The slug is URL-encoded to handle special characters safely.
  *
  * @param slug - The problem slug identifier (will be URL-encoded automatically)
+ * @param includeBaseOptions - Whether to ask for the whole library's options alongside the problem's own.
  * @returns The API URL path to fetch the problem
  */
-export function getProblemBySlugApiUrl(slug: string): string {
-  return buildApiUrl(`${PROBLEMS_PATH}/${encodeURIComponent(slug)}`)
+export function getProblemBySlugApiUrl(slug: string, includeBaseOptions: boolean): string {
+  return buildApiUrl(
+    `${PROBLEMS_PATH}/${encodeURIComponent(slug)}?includeBaseOptions=${includeBaseOptions}`
+  )
 }
 
 /**

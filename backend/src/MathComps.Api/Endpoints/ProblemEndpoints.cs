@@ -60,16 +60,8 @@ public static class ProblemEndpoints
             // Detect language from Accept-Language header
             var language = EndpointHelpers.GetRequestLanguage();
 
-            // Map the request onto the service's own query shape
-            var serviceQuery = new ProblemFilterQuery(
-                new ProblemFilterCriteria(
-                    query.Parameters.SearchText, query.Parameters.SearchInSolution, query.Parameters.OlympiadYears,
-                    query.Parameters.CompetitionPaths, query.Parameters.ProblemNumbers, query.Parameters.TagSlugs,
-                    query.Parameters.TagLogic, query.Parameters.AuthorSlugs, query.Parameters.AuthorLogic),
-                query.PageSize, query.PageNumber, query.FavoritesOnly, query.ListContentId, query.MarkStatus);
-
-            // Create service options
-            var options = new ProblemFilterOptions(serviceQuery, userId, language);
+            // The query alongside the context only the request itself can resolve
+            var options = new ProblemFilterOptions(query, userId, language);
 
             // Delegate to service
             var filterResult = await problemService.FilterAsync(options);
@@ -94,7 +86,13 @@ public static class ProblemEndpoints
 
         // The endpoint for getting the data for a filter
         // Allows anonymous access but provides personalized data if authenticated
-        app.MapGet($"{ProblemsPath}/{{slug}}", async (string slug, HttpContext context, IUserManager userManager, IProblemLookupService lookupService, IProblemFilterService filterService) =>
+        app.MapGet($"{ProblemsPath}/{{slug}}", async (
+            string slug,
+            bool includeBaseOptions,
+            HttpContext context,
+            IUserManager userManager,
+            IProblemLookupService lookupService,
+            IProblemFilterService filterService) =>
         {
             // Get problem metadata to construct appropriate filters
             var lookupResult = await lookupService.GetProblemLookupDataAsync(slug)
@@ -105,7 +103,7 @@ public static class ProblemEndpoints
             var userId = await userManager.GetUserIdAsync(context);
 
             // Get the filters state
-            var filters = new ProblemFilterCriteria(
+            var filters = new FilterParameters(
                 SearchText: string.Empty,
                 SearchInSolution: false,
                 OlympiadYears: [lookupResult.Season],
@@ -122,11 +120,12 @@ public static class ProblemEndpoints
 
             // Create service options
             var filterOptions = new ProblemFilterOptions(
-                new ProblemFilterQuery(
+                new FilterQuery(
                     filters,
                     PageSize: 1,
                     PageNumber: 1,
-                    FavoritesOnly: false
+                    FavoritesOnly: false,
+                    IncludeBaseOptions: includeBaseOptions
                 ),
                 userId,
                 language
