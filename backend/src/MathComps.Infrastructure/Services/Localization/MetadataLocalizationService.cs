@@ -68,8 +68,8 @@ public class MetadataLocalizationService : IMetadataLocalizationService
             : throw MissingLocalization("tag", slug, language);
 
     /// <inheritdoc />
-    public string GetSeasonLabel(Language language, int editionNumber, int startYear, int endYear) =>
-        GetMetadata(language).GetSeasonLabel(editionNumber, startYear, endYear);
+    public string GetSeasonLabel(Language language, int editionNumber, int startYear) =>
+        GetMetadata(language).GetSeasonLabel(editionNumber, startYear);
 
     /// <inheritdoc />
     public IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(string competitionPath) =>

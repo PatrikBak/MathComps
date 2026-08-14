@@ -60,8 +60,7 @@ public interface IMetadataLocalizationService
     /// <param name="lang">The language to get the format for.</param>
     /// <param name="editionNumber">The edition/year number (e.g., 57).</param>
     /// <param name="startYear">The start year of the season (e.g., 2024).</param>
-    /// <param name="endYear">The end year of the season (e.g., 2025).</param>
     /// <returns>A formatted season label (e.g., "57. ročník (2024/2025)").</returns>
     /// <exception cref="InvalidOperationException">Thrown if the season format is not found.</exception>
-    string GetSeasonLabel(Language lang, int editionNumber, int startYear, int endYear);
+    string GetSeasonLabel(Language lang, int editionNumber, int startYear);
 }

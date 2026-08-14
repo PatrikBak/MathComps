@@ -10,15 +10,15 @@ using MathComps.Infrastructure.Services.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
 using MathComps.Shared.Extensions;
 namespace MathComps.Infrastructure.Services.Problems;
 
 /// <summary>
-/// EF Core-backed implementation of problem retrieval and filtering aligned to API DTOs.
-/// Provides paginated problem search with faceted filtering capabilities including competitions,
-/// seasons, tags, authors, and full-text search with similarity matching.
+/// EF Core-backed implementation of <see cref="IProblemFilterService"/>. A page of problems and the facet
+/// counts beside it are separate queries over one filtered set, the page projected to its DTO in the database.
 /// </summary>
 /// <param name="dbContext">Database context for accessing problem entities and related data</param>
 /// <param name="paginationOptions">Configuration options for pagination limits and defaults</param>
@@ -39,38 +39,38 @@ public class ProblemFilterService(
         // The page as it will be served, which is how much of the filtered set one request can ask for.
         var bounds = PageBounds.ForRequestedPage(paginationOptions.Value, pageSize, pageNumber);
 
-        // PERFORMANCE OPTIMIZATION: Materialize text search results once
-        // This ensures the expensive text search executes exactly once, not multiple times across facets
+        // The problems the text search leaves, or all of them when nothing was searched for
         IQueryable<Problem> textFilteredQuery;
 
-        // First, apply text search if present to create a base query for facets
+        // If something was searched for...
         if (!string.IsNullOrWhiteSpace(parameters.SearchText))
         {
-            // Execute the text search ONCE and materialize the problem IDs in memory
+            // Run the search once and hold its ids in memory, since each facet would otherwise re-run it
             var matchingProblemIds = await GetMatchingProblemIdsByTextSearchAsync(
                 dbContext,
                 parameters.SearchText,
                 parameters.SearchInSolution);
 
-            // Pre-filter problems to only include those with matching text
-            // Uses cached problem IDs, no database round-trip for text search
+            // Narrow to the problems those ids name
             textFilteredQuery = dbContext.Problems
                 .Where(problem => matchingProblemIds.Contains(problem.Id));
         }
-        // No text search - start with all problems
+        // Nothing was searched for, so every problem is still in play
         else textFilteredQuery = dbContext.Problems;
 
         // The competitions the selected paths name, each standing for its whole subtree; empty when none is selected
         var competitionIds = await ResolveCompetitionIdsAsync(parameters.CompetitionPaths);
 
+        // Everything this request narrows by outside its facet criteria
+        var terms = new FilterTerms(competitionIds, favoritesOnly, listContentId, markStatus, userId);
+
         // Apply remaining filters (years, competitions, tags, authors, etc.) on top of text filter
-        var filteredQuery = ApplyFilters(textFilteredQuery, parameters,
-            competitionIds, favoritesOnly, listContentId, markStatus, userId);
+        var filteredQuery = ApplyFilters(textFilteredQuery, parameters, terms);
 
         // Get total count
         var totalCount = await filteredQuery.CountAsync();
 
-        // Build a query...
+        // The filtered problems, each shaped into its DTO
         var dtoQuery = filteredQuery
             // Apply consistent sorting for predictable pagination results
             .OrderByDefaultProblemSort()
@@ -91,10 +91,12 @@ public class ProblemFilterService(
                     .Select(text => text.MarkdownText!)
                     .First()
             })
-            // Which projects results to DTOs directly in the database query
+            // Build the DTO from it
             .Select(data => new ProblemDto(
-                // Simple properties
+                // How the problem is addressed
                 data.problem.Slug,
+
+                // What it asks
                 data.Statement,
 
                 // Problem Source
@@ -102,7 +104,6 @@ public class ProblemFilterService(
                     localization,
                     data.problem.Round.Season.EditionNumber,
                     data.problem.Round.Season.StartYear,
-                    data.problem.Round.Season.EndYear,
                     data.problem.Round.Competition.Path,
                     data.problem.Number,
                     language),
@@ -129,7 +130,7 @@ public class ProblemFilterService(
                         problemAuthor.Author.Name,
                         null
                     ))
-                    // Evaluate 
+                    // Evaluate
                     .ToImmutableList(),
 
                 // Similar Problems
@@ -148,7 +149,6 @@ public class ProblemFilterService(
                             localization,
                             similarProblem.SimilarProblem.Round.Season.EditionNumber,
                             similarProblem.SimilarProblem.Round.Season.StartYear,
-                            similarProblem.SimilarProblem.Round.Season.EndYear,
                             similarProblem.SimilarProblem.Round.Competition.Path,
                             similarProblem.SimilarProblem.Number,
                             language),
@@ -170,10 +170,10 @@ public class ProblemFilterService(
                 data.problem.SolutionLink,
 
                 // Liked
-                options.UserId != null && data.problem.Likes.Any(like => like.UserId == options.UserId),
+                userId != null && data.problem.Likes.Any(like => like.UserId == userId),
 
                 // Marked
-                options.UserId != null && data.problem.MarkStatuses.Any(mark => mark.UserId == options.UserId),
+                userId != null && data.problem.MarkStatuses.Any(mark => mark.UserId == userId),
 
                 // LikeCount
                 data.problem.Likes.Count,
@@ -182,9 +182,9 @@ public class ProblemFilterService(
                 data.problem.ProblemComments.Count(problemComment => problemComment.Comment.Status == CommentStatus.Active),
 
                 // ListContentIds — which of the user's lists contain this problem
-                options.UserId != null
+                userId != null
                     ? data.problem.UserProblemListItems
-                        .Where(item => item.List.UserId == options.UserId)
+                        .Where(item => item.List.UserId == userId)
                         .Select(item => item.List.ContentId)
                         .ToImmutableList()
                     : ImmutableList<string>.Empty
@@ -209,33 +209,47 @@ public class ProblemFilterService(
              // Build search bar options with faceting on the text-filtered base query
              // Most facets use disjunctive faceting, while tags and authors use conjunctive faceting
              // when AND logic is selected with at least one item
-             await BuildSearchOptionsAsync(textFilteredQuery, parameters, competitionIds,
-                 favoritesOnly, listContentId, markStatus, userId, language);
+             await BuildSearchOptionsAsync(textFilteredQuery, parameters, terms, language);
 
         // Return the complete filter result
         return new FilterResult(pagedResults, searchBarOptions);
     }
 
     /// <summary>
+    /// What one request narrows by beyond its facet criteria: the competitions its selection resolved to, and
+    /// what the person asking narrowed to on top.
+    /// </summary>
+    /// <remarks>
+    /// Every facet is counted by rerunning the filter with its own criteria varied, so these hold across each
+    /// of those runs while the criteria change.
+    /// </remarks>
+    /// <param name="CompetitionIds">Every competition the selections resolve to, subtrees included.</param>
+    /// <param name="FavoritesOnly"><inheritdoc cref="FilterQuery" path="/param[@name='FavoritesOnly']"/></param>
+    /// <param name="ListContentId"><inheritdoc cref="FilterQuery" path="/param[@name='ListContentId']"/></param>
+    /// <param name="MarkStatus"><inheritdoc cref="FilterQuery" path="/param[@name='MarkStatus']"/></param>
+    /// <param name="UserId"><inheritdoc cref="ProblemFilterOptions" path="/param[@name='UserId']"/></param>
+    private record FilterTerms(
+        IReadOnlyCollection<Guid> CompetitionIds,
+        bool FavoritesOnly,
+        string? ListContentId,
+        MarkStatusFilter? MarkStatus,
+        Guid? UserId);
+
+    /// <summary>
     /// Applies all active filters to the base query based on user's selections.
     /// </summary>
     /// <param name="problems">Base queryable to apply filters to</param>
     /// <param name="parameters">Filter parameters containing user selections and search criteria</param>
-    /// <param name="competitionIds">Every competition the selections resolve to, subtrees included</param>
-    /// <param name="favoritesOnly">Whether to filter only favorited problems</param>
-    /// <param name="listContentId">Optional ContentId of a user list to filter by</param>
-    /// <param name="markStatus">Optional mark status filter</param>
-    /// <param name="userId">The ID of the current user (nullable)</param>
+    /// <param name="terms"><inheritdoc cref="FilterTerms" path="/summary"/></param>
     /// <returns>Filtered queryable with all applicable conditions applied</returns>
     private static IQueryable<Problem> ApplyFilters(
         IQueryable<Problem> problems,
         ProblemFilterCriteria parameters,
-        IReadOnlyCollection<Guid> competitionIds,
-        bool favoritesOnly,
-        string? listContentId,
-        MarkStatusFilter? markStatus,
-        Guid? userId)
+        FilterTerms terms)
     {
+        // Convenient deconstruct
+        var (competitionIds, favoritesOnly, listContentId, markStatus, userId) = terms;
+
         // If favorites only is requested...
         if (favoritesOnly)
         {
@@ -265,7 +279,8 @@ public class ProblemFilterService(
                 MarkStatusFilter.Unmarked => problems.Where(problem =>
                     problem.MarkStatuses.All(mark => mark.UserId != userId.Value)),
 
-                _ => throw new InvalidOperationException("Invalid mark status filter.")
+                // The check above already narrowed to the whole enum, and only an undeclared value gets here
+                _ => throw new UnreachableException()
             };
         }
 
@@ -336,7 +351,7 @@ public class ProblemFilterService(
 
                     break;
 
-                // Sad
+                // Nothing else is a way to combine tags
                 default:
                     throw new ArgumentOutOfRangeException(nameof(parameters), parameters.TagLogic, "Invalid tag logic option");
             }
@@ -369,9 +384,9 @@ public class ProblemFilterService(
 
                     break;
 
-                // Sad
+                // Nothing else is a way to combine authors
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(parameters), parameters.TagLogic, "Invalid tag logic option");
+                    throw new ArgumentOutOfRangeException(nameof(parameters), parameters.AuthorLogic, "Invalid author logic option");
             }
         }
 
@@ -389,45 +404,32 @@ public class ProblemFilterService(
     /// </summary>
     /// <param name="baseQuery">Base queryable with all necessary includes</param>
     /// <param name="parameters">Current filter parameters used to determine facet counting behavior</param>
-    /// <param name="competitionIds"><inheritdoc cref="ApplyFilters" path="/param[@name='competitionIds']"/></param>
-    /// <param name="favoritesOnly">Whether to filter only favorited problems</param>
-    /// <param name="listContentId">Optional ContentId of a user list to filter by</param>
-    /// <param name="markStatus">Optional mark status filter</param>
-    /// <param name="userId">The ID of the current user (nullable)</param>
+    /// <param name="terms"><inheritdoc cref="FilterTerms" path="/summary"/></param>
     /// <param name="language">The language to use for facet labels and search options</param>
     /// <returns>Complete search bar options with facet counts and metadata</returns>
     private async Task<SearchBarOptions> BuildSearchOptionsAsync(
         IQueryable<Problem> baseQuery,
         ProblemFilterCriteria parameters,
-        IReadOnlyCollection<Guid> competitionIds,
-        bool favoritesOnly,
-        string? listContentId,
-        MarkStatusFilter? markStatus,
-        Guid? userId,
+        FilterTerms terms,
         Language language)
     {
         // Create facet-specific scopes by excluding each facet's own selections
         // This ensures counts reflect available options rather than current selections
-        var seasonsScope = ApplyFilters(baseQuery, parameters with { OlympiadYears = [] },
-            competitionIds, favoritesOnly, listContentId, markStatus, userId);
-        var problemNumbersScope = ApplyFilters(baseQuery, parameters with { ProblemNumbers = [] },
-            competitionIds, favoritesOnly, listContentId, markStatus, userId);
-        var competitionsScope = ApplyFilters(baseQuery, parameters with { CompetitionPaths = [] },
-            competitionIds, favoritesOnly, listContentId, markStatus, userId);
+        var seasonsScope = ApplyFilters(baseQuery, parameters with { OlympiadYears = [] }, terms);
+        var problemNumbersScope = ApplyFilters(baseQuery, parameters with { ProblemNumbers = [] }, terms);
+        var competitionsScope = ApplyFilters(baseQuery, parameters with { CompetitionPaths = [] }, terms);
 
         // For tags: use conjunctive counting when AND logic is selected with at least one tag
         // This shows "how many results if I add this tag" instead of "how many results are available"
         // Otherwise, use disjunctive counting (exclude selected tags)
         var tagsScope = parameters is { TagLogic: LogicToggle.And, TagSlugs.Count: > 0 }
-            ? ApplyFilters(baseQuery, parameters, competitionIds, favoritesOnly, listContentId, markStatus, userId)
-            : ApplyFilters(baseQuery, parameters with { TagSlugs = [] },
-                competitionIds, favoritesOnly, listContentId, markStatus, userId);
+            ? ApplyFilters(baseQuery, parameters, terms)
+            : ApplyFilters(baseQuery, parameters with { TagSlugs = [] }, terms);
 
         // For authors: Analogous logic to that of with tags
         var authorsScope = parameters is { AuthorLogic: LogicToggle.And, AuthorSlugs.Count: > 0 }
-            ? ApplyFilters(baseQuery, parameters, competitionIds, favoritesOnly, listContentId, markStatus, userId)
-            : ApplyFilters(baseQuery, parameters with { AuthorSlugs = [] },
-                competitionIds, favoritesOnly, listContentId, markStatus, userId);
+            ? ApplyFilters(baseQuery, parameters, terms)
+            : ApplyFilters(baseQuery, parameters with { AuthorSlugs = [] }, terms);
 
         // Build season facet options with problem counts
         var seasonGroups = (await seasonsScope
@@ -454,8 +456,7 @@ public class ProblemFilterService(
                 localization.GetSeasonLabel(
                     language,
                     seasonGroup.EditionNumber,
-                    seasonGroup.StartYear,
-                    seasonGroup.StartYear + 1
+                    seasonGroup.StartYear
                 ),
                 FullName: null,
                 seasonGroup.Count))
@@ -485,7 +486,12 @@ public class ProblemFilterService(
 
         // Apply localization to tag display names (in-memory)
         var localizedTagGroups = tagGroups
-            .Select(tag => new TagFacetOption(tag.Slug, localization.GetTagName(language, tag.Slug), localization.GetTagName(language, tag.Slug), tag.Count, tag.TagType))
+            .Select(tag => new TagFacetOption(
+                tag.Slug,
+                localization.GetTagName(language, tag.Slug),
+                FullName: null,
+                tag.Count,
+                tag.TagType))
             .ToList();
 
         // Build author facet options sorted by problem count then alphabetically
@@ -506,7 +512,7 @@ public class ProblemFilterService(
             // Then alphabetical
             .ThenBy(author => author.Name)
             // Project to FacetOption
-            .Select(author => new FacetOption(author.Slug, author.Name, author.Name, author.Count))
+            .Select(author => new FacetOption(author.Slug, author.Name, FullName: null, author.Count))
             // Execute the query
             .ToListAsync();
 
@@ -563,7 +569,6 @@ public class ProblemFilterService(
     /// <param name="localization">The resolver of localized display names.</param>
     /// <param name="editionNumber">The season's edition number.</param>
     /// <param name="startYear">The calendar year the season started.</param>
-    /// <param name="endYear">The calendar year the season ended.</param>
     /// <param name="competitionPath">The path of the competition the problem sits in.</param>
     /// <param name="number">The problem's number within its competition.</param>
     /// <param name="language">The language to label everything in.</param>
@@ -572,7 +577,6 @@ public class ProblemFilterService(
         IMetadataLocalizationService localization,
         int editionNumber,
         int startYear,
-        int endYear,
         string competitionPath,
         int number,
         Language language)
@@ -580,7 +584,7 @@ public class ProblemFilterService(
         // The season, labelled from its own template.
         var season = new LabeledSlug(
             editionNumber.ToString(),
-            localization.GetSeasonLabel(language, editionNumber, startYear, endYear));
+            localization.GetSeasonLabel(language, editionNumber, startYear));
 
         // The competition spelled out as every competition down to it, each addressed by its own path, which is what
         // its localized names are keyed by.
@@ -758,8 +762,8 @@ public class ProblemFilterService(
             );
         }
 
-        // Return distinct problem IDs to avoid duplicates
-        return await textSearchQuery.Select(text => text.ProblemId).ToListAsync();
+        // Return one id per problem, since a problem matching in several of its texts is one row per text here
+        return await textSearchQuery.Select(text => text.ProblemId).Distinct().ToListAsync();
     }
 
     /// <inheritdoc/>
@@ -815,8 +819,7 @@ public class ProblemFilterService(
                     localization.GetSeasonLabel(
                         language,
                         seasonGroup.Key.EditionNumber,
-                        seasonGroup.Key.StartYear,
-                        seasonGroup.Key.StartYear + 1
+                        seasonGroup.Key.StartYear
                     ),
                     [.. competitions]
                 );
