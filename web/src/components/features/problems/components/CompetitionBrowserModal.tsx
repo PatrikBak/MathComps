@@ -8,24 +8,29 @@ import { GroupedVirtuoso } from 'react-virtuoso'
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
 
-import { useContestBrowser } from '../hooks/use-contest-browser'
-import type { ContestWithCount, SeasonContestsGroup } from '../types/contest-browser-types'
+import { useCompetitionBrowser } from '../hooks/use-competition-browser'
+import type {
+  CompetitionWithCount,
+  SeasonCompetitionsGroup,
+} from '../types/competition-browser-types'
 
 /** Golden angle in degrees — guarantees maximum hue separation between consecutive indices. */
 const GOLDEN_ANGLE = 137.508
 
 /**
  * Builds a color map for a list of seasons, assigning a distinct HSL color
- * to each group of sibling contests using golden angle distribution.
+ * to each group of sibling competitions using golden angle distribution.
  *
  * @param seasons The seasons to build the color map for.
  *
  * @returns A map from color key to HSL color string.
  */
-function buildHueMap(seasons: SeasonContestsGroup[]): Map<string, number> {
+function buildHueMap(seasons: SeasonCompetitionsGroup[]): Map<string, number> {
   // Collect unique keys in order of first appearance
   const uniqueKeys = [
-    ...new Set(seasons.flatMap((seasonGroup) => seasonGroup.contests.map(getContestColorKey))),
+    ...new Set(
+      seasons.flatMap((seasonGroup) => seasonGroup.competitions.map(getCompetitionColorKey))
+    ),
   ]
 
   // Assign golden-angle-spaced hues
@@ -33,22 +38,22 @@ function buildHueMap(seasons: SeasonContestsGroup[]): Map<string, number> {
 }
 
 /**
- * Returns the color key for a contest, which is the contest one level above it. Siblings therefore
- * share a color, and a competition whose contests hang straight off it keeps them all under one.
+ * Returns the color key for a competition, which is the one a level above it. Siblings therefore
+ * share a color, and a competition with others hanging straight off it keeps them all under one.
  *
  * The key is taken off the path rather than the labels because labels are localized, and two
  * competitions reading alike in one language would silently share a hue.
  *
- * @param contest The contest to get the color key for.
+ * @param competition The competition to get the color key for.
  *
  * @returns The color key string.
  */
-function getContestColorKey(contest: ContestWithCount): string {
-  // What the contest hangs from, which is nothing at all for a whole competition
-  const parentPath = contest.path.split('-').slice(0, -1).join('-')
+function getCompetitionColorKey(competition: CompetitionWithCount): string {
+  // What the competition hangs from, which is nothing at all for one sitting at the root
+  const parentPath = competition.path.split('-').slice(0, -1).join('-')
 
-  // A competition stands under its own name, since there is nothing above it to group it with
-  return parentPath || contest.path
+  // A root competition stands under its own name, since there is nothing above it to group it with
+  return parentPath || competition.path
 }
 
 /**
@@ -58,12 +63,12 @@ function getContestColorKey(contest: ContestWithCount): string {
  *
  * @returns The problem count for the season.
  */
-function getSeasonProblemCount(season: SeasonContestsGroup) {
-  return season.contests.reduce((sum, contest) => sum + contest.problemCount, 0)
+function getSeasonProblemCount(season: SeasonCompetitionsGroup) {
+  return season.competitions.reduce((sum, competition) => sum + competition.problemCount, 0)
 }
 
 /**
- * Small decorative label chip used in the contest browser rows.
+ * Small decorative label chip used in the competition browser rows.
  * Not interactive — the entire row is the click target.
  */
 function Chip({ children, truncate }: { children: React.ReactNode; truncate?: boolean }) {
@@ -80,54 +85,54 @@ function Chip({ children, truncate }: { children: React.ReactNode; truncate?: bo
 }
 
 /**
- * The data passed when a contest is selected from the browser.
+ * The data passed when a competition is selected from the browser.
  * Names what was picked and nothing more - the parent is responsible for building the filter state.
  */
-export type ContestBrowserSelection = {
+export type CompetitionBrowserSelection = {
   /** Season slug (the edition number as string) */
   seasonSlug: string
-  /** The contest, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
+  /** The competition, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
   path: string
 }
 
 /**
- * Props for the {@link ContestBrowserModal} component.
+ * Props for the {@link CompetitionBrowserModal} component.
  */
-type ContestBrowserModalProps = {
+type CompetitionBrowserModalProps = {
   /** Whether the modal is open. */
   isOpen: boolean
   /** Callback to close the modal. */
   onClose: () => void
-  /** Callback to set the search filters when a contest is selected. */
-  onSelectContest: (filters: ContestBrowserSelection) => void
+  /** Callback to set the search filters when a competition is selected. */
+  onSelectCompetition: (filters: CompetitionBrowserSelection) => void
 }
 
 /**
- * Flattened contest item with its parent season and visual metadata.
+ * Flattened competition item with its parent season and visual metadata.
  */
-type FlattenedContest = {
-  /** The season of the contest */
-  season: SeasonContestsGroup
-  /** The contest */
-  contest: ContestWithCount
-  /** The hue (0-360) the contest shares with its siblings */
+type FlattenedCompetition = {
+  /** The season of the competition */
+  season: SeasonCompetitionsGroup
+  /** The competition */
+  competition: CompetitionWithCount
+  /** The hue (0-360) the competition shares with its siblings */
   hue: number
 }
 
 /**
  * Modal for browsing competitions organized by year. Features:
  * 1. Search box at the top
- * 2. Virtualized list of seasons with contests
- * 3. Color-coded dots for visual grouping of sibling contests
- * 4. Clicking on a contest sets the filters and closes the modal
+ * 2. Virtualized list of seasons with competitions
+ * 3. Color-coded dots for visual grouping of sibling competitions
+ * 4. Clicking on a competition sets the filters and closes the modal
  */
-export function ContestBrowserModal({
+export function CompetitionBrowserModal({
   isOpen,
   onClose,
-  onSelectContest,
-}: ContestBrowserModalProps) {
+  onSelectCompetition,
+}: CompetitionBrowserModalProps) {
   // Get the data loader
-  const { data, isLoading, error } = useContestBrowser(isOpen)
+  const { data, isLoading, error } = useCompetitionBrowser(isOpen)
 
   // The state for the current search query
   const [searchQuery, setSearchQuery] = useState('')
@@ -154,48 +159,52 @@ export function ContestBrowserModal({
     // Handle empty search query
     if (!normalizedSearchQuery) return data.seasons
 
-    // Filter contests based on search query
+    // Filter competitions based on search query
     return data.seasons
       .map((season) => ({
         ...season,
-        contests: season.contests.filter(
-          (contest) =>
-            contest.labels.some((label) => label.toLowerCase().includes(normalizedSearchQuery)) ||
-            season.editionLabel.toLowerCase().includes(normalizedSearchQuery)
+        competitions: season.competitions.filter(
+          (competition) =>
+            competition.labels.some((label) =>
+              label.toLowerCase().includes(normalizedSearchQuery)
+            ) || season.editionLabel.toLowerCase().includes(normalizedSearchQuery)
         ),
       }))
-      .filter((season) => season.contests.length > 0)
+      .filter((season) => season.competitions.length > 0)
   }, [data?.seasons, searchQuery])
 
   // Flatten data for GroupedVirtuoso with precomputed hues
-  const { groupCounts, flatContests } = useMemo(() => {
+  const { groupCounts, flatCompetitions } = useMemo(() => {
     // Get the counts for each season
-    const counts = filteredSeasons.map((season) => season.contests.length)
+    const counts = filteredSeasons.map((season) => season.competitions.length)
 
-    // Get the contests for each season with their assigned hue
-    const contests: FlattenedContest[] = filteredSeasons.flatMap((season) =>
-      season.contests.map((contest) => ({
+    // Get the competitions for each season with their assigned hue
+    const competitions: FlattenedCompetition[] = filteredSeasons.flatMap((season) =>
+      season.competitions.map((competition) => ({
         season,
-        contest,
-        hue: hueMap.get(getContestColorKey(contest)) ?? 0,
+        competition,
+        hue: hueMap.get(getCompetitionColorKey(competition)) ?? 0,
       }))
     )
 
-    // Return the flattened contests and group counts
-    return { groupCounts: counts, flatContests: contests }
+    // Return the flattened competitions and group counts
+    return { groupCounts: counts, flatCompetitions: competitions }
   }, [filteredSeasons, hueMap])
 
   /**
-   * Handles a contest click, setting the filters.
+   * Handles a competition click, setting the filters.
    *
-   * @param season The season of the contest.
-   * @param contest The contest to select.
+   * @param season The season of the competition.
+   * @param competition The competition to select.
    */
-  const handleContestClick = (season: SeasonContestsGroup, contest: ContestWithCount) => {
-    // Set filters for this contest + season
-    onSelectContest({
+  const handleCompetitionClick = (
+    season: SeasonCompetitionsGroup,
+    competition: CompetitionWithCount
+  ) => {
+    // Set filters for this competition + season
+    onSelectCompetition({
       seasonSlug: String(season.editionNumber),
-      path: contest.path,
+      path: competition.path,
     })
   }
 
@@ -203,7 +212,7 @@ export function ContestBrowserModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={tProblems('contestsOverview')}
+      title={tProblems('competitionsOverview')}
       showCloseButton
       className="max-w-xl max-h-[90vh] flex flex-col"
     >
@@ -214,7 +223,7 @@ export function ContestBrowserModal({
           type="text"
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder={tProblems('searchContests')}
+          placeholder={tProblems('searchCompetitions')}
           className="form-input pl-9 w-full text-sm"
           autoFocus
         />
@@ -228,11 +237,11 @@ export function ContestBrowserModal({
           </div>
         ) : error ? (
           <div className="text-center py-12 text-error">
-            <p>{tProblems('loadContestsFailed')}</p>
+            <p>{tProblems('loadCompetitionsFailed')}</p>
           </div>
         ) : filteredSeasons.length === 0 ? (
           <div className="text-center py-12 text-muted">
-            <p>{tProblems('noContests')}</p>
+            <p>{tProblems('noCompetitions')}</p>
           </div>
         ) : (
           <GroupedVirtuoso
@@ -256,11 +265,11 @@ export function ContestBrowserModal({
             }}
             itemContent={(index) => {
               // Get the data for the current row
-              const { season, contest, hue } = flatContests[index]
+              const { season, competition, hue } = flatCompetitions[index]
 
               return (
                 <button
-                  onClick={() => handleContestClick(season, contest)}
+                  onClick={() => handleCompetitionClick(season, competition)}
                   className={cn(
                     'w-full text-left px-3 py-1.5 rounded-md text-sm',
                     'flex items-center justify-between gap-3',
@@ -275,15 +284,18 @@ export function ContestBrowserModal({
                       style={{ backgroundColor: `hsl(${hue}, 55%, 62%)` }}
                     />
 
-                    {/* Contest chips, one per level down to the contest */}
-                    {contest.labels.map((label, labelIndex) => (
-                      <Chip key={labelIndex} truncate={labelIndex === contest.labels.length - 1}>
+                    {/* Competition chips, one per level down to the competition */}
+                    {competition.labels.map((label, labelIndex) => (
+                      <Chip
+                        key={labelIndex}
+                        truncate={labelIndex === competition.labels.length - 1}
+                      >
                         {label}
                       </Chip>
                     ))}
                   </span>
                   <span className="text-xs text-muted tabular-nums flex-shrink-0">
-                    {contest.problemCount}
+                    {competition.problemCount}
                   </span>
                 </button>
               )

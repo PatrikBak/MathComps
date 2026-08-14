@@ -5,7 +5,7 @@ using MathComps.Infrastructure.Persistence;
 namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
 /// <summary>
-/// Seeds competitions with the tree fields filled in, keyed the way a contest is addressed everywhere else: by
+/// Seeds competitions with the tree fields filled in, keyed the way a competition is addressed everywhere else: by
 /// its path, whose segments are the chain of competitions down to it.
 /// </summary>
 public static class CompetitionTreeSeed
@@ -33,15 +33,15 @@ public static class CompetitionTreeSeed
     /// competition a seeded round hangs under.
     /// </summary>
     /// <param name="context">The seeding context.</param>
-    /// <param name="contestPath">The contest's path (e.g. <c>csmo-a-i</c>, <c>imo</c>).</param>
+    /// <param name="competitionPath">The competition's path (e.g. <c>csmo-a-i</c>, <c>imo</c>).</param>
     /// <returns>The deepest competition on the chain.</returns>
-    public static Competition Chain(MathCompsDbContext context, string contestPath)
+    public static Competition Chain(MathCompsDbContext context, string competitionPath)
     {
         // The competition the walk has reached, still null before the root is placed.
         Competition? competition = null;
 
         // Each segment hangs off the one before it, the first being a root.
-        foreach (var (_, slug, path) in CompetitionTree.Descend(contestPath))
+        foreach (var (_, slug, path) in CompetitionTree.Descend(competitionPath))
         {
             // The parent this segment hangs off, captured before the local is reassigned.
             var parent = competition;

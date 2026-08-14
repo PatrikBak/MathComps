@@ -56,7 +56,7 @@ function isWorthWakingUp(query: Query): boolean {
  * doc is the canonical home for why its timings are what they are.
  */
 export const cachePolicy = {
-  /** Near-static content (problems, contests, filter options); admin edits only. Also the global baseline. */
+  /** Near-static content (problems, competitions, filter options); admin edits only. Also the global baseline. */
   content: { staleTime: 10 * MINUTE, gcTime: 30 * MINUTE },
   /** User- or peer-driven data that should reflect recent activity quickly (comment threads, the user's own lists). */
   userData: { staleTime: 30 * SECOND, gcTime: 10 * MINUTE },

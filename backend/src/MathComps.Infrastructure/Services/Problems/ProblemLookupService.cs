@@ -37,7 +37,7 @@ public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContex
         // Create isolated database context for this lookup operation
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Query for the season, the contest the problem sits in, and its number
+        // Query for the season, the competition the problem sits in, and its number
         var problem = await dbContext.Problems
             .Where(candidate => candidate.Slug == problemSlug)
             .Select(candidate => new
@@ -52,7 +52,7 @@ public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContex
         if (problem is null)
             return null;
 
-        // The season, the contest as the path naming it whole, and the number
+        // The season, the competition as the path naming it whole, and the number
         return new ProblemLookupResult(problem.EditionNumber, problem.Path, problem.Number);
     }
 }

@@ -14,20 +14,23 @@ import {
 import { cn } from '../../../shared/utils/css-utils'
 import { isExclusiveSelection } from '../../../shared/utils/event-utils'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
-import { usePrefetchContestBrowser } from '../hooks/use-contest-browser'
-import { useContestBrowserModal } from '../hooks/use-contest-browser-modal'
+import { usePrefetchCompetitionBrowser } from '../hooks/use-competition-browser'
+import { useCompetitionBrowserModal } from '../hooks/use-competition-browser-modal'
 import type {
   FilterOptionsWithCounts,
   MarkStatusFilter,
   SearchFiltersState,
 } from '../types/problem-library-types'
 import { generateCompetitionChips } from '../utils/competition-chips'
-import { buildContestTree, resolveContestPaths } from '../utils/contest-tree'
+import { buildCompetitionTree, resolveCompetitionPaths } from '../utils/competition-tree'
 import { createDefaultFilters } from '../utils/url-initialization'
 import { ActionsMenu } from './ActionsMenu'
 import type { ChipData } from './CollapsibleChipGroup'
 import { CollapsibleChipGroup } from './CollapsibleChipGroup'
-import { ContestBrowserModal, type ContestBrowserSelection } from './ContestBrowserModal'
+import {
+  CompetitionBrowserModal,
+  type CompetitionBrowserSelection,
+} from './CompetitionBrowserModal'
 import { MobileFilterButton } from './MobileFilterDrawer'
 import { ShareButton } from './ShareButton'
 
@@ -104,40 +107,40 @@ export default function ActiveFiltersBar({
   // Whether the viewport is wide enough for the sidebar
   const isSidebarVisible = useMinWidth('lg')
 
-  // The contest browser's open state and the controls that change it
-  const contestBrowser = useContestBrowserModal()
+  // The competition browser's open state and the controls that change it
+  const competitionBrowser = useCompetitionBrowserModal()
 
-  // A function which warms the contest browser
-  const prefetchContestBrowser = usePrefetchContestBrowser()
+  // A function which warms the competition browser
+  const prefetchCompetitionBrowser = usePrefetchCompetitionBrowser()
 
   // What the user said about the chips being expanded, or null while they have said nothing
   const [manualExpansionOverride, setManualExpansionOverride] = useState<boolean | null>(null)
 
-  // The contest taxonomy
-  const contestTree = useMemo(
-    () => buildContestTree(baseOptions.contests, baseOptions.contests),
-    [baseOptions.contests]
+  // The competition taxonomy
+  const competitionTree = useMemo(
+    () => buildCompetitionTree(baseOptions.competitions, baseOptions.competitions),
+    [baseOptions.competitions]
   )
 
-  // A function which applies a competition the user picked in the contest browser
-  const handleContestSelect = (selection: ContestBrowserSelection) => {
+  // A function which applies a competition the user picked in the competition browser
+  const handleCompetitionSelect = (selection: CompetitionBrowserSelection) => {
     // The season reads under its own name, falling back to the slug if the options are stale
     const seasonDisplayName =
       baseOptions.seasons.find((season) => season.slug === selection.seasonSlug)?.displayName ??
       selection.seasonSlug
 
     // What was picked, resolved against the taxonomy the chips are drawn from
-    const contestSelections = resolveContestPaths([selection.path], contestTree)
+    const competitionSelections = resolveCompetitionPaths([selection.path], competitionTree)
 
-    // The browser picks one contest outright, so everything else is cleared rather than kept
+    // The browser picks one competition outright, so everything else is cleared rather than kept
     onFiltersChange({
       ...defaultFilters,
       seasons: [{ slug: selection.seasonSlug, displayName: seasonDisplayName }],
-      contestSelection: contestSelections ?? [],
+      competitionSelection: competitionSelections ?? [],
     })
 
     // The filters already wrote the URL, so closing must not write it a second time
-    contestBrowser.closeWithoutUrlUpdate()
+    competitionBrowser.closeWithoutUrlUpdate()
   }
 
   // How many filters are set
@@ -146,7 +149,7 @@ export default function ActiveFiltersBar({
     filters.problemNumbers.length +
     filters.tags.length +
     filters.authors.length +
-    filters.contestSelection.length +
+    filters.competitionSelection.length +
     (filters.searchText ? 1 : 0)
 
   // The user's say overrides the automatic decision, which otherwise goes on how many chips there are
@@ -355,8 +358,8 @@ export default function ActiveFiltersBar({
 
   // The competition chips, folded up to the shallowest level that covers each selection
   const competitionChips = useMemo(() => {
-    return generateCompetitionChips(filters, contestTree, onFiltersChange)
-  }, [filters, contestTree, onFiltersChange])
+    return generateCompetitionChips(filters, competitionTree, onFiltersChange)
+  }, [filters, competitionTree, onFiltersChange])
 
   // The search chip, which reads the term back with its scope, or nothing when there is no term
   const searchTextChip =
@@ -576,15 +579,15 @@ export default function ActiveFiltersBar({
 
         {/* Actions */}
         <div className="flex flex-nowrap items-center justify-end gap-x-0 min-[400px]:gap-x-1 sm:gap-x-2 flex-shrink-0">
-          {/* Contest browser button */}
+          {/* Competition browser button */}
           <button
-            onClick={contestBrowser.open}
-            onMouseEnter={prefetchContestBrowser}
+            onClick={competitionBrowser.open}
+            onMouseEnter={prefetchCompetitionBrowser}
             className="inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs text-muted
               hover:bg-foreground/5 hover:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
               whitespace-nowrap"
-            aria-label={tFilters('contestsOverview')}
-            title={tFilters('contestsOverview')}
+            aria-label={tFilters('competitionsOverview')}
+            title={tFilters('competitionsOverview')}
           >
             <Grid3X3 className="h-3.5 w-3.5 flex-shrink-0" />
             <span className="hidden label-custom-show">{tFilters('competitions')}</span>
@@ -719,11 +722,11 @@ export default function ActiveFiltersBar({
         </div>
       )}
 
-      {/* Contest browser */}
-      <ContestBrowserModal
-        isOpen={contestBrowser.isOpen}
-        onClose={contestBrowser.closeWithUrlUpdate}
-        onSelectContest={handleContestSelect}
+      {/* Competition browser */}
+      <CompetitionBrowserModal
+        isOpen={competitionBrowser.isOpen}
+        onClose={competitionBrowser.closeWithUrlUpdate}
+        onSelectCompetition={handleCompetitionSelect}
       />
     </div>
   )

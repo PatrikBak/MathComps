@@ -16,18 +16,18 @@ public interface IMetadataLocalizationService
     SharedMetadata Shared { get; }
 
     /// <summary>
-    /// Checks that a draft's contest is somewhere problems can land: every competition its path runs through
-    /// must carry a structural entry in the shared taxonomy and a localized name in every locale, and the
-    /// contest itself must run as a sitting rather than carry a generation below it. Returns one
+    /// Checks that a draft's competition is somewhere problems can land: every competition its path runs through
+    /// must carry a structural entry in the shared taxonomy and a localized name in every locale, and the one the
+    /// path ends at must run as a sitting rather than carry a generation below it. Returns one
     /// <see cref="TaxonomyRegistryIssue"/> per competition with a gap, so a typo'd or unregistered path is
     /// caught up front rather than slipping through as a missing name; an empty list means it all resolves.
     /// </summary>
-    /// <param name="contestPath"><inheritdoc cref="Competition.Path" path="/summary"/></param>
+    /// <param name="competitionPath"><inheritdoc cref="Competition.Path" path="/summary"/></param>
     /// <returns>The registry-link issues found, or an empty list when everything resolves.</returns>
-    IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(string contestPath);
+    IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(string competitionPath);
 
     /// <summary>
-    /// Gets the localized short name of the contest node a path addresses, at whatever depth it sits — a whole
+    /// Gets the localized short name of the competition node a path addresses, at whatever depth it sits — a whole
     /// competition, a category within one, or a round.
     /// </summary>
     /// <param name="lang">The language to get the name for.</param>
@@ -37,7 +37,7 @@ public interface IMetadataLocalizationService
     string GetNodeShortName(Language lang, string path);
 
     /// <summary>
-    /// Gets the localized full name of the contest node a path addresses.
+    /// Gets the localized full name of the competition node a path addresses.
     /// </summary>
     /// <param name="lang">The language to get the name for.</param>
     /// <param name="path">The node's path (e.g., "imo", "csmo-a", "csmo-a-iii").</param>

@@ -3,7 +3,7 @@ import type { ApiResult } from '@/types/api'
 
 import type { FilterParameters } from '../types/problem-api-types'
 import type {
-  ContestSelection,
+  CompetitionSelection,
   FilterResponse,
   RawProblemFilterResponse,
   SearchFiltersState,
@@ -52,31 +52,31 @@ export async function getProblemBySlug(
     }
   }
 
-  // The contest the problem was set in, which is the deepest one on the chain down to it
-  const contest = problem.source.contest.at(-1)
+  // The competition the problem was set in, which is the deepest one on the chain down to it
+  const competition = problem.source.competition.at(-1)
 
-  // A problem hanging off no contest at all cannot be placed in the library
-  if (!contest) {
+  // A problem hanging off no competition at all cannot be placed in the library
+  if (!competition) {
     // Fail as a problem that cannot be shown
     return {
       success: false,
       error: {
-        message: 'Problem source named no contest',
+        message: 'Problem source named no competition',
         statusCode: 404,
         errorCode: 'ProblemNotFound',
       },
     }
   }
 
-  // The filter stands at that contest, whose slug is the whole path down to it
-  const selection: ContestSelection = { path: contest.slug }
+  // The filter stands at that competition, whose slug is the whole path down to it
+  const selection: CompetitionSelection = { path: competition.slug }
 
-  // Season, contest and position together pin down this one problem, so the rest stay empty
+  // Season, competition and position together pin down this one problem, so the rest stay empty
   const filters: SearchFiltersState = {
     searchText: '',
     searchInSolution: false,
     seasons: [problem.source.season],
-    contestSelection: [selection],
+    competitionSelection: [selection],
     problemNumbers: [problem.source.number],
     tags: [],
     tagLogic: 'or',
@@ -94,7 +94,7 @@ export async function getProblemBySlug(
       problem,
       filters,
       options: result.data.updatedOptions || {
-        contests: [],
+        competitions: [],
         seasons: [],
         problemNumbers: [],
         tags: [],
@@ -120,7 +120,7 @@ export async function getInitialFilterData(apiCall: ApiCaller): Promise<ApiResul
         searchText: '',
         searchInSolution: false,
         olympiadYears: [],
-        contestPaths: [],
+        competitionPaths: [],
         problemNumbers: [],
         tagSlugs: [],
         tagLogic: 'or',
@@ -258,15 +258,15 @@ function searchFiltersStateToFilterParameters(state: SearchFiltersState): Filter
   // The authors filtered on
   const authorSlugs = state.authors.map((author) => author.slug)
 
-  // The contests filtered on, each named by the path standing for it and everything under it
-  const contestPaths = state.contestSelection.map((selection) => selection.path)
+  // The competitions filtered on, each named by the path standing for it and everything under it
+  const competitionPaths = state.competitionSelection.map((selection) => selection.path)
 
   // The reduced lists alongside the fields that pass through untouched
   return {
     searchText: state.searchText,
     searchInSolution: state.searchInSolution,
     olympiadYears,
-    contestPaths,
+    competitionPaths,
     problemNumbers: state.problemNumbers,
     tagSlugs,
     tagLogic: state.tagLogic,

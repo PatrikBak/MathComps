@@ -19,23 +19,23 @@ public record DraftManifest(
     Verdict Verdict)
 {
     /// <summary>
-    /// Whether the taxonomy can be resolved from this manifest — true once the metadata carries a contest path.
+    /// Whether the taxonomy can be resolved from this manifest — true once the metadata carries a competition path.
     /// A blank path is the fallback the preflight emits when it can't read a well-formed one (and it has already
     /// reported that), so the registry and DB-preview checks would have nothing to resolve against.
     /// </summary>
-    public bool IsMetadataUsable => !string.IsNullOrWhiteSpace(Meta.ContestPath);
+    public bool IsMetadataUsable => !string.IsNullOrWhiteSpace(Meta.CompetitionPath);
 }
 
 /// <summary>
-/// Folder-level taxonomy from <c>_meta.yaml</c>. References the contest by path only — display names live in
+/// Folder-level taxonomy from <c>_meta.yaml</c>. References the competition by path only — display names live in
 /// the registry.
 /// </summary>
-/// <param name="ContestPath"><inheritdoc cref="Competition.Path" path="/summary"/></param>
+/// <param name="CompetitionPath"><inheritdoc cref="Competition.Path" path="/summary"/></param>
 /// <param name="Season">The season the draft belongs to.</param>
 /// <param name="Date">Round date as <c>YYYY-MM-DD</c>; approximate is fine since it's a sort key.</param>
 /// <param name="Language">The original language of the draft — the text variant in it is the original.</param>
 public record ManifestMeta(
-    string ContestPath,
+    string CompetitionPath,
     ManifestSeason Season,
     string Date,
     Language Language)

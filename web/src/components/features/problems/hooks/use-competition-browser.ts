@@ -4,16 +4,16 @@ import { useCallback } from 'react'
 import { type ApiState, readyApiCall, useApi } from '@/hooks/use-api'
 import { unwrap } from '@/lib/api/api-error'
 
-import { getContestsBySeasonApiUrl } from '../services/problem-api-urls'
-import type { SeasonContestBrowserResult } from '../types/contest-browser-types'
+import { getCompetitionsBySeasonApiUrl } from '../services/problem-api-urls'
+import type { SeasonCompetitionBrowserResult } from '../types/competition-browser-types'
 
 /**
- * Query key for the contest browser data.
+ * Query key for the competition browser data.
  */
-const contestBrowserQueryKey = ['problems', 'contests-by-season'] as const
+const competitionBrowserQueryKey = ['problems', 'competitions-by-season'] as const
 
 /**
- * Returns the shared query options for fetching contest browser data.
+ * Returns the shared query options for fetching competition browser data.
  *
  * @param api - The API client to use.
  *
@@ -21,14 +21,14 @@ const contestBrowserQueryKey = ['problems', 'contests-by-season'] as const
  */
 function getQueryOptions(api: ApiState) {
   return {
-    queryKey: contestBrowserQueryKey,
+    queryKey: competitionBrowserQueryKey,
     queryFn: async () => {
       // Narrow to the ready caller
       const apiCall = readyApiCall(api)
 
-      // The contest browser data, or throwing the backend failure
+      // The competition browser data, or throwing the backend failure
       return unwrap(
-        await apiCall<SeasonContestBrowserResult>(() => getContestsBySeasonApiUrl(), {
+        await apiCall<SeasonCompetitionBrowserResult>(() => getCompetitionsBySeasonApiUrl(), {
           method: 'GET',
         })
       )
@@ -39,13 +39,13 @@ function getQueryOptions(api: ApiState) {
 }
 
 /**
- * Hook to fetch and cache contest browser data (competitions grouped by season).
+ * Hook to fetch and cache competition browser data (competitions grouped by season).
  *
  * @param enabled - Whether to enable the query.
  *
  * @returns The React Query result object.
  */
-export function useContestBrowser(enabled: boolean) {
+export function useCompetitionBrowser(enabled: boolean) {
   // We need an API client to talk to the backend
   const api = useApi({ requireAuth: false })
 
@@ -57,10 +57,10 @@ export function useContestBrowser(enabled: boolean) {
 }
 
 /**
- * Hook to prefetch contest browser data.
+ * Hook to prefetch competition browser data.
  * Call on hover to load data before the modal opens.
  */
-export function usePrefetchContestBrowser() {
+export function usePrefetchCompetitionBrowser() {
   // We need an API client to talk to the backend
   const api = useApi({ requireAuth: false })
 

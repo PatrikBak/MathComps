@@ -57,22 +57,22 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Verifies that the lookup names the contest by its whole path, at whatever depth it sits.
+    /// Verifies that the lookup names the competition by its whole path, at whatever depth it sits.
     /// </summary>
     [Fact]
-    public Task GetProblemLookupDataNamesTheContestByItsWholePath() => RunTestAsync(async service =>
+    public Task GetProblemLookupDataNamesTheCompetitionByItsWholePath() => RunTestAsync(async service =>
     {
-        // A contest two levels down
+        // A competition two levels down
         var shallow = await service.GetProblemLookupDataAsync(ProblemSlug);
 
         // The path names it whole
-        Assert.Equal("testcomp-testround", shallow?.ContestPath);
+        Assert.Equal("testcomp-testround", shallow?.CompetitionPath);
 
         // One sitting four levels down
         var deep = await service.GetProblemLookupDataAsync(DeepProblemSlug);
 
-        // The path keeps every level of it, at whatever depth the contest sits
-        Assert.Equal("deep-mid-low-round", deep?.ContestPath);
+        // The path keeps every level of it, at whatever depth the competition sits
+        Assert.Equal("deep-mid-low-round", deep?.CompetitionPath);
     });
 
     /// <inheritdoc />

@@ -19,11 +19,11 @@ public interface IProblemFilterService
     Task<FilterResult> FilterAsync(ProblemFilterOptions options);
 
     /// <summary>
-    /// Gets all contests grouped by season with problem counts for the contest browser.
+    /// Gets all competitions grouped by season with problem counts for the competition browser.
     /// </summary>
     /// <param name="language">The language for localized display names.</param>
-    /// <returns>Seasons with their available contests and problem counts.</returns>
-    Task<SeasonContestBrowserResult> GetContestsBySeasonAsync(Language language);
+    /// <returns>Seasons with their available competitions and problem counts.</returns>
+    Task<SeasonCompetitionBrowserResult> GetCompetitionsBySeasonAsync(Language language);
 }
 
 /// <summary>

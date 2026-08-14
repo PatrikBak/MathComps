@@ -1,4 +1,4 @@
-// Pins the depth-agnostic contest code against a golden capture of the three-level behaviour, taken
+// Pins the depth-agnostic competition code against a golden capture of the three-level behaviour, taken
 // over a corpus from the live taxonomy. The capture addresses a node by the
 // `competition/<c>/category/<cat>` grammar, so its ids are read as paths before anything is compared.
 //
@@ -7,26 +7,26 @@
 
 import { describe, expect, it } from 'vitest'
 
-import type { ContestNodeOption } from '../types/problem-api-types'
-import { foldPickedPaths } from '../utils/contest-selection-fold'
-import { buildContestTree, expandedByDefault, toFacetNodes } from '../utils/contest-tree'
+import type { CompetitionNodeOption } from '../types/problem-api-types'
+import { foldPickedPaths } from '../utils/competition-selection-fold'
+import { buildCompetitionTree, expandedByDefault, toFacetNodes } from '../utils/competition-tree'
 import { serializeFilters } from '../utils/search-url-serialization'
 import {
   createDefaultFilters,
   initializeFiltersFromUrlOrDefaults,
 } from '../utils/url-initialization'
-import goldenFixture from './fixtures/contest-golden.json'
-import taxonomyFixture from './fixtures/contest-taxonomy.json'
-import filteredTaxonomyFixture from './fixtures/contest-taxonomy-filtered.json'
+import goldenFixture from './fixtures/competition-golden.json'
+import taxonomyFixture from './fixtures/competition-taxonomy.json'
+import filteredTaxonomyFixture from './fixtures/competition-taxonomy-filtered.json'
 
 /** The whole live taxonomy, which decides which nodes exist and how they are ordered. */
-const competitions = taxonomyFixture as unknown as ContestNodeOption[]
+const competitions = taxonomyFixture as unknown as CompetitionNodeOption[]
 
 /**
  * The same taxonomy narrowed to one edition, which drops some competitions outright and empties
  * others.
  */
-const filteredCompetitions = filteredTaxonomyFixture as unknown as ContestNodeOption[]
+const filteredCompetitions = filteredTaxonomyFixture as unknown as CompetitionNodeOption[]
 
 /** One node as the golden capture holds it. */
 type GoldenNode = {
@@ -44,7 +44,7 @@ type GoldenNode = {
 
 /**
  * The part of a captured selection the comparison reads, which is the three levels the backend names a
- * contest by.
+ * competition by.
  */
 type GoldenSelection = {
   /** The competition the selection sits under. */
@@ -81,8 +81,8 @@ type GoldenUrlCase = {
   value: string
   /** Whether the URL was rejected outright. */
   hasInvalidParams: boolean
-  /** The contests the URL filtered on. */
-  contestSelection: GoldenSelection[]
+  /** The competitions the URL filtered on. */
+  competitionSelection: GoldenSelection[]
   /** The query string the resulting filters serialise back to. */
   reserialized: string
 }
@@ -148,7 +148,7 @@ function normaliseNodes(nodes: GoldenNode[]): GoldenNode[] {
 describe('the taxonomy tree', () => {
   it('is built exactly as the three-level builder built it', () => {
     // The tree over the whole hierarchy, where every node counts everything under it
-    const tree = buildContestTree(competitions, competitions)
+    const tree = buildCompetitionTree(competitions, competitions)
 
     // The facet-facing shape, which is what the capture holds
     const facetNodes = toFacetNodes(tree.roots)
@@ -159,7 +159,7 @@ describe('the taxonomy tree', () => {
 
   it('takes counts from the filtered hierarchy and everything else from the whole one', () => {
     // The tree built with its counts taken from the narrowed payload
-    const tree = buildContestTree(competitions, filteredCompetitions)
+    const tree = buildCompetitionTree(competitions, filteredCompetitions)
 
     // The nodes that dropped out still stand, reading zero
     expect(toFacetNodes(tree.roots)).toEqual(normaliseNodes(golden.tree.yearFiltered))
@@ -167,7 +167,7 @@ describe('the taxonomy tree', () => {
 
   it('opens the same branches by default', () => {
     // The tree the expansion is taken from
-    const tree = buildContestTree(competitions, competitions)
+    const tree = buildCompetitionTree(competitions, competitions)
 
     // Every competition and every category, and no round, exactly as the capture holds
     expect(expandedByDefault(tree)).toEqual(golden.tree.defaultExpandedIds.map(idToPath))
@@ -189,7 +189,7 @@ describe('folding picked nodes', () => {
   for (const goldenCase of golden.fold) {
     it(`folds ${goldenCase.label} as before`, () => {
       // The tree the fold measures completeness against
-      const tree = buildContestTree(competitions, competitions)
+      const tree = buildCompetitionTree(competitions, competitions)
 
       // The same picked nodes, addressed by path
       const folded = foldPickedPaths(goldenCase.ids.map(idToPath), tree)
@@ -206,7 +206,7 @@ describe('folding picked nodes', () => {
 
   it('covers the same nodes as before in the cases whose order changed', () => {
     // The tree the fold measures completeness against
-    const tree = buildContestTree(competitions, competitions)
+    const tree = buildCompetitionTree(competitions, competitions)
 
     // The cases the loop above compares against a hand-written expectation rather than the capture
     const deviatingCases = golden.fold.filter(
@@ -239,7 +239,7 @@ describe('reading filters back out of a URL', () => {
   for (const goldenCase of golden.url) {
     it(`reads competitions=${goldenCase.value || '(empty)'} as before`, () => {
       // The taxonomy the paths are resolved against
-      const tree = buildContestTree(competitions, competitions)
+      const tree = buildCompetitionTree(competitions, competitions)
 
       // The whole URL pipeline, from query string to filter state
       const result = initializeFiltersFromUrlOrDefaults(
@@ -255,10 +255,12 @@ describe('reading filters back out of a URL', () => {
       expect(result.hasInvalidParams).toBe(expectInvalid)
 
       // A broken URL falls back to no filters, whichever way it broke
-      const expectedPaths = expectInvalid ? [] : goldenCase.contestSelection.map(selectionToPath)
+      const expectedPaths = expectInvalid
+        ? []
+        : goldenCase.competitionSelection.map(selectionToPath)
 
       // The same nodes filtered on, in the same order
-      expect(result.filters.contestSelection.map((selection) => selection.path)).toEqual(
+      expect(result.filters.competitionSelection.map((selection) => selection.path)).toEqual(
         expectedPaths
       )
     })
@@ -266,7 +268,7 @@ describe('reading filters back out of a URL', () => {
 
   it('writes back exactly the URL it read, for every path in the taxonomy', () => {
     // The taxonomy the paths are resolved against
-    const tree = buildContestTree(competitions, competitions)
+    const tree = buildCompetitionTree(competitions, competitions)
 
     // Every node, so a link to any level survives a round trip through the filters unchanged
     for (const path of golden.allPaths) {

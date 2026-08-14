@@ -40,7 +40,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -62,7 +62,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(7, initialResult.Problems.TotalCount);
         Assert.NotNull(initialResult.UpdatedOptions);
         Assert.Equal(2, initialResult.UpdatedOptions.Seasons.Count);
-        Assert.Equal(2, initialResult.UpdatedOptions.Contests.Count);
+        Assert.Equal(2, initialResult.UpdatedOptions.Competitions.Count);
         Assert.Equal(3, initialResult.UpdatedOptions.Authors.Count);
         Assert.Equal(3, initialResult.UpdatedOptions.Tags.Count);
     });
@@ -82,7 +82,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: "štvorstena",
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -125,7 +125,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: "stvorstena",
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -146,7 +146,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: "STVORSTENA",
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -167,7 +167,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: "PRIRODZENE",
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -188,7 +188,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: "prirodzene",
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -290,7 +290,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                         SearchText: "markdaunovom",
                         SearchInSolution: false,
                         OlympiadYears: [],
-                        ContestPaths: [],
+                        CompetitionPaths: [],
                         ProblemNumbers: [],
                         TagSlugs: [],
                         TagLogic: LogicToggle.Or,
@@ -309,7 +309,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                         SearchText: "rawtextovu",
                         SearchInSolution: true,
                         OlympiadYears: [],
-                        ContestPaths: [],
+                        CompetitionPaths: [],
                         ProblemNumbers: [],
                         TagSlugs: [],
                         TagLogic: LogicToggle.Or,
@@ -348,7 +348,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -385,7 +385,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: ["algebra", "number-theory"],
                     TagLogic: LogicToggle.Or,
@@ -421,7 +421,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: ["algebra", "number-theory"],
                     TagLogic: LogicToggle.And,
@@ -457,7 +457,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [75],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: ["geometry"],
                     TagLogic: LogicToggle.Or,
@@ -498,7 +498,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -517,7 +517,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -557,7 +557,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: "non_existent_text_gibrish",
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -600,7 +600,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -677,7 +677,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -736,7 +736,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -779,7 +779,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -810,25 +810,25 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal("74. ročník (2024/2025)", season74.DisplayName);
     });
 
-    #region Contest Tree Tests
+    #region Competition Tree Tests
 
     /// <summary>
-    /// Verifies that the contest facets also come back as the tree the contests actually form: every contest
-    /// holding problems and every contest above it, each addressed by its own path, ordered as the registry
+    /// Verifies that the competition facets also come back as the tree they actually form: every competition
+    /// holding problems and every competition above it, each addressed by its own path, ordered as the registry
     /// places it among its siblings, and carrying what its whole subtree holds rather than only what hangs off
     /// it directly.
     /// </summary>
     [Fact]
-    public Task FilterOffersTheContestsAsTheTreeTheyForm() => RunTestAsync(async service =>
+    public Task FilterOffersTheCompetitionsAsTheTreeTheyForm() => RunTestAsync(async service =>
     {
-        // Arrange - ask for everything, so every seeded contest reaches the facets
+        // Arrange - ask for everything, so every seeded competition reaches the facets
         var everythingQuery = new ProblemFilterOptions(
             new ProblemFilterQuery(
                 new ProblemFilterCriteria(
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -845,14 +845,14 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         // Act
         var result = await service.FilterAsync(everythingQuery);
 
-        // The contests as the tree they form
-        var contests = result.UpdatedOptions!.Contests;
+        // The competitions as the tree they form
+        var competitions = result.UpdatedOptions!.Competitions;
 
         // Assert - the competitions, in the order their sort orders place them
-        Assert.Equal(["csmo", "imo"], contests.Select(contest => contest.Path));
+        Assert.Equal(["csmo", "imo"], competitions.Select(competition => competition.Path));
 
         // The CSMO branch
-        var csmo = contests[0];
+        var csmo = competitions[0];
 
         // Assert - it totals every problem under it, six across its four categories
         Assert.Equal(6, csmo.Count);
@@ -881,7 +881,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Empty(z9.Children[0].Children);
 
         // A competition running as one flat sitting, which stands for itself and offers nothing under it
-        var imo = contests[1];
+        var imo = competitions[1];
 
         // Assert - it carries its own problem and no children
         Assert.Equal(1, imo.Count);
@@ -890,10 +890,10 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Verifies that a selection stands for its whole subtree: naming a branch matches everything under it,
-    /// while naming a contest that holds problems itself matches exactly those.
+    /// while naming a competition that holds problems itself matches exactly those.
     /// </summary>
     [Fact]
-    public Task FilterFoldsAContestSelectionOverItsWholeSubtree() => RunTestAsync(async service =>
+    public Task FilterFoldsACompetitionSelectionOverItsWholeSubtree() => RunTestAsync(async service =>
     {
         // The slugs of everything one path matches, ordered so the comparisons read as sets rather than pages
         async Task<string[]> MatchedSlugsAsync(string path)
@@ -905,7 +905,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                         SearchText: string.Empty,
                         SearchInSolution: false,
                         OlympiadYears: [],
-                        ContestPaths: [path],
+                        CompetitionPaths: [path],
                         ProblemNumbers: [],
                         TagSlugs: [],
                         TagLogic: LogicToggle.Or,
@@ -933,17 +933,17 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             ["74-z9-i-1", "74-z9-iii-1", "75-a-i-1", "75-a-i-2", "75-b-i-1", "75-c-i-1"],
             await MatchedSlugsAsync("csmo"));
 
-        // Assert - a path naming no contest matches nothing rather than falling back to a prefix of it
+        // Assert - a path naming no competition matches nothing rather than falling back to a prefix of it
         Assert.Empty(await MatchedSlugsAsync("csmo-a-i-nope"));
     });
 
     /// <summary>
-    /// Verifies that a problem names every contest down to the one it was set in, root-first, each entry
+    /// Verifies that a problem names every competition down to the one it was set in, root-first, each entry
     /// addressed by its full path — including a competition running as one flat sitting, whose chain is the
     /// competition alone.
     /// </summary>
     [Fact]
-    public Task FilterNamesEveryContestDownToTheProblemsOwn() => RunTestAsync(async service =>
+    public Task FilterNamesEveryCompetitionDownToTheProblemsOwn() => RunTestAsync(async service =>
     {
         // Arrange - ask for everything, so both a categorised problem and a flat-sitting one come back
         var everythingQuery = new ProblemFilterOptions(
@@ -952,7 +952,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -973,32 +973,34 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var csmoProblem = result.Problems.Items.Single(problem => problem.Slug == "75-a-i-1");
 
         // Assert - it names all three, each entry addressed by its whole path rather than its own segment
-        Assert.Equal(["csmo", "csmo-a", "csmo-a-i"], csmoProblem.Source.Contest.Select(contest => contest.Slug));
+        Assert.Equal(["csmo", "csmo-a", "csmo-a-i"],
+            csmoProblem.Source.Competition.Select(competition => competition.Slug));
 
         // Assert - and each carries the names it reads under
-        Assert.Equal(["CSMO", "A", "Domáce kolo"], csmoProblem.Source.Contest.Select(contest => contest.DisplayName));
-        Assert.Equal("Kategória A", csmoProblem.Source.Contest[1].FullName);
+        Assert.Equal(["CSMO", "A", "Domáce kolo"],
+            csmoProblem.Source.Competition.Select(competition => competition.DisplayName));
+        Assert.Equal("Kategória A", csmoProblem.Source.Competition[1].FullName);
 
         // The IMO problem, whose competition runs as one flat sitting
         var imoProblem = result.Problems.Items.Single(problem => problem.Slug == "imo-2025-1");
 
         // Assert - its chain is that competition and nothing else
-        Assert.Equal(["imo"], imoProblem.Source.Contest.Select(contest => contest.Slug));
+        Assert.Equal(["imo"], imoProblem.Source.Competition.Select(competition => competition.Slug));
     });
 
     #endregion
 
-    #region GetContestsBySeasonAsync Tests
+    #region GetCompetitionsBySeasonAsync Tests
 
     /// <summary>
     /// Verifies that both seeded seasons come back, ordered by edition number descending (newest first).
     /// This ensures the UI displays the most recent seasons at the top.
     /// </summary>
     [Fact]
-    public Task GetContestsBySeasonReturnsSeasonsInDescendingOrder() => RunTestAsync(async service =>
+    public Task GetCompetitionsBySeasonReturnsSeasonsInDescendingOrder() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync(Language.SK);
+        var result = await service.GetCompetitionsBySeasonAsync(Language.SK);
 
         // Assert - both seeded seasons come back
         Assert.Equal(2, result.Seasons.Count);
@@ -1011,97 +1013,98 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Verifies that a season offers every contest its problems were set in and nothing else, each named by its
+    /// Verifies that a season offers every competition its problems were set in and nothing else, each named by its
     /// own path — the three CSMO categories' home rounds and the IMO sitting.
     /// </summary>
     [Fact]
-    public Task GetContestsBySeasonReturnsContestsForEachSeason() => RunTestAsync(async service =>
+    public Task GetCompetitionsBySeasonReturnsCompetitionsForEachSeason() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync(Language.SK);
+        var result = await service.GetCompetitionsBySeasonAsync(Language.SK);
 
         // The newest season
         var season75 = result.Seasons.First(season => season.EditionNumber == 75);
 
-        // Assert - exactly the contests holding its problems, ordered down the tree
+        // Assert - exactly the competitions holding its problems, ordered down the tree
         Assert.Equal(
             ["csmo-a-i", "csmo-b-i", "csmo-c-i", "imo"],
-            season75.Contests.Select(contest => contest.Path));
+            season75.Competitions.Select(competition => competition.Path));
     });
 
     /// <summary>
-    /// Verifies that problem counts are correct for each contest.
-    /// This ensures the UI can display accurate problem counts next to each contest.
+    /// Verifies that problem counts are correct for each competition.
+    /// This ensures the UI can display accurate problem counts next to each competition.
     /// </summary>
     [Fact]
-    public Task GetContestsBySeasonReturnsProblemCounts() => RunTestAsync(async service =>
+    public Task GetCompetitionsBySeasonReturnsProblemCounts() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync(Language.SK);
+        var result = await service.GetCompetitionsBySeasonAsync(Language.SK);
 
-        // Assert - check specific contest counts
+        // Assert - check specific competition counts
         var season75 = result.Seasons.First(s => s.EditionNumber == 75);
 
         // CSMO A in season 75 has 2 problems (p1, p4)
-        var csmoA = season75.Contests.First(contest => contest.Path == "csmo-a-i");
+        var csmoA = season75.Competitions.First(competition => competition.Path == "csmo-a-i");
         Assert.Equal(2, csmoA.ProblemCount);
 
         // CSMO B in season 75 has 1 problem (p2)
-        var csmoB = season75.Contests.First(contest => contest.Path == "csmo-b-i");
+        var csmoB = season75.Competitions.First(competition => competition.Path == "csmo-b-i");
         Assert.Equal(1, csmoB.ProblemCount);
 
         // CSMO C in season 75 has 1 problem (p3)
-        var csmoC = season75.Contests.First(contest => contest.Path == "csmo-c-i");
+        var csmoC = season75.Competitions.First(competition => competition.Path == "csmo-c-i");
         Assert.Equal(1, csmoC.ProblemCount);
 
         // IMO in season 75 has 1 problem (p7)
-        var imo = season75.Contests.First(contest => contest.Path == "imo");
+        var imo = season75.Competitions.First(competition => competition.Path == "imo");
         Assert.Equal(1, imo.ProblemCount);
     });
 
     /// <summary>
-    /// Verifies that season 74 contains its own distinct contests.
+    /// Verifies that season 74 contains its own distinct competitions.
     /// Tests data isolation between seasons.
     /// </summary>
     [Fact]
-    public Task GetContestsBySeasonIsolatesContestsBySeason() => RunTestAsync(async service =>
+    public Task GetCompetitionsBySeasonIsolatesCompetitionsBySeason() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync(Language.SK);
+        var result = await service.GetCompetitionsBySeasonAsync(Language.SK);
 
-        // Assert - season 74 has different contests than season 75
+        // Assert - season 74 has different competitions than season 75
         var season74 = result.Seasons.First(season => season.EditionNumber == 74);
 
-        // Season 74 should have 2 contests (Z9 domestic and Z9 regional)
-        Assert.Equal(2, season74.Contests.Count);
+        // Season 74 should have 2 competitions (Z9 domestic and Z9 regional)
+        Assert.Equal(2, season74.Competitions.Count);
 
         // Both should sit under the Z9 category
-        Assert.All(season74.Contests, contest => Assert.True(TaxonomySlugs.IsAtOrUnder(contest.Path, "csmo-z9")));
+        Assert.All(season74.Competitions,
+            competition => Assert.True(TaxonomySlugs.IsAtOrUnder(competition.Path, "csmo-z9")));
     });
 
     /// <summary>
-    /// Verifies that each browsed contest reads as the chain of display names down to it, including a
+    /// Verifies that each browsed competition reads as the chain of display names down to it, including a
     /// competition running as one flat sitting, whose chain is a single label.
     /// </summary>
     [Fact]
-    public Task GetContestsBySeasonNamesEachContestByItsChain() => RunTestAsync(async service =>
+    public Task GetCompetitionsBySeasonNamesEachCompetitionByItsChain() => RunTestAsync(async service =>
     {
         // Act
-        var result = await service.GetContestsBySeasonAsync(Language.SK);
+        var result = await service.GetCompetitionsBySeasonAsync(Language.SK);
 
-        // The newest season, which holds both a three-level contest and a flat one
+        // The newest season, which holds both a three-level competition and a flat one
         var season75 = result.Seasons.First(season => season.EditionNumber == 75);
 
         // The home round of category A, which sits three levels down
-        var csmoA = season75.Contests.First(contest => contest.Path == "csmo-a-i");
+        var csmoA = season75.Competitions.First(competition => competition.Path == "csmo-a-i");
 
         // Assert - the labels read down to it
         Assert.Equal(["CSMO", "A", "Domáce kolo"], csmoA.Labels);
 
         // The IMO sitting, which is its own competition
-        var imo = season75.Contests.First(contest => contest.Path == "imo");
+        var imo = season75.Competitions.First(competition => competition.Path == "imo");
 
-        // Assert - a one-level contest reads as one label
+        // Assert - a one-level competition reads as one label
         Assert.Equal(["IMO"], imo.Labels);
     });
 
@@ -1123,7 +1126,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: "Ostrov",  // Unique text in 75-a-i-1
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -1161,7 +1164,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [75],
-                    ContestPaths: ["csmo-a-i"],
+                    CompetitionPaths: ["csmo-a-i"],
                     ProblemNumbers: [1],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -1201,7 +1204,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [75],
-                    ContestPaths: ["csmo-b-i"],
+                    CompetitionPaths: ["csmo-b-i"],
                     ProblemNumbers: [1],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -1244,7 +1247,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -1283,7 +1286,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -1322,7 +1325,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: ["geometry"],
                     TagLogic: LogicToggle.Or,
@@ -1367,7 +1370,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -1415,7 +1418,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -1453,7 +1456,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -1499,7 +1502,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -1553,7 +1556,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -1593,7 +1596,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,
@@ -2066,7 +2069,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                     SearchText: string.Empty,
                     SearchInSolution: false,
                     OlympiadYears: [],
-                    ContestPaths: [],
+                    CompetitionPaths: [],
                     ProblemNumbers: [],
                     TagSlugs: [],
                     TagLogic: LogicToggle.Or,

@@ -24,7 +24,7 @@ export function isTextOnlyChange(previous: SearchFiltersState, next: SearchFilte
     previous.favoritesOnly === next.favoritesOnly &&
     previous.markStatus === next.markStatus &&
     previous.listContentId === next.listContentId &&
-    equalContestSelections(previous.contestSelection, next.contestSelection)
+    equalCompetitionSelections(previous.competitionSelection, next.competitionSelection)
   )
 }
 
@@ -63,7 +63,7 @@ export function isNoOpFilterChange(
     previous.favoritesOnly === next.favoritesOnly &&
     previous.markStatus === next.markStatus &&
     previous.listContentId === next.listContentId &&
-    equalContestSelections(previous.contestSelection, next.contestSelection)
+    equalCompetitionSelections(previous.competitionSelection, next.competitionSelection)
   )
 }
 
@@ -98,15 +98,15 @@ function equalProblemNumbers(previous: number[], next: number[]): boolean {
 }
 
 /**
- * Whether two lists of contest filters name the same nodes, position for position.
+ * Whether two lists of competition filters name the same nodes, position for position.
  *
  * @param previous - The selections before the change.
  * @param next - The selections after it.
  * @returns True when both name the same selections in the same order.
  */
-function equalContestSelections(
-  previous: SearchFiltersState['contestSelection'],
-  next: SearchFiltersState['contestSelection']
+function equalCompetitionSelections(
+  previous: SearchFiltersState['competitionSelection'],
+  next: SearchFiltersState['competitionSelection']
 ): boolean {
   // Nothing handed over reads as nothing selected
   const previousArray = previous || []

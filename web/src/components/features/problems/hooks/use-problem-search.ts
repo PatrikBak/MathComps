@@ -17,7 +17,7 @@ import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { SEARCH_TIMING } from '../constants/timing-constants'
 import { getProblemsPageUrl, hasProblemId } from '../services/problem-routes'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
-import { buildContestTree } from '../utils/contest-tree'
+import { buildCompetitionTree } from '../utils/competition-tree'
 import { countActiveFilters } from '../utils/filter-validation'
 import { isNoOpFilterChange, isTextOnlyChange } from '../utils/search-logic'
 import { serializeFilters } from '../utils/search-url-serialization'
@@ -135,16 +135,16 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
 
   // The filters as read off the URL, the one place they are kept
   const urlParsingResult = useMemo(() => {
-    // A contest path can only be resolved once the taxonomy has arrived
+    // A competition path can only be resolved once the taxonomy has arrived
     if (!baseOptions) return null
 
     // Single problem view doesn't use URL filters
     if (problemId) return null
 
-    // Each contest path resolved against the taxonomy it was written for
+    // Each competition path resolved against the taxonomy it was written for
     return initializeFiltersFromUrlOrDefaults(
       searchParams,
-      buildContestTree(baseOptions.contests, baseOptions.contests)
+      buildCompetitionTree(baseOptions.competitions, baseOptions.competitions)
     )
   }, [searchParams, baseOptions, problemId])
 

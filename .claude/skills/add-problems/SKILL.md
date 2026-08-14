@@ -1,6 +1,6 @@
 ---
 name: add-problems
-description: Use this skill when adding a competition's problems to the site database through the bulk-import draft pipeline — registering a brand-new competition in the taxonomy if it isn't there yet, authoring the draft folder (statements + solutions + images, one original language plus translations), and running the bulk-import CLI validate until it passes. Trigger phrases — "add a new competition", "import a contest's problems into the DB", "register a competition in the taxonomy", "create a bulk-import draft", "add a round/year of a competition". Do NOT use for editing handouts (use the handout-* skills). The skill ends at `validate`; `apply` runs only on the user's explicit say-so.
+description: Use this skill when adding a competition's problems to the site database through the bulk-import draft pipeline — registering a brand-new competition in the taxonomy if it isn't there yet, authoring the draft folder (statements + solutions + images, one original language plus translations), and running the bulk-import CLI validate until it passes. Trigger phrases — "add a new competition", "import a competition's problems into the DB", "register a competition in the taxonomy", "create a bulk-import draft", "add a round/year of a competition". Do NOT use for editing handouts (use the handout-* skills). The skill ends at `validate`; `apply` runs only on the user's explicit say-so.
 ---
 
 # Add problems (bulk-import draft)
@@ -15,7 +15,7 @@ The format spec is the single source of truth — read it first: `web/scripts/PR
 
 ```
 my-draft/
-  _meta.yaml        # the contest's path + season / date / language (the original language, e.g. sk)
+  _meta.yaml        # the competition's path + season / date / language (the original language, e.g. sk)
   p1.sk.md          # problem 1 in its original language (the locale matching _meta's language): statement, optional "<!-- solution -->", solution
   p1.cs.md          # problem 1 in another locale (cs, en, …) — a translation; statement-only ok, solution only if the original has one
   p1.yaml           # problem 1's authors / solutionLink / tags — all optional; the file itself is required only for a newly-created problem
@@ -26,7 +26,7 @@ Filenames are `p<number>.<locale>.md`, locale one of `sk` / `cs` / `en`. The fil
 
 ## What a draft can do
 
-Each problem is matched to the DB by slug (`{edition}-{contestPath}-{order}`). The one fork is **does it already exist?**
+Each problem is matched to the DB by slug (`{edition}-{competitionPath}-{order}`). The one fork is **does it already exist?**
 
 - **New problem** → the import _creates_ it: it needs its original-language body **and** a `pN.yaml`; translations optional.
 - **Existing problem** → the import _patches_ it: ship only the bodies you're changing, and `pN.yaml` is optional (omit = leave authors/tags/link untouched). Statement and solution are independent halves, so adding just a solution is fine.
@@ -63,21 +63,21 @@ Add a test row for any new competition/round/name to `MetadataLocalizationServic
 ## Step 2 — Author `_meta.yaml`
 
 ```yaml
-contest: csmo-b-ii  # the contest's path
+competition: csmo-b-ii  # the competition's path
 season:
   year: 2025        # academic season START year — a SPRING event belongs to the previous autumn's season
 date: 2026-03-31    # the round date, YYYY-MM-DD
 language: sk        # the draft's original language: sk | cs | en
 ```
 
-`contest` is the path from Step 1: the slugs from the root of the taxonomy down to the contest the problems were set in, hyphen-joined, however many that is. `csmo-b-ii` is round II of category B; `memo-i` is a round of a competition with no categories; `imo` is a competition that runs as one flat sitting. Two rules the registry check enforces:
+`competition` is the path from Step 1: the slugs from the root of the taxonomy down to the competition the problems were set in, hyphen-joined, however many that is. `csmo-b-ii` is round II of category B; `memo-i` is a round of a competition with no categories; `imo` is a competition that runs as one flat sitting. Two rules the registry check enforces:
 
 - **Every competition on the path must be registered** — `csmo-b-ii` needs `csmo`, `csmo-b` and `csmo-b-ii` all present in the shared tree and named in all three locales, or you get one error per missing one.
-- **The contest must be a leaf.** Naming `csmo-b` when it carries rounds fails with "has contests nested below it" — those rounds are what a draft picks from, since problems hang off a sitting, not off a container.
+- **The competition must be a leaf.** Naming `csmo-b` when it carries rounds fails with "has competitions nested below it" — those rounds are what a draft picks from, since problems hang off a sitting, not off a container.
 
 Season year is the academic start, not the event year: a March-2026 event ⇒ `year: 2025` (ročník = year − 1950, shared across competitions by design — it is not each competition's own edition count).
 
-**Single-occasion competitions — give every round the same `date`.** When a competition runs all its rounds as one event (MEMO Individual + Team, CPSJ I + T, TST d1–d5), every round's `_meta.yaml` must carry the **same date**. The problem list sorts by event **date first** (newest first), then by round order (`OrderByDefaultProblemSort`: season → date → the contest's sort path → problem number). Because date outranks round order, distinct per-paper dates scatter one occasion's papers by date — the later paper sorts ahead of the earlier one (Team before Individual). A shared date collapses the date key so the round-order key takes over and the papers group in round order (Individual before Team). This is a deliberate data-side convention — don't "correct" the shared date to the real distinct per-paper days, it re-breaks the ordering.
+**Single-occasion competitions — give every round the same `date`.** When a competition runs all its rounds as one event (MEMO Individual + Team, CPSJ I + T, TST d1–d5), every round's `_meta.yaml` must carry the **same date**. The problem list sorts by event **date first** (newest first), then by round order (`OrderByDefaultProblemSort`: season → date → the competition's sort path → problem number). Because date outranks round order, distinct per-paper dates scatter one occasion's papers by date — the later paper sorts ahead of the earlier one (Team before Individual). A shared date collapses the date key so the round-order key takes over and the papers group in round order (Individual before Team). This is a deliberate data-side convention — don't "correct" the shared date to the real distinct per-paper days, it re-breaks the ordering.
 
 ## Step 3 — Write the problems
 
@@ -85,9 +85,9 @@ Each `pN.<lang>.md`: statement (markdown + inline `$…$` / display `$$…$$` Te
 
 **Statement shape:** the closing question/task is the last sentence of the final text paragraph — not a paragraph of its own. Split it off only when it must follow a block (bullet list, figure, or display math), where there's no sentence to attach it to.
 
-**Transcribe math from a render, not from text extraction.** When the source is a PDF, render its pages to images and read the formulas off the render — the text layer mangles fractions, exponents, and multi-line displays (`bc/a` extracts as `bc a`; a `b³` can read as `b3`/`b2`). Zoom the region to confirm any ambiguous sub/superscript before trusting it. Drop contest-admin lines that aren't part of the problem — "write the solution in language X", per-problem time limits, partial-credit grading notes.
+**Transcribe math from a render, not from text extraction.** When the source is a PDF, render its pages to images and read the formulas off the render — the text layer mangles fractions, exponents, and multi-line displays (`bc/a` extracts as `bc a`; a `b³` can read as `b3`/`b2`). Zoom the region to confirm any ambiguous sub/superscript before trusting it. Drop competition-admin lines that aren't part of the problem — "write the solution in language X", per-problem time limits, partial-credit grading notes.
 
-**Multi-language sources** (a contest authored by several countries, e.g. a Czech-Polish-Slovak match) can carry a *different* original language per problem within one round, and the source may even be in a language the site doesn't display (e.g. Polish). The pipeline still wants **one** `language:` per draft, so pick a single canonical original for the round (the source language you transcribed from, or `en` when the real source isn't a display language) and translate the rest — `is_original` is low-value, so don't build per-problem-original machinery for it.
+**Multi-language sources** (a competition authored by several countries, e.g. a Czech-Polish-Slovak match) can carry a *different* original language per problem within one round, and the source may even be in a language the site doesn't display (e.g. Polish). The pipeline still wants **one** `language:` per draft, so pick a single canonical original for the round (the source language you transcribed from, or `en` when the real source isn't a display language) and translate the rest — `is_original` is low-value, so don't build per-problem-original machinery for it.
 
 **Figures cut from a PDF** (clip id like `svgselect-region`, or an SVG that's huge for a plain line drawing) often carry the whole page's text as **hidden clipped glyphs** — bloated and embedding unrelated content. Slim to just the figure by dropping the `<defs>` glyph outlines and every `<use>`, keeping the stroked paths. Verify with a before/after render-diff (must be pixel-identical — guards against deleting real labels), and **ask the author before replacing a file they provided**.
 

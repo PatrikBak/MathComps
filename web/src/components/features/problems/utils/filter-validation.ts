@@ -9,7 +9,7 @@ import type { SearchFiltersState } from '../types/problem-library-types'
  * - Authors
  * - Seasons (years)
  * - Problem numbers
- * - Contest selections (competitions/categories/rounds)
+ * - Competition selections (a whole competition, a category or a round)
  * - Search text (if non-empty, counts as 1)
  *
  * @param filters - Current filter state to count
@@ -21,7 +21,7 @@ export function countActiveFilters(filters: SearchFiltersState): number {
     filters.authors.length +
     filters.seasons.length +
     filters.problemNumbers.length +
-    (filters.contestSelection?.length ?? 0) +
+    (filters.competitionSelection?.length ?? 0) +
     (filters.searchText.trim() ? 1 : 0)
   )
 }

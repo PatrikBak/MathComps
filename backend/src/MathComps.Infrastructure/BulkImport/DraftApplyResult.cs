@@ -38,7 +38,7 @@ public record AppliedText(
 /// A summary of what an apply run did: which taxonomy entities were created versus reused, what happened to every
 /// text, and how many images were uploaded versus skipped as already on remote storage.
 /// </summary>
-/// <param name="Entities">Create-vs-reuse for every competition on the contest's path, plus the season and
+/// <param name="Entities">Create-vs-reuse for every competition on the draft's path, plus the season and
 /// the round.</param>
 /// <param name="Texts">One entry per statement/solution text written, across all problems and languages.</param>
 /// <param name="ProblemsInserted">How many problems were newly created.</param>

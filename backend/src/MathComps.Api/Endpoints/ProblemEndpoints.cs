@@ -8,7 +8,7 @@ using MathComps.Infrastructure.Services.Users;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the problem catalog endpoints — filtering, the contest browser, single-problem lookup, and the
+/// Maps the problem catalog endpoints — filtering, the competition browser, single-problem lookup, and the
 /// like/mark toggles a signed-in user can apply to a problem.
 /// </summary>
 public static class ProblemEndpoints
@@ -64,7 +64,7 @@ public static class ProblemEndpoints
             var serviceQuery = new ProblemFilterQuery(
                 new ProblemFilterCriteria(
                     query.Parameters.SearchText, query.Parameters.SearchInSolution, query.Parameters.OlympiadYears,
-                    query.Parameters.ContestPaths, query.Parameters.ProblemNumbers, query.Parameters.TagSlugs,
+                    query.Parameters.CompetitionPaths, query.Parameters.ProblemNumbers, query.Parameters.TagSlugs,
                     query.Parameters.TagLogic, query.Parameters.AuthorSlugs, query.Parameters.AuthorLogic),
                 query.PageSize, query.PageNumber, query.FavoritesOnly, query.ListContentId, query.MarkStatus);
 
@@ -80,14 +80,14 @@ public static class ProblemEndpoints
         // Apply search-specific rate limiting
         .RequireRateLimiting(RateLimiterPolicies.SearchRateLimit);
 
-        // The endpoint for the contest browser - returns competitions grouped by season
-        app.MapGet($"{ProblemsPath}/contests-by-season", async (IProblemFilterService problemService) =>
+        // The endpoint for the competition browser - returns competitions grouped by season
+        app.MapGet($"{ProblemsPath}/competitions-by-season", async (IProblemFilterService problemService) =>
         {
             // Detect language from Accept-Language header
             var language = EndpointHelpers.GetRequestLanguage();
 
             // Delegate to service
-            return Results.Ok(await problemService.GetContestsBySeasonAsync(language));
+            return Results.Ok(await problemService.GetCompetitionsBySeasonAsync(language));
         })
         // Apply search-specific rate limiting
         .RequireRateLimiting(RateLimiterPolicies.SearchRateLimit);
@@ -109,7 +109,7 @@ public static class ProblemEndpoints
                 SearchText: string.Empty,
                 SearchInSolution: false,
                 OlympiadYears: [lookupResult.Season],
-                ContestPaths: [lookupResult.ContestPath],
+                CompetitionPaths: [lookupResult.CompetitionPath],
                 ProblemNumbers: [lookupResult.ProblemNumber],
                 TagSlugs: [],
                 TagLogic: LogicToggle.Or,

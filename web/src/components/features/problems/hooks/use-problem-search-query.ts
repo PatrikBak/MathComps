@@ -440,7 +440,7 @@ export function useProblemSearchQuery(
     return (
       filters.tags.length === 0 &&
       filters.authors.length === 0 &&
-      filters.contestSelection.length === 0 &&
+      filters.competitionSelection.length === 0 &&
       filters.seasons.length === 0 &&
       filters.problemNumbers.length === 0 &&
       !filters.searchText

@@ -72,11 +72,11 @@ public class MetadataLocalizationService : IMetadataLocalizationService
         GetMetadata(language).GetSeasonLabel(editionNumber, startYear, endYear);
 
     /// <inheritdoc />
-    public IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(string contestPath) =>
-        // Every competition the path runs through, root-down and the contest itself last, each reported when the
+    public IReadOnlyList<TaxonomyRegistryIssue> ValidateTaxonomyRegistration(string competitionPath) =>
+        // Every competition the path runs through, root-down and the one it names last, each reported when the
         // registry doesn't back it. OfType drops the ones that came back clean.
-        [.. CompetitionTree.Descend(contestPath)
-            .Select(node => GapAt(node.Path, isContest: node.Path == contestPath))
+        [.. CompetitionTree.Descend(competitionPath)
+            .Select(node => GapAt(node.Path, isTarget: node.Path == competitionPath))
             .OfType<TaxonomyRegistryIssue>()];
 
     #endregion
@@ -84,13 +84,12 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     #region Private Helpers
 
     /// <summary>
-    /// The registry gap at one competition on a contest's path, or null when the registry fully backs it.
+    /// The registry gap at one competition on a draft's path, or null when the registry fully backs it.
     /// </summary>
     /// <param name="path">The competition's path.</param>
-    /// <param name="isContest">Whether the path ends here, i.e. this competition is the one the draft
-    /// names.</param>
+    /// <param name="isTarget">Whether the path ends here, i.e. this competition is the one the draft names.</param>
     /// <returns>The gap found, or null when there is none.</returns>
-    private TaxonomyRegistryIssue? GapAt(string path, bool isContest)
+    private TaxonomyRegistryIssue? GapAt(string path, bool isTarget)
     {
         // The structural entry placing it, null when the registry carries none.
         var entry = Shared.Node(path);
@@ -98,17 +97,17 @@ public class MetadataLocalizationService : IMetadataLocalizationService
         // The locales that don't name it.
         var missingLocales = LocalesMissing(metadata => HasBothNames(metadata, path));
 
-        // The contest a draft names has to be a sitting: one carrying a generation below it holds the contests the
-        // draft was supposed to pick from. Everything above the contest is expected to carry one.
-        var carriesNestedContests = isContest && entry?.Children is { IsDefaultOrEmpty: false };
+        // The one a draft names has to be a sitting: one carrying a generation below it holds the competitions the
+        // draft was supposed to pick from. Everything above it is expected to carry one.
+        var carriesNestedCompetitions = isTarget && entry?.Children is { IsDefaultOrEmpty: false };
 
         // Report only on a real gap.
-        return entry is null || missingLocales.Length > 0 || carriesNestedContests
+        return entry is null || missingLocales.Length > 0 || carriesNestedCompetitions
             ? new TaxonomyRegistryIssue(
                 path,
                 MissingFromSharedStructure: entry is null,
                 missingLocales,
-                carriesNestedContests)
+                carriesNestedCompetitions)
             : null;
     }
 

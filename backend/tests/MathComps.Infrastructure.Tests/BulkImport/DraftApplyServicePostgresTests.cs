@@ -943,11 +943,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A single-segment contest path stops the chain at the root, so a whole brand running as one sitting is
+    /// A single-segment competition path stops the chain at the root, so a whole brand running as one sitting is
     /// what its problems hang under.
     /// </summary>
     [Fact]
-    public Task A_root_contest_stands_for_its_whole_competition() => RunTestAsync(async service =>
+    public Task A_root_path_stands_for_the_whole_competition() => RunTestAsync(async service =>
     {
         // Import an imo problem, imo being a competition the registry gives no rounds at all.
         await service.ApplyAsync(

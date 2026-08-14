@@ -2,9 +2,9 @@ import type * as React from 'react'
 
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
 
-import type { ContestSelection, SearchFiltersState } from '../types/problem-library-types'
-import { foldPickedPaths } from './contest-selection-fold'
-import { contestSelectionFor, type ContestTree } from './contest-tree'
+import type { CompetitionSelection, SearchFiltersState } from '../types/problem-library-types'
+import { foldPickedPaths } from './competition-selection-fold'
+import { competitionSelectionFor, type CompetitionTree } from './competition-tree'
 
 /**
  * One competition filter, as the chip standing for it.
@@ -31,7 +31,7 @@ type CompetitionChip = {
  * @param path - The node's path.
  * @returns Whether the selection is the node itself or something below it.
  */
-function isCoveredBy(selection: ContestSelection, path: string): boolean {
+function isCoveredBy(selection: CompetitionSelection, path: string): boolean {
   // The node itself, or anything deeper down the same branch
   return selection.path === path || selection.path.startsWith(`${path}-`)
 }
@@ -41,20 +41,20 @@ function isCoveredBy(selection: ContestSelection, path: string): boolean {
  * that covers it and ordered as the tree orders them.
  *
  * @param filters - The filters currently applied.
- * @param contestTree - The taxonomy, which supplies both the folding and the order.
+ * @param competitionTree - The taxonomy, which supplies both the folding and the order.
  * @param onFiltersChange - Applies the filter state a chip's click produces.
  * @returns The chips to show, in the tree's own order.
  */
 export function generateCompetitionChips(
   filters: SearchFiltersState,
-  contestTree: ContestTree,
+  competitionTree: CompetitionTree,
   onFiltersChange: (newFilters: SearchFiltersState) => void
 ): CompetitionChip[] {
   // No competition is filtered on
   if (
-    !filters.contestSelection ||
-    !Array.isArray(filters.contestSelection) ||
-    filters.contestSelection.length === 0
+    !filters.competitionSelection ||
+    !Array.isArray(filters.competitionSelection) ||
+    filters.competitionSelection.length === 0
   ) {
     // Nothing to stand a chip for
     return []
@@ -62,8 +62,8 @@ export function generateCompetitionChips(
 
   // The shallowest nodes covering everything picked, in the tree's own order
   const foldedNodes = foldPickedPaths(
-    filters.contestSelection.map((selection) => selection.path),
-    contestTree
+    filters.competitionSelection.map((selection) => selection.path),
+    competitionTree
   )
 
   // One chip per node that survived the folding
@@ -75,19 +75,19 @@ export function generateCompetitionChips(
       // A modifier click narrows the whole competition filter to this one node
       if (isExclusiveSelection(event)) {
         // This node alone, dropping everything else picked
-        onFiltersChange({ ...filters, contestSelection: [contestSelectionFor(node)] })
+        onFiltersChange({ ...filters, competitionSelection: [competitionSelectionFor(node)] })
 
         // The filter is settled
         return
       }
 
       // Everything picked outside the node's subtree, which is what the chip does not stand for
-      const remaining = filters.contestSelection.filter(
+      const remaining = filters.competitionSelection.filter(
         (selection) => !isCoveredBy(selection, node.path)
       )
 
       // Hand back the filter with this chip's branch dropped
-      onFiltersChange({ ...filters, contestSelection: remaining })
+      onFiltersChange({ ...filters, competitionSelection: remaining })
     },
   }))
 }

@@ -34,7 +34,7 @@ public interface IProblemLookupService
     /// </summary>
     /// <param name="problemSlug">URL-safe problem identifier (will be normalized to lowercase).</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>Problem lookup result naming the season and the contest's path, or null if not found.</returns>
+    /// <returns>Problem lookup result naming the season and the competition's path, or null if not found.</returns>
     Task<ProblemLookupResult?> GetProblemLookupDataAsync(string problemSlug, CancellationToken cancellationToken = default);
 }
 

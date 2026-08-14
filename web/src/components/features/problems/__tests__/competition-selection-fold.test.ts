@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { foldPickedPaths } from '../utils/contest-selection-fold'
-import { DEEP_TAXONOMY, makeContestTree } from './contest-tree-fixture'
+import { foldPickedPaths } from '../utils/competition-selection-fold'
+import { DEEP_TAXONOMY, makeCompetitionTree } from './competition-tree-fixture'
 
 /** The taxonomy every case here folds against, five levels at its deepest. */
-const tree = makeContestTree(DEEP_TAXONOMY)
+const tree = makeCompetitionTree(DEEP_TAXONOMY)
 
 /**
  * Folds the given paths and reports which nodes came out.
