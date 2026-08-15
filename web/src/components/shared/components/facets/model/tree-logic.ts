@@ -346,6 +346,22 @@ export function drawnRowIds(nodes: TreeNode[], expandedIds: Set<string>): string
 }
 
 /**
+ * Collects the nodes a hierarchy can open, judged on the tree as it is drawn: a search that strips a
+ * node's children leaves it nothing to open, whatever hangs off it in the tree it came from.
+ *
+ * @param nodes - The nodes at this depth, already narrowed by whatever a search left.
+ * @returns The ids of every node with children on show.
+ */
+export function expandableRowIds(nodes: TreeNode[]): Set<string> {
+  // Each branch contributes itself, and whatever branches hang below it
+  return new Set(
+    nodes.flatMap((node) =>
+      node.children?.length ? [node.id, ...expandableRowIds(node.children)] : []
+    )
+  )
+}
+
+/**
  * Locates a node anywhere in a tree.
  *
  * @param nodes - The roots to search.

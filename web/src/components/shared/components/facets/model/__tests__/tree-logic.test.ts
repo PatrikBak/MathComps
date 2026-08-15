@@ -4,6 +4,7 @@ import type { TreeNode } from '../facet-types'
 import {
   calculateParentState,
   drawnRowIds,
+  expandableRowIds,
   filterTreeBySearch,
   getAllAncestorIds,
   getAllDescendantIds,
@@ -493,6 +494,30 @@ describe('tree-logic', () => {
 
       // Nothing hangs off it, so being open changes nothing
       expect(drawn).toEqual([MEMO_INDIVIDUAL.id])
+    })
+  })
+
+  describe('expandableRowIds', () => {
+    it('collects every branch at every depth, and no leaf', () => {
+      // Act on the whole hierarchy
+      const expandable = expandableRowIds(mockTree)
+
+      // Both competitions and the two categories under one of them, the rounds being leaves
+      expect(expandable).toEqual(new Set([CSMO.id, CATEGORY_A.id, CATEGORY_B.id, mockTree[1].id]))
+    })
+
+    it('leaves out a branch a search stripped its children from', () => {
+      // A term matching one category by name, which nothing under it carries
+      const { tree } = filterTreeBySearch(mockTree, 'B')
+
+      // Act on what the search left standing
+      const expandable = expandableRowIds(tree)
+
+      // The category came through carrying nothing, so it has nothing left to open
+      expect(expandable.has(CATEGORY_B.id)).toBe(false)
+
+      // While the competition above it survives as the path down to the match
+      expect(expandable.has(CSMO.id)).toBe(true)
     })
   })
 })
