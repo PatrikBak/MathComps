@@ -3,11 +3,10 @@ import type { ApiResult } from '@/types/api'
 
 import type { FilterParameters, FilterQuery } from '../types/problem-api-types'
 import type {
-  CompetitionSelection,
   FilterResponse,
-  FilterResult,
   ProblemFilterResponse,
   SearchFiltersState,
+  SingleProblemResponse,
   SingleProblemResult,
 } from '../types/problem-library-types'
 import { createDefaultFilters } from '../utils/url-initialization'
@@ -33,7 +32,7 @@ export async function getProblemBySlug(
   includeBaseOptions: boolean
 ): Promise<ApiResult<SingleProblemResult>> {
   // Fetch the problem
-  const result = await apiCall<FilterResult>(
+  const result = await apiCall<SingleProblemResponse>(
     () => getProblemBySlugApiUrl(slug, includeBaseOptions),
     { method: 'GET' }
   )
@@ -41,8 +40,11 @@ export async function getProblemBySlug(
   // Pass a failure through untouched
   if (!result.success) return result
 
+  // The page the problem was served on, and where the archive found it
+  const { filterResult, filters: position } = result.data
+
   // The one problem the slug names
-  const problem = result.data.problems.items.at(0)
+  const problem = filterResult.problems.items.at(0)
 
   // An empty page means the slug matched no problem
   if (!problem) {
@@ -51,30 +53,20 @@ export async function getProblemBySlug(
   }
 
   // The filters below pin down this one problem, so its own counts are always owed
-  if (!result.data.updatedOptions) {
+  if (!filterResult.updatedOptions) {
     // Refused rather than shown with every count reading nought
     return problemNotFound('the answer carried no option counts')
   }
 
-  // The competition the problem was set in, which is the deepest one on the chain down to it
-  const competition = problem.source.competition.at(-1)
-
-  // A problem hangs off a competition at whatever depth it sits, so an empty chain is a payload the
-  // archive cannot produce. Refused rather than trusted, since this is where the wire is read.
-  if (!competition) {
-    // Fail as a problem that cannot be shown
-    return problemNotFound('the problem source named no competition')
-  }
-
-  // The filter stands at that competition, whose slug is the whole path down to it
-  const selection: CompetitionSelection = { path: competition.slug }
+  // The season as a filter addresses it, which is its edition number
+  const seasonSlug = String(position.season)
 
   // Season, competition and position together pin down this one problem, so the rest stay empty
   const filters: SearchFiltersState = {
     ...createDefaultFilters(),
-    seasons: [problem.source.season],
-    competitionSelection: [selection],
-    problemNumbers: [problem.source.number],
+    seasons: [{ slug: seasonSlug, displayName: seasonSlug, fullName: null }],
+    competitionSelection: [{ path: position.competitionPath }],
+    problemNumbers: [position.problemNumber],
   }
 
   // The problem, its filters, and the options they are picked from
@@ -83,8 +75,8 @@ export async function getProblemBySlug(
     data: {
       problem,
       filters,
-      baseOptions: result.data.baseOptions,
-      options: result.data.updatedOptions,
+      baseOptions: filterResult.baseOptions,
+      options: filterResult.updatedOptions,
     },
   }
 }

@@ -112,6 +112,29 @@ export type ProblemFilterResponse = {
 }
 
 /**
+ * Where one problem sits, which is everything a filter needs to name it and nothing else.
+ */
+type ProblemPosition = {
+  /** The edition of the olympiad it was set in, e.g. 75 for the 75th. */
+  season: number
+  /** The competition it was set in, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
+  competitionPath: string
+  /** Its position within that competition. */
+  problemNumber: number
+}
+
+/**
+ * One problem's answer, as the single-problem endpoint puts it on the wire: the page holding it, plus
+ * what the archive looked it up as.
+ */
+export type SingleProblemResponse = {
+  /** The one-problem page and the option counts. */
+  filterResult: FilterResult
+  /** Where the archive found the problem, which is what that page was fetched under. */
+  filters: ProblemPosition
+}
+
+/**
  * One page of problems as the service hands it on, which is a {@link ProblemFilterResponse} with the
  * nesting flattened away so a caller reads one object rather than reaching through two.
  */

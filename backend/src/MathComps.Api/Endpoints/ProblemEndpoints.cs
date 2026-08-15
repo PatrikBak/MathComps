@@ -132,7 +132,10 @@ public static class ProblemEndpoints
             );
 
             // Delegate to service
-            return Results.Ok(await filterService.FilterAsync(filterOptions));
+            var filterResult = await filterService.FilterAsync(filterOptions);
+
+            // The problem alongside the filters it was fetched under
+            return Results.Ok(new SingleProblemResponse(filterResult, lookupResult));
         })
         // Apply standard rate limiting
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
