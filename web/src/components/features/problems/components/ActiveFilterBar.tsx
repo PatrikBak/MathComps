@@ -147,7 +147,7 @@ export default function ActiveFiltersBar({
     filters.tags.length +
     filters.authors.length +
     filters.competitionSelection.length +
-    (filters.searchText ? 1 : 0)
+    (filters.searchText.trim() ? 1 : 0)
 
   // The user's say overrides the automatic decision, which otherwise goes on how many chips there are
   const areFiltersExpanded =
@@ -363,7 +363,7 @@ export default function ActiveFiltersBar({
     filters.searchText && filters.searchText.trim().length > 0
       ? {
           id: 'search-text',
-          displayName: `"${filters.searchText}"${filters.searchInSolution ? ` ${tFilters('searchInSolutionSuffix')}` : ''}`,
+          displayName: `"${filters.searchText.trim()}"${filters.searchInSolution ? ` ${tFilters('searchInSolutionSuffix')}` : ''}`,
           onClick: handleToggleSearchText,
         }
       : null

@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import type { SearchFiltersState } from '../types/problem-library-types'
-import { deserializeFilters, serializeFilters } from '../utils/search-url-serialization'
+import {
+  deserializeFilters,
+  serializeFilters,
+  spellTheSameUrl,
+} from '../utils/search-url-serialization'
 
 /**
  * Builds a {@link SearchFiltersState} with nothing filtered on beyond the given overrides.
@@ -280,6 +284,44 @@ describe('Search URL Serialization', () => {
 
       // The padding is not part of the term, so the URL carries only what was searched for
       expect(serialized).toBe('q=ab')
+    })
+  })
+
+  describe('Two filter states held against each other', () => {
+    it('reads a term that differs only in its padding as the same filters', () => {
+      // A term mid-typing, against the same term as the URL spells it
+      const beingTyped = createFilters({ searchText: 'ab ' })
+      const asTheUrlHasIt = createFilters({ searchText: 'ab' })
+
+      // The padding never reaches the URL, so both ask for the same problems
+      expect(spellTheSameUrl(beingTyped, asTheUrlHasIt)).toBe(true)
+    })
+
+    it('reads a facet value under two labels as the same filters', () => {
+      // The same tag, once under the name it reads by and once under its slug
+      const named = createFilters({
+        tags: [{ displayName: 'Combinatorics', slug: 'combinatorics', fullName: null }],
+      })
+      const unnamed = createFilters({
+        tags: [{ displayName: 'combinatorics', slug: 'combinatorics', fullName: null }],
+      })
+
+      // Only the slug is filtered on, so the label it reads under makes no difference
+      expect(spellTheSameUrl(named, unnamed)).toBe(true)
+    })
+
+    it('tells two genuinely different states apart', () => {
+      // Two terms, and a tag only one of the states filters on
+      const algebra = createFilters({ searchText: 'algebra' })
+      const geometry = createFilters({ searchText: 'geometry' })
+      const tagged = createFilters({
+        searchText: 'algebra',
+        tags: [{ displayName: 'Geometry', slug: 'geometry', fullName: null }],
+      })
+
+      // Each pair asks for different problems
+      expect(spellTheSameUrl(algebra, geometry)).toBe(false)
+      expect(spellTheSameUrl(algebra, tagged)).toBe(false)
     })
   })
 })

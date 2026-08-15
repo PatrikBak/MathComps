@@ -146,6 +146,23 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
 }
 
 /**
+ * Whether two filter states are spelled the same way in the URL.
+ *
+ * The URL is a lossy account of the filters: it leaves off the padding around the term, the label a
+ * facet value reads under, and the AND/OR mode while fewer than two values are picked. Two states
+ * spelling one query string therefore ask the archive the same question.
+ *
+ * @param first - One of the two states.
+ * @param second - The state to hold it against.
+ *
+ * @returns True when both produce the same query string.
+ */
+export const spellTheSameUrl = (first: SearchFiltersState, second: SearchFiltersState): boolean => {
+  // The query string is the whole of what either state asks for
+  return serializeFilters(first) === serializeFilters(second)
+}
+
+/**
  * Reads the URL's query string into the filters, with the competition paths left as written.
  * Validates that all URL parameters are recognized.
  *
