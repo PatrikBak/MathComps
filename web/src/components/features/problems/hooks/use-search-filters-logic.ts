@@ -1,5 +1,5 @@
 import { useLocale } from 'next-intl'
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useMemo } from 'react'
 
 import type {
   FacetOption as FacetUiOption,
@@ -155,23 +155,12 @@ export function useSearchFiltersLogic({
       .filter((path) => competitionTree.byPath.has(path))
   }, [filters.competitionSelection, competitionTree])
 
-  // The tree's own selection, held locally so a click lands on the checkbox at once
-  const [selectedTreeIds, setSelectedTreeIds] = useState<string[]>(selectionTreeNodeIds)
-
-  // The filters lead, so a selection made anywhere else takes the local copy over
-  useEffect(() => {
-    setSelectedTreeIds(selectionTreeNodeIds)
-  }, [selectionTreeNodeIds])
-
   /**
    * Records a selection the user made in the competition tree.
    *
    * @param nextSelectedIds - The nodes selected in their own right after the click.
    */
   function handleCompetitionTreeChange(nextSelectedIds: string[]) {
-    // Show it immediately, ahead of the round trip through the filters
-    setSelectedTreeIds(nextSelectedIds)
-
     // The same selection expressed at whatever depth covers it
     const selections = foldPickedPaths(nextSelectedIds, competitionTree).map(
       competitionSelectionFor
@@ -250,7 +239,7 @@ export function useSearchFiltersLogic({
   return {
     competitionTreeOpts,
     defaultExpandedIds,
-    selectedTreeIds,
+    selectedTreeIds: selectionTreeNodeIds,
     handleCompetitionTreeChange,
     seasonOpts,
     tagOpts,
