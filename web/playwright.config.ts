@@ -16,12 +16,22 @@ export const storageStatePath = 'playwright/.clerk/user.json'
 export default defineConfig({
   testDir: './e2e',
   reporter: 'list',
+  // Clerk's testing token, minted once into the environment every worker is forked from.
+  globalSetup: './e2e/support/global-setup.ts',
   use: { baseURL },
   projects: [
     // Not a test: this run exists to produce a signed-in browser state.
     { name: 'session', testMatch: /.*\.setup\.ts/ },
-    // The actual tests, which sign nobody in and stub the backend out.
-    { name: 'spec', testMatch: /.*\.spec\.ts/ },
+    // The tests that start with nobody signed in, which is most of them.
+    { name: 'spec', testMatch: /.*\.spec\.ts/, testIgnore: /.*\.signed-in\.spec\.ts/ },
+    // The tests that need a reader already signed in when the page loads. The session is minted
+    // fresh for every run, since a test elsewhere ending one invalidates it for good.
+    {
+      name: 'signed-in',
+      testMatch: /.*\.signed-in\.spec\.ts/,
+      dependencies: ['session'],
+      use: { storageState: storageStatePath },
+    },
   ],
   // Attach to an already-running dev server instead of starting a second one on the same port.
   webServer: {

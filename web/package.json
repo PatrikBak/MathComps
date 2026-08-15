@@ -11,6 +11,7 @@
     "test:run": "vitest run",
     "e2e:session": "playwright test --project=session && tsx scripts/write-mcp-session-injector.ts",
     "e2e:test": "playwright test --project=spec",
+    "e2e:signed-in": "playwright test --project=signed-in",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "type-check": "tsc --noEmit",

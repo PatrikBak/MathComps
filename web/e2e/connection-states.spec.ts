@@ -1,15 +1,14 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 
-import { ROUTES } from '@/i18n/i18n'
-
 import messages from '../messages/en.json'
-
-/**
- * The problems page in English, which is the canonical locale and so carries no route translation.
- * The locale is fixed here because it picks the messages the assertions below match on.
- */
-const PROBLEMS_PATH = `/en${ROUTES.PROBLEMS}`
+import {
+  BACKEND_ORIGIN,
+  failEveryBackendCall,
+  isBackendReachable,
+  PROBLEMS_PATH,
+  refuseEveryBackendCall,
+} from './support/backend-routes'
 
 /**
  * How long the page needs to exhaust its retry burst: four attempts spread over roughly 3.5s of
@@ -23,98 +22,6 @@ const SETTLE_TIMEOUT_MS = 15_000
  * means is that a particular message is on screen, not that a particular sentence is.
  */
 const { problems: problemsCopy, ui: uiCopy } = messages
-
-/**
- * Where the backend listens, read from the same variable the app builds its request URLs from. A
- * hardcoded origin that drifted would stop intercepting silently, and the page would then fail for
- * reasons that look nothing like a stale constant.
- */
-const BACKEND_ORIGIN = (() => {
-  // Whatever the environment holds under the name the app itself reads
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
-
-  // The app cannot make a single call without it, so there would be nothing to intercept
-  if (apiUrl === undefined || apiUrl.trim() === '') {
-    throw new Error('Missing NEXT_PUBLIC_API_URL. It belongs in web/.env.')
-  }
-
-  // Trim the trailing slash so the route globs below have exactly one separator
-  return apiUrl.replace(/\/$/, '')
-})()
-
-/**
- * Counts the calls the app makes to the backend and answers every one of them as unreachable.
- *
- * Standing in for the API here rather than stopping the real one keeps these tests deterministic,
- * and lets a single test watch traffic stop and start. Clerk's own traffic is left alone, since the
- * page never gets as far as querying without it.
- *
- * @param page - The page to intercept requests on.
- *
- * @returns How many backend calls have been attempted so far.
- */
-async function failEveryBackendCall(page: Page): Promise<() => number> {
-  // Every attempt counts, including the ones React Query makes on its own
-  let attempts = 0
-
-  // Stand in for the whole backend
-  await page.route(`${BACKEND_ORIGIN}/**`, async (route) => {
-    // The call was made, whatever becomes of it
-    attempts++
-
-    // An aborted connection is what a stopped API looks like from the browser: no response, no status
-    await route.abort('connectionrefused')
-  })
-
-  // Hand back a reader rather than the counter itself, so the caller always sees the live value
-  return () => attempts
-}
-
-/**
- * Counts the calls the app makes to the backend and has the server refuse every one of them.
- *
- * A refusal is the opposite of an outage: the server answered, so repeating the request cannot help.
- *
- * @param page - The page to intercept requests on.
- * @param status - The client-error status to answer with.
- *
- * @returns How many backend calls have been attempted so far.
- */
-async function refuseEveryBackendCall(page: Page, status: number): Promise<() => number> {
-  // Every attempt counts, including the ones React Query makes on its own
-  let attempts = 0
-
-  // Stand in for the whole backend
-  await page.route(`${BACKEND_ORIGIN}/**`, async (route) => {
-    // The call was made, whatever becomes of it
-    attempts++
-
-    // A bodyless client error is what a rate limiter or an authorization check looks like here
-    await route.fulfill({ status })
-  })
-
-  // Hand back a reader rather than the counter itself, so the caller always sees the live value
-  return () => attempts
-}
-
-/**
- * Whether the local API is up, for the tests that need one call to genuinely succeed.
- *
- * @returns Whether the backend answered at all, whatever it answered with.
- */
-async function isBackendReachable(): Promise<boolean> {
-  // Reaching the origin at all is the whole question, so any thrown result means no
-  try {
-    // Any HTTP answer proves something is listening; the status itself is beside the point
-    await fetch(BACKEND_ORIGIN)
-
-    // Something answered
-    return true
-  } catch {
-    // Only a refused connection lands here
-    return false
-  }
-}
 
 /**
  * Simulates leaving the tab and coming back, which is what React Query watches to revive a query
