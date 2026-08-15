@@ -13,13 +13,11 @@ import {
   PopoverTrigger,
 } from '@/components/shared/components/Popover'
 import { cn } from '@/components/shared/utils/css-utils'
-import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
 
+import { useAuthGatedFilter } from '../hooks/use-auth-gated-filter'
 import { useUserLists } from '../hooks/use-user-lists'
-import { getProblemsPageUrl } from '../services/problem-routes'
 import type { SearchFiltersState } from '../types/problem-library-types'
 import type { UserListDto } from '../types/user-list-types'
-import { serializeFilters } from '../utils/search-url-serialization'
 import { ManageListsModal, type ManageListsModalRef } from './ManageListsModal'
 import { UserListMenuItems } from './UserListMenuItems'
 
@@ -46,11 +44,11 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
   // Translations for the filter sidebar
   const t = useTranslations('problems.filters')
 
-  // Everything but "all problems" needs an account, so the sign-in state gates the choices
-  const { isLoaded, isSignedIn } = useAuth()
+  // Whether anybody is signed in
+  const { isSignedIn } = useAuth()
 
-  // A function which asks a signed-out user to sign in, carrying where to return to
-  const showLoginPrompt = useLoginPromptToast()
+  // A function which applies a filter only a signed-in reader may have
+  const { applyOrPrompt } = useAuthGatedFilter(onFiltersChange)
 
   // Whether the dropdown is showing
   const [open, setOpen] = useState(false)
@@ -96,34 +94,15 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
 
   // A function which shows only the problems the user has liked
   const handleSelectLiked = () => {
-    // Nothing can be decided until the sign-in state is known
-    if (!isLoaded) return
+    // Liking is the user's own, so a signed-out one is asked to sign in and brought back to this
+    // same choice. Any list filter gives way to it either way, since the two narrow differently.
+    const wasAnswered = applyOrPrompt(
+      { ...filters, favoritesOnly: true, listContentId: null },
+      t('viewFavoritesAuthReason')
+    )
 
-    // A signed-out user is asked to sign in, and is brought back to this same choice
-    if (!isSignedIn) {
-      // The filters they were reaching for, which the return URL has to carry
-      const nextFilters = { ...filters, favoritesOnly: true, listContentId: null }
-
-      // Those filters as they read in a URL
-      const queryString = serializeFilters(nextFilters)
-
-      // Where to land once they are signed in
-      const redirectUrl = getProblemsPageUrl(queryString)
-
-      // The prompt says why the account is needed
-      showLoginPrompt({ reason: t('viewFavoritesAuthReason'), redirectUrl })
-
-      // The dropdown closes, since nothing has been chosen yet
-      setOpen(false)
-
-      return
-    }
-
-    // Signed in, so the choice applies straight away, and any list filter gives way to it
-    onFiltersChange({ ...filters, favoritesOnly: true, listContentId: null })
-
-    // The choice is made, so the dropdown closes behind it
-    setOpen(false)
+    // Whichever way it went, nothing is left hanging open behind an answered choice
+    if (wasAnswered) setOpen(false)
   }
 
   // A function which shows only the problems on one of the user's lists

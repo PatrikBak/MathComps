@@ -1,0 +1,1714 @@
+{
+  "filterResult": {
+    "problems": {
+      "items": [
+        {
+          "slug": "67-tst-d3-1",
+          "statementMarkdown": "Let $n$ be a given positive integer. A word of length\u00A0$3n$ that contains each of the letters $\\mathsf{A}$, $\\mathsf{B}$, and\u00A0$\\mathsf{C}$ exactly $n$ times is called a *chameleon*. In one step, we can swap any two adjacent letters. Prove that for every chameleon\u00A0$X$ there exists a chameleon\u00A0$Y$ such that $X$ cannot be transformed into $Y$ in fewer than $3n^2/2$ steps.\n",
+          "source": {
+            "season": { "slug": "67", "displayName": "Edition 67 (2017/2018)", "fullName": null },
+            "competition": [
+              {
+                "slug": "tst",
+                "displayName": "IMO/MEMO TST",
+                "fullName": "Team Selection Test for IMO and MEMO"
+              },
+              { "slug": "tst-d3", "displayName": "Day 3", "fullName": "Day 3" }
+            ],
+            "number": 1
+          },
+          "tags": [
+            { "slug": "combinatorics", "displayName": "Combinatorics", "tagType": "area" },
+            { "slug": "prove-existence", "displayName": "Prove Existence", "tagType": "goal" }
+          ],
+          "authors": [],
+          "similarProblems": [],
+          "solutionLink": null,
+          "liked": false,
+          "marked": false,
+          "likeCount": 0,
+          "commentCount": 0,
+          "listContentIds": []
+        }
+      ],
+      "page": 1,
+      "pageSize": 10,
+      "totalCount": 1
+    },
+    "baseOptions": {
+      "competitions": [
+        {
+          "path": "csmo",
+          "displayName": "CSMO",
+          "fullName": "Czech-Slovak Mathematical Olympiad",
+          "count": 2354,
+          "children": [
+            {
+              "path": "csmo-a",
+              "displayName": "A",
+              "fullName": "Category A",
+              "count": 614,
+              "children": [
+                {
+                  "path": "csmo-a-i",
+                  "displayName": "Home Round",
+                  "fullName": "Home Round",
+                  "count": 198,
+                  "children": []
+                },
+                {
+                  "path": "csmo-a-s",
+                  "displayName": "School Round",
+                  "fullName": "School Round",
+                  "count": 96,
+                  "children": []
+                },
+                {
+                  "path": "csmo-a-ii",
+                  "displayName": "Regional Round",
+                  "fullName": "Regional Round",
+                  "count": 128,
+                  "children": []
+                },
+                {
+                  "path": "csmo-a-iii",
+                  "displayName": "National Round",
+                  "fullName": "National Round",
+                  "count": 192,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "path": "csmo-b",
+              "displayName": "B",
+              "fullName": "Category B",
+              "count": 416,
+              "children": [
+                {
+                  "path": "csmo-b-i",
+                  "displayName": "Home Round",
+                  "fullName": "Home Round",
+                  "count": 192,
+                  "children": []
+                },
+                {
+                  "path": "csmo-b-s",
+                  "displayName": "School Round",
+                  "fullName": "School Round",
+                  "count": 96,
+                  "children": []
+                },
+                {
+                  "path": "csmo-b-ii",
+                  "displayName": "Regional Round",
+                  "fullName": "Regional Round",
+                  "count": 128,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "path": "csmo-c",
+              "displayName": "C",
+              "fullName": "Category C",
+              "count": 416,
+              "children": [
+                {
+                  "path": "csmo-c-i",
+                  "displayName": "Home Round",
+                  "fullName": "Home Round",
+                  "count": 192,
+                  "children": []
+                },
+                {
+                  "path": "csmo-c-s",
+                  "displayName": "School Round",
+                  "fullName": "School Round",
+                  "count": 96,
+                  "children": []
+                },
+                {
+                  "path": "csmo-c-ii",
+                  "displayName": "Regional Round",
+                  "fullName": "Regional Round",
+                  "count": 128,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "path": "csmo-z9",
+              "displayName": "Z9",
+              "fullName": "Category Z9",
+              "count": 251,
+              "children": [
+                {
+                  "path": "csmo-z9-i",
+                  "displayName": "Home Round",
+                  "fullName": "Home Round",
+                  "count": 102,
+                  "children": []
+                },
+                {
+                  "path": "csmo-z9-ii",
+                  "displayName": "District Round",
+                  "fullName": "District Round",
+                  "count": 79,
+                  "children": []
+                },
+                {
+                  "path": "csmo-z9-iii",
+                  "displayName": "Regional Round",
+                  "fullName": "Regional Round",
+                  "count": 70,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "path": "csmo-z8",
+              "displayName": "Z8",
+              "fullName": "Category Z8",
+              "count": 158,
+              "children": [
+                {
+                  "path": "csmo-z8-i",
+                  "displayName": "Home Round",
+                  "fullName": "Home Round",
+                  "count": 102,
+                  "children": []
+                },
+                {
+                  "path": "csmo-z8-ii",
+                  "displayName": "District Round",
+                  "fullName": "District Round",
+                  "count": 56,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "path": "csmo-z7",
+              "displayName": "Z7",
+              "fullName": "Category Z7",
+              "count": 149,
+              "children": [
+                {
+                  "path": "csmo-z7-i",
+                  "displayName": "Home Round",
+                  "fullName": "Home Round",
+                  "count": 96,
+                  "children": []
+                },
+                {
+                  "path": "csmo-z7-ii",
+                  "displayName": "District Round",
+                  "fullName": "District Round",
+                  "count": 53,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "path": "csmo-z6",
+              "displayName": "Z6",
+              "fullName": "Category Z6",
+              "count": 149,
+              "children": [
+                {
+                  "path": "csmo-z6-i",
+                  "displayName": "Home Round",
+                  "fullName": "Home Round",
+                  "count": 102,
+                  "children": []
+                },
+                {
+                  "path": "csmo-z6-ii",
+                  "displayName": "District Round",
+                  "fullName": "District Round",
+                  "count": 47,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "path": "csmo-z5",
+              "displayName": "Z5",
+              "fullName": "Category Z5",
+              "count": 165,
+              "children": [
+                {
+                  "path": "csmo-z5-i",
+                  "displayName": "Home Round",
+                  "fullName": "Home Round",
+                  "count": 105,
+                  "children": []
+                },
+                {
+                  "path": "csmo-z5-ii",
+                  "displayName": "District Round",
+                  "fullName": "District Round",
+                  "count": 60,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "path": "csmo-z4",
+              "displayName": "Z4",
+              "fullName": "Category Z4",
+              "count": 36,
+              "children": [
+                {
+                  "path": "csmo-z4-i",
+                  "displayName": "Home Round",
+                  "fullName": "Home Round",
+                  "count": 24,
+                  "children": []
+                },
+                {
+                  "path": "csmo-z4-ii",
+                  "displayName": "School Round",
+                  "fullName": "School Round",
+                  "count": 12,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "tst",
+          "displayName": "IMO/MEMO TST",
+          "fullName": "Team Selection Test for IMO and MEMO",
+          "count": 454,
+          "children": [
+            {
+              "path": "tst-d1",
+              "displayName": "Day 1",
+              "fullName": "Day 1",
+              "count": 97,
+              "children": []
+            },
+            {
+              "path": "tst-d2",
+              "displayName": "Day 2",
+              "fullName": "Day 2",
+              "count": 88,
+              "children": []
+            },
+            {
+              "path": "tst-d3",
+              "displayName": "Day 3",
+              "fullName": "Day 3",
+              "count": 92,
+              "children": []
+            },
+            {
+              "path": "tst-d4",
+              "displayName": "Day 4",
+              "fullName": "Day 4",
+              "count": 94,
+              "children": []
+            },
+            {
+              "path": "tst-d5",
+              "displayName": "Day 5",
+              "fullName": "Day 5",
+              "count": 83,
+              "children": []
+            }
+          ]
+        },
+        {
+          "path": "memo",
+          "displayName": "MEMO",
+          "fullName": "Middle European Mathematical Olympiad",
+          "count": 212,
+          "children": [
+            {
+              "path": "memo-i",
+              "displayName": "Individual",
+              "fullName": "Individual Round",
+              "count": 76,
+              "children": []
+            },
+            {
+              "path": "memo-t",
+              "displayName": "Team",
+              "fullName": "Team Round",
+              "count": 136,
+              "children": []
+            }
+          ]
+        },
+        {
+          "path": "imo",
+          "displayName": "IMO",
+          "fullName": "International Mathematical Olympiad",
+          "count": 156,
+          "children": []
+        },
+        {
+          "path": "caps",
+          "displayName": "CAPS",
+          "fullName": "Czech-Austrian-Polish-Slovak Match",
+          "count": 163,
+          "children": []
+        },
+        {
+          "path": "emo",
+          "displayName": "EMO",
+          "fullName": "European Mathematical Olympiad",
+          "count": 8,
+          "children": []
+        },
+        {
+          "path": "egmo",
+          "displayName": "EGMO",
+          "fullName": "European Girl's Mathematical Olympiad",
+          "count": 92,
+          "children": []
+        },
+        {
+          "path": "tstc",
+          "displayName": "CPSJ TST",
+          "fullName": "Team Selection Test for CPSJ",
+          "count": 30,
+          "children": []
+        },
+        {
+          "path": "cpsj",
+          "displayName": "CPSJ",
+          "fullName": "Czech-Polish-Slovak Junior Match",
+          "count": 154,
+          "children": [
+            {
+              "path": "cpsj-i",
+              "displayName": "Individual",
+              "fullName": "Individual Round",
+              "count": 70,
+              "children": []
+            },
+            {
+              "path": "cpsj-t",
+              "displayName": "Team",
+              "fullName": "Team Round",
+              "count": 84,
+              "children": []
+            }
+          ]
+        },
+        {
+          "path": "duogeo",
+          "displayName": "DuoGeo",
+          "fullName": "DuoGeo",
+          "count": 24,
+          "children": [
+            {
+              "path": "duogeo-zs",
+              "displayName": "Elementary",
+              "fullName": "Elementary School",
+              "count": 12,
+              "children": []
+            },
+            {
+              "path": "duogeo-ss",
+              "displayName": "High School",
+              "fullName": "High School",
+              "count": 12,
+              "children": []
+            }
+          ]
+        }
+      ],
+      "seasons": [
+        { "slug": "75", "displayName": "Edition 75 (2025/2026)", "fullName": null, "count": 143 },
+        { "slug": "74", "displayName": "Edition 74 (2024/2025)", "fullName": null, "count": 169 },
+        { "slug": "73", "displayName": "Edition 73 (2023/2024)", "fullName": null, "count": 157 },
+        { "slug": "72", "displayName": "Edition 72 (2022/2023)", "fullName": null, "count": 157 },
+        { "slug": "71", "displayName": "Edition 71 (2021/2022)", "fullName": null, "count": 114 },
+        { "slug": "70", "displayName": "Edition 70 (2020/2021)", "fullName": null, "count": 157 },
+        { "slug": "69", "displayName": "Edition 69 (2019/2020)", "fullName": null, "count": 120 },
+        { "slug": "68", "displayName": "Edition 68 (2018/2019)", "fullName": null, "count": 152 },
+        { "slug": "67", "displayName": "Edition 67 (2017/2018)", "fullName": null, "count": 154 },
+        { "slug": "66", "displayName": "Edition 66 (2016/2017)", "fullName": null, "count": 154 },
+        { "slug": "65", "displayName": "Edition 65 (2015/2016)", "fullName": null, "count": 154 },
+        { "slug": "64", "displayName": "Edition 64 (2014/2015)", "fullName": null, "count": 154 },
+        { "slug": "63", "displayName": "Edition 63 (2013/2014)", "fullName": null, "count": 154 },
+        { "slug": "62", "displayName": "Edition 62 (2012/2013)", "fullName": null, "count": 154 },
+        { "slug": "61", "displayName": "Edition 61 (2011/2012)", "fullName": null, "count": 156 },
+        { "slug": "60", "displayName": "Edition 60 (2010/2011)", "fullName": null, "count": 146 },
+        { "slug": "59", "displayName": "Edition 59 (2009/2010)", "fullName": null, "count": 143 },
+        { "slug": "58", "displayName": "Edition 58 (2008/2009)", "fullName": null, "count": 109 },
+        { "slug": "57", "displayName": "Edition 57 (2007/2008)", "fullName": null, "count": 107 },
+        { "slug": "56", "displayName": "Edition 56 (2006/2007)", "fullName": null, "count": 85 },
+        { "slug": "55", "displayName": "Edition 55 (2005/2006)", "fullName": null, "count": 85 },
+        { "slug": "54", "displayName": "Edition 54 (2004/2005)", "fullName": null, "count": 100 },
+        { "slug": "53", "displayName": "Edition 53 (2003/2004)", "fullName": null, "count": 86 },
+        { "slug": "52", "displayName": "Edition 52 (2002/2003)", "fullName": null, "count": 76 },
+        { "slug": "51", "displayName": "Edition 51 (2001/2002)", "fullName": null, "count": 77 },
+        { "slug": "50", "displayName": "Edition 50 (2000/2001)", "fullName": null, "count": 77 },
+        { "slug": "49", "displayName": "Edition 49 (1999/2000)", "fullName": null, "count": 75 },
+        { "slug": "48", "displayName": "Edition 48 (1998/1999)", "fullName": null, "count": 46 },
+        { "slug": "47", "displayName": "Edition 47 (1997/1998)", "fullName": null, "count": 45 },
+        { "slug": "46", "displayName": "Edition 46 (1996/1997)", "fullName": null, "count": 45 },
+        { "slug": "45", "displayName": "Edition 45 (1995/1996)", "fullName": null, "count": 45 },
+        { "slug": "44", "displayName": "Edition 44 (1994/1995)", "fullName": null, "count": 45 },
+        { "slug": "43", "displayName": "Edition 43 (1993/1994)", "fullName": null, "count": 6 }
+      ],
+      "problemNumbers": [
+        { "slug": "1", "displayName": "1", "fullName": null, "count": 800 },
+        { "slug": "2", "displayName": "2", "fullName": null, "count": 799 },
+        { "slug": "3", "displayName": "3", "fullName": null, "count": 796 },
+        { "slug": "4", "displayName": "4", "fullName": null, "count": 556 },
+        { "slug": "5", "displayName": "5", "fullName": null, "count": 340 },
+        { "slug": "6", "displayName": "6", "fullName": null, "count": 320 },
+        { "slug": "7", "displayName": "7", "fullName": null, "count": 18 },
+        { "slug": "8", "displayName": "8", "fullName": null, "count": 18 }
+      ],
+      "tags": [
+        {
+          "slug": "geometry",
+          "displayName": "Geometry",
+          "fullName": null,
+          "count": 948,
+          "tagType": "area"
+        },
+        {
+          "slug": "prove-general-statement",
+          "displayName": "Prove General Statement",
+          "fullName": null,
+          "count": 909,
+          "tagType": "goal"
+        },
+        {
+          "slug": "find-all-solutions",
+          "displayName": "Find All Solutions",
+          "fullName": null,
+          "count": 897,
+          "tagType": "goal"
+        },
+        {
+          "slug": "number-theory",
+          "displayName": "Number Theory",
+          "fullName": null,
+          "count": 885,
+          "tagType": "area"
+        },
+        {
+          "slug": "algebra",
+          "displayName": "Algebra",
+          "fullName": null,
+          "count": 716,
+          "tagType": "area"
+        },
+        {
+          "slug": "calculate-value",
+          "displayName": "Calculate Value",
+          "fullName": null,
+          "count": 666,
+          "tagType": "goal"
+        },
+        {
+          "slug": "optimization-problem",
+          "displayName": "Optimization Problem",
+          "fullName": null,
+          "count": 499,
+          "tagType": "goal"
+        },
+        {
+          "slug": "divisibility",
+          "displayName": "Divisibility",
+          "fullName": null,
+          "count": 430,
+          "tagType": "type"
+        },
+        {
+          "slug": "combinatorics",
+          "displayName": "Combinatorics",
+          "fullName": null,
+          "count": 424,
+          "tagType": "area"
+        },
+        {
+          "slug": "invariant",
+          "displayName": "Invariant",
+          "fullName": null,
+          "count": 393,
+          "tagType": "technique"
+        },
+        {
+          "slug": "circumcircle",
+          "displayName": "Circumcircle",
+          "fullName": null,
+          "count": 278,
+          "tagType": "type"
+        },
+        {
+          "slug": "grid",
+          "displayName": "Grid",
+          "fullName": null,
+          "count": 243,
+          "tagType": "type"
+        },
+        {
+          "slug": "system-of-equations",
+          "displayName": "System of Equations",
+          "fullName": null,
+          "count": 231,
+          "tagType": "type"
+        },
+        {
+          "slug": "area",
+          "displayName": "Area",
+          "fullName": null,
+          "count": 228,
+          "tagType": "type"
+        },
+        {
+          "slug": "equation",
+          "displayName": "Equation",
+          "fullName": null,
+          "count": 216,
+          "tagType": "type"
+        },
+        {
+          "slug": "inequality",
+          "displayName": "Inequality",
+          "fullName": null,
+          "count": 199,
+          "tagType": "type"
+        },
+        {
+          "slug": "prove-existence",
+          "displayName": "Prove Existence",
+          "fullName": null,
+          "count": 170,
+          "tagType": "goal"
+        },
+        {
+          "slug": "count-solutions",
+          "displayName": "Count Solutions",
+          "fullName": null,
+          "count": 164,
+          "tagType": "goal"
+        },
+        {
+          "slug": "tangent-line",
+          "displayName": "Tangent Line",
+          "fullName": null,
+          "count": 159,
+          "tagType": "type"
+        },
+        {
+          "slug": "prime-numbers",
+          "displayName": "Prime Numbers",
+          "fullName": null,
+          "count": 150,
+          "tagType": "type"
+        },
+        {
+          "slug": "combinatorial-geometry",
+          "displayName": "Combinatorial Geometry",
+          "fullName": null,
+          "count": 149,
+          "tagType": "area"
+        },
+        {
+          "slug": "incircle",
+          "displayName": "Incircle",
+          "fullName": null,
+          "count": 138,
+          "tagType": "type"
+        },
+        {
+          "slug": "extremal-principle",
+          "displayName": "Extremal Principle",
+          "fullName": null,
+          "count": 124,
+          "tagType": "technique"
+        },
+        {
+          "slug": "square",
+          "displayName": "Square",
+          "fullName": null,
+          "count": 124,
+          "tagType": "type"
+        },
+        {
+          "slug": "rectangle",
+          "displayName": "Rectangle",
+          "fullName": null,
+          "count": 123,
+          "tagType": "type"
+        },
+        {
+          "slug": "pythagorean-theorem",
+          "displayName": "Pythagorean Theorem",
+          "fullName": null,
+          "count": 122,
+          "tagType": "technique"
+        },
+        {
+          "slug": "right-triangle",
+          "displayName": "Right Triangle",
+          "fullName": null,
+          "count": 119,
+          "tagType": "type"
+        },
+        {
+          "slug": "functional-equation",
+          "displayName": "Functional Equation",
+          "fullName": null,
+          "count": 113,
+          "tagType": "area"
+        },
+        {
+          "slug": "cyclic-quadrilateral",
+          "displayName": "Cyclic Quadrilateral",
+          "fullName": null,
+          "count": 95,
+          "tagType": "type"
+        },
+        {
+          "slug": "permutation",
+          "displayName": "Permutation",
+          "fullName": null,
+          "count": 91,
+          "tagType": "type"
+        },
+        {
+          "slug": "mathematical-induction",
+          "displayName": "Mathematical Induction",
+          "fullName": null,
+          "count": 85,
+          "tagType": "technique"
+        },
+        {
+          "slug": "absolute-value",
+          "displayName": "Absolute Value",
+          "fullName": null,
+          "count": 82,
+          "tagType": "type"
+        },
+        {
+          "slug": "does-solution-exist",
+          "displayName": "Does Solution Exist?",
+          "fullName": null,
+          "count": 82,
+          "tagType": "goal"
+        },
+        {
+          "slug": "perimeter",
+          "displayName": "Perimeter",
+          "fullName": null,
+          "count": 81,
+          "tagType": "type"
+        },
+        {
+          "slug": "trapezoid",
+          "displayName": "Trapezoid",
+          "fullName": null,
+          "count": 80,
+          "tagType": "type"
+        },
+        {
+          "slug": "pigeonhole-principle",
+          "displayName": "Pigeonhole Principle",
+          "fullName": null,
+          "count": 76,
+          "tagType": "technique"
+        },
+        {
+          "slug": "locus",
+          "displayName": "Locus",
+          "fullName": null,
+          "count": 74,
+          "tagType": "type"
+        },
+        {
+          "slug": "polynomial",
+          "displayName": "Polynomial",
+          "fullName": null,
+          "count": 73,
+          "tagType": "type"
+        },
+        {
+          "slug": "parallelogram",
+          "displayName": "Parallelogram",
+          "fullName": null,
+          "count": 70,
+          "tagType": "type"
+        },
+        {
+          "slug": "geometric-construction",
+          "displayName": "Geometric Construction",
+          "fullName": null,
+          "count": 69,
+          "tagType": "goal"
+        },
+        {
+          "slug": "recurrence-sequence",
+          "displayName": "Recurrence Sequence",
+          "fullName": null,
+          "count": 69,
+          "tagType": "type"
+        },
+        {
+          "slug": "factorization",
+          "displayName": "Factorization",
+          "fullName": null,
+          "count": 63,
+          "tagType": "technique"
+        },
+        {
+          "slug": "prove-equivalence",
+          "displayName": "Prove Equivalence",
+          "fullName": null,
+          "count": 61,
+          "tagType": "goal"
+        },
+        {
+          "slug": "orthocenter",
+          "displayName": "Orthocenter",
+          "fullName": null,
+          "count": 60,
+          "tagType": "type"
+        },
+        {
+          "slug": "am-gm-inequality",
+          "displayName": "AM-GM Inequality",
+          "fullName": null,
+          "count": 59,
+          "tagType": "technique"
+        },
+        { "slug": "mean", "displayName": "Mean", "fullName": null, "count": 58, "tagType": "type" },
+        {
+          "slug": "vietas-formulas",
+          "displayName": "Vieta's Formulas",
+          "fullName": null,
+          "count": 52,
+          "tagType": "technique"
+        },
+        {
+          "slug": "3d-geometry",
+          "displayName": "3D Geometry",
+          "fullName": null,
+          "count": 49,
+          "tagType": "area"
+        },
+        { "slug": "game", "displayName": "Game", "fullName": null, "count": 49, "tagType": "type" },
+        { "slug": "gcd", "displayName": "GCD", "fullName": null, "count": 47, "tagType": "type" },
+        {
+          "slug": "median",
+          "displayName": "Median",
+          "fullName": null,
+          "count": 43,
+          "tagType": "type"
+        },
+        {
+          "slug": "digit-sum",
+          "displayName": "Digit Sum",
+          "fullName": null,
+          "count": 42,
+          "tagType": "type"
+        },
+        {
+          "slug": "centroid",
+          "displayName": "Centroid",
+          "fullName": null,
+          "count": 41,
+          "tagType": "type"
+        },
+        {
+          "slug": "graph-theory",
+          "displayName": "Graph Theory",
+          "fullName": null,
+          "count": 39,
+          "tagType": "area"
+        },
+        {
+          "slug": "floor-function",
+          "displayName": "Floor Function",
+          "fullName": null,
+          "count": 36,
+          "tagType": "type"
+        },
+        {
+          "slug": "iterations",
+          "displayName": "Iterations",
+          "fullName": null,
+          "count": 36,
+          "tagType": "type"
+        },
+        {
+          "slug": "quadratic",
+          "displayName": "Quadratic",
+          "fullName": null,
+          "count": 35,
+          "tagType": "type"
+        },
+        {
+          "slug": "remainder",
+          "displayName": "Remainder",
+          "fullName": null,
+          "count": 34,
+          "tagType": "type"
+        },
+        {
+          "slug": "prove-non-existence",
+          "displayName": "Prove Non-existence",
+          "fullName": null,
+          "count": 33,
+          "tagType": "goal"
+        },
+        {
+          "slug": "winning-strategy",
+          "displayName": "Winning Strategy",
+          "fullName": null,
+          "count": 32,
+          "tagType": "goal"
+        },
+        {
+          "slug": "find-solution",
+          "displayName": "Find Solution",
+          "fullName": null,
+          "count": 30,
+          "tagType": "goal"
+        },
+        { "slug": "lcm", "displayName": "LCM", "fullName": null, "count": 29, "tagType": "type" },
+        {
+          "slug": "arithmetic-sequence",
+          "displayName": "Arithmetic Sequence",
+          "fullName": null,
+          "count": 28,
+          "tagType": "type"
+        },
+        {
+          "slug": "find-solution-if-exists",
+          "displayName": "Find Solution If Exists",
+          "fullName": null,
+          "count": 28,
+          "tagType": "goal"
+        },
+        {
+          "slug": "is-it-generally-true",
+          "displayName": "Is It Generally True?",
+          "fullName": null,
+          "count": 28,
+          "tagType": "goal"
+        },
+        {
+          "slug": "logic-problem",
+          "displayName": "Logic Problem",
+          "fullName": null,
+          "count": 28,
+          "tagType": "area"
+        },
+        {
+          "slug": "volume",
+          "displayName": "Volume",
+          "fullName": null,
+          "count": 27,
+          "tagType": "type"
+        },
+        {
+          "slug": "excircle",
+          "displayName": "Excircle",
+          "fullName": null,
+          "count": 26,
+          "tagType": "type"
+        },
+        {
+          "slug": "law-of-sines",
+          "displayName": "Law of Sines",
+          "fullName": null,
+          "count": 26,
+          "tagType": "technique"
+        },
+        {
+          "slug": "angle-bisector-theorem",
+          "displayName": "Angle Bisector Theorem",
+          "fullName": null,
+          "count": 22,
+          "tagType": "technique"
+        },
+        {
+          "slug": "coprime-numbers",
+          "displayName": "Coprime Numbers",
+          "fullName": null,
+          "count": 22,
+          "tagType": "type"
+        },
+        {
+          "slug": "power-of-a-point",
+          "displayName": "Power of a Point",
+          "fullName": null,
+          "count": 18,
+          "tagType": "technique"
+        },
+        {
+          "slug": "rhombus",
+          "displayName": "Rhombus",
+          "fullName": null,
+          "count": 18,
+          "tagType": "type"
+        },
+        {
+          "slug": "trigonometry",
+          "displayName": "Trigonometry",
+          "fullName": null,
+          "count": 18,
+          "tagType": "area"
+        },
+        {
+          "slug": "cuboid",
+          "displayName": "Cuboid",
+          "fullName": null,
+          "count": 17,
+          "tagType": "type"
+        },
+        {
+          "slug": "palindrome",
+          "displayName": "Palindrome",
+          "fullName": null,
+          "count": 16,
+          "tagType": "type"
+        },
+        {
+          "slug": "surface-area",
+          "displayName": "Surface Area",
+          "fullName": null,
+          "count": 16,
+          "tagType": "type"
+        },
+        {
+          "slug": "tangential-quadrilateral",
+          "displayName": "Tangential Quadrilateral",
+          "fullName": null,
+          "count": 16,
+          "tagType": "type"
+        },
+        {
+          "slug": "factorial",
+          "displayName": "Factorial",
+          "fullName": null,
+          "count": 15,
+          "tagType": "type"
+        },
+        {
+          "slug": "law-of-cosines",
+          "displayName": "Law of Cosines",
+          "fullName": null,
+          "count": 15,
+          "tagType": "technique"
+        },
+        {
+          "slug": "speed",
+          "displayName": "Speed",
+          "fullName": null,
+          "count": 15,
+          "tagType": "type"
+        },
+        {
+          "slug": "cauchy-schwarz-inequality",
+          "displayName": "Cauchy-Schwarz Inequality",
+          "fullName": null,
+          "count": 14,
+          "tagType": "technique"
+        },
+        {
+          "slug": "cryptarithm",
+          "displayName": "Cryptarithm",
+          "fullName": null,
+          "count": 14,
+          "tagType": "type"
+        },
+        {
+          "slug": "euclids-theorem",
+          "displayName": "Euclid's Theorem",
+          "fullName": null,
+          "count": 14,
+          "tagType": "technique"
+        },
+        {
+          "slug": "prove-uniqueness",
+          "displayName": "Prove Uniqueness",
+          "fullName": null,
+          "count": 12,
+          "tagType": "goal"
+        },
+        {
+          "slug": "binomial-coefficient",
+          "displayName": "Binomial Coefficient",
+          "fullName": null,
+          "count": 10,
+          "tagType": "type"
+        },
+        {
+          "slug": "chinese-remainder-theorem",
+          "displayName": "Chinese Remainder Theorem",
+          "fullName": null,
+          "count": 10,
+          "tagType": "technique"
+        },
+        {
+          "slug": "herons-formula",
+          "displayName": "Heron's Formula",
+          "fullName": null,
+          "count": 8,
+          "tagType": "technique"
+        },
+        {
+          "slug": "number-base",
+          "displayName": "Number Base",
+          "fullName": null,
+          "count": 8,
+          "tagType": "type"
+        },
+        {
+          "slug": "periodic-sequence",
+          "displayName": "Periodic Sequence",
+          "fullName": null,
+          "count": 7,
+          "tagType": "type"
+        },
+        {
+          "slug": "fibonacci-sequence",
+          "displayName": "Fibonacci Sequence",
+          "fullName": null,
+          "count": 6,
+          "tagType": "type"
+        },
+        {
+          "slug": "eulers-totient-function",
+          "displayName": "Euler's Totient Function",
+          "fullName": null,
+          "count": 5,
+          "tagType": "technique"
+        },
+        {
+          "slug": "fermats-little-theorem",
+          "displayName": "Fermat's Little Theorem",
+          "fullName": null,
+          "count": 5,
+          "tagType": "technique"
+        },
+        {
+          "slug": "fixed-point",
+          "displayName": "Fixed Point",
+          "fullName": null,
+          "count": 5,
+          "tagType": "type"
+        },
+        {
+          "slug": "cevas-theorem",
+          "displayName": "Ceva's Theorem",
+          "fullName": null,
+          "count": 4,
+          "tagType": "technique"
+        },
+        {
+          "slug": "ptolemys-theorem",
+          "displayName": "Ptolemy's Theorem",
+          "fullName": null,
+          "count": 4,
+          "tagType": "technique"
+        },
+        {
+          "slug": "circle-inversion",
+          "displayName": "Circle Inversion",
+          "fullName": null,
+          "count": 3,
+          "tagType": "technique"
+        },
+        {
+          "slug": "geometric-sequence",
+          "displayName": "Geometric Sequence",
+          "fullName": null,
+          "count": 3,
+          "tagType": "type"
+        },
+        {
+          "slug": "jensens-inequality",
+          "displayName": "Jensen's Inequality",
+          "fullName": null,
+          "count": 3,
+          "tagType": "technique"
+        },
+        {
+          "slug": "menelauss-theorem",
+          "displayName": "Menelaus's Theorem",
+          "fullName": null,
+          "count": 3,
+          "tagType": "technique"
+        },
+        {
+          "slug": "rearrangement-inequality",
+          "displayName": "Rearrangement Inequality",
+          "fullName": null,
+          "count": 3,
+          "tagType": "technique"
+        },
+        {
+          "slug": "pascals-theorem",
+          "displayName": "Pascal's Theorem",
+          "fullName": null,
+          "count": 2,
+          "tagType": "technique"
+        },
+        {
+          "slug": "probabilistic-method",
+          "displayName": "Probabilistic Method",
+          "fullName": null,
+          "count": 2,
+          "tagType": "technique"
+        },
+        {
+          "slug": "miquel-point",
+          "displayName": "Miquel Point",
+          "fullName": null,
+          "count": 1,
+          "tagType": "technique"
+        },
+        {
+          "slug": "vieta-jumping",
+          "displayName": "Vieta Jumping",
+          "fullName": null,
+          "count": 1,
+          "tagType": "technique"
+        }
+      ],
+      "authors": [
+        { "slug": "jaromir-simsa", "displayName": "Jaromír Šimša", "fullName": null, "count": 282 },
+        { "slug": "patrik-bak", "displayName": "Patrik Bak", "fullName": null, "count": 192 },
+        {
+          "slug": "jaroslav-svrcek",
+          "displayName": "Jaroslav Švrček",
+          "fullName": null,
+          "count": 182
+        },
+        { "slug": "libuse-hozova", "displayName": "Libuše Hozová", "fullName": null, "count": 126 },
+        { "slug": "josef-tkadlec", "displayName": "Josef Tkadlec", "fullName": null, "count": 113 },
+        { "slug": "jan-mazak", "displayName": "Ján Mazák", "fullName": null, "count": 96 },
+        {
+          "slug": "jaroslav-zhouf",
+          "displayName": "Jaroslav Zhouf",
+          "fullName": null,
+          "count": 89
+        },
+        { "slug": "pavel-cernek", "displayName": "Pavel Černek", "fullName": null, "count": 85 },
+        { "slug": "libor-simunek", "displayName": "Libor Šimůnek", "fullName": null, "count": 81 },
+        {
+          "slug": "michaela-petrova",
+          "displayName": "Michaela Petrová",
+          "fullName": null,
+          "count": 81
+        },
+        {
+          "slug": "monika-dillingerova",
+          "displayName": "Monika Dillingerová",
+          "fullName": null,
+          "count": 79
+        },
+        { "slug": "marta-volfova", "displayName": "Marta Volfová", "fullName": null, "count": 78 },
+        { "slug": "erika-novotna", "displayName": "Erika Novotná", "fullName": null, "count": 71 },
+        {
+          "slug": "pavel-leischner",
+          "displayName": "Pavel Leischner",
+          "fullName": null,
+          "count": 69
+        },
+        {
+          "slug": "karel-pazourek",
+          "displayName": "Karel Pazourek",
+          "fullName": null,
+          "count": 66
+        },
+        { "slug": "tomas-jurik", "displayName": "Tomáš Jurík", "fullName": null, "count": 64 },
+        {
+          "slug": "eva-semeradova",
+          "displayName": "Eva Semerádová",
+          "fullName": null,
+          "count": 54
+        },
+        { "slug": "pavel-calabek", "displayName": "Pavel Calábek", "fullName": null, "count": 48 },
+        { "slug": "pavel-novotny", "displayName": "Pavel Novotný", "fullName": null, "count": 46 },
+        { "slug": "peter-novotny", "displayName": "Peter Novotný", "fullName": null, "count": 46 },
+        {
+          "slug": "michal-rolinek",
+          "displayName": "Michal Rolínek",
+          "fullName": null,
+          "count": 41
+        },
+        {
+          "slug": "vojtech-balint",
+          "displayName": "Vojtech Bálint",
+          "fullName": null,
+          "count": 39
+        },
+        {
+          "slug": "svetlana-bednarova",
+          "displayName": "Svetlana Bednářová",
+          "fullName": null,
+          "count": 36
+        },
+        { "slug": "emil-kovac", "displayName": "Emil Kováč", "fullName": null, "count": 29 },
+        {
+          "slug": "lucie-ruzickova",
+          "displayName": "Lucie Růžičková",
+          "fullName": null,
+          "count": 28
+        },
+        {
+          "slug": "marie-krejcova",
+          "displayName": "Marie Krejčová",
+          "fullName": null,
+          "count": 28
+        },
+        {
+          "slug": "maria-domanyova",
+          "displayName": "Mária Dományová",
+          "fullName": null,
+          "count": 25
+        },
+        { "slug": "tomas-barta", "displayName": "Tomáš Bárta", "fullName": null, "count": 23 },
+        { "slug": "martin-mach", "displayName": "Martin Mach", "fullName": null, "count": 22 },
+        { "slug": "eva-patakova", "displayName": "Eva Patáková", "fullName": null, "count": 18 },
+        { "slug": "leo-bocek", "displayName": "Leo Boček", "fullName": null, "count": 18 },
+        {
+          "slug": "radek-horensky",
+          "displayName": "Radek Horenský",
+          "fullName": null,
+          "count": 18
+        },
+        {
+          "slug": "sarka-gergelitsova",
+          "displayName": "Šárka Gergelitsová",
+          "fullName": null,
+          "count": 18
+        },
+        { "slug": "jozsef-foldes", "displayName": "József Földes", "fullName": null, "count": 17 },
+        {
+          "slug": "alzbeta-bohinikova",
+          "displayName": "Alžbeta Bohiníková",
+          "fullName": null,
+          "count": 16
+        },
+        { "slug": "martin-panak", "displayName": "Martin Panák", "fullName": null, "count": 16 },
+        { "slug": "petr-hlineny", "displayName": "Petr Hliněný", "fullName": null, "count": 16 },
+        {
+          "slug": "iveta-jancigova",
+          "displayName": "Iveta Jančigová",
+          "fullName": null,
+          "count": 15
+        },
+        { "slug": "lenka-dedkova", "displayName": "Lenka Dedková", "fullName": null, "count": 15 },
+        { "slug": "marian-macko", "displayName": "Marián Macko", "fullName": null, "count": 14 },
+        { "slug": "ukasz-bozyk", "displayName": "Łukasz Bożyk", "fullName": null, "count": 13 },
+        {
+          "slug": "veronika-hucikova",
+          "displayName": "Veronika Hucíková",
+          "fullName": null,
+          "count": 13
+        },
+        {
+          "slug": "martin-melicher",
+          "displayName": "Martin Melicher",
+          "fullName": null,
+          "count": 12
+        },
+        { "slug": "petr-kanovsky", "displayName": "Petr Kaňovský", "fullName": null, "count": 12 },
+        { "slug": "michal-pecho", "displayName": "Michal Pecho", "fullName": null, "count": 11 },
+        {
+          "slug": "rastislav-kollar",
+          "displayName": "Rastislav Kollár",
+          "fullName": null,
+          "count": 11
+        },
+        {
+          "slug": "walther-janous",
+          "displayName": "Walther Janous",
+          "fullName": null,
+          "count": 11
+        },
+        { "slug": "david-hruska", "displayName": "David Hruška", "fullName": null, "count": 10 },
+        { "slug": "jan-babela", "displayName": "Ján Bábeľa", "fullName": null, "count": 10 },
+        { "slug": "jozef-rajnik", "displayName": "Jozef Rajník", "fullName": null, "count": 9 },
+        { "slug": "michal-janik", "displayName": "Michal Janík", "fullName": null, "count": 9 },
+        {
+          "slug": "miroslava-smitkova",
+          "displayName": "Miroslava Smitková",
+          "fullName": null,
+          "count": 9
+        },
+        { "slug": "zdenek-pezlar", "displayName": "Zdeněk Pezlar", "fullName": null, "count": 9 },
+        { "slug": "ales-kobza", "displayName": "Aleš Kobza", "fullName": null, "count": 8 },
+        {
+          "slug": "katarina-jasencakova",
+          "displayName": "Katarína Jasenčáková",
+          "fullName": null,
+          "count": 8
+        },
+        { "slug": "dominik-burek", "displayName": "Dominik Burek", "fullName": null, "count": 7 },
+        {
+          "slug": "eliska-macakova",
+          "displayName": "Eliška Macáková",
+          "fullName": null,
+          "count": 7
+        },
+        {
+          "slug": "dominik-martin-rigasz",
+          "displayName": "Dominik Martin Rigász",
+          "fullName": null,
+          "count": 6
+        },
+        { "slug": "jozef-moravcik", "displayName": "Jozef Moravčík", "fullName": null, "count": 6 },
+        {
+          "slug": "silvia-bodlakova",
+          "displayName": "Silvia Bodláková",
+          "fullName": null,
+          "count": 6
+        },
+        { "slug": "vojtech-zadnik", "displayName": "Vojtěch Žádník", "fullName": null, "count": 6 },
+        { "slug": "antonin-vrba", "displayName": "Antonín Vrba", "fullName": null, "count": 5 },
+        { "slug": "jan-kratochvil", "displayName": "Jan Kratochvíl", "fullName": null, "count": 5 },
+        {
+          "slug": "katarina-cernekova",
+          "displayName": "Katarína Černeková",
+          "fullName": null,
+          "count": 5
+        },
+        { "slug": "sarka-ptackova", "displayName": "Šárka Ptáčková", "fullName": null, "count": 5 },
+        { "slug": "jana-kopfova", "displayName": "Jana Kopfová", "fullName": null, "count": 4 },
+        { "slug": "kamil-duszenko", "displayName": "Kamil Duszenko", "fullName": null, "count": 4 },
+        { "slug": "marie-raabova", "displayName": "Marie Raabová", "fullName": null, "count": 4 },
+        { "slug": "martin-cadek", "displayName": "Martin Čadek", "fullName": null, "count": 4 },
+        {
+          "slug": "miroslava-farkas-smitkova",
+          "displayName": "Miroslava Farkas Smitková",
+          "fullName": null,
+          "count": 4
+        },
+        { "slug": "radovan-kucera", "displayName": "Radovan Kučera", "fullName": null, "count": 4 },
+        { "slug": "waldemar-pompe", "displayName": "Waldemar Pompe", "fullName": null, "count": 4 },
+        {
+          "slug": "anastasia-bredichina",
+          "displayName": "Anastasia Bredichina",
+          "fullName": null,
+          "count": 3
+        },
+        { "slug": "balint-hujter", "displayName": "Bálint Hujter", "fullName": null, "count": 3 },
+        { "slug": "eva-ridka", "displayName": "Eva Řídká", "fullName": null, "count": 3 },
+        {
+          "slug": "jarosaw-wroblewski",
+          "displayName": "Jarosław Wróblewski",
+          "fullName": null,
+          "count": 3
+        },
+        {
+          "slug": "marian-poturnay",
+          "displayName": "Marián Poturnay",
+          "fullName": null,
+          "count": 3
+        },
+        {
+          "slug": "miroslav-englis",
+          "displayName": "Miroslav Engliš",
+          "fullName": null,
+          "count": 3
+        },
+        { "slug": "patrik-vrba", "displayName": "Patrik Vrba", "fullName": null, "count": 3 },
+        { "slug": "pavel-salom", "displayName": "Pavel Šalom", "fullName": null, "count": 3 },
+        { "slug": "pavel-tlusty", "displayName": "Pavel Tlustý", "fullName": null, "count": 3 },
+        { "slug": "robert-toth", "displayName": "Róbert Tóth", "fullName": null, "count": 3 },
+        {
+          "slug": "stanislava-sojakova",
+          "displayName": "Stanislava Sojáková",
+          "fullName": null,
+          "count": 3
+        },
+        { "slug": "tomasz-ciesla", "displayName": "Tomasz Cieśla", "fullName": null, "count": 3 },
+        {
+          "slug": "tomasz-przybylowski",
+          "displayName": "Tomasz Przybylowski",
+          "fullName": null,
+          "count": 3
+        },
+        {
+          "slug": "veronika-bachrata",
+          "displayName": "Veronika Bachratá",
+          "fullName": null,
+          "count": 3
+        },
+        { "slug": "vladimir-dedek", "displayName": "Vladimír Dedek", "fullName": null, "count": 3 },
+        {
+          "slug": "barbara-roszkowska-lech",
+          "displayName": "Barbara Roszkowska-Lech",
+          "fullName": null,
+          "count": 2
+        },
+        { "slug": "ema-cudaiova", "displayName": "Ema Čudaiová", "fullName": null, "count": 2 },
+        {
+          "slug": "frantisek-steinhauser",
+          "displayName": "František Steinhauser",
+          "fullName": null,
+          "count": 2
+        },
+        { "slug": "gerd-baron", "displayName": "Gerd Baron", "fullName": null, "count": 2 },
+        { "slug": "ivan-novak", "displayName": "Ivan Novak", "fullName": null, "count": 2 },
+        { "slug": "jakub-lowit", "displayName": "Jakub Löwit", "fullName": null, "count": 2 },
+        { "slug": "jan-tesinsky", "displayName": "Jan Těšínský", "fullName": null, "count": 2 },
+        {
+          "slug": "jerzy-bednarczuk",
+          "displayName": "Jerzy Bednarczuk",
+          "fullName": null,
+          "count": 2
+        },
+        {
+          "slug": "josef-greilhuber",
+          "displayName": "Josef Greilhuber",
+          "fullName": null,
+          "count": 2
+        },
+        { "slug": "karel-horak", "displayName": "Karel Horák", "fullName": null, "count": 2 },
+        {
+          "slug": "lucia-ruzickova",
+          "displayName": "Lucia Růžičková",
+          "fullName": null,
+          "count": 2
+        },
+        { "slug": "maria-krallova", "displayName": "Mária Krállová", "fullName": null, "count": 2 },
+        { "slug": "marian-niepel", "displayName": "Marián Niepel", "fullName": null, "count": 2 },
+        {
+          "slug": "michael-reitmeir",
+          "displayName": "Michael Reitmeir",
+          "fullName": null,
+          "count": 2
+        },
+        { "slug": "radovan-svarc", "displayName": "Radovan Švarc", "fullName": null, "count": 2 },
+        {
+          "slug": "stanislav-travnicek",
+          "displayName": "Stanislav Trávníček",
+          "fullName": null,
+          "count": 2
+        },
+        { "slug": "vadym-solomka", "displayName": "Vadym Solomka", "fullName": null, "count": 2 },
+        { "slug": "adam-osekowski", "displayName": "Adam Osekowski", "fullName": null, "count": 1 },
+        {
+          "slug": "andrej-jancarik",
+          "displayName": "Andrej Jančařík",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "bartomiej-bzdega",
+          "displayName": "Bartłomiej Bzdęga",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "bernd-mulansky", "displayName": "Bernd Mulansky", "fullName": null, "count": 1 },
+        { "slug": "dag-hruby", "displayName": "Dag Hrubý", "fullName": null, "count": 1 },
+        {
+          "slug": "daniela-kovalcikova",
+          "displayName": "Daniela Kovalčíková",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "daniel-holmes", "displayName": "Daniel Holmes", "fullName": null, "count": 1 },
+        {
+          "slug": "david-reichmann",
+          "displayName": "David Reichmann",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "dominik-pultar", "displayName": "Dominik Pultar", "fullName": null, "count": 1 },
+        { "slug": "felix-schroder", "displayName": "Felix Schröder", "fullName": null, "count": 1 },
+        {
+          "slug": "frantisek-kardos",
+          "displayName": "František Kardoš",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "jakub-krivosik", "displayName": "Jakub Krivošík", "fullName": null, "count": 1 },
+        { "slug": "jakub-norek", "displayName": "Jakub Norek", "fullName": null, "count": 1 },
+        { "slug": "jakub-stepo", "displayName": "Jakub Štepo", "fullName": null, "count": 1 },
+        { "slug": "jan-kucharik", "displayName": "Jan Kuchařík", "fullName": null, "count": 1 },
+        { "slug": "jiri-blazek", "displayName": "Jiří Blažek", "fullName": null, "count": 1 },
+        { "slug": "jiri-dula", "displayName": "Jiří Dula", "fullName": null, "count": 1 },
+        { "slug": "jozsef-molnar", "displayName": "József Molnár", "fullName": null, "count": 1 },
+        {
+          "slug": "kamil-rychlewicz",
+          "displayName": "Kamil Rychlewicz",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "karel-pechous", "displayName": "Karel Pechouš", "fullName": null, "count": 1 },
+        { "slug": "karl-czakler", "displayName": "Karl Czakler", "fullName": null, "count": 1 },
+        {
+          "slug": "karol-wegrzycki",
+          "displayName": "Karol Węgrzycki",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "katarina-buzakova",
+          "displayName": "Katarína Buzáková",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "laura-vistanova",
+          "displayName": "Laura Vištanová",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "lenka-kopfova", "displayName": "Lenka Kopfová", "fullName": null, "count": 1 },
+        { "slug": "libor-cernicek", "displayName": "Libor Černíček", "fullName": null, "count": 1 },
+        { "slug": "lubomir-fabso", "displayName": "Ľubomír Fabšo", "fullName": null, "count": 1 },
+        { "slug": "lukas-komin", "displayName": "Lukáš Komín", "fullName": null, "count": 1 },
+        {
+          "slug": "marie-koblizkova",
+          "displayName": "Marie Koblížková",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "marta-strzelecka",
+          "displayName": "Marta Strzelecka",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "martin-tancer", "displayName": "Martin Tancer", "fullName": null, "count": 1 },
+        { "slug": "matija-basic", "displayName": "Matija Basić", "fullName": null, "count": 1 },
+        { "slug": "matus-harminc", "displayName": "Matúš Harminc", "fullName": null, "count": 1 },
+        { "slug": "matus-papso", "displayName": "Matúš Papšo", "fullName": null, "count": 1 },
+        {
+          "slug": "micha-pilipczuk",
+          "displayName": "Michał Pilipczuk",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "micha-strzelecki",
+          "displayName": "Michał Strzelecki",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "michal-szabados",
+          "displayName": "Michal Szabados",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "michal-takacs", "displayName": "Michal Takács", "fullName": null, "count": 1 },
+        { "slug": "milan-benes", "displayName": "Milan Beneš", "fullName": null, "count": 1 },
+        { "slug": "milan-hejny", "displayName": "Milan Hejný", "fullName": null, "count": 1 },
+        {
+          "slug": "morteza-saghafian",
+          "displayName": "Morteza Saghafian",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "mykhailo-shtandenko",
+          "displayName": "Mykhailo Shtandenko",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "pavol-kossaczky",
+          "displayName": "Pavol Kossaczký",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "raphael-steiner",
+          "displayName": "Raphael Steiner",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "sandor-kisfaludi-bak",
+          "displayName": "Sándor Kisfaludi-Bak",
+          "fullName": null,
+          "count": 1
+        },
+        {
+          "slug": "sarka-cernickova",
+          "displayName": "Šárka Černíčková",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "tomas-hecht", "displayName": "Tomáš Hecht", "fullName": null, "count": 1 },
+        { "slug": "tomas-joska", "displayName": "Tomáš Joska", "fullName": null, "count": 1 },
+        { "slug": "tomas-salcak", "displayName": "Tomáš Salčák", "fullName": null, "count": 1 },
+        {
+          "slug": "tomas-szaniszlo",
+          "displayName": "Tomáš Szaniszlo",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "vaclav-blazej", "displayName": "Václav Blažej", "fullName": null, "count": 1 },
+        { "slug": "vaclav-rozhon", "displayName": "Václav Rozhoň", "fullName": null, "count": 1 },
+        { "slug": "vitezslav-kala", "displayName": "Vítězslav Kala", "fullName": null, "count": 1 },
+        {
+          "slug": "vladimira-semerakova",
+          "displayName": "Vladimíra Semeráková",
+          "fullName": null,
+          "count": 1
+        },
+        { "slug": "vojtech-zlamal", "displayName": "Vojtěch Zlámal", "fullName": null, "count": 1 },
+        {
+          "slug": "wojciech-nadara",
+          "displayName": "Wojciech Nadara",
+          "fullName": null,
+          "count": 1
+        }
+      ]
+    },
+    "updatedOptions": {
+      "competitions": [
+        {
+          "path": "tst",
+          "displayName": "IMO/MEMO TST",
+          "fullName": "Team Selection Test for IMO and MEMO",
+          "count": 1,
+          "children": [
+            {
+              "path": "tst-d3",
+              "displayName": "Day 3",
+              "fullName": "Day 3",
+              "count": 1,
+              "children": []
+            }
+          ]
+        }
+      ],
+      "seasons": [
+        { "slug": "67", "displayName": "Edition 67 (2017/2018)", "fullName": null, "count": 1 }
+      ],
+      "problemNumbers": [{ "slug": "1", "displayName": "1", "fullName": null, "count": 1 }],
+      "tags": [
+        {
+          "slug": "combinatorics",
+          "displayName": "Combinatorics",
+          "fullName": null,
+          "count": 1,
+          "tagType": "area"
+        },
+        {
+          "slug": "prove-existence",
+          "displayName": "Prove Existence",
+          "fullName": null,
+          "count": 1,
+          "tagType": "goal"
+        }
+      ],
+      "authors": []
+    }
+  },
+  "listName": null
+}

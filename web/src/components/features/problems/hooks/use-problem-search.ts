@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 
-import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 import { errorCodeOf } from '@/lib/api/api-error'
@@ -27,6 +26,7 @@ import {
   namesOnlyKnownCompetitions,
 } from '../utils/url-initialization'
 import { useBaseOptions, useProblemSearchQuery, useSingleProblem } from './use-problem-search-query'
+import { useRefusedFilters } from './use-refused-filters'
 
 /** How much of a slug a notice can carry. */
 const MAX_NOTICE_SLUG_LENGTH = 20
@@ -113,6 +113,9 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // Translations for problem-related errors
   const tErrors = useTranslations('problems.errors')
 
+  // Translations for the filter controls
+  const tFilters = useTranslations('problems.filters')
+
   // Translations for the shared action labels
   const tActions = useTranslations('ui.actions')
 
@@ -130,9 +133,6 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
 
   // Who is signed in, and whether that is settled yet
   const { userId, isLoaded: isUserDataLoaded } = useAuth()
-
-  // A function which sends the reader off to sign in
-  const { redirectToLogin } = useLoginRedirect()
 
   // The signed-in user's id, null while auth is unsettled or nobody is signed in
   const signedInUserId = isUserDataLoaded ? (userId ?? null) : null
@@ -208,20 +208,39 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     }
   }, [urlParsingResult, namesAGoneCompetition, tErrors])
 
-  // Favorites are a reader's own, so asking for them signed out means signing in first
+  // A function which answers a filter this reader turns out not to be able to have
+  const { dropAndExplain } = useRefusedFilters({
+    filtersInForce: urlFilters,
+    filtersRequested: urlParsingResult?.filters ?? null,
+  })
+
+  // Favorites and mark status are a reader's own, so a URL asking for either without one is asking
+  // for something nobody can be given
   useEffect(() => {
-    // Nothing to do until the URL asks for favorites
-    if (!urlParsingResult?.favoritesRequested) return
+    // Nothing to weigh until the URL has been read, and nothing to refuse while somebody is signed
+    // in or auth has yet to say whether anybody is
+    if (!urlParsingResult || !isSignedOut) return
 
-    // Whether anyone is signed in is not known until auth settles
-    if (!isUserDataLoaded) return
+    // Whether the URL asked for the reader's own likes
+    const wantsFavorites = urlParsingResult.filters.favoritesOnly
 
-    // Nobody is signed in
-    if (!userId) {
-      // Send the reader to sign in
-      redirectToLogin()
-    }
-  }, [urlParsingResult?.favoritesRequested, isUserDataLoaded, userId, redirectToLogin])
+    // Whether it asked for the problems they have marked
+    const wantsMarkStatus = urlParsingResult.filters.markStatus !== null
+
+    // It asked for neither, so there is nothing to refuse
+    if (!wantsFavorites && !wantsMarkStatus) return
+
+    // Take them out of the URL and offer the account they need, naming whichever was reached for
+    dropAndExplain(
+      { favoritesOnly: false, markStatus: null },
+      {
+        kind: 'sign-in',
+        reason: wantsFavorites
+          ? tFilters('viewFavoritesAuthReason')
+          : tFilters('markStatusAuthReason'),
+      }
+    )
+  }, [urlParsingResult, isSignedOut, dropAndExplain, tFilters])
 
   // The filters the results are fetched for, which lag what the reader is typing
   const [queryFilters, setQueryFilters] = useState<SearchFiltersState | null>(null)
@@ -435,7 +454,25 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     tProblems,
   ])
 
-  // Handle a settled search error: an auth-gated filter needs a login, a bad list clears its URL param.
+  // The list the archive last answered for, null while the whole library is showing. A reader the
+  // archive has answered is one the backend let in, which is what tells a session ending apart from
+  // a list that was never theirs to open.
+  const lastReadListRef = useRef<string | null>(null)
+
+  // Remember which list the archive is answering for
+  useEffect(() => {
+    // Only an answer says anything about what this reader may read
+    if (searchQuery.uiState.kind !== 'ready') return
+
+    // The list that answer came back for
+    lastReadListRef.current = fetchedFilters?.listContentId ?? null
+  }, [searchQuery.uiState.kind, fetchedFilters])
+
+  // The failure already acted on, so the same one is not acted on twice
+  const handledFailureRef = useRef<QueryUiState | null>(null)
+
+  // Handle a settled search error, which the archive alone can raise: a filter it will not serve
+  // this reader comes out of the URL, and the rest of their search stays where it is.
   useEffect(() => {
     // The state the search settled into
     const searchState = searchQuery.uiState
@@ -443,39 +480,55 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     // Only a failure is this effect's business
     if (searchState.kind !== 'failed') return
 
+    // The same failure coming round again, which rewriting the URL below is itself enough to cause:
+    // acting on it twice would say the same thing to the reader twice
+    if (handledFailureRef.current === searchState) return
+
+    // This failure is being acted on now
+    handledFailureRef.current = searchState
+
     // The failure code, if any
     const errorCode = errorCodeOf(searchState.error)
 
-    // An auth-gated filter (favorites, mark status) reached the backend without a signed-in reader
-    if (
-      errorCode === 'FavoritesRequireAuthentication' ||
-      errorCode === 'MarkStatusRequiresAuthentication'
-    ) {
-      // Signing in is what makes such a filter mean anything
-      redirectToLogin()
-      return
+    // Favorites reached the backend without a reader behind them, which only a session lapsing
+    // between the library weighing the reader and the request going out can produce
+    if (errorCode === 'FavoritesRequireAuthentication') {
+      // Take them off and offer the account they need
+      dropAndExplain(
+        { favoritesOnly: false },
+        { kind: 'sign-in', reason: tFilters('viewFavoritesAuthReason') }
+      )
     }
-
+    // Mark status, the same way
+    else if (errorCode === 'MarkStatusRequiresAuthentication') {
+      // Take it off and offer the account it needs
+      dropAndExplain(
+        { markStatus: null },
+        { kind: 'sign-in', reason: tFilters('markStatusAuthReason') }
+      )
+    }
     // A list the URL names that no longer exists
-    if (errorCode === 'ListNotFound') {
-      // Say the list is gone
-      toast.error(tErrors('listNotFound'))
+    else if (errorCode === 'ListNotFound') {
+      // Take it off and say it is gone, which no account would bring back
+      dropAndExplain({ listContentId: null }, { kind: 'plain', message: tErrors('listNotFound') })
     }
     // A list this reader may not read, which only the backend can tell, since a list is shareable
     // and the URL alone says nothing about who may open it
     else if (errorCode === 'ListAccessDenied') {
-      // Say the list is not theirs to read
-      toast.error(tErrors('listAccessDenied'))
-    }
-    // Any other failure
-    else {
-      // The page itself explains it, so nothing to do here
-      return
-    }
+      // A list the archive was already answering for is one the reader was reading, so the refusal
+      // is their sign-in lapsing rather than a list that was never theirs. Accusing them of opening
+      // somebody else's would name something they did not do, and hide what did happen.
+      const signInExpired = (fetchedFilters?.listContentId ?? null) === lastReadListRef.current
 
-    // Back to the library, which takes the bad list out of the URL
-    router.replace(ROUTES.PROBLEMS, { scroll: false })
-  }, [searchQuery.uiState, router, redirectToLogin, tErrors])
+      // Take the list off, and say which of the two it was
+      dropAndExplain(
+        { listContentId: null },
+        signInExpired
+          ? { kind: 'sign-in-message', message: tErrors('listSignInExpired') }
+          : { kind: 'plain', message: tErrors('listAccessDenied') }
+      )
+    }
+  }, [searchQuery.uiState, fetchedFilters, dropAndExplain, tErrors, tFilters])
 
   // The options to pick from: a single problem's own, otherwise the counts the current results
   // leave behind, otherwise the whole library's

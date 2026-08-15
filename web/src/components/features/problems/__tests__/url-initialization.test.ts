@@ -148,15 +148,14 @@ describe('the most filters a URL may carry', () => {
 })
 
 describe('the filters that need the reader signed in', () => {
-  it('reports a favourites filter so the caller can send them to sign in', () => {
+  it('applies a favourites filter', () => {
     // The reader's own likes
     const params = new URLSearchParams({ favoritesOnly: 'true' })
 
     // The URL read
     const result = initializeFiltersFromUrlOrDefaults(params)
 
-    // Applied, and reported alongside so the caller can act on it
-    expect(result.favoritesRequested).toBe(true)
+    // Applied like any other, since who may keep it is weighed further along
     expect(result.filters.favoritesOnly).toBe(true)
   })
 

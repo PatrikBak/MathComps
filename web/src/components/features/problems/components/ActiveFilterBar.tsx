@@ -14,6 +14,7 @@ import {
 import { cn } from '../../../shared/utils/css-utils'
 import { isExclusiveSelection } from '../../../shared/utils/event-utils'
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
+import { useAuthGatedFilter } from '../hooks/use-auth-gated-filter'
 import { usePrefetchCompetitionBrowser } from '../hooks/use-competition-browser'
 import { useCompetitionBrowserModal } from '../hooks/use-competition-browser-modal'
 import type { MarkStatusFilter } from '../types/problem-api-types'
@@ -109,6 +110,9 @@ export default function ActiveFiltersBar({
 
   // A function which warms the competition browser
   const prefetchCompetitionBrowser = usePrefetchCompetitionBrowser()
+
+  // A function which applies a filter only a signed-in reader may have
+  const { applyOrPrompt } = useAuthGatedFilter(onFiltersChange)
 
   // What the user said about the chips being expanded, or null while they have said nothing
   const [manualExpansionOverride, setManualExpansionOverride] = useState<boolean | null>(null)
@@ -287,7 +291,17 @@ export default function ActiveFiltersBar({
 
   // A function which applies the mark status the user picked, or clears the filter
   const handleMarkStatusChange = (status: MarkStatusFilter | null) => {
-    onFiltersChange({ ...filters, markStatus: status })
+    // Clearing the filter asks nothing of anybody, so it needs no account behind it
+    if (status === null) {
+      // The library goes back to showing marked and unmarked alike
+      onFiltersChange({ ...filters, markStatus: null })
+
+      // Nothing else to weigh
+      return
+    }
+
+    // Marks are the user's own, so a signed-out one is asked to sign in and brought back to this
+    applyOrPrompt({ ...filters, markStatus: status }, tFilters('markStatusAuthReason'))
   }
 
   /**
@@ -428,7 +442,7 @@ export default function ActiveFiltersBar({
                     : filters.markStatus === 'unmarked'
                       ? tFilters('markStatusUnmarked')
                       : 'Invalid mark status',
-                onClick: () => onFiltersChange({ ...filters, markStatus: null }),
+                onClick: () => handleMarkStatusChange(null),
               },
             ],
           },

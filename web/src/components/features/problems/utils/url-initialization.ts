@@ -2,7 +2,7 @@ import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import type { SearchFiltersState } from '../types/problem-library-types'
 import type { CompetitionTree } from './competition-tree'
 import { countActiveFilters } from './filter-validation'
-import { deserializeFilters, URL_PARAMS } from './search-url-serialization'
+import { deserializeFilters } from './search-url-serialization'
 
 /**
  * Creates a default empty search filters state.
@@ -34,8 +34,6 @@ type UrlInitializationResult = {
   hasInvalidParams: boolean
   /** Whether the URL carried more filters than the library will apply at once. */
   hasTooManyFilters: boolean
-  /** Whether the URL asked for the reader's own likes. */
-  favoritesRequested: boolean
 }
 
 /**
@@ -61,12 +59,8 @@ export function initializeFiltersFromUrlOrDefaults(
       filters: createDefaultFilters(),
       hasInvalidParams: false,
       hasTooManyFilters: false,
-      favoritesRequested: false,
     }
   }
-
-  // Whether the URL asks for the reader's own likes
-  const favoritesRequested = searchParams.get(URL_PARAMS.FAVORITES_ONLY) === 'true'
 
   // The URL as filters, null when any part of it could not be read
   const parsedFilters = parseAndInterpretFilters(searchParams)
@@ -78,7 +72,6 @@ export function initializeFiltersFromUrlOrDefaults(
       filters: createDefaultFilters(),
       hasInvalidParams: true,
       hasTooManyFilters: false,
-      favoritesRequested,
     }
   }
 
@@ -89,7 +82,6 @@ export function initializeFiltersFromUrlOrDefaults(
       filters: createDefaultFilters(),
       hasInvalidParams: false,
       hasTooManyFilters: true,
-      favoritesRequested,
     }
   }
 
@@ -98,7 +90,6 @@ export function initializeFiltersFromUrlOrDefaults(
     filters: parsedFilters,
     hasInvalidParams: false,
     hasTooManyFilters: false,
-    favoritesRequested,
   }
 }
 
