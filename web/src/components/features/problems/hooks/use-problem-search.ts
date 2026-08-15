@@ -20,7 +20,7 @@ import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/probl
 import { buildCompetitionTree } from '../utils/competition-tree'
 import { countActiveFilters } from '../utils/filter-validation'
 import { isNoOpFilterChange, isTextOnlyChange } from '../utils/search-logic'
-import { serializeFilters } from '../utils/search-url-serialization'
+import { serializeFilters, spellTheSameUrl } from '../utils/search-url-serialization'
 import {
   createDefaultFilters,
   initializeFiltersFromUrlOrDefaults,
@@ -256,9 +256,18 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // The filters as the reader sees them, moving the moment they click, ahead of the URL catching up
   const [localFilters, setLocalFilters] = useState<SearchFiltersState | null>(null)
 
-  // A URL arriving from elsewhere, such as the back button or a shared link, takes the filters over
+  // A URL arriving from elsewhere, such as the back button or a shared link, takes the filters over.
+  // The one the library's own write put there is only an echo of what is on screen, and a lossy one:
+  // it carries the term without the padding the reader is still typing around it, so adopting that
+  // would snatch the padding back out of the box.
   useEffect(() => {
-    setLocalFilters(urlFilters)
+    setLocalFilters((current) => {
+      // The URL says something the filters on screen do not say already
+      if (!urlFilters || !current || !spellTheSameUrl(urlFilters, current)) return urlFilters
+
+      // Otherwise the screen keeps what it has
+      return current
+    })
   }, [urlFilters])
 
   // A function which records a filter change: the reader sees it at once, the URL catches up after
