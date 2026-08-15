@@ -785,7 +785,12 @@ export function MultiSelectFacet({
         )}
 
         {/* The options themselves */}
-        <FacetList labelId={facet.labelId} listRef={list.listRef} noTopPadding={!!grouping}>
+        <FacetList
+          role="group"
+          labelId={facet.labelId}
+          listRef={list.listRef}
+          noTopPadding={!!grouping}
+        >
           {/* Empty state, when there is nothing left to show */}
           {facet.filtered.length === 0 && (
             <div className="px-3 py-3 text-sm text-muted">{tFilters('noResults')}</div>

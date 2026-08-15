@@ -1075,8 +1075,6 @@
       "clearSearch": "Vymazat vyhledávání v {name}",
       "close": "Zavřít filtry",
       "closePopover": "Zavřít výběr",
-      "collapseNode": "Sbalit {name}",
-      "expandNode": "Rozbalit {name}",
       "logic": "Logika",
       "logicAll": "Všichni",
       "logicAtLeastOne": "Alespoň jeden",

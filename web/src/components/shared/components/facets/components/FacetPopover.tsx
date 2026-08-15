@@ -101,6 +101,9 @@ export function FacetPopover({
         modal={false}
         returnFocus={false}
         initialFocus={initialFocus}
+        // A row can go off the list while focus sits on it. The panel is what answers the keys, so
+        // focus dropping to the document would leave it open and deaf to the next arrow
+        restoreFocus
       >
         <div
           ref={refs.setFloating}
