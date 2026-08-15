@@ -1,9 +1,18 @@
+import { existsSync } from 'node:fs'
+
 import { defineConfig } from '@playwright/test'
+
+/** Where a developer's own secrets sit, which is a file only their machine has. */
+const LOCAL_ENV_FILE = '.env.local'
 
 // The Clerk keys and the test account's credentials sit with the app's other local secrets, and the
 // backend's address with the app's shared configuration. Loading the local file first is what gives
 // it precedence, since an already-set variable is never overwritten by a later load.
-process.loadEnvFile('.env.local')
+if (existsSync(LOCAL_ENV_FILE)) {
+  process.loadEnvFile(LOCAL_ENV_FILE)
+}
+
+// The configuration the whole repo shares, which every machine has
 process.loadEnvFile('.env')
 
 // The origin the session is minted against, and the one Clerk scopes its cookie to.
