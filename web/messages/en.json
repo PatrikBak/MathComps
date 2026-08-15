@@ -1075,8 +1075,6 @@
       "clearSearch": "Clear search in {name}",
       "close": "Close filters",
       "closePopover": "Close selection",
-      "collapseNode": "Collapse {name}",
-      "expandNode": "Expand {name}",
       "logic": "Logic",
       "logicAll": "All",
       "logicAtLeastOne": "At least one",

@@ -25,8 +25,8 @@ export const FOCUS_RING_INSET_CLASS =
  *
  * A 16px checkbox's own outline is a hard thing to follow down a list of forty, so the row it sits in
  * carries the mark instead and the control gives its own up. Keyed on the row's input alone: a row
- * holding a second control of its own, like a tree node's expander, leaves that one to ring itself
- * rather than reading as a box inside a box.
+ * holding a second control of its own leaves that one to ring itself rather than reading as a box
+ * inside a box. A row that takes focus itself reaches for {@link FOCUS_RING_INSET_CLASS} instead.
  */
 export const FOCUS_RING_ROW_CLASS = cn(
   'has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-inset has-[input:focus-visible]:ring-focus',

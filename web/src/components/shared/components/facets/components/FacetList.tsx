@@ -6,6 +6,8 @@ import { cn } from '@/components/shared/utils/css-utils'
  * The props of {@link FacetList}.
  */
 type FacetListProps = {
+  /** How the rows inside are read: a flat set of options is a group, a hierarchy a tree. */
+  role: 'group' | 'tree'
   /** Id of the heading that names the list. */
   labelId: string
   /** The scrolling list element. */
@@ -23,7 +25,13 @@ type FacetListProps = {
  * Its scrollbar is forced to stay on screen: macOS hides overlay scrollbars at rest, so a list cut off at its
  * height gives no sign there is more of it under the last row on show.
  */
-export function FacetList({ labelId, listRef, children, noTopPadding = false }: FacetListProps) {
+export function FacetList({
+  role,
+  labelId,
+  listRef,
+  children,
+  noTopPadding = false,
+}: FacetListProps) {
   return (
     <div
       ref={listRef}
@@ -34,7 +42,7 @@ export function FacetList({ labelId, listRef, children, noTopPadding = false }: 
         'scrollbar-visible grow min-h-0 overflow-y-auto',
         noTopPadding ? 'px-0.5 sm:px-1 pb-0.5 sm:pb-1' : 'p-0.5 sm:p-1'
       )}
-      role="group"
+      role={role}
       aria-labelledby={labelId}
       // Firefox hands a scrolling box its own place in the tab order, which would put a stop on the list
       // itself in front of the row that is meant to carry one
