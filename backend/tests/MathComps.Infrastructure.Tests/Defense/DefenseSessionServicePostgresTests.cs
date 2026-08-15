@@ -742,7 +742,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     public Task Missing_target_is_refused() => RunTestAsync(async service =>
     {
         // A start whose target never made it through the wire
-        var start = new DefenseSessionStart(null!, "my defense", Language.EN);
+        var start = new DefenseSessionStart(new StartDefenseRequest(null!, "my defense"), Language.EN);
 
         // Starting with it is refused the same way a blank field is
         await Assert.ThrowsAsync<DefenseMessageEmptyException>(
@@ -1138,7 +1138,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// <returns>The session start.</returns>
     private static DefenseSessionStart Request(
         string environmentId, string content, string handoutContentId = "handout-1") =>
-        new(new HandoutEnvironmentTarget(handoutContentId, environmentId), content, Language.EN);
+        new(new StartDefenseRequest(new HandoutEnvironmentTarget(handoutContentId, environmentId), content),
+            Language.EN);
 
     /// <summary>
     /// Builds a report against one of a conversation's replies, as the feedback service would write it.
