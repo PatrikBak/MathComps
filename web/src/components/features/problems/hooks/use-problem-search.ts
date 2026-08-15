@@ -32,6 +32,28 @@ import { useBaseOptions, useProblemSearchQuery, useSingleProblem } from './use-p
 const MAX_NOTICE_SLUG_LENGTH = 20
 
 /**
+ * Refuses the filters that only mean something to a signed-in reader.
+ *
+ * Favorites and mark status are the reader's own, and the backend refuses both without a session.
+ * Weighing the reader here too keeps both the screen and the requests off a filter that cannot hold.
+ *
+ * @param filters - The filters to hold against who is reading.
+ * @param isSignedOut - Whether nobody is signed in.
+ *
+ * @returns The filters as this reader may have them.
+ */
+function withoutRefusedFilters(
+  filters: SearchFiltersState | null,
+  isSignedOut: boolean
+): SearchFiltersState | null {
+  // There are no filters yet, or the reader is entitled to every one of them
+  if (!filters || !isSignedOut) return filters
+
+  // Nobody is signed in, so the filters that only mean something signed in come off
+  return { ...filters, favoritesOnly: false, markStatus: null }
+}
+
+/**
  * The problem search state: loading flags, active filters, and the current result page.
  */
 type ProblemSearchState = {
@@ -115,6 +137,9 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // The signed-in user's id, null while auth is unsettled or nobody is signed in
   const signedInUserId = isUserDataLoaded ? (userId ?? null) : null
 
+  // Whether nobody is signed in, which auth still loading cannot yet say
+  const isSignedOut = isUserDataLoaded && !userId
+
   // The locale the library reads in
   const locale = useLocale()
 
@@ -153,14 +178,18 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     )
   }, [baseOptions, urlParsingResult])
 
-  // The filters the URL asked for, which a competition the taxonomy has since dropped costs entirely
+  // The filters the URL asked for, which a competition the taxonomy has since dropped costs
+  // entirely, and which are held against whoever is reading
   const urlFilters = useMemo(() => {
     // The URL has yet to be read
     if (!urlParsingResult) return null
 
     // A competition nothing answers to leaves the library on its defaults
-    return namesAGoneCompetition ? createDefaultFilters() : urlParsingResult.filters
-  }, [urlParsingResult, namesAGoneCompetition])
+    const namedFilters = namesAGoneCompetition ? createDefaultFilters() : urlParsingResult.filters
+
+    // The filters left once the reader has been weighed
+    return withoutRefusedFilters(namedFilters, isSignedOut)
+  }, [urlParsingResult, namesAGoneCompetition, isSignedOut])
 
   // Say so when the URL asked for filters that could not be honoured
   useEffect(() => {
@@ -244,13 +273,20 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     }
   }, [urlFilters])
 
+  // The filters the fetch runs on. They sit parked while typing settles, and a session can end in
+  // the meantime, so who is reading is weighed against them again.
+  const fetchedFilters = useMemo(
+    () => withoutRefusedFilters(queryFilters, isSignedOut),
+    [queryFilters, isSignedOut]
+  )
+
   // The fetch of the problems the filters ask for. It waits on the options, the filters and the
   // reader all being known, and stands down entirely when the URL singles out one problem.
   const searchQuery = useProblemSearchQuery(
     locale,
-    queryFilters,
+    fetchedFilters,
     signedInUserId,
-    !problemId && queryFilters !== null && isUserDataLoaded
+    !problemId && fetchedFilters !== null && isUserDataLoaded
   )
 
   // The filters as the reader sees them, moving the moment they click, ahead of the URL catching up

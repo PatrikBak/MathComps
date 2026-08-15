@@ -1,7 +1,6 @@
-import { useAuth } from '@clerk/nextjs'
 import { Lightbulb, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
 
 import { MultiSelectFacet } from '@/components/shared/components/facets/components/MultiSelectFacet'
 import { TreeSelectFacet } from '@/components/shared/components/facets/components/TreeSelectFacet'
@@ -115,9 +114,6 @@ export const SearchFilters = ({
   // The search box
   const searchTextRef = useRef<HTMLInputElement | null>(null)
 
-  // Two filters are only meaningful to a signed-in user, so their sign-in state matters
-  const { isLoaded, isSignedIn } = useAuth()
-
   // Everything the facets render from, and the one handler the tree writes back through
   const {
     competitionTreeOpts,
@@ -137,14 +133,6 @@ export const SearchFilters = ({
 
   // A function which writes one filter back, carrying the rules that tie filters together
   const updateFilter = createFilterUpdater(filters, onFiltersChange)
-
-  // Signing out has to take the filters that only mean something signed in with it
-  useEffect(() => {
-    // Waiting for the auth state to load keeps a signed-in user's filters from being dropped
-    if (isLoaded && !isSignedIn && (filters.favoritesOnly || filters.markStatus)) {
-      onFiltersChange({ ...filters, favoritesOnly: false, markStatus: null })
-    }
-  }, [isLoaded, isSignedIn, filters, onFiltersChange])
 
   return (
     <div className="flex flex-col rounded-lg border border-foreground/10 bg-surface/95 shadow-lg lg:fixed lg:top-28 lg:bottom-8 lg:w-[var(--problems-sidebar-width)] lg:max-h-[calc(100vh-7rem)]">

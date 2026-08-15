@@ -1,7 +1,7 @@
 import { Check, ChevronDown, ChevronUp, FilterX, Grid3X3, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import * as React from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useMinWidth } from '@/hooks/use-breakpoint'
 
@@ -149,20 +149,17 @@ export default function ActiveFiltersBar({
     filters.competitionSelection.length +
     (filters.searchText.trim() ? 1 : 0)
 
+  // Nothing filtered means no crowding to have had an opinion about, so a standing one is dropped
+  if (activeFilterCount === 0 && manualExpansionOverride !== null) {
+    // The bar decides for itself again
+    setManualExpansionOverride(null)
+  }
+
   // The user's say overrides the automatic decision, which otherwise goes on how many chips there are
   const areFiltersExpanded =
     manualExpansionOverride !== null
       ? manualExpansionOverride
       : isSidebarVisible && activeFilterCount <= ACTIVE_FILTERS_CONSTANTS.maxFiltersForAutoExpand
-
-  // Clearing the filters hands the decision back to the automatic behaviour
-  useEffect(() => {
-    // With nothing filtered there is no crowding to have had an opinion about
-    if (activeFilterCount === 0) {
-      // So the bar goes back to deciding for itself
-      setManualExpansionOverride(null)
-    }
-  }, [activeFilterCount])
 
   // A function which takes the library back to showing everything
   const handleClearAll = () => {
