@@ -48,6 +48,23 @@ export function namesTheSameItems<T>(left: readonly T[], right: readonly T[]): b
 }
 
 /**
+ * Whether two lists name the same things in the same order, position for position. An item counts as
+ * the same one on the terms {@link namesTheSameItems} judges it by.
+ *
+ * @param left - One list.
+ * @param right - The other list.
+ *
+ * @returns True when both lists hold the same items in the same order.
+ */
+export function namesTheSameItemsInOrder<T>(left: readonly T[], right: readonly T[]): boolean {
+  // Differing counts settle it without any comparing
+  if (left.length !== right.length) return false
+
+  // Every position has to hold what the one facing it does
+  return left.every((item, index) => item === right[index])
+}
+
+/**
  * Narrows a raw value to a member of an allowed set, or null when it matches none. Handy for trusting
  * an external string (a URL query, a stored value) as a literal-union member before using it.
  *

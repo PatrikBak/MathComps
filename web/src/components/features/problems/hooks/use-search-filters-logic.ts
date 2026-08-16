@@ -136,17 +136,12 @@ export function useSearchFiltersLogic({
     [baseOptions.competitions]
   )
 
-  // The filters' competition selection, addressed the way the tree addresses its nodes
-  const selectionTreeNodeIds = useMemo(() => {
-    // No list of selections, nothing to address
-    if (!filters.competitionSelection || !Array.isArray(filters.competitionSelection)) {
-      // Nothing for the tree to tick
-      return []
-    }
-
-    // A selection naming a node the taxonomy no longer holds drops out
-    return filters.competitionSelection.filter((selection) => competitionTree.byPath.has(selection))
-  }, [filters.competitionSelection, competitionTree])
+  // The filters' competition selection, addressed the way the tree addresses its nodes, with a
+  // selection naming a node the taxonomy no longer holds left out
+  const selectionTreeNodeIds = useMemo(
+    () => filters.competitionSelection.filter((selection) => competitionTree.byPath.has(selection)),
+    [filters.competitionSelection, competitionTree]
+  )
 
   /**
    * Records a selection the user made in the competition tree.

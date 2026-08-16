@@ -51,11 +51,7 @@ export function generateCompetitionChips(
   onFiltersChange: (newFilters: SearchFiltersState) => void
 ): CompetitionChip[] {
   // No competition is filtered on
-  if (
-    !filters.competitionSelection ||
-    !Array.isArray(filters.competitionSelection) ||
-    filters.competitionSelection.length === 0
-  ) {
+  if (filters.competitionSelection.length === 0) {
     // Nothing to stand a chip for
     return []
   }

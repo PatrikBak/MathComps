@@ -21,7 +21,7 @@ export function countActiveFilters(filters: SearchFiltersState): number {
     filters.authors.length +
     filters.seasons.length +
     filters.problemNumbers.length +
-    (filters.competitionSelection?.length ?? 0) +
+    filters.competitionSelection.length +
     (filters.searchText.trim() ? 1 : 0)
   )
 }
