@@ -8,7 +8,14 @@ import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { useProblemStore } from '@/stores/problem-store'
 import type { ApiResult } from '@/types/api'
 
-import type { Problem } from '../types/problem-api-types'
+import {
+  applyProblemEdit,
+  invalidateAffectedSearches,
+  type ProblemEditContext,
+  restoreSearches,
+} from '../utils/problem-search-cache'
+import { filtersOnState, type ReaderState } from '../utils/problem-view-membership'
+import { userListQueryKeys } from './use-user-lists'
 
 /**
  * Pre-resolved i18n strings for the toggle action.
@@ -33,14 +40,10 @@ type ToggleProblemActionConfig = {
   apiFn: (apiCall: ApiCaller, slug: string) => Promise<ApiResult<void>>
   /** Store action for optimistic toggle */
   toggleInStore: (slug: string) => void
-  /** Property on Problem to read current state (e.g. 'liked', 'marked') */
-  stateKey: keyof Problem
-  /** Whether the current view filters by this property (any mark/like filter active) */
-  isFilteredView: () => boolean
-  /** Whether this specific toggle direction causes the item to leave the filtered view */
-  willLeaveFilteredView: (isActive: boolean) => boolean
-  /** React Query keys to invalidate on success */
-  invalidateQueryKeys: readonly unknown[]
+  /** What the toggle moves, which is both what it reads off a problem and what a screen can filter by */
+  toggles: ReaderState
+  /** Whether the counts the reader's own lists are drawn with move with it */
+  movesListCounts: boolean
   /** localStorage key for pending action */
   pendingStorageKey: string
   /** Pre-resolved i18n strings */
@@ -55,14 +58,6 @@ type ToggleProblemActionParams = {
   problemSlug: string
   /** The current state before toggling */
   isActive: boolean
-}
-
-/**
- * Context for rollback on mutation failure
- */
-type ToggleProblemActionContext = {
-  /** The previous displayed problem slugs before optimistic update */
-  previousDisplayedProblems: string[]
 }
 
 /**
@@ -89,38 +84,31 @@ export function useToggleProblemAction(config: ToggleProblemActionConfig) {
   })
 
   // Prepare the mutation
-  const mutation = useOptimisticMutation<
-    void,
-    ToggleProblemActionParams,
-    ToggleProblemActionContext
-  >({
+  const mutation = useOptimisticMutation<void, ToggleProblemActionParams, ProblemEditContext>({
     // Call the backend API
     apiFn: (apiCall, { problemSlug }) => config.apiFn(apiCall, problemSlug),
 
-    // Optimistic update before server call
-    onMutate: ({ problemSlug: updatedProblemSlug }) => {
-      // Save the previous state for rollback
-      const previousDisplayedProblems = useProblemStore.getState().displayedProblems
-
-      // Update the global state
-      config.toggleInStore(updatedProblemSlug)
-
-      // Return context with previous state for potential rollback
-      return { previousDisplayedProblems }
-    },
+    // The toggle taken to the store and to every screen it stops the problem belonging on, before
+    // the archive has been asked
+    onMutate: ({ problemSlug }) =>
+      applyProblemEdit(queryClient, problemSlug, () => config.toggleInStore(problemSlug)),
 
     // After successful server call
-    onSuccess: (_data, { problemSlug, isActive }) => {
-      // Invalidate in any filtered view to sync the result set with the server.
-      // Covers both deactivation (item removed) and undo (item restored).
-      if (config.isFilteredView()) {
-        queryClient.invalidateQueries({
-          queryKey: config.invalidateQueryKeys,
-        })
+    onSuccess: (_data, { problemSlug, isActive }, context) => {
+      // Every search narrowed by what just changed now answers differently, whichever screen the
+      // reader was on when they changed it, so none of them may go on serving what it holds
+      invalidateAffectedSearches(queryClient, (searchFilters) =>
+        filtersOnState(searchFilters, config.toggles)
+      )
+
+      // The reader's own lists are counted by the archive, so a toggle that moves one of those counts
+      // leaves every number the lists are drawn with a problem behind
+      if (config.movesListCounts) {
+        queryClient.invalidateQueries({ queryKey: userListQueryKeys.all })
       }
 
       // Show undo toast only when the item leaves the filtered view
-      if (config.willLeaveFilteredView(isActive)) {
+      if (context?.hasLeftView) {
         toast.info(config.messages.removedMessage, {
           action: {
             label: config.messages.undoLabel,
@@ -135,15 +123,14 @@ export function useToggleProblemAction(config: ToggleProblemActionConfig) {
 
     // Rollback on failure
     onError: (_error, { problemSlug }, context) => {
-      // Rollback the state in the store
-      if (context) {
-        config.toggleInStore(problemSlug)
-      }
+      // Nothing was optimistically applied when the mutation never got as far as running
+      if (!context) return
 
-      // Restore the original displayed problems list
-      if (context?.previousDisplayedProblems) {
-        useProblemStore.getState().setDisplayedProblems(context.previousDisplayedProblems)
-      }
+      // Rollback the state in the store
+      config.toggleInStore(problemSlug)
+
+      // And put back every search the problem was taken out of
+      restoreSearches(queryClient, context.hiddenFrom)
     },
 
     // Auth configuration
@@ -173,10 +160,10 @@ export function useToggleProblemAction(config: ToggleProblemActionConfig) {
       if (problem) {
         mutation.mutate({
           problemSlug,
-          isActive: problem[config.stateKey] as boolean,
+          isActive: problem[config.toggles],
         })
       }
     },
-    [mutation, config.stateKey]
+    [mutation, config.toggles]
   )
 }

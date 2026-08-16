@@ -203,17 +203,15 @@ test.describe('problems page with only some calls failing', () => {
   })
 
   test('sends a reader whose problem does not exist back to the list', async ({ page }) => {
-    // Stand in for the lookup alone
-    await page.route(`${BACKEND_ORIGIN}/**`, async (route) => {
-      // A lookup that matches nothing answers successfully with no items, which the service reads
-      // as a missing problem rather than as a failure to reach anything
-      if (route.request().method() === 'GET') {
-        await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
-        return
-      }
-
-      // Everything else is served for real
-      await route.continue()
+    // Stand in for the lookup alone, answering it the way the archive answers a slug it does not
+    // hold: a named refusal rather than a connection that went nowhere, which is the whole of what
+    // tells the page to leave instead of offering another go
+    await page.route(`${BACKEND_ORIGIN}/problems/no-such-problem*`, async (route) => {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/problem+json',
+        body: JSON.stringify({ status: 404, errorCode: 'ProblemNotFound' }),
+      })
     })
 
     // Ask for a problem that cannot be found
@@ -327,24 +325,36 @@ test.describe('problems page with only some calls failing', () => {
   })
 
   test('blames the outage rather than the filters when a search fails', async ({ page }) => {
-    // Only the filter options get through, which is the first call the page makes
-    let callsAllowed = 1
+    // The backend stays up until the test says otherwise
+    let breakEverything = false
 
-    // Stand in for everything after them, so the page comes up but the search behind it does not
+    // Stand in for it either way, so the switch takes effect mid-test
     await page.route(`${BACKEND_ORIGIN}/**`, async (route) => {
-      // Spend the allowance on the earliest calls
-      if (callsAllowed > 0) {
-        callsAllowed--
-        await route.continue()
+      // Once broken, nothing lands
+      if (breakEverything) {
+        await route.abort('connectionrefused')
         return
       }
 
-      // Everything later finds nothing listening
-      await route.abort('connectionrefused')
+      // Until then, everything is served for real
+      await route.continue()
     })
 
-    // Load the page, which has its filters but no results
+    // Load the page
     await page.goto(PROBLEMS_PATH)
+
+    // Wait for rows. The page's filters ride back on the same answer as its first rows, so until it
+    // has come up there is no distinction left between the archive being down and the filters
+    // matching nothing.
+    await page.getByTestId('virtuoso-scroller').waitFor({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Now take the backend away
+    breakEverything = true
+
+    // A search the reader sets off themselves, which finds nothing listening
+    await page
+      .getByRole('textbox', { name: problemsCopy.filters.search.label })
+      .fill('nothing listening')
 
     // The results are missing because the server is
     await expect(page.getByText(problemsCopy.errors.searchFailed)).toBeVisible({

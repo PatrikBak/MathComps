@@ -4,7 +4,6 @@ import { PENDING_PROBLEM_LIKE_STORAGE_KEY } from '@/constants/local-storage-cons
 import { useProblemStore } from '@/stores/problem-store'
 
 import { toggleProblemLike } from '../services/problem-service'
-import { problemQueryKeys } from './use-problem-search-query'
 import { useToggleProblemAction } from './use-toggle-problem-action'
 
 /**
@@ -19,17 +18,12 @@ export function useToggleProblemLike() {
   // Get store action
   const toggleProblemLikeInStore = useProblemStore((state) => state.toggleProblemLike)
 
-  // Get current filters to check if we're viewing favorites only
-  const currentFilters = useProblemStore((state) => state.currentFilters)
-
   // Reuse common abstraction for toggle action
   return useToggleProblemAction({
     apiFn: toggleProblemLike,
     toggleInStore: toggleProblemLikeInStore,
-    stateKey: 'liked',
-    isFilteredView: () => currentFilters?.favoritesOnly ?? false,
-    willLeaveFilteredView: (isActive) => isActive && (currentFilters?.favoritesOnly ?? false),
-    invalidateQueryKeys: problemQueryKeys.allSearches(),
+    toggles: 'liked',
+    movesListCounts: true,
     pendingStorageKey: PENDING_PROBLEM_LIKE_STORAGE_KEY,
     messages: {
       authReason: t('authReason'),

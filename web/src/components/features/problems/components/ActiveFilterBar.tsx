@@ -560,7 +560,10 @@ export default function ActiveFiltersBar({
             />
           ) : (
             <div className="ml-2 flex items-center gap-1.5 flex-shrink-0">
-              <div className="text-muted flex-shrink-0 whitespace-nowrap text-xs">
+              <div
+                className="text-muted flex-shrink-0 whitespace-nowrap text-xs"
+                data-problem-count={problemCount}
+              >
                 {tPlurals('problems', { count: problemCount })}
               </div>
             </div>

@@ -7,7 +7,12 @@ import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { useProblemStore } from '@/stores/problem-store'
 
 import { getListItemApiUrl } from '../services/user-list-api-urls'
-import { problemQueryKeys } from './use-problem-search-query'
+import {
+  applyProblemEdit,
+  invalidateAffectedSearches,
+  type ProblemEditContext,
+  restoreSearches,
+} from '../utils/problem-search-cache'
 import { userListQueryKeys } from './use-user-lists'
 
 /**
@@ -20,14 +25,6 @@ type ToggleListItemParams = {
   contentId: string
   /** Whether the problem is currently in the list (determines add vs remove) */
   isInList: boolean
-}
-
-/**
- * Context for rollback on error.
- */
-type ToggleListItemContext = {
-  /** The displayed problem slugs before optimistic update */
-  previousDisplayedProblems: string[]
 }
 
 /**
@@ -47,43 +44,36 @@ export function useToggleListItem() {
   // Store action for optimistic updates
   const toggleListMembership = useProblemStore((state) => state.toggleListMembership)
 
-  // Current filters to check if we're viewing a specific list
-  const currentFilters = useProblemStore((state) => state.currentFilters)
-
   // Prepare the mutation
-  const mutation = useOptimisticMutation<void, ToggleListItemParams, ToggleListItemContext>({
+  const mutation = useOptimisticMutation<void, ToggleListItemParams, ProblemEditContext>({
     // Call the backend API — POST to add, DELETE to remove
     apiFn: (apiCall, { contentId, problemSlug, isInList }) =>
       apiCall<void>(() => getListItemApiUrl(contentId, problemSlug), {
         method: isInList ? 'DELETE' : 'POST',
       }),
 
-    // Optimistically update the store before the server responds
-    onMutate: ({ problemSlug, contentId }) => {
-      // Save previous state for rollback
-      const previousDisplayedProblems = useProblemStore.getState().displayedProblems
-
-      // Toggle the list membership in the store
-      toggleListMembership(problemSlug, contentId)
-
-      // Return context for potential rollback
-      return { previousDisplayedProblems }
-    },
+    // The edit taken to the store and to every screen it stops the problem belonging on, before the
+    // archive has been asked
+    onMutate: ({ problemSlug, contentId }) =>
+      applyProblemEdit(queryClient, problemSlug, () =>
+        toggleListMembership(problemSlug, contentId)
+      ),
 
     // Handle successful server response
-    onSuccess: (_data, { problemSlug, contentId, isInList }) => {
+    onSuccess: (_data, { problemSlug, contentId, isInList }, context) => {
       // Invalidate the lists cache (problem counts may have changed)
       queryClient.invalidateQueries({ queryKey: userListQueryKeys.all })
 
-      // Invalidate problem search queries if we are currently viewing this list
-      // This forces the server to return the updated problem list (crucial for "Undo" restores)
-      if (currentFilters?.listContentId === contentId) {
-        queryClient.invalidateQueries({ queryKey: problemQueryKeys.allSearches() })
-      }
+      // A search reading inside this list now answers differently, whichever screen the reader was
+      // on when they edited it, so it may not go on serving what it holds
+      invalidateAffectedSearches(
+        queryClient,
+        (searchFilters) => searchFilters?.listContentId === contentId
+      )
 
       // Show undo toast when removing from a list while viewing it
       // (the problem just disappeared from the view, so undo is critical)
-      if (isInList && currentFilters?.listContentId === contentId) {
+      if (isInList && context?.hasLeftView) {
         toast.info(t('removedFromList'), {
           action: {
             label: t('favorites.undo'),
@@ -99,15 +89,14 @@ export function useToggleListItem() {
 
     // Rollback optimistic update on error
     onError: (_error, { problemSlug, contentId }, context) => {
-      // Rollback the list membership state
-      if (context) {
-        toggleListMembership(problemSlug, contentId)
-      }
+      // Nothing was optimistically applied when the mutation never got as far as running
+      if (!context) return
 
-      // Restore the original displayed problems list
-      if (context?.previousDisplayedProblems) {
-        useProblemStore.getState().setDisplayedProblems(context.previousDisplayedProblems)
-      }
+      // Rollback the list membership state
+      toggleListMembership(problemSlug, contentId)
+
+      // And put back every search the problem was taken out of
+      restoreSearches(queryClient, context.hiddenFrom)
     },
 
     // Auth configuration
