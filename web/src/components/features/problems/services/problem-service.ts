@@ -65,7 +65,7 @@ export async function getProblemBySlug(
   const filters: SearchFiltersState = {
     ...createDefaultFilters(),
     seasons: [{ slug: seasonSlug, displayName: seasonSlug, fullName: null }],
-    competitionSelection: [{ path: position.competitionPath }],
+    competitionSelection: [position.competitionPath],
     problemNumbers: [position.problemNumber],
   }
 
@@ -189,15 +189,12 @@ function searchFiltersStateToFilterParameters(state: SearchFiltersState): Filter
   // The authors filtered on
   const authorSlugs = state.authors.map((author) => author.slug)
 
-  // The competitions filtered on, each named by the path standing for it and everything under it
-  const competitionPaths = state.competitionSelection.map((selection) => selection.path)
-
   // The reduced lists alongside the fields that pass through untouched
   return {
     searchText: state.searchText,
     searchInSolution: state.searchInSolution,
     olympiadYears,
-    competitionPaths,
+    competitionPaths: state.competitionSelection,
     problemNumbers: state.problemNumbers,
     tagSlugs,
     tagLogic: state.tagLogic,

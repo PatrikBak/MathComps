@@ -6,7 +6,7 @@
 import type * as React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import type { CompetitionSelection, SearchFiltersState } from '../types/problem-library-types'
+import type { SearchFiltersState } from '../types/problem-library-types'
 import { generateCompetitionChips } from '../utils/competition-chips'
 import { DEEP_TAXONOMY, makeCompetitionTree } from './competition-tree-fixture'
 
@@ -30,7 +30,7 @@ function filtersWith(paths: string[]): SearchFiltersState {
     tagLogic: 'or',
     authors: [],
     authorLogic: 'or',
-    competitionSelection: paths.map((path) => ({ path })),
+    competitionSelection: paths,
     favoritesOnly: false,
     markStatus: null,
     listContentId: null,
@@ -109,11 +109,7 @@ describe('clicking a chip', () => {
 
     // Only the other filter survives
     expect(onFiltersChange).toHaveBeenCalledTimes(1)
-    expect(
-      onFiltersChange.mock.calls[0][0].competitionSelection.map(
-        (selection: CompetitionSelection) => selection.path
-      )
-    ).toEqual(['flat'])
+    expect(onFiltersChange.mock.calls[0][0].competitionSelection).toEqual(['flat'])
   })
 
   it('drops the whole subtree the chip stands for, however it came to stand for it', () => {
@@ -131,11 +127,7 @@ describe('clicking a chip', () => {
     chips[0].onClick(PLAIN_CLICK)
 
     // Nothing under it is left behind to keep the chip alive
-    expect(
-      onFiltersChange.mock.calls[0][0].competitionSelection.map(
-        (selection: CompetitionSelection) => selection.path
-      )
-    ).toEqual(['flat'])
+    expect(onFiltersChange.mock.calls[0][0].competitionSelection).toEqual(['flat'])
   })
 
   it('leaves a sibling alone whose slug merely extends the one clicked', () => {
@@ -156,11 +148,7 @@ describe('clicking a chip', () => {
     chips[0].onClick(PLAIN_CLICK)
 
     // The longer one is a competition in its own right rather than something below the one dropped
-    expect(
-      onFiltersChange.mock.calls[0][0].competitionSelection.map(
-        (selection: CompetitionSelection) => selection.path
-      )
-    ).toEqual(['tstc'])
+    expect(onFiltersChange.mock.calls[0][0].competitionSelection).toEqual(['tstc'])
   })
 
   it('narrows the whole competition filter to one chip under the modifier', () => {
@@ -178,11 +166,7 @@ describe('clicking a chip', () => {
     chips[1].onClick(EXCLUSIVE_CLICK)
 
     // Everything else goes, including the filters that were not part of this chip
-    expect(
-      onFiltersChange.mock.calls[0][0].competitionSelection.map(
-        (selection: CompetitionSelection) => selection.path
-      )
-    ).toEqual(['mid-t'])
+    expect(onFiltersChange.mock.calls[0][0].competitionSelection).toEqual(['mid-t'])
   })
 
   it('leaves the search term alone', () => {

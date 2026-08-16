@@ -44,7 +44,7 @@ describe('Search URL Serialization', () => {
         ],
         tagLogic: 'and',
         authors: [{ displayName: 'John Doe', slug: 'john-doe', fullName: null }],
-        competitionSelection: [{ path: 'imo-a-finals' }],
+        competitionSelection: ['imo-a-finals'],
         favoritesOnly: true,
       })
 
@@ -127,7 +127,7 @@ describe('Search URL Serialization', () => {
     it('should serialize a selection at any depth as its bare path', () => {
       // Three competitions, each naming a node at a different depth
       const filters = createFilters({
-        competitionSelection: [{ path: 'imo' }, { path: 'imo-a' }, { path: 'imo-a-i-navodne-x' }],
+        competitionSelection: ['imo', 'imo-a', 'imo-a-i-navodne-x'],
       })
 
       // Each written as the path it names, however deep that runs

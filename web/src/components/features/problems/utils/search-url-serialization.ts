@@ -44,19 +44,6 @@ const SEPARATORS = {
 } as const
 
 /**
- * Serializes competition selections into a compact string format.
- * A selection is written as its path, and several are joined by commas.
- *
- * @param selections - The competition filters to write.
- *
- * @returns The paths, comma-separated.
- */
-const serializeSelections = (selections: SearchFiltersState['competitionSelection']): string => {
-  // A path apiece, in the order they were picked
-  return selections.map((selection) => selection.path).join(SEPARATORS.LIST)
-}
-
-/**
  * Serializes search filters into a URL-safe query string.
  * Only the values that differ from the defaults are written.
  *
@@ -117,7 +104,7 @@ export const serializeFilters = (filters: SearchFiltersState): string => {
 
     // The competitions, each as the path of the node it names
     if (filters.competitionSelection.length > 0) {
-      const selectionsValue = serializeSelections(filters.competitionSelection)
+      const selectionsValue = filters.competitionSelection.join(SEPARATORS.LIST)
       params.push(`${URL_PARAMS.COMPETITIONS}=${selectionsValue}`)
     }
 

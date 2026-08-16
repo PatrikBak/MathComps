@@ -20,7 +20,7 @@ import { useCompetitionBrowserModal } from '../hooks/use-competition-browser-mod
 import type { MarkStatusFilter } from '../types/problem-api-types'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { generateCompetitionChips } from '../utils/competition-chips'
-import { buildCompetitionTree, resolveCompetitionPaths } from '../utils/competition-tree'
+import { buildCompetitionTree, validateCompetitionPaths } from '../utils/competition-tree'
 import { createDefaultFilters } from '../utils/url-initialization'
 import { ActionsMenu } from './ActionsMenu'
 import type { ChipData } from './CollapsibleChipGroup'
@@ -130,8 +130,8 @@ export default function ActiveFiltersBar({
       baseOptions.seasons.find((season) => season.slug === selection.seasonSlug)?.displayName ??
       selection.seasonSlug
 
-    // What was picked, resolved against the taxonomy the chips are drawn from
-    const competitionSelections = resolveCompetitionPaths([selection.path], competitionTree)
+    // What was picked, checked against the taxonomy the chips are drawn from
+    const competitionSelections = validateCompetitionPaths([selection.path], competitionTree)
 
     // The browser picks one competition outright, so everything else is cleared rather than kept
     onFiltersChange({

@@ -117,7 +117,7 @@ function parseAndInterpretFilters(searchParams: URLSearchParams): SearchFiltersS
   // The filters, each competition standing as the path the URL addressed it by
   return {
     ...finalState,
-    competitionSelection: competitionPaths.map((path) => ({ path })),
+    competitionSelection: competitionPaths,
   }
 }
 
@@ -139,7 +139,5 @@ export function namesOnlyKnownCompetitions(
   competitionTree: CompetitionTree
 ): boolean {
   // Every competition named has to still be there, since the URL was written against an older taxonomy
-  return filters.competitionSelection.every((selection) =>
-    competitionTree.byPath.has(selection.path)
-  )
+  return filters.competitionSelection.every((selection) => competitionTree.byPath.has(selection))
 }

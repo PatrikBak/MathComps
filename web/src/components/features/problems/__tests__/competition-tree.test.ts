@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import {
   buildCompetitionTree,
   expandedByDefault,
-  resolveCompetitionPaths,
   toFacetNodes,
+  validateCompetitionPaths,
 } from '../utils/competition-tree'
 import {
   DEEP_TAXONOMY,
@@ -37,31 +37,27 @@ describe('addressing a node by its path', () => {
   })
 
   it('resolves paths at any depth', () => {
-    // Three paths resolved at once, one per depth from a root down to the deepest leaf
-    const resolved = resolveCompetitionPaths(['flat', 'mo-a', 'mo-a-i-navodne-y'], tree)
+    // Three paths checked at once, one per depth from a root down to the deepest leaf
+    const resolved = validateCompetitionPaths(['flat', 'mo-a', 'mo-a-i-navodne-y'], tree)
 
     // Each lands on the node it names
-    expect(resolved?.map((selection) => selection.path)).toEqual([
-      'flat',
-      'mo-a',
-      'mo-a-i-navodne-y',
-    ])
+    expect(resolved).toEqual(['flat', 'mo-a', 'mo-a-i-navodne-y'])
   })
 
   it('rejects the whole URL when a path names no node, at any depth', () => {
     // A path that names nothing condemns the URL whether it is one segment long or five
-    expect(resolveCompetitionPaths(['ghost'], tree)).toBeNull()
-    expect(resolveCompetitionPaths(['mo-zz'], tree)).toBeNull()
-    expect(resolveCompetitionPaths(['mo-a-i-navodne-zz'], tree)).toBeNull()
-    expect(resolveCompetitionPaths(['mo-a-i-navodne-x-deeper'], tree)).toBeNull()
+    expect(validateCompetitionPaths(['ghost'], tree)).toBeNull()
+    expect(validateCompetitionPaths(['mo-zz'], tree)).toBeNull()
+    expect(validateCompetitionPaths(['mo-a-i-navodne-zz'], tree)).toBeNull()
+    expect(validateCompetitionPaths(['mo-a-i-navodne-x-deeper'], tree)).toBeNull()
 
     // Including when it arrives alongside paths that would have resolved
-    expect(resolveCompetitionPaths(['flat', 'ghost'], tree)).toBeNull()
+    expect(validateCompetitionPaths(['flat', 'ghost'], tree)).toBeNull()
   })
 
   it('resolves nothing to nothing rather than to a broken URL', () => {
     // No paths at all is what an absent parameter looks like, which is not an error
-    expect(resolveCompetitionPaths([], tree)).toEqual([])
+    expect(validateCompetitionPaths([], tree)).toEqual([])
   })
 })
 
