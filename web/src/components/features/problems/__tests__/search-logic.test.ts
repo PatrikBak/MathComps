@@ -26,7 +26,7 @@ describe('deciding when to search', () => {
       const baseFilters = {
         ...defaultFilters,
         tags: [{ slug: 'algebra', displayName: 'Algebra', fullName: null }],
-        competitionSelection: [{ path: 'mo-a' }],
+        competitionSelection: ['mo-a'],
       }
 
       // The term rewritten
@@ -160,14 +160,14 @@ describe('deciding when to search', () => {
       const withSelections = {
         ...defaultFilters,
         searchText: 'existing search',
-        competitionSelection: [{ path: 'mo-a-i' }],
+        competitionSelection: ['mo-a-i'],
       }
 
       // The term rewritten and another competition put in its place, leaving the count where it was
       const differentSelections = {
         ...withSelections,
         searchText: 'different search',
-        competitionSelection: [{ path: 'imo' }],
+        competitionSelection: ['imo'],
       }
 
       // A different competition entirely, so its results cannot wait out the typing
@@ -282,7 +282,7 @@ describe('deciding when to search', () => {
         ...defaultFilters,
         seasons: [{ slug: '2023', displayName: '2023', fullName: null }],
         problemNumbers: [1],
-        competitionSelection: [{ path: 'mo-a-i' }],
+        competitionSelection: ['mo-a-i'],
       }
 
       // The year traded for another, leaving every count where it was
@@ -301,7 +301,7 @@ describe('deciding when to search', () => {
       expect(isNoOpFilterChange(picked, numberMoved)).toBe(false)
 
       // The competition traded for another
-      const competitionMoved = { ...picked, competitionSelection: [{ path: 'imo' }] }
+      const competitionMoved = { ...picked, competitionSelection: ['imo'] }
 
       // A different competition entirely
       expect(isNoOpFilterChange(picked, competitionMoved)).toBe(false)

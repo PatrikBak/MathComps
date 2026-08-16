@@ -274,7 +274,7 @@ describe('reading filters back out of a URL', () => {
       expect(isInvalid).toBe(expectInvalid)
 
       // The paths the parse carried through
-      const parsedPaths = result.filters.competitionSelection.map((selection) => selection.path)
+      const parsedPaths = result.filters.competitionSelection
 
       // Nothing here names an unreadable key or season, so the parse itself always understands the URL
       expect(result.hasInvalidParams).toBe(false)

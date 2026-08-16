@@ -10,12 +10,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import type { FacetOption } from '../types/problem-api-types'
 import type { FilterOptionsWithCounts, SearchFiltersState } from '../types/problem-library-types'
 import { foldPickedPaths } from '../utils/competition-selection-fold'
-import {
-  buildCompetitionTree,
-  competitionSelectionFor,
-  expandedByDefault,
-  toFacetNodes,
-} from '../utils/competition-tree'
+import { buildCompetitionTree, expandedByDefault, toFacetNodes } from '../utils/competition-tree'
 
 /**
  * How a facet's options are ordered before they reach the UI.
@@ -150,9 +145,7 @@ export function useSearchFiltersLogic({
     }
 
     // A selection naming a node the taxonomy no longer holds drops out
-    return filters.competitionSelection
-      .map((selection) => selection.path)
-      .filter((path) => competitionTree.byPath.has(path))
+    return filters.competitionSelection.filter((selection) => competitionTree.byPath.has(selection))
   }, [filters.competitionSelection, competitionTree])
 
   /**
@@ -162,9 +155,7 @@ export function useSearchFiltersLogic({
    */
   function handleCompetitionTreeChange(nextSelectedIds: string[]) {
     // The same selection expressed at whatever depth covers it
-    const selections = foldPickedPaths(nextSelectedIds, competitionTree).map(
-      competitionSelectionFor
-    )
+    const selections = foldPickedPaths(nextSelectedIds, competitionTree).map((node) => node.path)
 
     // Only the competition filter moves; everything else stays as it was
     onFiltersChange({

@@ -53,10 +53,7 @@ describe('a URL carrying competitions', () => {
     // Every part of it understood
     expect(result.hasInvalidParams).toBe(false)
     expect(result.filters.searchText).toBe('algebra')
-    expect(result.filters.competitionSelection.map((selection) => selection.path)).toEqual([
-      'mo-a-i-navodne',
-      'flat',
-    ])
+    expect(result.filters.competitionSelection).toEqual(['mo-a-i-navodne', 'flat'])
   })
 
   it('falls back to the defaults when a season names no edition', () => {
@@ -80,9 +77,7 @@ describe('a URL carrying competitions', () => {
 
     // Carried through as written, since the archive resolves paths itself and must be asked first
     expect(result.hasInvalidParams).toBe(false)
-    expect(result.filters.competitionSelection.map((selection) => selection.path)).toEqual([
-      'mo-zz',
-    ])
+    expect(result.filters.competitionSelection).toEqual(['mo-zz'])
   })
 })
 

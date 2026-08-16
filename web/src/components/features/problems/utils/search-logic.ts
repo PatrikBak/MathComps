@@ -116,8 +116,5 @@ function equalCompetitionSelections(
   if (previousArray.length !== nextArray.length) return false
 
   // Order is meaningful here, so each position is compared against its own
-  return previousArray.every((previousSelection, index) => {
-    // How the backend is told about a node follows from the node, so the path settles it alone
-    return previousSelection.path === nextArray[index].path
-  })
+  return previousArray.every((previousSelection, index) => previousSelection === nextArray[index])
 }

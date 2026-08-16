@@ -4,7 +4,6 @@
 import type { TreeNode } from '@/components/shared/components/facets/model/facet-types'
 
 import type { CompetitionNodeOption } from '../types/problem-api-types'
-import type { CompetitionSelection } from '../types/problem-library-types'
 
 /** Sits between the ancestor names in a node's path label. */
 const LABEL_SEPARATOR = ' - '
@@ -137,46 +136,21 @@ export function toFacetNodes(nodes: CompetitionNode[]): TreeNode[] {
 }
 
 /**
- * Turns a node into the selection the filters hold.
- *
- * @param node - The node the filter names.
- * @returns The selection standing for it.
- */
-export function competitionSelectionFor(node: CompetitionNode): CompetitionSelection {
-  // The selection, which addresses the node at whatever depth it sits
-  return { path: node.path }
-}
-
-/**
- * Resolves paths against the taxonomy. A path naming no node means the URL was written for a taxonomy
+ * Checks paths against the taxonomy. A path naming no node means the URL was written for a taxonomy
  * this one no longer matches, which is treated as a broken URL rather than quietly dropping the filter
  * the reader asked for.
  *
- * @param paths - The paths to resolve.
- * @param tree - The taxonomy to resolve them against.
- * @returns The selections, or null when any path names no node.
+ * @param paths - The paths to validate.
+ * @param tree - The taxonomy to check them against.
+ * @returns The same paths, or null when any of them names no node.
  */
-export function resolveCompetitionPaths(
-  paths: string[],
-  tree: CompetitionTree
-): CompetitionSelection[] | null {
-  // The selections the paths resolve to
-  const selections: CompetitionSelection[] = []
-
-  // Every path has to land, since a partly understood filter is worse than an obviously broken one
-  for (const path of paths) {
-    // The node the path names, absent when the taxonomy has moved on since the URL was written
-    const node = tree.byPath.get(path)
-
-    // One unresolvable path condemns the whole URL
-    if (!node) return null
-
-    // The node stands as a filter at whatever depth it sits
-    selections.push(competitionSelectionFor(node))
-  }
+export function validateCompetitionPaths(paths: string[], tree: CompetitionTree): string[] | null {
+  // One path naming nothing condemns the whole set, since a partly understood filter is worse than
+  // an obviously broken one
+  if (paths.some((path) => !tree.byPath.has(path))) return null
 
   // Every path landed
-  return selections
+  return paths
 }
 
 /**

@@ -31,19 +31,6 @@ export type FilterOptionsWithCounts = {
 }
 
 /**
- * One competition filter, held at whatever depth of the taxonomy the user picked, so taking a
- * whole competition records one entry rather than every round in it. It carries no names of its
- * own: whatever shows the filter reads those off the node its path resolves to.
- *
- * One read off a URL names whatever that URL was written against, which a taxonomy that has moved on
- * since may no longer hold. Anything reading a node out of a selection has to allow for its absence.
- */
-export type CompetitionSelection = {
-  /** The node the filter names, addressed by the slugs leading down to it, e.g. `csmo-a-i`. */
-  path: string
-}
-
-/**
  * Everything the library is currently filtered by.
  */
 export type SearchFiltersState = {
@@ -53,8 +40,11 @@ export type SearchFiltersState = {
   searchInSolution: boolean
   /** The school years filtered on. */
   seasons: LabeledSlug[]
-  /** The competitions filtered on, each held at the level the user picked. */
-  competitionSelection: CompetitionSelection[]
+  /**
+   * The competitions filtered on, each as the slugs leading down to the node the user picked, e.g.
+   * `csmo-a-i`, so taking a whole competition records one path rather than every round in it.
+   */
+  competitionSelection: string[]
   /** The positions within a round filtered on. */
   problemNumbers: number[]
   /** The tags filtered on. */
