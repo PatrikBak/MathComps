@@ -1,3 +1,5 @@
+import { namesTheSameItemsInOrder } from '@/components/shared/utils/collection-utils'
+
 import type { LabeledSlug } from '../types/problem-api-types'
 import type { SearchFiltersState } from '../types/problem-library-types'
 
@@ -16,7 +18,7 @@ export function isTextOnlyChange(previous: SearchFiltersState, next: SearchFilte
     (previous.searchText !== next.searchText ||
       previous.searchInSolution !== next.searchInSolution) &&
     equalSlugs(previous.seasons, next.seasons) &&
-    equalProblemNumbers(previous.problemNumbers, next.problemNumbers) &&
+    namesTheSameItemsInOrder(previous.problemNumbers, next.problemNumbers) &&
     equalSlugs(previous.tags, next.tags) &&
     previous.tagLogic === next.tagLogic &&
     equalSlugs(previous.authors, next.authors) &&
@@ -24,7 +26,7 @@ export function isTextOnlyChange(previous: SearchFiltersState, next: SearchFilte
     previous.favoritesOnly === next.favoritesOnly &&
     previous.markStatus === next.markStatus &&
     previous.listContentId === next.listContentId &&
-    equalCompetitionSelections(previous.competitionSelection, next.competitionSelection)
+    namesTheSameItemsInOrder(previous.competitionSelection, next.competitionSelection)
   )
 }
 
@@ -55,7 +57,7 @@ export function isNoOpFilterChange(
     previous.searchText === next.searchText &&
     previous.searchInSolution === next.searchInSolution &&
     equalSlugs(previous.seasons, next.seasons) &&
-    equalProblemNumbers(previous.problemNumbers, next.problemNumbers) &&
+    namesTheSameItemsInOrder(previous.problemNumbers, next.problemNumbers) &&
     equalSlugs(previous.tags, next.tags) &&
     normalizedPreviousTagLogic === normalizedNextTagLogic &&
     equalSlugs(previous.authors, next.authors) &&
@@ -63,7 +65,7 @@ export function isNoOpFilterChange(
     previous.favoritesOnly === next.favoritesOnly &&
     previous.markStatus === next.markStatus &&
     previous.listContentId === next.listContentId &&
-    equalCompetitionSelections(previous.competitionSelection, next.competitionSelection)
+    namesTheSameItemsInOrder(previous.competitionSelection, next.competitionSelection)
   )
 }
 
@@ -80,41 +82,4 @@ function equalSlugs(previous: LabeledSlug[], next: LabeledSlug[]): boolean {
 
   // The label a value reads under carries no filtering meaning, so only its slug counts
   return previous.every((value, index) => value.slug === next[index].slug)
-}
-
-/**
- * Whether two lists of positions within a round hold the same numbers, in the same order.
- *
- * @param previous - The positions before the change.
- * @param next - The positions after it.
- * @returns True when both hold the same numbers in the same order.
- */
-function equalProblemNumbers(previous: number[], next: number[]): boolean {
-  // Differing counts settle it without any comparing
-  if (previous.length !== next.length) return false
-
-  // Order is meaningful here, so each position is compared against its own
-  return previous.every((problemNumber, index) => problemNumber === next[index])
-}
-
-/**
- * Whether two lists of competition filters name the same nodes, position for position.
- *
- * @param previous - The selections before the change.
- * @param next - The selections after it.
- * @returns True when both name the same selections in the same order.
- */
-function equalCompetitionSelections(
-  previous: SearchFiltersState['competitionSelection'],
-  next: SearchFiltersState['competitionSelection']
-): boolean {
-  // Nothing handed over reads as nothing selected
-  const previousArray = previous || []
-  const nextArray = next || []
-
-  // Differing counts settle it without any comparing
-  if (previousArray.length !== nextArray.length) return false
-
-  // Order is meaningful here, so each position is compared against its own
-  return previousArray.every((previousSelection, index) => previousSelection === nextArray[index])
 }
