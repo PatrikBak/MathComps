@@ -1,6 +1,6 @@
 import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import { skipToken, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
 import { useQueryUiState } from '@/hooks/use-query-ui-state'
@@ -21,7 +21,7 @@ import { countActiveFilters } from '../utils/filter-validation'
 /**
  * The data shape returned by the infinite search query.
  */
-type ProblemSearchInfiniteData = {
+export type ProblemSearchInfiniteData = {
   /** The problem data for the current page. */
   problems: {
     /** The list of problem slugs on this page. */
@@ -77,6 +77,22 @@ type UseProblemSearchInfiniteReturn = {
 }
 
 /**
+ * What one search names, beyond the prefix it shares with every other search.
+ *
+ * These ride in a single object rather than as loose positions, so a search sitting in the cache can
+ * be read back by name. Positions would leave every reader having to know which slot each was
+ * written at, which nothing checks and a reordering breaks in silence.
+ */
+type ProblemSearchKeySegment = {
+  /** The language the search was sent in. */
+  locale: string
+  /** The filters it was sent under, null while the filter state has yet to settle. */
+  filters: SearchFiltersState | null
+  /** The reader it was sent for, null when nobody is signed in. */
+  userId: string | null
+}
+
+/**
  * Query key factory for problem search queries.
  */
 export const problemQueryKeys = {
@@ -91,11 +107,30 @@ export const problemQueryKeys = {
 
   // Key for problem search results with specific filters + for the current user
   search: (locale: string, filters: SearchFiltersState | null, userId: string | null) =>
-    [...problemQueryKeys.allSearches(), locale, filters, userId] as const,
+    [...problemQueryKeys.allSearches(), { locale, filters, userId }] as const,
 
   // Key for a single problem by slug
   single: (locale: string, problemSlug: string | null, userId: string | null) =>
     [...problemQueryKeys.all, 'single', locale, problemSlug, userId] as const,
+}
+
+/**
+ * Reads what a search narrows to off the key it is cached under.
+ *
+ * Only {@link problemQueryKeys.search} builds a key shaped like this, and only searches ever reach
+ * here: React Query matches the key a caller asked under before it runs their own predicate, so a
+ * query of another kind is turned away first.
+ *
+ * @param queryKey - The key a search is held under.
+ *
+ * @returns The filters it was sent under, per {@link ProblemSearchKeySegment}.
+ */
+export function searchFiltersOf(queryKey: readonly unknown[]): SearchFiltersState | null {
+  // The segment naming this search, which every search key ends with
+  const segment = queryKey[queryKey.length - 1] as ProblemSearchKeySegment
+
+  // What it narrows to
+  return segment.filters
 }
 
 /**
@@ -382,9 +417,6 @@ export function useProblemSearchQuery(
   // Construct the infinite query
   const infiniteQuery = useProblemSearchInfinite(locale, filters, userId, enabled)
 
-  // Get the function to update displayed problems
-  const setDisplayedProblems = useProblemStore((state) => state.setDisplayedProblems)
-
   // Store previous problems array. We will use it to determine whether
   // we have fetched / obtained from cache the same problems as before.
   // If yes, we can then return the old problem array reference and avoid
@@ -417,11 +449,6 @@ export function useProblemSearchQuery(
     return newProblems
   }, [infiniteQuery.data?.pages])
 
-  // Sync problems to the global store
-  useEffect(() => {
-    setDisplayedProblems(finalProblems)
-  }, [finalProblems, setDisplayedProblems])
-
   // The counts this search narrows to, which the archive sends with the first page alone since every
   // page behind it narrows to the very same set
   const filterOptions = useMemo(
@@ -429,21 +456,18 @@ export function useProblemSearchQuery(
     [infiniteQuery.data]
   )
 
-  // Keep previous filter options during loading so sidebar counts remain steady while new results load
+  // The counts of the last search that had any, kept so the sidebar has numbers to show while the
+  // next search is still in flight
   const stableFilterOptionsRef = useRef<FilterOptionsWithCounts | null>(null)
-  // Track which filters produced the stable ref to detect stale data
-  const stableFiltersRef = useRef<SearchFiltersState | null>(null)
 
   // Only update the ref if we have new filter options
   if (filterOptions) {
     stableFilterOptionsRef.current = filterOptions
-    stableFiltersRef.current = filters
   }
   // A search that narrows nothing is answered with no counts of its own, and holding on to an older
   // search's would show them beside the next set of filters entirely
   else if (infiniteQuery.data) {
     stableFilterOptionsRef.current = null
-    stableFiltersRef.current = null
   }
 
   // A function which says whether a set of filters narrows nothing at all

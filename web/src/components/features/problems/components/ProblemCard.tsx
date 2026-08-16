@@ -227,6 +227,7 @@ export function ProblemCard({
 
   return (
     <div
+      data-problem-slug={problem.slug}
       className={cn(
         'bg-surface border rounded-lg shadow-lg overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-focus/10 hover:border-muted/80',
         // Highlight border when similar problems section is expanded

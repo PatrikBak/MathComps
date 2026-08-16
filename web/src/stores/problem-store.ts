@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 
 import type { Problem } from '@/components/features/problems/types/problem-api-types'
-import type { SearchFiltersState } from '@/components/features/problems/types/problem-library-types'
 
 /**
  * State for the global problem store, which represents the problems in the
@@ -11,12 +10,6 @@ import type { SearchFiltersState } from '@/components/features/problems/types/pr
 type ProblemState = {
   /* Map of problem slug to Problem object. */
   problems: Record<string, Problem>
-
-  /* Current active filters (synced from use-problem-search reducer). */
-  currentFilters: SearchFiltersState | null
-
-  /* The slugs of displayed problems (for optimistic updates). */
-  displayedProblems: string[]
 
   /* Add or update a single problem in the store. */
   upsertProblem: (problem: Problem) => void
@@ -36,12 +29,6 @@ type ProblemState = {
   /* Update the comment count of a problem in the store. */
   updateCommentCount: (slug: string, delta: number) => void
 
-  /* Set the currently displayed problems (called when search results load). */
-  setDisplayedProblems: (slugs: string[]) => void
-
-  /* Set the current filters (called when the filter results change) */
-  setCurrentFilters: (filters: SearchFiltersState | null) => void
-
   /* Reset the store to its initial state */
   reset: () => void
 }
@@ -55,8 +42,6 @@ type ProblemState = {
  */
 export const useProblemStore = create<ProblemState>((set) => ({
   problems: {},
-  displayedProblems: [],
-  currentFilters: null,
 
   upsertProblem: (problem) =>
     set((state) => ({
@@ -88,30 +73,21 @@ export const useProblemStore = create<ProblemState>((set) => ({
       // Ensure the problem is there
       if (!problem) return state
 
+      // Whether the reader likes it now that they have said so
+      const isLiked = !problem.liked
+
       // Update the problem in the store
       const updatedProblems = {
         ...state.problems,
         [problemSlug]: {
           ...problem,
-          liked: !problem.liked,
-          likeCount: problem.liked ? problem.likeCount - 1 : problem.likeCount + 1,
+          liked: isLiked,
+          likeCount: isLiked ? problem.likeCount + 1 : problem.likeCount - 1,
         },
       }
 
-      // We might update the displayed problems if we are filtering by "Liked Only"
-      let updatedDisplayed = state.displayedProblems
-
-      // If we are filtering by "Liked Only" (e.g., favorites tab),
-      // and we just unliked it, we should remove it from the view immediately.
-      if (state.currentFilters?.favoritesOnly && !problem.liked) {
-        updatedDisplayed = state.displayedProblems.filter((slug) => slug !== problemSlug)
-      }
-
       // Return the updated state
-      return {
-        problems: updatedProblems,
-        displayedProblems: updatedDisplayed,
-      }
+      return { problems: updatedProblems }
     }),
 
   toggleProblemMark: (problemSlug) =>
@@ -122,35 +98,20 @@ export const useProblemStore = create<ProblemState>((set) => ({
       // Ensure the problem is there
       if (!problem) return state
 
+      // Whether the problem is marked now that the reader has said so
+      const isMarked = !problem.marked
+
       // Update the problem in the store
       const updatedProblems = {
         ...state.problems,
         [problemSlug]: {
           ...problem,
-          marked: !problem.marked,
+          marked: isMarked,
         },
       }
 
-      // We might update the displayed problems if we are filtering by "Marked Only"
-      let updatedDisplayed = state.displayedProblems
-
-      // If we are filtering by "Marked Only" and we just unmarked it,
-      // we should remove it from the view immediately.
-      if (state.currentFilters?.markStatus === 'marked' && !problem.marked) {
-        updatedDisplayed = state.displayedProblems.filter((slug) => slug !== problemSlug)
-      }
-
-      // If we are filtering by "Unmarked Only" and we just marked it,
-      // we should remove it from the view immediately.
-      if (state.currentFilters?.markStatus === 'unmarked' && problem.marked) {
-        updatedDisplayed = state.displayedProblems.filter((slug) => slug !== problemSlug)
-      }
-
       // Return the updated state
-      return {
-        problems: updatedProblems,
-        displayedProblems: updatedDisplayed,
-      }
+      return { problems: updatedProblems }
     }),
 
   toggleListMembership: (problemSlug, contentId) =>
@@ -169,12 +130,6 @@ export const useProblemStore = create<ProblemState>((set) => ({
         ? problem.listContentIds.filter((id) => id !== contentId)
         : [...problem.listContentIds, contentId]
 
-      // If removing from a list while viewing that list, hide the problem
-      let updatedDisplayed = state.displayedProblems
-      if (isRemoving && state.currentFilters?.listContentId === contentId) {
-        updatedDisplayed = state.displayedProblems.filter((slug) => slug !== problemSlug)
-      }
-
       // Return updated state
       return {
         problems: {
@@ -184,7 +139,6 @@ export const useProblemStore = create<ProblemState>((set) => ({
             listContentIds: updatedListContentIds,
           },
         },
-        displayedProblems: updatedDisplayed,
       }
     }),
 
@@ -208,21 +162,9 @@ export const useProblemStore = create<ProblemState>((set) => ({
       }
     }),
 
-  setDisplayedProblems: (problemSlugs) =>
-    set(() => ({
-      displayedProblems: problemSlugs,
-    })),
-
-  setCurrentFilters: (filters) =>
-    set(() => ({
-      currentFilters: filters,
-    })),
-
   reset: () =>
     set(() => ({
       problems: {},
-      displayedProblems: [],
-      currentFilters: null,
     })),
 }))
 

@@ -10,7 +10,6 @@ import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 import { errorCodeOf } from '@/lib/api/api-error'
 import type { QueryUiState } from '@/lib/query-ui-state'
-import { useProblemStore } from '@/stores/problem-store'
 
 import { ACTIVE_FILTERS_CONSTANTS } from '../constants/filter-constants'
 import { SEARCH_TIMING } from '../constants/timing-constants'
@@ -367,11 +366,6 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
     return localFilters
   }, [problemId, singleProblemQuery.data?.filters, localFilters])
 
-  // Sync filters to global store
-  useEffect(() => {
-    useProblemStore.getState().setCurrentFilters(displayFilters)
-  }, [displayFilters])
-
   // A problem asked for by ID that turns out not to exist is worth saying out loud, because the
   // answer is to leave the page rather than to try again. Every other failure keeps the reader here,
   // where the page itself explains it.
@@ -554,11 +548,8 @@ export const useProblemSearch = (): UseProblemSearchReturn => {
   // Are we loading more pages?
   const isPaginationLoading = !problemId && searchQuery.isFetchingNextPage
 
-  // The problems the last search put on screen
-  const displayedProblems = useProblemStore((state) => state.displayedProblems)
-
   // The problems on screen: the one the URL names, or whatever the search returned
-  const problems = problemId ? [problemId] : displayedProblems
+  const problems = problemId ? [problemId] : searchQuery.problems
 
   // How many problems match, which the problem the URL names answers on its own
   const totalCount = problemId ? 1 : searchQuery.totalCount
