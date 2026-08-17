@@ -7,9 +7,11 @@ import { useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
+import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import type { DefenseProblem } from '../model/defense-types'
 import { DefenseConversation } from './DefenseConversation'
+import { MathildaWordmark } from './MathildaWordmark'
 
 /**
  * Props for the {@link DefenseChatTrigger}.
@@ -46,10 +48,16 @@ export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
   return (
     <>
       {/* Opens the defense for this problem */}
-      <Button variant="outline" size="sm" shape="pill" onClick={handleOpen} aria-label={t('name')}>
+      <Button
+        variant="outline"
+        size="sm"
+        shape="pill"
+        onClick={handleOpen}
+        aria-label={MATHILDA_NAME}
+      >
         <Bot size={16} strokeWidth={1.75} />
         <span>
-          <span className="text-brand-light">Math</span>ilda
+          <MathildaWordmark />
         </span>
       </Button>
 

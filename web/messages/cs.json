@@ -2,7 +2,7 @@
   "about": {
     "author": {
       "alt": "Profilová fotka Patrika Baka",
-      "description": "Jmenuji se <strong>Patrik Bak</strong> a matematickou olympiádou dlouhodobě žiju. Jako soutěžící jsem byl třikrát na mezinárodní matematické olympiádě (IMO) a dvakrát jsem získal bronzovou medaili. Později se mi tam jako autorovi dostaly dvě úlohy. Také mě baví přednášet a pomáhat s přípravou na soutěže druhým. Kromě matematiky mě baví programování, a hlavně když tyto dvě věci můžu spojit, což vedlo k projektu <link>GeoGen</link>, nástroji pro automatické generování geometrických úloh. <strong>MathComps</strong> je další prostor na seberealizaci v obou těchto směrech, přičemž vznikne něco milého a užitečného pro matematickou komunitu 😀",
+      "description": "Jmenuji se <strong>Patrik Bak</strong> a matematickou olympiádou dlouhodobě žiju. Jako soutěžící jsem byl třikrát na mezinárodní matematické olympiádě (IMO) a dvakrát jsem získal bronzovou medaili. Později se tam jako autorovi dostaly dvě mé úlohy. Také mě baví přednášet a pomáhat druhým s přípravou na soutěže. Kromě matematiky mě baví programování, a hlavně když tyto dvě věci můžu spojit, což vedlo k projektu <link>GeoGen</link>, nástroji pro automatické generování geometrických úloh. <strong>MathComps</strong> je další prostor pro seberealizaci v obou těchto směrech, přičemž vznikne něco milého a užitečného pro matematickou komunitu 😀",
       "shortBio": "Trojnásobný účastník a dvojnásobný medailista Mezinárodní matematické olympiády (IMO); autor soutěžních úloh a materiálů MathComps.",
       "title": "O autorovi"
     },
@@ -11,14 +11,14 @@
     },
     "next": {
       "registration": "Od dubna 2026 je MathComps zároveň registrovaným spolkem v Česku, MathComps z.s., IČO 249 37 924.",
-      "text1": "Moje dlouhodobá vize je mít víc interaktivních nástrojů. Momentálně pracuji na tom, aby na MathComps byly AI funkcionality, protože osobně jsem velký nadšenec pro AI a na sobě vidím, jak mi pomáhá při učení se novým věcem. Samozřejmě mimo tyto vymoženosti bych rád pokračoval v aktualizaci archivu, tvorbě a doplňování materiálů a průvodce soutěžemi.",
-      "text2": "V ideálním světě bych si dovedl představit pracovat na MathComps a souvisejících aktivitách jako tvorba materiálů na plný úvazek. To mi poslední rok bylo v konečném důsledku umožněno kombinací několika zdrojů příjmu: samotný web podpořila na začátku jeho vzniku firma <wincent>Wincent</wincent>, dále většina materiálů na stránce vznikla v rámci kroužků <matika>Matika Česku</matika>, no a poslední novinkou je podpora od <gtf>Global Talent Fund</gtf>, který sponzoruje nadcházející soutěže s AI zpětnou vazbou, které budou k otestování koncem léta.",
+      "text1": "Moje dlouhodobá vize je mít víc interaktivních nástrojů. Aktuálně existuje Mathilda, AI tutorka, která pomáhá při řešení úloh ve studijních materiálech a brzy bude i v soutěžích. Osobně jsem velký nadšenec pro AI a na sobě vidím, jak mi pomáhá při učení se novým věcem. Samozřejmě mimo tyto vymoženosti bych rád pokračoval v aktualizaci archivu, tvorbě a doplňování materiálů a průvodce soutěžemi.",
+      "text2": "V ideálním světě bych si dovedl představit pracovat na MathComps a souvisejících aktivitách jako tvorba materiálů na plný úvazek. To mi poslední rok bylo v konečném důsledku umožněno kombinací několika zdrojů příjmu: samotný web podpořila na začátku jeho vzniku firma <wincent>Wincent</wincent>, dále většina materiálů na stránkách vznikla v rámci kroužků <matika>Matika Česku</matika>, no a poslední novinkou je podpora od <gtf>Global Talent Fund</gtf>, který sponzoruje nadcházející soutěže s AI zpětnou vazbou, které začnou od 14. září 2026.",
       "text3": "Pokud vás MathComps případně mé myšlenky zaujaly a chtěli byste pomoct, finančně nebo jiným způsobem, nebo si jen tak popovídat, <link>napište mi</link>, každá zpráva potěší ☺️",
       "title": "Co bude dál"
     },
     "story": {
-      "text1": "Už delší dobu jsem si říkal, že by bylo užitečné mít prohledávatelný archiv česko-slovenských úloh, protože jsem v nich hledal často a hledat ve stovkách PDF souborech není žádná zábava. Taky jsem snil o tom, jak skvělé by bylo mít vyhledávání podle klíčových slov, rychle si vyfiltrovat úlohy o posloupnostech a podobně.",
-      "text2": "Podobné to je se studijními materiály, průběžně jich vždycky nějaké tvořím (k přednáškám na akcích) a zůstávají neveřejné, maximálně jako PDF soubory, které nejsou nejpraktičtější, např. se v nich nedají snadno skrývat návody nebo řešení a mít je blízko zadání, případně dobře zobrazit na mobilu.",
+      "text1": "Už delší dobu jsem si říkal, že by bylo užitečné mít prohledávatelný archiv česko-slovenských úloh, protože jsem v nich hledal často a hledat ve stovkách PDF souborů není žádná zábava. Taky jsem snil o tom, jak skvělé by bylo mít vyhledávání podle klíčových slov, rychle si vyfiltrovat úlohy o posloupnostech a podobně.",
+      "text2": "Podobné je to se studijními materiály, průběžně jich vždycky nějaké tvořím (k přednáškám na akcích) a zůstávají neveřejné, maximálně jako PDF soubory, které nejsou nejpraktičtější, např. se v nich nedají snadno skrývat návody nebo řešení a mít je blízko zadání, případně dobře zobrazit na mobilu.",
       "text3": "Kromě osobního hlediska mi vždy přišlo, že jednotný web, na kterém se snadno hledají úlohy a který obsahuje studijní materiály, může být velmi užitečný pro nováčky hledající, co ta olympiáda vlastně je a jaké jsou možnosti. Vítané by byly případně i nějaké začátečnicky přívětivé materiály, protože mně samotnému takové jednotné místo chybělo, když jsem ještě byl student hledající všechno možné k soutěžím.",
       "text4": "Na základě těchto motivací vznikla aktuální verze webu, která nabízí archiv úloh, studijní materiály a průvodce pro začátečníky. Do budoucna toho bude víc a víc, nejen co se týče velikosti archivu, počtu materiálů, ale i nových funkcionalit 😇",
       "title": "Proč MathComps začal"
@@ -367,7 +367,6 @@
     "libraryEmptyLead": "Mathilda je AI tutorka",
     "libraryLoading": "Načítám…",
     "loginPrompt": "Mathilda si tvoje konverzace ukládá, takže potřebuje účet.",
-    "name": "Mathilda",
     "newDefense": "Nová konverzace",
     "noReplyYet": "Zatím bez odpovědi",
     "opener": "Ahoj, jsem Mathilda. Můžeme si projít tvůj postup, podívat se na rozpracovaný nápad, nebo ti poradím, když se zasekneš. Nad odpověďmi chvíli přemýšlím, abych ti neprozradila příliš a neřekla něco špatně 😇",
@@ -615,7 +614,8 @@
       "proof": "Důkaz",
       "sectionLabel": "Materiály",
       "solution": "Řešení"
-    }
+    },
+    "mathilda": "S jednotlivými úlohami vám pomůže AI tutorka <name>Mathilda</name>, můžete jí svěřit své řešení nebo dílčí postup."
   },
   "home": {
     "about": {
@@ -637,7 +637,7 @@
       },
       "guide": {
         "description": "Přehled soutěží, seminářů a užitečných odkazů.",
-        "title": "Průvodce"
+        "title": "Rozcestník"
       },
       "handouts": {
         "description": "Průběžně doplňované studijní texty a sbírky úloh.",
@@ -655,14 +655,22 @@
       "subtitle": "Archiv soutěžních úloh, studijních materiálů, užitečných zdrojů, a postupně víc a víc.",
       "title": "Matematická olympiáda a věci okolo ní"
     },
+    "mathilda": {
+      "body": "AI pomocnice, která ti poradí s úlohami: představ jí své řešení nebo jen myšlenku, a ona ti ho zkontroluje nebo pomůže dokončit. Zatím funguje ve <link>studijních materiálech</link>, postupně ji rozšíříme i na archiv.",
+      "exchange": {
+        "candidate": "Zřejmě $a \\le b$ a $b \\le a$, takže $a = b$.",
+        "examiner": "Vyplývá z $a \\mid b$ vždy $a \\le b$ pro každou dvojici celých čísel?",
+        "statement": "Kdy pro celá čísla $a, b$ platí $a \\mid b$ a zároveň $b \\mid a$?"
+      }
+    },
     "news": {
       "seeAll": "Zobrazit vše",
       "title": "Novinky"
     },
     "upcoming": {
-      "comingSoon": "Koncem léta 2026",
+      "comingSoon": "14. září 2026",
       "feature": {
-        "description": "Soutěže s prezentováním řešení umělé inteligenci, která ho přímo v soutěži opravuje a nechává prostor ještě ho doladit.",
+        "description": "Soutěže s prezentováním řešení Mathildě, která ho přímo v soutěži opravuje a nechává prostor ještě ho doladit.",
         "title": "Soutěže s umělou inteligencí"
       },
       "title": "Co se chystá"

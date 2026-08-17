@@ -423,6 +423,16 @@ html {
   max-width: 85ch;
 }
 
+/* Smaller serif for a quoted excerpt. Each message is its own block, so the paragraph rhythm
+   collapses */
+.math-typography.math-compact {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+.math-typography.math-compact p {
+  margin: 0;
+}
+
 /* Headings reset to the sans-serif UI font with tight spacing and lined nums */
 .math-typography h1,
 .math-typography h2,

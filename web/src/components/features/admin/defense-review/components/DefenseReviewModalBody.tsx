@@ -9,6 +9,7 @@ import { indexReports } from '@/components/features/defense/model/defense-conver
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { Tabs } from '@/components/shared/components/Tabs'
 import { cn } from '@/components/shared/utils/css-utils'
+import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import type { UseDefenseReviewPanelsResult } from '../hooks/use-defense-review-panels'
 import type { DefenseReviewTabId } from '../model/defense-review-tabs'
@@ -112,7 +113,7 @@ export function DefenseReviewModalBody({
       <DefenseTranscript
         turns={detail.turns}
         conversationKey={detail.id}
-        roleLabels={{ examiner: tDefense('name'), candidate: t('student') }}
+        roleLabels={{ examiner: MATHILDA_NAME, candidate: t('student') }}
         regionLabel={tDefense('transcriptLabel')}
         jumpLabel={tDefense('jumpToLatest')}
         isThinking={false}

@@ -15,6 +15,7 @@ import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
 import { toPlainTextPreview } from '@/components/shared/utils/string-utils'
+import { MATHILDA_NAME } from '@/constants/mathilda'
 import { useDeferredAnchorJump } from '@/hooks/use-deferred-anchor-jump'
 import { ROUTES } from '@/i18n/i18n'
 
@@ -273,7 +274,7 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
       <Modal
         isOpen={isOpen}
         onClose={inConversation ? () => setSelected(null) : handleClose}
-        title={inConversation ? undefined : t('name')}
+        title={inConversation ? undefined : MATHILDA_NAME}
         ariaLabel={inConversation ? t('title') : undefined}
         showCloseButton={!inConversation}
         padded={!inConversation}
