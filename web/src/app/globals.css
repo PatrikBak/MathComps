@@ -18,6 +18,7 @@
   --color-brand: var(--color-violet-500);
   --color-brand-foreground: white;
   --color-brand-hover: var(--color-violet-700);
+  --color-brand-mid: var(--color-violet-400);
   --color-brand-light: var(--color-violet-300);
 
   /* 3. Actions & Feedback */
