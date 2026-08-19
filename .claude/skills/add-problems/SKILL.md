@@ -70,6 +70,8 @@ date: 2026-03-31    # the round date, YYYY-MM-DD
 language: sk        # the draft's original language: sk | cs | en
 ```
 
+Optionally `visibleSince: 2026-09-14T18:00:00Z` (see "Embargoing a round" below).
+
 `competition` is the path from Step 1: the slugs from the root of the taxonomy down to the competition the problems were set in, hyphen-joined, however many that is. `csmo-b-ii` is round II of category B; `memo-i` is a round of a competition with no categories; `imo` is a competition that runs as one flat sitting. Two rules the registry check enforces:
 
 - **Every competition on the path must be registered** — `csmo-b-ii` needs `csmo`, `csmo-b` and `csmo-b-ii` all present in the shared tree and named in all three locales, or you get one error per missing one.
@@ -78,6 +80,8 @@ language: sk        # the draft's original language: sk | cs | en
 Season year is the academic start, not the event year: a March-2026 event ⇒ `year: 2025` (ročník = year − 1950, shared across competitions by design — it is not each competition's own edition count).
 
 **Single-occasion competitions — give every round the same `date`.** When a competition runs all its rounds as one event (MEMO Individual + Team, CPSJ I + T, TST d1–d5), every round's `_meta.yaml` must carry the **same date**. The problem list sorts by event **date first** (newest first), then by round order (`OrderByDefaultProblemSort`: season → date → the competition's sort path → problem number). Because date outranks round order, distinct per-paper dates scatter one occasion's papers by date — the later paper sorts ahead of the earlier one (Team before Individual). A shared date collapses the date key so the round-order key takes over and the papers group in round order (Individual before Team). This is a deliberate data-side convention — don't "correct" the shared date to the real distinct per-paper days, it re-breaks the ordering.
+
+**Embargoing a round: `visibleSince`.** An ISO-8601 instant carrying an explicit offset (`Z` or `±HH:MM`) loads a round ahead of the day it opens. The problems land complete, and the archive begins serving them once the instant passes. Omit the field and the round is open the moment it is imported. The draft owns it, so a re-apply that drops the field lifts a stored embargo. It is a different axis from `date`, which is the day the round ran and only ever sorts, so an embargoed round can perfectly well have run in the past. It hides the problems and not their figures: those go to public storage at import time under a slug-derived key.
 
 ## Step 3 — Write the problems
 

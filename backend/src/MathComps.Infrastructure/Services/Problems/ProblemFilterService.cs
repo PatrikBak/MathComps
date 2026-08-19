@@ -40,6 +40,14 @@ public class ProblemFilterService(
         // The page as it will be served, which is how much of the filtered set one request can ask for.
         var bounds = PageBounds.ForRequestedPage(paginationOptions.Value, pageSize, pageNumber);
 
+        // The instant this whole request judges visibility at, so every query it runs agrees on it.
+        var now = DateTimeOffset.UtcNow;
+
+        // Every problem the archive may serve. The embargo sits here, on the root set, rather than among the
+        // criteria: it is not something the person asking narrowed by, so counting the "whole library" has to mean
+        // counting this, or the base options would advertise problems no query can reach.
+        var visibleProblems = dbContext.Problems.WhereRoundHasOpened(now);
+
         // The problems the text search leaves, or all of them when nothing was searched for
         IQueryable<Problem> textFilteredQuery;
 
@@ -52,12 +60,13 @@ public class ProblemFilterService(
                 parameters.SearchText,
                 parameters.SearchInSolution);
 
-            // Narrow to the problems those ids name
-            textFilteredQuery = dbContext.Problems
+            // Narrow to the problems those ids name. The search reads the texts directly, so this intersection is
+            // what keeps an embargoed problem out of a search that would otherwise have matched its statement.
+            textFilteredQuery = visibleProblems
                 .Where(problem => matchingProblemIds.Contains(problem.Id));
         }
         // Nothing was searched for, so every problem is still in play
-        else textFilteredQuery = dbContext.Problems;
+        else textFilteredQuery = visibleProblems;
 
         // The competitions the selected paths name, each standing for its whole subtree; empty when none is selected
         var competitionIds = await ResolveCompetitionIdsAsync(parameters.CompetitionPaths);
@@ -136,6 +145,11 @@ public class ProblemFilterService(
 
                 // Similar Problems
                 data.problem.SimilarProblems
+                    // Only neighbours whose own round has opened, since an edge would otherwise carry an embargoed
+                    // problem's slug and statement out beside a visible one. WhereRoundHasOpened owns the rule.
+                    .Where(similarProblem =>
+                        similarProblem.SimilarProblem.Round.VisibleSince == null
+                        || similarProblem.SimilarProblem.Round.VisibleSince <= now)
                     // Only similar enough problems
                     .Where(similarProblem =>
                         similarProblem.SimilarityScore >= similarityOptions.Value.MinSimilarityScore)
@@ -210,7 +224,7 @@ public class ProblemFilterService(
 
         // The whole library's options, counted over every problem rather than over what the query leaves
         var baseOptions = isFirstPage && includeBaseOptions
-            ? await BuildSearchOptionsAsync(dbContext.Problems, _everythingInPlay, _noTerms, language)
+            ? await BuildSearchOptionsAsync(visibleProblems, _everythingInPlay, _noTerms, language)
             : null;
 
         // The query's own options, worth counting only where they can differ from the library's.
@@ -822,9 +836,10 @@ public class ProblemFilterService(
     /// <inheritdoc/>
     public async Task<SeasonCompetitionBrowserResult> GetCompetitionsBySeasonAsync(Language language)
     {
-        // Group all problems by the season and the competition they belong to
+        // Group the problems the archive may serve by the season and the competition they belong to
         // We will then take only these data + problem count to build the result
         var competitionData = await dbContext.Problems
+            .WhereRoundHasOpened(DateTimeOffset.UtcNow)
             .GroupBy(problem => new
             {
                 problem.Round.Season.EditionNumber,

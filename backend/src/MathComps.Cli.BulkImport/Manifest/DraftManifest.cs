@@ -33,11 +33,16 @@ public record DraftManifest(
 /// <param name="CompetitionPath"><inheritdoc cref="Competition.Path" path="/summary"/></param>
 /// <param name="Season">The season the draft belongs to.</param>
 /// <param name="Date">Round date as <c>YYYY-MM-DD</c>; approximate is fine since it's a sort key.</param>
+/// <param name="VisibleSince">
+/// The instant the round opens to readers, as an ISO-8601 timestamp carrying an explicit offset, or null when it
+/// is open from the moment it lands.
+/// </param>
 /// <param name="Language">The original language of the draft — the text variant in it is the original.</param>
 public record ManifestMeta(
     string CompetitionPath,
     ManifestSeason Season,
     string Date,
+    string? VisibleSince,
     Language Language)
 {
     /// <summary>

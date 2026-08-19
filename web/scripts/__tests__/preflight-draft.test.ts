@@ -630,8 +630,54 @@ describe('narrowMeta', () => {
       competitionPath: 'csmo-a-iii',
       season: { year: 2024 },
       date: '2024-03-15',
+      visibleSince: null,
       language: 'sk',
     })
+  })
+
+  it('carries an embargo instant through, and leaves it null when absent', () => {
+    // An instant with an explicit offset survives verbatim, since the C# half re-parses this string
+    const stamped = narrowMeta({
+      competition: 'csmo-a-iii',
+      season: { year: 2024 },
+      date: '2024-03-15',
+      visibleSince: '2026-09-14T18:00:00Z',
+      language: 'sk',
+    })
+    expect(stamped.errors).toEqual([])
+    expect(stamped.meta.visibleSince).toBe('2026-09-14T18:00:00Z')
+
+    // Omitting it is the ordinary case and no error, so every existing draft stays valid
+    const bare = narrowMeta({
+      competition: 'csmo-a-iii',
+      season: { year: 2024 },
+      date: '2024-03-15',
+      language: 'sk',
+    })
+    expect(bare.errors).toEqual([])
+    expect(bare.meta.visibleSince).toBeNull()
+  })
+
+  it.each([
+    '2026-09-14T18:00:00',
+    '2026-09-14',
+    '2026-09-14 18:00:00Z',
+    '2026-02-30T18:00:00Z',
+    '2026-09-14T25:00:00Z',
+    '',
+    5,
+  ])('errors on the unusable visibleSince %j', (visibleSince) => {
+    const { meta, errors } = narrowMeta({
+      competition: 'csmo-a-iii',
+      season: { year: 2024 },
+      date: '2024-03-15',
+      visibleSince,
+      language: 'sk',
+    })
+
+    // A rejected instant narrows to null rather than embargoing the round by accident
+    expect(meta.visibleSince).toBeNull()
+    expect(errors.some((error) => error.message.includes('visibleSince'))).toBe(true)
   })
 
   it.each(['imo', 'imo-i', 'deep-mid-low-round', 'csmo-z10-ii'])(
