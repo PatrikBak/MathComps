@@ -100,19 +100,15 @@ const TURNS_WORTH_ANSWERING_FOR = 3
 const REPLIES_LEFT_TO_WARN_AT = 5
 
 /**
- * The composer's toolbar for a defense turn: only the math tools are kept, so a turn stays plain text
- * and mathematics.
+ * The composer's toolbar for a defense turn. Headings, links, spoilers and uploads are hidden, leaving the
+ * tools an argument is written with.
  */
 const DEFENSE_TOOLBAR: ToolbarConfig = {
-  numberedList: false,
-  bulletList: false,
-  quote: false,
   heading: false,
   link: false,
   spoiler: false,
   attachment: false,
   image: false,
-  emoji: false,
 }
 
 /**
