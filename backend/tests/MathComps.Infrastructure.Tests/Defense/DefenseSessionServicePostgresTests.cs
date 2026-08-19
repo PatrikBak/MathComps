@@ -433,8 +433,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
     /// <summary>
     /// Listing all of a user's sessions returns every problem's sessions ordered by when they were last spoken in
-    /// rather than when they were started, each carrying its statement and the student's first message, and excludes
-    /// other users' sessions.
+    /// rather than when they were started, each carrying its statement and the student's most recent message, and
+    /// excludes other users' sessions.
     /// </summary>
     [Fact]
     public Task ListAll_returns_every_problem_last_spoken_in_first_with_statement_and_preview() =>
@@ -458,10 +458,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // The one that was just continued
         var continued = sessions[0];
 
-        // It carries its target, snapshotted statement, and the student's first message
+        // It carries its target, snapshotted statement, and the student's most recent message
         Assert.Equal(new HandoutEnvironmentTarget("handout-1", "prob-1"), continued.Target);
         Assert.Equal(FakeDefenseContentResolver.Statement, continued.Statement);
-        Assert.Equal("first", continued.FirstStudentMessage);
+        Assert.Equal("one more thing", continued.LastStudentMessage);
 
         // And its stamp came from that appended turn, later than every other session's
         Assert.True(continued.LastActivityAt > sessions[1].LastActivityAt);
@@ -471,7 +471,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// A session rewound to the examiner's opener has no student message left, which the listing reports as none.
     /// </summary>
     [Fact]
-    public Task ListAll_reports_no_first_message_when_the_student_has_none() =>
+    public Task ListAll_reports_no_student_message_when_the_student_has_none() =>
         RunTestAsync(async service =>
     {
         // A session the student has spoken in
@@ -485,7 +485,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // The session is still there, with nothing the student said to preview
         var listed = Assert.Single(sessions);
-        Assert.Null(listed.FirstStudentMessage);
+        Assert.Null(listed.LastStudentMessage);
     });
 
     /// <summary>

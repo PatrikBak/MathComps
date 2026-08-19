@@ -26,10 +26,10 @@ public class AdminDefenseReviewService(
     : IAdminDefenseReviewService
 {
     /// <summary>
-    /// How much of a student's opening message a queue row carries. A row shows one line of it, and the whole
+    /// How much of a student's most recent message a queue row carries. A row shows one line of it, and the whole
     /// message can run to thousands of characters across a page of them.
     /// </summary>
-    private const int OpeningMessageChars = 300;
+    private const int LastStudentMessageChars = 300;
 
     /// <summary>
     /// The furthest back a period may reach, in days. Bounded rather than merely floored because the date the
@@ -117,8 +117,8 @@ public class AdminDefenseReviewService(
                     new AdminDefenseUserDto(session.User.Id, session.User.DisplayName, session.User.Email),
                     session.Turns
                         .Where(turn => turn.Role == TranscriptRole.Candidate)
-                        .OrderBy(turn => turn.Sequence)
-                        .Select(turn => turn.Content.Substring(0, OpeningMessageChars))
+                        .OrderByDescending(turn => turn.Sequence)
+                        .Select(turn => turn.Content.Substring(0, LastStudentMessageChars))
                         .FirstOrDefault(),
                     session.Turns.Count,
                     row.LastActivityAt,

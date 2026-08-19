@@ -593,9 +593,9 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
-    /// A queue row reports what the conversation holds: the student who held it, the message they opened with
-    /// rather than the examiner's, how many turns it ran to, what has been written about it, and which of the
-    /// two things a student can leave behind it carries.
+    /// A queue row reports what the conversation holds: the student who held it, their most recent message rather
+    /// than the examiner's or an earlier one of their own, how many turns it ran to, what has been written about
+    /// it, and which of the two things a student can leave behind it carries.
     /// </summary>
     [Fact]
     public Task A_queue_row_reports_what_the_conversation_holds() => RunTestAsync(async service =>
@@ -604,17 +604,28 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         await QueryAsync<IAdminNoteService>((_, notes) => notes.CreateAsync(
             _reviewerId, _newestSessionId, _newestReplyId, "she gave it away", null));
 
+        // Take the conversation past the student's opening message, so an earlier one of theirs can't win
+        await QueryAsync(async context =>
+        {
+            // A second student turn, after the reply the seed left
+            context.DefenseTurns.Add(NewTurn(
+                _newestSessionId, TranscriptRole.Candidate, "and here is my fix", 3, _now));
+
+            // Commit it
+            await context.SaveChangesAsync();
+        });
+
         // Read the row back
         var row = await GetConversationAsync(service, _newestSessionId);
 
         // It names who held the conversation
         Assert.Equal("Student", row.User.DisplayName);
 
-        // Opens on what the student said, not on the examiner's greeting
-        Assert.Equal("my newest defense", row.OpeningMessage);
+        // Reads what the student last said, not the examiner's reply nor the message they opened with
+        Assert.Equal("and here is my fix", row.LastStudentMessage);
 
         // Counts every turn in it
-        Assert.Equal(3, row.TurnCount);
+        Assert.Equal(4, row.TurnCount);
 
         // Carries the note
         Assert.Equal(1, row.NoteCount);

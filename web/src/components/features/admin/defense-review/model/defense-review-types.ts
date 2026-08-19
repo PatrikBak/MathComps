@@ -31,8 +31,8 @@ export type DefenseReviewConversation = {
   target: HandoutEnvironmentTarget
   /** Who held it. */
   user: DefenseReviewUser
-  /** The start of the message the student opened with; null when it holds no student turn. */
-  openingMessage: string | null
+  /** The start of the student's most recent message; null when it holds no student turn. */
+  lastStudentMessage: string | null
   /** How many turns it holds in total. */
   turnCount: number
   /** When something was last said in it, as an ISO-8601 string. */

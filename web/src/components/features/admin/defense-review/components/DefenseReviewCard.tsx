@@ -51,10 +51,12 @@ export const DefenseReviewCard = memo(function DefenseReviewCard({
   // Whether anything in it has arrived since it was last read
   const isUnread = conversation.unreadTurnCount > 0
 
-  // A glimpse of the conversation, stripped to plain text. An opening message that is nothing but markup
-  // strips to nothing, which reads as the same absence as never having opened with anything.
+  // A glimpse of the conversation, stripped to plain text. A student message that is nothing but
+  // markup strips to nothing, which reads as the same absence as never having said anything.
   const preview =
-    conversation.openingMessage === null ? '' : toPlainTextPreview(conversation.openingMessage)
+    conversation.lastStudentMessage === null
+      ? ''
+      : toPlainTextPreview(conversation.lastStudentMessage)
 
   // When it last moved, to the minute so two conversations from one day stay apart
   const lastActivityAt = format.dateTime(new Date(conversation.lastActivityAt), {
@@ -122,7 +124,7 @@ export const DefenseReviewCard = memo(function DefenseReviewCard({
           preview === '' ? 'italic' : 'line-clamp-2'
         )}
       >
-        {preview === '' ? t('noOpeningMessage') : preview}
+        {preview === '' ? t('noStudentMessage') : preview}
       </span>
 
       {/* What the queue holds against it */}

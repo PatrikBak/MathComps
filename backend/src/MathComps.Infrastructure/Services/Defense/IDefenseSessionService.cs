@@ -45,7 +45,7 @@ public interface IDefenseSessionService
 
     /// <summary>
     /// Lists all of a user's sessions across every problem, most recently active first, each summarized to its
-    /// problem, statement, last activity, and opening student message.
+    /// problem, statement, last activity, and most recent student message.
     /// </summary>
     /// <param name="userId">The user whose sessions to list.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
