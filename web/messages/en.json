@@ -55,6 +55,8 @@
       },
       "clearFilters": "Clear filters",
       "config": {
+        "fallbackModels": "Fallbacks",
+        "fallbackModelsNone": "none",
         "maxOutputTokens": "Output cap",
         "maxRevisions": "Revision cap",
         "model": "Model",

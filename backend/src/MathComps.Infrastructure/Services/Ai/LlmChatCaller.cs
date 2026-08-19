@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using MathComps.Infrastructure.Options;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
@@ -12,11 +13,15 @@ namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
 /// Implements <see cref="ILlmChatCaller"/> over an <see cref="OpenAIClient"/> pointed at the configured
-/// OpenAI-compatible endpoint. Derives a model-bound client per call, patches the reasoning level onto the raw
-/// request body, and retries a configured number of times because the endpoint occasionally hands back an unusable
-/// response, so a retry draws a fresh one. A reply that hit the output-token cap is retried the same way. Each reply's
-/// billed cost is folded into the spend tally as it lands, retries included.
+/// OpenAI-compatible endpoint. Derives a model-bound client per call, patches the reasoning level and the fallback
+/// chain onto the raw request body, and retries a configured number of times because the endpoint occasionally hands
+/// back an unusable response, so a retry draws a fresh one. A reply that hit the output-token cap is retried the same
+/// way. Each reply's billed cost is folded into the spend tally as it lands, retries included.
 /// </summary>
+/// <remarks>
+/// The retry and the fallback chain cover different failures: a retry re-draws when a reply came back unusable,
+/// having already been paid for, while the chain is the endpoint's own answer to the requested model never replying.
+/// </remarks>
 /// <param name="openAIClient">The connection to the configured endpoint; each call derives its model-bound client
 /// from it.</param>
 /// <param name="spendTracker">The tally every reply's billed cost is folded into.</param>
@@ -99,16 +104,18 @@ public class LlmChatCaller(
         // The model-bound client for this call, derived from the shared connection.
         var chatClient = openAIClient.GetChatClient(request.Model).AsIChatClient();
 
-        // The per-call options carry the output-token cap and the reasoning level when set; with neither, the request
-        // uses its default body.
-        var options = request.MaxOutputTokens is null && string.IsNullOrWhiteSpace(request.ReasoningEffort)
+        // Whether this call carries a field the SDK has no property for, so the raw request body has to be patched.
+        var hasPatchedFields =
+            !string.IsNullOrWhiteSpace(request.ReasoningEffort) || request.FallbackModels.Count > 0;
+
+        // The per-call options carry the output-token cap and whatever the body is patched with; with neither, the
+        // request uses its default body.
+        var options = request.MaxOutputTokens is null && !hasPatchedFields
             ? null
             : new ChatOptions
             {
                 MaxOutputTokens = request.MaxOutputTokens,
-                RawRepresentationFactory = string.IsNullOrWhiteSpace(request.ReasoningEffort)
-                    ? null
-                    : _ => BuildReasoningRepresentation(request.ReasoningEffort),
+                RawRepresentationFactory = hasPatchedFields ? _ => BuildPatchedRepresentation(request) : null,
             };
 
         // The two messages: instructions as system, the input the model acts on as user.
@@ -131,6 +138,14 @@ public class LlmChatCaller(
                 // Issue this attempt's request.
                 var response = await send(chatClient, messages, options, retryToken);
 
+                // The model that answered, which a fallback chain can route past the primary. A reply naming none
+                // leaves the model asked for as the closest thing to true.
+                var servedModel =
+                    response.RawRepresentation is ChatCompletion served
+                    && !string.IsNullOrWhiteSpace(served.Model)
+                        ? served.Model
+                        : request.Model;
+
                 // What this attempt billed.
                 var usage = ReadUsage(response);
 
@@ -145,8 +160,9 @@ public class LlmChatCaller(
                     throw new InvalidOperationException(
                         "The reply hit the output-token cap before finishing; raise MaxOutputTokens for this step.");
 
-                // Read the result out of the reply and pair it with everything this call billed, retries included.
-                return new ChatCallResult<TResult>(read(response), accumulatedUsage);
+                // Read the result out of the reply and pair it with what answered and everything this call billed,
+                // retries included.
+                return new ChatCallResult<TResult>(read(response), servedModel, accumulatedUsage);
             }, cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
@@ -210,23 +226,36 @@ public class LlmChatCaller(
     }
 
     /// <summary>
-    /// Builds the OpenAI request options carrying the endpoint's reasoning control. The OpenAI SDK has no native field for
-    /// it, so we patch a top-level <c>reasoning</c> object straight into the outgoing JSON body via the options' JSON
-    /// patch.
+    /// Builds the OpenAI request options carrying the endpoint's reasoning control and its fallback chain. The OpenAI
+    /// SDK has a native field for neither, so each is patched as a top-level field straight into the outgoing JSON
+    /// body via the options' JSON patch.
     /// </summary>
-    /// <param name="reasoningEffort">The reasoning-effort level to send.</param>
-    /// <returns>The OpenAI request options with the reasoning object patched in.</returns>
-    private static ChatCompletionOptions BuildReasoningRepresentation(string reasoningEffort)
+    /// <param name="request">The call whose reasoning level and fallback chain are patched in.</param>
+    /// <returns>The OpenAI request options with those fields patched in.</returns>
+    private static ChatCompletionOptions BuildPatchedRepresentation(ChatCallRequest request)
     {
-        // Serialize the reasoning object for this call.
-        var reasoningJson = $$"""{"effort":"{{reasoningEffort}}"}""";
-
         // Start from a fresh OpenAI options bag the adapter will fill with the normal chat params.
         var options = new ChatCompletionOptions();
 
-        // Set the top-level "reasoning" field on the options' raw JSON body — via the experimental Patch hook.
+        // Both fields go on through Patch, the SDK's sanctioned hook for ones it doesn't model; SCME0001 marks it
+        // experimental (its shape may change in a later SDK), so the suppression is scoped to this block.
 #pragma warning disable SCME0001
-        options.Patch.Set("$.reasoning"u8, Encoding.UTF8.GetBytes(reasoningJson));
+
+        // The reasoning level rides in a "reasoning" object, set only when the step asked for one.
+        if (!string.IsNullOrWhiteSpace(request.ReasoningEffort))
+        {
+            // Serialize the reasoning object for this call.
+            var reasoningJson = $$"""{"effort":"{{request.ReasoningEffort}}"}""";
+
+            // Set the reasoning object as the body's top-level field.
+            options.Patch.Set("$.reasoning"u8, Encoding.UTF8.GetBytes(reasoningJson));
+        }
+
+        // The fallback chain rides in a "fallbacks" array of model ids, left off entirely when the step has none —
+        // an empty array is a claim about routing we have no reason to make.
+        if (request.FallbackModels.Count > 0)
+            options.Patch.Set("$.fallbacks"u8, JsonSerializer.SerializeToUtf8Bytes(request.FallbackModels));
+
 #pragma warning restore SCME0001
 
         // Hand the patched options back to the adapter as this call's raw representation.

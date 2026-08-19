@@ -20,12 +20,14 @@ A turn is a small loop, not one call: the examiner writes a reply, independent g
 
 ### Per-step models
 
-Each step sets its own `Model`, `ReasoningEffort`, and `MaxOutputTokens` in `appsettings.examiner.json`, so you tune one without touching the others. The token cap bounds a runaway generation (a decoding loop otherwise burns to the model's output ceiling); a reply that hits the cap is retried inside the shared chat caller before the engine ever sees it. On thinking models the reasoning budget derives from the cap, so it also sets the step's thinking depth.
+Each step sets its own `Model`, `FallbackModels`, `ReasoningEffort`, and `MaxOutputTokens` in `appsettings.examiner.json`, so you tune one without touching the others. The token cap bounds a runaway generation (a decoding loop otherwise burns to the model's output ceiling); a reply that hits the cap is retried inside the shared chat caller before the engine ever sees it. On thinking models the reasoning budget derives from the cap, so it also sets the step's thinking depth.
 
 - **Generate** — the examiner's voice, run on every turn. A strong model gives sharper challenges; because the guards check its output independently, its model is a pure quality dial, not a correctness one.
 - **Math-check** — a strong reasoning model. A false "holds" is the unrecoverable failure (the examiner would teach a falsehood), so this is the one place not to economize.
 - **Leak-check** — also a strong model. The leak judgment is the hardest call — a lighter model missed even blatant leaks in testing — so it doesn't run cheap either.
 - **Language-check** — the one step that runs cheap: naming the language two short pieces of prose are in needs no depth, and its `low` effort keeps it around a tenth of a turn's cost. `none` is not worth reaching for on this provider — it still thinks, and billed more than `low` did on the same input.
+
+`FallbackModels` is the chain the provider walks when the primary doesn't answer at all (outage, rate limit, error on its side), which the retry can't reach, since that one re-draws replies the primary already gave. Make every hop a different vendor that takes a JSON schema and a system message: a sibling model shares the primary's route, and a model the provider won't carry a system message to answers with the persona missing and calls it a success.
 
 ### Progress and cost
 

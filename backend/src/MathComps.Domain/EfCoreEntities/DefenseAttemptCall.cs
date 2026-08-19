@@ -32,7 +32,8 @@ public class DefenseAttemptCall
     public required ExaminerStep Step { get; set; }
 
     /// <summary>
-    /// The model it routed to, in <c>vendor/model</c> form.
+    /// The model that answered it. A fallback chain can make that a different model from the one its step is
+    /// configured for.
     /// </summary>
     public required string Model { get; set; }
 

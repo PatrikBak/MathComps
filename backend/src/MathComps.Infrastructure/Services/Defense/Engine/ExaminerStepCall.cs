@@ -9,7 +9,8 @@ namespace MathComps.Infrastructure.Services.Defense.Engine;
 /// what moving its reasoning level would save. This is that breakdown.
 /// </summary>
 /// <param name="Step">The step this call ran.</param>
-/// <param name="Model">The model it routed to.</param>
+/// <param name="Model">The model that answered it, which a fallback chain can make a different one from the model its
+/// step is configured for.</param>
 /// <param name="ReasoningEffort">The reasoning-effort level it ran at, or null when none was sent.</param>
 /// <param name="Usage">What the call billed: its spend and token counts.</param>
 /// <param name="DurationMs">How long the call took, in milliseconds, retries included.</param>

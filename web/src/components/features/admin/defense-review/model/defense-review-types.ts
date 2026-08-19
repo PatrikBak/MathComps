@@ -263,8 +263,10 @@ export type ExaminerStepSnapshot = {
   promptPath?: string
   /** The prompt template's raw text, uninterpolated, as read when this was recorded. */
   promptText?: string
-  /** The model the step ran on. */
+  /** The model the step was configured to run on. */
   model?: string
+  /** The backup models the step was configured to fall back through, in order. */
+  fallbackModels?: string[]
   /** The reasoning-effort level the step ran at. */
   reasoningEffort?: string
   /** The cap on the step's output tokens. */
