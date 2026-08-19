@@ -29,6 +29,7 @@ public class DraftApplyService(
     public async Task<DraftApplyResult> ApplyAsync(
         DraftTarget target,
         DateOnly date,
+        DateTimeOffset? visibleSince,
         IReadOnlyList<DraftProblemContent> problems,
         string draftFolder)
     {
@@ -47,8 +48,9 @@ public class DraftApplyService(
         var (season, seasonAction) = await GetOrCreateSeasonAsync(context, target.SeasonYear);
         entities.Add(new EntityResolution("season", target.SeasonYear.ToString(), seasonAction));
 
-        // The round — this competition's sitting in this season — carrying the draft's date when freshly created.
-        var (round, roundAction) = await GetOrCreateRoundAsync(context, competition.Id, season.Id, date);
+        // The round — this competition's sitting in this season — carrying the draft's date and visibility.
+        var (round, roundAction) = await GetOrCreateRoundAsync(
+            context, competition.Id, season.Id, date, visibleSince);
         entities.Add(new EntityResolution("round", $"{target.CompetitionPath} {target.SeasonYear}", roundAction));
 
         // Write the problems, tallying the per-text outcomes and the insert/update/image counts.
@@ -214,40 +216,44 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Get-or-creates the round by (competition node, season), setting the draft's date on a fresh row and refreshing a
-    /// stale one: an existing round whose stored date differs from the draft's is updated in place so a corrected
-    /// <c>_meta</c> date actually lands, matching how the authors/tags reconcilers bring stored rows into line.
+    /// Get-or-creates the round by (competition node, season), stamping the draft's date and visibility on a fresh
+    /// row and refreshing a stale one: an existing round differing from the draft in either is updated in place so
+    /// a corrected <c>_meta</c> actually lands, matching how the authors/tags reconcilers bring stored rows into
+    /// line. Both fields are written from the draft, so dropping an embargo from <c>_meta</c> lifts the stored one.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="competitionId">The id of the competition node whose problems these are.</param>
     /// <param name="seasonId">The season's id.</param>
     /// <param name="date">The round date from <c>_meta</c>.</param>
+    /// <param name="visibleSince">The embargo instant from <c>_meta</c>, null when it names none.</param>
     /// <returns>The entity and whether it was reused unchanged, updated in place, or created.</returns>
     private static async Task<(Round Entity, ResolutionAction Action)> GetOrCreateRoundAsync(
-        MathCompsDbContext context, Guid competitionId, Guid seasonId, DateOnly date)
+        MathCompsDbContext context, Guid competitionId, Guid seasonId, DateOnly date, DateTimeOffset? visibleSince)
     {
         // The existing round for this (competition node, season), or null when net-new.
         var existing = await context.Rounds.FirstOrDefaultAsync(
             round => round.CompetitionId == competitionId && round.SeasonId == seasonId);
 
-        // Found it — reuse it when the date already matches, otherwise refresh the stale date in place.
+        // Found it — reuse it when it already matches the draft, otherwise refresh the stale fields in place.
         if (existing is not null)
         {
-            // Already carries the draft's date — reuse it untouched.
-            if (existing.Date == date)
+            // Already carries both of the draft's values — reuse it untouched.
+            if (existing.Date == date && existing.VisibleSince == visibleSince)
                 return (existing, ResolutionAction.Reuse);
 
-            // The stored date is stale — overwrite it in place (the tracked entity flushes on save) and report it.
+            // One of them is stale — overwrite both in place (the tracked entity flushes on save) and report it.
             existing.Date = date;
+            existing.VisibleSince = visibleSince;
             return (existing, ResolutionAction.Update);
         }
 
-        // Otherwise create it with the draft's date.
+        // Otherwise create it with the draft's date and visibility.
         var created = new Round
         {
             CompetitionId = competitionId,
             SeasonId = seasonId,
-            Date = date
+            Date = date,
+            VisibleSince = visibleSince
         };
         await context.Rounds.AddAsync(created);
         return (created, ResolutionAction.Create);

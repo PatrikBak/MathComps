@@ -28,6 +28,12 @@ export type ManifestMeta = {
   season: Season
   /** Round date as `YYYY-MM-DD`. */
   date: string
+  /**
+   * The instant the round opens to readers, as an ISO-8601 timestamp carrying an explicit offset, or `null` when
+   * it is open from the moment it is imported. A future instant embargoes the round: it lands complete and the
+   * archive starts serving it once the instant passes.
+   */
+  visibleSince: string | null
   /** The original language of this draft — the body whose `pN.<lang>.md` matches it is the original. */
   language: Locale
 }

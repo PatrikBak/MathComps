@@ -23,6 +23,7 @@ export const FALLBACK_META: ManifestMeta = {
   competitionPath: '',
   season: { year: 0 },
   date: '',
+  visibleSince: null,
   language: DEFAULT_LOCALE,
 }
 
@@ -76,10 +77,11 @@ export function narrowMeta(parsed: unknown): MetaResult {
   const competitionPath = requireCompetitionPath(parsed[COMPETITION_FIELD], errors)
   const season = narrowSeason(parsed.season, errors)
   const date = narrowDate(parsed.date, errors)
+  const visibleSince = narrowVisibleSince(parsed.visibleSince, errors)
   const language = narrowLanguage(parsed.language, errors)
 
   // Assemble the best-effort meta alongside the collected issues
-  return { meta: { competitionPath, season, date, language }, errors }
+  return { meta: { competitionPath, season, date, visibleSince, language }, errors }
 }
 
 /**
@@ -148,6 +150,46 @@ function narrowDate(value: unknown, errors: VerdictError[]): string {
   // Missing, wrong shape, or not a real date
   errors.push(metaIssue('date is required and must be a valid YYYY-MM-DD date'))
   return ''
+}
+
+/**
+ * Reads the optional `visibleSince` field, recording an error and returning `null` when it is present but not an
+ * ISO-8601 instant carrying an explicit offset. An offset is demanded rather than assumed because the value
+ * embargoes a round: a bare wall-clock time would open it at whatever the importing machine happens to think the
+ * zone is, which is the one thing an embargo must not depend on.
+ *
+ * @param value - The raw `visibleSince` value from the parsed document.
+ * @param errors - Accumulator the issue is pushed onto.
+ *
+ * @returns The timestamp string, or `null` when absent or malformed.
+ */
+function narrowVisibleSince(value: unknown, errors: VerdictError[]): string | null {
+  // Absent is the ordinary case: the round is open from the moment it lands
+  if (value === undefined || value === null) return null
+
+  // An instant with an explicit `Z` or `±HH:MM` offset, down to optional fractional seconds
+  const shape = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/
+
+  // A well-shaped string is the only thing worth reading a real instant out of
+  if (typeof value === 'string' && shape.test(value)) {
+    // The instant itself, which rejects an impossible hour or month
+    const instant = new Date(value)
+
+    // The calendar day it names, parsed on its own: a real day round-trips, while Feb 30th silently rolls over
+    const [calendarDay] = value.split('T')
+    const day = new Date(`${calendarDay}T00:00:00Z`)
+
+    // Both have to hold: a parsable instant naming a day that exists
+    if (!Number.isNaN(instant.getTime()) && day.toISOString().startsWith(calendarDay)) return value
+  }
+
+  // Present but unusable
+  errors.push(
+    metaIssue(
+      'visibleSince must be an ISO-8601 instant with an explicit offset (e.g. 2026-09-14T18:00:00Z), or be omitted'
+    )
+  )
+  return null
 }
 
 /**

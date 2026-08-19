@@ -18,8 +18,13 @@ public interface IDraftApplyService
     /// Partial failure is tolerated: orphaned uploads and half-written problems are reconciled by a re-run, so
     /// there's no wrapping transaction.
     /// </summary>
+    /// <remarks>
+    /// The draft owns the round's date and visibility outright: both are written on every run, so a re-apply that
+    /// drops the embargo from its <c>_meta</c> lifts the stored one.
+    /// </remarks>
     /// <param name="target">The competition and season the draft lands under.</param>
-    /// <param name="date">The round's date, set when the round is created.</param>
+    /// <param name="date">The round's date.</param>
+    /// <param name="visibleSince"><inheritdoc cref="Round.VisibleSince" path="/summary"/></param>
     /// <param name="problems">The problems to write — content, authors, images, per-language texts.</param>
     /// <param name="draftFolder">The draft folder on disk, the root the relative <c>images/…</c> refs resolve
     /// against.</param>
@@ -27,6 +32,7 @@ public interface IDraftApplyService
     Task<DraftApplyResult> ApplyAsync(
         DraftTarget target,
         DateOnly date,
+        DateTimeOffset? visibleSince,
         IReadOnlyList<DraftProblemContent> problems,
         string draftFolder);
 }

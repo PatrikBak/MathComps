@@ -39,6 +39,17 @@ public class Round
     public required DateOnly Date { get; set; }
 
     /// <summary>
+    /// The instant this round opens to readers, or null when it is already open. A round stamped with a future
+    /// instant is embargoed: it sits in the database complete, and the archive begins serving it once the instant
+    /// passes, with nothing having to flip it.
+    /// </summary>
+    /// <remarks>
+    /// A different axis from <see cref="Date"/>, which is the wall-clock day the round ran and only ever sorts.
+    /// A round may have run years ago and still be embargoed, or run tomorrow and be open already.
+    /// </remarks>
+    public DateTimeOffset? VisibleSince { get; set; }
+
+    /// <summary>
     /// Problems that belong to this specific round.
     /// </summary>
     public ICollection<Problem> Problems { get; } = [];

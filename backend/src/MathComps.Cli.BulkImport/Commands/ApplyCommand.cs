@@ -76,6 +76,11 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
         // The folder date is a validated YYYY-MM-DD; parse it for the round.
         var date = DateOnly.ParseExact(meta.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
+        // The embargo instant, when the folder names one; absent means the round opens as soon as it lands.
+        var visibleSince = meta.VisibleSince is null
+            ? (DateTimeOffset?)null
+            : DateTimeOffset.Parse(meta.VisibleSince, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+
         // Each problem's full content — authors, link, per-language bodies, images.
         var problems = outcome.Manifest.Problems
             .Select(problem => new DraftProblemContent(
@@ -93,7 +98,7 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
         var folderPath = Path.GetFullPath(folder);
 
         // Validation passed — perform the import.
-        var appliedOutcome = await apply.ApplyAsync(target, date, problems, folderPath);
+        var appliedOutcome = await apply.ApplyAsync(target, date, visibleSince, problems, folderPath);
 
         // Pair the apply outcome with the warning-only issues the run proceeded past.
         var result = new ApplyResult(appliedOutcome, outcome.Result.Issues);
