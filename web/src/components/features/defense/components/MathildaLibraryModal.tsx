@@ -255,15 +255,6 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
     }
   }
 
-  // Returns to the list when the open defense turns out to be gone, refreshing it so the row that led here goes too
-  const handleSessionGone = () => {
-    // Show the list again
-    setSelected(null)
-
-    // Drop the defense that is no longer there from it
-    refresh()
-  }
-
   // The problem to hand the conversation when a defense is open: its target and the statement snapshotted onto
   // the session, which is what the chat shows alongside the transcript.
   const conversationProblem: DefenseProblem | null =
@@ -283,17 +274,13 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
         onClosed={runArmedJump}
       >
         {selected !== null && conversationProblem !== null ? (
-          // The real conversation, reopened to the chosen session and continue-only
+          // The real conversation, opened on the chosen defense
           <DefenseConversation
             key={selected.id}
             problem={conversationProblem}
             isOpen={isOpen}
             onClose={() => setSelected(null)}
-            mode={{
-              kind: 'continueSaved',
-              sessionId: selected.id,
-              onSessionGone: handleSessionGone,
-            }}
+            initialSessionId={selected.id}
           />
         ) : isLoading ? (
           // Still fetching the list

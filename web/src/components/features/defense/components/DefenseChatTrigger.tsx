@@ -17,7 +17,7 @@ import { MathildaWordmark } from './MathildaWordmark'
  * Props for the {@link DefenseChatTrigger}.
  */
 type DefenseChatTriggerProps = {
-  /** The problem being defended, including its reference solution. */
+  /** The problem being defended. */
   problem: DefenseProblem
 }
 
@@ -75,7 +75,7 @@ export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
             problem={problem}
             isOpen={isOpen}
             onClose={close}
-            mode={{ kind: 'fromProblem' }}
+            initialSessionId={null}
           />
         </Modal>
       )}
