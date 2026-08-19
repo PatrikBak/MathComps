@@ -97,8 +97,8 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
           {/* One row per session: resume by selecting it, delete by the overlaid control or the
               Delete key on the focused row */}
           {sessions.map((session) => {
-            // The student's first message, absent while nothing has been said in the conversation yet
-            const firstStudentMessage = session.turns.find(
+            // The student's most recent message, absent while nothing has been said yet
+            const lastStudentMessage = session.turns.findLast(
               (turn) => turn.role === 'candidate'
             )?.content
 
@@ -134,12 +134,12 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
                   <span
                     className={cn(
                       'w-full truncate',
-                      firstStudentMessage === undefined ? 'italic text-muted' : 'text-foreground'
+                      lastStudentMessage === undefined ? 'italic text-muted' : 'text-foreground'
                     )}
                   >
-                    {firstStudentMessage === undefined
+                    {lastStudentMessage === undefined
                       ? t('noReplyYet')
-                      : toPlainTextPreview(firstStudentMessage)}
+                      : toPlainTextPreview(lastStudentMessage)}
                   </span>
                 </DropdownMenuItem>
 

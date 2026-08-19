@@ -112,7 +112,7 @@
       "newTurns": "+{count} new",
       "next": "Next",
       "nextUnread": "Next unread",
-      "noOpeningMessage": "Nothing said yet",
+      "noStudentMessage": "Nothing said yet",
       "noteCount": "Notes: {count}",
       "notes": {
         "byAuthor": "by {author}",

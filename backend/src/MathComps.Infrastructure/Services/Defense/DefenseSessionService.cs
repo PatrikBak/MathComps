@@ -235,7 +235,7 @@ public class DefenseSessionService(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // The user's sessions across every problem, most recently active first, each with its target, statement,
-        // last activity, and the message the student opened with. A session with no linked environment is excluded.
+        // last activity, and the student's most recent message. A session with no linked environment is excluded.
         return await dbContext.DefenseSessions
             .AsNoTracking()
             .Where(session => session.UserId == userId && session.EnvironmentTarget != null)
@@ -251,7 +251,7 @@ public class DefenseSessionService(
                 session.Turns.Max(turn => turn.CreatedAt),
                 session.Turns
                     .Where(turn => turn.Role == TranscriptRole.Candidate)
-                    .OrderBy(turn => turn.Sequence)
+                    .OrderByDescending(turn => turn.Sequence)
                     .Select(turn => turn.Content)
                     .FirstOrDefault()))
             .ToListAsync(cancellationToken);

@@ -94,10 +94,10 @@ function MathildaDefenseRow({
     onJumpInPage(problemLabel.link.anchorId)
   }
 
-  // A glimpse of the conversation: the student's first message, stripped to plain text. Null while
-  // nothing has been said in it yet.
+  // A glimpse of the conversation: the student's most recent message, stripped to plain text. Null
+  // while nothing has been said in it yet.
   const preview =
-    defense.firstStudentMessage === null ? null : toPlainTextPreview(defense.firstStudentMessage)
+    defense.lastStudentMessage === null ? null : toPlainTextPreview(defense.lastStudentMessage)
 
   // When the conversation last moved, to the minute so same-day defenses stay apart
   const lastActivityAt = format.dateTime(new Date(defense.lastActivityAt), {

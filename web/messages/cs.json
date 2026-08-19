@@ -112,7 +112,7 @@
       "newTurns": "+{count, plural, =1 {# nová} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
       "next": "Následující",
       "nextUnread": "Následující nepřečtená",
-      "noOpeningMessage": "Zatím žádná zpráva",
+      "noStudentMessage": "Zatím žádná zpráva",
       "noteCount": "Poznámky: {count}",
       "notes": {
         "byAuthor": "od {author}",
