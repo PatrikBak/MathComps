@@ -7,11 +7,14 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// </summary>
 /// <param name="PromptPath">Path to the step's prompt template.</param>
 /// <param name="PromptText">The prompt template's raw text, uninterpolated, as read when this was recorded.</param>
-/// <param name="Model">The model the step ran on.</param>
+/// <param name="Model">The model the step was configured to run on.</param>
+/// <param name="FallbackModels">The backup models the step was configured to fall back through, in order; empty when
+/// it rode on its primary alone.</param>
 /// <param name="ReasoningEffort">The reasoning-effort level the step ran at, or null when none was sent.</param>
 /// <param name="MaxOutputTokens">The cap on the step's output tokens, or null for the model's default.</param>
 public sealed record ChatStepConfigSnapshot(
-    string PromptPath, string PromptText, string Model, string? ReasoningEffort, int? MaxOutputTokens);
+    string PromptPath, string PromptText, string Model, IReadOnlyList<string> FallbackModels,
+    string? ReasoningEffort, int? MaxOutputTokens);
 
 /// <summary>
 /// The examiner engine's full config as recorded on a session at creation — the same shape as

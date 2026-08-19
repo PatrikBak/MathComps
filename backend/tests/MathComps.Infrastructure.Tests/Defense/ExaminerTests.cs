@@ -23,6 +23,17 @@ public class ExaminerTests
     private const int RevisionCap = 2;
 
     /// <summary>
+    /// The model the fake caller reports as having answered. Deliberately not the model the steps are configured
+    /// with, so a recorded call naming this one proves the routing was read off the reply.
+    /// </summary>
+    private const string ServedModel = "served-model";
+
+    /// <summary>
+    /// The model every step is configured to route to.
+    /// </summary>
+    private const string ConfiguredModel = "test-model";
+
+    /// <summary>
     /// Every turn runs each guard independently: a clean reply is math-checked, leak-checked and language-checked once
     /// each, with nothing revised.
     /// </summary>
@@ -428,6 +439,32 @@ public class ExaminerTests
     }
 
     /// <summary>
+    /// Every recorded call names the model that answered it rather than the one its step is configured for. A fallback
+    /// chain lets the endpoint route past the primary, so reading the model off config would file the turn's whole
+    /// trail under a model that never ran.
+    /// </summary>
+    [Fact]
+    public async Task Recorded_calls_name_the_model_that_answered()
+    {
+        // A clean turn, where the caller reports a model other than the configured one as having answered.
+        var caller = new Mock<ILlmChatCaller>();
+        SetupTextStep(caller, "a reply.");
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // Every call the turn recorded, across the generate step and each guard.
+        var calls = outcome.Attempts.SelectMany(attempt => attempt.Calls).ToList();
+
+        // Each one names the model that answered, which is not the one its step routes to.
+        Assert.NotEmpty(calls);
+        Assert.All(calls, call => Assert.Equal(ServedModel, call.Model));
+    }
+
+    /// <summary>
     /// The loop refuses a transcript whose last turn isn't the candidate's — there's nothing to reply to.
     /// </summary>
     [Fact]
@@ -491,7 +528,7 @@ public class ExaminerTests
             {
                 var path = Path.Combine(directory.FullName, name);
                 File.WriteAllText(path, "{problem} {reference} {revision_note}");
-                return new ChatStepSettings { Prompt = path, Model = "test-model" };
+                return new ChatStepSettings { Prompt = path, Model = ConfiguredModel };
             }
 
             // Settings wired to the throwaway prompts.
@@ -539,7 +576,8 @@ public class ExaminerTests
     /// <returns>The wrapped result.</returns>
     private static ChatCallResult<TResponse> Result<TResponse>(
         TResponse value, decimal cost = 0m, int promptTokens = 0, int completionTokens = 0) =>
-        new(value, new ModelUsage(cost, promptTokens, completionTokens, ReasoningTokens: 0, CachedPromptTokens: 0));
+        new(value, ServedModel,
+            new ModelUsage(cost, promptTokens, completionTokens, ReasoningTokens: 0, CachedPromptTokens: 0));
 
     /// <summary>
     /// Sets the fake caller to answer any call binding to <typeparamref name="TResponse"/> with the given response,

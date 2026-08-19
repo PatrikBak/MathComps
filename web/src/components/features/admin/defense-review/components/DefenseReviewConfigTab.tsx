@@ -104,6 +104,18 @@ function StepSettings({ step, snapshot, onOpenPrompt }: StepSettingsProps) {
         {/* The model */}
         <SettingEntry label={t('model')} value={snapshot?.model} />
 
+        {/* Where it was routed when the primary failed, where an empty chain means nowhere */}
+        <SettingEntry
+          label={t('fallbackModels')}
+          value={
+            snapshot === undefined
+              ? undefined
+              : snapshot.fallbackModels === undefined || snapshot.fallbackModels.length === 0
+                ? t('fallbackModelsNone')
+                : snapshot.fallbackModels.join(', ')
+          }
+        />
+
         {/* How hard it was told to think, where no effort recorded means it ran at none */}
         <SettingEntry
           label={t('reasoningEffort')}

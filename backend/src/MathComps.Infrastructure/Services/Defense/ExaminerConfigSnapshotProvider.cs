@@ -40,6 +40,6 @@ public class ExaminerConfigSnapshotProvider(IOptions<ExaminerSettings> settings)
 
         // Carry the rest of the step's config alongside the prompt text, unchanged.
         return new ChatStepConfigSnapshot(
-            step.Prompt, promptText, step.Model, step.ReasoningEffort, step.MaxOutputTokens);
+            step.Prompt, promptText, step.Model, step.FallbackModels, step.ReasoningEffort, step.MaxOutputTokens);
     }
 }

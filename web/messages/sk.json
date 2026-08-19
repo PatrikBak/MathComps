@@ -55,6 +55,8 @@
       },
       "clearFilters": "Zrušiť filtre",
       "config": {
+        "fallbackModels": "Náhradné modely",
+        "fallbackModelsNone": "žiadne",
         "maxOutputTokens": "Limit výstupu",
         "maxRevisions": "Limit prepisov",
         "model": "Model",

@@ -297,7 +297,9 @@ overrides and only needs the keys it changes:
   reckoned **per user**. There is no aggregate ceiling, so they bound one account, not the day's total. The turn cap
   and the two length caps ride to the browser on every session read, so once the API has restarted on the new value,
   the UI follows on the next page load with no frontend deploy.
-- `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models)
+- `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models).
+  Config binds arrays by index and merges rather than replaces, so restate a `FallbackModels` chain in full when
+  overriding one.
 - `src/MathComps.Infrastructure/appsettings.llm.{Env}.json` → `appsettings.llm.json` (LLM endpoint, retries)
 
 - **Apply a change:** edit the file, `./deploy.sh <env> restart api` — no `up -d`, no `--build`.

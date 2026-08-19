@@ -257,7 +257,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // Hand the message back with its math in the project's dollar delimiters, alongside what writing it cost.
         return (
             MathDelimiterNormalizer.Normalize(result.Value),
-            BuildStepCall(ExaminerStep.Generate, _settings.Generate, result.Usage, stopwatch.ElapsedMilliseconds));
+            BuildStepCall(ExaminerStep.Generate, _settings.Generate, result, stopwatch.ElapsedMilliseconds));
     }
 
     /// <summary>
@@ -351,22 +351,23 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
 
         // Hand back the verdict alongside what asking for it cost.
         return new GuardRun<TResult>(
-            result.Value, BuildStepCall(stepKind, step, result.Usage, stopwatch.ElapsedMilliseconds));
+            result.Value, BuildStepCall(stepKind, step, result, stopwatch.ElapsedMilliseconds));
     }
 
     /// <summary>
-    /// Records one call: which step made it, how it was routed, and what it billed. The routing comes off the step's
-    /// settings rather than the request, so a session's trail can be read against the config snapshot taken when it
-    /// started.
+    /// Records one call: which step made it, how it was routed, and what it billed. The reasoning level comes off the
+    /// step's settings, so a session's trail can be read against the config snapshot taken when it started; the model
+    /// comes off the reply instead, because a fallback chain means the settings only say which model was asked for.
     /// </summary>
+    /// <typeparam name="TResult">The shape the call's reply was read into.</typeparam>
     /// <param name="stepKind">Which step made the call.</param>
     /// <param name="step">The step's model and reasoning configuration.</param>
-    /// <param name="usage">What the call billed.</param>
+    /// <param name="result">The call's reply, carrying the model that answered and what it billed.</param>
     /// <param name="elapsedMs">How long the call took, in milliseconds.</param>
     /// <returns>The recorded call.</returns>
-    private static ExaminerStepCall BuildStepCall(
-        ExaminerStep stepKind, ChatStepSettings step, ModelUsage usage, long elapsedMs) =>
-        new(stepKind, step.Model, step.ReasoningEffort, usage, (int)elapsedMs);
+    private static ExaminerStepCall BuildStepCall<TResult>(
+        ExaminerStep stepKind, ChatStepSettings step, ChatCallResult<TResult> result, long elapsedMs) =>
+        new(stepKind, result.ServedModel, step.ReasoningEffort, result.Usage, (int)elapsedMs);
 
     /// <summary>
     /// Fills a prompt template's <c>{token}</c> placeholders from a value map in a single pass, so a filled-in
