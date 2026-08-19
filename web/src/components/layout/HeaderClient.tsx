@@ -12,6 +12,7 @@ import UserMenu from '@/components/layout/UserMenu'
 import { Button } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
 import { NavLink } from '@/components/shared/components/NavLink'
+import { MATHILDA_NAME } from '@/constants/mathilda'
 import { ROUTES } from '@/i18n/i18n'
 
 import { MobileNavigationDrawer } from './MobileNavigationDrawer'
@@ -38,7 +39,7 @@ function MathildaLibraryPlaceholder() {
     <Modal
       isOpen
       onClose={() => {}}
-      title={t('name')}
+      title={MATHILDA_NAME}
       showCloseButton={false}
       className="max-w-2xl"
     >

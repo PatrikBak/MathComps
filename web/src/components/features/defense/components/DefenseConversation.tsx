@@ -13,6 +13,7 @@ import { FeedbackDialog, toFeedbackOptions } from '@/components/shared/component
 import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import { useDefenseConversation } from '../hooks/use-defense-conversation'
 import { useDefenseFeedback } from '../hooks/use-defense-feedback'
@@ -235,7 +236,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
 
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
-    examiner: t('name'),
+    examiner: MATHILDA_NAME,
     candidate: t('roles.student'),
   }
 
@@ -246,7 +247,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
         {/* Who the student is talking to */}
         <div className="flex min-w-0 items-baseline gap-2">
           <span className="shrink-0 text-base font-bold text-foreground sm:text-lg">
-            {t('name')}
+            {MATHILDA_NAME}
           </span>
           <span className="truncate text-xs text-muted">{t('role')}</span>
         </div>

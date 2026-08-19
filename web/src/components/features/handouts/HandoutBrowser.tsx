@@ -1,5 +1,7 @@
+import { Bot } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { MathildaWordmark } from '@/components/features/defense/components/MathildaWordmark'
 import { HelpTooltip } from '@/components/shared/components/HelpTooltip'
 import type { Locale } from '@/i18n/i18n'
 
@@ -18,34 +20,50 @@ type HandoutBrowserProps = {
 }
 
 /**
- * The handouts list: a difficulty key over the topic sections, stacked full-width. Each section is a
+ * The handouts list: a key to the cards over the topic sections, stacked full-width. Each section is a
  * quiet category label over its handouts as cards that flow into a responsive grid.
  */
 export function HandoutBrowser({ sections, locale }: HandoutBrowserProps) {
   // Difficulty key translations
   const tDifficulty = useTranslations('handouts.difficulty')
 
+  // Handouts-surface copy
+  const tHandouts = useTranslations('handouts')
+
   // The key over the stacked sections
   return (
     <div>
-      {/* Difficulty key, revealed on demand behind a help icon */}
-      <div className="mb-8 flex items-center gap-1.5 text-sm font-medium text-muted-foreground sm:mb-10">
-        {/* Key label */}
-        <span>{tDifficulty('label')}</span>
-        {/* The three levels, revealed on hover */}
-        <HelpTooltip
-          label={tDifficulty('label')}
-          content={
-            <ul className="space-y-1.5">
-              {HANDOUT_DIFFICULTY_LEVELS.map((level) => (
-                <li key={level} className="flex items-center gap-2">
-                  <DifficultyMeter level={level} />
-                  <span>{tDifficulty(`level${level}`)}</span>
-                </li>
-              ))}
-            </ul>
-          }
-        />
+      {/* The key to the cards below */}
+      <div className="mb-8 space-y-2 text-sm text-muted-foreground sm:mb-10">
+        {/* Difficulty key, revealed on demand behind a help icon */}
+        <div className="flex items-center gap-1.5 font-medium">
+          {/* Key label */}
+          <span>{tDifficulty('label')}</span>
+          {/* The three levels, revealed on hover */}
+          <HelpTooltip
+            label={tDifficulty('label')}
+            content={
+              <ul className="space-y-1.5">
+                {HANDOUT_DIFFICULTY_LEVELS.map((level) => (
+                  <li key={level} className="flex items-center gap-2">
+                    <DifficultyMeter level={level} />
+                    <span>{tDifficulty(`level${level}`)}</span>
+                  </li>
+                ))}
+              </ul>
+            }
+          />
+        </div>
+
+        {/* The AI tutor waiting on the problems */}
+        <p className="flex gap-2">
+          <Bot size={16} className="mt-0.5 shrink-0 text-brand-light" aria-hidden />
+          <span>
+            {tHandouts.rich('mathilda', {
+              name: () => <MathildaWordmark />,
+            })}
+          </span>
+        </p>
       </div>
 
       {/* The topic sections, stacked full-width */}

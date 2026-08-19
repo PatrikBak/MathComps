@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.ProblemQuery;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,8 +38,10 @@ public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContex
         // Create isolated database context for this lookup operation
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Query for the season, the competition the problem sits in, and its number
+        // Query for the season, the competition the problem sits in, and its number, among the problems the
+        // archive may serve. An embargoed round's problem drops out here, taking its taxonomy with it
         var problem = await dbContext.Problems
+            .WhereRoundHasOpened(DateTimeOffset.UtcNow)
             .Where(candidate => candidate.Slug == problemSlug)
             .Select(candidate => new
             {
@@ -48,7 +51,7 @@ public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContex
             })
             .FirstOrDefaultAsync(cancellationToken);
 
-        // Nothing carries that slug
+        // Nothing readable carries that slug
         if (problem is null)
             return null;
 

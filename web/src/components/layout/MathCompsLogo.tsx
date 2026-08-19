@@ -42,7 +42,7 @@ export default function MathCompsLogo({ className }: MathCompsLogoProps) {
           unoptimized
         />
         <span className="text-xl sm:text-2xl lg:text-3xl tracking-[-0.035em] hyphens-none">
-          Math<span className="text-brand">Comps</span>
+          Math<span className="text-brand-mid">Comps</span>
         </span>
       </span>
     </AppLink>

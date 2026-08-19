@@ -11,13 +11,13 @@
     },
     "next": {
       "registration": "Od apríla 2026 je MathComps zároveň registrovaným spolkom v Česku, MathComps z.s., IČO 249 37 924.",
-      "text1": "Moja dlhodobá vízia je mať viac interaktívnych nástrojov. Momentálne pracujem na tom, aby na MathComps boli AI funkcionality, keďže osobne som veľký nadšenec pre AI a na sebe vidím, ako mi pomáha pri učení sa nových vecí. Samozrejme mimo tieto vymoženosti by som rád pokračoval v aktualizovaní archívu, tvorbe a dopĺňaní materiálov a sprievodcu súťažami.",
-      "text2": "V ideálnom svete by som si vedel predstaviť pracovať na MathComps a súvisiacich aktivitách ako tvorba materiálov na plný úväzok. To mi posledný rok bolo v konečnom dôsledku umožnené kombináciou niekoľkých zdrojov príjmu: samotný web podporila na začiatku jeho vzniku firma <wincent>Wincent</wincent>, ďalej väčšina materiálov na stránke vznikla v rámci krúžkov <matika>Matika Česku</matika>, no a poslednou novinkou je podpora od <gtf>Global Talent Fund</gtf>, ktorý sponzoruje nadchádzajúce súťaže s AI feedbackom, ktoré budú k otestovaniu koncom leta.",
+      "text1": "Moja dlhodobá vízia je mať viac interaktívnych nástrojov. Aktuálne existuje Mathilda, AI tútorka, ktorá pomáha pri riešení úloh v študijných materiáloch a čoskoro bude aj v súťažiach. Osobne som veľký nadšenec pre AI a na sebe vidím, ako mi pomáha pri učení sa nových vecí. Samozrejme mimo tieto vymoženosti by som rád pokračoval v aktualizovaní archívu, tvorbe a dopĺňaní materiálov a sprievodcu súťažami.",
+      "text2": "V ideálnom svete by som si vedel predstaviť, že budem na MathComps a súvisiacich aktivitách, ako je tvorba materiálov, pracovať na plný úväzok. To mi posledný rok bolo v konečnom dôsledku umožnené kombináciou niekoľkých zdrojov príjmu: samotný web podporila na začiatku jeho vzniku firma <wincent>Wincent</wincent>, ďalej väčšina materiálov na stránke vznikla v rámci krúžkov <matika>Matika Česku</matika>, no a poslednou novinkou je podpora od <gtf>Global Talent Fund</gtf>, ktorý sponzoruje nadchádzajúce súťaže s AI feedbackom, ktoré začnú od 14. septembra 2026.",
       "text3": "Ak vás MathComps prípadne moje myšlienky zaujali a chceli by ste pomôcť, finančne alebo iným spôsobom, alebo sa len tak porozprávať, <link>napíšte mi</link>, každá správa poteší ☺️",
       "title": "Čo bude ďalej"
     },
     "story": {
-      "text1": "Dlhšie som si hovoril, že by bolo užitočné mať prehľadávateľný archív česko-slovenských úloh, keďže som v nich hľadal často a hľadať v stovkách PDF súboroch nie je zábava. Taktiež som sníval o tom, aké skvelé by bolo mať hľadanie podľa kľúčových slov, rýchlo si vyfiltrovať úlohy o postupnostiach a podobne.",
+      "text1": "Dlhšie som si hovoril, že by bolo užitočné mať prehľadávateľný archív česko-slovenských úloh, keďže som v nich hľadal často a hľadať v stovkách PDF súborov nie je zábava. Taktiež som sníval o tom, aké skvelé by bolo mať hľadanie podľa kľúčových slov, rýchlo si vyfiltrovať úlohy o postupnostiach a podobne.",
       "text2": "Podobne je to so študijnými materiálmi, priebežne ich vždy nejaké tvorím (k prednáškam na akciách) a zostávajú neverejné, maximálne ako PDF súbory, ktoré nie sú najpraktickejšie, napr. sa v nich nedajú ľahko skrývať návody alebo riešenia a mať ich blízko zadaní, prípadne dobre zobraziť na mobile.",
       "text3": "Okrem osobného hľadiska mi vždy prišlo, že jednotný web, na ktorom sa ľahko hľadajú úlohy a ktorý obsahuje študijné materiály, môže byť veľmi užitočný pre nováčikov hľadajúcich, čo tá olympiáda vlastne je a aké sú možnosti. Vítané by boli prípadne aj nejaké začiatočnícky prívetivé materiály, keďže samému mi takéto jednotné miesto chýbalo, kým som ešte bol študent hľadajúci všetko možné k súťažiam.",
       "text4": "Na základe týchto motivácií vznikla aktuálna verzia webu, ktorá ponúka archív úloh, študijné materiály a sprievodcu pre začiatočníkov. Do budúcnosti toho bude viac a viac, nielen čo sa týka veľkosti archívu, počtu materiálov, ale aj nových funkcionalít 😇",
@@ -369,7 +369,6 @@
     "libraryEmptyLead": "Mathilda je AI tútorka",
     "libraryLoading": "Načítavam…",
     "loginPrompt": "Mathilda si tvoje konverzácie ukladá, takže potrebuje účet.",
-    "name": "Mathilda",
     "newDefense": "Nová konverzácia",
     "noReplyYet": "Zatiaľ bez odpovede",
     "opener": "Ahoj, som Mathilda. Môžeme si prejsť tvoj postup, pozrieť sa na rozpracovaný nápad, alebo ti poradím, keď sa zasekneš. Nad odpoveďami chvíľu rozmýšľam, aby som ti neprezradila priveľa a nepovedala niečo nesprávne 😇",
@@ -617,7 +616,8 @@
       "proof": "Dôkaz",
       "sectionLabel": "Materiály",
       "solution": "Riešenie"
-    }
+    },
+    "mathilda": "S jednotlivými úlohami vám pomôže AI tútorka <name>Mathilda</name>, môžete jej zveriť svoje riešenie alebo čiastkový postup."
   },
   "home": {
     "about": {
@@ -657,14 +657,22 @@
       "subtitle": "Archív súťažných úloh, študijných materiálov, užitočných zdrojov, a postupne viac a viac.",
       "title": "Matematická olympiáda a veci okolo nej"
     },
+    "mathilda": {
+      "body": "AI pomocníčka, ktorá ti poradí pri úlohách: predstav jej svoje riešenie alebo len myšlienku, a ona ti ho skontroluje alebo pomôže dokončiť. Zatiaľ funguje v <link>študijných materiáloch</link>, postupne ju rozšírime aj na archív.",
+      "exchange": {
+        "candidate": "Zrejme $a \\le b$ a $b \\le a$, takže $a = b$.",
+        "examiner": "Vyplýva z $a \\mid b$ vždy $a \\le b$ pre každú dvojicu celých čísel?",
+        "statement": "Kedy pre celé čísla $a, b$ platí $a \\mid b$ a zároveň $b \\mid a$?"
+      }
+    },
     "news": {
       "seeAll": "Zobraziť všetky",
       "title": "Novinky"
     },
     "upcoming": {
-      "comingSoon": "Koncom leta 2026",
+      "comingSoon": "14. septembra 2026",
       "feature": {
-        "description": "Súťaže s prezentovaním riešenia umelej inteligencii, ktorá ho priamo v súťaži opravuje a necháva priestor ešte ho doladiť.",
+        "description": "Súťaže s prezentovaním riešenia Mathilde, ktorá ho priamo v súťaži opravuje a necháva priestor ešte ho doladiť.",
         "title": "Súťaže s umelou inteligenciou"
       },
       "title": "Čo sa chystá"

@@ -2,7 +2,7 @@
   "about": {
     "author": {
       "alt": "Profile photo of Patrik Bak",
-      "description": "My name is <strong>Patrik Bak</strong>, and I've lived and breathed the math olympiad for a long time. As a competitor I went to the International Mathematical Olympiad (IMO) three times and won bronze twice. Later, two of my own problems made it onto the IMO. I also enjoy lecturing and helping others prepare for competitions. Beyond math, I enjoy programming, and especially combining the two, which led to <link>GeoGen</link>, a tool for automatically generating geometry problems. <strong>MathComps</strong> is another space to build on both of these, one that turns into something nice and useful for the math community 😀",
+      "description": "My name is <strong>Patrik Bak</strong>, and I've lived and breathed the math olympiad for a long time. As a competitor I went to the International Mathematical Olympiad (IMO) three times and won bronze twice. Later, two of my own problems made it onto the IMO. I also enjoy lecturing and helping others prepare for competitions. Beyond math, I enjoy programming, and especially combining the two, which led to <link>GeoGen</link>, a tool for automatically generating geometry problems. <strong>MathComps</strong> is another outlet for both of those, and one that creates something nice and useful for the math community 😀",
       "shortBio": "Three-time International Mathematical Olympiad participant and two-time medalist; author of competition problems and the MathComps handouts.",
       "title": "About the author"
     },
@@ -11,16 +11,16 @@
     },
     "next": {
       "registration": "Since April 2026, MathComps has also been a registered nonprofit association in the Czech Republic, MathComps z.s., IČO 249 37 924.",
-      "text1": "My long-term vision is more interactive tools. Right now I'm working on bringing AI features to MathComps, since I'm personally a big AI enthusiast and can see for myself how it helps me learn new things. Alongside that, I'd of course like to keep updating the archive and keep writing and adding to the materials and the competition guide.",
-      "text2": "In an ideal world, I could see myself working on MathComps and related work like writing materials full-time. This past year, that was ultimately made possible by a combination of a few income sources: the site itself was backed early on by <wincent>Wincent</wincent>, most of the site's materials also grew out of <matika>Matika Česku</matika>'s math circles, and the newest addition is support from <gtf>Global Talent Fund</gtf>, which is sponsoring the upcoming competitions with AI feedback, opening for testing later this summer.",
-      "text3": "If MathComps, or my thinking behind it, resonates with you and you'd like to help — financially or otherwise — or just want to talk, <link>get in touch</link>, every message is welcome ☺️",
+      "text1": "My long-term vision is more interactive tools. There's now Mathilda, an AI tutor who helps with solving the problems in the handouts, and who'll be in the competitions soon. I'm personally a big AI enthusiast and can see for myself how it helps me learn new things. Alongside that, I'd of course like to keep updating the archive and keep writing and adding to the materials and the competition guide.",
+      "text2": "In an ideal world, I could see myself working on MathComps and related things like writing handouts full-time. This past year, that was ultimately made possible by a combination of a few income sources: the site itself was backed early on by <wincent>Wincent</wincent>, most of the site's handouts also grew out of <matika>Matika Česku</matika>'s math circles, and the newest addition is support from <gtf>Global Talent Fund</gtf>, which is sponsoring the upcoming competitions with AI feedback, starting 14 September 2026.",
+      "text3": "If MathComps, or the thinking behind it, caught your interest and you'd like to help, financially or otherwise, or just want to talk, <link>get in touch</link>, every message makes my day ☺️",
       "title": "What's next"
     },
     "story": {
       "text1": "For a while I kept telling myself it would be useful to have a searchable archive of Czech-Slovak problems, since I searched them often and digging through hundreds of PDF files isn't much fun. I also dreamed of how great it would be to search by keyword, quickly filter down to problems on sequences, and so on.",
-      "text2": "It's much the same with study materials — I'm always writing some, for talks at events, and they stay unpublished, at best as PDF files that aren't the most practical: you can't easily hide hints or solutions and keep them close to the statements, or display them well on mobile.",
-      "text3": "Beyond the personal angle, it always struck me that a single site where problems are easy to find and study materials live alongside them could be genuinely useful for newcomers trying to figure out what the olympiad even is and what's out there. Some beginner-friendly materials would be welcome too, since I missed exactly this kind of single place myself back when I was a student hunting down everything I could find about competitions.",
-      "text4": "These motivations are what the current version of the site grew out of: an archive of problems, study materials, and a guide for beginners. There'll be more and more of this going forward — not just a bigger archive and more materials, but new features too 😇",
+      "text2": "It's much the same with handouts. I'm always writing some, for talks at events, and they stay unpublished, at best as PDF files that aren't the most practical: you can't easily hide hints or solutions and keep them close to the statements, or display them well on mobile.",
+      "text3": "Beyond the personal angle, it always struck me that a single site where problems are easy to find and which also has handouts could be really useful for newcomers trying to figure out what the olympiad even is and what's out there. Some beginner-friendly materials would be welcome too, since I missed having a single place like this myself back when I was a student hunting down everything I could find about competitions.",
+      "text4": "These motivations are what the current version of the site grew out of, and it offers an archive of problems, handouts, and a guide for beginners. There'll be more and more of this going forward, not just a bigger archive and more handouts, but new features too 😇",
       "title": "Why MathComps started"
     }
   },
@@ -46,7 +46,7 @@
           "leak": "Leak",
           "leakClean": "nothing given away",
           "leaks": "gave away {whatLeaked}",
-          "math": "Maths",
+          "math": "Math",
           "mathFails": "wrong: {correction}",
           "mathHolds": "every claim holds",
           "switchesLanguage": "drifted; the student wrote in {language}",
@@ -369,7 +369,6 @@
     "libraryEmptyLead": "Mathilda is an AI tutor",
     "libraryLoading": "Loading…",
     "loginPrompt": "Mathilda keeps your conversations, so she needs an account.",
-    "name": "Mathilda",
     "newDefense": "New conversation",
     "noReplyYet": "No reply yet",
     "opener": "Hi, I'm Mathilda. We can go through your work, look at a half-finished idea, or I'll nudge you when you're stuck. I take a moment over each reply, so I don't give too much away or say something wrong 😇",
@@ -600,9 +599,9 @@
       "theorem": "Theorem"
     },
     "hero": {
-      "body1": "A list of study materials I prepare on an ongoing basis for my lectures, as well as study texts for the <link>Matika Česku circles</link>. Not all materials have problems with solutions, and ideally I'd like to gradually add solutions to all of them.",
-      "outro": "I hope you'll find them useful. Please leave a comment or <feedback>send feedback</feedback> if you find a mistake. Feel free to reach out too if you'd like to contribute your own text.",
-      "title": "Study Materials"
+      "body1": "A list of handouts I keep preparing for my lectures, as well as study texts for the <link>Matika Česku circles</link>. Not all of them have problems with solutions, and ideally I'd like to gradually add solutions to all of them.",
+      "outro": "I hope you'll like them and find them useful. Please leave a comment or <feedback>send feedback</feedback> if you find a mistake. Write to me too if you'd like to contribute your own text.",
+      "title": "Handouts"
     },
     "labels": {
       "answer": "Answer",
@@ -617,24 +616,25 @@
       "proof": "Proof",
       "sectionLabel": "Handouts",
       "solution": "Solution"
-    }
+    },
+    "mathilda": "An AI tutor, <name>Mathilda</name>, will help you with the individual problems, and you can show her your solution or just part of your working."
   },
   "home": {
     "about": {
       "help": {
         "code": "The project is <link>open-source</link> and help with the code is welcome.",
-        "content": "Definitely <link>reach out</link> too if you'd like to contribute content.",
-        "feedback": "<link>Write to us</link> if you found a bug or have an idea for a new feature."
+        "content": "Do get in touch too if you'd like to <link>contribute content</link>.",
+        "feedback": "<link>Write to me</link> if you found a bug or have an idea for a new feature."
       },
-      "helpTitle": "Ways to help",
-      "intro": "MathComps is a non-profit project that aims to help everyone interested in maths competitions, students and teachers alike, as much as it can.",
+      "helpTitle": "How to help",
+      "intro": "MathComps is a non-profit project that aims to help everyone interested in math competitions, students and teachers alike, as much as possible.",
       "story": "Curious how it all came about? <link>Read the full story.</link>",
-      "supportNote": "Working on MathComps takes a lot of time and effort, and doing it full-time is not possible without financial support. If you would be interested in supporting the project, or know someone who might, I would be very grateful for a <link>message</link>. So far the project has been supported by:",
+      "supportNote": "Working on MathComps takes a lot of time and effort, and doing it full-time isn't possible without financial support. If you'd be interested in supporting the project, or know someone who might, I'd be very grateful for a <link>message</link>. So far the project has been supported by:",
       "title": "About the project"
     },
     "destinations": {
       "archive": {
-        "description": "An archive of problems, searchable by keyword and other criteria.",
+        "description": "An archive of problems, searchable by keywords and other criteria.",
         "title": "Archive"
       },
       "guide": {
@@ -642,7 +642,7 @@
         "title": "Guide"
       },
       "handouts": {
-        "description": "Study texts and problem sets, expanded over time.",
+        "description": "Study texts and problem sets, added to as I go.",
         "title": "Handouts"
       },
       "title": "What you'll find here"
@@ -654,42 +654,50 @@
         "ninePoint": "Nine-point circle"
       },
       "shuffle": "Show another construction",
-      "subtitle": "An archive of competition problems, study materials and useful resources, and gradually more and more.",
-      "title": "The maths olympiad, and everything around it"
+      "subtitle": "An archive of competition problems, handouts and useful resources, and gradually more and more.",
+      "title": "The math olympiad, and everything around it"
+    },
+    "mathilda": {
+      "body": "An AI helper who'll give you advice on problems: show her your solution, or just an idea, and she'll check it or help you finish it. For now she works in the <link>handouts</link>, and we'll gradually bring her to the archive too.",
+      "exchange": {
+        "candidate": "Clearly $a \\le b$ and $b \\le a$, so $a = b$.",
+        "examiner": "Does $a \\mid b$ always imply $a \\le b$ for every pair of integers?",
+        "statement": "When do $a \\mid b$ and $b \\mid a$ both hold for integers $a, b$?"
+      }
     },
     "news": {
       "seeAll": "See all",
       "title": "Latest news"
     },
     "upcoming": {
-      "comingSoon": "Late summer 2026",
+      "comingSoon": "14 September 2026",
       "feature": {
-        "description": "Competitions where you present your solution to an AI that corrects it in the contest, leaving you room to refine it.",
+        "description": "Competitions where you present your solution to Mathilda, who corrects it while the competition is still running, leaving you room to refine it.",
         "title": "Competitions with AI"
       },
-      "title": "On the horizon"
+      "title": "What's coming"
     }
   },
   "metadata": {
     "about": {
-      "description": "The story behind MathComps: who builds it, why a trilingual archive of olympiad problems, study materials, and a resource guide exists, and how it's built.",
-      "title": "About project"
+      "description": "The story behind MathComps: who builds it, why a trilingual archive of olympiad problems, handouts, and a resource guide exists, and what it's built on.",
+      "title": "About the project"
     },
     "adminDefenses": {
-      "description": "Every defense held with the AI examiner.",
-      "title": "Mathilda conversations"
+      "description": "An overview of the defenses held with the AI examiner.",
+      "title": "Conversations with Mathilda"
     },
     "guide": {
-      "description": "A list of competition information and links to various useful resources from the world of competitive mathematics.",
+      "description": "A list of information about competitions, and links to all sorts of useful things from the world of competition math.",
       "title": "Guide"
     },
     "handouts": {
-      "description": "Continuously prepared texts aimed at covering key topics in competitive mathematics.",
+      "description": "Texts I keep writing, meant to cover the key topics in competition math.",
       "title": "Handouts"
     },
     "home": {
-      "description": "A clear archive of problems, study materials, and a hub of useful resources for mathematical olympiads.",
-      "title": "The maths olympiad, and everything around it"
+      "description": "An easy-to-browse archive of problems, handouts, and a guide to useful resources for the math olympiad.",
+      "title": "The math olympiad, and everything around it"
     },
     "login": {
       "description": "Sign in to your account.",
@@ -704,7 +712,7 @@
       "title": "Privacy Policy and Terms of Use"
     },
     "problems": {
-      "description": "A searchable archive of problems from mathematical competitions.",
+      "description": "A searchable archive of problems from math competitions.",
       "title": "Problems"
     },
     "profile": {
@@ -712,7 +720,7 @@
       "title": "Profile"
     },
     "site": {
-      "description": "A platform for mathematical competitions with a problem archive, study materials, and a guide to useful resources."
+      "description": "A platform for math competitions with a problem archive, handouts, and a guide to useful resources."
     }
   },
   "navigation": {
@@ -734,7 +742,7 @@
     "categories": {
       "archive": "Archive",
       "development": "Development",
-      "handouts": "Materials",
+      "handouts": "Handouts",
       "misc": "Miscellaneous"
     },
     "clearFilter": "Show all news",
@@ -792,7 +800,7 @@
     "competitionsOverview": "Competitions overview",
     "connectionFailed": "Connection failed",
     "connectionFailedHint": "Could not reach the server.",
-    "description": "A searchable archive of problems from mathematical competitions.",
+    "description": "A searchable archive of problems from math competitions.",
     "emptyState": {
       "description": "Try adjusting the filters and searching again.",
       "title": "Nothing found"

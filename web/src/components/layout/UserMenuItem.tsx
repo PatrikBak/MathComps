@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
+import { MATHILDA_NAME } from '@/constants/mathilda'
 import { useCurrentUrl } from '@/hooks/use-current-url'
 import { ROUTES } from '@/i18n/i18n'
 
@@ -37,7 +38,6 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
   // Translations for section
   const tCommon = useTranslations('common')
   const tAuth = useTranslations('auth')
-  const tDefense = useTranslations('defense')
   const tDefenseReview = useTranslations('admin.defenseReview')
 
   // Get the current URL for logout redirect
@@ -58,7 +58,7 @@ export const UserMenuItem = ({ type, disabled = false, variant, onClick }: UserM
   const config = {
     mathilda: {
       icon: Bot,
-      label: tDefense('name'),
+      label: MATHILDA_NAME,
       bgColor: 'bg-brand/10',
       iconColor: 'text-brand-light',
     },

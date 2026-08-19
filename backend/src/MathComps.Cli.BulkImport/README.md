@@ -16,13 +16,19 @@ Image uploads are deduplicated against a ledger kept beside the draft sources (`
 
 Tag the draft before importing it: the [Tagging CLI](../MathComps.Cli.Tagging/README.md) writes a `tags:` list into each `pN.yaml`, which `apply` turns into the problem's tags. Run it *before* `validate`, so the preflight checks the slugs.
 
+## Embargoing a round
+
+A `visibleSince` in `_meta.yaml` loads a round ahead of the day it opens. The problems land complete, and the archive starts serving them once that instant passes, with no job to run and nothing to flip. The draft owns the field outright: re-applying without it lifts a stored embargo, the same way a corrected `date` overwrites a stored one.
+
+It hides the problems, not their images. Figures go to public storage the moment `apply` runs, under a key derived from the problem's slug (`problems/75-csmo-a-iii-1-incircle`), and the browser fetches them from there directly rather than through the API. Someone who guesses both the slug and the figure's filename stem can fetch a figure early; the statement, solution, tags, authors, the round's presence in every listing and its problem pages are all gone until it opens.
+
 ## Draft folder
 
 A folder of plain files — one round's problems plus their images. Full authoring spec: [the draft format reference](../../../web/scripts/PREFLIGHT_README.md).
 
 ```
 my-draft/
-  _meta.yaml        # competition / season / date / language
+  _meta.yaml        # competition / season / date / visibleSince / language
   p1.sk.md          # problem 1 — statement + solution (one file per language)
   p1.yaml           # problem 1 metadata — authors, solution link, tags
   p2.sk.md
