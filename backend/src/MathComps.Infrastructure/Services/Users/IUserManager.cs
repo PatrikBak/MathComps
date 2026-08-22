@@ -67,6 +67,19 @@ public interface IUserManager
     /// <param name="username">The name to take.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     Task SetUsernameAsync(Guid userId, string username, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Replaces what the user has told us about their competing.
+    /// </summary>
+    /// <remarks>
+    /// Every field is written every time, so a null clears what stood before. None of it is permanent the way a
+    /// username is.
+    /// </remarks>
+    /// <param name="userId">The internal user ID.</param>
+    /// <param name="request">What they are saying about themselves now.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    Task UpdateProfileAsync(
+        Guid userId, UpdateUserProfileRequest request, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -83,3 +96,8 @@ public sealed class UsernameAlreadySetException() : Exception("A username cannot
 /// Thrown when a username breaks the rules a name has to keep.
 /// </summary>
 public sealed class UsernameRejectedException() : Exception("That username cannot be used.");
+
+/// <summary>
+/// Thrown when a profile field is outside what it is allowed to say.
+/// </summary>
+public sealed class ProfileValueInvalidException() : Exception("That profile value cannot be used.");

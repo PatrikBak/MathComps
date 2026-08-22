@@ -6,7 +6,8 @@ namespace MathComps.Api.Endpoints;
 
 /// <summary>
 /// Maps the authenticated user's own account endpoints: reading and recording their acknowledgement of what
-/// talking to the AI tutor entails, and taking the username the site calls them by.
+/// talking to the AI tutor entails, taking the username the site calls them by, and reading and replacing what
+/// they have told us about their competing.
 /// </summary>
 public static class UserEndpoints
 {
@@ -94,6 +95,24 @@ public static class UserEndpoints
 
             // Take it, faulting when it is somebody else's, malformed, or they already have one
             await userManager.SetUsernameAsync(userId, request.Username, context.RequestAborted);
+
+            // No reason to return anything
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Replace what the authenticated user has told us about their competing
+        app.MapPut(ProfilePath, async (
+            UpdateUserProfileRequest request,
+            HttpContext context,
+            IUserManager userManager) =>
+        {
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Write what they said, faulting when any of it is outside what it may say
+            await userManager.UpdateProfileAsync(userId, request, context.RequestAborted);
 
             // No reason to return anything
             return Results.NoContent();

@@ -45,6 +45,15 @@ public partial class UserManager(
     public static partial Regex UsernamePattern();
 
     /// <summary>
+    /// The shape of an ISO 3166-1 alpha-2 country code.
+    /// </summary>
+    /// <remarks>
+    /// The shape and not the list: any well-formed alpha-2 code is stored, whichever countries a caller offers.
+    /// </remarks>
+    [GeneratedRegex("^[A-Z]{2}$")]
+    private static partial Regex CountryCodePattern();
+
+    /// <summary>
     /// A run of whitespace, which a name carries as a single space however it was typed.
     /// </summary>
     [GeneratedRegex(@"\s+")]
@@ -75,7 +84,16 @@ public partial class UserManager(
         await dbContext.Users
             .Upsert(userEntity)
             .On(user => user.ExternalId)
-            .Exclude(user => new { user.CreatedAt, user.Id, user.ConsentedToAiAt, user.Username })
+            .Exclude(user => new
+            {
+                user.CreatedAt,
+                user.Id,
+                user.ConsentedToAiAt,
+                user.Username,
+                user.GraduationYear,
+                user.HasLeftHighSchool,
+                user.CountryCode
+            })
             .RunAsync(cancellationToken);
 
         // Return the user ID
@@ -209,7 +227,8 @@ public partial class UserManager(
         // Narrow to the one user's own account details
         return await dbContext.Users
             .Where(user => user.Id == userId)
-            .Select(user => new UserProfileDto(user.Username))
+            .Select(user => new UserProfileDto(
+                user.Username, user.GraduationYear, user.HasLeftHighSchool, user.CountryCode))
             .FirstOrDefaultAsync(cancellationToken);
     }
 
@@ -246,6 +265,54 @@ public partial class UserManager(
             // Somebody already answers to it
             throw new UsernameTakenException();
         }
+    }
+
+    /// <inheritdoc />
+    public async Task UpdateProfileAsync(
+        Guid userId, UpdateUserProfileRequest request, CancellationToken cancellationToken = default)
+    {
+        // Somebody past school has no year to sit, so saying both is saying one of them by mistake
+        var graduationYear = request.HasLeftHighSchool ? null : request.GraduationYear;
+
+        // The country as it will be stored, refused here when it is not a country
+        var countryCode = NormalizeCountryCode(request.CountryCode);
+
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Write every field, so a value left out of the request is one the student cleared
+        await dbContext.Users
+            .Where(user => user.Id == userId)
+            .ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(user => user.GraduationYear, graduationYear)
+                    .SetProperty(user => user.HasLeftHighSchool, request.HasLeftHighSchool)
+                    .SetProperty(user => user.CountryCode, countryCode)
+                    .SetProperty(user => user.UpdatedAt, DateTimeOffset.UtcNow),
+                cancellationToken);
+    }
+
+    /// <summary>
+    /// Holds a country code to the shape an ISO 3166-1 alpha-2 code has.
+    /// </summary>
+    /// <param name="countryCode">The code as the caller sent it, or null for one they are not saying.</param>
+    /// <returns>The code as it will be stored.</returns>
+    private static string? NormalizeCountryCode(string? countryCode)
+    {
+        // Saying nothing is allowed, and is how a student clears a country they gave earlier
+        var trimmedCountryCode = countryCode.TrimToNull();
+        if (trimmedCountryCode == null)
+            return null;
+
+        // Stored uppercase whatever the caller sent, so two spellings of one country are one value
+        var upperCountryCode = trimmedCountryCode.ToUpperInvariant();
+
+        // Two letters and nothing else
+        if (!CountryCodePattern().IsMatch(upperCountryCode))
+            throw new ProfileValueInvalidException();
+
+        // The code as it will be stored
+        return upperCountryCode;
     }
 
     /// <summary>

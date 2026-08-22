@@ -8,7 +8,7 @@ import { type ReactNode, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
 import { Button } from '@/components/shared/components/Button'
-import { Select } from '@/components/shared/components/Select'
+import { Select } from '@/components/shared/components/select/Select'
 
 import { cn } from '../../shared/utils/css-utils'
 import { getTranslatedReasonOptions, REASON_OPTIONS, type ReasonOption } from './contact-reasons'
