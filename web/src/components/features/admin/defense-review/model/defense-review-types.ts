@@ -31,8 +31,8 @@ export type DefenseReviewConversation = {
   target: HandoutEnvironmentTarget
   /** Who held it. */
   user: DefenseReviewUser
-  /** The start of the message the student opened with; null when it holds no student turn. */
-  openingMessage: string | null
+  /** The start of the student's most recent message; null when it holds no student turn. */
+  lastStudentMessage: string | null
   /** How many turns it holds in total. */
   turnCount: number
   /** When something was last said in it, as an ISO-8601 string. */
@@ -263,8 +263,10 @@ export type ExaminerStepSnapshot = {
   promptPath?: string
   /** The prompt template's raw text, uninterpolated, as read when this was recorded. */
   promptText?: string
-  /** The model the step ran on. */
+  /** The model the step was configured to run on. */
   model?: string
+  /** The backup models the step was configured to fall back through, in order. */
+  fallbackModels?: string[]
   /** The reasoning-effort level the step ran at. */
   reasoningEffort?: string
   /** The cap on the step's output tokens. */

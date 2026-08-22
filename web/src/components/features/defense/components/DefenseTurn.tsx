@@ -9,7 +9,8 @@ import { RichMathEditorRenderer } from '@/components/shared/components/rich-math
 import { cn } from '@/components/shared/utils/css-utils'
 import { formatDurationMs } from '@/components/shared/utils/duration-utils'
 
-import type { Turn, TurnRole } from '../model/defense-types'
+import type { Turn } from '../model/defense-types'
+import { TURN_LABEL_CLASS, TURN_STYLES } from './turn-styles'
 
 /**
  * The controls a turn carries and their accessible labels. Shared by the transcript, which offers them on every
@@ -88,42 +89,6 @@ type DefenseTurnProps = TurnActionsAffordance & {
 }
 
 /**
- * The per-role look of a turn: both read as full-width blocks, the examiner as the bare ambient voice
- * and the student as a brand-tinted card, distinguished by tint and font voice. The brand violet is the
- * examiner's own color, so her label carries it and the student's stays neutral.
- */
-type TurnStyle = {
-  /** Classes for the turn's outer container. */
-  container: string
-  /** Whether the turn draws a box of its own, rather than sitting bare in the transcript. */
-  hasOwnBox: boolean
-  /** Classes for the role label. */
-  label: string
-  /** Classes for the message body: the examiner speaks in the serif math voice, the student in sans. */
-  body: string
-  /** Classes cancelling the container's own inset, so every turn's controls share one axis. */
-  actionsInset: string
-}
-
-/** The container/label/body styling for each role. */
-const TURN_STYLES: Record<TurnRole, TurnStyle> = {
-  examiner: {
-    container: '',
-    hasOwnBox: false,
-    label: 'text-brand-light',
-    body: 'math-typography',
-    actionsInset: '',
-  },
-  candidate: {
-    container: 'rounded-lg bg-brand/10 px-4 py-3',
-    hasOwnBox: true,
-    label: 'text-muted',
-    body: 'text-[15px] leading-relaxed',
-    actionsInset: '-mr-4',
-  },
-}
-
-/**
  * Renders one message of a defense conversation, styled by who authored it, with its body rendered as
  * read-only rich math.
  *
@@ -192,9 +157,7 @@ export function DefenseTurn({
             <span className="text-[11px] font-bold tabular-nums text-muted">{position}</span>
           )}
 
-          <div className={cn('text-[11px] font-bold uppercase tracking-wide', style.label)}>
-            {label}
-          </div>
+          <div className={cn(TURN_LABEL_CLASS, style.label)}>{label}</div>
 
           {durationMs !== null && (
             <span className="text-[11px] tabular-nums text-muted">

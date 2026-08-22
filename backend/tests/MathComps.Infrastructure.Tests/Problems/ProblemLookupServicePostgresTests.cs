@@ -31,6 +31,11 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
     private const string DeepProblemSlug = "deep-lookup-problem";
 
     /// <summary>
+    /// Slug of the seeded problem whose round is embargoed.
+    /// </summary>
+    private const string EmbargoedProblemSlug = "embargoed-lookup-problem";
+
+    /// <summary>
     /// Verifies that slug-to-id resolution returns the row for a known slug and null for an unknown one.
     /// </summary>
     [Fact]
@@ -73,6 +78,21 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
 
         // The path keeps every level of it, at whatever depth the competition sits
         Assert.Equal("deep-mid-low-round", deep?.CompetitionPath);
+    });
+
+    /// <summary>
+    /// Verifies that the two lookups disagree about an embargoed round, which is the asymmetry the interface
+    /// promises: reading a problem is an archive read and refuses one, resolving a slug to an id serves the
+    /// like/mark/list writes and answers for it.
+    /// </summary>
+    [Fact]
+    public Task EmbargoedProblemIsUnreadableButStillAddressable() => RunTestAsync(async service =>
+    {
+        // The detail lookup treats it as though it were not there, so its page answers not-found
+        Assert.Null(await service.GetProblemLookupDataAsync(EmbargoedProblemSlug));
+
+        // The id lookup still resolves it, since a write against a problem nobody can read yet is allowed
+        Assert.True((await service.GetProblemIdBySlugAsync(EmbargoedProblemSlug)).HasValue);
     });
 
     /// <inheritdoc />
@@ -121,6 +141,25 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
             RoundId = deepRound.Id,
             Number = 1,
             Slug = DeepProblemSlug
+        });
+
+        // A third sitting, stamped to open well after any test run, so it stands in for an embargoed round.
+        var embargoedRound = new Round
+        {
+            Id = Guid.NewGuid(),
+            CompetitionId = CompetitionTreeSeed.Chain(context, "embargoed-round").Id,
+            SeasonId = season.Id,
+            Date = DateOnly.FromDateTime(DateTime.Today),
+            VisibleSince = DateTimeOffset.UtcNow.AddYears(1)
+        };
+        context.Rounds.Add(embargoedRound);
+
+        // One problem in it
+        context.Problems.Add(new Problem
+        {
+            RoundId = embargoedRound.Id,
+            Number = 1,
+            Slug = EmbargoedProblemSlug
         });
 
         // Submit changes

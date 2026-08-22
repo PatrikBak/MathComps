@@ -6,7 +6,7 @@ How competition problems are authored for bulk import. A **draft folder** holds 
 
 ```
 my-draft/
-  _meta.yaml        # which competition, season and date the problems belong to, plus their original language
+  _meta.yaml        # which competition, season and date the problems belong to, when the round opens, and their original language
   p1.sk.md          # problem 1 body, in language "sk"
   p1.en.md          # optional translations of problem 1
   p1.yaml           # problem 1 metadata (one per problem, shared across languages)
@@ -27,10 +27,17 @@ competition: csmo-a-iii # the competition's path
 season:
   year: 2024 # calendar year the season starts
 date: 2024-03-15 # round date, YYYY-MM-DD
+visibleSince: 2026-09-14T18:00:00Z # optional, when the round opens to readers
 language: sk # the draft's original language: sk | cs | en
 ```
 
 The path is the competition's slugs from the root of the taxonomy down to it, hyphen-joined, and it runs as deep as the taxonomy does: `csmo-a-iii` is round III of category A of the Czech-Slovak MO, `imo` is a competition that runs as one flat sitting, and however deep a competition sits, the path names every level. Every segment is lowercase alphanumeric — a path outside that alphabet is refused here. Each node on the path has to be registered in the taxonomy, which the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md)'s `validate` step checks; the one the path ends at must be a leaf, since a competition carrying others below it is a container rather than a sitting problems belong to.
+
+`visibleSince` embargoes the round. The problems land in the database complete, and the archive begins serving them once that instant passes, with nobody having to flip anything. Omit it and the round is open the moment it is imported.
+
+It must carry an explicit offset (`Z` or `±HH:MM`). A bare wall-clock time would open the round at whatever the importing machine thinks the zone is, and that is the one thing an embargo must not depend on. It is a different axis from `date`, which is the day the round ran and only ever sorts.
+
+It hides the problems, not their images. Figures go to public storage under a key derived from the problem slug as soon as the import runs (see the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md)).
 
 ## Problem body — `pN.<lang>.md`
 

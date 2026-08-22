@@ -68,8 +68,8 @@ type UseDefenseConversationResult = DefenseConversationState &
  *
  * @param problem - The problem being defended.
  * @param opener - The examiner's opening line, seeded as the first turn of a fresh conversation.
- * @param initialSessionId - The id of a specific saved session to resume on open rather than the newest; when it
- *   isn't among this problem's sessions, none is resumed.
+ * @param initialSessionId - The saved session to resume on open, or null to take the most recently active; a
+ *   named session this problem's history doesn't hold resumes none.
  *
  * @returns The live conversation, its send flow, what the student says about it, and this problem's
  *   session history.
@@ -77,7 +77,7 @@ type UseDefenseConversationResult = DefenseConversationState &
 export function useDefenseConversation(
   problem: DefenseProblem,
   opener: string,
-  initialSessionId: string | undefined
+  initialSessionId: string | null
 ): UseDefenseConversationResult {
   // The query cache
   const queryClient = useQueryClient()
@@ -165,13 +165,13 @@ export function useDefenseConversation(
 
     // The chosen saved defense to open, or the most recently active when none was named
     const target =
-      initialSessionId !== undefined
-        ? sessionsQuery.data.sessions.find((session) => session.id === initialSessionId)
-        : sessionsQuery.data.sessions[0]
+      initialSessionId === null
+        ? sessionsQuery.data.sessions[0]
+        : sessionsQuery.data.sessions.find((session) => session.id === initialSessionId)
 
     // A named session missing from a list that is still being refreshed may yet arrive with it, so wait for the
     // refreshed list rather than settling on a stale one
-    if (initialSessionId !== undefined && target === undefined && sessionsQuery.isFetching) {
+    if (initialSessionId !== null && target === undefined && sessionsQuery.isFetching) {
       return
     }
 

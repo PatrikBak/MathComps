@@ -4,6 +4,7 @@ import AboutProjectSection from '@/components/features/home/AboutProjectSection'
 import DestinationsSection from '@/components/features/home/DestinationsSection'
 import HeroSection from '@/components/features/home/HeroSection'
 import LatestNewsSection from '@/components/features/home/LatestNewsSection'
+import MathildaSection from '@/components/features/home/MathildaSection'
 import UpcomingSection from '@/components/features/home/UpcomingSection'
 import Layout from '@/components/layout/Layout'
 import { SITE_TITLE } from '@/constants/og-metadata'
@@ -42,6 +43,7 @@ export default withLocale(async function Home({ locale }: PageProps) {
     <Layout>
       <HeroSection />
       <DestinationsSection />
+      <MathildaSection />
       <UpcomingSection />
       <LatestNewsSection locale={locale} />
       <AboutProjectSection />

@@ -48,6 +48,9 @@ const STEP_SHORTCUTS: StepShortcut[] = [
   { key: 'u', name: 'nextUnread', run: (selection) => selection.stepUnread() },
 ]
 
+/** Button sizing tightened to the width a phone has to spare. */
+const COMPACT_ACTION_CLASS = 'min-h-8 gap-1.5 px-2 text-xs sm:min-h-9 sm:gap-2 sm:px-3 sm:text-sm'
+
 /**
  * How many dialogs currently stand over the page, counted off the document itself.
  * @returns The number of dialogs on screen.
@@ -140,50 +143,17 @@ export function DefenseReviewQueue() {
   )
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Page title */}
-      <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
+      {/* The page title, and what can be done to the whole queue */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="text-2xl font-bold text-foreground hyphens-none">{t('title')}</h1>
 
-      {/* The filter bar, stuck under the site header */}
-      <div className="sticky-below-header -mx-1 px-1 py-2 backdrop-blur">
-        <DefenseReviewFilterBar
-          filter={filter}
-          onFieldChange={setField}
-          onClearAll={clearAll}
-          activeCount={activeCount}
-          options={options}
-        />
-      </div>
-
-      {/* The toolbar over the queue */}
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        {/* The count and the keys that walk the queue, emptied rather than dropped while nothing
-            matched, so that the buttons beside it keep their end of the row */}
-        <p className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-sm text-muted">
-          {hasConversations && (
-            <>
-              {/* How many there are, loaded or not */}
-              {tPlurals('conversations', { count: queue.totalConversations })}
-
-              {/* The shortcut hints, only where there is a keyboard to press them on */}
-              <span className="hidden items-center gap-4 text-xs text-muted-foreground sm:flex">
-                {STEP_SHORTCUTS.map((shortcut) => (
-                  <span key={shortcut.key} className="flex items-center gap-1">
-                    <Kbd>{shortcut.key}</Kbd>
-                    {t(`shortcuts.${shortcut.name}`)}
-                  </span>
-                ))}
-              </span>
-            </>
-          )}
-        </p>
-
-        {/* What can be done to the whole of it */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Clearing what is loaded, disabled rather than absent so the button beside it never shifts */}
           <Button
             variant="outline"
             size="sm"
+            className={COMPACT_ACTION_CLASS}
             disabled={unreadConversationIds.size === 0}
             onClick={markLoadedRead}
           >
@@ -196,6 +166,7 @@ export function DefenseReviewQueue() {
             ref={feedButtonRef}
             variant="outline"
             size="sm"
+            className={COMPACT_ACTION_CLASS}
             onClick={() => setIsFeedOpen(true)}
           >
             <StickyNote size={14} aria-hidden="true" />
@@ -203,6 +174,35 @@ export function DefenseReviewQueue() {
           </Button>
         </div>
       </div>
+
+      {/* The filter bar, stuck under the site header */}
+      <div className="sticky-below-header -mx-1 px-1 py-2 backdrop-blur">
+        <DefenseReviewFilterBar
+          filter={filter}
+          onFieldChange={setField}
+          onClearAll={clearAll}
+          activeCount={activeCount}
+          options={options}
+        />
+      </div>
+
+      {/* What is in the queue, and the keys that walk it */}
+      {hasConversations && (
+        <p className="flex flex-wrap items-baseline gap-x-6 gap-y-1 text-sm text-muted">
+          {/* How many there are, loaded or not */}
+          {tPlurals('conversations', { count: queue.totalConversations })}
+
+          {/* The shortcut hints, only where there is a keyboard to press them on */}
+          <span className="hidden items-center gap-4 text-xs text-muted-foreground sm:flex">
+            {STEP_SHORTCUTS.map((shortcut) => (
+              <span key={shortcut.key} className="flex items-center gap-1">
+                <Kbd>{shortcut.key}</Kbd>
+                {t(`shortcuts.${shortcut.name}`)}
+              </span>
+            ))}
+          </span>
+        </p>
+      )}
 
       {/* The queue, or whatever stands in its place */}
       {hasConversations ? (

@@ -6,6 +6,12 @@ namespace MathComps.Infrastructure.Services.Problems;
 /// Service for looking up problem information from the database.
 /// Provides common problem lookup operations needed across multiple CLI tools and services.
 /// </summary>
+/// <remarks>
+/// The two lookups deliberately disagree about an embargoed round. Reading a problem is an archive read, so
+/// <see cref="GetProblemLookupDataAsync"/> refuses one whose round has not opened. Resolving a slug to an id is
+/// not: it serves the like, mark and list-membership writes, and the offline tools, all of which are entitled to
+/// address a problem nobody can read yet. So <see cref="GetProblemIdBySlugAsync"/> answers for every problem.
+/// </remarks>
 public interface IProblemLookupService
 {
     /// <summary>
@@ -30,7 +36,8 @@ public interface IProblemLookupService
             ?? throw new ProblemNotFoundException(problemSlug);
 
     /// <summary>
-    /// Retrieves problem metadata from a problem slug (which is unique per problem).
+    /// Retrieves problem metadata from a problem slug (which is unique per problem), for a problem the archive may
+    /// serve. A problem whose round has not opened yet answers as though it did not exist.
     /// </summary>
     /// <param name="problemSlug">URL-safe problem identifier (will be normalized to lowercase).</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>

@@ -41,7 +41,7 @@ export const FOCUS_RING_ROW_CLASS = cn(
  */
 export const buttonVariants = cva(
   [
-    'inline-flex items-center justify-center gap-2 rounded-lg font-medium',
+    'inline-flex items-center justify-center gap-2 rounded-lg font-medium hyphens-none',
     'transition-all duration-200 active:scale-[0.98] motion-reduce:active:scale-100',
     FOCUS_RING_CLASS,
     'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',

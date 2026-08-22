@@ -2,17 +2,19 @@
 
 import { useAuth } from '@clerk/nextjs'
 import { Plus, X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 
+import { resolveHandoutProblemRef } from '@/components/features/handouts/handout-problem-ref'
 import { LoginButton } from '@/components/login/LoginButton'
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { FeedbackDialog, toFeedbackOptions } from '@/components/shared/components/FeedbackDialog'
 import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
-import { assertNever } from '@/components/shared/utils/assert-never'
+import { MATHILDA_NAME } from '@/constants/mathilda'
+import type { Locale } from '@/i18n/i18n'
 
 import { useDefenseConversation } from '../hooks/use-defense-conversation'
 import { useDefenseFeedback } from '../hooks/use-defense-feedback'
@@ -27,34 +29,6 @@ import { MathildaConsentGate } from './MathildaConsentGate'
 import { ProblemStrip } from './ProblemStrip'
 
 /**
- * A conversation opened from the problem itself, with the reference solution in scope: it resumes the newest saved
- * defense and can always open a fresh one.
- */
-type FromProblemMode = {
-  /** The discriminator. */
-  kind: 'fromProblem'
-}
-
-/**
- * A conversation reopened from the user's list of defenses, away from the problem it was held on. Only the named
- * session continues: the reference solution a fresh defense is argued against lives with the problem, not the
- * session, so there's nothing to open one with.
- */
-type ContinueSavedMode = {
-  /** The discriminator. */
-  kind: 'continueSaved'
-  /** The saved session to reopen. */
-  sessionId: string
-  /** Called once that session is gone, leaving nothing to continue. */
-  onSessionGone: () => void
-}
-
-/**
- * How a defense conversation was reached, which decides whether a fresh defense can be started from it.
- */
-export type DefenseConversationMode = FromProblemMode | ContinueSavedMode
-
-/**
  * Props for the {@link DefenseConversation}.
  */
 type DefenseConversationProps = {
@@ -64,27 +38,11 @@ type DefenseConversationProps = {
   isOpen: boolean
   /** Closes the conversation. */
   onClose: () => void
-  /** How the conversation was reached. */
-  mode: DefenseConversationMode
-}
-
-/**
- * The id of the saved session a mode reopens on, or undefined when it opens on the problem's newest defense.
- *
- * @param mode - How the conversation was reached.
- * @returns The id of the session to reopen, or undefined.
- */
-function initialSessionIdOf(mode: DefenseConversationMode): string | undefined {
-  switch (mode.kind) {
-    // A reopened conversation names the one session it exists for
-    case 'continueSaved':
-      return mode.sessionId
-    // Opened on the problem, the newest saved defense is resumed instead
-    case 'fromProblem':
-      return undefined
-    default:
-      return assertNever(mode)
-  }
+  /**
+   * The saved defense to open on, or null to open on the newest one held against the problem. Stable for the
+   * life of the mount: it is resumed once, so showing a different defense means mounting a new conversation.
+   */
+  initialSessionId: string | null
 }
 
 /**
@@ -99,19 +57,15 @@ const TURNS_WORTH_ANSWERING_FOR = 3
 const REPLIES_LEFT_TO_WARN_AT = 5
 
 /**
- * The composer's toolbar for a defense turn: only the math tools are kept, so a turn stays plain text
- * and mathematics.
+ * The composer's toolbar for a defense turn. Headings, links, spoilers and uploads are hidden, leaving the
+ * tools an argument is written with.
  */
 const DEFENSE_TOOLBAR: ToolbarConfig = {
-  numberedList: false,
-  bulletList: false,
-  quote: false,
   heading: false,
   link: false,
   spoiler: false,
   attachment: false,
   image: false,
-  emoji: false,
 }
 
 /**
@@ -119,13 +73,24 @@ const DEFENSE_TOOLBAR: ToolbarConfig = {
  * Reuses the shared rich-math editor as the composer and renders the exchange as an annotated transcript. Rendered
  * into a full-height modal panel its caller owns, so a surface already showing a modal can swap it in without
  * stacking dialogs.
+ *
+ * What a defense is argued against is resolved from the handout environment it names, so starting a fresh one
+ * takes the target and nothing else, wherever the conversation was opened from.
  */
-export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseConversationProps) {
+export function DefenseConversation({
+  problem,
+  isOpen,
+  onClose,
+  initialSessionId,
+}: DefenseConversationProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
 
   // Shared modal chrome copy
   const tModal = useTranslations('ui.modal')
+
+  // The active locale
+  const locale = useLocale() as Locale
 
   // Auth state
   const { isLoaded: isAuthLoaded, isSignedIn } = useAuth()
@@ -156,7 +121,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
     clearReport,
     deleteSession,
     rewind,
-  } = useDefenseConversation(problem, t('opener'), initialSessionIdOf(mode))
+  } = useDefenseConversation(problem, t('opener'), initialSessionId)
 
   // Reporting one of the examiner's replies and answering for the conversation as a whole, either of which
   // can be taken back again
@@ -198,12 +163,9 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
   const canAnswer =
     canAct && (turns.length >= TURNS_WORTH_ANSWERING_FOR || currentFeedback !== null)
 
-  // Whether a fresh defense can be opened at all: only the problem carries the reference one is argued against
-  const canOpenFresh = mode.kind === 'fromProblem'
-
-  // Whether a turn has somewhere to go: an open session to append to, or the standing to open one. A reopened
-  // conversation has neither until its session resumes, so it composes nothing in the meantime.
-  const canCompose = canOpenFresh || currentSessionId !== null
+  // Whether a turn has somewhere to go. A conversation opened on a named defense writes nothing until its resume
+  // settles: a turn sent before it would open a second defense beside the one being continued.
+  const canCompose = initialSessionId === null || initialResumeSettled
 
   // How many more replies the conversation has room for, or null while the caps are unknown. A reply still in
   // flight counts against it: it is written the moment it's sent, whatever the examiner then makes of it
@@ -212,30 +174,21 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
       ? null
       : limits.maxTurnsPerSession - turns.filter((turn) => turn.role === 'candidate').length
 
+  // Where this reader's language reaches the problem, absent when it doesn't carry the handout
+  const problemLink = resolveHandoutProblemRef(problem.target, locale)?.link ?? null
+
+  // Whether a fresh defense has anything to be argued against: what it is measured against is published per
+  // language, and a handout this locale doesn't carry publishes none
+  const canStartFresh = problemLink !== null
+
   // Whether there's a conversation worth resetting: an open session, or a fresh one the student has
   // already started (a sent or in-flight turn past the examiner's opener). A pristine blank chat has
   // nothing to start over.
-  const canStartNew = canOpenFresh && (currentSessionId !== null || turns.length > 1)
-
-  // A reopened conversation lives off whichever saved session is open. Once none is (the named one was already
-  // gone, or the open one was deleted from the history menu here) there is nothing left to continue and no
-  // reference to argue a fresh defense against, so hand back to whoever opened it rather than show a composer
-  // whose turns have nowhere to go. Switching to another of this problem's sessions keeps one open, so it stays.
-  useEffect(() => {
-    // Only a reopened conversation can outlive its session, and only a settled resume can say that it has
-    if (mode.kind !== 'continueSaved' || !initialResumeSettled) {
-      return
-    }
-
-    // Report it gone once nothing is open
-    if (currentSessionId === null) {
-      mode.onSessionGone()
-    }
-  }, [mode, initialResumeSettled, currentSessionId])
+  const canStartNew = canStartFresh && (currentSessionId !== null || turns.length > 1)
 
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
-    examiner: t('name'),
+    examiner: MATHILDA_NAME,
     candidate: t('roles.student'),
   }
 
@@ -246,7 +199,7 @@ export function DefenseConversation({ problem, isOpen, onClose, mode }: DefenseC
         {/* Who the student is talking to */}
         <div className="flex min-w-0 items-baseline gap-2">
           <span className="shrink-0 text-base font-bold text-foreground sm:text-lg">
-            {t('name')}
+            {MATHILDA_NAME}
           </span>
           <span className="truncate text-xs text-muted">{t('role')}</span>
         </div>

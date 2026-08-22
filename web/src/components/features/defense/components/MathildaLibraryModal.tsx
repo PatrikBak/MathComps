@@ -15,6 +15,7 @@ import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
 import { toPlainTextPreview } from '@/components/shared/utils/string-utils'
+import { MATHILDA_NAME } from '@/constants/mathilda'
 import { useDeferredAnchorJump } from '@/hooks/use-deferred-anchor-jump'
 import { ROUTES } from '@/i18n/i18n'
 
@@ -93,10 +94,10 @@ function MathildaDefenseRow({
     onJumpInPage(problemLabel.link.anchorId)
   }
 
-  // A glimpse of the conversation: the student's first message, stripped to plain text. Null while
-  // nothing has been said in it yet.
+  // A glimpse of the conversation: the student's most recent message, stripped to plain text. Null
+  // while nothing has been said in it yet.
   const preview =
-    defense.firstStudentMessage === null ? null : toPlainTextPreview(defense.firstStudentMessage)
+    defense.lastStudentMessage === null ? null : toPlainTextPreview(defense.lastStudentMessage)
 
   // When the conversation last moved, to the minute so same-day defenses stay apart
   const lastActivityAt = format.dateTime(new Date(defense.lastActivityAt), {
@@ -254,15 +255,6 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
     }
   }
 
-  // Returns to the list when the open defense turns out to be gone, refreshing it so the row that led here goes too
-  const handleSessionGone = () => {
-    // Show the list again
-    setSelected(null)
-
-    // Drop the defense that is no longer there from it
-    refresh()
-  }
-
   // The problem to hand the conversation when a defense is open: its target and the statement snapshotted onto
   // the session, which is what the chat shows alongside the transcript.
   const conversationProblem: DefenseProblem | null =
@@ -273,7 +265,7 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
       <Modal
         isOpen={isOpen}
         onClose={inConversation ? () => setSelected(null) : handleClose}
-        title={inConversation ? undefined : t('name')}
+        title={inConversation ? undefined : MATHILDA_NAME}
         ariaLabel={inConversation ? t('title') : undefined}
         showCloseButton={!inConversation}
         padded={!inConversation}
@@ -282,17 +274,13 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
         onClosed={runArmedJump}
       >
         {selected !== null && conversationProblem !== null ? (
-          // The real conversation, reopened to the chosen session and continue-only
+          // The real conversation, opened on the chosen defense
           <DefenseConversation
             key={selected.id}
             problem={conversationProblem}
             isOpen={isOpen}
             onClose={() => setSelected(null)}
-            mode={{
-              kind: 'continueSaved',
-              sessionId: selected.id,
-              onSessionGone: handleSessionGone,
-            }}
+            initialSessionId={selected.id}
           />
         ) : isLoading ? (
           // Still fetching the list
