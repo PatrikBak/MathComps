@@ -16,6 +16,8 @@ export type UserCompetitionProfile = {
  * What the site holds on the signed-in user's own account.
  */
 export type UserProfile = UserCompetitionProfile & {
+  /** The address the site has for them, or null when their account carries none. */
+  email: string | null
   /** The name the site calls them by, or null while they have yet to choose one. */
   username: string | null
 }

@@ -40,7 +40,7 @@ public class UserManagerUsernamePostgresTests(PostgresContainerFixture fixture)
     public Task SetUsernameAsync_TakesTheName() => RunTestAsync(async service =>
     {
         // A synced user with no name of their own yet
-        var userId = await service.SyncUserAsync(new UserSyncDto("user_take", "take@example.com", "Take", null));
+        var userId = await service.SyncUserAsync(new UserSyncDto("user_take", "take@example.com", null));
 
         // They choose one
         await service.SetUsernameAsync(userId, "  Peťo  Novák ");
@@ -59,11 +59,11 @@ public class UserManagerUsernamePostgresTests(PostgresContainerFixture fixture)
     public Task SetUsernameAsync_RefusesANameSomebodyElseHoldsInAnotherCasing() => RunTestAsync(async service =>
     {
         // One user who has taken a name
-        var firstId = await service.SyncUserAsync(new UserSyncDto("user_first", "first@example.com", "First", null));
+        var firstId = await service.SyncUserAsync(new UserSyncDto("user_first", "first@example.com", null));
         await service.SetUsernameAsync(firstId, "Kocurkovo");
 
         // And another reaching for the same one, shouted
-        var secondId = await service.SyncUserAsync(new UserSyncDto("user_second", "second@example.com", "Second", null));
+        var secondId = await service.SyncUserAsync(new UserSyncDto("user_second", "second@example.com", null));
 
         // Who is turned away
         await Assert.ThrowsAsync<UsernameTakenException>(() => service.SetUsernameAsync(secondId, "KOCURKOVO"));
@@ -81,13 +81,13 @@ public class UserManagerUsernamePostgresTests(PostgresContainerFixture fixture)
     public Task SetUsernameAsync_RefusesToChangeANameAlreadyTaken() => RunTestAsync(async service =>
     {
         // A user who has chosen
-        var userId = await service.SyncUserAsync(new UserSyncDto("user_again", "again@example.com", "Again", null));
+        var userId = await service.SyncUserAsync(new UserSyncDto("user_again", "again@example.com", null));
         await service.SetUsernameAsync(userId, "settled");
 
         // Having second thoughts
         await Assert.ThrowsAsync<UsernameAlreadySetException>(() => service.SetUsernameAsync(userId, "different"));
 
-        // The first name stands
+        // The name they first chose stands
         var profile = await service.GetProfileAsync(userId);
         Assert.Equal("settled", profile?.Username);
     });
@@ -108,7 +108,7 @@ public class UserManagerUsernamePostgresTests(PostgresContainerFixture fixture)
     {
         // A user with no name yet
         var userId = await service.SyncUserAsync(
-            new UserSyncDto($"user_bad_{username.GetHashCode():X}", "bad@example.com", "Bad", null));
+            new UserSyncDto($"user_bad_{username.GetHashCode():X}", "bad@example.com", null));
 
         // Who tries one that cannot be had
         await Assert.ThrowsAsync<UsernameRejectedException>(() => service.SetUsernameAsync(userId, username));
@@ -123,7 +123,7 @@ public class UserManagerUsernamePostgresTests(PostgresContainerFixture fixture)
     public Task SetUsernameAsync_RefusesANameThatWasNeverSent() => RunTestAsync(async service =>
     {
         // A user with no name yet
-        var userId = await service.SyncUserAsync(new UserSyncDto("user_null", "null@example.com", "Null", null));
+        var userId = await service.SyncUserAsync(new UserSyncDto("user_null", "null@example.com", null));
 
         // Who sends a body with nothing in it
         await Assert.ThrowsAsync<UsernameRejectedException>(() => service.SetUsernameAsync(userId, null!));
@@ -131,43 +131,43 @@ public class UserManagerUsernamePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Deleting an account leaves the name reserved. Anonymizing the row would hand the name back to whoever
-    /// asks next, and results that already carry it would then read as somebody else's. What stops a deleted
-    /// account still being named is the comment author projection, not this.
+    /// asks next, and results that already carry it would then read as somebody else's. The name is withheld
+    /// wherever it would be shown, so leaving it in the row names nobody.
     /// </summary>
     [Fact]
     public Task DeleteUserAsync_LeavesTheUsernameReserved() => RunTestAsync(async service =>
     {
         // A user who has taken a name
-        var userId = await service.SyncUserAsync(new UserSyncDto("user_gone", "gone@example.com", "Gone", null));
+        var userId = await service.SyncUserAsync(new UserSyncDto("user_gone", "gone@example.com", null));
         await service.SetUsernameAsync(userId, "Peťo Novák");
 
         // Who then leaves
         await service.DeleteUserAsync("user_gone");
 
-        // The name Clerk supplied is scrubbed, and the one holding the index is not
+        // The name still stands
         var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
-        Assert.Equal("Deleted User", user.DisplayName);
         Assert.Equal("Peťo Novák", user.Username);
     });
 
     /// <summary>
     /// Re-syncing a user from Clerk leaves their username standing. The sync upserts the whole row from an entity
     /// Clerk carries no username for, so a column not excluded from that write is silently blanked every time the
-    /// user edits their name or avatar upstream, which would hand a permanent identity back to whoever asks next.
+    /// user edits their avatar upstream, which would hand a permanent identity back to whoever asks next.
     /// </summary>
     [Fact]
     public Task SyncUserAsync_KeepsTheUsernameAcrossAResync() => RunTestAsync(async service =>
     {
         // A synced user who has taken a name
-        var userId = await service.SyncUserAsync(new UserSyncDto("user_keep", "keep@example.com", "Before", null));
+        var userId = await service.SyncUserAsync(new UserSyncDto("user_keep", "keep@example.com", null));
         await service.SetUsernameAsync(userId, "keeper");
 
-        // The same user comes back from Clerk with a changed display name
-        await service.SyncUserAsync(new UserSyncDto("user_keep", "keep@example.com", "After", null));
+        // The same user comes back from Clerk with a changed avatar
+        await service.SyncUserAsync(
+            new UserSyncDto("user_keep", "keep@example.com", "https://example.com/after.png"));
 
         // The upsert landed
         var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
-        Assert.Equal("After", user.DisplayName);
+        Assert.Equal("https://example.com/after.png", user.AvatarUrl);
 
         // And it left the name alone
         Assert.Equal("keeper", user.Username);

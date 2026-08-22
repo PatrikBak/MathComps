@@ -107,6 +107,7 @@ export default function ProfilePageContent() {
 
   // What the site holds on them
   const {
+    email,
     username,
     graduationYear,
     hasLeftHighSchool,
@@ -236,7 +237,7 @@ export default function ProfilePageContent() {
               <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full ring-4 ring-background overflow-hidden bg-surface">
                 <UserAvatarImage
                   imageUrl={user.imageUrl}
-                  altText={username || user.firstName || tProfile('defaultUser')}
+                  altText={username ?? tProfile('defaultUser')}
                   size={128}
                   className="w-full h-full"
                 />
@@ -268,7 +269,7 @@ export default function ProfilePageContent() {
 
             {/* Email */}
             <div className={readOnlyContainerClassName}>
-              <span className={commonFontStyle}>{user.primaryEmailAddress?.emailAddress}</span>
+              <span className={commonFontStyle}>{email}</span>
             </div>
 
             {/* Member since label */}

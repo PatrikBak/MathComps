@@ -153,10 +153,10 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Two students, so the queue has more than one person's conversations in it, and two reviewers, so their
         // read marks have each other to stay out of.
         context.Users.AddRange(
-            new User { Id = _studentId, ExternalId = "ext-student", DisplayName = "Student" },
-            new User { Id = _otherStudentId, ExternalId = "ext-other", DisplayName = "Other" },
-            new User { Id = _reviewerId, ExternalId = "ext-reviewer", DisplayName = "Reviewer" },
-            new User { Id = _otherReviewerId, ExternalId = "ext-reviewer-2", DisplayName = "Second reviewer" });
+            new User { Id = _studentId, ExternalId = "ext-student", Username = "Student" },
+            new User { Id = _otherStudentId, ExternalId = "ext-other", Username = "Other" },
+            new User { Id = _reviewerId, ExternalId = "ext-reviewer", Username = "Reviewer" },
+            new User { Id = _otherReviewerId, ExternalId = "ext-reviewer-2", Username = "Second reviewer" });
 
         // One handout holding both problems.
         var handoutId = Guid.CreateVersion7();
@@ -619,7 +619,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         var row = await GetConversationAsync(service, _newestSessionId);
 
         // It names who held the conversation
-        Assert.Equal("Student", row.User.DisplayName);
+        Assert.Equal("Student", row.User.Username);
 
         // Reads what the student last said, not the examiner's reply nor the message they opened with
         Assert.Equal("and here is my fix", row.LastStudentMessage);
@@ -640,6 +640,33 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Reports them the other way round, which is what says the two marks aren't one predicate written twice
         Assert.False(answered.HasStudentReport);
         Assert.True(answered.HasStudentFeedback);
+    });
+
+    /// <summary>
+    /// A deleted student is not named in the queue. Deletion leaves the username in the database, since the name
+    /// stays reserved for good, so withholding it is each projection's own job.
+    /// </summary>
+    [Fact]
+    public Task A_deleted_student_is_no_longer_named() => RunTestAsync(async service =>
+    {
+        // The student who held the conversation leaves
+        await QueryAsync(async context =>
+        {
+            // The student's row
+            var student = await context.Users.SingleAsync(user => user.Id == _studentId);
+
+            // Marked gone the way deletion marks it, which leaves the name standing
+            student.IsDeleted = true;
+
+            // Commit it
+            await context.SaveChangesAsync();
+        });
+
+        // Read the row back
+        var row = await GetConversationAsync(service, _newestSessionId);
+
+        // It holds nobody the review can name
+        Assert.Null(row.User.Username);
     });
 
     /// <summary>
@@ -825,7 +852,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Each under whoever wrote it
         Assert.Equal(
             ["Second reviewer", "Reviewer"],
-            detail.Notes.Select(note => note.Author.DisplayName));
+            detail.Notes.Select(note => note.Author.Username));
 
         // And marked as the reading reviewer's own only where they are the author
         Assert.Equal([false, true], detail.Notes.Select(note => note.IsOwn));

@@ -32,7 +32,7 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
         Guid Id,
         Guid? ParentCommentId,
         string AuthorExternalId,
-        string AuthorName,
+        string? AuthorName,
         string? AuthorAvatarUrl,
         string Content,
         CommentStatus Status,
@@ -213,7 +213,7 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
         var author = (await dbContext.Users
             .Where(user => user.Id == authorId)
             .Select(user => new CommentAuthorDto(
-                user.ExternalId, user.IsDeleted ? user.DisplayName : user.Username ?? user.DisplayName, user.AvatarUrl))
+                user.ExternalId, user.IsDeleted ? null : user.Username, user.AvatarUrl))
             .FirstOrDefaultAsync())
             // It must exist
             ?? throw new InvalidOperationException($"Author with id '{authorId}' not found");
@@ -482,7 +482,7 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
                 ct.id, 
                 ct.parent_comment_id, 
                 u.external_id AS author_external_id, 
-                CASE WHEN u.is_deleted THEN u.display_name ELSE COALESCE(u.username, u.display_name) END AS author_name, 
+                CASE WHEN u.is_deleted THEN NULL ELSE u.username END AS author_name, 
                 u.avatar_url AS author_avatar_url, 
                 ct.content, 
                 ct.status, 

@@ -2,11 +2,21 @@ import { describe, expect, it } from 'vitest'
 
 import type { HandoutProblemLabeller } from '@/components/features/handouts/handout-problem-label'
 
-import { toProblemFacet, toPromptVersionFacetOptions } from '../defense-review-facet-options'
+import {
+  toProblemFacet,
+  toPromptVersionFacetOptions,
+  toUserFacetOptions,
+} from '../defense-review-facet-options'
 import type {
   DefenseReviewProblemOption,
   DefenseReviewPromptVersionOption,
+  DefenseReviewUserOption,
 } from '../defense-review-types'
+
+/**
+ * What the tests call somebody the site holds neither a name nor an address for.
+ */
+const UNNAMED = 'User'
 
 /**
  * How the tests name a problem. The ids below name nothing on the site, so everything resolved through this
@@ -85,5 +95,41 @@ describe('toPromptVersionFacetOptions', () => {
       '2026-07-01T09:00:00Z',
       '2026-03-01T09:00:00Z',
     ])
+  })
+})
+
+describe('toUserFacetOptions', () => {
+  it('names a student by their username and their address', () => {
+    // A student the site holds both halves of
+    const users: DefenseReviewUserOption[] = [
+      { user: { id: '1', username: 'peto', email: 'peto@example.com' }, conversationCount: 3 },
+    ]
+
+    // Both ride in the label, since the label is also what the facet's search reads
+    expect(toUserFacetOptions(users, UNNAMED)[0].displayName).toBe('peto (peto@example.com)')
+  })
+
+  it('falls back to whichever half is left', () => {
+    // One student who has yet to choose a name, and one whose account is deleted so the address is gone
+    const users: DefenseReviewUserOption[] = [
+      { user: { id: '1', username: null, email: 'nameless@example.com' }, conversationCount: 1 },
+      { user: { id: '2', username: 'quiet', email: null }, conversationCount: 1 },
+    ]
+
+    // Each is still listed under what the site does hold, rather than under a placeholder
+    expect(toUserFacetOptions(users, UNNAMED).map((option) => option.displayName)).toEqual([
+      'nameless@example.com',
+      'quiet',
+    ])
+  })
+
+  it('falls back to the label when neither half is left', () => {
+    // A deleted account that never chose a name, which leaves nothing to name it by
+    const users: DefenseReviewUserOption[] = [
+      { user: { id: '1', username: null, email: null }, conversationCount: 1 },
+    ]
+
+    // Named by the label, since the row is still in the queue and has to say who held the conversation
+    expect(toUserFacetOptions(users, UNNAMED)[0].displayName).toBe(UNNAMED)
   })
 })
