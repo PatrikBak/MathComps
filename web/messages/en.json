@@ -379,7 +379,7 @@
     "remainingHours": "{hours} h {minutes} min",
     "remainingMinutes": "{minutes} min {seconds} s",
     "results": "Results",
-    "resultsPending": "results are being written",
+    "resultsPending": "marking in progress",
     "rules": {
       "accept": "I agree to the rules and will follow them.",
       "contact": "Anything unclear? <link>Write to us</link> rather than guessing.",
