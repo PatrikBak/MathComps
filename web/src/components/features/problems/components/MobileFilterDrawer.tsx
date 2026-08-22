@@ -110,6 +110,7 @@ export const MobileFilterDrawer = ({
                   filterOptions={filterOptions}
                   baseOptions={baseOptions}
                   sharedListName={sharedListName}
+                  onListPicked={onClose}
                 />
               </div>
             </div>

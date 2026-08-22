@@ -30,10 +30,9 @@ import {
   X,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useImperativeHandle, useState } from 'react'
 import { toast } from 'sonner'
 
-import { FOCUS_RING_ROW_CLASS } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import {
   DropdownMenu,
@@ -49,8 +48,8 @@ import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
 import { ROUTES } from '@/i18n/i18n'
 
-import { useCreateUserList } from '../hooks/use-create-user-list'
 import { useDeleteUserList } from '../hooks/use-delete-user-list'
+import { useNewListForm } from '../hooks/use-new-list-form'
 import { useRenameUserList } from '../hooks/use-rename-user-list'
 import { useReorderUserLists } from '../hooks/use-reorder-user-lists'
 import { useToggleListSharing } from '../hooks/use-toggle-list-sharing'
@@ -59,6 +58,7 @@ import { listNameSchema } from '../schemas/user-list-schemas'
 import type { UserListDto } from '../types/user-list-types'
 import { serializeFilters } from '../utils/search-url-serialization'
 import { createDefaultFilters } from '../utils/url-initialization'
+import { NewListInput } from './NewListInput'
 
 /**
  * Imperative handle exposed by {@link ManageListsModal} via ref.
@@ -359,6 +359,9 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
     // Internal open/close state
     const [isOpen, setIsOpen] = useState(false)
 
+    // The form for naming a new list
+    const newListForm = useNewListForm()
+
     // Expose open() to parents via ref
     useImperativeHandle(ref, () => ({
       open: () => setIsOpen(true),
@@ -367,8 +370,7 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
     // Close handler
     const handleClose = () => {
       setIsOpen(false)
-      setIsCreating(false)
-      setNewListName('')
+      newListForm.cancel()
     }
 
     // Fetch user lists
@@ -377,18 +379,8 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
     // Mutation hooks
     const { renameList } = useRenameUserList()
     const { deleteList } = useDeleteUserList()
-    const { createList, isPending: isCreatePending } = useCreateUserList()
     const { reorderLists } = useReorderUserLists()
     const { toggleSharing } = useToggleListSharing()
-
-    // Whether we're in "new list" mode
-    const [isCreating, setIsCreating] = useState(false)
-
-    // The current name of the new list
-    const [newListName, setNewListName] = useState('')
-
-    // The ref to the input where we're typing the new list name
-    const inputRef = useRef<HTMLInputElement>(null)
 
     // Track which list is pending deletion (for the confirm dialog)
     const [deletingList, setDeletingList] = useState<UserListDto | null>(null)
@@ -407,34 +399,14 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
     )
 
     /**
-     * Handles creating a new list with schema validation.
-     */
-    const handleCreate = () => {
-      // Validate with shared schema
-      const result = listNameSchema.safeParse(newListName)
-
-      // Show error if invalid
-      if (!result.success) {
-        toast.error(t('listNameInvalid'))
-        return
-      }
-
-      // Create the list
-      createList(result.data)
-
-      // Reset creation state
-      setNewListName('')
-      setIsCreating(false)
-    }
-
-    /**
-     * Handles viewing a list — sets filter and closes modal.
+     * Handles viewing a list — closes the modal and filters the library down to that list.
      *
      * @param contentId - The contentId of the list to view
      */
     const handleView = (contentId: string) => {
-      onSelectList(contentId)
+      // This modal goes first, since the pick can close whatever opened it
       handleClose()
+      onSelectList(contentId)
     }
 
     /**
@@ -502,42 +474,13 @@ export const ManageListsModal = forwardRef<ManageListsModalRef, ManageListsModal
 
           {/* Separator */}
           <div className="border-t border-foreground/10 mt-3 pt-3">
-            {isCreating ? (
-              /* Inline input for new list, whose row is the field: the input carries no edge of its own */
-              <div
-                className={cn(
-                  'flex items-center gap-2 rounded-sm px-2 py-1.5',
-                  FOCUS_RING_ROW_CLASS
-                )}
-              >
-                <Plus className="h-4 w-4 shrink-0 text-muted" />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={newListName}
-                  onChange={(event) => setNewListName(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault()
-                      handleCreate()
-                    }
-                    if (event.key === 'Escape') {
-                      event.preventDefault()
-                      setNewListName('')
-                      setIsCreating(false)
-                    }
-                  }}
-                  placeholder={t('newListPlaceholder')}
-                  disabled={isCreatePending}
-                  autoFocus
-                  className="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder-muted border-none outline-none focus:ring-0"
-                />
-                {isCreatePending && <LoadingSpinner className="h-4 w-4 shrink-0" />}
-              </div>
+            {newListForm.isCreating ? (
+              /* Inline input for new list */
+              <NewListInput form={newListForm} />
             ) : (
               /* Button to start creating a new list */
               <button
-                onClick={() => setIsCreating(true)}
+                onClick={newListForm.start}
                 className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted hover:text-foreground transition-colors w-full rounded-md hover:bg-foreground/5"
               >
                 <Plus className="h-4 w-4" />

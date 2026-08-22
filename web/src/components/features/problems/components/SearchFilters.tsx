@@ -95,6 +95,8 @@ function TipsAndTricks() {
 type SearchFiltersProps = UseSearchFiltersLogicProps & {
   /** When filtering by a shared list, the display name of that list. Null otherwise. */
   sharedListName?: string | null
+  /** Called once the user has settled on a body of problems. */
+  onListPicked?: () => void
 }
 
 /**
@@ -107,6 +109,7 @@ export const SearchFilters = ({
   filterOptions,
   baseOptions,
   sharedListName,
+  onListPicked,
 }: SearchFiltersProps) => {
   // Translations for the filter sidebar
   const t = useTranslations('problems.filters')
@@ -145,6 +148,7 @@ export const SearchFilters = ({
               filters={filters}
               onFiltersChange={onFiltersChange}
               sharedListName={sharedListName}
+              onListPicked={onListPicked}
             />
           </div>
 
