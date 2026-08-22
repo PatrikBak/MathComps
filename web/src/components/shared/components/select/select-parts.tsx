@@ -7,21 +7,12 @@ import { cn } from '@/components/shared/utils/css-utils'
 /**
  * The floating panel both selects open, bar the width, which each takes from its own trigger.
  *
- * The height cap goes through --anchor-max-height because whatever positions the panel writes its own inline
- * max-height, which a class could never win against. Both positioners read the var: Headless UI's own, driving
- * `Select`, and the hand-rolled one in `SearchableSelect`. The scroll padding matches the real one, so scrolling
- * a row into view stops short of the panel's edge rather than parking the row above it half cut off.
+ * The height cap goes through --anchor-max-height because the anchor writes its own inline max-height, which a
+ * class could never win against. The scroll padding matches the real one, so scrolling a row into view stops
+ * short of the panel's edge rather than parking the row above it half cut off.
  */
 export const SELECT_PANEL_CLASS_NAME =
   'scrollbar-visible z-floating [--anchor-max-height:32vh] overflow-y-auto rounded-lg border border-foreground/10 bg-surface/95 p-0.5 sm:p-1 scroll-p-0.5 sm:scroll-p-1 shadow-2xl backdrop-blur [--anchor-gap:8px]'
-
-/**
- * How far the panel clears its trigger, in pixels, and how much of the viewport's edge it keeps clear.
- *
- * The --anchor-gap above says the same thing to Headless UI's positioner. It is spelled twice because Tailwind
- * reads an arbitrary value off the source text and so cannot take one from here.
- */
-export const SELECT_PANEL_GAP = 8
 
 /**
  * How a choice reads inside the panel.
