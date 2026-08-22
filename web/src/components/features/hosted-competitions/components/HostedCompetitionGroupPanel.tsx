@@ -59,7 +59,8 @@ type HostedCompetitionGroupPanelProps = {
  * The header carries everything the group's competitions share: its name, the entry window, the problem
  * count and the clock. Each row under it carries one competition's category, standing and action.
  *
- * A group holding a single competition has no rows, and its standing and action ride the header instead.
+ * A group holding a single competition has no rows, and its standing and action take a line of their own
+ * under the header.
  */
 export function HostedCompetitionGroupPanel({
   group,
@@ -133,46 +134,29 @@ export function HostedCompetitionGroupPanel({
     }
   }
 
+  // How long is left, where the group has anything left to count
+  const countdown = renderCountdown()
+
   return (
     <SurfacePanel radius="xl" className={cn('overflow-hidden', PHASE_PANEL_CLASS[phase])}>
-      {/* Which group, when it runs, what holds for everything in it, and how long is left of it */}
+      {/* Which group, when it runs, how long is left of it, and what holds for everything inside it */}
       <div className="px-4 py-4 sm:px-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+        {/* The countdown holds the top right corner whatever the name's length, which a long name
+            wraps as text underneath */}
+        <div className="flex items-baseline justify-between gap-x-4">
           <h2
             className={cn(
-              'text-lg font-semibold',
+              'min-w-0 text-pretty text-lg font-semibold',
               phase === 'closed' ? 'text-muted-foreground' : 'text-foreground'
             )}
           >
             {group.name[locale]}
           </h2>
 
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-            {renderCountdown()}
-
-            {/* Where the student stands with the single competition, and the way into it; the header
-                carries both because there is no row underneath */}
-            {soleCompetition !== undefined && (
-              <>
-                <StandingLabel
-                  competition={soleCompetition}
-                  phase={phase}
-                  standing={deriveStanding(group, soleCompetition, now)}
-                  now={now}
-                />
-
-                <EntryAction
-                  competition={soleCompetition}
-                  phase={phase}
-                  standing={deriveStanding(group, soleCompetition, now)}
-                  onEnter={() => onEnter({ group, competition: soleCompetition })}
-                />
-              </>
-            )}
-          </div>
+          {countdown !== null && <div className="shrink-0 text-sm">{countdown}</div>}
         </div>
 
-        <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+        <div className="mt-3 flex flex-col items-start gap-2 text-sm sm:mt-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
           {/* When it takes entries */}
           {windowRange !== null && (
             <span className="inline-flex items-center gap-1.5 rounded-lg bg-foreground/5 px-2.5 py-1 font-medium tabular-nums text-foreground">
@@ -180,16 +164,40 @@ export function HostedCompetitionGroupPanel({
               {windowRange}
             </span>
           )}
-          <CompetitionTerms problemCount={group.problemCount} clockMinutes={group.clockMinutes} />
-        </div>
-      </div>
 
-      {/* What the practice group is for */}
-      {phase === 'practice' && (
-        <p className="px-4 pb-4 text-sm leading-relaxed text-foreground/70 sm:px-6">
-          {t('practiceNote')}
-        </p>
-      )}
+          {/* What it asks of whoever takes it, kept in a box of their own so a narrow screen breaks
+              before the pair rather than between them */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <CompetitionTerms problemCount={group.problemCount} clockMinutes={group.clockMinutes} />
+          </div>
+        </div>
+
+        {/* What the practice group is for */}
+        {phase === 'practice' && (
+          <p className="mt-3 text-sm leading-relaxed text-foreground/70">{t('practiceNote')}</p>
+        )}
+
+        {/* Where the student stands with the single competition, and the way into it. It takes the line a
+            row would have given it, so both shapes of card put the action in the same place. Several
+            states leave both of them with nothing to say, and an empty line still carries its margin */}
+        {soleCompetition !== undefined && (
+          <div className="mt-3 flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm empty:hidden sm:gap-x-5">
+            <StandingLabel
+              competition={soleCompetition}
+              phase={phase}
+              standing={deriveStanding(group, soleCompetition, now)}
+              now={now}
+            />
+
+            <EntryAction
+              competition={soleCompetition}
+              phase={phase}
+              standing={deriveStanding(group, soleCompetition, now)}
+              onEnter={() => onEnter({ group, competition: soleCompetition })}
+            />
+          </div>
+        )}
+      </div>
 
       {/* And the competitions themselves, one per category */}
       {soleCompetition === undefined && (
@@ -234,24 +242,32 @@ function CompetitionRow({ group, competition, phase, now, onEnter }: Competition
   const standing = deriveStanding(group, competition, now)
 
   return (
-    // The category on the left, everything else on the right. The right-hand cluster wraps as a whole, so
-    // on a narrow screen it takes its own line and stays pinned right
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 sm:px-6">
+    // The category on the left and the way onward pinned right, at every width. On a narrow screen the
+    // standing drops to a line of its own beneath them, so every row's action sits at the same end of
+    // the same line; on a wider one the two re-form as the single right-hand cluster
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 text-sm sm:px-6">
       {/* Which category */}
       <span>
         {competition.category !== null && <CategoryBadge category={competition.category} />}
       </span>
 
-      {/* Where the student stands, and the one way onward */}
-      <div className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-1 text-sm">
-        <StandingLabel competition={competition} phase={phase} standing={standing} now={now} />
+      {/* No box of its own on a narrow screen: it hands its two children straight to the row, which is
+          what lets them take separate lines there and one cluster here */}
+      <div className="contents sm:ml-auto sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-x-5">
+        {/* Where the student stands, which several states leave nothing to say */}
+        <div className="order-2 w-full text-right empty:hidden sm:order-none sm:w-auto">
+          <StandingLabel competition={competition} phase={phase} standing={standing} now={now} />
+        </div>
 
-        <EntryAction
-          competition={competition}
-          phase={phase}
-          standing={standing}
-          onEnter={onEnter}
-        />
+        {/* And the one way onward */}
+        <div className="order-1 ml-auto empty:hidden sm:order-none sm:ml-0">
+          <EntryAction
+            competition={competition}
+            phase={phase}
+            standing={standing}
+            onEnter={onEnter}
+          />
+        </div>
       </div>
     </div>
   )
@@ -391,7 +407,7 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
     const wasInIt = standing.kind !== 'none'
 
     return (
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-5">
         {wasInIt ? (
           <Button variant="link">
             <NotebookPen size={15} />
