@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl'
 import React from 'react'
 import { useCallback, useState } from 'react'
 
+import { UsernameGate } from '@/components/features/profile/components/UsernameGate'
+import { useUserProfile } from '@/components/features/profile/hooks/use-user-profile'
 import { LoginButton } from '@/components/login/LoginButton'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
@@ -46,6 +48,12 @@ type CommentSectionProps = {
 export function CommentSection({ target, variant = 'card' }: CommentSectionProps) {
   // Get current user ID for ownership checks
   const { userId, isLoaded: isUserLoaded } = useAuth()
+
+  // The name this comment would be signed with, absent until they have chosen one
+  const { username, isLoading: isUsernameLoading } = useUserProfile()
+
+  // Whether we know who is here and what they are called, since a missing name reads the same as an unread one
+  const isIdentityLoaded = isUserLoaded && !isUsernameLoading
 
   // Check if we are on mobile (used for conditional UI behavior)
   const isMobile = useIsMobile()
@@ -229,7 +237,12 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
           isCollapsed={collapsedIds.has(comment.id)}
           replyCount={replyCount}
           onToggleCollapse={() => handleToggleCollapse(comment.id)}
-          onReply={comment.isDeleted || !userId ? undefined : () => handleOpenReply(comment.id)}
+          onReply={
+            // Replying is offered once there is somebody to sign it, which is a signed-in user with a name
+            comment.isDeleted || !isIdentityLoaded || !userId || !username
+              ? undefined
+              : () => handleOpenReply(comment.id)
+          }
           onLike={isOwnComment ? undefined : () => handleLikeComment(comment.id, comment.isLiked)}
           onEdit={
             // Allow editing only for own comments that are not deleted
@@ -269,7 +282,9 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
     [
       isMobile,
       isUserLoaded,
+      isIdentityLoaded,
       userId,
+      username,
       variant,
       collapsedIds,
       replyCommentId,
@@ -362,7 +377,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
                 }[variant]
               }
             >
-              {!isUserLoaded ? (
+              {!isIdentityLoaded ? (
                 <div className="flex justify-center py-4">
                   <LoadingSpinner />
                 </div>
@@ -370,6 +385,8 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
                 <div className="flex justify-center py-4">
                   <LoginButton onBeforeRedirect={handleBeforeLoginRedirect} />
                 </div>
+              ) : !username ? (
+                <UsernameGate />
               ) : (
                 <RichMathEditor
                   variant={variant}

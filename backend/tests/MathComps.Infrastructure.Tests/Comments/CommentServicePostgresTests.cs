@@ -106,6 +106,69 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// A comment is signed with the name its author chose, not the one Clerk supplied. The two projections that
+    /// name an author are written separately, one in LINQ for the comment just created and one in raw SQL for
+    /// the thread read back, so both are asserted here: a fix applied to one and not the other renames a
+    /// student's comment the moment the page reloads.
+    /// </summary>
+    [Fact]
+    public Task CommentsAreSignedWithTheUsername() => RunTestAsync(async commentService =>
+    {
+        // The author has taken a name of their own
+        await QueryAsync(async context =>
+        {
+            var user = await context.Users.SingleAsync(user => user.Id == _user1Id);
+            user.Username = "Peťo Novák";
+            await context.SaveChangesAsync();
+        });
+
+        // Who writes something
+        var created = await commentService.CreateCommentAsync(
+            new CommentTarget(CommentTargetType.Handout, _testHandoutId), _user1Id, "Signed.");
+
+        // The comment comes back carrying it
+        Assert.Equal("Peťo Novák", created.Author.Name);
+
+        // And so does the thread it lands in
+        var thread = await commentService.GetCommentsAsync(
+            new CommentTarget(CommentTargetType.Handout, _testHandoutId), _user1Id);
+        Assert.Equal("Peťo Novák", thread[0].Author.Name);
+    });
+
+    /// <summary>
+    /// A deleted account stops being named. Deleting anonymizes the display name and deliberately leaves the
+    /// username standing, since the name stays reserved for good, so the projection is the only thing keeping
+    /// somebody who asked to be gone from still signing every comment they ever wrote.
+    /// </summary>
+    [Fact]
+    public Task GetCommentsAsync_DoesNotNameADeletedAuthorByTheirUsername() => RunTestAsync(async commentService =>
+    {
+        // An author with a name of their own
+        await QueryAsync(async context =>
+        {
+            var user = await context.Users.SingleAsync(user => user.Id == _user1Id);
+            user.Username = "Peťo Novák";
+            await context.SaveChangesAsync();
+        });
+
+        // Who writes something and then leaves, anonymized the way deletion anonymizes
+        await commentService.CreateCommentAsync(
+            new CommentTarget(CommentTargetType.Handout, _testHandoutId), _user1Id, "Written before leaving.");
+        await QueryAsync(async context =>
+        {
+            var user = await context.Users.SingleAsync(user => user.Id == _user1Id);
+            user.DisplayName = "Deleted User";
+            user.IsDeleted = true;
+            await context.SaveChangesAsync();
+        });
+
+        // The comment stands, signed by nobody in particular
+        var thread = await commentService.GetCommentsAsync(
+            new CommentTarget(CommentTargetType.Handout, _testHandoutId), null);
+        Assert.Equal("Deleted User", thread[0].Author.Name);
+    });
+
+    /// <summary>
     /// Verifies that creating a top-level comment works and can be retrieved.
     /// </summary>
     [Fact]

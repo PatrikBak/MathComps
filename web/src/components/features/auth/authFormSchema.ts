@@ -43,7 +43,7 @@ const createConfirmPasswordSchema = (t: ValidationTranslator) =>
  *
  * @returns The schema for the display name
  */
-export const createDisplayNameSchema = (t: ValidationTranslator) =>
+const createDisplayNameSchema = (t: ValidationTranslator) =>
   z
     .string()
     .min(1, t('nameRequired'))
