@@ -5,7 +5,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import { hasLocale, type Locale, NextIntlClientProvider } from 'next-intl'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { type ReactNode, Suspense } from 'react'
 
 import KatexSetup from '@/components/math/KatexSetup'
@@ -104,18 +104,19 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
     notFound()
   }
 
+  // Pin the locale for this render. next-intl otherwise resolves it from the request headers, which
+  // a static render cannot answer.
+  setRequestLocale(locale)
+
   // Locale-aware site metadata
   const siteMetadata = await getSiteMetadata(locale)
 
   // Localized author bio
   const tAuthor = await getTranslations({ locale, namespace: 'about.author' })
 
-  // Here's the HTML: the JSON-LD rides up front (outside the Suspense, so it's
-  // always in the shell), then our layout and 42 nested providers under one
-  // Suspense, partly because unknown routes render dynamically, but mostly
-  // because the header shows auth state, so we wait for Clerk to figure out
-  // server-side whether you're logged in before the layout resolves. mhm.
-  // I guess it could be done better but who cares, this comment is already too long
+  // Here's the HTML: the JSON-LD up front, then our layout and 42 nested providers under one
+  // Suspense. The boundary is what covers the header reading the request's query: an uncached read
+  // needs one above it or the build refuses the route outright.
   return (
     <html lang={locale} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={cn(inter.className, 'antialiased')}>

@@ -1,13 +1,10 @@
-import { Suspense } from 'react'
-
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { MobileTableOfContents } from '../table-of-contents/MobileTableOfContents'
 import type { TableOfContentsItem } from '../table-of-contents/table-of-contents-types'
 import { TableOfContents } from '../table-of-contents/TableOfContents'
 import Footer from './Footer'
-import { Header } from './Header'
-import HeaderClient from './HeaderClient'
+import Header from './Header'
 
 /**
  * Props for the {@link Layout} component.
@@ -42,9 +39,7 @@ export default function Layout({
   return (
     <div className={cn('min-h-screen flex flex-col', className)}>
       {/* Sticky header */}
-      <Suspense fallback={<HeaderClient isAuthenticated={false} />}>
-        <Header />
-      </Suspense>
+      <Header />
 
       {/* Body */}
       <main
