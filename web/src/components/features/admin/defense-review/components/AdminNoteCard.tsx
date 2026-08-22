@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import { Button } from '@/components/shared/components/Button'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 
-import type { AdminNote } from '../model/defense-review-types'
+import { type AdminNote, describeReviewUser } from '../model/defense-review-types'
 import { AdminNoteHeader, useNoteAnchorLabel } from './AdminNoteHeader'
 import { AdminNoteSurface } from './AdminNoteSurface'
 
@@ -51,6 +51,9 @@ export function AdminNoteCard({
   // Review-surface copy
   const t = useTranslations('admin.defenseReview.notes')
 
+  // Profile copy
+  const tProfile = useTranslations('profile')
+
   // The shared names for doing things to something
   const tActions = useTranslations('ui.actions')
 
@@ -94,7 +97,11 @@ export function AdminNoteCard({
         note={note}
         turnSequence={turnSequence}
         // The only name on this header, so it reads as a signature
-        author={<span className="text-muted-foreground">{note.author.displayName}</span>}
+        author={
+          <span className="text-muted-foreground">
+            {describeReviewUser(note.author, tProfile('defaultUser'))}
+          </span>
+        }
         actions={
           // Three marks on one dense line have no room for words, so each carries its name as a hover hint
           // as well as in the accessibility tree

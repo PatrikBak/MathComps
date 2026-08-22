@@ -8,7 +8,10 @@ import { useHandoutProblemLabel } from '@/components/features/handouts/use-hando
 import { Button } from '@/components/shared/components/Button'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 
-import type { AdminNoteFeedItem as FeedItem } from '../model/defense-review-types'
+import {
+  type AdminNoteFeedItem as FeedItem,
+  describeReviewUser,
+} from '../model/defense-review-types'
 import { AdminNoteHeader } from './AdminNoteHeader'
 import { AdminNoteSurface } from './AdminNoteSurface'
 
@@ -34,6 +37,9 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
   // Review-surface copy
   const t = useTranslations('admin.defenseReview')
 
+  // Profile copy
+  const tProfile = useTranslations('profile')
+
   // Which problem of which handout the conversation was about
   const problemLabel = useHandoutProblemLabel(item.target, t('deletedHandout'))
 
@@ -49,7 +55,9 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
         <div className="min-w-0 flex-1">
           {/* Which conversation it was written about */}
           <p className="flex min-w-0 items-baseline gap-2 text-sm">
-            <span className="truncate font-medium text-foreground">{item.user.displayName}</span>
+            <span className="truncate font-medium text-foreground">
+              {describeReviewUser(item.user, tProfile('defaultUser'))}
+            </span>
 
             <HandoutProblemRefLabel label={problemLabel} emphasis="muted" />
           </p>
@@ -62,7 +70,9 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
               // Said as a phrase rather than bare, since the student's own name already leads the card
               author={
                 <span className="text-muted-foreground">
-                  {t('notes.byAuthor', { author: item.note.author.displayName })}
+                  {t('notes.byAuthor', {
+                    author: describeReviewUser(item.note.author, tProfile('defaultUser')),
+                  })}
                 </span>
               }
             />

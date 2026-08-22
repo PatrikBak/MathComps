@@ -37,20 +37,6 @@ const createConfirmPasswordSchema = (t: ValidationTranslator) =>
   z.string().min(1, t('confirmPasswordRequired'))
 
 /**
- * Creates schema for display name validation.
- *
- * @param t - The translation function from useTranslations('validation')
- *
- * @returns The schema for the display name
- */
-const createDisplayNameSchema = (t: ValidationTranslator) =>
-  z
-    .string()
-    .min(1, t('nameRequired'))
-    .min(3, t('nameMinLength', { count: 3 }))
-    .max(20, t('nameMaxLength', { count: 20 }))
-
-/**
  * Creates base schema for verification code validation.
  *
  * @param t - The translation function from useTranslations('validation')
@@ -92,7 +78,6 @@ export function createAuthSchemas(t: ValidationTranslator) {
   const emailSchema = createEmailSchema(t)
   const passwordSchema = createPasswordSchema(t)
   const confirmPasswordSchema = createConfirmPasswordSchema(t)
-  const displayNameSchema = createDisplayNameSchema(t)
   const codeSchema = createCodeSchema(t)
 
   // Schema for login form
@@ -114,7 +99,6 @@ export function createAuthSchemas(t: ValidationTranslator) {
   // Schema for signup form
   const signupSchema = addPasswordMatchRefinement(
     z.object({
-      firstName: displayNameSchema,
       email: emailSchema,
       password: passwordSchema,
       confirmPassword: confirmPasswordSchema,

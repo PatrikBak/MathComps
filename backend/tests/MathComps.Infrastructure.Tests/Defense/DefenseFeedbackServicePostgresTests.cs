@@ -82,8 +82,8 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
     {
         // Two users, so ownership isolation can be checked.
         context.Users.AddRange(
-            new User { Id = _ownerId, ExternalId = "ext-owner", DisplayName = "Owner" },
-            new User { Id = _otherId, ExternalId = "ext-other", DisplayName = "Other" });
+            new User { Id = _ownerId, ExternalId = "ext-owner", Username = "Owner" },
+            new User { Id = _otherId, ExternalId = "ext-other", Username = "Other" });
 
         // Two conversations belonging to the owner, the first shaped like a real one: opener, the student,
         // the reply.

@@ -25,12 +25,6 @@ public class User
     public string? Email { get; set; }
 
     /// <summary>
-    /// Display name of the user.
-    /// </summary>
-    [MaxLength(100)]
-    public required string DisplayName { get; set; }
-
-    /// <summary>
     /// The name the site calls this user by, chosen once and never changed, or null while they have yet to choose.
     /// </summary>
     /// <remarks>
@@ -38,9 +32,8 @@ public class User
     /// that can change would have to be snapshotted everywhere it has ever been shown.
     ///
     /// Deleting an account leaves this standing, so the name stays reserved rather than going back into
-    /// circulation. That makes it the one piece of a deleted user that is still readable, so <b>anything that
-    /// shows a username has to fall back to <see cref="DisplayName"/> when <see cref="IsDeleted"/> is set</b>,
-    /// the way the comment author projections do. Deletion anonymizes that one and not this.
+    /// circulation. Anything that shows a username therefore has to hand over null once
+    /// <see cref="IsDeleted"/> is set.
     /// </remarks>
     [MaxLength(20)]
     public string? Username { get; set; }

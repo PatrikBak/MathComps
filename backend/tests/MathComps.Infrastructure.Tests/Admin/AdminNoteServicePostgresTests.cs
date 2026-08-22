@@ -82,9 +82,9 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
     {
         // The student whose conversations are being reviewed, and the two reviewers reading them.
         context.Users.AddRange(
-            new User { Id = _studentId, ExternalId = "ext-student", DisplayName = "Student" },
-            new User { Id = _reviewerId, ExternalId = "ext-reviewer", DisplayName = "Reviewer" },
-            new User { Id = _otherReviewerId, ExternalId = "ext-reviewer-2", DisplayName = "Other reviewer" });
+            new User { Id = _studentId, ExternalId = "ext-student", Username = "Student" },
+            new User { Id = _reviewerId, ExternalId = "ext-reviewer", Username = "Reviewer" },
+            new User { Id = _otherReviewerId, ExternalId = "ext-reviewer-2", Username = "Other reviewer" });
 
         // The handout and problem the conversations were held against, which the feed reads back.
         var handoutId = Guid.CreateVersion7();
@@ -229,7 +229,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(ReplySequence, feed.Items[1].TurnSequence);
 
         // And both carry who held the conversation
-        Assert.Equal(["Student"], feed.Items.Select(item => item.User.DisplayName).Distinct());
+        Assert.Equal(["Student"], feed.Items.Select(item => item.User.Username).Distinct());
 
         // Beside the reviewer whose reading each one is, who is somebody else entirely
         Assert.Equal([_reviewerId], feed.Items.Select(item => item.Note.Author.Id).Distinct());

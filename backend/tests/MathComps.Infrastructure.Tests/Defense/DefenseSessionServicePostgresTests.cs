@@ -160,8 +160,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     {
         // Two users, so ownership isolation can be checked.
         context.Users.AddRange(
-            new User { Id = _ownerId, ExternalId = "ext-owner", DisplayName = "Owner" },
-            new User { Id = _otherId, ExternalId = "ext-other", DisplayName = "Other" });
+            new User { Id = _ownerId, ExternalId = "ext-owner", Username = "Owner" },
+            new User { Id = _otherId, ExternalId = "ext-other", Username = "Other" });
 
         // Commit the seed.
         await context.SaveChangesAsync();

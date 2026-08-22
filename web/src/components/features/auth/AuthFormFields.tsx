@@ -1,4 +1,4 @@
-import { AtSign, KeyRound, Lock, LockKeyhole, Mail, User } from 'lucide-react'
+import { AtSign, KeyRound, Lock, LockKeyhole, Mail } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useFormContext } from 'react-hook-form'
 
@@ -47,18 +47,6 @@ export default function AuthFormFields({ screen, enteredEmail }: AuthFormFieldsP
           type="email"
           error={'email' in errors ? errors.email : undefined}
           registration={register('email')}
-        />
-      )}
-
-      {/* Name Field */}
-      {screen === 'signup-with-email' && (
-        <InputField
-          id="firstName"
-          label={tAuth('nameOrNickname')}
-          icon={User}
-          placeholder={tAuth('enterName')}
-          error={'firstName' in errors ? errors.firstName : undefined}
-          registration={register('firstName')}
         />
       )}
 

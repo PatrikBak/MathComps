@@ -72,7 +72,6 @@ public partial class UserManager(
         var userEntity = new User
         {
             ExternalId = userDto.ExternalId,
-            DisplayName = userDto.DisplayName,
             Email = userDto.Email,
             AvatarUrl = userDto.AvatarUrl,
             CreatedAt = now,
@@ -136,16 +135,10 @@ public partial class UserManager(
             return null;
         }
 
-        // The display name should be the first name
-        var displayName = clerkUser.FirstName
-            // And it should exist - either from social or email login
-            ?? throw new ArgumentException("A user without a first name should not exist.");
-
         // Happy path, we have the user
         var userDto = new UserSyncDto(
             clerkUser.Id,
             clerkUser.EmailAddresses.FirstOrDefault()?.EmailAddressValue ?? "",
-            displayName,
             clerkUser.ImageUrl
         );
 
@@ -170,8 +163,7 @@ public partial class UserManager(
             return;
         }
 
-        // Anonymize personal information.
-        user.DisplayName = "Deleted User";
+        // Anonymize personal information. The username stays, so the name stays reserved.
         user.Email = null;
         user.AvatarUrl = null;
 
@@ -228,7 +220,7 @@ public partial class UserManager(
         return await dbContext.Users
             .Where(user => user.Id == userId)
             .Select(user => new UserProfileDto(
-                user.Username, user.GraduationYear, user.HasLeftHighSchool, user.CountryCode))
+                user.Email, user.Username, user.GraduationYear, user.HasLeftHighSchool, user.CountryCode))
             .FirstOrDefaultAsync(cancellationToken);
     }
 

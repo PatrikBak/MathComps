@@ -6,10 +6,13 @@ namespace MathComps.Domain.Contracts.Comments;
 /// Author information for a comment.
 /// </summary>
 /// <param name="Id"><inheritdoc cref="User.ExternalId" path="/summary"/></param>
-/// <param name="Name">What the site calls the author, which is their username once they have chosen one.</param>
+/// <param name="Name">
+/// The author's username (<see cref="User.Username"/>), or null when they have chosen none or their account
+/// is deleted.
+/// </param>
 /// <param name="AvatarUrl"><inheritdoc cref="User.AvatarUrl" path="/summary"/></param>
 public record CommentAuthorDto(
     string Id,
-    string Name,
+    string? Name,
     string? AvatarUrl
 );

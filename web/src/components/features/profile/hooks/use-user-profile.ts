@@ -18,6 +18,8 @@ export const userProfileQueryKeys = {
  * Return type for {@link useUserProfile}.
  */
 type UseUserProfileResult = {
+  /** The address the site has for them, or null when their account carries none. */
+  email: string | null
   /** The name the site calls them by, or null while they have yet to choose one. */
   username: string | null
   /** The year they finish secondary school, or null while they have not said or already have. */
@@ -61,6 +63,7 @@ export function useUserProfile(): UseUserProfileResult {
 
   // Their profile, and whether it is known yet
   return {
+    email: query.data?.email ?? null,
     username: query.data?.username ?? null,
     graduationYear: query.data?.graduationYear ?? null,
     hasLeftHighSchool: query.data?.hasLeftHighSchool ?? false,

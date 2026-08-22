@@ -106,7 +106,7 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A comment is signed with the name its author chose, not the one Clerk supplied. The two projections that
+    /// A comment is signed with the author's username. The two projections that
     /// name an author are written separately, one in LINQ for the comment just created and one in raw SQL for
     /// the thread read back, so both are asserted here: a fix applied to one and not the other renames a
     /// student's comment the moment the page reloads.
@@ -136,9 +136,8 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A deleted account stops being named. Deleting anonymizes the display name and deliberately leaves the
-    /// username standing, since the name stays reserved for good, so the projection is the only thing keeping
-    /// somebody who asked to be gone from still signing every comment they ever wrote.
+    /// A deleted account stops being named. Deletion leaves the username standing, so the projection withholding
+    /// it is the only thing keeping somebody who asked to be gone from still signing every comment they wrote.
     /// </summary>
     [Fact]
     public Task GetCommentsAsync_DoesNotNameADeletedAuthorByTheirUsername() => RunTestAsync(async commentService =>
@@ -151,21 +150,29 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
             await context.SaveChangesAsync();
         });
 
-        // Who writes something and then leaves, anonymized the way deletion anonymizes
+        // Who writes something
         await commentService.CreateCommentAsync(
             new CommentTarget(CommentTargetType.Handout, _testHandoutId), _user1Id, "Written before leaving.");
+
+        // And then leaves, with the username still standing
         await QueryAsync(async context =>
         {
+            // Their row
             var user = await context.Users.SingleAsync(user => user.Id == _user1Id);
-            user.DisplayName = "Deleted User";
+
+            // Marked gone
             user.IsDeleted = true;
+
+            // Commit it
             await context.SaveChangesAsync();
         });
 
-        // The comment stands, signed by nobody in particular
+        // Read the thread back
         var thread = await commentService.GetCommentsAsync(
             new CommentTarget(CommentTargetType.Handout, _testHandoutId), null);
-        Assert.Equal("Deleted User", thread[0].Author.Name);
+
+        // The comment stands, signed by nobody in particular
+        Assert.Null(thread[0].Author.Name);
     });
 
     /// <summary>
@@ -688,7 +695,7 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = _user1Id,
             ExternalId = _user1ExternalId,
-            DisplayName = "User 1",
+            Username = "User 1",
             Email = "user1@example.com",
             AvatarUrl = _user1AvatarUrl,
             CreatedAt = DateTimeOffset.UtcNow,
@@ -698,7 +705,7 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = _user2Id,
             ExternalId = _user2ExternalId,
-            DisplayName = "User 2",
+            Username = "User 2",
             Email = "user2@example.com",
             AvatarUrl = null,
             CreatedAt = DateTimeOffset.UtcNow,

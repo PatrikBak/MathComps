@@ -1,5 +1,7 @@
 import type { UserResource } from '@clerk/types'
+import { useTranslations } from 'next-intl'
 
+import { useUserProfile } from '@/components/features/profile/hooks/use-user-profile'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { UserAvatarImage } from './UserAvatarImage'
@@ -26,19 +28,22 @@ type UserInfoHeaderProps = {
 const sizeConfig = {
   sm: {
     avatarSize: 44,
-    displayName: 'text-sm',
+    username: 'text-sm',
     handle: 'text-xs',
   },
   md: {
     avatarSize: 48,
-    displayName: 'text-base',
+    username: 'text-base',
     handle: 'text-sm',
   },
 } as const
 
 /**
- * Displays user information including avatar, name, and email address.
+ * Displays user information including avatar, username, and email address.
  * Used in dropdown menus and navigation drawers to show the current user's details.
+ *
+ * The username and email both come from the site's own profile read, so the block is bare until that read
+ * lands, and shows the email alone for somebody who has yet to choose a name.
  */
 export const UserInfoHeader = ({
   user,
@@ -46,6 +51,12 @@ export const UserInfoHeader = ({
   avatarClassName,
   size = 'sm',
 }: UserInfoHeaderProps) => {
+  // Profile copy
+  const tProfile = useTranslations('profile')
+
+  // The name and address the site holds them under
+  const { username, email } = useUserProfile()
+
   // Get the size config
   const config = sizeConfig[size]
 
@@ -53,25 +64,25 @@ export const UserInfoHeader = ({
     <div className={cn('flex items-center gap-3', className)}>
       <UserAvatarImage
         imageUrl={user.imageUrl}
-        altText={user.firstName || 'Používateľ'}
+        altText={username ?? tProfile('defaultUser')}
         size={config.avatarSize}
         className={avatarClassName}
       />
       <div className="min-w-0">
-        {user.firstName && (
-          <p className={cn('font-semibold text-foreground truncate', config.displayName)}>
-            {user.firstName}
+        {username !== null && (
+          <p className={cn('font-semibold text-foreground truncate', config.username)}>
+            {username}
           </p>
         )}
-        {user.emailAddresses && user.emailAddresses.length > 0 && (
+        {email !== null && (
           <p
             className={cn(
               'text-popover-foreground/60 truncate',
-              user.firstName ? 'mt-0.5' : '',
+              username !== null ? 'mt-0.5' : '',
               config.handle
             )}
           >
-            {user.emailAddresses[0].emailAddress}
+            {email}
           </p>
         )}
       </div>

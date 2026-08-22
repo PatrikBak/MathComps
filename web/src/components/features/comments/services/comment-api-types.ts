@@ -19,8 +19,8 @@ export type CommentTarget = {
 type CommentAuthorDto = {
   /** Unique identifier for the author. */
   id: string
-  /** Display name of the author. */
-  name: string
+  /** The author's username, or null when they have chosen none or their account is deleted. */
+  name: string | null
   /** Optional URL to the author's avatar image. */
   avatarUrl: string | null
 }

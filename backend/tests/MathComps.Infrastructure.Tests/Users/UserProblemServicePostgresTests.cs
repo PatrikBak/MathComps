@@ -305,7 +305,7 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = _user1Id,
             ExternalId = "user1",
-            DisplayName = "User 1",
+            Username = "User 1",
             Email = "user1@test.com",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -314,7 +314,7 @@ public class UserProblemServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = _user2Id,
             ExternalId = "user2",
-            DisplayName = "User 2",
+            Username = "User 2",
             Email = "user2@test.com",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

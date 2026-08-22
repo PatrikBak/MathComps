@@ -92,7 +92,7 @@ export default function UserMenu({ onOpenDefenses }: UserMenuProps) {
         <UserMenuTrigger id="user-menu-trigger" aria-label={tUserMenu('label')}>
           <UserAvatarImage
             imageUrl={user.imageUrl}
-            altText={user.firstName || tProfile('defaultUser')}
+            altText={tProfile('defaultUser')}
             size={40}
             className="-my-2"
           />

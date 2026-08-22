@@ -16,7 +16,7 @@ import { useDefenseReviewPanels } from '../hooks/use-defense-review-panels'
 import { useDefenseReviewReadMarking } from '../hooks/use-defense-review-read-marking'
 import type { MarkUnreadFrom } from '../hooks/use-defense-review-read-state'
 import type { UseDefenseReviewSelectionResult } from '../hooks/use-defense-review-selection'
-import type { DefenseReviewDetail } from '../model/defense-review-types'
+import { type DefenseReviewDetail, describeReviewUser } from '../model/defense-review-types'
 import { ActionLabel } from './ActionLabel'
 import { DefenseReviewModalBody } from './DefenseReviewModalBody'
 
@@ -65,6 +65,9 @@ export function DefenseReviewModal({
   // Review-surface copy
   const t = useTranslations('admin.defenseReview')
 
+  // Profile copy
+  const tProfile = useTranslations('profile')
+
   // The shared names for doing things to something
   const tActions = useTranslations('ui.actions')
 
@@ -98,7 +101,9 @@ export function DefenseReviewModal({
       ariaLabel={
         detail === null
           ? t('detailTitle')
-          : t('detailTitleFor', { student: detail.user.displayName })
+          : t('detailTitleFor', {
+              student: describeReviewUser(detail.user, tProfile('defaultUser')),
+            })
       }
       onClosed={() => {
         panels.reset()
@@ -110,7 +115,9 @@ export function DefenseReviewModal({
       <header className="flex shrink-0 items-center gap-3 border-b border-foreground/10 px-4 py-2.5 sm:px-5">
         {/* Who held it, and what it was about */}
         <div className="min-w-0 flex-1" aria-live="polite">
-          <p className="truncate font-bold text-foreground">{detail?.user.displayName ?? ' '}</p>
+          <p className="truncate font-bold text-foreground">
+            {detail === null ? ' ' : describeReviewUser(detail.user, tProfile('defaultUser'))}
+          </p>
           <p className="flex items-baseline gap-2 text-xs text-muted">
             {detail === null ? <span>&nbsp;</span> : <ConversationProblemRef detail={detail} />}
           </p>
