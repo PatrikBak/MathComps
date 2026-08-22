@@ -98,9 +98,9 @@ because it is missing.
 
     Setting $y=0$ we get $1+f(x)=2f(x)f(0)$, or
     $$
-    f(x)\bigl(2f(0)-1\bigr) = 1. \eqno(1)
+    f(x)\bigl(2f(0)-1\bigr) = 1.
     $$
-    Were $2f(0)-1$ zero, (1) would read $0=1$. Hence $2f(0)-1\neq0$ and
+    Were $2f(0)-1$ zero, this would read $0=1$. Hence $2f(0)-1\neq0$ and
     $$
     f(x) = \frac{1}{2f(0)-1},
     $$
@@ -231,7 +231,7 @@ because it is missing.
     $$
     x=f(f(x))-f(x)=f(f(y))-f(y)=y,
     $$
-    so $f$ is injective. Putting $x=0$ in the given equation gives $f(f(0))=f(0)$, and injectivity turns that into $f(0)=0$. In particular $f(f(0))=0$. Any further solution of $f(f(x))=0$ would satisfy $f(f(x))=f(f(0))=f(0)$, and hence $x=0$. The only solution is therefore $x=0$.
+    so $f$ is injective. Putting $x=0$ in the given equation gives $f(f(0))=f(0)$, and injectivity turns that into $f(0)=0$. In particular $f(f(0))=0$, so $x=0$ really is a solution. Conversely, if $f(f(x))=0$ then $f(f(x))=f(0)$, injectivity gives $f(x)=0=f(0)$, and injectivity once more gives $x=0$. The only solution is therefore $x=0$.
 }
 
 \EnvId{Fi_6DpBzAvQSV5yHlerRQ-x-squared-times-sum-of-values}
@@ -268,7 +268,7 @@ because it is missing.
 \Problem{0}{}{
     Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
     $$
-    f^2(x-y) = x^2-2f(x)f(y)+y^2.
+    \bigl(f(x-y)\bigr)^2 = x^2-2f(x)f(y)+y^2.
     $$
 }{
     First play around with zeros.
@@ -283,13 +283,13 @@ because it is missing.
 
     Substituting $x=y=0$ gives $3f(0)^2=0$, so $f(0)=0$, and the choice $y=0$ then gives
     $$
-    f(x)^2 = x^2 \eqno(1)
+    f(x)^2 = x^2
     $$
-    for every real $x$. That is our familiar trap; on its own it yields neither $f(x)\equiv x$ nor $f(x)\equiv-x$. But (1) holds for every number, $x-y$ included, so the left-hand side of the given equation is $(x-y)^2$; canceling the equal terms and dividing by $-2$ leaves
+    for every real $x$. That is our familiar trap; on its own it yields neither $f(x)\equiv x$ nor $f(x)\equiv-x$. But this holds for every number, $x-y$ included, so the left-hand side of the given equation is $(x-y)^2$; canceling the equal terms and dividing by $-2$ leaves
     $$
-    f(x)f(y) = xy. \eqno(2)
+    f(x)f(y) = xy. \eqno(1)
     $$
-    Now $f$ is not the zero function, or else the left-hand side of (2) would always be zero, while for $x=y=1$ the right-hand side is not. So pick $b$ with $f(b)\neq0$ and set $c=b/f(b)$; the choice $y=b$ in (2) gives $f(x)f(b)=xb$, so $f(x)=cx$. Back in (2), $c^2xy=xy$, so $c^2=1$ and $c=\pm1$.
+    Now $f$ is not the zero function, or else the left-hand side would always be zero, while for $x=y=1$ the right-hand side is not. So pick $b$ with $f(b)\neq0$ and set $c=b/f(b)$; the choice $y=b$ in (1) gives $f(x)f(b)=xb$, so $f(x)=cx$. Back in (1), $c^2xy=xy$, so $c^2=1$ and $c=\pm1$.
 
     Check: for $f(x)=\pm x$ we have both $f(x)f(y)=xy$ and $f(x-y)^2=(x-y)^2$, so
     $$
@@ -314,17 +314,17 @@ because it is missing.
 
     Expanding, we see the $1$s cancel; dividing through by $y>0$ then leaves
     $$
-    f(x)-f(x+y) = yf(x)f(x+y). \eqno(1)
+    f(x)-f(x+y) = yf(x)f(x+y).
     $$
-    The symmetric expression here is $f(x+y)$, since swapping $x$ and $y$ leaves the argument $x+y$ alone. So let us solve (1) for it; as $1+yf(x)$ is positive,
+    The symmetric expression here is $f(x+y)$, since swapping $x$ and $y$ leaves the argument $x+y$ alone. So let us solve the last equation for it; as $1+yf(x)$ is positive,
     $$
-    f(x+y) = \frac{f(x)}{1+yf(x)}. \eqno(2)
+    f(x+y) = \frac{f(x)}{1+yf(x)}.
     $$
-    Swapping $x$ and $y$ leaves the left-hand side of (2) alone, so it must leave the right-hand side alone too. Cross-multiplying gives $f(x)+xf(x)f(y)=f(y)+yf(x)f(y)$, and dividing by $f(x)f(y)>0$,
+    Swapping $x$ and $y$ leaves the left-hand side alone, so it must leave the right-hand side alone too. Cross-multiplying gives $f(x)+xf(x)f(y)=f(y)+yf(x)f(y)$, and dividing by $f(x)f(y)>0$,
     $$
-    \frac{1}{f(x)}-x = \frac{1}{f(y)}-y. \eqno(3)
+    \frac{1}{f(x)}-x = \frac{1}{f(y)}-y.
     $$
-    Fix $y$ in (3). The right-hand side is then a constant; call it $c$. So $f(x)=1/(x+c)$ for every $x>0$. From $c=1/f(x)-x$ and $f(x)>0$ we get $c>-x$ for every $x>0$, and if $c$ were negative, the choice $x=-c/2$ would give $c>c/2$, a contradiction. Hence $c\ge0$.
+    Now fix $y$. The right-hand side is then a constant; call it $c$. So $f(x)=1/(x+c)$ for every $x>0$. From $c=1/f(x)-x$ and $f(x)>0$ we get $c>-x$ for every $x>0$, and if $c$ were negative, the choice $x=-c/2$ would give $c>c/2$, a contradiction. Hence $c\ge0$.
 
     Check: for $c\ge0$ and $x>0$ we have $x+c>0$, so $f$ really is a function from $\R^+$ to $\R^+$, and
     $$
@@ -357,13 +357,13 @@ because it is missing.
     $$
     Relation (1) is begging us to put $x:=1-x$ in the given equation: the left-hand side becomes $f\bigl(y-(1-x)y\bigr)=f(xy)$ and the right-hand side, by (1), becomes $f(x)y+x^2f(y)$. The given equation has turned into the much nicer
     $$
-    f(xy) = f(x)y+x^2f(y). \eqno(2)
+    f(xy) = f(x)y+x^2f(y).
     $$
-    The left-hand side of (2) is symmetric in $x$ and $y$, so we may swap the variables and compare the two right-hand sides; rearranging,
+    The left-hand side is symmetric in $x$ and $y$, so we may swap the variables and compare the two right-hand sides; rearranging,
     $$
-    f(x)\,y(1-y) = f(y)\,x(1-x). \eqno(3)
+    f(x)\,y(1-y) = f(y)\,x(1-x).
     $$
-    The choices $y=0$ and $y=1$ in (3) merely zero out both sides, so take $y=2$ instead. It gives $-2f(x)=f(2)\,x(1-x)$, and with $c=f(2)/2$,
+    The choices $y=0$ and $y=1$ merely zero out both sides, so take $y=2$ instead. It gives $-2f(x)=f(2)\,x(1-x)$, and with $c=f(2)/2$,
     $$
     f(x) = c(x^2-x).
     $$
@@ -393,13 +393,13 @@ because it is missing.
 
     We are after a symmetric expression, since such an expression can be compared with itself after a swap of the variables. The left-hand side $f(xf(y))$ is not symmetric, but the choice $x:=f(x)$ (legal, since $f(x)>0$) turns it into $f(f(x)f(y))$:
     $$
-    f\bigl(f(x)f(y)\bigr) = f\bigl(f(x)y\bigr)+f(x). \eqno(1)
+    f\bigl(f(x)f(y)\bigr) = f\bigl(f(x)y\bigr)+f(x).
     $$
-    The term $f(f(x)y)$ is in the way, so let us solve for it using the given equation with the roles of the variables swapped, $f\bigl(yf(x)\bigr)=f(xy)+y$. Then (1) becomes
+    The term $f(f(x)y)$ is in the way, so let us solve for it using the given equation with the roles of the variables swapped, $f\bigl(yf(x)\bigr)=f(xy)+y$. The last equation then becomes
     $$
-    f\bigl(f(x)f(y)\bigr) = f(xy)+y+f(x). \eqno(2)
+    f\bigl(f(x)f(y)\bigr) = f(xy)+y+f(x). \eqno(1)
     $$
-    Swapping $x$ and $y$ leaves both the left-hand side of (2) and the term $f(xy)$ alone, so comparing (2) with its own swap gives $y+f(x)=x+f(y)$. So $f(x)-x$ is constant, $f(x)=x+c$. In the given equation the left-hand side is now $f\bigl(x(y+c)\bigr)=xy+xc+c$ and the right-hand side $xy+c+x$, so $xc=x$ and $c=1$.
+    Swapping $x$ and $y$ leaves both the left-hand side of (1) and the term $f(xy)$ alone, so comparing (1) with its own swap gives $y+f(x)=x+f(y)$. So $f(x)-x$ is constant, $f(x)=x+c$. In the given equation the left-hand side is now $f\bigl(x(y+c)\bigr)=xy+xc+c$ and the right-hand side $xy+c+x$, so $xc=x$ and $c=1$.
 
     Check: $f\bigl(xf(y)\bigr)=x(y+1)+1=xy+x+1$ and $f(xy)+x=xy+1+x$.
 }
@@ -423,21 +423,21 @@ because it is missing.
 
     Let us isolate the weird expression $f(xf(y))$ by dividing by $f(y)>0$:
     $$
-    f(xf(y)) = f(x)-\frac{1}{xyf(y)}. \eqno(1)
+    f(xf(y)) = f(x)-\frac{1}{xyf(y)}.
     $$
-    The argument $xf(y)$ becomes symmetric in $x$ and $y$ if we put $f(x)$ in place of $x$. Indeed, $x:=f(x)$ in (1) gives $f\bigl(f(x)f(y)\bigr)=f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)}$, whose left-hand side survives a swap of $x$ and $y$ untouched. Hence
+    The argument $xf(y)$ becomes symmetric in $x$ and $y$ if we put $f(x)$ in place of $x$. Indeed, $x:=f(x)$ gives $f\bigl(f(x)f(y)\bigr)=f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)}$, whose left-hand side survives a swap of $x$ and $y$ untouched. Hence
     $$
-    f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)} = f\bigl(f(y)\bigr)-\frac{1}{xf(x)f(y)}. \eqno(2)
+    f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)} = f\bigl(f(y)\bigr)-\frac{1}{xf(x)f(y)}.
     $$
-    Let $a=f(1)$. Putting $y=1$ in (2) yields one expression for $f(f(x))$,
+    Let $a=f(1)$. Putting $y=1$ yields one expression for $f(f(x))$,
     $$
-    f\bigl(f(x)\bigr) = f(a)+\frac{x-1}{axf(x)}, \eqno(3)
+    f\bigl(f(x)\bigr) = f(a)+\frac{x-1}{axf(x)}, \eqno(1)
     $$
     while the original equation with $x=1$, $y:=x$ reads $af(x)=f(x)f\bigl(f(x)\bigr)+\frac1x$ and yields a second,
     $$
-    f\bigl(f(x)\bigr) = a-\frac{1}{xf(x)}. \eqno(4)
+    f\bigl(f(x)\bigr) = a-\frac{1}{xf(x)}. \eqno(2)
     $$
-    In particular $x=1$ in (4) gives $f(a)=a-\frac1a$. Substituting that into (3), comparing with (4) and multiplying by $axf(x)$,
+    In particular $x=1$ in (2) gives $f(a)=a-\frac1a$. Substituting that into (1), comparing with (2) and multiplying by $axf(x)$,
     $$
     \eqalign{
         a^2xf(x)-a &= a^2xf(x)-xf(x)+x-1,\cr
@@ -511,18 +511,18 @@ because it is missing.
 \Problem{0}{}{
     Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
     $$
-    f(xf(x)+f(y)) = y+f^2(x).
+    f(xf(x)+f(y)) = y+\bigl(f(x)\bigr)^2.
     $$
 }{
     Spot some of our familiar good properties of $f$.
 }{
     The key is to prove that $f$ is a bijection on $\R$. For that it is worth looking at the right-hand side. The proof goes the same way as for $f(f(x))=x$. A substitution can make it clearer.
 }{
-    After substituting $x=0$ we have $f(f(y))=y+f^2(0)$, from which we can prove the bijection. This relation is nice; it would be useful to compute $f(0)$.
+    After substituting $x=0$ we have $f(f(y))=y+\bigl(f(0)\bigr)^2$, from which we can prove the bijection. This relation is nice; it would be useful to compute $f(0)$.
 }{
-    The key to computing $f(0)$ is a trick: From the shape of the equation I suspect that the solution will be $f(x)=x$, so $f(0)$ will probably be $0$. From surjectivity we know that the function is $0$ somewhere; say $f(a)=0$. Let us try to substitute suitably.
+    The key to computing $f(0)$ is a trick: From the shape of the equation I suspect that the solution will be $f(x)=x$, so $f(0)$ will probably be $0$. From surjectivity we know that the function is $0$ somewhere; say $f(r)=0$. Let us try to substitute suitably.
 }{
-    The key is $x=a$ into the original equation; that gives us directly $f(f(y))=y$, which compared with $f(f(y))=y+f^2(0)$ gives $f(0)=0$.
+    The key is $x=r$ into the original equation; that gives us directly $f(f(y))=y$, which compared with $f(f(y))=y+\bigl(f(0)\bigr)^2$ gives $f(0)=0$.
 }{
     Try to come up with a cute substitution that uses $f(f(x))=x$ in a cute way.
 }{
@@ -560,7 +560,7 @@ because it is missing.
     $$
     for every real $x$.
 
-    That is our familiar trap; (4) does not yet make $f$ identically $x$ or identically $-x$. So suppose there are nonzero $a$, $b$ with $f(a)=a$ and $f(b)=-b$. The choice $x=a$, $y=b$ in (1) gives $f(a^2-b)=b+a^2$, while by (4) $f(a^2-b)$ equals $a^2-b$ or $-(a^2-b)$. The first case forces $b=0$, the second $a=0$, either way a contradiction. Since the two formulas agree at zero, either $f(x)=x$ for all $x$, or $f(x)=-x$ for all $x$.
+    That is our familiar trap; (4) does not yet make $f$ identically $x$ or identically $-x$. The two formulas agree at zero, so if $f$ is neither of them, there are nonzero $a$, $b$ with $f(a)=a$ and $f(b)=-b$. The choice $x=a$, $y=b$ in (1) gives $f(a^2-b)=b+a^2$, while by (4) $f(a^2-b)$ equals $a^2-b$ or $-(a^2-b)$. The first case forces $b=0$, the second $a=0$, either way a contradiction. Hence either $f(x)=x$ for all $x$, or $f(x)=-x$ for all $x$.
 
     Check: for $f(x)=x$ the left-hand side of (1) equals $f(x^2+y)=x^2+y$ and the right-hand side $y+x^2$; for $f(x)=-x$ the left-hand side is $f(-x^2-y)=x^2+y$ and the right-hand side $y+x^2$.
 }
@@ -569,7 +569,7 @@ because it is missing.
 \Problem{0}{IMO 2008 P4}{
     Find all functions $f\colon \R^+\to\R^+$ such that for all positive real numbers $w,x,y,z$ satisfying $wx=yz$,
     $$
-    \frac{f^2(w)+f^2(x)}{f(y^2)+f(z^2)} = \frac{w^2+x^2}{y^2+z^2}.
+    \frac{\bigl(f(w)\bigr)^2+\bigl(f(x)\bigr)^2}{f(y^2)+f(z^2)} = \frac{w^2+x^2}{y^2+z^2}.
     $$
 }{
     Even the simplest substitution, all variables the same, gives something useful and inspiring.
@@ -673,12 +673,12 @@ because it is missing.
 \Problem{0}{IMO 1992 P2}{
     Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
     $$
-    f(x^2+f(y)) = y+f^2(x).
+    f(x^2+f(y)) = y+\bigl(f(x)\bigr)^2.
     $$
 }{
     Notice that $f$ has a zero and find it.
 }{
-    Why does $f$ have a zero? Well, for $y=-f^2(x)$ we have $f(\hbox{something})=0$. But how exactly do we compute it? It takes a few substitutions. Let $f(a)=0$...
+    Why does $f$ have a zero? Well, for $y=-\bigl(f(x)\bigr)^2$ we have $f(\hbox{something})=0$. But how exactly do we compute it? It takes a few substitutions. Let $f(a)=0$...
 }{
     The key is two substitutions, $[a,a]$ and $[0,a^2]$; from those we get $a=0$ right away. As always, $f(0)=0$ gives us a lot.
 }{
@@ -686,7 +686,7 @@ because it is missing.
 }{
     The trick is to try to prove that $f$ is an increasing function.
 }{
-    To prove that it is increasing, let us first substitute $y:=f(y)$, which gives us $f(x^2+y)=f(y)+f^2(x)$. This already implies that it is increasing, even though we cannot see it yet.
+    To prove that it is increasing, let us first substitute $y:=f(y)$, which gives us $f(x^2+y)=f(y)+\bigl(f(x)\bigr)^2$. This already implies that it is increasing, even though we cannot see it yet.
 }{
     If we have two numbers $u>v$, then we can find suitable $(x,y)$ so that $x^2+y=u$ and $y=v$. Do we then have $f(u)>f(v)$ in our equation?
 }{
@@ -694,25 +694,25 @@ because it is missing.
 }{
     \Answer{$f(x)=x$.}
 
-    First notice that $f$ has a zero: the choice $y=-f^2(x)$ makes the right-hand side zero, so $f$ vanishes at the point $x^2+f(y)$. So let $f(a)=0$ and let us try to compute $a$. Substituting $x=y=a$ gives
+    First notice that $f$ has a zero: the choice $y=-\bigl(f(x)\bigr)^2$ makes the right-hand side zero, so $f$ vanishes at the point $x^2+f(y)$. So let $f(a)=0$ and let us try to compute $a$. Substituting $x=y=a$ gives
     $$
-    f(a^2) = a, \eqno(1)
+    f(a^2) = a,
     $$
-    and the choice $x=0$, $y=a^2$ gives $f\bigl(f(a^2)\bigr)=a^2+f^2(0)$, which by (1) reads $0=a^2+f^2(0)$. Both terms are nonnegative, so $a=0$ and also $f(0)=0$.
+    and the choice $x=0$, $y=a^2$ gives $f\bigl(f(a^2)\bigr)=a^2+\bigl(f(0)\bigr)^2$, which by $f(a^2)=a$ reads $0=a^2+\bigl(f(0)\bigr)^2$. Both terms are nonnegative, so $a=0$ and also $f(0)=0$.
 
     Now $x=0$ gives us
     $$
-    f\bigl(f(y)\bigr) = y \eqno(2)
+    f\bigl(f(y)\bigr) = y \eqno(1)
     $$
     for all real $y$, so $f$ is injective, and together with $f(0)=0$ it vanishes only at zero.
 
-    Plain substitution takes us no further here, and an idea is needed: we show that $f$ is increasing. Relation (2) lets us put $y:=f(y)$ in the given equation, which unwinds the inner double $f$ and leaves
+    Plain substitution takes us no further here, and an idea is needed: we show that $f$ is increasing. Relation (1) lets us put $y:=f(y)$ in the given equation, which unwinds the inner double $f$ and leaves
     $$
-    f(x^2+y) = f(y)+f^2(x). \eqno(3)
+    f(x^2+y) = f(y)+\bigl(f(x)\bigr)^2.
     $$
-    Let $u>v$. The choice $y=v$ and $x=\sqrt{u-v}>0$ makes $x^2+y=u$, so (3) gives $f(u)=f(v)+f^2\bigl(\sqrt{u-v}\bigr)$. The added square is positive, since $f$ vanishes only at zero. Therefore $f(u)>f(v)$.
+    Let $u>v$. The choice $y=v$ and $x=\sqrt{u-v}>0$ makes $x^2+y=u$, so the last relation gives $f(u)=f(v)+\bigl(f(\sqrt{u-v})\bigr)^2$. The added square is positive, since $f$ vanishes only at zero. Therefore $f(u)>f(v)$.
 
-    But an increasing function satisfying (2) can only be the identity: if $f(x)>x$, monotonicity gives $f\bigl(f(x)\bigr)>f(x)>x$, and if $f(x)<x$ it gives $x=f\bigl(f(x)\bigr)<f(x)<x$, each contradicting (2).
+    But an increasing function satisfying (1) can only be the identity: if $f(x)>x$, monotonicity gives $f\bigl(f(x)\bigr)>f(x)>x$, and if $f(x)<x$ it gives $x=f\bigl(f(x)\bigr)<f(x)<x$, each contradicting (1).
 
     Check: the left-hand side is $f(x^2+y)=x^2+y$ and the right-hand side $y+x^2$.
 }
@@ -756,9 +756,9 @@ because it is missing.
 
     Now let $p$ be an arbitrary fixed point. The choice $x=p$ in (1) says that $p^3$ is a fixed point too, and the same reasoning applied to $p^3$ produces the fixed point $p^9$. To compare these powers, let us substitute $x=p$ into the given equation, leaving $y$ free; using $f(p)=p$ we get
     $$
-    f(p^3y) = f(y)+p^3-b. \eqno(3)
+    f(p^3y) = f(y)+p^3-b.
     $$
-    Apply relation (3) three times in a row, successively for $y=1$, $y=p^3$ and $y=p^6$:
+    Apply this relation three times in a row, successively for $y=1$, $y=p^3$ and $y=p^6$:
     $$
     f(p^3)=p^3,\qquad f(p^6)=2p^3-b,\qquad f(p^9)=3p^3-2b.
     $$
@@ -777,7 +777,7 @@ because it is missing.
 \Problem{0}{}{
     Find all functions $f\colon \R\to\R$ such that for all real numbers $x,y$,
     $$
-    f(x+f(y)) = f(x)+f^2(y)+2xf(y).
+    f(x+f(y)) = f(x)+\bigl(f(y)\bigr)^2+2xf(y).
     $$
 }{
     Let us try to guess the solution and make a suitable substitution accordingly.
@@ -805,7 +805,7 @@ because it is missing.
 }{
     \Answer{The zero function $f(x)=0$ and the functions $f(x)=x^2+c$ for an arbitrary real constant $c$.}
 
-    Let us first try to guess the solution. The right-hand side looks a lot like the expansion of $(x+f(y))^2$, and indeed $f(x)=x^2$ satisfies the equation, as does $f(x)=x^2+c$ for an arbitrary constant $c$. That leads us to track how far $f$ is from the square, so write $g(x)=f(x)-x^2$. Substituting $f(x)=g(x)+x^2$, the left-hand side of the given equation becomes $g\bigl(x+f(y)\bigr)+x^2+2xf(y)+f^2(y)$ and the right-hand side $g(x)+x^2+f^2(y)+2xf(y)$. Almost everything cancels, leaving $g(x+f(y))=g(x)$, and since $f(y)=y^2+g(y)$,
+    Let us first try to guess the solution. The right-hand side looks a lot like the expansion of $(x+f(y))^2$, and indeed $f(x)=x^2$ satisfies the equation, as does $f(x)=x^2+c$ for an arbitrary constant $c$. That leads us to track how far $f$ is from the square, so write $g(x)=f(x)-x^2$. Substituting $f(x)=g(x)+x^2$, the left-hand side of the given equation becomes $g\bigl(x+f(y)\bigr)+x^2+2xf(y)+\bigl(f(y)\bigr)^2$ and the right-hand side $g(x)+x^2+\bigl(f(y)\bigr)^2+2xf(y)$. Almost everything cancels, leaving $g(x+f(y))=g(x)$, and since $f(y)=y^2+g(y)$,
     $$
     g\bigl(x+y^2+g(y)\bigr) = g(x) \eqno(1)
     $$
@@ -817,11 +817,11 @@ because it is missing.
     $$
     and the right-hand side simplifies under the choice $x:=x+p(2y+p)$ in (1), which strips off the term $y^2+g(y)$. What is left is
     $$
-    g(x) = g\bigl(x+p(2y+p)\bigr) \eqno(2)
+    g(x) = g\bigl(x+p(2y+p)\bigr)
     $$
     for all real $x,y$. So every number of the form $p(2y+p)$ is a period of $g$ as well, and since $p\neq0$, this expression runs over all of $\R$ as $y$ does. Thus $g$ is unchanged by a shift of any size, so it is constant; write $c=g(0)$, and then $f(x)=x^2+c$.
 
-    Check: for the zero function both sides are zero; for $f(x)=x^2+c$ the left-hand side is $\bigl(x+f(y)\bigr)^2+c=x^2+2xf(y)+f^2(y)+c$ and the right-hand side $x^2+c+f^2(y)+2xf(y)$.
+    Check: for the zero function both sides are zero; for $f(x)=x^2+c$ the left-hand side is $\bigl(x+f(y)\bigr)^2+c=x^2+2xf(y)+\bigl(f(y)\bigr)^2+c$ and the right-hand side $x^2+c+\bigl(f(y)\bigr)^2+2xf(y)$.
 }
 
 \EnvId{kJJ4Hd66V4jiFP-sKLSFD-x-plus-fy-equals-y-times-f}
@@ -872,9 +872,9 @@ because it is missing.
 
     The values on the interval $(0,1]$ come from the given equation. For $x>0$ and $y>1$ we have $xy+1>1$, so (3) gives both $f(xy+1)=1/(xy+1)$ and $f(y)=1/y$, and the equation simplifies to
     $$
-    f\Bigl(x+\frac1y\Bigr) = \frac{1}{x+\frac1y}. \eqno(4)
+    f\Bigl(x+\frac1y\Bigr) = \frac{1}{x+\frac1y}.
     $$
-    Now let $t\le1$ be an arbitrary positive number and choose $y>1/t$; then $y>1$ and also $1/y<t$, so $x=t-1/y>0$ makes $x+\frac1y=t$ and (4) gives $f(t)=1/t$. Together with (3) we therefore have $f(x)=1/x$ for all $x>0$.
+    Now let $t\le1$ be an arbitrary positive number and choose $y>1/t$; then $y>1$ and also $1/y<t$, so $x=t-1/y>0$ makes $x+\frac1y=t$ and the last equation gives $f(t)=1/t$. Together with (3) we therefore have $f(x)=1/x$ for all $x>0$.
 
     Check: the left-hand side is $\frac{1}{x+1/y}=\frac{y}{xy+1}$ and the right-hand side $y\cdot\frac{1}{xy+1}$.
 }
