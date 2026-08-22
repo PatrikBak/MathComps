@@ -5,14 +5,14 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
- * The floating panel both selects open, bar the width, which each takes from its own trigger.
+ * How the floating panel both selects open is dressed. Where it goes and how big it may be is
+ * `useSelectPanel`'s, written onto the element as it moves.
  *
- * The height cap goes through --anchor-max-height because the anchor writes its own inline max-height, which a
- * class could never win against. The scroll padding matches the real one, so scrolling a row into view stops
- * short of the panel's edge rather than parking the row above it half cut off.
+ * The scroll padding matches the real one, so scrolling a row into view stops short of the panel's edge
+ * rather than parking the row above it half cut off.
  */
 export const SELECT_PANEL_CLASS_NAME =
-  'scrollbar-visible z-floating [--anchor-max-height:32vh] overflow-y-auto rounded-lg border border-foreground/10 bg-surface/95 p-0.5 sm:p-1 scroll-p-0.5 sm:scroll-p-1 shadow-2xl backdrop-blur [--anchor-gap:8px]'
+  'scrollbar-visible z-floating overflow-y-auto rounded-lg border border-foreground/10 bg-surface/95 p-0.5 sm:p-1 scroll-p-0.5 sm:scroll-p-1 shadow-2xl backdrop-blur'
 
 /**
  * How a choice reads inside the panel.
