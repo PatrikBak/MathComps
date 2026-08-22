@@ -1,3 +1,4 @@
+using MathComps.Domain.Contracts.Users;
 using MathComps.Infrastructure.Services.Clerk;
 
 namespace MathComps.Infrastructure.Services.Users;
@@ -47,4 +48,38 @@ public interface IUserManager
     /// <param name="userId">The internal user ID.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     Task RecordAiConsentAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reads what the user has told us about themselves.
+    /// </summary>
+    /// <param name="userId">The internal user ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Their profile, or null when no row answers to that id.</returns>
+    Task<UserProfileDto?> GetProfileAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Takes a username for the user, which is what the site calls them from then on.
+    /// </summary>
+    /// <remarks>
+    /// A username is chosen once and never changed, so this refuses a user who already has one.
+    /// </remarks>
+    /// <param name="userId">The internal user ID.</param>
+    /// <param name="username">The name to take.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    Task SetUsernameAsync(Guid userId, string username, CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Thrown when a username already answers for somebody else.
+/// </summary>
+public sealed class UsernameTakenException() : Exception("That username is already taken.");
+
+/// <summary>
+/// Thrown when the user already has a username, which cannot be exchanged for another.
+/// </summary>
+public sealed class UsernameAlreadySetException() : Exception("A username cannot be changed once set.");
+
+/// <summary>
+/// Thrown when a username breaks the rules a name has to keep.
+/// </summary>
+public sealed class UsernameRejectedException() : Exception("That username cannot be used.");

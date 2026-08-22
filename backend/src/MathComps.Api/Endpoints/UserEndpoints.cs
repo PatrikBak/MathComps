@@ -6,7 +6,7 @@ namespace MathComps.Api.Endpoints;
 
 /// <summary>
 /// Maps the authenticated user's own account endpoints: reading and recording their acknowledgement of what
-/// talking to the AI tutor entails.
+/// talking to the AI tutor entails, and taking the username the site calls them by.
 /// </summary>
 public static class UserEndpoints
 {
@@ -14,6 +14,16 @@ public static class UserEndpoints
     /// Path the AI-consent routes live at.
     /// </summary>
     private const string AiConsentPath = "/users/me/ai-consent";
+
+    /// <summary>
+    /// Path the username route lives at.
+    /// </summary>
+    private const string UsernamePath = "/users/me/username";
+
+    /// <summary>
+    /// Path the profile route lives at.
+    /// </summary>
+    private const string ProfilePath = "/users/me/profile";
 
     /// <summary>
     /// Maps the <c>/users/me</c> endpoints onto the route builder.
@@ -48,6 +58,42 @@ public static class UserEndpoints
 
             // Stamp the acknowledgement
             await userManager.RecordAiConsentAsync(userId, context.RequestAborted);
+
+            // No reason to return anything
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Read what the authenticated user has told us about themselves
+        app.MapGet(ProfilePath, async (
+            HttpContext context,
+            IUserManager userManager) =>
+        {
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Read their profile, faulting when the row they were resolved from has gone
+            var profile = await userManager.GetProfileAsync(userId, context.RequestAborted)
+                ?? throw new UserNotResolvedException();
+
+            // Return what we hold on them
+            return Results.Ok(profile);
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Take the username the authenticated user will be known by
+        app.MapPost(UsernamePath, async (
+            SetUsernameRequest request,
+            HttpContext context,
+            IUserManager userManager) =>
+        {
+            // Resolve the caller, faulting when the request has no user behind it
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Take it, faulting when it is somebody else's, malformed, or they already have one
+            await userManager.SetUsernameAsync(userId, request.Username, context.RequestAborted);
 
             // No reason to return anything
             return Results.NoContent();

@@ -1,21 +1,22 @@
 'use client'
 
 import { SignOutButton, useUser } from '@clerk/nextjs'
-import { CalendarDays, LogOut, Mail, User } from 'lucide-react'
+import { CalendarDays, LogOut, Mail } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
-import { createDisplayNameSchema } from '@/components/features/auth/authFormSchema'
 import { useInvalidateUserComments } from '@/components/features/comments/hooks/use-invalidate-user-comments'
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
-import { EditableTextField } from '@/components/shared/components/EditableTextField'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import { ROUTES } from '@/i18n/i18n'
 
+import { UsernameForm } from './components/UsernameForm'
+import { useSetUsername } from './hooks/use-set-username'
+import { useUserProfile } from './hooks/use-user-profile'
 import { PROFILE_AVATAR_GLOW, PROFILE_BANNER_GRADIENT } from './profile-colors'
 
 /**
@@ -49,8 +50,6 @@ export default function ProfilePageContent() {
   const tProfile = useTranslations('profile')
   // Translations for auth-related strings
   const tAuth = useTranslations('auth')
-  // Translations for validation errors
-  const tValidation = useTranslations('validation')
   // Translations for Clerk auth errors
   const tClerkErrors = useTranslations('clerkErrors')
 
@@ -62,6 +61,12 @@ export default function ProfilePageContent() {
 
   // Load user data from Clerk
   const { user, isLoaded } = useUser()
+
+  // The name the site calls them by
+  const { username } = useUserProfile()
+
+  // The one chance to choose it
+  const { setUsername, isSaving: isSavingUsername } = useSetUsername()
 
   // Ref for the file input
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -85,31 +90,6 @@ export default function ProfilePageContent() {
   // useEffect above will redirect us to the login page
   if (!user) {
     return null
-  }
-
-  /**
-   * Updates the user's display name
-   *
-   * @param newName The new display name
-   */
-  const onUpdateDisplayName = async (newName?: string) => {
-    // We need to have something to update
-    if (!user || !newName) return
-
-    try {
-      // Issue the update...
-      // Forget the last name (that might have come from social login)
-      await user.update({
-        firstName: newName,
-        lastName: '',
-      })
-
-      // Invalidate comments to refresh author name
-      await invalidateUserComments()
-    } catch (error) {
-      // Throw a new error with the friendly message so EditableTextField can display it
-      throw new Error(getClerkErrorMessage(error, tClerkErrors))
-    }
   }
 
   /**
@@ -147,7 +127,7 @@ export default function ProfilePageContent() {
   )
 
   return (
-    <div className="flex items-center justify-center px-4 py-8 sm:py-12 md:py-16 lg:py-20 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-2xl bg-surface/50 rounded-2xl border border-surface-inset/60 overflow-hidden shadow-xl backdrop-blur-sm">
         {/* Header with Avatar */}
         <div className={cn('relative h-24 sm:h-28 md:h-32', PROFILE_BANNER_GRADIENT)}>
@@ -188,7 +168,7 @@ export default function ProfilePageContent() {
               <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full ring-4 ring-background overflow-hidden bg-surface">
                 <UserAvatarImage
                   imageUrl={user.imageUrl}
-                  altText={user.firstName || tProfile('defaultUser')}
+                  altText={username || user.firstName || tProfile('defaultUser')}
                   size={128}
                   className="w-full h-full"
                 />
@@ -198,35 +178,34 @@ export default function ProfilePageContent() {
         </div>
 
         {/* User info Grid */}
-        <div className="px-4 sm:px-6 md:px-12 pb-8 sm:pb-10 md:pb-12 pt-16 sm:pt-20 md:pt-30">
+        <div className="px-4 sm:px-6 md:px-12 pb-8 sm:pb-10 md:pb-12 pt-16 sm:pt-20 md:pt-24">
+          {/* Who the site knows them as */}
+          <div className="flex flex-col items-center gap-2 pb-8 md:pb-10">
+            {username ? (
+              <h1 className="text-2xl font-semibold text-foreground">{username}</h1>
+            ) : (
+              <>
+                <p className="max-w-md text-pretty text-center text-sm text-muted">
+                  {tProfile('usernamePrompt')}
+                </p>
+                <UsernameForm onSubmit={setUsername} isSaving={isSavingUsername} />
+              </>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(250px,1fr)] justify-items-start items-center gap-x-8 gap-y-4 md:gap-y-9 [&>div:nth-child(2n)]:w-full">
-            {/* Row 1, Col 1 - Display name label */}
-            <ProfileInfoField icon={User} label={tProfile('displayName')} />
-
-            {/* Row 1, Col 2 - Display name input */}
-            <EditableTextField
-              value={user.firstName || ''}
-              onSave={onUpdateDisplayName}
-              schema={createDisplayNameSchema(tValidation)}
-              label={tProfile('displayNamePlaceholder')}
-              textClassName={cn(commonFontStyle, 'text-foreground')}
-              innerContainerClassName={containerClassName}
-              iconSize={14}
-              actionsClassName="pr-1"
-            />
-
-            {/* Row 2, Col 1 - Email label */}
+            {/* Email label */}
             <ProfileInfoField icon={Mail} label={tProfile('email')} />
 
-            {/* Row 2, Col 2 - Email read-only */}
+            {/* Email */}
             <div className={readOnlyContainerClassName}>
               <span className={commonFontStyle}>{user.primaryEmailAddress?.emailAddress}</span>
             </div>
 
-            {/* Row 3, Col 1 - Member since label */}
+            {/* Member since label */}
             <ProfileInfoField icon={CalendarDays} label={tProfile('memberSince')} />
 
-            {/* Row 3, Col 2 - Member since read-only */}
+            {/* Member since */}
             <div className={readOnlyContainerClassName}>
               <span className={commonFontStyle}>
                 {user?.createdAt &&

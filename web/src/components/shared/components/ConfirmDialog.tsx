@@ -47,7 +47,7 @@ type ConfirmDialogProps = {
   /** Dialog title */
   title: string
   /** Dialog message/description */
-  message: string
+  message: React.ReactNode
   /** Text for confirm button */
   confirmText?: string
   /** Text for cancel button */
@@ -105,7 +105,8 @@ export function ConfirmDialog({
       </div>
 
       {/* Message */}
-      <p className="text-sm text-muted mb-5 ml-[52px]">{message}</p>
+      {/* Opted out of the global auto-hyphenation, which otherwise breaks words mid-dialog */}
+      <p className="text-sm text-muted mb-5 ml-[52px] hyphens-none">{message}</p>
 
       {/* Buttons */}
       <div className="flex justify-end gap-3">

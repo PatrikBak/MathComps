@@ -11,6 +11,11 @@ namespace MathComps.Infrastructure.Persistence;
 /// <param name="options">DbContext options provided via dependency injection.</param>
 public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : DbContext(options)
 {
+    /// <summary>
+    /// Name of the unique index over lower(username), which a rejected write names.
+    /// </summary>
+    public const string UsernameIndexName = "ux_user_username_lower";
+
     #region DbSets
 
     /// <summary>Problems (core content).</summary>
@@ -519,6 +524,10 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         modelBuilder.Entity<User>(e =>
         {
             e.HasIndex(u => u.ExternalId).IsUnique().HasDatabaseName("ux_user_external_id");
+
+            // A username is one person's however they capitalized it, so its uniqueness is enforced by a unique
+            // index over lower(username). That is an expression index, which HasIndex cannot express, so the
+            // migration writes it directly and it does not appear in the model. Its name is UsernameIndexName.
         });
 
         #endregion User

@@ -207,6 +207,9 @@
     "Unauthenticated": "Please sign in to continue.",
     "UNAUTHORIZED": "You must be logged in for this action",
     "UPLOAD_URL_FAILED": "Failed to get upload URL",
+    "UsernameAlreadySet": "Your username is already set and cannot be changed.",
+    "UsernameRejected": "That username cannot be used.",
+    "UsernameTaken": "Somebody already has that username. Try another one.",
     "UserNotResolved": "We couldn't load your account. Please try signing in again.",
     "VALIDATION_FAILED": "Invalid form data"
   },
@@ -219,7 +222,7 @@
     "emailLabel": "Email",
     "enterCode": "Enter 6-digit code",
     "enterEmail": "Enter email",
-    "enterName": "Enter name or nickname",
+    "enterName": "Enter name",
     "enterNewPassword": "Enter new password",
     "enterPassword": "Enter password",
     "enterPasswordAgain": "Enter password again",
@@ -236,7 +239,7 @@
     "loadingButton": "Loading account",
     "login": "Log in",
     "loginRequired": "You must log in to {reason}",
-    "nameOrNickname": "Name or nickname",
+    "nameOrNickname": "Name",
     "newPassword": "New password",
     "or": "OR",
     "password": "Password",
@@ -1053,12 +1056,21 @@
   "profile": {
     "avatarUpdated": "Profile photo uploaded, update will take a few seconds",
     "defaultUser": "User",
-    "displayName": "Name / Nickname",
+    "displayName": "Name",
     "displayNamePlaceholder": "Enter your name",
     "email": "Email",
     "loading": "Loading user menu",
     "memberSince": "Member since",
-    "title": "Profile"
+    "title": "Profile",
+    "username": "Username",
+    "usernameAuthReason": "choosing a username",
+    "usernameConfirmBody": "You'll appear here as <name>{username}</name>. Once confirmed, it can't be changed.",
+    "usernameConfirmTitle": "Confirm your username",
+    "usernameError": "The username could not be taken. Please try again.",
+    "usernameGateBody": "Before your first comment, pick a name or nickname that shows up on your comments and in competition results. Once set, it can't be changed.",
+    "usernamePlaceholder": "Choose a username",
+    "usernamePrompt": "Pick a name or nickname that shows up on your comments and in competition results. Once set, it can't be changed.",
+    "usernameSubmit": "Confirm"
   },
   "ui": {
     "actions": {
@@ -1222,6 +1234,10 @@
     "passwordMinLength": "Password must be at least {count} characters",
     "passwordRequired": "Password is required",
     "passwordsDoNotMatch": "Passwords do not match",
-    "selectValidSubject": "Please select a valid subject"
+    "selectValidSubject": "Please select a valid subject",
+    "usernameCharacters": "Use letters, digits, spaces, hyphens and underscores only",
+    "usernameMaxLength": "Username can be at most {count} characters",
+    "usernameMinLength": "Username must be at least {count} characters",
+    "usernameRequired": "Username is required"
   }
 }

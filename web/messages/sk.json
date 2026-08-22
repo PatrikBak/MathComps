@@ -207,6 +207,9 @@
     "Unauthenticated": "Pre pokračovanie sa prihláste.",
     "UNAUTHORIZED": "Pre túto akciu musíte byť prihlásený",
     "UPLOAD_URL_FAILED": "Nepodarilo sa získať URL pre nahrávanie",
+    "UsernameAlreadySet": "Prezývku už máš nastavenú a nedá sa zmeniť.",
+    "UsernameRejected": "Túto prezývku nemožno použiť.",
+    "UsernameTaken": "Túto prezývku už niekto má. Skús inú.",
     "UserNotResolved": "Nepodarilo sa načítať tvoj účet. Skús sa prihlásiť znova.",
     "VALIDATION_FAILED": "Neplatné údaje vo formulári"
   },
@@ -219,7 +222,7 @@
     "emailLabel": "Email",
     "enterCode": "Zadajte 6-miestny kód",
     "enterEmail": "Zadajte email",
-    "enterName": "Zadajte meno alebo prezývku",
+    "enterName": "Zadajte meno",
     "enterNewPassword": "Zadajte nové heslo",
     "enterPassword": "Zadajte heslo",
     "enterPasswordAgain": "Zadajte heslo znova",
@@ -236,7 +239,7 @@
     "loadingButton": "Načítavam účet",
     "login": "Prihlásiť sa",
     "loginRequired": "Pre {reason} sa musíte prihlásiť",
-    "nameOrNickname": "Meno alebo prezývka",
+    "nameOrNickname": "Meno",
     "newPassword": "Nové heslo",
     "or": "ALEBO",
     "password": "Heslo",
@@ -1053,12 +1056,21 @@
   "profile": {
     "avatarUpdated": "Profilová fotka nahraná, aktualizácia potrvá pár sekúnd",
     "defaultUser": "Používateľ",
-    "displayName": "Meno / Prezývka",
+    "displayName": "Meno",
     "displayNamePlaceholder": "Zadajte vaše meno",
     "email": "Email",
     "loading": "Načítavam používateľské menu",
     "memberSince": "Členom od",
-    "title": "Profil"
+    "title": "Profil",
+    "username": "Prezývka",
+    "usernameAuthReason": "výber prezývky",
+    "usernameConfirmBody": "Budeš tu vystupovať ako <name>{username}</name>. Po potvrdení sa to už nebude dať zmeniť.",
+    "usernameConfirmTitle": "Potvrdiť prezývku",
+    "usernameError": "Prezývku sa nepodarilo zabrať. Skús to prosím znova.",
+    "usernameGateBody": "Pred prvým komentárom si vyber meno/prezývku, ktorá sa zobrazí v komentároch aj vo výsledkoch súťaží. Po jej nastavení sa už nebude dať zmeniť.",
+    "usernamePlaceholder": "Zvoľ si prezývku",
+    "usernamePrompt": "Vyber si meno/prezývku, ktorá sa zobrazí v komentároch aj vo výsledkoch súťaží. Po jej nastavení sa už nebude dať zmeniť.",
+    "usernameSubmit": "Potvrdiť"
   },
   "ui": {
     "actions": {
@@ -1222,6 +1234,10 @@
     "passwordMinLength": "Heslo musí mať aspoň {count} znakov",
     "passwordRequired": "Heslo je povinné",
     "passwordsDoNotMatch": "Heslá sa nezhodujú",
-    "selectValidSubject": "Prosím vyberte platný predmet"
+    "selectValidSubject": "Prosím vyberte platný predmet",
+    "usernameCharacters": "Použi iba písmená, číslice, medzery, pomlčky a podčiarkovníky",
+    "usernameMaxLength": "Prezývka môže mať najviac {count} znakov",
+    "usernameMinLength": "Prezývka musí mať aspoň {count} znakov",
+    "usernameRequired": "Prezývka je povinná"
   }
 }

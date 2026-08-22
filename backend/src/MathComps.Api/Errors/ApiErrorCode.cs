@@ -146,6 +146,21 @@ public enum ApiErrorCode
     UserNotResolved,
 
     /// <summary>
+    /// The requested username already answers for somebody else.
+    /// </summary>
+    UsernameTaken,
+
+    /// <summary>
+    /// The caller already has a username, which cannot be exchanged for another.
+    /// </summary>
+    UsernameAlreadySet,
+
+    /// <summary>
+    /// The requested username breaks the rules a name has to keep: its length, or the characters in it.
+    /// </summary>
+    UsernameRejected,
+
+    /// <summary>
     /// The request reached an authenticated endpoint without a valid bearer token (missing, malformed,
     /// or expired).
     /// </summary>
