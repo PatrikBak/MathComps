@@ -31,6 +31,8 @@ type ListsDropdownProps = {
   onFiltersChange: (filters: SearchFiltersState) => void
   /** When filtering by a shared list, the display name of that list. Null otherwise. */
   sharedListName?: string | null
+  /** Called once the user has settled on a body of problems. */
+  onListPicked?: () => void
 }
 
 /**
@@ -40,7 +42,12 @@ type ListsDropdownProps = {
  * Everything but the first needs an account, so a signed-out user gets a sign-in prompt
  * that carries the choice they were making, and lands back on it afterwards.
  */
-export function ListsDropdown({ filters, onFiltersChange, sharedListName }: ListsDropdownProps) {
+export function ListsDropdown({
+  filters,
+  onFiltersChange,
+  sharedListName,
+  onListPicked,
+}: ListsDropdownProps) {
   // Translations for the filter sidebar
   const t = useTranslations('problems.filters')
 
@@ -61,6 +68,12 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
 
   // The modal for renaming and deleting lists
   const manageRef = useRef<ManageListsModalRef>(null)
+
+  // A function which puts away the dropdown and whatever holds it, the choice having been made
+  const dismissAfterChoice = () => {
+    setOpen(false)
+    onListPicked?.()
+  }
 
   // A function which hands over to the manage-lists modal
   const handleManage = () => {
@@ -88,8 +101,8 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
     // Both of the narrowing filters go, since neither applies to the whole library
     onFiltersChange({ ...filters, favoritesOnly: false, listContentId: null })
 
-    // The choice is made, so the dropdown closes behind it
-    setOpen(false)
+    // Nothing is left hanging open behind the choice
+    dismissAfterChoice()
   }
 
   // A function which shows only the problems the user has liked
@@ -102,7 +115,7 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
     )
 
     // Whichever way it went, nothing is left hanging open behind an answered choice
-    if (wasAnswered) setOpen(false)
+    if (wasAnswered) dismissAfterChoice()
   }
 
   // A function which shows only the problems on one of the user's lists
@@ -110,8 +123,8 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
     // The liked filter gives way, since the two narrow the library differently
     onFiltersChange({ ...filters, favoritesOnly: false, listContentId: contentId })
 
-    // The choice is made, so the dropdown closes behind it
-    setOpen(false)
+    // Nothing is left hanging open behind the choice
+    dismissAfterChoice()
   }
 
   // Whether the whole library is showing, which is what neither filter being set means
@@ -157,6 +170,10 @@ export function ListsDropdown({ filters, onFiltersChange, sharedListName }: List
           align="start"
           className="w-[var(--radix-popover-trigger-width)]"
           onCloseAutoFocus={(event) => event.preventDefault()}
+          onEscapeKeyDown={(event) => {
+            // While a list is being named, Escape belongs to that field, which cancels it itself
+            if (isCreating) event.preventDefault()
+          }}
         >
           {/* All Problems */}
           <PopoverItem
