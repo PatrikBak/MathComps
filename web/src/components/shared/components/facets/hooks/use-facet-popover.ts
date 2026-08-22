@@ -1,15 +1,11 @@
 import {
-  autoUpdate,
-  flip,
+  type FloatingContext,
   type FloatingFocusManagerProps,
-  offset,
   type OpenChangeReason,
   type Placement,
-  shift,
-  size,
   useClick,
   useDismiss,
-  useFloating,
+  type UseFloatingReturn,
   useInteractions,
   useRole,
 } from '@floating-ui/react'
@@ -25,6 +21,7 @@ import {
 } from 'react'
 
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
+import { useFloatingPanel } from '@/hooks/use-floating-panel'
 
 import { filterOptionsBySearch } from '../model/facet-logic'
 import type { FacetOption } from '../model/facet-types'
@@ -117,11 +114,11 @@ export type UseFacetPopoverResult<T extends FacetOption> = {
   /** Id of the popover element. */
   popoverId: string
   /** Floating-ui's trigger and popover refs. */
-  refs: ReturnType<typeof useFloating>['refs']
+  refs: UseFloatingReturn['refs']
   /** Positioning styles for the popover element. */
   floatingStyles: CSSProperties
   /** Floating-ui's shared interaction context. */
-  context: ReturnType<typeof useFloating>['context']
+  context: FloatingContext
   /** Props the trigger has to spread. */
   getReferenceProps: ReturnType<typeof useInteractions>['getReferenceProps']
   /** Props the popover has to spread. */
@@ -178,8 +175,10 @@ export function useFacetPopover<T extends FacetOption>(
   // Whether the list is long enough to read better at a settled height than hugging its content
   const shouldUseMinHeight = filtered.length > MIN_HEIGHT_OPTIONS_THRESHOLD
 
-  // Positioning: anchored under the trigger, flipping above it when the page runs out below
-  const { refs, floatingStyles, context, placement } = useFloating({
+  // Positioning: under the trigger where the page has room below it, and above it where it does not.
+  // The side is pinned, since searching, collapsing a section and expanding a tree node all resize the
+  // popover while it stands open.
+  const { refs, floatingStyles, context, placement } = useFloatingPanel({
     open,
     onOpenChange: (nextOpen, _event, reason) => {
       // Only a close has a reason worth keeping, and recording an opening one would leave it standing
@@ -190,38 +189,29 @@ export function useFacetPopover<T extends FacetOption>(
       setOpen(nextOpen)
     },
     placement: 'bottom-start',
+    fallbackPlacements: ['top-start'],
+    pinSide: true,
     strategy: 'fixed',
-    whileElementsMounted: autoUpdate,
-    middleware: [
-      // Clear of the trigger
-      offset(8),
-
-      // Above the trigger instead, once there is no room below it
-      flip({ fallbackPlacements: ['top-start'], padding: 8 }),
-
-      // Nudged along the viewport rather than allowed to hang off its edge
-      shift({ padding: 8 }),
-
-      // Sized to the trigger, or to its own content, and to whatever height the viewport allows
-      size({
-        apply({ availableHeight, availableWidth, rects, elements }) {
-          // Written straight onto the element, since these change as the page moves
-          Object.assign(elements.floating.style, {
-            // Never past what the viewport offers, since a minimum outranks a maximum in CSS
-            minHeight: shouldUseMinHeight
-              ? `${Math.min(POPOVER_MIN_HEIGHT, availableHeight)}px`
-              : 'auto',
-            maxHeight: `${Math.min(POPOVER_MAX_HEIGHT, availableHeight)}px`,
-            // Growing to what it holds still has to stop at the viewport's edge: nudging it along can move an
-            // over-wide panel but never shrink it, and its rows only start truncating once something does.
-            maxWidth: `${availableWidth}px`,
-            // Sized by the rule this popover was set up with
-            ...POPOVER_WIDTH_STYLES[width](rects.reference.width, availableWidth),
-          })
-        },
-        padding: 8,
-      }),
-    ],
+    gap: 8,
+    padding: 8,
+    // Sized to the trigger, or to its own content, and to whatever height the viewport allows. The
+    // height cap is load-bearing: the side is settled on before the popover has finished dressing
+    // itself, so it is chosen against a panel shorter than the one that ends up standing there.
+    applySize({ availableHeight, availableWidth, rects, elements }) {
+      // Written straight onto the element, since these change as the page moves
+      Object.assign(elements.floating.style, {
+        // Never past what the viewport offers, since a minimum outranks a maximum in CSS
+        minHeight: shouldUseMinHeight
+          ? `${Math.min(POPOVER_MIN_HEIGHT, availableHeight)}px`
+          : 'auto',
+        maxHeight: `${Math.min(POPOVER_MAX_HEIGHT, availableHeight)}px`,
+        // Growing to what it holds still has to stop at the viewport's edge: nudging it along can move an
+        // over-wide panel but never shrink it, and its rows only start truncating once something does.
+        maxWidth: `${availableWidth}px`,
+        // Sized by the rule this popover was set up with
+        ...POPOVER_WIDTH_STYLES[width](rects.reference.width, availableWidth),
+      })
+    },
   })
 
   // Opens on a click of the trigger

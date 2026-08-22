@@ -2,6 +2,7 @@
 
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import type { ComponentType } from 'react'
+import { useState } from 'react'
 
 import {
   getSelectOptionClassName,
@@ -10,6 +11,7 @@ import {
   SELECT_PLACEHOLDER_CLASS_NAME,
   SelectChevron,
 } from '@/components/shared/components/select/select-parts'
+import { useSelectPanel } from '@/components/shared/components/select/use-select-panel'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -45,6 +47,9 @@ type SelectProps = {
  * The house single-choice dropdown.
  */
 export function Select({ options, value, onChange, placeholder, className }: SelectProps) {
+  // The button the panel positions itself against and takes its width from
+  const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null)
+
   // The choice currently picked. An empty value is nothing picked even when a choice carries it, so a list can
   // offer clearing itself as a row while the placeholder still reads as the placeholder
   const selectedOption = value === '' ? undefined : options.find((option) => option.value === value)
@@ -56,6 +61,7 @@ export function Select({ options, value, onChange, placeholder, className }: Sel
         <>
           {/* A button dressed as a text input */}
           <ListboxButton
+            ref={setTriggerElement}
             className={cn(
               'form-input flex items-center justify-between gap-2 text-left',
               className
@@ -78,33 +84,62 @@ export function Select({ options, value, onChange, placeholder, className }: Sel
             </span>
           </ListboxButton>
 
-          <ListboxOptions
-            anchor="bottom start"
-            className={cn('w-[var(--button-width)]', SELECT_PANEL_CLASS_NAME)}
-          >
-            {options.map((option) => {
-              // The choice's own icon, if it carries one
-              const Icon = option.icon
-
-              // The row for this choice
-              return (
-                <ListboxOption
-                  key={option.value}
-                  value={option.value}
-                  className={getSelectOptionClassName}
-                >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    {Icon && <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
-                    <TruncatedText className={SELECT_OPTION_LABEL_CLASS_NAME}>
-                      {option.label}
-                    </TruncatedText>
-                  </div>
-                </ListboxOption>
-              )
-            })}
-          </ListboxOptions>
+          <SelectPanel open={open} triggerElement={triggerElement} options={options} />
         </>
       )}
     </Listbox>
+  )
+}
+
+/**
+ * The props of {@link SelectPanel}.
+ */
+type SelectPanelProps = {
+  /** Whether the panel is open. */
+  open: boolean
+  /** The button the panel hangs off, once React has handed it over. */
+  triggerElement: HTMLElement | null
+  /** The choices on offer. */
+  options: readonly SelectOption[]
+}
+
+/**
+ * The floating list of choices.
+ *
+ * A component of its own because {@link useSelectPanel} needs to watch `open`, which only the render prop
+ * above can hand out.
+ */
+function SelectPanel({ open, triggerElement, options }: SelectPanelProps) {
+  // The panel's side, place and size
+  const { refs, floatingStyles } = useSelectPanel(open, triggerElement)
+
+  return (
+    <ListboxOptions
+      portal
+      ref={refs.setFloating}
+      style={floatingStyles}
+      className={SELECT_PANEL_CLASS_NAME}
+    >
+      {options.map((option) => {
+        // The choice's own icon, if it carries one
+        const Icon = option.icon
+
+        // The row for this choice
+        return (
+          <ListboxOption
+            key={option.value}
+            value={option.value}
+            className={getSelectOptionClassName}
+          >
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {Icon && <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+              <TruncatedText className={SELECT_OPTION_LABEL_CLASS_NAME}>
+                {option.label}
+              </TruncatedText>
+            </div>
+          </ListboxOption>
+        )
+      })}
+    </ListboxOptions>
   )
 }

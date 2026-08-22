@@ -15,6 +15,7 @@ import {
   SELECT_PANEL_CLASS_NAME,
   SelectChevron,
 } from '@/components/shared/components/select/select-parts'
+import { useSelectPanel } from '@/components/shared/components/select/use-select-panel'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -80,6 +81,9 @@ export function SearchableSelect({
   // What the user has typed to narrow the list
   const [query, setQuery] = useState('')
 
+  // The input and its chevron, which the panel positions itself against and takes its width from
+  const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null)
+
   // The choice currently picked, if the value still names one
   const selectedOption = options.find((option) => option.value === value)
 
@@ -113,7 +117,7 @@ export function SearchableSelect({
     >
       {({ open }) => (
         <>
-          <div className="relative">
+          <div className="relative" ref={setTriggerElement}>
             <ComboboxInput
               aria-label={ariaLabel}
               displayValue={() => selectedOption?.label ?? ''}
@@ -128,30 +132,69 @@ export function SearchableSelect({
             </ComboboxButton>
           </div>
 
-          <ComboboxOptions
-            anchor="bottom start"
-            className={cn('w-[var(--input-width)] empty:hidden', SELECT_PANEL_CLASS_NAME)}
-          >
-            {matchingOptions.length === 0 ? (
-              <p className="px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-muted">
-                {emptyMessage}
-              </p>
-            ) : (
-              matchingOptions.map((option) => (
-                <ComboboxOption
-                  key={option.value}
-                  value={option.value}
-                  className={getSelectOptionClassName}
-                >
-                  <TruncatedText className={SELECT_OPTION_LABEL_CLASS_NAME}>
-                    {option.label}
-                  </TruncatedText>
-                </ComboboxOption>
-              ))
-            )}
-          </ComboboxOptions>
+          <SearchableSelectPanel
+            open={open}
+            triggerElement={triggerElement}
+            options={matchingOptions}
+            emptyMessage={emptyMessage}
+          />
         </>
       )}
     </Combobox>
+  )
+}
+
+/**
+ * The props of {@link SearchableSelectPanel}.
+ */
+type SearchableSelectPanelProps = {
+  /** Whether the panel is open. */
+  open: boolean
+  /** The input the panel hangs off, once React has handed it over. */
+  triggerElement: HTMLElement | null
+  /** The choices the query left. */
+  options: readonly SearchableSelectOption[]
+  /** What to show when there are none. */
+  emptyMessage: string
+}
+
+/**
+ * The floating list of choices.
+ *
+ * A component of its own because {@link useSelectPanel} needs to watch `open`, which only the render prop
+ * above can hand out.
+ */
+function SearchableSelectPanel({
+  open,
+  triggerElement,
+  options,
+  emptyMessage,
+}: SearchableSelectPanelProps) {
+  // The panel's side, place and size
+  const { refs, floatingStyles } = useSelectPanel(open, triggerElement)
+
+  return (
+    <ComboboxOptions
+      portal
+      ref={refs.setFloating}
+      style={floatingStyles}
+      className={cn('empty:hidden', SELECT_PANEL_CLASS_NAME)}
+    >
+      {options.length === 0 ? (
+        <p className="px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-muted">
+          {emptyMessage}
+        </p>
+      ) : (
+        options.map((option) => (
+          <ComboboxOption
+            key={option.value}
+            value={option.value}
+            className={getSelectOptionClassName}
+          >
+            <TruncatedText className={SELECT_OPTION_LABEL_CLASS_NAME}>{option.label}</TruncatedText>
+          </ComboboxOption>
+        ))
+      )}
+    </ComboboxOptions>
   )
 }
