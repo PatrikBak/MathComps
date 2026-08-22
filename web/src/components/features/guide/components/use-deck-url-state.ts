@@ -1,6 +1,7 @@
 import { useLocale } from 'next-intl'
 import { useCallback, useState } from 'react'
 
+import { replaceQuery } from '@/components/shared/utils/url-utils'
 import { type Locale } from '@/i18n/i18n'
 
 import { GUIDE_PAGES, type GuidePage } from '../content/guide-content-types'
@@ -64,11 +65,8 @@ export function useDeckUrlState(
     (page: GuidePage, filters: GuideFilters) => {
       // Encode to a localized query string (empty when pristine)
       const queryString = encodeDeckState({ page, filters }, locale)
-      // Build the target URL, swapping only the query onto the current localized path
-      const path = window.location.pathname
-      const url = queryString ? `${path}?${queryString}` : path
-      // Write it via the History API, not the router, to avoid an RSC refetch on every navigation
-      window.history.replaceState(null, '', url)
+      // Put it on the address the deck is already on
+      replaceQuery(queryString)
     },
     [locale]
   )

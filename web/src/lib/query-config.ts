@@ -1,16 +1,12 @@
 import { type DefaultOptions, type Query, QueryClient } from '@tanstack/react-query'
 
+import { MINUTE_MS, SECOND_MS } from '@/components/shared/utils/time-units'
 import { isTransientFailure } from '@/lib/api/api-error'
-
-/** Milliseconds in a second; the base unit for every duration below. */
-const SECOND = 1000
-/** Milliseconds in a minute. */
-const MINUTE = 60 * SECOND
 
 /** Starting delay the exponential backoff doubles from. */
 const RETRY_BASE_MS = 500
 /** Ceiling the exponential backoff is capped at. */
-const RETRY_MAX_MS = 10 * SECOND
+const RETRY_MAX_MS = 10 * SECOND_MS
 /** How many times a transient failure is retried before the query settles into its error state. */
 const MAX_RETRIES = 3
 
@@ -57,11 +53,11 @@ function isWorthWakingUp(query: Query): boolean {
  */
 export const cachePolicy = {
   /** Near-static content (problems, competitions, filter options); admin edits only. Also the global baseline. */
-  content: { staleTime: 10 * MINUTE, gcTime: 30 * MINUTE },
+  content: { staleTime: 10 * MINUTE_MS, gcTime: 30 * MINUTE_MS },
   /** User- or peer-driven data that should reflect recent activity quickly (comment threads, the user's own lists). */
-  userData: { staleTime: 30 * SECOND, gcTime: 10 * MINUTE },
+  userData: { staleTime: 30 * SECOND_MS, gcTime: 10 * MINUTE_MS },
   /** Aggregate counts that can lag slightly without hurting the reader (comment counts). */
-  counts: { staleTime: 60 * SECOND, gcTime: 10 * MINUTE },
+  counts: { staleTime: 60 * SECOND_MS, gcTime: 10 * MINUTE_MS },
 } as const
 
 /** One tier of {@link cachePolicy}. */

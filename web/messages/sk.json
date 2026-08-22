@@ -311,6 +311,91 @@
     "profile": "Profil",
     "redirecting": "Presmerovávam..."
   },
+  "competitions": {
+    "categories": {
+      "advanced": "Pokročilá",
+      "elementary": "Základná",
+      "intermediate": "Stredná"
+    },
+    "categoryFuture": "Podľa záujmu môžu pribudnúť ďalšie kategórie alebo špeciálne súťaže, napríklad príprava na krajské kolo či geometrický maratón. <link>Napíš nám</link>, čo by ťa potešilo.",
+    "categoryHints": {
+      "advanced": "kto už je skúsenejší riešiteľ a trúfa si na úlohy z najvyššej kategórie stredoškolskej matematickej olympiády",
+      "elementary": "kto si chce vyskúšať súťažnú matematiku, vrátane základoškolákov",
+      "intermediate": "kto už niekedy vyriešil súťažné úlohy zo stredoškolskej matematickej olympiády"
+    },
+    "categoryNote": "Môžeš sa zúčastniť aj viacerých kategórií.",
+    "categoryToggle": "Ktorá úroveň je pre mňa?",
+    "clockHours": "{hours, plural, one {# hodina} few {# hodiny} other {# hodín}}",
+    "clockHoursMinutes": "{hours, plural, one {# hodina} few {# hodiny} other {# hodín}} {minutes, plural, one {# minúta} few {# minúty} other {# minút}}",
+    "clockMinutes": "{minutes, plural, one {# minúta} few {# minúty} other {# minút}}",
+    "closedLabel": "ukončená",
+    "closesIn": "ostáva {remaining}",
+    "continue": "Pokračovať",
+    "dialog": {
+      "back": "Späť",
+      "confirm": "Spustiť časomieru",
+      "consequence": "Časomiera sa spustí po kliknutí na tlačidlo. Po spustení ju nie je možné spustiť znovu.",
+      "consequencePractice": "Časomiera sa spustí po kliknutí na tlačidlo. Skúšobnú súťaž si môžeš dať znova, kedykoľvek.",
+      "forfeit": "Vzdať sa a pozrieť si úlohy",
+      "forfeitConfirm": "Vzdať sa",
+      "forfeitConsequence": "Úlohy uvidíš hneď a vo výsledkoch sa neobjavíš. Súťažiť v tejto kategórii už nebudeš môcť.",
+      "title": "{group}, {category}"
+    },
+    "enter": "Spustiť",
+    "entryAuthReason": "spustenie súťaže",
+    "entryError": "Súťaž sa nepodarilo spustiť.",
+    "entryWindow": "vstup {range}",
+    "forfeitError": "Súťaž sa nepodarilo vzdať.",
+    "howItWorks": {
+      "steps": [
+        "Vyberieš si aktívnu súťaž (nižšie je návod, ako si vybrať kategóriu) 🎮",
+        "Kedykoľvek v typicky dvojtýždennom súťažnom okne si spustíš časomieru ⏲️",
+        "Následne máš limitovaný čas na vyriešenie príkladov 📋",
+        "Svoje riešenia prezentuješ Mathilde a ona ti poskytne spätnú väzbu 🤖",
+        "Finálne body ti budú udelené po skončení súťaže na základe tvojich konverzácií s Mathildou 🔢",
+        "Neboj sa poslať neúplné riešenie alebo poprosiť Mathildu o pomoc, ak vôbec nevieš začať, aj progres po nápovedi je hodnotený kladným počtom bodov 🙂"
+      ],
+      "title": "Ako to funguje?"
+    },
+    "intro": "Vyskúšaj si súťaže rôznych úrovní, v ktorých svoje riešenie obhajuješ našej umelej inteligencii Mathilde priamo v súťažnom čase.",
+    "loadFailed": "Súťaže sa nepodarilo načítať.",
+    "mySolutions": "Moje riešenia",
+    "noCompetitions": "Zatiaľ tu nie je žiadna súťaž.",
+    "opensIn": "otvára sa o {remaining}",
+    "practiceNote": "Skúšobná súťaž s jednoduchými úlohami na vyskúšanie si súťažného prostredia.",
+    "problemCount": "{count, plural, one {# úloha} few {# úlohy} other {# úloh}}",
+    "problems": "Úlohy",
+    "readiness": {
+      "profileLink": "Doplniť profil",
+      "profileNeeded": "Ak chceš súťažiť, <link>doplň si profil</link>.",
+      "signedOut": "Súťažiť môžeš po <link>prihlásení</link>."
+    },
+    "remainingDays": "{days} d {hours} h",
+    "remainingHours": "{hours} h {minutes} min",
+    "remainingMinutes": "{minutes} min {seconds} s",
+    "results": "Výsledky",
+    "resultsPending": "výsledky sa pripravujú",
+    "rules": {
+      "accept": "Súhlasím s pravidlami a budem sa nimi riadiť.",
+      "contact": "Nie je niečo jasné? <link>Napíš nám</link>, radšej sa opýtaj vopred.",
+      "lines": [
+        "Použitie iného AI alebo akejkoľvek externej pomoci a komunikácie je zakázané, naše súťaže sú tréningom riešenia úloh a nie tréningom nechávania si ich vyriešiť inými.",
+        "Časomiera pokrýva aj riešenie, aj písanie si s Mathildou, treba brať do úvahy, že jej odpovede nemusia byť vždy najrýchlejšie (prioritizujeme presnosť nad rýchlosťou).",
+        "S Mathildou sa môžeš rozprávať dlho, avšak počet správ a dĺžka jednotlivej správy je z pochopiteľných dôvodov limitovaná.",
+        "Body sú udeľované na základe celej konverzácie, nemá teda zmysel sa z Mathildy snažiť vymámiť celé riešenie.",
+        "Úlohy prosím nezdieľaj, kým sa súťaž neuzavrie, nech tým nepokazíš zážitok ostatným.",
+        "Nesnaž sa Mathildu hacknúť, prinútiť ju, nech ti niečo naprogramuje alebo nech ti dá recept na polievku, takéto snahy budú viesť k diskvalifikácii."
+      ],
+      "title": "Než začneš"
+    },
+    "rulesButton": "Pravidlá",
+    "standing": {
+      "running": "súťažíš, ostáva {clock}"
+    },
+    "title": "Súťaže",
+    "try": "Vyskúšať",
+    "tryAgain": "Skúsiť znova"
+  },
   "contact": {
     "email": "Email",
     "emailPlaceholder": "vas@email.sk",
@@ -677,6 +762,10 @@
       "description": "Prehľad obhajob vedených s AI skúšajúcou.",
       "title": "Konverzácie s Mathildou"
     },
+    "competitions": {
+      "description": "Krátke online súťaže s novými úlohami: riešiš pod vlastnými hodinami a svoje riešenia obhajuješ pred Mathildou.",
+      "title": "Súťaže"
+    },
     "guide": {
       "description": "Zoznam informácií o súťažiach a odkazy na rôzne užitočné veci zo sveta súťažnej matematiky.",
       "title": "Sprievodca"
@@ -715,6 +804,7 @@
   },
   "navigation": {
     "about": "O projekte",
+    "competitions": "Súťaže",
     "contact": "Kontakt",
     "guide": "Sprievodca",
     "handouts": "Materiály",

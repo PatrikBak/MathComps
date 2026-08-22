@@ -12,9 +12,10 @@ import UserMenu from '@/components/layout/UserMenu'
 import { Button } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
 import { NavLink } from '@/components/shared/components/NavLink'
-import { ROUTES } from '@/i18n/i18n'
+import { useIsAdmin } from '@/hooks/use-is-admin'
 
 import { MobileNavigationDrawer } from './MobileNavigationDrawer'
+import { visibleNavigationItems } from './navigation-items'
 
 /**
  * The user's defenses, loaded on demand: the chat is heavy and most visits never open it.
@@ -88,6 +89,9 @@ export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
   // Translations for navigation
   const tNav = useTranslations('navigation')
 
+  // Whether the reader is an admin
+  const isAdmin = useIsAdmin()
+
   return (
     <>
       <header className="sticky top-0 left-0 right-0 bg-background/95 z-header">
@@ -97,10 +101,11 @@ export default function HeaderClient({ isAuthenticated }: HeaderClientProps) {
 
           {/* Center: Navigation Links (desktop only) */}
           <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-8 flex-1">
-            <NavLink href={ROUTES.PROBLEMS}>{tNav('problems')}</NavLink>
-            <NavLink href={ROUTES.HANDOUTS}>{tNav('handouts')}</NavLink>
-            <NavLink href={ROUTES.GUIDE}>{tNav('guide')}</NavLink>
-            <NavLink href={ROUTES.NEWS}>{tNav('news')}</NavLink>
+            {visibleNavigationItems(isAdmin).map((item) => (
+              <NavLink key={item.href} href={item.href}>
+                {tNav(item.labelKey)}
+              </NavLink>
+            ))}
           </div>
 
           {/* Right: Actions (desktop) + Mobile menu button */}

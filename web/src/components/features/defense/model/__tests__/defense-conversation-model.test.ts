@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { delay } from '@/components/shared/utils/async-utils'
 import { BackendApiError } from '@/lib/api/api-error'
 
 import {
@@ -32,7 +33,7 @@ const OPENER = 'Walk me through your argument.'
  */
 function flush(): Promise<void> {
   // A macrotask runs only after all microtasks have drained
-  return new Promise((resolve) => setTimeout(resolve, 0))
+  return delay(0)
 }
 
 /**

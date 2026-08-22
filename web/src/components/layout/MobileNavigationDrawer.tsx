@@ -14,10 +14,10 @@ import { LoginNavItem } from '@/components/login/LoginNavItem'
 import { Button, buttonVariants } from '@/components/shared/components/Button'
 import { NavLink } from '@/components/shared/components/NavLink'
 import { useIsAdmin } from '@/hooks/use-is-admin'
-import { ROUTES } from '@/i18n/i18n'
 import { usePathname } from '@/i18n/navigation'
 
 import { cn } from '../shared/utils/css-utils'
+import { visibleNavigationItems } from './navigation-items'
 
 /**
  * Props for the {@link MobileNavigationDrawer} component.
@@ -133,10 +133,11 @@ export const MobileNavigationDrawer = ({
 
                 {/* Main navigation */}
                 <nav className="flex flex-col">
-                  <MobileLink href={ROUTES.PROBLEMS}>{tNav('problems')}</MobileLink>
-                  <MobileLink href={ROUTES.HANDOUTS}>{tNav('handouts')}</MobileLink>
-                  <MobileLink href={ROUTES.GUIDE}>{tNav('guide')}</MobileLink>
-                  <MobileLink href={ROUTES.NEWS}>{tNav('news')}</MobileLink>
+                  {visibleNavigationItems(isAdmin).map((item) => (
+                    <MobileLink key={item.href} href={item.href}>
+                      {tNav(item.labelKey)}
+                    </MobileLink>
+                  ))}
                 </nav>
 
                 {/* Separator — only when logged in */}
