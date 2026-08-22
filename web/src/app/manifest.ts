@@ -10,8 +10,8 @@ import { DEFAULT_LOCALE } from '@/i18n/i18n'
  * @returns The manifest for the PWA.
  */
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  // Get site-level translations for default locale
-  const t = await getTranslations({ locale: DEFAULT_LOCALE, namespace: 'metadata.site' })
+  // The home page's copy
+  const t = await getTranslations({ locale: DEFAULT_LOCALE, namespace: 'pages.home' })
 
   // Generate the manifest
   return {

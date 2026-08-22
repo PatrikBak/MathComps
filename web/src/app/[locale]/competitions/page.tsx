@@ -23,7 +23,7 @@ export async function generateMetadata({
   // Generate locale-specific metadata
   return createPageMetadata({
     locale: locale as Locale,
-    namespace: 'metadata.competitions',
+    namespace: 'pages.competitions',
     path: ROUTES.COMPETITIONS,
     noindex: true,
   })

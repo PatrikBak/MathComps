@@ -359,7 +359,6 @@
       ],
       "title": "Jak to funguje?"
     },
-    "intro": "Vyzkoušej si soutěže různých úrovní, ve kterých své řešení obhajuješ naší umělé inteligenci Mathildě přímo v soutěžním čase.",
     "loadFailed": "Soutěže se nepodařilo načíst.",
     "mySolutions": "Moje řešení",
     "noCompetitions": "Zatím tu není žádná soutěž.",
@@ -394,7 +393,6 @@
     "standing": {
       "running": "soutěžíš, zbývá {clock}"
     },
-    "title": "Soutěže",
     "try": "Vyzkoušet",
     "tryAgain": "Zkusit znovu"
   },
@@ -763,55 +761,6 @@
       "title": "Co se chystá"
     }
   },
-  "metadata": {
-    "about": {
-      "description": "Příběh projektu MathComps: kdo ho tvoří, proč vznikl trojjazyčný archiv olympiádních úloh, studijních materiálů a rozcestníku zdrojů, a na čem je postavený.",
-      "title": "O projektu"
-    },
-    "adminDefenses": {
-      "description": "Přehled obhajob vedených s AI zkoušející.",
-      "title": "Konverzace s Mathildou"
-    },
-    "competitions": {
-      "description": "Krátké online soutěže s novými úlohami: řešíš pod vlastními hodinami a svá řešení obhajuješ před Mathildou.",
-      "title": "Soutěže"
-    },
-    "guide": {
-      "description": "Seznam informací o soutěžích a odkazy na různé užitečné věci ze světa soutěžní matematiky.",
-      "title": "Rozcestník"
-    },
-    "handouts": {
-      "description": "Průběžně připravované texty, které mají za cíl pokrýt klíčová témata soutěžní matematiky.",
-      "title": "Materiály"
-    },
-    "home": {
-      "description": "Přehledný archiv úloh, studijních materiálů a rozcestník užitečných zdrojů pro matematické olympiády.",
-      "title": "Matematická olympiáda a věci okolo ní"
-    },
-    "login": {
-      "description": "Přihlaste se do svého účtu.",
-      "title": "Přihlásit se"
-    },
-    "news": {
-      "description": "Co je nového na MathComps: nově zveřejněné materiály, přidané soutěže a sady úloh a vylepšení archivu, rozcestníku a nástrojů.",
-      "title": "Novinky"
-    },
-    "privacy": {
-      "description": "Zásady ochrany soukromí a podmínky používání platformy MathComps. Informace o zpracování údajů, cookies a právu na vymazání dat.",
-      "title": "Ochrana soukromí a podmínky používání"
-    },
-    "problems": {
-      "description": "Prohledávatelný archiv úloh z matematických soutěží.",
-      "title": "Úlohy"
-    },
-    "profile": {
-      "description": "Váš uživatelský profil.",
-      "title": "Profil"
-    },
-    "site": {
-      "description": "Platforma pro matematické soutěže s archivem úloh, učebními materiály a rozcestníkem užitečných zdrojů."
-    }
-  },
   "navigation": {
     "about": "O projektu",
     "competitions": "Soutěže",
@@ -848,6 +797,52 @@
     "description": "Ups! Tato adresa neexistuje nebo byla přesunuta.",
     "homeButton": "Domů",
     "title": "Stránka se nenašla"
+  },
+  "pages": {
+    "about": {
+      "description": "Proč MathComps vznikl, kdo ho tvoří a kam směřuje.",
+      "title": "O projektu"
+    },
+    "adminDefenses": {
+      "description": "Přehled obhajob vedených s AI zkoušející.",
+      "title": "Konverzace s Mathildou"
+    },
+    "competitions": {
+      "description": "Vyzkoušej si soutěže různých úrovní, ve kterých své řešení obhajuješ naší umělé inteligenci Mathildě přímo v soutěžním čase.",
+      "title": "Soutěže"
+    },
+    "guide": {
+      "description": "Přehled matematických soutěží a korespondenčních seminářů, jak začít a kam dál.",
+      "title": "Rozcestník"
+    },
+    "handouts": {
+      "description": "Studijní texty k tématům soutěžní matematiky.",
+      "title": "Materiály"
+    },
+    "home": {
+      "description": "Archiv soutěžních úloh, studijní materiály a rozcestník zdrojů. S úlohami ti pomůže AI tutorka Mathilda.",
+      "title": "Matematická olympiáda a věci okolo ní"
+    },
+    "login": {
+      "description": "Přihlas se do svého účtu na MathComps.",
+      "title": "Přihlásit se"
+    },
+    "news": {
+      "description": "Nové materiály, přidané úlohy a změny na MathComps.",
+      "title": "Novinky"
+    },
+    "privacy": {
+      "description": "Jak MathComps nakládá s tvými údaji a za jakých podmínek ho můžeš používat.",
+      "title": "Ochrana soukromí a podmínky používání"
+    },
+    "problems": {
+      "description": "Prohledávatelný archiv úloh z matematických soutěží.",
+      "title": "Úlohy"
+    },
+    "profile": {
+      "description": "Tvůj účet na MathComps.",
+      "title": "Profil"
+    }
   },
   "plurals": {
     "conversations": "{count, plural, =1 {# konverzace} =2 {# konverzace} =3 {# konverzace} =4 {# konverzace} other {# konverzací}}",
@@ -890,7 +885,6 @@
     "competitionsOverview": "Přehled soutěží",
     "connectionFailed": "Připojení selhalo",
     "connectionFailedHint": "Nepodařilo se spojit se serverem.",
-    "description": "Prohledávatelný archiv úloh z matematických soutěží.",
     "emptyState": {
       "description": "Zkuste upravit filtry a vyhledat znovu.",
       "title": "Nic se nenašlo"

@@ -21,7 +21,7 @@ export async function generateMetadata({
   const { locale } = await params
   return createPageMetadata({
     locale: locale as Locale,
-    namespace: 'metadata.about',
+    namespace: 'pages.about',
     path: ROUTES.ABOUT,
     useSection: true,
   })

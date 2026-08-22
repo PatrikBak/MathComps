@@ -23,7 +23,7 @@ export async function generateMetadata({
   // Generate locale-specific metadata
   return createPageMetadata({
     locale: locale as Locale,
-    namespace: 'metadata.adminDefenses',
+    namespace: 'pages.adminDefenses',
     path: ROUTES.ADMIN_DEFENSES,
     noindex: true,
   })
