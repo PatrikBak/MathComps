@@ -17,7 +17,7 @@ type ProblemsIntroSectionProps = {
  */
 export async function ProblemsIntroSection({ locale }: ProblemsIntroSectionProps) {
   // Reuse the page's own localized title + description
-  const t = await getTranslations({ locale, namespace: 'metadata.problems' })
+  const t = await getTranslations({ locale, namespace: 'pages.problems' })
 
   // Emit the sr-only heading + description
   return (

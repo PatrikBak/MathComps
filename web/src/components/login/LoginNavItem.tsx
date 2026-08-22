@@ -50,6 +50,7 @@ export const LoginNavItem = ({ className, onClick, isLoading }: LoginNavItemProp
           className,
           'flex items-center gap-2 animate-pulse cursor-progress select-none'
         )}
+        role="status"
         aria-label={t('loadingButton')}
         aria-busy="true"
       >

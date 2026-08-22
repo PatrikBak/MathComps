@@ -27,7 +27,7 @@ export async function generateMetadata({
   // Generate locale-specific metadata, keeping the full tagline for SEO and social previews
   const metadata = await createPageMetadata({
     locale: locale as Locale,
-    namespace: 'metadata.home',
+    namespace: 'pages.home',
     path: ROUTES.HOME,
   })
 

@@ -21,7 +21,7 @@ export async function generateMetadata({
   // Generate locale-specific metadata
   return createPageMetadata({
     locale: locale as Locale,
-    namespace: 'metadata.privacy',
+    namespace: 'pages.privacy',
     path: ROUTES.PRIVACY,
     useSection: true,
   })

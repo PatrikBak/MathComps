@@ -18,7 +18,6 @@ import {
   useMergeRefs,
   useRole,
 } from '@floating-ui/react'
-import { AnimatePresence, motion } from 'framer-motion'
 import * as React from 'react'
 import { useState } from 'react'
 
@@ -152,34 +151,28 @@ export function Tooltip({ children, content, placement, className = '' }: Toolti
         })
       )}
 
-      {/* The tooltip popover, rendered conditionally with a presence animation. */}
-      <AnimatePresence>
-        {open && (
-          <FloatingPortal>
-            <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
-                {...getFloatingProps({
-                  ref: refs.setFloating,
-                  className: `z-tooltip max-h-48 rounded-lg bg-surface/95 px-3 py-1.5 text-sm text-foreground shadow-lg backdrop-blur-sm overflow-y-auto ${className}`,
-                  style: {
-                    position: context.strategy,
-                    top: y ?? 0,
-                    left: x ?? 0,
-                    overflowWrap: 'break-word',
-                    lineHeight: '1.5',
-                  },
-                })}
-              >
-                {content}
-              </motion.div>
-            </FloatingFocusManager>
-          </FloatingPortal>
-        )}
-      </AnimatePresence>
+      {/* The tooltip popover */}
+      {open && (
+        <FloatingPortal>
+          <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
+            <div
+              {...getFloatingProps({
+                ref: refs.setFloating,
+                className: `z-tooltip max-h-48 animate-in overflow-y-auto rounded-lg bg-surface/95 px-3 py-1.5 text-sm text-foreground shadow-lg backdrop-blur-sm duration-150 ease-out fade-in zoom-in-95 motion-reduce:animate-none ${className}`,
+                style: {
+                  position: context.strategy,
+                  top: y ?? 0,
+                  left: x ?? 0,
+                  overflowWrap: 'break-word',
+                  lineHeight: '1.5',
+                },
+              })}
+            >
+              {content}
+            </div>
+          </FloatingFocusManager>
+        </FloatingPortal>
+      )}
     </>
   )
 }

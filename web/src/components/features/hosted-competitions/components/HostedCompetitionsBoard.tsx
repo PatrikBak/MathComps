@@ -36,6 +36,9 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
   // Competitions copy
   const t = useTranslations('competitions')
 
+  // The page's own name and description
+  const tPage = useTranslations('pages.competitions')
+
   // Who is reading, and what the program knows about them
   const { reader, readerKey, isReaderKnown } = useEntryReader()
 
@@ -72,8 +75,8 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
     <div className="mx-auto max-w-4xl hyphens-none">
       {/* What this page is, before anything can be pressed on it */}
       <div>
-        <PageHeader title={t('title')} className="mb-0">
-          <p>{t('intro')}</p>
+        <PageHeader title={tPage('title')} className="mb-0">
+          <p>{tPage('description')}</p>
 
           {/* What the thing is, which category to pick, and what an entry agrees to */}
           <div className="space-y-2">

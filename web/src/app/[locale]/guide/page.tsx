@@ -27,7 +27,7 @@ export async function generateMetadata({
   // Generate locale-specific metadata
   return createPageMetadata({
     locale: locale as Locale,
-    namespace: 'metadata.guide',
+    namespace: 'pages.guide',
     path: ROUTES.GUIDE,
     useSection: true,
   })

@@ -41,8 +41,8 @@ type SiteMetadata = {
  * @returns Site metadata for the given locale.
  */
 export async function getSiteMetadata(locale: Locale): Promise<SiteMetadata> {
-  // Get site-level translations
-  const t = await getTranslations({ locale, namespace: 'metadata.site' })
+  // The home page's copy
+  const t = await getTranslations({ locale, namespace: 'pages.home' })
 
   // Get the description
   const description = t('description')
@@ -177,21 +177,20 @@ export function generatePageMetadata(options: PageMetadataOptions): Metadata {
 }
 
 /**
- * Valid metadata translation namespaces.
- * Must contain 'title' and 'description' keys.
+ * A translation namespace naming one page: its 'title' and its one-line 'description'.
  */
-type MetadataNamespace =
-  | 'metadata.home'
-  | 'metadata.about'
-  | 'metadata.problems'
-  | 'metadata.guide'
-  | 'metadata.profile'
-  | 'metadata.handouts'
-  | 'metadata.login'
-  | 'metadata.privacy'
-  | 'metadata.news'
-  | 'metadata.competitions'
-  | 'metadata.adminDefenses'
+type PageNamespace =
+  | 'pages.home'
+  | 'pages.about'
+  | 'pages.problems'
+  | 'pages.guide'
+  | 'pages.profile'
+  | 'pages.handouts'
+  | 'pages.login'
+  | 'pages.privacy'
+  | 'pages.news'
+  | 'pages.competitions'
+  | 'pages.adminDefenses'
 
 /**
  * Options for creating page metadata with automatic translations.
@@ -199,8 +198,8 @@ type MetadataNamespace =
 type CreatePageMetadataOptions = {
   /** The current locale. */
   locale: Locale
-  /** Translation namespace containing 'title' and 'description' keys. */
-  namespace: MetadataNamespace
+  /** Translation namespace naming the page. */
+  namespace: PageNamespace
   /** URL path for canonical URL generation. */
   path?: string
   /** Open Graph content type ('website' or 'article'). */
