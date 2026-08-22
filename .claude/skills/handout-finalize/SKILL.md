@@ -39,7 +39,7 @@ Three values, one **single** `AskUserQuestion` call, before any file is touched.
 
 - **Section** — the `categoryKey` of the section the entry is appended to: `general`, `algebra`, `geometry`, `number-theory`, `combinatorics`. That's five and the tool takes four, so offer the plausible ones (topic cues: factoring/inequalities → `algebra`; angles/triangles → `geometry`; divisibility/primes → `number-theory`; counting/coloring/invariants → `combinatorics`; proof basics/induction → `general`) and let the auto-added "Other" cover the rest.
 - **`difficulty`** — required, `1`, `2` or `3` (`HANDOUT_DIFFICULTY_LEVELS`); the validator rejects anything else. Offer all three in numeric order, never reordered, each labelled with the legend readers actually see (`handouts.difficulty.level1..3` in `web/messages/sk.json`): 1 = beginners (category C and up), 2 = intermediate (category B and up), 3 = advanced (category A). Anchors already in `handouts.json`: `angle-basics-1`, `factorization`, `digits` = 1; `introduction-to-inequalities`, `combinatorial-games` = 2; `power-of-a-point`, `inverses-mod-p`, `functional-equations` = 3.
-- **`hideSolutionsAndProofs`** — publish the solutions or keep them hidden. `true` keeps solutions, proofs, answers and the full-solutions PDF off the page; hints and the skeleton PDF stay. Suggest hiding when the solutions are unreviewed or the handout is about to be lectured.
+- **`hideSolutionsAndProofs`** — publish the solutions or keep them hidden. `true` keeps solutions, proofs, answers and the full-solutions PDF off the page; hints and the skeleton PDF stay. Suggest hiding when the solutions are unreviewed or the handout is about to be lectured — and say then that the flag gates the UI only: the CLI never reads `handouts.json`, so the full PDF is still built, uploaded, and fetchable at its R2 URL.
 
 ### 3. Generate the `id` and edit `handouts.json`
 
@@ -100,7 +100,7 @@ Rule of thumb: the macro genuinely bridges source→web and other handouts will 
 
 Re-run the CLI on the same scoped glob until exit 0. **Never add `--no-build` to that loop**: the rules file is a content item copied into `bin/`, so skipping the build runs the previous copy. The edit appears to have done nothing, the run still exits 0, and the next move is hunting a phantom bug in a regex that was never applied.
 
-**Missing `\EnvId`:** the parser throws before anything else runs, so this surfaces as a step-4 failure listing every unmarked environment. Nothing downstream fills these in — add the ids to the `.tex` yourself, then re-run the CLI, which also regenerates the environment index. The format is `\EnvId{<nanoid>-<name>}`: the 21-character nanoid is the identity, identical in every language variant and never re-minted, dropped or rewritten once it exists; the name after it is that language's own, must be unique within its file, and lands in the page URL — so name it from what the statement visibly says, never its competition source, its solution technique, or the answer.
+**Missing `\EnvId`:** the parser throws before anything else runs, so this surfaces as a step-4 failure listing every unmarked environment. Nothing downstream fills these in — add the ids to the `.tex` yourself per the `handout-editor` skill's `\EnvId` spec, then re-run the CLI, which also regenerates the environment index.
 
 ### 6. Validate
 
