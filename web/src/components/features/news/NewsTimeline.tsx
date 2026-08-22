@@ -220,7 +220,7 @@ export function NewsTimeline({ items }: NewsTimelineProps) {
                     'flex gap-0 md:gap-5',
                     isHidden && 'hidden',
                     isRevealed &&
-                      'animate-in fade-in slide-in-from-top-1 duration-300 motion-reduce:animate-none'
+                      'animate-in fade-in slide-in-from-top-1 duration-300 transition-none motion-reduce:animate-none'
                   )}
                 >
                   {/* Left rail with date + dot (desktop only) */}
