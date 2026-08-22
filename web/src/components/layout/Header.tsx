@@ -4,7 +4,7 @@ import { useDisclosure, useToggle } from '@mantine/hooks'
 import { Menu } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 import MathCompsLogo from '@/components/layout/MathCompsLogo'
@@ -21,29 +21,32 @@ import { visibleNavigationItems } from './navigation-items'
 /**
  * The user's defenses, loaded on demand: the chat is heavy and most visits never open it.
  */
-const MathildaLibraryModal = dynamic(
-  () =>
-    import('@/components/features/defense/components/MathildaLibraryModal').then(
-      (module) => module.MathildaLibraryModal
-    ),
-  { loading: () => <MathildaLibraryPlaceholder /> }
+const MathildaLibraryModal = dynamic(() =>
+  import('@/components/features/defense/components/MathildaLibraryModal').then(
+    (module) => module.MathildaLibraryModal
+  )
 )
 
 /**
- * Stands in for the defenses while their chunk downloads, so the tap that opened them lands on something.
+ * Props for {@link MathildaLibraryPlaceholder}.
  */
-function MathildaLibraryPlaceholder() {
+type MathildaLibraryPlaceholderProps = {
+  /** Dismisses the placeholder */
+  onClose: () => void
+}
+
+/**
+ * Stands in for the defenses while their chunk downloads, so the tap that opened them lands on something.
+ *
+ * Its caller renders it only while the list is meant to be open, which is why it can hardcode
+ * `isOpen`.
+ */
+function MathildaLibraryPlaceholder({ onClose }: MathildaLibraryPlaceholderProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
 
   return (
-    <Modal
-      isOpen
-      onClose={() => {}}
-      title={MATHILDA_NAME}
-      showCloseButton={false}
-      className="max-w-2xl"
-    >
+    <Modal isOpen onClose={onClose} title={MATHILDA_NAME} showCloseButton className="max-w-2xl">
       <p className="py-8 text-center text-sm text-muted">{t('libraryLoading')}</p>
     </Modal>
   )
@@ -134,7 +137,11 @@ export default function Header() {
 
       {/* The user's defenses, over whichever menu opened them */}
       {hasOpenedDefenses && (
-        <MathildaLibraryModal isOpen={isDefensesOpen} onClose={closeDefenses} />
+        <Suspense
+          fallback={isDefensesOpen ? <MathildaLibraryPlaceholder onClose={closeDefenses} /> : null}
+        >
+          <MathildaLibraryModal isOpen={isDefensesOpen} onClose={closeDefenses} />
+        </Suspense>
       )}
     </>
   )
