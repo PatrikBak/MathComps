@@ -23,7 +23,7 @@ export async function generateMetadata({
   // Generate locale-specific metadata
   return createPageMetadata({
     locale: locale as Locale,
-    namespace: 'metadata.problems',
+    namespace: 'pages.problems',
     path: ROUTES.PROBLEMS,
     useSection: true,
   })

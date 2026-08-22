@@ -359,7 +359,6 @@
       ],
       "title": "Ako to funguje?"
     },
-    "intro": "Vyskúšaj si súťaže rôznych úrovní, v ktorých svoje riešenie obhajuješ našej umelej inteligencii Mathilde priamo v súťažnom čase.",
     "loadFailed": "Súťaže sa nepodarilo načítať.",
     "mySolutions": "Moje riešenia",
     "noCompetitions": "Zatiaľ tu nie je žiadna súťaž.",
@@ -394,7 +393,6 @@
     "standing": {
       "running": "súťažíš, ostáva {clock}"
     },
-    "title": "Súťaže",
     "try": "Vyskúšať",
     "tryAgain": "Skúsiť znova"
   },
@@ -763,55 +761,6 @@
       "title": "Čo sa chystá"
     }
   },
-  "metadata": {
-    "about": {
-      "description": "Príbeh projektu MathComps: kto ho tvorí, prečo vznikol trojjazyčný archív olympiádnych úloh, študijných materiálov a sprievodcu zdrojmi, a na čom je postavený.",
-      "title": "O projekte"
-    },
-    "adminDefenses": {
-      "description": "Prehľad obhajob vedených s AI skúšajúcou.",
-      "title": "Konverzácie s Mathildou"
-    },
-    "competitions": {
-      "description": "Krátke online súťaže s novými úlohami: riešiš pod vlastnými hodinami a svoje riešenia obhajuješ pred Mathildou.",
-      "title": "Súťaže"
-    },
-    "guide": {
-      "description": "Zoznam informácií o súťažiach a odkazy na rôzne užitočné veci zo sveta súťažnej matematiky.",
-      "title": "Sprievodca"
-    },
-    "handouts": {
-      "description": "Priebežne pripravované texty, ktoré majú za cieľ pokryť kľúčové témy súťažnej matematiky.",
-      "title": "Materiály"
-    },
-    "home": {
-      "description": "Prehľadný archív úloh, študijných materiálov a sprievodca užitočných zdrojov pre matematické olympiády.",
-      "title": "Matematická olympiáda a veci okolo nej"
-    },
-    "login": {
-      "description": "Prihláste sa do svojho účtu.",
-      "title": "Prihlásiť sa"
-    },
-    "news": {
-      "description": "Čo je nové na MathComps: novo zverejnené materiály, pridané súťaže a sady úloh a vylepšenia archívu, sprievodcu a nástrojov.",
-      "title": "Novinky"
-    },
-    "privacy": {
-      "description": "Zásady ochrany súkromia a podmienky používania platformy MathComps. Informácie o spracovaní údajov, cookies a práve na vymazanie dát.",
-      "title": "Ochrana súkromia a podmienky používania"
-    },
-    "problems": {
-      "description": "Prehľadávateľný archív úloh z matematických súťaží.",
-      "title": "Úlohy"
-    },
-    "profile": {
-      "description": "Váš používateľský profil.",
-      "title": "Profil"
-    },
-    "site": {
-      "description": "Platforma pre matematické súťaže s archívom úloh, učebnými materiálmi a sprievodcom užitočných zdrojov."
-    }
-  },
   "navigation": {
     "about": "O projekte",
     "competitions": "Súťaže",
@@ -848,6 +797,52 @@
     "description": "Ups! Táto adresa neexistuje alebo bola presunutá.",
     "homeButton": "Domov",
     "title": "Stránka sa nenašla"
+  },
+  "pages": {
+    "about": {
+      "description": "Prečo MathComps vznikol, kto ho tvorí a kam smeruje.",
+      "title": "O projekte"
+    },
+    "adminDefenses": {
+      "description": "Prehľad obhajob vedených s AI skúšajúcou.",
+      "title": "Konverzácie s Mathildou"
+    },
+    "competitions": {
+      "description": "Vyskúšaj si súťaže rôznych úrovní, v ktorých svoje riešenie obhajuješ našej umelej inteligencii Mathilde priamo v súťažnom čase.",
+      "title": "Súťaže"
+    },
+    "guide": {
+      "description": "Prehľad matematických súťaží a korešpondenčných seminárov, ako začať a kam ďalej.",
+      "title": "Sprievodca"
+    },
+    "handouts": {
+      "description": "Študijné texty k témam súťažnej matematiky.",
+      "title": "Materiály"
+    },
+    "home": {
+      "description": "Archív súťažných úloh, študijné materiály a sprievodca zdrojmi. S úlohami ti pomôže AI tútorka Mathilda.",
+      "title": "Matematická olympiáda a veci okolo nej"
+    },
+    "login": {
+      "description": "Prihlás sa do svojho účtu na MathComps.",
+      "title": "Prihlásiť sa"
+    },
+    "news": {
+      "description": "Nové materiály, pridané úlohy a zmeny na MathComps.",
+      "title": "Novinky"
+    },
+    "privacy": {
+      "description": "Ako MathComps narába s tvojimi údajmi a za akých podmienok ho môžeš používať.",
+      "title": "Ochrana súkromia a podmienky používania"
+    },
+    "problems": {
+      "description": "Prehľadávateľný archív úloh z matematických súťaží.",
+      "title": "Úlohy"
+    },
+    "profile": {
+      "description": "Tvoj účet na MathComps.",
+      "title": "Profil"
+    }
   },
   "plurals": {
     "conversations": "{count, plural, =1 {# konverzácia} =2 {# konverzácie} =3 {# konverzácie} =4 {# konverzácie} other {# konverzácií}}",
@@ -890,7 +885,6 @@
     "competitionsOverview": "Prehľad súťaží",
     "connectionFailed": "Pripojenie zlyhalo",
     "connectionFailedHint": "Nepodarilo sa spojiť so serverom.",
-    "description": "Prehľadávateľný archív úloh z matematických súťaží.",
     "emptyState": {
       "description": "Skúste upraviť filtre a vyhľadať znova.",
       "title": "Nič sa nenašlo"

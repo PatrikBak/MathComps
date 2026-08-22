@@ -359,7 +359,6 @@
       ],
       "title": "How does it work?"
     },
-    "intro": "Try competitions at several levels, where you defend your solutions to our AI Mathilda while your clock is still running.",
     "loadFailed": "The competitions could not be loaded.",
     "mySolutions": "My solutions",
     "noCompetitions": "There are no competitions here yet.",
@@ -394,7 +393,6 @@
     "standing": {
       "running": "competing, {clock} left"
     },
-    "title": "Competitions",
     "try": "Try it",
     "tryAgain": "Take it again"
   },
@@ -763,55 +761,6 @@
       "title": "What's coming"
     }
   },
-  "metadata": {
-    "about": {
-      "description": "The story behind MathComps: who builds it, why a trilingual archive of olympiad problems, handouts, and a resource guide exists, and what it's built on.",
-      "title": "About the project"
-    },
-    "adminDefenses": {
-      "description": "An overview of the defenses held with the AI examiner.",
-      "title": "Conversations with Mathilda"
-    },
-    "competitions": {
-      "description": "Short online competitions with fresh problems: you solve under your own clock and defend your solutions to Mathilda.",
-      "title": "Competitions"
-    },
-    "guide": {
-      "description": "A list of information about competitions, and links to all sorts of useful things from the world of competition math.",
-      "title": "Guide"
-    },
-    "handouts": {
-      "description": "Texts I keep writing, meant to cover the key topics in competition math.",
-      "title": "Handouts"
-    },
-    "home": {
-      "description": "An easy-to-browse archive of problems, handouts, and a guide to useful resources for the math olympiad.",
-      "title": "The math olympiad, and everything around it"
-    },
-    "login": {
-      "description": "Sign in to your account.",
-      "title": "Sign in"
-    },
-    "news": {
-      "description": "What's new on MathComps: newly published handouts, added competitions and problem sets, and improvements to the archive, guide, and tools.",
-      "title": "News"
-    },
-    "privacy": {
-      "description": "Privacy policy and terms of use for the MathComps platform. Information about data processing, cookies, and the right to data deletion.",
-      "title": "Privacy Policy and Terms of Use"
-    },
-    "problems": {
-      "description": "A searchable archive of problems from math competitions.",
-      "title": "Problems"
-    },
-    "profile": {
-      "description": "Your user profile.",
-      "title": "Profile"
-    },
-    "site": {
-      "description": "A platform for math competitions with a problem archive, handouts, and a guide to useful resources."
-    }
-  },
   "navigation": {
     "about": "About",
     "competitions": "Competitions",
@@ -848,6 +797,52 @@
     "description": "Oops! This page doesn't exist or has been moved.",
     "homeButton": "Home",
     "title": "Page not found"
+  },
+  "pages": {
+    "about": {
+      "description": "Why MathComps exists, who builds it, and where it's headed.",
+      "title": "About the project"
+    },
+    "adminDefenses": {
+      "description": "An overview of the defenses held with the AI examiner.",
+      "title": "Conversations with Mathilda"
+    },
+    "competitions": {
+      "description": "Try competitions at several levels, where you defend your solutions to our AI Mathilda while your clock is still running.",
+      "title": "Competitions"
+    },
+    "guide": {
+      "description": "An overview of math competitions and correspondence seminars, how to start, and where to go next.",
+      "title": "Guide"
+    },
+    "handouts": {
+      "description": "Handouts on topics in competition math.",
+      "title": "Handouts"
+    },
+    "home": {
+      "description": "An archive of competition problems, handouts, and a guide to useful resources. Mathilda, our AI tutor, helps you with the problems.",
+      "title": "The math olympiad, and everything around it"
+    },
+    "login": {
+      "description": "Sign in to your MathComps account.",
+      "title": "Sign in"
+    },
+    "news": {
+      "description": "New handouts, added problems, and changes on MathComps.",
+      "title": "News"
+    },
+    "privacy": {
+      "description": "How MathComps handles your data, and the terms you use it under.",
+      "title": "Privacy Policy and Terms of Use"
+    },
+    "problems": {
+      "description": "A searchable archive of problems from math competitions.",
+      "title": "Problems"
+    },
+    "profile": {
+      "description": "Your MathComps account.",
+      "title": "Profile"
+    }
   },
   "plurals": {
     "conversations": "{count, plural, =1 {# conversation} other {# conversations}}",
@@ -890,7 +885,6 @@
     "competitionsOverview": "Competitions overview",
     "connectionFailed": "Connection failed",
     "connectionFailedHint": "Could not reach the server.",
-    "description": "A searchable archive of problems from math competitions.",
     "emptyState": {
       "description": "Try adjusting the filters and searching again.",
       "title": "Nothing found"
