@@ -106,3 +106,19 @@ export function toUrlSearchParams(
   // Assemble the query from the flattened pairs
   return new URLSearchParams(pairs)
 }
+
+/**
+ * Puts a query string on the address the reader is on, leaving the page exactly where it stands.
+ *
+ * Written straight to history rather than routed, because the page has already answered for the values
+ * being written and a route would refetch it to change nothing the reader can see.
+ *
+ * @param query - The query string, without its `?`; an empty one leaves the address bare.
+ */
+export function replaceQuery(query: string): void {
+  // The address the reader is on
+  const { pathname } = window.location
+
+  // Put the query on it, leaving the page where it stands
+  window.history.replaceState(null, '', query ? `${pathname}?${query}` : pathname)
+}

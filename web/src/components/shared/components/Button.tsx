@@ -75,8 +75,10 @@ export const buttonVariants = cva(
       },
     },
     compoundVariants: [
-      // A link reads as inline text: drop the box sizing and press animation the other variants carry
-      { variant: 'link', class: 'min-h-0 rounded px-0 active:scale-100' },
+      // A link reads as inline text: drop the box sizing and press animation the other variants carry.
+      // Colors only, because `transition-all` over a press scale that never changes still promotes the
+      // element to its own compositing layer and back, and an icon inside it flickers on the way
+      { variant: 'link', class: 'min-h-0 rounded px-0 transition-colors active:scale-100' },
     ],
     defaultVariants: {
       variant: 'secondary',

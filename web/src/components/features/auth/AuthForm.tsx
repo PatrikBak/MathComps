@@ -11,7 +11,9 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { delay } from '@/components/shared/utils/async-utils'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
+import { SECOND_MS } from '@/components/shared/utils/time-units'
 import { AUTH_RETURN_URL_STORAGE_KEY } from '@/constants/local-storage-constants'
 import { type Locale, ROUTES } from '@/i18n/i18n'
 import { getPathname } from '@/i18n/navigation'
@@ -364,7 +366,7 @@ export default function AuthForm() {
       setSuccessMessage(tAuth('passwordResetSuccess'))
 
       // Wait a moment so user can see the confirmation
-      await new Promise((resolve) => setTimeout(resolve, 3000))
+      await delay(3 * SECOND_MS)
 
       // Otherwise log the user in
       // (which will cause a re-render which will cause a redirect)

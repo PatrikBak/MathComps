@@ -190,6 +190,7 @@ type MetadataNamespace =
   | 'metadata.login'
   | 'metadata.privacy'
   | 'metadata.news'
+  | 'metadata.competitions'
   | 'metadata.adminDefenses'
 
 /**

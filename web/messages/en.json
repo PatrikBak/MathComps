@@ -313,6 +313,91 @@
     "profile": "Profile",
     "redirecting": "Redirecting..."
   },
+  "competitions": {
+    "categories": {
+      "advanced": "Advanced",
+      "elementary": "Elementary",
+      "intermediate": "Intermediate"
+    },
+    "categoryFuture": "More levels may follow, or special competitions like a regional-round warm-up or a geometry marathon. <link>Write to us</link> with what you would like.",
+    "categoryHints": {
+      "advanced": "for an experienced solver who fancies the top category of the national olympiad",
+      "elementary": "for anyone who wants to try competition maths, primary school included",
+      "intermediate": "for anyone who has solved competition problems from the national olympiad before"
+    },
+    "categoryNote": "You can take part in more than one level.",
+    "categoryToggle": "Which level is for me?",
+    "clockHours": "{hours, plural, one {# hour} other {# hours}}",
+    "clockHoursMinutes": "{hours, plural, one {# hour} other {# hours}} {minutes, plural, one {# minute} other {# minutes}}",
+    "clockMinutes": "{minutes, plural, one {# minute} other {# minutes}}",
+    "closedLabel": "ended",
+    "closesIn": "{remaining} left",
+    "continue": "Continue",
+    "dialog": {
+      "back": "Back",
+      "confirm": "Start the clock",
+      "consequence": "The clock starts when you press the button. Once it has started, it cannot be started again.",
+      "consequencePractice": "The clock starts when you press the button. You can take the practice competition again whenever you like.",
+      "forfeit": "Give up and see the problems",
+      "forfeitConfirm": "Give up",
+      "forfeitConsequence": "You get the problems now and you will not appear in the results. You will not be able to compete in this category.",
+      "title": "{group}, {category}"
+    },
+    "enter": "Start",
+    "entryAuthReason": "starting a competition",
+    "entryError": "The competition could not be started.",
+    "entryWindow": "entry {range}",
+    "forfeitError": "Could not give up the competition.",
+    "howItWorks": {
+      "steps": [
+        "Pick an open competition (how to choose a level is right below) 🎮",
+        "Start your clock whenever you like inside the entry window, usually two weeks ⏲️",
+        "From there you have a limited time to solve the problems 📋",
+        "You present your solutions to Mathilda and she gives you feedback 🤖",
+        "Your final marks come after the competition closes, from your conversations with Mathilda 🔢",
+        "Send a partial solution, or ask Mathilda for help if you cannot start at all: progress after a hint still earns marks 🙂"
+      ],
+      "title": "How does it work?"
+    },
+    "intro": "Try competitions at several levels, where you defend your solutions to our AI Mathilda while your clock is still running.",
+    "loadFailed": "The competitions could not be loaded.",
+    "mySolutions": "My solutions",
+    "noCompetitions": "There are no competitions here yet.",
+    "opensIn": "opens in {remaining}",
+    "practiceNote": "A practice competition with easy problems, for trying out how the whole thing works.",
+    "problemCount": "{count, plural, one {# problem} other {# problems}}",
+    "problems": "Problems",
+    "readiness": {
+      "profileLink": "Complete profile",
+      "profileNeeded": "<link>Complete your profile</link> if you want to compete.",
+      "signedOut": "You can compete once you <link>sign in</link>."
+    },
+    "remainingDays": "{days} d {hours} h",
+    "remainingHours": "{hours} h {minutes} min",
+    "remainingMinutes": "{minutes} min {seconds} s",
+    "results": "Results",
+    "resultsPending": "results are being written",
+    "rules": {
+      "accept": "I agree to the rules and will follow them.",
+      "contact": "Anything unclear? <link>Write to us</link> rather than guessing.",
+      "lines": [
+        "No other AI, no outside help of any kind. These competitions train you to solve problems, not to have them solved for you.",
+        "The clock covers solving and writing to Mathilda both, and her replies are not always instant (we would rather she was accurate than fast).",
+        "Talk to Mathilda as long as you like, though the number of messages and the length of one message are limited, for reasons you can guess.",
+        "Marks come from the whole conversation, so there is nothing to gain from wringing a full solution out of her.",
+        "Please do not share the problems until the competition closes, so you do not spoil it for everybody else.",
+        "Do not try to hack Mathilda, to make her write you code or hand you a soup recipe. That gets you disqualified."
+      ],
+      "title": "Before you start"
+    },
+    "rulesButton": "Rules",
+    "standing": {
+      "running": "competing, {clock} left"
+    },
+    "title": "Competitions",
+    "try": "Try it",
+    "tryAgain": "Take it again"
+  },
   "contact": {
     "email": "Email",
     "emailPlaceholder": "your@email.com",
@@ -687,6 +772,10 @@
       "description": "An overview of the defenses held with the AI examiner.",
       "title": "Conversations with Mathilda"
     },
+    "competitions": {
+      "description": "Short online competitions with fresh problems: you solve under your own clock and defend your solutions to Mathilda.",
+      "title": "Competitions"
+    },
     "guide": {
       "description": "A list of information about competitions, and links to all sorts of useful things from the world of competition math.",
       "title": "Guide"
@@ -725,6 +814,7 @@
   },
   "navigation": {
     "about": "About",
+    "competitions": "Competitions",
     "contact": "Contact",
     "guide": "Guide",
     "handouts": "Handouts",
