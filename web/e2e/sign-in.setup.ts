@@ -1,5 +1,6 @@
 import { test as setup } from '@playwright/test'
 
+import messages from '../messages/en.json'
 import { storageStatePath } from '../playwright.config'
 import { signInTestUser } from './support/session'
 
@@ -15,7 +16,7 @@ setup('sign in and save the session', async ({ page }) => {
   await page.goto('/en/profile')
 
   // The header swaps the sign-in link for this menu only once Clerk resolves a user.
-  await page.getByRole('button', { name: 'User menu' }).waitFor()
+  await page.getByRole('button', { name: messages.ui.userMenu.label, exact: true }).waitFor()
 
   // Cookies plus local storage are what a fresh browser needs to start out authenticated.
   await page.context().storageState({ path: storageStatePath })

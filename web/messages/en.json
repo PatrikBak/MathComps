@@ -233,7 +233,7 @@
       "passwordReset": "PASSWORD RESET",
       "verifyEmail": "VERIFY EMAIL"
     },
-    "loadingButton": "Loading login button",
+    "loadingButton": "Loading account",
     "login": "Log in",
     "loginRequired": "You must log in to {reason}",
     "nameOrNickname": "Name or nickname",
@@ -1212,8 +1212,7 @@
       "loadMore": "Load more"
     },
     "userMenu": {
-      "label": "User menu",
-      "loading": "Loading user menu"
+      "label": "User menu"
     }
   },
   "validation": {

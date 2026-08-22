@@ -233,7 +233,7 @@
       "passwordReset": "OBNOVENIE HESLA",
       "verifyEmail": "OVERENIE EMAILU"
     },
-    "loadingButton": "Načítavam prihlasovací prvok",
+    "loadingButton": "Načítavam účet",
     "login": "Prihlásiť sa",
     "loginRequired": "Pre {reason} sa musíte prihlásiť",
     "nameOrNickname": "Meno alebo prezývka",
@@ -1212,8 +1212,7 @@
       "loadMore": "Načítať ďalšie"
     },
     "userMenu": {
-      "label": "Používateľské menu",
-      "loading": "Načítavam používateľské menu"
+      "label": "Používateľské menu"
     }
   },
   "validation": {

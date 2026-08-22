@@ -43,11 +43,6 @@ UserMenuTrigger.displayName = 'UserMenuTrigger'
  * Props for the {@link UserMenu} component.
  */
 type UserMenuProps = {
-  /**
-   * The authentication state of the user coming from the server. If we know this
-   * state is true, we will show the user menu skeleton to prevent layout shift.
-   */
-  isAuthenticated: boolean
   /** Opens the user's defenses. */
   onOpenDefenses: () => void
 }
@@ -57,7 +52,7 @@ type UserMenuProps = {
  * Handles all auth states: loading, logged out (shows login), and logged in (shows dropdown).
  * Built with Radix UI Dropdown for better accessibility.
  */
-export default function UserMenu({ isAuthenticated, onOpenDefenses }: UserMenuProps) {
+export default function UserMenu({ onOpenDefenses }: UserMenuProps) {
   // Get the logged-in user
   const { user, isLoaded } = useUser()
 
@@ -79,22 +74,9 @@ export default function UserMenu({ isAuthenticated, onOpenDefenses }: UserMenuPr
   const tUserMenu = useTranslations('ui.userMenu')
   const tProfile = useTranslations('profile')
 
-  // If the server is saying we're authenticated but the user is not loaded yet,
-  // we will show the skeleton of the user menu to prevent layout shift.
-  // We also check for !mounted to match the server's output during hydration.
-  if (isAuthenticated && (!isLoaded || !mounted)) {
-    return (
-      <UserMenuTrigger aria-label={tUserMenu('loading')}>
-        <div className="w-10 h-10 rounded-full bg-surface-inset/50 animate-pulse -my-2" />
-        <ChevronDown className="w-4 h-4 text-popover-foreground/30" aria-hidden="true" />
-      </UserMenuTrigger>
-    )
-  }
-
-  // Still loading auth state - use LoginNavItem skeleton which will handle loading animation
-  // We also check !mounted to ensure hydration consistency: SSR always has isLoaded=false,
-  // so the client must show the same skeleton until mounted.
-  if (!isLoaded || !user) {
+  // Until Clerk answers, both auth states share one skeleton. The !mounted check keeps the first
+  // client render matching the server's, which never has a user.
+  if (!isLoaded || !mounted || !user) {
     return (
       <LoginNavItem
         isLoading={!isLoaded || !mounted}
