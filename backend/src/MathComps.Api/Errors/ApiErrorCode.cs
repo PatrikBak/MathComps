@@ -161,6 +161,11 @@ public enum ApiErrorCode
     UsernameRejected,
 
     /// <summary>
+    /// A profile field is outside what it is allowed to say, such as a country code that is not one.
+    /// </summary>
+    ProfileValueInvalid,
+
+    /// <summary>
     /// The request reached an authenticated endpoint without a valid bearer token (missing, malformed,
     /// or expired).
     /// </summary>

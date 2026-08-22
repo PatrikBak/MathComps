@@ -44,9 +44,12 @@ export function useSetUsername(): UseSetUsernameResult {
     // Hand the name to the backend, which is what decides whether it was still free
     apiFn: (apiCall, username) => setUsernameRequest(apiCall, username),
 
-    // Echo it into the cache, so nothing waits on a refetch to see it
+    // Echo it into the cache, so nothing waits on a refetch to see it. The rest of the profile is left as it
+    // was read, since taking a name says nothing about the rest of it
     onSuccess: (_result, username) => {
-      queryClient.setQueryData<UserProfile>(userProfileQueryKeys.all, { username })
+      queryClient.setQueryData<UserProfile>(userProfileQueryKeys.all, (previous) =>
+        previous === undefined ? previous : { ...previous, username }
+      )
     },
 
     // Everything this user has authored is signed with the new name

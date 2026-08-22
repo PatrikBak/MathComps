@@ -15,7 +15,7 @@ type FacetItemLabelProps = {
 export function FacetItemLabel({ children }: FacetItemLabelProps) {
   return (
     <div className="min-w-0 pr-3">
-      <TruncatedText className="truncate text-xs sm:text-sm font-medium">{children}</TruncatedText>
+      <TruncatedText className="text-xs sm:text-sm font-medium">{children}</TruncatedText>
     </div>
   )
 }

@@ -46,6 +46,30 @@ public class User
     public string? Username { get; set; }
 
     /// <summary>
+    /// The calendar year this student finishes secondary school, or null when they have not said or already
+    /// have.
+    /// </summary>
+    /// <remarks>
+    /// A year and not a grade, because a grade is only true until September while the year it ends in stays
+    /// true. Unbounded: which years a student may pick from is the form's to decide.
+    /// </remarks>
+    public int? GraduationYear { get; set; }
+
+    /// <summary>
+    /// Whether this person is past high school, and so has no age group to be listed against.
+    /// </summary>
+    /// <remarks>
+    /// Exclusive with <see cref="GraduationYear"/>: setting this clears that.
+    /// </remarks>
+    public bool HasLeftHighSchool { get; set; }
+
+    /// <summary>
+    /// Where this student competes from as an ISO 3166-1 alpha-2 code, or null while they have not said.
+    /// </summary>
+    [MaxLength(2)]
+    public string? CountryCode { get; set; }
+
+    /// <summary>
     /// URL to the user's avatar image (from Clerk).
     /// </summary>
     [MaxLength(500)]

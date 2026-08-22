@@ -1,7 +1,7 @@
 import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
-import type { UserProfile } from '../model/profile-types'
+import type { UserCompetitionProfile, UserProfile } from '../model/profile-types'
 import { getSetUsernameUrl, getUserProfileUrl } from './profile-api-urls'
 
 /**
@@ -27,5 +27,23 @@ export function setUsername(apiCall: ApiCaller, username: string): Promise<ApiRe
   return apiCall<void>(() => getSetUsernameUrl(), {
     method: 'POST',
     body: JSON.stringify({ username }),
+  })
+}
+
+/**
+ * Replaces what the signed-in user has said about their competing.
+ *
+ * @param apiCall - The caller carrying the signed-in user's token
+ * @param profile - What they are saying about themselves now
+ *
+ * @returns Nothing, or the failure that stopped it being saved.
+ */
+export function updateUserProfile(
+  apiCall: ApiCaller,
+  profile: UserCompetitionProfile
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getUserProfileUrl(), {
+    method: 'PUT',
+    body: JSON.stringify(profile),
   })
 }

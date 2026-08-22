@@ -33,6 +33,7 @@ export const BACKEND_ERROR_CODES = [
   'UsernameTaken',
   'UsernameAlreadySet',
   'UsernameRejected',
+  'ProfileValueInvalid',
   'Unauthenticated',
   'Forbidden',
   'RateLimited',

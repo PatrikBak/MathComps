@@ -20,6 +20,12 @@ export const userProfileQueryKeys = {
 type UseUserProfileResult = {
   /** The name the site calls them by, or null while they have yet to choose one. */
   username: string | null
+  /** The year they finish secondary school, or null while they have not said or already have. */
+  graduationYear: number | null
+  /** Whether they are past high school, and so have no age group to be listed against. */
+  hasLeftHighSchool: boolean
+  /** Where they compete from as an ISO 3166-1 alpha-2 code, or null while they have not said. */
+  countryCode: string | null
   /** Whether the answer is still being read, so neither state is known yet. */
   isLoading: boolean
 }
@@ -46,8 +52,8 @@ export function useUserProfile(): UseUserProfileResult {
       // Their profile, or throwing the backend failure
       return unwrap(await getUserProfile(apiCall))
     },
-    // Never stale: the name is null exactly until this person takes one, and the call that takes it
-    // writes the answer straight into this cache. Nothing else can move it, so nothing needs re-asking
+    // Never stale: nothing outside this browser writes any of these, and every call that does echoes its own
+    // answer straight into this cache, so there is never a newer one to go and ask for
     staleTime: Infinity,
     // Only fetch once there is a signed-in caller to ask about
     enabled: api.state === 'ready',
@@ -56,6 +62,9 @@ export function useUserProfile(): UseUserProfileResult {
   // Their profile, and whether it is known yet
   return {
     username: query.data?.username ?? null,
+    graduationYear: query.data?.graduationYear ?? null,
+    hasLeftHighSchool: query.data?.hasLeftHighSchool ?? false,
+    countryCode: query.data?.countryCode ?? null,
     isLoading: api.state === 'loading' || query.isLoading,
   }
 }

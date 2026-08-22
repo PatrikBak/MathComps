@@ -154,7 +154,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                         className={cn('h-4 w-4 shrink-0', isActive ? 'text-focus' : 'text-muted')}
                       />
                     )}
-                    <TruncatedText className="truncate text-sm">{list.name}</TruncatedText>
+                    <TruncatedText className="text-sm">{list.name}</TruncatedText>
                   </div>
                   <span className="w-6 shrink-0 text-right text-xs tabular-nums text-muted">
                     {list.problemCount}
