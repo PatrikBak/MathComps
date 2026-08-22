@@ -1,8 +1,6 @@
 import { useTranslations } from 'next-intl'
 import { memo, type ReactNode } from 'react'
 import Markdown, { type Components } from 'react-markdown'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -166,32 +164,20 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
             <strong className="font-semibold text-foreground">{children}</strong>
           ),
           em: ({ children }) => <em className="italic">{children}</em>,
-          code: ({ children, className }) => {
-            // Check if this is a code block (has language class)
-            const match = /language-(\w+)/.exec(className || '')
-            const language = match?.[1]
-
-            // Code block with syntax highlighting
-            if (language) {
-              return (
-                <SyntaxHighlighter
-                  style={oneDark}
-                  language={language}
-                  PreTag="div"
-                  className="!my-2 !rounded-md !text-sm"
-                >
-                  {String(children).replace(/\n$/, '')}
-                </SyntaxHighlighter>
-              )
-            }
-
-            // Inline code
-            return (
-              <code className="bg-foreground/5 px-1 py-0.5 rounded text-xs text-brand-light font-mono">
-                {children}
-              </code>
-            )
-          },
+          // A fenced block arrives wrapped in its own `pre`, which carries the panel and resets
+          // the inline pill styling its `code` child would otherwise wear.
+          pre: ({ children }) => (
+            <pre className="bg-foreground/5 my-2 overflow-x-auto rounded-md p-3 text-sm [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-sm [&>code]:text-foreground">
+              {children}
+            </pre>
+          ),
+          code: ({ children }) => (
+            <code className="bg-foreground/5 px-1 py-0.5 rounded text-xs text-brand-light font-mono">
+              {/* The newline that closed the fence would render as a blank last line; inline
+                  code has none to lose. */}
+              {typeof children === 'string' ? children.replace(/\n$/, '') : children}
+            </code>
+          ),
           blockquote: ({ children }) => (
             <blockquote className="border-l-2 border-brand/50 pl-3 my-2 text-muted italic">
               {children}

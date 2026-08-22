@@ -1,10 +1,8 @@
-'use client'
-
 import { useTranslations } from 'next-intl'
 
 import { TURN_LABEL_CLASS, TURN_STYLES } from '@/components/features/defense/components/turn-styles'
 import type { TurnRole } from '@/components/features/defense/model/defense-types'
-import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
+import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { cn } from '@/components/shared/utils/css-utils'
 import { MATHILDA_NAME } from '@/constants/mathilda'
@@ -51,10 +49,7 @@ export function MathildaExcerpt() {
     <SurfacePanel radius="xl">
       {/* The problem being defended */}
       <div className="math-typography math-compact border-b border-foreground/10 p-3.5 text-muted-foreground sm:p-4">
-        <RichMathEditorRenderer
-          content={t.raw('statement') as string}
-          lightImageBackground={false}
-        />
+        <MathRendererClient content={t.raw('statement') as string} />
       </div>
 
       {/* The exchange */}
@@ -73,10 +68,7 @@ export function MathildaExcerpt() {
 
               {/* What they said */}
               <div className={cn(style.body, 'math-compact')}>
-                <RichMathEditorRenderer
-                  content={t.raw(turn.bodyKey) as string}
-                  lightImageBackground={false}
-                />
+                <MathRendererClient content={t.raw(turn.bodyKey) as string} />
               </div>
             </div>
           )
