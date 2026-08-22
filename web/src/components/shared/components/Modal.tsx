@@ -14,7 +14,7 @@ import { useOnClosed } from '@/hooks/use-on-closed'
  * where it went.
  */
 const ENTER_ANIMATION =
-  'animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none'
+  'animate-in fade-in duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] transition-none motion-reduce:animate-none'
 
 /**
  * Props for the {@link Modal} component.

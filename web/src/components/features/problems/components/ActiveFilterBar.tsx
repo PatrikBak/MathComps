@@ -38,7 +38,7 @@ import { ShareButton } from './ShareButton'
 const FILTER_ROWS_CLASS = cn(
   'max-h-[40vh] overflow-y-auto pr-1',
   'border-t border-foreground/10 mt-3 pt-3 lg:mt-4 lg:pt-4',
-  'animate-in fade-in slide-in-from-top-2 duration-200'
+  'animate-in fade-in slide-in-from-top-2 duration-200 transition-none'
 )
 
 /**
