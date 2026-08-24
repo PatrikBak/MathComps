@@ -7,10 +7,11 @@ import {
 import type { FacetOption } from '@/components/shared/components/facets/model/facet-types'
 
 import { encodeProblemKey } from './defense-review-filters'
-import type {
-  DefenseReviewProblemOption,
-  DefenseReviewPromptVersionOption,
-  DefenseReviewUserOption,
+import {
+  type DefenseReviewProblemOption,
+  type DefenseReviewPromptVersionOption,
+  type DefenseReviewUserOption,
+  describeReviewUser,
 } from './defense-review-types'
 
 /**
@@ -20,16 +21,21 @@ import type {
  * reads, so either half finds the student.
  *
  * @param users - The students, as the backend counted them.
+ * @param unnamedLabel - What to call a student the site holds neither a name nor an address for.
+ *
  * @returns The options, ready for the facet.
  */
-export function toUserFacetOptions(users: DefenseReviewUserOption[]): FacetOption[] {
-  // One option per student, named so that either half of the name finds them
+export function toUserFacetOptions(
+  users: DefenseReviewUserOption[],
+  unnamedLabel: string
+): FacetOption[] {
+  // One option per student, carrying whichever halves the site holds so the search reads them
   return users.map((option) => ({
     id: option.user.id,
     displayName:
-      option.user.email === null
-        ? option.user.displayName
-        : `${option.user.displayName} (${option.user.email})`,
+      option.user.username === null || option.user.email === null
+        ? describeReviewUser(option.user, unnamedLabel)
+        : `${option.user.username} (${option.user.email})`,
     count: option.conversationCount,
   }))
 }

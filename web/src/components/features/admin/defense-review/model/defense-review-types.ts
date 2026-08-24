@@ -8,14 +8,13 @@ import type { HandoutEnvironmentTarget } from '@/components/features/handouts/ha
 
 /**
  * Somebody the review names: the student who held a conversation, or the reviewer who wrote a note about
- * one. The name alone doesn't identify anyone, since two people can share one and a deleted account keeps a
- * placeholder, so the address rides alongside it.
+ * one. The username can be missing, so the address rides alongside it; a deleted account has neither.
  */
-type DefenseReviewUser = {
+export type DefenseReviewUser = {
   /** Stable identifier. */
   id: string
-  /** What they are called. */
-  displayName: string
+  /** The name the site calls them by; null while they have chosen none, and once their account is deleted. */
+  username: string | null
   /** Their address; null once their account is deleted. */
   email: string | null
 }
@@ -301,4 +300,17 @@ export type AdminNoteFeedItem = {
   user: DefenseReviewUser
   /** Where the reply it is against sits; null when it is against the conversation as a whole. */
   turnSequence: number | null
+}
+
+/**
+ * Names somebody on a review surface, since either half of what identifies them can be missing.
+ *
+ * @param user - The person to name.
+ * @param unnamedLabel - What to call somebody the site holds neither a name nor an address for.
+ *
+ * @returns Their username, their address when they have chosen no name, and the label when neither is left.
+ */
+export function describeReviewUser(user: DefenseReviewUser, unnamedLabel: string): string {
+  // Whichever half the site still holds, and the label when it holds neither
+  return user.username ?? user.email ?? unnamedLabel
 }

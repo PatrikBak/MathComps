@@ -137,15 +137,11 @@ export default function AuthForm() {
     }
   })
 
-  // Focus appropriate field when screen changes
+  // Focus the password field when either email screen opens
   useEffect(() => {
-    if (screen === 'login-with-email') {
-      // Focus password field when switching to login screen
+    if (screen === 'login-with-email' || screen === 'signup-with-email') {
       // Use setTimeout to ensure the DOM has updated
       setTimeout(() => methods.setFocus('password'), 0)
-    } else if (screen === 'signup-with-email') {
-      // Focus name field when switching to signup screen
-      setTimeout(() => methods.setFocus('firstName'), 0)
     }
   }, [screen, methods])
 
@@ -203,9 +199,8 @@ export default function AuthForm() {
       // Route to login if email exists, signup if it doesn't
       switchScreen(emailExists ? 'login-with-email' : 'signup-with-email')
 
-      // If the email has changed, we want to clear the name and code fields
+      // If the email has changed, the code sent to the old one is not the one to enter
       if (data.email !== enteredEmail) {
-        methods.setValue('firstName', '')
         methods.setValue('code', '')
       }
     })
@@ -243,7 +238,7 @@ export default function AuthForm() {
   /**
    * Handles signup form submission.
    *
-   * @param data - The signup form data (email, password, name)
+   * @param data - The signup form data
    */
   const handleSignup = async (data: SignupFormData) => {
     // I suppose this should never happen
@@ -254,7 +249,6 @@ export default function AuthForm() {
       const result = await signUp.create({
         emailAddress: data.email,
         password: data.password,
-        firstName: data.firstName,
       })
 
       // If sign up was successful

@@ -64,6 +64,9 @@ export function useDefenseReviewFacetOptions(
   // Handout-surface copy
   const tHandouts = useTranslations('handouts')
 
+  // Profile copy
+  const tProfile = useTranslations('profile')
+
   // The active locale
   const locale = useLocale() as Locale
 
@@ -82,8 +85,8 @@ export function useDefenseReviewFacetOptions(
 
   // The students who have held a conversation
   const userOptions = useMemo(
-    () => (options === null ? [] : toUserFacetOptions(options.users)),
-    [options]
+    () => (options === null ? [] : toUserFacetOptions(options.users, tProfile('defaultUser'))),
+    [options, tProfile]
   )
 
   // The problems one has been held against, under the handout they belong to, with what to call each of

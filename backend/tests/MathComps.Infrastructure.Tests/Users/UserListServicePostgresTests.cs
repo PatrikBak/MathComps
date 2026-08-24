@@ -363,7 +363,7 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = _user1Id,
             ExternalId = "user1",
-            DisplayName = "User 1",
+            Username = "User 1",
             Email = "user1@example.com",
             AvatarUrl = null,
             CreatedAt = DateTimeOffset.UtcNow,
@@ -373,7 +373,7 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
         {
             Id = _user2Id,
             ExternalId = "user2",
-            DisplayName = "User 2",
+            Username = "User 2",
             Email = "user2@example.com",
             AvatarUrl = null,
             CreatedAt = DateTimeOffset.UtcNow,

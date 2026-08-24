@@ -1359,7 +1359,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x)\\bigl(2f(0)-1\\bigr) = 1. \\tag{1}",
+                  "text": "f(x)\\bigl(2f(0)-1\\bigr) = 1.",
                   "isDisplay": true
                 },
                 {
@@ -1376,7 +1376,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " zero, (1) would read "
+                      "text": " zero, this would read "
                     },
                     {
                       "type": "math",
@@ -3013,7 +3013,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Any further solution of "
+                      "text": ", so "
+                    },
+                    {
+                      "type": "math",
+                      "text": "x=0",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " really is a solution. Conversely, if "
                     },
                     {
                       "type": "math",
@@ -3022,16 +3031,25 @@
                     },
                     {
                       "type": "text",
-                      "text": " would satisfy "
+                      "text": " then "
                     },
                     {
                       "type": "math",
-                      "text": "f(f(x))=f(f(0))=f(0)",
+                      "text": "f(f(x))=f(0)",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", and hence "
+                      "text": ", injectivity gives "
+                    },
+                    {
+                      "type": "math",
+                      "text": "f(x)=0=f(0)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and injectivity once more gives "
                     },
                     {
                       "type": "math",
@@ -3566,7 +3584,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f^2(x-y) = x^2-2f(x)f(y)+y^2.",
+                  "text": "\\bigl(f(x-y)\\bigr)^2 = x^2-2f(x)f(y)+y^2.",
                   "isDisplay": true
                 }
               ],
@@ -3830,7 +3848,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x)^2 = x^2 \\tag{1}",
+                  "text": "f(x)^2 = x^2",
                   "isDisplay": true
                 },
                 {
@@ -3865,7 +3883,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". But (1) holds for every number, "
+                      "text": ". But this holds for every number, "
                     },
                     {
                       "type": "math",
@@ -3899,7 +3917,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x)f(y) = xy. \\tag{2}",
+                  "text": "f(x)f(y) = xy. \\tag{1}",
                   "isDisplay": true
                 },
                 {
@@ -3916,7 +3934,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " is not the zero function, or else the left-hand side of (2) would always be zero, while for "
+                      "text": " is not the zero function, or else the left-hand side would always be zero, while for "
                     },
                     {
                       "type": "math",
@@ -3961,7 +3979,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " in (2) gives "
+                      "text": " in (1) gives "
                     },
                     {
                       "type": "math",
@@ -3979,7 +3997,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Back in (2), "
+                      "text": ". Back in (1), "
                     },
                     {
                       "type": "math",
@@ -4271,7 +4289,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x)-f(x+y) = yf(x)f(x+y). \\tag{1}",
+                  "text": "f(x)-f(x+y) = yf(x)f(x+y).",
                   "isDisplay": true
                 },
                 {
@@ -4315,7 +4333,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " alone. So let us solve (1) for it; as "
+                      "text": " alone. So let us solve the last equation for it; as "
                     },
                     {
                       "type": "math",
@@ -4331,7 +4349,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x+y) = \\frac{f(x)}{1+yf(x)}. \\tag{2}",
+                  "text": "f(x+y) = \\frac{f(x)}{1+yf(x)}.",
                   "isDisplay": true
                 },
                 {
@@ -4357,7 +4375,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " leaves the left-hand side of (2) alone, so it must leave the right-hand side alone too. Cross-multiplying gives "
+                      "text": " leaves the left-hand side alone, so it must leave the right-hand side alone too. Cross-multiplying gives "
                     },
                     {
                       "type": "math",
@@ -4382,7 +4400,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "\\frac{1}{f(x)}-x = \\frac{1}{f(y)}-y. \\tag{3}",
+                  "text": "\\frac{1}{f(x)}-x = \\frac{1}{f(y)}-y.",
                   "isDisplay": true
                 },
                 {
@@ -4390,7 +4408,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Fix "
+                      "text": "Now fix "
                     },
                     {
                       "type": "math",
@@ -4399,7 +4417,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " in (3). The right-hand side is then a constant; call it "
+                      "text": ". The right-hand side is then a constant; call it "
                     },
                     {
                       "type": "math",
@@ -4929,7 +4947,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(xy) = f(x)y+x^2f(y). \\tag{2}",
+                  "text": "f(xy) = f(x)y+x^2f(y).",
                   "isDisplay": true
                 },
                 {
@@ -4937,7 +4955,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "The left-hand side of (2) is symmetric in "
+                      "text": "The left-hand side is symmetric in "
                     },
                     {
                       "type": "math",
@@ -4962,7 +4980,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x)\\,y(1-y) = f(y)\\,x(1-x). \\tag{3}",
+                  "text": "f(x)\\,y(1-y) = f(y)\\,x(1-x).",
                   "isDisplay": true
                 },
                 {
@@ -4988,7 +5006,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " in (3) merely zero out both sides, so take "
+                      "text": " merely zero out both sides, so take "
                     },
                     {
                       "type": "math",
@@ -5272,7 +5290,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(x)f(y)\\bigr) = f\\bigl(f(x)y\\bigr)+f(x). \\tag{1}",
+                  "text": "f\\bigl(f(x)f(y)\\bigr) = f\\bigl(f(x)y\\bigr)+f(x).",
                   "isDisplay": true
                 },
                 {
@@ -5298,14 +5316,14 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Then (1) becomes"
+                      "text": ". The last equation then becomes"
                     }
                   ],
                   "highligted": false
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(x)f(y)\\bigr) = f(xy)+y+f(x). \\tag{2}",
+                  "text": "f\\bigl(f(x)f(y)\\bigr) = f(xy)+y+f(x). \\tag{1}",
                   "isDisplay": true
                 },
                 {
@@ -5331,7 +5349,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " leaves both the left-hand side of (2) and the term "
+                      "text": " leaves both the left-hand side of (1) and the term "
                     },
                     {
                       "type": "math",
@@ -5340,7 +5358,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " alone, so comparing (2) with its own swap gives "
+                      "text": " alone, so comparing (1) with its own swap gives "
                     },
                     {
                       "type": "math",
@@ -5685,7 +5703,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(xf(y)) = f(x)-\\frac{1}{xyf(y)}. \\tag{1}",
+                  "text": "f(xf(y)) = f(x)-\\frac{1}{xyf(y)}.",
                   "isDisplay": true
                 },
                 {
@@ -5747,7 +5765,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " in (1) gives "
+                      "text": " gives "
                     },
                     {
                       "type": "math",
@@ -5781,7 +5799,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(x)\\bigr)-\\frac{1}{yf(x)f(y)} = f\\bigl(f(y)\\bigr)-\\frac{1}{xf(x)f(y)}. \\tag{2}",
+                  "text": "f\\bigl(f(x)\\bigr)-\\frac{1}{yf(x)f(y)} = f\\bigl(f(y)\\bigr)-\\frac{1}{xf(x)f(y)}.",
                   "isDisplay": true
                 },
                 {
@@ -5807,7 +5825,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " in (2) yields one expression for "
+                      "text": " yields one expression for "
                     },
                     {
                       "type": "math",
@@ -5823,7 +5841,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(x)\\bigr) = f(a)+\\frac{x-1}{axf(x)}, \\tag{3}",
+                  "text": "f\\bigl(f(x)\\bigr) = f(a)+\\frac{x-1}{axf(x)}, \\tag{1}",
                   "isDisplay": true
                 },
                 {
@@ -5865,7 +5883,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(x)\\bigr) = a-\\frac{1}{xf(x)}. \\tag{4}",
+                  "text": "f\\bigl(f(x)\\bigr) = a-\\frac{1}{xf(x)}. \\tag{2}",
                   "isDisplay": true
                 },
                 {
@@ -5882,7 +5900,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " in (4) gives "
+                      "text": " in (2) gives "
                     },
                     {
                       "type": "math",
@@ -5891,7 +5909,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Substituting that into (3), comparing with (4) and multiplying by "
+                      "text": ". Substituting that into (1), comparing with (2) and multiplying by "
                     },
                     {
                       "type": "math",
@@ -6620,7 +6638,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(xf(x)+f(y)) = y+f^2(x).",
+                  "text": "f(xf(x)+f(y)) = y+\\bigl(f(x)\\bigr)^2.",
                   "isDisplay": true
                 }
               ],
@@ -6704,7 +6722,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "f(f(y))=y+f^2(0)",
+                        "text": "f(f(y))=y+\\bigl(f(0)\\bigr)^2",
                         "isDisplay": false
                       },
                       {
@@ -6779,7 +6797,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "f(a)=0",
+                        "text": "f(r)=0",
                         "isDisplay": false
                       },
                       {
@@ -6800,7 +6818,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "x=a",
+                        "text": "x=r",
                         "isDisplay": false
                       },
                       {
@@ -6818,7 +6836,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "f(f(y))=y+f^2(0)",
+                        "text": "f(f(y))=y+\\bigl(f(0)\\bigr)^2",
                         "isDisplay": false
                       },
                       {
@@ -7339,7 +7357,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ". So suppose there are nonzero "
+                      "text": ". The two formulas agree at zero, so if "
+                    },
+                    {
+                      "type": "math",
+                      "text": "f",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " is neither of them, there are nonzero "
                     },
                     {
                       "type": "math",
@@ -7447,7 +7474,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", either way a contradiction. Since the two formulas agree at zero, either "
+                      "text": ", either way a contradiction. Hence either "
                     },
                     {
                       "type": "math",
@@ -7609,7 +7636,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "\\frac{f^2(w)+f^2(x)}{f(y^2)+f(z^2)} = \\frac{w^2+x^2}{y^2+z^2}.",
+                  "text": "\\frac{\\bigl(f(w)\\bigr)^2+\\bigl(f(x)\\bigr)^2}{f(y^2)+f(z^2)} = \\frac{w^2+x^2}{y^2+z^2}.",
                   "isDisplay": true
                 }
               ],
@@ -9673,7 +9700,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x^2+f(y)) = y+f^2(x).",
+                  "text": "f(x^2+f(y)) = y+\\bigl(f(x)\\bigr)^2.",
                   "isDisplay": true
                 }
               ],
@@ -9718,7 +9745,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "y=-f^2(x)",
+                        "text": "y=-\\bigl(f(x)\\bigr)^2",
                         "isDisplay": false
                       },
                       {
@@ -9865,7 +9892,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "f(x^2+y)=f(y)+f^2(x)",
+                        "text": "f(x^2+y)=f(y)+\\bigl(f(x)\\bigr)^2",
                         "isDisplay": false
                       },
                       {
@@ -10000,7 +10027,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "y=-f^2(x)",
+                      "text": "y=-\\bigl(f(x)\\bigr)^2",
                       "isDisplay": false
                     },
                     {
@@ -10057,7 +10084,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(a^2) = a, \\tag{1}",
+                  "text": "f(a^2) = a,",
                   "isDisplay": true
                 },
                 {
@@ -10087,16 +10114,25 @@
                     },
                     {
                       "type": "math",
-                      "text": "f\\bigl(f(a^2)\\bigr)=a^2+f^2(0)",
+                      "text": "f\\bigl(f(a^2)\\bigr)=a^2+\\bigl(f(0)\\bigr)^2",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", which by (1) reads "
+                      "text": ", which by "
                     },
                     {
                       "type": "math",
-                      "text": "0=a^2+f^2(0)",
+                      "text": "f(a^2)=a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " reads "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0=a^2+\\bigl(f(0)\\bigr)^2",
                       "isDisplay": false
                     },
                     {
@@ -10145,7 +10181,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(y)\\bigr) = y \\tag{2}",
+                  "text": "f\\bigl(f(y)\\bigr) = y \\tag{1}",
                   "isDisplay": true
                 },
                 {
@@ -10199,7 +10235,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " is increasing. Relation (2) lets us put "
+                      "text": " is increasing. Relation (1) lets us put "
                     },
                     {
                       "type": "math",
@@ -10224,7 +10260,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x^2+y) = f(y)+f^2(x). \\tag{3}",
+                  "text": "f(x^2+y) = f(y)+\\bigl(f(x)\\bigr)^2.",
                   "isDisplay": true
                 },
                 {
@@ -10268,11 +10304,11 @@
                     },
                     {
                       "type": "text",
-                      "text": ", so (3) gives "
+                      "text": ", so the last relation gives "
                     },
                     {
                       "type": "math",
-                      "text": "f(u)=f(v)+f^2\\bigl(\\sqrt{u-v}\\bigr)",
+                      "text": "f(u)=f(v)+\\bigl(f(\\sqrt{u-v})\\bigr)^2",
                       "isDisplay": false
                     },
                     {
@@ -10305,7 +10341,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "But an increasing function satisfying (2) can only be the identity: if "
+                      "text": "But an increasing function satisfying (1) can only be the identity: if "
                     },
                     {
                       "type": "math",
@@ -10341,7 +10377,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", each contradicting (2)."
+                      "text": ", each contradicting (1)."
                     }
                   ],
                   "highligted": false
@@ -11130,7 +11166,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(p^3y) = f(y)+p^3-b. \\tag{3}",
+                  "text": "f(p^3y) = f(y)+p^3-b.",
                   "isDisplay": true
                 },
                 {
@@ -11138,7 +11174,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Apply relation (3) three times in a row, successively for "
+                      "text": "Apply this relation three times in a row, successively for "
                     },
                     {
                       "type": "math",
@@ -11519,7 +11555,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x+f(y)) = f(x)+f^2(y)+2xf(y).",
+                  "text": "f(x+f(y)) = f(x)+\\bigl(f(y)\\bigr)^2+2xf(y).",
                   "isDisplay": true
                 }
               ],
@@ -11964,7 +12000,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "g\\bigl(x+f(y)\\bigr)+x^2+2xf(y)+f^2(y)",
+                      "text": "g\\bigl(x+f(y)\\bigr)+x^2+2xf(y)+\\bigl(f(y)\\bigr)^2",
                       "isDisplay": false
                     },
                     {
@@ -11973,7 +12009,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "g(x)+x^2+f^2(y)+2xf(y)",
+                      "text": "g(x)+x^2+\\bigl(f(y)\\bigr)^2+2xf(y)",
                       "isDisplay": false
                     },
                     {
@@ -12169,7 +12205,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "g(x) = g\\bigl(x+p(2y+p)\\bigr) \\tag{2}",
+                  "text": "g(x) = g\\bigl(x+p(2y+p)\\bigr)",
                   "isDisplay": true
                 },
                 {
@@ -12281,7 +12317,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\bigl(x+f(y)\\bigr)^2+c=x^2+2xf(y)+f^2(y)+c",
+                      "text": "\\bigl(x+f(y)\\bigr)^2+c=x^2+2xf(y)+\\bigl(f(y)\\bigr)^2+c",
                       "isDisplay": false
                     },
                     {
@@ -12290,7 +12326,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "x^2+c+f^2(y)+2xf(y)",
+                      "text": "x^2+c+\\bigl(f(y)\\bigr)^2+2xf(y)",
                       "isDisplay": false
                     },
                     {
@@ -13250,7 +13286,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\Bigl(x+\\frac1y\\Bigr) = \\frac{1}{x+\\frac1y}. \\tag{4}",
+                  "text": "f\\Bigl(x+\\frac1y\\Bigr) = \\frac{1}{x+\\frac1y}.",
                   "isDisplay": true
                 },
                 {
@@ -13312,7 +13348,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " and (4) gives "
+                      "text": " and the last equation gives "
                     },
                     {
                       "type": "math",

@@ -82,15 +82,14 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     private static readonly DateTimeOffset _firstToldAt = new(2026, 1, 2, 3, 4, 5, TimeSpan.Zero);
 
     /// <summary>
-    /// A first sync writes the user as Clerk described them, which is what the site shows next to anything they
-    /// later author.
+    /// A first sync writes the user as Clerk described them: the address to reach them at and their picture.
     /// </summary>
     [Fact]
     public Task SyncUserAsync_WritesWhatClerkSentAboutANewUser() => RunTestAsync(async service =>
     {
         // Someone signs in for the first time
         var userId = await service.SyncUserAsync(new UserSyncDto(
-            CreateExternalId, "create@example.com", "Created", "https://example.com/created.png"));
+            CreateExternalId, "create@example.com", "https://example.com/created.png"));
 
         // The row the sync wrote
         var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
@@ -98,7 +97,6 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
         // It carries them as Clerk described them
         Assert.Equal(CreateExternalId, user.ExternalId);
         Assert.Equal("create@example.com", user.Email);
-        Assert.Equal("Created", user.DisplayName);
         Assert.Equal("https://example.com/created.png", user.AvatarUrl);
 
         // And as a live user rather than a deleted one
@@ -114,7 +112,7 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     {
         // A synced user
         var userId = await service.SyncUserAsync(
-            new UserSyncDto(IdentityExternalId, "identity@example.com", "Before", null));
+            new UserSyncDto(IdentityExternalId, "identity@example.com", null));
 
         // The moment the row records them joining
         var createdAt = await QueryValueAsync(context => context.Users
@@ -122,9 +120,9 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
             .Select(user => user.CreatedAt)
             .SingleAsync());
 
-        // Clerk sends the same user along again, with a changed display name
+        // Clerk sends the same user along again, with a changed avatar
         var resyncedId = await service.SyncUserAsync(
-            new UserSyncDto(IdentityExternalId, "identity@example.com", "After", null));
+            new UserSyncDto(IdentityExternalId, "identity@example.com", "https://example.com/after.png"));
 
         // The same row answered
         Assert.Equal(userId, resyncedId);
@@ -145,7 +143,7 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     {
         // A user the sync path has already brought in
         var userId = await service.SyncUserAsync(
-            new UserSyncDto(LookupExternalId, "lookup@example.com", "Lookup", null));
+            new UserSyncDto(LookupExternalId, "lookup@example.com", null));
 
         // Something holding only their Clerk id asks who they are
         var foundId = await service.GetUserIdAsync(LookupExternalId);
@@ -157,27 +155,27 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     /// <summary>
     /// Re-syncing a user from Clerk leaves their AI acknowledgement standing. The sync upserts the whole row from an
     /// entity Clerk carries no acknowledgement for, so a column not excluded from that write is silently blanked
-    /// every time the user edits their name or avatar upstream.
+    /// every time the user edits their avatar upstream.
     /// </summary>
     [Fact]
     public Task SyncUserAsync_KeepsAiConsentAcrossAResync() => RunTestAsync(async service =>
     {
         // A synced user
         var userId = await service.SyncUserAsync(
-            new UserSyncDto(ResyncExternalId, "resync@example.com", "Before", null));
+            new UserSyncDto(ResyncExternalId, "resync@example.com", null));
 
         // Who has since acknowledged what talking to Mathilda entails
         await service.RecordAiConsentAsync(userId);
 
-        // The same user comes back from Clerk with a changed display name
+        // The same user comes back from Clerk with a changed avatar
         await service.SyncUserAsync(
-            new UserSyncDto(ResyncExternalId, "resync@example.com", "After", null));
+            new UserSyncDto(ResyncExternalId, "resync@example.com", "https://example.com/after.png"));
 
         // The row as the resync left it
         var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
 
         // The upsert landed
-        Assert.Equal("After", user.DisplayName);
+        Assert.Equal("https://example.com/after.png", user.AvatarUrl);
 
         // And it left the acknowledgement alone
         Assert.NotNull(user.ConsentedToAiAt);
@@ -192,7 +190,7 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     {
         // A synced user who has yet to meet Mathilda
         var userId = await service.SyncUserAsync(
-            new UserSyncDto(UntoldExternalId, "untold@example.com", "Untold", null));
+            new UserSyncDto(UntoldExternalId, "untold@example.com", null));
 
         // The gate asks whether they have been told
         var consentedAt = await service.GetAiConsentAsync(userId);
@@ -213,7 +211,7 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     {
         // A synced user who has yet to meet Mathilda
         var userId = await service.SyncUserAsync(
-            new UserSyncDto(StampExternalId, "stamp@example.com", "Stamp", null));
+            new UserSyncDto(StampExternalId, "stamp@example.com", null));
 
         // The moment just before they acknowledge, at the precision the database keeps
         var before = DateTimeOffset.UtcNow.TruncateToMicroseconds();
@@ -238,7 +236,7 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     {
         // A synced user
         var userId = await service.SyncUserAsync(
-            new UserSyncDto(RepeatExternalId, "repeat@example.com", "Repeat", null));
+            new UserSyncDto(RepeatExternalId, "repeat@example.com", null));
 
         // Who has acknowledged what talking to Mathilda entails
         await service.RecordAiConsentAsync(userId);
@@ -264,7 +262,7 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
     {
         // A synced user carrying every piece of personal information Clerk sends
         var userId = await service.SyncUserAsync(
-            new UserSyncDto(DeleteExternalId, "delete@example.com", "Deleted Me", "https://example.com/avatar.png"));
+            new UserSyncDto(DeleteExternalId, "delete@example.com", "https://example.com/avatar.png"));
 
         // Clerk reports the account gone
         await service.DeleteUserAsync(DeleteExternalId);
@@ -272,11 +270,10 @@ public class UserManagerPostgresTests(PostgresContainerFixture fixture)
         // The row is still there
         var user = await QueryValueAsync(context => context.Users.SingleAsync(user => user.Id == userId));
 
-        // Flagged as deleted, and stripped of anything identifying
+        // Flagged as deleted, and stripped of what Clerk supplied
         Assert.True(user.IsDeleted);
         Assert.Null(user.Email);
         Assert.Null(user.AvatarUrl);
-        Assert.NotEqual("Deleted Me", user.DisplayName);
     });
 
     /// <summary>

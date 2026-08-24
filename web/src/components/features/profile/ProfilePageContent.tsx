@@ -1,21 +1,26 @@
 'use client'
 
-import { SignOutButton, useUser } from '@clerk/nextjs'
-import { CalendarDays, LogOut, Mail } from 'lucide-react'
-import { useFormatter, useTranslations } from 'next-intl'
-import { useEffect, useRef } from 'react'
+import { useUser } from '@clerk/nextjs'
+import { CalendarDays, GraduationCap, Mail, MapPin } from 'lucide-react'
+import { useFormatter, useLocale, useTranslations } from 'next-intl'
+import { useEffect, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 
 import { useInvalidateUserComments } from '@/components/features/comments/hooks/use-invalidate-user-comments'
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
+import { HelpTooltip } from '@/components/shared/components/HelpTooltip'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
+import { SearchableSelect } from '@/components/shared/components/select/SearchableSelect'
+import { Select } from '@/components/shared/components/select/Select'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useLoginRedirect } from '@/hooks/use-login-redirect'
-import { ROUTES } from '@/i18n/i18n'
 
 import { UsernameForm } from './components/UsernameForm'
+import { getCountryOptions } from './countries'
+import { getGraduationYears, PAST_SCHOOL_VALUE } from './graduation-year'
 import { useSetUsername } from './hooks/use-set-username'
+import { useUpdateProfile } from './hooks/use-update-profile'
 import { useUserProfile } from './hooks/use-user-profile'
 import { PROFILE_AVATAR_GLOW, PROFILE_BANNER_GRADIENT } from './profile-colors'
 
@@ -27,29 +32,64 @@ type ProfileInfoFieldProps = {
   icon: React.ElementType
   /** The label to display */
   label: string
+  /** Why the field is being asked, when that is not obvious from the label */
+  help?: string
 }
 
 /**
  * A component that displays a profile info field
  */
-function ProfileInfoField({ icon: Icon, label }: ProfileInfoFieldProps) {
+function ProfileInfoField({ icon: Icon, label, help }: ProfileInfoFieldProps) {
   return (
     <div className="text-foreground font-medium text-base md:text-right flex items-center justify-start md:justify-end gap-2 pt-4 md:pt-0">
       <Icon className="w-5 h-5" />
       <span className="whitespace-nowrap">{label}</span>
+      {help !== undefined && <HelpTooltip content={help} label={label} />}
     </div>
   )
 }
 
 /**
- * Content component for the profile page.
- * Displays user avatar, info, and sign-out button.
+ * Props for the {@link ProfileSection} component
+ */
+type ProfileSectionProps = {
+  /** What the section is called */
+  title: string
+  /** One line saying what the section's fields are for, or who can see them */
+  note: string
+  /** The label/field pairs the section holds */
+  children: React.ReactNode
+}
+
+/**
+ * A titled group of profile fields.
+ */
+function ProfileSection({ title, note, children }: ProfileSectionProps) {
+  return (
+    <section className="pt-6 md:pt-8">
+      {/* Section title */}
+      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+
+      {/* What the section's fields are for */}
+      <p className="mt-1 mb-5 text-pretty text-xs text-muted">{note}</p>
+
+      {/* Label on the left, field on the right, stacking on a narrow screen */}
+      <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(250px,1fr)] justify-items-start items-center gap-x-8 gap-y-4 md:gap-y-6 [&>div:nth-child(2n)]:w-full">
+        {children}
+      </div>
+    </section>
+  )
+}
+
+/**
+ * The signed-in student's own page: who the site calls them, and what a competition needs to place them.
+ *
+ * The username is taken once, through a form that only appears while there is none. Every other field saves on
+ * the pick.
  */
 export default function ProfilePageContent() {
   // Translations for profile page
   const tProfile = useTranslations('profile')
-  // Translations for auth-related strings
-  const tAuth = useTranslations('auth')
   // Translations for Clerk auth errors
   const tClerkErrors = useTranslations('clerkErrors')
 
@@ -60,13 +100,41 @@ export default function ProfilePageContent() {
   const { redirectToLogin } = useLoginRedirect()
 
   // Load user data from Clerk
-  const { user, isLoaded } = useUser()
+  const { user, isLoaded: isUserLoaded } = useUser()
 
-  // The name the site calls them by
-  const { username } = useUserProfile()
+  // The reader's language
+  const locale = useLocale()
 
-  // The one chance to choose it
+  // What the site holds on them
+  const {
+    email,
+    username,
+    graduationYear,
+    hasLeftHighSchool,
+    countryCode,
+    isLoading: isProfileLoading,
+  } = useUserProfile()
+
+  // The one chance to choose the name
   const { setUsername, isSaving: isSavingUsername } = useSetUsername()
+
+  // A function which saves what they say about their competing
+  const { updateProfile } = useUpdateProfile()
+
+  // The years on offer, with being past school as one of the answers
+  const graduationYearOptions = useMemo(
+    () => [
+      ...getGraduationYears(new Date().getUTCFullYear()).map((year) => ({
+        value: String(year),
+        label: String(year),
+      })),
+      { value: PAST_SCHOOL_VALUE, label: tProfile('graduationYearPastSchool') },
+    ],
+    [tProfile]
+  )
+
+  // Every country, named and sorted in the reader's own language, theirs on top
+  const countryOptions = useMemo(() => getCountryOptions(locale), [locale])
 
   // Ref for the file input
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -76,13 +144,14 @@ export default function ProfilePageContent() {
 
   // If no user is logged in, redirect to the login page
   useEffect(() => {
-    if (isLoaded && !user) {
+    if (isUserLoaded && !user) {
       redirectToLogin()
     }
-  }, [isLoaded, user, redirectToLogin])
+  }, [isUserLoaded, user, redirectToLogin])
 
-  // A loading spinner while Clerk is loading user data
-  if (!isLoaded) {
+  // A loading spinner until both halves of who they are have arrived. Rendering on Clerk alone would offer the
+  // name form to somebody who already has one, and would take a pick against fields nobody has read yet
+  if (!isUserLoaded || isProfileLoading) {
     return <LoadingSpinner />
   }
 
@@ -168,7 +237,7 @@ export default function ProfilePageContent() {
               <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full ring-4 ring-background overflow-hidden bg-surface">
                 <UserAvatarImage
                   imageUrl={user.imageUrl}
-                  altText={username || user.firstName || tProfile('defaultUser')}
+                  altText={username ?? tProfile('defaultUser')}
                   size={128}
                   className="w-full h-full"
                 />
@@ -180,7 +249,7 @@ export default function ProfilePageContent() {
         {/* User info Grid */}
         <div className="px-4 sm:px-6 md:px-12 pb-8 sm:pb-10 md:pb-12 pt-16 sm:pt-20 md:pt-24">
           {/* Who the site knows them as */}
-          <div className="flex flex-col items-center gap-2 pb-8 md:pb-10">
+          <div className="flex flex-col items-center gap-2">
             {username ? (
               <h1 className="text-2xl font-semibold text-foreground">{username}</h1>
             ) : (
@@ -193,13 +262,14 @@ export default function ProfilePageContent() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(250px,1fr)] justify-items-start items-center gap-x-8 gap-y-4 md:gap-y-9 [&>div:nth-child(2n)]:w-full">
+          {/* Account section */}
+          <ProfileSection title={tProfile('accountSection')} note={tProfile('accountNote')}>
             {/* Email label */}
             <ProfileInfoField icon={Mail} label={tProfile('email')} />
 
             {/* Email */}
             <div className={readOnlyContainerClassName}>
-              <span className={commonFontStyle}>{user.primaryEmailAddress?.emailAddress}</span>
+              <span className={commonFontStyle}>{email}</span>
             </div>
 
             {/* Member since label */}
@@ -216,27 +286,60 @@ export default function ProfilePageContent() {
                   })}
               </span>
             </div>
-          </div>
-        </div>
+          </ProfileSection>
 
-        {/* Sign out button */}
-        <div className="py-6 border-t border-foreground/10 flex flex-col items-center gap-4">
-          <SignOutButton redirectUrl={ROUTES.HOME}>
-            <button
-              className={cn(
-                'inline-flex items-center justify-center gap-2',
-                'rounded-lg font-medium transition-all duration-200',
-                'px-5 py-2.5 text-sm text-error',
-                'bg-error/10 hover:bg-error/15',
-                'border border-error/20 hover:border-error/30',
-                'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                'focus-visible:ring-error/40 focus-visible:ring-offset-inset'
-              )}
-            >
-              <LogOut className="w-4 h-4" />
-              <span>{tAuth('signOut')}</span>
-            </button>
-          </SignOutButton>
+          {/* Competition section */}
+          <ProfileSection title={tProfile('competitionSection')} note={tProfile('competitionNote')}>
+            {/* Graduation year label */}
+            <ProfileInfoField
+              icon={GraduationCap}
+              label={tProfile('graduationYear')}
+              help={tProfile('graduationYearHelp')}
+            />
+
+            {/* Graduation year, saved on the pick */}
+            <div>
+              <Select
+                options={graduationYearOptions}
+                value={
+                  hasLeftHighSchool
+                    ? PAST_SCHOOL_VALUE
+                    : graduationYear === null
+                      ? ''
+                      : String(graduationYear)
+                }
+                onChange={(picked) =>
+                  updateProfile({
+                    graduationYear: picked === PAST_SCHOOL_VALUE ? null : Number(picked),
+                    hasLeftHighSchool: picked === PAST_SCHOOL_VALUE,
+                    countryCode,
+                  })
+                }
+                placeholder={tProfile('graduationYearPlaceholder')}
+              />
+            </div>
+
+            {/* Country label */}
+            <ProfileInfoField icon={MapPin} label={tProfile('country')} />
+
+            {/* Country, saved on the pick */}
+            <div>
+              <SearchableSelect
+                options={countryOptions}
+                value={countryCode ?? ''}
+                onChange={(picked) =>
+                  updateProfile({
+                    graduationYear,
+                    hasLeftHighSchool,
+                    countryCode: picked === '' ? null : picked,
+                  })
+                }
+                placeholder={tProfile('countryPlaceholder')}
+                emptyMessage={tProfile('countryNoMatch')}
+                ariaLabel={tProfile('country')}
+              />
+            </div>
+          </ProfileSection>
         </div>
       </div>
     </div>

@@ -132,7 +132,7 @@ export function DefenseTurn({
         isPointedAt && !style.hasOwnBox && 'px-4 py-3',
         entranceAnimation &&
           !reducedMotion &&
-          'animate-in fade-in slide-in-from-bottom-2 duration-300'
+          'animate-in fade-in slide-in-from-bottom-2 duration-300 transition-none'
       )}
     >
       {/* The author label, with the turn's controls at the row's trailing edge so they never cover the

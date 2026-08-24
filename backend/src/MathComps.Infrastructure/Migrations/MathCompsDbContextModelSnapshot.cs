@@ -1185,15 +1185,14 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("consented_to_ai_at");
 
+                    b.Property<string>("CountryCode")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)")
+                        .HasColumnName("country_code");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("display_name");
 
                     b.Property<string>("Email")
                         .HasMaxLength(255)
@@ -1205,6 +1204,14 @@ namespace MathComps.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("external_id");
+
+                    b.Property<int?>("GraduationYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("graduation_year");
+
+                    b.Property<bool>("HasLeftHighSchool")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_left_high_school");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")

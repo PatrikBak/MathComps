@@ -123,6 +123,7 @@ public sealed class GlobalExceptionHandler(
         UsernameTakenException => (StatusCodes.Status409Conflict, ApiErrorCode.UsernameTaken),
         UsernameAlreadySetException => (StatusCodes.Status409Conflict, ApiErrorCode.UsernameAlreadySet),
         UsernameRejectedException => (StatusCodes.Status400BadRequest, ApiErrorCode.UsernameRejected),
+        ProfileValueInvalidException => (StatusCodes.Status400BadRequest, ApiErrorCode.ProfileValueInvalid),
 
         // A body the route can't be built from never reaches an endpoint, so the framework is the one that
         // judged it; carrying its own status through is what stops a caller's bad JSON reading as our fault

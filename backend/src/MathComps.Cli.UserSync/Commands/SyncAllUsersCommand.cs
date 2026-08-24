@@ -45,18 +45,6 @@ public class SyncAllUsersCommand(
                 // For each user
                 foreach (var user in users)
                 {
-                    // Extract display name (which is the first name required)
-                    var displayName = user.FirstName;
-
-                    // In theory it should be there...
-                    if (string.IsNullOrEmpty(displayName))
-                    {
-                        // Skip if no first name
-                        AnsiConsole.MarkupLine($"[yellow]Skipping user {user.Id}: no first name[/]");
-                        task.Increment(1);
-                        continue;
-                    }
-
                     // Extract email from first email address
                     var email = user.EmailAddresses.FirstOrDefault()?.EmailAddressValue;
 
@@ -64,7 +52,6 @@ public class SyncAllUsersCommand(
                     var dto = new UserSyncDto(
                         user.Id,
                         email,
-                        displayName,
                         user.ImageUrl
                     );
 
@@ -72,7 +59,9 @@ public class SyncAllUsersCommand(
                     await userManager.SyncUserAsync(dto);
 
                     // Log success
-                    AnsiConsole.MarkupLine($"[dim]Synced: {displayName} ({user.Id})[/]");
+                    AnsiConsole.MarkupLine($"[dim]Synced: {user.Id}[/]");
+
+                    // Advance the progress bar
                     task.Increment(1);
                 }
             });

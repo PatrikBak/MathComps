@@ -7,8 +7,9 @@ import { useTranslations } from 'next-intl'
 import { type ReactNode, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
+import { useUserProfile } from '@/components/features/profile/hooks/use-user-profile'
 import { Button } from '@/components/shared/components/Button'
-import { Select } from '@/components/shared/components/Select'
+import { Select } from '@/components/shared/components/select/Select'
 
 import { cn } from '../../shared/utils/css-utils'
 import { getTranslatedReasonOptions, REASON_OPTIONS, type ReasonOption } from './contact-reasons'
@@ -107,20 +108,19 @@ export default function ContactForm({ defaultReason, onSubmit }: ContactFormProp
   // The signed-in user, if any
   const { user, isLoaded } = useUser()
 
-  // Their display name, which Clerk keeps in firstName, and their email
-  const displayName = user?.firstName ?? ''
-  const email = user?.primaryEmailAddress?.emailAddress ?? ''
+  // Their username and email
+  const { username, email } = useUserProfile()
 
   // The form's seed values, with everything but the name and email empty until the user fills them
   const values = useMemo<ContactFormData>(
     () => ({
-      name: displayName,
-      email,
+      name: username ?? '',
+      email: email ?? '',
       reason: defaultReason as ReasonOption,
       message: '',
       website: '',
     }),
-    [displayName, email, defaultReason]
+    [username, email, defaultReason]
   )
 
   // Form state and helpers, validated against the schema
@@ -132,7 +132,7 @@ export default function ContactForm({ defaultReason, onSubmit }: ContactFormProp
     formState: { errors, isSubmitting, dirtyFields, isSubmitted },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
-    // Reactively adopt the Clerk seed once it resolves
+    // Reactively adopt the seed once the profile resolves
     values,
     // Keep anything the user already typed
     resetOptions: { keepDirtyValues: true },
@@ -140,9 +140,9 @@ export default function ContactForm({ defaultReason, onSubmit }: ContactFormProp
     mode: 'onTouched',
   })
 
-  // Aim the dialog's initial focus at the first unfilled field once Clerk resolves:
-  // the message when signed in (name/email are prefilled), otherwise the name. The
-  // modal's focus trap focuses the data-autofocus element itself, so focus lands cleanly.
+  // Aim the dialog's initial focus at the first field the user has to fill: the message
+  // when signed in, the name otherwise. The modal's focus trap focuses the data-autofocus
+  // element itself, so focus lands cleanly.
   const focusName = isLoaded && !user
   const focusMessage = isLoaded && Boolean(user)
 

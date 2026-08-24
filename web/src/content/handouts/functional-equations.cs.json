@@ -1359,7 +1359,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x)\\bigl(2f(0)-1\\bigr) = 1. \\tag{1}",
+                  "text": "f(x)\\bigl(2f(0)-1\\bigr) = 1.",
                   "isDisplay": true
                 },
                 {
@@ -1376,7 +1376,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", dávala by (1) rovnost "
+                      "text": ", dostali bychom rovnost "
                     },
                     {
                       "type": "math",
@@ -3005,16 +3005,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Je-li teď "
+                      "text": ", takže "
                     },
                     {
                       "type": "math",
-                      "text": "x",
+                      "text": "x=0",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " libovolné řešení rovnice "
+                      "text": " řešením opravdu je. Je-li naopak "
                     },
                     {
                       "type": "math",
@@ -3023,16 +3023,34 @@
                     },
                     {
                       "type": "text",
-                      "text": ", platí "
+                      "text": " pro nějaké "
                     },
                     {
                       "type": "math",
-                      "text": "f(f(x))=f(f(0))=f(0)",
+                      "text": "x",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0tedy "
+                      "text": ", platí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "f(f(x))=f(0)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", z\u00A0prostoty "
+                    },
+                    {
+                      "type": "math",
+                      "text": "f(x)=0=f(0)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0ještě jednou z\u00A0prostoty "
                     },
                     {
                       "type": "math",
@@ -3567,7 +3585,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f^2(x-y) = x^2-2f(x)f(y)+y^2.",
+                  "text": "\\bigl(f(x-y)\\bigr)^2 = x^2-2f(x)f(y)+y^2.",
                   "isDisplay": true
                 }
               ],
@@ -3840,7 +3858,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x)^2 = x^2 \\tag{1}",
+                  "text": "f(x)^2 = x^2",
                   "isDisplay": true
                 },
                 {
@@ -3875,7 +3893,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Vztah (1) však platí pro libovolné číslo, tedy i\u00A0pro "
+                      "text": ". Tento vztah však platí pro libovolné číslo, tedy i\u00A0pro "
                     },
                     {
                       "type": "math",
@@ -3909,7 +3927,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x)f(y) = xy. \\tag{2}",
+                  "text": "f(x)f(y) = xy. \\tag{1}",
                   "isDisplay": true
                 },
                 {
@@ -3926,7 +3944,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " není nulová, jinak by levá strana (2) byla vždy nulová, zatímco pravá pro "
+                      "text": " není nulová, jinak by levá strana byla vždy nulová, zatímco pravá pro "
                     },
                     {
                       "type": "math",
@@ -3962,7 +3980,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " v\u00A0(2) dává "
+                      "text": " v\u00A0(1) dává "
                     },
                     {
                       "type": "math",
@@ -3980,7 +3998,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Dosazením zpět do (2) dostaneme "
+                      "text": ". Dosazením zpět do (1) dostaneme "
                     },
                     {
                       "type": "math",
@@ -4263,7 +4281,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x)-f(x+y) = yf(x)f(x+y). \\tag{1}",
+                  "text": "f(x)-f(x+y) = yf(x)f(x+y).",
                   "isDisplay": true
                 },
                 {
@@ -4307,7 +4325,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " nezmění. Vyjádřeme si ho proto z\u00A0(1); díky kladnosti "
+                      "text": " nezmění. Vyjádřeme si ho proto z\u00A0této rovnice; díky kladnosti "
                     },
                     {
                       "type": "math",
@@ -4323,7 +4341,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x+y) = \\frac{f(x)}{1+yf(x)}. \\tag{2}",
+                  "text": "f(x+y) = \\frac{f(x)}{1+yf(x)}.",
                   "isDisplay": true
                 },
                 {
@@ -4331,7 +4349,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Levá strana (2) se záměnou "
+                      "text": "Levá strana se záměnou "
                     },
                     {
                       "type": "math",
@@ -4370,7 +4388,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "\\frac{1}{f(x)}-x = \\frac{1}{f(y)}-y. \\tag{3}",
+                  "text": "\\frac{1}{f(x)}-x = \\frac{1}{f(y)}-y.",
                   "isDisplay": true
                 },
                 {
@@ -4378,7 +4396,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Zafixujme v\u00A0(3) "
+                      "text": "Zafixujme nyní "
                     },
                     {
                       "type": "math",
@@ -4917,7 +4935,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(xy) = f(x)y+x^2f(y). \\tag{2}",
+                  "text": "f(xy) = f(x)y+x^2f(y).",
                   "isDisplay": true
                 },
                 {
@@ -4925,7 +4943,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Levá strana (2) je symetrická v\u00A0"
+                      "text": "Levá strana je symetrická v\u00A0"
                     },
                     {
                       "type": "math",
@@ -4950,7 +4968,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x)\\,y(1-y) = f(y)\\,x(1-x). \\tag{3}",
+                  "text": "f(x)\\,y(1-y) = f(y)\\,x(1-x).",
                   "isDisplay": true
                 },
                 {
@@ -4976,7 +4994,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " v\u00A0(3) jenom vynulují obě strany, vezměme tedy například "
+                      "text": " jenom vynulují obě strany, vezměme tedy například "
                     },
                     {
                       "type": "math",
@@ -5256,7 +5274,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(x)f(y)\\bigr) = f\\bigl(f(x)y\\bigr)+f(x). \\tag{1}",
+                  "text": "f\\bigl(f(x)f(y)\\bigr) = f\\bigl(f(x)y\\bigr)+f(x).",
                   "isDisplay": true
                 },
                 {
@@ -5282,14 +5300,14 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Tím (1) přejde na"
+                      "text": ". Tím poslední rovnice přejde na"
                     }
                   ],
                   "highligted": false
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(x)f(y)\\bigr) = f(xy)+y+f(x). \\tag{2}",
+                  "text": "f\\bigl(f(x)f(y)\\bigr) = f(xy)+y+f(x). \\tag{1}",
                   "isDisplay": true
                 },
                 {
@@ -5297,7 +5315,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Levá strana (2) i\u00A0výraz "
+                      "text": "Levá strana (1) i\u00A0výraz "
                     },
                     {
                       "type": "math",
@@ -5324,7 +5342,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " nezmění, takže porovnáním (2) s\u00A0rovností po takové záměně máme "
+                      "text": " nezmění, takže porovnáním (1) s\u00A0rovností po takové záměně máme "
                     },
                     {
                       "type": "math",
@@ -5669,7 +5687,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(xf(y)) = f(x)-\\frac{1}{xyf(y)}. \\tag{1}",
+                  "text": "f(xf(y)) = f(x)-\\frac{1}{xyf(y)}.",
                   "isDisplay": true
                 },
                 {
@@ -5731,7 +5749,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " v\u00A0(1) dává "
+                      "text": " dává "
                     },
                     {
                       "type": "math",
@@ -5765,7 +5783,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(x)\\bigr)-\\frac{1}{yf(x)f(y)} = f\\bigl(f(y)\\bigr)-\\frac{1}{xf(x)f(y)}. \\tag{2}",
+                  "text": "f\\bigl(f(x)\\bigr)-\\frac{1}{yf(x)f(y)} = f\\bigl(f(y)\\bigr)-\\frac{1}{xf(x)f(y)}.",
                   "isDisplay": true
                 },
                 {
@@ -5791,14 +5809,14 @@
                     },
                     {
                       "type": "text",
-                      "text": " v\u00A0(2) dává první vyjádření"
+                      "text": " dává první vyjádření"
                     }
                   ],
                   "highligted": false
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(x)\\bigr) = f(a)+\\frac{x-1}{axf(x)}, \\tag{3}",
+                  "text": "f\\bigl(f(x)\\bigr) = f(a)+\\frac{x-1}{axf(x)}, \\tag{1}",
                   "isDisplay": true
                 },
                 {
@@ -5840,7 +5858,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(x)\\bigr) = a-\\frac{1}{xf(x)}. \\tag{4}",
+                  "text": "f\\bigl(f(x)\\bigr) = a-\\frac{1}{xf(x)}. \\tag{2}",
                   "isDisplay": true
                 },
                 {
@@ -5857,7 +5875,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " v\u00A0(4) dává "
+                      "text": " v\u00A0(2) dává "
                     },
                     {
                       "type": "math",
@@ -5866,7 +5884,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Po dosazení do (3), porovnání s\u00A0(4) a\u00A0vynásobení výrazem "
+                      "text": ". Po dosazení do (1), porovnání s\u00A0(2) a\u00A0vynásobení výrazem "
                     },
                     {
                       "type": "math",
@@ -6604,7 +6622,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(xf(x)+f(y)) = y+f^2(x).",
+                  "text": "f(xf(x)+f(y)) = y+\\bigl(f(x)\\bigr)^2.",
                   "isDisplay": true
                 }
               ],
@@ -6688,7 +6706,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "f(f(y))=y+f^2(0)",
+                        "text": "f(f(y))=y+\\bigl(f(0)\\bigr)^2",
                         "isDisplay": false
                       },
                       {
@@ -6763,7 +6781,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "f(a)=0",
+                        "text": "f(r)=0",
                         "isDisplay": false
                       },
                       {
@@ -6784,7 +6802,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "x=a",
+                        "text": "x=r",
                         "isDisplay": false
                       },
                       {
@@ -6802,7 +6820,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "f(f(y))=y+f^2(0)",
+                        "text": "f(f(y))=y+\\bigl(f(0)\\bigr)^2",
                         "isDisplay": false
                       },
                       {
@@ -7314,7 +7332,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Předpokládejme tedy, že existují nenulová "
+                      "text": ". V\u00A0nule oba předpisy splývají, takže pokud "
+                    },
+                    {
+                      "type": "math",
+                      "text": "f",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " není ani jedním z\u00A0nich, existují nenulová "
                     },
                     {
                       "type": "math",
@@ -7332,7 +7359,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " taková, že "
+                      "text": " s\u00A0"
                     },
                     {
                       "type": "math",
@@ -7422,7 +7449,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", obojí spor. Protože v\u00A0nule oba předpisy splývají, platí buď "
+                      "text": ", obojí spor. Platí tedy buď "
                     },
                     {
                       "type": "math",
@@ -7584,7 +7611,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "\\frac{f^2(w)+f^2(x)}{f(y^2)+f(z^2)} = \\frac{w^2+x^2}{y^2+z^2}.",
+                  "text": "\\frac{\\bigl(f(w)\\bigr)^2+\\bigl(f(x)\\bigr)^2}{f(y^2)+f(z^2)} = \\frac{w^2+x^2}{y^2+z^2}.",
                   "isDisplay": true
                 }
               ],
@@ -9657,7 +9684,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x^2+f(y)) = y+f^2(x).",
+                  "text": "f(x^2+f(y)) = y+\\bigl(f(x)\\bigr)^2.",
                   "isDisplay": true
                 }
               ],
@@ -9702,7 +9729,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "y=-f^2(x)",
+                        "text": "y=-\\bigl(f(x)\\bigr)^2",
                         "isDisplay": false
                       },
                       {
@@ -9849,7 +9876,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "f(x^2+y)=f(y)+f^2(x)",
+                        "text": "f(x^2+y)=f(y)+\\bigl(f(x)\\bigr)^2",
                         "isDisplay": false
                       },
                       {
@@ -9984,7 +10011,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "y=-f^2(x)",
+                      "text": "y=-\\bigl(f(x)\\bigr)^2",
                       "isDisplay": false
                     },
                     {
@@ -10041,7 +10068,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(a^2) = a, \\tag{1}",
+                  "text": "f(a^2) = a,",
                   "isDisplay": true
                 },
                 {
@@ -10071,16 +10098,25 @@
                     },
                     {
                       "type": "math",
-                      "text": "f\\bigl(f(a^2)\\bigr)=a^2+f^2(0)",
+                      "text": "f\\bigl(f(a^2)\\bigr)=a^2+\\bigl(f(0)\\bigr)^2",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": ", což je podle (1) rovnost "
+                      "text": ", což je díky "
                     },
                     {
                       "type": "math",
-                      "text": "0=a^2+f^2(0)",
+                      "text": "f(a^2)=a",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " rovnost "
+                    },
+                    {
+                      "type": "math",
+                      "text": "0=a^2+\\bigl(f(0)\\bigr)^2",
                       "isDisplay": false
                     },
                     {
@@ -10129,7 +10165,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\bigl(f(y)\\bigr) = y \\tag{2}",
+                  "text": "f\\bigl(f(y)\\bigr) = y \\tag{1}",
                   "isDisplay": true
                 },
                 {
@@ -10183,7 +10219,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je rostoucí. Vztah (2) nám dovoluje dosadit do zadání "
+                      "text": " je rostoucí. Vztah (1) nám dovoluje dosadit do zadání "
                     },
                     {
                       "type": "math",
@@ -10208,7 +10244,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x^2+y) = f(y)+f^2(x). \\tag{3}",
+                  "text": "f(x^2+y) = f(y)+\\bigl(f(x)\\bigr)^2.",
                   "isDisplay": true
                 },
                 {
@@ -10252,11 +10288,11 @@
                     },
                     {
                       "type": "text",
-                      "text": ", takže (3) dává "
+                      "text": ", takže poslední vztah dává "
                     },
                     {
                       "type": "math",
-                      "text": "f(u)=f(v)+f^2\\bigl(\\sqrt{u-v}\\bigr)",
+                      "text": "f(u)=f(v)+\\bigl(f(\\sqrt{u-v})\\bigr)^2",
                       "isDisplay": false
                     },
                     {
@@ -10289,7 +10325,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Rostoucí funkce splňující (2) však už musí být identita: z\u00A0"
+                      "text": "Rostoucí funkce splňující (1) však už musí být identita: z\u00A0"
                     },
                     {
                       "type": "math",
@@ -10325,7 +10361,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", obojí spor s\u00A0(2)."
+                      "text": ", obojí spor s\u00A0(1)."
                     }
                   ],
                   "highligted": false
@@ -11114,7 +11150,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(p^3y) = f(y)+p^3-b. \\tag{3}",
+                  "text": "f(p^3y) = f(y)+p^3-b.",
                   "isDisplay": true
                 },
                 {
@@ -11122,7 +11158,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Vztah (3) použijeme třikrát za sebou, postupně pro "
+                      "text": "Tento vztah použijeme třikrát za sebou, postupně pro "
                     },
                     {
                       "type": "math",
@@ -11503,7 +11539,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f(x+f(y)) = f(x)+f^2(y)+2xf(y).",
+                  "text": "f(x+f(y)) = f(x)+\\bigl(f(y)\\bigr)^2+2xf(y).",
                   "isDisplay": true
                 }
               ],
@@ -11948,7 +11984,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "g\\bigl(x+f(y)\\bigr)+x^2+2xf(y)+f^2(y)",
+                      "text": "g\\bigl(x+f(y)\\bigr)+x^2+2xf(y)+\\bigl(f(y)\\bigr)^2",
                       "isDisplay": false
                     },
                     {
@@ -11957,7 +11993,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "g(x)+x^2+f^2(y)+2xf(y)",
+                      "text": "g(x)+x^2+\\bigl(f(y)\\bigr)^2+2xf(y)",
                       "isDisplay": false
                     },
                     {
@@ -12149,7 +12185,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "g(x) = g\\bigl(x+p(2y+p)\\bigr) \\tag{2}",
+                  "text": "g(x) = g\\bigl(x+p(2y+p)\\bigr)",
                   "isDisplay": true
                 },
                 {
@@ -12261,7 +12297,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "\\bigl(x+f(y)\\bigr)^2+c=x^2+2xf(y)+f^2(y)+c",
+                      "text": "\\bigl(x+f(y)\\bigr)^2+c=x^2+2xf(y)+\\bigl(f(y)\\bigr)^2+c",
                       "isDisplay": false
                     },
                     {
@@ -12270,7 +12306,7 @@
                     },
                     {
                       "type": "math",
-                      "text": "x^2+c+f^2(y)+2xf(y)",
+                      "text": "x^2+c+\\bigl(f(y)\\bigr)^2+2xf(y)",
                       "isDisplay": false
                     },
                     {
@@ -13230,7 +13266,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "f\\Bigl(x+\\frac1y\\Bigr) = \\frac{1}{x+\\frac1y}. \\tag{4}",
+                  "text": "f\\Bigl(x+\\frac1y\\Bigr) = \\frac{1}{x+\\frac1y}.",
                   "isDisplay": true
                 },
                 {
@@ -13292,7 +13328,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0(4) dává "
+                      "text": " a\u00A0poslední rovnost dává "
                     },
                     {
                       "type": "math",

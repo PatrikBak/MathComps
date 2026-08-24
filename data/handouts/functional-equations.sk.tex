@@ -98,9 +98,9 @@ konštantné funkcie.
 
     Voľbou $y=0$ dostaneme $1+f(x)=2f(x)f(0)$, čiže
     $$
-    f(x)\bigl(2f(0)-1\bigr) = 1. \eqno(1)
+    f(x)\bigl(2f(0)-1\bigr) = 1.
     $$
-    Keby $2f(0)-1=0$, dávala by (1) rovnosť $0=1$. Preto $2f(0)-1\neq0$ a
+    Keby $2f(0)-1=0$, dostali by sme rovnosť $0=1$. Preto $2f(0)-1\neq0$ a
     $$
     f(x) = \frac{1}{2f(0)-1},
     $$
@@ -231,7 +231,7 @@ konštantné funkcie.
     $$
     x=f(f(x))-f(x)=f(f(y))-f(y)=y,
     $$
-    a~$f$ je prostá. Ak do zadania dosadíme $x=0$, získame $f(f(0))=f(0)$, a~z~prostoty platí $f(0)=0$. Tým sme dostali aj platnosť $f(f(0))=0$. Ak teraz existuje ešte nejaké riešenie $f(f(x))=0$, tak $f(f(x))=f(f(0))=f(0)$, a~teda $x=0$. Jediným riešením je preto $x=0$.
+    a~$f$ je prostá. Ak do zadania dosadíme $x=0$, získame $f(f(0))=f(0)$, a~z~prostoty platí $f(0)=0$. Tým sme dostali aj platnosť $f(f(0))=0$, takže $x=0$ riešením naozaj je. Ak naopak $f(f(x))=0$ pre nejaké $x$, tak $f(f(x))=f(0)$, z~prostoty $f(x)=0=f(0)$ a~ešte raz z~prostoty $x=0$. Jediným riešením je preto $x=0$.
 }
 
 \EnvId{Fi_6DpBzAvQSV5yHlerRQ-mocnina-krat-sucet-hodnot}
@@ -268,7 +268,7 @@ konštantné funkcie.
 \Problem{0}{}{
     Nájdite všetky funkcie $f\colon \R\to\R$ také, že pre všetky reálne čísla $x,y$ platí
     $$
-    f^2(x-y) = x^2-2f(x)f(y)+y^2.
+    \bigl(f(x-y)\bigr)^2 = x^2-2f(x)f(y)+y^2.
     $$
 }{
     Najprv sa pohraj s~nulami.
@@ -283,13 +283,13 @@ konštantné funkcie.
 
     Dosadením $x=y=0$ máme $3f(0)^2=0$, teda $f(0)=0$, a~voľba $y=0$ potom dáva
     $$
-    f(x)^2 = x^2 \eqno(1)
+    f(x)^2 = x^2
     $$
-    pre každé reálne $x$. To je naša známa pasca, sama osebe ešte nedáva $f(x)\equiv x$ ani $f(x)\equiv-x$. Vzťah (1) však platí pre ľubovoľné číslo, teda aj pre $x-y$, takže ľavá strana zadania je $(x-y)^2$ a~po odčítaní rovnakých členov a~vydelení číslom $-2$ zostane
+    pre každé reálne $x$. To je naša známa pasca, sama osebe ešte nedáva $f(x)\equiv x$ ani $f(x)\equiv-x$. Tento vzťah však platí pre ľubovoľné číslo, teda aj pre $x-y$, takže ľavá strana zadania je $(x-y)^2$ a~po odčítaní rovnakých členov a~vydelení číslom $-2$ zostane
     $$
-    f(x)f(y) = xy. \eqno(2)
+    f(x)f(y) = xy. \eqno(1)
     $$
-    Funkcia $f$ nie je nulová, lebo inak by ľavá strana (2) bola stále nulová, kým pravá pre $x=y=1$ nie je. Nech teda $f(b)\neq0$ a~$c=b/f(b)$; voľba $y=b$ v~(2) dáva $f(x)f(b)=xb$, čiže $f(x)=cx$. Späť v~(2) to dáva $c^2xy=xy$, odkiaľ $c^2=1$ a~$c=\pm1$.
+    Funkcia $f$ nie je nulová, lebo inak by ľavá strana bola stále nulová, kým pravá pre $x=y=1$ nie je. Nech teda $f(b)\neq0$ a~$c=b/f(b)$; voľba $y=b$ v~(1) dáva $f(x)f(b)=xb$, čiže $f(x)=cx$. Späť v~(1) to dáva $c^2xy=xy$, odkiaľ $c^2=1$ a~$c=\pm1$.
 
     Skúška: pre $f(x)=\pm x$ platí $f(x)f(y)=xy$ aj $f(x-y)^2=(x-y)^2$, takže
     $$
@@ -314,17 +314,17 @@ konštantné funkcie.
 
     Po roznásobení sa jednotky odčítajú a~po vydelení kladným $y$ zostane
     $$
-    f(x)-f(x+y) = yf(x)f(x+y). \eqno(1)
+    f(x)-f(x+y) = yf(x)f(x+y).
     $$
-    Symetrickým výrazom je tu $f(x+y)$, lebo pri výmene $x$ a~$y$ sa argument $x+y$ nezmení. Vyjadrime si ho preto z~(1); vďaka kladnosti $1+yf(x)$ máme
+    Symetrickým výrazom je tu $f(x+y)$, lebo pri výmene $x$ a~$y$ sa argument $x+y$ nezmení. Vyjadrime si ho preto z~tejto rovnice; vďaka kladnosti $1+yf(x)$ máme
     $$
-    f(x+y) = \frac{f(x)}{1+yf(x)}. \eqno(2)
+    f(x+y) = \frac{f(x)}{1+yf(x)}.
     $$
-    Ľavá strana (2) sa výmenou $x$ a~$y$ nezmení, a~teda sa nesmie zmeniť ani pravá. Po vynásobení krížom je $f(x)+xf(x)f(y)=f(y)+yf(x)f(y)$ a~po vydelení kladným $f(x)f(y)$
+    Ľavá strana sa výmenou $x$ a~$y$ nezmení, a~teda sa nesmie zmeniť ani pravá. Po vynásobení krížom je $f(x)+xf(x)f(y)=f(y)+yf(x)f(y)$ a~po vydelení kladným $f(x)f(y)$
     $$
-    \frac{1}{f(x)}-x = \frac{1}{f(y)}-y. \eqno(3)
+    \frac{1}{f(x)}-x = \frac{1}{f(y)}-y.
     $$
-    Zafixujme v~(3) $y$; pravá strana je konštanta, označme ju $c$. Potom $f(x)=1/(x+c)$ pre každé $x>0$. Z~$c=1/f(x)-x$ a~$f(x)>0$ máme $c>-x$ pre každé $x>0$, a~keby bolo $c<0$, voľba $x=-c/2$ by dala $c>c/2$, spor. Preto $c\ge0$.
+    Zafixujme teraz $y$; pravá strana je konštanta, označme ju $c$. Potom $f(x)=1/(x+c)$ pre každé $x>0$. Z~$c=1/f(x)-x$ a~$f(x)>0$ máme $c>-x$ pre každé $x>0$, a~keby bolo $c<0$, voľba $x=-c/2$ by dala $c>c/2$, spor. Preto $c\ge0$.
 
     Skúška: pre $c\ge0$ a~$x>0$ je $x+c>0$, takže $f$ je naozaj funkcia z~$\R^+$ do $\R^+$, a
     $$
@@ -357,13 +357,13 @@ konštantné funkcie.
     $$
     Vzťah (1) priam pýta dosadiť do zadania $x:=1-x$: ľavá strana prejde na $f\bigl(y-(1-x)y\bigr)=f(xy)$ a~pravá podľa (1) na $f(x)y+x^2f(y)$. Zadanie sa tak zmenilo na oveľa krajšiu rovnicu
     $$
-    f(xy) = f(x)y+x^2f(y). \eqno(2)
+    f(xy) = f(x)y+x^2f(y).
     $$
-    Ľavá strana (2) je symetrická v~$x$ a~$y$, preto smieme premenné vymeniť a~obe pravé strany porovnať; po preusporiadaní
+    Ľavá strana je symetrická v~$x$ a~$y$, preto smieme premenné vymeniť a~obe pravé strany porovnať; po preusporiadaní
     $$
-    f(x)\,y(1-y) = f(y)\,x(1-x). \eqno(3)
+    f(x)\,y(1-y) = f(y)\,x(1-x).
     $$
-    Voľby $y=0$ a~$y=1$ v~(3) iba vynulujú obe strany, vezmime teda napríklad $y=2$. Dostaneme $-2f(x)=f(2)\,x(1-x)$, čiže po označení $c=f(2)/2$
+    Voľby $y=0$ a~$y=1$ iba vynulujú obe strany, vezmime teda napríklad $y=2$. Dostaneme $-2f(x)=f(2)\,x(1-x)$, čiže po označení $c=f(2)/2$
     $$
     f(x) = c(x^2-x).
     $$
@@ -393,13 +393,13 @@ konštantné funkcie.
 
     Snažíme sa vyrobiť symetrický výraz, taký totiž vieme porovnať so sebou samým po zámene premenných. Ľavá strana $f(xf(y))$ symetrická nie je, ale voľba $x:=f(x)$ (legálna, lebo $f(x)>0$) z~nej spraví $f(f(x)f(y))$:
     $$
-    f\bigl(f(x)f(y)\bigr) = f\bigl(f(x)y\bigr)+f(x). \eqno(1)
+    f\bigl(f(x)f(y)\bigr) = f\bigl(f(x)y\bigr)+f(x).
     $$
-    Prekážajúce $f(f(x)y)$ vyjadríme zo zadania s~vymenenými úlohami premenných, $f\bigl(yf(x)\bigr)=f(xy)+y$, čím (1) prejde na
+    Prekážajúce $f(f(x)y)$ vyjadríme zo zadania s~vymenenými úlohami premenných, $f\bigl(yf(x)\bigr)=f(xy)+y$, čím posledná rovnica prejde na
     $$
-    f\bigl(f(x)f(y)\bigr) = f(xy)+y+f(x). \eqno(2)
+    f\bigl(f(x)f(y)\bigr) = f(xy)+y+f(x). \eqno(1)
     $$
-    Ľavá strana (2) aj výraz $f(xy)$ sa zámenou $x$ a~$y$ nezmenia, takže porovnaním (2) s~rovnosťou po takejto zámene máme $y+f(x)=x+f(y)$. Výraz $f(x)-x$ je teda konštantný, $f(x)=x+c$. Dosadením do zadania je ľavá strana $f\bigl(x(y+c)\bigr)=xy+xc+c$ a~pravá $xy+c+x$, odkiaľ $xc=x$ a~$c=1$.
+    Ľavá strana (1) aj výraz $f(xy)$ sa zámenou $x$ a~$y$ nezmenia, takže porovnaním (1) s~rovnosťou po takejto zámene máme $y+f(x)=x+f(y)$. Výraz $f(x)-x$ je teda konštantný, $f(x)=x+c$. Dosadením do zadania je ľavá strana $f\bigl(x(y+c)\bigr)=xy+xc+c$ a~pravá $xy+c+x$, odkiaľ $xc=x$ a~$c=1$.
 
     Skúška: $f\bigl(xf(y)\bigr)=x(y+1)+1=xy+x+1$ a~$f(xy)+x=xy+1+x$.
 }
@@ -423,21 +423,21 @@ konštantné funkcie.
 
     Divný výraz $f(xf(y))$ si osamostatníme vydelením kladným $f(y)$:
     $$
-    f(xf(y)) = f(x)-\frac{1}{xyf(y)}. \eqno(1)
+    f(xf(y)) = f(x)-\frac{1}{xyf(y)}.
     $$
-    Argument $xf(y)$ sa stane symetrickým v~$x$ a~$y$, ak za $x$ dosadíme $f(x)$. Voľba $x:=f(x)$ v~(1) dáva $f\bigl(f(x)f(y)\bigr)=f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)}$, kde sa ľavá strana zámenou $x$ a~$y$ nezmení, takže
+    Argument $xf(y)$ sa stane symetrickým v~$x$ a~$y$, ak za $x$ dosadíme $f(x)$. Voľba $x:=f(x)$ dáva $f\bigl(f(x)f(y)\bigr)=f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)}$, kde sa ľavá strana zámenou $x$ a~$y$ nezmení, takže
     $$
-    f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)} = f\bigl(f(y)\bigr)-\frac{1}{xf(x)f(y)}. \eqno(2)
+    f\bigl(f(x)\bigr)-\frac{1}{yf(x)f(y)} = f\bigl(f(y)\bigr)-\frac{1}{xf(x)f(y)}.
     $$
-    Označme $a=f(1)$. Voľba $y=1$ v~(2) dáva prvé vyjadrenie
+    Označme $a=f(1)$. Voľba $y=1$ dáva prvé vyjadrenie
     $$
-    f\bigl(f(x)\bigr) = f(a)+\frac{x-1}{axf(x)}, \eqno(3)
+    f\bigl(f(x)\bigr) = f(a)+\frac{x-1}{axf(x)}, \eqno(1)
     $$
     kým pôvodná rovnica pre $x=1$, $y:=x$ znie $af(x)=f(x)f\bigl(f(x)\bigr)+\frac1x$, čiže
     $$
-    f\bigl(f(x)\bigr) = a-\frac{1}{xf(x)}. \eqno(4)
+    f\bigl(f(x)\bigr) = a-\frac{1}{xf(x)}. \eqno(2)
     $$
-    Špeciálne $x=1$ v~(4) dáva $f(a)=a-\frac1a$. Po dosadení do (3), porovnaní s~(4) a~vynásobení výrazom $axf(x)$ máme
+    Špeciálne $x=1$ v~(2) dáva $f(a)=a-\frac1a$. Po dosadení do (1), porovnaní s~(2) a~vynásobení výrazom $axf(x)$ máme
     $$
     \eqalign{
         a^2xf(x)-a &= a^2xf(x)-xf(x)+x-1,\cr
@@ -511,18 +511,18 @@ konštantné funkcie.
 \Problem{0}{}{
     Nájdite všetky funkcie $f\colon \R\to\R$ také, že pre všetky reálne čísla $x,y$ platí
     $$
-    f(xf(x)+f(y)) = y+f^2(x).
+    f(xf(x)+f(y)) = y+\bigl(f(x)\bigr)^2.
     $$
 }{
     Nahliadnite nejaké z~našich známych dobrých vlastností $f$.
 }{
     Kľúčom je dokázať, že $f$ je bijekcia na $\R$. K~tomu sa oplatí pozrieť na pravú stranu. Dôkaz prebieha podobne ako pre $f(f(x))=x$. Môžeme si pomôcť dosadením, aby to bolo jasnejšie.
 }{
-    Po dosadení $x=0$ máme $f(f(y))=y+f^2(0)$, z~čoho dokážeme bijekciu. Tento vzťah je fajn, hodilo by sa spočítať $f(0)$.
+    Po dosadení $x=0$ máme $f(f(y))=y+\bigl(f(0)\bigr)^2$, z~čoho dokážeme bijekciu. Tento vzťah je fajn, hodilo by sa spočítať $f(0)$.
 }{
-    Kľúčom k~spočítaniu $f(0)$ je trik: Podľa tvaru rovnice tuším, že riešením bude $f(x)=x$, teda $f(0)$ bude asi $0$. Zo surjektivity vieme, že funkcia je niekde $0$, nech $f(a)=0$. Skúsme vhodne dosadiť.
+    Kľúčom k~spočítaniu $f(0)$ je trik: Podľa tvaru rovnice tuším, že riešením bude $f(x)=x$, teda $f(0)$ bude asi $0$. Zo surjektivity vieme, že funkcia je niekde $0$, nech $f(r)=0$. Skúsme vhodne dosadiť.
 }{
-    Kľúčom je $x=a$ do pôvodnej rovnice, to nám dáva rovno $f(f(y))=y$, čo v~porovnaní s~$f(f(y))=y+f^2(0)$ dáva $f(0)=0$.
+    Kľúčom je $x=r$ do pôvodnej rovnice, to nám dáva rovno $f(f(y))=y$, čo v~porovnaní s~$f(f(y))=y+\bigl(f(0)\bigr)^2$ dáva $f(0)=0$.
 }{
     Skúste vymyslieť vtipné dosadenie, ktoré vtipne použije $f(f(x))=x$.
 }{
@@ -560,7 +560,7 @@ konštantné funkcie.
     $$
     pre každé reálne $x$.
 
-    To je naša známa pasca, zo (4) ešte nevyplýva, že $f$ je identicky $x$ alebo identicky $-x$. Predpokladajme teda, že existujú nenulové $a$, $b$ také, že $f(a)=a$ a~$f(b)=-b$. Voľba $x=a$, $y=b$ v~(1) dáva $f(a^2-b)=b+a^2$, kým podľa (4) je $f(a^2-b)$ rovné $a^2-b$ alebo $-(a^2-b)$. V~prvom prípade $b=0$, v~druhom $a=0$, oboje spor. Keďže v~nule oba predpisy splývajú, platí buď $f(x)=x$ pre všetky $x$, alebo $f(x)=-x$ pre všetky $x$.
+    To je naša známa pasca, zo (4) ešte nevyplýva, že $f$ je identicky $x$ alebo identicky $-x$. V~nule oba predpisy splývajú, takže ak $f$ nie je ani jedným z~nich, existujú nenulové $a$, $b$ s~$f(a)=a$ a~$f(b)=-b$. Voľba $x=a$, $y=b$ v~(1) dáva $f(a^2-b)=b+a^2$, kým podľa (4) je $f(a^2-b)$ rovné $a^2-b$ alebo $-(a^2-b)$. V~prvom prípade $b=0$, v~druhom $a=0$, oboje spor. Platí teda buď $f(x)=x$ pre všetky $x$, alebo $f(x)=-x$ pre všetky $x$.
 
     Skúška: pre $f(x)=x$ je ľavá strana (1) rovná $f(x^2+y)=x^2+y$ a~pravá $y+x^2$; pre $f(x)=-x$ je ľavá $f(-x^2-y)=x^2+y$ a~pravá $y+x^2$.
 }
@@ -569,7 +569,7 @@ konštantné funkcie.
 \Problem{0}{IMO 2008 P4}{
     Nájdite všetky funkcie $f\colon \R^+\to\R^+$ také, že pre všetky kladné reálne čísla $w,x,y,z$ spĺňajúce $wx=yz$ platí
     $$
-    \frac{f^2(w)+f^2(x)}{f(y^2)+f(z^2)} = \frac{w^2+x^2}{y^2+z^2}.
+    \frac{\bigl(f(w)\bigr)^2+\bigl(f(x)\bigr)^2}{f(y^2)+f(z^2)} = \frac{w^2+x^2}{y^2+z^2}.
     $$
 }{
     Už najjednoduchšie dosadenie, všetky rovnaké premenné, dáva niečo užitočné a~inšpiratívne.
@@ -673,12 +673,12 @@ konštantné funkcie.
 \Problem{0}{IMO 1992 P2}{
     Nájdite všetky funkcie $f\colon \R\to\R$ také, že pre všetky reálne čísla $x,y$ platí
     $$
-    f(x^2+f(y)) = y+f^2(x).
+    f(x^2+f(y)) = y+\bigl(f(x)\bigr)^2.
     $$
 }{
     Všimni si, že $f$ má nulový bod a~nájdi ho.
 }{
-    Prečo má $f$ nulový bod? Nuž, pre $y=-f^2(x)$ máme $f(\hbox{niečo})=0$. Ako ale presne spočítame? Chce to pár dosadení. Nech $f(a)=0$...
+    Prečo má $f$ nulový bod? Nuž, pre $y=-\bigl(f(x)\bigr)^2$ máme $f(\hbox{niečo})=0$. Ako ale presne spočítame? Chce to pár dosadení. Nech $f(a)=0$...
 }{
     Kľúčom sú dve dosadenia, $[a,a]$ a~$[0,a^2]$, z~toho rovno dostaneme $a=0$. Ako vždy, $f(0)=0$ nám veľa dáva.
 }{
@@ -686,7 +686,7 @@ konštantné funkcie.
 }{
     Trik je skúsiť dokázať, že $f$ je rastúca funkcia.
 }{
-    Na dôkaz rastúcosti najprv dosaďme $y:=f(y)$, čo nám dá $f(x^2+y)=f(y)+f^2(x)$. Rastúcosť z~toho už plynie, aj keď to nie je vidieť.
+    Na dôkaz rastúcosti najprv dosaďme $y:=f(y)$, čo nám dá $f(x^2+y)=f(y)+\bigl(f(x)\bigr)^2$. Rastúcosť z~toho už plynie, aj keď to nie je vidieť.
 }{
     Ak máme dve čísla $u>v$, tak vieme nájsť vhodné $(x,y)$, aby $x^2+y=u$ a~$y=v$. Máme potom v~našej rovnici $f(u)>f(v)$?
 }{
@@ -694,25 +694,25 @@ konštantné funkcie.
 }{
     \Answer{$f(x)=x$.}
 
-    Najprv si všimnime, že $f$ má nulový bod: pri voľbe $y=-f^2(x)$ je pravá strana nulová, takže $f$ je nulová v~bode $x^2+f(y)$. Nech teda $f(a)=0$ a~pokúsme sa $a$ spočítať. Dosadenie $x=y=a$ dáva
+    Najprv si všimnime, že $f$ má nulový bod: pri voľbe $y=-\bigl(f(x)\bigr)^2$ je pravá strana nulová, takže $f$ je nulová v~bode $x^2+f(y)$. Nech teda $f(a)=0$ a~pokúsme sa $a$ spočítať. Dosadenie $x=y=a$ dáva
     $$
-    f(a^2) = a, \eqno(1)
+    f(a^2) = a,
     $$
-    a~voľba $x=0$, $y=a^2$ dáva $f\bigl(f(a^2)\bigr)=a^2+f^2(0)$, čo je podľa (1) rovnosť $0=a^2+f^2(0)$. Oba sčítance sú nezáporné, a~preto $a=0$ aj $f(0)=0$.
+    a~voľba $x=0$, $y=a^2$ dáva $f\bigl(f(a^2)\bigr)=a^2+\bigl(f(0)\bigr)^2$, čo je vďaka $f(a^2)=a$ rovnosť $0=a^2+\bigl(f(0)\bigr)^2$. Oba sčítance sú nezáporné, a~preto $a=0$ aj $f(0)=0$.
 
     Teraz nám $x=0$ dáva
     $$
-    f\bigl(f(y)\bigr) = y \eqno(2)
+    f\bigl(f(y)\bigr) = y \eqno(1)
     $$
     pre všetky reálne $y$, odkiaľ je $f$ prostá, a~spolu s~$f(0)=0$ je teda nulová jedine v~nule.
 
-    Tu už obyčajné dosadzovanie končí a~chce to myšlienku: ukážeme, že $f$ je rastúca. Vzťah (2) nám dovoľuje dosadiť do zadania $y:=f(y)$, čím sa vnútorné dvojité $f$ zjednoduší a~zostane
+    Tu už obyčajné dosadzovanie končí a~chce to myšlienku: ukážeme, že $f$ je rastúca. Vzťah (1) nám dovoľuje dosadiť do zadania $y:=f(y)$, čím sa vnútorné dvojité $f$ zjednoduší a~zostane
     $$
-    f(x^2+y) = f(y)+f^2(x). \eqno(3)
+    f(x^2+y) = f(y)+\bigl(f(x)\bigr)^2.
     $$
-    Nech $u>v$. Pri voľbe $y=v$ a~$x=\sqrt{u-v}>0$ je $x^2+y=u$, takže (3) dáva $f(u)=f(v)+f^2\bigl(\sqrt{u-v}\bigr)$, kde pripočítaný štvorec je kladný, lebo $f$ je nulová jedine v~nule. Preto $f(u)>f(v)$.
+    Nech $u>v$. Pri voľbe $y=v$ a~$x=\sqrt{u-v}>0$ je $x^2+y=u$, takže posledný vzťah dáva $f(u)=f(v)+\bigl(f(\sqrt{u-v})\bigr)^2$, kde pripočítaný štvorec je kladný, lebo $f$ je nulová jedine v~nule. Preto $f(u)>f(v)$.
 
-    Rastúca funkcia spĺňajúca (2) však už musí byť identita: z~$f(x)>x$ by rastúcosť dala $f\bigl(f(x)\bigr)>f(x)>x$ a~z~$f(x)<x$ zas $x=f\bigl(f(x)\bigr)<f(x)<x$, oboje spor s~(2).
+    Rastúca funkcia spĺňajúca (1) však už musí byť identita: z~$f(x)>x$ by rastúcosť dala $f\bigl(f(x)\bigr)>f(x)>x$ a~z~$f(x)<x$ zas $x=f\bigl(f(x)\bigr)<f(x)<x$, oboje spor s~(1).
 
     Skúška: ľavá strana je $f(x^2+y)=x^2+y$ a~pravá $y+x^2$.
 }
@@ -756,9 +756,9 @@ konštantné funkcie.
 
     Nech je teraz $p$ ľubovoľný pevný bod. Voľba $x=p$ v~(1) hovorí, že pevným bodom je aj $p^3$, a~tá istá úvaha pre $p^3$ dáva pevný bod $p^9$. Aby sme tieto mocniny vedeli porovnať, dosaďme do zadania $x=p$ pri voľnom $y$; pomocou $f(p)=p$ dostaneme
     $$
-    f(p^3y) = f(y)+p^3-b. \eqno(3)
+    f(p^3y) = f(y)+p^3-b.
     $$
-    Vzťah (3) použijeme trikrát za sebou, postupne pre $y=1$, $y=p^3$ a~$y=p^6$:
+    Tento vzťah použijeme trikrát za sebou, postupne pre $y=1$, $y=p^3$ a~$y=p^6$:
     $$
     f(p^3)=p^3,\qquad f(p^6)=2p^3-b,\qquad f(p^9)=3p^3-2b.
     $$
@@ -777,7 +777,7 @@ konštantné funkcie.
 \Problem{0}{}{
     Nájdite všetky funkcie $f\colon \R\to\R$ také, že pre všetky reálne čísla $x,y$ platí
     $$
-    f(x+f(y)) = f(x)+f^2(y)+2xf(y).
+    f(x+f(y)) = f(x)+\bigl(f(y)\bigr)^2+2xf(y).
     $$
 }{
     Skúsme uhádnuť riešenie a~podľa toho spraviť vhodnú substitúciu.
@@ -805,7 +805,7 @@ konštantné funkcie.
 }{
     \Answer{Nulová funkcia $f(x)=0$ a~funkcie $f(x)=x^2+c$ pre ľubovoľnú reálnu konštantu $c$.}
 
-    Skúsme si riešenie najprv uhádnuť. Pravá strana nápadne pripomína rozvinutý štvorec $(x+f(y))^2$, a~naozaj $f(x)=x^2$ rovnicu spĺňa, rovnako ako $f(x)=x^2+c$ pre ľubovoľnú konštantu $c$. To nás navádza sledovať, ako veľmi sa $f$ od štvorca líši, teda označiť $g(x)=f(x)-x^2$. Po dosadení $f(x)=g(x)+x^2$ je ľavá strana zadania rovná $g\bigl(x+f(y)\bigr)+x^2+2xf(y)+f^2(y)$ a~pravá $g(x)+x^2+f^2(y)+2xf(y)$. Skoro všetko sa vyruší a~zostane $g(x+f(y))=g(x)$, čiže vďaka $f(y)=y^2+g(y)$
+    Skúsme si riešenie najprv uhádnuť. Pravá strana nápadne pripomína rozvinutý štvorec $(x+f(y))^2$, a~naozaj $f(x)=x^2$ rovnicu spĺňa, rovnako ako $f(x)=x^2+c$ pre ľubovoľnú konštantu $c$. To nás navádza sledovať, ako veľmi sa $f$ od štvorca líši, teda označiť $g(x)=f(x)-x^2$. Po dosadení $f(x)=g(x)+x^2$ je ľavá strana zadania rovná $g\bigl(x+f(y)\bigr)+x^2+2xf(y)+\bigl(f(y)\bigr)^2$ a~pravá $g(x)+x^2+\bigl(f(y)\bigr)^2+2xf(y)$. Skoro všetko sa vyruší a~zostane $g(x+f(y))=g(x)$, čiže vďaka $f(y)=y^2+g(y)$
     $$
     g\bigl(x+y^2+g(y)\bigr) = g(x) \eqno(1)
     $$
@@ -817,11 +817,11 @@ konštantné funkcie.
     $$
     kde pravú stranu zjednodušíme voľbou $x:=x+p(2y+p)$ v~(1), ktorá sa zbaví členu $y^2+g(y)$. Zostáva
     $$
-    g(x) = g\bigl(x+p(2y+p)\bigr) \eqno(2)
+    g(x) = g\bigl(x+p(2y+p)\bigr)
     $$
     pre všetky reálne $x,y$. Aj každé číslo tvaru $p(2y+p)$ je teda perióda $g$, a~keďže $p\neq0$, nadobúda tento výraz pri prebehnutí $y$ cez $\R$ úplne ľubovoľnú reálnu hodnotu. Funkcia $g$ sa teda nezmení po posunutí o~hocičo, čiže je konštantná; označme $c=g(0)$, potom $f(x)=x^2+c$.
 
-    Skúška: pre nulovú funkciu sú obe strany nulové, pre $f(x)=x^2+c$ je ľavá strana $\bigl(x+f(y)\bigr)^2+c=x^2+2xf(y)+f^2(y)+c$ a~pravá $x^2+c+f^2(y)+2xf(y)$.
+    Skúška: pre nulovú funkciu sú obe strany nulové, pre $f(x)=x^2+c$ je ľavá strana $\bigl(x+f(y)\bigr)^2+c=x^2+2xf(y)+\bigl(f(y)\bigr)^2+c$ a~pravá $x^2+c+\bigl(f(y)\bigr)^2+2xf(y)$.
 }
 
 \EnvId{kJJ4Hd66V4jiFP-sKLSFD-argument-xy-plus-jedna}
@@ -872,9 +872,9 @@ konštantné funkcie.
 
     Hodnoty na intervale $(0,1]$ už dopočítame zo zadania. Pre $x>0$ a~$y>1$ je $xy+1>1$, takže podľa (3) je $f(xy+1)=1/(xy+1)$ aj $f(y)=1/y$ a~rovnica sa zjednoduší na
     $$
-    f\Bigl(x+\frac1y\Bigr) = \frac{1}{x+\frac1y}. \eqno(4)
+    f\Bigl(x+\frac1y\Bigr) = \frac{1}{x+\frac1y}.
     $$
-    Nech je teraz $t\le1$ ľubovoľné kladné číslo a~zvoľme $y>1/t$; potom $y>1$ aj $1/y<t$, takže pre $x=t-1/y>0$ je $x+\frac1y=t$ a~(4) dáva $f(t)=1/t$. Spolu s~(3) je teda $f(x)=1/x$ pre všetky $x>0$.
+    Nech je teraz $t\le1$ ľubovoľné kladné číslo a~zvoľme $y>1/t$; potom $y>1$ aj $1/y<t$, takže pre $x=t-1/y>0$ je $x+\frac1y=t$ a~posledná rovnosť dáva $f(t)=1/t$. Spolu s~(3) je teda $f(x)=1/x$ pre všetky $x>0$.
 
     Skúška: ľavá strana je $\frac{1}{x+1/y}=\frac{y}{xy+1}$ a~pravá $y\cdot\frac{1}{xy+1}$.
 }

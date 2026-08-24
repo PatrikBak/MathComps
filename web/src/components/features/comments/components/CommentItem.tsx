@@ -22,8 +22,8 @@ export type CommentData = {
   id: string
   /** Unique identifier for the author (used for ownership checks). */
   authorId: string
-  /** The name or username of the person who wrote the comment. */
-  author: string
+  /** The username of the person who wrote the comment, or null when there is none to show. */
+  author: string | null
   /** URL of the author's avatar image. */
   avatarUrl?: string | null
   /** The markdown-formatted text content of the comment. */
@@ -103,8 +103,14 @@ export function CommentItem({
   const tPlurals = useTranslations('plurals')
   const tComments = useTranslations('comments')
 
+  // Profile copy
+  const tProfile = useTranslations('profile')
+
   // Date formatter (uses current locale automatically)
   const format = useFormatter()
+
+  // The name the comment is signed with, standing in when the site has none to show
+  const authorName = author ?? tProfile('defaultUser')
 
   // Reset hover state when expanding
   useEffect(() => {
@@ -214,7 +220,7 @@ export function CommentItem({
         <div className="flex-shrink-0 z-10">
           <UserAvatarImage
             imageUrl={avatarUrl}
-            altText={tComments('avatarAlt', { author })}
+            altText={tComments('avatarAlt', { author: authorName })}
             size={AVATAR_SIZE}
           />
         </div>
@@ -226,7 +232,7 @@ export function CommentItem({
             {/* Group: Author + Timestamp (wraps together first, then individually) */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
               {/* (1) Author */}
-              <span className="text-sm font-medium text-foreground">{author}</span>
+              <span className="text-sm font-medium text-foreground">{authorName}</span>
 
               {/* (2) Timestamp + edited */}
               <span className="text-xs text-muted flex items-center gap-1">

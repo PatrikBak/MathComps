@@ -161,7 +161,8 @@ public class AdminNoteService(
             note.Id,
             note.SessionId,
             note.TurnId,
-            new AdminDefenseUserDto(note.Author.Id, note.Author.DisplayName, note.Author.Email),
+            new AdminDefenseUserDto(
+                note.Author.Id, note.Author.IsDeleted ? null : note.Author.Username, note.Author.Email),
             // The gate above leaves only the author here.
             true,
             note.Content,
@@ -260,7 +261,9 @@ public class AdminNoteService(
                     note.SessionId,
                     note.TurnId,
                     new AdminDefenseUserDto(
-                        note.Author.Id, note.Author.DisplayName, note.Author.Email),
+                        note.Author.Id,
+                        note.Author.IsDeleted ? null : note.Author.Username,
+                        note.Author.Email),
                     note.AuthorId == reviewerId,
                     note.Content,
                     note.Category,
@@ -271,7 +274,9 @@ public class AdminNoteService(
                     note.Session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                     note.Session.EnvironmentTarget.HandoutEnvironment.ContentId),
                 new AdminDefenseUserDto(
-                    note.Session.User.Id, note.Session.User.DisplayName, note.Session.User.Email),
+                    note.Session.User.Id,
+                    note.Session.User.IsDeleted ? null : note.Session.User.Username,
+                    note.Session.User.Email),
                 // Where a turn-level note hangs.
                 note.Turn == null ? null : note.Turn.Sequence))
             .ToListAsync(cancellationToken);
@@ -294,7 +299,8 @@ public class AdminNoteService(
         // Whoever sits under the id, and only the three fields a byline is made of.
         return dbContext.Users
             .Where(user => user.Id == userId)
-            .Select(user => new AdminDefenseUserDto(user.Id, user.DisplayName, user.Email))
+            .Select(user => new AdminDefenseUserDto(
+                user.Id, user.IsDeleted ? null : user.Username, user.Email))
             .FirstOrDefaultAsync(cancellationToken);
     }
 }

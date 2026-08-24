@@ -3,10 +3,7 @@
 import { useAuth } from '@clerk/nextjs'
 import { Check, Layers, Plus, Settings } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
 
-import { FOCUS_RING_ROW_CLASS } from '@/components/shared/components/Button'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { PopoverItem, PopoverSeparator } from '@/components/shared/components/Popover'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
@@ -14,10 +11,10 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
 import { useProblemStore } from '@/stores/problem-store'
 
-import { useCreateUserList } from '../hooks/use-create-user-list'
+import { useNewListForm } from '../hooks/use-new-list-form'
 import { useToggleListItem } from '../hooks/use-toggle-list-item'
 import { useUserLists } from '../hooks/use-user-lists'
-import { listNameSchema } from '../schemas/user-list-schemas'
+import { NewListInput } from './NewListInput'
 
 /*
  * Stable empty array to avoid re-rendering when lists are empty.
@@ -75,26 +72,11 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
   // Login prompt
   const showLoginPrompt = useLoginPromptToast()
 
-  // Whether we're in "new list" mode
-  const [isCreating, setIsCreatingRaw] = useState(false)
-
-  // Wrapper that notifies the parent in the same render batch
-  const setIsCreating = (value: boolean) => {
-    setIsCreatingRaw(value)
-    props.onCreatingChange?.(value)
-  }
-
-  // The current name of the new list
-  const [newListName, setNewListName] = useState('')
-
-  // The ref to the input where we're typing the new list name
-  const inputRef = useRef<HTMLInputElement>(null)
+  // The form for naming a new list
+  const newListForm = useNewListForm({ onCreatingChange: props.onCreatingChange })
 
   // Fetch user lists
   const { lists, isLoading: isListsLoading } = useUserLists()
-
-  // Create list mutation
-  const { createList, isPending: isCreatePending } = useCreateUserList()
 
   // Toggle list item mutation (only used in membership mode)
   const toggleListItem = useToggleListItem()
@@ -105,15 +87,6 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
       ? (state.problems[props.problemSlug]?.listContentIds ?? EMPTY_ARRAY)
       : EMPTY_ARRAY
   )
-
-  // Focus the input once creation mode has rendered it visible (it's always
-  // mounted but hidden, so defer a tick past the commit that reveals it)
-  useEffect(() => {
-    if (isCreating) {
-      const timer = setTimeout(() => inputRef.current?.focus(), 0)
-      return () => clearTimeout(timer)
-    }
-  }, [isCreating])
 
   return (
     <>
@@ -130,7 +103,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
             return (
               <PopoverItem
                 key={list.contentId}
-                disabled={isCreating}
+                disabled={newListForm.isCreating}
                 onClick={() => {
                   // Filter mode: filter by the selected list
                   if (props.mode === 'filter') {
@@ -154,7 +127,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                         className={cn('h-4 w-4 shrink-0', isActive ? 'text-focus' : 'text-muted')}
                       />
                     )}
-                    <TruncatedText className="truncate text-sm">{list.name}</TruncatedText>
+                    <TruncatedText className="text-sm">{list.name}</TruncatedText>
                   </div>
                   <span className="w-6 shrink-0 text-right text-xs tabular-nums text-muted">
                     {list.problemCount}
@@ -186,65 +159,17 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
              so the wider one always defines the width (prevents horizontal shift) */}
           <div className="grid">
             {/* Input for typing the new list name */}
-            <div
+            <NewListInput
+              form={newListForm}
               className={cn(
-                'relative flex select-none items-center rounded-sm px-2 py-1.5 text-sm gap-2 col-start-1 row-start-1',
-                // The row is the field, since the input inside it carries no edge of its own
-                FOCUS_RING_ROW_CLASS,
-                !isCreating && 'invisible'
+                'relative col-start-1 row-start-1',
+                !newListForm.isCreating && 'invisible'
               )}
-            >
-              <Plus className="h-4 w-4 shrink-0 text-muted" />
-              <input
-                ref={inputRef}
-                type="text"
-                value={newListName}
-                onChange={(event) => setNewListName(event.target.value)}
-                onKeyDown={(event) => {
-                  // Keep keystrokes from reaching the popover (e.g. Escape closing it)
-                  event.stopPropagation()
-
-                  // Enter → create list
-                  if (event.key === 'Enter') {
-                    event.preventDefault()
-
-                    // Validate with shared schema
-                    const result = listNameSchema.safeParse(newListName)
-
-                    // Show error if invalid
-                    if (!result.success) {
-                      toast.error(t('listNameInvalid'))
-                      return
-                    }
-
-                    // Create the list (reset state after the mutation succeeds,
-                    // so the input stays visible until the new list is in the cache)
-                    createList(result.data, {
-                      onSuccess: () => {
-                        setNewListName('')
-                        setIsCreating(false)
-                      },
-                    })
-                  }
-                  // Escape → cancel
-                  if (event.key === 'Escape') {
-                    event.preventDefault()
-
-                    // Reset the list state
-                    setNewListName('')
-                    setIsCreating(false)
-                  }
-                }}
-                placeholder={t('newListPlaceholder')}
-                disabled={isCreatePending}
-                className="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder-muted border-none outline-none focus:ring-0"
-              />
-              <LoadingSpinner className={cn('h-4 w-4 shrink-0', !isCreatePending && 'invisible')} />
-            </div>
+            />
 
             {/* Button to reveal the input (visible when not creating) */}
             <PopoverItem
-              disabled={isCreating}
+              disabled={newListForm.isCreating}
               onClick={() => {
                 // Auth gate: show login prompt for unsigned users
                 if (!isSignedIn) {
@@ -258,9 +183,12 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
                 }
 
                 // Signed in: reveal the input
-                setIsCreating(true)
+                newListForm.start()
               }}
-              className={cn('col-start-1 row-start-1 text-muted', isCreating && 'invisible')}
+              className={cn(
+                'col-start-1 row-start-1 text-muted',
+                newListForm.isCreating && 'invisible'
+              )}
             >
               <div className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
@@ -272,7 +200,7 @@ export function UserListMenuItems(props: UserListMenuItemsProps) {
           {/* Manage lists — only when signed in and lists exist */}
           {isSignedIn && props.onManage && lists && lists.length > 0 && (
             <PopoverItem
-              disabled={isCreating}
+              disabled={newListForm.isCreating}
               onClick={() => props.onManage?.()}
               className="text-muted"
             >

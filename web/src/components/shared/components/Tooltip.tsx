@@ -1,17 +1,11 @@
 'use client'
 
 import {
-  autoUpdate,
-  flip,
   FloatingFocusManager,
   FloatingPortal,
-  offset,
   type Placement,
-  shift,
-  size,
   useClick,
   useDismiss,
-  useFloating,
   useFocus,
   useHover,
   useInteractions,
@@ -20,6 +14,8 @@ import {
 } from '@floating-ui/react'
 import * as React from 'react'
 import { useState } from 'react'
+
+import { useFloatingPanel } from '@/hooks/use-floating-panel'
 
 /**
  * Props for the {@link Tooltip} component.
@@ -54,37 +50,27 @@ export function Tooltip({ children, content, placement, className = '' }: Toolti
   const [open, setOpen] = useState(false)
 
   // Set up floating UI logic for tooltip positioning and sizing
-  const { x, y, refs, context } = useFloating({
-    // Preferred tooltip placement (top, bottom, left, right)
+  const { x, y, refs, context } = useFloatingPanel({
+    // Preferred tooltip placement (top, bottom, left, right). The sides to fall back to are left to
+    // floating-ui, which derives them from this one, since callers pass every side
     placement,
+    // Free to re-flip as the page moves under the trigger, which keeps a tooltip on screen
+    pinSide: false,
     // Currently open/closed state of tooltip
     open,
     // Called when open state changes (on hover/click)
     onOpenChange: setOpen,
-    // Middleware functions for positioning and constraining tooltip
-    middleware: [
-      // Add gap spacing between trigger and tooltip
-      offset(5),
-      // Flip tooltip side if there isn't enough space
-      flip({ padding: 16 }),
-      // Shift tooltip into view if it would overflow viewport
-      shift({ padding: 16 }),
-      // Restrict tooltip width/height to fit available space
-      size({
-        // Custom logic to apply calculated width/height to tooltip
-        apply({ availableWidth, availableHeight, elements }) {
-          // Constrain the tooltip width/height to fit within available space
-          // Cap max width to reduce excessive wrapping while keeping tooltips readable
-          const maxWidth = Math.min(availableWidth, 480)
-          elements.floating.style.maxWidth = `${maxWidth}px`
-          elements.floating.style.maxHeight = `${availableHeight}px`
-        },
-        // Extra padding from the edges of the viewport
-        padding: 16,
-      }),
-    ],
-    // Automatically update position while trigger/floating elements move or resize
-    whileElementsMounted: autoUpdate,
+    // Gap between the trigger and the tooltip
+    gap: 5,
+    // How much of the viewport's edge it keeps clear
+    padding: 16,
+    // Constrain the tooltip width/height to fit within available space
+    applySize({ availableWidth, availableHeight, elements }) {
+      // Cap max width to reduce excessive wrapping while keeping tooltips readable
+      const maxWidth = Math.min(availableWidth, 480)
+      elements.floating.style.maxWidth = `${maxWidth}px`
+      elements.floating.style.maxHeight = `${availableHeight}px`
+    },
   })
 
   // Set up interactions for tooltip trigger and floating content
@@ -158,7 +144,10 @@ export function Tooltip({ children, content, placement, className = '' }: Toolti
             <div
               {...getFloatingProps({
                 ref: refs.setFloating,
-                className: `z-tooltip max-h-48 animate-in overflow-y-auto rounded-lg bg-surface/95 px-3 py-1.5 text-sm text-foreground shadow-lg backdrop-blur-sm duration-150 ease-out fade-in zoom-in-95 motion-reduce:animate-none ${className}`,
+                // `duration-150` and `ease-out` feed the enter animation through `--tw-duration` and
+                // `--tw-ease`, but they also emit the transition longhands, and `transition-property`
+                // defaults to `all`. Without `transition-none` the popover animates `top`/`left` from 0,0.
+                className: `z-tooltip max-h-48 animate-in overflow-y-auto rounded-lg bg-surface/95 px-3 py-1.5 text-sm text-foreground shadow-lg backdrop-blur-sm duration-150 ease-out fade-in zoom-in-95 transition-none motion-reduce:animate-none ${className}`,
                 style: {
                   position: context.strategy,
                   top: y ?? 0,

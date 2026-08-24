@@ -114,7 +114,10 @@ public class AdminDefenseReviewService(
                 (row, session) => new AdminDefenseConversationDto(
                     session.Id,
                     new HandoutEnvironmentTarget(row.HandoutContentId, row.EnvironmentId),
-                    new AdminDefenseUserDto(session.User.Id, session.User.DisplayName, session.User.Email),
+                    new AdminDefenseUserDto(
+                        session.User.Id,
+                        session.User.IsDeleted ? null : session.User.Username,
+                        session.User.Email),
                     session.Turns
                         .Where(turn => turn.Role == TranscriptRole.Candidate)
                         .OrderByDescending(turn => turn.Sequence)
@@ -157,16 +160,21 @@ public class AdminDefenseReviewService(
         var userRows = await dbContext.DefenseSessions
             .AsNoTracking()
             .Where(session => session.EnvironmentTarget != null)
-            .GroupBy(session => new { session.UserId, session.User.DisplayName, session.User.Email })
+            .GroupBy(session => new
+            {
+                session.UserId,
+                Username = session.User.IsDeleted ? null : session.User.Username,
+                session.User.Email
+            })
             .Select(group => new
             {
                 group.Key.UserId,
-                group.Key.DisplayName,
+                group.Key.Username,
                 group.Key.Email,
                 ConversationCount = group.Count(),
             })
             .OrderByDescending(row => row.ConversationCount)
-            .ThenBy(row => row.DisplayName)
+            .ThenBy(row => row.Username)
             .ToListAsync(cancellationToken);
 
         // Every problem one has been held against, carrying the content ids the reader's side names them by.
@@ -190,7 +198,7 @@ public class AdminDefenseReviewService(
         // The students, each with how many conversations they hold.
         var users = userRows
             .Select(row => new AdminDefenseUserOptionDto(
-                new AdminDefenseUserDto(row.UserId, row.DisplayName, row.Email), row.ConversationCount))
+                new AdminDefenseUserDto(row.UserId, row.Username, row.Email), row.ConversationCount))
             .ToList();
 
         // The problems, each with how many conversations were held against it.
@@ -230,7 +238,10 @@ public class AdminDefenseReviewService(
                 Target = new HandoutEnvironmentTarget(
                     session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                     session.EnvironmentTarget.HandoutEnvironment.ContentId),
-                User = new AdminDefenseUserDto(session.User.Id, session.User.DisplayName, session.User.Email),
+                User = new AdminDefenseUserDto(
+                    session.User.Id,
+                    session.User.IsDeleted ? null : session.User.Username,
+                    session.User.Email),
                 session.ProblemStatement,
                 session.ProblemReference,
                 session.ExaminerConfig,
@@ -283,7 +294,9 @@ public class AdminDefenseReviewService(
                         note.SessionId,
                         note.TurnId,
                         new AdminDefenseUserDto(
-                            note.Author.Id, note.Author.DisplayName, note.Author.Email),
+                            note.Author.Id,
+                            note.Author.IsDeleted ? null : note.Author.Username,
+                            note.Author.Email),
                         note.AuthorId == reviewerId,
                         note.Content,
                         note.Category,

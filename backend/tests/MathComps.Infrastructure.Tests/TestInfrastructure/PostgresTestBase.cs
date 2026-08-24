@@ -123,11 +123,11 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
     }
 
     /// <summary>
-    /// Runs a read against a fresh scope over the same database, handing the body a context so assertions can verify
-    /// the rows the service under test committed.
+    /// Runs a body against a fresh scope over the same database, so assertions can read the rows the service under
+    /// test committed, and so a test can put the database into the state it wants before calling that service.
     /// </summary>
-    /// <param name="query">The query body, handed a fresh context.</param>
-    /// <returns>A task representing the query.</returns>
+    /// <param name="query">The body, handed a fresh context. It may write, so long as it saves.</param>
+    /// <returns>A task representing the body.</returns>
     protected async Task QueryAsync(Func<MathCompsDbContext, Task> query)
     {
         // A new provider over the same connection string sees the committed rows.
@@ -138,12 +138,12 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
     }
 
     /// <summary>
-    /// Runs a read against a fresh scope over the same database, handing the body a context plus a resolved service
-    /// (e.g. the metadata registry) so assertions can compare committed rows against that service's values.
+    /// Runs a body against a fresh scope over the same database, handing it a context plus a resolved service
+    /// (e.g. the metadata registry), so a test can read or write through either.
     /// </summary>
     /// <typeparam name="TResolved">The companion service to resolve alongside the context.</typeparam>
-    /// <param name="query">The query body, handed a fresh context and the resolved service.</param>
-    /// <returns>A task representing the query.</returns>
+    /// <param name="query">The body, handed a fresh context and the resolved service. It may write.</param>
+    /// <returns>A task representing the body.</returns>
     protected async Task QueryAsync<TResolved>(Func<MathCompsDbContext, TResolved, Task> query) where TResolved : notnull
     {
         // A new provider over the same connection string sees the committed rows.
