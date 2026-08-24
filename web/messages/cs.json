@@ -316,6 +316,11 @@
     "redirecting": "Přesměrovávám..."
   },
   "competitions": {
+    "areaClockSpent": "Tvůj čas vypršel. Úlohy si můžeš řešit dál a s Mathildou se o nich bavit, ale do výsledků se ti nové zprávy nezapočítají.",
+    "areaFinished": "Soutěž máš ukončenou. Úlohy si můžeš řešit dál a s Mathildou se o nich bavit, ale do výsledků se ti nové zprávy nezapočítají.",
+    "areaForfeited": "Soutěže ses nezúčastnil. Úlohy si můžeš zkusit nesoutěžně.",
+    "areaProblemsFailed": "Úlohy se nepodařilo načíst.",
+    "backToCompetitions": "Zpět na soutěže",
     "categories": {
       "advanced": "Pokročilá",
       "elementary": "Základní",
@@ -329,9 +334,13 @@
     },
     "categoryNote": "Zúčastnit se můžeš i více kategorií.",
     "categoryToggle": "Která úroveň je pro mě?",
+    "clockFinished": "Ukončeno",
     "clockHours": "{hours, plural, one {# hodina} few {# hodiny} other {# hodin}}",
     "clockHoursMinutes": "{hours, plural, one {# hodina} few {# hodiny} other {# hodin}} {minutes, plural, one {# minuta} few {# minuty} other {# minut}}",
+    "clockLeftHours": "{hours} h {minutes} min",
+    "clockLeftMinutes": "{minutes} min",
     "clockMinutes": "{minutes, plural, one {# minuta} few {# minuty} other {# minut}}",
+    "clockSpent": "Čas vypršel",
     "closedLabel": "ukončená",
     "closesIn": "zbývá {remaining}",
     "continue": "Pokračovat",
@@ -349,6 +358,14 @@
     "entryAuthReason": "spuštění soutěže",
     "entryError": "Soutěž se nepodařilo spustit.",
     "entryWindow": "vstup {range}",
+    "finishDialog": {
+      "confirm": "Ukončit",
+      "consequence": "Tvůj čas se tím zastaví a nic, co napíšeš potom, se už do soutěže nepočítá. Vrátit to zpět nejde.",
+      "keepWorking": "Pokračovat v řešení",
+      "title": "Ukončit soutěž?"
+    },
+    "finishEntry": "Ukončit soutěž",
+    "finishError": "Soutěž se nepodařilo ukončit. Zkus to prosím znovu.",
     "forfeitError": "Soutěž se nepodařilo vzdát.",
     "howItWorks": {
       "steps": [
@@ -365,8 +382,11 @@
     "mySolutions": "Moje řešení",
     "noCompetitions": "Zatím tu není žádná soutěž.",
     "opensIn": "otevírá se za {remaining}",
+    "practiceIntro": "Vyzkoušej si, jaké to je v ostrých soutěžích. V této zkušební soutěži to funguje stejně, až na to, že se nic nehodnotí a že ji můžeš spustit vícekrát a pokračovat ve svých předchozích obhajobách.",
+    "practiceIntroDismiss": "Rozumím",
     "practiceNote": "Zkušební soutěž s jednoduchými úlohami na vyzkoušení soutěžního prostředí.",
     "problemCount": "{count, plural, one {# úloha} few {# úlohy} other {# úloh}}",
+    "problemHeading": "Úloha {position}",
     "problems": "Úlohy",
     "readiness": {
       "profileLink": "Doplnit profil",
@@ -395,8 +415,12 @@
     "standing": {
       "running": "soutěžíš, zbývá {clock}"
     },
+    "startAnotherDefense": "Začít další rozhovor",
+    "startDefense": "Obhajovat řešení",
     "try": "Vyzkoušet",
-    "tryAgain": "Zkusit znovu"
+    "tryAgain": "Zkusit znovu",
+    "turnsSpent": "{spent}/{max} zpráv",
+    "typedSolutionsOnly": "Řešení píšeš přímo tady. Fotky ručně psaného řešení zatím nepodporujeme."
   },
   "contact": {
     "email": "Email",
@@ -429,6 +453,8 @@
     "SK": "Slovensko"
   },
   "defense": {
+    "competitionClockDivider": "Konec soutěže",
+    "competitionClockSpent": "Tohle se už do soutěže nepočítá.",
     "consentAccept": "Rozumím",
     "consentAuthReason": "rozhovor s Mathildou",
     "consentBody": "Konverzace s Mathildou ukládáme a případně čteme, abychom ji vylepšili. Zároveň prosíme o fér používání, každá její reakce nás něco stojí. Odklikni, pokud jsi s tím v pohodě 🙂",
@@ -808,6 +834,10 @@
     "adminDefenses": {
       "description": "Přehled obhajob vedených s AI zkoušející.",
       "title": "Konverzace s Mathildou"
+    },
+    "competitionArea": {
+      "description": "Úlohy, tvůj čas a obhajoby, které o nich vedeš.",
+      "title": "Soutěž"
     },
     "competitions": {
       "description": "Vyzkoušej si soutěže různých úrovní, ve kterých své řešení obhajuješ naší umělé inteligenci Mathildě přímo v soutěžním čase.",

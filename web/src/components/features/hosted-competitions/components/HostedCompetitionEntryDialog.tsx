@@ -93,10 +93,23 @@ export function HostedCompetitionEntryDialog({
   // Nothing to press until, on a first entry ever, the rules are accepted
   const isBlocked = needsRulesAccept && !hasAccepted
 
+  // Backing out of the dialog, which stops being on offer once the press it asked about is in flight. The
+  // entry is spent the moment the backend takes it and the student is taken to the problems either way, so
+  // a dismissal reading as calling the whole thing off would be answered by the area opening a beat later
+  const dismiss = () => {
+    // Nothing to back out of any more
+    if (isEntering) {
+      return
+    }
+
+    // Still theirs to call off
+    onClose()
+  }
+
   return (
     <Modal
       isOpen
-      onClose={onClose}
+      onClose={dismiss}
       title={
         competition.category === null
           ? group.name[locale]
@@ -119,10 +132,10 @@ export function HostedCompetitionEntryDialog({
 
           {/* Back out of it, or go through with it */}
           <div className="mt-6 flex justify-end gap-3">
-            <Button variant="ghost" onClick={() => setIsForfeitAsked(false)}>
+            <Button variant="ghost" disabled={isEntering} onClick={() => setIsForfeitAsked(false)}>
               {t('dialog.back')}
             </Button>
-            <Button variant="subtle" loading={isEntering} onClick={onForfeit}>
+            <Button variant="danger" loading={isEntering} onClick={onForfeit}>
               {t('dialog.forfeitConfirm')}
             </Button>
           </div>
@@ -134,14 +147,17 @@ export function HostedCompetitionEntryDialog({
             {isPracticeGroup(group) ? t('dialog.consequencePractice') : t('dialog.consequence')}
           </p>
 
-          {/* The rules, in plain sight on the one entry that accepts them. Every later entry reaches them
-          from the page header instead */}
+          {/* What it will ask of them */}
+          <p className="mt-2 text-sm leading-relaxed text-muted">{t('typedSolutionsOnly')}</p>
+
+          {/* The rules, in plain sight on the one entry that accepts them. Every later entry reaches
+              them from the page header instead */}
           {needsRulesAccept && (
             <section className="mt-4 rounded-lg bg-foreground/5 p-4">
               <h3 className="text-sm font-semibold text-foreground">{tRules('title')}</h3>
               <ul className="mt-2 list-outside list-disc space-y-1.5 pl-4 text-sm leading-relaxed text-muted-foreground marker:text-muted/60">
-                {reminders.map((line) => (
-                  <li key={line}>{line}</li>
+                {reminders.map((line, index) => (
+                  <li key={index}>{line}</li>
                 ))}
               </ul>
             </section>
@@ -170,7 +186,7 @@ export function HostedCompetitionEntryDialog({
             )}
 
             <div className="ml-auto flex gap-3">
-              <Button variant="ghost" onClick={onClose}>
+              <Button variant="ghost" disabled={isEntering} onClick={onClose}>
                 {tActions('cancel')}
               </Button>
               <Button

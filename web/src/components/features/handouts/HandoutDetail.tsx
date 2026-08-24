@@ -179,7 +179,10 @@ function renderDocumentSections(
             const defenseTrigger = hasDefenseReference(contentBlock) ? (
               <DefenseChatTrigger
                 problem={{
-                  target: { handoutContentId: contentId, environmentId: contentBlock.id },
+                  target: {
+                    kind: 'handout',
+                    environment: { handoutContentId: contentId, environmentId: contentBlock.id },
+                  },
                   statement: blockSequenceToMarkdown(contentBlock.body),
                 }}
               />

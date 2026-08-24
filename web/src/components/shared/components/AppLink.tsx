@@ -8,6 +8,20 @@ import { Link } from '@/i18n/navigation'
 import { isExternalHref } from '../utils/url-utils'
 
 /**
+ * A destination named by its route rather than by a path built out of it, which is the only form a
+ * localized route with a dynamic segment can be named in: a built path matches no route, so next-intl
+ * carries it through as itself and the reader reaches the localized one by being redirected off it.
+ */
+type RouteHref = {
+  /** The canonical route, dynamic segments and all. */
+  pathname: string
+  /** What fills those segments, by segment name. */
+  params?: Record<string, string>
+  /** What to hang off the address. */
+  query?: Record<string, string | undefined>
+}
+
+/**
  * Props for the {@link AppLink} component.
  */
 type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
@@ -16,8 +30,9 @@ type AppLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> 
    * - An internal path (e.g., `/about`, `/problems?category=imo`)
    * - An external URL (e.g., `https://example.com`)
    * - A hash anchor (e.g., `#section`, `/#hero`)
+   * - A {@link RouteHref}, which is what a localized route with a dynamic segment needs
    */
-  href: string
+  href: string | RouteHref
   /**
    * Controls Next.js prefetching behavior for internal links.
    * Has no effect on external links or hash anchors.
@@ -62,10 +77,13 @@ export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
       ? cn(className)
       : cn('text-muted hover:text-foreground transition-colors duration-300', className)
 
+    // A destination named by its route is always one of ours, and carries nothing a string check reads
+    const isRoute = typeof href !== 'string'
+
     // Determine if this should behave as an external link:
     // - Explicitly marked as external, OR
     // - Detected as external by URL pattern (starts with http:// or https://)
-    const isExternal = external ?? isExternalHref(href)
+    const isExternal = isRoute ? false : (external ?? isExternalHref(href))
 
     // Configure new tab behavior with security attributes
     const target = newTab ? '_blank' : undefined
@@ -75,7 +93,7 @@ export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
     // - External links (no client-side navigation needed)
     // - Pure hash anchors ("#section") — Next.js Link would add locale prefix and break scrolling
     // - Root hash anchors ("/#section") — same reason
-    if (isExternal || href.startsWith('#') || href.startsWith('/#')) {
+    if (!isRoute && (isExternal || href.startsWith('#') || href.startsWith('/#'))) {
       return <a ref={ref} href={href} className={classes} target={target} rel={rel} {...rest} />
     }
 

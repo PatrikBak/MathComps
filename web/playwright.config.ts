@@ -15,8 +15,16 @@ if (existsSync(LOCAL_ENV_FILE)) {
 // The configuration the whole repo shares, which every machine has
 process.loadEnvFile('.env')
 
-// The origin the session is minted against, and the one Clerk scopes its cookie to.
-const baseURL = 'http://localhost:3000'
+// The origin the session is minted against, and the one Clerk scopes its cookie to. A worktree serves its
+// own dev server on another port, and without an override the run attaches to whatever holds 3000 and
+// tests somebody else's checkout, which reads as the code being broken rather than the wrong app answering.
+const baseURL = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3000'
+
+/**
+ * The port that origin is served on, which a dev server this run has to start needs telling. An origin
+ * naming none is served on the default one, which is where the dev server puts itself anyway.
+ */
+const port = new URL(baseURL).port || '3000'
 
 /** Where the signed-in browser state is parked once the sign-in run finishes. */
 export const storageStatePath = 'playwright/.clerk/user.json'
@@ -44,7 +52,7 @@ export default defineConfig({
   ],
   // Attach to an already-running dev server instead of starting a second one on the same port.
   webServer: {
-    command: 'npm run dev',
+    command: `npm run dev -- --port ${port}`,
     url: baseURL,
     reuseExistingServer: true,
   },

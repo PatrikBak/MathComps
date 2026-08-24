@@ -176,3 +176,28 @@ describe('generatePageMetadata - hreflang alternates', () => {
     expect(languages['x-default']).toBe(`${TEST_SITE_URL}/en/handouts/adding-points`)
   })
 })
+
+describe('generatePageMetadata - dynamic route segments', () => {
+  it('fills a route parameter into every locale of the path', () => {
+    // A competition's own area, whose path carries an [id] and whose segment is worded per locale
+    const metadata = generatePageMetadata({
+      locale: 'sk',
+      path: '/competitions/[id]',
+      routeParams: { id: 'open-intermediate' },
+      title: 'Sutaz',
+    })
+
+    // The id is one value the whole site shares, so every locale gets the same one in its own path
+    const languages = metadata.alternates?.languages as Record<string, string>
+    expect(metadata.alternates?.canonical).toBe(`${TEST_SITE_URL}/sk/sutaze/open-intermediate`)
+    expect(languages['en']).toBe(`${TEST_SITE_URL}/en/competitions/open-intermediate`)
+    expect(languages['cs']).toBe(`${TEST_SITE_URL}/cs/souteze/open-intermediate`)
+  })
+
+  it('refuses a path whose dynamic segment nobody supplied a value for', () => {
+    // The same route with nothing to put in its [id]
+    expect(() =>
+      generatePageMetadata({ locale: 'sk', path: '/competitions/[id]', title: 'Sutaz' })
+    ).toThrow()
+  })
+})

@@ -7,11 +7,14 @@ export const MINUTE_SECONDS = 60
 /** Minutes in an hour. */
 export const HOUR_MINUTES = 60
 
+/** How many hours a day holds. */
+const DAY_HOURS = 24
+
 /** Seconds in an hour. */
 export const HOUR_SECONDS = HOUR_MINUTES * MINUTE_SECONDS
 
 /** Seconds in a day. */
-export const DAY_SECONDS = 24 * HOUR_SECONDS
+export const DAY_SECONDS = DAY_HOURS * HOUR_SECONDS
 
 /** Milliseconds in a minute. */
 export const MINUTE_MS = MINUTE_SECONDS * SECOND_MS

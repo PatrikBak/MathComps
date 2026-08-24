@@ -1,16 +1,9 @@
 'use client'
 
 import { useReducedMotion } from '@mantine/hooks'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/components/shared/utils/css-utils'
-
-/**
- * Props for the {@link ThinkingIndicator}.
- */
-type ThinkingIndicatorProps = {
-  /** The examiner-voiced status line. */
-  label: string
-}
 
 /** Number of animated pips closing the thinking line as its ellipsis. */
 const PIP_COUNT = 3
@@ -21,14 +14,17 @@ const PIP_COUNT = 3
  * The enclosing transcript is the live region that announces the line, so the indicator adds no
  * live-region role of its own.
  */
-export function ThinkingIndicator({ label }: ThinkingIndicatorProps) {
+export function ThinkingIndicator() {
+  // Defense copy
+  const t = useTranslations('defense')
+
   // Whether the viewer asked to minimize motion
   const reducedMotion = useReducedMotion()
 
   return (
     <div className="flex items-center gap-2 pl-4 text-sm italic text-muted">
       {/* The examiner-voiced status line */}
-      <span>{label}</span>
+      <span>{t('thinking')}</span>
 
       {/* The breathing pips */}
       <span className="flex gap-1" aria-hidden="true">

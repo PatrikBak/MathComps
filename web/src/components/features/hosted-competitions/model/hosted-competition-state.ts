@@ -1,7 +1,11 @@
 import { assertNever } from '@/components/shared/utils/assert-never'
-import { MINUTE_MS } from '@/components/shared/utils/time-units'
+import { HOUR_MINUTES, MINUTE_MS } from '@/components/shared/utils/time-units'
 
-import type { HostedCompetition, HostedCompetitionGroup } from './hosted-competition-types'
+import type {
+  HostedCompetition,
+  HostedCompetitionGroup,
+  SatEntry,
+} from './hosted-competition-types'
 
 /**
  * Where a group sits in its own life.
@@ -59,6 +63,36 @@ export function isPracticeGroup(group: HostedCompetitionGroup): boolean {
 }
 
 /**
+ * An entry the student sat, whose clock decides which of their turns count towards it.
+ */
+type SatAreaEntry = {
+  /** The discriminant. */
+  kind: 'sat'
+  /** When the entry stops counting, as an ISO-8601 string. */
+  endsAt: string
+  /** Whether the student closed the entry themselves rather than letting the clock close it. */
+  wasHandedIn: boolean
+}
+
+/**
+ * An entry the student gave up for the problems, which no clock and no grader belongs to.
+ */
+type ForfeitedAreaEntry = {
+  /** The discriminant. */
+  kind: 'forfeited'
+}
+
+/**
+ * A spent entry as everything inside the area reads it: {@link entryEndsAt} and {@link wasHandedInEarly}
+ * already applied, so a problem panel or a conversation is handed the instant and not the arithmetic
+ * behind it.
+ *
+ * Its two arms are the two ways an entry can be spent, and they differ in one thing: whether there is a
+ * clock the turns are counted against. Both read the same problems under the same terms.
+ */
+export type AreaEntry = SatAreaEntry | ForfeitedAreaEntry
+
+/**
  * Where a student stands with one competition.
  */
 export type HostedCompetitionStanding =
@@ -96,6 +130,62 @@ export function derivePhase(group: HostedCompetitionGroup, now: number): GroupPh
 }
 
 /**
+ * When a sat entry's clock would run out on its own, whatever the student did about it.
+ *
+ * @param group - The group it belongs to, which sets how long its clock runs.
+ * @param entry - The entry the student sat.
+ *
+ * @returns The instant, in epoch milliseconds.
+ */
+function clockRunsOutAtMs(group: HostedCompetitionGroup, entry: SatEntry): number {
+  // The clock starts when the student does, not when the group opens
+  return Date.parse(entry.startedAt) + group.clockMinutes * MINUTE_MS
+}
+
+/**
+ * Whether the student closed a sat entry themselves rather than letting its clock close it.
+ *
+ * The stamp alone does not say: a backend is free to write one when the clock runs out too, and a screen
+ * that reads any stamp as a hand-in tells a student they gave up time they actually spent. What separates
+ * them is whether the entry ended before the clock would have.
+ *
+ * @param group - The group it belongs to, which sets how long its clock runs.
+ * @param entry - The entry the student sat.
+ *
+ * @returns Whether they handed it in early.
+ */
+export function wasHandedInEarly(group: HostedCompetitionGroup, entry: SatEntry): boolean {
+  // Closed, and closed before the clock would have closed it
+  return entry.finishedAt !== null && Date.parse(entry.finishedAt) < clockRunsOutAtMs(group, entry)
+}
+
+/**
+ * When a sat entry stopped counting: the clock running out, or the student handing it in ahead of that.
+ *
+ * Kept apart from the standing, which drops it the moment the clock is spent while a surface that lets a
+ * student keep going unranked still has to say where the counted part ended.
+ *
+ * @param group - The group it belongs to, which sets how long its clock runs.
+ * @param entry - The entry the student sat.
+ *
+ * @returns The instant it ends, as an ISO-8601 string.
+ */
+export function entryEndsAt(group: HostedCompetitionGroup, entry: SatEntry): string {
+  // Where its own clock would have put it
+  const clockRunsOutAt = clockRunsOutAtMs(group, entry)
+
+  // A student who closed the entry themselves ended it there, and the time they left on the clock is not
+  // time anything of theirs can still count in
+  const endsAt =
+    entry.finishedAt === null
+      ? clockRunsOutAt
+      : Math.min(clockRunsOutAt, Date.parse(entry.finishedAt))
+
+  // Whichever came first
+  return new Date(endsAt).toISOString()
+}
+
+/**
  * Where a student stands with one competition.
  *
  * Nothing marks an entry finished when its clock runs out, so an entry whose end has passed is over by
@@ -129,11 +219,12 @@ export function deriveStanding(
     // Sat, so it is the clock that says whether they are still in it
     case 'sat': {
       // When the clock they were given runs out
-      const endsAt = new Date(
-        Date.parse(entry.startedAt) + group.clockMinutes * MINUTE_MS
-      ).toISOString()
+      const endsAt = entryEndsAt(group, entry)
 
-      // Still inside, with time left on the clock
+      // Still inside, with time left on the clock. Closing the entry is asked about separately, the stamp
+      // saying so being enough on its own: it can sit ahead of the clock this is read against, a browser
+      // and whatever wrote the stamp never agreeing to the second, and an entry the student has closed
+      // must not read as one they are still sitting
       if (entry.finishedAt === null && Date.parse(endsAt) > now) {
         return { kind: 'running', endsAt }
       }
@@ -178,4 +269,60 @@ export function orderForReading(
     // Phase first, and the newer of two in the same phase ahead of the older
     return byPhase !== 0 ? byPhase : Date.parse(right.opensAt) - Date.parse(left.opensAt)
   })
+}
+
+/**
+ * How a running clock says how much of itself is left.
+ */
+export type ClockDisplayMode = 'minutes' | 'seconds'
+
+/**
+ * How much of the clock is left before it starts counting in seconds.
+ */
+const PRECISE_BELOW_MS = MINUTE_MS
+
+/**
+ * Decides how precisely a running clock should say how much is left.
+ *
+ * Minutes for almost all of it. Seconds only inside the last one, where they are what the student is
+ * deciding against.
+ *
+ * @param remainingMs - How much of the clock is left, in milliseconds.
+ *
+ * @returns Which way to say it.
+ */
+export function clockDisplayMode(remainingMs: number): ClockDisplayMode {
+  // Seconds only inside the last minute
+  return remainingMs < PRECISE_BELOW_MS ? 'seconds' : 'minutes'
+}
+
+/**
+ * How a minutes-mode reading breaks down.
+ */
+export type ClockMinutesLeft = {
+  /** Whole hours left, counting a clock longer than a day in hours rather than losing the days. */
+  hours: number
+  /** The minutes left over those hours. */
+  minutes: number
+}
+
+/**
+ * Breaks a clock's remainder down for a minutes-mode reading, rounded up.
+ *
+ * Up, a countdown saying how long there is left rather than how much whole time has yet to pass: a
+ * two-hour entry would otherwise read `1 h 59 min` the instant the student presses the button.
+ *
+ * @param remainingMs - How much of the clock is left, in milliseconds.
+ *
+ * @returns The reading.
+ */
+export function clockMinutesLeft(remainingMs: number): ClockMinutesLeft {
+  // Every part-minute counted as a whole one
+  const totalMinutes = Math.ceil(Math.max(0, remainingMs) / MINUTE_MS)
+
+  // Broken into hours and the minutes over them
+  return {
+    hours: Math.floor(totalMinutes / HOUR_MINUTES),
+    minutes: totalMinutes % HOUR_MINUTES,
+  }
 }

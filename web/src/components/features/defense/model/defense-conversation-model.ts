@@ -163,7 +163,7 @@ type InFlight = {
  */
 function draftTurn(role: TurnRole, content: string): Turn {
   // The unsaved draft turn
-  return { id: null, role, content }
+  return { id: null, createdAt: null, role, content }
 }
 
 /**

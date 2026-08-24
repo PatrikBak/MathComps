@@ -27,8 +27,11 @@ type DefenseHistoryMenuProps = {
   currentSessionId: string | null
   /** Opens an existing session. */
   onSelect: (session: DefenseSession) => void
-  /** Deletes a session. */
-  onDelete: (sessionId: string) => Promise<void>
+  /**
+   * Deletes a session; null where none of them can be dropped, which is what a competition passes.
+   * Browsing the conversations is unaffected.
+   */
+  onDelete: ((sessionId: string) => Promise<void>) | null
 }
 
 /**
@@ -65,8 +68,8 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
 
   // Deletes the armed session
   const confirmDelete = async () => {
-    // Nothing armed
-    if (sessionToDelete === null) {
+    // Nothing armed, or nothing that can be dropped at all
+    if (sessionToDelete === null || onDelete === null) {
       return
     }
 
@@ -113,13 +116,15 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
                   onKeyDown={(event) => {
                     // Delete on the focused row arms the confirmation, the keyboard path to the
                     // pointer-only overlay control
-                    if (event.key === 'Delete') {
+                    if (onDelete !== null && event.key === 'Delete') {
                       event.preventDefault()
                       askToDelete(session)
                     }
                   }}
                   className={cn(
-                    'flex-col items-start gap-0.5 pr-12',
+                    'flex-col items-start gap-0.5',
+                    // Room for the overlaid control, which only exists where there is one
+                    onDelete !== null && 'pr-12',
                     session.id === currentSessionId && 'bg-brand/10'
                   )}
                 >
@@ -144,15 +149,17 @@ export const DefenseHistoryMenu = memo(function DefenseHistoryMenu({
                 </DropdownMenuItem>
 
                 {/* Delete the session, overlaid so its click never reaches the row's resume */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t('deleteSession')}
-                  onClick={() => askToDelete(session)}
-                  className="absolute inset-y-0 right-0 h-auto w-11 rounded-md hover:bg-error/10 hover:text-error"
-                >
-                  <Trash2 size={15} />
-                </Button>
+                {onDelete !== null && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t('deleteSession')}
+                    onClick={() => askToDelete(session)}
+                    className="absolute inset-y-0 right-0 h-auto w-11 rounded-md hover:bg-error/10 hover:text-error"
+                  >
+                    <Trash2 size={15} />
+                  </Button>
+                )}
               </div>
             )
           })}

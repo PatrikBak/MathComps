@@ -2,6 +2,7 @@
 
 import { useIsomorphicEffect, useMergedRef, usePrevious } from '@mantine/hooks'
 import { ArrowDown } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Fragment, useRef } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
@@ -9,12 +10,7 @@ import { useFollowTail } from '@/hooks/use-follow-tail'
 
 import { useRevealPointedTurn } from '../hooks/use-reveal-pointed-turn'
 import type { DefenseTurnReport, Turn, TurnRole } from '../model/defense-types'
-import {
-  DefenseTurn,
-  type TurnActionsAffordance,
-  type TurnDraftsMark,
-  type TurnUnreadMark,
-} from './DefenseTurn'
+import { DefenseTurn, type TurnDraftsMark, type TurnUnreadMark } from './DefenseTurn'
 import { ThinkingIndicator } from './ThinkingIndicator'
 
 /** Which authors' messages can be reported. */
@@ -24,17 +20,17 @@ const IS_REPORTABLE_ROLE: Record<TurnRole, boolean> = {
 }
 
 /**
- * Props for the {@link NewSinceMark}.
+ * Props for the {@link TranscriptDivider}.
  */
-type NewSinceMarkProps = {
-  /** What the mark says. */
+type TranscriptDividerProps = {
+  /** What the line says. */
   label: string
 }
 
 /**
- * The line across the transcript where a reader's last pass stopped.
+ * A labelled line drawn across the transcript before one turn. What it means is the caller's word.
  */
-function NewSinceMark({ label }: NewSinceMarkProps) {
+function TranscriptDivider({ label }: TranscriptDividerProps) {
   return (
     <div className="flex items-center gap-3" role="separator" aria-label={label}>
       <span className="h-px flex-1 bg-foreground/20" aria-hidden="true" />
@@ -45,42 +41,40 @@ function NewSinceMark({ label }: NewSinceMarkProps) {
 }
 
 /**
- * Where a reader's last pass through the conversation stopped, so the turns that arrived since it can be told
- * apart from the ones they have already worked through.
+ * A line drawn before one turn, setting what follows it apart from what came before.
+ *
+ * The transcript draws it and the caller says what it means: a reader's last pass stopped here, or an entry's
+ * clock did.
  */
-type TranscriptNewSinceMark = {
-  /** The first turn that arrived after the last pass. */
+type TranscriptDivider = {
+  /** The turn the line sits above. */
   turnId: string
-  /** What the mark says. */
+  /** What the line says. */
   label: string
 }
 
 /**
  * Props for the {@link DefenseTranscript}.
  */
-type DefenseTranscriptProps = TurnActionsAffordance & {
+type DefenseTranscriptProps = {
+  /** Whether to offer each turn's own controls, both of which act on the conversation. */
+  canAct: boolean
   /** The conversation so far, oldest first. */
   turns: readonly Turn[]
   /** An id for the current conversation, distinct across conversations. */
   conversationKey: string | number
   /** The localized label for each role. */
   roleLabels: Record<TurnRole, string>
-  /** The accessible name for the conversation log region. */
-  regionLabel: string
-  /** The label on the jump-to-latest affordance. */
-  jumpLabel: string
   /** Whether the examiner is currently producing a reply. */
   isThinking: boolean
-  /** The examiner-voiced line shown while thinking. */
-  thinkingLabel: string
   /** What the student holds against the conversation's replies, by reply. */
   reports: ReadonlyMap<string, DefenseTurnReport>
   /** Rewinds the conversation to the turn at the given index. */
   onRewindTurn: (index: number) => void
   /** Says what went wrong with the named reply, or revises what was already said. */
   onReportTurn: (turnId: string) => void
-  /** Where the reader's last pass stopped; null when nothing marks one. */
-  newSince: TranscriptNewSinceMark | null
+  /** Where the line goes and what it says; null when nothing divides the conversation. */
+  dividerBeforeTurn: TranscriptDivider | null
   /** Moving where the reader picks the conversation up; null where nobody keeps a place in it. */
   unreadMark: TurnUnreadMark | null
   /** Reading the drafts behind a reply; null where the reader isn't allowed to see them. */
@@ -105,18 +99,12 @@ export function DefenseTranscript({
   turns,
   conversationKey,
   roleLabels,
-  regionLabel,
-  jumpLabel,
   isThinking,
-  thinkingLabel,
   reports,
   canAct,
-  rewindLabel,
-  reportLabel,
-  reportedLabel,
   onRewindTurn,
   onReportTurn,
-  newSince,
+  dividerBeforeTurn,
   unreadMark,
   draftsMark,
   turnDurationsMs,
@@ -124,6 +112,9 @@ export function DefenseTranscript({
   pointedAtTurnId = null,
   footer,
 }: DefenseTranscriptProps) {
+  // Defense copy
+  const t = useTranslations('defense')
+
   // The scroll region, kept pinned to the newest turn while the reader sits at the bottom
   const { scrollRef, contentRef, isScrolledUp, scrollToBottom } = useFollowTail()
 
@@ -194,7 +185,7 @@ export function DefenseTranscript({
           <div
             role="log"
             aria-live="polite"
-            aria-label={regionLabel}
+            aria-label={t('transcriptLabel')}
             className="flex flex-col gap-5"
           >
             {/* Every turn in order */}
@@ -203,8 +194,9 @@ export function DefenseTranscript({
               // opener, or a draft the backend hasn't taken yet
               const reportableId = IS_REPORTABLE_ROLE[turn.role] && index > 0 ? turn.id : null
 
-              // Whether the reader's last pass stopped just before this turn
-              const startsWhatIsNew = newSince !== null && turn.id === newSince.turnId
+              // Whether the line, if there is one, sits above this turn
+              const startsWhatIsDivided =
+                dividerBeforeTurn !== null && turn.id === dividerBeforeTurn.turnId
 
               // Whether whatever points into the conversation points at this turn. A draft the backend
               // hasn't taken yet is no turn in particular, so nothing can be pointing at it
@@ -212,7 +204,7 @@ export function DefenseTranscript({
 
               return (
                 <Fragment key={index}>
-                  {startsWhatIsNew && <NewSinceMark label={newSince.label} />}
+                  {startsWhatIsDivided && <TranscriptDivider label={dividerBeforeTurn.label} />}
 
                   <DefenseTurn
                     turn={turn}
@@ -222,9 +214,6 @@ export function DefenseTranscript({
                     animate={index === justArrivedIndex}
                     isReported={reportableId !== null && reports.has(reportableId)}
                     canAct={canAct}
-                    rewindLabel={rewindLabel}
-                    reportLabel={reportLabel}
-                    reportedLabel={reportedLabel}
                     onRewind={() => onRewindTurn(index)}
                     onReport={reportableId === null ? null : () => onReportTurn(reportableId)}
                     unreadMark={unreadMark}
@@ -236,7 +225,7 @@ export function DefenseTranscript({
             })}
 
             {/* The examiner working on her next reply */}
-            {isThinking && <ThinkingIndicator label={thinkingLabel} />}
+            {isThinking && <ThinkingIndicator />}
           </div>
 
           {/* Where the conversation ends */}
@@ -254,7 +243,7 @@ export function DefenseTranscript({
           className="absolute bottom-3 left-1/2 -translate-x-1/2 gap-1.5 bg-surface/95 text-xs font-semibold text-muted-foreground shadow-lg backdrop-blur-sm hover:text-foreground"
         >
           <ArrowDown size={14} />
-          {jumpLabel}
+          {t('jumpToLatest')}
         </Button>
       )}
     </div>

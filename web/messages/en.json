@@ -316,6 +316,11 @@
     "redirecting": "Redirecting..."
   },
   "competitions": {
+    "areaClockSpent": "Your time is up. You can keep solving the problems and talking to Mathilda about them, but new messages no longer count towards your result.",
+    "areaFinished": "You have finished this competition. You can keep solving the problems and talking to Mathilda about them, but new messages no longer count towards your result.",
+    "areaForfeited": "You did not take part in this competition. You can still try the problems outside it.",
+    "areaProblemsFailed": "The problems could not be loaded.",
+    "backToCompetitions": "Back to competitions",
     "categories": {
       "advanced": "Advanced",
       "elementary": "Elementary",
@@ -329,9 +334,13 @@
     },
     "categoryNote": "You can take part in more than one level.",
     "categoryToggle": "Which level is for me?",
+    "clockFinished": "Handed in",
     "clockHours": "{hours, plural, one {# hour} other {# hours}}",
     "clockHoursMinutes": "{hours, plural, one {# hour} other {# hours}} {minutes, plural, one {# minute} other {# minutes}}",
+    "clockLeftHours": "{hours} h {minutes} min",
+    "clockLeftMinutes": "{minutes} min",
     "clockMinutes": "{minutes, plural, one {# minute} other {# minutes}}",
+    "clockSpent": "Time up",
     "closedLabel": "ended",
     "closesIn": "{remaining} left",
     "continue": "Continue",
@@ -349,6 +358,14 @@
     "entryAuthReason": "starting a competition",
     "entryError": "The competition could not be started.",
     "entryWindow": "entry {range}",
+    "finishDialog": {
+      "confirm": "Hand in",
+      "consequence": "Your clock stops here, and nothing you write afterwards counts towards your entry. This cannot be undone.",
+      "keepWorking": "Keep working",
+      "title": "Hand this entry in?"
+    },
+    "finishEntry": "Finish and hand in",
+    "finishError": "The entry could not be closed. Please try again.",
     "forfeitError": "Could not give up the competition.",
     "howItWorks": {
       "steps": [
@@ -365,8 +382,11 @@
     "mySolutions": "My solutions",
     "noCompetitions": "There are no competitions here yet.",
     "opensIn": "opens in {remaining}",
+    "practiceIntro": "See what a real competition feels like. This practice one works the same way, except nothing is graded and you can run it again and pick up your earlier defenses.",
+    "practiceIntroDismiss": "Got it",
     "practiceNote": "A practice competition with easy problems, for trying out how the whole thing works.",
     "problemCount": "{count, plural, one {# problem} other {# problems}}",
+    "problemHeading": "Problem {position}",
     "problems": "Problems",
     "readiness": {
       "profileLink": "Complete profile",
@@ -395,8 +415,12 @@
     "standing": {
       "running": "competing, {clock} left"
     },
+    "startAnotherDefense": "Start another conversation",
+    "startDefense": "Defend your solution",
     "try": "Try it",
-    "tryAgain": "Take it again"
+    "tryAgain": "Take it again",
+    "turnsSpent": "{spent}/{max} messages",
+    "typedSolutionsOnly": "You type your solution in here. Photos of handwritten work are not supported yet."
   },
   "contact": {
     "email": "Email",
@@ -429,6 +453,8 @@
     "SK": "Slovakia"
   },
   "defense": {
+    "competitionClockDivider": "Entry closed",
+    "competitionClockSpent": "This no longer counts towards the competition.",
     "consentAccept": "Got it",
     "consentAuthReason": "talking to Mathilda",
     "consentBody": "We save your conversations with Mathilda and might read them to make her better. We also ask you to use her fairly, every reply she gives costs us something. Click through if you're fine with that 🙂",
@@ -808,6 +834,10 @@
     "adminDefenses": {
       "description": "An overview of the defenses held with the AI examiner.",
       "title": "Conversations with Mathilda"
+    },
+    "competitionArea": {
+      "description": "The problems, your clock, and the defenses you hold about them.",
+      "title": "Competition"
     },
     "competitions": {
       "description": "Try competitions at several levels, where you defend your solutions to our AI Mathilda while your clock is still running.",

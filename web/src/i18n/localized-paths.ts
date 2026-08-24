@@ -4,18 +4,20 @@ import { DEFAULT_LOCALE, pathnames, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 /**
  * Resolves the localized path for a given canonical path and locale.
- * Looks up the path in the next-intl pathnames map and substitutes any [slug] placeholder.
+ * Looks up the path in the next-intl pathnames map and fills in its dynamic segments.
  *
  * @param canonicalPath - The canonical (English) route path (e.g., '/about')
  * @param locale - The target locale
  * @param slugTranslations - Optional map of localized slugs to replace [slug] with
+ * @param routeParams - Optional values for the route's other dynamic segments, by segment name
  *
- * @returns The resolved localized path, or undefined if the locale has no slug translation
+ * @returns The resolved localized path, or undefined if a segment could not be filled in
  */
 export function resolveLocalizedPath(
   canonicalPath: string,
   locale: Locale,
-  slugTranslations?: PartialLocalizedString
+  slugTranslations?: PartialLocalizedString,
+  routeParams?: Record<string, string>
 ): string | undefined {
   // Get the pathname mapping for this route (if it exists)
   const pathnameMapping = pathnames[canonicalPath]
@@ -48,6 +50,18 @@ export function resolveLocalizedPath(
     }
   }
 
+  // Fill in whatever other dynamic segments the route declares. A slug is translated per locale; anything
+  // else is one value the whole site shares, so it is substituted rather than looked up
+  for (const [name, value] of Object.entries(routeParams ?? {})) {
+    // Handed back from a function, so a value carrying a `$` is a value rather than a replacement pattern
+    localizedPath = localizedPath.replace(`[${name}]`, () => encodeURIComponent(value))
+  }
+
+  // A segment nobody supplied a value for would otherwise reach a URL with its brackets still on
+  if (localizedPath.includes('[')) {
+    return undefined
+  }
+
   // Return the resolved localized path
   return localizedPath
 }
@@ -73,12 +87,14 @@ export function toLocaleUrlSuffix(localizedPath: string): string {
  *
  * @param canonicalPath - The canonical path for the route (e.g., '/problems')
  * @param slugTranslations - Optional map of localized slugs to replace [slug] with
+ * @param routeParams - Optional values for the route's other dynamic segments, by segment name
  *
  * @returns An object mapping locale codes to full URLs for alternates.languages
  */
 export function buildAlternateLanguages(
   canonicalPath: string,
-  slugTranslations?: PartialLocalizedString
+  slugTranslations?: PartialLocalizedString,
+  routeParams?: Record<string, string>
 ): Record<string, string> {
   // We need to include real site url
   const siteUrl = getRequiredEnv('NEXT_PUBLIC_SITE_URL')
@@ -89,7 +105,7 @@ export function buildAlternateLanguages(
   // Handle all supported locales
   for (const locale of SUPPORTED_LOCALES) {
     // Resolve the localized path for this locale
-    const localizedPath = resolveLocalizedPath(canonicalPath, locale, slugTranslations)
+    const localizedPath = resolveLocalizedPath(canonicalPath, locale, slugTranslations, routeParams)
 
     // Skip locales where the path couldn't be resolved (e.g. missing slug)
     if (localizedPath === undefined) continue

@@ -256,9 +256,15 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
   }
 
   // The problem to hand the conversation when a defense is open: its target and the statement snapshotted onto
-  // the session, which is what the chat shows alongside the transcript.
+  // the session, which is what the chat shows alongside the transcript. The library lists handout defenses
+  // only, so its targets are named as such on the way in.
   const conversationProblem: DefenseProblem | null =
-    selected === null ? null : { target: selected.target, statement: selected.statement }
+    selected === null
+      ? null
+      : {
+          target: { kind: 'handout', environment: selected.target },
+          statement: selected.statement,
+        }
 
   return (
     <>
@@ -280,7 +286,8 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
             problem={conversationProblem}
             isOpen={isOpen}
             onClose={() => setSelected(null)}
-            initialSessionId={selected.id}
+            opening={{ kind: 'named', sessionId: selected.id }}
+            competition={null}
           />
         ) : isLoading ? (
           // Still fetching the list

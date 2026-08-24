@@ -19,7 +19,7 @@ import type {
 
 /** The problem every test defends. */
 const SAMPLE_PROBLEM: DefenseProblem = {
-  target: { handoutContentId: 'handout-1', environmentId: 'p1' },
+  target: { kind: 'handout', environment: { handoutContentId: 'handout-1', environmentId: 'p1' } },
   statement: 'Prove it.',
 }
 
@@ -95,11 +95,17 @@ class FakeBackend implements DefenseConversationServices {
     }
 
     // The student's turn
-    const studentTurn: Turn = { id: null, role: 'candidate', content: request.content }
+    const studentTurn: Turn = {
+      id: null,
+      createdAt: null,
+      role: 'candidate',
+      content: request.content,
+    }
 
     // A distinct examiner reply
     const replyTurn: Turn = {
       id: null,
+      createdAt: null,
       role: 'examiner',
       content: `probe ${(this.replyCount += 1)}`,
     }
@@ -114,7 +120,10 @@ class FakeBackend implements DefenseConversationServices {
       const session: DefenseSession = {
         id: `session-${(this.sessionCount += 1)}`,
         target: request.target,
-        turns: [...this.stampTurns([{ id: null, role: 'examiner', content: OPENER }]), ...newTurns],
+        turns: [
+          ...this.stampTurns([{ id: null, createdAt: null, role: 'examiner', content: OPENER }]),
+          ...newTurns,
+        ],
         feedback: null,
         reports: [],
       }
@@ -244,7 +253,7 @@ describe('DefenseConversationModel', () => {
     const state = model.getSnapshot()
 
     // Only the opener, idle and unsaved
-    expect(state.turns).toEqual([{ id: null, role: 'examiner', content: OPENER }])
+    expect(state.turns).toEqual([{ id: null, createdAt: null, role: 'examiner', content: OPENER }])
     expect(state.isThinking).toBe(false)
     expect(state.currentSessionId).toBeNull()
   })

@@ -7,25 +7,26 @@ import { useEffect } from 'react'
 import { toast } from 'sonner'
 
 import { resolveHandoutProblemRef } from '@/components/features/handouts/handout-problem-ref'
-import { LoginButton } from '@/components/login/LoginButton'
+import { CompetitionClock } from '@/components/features/hosted-competitions/components/CompetitionClock'
+import type { AreaEntry } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
-import { FeedbackDialog, toFeedbackOptions } from '@/components/shared/components/FeedbackDialog'
-import type { ToolbarConfig } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
-import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 import type { Locale } from '@/i18n/i18n'
 
+import { useDefenseCompetitionMode } from '../hooks/use-defense-competition-mode'
 import { useDefenseConversation } from '../hooks/use-defense-conversation'
 import { useDefenseFeedback } from '../hooks/use-defense-feedback'
 import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
 import { useMathildaConsent } from '../hooks/use-mathilda-consent'
-import { OUTCOME_KEYS, REPORT_CATEGORY_KEYS } from '../model/defense-feedback-options'
-import type { DefenseProblem, TurnRole } from '../model/defense-types'
+import { resolveComposerState } from '../model/defense-composer-state'
+import { defenseDraftStorageKey, handoutTargetOf } from '../model/defense-target'
+import type { DefenseOpening, DefenseProblem, TurnRole } from '../model/defense-types'
+import { DefenseComposer } from './DefenseComposer'
+import { DefenseFeedbackDialogs } from './DefenseFeedbackDialogs'
 import { DefenseFeedbackPrompt } from './DefenseFeedbackPrompt'
 import { DefenseHistoryMenu } from './DefenseHistoryMenu'
 import { DefenseTranscript } from './DefenseTranscript'
-import { MathildaConsentGate } from './MathildaConsentGate'
 import { ProblemStrip } from './ProblemStrip'
 
 /**
@@ -39,10 +40,17 @@ type DefenseConversationProps = {
   /** Closes the conversation. */
   onClose: () => void
   /**
-   * The saved defense to open on, or null to open on the newest one held against the problem. Stable for the
-   * life of the mount: it is resumed once, so showing a different defense means mounting a new conversation.
+   * Which conversation to open on. Stable for the life of the mount: it is opened once, so showing a
+   * different defense means mounting a new conversation.
    */
-  initialSessionId: string | null
+  opening: DefenseOpening
+  /**
+   * The competition entry this defense is being argued inside, or null outside a competition.
+   *
+   * Inside one the conversation is read-only past what has been said: every attempt stays part of the
+   * record a grader reads.
+   */
+  competition: AreaEntry | null
 }
 
 /**
@@ -50,23 +58,6 @@ type DefenseConversationProps = {
  * something, and the reply to it. Anything shorter has not been a defense yet.
  */
 const TURNS_WORTH_ANSWERING_FOR = 3
-
-/**
- * How few replies a conversation has to have left before the composer says so.
- */
-const REPLIES_LEFT_TO_WARN_AT = 5
-
-/**
- * The composer's toolbar for a defense turn. Headings, links, spoilers and uploads are hidden, leaving the
- * tools an argument is written with.
- */
-const DEFENSE_TOOLBAR: ToolbarConfig = {
-  heading: false,
-  link: false,
-  spoiler: false,
-  attachment: false,
-  image: false,
-}
 
 /**
  * The defense chat body: a student argues their solution to a problem and the examiner probes it turn by turn.
@@ -81,7 +72,8 @@ export function DefenseConversation({
   problem,
   isOpen,
   onClose,
-  initialSessionId,
+  opening,
+  competition,
 }: DefenseConversationProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
@@ -121,7 +113,7 @@ export function DefenseConversation({
     clearReport,
     deleteSession,
     rewind,
-  } = useDefenseConversation(problem, t('opener'), initialSessionId)
+  } = useDefenseConversation(problem, t('opener'), opening)
 
   // Reporting one of the examiner's replies and answering for the conversation as a whole, either of which
   // can be taken back again
@@ -143,7 +135,14 @@ export function DefenseConversation({
     stop,
     rewind,
     deleteSession,
+    draftStorageKey: defenseDraftStorageKey(problem.target),
   })
+
+  // Where this conversation stands against the entry's clock, and whether the account gates apply
+  const competitionMode = useDefenseCompetitionMode(competition, turns)
+
+  // Whether this defense is being argued inside a competition, which is what takes the controls away
+  const isCompetition = competition !== null
 
   // Surface a failed history load, but only while the modal is open: an empty history and a load failure
   // look identical otherwise, and the mounted-but-closed modal keeps the query running in the background
@@ -155,8 +154,10 @@ export function DefenseConversation({
 
   // A turn's own controls are offered only on a saved conversation and never mid-turn; a session id only
   // ever names one the signed-in viewer owns, so there's no one else's conversation to act on. Unknown caps
-  // mean the history hasn't arrived, and a report would have no cap to hold its comment to
-  const canAct = !isThinking && currentSessionId !== null && limits !== null
+  // mean the history hasn't arrived, and a report would have no cap to hold its comment to. A competition
+  // takes them all away at once: rewinding and deleting would rewrite the record a grader reads, and
+  // reporting a reply writes through a path that asks an unauthenticated reader to sign in
+  const canAct = !isThinking && currentSessionId !== null && limits !== null && !isCompetition
 
   // Whether the conversation has enough behind it to be worth summing up, or was already summed up, which
   // keeps a standing answer reachable to revise however short a rewind has left the conversation.
@@ -165,7 +166,7 @@ export function DefenseConversation({
 
   // Whether a turn has somewhere to go. A conversation opened on a named defense writes nothing until its resume
   // settles: a turn sent before it would open a second defense beside the one being continued.
-  const canCompose = initialSessionId === null || initialResumeSettled
+  const canCompose = opening.kind !== 'named' || initialResumeSettled
 
   // How many more replies the conversation has room for, or null while the caps are unknown. A reply still in
   // flight counts against it: it is written the moment it's sent, whatever the examiner then makes of it
@@ -174,8 +175,12 @@ export function DefenseConversation({
       ? null
       : limits.maxTurnsPerSession - turns.filter((turn) => turn.role === 'candidate').length
 
+  // The handout environment behind this problem, absent when it is not a handout problem at all
+  const handoutTarget = handoutTargetOf(problem.target)
+
   // Where this reader's language reaches the problem, absent when it doesn't carry the handout
-  const problemLink = resolveHandoutProblemRef(problem.target, locale)?.link ?? null
+  const problemLink =
+    handoutTarget === null ? null : (resolveHandoutProblemRef(handoutTarget, locale)?.link ?? null)
 
   // Whether a fresh defense has anything to be argued against: what it is measured against is published per
   // language, and a handout this locale doesn't carry publishes none
@@ -184,7 +189,8 @@ export function DefenseConversation({
   // Whether there's a conversation worth resetting: an open session, or a fresh one the student has
   // already started (a sent or in-flight turn past the examiner's opener). A pristine blank chat has
   // nothing to start over.
-  const canStartNew = canStartFresh && (currentSessionId !== null || turns.length > 1)
+  const canStartNew =
+    canStartFresh && !isCompetition && (currentSessionId !== null || turns.length > 1)
 
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
@@ -196,13 +202,23 @@ export function DefenseConversation({
     <>
       {/* The header: who is examining, and the conversation's controls */}
       <div className="flex items-center gap-3 border-b border-foreground/10 px-4 py-2.5 sm:px-5">
-        {/* Who the student is talking to */}
+        {/* Who the student is talking to. What she is gets said where there is room for the whole of it:
+            truncated to a letter and an ellipsis it says nothing and still takes the width */}
         <div className="flex min-w-0 items-baseline gap-2">
           <span className="shrink-0 text-base font-bold text-foreground sm:text-lg">
             {MATHILDA_NAME}
           </span>
-          <span className="truncate text-xs text-muted">{t('role')}</span>
+          <span className="hidden truncate text-xs text-muted sm:inline">{t('role')}</span>
         </div>
+
+        {/* How long the entry has left, which the page behind this modal is no longer there to say */}
+        {competition?.kind === 'sat' && (
+          <CompetitionClock
+            endsAt={competition.endsAt}
+            now={competitionMode.now}
+            wasHandedIn={competition.wasHandedIn}
+          />
+        )}
 
         {/* The conversation's controls, at the trailing edge */}
         <div className="ml-auto flex items-center gap-2">
@@ -226,7 +242,7 @@ export function DefenseConversation({
               sessions={sessions}
               currentSessionId={currentSessionId}
               onSelect={resume}
-              onDelete={turn.removeSession}
+              onDelete={isCompetition ? null : turn.removeSession}
             />
           )}
 
@@ -238,25 +254,26 @@ export function DefenseConversation({
       </div>
 
       {/* Re-readable problem statement */}
-      <ProblemStrip label={t('problemStrip')} statement={problem.statement} />
+      <ProblemStrip statement={problem.statement} />
 
       {/* The conversation so far */}
       <DefenseTranscript
         turns={turns}
         conversationKey={conversationEpoch}
         roleLabels={roleLabels}
-        regionLabel={t('transcriptLabel')}
-        jumpLabel={t('jumpToLatest')}
         isThinking={isThinking}
-        thinkingLabel={t('thinking')}
         reports={reports}
         canAct={canAct}
-        rewindLabel={t('rewind')}
-        reportLabel={t('report')}
-        reportedLabel={t('reported')}
         onRewindTurn={turn.requestRewind}
         onReportTurn={report.open}
-        newSince={null}
+        dividerBeforeTurn={
+          competitionMode.firstUncountedTurnId === null
+            ? null
+            : {
+                turnId: competitionMode.firstUncountedTurnId,
+                label: t('competitionClockDivider'),
+              }
+        }
         unreadMark={null}
         // A rejected draft is what a guard kept from the student, so their own view never offers one
         draftsMark={null}
@@ -264,12 +281,7 @@ export function DefenseConversation({
         turnDurationsMs={null}
         footer={
           canAnswer && (
-            <DefenseFeedbackPrompt
-              isAnswered={currentFeedback !== null}
-              answeredLabel={t('feedbackGiven')}
-              questionLabel={t('feedbackTitle')}
-              onOpen={answer.open}
-            />
+            <DefenseFeedbackPrompt isAnswered={currentFeedback !== null} onOpen={answer.open} />
           )
         }
       />
@@ -284,111 +296,46 @@ export function DefenseConversation({
         variant="danger"
       />
 
-      {/* Every way one of the examiner's replies went wrong */}
-      {limits !== null && (
-        <FeedbackDialog
-          isOpen={report.isOpen}
-          onClose={report.close}
-          onRemove={report.standing === undefined ? null : report.requestRemoval}
-          choice={{
-            selection: 'multiple',
-            initialValues: report.standing?.categories ?? [],
-            onSubmit: report.submit,
-          }}
-          requiresComment="other"
-          requiresCommentHint={t('requiresCommentHint')}
-          title={t('reportTitle')}
-          options={toFeedbackOptions(REPORT_CATEGORY_KEYS, t)}
-          initialComment={report.standing?.comment ?? ''}
-          commentLabel={t('reportCommentLabel')}
-          commentMaxLength={limits.maxFeedbackCommentChars}
-          isPending={report.isSubmitting}
-        />
-      )}
-
-      {/* The question before a report comes off, since taking it off drops something the student said */}
-      <ConfirmDialog
-        isOpen={report.isRemoving}
-        onClose={report.cancelRemoval}
-        onConfirm={report.confirmRemoval}
-        title={t('removeReportTitle')}
-        message={t('removeReportMessage')}
-        variant="danger"
-      />
-
-      {/* What the student makes of the conversation as a whole */}
-      {limits !== null && (
-        <FeedbackDialog
-          isOpen={answer.isOpen}
-          onClose={answer.close}
-          onRemove={currentFeedback === null ? null : answer.requestRemoval}
-          choice={{
-            selection: 'single',
-            initialValue: currentFeedback?.outcome ?? null,
-            onSubmit: answer.submit,
-          }}
-          requiresComment="somethingElse"
-          requiresCommentHint={t('requiresCommentHint')}
-          title={t('feedbackTitle')}
-          options={toFeedbackOptions(OUTCOME_KEYS, t)}
-          initialComment={currentFeedback?.comment ?? ''}
-          commentLabel={t('feedbackCommentLabel')}
-          commentMaxLength={limits.maxFeedbackCommentChars}
-          isPending={answer.isSubmitting}
-        />
-      )}
-
-      {/* And the same for the answer the conversation as a whole carries */}
-      <ConfirmDialog
-        isOpen={answer.isRemoving}
-        onClose={answer.cancelRemoval}
-        onConfirm={answer.confirmRemoval}
-        title={t('removeFeedbackTitle')}
-        message={t('removeFeedbackMessage')}
-        variant="danger"
+      {/* Everything the student can say about the conversation, and the questions before any of it comes
+          off again */}
+      <DefenseFeedbackDialogs
+        report={report}
+        answer={answer}
+        currentFeedback={currentFeedback}
+        limits={limits}
       />
 
       {/* Composer, once there is a conversation for it to write into */}
       <div className="border-t border-foreground/10 px-4 py-3 sm:px-5">
-        {!canCompose || !isAuthLoaded || consent.isLoading ? (
-          <p className="py-3 text-center text-sm text-muted">{t('libraryLoading')}</p>
-        ) : !isSignedIn ? (
-          <div className="flex flex-col items-center gap-3 py-3 text-center">
-            {/* Why there is nothing to write into */}
-            <p className="text-sm text-muted">{t('loginPrompt')}</p>
-
-            {/* And the way to fix that */}
-            <LoginButton />
-          </div>
-        ) : !consent.hasConsented ? (
-          <MathildaConsentGate onAccept={consent.accept} isAccepting={consent.isAccepting} />
-        ) : repliesLeft !== null && repliesLeft <= 0 && !isThinking ? (
-          <p className="py-3 text-center text-sm text-muted">{t('conversationFull')}</p>
-        ) : (
-          <>
-            {/* How much room is left, once there is little of it */}
-            {repliesLeft !== null && repliesLeft > 0 && repliesLeft <= REPLIES_LEFT_TO_WARN_AT && (
-              <p className="mb-1.5 text-xs text-muted">
-                {t('repliesLeft', { count: repliesLeft })}
-              </p>
-            )}
-
-            {/* Where the next reply is written */}
-            <RichMathEditor
-              variant="card"
-              toolbar={DEFENSE_TOOLBAR}
-              maxCharacters={limits?.maxCandidateChars}
-              value={turn.draft}
-              onChange={turn.setDraft}
-              onSend={() => void turn.sendDraft()}
-              onStop={turn.stopReply}
-              autoFocus
-              ref={turn.editorRef}
-              isLoading={isThinking}
-              placeholder={t('placeholder')}
-            />
-          </>
+        {/* What sending now costs, said where the sending happens. One line and no surface: the clock in
+            the header and the line across the transcript have both already said the entry is closed, so a
+            filled block repeating it a third time is a standing apology sat on top of the composer */}
+        {competitionMode.hasClockExpired && (
+          <p className="mb-2 text-xs text-muted">{t('competitionClockSpent')}</p>
         )}
+
+        <DefenseComposer
+          state={resolveComposerState({
+            isConversationReady: canCompose,
+            isAuthSettled: isAuthLoaded,
+            // Undefined until the account settles, which `isAuthSettled` is the answer to
+            isSignedIn: isSignedIn === true,
+            isConsentLoading: consent.isLoading,
+            hasConsented: consent.hasConsented,
+            isGateWaived: competitionMode.isGateWaived,
+            isThinking,
+            repliesLeft,
+          })}
+          draft={turn.draft}
+          onDraftChange={turn.setDraft}
+          onSend={() => void turn.sendDraft()}
+          onStop={turn.stopReply}
+          editorRef={turn.editorRef}
+          isThinking={isThinking}
+          maxCharacters={limits?.maxCandidateChars}
+          onAcceptConsent={consent.accept}
+          isAcceptingConsent={consent.isAccepting}
+        />
       </div>
     </>
   )

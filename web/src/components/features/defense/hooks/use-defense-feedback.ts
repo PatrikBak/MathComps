@@ -113,7 +113,7 @@ type FeedbackFlow<TOpenOn extends unknown[], TAnswers extends unknown[]> = {
  * Saying what went wrong with one of the examiner's replies, which is asked of one reply at a time and so
  * also carries what already stands against the one being asked about.
  */
-type ReportFlow = FeedbackFlow<
+export type ReportFlow = FeedbackFlow<
   [turnId: string],
   [categories: readonly DefenseReportCategory[], comment: string]
 > & {
@@ -124,7 +124,7 @@ type ReportFlow = FeedbackFlow<
 /**
  * Saying where the conversation as a whole left the student.
  */
-type AnswerFlow = FeedbackFlow<[], [outcome: DefenseOutcome, comment: string]>
+export type AnswerFlow = FeedbackFlow<[], [outcome: DefenseOutcome, comment: string]>
 
 /**
  * The two things a student can say about a defense, each drivable on its own.

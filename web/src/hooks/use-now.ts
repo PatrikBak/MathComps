@@ -1,7 +1,6 @@
 'use client'
 
-import { useInterval } from '@mantine/hooks'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { SECOND_MS } from '@/components/shared/utils/time-units'
 
@@ -15,15 +14,32 @@ import { SECOND_MS } from '@/components/shared/utils/time-units'
  * render anything derived from it until the browser has taken over.
  *
  * @param tickMs - How often to re-read the clock, in milliseconds.
+ * @param isEnabled - Whether the clock runs at all; a caller with nothing to time holds it still.
  *
  * @returns The current instant, in epoch milliseconds.
  */
-export function useNow(tickMs: number = SECOND_MS): number {
+export function useNow(tickMs: number = SECOND_MS, isEnabled: boolean = true): number {
   // The instant as of the last tick
   const [now, setNow] = useState(() => Date.now())
 
-  // Re-read it from mount onwards
-  useInterval(() => setNow(Date.now()), tickMs, { autoInvoke: true })
+  // Run the clock only while the caller has something to time
+  useEffect(() => {
+    // Nothing to time, so nothing runs
+    if (!isEnabled) {
+      return
+    }
+
+    // A surface the reader navigated away from and came back to keeps the state it had while its interval
+    // was stopped, so its first frame back would otherwise be drawn against whenever it last ticked: a
+    // countdown reappearing at the reading it was left at, and then jumping
+    setNow(Date.now())
+
+    // The tick
+    const intervalId = setInterval(() => setNow(Date.now()), tickMs)
+
+    // Stop the clock once the caller is gone or has nothing left to time
+    return () => clearInterval(intervalId)
+  }, [isEnabled, tickMs])
 
   // The instant everything reading this hook agrees on
   return now
