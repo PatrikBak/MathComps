@@ -70,16 +70,21 @@ export function useLanguageSwitcher(): LanguageSwitcherReturn {
             newLocale
           )
         : searchParams.toString()
-      // Append the query to the path when there is one
-      const urlWithParams = queryString ? `${pathname}?${queryString}` : pathname
 
-      // Change it while preserving the current path, query parameters, and dynamic route params
+      // Change it while preserving the current path, query parameters, and dynamic route params.
+      // The query rides in its own field rather than glued onto the pathname: a pathname carrying one
+      // matches no known route, so next-intl stops filling the route's dynamic segments in and the reader
+      // lands on a literal '/sutaze/[id]'
       router.replace(
-        // FROM INTL DOC:
-        // @ts-expect-error -- TypeScript will validate that only known `params`
-        // are used in combination with a given `pathname`. Since the two will
-        // always match for the current route, we can skip runtime checks.
-        { pathname: urlWithParams, params: translatedParams },
+        {
+          pathname,
+          // FROM INTL DOC:
+          // @ts-expect-error -- TypeScript will validate that only known `params`
+          // are used in combination with a given `pathname`. Since the two will
+          // always match for the current route, we can skip runtime checks.
+          params: translatedParams,
+          query: Object.fromEntries(new URLSearchParams(queryString)),
+        },
         { locale: newLocale }
       )
 

@@ -1,5 +1,6 @@
 'use client'
 
+import type { LucideIcon } from 'lucide-react'
 import {
   ArrowRight,
   CalendarRange,
@@ -11,8 +12,10 @@ import {
   Trophy,
 } from 'lucide-react'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
+import type { ComponentProps } from 'react'
 import type { ReactNode } from 'react'
 
+import { AppLink } from '@/components/shared/components/AppLink'
 import { Button } from '@/components/shared/components/Button'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { assertNever } from '@/components/shared/utils/assert-never'
@@ -21,6 +24,7 @@ import { formatClockRemaining } from '@/components/shared/utils/duration-utils'
 import type { Locale } from '@/i18n/i18n'
 
 import { useClockLength } from '../hooks/use-clock-length'
+import { useCompetitionAreaHref } from '../hooks/use-competition-area-href'
 import { useRemainingLabel } from '../hooks/use-remaining-label'
 import type { GroupPhase, HostedCompetitionStanding } from '../model/hosted-competition-state'
 import { derivePhase, deriveStanding } from '../model/hosted-competition-state'
@@ -235,8 +239,12 @@ function CompetitionRow({ group, competition, phase, now, onEnter }: Competition
 
   return (
     // The category on the left, everything else on the right. The right-hand cluster wraps as a whole, so
-    // on a narrow screen it takes its own line and stays pinned right
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 sm:px-6">
+    // on a narrow screen it takes its own line and stays pinned right. The row names which competition it
+    // is about, a category badge being absent on the practice one and worded on the rest
+    <div
+      className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 sm:px-6"
+      data-competition-id={competition.id}
+    >
       {/* Which category */}
       <span>
         {competition.category !== null && <CategoryBadge category={competition.category} />}
@@ -350,6 +358,32 @@ function CompetitionTerms({ problemCount, clockMinutes }: CompetitionTermsProps)
 }
 
 /**
+ * Props for the {@link AreaLink} component.
+ */
+type AreaLinkProps = {
+  /** Where it goes. */
+  href: ComponentProps<typeof AppLink>['href']
+  /** What it is drawn with. */
+  icon: LucideIcon
+  /** What it says. */
+  label: string
+}
+
+/**
+ * A way into a competition's own area, worded the way the presses beside it are.
+ */
+function AreaLink({ href, icon: Icon, label }: AreaLinkProps) {
+  return (
+    <AppLink href={href} plain className="text-link">
+      <span className="inline-flex items-center gap-1.5 text-sm font-medium">
+        <Icon size={15} />
+        {label}
+      </span>
+    </AppLink>
+  )
+}
+
+/**
  * Props for the {@link EntryAction} component.
  */
 type EntryActionProps = {
@@ -372,11 +406,14 @@ type EntryActionProps = {
  * The press keeps the same word whatever stands in the way, and is never disabled: what it turns into is
  * the guard's call rather than this button's.
  *
- * The competition's own area and the results are still being built, so those links render dead.
+ * The results are still being built, so that link renders dead.
  */
 function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps) {
   // Competitions copy
   const t = useTranslations('competitions')
+
+  // The way into the competition's own area
+  const areaHref = useCompetitionAreaHref()
 
   // Over, so the way in is gone and both of the things it left behind are open to everybody. They are its
   // own, not its group's: each category was a different problem set answered by a different set of people.
@@ -393,10 +430,7 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
     return (
       <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
         {wasInIt ? (
-          <Button variant="link">
-            <NotebookPen size={15} />
-            {t('mySolutions')}
-          </Button>
+          <AreaLink href={areaHref(competition.id)} icon={NotebookPen} label={t('mySolutions')} />
         ) : (
           competition.problemsPublished && (
             <Button variant="link">
@@ -430,15 +464,10 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
     // Inside, and the way back to the clock they left running. The loudest thing the page can offer while
     // it is offering it: everything else here waits, and this one is being spent
     case 'running':
-      return (
-        <Button variant="link">
-          <Play size={15} />
-          {t('continue')}
-        </Button>
-      )
+      return <AreaLink href={areaHref(competition.id)} icon={Play} label={t('continue')} />
 
     // Taken. The practice one is the only competition anybody gets a second go at; every other one offers
-    // the student their own work back
+    // the student their own work back, which is in the area they spent the entry in
     case 'done':
       return phase === 'practice' ? (
         <Button variant="link" onClick={onEnter}>
@@ -446,10 +475,7 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
           {t('tryAgain')}
         </Button>
       ) : (
-        <Button variant="link">
-          <NotebookPen size={15} />
-          {t('mySolutions')}
-        </Button>
+        <AreaLink href={areaHref(competition.id)} icon={NotebookPen} label={t('mySolutions')} />
       )
 
     // Untaken, so the group decides: one that has not opened yet has nothing to press, and an open one

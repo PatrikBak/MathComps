@@ -117,13 +117,22 @@
   }
 }
 
+:root {
+  /* The page's own backdrop. Fixed to the viewport wherever it is painted, so anything resting on top of
+     the page can repaint it and land exactly on the pixels it covers */
+  --page-backdrop: radial-gradient(
+    ellipse at top,
+    var(--color-indigo-950) 0%,
+    var(--color-background) 50%
+  );
+}
+
 @layer base {
   body {
-    background: radial-gradient(
-      ellipse at top,
-      var(--color-indigo-950) 0%,
-      var(--color-background) 50%
-    );
+    /* Colour first, gradient over it. The shorthand would otherwise leave the colour transparent, and a
+       viewport-fixed gradient is the one paint Safari re-rasterizes on its own schedule: while it does,
+       a transparent page shows the browser's grey canvas instead of the site */
+    background: var(--color-background) var(--page-backdrop);
     background-attachment: fixed;
   }
 
@@ -234,6 +243,14 @@
   position: sticky;
   top: var(--header-height);
   z-index: var(--z-sticky);
+}
+
+/* The page's own backdrop, repainted. A resting bar needs to hide what slides under it, and this is the
+   one fill that does so without reading as a panel: the gradient is fixed to the viewport, so a copy of
+   it lands on exactly the pixels it covers, at any scroll position */
+@utility page-backdrop {
+  background: var(--color-background) var(--page-backdrop);
+  background-attachment: fixed;
 }
 
 html {

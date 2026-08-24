@@ -56,25 +56,33 @@ export async function getSiteMetadata(locale: Locale): Promise<SiteMetadata> {
 }
 
 /**
- * Options for generating page metadata.
+ * Where a page sits and how it is treated, which is the same question however its words are found.
  */
-type PageMetadataOptions = {
+type PageAddress = {
+  /** The locale for OG metadata. */
+  locale: Locale
+  /** URL path for canonical URL generation. */
+  path?: string
+  /** Values for the route's other dynamic segments, by segment name. */
+  routeParams?: Record<string, string>
+  /** Open Graph content type ('website' or 'article'). */
+  type?: 'website' | 'article'
+  /** Whether to prevent search engines from indexing the page. */
+  noindex?: boolean
+}
+
+/**
+ * Options for generating page metadata, with its words already in hand.
+ */
+type PageMetadataOptions = PageAddress & {
   /** Page title (will be appended with site name). */
   title?: string
   /** Page description for SEO and OG tags. */
   description?: string
-  /** URL path for canonical URL generation. */
-  path?: string
-  /** Open Graph content type ('website' or 'article'). */
-  type?: 'website' | 'article'
   /** Open Graph section for content categorization. */
   section?: string
-  /** The locale for OG metadata. */
-  locale: Locale
   /** Optional slug translations for dynamic routes. */
   slugTranslations?: Record<Locale, string>
-  /** Whether to prevent search engines from indexing the page. */
-  noindex?: boolean
 }
 
 /**
@@ -94,6 +102,7 @@ export function generatePageMetadata(options: PageMetadataOptions): Metadata {
     section,
     locale,
     slugTranslations,
+    routeParams,
     noindex = false,
   } = options
 
@@ -101,11 +110,13 @@ export function generatePageMetadata(options: PageMetadataOptions): Metadata {
   const ogLocale = LOCALE_TO_OG_LOCALE[locale]
 
   // Resolve the fully localized path for the current locale (includes slug substitution)
-  const localizedPath = resolveLocalizedPath(path, locale, slugTranslations)
+  const localizedPath = resolveLocalizedPath(path, locale, slugTranslations, routeParams)
 
   // Fail loudly if the path couldn't be resolved (e.g. missing slug translation)
   if (localizedPath === undefined) {
-    throw new Error(`[Metadata] Missing slug translation for locale '${locale}' on path '${path}'.`)
+    throw new Error(
+      `[Metadata] Could not resolve path '${path}' for locale '${locale}': a slug translation or a route param is missing.`
+    )
   }
 
   // Generate canonical URL with locale prefix (e.g. https://site.com/sk/o-projekte)
@@ -126,7 +137,7 @@ export function generatePageMetadata(options: PageMetadataOptions): Metadata {
     // Canonical URL and alternate languages (hreflang)
     alternates: {
       canonical: url,
-      languages: buildAlternateLanguages(path, slugTranslations),
+      languages: buildAlternateLanguages(path, slugTranslations, routeParams),
     },
 
     // Open Graph
@@ -189,25 +200,18 @@ type PageNamespace =
   | 'pages.login'
   | 'pages.privacy'
   | 'pages.news'
+  | 'pages.competitionArea'
   | 'pages.competitions'
   | 'pages.adminDefenses'
 
 /**
  * Options for creating page metadata with automatic translations.
  */
-type CreatePageMetadataOptions = {
-  /** The current locale. */
-  locale: Locale
+type CreatePageMetadataOptions = PageAddress & {
   /** Translation namespace naming the page. */
   namespace: PageNamespace
-  /** URL path for canonical URL generation. */
-  path?: string
-  /** Open Graph content type ('website' or 'article'). */
-  type?: 'website' | 'article'
   /** Whether to use title as section (for OG tags). */
   useSection?: boolean
-  /** Whether to prevent search engines from indexing the page. */
-  noindex?: boolean
 }
 
 /**
@@ -223,6 +227,7 @@ export async function createPageMetadata({
   locale,
   namespace,
   path = '',
+  routeParams,
   type = 'website',
   useSection = false,
   noindex = false,
@@ -239,6 +244,7 @@ export async function createPageMetadata({
     title,
     description,
     path,
+    routeParams,
     type,
     section: useSection ? title : undefined,
     locale,

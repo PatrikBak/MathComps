@@ -8,14 +8,21 @@ import { DAY_MS, MINUTE_MS, SECOND_MS } from '@/components/shared/utils/time-uni
 import type { LocalizedString } from '@/i18n/i18n'
 import type { ApiResult } from '@/types/api'
 
+import { entryEndsAt } from '../model/hosted-competition-state'
 import type {
   EntryReadiness,
   HostedCompetition,
   HostedCompetitionEntry,
   HostedCompetitionGroup,
   HostedCompetitionsView,
+  SpentEntry,
 } from '../model/hosted-competition-types'
 import { HOSTED_COMPETITION_CATEGORIES } from '../model/hosted-competition-types'
+import {
+  buildCompetitionProblems,
+  clearCompetitionTranscripts,
+} from './competition-run-mock-service'
+import { readMockState, writeMockState } from './mock-persistence'
 
 /**
  * Which set of facts the mocked backend answers with.
@@ -49,7 +56,7 @@ const SCENARIOS: HostedCompetitionScenario[] = [
 const DEFAULT_SCENARIO: HostedCompetitionScenario = 'ready'
 
 /** How long the mocked calls take to answer, so the waiting states are the ones a reader actually sees. */
-const RESPONSE_DELAY_MS = 350
+export const RESPONSE_DELAY_MS = 350
 
 /** How many problems a competition's set holds. */
 const PROBLEMS_PER_COMPETITION = 3
@@ -57,8 +64,8 @@ const PROBLEMS_PER_COMPETITION = 3
 /** How long a competition's clock runs, in minutes. */
 const CLOCK_MINUTES = 120
 
-/** How long the practice competition's clock runs, in minutes. */
-const PRACTICE_CLOCK_MINUTES = 45
+/** How long the practice competition's clock runs, in minutes. Short enough to watch it run out. */
+const PRACTICE_CLOCK_MINUTES = 1
 
 /** How long a group takes entries for, in days. */
 const WINDOW_DAYS = 13
@@ -190,7 +197,7 @@ function askedScenario(): string | undefined {
  *
  * @returns The scenario the address asks for.
  */
-function currentScenario(): HostedCompetitionScenario {
+export function currentScenario(): HostedCompetitionScenario {
   return parseScenario(askedScenario())
 }
 
@@ -560,12 +567,75 @@ function stateOf(scenario: HostedCompetitionScenario): HostedCompetitionMockStat
     return existing
   }
 
-  // Otherwise build the scenario's starting facts and remember them
+  // Otherwise build the scenario's starting facts
   const created = { view: buildView(scenario), readiness: buildReadiness(scenario) }
+
+  // And put back whatever the reader did to them before the last reload
+  const held = readMockState<HeldMockState>(mockStateKey(scenario))
+
+  // Which stands where the starting facts do not
+  if (held !== null) {
+    // Each competition takes back the entry the reader left on it
+    for (const competition of created.view.groups.flatMap((group) => group.competitions)) {
+      competition.entry = held.entries[competition.id] ?? competition.entry
+    }
+
+    // And the acceptance the first of them carried
+    created.readiness.hasAcceptedRules = held.hasAcceptedRules
+  }
+
+  // Which is what this scenario answers with from here on
   scenarioStates.set(scenario, created)
 
-  // The scenario's starting facts
+  // The scenario's facts, as the reader last left them
   return created
+}
+
+/**
+ * What survives a reload: the entries a reader has taken, and the acceptance the first of them carried.
+ *
+ * Only what a press can change, so the rest of a scenario's facts are still whatever the code now says
+ * rather than whatever it said when the tab was opened.
+ */
+type HeldMockState = {
+  /** The entry each competition holds, by competition id. */
+  entries: Record<string, HostedCompetitionEntry>
+  /** Whether the student has accepted the rules. */
+  hasAcceptedRules: boolean
+}
+
+/**
+ * Names where one scenario's state is held.
+ *
+ * @param scenario - Which set of facts.
+ *
+ * @returns The name.
+ */
+function mockStateKey(scenario: HostedCompetitionScenario): string {
+  // One name per scenario
+  return `hosted-competitions.${scenario}`
+}
+
+/**
+ * Holds what a press changed, so the next reload finds it rather than the scenario's starting facts.
+ *
+ * @param scenario - Which set of facts was changed.
+ * @param state - The scenario's facts as they now stand.
+ */
+function holdState(scenario: HostedCompetitionScenario, state: HostedCompetitionMockState): void {
+  // Every entry the reader currently holds, against the competition holding it
+  const entries = Object.fromEntries(
+    state.view.groups
+      .flatMap((group) => group.competitions)
+      .filter((competition) => competition.entry !== null)
+      .map((competition) => [competition.id, competition.entry!])
+  )
+
+  // Held with the acceptance, which is the other thing a press can change
+  writeMockState(mockStateKey(scenario), {
+    entries,
+    hasAcceptedRules: state.readiness.hasAcceptedRules,
+  })
 }
 
 /**
@@ -596,15 +666,15 @@ export async function fetchEntryReadiness(): Promise<ApiResult<EntryReadiness>> 
 
 /**
  * Takes the student's entry into one competition: the clock starts and, on a first entry ever, the rules
- * are accepted along with it.
+ * are accepted along with it. It answers with the problems the entry just bought.
  *
  * @param competitionId - Which competition is being entered.
  *
- * @returns The entry that was created, as the API would report it.
+ * @returns The entry that was created and the set it opens, as the API would report it.
  */
 export async function enterHostedCompetition(
   competitionId: string
-): Promise<ApiResult<HostedCompetitionEntry>> {
+): Promise<ApiResult<SpentEntry>> {
   // Let the pressed button hold its spinner
   await delay(RESPONSE_DELAY_MS)
 
@@ -630,22 +700,27 @@ export async function enterHostedCompetition(
   // Hold the entry, and the acceptance the press carried with it
   competition.entry = entry
   state.readiness.hasAcceptedRules = true
+  holdState(currentScenario(), state)
 
-  // The entry the press created
-  return { success: true, data: entry }
+  // Whatever a previous run of this competition left behind goes with it, the practice one being
+  // takeable again
+  clearCompetitionTranscripts(competitionId)
+
+  // The entry the press created, and the set it bought
+  return { success: true, data: { entry, problems: buildCompetitionProblems(competitionId) } }
 }
 
 /**
  * Gives the student's entry up: the problems open to them and no clock is ever started. It spends the
- * entry exactly as sitting it would.
+ * entry exactly as sitting it would, and answers with the same set an entry sat would have opened.
  *
  * @param competitionId - Which competition is being given up.
  *
- * @returns The entry that was created, as the API would report it.
+ * @returns The entry that was created and the set it opens, as the API would report it.
  */
 export async function forfeitHostedCompetition(
   competitionId: string
-): Promise<ApiResult<HostedCompetitionEntry>> {
+): Promise<ApiResult<SpentEntry>> {
   // Let the pressed button hold its spinner
   await delay(RESPONSE_DELAY_MS)
 
@@ -666,7 +741,83 @@ export async function forfeitHostedCompetition(
   // Hold the entry, and the acceptance the press carried with it
   competition.entry = entry
   state.readiness.hasAcceptedRules = true
+  holdState(currentScenario(), state)
 
-  // The entry the press created
-  return { success: true, data: entry }
+  // The entry the press created, and the set it bought
+  return { success: true, data: { entry, problems: buildCompetitionProblems(competitionId) } }
+}
+
+/**
+ * Closes a running entry where the student says rather than where its clock does. Nothing is added to what
+ * they have written: what it changes is that nothing more can be.
+ *
+ * @param competitionId - Which competition's entry is being handed in.
+ *
+ * @returns The entry as it now stands, as the API would report it.
+ */
+export async function finishHostedCompetition(
+  competitionId: string
+): Promise<ApiResult<HostedCompetitionEntry>> {
+  // Let the pressed button hold its spinner
+  await delay(RESPONSE_DELAY_MS)
+
+  // The scenario's facts as they now stand
+  const state = stateOf(currentScenario())
+
+  // The competition being handed in
+  const competition = state.view.groups
+    .flatMap((group) => group.competitions)
+    .find((candidate) => candidate.id === competitionId)
+
+  // The entry it holds
+  const entry = competition?.entry ?? null
+
+  // Which has to be one the student is currently sitting
+  if (competition === undefined || entry === null || entry.kind !== 'sat') {
+    return { success: false, error: { message: 'No entry to finish', statusCode: 404 } }
+  }
+
+  // Over where the student said, and the clock they left on it goes with it
+  const finished: HostedCompetitionEntry = {
+    ...entry,
+    finishedAt: entry.finishedAt ?? new Date().toISOString(),
+  }
+
+  // Which is what the competition now holds
+  competition.entry = finished
+
+  // And what the next reload should find
+  holdState(currentScenario(), state)
+
+  // The entry as the press left it
+  return { success: true, data: finished }
+}
+
+/**
+ * When the clock ran out on the entry a scenario's student holds in one competition.
+ *
+ * The transcripts are seeded around it, so a conversation straddling the boundary is there to read on
+ * arrival instead of only after somebody waits the clock out.
+ *
+ * @param competitionId - Which competition's entry is being read.
+ *
+ * @returns The instant, as an ISO-8601 string, or null when no clock ever ran on it.
+ */
+export function findMockEntryClockEnd(competitionId: string): string | null {
+  // The scenario's groups, one of which holds the competition
+  const groups = stateOf(currentScenario()).view.groups
+
+  // Whichever of them sets it
+  for (const group of groups) {
+    // The competition, if this group is the one holding it
+    const competition = group.competitions.find((candidate) => candidate.id === competitionId)
+
+    // Only an entry the student actually sat has a clock to have ended
+    if (competition?.entry?.kind === 'sat') {
+      return entryEndsAt(group, competition.entry)
+    }
+  }
+
+  // Either no such competition, or one nobody sat
+  return null
 }

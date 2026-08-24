@@ -2,6 +2,7 @@
 
 import { useReducedMotion } from '@mantine/hooks'
 import { Flag, Layers, Mail, Undo2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
@@ -11,22 +12,6 @@ import { formatDurationMs } from '@/components/shared/utils/duration-utils'
 
 import type { Turn } from '../model/defense-types'
 import { TURN_LABEL_CLASS, TURN_STYLES } from './turn-styles'
-
-/**
- * The controls a turn carries and their accessible labels. Shared by the transcript, which offers them on every
- * turn, and each turn, which renders the ones it was told to offer. Both controls act on the conversation,
- * so one flag governs them.
- */
-export type TurnActionsAffordance = {
-  /** Whether to offer the turn's own controls. */
-  canAct: boolean
-  /** The accessible label for the rewind control. */
-  rewindLabel: string
-  /** The accessible label for the report control. */
-  reportLabel: string
-  /** The accessible label a reply carries once it has been reported. */
-  reportedLabel: string
-}
 
 /**
  * The control offering to pick the conversation up again from a turn, and what it is called. Held apart from the
@@ -60,7 +45,9 @@ export type TurnDraftsMark = {
 /**
  * Props for a single {@link DefenseTurn}.
  */
-type DefenseTurnProps = TurnActionsAffordance & {
+type DefenseTurnProps = {
+  /** Whether to offer the turn's own controls, both of which act on the conversation. */
+  canAct: boolean
   /** The message this turn renders. */
   turn: Turn
   /** Its 1-based place in the conversation, shown beside the role; null where nothing counts turns. */
@@ -107,15 +94,15 @@ export function DefenseTurn({
   animate,
   isReported,
   canAct,
-  rewindLabel,
-  reportLabel,
-  reportedLabel,
   onRewind,
   onReport,
   unreadMark,
   draftsMark,
   durationMs,
 }: DefenseTurnProps) {
+  // Defense copy
+  const t = useTranslations('defense')
+
   // The look for this turn's author
   const style = TURN_STYLES[turn.role]
 
@@ -178,7 +165,7 @@ export function DefenseTurn({
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label={isReported ? reportedLabel : reportLabel}
+                aria-label={isReported ? t('reported') : t('report')}
                 onClick={onReport}
                 className={cn(
                   'size-7 hover:text-foreground',
@@ -193,7 +180,7 @@ export function DefenseTurn({
             {!canAct && isReported && (
               <span
                 role="img"
-                aria-label={reportedLabel}
+                aria-label={t('reported')}
                 className="flex size-7 items-center justify-center text-muted-foreground"
               >
                 <Flag size={14} className="fill-current" aria-hidden="true" />
@@ -205,7 +192,7 @@ export function DefenseTurn({
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label={rewindLabel}
+                aria-label={t('rewind')}
                 onClick={onRewind}
                 className="size-7 text-muted/60 hover:text-foreground"
               >

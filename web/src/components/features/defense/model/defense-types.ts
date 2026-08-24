@@ -1,5 +1,7 @@
 import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
 
+import type { DefenseTarget } from './defense-target'
+
 /**
  * Who authored a turn in a defense conversation: the AI examiner probing the solution, or the student
  * defending it.
@@ -12,6 +14,8 @@ export type TurnRole = 'examiner' | 'candidate'
 export type Turn = {
   /** Stable identifier; null while the message is a draft the backend hasn't taken yet. */
   id: string | null
+  /** When the message was authored, as an ISO-8601 string; null while it is a draft. */
+  createdAt: string | null
   /** Who authored the message. */
   role: TurnRole
   /** The message body as markdown/math source. */
@@ -83,8 +87,8 @@ export type DefenseTurnReport = {
 export type DefenseSession = {
   /** Stable identifier. */
   id: string
-  /** The handout environment this defense is about. */
-  target: HandoutEnvironmentTarget
+  /** What this defense is about. */
+  target: DefenseTarget
   /** The conversation so far, oldest first. */
   turns: StoredTurn[]
   /** What the student said about the conversation; null until they say anything. */
@@ -135,13 +139,47 @@ export type DefenseSessionListItem = {
 }
 
 /**
+ * Open on the most recently active conversation held against the problem, if there is one.
+ */
+type OpenNewestDefense = {
+  /** The discriminant. */
+  kind: 'newest'
+}
+
+/**
+ * Open on one named conversation.
+ */
+type OpenNamedDefense = {
+  /** The discriminant. */
+  kind: 'named'
+  /** Which conversation to open. */
+  sessionId: string
+}
+
+/**
+ * Open on a blank conversation, leaving whatever is already saved where it is.
+ */
+type OpenFreshDefense = {
+  /** The discriminant. */
+  kind: 'fresh'
+}
+
+/**
+ * Which conversation the chat opens on.
+ *
+ * Its own member for a blank one rather than an absent id: a surface that starts second conversations needs
+ * to say "not the newest, a new one", which no id and no absence of one can spell.
+ */
+export type DefenseOpening = OpenNewestDefense | OpenNamedDefense | OpenFreshDefense
+
+/**
  * The problem a defense is held against. The reasoning it is measured against never reaches the client:
  * the backend resolves the statement, reference and hints from the handout environment itself, and the
  * statement here is only the copy the chat shows alongside the conversation.
  */
 export type DefenseProblem = {
-  /** The handout environment this problem is. */
-  target: HandoutEnvironmentTarget
+  /** What this problem is: a handout's environment, or a competition's problem. */
+  target: DefenseTarget
   /** The problem statement as markdown/math source. */
   statement: string
 }
@@ -155,8 +193,8 @@ export type DefenseProblem = {
 type StartDefenseTurnRequest = {
   /** Marks the request that opens a new session. */
   kind: 'start'
-  /** The handout environment the new session is about. */
-  target: HandoutEnvironmentTarget
+  /** What the new session is about. */
+  target: DefenseTarget
   /** The student's turn as markdown/math source. */
   content: string
   /** Aborts the in-flight round-trip when the student stops the turn. */

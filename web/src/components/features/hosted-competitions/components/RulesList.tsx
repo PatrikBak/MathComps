@@ -6,18 +6,11 @@ import { useTranslations } from 'next-intl'
 import { ProseContactLink } from '@/components/features/contact/ProseContactLink'
 
 import { DisclosureNote } from './DisclosureNote'
-import { HeaderDisclosure } from './HeaderDisclosure'
 
 /**
- * The rules, readable without going near an irreversible press.
- *
- * The same lines appear inside the entry dialog on the one entry that accepts them; after that, this is
- * where they live.
+ * The rules themselves, and where to take anything they do not answer.
  */
-export function RulesNote() {
-  // Competitions copy
-  const t = useTranslations('competitions')
-
+export function RulesList() {
   // The rules' own copy, read from its own namespace so the lines come back as the array they are
   const tRules = useTranslations('competitions.rules')
 
@@ -25,10 +18,10 @@ export function RulesNote() {
   const lines = tRules.raw('lines') as string[]
 
   return (
-    <HeaderDisclosure label={t('rulesButton')}>
+    <>
       <ul className="list-outside list-disc space-y-2 pl-5 text-sm text-muted marker:text-muted/60">
-        {lines.map((line) => (
-          <li key={line}>{line}</li>
+        {lines.map((line, index) => (
+          <li key={index}>{line}</li>
         ))}
       </ul>
 
@@ -38,6 +31,6 @@ export function RulesNote() {
           link: (chunks) => <ProseContactLink reason="other">{chunks}</ProseContactLink>,
         })}
       </DisclosureNote>
-    </HeaderDisclosure>
+    </>
   )
 }

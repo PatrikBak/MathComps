@@ -93,9 +93,6 @@ export function DefenseReviewModalBody({
     [attemptsByTurn]
   )
 
-  // Defense-surface copy, for what the conversation's own parts are called
-  const tDefense = useTranslations('defense')
-
   // Where the reading stops, drawn only where it has read turns above it: over the whole conversation it
   // would separate nothing, and it would land where a rule between the statement and the transcript goes
   const newSince =
@@ -107,25 +104,19 @@ export function DefenseReviewModalBody({
   const transcriptPane = (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* The problem, re-readable above the conversation */}
-      <ProblemStrip label={tDefense('problemStrip')} statement={detail.statement} />
+      <ProblemStrip statement={detail.statement} />
 
       {/* What was said, and what the student made of it */}
       <DefenseTranscript
         turns={detail.turns}
         conversationKey={detail.id}
         roleLabels={{ examiner: MATHILDA_NAME, candidate: t('student') }}
-        regionLabel={tDefense('transcriptLabel')}
-        jumpLabel={tDefense('jumpToLatest')}
         isThinking={false}
-        thinkingLabel={tDefense('thinking')}
         reports={indexReports(detail.reports)}
         canAct={false}
-        rewindLabel={tDefense('rewind')}
-        reportLabel={tDefense('report')}
-        reportedLabel={tDefense('reported')}
         onRewindTurn={() => undefined}
         onReportTurn={() => undefined}
-        newSince={newSince}
+        dividerBeforeTurn={newSince}
         // Where the next pass through it starts is the reviewer's to move, reply by reply
         unreadMark={{ label: t('markUnreadFromTurn'), onMark: onMarkUnreadFrom }}
         // How each reply was arrived at, offered only on the replies that kept their drafts

@@ -75,7 +75,8 @@ export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
             problem={problem}
             isOpen={isOpen}
             onClose={close}
-            initialSessionId={null}
+            opening={{ kind: 'newest' }}
+            competition={null}
           />
         </Modal>
       )}

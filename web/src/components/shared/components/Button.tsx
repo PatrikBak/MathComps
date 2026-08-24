@@ -59,6 +59,8 @@ export const buttonVariants = cva(
         outline:
           'border border-foreground/10 text-foreground hover:bg-foreground/5 hover:border-muted/60',
         link: 'text-link hover:text-link-hover hover:underline',
+        danger:
+          'bg-error/15 border border-error/30 text-error hover:bg-error/25 hover:border-error/50',
       },
       size: {
         sm: 'min-h-9 px-3 text-sm',

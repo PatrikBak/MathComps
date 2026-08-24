@@ -4,6 +4,14 @@ import { useAuth } from '@clerk/nextjs'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
+import { invalidateCompetitionProblems } from '@/components/features/hosted-competitions/hooks/hosted-competition-cache'
+import {
+  deleteCompetitionDefenseSession,
+  listCompetitionDefenseSessions,
+  rewindCompetitionDefenseTurns,
+  submitCompetitionDefenseTurn,
+} from '@/components/features/hosted-competitions/services/competition-run-mock-service'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { useApi } from '@/hooks/use-api'
 import { unwrap } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
@@ -16,7 +24,12 @@ import {
   type RewindOutcome,
   type SendOutcome,
 } from '../model/defense-conversation-model'
-import type { DefenseLimits, DefenseProblem, DefenseSession } from '../model/defense-types'
+import type {
+  DefenseLimits,
+  DefenseOpening,
+  DefenseProblem,
+  DefenseSession,
+} from '../model/defense-types'
 import { deleteSession, listSessions, rewindTurns, submitTurn } from '../services/session-service'
 import { defenseSessionsQueryKey, invalidateDefenseLists } from './defense-cache'
 
@@ -68,8 +81,8 @@ type UseDefenseConversationResult = DefenseConversationState &
  *
  * @param problem - The problem being defended.
  * @param opener - The examiner's opening line, seeded as the first turn of a fresh conversation.
- * @param initialSessionId - The saved session to resume on open, or null to take the most recently active; a
- *   named session this problem's history doesn't hold resumes none.
+ * @param opening - Which conversation to open on; a named one this problem's history doesn't hold opens
+ *   none.
  *
  * @returns The live conversation, its send flow, what the student says about it, and this problem's
  *   session history.
@@ -77,7 +90,7 @@ type UseDefenseConversationResult = DefenseConversationState &
 export function useDefenseConversation(
   problem: DefenseProblem,
   opener: string,
-  initialSessionId: string | null
+  opening: DefenseOpening
 ): UseDefenseConversationResult {
   // The query cache
   const queryClient = useQueryClient()
@@ -95,6 +108,21 @@ export function useDefenseConversation(
   // The backend calls bound to the current caller (unwrapped to data or a throw), or null when the caller
   // isn't ready. Memoized on the caller so it keeps a stable identity across renders.
   const buildServices = useCallback((): DefenseConversationServices | null => {
+    // A competition problem has no handout endpoint behind it, so it is answered by its own backend and
+    // waits on no caller
+    if (problem.target.kind === 'competition') {
+      return {
+        // Send the turn, returning the conversation grown with it and the reply
+        submitTurn: async (request) => unwrap(await submitCompetitionDefenseTurn(request)),
+        // Remove the conversation
+        deleteSession: async (sessionId) => {
+          unwrap(await deleteCompetitionDefenseSession(sessionId))
+        },
+        // Refused: a competition offers no rewind, so reaching this is a bug
+        rewindTurns: rewindCompetitionDefenseTurns,
+      }
+    }
+
     // No caller yet: the client is still loading or the user is signed out, so there are no services
     if (apiCall === null) {
       return null
@@ -113,20 +141,26 @@ export function useDefenseConversation(
         unwrap(await rewindTurns(apiCall, sessionId, keepThroughSequence))
       },
     }
-  }, [apiCall])
+  }, [apiCall, problem.target])
 
   // This problem's persisted sessions
   const sessionsQuery = useQuery({
     queryKey: defenseSessionsQueryKey(problem.target, isUserLoaded ? (userId ?? null) : null),
     queryFn: async () => {
+      // A competition problem is answered by its own backend, which needs no caller
+      if (problem.target.kind === 'competition') {
+        return unwrap(await listCompetitionDefenseSessions(problem.target))
+      }
+
       // The client must be ready to fetch
       if (apiCall === null) throw new Error('API not ready')
 
       // Fetch the sessions, unwrapped to the list or a throw
-      return unwrap(await listSessions(apiCall, problem.target))
+      return unwrap(await listSessions(apiCall, problem.target.environment))
     },
-    // Only fetch once the client is ready and the key's user is settled
-    enabled: apiCall !== null && isUserLoaded,
+    // Only fetch once the client is ready and the key's user is settled, which a competition waits on
+    // neither of
+    enabled: problem.target.kind === 'competition' || (apiCall !== null && isUserLoaded),
     // Sessions are the user's own recent activity
     ...cachePolicy.userData,
   })
@@ -138,7 +172,15 @@ export function useDefenseConversation(
         problem,
         opener,
         // Refresh every list the written session appears in
-        onSessionsChanged: () => invalidateDefenseLists(queryClient),
+        onSessionsChanged: () => {
+          // The defense surface's own lists, per problem and across all of them
+          invalidateDefenseLists(queryClient)
+
+          // And the competition area's list of the same conversations, which no defense query reaches
+          if (problem.target.kind === 'competition') {
+            invalidateCompetitionProblems(queryClient)
+          }
+        },
       })
   )
 
@@ -163,15 +205,12 @@ export function useDefenseConversation(
       return
     }
 
-    // The chosen saved defense to open, or the most recently active when none was named
-    const target =
-      initialSessionId === null
-        ? sessionsQuery.data.sessions[0]
-        : sessionsQuery.data.sessions.find((session) => session.id === initialSessionId)
+    // The saved defense to open on, which a fresh opening deliberately has none of
+    const target = resumeTargetOf(opening, sessionsQuery.data.sessions)
 
     // A named session missing from a list that is still being refreshed may yet arrive with it, so wait for the
     // refreshed list rather than settling on a stale one
-    if (initialSessionId !== null && target === undefined && sessionsQuery.isFetching) {
+    if (opening.kind === 'named' && target === undefined && sessionsQuery.isFetching) {
       return
     }
 
@@ -189,13 +228,7 @@ export function useDefenseConversation(
 
     // Whatever the outcome, the conversation the caller asked for has had its chance to open
     setInitialResumeSettled(true)
-  }, [
-    sessionsQuery.isSuccess,
-    sessionsQuery.isFetching,
-    sessionsQuery.data,
-    model,
-    initialSessionId,
-  ])
+  }, [sessionsQuery.isSuccess, sessionsQuery.isFetching, sessionsQuery.data, model, opening])
 
   // Runs a model action against the ready services, or reports the shared not-ready failure when the
   // client is still loading or signed out. Every action's not-ready path collapses here. Stable across
@@ -253,5 +286,36 @@ export function useDefenseConversation(
     clearReport: model.clearReport,
     deleteSession: removeSession,
     rewind,
+  }
+}
+
+/**
+ * Picks the saved conversation an opening asks for.
+ *
+ * @param opening - Which conversation the chat is opening on.
+ * @param sessions - This problem's saved conversations, most recently active first.
+ *
+ * @returns The one to resume, or undefined when the opening wants none or the named one is not here.
+ */
+function resumeTargetOf(
+  opening: DefenseOpening,
+  sessions: readonly DefenseSession[]
+): DefenseSession | undefined {
+  switch (opening.kind) {
+    // Continue where the student left off, which is what reopening a problem usually means
+    case 'newest':
+      return sessions[0]
+
+    // Continue one in particular
+    case 'named':
+      return sessions.find((session) => session.id === opening.sessionId)
+
+    // Start over beside whatever is already saved
+    case 'fresh':
+      return undefined
+
+    // Every opening is handled above
+    default:
+      return assertNever(opening)
   }
 }

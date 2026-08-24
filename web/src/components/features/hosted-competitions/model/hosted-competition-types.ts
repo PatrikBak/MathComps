@@ -26,6 +26,38 @@ export type HostedCompetition = {
 }
 
 /**
+ * One problem of a competition's set, as an entrant reads it: the statement, and nothing it is measured
+ * against.
+ */
+export type HostedCompetitionProblem = {
+  /** Stable identifier, unique within its competition. */
+  id: string
+  /** Where it sits in the set, counting from one. */
+  position: number
+  /** The statement as markdown/math source, in every language the site is read in. */
+  statement: LocalizedString
+  /** The conversations the student has held about it, most recently active first. */
+  defenses: HostedCompetitionDefenseLine[]
+}
+
+/**
+ * One conversation a student has held about one problem, as its row on the problem says it.
+ *
+ * Enough to choose between them and no more. What was last said stays out: the most recent line is
+ * usually the examiner's challenge, and reading it back on the page would spoil it.
+ */
+export type HostedCompetitionDefenseLine = {
+  /** The defense session it leads to. */
+  sessionId: string
+  /** When the student opened it, as an ISO-8601 string. */
+  startedAt: string
+  /** How many turns the student has spent in it. */
+  turnsSpent: number
+  /** The most turns it will take, so a row can say how much room is left. */
+  maxTurns: number
+}
+
+/**
  * The levels a group runs, easiest first. Each is a difficulty a student picks, not a bucket they are put in.
  */
 export const HOSTED_COMPETITION_CATEGORIES = ['elementary', 'intermediate', 'advanced'] as const
@@ -46,7 +78,7 @@ export type HostedCompetitionEntry = SatEntry | ForfeitedEntry
 /**
  * An entry the student sat, whether or not its clock has run out.
  */
-type SatEntry = {
+export type SatEntry = {
   /** The discriminant. */
   kind: 'sat'
   /** When the student entered, which is when their clock started, as an ISO-8601 string. */
@@ -65,6 +97,19 @@ type ForfeitedEntry = {
   kind: 'forfeited'
   /** When the student gave the entry up, as an ISO-8601 string. */
   forfeitedAt: string
+}
+
+/**
+ * What spending an entry hands back: the entry itself, and the problems it bought.
+ *
+ * One answer carrying both. The clock starts where the entry is taken, so a student left waiting on a
+ * second read for the statements reaches them having already spent some of their own time.
+ */
+export type SpentEntry = {
+  /** The entry as it now stands. */
+  entry: HostedCompetitionEntry
+  /** The competition's problems, in the order it sets them. */
+  problems: HostedCompetitionProblem[]
 }
 
 /**

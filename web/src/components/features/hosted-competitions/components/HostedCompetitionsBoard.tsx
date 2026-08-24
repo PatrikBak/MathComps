@@ -15,10 +15,11 @@ import { entryBlocker, hasAccount } from '../model/entry-reader'
 import { orderForReading } from '../model/hosted-competition-state'
 import { CategoryLegend } from './CategoryLegend'
 import { EntryGate } from './EntryGate'
+import { HeaderDisclosure } from './HeaderDisclosure'
 import { HostedCompetitionEntryDialog } from './HostedCompetitionEntryDialog'
 import { HostedCompetitionGroupPanel } from './HostedCompetitionGroupPanel'
 import { HowItWorks } from './HowItWorks'
-import { RulesNote } from './RulesNote'
+import { RulesList } from './RulesList'
 import { ScenarioSwitcher } from './ScenarioSwitcher'
 
 /**
@@ -82,7 +83,12 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
           <div className="space-y-2">
             <HowItWorks />
             <CategoryLegend />
-            <RulesNote />
+
+            {/* The rules, readable without going near an irreversible press. The same lines appear inside
+                the entry dialog on the one entry that accepts them; after that, this is where they live */}
+            <HeaderDisclosure label={t('rulesButton')}>
+              <RulesList />
+            </HeaderDisclosure>
           </div>
 
           {/* What the reader still owes, said before they reach for a button */}

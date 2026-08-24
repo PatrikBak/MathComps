@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 
 import type { RichMathEditorRef } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { usePersistentDraft } from '@/hooks/use-persistent-draft'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 import { resolveErrorMessage } from '@/lib/api/api-error-utils'
 
@@ -42,6 +43,8 @@ type DefenseTurnControlsInput = {
   rewind: (keepThroughSequence: number) => Promise<RewindOutcome>
   /** Deletes a session, dropping back to a fresh conversation when it was the open one. */
   deleteSession: (sessionId: string) => Promise<DeleteOutcome>
+  /** Where the unsent turn is kept across closes and reloads, or null to keep it only for this mount. */
+  draftStorageKey: string | null
 }
 
 /**
@@ -88,8 +91,8 @@ export function useDefenseTurnControls(
   // Central failure-code copy
   const tApiErrors = useTranslations('apiErrors')
 
-  // The in-progress composer text
-  const [draft, setDraft] = useState('')
+  // The in-progress composer text, kept wherever the caller asked for it
+  const [draft, setDraft] = usePersistentDraft(conversation.draftStorageKey, '')
 
   // The rewind awaiting confirmation, or null
   const [rewindTarget, setRewindTarget] = useState<RewindTarget | null>(null)

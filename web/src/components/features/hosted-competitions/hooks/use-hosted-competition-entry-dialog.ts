@@ -2,8 +2,12 @@
 
 import { useCallback, useState } from 'react'
 
+import { useIsMountedRef } from '@/hooks/use-is-mounted-ref'
+import { useRouter } from '@/i18n/navigation'
+
 import type { PendingEntry } from '../model/hosted-competition-types'
 import type { HostedCompetitionsReaderKey } from './hosted-competition-cache'
+import { useCompetitionAreaHref } from './use-competition-area-href'
 import { useEnterHostedCompetition } from './use-enter-hosted-competition'
 
 /**
@@ -42,13 +46,42 @@ export function useHostedCompetitionEntryDialog(
   // A function which drops the question
   const close = useCallback(() => setPending(null), [])
 
-  // Taking the entry, or giving it up, either of which closes the dialog once it lands
-  const { enter, forfeit, isEntering } = useEnterHostedCompetition(readerKey, close)
+  // The localized router, for taking the student where the entry they just spent is read
+  const router = useRouter()
+
+  // The way into one competition's own area
+  const areaHref = useCompetitionAreaHref()
+
+  // Whether the list is still on screen, which the continuation the press leaves behind has to ask
+  const isMountedRef = useIsMountedRef()
+
+  // Where a landed entry leaves the student: inside the competition, which is where the problems both
+  // answers to the dialog spend it on are read
+  const land = useCallback(
+    (competitionId: string) => {
+      // The student went somewhere else while the entry was landing, and where they went is their answer
+      if (!isMountedRef.current) {
+        return
+      }
+
+      // The question is answered
+      close()
+
+      // And the student is where the entry they spent is read
+      router.push(areaHref(competitionId))
+    },
+    [close, router, areaHref, isMountedRef]
+  )
+
+  // Taking the entry, or giving it up, either of which lands the student inside the competition
+  const { enter, forfeit, isEntering } = useEnterHostedCompetition(readerKey, land)
 
   // A function which answers the question
   const confirm = useCallback(() => {
     // Nothing to enter while the dialog is closed
-    if (pending === null) return
+    if (pending === null) {
+      return
+    }
 
     // Take the entry into whichever competition was asked about
     enter(pending.competition.id)
@@ -57,12 +90,21 @@ export function useHostedCompetitionEntryDialog(
   // A function which answers it by giving the entry up for the problems
   const confirmForfeit = useCallback(() => {
     // Nothing to give up while the dialog is closed
-    if (pending === null) return
+    if (pending === null) {
+      return
+    }
 
     // Spend the entry on whichever competition was asked about
     forfeit(pending.competition.id)
   }, [forfeit, pending])
 
   // What the dialog is asking about, and the ways to answer it
-  return { pending, open: setPending, close, confirm, forfeit: confirmForfeit, isEntering }
+  return {
+    pending,
+    open: setPending,
+    close,
+    confirm,
+    forfeit: confirmForfeit,
+    isEntering,
+  }
 }

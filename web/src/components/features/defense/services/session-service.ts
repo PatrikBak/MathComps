@@ -3,6 +3,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
+import { handoutTargetOf } from '../model/defense-target'
 import type {
   DefenseOutcome,
   DefenseReportCategory,
@@ -66,12 +67,16 @@ export function submitTurn(
   request: DefenseTurnRequest
 ): Promise<ApiResult<DefenseSession>> {
   switch (request.kind) {
-    // Open a new session against a problem, naming it rather than describing it
+    // Open a new session against a problem, naming it rather than describing it. This endpoint knows only
+    // handout environments, so the environment is what goes on the wire and the discriminant stays here
     case 'start':
       return apiCall<DefenseSession>(() => getStartDefenseUrl(), {
         method: 'POST',
         signal: request.signal,
-        body: JSON.stringify({ target: request.target, content: request.content }),
+        body: JSON.stringify({
+          target: handoutTargetOf(request.target),
+          content: request.content,
+        }),
       })
     // Append the student's message to the open session
     case 'continue':

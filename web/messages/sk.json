@@ -317,6 +317,11 @@
     "redirecting": "Presmerovávam..."
   },
   "competitions": {
+    "areaClockSpent": "Tvoj čas vypršal. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",
+    "areaFinished": "Súťaž máš ukončenú. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",
+    "areaForfeited": "Súťaže si sa nezúčastnil. Úlohy si môžeš skúsiť nesúťažne.",
+    "areaProblemsFailed": "Úlohy sa nepodarilo načítať.",
+    "backToCompetitions": "Späť na súťaže",
     "categories": {
       "advanced": "Pokročilá",
       "elementary": "Základná",
@@ -330,9 +335,13 @@
     },
     "categoryNote": "Môžeš sa zúčastniť aj viacerých kategórií.",
     "categoryToggle": "Ktorá úroveň je pre mňa?",
+    "clockFinished": "Ukončené",
     "clockHours": "{hours, plural, one {# hodina} few {# hodiny} other {# hodín}}",
     "clockHoursMinutes": "{hours, plural, one {# hodina} few {# hodiny} other {# hodín}} {minutes, plural, one {# minúta} few {# minúty} other {# minút}}",
+    "clockLeftHours": "{hours} h {minutes} min",
+    "clockLeftMinutes": "{minutes} min",
     "clockMinutes": "{minutes, plural, one {# minúta} few {# minúty} other {# minút}}",
+    "clockSpent": "Čas vypršal",
     "closedLabel": "ukončená",
     "closesIn": "ostáva {remaining}",
     "continue": "Pokračovať",
@@ -350,6 +359,14 @@
     "entryAuthReason": "spustenie súťaže",
     "entryError": "Súťaž sa nepodarilo spustiť.",
     "entryWindow": "vstup {range}",
+    "finishDialog": {
+      "confirm": "Ukončiť",
+      "consequence": "Tvoj čas sa tým zastaví a nič, čo napíšeš potom, sa už do súťaže nepočíta. Späť sa to vrátiť nedá.",
+      "keepWorking": "Pokračovať v riešení",
+      "title": "Ukončiť súťaž?"
+    },
+    "finishEntry": "Ukončiť súťaž",
+    "finishError": "Súťaž sa nepodarilo ukončiť. Skús to prosím znova.",
     "forfeitError": "Súťaž sa nepodarilo vzdať.",
     "howItWorks": {
       "steps": [
@@ -366,8 +383,11 @@
     "mySolutions": "Moje riešenia",
     "noCompetitions": "Zatiaľ tu nie je žiadna súťaž.",
     "opensIn": "otvára sa o {remaining}",
+    "practiceIntro": "Vyskúšaj si, aké to je v ostrých súťažiach. V tejto skúšobnej súťaži to funguje rovnako, až na to, že to nie je hodnotené a že si ju môžeš spustiť viackrát a pokračovať vo svojich predošlých obhajobách.",
+    "practiceIntroDismiss": "Rozumiem",
     "practiceNote": "Skúšobná súťaž s jednoduchými úlohami na vyskúšanie si súťažného prostredia.",
     "problemCount": "{count, plural, one {# úloha} few {# úlohy} other {# úloh}}",
+    "problemHeading": "Úloha {position}",
     "problems": "Úlohy",
     "readiness": {
       "profileLink": "Doplniť profil",
@@ -396,8 +416,12 @@
     "standing": {
       "running": "súťažíš, ostáva {clock}"
     },
+    "startAnotherDefense": "Začať ďalší rozhovor",
+    "startDefense": "Obhajovať riešenie",
     "try": "Vyskúšať",
-    "tryAgain": "Skúsiť znova"
+    "tryAgain": "Skúsiť znova",
+    "turnsSpent": "{spent}/{max} správ",
+    "typedSolutionsOnly": "Riešenie píšeš priamo tu. Fotky ručne písaného riešenia zatiaľ nepodporujeme."
   },
   "contact": {
     "email": "Email",
@@ -430,6 +454,8 @@
     "SK": "Slovensko"
   },
   "defense": {
+    "competitionClockDivider": "Koniec súťaže",
+    "competitionClockSpent": "Toto sa už do súťaže nepočíta.",
     "consentAccept": "Rozumiem",
     "consentAuthReason": "rozhovor s Mathildou",
     "consentBody": "Konverzácie s Mathildou ukladáme a prípadne čítame, aby sme ju vylepšili. Zároveň prosíme o fér používanie, každá jej reakcia nás niečo stojí. Odklikni, ak si s tým v pohode 🙂",
@@ -809,6 +835,10 @@
     "adminDefenses": {
       "description": "Prehľad obhajob vedených s AI skúšajúcou.",
       "title": "Konverzácie s Mathildou"
+    },
+    "competitionArea": {
+      "description": "Úlohy, tvoj čas a obhajoby, ktoré o nich vedieš.",
+      "title": "Súťaž"
     },
     "competitions": {
       "description": "Vyskúšaj si súťaže rôznych úrovní, v ktorých svoje riešenie obhajuješ našej umelej inteligencii Mathilde priamo v súťažnom čase.",

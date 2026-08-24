@@ -1,7 +1,8 @@
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 
-import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
+import { assertNever } from '@/components/shared/utils/assert-never'
 
+import type { DefenseTarget } from '../model/defense-target'
 import type { DefenseSession, DefenseSessionList } from '../model/defense-types'
 
 /** The root every defense query key hangs off, so one call can match them all. */
@@ -20,25 +21,74 @@ export function myDefensesQueryKey(userId: string | null): QueryKey {
 }
 
 /**
- * Builds the query key for the sessions a user holds against one handout environment.
+ * The key every conversation list about one competition's problem hangs off.
  *
- * @param target - The handout environment whose sessions these are.
+ * The full key below adds the problem and the user, and {@link forgetCompetitionDefenseLists} matches on
+ * this much alone, so both of them follow whatever this says.
+ *
+ * @param competitionId - Which competition sets the problem.
+ *
+ * @returns The key.
+ */
+function competitionSessionsKeyPrefix(competitionId: string): QueryKey {
+  // The competition, under the root every defense list hangs off
+  return [...DEFENSE_QUERY_KEY, 'sessions', 'competition', competitionId] as const
+}
+
+/**
+ * Builds the query key for the sessions a user holds against one problem.
+ *
+ * Every arm keeps 'sessions' as its second segment, so {@link patchCachedDefenseSession} still reaches
+ * all of them with one prefix.
+ *
+ * @param target - What the sessions are held against.
  * @param userId - The signed-in user's id, or null while it isn't known.
  *
  * @returns The query key.
  */
-export function defenseSessionsQueryKey(
-  target: HandoutEnvironmentTarget,
-  userId: string | null
-): QueryKey {
-  // One key per user and environment
-  return [
-    ...DEFENSE_QUERY_KEY,
-    'sessions',
-    target.handoutContentId,
-    target.environmentId,
-    userId,
-  ] as const
+export function defenseSessionsQueryKey(target: DefenseTarget, userId: string | null): QueryKey {
+  switch (target.kind) {
+    // One key per user and handout environment
+    case 'handout':
+      return [
+        ...DEFENSE_QUERY_KEY,
+        'sessions',
+        'handout',
+        target.environment.handoutContentId,
+        target.environment.environmentId,
+        userId,
+      ] as const
+
+    // One key per user and competition problem
+    case 'competition':
+      return [
+        ...competitionSessionsKeyPrefix(target.competitionId),
+        target.problemId,
+        userId,
+      ] as const
+
+    // Every target is handled above
+    default:
+      return assertNever(target)
+  }
+}
+
+/**
+ * Forgets every cached list of the conversations held about one competition's problems.
+ *
+ * Their key names the problem, and the problem outlives the entry: a competition taken a second time
+ * opens holding the previous run's conversations, offering them to be read and resumed under the fresh
+ * clock, until the read behind them lands.
+ *
+ * @param queryClient - The cache to forget them from.
+ * @param competitionId - Whose problems' lists to forget.
+ */
+export function forgetCompetitionDefenseLists(
+  queryClient: QueryClient,
+  competitionId: string
+): void {
+  // Every problem of that competition, whichever user the list belongs to
+  queryClient.removeQueries({ queryKey: competitionSessionsKeyPrefix(competitionId) })
 }
 
 /**
