@@ -2,6 +2,7 @@ using MathComps.Api.Endpoints;
 using MathComps.Api.Errors;
 using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Comments;
+using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Users;
@@ -79,8 +80,11 @@ public sealed class GlobalExceptionHandler(
         ProblemNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ProblemNotFound),
         ListNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ListNotFound),
         DefenseSessionNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.DefenseSessionNotFound),
-        DefenseEnvironmentNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.DefenseEnvironmentNotFound),
+        DefenseContentNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.DefenseContentNotFound),
         AdminNoteNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.AdminNoteNotFound),
+        HostedCompetitionNotFoundException
+            => (StatusCodes.Status404NotFound, ApiErrorCode.HostedCompetitionNotFound),
+        HostedProblemNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.HostedProblemNotFound),
 
         // Defense guardrails: the request doesn't hold up, or the user's usage is over a cap
         DefenseMessageTooLongException => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseMessageTooLong),
@@ -96,6 +100,16 @@ public sealed class GlobalExceptionHandler(
         // retry-after semantics
         DefenseSpendLimitException => (StatusCodes.Status429TooManyRequests, ApiErrorCode.DefenseSpendLimit),
 
+        // Competition entries: what the student is holding doesn't allow what they asked for
+        HostedEntryRequiredException => (StatusCodes.Status403Forbidden, ApiErrorCode.HostedEntryRequired),
+        HostedGroupNotOpenException
+            => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedGroupNotOpen),
+        HostedEntryAlreadySpentException => (StatusCodes.Status409Conflict, ApiErrorCode.HostedEntryAlreadySpent),
+        HostedEntryNotRunningException
+            => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedEntryNotRunning),
+        HostedEntryProfileIncompleteException
+            => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedEntryProfileIncomplete),
+
         // A review note the contract can't take: what it says, or the reply it stands against
         AdminNoteValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminNoteValue),
         AdminNoteTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminNoteTarget),
@@ -107,6 +121,9 @@ public sealed class GlobalExceptionHandler(
         NotCommentAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotCommentAuthor),
         NotAdminNoteAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotAdminNoteAuthor),
         ListAccessDeniedException => (StatusCodes.Status403Forbidden, ApiErrorCode.ListAccessDenied),
+        // The student owns the conversation and is refused the rewind or delete all the same
+        DefenseCompetitionSessionImmutableException
+            => (StatusCodes.Status403Forbidden, ApiErrorCode.DefenseCompetitionSessionImmutable),
 
         // State conflicts
         CannotLikeOwnCommentException => (StatusCodes.Status409Conflict, ApiErrorCode.CannotLikeOwnComment),

@@ -4,6 +4,7 @@ using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Domain.Localization;
+using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Dtos;
@@ -104,10 +105,15 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     private CancellationTokenSource? _abort;
 
     /// <summary>
-    /// The handout content every start resolves against. Read by <see cref="ConfigureServices"/>, so a test
-    /// swapping it must do so before the service is built.
+    /// The content every start resolves against, whatever kind of target it names.
     /// </summary>
     private readonly FakeDefenseContentResolver _content = new();
+
+    /// <summary>
+    /// The problem of a hosted competition, which is what a session defending something other than a handout
+    /// environment is pointed at.
+    /// </summary>
+    private readonly Guid _problemId = Guid.CreateVersion7();
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
@@ -142,7 +148,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // directly.
         services.AddSingleton<IExaminerConfigSnapshotProvider, ExaminerConfigSnapshotProvider>();
 
-        // Stands in for the published handout content the examiner is served from.
+        // Stands in for the site's own content the examiner is served from.
         services.AddSingleton<IDefenseContentResolver>(_ => _content);
 
         // The examiner's own lines, read from the real resource so a missing translation shows up here.
@@ -150,6 +156,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Serializes a user's concurrent turns.
         services.AddSingleton<IDefenseUserTurnGate, DefenseUserTurnGate>();
+
+        // Says whether the target being argued may be argued at all.
+        services.AddScoped<IDefenseTargetGuard, DefenseTargetGuard>();
 
         // The service under test.
         services.AddScoped<IDefenseSessionService, DefenseSessionService>();
@@ -162,6 +171,58 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         context.Users.AddRange(
             new User { Id = _ownerId, ExternalId = "ext-owner", Username = "Owner" },
             new User { Id = _otherId, ExternalId = "ext-other", Username = "Other" });
+
+        // Everything below exists to make one hosted problem, which a session can defend as well as a handout
+        // environment.
+
+        // The season the round sits in.
+        var season = new Season { Id = Guid.NewGuid(), StartYear = 2026, EditionNumber = 76 };
+        context.Seasons.Add(season);
+
+        // The root the competition node hangs off.
+        CompetitionTreeSeed.Root(context, "mc", 100);
+
+        // The group running it, open and not yet closed, so nothing but the entry decides who may argue.
+        var group = new HostedGroup
+        {
+            Id = Guid.CreateVersion7(),
+            Slug = "mc-open",
+            OpensAt = DateTimeOffset.UtcNow.AddDays(-1),
+            ClosesAt = DateTimeOffset.UtcNow.AddYears(1),
+            ClockMinutes = 180,
+            AllowsReentry = false,
+        };
+        context.HostedGroups.Add(group);
+
+        // Its one round, embargoed until the group closes, which is what an entry buys past.
+        var roundId = Guid.CreateVersion7();
+        context.Rounds.Add(new Round
+        {
+            Id = roundId,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "mc-advanced").Id,
+            SeasonId = season.Id,
+            Date = new DateOnly(2026, 10, 1),
+            VisibleSince = group.ClosesAt,
+            HostedGroupId = group.Id,
+        });
+
+        // And the problem itself, which the problem-target tests argue.
+        context.Problems.Add(new Problem
+        {
+            Id = _problemId,
+            RoundId = roundId,
+            Number = 1,
+            Slug = "mc-advanced-1",
+        });
+
+        // The entry that lets the owner argue the problem, and which the other user has not taken.
+        context.HostedEntries.Add(new HostedEntry
+        {
+            Id = Guid.CreateVersion7(),
+            UserId = _ownerId,
+            RoundId = roundId,
+            StartedAt = DateTimeOffset.UtcNow,
+        });
 
         // Commit the seed.
         await context.SaveChangesAsync();
@@ -468,6 +529,33 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
+    /// A conversation about a competition problem stays out of the cross-problem listing. The listing carries each
+    /// session's snapshotted statement, and it is read on a page that knows nothing about embargoes, so a
+    /// competition session appearing there would publish the statement its competition is still holding back.
+    /// </summary>
+    [Fact]
+    public Task ListAll_leaves_out_a_competition_problems_conversation() => RunTestAsync(async service =>
+    {
+        // The owner's conversation about a handout environment
+        var handout = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // The owner's second conversation, about a hosted problem
+        await service.StartAsync(
+            _ownerId,
+            new DefenseSessionStart(
+                new StartDefenseRequest(new ProblemTarget(_problemId), "my defense"), Language.EN));
+
+        // Both were written
+        Assert.Equal(2, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+
+        // Listing the owner's conversations comes back with exactly one
+        var listed = Assert.Single(await service.ListAllAsync(_ownerId));
+
+        // The handout conversation, with the problem one left out
+        Assert.Equal(handout.Id, listed.Id);
+    });
+
+    /// <summary>
     /// A session rewound to the examiner's opener has no student message left, which the listing reports as none.
     /// </summary>
     [Fact]
@@ -573,6 +661,77 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             Assert.Equal(1, await context.DefenseSpends.CountAsync(spend => spend.UserId == _ownerId));
         });
     });
+
+    /// <summary>
+    /// A conversation about a problem can be neither rewound nor deleted: it is the record of what the
+    /// student argued under their entry, so it outlives their opinion of it.
+    /// </summary>
+    [Fact]
+    public Task A_problems_conversation_cannot_be_rewound_or_deleted() => RunTestAsync(async service =>
+    {
+        // Argue a problem the site hosts, which the seeded entry lets the owner do
+        var session = await service.StartAsync(
+            _ownerId, new DefenseSessionStart(
+                new StartDefenseRequest(new ProblemTarget(_problemId), "my defense"), Language.EN));
+
+        // The rewind is refused
+        await Assert.ThrowsAsync<DefenseCompetitionSessionImmutableException>(
+            () => service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 0));
+
+        // The delete is refused too
+        await Assert.ThrowsAsync<DefenseCompetitionSessionImmutableException>(
+            () => service.DeleteAsync(_ownerId, session.Id));
+
+        // The conversation is still there to be read
+        Assert.Equal(1, await QueryValueAsync(context => context.DefenseSessions
+            .CountAsync(candidate => candidate.Id == session.Id)));
+    });
+
+    /// <summary>
+    /// A session defends one thing and the database is what says so: a second target row for a session that
+    /// already has one is refused, rather than left to the writing code to remember.
+    /// </summary>
+    [Fact]
+    public Task A_session_cannot_defend_two_things_at_once() => RunTestAsync(async service =>
+    {
+        // A conversation about a handout environment
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // Pointing the same conversation at a problem as well
+        var refused = await Assert.ThrowsAsync<DbUpdateException>(() => QueryAsync(async context =>
+        {
+            // A second target row for the conversation
+            context.ProblemDefenses.Add(new ProblemDefense
+            {
+                DefenseSessionId = session.Id,
+                ProblemId = _problemId,
+            });
+
+            // Commit the second target
+            await context.SaveChangesAsync();
+        }));
+
+        // Refused by the key the target rows point at the session by, which carries the kind
+        Assert.Contains(
+            "fk_problem_defenses_defense_sessions",
+            refused.InnerException?.Message ?? string.Empty,
+            StringComparison.Ordinal);
+
+        // The second target never landed
+        Assert.Equal(0, await QueryValueAsync(context => context.ProblemDefenses.CountAsync()));
+    });
+
+    /// <summary>
+    /// A student with no entry cannot open a conversation about an embargoed problem, which is the gate the whole
+    /// embargo rests on: the statement and the reference both ride back in the answer.
+    /// </summary>
+    [Fact]
+    public Task A_problem_cannot_be_argued_without_an_entry() => RunTestAsync(async service =>
+        // The other user never entered
+        await Assert.ThrowsAsync<HostedEntryRequiredException>(
+            () => service.StartAsync(
+                _otherId, new DefenseSessionStart(
+                    new StartDefenseRequest(new ProblemTarget(_problemId), "let me in"), Language.EN))));
 
     /// <summary>
     /// A session belonging to another user is treated as absent on both continue and delete.
@@ -753,6 +912,26 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
+    /// A problem target whose id never arrived is refused as the missing field it is. The binder writes an empty
+    /// Guid for a field the request left out, so nothing further along sees a null to complain about, and without
+    /// this the caller would be told the problem was not found rather than that they had failed to name one.
+    /// </summary>
+    [Fact]
+    public Task A_problem_target_with_no_id_is_refused() => RunTestAsync(async service =>
+    {
+        // A target of the right shape naming nothing
+        var start = new DefenseSessionStart(
+            new StartDefenseRequest(new ProblemTarget(Guid.Empty), "my defense"), Language.EN);
+
+        // Starting with that target is refused the same way omitting one altogether is
+        await Assert.ThrowsAsync<DefenseMessageEmptyException>(
+            () => service.StartAsync(_ownerId, start));
+
+        // Nothing was written
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+    });
+
+    /// <summary>
     /// A start naming an environment the site has no content for is refused, and costs nothing: the lookup happens
     /// before the examiner runs, so a caller can't spend the model's budget on a problem that doesn't exist.
     /// </summary>
@@ -763,7 +942,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         _content.UnknownEnvironmentIds.Add("prob-gone");
 
         // Starting against it is refused
-        await Assert.ThrowsAsync<DefenseEnvironmentNotFoundException>(
+        await Assert.ThrowsAsync<DefenseContentNotFoundException>(
             () => service.StartAsync(_ownerId, Request("prob-gone", "my defense")));
 
         // No session, and no spend either
@@ -1180,8 +1359,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     };
 
     /// <summary>
-    /// A test double for <see cref="IDefenseContentResolver"/> standing in for the site's published handout
-    /// content: every environment resolves to the same fixed problem, except the ones a test withholds.
+    /// A test double for <see cref="IDefenseContentResolver"/> standing in for the site's own content: every
+    /// target resolves to the same fixed problem, except the environments a test withholds.
     /// </summary>
     private sealed class FakeDefenseContentResolver : IDefenseContentResolver
     {
@@ -1202,13 +1381,14 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         /// <inheritdoc/>
         public Task<DefenseProblemContent?> ResolveAsync(
-            HandoutEnvironmentTarget target, Language language, CancellationToken cancellationToken)
+            DefenseTarget target, Language language, CancellationToken cancellationToken)
         {
-            // A withheld environment resolves to nothing, as an unpublished or deleted one would
-            if (UnknownEnvironmentIds.Contains(target.EnvironmentId))
+            // A withheld handout environment resolves to nothing, as an unpublished or deleted one would
+            if (target is HandoutEnvironmentTarget handout
+                && UnknownEnvironmentIds.Contains(handout.EnvironmentId))
                 return Task.FromResult<DefenseProblemContent?>(null);
 
-            // Otherwise the same fixed problem, whichever environment was asked for
+            // Otherwise the same fixed problem, whatever was asked for
             return Task.FromResult<DefenseProblemContent?>(
                 new DefenseProblemContent(Statement, Reference, []));
         }

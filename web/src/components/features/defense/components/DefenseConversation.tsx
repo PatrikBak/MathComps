@@ -48,7 +48,7 @@ type DefenseConversationProps = {
    * The competition entry this defense is being argued inside, or null outside a competition.
    *
    * Inside one the conversation is read-only past what has been said: every attempt stays part of the
-   * record a grader reads.
+   * record of what the student argued under their entry.
    */
   competition: AreaEntry | null
 }
@@ -65,8 +65,9 @@ const TURNS_WORTH_ANSWERING_FOR = 3
  * into a full-height modal panel its caller owns, so a surface already showing a modal can swap it in without
  * stacking dialogs.
  *
- * What a defense is argued against is resolved from the handout environment it names, so starting a fresh one
- * takes the target and nothing else, wherever the conversation was opened from.
+ * What a defense is argued against is resolved from the target it names, a handout's environment or a
+ * competition's problem, so starting a fresh one takes the target and nothing else, wherever the
+ * conversation was opened from.
  */
 export function DefenseConversation({
   problem,
@@ -138,7 +139,7 @@ export function DefenseConversation({
     draftStorageKey: defenseDraftStorageKey(problem.target),
   })
 
-  // Where this conversation stands against the entry's clock, and whether the account gates apply
+  // Where this conversation stands against the entry's clock
   const competitionMode = useDefenseCompetitionMode(competition, turns)
 
   // Whether this defense is being argued inside a competition, which is what takes the controls away
@@ -155,8 +156,7 @@ export function DefenseConversation({
   // A turn's own controls are offered only on a saved conversation and never mid-turn; a session id only
   // ever names one the signed-in viewer owns, so there's no one else's conversation to act on. Unknown caps
   // mean the history hasn't arrived, and a report would have no cap to hold its comment to. A competition
-  // takes them all away at once: rewinding and deleting would rewrite the record a grader reads, and
-  // reporting a reply writes through a path that asks an unauthenticated reader to sign in
+  // takes them all away at once: rewinding and deleting would rewrite the record of what was argued
   const canAct = !isThinking && currentSessionId !== null && limits !== null && !isCompetition
 
   // Whether the conversation has enough behind it to be worth summing up, or was already summed up, which
@@ -182,8 +182,9 @@ export function DefenseConversation({
   const problemLink =
     handoutTarget === null ? null : (resolveHandoutProblemRef(handoutTarget, locale)?.link ?? null)
 
-  // Whether a fresh defense has anything to be argued against: what it is measured against is published per
-  // language, and a handout this locale doesn't carry publishes none
+  // Whether a fresh defense has anything to be argued against: what a handout problem is measured against
+  // is published per language, so a locale that doesn't carry it reaches none, and a competition problem
+  // names no handout to reach
   const canStartFresh = problemLink !== null
 
   // Whether there's a conversation worth resetting: an open session, or a fresh one the student has
@@ -322,7 +323,6 @@ export function DefenseConversation({
             isSignedIn: isSignedIn === true,
             isConsentLoading: consent.isLoading,
             hasConsented: consent.hasConsented,
-            isGateWaived: competitionMode.isGateWaived,
             isThinking,
             repliesLeft,
           })}

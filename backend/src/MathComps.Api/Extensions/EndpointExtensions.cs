@@ -29,6 +29,9 @@ public static class EndpointExtensions
         // AI-examiner defense conversations
         app.MapDefenseEndpoints();
 
+        // The competitions the site hosts itself: the groups, entries, and the problems an entry opens
+        app.MapCompetitionEndpoints();
+
         // Admin-only endpoints, gated by the admin policy
         app.MapAdminEndpoints();
 

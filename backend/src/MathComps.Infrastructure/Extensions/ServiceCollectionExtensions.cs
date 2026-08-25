@@ -8,6 +8,7 @@ using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Clerk;
 using MathComps.Infrastructure.Services.Comments;
+using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Engine;
@@ -379,10 +380,11 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers the defense feature: the examiner engine, the input/turn/spend caps, the per-user turn gate, the
-    /// lookup of what the examiner is told about a problem, her own localized lines, the service that runs and
-    /// persists defense conversations, and the service that records the students' feedback on them. Assumes the
-    /// chat stack is registered (see <see cref="AddLlmChat"/>) and, since the problem content is read back out of
-    /// object storage, that <see cref="AddStorage"/> has run.
+    /// lookup of what the examiner is told about a problem, her own localized lines, the guard saying whether a
+    /// student may argue a given target, the service that runs and persists defense conversations, and the service
+    /// that records the students' feedback on them. Assumes the chat stack is registered (see
+    /// <see cref="AddLlmChat"/>) and, since the problem content is read back out of object storage, that
+    /// <see cref="AddStorage"/> has run.
     /// </summary>
     /// <param name="services">The service collection to add the defense feature to.</param>
     /// <param name="configuration">The application configuration carrying the <c>Examiner</c>,
@@ -405,11 +407,13 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        // The app's in-memory cache, pulled in here because the resolver below caches its reads in one.
+        // The app's in-memory cache, pulled in here because the handout resolver below caches its reads in one.
         services.AddMemoryCache();
 
-        // Resolves a problem from the handout environment it lives in.
-        services.TryAddSingleton<IDefenseContentResolver, StoredDefenseContentResolver>();
+        // Resolves what the examiner is told, from whichever source the defense's target names.
+        services.TryAddSingleton<IHandoutDefenseContentResolver, HandoutDefenseContentResolver>();
+        services.TryAddSingleton<IProblemDefenseContentResolver, ProblemDefenseContentResolver>();
+        services.TryAddSingleton<IDefenseContentResolver, DefenseContentResolver>();
 
         // The examiner's own lines, read from disk once; a singleton for the same reason.
         services.TryAddSingleton<IDefenseCopy, DefenseCopy>();
@@ -422,6 +426,30 @@ public static class ServiceCollectionExtensions
 
         // The service that records what students thought of those conversations.
         services.TryAddScoped<IDefenseFeedbackService, DefenseFeedbackService>();
+
+        // Says whether a student may argue what a defense target names.
+        services.TryAddScoped<IDefenseTargetGuard, DefenseTargetGuard>();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the competitions the site hosts itself: the service backing what a student sees of them and what
+    /// they do with an entry. Pulls in <see cref="AddLocalization"/> since a competition's name is read from the
+    /// taxonomy metadata. Assumes the defense caps are registered (see <see cref="AddDefenseServices"/>), since a
+    /// competition reports how many turns a defense allows. Expects the DbContext from
+    /// <see cref="AddMathCompsDbContext"/>.
+    /// </summary>
+    /// <param name="services">The service collection to add the competition services to.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddCompetitionServices(this IServiceCollection services)
+    {
+        // A competition is named after the node it runs under, so bring the metadata registry along.
+        services.AddLocalization();
+
+        // Runs the competitions the site hosts itself.
+        services.TryAddScoped<IHostedCompetitionService, HostedCompetitionService>();
 
         // Builder pattern
         return services;

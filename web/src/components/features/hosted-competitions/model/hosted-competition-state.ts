@@ -75,7 +75,7 @@ type SatAreaEntry = {
 }
 
 /**
- * An entry the student gave up for the problems, which no clock and no grader belongs to.
+ * An entry the student gave up for the problems, so no clock ever ran on it.
  */
 type ForfeitedAreaEntry = {
   /** The discriminant. */

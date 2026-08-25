@@ -12,10 +12,11 @@ using Microsoft.Extensions.Options;
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
-/// Implements <see cref="IDefenseSessionService"/> over the database and the examiner engine. A turn takes the user's
-/// serialization gate, runs the guardrails, then the engine (no DB work while it runs), then persists the turns and one
-/// <see cref="DefenseSpend"/> row from the turn's cost — the gate held throughout so a user's concurrent turns can't
-/// each clear the spend check against the same pre-write total.
+/// Implements <see cref="IDefenseSessionService"/> over the database and the examiner engine. A turn checks its
+/// inputs first, then takes the user's serialization gate, weighs the turn and spend caps under it, runs the engine
+/// (no DB work while it runs), and persists the turns and one <see cref="DefenseSpend"/> row from the turn's cost —
+/// the gate held throughout so a user's concurrent turns can't each clear the spend check against the same
+/// pre-write total.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="examiner">The engine that produces the examiner's reply.</param>
@@ -25,10 +26,11 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// <param name="turnGate">Serializes a single user's turns.</param>
 /// <param name="contentResolver">Looks up what a new session's examiner is told about the problem.</param>
 /// <param name="defenseCopy">The examiner's own lines, in the student's language.</param>
+/// <param name="targetGuard">Says whether a student may argue what the target names.</param>
 public class DefenseSessionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory, IExaminer examiner, IOptions<DefenseLimits> limits,
     IExaminerConfigSnapshotProvider examinerConfigSnapshotProvider, IDefenseUserTurnGate turnGate,
-    IDefenseContentResolver contentResolver, IDefenseCopy defenseCopy)
+    IDefenseContentResolver contentResolver, IDefenseCopy defenseCopy, IDefenseTargetGuard targetGuard)
     : IDefenseSessionService
 {
     /// <summary>
@@ -47,19 +49,21 @@ public class DefenseSessionService(
     {
         // Every field a start needs must be present and non-blank; a missing one (null through JSON) or a blank one
         // is a bad request, not a server fault.
-        EnsureTargetPresent(start.Request.Target);
-        EnsureNotBlank(start.Request.Content);
+        DefenseInputs.EnsureTargetPresent(start.Request.Target, _limits);
+        DefenseInputs.EnsureNotBlank(start.Request.Content);
 
-        // Bound what the caller sent before it is used to look anything up.
-        EnsureWithinLength(start.Request.Target.HandoutContentId, _limits.MaxHandoutContentIdChars);
-        EnsureWithinLength(start.Request.Target.EnvironmentId, _limits.MaxEnvironmentIdChars);
-        EnsureWithinLength(start.Request.Content, _limits.MaxCandidateChars);
+        // Bound the student's message before doing anything with it.
+        DefenseInputs.EnsureWithinLength(start.Request.Content, _limits.MaxCandidateChars);
 
-        // The problem itself comes from the site's own content, so a caller can only choose which environment to
-        // defend, never what the examiner is told about it. A target naming an environment nothing is published
-        // for is a 404 rather than a rejected input: the request was well formed, the content just isn't there.
+        // Whether this student may argue the target at all, settled before the content is so much as read: an
+        // embargoed statement and its reference both ride back in the answer.
+        await targetGuard.EnsureCanDefendAsync(userId, start.Request.Target, cancellationToken);
+
+        // The problem itself comes from the site's own content, so a caller can only choose which problem to
+        // defend, never what the examiner is told about it. A target naming content nothing is published for is a
+        // 404 rather than a rejected input: the request was well formed, the content just isn't there.
         var problem = await contentResolver.ResolveAsync(start.Request.Target, start.Language, cancellationToken)
-            ?? throw new DefenseEnvironmentNotFoundException();
+            ?? throw new DefenseContentNotFoundException();
 
         // Fold the author's hints into the reference so the examiner reads them as staged, earned-only help.
         var reference = AuthorHintsSection.BuildReference(problem.Reference, problem.Hints);
@@ -76,10 +80,6 @@ public class DefenseSessionService(
         // Refuse the turn if the user is already over their spend ceiling.
         await EnsureUnderSpendCeilingAsync(dbContext, userId, cancellationToken);
 
-        // The anchor row for the environment being defended, upserted on demand.
-        var handoutEnvironmentId =
-            await UpsertHandoutEnvironmentAsync(dbContext, start.Request.Target, cancellationToken);
-
         // One timestamp for the session and its seed turns.
         var seededAt = DateTimeOffset.UtcNow;
 
@@ -87,6 +87,7 @@ public class DefenseSessionService(
         var session = new DefenseSession
         {
             UserId = userId,
+            TargetKind = DefenseTargets.KindOf(start.Request.Target),
             ProblemStatement = problem.Statement,
             ProblemReference = reference,
             ExaminerConfig = _examinerConfigJson,
@@ -105,12 +106,8 @@ public class DefenseSessionService(
         // Track the new session.
         dbContext.DefenseSessions.Add(session);
 
-        // And the environment it defends.
-        dbContext.HandoutEnvironmentDefenses.Add(new HandoutEnvironmentDefense
-        {
-            DefenseSessionId = session.Id,
-            HandoutEnvironmentId = handoutEnvironmentId,
-        });
+        // And the row saying what it defends, which is one row of one table either way.
+        await DefenseTargets.AddRowAsync(dbContext, session.Id, start.Request.Target, cancellationToken);
 
         // Persist the session, its turns, its target, and the spend row in one write.
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -124,10 +121,10 @@ public class DefenseSessionService(
         Guid userId, Guid sessionId, string content, CancellationToken cancellationToken = default)
     {
         // Reject a blank message before anything else; there's nothing to defend.
-        EnsureNotBlank(content);
+        DefenseInputs.EnsureNotBlank(content);
 
         // Bound the message before doing anything with it.
-        EnsureWithinLength(content, _limits.MaxCandidateChars);
+        DefenseInputs.EnsureWithinLength(content, _limits.MaxCandidateChars);
 
         // Serialize this user's turns for the rest of the operation, so concurrent continues can't both clear the
         // turn cap and spend check against the same pre-write state.
@@ -137,10 +134,10 @@ public class DefenseSessionService(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // The session with its turns (tracked, for the append below), the student's answer for it and what they
-        // hold against its replies, plus the two content ids of the environment it defends. Split, because
-        // turns and reports are two collections off one row: joined in a single query the database would return
-        // every pairing of them, each repeating the session's statement, reference, and settings snapshot.
-        // Another user's session never comes back from it, and a missing one reads the same.
+        // hold against its replies, plus the columns of both target arms, of which the session's kind says which
+        // are filled. Split, because turns and reports are two collections off one row: joined in a single query
+        // the database would return every pairing of them, each repeating the session's statement, reference, and
+        // settings snapshot. Another user's session never comes back from it, and a missing one reads the same.
         var loaded = await dbContext.DefenseSessions
             .Include(defenseSession => defenseSession.Turns)
             .Include(defenseSession => defenseSession.Feedback)
@@ -150,9 +147,9 @@ public class DefenseSessionService(
             .Select(defenseSession => new
             {
                 Session = defenseSession,
-                Target = new HandoutEnvironmentTarget(
-                    defenseSession.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
-                    defenseSession.EnvironmentTarget.HandoutEnvironment.ContentId),
+                HandoutContentId = (string?)defenseSession.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
+                EnvironmentId = (string?)defenseSession.EnvironmentTarget.HandoutEnvironment.ContentId,
+                ProblemId = (Guid?)defenseSession.ProblemTarget!.ProblemId,
             })
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new DefenseSessionNotFoundException();
@@ -180,27 +177,28 @@ public class DefenseSessionService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Hand back the grown conversation.
-        return ToSessionDto(session, loaded.Target);
+        return ToSessionDto(
+            session,
+            DefenseTargets.FromColumns(
+                session.TargetKind, loaded.HandoutContentId, loaded.EnvironmentId, loaded.ProblemId));
     }
 
     /// <inheritdoc/>
     public async Task<DefenseSessionListDto> ListAsync(
-        Guid userId, HandoutEnvironmentTarget target, CancellationToken cancellationToken = default)
+        Guid userId, DefenseTarget target, CancellationToken cancellationToken = default)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's sessions against this environment, most recently active first: each conversation in order,
+        // The user's sessions against this target, most recently active first: each conversation in order,
         // the student's answer for it, and what they hold against its replies. Every session in this list defends
         // the target the caller named, so it rides into each one. Split, so the turns and the reports don't
         // multiply out.
         var sessions = await dbContext.DefenseSessions
             .AsNoTracking()
             .AsSplitQuery()
-            .Where(session => session.UserId == userId
-                && session.EnvironmentTarget != null
-                && session.EnvironmentTarget.HandoutEnvironment.ContentId == target.EnvironmentId
-                && session.EnvironmentTarget.HandoutEnvironment.Handout.ContentId == target.HandoutContentId)
+            .Where(session => session.UserId == userId)
+            .Where(DefenseTargets.HeldAgainst(target))
             .OrderByDescending(session => session.Turns.Max(turn => turn.CreatedAt))
             // A tie goes to the session started later: ids are time-ordered v7 Guids.
             .ThenByDescending(session => session.Id)
@@ -234,8 +232,9 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's sessions across every problem, most recently active first, each with its target, statement,
-        // last activity, and the student's most recent message. A session with no linked environment is excluded.
+        // The user's handout sessions, most recently active first, each with its target, statement, last
+        // activity, and the student's most recent message. A competition conversation is left out: it is read
+        // inside the competition area, whose problems may still be embargoed.
         return await dbContext.DefenseSessions
             .AsNoTracking()
             .Where(session => session.UserId == userId && session.EnvironmentTarget != null)
@@ -268,6 +267,10 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
+        // A conversation about a competition problem is the record of what a student argued under their entry,
+        // so it outlives their opinion of it.
+        await EnsureNotCompetitionAsync(dbContext, userId, sessionId, cancellationToken);
+
         // Delete the session, filtering on the owner so another user's id can't reach it. The cascade drops its
         // turns and everything the student said about the conversation; the spend rows are independent and stay.
         var deleted = await dbContext.DefenseSessions
@@ -289,6 +292,10 @@ public class DefenseSessionService(
         await DefenseSessionWrites.ToOwnedSessionAsync(
             dbContextFactory, turnGate, userId, sessionId, async dbContext =>
             {
+                // A rewind of a competition conversation would quietly rewrite what the student argued under
+                // their entry.
+                await EnsureNotCompetitionAsync(dbContext, userId, sessionId, cancellationToken);
+
                 // Who authored the turn to keep as the new last one.
                 var keptRole =
                     await GetTurnRoleAsync(dbContext, sessionId, keepThroughSequence, cancellationToken);
@@ -306,6 +313,67 @@ public class DefenseSessionService(
                     .Where(turn => turn.SessionId == sessionId && turn.Sequence > keepThroughSequence)
                     .ExecuteDeleteAsync(cancellationToken);
             }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Throws when the user's spend so far today has reached the per-user daily ceiling.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context to query.</param>
+    /// <param name="userId">The user to check.</param>
+    /// <param name="cancellationToken">A token to cancel the query.</param>
+    private async Task EnsureUnderSpendCeilingAsync(
+        MathCompsDbContext dbContext, Guid userId, CancellationToken cancellationToken)
+    {
+        // The start of today, in UTC.
+        var dayStart = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero);
+
+        // Sum the user's spend since then.
+        var spent = await dbContext.DefenseSpends
+            .Where(spend => spend.UserId == userId && spend.CreatedAt >= dayStart)
+            .SumAsync(spend => spend.Cost, cancellationToken);
+
+        // Over the ceiling refuses the turn before any model call.
+        if (spent >= _limits.DailySpendCeilingPerUser)
+            throw new DefenseSpendLimitException();
+    }
+
+    /// <summary>
+    /// Throws when a session defends a competition problem, which may be neither rewound nor deleted.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="userId">The caller, so another user's session reads as missing rather than as refused.</param>
+    /// <param name="sessionId">The session being acted on.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    private static async Task EnsureNotCompetitionAsync(
+        MathCompsDbContext dbContext, Guid userId, Guid sessionId, CancellationToken cancellationToken)
+    {
+        // Whether the caller's session defends a competition problem. A session that isn't theirs matches
+        // nothing and falls through to whatever the caller was doing, which answers not-found on its own.
+        var isCompetition = await dbContext.DefenseSessions
+            .Where(DefenseSessionWrites.IsOwnedBy(userId, sessionId))
+            .AnyAsync(session => session.ProblemTarget != null, cancellationToken);
+
+        // Refused outright, whatever state the entry it was argued under is in.
+        if (isCompetition)
+            throw new DefenseCompetitionSessionImmutableException();
+    }
+
+    /// <summary>
+    /// Reads who authored the turn at one sequence of a session.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="sessionId">The session the turn belongs to.</param>
+    /// <param name="sequence">The turn's position in the conversation.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The turn's role, or null when the session holds no turn at that sequence.</returns>
+    private static async Task<TranscriptRole?> GetTurnRoleAsync(
+        MathCompsDbContext dbContext, Guid sessionId, int sequence, CancellationToken cancellationToken)
+    {
+        // The role of the turn at that point in the conversation, absent when nothing sits there.
+        return await dbContext.DefenseTurns
+            .Where(turn => turn.SessionId == sessionId && turn.Sequence == sequence)
+            .Select(turn => (TranscriptRole?)turn.Role)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     /// <summary>
@@ -444,6 +512,14 @@ public class DefenseSessionService(
     }
 
     /// <summary>
+    /// Builds the engine's transcript from a session's stored turns, in sequence order.
+    /// </summary>
+    /// <param name="turns">The session's turns.</param>
+    /// <returns>The conversation as the engine reads it.</returns>
+    private static Transcript BuildTranscript(IEnumerable<DefenseTurn> turns) =>
+        new([.. turns.OrderBy(turn => turn.Sequence).Select(turn => new TranscriptTurn(turn.Role, turn.Content))]);
+
+    /// <summary>
     /// Maps a turn's engine attempts onto rows against the turn they were drafted for. The fallback flag belongs to
     /// the turn rather than to an attempt, so it lands on the last one, which is the attempt it describes.
     /// </summary>
@@ -519,99 +595,13 @@ public class DefenseSessionService(
     }
 
     /// <summary>
-    /// Builds the engine's transcript from a session's stored turns, in sequence order.
-    /// </summary>
-    /// <param name="turns">The session's turns.</param>
-    /// <returns>The conversation as the engine reads it.</returns>
-    private static Transcript BuildTranscript(IEnumerable<DefenseTurn> turns) =>
-        new([.. turns.OrderBy(turn => turn.Sequence).Select(turn => new TranscriptTurn(turn.Role, turn.Content))]);
-
-    /// <summary>
-    /// Throws when the user's spend so far today has reached the per-user daily ceiling.
-    /// </summary>
-    /// <param name="dbContext">The operation's database context to query.</param>
-    /// <param name="userId">The user to check.</param>
-    /// <param name="cancellationToken">A token to cancel the query.</param>
-    private async Task EnsureUnderSpendCeilingAsync(
-        MathCompsDbContext dbContext, Guid userId, CancellationToken cancellationToken)
-    {
-        // The start of today, in UTC.
-        var dayStart = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero);
-
-        // Sum the user's spend since then.
-        var spent = await dbContext.DefenseSpends
-            .Where(spend => spend.UserId == userId && spend.CreatedAt >= dayStart)
-            .SumAsync(spend => spend.Cost, cancellationToken);
-
-        // Over the ceiling refuses the turn before any model call.
-        if (spent >= _limits.DailySpendCeilingPerUser)
-            throw new DefenseSpendLimitException();
-    }
-
-    /// <summary>
-    /// Throws when a required input is missing or blank.
-    /// </summary>
-    /// <param name="value">The required input to check.</param>
-    private static void EnsureNotBlank(string value)
-    {
-        // Null (a missing JSON field), empty, or whitespace-only is a bad request, not a server fault.
-        if (string.IsNullOrWhiteSpace(value))
-            throw new DefenseMessageEmptyException();
-    }
-
-    /// <summary>
-    /// Throws when the environment being defended is missing or either half of it is blank.
-    /// </summary>
-    /// <param name="target">The environment to check, null when the request omitted it entirely.</param>
-    private static void EnsureTargetPresent(HandoutEnvironmentTarget? target)
-    {
-        // A request that omits the target names nothing to defend, which is a bad request like any blank field.
-        if (target is null)
-            throw new DefenseMessageEmptyException();
-
-        // Both halves are needed to locate the environment, so neither may be blank.
-        EnsureNotBlank(target.HandoutContentId);
-        EnsureNotBlank(target.EnvironmentId);
-    }
-
-    /// <summary>
-    /// Throws when a value exceeds its length cap.
-    /// </summary>
-    /// <param name="value">The text to bound.</param>
-    /// <param name="maxLength">The most characters allowed.</param>
-    private static void EnsureWithinLength(string value, int maxLength)
-    {
-        // Over the cap is a bad request, not a server error.
-        if (value.Length > maxLength)
-            throw new DefenseMessageTooLongException();
-    }
-
-    /// <summary>
-    /// Reads who authored the turn at one sequence of a session.
-    /// </summary>
-    /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="sessionId">The session the turn belongs to.</param>
-    /// <param name="sequence">The turn's position in the conversation.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The turn's role, or null when the session holds no turn at that sequence.</returns>
-    private static async Task<TranscriptRole?> GetTurnRoleAsync(
-        MathCompsDbContext dbContext, Guid sessionId, int sequence, CancellationToken cancellationToken)
-    {
-        // The role of the turn at that point in the conversation, absent when nothing sits there.
-        return await dbContext.DefenseTurns
-            .Where(turn => turn.SessionId == sessionId && turn.Sequence == sequence)
-            .Select(turn => (TranscriptRole?)turn.Role)
-            .FirstOrDefaultAsync(cancellationToken);
-    }
-
-    /// <summary>
     /// Projects a session to its client shape: its turns in order, what the student said about the conversation,
     /// and what they hold against its replies.
     /// </summary>
     /// <param name="session">The session to project.</param>
-    /// <param name="target">The environment the session defends.</param>
+    /// <param name="target">What the session defends.</param>
     /// <returns>The session's client shape.</returns>
-    private static DefenseSessionDto ToSessionDto(DefenseSession session, HandoutEnvironmentTarget target) =>
+    private static DefenseSessionDto ToSessionDto(DefenseSession session, DefenseTarget target) =>
         new(session.Id,
             target,
             ToTurnDtos(session.Turns),
@@ -627,26 +617,6 @@ public class DefenseSessionService(
         feedback is null
             ? null
             : new DefenseFeedbackDto(feedback.Outcome, feedback.Comment);
-
-    /// <summary>
-    /// Finds the anchor row for the environment being defended, creating the handout's and the environment's anchor
-    /// rows on demand when either is seen for the first time.
-    /// </summary>
-    /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="target">The environment to anchor.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The environment anchor row's id.</returns>
-    private static async Task<Guid> UpsertHandoutEnvironmentAsync(
-        MathCompsDbContext dbContext, HandoutEnvironmentTarget target, CancellationToken cancellationToken)
-    {
-        // The handout the environment hangs off.
-        var handoutId = await ContentAnchors.EnsureHandoutAsync(
-            dbContext, target.HandoutContentId, cancellationToken);
-
-        // The environment itself, scoped to that handout.
-        return await ContentAnchors.EnsureHandoutEnvironmentAsync(
-            dbContext, handoutId, target.EnvironmentId, cancellationToken);
-    }
 
     /// <summary>
     /// Projects a session's turns to their client shape, in sequence order.

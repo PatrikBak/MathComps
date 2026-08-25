@@ -1,23 +1,19 @@
 'use client'
 
 import type { QueryClient } from '@tanstack/react-query'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
-import { toast } from 'sonner'
 
 import { forgetCompetitionDefenseLists } from '@/components/features/defense/hooks/defense-cache'
 import { forgetDefenseDraft } from '@/components/features/defense/model/defense-target'
-import { assertNever } from '@/components/shared/utils/assert-never'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
-import { unwrap } from '@/lib/api/api-error'
 
 import type { EntryReadiness, SpentEntry } from '../model/hosted-competition-types'
 import {
   enterHostedCompetition,
   forfeitHostedCompetition,
-  useMockViewer,
-} from '../services/hosted-competition-mock-service'
+} from '../services/hosted-competition-service'
 import type { HostedCompetitionsReaderKey } from './hosted-competition-cache'
 import {
   entryReadinessQueryKey,
@@ -58,9 +54,6 @@ export function useEnterHostedCompetition(
   // Competitions copy
   const t = useTranslations('competitions')
 
-  // Who is reading, as far as the mocked backend is concerned
-  const { viewer } = useMockViewer()
-
   // The React Query cache
   const queryClient = useQueryClient()
 
@@ -97,7 +90,7 @@ export function useEnterHostedCompetition(
 
   // Taking the entry
   const entryMutation = useOptimisticMutation<SpentEntry, string>({
-    apiFn: (_apiCall, competitionId) => enterHostedCompetition(competitionId),
+    apiFn: (apiCall, competitionId) => enterHostedCompetition(apiCall, competitionId),
     onSuccess: land,
     authReason: t('entryAuthReason'),
     errorMessage: t('entryError'),
@@ -105,56 +98,17 @@ export function useEnterHostedCompetition(
 
   // Giving it up for the problems, which lands in the cache the same way an entry does
   const forfeitMutation = useOptimisticMutation<SpentEntry, string>({
-    apiFn: (_apiCall, competitionId) => forfeitHostedCompetition(competitionId),
+    apiFn: (apiCall, competitionId) => forfeitHostedCompetition(apiCall, competitionId),
     onSuccess: land,
     authReason: t('entryAuthReason'),
     errorMessage: t('forfeitError'),
   })
 
-  // The same entry, taken without the auth gate. The shared mutation weighs a real Clerk session before
-  // it fires, which `?scenario=` has no way to hand it, so a mocked student would be turned away at the
-  // one press this whole page exists for. It goes when the mocked service does
-  const mockedEntryMutation = useMutation({
-    mutationFn: async (competitionId: string) => {
-      // The entry and the set it bought, or throwing the mocked failure
-      return unwrap(await enterHostedCompetition(competitionId))
-    },
-    onSuccess: land,
-    onError: () => toast.error(t('entryError')),
-  })
-
-  // The same for a forfeit, and it goes with the one above
-  const mockedForfeitMutation = useMutation({
-    mutationFn: async (competitionId: string) => {
-      // The spent entry and the set it bought, or throwing the mocked failure
-      return unwrap(await forfeitHostedCompetition(competitionId))
-    },
-    onSuccess: land,
-    onError: () => toast.error(t('forfeitError')),
-  })
-
-  // Whichever pair this reader's presses can actually go through
-  switch (viewer) {
-    // A student the address invented, whose entries the mock takes and the backend never hears of
-    case 'student':
-      return {
-        enter: mockedEntryMutation.mutate,
-        forfeit: mockedForfeitMutation.mutate,
-        isEntering: mockedEntryMutation.isPending || mockedForfeitMutation.isPending,
-      }
-
-    // Anybody the mock did not invent, signed in or not
-    case 'real':
-    case 'anonymous':
-      return {
-        enter: entryMutation.mutate,
-        forfeit: forfeitMutation.mutate,
-        isEntering: entryMutation.isPending || forfeitMutation.isPending,
-      }
-
-    // Every viewer is handled above
-    default:
-      return assertNever(viewer)
+  // The two presses, and whether either is in flight
+  return {
+    enter: entryMutation.mutate,
+    forfeit: forfeitMutation.mutate,
+    isEntering: entryMutation.isPending || forfeitMutation.isPending,
   }
 }
 

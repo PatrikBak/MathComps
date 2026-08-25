@@ -24,7 +24,6 @@ import { formatClockRemaining } from '@/components/shared/utils/duration-utils'
 import type { Locale } from '@/i18n/i18n'
 
 import { useClockLength } from '../hooks/use-clock-length'
-import { useCompetitionAreaHref } from '../hooks/use-competition-area-href'
 import { useRemainingLabel } from '../hooks/use-remaining-label'
 import type { GroupPhase, HostedCompetitionStanding } from '../model/hosted-competition-state'
 import { derivePhase, deriveStanding } from '../model/hosted-competition-state'
@@ -33,6 +32,7 @@ import type {
   HostedCompetitionGroup,
   PendingEntry,
 } from '../model/hosted-competition-types'
+import { competitionAreaHref } from '../services/hosted-competition-routes'
 import { CategoryBadge } from './CategoryBadge'
 
 /**
@@ -428,9 +428,6 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
   // Competitions copy
   const t = useTranslations('competitions')
 
-  // The way into the competition's own area
-  const areaHref = useCompetitionAreaHref()
-
   // Over, so the way in is gone and both of the things it left behind are open to everybody. They are its
   // own, not its group's: each category was a different problem set answered by a different set of people.
   // A clock still running outlives the window, an entry ending on its own length
@@ -446,7 +443,11 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
     return (
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-5">
         {wasInIt ? (
-          <AreaLink href={areaHref(competition.id)} icon={NotebookPen} label={t('mySolutions')} />
+          <AreaLink
+            href={competitionAreaHref(competition.id)}
+            icon={NotebookPen}
+            label={t('mySolutions')}
+          />
         ) : (
           competition.problemsPublished && (
             <Button variant="link">
@@ -480,7 +481,9 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
     // Inside, and the way back to the clock they left running. The loudest thing the page can offer while
     // it is offering it: everything else here waits, and this one is being spent
     case 'running':
-      return <AreaLink href={areaHref(competition.id)} icon={Play} label={t('continue')} />
+      return (
+        <AreaLink href={competitionAreaHref(competition.id)} icon={Play} label={t('continue')} />
+      )
 
     // Taken. The practice one is the only competition anybody gets a second go at; every other one offers
     // the student their own work back, which is in the area they spent the entry in
@@ -491,7 +494,11 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
           {t('tryAgain')}
         </Button>
       ) : (
-        <AreaLink href={areaHref(competition.id)} icon={NotebookPen} label={t('mySolutions')} />
+        <AreaLink
+          href={competitionAreaHref(competition.id)}
+          icon={NotebookPen}
+          label={t('mySolutions')}
+        />
       )
 
     // Untaken, so the group decides: one that has not opened yet has nothing to press, and an open one

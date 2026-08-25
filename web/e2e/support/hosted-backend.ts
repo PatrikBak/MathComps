@@ -1,0 +1,1098 @@
+import type { Page, Route } from '@playwright/test'
+
+import type {
+  DefenseLimits,
+  DefenseSession,
+  DefenseSessionList,
+  MathildaConsent,
+  StoredTurn,
+} from '@/components/features/defense/model/defense-types'
+import { entryEndsAt } from '@/components/features/hosted-competitions/model/hosted-competition-state'
+import type {
+  EntryReadiness,
+  HostedCompetition,
+  HostedCompetitionEntry,
+  HostedCompetitionGroup,
+  HostedCompetitionProblem,
+  HostedCompetitionsView,
+  SpentEntry,
+} from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import { HOSTED_COMPETITION_CATEGORIES } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import { assertNever } from '@/components/shared/utils/assert-never'
+import { formatMonthAndYear } from '@/components/shared/utils/date-utils'
+import { DAY_MS, MINUTE_MS, SECOND_MS } from '@/components/shared/utils/time-units'
+import type { LocalizedString } from '@/i18n/i18n'
+
+import { BACKEND_ORIGIN } from './backend-routes'
+
+/**
+ * A backend for the competitions surface that answers out of memory instead of a database.
+ *
+ * The surface is one of the few the archive cannot stand in for: every state a student can be in is a row
+ * somebody had to create, and reaching them for real means applying drafts, declaring a group and holding a
+ * conversation with a live examiner that answers differently every run. Standing in for the API instead gives
+ * each test the one state it is about, and makes the examiner's replies something an assertion can name.
+ *
+ * It holds real state rather than replaying fixtures: an entry taken in one call is there in the next read,
+ * and a turn sent is in the transcript that comes back. That is what lets a test press a button and then
+ * assert on what the page does with the answer, reloads included.
+ */
+
+/** How many problems a competition's set holds. */
+const PROBLEMS_PER_COMPETITION = 3
+
+/** How long a competition's clock runs, in minutes. */
+const CLOCK_MINUTES = 120
+
+/** How long the practice competition's clock runs, in minutes. Short enough to watch it run out. */
+const PRACTICE_CLOCK_MINUTES = 1
+
+/** How long a group takes entries for, in days. */
+const WINDOW_DAYS = 13
+
+/** The category the entered states put the student inside. */
+const ENTERED_CATEGORY_INDEX = 1
+
+/** The competition the specs enter, one of those the open group runs. */
+export const COMPETITION_ID = 'open-intermediate'
+
+/** {@link PROBLEMS_PER_COMPETITION}, as the specs read it. */
+export const PROBLEM_COUNT = PROBLEMS_PER_COMPETITION
+
+/**
+ * How long the fake takes to answer, so the waiting states are the ones a reader actually sees.
+ *
+ * A test that needs to catch a spinner needs the spinner to exist for longer than the assertion takes to
+ * arrive; one that does not is slowed by exactly this much per call, which is why it is small.
+ */
+const RESPONSE_DELAY_MS = 200
+
+/**
+ * The longest the runner waits for the page's clock to live through {@link RESPONSE_DELAY_MS}.
+ *
+ * A held clock is not walked forward by anything the fake does, so without this a spec that pauses and
+ * then asserts would hang here rather than failing on the assertion it is about. It has to stay well
+ * under the timeout the specs give their own assertions: a ceiling above that one answers the call
+ * after the assertion it was holding up has already given up, and the failure then names a missing
+ * divider rather than a reply that never came.
+ */
+const THINKING_CEILING_MS = 5_000
+
+/**
+ * How often the page's clock is read while a call is being held open.
+ *
+ * Each read is a round trip into the page, and so is the `fastForward` that ends the wait. Reading
+ * every few milliseconds contends with it, and a paused clock then stays paused long enough for the
+ * reply to miss its own assertion.
+ */
+const POLL_INTERVAL_MS = 200
+
+/**
+ * Which state the student is in when the page opens.
+ *
+ * Only what cannot coexist gets a name of its own. Everything a student can hold at the same time as
+ * something else is in every one of them at once.
+ */
+export type HostedState =
+  /** Everything an entry needs, and nothing taken yet. */
+  | 'ready'
+  /** Forty minutes into a two-hour clock. */
+  | 'running'
+  /** A minute and a half off running out. */
+  | 'expiring'
+  /** Closed early, an hour ago. */
+  | 'finished'
+  /** Given up half an hour ago for the problems, so no clock ever ran. */
+  | 'forfeited'
+  /** Signed up and never named themselves, so the gate has something to hold back. */
+  | 'gate-blocked'
+  /** Everything in place except the rules, which is a first entry ever. */
+  | 'first-entry'
+
+/**
+ * What to vary about the student beyond the state they are in.
+ */
+export type HostedBackendOptions = {
+  /**
+   * Whether they have already been told what talking to Mathilda entails. Defaults to true, since every
+   * spec about the chat needs to be past that gate to reach a composer at all.
+   */
+  hasConsented?: boolean
+}
+
+/**
+ * What the student did in one group that has closed.
+ */
+type PastSeed = {
+  /** How many days ago it closed. */
+  closedDaysAgo: number
+  /** Which categories they entered, by index. */
+  entries: number[]
+  /** Whether their results have been published. */
+  resultsPublished: boolean
+}
+
+/**
+ * Every group behind the open one, newest first.
+ *
+ * Written out rather than generated, the point being the states they cover: two categories taken in one
+ * group, results published and results still being written, and one group skipped entirely.
+ */
+const PAST_SEEDS: PastSeed[] = [
+  { closedDaysAgo: 21, entries: [0, 1], resultsPublished: false },
+  { closedDaysAgo: 52, entries: [1], resultsPublished: true },
+  { closedDaysAgo: 83, entries: [2], resultsPublished: true },
+  { closedDaysAgo: 114, entries: [], resultsPublished: true },
+]
+
+/**
+ * The statements a competition sets, in the order it sets them.
+ *
+ * Real typeset maths rather than filler, since what these exercise is a student reading a problem and
+ * arguing about it.
+ */
+const STATEMENTS: LocalizedString[] = [
+  {
+    sk: 'Nájdite všetky dvojice kladných celých čísel $(a, b)$ také, že $a^2 + b$ aj $b^2 + a$ sú druhé mocniny celých čísel.',
+    cs: 'Najděte všechny dvojice kladných celých čísel $(a, b)$ takové, že $a^2 + b$ i $b^2 + a$ jsou druhé mocniny celých čísel.',
+    en: 'Find all pairs of positive integers $(a, b)$ such that both $a^2 + b$ and $b^2 + a$ are perfect squares.',
+  },
+  {
+    sk: 'Nech $ABC$ je ostrouhlý trojuholník s výškami $AD$, $BE$ a $CF$. Dokážte, že priamka $EF$ je kolmá na priamku $AO$, kde $O$ je stred opísanej kružnice trojuholníka $ABC$.',
+    cs: 'Nechť $ABC$ je ostroúhlý trojúhelník s výškami $AD$, $BE$ a $CF$. Dokažte, že přímka $EF$ je kolmá na přímku $AO$, kde $O$ je střed kružnice opsané trojúhelníku $ABC$.',
+    en: 'Let $ABC$ be an acute triangle with altitudes $AD$, $BE$ and $CF$. Prove that the line $EF$ is perpendicular to the line $AO$, where $O$ is the circumcentre of triangle $ABC$.',
+  },
+  {
+    sk: 'Na tabuli je napísaných $n$ jednotiek. V každom kroku zmažeme dve čísla $x$ a $y$ a napíšeme namiesto nich $\\frac{x + y}{4}$. Pre ktoré $n$ vieme dosiahnuť, aby na tabuli zostalo jediné číslo aspoň $\\frac{1}{n}$?',
+    cs: 'Na tabuli je napsáno $n$ jedniček. V každém kroku smažeme dvě čísla $x$ a $y$ a napíšeme místo nich $\\frac{x + y}{4}$. Pro která $n$ dokážeme docílit, aby na tabuli zbylo jediné číslo alespoň $\\frac{1}{n}$?',
+    en: 'The number $1$ is written on a board $n$ times. At each step we erase two numbers $x$ and $y$ and write $\\frac{x + y}{4}$ in their place. For which $n$ can we make the single remaining number at least $\\frac{1}{n}$?',
+  },
+]
+
+/** The examiner's opening line, which the backend owns and every transcript starts on. */
+const OPENER =
+  'Tell me how you approached this one. Start wherever your argument starts, not where the problem does.'
+
+/**
+ * What the examiner says next, cycled by how many turns the student has spent.
+ *
+ * A fake cannot argue, so these probe without claiming to have read anything. They are also what an
+ * assertion names, which a live examiner could never be.
+ */
+const SCRIPTED_REPLIES = [
+  'That is a step, but it is not yet a reason. What forces it to hold rather than merely happen to?',
+  'Take the case you skipped over. Does the same argument survive it, or does it need a second idea?',
+  'You are asserting the bound. Show me where it comes from, in one line if you can.',
+  'Good. Now the other direction: what would have to be true for this to fail?',
+]
+
+/** What one entry is held to, standing in for the competition's own setup. */
+const LIMITS: DefenseLimits = {
+  maxCandidateChars: 4000,
+  maxFeedbackCommentChars: 1000,
+  maxTurnsPerSession: 20,
+}
+
+/**
+ * Everything one page's fake backend currently holds.
+ *
+ * One of these per installed fake, so two tests running side by side never write over each other and a
+ * reload finds what the call before it left.
+ */
+type FakeState = {
+  /** Every group, in the order they are listed. */
+  view: HostedCompetitionsView
+  /** Whether the student has what an entry needs of them. */
+  readiness: EntryReadiness
+  /** Each problem's conversations, most recently active first, by problem id. */
+  transcripts: Map<string, DefenseSession[]>
+  /** How many ids have been minted, so nothing collides with anything minted before it. */
+  minted: number
+}
+
+/**
+ * Builds an entry that ran its full clock and was closed at the end of it.
+ *
+ * @param endedAtMs - When it ended, in epoch milliseconds.
+ *
+ * @returns The entry.
+ */
+function pastEntry(endedAtMs: number): HostedCompetitionEntry {
+  // A clock that ran its full length, so it started one whole clock before it ended
+  return {
+    kind: 'sat',
+    startedAt: new Date(endedAtMs - CLOCK_MINUTES * MINUTE_MS).toISOString(),
+    finishedAt: new Date(endedAtMs).toISOString(),
+  }
+}
+
+/**
+ * Builds the entry a state puts on the open group.
+ *
+ * @param state - Which state to build.
+ * @param now - The instant the times are measured from, in epoch milliseconds.
+ *
+ * @returns The entry, or null for a state nobody has entered in.
+ */
+function openEntry(state: HostedState, now: number): HostedCompetitionEntry | null {
+  // Only a state that has spent an entry puts one on the group
+  switch (state) {
+    // Forty minutes in, with most of the clock still to run
+    case 'running':
+      return {
+        kind: 'sat',
+        startedAt: new Date(now - 40 * MINUTE_MS).toISOString(),
+        finishedAt: null,
+      }
+
+    // A minute and a half off running out
+    case 'expiring':
+      return {
+        kind: 'sat',
+        startedAt: new Date(now - CLOCK_MINUTES * MINUTE_MS + 90 * SECOND_MS).toISOString(),
+        finishedAt: null,
+      }
+
+    // Closed early, an hour ago
+    case 'finished':
+      return pastEntry(now - 60 * MINUTE_MS)
+
+    // Given up half an hour ago for the problems, so no clock was ever started
+    case 'forfeited':
+      return { kind: 'forfeited', forfeitedAt: new Date(now - 30 * MINUTE_MS).toISOString() }
+
+    // Every other state leaves it untouched
+    case 'ready':
+    case 'gate-blocked':
+    case 'first-entry':
+      return null
+
+    // Every state is handled above
+    default:
+      return assertNever(state)
+  }
+}
+
+/**
+ * Builds one group's competitions, one per category.
+ *
+ * @param groupId - Which group they belong to.
+ * @param entryFor - The entry each category carries, by index.
+ * @param resultsPublished - Whether their results have been published.
+ * @param problemsPublished - Whether their problems can be read, which only a closed group's can.
+ *
+ * @returns One competition per category.
+ */
+function buildCompetitions(
+  groupId: string,
+  entryFor: (index: number) => HostedCompetitionEntry | null,
+  resultsPublished: boolean,
+  problemsPublished: boolean
+): HostedCompetition[] {
+  // One competition per category, all of them on the same terms
+  return HOSTED_COMPETITION_CATEGORIES.map((category, index) => ({
+    id: `${groupId}-${category}`,
+    category,
+    entry: entryFor(index),
+    resultsPublished,
+    problemsPublished,
+  }))
+}
+
+/**
+ * Builds the single competition a specially named group runs.
+ *
+ * @param groupId - Which group it belongs to.
+ * @param entry - The entry it carries, if any.
+ * @param resultsPublished - Whether its results have been published.
+ * @param problemsPublished - Whether its problems can be read.
+ *
+ * @returns The one competition, which carries no category: the group's own name says who it is for.
+ */
+function buildSoloCompetition(
+  groupId: string,
+  entry: HostedCompetitionEntry | null,
+  resultsPublished: boolean,
+  problemsPublished: boolean
+): HostedCompetition[] {
+  // The one competition, named after its group since no category tells it apart
+  return [{ id: `${groupId}-set`, category: null, entry, resultsPublished, problemsPublished }]
+}
+
+/**
+ * Names a group after the month it opens in, which is what most of them are called.
+ *
+ * Written from the dates rather than fixed, so they move with the clock instead of drifting behind it.
+ *
+ * @param opensAtMs - When the group opens, in epoch milliseconds.
+ *
+ * @returns The name, in every language.
+ */
+function monthNames(opensAtMs: number): LocalizedString {
+  // The instant the month is read off
+  const instant = new Date(opensAtMs).toISOString()
+
+  // The same month, written the way each language writes it
+  return {
+    sk: formatMonthAndYear(instant, 'sk'),
+    cs: formatMonthAndYear(instant, 'cs'),
+    en: formatMonthAndYear(instant, 'en'),
+  }
+}
+
+/**
+ * Builds everything the surface reads for a state.
+ *
+ * @param state - Which state to build.
+ *
+ * @returns Every group, in the order they are listed.
+ */
+function buildView(state: HostedState): HostedCompetitionsView {
+  // The moment every time on the page is measured from
+  const now = Date.now()
+
+  // A student on their very first visit has taken nothing at all
+  const isNewcomer = state === 'first-entry'
+
+  // The practice one, which never closes and never publishes results
+  const practice: HostedCompetitionGroup = {
+    id: 'practice',
+    name: { sk: 'Skúšobná súťaž', cs: 'Zkušební soutěž', en: 'Practice competition' },
+    problemCount: PROBLEMS_PER_COMPETITION,
+    clockMinutes: PRACTICE_CLOCK_MINUTES,
+    opensAt: new Date(now - 200 * DAY_MS).toISOString(),
+    closesAt: null,
+    competitions: buildSoloCompetition('practice', null, false, false),
+  }
+
+  // One the program named itself rather than after a month, running a single competition
+  const preparationOpensAt = now + 9 * DAY_MS
+  const preparation: HostedCompetitionGroup = {
+    id: 'preparation',
+    name: {
+      sk: 'Príprava na celoštátne kolo A',
+      cs: 'Příprava na celostátní kolo A',
+      en: 'National round A preparation',
+    },
+    problemCount: PROBLEMS_PER_COMPETITION,
+    clockMinutes: CLOCK_MINUTES,
+    opensAt: new Date(preparationOpensAt).toISOString(),
+    closesAt: new Date(preparationOpensAt + WINDOW_DAYS * DAY_MS).toISOString(),
+    competitions: buildSoloCompetition('preparation', null, false, false),
+  }
+
+  // The one announced but not started
+  const upcomingOpensAt = now + 24 * DAY_MS
+  const upcoming: HostedCompetitionGroup = {
+    id: 'upcoming',
+    name: monthNames(upcomingOpensAt),
+    problemCount: PROBLEMS_PER_COMPETITION,
+    clockMinutes: CLOCK_MINUTES,
+    opensAt: new Date(upcomingOpensAt).toISOString(),
+    closesAt: new Date(upcomingOpensAt + WINDOW_DAYS * DAY_MS).toISOString(),
+    competitions: buildCompetitions('upcoming', () => null, false, false),
+  }
+
+  // The one taking entries, plus whatever the state put on it
+  const openOpensAt = now - 6 * DAY_MS
+  const open: HostedCompetitionGroup = {
+    id: 'open',
+    name: monthNames(openOpensAt),
+    problemCount: PROBLEMS_PER_COMPETITION,
+    clockMinutes: CLOCK_MINUTES,
+    opensAt: new Date(openOpensAt).toISOString(),
+    closesAt: new Date(openOpensAt + WINDOW_DAYS * DAY_MS).toISOString(),
+    competitions: buildCompetitions(
+      'open',
+      (index) => (index === ENTERED_CATEGORY_INDEX ? openEntry(state, now) : null),
+      false,
+      false
+    ),
+  }
+
+  // A specially named one taking entries right now
+  const openSpecialOpensAt = now - 3 * DAY_MS
+  const openSpecial: HostedCompetitionGroup = {
+    id: 'open-special',
+    name: {
+      sk: 'Príprava na krajské kolo A',
+      cs: 'Příprava na krajské kolo A',
+      en: 'Regional round A preparation',
+    },
+    problemCount: PROBLEMS_PER_COMPETITION,
+    clockMinutes: CLOCK_MINUTES,
+    opensAt: new Date(openSpecialOpensAt).toISOString(),
+    closesAt: new Date(openSpecialOpensAt + WINDOW_DAYS * DAY_MS).toISOString(),
+    competitions: buildSoloCompetition('open-special', openEntry(state, now), false, false),
+  }
+
+  // And one that is over, sat by everybody but the newcomer
+  const closedSpecialClosedAt = now - 34 * DAY_MS
+  const closedSpecial: HostedCompetitionGroup = {
+    id: 'closed-special',
+    name: {
+      sk: 'Príprava na školské kolo A',
+      cs: 'Příprava na školní kolo A',
+      en: 'School round A preparation',
+    },
+    problemCount: PROBLEMS_PER_COMPETITION,
+    clockMinutes: CLOCK_MINUTES,
+    opensAt: new Date(closedSpecialClosedAt - WINDOW_DAYS * DAY_MS).toISOString(),
+    closesAt: new Date(closedSpecialClosedAt).toISOString(),
+    competitions: buildSoloCompetition(
+      'closed-special',
+      isNewcomer ? null : pastEntry(closedSpecialClosedAt - 3 * DAY_MS),
+      true,
+      true
+    ),
+  }
+
+  // Everything behind them
+  const past: HostedCompetitionGroup[] = PAST_SEEDS.map((seed) => {
+    // The fortnight it took entries in, counted back from the day it closed
+    const closedAt = now - seed.closedDaysAgo * DAY_MS
+    const opensAt = closedAt - WINDOW_DAYS * DAY_MS
+
+    // What its competitions are named after
+    const id = `past-${seed.closedDaysAgo}`
+
+    // The group, named after the month it opened in
+    return {
+      id,
+      name: monthNames(opensAt),
+      problemCount: PROBLEMS_PER_COMPETITION,
+      clockMinutes: CLOCK_MINUTES,
+      opensAt: new Date(opensAt).toISOString(),
+      closesAt: new Date(closedAt).toISOString(),
+      competitions: buildCompetitions(
+        id,
+        (index) => {
+          // A newcomer has nothing behind them, and neither does a category they sat out
+          return isNewcomer || !seed.entries.includes(index)
+            ? // Nothing on that category
+              null
+            : // The entry they sat, two days before the group closed
+              pastEntry(closedAt - 2 * DAY_MS)
+        },
+        seed.resultsPublished,
+        true
+      ),
+    }
+  })
+
+  // Every group there is to show
+  return { groups: [practice, preparation, upcoming, open, openSpecial, closedSpecial, ...past] }
+}
+
+/**
+ * Builds the readiness a state starts from.
+ *
+ * @param state - Which state to build.
+ *
+ * @returns Whether the student has what an entry needs of them.
+ */
+function buildReadiness(state: HostedState): EntryReadiness {
+  // What each state leaves the student holding
+  switch (state) {
+    // Signed up and never named themselves, so the gate has something to hold back
+    case 'gate-blocked':
+      return {
+        hasUsername: false,
+        hasAnsweredGraduation: true,
+        hasEmail: false,
+        hasAcceptedRules: true,
+      }
+
+    // Everything in place except the rules, which is a first entry ever
+    case 'first-entry':
+      return {
+        hasUsername: true,
+        hasAnsweredGraduation: true,
+        hasEmail: true,
+        hasAcceptedRules: false,
+      }
+
+    // Every other state is ready to enter
+    case 'ready':
+    case 'running':
+    case 'expiring':
+    case 'finished':
+    case 'forfeited':
+      return {
+        hasUsername: true,
+        hasAnsweredGraduation: true,
+        hasEmail: true,
+        hasAcceptedRules: true,
+      }
+
+    // Every state is handled above
+    default:
+      return assertNever(state)
+  }
+}
+
+/**
+ * Names one problem of one competition's set.
+ *
+ * @param competitionId - Which competition the set belongs to.
+ * @param position - Where the problem sits in it, counting from one.
+ *
+ * @returns The problem's id.
+ */
+function problemIdOf(competitionId: string, position: number): string {
+  // Named after the competition it belongs to, so two sets never collide
+  return `${competitionId}-p${position}`
+}
+
+/**
+ * Builds a stored turn.
+ *
+ * @param state - The state minting its id.
+ * @param role - Who authored it.
+ * @param content - What it says.
+ * @param atMs - When it was authored, in epoch milliseconds.
+ *
+ * @returns The turn.
+ */
+function storedTurn(
+  state: FakeState,
+  role: StoredTurn['role'],
+  content: string,
+  atMs: number
+): StoredTurn {
+  // A number no turn before it took
+  state.minted++
+
+  // The turn, wearing that number
+  return { id: `turn-${state.minted}`, createdAt: new Date(atMs).toISOString(), role, content }
+}
+
+/**
+ * The conversations held against one problem, opened empty on first ask.
+ *
+ * @param state - The fake's memory.
+ * @param problemId - Which problem's conversations.
+ *
+ * @returns The conversations, most recently active first.
+ */
+function transcriptsOf(state: FakeState, problemId: string): DefenseSession[] {
+  // What is already there
+  const existing = state.transcripts.get(problemId)
+
+  // A problem already argued about hands back what it holds
+  if (existing !== undefined) {
+    return existing
+  }
+
+  // One nobody has argued about yet starts with nothing
+  const opened: DefenseSession[] = []
+
+  // Which is what it holds from here
+  state.transcripts.set(problemId, opened)
+
+  // And what this ask and every later one reads
+  return opened
+}
+
+/**
+ * Builds one competition's problem set, with whatever has been said about each.
+ *
+ * @param state - The fake's memory.
+ * @param competitionId - Which competition's set.
+ *
+ * @returns The problems, in the order the competition sets them.
+ */
+function buildProblems(state: FakeState, competitionId: string): HostedCompetitionProblem[] {
+  // One problem per statement, as many of them as a competition sets
+  return STATEMENTS.slice(0, PROBLEMS_PER_COMPETITION).map((statement, index) => {
+    // Where it sits in the set
+    const position = index + 1
+
+    // The id the problem is named by
+    const id = problemIdOf(competitionId, position)
+
+    // A row per conversation, saying enough to choose between them and no more
+    const defenses = transcriptsOf(state, id).map((session) => ({
+      sessionId: session.id,
+      startedAt: session.turns[0]?.createdAt ?? new Date(0).toISOString(),
+      turnsSpent: session.turns.filter((turn) => turn.role === 'candidate').length,
+      maxTurns: LIMITS.maxTurnsPerSession,
+    }))
+
+    // The problem, with whatever has been said about it
+    return { id, position, statement, defenses }
+  })
+}
+
+/**
+ * What the page's own clock reads, which a spec holding it still has moved on from the runner's.
+ *
+ * Every instant stamped while a call is being answered has to come from here. A turn stamped off the
+ * runner's clock lands before a buzzer the page has already walked past, and the transcript then reads
+ * as though the reply beat a deadline it did not. What the fake lays out before it answers anything is
+ * measured on the runner's clock, which is the only one there is at that point.
+ *
+ * @param page - The page whose clock to read.
+ *
+ * @returns The instant, in epoch milliseconds.
+ */
+async function pageNow(page: Page): Promise<number> {
+  // The page's own clock, read inside it
+  try {
+    return await page.evaluate(() => Date.now())
+  } catch {
+    // A page mid-navigation has no clock to read, and the runner's is then the closest thing there is
+    return Date.now()
+  }
+}
+
+/**
+ * Answers a route with a JSON body, after the delay every call takes.
+ *
+ * The delay is served by the page rather than the runner, so a spec that holds the clock still decides
+ * when the answer lands: that window between a turn being sent and its reply arriving is exactly what
+ * the specs about the buzzer are about.
+ *
+ * @param page - The page the call came from.
+ * @param route - The call to answer.
+ * @param body - What to answer with.
+ */
+async function answer(page: Page, route: Route, body: unknown): Promise<void> {
+  // Take as long over the answer as every call takes
+  await think(page)
+
+  // Hand the body back
+  await route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify(body),
+  })
+}
+
+/**
+ * Holds a call open for as long as every call takes to answer, measured on the page's clock.
+ *
+ * Its own step because the two defense handlers stamp on both sides of it: the student's turn where it
+ * reached the backend, the reply where the examiner finished writing it. Collapsing the two onto one
+ * instant is what would let a turn sent with time to spare land the wrong side of the buzzer.
+ *
+ * It watches the page's clock rather than sleeping on a timer inside the page. A spec that pauses the
+ * clock and then walks it forward is exactly the case these calls exist for, and an in-page timer
+ * awaited from here never fires: the page is blocked on this very request, so the wait and the thing
+ * that would end it are the same event loop. The real-time ceiling is what keeps a spec that pauses the
+ * clock and never advances it from hanging here instead of failing on its own assertion.
+ *
+ * @param page - The page whose clock the wait runs on.
+ */
+async function think(page: Page): Promise<void> {
+  // Where the page's clock stood when the call arrived
+  const from = await pageNow(page)
+
+  // And where the runner's clock stood, which is what bounds the wait
+  const realFrom = Date.now()
+
+  // Until the page has lived through the delay, or the runner has waited far longer than one
+  while (Date.now() - realFrom < THINKING_CEILING_MS) {
+    // Where the page's clock stands now, or the runner's when the page has gone away mid-call
+    const now = await pageNow(page)
+
+    // Long enough on the page's own clock
+    if (now - from >= RESPONSE_DELAY_MS) {
+      return
+    }
+
+    // Otherwise look again shortly, on the runner's clock, which nothing under test can hold
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
+  }
+}
+
+/**
+ * Finds one competition wherever its group sits.
+ *
+ * @param state - The fake's memory.
+ * @param competitionId - Which competition to find.
+ *
+ * @returns The competition, or undefined when nothing is named by that id.
+ */
+function competitionIn(state: FakeState, competitionId: string): HostedCompetition | undefined {
+  // Ids are unique across every group, so the first match is the only one
+  return state.view.groups
+    .flatMap((group) => group.competitions)
+    .find((candidate) => candidate.id === competitionId)
+}
+
+/**
+ * Seeds the conversation an entered competition's first problem opens with.
+ *
+ * It straddles the end of the clock, so the boundary between what the clock covered and what it did not
+ * is there to look at on arrival rather than only after somebody waits a two-hour clock out. Only the
+ * first problem gets one: the rest are what a spec writes into itself.
+ *
+ * @param state - The fake's memory.
+ * @param group - The group setting the terms the clock runs on.
+ * @param competition - The competition whose entry it is placed around.
+ */
+function seedStraddlingDefense(
+  state: FakeState,
+  group: HostedCompetitionGroup,
+  competition: HostedCompetition
+): void {
+  // Only an entry the student actually sat has a clock to have said anything inside
+  if (competition.entry?.kind !== 'sat') {
+    return
+  }
+
+  // The instant the counted part ends
+  const endsAtMs = Date.parse(entryEndsAt(group, competition.entry))
+
+  // Whether it has already passed, which is what makes a straddling transcript possible at all
+  const isSpent = endsAtMs <= Date.now()
+
+  // The counted part, which sits inside the clock either way
+  const turns = [
+    storedTurn(state, 'examiner', OPENER, endsAtMs - 40 * MINUTE_MS),
+    storedTurn(
+      state,
+      'candidate',
+      'I claim the only solutions are $a = b$. Suppose $a^2 + b = k^2$ for some integer $k$.',
+      endsAtMs - 38 * MINUTE_MS
+    ),
+    storedTurn(state, 'examiner', SCRIPTED_REPLIES[0]!, endsAtMs - 37 * MINUTE_MS),
+    storedTurn(
+      state,
+      'candidate',
+      'Because $a^2 < a^2 + b < (a + 1)^2$ whenever $b \\le 2a$, so there is no square strictly between them.',
+      endsAtMs - 30 * MINUTE_MS
+    ),
+    storedTurn(state, 'examiner', SCRIPTED_REPLIES[1]!, endsAtMs - 29 * MINUTE_MS),
+  ]
+
+  // And one exchange the clock no longer covers, once the boundary is behind us
+  if (isSpent) {
+    turns.push(
+      storedTurn(
+        state,
+        'candidate',
+        'Coming back to the case $b > 2a$ now that my time is gone: I think it forces $b = a^2 + a$.',
+        endsAtMs + 4 * MINUTE_MS
+      ),
+      storedTurn(state, 'examiner', SCRIPTED_REPLIES[2]!, endsAtMs + 5 * MINUTE_MS)
+    )
+  }
+
+  // The problem it is held against, which is the first of the set
+  const problemId = problemIdOf(competition.id, 1)
+
+  // A number no conversation before it took
+  state.minted++
+
+  // The one conversation that problem opens with
+  state.transcripts.set(problemId, [
+    {
+      id: `session-${state.minted}`,
+      target: { kind: 'problem', problemId },
+      turns,
+      feedback: null,
+      reports: [],
+    },
+  ])
+}
+
+/**
+ * What opening a conversation sends, in as much of it as the fake reads.
+ */
+type StartRequestBody = {
+  /** The problem being argued. */
+  target: { problemId: string }
+  /** What the turn opening the argument says. */
+  content: string
+}
+
+/**
+ * What a further turn in an open conversation sends.
+ */
+type TurnRequestBody = {
+  /** What the turn says. */
+  content: string
+}
+
+/**
+ * Stands in for the whole competitions backend on one page.
+ *
+ * The competitions calls are answered from memory, as are the defense conversations and the student's
+ * Mathilda consent; everything else the app asks the backend for is left to the real one, so a test can
+ * still lean on the archive around the surface under test.
+ *
+ * @param page - The page to intercept requests on.
+ * @param initial - Which state the student is in when the page opens.
+ * @param options - What to vary about the student outside the states above.
+ */
+export async function installHostedBackend(
+  page: Page,
+  initial: HostedState,
+  options: HostedBackendOptions = {}
+): Promise<void> {
+  // What this page's backend holds, which its calls read and write
+  const state: FakeState = {
+    view: buildView(initial),
+    readiness: buildReadiness(initial),
+    transcripts: new Map(),
+    minted: 0,
+  }
+
+  // Whatever was already said inside an entry the state opens with
+  for (const group of state.view.groups) {
+    // Every competition that group runs
+    for (const competition of group.competitions) {
+      seedStraddlingDefense(state, group, competition)
+    }
+  }
+
+  // When the student acknowledged what talking to Mathilda entails, null while they have not
+  let consentedAt: string | null = options.hasConsented === false ? null : new Date().toISOString()
+
+  // The acknowledgement the chat is gated on: where the student stands, and the call that gives it
+  await page.route(`${BACKEND_ORIGIN}/users/me/ai-consent`, async (route) => {
+    // Giving consent, which the gate does and nothing else can
+    if (route.request().method() === 'POST') {
+      // Acknowledged where the page's clock stands
+      consentedAt = new Date(await pageNow(page)).toISOString()
+
+      // Answered with nothing to say
+      await answer(page, route, {})
+
+      // Done, since what follows answers the read
+      return
+    }
+
+    // Where the student stands
+    await answer(page, route, { consentedAt } satisfies MathildaConsent)
+  })
+
+  // The whole surface in one read
+  await page.route(`${BACKEND_ORIGIN}/competitions`, (route) => answer(page, route, state.view))
+
+  // What the student's account already holds
+  await page.route(`${BACKEND_ORIGIN}/competitions/readiness`, (route) =>
+    answer(page, route, state.readiness)
+  )
+
+  // Every call that spends or closes an entry, and the read that serves a spent one's problems
+  await page.route(`${BACKEND_ORIGIN}/competitions/*/*`, async (route) => {
+    // Which competition, and which of its endpoints
+    const segments = new URL(route.request().url()).pathname.split('/')
+    const endpoint = segments.pop() ?? ''
+    const competitionId = segments.pop() ?? ''
+
+    // The competition being acted on
+    const competition = competitionIn(state, competitionId)
+
+    // One nobody can find is a failure the caller surfaces like any other
+    if (competition === undefined) {
+      // Answered as a call for something that is not there
+      await route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
+
+      // Nothing to act on
+      return
+    }
+
+    // What is being asked of that competition
+    switch (endpoint) {
+      // The clock starts now, and the call carries the acceptance with it
+      case 'entry': {
+        // The entry, started where the page's clock stands
+        competition.entry = {
+          kind: 'sat',
+          startedAt: new Date(await pageNow(page)).toISOString(),
+          finishedAt: null,
+        }
+
+        // Taking one is agreeing to the rules
+        state.readiness.hasAcceptedRules = true
+
+        // Answered with the entry and the problems it bought
+        await answer(page, route, {
+          entry: competition.entry,
+          problems: buildProblems(state, competitionId),
+        } satisfies SpentEntry)
+
+        // Nothing else this call needs
+        return
+      }
+
+      // Spent, and over in the same instant, so no clock ever runs
+      case 'forfeit': {
+        // The entry, given up where the page's clock stands
+        competition.entry = {
+          kind: 'forfeited',
+          forfeitedAt: new Date(await pageNow(page)).toISOString(),
+        }
+
+        // Giving one up is agreeing to the rules just as taking it is
+        state.readiness.hasAcceptedRules = true
+
+        // Answered with the entry and the problems it bought
+        await answer(page, route, {
+          entry: competition.entry,
+          problems: buildProblems(state, competitionId),
+        } satisfies SpentEntry)
+
+        // Nothing else this call needs
+        return
+      }
+
+      // Over where the student said, and the clock they left on it goes with it
+      case 'finish': {
+        // The entry as it stands
+        const entry = competition.entry
+
+        // An entry can only be closed while the student is sitting it
+        if (entry === null || entry.kind !== 'sat') {
+          // Answered as a call for something that is not there
+          await route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
+
+          // Nothing to close
+          return
+        }
+
+        // Closed where the page's clock stands, unless it already carries a close
+        competition.entry = {
+          ...entry,
+          finishedAt: entry.finishedAt ?? new Date(await pageNow(page)).toISOString(),
+        }
+
+        // Answered with the entry as it now stands
+        await answer(page, route, competition.entry)
+
+        // Nothing else this call needs
+        return
+      }
+
+      // The one place an embargoed statement is served
+      case 'problems': {
+        // Answered with the competition's whole set
+        await answer(page, route, buildProblems(state, competitionId))
+
+        // Nothing else this read needs
+        return
+      }
+
+      // Nothing else lives under a competition
+      default: {
+        await route.fallback()
+      }
+    }
+  })
+
+  // The conversations held against one problem, and the caps a further one is held to
+  await page.route(`${BACKEND_ORIGIN}/defense/sessions/problems/*`, (route) => {
+    // Which problem's conversations
+    const problemId = new URL(route.request().url()).pathname.split('/').pop() ?? ''
+
+    // Answered from memory, opening an empty transcript for a problem nobody has argued about
+    return answer(page, route, {
+      sessions: transcriptsOf(state, problemId),
+      limits: LIMITS,
+    } satisfies DefenseSessionList)
+  })
+
+  // Opening a conversation, which starts on the examiner's own line and answers the first turn
+  await page.route(`${BACKEND_ORIGIN}/defense/sessions`, async (route) => {
+    // Anything but a new conversation belongs to the real backend
+    if (route.request().method() !== 'POST') {
+      // Passed on unanswered
+      await route.fallback()
+
+      // What follows opens a conversation, which this call is not
+      return
+    }
+
+    // What is being argued, and the turn opening the argument
+    const body = route.request().postDataJSON() as StartRequestBody
+
+    // When the turn reached the backend. The greeting belongs to the same instant: it is what the
+    // conversation was opened on, so it cannot be stamped after the turn that asked for it.
+    const receivedAt = await pageNow(page)
+
+    // Take as long over the opening as every call takes
+    await think(page)
+
+    // A number no conversation before it took
+    state.minted++
+
+    // Opened on the examiner's line, then the student's turn, then her reply to it
+    const session: DefenseSession = {
+      id: `session-${state.minted}`,
+      target: { kind: 'problem', problemId: body.target.problemId },
+      turns: [
+        storedTurn(state, 'examiner', OPENER, receivedAt),
+        storedTurn(state, 'candidate', body.content, receivedAt + 1),
+        // Stamped where it was actually said, which is once there is a reply to say
+        storedTurn(state, 'examiner', SCRIPTED_REPLIES[0]!, await pageNow(page)),
+      ],
+      feedback: null,
+      reports: [],
+    }
+
+    // Newest first, which is the order the rows are read in
+    transcriptsOf(state, body.target.problemId).unshift(session)
+
+    // Answered with the conversation as it now stands
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(session),
+    })
+  })
+
+  // Every further turn in an open conversation
+  await page.route(`${BACKEND_ORIGIN}/defense/sessions/*/turns`, async (route) => {
+    // Which conversation the turn belongs to
+    const sessionId = new URL(route.request().url()).pathname.split('/').at(-2) ?? ''
+
+    // What the student just said
+    const { content } = route.request().postDataJSON() as TurnRequestBody
+
+    // Wherever it is being held
+    const session = [...state.transcripts.values()]
+      .flat()
+      .find((candidate) => candidate.id === sessionId)
+
+    // One nobody can find is a failure the caller surfaces like any other
+    if (session === undefined) {
+      // Answered as a call for something that is not there
+      await route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
+
+      // Nothing to add a turn to
+      return
+    }
+
+    // When the turn reached the backend. The entry's clock counts a turn by this stamp, so one taken
+    // after the reply was written would spend the examiner's thinking time out of the student's clock.
+    const receivedAt = await pageNow(page)
+
+    // Take as long over the turn as every call takes
+    await think(page)
+
+    // How many the student has spent, which is what picks the reply
+    const spent = session.turns.filter((turn) => turn.role === 'candidate').length
+
+    // The turn where it landed, and the reply where it was actually said
+    session.turns.push(
+      storedTurn(state, 'candidate', content, receivedAt),
+      storedTurn(
+        state,
+        'examiner',
+        SCRIPTED_REPLIES[spent % SCRIPTED_REPLIES.length]!,
+        await pageNow(page)
+      )
+    )
+
+    // Answered with the conversation as it now stands
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(session),
+    })
+  })
+}

@@ -18,7 +18,7 @@ namespace MathComps.Infrastructure.Tests.Admin;
 /// orders and pages the conversations by when they were last spoken to, that its counts follow the filters, that
 /// whether a conversation counts as unread is derived from its turns rather than stored, that a row and the whole
 /// conversation behind it carry what has been written and said about them, that conversations group by the settings
-/// they ran on, and that one held against no problem stays out of reach entirely.
+/// they ran on, and that one held against nothing at all stays out of reach entirely.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fixture)
@@ -45,33 +45,33 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     private static readonly Guid _otherReviewerId = Guid.Parse("00000000-0000-0000-0000-0000000000f2");
 
     /// <summary>
-    /// The problem two of the conversations were held against.
+    /// The handout environment two of the conversations were held against.
     /// </summary>
-    private static readonly Guid _sharedProblemId = Guid.Parse("00000000-0000-0000-0000-0000000000e1");
+    private static readonly Guid _sharedEnvironmentId = Guid.Parse("00000000-0000-0000-0000-0000000000e1");
 
     /// <summary>
-    /// A second problem, so the queue names more than one across its conversations.
+    /// A second handout environment, so the queue names more than one across its conversations.
     /// </summary>
-    private static readonly Guid _otherProblemId = Guid.Parse("00000000-0000-0000-0000-0000000000e2");
+    private static readonly Guid _otherEnvironmentId = Guid.Parse("00000000-0000-0000-0000-0000000000e2");
 
     /// <summary>
-    /// The oldest conversation against the shared problem.
+    /// The oldest conversation against the shared environment.
     /// </summary>
     private static readonly Guid _oldestSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a1");
 
     /// <summary>
-    /// The newer conversation against the shared problem, held by the other student.
+    /// The newer conversation against the shared environment, held by the other student.
     /// </summary>
     private static readonly Guid _newerSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a2");
 
     /// <summary>
-    /// The only conversation against the second problem, and the most recently active of them all. Opened long
+    /// The only conversation against the second environment, and the most recently active of them all. Opened long
     /// before the other two and carried on yesterday, so where it lands says which end of its turns the queue reads.
     /// </summary>
     private static readonly Guid _newestSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a3");
 
     /// <summary>
-    /// A conversation held against no problem at all, which every read is meant to leave out.
+    /// A conversation held against nothing at all, which every read is meant to leave out.
     /// </summary>
     private static readonly Guid _targetlessSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a4");
 
@@ -101,7 +101,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     };
 
     /// <summary>
-    /// The handout every seeded problem belongs to.
+    /// The handout every seeded environment belongs to.
     /// </summary>
     private const string HandoutContentId = "handout-one";
 
@@ -158,17 +158,17 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             new User { Id = _reviewerId, ExternalId = "ext-reviewer", Username = "Reviewer" },
             new User { Id = _otherReviewerId, ExternalId = "ext-reviewer-2", Username = "Second reviewer" });
 
-        // One handout holding both problems.
+        // One handout holding both environments.
         var handoutId = Guid.CreateVersion7();
         context.Handouts.Add(new Handout { Id = handoutId, ContentId = HandoutContentId });
 
-        // The two problems the conversations were held against.
+        // The two environments the conversations were held against.
         context.HandoutEnvironments.AddRange(
-            new HandoutEnvironment { Id = _sharedProblemId, HandoutId = handoutId, ContentId = "problem-one" },
-            new HandoutEnvironment { Id = _otherProblemId, HandoutId = handoutId, ContentId = "problem-two" });
+            new HandoutEnvironment { Id = _sharedEnvironmentId, HandoutId = handoutId, ContentId = "problem-one" },
+            new HandoutEnvironment { Id = _otherEnvironmentId, HandoutId = handoutId, ContentId = "problem-two" });
 
-        // Four conversations: two against the shared problem, one against the other, and one against nothing. The
-        // one held by the other student runs on the same settings written differently, so the version grouping has
+        // Four conversations: two against the shared environment, one against the other, and one against nothing.
+        // The one held by the other student runs on the same settings written differently, so the version grouping has
         // something to prove; the targetless one runs on the settings two others share, so leaving it out of the
         // grouping is a fact of its own rather than a side effect of it standing alone.
         context.DefenseSessions.AddRange(
@@ -203,9 +203,9 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // What each conversation was held against, the targetless one deliberately naming nothing.
         context.HandoutEnvironmentDefenses.AddRange(
-            NewTarget(_oldestSessionId, _sharedProblemId),
-            NewTarget(_newerSessionId, _sharedProblemId),
-            NewTarget(_newestSessionId, _otherProblemId));
+            NewTarget(_oldestSessionId, _sharedEnvironmentId),
+            NewTarget(_newerSessionId, _sharedEnvironmentId),
+            NewTarget(_newestSessionId, _otherEnvironmentId));
 
         // What the student made of the newest conversation's last reply, so one of them carries a complaint.
         context.DefenseTurnReports.Add(new DefenseTurnReport
@@ -233,9 +233,9 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     }
 
     /// <summary>
-    /// The queue reads as one run of conversations, the ones spoken to most recently first, each naming the problem
-    /// it was held against. Recency is the last thing said in a conversation rather than the first, so the one
-    /// opened twenty days ago and carried on yesterday leads the two opened after it.
+    /// The queue reads as one run of conversations, the ones spoken to most recently first, each naming the
+    /// environment it was held against. Recency is the last thing said in a conversation rather than the first, so
+    /// the one opened twenty days ago and carried on yesterday leads the two opened after it.
     /// </summary>
     [Fact]
     public Task Queue_orders_every_conversation_by_recency() => RunTestAsync(async service =>
@@ -251,12 +251,12 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Counted in the same unit the page is cut in
         Assert.Equal(3, queue.TotalCount);
 
-        // Each names the problem it was held against
+        // Each names the environment it was held against
         Assert.Equal(
             ["problem-two", "problem-one", "problem-one"],
             queue.Items.Select(conversation => conversation.Target.EnvironmentId));
 
-        // Under the handout that problem belongs to
+        // Under the handout that environment belongs to
         Assert.All(
             queue.Items,
             conversation => Assert.Equal(HandoutContentId, conversation.Target.HandoutContentId));
@@ -578,7 +578,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Read what the filters can be set to
         var options = await service.GetFilterOptionsAsync();
 
-        // Two versions across the three conversations that name a problem
+        // Two versions across the three conversations that name an environment
         Assert.Equal(2, options.PromptVersions.Count);
 
         // The one the two written differently share
@@ -704,7 +704,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 NewFilter() with { HandoutContentId = HandoutContentId }, 3, "newest, newer, oldest"),
             ("a handout nothing was held against leaves nothing",
                 NewFilter() with { HandoutContentId = "no-such-handout" }, 0, ""),
-            ("two were held against the shared problem",
+            ("two were held against the shared environment",
                 NewFilter() with { EnvironmentId = "problem-one" }, 2, "newer, oldest"),
             ("one has been written about", NewFilter() with { HasNotes = true }, 1, "newest"),
             ("leaving the other two unwritten-about",
@@ -859,11 +859,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
-    /// Everyone who has held a conversation and every problem one was held against read back as filter options,
+    /// Everyone who has held a conversation and every environment one was held against read back as filter options,
     /// each carrying how many conversations it accounts for, the busiest first.
     /// </summary>
     [Fact]
-    public Task Filter_options_name_every_student_and_problem_with_their_counts() => RunTestAsync(async service =>
+    public Task Filter_options_name_every_student_and_environment_with_their_counts() => RunTestAsync(async service =>
     {
         // Read what the filters can be set to
         var options = await service.GetFilterOptionsAsync();
@@ -874,7 +874,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             options.Users.Select(option => option.User.Id));
         Assert.Equal([2, 1], options.Users.Select(option => option.ConversationCount));
 
-        // And both problems one was held against, the shared one ahead of the other
+        // And both environments one was held against, the shared one ahead of the other
         Assert.Equal(
             ["problem-one", "problem-two"],
             options.Problems.Select(option => option.Target.EnvironmentId));
@@ -887,16 +887,16 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
-    /// A conversation held against no problem is out of the reviewer's reach altogether: it never reaches the queue,
-    /// which has no problem to name it by, and asking for it outright reads as absent rather than opening it.
+    /// A conversation held against no environment is out of the reviewer's reach altogether: it never reaches the
+    /// queue, which has nothing to name it by, and asking for it outright reads as absent rather than opening it.
     /// </summary>
     [Fact]
-    public Task A_conversation_held_against_no_problem_stays_out_of_reach() => RunTestAsync(async service =>
+    public Task A_conversation_held_against_no_environment_stays_out_of_reach() => RunTestAsync(async service =>
     {
         // Read the whole queue, narrowed by nothing
         var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1);
 
-        // The three that name a problem are all of it, though the targetless one moved more recently than two
+        // The three that name an environment are all of it, though the targetless one moved more recently than two
         Assert.Equal(3, queue.TotalCount);
         Assert.DoesNotContain(_targetlessSessionId, queue.Items.Select(conversation => conversation.Id));
 
@@ -966,7 +966,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         new(false, null, false, false, null, null, null, null, null);
 
     /// <summary>
-    /// Builds one seeded conversation.
+    /// Builds one seeded conversation, held against a handout environment.
     /// </summary>
     /// <param name="sessionId">The conversation's identifier.</param>
     /// <param name="userId">Who held it.</param>
@@ -976,6 +976,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     {
         Id = sessionId,
         UserId = userId,
+        TargetKind = DefenseTargetKind.Handout,
         ProblemStatement = "a problem",
         ProblemReference = "a reference",
         ExaminerConfig = examinerConfig,
@@ -983,10 +984,10 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     };
 
     /// <summary>
-    /// Builds the link saying which problem a seeded conversation was held against.
+    /// Builds the link saying which handout environment a seeded conversation was held against.
     /// </summary>
     /// <param name="sessionId">The conversation.</param>
-    /// <param name="handoutEnvironmentId">The problem it was held against.</param>
+    /// <param name="handoutEnvironmentId">The handout environment it was held against.</param>
     /// <returns>The link, ready to add.</returns>
     private static HandoutEnvironmentDefense NewTarget(Guid sessionId, Guid handoutEnvironmentId) => new()
     {

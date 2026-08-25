@@ -46,7 +46,7 @@ export type HostedCompetitionProblem = {
  * Enough to choose between them and no more. What was last said stays out: the most recent line is
  * usually the examiner's challenge, and reading it back on the page would spoil it.
  */
-export type HostedCompetitionDefenseLine = {
+type HostedCompetitionDefenseLine = {
   /** The defense session it leads to. */
   sessionId: string
   /** When the student opened it, as an ISO-8601 string. */
@@ -162,12 +162,12 @@ export type HostedCompetitionsView = {
  * A result has to name a student and reach them, so these are asked for before the clock rather than after.
  */
 export type EntryReadiness = {
-  /** The permanent nickname the student's results are published under, or null while they have none. */
-  nickname: string | null
-  /** The year the student graduates, or null while they have not given it. */
-  graduationYear: number | null
-  /** Whether the student has an address that has been confirmed to reach them. */
-  hasVerifiedEmail: boolean
+  /** Whether the student has claimed the permanent name their results are published under. */
+  hasUsername: boolean
+  /** Whether the student has said where they are in school. */
+  hasAnsweredGraduation: boolean
+  /** Whether the student has an email address on file. */
+  hasEmail: boolean
   /** Whether the student has ever accepted the competition rules. */
   hasAcceptedRules: boolean
 }

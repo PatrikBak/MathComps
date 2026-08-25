@@ -4,11 +4,11 @@ import { entryBlocker } from '../entry-reader'
 import type { EntryReadiness } from '../hosted-competition-types'
 
 describe('entryBlocker', () => {
-  /** A student who has given the program everything it needs to publish a result of theirs. */
+  // A student holding everything an entry asks of them
   const READY: EntryReadiness = {
-    nickname: 'kubo',
-    graduationYear: 2027,
-    hasVerifiedEmail: true,
+    hasUsername: true,
+    hasAnsweredGraduation: true,
+    hasEmail: true,
     hasAcceptedRules: true,
   }
 
@@ -22,17 +22,21 @@ describe('entryBlocker', () => {
     expect(entryBlocker({ kind: 'signedOut' })).toBe('signIn')
   })
 
-  it('asks for whichever field a published result would be missing', () => {
-    // The three the results table needs to name somebody, each withheld on its own
-    expect(entryBlocker({ kind: 'signedIn', readiness: { ...READY, nickname: null } })).toBe(
+  it('asks for whichever field a result of theirs would be missing', () => {
+    // The name withheld on its own
+    expect(entryBlocker({ kind: 'signedIn', readiness: { ...READY, hasUsername: false } })).toBe(
       'profile'
     )
-    expect(entryBlocker({ kind: 'signedIn', readiness: { ...READY, graduationYear: null } })).toBe(
-      'profile'
-    )
+
+    // The graduation answer withheld on its own
     expect(
-      entryBlocker({ kind: 'signedIn', readiness: { ...READY, hasVerifiedEmail: false } })
+      entryBlocker({ kind: 'signedIn', readiness: { ...READY, hasAnsweredGraduation: false } })
     ).toBe('profile')
+
+    // The email address withheld on its own
+    expect(entryBlocker({ kind: 'signedIn', readiness: { ...READY, hasEmail: false } })).toBe(
+      'profile'
+    )
   })
 
   it('holds the gate shut on a profile nothing could be read out of', () => {

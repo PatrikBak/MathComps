@@ -11,7 +11,7 @@ import { useEntryGuard } from '../hooks/use-entry-guard'
 import { useEntryReader } from '../hooks/use-entry-reader'
 import { useHostedCompetitionEntryDialog } from '../hooks/use-hosted-competition-entry-dialog'
 import { useHostedCompetitionsView } from '../hooks/use-hosted-competitions-view'
-import { entryBlocker, hasAccount } from '../model/entry-reader'
+import { entryBlocker } from '../model/entry-reader'
 import { orderForReading } from '../model/hosted-competition-state'
 import { CategoryLegend } from './CategoryLegend'
 import { EntryGate } from './EntryGate'
@@ -20,7 +20,6 @@ import { HostedCompetitionEntryDialog } from './HostedCompetitionEntryDialog'
 import { HostedCompetitionGroupPanel } from './HostedCompetitionGroupPanel'
 import { HowItWorks } from './HowItWorks'
 import { RulesList } from './RulesList'
-import { ScenarioSwitcher } from './ScenarioSwitcher'
 
 /**
  * Props for the {@link HostedCompetitionsBoard} component.
@@ -47,7 +46,7 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
   const blocker = entryBlocker(reader)
 
   // Every competition the student can see
-  const { view, uiState } = useHostedCompetitionsView(hasAccount(reader), readerKey, isReaderKnown)
+  const { view, uiState } = useHostedCompetitionsView(readerKey, isReaderKnown)
 
   // The question standing between a press and a running clock
   const dialog = useHostedCompetitionEntryDialog(readerKey)
@@ -75,29 +74,24 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
     // Hyphenation off: the global setting is for article prose, and the words here are names and labels
     <div className="mx-auto max-w-4xl hyphens-none">
       {/* What this page is, before anything can be pressed on it */}
-      <div>
-        <PageHeader title={tPage('title')} className="mb-0">
-          <p>{tPage('description')}</p>
+      <PageHeader title={tPage('title')} className="mb-0">
+        <p>{tPage('description')}</p>
 
-          {/* What the thing is, which category to pick, and what an entry agrees to */}
-          <div className="space-y-2">
-            <HowItWorks />
-            <CategoryLegend />
+        {/* What the thing is, which category to pick, and what an entry agrees to */}
+        <div className="space-y-2">
+          <HowItWorks />
+          <CategoryLegend />
 
-            {/* The rules, readable without going near an irreversible press. The same lines appear inside
-                the entry dialog on the one entry that accepts them; after that, this is where they live */}
-            <HeaderDisclosure label={t('rulesButton')}>
-              <RulesList />
-            </HeaderDisclosure>
-          </div>
+          {/* The rules, readable without going near an irreversible press. The same lines appear inside
+              the entry dialog on the one entry that accepts them; after that, this is where they live */}
+          <HeaderDisclosure label={t('rulesButton')}>
+            <RulesList />
+          </HeaderDisclosure>
+        </div>
 
-          {/* What the reader still owes, said before they reach for a button */}
-          {blocker !== undefined && blocker !== null && <EntryGate blocker={blocker} />}
-        </PageHeader>
-
-        {/* Every mocked state, one press apart, for as long as the states are mocked */}
-        <ScenarioSwitcher reader={reader} blocker={blocker} />
-      </div>
+        {/* What the reader still owes, said before they reach for a button */}
+        {blocker !== undefined && blocker !== null && <EntryGate blocker={blocker} />}
+      </PageHeader>
 
       {/* The list, once there is one to draw */}
       <div className="mt-8 sm:mt-10">

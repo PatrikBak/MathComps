@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
 
+import { invalidateEntryReadiness } from '@/components/features/hosted-competitions/hooks/hosted-competition-cache'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
 import type { UserCompetitionProfile, UserProfile } from '../model/profile-types'
@@ -44,6 +45,9 @@ export function useUpdateProfile(): UseUpdateProfileResult {
         previous === undefined ? previous : { ...previous, ...profile }
       )
     },
+
+    // The graduation answer is one of the fields the entry gate reads off the account
+    onSettled: () => invalidateEntryReadiness(queryClient),
 
     // Two picks in quick succession land in the order they were made, so the row ends up holding the last one
     scope: { id: 'userProfile' },

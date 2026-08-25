@@ -235,6 +235,38 @@
     "duogeo-ss": {
       "shortName": "SŠ",
       "fullName": "Kategória SŠ"
+    },
+    "mc": {
+      "shortName": "MathComps",
+      "fullName": "Súťaže MathComps"
+    },
+    "mc-practice": {
+      "shortName": "Skúšobná súťaž",
+      "fullName": "Skúšobná súťaž"
+    },
+    "mc-elementary": {
+      "shortName": "Základná",
+      "fullName": "Základná kategória"
+    },
+    "mc-elementary-1": {
+      "shortName": "September",
+      "fullName": "September"
+    },
+    "mc-intermediate": {
+      "shortName": "Stredná",
+      "fullName": "Stredná kategória"
+    },
+    "mc-intermediate-1": {
+      "shortName": "September",
+      "fullName": "September"
+    },
+    "mc-advanced": {
+      "shortName": "Pokročilá",
+      "fullName": "Pokročilá kategória"
+    },
+    "mc-advanced-1": {
+      "shortName": "September",
+      "fullName": "September"
     }
   },
   "seasonFormat": "{number}. ročník ({start}/{end})"

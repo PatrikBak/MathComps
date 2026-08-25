@@ -235,6 +235,38 @@
     "duogeo-ss": {
       "shortName": "High School",
       "fullName": "High School"
+    },
+    "mc": {
+      "shortName": "MathComps",
+      "fullName": "MathComps competitions"
+    },
+    "mc-practice": {
+      "shortName": "Practice competition",
+      "fullName": "Practice competition"
+    },
+    "mc-elementary": {
+      "shortName": "Elementary",
+      "fullName": "Elementary category"
+    },
+    "mc-elementary-1": {
+      "shortName": "September",
+      "fullName": "September"
+    },
+    "mc-intermediate": {
+      "shortName": "Intermediate",
+      "fullName": "Intermediate category"
+    },
+    "mc-intermediate-1": {
+      "shortName": "September",
+      "fullName": "September"
+    },
+    "mc-advanced": {
+      "shortName": "Advanced",
+      "fullName": "Advanced category"
+    },
+    "mc-advanced-1": {
+      "shortName": "September",
+      "fullName": "September"
     }
   },
   "seasonFormat": "Edition {number} ({start}/{end})"

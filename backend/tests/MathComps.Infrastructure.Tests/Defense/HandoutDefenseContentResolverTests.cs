@@ -12,11 +12,11 @@ using static Microsoft.Extensions.Options.Options;
 namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
-/// Unit tests for <see cref="StoredDefenseContentResolver"/>: the object key a target maps to, that a cached handout
+/// Unit tests for <see cref="HandoutDefenseContentResolver"/>: the object key a target maps to, that a cached handout
 /// is served without reading storage again, and what an absent or unreadable blob resolves to. Storage is faked, so
 /// no network is involved. Expiry itself is <see cref="MemoryCache"/>'s job and is not retested here.
 /// </summary>
-public sealed class StoredDefenseContentResolverTests
+public sealed class HandoutDefenseContentResolverTests
 {
     /// <summary>
     /// A blob holding one defendable environment, in the shape the handout build publishes.
@@ -142,12 +142,12 @@ public sealed class StoredDefenseContentResolverTests
     /// </summary>
     /// <param name="reader">The storage to read blobs from.</param>
     /// <returns>The resolver.</returns>
-    private static StoredDefenseContentResolver Resolver(FakeObjectReader reader) =>
+    private static HandoutDefenseContentResolver Resolver(FakeObjectReader reader) =>
         new(
             reader,
             new MemoryCache(new MemoryCacheOptions()),
             Create(new DefenseContentOptions { CacheSeconds = 600 }),
-            NullLogger<StoredDefenseContentResolver>.Instance);
+            NullLogger<HandoutDefenseContentResolver>.Instance);
 
     /// <summary>
     /// A test double for <see cref="IObjectReader"/> over an in-memory store, recording each read so a test can see

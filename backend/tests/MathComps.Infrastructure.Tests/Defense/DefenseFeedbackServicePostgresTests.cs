@@ -849,7 +849,7 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
-    /// Builds one seeded conversation of the owner's.
+    /// Builds one seeded conversation of the owner's, held against a handout environment.
     /// </summary>
     /// <param name="sessionId">The conversation's identifier.</param>
     /// <returns>The session, ready to add.</returns>
@@ -857,6 +857,7 @@ public class DefenseFeedbackServicePostgresTests(PostgresContainerFixture fixtur
     {
         Id = sessionId,
         UserId = _ownerId,
+        TargetKind = DefenseTargetKind.Handout,
         ProblemStatement = "a problem",
         ProblemReference = "a reference",
         ExaminerConfig = "{}",

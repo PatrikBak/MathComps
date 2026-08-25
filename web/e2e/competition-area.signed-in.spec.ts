@@ -4,57 +4,52 @@ import {
   areaCopy,
   areaPath,
   chatCopy,
-  COMPETITION_ID,
   holdClock,
-  listPath,
+  LIST_PATH,
   openExistingDefense,
-  PROBLEM_COUNT,
   sendTurn,
 } from './support/competitions'
+import { COMPETITION_ID, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
 
-/** How long the mocked backend has to answer before a wait is called a failure. */
+/** How long the fake backend has to answer before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 15_000
 
-/** A competition nobody in these scenarios has an entry on, so the guard has something to turn away. */
+/** A competition no state ever holds an entry on, so the guard has something to turn away. */
 const UNENTERED_COMPETITION_ID = 'open-advanced'
 
 test.describe('the competition area', () => {
-  test('carries the scenario in with it', async ({ page }) => {
-    // The list, read under a scenario every mocked answer is keyed on
-    await page.goto(listPath('running'))
-
-    // The way back into a clock still running
-    await page.getByRole('link', { name: areaCopy.continue }).first().click()
-
-    // Which carries the scenario in with it, or the area answers as a student who never entered
-    await expect(page).toHaveURL(/\/competitions\/[^?]+\?scenario=running/)
-  })
-
   test('puts the whole set on one page', async ({ page }) => {
-    // The area of a competition the student is inside
-    await page.goto(areaPath('running'))
+    // A student inside a competition
+    await installHostedBackend(page, 'running')
 
-    // Every statement at once, the entry's first minutes being spent deciding where the clock is worth
-    // going
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // Which draws every statement at once
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
       timeout: SETTLE_TIMEOUT_MS,
     })
   })
 
   test('takes a turn and answers it', async ({ page }) => {
-    // The area of a competition the student is inside
-    await page.goto(areaPath('running'))
+    // A student inside a competition
+    await installHostedBackend(page, 'running')
 
-    // And the conversation it has already seeded on the first problem
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // And the conversation already seeded on the first problem
     await openExistingDefense(page)
 
-    // A conversation opened on a saved defense writes nothing until its resume settles, so the composer
-    // going live is also the transcript being all there. Counted any earlier, the baseline is short by
-    // whatever had not rendered yet
+    // A conversation opened on a saved defense writes nothing until its resume settles, so the
+    // composer going live is also the transcript being all there. Counted any earlier, the baseline
+    // is short by whatever had not rendered yet
     await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
 
-    // How many times the examiner has spoken so far, which one more turn has to move
+    // The transcript as it now reads
     const transcript = page.getByLabel(chatCopy.transcriptLabel)
+
+    // How many times the examiner has spoken so far, which one more turn has to move
     const examinerTurnsBefore = await transcript.getByText('Mathilda', { exact: true }).count()
 
     // What the student says
@@ -64,8 +59,10 @@ test.describe('the competition area', () => {
     // Written and sent
     await sendTurn(page, turn)
 
-    // The turn lands in the transcript, and the composer empties behind it
+    // The turn lands in the transcript
     await expect(transcript.getByText(turn)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // And the composer empties behind it
     await expect(page.locator('textarea')).toHaveValue('')
 
     // And the examiner answers it, which is what the student is actually waiting on
@@ -75,30 +72,66 @@ test.describe('the competition area', () => {
     )
   })
 
+  test('asks a first-time reader to acknowledge Mathilda before writing anything', async ({
+    page,
+  }) => {
+    // A student inside a competition who has never opened the chat before
+    await installHostedBackend(page, 'running', { hasConsented: false })
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // And the conversation the entry already holds
+    await openExistingDefense(page)
+
+    // The chat opens on what talking to her entails
+    await expect(page.getByText(chatCopy.consentBody)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // With nowhere to write yet
+    await expect(page.locator('textarea')).toHaveCount(0)
+
+    // Acknowledge it, which is asked once and then never again
+    await page.getByRole('button', { name: chatCopy.consentAccept }).click()
+
+    // After which there is somewhere to write
+    await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
+
+    // And the acknowledgement is gone
+    await expect(page.getByText(chatCopy.consentBody)).toHaveCount(0)
+  })
+
   test('keeps a half-written turn through a reload', async ({ page }) => {
-    // The area of a competition the student is inside
-    await page.goto(areaPath('running'))
+    // A student inside a competition
+    await installHostedBackend(page, 'running')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
 
     // And a conversation to write into
     await openExistingDefense(page)
 
     // Half a solution, never sent
     const draft = 'Half-written thought I do not want to lose'
+
+    // Written into the composer
     await page.locator('textarea').fill(draft)
 
-    // A stray reload, which rebuilds the mocked transcript from its seed
+    // A stray reload, which rebuilds the transcript from what the fake holds
     await page.reload()
 
     // Back into the same conversation
     await openExistingDefense(page)
 
-    // Where the draft is still waiting, an entry being irreversible and its clock still running
+    // Where the draft is still waiting
     await expect(page.locator('textarea')).toHaveValue(draft, { timeout: SETTLE_TIMEOUT_MS })
   })
 
   test('draws the line where the clock ran out and keeps writing under it', async ({ page }) => {
     // An entry whose clock has already run out
-    await page.goto(areaPath('finished'))
+    await installHostedBackend(page, 'finished')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
 
     // And the conversation seeded across the boundary
     await openExistingDefense(page)
@@ -108,7 +141,7 @@ test.describe('the competition area', () => {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // The line a grader reads by, drawn across the transcript itself
+    // The line the clock ran out on, drawn across the transcript itself
     await expect(
       page.getByRole('separator', { name: chatCopy.competitionClockDivider })
     ).toBeVisible()
@@ -129,26 +162,33 @@ test.describe('the competition area', () => {
   test('draws the line the moment the clock runs out under a reader watching it', async ({
     page,
   }) => {
-    // A clock the spec can walk forward, the seeded case above starting already over
+    // A clock the spec can walk forward, this entry starting with time still on it
     await page.clock.install()
 
     // An entry with ninety seconds left on it
-    await page.goto(areaPath('expiring'))
+    await installHostedBackend(page, 'expiring')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
 
     // And a conversation open across the instant it runs out
     await openExistingDefense(page)
 
-    // Before the buzzer: the seeded conversation is covered end to end, so nothing is said and nothing drawn
+    // The seeded conversation is covered end to end once the composer goes live
     await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
+
+    // So before the buzzer nothing is said about a spent clock
     await expect(page.getByText(chatCopy.competitionClockSpent)).toHaveCount(0)
+
+    // And no line is drawn
     await expect(
       page.getByRole('separator', { name: chatCopy.competitionClockDivider })
     ).toHaveCount(0)
 
-    // Past the ninety seconds this scenario leaves on the clock
+    // Past the ninety seconds this state leaves on the clock
     await page.clock.fastForward('02:00')
 
-    // Which the reader is told about where they are about to write, without anybody reloading
+    // The reader is told so where they are about to write, without anybody reloading
     await expect(page.getByText(chatCopy.competitionClockSpent)).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
@@ -156,22 +196,26 @@ test.describe('the competition area', () => {
     // A turn taken now
     await sendTurn(page, 'A turn taken after it stopped counting.')
 
-    // The mocked reply is a timer like any other, so the fake clock has to be walked forward for it to land
+    // The reply is held until the page's own clock has moved on, so a held clock has to be walked
+    // forward for it to land
     await page.clock.fastForward('00:05')
 
-    // And it falls the other side of the line
+    // And the turn falls the other side of the line
     await expect(
       page.getByRole('separator', { name: chatCopy.competitionClockDivider })
     ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
   })
 
   test('counts a turn sent before the buzzer, however long the reply takes', async ({ page }) => {
-    // A clock the spec can hold still, the race being what happens between a turn being sent and its reply
-    // coming back
+    // A clock the spec can hold still, the race being what happens between a turn being sent and
+    // its reply coming back
     await page.clock.install()
 
     // An entry with a minute and a half left on it
-    await page.goto(areaPath('expiring'))
+    await installHostedBackend(page, 'expiring')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
 
     // And a conversation to write into
     await openExistingDefense(page)
@@ -179,7 +223,7 @@ test.describe('the competition area', () => {
     // Which is all there once the composer goes live
     await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
 
-    // Time stops with the entry still running, so nothing lands until the spec lets it
+    // Stop time with the entry still running, so nothing lands until the spec lets it
     await holdClock(page)
 
     // What the student gets in with time to spare
@@ -199,8 +243,8 @@ test.describe('the competition area', () => {
       transcript.getByRole('separator', { name: chatCopy.competitionClockDivider })
     ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
-    // With the student's own turn above it: a turn counts by when it reached the backend, never by when
-    // the answer to it was ready
+    // With the student's own turn above it: a turn counts by when it reached the backend, never by
+    // when the answer to it was ready
     await expect(
       transcript.locator('[role="separator"] ~ *').filter({ hasText: turn })
     ).toHaveCount(0)
@@ -213,7 +257,10 @@ test.describe('the competition area', () => {
     await page.clock.install()
 
     // An entry with a minute and a half left on it
-    await page.goto(areaPath('expiring'))
+    await installHostedBackend(page, 'expiring')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
 
     // Once the set is there to pick a problem from
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
@@ -226,7 +273,7 @@ test.describe('the competition area', () => {
     // And a composer to write it in
     await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
 
-    // Time stops with the entry still running
+    // Stop time with the entry still running
     await holdClock(page)
 
     // The turn that opens the conversation
@@ -243,22 +290,27 @@ test.describe('the competition area', () => {
       transcript.getByRole('separator', { name: chatCopy.competitionClockDivider })
     ).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
-    // With that reply alone below it: the greeting belongs to the moment the conversation was asked for,
-    // so it cannot be stamped after the turn that asked for it
+    // With that reply alone below it: the greeting belongs to the moment the conversation was asked
+    // for, so it cannot be stamped after the turn that asked for it
     await expect(transcript.locator('[role="separator"] ~ *')).toHaveCount(1)
   })
 
-  test('starts a practice retake with nothing the last run left behind', async ({ page }) => {
+  test("carries a practice run's conversations into the retake, on a fresh clock", async ({
+    page,
+  }) => {
     // A clock the spec can walk past the practice run's own minute with
     await page.clock.install()
 
-    // The list, where the practice run is taken
-    await page.goto(listPath('ready'))
+    // A student with an entry still to spend
+    await installHostedBackend(page, 'ready')
 
-    // The press that takes it
+    // Open the list, where the practice run is taken
+    await page.goto(LIST_PATH)
+
+    // Press try
     await page.getByRole('button', { name: areaCopy.try }).first().click()
 
-    // Which the dialog confirms
+    // And confirm the dialog
     await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
 
     // Inside, on a set nobody has argued yet
@@ -278,18 +330,15 @@ test.describe('the competition area', () => {
     // Written and sent
     await sendTurn(page, said)
 
-    // Which lands in the transcript, so the run has something to leave behind
+    // The turn lands in the transcript, so the run has something to leave behind
     await expect(page.getByLabel(chatCopy.transcriptLabel).getByText(said)).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // And half of what they were going to say next, never sent
-    await page.locator('textarea').fill('Half a thought from the first run')
-
-    // Left where it is, the chat closing over it
+    // Out of the chat, to the page behind it
     await page.keyboard.press('Escape')
 
-    // The practice minute, walked past, which is what leaves the run behind
+    // The practice minute, walked past, which is what ends the run
     await page.clock.fastForward('02:00')
 
     // Out to the list the way the app goes there, which keeps what the last run left in the cache
@@ -308,48 +357,37 @@ test.describe('the competition area', () => {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // Which lists nothing the last one said, every problem back to offering a first conversation
-    await expect(page.getByRole('button', { name: /messages$/ })).toHaveCount(0)
-    await expect(page.getByRole('button', { name: areaCopy.startDefense })).toHaveCount(
-      PROBLEM_COUNT
-    )
+    // Still carrying what the last run said: a conversation hangs off the problem, not off the
+    // entry, so retaking resets the clock and takes nothing else back
+    await expect(page.getByRole('button', { name: /messages$/ })).toHaveCount(1)
 
-    // Time stops before the chat is opened, so what it draws is what this run already holds. A read
-    // landing behind it corrects the list a beat later, which the assertion below would otherwise pass on
-    await holdClock(page)
-
-    // The chat, opened on a conversation this run has yet to hold
-    await page.getByRole('button', { name: areaCopy.startDefense }).first().click()
-
-    // Nothing to browse back to: the control is offered only where a conversation was held, and none was
-    await expect(page.getByRole('button', { name: chatCopy.history })).toHaveCount(0)
-
-    // And once the chat has everything it is waiting on, an empty composer: a half-written turn is no more
-    // part of this run than a sent one
-    await page.clock.fastForward('00:05')
-    await expect(page.locator('textarea')).toHaveValue('', { timeout: SETTLE_TIMEOUT_MS })
+    // And the clock is the run's own, not what was left of the last one
+    await expect(page.getByText(areaCopy.clockSpent)).toHaveCount(0)
   })
 
   test('introduces the practice run once and then stops', async ({ page }) => {
-    // The list, no scenario handing anybody a practice entry
-    await page.goto(listPath('ready'))
+    // A student holding no practice entry yet
+    await installHostedBackend(page, 'ready')
 
-    // So the way into the practice run is the press
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // Press try
     await page.getByRole('button', { name: areaCopy.try }).first().click()
 
-    // Which the dialog confirms
+    // And confirm the dialog
     await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
 
     // What the practice run says about itself
     const intro = page.getByText(areaCopy.practiceIntro)
 
-    // Said on arrival
+    // Which is said on arrival
     await expect(intro).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
-    // Until the reader says they have read it
+    // Dismiss it, the reader having read it
     await page.getByRole('button', { name: areaCopy.practiceIntroDismiss }).click()
 
-    // After which it is gone
+    // After which the intro is gone
     await expect(intro).toHaveCount(0)
 
     // A reload, which a component-local state would not survive
@@ -358,26 +396,32 @@ test.describe('the competition area', () => {
     // And once the area is back
     await expect(page.getByRole('article').first()).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
-    // It is still gone
+    // The intro is still gone
     await expect(intro).toHaveCount(0)
   })
 
   test('reaches the rules without leaving the clock', async ({ page }) => {
-    // The area of a competition the student is inside
-    await page.goto(areaPath('running'))
+    // A student inside a competition
+    await installHostedBackend(page, 'running')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
 
     // The rules, agreed to once at the first entry ever and read here afterwards
     await page.getByRole('button', { name: areaCopy.rulesButton }).click()
 
-    // Which open over the clock rather than away from it
+    // Which open in a dialog over the area, the clock never left
     await expect(page.getByRole('dialog')).toContainText(areaCopy.rules.lines[0]!, {
       timeout: SETTLE_TIMEOUT_MS,
     })
   })
 
   test('offers nothing that could take a turn back', async ({ page }) => {
-    // The area of a competition the student is inside
-    await page.goto(areaPath('running'))
+    // A student inside a competition
+    await installHostedBackend(page, 'running')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
 
     // And a conversation to look for the controls in
     await openExistingDefense(page)
@@ -387,7 +431,7 @@ test.describe('the competition area', () => {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // But nothing that could rewrite the record a grader reads
+    // But nothing that could rewrite the record the conversation leaves behind
     await expect(page.getByRole('button', { name: chatCopy.rewind })).toHaveCount(0)
     await expect(page.getByRole('button', { name: chatCopy.report })).toHaveCount(0)
     await expect(page.getByRole('button', { name: chatCopy.deleteSession })).toHaveCount(0)
@@ -396,17 +440,20 @@ test.describe('the competition area', () => {
 
   test('lets an entry given up for the problems argue them anyway', async ({ page }) => {
     // An entry given up for the problems
-    await page.goto(areaPath('forfeited'))
+    await installHostedBackend(page, 'forfeited')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
 
     // Which reads the same set as any other
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // Said in plain sight, so the offer never reads as an entry that is somehow still live
+    // With the entry named as given up, in plain sight
     await expect(page.getByText(areaCopy.areaForfeited)).toBeVisible()
 
-    // And the examiner argues them anyway, what the press spent being the result
+    // And every problem still offering the examiner
     await expect(page.getByRole('button', { name: areaCopy.startDefense })).toHaveCount(
       PROBLEM_COUNT
     )
@@ -414,31 +461,75 @@ test.describe('the competition area', () => {
 
   test('hands the entry in early and stops counting there', async ({ page }) => {
     // A clock still running, and a student who is done before it is
-    await page.goto(areaPath('running'))
+    await installHostedBackend(page, 'running')
 
-    // Handing the entry in
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // Hand the entry in
     await page.getByRole('button', { name: areaCopy.finishEntry }).click()
 
     // Which is asked about before it happens
     await page.getByRole('button', { name: areaCopy.finishDialog.confirm, exact: true }).click()
 
     // Out to the list, the way entering came in from it
-    await expect(page).toHaveURL(/\/competitions\?scenario=running$/, {
+    await expect(page).toHaveURL(/\/competitions$/, {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // Where the row now offers the work back rather than a clock to go on spending
-    const own = page.locator(`a[href="/en/competitions/${COMPETITION_ID}?scenario=running"]`)
+    // The row of the competition just handed in
+    const own = page.locator(`a[href="/en/competitions/${COMPETITION_ID}"]`)
+
+    // Which now offers the work back
     await expect(own).toHaveText(areaCopy.mySolutions, { timeout: SETTLE_TIMEOUT_MS })
 
     // Back inside
     await own.click()
 
-    // Where the page says the student closed it themselves rather than that time ran out
+    // Where the page names it a hand-in, not a spent clock
     await expect(page.getByText(areaCopy.areaFinished)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // And there is nothing left to hand in
     await expect(page.getByRole('button', { name: areaCopy.finishEntry })).toHaveCount(0)
+  })
+
+  test('offers a re-entrant competition again once it has been handed in', async ({ page }) => {
+    // A student with nothing taken yet
+    await installHostedBackend(page, 'ready')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // The press that would take the practice run a second time
+    const again = page.getByRole('button', { name: areaCopy.tryAgain })
+
+    // Which the list offers as a first go
+    await expect(page.getByRole('button', { name: areaCopy.try })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // And not yet as a second one
+    await expect(again).toHaveCount(0)
+
+    // Press try
+    await page.getByRole('button', { name: areaCopy.try }).first().click()
+
+    // And confirm the dialog
+    await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
+
+    // Once the student is inside it
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Hand it in ahead of its own clock
+    await page.getByRole('button', { name: areaCopy.finishEntry }).click()
+
+    // Which is asked about before it happens
+    await page.getByRole('button', { name: areaCopy.finishDialog.confirm, exact: true }).click()
+
+    // Out to the list, where the practice run is the one competition offering another go
+    await expect(again).toHaveCount(1, { timeout: SETTLE_TIMEOUT_MS })
   })
 
   test('takes the hand-in question away when the buzzer beats the student to it', async ({
@@ -448,7 +539,10 @@ test.describe('the competition area', () => {
     await page.clock.install()
 
     // And an entry with ninety seconds left to walk past
-    await page.goto(areaPath('expiring'))
+    await installHostedBackend(page, 'expiring')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
 
     // The question, asked while there is still an entry to answer it about
     await page.getByRole('button', { name: areaCopy.finishEntry }).click()
@@ -461,32 +555,34 @@ test.describe('the competition area', () => {
     // And the clock running out underneath it
     await page.clock.fastForward('02:00')
 
-    // The page says so
+    // The page says the clock is spent
     await expect(page.getByText(areaCopy.areaClockSpent)).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // And the question goes with the entry it was about, rather than leaving a press which cannot be
-    // undone standing over a page that has moved on without it
+    // And the question goes with the entry it was about
     await expect(page.getByText(areaCopy.finishDialog.consequence)).toHaveCount(0)
   })
 
   test('keeps an entry taken a moment ago through a reload', async ({ page }) => {
-    // The list, where an entry is taken
-    await page.goto(listPath('ready'))
+    // A student with an entry still to spend
+    await installHostedBackend(page, 'ready')
 
-    // The press that takes one
+    // Open the list, where the entry is taken
+    await page.goto(LIST_PATH)
+
+    // Press try
     await page.getByRole('button', { name: areaCopy.try }).first().click()
 
-    // Which the dialog confirms
+    // And confirm the dialog
     await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
 
     // The press lands them inside, since the list has no way to show what an entry is spent on
-    await expect(page).toHaveURL(/\/competitions\/[^?]+\?scenario=ready/, {
+    await expect(page).toHaveURL(/\/competitions\/[^?]+$/, {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // A reload, which the mocked backend holds its facts in memory across
+    // A reload, which the fake backend holds its facts in memory across
     await page.reload()
 
     // Still inside, rather than turned away as somebody who never entered
@@ -495,19 +591,25 @@ test.describe('the competition area', () => {
     })
   })
 
-  test('turns away a reader with no entry without losing their scenario', async ({ page }) => {
-    // The area of a competition nobody in this scenario entered, whose problems are embargoed
-    await page.goto(areaPath('running', UNENTERED_COMPETITION_ID))
+  test('turns away a reader with no entry', async ({ page }) => {
+    // A student inside a competition
+    await installHostedBackend(page, 'running')
 
-    // Which sends the reader to the list, with the scenario still on the address
-    await expect(page).toHaveURL(/\/competitions\?scenario=running/, { timeout: SETTLE_TIMEOUT_MS })
+    // Open the area of a competition they never entered
+    await page.goto(areaPath(UNENTERED_COMPETITION_ID))
+
+    // Which sends them back to the list rather than serving them the statements
+    await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
   })
 
   test('keeps the competition it is on when the reader changes language', async ({ page }) => {
-    // The area of a competition the student is inside
-    await page.goto(areaPath('running'))
+    // A student inside a competition
+    await installHostedBackend(page, 'running')
 
-    // Once it is there to switch away from
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // Once the area is there to switch away from
     await expect(page.getByRole('article').first()).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // The language switcher

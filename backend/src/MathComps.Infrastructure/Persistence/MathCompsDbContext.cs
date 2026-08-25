@@ -120,6 +120,15 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>When defense conversations were last read while reviewing.</summary>
     public DbSet<AdminSessionReview> AdminSessionReviews => Set<AdminSessionReview>();
 
+    /// <summary>The batches of competitions the site runs itself.</summary>
+    public DbSet<HostedGroup> HostedGroups => Set<HostedGroup>();
+
+    /// <summary>Students' entries into the rounds those groups run.</summary>
+    public DbSet<HostedEntry> HostedEntries => Set<HostedEntry>();
+
+    /// <summary>Links from a defense session to the archive problem it defends.</summary>
+    public DbSet<ProblemDefense> ProblemDefenses => Set<ProblemDefense>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -732,13 +741,20 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         modelBuilder.Entity<HandoutEnvironmentDefense>(e =>
         {
-            // A session defends exactly one environment, so its own id doubles as this row's key.
+            // A session defends one target, so its own id doubles as this row's key.
             e.HasKey(defense => defense.DefenseSessionId);
 
-            // The session this row extends, sharing its id as this table's own key.
+            // Pinned to DefenseTargetKind.Handout, which is the 0 the constraint holds.
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_handout_environment_defense_target_kind", "\"target_kind\" = 0"));
+
+            // The session this row extends, sharing its id as this table's own key. The kind is part of that
+            // foreign key, which is what DefenseTargetKind is stored for.
             e.HasOne(defense => defense.DefenseSession)
              .WithOne(session => session.EnvironmentTarget)
-             .HasForeignKey<HandoutEnvironmentDefense>(defense => defense.DefenseSessionId)
+             .HasForeignKey<HandoutEnvironmentDefense>(
+                 defense => new { defense.DefenseSessionId, defense.TargetKind })
+             .HasPrincipalKey<DefenseSession>(session => new { session.Id, session.TargetKind })
              .OnDelete(DeleteBehavior.Cascade);
 
             // Defenses belong to their environment, cascading so deleting it drops them.
@@ -753,6 +769,90 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion HandoutEnvironmentDefense
+
+        #region HostedGroup
+
+        modelBuilder.Entity<HostedGroup>(e =>
+        {
+            // What the import addresses a group by, so re-applying its drafts updates the group rather than
+            // creating a second one.
+            e.HasIndex(group => group.Slug)
+             .IsUnique()
+             .HasDatabaseName("ux_hosted_group_slug");
+
+            // The rounds the group runs, one per category. Restricted: a group whose rounds still hold problems
+            // is not something a delete should quietly take with it.
+            e.HasMany(group => group.Rounds)
+             .WithOne(round => round.HostedGroup)
+             .HasForeignKey(round => round.HostedGroupId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        #endregion HostedGroup
+
+        #region HostedEntry
+
+        modelBuilder.Entity<HostedEntry>(e =>
+        {
+            // Owner of the entry, cascading so deleting a user drops their entries.
+            e.HasOne(entry => entry.User)
+             .WithMany()
+             .HasForeignKey(entry => entry.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The round entered. Restricted, an entry being the record a result is eventually read from.
+            e.HasOne(entry => entry.Round)
+             .WithMany()
+             .HasForeignKey(entry => entry.RoundId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // Every read starts from the student and the round they are looking at, and there is one row to
+            // find: re-entry resets it rather than adding another. Unique, so two simultaneous presses cannot
+            // both read no row and then both write one.
+            e.HasIndex(entry => new { entry.UserId, entry.RoundId })
+             .IsUnique()
+             .HasDatabaseName("ux_hosted_entry_user_id_round_id");
+
+            // An entry exists because it was spent, so exactly one of the two ways is stamped. A row with
+            // neither is an entry nothing bought, which every reader of the pair would then have to allow for.
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_hosted_entry_sat_or_forfeited",
+                "(\"started_at\" IS NULL) <> (\"forfeited_at\" IS NULL)"));
+        });
+
+        #endregion HostedEntry
+
+        #region ProblemDefense
+
+        modelBuilder.Entity<ProblemDefense>(e =>
+        {
+            // A session defends one target, so its own id doubles as this row's key.
+            e.HasKey(defense => defense.DefenseSessionId);
+
+            // Pinned to DefenseTargetKind.Problem, which is the 1 the constraint holds.
+            e.ToTable(t => t.HasCheckConstraint("ck_problem_defense_target_kind", "\"target_kind\" = 1"));
+
+            // The session this row extends, sharing its id as this table's own key. The kind is part of that
+            // foreign key, which is what DefenseTargetKind is stored for.
+            e.HasOne(defense => defense.DefenseSession)
+             .WithOne(session => session.ProblemTarget)
+             .HasForeignKey<ProblemDefense>(defense => new { defense.DefenseSessionId, defense.TargetKind })
+             .HasPrincipalKey<DefenseSession>(session => new { session.Id, session.TargetKind })
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Defenses point at their problem. Restricted, since a conversation held under an entry must outlive
+            // any tidying of the archive row it was held against.
+            e.HasOne(defense => defense.Problem)
+             .WithMany()
+             .HasForeignKey(defense => defense.ProblemId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // A student's history for one problem is the list query.
+            e.HasIndex(defense => defense.ProblemId)
+             .HasDatabaseName("ix_problem_defense_problem_id");
+        });
+
+        #endregion ProblemDefense
 
         #region NewsArticle
 
@@ -838,6 +938,11 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
             // Every list query starts from the owner.
             e.HasIndex(session => session.UserId).HasDatabaseName("ix_defense_session_user_id");
+
+            // What each target table points at the session by. Redundant against the primary key on its own, and
+            // there so a target row has to agree with the session about which kind of target it is.
+            e.HasAlternateKey(session => new { session.Id, session.TargetKind })
+             .HasName("ak_defense_session_id_target_kind");
         });
 
         #endregion DefenseSession

@@ -1,6 +1,7 @@
 using MathComps.Api.Errors;
 using MathComps.Api.Extensions;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Competitions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -16,7 +17,18 @@ namespace MathComps.Api.Tests;
 public class GlobalExceptionHandlerTests
 {
     /// <summary>
-    /// Every business exception maps to a client status (not a 500) and stamps its wire code.
+    /// The refusals raised by services no endpoint calls, which have no HTTP meaning to classify. Naming them
+    /// one by one rather than skipping their namespace keeps the guard on the exceptions that sit beside them:
+    /// the competition endpoints throw several of their own out of the same folder.
+    /// </summary>
+    private static readonly HashSet<string> _cliOnly =
+    [
+        // Raised while a group manifest is declared, which only the Competitions CLI ever does
+        nameof(HostedGroupManifestException),
+    ];
+
+    /// <summary>
+    /// Every business exception a request can reach maps to a client status (not a 500) and stamps its wire code.
     /// </summary>
     [Fact]
     public async Task Every_business_exception_maps_to_a_client_status_and_code()
@@ -31,8 +43,9 @@ public class GlobalExceptionHandlerTests
             .Where(type => typeof(Exception).IsAssignableFrom(type)
                 && type.Namespace?.StartsWith("MathComps.Api", StringComparison.Ordinal) == true);
 
-        // Both assemblies' business exceptions must classify
-        var exceptionTypes = infrastructureExceptions.Concat(apiExceptions);
+        // Both assemblies' business exceptions must classify, bar the ones no request can reach
+        var exceptionTypes = infrastructureExceptions.Concat(apiExceptions)
+            .Where(type => !_cliOnly.Contains(type.Name));
 
         // Drive each one through the real handler
         foreach (var exceptionType in exceptionTypes)
@@ -46,7 +59,9 @@ public class GlobalExceptionHandlerTests
             await handler.TryHandleAsync(httpContext, CreateException(exceptionType), CancellationToken.None);
 
             // A recognized failure maps to a client status, never the unexpected-fault 500
-            Assert.NotEqual(StatusCodes.Status500InternalServerError, httpContext.Response.StatusCode);
+            Assert.True(
+                httpContext.Response.StatusCode != StatusCodes.Status500InternalServerError,
+                $"{exceptionType.Name} has no classification arm, so it reaches the client as a 500.");
 
             // ...and carries the wire code named after the exception (minus the "Exception" suffix)
             var expectedCode = exceptionType.Name[..^nameof(Exception).Length];

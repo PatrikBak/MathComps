@@ -26,9 +26,9 @@ public class MetadataLocalizationServiceTests
     /// </summary>
     [Fact]
     public void Shared_roots_are_in_display_order() =>
-        // CSMO first … DuoGeo last.
+        // CSMO first … the site's own competitions last, placed after the archive's on purpose.
         Assert.Equal(
-            ["csmo", "tst", "memo", "imo", "caps", "emo", "egmo", "tstc", "cpsj", "duogeo"],
+            ["csmo", "tst", "memo", "imo", "caps", "emo", "egmo", "tstc", "cpsj", "duogeo", "mc"],
             [.. _service.Shared.ChildSlugs(parentPath: null)]);
 
     /// <summary>

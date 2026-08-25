@@ -1,10 +1,11 @@
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// One user's defense conversation about one problem: the student argues a solution and the AI examiner probes it,
-/// turn by turn. Holds the problem statement and its reference solution so a follow-up turn can re-run the examiner
-/// without the client resending them. Deleting a session removes it, its turns, and everything the student said
-/// about it outright (the spend record in <see cref="DefenseSpend"/> is independent and survives).
+/// One user's defense conversation: the student argues a solution and the AI examiner probes it, turn by turn.
+/// Holds the problem statement and its reference solution so a follow-up turn can re-run the examiner without
+/// the client resending them. Deleting a session removes it, its turns, and everything the student said about
+/// it outright (the spend record in <see cref="DefenseSpend"/> is independent and survives). Not every session
+/// may be deleted; see <see cref="ProblemTarget"/>.
 /// </summary>
 public class DefenseSession
 {
@@ -24,9 +25,25 @@ public class DefenseSession
     public User User { get; set; } = null!;
 
     /// <summary>
-    /// Which handout environment this session defends. Null when no environment is linked to this session.
+    /// Which kind of thing this session defends, which is also what holds it to one target
+    /// (<see cref="DefenseTargetKind"/>).
+    /// </summary>
+    public required DefenseTargetKind TargetKind { get; set; }
+
+    /// <summary>
+    /// Which handout environment this session defends. Null when the session defends something else.
     /// </summary>
     public HandoutEnvironmentDefense? EnvironmentTarget { get; set; }
+
+    /// <summary>
+    /// Which archive problem this session defends. Null when the session defends something else.
+    /// </summary>
+    /// <remarks>
+    /// Exclusive with <see cref="EnvironmentTarget"/>, enforced by <see cref="TargetKind"/>. A session that
+    /// defends a problem can be neither rewound nor deleted: it is the record of what the student argued under
+    /// their entry, so it outlives their opinion of it.
+    /// </remarks>
+    public ProblemDefense? ProblemTarget { get; set; }
 
     /// <summary>
     /// What the student said about the conversation. Null until they say anything.

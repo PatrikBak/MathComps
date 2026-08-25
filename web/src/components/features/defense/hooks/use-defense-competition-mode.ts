@@ -1,7 +1,6 @@
 'use client'
 
 import type { AreaEntry } from '@/components/features/hosted-competitions/model/hosted-competition-state'
-import { useMockViewer } from '@/components/features/hosted-competitions/services/hosted-competition-mock-service'
 import { SECOND_MS } from '@/components/shared/utils/time-units'
 import { useNow } from '@/hooks/use-now'
 
@@ -17,13 +16,6 @@ type UseDefenseCompetitionModeResult = {
   now: number
   /** The first turn the clock no longer covers, which the line sits above; null when none is. */
   firstUncountedTurnId: string | null
-  /**
-   * Whether the account gates are waived for this reader.
-   *
-   * Only ever inside a competition, and only for a mocked reader: the scenario is read off the address, so
-   * keying on it alone waives the gates anywhere the address can be typed.
-   */
-  isGateWaived: boolean
 }
 
 /**
@@ -47,15 +39,11 @@ export function useDefenseCompetitionMode(
   // is no deadline to cross, a chat being left mounted after it closes
   const now = useNow(SECOND_MS, endsAt !== null)
 
-  // Whether a mocked student is reading, who has no session to sign in with or acknowledge from
-  const { viewer } = useMockViewer()
-
   // Where the defense stands against the entry
   return {
     now,
     hasClockExpired: endsAt !== null && Date.parse(endsAt) <= now,
     firstUncountedTurnId: endsAt === null ? null : findFirstUncountedTurnId(turns, endsAt),
-    isGateWaived: competition !== null && viewer === 'student',
   }
 }
 

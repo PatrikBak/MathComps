@@ -81,14 +81,39 @@ export type DefenseTurnReport = {
 }
 
 /**
+ * A stored defense held against one environment of a published handout, as the API names it.
+ */
+type HandoutSessionTarget = {
+  /** The discriminant. */
+  kind: 'handout'
+} & HandoutEnvironmentTarget
+
+/**
+ * A stored defense held against one archive problem, as the API names it.
+ */
+type ProblemSessionTarget = {
+  /** The discriminant. */
+  kind: 'problem'
+  /** The problem being defended. */
+  problemId: string
+}
+
+/**
+ * What a stored defense says it is about, in the shape the API returns it: a handout's environment, or an
+ * archive problem. Flatter than the {@link DefenseTarget} the surface works in, which also carries what a
+ * competition area needs to key its own caches by.
+ */
+export type DefenseSessionTarget = HandoutSessionTarget | ProblemSessionTarget
+
+/**
  * One defense conversation a student has held about a single problem: the full transcript plus its
  * identity. A student may hold several about the same problem over time.
  */
 export type DefenseSession = {
   /** Stable identifier. */
   id: string
-  /** What this defense is about. */
-  target: DefenseTarget
+  /** What this defense is about, as the API says it. */
+  target: DefenseSessionTarget
   /** The conversation so far, oldest first. */
   turns: StoredTurn[]
   /** What the student said about the conversation; null until they say anything. */
@@ -174,8 +199,8 @@ export type DefenseOpening = OpenNewestDefense | OpenNamedDefense | OpenFreshDef
 
 /**
  * The problem a defense is held against. The reasoning it is measured against never reaches the client:
- * the backend resolves the statement, reference and hints from the handout environment itself, and the
- * statement here is only the copy the chat shows alongside the conversation.
+ * the backend resolves the statement, reference and hints from the target itself, and the statement here
+ * is only the copy the chat shows alongside the conversation.
  */
 export type DefenseProblem = {
   /** What this problem is: a handout's environment, or a competition's problem. */

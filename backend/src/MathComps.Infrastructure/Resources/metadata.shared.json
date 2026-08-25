@@ -67,6 +67,15 @@
     {
       "slug": "duogeo",
       "children": [{ "slug": "zs" }, { "slug": "ss" }]
+    },
+    {
+      "slug": "mc",
+      "children": [
+        { "slug": "practice" },
+        { "slug": "elementary", "children": [{ "slug": "1" }] },
+        { "slug": "intermediate", "children": [{ "slug": "1" }] },
+        { "slug": "advanced", "children": [{ "slug": "1" }] }
+      ]
     }
   ]
 }

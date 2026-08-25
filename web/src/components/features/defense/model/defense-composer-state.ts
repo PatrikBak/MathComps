@@ -64,8 +64,6 @@ export type DefenseComposerInput = {
   isConsentLoading: boolean
   /** Whether the reader has acknowledged what talking to the examiner entails. */
   hasConsented: boolean
-  /** Whether the account gates are waived, which is what a mocked reader is let through on. */
-  isGateWaived: boolean
   /** Whether a reply is in flight. */
   isThinking: boolean
   /** How many turns the conversation has left, or null while the caps are not known. */
@@ -80,25 +78,19 @@ export type DefenseComposerInput = {
  * @returns The state to render.
  */
 export function resolveComposerState(input: DefenseComposerInput): DefenseComposerState {
-  // Nothing to write into yet. A waived reader waits on no acknowledgement, so that read never holds them
-  if (
-    !input.isConversationReady ||
-    (!input.isGateWaived && (!input.isAuthSettled || input.isConsentLoading))
-  ) {
+  // Nothing to write into yet
+  if (!input.isConversationReady || !input.isAuthSettled || input.isConsentLoading) {
     return { kind: 'loading' }
   }
 
-  // The account gates, which a waiver skips outright
-  if (!input.isGateWaived) {
-    // Nobody to write the turn as
-    if (!input.isSignedIn) {
-      return { kind: 'signInRequired' }
-    }
+  // Nobody to write the turn as
+  if (!input.isSignedIn) {
+    return { kind: 'signInRequired' }
+  }
 
-    // Nobody who has said what they are agreeing to
-    if (!input.hasConsented) {
-      return { kind: 'consentRequired' }
-    }
+  // Nobody who has said what they are agreeing to
+  if (!input.hasConsented) {
+    return { kind: 'consentRequired' }
   }
 
   // Every turn spent, though a reply still coming is allowed to land

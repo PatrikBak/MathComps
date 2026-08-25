@@ -235,6 +235,38 @@
     "duogeo-ss": {
       "shortName": "SŠ",
       "fullName": "Kategorie SŠ"
+    },
+    "mc": {
+      "shortName": "MathComps",
+      "fullName": "Soutěže MathComps"
+    },
+    "mc-practice": {
+      "shortName": "Zkušební soutěž",
+      "fullName": "Zkušební soutěž"
+    },
+    "mc-elementary": {
+      "shortName": "Základní",
+      "fullName": "Základní kategorie"
+    },
+    "mc-elementary-1": {
+      "shortName": "Září",
+      "fullName": "Září"
+    },
+    "mc-intermediate": {
+      "shortName": "Střední",
+      "fullName": "Střední kategorie"
+    },
+    "mc-intermediate-1": {
+      "shortName": "Září",
+      "fullName": "Září"
+    },
+    "mc-advanced": {
+      "shortName": "Pokročilá",
+      "fullName": "Pokročilá kategorie"
+    },
+    "mc-advanced-1": {
+      "shortName": "Září",
+      "fullName": "Září"
     }
   },
   "seasonFormat": "{number}. ročník ({start}/{end})"
