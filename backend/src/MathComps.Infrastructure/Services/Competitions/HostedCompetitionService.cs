@@ -6,6 +6,7 @@ using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -142,8 +143,9 @@ public sealed class HostedCompetitionService(
             throw new HostedEntryNotRunningException();
 
         // Over where the student said, and the clock they left on it goes with it. Whether that counts as handing
-        // in early is arithmetic against the group's clock, which the reader does for itself.
-        entry.FinishedAt = DateTimeOffset.UtcNow;
+        // in early is arithmetic against the group's clock, which the reader does for itself. Stamped no finer
+        // than the row will hold it, so the entry this returns matches the same entry read back.
+        entry.FinishedAt = DateTimeOffset.UtcNow.TruncateToMicroseconds();
 
         // The close itself.
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -194,8 +196,9 @@ public sealed class HostedCompetitionService(
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new HostedCompetitionNotFoundException();
 
-        // One instant for the checks and for whatever they let through.
-        var now = DateTimeOffset.UtcNow;
+        // One instant for the checks and for whatever they let through, no finer than a stamp written from it
+        // will be held, so the entry this returns matches the same entry read back.
+        var now = DateTimeOffset.UtcNow.TruncateToMicroseconds();
 
         // Announced but not yet open, or past its window: either way there is no entry to take.
         if (group.OpensAt > now || (group.ClosesAt is { } closesAt && closesAt <= now))
