@@ -1,18 +1,13 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { invalidateCompetitionProblems } from '@/components/features/hosted-competitions/hooks/hosted-competition-cache'
-import {
-  deleteCompetitionDefenseSession,
-  listCompetitionDefenseSessions,
-  rewindCompetitionDefenseTurns,
-  submitCompetitionDefenseTurn,
-} from '@/components/features/hosted-competitions/services/competition-run-mock-service'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { useApi } from '@/hooks/use-api'
+import { useApiQuery } from '@/hooks/use-api-query'
 import { unwrap } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
@@ -108,21 +103,6 @@ export function useDefenseConversation(
   // The backend calls bound to the current caller (unwrapped to data or a throw), or null when the caller
   // isn't ready. Memoized on the caller so it keeps a stable identity across renders.
   const buildServices = useCallback((): DefenseConversationServices | null => {
-    // A competition problem has no handout endpoint behind it, so it is answered by its own backend and
-    // waits on no caller
-    if (problem.target.kind === 'competition') {
-      return {
-        // Send the turn, returning the conversation grown with it and the reply
-        submitTurn: async (request) => unwrap(await submitCompetitionDefenseTurn(request)),
-        // Remove the conversation
-        deleteSession: async (sessionId) => {
-          unwrap(await deleteCompetitionDefenseSession(sessionId))
-        },
-        // Refused: a competition offers no rewind, so reaching this is a bug
-        rewindTurns: rewindCompetitionDefenseTurns,
-      }
-    }
-
     // No caller yet: the client is still loading or the user is signed out, so there are no services
     if (apiCall === null) {
       return null
@@ -141,26 +121,16 @@ export function useDefenseConversation(
         unwrap(await rewindTurns(apiCall, sessionId, keepThroughSequence))
       },
     }
-  }, [apiCall, problem.target])
+  }, [apiCall])
 
   // This problem's persisted sessions
-  const sessionsQuery = useQuery({
+  const sessionsQuery = useApiQuery({
     queryKey: defenseSessionsQueryKey(problem.target, isUserLoaded ? (userId ?? null) : null),
-    queryFn: async () => {
-      // A competition problem is answered by its own backend, which needs no caller
-      if (problem.target.kind === 'competition') {
-        return unwrap(await listCompetitionDefenseSessions(problem.target))
-      }
-
-      // The client must be ready to fetch
-      if (apiCall === null) throw new Error('API not ready')
-
-      // Fetch the sessions, unwrapped to the list or a throw
-      return unwrap(await listSessions(apiCall, problem.target.environment))
-    },
-    // Only fetch once the client is ready and the key's user is settled, which a competition waits on
-    // neither of
-    enabled: problem.target.kind === 'competition' || (apiCall !== null && isUserLoaded),
+    fetch: (caller) => listSessions(caller, problem.target),
+    // The reader's own conversations, so they are read as them
+    requireAuth: true,
+    // Only fetch once the key's user is settled, or the list lands under the wrong one
+    enabled: isUserLoaded,
     // Sessions are the user's own recent activity
     ...cachePolicy.userData,
   })
@@ -176,7 +146,7 @@ export function useDefenseConversation(
           // The defense surface's own lists, per problem and across all of them
           invalidateDefenseLists(queryClient)
 
-          // And the competition area's list of the same conversations, which no defense query reaches
+          // A competition problem also sits in the competition area's list, which no defense query reaches
           if (problem.target.kind === 'competition') {
             invalidateCompetitionProblems(queryClient)
           }

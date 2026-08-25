@@ -1,5 +1,7 @@
 import type { Page } from '@playwright/test'
 
+import { ROUTES } from '@/i18n/i18n'
+
 import messages from '../../messages/en.json'
 
 /**
@@ -14,41 +16,22 @@ export const areaCopy = competitionsCopy
 /** The copy the defense chat reads under. */
 export const chatCopy = defenseCopy
 
-/** The competition the specs enter, one of the open group's three. */
-export const COMPETITION_ID = 'open-intermediate'
-
-/** How many problems its set holds. */
-export const PROBLEM_COUNT = 3
-
 /**
- * The list, read under one of the mocked backend's scenarios.
- *
- * @param scenario - Which set of facts to read it under.
- *
- * @returns The path.
+ * The competitions list in English, which is the canonical locale and so carries no route translation.
  */
-export function listPath(scenario: string): string {
-  // The list, with the scenario the mocked backend answers from
-  return `/en/competitions?scenario=${scenario}`
-}
+export const LIST_PATH = `/en${ROUTES.COMPETITIONS}`
 
 /**
- * One competition's own area, read under one of the mocked backend's scenarios.
+ * One competition's own area.
  *
- * @param scenario - Which set of facts to read it under.
  * @param competitionId - Which competition's area.
  *
  * @returns The path.
  */
-export function areaPath(scenario: string, competitionId: string = COMPETITION_ID): string {
-  // The area, with the scenario the mocked backend answers from
-  return `/en/competitions/${competitionId}?scenario=${scenario}`
+export function areaPath(competitionId: string): string {
+  // An area hangs off the list under the competition's own id
+  return `${LIST_PATH}/${competitionId}`
 }
-
-/**
- * The scenario naming a reader with no account at all, which no query value spells on its own.
- */
-export const SIGNED_OUT_SCENARIO = 'signed-out'
 
 /**
  * Opens the chat on a problem's most recent conversation.

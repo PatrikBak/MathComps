@@ -7,7 +7,7 @@ import type {
 } from '../model/hosted-competition-types'
 
 /** Root of every query key the competitions surface reads under, so invalidating it reaches them all. */
-export const HOSTED_COMPETITIONS_QUERY_KEY = ['competitions'] as const
+const HOSTED_COMPETITIONS_QUERY_KEY = ['competitions'] as const
 
 /**
  * Who a cached competitions answer belongs to.
@@ -16,7 +16,7 @@ export const HOSTED_COMPETITIONS_QUERY_KEY = ['competitions'] as const
  * offers. Cached under anything less, signing out and back in as somebody else hands the second reader the
  * first one's history.
  *
- * A mocked student's identity is the scenario that invented them, and an anonymous reader has none.
+ * A signed-out visitor has no identity, and holds no entries either.
  */
 export type HostedCompetitionsReaderKey = string | null
 
@@ -32,6 +32,9 @@ export function hostedCompetitionsViewQueryKey(readerKey: HostedCompetitionsRead
   return [...HOSTED_COMPETITIONS_QUERY_KEY, 'view', readerKey] as const
 }
 
+/** Root every student's readiness hangs off, so one call reaches whoever is reading. */
+const ENTRY_READINESS_QUERY_KEY = [...HOSTED_COMPETITIONS_QUERY_KEY, 'entryReadiness'] as const
+
 /**
  * The key the student's entry readiness is cached under.
  *
@@ -41,7 +44,7 @@ export function hostedCompetitionsViewQueryKey(readerKey: HostedCompetitionsRead
  */
 export function entryReadinessQueryKey(readerKey: HostedCompetitionsReaderKey): QueryKey {
   // Readiness is about the student rather than the reading, so it carries no language
-  return [...HOSTED_COMPETITIONS_QUERY_KEY, 'entryReadiness', readerKey] as const
+  return [...ENTRY_READINESS_QUERY_KEY, readerKey] as const
 }
 
 /** Root every problem set hangs off, so one call reaches whichever reader and competition it belongs to. */
@@ -69,10 +72,40 @@ export function competitionProblemsQueryKey(
  * The rows under each statement say how many turns a conversation has spent, so anything that writes a
  * conversation moves them.
  *
+ * Narrower than {@link invalidateHostedCompetitions}: it leaves the view and readiness alone. Anything that
+ * moves an entry wants that one instead.
+ *
  * @param queryClient - The cache to refresh.
  */
 export function invalidateCompetitionProblems(queryClient: QueryClient): void {
   void queryClient.invalidateQueries({ queryKey: COMPETITION_PROBLEMS_QUERY_KEY })
+}
+
+/**
+ * Refreshes what the program still owes a student before it will take an entry from them.
+ *
+ * Its answer is read off the account, so anything that writes the account moves it.
+ *
+ * The narrowest of the invalidators: it leaves the view and the problem sets alone. Anything that moves
+ * an entry wants {@link invalidateHostedCompetitions} instead.
+ *
+ * @param queryClient - The cache to refresh.
+ */
+export function invalidateEntryReadiness(queryClient: QueryClient): void {
+  void queryClient.invalidateQueries({ queryKey: ENTRY_READINESS_QUERY_KEY })
+}
+
+/**
+ * Refreshes everything the competitions surface reads: the view, what each student still owes, and every
+ * problem set.
+ *
+ * React Query matches a key by prefix, and every key here is built off the same root, so this one call
+ * reaches the problem sets too. That is what it is for: an entry that closes changes more than the entry.
+ *
+ * @param queryClient - The cache to refresh.
+ */
+export function invalidateHostedCompetitions(queryClient: QueryClient): void {
+  void queryClient.invalidateQueries({ queryKey: HOSTED_COMPETITIONS_QUERY_KEY })
 }
 
 /**

@@ -2,6 +2,8 @@ import type { HandoutEnvironmentTarget } from '@/components/features/handouts/ha
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { DEFENSE_DRAFT_STORAGE_PREFIX } from '@/constants/local-storage-constants'
 
+import type { DefenseSessionTarget } from './defense-types'
+
 /**
  * A defense held against one environment of a published handout.
  */
@@ -15,7 +17,7 @@ type HandoutDefenseTarget = {
 /**
  * A defense held against one problem of a hosted competition.
  */
-export type CompetitionDefenseTarget = {
+type CompetitionDefenseTarget = {
   /** The discriminant. */
   kind: 'competition'
   /** The competition the problem is set in. */
@@ -30,6 +32,29 @@ export type CompetitionDefenseTarget = {
  * What a defense is held against: a handout's environment, or a competition's problem.
  */
 export type DefenseTarget = HandoutDefenseTarget | CompetitionDefenseTarget
+
+/**
+ * Turns a target the surface works in into the shape the API takes.
+ *
+ * @param target - What the defense is held against.
+ *
+ * @returns The same target, flattened onto the wire.
+ */
+export function toWireTarget(target: DefenseTarget): DefenseSessionTarget {
+  switch (target.kind) {
+    // A handout environment travels as its two content ids
+    case 'handout':
+      return { kind: 'handout', ...target.environment }
+
+    // A competition problem is an archive problem, so it travels as its own id
+    case 'competition':
+      return { kind: 'problem', problemId: target.problemId }
+
+    // Every target is handled above
+    default:
+      return assertNever(target)
+  }
+}
 
 /**
  * Reads the handout environment a target names.

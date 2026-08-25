@@ -77,9 +77,13 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
         var date = DateOnly.ParseExact(meta.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
         // The embargo instant, when the folder names one; absent means the round opens as soon as it lands.
+        // Read as UTC whatever offset the folder wrote it in, for the reason HostedGroupService.DeclareAsync
+        // spells out.
         var visibleSince = meta.VisibleSince is null
             ? (DateTimeOffset?)null
-            : DateTimeOffset.Parse(meta.VisibleSince, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+            : DateTimeOffset
+                .Parse(meta.VisibleSince, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind)
+                .ToUniversalTime();
 
         // Each problem's full content — authors, link, per-language bodies, images.
         var problems = outcome.Manifest.Problems

@@ -228,6 +228,7 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 ### Data Pipeline Tools
 
 - **[Bulk Import](src/MathComps.Cli.BulkImport/README.md)** – Validates and applies problem-draft folders to the database
+- **[Competitions](src/MathComps.Cli.Competitions/README.md)** – Declares a hosted group from its manifest: links the rounds it runs and sets the terms
 
 ### AI-Powered Tools
 

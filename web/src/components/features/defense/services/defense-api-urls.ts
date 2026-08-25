@@ -7,7 +7,7 @@ import { buildApiUrl } from '@/components/shared/utils/url-utils'
 const SESSIONS_PATH = '/defense/sessions'
 
 /**
- * Builds the URL for listing a handout environment's defense sessions.
+ * Builds the URL for listing the user's own defense sessions against a handout environment.
  *
  * @param target - The handout environment whose sessions to list.
  * @returns The list URL.
@@ -18,6 +18,17 @@ export function getDefenseSessionsUrl(target: HandoutEnvironmentTarget): string 
     handoutContentId: target.handoutContentId,
     environmentId: target.environmentId,
   })
+}
+
+/**
+ * Builds the URL for listing the user's own defense sessions against an archive problem.
+ *
+ * @param problemId - The archive problem whose sessions to list.
+ * @returns The list URL.
+ */
+export function getProblemDefenseSessionsUrl(problemId: string): string {
+  // The list endpoint for one archive problem
+  return buildApiUrl(`${SESSIONS_PATH}/problems/${encodeURIComponent(problemId)}`)
 }
 
 /**

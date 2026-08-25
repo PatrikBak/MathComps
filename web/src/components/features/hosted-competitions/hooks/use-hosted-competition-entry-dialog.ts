@@ -6,8 +6,8 @@ import { useIsMountedRef } from '@/hooks/use-is-mounted-ref'
 import { useRouter } from '@/i18n/navigation'
 
 import type { PendingEntry } from '../model/hosted-competition-types'
+import { competitionAreaHref } from '../services/hosted-competition-routes'
 import type { HostedCompetitionsReaderKey } from './hosted-competition-cache'
-import { useCompetitionAreaHref } from './use-competition-area-href'
 import { useEnterHostedCompetition } from './use-enter-hosted-competition'
 
 /**
@@ -49,9 +49,6 @@ export function useHostedCompetitionEntryDialog(
   // The localized router, for taking the student where the entry they just spent is read
   const router = useRouter()
 
-  // The way into one competition's own area
-  const areaHref = useCompetitionAreaHref()
-
   // Whether the list is still on screen, which the continuation the press leaves behind has to ask
   const isMountedRef = useIsMountedRef()
 
@@ -68,9 +65,9 @@ export function useHostedCompetitionEntryDialog(
       close()
 
       // And the student is where the entry they spent is read
-      router.push(areaHref(competitionId))
+      router.push(competitionAreaHref(competitionId))
     },
-    [close, router, areaHref, isMountedRef]
+    [close, router, isMountedRef]
   )
 
   // Taking the entry, or giving it up, either of which lands the student inside the competition

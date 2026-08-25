@@ -6,10 +6,11 @@ using MathComps.Infrastructure.Services.Users;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the defense endpoints: listing a user's defense conversations, for one problem or across every problem,
-/// starting one, continuing it with the next turn, rewinding one to an earlier point, recording or taking back
-/// what the student thought of it, and deleting one. Open to any signed-in user, with every route scoped to the
-/// caller's own sessions; the turn routes are tightly rate-limited because each turn is several LLM calls.
+/// Maps the defense endpoints: listing a user's defense conversations, for one handout environment, for one
+/// archive problem, or across every problem, starting one, continuing it with the next turn, rewinding one to
+/// an earlier point, recording or taking back what the student thought of it, and deleting one. Open to any
+/// signed-in user, with every route scoped to the caller's own sessions; the turn routes are tightly
+/// rate-limited because each turn is several LLM calls.
 /// </summary>
 public static class DefenseEndpoints
 {
@@ -39,6 +40,29 @@ public static class DefenseEndpoints
             var target = new HandoutEnvironmentTarget(handoutContentId, environmentId);
 
             // Fetch the user's sessions against it, and the caps a further turn is held to
+            var list = await defenseService.ListAsync(userId, target, context.RequestAborted);
+
+            // Return them
+            return Results.Ok(list);
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // List the user's sessions against one archive problem, with the caps its defenses are held to
+        app.MapGet($"{SessionsPath}/problems/{{problemId:guid}}", async (
+            Guid problemId,
+            HttpContext context,
+            IUserManager userManager,
+            IDefenseSessionService defenseService) =>
+        {
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // The problem the sessions are held against
+            var target = new ProblemTarget(problemId);
+
+            // Fetch the user's sessions against it, and the caps a further turn is held to. Only their own come
+            // back, so an embargoed statement reaches nobody it has not already reached
             var list = await defenseService.ListAsync(userId, target, context.RequestAborted);
 
             // Return them

@@ -9,6 +9,7 @@ import {
   findFirstTurnAfter,
   findReadPassBefore,
 } from '../defense-conversation-model'
+import { toWireTarget } from '../defense-target'
 import type {
   DefenseProblem,
   DefenseSession,
@@ -119,7 +120,7 @@ class FakeBackend implements DefenseConversationServices {
       // Assemble the new session under a server-minted id
       const session: DefenseSession = {
         id: `session-${(this.sessionCount += 1)}`,
-        target: request.target,
+        target: toWireTarget(request.target),
         turns: [
           ...this.stampTurns([{ id: null, createdAt: null, role: 'examiner', content: OPENER }]),
           ...newTurns,

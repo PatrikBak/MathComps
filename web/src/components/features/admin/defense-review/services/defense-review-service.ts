@@ -26,8 +26,7 @@ import {
 
 /**
  * The backend for reviewing defense conversations: authenticated calls to the .NET API, every one of them
- * behind the admin policy. Each function takes an {@link ApiCaller} and returns an {@link ApiResult}; the
- * consumer unwraps it.
+ * behind the admin policy.
  */
 
 /**

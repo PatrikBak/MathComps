@@ -1,14 +1,12 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
-
+import { useApiQuery } from '@/hooks/use-api-query'
 import { useQueryUiState } from '@/hooks/use-query-ui-state'
-import { unwrap } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import type { HostedCompetitionProblem } from '../model/hosted-competition-types'
-import { fetchCompetitionProblems } from '../services/competition-run-mock-service'
+import { fetchCompetitionProblems } from '../services/hosted-competition-service'
 import type { HostedCompetitionsReaderKey } from './hosted-competition-cache'
 import { competitionProblemsQueryKey } from './hosted-competition-cache'
 
@@ -20,27 +18,6 @@ type UseCompetitionProblemsResult = {
   problems: HostedCompetitionProblem[] | undefined
   /** How far the read got, for whatever stands in the surface's place. */
   uiState: QueryUiState
-}
-
-/**
- * How one competition's problem set is read.
- *
- * @param readerKey - Who the answer belongs to, which is what it gets cached under.
- * @param competitionId - Which competition's problems to read.
- *
- * @returns The query.
- */
-function competitionProblemsQuery(readerKey: HostedCompetitionsReaderKey, competitionId: string) {
-  // The read, keyed per reader and competition
-  return {
-    queryKey: competitionProblemsQueryKey(readerKey, competitionId),
-    queryFn: async () => {
-      // The problems, or throwing the backend failure
-      return unwrap(await fetchCompetitionProblems(competitionId))
-    },
-    // A conversation held on another tab should show up here promptly
-    ...cachePolicy.userData,
-  }
 }
 
 /**
@@ -57,11 +34,16 @@ export function useCompetitionProblems(
   competitionId: string,
   isEntitled: boolean
 ): UseCompetitionProblemsResult {
-  // The set, each problem carrying its own conversations
-  const query = useQuery({
-    ...competitionProblemsQuery(readerKey, competitionId),
+  // The set, each problem carrying its own conversations, keyed per reader and competition
+  const query = useApiQuery<HostedCompetitionProblem[]>({
+    queryKey: competitionProblemsQueryKey(readerKey, competitionId),
+    fetch: (apiCall) => fetchCompetitionProblems(apiCall, competitionId),
+    // Served through the reader's own entry, so it is read as them
+    requireAuth: true,
     // Embargoed until an entry is spent on them, so nothing is asked for before there is one
     enabled: isEntitled,
+    // A conversation held on another tab should show up here promptly
+    ...cachePolicy.userData,
   })
 
   // How far the read got

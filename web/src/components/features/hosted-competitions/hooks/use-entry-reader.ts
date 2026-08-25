@@ -1,14 +1,13 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs'
-import { useQuery } from '@tanstack/react-query'
 
-import { unwrap } from '@/lib/api/api-error'
+import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
 
 import type { EntryReader } from '../model/entry-reader'
 import type { EntryReadiness } from '../model/hosted-competition-types'
-import { fetchEntryReadiness, useMockViewer } from '../services/hosted-competition-mock-service'
+import { fetchEntryReadiness } from '../services/hosted-competition-service'
 import type { HostedCompetitionsReaderKey } from './hosted-competition-cache'
 import { entryReadinessQueryKey } from './hosted-competition-cache'
 
@@ -73,30 +72,24 @@ type UseEntryReaderResult = {
  * @returns Who is reading, and the key their answers are cached under.
  */
 export function useEntryReader(): UseEntryReaderResult {
-  // Who the address asks to be shown as, which only the mocked service answers to
-  const { viewer, scenario } = useMockViewer()
-
   // Who is reading, and whether that is settled yet
   const { isLoaded, isSignedIn: hasAccount, userId } = useAuth()
 
-  // Somebody the page can call a student, whether they signed in or the query string said to pretend one
-  // way or the other
-  const isSignedIn =
-    viewer === 'student' ? true : viewer === 'anonymous' ? false : hasAccount === true
+  // Whether anybody is signed in
+  const isSignedIn = hasAccount === true
 
-  // Clerk only gets to hold the page up when it is Clerk the answer depends on
-  const isViewerKnown = viewer !== 'real' || isLoaded
+  // Whether who is reading is settled yet
+  const isReaderKnown = isLoaded
 
-  // Whose answers these are. A mocked student is identified by the scenario that invented them
-  const readerKey: HostedCompetitionsReaderKey = viewer === 'student' ? scenario : (userId ?? null)
+  // Whose answers these are
+  const readerKey: HostedCompetitionsReaderKey = userId ?? null
 
   // What the student has given, which only somebody signed in has any of
-  const query = useQuery({
+  const query = useApiQuery({
     queryKey: entryReadinessQueryKey(readerKey),
-    queryFn: async () => {
-      // The readiness, or throwing the backend failure
-      return unwrap(await fetchEntryReadiness())
-    },
+    fetch: fetchEntryReadiness,
+    // The reader's own profile, so it is read as them
+    requireAuth: true,
     // Nobody signed in has a profile to read, so the call is never made
     enabled: isSignedIn,
     // A field filled in on the profile in another tab should show up here promptly
@@ -106,12 +99,12 @@ export function useEntryReader(): UseEntryReaderResult {
   // Who is reading, and where their answers live
   return {
     reader: toReader({
-      isKnown: isViewerKnown,
+      isKnown: isReaderKnown,
       isSignedIn,
       readiness: query.data,
       hasFailed: query.isError,
     }),
     readerKey,
-    isReaderKnown: isViewerKnown,
+    isReaderKnown,
   }
 }

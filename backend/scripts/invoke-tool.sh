@@ -9,6 +9,7 @@
 #   ./invoke-tool.sh -e staging bulk-import validate ./my-draft
 #   ./invoke-tool.sh -e staging bulk-import validate 'data/problems/skmo-*'   # globs / many folders
 #   ./invoke-tool.sh -e prod bulk-import apply ./my-draft
+#   ./invoke-tool.sh -e prod competitions ./data/problems/mc-2026-1.group.json --dry-run
 #   ./invoke-tool.sh embeddings -p "Regenerate"
 
 set -euo pipefail
@@ -30,6 +31,7 @@ Commands:
   embeddings     - Generate embeddings
   sync-users     - Sync all users from Clerk
   bulk-import    - Import problem drafts (e.g. bulk-import apply ./my-draft)
+  competitions   - Declare a hosted group from its manifest (e.g. competitions ./my-group.group.json)
 EOF
 }
 
@@ -162,6 +164,7 @@ case "$tool_command" in
     embeddings)   run_tool "MathComps.Cli.Embeddings" ;;
     sync-users)   run_tool "MathComps.Cli.UserSync" ;;
     bulk-import)  run_tool "MathComps.Cli.BulkImport" ;;
+    competitions) run_tool "MathComps.Cli.Competitions" ;;
     *) echo "Unknown command: $tool_command" >&2; usage; exit 1 ;;
 esac
 status=$?

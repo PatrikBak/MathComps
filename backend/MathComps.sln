@@ -1,4 +1,5 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -45,6 +46,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Cli.Examiner.Tests", "tests\MathComps.Cli.Examiner.Tests\MathComps.Cli.Examiner.Tests.csproj", "{525BC626-2956-49A4-B755-A0397529F68B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Api.Tests", "tests\MathComps.Api.Tests\MathComps.Api.Tests.csproj", "{26C77E6A-25F3-4528-B35B-37FA5AB3D0A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathComps.Cli.Competitions", "src\MathComps.Cli.Competitions\MathComps.Cli.Competitions.csproj", "{E81EE977-FF9D-4517-8E44-4294E3381497}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -296,6 +299,18 @@ Global
 		{26C77E6A-25F3-4528-B35B-37FA5AB3D0A3}.Release|x64.Build.0 = Release|Any CPU
 		{26C77E6A-25F3-4528-B35B-37FA5AB3D0A3}.Release|x86.ActiveCfg = Release|Any CPU
 		{26C77E6A-25F3-4528-B35B-37FA5AB3D0A3}.Release|x86.Build.0 = Release|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Debug|x64.Build.0 = Debug|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Debug|x86.Build.0 = Debug|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Release|x64.ActiveCfg = Release|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Release|x64.Build.0 = Release|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Release|x86.ActiveCfg = Release|Any CPU
+		{E81EE977-FF9D-4517-8E44-4294E3381497}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -321,5 +336,6 @@ Global
 		{800B9B46-A4B0-4805-9D52-7EB20BF2AF1D} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{525BC626-2956-49A4-B755-A0397529F68B} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{26C77E6A-25F3-4528-B35B-37FA5AB3D0A3} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{E81EE977-FF9D-4517-8E44-4294E3381497} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

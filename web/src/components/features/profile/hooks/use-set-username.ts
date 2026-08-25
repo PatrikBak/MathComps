@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
 
 import { useInvalidateUserComments } from '@/components/features/comments/hooks/use-invalidate-user-comments'
+import { invalidateEntryReadiness } from '@/components/features/hosted-competitions/hooks/hosted-competition-cache'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
 import type { UserProfile } from '../model/profile-types'
@@ -52,8 +53,14 @@ export function useSetUsername(): UseSetUsernameResult {
       )
     },
 
-    // Everything this user has authored is signed with the new name
-    onSettled: () => invalidateUserComments(),
+    // Refresh what a claimed name changes
+    onSettled: () => {
+      // Everything this user has authored is signed with the new name
+      invalidateUserComments()
+
+      // The name is one of the fields the entry gate reads off the account
+      invalidateEntryReadiness(queryClient)
+    },
 
     // The reason shown in the auth prompt
     authReason: tProfile('usernameAuthReason'),

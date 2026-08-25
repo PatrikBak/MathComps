@@ -353,12 +353,19 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("problem_statement");
 
+                    b.Property<int>("TargetKind")
+                        .HasColumnType("integer")
+                        .HasColumnName("target_kind");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
                         .HasName("pk_defense_sessions");
+
+                    b.HasAlternateKey("Id", "TargetKind")
+                        .HasName("ak_defense_session_id_target_kind");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_defense_session_user_id");
@@ -705,13 +712,103 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("handout_environment_id");
 
+                    b.Property<int>("TargetKind")
+                        .HasColumnType("integer")
+                        .HasColumnName("target_kind");
+
                     b.HasKey("DefenseSessionId")
                         .HasName("pk_handout_environment_defenses");
 
                     b.HasIndex("HandoutEnvironmentId")
                         .HasDatabaseName("ix_handout_environment_defense_handout_environment_id");
 
-                    b.ToTable("handout_environment_defenses", (string)null);
+                    b.HasIndex("DefenseSessionId", "TargetKind")
+                        .IsUnique()
+                        .HasDatabaseName("ix_handout_environment_defenses_defense_session_id_target_kind");
+
+                    b.ToTable("handout_environment_defenses", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_handout_environment_defense_target_kind", "\"target_kind\" = 0");
+                        });
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HostedEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("finished_at");
+
+                    b.Property<DateTimeOffset?>("ForfeitedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("forfeited_at");
+
+                    b.Property<Guid>("RoundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("round_id");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_hosted_entries");
+
+                    b.HasIndex("RoundId")
+                        .HasDatabaseName("ix_hosted_entries_round_id");
+
+                    b.HasIndex("UserId", "RoundId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_hosted_entry_user_id_round_id");
+
+                    b.ToTable("hosted_entries", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_hosted_entry_sat_or_forfeited", "(\"started_at\" IS NULL) <> (\"forfeited_at\" IS NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HostedGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("AllowsReentry")
+                        .HasColumnType("boolean")
+                        .HasColumnName("allows_reentry");
+
+                    b.Property<int>("ClockMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("clock_minutes");
+
+                    b.Property<DateTimeOffset?>("ClosesAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closes_at");
+
+                    b.Property<DateTimeOffset>("OpensAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("opens_at");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("slug");
+
+                    b.HasKey("Id")
+                        .HasName("pk_hosted_groups");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ux_hosted_group_slug");
+
+                    b.ToTable("hosted_groups", (string)null);
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticle", b =>
@@ -842,6 +939,36 @@ namespace MathComps.Infrastructure.Migrations
                         .HasDatabaseName("ux_problem_comment_comment_id");
 
                     b.ToTable("problem_comments", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemDefense", b =>
+                {
+                    b.Property<Guid>("DefenseSessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("defense_session_id");
+
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("problem_id");
+
+                    b.Property<int>("TargetKind")
+                        .HasColumnType("integer")
+                        .HasColumnName("target_kind");
+
+                    b.HasKey("DefenseSessionId")
+                        .HasName("pk_problem_defenses");
+
+                    b.HasIndex("ProblemId")
+                        .HasDatabaseName("ix_problem_defense_problem_id");
+
+                    b.HasIndex("DefenseSessionId", "TargetKind")
+                        .IsUnique()
+                        .HasDatabaseName("ix_problem_defenses_defense_session_id_target_kind");
+
+                    b.ToTable("problem_defenses", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_problem_defense_target_kind", "\"target_kind\" = 1");
+                        });
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemEmbedding", b =>
@@ -1090,6 +1217,10 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("date")
                         .HasColumnName("date");
 
+                    b.Property<Guid?>("HostedGroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("hosted_group_id");
+
                     b.Property<Guid>("SeasonId")
                         .HasColumnType("uuid")
                         .HasColumnName("season_id");
@@ -1100,6 +1231,9 @@ namespace MathComps.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_rounds");
+
+                    b.HasIndex("HostedGroupId")
+                        .HasDatabaseName("ix_rounds_hosted_group_id");
 
                     b.HasIndex("SeasonId")
                         .HasDatabaseName("ix_rounds_season_id");
@@ -1216,6 +1350,10 @@ namespace MathComps.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
+
+                    b.Property<DateTimeOffset?>("RulesAcceptedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("rules_accepted_at");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1551,13 +1689,6 @@ namespace MathComps.Infrastructure.Migrations
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HandoutEnvironmentDefense", b =>
                 {
-                    b.HasOne("MathComps.Domain.EfCoreEntities.DefenseSession", "DefenseSession")
-                        .WithOne("EnvironmentTarget")
-                        .HasForeignKey("MathComps.Domain.EfCoreEntities.HandoutEnvironmentDefense", "DefenseSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_handout_environment_defenses_defense_sessions_defense_sessi");
-
                     b.HasOne("MathComps.Domain.EfCoreEntities.HandoutEnvironment", "HandoutEnvironment")
                         .WithMany("Defenses")
                         .HasForeignKey("HandoutEnvironmentId")
@@ -1565,9 +1696,38 @@ namespace MathComps.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_handout_environment_defenses_handout_environments_handout_e");
 
+                    b.HasOne("MathComps.Domain.EfCoreEntities.DefenseSession", "DefenseSession")
+                        .WithOne("EnvironmentTarget")
+                        .HasForeignKey("MathComps.Domain.EfCoreEntities.HandoutEnvironmentDefense", "DefenseSessionId", "TargetKind")
+                        .HasPrincipalKey("MathComps.Domain.EfCoreEntities.DefenseSession", "Id", "TargetKind")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_handout_environment_defenses_defense_sessions_defense_sessi");
+
                     b.Navigation("DefenseSession");
 
                     b.Navigation("HandoutEnvironment");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HostedEntry", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Round", "Round")
+                        .WithMany()
+                        .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_hosted_entries_rounds_round_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_hosted_entries_users_user_id");
+
+                    b.Navigation("Round");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticleComment", b =>
@@ -1641,6 +1801,28 @@ namespace MathComps.Infrastructure.Migrations
                         .HasConstraintName("fk_problem_comments_problems_problem_id");
 
                     b.Navigation("Comment");
+
+                    b.Navigation("Problem");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProblemDefense", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Problem", "Problem")
+                        .WithMany()
+                        .HasForeignKey("ProblemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_problem_defenses_problems_problem_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.DefenseSession", "DefenseSession")
+                        .WithOne("ProblemTarget")
+                        .HasForeignKey("MathComps.Domain.EfCoreEntities.ProblemDefense", "DefenseSessionId", "TargetKind")
+                        .HasPrincipalKey("MathComps.Domain.EfCoreEntities.DefenseSession", "Id", "TargetKind")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_problem_defenses_defense_sessions_defense_session_id_target");
+
+                    b.Navigation("DefenseSession");
 
                     b.Navigation("Problem");
                 });
@@ -1791,6 +1973,12 @@ namespace MathComps.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_rounds_competitions_competition_id");
 
+                    b.HasOne("MathComps.Domain.EfCoreEntities.HostedGroup", "HostedGroup")
+                        .WithMany("Rounds")
+                        .HasForeignKey("HostedGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_rounds_hosted_groups_hosted_group_id");
+
                     b.HasOne("MathComps.Domain.EfCoreEntities.Season", "Season")
                         .WithMany("Rounds")
                         .HasForeignKey("SeasonId")
@@ -1799,6 +1987,8 @@ namespace MathComps.Infrastructure.Migrations
                         .HasConstraintName("fk_rounds_seasons_season_id");
 
                     b.Navigation("Competition");
+
+                    b.Navigation("HostedGroup");
 
                     b.Navigation("Season");
                 });
@@ -1859,6 +2049,8 @@ namespace MathComps.Infrastructure.Migrations
 
                     b.Navigation("Feedback");
 
+                    b.Navigation("ProblemTarget");
+
                     b.Navigation("Reports");
 
                     b.Navigation("Turns");
@@ -1884,6 +2076,11 @@ namespace MathComps.Infrastructure.Migrations
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HandoutEnvironment", b =>
                 {
                     b.Navigation("Defenses");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HostedGroup", b =>
+                {
+                    b.Navigation("Rounds");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.NewsArticle", b =>

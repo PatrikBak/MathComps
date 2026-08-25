@@ -12,21 +12,25 @@ import { SECOND_MS } from '@/components/shared/utils/time-units'
 import { PRACTICE_INTRO_DISMISSED_STORAGE_KEY } from '@/constants/local-storage-constants'
 import { useNow } from '@/hooks/use-now'
 import type { Locale } from '@/i18n/i18n'
+import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
-import { useCompetitionsListHref } from '../hooks/use-competition-area-href'
 import { useCompetitionProblems } from '../hooks/use-competition-problems'
 import { useEntryReader } from '../hooks/use-entry-reader'
 import { useFinishHostedCompetition } from '../hooks/use-finish-hosted-competition'
 import { useHostedCompetitionsView } from '../hooks/use-hosted-competitions-view'
-import { hasAccount } from '../model/entry-reader'
 import type { AreaEntry } from '../model/hosted-competition-state'
 import { entryEndsAt, isPracticeGroup, wasHandedInEarly } from '../model/hosted-competition-state'
 import { CategoryBadge } from './CategoryBadge'
 import { CompetitionProblemPanel } from './CompetitionProblemPanel'
 import { CompetitionStandingStrip } from './CompetitionStandingStrip'
 import { RulesList } from './RulesList'
+
+/**
+ * The way back to the list. Module-level so every render hands out the same object.
+ */
+const LIST_HREF = { pathname: ROUTES.COMPETITIONS }
 
 /**
  * Props for the {@link CompetitionArea} component.
@@ -52,11 +56,8 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
   // The localized router, for sending a reader with no entry back where they came from
   const router = useRouter()
 
-  // The way back to the list, carrying whatever the address carries
-  const listHref = useCompetitionsListHref()
-
-  // Who is reading, and what the program knows about them
-  const { reader, readerKey, isReaderKnown } = useEntryReader()
+  // Whose answers these are, and whether that is settled yet
+  const { readerKey, isReaderKnown } = useEntryReader()
 
   // Whether the reader has the rules open
   const [areRulesOpen, { open: openRules, close: closeRules }] = useDisclosure(false)
@@ -70,15 +71,11 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
     closeFinish()
 
     // And out to the list, the way entering came in from it
-    router.push(listHref)
+    router.push(LIST_HREF)
   })
 
   // Every competition the student can see, which the board has usually already fetched
-  const { view, uiState: viewState } = useHostedCompetitionsView(
-    hasAccount(reader),
-    readerKey,
-    isReaderKnown
-  )
+  const { view, uiState: viewState } = useHostedCompetitionsView(readerKey, isReaderKnown)
 
   // The group holding this competition, and the competition itself
   const competitionInGroup = view?.groups
@@ -114,13 +111,12 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
     defaultValue: false,
   })
 
-  // A reader with no entry has nothing to read here, so the list is where they go instead. The scenario
-  // rides along, or the mocked reader arrives at the list as somebody else entirely
+  // A reader with no entry has nothing to read here, so the list is where they go instead
   useEffect(() => {
     if (view !== undefined && !isEntitled) {
-      router.replace(listHref)
+      router.replace(LIST_HREF)
     }
-  }, [view, isEntitled, router, listHref])
+  }, [view, isEntitled, router])
 
   // Still working out what there is to show, or on the way out
   if (competitionInGroup === undefined || entry === null) {
@@ -172,7 +168,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
           wasHandedIn={wasHandedIn}
           onFinish={hasEnded || entry.kind !== 'sat' ? null : openFinish}
           onOpenRules={openRules}
-          listHref={listHref}
+          listHref={LIST_HREF}
         />
       </div>
 

@@ -12,18 +12,18 @@ using Microsoft.Extensions.Options;
 namespace MathComps.Infrastructure.Services.Defense.Content;
 
 /// <summary>
-/// An <see cref="IDefenseContentResolver"/> reading the blobs the handout build publishes to object storage, one per
-/// handout per language. A handout's blob is cached for its configured window, so an edited problem reaches new
-/// defenses without a deploy while a run of defenses against one handout costs a single read.
+/// An <see cref="IHandoutDefenseContentResolver"/> reading the blobs the handout build publishes to object
+/// storage, one per handout per language. A handout's blob is cached for its configured window, so an edited
+/// problem reaches new defenses without a deploy while a run of defenses against one handout costs a single read.
 /// </summary>
 /// <param name="objectReader">Reads the published blobs.</param>
 /// <param name="cache">The in-memory cache.</param>
-/// <param name="options">How long a cached handout is served for.</param>
+/// <param name="options">The defense content settings.</param>
 /// <param name="logger">Records a blob that cannot be understood.</param>
-public sealed class StoredDefenseContentResolver(
+public sealed class HandoutDefenseContentResolver(
     IObjectReader objectReader, IMemoryCache cache, IOptions<DefenseContentOptions> options,
-    ILogger<StoredDefenseContentResolver> logger)
-    : IDefenseContentResolver
+    ILogger<HandoutDefenseContentResolver> logger)
+    : IHandoutDefenseContentResolver
 {
     /// <summary>
     /// How long a cached handout is served before the next lookup reads it again.

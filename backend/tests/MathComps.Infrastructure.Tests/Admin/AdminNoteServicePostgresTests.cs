@@ -48,7 +48,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
     private static readonly Guid _otherSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a2");
 
     /// <summary>
-    /// A conversation with no problem behind it, which nothing can open.
+    /// A conversation with no environment behind it, which nothing can open.
     /// </summary>
     private static readonly Guid _untargetedSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a3");
 
@@ -86,12 +86,12 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
             new User { Id = _reviewerId, ExternalId = "ext-reviewer", Username = "Reviewer" },
             new User { Id = _otherReviewerId, ExternalId = "ext-reviewer-2", Username = "Other reviewer" });
 
-        // The handout and problem the conversations were held against, which the feed reads back.
+        // The handout and environment the conversations were held against, which the feed reads back.
         var handoutId = Guid.CreateVersion7();
-        var problemId = Guid.CreateVersion7();
+        var environmentId = Guid.CreateVersion7();
         context.Handouts.Add(new Handout { Id = handoutId, ContentId = "handout-one" });
         context.HandoutEnvironments.Add(
-            new HandoutEnvironment { Id = problemId, HandoutId = handoutId, ContentId = "problem-one" });
+            new HandoutEnvironment { Id = environmentId, HandoutId = handoutId, ContentId = "problem-one" });
 
         // Three conversations, the first shaped like a real one: opener, the student, the reply.
         context.DefenseSessions.AddRange(
@@ -107,11 +107,19 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         context.DefenseTurns.Add(
             NewTurn(_otherSessionReplyId, _otherSessionId, TranscriptRole.Examiner, "elsewhere", 0));
 
-        // What the first two were held against, so the feed has a problem to name. The third is left standing
+        // What the first two were held against, so the feed has an environment to name. The third is left standing
         // against nothing, which is the state the feed reads as unreachable.
         context.HandoutEnvironmentDefenses.AddRange(
-            new HandoutEnvironmentDefense { DefenseSessionId = _sessionId, HandoutEnvironmentId = problemId },
-            new HandoutEnvironmentDefense { DefenseSessionId = _otherSessionId, HandoutEnvironmentId = problemId });
+            new HandoutEnvironmentDefense
+            {
+                DefenseSessionId = _sessionId,
+                HandoutEnvironmentId = environmentId,
+            },
+            new HandoutEnvironmentDefense
+            {
+                DefenseSessionId = _otherSessionId,
+                HandoutEnvironmentId = environmentId,
+            });
 
         // Commit the seed.
         await context.SaveChangesAsync();
@@ -204,7 +212,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// The feed carries enough of where a note was written to be read without opening the conversation: who held
-    /// it, which problem it was about, and where in it the reply sits.
+    /// it, which environment it was about, and where in it the reply sits.
     /// </summary>
     [Fact]
     public Task The_feed_carries_where_each_note_was_written() => RunTestAsync(async service =>
@@ -234,7 +242,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         // Beside the reviewer whose reading each one is, who is somebody else entirely
         Assert.Equal([_reviewerId], feed.Items.Select(item => item.Note.Author.Id).Distinct());
 
-        // As well as which problem it was about
+        // As well as which environment it was about
         Assert.Equal(["problem-one"], feed.Items.Select(item => item.Target.EnvironmentId).Distinct());
     });
 
@@ -468,13 +476,13 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A conversation that has lost its problem stays out of the feed whole, count included: opening one takes a
-    /// problem, so a line about it would lead nowhere.
+    /// A conversation that has lost its environment stays out of the feed whole, count included: opening one takes
+    /// an environment, so a line about it would lead nowhere.
     /// </summary>
     [Fact]
-    public Task The_feed_leaves_out_a_conversation_with_no_problem_behind_it() => RunTestAsync(async service =>
+    public Task The_feed_leaves_out_a_conversation_with_no_environment_behind_it() => RunTestAsync(async service =>
     {
-        // A note about the conversation that still has its problem
+        // A note about the conversation that still has its environment
         await service.CreateAsync(_reviewerId, _sessionId, null, "went in circles", null);
 
         // And one about the conversation that has none
@@ -524,7 +532,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
             MsOptions.Create(new PaginationOptions { DefaultPageSize = 2 })));
 
     /// <summary>
-    /// Builds one seeded conversation.
+    /// Builds one seeded conversation, held against a handout environment.
     /// </summary>
     /// <param name="sessionId">The conversation's identifier.</param>
     /// <returns>The conversation, ready to add.</returns>
@@ -532,6 +540,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
     {
         Id = sessionId,
         UserId = _studentId,
+        TargetKind = DefenseTargetKind.Handout,
         ProblemStatement = "a problem",
         ProblemReference = "a reference",
         ExaminerConfig = "{}",

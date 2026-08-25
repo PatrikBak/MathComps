@@ -11,7 +11,6 @@ describe('resolveComposerState', () => {
     isSignedIn: true,
     isConsentLoading: false,
     hasConsented: true,
-    isGateWaived: false,
     isThinking: false,
     repliesLeft: 12,
   }
@@ -48,21 +47,6 @@ describe('resolveComposerState', () => {
     expect(
       resolveComposerState({ ...READY, isSignedIn: false, hasConsented: false, repliesLeft: 0 })
     ).toEqual({ kind: 'signInRequired' })
-  })
-
-  it('opens for a waived reader who has neither an account nor an acknowledgement', () => {
-    // What the mocked student is let through on, and the reason the waiver is its own answer rather than a
-    // signed-in reader in disguise
-    expect(
-      resolveComposerState({
-        ...READY,
-        isGateWaived: true,
-        isAuthSettled: false,
-        isSignedIn: false,
-        isConsentLoading: true,
-        hasConsented: false,
-      })
-    ).toEqual({ kind: 'open', repliesLeft: 12 })
   })
 
   it('closes a conversation that has spent every turn it was given', () => {

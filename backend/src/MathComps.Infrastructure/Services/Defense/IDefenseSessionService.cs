@@ -4,8 +4,8 @@ namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
 /// Runs and persists a user's AI-examiner defense conversations: opening a session, continuing it turn by turn (each
-/// turn runs the examiner engine and records its spend), listing a user's sessions for one problem or across every
-/// problem, rewinding one to an earlier point, and deleting one.
+/// turn runs the examiner engine and records its spend), listing a user's sessions against one target or all of
+/// their handout sessions, rewinding one to an earlier point, and deleting one.
 /// Guardrails (input sizes, turn count, per-user spend) are enforced before any model call.
 /// </summary>
 public interface IDefenseSessionService
@@ -15,7 +15,7 @@ public interface IDefenseSessionService
     /// and returns the full three-turn conversation.
     /// </summary>
     /// <param name="userId">The user opening the session.</param>
-    /// <param name="start">The problem being defended and the student's first message.</param>
+    /// <param name="start">What is being defended and the student's first message.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The created session with its opener, the student turn, and the examiner's reply.</returns>
     Task<DefenseSessionDto> StartAsync(
@@ -33,28 +33,30 @@ public interface IDefenseSessionService
         Guid userId, Guid sessionId, string content, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Lists a user's sessions against one handout environment, most recently active first, each with its turns,
-    /// alongside the caps a further turn against it has to stay within.
+    /// Lists a user's sessions against one target, most recently active first, each with its turns, alongside the
+    /// caps a further turn against it has to stay within.
     /// </summary>
     /// <param name="userId">The user whose sessions to list.</param>
-    /// <param name="target">The handout environment to filter to.</param>
+    /// <param name="target">What the sessions defend.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The user's sessions against that environment, and the caps they are held to.</returns>
+    /// <returns>The user's sessions against that target, and the caps they are held to.</returns>
     Task<DefenseSessionListDto> ListAsync(
-        Guid userId, HandoutEnvironmentTarget target, CancellationToken cancellationToken = default);
+        Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Lists all of a user's sessions across every problem, most recently active first, each summarized to its
-    /// problem, statement, last activity, and most recent student message.
+    /// Lists all of a user's handout sessions, most recently active first, each summarized to its problem,
+    /// statement, last activity, and most recent student message. Competition conversations are left out: they
+    /// are read inside the competition area, whose problems may still be embargoed.
     /// </summary>
     /// <param name="userId">The user whose sessions to list.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The user's sessions across every problem, most recently active first.</returns>
+    /// <returns>The user's handout sessions, most recently active first.</returns>
     Task<IReadOnlyList<DefenseSessionListItemDto>> ListAllAsync(
         Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes a session and its turns outright. The session must belong to the user.
+    /// Deletes a session and its turns outright. The session must belong to the user, and must not be a
+    /// competition conversation.
     /// </summary>
     /// <param name="userId">The user the session must belong to.</param>
     /// <param name="sessionId">The session to delete.</param>
@@ -64,7 +66,7 @@ public interface IDefenseSessionService
     /// <summary>
     /// Rewinds a session to a chosen point, deleting every turn after it so the conversation can be taken
     /// from there again. The kept point must be an examiner turn, so the result awaits the student's next
-    /// message. The session must belong to the user.
+    /// message. The session must belong to the user, and must not be a competition conversation.
     /// </summary>
     /// <param name="userId">The user the session must belong to.</param>
     /// <param name="sessionId">The session to rewind.</param>
@@ -80,9 +82,10 @@ public interface IDefenseSessionService
 public sealed class DefenseSessionNotFoundException() : Exception("Defense session not found");
 
 /// <summary>
-/// Thrown when a start names a handout environment the site has no content for, in the language asked for.
+/// Thrown when a start names a target the site has no content for, in the language asked for. Covers either
+/// arm: a handout environment nothing is published under, and a problem with no statement in that language.
 /// </summary>
-public sealed class DefenseEnvironmentNotFoundException() : Exception("Statement not found");
+public sealed class DefenseContentNotFoundException() : Exception("Statement not found");
 
 /// <summary>
 /// Thrown when a submitted message or problem text exceeds its configured length cap.
@@ -103,6 +106,13 @@ public sealed class DefenseTurnLimitException() : Exception("This defense has re
 /// Thrown when the user has reached their configured daily spend ceiling.
 /// </summary>
 public sealed class DefenseSpendLimitException() : Exception("You have reached your usage limit — try again later");
+
+/// <summary>
+/// Thrown when a competition conversation is rewound or deleted. What a student argued under their entry
+/// outlives their opinion of it.
+/// </summary>
+public sealed class DefenseCompetitionSessionImmutableException()
+    : Exception("A competition conversation cannot be changed");
 
 /// <summary>
 /// Thrown when a rewind names no cut point at all, or names one that is out of range or is not an examiner

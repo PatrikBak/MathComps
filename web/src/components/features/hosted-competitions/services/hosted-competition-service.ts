@@ -1,0 +1,103 @@
+import type { ApiCaller } from '@/hooks/use-api'
+import type { ApiResult } from '@/types/api'
+
+import type {
+  EntryReadiness,
+  HostedCompetitionEntry,
+  HostedCompetitionProblem,
+  HostedCompetitionsView,
+  SpentEntry,
+} from '../model/hosted-competition-types'
+import {
+  getCompetitionProblemsUrl,
+  getEnterCompetitionUrl,
+  getEntryReadinessUrl,
+  getFinishCompetitionUrl,
+  getForfeitCompetitionUrl,
+  getHostedCompetitionsViewUrl,
+} from './hosted-competition-api-urls'
+
+/**
+ * The backend for the competitions the site hosts itself: authenticated calls to the .NET API.
+ */
+
+/**
+ * Reads every group a student can see, with whatever entry they hold in each competition.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @returns The competitions view.
+ */
+export function fetchHostedCompetitionsView(
+  apiCall: ApiCaller
+): Promise<ApiResult<HostedCompetitionsView>> {
+  return apiCall<HostedCompetitionsView>(() => getHostedCompetitionsViewUrl())
+}
+
+/**
+ * Reads whether the student has what an entry needs of them.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @returns The student's readiness.
+ */
+export function fetchEntryReadiness(apiCall: ApiCaller): Promise<ApiResult<EntryReadiness>> {
+  return apiCall<EntryReadiness>(() => getEntryReadinessUrl())
+}
+
+/**
+ * Takes the student's entry into one competition: the clock starts and the problems it bought come back
+ * with it.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param competitionId - Which competition is being entered.
+ * @returns The entry that was created and the set it opens.
+ */
+export function enterHostedCompetition(
+  apiCall: ApiCaller,
+  competitionId: string
+): Promise<ApiResult<SpentEntry>> {
+  return apiCall<SpentEntry>(() => getEnterCompetitionUrl(competitionId), { method: 'POST' })
+}
+
+/**
+ * Gives the student's entry up: the problems open to them and no clock is ever started.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param competitionId - Which competition's entry is being given up.
+ * @returns The entry that was created and the set it opens.
+ */
+export function forfeitHostedCompetition(
+  apiCall: ApiCaller,
+  competitionId: string
+): Promise<ApiResult<SpentEntry>> {
+  return apiCall<SpentEntry>(() => getForfeitCompetitionUrl(competitionId), { method: 'POST' })
+}
+
+/**
+ * Closes a running entry where the student says rather than where its clock does.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param competitionId - Which competition's entry is being handed in.
+ * @returns The entry as it now stands.
+ */
+export function finishHostedCompetition(
+  apiCall: ApiCaller,
+  competitionId: string
+): Promise<ApiResult<HostedCompetitionEntry>> {
+  return apiCall<HostedCompetitionEntry>(() => getFinishCompetitionUrl(competitionId), {
+    method: 'POST',
+  })
+}
+
+/**
+ * Reads one competition's problem set, with whatever the student has said about each.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param competitionId - Which competition's problems to read.
+ * @returns The problems, in the order the competition sets them.
+ */
+export function fetchCompetitionProblems(
+  apiCall: ApiCaller,
+  competitionId: string
+): Promise<ApiResult<HostedCompetitionProblem[]>> {
+  return apiCall<HostedCompetitionProblem[]>(() => getCompetitionProblemsUrl(competitionId))
+}

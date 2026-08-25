@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { DefenseTarget } from '../defense-target'
-import { defenseDraftStorageKey, handoutTargetOf } from '../defense-target'
+import { defenseDraftStorageKey, handoutTargetOf, toWireTarget } from '../defense-target'
 
 /** A defense held against a problem set by a competition. */
 const COMPETITION: DefenseTarget = {
@@ -17,9 +17,28 @@ const HANDOUT: DefenseTarget = {
   environment: { handoutContentId: 'inverses-mod-p', environmentId: 'ab12cd34' },
 }
 
+describe('toWireTarget', () => {
+  it('flattens a handout environment onto the two ids the API names it by', () => {
+    // The server reads the discriminator and the two ids off one object, not off a nested environment
+    expect(toWireTarget(HANDOUT)).toEqual({
+      kind: 'handout',
+      handoutContentId: 'inverses-mod-p',
+      environmentId: 'ab12cd34',
+    })
+  })
+
+  it('sends a competition problem as its own id under the problem kind', () => {
+    // The wire knows the archive problem and nothing about the competition it was read inside
+    expect(toWireTarget(COMPETITION)).toEqual({
+      kind: 'problem',
+      problemId: 'open-intermediate-p2',
+    })
+  })
+})
+
 describe('handoutTargetOf', () => {
   it('hands back the environment a handout defense is held against', () => {
-    // This is what goes on the wire when a session is started, so the arms deciding it are the request
+    // A handout defense names an environment, which is what the reader's link to the problem resolves from
     expect(handoutTargetOf(HANDOUT)).toEqual({
       handoutContentId: 'inverses-mod-p',
       environmentId: 'ab12cd34',

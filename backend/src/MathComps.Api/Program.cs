@@ -138,6 +138,9 @@ builder.Services.AddStorage();
 builder.Services.AddLlmChat(builder.Configuration);
 builder.Services.AddDefenseServices(builder.Configuration);
 
+// The competitions the site hosts itself
+builder.Services.AddCompetitionServices();
+
 // The admin-only review of defense conversations
 builder.Services.AddAdminServices();
 

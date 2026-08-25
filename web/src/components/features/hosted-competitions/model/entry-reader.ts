@@ -3,17 +3,15 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import type { EntryReadiness } from './hosted-competition-types'
 
 /**
- * Whether a student has given everything a result of theirs would be published under.
+ * Whether a student has given everything a result of theirs would need.
  *
  * @param readiness - What the student has given of themselves so far.
  *
  * @returns Whether anything is still missing.
  */
 function isProfileComplete(readiness: EntryReadiness): boolean {
-  // Three things the results cannot name a student without
-  return (
-    readiness.nickname !== null && readiness.graduationYear !== null && readiness.hasVerifiedEmail
-  )
+  // A name to publish the result under, and a way to reach the student behind it
+  return readiness.hasUsername && readiness.hasAnsweredGraduation && readiness.hasEmail
 }
 
 /**
@@ -65,19 +63,6 @@ type UnreadReader = {
 }
 
 /**
- * Whether the reader has an account, which is what an entry hangs off. A reader nobody has settled yet
- * counts as not having one.
- *
- * @param reader - Who is reading.
- *
- * @returns Whether there is an account.
- */
-export function hasAccount(reader: EntryReader): boolean {
-  // An account either way, whether or not anything could be read off it
-  return reader.kind === 'signedIn' || reader.kind === 'unread'
-}
-
-/**
  * What stands between this reader and any entry, named once for everything that has to say it.
  *
  * A profile nobody could read counts as one still owed.
@@ -100,7 +85,7 @@ export function entryBlocker(reader: EntryReader): EntryBlocker | null | undefin
     case 'unread':
       return 'profile'
 
-    // An account, so it comes down to the fields a published result names a student by
+    // An account, so it comes down to what the student has given of themselves
     case 'signedIn':
       return isProfileComplete(reader.readiness) ? null : 'profile'
 

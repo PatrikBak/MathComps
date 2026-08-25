@@ -50,6 +50,16 @@ public class Round
     public DateTimeOffset? VisibleSince { get; set; }
 
     /// <summary>
+    /// Foreign key to the hosted group this round runs in, or null for a round the site did not host.
+    /// </summary>
+    public Guid? HostedGroupId { get; set; }
+
+    /// <summary>
+    /// Navigation to the hosted group, null on a round the site did not host.
+    /// </summary>
+    public HostedGroup? HostedGroup { get; set; }
+
+    /// <summary>
     /// Problems that belong to this specific round.
     /// </summary>
     public ICollection<Problem> Problems { get; } = [];

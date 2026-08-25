@@ -1,9 +1,9 @@
-import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
-import { handoutTargetOf } from '../model/defense-target'
+import type { DefenseTarget } from '../model/defense-target'
+import { toWireTarget } from '../model/defense-target'
 import type {
   DefenseOutcome,
   DefenseReportCategory,
@@ -18,29 +18,42 @@ import {
   getDefenseSessionsUrl,
   getDeleteDefenseSessionUrl,
   getMyDefenseSessionsUrl,
+  getProblemDefenseSessionsUrl,
   getReportDefenseTurnUrl,
   getRewindDefenseUrl,
   getStartDefenseUrl,
 } from './defense-api-urls'
 
 /**
- * The backend for defense conversations: authenticated calls to the .NET API. Each function takes an
- * {@link ApiCaller} and returns an {@link ApiResult}; the consumer unwraps it.
+ * The backend for defense conversations: authenticated calls to the .NET API.
  */
 
 /**
- * Lists a handout environment's defense sessions, most recently active first, with the caps a defense
- * against it is held to.
+ * Lists a target's defense sessions, most recently active first, with the caps a defense against it is
+ * held to.
  *
  * @param apiCall - The authenticated API caller.
- * @param target - The handout environment whose sessions these are.
- * @returns The sessions held against the given environment, and the caps they are held to.
+ * @param target - What the sessions are held against.
+ * @returns The sessions held against the given target, and the caps they are held to.
  */
 export function listSessions(
   apiCall: ApiCaller,
-  target: HandoutEnvironmentTarget
+  target: DefenseTarget
 ): Promise<ApiResult<DefenseSessionList>> {
-  return apiCall<DefenseSessionList>(() => getDefenseSessionsUrl(target))
+  // Each arm has its own route, since one names a problem and the other a handout environment
+  return apiCall<DefenseSessionList>(() => {
+    switch (target.kind) {
+      // A competition problem is an archive problem, so its own id locates it
+      case 'competition':
+        return getProblemDefenseSessionsUrl(target.problemId)
+      // A handout environment takes the two content ids that locate it
+      case 'handout':
+        return getDefenseSessionsUrl(target.environment)
+      // Every target is handled above
+      default:
+        return assertNever(target)
+    }
+  })
 }
 
 /**
@@ -67,14 +80,13 @@ export function submitTurn(
   request: DefenseTurnRequest
 ): Promise<ApiResult<DefenseSession>> {
   switch (request.kind) {
-    // Open a new session against a problem, naming it rather than describing it. This endpoint knows only
-    // handout environments, so the environment is what goes on the wire and the discriminant stays here
+    // Open a new session against a problem
     case 'start':
       return apiCall<DefenseSession>(() => getStartDefenseUrl(), {
         method: 'POST',
         signal: request.signal,
         body: JSON.stringify({
-          target: handoutTargetOf(request.target),
+          target: toWireTarget(request.target),
           content: request.content,
         }),
       })

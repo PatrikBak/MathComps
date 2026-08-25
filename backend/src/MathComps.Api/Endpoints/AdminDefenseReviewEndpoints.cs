@@ -29,8 +29,8 @@ public static class AdminDefenseReviewEndpoints
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapAdminDefenseReviewEndpoints(this IEndpointRouteBuilder app)
     {
-        // Read a page of the queue. The filters go in a body rather than a query string because there are nine
-        // of them.
+        // Read a page of the queue. The filters go in a body rather than a query string, there being too many
+        // of them to spell out in a URL.
         app.MapPost($"{ReviewPath}/sessions/filter", async (
             AdminDefenseQueueRequest request,
             HttpContext context,

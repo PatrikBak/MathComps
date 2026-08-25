@@ -62,10 +62,10 @@ public enum ApiErrorCode
     DefenseSessionNotFound,
 
     /// <summary>
-    /// The handout environment a defense was started against has no content on the site, in the language asked
-    /// for. Covers every defendable kind, not just problems — a theorem or exercise resolves the same way.
+    /// What a defense was started against has no content on the site, in the language asked for. Covers every
+    /// defendable kind: a handout's theorem or exercise, and an archive problem.
     /// </summary>
-    DefenseEnvironmentNotFound,
+    DefenseContentNotFound,
 
     /// <summary>
     /// A defense message or problem text exceeded its length cap.
@@ -107,6 +107,47 @@ public enum ApiErrorCode
     /// A feedback comment is over its length cap.
     /// </summary>
     DefenseFeedbackCommentTooLong,
+
+    /// <summary>
+    /// A rewind or delete was asked of a competition conversation, which cannot be changed.
+    /// </summary>
+    DefenseCompetitionSessionImmutable,
+
+    /// <summary>
+    /// No hosted competition exists under the id.
+    /// </summary>
+    HostedCompetitionNotFound,
+
+    /// <summary>
+    /// The problem is not one a hosted competition sets.
+    /// </summary>
+    HostedProblemNotFound,
+
+    /// <summary>
+    /// The competition's problems were reached for without an entry having been spent into it.
+    /// </summary>
+    HostedEntryRequired,
+
+    /// <summary>
+    /// An entry was taken into a group that is not currently taking them.
+    /// </summary>
+    HostedGroupNotOpen,
+
+    /// <summary>
+    /// A second entry was taken into a competition that allows only one.
+    /// </summary>
+    HostedEntryAlreadySpent,
+
+    /// <summary>
+    /// An entry was handed in that is not one the student is currently sitting.
+    /// </summary>
+    HostedEntryNotRunning,
+
+    /// <summary>
+    /// An entry was taken by a student whose account is missing a username, an email address, or an answer
+    /// about graduating high school.
+    /// </summary>
+    HostedEntryProfileIncomplete,
 
     /// <summary>
     /// A review note the contract cannot take: no text at all, more text than a note may carry, or a category
