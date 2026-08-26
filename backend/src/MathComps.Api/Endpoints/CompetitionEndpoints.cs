@@ -61,6 +61,24 @@ public static class CompetitionEndpoints
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
+        // The caller asking not to be told about their unfinished profile again
+        app.MapPost($"{CompetitionsPath}/readiness/dismissal", async (
+            HttpContext context,
+            IUserManager userManager,
+            IHostedCompetitionService competitionService) =>
+        {
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Take their word for it
+            await competitionService.DismissProfilePromptAsync(userId, context.RequestAborted);
+
+            // No reason to return anything
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
         // Take the entry: the clock starts, and the problems it bought come back with it
         app.MapPost($"{CompetitionsPath}/{{roundId:guid}}/entry", async (
             Guid roundId,

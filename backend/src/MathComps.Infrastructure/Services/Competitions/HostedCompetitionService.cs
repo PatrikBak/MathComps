@@ -109,9 +109,25 @@ public sealed class HostedCompetitionService(
                 user.Username != null,
                 user.GraduationYear != null || user.HasLeftHighSchool,
                 user.Email != null,
-                user.RulesAcceptedAt != null))
+                user.RulesAcceptedAt != null,
+                user.ProfilePromptDismissedAt != null))
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new InvalidOperationException($"User {userId} was resolved and then vanished.");
+    }
+
+    /// <inheritdoc/>
+    public async Task DismissProfilePromptAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Stamp the moment, filtering on it still being unset so hiding it a second time leaves the first one
+        // standing rather than rewriting when they asked
+        await dbContext.Users
+            .Where(user => user.Id == userId && user.ProfilePromptDismissedAt == null)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(user => user.ProfilePromptDismissedAt, DateTimeOffset.UtcNow),
+                cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -212,8 +228,10 @@ public sealed class HostedCompetitionService(
         if (entry is not null && !group.AllowsReentry)
             throw new HostedEntryAlreadySpentException();
 
-        // What an entry asks of the student's account, settled before anything is written.
-        await EnsureReadyToEnterAsync(dbContext, userId, cancellationToken);
+        // What an entry asks of the student's account, settled before anything is written. A group with no
+        // closing instant is never graded, so it has no result to name a student in and asks for no fields.
+        if (group.ClosesAt is not null)
+            await EnsureReadyToEnterAsync(dbContext, userId, cancellationToken);
 
         // The row the student's run is recorded in, which is the one they already hold when they are taking the
         // group again.

@@ -10,6 +10,7 @@ import type {
 } from '../model/hosted-competition-types'
 import {
   getCompetitionProblemsUrl,
+  getDismissProfilePromptUrl,
   getEnterCompetitionUrl,
   getEntryReadinessUrl,
   getFinishCompetitionUrl,
@@ -41,6 +42,16 @@ export function fetchHostedCompetitionsView(
  */
 export function fetchEntryReadiness(apiCall: ApiCaller): Promise<ApiResult<EntryReadiness>> {
   return apiCall<EntryReadiness>(() => getEntryReadinessUrl())
+}
+
+/**
+ * Takes the student's word that they do not want their unfinished profile named again.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @returns Nothing, once the answer is recorded.
+ */
+export function dismissProfilePrompt(apiCall: ApiCaller): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getDismissProfilePromptUrl(), { method: 'POST' })
 }
 
 /**

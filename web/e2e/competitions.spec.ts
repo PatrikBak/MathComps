@@ -20,6 +20,9 @@ test.describe('the competitions list', () => {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
+    // And no way to be rid of it: there is no account to keep that answer against
+    await expect(page.getByRole('button', { name: areaCopy.readiness.dismiss })).toHaveCount(0)
+
     // Press enter, whose label reads the same in every state
     await page.getByRole('button', { name: areaCopy.enter, exact: true }).first().click()
 

@@ -26,6 +26,16 @@ export function getEntryReadinessUrl(): string {
 }
 
 /**
+ * Builds the URL for asking the page to stop naming the student's unfinished profile.
+ *
+ * @returns The dismissal URL.
+ */
+export function getDismissProfilePromptUrl(): string {
+  // The readiness dismissal endpoint
+  return buildApiUrl(`${COMPETITIONS_PATH}/readiness/dismissal`)
+}
+
+/**
  * Builds the URL for taking an entry into one competition.
  *
  * @param competitionId - Which competition is being entered.

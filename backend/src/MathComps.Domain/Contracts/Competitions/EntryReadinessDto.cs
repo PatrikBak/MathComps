@@ -10,8 +10,11 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// Whether the student has said where they are in school. Having left answers it as much as a year does.</param>
 /// <param name="HasEmail">Whether the student has an email address on file.</param>
 /// <param name="HasAcceptedRules">Whether the student has ever accepted the competition rules.</param>
+/// <param name="HasHiddenProfilePrompt">
+/// Whether the student has asked to stop being told that their profile is unfinished.</param>
 public record EntryReadinessDto(
     bool HasUsername,
     bool HasAnsweredGraduation,
     bool HasEmail,
-    bool HasAcceptedRules);
+    bool HasAcceptedRules,
+    bool HasHiddenProfilePrompt);

@@ -29,6 +29,15 @@ public interface IHostedCompetitionService
     Task<EntryReadinessDto> GetReadinessAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Takes a student's word that they do not want to be told their profile is unfinished again. Saying it a
+    /// second time leaves the first answer standing.
+    /// </summary>
+    /// <param name="userId">The student asking.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>A task that completes once the answer is recorded.</returns>
+    Task DismissProfilePromptAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Takes a student's entry into one competition: their clock starts and, on a first entry ever, the rules are
     /// accepted along with it.
     /// </summary>

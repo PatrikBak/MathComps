@@ -325,7 +325,9 @@
   },
   "competitions": {
     "areaClockSpent": "Your time is up. You can keep solving the problems and talking to Mathilda about them, but new messages no longer count towards your result.",
+    "areaClockSpentPractice": "Your time is up. You can keep solving the problems and talking to Mathilda about them.",
     "areaFinished": "You have finished this competition. You can keep solving the problems and talking to Mathilda about them, but new messages no longer count towards your result.",
+    "areaFinishedPractice": "You have finished the practice competition. You can keep solving the problems and talking to Mathilda about them.",
     "areaForfeited": "You did not take part in this competition. You can still try the problems outside it.",
     "areaProblemsFailed": "The problems could not be loaded.",
     "backToCompetitions": "Back to competitions",
@@ -397,8 +399,11 @@
     "problemHeading": "Problem {position}",
     "problems": "Problems",
     "readiness": {
+      "dismiss": "Hide",
+      "dismissAuthReason": "hiding this message",
+      "dismissError": "The message could not be hidden.",
       "profileLink": "Complete profile",
-      "profileNeeded": "<link>Complete your profile</link> if you want to compete.",
+      "profileNeeded": "Before entering a real competition you need to <link>complete your profile</link>.",
       "signedOut": "You can compete once you <link>sign in</link>."
     },
     "remainingDays": "{days} d {hours} h",
