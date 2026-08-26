@@ -325,7 +325,9 @@
   },
   "competitions": {
     "areaClockSpent": "Tvoj čas vypršal. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",
+    "areaClockSpentPractice": "Tvoj čas vypršal. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať.",
     "areaFinished": "Súťaž máš ukončenú. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",
+    "areaFinishedPractice": "Skúšobnú súťaž máš ukončenú. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať.",
     "areaForfeited": "Súťaže si sa nezúčastnil. Úlohy si môžeš skúsiť nesúťažne.",
     "areaProblemsFailed": "Úlohy sa nepodarilo načítať.",
     "backToCompetitions": "Späť na súťaže",
@@ -397,8 +399,11 @@
     "problemHeading": "Úloha {position}",
     "problems": "Úlohy",
     "readiness": {
+      "dismiss": "Skryť",
+      "dismissAuthReason": "skrytie tejto správy",
+      "dismissError": "Správu sa nepodarilo skryť.",
       "profileLink": "Doplniť profil",
-      "profileNeeded": "Ak chceš súťažiť, <link>doplň si profil</link>.",
+      "profileNeeded": "Pred vstupom do ostrých súťaží je nutné <link>vyplniť údaje v profile</link>.",
       "signedOut": "Súťažiť môžeš po <link>prihlásení</link>."
     },
     "remainingDays": "{days} d {hours} h",

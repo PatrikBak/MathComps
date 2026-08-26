@@ -7,11 +7,12 @@ import { PageHeader } from '@/components/shared/components/PageHeader'
 import { useNow } from '@/hooks/use-now'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
+import { useDismissProfilePrompt } from '../hooks/use-dismiss-profile-prompt'
 import { useEntryGuard } from '../hooks/use-entry-guard'
 import { useEntryReader } from '../hooks/use-entry-reader'
 import { useHostedCompetitionEntryDialog } from '../hooks/use-hosted-competition-entry-dialog'
 import { useHostedCompetitionsView } from '../hooks/use-hosted-competitions-view'
-import { entryBlocker } from '../model/entry-reader'
+import { headerBlocker } from '../model/entry-reader'
 import { orderForReading } from '../model/hosted-competition-state'
 import { CategoryLegend } from './CategoryLegend'
 import { EntryGate } from './EntryGate'
@@ -42,9 +43,6 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
   // Who is reading, and what the program knows about them
   const { reader, readerKey, isReaderKnown } = useEntryReader()
 
-  // What stands between them and any entry
-  const blocker = entryBlocker(reader)
-
   // Every competition the student can see
   const { view, uiState } = useHostedCompetitionsView(readerKey, isReaderKnown)
 
@@ -57,9 +55,9 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
   // Every group, most actionable first
   const groups = view === undefined ? [] : orderForReading(view.groups, now)
 
-  // What a press turns into, given what the reader still owes
+  // What a press turns into, given what the group they pressed asks of them
   const guardEntry = useEntryGuard({
-    blocker,
+    reader,
     groups,
     openDialog: dialog.open,
     entryIntentId,
@@ -68,7 +66,13 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
 
   // The list waits on who is reading as well as on its own fetch: drawn any earlier, a signed-in student
   // is offered the sign-in press
-  const listState: QueryUiState = blocker === undefined ? { kind: 'loading' } : uiState
+  const listState: QueryUiState = reader.kind === 'unknown' ? { kind: 'loading' } : uiState
+
+  // Hiding the profile sentence for good
+  const { dismissProfilePrompt } = useDismissProfilePrompt(readerKey)
+
+  // The step the header names, if there is one
+  const gateBlocker = headerBlocker(reader, groups)
 
   return (
     // Hyphenation off: the global setting is for article prose, and the words here are names and labels
@@ -90,7 +94,12 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
         </div>
 
         {/* What the reader still owes, said before they reach for a button */}
-        {blocker !== undefined && blocker !== null && <EntryGate blocker={blocker} />}
+        {gateBlocker !== null && (
+          <EntryGate
+            blocker={gateBlocker}
+            onDismiss={gateBlocker === 'profile' ? dismissProfilePrompt : undefined}
+          />
+        )}
       </PageHeader>
 
       {/* The list, once there is one to draw */}

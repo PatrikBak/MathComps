@@ -501,6 +501,7 @@ function buildReadiness(state: HostedState): EntryReadiness {
         hasAnsweredGraduation: true,
         hasEmail: false,
         hasAcceptedRules: true,
+        hasHiddenProfilePrompt: false,
       }
 
     // Everything in place except the rules, which is a first entry ever
@@ -510,6 +511,7 @@ function buildReadiness(state: HostedState): EntryReadiness {
         hasAnsweredGraduation: true,
         hasEmail: true,
         hasAcceptedRules: false,
+        hasHiddenProfilePrompt: false,
       }
 
     // Every other state is ready to enter
@@ -523,6 +525,7 @@ function buildReadiness(state: HostedState): EntryReadiness {
         hasAnsweredGraduation: true,
         hasEmail: true,
         hasAcceptedRules: true,
+        hasHiddenProfilePrompt: false,
       }
 
     // Every state is handled above
@@ -982,6 +985,26 @@ export async function installHostedBackend(
         await route.fallback()
       }
     }
+  })
+
+  // The student asking not to be told about their unfinished profile again. Registered after the pattern
+  // above, which would otherwise read "readiness" as a competition nobody can find: a later route is the
+  // one Playwright tries first
+  await page.route(`${BACKEND_ORIGIN}/competitions/readiness/dismissal`, async (route) => {
+    // Only the write lives here
+    if (route.request().method() !== 'POST') {
+      // Passed on unanswered
+      await route.fallback()
+
+      // Nothing else answers on this path
+      return
+    }
+
+    // Take their word for it, which is what the next readiness read will carry
+    state.readiness.hasHiddenProfilePrompt = true
+
+    // Nothing comes back
+    await route.fulfill({ status: 204, body: '' })
   })
 
   // The conversations held against one problem, and the caps a further one is held to

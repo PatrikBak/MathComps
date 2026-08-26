@@ -5,13 +5,14 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { replaceQuery } from '@/components/shared/utils/url-utils'
 import { useCurrentUrl } from '@/hooks/use-current-url'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 
-import type { EntryBlocker } from '../model/entry-reader'
+import { entryBlockerFor, type EntryReader } from '../model/entry-reader'
 import type { HostedCompetitionGroup, PendingEntry } from '../model/hosted-competition-types'
 
 /**
@@ -23,8 +24,8 @@ const ENTRY_INTENT_PARAM = 'enter'
  * Parameters for {@link useEntryGuard}.
  */
 type UseEntryGuardParams = {
-  /** What stands between the reader and any entry, undefined while that is still on its way. */
-  blocker: EntryBlocker | null | undefined
+  /** Who is reading, and what is known about them. */
+  reader: EntryReader
   /** Every group on screen. */
   groups: HostedCompetitionGroup[]
   /** Asks the reader about a competition, only ever somebody who can actually enter it. */
@@ -41,10 +42,13 @@ type UseEntryGuardParams = {
 }
 
 /**
- * What pressing Enter turns into, given what the reader still owes.
+ * What pressing Enter turns into, given what the reader still owes on the group they pressed.
  *
  * One press and three endings: the entry's own question, a prompt for an account, or a prompt for the
  * profile fields. Neither prompt navigates; each is a toast carrying the action.
+ *
+ * What is owed is read at the press rather than for the page, since the practice group asks less of a
+ * student than a graded one does.
  *
  * A press made before signing in is carried across it and answered on the way back, so the reader lands on
  * the question they pressed rather than on the list they pressed it from.
@@ -54,7 +58,7 @@ type UseEntryGuardParams = {
  * @returns The call every entry press goes through.
  */
 export function useEntryGuard({
-  blocker,
+  reader,
   groups,
   openDialog,
   entryIntentId,
@@ -75,48 +79,62 @@ export function useEntryGuard({
   // A function which answers one press, given what the reader still owes
   const guard = useCallback(
     (pending: PendingEntry) => {
-      // No account yet, so the press goes to one and brings this same competition back with it
-      if (blocker === 'signIn') {
-        // This page, plus which competition was pressed
-        const [path, search = ''] = getCurrentUrl().split('?')
-        const query = new URLSearchParams(search)
-        query.set(ENTRY_INTENT_PARAM, pending.competition.id)
+      // What the group they pressed asks of them
+      const blocker = entryBlockerFor(reader, pending.group)
 
-        // Ask for the account, naming the competition to come back to
-        showLoginPrompt({
-          reason: t('entryAuthReason'),
-          redirectUrl: `${path}?${query}`,
-        })
+      switch (blocker) {
+        // No account yet, so the press goes to one and brings this same competition back with it
+        case 'signIn': {
+          // This page, plus which competition was pressed
+          const [path, search = ''] = getCurrentUrl().split('?')
+          const query = new URLSearchParams(search)
+          query.set(ENTRY_INTENT_PARAM, pending.competition.id)
 
-        // The press is answered on the way back rather than here
-        return
-      }
+          // Ask for the account, naming the competition to come back to
+          showLoginPrompt({
+            reason: t('entryAuthReason'),
+            redirectUrl: `${path}?${query}`,
+          })
 
-      // An account, but not the fields a published result would have to name them by
-      if (blocker === 'profile') {
-        // The header's own sentence, minus the link inside it, the toast's action carrying that
-        // destination instead
-        const message = t.rich('readiness.profileNeeded', { link: (chunks) => chunks })
+          // The press is answered on the way back rather than here
+          return
+        }
 
-        // Ask for the fields, with the way to them on the toast
-        toast.warning(message, {
-          action: {
-            label: t('readiness.profileLink'),
-            onClick: () => router.push(ROUTES.PROFILE),
-          },
-        })
+        // An account, but not the fields a published result would have to name them by
+        case 'profile': {
+          // The header's own sentence, minus the link inside it, the toast's action carrying that
+          // destination instead
+          const message = t.rich('readiness.profileNeeded', { link: (chunks) => chunks })
 
-        // Nothing opens until the profile has what a result would name them by
-        return
-      }
+          // Ask for the fields, with the way to them on the toast
+          toast.warning(message, {
+            action: {
+              label: t('readiness.profileLink'),
+              onClick: () => router.push(ROUTES.PROFILE),
+            },
+          })
 
-      // Nothing in the way. An unsettled answer is not the same thing, and never reaches here: the list is
-      // held until it lands
-      if (blocker === null) {
-        openDialog(pending)
+          // Nothing opens until the profile has what a result would name them by
+          return
+        }
+
+        // Nothing in the way, so the press reaches the entry's own question
+        case null:
+          openDialog(pending)
+
+          // Which is the whole answer
+          return
+
+        // Still being settled, which no press reaches: the list is held until it lands
+        case undefined:
+          return
+
+        // Every answer is handled above
+        default:
+          return assertNever(blocker)
       }
     },
-    [blocker, getCurrentUrl, openDialog, router, showLoginPrompt, t]
+    [getCurrentUrl, openDialog, reader, router, showLoginPrompt, t]
   )
 
   // Whether the press carried across the sign-in has been answered, so it is answered once and not again
@@ -133,8 +151,8 @@ export function useEntryGuard({
       return
     }
 
-    // Neither the rows nor what stands in the way has landed, so there is nothing to answer with yet
-    if (blocker === undefined || !hasView) {
+    // Neither the rows nor who is reading has landed, so there is nothing to answer with yet
+    if (reader.kind === 'unknown' || !hasView) {
       return
     }
 
@@ -159,7 +177,7 @@ export function useEntryGuard({
     if (group !== undefined && competition !== undefined) {
       guard({ group, competition })
     }
-  }, [blocker, groups, entryIntentId, guard, hasView, searchParams])
+  }, [reader, groups, entryIntentId, guard, hasView, searchParams])
 
   // The call every entry press goes through
   return guard

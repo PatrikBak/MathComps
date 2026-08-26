@@ -203,4 +203,71 @@ test.describe('the competitions list', () => {
     // And nothing to give up, the practice competition being takeable again
     await expect(page.getByRole('button', { name: areaCopy.dialog.forfeit })).toHaveCount(0)
   })
+
+  test('takes an unfilled profile into the practice run, which publishes no result', async ({
+    page,
+  }) => {
+    // A student whose profile is missing what a result would name them by
+    await installHostedBackend(page, 'gate-blocked')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // Press try, which is the practice run
+    await page.getByRole('button', { name: areaCopy.try }).first().click()
+
+    // The clock is offered, the fields being wanted for a result the practice run never produces
+    await expect(page.getByRole('button', { name: areaCopy.dialog.confirm })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+  })
+
+  test('keeps saying what a graded entry wants after the sentence is hidden', async ({ page }) => {
+    // A student whose profile is missing what a result would name them by
+    await installHostedBackend(page, 'gate-blocked')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // The way to be rid of the sentence, which only an unfinished profile is offered
+    const dismiss = page.getByRole('button', { name: areaCopy.readiness.dismiss })
+    await expect(dismiss).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Take it
+    await dismiss.click()
+
+    // And the sentence goes
+    await expect(dismiss).toHaveCount(0)
+
+    // Press enter on a graded competition, which is what the fields are actually wanted for
+    await page.getByRole('button', { name: areaCopy.enter, exact: true }).first().click()
+
+    // The press still says what the entry wants, so hiding the sentence never leaves a dead button
+    await expect(page.getByRole('button', { name: areaCopy.readiness.profileLink })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+  })
+
+  test('leaves the sentence hidden across a reload', async ({ page }) => {
+    // A student whose profile is missing what a result would name them by
+    await installHostedBackend(page, 'gate-blocked')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // And be rid of the sentence
+    await page.getByRole('button', { name: areaCopy.readiness.dismiss }).click()
+
+    // Come back to the page
+    await page.reload()
+
+    // Wait for the list itself, so the assertion below is read against a drawn page rather than an empty
+    // one, which would pass whether the answer stuck or not
+    await expect(page.getByRole('button', { name: areaCopy.try }).first()).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // And it stays gone, the answer having been kept against the account rather than the tab
+    await expect(page.getByRole('button', { name: areaCopy.readiness.dismiss })).toHaveCount(0)
+  })
 })

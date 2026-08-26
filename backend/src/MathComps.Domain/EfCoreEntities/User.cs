@@ -89,6 +89,11 @@ public class User
     public DateTimeOffset? RulesAcceptedAt { get; set; }
 
     /// <summary>
+    /// When the student asked to stop being told that their profile is unfinished, or null while they have not.
+    /// </summary>
+    public DateTimeOffset? ProfilePromptDismissedAt { get; set; }
+
+    /// <summary>
     /// Timestamp when the user was created in our system.
     /// </summary>
     public DateTimeOffset CreatedAt { get; set; }

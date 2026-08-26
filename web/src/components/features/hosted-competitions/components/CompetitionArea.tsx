@@ -133,6 +133,9 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
   // The group setting the terms, and the competition itself
   const { group, competition } = competitionInGroup
 
+  // Whether this is the run nobody is graded on
+  const isPractice = isPracticeGroup(group)
+
   // Whether the student closed it themselves, which the page says differently from a clock running out
   const wasHandedIn = entry.kind === 'sat' && wasHandedInEarly(group, entry)
 
@@ -186,7 +189,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
       )}
 
       {/* What the practice run is, said once to whoever has not met it before */}
-      {isPracticeGroup(group) && !isIntroDismissed && (
+      {isPractice && !isIntroDismissed && (
         <AreaNote>
           <p>{t('practiceIntro')}</p>
 
@@ -197,7 +200,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
       )}
 
       {/* That the entry is closed, and what that does and does not stop */}
-      {hasEnded && <AreaNote>{wasHandedIn ? t('areaFinished') : t('areaClockSpent')}</AreaNote>}
+      {hasEnded && <AreaNote>{t(endedNoteKey(wasHandedIn, isPractice))}</AreaNote>}
 
       {/* An entry given up for the problems, which never had a clock */}
       {entry.kind === 'forfeited' && <AreaNote>{t('areaForfeited')}</AreaNote>}
@@ -290,4 +293,28 @@ function AreaNote({ children }: AreaNoteProps) {
       {children}
     </div>
   )
+}
+
+/**
+ * Which sentence a closed entry gets.
+ *
+ * The graded pair name the results that later messages fall outside of. The practice run has none, so it
+ * says what it can still offer and promises nothing.
+ *
+ * @param wasHandedIn - Whether the student closed it themselves rather than running out of clock.
+ * @param isPractice - Whether this is the run nobody is graded on.
+ *
+ * @returns The copy key.
+ */
+function endedNoteKey(
+  wasHandedIn: boolean,
+  isPractice: boolean
+): 'areaFinished' | 'areaClockSpent' | 'areaFinishedPractice' | 'areaClockSpentPractice' {
+  // Nothing about the practice run is counted, so neither of its sentences can mention a result
+  if (isPractice) {
+    return wasHandedIn ? 'areaFinishedPractice' : 'areaClockSpentPractice'
+  }
+
+  // And the graded pair, which both say where the line falls
+  return wasHandedIn ? 'areaFinished' : 'areaClockSpent'
 }

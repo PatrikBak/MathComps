@@ -259,6 +259,66 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
+    /// Verifies that an unfinished profile stops a graded entry and not a practice one. The fields exist so a
+    /// published result can name the student, and the group that never closes publishes none.
+    /// </summary>
+    [Fact]
+    public Task An_unfinished_profile_stops_only_a_graded_entry() => RunTestAsync(async service =>
+    {
+        // Take back the name a result would be published under
+        await QueryAsync(async context =>
+        {
+            await context.Users
+                .Where(user => user.Id == _studentId)
+                .ExecuteUpdateAsync(update => update.SetProperty(user => user.Username, (string?)null));
+        });
+
+        // The graded competition refuses them
+        await Assert.ThrowsAsync<HostedEntryProfileIncompleteException>(
+            () => service.EnterAsync(_studentId, _advancedRoundId));
+
+        // While the practice one takes them
+        await service.EnterAsync(_studentId, _practiceRoundId);
+
+        // Leaving the one entry behind, which is the practice run
+        Assert.Equal(1, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
+    });
+
+    /// <summary>
+    /// Verifies that hiding the profile prompt is recorded once and reported back, and that asking again leaves
+    /// the first answer where it is rather than restamping it.
+    /// </summary>
+    [Fact]
+    public Task Hiding_the_profile_prompt_is_asked_once_ever() => RunTestAsync(async service =>
+    {
+        // Nothing hidden before they ask
+        Assert.False((await service.GetReadinessAsync(_studentId)).HasHiddenProfilePrompt);
+
+        // They ask
+        await service.DismissProfilePromptAsync(_studentId);
+
+        // When they asked
+        var dismissedAt = await QueryValueAsync(context => context.Users
+            .Where(user => user.Id == _studentId)
+            .Select(user => user.ProfilePromptDismissedAt)
+            .FirstAsync());
+
+        // Which the readiness now reports
+        Assert.True((await service.GetReadinessAsync(_studentId)).HasHiddenProfilePrompt);
+
+        // Asking a second time
+        await service.DismissProfilePromptAsync(_studentId);
+
+        // Leaves the first answer standing, since it is when they asked and not how often
+        Assert.Equal(
+            dismissedAt,
+            await QueryValueAsync(context => context.Users
+                .Where(user => user.Id == _studentId)
+                .Select(user => user.ProfilePromptDismissedAt)
+                .FirstAsync()));
+    });
+
+    /// <summary>
     /// Verifies that a student taking the practice group again ends up on one run rather than two. The row is
     /// reset rather than added to, and the index over the pair is what makes that hold when the two attempts
     /// arrive together and neither has seen the other's write.

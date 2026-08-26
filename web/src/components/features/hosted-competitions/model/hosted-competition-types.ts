@@ -170,4 +170,9 @@ export type EntryReadiness = {
   hasEmail: boolean
   /** Whether the student has ever accepted the competition rules. */
   hasAcceptedRules: boolean
+  /**
+   * Whether the student has asked not to be told their profile is unfinished again. It settles what the
+   * page says rather than what it allows, so it is no part of being ready.
+   */
+  hasHiddenProfilePrompt: boolean
 }
