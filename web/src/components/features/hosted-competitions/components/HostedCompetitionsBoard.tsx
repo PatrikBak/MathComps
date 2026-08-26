@@ -1,7 +1,9 @@
 'use client'
 
+import { MessageSquarePlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { ProseContactLink } from '@/components/features/contact/ProseContactLink'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { PageHeader } from '@/components/shared/components/PageHeader'
 import { useNow } from '@/hooks/use-now'
@@ -15,6 +17,7 @@ import { useHostedCompetitionsView } from '../hooks/use-hosted-competitions-view
 import { headerBlocker } from '../model/entry-reader'
 import { orderForReading } from '../model/hosted-competition-state'
 import { CategoryLegend } from './CategoryLegend'
+import { DisclosureNote } from './DisclosureNote'
 import { EntryGate } from './EntryGate'
 import { HeaderDisclosure } from './HeaderDisclosure'
 import { HostedCompetitionEntryDialog } from './HostedCompetitionEntryDialog'
@@ -89,7 +92,15 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
           {/* The rules, readable without going near an irreversible press. The same lines appear inside
               the entry dialog on the one entry that accepts them; after that, this is where they live */}
           <HeaderDisclosure label={t('rulesButton')}>
+            {/* The terms themselves */}
             <RulesList />
+
+            {/* Where to take anything the rules do not answer */}
+            <DisclosureNote icon={MessageSquarePlus}>
+              {t.rich('rules.contact', {
+                link: (chunks) => <ProseContactLink reason="other">{chunks}</ProseContactLink>,
+              })}
+            </DisclosureNote>
           </HeaderDisclosure>
         </div>
 
