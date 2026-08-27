@@ -25,7 +25,10 @@ jobs:
           node-version: lts/*
           cache: npm
           cache-dependency-path: web/package-lock.json
+      # Install exactly what the lockfile pins
       - run: npm ci
+
+      # Types, lint, formatting, knip, the content validators, vitest, then a production build
       - run: npm run ci
 
   backend:
@@ -39,9 +42,13 @@ jobs:
           cache: true
           cache-dependency-path: backend/Directory.Packages.props
 
+      # Pull the packages down once for the whole job
       - run: dotnet restore backend/MathComps.sln
-      - run: dotnet format backend/MathComps.sln --verify-no-changes --no-restore
+
+      # Compile everything, warnings-as-errors
       - run: dotnet build backend/MathComps.sln --configuration Release --no-restore
+
+      # Every test project, against the binaries just built
       - run: dotnet test backend/MathComps.sln --configuration Release --no-build
 
       - name: Restore EF Core tools
@@ -67,11 +74,12 @@ jobs:
           git add data/handouts/ web/src/content/handouts/
           git diff --staged --exit-code
 
-  # ReSharper static analysis. main sits at a zero-finding baseline, so any finding here is new.
+  # The backend's static gates: formatting, then ReSharper analysis. main sits at a zero-finding inspectcode
+  # baseline, so any finding there is new.
   # Clear it by fixing the code, or — for a genuine tool blind spot — `// ReSharper disable once <RULE>`
   # with a one-line reason. The jb version is pinned in backend/.config/dotnet-tools.json.
-  inspect:
-    name: Inspect
+  analysis:
+    name: Analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -81,7 +89,11 @@ jobs:
           cache: true
           cache-dependency-path: backend/Directory.Packages.props
 
+      # Pull the packages down once for the whole job
       - run: dotnet restore backend/MathComps.sln
+
+      # Fail on anything the formatter would rewrite
+      - run: dotnet format backend/MathComps.sln --verify-no-changes --no-restore
 
       - name: Restore tools (jb)
         working-directory: backend

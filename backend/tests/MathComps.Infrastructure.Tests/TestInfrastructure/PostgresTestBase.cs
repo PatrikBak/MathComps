@@ -1,7 +1,4 @@
-using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MathComps.Infrastructure.Tests.TestInfrastructure;
@@ -32,13 +29,14 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
         // Get connection string for our unique database
         _connectionString = fixture.GetConnectionString(_dbName);
 
+        // Copy the fixture's migrated template into this test's own database. Nothing can connect to that
+        // database until this runs.
+        await fixture.CreateDatabaseFromTemplateAsync(_dbName);
+
         // Create the DB context using the service provider
         await using var serviceProvider = CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<MathCompsDbContext>();
-
-        // Ensure we start with a fully migrated database
-        await context.Database.MigrateAsync();
 
         // Seed the database with test data
         await SeedDataAsync(context);
@@ -56,30 +54,14 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
     /// </param>
     /// <returns>A configured service provider ready for dependency injection.</returns>
     protected ServiceProvider CreateServiceProvider(Action<IServiceCollection>? overrides = null)
-    {
-        // Create in-memory configuration with the test database connection string
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:DefaultConnection"] = _connectionString
-            })
-            .Build();
+        => TestServiceProvider.Build(_connectionString!, services =>
+        {
+            // Let a derived class add or replace registrations (e.g. a fake for an external dependency).
+            ConfigureServices(services);
 
-        // The infrastructure shared by every test; a derived class adds its own service module via ConfigureServices.
-        var services = new ServiceCollection()
-            .AddSingleton<IConfiguration>(configuration)
-            .AddLogging()
-            .AddMathCompsDbContext(configuration);
-
-        // Let a derived class add or replace registrations (e.g. a fake for an external dependency).
-        ConfigureServices(services);
-
-        // And let one test differ from its class, e.g. in the options the service under test reads.
-        overrides?.Invoke(services);
-
-        // Build the provider.
-        return services.BuildServiceProvider();
-    }
+            // And let one test differ from its class, e.g. in the options the service under test reads.
+            overrides?.Invoke(services);
+        });
 
     /// <summary>
     /// Hook for derived classes to add or override service registrations before the provider is built — e.g. to
