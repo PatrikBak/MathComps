@@ -274,26 +274,37 @@ export function orderForReading(
 /**
  * How a running clock says how much of itself is left.
  */
-export type ClockDisplayMode = 'minutes' | 'seconds'
+export type ClockDisplayMode = 'minutes' | 'closing' | 'final'
 
 /**
- * How much of the clock is left before it starts counting in seconds.
+ * How much of the clock is left when it starts counting in seconds.
  */
-const PRECISE_BELOW_MS = MINUTE_MS
+const CLOSING_BELOW_MS = 5 * MINUTE_MS
+
+/**
+ * How much of the clock is left when it stops being something a student can still act on.
+ */
+const FINAL_BELOW_MS = MINUTE_MS
 
 /**
  * Decides how precisely a running clock should say how much is left.
  *
- * Minutes for almost all of it. Seconds only inside the last one, where they are what the student is
- * deciding against.
+ * Minutes for almost all of it, since a rounded reading is all there is to act on. Seconds from five
+ * minutes out, which is where the decision turns from the problem to whether there is time to write it
+ * up. Under a minute nothing is left to decide, and the reading is a deadline.
  *
  * @param remainingMs - How much of the clock is left, in milliseconds.
  *
  * @returns Which way to say it.
  */
 export function clockDisplayMode(remainingMs: number): ClockDisplayMode {
-  // Seconds only inside the last minute
-  return remainingMs < PRECISE_BELOW_MS ? 'seconds' : 'minutes'
+  // The deadline itself
+  if (remainingMs < FINAL_BELOW_MS) {
+    return 'final'
+  }
+
+  // The part where the seconds are the decision
+  return remainingMs < CLOSING_BELOW_MS ? 'closing' : 'minutes'
 }
 
 /**
@@ -325,4 +336,30 @@ export function clockMinutesLeft(remainingMs: number): ClockMinutesLeft {
     hours: Math.floor(totalMinutes / HOUR_MINUTES),
     minutes: totalMinutes % HOUR_MINUTES,
   }
+}
+
+/**
+ * How much of the minute a rounded reading stands on is still to run, as a fraction of one.
+ *
+ * A reading counted in whole minutes holds still for a minute at a time, and a student meeting it in the
+ * first of those cannot tell a running clock from a stopped one. This is the remainder the rounding
+ * hides, so something can be drawn moving while the number waits its turn.
+ *
+ * The minute and not the whole entry: over a two-hour clock the same reading drawn once end to end moves
+ * a sixth of a pixel a second, and holds just as still as the number it was drawn to answer.
+ *
+ * @param remainingMs - How much of the clock is left, in milliseconds.
+ *
+ * @returns How much of the current minute is left, from one down to zero.
+ */
+export function clockMinuteFraction(remainingMs: number): number {
+  // Whatever is left, with a clock read past its own end counted as spent
+  const left = Math.max(0, remainingMs)
+
+  // The minute the reading is standing on, off the same rounding the reading uses so the two change
+  // on the same tick
+  const minutesLeft = Math.ceil(left / MINUTE_MS)
+
+  // How far into that minute the clock has run
+  return 1 - (minutesLeft * MINUTE_MS - left) / MINUTE_MS
 }
