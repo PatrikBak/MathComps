@@ -101,8 +101,9 @@ jobs:
 
       - name: Run inspectcode
         working-directory: backend
-        # No --no-build: inspectcode restores and builds the solution itself, matching the local baseline.
-        run: dotnet jb inspectcode MathComps.sln --output=inspect.sarif --format=Sarif
+        # --no-build: the restore above is all inspectcode needs, and the finding set is the same
+        # whether the solution gets built first or only restored.
+        run: dotnet jb inspectcode MathComps.sln --no-build --output=inspect.sarif --format=Sarif
 
       - name: Fail on any finding
         run: |
