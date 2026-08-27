@@ -3,7 +3,9 @@ import { HOUR_MINUTES, MINUTE_MS } from '@/components/shared/utils/time-units'
 
 import type {
   HostedCompetition,
+  HostedCompetitionEntry,
   HostedCompetitionGroup,
+  HostedCompetitionsView,
   SatEntry,
 } from './hosted-competition-types'
 
@@ -183,6 +185,73 @@ export function entryEndsAt(group: HostedCompetitionGroup, entry: SatEntry): str
 
   // Whichever came first
   return new Date(endsAt).toISOString()
+}
+
+/**
+ * One competition and the group whose terms it runs on, which is what locating one in the view hands back.
+ */
+export type CompetitionInGroup = {
+  /** The group it runs in. */
+  group: HostedCompetitionGroup
+  /** The competition itself. */
+  competition: HostedCompetition
+}
+
+/**
+ * Finds one competition in the view, along with the group whose terms it runs on. A competition is named on
+ * its own everywhere a reader arrives at one, while everything about how it runs sits on its group.
+ *
+ * @param view - Every group the reader can see, undefined while the read has not landed.
+ * @param competitionId - Which competition to find.
+ *
+ * @returns The competition and its group, or undefined when the view holds no such competition.
+ */
+export function findCompetitionInGroup(
+  view: HostedCompetitionsView | undefined,
+  competitionId: string
+): CompetitionInGroup | undefined {
+  // The one competition of that id, wherever in the groups it sits
+  return view?.groups
+    .flatMap((group) => group.competitions.map((competition) => ({ group, competition })))
+    .find((candidate) => candidate.competition.id === competitionId)
+}
+
+/**
+ * Reads a spent entry the way everything about one of its problems reads it, the arithmetic over the
+ * group's clock already done.
+ *
+ * @param group - The group it belongs to, which sets how long its clock runs.
+ * @param entry - The entry the student spent, null while they have spent none.
+ *
+ * @returns The entry, or null when there is none to read.
+ */
+export function toAreaEntry(
+  group: HostedCompetitionGroup,
+  entry: HostedCompetitionEntry | null
+): AreaEntry | null {
+  // Nothing spent, so there is nothing to read it against
+  if (entry === null) {
+    return null
+  }
+
+  // What they did with the entry decides which of them this is
+  switch (entry.kind) {
+    // Given up for the problems, so no clock ever started
+    case 'forfeited':
+      return { kind: 'forfeited' }
+
+    // Sat, so it carries where its counted part ended and whether the student ended it themselves
+    case 'sat':
+      return {
+        kind: 'sat',
+        endsAt: entryEndsAt(group, entry),
+        wasHandedIn: wasHandedInEarly(group, entry),
+      }
+
+    // Every entry is handled above
+    default:
+      return assertNever(entry)
+  }
 }
 
 /**

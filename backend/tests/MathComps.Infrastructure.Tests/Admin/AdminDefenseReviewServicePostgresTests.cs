@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.Admin;
+using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Extensions;
@@ -331,12 +332,12 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         Assert.Equal(
             ["problem-two", "problem-one", "problem-one"],
             queue.Items
-                .Where(conversation => conversation.Target is AdminHandoutTarget)
+                .Where(conversation => conversation.Target is NamedHandoutTarget)
                 .Select(conversation => Handout(conversation.Target).EnvironmentId));
 
         // Under the handout that environment belongs to
         Assert.All(
-            queue.Items.Where(conversation => conversation.Target is AdminHandoutTarget),
+            queue.Items.Where(conversation => conversation.Target is NamedHandoutTarget),
             conversation => Assert.Equal(HandoutContentId, Handout(conversation.Target).HandoutContentId));
     });
 
@@ -957,7 +958,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             queue.Items.Where(candidate => candidate.Id == _archiveSessionId));
 
         // Named by the problem's slug and where the problem comes from
-        var target = Assert.IsType<AdminProblemTarget>(conversation.Target);
+        var target = Assert.IsType<NamedProblemTarget>(conversation.Target);
         Assert.Equal(ArchiveProblemSlug, target.Slug);
 
         // Which is every competition down to the one that set it, each named in the language asked for
@@ -996,7 +997,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             var detail = await service.GetDetailAsync(_reviewerId, _archiveSessionId, Language.EN);
 
             // Which names an archive problem rather than a handout one
-            var target = Assert.IsType<AdminProblemTarget>(detail.Target);
+            var target = Assert.IsType<NamedProblemTarget>(detail.Target);
             Assert.Equal(ArchiveProblemSlug, target.Slug);
 
             // Which is every competition down to the one that set it, each named in the language asked for
@@ -1020,11 +1021,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // The archive problem among them, carrying the one conversation held against it
         var option = Assert.Single(
-            options.Problems.Where(candidate => candidate.Target is AdminProblemTarget));
+            options.Problems.Where(candidate => candidate.Target is NamedProblemTarget));
         Assert.Equal(1, option.ConversationCount);
 
         // Named the same way the queue names it
-        Assert.Equal(ArchiveProblemSlug, Assert.IsType<AdminProblemTarget>(option.Target).Slug);
+        Assert.Equal(ArchiveProblemSlug, Assert.IsType<NamedProblemTarget>(option.Target).Slug);
     });
 
     /// <summary>
@@ -1045,7 +1046,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // The handout environments one was held against, the shared one ahead of the other
         var handoutOptions = options.Problems
-            .Where(option => option.Target is AdminHandoutTarget)
+            .Where(option => option.Target is NamedHandoutTarget)
             .ToList();
         Assert.Equal(
             ["problem-one", "problem-two"],
@@ -1135,8 +1136,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// </summary>
     /// <param name="target">The problem a conversation was held against.</param>
     /// <returns>The handout environment.</returns>
-    private static AdminHandoutTarget Handout(AdminDefenseTarget target) =>
-        Assert.IsType<AdminHandoutTarget>(target);
+    private static NamedHandoutTarget Handout(NamedDefenseTarget target) =>
+        Assert.IsType<NamedHandoutTarget>(target);
 
     /// <summary>
     /// Builds a filter that narrows nothing, so a test naming no filter reads the whole seed. Tests that do want

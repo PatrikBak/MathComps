@@ -4,12 +4,12 @@ import { Flag, type LucideIcon, MessageSquareQuote, MessagesSquare, StickyNote }
 import { useFormatter, useTranslations } from 'next-intl'
 import { memo } from 'react'
 
+import { DefenseTargetLabel } from '@/components/features/defense/components/DefenseTargetLabel'
 import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
 import { toPlainTextPreview } from '@/components/shared/utils/string-utils'
 
 import { type DefenseReviewConversation, describeReviewUser } from '../model/defense-review-types'
-import { DefenseTargetLabel } from './DefenseTargetLabel'
 
 /**
  * Props for the {@link DefenseReviewCard} component.

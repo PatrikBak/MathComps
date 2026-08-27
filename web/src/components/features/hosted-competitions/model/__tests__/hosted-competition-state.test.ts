@@ -10,6 +10,7 @@ import {
   deriveStanding,
   entryEndsAt,
   orderForReading,
+  toAreaEntry,
   wasHandedInEarly,
 } from '../hosted-competition-state'
 import type {
@@ -206,6 +207,31 @@ describe('wasHandedInEarly', () => {
   it('reads an entry nobody closed as neither', () => {
     // Still running, so there is nothing to have been given up
     expect(wasHandedInEarly(groupOf(), asSat(entryOf(HOUR_MS, null)))).toBe(false)
+  })
+})
+
+describe('toAreaEntry', () => {
+  it('reads no entry as nothing to read a conversation against', () => {
+    expect(toAreaEntry(groupOf(), null)).toBeNull()
+  })
+
+  it('reads an entry given up for the problems as one no clock ever ran on', () => {
+    expect(
+      toAreaEntry(groupOf(), { kind: 'forfeited', forfeitedAt: new Date(NOW).toISOString() })
+    ).toEqual({ kind: 'forfeited' })
+  })
+
+  it('ends a handed-in entry where the student stopped it rather than where its clock would have', () => {
+    // Half an hour left on the clock when the student handed it in
+    const handedInAt = new Date(NOW - 30 * MINUTE_MS).toISOString()
+    const entry = entryOf(30 * MINUTE_MS, handedInAt)
+
+    // Which is where the conversation stops counting, and it reads as the hand-in it was
+    expect(toAreaEntry(groupOf(), entry)).toEqual({
+      kind: 'sat',
+      endsAt: handedInAt,
+      wasHandedIn: true,
+    })
   })
 })
 

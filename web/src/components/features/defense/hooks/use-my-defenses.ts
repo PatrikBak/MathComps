@@ -78,12 +78,18 @@ export function useMyDefenses(): UseMyDefensesResult {
     onSettled: () => invalidateDefenseLists(queryClient),
   })
 
-  // The list, its load state, and the delete control
+  // A function which removes a defense
+  const deleteDefense = (sessionId: string) => deleteMutation.mutateAsync(sessionId)
+
+  // A function which reads the list again
+  const refresh = () => invalidateDefenseLists(queryClient)
+
+  // The list, its load state, and the controls over it
   return {
     defenses: query.data ?? [],
     isLoading: api.state !== 'ready' || !isUserLoaded || query.isLoading,
     isError: query.isError,
-    deleteDefense: (sessionId: string) => deleteMutation.mutateAsync(sessionId),
-    refresh: () => invalidateDefenseLists(queryClient),
+    deleteDefense,
+    refresh,
   }
 }

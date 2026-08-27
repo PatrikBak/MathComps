@@ -2,9 +2,9 @@ import type {
   DefenseFeedback,
   DefenseReportCategory,
   DefenseTurnReport,
+  NamedDefenseTarget,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
-import type { ProblemSource } from '@/components/features/problems/types/problem-api-types'
 
 /**
  * Somebody the review names: the student who held a conversation, or the reviewer who wrote a note about
@@ -20,37 +20,6 @@ export type DefenseReviewUser = {
 }
 
 /**
- * A handout problem a conversation was held against, which the reader's own side names from handout content
- * it already holds.
- */
-export type DefenseReviewHandoutTarget = {
-  /** Which arm this is. */
-  kind: 'handout'
-  /** The handout's permanent content id. */
-  handoutContentId: string
-  /** The environment's permanent id, unique within its handout. */
-  environmentId: string
-}
-
-/**
- * An archive problem a conversation was held against, already named: nothing on the reader's side can name a
- * competition still under embargo.
- */
-export type DefenseReviewProblemTarget = {
-  /** Which arm this is. */
-  kind: 'problem'
-  /** URL-safe identifier, unique across the archive. */
-  slug: string
-  /** Where the problem comes from. */
-  source: ProblemSource
-}
-
-/**
- * What a conversation was held against. Exactly one arm applies to any one conversation.
- */
-export type DefenseReviewTarget = DefenseReviewHandoutTarget | DefenseReviewProblemTarget
-
-/**
  * One conversation as the review queue lists it: who held it, what it was against, how it opened, and every mark
  * that decides whether it is worth opening.
  */
@@ -58,7 +27,7 @@ export type DefenseReviewConversation = {
   /** Stable identifier. */
   id: string
   /** The problem it was held against. */
-  target: DefenseReviewTarget
+  target: NamedDefenseTarget
   /** Who held it. */
   user: DefenseReviewUser
   /** The start of the student's most recent message; null when it holds no student turn. */
@@ -121,7 +90,7 @@ export type DefenseReviewUserOption = {
  */
 export type DefenseReviewProblemOption = {
   /** The problem. */
-  target: DefenseReviewTarget
+  target: NamedDefenseTarget
   /** How many conversations have been held against it. */
   conversationCount: number
 }
@@ -186,7 +155,7 @@ export type DefenseReviewDetail = {
   /** Stable identifier. */
   id: string
   /** The problem it was held against. */
-  target: DefenseReviewTarget
+  target: NamedDefenseTarget
   /** Who held it. */
   user: DefenseReviewUser
   /** The problem statement as it stood when it was started. */
@@ -327,7 +296,7 @@ export type AdminNoteFeedItem = {
   /** The note. */
   note: AdminNote
   /** The problem its conversation was held against. */
-  target: DefenseReviewTarget
+  target: NamedDefenseTarget
   /** Who held that conversation. */
   user: DefenseReviewUser
   /** Where the reply it is against sits; null when it is against the conversation as a whole. */

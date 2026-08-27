@@ -3,6 +3,7 @@
 import { ArrowUpRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { DefenseTargetLabel } from '@/components/features/defense/components/DefenseTargetLabel'
 import { Button } from '@/components/shared/components/Button'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 
@@ -12,7 +13,6 @@ import {
 } from '../model/defense-review-types'
 import { AdminNoteHeader } from './AdminNoteHeader'
 import { AdminNoteSurface } from './AdminNoteSurface'
-import { DefenseTargetLabel } from './DefenseTargetLabel'
 
 /**
  * Props for the {@link AdminNoteFeedItem} component.

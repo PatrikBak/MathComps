@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
+import type {
+  NamedHandoutTarget,
+  NamedProblemTarget,
+} from '@/components/features/defense/model/defense-types'
+
 import {
   countActiveFilters,
   decodeProblemKey,
@@ -11,11 +16,7 @@ import {
   toSignalSelection,
   withFilterField,
 } from '../defense-review-filters'
-import type {
-  DefenseReviewFilter,
-  DefenseReviewHandoutTarget,
-  DefenseReviewProblemTarget,
-} from '../defense-review-types'
+import type { DefenseReviewFilter } from '../defense-review-types'
 
 describe('serializeFilter', () => {
   it('keys two filterings that narrow the same conversations alike', () => {
@@ -91,7 +92,7 @@ describe('countActiveFilters', () => {
 describe('encodeProblemKey/decodeProblemKey', () => {
   it('round-trips a handout problem through its id', () => {
     // A problem, named the way the content ids really look
-    const target: DefenseReviewHandoutTarget = {
+    const target: NamedHandoutTarget = {
       kind: 'handout',
       handoutContentId: 'Kp2vR8mLqX3nYwTfJc6Db',
       environmentId: 'K8Jhyizt5YvLRX463Ka_e',
@@ -106,8 +107,10 @@ describe('encodeProblemKey/decodeProblemKey', () => {
 
   it('round-trips an archive problem through its id', () => {
     // A problem out of the archive, which one slug addresses
-    const target: DefenseReviewProblemTarget = {
+    const target: NamedProblemTarget = {
       kind: 'problem',
+      problemId: 'problem-1',
+      competitionId: 'round-1',
       slug: '76-mc-advanced-1-2',
       source: {
         season: { slug: '76', displayName: 'Edition 76 (2026/2027)', fullName: null },

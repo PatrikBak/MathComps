@@ -1,3 +1,7 @@
+import type {
+  NamedHandoutTarget,
+  NamedProblemTarget,
+} from '@/components/features/defense/model/defense-types'
 import {
   describeHandoutProblem,
   type HandoutProblemLabeller,
@@ -7,9 +11,7 @@ import type { FacetOption } from '@/components/shared/components/facets/model/fa
 
 import { encodeProblemKey } from './defense-review-filters'
 import {
-  type DefenseReviewHandoutTarget,
   type DefenseReviewProblemOption,
-  type DefenseReviewProblemTarget,
   type DefenseReviewPromptVersionOption,
   type DefenseReviewUserOption,
   describeReviewUser,
@@ -92,7 +94,7 @@ type ProblemFacetEntry = {
  * @returns The problem as the facet reads it.
  */
 function readHandoutProblem(
-  target: DefenseReviewHandoutTarget,
+  target: NamedHandoutTarget,
   labeller: HandoutProblemLabeller
 ): ProblemFacetEntry {
   // The problem as it reads: which handout, and which of its environments
@@ -130,10 +132,7 @@ function readHandoutProblem(
  *
  * @returns The problem as the facet reads it.
  */
-function readArchiveProblem(
-  target: DefenseReviewProblemTarget,
-  problemWord: string
-): ProblemFacetEntry {
+function readArchiveProblem(target: NamedProblemTarget, problemWord: string): ProblemFacetEntry {
   // The problem as it reads: where the competition sits, which run of it, and which problem of that
   const label = describeProblemRef(target.source, problemWord)
 

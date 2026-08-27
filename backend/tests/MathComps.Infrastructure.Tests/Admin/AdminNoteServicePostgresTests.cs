@@ -1,4 +1,4 @@
-using MathComps.Domain.Contracts.Admin;
+using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Extensions;
@@ -327,7 +327,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         var feed = await service.GetFeedAsync(_reviewerId, openOnly: false, 1, Language.EN);
 
         // The one note, naming an archive problem rather than a handout one
-        var target = Assert.IsType<AdminProblemTarget>(Assert.Single(feed.Items).Target);
+        var target = Assert.IsType<NamedProblemTarget>(Assert.Single(feed.Items).Target);
         Assert.Equal(ArchiveProblemSlug, target.Slug);
 
         // Which is every competition down to the one that set it, each named in the language asked for
@@ -669,6 +669,6 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     /// <param name="target">The problem a conversation was held against.</param>
     /// <returns>The handout environment.</returns>
-    private static AdminHandoutTarget Handout(AdminDefenseTarget target) =>
-        Assert.IsType<AdminHandoutTarget>(target);
+    private static NamedHandoutTarget Handout(NamedDefenseTarget target) =>
+        Assert.IsType<NamedHandoutTarget>(target);
 }
