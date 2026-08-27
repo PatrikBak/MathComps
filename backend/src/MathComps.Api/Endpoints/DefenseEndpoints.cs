@@ -80,8 +80,9 @@ public static class DefenseEndpoints
             // Resolve the calling user
             var userId = await userManager.RequireUserIdAsync(context);
 
-            // Fetch every session the user holds
-            var sessions = await defenseService.ListAllAsync(userId, context.RequestAborted);
+            // Fetch every session the user holds, named in the request's language
+            var sessions = await defenseService.ListAllAsync(
+                userId, EndpointHelpers.GetRequestLanguage(), context.RequestAborted);
 
             // Return them
             return Results.Ok(sessions);

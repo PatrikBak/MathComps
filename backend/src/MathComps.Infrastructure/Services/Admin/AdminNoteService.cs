@@ -3,6 +3,7 @@ using MathComps.Domain.Contracts.Helpers;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Options;
+using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Pagination;
 using MathComps.Infrastructure.Persistence;
@@ -275,9 +276,11 @@ public class AdminNoteService(
                     note.ResolvedAt,
                     note.CreatedAt,
                     note.UpdatedAt),
-                new AdminDefenseTargets.Columns(
+                new NamedDefenseTargets.Columns(
                     note.Session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                     note.Session.EnvironmentTarget!.HandoutEnvironment.ContentId,
+                    note.Session.ProblemTarget!.ProblemId,
+                    note.Session.ProblemTarget!.Problem.RoundId,
                     note.Session.ProblemTarget!.Problem.Slug,
                     note.Session.ProblemTarget!.Problem.Number,
                     note.Session.ProblemTarget!.Problem.Round.Competition.Path,
@@ -295,7 +298,7 @@ public class AdminNoteService(
         var items = rows
             .Select(row => new AdminNoteFeedItemDto(
                 row.Note,
-                AdminDefenseTargets.Build(localization, language, row.Target),
+                NamedDefenseTargets.Build(localization, language, row.Target),
                 row.User,
                 row.TurnSequence))
             .ToList();
@@ -327,12 +330,12 @@ public class AdminNoteService(
     /// One note as the page comes back, its conversation's problem still as the columns naming it.
     /// </summary>
     /// <param name="Note"><inheritdoc cref="AdminNoteDto" path="/summary"/></param>
-    /// <param name="Target"><inheritdoc cref="AdminDefenseTargets.Columns" path="/summary"/></param>
+    /// <param name="Target"><inheritdoc cref="NamedDefenseTargets.Columns" path="/summary"/></param>
     /// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
     /// <param name="TurnSequence"><inheritdoc cref="AdminNoteFeedItemDto.TurnSequence" path="/summary"/></param>
     private sealed record FeedRow(
         AdminNoteDto Note,
-        AdminDefenseTargets.Columns Target,
+        NamedDefenseTargets.Columns Target,
         AdminDefenseUserDto User,
         int? TurnSequence);
 }

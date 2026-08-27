@@ -64,6 +64,9 @@ export function useDefenseReviewFacetOptions(
   // Handout-surface copy
   const tHandouts = useTranslations('handouts')
 
+  // Defense-surface copy
+  const tDefense = useTranslations('defense')
+
   // Profile copy
   const tProfile = useTranslations('profile')
 
@@ -77,10 +80,10 @@ export function useDefenseReviewFacetOptions(
   const labeller = useMemo(
     () => ({
       environmentLabels: buildEnvironmentLabels(tHandouts),
-      deletedHandoutLabel: t('deletedHandout'),
+      deletedHandoutLabel: tDefense('deletedHandout'),
       locale,
     }),
-    [tHandouts, t, locale]
+    [tHandouts, tDefense, locale]
   )
 
   // The students who have held a conversation

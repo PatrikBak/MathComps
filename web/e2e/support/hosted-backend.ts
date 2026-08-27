@@ -4,6 +4,7 @@ import type {
   DefenseLimits,
   DefenseSession,
   DefenseSessionList,
+  DefenseSessionListItem,
   MathildaConsent,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
@@ -627,6 +628,93 @@ function buildProblems(state: FakeState, competitionId: string): HostedCompetiti
   })
 }
 
+/** The season every conversation in the library reads as having been set in. */
+const LIBRARY_SEASON_START_YEAR = 2026
+
+/**
+ * Builds the cross-problem list the library reads: every conversation the fake holds, most recently
+ * spoken in first, each named the way the backend names one.
+ *
+ * Walked from the groups rather than from the transcripts alone, since naming a conversation takes the
+ * competition it was set in and a problem id says only which problem.
+ *
+ * @param state - The fake's memory.
+ *
+ * @returns The conversations, most recently active first.
+ */
+function buildLibrary(state: FakeState): DefenseSessionListItem[] {
+  // Every conversation of every problem of every competition, named by where it was set
+  const competitionItems = state.view.groups.flatMap((group) =>
+    group.competitions.flatMap((competition) =>
+      Array.from({ length: PROBLEMS_PER_COMPETITION }, (_unused, index) => index + 1).flatMap(
+        (position) => libraryItemsOf(state, group, competition.id, position)
+      )
+    )
+  )
+
+  // Most recently spoken in first, the handout one oldest so the competition rows lead
+  return [...competitionItems, HANDOUT_ITEM].sort((first, second) =>
+    second.lastActivityAt.localeCompare(first.lastActivityAt)
+  )
+}
+
+/**
+ * A conversation held about a handout the site no longer carries, so a spec can tell a control a
+ * competition conversation is refused from one the list has lost altogether.
+ */
+const HANDOUT_ITEM: DefenseSessionListItem = {
+  id: 'session-handout',
+  target: { kind: 'handout', handoutContentId: 'gone', environmentId: 'gone-1' },
+  statement: 'Prove that every positive integer has a unique factorisation into primes.',
+  lastActivityAt: new Date(0).toISOString(),
+  lastStudentMessage:
+    'Induction on the size of the number, with the smallest prime factor peeled off.',
+}
+
+/**
+ * Builds the list rows for one problem's conversations.
+ *
+ * @param state - The fake's memory.
+ * @param group - The group the competition runs in, which is what names it.
+ * @param competitionId - The competition the problem belongs to.
+ * @param position - Where the problem sits in the set, counting from one.
+ *
+ * @returns One row per conversation held about that problem.
+ */
+function libraryItemsOf(
+  state: FakeState,
+  group: HostedCompetitionGroup,
+  competitionId: string,
+  position: number
+): DefenseSessionListItem[] {
+  // The problem the rows are about
+  const problemId = problemIdOf(competitionId, position)
+
+  // A row per conversation, named the way the backend names one
+  return transcriptsOf(state, problemId).map((session) => ({
+    id: session.id,
+    target: {
+      kind: 'problem' as const,
+      problemId,
+      competitionId,
+      slug: problemId,
+      source: {
+        season: { slug: '76', displayName: 'Edition 76 (2026/2027)', fullName: null },
+        startYear: LIBRARY_SEASON_START_YEAR,
+        competition: [
+          { slug: 'mc', displayName: 'MathComps', fullName: null },
+          { slug: competitionId, displayName: group.name.en, fullName: null },
+        ],
+        number: position,
+      },
+    },
+    statement: STATEMENTS[position - 1]?.en ?? '',
+    lastActivityAt: session.turns.at(-1)?.createdAt ?? new Date(0).toISOString(),
+    lastStudentMessage:
+      session.turns.findLast((turn) => turn.role === 'candidate')?.content ?? null,
+  }))
+}
+
 /**
  * What the page's own clock reads, which a spec holding it still has moved on from the runner's.
  *
@@ -1018,6 +1106,11 @@ export async function installHostedBackend(
       limits: LIMITS,
     } satisfies DefenseSessionList)
   })
+
+  // Every conversation the student holds, across every problem, which is what the library lists
+  await page.route(`${BACKEND_ORIGIN}/defense/sessions/mine`, (route) =>
+    answer(page, route, buildLibrary(state))
+  )
 
   // Opening a conversation, which starts on the examiner's own line and answers the first turn
   await page.route(`${BACKEND_ORIGIN}/defense/sessions`, async (route) => {

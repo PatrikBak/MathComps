@@ -10,7 +10,6 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;
-using MathComps.Infrastructure.Services.Problems;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -116,9 +115,11 @@ public class AdminDefenseReviewService(
                 session => session.Id,
                 (row, session) => new QueueRow(
                     session.Id,
-                    new AdminDefenseTargets.Columns(
+                    new NamedDefenseTargets.Columns(
                         session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                         session.EnvironmentTarget!.HandoutEnvironment.ContentId,
+                        session.ProblemTarget!.ProblemId,
+                        session.ProblemTarget!.Problem.RoundId,
                         session.ProblemTarget!.Problem.Slug,
                         session.ProblemTarget!.Problem.Number,
                         session.ProblemTarget!.Problem.Round.Competition.Path,
@@ -152,7 +153,7 @@ public class AdminDefenseReviewService(
             .ThenBy(row => row.Id.ToString(), StringComparer.Ordinal)
             .Select(row => new AdminDefenseConversationDto(
                 row.Id,
-                AdminDefenseTargets.Build(localization, language, row.Target),
+                NamedDefenseTargets.Build(localization, language, row.Target),
                 row.User,
                 row.LastStudentMessage,
                 row.TurnCount,
@@ -220,6 +221,8 @@ public class AdminDefenseReviewService(
             .AsNoTracking()
             .GroupBy(defense => new
             {
+                defense.ProblemId,
+                defense.Problem.RoundId,
                 defense.Problem.Slug,
                 defense.Problem.Number,
                 CompetitionPath = defense.Problem.Round.Competition.Path,
@@ -228,11 +231,16 @@ public class AdminDefenseReviewService(
             })
             .Select(group => new
             {
-                group.Key.Slug,
-                group.Key.Number,
-                group.Key.CompetitionPath,
-                group.Key.EditionNumber,
-                group.Key.StartYear,
+                Target = new NamedDefenseTargets.Columns(
+                    null,
+                    null,
+                    group.Key.ProblemId,
+                    group.Key.RoundId,
+                    group.Key.Slug,
+                    group.Key.Number,
+                    group.Key.CompetitionPath,
+                    group.Key.EditionNumber,
+                    group.Key.StartYear),
                 ConversationCount = group.Count(),
             })
             .ToListAsync(cancellationToken);
@@ -246,28 +254,19 @@ public class AdminDefenseReviewService(
         // The handout problems, each with how many conversations were held against it.
         var handoutProblems = handoutRows
             .Select(row => new AdminDefenseProblemOptionDto(
-                new AdminHandoutTarget(row.HandoutContentId, row.EnvironmentId), row.ConversationCount));
+                new NamedHandoutTarget(row.HandoutContentId, row.EnvironmentId), row.ConversationCount));
 
         // The archive problems, each named where it comes from.
         var archiveProblems = archiveRows
             .Select(row => new AdminDefenseProblemOptionDto(
-                new AdminProblemTarget(
-                    row.Slug,
-                    ProblemSources.Build(
-                        localization,
-                        row.EditionNumber,
-                        row.StartYear,
-                        row.CompetitionPath,
-                        row.Number,
-                        language)),
-                row.ConversationCount));
+                NamedDefenseTargets.Build(localization, language, row.Target), row.ConversationCount));
 
         // Both kinds in one list, the busiest first, ties broken by whatever addresses the problem so that two
         // with the same count keep one order between reads.
         var problems = handoutProblems
             .Concat(archiveProblems)
             .OrderByDescending(option => option.ConversationCount)
-            .ThenBy(option => AdminDefenseTargets.Key(option.Target), StringComparer.Ordinal)
+            .ThenBy(option => NamedDefenseTargets.Key(option.Target), StringComparer.Ordinal)
             .ToList();
 
         // And every set of settings one has run on.
@@ -299,9 +298,11 @@ public class AdminDefenseReviewService(
             .Select(session => new
             {
                 session.Id,
-                Target = new AdminDefenseTargets.Columns(
+                Target = new NamedDefenseTargets.Columns(
                     session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                     session.EnvironmentTarget!.HandoutEnvironment.ContentId,
+                    session.ProblemTarget!.ProblemId,
+                    session.ProblemTarget!.Problem.RoundId,
                     session.ProblemTarget!.Problem.Slug,
                     session.ProblemTarget!.Problem.Number,
                     session.ProblemTarget!.Problem.Round.Competition.Path,
@@ -389,7 +390,7 @@ public class AdminDefenseReviewService(
         // Hand it back with the settings parsed into the response rather than double-encoded into it.
         return new AdminDefenseDetailDto(
             loaded.Id,
-            AdminDefenseTargets.Build(localization, language, loaded.Target),
+            NamedDefenseTargets.Build(localization, language, loaded.Target),
             loaded.User,
             loaded.ProblemStatement,
             loaded.ProblemReference,
@@ -659,7 +660,7 @@ public class AdminDefenseReviewService(
     /// One conversation as the page comes back, its problem still as the columns naming it.
     /// </summary>
     /// <param name="Id"><inheritdoc cref="AdminDefenseConversationDto.Id" path="/summary"/></param>
-    /// <param name="Target"><inheritdoc cref="AdminDefenseTargets.Columns" path="/summary"/></param>
+    /// <param name="Target"><inheritdoc cref="NamedDefenseTargets.Columns" path="/summary"/></param>
     /// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
     /// <param name="LastStudentMessage"><inheritdoc cref="AdminDefenseConversationDto.LastStudentMessage" path="/summary"/></param>
     /// <param name="TurnCount"><inheritdoc cref="AdminDefenseConversationDto.TurnCount" path="/summary"/></param>
@@ -671,7 +672,7 @@ public class AdminDefenseReviewService(
     /// <param name="HasStudentFeedback"><inheritdoc cref="AdminDefenseConversationDto.HasStudentFeedback" path="/summary"/></param>
     private sealed record QueueRow(
         Guid Id,
-        AdminDefenseTargets.Columns Target,
+        NamedDefenseTargets.Columns Target,
         AdminDefenseUserDto User,
         string? LastStudentMessage,
         int TurnCount,

@@ -17,7 +17,7 @@ import type { UseDefenseReviewSelectionResult } from '../hooks/use-defense-revie
 import { describeReviewUser } from '../model/defense-review-types'
 import { ActionLabel } from './ActionLabel'
 import { DefenseReviewModalBody } from './DefenseReviewModalBody'
-import { DefenseTargetRef } from './DefenseTargetLabel'
+import { DefenseTargetRef } from './DefenseTargetRef'
 
 /**
  * Props for the {@link DefenseReviewModal} component.

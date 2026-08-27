@@ -16,15 +16,14 @@ import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
+import { useAreaEntry } from '../hooks/use-area-entry'
 import { useCompetitionProblems } from '../hooks/use-competition-problems'
 import { useEntryReader } from '../hooks/use-entry-reader'
-import { useFinishHostedCompetition } from '../hooks/use-finish-hosted-competition'
-import { useHostedCompetitionsView } from '../hooks/use-hosted-competitions-view'
-import type { AreaEntry } from '../model/hosted-competition-state'
-import { entryEndsAt, isPracticeGroup, wasHandedInEarly } from '../model/hosted-competition-state'
+import { isPracticeGroup } from '../model/hosted-competition-state'
 import { CategoryBadge } from './CategoryBadge'
 import { CompetitionProblemPanel } from './CompetitionProblemPanel'
 import { CompetitionStandingStrip } from './CompetitionStandingStrip'
+import { FinishEntryDialog } from './FinishEntryDialog'
 import { RulesList } from './RulesList'
 
 /**
@@ -65,34 +64,18 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
   // Whether the reader has been asked whether they really mean to hand the entry in
   const [isFinishAsked, { open: openFinish, close: closeFinish }] = useDisclosure(false)
 
-  // Closing the entry where the student says rather than where the clock does
-  const { finish, isFinishing } = useFinishHostedCompetition(readerKey, competitionId, () => {
-    // The question is answered
-    closeFinish()
+  // The competition, the group setting its terms, and the entry the reader spent on it
+  const {
+    competitionInGroup,
+    entry: defenseEntry,
+    uiState: viewState,
+  } = useAreaEntry(readerKey, isReaderKnown, competitionId)
 
-    // And out to the list, the way entering came in from it
-    router.push(LIST_HREF)
-  })
-
-  // Every competition the student can see, which the board has usually already fetched
-  const { view, uiState: viewState } = useHostedCompetitionsView(readerKey, isReaderKnown)
-
-  // The group holding this competition, and the competition itself
-  const competitionInGroup = view?.groups
-    .flatMap((group) => group.competitions.map((competition) => ({ group, competition })))
-    .find((candidate) => candidate.competition.id === competitionId)
-
-  // The entry the reader spent on this one, which is what the problems are behind
-  const entry = competitionInGroup?.competition.entry ?? null
-
-  // Whether there is one at all
-  const isEntitled = entry !== null
+  // Whether there is an entry at all
+  const isEntitled = defenseEntry !== null
 
   // When the counted part ended, which nothing but a sat entry has
-  const endsAt =
-    competitionInGroup !== undefined && entry?.kind === 'sat'
-      ? entryEndsAt(competitionInGroup.group, entry)
-      : null
+  const endsAt = defenseEntry?.kind === 'sat' ? defenseEntry.endsAt : null
 
   // This competition's problems, once there is an entry to read them through
   const { problems, uiState: problemsState } = useCompetitionProblems(
@@ -113,13 +96,13 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
 
   // A reader with no entry has nothing to read here, so the list is where they go instead
   useEffect(() => {
-    if (view !== undefined && !isEntitled) {
+    if (viewState.kind === 'ready' && !isEntitled) {
       router.replace(LIST_HREF)
     }
-  }, [view, isEntitled, router])
+  }, [viewState, isEntitled, router])
 
   // Still working out what there is to show, or on the way out
-  if (competitionInGroup === undefined || entry === null) {
+  if (competitionInGroup === undefined || defenseEntry === null) {
     return <AreaPlaceholder uiState={viewState} failed={t('loadFailed')} />
   }
 
@@ -137,12 +120,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
   const isPractice = isPracticeGroup(group)
 
   // Whether the student closed it themselves, which the page says differently from a clock running out
-  const wasHandedIn = entry.kind === 'sat' && wasHandedInEarly(group, entry)
-
-  // The entry as the chat reads it: the same problems under the same terms either way, and a clock only
-  // where one was ever started
-  const defenseEntry: AreaEntry =
-    endsAt === null ? { kind: 'forfeited' } : { kind: 'sat', endsAt, wasHandedIn }
+  const wasHandedIn = defenseEntry.kind === 'sat' && defenseEntry.wasHandedIn
 
   // Whether the counted part is over, which changes what the page says and nothing about what it offers.
   // A hand-in settles it outright, and a clock within its last second, the same boundary the reading
@@ -169,7 +147,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
           endsAt={endsAt}
           now={now}
           wasHandedIn={wasHandedIn}
-          onFinish={hasEnded || entry.kind !== 'sat' ? null : openFinish}
+          onFinish={hasEnded || defenseEntry.kind !== 'sat' ? null : openFinish}
           onOpenRules={openRules}
           listHref={LIST_HREF}
         />
@@ -203,7 +181,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
       {hasEnded && <AreaNote>{t(endedNoteKey(wasHandedIn, isPractice))}</AreaNote>}
 
       {/* An entry given up for the problems, which never had a clock */}
-      {entry.kind === 'forfeited' && <AreaNote>{t('areaForfeited')}</AreaNote>}
+      {defenseEntry.kind === 'forfeited' && <AreaNote>{t('areaForfeited')}</AreaNote>}
 
       {/* The set, read top to bottom */}
       <div className="flex flex-col gap-4">
@@ -218,35 +196,21 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
         ))}
       </div>
 
-      {/* What handing in costs, asked before it happens, there being no way back from it. The clock can run
-          out while the question is still on screen, and an entry the buzzer has already closed has nothing
-          left to hand in: the question goes with it, rather than leaving an irreversible press standing over
-          a page which has moved on without it. A press already in flight keeps it, so the buzzer landing in
-          the moment between pressing and the answer coming back does not take the spinner off the screen */}
-      {isFinishAsked && (!hasEnded || isFinishing) && (
-        <Modal
-          isOpen
-          onClose={closeFinish}
-          title={t('finishDialog.title')}
-          showCloseButton={false}
-          className="max-w-md hyphens-none"
-          // Nothing is focused ahead of the reader on a dialog whose primary button cannot be undone
-          focusPanelOnOpen
-        >
-          <p className="text-sm leading-relaxed text-foreground/80">
-            {t('finishDialog.consequence')}
-          </p>
+      {/* What handing in costs, asked before it happens */}
+      <FinishEntryDialog
+        readerKey={readerKey}
+        competitionId={competitionId}
+        isAsked={isFinishAsked}
+        hasEnded={hasEnded}
+        onClose={closeFinish}
+        onFinished={() => {
+          // The question is answered
+          closeFinish()
 
-          <div className="mt-6 flex justify-end gap-3">
-            <Button variant="ghost" onClick={closeFinish}>
-              {t('finishDialog.keepWorking')}
-            </Button>
-            <Button variant="danger" loading={isFinishing} onClick={finish}>
-              {t('finishDialog.confirm')}
-            </Button>
-          </div>
-        </Modal>
-      )}
+          // And out to the list, the way entering came in from it
+          router.push(LIST_HREF)
+        }}
+      />
     </div>
   )
 }

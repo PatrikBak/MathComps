@@ -73,7 +73,6 @@
         },
         "unknown": "Táto konverzácia prebehla skôr, než sa nastavenia zaznamenávali."
       },
-      "deletedHandout": "Odstránený materiál",
       "detailFailed": "Konverzáciu sa nepodarilo načítať",
       "detailTitle": "Konverzácia",
       "detailTitleFor": "Konverzácia: {student}",
@@ -377,6 +376,7 @@
     "finishEntry": "Ukončiť súťaž",
     "finishError": "Súťaž sa nepodarilo ukončiť. Skús to prosím znova.",
     "forfeitError": "Súťaž sa nepodarilo vzdať.",
+    "goToArea": "Otvoriť v súťaži",
     "howItWorks": {
       "steps": [
         "Vyberieš si aktívnu súťaž (nižšie je návod, ako si vybrať kategóriu) 🎮",
@@ -474,6 +474,7 @@
     "consentError": "Tvoje potvrdenie sa nepodarilo uložiť.",
     "consentPolicyLink": "Súkromie a podmienky",
     "conversationFull": "Táto konverzácia dosiahla svoj limit. Začni novú alebo sa v tejto vráť späť (prídeš však o správy, tie sa natrvalo zmažú).",
+    "deletedHandout": "Odstránený materiál",
     "deleteError": "Konverzáciu sa nepodarilo odstrániť.",
     "deleteSession": "Odstrániť z histórie",
     "deleteSessionMessage": "Táto konverzácia sa natrvalo odstráni.",
@@ -488,7 +489,6 @@
     "history": "História",
     "historyError": "Nepodarilo sa načítať tvoje predchádzajúce konverzácie.",
     "jumpToLatest": "Skočiť na najnovšie",
-    "libraryDeletedHandout": "Odstránený materiál",
     "libraryEmpty": "Otvor ľubovoľný <link>materiál</link>, vyber si úlohu, začni vysvetľovať svoje riešenie alebo aspoň nápad, ako naň prísť, a Mathilda sa s tebou porozpráva, posúdi, ako na tom si, a postrčí ťa, keď bude treba.",
     "libraryEmptyLead": "Mathilda je AI tútorka",
     "libraryLoading": "Načítavam…",

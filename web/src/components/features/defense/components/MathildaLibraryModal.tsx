@@ -1,27 +1,25 @@
 'use client'
 
-import { ArrowUpRight, Bot, Trash2 } from 'lucide-react'
-import { useFormatter, useTranslations } from 'next-intl'
-import type { MouseEvent, RefObject } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { Bot } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { HandoutProblemRefLabel } from '@/components/features/handouts/HandoutProblemRefLabel'
-import { useHandoutProblemLabel } from '@/components/features/handouts/use-handout-problem-label'
-import { useIsCurrentHandout } from '@/components/features/handouts/use-is-current-handout'
 import { AppLink } from '@/components/shared/components/AppLink'
-import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
+import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
+import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { Modal } from '@/components/shared/components/Modal'
-import { cn } from '@/components/shared/utils/css-utils'
-import { toPlainTextPreview } from '@/components/shared/utils/string-utils'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 import { useDeferredAnchorJump } from '@/hooks/use-deferred-anchor-jump'
 import { ROUTES } from '@/i18n/i18n'
 
+import { useLibraryConversation } from '../hooks/use-library-conversation'
+import { useLibrarySelection } from '../hooks/use-library-selection'
 import { useMyDefenses } from '../hooks/use-my-defenses'
-import type { DefenseProblem, DefenseSessionListItem } from '../model/defense-types'
+import type { DefenseSessionListItem } from '../model/defense-types'
 import { DefenseConversation } from './DefenseConversation'
+import { MathildaDefenseRow } from './MathildaDefenseRow'
 
 /**
  * Props for the {@link MathildaLibraryModal}.
@@ -31,141 +29,6 @@ type MathildaLibraryModalProps = {
   isOpen: boolean
   /** Closes the whole feature. */
   onClose: () => void
-}
-
-/**
- * Props for the {@link MathildaDefenseRow}.
- */
-type MathildaDefenseRowProps = {
-  /** The defense this row stands for. */
-  defense: DefenseSessionListItem
-  /** Holds this row's control when it is the one to return focus to, else null. */
-  openRef: RefObject<HTMLButtonElement | null> | null
-  /** Opens this defense's conversation. */
-  onOpen: (defense: DefenseSessionListItem) => void
-  /** Arms the delete confirmation for this defense. */
-  onDelete: (defense: DefenseSessionListItem) => void
-  /** Closes the list. */
-  onClose: () => void
-  /** Closes the list and takes the reader to an anchor on the page they are already on. */
-  onJumpInPage: (anchorId: string) => void
-}
-
-/**
- * One row in the list of a user's defenses: which handout and problem it was about, a glimpse of the conversation,
- * its date, and trailing controls. Clicking the row opens the conversation; the trailing jump goes to the problem
- * in its handout, and the trash removes the defense.
- */
-function MathildaDefenseRow({
-  defense,
-  openRef,
-  onOpen,
-  onDelete,
-  onClose,
-  onJumpInPage,
-}: MathildaDefenseRowProps) {
-  // Defense-surface copy
-  const t = useTranslations('defense')
-
-  // Handout-surface copy
-  const tHandouts = useTranslations('handouts')
-
-  // Locale-aware value formatter
-  const format = useFormatter()
-
-  // Which problem of which handout this defense was about
-  const problemLabel = useHandoutProblemLabel(defense.target, t('libraryDeletedHandout'))
-
-  // Whether the reader is already reading the handout this defense was about
-  const isOnThisHandout = useIsCurrentHandout(problemLabel.link?.handoutSlug ?? null)
-
-  // Sends a jump that stays on this page to the scroll, and lets every other one navigate
-  const handleJumpClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    // Another handout, so the link is the one to carry the reader there
-    if (!isOnThisHandout || problemLabel.link === null) {
-      onClose()
-      return
-    }
-
-    // There is nowhere to navigate to, so keep the page as it is
-    event.preventDefault()
-
-    // Hand the jump over to be made once the list has left
-    onJumpInPage(problemLabel.link.anchorId)
-  }
-
-  // A glimpse of the conversation: the student's most recent message, stripped to plain text. Null
-  // while nothing has been said in it yet.
-  const preview =
-    defense.lastStudentMessage === null ? null : toPlainTextPreview(defense.lastStudentMessage)
-
-  // When the conversation last moved, to the minute so same-day defenses stay apart
-  const lastActivityAt = format.dateTime(new Date(defense.lastActivityAt), {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  })
-
-  return (
-    <div className="group flex flex-col gap-2 rounded-lg bg-foreground/5 px-3.5 py-2.5 transition-colors hover:bg-foreground/10 min-[400px]:flex-row min-[400px]:items-stretch min-[400px]:gap-3 min-[400px]:pl-4 min-[400px]:pr-3">
-      {/* Open the conversation */}
-      <button
-        ref={openRef}
-        type="button"
-        onClick={() => onOpen(defense)}
-        className={cn(
-          'flex min-w-0 flex-1 flex-col items-start gap-0.5 rounded-md text-left',
-          FOCUS_RING_CLASS
-        )}
-      >
-        {/* Which handout, and which problem within it */}
-        <span className="flex w-full items-baseline gap-2">
-          <HandoutProblemRefLabel label={problemLabel} emphasis="strong" />
-        </span>
-
-        {/* A glimpse of the conversation, or that nothing has been said in it yet */}
-        <span className={cn('w-full truncate text-sm text-muted', preview === null && 'italic')}>
-          {preview ?? t('noReplyYet')}
-        </span>
-      </button>
-
-      {/* The stamp and its controls: a footer under the text until the row is wide enough to hold them beside it */}
-      <div className="flex shrink-0 items-center justify-between gap-2 min-[400px]:flex-col min-[400px]:items-end min-[400px]:gap-1">
-        <time dateTime={defense.lastActivityAt} className="text-[11px] leading-none text-muted">
-          {lastActivityAt}
-        </time>
-
-        {/* Jump and delete */}
-        <div className="-my-1 flex items-center text-muted">
-          {/* Jump straight to the problem in its handout, offered only where that page exists */}
-          {problemLabel.link !== null && (
-            <AppLink
-              href={problemLabel.link.href}
-              plain
-              aria-label={tHandouts('labels.goToHandout')}
-              onClick={handleJumpClick}
-              className={cn(
-                'flex size-11 items-center justify-center rounded-md transition-colors hover:bg-foreground/10 hover:text-foreground',
-                FOCUS_RING_CLASS
-              )}
-            >
-              <ArrowUpRight size={16} />
-            </AppLink>
-          )}
-
-          {/* Delete the defense */}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t('deleteSession')}
-            onClick={() => onDelete(defense)}
-            className="size-11 hover:bg-error/10 hover:text-error"
-          >
-            <Trash2 size={16} />
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 /**
@@ -183,14 +46,11 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
   // The user's defenses across every problem, and the controls over them
   const { defenses, isLoading, isError, deleteDefense, refresh } = useMyDefenses()
 
-  // The defense whose conversation is open, or null while the list is shown
-  const [selected, setSelected] = useState<DefenseSessionListItem | null>(null)
+  // Which defense is open, and the row focus returns to on the way back
+  const { selected, open, clear, rowRef } = useLibrarySelection()
 
-  // The row of the last opened defense
-  const rowToRefocus = useRef<HTMLButtonElement | null>(null)
-
-  // Which defense that row stands for
-  const [lastOpenedId, setLastOpenedId] = useState<string | null>(null)
+  // What the chosen defense opens as: the problem to argue and the entry it is argued inside
+  const conversation = useLibraryConversation(selected)
 
   // The defense awaiting delete confirmation, or null
   const [toDelete, setToDelete] = useState<DefenseSessionListItem | null>(null)
@@ -198,33 +58,16 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
   // A jump to a problem on the page behind the modal, made once the modal is out of its way
   const { armJump, runArmedJump } = useDeferredAnchorJump()
 
-  // Whether the conversation view is showing instead of the list
+  // Whether a defense is chosen
   const inConversation = selected !== null
 
-  // Returning from a conversation unmounts the control that had focus, so put it back on the row it came from
-  useEffect(() => {
-    // Only the swap back to the list has a row to return to
-    if (inConversation) {
-      return
-    }
-
-    // Hand focus to the row that was open, if it is still listed
-    rowToRefocus.current?.focus()
-  }, [inConversation])
-
-  // Opens a defense's conversation, noting the row so focus can return to it
-  const handleOpen = (defense: DefenseSessionListItem) => {
-    // Note the row focus comes back to
-    setLastOpenedId(defense.id)
-
-    // Show the conversation
-    setSelected(defense)
-  }
+  // Whether the chat has the panel, which brings its own close and title with it
+  const isChatShowing = conversation.problem !== null
 
   // Closes the whole feature, dropping any selection so it reopens on the list
   const handleClose = () => {
     // Back to the list for next time
-    setSelected(null)
+    clear()
 
     // Close the feature
     onClose()
@@ -255,39 +98,37 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
     }
   }
 
-  // The problem to hand the conversation when a defense is open: its target and the statement snapshotted onto
-  // the session, which is what the chat shows alongside the transcript. The library lists handout defenses
-  // only, so its targets are named as such on the way in.
-  const conversationProblem: DefenseProblem | null =
-    selected === null
-      ? null
-      : {
-          target: { kind: 'handout', environment: selected.target },
-          statement: selected.statement,
-        }
-
   return (
     <>
       <Modal
         isOpen={isOpen}
-        onClose={inConversation ? () => setSelected(null) : handleClose}
-        title={inConversation ? undefined : MATHILDA_NAME}
-        ariaLabel={inConversation ? t('title') : undefined}
-        showCloseButton={!inConversation}
-        padded={!inConversation}
-        tall={inConversation}
-        className={inConversation ? undefined : 'max-w-2xl'}
+        onClose={inConversation ? clear : handleClose}
+        title={isChatShowing ? undefined : MATHILDA_NAME}
+        ariaLabel={isChatShowing ? t('title') : undefined}
+        showCloseButton={!isChatShowing}
+        padded={!isChatShowing}
+        tall={isChatShowing}
+        className={isChatShowing ? undefined : 'max-w-2xl'}
         onClosed={runArmedJump}
       >
-        {selected !== null && conversationProblem !== null ? (
+        {selected !== null && conversation.problem !== null ? (
           // The real conversation, opened on the chosen defense
           <DefenseConversation
             key={selected.id}
-            problem={conversationProblem}
+            problem={conversation.problem}
             isOpen={isOpen}
-            onClose={() => setSelected(null)}
+            onClose={clear}
             opening={{ kind: 'named', sessionId: selected.id }}
-            competition={null}
+            competition={conversation.competition}
+          />
+        ) : selected !== null ? (
+          // A chosen defense whose problem is not in hand yet, which is the entry a competition one is read
+          // against still being read
+          <FetchStatePlaceholder
+            uiState={conversation.uiState}
+            empty={<p className="text-sm text-error">{t('historyError')}</p>}
+            failed={<p className="text-sm text-error">{t('historyError')}</p>}
+            className="flex flex-col items-center gap-3 py-8 text-center"
           />
         ) : isLoading ? (
           // Still fetching the list
@@ -326,8 +167,8 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
               <MathildaDefenseRow
                 key={defense.id}
                 defense={defense}
-                openRef={defense.id === lastOpenedId ? rowToRefocus : null}
-                onOpen={handleOpen}
+                openRef={rowRef(defense)}
+                onOpen={open}
                 onDelete={setToDelete}
                 onClose={handleClose}
                 onJumpInPage={handleJumpInPage}

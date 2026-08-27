@@ -1,6 +1,7 @@
+import type { NamedDefenseTarget } from '@/components/features/defense/model/defense-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
-import type { DefenseReviewFilter, DefenseReviewTarget } from './defense-review-types'
+import type { DefenseReviewFilter } from './defense-review-types'
 
 /**
  * Sits between the parts of a problem's key. Every part is a slug or a nanoid, so it can't appear inside one.
@@ -152,7 +153,8 @@ const PROBLEM_KEY_KINDS = { handout: 'handout', problem: 'problem' } as const
  * @param target - The problem.
  * @returns The problem as one id.
  */
-export function encodeProblemKey(target: DefenseReviewTarget): string {
+export function encodeProblemKey(target: NamedDefenseTarget): string {
+  // Reduce the problem the way its own kind is addressed
   switch (target.kind) {
     // A handout problem, which both of its ids are needed to locate
     case 'handout':

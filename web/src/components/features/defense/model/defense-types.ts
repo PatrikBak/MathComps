@@ -1,4 +1,5 @@
 import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
+import type { ProblemSource } from '@/components/features/problems/types/problem-api-types'
 
 import type { DefenseTarget } from './defense-target'
 
@@ -81,9 +82,10 @@ export type DefenseTurnReport = {
 }
 
 /**
- * A stored defense held against one environment of a published handout, as the API names it.
+ * The handout environment a defense is held against: the same two ids whether a request names it or a
+ * listing reads it back.
  */
-type HandoutSessionTarget = {
+export type NamedHandoutTarget = {
   /** The discriminant. */
   kind: 'handout'
 } & HandoutEnvironmentTarget
@@ -103,7 +105,7 @@ type ProblemSessionTarget = {
  * archive problem. Flatter than the {@link DefenseTarget} the surface works in, which also carries what a
  * competition area needs to key its own caches by.
  */
-export type DefenseSessionTarget = HandoutSessionTarget | ProblemSessionTarget
+export type DefenseSessionTarget = NamedHandoutTarget | ProblemSessionTarget
 
 /**
  * One defense conversation a student has held about a single problem: the full transcript plus its
@@ -147,14 +149,37 @@ export type DefenseSessionList = {
 }
 
 /**
+ * An archive problem a conversation was held against, named as well as addressed: nothing on the reader's
+ * side can name a competition still under embargo.
+ */
+export type NamedProblemTarget = {
+  /** The discriminant. */
+  kind: 'problem'
+  /** The problem being defended. */
+  problemId: string
+  /** The competition it was set in, identified by the round it runs as. */
+  competitionId: string
+  /** URL-safe identifier, unique across the archive. */
+  slug: string
+  /** Where the problem comes from. */
+  source: ProblemSource
+}
+
+/**
+ * What a conversation was held against, as a surface reading conversations back names it. Exactly one arm
+ * applies to any one conversation.
+ */
+export type NamedDefenseTarget = NamedHandoutTarget | NamedProblemTarget
+
+/**
  * One of a user's defenses as it appears in their cross-problem list: a summary of what it was about, when it
  * last moved, and where the student got to. It carries no turns.
  */
 export type DefenseSessionListItem = {
   /** Stable identifier. */
   id: string
-  /** The handout environment this defense is about. */
-  target: HandoutEnvironmentTarget
+  /** What this defense is about. */
+  target: NamedDefenseTarget
   /** The problem statement as it stood when the session was started. */
   statement: string
   /** When something was last said in the conversation, as an ISO-8601 string. */

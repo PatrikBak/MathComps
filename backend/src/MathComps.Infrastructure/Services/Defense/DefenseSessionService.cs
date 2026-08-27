@@ -1,11 +1,13 @@
 using System.Diagnostics;
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Engine;
+using MathComps.Infrastructure.Services.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -27,10 +29,12 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// <param name="contentResolver">Looks up what a new session's examiner is told about the problem.</param>
 /// <param name="defenseCopy">The examiner's own lines, in the student's language.</param>
 /// <param name="targetGuard">Says whether a student may argue what the target names.</param>
+/// <param name="localization">Resolves the localized names a competition problem is listed under.</param>
 public class DefenseSessionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory, IExaminer examiner, IOptions<DefenseLimits> limits,
     IExaminerConfigSnapshotProvider examinerConfigSnapshotProvider, IDefenseUserTurnGate turnGate,
-    IDefenseContentResolver contentResolver, IDefenseCopy defenseCopy, IDefenseTargetGuard targetGuard)
+    IDefenseContentResolver contentResolver, IDefenseCopy defenseCopy, IDefenseTargetGuard targetGuard,
+    IMetadataLocalizationService localization)
     : IDefenseSessionService
 {
     /// <summary>
@@ -227,25 +231,34 @@ public class DefenseSessionService(
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<DefenseSessionListItemDto>> ListAllAsync(
-        Guid userId, CancellationToken cancellationToken = default)
+        Guid userId, Language language, CancellationToken cancellationToken = default)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's handout sessions, most recently active first, each with its target, statement, last
-        // activity, and the student's most recent message. A competition conversation is left out: it is read
-        // inside the competition area, whose problems may still be embargoed.
-        return await dbContext.DefenseSessions
+        // The user's sessions, most recently active first, each with the columns of both target arms, its
+        // statement, last activity, and the student's most recent message.
+        var rows = await dbContext.DefenseSessions
             .AsNoTracking()
-            .Where(session => session.UserId == userId && session.EnvironmentTarget != null)
+            .Where(session => session.UserId == userId)
+            // A session whose handout environment was dropped keeps its own row, and there is nothing left to
+            // name it by, so it is left out rather than failing the whole list.
+            .Where(session => session.EnvironmentTarget != null || session.ProblemTarget != null)
             .OrderByDescending(session => session.Turns.Max(turn => turn.CreatedAt))
             // A tie goes to the session started later: ids are time-ordered v7 Guids.
             .ThenByDescending(session => session.Id)
-            .Select(session => new DefenseSessionListItemDto(
+            .Select(session => new ListRow(
                 session.Id,
-                new HandoutEnvironmentTarget(
+                new NamedDefenseTargets.Columns(
                     session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
-                    session.EnvironmentTarget.HandoutEnvironment.ContentId),
+                    session.EnvironmentTarget!.HandoutEnvironment.ContentId,
+                    session.ProblemTarget!.ProblemId,
+                    session.ProblemTarget!.Problem.RoundId,
+                    session.ProblemTarget!.Problem.Slug,
+                    session.ProblemTarget!.Problem.Number,
+                    session.ProblemTarget!.Problem.Round.Competition.Path,
+                    session.ProblemTarget!.Problem.Round.Season.EditionNumber,
+                    session.ProblemTarget!.Problem.Round.Season.StartYear),
                 session.ProblemStatement,
                 session.Turns.Max(turn => turn.CreatedAt),
                 session.Turns
@@ -254,6 +267,17 @@ public class DefenseSessionService(
                     .Select(turn => turn.Content)
                     .FirstOrDefault()))
             .ToListAsync(cancellationToken);
+
+        // Name each one.
+        return
+        [
+            .. rows.Select(row => new DefenseSessionListItemDto(
+                row.Id,
+                NamedDefenseTargets.Build(localization, language, row.Target),
+                row.Statement,
+                row.LastActivityAt,
+                row.LastStudentMessage)),
+        ];
     }
 
     /// <inheritdoc/>
@@ -636,4 +660,20 @@ public class DefenseSessionService(
     private static IReadOnlyList<DefenseTurnReportDto> ToReportDtos(IEnumerable<DefenseTurnReport> reports) =>
         [.. reports.Select(report => new DefenseTurnReportDto(
             report.TurnId, report.Categories, report.Comment))];
+
+    /// <summary>
+    /// One listed conversation as it comes back, its problem still as the columns naming it.
+    /// </summary>
+    /// <param name="Id"><inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='Id']"/></param>
+    /// <param name="Target"><inheritdoc cref="NamedDefenseTargets.Columns" path="/summary"/></param>
+    /// <param name="Statement"><inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='Statement']"/></param>
+    /// <param name="LastActivityAt"><inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='LastActivityAt']"/></param>
+    /// <param name="LastStudentMessage">
+    /// <inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='LastStudentMessage']"/></param>
+    private sealed record ListRow(
+        Guid Id,
+        NamedDefenseTargets.Columns Target,
+        string Statement,
+        DateTimeOffset LastActivityAt,
+        string? LastStudentMessage);
 }

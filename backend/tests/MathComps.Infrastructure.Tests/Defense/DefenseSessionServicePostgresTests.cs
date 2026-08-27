@@ -9,6 +9,7 @@ using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Dtos;
 using MathComps.Infrastructure.Services.Defense.Engine;
+using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -115,6 +116,11 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// </summary>
     private readonly Guid _problemId = Guid.CreateVersion7();
 
+    /// <summary>
+    /// The round that problem sits in, which is the competition it was set in.
+    /// </summary>
+    private readonly Guid _roundId = Guid.CreateVersion7();
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
@@ -160,6 +166,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Says whether the target being argued may be argued at all.
         services.AddScoped<IDefenseTargetGuard, DefenseTargetGuard>();
 
+        // The display names a competition problem is listed under.
+        services.AddSingleton<IMetadataLocalizationService, MetadataLocalizationService>();
+
         // The service under test.
         services.AddScoped<IDefenseSessionService, DefenseSessionService>();
     }
@@ -195,10 +204,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         context.HostedGroups.Add(group);
 
         // Its one round, embargoed until the group closes, which is what an entry buys past.
-        var roundId = Guid.CreateVersion7();
         context.Rounds.Add(new Round
         {
-            Id = roundId,
+            Id = _roundId,
             CompetitionId = CompetitionTreeSeed.Chain(context, "mc-advanced").Id,
             SeasonId = season.Id,
             Date = new DateOnly(2026, 10, 1),
@@ -210,7 +218,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         context.Problems.Add(new Problem
         {
             Id = _problemId,
-            RoundId = roundId,
+            RoundId = _roundId,
             Number = 1,
             Slug = "mc-advanced-1",
         });
@@ -220,7 +228,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         {
             Id = Guid.CreateVersion7(),
             UserId = _ownerId,
-            RoundId = roundId,
+            RoundId = _roundId,
             StartedAt = DateTimeOffset.UtcNow,
         });
 
@@ -511,7 +519,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await service.ContinueAsync(_ownerId, first.Id, "one more thing");
 
         // List every session the owner holds
-        var sessions = await service.ListAllAsync(_ownerId);
+        var sessions = await service.ListAllAsync(_ownerId, Language.EN);
 
         // Only the owner's three come back, across both problems, most recently active first
         Assert.Equal([first.Id, third.Id, second.Id], sessions.Select(session => session.Id));
@@ -520,7 +528,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         var continued = sessions[0];
 
         // It carries its target, snapshotted statement, and the student's most recent message
-        Assert.Equal(new HandoutEnvironmentTarget("handout-1", "prob-1"), continued.Target);
+        Assert.Equal(new NamedHandoutTarget("handout-1", "prob-1"), continued.Target);
         Assert.Equal(FakeDefenseContentResolver.Statement, continued.Statement);
         Assert.Equal("one more thing", continued.LastStudentMessage);
 
@@ -529,30 +537,46 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// A conversation about a competition problem stays out of the cross-problem listing. The listing carries each
-    /// session's snapshotted statement, and it is read on a page that knows nothing about embargoes, so a
-    /// competition session appearing there would publish the statement its competition is still holding back.
+    /// A conversation about a competition problem is listed alongside the handout ones, named by the competition
+    /// it was set in, since the student's own side has nothing to resolve a problem's identity against. An
+    /// embargoed round is no reason to hold it back: the student holds the entry that bought them past it.
     /// </summary>
     [Fact]
-    public Task ListAll_leaves_out_a_competition_problems_conversation() => RunTestAsync(async service =>
+    public Task ListAll_names_a_competition_conversation_by_where_its_problem_comes_from() =>
+        RunTestAsync(async service =>
     {
         // The owner's conversation about a handout environment
         var handout = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
 
-        // The owner's second conversation, about a hosted problem
-        await service.StartAsync(
+        // The owner's second conversation, about a hosted problem whose round is still under embargo
+        var competition = await service.StartAsync(
             _ownerId,
             new DefenseSessionStart(
                 new StartDefenseRequest(new ProblemTarget(_problemId), "my defense"), Language.EN));
 
-        // Both were written
-        Assert.Equal(2, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+        // Listing the owner's conversations comes back with both, the competition one first
+        var sessions = await service.ListAllAsync(_ownerId, Language.EN);
+        Assert.Equal([competition.Id, handout.Id], sessions.Select(session => session.Id));
 
-        // Listing the owner's conversations comes back with exactly one
-        var listed = Assert.Single(await service.ListAllAsync(_ownerId));
+        // The competition one names a problem rather than a handout environment
+        var target = Assert.IsType<NamedProblemTarget>(sessions[0].Target);
 
-        // The handout conversation, with the problem one left out
-        Assert.Equal(handout.Id, listed.Id);
+        // Carrying the ids that address the problem and the competition, and the slug the archive uses
+        Assert.Equal(_problemId, target.ProblemId);
+        Assert.Equal(_roundId, target.CompetitionId);
+        Assert.Equal("mc-advanced-1", target.Slug);
+
+        // Named as every competition down to the one that set it, in the language asked for
+        Assert.Equal(
+            ["MathComps", "Advanced"],
+            target.Source.Competition.Select(node => node.DisplayName));
+
+        // Along with the season's own year and the problem's place in the competition
+        Assert.Equal(2026, target.Source.StartYear);
+        Assert.Equal(1, target.Source.Number);
+
+        // And it carries the statement its competition is still holding back from everybody else
+        Assert.Equal(FakeDefenseContentResolver.Statement, sessions[0].Statement);
     });
 
     /// <summary>
@@ -569,7 +593,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 0);
 
         // List every session the owner holds
-        var sessions = await service.ListAllAsync(_ownerId);
+        var sessions = await service.ListAllAsync(_ownerId, Language.EN);
 
         // The session is still there, with nothing the student said to preview
         var listed = Assert.Single(sessions);

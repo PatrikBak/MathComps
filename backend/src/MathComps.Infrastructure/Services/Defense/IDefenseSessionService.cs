@@ -1,11 +1,12 @@
 using MathComps.Domain.Contracts.Defense;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
 /// Runs and persists a user's AI-examiner defense conversations: opening a session, continuing it turn by turn (each
 /// turn runs the examiner engine and records its spend), listing a user's sessions against one target or all of
-/// their handout sessions, rewinding one to an earlier point, and deleting one.
+/// them, rewinding one to an earlier point, and deleting one.
 /// Guardrails (input sizes, turn count, per-user spend) are enforced before any model call.
 /// </summary>
 public interface IDefenseSessionService
@@ -44,15 +45,17 @@ public interface IDefenseSessionService
         Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Lists all of a user's handout sessions, most recently active first, each summarized to its problem,
-    /// statement, last activity, and most recent student message. Competition conversations are left out: they
-    /// are read inside the competition area, whose problems may still be embargoed.
+    /// Lists all of a user's sessions, most recently active first, each summarized to its problem, statement,
+    /// last activity, and most recent student message. A competition conversation is among them: only the
+    /// student who held it is ever shown it, and the entry that let them hold it is what entitles them to its
+    /// problems for as long as the embargo runs.
     /// </summary>
     /// <param name="userId">The user whose sessions to list.</param>
+    /// <param name="language">The language to name a competition problem in.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The user's handout sessions, most recently active first.</returns>
+    /// <returns>The user's sessions, most recently active first.</returns>
     Task<IReadOnlyList<DefenseSessionListItemDto>> ListAllAsync(
-        Guid userId, CancellationToken cancellationToken = default);
+        Guid userId, Language language, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes a session and its turns outright. The session must belong to the user, and must not be a

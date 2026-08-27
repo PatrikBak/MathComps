@@ -73,7 +73,6 @@
         },
         "unknown": "This conversation ran before the settings were recorded."
       },
-      "deletedHandout": "Deleted handout",
       "detailFailed": "Couldn't load the conversation",
       "detailTitle": "Conversation",
       "detailTitleFor": "Conversation: {student}",
@@ -377,6 +376,7 @@
     "finishEntry": "Finish and hand in",
     "finishError": "The entry could not be closed. Please try again.",
     "forfeitError": "Could not give up the competition.",
+    "goToArea": "Open in the competition",
     "howItWorks": {
       "steps": [
         "Pick an open competition (how to choose a level is right below) 🎮",
@@ -474,6 +474,7 @@
     "consentError": "Your confirmation couldn't be saved.",
     "consentPolicyLink": "Privacy and terms",
     "conversationFull": "This conversation has reached its limit. Start a new one, or rewind this one (the messages you drop are gone for good).",
+    "deletedHandout": "Deleted handout",
     "deleteError": "The conversation couldn't be removed.",
     "deleteSession": "Remove from history",
     "deleteSessionMessage": "This conversation will be permanently removed.",
@@ -488,7 +489,6 @@
     "history": "History",
     "historyError": "Couldn't load your past conversations.",
     "jumpToLatest": "Jump to latest",
-    "libraryDeletedHandout": "Deleted handout",
     "libraryEmpty": "Open any <link>handout</link>, pick a problem, start explaining your solution or your ideas for one, and she'll talk it through with you, weigh up where it stands, and nudge you when you need it.",
     "libraryEmptyLead": "Mathilda is an AI tutor",
     "libraryLoading": "Loading…",
