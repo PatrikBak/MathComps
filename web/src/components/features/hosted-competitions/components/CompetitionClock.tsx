@@ -9,7 +9,11 @@ import { formatClockRemaining } from '@/components/shared/utils/duration-utils'
 import { SECOND_MS } from '@/components/shared/utils/time-units'
 
 import type { ClockDisplayMode } from '../model/hosted-competition-state'
-import { clockDisplayMode, clockMinutesLeft } from '../model/hosted-competition-state'
+import {
+  clockDisplayMode,
+  clockMinuteFraction,
+  clockMinutesLeft,
+} from '../model/hosted-competition-state'
 
 /**
  * How each precision colours the reading and its icon.
@@ -22,20 +26,29 @@ type ClockModeColors = {
 }
 
 /**
- * What each precision is painted in: the last minute in the colour a deadline is said in, everything
- * before it in the one an ordinary reading is.
+ * What each precision is painted in: the last minute in the colour a deadline is said in, the window
+ * before it in the one a warning is, and the rest of the clock in the one an ordinary reading is.
  */
 const CLOCK_MODE_COLORS: Record<ClockDisplayMode, ClockModeColors> = {
   minutes: { reading: 'text-foreground', icon: 'text-muted' },
-  seconds: { reading: 'text-error', icon: 'text-error' },
+  closing: { reading: 'text-warning', icon: 'text-warning' },
+  final: { reading: 'text-error', icon: 'text-error' },
 }
 
 /**
  * How the reading sits, whatever it currently says. It carries no surface of its own, and it never breaks
- * across lines: a clock split over two of them stops reading as a clock.
+ * across lines: a clock split over two of them stops reading as a clock. It is also what the drain is
+ * positioned against.
  */
 const CLOCK_CLASS =
-  'inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-sm font-medium tabular-nums'
+  'relative inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-sm font-medium tabular-nums'
+
+/**
+ * How the drain under a running reading sits: along the bottom of the reading, held off either end by the
+ * same padding the reading itself keeps. That inset is what holds its ends square, clear of the corner
+ * radius of whatever shape is drawn around the clock, which would otherwise shave them into tapers.
+ */
+const CLOCK_DRAIN_CLASS = 'absolute inset-x-3 bottom-0 h-px origin-left bg-muted/50'
 
 /**
  * Props for the {@link CompetitionClock}.
@@ -51,6 +64,10 @@ type CompetitionClockProps = {
 
 /**
  * How much of an entrant's own clock is left, read to the precision {@link clockDisplayMode} sets.
+ *
+ * A minutes reading carries a drain under it, since it holds still for a minute at a time and a still
+ * clock reads as a stopped one. The seconds retire it: a reading counting them moves once a second on its
+ * own.
  */
 export function CompetitionClock({ endsAt, now, wasHandedIn }: CompetitionClockProps) {
   // Competitions copy
@@ -76,11 +93,19 @@ export function CompetitionClock({ endsAt, now, wasHandedIn }: CompetitionClockP
   // What that precision is painted in
   const colors = CLOCK_MODE_COLORS[mode]
 
-  // The reading, which turns red for its last minute
+  // The reading, which warms as its clock closes and turns red for the last minute
   return (
     <span className={cn(CLOCK_CLASS, colors.reading)}>
       <Timer size={14} className={colors.icon} />
       {clockText()}
+
+      {mode === 'minutes' && (
+        <span
+          aria-hidden
+          className={CLOCK_DRAIN_CLASS}
+          style={{ transform: `scaleX(${clockMinuteFraction(remainingMs)})` }}
+        />
+      )}
     </span>
   )
 
@@ -102,8 +127,9 @@ export function CompetitionClock({ endsAt, now, wasHandedIn }: CompetitionClockP
           : t('clockLeftMinutes', { minutes })
       }
 
-      // Inside the last minute, where the seconds are the decision
-      case 'seconds':
+      // Close enough that the seconds are the decision, and then the deadline itself
+      case 'closing':
+      case 'final':
         return formatClockRemaining(remainingMs)
 
       // Every mode is handled above

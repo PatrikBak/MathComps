@@ -4,6 +4,7 @@ import { DAY_MS, HOUR_MS, MINUTE_MS, SECOND_MS } from '@/components/shared/utils
 
 import {
   clockDisplayMode,
+  clockMinuteFraction,
   clockMinutesLeft,
   derivePhase,
   deriveStanding,
@@ -251,14 +252,36 @@ describe('orderForReading', () => {
 })
 
 describe('clockDisplayMode', () => {
-  it('is still counting in minutes with exactly a minute left', () => {
-    // The switch belongs inside the last minute, not at the moment it begins
-    expect(clockDisplayMode(MINUTE_MS)).toBe('minutes')
+  it('is still counting in minutes with exactly five left', () => {
+    // The switch belongs inside the closing window, not at the moment it begins
+    expect(clockDisplayMode(5 * MINUTE_MS)).toBe('minutes')
   })
 
-  it('counts in seconds once inside the last minute', () => {
+  it('counts in seconds once inside the last five minutes', () => {
     // Here the seconds are what a student is actually deciding against
-    expect(clockDisplayMode(MINUTE_MS - 1)).toBe('seconds')
+    expect(clockDisplayMode(5 * MINUTE_MS - 1)).toBe('closing')
+  })
+
+  it('is still closing with exactly a minute left', () => {
+    // The deadline paint belongs inside the last minute, not at the moment it begins
+    expect(clockDisplayMode(MINUTE_MS)).toBe('closing')
+  })
+
+  it('reads the last minute as the deadline it is', () => {
+    // Nothing is left to decide, so the reading stops being information and starts being a warning
+    expect(clockDisplayMode(MINUTE_MS - 1)).toBe('final')
+  })
+})
+
+describe('clockMinuteFraction', () => {
+  it('is full on the tick the reading changes', () => {
+    // A minute out either way and the drain runs dry while the number still has a minute to sit on
+    expect(clockMinuteFraction(29 * MINUTE_MS)).toBe(1)
+  })
+
+  it('is spent by the moment the reading is about to change again', () => {
+    // A millisecond of the minute left, so the drain has all but gone
+    expect(clockMinuteFraction(28 * MINUTE_MS + 1)).toBeCloseTo(0, 4)
   })
 })
 
