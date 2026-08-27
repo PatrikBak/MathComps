@@ -1,6 +1,11 @@
-import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
+import { assertNever } from '@/components/shared/utils/assert-never'
 
-import type { DefenseReviewFilter } from './defense-review-types'
+import type { DefenseReviewFilter, DefenseReviewTarget } from './defense-review-types'
+
+/**
+ * Sits between the parts of a problem's key. Every part is a slug or a nanoid, so it can't appear inside one.
+ */
+const PROBLEM_KEY_SEPARATOR = ':'
 
 /**
  * A filter narrowing nothing, which is where the queue starts and what clearing returns it to.
@@ -127,30 +132,108 @@ export function readSignalSelection(
 }
 
 /**
+ * Which problem a filter narrows to. A conversation is held against a handout problem or an archive one, so a
+ * filter naming a problem sets one arm's fields and leaves the other's unset.
+ */
+export type DefenseReviewProblemFields = Pick<
+  DefenseReviewFilter,
+  'handoutContentId' | 'environmentId' | 'problemSlug'
+>
+
+/**
+ * What a problem key names before its own address: which kind of problem it is, since a handout problem and an
+ * archive one are addressed by different things and one key has to be read back as the right one.
+ */
+const PROBLEM_KEY_KINDS = { handout: 'handout', problem: 'problem' } as const
+
+/**
  * Reduces a problem to one string, so it can be an option's id and be read back from the reader's selection.
- * Both halves are needed, since a problem's own id only means anything within its handout.
  *
  * @param target - The problem.
  * @returns The problem as one id.
  */
-export function encodeProblemKey(target: HandoutEnvironmentTarget): string {
-  // The two ids joined; both are nanoids, so the separator can't appear inside either
-  return `${target.handoutContentId}:${target.environmentId}`
+export function encodeProblemKey(target: DefenseReviewTarget): string {
+  switch (target.kind) {
+    // A handout problem, which both of its ids are needed to locate
+    case 'handout':
+      return handoutProblemKey(target.handoutContentId, target.environmentId)
+
+    // An archive problem, which one slug addresses
+    case 'problem':
+      return archiveProblemKey(target.slug)
+
+    // An arm nothing here knows
+    default:
+      return assertNever(target)
+  }
 }
 
 /**
- * Reads a problem back out of the id {@link encodeProblemKey} made.
+ * The key a handout problem reads under.
+ *
+ * @param handoutContentId - The handout's permanent content id.
+ * @param environmentId - The environment's permanent id, unique within its handout.
+ *
+ * @returns The problem as one id.
+ */
+function handoutProblemKey(handoutContentId: string, environmentId: string): string {
+  // Both halves, since a problem's own id only means anything within its handout
+  return [PROBLEM_KEY_KINDS.handout, handoutContentId, environmentId].join(PROBLEM_KEY_SEPARATOR)
+}
+
+/**
+ * The key an archive problem reads under.
+ *
+ * @param slug - The problem's slug, unique across the archive.
+ * @returns The problem as one id.
+ */
+function archiveProblemKey(slug: string): string {
+  // The slug addresses it on its own
+  return [PROBLEM_KEY_KINDS.problem, slug].join(PROBLEM_KEY_SEPARATOR)
+}
+
+/**
+ * Reads an id back into the fields it narrows by, undoing what {@link encodeProblemKey} wrote.
  *
  * @param key - The id to read.
- * @returns The problem, or null when the id isn't one of ours.
+ * @returns The fields it narrows by, or null when the id isn't one of ours.
  */
-export function decodeProblemKey(key: string): HandoutEnvironmentTarget | null {
-  // The two halves
-  const [handoutContentId, environmentId] = key.split(':')
+export function decodeProblemKey(key: string): DefenseReviewProblemFields | null {
+  // What the key names, its kind leading
+  const [kind, ...address] = key.split(PROBLEM_KEY_SEPARATOR)
+
+  // A handout problem, which stands only once both of its halves do
+  if (kind === PROBLEM_KEY_KINDS.handout && address.length === 2 && address.every(Boolean)) {
+    return { handoutContentId: address[0], environmentId: address[1] }
+  }
+
+  // An archive problem, which one slug addresses
+  if (kind === PROBLEM_KEY_KINDS.problem && address.length === 1 && address[0] !== '') {
+    return { problemSlug: address[0] }
+  }
 
   // Anything else came from somewhere other than encodeProblemKey
-  if (!handoutContentId || !environmentId) return null
+  return null
+}
 
-  // The problem it names
-  return { handoutContentId, environmentId }
+/**
+ * Reads the problem a filter narrows to back as the key its option carries, so the facet can show which of its
+ * options is the one standing.
+ *
+ * @param filter - The filter as it stands.
+ * @returns The key, or null while the filter names no problem.
+ */
+export function problemKeyOf(filter: DefenseReviewFilter): string | null {
+  // A handout problem, which only stands once both halves are set
+  if (filter.handoutContentId !== undefined && filter.environmentId !== undefined) {
+    return handoutProblemKey(filter.handoutContentId, filter.environmentId)
+  }
+
+  // An archive problem, addressed by its slug
+  if (filter.problemSlug !== undefined) {
+    return archiveProblemKey(filter.problemSlug)
+  }
+
+  // The filter narrows to every problem
+  return null
 }

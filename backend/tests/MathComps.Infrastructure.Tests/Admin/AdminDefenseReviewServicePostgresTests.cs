@@ -1,10 +1,12 @@
 using MathComps.Domain.Contracts.Admin;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Defense;
+using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +45,34 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// A second reviewer, so one reading a conversation has somebody else's queue to leave alone.
     /// </summary>
     private static readonly Guid _otherReviewerId = Guid.Parse("00000000-0000-0000-0000-0000000000f2");
+
+    /// <summary>
+    /// The settings the competition conversation ran on, shared with nothing else so that the grouping by
+    /// version still has exactly one pair to find.
+    /// </summary>
+    private const string ArchiveExaminerConfig =
+        /*lang=json,strict*/ """{"generate":{"model":"gemini-3.6-flash","promptText":"be strict"}}""";
+
+    /// <summary>
+    /// The archive problem one of the conversations was held against.
+    /// </summary>
+    private static readonly Guid _archiveProblemId = Guid.Parse("00000000-0000-0000-0000-0000000000d1");
+
+    /// <summary>
+    /// The conversation held against that problem.
+    /// </summary>
+    private static readonly Guid _archiveSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a5");
+
+    /// <summary>
+    /// The slug addressing the archive problem, which is what the queue is narrowed to it by.
+    /// </summary>
+    private const string ArchiveProblemSlug = "76-mc-advanced-1-2";
+
+    /// <summary>
+    /// The node the archive problem's competition sits at. Registered in the taxonomy, since naming the
+    /// competition is the whole of what this arm adds.
+    /// </summary>
+    private const string ArchiveCompetitionPath = "mc-advanced-1";
 
     /// <summary>
     /// The handout environment two of the conversations were held against.
@@ -98,6 +128,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         [_oldestSessionId] = "oldest",
         [_newerSessionId] = "newer",
         [_newestSessionId] = "newest",
+        [_archiveSessionId] = "competition",
     };
 
     /// <summary>
@@ -145,6 +176,9 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Writing notes, which several of the queue's marks are read off.
         services.AddScoped<IAdminNoteService, AdminNoteService>();
+
+        // The display names an archive problem is named by.
+        services.AddSingleton<IMetadataLocalizationService, MetadataLocalizationService>();
     }
 
     /// <inheritdoc/>
@@ -167,15 +201,47 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             new HandoutEnvironment { Id = _sharedEnvironmentId, HandoutId = handoutId, ContentId = "problem-one" },
             new HandoutEnvironment { Id = _otherEnvironmentId, HandoutId = handoutId, ContentId = "problem-two" });
 
-        // Four conversations: two against the shared environment, one against the other, and one against nothing.
+        // The competition the archive problem was set in, and the season it ran in.
+        var competitionId = Guid.CreateVersion7();
+        var seasonId = Guid.CreateVersion7();
+        var roundId = Guid.CreateVersion7();
+        context.Competitions.Add(new Competition
+        {
+            Id = competitionId,
+            Slug = "1",
+            Path = ArchiveCompetitionPath,
+            SortPath = ArchiveCompetitionPath,
+            SortOrder = 1,
+        });
+        context.Seasons.Add(new Season { Id = seasonId, StartYear = 2026, EditionNumber = 76 });
+        context.Rounds.Add(new Round
+        {
+            Id = roundId,
+            CompetitionId = competitionId,
+            SeasonId = seasonId,
+            Date = new DateOnly(2026, 9, 28),
+        });
+
+        // And the problem itself, which the queue names by where it comes from rather than by an id.
+        context.Problems.Add(new Problem
+        {
+            Id = _archiveProblemId,
+            RoundId = roundId,
+            Number = 2,
+            Slug = ArchiveProblemSlug,
+        });
+
+        // Five conversations: two against the shared environment, one against the other, one against an
+        // archive problem, and one against nothing.
         // The one held by the other student runs on the same settings written differently, so the version grouping has
         // something to prove; the targetless one runs on the settings two others share, so leaving it out of the
         // grouping is a fact of its own rather than a side effect of it standing alone.
         context.DefenseSessions.AddRange(
-            NewSession(_oldestSessionId, _studentId, ExaminerConfig),
-            NewSession(_newerSessionId, _otherStudentId, EquivalentExaminerConfig),
-            NewSession(_newestSessionId, _studentId, examinerConfig: "{}"),
-            NewSession(_targetlessSessionId, _studentId, ExaminerConfig));
+            NewSession(_oldestSessionId, _studentId, ExaminerConfig, DefenseTargetKind.Handout),
+            NewSession(_newerSessionId, _otherStudentId, EquivalentExaminerConfig, DefenseTargetKind.Handout),
+            NewSession(_newestSessionId, _studentId, examinerConfig: "{}", DefenseTargetKind.Handout),
+            NewSession(_archiveSessionId, _studentId, ArchiveExaminerConfig, DefenseTargetKind.Problem),
+            NewSession(_targetlessSessionId, _studentId, ExaminerConfig, DefenseTargetKind.Handout));
 
         // Their turns, staggered so the queue has a clear order to put them in. The newest conversation opened
         // twenty days ago and was carried on yesterday, so when it last moved and when it opened disagree and only
@@ -188,6 +254,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             NewTurn(_newestSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-20), _newestOpenerId),
             NewTurn(_newestSessionId, TranscriptRole.Candidate, "my newest defense", 1, _now.AddDays(-1)),
             NewTurn(_newestSessionId, TranscriptRole.Examiner, "her reply", 2, _now.AddDays(-1), _newestReplyId),
+            NewTurn(_archiveSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-3)),
+            NewTurn(_archiveSessionId, TranscriptRole.Candidate, "my competition defense", 1, _now.AddDays(-3)),
             NewTurn(_targetlessSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-2)),
             NewTurn(_targetlessSessionId, TranscriptRole.Candidate, "my untargeted defense", 1, _now.AddDays(-2)));
 
@@ -201,11 +269,19 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 0, "her leaky draft", leaks: true,
                 _attemptDurationsMs[0]));
 
-        // What each conversation was held against, the targetless one deliberately naming nothing.
+        // Which handout problem each of those conversations was held against, the targetless one deliberately
+        // naming nothing.
         context.HandoutEnvironmentDefenses.AddRange(
             NewTarget(_oldestSessionId, _sharedEnvironmentId),
             NewTarget(_newerSessionId, _sharedEnvironmentId),
             NewTarget(_newestSessionId, _otherEnvironmentId));
+
+        // And the archive problem the competition conversation was held against.
+        context.ProblemDefenses.Add(new ProblemDefense
+        {
+            DefenseSessionId = _archiveSessionId,
+            ProblemId = _archiveProblemId,
+        });
 
         // What the student made of the newest conversation's last reply, so one of them carries a complaint.
         context.DefenseTurnReports.Add(new DefenseTurnReport
@@ -241,25 +317,27 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Queue_orders_every_conversation_by_recency() => RunTestAsync(async service =>
     {
         // Read the whole queue
-        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1);
+        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
 
-        // All three came back, yesterday's ahead of the one from five days ago, ahead of the one from ten
+        // All four came back, yesterday's leading and the one from ten days ago last
         Assert.Equal(
-            [_newestSessionId, _newerSessionId, _oldestSessionId],
+            [_newestSessionId, _archiveSessionId, _newerSessionId, _oldestSessionId],
             queue.Items.Select(conversation => conversation.Id));
 
         // Counted in the same unit the page is cut in
-        Assert.Equal(3, queue.TotalCount);
+        Assert.Equal(4, queue.TotalCount);
 
-        // Each names the environment it was held against
+        // Each handout one names the environment it was held against
         Assert.Equal(
             ["problem-two", "problem-one", "problem-one"],
-            queue.Items.Select(conversation => conversation.Target.EnvironmentId));
+            queue.Items
+                .Where(conversation => conversation.Target is AdminHandoutTarget)
+                .Select(conversation => Handout(conversation.Target).EnvironmentId));
 
         // Under the handout that environment belongs to
         Assert.All(
-            queue.Items,
-            conversation => Assert.Equal(HandoutContentId, conversation.Target.HandoutContentId));
+            queue.Items.Where(conversation => conversation.Target is AdminHandoutTarget),
+            conversation => Assert.Equal(HandoutContentId, Handout(conversation.Target).HandoutContentId));
     });
 
     /// <summary>
@@ -271,22 +349,24 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         async service =>
         {
             // Ask for the first page
-            var first = await service.GetQueueAsync(_reviewerId, NewFilter(), 1);
+            var first = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
 
             // And then for the rest
-            var second = await service.GetQueueAsync(_reviewerId, NewFilter(), 2);
+            var second = await service.GetQueueAsync(_reviewerId, NewFilter(), 2, Language.EN);
 
             // The first page holds the two most recent, in order
             Assert.Equal(
-                [_newestSessionId, _newerSessionId],
+                [_newestSessionId, _archiveSessionId],
                 first.Items.Select(conversation => conversation.Id));
 
-            // The second carries on with the last one rather than repeating anything
-            Assert.Equal(_oldestSessionId, Assert.Single(second.Items).Id);
+            // The second carries on with the rest rather than repeating anything
+            Assert.Equal(
+                [_newerSessionId, _oldestSessionId],
+                second.Items.Select(conversation => conversation.Id));
 
             // And both report the same total, which is what says a third page would hold nothing
-            Assert.Equal(3, first.TotalCount);
-            Assert.Equal(3, second.TotalCount);
+            Assert.Equal(4, first.TotalCount);
+            Assert.Equal(4, second.TotalCount);
         },
         // A page smaller than the seed, so the queue has a second one to carry on to
         services => services.AddSingleton(
@@ -527,10 +607,10 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     {
         // Ask for the unread ones with nothing opened yet, so no conversation has a stamp of any kind
         var unread = await service.GetQueueAsync(
-            _reviewerId, NewFilter() with { Unread = true }, 1);
+            _reviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
 
-        // All three count as unread
-        Assert.Equal(3, unread.TotalCount);
+        // All four count as unread
+        Assert.Equal(4, unread.TotalCount);
     });
 
     /// <summary>
@@ -545,27 +625,27 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Their own unread queue
         var read = await service.GetQueueAsync(
-            _reviewerId, NewFilter() with { Unread = true }, 1);
+            _reviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
 
         // Which settles the one they read
-        Assert.Equal(2, read.TotalCount);
+        Assert.Equal(3, read.TotalCount);
 
         // The other reviewer's, who has read nothing
         var other = await service.GetQueueAsync(
-            _otherReviewerId, NewFilter() with { Unread = true }, 1);
+            _otherReviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
 
-        // Where all three still stand
-        Assert.Equal(3, other.TotalCount);
+        // Where all four still stand
+        Assert.Equal(4, other.TotalCount);
 
         // And the detail carries each reviewer their own stamp
-        Assert.NotNull((await service.GetDetailAsync(_reviewerId, _newestSessionId)).ReadAt);
-        Assert.Null((await service.GetDetailAsync(_otherReviewerId, _newestSessionId)).ReadAt);
+        Assert.NotNull((await service.GetDetailAsync(_reviewerId, _newestSessionId, Language.EN)).ReadAt);
+        Assert.Null((await service.GetDetailAsync(_otherReviewerId, _newestSessionId, Language.EN)).ReadAt);
 
         // The other reviewer puts it back to unread, which takes only their own stamp, and they never had one
         await service.MarkUnreadAsync(_otherReviewerId, _newestSessionId);
 
         // So the first reviewer's still stands
-        Assert.NotNull((await service.GetDetailAsync(_reviewerId, _newestSessionId)).ReadAt);
+        Assert.NotNull((await service.GetDetailAsync(_reviewerId, _newestSessionId, Language.EN)).ReadAt);
     });
 
     /// <summary>
@@ -576,17 +656,17 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Conversations_group_by_the_settings_they_ran_on() => RunTestAsync(async service =>
     {
         // Read what the filters can be set to
-        var options = await service.GetFilterOptionsAsync();
+        var options = await service.GetFilterOptionsAsync(Language.EN);
 
-        // Two versions across the three conversations that name an environment
-        Assert.Equal(2, options.PromptVersions.Count);
+        // Three versions across the four conversations that name a problem
+        Assert.Equal(3, options.PromptVersions.Count);
 
         // The one the two written differently share
         var shared = options.PromptVersions.Single(version => version.ConversationCount == 2);
 
         // Narrow the queue to the shared version
         var queue = await service.GetQueueAsync(
-            _reviewerId, NewFilter() with { PromptVersion = shared.Version }, 1);
+            _reviewerId, NewFilter() with { PromptVersion = shared.Version }, 1, Language.EN);
 
         // Which leaves exactly the two that ran on it
         Assert.Equal(2, queue.TotalCount);
@@ -698,24 +778,28 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // to its neighbour's column would otherwise sit unnoticed
         (string Description, AdminDefenseQueueFilter Filter, int Count, string Left)[] cases =
         [
-            ("one student holds two of the three",
-                NewFilter() with { UserId = _studentId }, 2, "newest, oldest"),
-            ("every conversation is against the seeded handout",
+            ("one student holds three of the four",
+                NewFilter() with { UserId = _studentId }, 3, "newest, competition, oldest"),
+            ("every handout conversation is against the seeded handout",
                 NewFilter() with { HandoutContentId = HandoutContentId }, 3, "newest, newer, oldest"),
             ("a handout nothing was held against leaves nothing",
                 NewFilter() with { HandoutContentId = "no-such-handout" }, 0, ""),
             ("two were held against the shared environment",
                 NewFilter() with { EnvironmentId = "problem-one" }, 2, "newer, oldest"),
+            ("the archive problem leaves the one held against it",
+                NewFilter() with { ProblemSlug = ArchiveProblemSlug }, 1, "competition"),
+            ("a problem nothing was held against leaves nothing",
+                NewFilter() with { ProblemSlug = "no-such-problem" }, 0, ""),
             ("one has been written about", NewFilter() with { HasNotes = true }, 1, "newest"),
-            ("leaving the other two unwritten-about",
-                NewFilter() with { HasNotes = false }, 2, "newer, oldest"),
+            ("leaving the other three unwritten-about",
+                NewFilter() with { HasNotes = false }, 3, "competition, newer, oldest"),
             ("one student reported a reply", NewFilter() with { StudentReported = true }, 1, "newest"),
             ("and a different conversation was answered for",
                 NewFilter() with { StudentFeedback = true }, 1, "oldest"),
             ("only the one carried on yesterday falls inside three days, however long ago it opened",
                 NewFilter() with { WithinDays = 3 }, 1, "newest"),
             ("a period past the ceiling is held to it rather than falling off the calendar",
-                NewFilter() with { WithinDays = int.MaxValue }, 3, "newest, newer, oldest"),
+                NewFilter() with { WithinDays = int.MaxValue }, 4, "newest, competition, newer, oldest"),
             ("and a period of no days is held to one day, which the one carried on just now falls inside",
                 NewFilter() with { WithinDays = 0 }, 1, "newest"),
         ];
@@ -727,7 +811,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         foreach (var (description, filter, _, _) in cases)
         {
             // What this one leaves
-            var queue = await service.GetQueueAsync(_reviewerId, filter, 1);
+            var queue = await service.GetQueueAsync(_reviewerId, filter, 1, Language.EN);
 
             // Recorded under its label, by the pager's count and by the conversations on the page
             actual.Add($"{description}: {queue.TotalCount} ({Describe(queue.Items)})");
@@ -746,7 +830,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task The_detail_carries_the_whole_conversation_and_what_it_ran_on() => RunTestAsync(async service =>
     {
         // Read the conversation the student answered for
-        var detail = await service.GetDetailAsync(_reviewerId, _oldestSessionId);
+        var detail = await service.GetDetailAsync(_reviewerId, _oldestSessionId, Language.EN);
 
         // Everything the examiner was working from
         Assert.Equal("a problem", detail.Statement);
@@ -777,7 +861,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task The_detail_carries_every_draft_behind_a_reply() => RunTestAsync(async service =>
     {
         // Read the conversation whose last reply took two drafts
-        var detail = await service.GetDetailAsync(_reviewerId, _newestSessionId);
+        var detail = await service.GetDetailAsync(_reviewerId, _newestSessionId, Language.EN);
 
         // Both came back in the order they were drafted
         Assert.Equal(["her leaky draft", "her reply"], detail.Attempts.Select(attempt => attempt.Reply));
@@ -813,7 +897,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         RunTestAsync(async service =>
     {
         // Read a conversation seeded with turns and nothing recorded behind them
-        var detail = await service.GetDetailAsync(_reviewerId, _oldestSessionId);
+        var detail = await service.GetDetailAsync(_reviewerId, _oldestSessionId, Language.EN);
 
         // Its turns came back, and it simply holds no drafts
         Assert.NotEmpty(detail.Turns);
@@ -842,7 +926,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         });
 
         // Read the conversation the first two were written about
-        var detail = await service.GetDetailAsync(_reviewerId, _newestSessionId);
+        var detail = await service.GetDetailAsync(_reviewerId, _newestSessionId, Language.EN);
 
         // Only its own two come back, the later reading ahead of the earlier
         Assert.Equal(
@@ -859,6 +943,91 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
+    /// A conversation held against an archive problem reaches the queue alongside the handout ones, named by the
+    /// competition it was set in rather than by an id the reviewer's side has nothing to resolve.
+    /// </summary>
+    [Fact]
+    public Task An_archive_problem_reads_back_named_by_where_it_comes_from() => RunTestAsync(async service =>
+    {
+        // The whole queue, which holds conversations of both kinds
+        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
+
+        // The competition one, which the queue carries as an archive problem rather than a handout one
+        var conversation = Assert.Single(
+            queue.Items.Where(candidate => candidate.Id == _archiveSessionId));
+
+        // Named by the problem's slug and where the problem comes from
+        var target = Assert.IsType<AdminProblemTarget>(conversation.Target);
+        Assert.Equal(ArchiveProblemSlug, target.Slug);
+
+        // Which is every competition down to the one that set it, each named in the language asked for
+        Assert.Equal(
+            ["MathComps", "Advanced", "September"],
+            target.Source.Competition.Select(competition => competition.DisplayName));
+
+        // Along with the season's own year and the problem's place in the competition
+        Assert.Equal(2026, target.Source.StartYear);
+        Assert.Equal(2, target.Source.Number);
+    });
+
+    /// <summary>
+    /// The queue narrows to one archive problem by its slug, which addresses it on its own.
+    /// </summary>
+    [Fact]
+    public Task The_queue_narrows_to_one_archive_problem() => RunTestAsync(async service =>
+    {
+        // Narrowed to the one problem out of the archive
+        var queue = await service.GetQueueAsync(
+            _reviewerId, NewFilter() with { ProblemSlug = ArchiveProblemSlug }, 1, Language.EN);
+
+        // Which leaves the one conversation held against it
+        Assert.Equal([_archiveSessionId], queue.Items.Select(conversation => conversation.Id));
+    });
+
+    /// <summary>
+    /// Opening a competition conversation names its problem the same way the queue does. The detail builds its
+    /// own projection over the same columns, so the queue naming one is no evidence that the modal does.
+    /// </summary>
+    [Fact]
+    public Task The_detail_of_an_archive_conversation_names_where_its_problem_comes_from() =>
+        RunTestAsync(async service =>
+        {
+            // The competition conversation, read in full
+            var detail = await service.GetDetailAsync(_reviewerId, _archiveSessionId, Language.EN);
+
+            // Which names an archive problem rather than a handout one
+            var target = Assert.IsType<AdminProblemTarget>(detail.Target);
+            Assert.Equal(ArchiveProblemSlug, target.Slug);
+
+            // Which is every competition down to the one that set it, each named in the language asked for
+            Assert.Equal(
+                ["MathComps", "Advanced", "September"],
+                target.Source.Competition.Select(competition => competition.DisplayName));
+
+            // Along with the season's own year and the problem's place in the competition
+            Assert.Equal(2026, target.Source.StartYear);
+            Assert.Equal(2, target.Source.Number);
+        });
+
+    /// <summary>
+    /// An archive problem is offered as a filter option beside the handout ones, so the facet reaches both kinds.
+    /// </summary>
+    [Fact]
+    public Task Filter_options_name_the_archive_problem_too() => RunTestAsync(async service =>
+    {
+        // What the filters can be set to
+        var options = await service.GetFilterOptionsAsync(Language.EN);
+
+        // The archive problem among them, carrying the one conversation held against it
+        var option = Assert.Single(
+            options.Problems.Where(candidate => candidate.Target is AdminProblemTarget));
+        Assert.Equal(1, option.ConversationCount);
+
+        // Named the same way the queue names it
+        Assert.Equal(ArchiveProblemSlug, Assert.IsType<AdminProblemTarget>(option.Target).Slug);
+    });
+
+    /// <summary>
     /// Everyone who has held a conversation and every environment one was held against read back as filter options,
     /// each carrying how many conversations it accounts for, the busiest first.
     /// </summary>
@@ -866,24 +1035,27 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Filter_options_name_every_student_and_environment_with_their_counts() => RunTestAsync(async service =>
     {
         // Read what the filters can be set to
-        var options = await service.GetFilterOptionsAsync();
+        var options = await service.GetFilterOptionsAsync(Language.EN);
 
-        // Both students who held one, the one holding two ahead of the one holding one, and neither reviewer
+        // Both students who held one, the one holding three ahead of the one holding one, and neither reviewer
         Assert.Equal(
             [_studentId, _otherStudentId],
             options.Users.Select(option => option.User.Id));
-        Assert.Equal([2, 1], options.Users.Select(option => option.ConversationCount));
+        Assert.Equal([3, 1], options.Users.Select(option => option.ConversationCount));
 
-        // And both environments one was held against, the shared one ahead of the other
+        // The handout environments one was held against, the shared one ahead of the other
+        var handoutOptions = options.Problems
+            .Where(option => option.Target is AdminHandoutTarget)
+            .ToList();
         Assert.Equal(
             ["problem-one", "problem-two"],
-            options.Problems.Select(option => option.Target.EnvironmentId));
-        Assert.Equal([2, 1], options.Problems.Select(option => option.ConversationCount));
+            handoutOptions.Select(option => Handout(option.Target).EnvironmentId));
+        Assert.Equal([2, 1], handoutOptions.Select(option => option.ConversationCount));
 
         // Each under the handout it belongs to
         Assert.All(
-            options.Problems,
-            option => Assert.Equal(HandoutContentId, option.Target.HandoutContentId));
+            handoutOptions,
+            option => Assert.Equal(HandoutContentId, Handout(option.Target).HandoutContentId));
     });
 
     /// <summary>
@@ -894,15 +1066,15 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task A_conversation_held_against_no_environment_stays_out_of_reach() => RunTestAsync(async service =>
     {
         // Read the whole queue, narrowed by nothing
-        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1);
+        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
 
-        // The three that name an environment are all of it, though the targetless one moved more recently than two
-        Assert.Equal(3, queue.TotalCount);
+        // The four that name a problem are all of it, though the targetless one moved more recently than two
+        Assert.Equal(4, queue.TotalCount);
         Assert.DoesNotContain(_targetlessSessionId, queue.Items.Select(conversation => conversation.Id));
 
         // And asking for it by name is refused the same way an id nothing was seeded under is
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
-            () => service.GetDetailAsync(_reviewerId, _targetlessSessionId));
+            () => service.GetDetailAsync(_reviewerId, _targetlessSessionId, Language.EN));
     });
 
     /// <summary>
@@ -916,7 +1088,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Reading it
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
-            () => service.GetDetailAsync(_reviewerId, missingId));
+            () => service.GetDetailAsync(_reviewerId, missingId, Language.EN));
 
         // Marking it read
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
@@ -951,11 +1123,20 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         IAdminDefenseReviewService service, Guid sessionId, Guid? reviewerId = null)
     {
         // The whole queue, since a row only exists as part of it
-        var queue = await service.GetQueueAsync(reviewerId ?? _reviewerId, NewFilter(), 1);
+        var queue = await service.GetQueueAsync(reviewerId ?? _reviewerId, NewFilter(), 1, Language.EN);
 
         // The row under that id
         return queue.Items.Single(conversation => conversation.Id == sessionId);
     }
+
+    /// <summary>
+    /// Reads a conversation's problem as the handout environment it is, failing the test when it is anything
+    /// else, which is what lets an assertion name a handout's own fields.
+    /// </summary>
+    /// <param name="target">The problem a conversation was held against.</param>
+    /// <returns>The handout environment.</returns>
+    private static AdminHandoutTarget Handout(AdminDefenseTarget target) =>
+        Assert.IsType<AdminHandoutTarget>(target);
 
     /// <summary>
     /// Builds a filter that narrows nothing, so a test naming no filter reads the whole seed. Tests that do want
@@ -963,7 +1144,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// </summary>
     /// <returns>The filter.</returns>
     private static AdminDefenseQueueFilter NewFilter() =>
-        new(false, null, false, false, null, null, null, null, null);
+        new(false, null, false, false, null, null, null, null, null, null);
 
     /// <summary>
     /// Builds one seeded conversation, held against a handout environment.
@@ -971,17 +1152,19 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// <param name="sessionId">The conversation's identifier.</param>
     /// <param name="userId">Who held it.</param>
     /// <param name="examinerConfig">The settings it ran on.</param>
+    /// <param name="targetKind">Which kind of problem it was held against.</param>
     /// <returns>The conversation, ready to add.</returns>
-    private static DefenseSession NewSession(Guid sessionId, Guid userId, string examinerConfig) => new()
-    {
-        Id = sessionId,
-        UserId = userId,
-        TargetKind = DefenseTargetKind.Handout,
-        ProblemStatement = "a problem",
-        ProblemReference = "a reference",
-        ExaminerConfig = examinerConfig,
-        CreatedAt = _now.AddDays(-30),
-    };
+    private static DefenseSession NewSession(
+        Guid sessionId, Guid userId, string examinerConfig, DefenseTargetKind targetKind) => new()
+        {
+            Id = sessionId,
+            UserId = userId,
+            TargetKind = targetKind,
+            ProblemStatement = "a problem",
+            ProblemReference = "a reference",
+            ExaminerConfig = examinerConfig,
+            CreatedAt = _now.AddDays(-30),
+        };
 
     /// <summary>
     /// Builds the link saying which handout environment a seeded conversation was held against.

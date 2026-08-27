@@ -39,19 +39,53 @@ const LABELLER: HandoutProblemLabeller = {
  */
 const OUTLIVED_PROBLEMS: DefenseReviewProblemOption[] = [
   {
-    target: { handoutContentId: 'gone-handout-1', environmentId: 'gone-problem-1' },
+    target: {
+      kind: 'handout',
+      handoutContentId: 'gone-handout-1',
+      environmentId: 'gone-problem-1',
+    },
     conversationCount: 3,
   },
   {
-    target: { handoutContentId: 'gone-handout-2', environmentId: 'gone-problem-2' },
+    target: {
+      kind: 'handout',
+      handoutContentId: 'gone-handout-2',
+      environmentId: 'gone-problem-2',
+    },
     conversationCount: 1,
   },
 ]
 
+/**
+ * One competition run in two seasons, each with the same problem number, which is what makes the two options
+ * indistinguishable without the season.
+ */
+const ARCHIVE_PROBLEMS: DefenseReviewProblemOption[] = [2026, 2027].map((startYear) => ({
+  target: {
+    kind: 'problem',
+    slug: `${startYear}-mc-advanced-1-2`,
+    source: {
+      season: {
+        slug: '76',
+        displayName: `Edition 76 (${startYear}/${startYear + 1})`,
+        fullName: null,
+      },
+      startYear,
+      competition: [
+        { slug: 'mc', displayName: 'MathComps', fullName: null },
+        { slug: 'mc-advanced', displayName: 'Advanced', fullName: null },
+        { slug: 'mc-advanced-1', displayName: 'September', fullName: null },
+      ],
+      number: 2,
+    },
+  },
+  conversationCount: 1,
+}))
+
 describe('toProblemFacet', () => {
   it('collapses the handouts that are gone into one section', () => {
     // Two removed handouts, which nothing on this side can tell apart beyond their content ids
-    const facet = toProblemFacet(OUTLIVED_PROBLEMS, LABELLER)
+    const facet = toProblemFacet(OUTLIVED_PROBLEMS, LABELLER, 'Problem')
 
     // One heading rather than a run of identical ones, since two of them read as the same section twice
     expect(Object.values(facet.sectionLabels)).toEqual(['Deleted handout'])
@@ -59,12 +93,33 @@ describe('toProblemFacet', () => {
 
   it('files the problems outliving their handouts under the one section that names them', () => {
     // The same two problems, as the facet lists them
-    const facet = toProblemFacet(OUTLIVED_PROBLEMS, LABELLER)
+    const facet = toProblemFacet(OUTLIVED_PROBLEMS, LABELLER, 'Problem')
 
     // Both land in the section the headings name, rather than in one apiece that nothing renders
     expect(new Set(facet.options.map((option) => option.groupKey))).toEqual(
       new Set(Object.keys(facet.sectionLabels))
     )
+  })
+})
+
+describe('toProblemFacet, over the archive', () => {
+  it('heads a competition with the season it ran in, so two runs of it read apart', () => {
+    // The same competition run in two seasons, which its own name is the same for
+    const facet = toProblemFacet(ARCHIVE_PROBLEMS, LABELLER, 'Problem')
+
+    // Each season heads its own section, rather than both runs filing under one
+    expect(Object.values(facet.sectionLabels).sort()).toEqual([
+      'MathComps Advanced September 2026/2027',
+      'MathComps Advanced September 2027/2028',
+    ])
+  })
+
+  it('names the option by the problem alone, the competition being what the heading says', () => {
+    // The problems as the facet lists them
+    const facet = toProblemFacet(ARCHIVE_PROBLEMS, LABELLER, 'Problem')
+
+    // Which reads as the problem's own place in its competition
+    expect(facet.options.map((option) => option.displayName)).toEqual(['Problem 2', 'Problem 2'])
   })
 })
 

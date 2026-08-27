@@ -3,8 +3,6 @@
 import { ArrowUpRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { HandoutProblemRefLabel } from '@/components/features/handouts/HandoutProblemRefLabel'
-import { useHandoutProblemLabel } from '@/components/features/handouts/use-handout-problem-label'
 import { Button } from '@/components/shared/components/Button'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 
@@ -14,6 +12,7 @@ import {
 } from '../model/defense-review-types'
 import { AdminNoteHeader } from './AdminNoteHeader'
 import { AdminNoteSurface } from './AdminNoteSurface'
+import { DefenseTargetLabel } from './DefenseTargetLabel'
 
 /**
  * Props for the {@link AdminNoteFeedItem} component.
@@ -40,9 +39,6 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
   // Profile copy
   const tProfile = useTranslations('profile')
 
-  // Which problem of which handout the conversation was about
-  const problemLabel = useHandoutProblemLabel(item.target, t('deletedHandout'))
-
   return (
     <AdminNoteSurface
       noteId={item.note.id}
@@ -59,7 +55,7 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
               {describeReviewUser(item.user, tProfile('defaultUser'))}
             </span>
 
-            <HandoutProblemRefLabel label={problemLabel} emphasis="muted" />
+            <DefenseTargetLabel target={item.target} emphasis="muted" />
           </p>
 
           {/* Where in that conversation it hangs, and who wrote it */}

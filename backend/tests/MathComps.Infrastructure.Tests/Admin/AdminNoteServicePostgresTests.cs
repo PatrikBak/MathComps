@@ -1,9 +1,12 @@
+using MathComps.Domain.Contracts.Admin;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Defense;
+using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,6 +56,27 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
     private static readonly Guid _untargetedSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a3");
 
     /// <summary>
+    /// A conversation held against an archive problem, which the feed names from the taxonomy rather than from
+    /// handout content.
+    /// </summary>
+    private static readonly Guid _archiveSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a4");
+
+    /// <summary>
+    /// The archive problem that conversation was held against.
+    /// </summary>
+    private static readonly Guid _archiveProblemId = Guid.Parse("00000000-0000-0000-0000-0000000000d1");
+
+    /// <summary>
+    /// How the archive addresses that problem.
+    /// </summary>
+    private const string ArchiveProblemSlug = "76-mc-advanced-1-2";
+
+    /// <summary>
+    /// The competition it was set in, which has to be one the taxonomy knows for its names to resolve.
+    /// </summary>
+    private const string ArchiveCompetitionPath = "mc-advanced-1";
+
+    /// <summary>
     /// The reply the notes are written against.
     /// </summary>
     private static readonly Guid _replyId = Guid.Parse("00000000-0000-0000-0000-0000000000b2");
@@ -75,6 +99,9 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
 
         // The service under test.
         services.AddScoped<IAdminNoteService, AdminNoteService>();
+
+        // The display names an archive problem is named by.
+        services.AddSingleton<IMetadataLocalizationService, MetadataLocalizationService>();
     }
 
     /// <inheritdoc/>
@@ -93,9 +120,42 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         context.HandoutEnvironments.Add(
             new HandoutEnvironment { Id = environmentId, HandoutId = handoutId, ContentId = "problem-one" });
 
-        // Three conversations, the first shaped like a real one: opener, the student, the reply.
+        // The competition an archive problem was set in, and the season it ran in.
+        var competitionId = Guid.CreateVersion7();
+        var seasonId = Guid.CreateVersion7();
+        var roundId = Guid.CreateVersion7();
+        context.Competitions.Add(new Competition
+        {
+            Id = competitionId,
+            Slug = "1",
+            Path = ArchiveCompetitionPath,
+            SortPath = ArchiveCompetitionPath,
+            SortOrder = 1,
+        });
+        context.Seasons.Add(new Season { Id = seasonId, StartYear = 2026, EditionNumber = 76 });
+        context.Rounds.Add(new Round
+        {
+            Id = roundId,
+            CompetitionId = competitionId,
+            SeasonId = seasonId,
+            Date = new DateOnly(2026, 9, 28),
+        });
+
+        // And the problem itself, which the feed names by where it comes from.
+        context.Problems.Add(new Problem
+        {
+            Id = _archiveProblemId,
+            RoundId = roundId,
+            Number = 2,
+            Slug = ArchiveProblemSlug,
+        });
+
+        // Four conversations, the first shaped like a real one: opener, the student, the reply.
         context.DefenseSessions.AddRange(
-            NewSession(_sessionId), NewSession(_otherSessionId), NewSession(_untargetedSessionId));
+            NewSession(_sessionId),
+            NewSession(_otherSessionId),
+            NewSession(_untargetedSessionId),
+            NewSession(_archiveSessionId, DefenseTargetKind.Problem));
 
         // The turns of the conversation under test.
         context.DefenseTurns.AddRange(
@@ -120,6 +180,13 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
                 DefenseSessionId = _otherSessionId,
                 HandoutEnvironmentId = environmentId,
             });
+
+        // And the archive problem the fourth was held against.
+        context.ProblemDefenses.Add(new ProblemDefense
+        {
+            DefenseSessionId = _archiveSessionId,
+            ProblemId = _archiveProblemId,
+        });
 
         // Commit the seed.
         await context.SaveChangesAsync();
@@ -194,10 +261,10 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         await service.SetResolvedAsync(settled.Id, resolved: true);
 
         // The feed still carries both
-        Assert.Equal(2, (await service.GetFeedAsync(_reviewerId, openOnly: false, 1)).TotalCount);
+        Assert.Equal(2, (await service.GetFeedAsync(_reviewerId, openOnly: false, 1, Language.EN)).TotalCount);
 
         // Ask for the open set
-        var open = await service.GetFeedAsync(_reviewerId, openOnly: true, 1);
+        var open = await service.GetFeedAsync(_reviewerId, openOnly: true, 1, Language.EN);
 
         // Where only one still stands
         Assert.Equal(1, open.TotalCount);
@@ -207,7 +274,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         await service.SetResolvedAsync(settled.Id, resolved: false);
 
         // Which brings it into the open set again
-        Assert.Equal(2, (await service.GetFeedAsync(_reviewerId, openOnly: true, 1)).TotalCount);
+        Assert.Equal(2, (await service.GetFeedAsync(_reviewerId, openOnly: true, 1, Language.EN)).TotalCount);
     });
 
     /// <summary>
@@ -224,7 +291,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         await service.CreateAsync(_reviewerId, _sessionId, null, "went in circles", null);
 
         // Read the feed, newest first
-        var feed = await service.GetFeedAsync(_reviewerId, openOnly: false, 1);
+        var feed = await service.GetFeedAsync(_reviewerId, openOnly: false, 1, Language.EN);
 
         // The newest note
         var newest = feed.Items[0];
@@ -243,7 +310,34 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal([_reviewerId], feed.Items.Select(item => item.Note.Author.Id).Distinct());
 
         // As well as which environment it was about
-        Assert.Equal(["problem-one"], feed.Items.Select(item => item.Target.EnvironmentId).Distinct());
+        Assert.Equal(["problem-one"], feed.Items.Select(item => Handout(item.Target).EnvironmentId).Distinct());
+    });
+
+    /// <summary>
+    /// A note on a competition conversation carries the problem named from the taxonomy. The feed reads its
+    /// problem through a projection of its own, so the review queue naming one is no evidence that the feed does.
+    /// </summary>
+    [Fact]
+    public Task The_feed_names_an_archive_problem_by_where_it_comes_from() => RunTestAsync(async service =>
+    {
+        // A note on the conversation held against an archive problem
+        await service.CreateAsync(_reviewerId, _archiveSessionId, null, "she led him to it", null);
+
+        // Read the feed
+        var feed = await service.GetFeedAsync(_reviewerId, openOnly: false, 1, Language.EN);
+
+        // The one note, naming an archive problem rather than a handout one
+        var target = Assert.IsType<AdminProblemTarget>(Assert.Single(feed.Items).Target);
+        Assert.Equal(ArchiveProblemSlug, target.Slug);
+
+        // Which is every competition down to the one that set it, each named in the language asked for
+        Assert.Equal(
+            ["MathComps", "Advanced", "September"],
+            target.Source.Competition.Select(competition => competition.DisplayName));
+
+        // Along with the season's own year and the problem's place in the competition
+        Assert.Equal(2026, target.Source.StartYear);
+        Assert.Equal(2, target.Source.Number);
     });
 
     /// <summary>
@@ -467,7 +561,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         await service.CreateAsync(_otherReviewerId, _sessionId, null, "theirs", null);
 
         // Read back as the first reviewer
-        var feed = await service.GetFeedAsync(_reviewerId, openOnly: false, 1);
+        var feed = await service.GetFeedAsync(_reviewerId, openOnly: false, 1, Language.EN);
 
         // Only their own comes back as theirs to change
         Assert.Equal(
@@ -489,7 +583,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
         await service.CreateAsync(_reviewerId, _untargetedSessionId, null, "nowhere to open", null);
 
         // Read the feed
-        var feed = await service.GetFeedAsync(_reviewerId, openOnly: false, 1);
+        var feed = await service.GetFeedAsync(_reviewerId, openOnly: false, 1, Language.EN);
 
         // Which carries the one note that can be followed back
         Assert.Equal("went in circles", Assert.Single(feed.Items).Note.Content);
@@ -512,10 +606,10 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
             await service.CreateAsync(_reviewerId, _sessionId, null, "third", null);
 
             // Ask for the first page
-            var first = await service.GetFeedAsync(_reviewerId, openOnly: false, 1);
+            var first = await service.GetFeedAsync(_reviewerId, openOnly: false, 1, Language.EN);
 
             // And for the rest
-            var second = await service.GetFeedAsync(_reviewerId, openOnly: false, 2);
+            var second = await service.GetFeedAsync(_reviewerId, openOnly: false, 2, Language.EN);
 
             // The first page holds the two most recent, newest ahead of the one before it
             Assert.Equal(["third", "second"], first.Items.Select(item => item.Note.Content));
@@ -532,20 +626,22 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
             MsOptions.Create(new PaginationOptions { DefaultPageSize = 2 })));
 
     /// <summary>
-    /// Builds one seeded conversation, held against a handout environment.
+    /// Builds one seeded conversation.
     /// </summary>
     /// <param name="sessionId">The conversation's identifier.</param>
+    /// <param name="targetKind">Which kind of problem it was held against.</param>
     /// <returns>The conversation, ready to add.</returns>
-    private static DefenseSession NewSession(Guid sessionId) => new()
-    {
-        Id = sessionId,
-        UserId = _studentId,
-        TargetKind = DefenseTargetKind.Handout,
-        ProblemStatement = "a problem",
-        ProblemReference = "a reference",
-        ExaminerConfig = "{}",
-        CreatedAt = DateTimeOffset.UtcNow,
-    };
+    private static DefenseSession NewSession(
+        Guid sessionId, DefenseTargetKind targetKind = DefenseTargetKind.Handout) => new()
+        {
+            Id = sessionId,
+            UserId = _studentId,
+            TargetKind = targetKind,
+            ProblemStatement = "a problem",
+            ProblemReference = "a reference",
+            ExaminerConfig = "{}",
+            CreatedAt = DateTimeOffset.UtcNow,
+        };
 
     /// <summary>
     /// Builds one seeded turn.
@@ -566,4 +662,13 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
             Sequence = sequence,
             CreatedAt = DateTimeOffset.UtcNow,
         };
+
+    /// <summary>
+    /// Reads a conversation's problem as the handout environment it is, failing the test when it is anything
+    /// else, which is what lets an assertion name a handout's own fields.
+    /// </summary>
+    /// <param name="target">The problem a conversation was held against.</param>
+    /// <returns>The handout environment.</returns>
+    private static AdminHandoutTarget Handout(AdminDefenseTarget target) =>
+        Assert.IsType<AdminHandoutTarget>(target);
 }

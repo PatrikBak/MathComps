@@ -1,18 +1,21 @@
 import { describe, expect, it } from 'vitest'
 
-import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
-
 import {
   countActiveFilters,
   decodeProblemKey,
   type DefenseReviewSignals,
   encodeProblemKey,
+  problemKeyOf,
   readSignalSelection,
   serializeFilter,
   toSignalSelection,
   withFilterField,
 } from '../defense-review-filters'
-import type { DefenseReviewFilter } from '../defense-review-types'
+import type {
+  DefenseReviewFilter,
+  DefenseReviewHandoutTarget,
+  DefenseReviewProblemTarget,
+} from '../defense-review-types'
 
 describe('serializeFilter', () => {
   it('keys two filterings that narrow the same conversations alike', () => {
@@ -86,15 +89,45 @@ describe('countActiveFilters', () => {
 })
 
 describe('encodeProblemKey/decodeProblemKey', () => {
-  it('round-trips a problem through its id', () => {
+  it('round-trips a handout problem through its id', () => {
     // A problem, named the way the content ids really look
-    const target: HandoutEnvironmentTarget = {
+    const target: DefenseReviewHandoutTarget = {
+      kind: 'handout',
       handoutContentId: 'Kp2vR8mLqX3nYwTfJc6Db',
       environmentId: 'K8Jhyizt5YvLRX463Ka_e',
     }
 
-    // Both halves survive the trip through the option's id
-    expect(decodeProblemKey(encodeProblemKey(target))).toEqual(target)
+    // Both halves survive the trip through the option's id, and nothing narrows the archive by
+    expect(decodeProblemKey(encodeProblemKey(target))).toEqual({
+      handoutContentId: target.handoutContentId,
+      environmentId: target.environmentId,
+    })
+  })
+
+  it('round-trips an archive problem through its id', () => {
+    // A problem out of the archive, which one slug addresses
+    const target: DefenseReviewProblemTarget = {
+      kind: 'problem',
+      slug: '76-mc-advanced-1-2',
+      source: {
+        season: { slug: '76', displayName: 'Edition 76 (2026/2027)', fullName: null },
+        startYear: 2026,
+        competition: [{ slug: 'mc', displayName: 'MathComps', fullName: null }],
+        number: 2,
+      },
+    }
+
+    // The slug survives the trip, and nothing narrows a handout by
+    expect(decodeProblemKey(encodeProblemKey(target))).toEqual({ problemSlug: target.slug })
+  })
+
+  it('reads a handout id and an archive one as different problems', () => {
+    // A handout content id and a problem slug that happen to read the same
+    const shared = 'the-same-text'
+
+    // Which the kind in front of each keeps apart, rather than one being read as the other
+    expect(decodeProblemKey(`problem:${shared}`)).toEqual({ problemSlug: shared })
+    expect(decodeProblemKey(`handout:${shared}`)).toBeNull()
   })
 
   it('refuses an id that names only one half', () => {
@@ -105,6 +138,25 @@ describe('encodeProblemKey/decodeProblemKey', () => {
   it('refuses an id whose halves are empty', () => {
     // The separator alone is not an id either
     expect(decodeProblemKey(':')).toBeNull()
+  })
+})
+
+describe('problemKeyOf', () => {
+  it('names no problem while only half a handout one is set', () => {
+    // A handout with no problem within it narrows to the handout, which no option stands for
+    expect(problemKeyOf({ handoutContentId: 'handout-1' })).toBeNull()
+  })
+
+  it('lets the handout stand where a filter somehow names a problem of each kind', () => {
+    // Both arms set at once, which no pick can produce and an address can
+    const key = problemKeyOf({
+      handoutContentId: 'handout-1',
+      environmentId: 'problem-1',
+      problemSlug: '76-mc-advanced-1-2',
+    })
+
+    // The handout is the one the option stands for, matching what the address itself keeps
+    expect(key).toBe('handout:handout-1:problem-1')
   })
 })
 

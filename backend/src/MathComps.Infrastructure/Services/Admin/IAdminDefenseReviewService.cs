@@ -1,5 +1,6 @@
 using MathComps.Domain.Contracts.Admin;
 using MathComps.Domain.Contracts.Helpers;
+using MathComps.Domain.Localization;
 
 namespace MathComps.Infrastructure.Services.Admin;
 
@@ -16,30 +17,35 @@ public interface IAdminDefenseReviewService
     /// <param name="reviewerId">Whose read marks decide what counts as unread.</param>
     /// <param name="filter">Which conversations to show.</param>
     /// <param name="pageNumber">1-based page index to retrieve; values outside the range are clamped.</param>
+    /// <param name="language">The language to name each conversation's problem in.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The page of conversations, as big as the server serves them.</returns>
     Task<PagedList<AdminDefenseConversationDto>> GetQueueAsync(
         Guid reviewerId,
         AdminDefenseQueueFilter filter,
         int pageNumber,
+        Language language,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Reads what the queue's filters can be set to.
     /// </summary>
+    /// <param name="language">The language to name each problem in.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>Every student, problem, and set of examiner settings a conversation exists under.</returns>
-    Task<AdminDefenseFilterOptionsDto> GetFilterOptionsAsync(CancellationToken cancellationToken = default);
+    Task<AdminDefenseFilterOptionsDto> GetFilterOptionsAsync(
+        Language language, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Reads one conversation in full, along with the read stamp as it stood before this read.
     /// </summary>
     /// <param name="reviewerId">Whose read stamp to carry back with it.</param>
     /// <param name="sessionId">The conversation to read.</param>
+    /// <param name="language">The language to name its problem in.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The whole conversation.</returns>
     Task<AdminDefenseDetailDto> GetDetailAsync(
-        Guid reviewerId, Guid sessionId, CancellationToken cancellationToken = default);
+        Guid reviewerId, Guid sessionId, Language language, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Records that a reviewer has read a conversation as of now, replacing any earlier stamp of theirs. Turns

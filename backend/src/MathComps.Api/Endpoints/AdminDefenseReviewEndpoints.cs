@@ -46,9 +46,13 @@ public static class AdminDefenseReviewEndpoints
             // The reviewer asking, whose own read marks decide what the queue counts as unread
             var reviewerId = await userManager.RequireUserIdAsync(context);
 
-            // The page of conversations
+            // The page of conversations, each problem named in the language the request asks for
             var queue = await reviewService.GetQueueAsync(
-                reviewerId, filter, request.PageNumber, cancellationToken);
+                reviewerId,
+                filter,
+                request.PageNumber,
+                EndpointHelpers.GetRequestLanguage(),
+                cancellationToken);
 
             // Return it
             return Results.Ok(queue);
@@ -62,7 +66,8 @@ public static class AdminDefenseReviewEndpoints
             CancellationToken cancellationToken) =>
         {
             // Every student, problem and set of examiner settings a conversation exists under
-            var options = await reviewService.GetFilterOptionsAsync(cancellationToken);
+            var options = await reviewService.GetFilterOptionsAsync(
+                EndpointHelpers.GetRequestLanguage(), cancellationToken);
 
             // Return them
             return Results.Ok(options);
@@ -82,7 +87,8 @@ public static class AdminDefenseReviewEndpoints
             var reviewerId = await userManager.RequireUserIdAsync(context);
 
             // The whole conversation, along with the read stamp as it stood before this read
-            var detail = await reviewService.GetDetailAsync(reviewerId, id, cancellationToken);
+            var detail = await reviewService.GetDetailAsync(
+                reviewerId, id, EndpointHelpers.GetRequestLanguage(), cancellationToken);
 
             // Return it
             return Results.Ok(detail);

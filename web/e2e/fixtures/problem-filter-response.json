@@ -7,6 +7,7 @@
           "statementMarkdown": "Let $n$ be a given positive integer. A word of length\u00A0$3n$ that contains each of the letters $\\mathsf{A}$, $\\mathsf{B}$, and\u00A0$\\mathsf{C}$ exactly $n$ times is called a *chameleon*. In one step, we can swap any two adjacent letters. Prove that for every chameleon\u00A0$X$ there exists a chameleon\u00A0$Y$ such that $X$ cannot be transformed into $Y$ in fewer than $3n^2/2$ steps.\n",
           "source": {
             "season": { "slug": "67", "displayName": "Edition 67 (2017/2018)", "fullName": null },
+            "startYear": 2017,
             "competition": [
               {
                 "slug": "tst",

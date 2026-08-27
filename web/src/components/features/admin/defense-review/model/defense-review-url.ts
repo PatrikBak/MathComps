@@ -40,7 +40,13 @@ const USER_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 /**
  * The filter's free-text fields, which go into the address as they stand.
  */
-const TEXT_FIELDS = ['userId', 'handoutContentId', 'environmentId', 'promptVersion'] as const
+const TEXT_FIELDS = [
+  'userId',
+  'handoutContentId',
+  'environmentId',
+  'problemSlug',
+  'promptVersion',
+] as const
 
 /**
  * What the queue is showing, as the address bar carries it.
@@ -78,7 +84,7 @@ export function toDefenseReviewQuery(state: DefenseReviewUrlState): string {
     if (state.filter[field] === true) params.set(field, '1')
   })
 
-  // The fields naming a student, a handout, a problem or a set of settings
+  // The fields naming a student, a handout, either kind of problem, or a set of settings
   TEXT_FIELDS.forEach((field) => {
     // What it was narrowed to
     const value = state.filter[field]
@@ -90,6 +96,11 @@ export function toDefenseReviewQuery(state: DefenseReviewUrlState): string {
   // A problem's id only means anything alongside its handout's, so a half-named problem stays out of the
   // address rather than being written into one that reads back as something else
   if (!params.has('handoutContentId')) params.delete('environmentId')
+
+  // A conversation is held against one problem, so an address naming one of each kind narrows to nothing.
+  // The handout is the one that stands, since it takes two fields to name and so is the harder to arrive at
+  // by hand.
+  if (params.has('handoutContentId')) params.delete('problemSlug')
 
   // How recently the conversation must have moved
   if (state.filter.withinDays !== undefined) {
@@ -169,6 +180,12 @@ export function fromDefenseReviewQuery(params: URLSearchParams): DefenseReviewUr
   if (filter.environmentId !== undefined && filter.handoutContentId === undefined) {
     // Drop it and leave the rest of the narrowing standing
     delete filter.environmentId
+  }
+
+  // And an address naming a problem of each kind narrows to nothing, the handout being the one that stands
+  if (filter.handoutContentId !== undefined) {
+    // Drop the archive one and leave the rest of the narrowing standing
+    delete filter.problemSlug
   }
 
   // Which conversation to open, if the address names one

@@ -1,8 +1,9 @@
 using MathComps.Domain.Contracts.Admin;
-using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.Contracts.Helpers;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Options;
+using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Pagination;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Shared.Extensions;
@@ -16,9 +17,11 @@ namespace MathComps.Infrastructure.Services.Admin;
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="paginationOptions">The bounds a page of the feed is cut by.</param>
+/// <param name="localization">The resolver of localized display names.</param>
 public class AdminNoteService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IOptions<PaginationOptions> paginationOptions) : IAdminNoteService
+    IOptions<PaginationOptions> paginationOptions,
+    IMetadataLocalizationService localization) : IAdminNoteService
 {
     /// <summary>
     /// The most text one note may carry, set far above anything a reviewer writes. The body rides back in full
@@ -226,6 +229,7 @@ public class AdminNoteService(
         Guid reviewerId,
         bool openOnly,
         int pageNumber,
+        Language language,
         CancellationToken cancellationToken = default)
     {
         // The page as it will be served, which is how much of the feed one request can ask for.
@@ -239,7 +243,8 @@ public class AdminNoteService(
         // opened.
         var notes = dbContext.AdminNotes
             .AsNoTracking()
-            .Where(note => note.Session.EnvironmentTarget != null);
+            .Where(note =>
+                note.Session.EnvironmentTarget != null || note.Session.ProblemTarget != null);
 
         // Leave out what has already been settled.
         if (openOnly)
@@ -249,13 +254,13 @@ public class AdminNoteService(
         var totalCount = await notes.CountAsync(cancellationToken);
 
         // The page itself, newest first, each note carrying where it was written.
-        var items = await notes
+        var rows = await notes
             .OrderByDescending(note => note.CreatedAt)
             // A tie goes to the note written later: ids are time-ordered v7 Guids.
             .ThenByDescending(note => note.Id)
             .Skip(bounds.Skip)
             .Take(bounds.PageSize)
-            .Select(note => new AdminNoteFeedItemDto(
+            .Select(note => new FeedRow(
                 new AdminNoteDto(
                     note.Id,
                     note.SessionId,
@@ -270,9 +275,14 @@ public class AdminNoteService(
                     note.ResolvedAt,
                     note.CreatedAt,
                     note.UpdatedAt),
-                new HandoutEnvironmentTarget(
+                new AdminDefenseTargets.Columns(
                     note.Session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
-                    note.Session.EnvironmentTarget.HandoutEnvironment.ContentId),
+                    note.Session.EnvironmentTarget!.HandoutEnvironment.ContentId,
+                    note.Session.ProblemTarget!.Problem.Slug,
+                    note.Session.ProblemTarget!.Problem.Number,
+                    note.Session.ProblemTarget!.Problem.Round.Competition.Path,
+                    note.Session.ProblemTarget!.Problem.Round.Season.EditionNumber,
+                    note.Session.ProblemTarget!.Problem.Round.Season.StartYear),
                 new AdminDefenseUserDto(
                     note.Session.User.Id,
                     note.Session.User.IsDeleted ? null : note.Session.User.Username,
@@ -280,6 +290,15 @@ public class AdminNoteService(
                 // Where a turn-level note hangs.
                 note.Turn == null ? null : note.Turn.Sequence))
             .ToListAsync(cancellationToken);
+
+        // Each note with its conversation's problem named, which takes the taxonomy the database knows nothing of.
+        var items = rows
+            .Select(row => new AdminNoteFeedItemDto(
+                row.Note,
+                AdminDefenseTargets.Build(localization, language, row.Target),
+                row.User,
+                row.TurnSequence))
+            .ToList();
 
         // Hand back the page.
         return new PagedList<AdminNoteFeedItemDto>(
@@ -303,4 +322,17 @@ public class AdminNoteService(
                 user.Id, user.IsDeleted ? null : user.Username, user.Email))
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// One note as the page comes back, its conversation's problem still as the columns naming it.
+    /// </summary>
+    /// <param name="Note"><inheritdoc cref="AdminNoteDto" path="/summary"/></param>
+    /// <param name="Target"><inheritdoc cref="AdminDefenseTargets.Columns" path="/summary"/></param>
+    /// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
+    /// <param name="TurnSequence"><inheritdoc cref="AdminNoteFeedItemDto.TurnSequence" path="/summary"/></param>
+    private sealed record FeedRow(
+        AdminNoteDto Note,
+        AdminDefenseTargets.Columns Target,
+        AdminDefenseUserDto User,
+        int? TurnSequence);
 }
