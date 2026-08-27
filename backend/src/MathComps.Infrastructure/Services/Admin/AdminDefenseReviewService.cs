@@ -7,7 +7,10 @@ using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Pagination;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Services.Defense;
+using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Problems;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -20,9 +23,11 @@ namespace MathComps.Infrastructure.Services.Admin;
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="paginationOptions">The bounds a page of the queue is cut by.</param>
+/// <param name="localization">The resolver of localized display names.</param>
 public class AdminDefenseReviewService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IOptions<PaginationOptions> paginationOptions)
+    IOptions<PaginationOptions> paginationOptions,
+    IMetadataLocalizationService localization)
     : IAdminDefenseReviewService
 {
     /// <summary>
@@ -42,6 +47,7 @@ public class AdminDefenseReviewService(
         Guid reviewerId,
         AdminDefenseQueueFilter filter,
         int pageNumber,
+        Language language,
         CancellationToken cancellationToken = default)
     {
         // The page as it will be served, which is how much of the queue one request can ask for.
@@ -68,9 +74,6 @@ public class AdminDefenseReviewService(
             select new
             {
                 SessionId = session.Id,
-                session.EnvironmentTarget!.HandoutEnvironmentId,
-                HandoutContentId = session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
-                EnvironmentId = session.EnvironmentTarget!.HandoutEnvironment.ContentId,
                 LastActivityAt = lastActivityAt,
                 ReadAt = readAt,
                 IsUnread = readAt == null || lastActivityAt > readAt,
@@ -111,9 +114,16 @@ public class AdminDefenseReviewService(
                 allSessions,
                 row => row.SessionId,
                 session => session.Id,
-                (row, session) => new AdminDefenseConversationDto(
+                (row, session) => new QueueRow(
                     session.Id,
-                    new HandoutEnvironmentTarget(row.HandoutContentId, row.EnvironmentId),
+                    new AdminDefenseTargets.Columns(
+                        session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
+                        session.EnvironmentTarget!.HandoutEnvironment.ContentId,
+                        session.ProblemTarget!.Problem.Slug,
+                        session.ProblemTarget!.Problem.Number,
+                        session.ProblemTarget!.Problem.Round.Competition.Path,
+                        session.ProblemTarget!.Problem.Round.Season.EditionNumber,
+                        session.ProblemTarget!.Problem.Round.Season.StartYear),
                     new AdminDefenseUserDto(
                         session.User.Id,
                         session.User.IsDeleted ? null : session.User.Username,
@@ -138,8 +148,20 @@ public class AdminDefenseReviewService(
         // text spells those bytes out in order. Comparing the ids themselves is a different order, and one that
         // disagrees, so a conversation could sit on one side of a page boundary in the database and the other here.
         var conversations = page
-            .OrderByDescending(conversation => conversation.LastActivityAt)
-            .ThenBy(conversation => conversation.Id.ToString(), StringComparer.Ordinal)
+            .OrderByDescending(row => row.LastActivityAt)
+            .ThenBy(row => row.Id.ToString(), StringComparer.Ordinal)
+            .Select(row => new AdminDefenseConversationDto(
+                row.Id,
+                AdminDefenseTargets.Build(localization, language, row.Target),
+                row.User,
+                row.LastStudentMessage,
+                row.TurnCount,
+                row.LastActivityAt,
+                row.ReadAt,
+                row.UnreadTurnCount,
+                row.NoteCount,
+                row.HasStudentReport,
+                row.HasStudentFeedback))
             .ToList();
 
         // Hand it back.
@@ -149,7 +171,7 @@ public class AdminDefenseReviewService(
 
     /// <inheritdoc/>
     public async Task<AdminDefenseFilterOptionsDto> GetFilterOptionsAsync(
-        CancellationToken cancellationToken = default)
+        Language language, CancellationToken cancellationToken = default)
     {
         // This read's own context, since reading what the filters can be set to is a unit of work in itself.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -157,9 +179,7 @@ public class AdminDefenseReviewService(
         // Everyone who has held a conversation, the busiest first. A student with none never appears. The grouped
         // rows come back anonymous and take their contract's shape afterwards, since a projection straight into
         // one doesn't survive being grouped over.
-        var userRows = await dbContext.DefenseSessions
-            .AsNoTracking()
-            .Where(session => session.EnvironmentTarget != null)
+        var userRows = await ReviewableSessions(dbContext)
             .GroupBy(session => new
             {
                 session.UserId,
@@ -177,8 +197,9 @@ public class AdminDefenseReviewService(
             .ThenBy(row => row.Username)
             .ToListAsync(cancellationToken);
 
-        // Every problem one has been held against, carrying the content ids the reader's side names them by.
-        var problemRows = await dbContext.HandoutEnvironmentDefenses
+        // Every handout problem one has been held against, carrying the content ids the reader's side names
+        // them by.
+        var handoutRows = await dbContext.HandoutEnvironmentDefenses
             .AsNoTracking()
             .GroupBy(defense => new
             {
@@ -191,8 +212,29 @@ public class AdminDefenseReviewService(
                 group.Key.EnvironmentId,
                 ConversationCount = group.Count(),
             })
-            .OrderByDescending(row => row.ConversationCount)
-            .ThenBy(row => row.HandoutContentId)
+            .ToListAsync(cancellationToken);
+
+        // And every archive problem, carrying what naming it takes: nothing on the reader's side can name a
+        // competition still under embargo.
+        var archiveRows = await dbContext.ProblemDefenses
+            .AsNoTracking()
+            .GroupBy(defense => new
+            {
+                defense.Problem.Slug,
+                defense.Problem.Number,
+                CompetitionPath = defense.Problem.Round.Competition.Path,
+                defense.Problem.Round.Season.EditionNumber,
+                defense.Problem.Round.Season.StartYear,
+            })
+            .Select(group => new
+            {
+                group.Key.Slug,
+                group.Key.Number,
+                group.Key.CompetitionPath,
+                group.Key.EditionNumber,
+                group.Key.StartYear,
+                ConversationCount = group.Count(),
+            })
             .ToListAsync(cancellationToken);
 
         // The students, each with how many conversations they hold.
@@ -201,10 +243,31 @@ public class AdminDefenseReviewService(
                 new AdminDefenseUserDto(row.UserId, row.Username, row.Email), row.ConversationCount))
             .ToList();
 
-        // The problems, each with how many conversations were held against it.
-        var problems = problemRows
+        // The handout problems, each with how many conversations were held against it.
+        var handoutProblems = handoutRows
             .Select(row => new AdminDefenseProblemOptionDto(
-                new HandoutEnvironmentTarget(row.HandoutContentId, row.EnvironmentId), row.ConversationCount))
+                new AdminHandoutTarget(row.HandoutContentId, row.EnvironmentId), row.ConversationCount));
+
+        // The archive problems, each named where it comes from.
+        var archiveProblems = archiveRows
+            .Select(row => new AdminDefenseProblemOptionDto(
+                new AdminProblemTarget(
+                    row.Slug,
+                    ProblemSources.Build(
+                        localization,
+                        row.EditionNumber,
+                        row.StartYear,
+                        row.CompetitionPath,
+                        row.Number,
+                        language)),
+                row.ConversationCount));
+
+        // Both kinds in one list, the busiest first, ties broken by whatever addresses the problem so that two
+        // with the same count keep one order between reads.
+        var problems = handoutProblems
+            .Concat(archiveProblems)
+            .OrderByDescending(option => option.ConversationCount)
+            .ThenBy(option => AdminDefenseTargets.Key(option.Target), StringComparer.Ordinal)
             .ToList();
 
         // And every set of settings one has run on.
@@ -216,7 +279,7 @@ public class AdminDefenseReviewService(
 
     /// <inheritdoc/>
     public async Task<AdminDefenseDetailDto> GetDetailAsync(
-        Guid reviewerId, Guid sessionId, CancellationToken cancellationToken = default)
+        Guid reviewerId, Guid sessionId, Language language, CancellationToken cancellationToken = default)
     {
         // This read's own context, since reading one conversation is a unit of work in itself.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -231,13 +294,19 @@ public class AdminDefenseReviewService(
         var loaded = await dbContext.DefenseSessions
             .AsNoTracking()
             .AsSplitQuery()
-            .Where(session => session.Id == sessionId && session.EnvironmentTarget != null)
+            .Where(session => session.Id == sessionId
+                && (session.EnvironmentTarget != null || session.ProblemTarget != null))
             .Select(session => new
             {
                 session.Id,
-                Target = new HandoutEnvironmentTarget(
+                Target = new AdminDefenseTargets.Columns(
                     session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
-                    session.EnvironmentTarget.HandoutEnvironment.ContentId),
+                    session.EnvironmentTarget!.HandoutEnvironment.ContentId,
+                    session.ProblemTarget!.Problem.Slug,
+                    session.ProblemTarget!.Problem.Number,
+                    session.ProblemTarget!.Problem.Round.Competition.Path,
+                    session.ProblemTarget!.Problem.Round.Season.EditionNumber,
+                    session.ProblemTarget!.Problem.Round.Season.StartYear),
                 User = new AdminDefenseUserDto(
                     session.User.Id,
                     session.User.IsDeleted ? null : session.User.Username,
@@ -320,7 +389,7 @@ public class AdminDefenseReviewService(
         // Hand it back with the settings parsed into the response rather than double-encoded into it.
         return new AdminDefenseDetailDto(
             loaded.Id,
-            loaded.Target,
+            AdminDefenseTargets.Build(localization, language, loaded.Target),
             loaded.User,
             loaded.ProblemStatement,
             loaded.ProblemReference,
@@ -491,6 +560,17 @@ public class AdminDefenseReviewService(
     }
 
     /// <summary>
+    /// The conversations the review surface reads: every one held against something. A conversation whose
+    /// target row never landed names no problem, so nothing here can say what it was about.
+    /// </summary>
+    /// <param name="dbContext">The context the query is built against.</param>
+    /// <returns>The conversations, still unrun.</returns>
+    private static IQueryable<DefenseSession> ReviewableSessions(MathCompsDbContext dbContext) =>
+        dbContext.DefenseSessions
+            .AsNoTracking()
+            .Where(session => session.EnvironmentTarget != null || session.ProblemTarget != null);
+
+    /// <summary>
     /// Narrows the conversations to those the database can pick out from what is stored against them, which is
     /// every filter except the two over when a conversation last moved and when it was last read. Those two are
     /// stored nowhere and so are applied further along, once both values have been worked out.
@@ -501,11 +581,8 @@ public class AdminDefenseReviewService(
     private static IQueryable<DefenseSession> ApplySessionFilters(
         MathCompsDbContext dbContext, AdminDefenseQueueFilter filter)
     {
-        // Conversations held against a problem. One held against nothing has no problem to name in the queue,
-        // so it never reaches it.
-        var sessions = dbContext.DefenseSessions
-            .AsNoTracking()
-            .Where(session => session.EnvironmentTarget != null);
+        // Conversations held against a problem, of either kind.
+        var sessions = ReviewableSessions(dbContext);
 
         // Whose conversations to read.
         if (filter.UserId is { } userId)
@@ -520,6 +597,10 @@ public class AdminDefenseReviewService(
         if (filter.EnvironmentId is { } environmentId)
             sessions = sessions.Where(session =>
                 session.EnvironmentTarget!.HandoutEnvironment.ContentId == environmentId);
+
+        // Or which archive problem, which one id addresses on its own.
+        if (filter.ProblemSlug is { } problemSlug)
+            sessions = sessions.Where(session => session.ProblemTarget!.Problem.Slug == problemSlug);
 
         // Conversations somebody has written about, or the ones nobody has.
         if (filter.HasNotes is { } hasNotes)
@@ -557,9 +638,7 @@ public class AdminDefenseReviewService(
         // Group the conversations by their settings and measure each group's span. The rows come back anonymous
         // and take their contract's shape afterwards, since a projection straight into one doesn't survive being
         // grouped over.
-        var rows = await dbContext.DefenseSessions
-            .AsNoTracking()
-            .Where(session => session.EnvironmentTarget != null)
+        var rows = await ReviewableSessions(dbContext)
             .GroupBy(session => PostgresDbFunctions.ExaminerConfigVersion(session.ExaminerConfig))
             .Select(group => new
             {
@@ -575,4 +654,31 @@ public class AdminDefenseReviewService(
         return [.. rows.Select(row => new AdminDefensePromptVersionOptionDto(
             row.Version, row.FirstSeenAt, row.LastSeenAt, row.ConversationCount))];
     }
+
+    /// <summary>
+    /// One conversation as the page comes back, its problem still as the columns naming it.
+    /// </summary>
+    /// <param name="Id"><inheritdoc cref="AdminDefenseConversationDto.Id" path="/summary"/></param>
+    /// <param name="Target"><inheritdoc cref="AdminDefenseTargets.Columns" path="/summary"/></param>
+    /// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
+    /// <param name="LastStudentMessage"><inheritdoc cref="AdminDefenseConversationDto.LastStudentMessage" path="/summary"/></param>
+    /// <param name="TurnCount"><inheritdoc cref="AdminDefenseConversationDto.TurnCount" path="/summary"/></param>
+    /// <param name="LastActivityAt"><inheritdoc cref="AdminDefenseConversationDto.LastActivityAt" path="/summary"/></param>
+    /// <param name="ReadAt"><inheritdoc cref="AdminDefenseConversationDto.ReadAt" path="/summary"/></param>
+    /// <param name="UnreadTurnCount"><inheritdoc cref="AdminDefenseConversationDto.UnreadTurnCount" path="/summary"/></param>
+    /// <param name="NoteCount"><inheritdoc cref="AdminDefenseConversationDto.NoteCount" path="/summary"/></param>
+    /// <param name="HasStudentReport"><inheritdoc cref="AdminDefenseConversationDto.HasStudentReport" path="/summary"/></param>
+    /// <param name="HasStudentFeedback"><inheritdoc cref="AdminDefenseConversationDto.HasStudentFeedback" path="/summary"/></param>
+    private sealed record QueueRow(
+        Guid Id,
+        AdminDefenseTargets.Columns Target,
+        AdminDefenseUserDto User,
+        string? LastStudentMessage,
+        int TurnCount,
+        DateTimeOffset LastActivityAt,
+        DateTimeOffset? ReadAt,
+        int UnreadTurnCount,
+        int NoteCount,
+        bool HasStudentReport,
+        bool HasStudentFeedback);
 }

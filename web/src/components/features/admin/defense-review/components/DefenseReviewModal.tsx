@@ -3,8 +3,6 @@
 import { ChevronLeft, ChevronRight, Mail, MailOpen, MailPlus, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { HandoutProblemRefLink } from '@/components/features/handouts/HandoutProblemRefLink'
-import { useHandoutProblemLabel } from '@/components/features/handouts/use-handout-problem-label'
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
@@ -16,9 +14,10 @@ import { useDefenseReviewPanels } from '../hooks/use-defense-review-panels'
 import { useDefenseReviewReadMarking } from '../hooks/use-defense-review-read-marking'
 import type { MarkUnreadFrom } from '../hooks/use-defense-review-read-state'
 import type { UseDefenseReviewSelectionResult } from '../hooks/use-defense-review-selection'
-import { type DefenseReviewDetail, describeReviewUser } from '../model/defense-review-types'
+import { describeReviewUser } from '../model/defense-review-types'
 import { ActionLabel } from './ActionLabel'
 import { DefenseReviewModalBody } from './DefenseReviewModalBody'
+import { DefenseTargetRef } from './DefenseTargetLabel'
 
 /**
  * Props for the {@link DefenseReviewModal} component.
@@ -119,7 +118,11 @@ export function DefenseReviewModal({
             {detail === null ? ' ' : describeReviewUser(detail.user, tProfile('defaultUser'))}
           </p>
           <p className="flex items-baseline gap-2 text-xs text-muted">
-            {detail === null ? <span>&nbsp;</span> : <ConversationProblemRef detail={detail} />}
+            {detail === null ? (
+              <span>&nbsp;</span>
+            ) : (
+              <DefenseTargetRef target={detail.target} emphasis="muted" />
+            )}
           </p>
         </div>
 
@@ -223,28 +226,4 @@ export function DefenseReviewModal({
       )}
     </Modal>
   )
-}
-
-/**
- * Props for the {@link ConversationProblemRef} component.
- */
-type ConversationProblemRefProps = {
-  /** The conversation whose problem is being named. */
-  detail: DefenseReviewDetail
-}
-
-/**
- * Which problem of which handout the open conversation was held against, and the way to go and read it.
- *
- * A component of its own so that naming the problem, which reads handout content, happens only once there is a
- * conversation to name one for.
- */
-function ConversationProblemRef({ detail }: ConversationProblemRefProps) {
-  // Review-surface copy
-  const t = useTranslations('admin.defenseReview')
-
-  // Which problem of which handout it was held against
-  const problemLabel = useHandoutProblemLabel(detail.target, t('deletedHandout'))
-
-  return <HandoutProblemRefLink label={problemLabel} emphasis="muted" />
 }

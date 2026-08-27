@@ -14,6 +14,10 @@ namespace MathComps.Domain.Contracts.Admin;
 /// Which environment within that handout to show, or null for every environment in it. Only meaningful alongside
 /// <paramref name="HandoutContentId"/>, since an environment's id is unique only within its own handout.
 /// </param>
+/// <param name="ProblemSlug">
+/// Which archive problem's conversations to show, or null for every problem's. Exclusive with
+/// <paramref name="HandoutContentId"/>: a conversation is held against one or the other.
+/// </param>
 /// <param name="WithinDays">
 /// How recently the conversation must have moved, in days, or null for however long ago.
 /// </param>
@@ -28,5 +32,6 @@ public record AdminDefenseQueueFilter(
     Guid? UserId,
     string? HandoutContentId,
     string? EnvironmentId,
+    string? ProblemSlug,
     int? WithinDays,
     string? PromptVersion);

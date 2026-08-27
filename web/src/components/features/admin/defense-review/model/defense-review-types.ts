@@ -4,7 +4,7 @@ import type {
   DefenseTurnReport,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
-import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
+import type { ProblemSource } from '@/components/features/problems/types/problem-api-types'
 
 /**
  * Somebody the review names: the student who held a conversation, or the reviewer who wrote a note about
@@ -20,6 +20,37 @@ export type DefenseReviewUser = {
 }
 
 /**
+ * A handout problem a conversation was held against, which the reader's own side names from handout content
+ * it already holds.
+ */
+export type DefenseReviewHandoutTarget = {
+  /** Which arm this is. */
+  kind: 'handout'
+  /** The handout's permanent content id. */
+  handoutContentId: string
+  /** The environment's permanent id, unique within its handout. */
+  environmentId: string
+}
+
+/**
+ * An archive problem a conversation was held against, already named: nothing on the reader's side can name a
+ * competition still under embargo.
+ */
+export type DefenseReviewProblemTarget = {
+  /** Which arm this is. */
+  kind: 'problem'
+  /** URL-safe identifier, unique across the archive. */
+  slug: string
+  /** Where the problem comes from. */
+  source: ProblemSource
+}
+
+/**
+ * What a conversation was held against. Exactly one arm applies to any one conversation.
+ */
+export type DefenseReviewTarget = DefenseReviewHandoutTarget | DefenseReviewProblemTarget
+
+/**
  * One conversation as the review queue lists it: who held it, what it was against, how it opened, and every mark
  * that decides whether it is worth opening.
  */
@@ -27,7 +58,7 @@ export type DefenseReviewConversation = {
   /** Stable identifier. */
   id: string
   /** The problem it was held against. */
-  target: HandoutEnvironmentTarget
+  target: DefenseReviewTarget
   /** Who held it. */
   user: DefenseReviewUser
   /** The start of the student's most recent message; null when it holds no student turn. */
@@ -67,6 +98,8 @@ export type DefenseReviewFilter = {
   handoutContentId?: string
   /** Which problem within that handout, only meaningful alongside the handout. */
   environmentId?: string
+  /** Which archive problem's conversations to show, which one slug addresses on its own. */
+  problemSlug?: string
   /** How recently the conversation must have moved, in days. */
   withinDays?: number
   /** Which examiner settings the conversation ran on. */
@@ -84,12 +117,11 @@ export type DefenseReviewUserOption = {
 }
 
 /**
- * One problem the queue can be filtered to. It carries content ids rather than a row identity, because naming a
- * problem takes handout content the API doesn't ship.
+ * One problem the queue can be filtered to.
  */
 export type DefenseReviewProblemOption = {
   /** The problem. */
-  target: HandoutEnvironmentTarget
+  target: DefenseReviewTarget
   /** How many conversations have been held against it. */
   conversationCount: number
 }
@@ -154,7 +186,7 @@ export type DefenseReviewDetail = {
   /** Stable identifier. */
   id: string
   /** The problem it was held against. */
-  target: HandoutEnvironmentTarget
+  target: DefenseReviewTarget
   /** Who held it. */
   user: DefenseReviewUser
   /** The problem statement as it stood when it was started. */
@@ -295,7 +327,7 @@ export type AdminNoteFeedItem = {
   /** The note. */
   note: AdminNote
   /** The problem its conversation was held against. */
-  target: HandoutEnvironmentTarget
+  target: DefenseReviewTarget
   /** Who held that conversation. */
   user: DefenseReviewUser
   /** Where the reply it is against sits; null when it is against the conversation as a whole. */

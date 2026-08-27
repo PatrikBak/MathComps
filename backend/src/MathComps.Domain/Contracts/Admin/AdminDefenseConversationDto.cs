@@ -1,5 +1,3 @@
-using MathComps.Domain.Contracts.Defense;
-
 namespace MathComps.Domain.Contracts.Admin;
 
 /// <summary>
@@ -7,7 +5,7 @@ namespace MathComps.Domain.Contracts.Admin;
 /// got to, and every mark that decides whether it is worth opening.
 /// </summary>
 /// <param name="Id">The conversation's identifier.</param>
-/// <param name="Target"><inheritdoc cref="HandoutEnvironmentTarget" path="/summary"/></param>
+/// <param name="Target"><inheritdoc cref="AdminDefenseTarget" path="/summary"/></param>
 /// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
 /// <param name="LastStudentMessage">
 /// The start of the student's most recent message, cut short. Null when the conversation holds no student turn.
@@ -23,7 +21,7 @@ namespace MathComps.Domain.Contracts.Admin;
 /// <param name="HasStudentFeedback">Whether the student said where it left them.</param>
 public record AdminDefenseConversationDto(
     Guid Id,
-    HandoutEnvironmentTarget Target,
+    AdminDefenseTarget Target,
     AdminDefenseUserDto User,
     string? LastStudentMessage,
     int TurnCount,

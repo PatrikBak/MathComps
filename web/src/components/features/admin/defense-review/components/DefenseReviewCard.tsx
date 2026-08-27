@@ -4,13 +4,12 @@ import { Flag, type LucideIcon, MessageSquareQuote, MessagesSquare, StickyNote }
 import { useFormatter, useTranslations } from 'next-intl'
 import { memo } from 'react'
 
-import { HandoutProblemRefLabel } from '@/components/features/handouts/HandoutProblemRefLabel'
-import { useHandoutProblemLabel } from '@/components/features/handouts/use-handout-problem-label'
 import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
 import { toPlainTextPreview } from '@/components/shared/utils/string-utils'
 
 import { type DefenseReviewConversation, describeReviewUser } from '../model/defense-review-types'
+import { DefenseTargetLabel } from './DefenseTargetLabel'
 
 /**
  * Props for the {@link DefenseReviewCard} component.
@@ -48,9 +47,6 @@ export const DefenseReviewCard = memo(function DefenseReviewCard({
   // Locale-aware value formatter
   const format = useFormatter()
 
-  // Which problem of which handout it was held against
-  const problemLabel = useHandoutProblemLabel(conversation.target, t('deletedHandout'))
-
   // Whether anything in it has arrived since it was last read
   const isUnread = conversation.unreadTurnCount > 0
 
@@ -83,7 +79,7 @@ export const DefenseReviewCard = memo(function DefenseReviewCard({
       {/* Which problem it was held against, and when it last moved */}
       <span className="flex items-baseline gap-3">
         <span className="flex min-w-0 flex-1 items-baseline gap-2 text-sm">
-          <HandoutProblemRefLabel label={problemLabel} emphasis="muted" />
+          <DefenseTargetLabel target={conversation.target} emphasis="muted" />
         </span>
 
         <time

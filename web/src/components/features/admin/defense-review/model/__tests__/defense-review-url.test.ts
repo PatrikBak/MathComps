@@ -11,10 +11,13 @@ import {
  * A queue whose filter has nothing left out, so that a field added to {@link DefenseReviewFilter} without
  * being added to the fixture fails to compile: the round trip below can only catch a field the address
  * mangles, never one the address was never asked to carry.
+ *
+ * The archive problem is the one field it leaves out, since a conversation is held against one problem and
+ * an address naming one of each kind is written back out naming only the handout.
  */
 type FullyNarrowedQueue = {
   /** Every one of the filter's fields, each narrowing something. */
-  filter: Required<DefenseReviewFilter>
+  filter: Required<Omit<DefenseReviewFilter, 'problemSlug'>>
   /** The conversation being read. */
   openId: string
 }
@@ -61,6 +64,29 @@ describe('toDefenseReviewQuery', () => {
 
     // Written out as a 0, which is what survives a reload
     expect(query).toBe('hasNotes=0')
+  })
+
+  it('round-trips a queue narrowed to an archive problem', () => {
+    // A problem out of the archive, which one slug addresses
+    const filter: DefenseReviewFilter = { problemSlug: '76-mc-advanced-1-2' }
+
+    // Which comes back naming the same problem
+    expect(read(toDefenseReviewQuery({ filter, openId: null })).filter).toEqual(filter)
+  })
+
+  it('lets the handout stand where a filter names a problem of each kind', () => {
+    // Both arms at once, which no pick can produce and a hand-written address can
+    const query = toDefenseReviewQuery({
+      filter: {
+        handoutContentId: 'handout-1',
+        environmentId: 'problem-1',
+        problemSlug: '76-mc-advanced-1-2',
+      },
+      openId: null,
+    })
+
+    // The archive one goes, since a conversation held against both is a narrowing matching nothing
+    expect(query).toBe('environmentId=problem-1&handoutContentId=handout-1')
   })
 
   it('leaves out a problem named without its handout, which a reload would drop anyway', () => {

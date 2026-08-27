@@ -89,21 +89,20 @@ export function useDefenseReviewFacetOptions(
     [options, tProfile]
   )
 
-  // The problems one has been held against, under the handout they belong to, with what to call each of
-  // those handouts; held still so that redrawing the row doesn't reopen a section the reader collapsed
-  // while searching
+  // The problems one has been held against, under whatever holds them, with what to call each of those;
+  // held still so that redrawing the row doesn't reopen a section the reader collapsed while searching
   const problemFacet = useMemo(
     () =>
       options === null
         ? { options: [], sectionLabels: {} }
-        : toProblemFacet(options.problems, labeller),
-    [options, labeller]
+        : toProblemFacet(options.problems, labeller, tHandouts('environments.problem')),
+    [options, labeller, tHandouts]
   )
 
   // The options themselves
   const problemOptions = problemFacet.options
 
-  // The sections in the order the handouts came, and what each is called
+  // The sections in the order their problems came, and what each is called
   const problemGrouping = useMemo(
     () => ({ keys: Object.keys(problemFacet.sectionLabels), labels: problemFacet.sectionLabels }),
     [problemFacet]

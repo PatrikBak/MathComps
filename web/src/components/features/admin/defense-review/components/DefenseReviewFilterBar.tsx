@@ -14,7 +14,7 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { useDefenseReviewFacetOptions } from '../hooks/use-defense-review-facet-options'
 import {
   decodeProblemKey,
-  encodeProblemKey,
+  problemKeyOf,
   readSignalSelection,
   toSignalSelection,
 } from '../model/defense-review-filters'
@@ -68,6 +68,9 @@ export function DefenseReviewFilterBar({
     signalOptions,
     periodOptions,
   } = useDefenseReviewFacetOptions(options)
+
+  // Which problem option the filter currently stands on; null while it names none
+  const problemKey = problemKeyOf(filter)
 
   // Which of the signal options the filter currently stands for
   const selectedSignals = toSignalSelection(filter)
@@ -132,27 +135,18 @@ export function DefenseReviewFilterBar({
         options={problemOptions}
         grouping={problemGrouping}
         selectionMode="single"
-        selected={
-          // A problem only stands once both halves are set, either alone naming nothing
-          filter.environmentId === undefined || filter.handoutContentId === undefined
-            ? []
-            : [
-                encodeProblemKey({
-                  handoutContentId: filter.handoutContentId,
-                  environmentId: filter.environmentId,
-                }),
-              ]
-        }
+        selected={problemKey === null ? [] : [problemKey]}
         onChange={(selected) => {
           // Which problem now stands, if any
           const picked = selected.at(-1)
 
-          // The two halves travel together, since a problem's id only means anything within its handout
-          const target = picked === undefined ? null : decodeProblemKey(picked)
+          // Which fields it narrows by, an archive problem and a handout one taking different ones
+          const fields = picked === undefined ? null : decodeProblemKey(picked)
 
-          // Both fields set from the one pick, and both dropped together when it is cleared
-          onFieldChange('handoutContentId', target?.handoutContentId)
-          onFieldChange('environmentId', target?.environmentId)
+          // Every field set from the one pick, so picking a problem of one kind clears the other's
+          onFieldChange('handoutContentId', fields?.handoutContentId)
+          onFieldChange('environmentId', fields?.environmentId)
+          onFieldChange('problemSlug', fields?.problemSlug)
         }}
       />
 

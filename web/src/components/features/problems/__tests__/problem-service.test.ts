@@ -40,6 +40,7 @@ function apiCallReturning(
     solutionLink: null,
     source: {
       season: { slug: '2023', displayName: '2023', fullName: null },
+      startYear: 2023,
       competition: [{ slug: 'imo', displayName: 'imo', fullName: null }],
       number: 1,
     },

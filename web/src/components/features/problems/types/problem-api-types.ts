@@ -64,9 +64,15 @@ export type LogicToggle = 'or' | 'and'
 /**
  * Where a problem comes from: the season it ran in, the competition it was set in, and its position there.
  */
-type ProblemSource = {
+export type ProblemSource = {
   /** The season it was set in, whose slug is the edition number. */
   season: LabeledSlug
+  /**
+   * The calendar year the season started. It rides beside `season` because that label spells the season out as
+   * an edition number, which counts one competition's own editions and says nothing true about the rest of the
+   * season sharing it.
+   */
+  startYear: number
   /**
    * Every competition down to the one it was set in, root-first, so the last entry is the competition itself.
    * Each entry's `slug` is that competition's whole path rather than its own segment, which is what names a

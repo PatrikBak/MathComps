@@ -8,7 +8,7 @@ namespace MathComps.Domain.Contracts.Admin;
 /// given, the settings it ran on, and what has already been written about it.
 /// </summary>
 /// <param name="Id">The conversation's identifier.</param>
-/// <param name="Target"><inheritdoc cref="HandoutEnvironmentTarget" path="/summary"/></param>
+/// <param name="Target"><inheritdoc cref="AdminDefenseTarget" path="/summary"/></param>
 /// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
 /// <param name="Statement">The problem statement as it stood when the conversation was started.</param>
 /// <param name="Reference">
@@ -33,7 +33,7 @@ namespace MathComps.Domain.Contracts.Admin;
 /// <param name="CreatedAt">When the conversation was started.</param>
 public record AdminDefenseDetailDto(
     Guid Id,
-    HandoutEnvironmentTarget Target,
+    AdminDefenseTarget Target,
     AdminDefenseUserDto User,
     string Statement,
     string Reference,

@@ -1,14 +1,15 @@
-import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
 import {
   describeHandoutProblem,
-  type HandoutProblemLabel,
   type HandoutProblemLabeller,
 } from '@/components/features/handouts/handout-problem-label'
+import { describeProblemRef } from '@/components/features/problems/problem-ref-label'
 import type { FacetOption } from '@/components/shared/components/facets/model/facet-types'
 
 import { encodeProblemKey } from './defense-review-filters'
 import {
+  type DefenseReviewHandoutTarget,
   type DefenseReviewProblemOption,
+  type DefenseReviewProblemTarget,
   type DefenseReviewPromptVersionOption,
   type DefenseReviewUserOption,
   describeReviewUser,
@@ -45,25 +46,13 @@ export function toUserFacetOptions(
  * section each: their handouts are told apart only by a content id, so a section per handout is a run of
  * headings a reader cannot tell apart, all of them saying the same thing.
  */
-const DELETED_HANDOUT_GROUP_KEY = 'deletedHandout'
+const DELETED_HANDOUT_SECTION_KEY = 'deletedHandout'
 
 /**
- * Which section a problem falls into: its handout, or the shared one every problem outliving its handout
- * lands in.
- *
- * @param target - The problem.
- * @param label - The problem as it reads.
- * @returns The section's key.
+ * Sits in front of a section's own address, so a handout's content id and a competition's path can't land on
+ * one section between them.
  */
-function toProblemGroupKey(target: HandoutEnvironmentTarget, label: HandoutProblemLabel): string {
-  // Nothing names the handout any more, so the problem joins the ones in the same position. It is the
-  // handout going that costs the heading its words, not the problem: one dropped from a handout the site
-  // still carries files under that handout, which is named and tells the reader something.
-  if (!label.isHandoutOnSite) return DELETED_HANDOUT_GROUP_KEY
-
-  // Otherwise it files under the handout it belongs to
-  return target.handoutContentId
-}
+const SECTION_KEY_KINDS = { handout: 'handout', competition: 'competition' } as const
 
 /**
  * The problem facet: its options, and what each of its sections is called.
@@ -76,57 +65,139 @@ export type DefenseReviewProblemFacet = {
 }
 
 /**
- * Turns the problems into facet options, grouped under the handout they belong to.
+ * One problem as the facet reads it: which section it files under, what that section is called, and how the
+ * option itself reads.
+ */
+type ProblemFacetEntry = {
+  /** The key of the section it files under. */
+  sectionKey: string
+  /** What that section is called. */
+  sectionLabel: string
+  /** What to call the option under that heading, e.g. "Problem 3". */
+  displayName: string
+  /** Its fuller name, which the facet's search reads and its trigger shows once one is picked. */
+  fullName: string
+}
+
+/**
+ * Reads a handout problem as the facet holds it.
  *
- * The backend can only name them by id: it ships no handout content and so cannot tell one problem from
- * another in any language. The labels are resolved here instead, and a problem whose handout has since gone
- * from the site keeps its option under a heading saying so rather than disappearing along with its
- * conversations.
+ * The heading names the handout, so the option only names the problem. The handout is still there as the
+ * option's fuller name: there are hundreds of options here, so the reader is typing rather than scrolling, and
+ * "Problem 3" on its own belongs to every handout at once.
  *
- * The section heading names the handout, so an option only names the problem. The handout is still there as
- * the option's fuller name, which is what the search reads and what the trigger shows once one is picked:
- * there are hundreds of options here, so the reader is typing rather than scrolling, and "Problem 3" on its
- * own belongs to every handout at once.
+ * @param target - The problem.
+ * @param labeller - How to name it.
+ *
+ * @returns The problem as the facet reads it.
+ */
+function readHandoutProblem(
+  target: DefenseReviewHandoutTarget,
+  labeller: HandoutProblemLabeller
+): ProblemFacetEntry {
+  // The problem as it reads: which handout, and which of its environments
+  const label = describeHandoutProblem(target, labeller)
+
+  // Nothing names the handout any more, so the problem joins the ones in the same position. It is the
+  // handout going that costs the heading its words, not the problem: one dropped from a handout the site
+  // still carries files under that handout, which is named and tells the reader something.
+  const sectionKey = label.isHandoutOnSite
+    ? [SECTION_KEY_KINDS.handout, target.handoutContentId].join(':')
+    : DELETED_HANDOUT_SECTION_KEY
+
+  // What to call it under the heading naming its handout; a problem gone from that handout falls back to
+  // its own id, which the heading still narrows down
+  const displayName = label.environment === null ? target.environmentId : label.environment.label
+
+  // What heads the section: its handout, or the wording standing in for the ones that have gone, since
+  // letting whichever of those was labelled last name it heads them with one of the others
+  const sectionLabel = label.isHandoutOnSite ? label.handoutTitle : labeller.deletedHandoutLabel
+
+  // The problem as the facet holds it
+  return {
+    sectionKey,
+    sectionLabel,
+    displayName,
+    fullName: `${displayName} (${label.handoutTitle})`,
+  }
+}
+
+/**
+ * Reads an archive problem as the facet holds it.
+ *
+ * @param target - The problem.
+ * @param problemWord - What this surface calls a problem, e.g. "Problem".
+ *
+ * @returns The problem as the facet reads it.
+ */
+function readArchiveProblem(
+  target: DefenseReviewProblemTarget,
+  problemWord: string
+): ProblemFacetEntry {
+  // The problem as it reads: where the competition sits, which run of it, and which problem of that
+  const label = describeProblemRef(target.source, problemWord)
+
+  // It files under the competition it was set in, which the last entry of the chain names
+  const competitionPath = target.source.competition.at(-1)?.slug ?? target.slug
+
+  // The heading spells the whole chain out, since it is what the reader is searching by
+  const sectionLabel = [...label.context, label.edition].join(' ')
+
+  // The season addresses the section along with the competition, since a competition runs again every year
+  const sectionKey = [SECTION_KEY_KINDS.competition, competitionPath, target.source.startYear].join(
+    ':'
+  )
+
+  // The problem as the facet holds it
+  return {
+    sectionKey,
+    sectionLabel,
+    displayName: label.problem,
+    fullName: `${label.problem} (${sectionLabel})`,
+  }
+}
+
+/**
+ * Turns the problems into facet options, grouped under whatever holds them.
+ *
+ * A handout problem is named here, since the site's handout content is read on the client and the backend can
+ * only address it by id. An archive problem arrives already named, since the taxonomy is not read here.
  *
  * The sections come out of the same pass as the options, since a section's heading and the options filed
  * under it are two readings of one labelling, and computing them apart is what lets them disagree.
  *
  * @param problems - The problems, as the backend counted them.
- * @param labeller - How to name them.
+ * @param labeller - How to name the handout ones.
+ * @param problemWord - What this surface calls a problem, e.g. "Problem".
+ *
  * @returns The options and their section headings, as described by {@link DefenseReviewProblemFacet}.
  */
 export function toProblemFacet(
   problems: DefenseReviewProblemOption[],
-  labeller: HandoutProblemLabeller
+  labeller: HandoutProblemLabeller,
+  problemWord: string
 ): DefenseReviewProblemFacet {
-  // What to call each section, filled in as the problems name the handouts they file under
+  // What to call each section, filled in as the problems name what they file under
   const sectionLabels: Record<string, string> = {}
 
-  // One option per problem, each carrying the handout it files under
+  // One option per problem, each carrying the section it files under
   const options = problems.map((option) => {
-    // The problem as it reads: which handout, and which of its environments
-    const label = describeHandoutProblem(option.target, labeller)
+    // The problem as the facet reads it, whichever kind of problem it is
+    const entry =
+      option.target.kind === 'handout'
+        ? readHandoutProblem(option.target, labeller)
+        : readArchiveProblem(option.target, problemWord)
 
-    // The section it falls into
-    const groupKey = toProblemGroupKey(option.target, label)
+    // What that section is called
+    sectionLabels[entry.sectionKey] = entry.sectionLabel
 
-    // What that section is called. The shared one names itself, since the problems landing in it come from
-    // several handouts and letting whichever was labelled last name it heads them with one of the others.
-    sectionLabels[groupKey] =
-      groupKey === DELETED_HANDOUT_GROUP_KEY ? labeller.deletedHandoutLabel : label.handoutTitle
-
-    // What to call it under the heading naming its handout; a problem gone from that handout falls back to
-    // its own id, which the heading still narrows down
-    const displayName =
-      label.environment === null ? option.target.environmentId : label.environment.label
-
-    // The option, keyed by the pair of ids since neither identifies a problem on its own
+    // The option, keyed the way the reader's selection is read back
     return {
       id: encodeProblemKey(option.target),
-      displayName,
-      fullName: `${displayName} (${label.handoutTitle})`,
+      displayName: entry.displayName,
+      fullName: entry.fullName,
       count: option.conversationCount,
-      groupKey,
+      groupKey: entry.sectionKey,
     }
   })
 

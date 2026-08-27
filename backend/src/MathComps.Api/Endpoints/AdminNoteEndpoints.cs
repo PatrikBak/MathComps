@@ -36,7 +36,7 @@ public static class AdminNoteEndpoints
 
             // The page of notes, each carrying where it was written
             var feed = await noteService.GetFeedAsync(
-                reviewerId, openOnly, pageNumber, cancellationToken);
+                reviewerId, openOnly, pageNumber, EndpointHelpers.GetRequestLanguage(), cancellationToken);
 
             // Return it
             return Results.Ok(feed);

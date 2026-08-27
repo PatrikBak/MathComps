@@ -23,6 +23,7 @@ export function problemWith(state: Partial<Problem> = {}): Problem {
     solutionLink: null,
     source: {
       season: { slug: '75', displayName: '75', fullName: null },
+      startYear: 2025,
       competition: [],
       number: 1,
     },
