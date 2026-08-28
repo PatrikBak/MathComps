@@ -46,8 +46,10 @@ export type TurnDraftsMark = {
  * Props for a single {@link DefenseTurn}.
  */
 type DefenseTurnProps = {
-  /** Whether to offer the turn's own controls, both of which act on the conversation. */
-  canAct: boolean
+  /** Whether to offer the report control, which sits beside the turn and leaves it as it stands. */
+  canGiveFeedback: boolean
+  /** Whether to offer the rewind control, which drops this turn and everything after it. */
+  canRewind: boolean
   /** The message this turn renders. */
   turn: Turn
   /** Its 1-based place in the conversation, shown beside the role; null where nothing counts turns. */
@@ -93,7 +95,8 @@ export function DefenseTurn({
   label,
   animate,
   isReported,
-  canAct,
+  canGiveFeedback,
+  canRewind,
   onRewind,
   onReport,
   unreadMark,
@@ -154,14 +157,15 @@ export function DefenseTurn({
         </div>
 
         {/* The turn's controls, and whatever has already been said about it */}
-        {(canAct ||
+        {(canGiveFeedback ||
+          canRewind ||
           isReported ||
           draftCount !== null ||
           (unreadMark !== null && turnId !== null)) && (
           <div className={cn('flex shrink-0 items-center gap-0.5', style.actionsInset)}>
             {/* Say what went wrong with a reply. A reported one keeps the control and carries a filled flag,
                 so the student can see what they said and change it */}
-            {canAct && onReport !== null && (
+            {canGiveFeedback && onReport !== null && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -177,7 +181,7 @@ export function DefenseTurn({
             )}
 
             {/* The same mark with nothing to click, for a reader who is only reading */}
-            {!canAct && isReported && (
+            {!canGiveFeedback && isReported && (
               <span
                 role="img"
                 aria-label={t('reported')}
@@ -188,7 +192,7 @@ export function DefenseTurn({
             )}
 
             {/* Rewind the conversation to this turn */}
-            {canAct && (
+            {canRewind && (
               <Button
                 variant="ghost"
                 size="icon"

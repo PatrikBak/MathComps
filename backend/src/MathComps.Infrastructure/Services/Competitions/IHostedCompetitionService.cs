@@ -77,6 +77,33 @@ public interface IHostedCompetitionService
     /// <returns>The problems, in the order the competition sets them.</returns>
     Task<IReadOnlyList<HostedCompetitionProblemDto>> GetProblemsAsync(
         Guid userId, Guid roundId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Records what a student says about their own solution to one of a competition's problems, replacing
+    /// whatever they said about it before. Offered while their entry runs and for a short grace after it ends.
+    /// </summary>
+    /// <param name="userId">The student saying it.</param>
+    /// <param name="roundId">The competition the problem belongs to.</param>
+    /// <param name="problemId">The problem the claim is about.</param>
+    /// <param name="comment">What they say about the solution, which is the whole of the claim.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>A task that completes once the claim is recorded.</returns>
+    Task SetSelfAssessmentAsync(
+        Guid userId, Guid roundId, Guid problemId, string comment,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Takes back what a student said about their own solution to one of a competition's problems, open for
+    /// exactly as long as leaving one is. Naming a problem they have said nothing about leaves them where they
+    /// asked to be, so it passes for done.
+    /// </summary>
+    /// <param name="userId">The student taking it back.</param>
+    /// <param name="roundId">The competition the problem belongs to.</param>
+    /// <param name="problemId">The problem the claim was about.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>A task that completes once nothing of theirs stands against the problem.</returns>
+    Task ClearSelfAssessmentAsync(
+        Guid userId, Guid roundId, Guid problemId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

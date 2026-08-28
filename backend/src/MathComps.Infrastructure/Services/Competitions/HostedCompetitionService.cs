@@ -5,6 +5,7 @@ using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -21,14 +22,22 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="localization">Resolves the localized name of the node a competition runs under.</param>
 /// <param name="limits">The caps a defense is held to.</param>
+/// <param name="options">The terms a hosted competition runs on.</param>
 public sealed class HostedCompetitionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
-    IOptions<DefenseLimits> limits)
+    IOptions<DefenseLimits> limits,
+    IOptions<HostedCompetitionOptions> options)
     : IHostedCompetitionService
 {
     /// <inheritdoc cref="DefenseLimitsDto.MaxTurnsPerSession" path="/summary"/>
     private readonly int _maxTurnsPerSession = limits.Value.MaxTurnsPerSession;
+
+    /// <inheritdoc cref="DefenseLimitsDto.MaxFeedbackCommentChars" path="/summary"/>
+    private readonly int _maxCommentChars = limits.Value.MaxFeedbackCommentChars;
+
+    /// <inheritdoc cref="HostedCompetitionOptions.NoteGraceMinutes" path="/summary"/>
+    private readonly int _noteGraceMinutes = options.Value.NoteGraceMinutes;
 
     /// <inheritdoc/>
     public async Task<HostedCompetitionsViewDto> GetViewAsync(
@@ -72,7 +81,7 @@ public sealed class HostedCompetitionService(
 
         // The view, one group at a time.
         return new HostedCompetitionsViewDto(
-        [
+            [
             .. groups.Select(group => new HostedGroupDto(
                 group.Id,
                 // Every round of a group runs under a node of the same name, so the first names the group.
@@ -91,7 +100,8 @@ public sealed class HostedCompetitionService(
                         ResultsPublished: false,
                         ProblemsPublished: round.VisibleSince is null || round.VisibleSince <= now)),
                 ])),
-        ]);
+            ],
+            _noteGraceMinutes);
     }
 
     /// <inheritdoc/>
@@ -182,6 +192,72 @@ public sealed class HostedCompetitionService(
 
         // The set, in the order the competition sets it.
         return await ReadProblemsAsync(dbContext, userId, roundId, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task SetSelfAssessmentAsync(
+        Guid userId, Guid roundId, Guid problemId, string comment, CancellationToken cancellationToken = default)
+    {
+        // What the student wrote, reduced to the text it carries. The words are the whole claim, so a blank
+        // one is a bad request rather than a quiet way of dropping what stands.
+        var written = comment.TrimToNull() ?? throw new DefenseFeedbackValueException();
+
+        // Held to the same cap as everything else a student writes about a defense.
+        if (written.Length > _maxCommentChars)
+            throw new DefenseFeedbackCommentTooLongException();
+
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // A note belongs to a run and closes shortly after it.
+        await EnsureNotesOpenAsync(dbContext, userId, roundId, cancellationToken);
+
+        // And the problem has to be one of that competition's own, so a claim can't be filed under a set the
+        // entry never opened.
+        var isOfRound = await dbContext.Problems
+            .AsNoTracking()
+            .AnyAsync(problem => problem.Id == problemId && problem.RoundId == roundId, cancellationToken);
+
+        // Named one of somebody else's set, which is not this competition's claim to hold.
+        if (!isOfRound)
+            throw new HostedProblemNotFoundException();
+
+        // One timestamp, so a first claim reads as never revised.
+        var claimedAt = DateTimeOffset.UtcNow;
+
+        // Record it as the student's one and only claim about the problem. Keeping the first stamp out of the
+        // update leaves a revision the same row, still saying when they first spoke.
+        await dbContext.ProblemSelfAssessments
+            .Upsert(new ProblemSelfAssessment
+            {
+                UserId = userId,
+                ProblemId = problemId,
+                Comment = written,
+                CreatedAt = claimedAt,
+                UpdatedAt = claimedAt,
+            })
+            .On(assessment => new { assessment.UserId, assessment.ProblemId })
+            .Exclude(assessment => assessment.CreatedAt)
+            .RunAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task ClearSelfAssessmentAsync(
+        Guid userId, Guid roundId, Guid problemId, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Taking a note back is open for exactly as long as leaving one is.
+        await EnsureNotesOpenAsync(dbContext, userId, roundId, cancellationToken);
+
+        // Drop it, the competition riding in the delete itself. A problem they have claimed nothing about, or
+        // one of somebody else's set, leaves them where they asked to be.
+        await dbContext.ProblemSelfAssessments
+            .Where(assessment => assessment.UserId == userId
+                && assessment.ProblemId == problemId
+                && assessment.Problem.RoundId == roundId)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 
     /// <summary>
@@ -332,7 +408,8 @@ public sealed class HostedCompetitionService(
         };
 
     /// <summary>
-    /// Reads one competition's problems with the student's conversations about each.
+    /// Reads one competition's problems with the student's conversations about each, and what they claim of
+    /// their own solution.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="userId">The student reading.</param>
@@ -381,7 +458,17 @@ public sealed class HostedCompetitionService(
             })
             .ToListAsync(cancellationToken);
 
-        // Each problem with the conversations held about it.
+        // What the student currently claims about each of those solutions, for the problems they have said
+        // anything about. Keyed on them and the problem, so a claim made in an earlier run is still theirs.
+        var assessments = await dbContext.ProblemSelfAssessments
+            .AsNoTracking()
+            .Where(assessment => problemIds.Contains(assessment.ProblemId) && assessment.UserId == userId)
+            .ToDictionaryAsync(
+                assessment => assessment.ProblemId,
+                assessment => assessment.Comment,
+                cancellationToken);
+
+        // Each problem with the conversations held about it and what the student makes of their own solution.
         return
         [
             .. problems.Select(problem => new HostedCompetitionProblemDto(
@@ -394,7 +481,9 @@ public sealed class HostedCompetitionService(
                     .. defenses
                         .Where(defense => defense.ProblemId == problem.Id)
                         .Select(defense => defense.Line),
-                ])),
+                ],
+                assessments.GetValueOrDefault(problem.Id),
+                _maxCommentChars)),
         ];
     }
 
@@ -440,6 +529,53 @@ public sealed class HostedCompetitionService(
         // And past that it is the same rule a conversation about one of its problems is opened under.
         await HostedEntryRules.EnsureEntitledAsync(
             dbContext, userId, roundId, round.VisibleSince, cancellationToken);
+    }
+
+    /// <summary>
+    /// Throws unless the student may still say something about a round's solutions: they sat an entry into it
+    /// rather than giving it up, and its grace has not run out, if it has ended at all.
+    /// </summary>
+    /// <remarks>
+    /// Stricter than the read rule above, which lets anybody read a set out of embargo. What a student says
+    /// about their own solution is read beside the transcript they argued it in, and that transcript stops
+    /// where the entry does, so what is said about it has to stop shortly after.
+    /// </remarks>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="userId">The student writing.</param>
+    /// <param name="roundId">The competition they are writing under.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    private async Task EnsureNotesOpenAsync(
+        MathCompsDbContext dbContext, Guid userId, Guid roundId, CancellationToken cancellationToken)
+    {
+        // Their entry with the clock it was given, absent unless the site hosts the round and they spent one.
+        var entry = await dbContext.HostedEntries
+            .AsNoTracking()
+            .Where(candidate => candidate.UserId == userId
+                && candidate.RoundId == roundId
+                && candidate.Round.HostedGroup != null)
+            .Select(candidate => new
+            {
+                candidate.StartedAt,
+                candidate.FinishedAt,
+                candidate.Round.HostedGroup!.ClockMinutes,
+            })
+            .FirstOrDefaultAsync(cancellationToken)
+            // Nothing spent here, so there is no run of theirs to say anything in.
+            ?? throw new HostedEntryRequiredException();
+
+        // An entry given up for the problems was never a run, so nothing was argued in it to speak about.
+        if (entry.StartedAt is not { } startedAt)
+            throw new HostedEntryNotRunningException();
+
+        // Where the entry stopped counting: the clock running out, or the student closing it ahead of that.
+        var clockRunsOutAt = startedAt.AddMinutes(entry.ClockMinutes);
+        var endedAt = entry.FinishedAt is { } finishedAt && finishedAt < clockRunsOutAt
+            ? finishedAt
+            : clockRunsOutAt;
+
+        // Past the grace that follows it, so the note and the transcript have both settled.
+        if (endedAt.AddMinutes(_noteGraceMinutes) <= DateTimeOffset.UtcNow)
+            throw new HostedEntryNotRunningException();
     }
 
     /// <summary>

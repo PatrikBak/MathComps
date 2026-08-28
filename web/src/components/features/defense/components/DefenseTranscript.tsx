@@ -57,8 +57,10 @@ type TranscriptDivider = {
  * Props for the {@link DefenseTranscript}.
  */
 type DefenseTranscriptProps = {
-  /** Whether to offer each turn's own controls, both of which act on the conversation. */
-  canAct: boolean
+  /** Whether to offer each turn's report control, which leaves the conversation as it stands. */
+  canGiveFeedback: boolean
+  /** Whether to offer each turn's rewind control, which drops everything after it. */
+  canRewind: boolean
   /** The conversation so far, oldest first. */
   turns: readonly Turn[]
   /** An id for the current conversation, distinct across conversations. */
@@ -101,7 +103,8 @@ export function DefenseTranscript({
   roleLabels,
   isThinking,
   reports,
-  canAct,
+  canGiveFeedback,
+  canRewind,
   onRewindTurn,
   onReportTurn,
   dividerBeforeTurn,
@@ -213,7 +216,8 @@ export function DefenseTranscript({
                     label={roleLabels[turn.role]}
                     animate={index === justArrivedIndex}
                     isReported={reportableId !== null && reports.has(reportableId)}
-                    canAct={canAct}
+                    canGiveFeedback={canGiveFeedback}
+                    canRewind={canRewind}
                     onRewind={() => onRewindTurn(index)}
                     onReport={reportableId === null ? null : () => onReportTurn(reportableId)}
                     unreadMark={unreadMark}

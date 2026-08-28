@@ -425,6 +425,11 @@
       "title": "Before you start"
     },
     "rulesButton": "Rules",
+    "selfAssessmentAsk": "Leave a comment about your solution",
+    "selfAssessmentError": "That couldn't be saved.",
+    "selfAssessmentNote": "The person who grades this problem reads it. You can edit it while your clock is running, and for half an hour after it stops.",
+    "selfAssessmentPracticeNote": "In a real competition a grader reads this. You can edit a note like this while your clock is running, and for half an hour after it stops.",
+    "selfAssessmentPrompt": "Leave us a comment about your solution, for instance how many points you think it deserves 😀",
     "standing": {
       "running": "competing, {clock} left"
     },
@@ -520,6 +525,7 @@
       "tone": "I didn't like her tone"
     },
     "reportCommentLabel": "What happened exactly?",
+    "reportCompetitionNote": "In a competition this is read by the person who grades your solution.",
     "reported": "Change your feedback",
     "reportTitle": "What went wrong?",
     "requiresCommentHint": "write below",

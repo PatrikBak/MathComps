@@ -157,6 +157,7 @@ export function writeCachedEntry(
 
       // The same view with the entry on its own competition
       return {
+        ...view,
         groups: view.groups.map((group) => ({
           ...group,
           competitions: group.competitions.map((competition) =>
@@ -166,4 +167,44 @@ export function writeCachedEntry(
       }
     }
   )
+}
+
+/**
+ * Puts what a student claims about one solution onto its own problem in the cached set.
+ *
+ * @param queryClient - The React Query cache.
+ * @param readerKey - Who the cached set belongs to.
+ * @param competitionId - Which competition's problems these are.
+ * @param problemId - Which problem the claim is about.
+ * @param assessment - What they now say, or null once they have taken it back.
+ *
+ * @returns What stood there before this write, which is what a refused one has to be put back to.
+ */
+export function writeCachedSelfAssessment(
+  queryClient: QueryClient,
+  readerKey: HostedCompetitionsReaderKey,
+  competitionId: string,
+  problemId: string,
+  assessment: string | null
+): string | null {
+  // Where the set is cached, which the read and the write below both go through
+  const key = competitionProblemsQueryKey(readerKey, competitionId)
+
+  // What the problem said a moment ago, read off the row rather than taken from the caller: the caller
+  // reads it from this same row, so an optimistic write has already moved their copy on by the time a
+  // refusal comes back. Absent while nothing has been read, which reads as nothing said
+  const previous =
+    queryClient
+      .getQueryData<HostedCompetitionProblem[]>(key)
+      ?.find((problem) => problem.id === problemId)?.selfAssessment ?? null
+
+  // The set with the claim on its own problem, every other one left where it was
+  queryClient.setQueryData<HostedCompetitionProblem[]>(key, (problems) =>
+    problems?.map((problem) =>
+      problem.id === problemId ? { ...problem, selfAssessment: assessment } : problem
+    )
+  )
+
+  // For whoever has to put it back
+  return previous
 }

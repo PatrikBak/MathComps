@@ -129,6 +129,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Links from a defense session to the archive problem it defends.</summary>
     public DbSet<ProblemDefense> ProblemDefenses => Set<ProblemDefense>();
 
+    /// <summary>What students say about their own solutions, one claim per student per problem.</summary>
+    public DbSet<ProblemSelfAssessment> ProblemSelfAssessments => Set<ProblemSelfAssessment>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -853,6 +856,34 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion ProblemDefense
+
+        #region ProblemSelfAssessment
+
+        modelBuilder.Entity<ProblemSelfAssessment>(e =>
+        {
+            // A student says one thing about one problem, so the pair is the row. Unique by construction, so
+            // two simultaneous presses cannot both read no row and then both write one.
+            e.HasKey(assessment => new { assessment.UserId, assessment.ProblemId });
+
+            // Whose claim it is, cascading so deleting a user drops what they claimed.
+            e.HasOne(assessment => assessment.User)
+             .WithMany()
+             .HasForeignKey(assessment => assessment.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // What it is about. Restricted, on the same terms as the conversations beside it: a claim made under
+            // an entry must outlive any tidying of the archive row it was made against.
+            e.HasOne(assessment => assessment.Problem)
+             .WithMany()
+             .HasForeignKey(assessment => assessment.ProblemId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // The words are the whole claim, so a row holding none says nothing and should have been dropped.
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_problem_self_assessment_comment_carries_text", CarriesText("comment")));
+        });
+
+        #endregion ProblemSelfAssessment
 
         #region NewsArticle
 

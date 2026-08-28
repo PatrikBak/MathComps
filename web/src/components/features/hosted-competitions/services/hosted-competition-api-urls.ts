@@ -78,3 +78,18 @@ export function getCompetitionProblemsUrl(competitionId: string): string {
   // The problems endpoint for the competition
   return buildApiUrl(`${COMPETITIONS_PATH}/${encodeURIComponent(competitionId)}/problems`)
 }
+
+/**
+ * Builds the URL for what a student says about their own solution to one of a competition's problems, which
+ * is the same address whether they are recording it or taking it back.
+ *
+ * @param competitionId - Which competition the problem belongs to.
+ * @param problemId - Which problem the claim is about.
+ * @returns The self-assessment URL.
+ */
+export function getProblemSelfAssessmentUrl(competitionId: string, problemId: string): string {
+  // The assessment endpoint for the problem
+  return buildApiUrl(
+    `${COMPETITIONS_PATH}/${encodeURIComponent(competitionId)}/problems/${encodeURIComponent(problemId)}/assessment`
+  )
+}

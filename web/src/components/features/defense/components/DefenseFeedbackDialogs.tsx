@@ -3,11 +3,12 @@
 import { useTranslations } from 'next-intl'
 
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
-import { FeedbackDialog, toFeedbackOptions } from '@/components/shared/components/FeedbackDialog'
+import { entriesOf } from '@/components/shared/utils/collection-utils'
 
 import type { AnswerFlow, ReportFlow } from '../hooks/use-defense-feedback'
 import { OUTCOME_KEYS, REPORT_CATEGORY_KEYS } from '../model/defense-feedback-options'
 import type { DefenseFeedback, DefenseLimits } from '../model/defense-types'
+import { FeedbackDialog } from './FeedbackDialog'
 
 /**
  * Props for the {@link DefenseFeedbackDialogs} component.
@@ -21,6 +22,8 @@ type DefenseFeedbackDialogsProps = {
   currentFeedback: DefenseFeedback | null
   /** The caps a comment is held to; null until the backend has said what they are. */
   limits: DefenseLimits | null
+  /** Whether the conversation is being argued inside a competition, which changes who reads a report. */
+  isCompetition: boolean
 }
 
 /**
@@ -35,9 +38,16 @@ export function DefenseFeedbackDialogs({
   answer,
   currentFeedback,
   limits,
+  isCompetition,
 }: DefenseFeedbackDialogsProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
+
+  // The answers a question offers, in the order its record lists them. The keys are the message keys the
+  // defense copy is read under, so a record naming one the copy does not carry is caught here
+  function optionsOf<TValue extends string>(labelKeys: Record<TValue, Parameters<typeof t>[0]>) {
+    return entriesOf(labelKeys).map(([value, labelKey]) => ({ value, label: t(labelKey) }))
+  }
 
   return (
     <>
@@ -55,7 +65,10 @@ export function DefenseFeedbackDialogs({
           requiresComment="other"
           requiresCommentHint={t('requiresCommentHint')}
           title={t('reportTitle')}
-          options={toFeedbackOptions(REPORT_CATEGORY_KEYS, t)}
+          // Inside a competition a report is read by whoever grades the transcript, and a student writing
+          // one means it as a case for their solution rather than as a note about the examiner
+          note={isCompetition ? t('reportCompetitionNote') : null}
+          options={optionsOf(REPORT_CATEGORY_KEYS)}
           initialComment={report.standing?.comment ?? ''}
           commentLabel={t('reportCommentLabel')}
           commentMaxLength={limits.maxFeedbackCommentChars}
@@ -87,7 +100,8 @@ export function DefenseFeedbackDialogs({
           requiresComment="somethingElse"
           requiresCommentHint={t('requiresCommentHint')}
           title={t('feedbackTitle')}
-          options={toFeedbackOptions(OUTCOME_KEYS, t)}
+          note={null}
+          options={optionsOf(OUTCOME_KEYS)}
           initialComment={currentFeedback?.comment ?? ''}
           commentLabel={t('feedbackCommentLabel')}
           commentMaxLength={limits.maxFeedbackCommentChars}

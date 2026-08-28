@@ -16,6 +16,7 @@ import {
   getFinishCompetitionUrl,
   getForfeitCompetitionUrl,
   getHostedCompetitionsViewUrl,
+  getProblemSelfAssessmentUrl,
 } from './hosted-competition-api-urls'
 
 /**
@@ -111,4 +112,43 @@ export function fetchCompetitionProblems(
   competitionId: string
 ): Promise<ApiResult<HostedCompetitionProblem[]>> {
   return apiCall<HostedCompetitionProblem[]>(() => getCompetitionProblemsUrl(competitionId))
+}
+
+/**
+ * Records what the student makes of their own solution to one problem, replacing what they said before.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param competitionId - Which competition the problem belongs to.
+ * @param problemId - Which problem the claim is about.
+ * @param comment - What they say about the solution.
+ * @returns Nothing, once the claim is recorded.
+ */
+export function setProblemSelfAssessment(
+  apiCall: ApiCaller,
+  competitionId: string,
+  problemId: string,
+  comment: string
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getProblemSelfAssessmentUrl(competitionId, problemId), {
+    method: 'PUT',
+    body: JSON.stringify({ comment }),
+  })
+}
+
+/**
+ * Takes back what the student said about their own solution to one problem.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param competitionId - Which competition the problem belongs to.
+ * @param problemId - Which problem the claim was about.
+ * @returns Nothing, once nothing of theirs stands against the problem.
+ */
+export function clearProblemSelfAssessment(
+  apiCall: ApiCaller,
+  competitionId: string,
+  problemId: string
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getProblemSelfAssessmentUrl(competitionId, problemId), {
+    method: 'DELETE',
+  })
 }

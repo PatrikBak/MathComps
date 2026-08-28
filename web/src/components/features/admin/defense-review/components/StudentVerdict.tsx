@@ -10,7 +10,7 @@ import type {
   DefenseTurnReport,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
-import { toFeedbackOptions } from '@/components/shared/components/FeedbackDialog'
+import { entriesOf } from '@/components/shared/utils/collection-utils'
 
 /**
  * Props for the {@link StudentVerdict} component.
@@ -43,12 +43,12 @@ export function StudentVerdict({ feedback, reports, turns }: StudentVerdictProps
 
   // What each outcome is called, as the student saw it
   const outcomeLabels = new Map(
-    toFeedbackOptions(OUTCOME_KEYS, tDefense).map((option) => [option.value, option.label])
+    entriesOf(OUTCOME_KEYS).map(([outcome, labelKey]) => [outcome, tDefense(labelKey)])
   )
 
   // And each of the ways a reply can go wrong
   const categoryLabels = new Map(
-    toFeedbackOptions(REPORT_CATEGORY_KEYS, tDefense).map((option) => [option.value, option.label])
+    entriesOf(REPORT_CATEGORY_KEYS).map(([category, labelKey]) => [category, tDefense(labelKey)])
   )
 
   return (

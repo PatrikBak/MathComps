@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 
 import { DAY_MS, HOUR_MS, MINUTE_MS, SECOND_MS } from '@/components/shared/utils/time-units'
 
+import type { AreaEntry } from '../hosted-competition-state'
 import {
+  areNotesOpen,
   clockDisplayMode,
   clockMinuteFraction,
   clockMinutesLeft,
@@ -232,6 +234,47 @@ describe('toAreaEntry', () => {
       endsAt: handedInAt,
       wasHandedIn: true,
     })
+  })
+})
+
+describe('areNotesOpen', () => {
+  /** How long the server says notes are still taken after an entry ends, in minutes. */
+  const GRACE_MINUTES = 30
+
+  /**
+   * Builds a sat entry that stopped counting a given distance from {@link NOW}.
+   *
+   * @param endedMsAgo - How long ago it stopped, negative while it is still running.
+   *
+   * @returns The entry as everything inside the area reads it.
+   */
+  function satEntry(endedMsAgo: number): AreaEntry {
+    // Only the instant it ends matters here, the grace hanging off that and nothing else
+    return {
+      kind: 'sat',
+      endsAt: new Date(NOW - endedMsAgo).toISOString(),
+      wasHandedIn: false,
+    }
+  }
+
+  it('asks nothing about an entry given up for the problems', () => {
+    // Nothing was sat, so there is no run of theirs to say anything about
+    expect(areNotesOpen({ kind: 'forfeited' }, GRACE_MINUTES, NOW)).toBe(false)
+  })
+
+  it('takes notes while the clock is still running', () => {
+    expect(areNotesOpen(satEntry(-HOUR_MS), GRACE_MINUTES, NOW)).toBe(true)
+  })
+
+  it('keeps taking them inside the grace that follows the entry', () => {
+    // Twenty-nine minutes past the end, so a minute of the half-hour is still to come
+    expect(areNotesOpen(satEntry(29 * MINUTE_MS), GRACE_MINUTES, NOW)).toBe(true)
+  })
+
+  it('stops on the instant the grace is spent', () => {
+    // Exactly half an hour past the end, which the backend already refuses: read any looser and the page
+    // offers a note the server turns away
+    expect(areNotesOpen(satEntry(30 * MINUTE_MS), GRACE_MINUTES, NOW)).toBe(false)
   })
 })
 

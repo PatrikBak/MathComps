@@ -45,6 +45,9 @@ const PROBLEMS_PER_COMPETITION = 3
 /** How long a competition's clock runs, in minutes. */
 const CLOCK_MINUTES = 120
 
+/** How long past the end of an entry the fake still takes a note about a solution, in minutes. */
+const NOTE_GRACE_MINUTES = 30
+
 /** How long the practice competition's clock runs, in minutes. Short enough to watch it run out. */
 const PRACTICE_CLOCK_MINUTES = 1
 
@@ -119,6 +122,12 @@ export type HostedBackendOptions = {
    * spec about the chat needs to be past that gate to reach a composer at all.
    */
   hasConsented?: boolean
+
+  /**
+   * A note the student already left about their first solution in every competition, so a state whose entry
+   * is long over still has one to read back. Absent while they have left none.
+   */
+  standingNote?: string
 }
 
 /**
@@ -207,6 +216,8 @@ type FakeState = {
   readiness: EntryReadiness
   /** Each problem's conversations, most recently active first, by problem id. */
   transcripts: Map<string, DefenseSession[]>
+  /** What the student left about each solution, by problem id, for the ones they have said anything about. */
+  assessments: Map<string, string>
   /** How many ids have been minted, so nothing collides with anything minted before it. */
   minted: number
 }
@@ -481,8 +492,11 @@ function buildView(state: HostedState): HostedCompetitionsView {
     }
   })
 
-  // Every group there is to show
-  return { groups: [practice, preparation, upcoming, open, openSpecial, closedSpecial, ...past] }
+  // Every group there is to show, on the terms the whole program runs on
+  return {
+    groups: [practice, preparation, upcoming, open, openSpecial, closedSpecial, ...past],
+    noteGraceMinutes: NOTE_GRACE_MINUTES,
+  }
 }
 
 /**
@@ -623,8 +637,16 @@ function buildProblems(state: FakeState, competitionId: string): HostedCompetiti
       maxTurns: LIMITS.maxTurnsPerSession,
     }))
 
-    // The problem, with whatever has been said about it
-    return { id, position, statement, defenses }
+    // The problem, with whatever has been said about it and whatever the student claims of their own
+    // solution
+    return {
+      id,
+      position,
+      statement,
+      defenses,
+      selfAssessment: state.assessments.get(id) ?? null,
+      maxCommentChars: LIMITS.maxFeedbackCommentChars,
+    }
   })
 }
 
@@ -928,6 +950,7 @@ export async function installHostedBackend(
     view: buildView(initial),
     readiness: buildReadiness(initial),
     transcripts: new Map(),
+    assessments: new Map(),
     minted: 0,
   }
 
@@ -936,6 +959,11 @@ export async function installHostedBackend(
     // Every competition that group runs
     for (const competition of group.competitions) {
       seedStraddlingDefense(state, group, competition)
+
+      // And whatever the student already claimed of the first solution in it
+      if (options.standingNote !== undefined) {
+        state.assessments.set(problemIdOf(competition.id, 1), options.standingNote)
+      }
     }
   }
 
@@ -1073,6 +1101,28 @@ export async function installHostedBackend(
         await route.fallback()
       }
     }
+  })
+
+  // What the student left about one solution. Registered after the pattern above for the same reason the
+  // dismissal below is
+  await page.route(`${BACKEND_ORIGIN}/competitions/*/problems/*/assessment`, async (route) => {
+    // Which problem is being claimed about
+    const problemId = new URL(route.request().url()).pathname.split('/').at(-2) ?? ''
+
+    // Recording a note replaces whatever stood, and the delete drops it
+    if (route.request().method() === 'PUT') {
+      // What the student wrote
+      const body = route.request().postDataJSON() as { comment: string }
+
+      // Held as their one and only note about the problem
+      state.assessments.set(problemId, body.comment)
+    } else {
+      // Nothing of theirs stands against it now
+      state.assessments.delete(problemId)
+    }
+
+    // Nothing to hand back either way
+    await route.fulfill({ status: 204, body: '' })
   })
 
   // The student asking not to be told about their unfinished profile again. Registered after the pattern

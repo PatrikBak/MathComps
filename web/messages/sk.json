@@ -425,6 +425,11 @@
       "title": "Než začneš"
     },
     "rulesButton": "Pravidlá",
+    "selfAssessmentAsk": "Nechaj nám komentár k riešeniu",
+    "selfAssessmentError": "Nepodarilo sa to uložiť.",
+    "selfAssessmentNote": "Číta to človek, ktorý bude úlohu hodnotiť. Upravovať sa dá, kým ti beží čas, a ešte pol hodiny po jeho skončení.",
+    "selfAssessmentPracticeNote": "V skutočnej súťaži toto bude čítať hodnotiteľ. Takéto poznámky sa dajú upravovať, kým ti beží čas, a ešte pol hodiny po jeho skončení.",
+    "selfAssessmentPrompt": "Nechaj nám komentár k svojmu riešeniu, napríklad koľko bodov si podľa teba zaslúži 😀",
     "standing": {
       "running": "súťažíš, ostáva {clock}"
     },
@@ -520,6 +525,7 @@
       "tone": "Nepáčil sa mi jej tón"
     },
     "reportCommentLabel": "Čo konkrétne sa stalo?",
+    "reportCompetitionNote": "V súťaži toto číta človek, ktorý bude tvoje riešenie opravovať.",
     "reported": "Upraviť spätnú väzbu",
     "reportTitle": "Čo sa nepodarilo?",
     "requiresCommentHint": "napíš nižšie",
