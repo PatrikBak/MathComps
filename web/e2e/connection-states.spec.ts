@@ -1,14 +1,19 @@
 import type { Page } from '@playwright/test'
-import { expect, test } from '@playwright/test'
 
 import messages from '../messages/en.json'
 import {
   BACKEND_ORIGIN,
   failEveryBackendCall,
-  isBackendReachable,
   PROBLEMS_PATH,
   refuseEveryBackendCall,
+  SEARCH_PATH,
 } from './support/backend-routes'
+import {
+  searchAnswerWith,
+  searchAnswerWithMoreToCome,
+  stubSearchRule,
+} from './support/problem-actions'
+import { expect, test } from './support/test'
 
 /**
  * How long the page needs to exhaust its retry burst: four attempts spread over roughly 3.5s of
@@ -22,6 +27,9 @@ const SETTLE_TIMEOUT_MS = 15_000
  * means is that a particular message is on screen, not that a particular sentence is.
  */
 const { problems: problemsCopy, ui: uiCopy } = messages
+
+/** A word no problem carries, which is how a search is made to come back with nothing. */
+const NOTHING_MATCHES = 'qwertyuiopasdfgh'
 
 /**
  * Simulates leaving the tab and coming back, which is what React Query watches to revive a query
@@ -62,6 +70,43 @@ async function goOffline(page: Page): Promise<void> {
     Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
     window.dispatchEvent(new Event('offline'))
   })
+}
+
+/**
+ * Stands in for the archive, answering searches until the test takes it away.
+ *
+ * The page it answers with is a full one with another behind it, since a list has to have rows before
+ * it can be scrolled to its end and has to know more exist before it asks for them. The switch is
+ * handed back, so the moment the archive goes is the test's to pick.
+ *
+ * @param page - The page to intercept searches on.
+ *
+ * @returns A function which takes the archive away, from the next search on.
+ */
+async function stubArchiveUntilBroken(page: Page): Promise<() => void> {
+  // Whether the archive is still answering
+  let isBroken = false
+
+  // The answer it gives while it is up
+  await stubSearchRule(page, () => searchAnswerWithMoreToCome())
+
+  // And the outage, which overrides that answer once it starts: a later route is the one Playwright
+  // tries first, and falling back reaches the one above while there is nothing wrong
+  await page.route(`${BACKEND_ORIGIN}${SEARCH_PATH}`, async (route) => {
+    // Nothing lands once the archive has gone
+    if (isBroken) {
+      await route.abort('connectionrefused')
+      return
+    }
+
+    // Until then, the answer underneath this one
+    await route.fallback()
+  })
+
+  // Hand back the switch
+  return () => {
+    isBroken = true
+  }
 }
 
 test.describe('problems page with the API down', () => {
@@ -171,26 +216,15 @@ test.describe('problems page with the API down', () => {
 })
 
 test.describe('problems page with only some calls failing', () => {
-  // Unlike the tests above, these need the real API: each turns on one call failing while another
-  // succeeds, and only a live backend can supply the half that works.
-  test.beforeAll(async () => {
-    // Skipping beats failing with an assertion that says nothing about the missing backend
-    test.skip(!(await isBackendReachable()), 'needs the local API running')
-  })
-
   test('explains a problem that failed to load instead of sitting on skeletons', async ({
     page,
   }) => {
-    // Fail only the single-problem fetch, which is the one GET the page makes
-    await page.route(`${BACKEND_ORIGIN}/**`, async (route) => {
-      // The problem itself never arrives
-      if (route.request().method() === 'GET') {
-        await route.abort('connectionrefused')
-        return
-      }
+    // The archive answers the list, so what is missing is the problem rather than the page around it
+    await stubSearchRule(page, () => searchAnswerWithMoreToCome())
 
-      // Everything else, the filter options included, is served for real
-      await route.continue()
+    // The problem itself never arrives
+    await page.route(`${BACKEND_ORIGIN}/problems/any-problem-slug*`, async (route) => {
+      await route.abort('connectionrefused')
     })
 
     // Open the page on a problem, whose slug never matters because the call never lands
@@ -203,6 +237,9 @@ test.describe('problems page with only some calls failing', () => {
   })
 
   test('sends a reader whose problem does not exist back to the list', async ({ page }) => {
+    // The list the reader is sent back to
+    await stubSearchRule(page, () => searchAnswerWith({}))
+
     // Stand in for the lookup alone, answering it the way the archive answers a slug it does not
     // hold: a named refusal rather than a connection that went nowhere, which is the whole of what
     // tells the page to leave instead of offering another go
@@ -225,20 +262,8 @@ test.describe('problems page with only some calls failing', () => {
   })
 
   test('reports a failed load-more once, under the rows it could not extend', async ({ page }) => {
-    // The backend stays up until the test says otherwise
-    let breakEverything = false
-
-    // Stand in for it either way, so the switch takes effect mid-test
-    await page.route(`${BACKEND_ORIGIN}/**`, async (route) => {
-      // Once broken, nothing lands
-      if (breakEverything) {
-        await route.abort('connectionrefused')
-        return
-      }
-
-      // Until then, everything is served for real
-      await route.continue()
-    })
+    // The archive, which answers until this test takes it away
+    const breakArchive = await stubArchiveUntilBroken(page)
 
     // Load the page
     await page.goto(PROBLEMS_PATH)
@@ -247,8 +272,8 @@ test.describe('problems page with only some calls failing', () => {
     const scroller = page.getByTestId('virtuoso-scroller')
     await scroller.waitFor({ timeout: SETTLE_TIMEOUT_MS })
 
-    // Now take the backend away
-    breakEverything = true
+    // Now take the archive away
+    breakArchive()
 
     // Scroll to the end, which is what asks for the next page
     await scroller.evaluate((element) => {
@@ -270,20 +295,8 @@ test.describe('problems page with only some calls failing', () => {
   })
 
   test('holds the end of the list still while the failed load-more retries', async ({ page }) => {
-    // The backend stays up until the test says otherwise
-    let breakEverything = false
-
-    // Stand in for it either way, so the switch takes effect mid-test
-    await page.route(`${BACKEND_ORIGIN}/**`, async (route) => {
-      // Once broken, nothing lands
-      if (breakEverything) {
-        await route.abort('connectionrefused')
-        return
-      }
-
-      // Until then, everything is served for real
-      await route.continue()
-    })
+    // The archive, which answers until this test takes it away
+    const breakArchive = await stubArchiveUntilBroken(page)
 
     // Load the page
     await page.goto(PROBLEMS_PATH)
@@ -292,8 +305,8 @@ test.describe('problems page with only some calls failing', () => {
     const scroller = page.getByTestId('virtuoso-scroller')
     await scroller.waitFor({ timeout: SETTLE_TIMEOUT_MS })
 
-    // Now take the backend away
-    breakEverything = true
+    // Now take the archive away
+    breakArchive()
 
     // Scroll to the end so the next page is asked for, and fails
     await scroller.evaluate((element) => {
@@ -325,20 +338,8 @@ test.describe('problems page with only some calls failing', () => {
   })
 
   test('blames the outage rather than the filters when a search fails', async ({ page }) => {
-    // The backend stays up until the test says otherwise
-    let breakEverything = false
-
-    // Stand in for it either way, so the switch takes effect mid-test
-    await page.route(`${BACKEND_ORIGIN}/**`, async (route) => {
-      // Once broken, nothing lands
-      if (breakEverything) {
-        await route.abort('connectionrefused')
-        return
-      }
-
-      // Until then, everything is served for real
-      await route.continue()
-    })
+    // The archive, which answers until this test takes it away
+    const breakArchive = await stubArchiveUntilBroken(page)
 
     // Load the page
     await page.goto(PROBLEMS_PATH)
@@ -348,8 +349,8 @@ test.describe('problems page with only some calls failing', () => {
     // matching nothing.
     await page.getByTestId('virtuoso-scroller').waitFor({ timeout: SETTLE_TIMEOUT_MS })
 
-    // Now take the backend away
-    breakEverything = true
+    // Now take the archive away
+    breakArchive()
 
     // A search the reader sets off themselves, which finds nothing listening
     await page
@@ -368,6 +369,13 @@ test.describe('problems page with only some calls failing', () => {
   test('blames the connection rather than the filters when a search is held back', async ({
     page,
   }) => {
+    // The archive, which matches everything until a search asks for a word no problem carries
+    await stubSearchRule(page, (query) =>
+      query.parameters.searchText === NOTHING_MATCHES
+        ? searchAnswerWith({})
+        : searchAnswerWithMoreToCome()
+    )
+
     // Load the page with everything working, so there are filters to search with
     await page.goto(PROBLEMS_PATH)
     await page.getByTestId('virtuoso-scroller').waitFor({ timeout: SETTLE_TIMEOUT_MS })
@@ -380,7 +388,7 @@ test.describe('problems page with only some calls failing', () => {
     // Search for something no problem contains, which clears the rows out of the way. They have to
     // be gone already for the next search to have nothing to hide behind, since rows from an earlier
     // search survive one that never runs.
-    await searchBox.fill('qwertyuiopasdfgh')
+    await searchBox.fill(NOTHING_MATCHES)
     await expect(page.getByText(problemsCopy.emptyState.title)).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
@@ -389,7 +397,7 @@ test.describe('problems page with only some calls failing', () => {
     await goOffline(page)
 
     // Search again, so the results are missing because the request never left
-    await searchBox.fill('qwertyuiopasdfghjkl')
+    await searchBox.fill(`${NOTHING_MATCHES}-again`)
 
     // The list says what became of the search it stands in for. The heading is what tells this apart
     // from the app-wide offline banner, which says the same thing.

@@ -933,8 +933,7 @@ type TurnRequestBody = {
  * Stands in for the whole competitions backend on one page.
  *
  * The competitions calls are answered from memory, as are the defense conversations and the student's
- * Mathilda consent; everything else the app asks the backend for is left to the real one, so a test can
- * still lean on the archive around the surface under test.
+ * Mathilda consent. Anything else the surface reads is somebody else's stub to install.
  *
  * @param page - The page to intercept requests on.
  * @param initial - Which state the student is in when the page opens.
@@ -1096,7 +1095,7 @@ export async function installHostedBackend(
         return
       }
 
-      // Nothing else lives under a competition
+      // Nothing else lives under a competition, so the run names it rather than inventing an answer
       default: {
         await route.fallback()
       }
@@ -1131,7 +1130,7 @@ export async function installHostedBackend(
   await page.route(`${BACKEND_ORIGIN}/competitions/readiness/dismissal`, async (route) => {
     // Only the write lives here
     if (route.request().method() !== 'POST') {
-      // Passed on unanswered
+      // Passed on, so the run names it
       await route.fallback()
 
       // Nothing else answers on this path
@@ -1164,9 +1163,9 @@ export async function installHostedBackend(
 
   // Opening a conversation, which starts on the examiner's own line and answers the first turn
   await page.route(`${BACKEND_ORIGIN}/defense/sessions`, async (route) => {
-    // Anything but a new conversation belongs to the real backend
+    // Only opening a conversation lives here
     if (route.request().method() !== 'POST') {
-      // Passed on unanswered
+      // Passed on, so the run names it
       await route.fallback()
 
       // What follows opens a conversation, which this call is not

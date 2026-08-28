@@ -1,7 +1,6 @@
-import { expect, test } from '@playwright/test'
-
 import { areaCopy, LIST_PATH } from './support/competitions'
 import { installHostedBackend } from './support/hosted-backend'
+import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 15_000

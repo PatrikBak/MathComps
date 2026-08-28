@@ -1,6 +1,9 @@
 import type { Page } from '@playwright/test'
 
+import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
 import type { FilterQuery } from '@/components/features/problems/types/problem-api-types'
+import type { UserListsResponse } from '@/components/features/problems/types/user-list-types'
+import type { UserProfile } from '@/components/features/profile/model/profile-types'
 import { ROUTES } from '@/i18n/i18n'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
@@ -120,7 +123,7 @@ export async function refuseEveryBackendCall(page: Page, status: number): Promis
  * None of the library's narrowings are database facts, they are answers: a list is one this reader
  * may open or may not, favorites are theirs or nobody's. The token on the request is the whole of
  * what decides that, so a handler reading it and the body beside it can be the rule, with no rows
- * behind it. Everything the app asks the backend for other than a search is left to the real one.
+ * behind it.
  *
  * A refusal is answered with the status and the code, which is the whole of what the client reads
  * off a failed request.
@@ -263,20 +266,109 @@ export async function recordNotices(page: Page): Promise<() => string[]> {
 }
 
 /**
- * Whether the local API is up, for the tests that need one call to genuinely succeed.
+ * Stands in for the endpoint the reader's own lists are drawn from, answering it afresh each time it
+ * is asked.
  *
- * @returns Whether the backend answered at all, whatever it answered with.
+ * The counts are read at the moment of the answer rather than fixed when the stub is installed, so a
+ * number that moves on screen proves the archive was asked again. Nothing else can move it: the app
+ * never counts these itself.
+ *
+ * @param page - The page to intercept the lookup on.
+ * @param listsNow - The lists and the liked count as they stand when the lookup arrives.
+ *
+ * @returns How many times the lists have been asked for so far.
  */
-export async function isBackendReachable(): Promise<boolean> {
-  // Reaching the origin at all is the whole question, so any thrown result means no
-  try {
-    // Any HTTP answer proves something is listening; the status itself is beside the point
-    await fetch(BACKEND_ORIGIN)
+export async function stubUserLists(
+  page: Page,
+  listsNow: () => UserListsResponse
+): Promise<() => number> {
+  // Every lookup that reached the endpoint
+  let lookups = 0
 
-    // Something answered
-    return true
-  } catch {
-    // Only a refused connection lands here
-    return false
-  }
+  // Stand in for the lists alone
+  await page.route(`${BACKEND_ORIGIN}/users/me/lists`, async (route) => {
+    // The lists were asked for, whatever becomes of it
+    lookups++
+
+    // Answered as they stand right now
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(listsNow()),
+    })
+  })
+
+  // Hand back a reader rather than the counter itself, so the caller always sees the live value
+  return () => lookups
+}
+
+/** A problem nobody has said anything about. */
+const NO_COMMENTS: CommentDto[] = []
+
+/** A reader who keeps no lists and has liked nothing, which is what a spec about neither wants. */
+const NO_LISTS: UserListsResponse = { likedCount: 0, lists: [] }
+
+/**
+ * A reader who has said nothing about themselves yet.
+ *
+ * Blank rather than complete because a spec here decides what its reader has filled in through its own
+ * stub, and specs about a student who has filled in nothing would otherwise have the app holding two
+ * answers to the same question.
+ */
+const NOTHING_SAID: UserProfile = {
+  graduationYear: null,
+  hasLeftHighSchool: false,
+  countryCode: null,
+  email: null,
+  username: null,
+}
+
+/**
+ * Answers one read a page makes about whoever is looking at it, and only the read.
+ *
+ * A write on the same path is something a spec is doing on purpose, so it is passed on to the refusal
+ * underneath and named there.
+ *
+ * @param page - The page to intercept the read on.
+ * @param pattern - Which URLs it answers, as a Playwright route glob.
+ * @param body - What it answers with.
+ */
+async function stubAmbientRead(page: Page, pattern: string, body: unknown): Promise<void> {
+  // Stand in for that one endpoint
+  await page.route(pattern, async (route) => {
+    // Anything but a read belongs to whichever spec is making it
+    if (route.request().method() !== 'GET') {
+      await route.fallback()
+      return
+    }
+
+    // Answered as it stands
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(body),
+    })
+  })
+}
+
+/**
+ * Answers the reads a page makes about whoever is looking at it, none of which any spec here is about.
+ *
+ * A problem row asks for its discussion, the library sidebar asks for the reader's lists, and the
+ * header asks what the site holds on them. A spec that leaves those to whatever the author has running
+ * locally passes on that machine and nowhere else, so they are answered here with the emptiest thing
+ * that renders. A spec these are the subject of registers its own stub afterwards, which is the one
+ * Playwright then tries first.
+ *
+ * @param page - The page to intercept the reads on.
+ */
+export async function stubReaderAndDiscussion(page: Page): Promise<void> {
+  // The discussion under a problem, which every row on screen asks for
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/comments*`, NO_COMMENTS)
+
+  // The reader's own lists
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/users/me/lists`, NO_LISTS)
+
+  // What the site holds on them
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/users/me/profile`, NOTHING_SAID)
 }

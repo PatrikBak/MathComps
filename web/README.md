@@ -131,8 +131,7 @@ npm run preview
 - `npm run knip` – Find unused files, exports, and dependencies
 - `npm run knip:fix` – Remove unused code (be careful!)
 - `npm run e2e:session` – Sign in and save a browser session (see [Signed-in browser](#signed-in-browser))
-- `npm run e2e:test` – Run the Playwright specs that sign nobody in, against a dev server (not part of `ci`)
-- `npm run e2e:signed-in` – Run the specs that start with a reader already signed in (mints its own session first)
+- `npm run e2e` – Run the whole Playwright suite (CI runs this in its own job, not through `ci`). Narrow it with Playwright's own flags, e.g. `--project=spec` or a filename
 
 ### Combined Commands
 
@@ -166,13 +165,17 @@ The problem search feature is in [`src/components/features/problems/`](src/compo
 - Virtual infinite scrolling
 - Similar problems integration
 
+### Browser tests
+
+Every backend call the specs make is answered by a stub, so the suite needs no API and no database. The runner in [`e2e/support/test.ts`](e2e/support/test.ts) refuses anything no stub claimed and fails the test naming the call, which is how a new test that quietly leans on a local backend gets caught. Two things to know when writing one: a call your page makes needs a stub even when your test is about something else, and `route.continue()` reaches the network rather than the stubs, so nothing may use it.
+
 ### Signed-in browser
 
 `npm run e2e:session` produces a browser session for driving the app manually against local dev. It is not a test suite: it signs the E2E account in through Clerk's API (the sign-up form's Turnstile check deadlocks an automated browser) and writes `playwright/.clerk/user.json` plus a snippet at `.playwright-mcp/inject-session.mjs` that replays the session into a Playwright MCP browser. Both are git-ignored and hold live auth cookies.
 
 Needs `E2E_CLERK_USER_EMAIL` and `E2E_CLERK_USER_PASSWORD` in `.env.local`, a dev server on port 3000, and `npx playwright install chromium` once per machine.
 
-The same session is what `npm run e2e:signed-in` starts its specs from, minted fresh each run. A spec that needs to end a session mid-test signs in on its own instead, since ending one invalidates it for good and every spec sharing it would start out dead.
+The same session is what the `signed-in` specs start from, minted fresh each run. A spec that needs to end a session mid-test signs in on its own instead, since ending one invalidates it for good and every spec sharing it would start out dead.
 
 ### Webhooks
 

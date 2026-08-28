@@ -1,5 +1,3 @@
-import { expect, test } from '@playwright/test'
-
 import {
   errorsCopy,
   filtersCopy,
@@ -11,6 +9,7 @@ import {
 import type { SearchCall } from './support/backend-routes'
 import { PROBLEMS_PATH, recordNotices, stubProblemSearch } from './support/backend-routes'
 import { endSessionInPlace, signInTestUser } from './support/session'
+import { expect, test } from './support/test'
 
 /**
  * How long the library needs to settle: read the URL, weigh whoever is reading, and send at most one

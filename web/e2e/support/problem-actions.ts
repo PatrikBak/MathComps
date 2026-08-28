@@ -1,7 +1,6 @@
 import type { Page, Route } from '@playwright/test'
 
 import type { FilterQuery, Problem } from '@/components/features/problems/types/problem-api-types'
-import type { UserListsResponse } from '@/components/features/problems/types/user-list-types'
 
 import searchFixture from '../fixtures/problem-filter-response.json'
 import { BACKEND_ORIGIN, SEARCH_PATH } from './backend-routes'
@@ -35,10 +34,15 @@ export const ACTION_DELAY_MS = 1500
  * archive's own answer does.
  *
  * @param readerStates - The problems to answer with, keyed by the slug each is given.
+ * @param totalCount - How many the narrowing matches in all, defaulting to the ones served here.
+ *   Anything above that is what tells the library another page is waiting behind this one.
  *
  * @returns The answer, as the search endpoint puts it on the wire.
  */
-export function searchAnswerWith(readerStates: Record<string, ProblemReaderState>): unknown {
+export function searchAnswerWith(
+  readerStates: Record<string, ProblemReaderState>,
+  totalCount?: number
+): unknown {
   // The answer as it came back from the archive, safe to edit
   const answer = structuredClone(searchFixture)
 
@@ -59,11 +63,33 @@ export function searchAnswerWith(readerStates: Record<string, ProblemReaderState
   answer.filterResult.problems = {
     ...answer.filterResult.problems,
     items,
-    totalCount: items.length,
+    totalCount: totalCount ?? items.length,
   } as typeof answer.filterResult.problems
 
   // The answer, now about these problems
   return answer
+}
+
+/**
+ * Builds a search answer holding a full page of problems, with as many again waiting behind it.
+ *
+ * A list can only be scrolled to its end once it has enough rows to scroll, and it only asks for the
+ * next page once the count says one exists. Both are what this is for, and neither is true of a single
+ * problem, which is all the fixture carries on its own.
+ *
+ * @returns The answer, as the search endpoint puts it on the wire.
+ */
+export function searchAnswerWithMoreToCome(): unknown {
+  // A page as full as the archive itself serves them
+  const { pageSize } = searchFixture.filterResult.problems
+
+  // The problems filling it, which are there to be scrolled past rather than looked at
+  const rows = Object.fromEntries(
+    Array.from({ length: pageSize }, (_unused, index) => [`filler-problem-${index + 1}`, {}])
+  )
+
+  // Twice the page, so the first one leaves another behind it
+  return searchAnswerWith(rows, pageSize * 2)
 }
 
 /**
@@ -81,7 +107,7 @@ export async function stubSearchRule(
   // Every search that reached the endpoint, in the order it was sent
   const searches: FilterQuery[] = []
 
-  // Stand in for the search alone, leaving everything else to the real backend
+  // Stand in for the search alone
   await page.route(`${BACKEND_ORIGIN}${SEARCH_PATH}`, async (route) => {
     // The search as it went out
     const query = route.request().postDataJSON() as FilterQuery
@@ -177,43 +203,6 @@ export async function stubProblemActions(
 
   // Hand back a snapshot on each read, so a list cannot grow underneath an assertion mid-check
   return () => [...actions]
-}
-
-/**
- * Stands in for the endpoint the reader's own lists are drawn from, answering it afresh each time it
- * is asked.
- *
- * The counts are read at the moment of the answer rather than fixed when the stub is installed, so a
- * number that moves on screen proves the archive was asked again. Nothing else can move it: the app
- * never counts these itself.
- *
- * @param page - The page to intercept the lookup on.
- * @param listsNow - The lists and the liked count as they stand when the lookup arrives.
- *
- * @returns How many times the lists have been asked for so far.
- */
-export async function stubUserLists(
-  page: Page,
-  listsNow: () => UserListsResponse
-): Promise<() => number> {
-  // Every lookup that reached the endpoint
-  let lookups = 0
-
-  // Stand in for the lists alone, leaving the endpoints under them to the action stub
-  await page.route(`${BACKEND_ORIGIN}/users/me/lists`, async (route) => {
-    // The lists were asked for, whatever becomes of it
-    lookups++
-
-    // Answered as they stand right now
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(listsNow()),
-    })
-  })
-
-  // Hand back a reader rather than the counter itself, so the caller always sees the live value
-  return () => lookups
 }
 
 /**
