@@ -1,4 +1,5 @@
 using MathComps.Api.Constants;
+using MathComps.Domain.Contracts.Competitions;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Users;
 
@@ -7,7 +8,7 @@ namespace MathComps.Api.Endpoints;
 /// <summary>
 /// Maps the endpoints behind the competitions the site hosts itself: reading the groups, reading what an entry
 /// needs of the caller, spending an entry (by sitting it or by giving it up for the problems), closing one early,
-/// and reading the problems an entry opens.
+/// reading the problems an entry opens, and recording what the student makes of their own solutions.
 /// </summary>
 /// <remarks>
 /// The problems route is the only place an embargoed problem is served, and it serves one only to a caller who
@@ -151,6 +152,49 @@ public static class CompetitionEndpoints
 
             // Return them
             return Results.Ok(problems);
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Record what the student makes of their own solution to one of the set, replacing what they said before
+        app.MapPut($"{CompetitionsPath}/{{roundId:guid}}/problems/{{problemId:guid}}/assessment", async (
+            Guid roundId,
+            Guid problemId,
+            SetProblemSelfAssessmentRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IHostedCompetitionService competitionService) =>
+        {
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Record the claim
+            await competitionService.SetSelfAssessmentAsync(
+                userId, roundId, problemId, request.Comment, context.RequestAborted);
+
+            // Nothing to hand back: the claim is what the caller already holds
+            return Results.NoContent();
+        })
+        .RequireAuthorization()
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Take back what the student said about their own solution to one of the set
+        app.MapDelete($"{CompetitionsPath}/{{roundId:guid}}/problems/{{problemId:guid}}/assessment", async (
+            Guid roundId,
+            Guid problemId,
+            HttpContext context,
+            IUserManager userManager,
+            IHostedCompetitionService competitionService) =>
+        {
+            // Resolve the calling user
+            var userId = await userManager.RequireUserIdAsync(context);
+
+            // Drop the claim
+            await competitionService.ClearSelfAssessmentAsync(
+                userId, roundId, problemId, context.RequestAborted);
+
+            // Nothing stands against the problem now
+            return Results.NoContent();
         })
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);

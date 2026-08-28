@@ -6,6 +6,7 @@ using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using MathComps.Infrastructure.Services.Competitions;
+using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,6 +20,21 @@ namespace MathComps.Infrastructure.Tests.Competitions;
 public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IHostedCompetitionService>(fixture)
 {
+    /// <summary>
+    /// The longest comment this class's caps allow, which is what the cap test writes against.
+    /// </summary>
+    private const int CommentCharCap = 1000;
+
+    /// <summary>
+    /// How long the seeded groups' clocks run, which is what a test spending one has to get past.
+    /// </summary>
+    private const int ClockMinutes = 180;
+
+    /// <summary>
+    /// How long after an entry the service still takes notes, which is what a test closing one has to get past.
+    /// </summary>
+    private const int NoteGraceMinutes = 30;
+
     /// <summary>
     /// The student every test enters as.
     /// </summary>
@@ -71,10 +87,14 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             limits.MaxCandidateChars = 4000;
             limits.MaxHandoutContentIdChars = 100;
             limits.MaxEnvironmentIdChars = 100;
-            limits.MaxFeedbackCommentChars = 1000;
+            limits.MaxFeedbackCommentChars = CommentCharCap;
             limits.MaxTurnsPerSession = 20;
             limits.DailySpendCeilingPerUser = 1;
         });
+
+        // The window a note about a solution stays open in, past the end of the entry.
+        services.Configure<HostedCompetitionOptions>(
+            options => options.NoteGraceMinutes = NoteGraceMinutes);
 
         // The service under test.
         services.AddScoped<IHostedCompetitionService, HostedCompetitionService>();
@@ -733,6 +753,442 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         Assert.All(group.Name.Values, name => Assert.False(string.IsNullOrWhiteSpace(name)));
     });
 
+    /// <summary>
+    /// Verifies that what a student says about their own solution reads back on the problem it was about, and
+    /// that saying it again revises the one claim rather than standing beside the first.
+    /// </summary>
+    [Fact]
+    public Task A_claim_about_a_solution_reads_back_and_is_revised_in_place() => RunTestAsync(async service =>
+    {
+        // An entry, which is what a claim is made inside
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // The problem it is made about
+        var problemId = spent.Problems[0].Id;
+
+        // What the student first says
+        await service.SetSelfAssessmentAsync(
+            _studentId, _advancedRoundId, problemId, "stuck on the last case");
+
+        // And what they say once they have finished it
+        await service.SetSelfAssessmentAsync(
+            _studentId, _advancedRoundId, problemId, "the last case works after all");
+
+        // The set as it now reads
+        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+
+        // Which carries only what they currently say
+        Assert.Equal(
+            "the last case works after all",
+            Assert.Single(problems, problem => problem.Id == problemId).SelfAssessment);
+
+        // On the one row a student ever holds about a problem
+        Assert.Equal(
+            1,
+            await QueryValueAsync(context => context.ProblemSelfAssessments
+                .CountAsync(assessment => assessment.ProblemId == problemId)));
+
+        // And the rest of the set untouched
+        Assert.All(
+            problems.Where(problem => problem.Id != problemId),
+            problem => Assert.Null(problem.SelfAssessment));
+    });
+
+    /// <summary>
+    /// Verifies that revising a claim leaves it still saying when the student first made it. The two stamps are
+    /// what tells a claim nobody has touched from one that has moved since, so a revision must keep the first.
+    /// </summary>
+    [Fact]
+    public Task A_revised_claim_still_says_when_it_was_first_made() => RunTestAsync(async service =>
+    {
+        // An entry, which is what a claim is made inside
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // The problem it is made about
+        var problemId = spent.Problems[0].Id;
+
+        // What the student first says
+        await service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, problemId, "half of it");
+
+        // The row it left
+        var first = await ReadClaimAsync(problemId);
+
+        // Which nothing has moved yet, so both its stamps read the same
+        Assert.Equal(first.CreatedAt, first.UpdatedAt);
+
+        // And what they say once they have finished it
+        await service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, problemId, "all of it");
+
+        // The row as it now stands
+        var revised = await ReadClaimAsync(problemId);
+
+        // Still saying when they first spoke
+        Assert.Equal(first.CreatedAt, revised.CreatedAt);
+
+        // And saying separately when they last changed it
+        Assert.True(revised.UpdatedAt > first.UpdatedAt);
+    });
+
+    /// <summary>
+    /// Verifies that a student can take a claim back, and that taking back one they never made leaves them where
+    /// they asked to be rather than failing.
+    /// </summary>
+    [Fact]
+    public Task A_claim_can_be_taken_back_and_taking_back_nothing_passes() => RunTestAsync(async service =>
+    {
+        // An entry, which is what a claim is made inside
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // The problem it is made about
+        var problemId = spent.Problems[0].Id;
+
+        // Nothing stands yet, and dropping nothing is not a failure
+        await service.ClearSelfAssessmentAsync(_studentId, _advancedRoundId, problemId);
+
+        // Something the student then says
+        await service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, problemId, "no idea on this one");
+
+        // And takes back
+        await service.ClearSelfAssessmentAsync(_studentId, _advancedRoundId, problemId);
+
+        // The set as it now reads
+        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+
+        // Leaving the problem carrying nothing of theirs
+        Assert.Null(Assert.Single(problems, problem => problem.Id == problemId).SelfAssessment);
+    });
+
+    /// <summary>
+    /// Verifies that a note outlives the entry by the grace that follows it, so a student who ran out of clock
+    /// mid-thought still gets to write it down.
+    /// </summary>
+    [Fact]
+    public Task A_note_survives_the_entry_by_its_grace() => RunTestAsync(async service =>
+    {
+        // An entry, which is what a claim is made inside
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // The problem it is made about
+        var problemId = spent.Problems[0].Id;
+
+        // Closed where the student says
+        await service.FinishAsync(_studentId, _advancedRoundId);
+
+        // Which still takes what they have to say about it
+        await service.SetSelfAssessmentAsync(
+            _studentId, _advancedRoundId, problemId, "one more thought on the way out");
+
+        // The set as it now reads
+        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+
+        // Carrying what they said on the way out
+        Assert.Equal(
+            "one more thought on the way out",
+            Assert.Single(problems, problem => problem.Id == problemId).SelfAssessment);
+    });
+
+    /// <summary>
+    /// Verifies that a note closes once the grace after the entry has itself run out, whether the student
+    /// closed the entry themselves or its clock did.
+    /// </summary>
+    [Fact]
+    public Task A_note_closes_once_the_grace_has_run_out() => RunTestAsync(async service =>
+    {
+        // An entry into the harder category
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // The problem the claim would be about
+        var problemId = spent.Problems[0].Id;
+
+        // Handed in
+        await service.FinishAsync(_studentId, _advancedRoundId);
+
+        // Long enough ago that even the grace is spent
+        await BackdateEntryAsync(_advancedRoundId, ClockMinutes + NoteGraceMinutes + 1);
+
+        // Which leaves nothing more to say about it, or to take back
+        await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
+            service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, problemId, "too late"));
+        await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
+            service.ClearSelfAssessmentAsync(_studentId, _advancedRoundId, problemId));
+
+        // A second entry, into the easier category, left open rather than handed in
+        var other = await service.EnterAsync(_studentId, _elementaryRoundId);
+
+        // Started far enough back that its own clock and the grace after it have both run out
+        await BackdateEntryAsync(_elementaryRoundId, ClockMinutes + NoteGraceMinutes + 1);
+
+        // Which closes it just as firmly
+        await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
+            service.SetSelfAssessmentAsync(
+                _studentId, _elementaryRoundId, other.Problems[0].Id, "written long after the buzzer"));
+    });
+
+    /// <summary>
+    /// Verifies that the grace runs from where the student stopped rather than from where their clock would
+    /// have. An entry handed in with hours still on it is over the moment they hand it in, so what they may
+    /// still say about it ends shortly after that, not shortly after a clock nobody let run out.
+    /// </summary>
+    [Fact]
+    public Task The_grace_after_an_early_hand_in_runs_from_the_hand_in() => RunTestAsync(async service =>
+    {
+        // An entry
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // The problem the claim would be about
+        var problemId = spent.Problems[0].Id;
+
+        // Closed at once, so nearly the whole clock is left standing on it
+        await service.FinishAsync(_studentId, _advancedRoundId);
+
+        // Moved back just past the grace, and nowhere near the end of the clock it never spent
+        await BackdateEntryAsync(_advancedRoundId, NoteGraceMinutes + 1);
+
+        // Which is already too late: the entry ended where the student ended it
+        await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
+            service.SetSelfAssessmentAsync(
+                _studentId, _advancedRoundId, problemId, "written well after handing in"));
+    });
+
+    /// <summary>
+    /// Verifies that a hand-in landing after the clock already ran out buys back nothing. Nothing refuses a
+    /// late hand-in, so the stamp it leaves sits hours past the buzzer, and taking that as the end of the
+    /// entry would hand a student a fresh grace whenever they pressed it.
+    /// </summary>
+    [Fact]
+    public Task A_hand_in_after_the_buzzer_reopens_nothing() => RunTestAsync(async service =>
+    {
+        // An entry, left running
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // The problem the claim would be about
+        var problemId = spent.Problems[0].Id;
+
+        // Moved back far enough that its clock, and the grace behind it, both ran out while the student
+        // was away
+        await BackdateEntryAsync(_advancedRoundId, ClockMinutes + NoteGraceMinutes + 1);
+
+        // Closed only now, which stamps the hand-in at this moment rather than at the buzzer
+        await service.FinishAsync(_studentId, _advancedRoundId);
+
+        // And leaves the window shut: an entry ends at the buzzer at the latest, whenever the student got
+        // around to saying so
+        await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
+            service.SetSelfAssessmentAsync(
+                _studentId, _advancedRoundId, problemId, "hours after the clock ran out"));
+    });
+
+    /// <summary>
+    /// Verifies that an entry given up for the problems takes no notes, never having been a run.
+    /// </summary>
+    [Fact]
+    public Task An_entry_given_up_for_the_problems_takes_no_notes() => RunTestAsync(async service =>
+    {
+        // Given up rather than sat
+        var spent = await service.ForfeitAsync(_studentId, _advancedRoundId);
+
+        // So there is nothing of theirs to say anything about
+        await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
+            service.SetSelfAssessmentAsync(
+                _studentId, _advancedRoundId, spent.Problems[0].Id, "read them without sitting them"));
+    });
+
+    /// <summary>
+    /// Verifies that a claim cannot be filed under a competition whose set does not hold the problem, which is
+    /// what keeps one entry's claim off another competition.
+    /// </summary>
+    [Fact]
+    public Task A_claim_about_another_competitions_problem_is_refused() => RunTestAsync(async service =>
+    {
+        // An entry into the harder category
+        var advanced = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // And one into the easier, so the refusal below is not about the entry
+        await service.EnterAsync(_studentId, _elementaryRoundId);
+
+        // The harder category's problem, claimed under the easier one
+        await Assert.ThrowsAsync<HostedProblemNotFoundException>(() =>
+            service.SetSelfAssessmentAsync(
+                _studentId, _elementaryRoundId, advanced.Problems[0].Id, "filed under the wrong set"));
+    });
+
+    /// <summary>
+    /// Verifies that claiming takes an entry even where the problems are already public. Reading a set out of
+    /// embargo needs nothing, and saying something about a solution is still part of a run.
+    /// </summary>
+    [Fact]
+    public Task A_claim_takes_an_entry_even_where_the_problems_are_public() => RunTestAsync(async service =>
+    {
+        // The set whose embargo has passed, which anybody may read
+        var problems = await service.GetProblemsAsync(_studentId, _openedRoundId);
+
+        // And which nobody may speak in without having sat it
+        await Assert.ThrowsAsync<HostedEntryRequiredException>(() =>
+            service.SetSelfAssessmentAsync(
+                _studentId, _openedRoundId, problems[0].Id, "read it without entering"));
+    });
+
+    /// <summary>
+    /// Verifies that a claim survives taking a group again, on the same terms the conversations beside it do:
+    /// what the student thinks of their solution is theirs rather than the run's.
+    /// </summary>
+    [Fact]
+    public Task A_claim_survives_re_entry() => RunTestAsync(async service =>
+    {
+        // The practice run, which may be taken twice
+        var first = await service.EnterAsync(_studentId, _practiceRoundId);
+        var problemId = first.Problems[0].Id;
+
+        // Something said in the first run
+        await service.SetSelfAssessmentAsync(_studentId, _practiceRoundId, problemId, "half of it");
+
+        // And the second run, which resets the entry row
+        var second = await service.EnterAsync(_studentId, _practiceRoundId);
+
+        // Still carrying what they said, the set coming back with the entry that bought it
+        Assert.Equal(
+            "half of it",
+            Assert.Single(second.Problems, problem => problem.Id == problemId).SelfAssessment);
+    });
+
+    /// <summary>
+    /// Verifies that one student's claim is not read back as another's, the set being read per student.
+    /// </summary>
+    [Fact]
+    public Task Another_students_claim_is_not_read_back_as_yours() => RunTestAsync(async service =>
+    {
+        // This student sitting the competition
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // And the other one sitting it too
+        await service.EnterAsync(_otherStudentId, _advancedRoundId);
+
+        // The problem both of them hold
+        var problemId = spent.Problems[0].Id;
+
+        // What the other one says about it
+        await service.SetSelfAssessmentAsync(_otherStudentId, _advancedRoundId, problemId, "I have it");
+
+        // The set as this student reads it
+        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+
+        // Which carries nothing of the other one's
+        Assert.All(problems, problem => Assert.Null(problem.SelfAssessment));
+    });
+
+    /// <summary>
+    /// Verifies that taking a claim back reaches only the competition it is asked about, since the row it drops
+    /// is keyed on the student and the problem while the route names a competition.
+    /// </summary>
+    [Fact]
+    public Task Taking_a_claim_back_reaches_only_the_named_competition() => RunTestAsync(async service =>
+    {
+        // An entry into the harder category
+        var advanced = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // And one into the easier
+        var elementary = await service.EnterAsync(_studentId, _elementaryRoundId);
+
+        // A claim standing on the harder one's first problem
+        await service.SetSelfAssessmentAsync(
+            _studentId, _advancedRoundId, advanced.Problems[0].Id, "the harder one");
+
+        // And one on the easier one's
+        await service.SetSelfAssessmentAsync(
+            _studentId, _elementaryRoundId, elementary.Problems[0].Id, "the easier one");
+
+        // The harder category's claim, asked to be dropped under the easier one
+        await service.ClearSelfAssessmentAsync(_studentId, _elementaryRoundId, advanced.Problems[0].Id);
+
+        // The harder category's set as it now reads
+        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+
+        // Which leaves the claim standing, the competition it was made under not being the one that asked
+        Assert.Equal(
+            "the harder one",
+            Assert.Single(problems, problem => problem.Id == advanced.Problems[0].Id).SelfAssessment);
+    });
+
+    /// <summary>
+    /// Verifies that words saying nothing are refused rather than quietly dropping what already stands, the
+    /// words being the whole of a claim.
+    /// </summary>
+    [Fact]
+    public Task Words_saying_nothing_are_refused() => RunTestAsync(async service =>
+    {
+        // An entry, which is what a claim would be made inside
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // Nothing but whitespace, which carries no claim
+        await Assert.ThrowsAsync<DefenseFeedbackValueException>(() =>
+            service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, spent.Problems[0].Id, "   \n  "));
+    });
+
+    /// <summary>
+    /// Verifies that words past the cap are refused and words at it are kept, the column itself holding text of
+    /// any length so nothing below this would notice.
+    /// </summary>
+    [Fact]
+    public Task Words_past_the_cap_are_refused_and_words_at_it_are_kept() => RunTestAsync(async service =>
+    {
+        // An entry, which is what a claim is made inside
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // The problem it is made about
+        var problemId = spent.Problems[0].Id;
+
+        // One character over what the caps allow
+        await Assert.ThrowsAsync<DefenseFeedbackCommentTooLongException>(() =>
+            service.SetSelfAssessmentAsync(
+                _studentId, _advancedRoundId, problemId, new string('x', CommentCharCap + 1)));
+
+        // Exactly what they allow, which is theirs to write
+        var atTheCap = new string('x', CommentCharCap);
+
+        // Written
+        await service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, problemId, atTheCap);
+
+        // The set as it now reads
+        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+
+        // Carrying every character of it
+        Assert.Equal(
+            atTheCap,
+            Assert.Single(problems, problem => problem.Id == problemId).SelfAssessment);
+    });
+
+    /// <summary>
+    /// Reads back the row behind the student's claim about one problem, which is where its stamps are.
+    /// </summary>
+    /// <param name="problemId">The problem the claim is about.</param>
+    /// <returns>The claim.</returns>
+    private Task<ProblemSelfAssessment> ReadClaimAsync(Guid problemId) =>
+        QueryValueAsync(context => context.ProblemSelfAssessments
+            .AsNoTracking()
+            .SingleAsync(assessment =>
+                assessment.UserId == _studentId && assessment.ProblemId == problemId));
+
+    /// <summary>
+    /// Moves a student's entry back in time, so a clock or a grace that would otherwise still be running has
+    /// already run out.
+    /// </summary>
+    /// <param name="roundId">The competition their entry is into.</param>
+    /// <param name="minutes">How far back to move both of its stamps.</param>
+    /// <returns>A task that completes once the entry sits that far back.</returns>
+    private Task BackdateEntryAsync(Guid roundId, int minutes) => QueryAsync(async context =>
+    {
+        // The one row a student ever holds in a round
+        var entry = await context.HostedEntries.SingleAsync(
+            candidate => candidate.UserId == _studentId && candidate.RoundId == roundId);
+
+        // Both stamps move together, so a hand-in stays where it was relative to the clock it beat
+        entry.StartedAt = entry.StartedAt?.AddMinutes(-minutes);
+        entry.FinishedAt = entry.FinishedAt?.AddMinutes(-minutes);
+
+        // Where the entry now sits
+        await context.SaveChangesAsync();
+    });
+
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
@@ -822,7 +1278,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             Slug = slug,
             OpensAt = opensAt,
             ClosesAt = closesAt,
-            ClockMinutes = 180,
+            ClockMinutes = ClockMinutes,
             AllowsReentry = allowsReentry,
         };
         context.HostedGroups.Add(group);

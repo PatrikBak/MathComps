@@ -16,6 +16,7 @@ import type { Locale } from '@/i18n/i18n'
 import type { HostedCompetitionsReaderKey } from '../hooks/hosted-competition-cache'
 import type { AreaEntry } from '../model/hosted-competition-state'
 import type { HostedCompetitionProblem } from '../model/hosted-competition-types'
+import { ProblemSelfAssessmentNote } from './ProblemSelfAssessmentNote'
 
 /**
  * Props for the {@link CompetitionProblemPanel}.
@@ -29,6 +30,10 @@ type CompetitionProblemPanelProps = {
   problem: HostedCompetitionProblem
   /** The entry it is being solved inside. */
   entry: AreaEntry
+  /** Whether a note about the solution can still be written, which closes shortly after the entry does. */
+  areNotesOpen: boolean
+  /** Whether this is the run nobody is graded on, which changes who a note says will read it. */
+  isPractice: boolean
 }
 
 /**
@@ -39,6 +44,8 @@ export function CompetitionProblemPanel({
   readerKey,
   problem,
   entry,
+  areNotesOpen,
+  isPractice,
 }: CompetitionProblemPanelProps) {
   // Competitions copy
   const t = useTranslations('competitions')
@@ -109,6 +116,18 @@ export function CompetitionProblemPanel({
           <Plus size={15} />
           {problem.defenses.length === 0 ? t('startDefense') : t('startAnotherDefense')}
         </Button>
+
+        {/* What the student wants to say about their own solution, which is about the problem rather than
+            about any one of the conversations above it */}
+        <ProblemSelfAssessmentNote
+          readerKey={readerKey}
+          competitionId={competitionId}
+          problemId={problem.id}
+          assessment={problem.selfAssessment}
+          areNotesOpen={areNotesOpen}
+          isPractice={isPractice}
+          maxCommentChars={problem.maxCommentChars}
+        />
       </div>
 
       {/* The chat itself, keyed on the opening so resuming a different conversation remounts it */}

@@ -142,7 +142,7 @@ export function DefenseConversation({
   // Where this conversation stands against the entry's clock
   const competitionMode = useDefenseCompetitionMode(competition, turns)
 
-  // Whether this defense is being argued inside a competition, which is what takes the controls away
+  // Whether this defense is being argued inside a competition, which is what settles its transcript
   const isCompetition = competition !== null
 
   // Surface a failed history load, but only while the modal is open: an empty history and a load failure
@@ -153,16 +153,19 @@ export function DefenseConversation({
     }
   }, [isOpen, sessionsFailed, t])
 
-  // A turn's own controls are offered only on a saved conversation and never mid-turn; a session id only
-  // ever names one the signed-in viewer owns, so there's no one else's conversation to act on. Unknown caps
-  // mean the history hasn't arrived, and a report would have no cap to hold its comment to. A competition
-  // takes them all away at once: rewinding and deleting would rewrite the record of what was argued
-  const canAct = !isThinking && currentSessionId !== null && limits !== null && !isCompetition
+  // Feedback, on one reply or on the whole conversation, is offered only on a saved one and never mid-turn;
+  // a session id only ever names one the signed-in viewer owns, so there's no one else's to speak about.
+  // Unknown caps mean the history hasn't arrived, and a report would have no cap to hold its comment to
+  const canGiveFeedback = !isThinking && currentSessionId !== null && limits !== null
+
+  // Rewinding takes the same conditions and one more, since it drops turns rather than speaking about them:
+  // a competition's transcript is the thing that later gets graded, so nothing inside one may rewrite it
+  const canRewind = canGiveFeedback && !isCompetition
 
   // Whether the conversation has enough behind it to be worth summing up, or was already summed up, which
   // keeps a standing answer reachable to revise however short a rewind has left the conversation.
   const canAnswer =
-    canAct && (turns.length >= TURNS_WORTH_ANSWERING_FOR || currentFeedback !== null)
+    canGiveFeedback && (turns.length >= TURNS_WORTH_ANSWERING_FOR || currentFeedback !== null)
 
   // Whether a turn has somewhere to go. A conversation opened on a named defense writes nothing until its resume
   // settles: a turn sent before it would open a second defense beside the one being continued.
@@ -264,7 +267,8 @@ export function DefenseConversation({
         roleLabels={roleLabels}
         isThinking={isThinking}
         reports={reports}
-        canAct={canAct}
+        canGiveFeedback={canGiveFeedback}
+        canRewind={canRewind}
         onRewindTurn={turn.requestRewind}
         onReportTurn={report.open}
         dividerBeforeTurn={
@@ -304,6 +308,7 @@ export function DefenseConversation({
         answer={answer}
         currentFeedback={currentFeedback}
         limits={limits}
+        isCompetition={isCompetition}
       />
 
       {/* Composer, once there is a conversation for it to write into */}

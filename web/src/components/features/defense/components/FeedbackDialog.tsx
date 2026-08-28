@@ -14,33 +14,11 @@ import { cn } from '@/components/shared/utils/css-utils'
  *
  * @template TValue - The set of answers the dialog reports.
  */
-export type FeedbackOption<TValue extends string> = {
+type FeedbackOption<TValue extends string> = {
   /** The value reported when this answer is chosen. */
   value: TValue
   /** The answer as the reader sees it. */
   label: string
-}
-
-/**
- * The answers a question offers, in the order the record lists them.
- *
- * @param labelKeys - The message key naming each answer, keyed by the answer itself.
- * @param translate - Resolves one of those keys to the answer as the reader sees it.
- *
- * @returns The answers under their labels.
- *
- * @template TValue - The set of answers the question reports.
- * @template TKey - The message keys naming them.
- */
-export function toFeedbackOptions<TValue extends string, TKey extends string>(
-  labelKeys: Record<TValue, TKey>,
-  translate: (key: TKey) => string
-): FeedbackOption<TValue>[] {
-  // Pair each answer with its label; the entries are the record's own keys
-  return (Object.entries(labelKeys) as [TValue, TKey][]).map(([value, labelKey]) => ({
-    value,
-    label: translate(labelKey),
-  }))
 }
 
 /**
@@ -123,6 +101,8 @@ type FeedbackQuestionProps<TValue extends string> = {
   onRemove: (() => void) | null
   /** The question being asked. */
   title: string
+  /** What the reader should know before answering, sat under the question; null when there is nothing. */
+  note: string | null
   /** The answers to choose between. */
   options: readonly FeedbackOption<TValue>[]
   /** The words to open the free-text field on, empty to open it blank. */
@@ -226,6 +206,7 @@ function FeedbackQuestion<TValue extends string>({
   onClose,
   onRemove,
   title,
+  note,
   options,
   initialComment,
   commentLabel,
@@ -314,8 +295,21 @@ function FeedbackQuestion<TValue extends string>({
         {title}
       </h3>
 
+      {/* What answering this one does, where the question alone doesn't say. Named by the answers below
+          it, so it reaches somebody who lands straight on the group */}
+      {note !== null && (
+        <p id={`${groupId}-note`} className="-mt-2 mb-4 text-sm text-muted">
+          {note}
+        </p>
+      )}
+
       {/* The answers to pick between */}
-      <div role={style.listRole} aria-labelledby={`${groupId}-title`} className="flex flex-col">
+      <div
+        role={style.listRole}
+        aria-labelledby={`${groupId}-title`}
+        aria-describedby={note === null ? undefined : `${groupId}-note`}
+        className="flex flex-col"
+      >
         {options.map((option) => (
           <label
             key={option.value}

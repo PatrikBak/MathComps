@@ -19,7 +19,7 @@ import type { QueryUiState } from '@/lib/query-ui-state'
 import { useAreaEntry } from '../hooks/use-area-entry'
 import { useCompetitionProblems } from '../hooks/use-competition-problems'
 import { useEntryReader } from '../hooks/use-entry-reader'
-import { isPracticeGroup } from '../model/hosted-competition-state'
+import { areNotesOpen, isPracticeGroup } from '../model/hosted-competition-state'
 import { CategoryBadge } from './CategoryBadge'
 import { CompetitionProblemPanel } from './CompetitionProblemPanel'
 import { CompetitionStandingStrip } from './CompetitionStandingStrip'
@@ -114,7 +114,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
   }
 
   // The group setting the terms, and the competition itself
-  const { group, competition } = competitionInGroup
+  const { group, competition, noteGraceMinutes } = competitionInGroup
 
   // Whether this is the run nobody is graded on
   const isPractice = isPracticeGroup(group)
@@ -192,6 +192,8 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
             readerKey={readerKey}
             problem={problem}
             entry={defenseEntry}
+            areNotesOpen={areNotesOpen(defenseEntry, noteGraceMinutes, now)}
+            isPractice={isPractice}
           />
         ))}
       </div>

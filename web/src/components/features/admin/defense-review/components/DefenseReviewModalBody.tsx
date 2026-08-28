@@ -113,7 +113,8 @@ export function DefenseReviewModalBody({
         roleLabels={{ examiner: MATHILDA_NAME, candidate: t('student') }}
         isThinking={false}
         reports={indexReports(detail.reports)}
-        canAct={false}
+        canGiveFeedback={false}
+        canRewind={false}
         onRewindTurn={() => undefined}
         onReportTurn={() => undefined}
         dividerBeforeTurn={newSince}

@@ -438,8 +438,8 @@ public static class ServiceCollectionExtensions
     /// Registers the competitions the site hosts itself: the service backing what a student sees of them and what
     /// they do with an entry. Pulls in <see cref="AddLocalization"/> since a competition's name is read from the
     /// taxonomy metadata. Assumes the defense caps are registered (see <see cref="AddDefenseServices"/>), since a
-    /// competition reports how many turns a defense allows. Expects the DbContext from
-    /// <see cref="AddMathCompsDbContext"/>.
+    /// competition reports how many turns a defense allows. Registers the terms a hosted competition runs on,
+    /// and expects the DbContext from <see cref="AddMathCompsDbContext"/>.
     /// </summary>
     /// <param name="services">The service collection to add the competition services to.</param>
     /// <returns>The service collection for chaining.</returns>
@@ -447,6 +447,14 @@ public static class ServiceCollectionExtensions
     {
         // A competition is named after the node it runs under, so bring the metadata registry along.
         services.AddLocalization();
+
+        // The terms a hosted competition runs on, checked at startup so a bad window fails fast.
+        services.AddOptions<HostedCompetitionOptions>()
+            .BindConfiguration(HostedCompetitionOptions.ConfigurationSectionName)
+            .Validate(
+                options => options.NoteGraceMinutes >= 0,
+                $"{nameof(HostedCompetitionOptions.NoteGraceMinutes)} must be >= 0.")
+            .ValidateOnStart();
 
         // Runs the competitions the site hosts itself.
         services.TryAddScoped<IHostedCompetitionService, HostedCompetitionService>();

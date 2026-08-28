@@ -38,6 +38,13 @@ export type HostedCompetitionProblem = {
   statement: LocalizedString
   /** The conversations the student has held about it, most recently active first. */
   defenses: HostedCompetitionDefenseLine[]
+  /**
+   * What the student says about their own solution, or null while they have said nothing. One per problem
+   * however many conversations they spent arguing it, and revised rather than accumulated.
+   */
+  selfAssessment: string | null
+  /** The longest what they say about it may be, in characters. */
+  maxCommentChars: number
 }
 
 /**
@@ -154,6 +161,12 @@ export type HostedCompetitionGroup = {
 export type HostedCompetitionsView = {
   /** Every group the program has run, is running, or has announced. */
   groups: HostedCompetitionGroup[]
+  /**
+   * How long after an entry ends a student may still say something about their own solutions, in minutes.
+   *
+   * Served rather than held here, so the page offers exactly the window the server keeps.
+   */
+  noteGraceMinutes: number
 }
 
 /**

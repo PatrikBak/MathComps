@@ -17,6 +17,23 @@ export function toggleSetItem<T>(set: Set<T>, item: T): Set<T> {
 }
 
 /**
+ * A record's entries with its own key type kept, which `Object.entries` widens to `string`.
+ *
+ * @param record - The key/value pairs to walk.
+ *
+ * @returns The pairs, each still naming which key it came from.
+ *
+ * @template TKey - The record's keys.
+ * @template TValue - What it holds under them.
+ */
+export function entriesOf<TKey extends string, TValue>(
+  record: Record<TKey, TValue>
+): [TKey, TValue][] {
+  // The cast is the whole of it: the runtime pairs are already right, only their type is too wide
+  return Object.entries(record) as [TKey, TValue][]
+}
+
+/**
  * Inverts a key → value record into a value → key Map. When two keys share a value, the last one wins.
  *
  * @param record - The key/value pairs to reverse.
@@ -25,7 +42,7 @@ export function toggleSetItem<T>(set: Set<T>, item: T): Set<T> {
  */
 export function invert<TKey extends string>(record: Record<TKey, string>): Map<string, TKey> {
   // Walk each key/value pair into the reverse map
-  return new Map((Object.entries(record) as [TKey, string][]).map(([key, value]) => [value, key]))
+  return new Map(entriesOf(record).map(([key, value]) => [value, key]))
 }
 
 /**

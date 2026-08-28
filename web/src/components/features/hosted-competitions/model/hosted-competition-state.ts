@@ -188,6 +188,24 @@ export function entryEndsAt(group: HostedCompetitionGroup, entry: SatEntry): str
 }
 
 /**
+ * Whether a student may still leave a note about their own solutions to a competition's problems.
+ *
+ * An entry given up for the problems was never a run, so nothing was argued in it to speak about; one that
+ * was sat stays open for the grace that follows its end.
+ *
+ * @param entry - The entry the student spent.
+ * @param graceMinutes - How long past the end of the entry notes are still taken.
+ * @param now - The instant to read it against, in epoch milliseconds.
+ *
+ * @returns Whether notes are still being taken.
+ */
+export function areNotesOpen(entry: AreaEntry, graceMinutes: number, now: number): boolean {
+  // Nothing was sat, so there is nothing of theirs to say anything about; and what was sat runs out once
+  // the grace behind its end does
+  return entry.kind !== 'forfeited' && Date.parse(entry.endsAt) + graceMinutes * MINUTE_MS > now
+}
+
+/**
  * One competition and the group whose terms it runs on, which is what locating one in the view hands back.
  */
 export type CompetitionInGroup = {
@@ -195,6 +213,8 @@ export type CompetitionInGroup = {
   group: HostedCompetitionGroup
   /** The competition itself. */
   competition: HostedCompetition
+  /** How long past the end of an entry notes are still taken, in minutes; the program's own term. */
+  noteGraceMinutes: number
 }
 
 /**
@@ -210,10 +230,18 @@ export function findCompetitionInGroup(
   view: HostedCompetitionsView | undefined,
   competitionId: string
 ): CompetitionInGroup | undefined {
+  // Nothing has arrived, so there is nothing to find it in
+  if (view === undefined) {
+    return undefined
+  }
+
   // The one competition of that id, wherever in the groups it sits
-  return view?.groups
+  const found = view.groups
     .flatMap((group) => group.competitions.map((competition) => ({ group, competition })))
     .find((candidate) => candidate.competition.id === competitionId)
+
+  // With the terms the whole program runs on, which is where the note window is set
+  return found === undefined ? undefined : { ...found, noteGraceMinutes: view.noteGraceMinutes }
 }
 
 /**
