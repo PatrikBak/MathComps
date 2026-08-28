@@ -1,5 +1,3 @@
-import { expect, test } from '@playwright/test'
-
 import {
   actionsCopy,
   areaCopy,
@@ -11,6 +9,7 @@ import {
   sendTurn,
 } from './support/competitions'
 import { COMPETITION_ID, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
+import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 15_000

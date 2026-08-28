@@ -1,5 +1,3 @@
-import { expect, test } from '@playwright/test'
-
 import {
   errorsCopy,
   filtersCopy,
@@ -8,6 +6,7 @@ import {
   loginPromptFor,
 } from './support/archive-filters'
 import { PROBLEMS_PATH, recordNotices, stubProblemSearch } from './support/backend-routes'
+import { expect, test } from './support/test'
 
 /**
  * How long the library needs to settle: boot Clerk, resolve who is reading, and send its first

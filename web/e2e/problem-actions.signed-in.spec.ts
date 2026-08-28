@@ -1,9 +1,8 @@
 import type { Locator, Page } from '@playwright/test'
-import { expect, test } from '@playwright/test'
 
 import messages from '../messages/en.json'
 import { filtersCopy } from './support/archive-filters'
-import { PROBLEMS_PATH, recordNotices } from './support/backend-routes'
+import { PROBLEMS_PATH, recordNotices, stubUserLists } from './support/backend-routes'
 import {
   ACTION_DELAY_MS,
   recordListReadings,
@@ -11,8 +10,8 @@ import {
   stubProblemActions,
   stubSearchAnswer,
   stubSearchRule,
-  stubUserLists,
 } from './support/problem-actions'
+import { expect, test } from './support/test'
 
 /** The copy the problem cards and their toasts read under, taken from the app's own messages. */
 const problemsCopy = messages.problems
@@ -455,10 +454,12 @@ test.describe('acting on a problem the screen has no opinion about', () => {
     // Open the library with nothing filtered on
     await page.goto(PROBLEMS_PATH)
 
-    // The rows are drawn
-    await expect(rowFor(page, EDITED)).toBeVisible({
-      timeout: SETTLE_TIMEOUT_MS,
-    })
+    // The list settles a frame or two after its first row is up, the count landing last of all. A
+    // baseline taken before that leaves a reading still to come, which the check below would read as
+    // the click having moved the list.
+    await expect
+      .poll(() => readings().at(-1), { timeout: SETTLE_TIMEOUT_MS })
+      .toEqual({ slugs: [EDITED, UNTOUCHED], problemCount: 2 })
 
     // How the list read before anything was clicked
     const readingsBeforeClick = readings().length

@@ -29,13 +29,28 @@ const port = new URL(baseURL).port || '3000'
 /** Where the signed-in browser state is parked once the sign-in run finishes. */
 export const storageStatePath = 'playwright/.clerk/user.json'
 
+/** Whether this run is CI's rather than somebody's own machine. */
+const isCi = Boolean(process.env['CI'])
+
 /** Playwright config */
 export default defineConfig({
   testDir: './e2e',
   reporter: 'list',
+  // Tests inside one file may run at the same time, since a run otherwise cannot finish faster than
+  // its longest file however many workers it is given.
+  fullyParallel: true,
+  // More workers than the runner has cores, since the time here goes on retry backoff and quiet
+  // windows rather than on compute. A machine of one's own keeps Playwright's half-the-cores default.
+  workers: isCi ? '100%' : undefined,
+  // One retry tells a flake apart from a break
+  retries: isCi ? 1 : 0,
+  // A test.only left behind would otherwise green the suite by running a single test
+  forbidOnly: isCi,
   // Clerk's testing token, minted once into the environment every worker is forked from.
   globalSetup: './e2e/support/global-setup.ts',
-  use: { baseURL },
+  // A retry keeps the trace of the attempt that failed, which is the whole of what a run nobody was
+  // watching leaves behind.
+  use: { baseURL, trace: 'on-first-retry' },
   projects: [
     // Not a test: this run exists to produce a signed-in browser state.
     { name: 'session', testMatch: /.*\.setup\.ts/ },
@@ -50,10 +65,13 @@ export default defineConfig({
       use: { storageState: storageStatePath },
     },
   ],
-  // Attach to an already-running dev server instead of starting a second one on the same port.
   webServer: {
-    command: `npm run dev -- --port ${port}`,
+    // What ships, on CI, which the job has already built: dev mode compiles a route the first time it
+    // is asked for and renders it differently from the build these tests are a gate on.
+    command: isCi ? `npm run start -- --port ${port}` : `npm run dev -- --port ${port}`,
     url: baseURL,
-    reuseExistingServer: true,
+    // Attach to a server already up rather than starting a second one on the same port. Never on CI,
+    // which has nothing of its own to attach to and would otherwise test whatever it found there.
+    reuseExistingServer: !isCi,
   },
 })

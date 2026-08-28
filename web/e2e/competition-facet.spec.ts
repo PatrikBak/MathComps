@@ -1,5 +1,3 @@
-import { expect, test } from '@playwright/test'
-
 import { facetsCopy, filtersCopy, KEPT_FILTER, recordTreeReadings } from './support/archive-filters'
 import {
   BACKEND_ORIGIN,
@@ -7,6 +5,7 @@ import {
   SEARCH_PATH,
   stubProblemSearch,
 } from './support/backend-routes'
+import { expect, test } from './support/test'
 
 /** How long the library needs to read the URL and send the one search off the back of it. */
 const SETTLE_TIMEOUT_MS = 15_000

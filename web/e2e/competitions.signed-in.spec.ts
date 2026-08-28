@@ -1,7 +1,7 @@
-import { expect, test } from '@playwright/test'
-
+import { stubProblemSearch } from './support/backend-routes'
 import { areaCopy, holdClock, LIST_PATH } from './support/competitions'
 import { COMPETITION_ID, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
+import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 15_000
@@ -87,6 +87,9 @@ test.describe('the competitions list', () => {
 
     // A student with an entry still to spend
     await installHostedBackend(page, 'ready')
+
+    // The archive, which the walk below passes through on its way somewhere that is not the list
+    await stubProblemSearch(page, () => null)
 
     // Open the list
     await page.goto(LIST_PATH)
