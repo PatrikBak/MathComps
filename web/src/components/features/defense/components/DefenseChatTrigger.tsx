@@ -9,6 +9,7 @@ import { Button } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
+import { useDefenseCopy } from '../hooks/use-defense-copy'
 import type { DefenseProblem } from '../model/defense-types'
 import { DefenseConversation } from './DefenseConversation'
 import { MathildaWordmark } from './MathildaWordmark'
@@ -29,6 +30,10 @@ type DefenseChatTriggerProps = {
 export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
+
+  // Warmed while the page paints, so the greeting is cached by the time anybody opens the chat. Every
+  // trigger on the page asks for the same one, which is one request between them
+  useDefenseCopy()
 
   // Modal open state
   const [isOpen, { open, close }] = useDisclosure(false)

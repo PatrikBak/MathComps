@@ -1,6 +1,7 @@
 import type { Page, Route } from '@playwright/test'
 
 import type {
+  DefenseCopy,
   DefenseLimits,
   DefenseSession,
   DefenseSessionList,
@@ -179,8 +180,8 @@ const STATEMENTS: LocalizedString[] = [
   },
 ]
 
-/** The examiner's opening line, which the backend owns and every transcript starts on. */
-const OPENER =
+/** The examiner's opening line, which the backend serves and every transcript starts on. */
+export const OPENER =
   'Tell me how you approached this one. Start wherever your argument starts, not where the problem does.'
 
 /**
@@ -1143,6 +1144,11 @@ export async function installHostedBackend(
     // Nothing comes back
     await route.fulfill({ status: 204, body: '' })
   })
+
+  // The examiner's canned lines, which the chat reads before it has anything else to show
+  await page.route(`${BACKEND_ORIGIN}/defense/copy`, (route) =>
+    answer(page, route, { opener: OPENER } satisfies DefenseCopy)
+  )
 
   // The conversations held against one problem, and the caps a further one is held to
   await page.route(`${BACKEND_ORIGIN}/defense/sessions/problems/*`, (route) => {

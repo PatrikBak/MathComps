@@ -1,5 +1,6 @@
 import { ROUTES } from '@/i18n/i18n'
 
+import { MATHILDA_OPENER } from './support/backend-routes'
 import { chatCopy } from './support/competitions'
 import { expect, test } from './support/test'
 
@@ -8,8 +9,8 @@ const SETTLE_TIMEOUT_MS = 15_000
 
 /**
  * A published handout whose problems carry a solution to defend, in English, which is the canonical
- * locale and so carries no route translation. Nothing on the page asks the backend anything, so it needs
- * no stub standing behind it.
+ * locale and so carries no route translation. The only thing it asks the backend for is the greeting an
+ * opened chat shows, which the ambient stubs already answer.
  */
 const HANDOUT_PATH = `/en${ROUTES.HANDOUTS}/proofs-basics`
 
@@ -28,6 +29,9 @@ test.describe('the defense composer', () => {
 
     // Opened on the first of them
     await triggers.first().click()
+
+    // Greeted all the same, which is the whole of what there is to read without an account
+    await expect(page.getByText(MATHILDA_OPENER.opener)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // The way in is what the composer offers
     await expect(page.getByText(chatCopy.loginPrompt)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })

@@ -7,6 +7,16 @@ import { buildApiUrl } from '@/components/shared/utils/url-utils'
 const SESSIONS_PATH = '/defense/sessions'
 
 /**
+ * Builds the URL for reading the examiner's canned lines.
+ *
+ * @returns The copy URL.
+ */
+export function getDefenseCopyUrl(): string {
+  // The copy endpoint, which needs no account
+  return buildApiUrl('/defense/copy')
+}
+
+/**
  * Builds the URL for listing the user's own defense sessions against a handout environment.
  *
  * @param target - The handout environment whose sessions to list.

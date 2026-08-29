@@ -2,7 +2,6 @@
 
 import { useAuth } from '@clerk/nextjs'
 import { useQueryClient } from '@tanstack/react-query'
-import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { invalidateCompetitionProblems } from '@/components/features/hosted-competitions/hooks/hosted-competition-cache'
@@ -86,9 +85,6 @@ export function useDefenseConversation(
   problem: DefenseProblem,
   opening: DefenseOpening
 ): UseDefenseConversationResult {
-  // Defense-surface copy
-  const t = useTranslations('defense')
-
   // The query cache
   const queryClient = useQueryClient()
 
@@ -142,10 +138,6 @@ export function useDefenseConversation(
     () =>
       new DefenseConversationModel({
         problem,
-        // The greeting, so the chat opens on one before a session exists. The backend seeds its own copy
-        // as the saved conversation's first turn, so this message and the backend's `defense-copy.json`
-        // must stay in step.
-        opener: t('opener'),
         // Refresh every list the written session appears in
         onSessionsChanged: () => {
           // The defense surface's own lists, per problem and across all of them

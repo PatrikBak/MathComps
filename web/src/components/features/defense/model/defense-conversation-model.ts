@@ -133,8 +133,6 @@ export type DefenseConversationServices = {
 export type DefenseConversationModelOptions = {
   /** The problem being defended. */
   problem: DefenseProblem
-  /** The examiner's opening line, shown while the conversation is still unsaved. */
-  opener: string
   /** Called after any write to the session store. */
   onSessionsChanged: () => void
 }
@@ -161,7 +159,7 @@ type InFlight = {
  *
  * @returns The turn.
  */
-function draftTurn(role: TurnRole, content: string): Turn {
+export function draftTurn(role: TurnRole, content: string): Turn {
   // The unsaved draft turn
   return { id: null, createdAt: null, role, content }
 }
@@ -273,12 +271,6 @@ export class DefenseConversationModel {
   /** The problem being defended. */
   private readonly problem: DefenseProblem
 
-  /**
-   * The examiner's opening line, shown while the conversation is still unsaved. The backend seeds its own
-   * copy as the saved conversation's first turn, so the two are translations of the same greeting.
-   */
-  private readonly opener: string
-
   /** Called after any write to the session store. */
   private readonly onSessionsChanged: () => void
 
@@ -294,17 +286,16 @@ export class DefenseConversationModel {
   /**
    * Builds the model, seeded with a fresh, unsaved conversation.
    *
-   * @param options - The problem, opener, and history callback the model runs on.
+   * @param options - The problem and history callback the model runs on.
    */
   constructor(options: DefenseConversationModelOptions) {
-    // Keep the injected problem, opener, and history callback
+    // Keep the injected problem and history callback
     this.problem = options.problem
-    this.opener = options.opener
     this.onSessionsChanged = options.onSessionsChanged
 
-    // Seed a fresh conversation with the examiner's opener
+    // Seed a conversation the student has yet to say anything into
     this.state = {
-      turns: [draftTurn('examiner', options.opener)],
+      turns: [],
       isThinking: false,
       currentSessionId: null,
       currentFeedback: null,
@@ -453,12 +444,12 @@ export class DefenseConversationModel {
     // Cancel any turn still in flight for the conversation being left
     this.abandonInFlight()
 
-    // Reseed a blank conversation with just the examiner's opener
+    // Reseed a blank conversation
     this.setState({
       currentSessionId: null,
       currentFeedback: null,
       reports: new Map(),
-      turns: [draftTurn('examiner', this.opener)],
+      turns: [],
       conversationEpoch: this.state.conversationEpoch + 1,
     })
   }

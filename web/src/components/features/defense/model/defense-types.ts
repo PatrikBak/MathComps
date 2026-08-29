@@ -138,6 +138,15 @@ export type DefenseLimits = {
 }
 
 /**
+ * The examiner's canned lines, in the reader's language. Written down on the backend alone, so the greeting
+ * an unsaved conversation shows is the one a saved conversation carries.
+ */
+export type DefenseCopy = {
+  /** The greeting that opens every conversation. */
+  opener: string
+}
+
+/**
  * What a problem's defense surface opens on: the conversations held against it, and the caps a further one
  * is held to.
  */

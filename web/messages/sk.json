@@ -501,7 +501,6 @@
     "loginPrompt": "Mathilda si tvoje konverzácie ukladá, takže potrebuje účet.",
     "newDefense": "Nová konverzácia",
     "noReplyYet": "Zatiaľ bez odpovede",
-    "opener": "Ahoj, som Mathilda. Môžeme si prejsť tvoj postup, pozrieť sa na rozpracovaný nápad, alebo ti poradím, keď sa zasekneš. Nad odpoveďami chvíľu rozmýšľam, aby som ti neprezradila priveľa a nepovedala niečo nesprávne 😇",
     "outcomes": {
       "confirmedTheSolution": "Uistila ma, že riešenie platí",
       "foundTheMistake": "Našla mi chybu/nepresnosť",

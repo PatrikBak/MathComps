@@ -5,6 +5,7 @@ import type { ApiResult } from '@/types/api'
 import type { DefenseTarget } from '../model/defense-target'
 import { toWireTarget } from '../model/defense-target'
 import type {
+  DefenseCopy,
   DefenseOutcome,
   DefenseReportCategory,
   DefenseSession,
@@ -14,6 +15,7 @@ import type {
 } from '../model/defense-types'
 import {
   getContinueDefenseUrl,
+  getDefenseCopyUrl,
   getDefenseFeedbackUrl,
   getDefenseSessionsUrl,
   getDeleteDefenseSessionUrl,
@@ -25,8 +27,19 @@ import {
 } from './defense-api-urls'
 
 /**
- * The backend for defense conversations: authenticated calls to the .NET API.
+ * The backend behind the defense surface: calls to the .NET API. Every call but the copy read speaks for a
+ * signed-in student about their own conversations.
  */
+
+/**
+ * Reads the examiner's canned lines in the caller's language.
+ *
+ * @param apiCall - The API caller.
+ * @returns The lines the chat shows before the backend has saved anything.
+ */
+export function fetchDefenseCopy(apiCall: ApiCaller): Promise<ApiResult<DefenseCopy>> {
+  return apiCall<DefenseCopy>(() => getDefenseCopyUrl())
+}
 
 /**
  * Lists a target's defense sessions, most recently active first, with the caps a defense against it is
