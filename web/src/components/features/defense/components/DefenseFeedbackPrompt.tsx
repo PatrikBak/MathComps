@@ -17,14 +17,15 @@ type DefenseFeedbackPromptProps = {
 
 /**
  * A quiet line asking how the conversation went, which carries the answer once the student gives one and
- * reopens for them to revise it.
+ * reopens for them to revise it. Carries no spacing of its own, since where it sits is the transcript's
+ * business.
  */
 export function DefenseFeedbackPrompt({ isAnswered, onOpen }: DefenseFeedbackPromptProps) {
   // Defense copy
   const t = useTranslations('defense')
 
   return (
-    <div className="flex justify-center pt-2 pb-1">
+    <div className="flex justify-center">
       <Button
         variant="outline"
         size="sm"
