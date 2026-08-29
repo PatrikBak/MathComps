@@ -2,6 +2,7 @@
 
 import { useAuth } from '@clerk/nextjs'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { invalidateCompetitionProblems } from '@/components/features/hosted-competitions/hooks/hosted-competition-cache'
@@ -70,12 +71,11 @@ type UseDefenseConversationResult = DefenseConversationState &
  * Also surfaces this problem's session history.
  *
  * A thin React binding over {@link DefenseConversationModel}: the model owns the state machine and its
- * concurrency, this hook wires it to React and to the session-history query. The problem's identity
- * must be stable for the life of the mount: the model is created once and keeps writing under the
- * first problem's target.
+ * concurrency, this hook wires it to React and to the session-history query. The model is built once per
+ * mount and keeps writing under the problem it was built with, which holds because `DefenseConversation`
+ * keys itself on that target.
  *
  * @param problem - The problem being defended.
- * @param opener - The examiner's opening line, seeded as the first turn of a fresh conversation.
  * @param opening - Which conversation to open on; a named one this problem's history doesn't hold opens
  *   none.
  *
@@ -84,9 +84,11 @@ type UseDefenseConversationResult = DefenseConversationState &
  */
 export function useDefenseConversation(
   problem: DefenseProblem,
-  opener: string,
   opening: DefenseOpening
 ): UseDefenseConversationResult {
+  // Defense-surface copy
+  const t = useTranslations('defense')
+
   // The query cache
   const queryClient = useQueryClient()
 
@@ -140,7 +142,10 @@ export function useDefenseConversation(
     () =>
       new DefenseConversationModel({
         problem,
-        opener,
+        // The greeting, so the chat opens on one before a session exists. The backend seeds its own copy
+        // as the saved conversation's first turn, so this message and the backend's `defense-copy.json`
+        // must stay in step.
+        opener: t('opener'),
         // Refresh every list the written session appears in
         onSessionsChanged: () => {
           // The defense surface's own lists, per problem and across all of them

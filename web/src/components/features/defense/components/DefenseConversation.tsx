@@ -20,7 +20,7 @@ import { useDefenseFeedback } from '../hooks/use-defense-feedback'
 import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
 import { useMathildaConsent } from '../hooks/use-mathilda-consent'
 import { resolveComposerState } from '../model/defense-composer-state'
-import { defenseDraftStorageKey, handoutTargetOf } from '../model/defense-target'
+import { defenseDraftStorageKey, defenseTargetKey, handoutTargetOf } from '../model/defense-target'
 import type { DefenseOpening, DefenseProblem, TurnRole } from '../model/defense-types'
 import { DefenseComposer } from './DefenseComposer'
 import { DefenseFeedbackDialogs } from './DefenseFeedbackDialogs'
@@ -60,6 +60,17 @@ type DefenseConversationProps = {
 const TURNS_WORTH_ANSWERING_FOR = 3
 
 /**
+ * The defense chat, mounted against the problem it is about.
+ *
+ * {@link DefenseConversationForTarget} builds its conversation once per mount and keeps writing under the
+ * problem it was built with, so a defense about another problem is another mount. Keying on the target is
+ * what makes that hold wherever the chat is opened from.
+ */
+export function DefenseConversation(props: DefenseConversationProps) {
+  return <DefenseConversationForTarget key={defenseTargetKey(props.problem.target)} {...props} />
+}
+
+/**
  * The defense chat body: a student argues their solution to a problem and the examiner probes it turn by turn.
  * Reuses the shared rich-math editor as the composer and renders the exchange as an annotated transcript. Rendered
  * into a full-height modal panel its caller owns, so a surface already showing a modal can swap it in without
@@ -69,7 +80,7 @@ const TURNS_WORTH_ANSWERING_FOR = 3
  * competition's problem, so starting a fresh one takes the target and nothing else, wherever the
  * conversation was opened from.
  */
-export function DefenseConversation({
+function DefenseConversationForTarget({
   problem,
   isOpen,
   onClose,
@@ -91,9 +102,7 @@ export function DefenseConversation({
   // The student's standing acknowledgement of what talking to Mathilda entails, and the call that records it
   const consent = useMathildaConsent()
 
-  // The live conversation, its examiner-driven send flow, and this problem's session history. The greeting is
-  // read here so the chat opens on it before a session exists; the backend seeds its own copy as the saved
-  // conversation's first turn, so `defense.opener` and the backend's `defense-copy.json` must stay in step.
+  // The live conversation, its examiner-driven send flow, and this problem's session history
   const {
     turns,
     isThinking,
@@ -114,7 +123,7 @@ export function DefenseConversation({
     clearReport,
     deleteSession,
     rewind,
-  } = useDefenseConversation(problem, t('opener'), opening)
+  } = useDefenseConversation(problem, opening)
 
   // Reporting one of the examiner's replies and answering for the conversation as a whole, either of which
   // can be taken back again
