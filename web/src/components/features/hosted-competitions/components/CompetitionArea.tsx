@@ -3,33 +3,22 @@
 import { useDisclosure, useLocalStorage } from '@mantine/hooks'
 import { useLocale, useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { Modal } from '@/components/shared/components/Modal'
-import { SECOND_MS } from '@/components/shared/utils/time-units'
 import { PRACTICE_INTRO_DISMISSED_STORAGE_KEY } from '@/constants/local-storage-constants'
-import { useNow } from '@/hooks/use-now'
 import type { Locale } from '@/i18n/i18n'
-import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
-import { useAreaEntry } from '../hooks/use-area-entry'
-import { useCompetitionProblems } from '../hooks/use-competition-problems'
-import { useEntryReader } from '../hooks/use-entry-reader'
-import { areNotesOpen, isPracticeGroup } from '../model/hosted-competition-state'
+import { useCompetitionArea } from '../hooks/use-competition-area'
+import { COMPETITIONS_LIST_HREF } from '../services/hosted-competition-routes'
 import { CategoryBadge } from './CategoryBadge'
 import { CompetitionProblemPanel } from './CompetitionProblemPanel'
 import { CompetitionStandingStrip } from './CompetitionStandingStrip'
 import { FinishEntryDialog } from './FinishEntryDialog'
 import { RulesList } from './RulesList'
-
-/**
- * The way back to the list. Module-level so every render hands out the same object.
- */
-const LIST_HREF = { pathname: ROUTES.COMPETITIONS }
 
 /**
  * Props for the {@link CompetitionArea} component.
@@ -52,11 +41,11 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
   // The active locale, which decides what the group is called
   const locale = useLocale() as Locale
 
-  // The localized router, for sending a reader with no entry back where they came from
+  // The localized router
   const router = useRouter()
 
-  // Whose answers these are, and whether that is settled yet
-  const { readerKey, isReaderKnown } = useEntryReader()
+  // Everything the page says about this competition and the entry spent on it
+  const area = useCompetitionArea(competitionId)
 
   // Whether the reader has the rules open
   const [areRulesOpen, { open: openRules, close: closeRules }] = useDisclosure(false)
@@ -64,68 +53,36 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
   // Whether the reader has been asked whether they really mean to hand the entry in
   const [isFinishAsked, { open: openFinish, close: closeFinish }] = useDisclosure(false)
 
-  // The competition, the group setting its terms, and the entry the reader spent on it
-  const {
-    competitionInGroup,
-    entry: defenseEntry,
-    uiState: viewState,
-  } = useAreaEntry(readerKey, isReaderKnown, competitionId)
-
-  // Whether there is an entry at all
-  const isEntitled = defenseEntry !== null
-
-  // When the counted part ended, which nothing but a sat entry has
-  const endsAt = defenseEntry?.kind === 'sat' ? defenseEntry.endsAt : null
-
-  // This competition's problems, once there is an entry to read them through
-  const { problems, uiState: problemsState } = useCompetitionProblems(
-    readerKey,
-    competitionId,
-    isEntitled
-  )
-
-  // One clock for the page, so every deadline on it moves on the same tick. An entry given up for the
-  // problems has none, and neither does a page still working out what it is showing
-  const now = useNow(SECOND_MS, endsAt !== null)
-
   // Whether the practice run has already introduced itself to this browser
   const [isIntroDismissed, setIsIntroDismissed] = useLocalStorage<boolean>({
     key: PRACTICE_INTRO_DISMISSED_STORAGE_KEY,
     defaultValue: false,
   })
 
-  // A reader with no entry has nothing to read here, so the list is where they go instead
-  useEffect(() => {
-    if (viewState.kind === 'ready' && !isEntitled) {
-      router.replace(LIST_HREF)
-    }
-  }, [viewState, isEntitled, router])
-
-  // Still working out what there is to show, or on the way out
-  if (competitionInGroup === undefined || defenseEntry === null) {
-    return <AreaPlaceholder uiState={viewState} failed={t('loadFailed')} />
+  // One of the two reads is still out, gave up, or turned up nothing to stay here for
+  if (area.kind === 'pending') {
+    return (
+      <AreaPlaceholder
+        uiState={area.uiState}
+        failed={t(area.waitingOn === 'view' ? 'loadFailed' : 'areaProblemsFailed')}
+      />
+    )
   }
 
-  // And on the set itself, which is what the page is for. A page that seated its header the moment the
-  // first of the two reads landed would put a spinner high on it and then move it down under the header
-  // once the second one did, so both reads stand behind the same one
-  if (problems === undefined) {
-    return <AreaPlaceholder uiState={problemsState} failed={t('areaProblemsFailed')} />
-  }
-
-  // The group setting the terms, and the competition itself
-  const { group, competition, noteGraceMinutes } = competitionInGroup
-
-  // Whether this is the run nobody is graded on
-  const isPractice = isPracticeGroup(group)
-
-  // Whether the student closed it themselves, which the page says differently from a clock running out
-  const wasHandedIn = defenseEntry.kind === 'sat' && defenseEntry.wasHandedIn
-
-  // Whether the counted part is over, which changes what the page says and nothing about what it offers.
-  // A hand-in settles it outright, and a clock within its last second, the same boundary the reading
-  // itself uses: read any finer and the two disagree for a frame
-  const hasEnded = wasHandedIn || (endsAt !== null && Date.parse(endsAt) - now < SECOND_MS)
+  // What there is to draw, once both reads have landed
+  const {
+    readerKey,
+    group,
+    competition,
+    entry,
+    problems,
+    now,
+    endsAt,
+    isPractice,
+    wasHandedIn,
+    hasEnded,
+    areNotesOpen,
+  } = area
 
   return (
     // Hyphenation off: the global setting is for article prose, and the words here are names and labels
@@ -147,9 +104,9 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
           endsAt={endsAt}
           now={now}
           wasHandedIn={wasHandedIn}
-          onFinish={hasEnded || defenseEntry.kind !== 'sat' ? null : openFinish}
+          onFinish={hasEnded || entry.kind !== 'sat' ? null : openFinish}
           onOpenRules={openRules}
-          listHref={LIST_HREF}
+          listHref={COMPETITIONS_LIST_HREF}
         />
       </div>
 
@@ -181,7 +138,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
       {hasEnded && <AreaNote>{t(endedNoteKey(wasHandedIn, isPractice))}</AreaNote>}
 
       {/* An entry given up for the problems, which never had a clock */}
-      {defenseEntry.kind === 'forfeited' && <AreaNote>{t('areaForfeited')}</AreaNote>}
+      {entry.kind === 'forfeited' && <AreaNote>{t('areaForfeited')}</AreaNote>}
 
       {/* The set, read top to bottom */}
       <div className="flex flex-col gap-4">
@@ -191,8 +148,8 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
             competitionId={competitionId}
             readerKey={readerKey}
             problem={problem}
-            entry={defenseEntry}
-            areNotesOpen={areNotesOpen(defenseEntry, noteGraceMinutes, now)}
+            entry={entry}
+            areNotesOpen={areNotesOpen}
             isPractice={isPractice}
           />
         ))}
@@ -210,7 +167,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
           closeFinish()
 
           // And out to the list, the way entering came in from it
-          router.push(LIST_HREF)
+          router.push(COMPETITIONS_LIST_HREF)
         }}
       />
     </div>

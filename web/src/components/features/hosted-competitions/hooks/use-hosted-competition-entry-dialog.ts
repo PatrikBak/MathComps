@@ -13,7 +13,7 @@ import { useEnterHostedCompetition } from './use-enter-hosted-competition'
 /**
  * Return type for {@link useHostedCompetitionEntryDialog}.
  */
-type UseHostedCompetitionEntryDialogResult = {
+export type UseHostedCompetitionEntryDialogResult = {
   /** What the dialog is asking about, or null while it is closed. */
   pending: PendingEntry | null
   /** Asks about a competition. */

@@ -1,3 +1,4 @@
+import { BACKEND_ORIGIN } from './support/backend-routes'
 import {
   actionsCopy,
   areaCopy,
@@ -22,6 +23,9 @@ const REVISED_NOTE = 'On reflection the last case needs the bound the other way 
 
 /** A competition no state ever holds an entry on, so the guard has something to turn away. */
 const UNENTERED_COMPETITION_ID = 'open-advanced'
+
+/** The practice run, the one competition whose clock nobody is graded against. */
+const PRACTICE_COMPETITION_ID = 'practice-set'
 
 test.describe('the competition area', () => {
   test('puts the whole set on one page', async ({ page }) => {
@@ -282,14 +286,21 @@ test.describe('the competition area', () => {
     // Stop time with the entry still running
     await holdClock(page)
 
-    // The turn that opens the conversation
-    await sendTurn(page, 'The first thing I have to say about this one.')
+    // What the turn opening the conversation says
+    const opening = 'The first thing I have to say about this one.'
 
-    // And the buzzer going while the examiner is still writing
-    await page.clock.fastForward('05:00')
+    // Written and sent
+    await sendTurn(page, opening)
 
     // The conversation as it now reads
     const transcript = page.getByLabel(chatCopy.transcriptLabel)
+
+    // Held until the turn is in it: a clock walked forward before the mint lands stamps the greeting and
+    // this turn after the buzzer too, and the line is then drawn above all three
+    await expect(transcript.getByText(opening)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // And the buzzer going while the examiner is still writing
+    await page.clock.fastForward('05:00')
 
     // The line is drawn, the reply having been said the other side of it
     await expect(
@@ -465,6 +476,79 @@ test.describe('the competition area', () => {
 
     // The intro is still gone
     await expect(intro).toHaveCount(0)
+  })
+
+  test('says nothing about a result when a practice clock runs out', async ({ page }) => {
+    // A clock the spec can walk past the practice run's own minute with
+    await page.clock.install()
+
+    // A student with an entry still to spend
+    await installHostedBackend(page, 'ready')
+
+    // Open the list, where the practice run is taken
+    await page.goto(LIST_PATH)
+
+    // Press try
+    await page.getByRole('button', { name: areaCopy.try }).first().click()
+
+    // And confirm the dialog
+    await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
+
+    // Inside, on the set the run is spent on
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The practice minute, walked past, which is what ends the run
+    await page.clock.fastForward('02:00')
+
+    // Which the page says without naming a result, the practice run having none
+    await expect(page.getByText(areaCopy.areaClockSpentPractice)).toBeVisible()
+
+    // And not the graded sentence, which names a result later messages fall outside of
+    await expect(page.getByText(areaCopy.areaClockSpent)).toHaveCount(0)
+  })
+
+  test('says nothing about a result when a practice run is handed in', async ({ page }) => {
+    // A clock held where it is, so the practice minute cannot run out under a hand-in meant to beat it
+    await page.clock.install()
+
+    // A student with an entry still to spend
+    await installHostedBackend(page, 'ready')
+
+    // Open the list, where the practice run is taken
+    await page.goto(LIST_PATH)
+
+    // Press try
+    await page.getByRole('button', { name: areaCopy.try }).first().click()
+
+    // And confirm the dialog
+    await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
+
+    // Inside, on the set the run is spent on
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Hand it in ahead of its own clock
+    await page.getByRole('button', { name: areaCopy.finishEntry }).click()
+
+    // Which is asked about before it happens
+    await page.getByRole('button', { name: areaCopy.finishDialog.confirm, exact: true }).click()
+
+    // Out to the list, the way entering came in from it
+    await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Back inside the run just handed in
+    await page.goto(areaPath(PRACTICE_COMPETITION_ID))
+
+    // Where the page names it a hand-in, and still promises nothing about a result
+    await expect(page.getByText(areaCopy.areaFinishedPractice)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // And not the graded sentence, which is the one that mentions a result
+    await expect(page.getByText(areaCopy.areaFinished)).toHaveCount(0)
   })
 
   test('reaches the rules without leaving the clock', async ({ page }) => {
@@ -819,6 +903,75 @@ test.describe('the competition area', () => {
 
     // Which sends them back to the list rather than serving them the statements
     await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
+  })
+
+  test('blames the read rather than the entry when the surface stops answering', async ({
+    page,
+  }) => {
+    // A student inside a competition
+    await installHostedBackend(page, 'running')
+
+    // Whose surface then stops answering, which is the read the entry itself is found in
+    await page.route(`${BACKEND_ORIGIN}/competitions`, (route) => route.abort('connectionrefused'))
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // Which says the read failed
+    await expect(page.getByText(areaCopy.loadFailed)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // And leaves them on it: a page that could not read the entry is not one that found none
+    await expect(page).toHaveURL(new RegExp(`/competitions/${COMPETITION_ID}$`))
+  })
+
+  test('blames the problems read rather than the whole page when only it fails', async ({
+    page,
+  }) => {
+    // A student inside a competition
+    await installHostedBackend(page, 'running')
+
+    // Whose problems stop coming, the entry behind them still reading fine
+    await page.route(`${BACKEND_ORIGIN}/competitions/*/problems`, (route) =>
+      route.abort('connectionrefused')
+    )
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // Which says what actually failed
+    await expect(page.getByText(areaCopy.areaProblemsFailed)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // And not what the surface says when nothing of it arrives at all
+    await expect(page.getByText(areaCopy.loadFailed)).toHaveCount(0)
+  })
+
+  test('asks for no statements at all until an entry has been spent on them', async ({ page }) => {
+    // A student inside one competition, and so outside every other
+    await installHostedBackend(page, 'running')
+
+    // How many reads of a set have reached the backend, whoever they were for
+    let problemReads = 0
+
+    // Counting each one on its way past
+    await page.route(`${BACKEND_ORIGIN}/competitions/*/problems`, (route) => {
+      // The read was made, whatever becomes of it
+      problemReads++
+
+      // And is answered by the fake behind this, which is what the whole surface reads through
+      return route.fallback()
+    })
+
+    // Open the area of a competition they never entered
+    await page.goto(areaPath(UNENTERED_COMPETITION_ID))
+
+    // Which turns them away
+    await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Having asked for none of its statements: they are embargoed until an entry is spent on them, and
+    // a page that asks anyway leans on the backend to say no
+    expect(problemReads).toBe(0)
   })
 
   test('keeps the competition it is on when the reader changes language', async ({ page }) => {
