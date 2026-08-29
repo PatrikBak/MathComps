@@ -27,7 +27,7 @@ import { DefenseFeedbackDialogs } from './DefenseFeedbackDialogs'
 import { DefenseFeedbackPrompt } from './DefenseFeedbackPrompt'
 import { DefenseHistoryMenu } from './DefenseHistoryMenu'
 import { DefenseTranscript } from './DefenseTranscript'
-import { ProblemStrip } from './ProblemStrip'
+import { ProblemBand } from './ProblemBand'
 
 /**
  * Props for the {@link DefenseConversation}.
@@ -58,6 +58,14 @@ type DefenseConversationProps = {
  * something, and the reply to it. Anything shorter has not been a defense yet.
  */
 const TURNS_WORTH_ANSWERING_FOR = 3
+
+/**
+ * How tall the empty composer stands before what is typed into it grows it.
+ *
+ * As low as it goes without moving the shared editor's own floor. A turn longer than it scrolls, and the
+ * composer's expand-and-preview is where a full write-up is written.
+ */
+const COMPOSER_MIN_HEIGHT_PX = 120
 
 /**
  * The defense chat body: a student argues their solution to a problem and the examiner probes it turn by turn.
@@ -205,7 +213,7 @@ export function DefenseConversation({
   return (
     <>
       {/* The header: who is examining, and the conversation's controls */}
-      <div className="flex items-center gap-3 border-b border-foreground/10 px-4 py-2.5 sm:px-5">
+      <div className="flex items-center gap-3 border-b border-foreground/10 px-4 py-2 sm:px-5">
         {/* Who the student is talking to. What she is gets said where there is room for the whole of it:
             truncated to a letter and an ellipsis it says nothing and still takes the width */}
         <div className="flex min-w-0 items-baseline gap-2">
@@ -258,7 +266,7 @@ export function DefenseConversation({
       </div>
 
       {/* Re-readable problem statement */}
-      <ProblemStrip statement={problem.statement} />
+      <ProblemBand statement={problem.statement} />
 
       {/* The conversation so far */}
       <DefenseTranscript
@@ -285,9 +293,9 @@ export function DefenseConversation({
         // How long the examiner took is tuning data, and reads to a student as an apology for the wait
         turnDurationsMs={null}
         footer={
-          canAnswer && (
+          canAnswer ? (
             <DefenseFeedbackPrompt isAnswered={currentFeedback !== null} onOpen={answer.open} />
-          )
+          ) : null
         }
       />
 
@@ -312,7 +320,7 @@ export function DefenseConversation({
       />
 
       {/* Composer, once there is a conversation for it to write into */}
-      <div className="border-t border-foreground/10 px-4 py-3 sm:px-5">
+      <div className="border-t border-foreground/10 px-4 py-2.5 sm:px-5">
         {/* What sending now costs, said where the sending happens. One line and no surface: the clock in
             the header and the line across the transcript have both already said the entry is closed, so a
             filled block repeating it a third time is a standing apology sat on top of the composer */}
@@ -340,6 +348,7 @@ export function DefenseConversation({
           maxCharacters={limits?.maxCandidateChars}
           onAcceptConsent={consent.accept}
           isAcceptingConsent={consent.isAccepting}
+          editorMinHeightPx={COMPOSER_MIN_HEIGHT_PX}
         />
       </div>
     </>

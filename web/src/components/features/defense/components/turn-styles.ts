@@ -8,7 +8,12 @@ import type { TurnRole } from '../model/defense-types'
 type TurnStyle = {
   /** Classes for the turn's outer container. */
   container: string
-  /** Whether the turn draws a box of its own, rather than sitting bare in the transcript. */
+  /**
+   * Whether the turn draws a box of its own, rather than sitting bare in the transcript.
+   *
+   * Also what settles whether it is worth naming its author on screen: the box is what says who wrote it,
+   * so a bare turn carries a label and a boxed one would only be repeating itself.
+   */
   hasOwnBox: boolean
   /** Classes for the role label. */
   label: string
@@ -24,15 +29,15 @@ export const TURN_STYLES: Record<TurnRole, TurnStyle> = {
     container: '',
     hasOwnBox: false,
     label: 'text-brand-light',
-    body: 'math-typography',
+    body: 'math-typography math-conversation',
     actionsInset: '',
   },
   candidate: {
-    container: 'rounded-lg bg-brand/10 px-4 py-3',
+    container: 'rounded-lg bg-brand/10 px-3.5 py-2',
     hasOwnBox: true,
     label: 'text-muted',
-    body: 'text-[15px] leading-relaxed',
-    actionsInset: '-mr-4',
+    body: 'text-sm leading-6',
+    actionsInset: '-mr-3.5',
   },
 }
 

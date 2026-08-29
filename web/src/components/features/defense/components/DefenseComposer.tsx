@@ -54,6 +54,8 @@ type DefenseComposerProps = {
   onAcceptConsent: () => void
   /** Whether that acknowledgement is being recorded. */
   isAcceptingConsent: boolean
+  /** How tall the empty editor stands. */
+  editorMinHeightPx: number
 }
 
 /**
@@ -70,6 +72,7 @@ export function DefenseComposer({
   maxCharacters,
   onAcceptConsent,
   isAcceptingConsent,
+  editorMinHeightPx,
 }: DefenseComposerProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
@@ -125,6 +128,7 @@ export function DefenseComposer({
             autoFocus
             ref={editorRef}
             isLoading={isThinking}
+            minHeightPx={editorMinHeightPx}
             placeholder={t('placeholder')}
           />
         </>

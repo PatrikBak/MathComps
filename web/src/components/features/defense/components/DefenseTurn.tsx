@@ -123,12 +123,18 @@ export function DefenseTurn({
   const draftCount =
     draftsMark === null || turnId === null ? null : (draftsMark.draftCounts.get(turnId) ?? null)
 
+  // Whether anything is written across the top of the turn: its author on a turn with no box to say who
+  // wrote it, its place where something outside the conversation counts turns, or how long it took
+  const hasHeaderRow = !style.hasOwnBox || position !== null || durationMs !== null
+
   return (
     <div
       data-turn-id={turnId ?? undefined}
       className={cn(
-        'space-y-1.5',
+        'space-y-0.5',
         style.container,
+        // A turn with no header row still has to keep its own text out from under the controls
+        !hasHeaderRow && 'relative pr-10',
         // A ring, not a tint: the tint is what says who authored the turn
         isPointedAt && 'rounded-lg ring-2 ring-inset ring-focus/60',
         // A role with no box of its own needs the padding for the ring to clear the text
@@ -138,16 +144,25 @@ export function DefenseTurn({
           'animate-in fade-in slide-in-from-bottom-2 duration-300 transition-none'
       )}
     >
+      {/* Who wrote it, for a reader who cannot see the box that would otherwise say so */}
+      {!hasHeaderRow && <span className="sr-only">{label}</span>}
+
       {/* The author label, with the turn's controls at the row's trailing edge so they never cover the
-          message body */}
-      <div className="flex items-center justify-between gap-2">
+          message body. A turn that names nobody keeps no row: its controls sit over the body's own top
+          corner instead, which is why the body clears a gutter for them */}
+      <div
+        className={cn(
+          'flex items-center justify-between gap-2',
+          !hasHeaderRow && 'pointer-events-none absolute inset-x-0 top-0 justify-end px-3.5 py-2'
+        )}
+      >
         {/* Where the turn sits, who authored it, and how long it took them */}
-        <div className="flex min-w-0 items-baseline gap-2">
+        <div className={cn('flex min-w-0 items-baseline gap-2', !hasHeaderRow && 'hidden')}>
           {position !== null && (
             <span className="text-[11px] font-bold tabular-nums text-muted">{position}</span>
           )}
 
-          <div className={cn(TURN_LABEL_CLASS, style.label)}>{label}</div>
+          {!style.hasOwnBox && <div className={cn(TURN_LABEL_CLASS, style.label)}>{label}</div>}
 
           {durationMs !== null && (
             <span className="text-[11px] tabular-nums text-muted">
@@ -156,13 +171,21 @@ export function DefenseTurn({
           )}
         </div>
 
-        {/* The turn's controls, and whatever has already been said about it */}
+        {/* The turn's controls, and whatever has already been said about it. They are pulled in past
+            their own box so the label beside them, not their height, is what the row stands at */}
         {(canGiveFeedback ||
           canRewind ||
           isReported ||
           draftCount !== null ||
           (unreadMark !== null && turnId !== null)) && (
-          <div className={cn('flex shrink-0 items-center gap-0.5', style.actionsInset)}>
+          <div
+            className={cn(
+              '-my-1 flex shrink-0 items-center gap-0.5',
+              style.actionsInset,
+              // The row itself takes no clicks where it lies over the body; its controls still do
+              !hasHeaderRow && 'pointer-events-auto'
+            )}
+          >
             {/* Say what went wrong with a reply. A reported one keeps the control and carries a filled flag,
                 so the student can see what they said and change it */}
             {canGiveFeedback && onReport !== null && (
@@ -172,7 +195,7 @@ export function DefenseTurn({
                 aria-label={isReported ? t('reported') : t('report')}
                 onClick={onReport}
                 className={cn(
-                  'size-7 hover:text-foreground',
+                  'size-6 hover:text-foreground',
                   isReported ? 'text-muted-foreground' : 'text-muted/60'
                 )}
               >
@@ -185,7 +208,7 @@ export function DefenseTurn({
               <span
                 role="img"
                 aria-label={t('reported')}
-                className="flex size-7 items-center justify-center text-muted-foreground"
+                className="flex size-6 items-center justify-center text-muted-foreground"
               >
                 <Flag size={14} className="fill-current" aria-hidden="true" />
               </span>
@@ -198,7 +221,7 @@ export function DefenseTurn({
                 size="icon"
                 aria-label={t('rewind')}
                 onClick={onRewind}
-                className="size-7 text-muted/60 hover:text-foreground"
+                className="size-6 text-muted/60 hover:text-foreground"
               >
                 <Undo2 size={14} />
               </Button>
@@ -212,7 +235,7 @@ export function DefenseTurn({
                 size="icon"
                 aria-label={draftsMark.label(draftCount)}
                 onClick={() => draftsMark.onOpen(turnId)}
-                className="relative size-7 text-muted/60 hover:text-foreground"
+                className="relative size-6 text-muted/60 hover:text-foreground"
               >
                 <Layers size={14} />
                 {draftCount > 1 && (
@@ -231,7 +254,7 @@ export function DefenseTurn({
                 size="icon"
                 aria-label={unreadMark.label}
                 onClick={() => unreadMark.onMark(turnId)}
-                className="size-7 text-muted/60 hover:text-foreground"
+                className="size-6 text-muted/60 hover:text-foreground"
               >
                 <Mail size={14} />
               </Button>
