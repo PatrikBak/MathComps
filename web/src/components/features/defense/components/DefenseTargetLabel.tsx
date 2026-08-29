@@ -58,10 +58,10 @@ function HandoutTarget({ target, emphasis }: HandoutTargetProps) {
 /**
  * Which problem a conversation was held against, whichever kind of problem that is.
  *
- * An archive problem's parts carry different weights. What the competition sits under gives way first when
- * the line runs out of room, since every problem out of one archive shares most of it. The problem itself is
- * coloured the way the handout pages colour a problem, so a line naming an archive problem and one naming a
- * handout problem read as the same kind of thing.
+ * An archive problem's parts carry different weights. Which problem it was is the half that tells two of
+ * these apart, so it holds its width while the competition's own name wraps or gives way as the room runs
+ * out. The problem is coloured the way the handout pages colour a problem, so a line naming an archive
+ * problem and one naming a handout problem read as the same kind of thing.
  *
  * It brings no row of its own so that a caller can set the text size and put whatever else belongs on the
  * line beside it.
@@ -91,7 +91,7 @@ export function DefenseTargetLabel({ target, emphasis }: DefenseTargetLabelProps
           ))}
 
           {/* The competition and which run of it */}
-          <span className={cn('shrink-0', ARCHIVE_EMPHASIS_CLASS[emphasis])}>{label.edition}</span>
+          <span className={cn('min-w-0', ARCHIVE_EMPHASIS_CLASS[emphasis])}>{label.edition}</span>
 
           {/* Which problem of that run */}
           <span className={cn('shrink-0', ENVIRONMENT_TEXT_COLOR.problem)}>{label.problem}</span>
