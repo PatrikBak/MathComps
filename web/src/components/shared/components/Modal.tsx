@@ -110,7 +110,7 @@ export function Modal({
               'zoom-in-95',
               ENTER_ANIMATION,
               padded && 'p-3 sm:p-6',
-              tall && 'flex h-[100dvh] flex-col sm:h-[92vh] sm:max-w-4xl',
+              tall && 'flex h-[100dvh] flex-col sm:h-[94vh] sm:max-w-4xl',
               focusPanelOnOpen && 'focus:outline-none',
               className
             )}

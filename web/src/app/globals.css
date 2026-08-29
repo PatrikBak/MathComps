@@ -441,6 +441,76 @@ html {
   max-width: 85ch;
 }
 
+/* Reference density for a statement read alongside a conversation about it: a notch under the
+   conversation's own size, with the display-math gutters pulled in, which is where a multi-part
+   statement spends most of its height. */
+.math-typography.math-reference {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.math-typography.math-reference p {
+  margin-block: 0.4em;
+}
+.math-typography.math-reference > :first-child {
+  margin-top: 0;
+}
+.math-typography.math-reference > :last-child {
+  margin-bottom: 0;
+}
+.math-typography.math-reference ol,
+.math-typography.math-reference ul {
+  margin-block: 0.4em;
+}
+.math-typography.math-reference li + li {
+  margin-top: 0.3em;
+}
+/* Display math loses the bump it carries in running prose: at this density the equation is already the
+   widest thing on the line, and the extra size is what pushes it into a scroll. */
+.math-typography.math-reference .katex-display > .katex {
+  font-size: 1em;
+}
+/* A formula wider than the space it is read in scrolls, and says so: the bar it would otherwise use is
+   the one the global `*` rule hides, which leaves the clip looking like the end of the equation. */
+.math-typography.math-reference .katex-display {
+  margin-block: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface-hover) transparent;
+}
+.math-typography.math-reference .katex-display::-webkit-scrollbar {
+  -webkit-appearance: none;
+  height: 6px;
+}
+.math-typography.math-reference .katex-display::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background-color: var(--color-surface-hover);
+}
+/* A centred equation inside a lettered part spans the full width: the marker gutter is there to hang
+   `a)` in, and an equation has no marker to clear. */
+.math-typography.math-reference li > .math-display,
+.math-typography.math-reference li > .katex-display {
+  margin-inline-start: -1.6em;
+}
+
+/* Conversation density: a notch under the reading size, with the paragraph rhythm pulled in. The outer
+   margins go entirely, since what marks a turn's edges is its own box or label and the gap to the next
+   one. */
+.math-typography.math-conversation {
+  font-size: clamp(0.875rem, 0.8rem + 0.24vw, 0.975rem);
+  line-height: 1.55;
+}
+.math-typography.math-conversation p {
+  margin-block: 0.5em;
+}
+.math-typography.math-conversation > :first-child {
+  margin-top: 0;
+}
+.math-typography.math-conversation > :last-child {
+  margin-bottom: 0;
+}
+.math-typography.math-conversation .katex-display {
+  margin-block: 0.8rem;
+}
+
 /* Smaller serif for a quoted excerpt. Each message is its own block, so the paragraph rhythm
    collapses */
 .math-typography.math-compact {

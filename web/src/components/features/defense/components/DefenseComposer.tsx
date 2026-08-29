@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl'
 import type { Ref } from 'react'
 
 import { LoginButton } from '@/components/login/LoginButton'
+import { Button } from '@/components/shared/components/Button'
 import type {
   RichMathEditorRef,
   ToolbarConfig,
@@ -54,6 +55,12 @@ type DefenseComposerProps = {
   onAcceptConsent: () => void
   /** Whether that acknowledgement is being recorded. */
   isAcceptingConsent: boolean
+  /** Reads the acknowledgement again after the read for it failed. */
+  onRetryConsent: () => void
+  /** Whether that re-read is in flight. */
+  isRetryingConsent: boolean
+  /** How tall the empty editor stands. */
+  editorMinHeightPx: number
 }
 
 /**
@@ -70,9 +77,15 @@ export function DefenseComposer({
   maxCharacters,
   onAcceptConsent,
   isAcceptingConsent,
+  onRetryConsent,
+  isRetryingConsent,
+  editorMinHeightPx,
 }: DefenseComposerProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
+
+  // Copy for the buttons the whole app shares
+  const tActions = useTranslations('ui.actions')
 
   // The editor, or the reason there is nothing to write into
   switch (state.kind) {
@@ -95,6 +108,25 @@ export function DefenseComposer({
     // Nobody who has said what they are agreeing to
     case 'consentRequired':
       return <MathildaConsentGate onAccept={onAcceptConsent} isAccepting={isAcceptingConsent} />
+
+    // Nobody who could be asked whether they have already agreed
+    case 'consentUnknown':
+      return (
+        <div className="flex flex-col items-center gap-3 py-3 text-center">
+          {/* What could not be found out */}
+          <p className="max-w-[700px] text-pretty text-sm text-muted">{t('consentUnavailable')}</p>
+
+          {/* Asking again */}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onRetryConsent}
+            loading={isRetryingConsent}
+          >
+            {tActions('retry')}
+          </Button>
+        </div>
+      )
 
     // Every turn spent
     case 'full':
@@ -125,6 +157,7 @@ export function DefenseComposer({
             autoFocus
             ref={editorRef}
             isLoading={isThinking}
+            minHeightPx={editorMinHeightPx}
             placeholder={t('placeholder')}
           />
         </>

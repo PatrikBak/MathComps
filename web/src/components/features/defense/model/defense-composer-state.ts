@@ -1,3 +1,39 @@
+import { assertNever } from '@/components/shared/utils/assert-never'
+
+import type { MathildaConsent, MathildaConsentStatus } from './defense-types'
+
+/**
+ * How a read of the standing acknowledgement came back.
+ */
+type ConsentRead = {
+  /** What the last read that got through came back with, undefined while none has. */
+  data: MathildaConsent | undefined
+  /** Whether the most recent attempt failed. */
+  isError: boolean
+}
+
+/**
+ * Reads where the student stands off the read that asked.
+ *
+ * @param read - How the read of the standing acknowledgement came back.
+ *
+ * @returns What it establishes.
+ */
+export function resolveConsentStatus(read: ConsentRead): MathildaConsentStatus {
+  // An answer already in hand, which a later read failing does not take back
+  if (read.data !== undefined) {
+    return read.data.consentedAt != null ? 'given' : 'missing'
+  }
+
+  // A failure with nothing behind it establishes nothing
+  if (read.isError) {
+    return 'unknown'
+  }
+
+  // Nothing back yet, which is also where a reader with no account sits, since nothing reads for them
+  return 'loading'
+}
+
 /**
  * The conversation is not ready to be written into yet.
  */
@@ -20,6 +56,14 @@ type ComposerSignInRequired = {
 type ComposerConsentRequired = {
   /** The discriminant. */
   kind: 'consentRequired'
+}
+
+/**
+ * Where the student stands on what talking to the examiner entails could not be read.
+ */
+type ComposerConsentUnknown = {
+  /** The discriminant. */
+  kind: 'consentUnknown'
 }
 
 /**
@@ -47,6 +91,7 @@ export type DefenseComposerState =
   | ComposerLoading
   | ComposerSignInRequired
   | ComposerConsentRequired
+  | ComposerConsentUnknown
   | ComposerFull
   | ComposerOpen
 
@@ -60,10 +105,8 @@ export type DefenseComposerInput = {
   isAuthSettled: boolean
   /** Whether the reader has an account. */
   isSignedIn: boolean
-  /** Whether the reader's acknowledgement is still being read. */
-  isConsentLoading: boolean
-  /** Whether the reader has acknowledged what talking to the examiner entails. */
-  hasConsented: boolean
+  /** Where the reader stands on acknowledging what talking to the examiner entails. */
+  consentStatus: MathildaConsentStatus
   /** Whether a reply is in flight. */
   isThinking: boolean
   /** How many turns the conversation has left, or null while the caps are not known. */
@@ -79,18 +122,36 @@ export type DefenseComposerInput = {
  */
 export function resolveComposerState(input: DefenseComposerInput): DefenseComposerState {
   // Nothing to write into yet
-  if (!input.isConversationReady || !input.isAuthSettled || input.isConsentLoading) {
+  if (!input.isConversationReady || !input.isAuthSettled) {
     return { kind: 'loading' }
   }
 
-  // Nobody to write the turn as
+  // Nobody to write the turn as, asked ahead of the acknowledgement, which never reads for such a reader
   if (!input.isSignedIn) {
     return { kind: 'signInRequired' }
   }
 
-  // Nobody who has said what they are agreeing to
-  if (!input.hasConsented) {
-    return { kind: 'consentRequired' }
+  // Where the reader stands on the acknowledgement
+  switch (input.consentStatus) {
+    // Still being read
+    case 'loading':
+      return { kind: 'loading' }
+
+    // Nobody who could be asked whether they have already agreed
+    case 'unknown':
+      return { kind: 'consentUnknown' }
+
+    // Nobody who has said what they are agreeing to
+    case 'missing':
+      return { kind: 'consentRequired' }
+
+    // Past it, so what is left to weigh is the conversation's own room
+    case 'given':
+      break
+
+    // Every standing is handled above
+    default:
+      return assertNever(input.consentStatus)
   }
 
   // Every turn spent, though a reply still coming is allowed to land

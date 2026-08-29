@@ -7,7 +7,8 @@ import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { unwrap } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
-import type { MathildaConsent } from '../model/defense-types'
+import { resolveConsentStatus } from '../model/defense-composer-state'
+import type { MathildaConsent, MathildaConsentStatus } from '../model/defense-types'
 import { getMathildaConsent, recordMathildaConsent } from '../services/consent-service'
 
 /**
@@ -21,22 +22,24 @@ const mathildaConsentQueryKeys = {
  * Return type for {@link useMathildaConsent}.
  */
 type UseMathildaConsentResult = {
-  /** Whether the student has been told what talking to Mathilda entails. */
-  hasConsented: boolean
-  /** Whether the answer is still being read, so neither state is known yet. */
-  isLoading: boolean
+  /** Where the student stands on the acknowledgement, the read's own failure included. */
+  status: MathildaConsentStatus
   /** Records the acknowledgement. Referentially stable for the hook's lifetime. */
   accept: () => void
   /** Whether an acknowledgement is in flight. */
   isAccepting: boolean
+  /** Reads the acknowledgement again after a failed read. Referentially stable for the hook's lifetime. */
+  retry: () => void
+  /** Whether a re-read is in flight. */
+  isRetrying: boolean
 }
 
 /**
  * The student's standing acknowledgement that Mathilda is not a person and that conversations with her are
- * stored and read, and the way to give it. A failed read reports no acknowledgement, so an answer nobody got
- * cannot pass for one.
+ * stored and read, and the way to give it. A read that failed carries its own standing, since an answer
+ * nobody got is neither the acknowledgement nor the absence of one.
  *
- * @returns Where the student stands, and the call that records it.
+ * @returns Where the student stands, and the calls that record it and re-read it.
  */
 export function useMathildaConsent(): UseMathildaConsentResult {
   // Defense-surface copy
@@ -89,11 +92,18 @@ export function useMathildaConsent(): UseMathildaConsentResult {
   // A function which records the acknowledgement
   const accept = useCallback(() => mutate(), [mutate])
 
-  // Where the student stands, and the call that records it
+  // The query's own re-read
+  const { refetch } = query
+
+  // A function which reads the acknowledgement again
+  const retry = useCallback(() => void refetch(), [refetch])
+
+  // Where the student stands, and the calls that record it and re-read it
   return {
-    hasConsented: query.data?.consentedAt != null,
-    isLoading: query.isLoading,
+    status: resolveConsentStatus(query),
     accept,
     isAccepting: mutation.isPending,
+    retry,
+    isRetrying: query.isFetching,
   }
 }
