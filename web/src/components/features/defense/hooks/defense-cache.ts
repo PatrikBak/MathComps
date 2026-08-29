@@ -9,6 +9,22 @@ import type { DefenseSession, DefenseSessionList } from '../model/defense-types'
 const DEFENSE_QUERY_KEY = ['defense'] as const
 
 /**
+ * Builds the query key for the examiner's canned lines.
+ *
+ * Kept out of {@link DEFENSE_QUERY_KEY} so writing a session never refetches copy that no write can
+ * change. The locale belongs in the key because the request asks for it in a header, which React Query
+ * cannot see.
+ *
+ * @param locale - The language the lines are read in.
+ *
+ * @returns The query key.
+ */
+export function defenseCopyQueryKey(locale: string): QueryKey {
+  // One entry per language
+  return ['defense-copy', locale] as const
+}
+
+/**
  * Builds the query key for a user's cross-problem list of defenses.
  *
  * @param userId - The signed-in user's id, or null while it isn't known.

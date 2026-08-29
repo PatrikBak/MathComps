@@ -3,7 +3,7 @@
 import { useAuth } from '@clerk/nextjs'
 import { Plus, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import { resolveHandoutProblemRef } from '@/components/features/handouts/handout-problem-ref'
@@ -16,10 +16,12 @@ import type { Locale } from '@/i18n/i18n'
 
 import { useDefenseCompetitionMode } from '../hooks/use-defense-competition-mode'
 import { useDefenseConversation } from '../hooks/use-defense-conversation'
+import { useDefenseCopy } from '../hooks/use-defense-copy'
 import { useDefenseFeedback } from '../hooks/use-defense-feedback'
 import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
 import { useMathildaConsent } from '../hooks/use-mathilda-consent'
 import { resolveComposerState } from '../model/defense-composer-state'
+import { draftTurn } from '../model/defense-conversation-model'
 import { defenseDraftStorageKey, defenseTargetKey, handoutTargetOf } from '../model/defense-target'
 import type { DefenseOpening, DefenseProblem, TurnRole } from '../model/defense-types'
 import { DefenseComposer } from './DefenseComposer'
@@ -133,6 +135,19 @@ function DefenseConversationForTarget({
     rewind,
   } = useDefenseConversation(problem, opening)
 
+  // The examiner's greeting
+  const { opener } = useDefenseCopy()
+
+  // What the transcript shows. A conversation the backend has not saved yet gets the greeting put in front
+  // of it; a saved one already carries its own as turn 0, and the two swap in the same state write
+  const shownTurns = useMemo(
+    () =>
+      currentSessionId === null && opener !== null
+        ? [draftTurn('examiner', opener), ...turns]
+        : turns,
+    [currentSessionId, opener, turns]
+  )
+
   // Reporting one of the examiner's replies and answering for the conversation as a whole, either of which
   // can be taken back again
   const { report, answer } = useDefenseFeedback({
@@ -146,7 +161,7 @@ function DefenseConversationForTarget({
 
   // The composer, and the controls that act on the conversation around it
   const turn = useDefenseTurnControls({
-    turns,
+    turns: shownTurns,
     isThinking,
     conversationEpoch,
     send,
@@ -157,7 +172,7 @@ function DefenseConversationForTarget({
   })
 
   // Where this conversation stands against the entry's clock
-  const competitionMode = useDefenseCompetitionMode(competition, turns)
+  const competitionMode = useDefenseCompetitionMode(competition, shownTurns)
 
   // Whether this defense is being argued inside a competition, which is what settles its transcript
   const isCompetition = competition !== null
@@ -182,7 +197,7 @@ function DefenseConversationForTarget({
   // Whether the conversation has enough behind it to be worth summing up, or was already summed up, which
   // keeps a standing answer reachable to revise however short a rewind has left the conversation.
   const canAnswer =
-    canGiveFeedback && (turns.length >= TURNS_WORTH_ANSWERING_FOR || currentFeedback !== null)
+    canGiveFeedback && (shownTurns.length >= TURNS_WORTH_ANSWERING_FOR || currentFeedback !== null)
 
   // Whether a turn has somewhere to go. A conversation opened on a named defense writes nothing until its resume
   // settles: a turn sent before it would open a second defense beside the one being continued.
@@ -193,7 +208,7 @@ function DefenseConversationForTarget({
   const repliesLeft =
     limits === null
       ? null
-      : limits.maxTurnsPerSession - turns.filter((turn) => turn.role === 'candidate').length
+      : limits.maxTurnsPerSession - shownTurns.filter((turn) => turn.role === 'candidate').length
 
   // The handout environment behind this problem, absent when it is not a handout problem at all
   const handoutTarget = handoutTargetOf(problem.target)
@@ -208,10 +223,11 @@ function DefenseConversationForTarget({
   const canStartFresh = problemLink !== null
 
   // Whether there's a conversation worth resetting: an open session, or a fresh one the student has
-  // already started (a sent or in-flight turn past the examiner's opener). A pristine blank chat has
+  // already started, which is a sent or in-flight turn of their own. The greeting is nobody's turn, so
+  // this counts the conversation's own rather than what the transcript shows. A pristine blank chat has
   // nothing to start over.
   const canStartNew =
-    canStartFresh && !isCompetition && (currentSessionId !== null || turns.length > 1)
+    canStartFresh && !isCompetition && (currentSessionId !== null || turns.length > 0)
 
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
@@ -279,7 +295,7 @@ function DefenseConversationForTarget({
 
       {/* The conversation so far */}
       <DefenseTranscript
-        turns={turns}
+        turns={shownTurns}
         conversationKey={conversationEpoch}
         roleLabels={roleLabels}
         isThinking={isThinking}

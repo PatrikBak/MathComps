@@ -8,9 +8,6 @@ namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
 /// An <see cref="IDefenseCopy"/> reading its lines from <see cref="ResourcePaths.DefenseCopy"/>, once at startup.
-/// The same lines are also translated in the frontend's message catalogue under <c>defense</c>, which is what the
-/// chat shows before a session exists; keep the two in step, or the greeting changes wording the moment the first
-/// reply lands.
 /// </summary>
 public sealed class DefenseCopy : IDefenseCopy
 {

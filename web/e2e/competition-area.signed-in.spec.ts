@@ -9,7 +9,12 @@ import {
   openExistingDefense,
   sendTurn,
 } from './support/competitions'
-import { COMPETITION_ID, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
+import {
+  COMPETITION_ID,
+  installHostedBackend,
+  OPENER,
+  PROBLEM_COUNT,
+} from './support/hosted-backend'
 import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
@@ -361,6 +366,10 @@ test.describe('the competition area', () => {
     // With that reply alone below it: the greeting belongs to the moment the conversation was asked
     // for, so it cannot be stamped after the turn that asked for it
     await expect(transcript.locator('[role="separator"] ~ *')).toHaveCount(1)
+
+    // And greeted once across the save: the chat greets an unsaved conversation itself, the saved one
+    // that lands here carries a greeting of its own, and only one of the two may be on screen
+    await expect(transcript.getByText(OPENER)).toHaveCount(1)
   })
 
   test("carries a practice run's conversations into the retake, on a fresh clock", async ({

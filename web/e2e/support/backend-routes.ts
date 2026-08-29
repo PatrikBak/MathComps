@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
+import type { DefenseCopy } from '@/components/features/defense/model/defense-types'
 import type { FilterQuery } from '@/components/features/problems/types/problem-api-types'
 import type { UserListsResponse } from '@/components/features/problems/types/user-list-types'
 import type { UserProfile } from '@/components/features/profile/model/profile-types'
@@ -323,6 +324,9 @@ const NOTHING_SAID: UserProfile = {
   username: null,
 }
 
+/** The greeting the chat opens on, standing in for whatever the backend currently greets with. */
+export const MATHILDA_OPENER: DefenseCopy = { opener: 'Tell me how you got there.' }
+
 /**
  * Answers one read a page makes about whoever is looking at it, and only the read.
  *
@@ -352,17 +356,17 @@ async function stubAmbientRead(page: Page, pattern: string, body: unknown): Prom
 }
 
 /**
- * Answers the reads a page makes about whoever is looking at it, none of which any spec here is about.
+ * Answers the reads a page makes on its own account, none of which any spec here is about.
  *
- * A problem row asks for its discussion, the library sidebar asks for the reader's lists, and the
- * header asks what the site holds on them. A spec that leaves those to whatever the author has running
- * locally passes on that machine and nowhere else, so they are answered here with the emptiest thing
- * that renders. A spec these are the subject of registers its own stub afterwards, which is the one
- * Playwright then tries first.
+ * A problem row asks for its discussion, the library sidebar asks for the reader's lists, the header
+ * asks what the site holds on them, and an opened chat asks what the examiner greets with. A spec that
+ * leaves those to whatever the author has running locally passes on that machine and nowhere else, so
+ * they are answered here with the emptiest thing that renders. A spec these are the subject of
+ * registers its own stub afterwards, which is the one Playwright then tries first.
  *
  * @param page - The page to intercept the reads on.
  */
-export async function stubReaderAndDiscussion(page: Page): Promise<void> {
+export async function stubAmbientReads(page: Page): Promise<void> {
   // The discussion under a problem, which every row on screen asks for
   await stubAmbientRead(page, `${BACKEND_ORIGIN}/comments*`, NO_COMMENTS)
 
@@ -371,4 +375,7 @@ export async function stubReaderAndDiscussion(page: Page): Promise<void> {
 
   // What the site holds on them
   await stubAmbientRead(page, `${BACKEND_ORIGIN}/users/me/profile`, NOTHING_SAID)
+
+  // The examiner's greeting, which an opened chat shows before it has anything else
+  await stubAmbientRead(page, `${BACKEND_ORIGIN}/defense/copy`, MATHILDA_OPENER)
 }

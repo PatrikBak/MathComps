@@ -1,6 +1,6 @@
 import { expect, test as base } from '@playwright/test'
 
-import { BACKEND_ORIGIN, stubReaderAndDiscussion } from './backend-routes'
+import { BACKEND_ORIGIN, stubAmbientReads } from './backend-routes'
 
 /**
  * The runner every spec builds on, which holds each test to answering its own backend calls.
@@ -35,8 +35,8 @@ export const test = base.extend<{ hermeticBackend: void }>({
         await route.abort('connectionrefused')
       })
 
-      // The reads every page makes about whoever is looking at it, which override the refusal above
-      await stubReaderAndDiscussion(page)
+      // The reads a page makes on its own account, which override the refusal above
+      await stubAmbientReads(page)
 
       // The test itself
       await use()

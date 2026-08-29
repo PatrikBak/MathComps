@@ -229,7 +229,6 @@ function makeModel(): ModelHarness {
   // The model under test, wired to the fake
   const model = new DefenseConversationModel({
     problem: SAMPLE_PROBLEM,
-    opener: OPENER,
     onSessionsChanged: () => {
       changes += 1
     },
@@ -246,19 +245,6 @@ function roles(turns: readonly Turn[]): string[] {
 }
 
 describe('DefenseConversationModel', () => {
-  it('seeds a fresh conversation with the examiner opener', () => {
-    // A brand-new model
-    const { model } = makeModel()
-
-    // Its initial state
-    const state = model.getSnapshot()
-
-    // Only the opener, idle and unsaved
-    expect(state.turns).toEqual([{ id: null, createdAt: null, role: 'examiner', content: OPENER }])
-    expect(state.isThinking).toBe(false)
-    expect(state.currentSessionId).toBeNull()
-  })
-
   it('shows the student turn and the thinking indicator before the round-trip resolves', () => {
     // A fresh model
     const { model, backend } = makeModel()
@@ -268,8 +254,8 @@ describe('DefenseConversationModel', () => {
 
     // The student turn and the indicator are already on screen
     const state = model.getSnapshot()
-    expect(roles(state.turns)).toEqual(['examiner', 'candidate'])
-    expect(state.turns[1].content).toBe('my answer')
+    expect(roles(state.turns)).toEqual(['candidate'])
+    expect(state.turns[0].content).toBe('my answer')
     expect(state.isThinking).toBe(true)
   })
 
@@ -359,9 +345,9 @@ describe('DefenseConversationModel', () => {
     // The send reports it was stopped
     expect(await sent).toEqual({ kind: 'stopped' })
 
-    // The view is back to the opener and nothing was saved
+    // The view is back to empty and nothing was saved
     const state = model.getSnapshot()
-    expect(roles(state.turns)).toEqual(['examiner'])
+    expect(state.turns).toEqual([])
     expect(state.isThinking).toBe(false)
     expect(backend.store).toHaveLength(0)
   })
@@ -396,7 +382,7 @@ describe('DefenseConversationModel', () => {
     expect(reclaimed).toBe('answer')
     expect(await sent).toEqual({ kind: 'stopped' })
     const state = model.getSnapshot()
-    expect(roles(state.turns)).toEqual(['examiner'])
+    expect(state.turns).toEqual([])
     expect(state.currentSessionId).toBeNull()
   })
 
@@ -419,7 +405,7 @@ describe('DefenseConversationModel', () => {
     // The stop still wins: the draft is reclaimed and the failure never surfaces as an error
     expect(reclaimed).toBe('answer')
     expect(await sent).toEqual({ kind: 'stopped' })
-    expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
+    expect(model.getSnapshot().turns).toEqual([])
   })
 
   it('does not clobber a fresh conversation when a session switch abandons an in-flight turn', async () => {
@@ -431,13 +417,13 @@ describe('DefenseConversationModel', () => {
     // Switch to a fresh conversation mid-flight
     model.startNew()
 
-    // The fresh view shows just the opener, unsaved
-    expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
+    // The fresh view is empty and unsaved
+    expect(model.getSnapshot().turns).toEqual([])
     expect(model.getSnapshot().currentSessionId).toBeNull()
 
     // The abandoned round-trip resolves to stopped and never repaints the fresh view
     expect(await sent).toEqual({ kind: 'stopped' })
-    expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
+    expect(model.getSnapshot().turns).toEqual([])
   })
 
   it('reports failed and rolls back when the round-trip errors', async () => {
@@ -455,7 +441,7 @@ describe('DefenseConversationModel', () => {
 
     // The optimistic turn is rolled back and nothing was saved
     const state = model.getSnapshot()
-    expect(roles(state.turns)).toEqual(['examiner'])
+    expect(state.turns).toEqual([])
     expect(state.isThinking).toBe(false)
     expect(backend.store).toHaveLength(0)
   })
@@ -566,7 +552,7 @@ describe('DefenseConversationModel', () => {
     // The conversation resets and the session is gone
     const state = model.getSnapshot()
     expect(state.currentSessionId).toBeNull()
-    expect(roles(state.turns)).toEqual(['examiner'])
+    expect(state.turns).toEqual([])
     expect(backend.store).toHaveLength(0)
   })
 
@@ -638,7 +624,7 @@ describe('DefenseConversationModel', () => {
     // The end state matches intent, so it resolves as done and drops back to a fresh conversation
     expect(outcome).toEqual({ kind: 'done' })
     expect(model.getSnapshot().currentSessionId).toBeNull()
-    expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
+    expect(model.getSnapshot().turns).toEqual([])
   })
 
   it('rewinds the open conversation to the kept prefix', async () => {
@@ -712,9 +698,9 @@ describe('DefenseConversationModel', () => {
     // A rewind has no saved conversation to truncate
     const outcome = await model.rewind(0, backend)
 
-    // It fails up front, leaving the opener-only view in place
+    // It fails up front, leaving the empty view in place
     expect(outcome).toEqual({ kind: 'failed', errorCode: undefined })
-    expect(roles(model.getSnapshot().turns)).toEqual(['examiner'])
+    expect(model.getSnapshot().turns).toEqual([])
   })
 
   it('shows a resumed conversation answer and asks again on a fresh one', async () => {

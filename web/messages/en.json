@@ -501,7 +501,6 @@
     "loginPrompt": "Mathilda keeps your conversations, so she needs an account.",
     "newDefense": "New conversation",
     "noReplyYet": "No reply yet",
-    "opener": "Hi, I'm Mathilda. We can go through your work, look at a half-finished idea, or I'll nudge you when you're stuck. I take a moment over each reply, so I don't give too much away or say something wrong 😇",
     "outcomes": {
       "confirmedTheSolution": "She confirmed my solution holds",
       "foundTheMistake": "She found a mistake or an imprecision",

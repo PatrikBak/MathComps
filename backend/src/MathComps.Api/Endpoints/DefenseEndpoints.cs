@@ -6,11 +6,12 @@ using MathComps.Infrastructure.Services.Users;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the defense endpoints: listing a user's defense conversations, for one handout environment, for one
-/// archive problem, or across every problem, starting one, continuing it with the next turn, rewinding one to
-/// an earlier point, recording or taking back what the student thought of it, and deleting one. Open to any
-/// signed-in user, with every route scoped to the caller's own sessions; the turn routes are tightly
-/// rate-limited because each turn is several LLM calls.
+/// Maps the defense endpoints: reading the examiner's canned lines, listing a user's defense conversations,
+/// for one handout environment, for one archive problem, or across every problem, starting one, continuing it
+/// with the next turn, rewinding one to an earlier point, recording or taking back what the student thought of
+/// it, and deleting one. Every session route needs an account and is scoped to the caller's own sessions; the
+/// lines are read by a visitor who has yet to sign in. The turn routes are tightly rate-limited because each
+/// turn is several LLM calls.
 /// </summary>
 public static class DefenseEndpoints
 {
@@ -20,11 +21,27 @@ public static class DefenseEndpoints
     private const string SessionsPath = "/defense/sessions";
 
     /// <summary>
+    /// Path the examiner's canned lines are read from.
+    /// </summary>
+    private const string CopyPath = "/defense/copy";
+
+    /// <summary>
     /// Maps the <c>/defense</c> endpoints onto the route builder.
     /// </summary>
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapDefenseEndpoints(this IEndpointRouteBuilder app)
     {
+        // Read the examiner's canned lines, which a visitor with no account is served too
+        app.MapGet(CopyPath, (IDefenseCopy defenseCopy) =>
+        {
+            // The greeting in the language the request asked for
+            var opener = defenseCopy.GetOpener(EndpointHelpers.GetRequestLanguage());
+
+            // Return it
+            return Results.Ok(new DefenseCopyDto(opener));
+        })
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
         // List the user's sessions against one handout environment, with the caps its defenses are held to
         app.MapGet(SessionsPath, async (
             string handoutContentId,
