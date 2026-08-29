@@ -122,6 +122,8 @@ dotnet run --project backend/src/MathComps.Cli.Tagging -- ./data/problems/my-dra
 
 This writes a `tags:` list into each `pN.yaml`. It skips any problem that already has a `tags:` key, so it's safe to re-run; to redo everything pass `--retag`, or to redo one problem delete its `tags:` key. Names it proposes outside the approved vocabulary land in `tag-suggestions.json` for review, never in a `pN.yaml`. See the [Tagging CLI README](../../../backend/src/MathComps.Cli.Tagging/README.md). Needs `Llm:ApiKey` in that project's user secrets.
 
+Hand-editing the list afterwards: keep **exactly one Area tag** (3322 of 3345 tagged problems carry one), and judge each candidate against its description in [`approved-tags.json`](../../../backend/src/MathComps.Infrastructure/Resources/approved-tags.json) — those descriptions decide the edge cases, and that file is the vocabulary, not the DB `tags` table, which holds slugs `validate` rejects.
+
 ## Step 6 — Validate (the goal)
 
 ```bash
