@@ -6,7 +6,9 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # On main every commit gets its own group, so each merge holds its place in the queue and reaches prod.
+  # Branches share one group and collapse to the newest push.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref == 'refs/heads/main' && github.sha || '' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
@@ -19,7 +21,7 @@ jobs:
     env:
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
@@ -47,7 +49,7 @@ jobs:
       E2E_CLERK_USER_EMAIL: ${{ secrets.E2E_CLERK_USER_EMAIL }}
       E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
@@ -88,8 +90,8 @@ jobs:
     name: Backend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: backend/global.json
           cache: true
@@ -135,8 +137,8 @@ jobs:
     name: Analysis
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: backend/global.json
           cache: true
@@ -166,3 +168,52 @@ jobs:
             jq -r '.runs[].results[] | "::error::\(.ruleId) \(.locations[0].physicalLocation.artifactLocation.uri // "?"):\(.locations[0].physicalLocation.region.startLine // "?")"' backend/inspect.sarif
             exit 1
           fi
+
+  # Ships the backend to the prod server the same way a hand-run deploy does: ssh in, pull, rebuild. A
+  # forced command on the server pins the key to backend/ci-deploy.sh, which decides what actually runs.
+  # The `needs` edge carries an implicit success() that survives the `if` below, so this waits on every
+  # gate being green.
+  # Every merge to main runs it. When nothing under backend/ changed the build is a cache hit and compose
+  # keeps the running container, so such a merge costs a minute of CI and leaves prod as it was.
+  deploy:
+    name: Deploy backend
+    needs: [frontend, e2e, backend, analysis]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    # Half an hour is well past a cold rebuild; the default is six hours
+    timeout-minutes: 30
+    # A static group, so two merges in a row both reach the server, in order, and each deploy runs to
+    # completion
+    concurrency:
+      group: production-deploy
+      queue: max
+    steps:
+      - name: Deploy over SSH
+        env:
+          DEPLOY_KEY: ${{ secrets.PROD_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+          DEPLOY_TARGET: ${{ secrets.PROD_SSH_TARGET }}
+        run: |
+          # Somewhere to keep the key and the host key
+          install -d -m 700 ~/.ssh
+
+          # The server's host key, pinned from a secret, so ssh trusts that one machine
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+          # The key the forced command on the server is pinned to
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+
+          # Owner-only, as ssh demands of a private key
+          chmod 600 ~/.ssh/deploy_key
+
+          # The commit rides along, so the server deploys exactly what these gates just passed.
+          # ServerAliveInterval holds the connection through the health wait, which is silent for minutes.
+          # BatchMode makes ssh fail outright on anything it would prompt for.
+          ssh -i ~/.ssh/deploy_key \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=6 \
+            "$DEPLOY_TARGET" "${{ github.sha }}"

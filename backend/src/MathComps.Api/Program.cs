@@ -3,6 +3,7 @@ using MathComps.Api.Errors;
 using MathComps.Api.Extensions;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
+using MathComps.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
@@ -109,7 +110,10 @@ builder.Services.AddAuthorizationBuilder()
 
 // Basic observability
 builder.Services.AddLogging();
-builder.Services.AddHealthChecks();
+
+// The database check makes /health mean the API can serve a request.
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<MathCompsDbContext>();
 
 // RFC 9457 problem responses plus the last-resort handler for exceptions that escape the endpoints
 builder.Services.AddProblemDetails();

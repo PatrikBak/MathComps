@@ -34,6 +34,25 @@ if [[ "$ENV" != "prod" && "$ENV" != "staging" ]]; then
     exit 1
 fi
 
+# The docker compose subcommand, so the tail of the script can tell a deploy from a `logs`
+SUBCOMMAND="${1:-}"
+
+# Serialize the subcommands that mutate the stack, so a hand deploy and an automatic one landing together
+# take their turns at recreating containers. Just these three: a long-lived `logs -f` holding the lock
+# would park every deploy behind a terminal.
+case "$SUBCOMMAND" in
+    up | down | restart)
+        if [[ -z "${DEPLOY_LOCK_HELD:-}" ]] && command -v flock > /dev/null; then
+            # Marks the re-exec below, so the second pass goes straight to the command
+            export DEPLOY_LOCK_HELD=1
+
+            # 25 minutes covers a cold rebuild on this box; past that the holder is stuck, not slow. Under
+            # the deploy job's own 30-minute cap, so a blocked CI deploy fails here, naming the lock.
+            exec flock --timeout 1500 "/tmp/mathcomps-deploy-${ENV}.lock" "$0" "$ENV" "$@"
+        fi
+        ;;
+esac
+
 # Build the environment file name (e.g., ".env.prod" or ".env.staging")
 ENV_FILE=".env.${ENV}"
 
@@ -56,18 +75,19 @@ fi
 
 # Ensure traefik-public network exists
 if ! docker network inspect traefik-public >/dev/null 2>&1; then
-    echo "==> Creating traefik-public network"
+    echo "==> Creating traefik-public network" >&2
     docker network create traefik-public
 fi
 
 # Ensure Traefik is running (shared reverse proxy for all environments)
 if ! docker ps --format '{{.Names}}' | grep -q '^traefik$'; then
-    echo "==> Starting Traefik"
+    echo "==> Starting Traefik" >&2
     docker compose -f docker-compose.traefik.yml --env-file .env up -d
 fi
 
-# Print which environment we're deploying
-echo "==> Deploying $ENV environment"
+# Print which environment we're deploying. Status goes to stderr, here and above, leaving stdout to
+# docker compose alone, so a caller can capture what it printed.
+echo "==> Deploying $ENV environment" >&2
 
 # Run docker compose with:
 # -f docker-compose.yml        = base configuration
@@ -75,9 +95,22 @@ echo "==> Deploying $ENV environment"
 # --env-file .env              = load shared environment variables
 # --env-file $ENV_FILE         = load environment-specific overrides (later file wins)
 # "$@"                         = pass all remaining arguments to docker compose
+COMPOSE_STATUS=0
 docker compose \
     -f docker-compose.yml \
     -f "$COMPOSE_OVERRIDE" \
     --env-file .env \
     --env-file "$ENV_FILE" \
-    "$@"
+    "$@" || COMPOSE_STATUS=$?
+
+# Reclaim what a --build leaves behind. Just after an up, the one subcommand here that builds, and on a
+# failure too, since a deploy that fell over built an image on its way.
+if [[ "$SUBCOMMAND" == "up" ]]; then
+    # until=24h keeps yesterday's image as something to roll back onto
+    docker image prune -f --filter 'until=24h'
+
+    # The SDK stage's layers, which live in the build cache, out of an image prune's reach
+    docker builder prune -f --keep-storage 10GB
+fi
+
+exit $COMPOSE_STATUS

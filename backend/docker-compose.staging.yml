@@ -16,8 +16,8 @@ services:
 
   api:
     image: mathcomps-api:staging
-    # Gitignored staging config overrides, layered on the baked-in appsettings*.json: change a value with a
-    # restart, no rebuild. See backend/README.md's "Config Overrides".
+    # Gitignored staging config overrides, layered on the baked-in base appsettings*.json: change a value
+    # with a restart, no rebuild. See backend/README.md's "Config overrides".
     volumes:
       - ./src/MathComps.Api/appsettings.Staging.json:/app/appsettings.Staging.json:ro
       - ./src/MathComps.Infrastructure/appsettings.examiner.Staging.json:/app/appsettings.examiner.Staging.json:ro
@@ -26,7 +26,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Staging
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mathcomps-staging.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.mathcomps-staging.rule=Host(`${DOMAIN:?set it in .env.staging}`)"
       - "traefik.http.routers.mathcomps-staging.entrypoints=websecure"
       - "traefik.http.routers.mathcomps-staging.tls.certresolver=letsencrypt"
       - "traefik.http.services.mathcomps-staging.loadbalancer.server.port=8080"

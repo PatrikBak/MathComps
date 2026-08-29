@@ -27,7 +27,14 @@ Dockerfile
 docker-compose.yml
 .dockerignore
 .env
-.env.example
+.env.*
+
+# Ignore the gitignored per-environment config. The compose overrides bind-mount it at runtime, so the
+# mount stays its only copy and prod secrets stay out of the image layers.
+**/appsettings.*.Production.json
+**/appsettings.*.Staging.json
+**/appsettings.Production.json
+**/appsettings.Staging.json
 
 # Ignore test projects
 **/tests/
