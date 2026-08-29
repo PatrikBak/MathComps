@@ -147,8 +147,8 @@ function DefenseRowShell({
           FOCUS_RING_CLASS
         )}
       >
-        {/* Which problem it was about */}
-        <span className="flex w-full items-baseline gap-2">{label}</span>
+        {/* Which problem it was about, on as many lines as a panel this narrow needs */}
+        <span className="flex w-full flex-wrap items-baseline gap-x-2 gap-y-0.5">{label}</span>
 
         {/* A glimpse of the conversation, or that nothing has been said in it yet */}
         <span className={cn('w-full truncate text-sm text-muted', preview === null && 'italic')}>
