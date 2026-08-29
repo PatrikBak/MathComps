@@ -87,13 +87,13 @@ type DefenseTranscriptProps = {
   showPositions?: boolean
   /** The turn something outside the conversation currently points at; null when nothing does. */
   pointedAtTurnId?: string | null
-  /** Rendered under the last turn, where the conversation ends. */
+  /** Rendered at the foot of the pane, where the conversation ends; null when there is nothing to say. */
   footer: React.ReactNode
 }
 
 /**
  * The scrolling conversation: every turn in order, the mark where a reader's last pass stopped, the thinking
- * indicator while the examiner replies, and the caller's footer under the whole exchange. Keeps the newest
+ * indicator while the examiner replies, and the caller's footer at the foot of the pane. Keeps the newest
  * content in view while the reader is at the bottom, but yields control (and offers a jump-back affordance)
  * once they scroll up to re-read.
  */
@@ -179,17 +179,17 @@ export function DefenseTranscript({
       <div
         key={conversationKey}
         ref={setPane}
-        className="flex-1 overflow-y-auto overscroll-contain [mask-image:linear-gradient(to_bottom,transparent,#000_1.5rem,#000_calc(100%-1.5rem),transparent)]"
+        className="flex-1 overflow-y-auto overscroll-contain [mask-image:linear-gradient(to_bottom,transparent,#000_1rem,#000_calc(100%-1rem),transparent)]"
       >
         {/* The growing content the region follows */}
-        <div ref={contentRef} className="flex flex-col gap-5 px-5 py-5">
+        <div ref={contentRef} className="flex min-h-full flex-col gap-3.5 px-5 py-5">
           {/* What was said, announced to assistive tech as it grows. The footer sits outside it: it is the
               surface asking a question, not the conversation saying something */}
           <div
             role="log"
             aria-live="polite"
             aria-label={t('transcriptLabel')}
-            className="flex flex-col gap-5"
+            className="flex flex-col gap-3.5"
           >
             {/* Every turn in order */}
             {turns.map((turn, index) => {
@@ -232,8 +232,9 @@ export function DefenseTranscript({
             {isThinking && <ThinkingIndicator />}
           </div>
 
-          {/* Where the conversation ends */}
-          {footer}
+          {/* Where the conversation ends, held at the foot of the pane: a short conversation would
+              otherwise strand it mid-panel with the empty rest of the transcript under it */}
+          {footer !== null && <div className="-mb-1 mt-auto pt-1">{footer}</div>}
         </div>
       </div>
 

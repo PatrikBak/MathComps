@@ -59,6 +59,8 @@ type DefenseComposerProps = {
   onRetryConsent: () => void
   /** Whether that re-read is in flight. */
   isRetryingConsent: boolean
+  /** How tall the empty editor stands. */
+  editorMinHeightPx: number
 }
 
 /**
@@ -77,6 +79,7 @@ export function DefenseComposer({
   isAcceptingConsent,
   onRetryConsent,
   isRetryingConsent,
+  editorMinHeightPx,
 }: DefenseComposerProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
@@ -154,6 +157,7 @@ export function DefenseComposer({
             autoFocus
             ref={editorRef}
             isLoading={isThinking}
+            minHeightPx={editorMinHeightPx}
             placeholder={t('placeholder')}
           />
         </>

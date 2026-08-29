@@ -221,6 +221,18 @@ variables in `.env` (see [Environment Setup](#environment-setup)).
 
 See the [API README](src/MathComps.Api/README.md) for running instructions.
 
+## Development
+
+### Code Formatting
+
+Format code using `dotnet format`:
+
+```bash
+# From the backend directory
+cd backend
+dotnet format
+```
+
 ## CLI Tools
 
 Command-line tools for data processing, parsing, and AI features. Each tool has its own README with detailed instructions.
@@ -245,7 +257,7 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 
 The backend supports separate **staging** and **production** environments using Docker Compose override files.
 
-### Quick Start
+### Everyday commands
 
 ```bash
 # Start production
@@ -261,14 +273,24 @@ The backend supports separate **staging** and **production** environments using 
 ./deploy.sh prod logs -f api
 ```
 
-### Database Migrations
+### Automatic deploys
 
-Migrations are applied automatically on every deploy: a migration bundle (`efbundle`) built into the image (see the [Dockerfile](Dockerfile)) is run by a one-shot `migrate` service against the local Postgres before the API starts.
+Every merge to `main` deploys once the gates are green. The `deploy` job in [ci.yml](../.github/workflows/ci.yml) SSHes to the server and runs [ci-deploy.sh](ci-deploy.sh), which fast-forwards to the commit CI passed, runs `./deploy-prod.sh up -d --build`, and waits for the API's healthcheck. The commands above still work by hand.
 
-- The API is gated on the migrate service finishing successfully, so it won't start if a migration fails — the failing migration is named in `./deploy.sh prod logs migrate`.
-- It's idempotent: a deploy with nothing pending is a no-op.
+Every merge deploys, whatever it touched. One that changed nothing under `backend/` rebuilds from cache and compose keeps the running container, so it costs a minute of CI and no downtime.
 
-### Environment Setup
+The health wait proves the container came up and can reach the database, since `/health` runs a `DbContext` check. That is its whole scope: an LLM backend that is down still passes.
+
+A red `deploy` job is an alert, not a gate. `up -d` swaps the container and applies migrations before the health wait starts, so prod is already serving the new build and failing its healthcheck. Fix forward, or roll back as below.
+
+### Rolling back
+
+To roll back, run `git checkout main && git reset --hard <sha>` on the server, then rebuild. Plain `git checkout <sha>` leaves a detached HEAD, which the next automatic deploy cannot fast-forward, so every later merge fails at that line until someone moves the checkout back onto `main`.
+
+### Setting up a new server
+
+In order. The numbered steps are what any deploy needs, by hand or otherwise; the subsection after them is
+what makes deploys automatic.
 
 1. Copy the base example file to `.env`:
 
@@ -276,7 +298,7 @@ Migrations are applied automatically on every deploy: a migration bundle (`efbun
    cp .env.example .env
    ```
 
-2. Edit `.env` with your shared values. The `R2_*` block feeds the API's `CloudflareR2` settings; without them every route works except opening a defense.
+2. Edit `.env` with your shared values.
 
 3. Create environment-specific overrides:
 
@@ -285,13 +307,120 @@ Migrations are applied automatically on every deploy: a migration bundle (`efbun
    cp .env.staging.example .env.staging  # For staging
    ```
 
-4. Edit the override files with environment-specific values (`DOMAIN`)
+4. Edit the override files with environment-specific values (`DOMAIN`). Set it in **both**: each file is
+   loaded only for its own environment, and a deploy whose file lacks it stops with `DOMAIN: set it in
+   .env.<env>`.
 
-### Config Overrides (no container rebuild needed)
+5. Create the external volumes once per server. Compose declares them `external: true` and will not create
+   them, so a fresh box fails the deploy with `external volume ... not found`:
+
+   ```bash
+   docker volume create postgres_data_prod
+   docker volume create postgres_data_staging   # only if you run staging
+   docker volume create traefik_letsencrypt
+   ```
+
+6. Create the per-environment config overrides, empty if you have nothing to override, **before** the first
+   `up -d`. Docker turns a missing bind-mount source into an empty directory, which the API then can't read.
+   See [Config overrides](#config-overrides) for what goes in them.
+
+   ```bash
+   echo '{}' > src/MathComps.Api/appsettings.Production.json
+   echo '{}' > src/MathComps.Infrastructure/appsettings.examiner.Production.json
+   echo '{}' > src/MathComps.Infrastructure/appsettings.llm.Production.json
+   ```
+
+7. Deploy by hand once, to check the stack comes up before CI ever touches it:
+
+   ```bash
+   ./deploy.sh prod up -d
+   ./deploy.sh prod logs -f api
+   ```
+
+#### Wiring up automatic deploys
+
+**1. Make the key. On your laptop:**
+
+```bash
+ssh-keygen -t ed25519 -f ~/gha-deploy -N "" -C gha-deploy
+cat ~/gha-deploy.pub          # copy this line
+```
+
+**2. Prepare the server.** SSH in as the deploy user and go to the checkout, wherever it lives:
+
+```bash
+cd <your checkout>
+
+# Agent forwarding is blocked in step 3, so an SSH remote stops working. Switch it.
+git remote set-url origin https://github.com/PatrikBak/MathComps.git
+git checkout main && git pull
+```
+
+**3. Install the key. Still on the server, still in that directory.** Paste the public line from step 1 in
+place of `ssh-ed25519 AAAA... gha-deploy`:
+
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+echo "restrict,command=\"$(git rev-parse --show-toplevel)/backend/ci-deploy.sh\" ssh-ed25519 AAAA... gha-deploy" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+**4. Back on your laptop, park the server's address in a shell variable**, the same `user@host` you
+already SSH to. Steps 5 and 6 use it, and it is what goes in the `PROD_SSH_TARGET` secret in step 7. Type
+it once and reuse it, because ssh files a host key under the name you typed: keyscan the IP, hand GitHub
+the hostname, and the key it gets back is a different one.
+
+```bash
+SERVER=<user>@<host>
+```
+
+**5. Check the key works:**
+
+```bash
+ssh -i ~/gha-deploy "$SERVER" whoami
+```
+
+This runs a real deploy instead of printing a username. That is the forced command doing its job.
+
+**6. Grab the host key:**
+
+```bash
+ssh-keyscan -t ed25519 "${SERVER#*@}"
+```
+
+Check the fingerprint against the box before you trust it, then keep the output for the next step.
+
+**7. Add the secrets.** In Settings → Environments, create an environment named `production` and set its
+deployment branches to `main` only. Add three secrets **to that environment, not to the repo** (this repo is
+public):
+
+| Secret | Value |
+|---|---|
+| `PROD_SSH_KEY` | the whole of `~/gha-deploy`, the file without `.pub` |
+| `PROD_SSH_KNOWN_HOSTS` | step 6's output |
+| `PROD_SSH_TARGET` | `$SERVER` from step 4, verbatim |
+
+Merge anything to `main` and watch the `Deploy backend` job.
+
+### Reference
+
+#### Database migrations
+
+Migrations are applied automatically on every deploy: a migration bundle (`efbundle`) built into the image (see the [Dockerfile](Dockerfile)) is run by a one-shot `migrate` service against the local Postgres before the API starts.
+
+- The API is gated on the migrate service finishing successfully, so it won't start if a migration fails — the failing migration is named in `./deploy.sh prod logs migrate`, which an automatic deploy dumps into the job log on its way out.
+- It's idempotent: a deploy with nothing pending is a no-op.
+- Since deploys are automatic, a merged migration reaches the production database with nobody watching. The
+  gate on it is the PR, not the deploy.
+
+#### Config overrides
 
 Per-environment `appsettings.{Production|Staging}.json` files, gitignored and bind-mounted over the
 baked-in config, so you can change a value without rebuilding the image. Each sits next to the base file it
-overrides and only needs the keys it changes:
+overrides and only needs the keys it changes.
+
+`.dockerignore` keeps them out of the build context, so the mount is the only copy. Prod secrets never reach
+an image layer, and a mount that goes missing leaves the API on the base `appsettings.json`:
 
 - `src/MathComps.Api/appsettings.{Env}.json` → `appsettings.json` (`Cors`, `DefenseLimits`, `Examiner:UseFake`, …).
   `DefenseLimits` holds what bounds the defense feature: a daily spend ceiling in dollars and a turn cap, both
@@ -303,19 +432,15 @@ overrides and only needs the keys it changes:
   overriding one.
 - `src/MathComps.Infrastructure/appsettings.llm.{Env}.json` → `appsettings.llm.json` (LLM endpoint, retries)
 
-- **Apply a change:** edit the file, `./deploy.sh <env> restart api` — no `up -d`, no `--build`.
+- **Apply a change:** edit the file, `./deploy.sh <env> restart api` — no `up -d`, no `--build`. `restart` takes the deploy lock, so it waits if an automatic deploy is in flight.
 - **First rollout:** create the files (`echo '{}' > …`) **before** the `up -d` that adds the mounts, else
   Docker turns each missing source into an empty directory. They're gitignored, so `git pull` won't bring them.
 - **Locally:** `ASPNETCORE_ENVIRONMENT=Production dotnet run` picks them up too.
 
-## Development
+#### What `deploy.sh` does around compose
 
-### Code Formatting
+`up`, `down` and `restart` take `/tmp/mathcomps-deploy-<env>.lock`, so a hand deploy and an automatic one can't interleave. Whoever gets there second blocks until the first finishes: your terminal sits there while CI deploys, and CI's job sits there while you do. It gives up after 25 minutes. `logs`, `ps` and `exec` don't take the lock.
 
-Format code using `dotnet format`:
+After an `up`, success or failure, the script reclaims what the `--build` left behind: images older than 24 hours, and the build cache above 10 GB. It then exits with compose's status, not the prune's.
 
-```bash
-# From the backend directory
-cd backend
-dotnet format
-```
+The `==>` status lines go to stderr, so `$(./deploy-prod.sh ps -q api)` returns just the container id.
