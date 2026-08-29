@@ -12,7 +12,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      # Loopback only, like prod and staging: a dev database seeded from a prod dump holds real user data
+      # behind a well-known password.
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata_dev:/var/lib/postgresql/data
     healthcheck:

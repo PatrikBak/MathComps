@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_DB: mathcomps
       POSTGRES_USER: mathcomps
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set it in .env}
     networks:
       - internal
     healthcheck:
@@ -17,6 +17,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      # A minute of grace: a first initdb or a recovery on a large database outlasts the retries above, and
+      # compose fails the whole up the moment a dependency reports unhealthy.
+      start_period: 60s
 
   # One-shot: applies pending EF Core migrations against postgres, then exits.
   # Reuses the API image and runs the baked-in migration bundle.
@@ -30,7 +33,7 @@ services:
     # efbundle reads its connection string from this env var.
     # Command Timeout=300 keeps long index builds from aborting at the 30s default.
     environment:
-      ConnectionStrings__DefaultConnection: Host=postgres;Database=mathcomps;Username=mathcomps;Password=${DB_PASSWORD};Command Timeout=300
+      ConnectionStrings__DefaultConnection: Host=postgres;Database=mathcomps;Username=mathcomps;Password=${DB_PASSWORD:?set it in .env};Command Timeout=300
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,16 +49,16 @@ services:
     restart: unless-stopped
     environment:
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__DefaultConnection: Host=postgres;Database=mathcomps;Username=mathcomps;Password=${DB_PASSWORD}
-      Authentication__Clerk__Authority: ${CLERK_AUTHORITY}
-      Clerk__SecretKey: ${CLERK_SECRET_KEY}
-      Clerk__WebhookSecret: ${CLERK_WEBHOOK_SECRET}
-      Llm__ApiKey: ${LLM_API_KEY}
+      ConnectionStrings__DefaultConnection: Host=postgres;Database=mathcomps;Username=mathcomps;Password=${DB_PASSWORD:?set it in .env}
+      Authentication__Clerk__Authority: ${CLERK_AUTHORITY:?set it in .env}
+      Clerk__SecretKey: ${CLERK_SECRET_KEY:?set it in .env}
+      Clerk__WebhookSecret: ${CLERK_WEBHOOK_SECRET:?set it in .env}
+      Llm__ApiKey: ${LLM_API_KEY:?set it in .env}
       # Read-only access to the bucket the handouts CLI publishes the examiner's problem content to.
-      CloudflareR2__AccountId: ${R2_ACCOUNT_ID}
-      CloudflareR2__BucketName: ${R2_BUCKET_NAME}
-      CloudflareR2__AccessKeyId: ${R2_ACCESS_KEY_ID}
-      CloudflareR2__SecretAccessKey: ${R2_SECRET_ACCESS_KEY}
+      CloudflareR2__AccountId: ${R2_ACCOUNT_ID:?set it in .env}
+      CloudflareR2__BucketName: ${R2_BUCKET_NAME:?set it in .env}
+      CloudflareR2__AccessKeyId: ${R2_ACCESS_KEY_ID:?set it in .env}
+      CloudflareR2__SecretAccessKey: ${R2_SECRET_ACCESS_KEY:?set it in .env}
     depends_on:
       postgres:
         condition: service_healthy

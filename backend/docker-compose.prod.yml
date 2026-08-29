@@ -15,8 +15,8 @@ services:
 
   api:
     image: mathcomps-api:prod
-    # Gitignored prod config overrides, layered on the baked-in appsettings*.json: change a value with a
-    # restart, no rebuild. See backend/README.md's "Config Overrides".
+    # Gitignored prod config overrides, layered on the baked-in base appsettings*.json: change a value with
+    # a restart, no rebuild. See backend/README.md's "Config overrides".
     volumes:
       - ./src/MathComps.Api/appsettings.Production.json:/app/appsettings.Production.json:ro
       - ./src/MathComps.Infrastructure/appsettings.examiner.Production.json:/app/appsettings.examiner.Production.json:ro
@@ -25,7 +25,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mathcomps-prod.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.mathcomps-prod.rule=Host(`${DOMAIN:?set it in .env.prod}`)"
       - "traefik.http.routers.mathcomps-prod.entrypoints=websecure"
       - "traefik.http.routers.mathcomps-prod.tls.certresolver=letsencrypt"
       - "traefik.http.services.mathcomps-prod.loadbalancer.server.port=8080"
