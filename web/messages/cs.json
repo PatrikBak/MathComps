@@ -478,6 +478,7 @@
     "consentBody": "Konverzace s Mathildou ukládáme a případně čteme, abychom ji vylepšili. Zároveň prosíme o fér používání, každá její reakce nás něco stojí. Odklikni, pokud jsi s tím v pohodě 🙂",
     "consentError": "Tvoje potvrzení se nepodařilo uložit.",
     "consentPolicyLink": "Soukromí a podmínky",
+    "consentUnavailable": "Nepodařilo se nám načíst tvoje potvrzení k rozhovoru s Mathildou.",
     "conversationFull": "Tato konverzace dosáhla svého limitu. Začni novou nebo se v této vrať zpět (přijdeš ale o zprávy, ty se trvale smažou).",
     "deletedHandout": "Odstraněný materiál",
     "deleteError": "Konverzaci se nepodařilo odstranit.",

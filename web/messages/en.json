@@ -478,6 +478,7 @@
     "consentBody": "We save your conversations with Mathilda and might read them to make her better. We also ask you to use her fairly, every reply she gives costs us something. Click through if you're fine with that 🙂",
     "consentError": "Your confirmation couldn't be saved.",
     "consentPolicyLink": "Privacy and terms",
+    "consentUnavailable": "We couldn't check whether you've already agreed to talk to Mathilda.",
     "conversationFull": "This conversation has reached its limit. Start a new one, or rewind this one (the messages you drop are gone for good).",
     "deletedHandout": "Deleted handout",
     "deleteError": "The conversation couldn't be removed.",

@@ -110,6 +110,57 @@ test.describe('the competition area', () => {
     await expect(page.getByText(chatCopy.consentBody)).toHaveCount(0)
   })
 
+  test('says it could not read the acknowledgement rather than asking a reader who gave it', async ({
+    page,
+  }) => {
+    // A student who acknowledged it long ago
+    await installHostedBackend(page, 'running')
+
+    // Whether the read of that gets through
+    let isConsentReachable = false
+
+    // Registered after the backend standing in behind it, which is what puts this one first
+    await page.route(`${BACKEND_ORIGIN}/users/me/ai-consent`, async (route) => {
+      // Anything the outage is not about goes on to the backend behind this
+      if (isConsentReachable || route.request().method() !== 'GET') {
+        await route.fallback()
+        return
+      }
+
+      // An aborted connection is what a student sees when nothing is there to answer them
+      await route.abort('connectionrefused')
+    })
+
+    // Open the competition's area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // And the conversation the entry already holds
+    await openExistingDefense(page)
+
+    // The chat says what it could not find out
+    await expect(page.getByText(chatCopy.consentUnavailable)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Rather than asking again for something they already gave
+    await expect(page.getByText(chatCopy.consentBody)).toHaveCount(0)
+
+    // With nowhere to write in the meantime
+    await expect(page.locator('textarea')).toHaveCount(0)
+
+    // Something to answer the next read
+    isConsentReachable = true
+
+    // Asked once more
+    await page.getByRole('button', { name: actionsCopy.retry }).click()
+
+    // After which the chat is theirs again
+    await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
+
+    // And the apology is gone
+    await expect(page.getByText(chatCopy.consentUnavailable)).toHaveCount(0)
+  })
+
   test('keeps a half-written turn through a reload', async ({ page }) => {
     // A student inside a competition
     await installHostedBackend(page, 'running')
