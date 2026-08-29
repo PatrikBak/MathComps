@@ -326,8 +326,7 @@ export function DefenseConversation({
             isAuthSettled: isAuthLoaded,
             // Undefined until the account settles, which `isAuthSettled` is the answer to
             isSignedIn: isSignedIn === true,
-            isConsentLoading: consent.isLoading,
-            hasConsented: consent.hasConsented,
+            consentStatus: consent.status,
             isThinking,
             repliesLeft,
           })}
@@ -340,6 +339,8 @@ export function DefenseConversation({
           maxCharacters={limits?.maxCandidateChars}
           onAcceptConsent={consent.accept}
           isAcceptingConsent={consent.isAccepting}
+          onRetryConsent={consent.retry}
+          isRetryingConsent={consent.isRetrying}
         />
       </div>
     </>

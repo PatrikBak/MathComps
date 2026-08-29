@@ -280,3 +280,9 @@ export type MathildaConsent = {
   /** When they acknowledged it, as an ISO-8601 string; null while they have yet to. */
   consentedAt: string | null
 }
+
+/**
+ * Where the reader stands on the {@link MathildaConsent}, as far as the frontend can tell. The last member
+ * is the read itself having failed, which leaves neither answer in hand and so is not a refusal.
+ */
+export type MathildaConsentStatus = 'loading' | 'given' | 'missing' | 'unknown'
