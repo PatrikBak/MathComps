@@ -6,16 +6,8 @@ import { useTranslations } from 'next-intl'
 import { ProseContactLink } from '@/components/features/contact/ProseContactLink'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { PageHeader } from '@/components/shared/components/PageHeader'
-import { useNow } from '@/hooks/use-now'
-import type { QueryUiState } from '@/lib/query-ui-state'
 
-import { useDismissProfilePrompt } from '../hooks/use-dismiss-profile-prompt'
-import { useEntryGuard } from '../hooks/use-entry-guard'
-import { useEntryReader } from '../hooks/use-entry-reader'
-import { useHostedCompetitionEntryDialog } from '../hooks/use-hosted-competition-entry-dialog'
-import { useHostedCompetitionsView } from '../hooks/use-hosted-competitions-view'
-import { headerBlocker } from '../model/entry-reader'
-import { orderForReading } from '../model/hosted-competition-state'
+import { useHostedCompetitionsBoard } from '../hooks/use-hosted-competitions-board'
 import { CategoryLegend } from './CategoryLegend'
 import { DisclosureNote } from './DisclosureNote'
 import { EntryGate } from './EntryGate'
@@ -43,39 +35,17 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
   // The page's own name and description
   const tPage = useTranslations('pages.competitions')
 
-  // Who is reading, and what the program knows about them
-  const { reader, readerKey, isReaderKnown } = useEntryReader()
-
-  // Every competition the student can see
-  const { view, uiState } = useHostedCompetitionsView(readerKey, isReaderKnown)
-
-  // The question standing between a press and a running clock
-  const dialog = useHostedCompetitionEntryDialog(readerKey)
-
-  // One clock for the page, so every deadline on it moves on the same tick
-  const now = useNow()
-
-  // Every group, most actionable first
-  const groups = view === undefined ? [] : orderForReading(view.groups, now)
-
-  // What a press turns into, given what the group they pressed asks of them
-  const guardEntry = useEntryGuard({
-    reader,
+  // What there is to draw, and what its presses go through
+  const {
     groups,
-    openDialog: dialog.open,
-    entryIntentId,
-    hasView: view !== undefined,
-  })
-
-  // The list waits on who is reading as well as on its own fetch: drawn any earlier, a signed-in student
-  // is offered the sign-in press
-  const listState: QueryUiState = reader.kind === 'unknown' ? { kind: 'loading' } : uiState
-
-  // Hiding the profile sentence for good
-  const { dismissProfilePrompt } = useDismissProfilePrompt(readerKey)
-
-  // The step the header names, if there is one
-  const gateBlocker = headerBlocker(reader, groups)
+    listState,
+    now,
+    gateBlocker,
+    needsRulesAccept,
+    dialog,
+    enterCompetition,
+    dismissProfilePrompt,
+  } = useHostedCompetitionsBoard(entryIntentId)
 
   return (
     // Hyphenation off: the global setting is for article prose, and the words here are names and labels
@@ -115,7 +85,7 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
 
       {/* The list, once there is one to draw */}
       <div className="mt-8 sm:mt-10">
-        {listState.kind !== 'ready' || view === undefined || groups.length === 0 ? (
+        {listState.kind !== 'ready' || groups.length === 0 ? (
           <FetchStatePlaceholder
             uiState={listState}
             className="flex flex-col items-center gap-3 py-16 text-center"
@@ -129,7 +99,7 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
                 key={group.id}
                 group={group}
                 now={now}
-                onEnter={guardEntry}
+                onEnter={enterCompetition}
               />
             ))}
           </div>
@@ -141,7 +111,7 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
         <HostedCompetitionEntryDialog
           group={dialog.pending.group}
           competition={dialog.pending.competition}
-          needsRulesAccept={reader.kind !== 'signedIn' || !reader.readiness.hasAcceptedRules}
+          needsRulesAccept={needsRulesAccept}
           onClose={dialog.close}
           onConfirm={dialog.confirm}
           onForfeit={dialog.forfeit}

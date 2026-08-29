@@ -1,3 +1,4 @@
+import { BACKEND_ORIGIN } from './support/backend-routes'
 import { areaCopy, LIST_PATH } from './support/competitions'
 import { installHostedBackend } from './support/hosted-backend'
 import { expect, test } from './support/test'
@@ -30,5 +31,22 @@ test.describe('the competitions list', () => {
 
     // And no entry dialog opened behind the prompt
     await expect(page.getByRole('dialog')).toHaveCount(0)
+  })
+
+  test('says the list failed to load rather than that nothing is scheduled', async ({ page }) => {
+    // The competitions surface
+    await installHostedBackend(page, 'first-entry')
+
+    // Whose one read then stops answering
+    await page.route(`${BACKEND_ORIGIN}/competitions`, (route) => route.abort('connectionrefused'))
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // Which says the read failed
+    await expect(page.getByText(areaCopy.loadFailed)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // And not that the program has nothing on, which a failed read is in no position to say
+    await expect(page.getByText(areaCopy.noCompetitions)).toHaveCount(0)
   })
 })

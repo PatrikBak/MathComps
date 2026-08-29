@@ -11,6 +11,7 @@ import {
   derivePhase,
   deriveStanding,
   entryEndsAt,
+  hasEntryEnded,
   orderForReading,
   toAreaEntry,
   wasHandedInEarly,
@@ -234,6 +235,49 @@ describe('toAreaEntry', () => {
       endsAt: handedInAt,
       wasHandedIn: true,
     })
+  })
+})
+
+describe('hasEntryEnded', () => {
+  /**
+   * Builds a sat entry whose counted part ends a given distance from {@link NOW}.
+   *
+   * @param endsInMs - How long is left of it, negative once it has run out.
+   * @param wasHandedIn - Whether the student closed it themselves.
+   *
+   * @returns The entry as everything inside the area reads it.
+   */
+  function satEntry(endsInMs: number, wasHandedIn = false): AreaEntry {
+    // Only the instant it ends and who ended it decide this
+    return {
+      kind: 'sat',
+      endsAt: new Date(NOW + endsInMs).toISOString(),
+      wasHandedIn,
+    }
+  }
+
+  it('never ends an entry given up for the problems', () => {
+    // No clock ever ran on it, so there is no counted part to be over
+    expect(hasEntryEnded({ kind: 'forfeited' }, NOW)).toBe(false)
+  })
+
+  it('keeps a running clock open', () => {
+    expect(hasEntryEnded(satEntry(HOUR_MS), NOW)).toBe(false)
+  })
+
+  it('holds the entry open through the second before the last', () => {
+    // Two seconds left, which is a second clear of the boundary
+    expect(hasEntryEnded(satEntry(2 * SECOND_MS), NOW)).toBe(false)
+  })
+
+  it('ends it inside its last second', () => {
+    // The countdown reads zero from here, so a sentence saying otherwise contradicts it
+    expect(hasEntryEnded(satEntry(SECOND_MS - 1), NOW)).toBe(true)
+  })
+
+  it('ends a hand-in with time still on the clock', () => {
+    // The student closed it, so what the clock has left is not time anything can still count in
+    expect(hasEntryEnded(satEntry(HOUR_MS, true), NOW)).toBe(true)
   })
 })
 

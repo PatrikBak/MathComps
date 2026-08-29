@@ -1,5 +1,5 @@
 import { assertNever } from '@/components/shared/utils/assert-never'
-import { HOUR_MINUTES, MINUTE_MS } from '@/components/shared/utils/time-units'
+import { HOUR_MINUTES, MINUTE_MS, SECOND_MS } from '@/components/shared/utils/time-units'
 
 import type {
   HostedCompetition,
@@ -185,6 +185,29 @@ export function entryEndsAt(group: HostedCompetitionGroup, entry: SatEntry): str
 
   // Whichever came first
   return new Date(endsAt).toISOString()
+}
+
+/**
+ * Whether the counted part of an entry is over.
+ *
+ * A hand-in settles it outright, whatever is left on the clock. Otherwise it is the clock, read to within
+ * its last second: that is the boundary the reading on screen stands on, and read any finer the sentence
+ * and the countdown disagree for a frame. An entry given up for the problems never had a clock, so there
+ * is nothing of it to be over.
+ *
+ * @param entry - The entry the student spent.
+ * @param now - The instant to read it against, in epoch milliseconds.
+ *
+ * @returns Whether it has ended.
+ */
+export function hasEntryEnded(entry: AreaEntry, now: number): boolean {
+  // Nothing was sat, so there is no counted part to end
+  if (entry.kind === 'forfeited') {
+    return false
+  }
+
+  // Closed by the student, or by a clock down to its last second
+  return entry.wasHandedIn || Date.parse(entry.endsAt) - now < SECOND_MS
 }
 
 /**

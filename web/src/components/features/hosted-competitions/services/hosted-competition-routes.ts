@@ -1,6 +1,13 @@
 import { ROUTES } from '@/i18n/i18n'
 
 /**
+ * The way to the competitions list.
+ *
+ * Module-level so every render hands out the same object.
+ */
+export const COMPETITIONS_LIST_HREF = { pathname: ROUTES.COMPETITIONS }
+
+/**
  * The localized-route href shape narrowed to the competition area route, so the only thing a caller fills
  * in is which competition's area it names.
  */
