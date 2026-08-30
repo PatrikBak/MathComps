@@ -23,7 +23,7 @@ export const BACKEND_ERROR_CODES = [
   'DefenseReportTarget',
   'DefenseFeedbackValue',
   'DefenseFeedbackCommentTooLong',
-  'DefenseCompetitionSessionImmutable',
+  'DefenseGradedSessionImmutable',
   'HostedCompetitionNotFound',
   'HostedProblemNotFound',
   'HostedEntryRequired',

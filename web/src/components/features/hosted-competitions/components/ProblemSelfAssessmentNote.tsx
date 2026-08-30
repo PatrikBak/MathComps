@@ -23,8 +23,8 @@ type ProblemSelfAssessmentNoteProps = {
   assessment: string | null
   /** Whether the note can still be written, which closes shortly after the entry does. */
   areNotesOpen: boolean
-  /** Whether this is the run nobody is graded on, which changes who the note says will read it. */
-  isPractice: boolean
+  /** Whether the student is graded on this run, which changes who the note says will read it. */
+  isGraded: boolean
   /** The longest the note may be, which the backend refuses anything over. */
   maxCommentChars: number
 }
@@ -41,7 +41,7 @@ export function ProblemSelfAssessmentNote({
   problemId,
   assessment,
   areNotesOpen,
-  isPractice,
+  isGraded,
   maxCommentChars,
 }: ProblemSelfAssessmentNoteProps) {
   // Competitions copy
@@ -86,9 +86,9 @@ export function ProblemSelfAssessmentNote({
           autoFocus
         />
 
-        {/* Who ends up reading it, which the practice run nobody grades answers differently */}
+        {/* Who ends up reading it, which a run nobody grades answers differently */}
         <p className="mt-1.5 text-xs text-muted">
-          {t(isPractice ? 'selfAssessmentPracticeNote' : 'selfAssessmentNote')}
+          {t(isGraded ? 'selfAssessmentNote' : 'selfAssessmentPracticeNote')}
         </p>
 
         <div className="mt-2 flex items-center justify-end gap-2">

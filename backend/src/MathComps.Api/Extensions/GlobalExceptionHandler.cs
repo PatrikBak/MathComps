@@ -122,8 +122,8 @@ public sealed class GlobalExceptionHandler(
         NotAdminNoteAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotAdminNoteAuthor),
         ListAccessDeniedException => (StatusCodes.Status403Forbidden, ApiErrorCode.ListAccessDenied),
         // The student owns the conversation and is refused the rewind or delete all the same
-        DefenseCompetitionSessionImmutableException
-            => (StatusCodes.Status403Forbidden, ApiErrorCode.DefenseCompetitionSessionImmutable),
+        DefenseGradedSessionImmutableException
+            => (StatusCodes.Status403Forbidden, ApiErrorCode.DefenseGradedSessionImmutable),
 
         // State conflicts
         CannotLikeOwnCommentException => (StatusCodes.Status409Conflict, ApiErrorCode.CannotLikeOwnComment),

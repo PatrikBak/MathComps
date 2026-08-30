@@ -22,8 +22,11 @@ type DefenseFeedbackDialogsProps = {
   currentFeedback: DefenseFeedback | null
   /** The caps a comment is held to; null until the backend has said what they are. */
   limits: DefenseLimits | null
-  /** Whether the conversation is being argued inside a competition, which changes who reads a report. */
-  isCompetition: boolean
+  /**
+   * Whether the student is graded on the run the conversation is argued inside, which decides who reads a
+   * report.
+   */
+  isGraded: boolean
 }
 
 /**
@@ -38,7 +41,7 @@ export function DefenseFeedbackDialogs({
   answer,
   currentFeedback,
   limits,
-  isCompetition,
+  isGraded,
 }: DefenseFeedbackDialogsProps) {
   // Defense-surface copy
   const t = useTranslations('defense')
@@ -65,9 +68,9 @@ export function DefenseFeedbackDialogs({
           requiresComment="other"
           requiresCommentHint={t('requiresCommentHint')}
           title={t('reportTitle')}
-          // Inside a competition a report is read by whoever grades the transcript, and a student writing
-          // one means it as a case for their solution rather than as a note about the examiner
-          note={isCompetition ? t('reportCompetitionNote') : null}
+          // In a graded run a report is read by whoever grades the transcript, and a student writing one
+          // means it as a case for their solution rather than as a note about the examiner
+          note={isGraded ? t('reportGradedNote') : null}
           options={optionsOf(REPORT_CATEGORY_KEYS)}
           initialComment={report.standing?.comment ?? ''}
           commentLabel={t('reportCommentLabel')}

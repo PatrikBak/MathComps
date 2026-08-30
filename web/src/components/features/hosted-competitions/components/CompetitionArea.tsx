@@ -78,7 +78,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
     problems,
     now,
     endsAt,
-    isPractice,
+    isGraded,
     wasHandedIn,
     hasEnded,
     areNotesOpen,
@@ -124,7 +124,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
       )}
 
       {/* What the practice run is, said once to whoever has not met it before */}
-      {isPractice && !isIntroDismissed && (
+      {!isGraded && !isIntroDismissed && (
         <AreaNote>
           <p>{t('practiceIntro')}</p>
 
@@ -135,7 +135,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
       )}
 
       {/* That the entry is closed, and what that does and does not stop */}
-      {hasEnded && <AreaNote>{t(endedNoteKey(wasHandedIn, isPractice))}</AreaNote>}
+      {hasEnded && <AreaNote>{t(endedNoteKey(wasHandedIn, isGraded))}</AreaNote>}
 
       {/* An entry given up for the problems, which never had a clock */}
       {entry.kind === 'forfeited' && <AreaNote>{t('areaForfeited')}</AreaNote>}
@@ -150,7 +150,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
             problem={problem}
             entry={entry}
             areNotesOpen={areNotesOpen}
-            isPractice={isPractice}
+            isGraded={isGraded}
           />
         ))}
       </div>
@@ -225,19 +225,19 @@ function AreaNote({ children }: AreaNoteProps) {
  * says what it can still offer and promises nothing.
  *
  * @param wasHandedIn - Whether the student closed it themselves rather than running out of clock.
- * @param isPractice - Whether this is the run nobody is graded on.
+ * @param isGraded - Whether the student is graded on this run.
  *
  * @returns The copy key.
  */
 function endedNoteKey(
   wasHandedIn: boolean,
-  isPractice: boolean
+  isGraded: boolean
 ): 'areaFinished' | 'areaClockSpent' | 'areaFinishedPractice' | 'areaClockSpentPractice' {
-  // Nothing about the practice run is counted, so neither of its sentences can mention a result
-  if (isPractice) {
-    return wasHandedIn ? 'areaFinishedPractice' : 'areaClockSpentPractice'
+  // The graded pair, which both say where the line falls
+  if (isGraded) {
+    return wasHandedIn ? 'areaFinished' : 'areaClockSpent'
   }
 
-  // And the graded pair, which both say where the line falls
-  return wasHandedIn ? 'areaFinished' : 'areaClockSpent'
+  // And the pair for a run nobody grades, counted nowhere and so mentioning no result
+  return wasHandedIn ? 'areaFinishedPractice' : 'areaClockSpentPractice'
 }

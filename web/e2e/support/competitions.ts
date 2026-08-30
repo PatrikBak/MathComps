@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { ROUTES } from '@/i18n/i18n'
 
@@ -34,6 +34,20 @@ export const LIST_PATH = `/en${ROUTES.COMPETITIONS}`
 export function areaPath(competitionId: string): string {
   // An area hangs off the list under the competition's own id
   return `${LIST_PATH}/${competitionId}`
+}
+
+/**
+ * The transcript of the open conversation.
+ *
+ * Matched on its role as well as its name: the chat also carries a "New conversation" button, whose
+ * accessible name holds the transcript's own, so a name alone resolves to both.
+ *
+ * @param page - The page the conversation is open on.
+ *
+ * @returns The transcript.
+ */
+export function transcriptOf(page: Page): Locator {
+  return page.getByRole('log', { name: chatCopy.transcriptLabel })
 }
 
 /**

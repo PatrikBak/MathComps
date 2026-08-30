@@ -236,8 +236,8 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's sessions, most recently active first, each with the columns of both target arms, its
-        // statement, last activity, and the student's most recent message.
+        // The user's sessions, most recently active first, each with the columns of both target arms, the round
+        // it was argued under, its statement, last activity, and the student's most recent message.
         var rows = await dbContext.DefenseSessions
             .AsNoTracking()
             .Where(session => session.UserId == userId)
@@ -259,6 +259,12 @@ public class DefenseSessionService(
                     session.ProblemTarget!.Problem.Round.Competition.Path,
                     session.ProblemTarget!.Problem.Round.Season.EditionNumber,
                     session.ProblemTarget!.Problem.Round.Season.StartYear),
+                new DefenseGrading(
+                    session.ProblemTarget == null
+                        ? null
+                        : new DefenseProblemRound(
+                            session.ProblemTarget.Problem.Round.HostedGroupId != null,
+                            session.ProblemTarget.Problem.Round.HostedGroup!.ClosesAt)),
                 session.ProblemStatement,
                 session.Turns.Max(turn => turn.CreatedAt),
                 session.Turns
@@ -276,7 +282,8 @@ public class DefenseSessionService(
                 NamedDefenseTargets.Build(localization, language, row.Target),
                 row.Statement,
                 row.LastActivityAt,
-                row.LastStudentMessage)),
+                row.LastStudentMessage,
+                row.Grading.IsGraded)),
         ];
     }
 
@@ -291,9 +298,8 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // A conversation about a competition problem is the record of what a student argued under their entry,
-        // so it outlives their opinion of it.
-        await EnsureNotCompetitionAsync(dbContext, userId, sessionId, cancellationToken);
+        // What the student argued where they are graded is not theirs to drop.
+        await EnsureNotGradedAsync(dbContext, userId, sessionId, cancellationToken);
 
         // Delete the session, filtering on the owner so another user's id can't reach it. The cascade drops its
         // turns and everything the student said about the conversation; the spend rows are independent and stay.
@@ -316,9 +322,9 @@ public class DefenseSessionService(
         await DefenseSessionWrites.ToOwnedSessionAsync(
             dbContextFactory, turnGate, userId, sessionId, async dbContext =>
             {
-                // A rewind of a competition conversation would quietly rewrite what the student argued under
-                // their entry.
-                await EnsureNotCompetitionAsync(dbContext, userId, sessionId, cancellationToken);
+                // A rewind of a graded conversation would quietly rewrite what the student argued under their
+                // entry.
+                await EnsureNotGradedAsync(dbContext, userId, sessionId, cancellationToken);
 
                 // Who authored the turn to keep as the new last one.
                 var keptRole =
@@ -362,24 +368,33 @@ public class DefenseSessionService(
     }
 
     /// <summary>
-    /// Throws when a session defends a competition problem, which may be neither rewound nor deleted.
+    /// Throws when the student is graded on the round the session was argued under, which may then be neither
+    /// rewound nor deleted (<see cref="DefenseGradedSessionImmutableException"/>).
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="userId">The caller, so another user's session reads as missing rather than as refused.</param>
     /// <param name="sessionId">The session being acted on.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    private static async Task EnsureNotCompetitionAsync(
+    private static async Task EnsureNotGradedAsync(
         MathCompsDbContext dbContext, Guid userId, Guid sessionId, CancellationToken cancellationToken)
     {
-        // Whether the caller's session defends a competition problem. A session that isn't theirs matches
-        // nothing and falls through to whatever the caller was doing, which answers not-found on its own.
-        var isCompetition = await dbContext.DefenseSessions
+        // What the caller's session was argued under, down to the closing instant of the group its round runs
+        // in. A session that isn't theirs matches nothing and falls through to whatever the caller was doing,
+        // which answers not-found on its own.
+        var grading = await dbContext.DefenseSessions
             .Where(DefenseSessionWrites.IsOwnedBy(userId, sessionId))
-            .AnyAsync(session => session.ProblemTarget != null, cancellationToken);
+            .Select(session => new DefenseGrading(
+                session.ProblemTarget == null
+                    ? null
+                    : new DefenseProblemRound(
+                        session.ProblemTarget.Problem.Round.HostedGroupId != null,
+                        session.ProblemTarget.Problem.Round.HostedGroup!.ClosesAt)))
+            .FirstOrDefaultAsync(cancellationToken);
 
-        // Refused outright, whatever state the entry it was argued under is in.
-        if (isCompetition)
-            throw new DefenseCompetitionSessionImmutableException();
+        // Refused whenever the student is graded on the round it was argued under, whatever state that entry is
+        // in.
+        if (grading?.IsGraded == true)
+            throw new DefenseGradedSessionImmutableException();
     }
 
     /// <summary>
@@ -666,6 +681,7 @@ public class DefenseSessionService(
     /// </summary>
     /// <param name="Id"><inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='Id']"/></param>
     /// <param name="Target"><inheritdoc cref="NamedDefenseTargets.Columns" path="/summary"/></param>
+    /// <param name="Grading"><inheritdoc cref="DefenseGrading" path="/summary"/></param>
     /// <param name="Statement"><inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='Statement']"/></param>
     /// <param name="LastActivityAt"><inheritdoc cref="DefenseSessionListItemDto" path="/param[@name='LastActivityAt']"/></param>
     /// <param name="LastStudentMessage">
@@ -673,6 +689,7 @@ public class DefenseSessionService(
     private sealed record ListRow(
         Guid Id,
         NamedDefenseTargets.Columns Target,
+        DefenseGrading Grading,
         string Statement,
         DateTimeOffset LastActivityAt,
         string? LastStudentMessage);

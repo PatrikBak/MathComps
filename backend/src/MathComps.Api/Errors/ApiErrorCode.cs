@@ -109,9 +109,9 @@ public enum ApiErrorCode
     DefenseFeedbackCommentTooLong,
 
     /// <summary>
-    /// A rewind or delete was asked of a competition conversation, which cannot be changed.
+    /// A rewind or delete was asked of a conversation argued under a graded round, which cannot be changed.
     /// </summary>
-    DefenseCompetitionSessionImmutable,
+    DefenseGradedSessionImmutable,
 
     /// <summary>
     /// No hosted competition exists under the id.

@@ -6,9 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import { resolveHandoutProblemRef } from '@/components/features/handouts/handout-problem-ref'
 import { CompetitionClock } from '@/components/features/hosted-competitions/components/CompetitionClock'
-import type { AreaEntry } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { MATHILDA_NAME } from '@/constants/mathilda'
@@ -22,8 +20,17 @@ import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
 import { useMathildaConsent } from '../hooks/use-mathilda-consent'
 import { resolveComposerState } from '../model/defense-composer-state'
 import { draftTurn } from '../model/defense-conversation-model'
-import { defenseDraftStorageKey, defenseTargetKey, handoutTargetOf } from '../model/defense-target'
-import type { DefenseOpening, DefenseProblem, TurnRole } from '../model/defense-types'
+import {
+  defenseDraftStorageKey,
+  defenseTargetKey,
+  isSubjectReachable,
+} from '../model/defense-target'
+import type {
+  DefenseCompetitionRun,
+  DefenseOpening,
+  DefenseProblem,
+  TurnRole,
+} from '../model/defense-types'
 import { DefenseComposer } from './DefenseComposer'
 import { DefenseFeedbackDialogs } from './DefenseFeedbackDialogs'
 import { DefenseFeedbackPrompt } from './DefenseFeedbackPrompt'
@@ -47,12 +54,10 @@ type DefenseConversationProps = {
    */
   opening: DefenseOpening
   /**
-   * The competition entry this defense is being argued inside, or null outside a competition.
-   *
-   * Inside one the conversation is read-only past what has been said: every attempt stays part of the
-   * record of what the student argued under their entry.
+   * The competition run this defense is being argued inside, or null outside a competition. What a graded
+   * one settles about the conversation is on {@link DefenseCompetitionRun}.
    */
-  competition: AreaEntry | null
+  competition: DefenseCompetitionRun | null
 }
 
 /**
@@ -172,10 +177,10 @@ function DefenseConversationForTarget({
   })
 
   // Where this conversation stands against the entry's clock
-  const competitionMode = useDefenseCompetitionMode(competition, shownTurns)
+  const competitionMode = useDefenseCompetitionMode(competition?.entry ?? null, shownTurns)
 
-  // Whether this defense is being argued inside a competition, which is what settles its transcript
-  const isCompetition = competition !== null
+  // Whether the student is graded on the run this defense is argued inside
+  const isGraded = competition?.isGraded ?? false
 
   // Surface a failed history load, but only while the modal is open: an empty history and a load failure
   // look identical otherwise, and the mounted-but-closed modal keeps the query running in the background
@@ -191,8 +196,8 @@ function DefenseConversationForTarget({
   const canGiveFeedback = !isThinking && currentSessionId !== null && limits !== null
 
   // Rewinding takes the same conditions and one more, since it drops turns rather than speaking about them:
-  // a competition's transcript is the thing that later gets graded, so nothing inside one may rewrite it
-  const canRewind = canGiveFeedback && !isCompetition
+  // what the student argued in a graded run is what they are marked on, so nothing inside one may rewrite it
+  const canRewind = canGiveFeedback && !isGraded
 
   // Whether the conversation has enough behind it to be worth summing up, or was already summed up, which
   // keeps a standing answer reachable to revise however short a rewind has left the conversation.
@@ -210,24 +215,14 @@ function DefenseConversationForTarget({
       ? null
       : limits.maxTurnsPerSession - shownTurns.filter((turn) => turn.role === 'candidate').length
 
-  // The handout environment behind this problem, absent when it is not a handout problem at all
-  const handoutTarget = handoutTargetOf(problem.target)
-
-  // Where this reader's language reaches the problem, absent when it doesn't carry the handout
-  const problemLink =
-    handoutTarget === null ? null : (resolveHandoutProblemRef(handoutTarget, locale)?.link ?? null)
-
-  // Whether a fresh defense has anything to be argued against: what a handout problem is measured against
-  // is published per language, so a locale that doesn't carry it reaches none, and a competition problem
-  // names no handout to reach
-  const canStartFresh = problemLink !== null
+  // Whether a fresh defense would have anything to be argued against
+  const canStartFresh = isSubjectReachable(problem.target, locale)
 
   // Whether there's a conversation worth resetting: an open session, or a fresh one the student has
   // already started, which is a sent or in-flight turn of their own. The greeting is nobody's turn, so
   // this counts the conversation's own rather than what the transcript shows. A pristine blank chat has
   // nothing to start over.
-  const canStartNew =
-    canStartFresh && !isCompetition && (currentSessionId !== null || turns.length > 0)
+  const canStartNew = canStartFresh && (currentSessionId !== null || turns.length > 0)
 
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
@@ -249,11 +244,11 @@ function DefenseConversationForTarget({
         </div>
 
         {/* How long the entry has left, which the page behind this modal is no longer there to say */}
-        {competition?.kind === 'sat' && (
+        {competition?.entry.kind === 'sat' && (
           <CompetitionClock
-            endsAt={competition.endsAt}
+            endsAt={competition.entry.endsAt}
             now={competitionMode.now}
-            wasHandedIn={competition.wasHandedIn}
+            wasHandedIn={competition.entry.wasHandedIn}
           />
         )}
 
@@ -279,7 +274,7 @@ function DefenseConversationForTarget({
               sessions={sessions}
               currentSessionId={currentSessionId}
               onSelect={resume}
-              onDelete={isCompetition ? null : turn.removeSession}
+              onDelete={isGraded ? null : turn.removeSession}
             />
           )}
 
@@ -341,7 +336,7 @@ function DefenseConversationForTarget({
         answer={answer}
         currentFeedback={currentFeedback}
         limits={limits}
-        isCompetition={isCompetition}
+        isGraded={isGraded}
       />
 
       {/* Composer, once there is a conversation for it to write into */}

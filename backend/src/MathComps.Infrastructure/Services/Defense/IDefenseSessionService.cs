@@ -46,7 +46,7 @@ public interface IDefenseSessionService
 
     /// <summary>
     /// Lists all of a user's sessions, most recently active first, each summarized to its problem, statement,
-    /// last activity, and most recent student message. A competition conversation is among them: only the
+    /// last activity, most recent student message, and whether the student is graded on it. A competition conversation is among them: only the
     /// student who held it is ever shown it, and the entry that let them hold it is what entitles them to its
     /// problems for as long as the embargo runs.
     /// </summary>
@@ -58,8 +58,8 @@ public interface IDefenseSessionService
         Guid userId, Language language, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes a session and its turns outright. The session must belong to the user, and must not be a
-    /// competition conversation.
+    /// Deletes a session and its turns outright. The session must belong to the user, and must not be part of
+    /// a graded round.
     /// </summary>
     /// <param name="userId">The user the session must belong to.</param>
     /// <param name="sessionId">The session to delete.</param>
@@ -69,7 +69,7 @@ public interface IDefenseSessionService
     /// <summary>
     /// Rewinds a session to a chosen point, deleting every turn after it so the conversation can be taken
     /// from there again. The kept point must be an examiner turn, so the result awaits the student's next
-    /// message. The session must belong to the user, and must not be a competition conversation.
+    /// message. The session must belong to the user, and must not be part of a graded round.
     /// </summary>
     /// <param name="userId">The user the session must belong to.</param>
     /// <param name="sessionId">The session to rewind.</param>
@@ -111,11 +111,11 @@ public sealed class DefenseTurnLimitException() : Exception("This defense has re
 public sealed class DefenseSpendLimitException() : Exception("You have reached your usage limit — try again later");
 
 /// <summary>
-/// Thrown when a competition conversation is rewound or deleted. What a student argued under their entry
-/// outlives their opinion of it.
+/// Thrown when a conversation argued under a graded round is rewound or deleted. What a student argued where
+/// they are graded outlives their opinion of it.
 /// </summary>
-public sealed class DefenseCompetitionSessionImmutableException()
-    : Exception("A competition conversation cannot be changed");
+public sealed class DefenseGradedSessionImmutableException()
+    : Exception("A graded conversation cannot be changed");
 
 /// <summary>
 /// Thrown when a rewind names no cut point at all, or names one that is out of range or is not an examiner

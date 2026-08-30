@@ -3,11 +3,14 @@
 import { useAuth } from '@clerk/nextjs'
 
 import { useAreaEntry } from '@/components/features/hosted-competitions/hooks/use-area-entry'
-import type { AreaEntry } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
-import type { DefenseProblem, DefenseSessionListItem } from '../model/defense-types'
+import type {
+  DefenseCompetitionRun,
+  DefenseProblem,
+  DefenseSessionListItem,
+} from '../model/defense-types'
 
 /**
  * What a defense waiting on nothing reports. Module-level so every render hands out the same object.
@@ -23,8 +26,8 @@ type UseLibraryConversationResult = {
    * is still waiting on the entry it was argued under.
    */
   problem: DefenseProblem | null
-  /** The entry the conversation is being argued inside, or null outside a competition. */
-  competition: AreaEntry | null
+  /** The run the conversation is being argued inside, or null outside a competition. */
+  competition: DefenseCompetitionRun | null
   /**
    * How far the read behind the problem got, so a chosen defense that cannot be opened says so rather than
    * waiting for good. Ready for a handout defense, which waits on nothing.
@@ -37,11 +40,11 @@ type UseLibraryConversationResult = {
  * the entry and its clock included, so the same conversation reads the same wherever it was reached from.
  *
  * That entry is read before the conversation is handed over rather than alongside it: without one the chat
- * offers to rewind and delete a conversation the backend refuses to change.
+ * offers to rewind and delete a graded conversation the backend refuses to change.
  *
  * @param defense - The defense the student chose, or null while they are still on the list.
  *
- * @returns The problem to open on, and the entry it is argued inside.
+ * @returns The problem to open on, and the run it is argued inside.
  */
 export function useLibraryConversation(
   defense: DefenseSessionListItem | null
@@ -87,7 +90,7 @@ export function useLibraryConversation(
               },
               statement: defense.statement,
             },
-            competition: entry,
+            competition: { entry, isGraded: defense.isGraded },
             uiState,
           }
 

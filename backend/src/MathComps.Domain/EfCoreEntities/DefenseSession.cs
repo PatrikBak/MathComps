@@ -40,8 +40,8 @@ public class DefenseSession
     /// </summary>
     /// <remarks>
     /// Exclusive with <see cref="EnvironmentTarget"/>, enforced by <see cref="TargetKind"/>. A session that
-    /// defends a problem can be neither rewound nor deleted: it is the record of what the student argued under
-    /// their entry, so it outlives their opinion of it.
+    /// defends a problem the student is graded on can be neither rewound nor deleted: it is the record of what
+    /// they argued under their entry.
     /// </remarks>
     public ProblemDefense? ProblemTarget { get; set; }
 

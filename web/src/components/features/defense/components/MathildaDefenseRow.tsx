@@ -165,8 +165,7 @@ function DefenseRowShell({
         {/* Delete and jump, in that order so the jump ends every row and the arrows line up down the
             list whether or not the defense beside them can be dropped */}
         <div className="-my-1 flex items-center text-muted">
-          {/* Delete the defense, offered on everything but a competition one, which the site keeps whatever
-              the student comes to think of it */}
+          {/* Delete the defense, on the rows that offer it */}
           {onDelete !== null && (
             <Button
               variant="ghost"
@@ -252,12 +251,15 @@ function HandoutDefenseRow({
  * A row for a defense about a competition problem: named on the way in, since the reader's own side cannot
  * name a competition still under embargo, and jumping to the competition's own area, which is where the
  * problem is read and where the entry it was argued under lives.
+ *
+ * The drop is offered only where the student is not graded on the run, per {@link DefenseCompetitionRun}.
  */
 function CompetitionDefenseRow({
   defense,
   target,
   openRef,
   onOpen,
+  onDelete,
   onClose,
 }: CompetitionDefenseRowProps) {
   // Competitions copy
@@ -268,7 +270,7 @@ function CompetitionDefenseRow({
       defense={defense}
       openRef={openRef}
       onOpen={onOpen}
-      onDelete={null}
+      onDelete={defense.isGraded ? null : onDelete}
       label={<DefenseTargetLabel target={target} emphasis="strong" />}
       jump={
         <RowJump

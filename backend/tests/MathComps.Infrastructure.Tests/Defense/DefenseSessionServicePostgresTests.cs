@@ -121,6 +121,16 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// </summary>
     private readonly Guid _roundId = Guid.CreateVersion7();
 
+    /// <summary>
+    /// The problem set in the practice round, which nobody is graded on.
+    /// </summary>
+    private readonly Guid _practiceProblemId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// The round the practice problem was set in.
+    /// </summary>
+    private readonly Guid _practiceRoundId = Guid.CreateVersion7();
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
@@ -191,7 +201,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // The root the competition node hangs off.
         CompetitionTreeSeed.Root(context, "mc", 100);
 
-        // The group running it, open and not yet closed, so nothing but the entry decides who may argue.
+        // The graded group running it, open and not yet closed, so nothing but the entry decides who may argue.
         var group = new HostedGroup
         {
             Id = Guid.CreateVersion7(),
@@ -229,6 +239,49 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             Id = Guid.CreateVersion7(),
             UserId = _ownerId,
             RoundId = _roundId,
+            StartedAt = DateTimeOffset.UtcNow,
+        });
+
+        // The practice group beside it, which never closes and so grades nobody.
+        var practiceGroup = new HostedGroup
+        {
+            Id = Guid.CreateVersion7(),
+            Slug = "mc-practice",
+            OpensAt = DateTimeOffset.UtcNow.AddDays(-1),
+            ClosesAt = null,
+            ClockMinutes = 30,
+            AllowsReentry = true,
+        };
+        context.HostedGroups.Add(practiceGroup);
+
+        // Its round, embargoed with no date to lift at, which a group that never closes is free to carry: the
+        // entry is the only way through to its problems.
+        context.Rounds.Add(new Round
+        {
+            Id = _practiceRoundId,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "mc-practice").Id,
+            SeasonId = season.Id,
+            Date = new DateOnly(2026, 10, 1),
+            VisibleSince = DateTimeOffset.MaxValue,
+            HostedGroupId = practiceGroup.Id,
+        });
+
+        // And the problem the practice conversations argue.
+        context.Problems.Add(new Problem
+        {
+            Id = _practiceProblemId,
+            RoundId = _practiceRoundId,
+            Number = 1,
+            Slug = "mc-practice-1",
+        });
+
+        // The entry that buys the owner past the practice round's embargo, which the practice group hands out
+        // again and again.
+        context.HostedEntries.Add(new HostedEntry
+        {
+            Id = Guid.CreateVersion7(),
+            UserId = _ownerId,
+            RoundId = _practiceRoundId,
             StartedAt = DateTimeOffset.UtcNow,
         });
 
@@ -577,6 +630,11 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // And it carries the statement its competition is still holding back from everybody else
         Assert.Equal(FakeDefenseContentResolver.Statement, sessions[0].Statement);
+
+        // Its round is one the student is graded on, which is what keeps it from being taken back; the handout
+        // one was argued under no round at all
+        Assert.True(sessions[0].IsGraded);
+        Assert.False(sessions[1].IsGraded);
     });
 
     /// <summary>
@@ -687,11 +745,11 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// A conversation about a problem can be neither rewound nor deleted: it is the record of what the
-    /// student argued under their entry, so it outlives their opinion of it.
+    /// A conversation argued under a graded entry can be neither rewound nor deleted: it is the record of what
+    /// the student argued under their entry, so it outlives their opinion of it.
     /// </summary>
     [Fact]
-    public Task A_problems_conversation_cannot_be_rewound_or_deleted() => RunTestAsync(async service =>
+    public Task A_graded_rounds_conversation_cannot_be_rewound_or_deleted() => RunTestAsync(async service =>
     {
         // Argue a problem the site hosts, which the seeded entry lets the owner do
         var session = await service.StartAsync(
@@ -699,15 +757,81 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 new StartDefenseRequest(new ProblemTarget(_problemId), "my defense"), Language.EN));
 
         // The rewind is refused
-        await Assert.ThrowsAsync<DefenseCompetitionSessionImmutableException>(
+        await Assert.ThrowsAsync<DefenseGradedSessionImmutableException>(
             () => service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 0));
 
         // The delete is refused too
-        await Assert.ThrowsAsync<DefenseCompetitionSessionImmutableException>(
+        await Assert.ThrowsAsync<DefenseGradedSessionImmutableException>(
             () => service.DeleteAsync(_ownerId, session.Id));
 
         // The conversation is still there to be read
         Assert.Equal(1, await QueryValueAsync(context => context.DefenseSessions
+            .CountAsync(candidate => candidate.Id == session.Id)));
+    });
+
+    /// <summary>
+    /// Releasing a round from its group, which a corrected manifest does, leaves the conversations already argued
+    /// under it refused. What the student argued when somebody was grading it is not theirs to drop because an
+    /// admin has since redrawn the program.
+    /// </summary>
+    [Fact]
+    public Task A_released_rounds_conversation_stays_refused() => RunTestAsync(async service =>
+    {
+        // Argue the graded problem while its round still belongs to the group
+        var session = await service.StartAsync(
+            _ownerId, new DefenseSessionStart(
+                new StartDefenseRequest(new ProblemTarget(_problemId), "my defense"), Language.EN));
+
+        // Then take the round out of the group, the way re-declaring a manifest that no longer names it does
+        await QueryAsync(async context =>
+        {
+            // The round as it stands
+            var round = await context.Rounds.SingleAsync(candidate => candidate.Id == _roundId);
+
+            // Cut loose from the group that was running it
+            round.HostedGroupId = null;
+
+            // Written down
+            await context.SaveChangesAsync();
+        });
+
+        // The delete is refused all the same, the round having been released after the fact
+        await Assert.ThrowsAsync<DefenseGradedSessionImmutableException>(
+            () => service.DeleteAsync(_ownerId, session.Id));
+
+        // And the listing says so, so the surface offers no control the backend would turn down
+        var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
+        Assert.True(listed.IsGraded);
+    });
+
+    /// <summary>
+    /// A practice round grades nobody, so what the student argued in it protects nothing and stays theirs to take
+    /// back: both the rewind and the delete go through, and the listing says so before either is pressed.
+    /// </summary>
+    [Fact]
+    public Task A_practice_rounds_conversation_can_be_rewound_and_deleted() => RunTestAsync(async service =>
+    {
+        // Argue a problem set in the round whose group never closes
+        var session = await service.StartAsync(
+            _ownerId, new DefenseSessionStart(
+                new StartDefenseRequest(new ProblemTarget(_practiceProblemId), "my defense"), Language.EN));
+
+        // The listing reports the conversation as nobody's to grade, so the surface offers the controls at all
+        var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
+        Assert.False(listed.IsGraded);
+
+        // Rewind to the examiner's opener
+        await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 0);
+
+        // Which leaves the opener alone, everything said after it dropped
+        Assert.Equal(1, await QueryValueAsync(context => context.DefenseTurns
+            .CountAsync(turn => turn.SessionId == session.Id)));
+
+        // And drop the conversation itself
+        await service.DeleteAsync(_ownerId, session.Id);
+
+        // Which is gone from the database
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions
             .CountAsync(candidate => candidate.Id == session.Id)));
     });
 
