@@ -15,47 +15,109 @@ const QUEUE_QUERY_KEY = [...REVIEW_QUERY_KEY, 'queue'] as const
 const UNREAD_FILTER_PART = serializeFilter({ unread: true })
 
 /**
+ * What one filtering of the queue names, beyond the prefix it shares with every other filtering.
+ *
+ * These ride in a single object so a filtering sitting in the cache can be read back by name. Read off a
+ * position, a reader has to know which slot it was written at, which nothing checks.
+ */
+type QueueKeySegment = {
+  /** The language the pages were read in, which names each conversation's problem. */
+  locale: string
+  /** The filtering they were read under. */
+  filter: string
+}
+
+/**
  * Builds the query key for one filtering of the review queue.
  *
  * @param filter - Which conversations the queue is showing.
+ * @param locale - The language it is read in.
  * @returns The query key.
  */
-export function reviewQueueQueryKey(filter: DefenseReviewFilter): QueryKey {
+export function reviewQueueQueryKey(filter: DefenseReviewFilter, locale: string): QueryKey {
   // Keyed by the serialized filter, since the object's fields carry whatever order they were built up in and
   // would otherwise key one filtering as two
-  return [...QUEUE_QUERY_KEY, serializeFilter(filter)] as const
+  return [...QUEUE_QUERY_KEY, { locale, filter: serializeFilter(filter) }] as const
+}
+
+/**
+ * Reads the filtering a queue's pages were read under off the key they are cached under.
+ *
+ * Only {@link reviewQueueQueryKey} builds a key shaped like this, and only the queue's own pages ever reach
+ * here: React Query matches the key a caller asked under before it runs their own predicate, so a query of
+ * another kind is turned away first.
+ *
+ * @param queryKey - The key a filtering's pages are held under.
+ * @returns What it narrows to, serialized.
+ */
+function queueFilterOf(queryKey: readonly unknown[]): string {
+  // The segment naming this filtering, which every queue key ends with
+  const segment = queryKey[queryKey.length - 1] as QueueKeySegment
+
+  // What it narrows to
+  return segment.filter
 }
 
 /**
  * Builds the query key for what the queue's filters can be set to.
  *
+ * @param locale - The language the options are named in.
  * @returns The query key.
  */
-export function reviewFilterOptionsQueryKey(): QueryKey {
-  // One list for the whole surface, since the options are counted over every conversation
-  return [...REVIEW_QUERY_KEY, 'filters'] as const
+export function reviewFilterOptionsQueryKey(locale: string): QueryKey {
+  // One list per language for the whole surface, since the options are counted over every conversation
+  return [...REVIEW_QUERY_KEY, 'filters', locale] as const
+}
+
+/**
+ * The key every reading of one conversation hangs off.
+ *
+ * {@link reviewDetailQueryKey} adds the language, and {@link invalidateReviewDetail} matches on this much
+ * alone, so both of them follow whatever this says.
+ *
+ * @param sessionId - The conversation.
+ * @returns The key.
+ */
+function reviewDetailKeyPrefix(sessionId: string): QueryKey {
+  // Kept apart from the note keys, so writing a note doesn't drag a whole transcript back over the wire
+  return [...REVIEW_QUERY_KEY, 'detail', sessionId] as const
 }
 
 /**
  * Builds the query key for one conversation read in full.
  *
  * @param sessionId - The conversation.
+ * @param locale - The language it is read in.
  * @returns The query key.
  */
-export function reviewDetailQueryKey(sessionId: string): QueryKey {
-  // Kept apart from the note keys, so writing a note doesn't drag a whole transcript back over the wire
-  return [...REVIEW_QUERY_KEY, 'detail', sessionId] as const
+export function reviewDetailQueryKey(sessionId: string, locale: string): QueryKey {
+  // The language last, so the prefix still reaches the conversation in every language it was read in
+  return [...reviewDetailKeyPrefix(sessionId), locale] as const
+}
+
+/**
+ * Refreshes one conversation wherever it is cached, in every language it has been read in. What a note says
+ * about a conversation is true of the conversation rather than of the reading, so a copy left holding the note
+ * list from before the write would go on offering a settled note as still standing.
+ *
+ * @param queryClient - The cache to refresh.
+ * @param sessionId - The conversation whose notes changed.
+ */
+export function invalidateReviewDetail(queryClient: QueryClient, sessionId: string): void {
+  // That one conversation, whichever language it was read in
+  void queryClient.invalidateQueries({ queryKey: reviewDetailKeyPrefix(sessionId) })
 }
 
 /**
  * Builds the query key for one narrowing of the notes feed, whose pages accumulate under it.
  *
  * @param openOnly - Whether the feed is leaving out what has been settled.
+ * @param locale - The language it is read in.
  * @returns The query key.
  */
-export function noteFeedQueryKey(openOnly: boolean): QueryKey {
+export function noteFeedQueryKey(openOnly: boolean, locale: string): QueryKey {
   // The narrowing rides in the key, so each one accumulates its own pages
-  return [...REVIEW_QUERY_KEY, 'feed', openOnly] as const
+  return [...REVIEW_QUERY_KEY, 'feed', openOnly, locale] as const
 }
 
 /**
@@ -83,13 +145,9 @@ export function invalidateUnreadQueue(queryClient: QueryClient): void {
   // Every filtering whose key carries the unread field, whatever else it narrows by
   void queryClient.invalidateQueries({
     queryKey: QUEUE_QUERY_KEY,
-    predicate: (query) => {
-      // The filter the pages under this key were read with
-      const [, , serialized] = query.queryKey
-
+    predicate: (query) =>
       // Matched between the separators rather than anywhere in the string, so no other field can stand in for it
-      return typeof serialized === 'string' && serialized.split('&').includes(UNREAD_FILTER_PART)
-    },
+      queueFilterOf(query.queryKey).split('&').includes(UNREAD_FILTER_PART),
   })
 }
 

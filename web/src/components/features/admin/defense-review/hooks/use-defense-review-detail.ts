@@ -1,4 +1,5 @@
 import { skipToken, useQuery } from '@tanstack/react-query'
+import { useLocale } from 'next-intl'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
 import { useQueryUiState } from '@/hooks/use-query-ui-state'
@@ -38,10 +39,13 @@ export function useDefenseReviewDetail(sessionId: string | null): UseDefenseRevi
   // The authenticated caller
   const api = useApi({ requireAuth: true })
 
+  // The language it is read in
+  const locale = useLocale()
+
   // The conversation itself. The fetcher closes over the id the key was built from rather than reading the
   // argument back, so it can't be reached with none open and needs no assertion that it wasn't.
   const query = useQuery({
-    queryKey: reviewDetailQueryKey(sessionId ?? NO_CONVERSATION),
+    queryKey: reviewDetailQueryKey(sessionId ?? NO_CONVERSATION, locale),
     queryFn:
       sessionId === null
         ? skipToken

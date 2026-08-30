@@ -9,7 +9,7 @@ import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
 import type { UserCompetitionProfile, UserProfile } from '../model/profile-types'
 import { updateUserProfile } from '../services/profile-service'
-import { userProfileQueryKeys } from './use-user-profile'
+import { useUserProfileKey } from './use-user-profile'
 
 /**
  * Return type for {@link useUpdateProfile}.
@@ -33,6 +33,9 @@ export function useUpdateProfile(): UseUpdateProfileResult {
   // The React Query cache
   const queryClient = useQueryClient()
 
+  // Where this user's profile is cached
+  const profileKey = useUserProfileKey()
+
   // Saving it
   const mutation = useOptimisticMutation<void, UserCompetitionProfile>({
     // Hand it to the backend, which is what decides whether it is sayable
@@ -41,7 +44,7 @@ export function useUpdateProfile(): UseUpdateProfileResult {
     // Echo them into the cache on the pick rather than on the answer. The request replaces every field, so a
     // second pick made while the first is in flight would otherwise read its siblings from before it
     onMutate: (profile) => {
-      queryClient.setQueryData<UserProfile>(userProfileQueryKeys.all, (previous) =>
+      queryClient.setQueryData<UserProfile>(profileKey, (previous) =>
         previous === undefined ? previous : { ...previous, ...profile }
       )
     },

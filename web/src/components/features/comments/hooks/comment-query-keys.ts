@@ -26,7 +26,10 @@ export const commentCountQueryKeys = {
   /** Query key for a specific target type */
   forType: (targetType: CommentTargetType) => [...commentCountQueryKeys.all, targetType] as const,
 
-  /** Query key for a specific target type and target IDs */
-  forTargetIds: (targetType: CommentTargetType, targetIds: string[]) =>
-    [...commentCountQueryKeys.forType(targetType), targetIds.sort().join(',')] as const,
+  /**
+   * Query key for a specific target type and target IDs. Sorted so that the same set asked for in two orders
+   * keys as one query, and over a copy so the caller's own array keeps the order they built it in.
+   */
+  forTargetIds: (targetType: CommentTargetType, targetIds: readonly string[]) =>
+    [...commentCountQueryKeys.forType(targetType), [...targetIds].sort().join(',')] as const,
 }

@@ -2,6 +2,7 @@
 
 import { useAuth } from '@clerk/nextjs'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useLocale } from 'next-intl'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
 import { errorCodeOf, unwrap } from '@/lib/api/api-error'
@@ -39,12 +40,15 @@ export function useMyDefenses(): UseMyDefensesResult {
   // Whose defenses these are, once Clerk knows
   const { userId, isLoaded: isUserLoaded } = useAuth()
 
+  // The language the list is read in
+  const locale = useLocale()
+
   // Cache handle for the defenses list
   const queryClient = useQueryClient()
 
   // The user's sessions across every problem
   const query = useQuery({
-    queryKey: myDefensesQueryKey(isUserLoaded ? (userId ?? null) : null),
+    queryKey: myDefensesQueryKey(isUserLoaded ? (userId ?? null) : null, locale),
     queryFn: async () => {
       // Narrow to the ready caller
       const apiCall = readyApiCall(api)

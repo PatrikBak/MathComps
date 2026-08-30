@@ -356,12 +356,12 @@ describe('marking the searches a change reaches as stale', () => {
   it('never takes a query that is not a search for one', () => {
     // The reader's own lists, which are cached nowhere near a search
     const queryClient = new QueryClient()
-    queryClient.setQueryData(userListQueryKeys.lists(), { likedCount: 1, lists: [] })
+    queryClient.setQueryData(userListQueryKeys.lists(READER), { likedCount: 1, lists: [] })
 
     // A change reaching every search there is
     invalidateAffectedSearches(queryClient, () => true)
 
     // And no other query at all
-    expect(queryClient.getQueryState(userListQueryKeys.lists())?.isInvalidated).toBe(false)
+    expect(queryClient.getQueryState(userListQueryKeys.lists(READER))?.isInvalidated).toBe(false)
   })
 })

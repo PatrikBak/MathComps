@@ -248,8 +248,10 @@ export function useDefenseReviewReadState(): UseDefenseReviewReadStateResult {
 
       // Rewrite it to what the reader has already seen happen
       patchCachedQueueConversation(queryClient, sessionId, (conversation) => {
-        // Only the mark that opened the set sees the row as the server last left it
-        if (existing === undefined) {
+        // Only the mark that opened the set sees the row as the server last left it, and only off one copy
+        // of it: the conversation is cached once per filtering and language, and copies read at different
+        // moments disagree about how much of it is unread
+        if (existing === undefined && marks.previous === null) {
           // What the row said before any mark touched it
           marks.previous = {
             readAt: conversation.readAt,
@@ -257,8 +259,8 @@ export function useDefenseReviewReadState(): UseDefenseReviewReadStateResult {
           }
         }
 
-        // What the mark leaves the row saying
-        written.value = markedReadState(conversation, mark, new Date().toISOString())
+        // What the mark leaves the row saying, computed once so every copy of it says the same thing
+        written.value ??= markedReadState(conversation, mark, new Date().toISOString())
 
         // The row as this mark leaves it
         return { ...conversation, ...written.value }

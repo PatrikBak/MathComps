@@ -1,3 +1,4 @@
+import { useAuth } from '@clerk/nextjs'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
@@ -12,10 +13,13 @@ import type { MathildaConsent, MathildaConsentStatus } from '../model/defense-ty
 import { getMathildaConsent, recordMathildaConsent } from '../services/consent-service'
 
 /**
- * Query keys for the student's Mathilda acknowledgement, used for cache management.
+ * Query keys for the student's Mathilda acknowledgement, used for cache management. Keyed by student, since
+ * signing out and back in as somebody else never reloads the page, and an entry cached under anything less
+ * takes the second reader past a gate they never stood at.
  */
 const mathildaConsentQueryKeys = {
   all: ['mathildaConsent'] as const,
+  forUser: (userId: string | null) => [...mathildaConsentQueryKeys.all, userId] as const,
 }
 
 /**
@@ -51,9 +55,15 @@ export function useMathildaConsent(): UseMathildaConsentResult {
   // API client for the signed-in caller
   const api = useApi({ requireAuth: true })
 
+  // Whose acknowledgement it is, once Clerk knows
+  const { userId, isLoaded: isUserLoaded } = useAuth()
+
+  // Where this student's acknowledgement is cached, held under a null user until Clerk has settled who they are
+  const consentKey = mathildaConsentQueryKeys.forUser(isUserLoaded ? (userId ?? null) : null)
+
   // Where the student stands
   const query = useQuery({
-    queryKey: mathildaConsentQueryKeys.all,
+    queryKey: consentKey,
     queryFn: async () => {
       // Narrow to the ready caller
       const apiCall = readyApiCall(api)
@@ -74,7 +84,7 @@ export function useMathildaConsent(): UseMathildaConsentResult {
 
     // Echo it into the cache, so nothing waits on a refetch to see it
     onSuccess: () => {
-      queryClient.setQueryData<MathildaConsent>(mathildaConsentQueryKeys.all, {
+      queryClient.setQueryData<MathildaConsent>(consentKey, {
         consentedAt: new Date().toISOString(),
       })
     },

@@ -15,8 +15,8 @@ import {
 } from '../services/defense-review-service'
 import {
   invalidateNoteFeed,
+  invalidateReviewDetail,
   patchCachedQueueConversation,
-  reviewDetailQueryKey,
 } from './defense-review-cache'
 
 /**
@@ -162,7 +162,7 @@ export function useAdminNotes(sessionId: string): UseAdminNotesResult {
     },
     onSuccess: (_result, { sessionId: writtenAgainst, write }) => {
       // The conversation carries its own notes, so it has to be read again to show what just changed
-      void queryClient.invalidateQueries({ queryKey: reviewDetailQueryKey(writtenAgainst) })
+      invalidateReviewDetail(queryClient, writtenAgainst)
 
       // The feed reads newest-first across every conversation, which a patch can't keep in order
       invalidateNoteFeed(queryClient)
