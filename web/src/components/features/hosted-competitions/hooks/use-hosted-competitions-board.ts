@@ -72,8 +72,10 @@ export function useHostedCompetitionsBoard(
   })
 
   // The list waits on who is reading as well as on its own fetch: drawn any earlier, a signed-in student
-  // is offered the sign-in press
-  const listState: QueryUiState = reader.kind === 'unknown' ? { kind: 'loading' } : uiState
+  // is offered the sign-in press. It is given up again once an entry has landed, the row it was taken on
+  // counting down a clock whose problems are on the page the student is on their way to
+  const listState: QueryUiState =
+    reader.kind === 'unknown' || dialog.isLeaving ? { kind: 'loading' } : uiState
 
   // Hiding the profile sentence for good
   const { dismissProfilePrompt } = useDismissProfilePrompt(readerKey)

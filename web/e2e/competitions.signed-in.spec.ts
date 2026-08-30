@@ -1,5 +1,5 @@
 import { stubProblemSearch } from './support/backend-routes'
-import { areaCopy, holdClock, LIST_PATH } from './support/competitions'
+import { areaCopy, areaPath, holdClock, LIST_PATH } from './support/competitions'
 import { COMPETITION_ID, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
@@ -163,6 +163,71 @@ test.describe('the competitions list', () => {
     await page.clock.fastForward('00:01')
 
     // Which is enough to be reading the statements, the entry having brought them back with it
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+  })
+
+  test('gives the list up the moment an entry lands, clock and all', async ({ page }) => {
+    // A student with an entry still to spend
+    await installHostedBackend(page, 'ready')
+
+    // The area is held on its way over, which is the window this is about: the entry has landed, its clock
+    // is running, and the page the student reads it on has not arrived yet
+    let releaseArea = (): void => {}
+    const isAreaReleased = new Promise<void>((resolve) => {
+      releaseArea = resolve
+    })
+
+    // Every read of the area's own route, the one warmed while the dialog was open included
+    await page.route(
+      (url) => url.pathname === areaPath(COMPETITION_ID),
+      async (route) => {
+        await isAreaReleased
+        await route.continue()
+      }
+    )
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // The row of the competition being entered
+    const row = page.locator(`[data-competition-id="${COMPETITION_ID}"]`)
+
+    // Press enter, which opens the dialog
+    await row.getByRole('button', { name: areaCopy.enter, exact: true }).click()
+
+    // The button the entry is confirmed on
+    const confirm = page.getByRole('button', { name: areaCopy.dialog.confirm })
+
+    // Once the dialog is there to answer
+    await expect(confirm).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Confirm, and wait out the entry itself: from here the clock is running and the area is all that is
+    // still owed
+    await Promise.all([
+      page.waitForResponse(
+        (response) => response.url().endsWith(`/competitions/${COMPETITION_ID}/entry`),
+        { timeout: SETTLE_TIMEOUT_MS }
+      ),
+      confirm.click(),
+    ])
+
+    // Long enough for the list to have gone back to being readable, since what is asserted is that it does
+    // not: the assertions alone would read the page before the answer they are about has been drawn
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // The row they pressed is not what they are looking at while they wait: it counts a clock down from
+    // here, and a student meets their own clock beside the problems it is being spent on
+    await expect(row).toHaveCount(0)
+
+    // Nor is the way back into it anywhere else on the page
+    await expect(page.getByRole('link', { name: areaCopy.continue })).toHaveCount(0)
+
+    // The area arrives
+    releaseArea()
+
+    // And the statements are what the clock is first read beside
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
       timeout: SETTLE_TIMEOUT_MS,
     })
