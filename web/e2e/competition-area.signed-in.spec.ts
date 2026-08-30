@@ -8,6 +8,7 @@ import {
   LIST_PATH,
   openExistingDefense,
   sendTurn,
+  transcriptOf,
 } from './support/competitions'
 import {
   COMPETITION_ID,
@@ -62,7 +63,7 @@ test.describe('the competition area', () => {
     await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
 
     // The transcript as it now reads
-    const transcript = page.getByLabel(chatCopy.transcriptLabel)
+    const transcript = transcriptOf(page)
 
     // How many times the examiner has spoken so far, which one more turn has to move
     const examinerTurnsBefore = await transcript.getByText('Mathilda', { exact: true }).count()
@@ -302,7 +303,7 @@ test.describe('the competition area', () => {
     await page.clock.fastForward('05:00')
 
     // The conversation as it now reads
-    const transcript = page.getByLabel(chatCopy.transcriptLabel)
+    const transcript = transcriptOf(page)
 
     // The line is drawn, the reply having been said the other side of it
     await expect(
@@ -349,7 +350,7 @@ test.describe('the competition area', () => {
     await sendTurn(page, opening)
 
     // The conversation as it now reads
-    const transcript = page.getByLabel(chatCopy.transcriptLabel)
+    const transcript = transcriptOf(page)
 
     // Held until the turn is in it: a clock walked forward before the mint lands stamps the greeting and
     // this turn after the buzzer too, and the line is then drawn above all three
@@ -408,7 +409,7 @@ test.describe('the competition area', () => {
     await sendTurn(page, said)
 
     // The turn lands in the transcript, so the run has something to leave behind
-    await expect(page.getByLabel(chatCopy.transcriptLabel).getByText(said)).toBeVisible({
+    await expect(transcriptOf(page).getByText(said)).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
 
@@ -654,10 +655,10 @@ test.describe('the competition area', () => {
     // Away again, leaving the conversation as it was
     await page.getByRole('button', { name: actionsCopy.cancel }).click()
 
-    // But nothing that could rewrite the record the conversation leaves behind
+    // But nothing that could rewrite the record the conversation leaves behind. Starting another one is
+    // still offered: it adds to that record rather than taking anything out of it
     await expect(page.getByRole('button', { name: chatCopy.rewind })).toHaveCount(0)
     await expect(page.getByRole('button', { name: chatCopy.deleteSession })).toHaveCount(0)
-    await expect(page.getByRole('button', { name: chatCopy.newDefense })).toHaveCount(0)
   })
 
   test('lets a student take back a practice conversation, which grades nobody', async ({
@@ -691,7 +692,7 @@ test.describe('the competition area', () => {
     await sendTurn(page, said)
 
     // Answered, which is the conversation the backend now holds
-    const transcript = page.getByLabel(chatCopy.transcriptLabel)
+    const transcript = transcriptOf(page)
     await expect(transcript.getByText(said)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // Saying what went wrong with a reply is offered here too
