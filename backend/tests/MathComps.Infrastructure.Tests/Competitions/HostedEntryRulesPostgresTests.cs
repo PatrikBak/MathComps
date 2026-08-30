@@ -51,6 +51,11 @@ public class HostedEntryRulesPostgresTests(PostgresContainerFixture fixture)
     private readonly Guid _neverEmbargoedRoundId = Guid.CreateVersion7();
 
     /// <summary>
+    /// An embargoed round the student gave their entry up on rather than sitting it.
+    /// </summary>
+    private readonly Guid _forfeitedRoundId = Guid.CreateVersion7();
+
+    /// <summary>
     /// An embargo that has not lifted refuses a student holding no entry at all, which is the rule's base case
     /// and the one the scoping tests below vary.
     /// </summary>
@@ -89,6 +94,16 @@ public class HostedEntryRulesPostgresTests(PostgresContainerFixture fixture)
     public Task The_students_own_entry_opens_the_round() => RunTestAsync(async factory =>
         // The one pairing of student and round the seed created
         await EnsureEntitledAsync(factory, _studentId, _enteredRoundId));
+
+    /// <summary>
+    /// An entry given up opens the round exactly as a sat one does. The student is out of the results either
+    /// way, so nothing is left to protect and they may keep working the problems and arguing them with the
+    /// examiner, unranked.
+    /// </summary>
+    [Fact]
+    public Task An_entry_given_up_opens_the_round_too() => RunTestAsync(async factory =>
+        // Forfeited rather than sat, and the round opens all the same
+        await EnsureEntitledAsync(factory, _studentId, _forfeitedRoundId));
 
     /// <summary>
     /// Once the instant has passed the problems are public, so no entry is asked for. This is what makes the
@@ -136,6 +151,9 @@ public class HostedEntryRulesPostgresTests(PostgresContainerFixture fixture)
         // A round that never had an instant at all.
         SeedRound(context, season, _neverEmbargoedRoundId, "mc", visibleSince: null);
 
+        // And one still embargoed, which the student gave their entry up on.
+        SeedRound(context, season, _forfeitedRoundId, "mc-open", embargoedUntil);
+
         // The one entry the whole file turns on: this student, this round, and nothing else.
         context.HostedEntries.Add(new HostedEntry
         {
@@ -143,6 +161,15 @@ public class HostedEntryRulesPostgresTests(PostgresContainerFixture fixture)
             UserId = _studentId,
             RoundId = _enteredRoundId,
             StartedAt = DateTimeOffset.UtcNow,
+        });
+
+        // The same student's other entry, spent by giving it up: no clock ever started on it.
+        context.HostedEntries.Add(new HostedEntry
+        {
+            Id = Guid.CreateVersion7(),
+            UserId = _studentId,
+            RoundId = _forfeitedRoundId,
+            ForfeitedAt = DateTimeOffset.UtcNow,
         });
 
         // Submit changes

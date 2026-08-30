@@ -16,11 +16,6 @@ import type { DefenseComposerState } from '../model/defense-composer-state'
 import { MathildaConsentGate } from './MathildaConsentGate'
 
 /**
- * How few replies a conversation has to have left before the composer says so.
- */
-const REPLIES_LEFT_TO_WARN_AT = 5
-
-/**
  * The composer's toolbar for a defense turn, cut to the tools an argument is written with.
  */
 const DEFENSE_TOOLBAR: ToolbarConfig = {
@@ -128,22 +123,25 @@ export function DefenseComposer({
         </div>
       )
 
-    // Every turn spent
+    // Every turn spent, which a graded conversation says differently: rewind is gone there, so another
+    // conversation on the problem is the way on
     case 'full':
-      return <p className="py-3 text-center text-sm text-muted">{t('conversationFull')}</p>
+      return (
+        <p className="py-3 text-center text-sm text-muted">
+          {t(state.isGraded ? 'conversationFullCompetition' : 'conversationFull')}
+        </p>
+      )
 
     // Open for the next turn
     case 'open':
       return (
         <>
-          {/* How much room is left, once there is little of it */}
-          {state.repliesLeft !== null &&
-            state.repliesLeft > 0 &&
-            state.repliesLeft <= REPLIES_LEFT_TO_WARN_AT && (
-              <p className="mb-1.5 text-xs text-muted">
-                {t('repliesLeft', { count: state.repliesLeft })}
-              </p>
-            )}
+          {/* How much room is left, when there is a count to show */}
+          {state.repliesLeft !== null && state.repliesLeft > 0 && (
+            <p className="mb-1.5 text-xs text-muted">
+              {t('repliesLeft', { count: state.repliesLeft })}
+            </p>
+          )}
 
           {/* Where the next reply is written */}
           <RichMathEditor

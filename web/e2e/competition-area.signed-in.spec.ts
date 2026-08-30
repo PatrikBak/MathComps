@@ -563,11 +563,10 @@ test.describe('the competition area', () => {
     // The practice minute, walked past, which is what ends the run
     await page.clock.fastForward('02:00')
 
-    // Which the page says without naming a result, the practice run having none
-    await expect(page.getByText(areaCopy.areaClockSpentPractice)).toBeVisible()
-
-    // And not the graded sentence, which names a result later messages fall outside of
+    // After which the page says nothing at all: both halves of the graded sentence are about a result
+    // the practice run does not have
     await expect(page.getByText(areaCopy.areaClockSpent)).toHaveCount(0)
+    await expect(page.getByText(areaCopy.areaFinished)).toHaveCount(0)
   })
 
   test('says nothing about a result when a practice run is handed in', async ({ page }) => {
@@ -603,13 +602,14 @@ test.describe('the competition area', () => {
     // Back inside the run just handed in
     await page.goto(areaPath(PRACTICE_COMPETITION_ID))
 
-    // Where the page names it a hand-in, and still promises nothing about a result
-    await expect(page.getByText(areaCopy.areaFinishedPractice)).toBeVisible({
+    // On the set again, so the page has settled and its notes are whatever they are going to be
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // And not the graded sentence, which is the one that mentions a result
+    // Where it promises nothing about a result, because it has none to promise
     await expect(page.getByText(areaCopy.areaFinished)).toHaveCount(0)
+    await expect(page.getByText(areaCopy.areaClockSpent)).toHaveCount(0)
   })
 
   test('reaches the rules without leaving the clock', async ({ page }) => {

@@ -324,10 +324,8 @@
   },
   "competitions": {
     "areaClockSpent": "Your time is up. You can keep solving the problems and talking to Mathilda about them, but new messages no longer count towards your result.",
-    "areaClockSpentPractice": "Your time is up. You can keep solving the problems and talking to Mathilda about them.",
     "areaFinished": "You have finished this competition. You can keep solving the problems and talking to Mathilda about them, but new messages no longer count towards your result.",
-    "areaFinishedPractice": "You have finished the practice competition. You can keep solving the problems and talking to Mathilda about them.",
-    "areaForfeited": "You did not take part in this competition. You can still try the problems outside it.",
+    "areaForfeited": "You can no longer compete. You can still work on the problems here, they just do not count.",
     "areaProblemsFailed": "The problems could not be loaded.",
     "backToCompetitions": "Back to competitions",
     "categories": {
@@ -337,13 +335,13 @@
     },
     "categoryFuture": "More levels may follow, or special competitions like a regional-round warm-up or a geometry marathon. <link>Write to us</link> with what you would like.",
     "categoryHints": {
-      "advanced": "for an experienced solver who fancies the top category of the national olympiad",
-      "elementary": "for anyone who wants to try competition maths, primary school included",
-      "intermediate": "for anyone who has solved competition problems from the national olympiad before"
+      "advanced": "if you fancy the top category of the national olympiad",
+      "elementary": "if you want to try competition maths, primary school included",
+      "intermediate": "if you already have a few national olympiad problems behind you"
     },
     "categoryNote": "You can take part in more than one level.",
     "categoryToggle": "Which level is for me?",
-    "clockFinished": "Handed in",
+    "clockFinished": "Finished",
     "clockHours": "{hours, plural, one {# hour} other {# hours}}",
     "clockHoursMinutes": "{hours, plural, one {# hour} other {# hours}} {minutes, plural, one {# minute} other {# minutes}}",
     "clockLeftHours": "{hours} h {minutes} min",
@@ -356,7 +354,7 @@
     "dialog": {
       "back": "Back",
       "confirm": "Start the clock",
-      "consequence": "The clock starts when you press the button. Once it has started, it cannot be started again.",
+      "consequence": "The clock starts when you press the button. Nothing you write to Mathilda can be taken back or deleted.",
       "consequencePractice": "The clock starts when you press the button. You can take the practice competition again whenever you like.",
       "forfeit": "Give up and see the problems",
       "forfeitConfirm": "Give up",
@@ -368,12 +366,12 @@
     "entryError": "The competition could not be started.",
     "entryWindow": "entry {range}",
     "finishDialog": {
-      "confirm": "Hand in",
+      "confirm": "Finish",
       "consequence": "Your clock stops here, and nothing you write afterwards counts towards your entry. This cannot be undone.",
       "keepWorking": "Keep working",
-      "title": "Hand this entry in?"
+      "title": "Finish now?"
     },
-    "finishEntry": "Finish and hand in",
+    "finishEntry": "Finish early",
     "finishError": "The entry could not be closed. Please try again.",
     "forfeitError": "Could not give up the competition.",
     "goToArea": "Open in the competition",
@@ -383,8 +381,8 @@
         "Start your clock whenever you like inside the entry window, usually two weeks ⏲️",
         "From there you have a limited time to solve the problems 📋",
         "You present your solutions to Mathilda and she gives you feedback 🤖",
-        "Your final marks come after the competition closes, from your conversations with Mathilda 🔢",
-        "Send a partial solution, or ask Mathilda for help if you cannot start at all: progress after a hint still earns marks 🙂"
+        "A person reads your conversations and awards the points, up to 6 per problem. Ties are broken by the time of your last message on each problem, so end a conversation once the problem is done 🔢",
+        "Send a partial solution, or ask Mathilda for help if you cannot start at all. A point she helped you to is worth half a point, so trying is always worth it 🙂"
       ],
       "title": "How does it work?"
     },
@@ -400,14 +398,12 @@
     "problems": "Problems",
     "readiness": {
       "dismiss": "Hide",
-      "dismissAuthReason": "hiding this message",
       "dismissError": "The message could not be hidden.",
       "profileLink": "Complete profile",
       "profileNeeded": "Before entering a real competition you need to <link>complete your profile</link>.",
       "signedOut": "You can compete once you <link>sign in</link>."
     },
     "remainingDays": "{days} d {hours} h",
-    "remainingHours": "{hours} h {minutes} min",
     "remainingMinutes": "{minutes} min {seconds} s",
     "results": "Results",
     "resultsPending": "marking in progress",
@@ -416,25 +412,27 @@
       "contact": "Anything unclear? <link>Write to us</link> rather than guessing.",
       "lines": [
         "No other AI, no outside help of any kind. These competitions train you to solve problems, not to have them solved for you.",
-        "The clock covers solving and writing to Mathilda both, and her replies are not always instant (we would rather she was accurate than fast).",
+        "One person, one account, please. We are trusting you here.",
+        "The clock covers solving and writing to Mathilda both. Expect her to take her time: she goes for accuracy over speed.",
         "Talk to Mathilda as long as you like, though the number of messages and the length of one message are limited, for reasons you can guess.",
-        "Marks come from the whole conversation, so there is nothing to gain from wringing a full solution out of her.",
+        "Everything you write about a problem is marked together. A person does the marking, and they see the whole conversation.",
+        "Mathilda is here to check your solution and help you along, not to solve it for you. Wringing a full solution out of her without doing the work earns nothing.",
         "Please do not share the problems until the competition closes, so you do not spoil it for everybody else.",
         "Do not try to hack Mathilda, to make her write you code or hand you a soup recipe. That gets you disqualified."
       ],
       "title": "Before you start"
     },
     "rulesButton": "Rules",
-    "selfAssessmentAsk": "Leave a comment about your solution",
+    "selfAssessmentAsk": "Comment on your solution",
     "selfAssessmentError": "That couldn't be saved.",
     "selfAssessmentNote": "The person who grades this problem reads it. You can edit it while your clock is running, and for half an hour after it stops.",
     "selfAssessmentPracticeNote": "In a real competition a grader reads this. You can edit a note like this while your clock is running, and for half an hour after it stops.",
-    "selfAssessmentPrompt": "Leave us a comment about your solution, for instance how many points you think it deserves 😀",
+    "selfAssessmentPrompt": "Leave a comment on your solution if you like 😀",
     "standing": {
       "running": "competing, {clock} left"
     },
     "startAnotherDefense": "Start another conversation",
-    "startDefense": "Defend your solution",
+    "startDefense": "Write your solution",
     "try": "Try it",
     "tryAgain": "Take it again",
     "turnsSpent": "{spent}/{max} messages",
@@ -471,15 +469,16 @@
     "SK": "Slovakia"
   },
   "defense": {
-    "competitionClockDivider": "Entry closed",
+    "competitionClockDivider": "Time's up",
     "competitionClockSpent": "This no longer counts towards the competition.",
     "consentAccept": "Got it",
     "consentAuthReason": "talking to Mathilda",
-    "consentBody": "We save your conversations with Mathilda and might read them to make her better. We also ask you to use her fairly, every reply she gives costs us something. Click through if you're fine with that 🙂",
+    "consentBody": "We keep your conversations with Mathilda and read them to make her better. She is an AI model and she can be wrong 🙂",
     "consentError": "Your confirmation couldn't be saved.",
     "consentPolicyLink": "Privacy and terms",
     "consentUnavailable": "We couldn't check whether you've already agreed to talk to Mathilda.",
     "conversationFull": "This conversation has reached its limit. Start a new one, or rewind this one (the messages you drop are gone for good).",
+    "conversationFullCompetition": "This conversation has had too many messages. You can start another one though, it all gets marked together.",
     "deletedHandout": "Deleted handout",
     "deleteError": "The conversation couldn't be removed.",
     "deleteSession": "Remove from history",
@@ -498,7 +497,7 @@
     "libraryEmpty": "Open any <link>handout</link>, pick a problem, start explaining your solution or your ideas for one, and she'll talk it through with you, weigh up where it stands, and nudge you when you need it.",
     "libraryEmptyLead": "Mathilda is an AI tutor",
     "libraryLoading": "Loading…",
-    "loginPrompt": "Mathilda keeps your conversations, so she needs an account.",
+    "loginPrompt": "Mathilda keeps your conversations, so you will need an account.",
     "newDefense": "New conversation",
     "noReplyYet": "No reply yet",
     "outcomes": {
@@ -533,10 +532,11 @@
     "rewindError": "The conversation couldn't be rewound.",
     "rewindMessage": "Everything after this point will be permanently deleted.",
     "rewindTitle": "Rewind to here?",
-    "role": "AI tutor",
+    "roleOpponent": "AI opponent",
     "roles": {
       "student": "You"
     },
+    "roleTutor": "AI tutor",
     "sendError": "Your reply couldn't be sent.",
     "thinking": "Thinking",
     "title": "Mathilda, AI tutor",

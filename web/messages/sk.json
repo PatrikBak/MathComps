@@ -324,10 +324,8 @@
   },
   "competitions": {
     "areaClockSpent": "Tvoj čas vypršal. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",
-    "areaClockSpentPractice": "Tvoj čas vypršal. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať.",
     "areaFinished": "Súťaž máš ukončenú. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",
-    "areaFinishedPractice": "Skúšobnú súťaž máš ukončenú. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať.",
-    "areaForfeited": "Súťaže si sa nezúčastnil. Úlohy si môžeš skúsiť nesúťažne.",
+    "areaForfeited": "Už nemôžeš súťažiť. Úlohy si tu môžeš skúšať ďalej, len sa nepočítajú.",
     "areaProblemsFailed": "Úlohy sa nepodarilo načítať.",
     "backToCompetitions": "Späť na súťaže",
     "categories": {
@@ -337,9 +335,9 @@
     },
     "categoryFuture": "Podľa záujmu môžu pribudnúť ďalšie kategórie alebo špeciálne súťaže, napríklad príprava na krajské kolo či geometrický maratón. <link>Napíš nám</link>, čo by ťa potešilo.",
     "categoryHints": {
-      "advanced": "kto už je skúsenejší riešiteľ a trúfa si na úlohy z najvyššej kategórie stredoškolskej matematickej olympiády",
-      "elementary": "kto si chce vyskúšať súťažnú matematiku, vrátane základoškolákov",
-      "intermediate": "kto už niekedy vyriešil súťažné úlohy zo stredoškolskej matematickej olympiády"
+      "advanced": "ak si už trúfaš na úlohy z najvyššej kategórie stredoškolskej MO",
+      "elementary": "ak si chceš vyskúšať súťažnú matematiku, pokojne aj zo základnej školy",
+      "intermediate": "ak už máš za sebou nejaké úlohy zo stredoškolskej MO"
     },
     "categoryNote": "Môžeš sa zúčastniť aj viacerých kategórií.",
     "categoryToggle": "Ktorá úroveň je pre mňa?",
@@ -356,7 +354,7 @@
     "dialog": {
       "back": "Späť",
       "confirm": "Spustiť časomieru",
-      "consequence": "Časomiera sa spustí po kliknutí na tlačidlo. Po spustení ju nie je možné spustiť znovu.",
+      "consequence": "Časomiera sa spustí po kliknutí na tlačidlo. Nič, čo Mathilde napíšeš, sa už nedá vrátiť ani zmazať.",
       "consequencePractice": "Časomiera sa spustí po kliknutí na tlačidlo. Skúšobnú súťaž si môžeš dať znova, kedykoľvek.",
       "forfeit": "Vzdať sa a pozrieť si úlohy",
       "forfeitConfirm": "Vzdať sa",
@@ -383,8 +381,8 @@
         "Kedykoľvek v typicky dvojtýždennom súťažnom okne si spustíš časomieru ⏲️",
         "Následne máš limitovaný čas na vyriešenie príkladov 📋",
         "Svoje riešenia prezentuješ Mathilde a ona ti poskytne spätnú väzbu 🤖",
-        "Finálne body ti budú udelené po skončení súťaže na základe tvojich konverzácií s Mathildou 🔢",
-        "Neboj sa poslať neúplné riešenie alebo poprosiť Mathildu o pomoc, ak vôbec nevieš začať, aj progres po nápovedi je hodnotený kladným počtom bodov 🙂"
+        "Tvoje konverzácie si prečíta človek a udelí ti body, za každú úlohu najviac 6. Pri rovnosti rozhoduje čas tvojej poslednej správy pri každej úlohe, takže keď máš úlohu za sebou, rozhovor radšej ukonči 🔢",
+        "Neboj sa poslať neúplné riešenie alebo poprosiť Mathildu o pomoc, keď vôbec nevieš začať. Za bod, ku ktorému ti pomohla, dostaneš pol boda, takže skúsiť sa oplatí vždy 🙂"
       ],
       "title": "Ako to funguje?"
     },
@@ -400,14 +398,12 @@
     "problems": "Úlohy",
     "readiness": {
       "dismiss": "Skryť",
-      "dismissAuthReason": "skrytie tejto správy",
       "dismissError": "Správu sa nepodarilo skryť.",
       "profileLink": "Doplniť profil",
       "profileNeeded": "Pred vstupom do ostrých súťaží je nutné <link>vyplniť údaje v profile</link>.",
       "signedOut": "Súťažiť môžeš po <link>prihlásení</link>."
     },
     "remainingDays": "{days} d {hours} h",
-    "remainingHours": "{hours} h {minutes} min",
     "remainingMinutes": "{minutes} min {seconds} s",
     "results": "Výsledky",
     "resultsPending": "výsledky sa pripravujú",
@@ -415,26 +411,28 @@
       "accept": "Súhlasím s pravidlami a budem sa nimi riadiť.",
       "contact": "Nie je niečo jasné? <link>Napíš nám</link>, radšej sa opýtaj vopred.",
       "lines": [
-        "Použitie iného AI alebo akejkoľvek externej pomoci a komunikácie je zakázané, naše súťaže sú tréningom riešenia úloh a nie tréningom nechávania si ich vyriešiť inými.",
-        "Časomiera pokrýva aj riešenie, aj písanie si s Mathildou, treba brať do úvahy, že jej odpovede nemusia byť vždy najrýchlejšie (prioritizujeme presnosť nad rýchlosťou).",
-        "S Mathildou sa môžeš rozprávať dlho, avšak počet správ a dĺžka jednotlivej správy je z pochopiteľných dôvodov limitovaná.",
-        "Body sú udeľované na základe celej konverzácie, nemá teda zmysel sa z Mathildy snažiť vymámiť celé riešenie.",
+        "Použitie inej AI alebo akejkoľvek externej pomoci a komunikácie je zakázané. Naše súťaže sú tréningom riešenia úloh, a nie tréningom toho, ako si ich nechať vyriešiť od niekoho iného.",
+        "Jeden človek by mal súťažiť len s jedným účtom, prosíme o férovosť.",
+        "Časomiera pokrýva aj riešenie, aj písanie si s Mathildou. Rátaj s tým, že sa snaží o presnosť na úkor rýchlosti.",
+        "S Mathildou sa môžeš rozprávať dlho, ale počet správ aj dĺžka jednej správy sú z pochopiteľných dôvodov obmedzené.",
+        "Body udeľujeme za všetky tvoje konverzácie k danej úlohe dokopy. Hodnotí človek, ktorý vidí celú konverzáciu.",
+        "Mathilda má tvoje riešenie skontrolovať a pomôcť ti, nie ho vyriešiť za teba. Pokusy vymámiť z nej celé riešenie bez práce hodnotené nebudú.",
         "Úlohy prosím nezdieľaj, kým sa súťaž neuzavrie, nech tým nepokazíš zážitok ostatným.",
-        "Nesnaž sa Mathildu hacknúť, prinútiť ju, nech ti niečo naprogramuje alebo nech ti dá recept na polievku, takéto snahy budú viesť k diskvalifikácii."
+        "Nesnaž sa Mathildu hacknúť ani ju prinútiť, aby ti niečo naprogramovala alebo dala recept na polievku. Takéto pokusy končia diskvalifikáciou."
       ],
       "title": "Než začneš"
     },
     "rulesButton": "Pravidlá",
-    "selfAssessmentAsk": "Nechaj nám komentár k riešeniu",
+    "selfAssessmentAsk": "Komentár k riešeniu",
     "selfAssessmentError": "Nepodarilo sa to uložiť.",
     "selfAssessmentNote": "Číta to človek, ktorý bude úlohu hodnotiť. Upravovať sa dá, kým ti beží čas, a ešte pol hodiny po jeho skončení.",
     "selfAssessmentPracticeNote": "V skutočnej súťaži toto bude čítať hodnotiteľ. Takéto poznámky sa dajú upravovať, kým ti beží čas, a ešte pol hodiny po jeho skončení.",
-    "selfAssessmentPrompt": "Nechaj nám komentár k svojmu riešeniu, napríklad koľko bodov si podľa teba zaslúži 😀",
+    "selfAssessmentPrompt": "Ak chceš, nechaj nám komentár k svojmu riešeniu 😀",
     "standing": {
       "running": "súťažíš, ostáva {clock}"
     },
     "startAnotherDefense": "Začať ďalší rozhovor",
-    "startDefense": "Obhajovať riešenie",
+    "startDefense": "Napísať riešenie",
     "try": "Vyskúšať",
     "tryAgain": "Skúsiť znova",
     "turnsSpent": "{spent}/{max} správ",
@@ -471,15 +469,16 @@
     "SK": "Slovensko"
   },
   "defense": {
-    "competitionClockDivider": "Koniec súťaže",
+    "competitionClockDivider": "Čas vypršal",
     "competitionClockSpent": "Toto sa už do súťaže nepočíta.",
     "consentAccept": "Rozumiem",
     "consentAuthReason": "rozhovor s Mathildou",
-    "consentBody": "Konverzácie s Mathildou ukladáme a prípadne čítame, aby sme ju vylepšili. Zároveň prosíme o fér používanie, každá jej reakcia nás niečo stojí. Odklikni, ak si s tým v pohode 🙂",
+    "consentBody": "Konverzácie s Mathildou si ukladáme a čítame ich, aby sme ju vylepšili. Je to AI model a môže sa mýliť 🙂",
     "consentError": "Tvoje potvrdenie sa nepodarilo uložiť.",
     "consentPolicyLink": "Súkromie a podmienky",
     "consentUnavailable": "Nepodarilo sa nám načítať tvoje potvrdenie k rozhovoru s Mathildou.",
     "conversationFull": "Táto konverzácia dosiahla svoj limit. Začni novú alebo sa v tejto vráť späť (prídeš však o správy, tie sa natrvalo zmažú).",
+    "conversationFullCompetition": "V tejto konverzácii už bolo priveľa správ. Môžeš ale začať ďalšiu, hodnotiť sa bude všetko spolu.",
     "deletedHandout": "Odstránený materiál",
     "deleteError": "Konverzáciu sa nepodarilo odstrániť.",
     "deleteSession": "Odstrániť z histórie",
@@ -498,7 +497,7 @@
     "libraryEmpty": "Otvor ľubovoľný <link>materiál</link>, vyber si úlohu, začni vysvetľovať svoje riešenie alebo aspoň nápad, ako naň prísť, a Mathilda sa s tebou porozpráva, posúdi, ako na tom si, a postrčí ťa, keď bude treba.",
     "libraryEmptyLead": "Mathilda je AI tútorka",
     "libraryLoading": "Načítavam…",
-    "loginPrompt": "Mathilda si tvoje konverzácie ukladá, takže potrebuje účet.",
+    "loginPrompt": "Mathilda si tvoje konverzácie ukladá, takže na ňu potrebuješ účet.",
     "newDefense": "Nová konverzácia",
     "noReplyYet": "Zatiaľ bez odpovede",
     "outcomes": {
@@ -533,10 +532,11 @@
     "rewindError": "Konverzáciu sa nepodarilo vrátiť späť.",
     "rewindMessage": "Všetko po tomto bode sa natrvalo odstráni.",
     "rewindTitle": "Vrátiť konverzáciu sem?",
-    "role": "AI tútorka",
+    "roleOpponent": "AI oponentka",
     "roles": {
       "student": "Ty"
     },
+    "roleTutor": "AI tútorka",
     "sendError": "Tvoju odpoveď sa nepodarilo odoslať.",
     "thinking": "Premýšľam",
     "title": "Mathilda, AI tútorka",
@@ -788,7 +788,7 @@
       "title": "Matematická olympiáda a veci okolo nej"
     },
     "mathilda": {
-      "body": "AI pomocníčka, ktorá ti poradí pri úlohách: predstav jej svoje riešenie alebo len myšlienku, a ona ti ho skontroluje alebo pomôže dokončiť. Zatiaľ funguje v <link>študijných materiáloch</link>, postupne ju rozšírime aj na archív.",
+      "body": "AI tútorka, ktorá ti poradí s úlohami: predstav jej svoje riešenie alebo len nápad a ona ho skontroluje alebo ti pomôže dotiahnuť ho. Zatiaľ funguje v <link>študijných materiáloch</link>, postupne ju prinesieme aj do archívu.",
       "exchange": {
         "candidate": "Zrejme $a \\le b$ a $b \\le a$, takže $a = b$.",
         "examiner": "Vyplýva z $a \\mid b$ vždy $a \\le b$ pre každú dvojicu celých čísel?",
@@ -859,7 +859,7 @@
       "title": "Súťaž"
     },
     "competitions": {
-      "description": "Vyskúšaj si súťaže rôznych úrovní, v ktorých svoje riešenie obhajuješ našej umelej inteligencii Mathilde priamo v súťažnom čase.",
+      "description": "Vyskúšaj si súťaže rôznych úrovní, v ktorých svoje riešenie obhajuješ priamo v súťažnom čase pred našou umelou inteligenciou Mathildou.",
       "title": "Súťaže"
     },
     "guide": {
