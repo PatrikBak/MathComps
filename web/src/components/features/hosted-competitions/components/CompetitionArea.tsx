@@ -134,8 +134,11 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
         </AreaNote>
       )}
 
-      {/* That the entry is closed, and what that does and does not stop */}
-      {hasEnded && <AreaNote>{t(endedNoteKey(wasHandedIn, isGraded))}</AreaNote>}
+      {/* That the entry is closed, and what that does and does not stop. Only a graded run has a result
+          to draw that line around */}
+      {hasEnded && isGraded && (
+        <AreaNote>{t(wasHandedIn ? 'areaFinished' : 'areaClockSpent')}</AreaNote>
+      )}
 
       {/* An entry given up for the problems, which never had a clock */}
       {entry.kind === 'forfeited' && <AreaNote>{t('areaForfeited')}</AreaNote>}
@@ -216,28 +219,4 @@ function AreaNote({ children }: AreaNoteProps) {
       {children}
     </div>
   )
-}
-
-/**
- * Which sentence a closed entry gets.
- *
- * The graded pair name the results that later messages fall outside of. The practice run has none, so it
- * says what it can still offer and promises nothing.
- *
- * @param wasHandedIn - Whether the student closed it themselves rather than running out of clock.
- * @param isGraded - Whether the student is graded on this run.
- *
- * @returns The copy key.
- */
-function endedNoteKey(
-  wasHandedIn: boolean,
-  isGraded: boolean
-): 'areaFinished' | 'areaClockSpent' | 'areaFinishedPractice' | 'areaClockSpentPractice' {
-  // The graded pair, which both say where the line falls
-  if (isGraded) {
-    return wasHandedIn ? 'areaFinished' : 'areaClockSpent'
-  }
-
-  // And the pair for a run nobody grades, counted nowhere and so mentioning no result
-  return wasHandedIn ? 'areaFinishedPractice' : 'areaClockSpentPractice'
 }

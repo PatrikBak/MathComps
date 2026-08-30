@@ -240,7 +240,9 @@ function DefenseConversationForTarget({
           <span className="shrink-0 text-base font-bold text-foreground sm:text-lg">
             {MATHILDA_NAME}
           </span>
-          <span className="hidden truncate text-xs text-muted sm:inline">{t('role')}</span>
+          <span className="hidden truncate text-xs text-muted sm:inline">
+            {t(competition === null ? 'roleTutor' : 'roleOpponent')}
+          </span>
         </div>
 
         {/* How long the entry has left, which the page behind this modal is no longer there to say */}
@@ -357,6 +359,7 @@ function DefenseConversationForTarget({
             consentStatus: consent.status,
             isThinking,
             repliesLeft,
+            isGraded,
           })}
           draft={turn.draft}
           onDraftChange={turn.setDraft}

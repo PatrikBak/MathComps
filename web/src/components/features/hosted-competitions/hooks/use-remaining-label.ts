@@ -28,7 +28,7 @@ export function useRemainingLabel(): (deadline: string, now: number) => string {
 
       // Inside the last day, where the minutes start to matter
       if (parts.hours > 0) {
-        return t('remainingHours', { hours: parts.hours, minutes: parts.minutes })
+        return t('clockLeftHours', { hours: parts.hours, minutes: parts.minutes })
       }
 
       // Inside the last hour, down to the seconds

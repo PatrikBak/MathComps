@@ -72,6 +72,11 @@ type ComposerConsentUnknown = {
 type ComposerFull = {
   /** The discriminant. */
   kind: 'full'
+  /**
+   * Whether the conversation is being graded, which takes rewind away and leaves another conversation
+   * on the problem as the way on.
+   */
+  isGraded: boolean
 }
 
 /**
@@ -80,9 +85,16 @@ type ComposerFull = {
 type ComposerOpen = {
   /** The discriminant. */
   kind: 'open'
-  /** How many turns are left, or null while the caps are not known. */
+  /** How many turns are left, or null when that is unknown or not worth saying yet. */
   repliesLeft: number | null
 }
+
+/**
+ * How close to the cap an ungraded conversation gets before the room left is said out loud. Running
+ * out costs nothing there, so a count carried from the first turn only makes a student ration
+ * questions they should be asking.
+ */
+const UNGRADED_REPLIES_LEFT_TO_WARN_AT = 5
 
 /**
  * What the composer area currently is: a wait, a gate, a spent conversation, or a live editor.
@@ -111,6 +123,8 @@ export type DefenseComposerInput = {
   isThinking: boolean
   /** How many turns the conversation has left, or null while the caps are not known. */
   repliesLeft: number | null
+  /** Whether the conversation is being graded. */
+  isGraded: boolean
 }
 
 /**
@@ -156,9 +170,15 @@ export function resolveComposerState(input: DefenseComposerInput): DefenseCompos
 
   // Every turn spent, though a reply still coming is allowed to land
   if (input.repliesLeft !== null && input.repliesLeft <= 0 && !input.isThinking) {
-    return { kind: 'full' }
+    return { kind: 'full', isGraded: input.isGraded }
   }
 
-  // Open for the next turn, with whatever room is left in it
-  return { kind: 'open', repliesLeft: input.repliesLeft }
+  // A graded conversation says the room left from the first turn, because a student who runs out
+  // mid-argument has no rewind to undo it; anywhere else waits until the wall is close
+  const isRoomLeftWorthSaying =
+    input.repliesLeft !== null &&
+    (input.isGraded || input.repliesLeft <= UNGRADED_REPLIES_LEFT_TO_WARN_AT)
+
+  // Open for the next turn, carrying the count only where it is worth saying
+  return { kind: 'open', repliesLeft: isRoomLeftWorthSaying ? input.repliesLeft : null }
 }

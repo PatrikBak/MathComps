@@ -51,8 +51,8 @@ export function useDismissProfilePrompt(
     // What the page says about the account has just moved
     onSettled: () => invalidateEntryReadiness(queryClient),
 
-    // The reason shown in the auth prompt
-    authReason: t('readiness.dismissAuthReason'),
+    // Unreachable: only a signed-in student is ever offered the dismiss, so the entry reason stands in
+    authReason: t('entryAuthReason'),
 
     // Fallback copy when the failure carried no recognized code
     errorMessage: t('readiness.dismissError'),

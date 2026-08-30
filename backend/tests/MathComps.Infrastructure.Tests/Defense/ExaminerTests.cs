@@ -220,10 +220,14 @@ public class ExaminerTests
     }
 
     /// <summary>
-    /// A reply that keeps withholding an earned close burns through the revision cap, then ships the constrained
-    /// fallback generated under the closing note instead of the never-closing draft — still carrying its withheld-close
-    /// verdict, so the trace shows the exam never got to end.
+    /// A reply that keeps withholding an earned close burns through the revision cap, then ships the same holding
+    /// fallback every other surviving fault gets — still carrying its withheld-close verdict, so the trace shows the
+    /// conversation never got to end.
     /// </summary>
+    /// <remarks>
+    /// It holds rather than concedes on purpose: conceding is the one claim the math guard never sees, so it never
+    /// ships from a fallback nothing can reject.
+    /// </remarks>
     [Fact]
     public async Task A_persistent_withheld_close_ships_the_constrained_fallback_after_the_cap()
     {
@@ -253,9 +257,11 @@ public class ExaminerTests
         Assert.True(outcome.SafeFallback);
         Assert.True(outcome.Shipped.LeakCheck.WithholdsClose);
 
-        // The last generate ran under the closing note — a withheld close is the surviving fault, so the fallback
-        // ends the exam instead of retreating to a holding question.
-        Assert.Contains("closing reply", generateRequests[^1].SystemPrompt);
+        // And it ran under the holding note, which asserts nothing.
+        Assert.Contains("minimal holding reply", generateRequests[^1].SystemPrompt);
+
+        // Not under one conceding a solution no guard checked.
+        Assert.DoesNotContain("their solution stands", generateRequests[^1].SystemPrompt);
     }
 
     /// <summary>
@@ -413,6 +419,55 @@ public class ExaminerTests
 
         // ...while the template's real {reference} placeholder still got filled with the reference solution.
         Assert.Contains(reference, generateRequests[0].SystemPrompt);
+    }
+
+    /// <summary>
+    /// Wordings that would put the examiner's internal framing into a reply the student reads. She is framed as an
+    /// oral-exam examiner because that is what makes her probe rather than explain, but the surface calls her a tutor
+    /// on a handout and an opponent in a competition, so the word belongs to the framing and not to her voice.
+    /// </summary>
+    private static readonly string[] _framingLeaks =
+        ["end the exam", "close the exam", "AI examiner on MathComps"];
+
+    /// <summary>
+    /// The shipped generate prompt carries none of those wordings, which is what keeps a leak of this kind out of a
+    /// transcript nobody is diffing.
+    /// </summary>
+    [Fact]
+    public void The_shipped_generate_prompt_never_scripts_the_framing_into_a_reply()
+    {
+        // The production prompt, read from where the build puts it.
+        var prompt = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Prompts", "generate.txt"));
+
+        // None of the wordings that would reach the candidate.
+        foreach (var leak in _framingLeaks)
+            Assert.DoesNotContain(leak, prompt);
+    }
+
+    /// <summary>
+    /// Neither do the notes the engine writes itself. The revision note for a withheld close and the fallback note
+    /// both land on exactly the turns that produce a close, and the fallback ships with no guard able to reject it.
+    /// </summary>
+    [Fact]
+    public async Task The_notes_that_land_on_a_close_never_script_the_framing_into_a_reply()
+    {
+        // A draft that keeps withholding an earned close, so the run walks the revision notes and then the fallback.
+        var generateRequests = new List<ChatCallRequest>();
+        var caller = new Mock<ILlmChatCaller>();
+        caller.Setup(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("keeps pressing."));
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanLeak() with { WithholdsClose = true, Established = "the pairing chain" });
+        SetupStep(caller, CleanLanguage());
+
+        // Run the turn. The throwaway template is the note and nothing else, so each request is one note.
+        await RunAsync(caller);
+
+        // Every note the run wrote, the fallback's included.
+        foreach (var request in generateRequests)
+            foreach (var leak in _framingLeaks)
+                Assert.DoesNotContain(leak, request.SystemPrompt);
     }
 
     /// <summary>

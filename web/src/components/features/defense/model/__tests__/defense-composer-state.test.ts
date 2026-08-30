@@ -12,6 +12,7 @@ describe('resolveComposerState', () => {
     consentStatus: 'given',
     isThinking: false,
     repliesLeft: 12,
+    isGraded: false,
   }
 
   it('waits while the reader has not been asked to acknowledge anything yet', () => {
@@ -92,7 +93,18 @@ describe('resolveComposerState', () => {
 
   it('closes a conversation that has spent every turn it was given', () => {
     // Nothing left to write into, and saying so beats an editor whose send would be refused
-    expect(resolveComposerState({ ...READY, repliesLeft: 0 })).toEqual({ kind: 'full' })
+    expect(resolveComposerState({ ...READY, repliesLeft: 0 })).toEqual({
+      kind: 'full',
+      isGraded: false,
+    })
+  })
+
+  it('carries the grading through to a spent conversation', () => {
+    // The sentence the composer shows there names a different way on, because grading takes rewind away
+    expect(resolveComposerState({ ...READY, repliesLeft: 0, isGraded: true })).toEqual({
+      kind: 'full',
+      isGraded: true,
+    })
   })
 
   it('stays open on the last turn while its reply is still coming', () => {
@@ -100,6 +112,32 @@ describe('resolveComposerState', () => {
     expect(resolveComposerState({ ...READY, repliesLeft: 0, isThinking: true })).toEqual({
       kind: 'open',
       repliesLeft: 0,
+    })
+  })
+
+  it('carries the full count through on a graded very first turn', () => {
+    // A graded conversation rewinds nothing, so the room left is said from the start and a student who
+    // runs out mid-argument was told it was coming
+    expect(resolveComposerState({ ...READY, repliesLeft: 30, isGraded: true })).toEqual({
+      kind: 'open',
+      repliesLeft: 30,
+    })
+  })
+
+  it('holds the count back where nothing is graded until the wall is close', () => {
+    // Running out costs nothing here, so a count from the first turn only makes a student ration
+    // questions they should be asking
+    expect(resolveComposerState({ ...READY, repliesLeft: 30 })).toEqual({
+      kind: 'open',
+      repliesLeft: null,
+    })
+  })
+
+  it('says the count once the wall is close even where nothing is graded', () => {
+    // Cheap as it is, the wall still arrives without warning otherwise
+    expect(resolveComposerState({ ...READY, repliesLeft: 5 })).toEqual({
+      kind: 'open',
+      repliesLeft: 5,
     })
   })
 

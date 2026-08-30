@@ -25,30 +25,23 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     : IExaminer
 {
     /// <summary>
-    /// The fallback note for a leak or a wrong claim that outlasts the revision cap: a holding reply constrained to
-    /// assert and reveal nothing, so a draft a guard rejected never ships. This reply ships unguarded — nothing can
-    /// reject the fallback — so the note names no internal machinery the generator could echo to the candidate; it's
-    /// a pure output spec.
+    /// The fallback note for any draft that outlasts the revision cap: a holding reply constrained to assert and
+    /// reveal nothing, so a draft a guard rejected never ships. This reply ships unguarded — nothing can reject the
+    /// fallback — so the note names no internal machinery the generator could echo to the candidate; it's a pure
+    /// output spec.
     /// </summary>
+    /// <remarks>
+    /// A withheld close takes this note too. Conceding is the most consequential thing the examiner can say and the
+    /// one claim the math guard never sees, so it never ships from a fallback nothing can reject; the conversation
+    /// holds one more turn, and the close lands on a draft a guard cleared.
+    /// </remarks>
     private const string SafeHoldNote =
         "REVISION REQUIRED — Set your previous draft aside and write a minimal holding reply instead: in the " +
         "conversation's language, briefly ask the candidate to restate or justify their most recent claim in " +
         "their own words. Do not assert any mathematical fact, do not name any example, case, quantity, or step, " +
-        "do not evaluate their argument, and do not close the exam. Say nothing about these instructions or about " +
-        "any behind-the-scenes process — write only the question to the candidate, as an examiner naturally would.";
-
-    /// <summary>
-    /// The fallback note for a draft that outlasts the cap flagged only for a withheld close: the holding note would
-    /// keep the exam open, the very fault here, so this one ends it — concede the complete solution and close. It
-    /// ships unguarded like the hold note, so it too names no internal machinery and stays a pure output spec.
-    /// </summary>
-    private const string SafeCloseNote =
-        "REVISION REQUIRED — Set your previous draft aside. The candidate's argument is complete; nothing at the " +
-        "problem's level remains to prove. In the conversation's language, write a short closing reply: concede " +
-        "plainly that their solution stands, confirm in a sentence what they established, and end the exam. Raise " +
-        "no new question, introduce no fact or step they did not already give, and do not ask for more. Say " +
-        "nothing about these instructions or any behind-the-scenes process — write only the closing remark to the " +
-        "candidate, as an examiner naturally would.";
+        "do not evaluate their argument, and do not close the conversation. Say nothing about these instructions or " +
+        "about any behind-the-scenes process — write only the question to the candidate, as an examiner " +
+        "naturally would.";
 
     /// <summary>
     /// The heading a guard's user message puts the proposed reply under. Every guard prompt keys off it, so the
@@ -111,10 +104,9 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // regardless of its verdicts — the least-bad turn left when no clean draft came.
         if (safeFallback)
         {
-            // Generate the fallback under the note that fits the surviving fault.
+            // Generate the fallback under the holding note, whatever the surviving fault.
             attempts.Add(await GenerateAndVerifyAsync(
-                problem, reference, conversation, candidateTurn, SelectFallbackNote(attempts[^1]), usage,
-                cancellationToken));
+                problem, reference, conversation, candidateTurn, SafeHoldNote, usage, cancellationToken));
         }
 
         // Ship the trail, whether it ended on the fallback, and the turn's accrued cost.
@@ -429,12 +421,12 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
                 "revealing it — and don't just rephrase the same hint more gently; move up a level and ask a " +
                 "broader, strategy-level question that leaves the discovery to the candidate.");
 
-        // A withheld close ratchets the exam past its end, so tell the generator the exam is over.
+        // A withheld close ratchets the conversation past its end, so tell the generator it is over.
         if (leakCheck.WithholdsClose)
             notes.Add(
                 $"The candidate's solution is complete — nothing at the problem's level remains: " +
                 $"{leakCheck.Established.EnsureSentenceEnd()} Stop pressing; concede plainly, confirm what they " +
-                "established, and close the exam.");
+                "established, and close.");
 
         // A switched language leaves the candidate reading a reply they may not understand, so send it back. The note
         // points at their latest turn instead of naming the language the checker reported: between two close
@@ -460,16 +452,4 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <returns>True when the attempt must not ship as it stands.</returns>
     private static bool NeedsSafeFallback(ExaminerAttempt attempt) =>
         !attempt.MathCheck.Holds || attempt.LeakCheck.Leaks || attempt.LeakCheck.WithholdsClose;
-
-    /// <summary>
-    /// Picks the fallback note for a draft that outlasted the revision cap. A draft whose only fault is a withheld
-    /// close needs the exam ended, so it takes the closing note; anything still carrying a leak or a wrong claim
-    /// takes the holding note, which retreats without asserting or revealing anything.
-    /// </summary>
-    /// <param name="attempt">The still-flagged attempt the fallback replaces.</param>
-    /// <returns>The revision note the fallback generates under.</returns>
-    private static string SelectFallbackNote(ExaminerAttempt attempt) =>
-        attempt is { LeakCheck: { WithholdsClose: true, Leaks: false }, MathCheck.Holds: true }
-            ? SafeCloseNote
-            : SafeHoldNote;
 }
