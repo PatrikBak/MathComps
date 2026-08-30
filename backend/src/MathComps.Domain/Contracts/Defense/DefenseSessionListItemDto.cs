@@ -10,6 +10,7 @@ namespace MathComps.Domain.Contracts.Defense;
 /// <param name="LastActivityAt">When something was last said in the conversation.</param>
 /// <param name="LastStudentMessage">
 /// The student's most recent message, or null when the conversation holds no student turn.</param>
+/// <param name="IsGraded">Whether the student is graded on the round the conversation was argued under.</param>
 public record DefenseSessionListItemDto(
     Guid Id, NamedDefenseTarget Target, string Statement, DateTimeOffset LastActivityAt,
-    string? LastStudentMessage);
+    string? LastStudentMessage, bool IsGraded);

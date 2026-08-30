@@ -28,7 +28,7 @@ type DefenseHistoryMenuProps = {
   /** Opens an existing session. */
   onSelect: (session: DefenseSession) => void
   /**
-   * Deletes a session; null where none of them can be dropped, which is what a competition passes.
+   * Deletes a session; null where none of them can be dropped, which is what a graded run passes.
    * Browsing the conversations is unaffected.
    */
   onDelete: ((sessionId: string) => Promise<void>) | null

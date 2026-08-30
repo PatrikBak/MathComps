@@ -49,7 +49,7 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
   // Which defense is open, and the row focus returns to on the way back
   const { selected, open, clear, rowRef } = useLibrarySelection()
 
-  // What the chosen defense opens as: the problem to argue and the entry it is argued inside
+  // What the chosen defense opens as: the problem to argue and the run it is argued inside
   const conversation = useLibraryConversation(selected)
 
   // The defense awaiting delete confirmation, or null
@@ -122,7 +122,7 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
             competition={conversation.competition}
           />
         ) : selected !== null ? (
-          // A chosen defense whose problem is not in hand yet, which is the entry a competition one is read
+          // A chosen defense whose problem is not in hand yet, which is the run a competition one is read
           // against still being read
           <FetchStatePlaceholder
             uiState={conversation.uiState}

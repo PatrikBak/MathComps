@@ -9,7 +9,10 @@ import type {
   MathildaConsent,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
-import { entryEndsAt } from '@/components/features/hosted-competitions/model/hosted-competition-state'
+import {
+  entryEndsAt,
+  isPracticeGroup,
+} from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import type {
   EntryReadiness,
   HostedCompetition,
@@ -682,8 +685,8 @@ function buildLibrary(state: FakeState): DefenseSessionListItem[] {
 }
 
 /**
- * A conversation held about a handout the site no longer carries, so a spec can tell a control a
- * competition conversation is refused from one the list has lost altogether.
+ * A conversation held about a handout the site no longer carries, so a spec can tell a control a graded
+ * conversation is refused from one the list has lost altogether.
  */
 const HANDOUT_ITEM: DefenseSessionListItem = {
   id: 'session-handout',
@@ -692,6 +695,7 @@ const HANDOUT_ITEM: DefenseSessionListItem = {
   lastActivityAt: new Date(0).toISOString(),
   lastStudentMessage:
     'Induction on the size of the number, with the smallest prime factor peeled off.',
+  isGraded: false,
 }
 
 /**
@@ -735,6 +739,7 @@ function libraryItemsOf(
     lastActivityAt: session.turns.at(-1)?.createdAt ?? new Date(0).toISOString(),
     lastStudentMessage:
       session.turns.findLast((turn) => turn.role === 'candidate')?.content ?? null,
+    isGraded: !isPracticeGroup(group),
   }))
 }
 
@@ -920,6 +925,14 @@ type StartRequestBody = {
   target: { problemId: string }
   /** What the turn opening the argument says. */
   content: string
+}
+
+/**
+ * What rewinding a conversation sends.
+ */
+type RewindRequestBody = {
+  /** The sequence of the last turn to keep; every later one goes. */
+  keepThroughSequence: number
 }
 
 /**
@@ -1166,6 +1179,79 @@ export async function installHostedBackend(
   await page.route(`${BACKEND_ORIGIN}/defense/sessions/mine`, (route) =>
     answer(page, route, buildLibrary(state))
   )
+
+  // Dropping a conversation, which the student may do with anything they are not graded on. The pattern
+  // reaches the library read above too, so everything but the drop is passed back to it
+  await page.route(`${BACKEND_ORIGIN}/defense/sessions/*`, async (route) => {
+    // Only dropping a conversation lives here
+    if (route.request().method() !== 'DELETE') {
+      // Passed on, so the read it was meant for answers it
+      await route.fallback()
+
+      // What follows drops a conversation, which this call is not
+      return
+    }
+
+    // Which conversation is being dropped
+    const sessionId = new URL(route.request().url()).pathname.split('/').pop() ?? ''
+
+    // Out of whichever problem was holding it, so every list that reads the same memory follows
+    for (const sessions of state.transcripts.values()) {
+      // Where it sits among that problem's conversations, absent when it is another problem's
+      const index = sessions.findIndex((candidate) => candidate.id === sessionId)
+
+      // Taken out where it was found
+      if (index !== -1) {
+        sessions.splice(index, 1)
+      }
+    }
+
+    // Answered with nothing, the way the backend answers a drop
+    await route.fulfill({ status: 204, body: '' })
+  })
+
+  // Rewinding a conversation to a chosen turn, dropping everything said after it
+  await page.route(`${BACKEND_ORIGIN}/defense/sessions/*/rewind`, async (route) => {
+    // Which conversation is being rewound
+    const sessionId = new URL(route.request().url()).pathname.split('/').at(-2) ?? ''
+
+    // How much of the conversation the student is keeping
+    const { keepThroughSequence } = route.request().postDataJSON() as RewindRequestBody
+
+    // Wherever it is being held
+    const session = [...state.transcripts.values()]
+      .flat()
+      .find((candidate) => candidate.id === sessionId)
+
+    // One nobody can find is a failure the caller surfaces like any other
+    if (session === undefined) {
+      // Answered as a call for something that is not there
+      await route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
+
+      // Nothing to rewind
+      return
+    }
+
+    // The cut point must land on an examiner turn, so the rewound conversation awaits the student. A client
+    // that miscounts asks for a candidate one, which the site refuses
+    if (session.turns[keepThroughSequence]?.role !== 'examiner') {
+      // Answered as a rewind point that is not one
+      await route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({ errorCode: 'DefenseRewindTarget' }),
+      })
+
+      // Nothing is dropped on a cut point the conversation cannot take
+      return
+    }
+
+    // The kept prefix, which is what every later read of the conversation comes back with
+    session.turns = session.turns.slice(0, keepThroughSequence + 1)
+
+    // Answered with nothing, the way the backend answers a rewind
+    await route.fulfill({ status: 204, body: '' })
+  })
 
   // Opening a conversation, which starts on the examiner's own line and answers the first turn
   await page.route(`${BACKEND_ORIGIN}/defense/sessions`, async (route) => {

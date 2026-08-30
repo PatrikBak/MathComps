@@ -4,7 +4,7 @@ import type { DefenseTarget } from '../defense-target'
 import {
   defenseDraftStorageKey,
   defenseTargetKey,
-  handoutTargetOf,
+  isSubjectReachable,
   toWireTarget,
 } from '../defense-target'
 
@@ -41,18 +41,16 @@ describe('toWireTarget', () => {
   })
 })
 
-describe('handoutTargetOf', () => {
-  it('hands back the environment a handout defense is held against', () => {
-    // A handout defense names an environment, which is what the reader's link to the problem resolves from
-    expect(handoutTargetOf(HANDOUT)).toEqual({
-      handoutContentId: 'inverses-mod-p',
-      environmentId: 'ab12cd34',
-    })
+describe('isSubjectReachable', () => {
+  it('reaches a competition problem whatever language the reader is in', () => {
+    // The competition area hands the statement in with the problem, so there is nothing left to look up
+    expect(isSubjectReachable(COMPETITION, 'sk')).toBe(true)
+    expect(isSubjectReachable(COMPETITION, 'en')).toBe(true)
   })
 
-  it('names no environment for a defense held inside a competition', () => {
-    // A competition problem lives in no handout, and a request claiming one would point at nothing
-    expect(handoutTargetOf(COMPETITION)).toBeNull()
+  it('reaches nothing for a handout the site does not carry', () => {
+    // A target outlives the handout it points at, and a fresh conversation about one has no subject
+    expect(isSubjectReachable(HANDOUT, 'sk')).toBe(false)
   })
 })
 

@@ -52,8 +52,8 @@ type ReadyArea = {
   now: number
   /** When the counted part ends, as an ISO-8601 string; null for an entry that never had a clock. */
   endsAt: string | null
-  /** Whether this is the run nobody is graded on. */
-  isPractice: boolean
+  /** Whether the student is graded on this run. */
+  isGraded: boolean
   /** Whether the student closed the entry themselves, which the page says differently from a spent clock. */
   wasHandedIn: boolean
   /** Whether the counted part is over, which changes what the page says and nothing about what it offers. */
@@ -146,7 +146,7 @@ export function useCompetitionArea(competitionId: string): UseCompetitionAreaRes
     now,
     endsAt,
     wasHandedIn,
-    isPractice: isPracticeGroup(group),
+    isGraded: !isPracticeGroup(group),
     hasEnded: hasEntryEnded(entry, now),
     areNotesOpen: areNotesOpen(entry, noteGraceMinutes, now),
   }

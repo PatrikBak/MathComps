@@ -32,8 +32,8 @@ type CompetitionProblemPanelProps = {
   entry: AreaEntry
   /** Whether a note about the solution can still be written, which closes shortly after the entry does. */
   areNotesOpen: boolean
-  /** Whether this is the run nobody is graded on, which changes who a note says will read it. */
-  isPractice: boolean
+  /** Whether the student is graded on this run. */
+  isGraded: boolean
 }
 
 /**
@@ -45,7 +45,7 @@ export function CompetitionProblemPanel({
   problem,
   entry,
   areNotesOpen,
-  isPractice,
+  isGraded,
 }: CompetitionProblemPanelProps) {
   // Competitions copy
   const t = useTranslations('competitions')
@@ -125,7 +125,7 @@ export function CompetitionProblemPanel({
           problemId={problem.id}
           assessment={problem.selfAssessment}
           areNotesOpen={areNotesOpen}
-          isPractice={isPractice}
+          isGraded={isGraded}
           maxCommentChars={problem.maxCommentChars}
         />
       </div>
@@ -153,7 +153,7 @@ export function CompetitionProblemPanel({
                 ? { kind: 'fresh' }
                 : { kind: 'named', sessionId: openedSessionId }
             }
-            competition={entry}
+            competition={{ entry, isGraded }}
           />
         </Modal>
       )}

@@ -2,7 +2,14 @@ import type { Page } from '@playwright/test'
 
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
-import { areaCopy, areaPath, chatCopy, LIST_PATH } from './support/competitions'
+import {
+  actionsCopy,
+  areaCopy,
+  areaPath,
+  chatCopy,
+  LIST_PATH,
+  sendTurn,
+} from './support/competitions'
 import { COMPETITION_ID, installHostedBackend } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
@@ -11,6 +18,9 @@ const SETTLE_TIMEOUT_MS = 15_000
 
 /** The season every conversation the fake holds reads as having been set in. */
 const SEASON_YEARS = '2026/2027'
+
+/** What the run that grades nobody is called. */
+const PRACTICE_NAME = 'Practice competition'
 
 /**
  * Opens the student's own list of conversations from the user menu.
@@ -54,7 +64,7 @@ test.describe("the student's own list of conversations", () => {
     await expect(row).toContainText('Problem 1')
   })
 
-  test('offers no way to drop a competition conversation, and keeps offering it elsewhere', async ({
+  test('offers no way to drop a graded conversation, and keeps offering it elsewhere', async ({
     page,
   }) => {
     // A student holding conversations of both kinds
@@ -80,6 +90,51 @@ test.describe("the student's own list of conversations", () => {
     await expect(
       handoutRow.locator('..').getByRole('button', { name: chatCopy.deleteSession })
     ).toBeVisible()
+  })
+
+  test('drops a practice conversation off the list, which grades nobody', async ({ page }) => {
+    // A student with an entry still to spend, and graded conversations already behind them
+    await installHostedBackend(page, 'ready')
+
+    // Open the list, where the practice run is taken
+    await page.goto(LIST_PATH)
+
+    // Press try
+    await page.getByRole('button', { name: areaCopy.try }).first().click()
+
+    // And confirm the dialog
+    await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
+
+    // A conversation held about the first problem of the practice set
+    await page
+      .getByRole('button', { name: areaCopy.startDefense })
+      .first()
+      .click({ timeout: SETTLE_TIMEOUT_MS })
+    await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
+
+    // What the student argues, which is what the conversation is saved under
+    await sendTurn(page, 'Every residue class is hit, so the bound is tight')
+    await expect(page.getByLabel(chatCopy.transcriptLabel)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Out of the competition, back to where the list is reached from
+    await page.goto(LIST_PATH)
+
+    // Their list, and the row the practice conversation reads on among the graded ones behind it
+    const library = await openLibrary(page)
+    const practiceRows = library.getByRole('button').filter({ hasText: PRACTICE_NAME })
+    await expect(practiceRows).toHaveCount(1, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Which the list offers to drop, the student not being graded on the run it was argued under
+    await practiceRows.locator('..').getByRole('button', { name: chatCopy.deleteSession }).click()
+
+    // Confirmed, since a drop is not taken back
+    await page.getByRole('button', { name: actionsCopy.confirm }).click()
+
+    // Leaving the list without it, and the graded rows behind it untouched
+    await expect(practiceRows).toHaveCount(0, { timeout: SETTLE_TIMEOUT_MS })
+    await expect(library.getByRole('button').filter({ hasText: SEASON_YEARS })).not.toHaveCount(0)
   })
 
   test('opens a competition conversation on the terms its own area opens it on', async ({

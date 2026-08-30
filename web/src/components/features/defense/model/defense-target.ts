@@ -1,6 +1,8 @@
 import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
+import { resolveHandoutProblemRef } from '@/components/features/handouts/handout-problem-ref'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { DEFENSE_DRAFT_STORAGE_PREFIX } from '@/constants/local-storage-constants'
+import type { Locale } from '@/i18n/i18n'
 
 import type { DefenseSessionTarget } from './defense-types'
 
@@ -89,21 +91,23 @@ export function defenseTargetKey(target: DefenseTarget): string {
 }
 
 /**
- * Reads the handout environment a target names.
+ * Whether the reader's language still reaches what a defense is held against, which is what a fresh
+ * conversation needs to have a subject at all.
  *
- * @param target - The target being read.
+ * @param target - What the defense is held against.
+ * @param locale - The language the reader is in.
  *
- * @returns The environment, or null for a defense held somewhere other than a handout.
+ * @returns Whether the subject is reachable.
  */
-export function handoutTargetOf(target: DefenseTarget): HandoutEnvironmentTarget | null {
+export function isSubjectReachable(target: DefenseTarget, locale: Locale): boolean {
   switch (target.kind) {
-    // A handout defense is the one that has one
+    // A handout's problem is published per language, and a target can outlive the handout it points at
     case 'handout':
-      return target.environment
+      return resolveHandoutProblemRef(target.environment, locale) !== null
 
-    // A competition problem lives in no handout
+    // A competition's problem comes in with its statement, so the area that set it has already answered
     case 'competition':
-      return null
+      return true
 
     // Every target is handled above
     default:

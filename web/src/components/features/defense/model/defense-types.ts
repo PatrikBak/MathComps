@@ -1,4 +1,5 @@
 import type { HandoutEnvironmentTarget } from '@/components/features/handouts/handout-metadata-types'
+import type { AreaEntry } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import type { ProblemSource } from '@/components/features/problems/types/problem-api-types'
 
 import type { DefenseTarget } from './defense-target'
@@ -195,6 +196,25 @@ export type DefenseSessionListItem = {
   lastActivityAt: string
   /** The student's most recent message; null when the session has none. */
   lastStudentMessage: string | null
+  /**
+   * Whether the student is graded on the run the defense was argued under. See
+   * {@link DefenseCompetitionRun}.
+   */
+  isGraded: boolean
+}
+
+/**
+ * The competition run a defense is argued inside: the entry its clock comes from, and whether the student
+ * is graded on it.
+ *
+ * A graded run makes the conversation the record of what the student argued under their entry, so nothing
+ * inside one may rewrite it. A practice run grades nobody, so its conversations stay the student's own.
+ */
+export type DefenseCompetitionRun = {
+  /** The entry the defense is argued inside. */
+  entry: AreaEntry
+  /** Whether the student is graded on the run the entry was spent in. */
+  isGraded: boolean
 }
 
 /**
