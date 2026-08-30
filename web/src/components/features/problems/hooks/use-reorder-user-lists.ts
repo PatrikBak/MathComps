@@ -5,7 +5,7 @@ import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
 import { getListOrderApiUrl } from '../services/user-list-api-urls'
 import type { UserListsResponse } from '../types/user-list-types'
-import { userListQueryKeys } from './use-user-lists'
+import { userListQueryKeys, useUserListsKey } from './use-user-lists'
 
 /**
  * Return type for {@link useReorderUserLists}.
@@ -37,6 +37,9 @@ export function useReorderUserLists(): UseReorderUserListsResult {
   // Translations for error and auth-prompt messages
   const t = useTranslations('problems.filters')
 
+  // Where this user's lists are cached
+  const listsKey = useUserListsKey()
+
   // Reorder mutation with optimistic update
   const mutation = useOptimisticMutation<void, string[], ReorderContext>({
     // Call the reorder endpoint
@@ -50,10 +53,10 @@ export function useReorderUserLists(): UseReorderUserListsResult {
     // Optimistic update — reorder the cached lists immediately
     onMutate: async (contentIds) => {
       // Cancel in-flight queries to prevent overwriting our optimistic data
-      await queryClient.cancelQueries({ queryKey: userListQueryKeys.lists() })
+      await queryClient.cancelQueries({ queryKey: listsKey })
 
       // Snapshot the previous cache for rollback
-      const previous = queryClient.getQueryData<UserListsResponse>(userListQueryKeys.lists())
+      const previous = queryClient.getQueryData<UserListsResponse>(listsKey)
 
       // Optimistically reorder the cached lists
       if (previous) {
@@ -64,7 +67,7 @@ export function useReorderUserLists(): UseReorderUserListsResult {
         const reordered = contentIds.map((id) => listMap.get(id)).filter(Boolean)
 
         // Setup the new order in the cache
-        queryClient.setQueryData<UserListsResponse>(userListQueryKeys.lists(), {
+        queryClient.setQueryData<UserListsResponse>(listsKey, {
           ...previous,
           lists: reordered as UserListsResponse['lists'],
         })
@@ -78,7 +81,7 @@ export function useReorderUserLists(): UseReorderUserListsResult {
     onError: (_error, _contentIds, context) => {
       // Restore the pre-reorder order
       if (context?.previous) {
-        queryClient.setQueryData(userListQueryKeys.lists(), context.previous)
+        queryClient.setQueryData(listsKey, context.previous)
       }
     },
 

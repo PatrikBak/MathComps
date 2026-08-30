@@ -1,3 +1,4 @@
+import { useLocale } from 'next-intl'
 import { useCallback, useMemo } from 'react'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
@@ -45,6 +46,9 @@ export function useDefenseReviewQueue(filter: DefenseReviewFilter): UseDefenseRe
   // The authenticated caller
   const api = useApi({ requireAuth: true })
 
+  // The language the queue is read in
+  const locale = useLocale()
+
   // Fetches one page
   const fetchPage = useCallback(
     async (pageNumber: number, signal: AbortSignal) =>
@@ -54,7 +58,7 @@ export function useDefenseReviewQueue(filter: DefenseReviewFilter): UseDefenseRe
 
   // The queue itself, a page of conversations at a time
   const paged = usePagedQuery({
-    queryKey: reviewQueueQueryKey(filter),
+    queryKey: reviewQueueQueryKey(filter, locale),
     fetchPage,
     enabled: api.state === 'ready',
     cachePolicy: cachePolicy.userData,

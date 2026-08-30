@@ -27,13 +27,16 @@ export function defenseCopyQueryKey(locale: string): QueryKey {
 /**
  * Builds the query key for a user's cross-problem list of defenses.
  *
+ * The language belongs in it because the list names each conversation's competition, which is worded.
+ *
  * @param userId - The signed-in user's id, or null while it isn't known.
+ * @param locale - The language the list is read in.
  *
  * @returns The query key.
  */
-export function myDefensesQueryKey(userId: string | null): QueryKey {
+export function myDefensesQueryKey(userId: string | null, locale: string): QueryKey {
   // Keyed by user, so a switched account never reads the previous one's list
-  return [...DEFENSE_QUERY_KEY, 'mine', userId] as const
+  return [...DEFENSE_QUERY_KEY, 'mine', userId, locale] as const
 }
 
 /**

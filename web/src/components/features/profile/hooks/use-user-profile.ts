@@ -1,5 +1,7 @@
 'use client'
 
+import { useAuth } from '@clerk/nextjs'
+import type { QueryKey } from '@tanstack/react-query'
 import { useQuery } from '@tanstack/react-query'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
@@ -10,8 +12,28 @@ import { getUserProfile } from '../services/profile-service'
 /**
  * Query keys for the signed-in user's own profile, used for cache management.
  */
-export const userProfileQueryKeys = {
+const userProfileQueryKeys = {
   all: ['userProfile'] as const,
+  forUser: (userId: string | null) => [...userProfileQueryKeys.all, userId] as const,
+}
+
+/**
+ * The key the signed-in user's own profile is cached under: the read, and every write that echoes into it.
+ *
+ * Keyed by user, since signing out and back in as somebody else never reloads the page, and an entry cached
+ * under anything less hands the second reader the first one's name and address.
+ *
+ * One hook for all of them, so a write cannot address a key the read never wrote to, which lands nowhere and
+ * says nothing.
+ *
+ * @returns The key.
+ */
+export function useUserProfileKey(): QueryKey {
+  // Whose profile it is, once Clerk knows
+  const { userId, isLoaded } = useAuth()
+
+  // The key, holding the user as null until Clerk has settled who they are
+  return userProfileQueryKeys.forUser(isLoaded ? (userId ?? null) : null)
 }
 
 /**
@@ -44,9 +66,12 @@ export function useUserProfile(): UseUserProfileResult {
   // API client for the signed-in caller
   const api = useApi({ requireAuth: true })
 
+  // Where this user's profile is cached
+  const profileKey = useUserProfileKey()
+
   // What the site holds on them
   const query = useQuery({
-    queryKey: userProfileQueryKeys.all,
+    queryKey: profileKey,
     queryFn: async () => {
       // Narrow to the ready caller
       const apiCall = readyApiCall(api)

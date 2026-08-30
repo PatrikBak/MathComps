@@ -1,3 +1,4 @@
+import { useLocale } from 'next-intl'
 import { useCallback, useMemo, useState } from 'react'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
@@ -49,6 +50,9 @@ export function useAdminNoteFeed(enabled: boolean): UseAdminNoteFeedResult {
   // The authenticated caller
   const api = useApi({ requireAuth: true })
 
+  // The language the feed is read in
+  const locale = useLocale()
+
   // Whether what is settled is being left out
   const [openOnly, setOpenOnly] = useState(false)
 
@@ -61,7 +65,7 @@ export function useAdminNoteFeed(enabled: boolean): UseAdminNoteFeedResult {
 
   // The feed itself, a page of notes at a time
   const paged = usePagedQuery({
-    queryKey: noteFeedQueryKey(openOnly),
+    queryKey: noteFeedQueryKey(openOnly, locale),
     fetchPage,
     enabled: enabled && api.state === 'ready',
     cachePolicy: cachePolicy.userData,

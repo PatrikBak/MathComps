@@ -10,7 +10,7 @@ import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
 import type { UserProfile } from '../model/profile-types'
 import { setUsername as setUsernameRequest } from '../services/profile-service'
-import { userProfileQueryKeys } from './use-user-profile'
+import { useUserProfileKey } from './use-user-profile'
 
 /**
  * Return type for {@link useSetUsername}.
@@ -40,6 +40,9 @@ export function useSetUsername(): UseSetUsernameResult {
   // A function which refreshes everything this user has signed
   const { invalidateUserComments } = useInvalidateUserComments()
 
+  // Where this user's profile is cached
+  const profileKey = useUserProfileKey()
+
   // Claiming the name
   const mutation = useOptimisticMutation<void, string>({
     // Hand the name to the backend, which is what decides whether it was still free
@@ -48,7 +51,7 @@ export function useSetUsername(): UseSetUsernameResult {
     // Echo it into the cache, so nothing waits on a refetch to see it. The rest of the profile is left as it
     // was read, since taking a name says nothing about the rest of it
     onSuccess: (_result, username) => {
-      queryClient.setQueryData<UserProfile>(userProfileQueryKeys.all, (previous) =>
+      queryClient.setQueryData<UserProfile>(profileKey, (previous) =>
         previous === undefined ? previous : { ...previous, username }
       )
     },
