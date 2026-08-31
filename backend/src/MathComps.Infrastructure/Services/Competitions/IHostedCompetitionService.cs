@@ -118,6 +118,12 @@ public sealed class HostedCompetitionNotFoundException() : Exception("Competitio
 public sealed class HostedGroupNotOpenException() : Exception("This competition is not taking entries");
 
 /// <summary>
+/// Thrown when an entry is taken into a competition holding fewer problems than its group announced.
+/// </summary>
+public sealed class HostedCompetitionNotReadyException()
+    : Exception("This competition's problems are not all there yet");
+
+/// <summary>
 /// Thrown when a student takes a second entry into a competition whose group allows only one.
 /// </summary>
 public sealed class HostedEntryAlreadySpentException() : Exception("This entry has already been spent");

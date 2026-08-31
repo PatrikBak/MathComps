@@ -142,7 +142,7 @@ export type HostedCompetitionGroup = {
   id: string
   /** What a heading calls it, in every language the site is read in. */
   name: LocalizedString
-  /** How many problems each of its competitions holds. */
+  /** How many problems each of its competitions asks, announced rather than counted. */
   problemCount: number
   /** How long a student's own clock runs, in minutes. */
   clockMinutes: number

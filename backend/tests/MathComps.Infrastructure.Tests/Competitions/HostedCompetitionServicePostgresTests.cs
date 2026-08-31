@@ -75,6 +75,11 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     /// </summary>
     private readonly Guid _emptyGroupId = Guid.CreateVersion7();
 
+    /// <summary>
+    /// The round of an open group whose problems have not all landed, holding one where its group announces two.
+    /// </summary>
+    private readonly Guid _unfilledRoundId = Guid.CreateVersion7();
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
@@ -164,6 +169,39 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // Over, and not taking entries any more
         await Assert.ThrowsAsync<HostedGroupNotOpenException>(
             () => service.EnterAsync(_studentId, _openedRoundId)));
+
+    /// <summary>
+    /// Verifies that a competition short of the problems its group announced refuses an entry. A group goes on
+    /// the site before its problems are picked, so a window can open over a round that is still being filled, and
+    /// an entry is spent once: buying a paper the card promised and the round cannot serve costs the student the
+    /// whole competition.
+    /// </summary>
+    [Fact]
+    public Task A_competition_short_of_its_problems_refuses_an_entry() => RunTestAsync(async service =>
+    {
+        // Open, and holding one problem where its group announced two
+        await Assert.ThrowsAsync<HostedCompetitionNotReadyException>(
+            () => service.EnterAsync(_studentId, _unfilledRoundId));
+
+        // Nor was an entry left behind by the attempt
+        Assert.Equal(0, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
+    });
+
+    /// <summary>
+    /// Verifies that a forfeit into a competition short of its problems is refused the same as a sitting. Giving
+    /// an entry up buys the problems, so it spends exactly what entering spends, and a guard that only covered
+    /// the sitting half would hand the short paper over for the same price.
+    /// </summary>
+    [Fact]
+    public Task A_competition_short_of_its_problems_refuses_a_forfeit() => RunTestAsync(async service =>
+    {
+        // Given up rather than sat, into the round holding one of its two problems
+        await Assert.ThrowsAsync<HostedCompetitionNotReadyException>(
+            () => service.ForfeitAsync(_studentId, _unfilledRoundId));
+
+        // Nor was an entry left behind by the attempt
+        Assert.Equal(0, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
+    });
 
     /// <summary>
     /// Verifies that a student whose account is missing one of the fields the entry gate asks for cannot enter.
@@ -438,8 +476,8 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             (await service.GetViewAsync(_studentId)).Groups,
             candidate => candidate.Id == _emptyGroupId);
 
-        // The group sets no problems
-        Assert.Equal(0, group.ProblemCount);
+        // It still says how many problems it will set, that being its own and not its rounds'
+        Assert.Equal(2, group.ProblemCount);
 
         // No competitions run under it
         Assert.Empty(group.Competitions);
@@ -883,17 +921,31 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
-    /// Verifies that a group's heading and problem count come off its rounds, which share both by construction.
+    /// Verifies that a group's heading comes off its rounds, which share it by construction, while the size it
+    /// announces is its own. Read off the group whose round is still a problem short, since that is the only one
+    /// where the two answers differ: counting the round would say one, and the card has to keep saying two from
+    /// the day the dates were set.
     /// </summary>
     [Fact]
-    public Task A_group_reads_its_name_and_size_off_its_rounds() => RunTestAsync(async service =>
+    public Task A_group_reads_its_name_off_its_rounds_and_its_size_off_itself() => RunTestAsync(async service =>
     {
+        // Every group on the page
+        var groups = (await service.GetViewAsync(_studentId)).Groups;
+
+        // The one whose round holds one problem against the two it announced
+        var unfilled = Assert.Single(
+            groups,
+            candidate => candidate.Competitions.Any(competition => competition.Id == _unfilledRoundId));
+
+        // Which still says two, the number it was declared with rather than the one its round holds
+        Assert.Equal(2, unfilled.ProblemCount);
+
         // The group the two categories run in
         var group = Assert.Single(
-            (await service.GetViewAsync(_studentId)).Groups,
+            groups,
             candidate => candidate.Competitions.Any(competition => competition.Id == _advancedRoundId));
 
-        // Both rounds hold the same number of problems, which is what a group says it sets
+        // The size it was declared with
         Assert.Equal(2, group.ProblemCount);
 
         // And the heading carries every language the site is read in
@@ -1372,7 +1424,9 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         var closesAt = DateTimeOffset.UtcNow.AddYears(1);
 
         // The group taking entries now.
-        var open = Group(context, "mc-open", DateTimeOffset.UtcNow.AddDays(-1), closesAt, allowsReentry: false);
+        var open = Group(
+            context, "mc-open", DateTimeOffset.UtcNow.AddDays(-1), closesAt, allowsReentry: false,
+            problemCount: 2);
 
         // Its rounds, one per level, embargoed until it closes.
         SeedRound(context, season, open, _advancedRoundId, "mc-advanced", closesAt, problems: 2);
@@ -1381,28 +1435,39 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // A group that has been announced and is not taking entries yet.
         var upcoming = Group(
             context, "mc-upcoming", DateTimeOffset.UtcNow.AddDays(30), DateTimeOffset.UtcNow.AddDays(60),
-            allowsReentry: false);
+            allowsReentry: false, problemCount: 2);
         SeedRound(
             context, season, upcoming, _upcomingRoundId, "mc-intermediate",
             DateTimeOffset.UtcNow.AddDays(60), problems: 2);
 
         // The practice group: no closing instant, so no embargo either, and takeable again.
         var practice = Group(
-            context, "mc-practice", DateTimeOffset.UtcNow.AddDays(-30), closesAt: null, allowsReentry: true);
+            context, "mc-practice", DateTimeOffset.UtcNow.AddDays(-30), closesAt: null, allowsReentry: true,
+            problemCount: 1);
         SeedRound(context, season, practice, _practiceRoundId, "mc", visibleSince: null, problems: 1);
 
         // A group whose problems have already come out, so its round is open to everybody.
         var opened = Group(
             context, "mc-opened", DateTimeOffset.UtcNow.AddDays(-60), DateTimeOffset.UtcNow.AddDays(-1),
-            allowsReentry: false);
+            allowsReentry: false, problemCount: 1);
         SeedRound(
             context, season, opened, _openedRoundId, "mc-advanced", DateTimeOffset.UtcNow.AddDays(-1),
             problems: 1, seasonYear: 2025);
 
-        // A group whose rounds have not been applied yet, which is what one looks like between the two CLI runs
-        // that declare it.
-        Group(context, "mc-empty", DateTimeOffset.UtcNow.AddDays(-1), closesAt, allowsReentry: false)
-            .Id = _emptyGroupId;
+        // A group open for entries whose round is still a problem short of what it announced, which is what one
+        // looks like when the window opens before the authoring is finished.
+        var unfilled = Group(
+            context, "mc-unfilled", DateTimeOffset.UtcNow.AddDays(-1), closesAt, allowsReentry: false,
+            problemCount: 2);
+        SeedRound(
+            context, season, unfilled, _unfilledRoundId, "mc-elementary", closesAt, problems: 1,
+            seasonYear: 2024);
+
+        // A group whose rounds have not been applied yet, which is what one looks like between the draft that
+        // raises them and the problems that fill them.
+        Group(
+            context, "mc-empty", DateTimeOffset.UtcNow.AddDays(-1), closesAt, allowsReentry: false,
+            problemCount: 2).Id = _emptyGroupId;
 
         // Submit changes
         await context.SaveChangesAsync();
@@ -1416,10 +1481,11 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     /// <param name="opensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
     /// <param name="closesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
     /// <param name="allowsReentry"><inheritdoc cref="HostedGroup.AllowsReentry" path="/summary"/></param>
+    /// <param name="problemCount"><inheritdoc cref="HostedGroup.ProblemCount" path="/summary"/></param>
     /// <returns>The tracked group.</returns>
     private static HostedGroup Group(
         MathCompsDbContext context, string slug, DateTimeOffset opensAt, DateTimeOffset? closesAt,
-        bool allowsReentry)
+        bool allowsReentry, int problemCount)
     {
         // The group row.
         var group = new HostedGroup
@@ -1430,6 +1496,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             ClosesAt = closesAt,
             ClockMinutes = ClockMinutes,
             AllowsReentry = allowsReentry,
+            ProblemCount = problemCount,
         };
         context.HostedGroups.Add(group);
 

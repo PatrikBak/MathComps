@@ -357,7 +357,12 @@ describe('orderForReading', () => {
       closesAt: new Date(NOW - 47 * DAY_MS).toISOString(),
     }),
     groupOf({
-      id: 'upcoming',
+      id: 'later',
+      opensAt: new Date(NOW + 40 * DAY_MS).toISOString(),
+      closesAt: new Date(NOW + 53 * DAY_MS).toISOString(),
+    }),
+    groupOf({
+      id: 'sooner',
       opensAt: new Date(NOW + 10 * DAY_MS).toISOString(),
       closesAt: new Date(NOW + 23 * DAY_MS).toISOString(),
     }),
@@ -375,10 +380,20 @@ describe('orderForReading', () => {
     expect(orderForReading(GROUPS, NOW).map((group) => group.id)).toEqual([
       'practice',
       'open',
-      'upcoming',
+      'sooner',
+      'later',
       'newer',
       'older',
     ])
+  })
+
+  it('counts down to the next one and back from the last', () => {
+    // Two still to come read soonest first, since the next to happen is the one being waited for
+    const ids = orderForReading(GROUPS, NOW).map((group) => group.id)
+    expect(ids.indexOf('sooner')).toBeLessThan(ids.indexOf('later'))
+
+    // Two already over read the other way, the one that just closed being the one still talked about
+    expect(ids.indexOf('newer')).toBeLessThan(ids.indexOf('older'))
   })
 
   it('sorts a copy rather than the array it was handed', () => {

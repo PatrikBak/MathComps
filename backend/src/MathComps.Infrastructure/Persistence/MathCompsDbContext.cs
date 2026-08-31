@@ -783,6 +783,10 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
              .IsUnique()
              .HasDatabaseName("ux_hosted_group_slug");
 
+            // DB-side invariants
+            e.ToTable(t => t.HasCheckConstraint(
+                "ck_hosted_group_problem_count_positive", "\"problem_count\" > 0"));
+
             // The rounds the group runs, one per category. Restricted: a group whose rounds still hold problems
             // is not something a delete should quietly take with it.
             e.HasMany(group => group.Rounds)

@@ -299,6 +299,27 @@ public static class ServiceCollectionExtensions
         // Read-only DB-resolution service backing the import preview
         services.TryAddScoped<IDraftResolutionService, DraftResolutionService>();
 
+        // The writer that raises the competition node and season a draft names.
+        services.AddCompetitionTreeWriter();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the writer that raises a competition path's nodes and a season, together with the registry it
+    /// orders them by. Every tool that puts rows into the archive's tree needs it, so it stands on its own.
+    /// </summary>
+    /// <param name="services">The service collection to add the writer to.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddCompetitionTreeWriter(this IServiceCollection services)
+    {
+        // The registry the writer orders each generation by.
+        services.AddLocalization();
+
+        // The writer itself.
+        services.TryAddScoped<ICompetitionTreeWriter, CompetitionTreeWriter>();
+
         // Builder pattern
         return services;
     }

@@ -28,6 +28,7 @@ export const BACKEND_ERROR_CODES = [
   'HostedProblemNotFound',
   'HostedEntryRequired',
   'HostedGroupNotOpen',
+  'HostedCompetitionNotReady',
   'HostedEntryAlreadySpent',
   'HostedEntryNotRunning',
   'HostedEntryProfileIncomplete',

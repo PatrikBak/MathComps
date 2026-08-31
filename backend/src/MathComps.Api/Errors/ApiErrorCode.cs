@@ -134,6 +134,11 @@ public enum ApiErrorCode
     HostedGroupNotOpen,
 
     /// <summary>
+    /// An entry was taken into a competition holding fewer problems than its group announced.
+    /// </summary>
+    HostedCompetitionNotReady,
+
+    /// <summary>
     /// A second entry was taken into a competition that allows only one.
     /// </summary>
     HostedEntryAlreadySpent,

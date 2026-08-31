@@ -94,8 +94,11 @@ public static class TaxonomyResequencer
             .Select(mover => new SortOrderChange(mover.Node.Path, mover.Node.SortOrder, mover.Target))
             .ToImmutableArray();
 
-        // One transaction so a failure between the two phases can't leave parked values committed.
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        // One transaction so a failure between the two phases can't leave parked values committed. A caller that
+        // is already holding one covers both phases itself, and a second one over the same connection is refused.
+        await using var transaction = context.Database.CurrentTransaction is null
+            ? await context.Database.BeginTransactionAsync()
+            : null;
 
         // The park base sits above every current order and every order about to be claimed, so parked values
         // collide with nothing still live and no final lands on a slot a mover is still parked in. A registry
@@ -117,8 +120,9 @@ public static class TaxonomyResequencer
         // Flush the finals.
         await context.SaveChangesAsync();
 
-        // Commit both phases atomically.
-        await transaction.CommitAsync();
+        // Commit both phases atomically, unless the caller's own transaction is what will.
+        if (transaction is not null)
+            await transaction.CommitAsync();
 
         // The renumbering performed.
         return changes;

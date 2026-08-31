@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using MathComps.Domain.Taxonomy;
@@ -12,17 +11,17 @@ namespace MathComps.Infrastructure.BulkImport;
 
 /// <summary>
 /// EF Core implementation of <see cref="IDraftApplyService"/>. Spins up one tracking
-/// <see cref="MathCompsDbContext"/>, raises the competition node the draft's path names (ordering each generation by
-/// <see cref="IMetadataLocalizationService"/>'s registry), uploads images through the
-/// <see cref="ITrackedFileUploader"/> (which skips ones already on remote storage) and rewrites their refs, then
-/// inserts or overwrites the problems and saves once at the end.
+/// <see cref="MathCompsDbContext"/>, raises the competition node and season the draft's path names through the
+/// <see cref="ICompetitionTreeWriter"/>, uploads images through the <see cref="ITrackedFileUploader"/> (which skips
+/// ones already on remote storage) and rewrites their refs, then inserts or overwrites the problems and saves once
+/// at the end.
 /// </summary>
 /// <param name="dbContextFactory">Factory for the tracking write context.</param>
-/// <param name="metadata">The registry, which orders every generation of the competition tree.</param>
+/// <param name="tree">Raises the competition node and the season the draft names.</param>
 /// <param name="uploader">Remote storage for the problem images, skipping ones unchanged since their last upload.</param>
 public class DraftApplyService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IMetadataLocalizationService metadata,
+    ICompetitionTreeWriter tree,
     ITrackedFileUploader uploader) : IDraftApplyService
 {
     /// <inheritdoc/>
@@ -41,16 +40,16 @@ public class DraftApplyService(
 
         // Raise every node on the competition's path, renumbering each generation to the registry on the way down. The
         // renumbering runs before anything is created, so a mid-list insertion frees the slot the newcomer claims.
-        var (competition, chain, sortOrderChanges) = await ResolveNodeAsync(context, target.CompetitionPath);
+        var (competition, chain, sortOrderChanges) = await tree.ResolveNodeAsync(context, target.CompetitionPath);
         entities.AddRange(chain);
 
         // Season by start year.
-        var (season, seasonAction) = await GetOrCreateSeasonAsync(context, target.SeasonYear);
+        var (season, seasonAction) = await tree.GetOrCreateSeasonAsync(context, target.SeasonYear);
         entities.Add(new EntityResolution("season", target.SeasonYear.ToString(), seasonAction));
 
         // The round — this competition's sitting in this season — carrying the draft's date and visibility.
         var (round, roundAction) = await GetOrCreateRoundAsync(
-            context, competition.Id, season.Id, date, visibleSince);
+            context, competition.Id, target.CompetitionPath, season.Id, date, visibleSince);
         entities.Add(new EntityResolution("round", $"{target.CompetitionPath} {target.SeasonYear}", roundAction));
 
         // Write the problems, tallying the per-text outcomes and the insert/update/image counts.
@@ -117,118 +116,23 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Raises every competition node on a path — the competition, whatever sits between, and the node itself — each
-    /// created if missing, and renumbers each generation it descends through to its registry positions first, so a
-    /// mid-list insertion frees the slot the newcomer claims instead of colliding with a stored order. A node is
-    /// born with its sort path already stamped: the walk runs root-down, so its parent's is known, and a row
-    /// committed without one would be a node the readers throw on.
-    /// </summary>
-    /// <param name="context">The tracking write context.</param>
-    /// <param name="path">The competition path the draft names.</param>
-    /// <returns>The node the path addresses, one resolution per node on it, and every node renumbered.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the registry can't place a node on the path.</exception>
-    private async Task<(Competition Node, ImmutableArray<EntityResolution> Chain,
-        ImmutableArray<SortOrderChange> Changes)> ResolveNodeAsync(MathCompsDbContext context, string path)
-    {
-        // The chain and the renumbering, filled in as the walk descends.
-        var chain = ImmutableArray.CreateBuilder<EntityResolution>();
-        var changes = ImmutableArray.CreateBuilder<SortOrderChange>();
-
-        // The node the walk has reached, still null above the roots.
-        Competition? parent = null;
-
-        // One generation per segment, from the root down.
-        foreach (var (parentPath, slug, nodePath) in CompetitionTree.Descend(path))
-        {
-            // Every node already sitting in this generation, the wanted one possibly among them.
-            var parentId = parent?.Id;
-            var siblings = await context.Competitions
-                .Where(candidate => candidate.ParentId == parentId).ToListAsync();
-
-            // Bring the generation in line with the registry before the newcomer claims a slot in it.
-            var registryOrderOf = TaxonomyResequencer.ChildOrder(metadata.Shared, parentPath);
-            changes.AddRange(await TaxonomyResequencer.ResequenceAsync(context, siblings, registryOrderOf));
-
-            // A node the registry doesn't carry can't be placed among its siblings at all.
-            var order = registryOrderOf(nodePath)
-                ?? throw new InvalidOperationException(
-                    $"Competition '{nodePath}' has no structural entry to order it by.");
-
-            // The node this generation already carries for the slug, null until some draft introduces it.
-            var existing = siblings.FirstOrDefault(candidate => candidate.Slug == slug);
-
-            // Reuse what's already standing, or raise it at the position just computed.
-            parent = existing ?? new Competition
-            {
-                ParentId = parentId,
-                Slug = slug,
-                Path = nodePath,
-                SortPath = CompetitionTree.ComposeSortPath(parent?.SortPath, order),
-                SortOrder = order
-            };
-            chain.Add(new EntityResolution(
-                "competition", nodePath, existing is null ? ResolutionAction.Create : ResolutionAction.Reuse));
-
-            // A newcomer has to land before the next generation can hang off its identity.
-            if (existing is null)
-                await context.Competitions.AddAsync(parent);
-
-            // Flush either way: the reuse path may still be carrying this generation's renumbering.
-            await context.SaveChangesAsync();
-        }
-
-        // A sort path reads down the whole chain, so a renumbering above invalidates every path below it.
-        if (changes.Count > 0)
-        {
-            // The whole tree, which is small enough to restamp in memory.
-            var nodes = await context.Competitions.ToListAsync();
-
-            // Rebuild every path from the orders the renumbering left behind.
-            CompetitionTree.RestampSortPaths(nodes);
-
-            // Persist the rewritten paths.
-            await context.SaveChangesAsync();
-        }
-
-        // The deepest node, the chain that reached it, and what moved on the way.
-        return (parent!, chain.ToImmutable(), changes.ToImmutable());
-    }
-
-    /// <summary>
-    /// Get-or-creates the season by start year, deriving a new row's <see cref="Season.EditionNumber"/> via
-    /// <see cref="Season.EditionFromStartYear"/>.
-    /// </summary>
-    /// <param name="context">The write context.</param>
-    /// <param name="startYear">The season's start year.</param>
-    /// <returns>The entity and whether it was reused or created.</returns>
-    private static async Task<(Season Entity, ResolutionAction Action)> GetOrCreateSeasonAsync(
-        MathCompsDbContext context, int startYear)
-    {
-        // Reuse the existing season when present.
-        var existing = await context.Seasons.FirstOrDefaultAsync(season => season.StartYear == startYear);
-        if (existing is not null)
-            return (existing, ResolutionAction.Reuse);
-
-        // Otherwise create it, the edition number being the shared ročník derived from the year.
-        var created = new Season { StartYear = startYear, EditionNumber = Season.EditionFromStartYear(startYear) };
-        await context.Seasons.AddAsync(created);
-        return (created, ResolutionAction.Create);
-    }
-
-    /// <summary>
     /// Get-or-creates the round by (competition node, season), stamping the draft's date and visibility on a fresh
     /// row and refreshing a stale one: an existing round differing from the draft in either is updated in place so
     /// a corrected <c>_meta</c> actually lands, matching how the authors/tags reconcilers bring stored rows into
-    /// line. Both fields are written from the draft, so dropping an embargo from <c>_meta</c> lifts the stored one.
+    /// line. Both fields are written from the draft, so dropping an embargo from <c>_meta</c> lifts the stored one,
+    /// on every round but one the site runs itself: there the group's declaration owns the instant.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="competitionId">The id of the competition node whose problems these are.</param>
+    /// <param name="competitionPath">The path of that node.</param>
     /// <param name="seasonId">The season's id.</param>
     /// <param name="date">The round date from <c>_meta</c>.</param>
     /// <param name="visibleSince">The embargo instant from <c>_meta</c>, null when it names none.</param>
     /// <returns>The entity and whether it was reused unchanged, updated in place, or created.</returns>
+    /// <exception cref="InvalidOperationException">The draft would move the embargo of a round a group runs.</exception>
     private static async Task<(Round Entity, ResolutionAction Action)> GetOrCreateRoundAsync(
-        MathCompsDbContext context, Guid competitionId, Guid seasonId, DateOnly date, DateTimeOffset? visibleSince)
+        MathCompsDbContext context, Guid competitionId, string competitionPath, Guid seasonId, DateOnly date,
+        DateTimeOffset? visibleSince)
     {
         // The existing round for this (competition node, season), or null when net-new.
         var existing = await context.Rounds.FirstOrDefaultAsync(
@@ -240,6 +144,13 @@ public class DraftApplyService(
             // Already carries both of the draft's values — reuse it untouched.
             if (existing.Date == date && existing.VisibleSince == visibleSince)
                 return (existing, ResolutionAction.Reuse);
+
+            // A round the site runs is held back by its group's closing instant, so writing the draft's over it
+            // would open a live competition's problems to everybody who can sign in, spending no entry.
+            if (existing.HostedGroupId is not null && existing.VisibleSince != visibleSince)
+                throw new InvalidOperationException(
+                    $"Round '{competitionPath}' runs in a hosted group, whose closing instant is what holds its "
+                    + "problems back. Match the draft's visibleSince to it, or correct the group manifest.");
 
             // One of them is stale — overwrite both in place (the tracked entity flushes on save) and report it.
             existing.Date = date;
