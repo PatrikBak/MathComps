@@ -43,8 +43,7 @@ public sealed class HostedCompetitionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Every group with its rounds: the node each round runs under, how many problems it holds, and when its
-        // problems open. Newest first.
+        // Every group with its rounds: the node each round runs under and when its problems open. Newest first.
         var groups = await dbContext.HostedGroups
             .AsNoTracking()
             .OrderByDescending(group => group.OpensAt)
@@ -54,6 +53,7 @@ public sealed class HostedCompetitionService(
                 group.OpensAt,
                 group.ClosesAt,
                 group.ClockMinutes,
+                group.ProblemCount,
                 Rounds = group.Rounds
                     .OrderBy(round => round.Competition.SortPath)
                     .Select(round => new
@@ -61,7 +61,6 @@ public sealed class HostedCompetitionService(
                         round.Id,
                         CompetitionPath = round.Competition.Path,
                         round.VisibleSince,
-                        ProblemCount = round.Problems.Count,
                     })
                     .ToList(),
             })
@@ -83,8 +82,7 @@ public sealed class HostedCompetitionService(
                 group.Id,
                 // Every round of a group runs under a node of the same name, so the first names the group.
                 NameOf(group.Rounds.Count == 0 ? null : group.Rounds[0].CompetitionPath),
-                // The rounds hold the same number of problems, so the first of them says how many.
-                group.Rounds.Count == 0 ? 0 : group.Rounds[0].ProblemCount,
+                group.ProblemCount,
                 group.ClockMinutes,
                 group.OpensAt,
                 group.ClosesAt,
@@ -299,6 +297,8 @@ public sealed class HostedCompetitionService(
                 round.HostedGroup.ClosesAt,
                 round.HostedGroup.AllowsReentry,
                 round.HostedGroup.ClockMinutes,
+                round.HostedGroup.ProblemCount,
+                ProblemsHeld = round.Problems.Count,
             })
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new HostedCompetitionNotFoundException();
@@ -318,6 +318,12 @@ public sealed class HostedCompetitionService(
         // An entry is spent once, unless the group it runs in is one students may take again.
         if (entry is not null && !group.AllowsReentry)
             throw new HostedEntryAlreadySpentException();
+
+        // A competition may stand on the site before its problems are picked, so a round short of the number its
+        // group announced cannot serve the paper the card promised. Spending an entry into it would cost the
+        // student the whole competition for a set nobody finished writing.
+        if (group.ProblemsHeld < group.ProblemCount)
+            throw new HostedCompetitionNotReadyException();
 
         // What an entry asks of the student's account, settled before anything is written. A group with no
         // closing instant is never graded, so it has no result to name a student in and asks for no fields.

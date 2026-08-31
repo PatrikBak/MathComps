@@ -1,17 +1,25 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
+using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Localization;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Competitions;
 
 /// <summary>
-/// EF Core-backed implementation of <see cref="IHostedGroupService"/>. Everything a manifest changes lands in
-/// one save at the end, so it is carried out whole or not at all.
+/// EF Core-backed implementation of <see cref="IHostedGroupService"/>. The declaration runs inside one
+/// transaction, so it is carried out whole or not at all even where raising a competition node has to flush a
+/// generation before it can descend into the next.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context the declaration runs on.</param>
-public sealed class HostedGroupService(IDbContextFactory<MathCompsDbContext> dbContextFactory)
+/// <param name="tree">Raises the competition node and the season a manifest's round hangs off.</param>
+/// <param name="metadata">The registry, which says whether the taxonomy can place a path at all.</param>
+public sealed class HostedGroupService(
+    IDbContextFactory<MathCompsDbContext> dbContextFactory,
+    ICompetitionTreeWriter tree,
+    IMetadataLocalizationService metadata)
     : IHostedGroupService
 {
     /// <inheritdoc/>
@@ -20,6 +28,11 @@ public sealed class HostedGroupService(IDbContextFactory<MathCompsDbContext> dbC
     {
         // Everything the document alone can be wrong about, before the database is opened at all.
         EnsureManifestComplete(manifest);
+
+        // The calendar day the group opens on, read in the offset its author wrote rather than in UTC. A window
+        // opening at local midnight sits on the previous day in UTC, so taking it off the normalised instant
+        // below would date every round this raises a day before the competition it runs.
+        var opensOn = DateOnly.FromDateTime(manifest.OpensAt.DateTime);
 
         // The instants as UTC from here on. An author writes them in their own offset, and the column stores an
         // instant rather than the offset it was written in.
@@ -32,30 +45,56 @@ public sealed class HostedGroupService(IDbContextFactory<MathCompsDbContext> dbC
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The rounds the manifest names, and how many problems each of them holds.
+        // Raising a node saves each generation before descending into the next, so the refusals below would
+        // otherwise fire over rows already written. Nothing is committed until the very end, and a dry run never
+        // commits at all.
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        // The rounds the manifest names, and how many of them are still to be filled.
         var rounds = new List<Round>();
-        var problemCounts = new List<int>();
+        var roundsAwaitingProblems = 0;
 
         // Each named round again, this time against what has actually landed.
         foreach (var reference in manifest.Rounds)
         {
-            // The round under that node in that season. One whose draft has not landed yet stops the
-            // declaration: the group would otherwise stand with a category missing and nothing would say so.
+            // Whether the taxonomy can place the path at all: it may be unregistered, half-named, or a container
+            // carrying the competitions a round should hang off instead. Asked before the node is raised, since
+            // the resolver's own complaint arrives as a fault nobody can act on. The registry answers for every
+            // step of the path, so a gap carries the node it sits on and the clause saying which of the three.
+            var unregistered = metadata.ValidateTaxonomyRegistration(reference.CompetitionPath);
+            if (unregistered.Count > 0)
+                throw new HostedGroupManifestException(
+                    $"'{reference.CompetitionPath}' cannot carry a round: "
+                    + string.Join("; ", unregistered.Select(issue => $"'{issue.Path}' has {issue.Gaps}"))
+                    + ".");
+
+            // The node the round hangs off, raised when the database has not met it yet.
+            var (competition, _, _) = await tree.ResolveNodeAsync(dbContext, reference.CompetitionPath);
+
+            // The season the round sits in, raised the same way a draft raises one.
+            var (season, _) = await tree.GetOrCreateSeasonAsync(dbContext, reference.SeasonYear);
+
+            // The round itself, which a draft may have raised already.
             var round = await dbContext.Rounds
                 .Include(candidate => candidate.Competition)
-                .Where(candidate => candidate.Competition.Path == reference.CompetitionPath
-                    && candidate.Season.StartYear == reference.SeasonYear)
-                .FirstOrDefaultAsync(cancellationToken)
-                ?? throw new HostedGroupManifestException(
-                    $"No round for '{reference.CompetitionPath}' in {reference.SeasonYear}. Apply its draft first.");
+                .FirstOrDefaultAsync(
+                    candidate => candidate.CompetitionId == competition.Id && candidate.SeasonId == season.Id,
+                    cancellationToken);
 
-            // A round's embargo is what actually keeps its problems back, so a manifest disagreeing with it
-            // would promise a closing date the problems don't keep. A group that never closes promises no date at
-            // all, and its rounds are free to carry any embargo, including one that never lifts.
-            if (manifest.ClosesAt is not null && round.VisibleSince != manifest.ClosesAt)
-                throw new HostedGroupManifestException(
-                    $"'{reference.CompetitionPath}' opens at {Describe(round.VisibleSince)}, but the group closes "
-                    + $"at {Describe(manifest.ClosesAt)}. Fix the draft's visibleSince.");
+            // Nothing there yet, so the manifest puts it there: a competition goes on the site the day its dates
+            // are decided, and the problems land on it later. Its own dates are filled in below, which is where a
+            // round the manifest raised on an earlier run has them refreshed too.
+            if (round is null)
+            {
+                round = new Round
+                {
+                    CompetitionId = competition.Id,
+                    SeasonId = season.Id,
+                    Competition = competition,
+                    Date = opensOn,
+                };
+                dbContext.Rounds.Add(round);
+            }
 
             // What each of the round's problems is written in. Only the kinds a competition needs: the site
             // serves the statement and the examiner reasons from the solution.
@@ -81,26 +120,46 @@ public sealed class HostedGroupService(IDbContextFactory<MathCompsDbContext> dbC
                 .ToList();
 
             // Nothing downstream has a fallback for a language a problem was never written in: the site would
-            // serve a blank statement and the examiner would refuse the conversation, both mid-competition.
+            // serve a blank statement and the examiner would refuse the conversation, both mid-competition. An
+            // empty round has no problem to be missing one, so it passes here on its own.
             if (incomplete.Count > 0)
                 throw new HostedGroupManifestException(
                     $"'{reference.CompetitionPath}' problem(s) {string.Join(", ", incomplete)} lack a statement "
                     + "or a solution in one of the site's languages.");
 
-            // The round stands, so keep it and what it holds.
+            // A round holding nothing has no draft behind it yet, so its dates are still this declaration's own to
+            // write: it put the round there, and nothing has been published off it that moving them could take
+            // back. The embargo below would otherwise disagree with every corrected manifest, freezing a group's
+            // window the moment it was announced.
+            if (written.Count == 0)
+            {
+                round.Date = opensOn;
+                round.VisibleSince = manifest.ClosesAt ?? DateTimeOffset.MaxValue;
+            }
+
+            // Once problems land the draft owns the embargo, and it is what actually keeps them back, so a
+            // manifest disagreeing with it would promise a closing date the problems don't keep. A group that
+            // never closes promises no date at all, and its rounds may carry any embargo, one that never lifts
+            // included.
+            else if (manifest.ClosesAt is not null && round.VisibleSince != manifest.ClosesAt)
+                throw new HostedGroupManifestException(
+                    $"'{reference.CompetitionPath}' opens at {Describe(round.VisibleSince)}, but the group closes "
+                    + $"at {Describe(manifest.ClosesAt)}. Fix the draft's visibleSince.");
+
+            // A round is either still waiting on its problems or holding exactly the number the group announces.
+            // Anything between is a draft that landed short, and the card would go on promising the full paper.
+            if (written.Count != 0 && written.Count != manifest.ProblemCount)
+                throw new HostedGroupManifestException(
+                    $"'{reference.CompetitionPath}' holds {written.Count} problem(s), but the group announces "
+                    + $"{manifest.ProblemCount}.");
+
+            // The round stands, so keep it.
             rounds.Add(round);
-            problemCounts.Add(written.Count);
+
+            // One still waiting on its problems, which the outcome counts.
+            if (written.Count == 0)
+                roundsAwaitingProblems += 1;
         }
-
-        // The rounds are one competition run at several levels, so a student picking a harder one must not be
-        // picking a longer paper as well.
-        if (problemCounts.Distinct().Count() > 1)
-            throw new HostedGroupManifestException(
-                $"The rounds hold different numbers of problems ({string.Join(", ", problemCounts)}).");
-
-        // Counts that agree can agree on zero, so a group whose rounds hold nothing at all gets this far.
-        if (problemCounts[0] == 0)
-            throw new HostedGroupManifestException("The rounds hold no problems. Apply their drafts first.");
 
         // The group as it already stands, if this manifest has been applied before.
         var group = await dbContext.HostedGroups
@@ -124,18 +183,20 @@ public sealed class HostedGroupService(IDbContextFactory<MathCompsDbContext> dbC
                 .Distinct()
                 .ToListAsync(cancellationToken);
 
-        // Re-running the same manifest stays free. Moving the window, the clock or the re-entry rule under a
-        // student already sitting it does not: a shortened clock expires one already running, a moved window
-        // shuts a competition somebody is in, and withdrawing re-entry strands whoever holds a second entry.
+        // Re-running the same manifest stays free. Moving the window, the clock, the re-entry rule or the size
+        // under a student already sitting it does not: a shortened clock expires one already running, a moved
+        // window shuts a competition somebody is in, withdrawing re-entry strands whoever holds a second entry,
+        // and a resized paper is not the one they entered.
         if (entered.Count > 0
             && (group!.OpensAt != manifest.OpensAt
                 || group.ClosesAt != manifest.ClosesAt
                 || group.ClockMinutes != manifest.ClockMinutes
-                || group.AllowsReentry != manifest.AllowsReentry))
+                || group.AllowsReentry != manifest.AllowsReentry
+                || group.ProblemCount != manifest.ProblemCount))
         {
             throw new HostedGroupManifestException(
-                $"'{manifest.Slug}' has been entered, so its window, clock and re-entry rule can no longer be "
-                + "changed.");
+                $"'{manifest.Slug}' has been entered, so its window, clock, re-entry rule and size can no longer "
+                + "be changed.");
         }
 
         // The manifest's rounds that some other group already runs, by their competition path.
@@ -174,6 +235,7 @@ public sealed class HostedGroupService(IDbContextFactory<MathCompsDbContext> dbC
                 ClockMinutes = manifest.ClockMinutes,
                 ClosesAt = manifest.ClosesAt,
                 AllowsReentry = manifest.AllowsReentry,
+                ProblemCount = manifest.ProblemCount,
             };
             dbContext.HostedGroups.Add(group);
         }
@@ -181,11 +243,12 @@ public sealed class HostedGroupService(IDbContextFactory<MathCompsDbContext> dbC
         // Already there, so the manifest brings it into line: it owns every field outright.
         else
         {
-            // The window, the clock and the re-entry rule, as the manifest now has them.
+            // The window, the clock, the re-entry rule and the size, as the manifest now has them.
             group.OpensAt = manifest.OpensAt;
             group.ClockMinutes = manifest.ClockMinutes;
             group.ClosesAt = manifest.ClosesAt;
             group.AllowsReentry = manifest.AllowsReentry;
+            group.ProblemCount = manifest.ProblemCount;
         }
 
         // Whatever the group runs today, which a corrected manifest may no longer name.
@@ -205,10 +268,14 @@ public sealed class HostedGroupService(IDbContextFactory<MathCompsDbContext> dbC
 
         // Every refusal above has fired by now, so a dry run already has its answer and leaves the database alone.
         if (!dryRun)
+        {
             await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
 
         // What it did, or would have done.
-        return new HostedGroupDeclarationOutcome(group.Id, created, rounds.Count, problemCounts[0]);
+        return new HostedGroupDeclarationOutcome(
+            group.Id, created, rounds.Count, manifest.ProblemCount, roundsAwaitingProblems);
     }
 
     /// <summary>
@@ -231,6 +298,8 @@ public sealed class HostedGroupService(IDbContextFactory<MathCompsDbContext> dbC
             throw new HostedGroupManifestException("The manifest carries no opensAt.");
         if (manifest.ClockMinutes <= 0)
             throw new HostedGroupManifestException("The manifest gives the group no clock.");
+        if (manifest.ProblemCount <= 0)
+            throw new HostedGroupManifestException("The manifest gives the group no problems.");
 
         // A window that shuts at or before it opens, so the group is never open at all.
         if (manifest.ClosesAt is { } closesAt && closesAt <= manifest.OpensAt)
@@ -252,6 +321,12 @@ public sealed class HostedGroupService(IDbContextFactory<MathCompsDbContext> dbC
             if (!TaxonomySlugs.IsAtOrUnder(reference.CompetitionPath, HostedTaxonomy.RootSlug))
                 throw new HostedGroupManifestException(
                     $"'{reference.CompetitionPath}' is not under '{HostedTaxonomy.RootSlug}'.");
+
+            // A blank year, which the declaration would otherwise raise as a season and lose to the sanity check
+            // on the column, in a fault naming a constraint rather than the field the author left out.
+            if (reference.SeasonYear <= 0)
+                throw new HostedGroupManifestException(
+                    $"'{reference.CompetitionPath}' carries no seasonYear.");
         }
     }
 

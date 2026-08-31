@@ -7,9 +7,9 @@ using Spectre.Console.Cli;
 namespace MathComps.Cli.Competitions.Commands;
 
 /// <summary>
-/// Declares a hosted group: the batch of rounds the site runs as one competition, and the terms it runs on. The
-/// rounds themselves are ordinary drafts imported the ordinary way, so this runs after their <c>apply</c> and only
-/// links what is already there.
+/// Declares a hosted group: the batch of rounds the site runs as one competition, and the terms it runs on. It
+/// raises whatever the manifest names that the database has not met yet, so a group goes on the site the day its
+/// dates are decided and the problems land on its rounds later.
 /// </summary>
 /// <param name="declare">The service that carries the manifest out.</param>
 [Description("Declare a hosted group from its manifest: link its rounds and set the terms they run on.")]
@@ -62,11 +62,17 @@ public class DeclareGroupCommand(IHostedGroupService declare) : AsyncCommand<Dec
                 ? outcome.Created ? "Would create" : "Would update"
                 : outcome.Created ? "Created" : "Updated";
 
-            // The group's size, in rounds and problems each.
+            // The group's size, in rounds and the problems each of them announces.
             var size = $"{outcome.RoundsLinked} round(s) of {outcome.ProblemCount} problem(s) each";
 
             // What it did, in one line.
             AnsiConsole.MarkupLineInterpolated($"[green]{verb}[/] group [bold]{manifest.Slug}[/]: {size}.");
+
+            // A group may stand before its problems are picked, so say how much of it is still to come. Without
+            // it the line above reads as a full group over rounds holding nothing.
+            if (outcome.RoundsAwaitingProblems > 0)
+                AnsiConsole.MarkupLineInterpolated(
+                    $"[yellow]{outcome.RoundsAwaitingProblems} round(s) still waiting on their problems.[/]");
 
             // The group stands as the manifest describes it, or a dry run says it would.
             return 0;

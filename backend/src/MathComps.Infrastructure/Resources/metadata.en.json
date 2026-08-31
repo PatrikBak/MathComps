@@ -256,6 +256,10 @@
       "shortName": "October",
       "fullName": "October"
     },
+    "mc-elementary-3": {
+      "shortName": "November",
+      "fullName": "November"
+    },
     "mc-intermediate": {
       "shortName": "Intermediate",
       "fullName": "Intermediate category"
@@ -268,6 +272,10 @@
       "shortName": "October",
       "fullName": "October"
     },
+    "mc-intermediate-3": {
+      "shortName": "November",
+      "fullName": "November"
+    },
     "mc-advanced": {
       "shortName": "Advanced",
       "fullName": "Advanced category"
@@ -279,6 +287,10 @@
     "mc-advanced-2": {
       "shortName": "October",
       "fullName": "October"
+    },
+    "mc-advanced-3": {
+      "shortName": "November",
+      "fullName": "November"
     }
   },
   "seasonFormat": "Edition {number} ({start}/{end})"

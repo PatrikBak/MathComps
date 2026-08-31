@@ -9,8 +9,11 @@ return await CliApp.Create<Program>("Competitions")
     .RequireConfigFile("appsettings.json")
     .ConfigureServices((services, configuration) =>
     {
-        // The manifest is applied against rounds that are already in the database.
+        // The manifest is written against the archive's own tables.
         services.AddMathCompsDbContext(configuration);
+
+        // What raises a node and a season the manifest names and the database has not met yet.
+        services.AddCompetitionTreeWriter();
 
         // The service the command hands the manifest to.
         services.AddScoped<IHostedGroupService, HostedGroupService>();

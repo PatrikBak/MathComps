@@ -194,6 +194,7 @@
     "FILE_TOO_LARGE": "File is too large. Maximum: {max} MB",
     "Forbidden": "You don't have permission to do that.",
     "HostedCompetitionNotFound": "This competition no longer exists.",
+    "HostedCompetitionNotReady": "This competition's problems aren't ready yet.",
     "HostedEntryAlreadySpent": "You can no longer enter this competition.",
     "HostedEntryNotRunning": "You've already finished this competition.",
     "HostedEntryProfileIncomplete": "Fill in your name, graduation year and email before entering.",

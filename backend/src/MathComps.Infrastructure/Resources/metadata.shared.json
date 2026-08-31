@@ -72,9 +72,9 @@
       "slug": "mc",
       "children": [
         { "slug": "practice" },
-        { "slug": "elementary", "children": [{ "slug": "1" }, { "slug": "2" }] },
-        { "slug": "intermediate", "children": [{ "slug": "1" }, { "slug": "2" }] },
-        { "slug": "advanced", "children": [{ "slug": "1" }, { "slug": "2" }] }
+        { "slug": "elementary", "children": [{ "slug": "1" }, { "slug": "2" }, { "slug": "3" }] },
+        { "slug": "intermediate", "children": [{ "slug": "1" }, { "slug": "2" }, { "slug": "3" }] },
+        { "slug": "advanced", "children": [{ "slug": "1" }, { "slug": "2" }, { "slug": "3" }] }
       ]
     }
   ]

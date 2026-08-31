@@ -104,6 +104,8 @@ public sealed class GlobalExceptionHandler(
         HostedEntryRequiredException => (StatusCodes.Status403Forbidden, ApiErrorCode.HostedEntryRequired),
         HostedGroupNotOpenException
             => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedGroupNotOpen),
+        HostedCompetitionNotReadyException
+            => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedCompetitionNotReady),
         HostedEntryAlreadySpentException => (StatusCodes.Status409Conflict, ApiErrorCode.HostedEntryAlreadySpent),
         HostedEntryNotRunningException
             => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedEntryNotRunning),

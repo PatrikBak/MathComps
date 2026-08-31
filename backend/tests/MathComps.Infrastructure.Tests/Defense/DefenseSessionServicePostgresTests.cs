@@ -210,6 +210,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             ClosesAt = DateTimeOffset.UtcNow.AddYears(1),
             ClockMinutes = 180,
             AllowsReentry = false,
+            ProblemCount = 1,
         };
         context.HostedGroups.Add(group);
 
@@ -251,6 +252,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             ClosesAt = null,
             ClockMinutes = 30,
             AllowsReentry = true,
+            ProblemCount = 1,
         };
         context.HostedGroups.Add(practiceGroup);
 

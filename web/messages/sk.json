@@ -194,6 +194,7 @@
     "FILE_TOO_LARGE": "Súbor je príliš veľký. Maximum: {max} MB",
     "Forbidden": "Na túto akciu nemáte oprávnenie.",
     "HostedCompetitionNotFound": "Táto súťaž už neexistuje.",
+    "HostedCompetitionNotReady": "Táto súťaž ešte nemá pripravené úlohy.",
     "HostedEntryAlreadySpent": "Do tejto súťaže už nejde vstúpiť.",
     "HostedEntryNotRunning": "Túto súťaž už máš za sebou.",
     "HostedEntryProfileIncomplete": "Pred vstupom si doplň meno, rok maturity a e-mail.",

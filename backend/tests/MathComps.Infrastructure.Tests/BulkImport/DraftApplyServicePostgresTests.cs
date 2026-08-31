@@ -293,6 +293,59 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// A draft moving the embargo of a round the site runs itself is refused. The group's closing instant is what
+    /// actually holds those problems back, so writing the draft's over it would open a live competition to
+    /// everybody who can sign in, and the entry it charges would buy them nothing.
+    /// </summary>
+    [Fact]
+    public Task Applying_over_a_hosted_rounds_embargo_is_refused() => RunTestAsync(async service =>
+    {
+        // When the group closes, which is also the embargo its round carries.
+        var closesAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero);
+
+        // Import the problem under that embargo.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, closesAt,
+            [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
+
+        // The group taking the round over, the way a declaration does.
+        await QueryAsync(async context =>
+        {
+            // The group on the terms it runs.
+            var group = new HostedGroup
+            {
+                Slug = "mc-2026-1",
+                OpensAt = closesAt.AddDays(-14),
+                ClosesAt = closesAt,
+                ClockMinutes = 120,
+                AllowsReentry = false,
+                ProblemCount = 1,
+            };
+            context.HostedGroups.Add(group);
+
+            // The round it now runs.
+            (await context.Rounds.SingleAsync()).HostedGroup = group;
+
+            // Submit changes.
+            await context.SaveChangesAsync();
+        });
+
+        // Re-import the identical draft with the embargo moved an hour on.
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.ApplyAsync(
+                CsmoTarget(), RoundDate, closesAt.AddHours(1),
+                [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath()));
+
+        // Said in terms of the round and the field whoever authored it has to bring back into line.
+        Assert.Contains("csmo-a-iii", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("visibleSince", exception.Message, StringComparison.Ordinal);
+
+        // And the round still carries the instant the group declared.
+        await QueryAsync(async context =>
+            Assert.Equal(closesAt, (await context.Rounds.SingleAsync()).VisibleSince));
+    });
+
+    /// <summary>
     /// Re-importing an image-bearing problem unchanged is recognised as a no-op: the rewritten body reproduces
     /// exactly, so the text reports unchanged and the problem doesn't count as updated.
     /// </summary>

@@ -451,7 +451,7 @@ const PHASE_ORDER: Record<GroupPhase, number> = {
  * @param groups - The groups being listed.
  * @param now - The instant their phases are read against, in epoch milliseconds.
  *
- * @returns The groups, most actionable first and newest first within a phase.
+ * @returns The groups, most actionable first, then by when each of them opens.
  */
 export function orderForReading(
   groups: HostedCompetitionGroup[],
@@ -460,10 +460,18 @@ export function orderForReading(
   // Sorting a copy, the caller's array being the query cache's own
   return [...groups].sort((left, right) => {
     // What each of them is currently doing
-    const byPhase = PHASE_ORDER[derivePhase(left, now)] - PHASE_ORDER[derivePhase(right, now)]
+    const phase = derivePhase(left, now)
+    const byPhase = PHASE_ORDER[phase] - PHASE_ORDER[derivePhase(right, now)]
 
-    // Phase first, and the newer of two in the same phase ahead of the older
-    return byPhase !== 0 ? byPhase : Date.parse(right.opensAt) - Date.parse(left.opensAt)
+    // Phase decides it wherever the two differ
+    if (byPhase !== 0) return byPhase
+
+    // Two still to come read soonest first, since the one being waited for is the next to happen.
+    // Everywhere else the newer leads: a competition that just closed is the one still being talked
+    // about, and the one before it matters less the further back it goes.
+    return phase === 'upcoming'
+      ? Date.parse(left.opensAt) - Date.parse(right.opensAt)
+      : Date.parse(right.opensAt) - Date.parse(left.opensAt)
   })
 }
 

@@ -18,7 +18,7 @@ Tag the draft before importing it: the [Tagging CLI](../MathComps.Cli.Tagging/RE
 
 ## Embargoing a round
 
-A `visibleSince` in `_meta.yaml` loads a round ahead of the day it opens. The problems land complete, and the archive starts serving them once that instant passes, with no job to run and nothing to flip. The draft owns the field outright: re-applying without it lifts a stored embargo, the same way a corrected `date` overwrites a stored one.
+A `visibleSince` in `_meta.yaml` loads a round ahead of the day it opens. The problems land complete, and the archive starts serving them once that instant passes, with no job to run and nothing to flip. The draft owns the field outright: re-applying without it lifts a stored embargo, the same way a corrected `date` overwrites a stored one. On a round the site runs itself that ownership passes to the group: its closing instant is the embargo, so a draft carrying a different one is refused rather than applied.
 
 It hides the problems, not their images. Figures go to public storage the moment `apply` runs, under a key derived from the problem's slug (`problems/75-csmo-a-iii-1-incircle`), and the browser fetches them from there directly rather than through the API. Someone who guesses both the slug and the figure's filename stem can fetch a figure early; the statement, solution, tags, authors, the round's presence in every listing and its problem pages are all gone until it opens.
 

@@ -50,6 +50,13 @@ public class HostedGroup
     public required bool AllowsReentry { get; set; }
 
     /// <summary>
+    /// How many problems each of the group's competitions asks, announced rather than counted. A group goes on the
+    /// site before anybody has picked its problems, so the number has to stand before the rounds hold anything, and
+    /// the declaration is what keeps them from ever disagreeing with it.
+    /// </summary>
+    public required int ProblemCount { get; set; }
+
+    /// <summary>
     /// The rounds the group runs, one per category.
     /// </summary>
     public ICollection<Round> Rounds { get; } = [];
