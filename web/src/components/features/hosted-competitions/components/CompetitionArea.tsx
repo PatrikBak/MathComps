@@ -8,12 +8,13 @@ import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { Modal } from '@/components/shared/components/Modal'
 import { PRACTICE_INTRO_DISMISSED_STORAGE_KEY } from '@/constants/local-storage-constants'
+import { useAddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 import type { Locale } from '@/i18n/i18n'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { useCompetitionArea } from '../hooks/use-competition-area'
 import { clockEndsAt } from '../model/hosted-competition-state'
-import { COMPETITIONS_LIST_HREF } from '../services/hosted-competition-routes'
+import { COMPETITIONS_LIST_HREF, SOLUTION_PARAM } from '../services/hosted-competition-routes'
 import { CategoryBadge } from './CategoryBadge'
 import { CompetitionProblemPanel } from './CompetitionProblemPanel'
 import { CompetitionStandingStrip } from './CompetitionStandingStrip'
@@ -49,6 +50,9 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
 
   // Whether the reader has been asked whether they really mean to hand the entry in
   const [isFinishAsked, { open: openFinish, close: closeFinish }] = useDisclosure(false)
+
+  // Which problem's official solution is open, one answer for the whole set
+  const solutionDisclosure = useAddressedDisclosure(SOLUTION_PARAM)
 
   // Whether the practice run has already introduced itself to this browser
   const [isIntroDismissed, setIsIntroDismissed] = useLocalStorage<boolean>({
@@ -138,6 +142,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
             problem={problem}
             run={run}
             isGraded={isGraded}
+            solutionDisclosure={solutionDisclosure}
           />
         ))}
       </div>

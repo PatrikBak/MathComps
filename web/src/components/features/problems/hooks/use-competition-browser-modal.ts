@@ -1,5 +1,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
+
+import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 
 import { URL_PARAMS } from '../utils/search-url-serialization'
 
@@ -21,7 +23,7 @@ type UseCompetitionBrowserModalReturn = {
  * Hook for managing the competition browser modal's open/close state.
  *
  * Uses internal React state for the modal visibility, with URL synchronization:
- * - Reads from URL only once on mount (to support direct links with modal open)
+ * - Reads the URL once, on the first render, so a direct link lands with the modal already open
  * - Writes to URL when opening/closing (for shareable links and browser history)
  *
  * Internal state (not URL-derived per render) keeps the modal isolated from debounced filter URL
@@ -35,28 +37,13 @@ export function useCompetitionBrowserModal(): UseCompetitionBrowserModalReturn {
   // (from which we might derive the state of the competition browser modal)
   const searchParams = useSearchParams()
 
+  // Whether the link the page was opened on asked for the browser
+  const wasAskedFor = useInitialUrlState(
+    (params) => params.get(URL_PARAMS.BROWSE_COMPETITIONS) === 'true'
+  )
+
   // Internal state for modal visibility
-  const [isOpen, setIsOpen] = useState(false)
-
-  // Track whether we've initialized from URL (one-time read on mount)
-  const hasInitialized = useRef(false)
-
-  // Initialize modal state from URL on mount (one-time)
-  useEffect(() => {
-    // Don't run more than once
-    if (hasInitialized.current) return
-
-    // Mark as initialized
-    hasInitialized.current = true
-
-    // Check if the URL has the browse competitions param
-    const shouldOpen = searchParams.get(URL_PARAMS.BROWSE_COMPETITIONS) === 'true'
-
-    // If it does, open the modal
-    if (shouldOpen) {
-      setIsOpen(true)
-    }
-  }, [searchParams])
+  const [isOpen, setIsOpen] = useState(wasAskedFor)
 
   /** Opens the competition browser modal and updates the URL */
   const open = useCallback(() => {

@@ -8,11 +8,9 @@ import { useState } from 'react'
 import { Button } from '@/components/shared/components/Button'
 import { Kbd } from '@/components/shared/components/Kbd'
 import { LoadMore } from '@/components/shared/components/LoadMore'
+import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 
-import {
-  useDefenseReviewAddressSync,
-  useDefenseReviewInitialAddress,
-} from '../hooks/use-defense-review-address'
+import { useDefenseReviewAddressSync } from '../hooks/use-defense-review-address'
 import { useDefenseReviewFacets } from '../hooks/use-defense-review-facets'
 import { useDefenseReviewFilters } from '../hooks/use-defense-review-filters'
 import { useDefenseReviewFocusReturn } from '../hooks/use-defense-review-focus-return'
@@ -23,6 +21,7 @@ import {
   type UseDefenseReviewSelectionResult,
 } from '../hooks/use-defense-review-selection'
 import { useDefenseReviewUnread } from '../hooks/use-defense-review-unread'
+import { fromDefenseReviewQuery } from '../model/defense-review-url'
 import { AdminNoteFeedModal } from './AdminNoteFeedModal'
 import { DefenseReviewCard } from './DefenseReviewCard'
 import { DefenseReviewFilterBar } from './DefenseReviewFilterBar'
@@ -82,7 +81,7 @@ export function DefenseReviewQueue() {
   const tPlurals = useTranslations('plurals')
 
   // What the address was asking for when the queue opened
-  const initialAddress = useDefenseReviewInitialAddress()
+  const initialAddress = useInitialUrlState(fromDefenseReviewQuery)
 
   // Which conversations to show
   const { filter, setField, clearAll, activeCount } = useDefenseReviewFilters(initialAddress.filter)

@@ -11,6 +11,7 @@ import { Modal } from '@/components/shared/components/Modal'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { MATHILDA_NAME } from '@/constants/mathilda'
+import type { AddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 import type { Locale } from '@/i18n/i18n'
 
 import type { HostedCompetitionsReaderKey } from '../hooks/hosted-competition-cache'
@@ -33,6 +34,8 @@ type CompetitionProblemPanelProps = {
   run: AreaRun | null
   /** Whether the student is graded on this run. */
   isGraded: boolean
+  /** Which problem of the set has its official solution open, by position. */
+  solutionDisclosure: AddressedDisclosure
 }
 
 /**
@@ -44,6 +47,7 @@ export function CompetitionProblemPanel({
   problem,
   run,
   isGraded,
+  solutionDisclosure,
 }: CompetitionProblemPanelProps) {
   // Competitions copy
   const t = useTranslations('competitions')
@@ -88,6 +92,9 @@ export function CompetitionProblemPanel({
             position={problem.position}
             statement={problem.statement}
             solution={problem.solution}
+            isOpen={solutionDisclosure.openedValue === String(problem.position)}
+            onOpen={() => solutionDisclosure.open(String(problem.position))}
+            onClose={solutionDisclosure.close}
           />
         )}
 

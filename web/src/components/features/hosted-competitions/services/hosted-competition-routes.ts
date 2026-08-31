@@ -35,3 +35,14 @@ export function competitionAreaHref(competitionId: string): CompetitionAreaHref 
     params: { id: competitionId },
   }
 }
+
+/**
+ * The query parameter naming which problem's official solution is open, so that the address bar of an
+ * opened solution is a link somebody else can follow straight back to it.
+ *
+ * Carries the problem's position, so that the address is one a person can read and type. Reordering a set
+ * therefore moves an old link to whatever now sits in that place.
+ *
+ * Inert for a reader the solution is not out for yet: nothing on their page answers to it.
+ */
+export const SOLUTION_PARAM = 'solution'

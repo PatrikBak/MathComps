@@ -1,6 +1,5 @@
 'use client'
 
-import { useDisclosure } from '@mantine/hooks'
 import { BookOpen, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
@@ -20,6 +19,12 @@ type CompetitionSolutionProps = {
   statement: LocalizedString
   /** The official solution, in every language the site is read in. */
   solution: LocalizedString
+  /** Whether this problem is the one whose solution is being read. */
+  isOpen: boolean
+  /** Opens the solution. */
+  onOpen: () => void
+  /** Closes the solution. */
+  onClose: () => void
 }
 
 /**
@@ -32,7 +37,14 @@ type CompetitionSolutionProps = {
  * The surface is laid out the way the conversation about the same problem is: the statement above, folded
  * away by the same control, and what is said about it underneath.
  */
-export function CompetitionSolution({ position, statement, solution }: CompetitionSolutionProps) {
+export function CompetitionSolution({
+  position,
+  statement,
+  solution,
+  isOpen,
+  onOpen,
+  onClose,
+}: CompetitionSolutionProps) {
   // Competitions copy
   const t = useTranslations('competitions')
 
@@ -42,15 +54,12 @@ export function CompetitionSolution({ position, statement, solution }: Competiti
   // The active locale, which decides which language both texts are read in
   const locale = useLocale() as Locale
 
-  // Whether the solution is being read
-  const [isOpen, { open, close }] = useDisclosure(false)
-
   return (
     <>
       {/* Drawn as the conversation rows beside it are, down to the icon and the size */}
       <button
         type="button"
-        onClick={open}
+        onClick={onOpen}
         className="focus flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5"
       >
         <span className="inline-flex items-center gap-2 text-foreground">
@@ -63,7 +72,7 @@ export function CompetitionSolution({ position, statement, solution }: Competiti
       {isOpen && (
         <Modal
           isOpen
-          onClose={close}
+          onClose={onClose}
           showCloseButton={false}
           padded={false}
           ariaLabel={t('officialSolution')}
@@ -84,7 +93,7 @@ export function CompetitionSolution({ position, statement, solution }: Competiti
             <Button
               variant="ghost"
               size="icon"
-              onClick={close}
+              onClick={onClose}
               aria-label={tModal('close')}
               className="ml-auto shrink-0"
             >
