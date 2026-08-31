@@ -3,7 +3,7 @@
 import { Link } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
+import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -78,11 +78,7 @@ const SimilarProblemCard = ({
 
       <div className="p-4 text-sm text-muted-foreground">
         <div className="math-typography">
-          <RichMathEditorRenderer
-            content={problem.statementMarkdown}
-            imageContext="problems"
-            lightImageBackground
-          />
+          <ProblemMarkdown content={problem.statementMarkdown} />
         </div>
       </div>
     </div>
