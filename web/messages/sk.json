@@ -321,7 +321,9 @@
     },
     "loading": "Načítava sa...",
     "profile": "Profil",
-    "redirecting": "Presmerovávam..."
+    "redirecting": "Presmerovávam...",
+    "signInAgain": "Skúsiť znova",
+    "signInStalled": "Prihlásenie sa nepodarilo dokončiť."
   },
   "competitions": {
     "areaClockSpent": "Tvoj čas vypršal. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",

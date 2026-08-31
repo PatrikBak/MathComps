@@ -321,7 +321,9 @@
     },
     "loading": "Loading...",
     "profile": "Profile",
-    "redirecting": "Redirecting..."
+    "redirecting": "Redirecting...",
+    "signInAgain": "Try again",
+    "signInStalled": "We could not finish signing you in."
   },
   "competitions": {
     "areaClockSpent": "Your time is up. You can keep solving the problems and talking to Mathilda about them, but new messages no longer count towards your result.",
