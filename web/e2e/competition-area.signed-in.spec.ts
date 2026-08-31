@@ -6,6 +6,7 @@ import {
   chatCopy,
   holdClock,
   LIST_PATH,
+  modalCopy,
   openExistingDefense,
   sendTurn,
   transcriptOf,
@@ -13,6 +14,7 @@ import {
 import {
   COMPETITION_ID,
   installHostedBackend,
+  LIMITS,
   OPENER,
   PROBLEM_COUNT,
 } from './support/hosted-backend'
@@ -30,8 +32,20 @@ const REVISED_NOTE = 'On reflection the last case needs the bound the other way 
 /** A competition no state ever holds an entry on, so the guard has something to turn away. */
 const UNENTERED_COMPETITION_ID = 'open-advanced'
 
-/** The practice run, the one competition whose clock nobody is graded against. */
-const PRACTICE_COMPETITION_ID = 'practice-set'
+/** A competition that closed a month ago, which a newcomer has no entry on and may still read. */
+const CLOSED_COMPETITION_ID = 'closed-special-set'
+
+/**
+ * How the first problem's official solution opens, which is prose rather than maths so a single string
+ * finds it however KaTeX sets the rest of the sentence.
+ */
+const SOLUTION_OPENING = 'Assume without loss of generality'
+
+/**
+ * How the first problem's own statement opens, prose again so a single string finds it however KaTeX sets
+ * the rest of the sentence.
+ */
+const STATEMENT_OPENING = 'Find all pairs of positive integers'
 
 test.describe('the competition area', () => {
   test('puts the whole set on one page', async ({ page }) => {
@@ -437,7 +451,7 @@ test.describe('the competition area', () => {
 
     // Still carrying what the last run said: a conversation hangs off the problem, not off the
     // entry, so retaking resets the clock and takes nothing else back
-    await expect(page.getByRole('button', { name: /messages$/ })).toHaveCount(1)
+    await expect(page.locator('[data-defense-session-id]')).toHaveCount(1)
 
     // And the clock is the run's own, not what was left of the last one
     await expect(page.getByText(areaCopy.clockSpent)).toHaveCount(0)
@@ -596,16 +610,13 @@ test.describe('the competition area', () => {
     // Which is asked about before it happens
     await page.getByRole('button', { name: areaCopy.finishDialog.confirm, exact: true }).click()
 
-    // Out to the list, the way entering came in from it
-    await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
-
-    // Back inside the run just handed in
-    await page.goto(areaPath(PRACTICE_COMPETITION_ID))
-
-    // On the set again, so the page has settled and its notes are whatever they are going to be
-    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+    // Nothing left to hand in, so the page has settled
+    await expect(page.getByRole('button', { name: areaCopy.finishEntry })).toHaveCount(0, {
       timeout: SETTLE_TIMEOUT_MS,
     })
+
+    // And the set stays where it is
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT)
 
     // Where it promises nothing about a result, because it has none to promise
     await expect(page.getByText(areaCopy.areaFinished)).toHaveCount(0)
@@ -903,25 +914,20 @@ test.describe('the competition area', () => {
     // Which is asked about before it happens
     await page.getByRole('button', { name: areaCopy.finishDialog.confirm, exact: true }).click()
 
-    // Out to the list, the way entering came in from it
-    await expect(page).toHaveURL(/\/competitions$/, {
-      timeout: SETTLE_TIMEOUT_MS,
-    })
-
-    // The row of the competition just handed in
-    const own = page.locator(`a[href="/en/competitions/${COMPETITION_ID}"]`)
-
-    // Which now offers the work back
-    await expect(own).toHaveText(areaCopy.mySolutions, { timeout: SETTLE_TIMEOUT_MS })
-
-    // Back inside
-    await own.click()
-
-    // Where the page names it a hand-in, not a spent clock
+    // The page stays on the set, naming it a hand-in rather than a spent clock
     await expect(page.getByText(areaCopy.areaFinished)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // And there is nothing left to hand in
     await expect(page.getByRole('button', { name: areaCopy.finishEntry })).toHaveCount(0)
+
+    // Out on the list
+    await page.goto(LIST_PATH)
+
+    // Where the row of the competition just handed in now offers the work back
+    await expect(page.locator(`a[href="/en/competitions/${COMPETITION_ID}"]`)).toHaveText(
+      areaCopy.mySolutions,
+      { timeout: SETTLE_TIMEOUT_MS }
+    )
   })
 
   test('offers a re-entrant competition again once it has been handed in', async ({ page }) => {
@@ -959,7 +965,10 @@ test.describe('the competition area', () => {
     // Which is asked about before it happens
     await page.getByRole('button', { name: areaCopy.finishDialog.confirm, exact: true }).click()
 
-    // Out to the list, where the practice run is the one competition offering another go
+    // And back out on the list
+    await page.goto(LIST_PATH)
+
+    // Where the practice run is the one competition offering another go
     await expect(again).toHaveCount(1, { timeout: SETTLE_TIMEOUT_MS })
   })
 
@@ -1122,5 +1131,245 @@ test.describe('the competition area', () => {
     await expect(page).toHaveURL(new RegExp(`/sk/sutaze/${COMPETITION_ID}`), {
       timeout: SETTLE_TIMEOUT_MS,
     })
+  })
+
+  test('offers no solution while the clock is running', async ({ page }) => {
+    // A student forty minutes into a two-hour clock
+    await installHostedBackend(page, 'running')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // Once the whole set is drawn
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Nothing offers what a problem is measured against
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(0)
+
+    // Nor is one sitting unopened in the page, where the browser's own devtools would reach it
+    await expect(page.getByText(SOLUTION_OPENING)).toHaveCount(0)
+  })
+
+  test('reads the solution on a surface of its own once the entry is given up', async ({
+    page,
+  }) => {
+    // A student who gave the entry up half an hour ago to read the problems
+    await installHostedBackend(page, 'forfeited')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // Every problem now offers one
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Held back until asked for, so arriving does not put the answer in front of somebody who wants
+    // another go at the problem first
+    await expect(page.getByText(SOLUTION_OPENING)).toHaveCount(0)
+
+    // Asked for on the first problem
+    await page.getByRole('button', { name: areaCopy.officialSolution, exact: true }).first().click()
+
+    // Which opens it on a surface of its own
+    const solution = page.getByRole('dialog')
+
+    // Where the solution is
+    await expect(solution.getByText(SOLUTION_OPENING)).toBeVisible()
+
+    // Carrying the problem it answers, up where a conversation about the same problem carries it, so
+    // following the argument never costs the statement
+    await expect(solution.getByText(STATEMENT_OPENING)).toBeVisible()
+
+    // Closed again
+    await solution.getByRole('button', { name: modalCopy.close }).click()
+
+    // And the solution is off the set
+    await expect(page.getByText(SOLUTION_OPENING)).toHaveCount(0)
+  })
+
+  test('opens the solutions the moment the clock runs out under a reader watching it', async ({
+    page,
+  }) => {
+    // A clock the spec can walk forward, this entry starting with time still on it
+    await page.clock.install()
+
+    // An entry with ninety seconds left on it
+    await installHostedBackend(page, 'expiring')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // Which draws the set while the entry still counts
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // So nothing is offered yet
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(0)
+
+    // Past the ninety seconds this state leaves on the clock
+    await page.clock.fastForward('02:00')
+
+    // And the official solutions arrive with nobody reloading the page or pressing anything on it
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+  })
+
+  test('counts the conversation down from its first turn inside a competition', async ({
+    page,
+  }) => {
+    // A student forty minutes into a two-hour clock
+    await installHostedBackend(page, 'running')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // And start a conversation about the first problem
+    await page.getByRole('button', { name: areaCopy.startDefense }).first().click()
+
+    // The room the conversation has, said before a word of it is spent: a clock pushes a student to spend
+    // turns fast, and nothing undoes a conversation spent that way
+    await expect(page.getByText(`0/${LIMITS.maxTurnsPerSession}`, { exact: true })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // One turn spent
+    await sendTurn(page, 'The bound follows from the pigeonhole on the residues')
+
+    // And the count moves with it
+    await expect(page.getByText(`1/${LIMITS.maxTurnsPerSession}`, { exact: true })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+  })
+
+  test('opens the solutions where the student hands in, without taking them off the set', async ({
+    page,
+  }) => {
+    // A student forty minutes into a two-hour clock
+    await installHostedBackend(page, 'running')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // Once the whole set is drawn
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Nothing is offered while the clock counts
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(0)
+
+    // Hand it in ahead of its own clock
+    await page.getByRole('button', { name: areaCopy.finishEntry }).click()
+
+    // Which is asked about before it happens
+    await page.getByRole('button', { name: areaCopy.finishDialog.confirm, exact: true }).click()
+
+    // And the official solutions arrive
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(PROBLEM_COUNT, { timeout: SETTLE_TIMEOUT_MS })
+
+    // On the set the student just argued, which is the page they were already on
+    await expect(page).toHaveURL(new RegExp(`/competitions/${COMPETITION_ID}$`))
+  })
+
+  test('closes the solutions again when the practice run is taken a second time', async ({
+    page,
+  }) => {
+    // A clock the spec can walk forward
+    await page.clock.install()
+
+    // And a student with an entry still to spend
+    await installHostedBackend(page, 'ready')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // Press try
+    await page.getByRole('button', { name: areaCopy.try }).first().click()
+
+    // And confirm the dialog
+    await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
+
+    // Which lands on the set the run is spent on
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Past the minute this run's clock lasts
+    await page.clock.fastForward('02:00')
+
+    // Which opens the official solutions
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(PROBLEM_COUNT, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Then back out to the list
+    await page.goto(LIST_PATH)
+
+    // Where taking it again starts a fresh clock over the same problems
+    await page.getByRole('button', { name: areaCopy.tryAgain }).click()
+
+    // Confirmed the same way
+    await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
+
+    // Back on the set
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // With nothing to measure it against, the run just started being one they are competing in
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(0)
+
+    // And what the last run opened is gone from the page rather than sitting in it unopened
+    await expect(page.getByText(SOLUTION_OPENING)).toHaveCount(0)
+  })
+
+  test('reads a closed competition it was never in, solutions and all', async ({ page }) => {
+    // A student who has entered nothing at all, so the competition that closed a month ago is one they
+    // watched from the outside
+    await installHostedBackend(page, 'first-entry')
+
+    // Open the list, where that competition offers its problems
+    await page.goto(LIST_PATH)
+
+    // The one link it leaves a reader who was never in it
+    const problems = page.locator(`a[href="/en/competitions/${CLOSED_COMPETITION_ID}"]`)
+
+    // Which reads as the offer of the problems
+    await expect(problems).toHaveText(areaCopy.problems, { timeout: SETTLE_TIMEOUT_MS })
+
+    // And goes to the area
+    await problems.click()
+
+    // Where the whole set is drawn, no entry having been spent on any of it
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // With the official solutions beside the problems, nobody being able to still be competing here
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(PROBLEM_COUNT)
+
+    // And nothing to hand in, there being no entry of theirs to close
+    await expect(page.getByRole('button', { name: areaCopy.finishEntry })).toHaveCount(0)
   })
 })

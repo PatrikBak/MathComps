@@ -85,14 +85,32 @@ type ForfeitedAreaEntry = {
 }
 
 /**
- * A spent entry as everything inside the area reads it: {@link entryEndsAt} and {@link wasHandedInEarly}
- * already applied, so a problem panel or a conversation is handed the instant and not the arithmetic
- * behind it.
+ * A spent entry with {@link entryEndsAt} and {@link wasHandedInEarly} already applied, so whatever is
+ * handed one gets the instant and not the arithmetic behind it.
  *
  * Its two arms are the two ways an entry can be spent, and they differ in one thing: whether there is a
  * clock the turns are counted against. Both read the same problems under the same terms.
  */
 export type AreaEntry = SatAreaEntry | ForfeitedAreaEntry
+
+/**
+ * A sat entry as the area reads it, with where one instant leaves the clock it runs on.
+ */
+type SatAreaRun = SatAreaEntry & {
+  /** Whether the counted part is over, which closes the hand-in and changes what the page says. */
+  hasEnded: boolean
+  /** Whether the student may still say something about their own solutions. */
+  areNotesOpen: boolean
+}
+
+/**
+ * The entry a student spent here, carrying every reading of it the page needs, all taken against the one
+ * instant the page is drawn at. Stands in for an {@link AreaEntry} wherever one is wanted.
+ *
+ * Only a sat entry has anything read off it. A forfeit ran no clock, so the entry itself is the whole of
+ * what the area holds about one.
+ */
+export type AreaRun = SatAreaRun | ForfeitedAreaEntry
 
 /**
  * Where a student stands with one competition.
@@ -226,6 +244,64 @@ export function areNotesOpen(entry: AreaEntry, graceMinutes: number, now: number
   // Nothing was sat, so there is nothing of theirs to say anything about; and what was sat runs out once
   // the grace behind its end does
   return entry.kind !== 'forfeited' && Date.parse(entry.endsAt) + graceMinutes * MINUTE_MS > now
+}
+
+/**
+ * When a spent entry stops counting.
+ *
+ * @param entry - The entry the student spent, or null where they spent none.
+ *
+ * @returns The instant as an ISO-8601 string, or null wherever no clock of theirs runs.
+ */
+export function clockEndsAt(entry: AreaEntry | null): string | null {
+  // Nothing spent here, so there is no clock to end
+  if (entry === null) {
+    return null
+  }
+
+  switch (entry.kind) {
+    // The end its clock runs to
+    case 'sat':
+      return entry.endsAt
+
+    // Given up for the problems, so no clock ever ran to end
+    case 'forfeited':
+      return null
+
+    // Every entry is handled above
+    default:
+      return assertNever(entry)
+  }
+}
+
+/**
+ * Reads a spent entry into what one competition's own area draws from, with everything the clock decides
+ * settled against a single instant.
+ *
+ * @param entry - The entry the student spent.
+ * @param graceMinutes - How long past the end of the entry notes are still taken.
+ * @param now - The instant to read it against, in epoch milliseconds.
+ *
+ * @returns The entry, with what the clock decides on it already settled.
+ */
+export function readAreaRun(entry: AreaEntry, graceMinutes: number, now: number): AreaRun {
+  switch (entry.kind) {
+    // A clock ran on it, so where it stands and whether notes are still taken both follow from it
+    case 'sat':
+      return {
+        ...entry,
+        hasEnded: hasEntryEnded(entry, now),
+        areNotesOpen: areNotesOpen(entry, graceMinutes, now),
+      }
+
+    // No clock ran on it, so there is nothing to read that the entry does not already say
+    case 'forfeited':
+      return entry
+
+    // Every entry is handled above
+    default:
+      return assertNever(entry)
+  }
 }
 
 /**

@@ -183,6 +183,29 @@ const STATEMENTS: LocalizedString[] = [
   },
 ]
 
+/**
+ * The official solution to each of {@link STATEMENTS}, in the order the competition sets them.
+ *
+ * Real arguments, since what these exercise is a student reading one back once their entry is over.
+ */
+const SOLUTIONS: LocalizedString[] = [
+  {
+    sk: 'Bez ujmy na všeobecnosti nech $a \\le b$. Potom $b^2 < b^2 + a$ a zároveň $b^2 + a \\le b^2 + b < (b+1)^2$, takže $b^2 + a$ leží ostro medzi dvoma susednými druhými mocninami. Taká dvojica teda neexistuje.',
+    cs: 'Bez újmy na obecnosti nechť $a \\le b$. Pak $b^2 < b^2 + a$ a zároveň $b^2 + a \\le b^2 + b < (b+1)^2$, takže $b^2 + a$ leží ostře mezi dvěma sousedními druhými mocninami. Taková dvojice tedy neexistuje.',
+    en: 'Assume without loss of generality that $a \\le b$. Then $b^2 < b^2 + a$ and $b^2 + a \\le b^2 + b < (b+1)^2$, so $b^2 + a$ lies strictly between two consecutive squares. No such pair exists.',
+  },
+  {
+    sk: 'Body $B$, $C$, $E$, $F$ ležia na kružnici s priemerom $BC$, takže $\\angle AFE = \\angle ACB$. Dotyčnica k opísanej kružnici v bode $A$ zviera s $AB$ ten istý uhol, takže je rovnobežná s $EF$. Keďže $OA$ je na túto dotyčnicu kolmá, je kolmá aj na $EF$.',
+    cs: 'Body $B$, $C$, $E$, $F$ leží na kružnici s průměrem $BC$, takže $\\angle AFE = \\angle ACB$. Tečna ke kružnici opsané v bodě $A$ svírá s $AB$ tentýž úhel, takže je rovnoběžná s $EF$. Protože $OA$ je na tuto tečnu kolmá, je kolmá i na $EF$.',
+    en: 'The points $B$, $C$, $E$, $F$ lie on the circle with diameter $BC$, so $\\angle AFE = \\angle ACB$. The tangent to the circumcircle at $A$ makes the same angle with $AB$, hence it is parallel to $EF$. Since $OA$ is perpendicular to that tangent, it is perpendicular to $EF$.',
+  },
+  {
+    sk: 'Sledujme súčet čísel na tabuli. Krok nahrádzajúci $x$ a $y$ číslom $\\frac{x+y}{4}$ ho zmenší presne o $\\frac{3(x+y)}{4}$, takže súčet nikdy nerastie. Odtiaľ sa dá ohraničiť posledné číslo a dopočítať, pre ktoré $n$ je hranica $\\frac{1}{n}$ ešte dosiahnuteľná.',
+    cs: 'Sledujme součet čísel na tabuli. Krok nahrazující $x$ a $y$ číslem $\\frac{x+y}{4}$ jej zmenší přesně o $\\frac{3(x+y)}{4}$, takže součet nikdy neroste. Odtud lze omezit poslední číslo a dopočítat, pro která $n$ je hranice $\\frac{1}{n}$ ještě dosažitelná.',
+    en: 'Follow the sum of the numbers on the board. A step replacing $x$ and $y$ by $\\frac{x+y}{4}$ decreases it by exactly $\\frac{3(x+y)}{4}$, so the sum never grows. That bounds the final number, and the bound settles which $n$ can still reach $\\frac{1}{n}$.',
+  },
+]
+
 /** The examiner's opening line, which the backend serves and every transcript starts on. */
 export const OPENER =
   'Tell me how you approached this one. Start wherever your argument starts, not where the problem does.'
@@ -201,7 +224,7 @@ const SCRIPTED_REPLIES = [
 ]
 
 /** What one entry is held to, standing in for the competition's own setup. */
-const LIMITS: DefenseLimits = {
+export const LIMITS: DefenseLimits = {
   maxCandidateChars: 4000,
   maxFeedbackCommentChars: 1000,
   maxTurnsPerSession: 20,
@@ -621,10 +644,15 @@ function transcriptsOf(state: FakeState, problemId: string): DefenseSession[] {
  *
  * @param state - The fake's memory.
  * @param competitionId - Which competition's set.
+ * @param isSolutionOpen - Whether the set may carry its official solutions.
  *
  * @returns The problems, in the order the competition sets them.
  */
-function buildProblems(state: FakeState, competitionId: string): HostedCompetitionProblem[] {
+function buildProblems(
+  state: FakeState,
+  competitionId: string,
+  isSolutionOpen: boolean
+): HostedCompetitionProblem[] {
   // One problem per statement, as many of them as a competition sets
   return STATEMENTS.slice(0, PROBLEMS_PER_COMPETITION).map((statement, index) => {
     // Where it sits in the set
@@ -633,12 +661,10 @@ function buildProblems(state: FakeState, competitionId: string): HostedCompetiti
     // The id the problem is named by
     const id = problemIdOf(competitionId, position)
 
-    // A row per conversation, saying enough to choose between them and no more
+    // A row per conversation, saying enough to tell it from the others and no more
     const defenses = transcriptsOf(state, id).map((session) => ({
       sessionId: session.id,
       startedAt: session.turns[0]?.createdAt ?? new Date(0).toISOString(),
-      turnsSpent: session.turns.filter((turn) => turn.role === 'candidate').length,
-      maxTurns: LIMITS.maxTurnsPerSession,
     }))
 
     // The problem, with whatever has been said about it and whatever the student claims of their own
@@ -647,11 +673,57 @@ function buildProblems(state: FakeState, competitionId: string): HostedCompetiti
       id,
       position,
       statement,
+      solution: isSolutionOpen ? (SOLUTIONS[index] ?? null) : null,
       defenses,
       selfAssessment: state.assessments.get(id) ?? null,
       maxCommentChars: LIMITS.maxFeedbackCommentChars,
     }
   })
+}
+
+/**
+ * Mirrors the rule the real backend serves an official solution under: it is open unless the student has a
+ * clock of their own still running.
+ *
+ * @param entry - The entry the student holds here, null while they hold none.
+ * @param clockMinutes - How long a clock in this group runs, in minutes.
+ * @param now - The instant to read the clock against, in epoch milliseconds.
+ *
+ * @returns Whether the set may carry its solutions.
+ */
+function isSolutionOpen(
+  entry: HostedCompetitionEntry | null,
+  clockMinutes: number,
+  now: number
+): boolean {
+  // No entry at all, so this is a competition read after it closed; and one given up for the problems never
+  // ran a clock to protect
+  if (entry === null || entry.kind === 'forfeited') {
+    return true
+  }
+
+  // Closed by the student, whatever they left on the clock
+  if (entry.finishedAt !== null) {
+    return true
+  }
+
+  // Otherwise the clock says it
+  return Date.parse(entry.startedAt) + clockMinutes * MINUTE_MS <= now
+}
+
+/**
+ * The group one competition runs in, which is what sets the clock its entry is measured by.
+ *
+ * @param state - The fake's memory.
+ * @param competitionId - Which competition's group.
+ *
+ * @returns The group, or undefined when nothing holds that competition.
+ */
+function groupOf(state: FakeState, competitionId: string): HostedCompetitionGroup | undefined {
+  // Ids are unique across every group, so the first group holding it is the only one
+  return state.view.groups.find((group) =>
+    group.competitions.some((competition) => competition.id === competitionId)
+  )
 }
 
 /** The season every conversation in the library reads as having been set in. */
@@ -1042,10 +1114,11 @@ export async function installHostedBackend(
         // Taking one is agreeing to the rules
         state.readiness.hasAcceptedRules = true
 
-        // Answered with the entry and the problems it bought
+        // Answered with the entry and the problems it bought, which carry no solution: the clock has this
+        // instant started
         await answer(page, route, {
           entry: competition.entry,
-          problems: buildProblems(state, competitionId),
+          problems: buildProblems(state, competitionId, false),
         } satisfies SpentEntry)
 
         // Nothing else this call needs
@@ -1063,10 +1136,11 @@ export async function installHostedBackend(
         // Giving one up is agreeing to the rules just as taking it is
         state.readiness.hasAcceptedRules = true
 
-        // Answered with the entry and the problems it bought
+        // Answered with the entry and the problems it bought, solutions and all: giving the entry up is
+        // saying they are not competing here
         await answer(page, route, {
           entry: competition.entry,
-          problems: buildProblems(state, competitionId),
+          problems: buildProblems(state, competitionId, true),
         } satisfies SpentEntry)
 
         // Nothing else this call needs
@@ -1102,8 +1176,19 @@ export async function installHostedBackend(
 
       // The one place an embargoed statement is served
       case 'problems': {
-        // Answered with the competition's whole set
-        await answer(page, route, buildProblems(state, competitionId))
+        // How long a clock in this competition's group runs
+        const clockMinutes = groupOf(state, competitionId)?.clockMinutes ?? CLOCK_MINUTES
+
+        // Answered with the competition's whole set, carrying the solutions where they are owed them
+        await answer(
+          page,
+          route,
+          buildProblems(
+            state,
+            competitionId,
+            isSolutionOpen(competition.entry, clockMinutes, await pageNow(page))
+          )
+        )
 
         // Nothing else this read needs
         return

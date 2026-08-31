@@ -54,8 +54,8 @@ type DefenseConversationProps = {
    */
   opening: DefenseOpening
   /**
-   * The competition run this defense is being argued inside, or null outside a competition. What a graded
-   * one settles about the conversation is on {@link DefenseCompetitionRun}.
+   * The competition run this defense is being argued inside, or null where nothing of the reader's own is
+   * being spent on it. What a graded one settles about the conversation is on {@link DefenseCompetitionRun}.
    */
   competition: DefenseCompetitionRun | null
 }
@@ -359,7 +359,7 @@ function DefenseConversationForTarget({
             consentStatus: consent.status,
             isThinking,
             repliesLeft,
-            isGraded,
+            competition: competition === null ? null : { isGraded: competition.isGraded },
           })}
           draft={turn.draft}
           onDraftChange={turn.setDraft}
@@ -368,6 +368,7 @@ function DefenseConversationForTarget({
           editorRef={turn.editorRef}
           isThinking={isThinking}
           maxCharacters={limits?.maxCandidateChars}
+          maxReplies={limits?.maxTurnsPerSession}
           onAcceptConsent={consent.accept}
           isAcceptingConsent={consent.isAccepting}
           onRetryConsent={consent.retry}

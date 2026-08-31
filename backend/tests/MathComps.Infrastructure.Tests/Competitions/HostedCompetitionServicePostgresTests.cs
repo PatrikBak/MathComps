@@ -558,6 +558,156 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
+    /// Verifies that a student with a clock running is handed no official solution, on the answer the entry itself
+    /// comes back in and on every read after it.
+    /// </summary>
+    [Fact]
+    public Task A_running_clock_hands_back_no_solution() => RunTestAsync(async service =>
+    {
+        // Take the entry, which starts the clock
+        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // The answer it came back in carries the statements and nothing to check them against
+        Assert.All(spent.Problems, problem => Assert.Null(problem.Solution));
+
+        // Read the set again while the clock is still running
+        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+
+        // Which holds nothing to check the statements against either
+        Assert.All(problems, problem => Assert.Null(problem.Solution));
+    });
+
+    /// <summary>
+    /// Verifies that handing the entry in opens the solutions, in every language the site is read in.
+    /// </summary>
+    [Fact]
+    public Task Handing_the_entry_in_opens_the_solutions() => RunTestAsync(async service =>
+    {
+        // Sit the entry
+        await service.EnterAsync(_studentId, _advancedRoundId);
+
+        // And close it
+        await service.FinishAsync(_studentId, _advancedRoundId);
+
+        // Read the set back
+        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+
+        // Which now carries what the problems were measured against
+        var solution = Assert.IsAssignableFrom<IReadOnlyDictionary<Language, string>>(problems[0].Solution);
+
+        // Written in every language the site is read in, the way the statement beside it is
+        Assert.Equal(Enum.GetValues<Language>().Order(), solution.Keys.Order());
+
+        // And it is the first problem's own solution
+        Assert.Equal("Riešenie 1", solution[Language.SK]);
+        Assert.Equal("Solution 1", solution[Language.EN]);
+    });
+
+    /// <summary>
+    /// Verifies that giving the entry up opens the solutions with the problems. Whoever forfeits has said they are
+    /// not competing here, which is the whole of what holds a solution back.
+    /// </summary>
+    [Fact]
+    public Task Forfeiting_opens_the_solutions() => RunTestAsync(async service =>
+    {
+        // Give the entry up, which starts no clock
+        var spent = await service.ForfeitAsync(_studentId, _advancedRoundId);
+
+        // So the answer carries the solutions along with the statements
+        Assert.All(spent.Problems, problem => Assert.NotNull(problem.Solution));
+    });
+
+    /// <summary>
+    /// Verifies that a competition past its embargo hands its solutions to a reader holding no entry, the same way
+    /// it hands them its problems.
+    /// </summary>
+    [Fact]
+    public Task An_opened_competitions_solutions_need_no_entry() => RunTestAsync(async service =>
+    {
+        // Nobody has entered this one, and its solutions open anyway
+        var problems = await service.GetProblemsAsync(_studentId, _openedRoundId);
+
+        // And there is no run of theirs a solution could spoil
+        Assert.NotNull(problems[0].Solution);
+    });
+
+    /// <summary>
+    /// Verifies that a clock still running holds the solutions back on a round whose problems are already public,
+    /// which the practice one here is. The embargo and the student's own clock are separate gates, and a lifted
+    /// embargo says nothing about whether somebody is mid-run.
+    /// </summary>
+    [Fact]
+    public Task A_running_practice_clock_beats_the_public_problems() => RunTestAsync(async service =>
+    {
+        // Read the round before anything is entered
+        var beforehand = await service.GetProblemsAsync(_studentId, _practiceRoundId);
+
+        // Its problems are open to anybody, solution and all
+        Assert.NotNull(beforehand[0].Solution);
+
+        // Then sit the practice run, which starts a clock over that same public set
+        var spent = await service.EnterAsync(_studentId, _practiceRoundId);
+
+        // And the solution goes away in the answer the entry came back in
+        Assert.Null(spent.Problems[0].Solution);
+
+        // As it does on every read while that clock runs
+        Assert.Null((await service.GetProblemsAsync(_studentId, _practiceRoundId))[0].Solution);
+    });
+
+    /// <summary>
+    /// Verifies that taking a re-entrant group again closes the solutions the run before it opened. The row in the
+    /// database still holds the finished run at the moment the set is read, so only the stamps the new entry has
+    /// just been given can say the student is competing again.
+    /// </summary>
+    [Fact]
+    public Task Taking_the_practice_group_again_closes_its_solutions() => RunTestAsync(async service =>
+    {
+        // Sit a run
+        await service.EnterAsync(_studentId, _practiceRoundId);
+
+        // And close it, which opens the solutions
+        await service.FinishAsync(_studentId, _practiceRoundId);
+
+        // And the set reads that solution back
+        Assert.NotNull((await service.GetProblemsAsync(_studentId, _practiceRoundId))[0].Solution);
+
+        // Then a second go at the same competition, which starts a fresh clock over the same problems
+        var again = await service.EnterAsync(_studentId, _practiceRoundId);
+
+        // The set it hands back holds nothing to measure them against
+        Assert.All(again.Problems, problem => Assert.Null(problem.Solution));
+
+        // And neither does reading it again
+        Assert.All(
+            await service.GetProblemsAsync(_studentId, _practiceRoundId),
+            problem => Assert.Null(problem.Solution));
+    });
+
+    /// <summary>
+    /// Verifies that a problem whose solution was never written in one of the site's languages stops the read
+    /// rather than serving a set with a hole in it. The declaration refuses a round like that, so one reaching a
+    /// reader is a bug upstream, and a read that quietly went on would be the thing hiding it.
+    /// </summary>
+    [Fact]
+    public Task A_solution_missing_a_language_stops_the_read() => RunTestAsync(async service =>
+    {
+        // The English solution of every problem in an open competition, taken away
+        await QueryAsync(context => context.ProblemTexts
+            .Where(text => text.Problem.RoundId == _openedRoundId
+                && text.DocumentType == DocumentType.Solution
+                && text.Language == Language.EN)
+            .ExecuteDeleteAsync());
+
+        // Which the read refuses to work around
+        var thrown = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.GetProblemsAsync(_studentId, _openedRoundId));
+
+        // Naming what the round is missing
+        Assert.Contains("solution", thrown.Message, StringComparison.OrdinalIgnoreCase);
+    });
+
+    /// <summary>
     /// Verifies that a round the site does not host answers as no competition at all, rather than leaking whether
     /// an archive round exists under the id.
     /// </summary>
@@ -1331,17 +1481,23 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             };
             context.Problems.Add(problem);
 
-            // Its statement in each language, so the answer can be checked for carrying all of them.
-            foreach (var (language, prefix) in new[]
+            // Its statement and its solution in each language, so the answer can be checked for carrying all of
+            // them. A hosted round holds both throughout, the declaration refusing a group whose problems do not.
+            foreach (var (documentType, language, prefix) in new[]
                      {
-                         (Language.SK, "Zadanie"), (Language.CS, "Zadání"), (Language.EN, "Statement"),
+                         (DocumentType.Statement, Language.SK, "Zadanie"),
+                         (DocumentType.Statement, Language.CS, "Zadání"),
+                         (DocumentType.Statement, Language.EN, "Statement"),
+                         (DocumentType.Solution, Language.SK, "Riešenie"),
+                         (DocumentType.Solution, Language.CS, "Řešení"),
+                         (DocumentType.Solution, Language.EN, "Solution"),
                      })
             {
                 context.ProblemTexts.Add(new ProblemText
                 {
                     Id = Guid.NewGuid(),
                     ProblemId = problem.Id,
-                    DocumentType = DocumentType.Statement,
+                    DocumentType = documentType,
                     Language = language,
                     MarkdownText = $"{prefix} {number}",
                     IsOriginal = language == Language.SK,

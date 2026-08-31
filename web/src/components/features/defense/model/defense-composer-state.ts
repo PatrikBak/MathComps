@@ -90,11 +90,15 @@ type ComposerOpen = {
 }
 
 /**
- * How close to the cap an ungraded conversation gets before the room left is said out loud. Running
- * out costs nothing there, so a count carried from the first turn only makes a student ration
- * questions they should be asking.
+ * How few replies are left before running low is worth saying out loud. Outside a competition a count
+ * carried from the first turn would only make a reader ration questions they should be asking.
  */
-const UNGRADED_REPLIES_LEFT_TO_WARN_AT = 5
+export const REPLIES_LEFT_TO_WARN_AT = 5
+
+/**
+ * How few replies are left before running low reads as the wall itself.
+ */
+export const REPLIES_LEFT_TO_ALARM_AT = 1
 
 /**
  * What the composer area currently is: a wait, a gate, a spent conversation, or a live editor.
@@ -106,6 +110,14 @@ export type DefenseComposerState =
   | ComposerConsentUnknown
   | ComposerFull
   | ComposerOpen
+
+/**
+ * The competition run a conversation is being argued inside, as far as the composer has to know it.
+ */
+type ComposerCompetitionRun = {
+  /** Whether the student is graded on the run. */
+  isGraded: boolean
+}
 
 /**
  * What the composer is being asked to be.
@@ -123,8 +135,8 @@ export type DefenseComposerInput = {
   isThinking: boolean
   /** How many turns the conversation has left, or null while the caps are not known. */
   repliesLeft: number | null
-  /** Whether the conversation is being graded. */
-  isGraded: boolean
+  /** The competition run it is being argued inside, or null outside one. */
+  competition: ComposerCompetitionRun | null
 }
 
 /**
@@ -170,14 +182,15 @@ export function resolveComposerState(input: DefenseComposerInput): DefenseCompos
 
   // Every turn spent, though a reply still coming is allowed to land
   if (input.repliesLeft !== null && input.repliesLeft <= 0 && !input.isThinking) {
-    return { kind: 'full', isGraded: input.isGraded }
+    return { kind: 'full', isGraded: input.competition !== null && input.competition.isGraded }
   }
 
-  // A graded conversation says the room left from the first turn, because a student who runs out
-  // mid-argument has no rewind to undo it; anywhere else waits until the wall is close
+  // A competition says the room left from the first turn, since its clock pushes a student to spend
+  // turns fast and nothing undoes a conversation spent that way. Elsewhere the count waits until the
+  // wall is close
   const isRoomLeftWorthSaying =
     input.repliesLeft !== null &&
-    (input.isGraded || input.repliesLeft <= UNGRADED_REPLIES_LEFT_TO_WARN_AT)
+    (input.competition !== null || input.repliesLeft <= REPLIES_LEFT_TO_WARN_AT)
 
   // Open for the next turn, carrying the count only where it is worth saying
   return { kind: 'open', repliesLeft: isRoomLeftWorthSaying ? input.repliesLeft : null }

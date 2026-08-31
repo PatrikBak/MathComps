@@ -55,7 +55,7 @@ export function RichMathEditorOverflowMenu({ items }: RichMathEditorOverflowMenu
           <MenuItems
             anchor="bottom end"
             transition
-            className="z-floating mt-1 shadow-2xl border border-foreground/10 rounded-xl overflow-hidden bg-popover min-w-[180px] p-1 origin-top-right transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
+            className="z-floating mt-1 shadow-2xl border border-foreground/10 rounded-xl overflow-hidden bg-surface min-w-[180px] p-1 origin-top-right transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
           >
             {items.map((item, index) => (
               <MenuItem key={index}>

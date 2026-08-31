@@ -35,6 +35,38 @@ public static class HostedEntryRules
         if (!hasEntry)
             throw new HostedEntryRequiredException();
     }
+
+    /// <summary>
+    /// Whether the official solution to a round's problems may be put in front of a student: a clock of theirs
+    /// still running is what holds it back.
+    /// </summary>
+    /// <remarks>
+    /// Everything else opens it: an entry they handed in, a clock that ran out, an entry they gave up for the
+    /// problems, and a competition that has closed, which anybody may then read.
+    ///
+    /// The round's embargo is a separate gate, deciding whether the problems may be reached at all, and
+    /// <see cref="EnsureEntitledAsync"/> has settled it by the time anything asks this.
+    /// </remarks>
+    /// <param name="startedAt"><inheritdoc cref="HostedEntry.StartedAt" path="/summary"/></param>
+    /// <param name="finishedAt"><inheritdoc cref="HostedEntry.FinishedAt" path="/summary"/></param>
+    /// <param name="clockMinutes"><inheritdoc cref="HostedGroup.ClockMinutes" path="/summary"/></param>
+    /// <param name="now">The instant to read the clock against.</param>
+    /// <returns>Whether the solution may be served.</returns>
+    public static bool IsSolutionOpen(
+        DateTimeOffset? startedAt, DateTimeOffset? finishedAt, int clockMinutes, DateTimeOffset now)
+    {
+        // No clock ever ran, so there is no run of theirs to hold anything back from: the entry was given up
+        // for the problems.
+        if (startedAt is not { } clockStartedAt)
+            return true;
+
+        // Closed by the student, whatever they left on the clock.
+        if (finishedAt is not null)
+            return true;
+
+        // Otherwise the clock says it: one still running is a student still competing.
+        return clockStartedAt.AddMinutes(clockMinutes) <= now;
+    }
 }
 
 /// <summary>

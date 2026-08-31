@@ -19,6 +19,9 @@ export const chatCopy = defenseCopy
 /** The labels every shared control reads under, whichever surface it is on. */
 export const actionsCopy = ui.actions
 
+/** The chrome every modal carries, whatever it is holding. */
+export const modalCopy = ui.modal
+
 /**
  * The competitions list in English, which is the canonical locale and so carries no route translation.
  */
@@ -56,11 +59,8 @@ export function transcriptOf(page: Page): Locator {
  * @param page - The page it is being opened on.
  */
 export async function openExistingDefense(page: Page): Promise<void> {
-  // The row carries how many turns have gone into the conversation, which is what names it
-  await page
-    .getByRole('button', { name: /messages$/ })
-    .first()
-    .click()
+  // The row of the conversation it opens, addressed by the conversation's own id
+  await page.locator('[data-defense-session-id]').first().click()
 }
 
 /**

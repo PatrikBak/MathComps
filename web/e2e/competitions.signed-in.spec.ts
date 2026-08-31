@@ -9,6 +9,9 @@ const SETTLE_TIMEOUT_MS = 15_000
 /** How long a landing gets to happen before a spec is willing to say none did. */
 const LANDING_WINDOW_MS = 1_000
 
+/** The practice run, the one competition anybody gets a second go at. */
+const PRACTICE_COMPETITION_ID = 'practice-set'
+
 test.describe('the competitions list', () => {
   test('asks a reader with an unfilled profile for the fields a result would name them by', async ({
     page,
@@ -251,6 +254,44 @@ test.describe('the competitions list', () => {
 
     // And nothing anywhere in that row to take the entry a second time
     await expect(row.getByRole('button')).toHaveCount(0)
+  })
+
+  test('offers the way back into a spent practice run, not only a second go at it', async ({
+    page,
+  }) => {
+    // A clock the spec can walk forward
+    await page.clock.install()
+
+    // And a student with an entry still to spend
+    await installHostedBackend(page, 'ready')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // Press try
+    await page.getByRole('button', { name: areaCopy.try }).first().click()
+
+    // And confirm the dialog
+    await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
+
+    // Which lands on its statements
+    await expect(page.getByRole('article').first()).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Past the minute this run's clock lasts
+    await page.clock.fastForward('02:00')
+
+    // Back out to the list
+    await page.goto(LIST_PATH)
+
+    // Where the run they just spent offers the way back into it, beside the second go that would start a
+    // clock and close the solutions it opened
+    await expect(page.locator(`a[href="/en/competitions/${PRACTICE_COMPETITION_ID}"]`)).toHaveText(
+      areaCopy.mySolutions,
+      { timeout: SETTLE_TIMEOUT_MS }
+    )
+
+    // And that second go is still offered beside it
+    await expect(page.getByRole('button', { name: areaCopy.tryAgain })).toBeVisible()
   })
 
   test('has nothing to give up on the practice competition', async ({ page }) => {

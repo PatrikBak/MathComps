@@ -12,7 +12,7 @@ describe('resolveComposerState', () => {
     consentStatus: 'given',
     isThinking: false,
     repliesLeft: 12,
-    isGraded: false,
+    competition: null,
   }
 
   it('waits while the reader has not been asked to acknowledge anything yet', () => {
@@ -101,7 +101,9 @@ describe('resolveComposerState', () => {
 
   it('carries the grading through to a spent conversation', () => {
     // The sentence the composer shows there names a different way on, because grading takes rewind away
-    expect(resolveComposerState({ ...READY, repliesLeft: 0, isGraded: true })).toEqual({
+    expect(
+      resolveComposerState({ ...READY, repliesLeft: 0, competition: { isGraded: true } })
+    ).toEqual({
       kind: 'full',
       isGraded: true,
     })
@@ -115,17 +117,19 @@ describe('resolveComposerState', () => {
     })
   })
 
-  it('carries the full count through on a graded very first turn', () => {
-    // A graded conversation rewinds nothing, so the room left is said from the start and a student who
-    // runs out mid-argument was told it was coming
-    expect(resolveComposerState({ ...READY, repliesLeft: 30, isGraded: true })).toEqual({
+  it('carries the full count through on a competition very first turn', () => {
+    // A competition's clock pushes a student to spend turns fast, so the count stands before the first
+    // turn is spent
+    expect(
+      resolveComposerState({ ...READY, repliesLeft: 30, competition: { isGraded: false } })
+    ).toEqual({
       kind: 'open',
       repliesLeft: 30,
     })
   })
 
-  it('holds the count back where nothing is graded until the wall is close', () => {
-    // Running out costs nothing here, so a count from the first turn only makes a student ration
+  it('holds the count back outside a competition until the wall is close', () => {
+    // Running out costs nothing here, so a count from the first turn only makes a reader ration
     // questions they should be asking
     expect(resolveComposerState({ ...READY, repliesLeft: 30 })).toEqual({
       kind: 'open',
@@ -133,7 +137,7 @@ describe('resolveComposerState', () => {
     })
   })
 
-  it('says the count once the wall is close even where nothing is graded', () => {
+  it('says the count once the wall is close outside a competition', () => {
     // Cheap as it is, the wall still arrives without warning otherwise
     expect(resolveComposerState({ ...READY, repliesLeft: 5 })).toEqual({
       kind: 'open',

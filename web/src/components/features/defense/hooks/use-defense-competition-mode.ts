@@ -1,6 +1,7 @@
 'use client'
 
 import type { AreaEntry } from '@/components/features/hosted-competitions/model/hosted-competition-state'
+import { clockEndsAt } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import { SECOND_MS } from '@/components/shared/utils/time-units'
 import { useNow } from '@/hooks/use-now'
 
@@ -33,7 +34,7 @@ export function useDefenseCompetitionMode(
   turns: readonly Turn[]
 ): UseDefenseCompetitionModeResult {
   // When the entry stops counting, which an entry given up for the problems never started doing
-  const endsAt = competition?.kind === 'sat' ? competition.endsAt : null
+  const endsAt = clockEndsAt(competition)
 
   // The clock the banner appears on, which has to move without anybody reloading. Held still where there
   // is no deadline to cross, a chat being left mounted after it closes

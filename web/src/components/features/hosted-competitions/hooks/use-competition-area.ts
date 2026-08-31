@@ -1,5 +1,7 @@
 'use client'
 
+import { usePrevious } from '@mantine/hooks'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 import { SECOND_MS } from '@/components/shared/utils/time-units'
@@ -7,8 +9,14 @@ import { useNow } from '@/hooks/use-now'
 import { useRouter } from '@/i18n/navigation'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
-import type { AreaEntry } from '../model/hosted-competition-state'
-import { areNotesOpen, hasEntryEnded, isPracticeGroup } from '../model/hosted-competition-state'
+import type { AreaRun } from '../model/hosted-competition-state'
+import {
+  clockEndsAt,
+  derivePhase,
+  hasEntryEnded,
+  isPracticeGroup,
+  readAreaRun,
+} from '../model/hosted-competition-state'
 import type {
   HostedCompetition,
   HostedCompetitionGroup,
@@ -16,6 +24,7 @@ import type {
 } from '../model/hosted-competition-types'
 import { COMPETITIONS_LIST_HREF } from '../services/hosted-competition-routes'
 import type { HostedCompetitionsReaderKey } from './hosted-competition-cache'
+import { invalidateCompetitionProblems } from './hosted-competition-cache'
 import { useAreaEntry } from './use-area-entry'
 import { useCompetitionProblems } from './use-competition-problems'
 import { useEntryReader } from './use-entry-reader'
@@ -44,22 +53,14 @@ type ReadyArea = {
   group: HostedCompetitionGroup
   /** The competition itself. */
   competition: HostedCompetition
-  /** The entry the student spent on it. */
-  entry: AreaEntry
+  /** The run the reader spent here, or null on a closed competition they were never in. */
+  run: AreaRun | null
   /** Its problems, in the order it sets them. */
   problems: HostedCompetitionProblem[]
   /** The one instant the whole page is read against, in epoch milliseconds. */
   now: number
-  /** When the counted part ends, as an ISO-8601 string; null for an entry that never had a clock. */
-  endsAt: string | null
   /** Whether the student is graded on this run. */
   isGraded: boolean
-  /** Whether the student closed the entry themselves, which the page says differently from a spent clock. */
-  wasHandedIn: boolean
-  /** Whether the counted part is over, which changes what the page says and nothing about what it offers. */
-  hasEnded: boolean
-  /** Whether the student may still say something about their own solutions. */
-  areNotesOpen: boolean
 }
 
 /**
@@ -71,8 +72,9 @@ type UseCompetitionAreaResult = PendingArea | ReadyArea
  * One competition as its own area reads it: the set, the entry spent on it, and everything the page says
  * about where that entry stands.
  *
- * Two reads stand behind all of it, and a reader with no entry is sent back to the list rather than shown
- * an area with nothing in it.
+ * Two reads stand behind all of it. A reader with no entry is sent back to the list rather than shown an
+ * area with nothing in it, unless the competition has closed: its problems are public from that moment, so
+ * anybody may read the set and the official solutions beside it.
  *
  * @param competitionId - Which competition the reader is inside.
  *
@@ -81,6 +83,9 @@ type UseCompetitionAreaResult = PendingArea | ReadyArea
 export function useCompetitionArea(competitionId: string): UseCompetitionAreaResult {
   // The localized router, for sending a reader with no entry back where they came from
   const router = useRouter()
+
+  // The React Query cache, for reading the set again once the clock stops counting
+  const queryClient = useQueryClient()
 
   // Whose answers these are, and whether that is settled yet
   const { readerKey, isReaderKnown } = useEntryReader()
@@ -92,32 +97,57 @@ export function useCompetitionArea(competitionId: string): UseCompetitionAreaRes
     uiState: viewState,
   } = useAreaEntry(readerKey, isReaderKnown, competitionId)
 
-  // Whether there is an entry at all
-  const isEntitled = entry !== null
-
-  // When the counted part ended, which nothing but a sat entry has
-  const endsAt = entry?.kind === 'sat' ? entry.endsAt : null
-
-  // This competition's problems, once there is an entry to read them through
-  const { problems, uiState: problemsState } = useCompetitionProblems(
-    readerKey,
-    competitionId,
-    isEntitled
-  )
+  // When the counted part ends, which nothing but a sat entry has
+  const endsAt = clockEndsAt(entry)
 
   // One clock for the page, so every deadline on it moves on the same tick. An entry given up for the
   // problems has none, and neither does a page still working out what it is showing
   const now = useNow(SECOND_MS, endsAt !== null)
 
-  // A reader with no entry has nothing to read here, so the list is where they go instead
+  // Whether the set may be read at all: an entry of their own buys it, and a competition that is over and
+  // out of embargo hands it to every reader with an account, which is the one way onto this page without
+  // one. The read behind it is made as the reader, so somebody signed out has no way to make it
+  const isReadable =
+    entry !== null ||
+    (readerKey !== null &&
+      competitionInGroup !== undefined &&
+      derivePhase(competitionInGroup.group, now) === 'closed' &&
+      competitionInGroup.competition.problemsPublished)
+
+  // This competition's problems, once there is something entitling the reader to them
+  const { problems, uiState: problemsState } = useCompetitionProblems(
+    readerKey,
+    competitionId,
+    isReadable
+  )
+
+  // Whether the counted part is over, which the page needs before it draws anything as well as after. A
+  // reader who never entered has no counted part, and neither has an entry given up for the problems
+  const hasEnded = entry !== null && hasEntryEnded(entry, now)
+
+  // Whether the counted part was already over a render ago, which is what tells a clock running out under
+  // the page from a page opened after one had
+  const wasEnded = usePrevious(hasEnded)
+
+  // A reader with nothing to read here, the competition being neither theirs nor over, so the list is
+  // where they go instead
   useEffect(() => {
-    if (viewState.kind === 'ready' && !isEntitled) {
+    if (viewState.kind === 'ready' && !isReadable) {
       router.replace(COMPETITIONS_LIST_HREF)
     }
-  }, [viewState, isEntitled, router])
+  }, [viewState, isReadable, router])
+
+  // A clock running out under the page opens the official solutions, and nothing was pressed to say so:
+  // the set on screen was read while the entry still counted, so it is read again now that it does not.
+  // Only on the turn itself. A page opened on an entry already over read the solutions the first time
+  useEffect(() => {
+    if (hasEnded && wasEnded === false) {
+      invalidateCompetitionProblems(queryClient)
+    }
+  }, [hasEnded, wasEnded, queryClient])
 
   // Still working out what there is to show, or on the way out
-  if (competitionInGroup === undefined || entry === null) {
+  if (competitionInGroup === undefined || !isReadable) {
     return { kind: 'pending', uiState: viewState, waitingOn: 'view' }
   }
 
@@ -131,23 +161,18 @@ export function useCompetitionArea(competitionId: string): UseCompetitionAreaRes
   // The group setting the terms, the competition itself, and how long past an entry notes are taken
   const { group, competition, noteGraceMinutes } = competitionInGroup
 
-  // Nothing but a sat entry can have been closed early, one given up for the problems never having had
-  // a clock to beat
-  const wasHandedIn = entry.kind === 'sat' && entry.wasHandedIn
+  // The run the page draws from, or nothing at all where the reader spent no entry here
+  const run: AreaRun | null = entry === null ? null : readAreaRun(entry, noteGraceMinutes, now)
 
-  // What the page draws, every reading of the entry taken against the one clock above
+  // What the page draws
   return {
     kind: 'ready',
     readerKey,
     group,
     competition,
-    entry,
+    run,
     problems,
     now,
-    endsAt,
-    wasHandedIn,
     isGraded: !isPracticeGroup(group),
-    hasEnded: hasEntryEnded(entry, now),
-    areNotesOpen: areNotesOpen(entry, noteGraceMinutes, now),
   }
 }

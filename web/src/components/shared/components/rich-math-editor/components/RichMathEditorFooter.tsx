@@ -1,5 +1,6 @@
 import { CornerDownLeft, Expand, Eye, Image, Paperclip, Square, Type, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import type { ReactNode } from 'react'
 
 import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
@@ -19,7 +20,7 @@ type CounterBadgeProps = {
   count: number
   /** Maximum allowed value */
   max: number
-  /** Whether the count exceeds the limit */
+  /** Whether the count has reached the point it reads as spent */
   isOver: boolean
   /** Whether the count is approaching the limit */
   isNear: boolean
@@ -33,7 +34,7 @@ type CounterBadgeProps = {
  * Badge component displaying a count with an icon.
  * Automatically colors based on proximity to limit.
  */
-function CounterBadge({
+export function CounterBadge({
   icon: Icon,
   count,
   max,
@@ -101,6 +102,8 @@ type RichMathEditorFooterProps = {
   imageCount: number
   /** Current number of uploaded file attachments */
   attachmentCount: number
+  /** What the surface counts of its own, shown beside the draft's counters. */
+  meta: ReactNode
   /** Callback triggered when the send button is clicked */
   onSend?: () => void
   /** Callback triggered when the cancel button is clicked */
@@ -125,6 +128,7 @@ export function RichMathEditorFooter({
   maxCharacters,
   imageCount,
   attachmentCount,
+  meta,
   onSend,
   onCancel,
   onStop,
@@ -154,7 +158,7 @@ export function RichMathEditorFooter({
   return (
     <div
       className={cn(
-        'grid grid-cols-[1fr_auto] items-center gap-2 px-2 py-1.5',
+        '@container grid grid-cols-[1fr_auto] items-center gap-2 px-2 py-1.5',
         {
           card: cn(
             'bg-surface/50',
@@ -164,28 +168,34 @@ export function RichMathEditorFooter({
         }[variant]
       )}
     >
-      {/* Column 1: Expand + Metrics (can wrap) */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      {/* Column 1: Expand + Metrics */}
+      <div className="flex min-w-0 items-center justify-between gap-2">
         {/* Expand button */}
         {modeConfig.mode === 'inline' && modeConfig.onExpand && (
           <button
             type="button"
             onClick={modeConfig.onExpand}
-            className="flex items-center gap-1.5 pl-0.5 pr-2 sm:px-2 py-1 rounded text-xs transition-colors text-muted hover:text-foreground hover:bg-foreground/10 whitespace-nowrap"
+            className="flex min-w-0 items-center gap-1.5 pl-0.5 pr-2 sm:px-2 py-1 rounded text-xs transition-colors text-muted hover:text-foreground hover:bg-foreground/10"
             title={tEditor('expandEditor')}
           >
-            <Expand size={12} />
-            <span>{tEditor('expandWithPreview')}</span>
-            <Eye size={12} />
+            <Expand size={12} className="shrink-0" />
+            <span className="hidden whitespace-nowrap @[480px]:inline">
+              {tEditor('expandWithPreview')}
+            </span>
+            <Eye size={12} className="hidden shrink-0 @[480px]:block" />
           </button>
         )}
 
         {/* Metrics */}
         {(() => {
-          if (charCount === 0 && imageCount === 0 && attachmentCount === 0) return null
+          // The draft's own counters appear as the thing they count does. What the surface counts is
+          // none of the draft's, so it stands from the empty editor onwards
+          if (meta === undefined && charCount === 0 && imageCount === 0 && attachmentCount === 0)
+            return null
 
           return (
-            <div className="flex items-center gap-3 text-xs">
+            <div className="flex shrink-0 items-center gap-3 text-xs">
+              {meta}
               {imageCount > 0 && (
                 <CounterBadge
                   icon={Image}

@@ -1,5 +1,6 @@
 'use client'
 
+import { MessageSquare } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { Ref } from 'react'
 
@@ -10,9 +11,11 @@ import type {
   ToolbarConfig,
 } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
+import { CounterBadge } from '@/components/shared/components/rich-math-editor/components/RichMathEditorFooter'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
 import type { DefenseComposerState } from '../model/defense-composer-state'
+import { REPLIES_LEFT_TO_ALARM_AT, REPLIES_LEFT_TO_WARN_AT } from '../model/defense-composer-state'
 import { MathildaConsentGate } from './MathildaConsentGate'
 
 /**
@@ -46,6 +49,8 @@ type DefenseComposerProps = {
   isThinking: boolean
   /** The longest a single turn may be, or undefined while the caps are not known. */
   maxCharacters: number | undefined
+  /** The most turns the conversation may hold, or undefined while the caps are not known. */
+  maxReplies: number | undefined
   /** Records the reader's acknowledgement. */
   onAcceptConsent: () => void
   /** Whether that acknowledgement is being recorded. */
@@ -70,6 +75,7 @@ export function DefenseComposer({
   editorRef,
   isThinking,
   maxCharacters,
+  maxReplies,
   onAcceptConsent,
   isAcceptingConsent,
   onRetryConsent,
@@ -135,30 +141,35 @@ export function DefenseComposer({
     // Open for the next turn
     case 'open':
       return (
-        <>
-          {/* How much room is left, when there is a count to show */}
-          {state.repliesLeft !== null && state.repliesLeft > 0 && (
-            <p className="mb-1.5 text-xs text-muted">
-              {t('repliesLeft', { count: state.repliesLeft })}
-            </p>
-          )}
-
-          {/* Where the next reply is written */}
-          <RichMathEditor
-            variant="card"
-            toolbar={DEFENSE_TOOLBAR}
-            maxCharacters={maxCharacters}
-            value={draft}
-            onChange={onDraftChange}
-            onSend={onSend}
-            onStop={onStop}
-            autoFocus
-            ref={editorRef}
-            isLoading={isThinking}
-            minHeightPx={editorMinHeightPx}
-            placeholder={t('placeholder')}
-          />
-        </>
+        // Where the next reply is written, its footer counting the conversation's room beside the
+        // draft's characters
+        <RichMathEditor
+          variant="card"
+          toolbar={DEFENSE_TOOLBAR}
+          maxCharacters={maxCharacters}
+          value={draft}
+          onChange={onDraftChange}
+          onSend={onSend}
+          onStop={onStop}
+          autoFocus
+          ref={editorRef}
+          isLoading={isThinking}
+          minHeightPx={editorMinHeightPx}
+          placeholder={t('placeholder')}
+          footerMeta={
+            state.repliesLeft !== null && maxReplies !== undefined ? (
+              <CounterBadge
+                icon={MessageSquare}
+                count={maxReplies - state.repliesLeft}
+                max={maxReplies}
+                isOver={state.repliesLeft <= REPLIES_LEFT_TO_ALARM_AT}
+                isNear={state.repliesLeft <= REPLIES_LEFT_TO_WARN_AT}
+                title={t('repliesLeft', { count: state.repliesLeft })}
+                tabular
+              />
+            ) : undefined
+          }
+        />
       )
 
     // Every state is handled above

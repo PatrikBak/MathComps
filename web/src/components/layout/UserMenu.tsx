@@ -98,7 +98,7 @@ export default function UserMenu({ onOpenDefenses }: UserMenuProps) {
           />
           <ChevronDown
             className={cn(
-              'w-4 h-4 text-popover-foreground/60 transition-transform duration-200',
+              'w-4 h-4 text-muted transition-transform duration-200',
               'group-data-[state=open]:rotate-180'
             )}
             aria-hidden="true"

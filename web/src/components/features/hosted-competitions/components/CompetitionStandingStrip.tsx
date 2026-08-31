@@ -22,7 +22,7 @@ const ACTION_CLASS = cn(
  * Props for the {@link CompetitionStandingStrip}.
  */
 type CompetitionStandingStripProps = {
-  /** When the entry stops counting, as an ISO-8601 string; null on one given up for the problems. */
+  /** When the entry stops counting, as an ISO-8601 string; null wherever no clock of the reader's runs. */
   endsAt: string | null
   /** The instant the clock is read against, in epoch milliseconds. */
   now: number

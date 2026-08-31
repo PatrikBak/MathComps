@@ -13,6 +13,7 @@ import {
   entryEndsAt,
   hasEntryEnded,
   orderForReading,
+  readAreaRun,
   toAreaEntry,
   wasHandedInEarly,
 } from '../hosted-competition-state'
@@ -319,6 +320,31 @@ describe('areNotesOpen', () => {
     // Exactly half an hour past the end, which the backend already refuses: read any looser and the page
     // offers a note the server turns away
     expect(areNotesOpen(satEntry(30 * MINUTE_MS), GRACE_MINUTES, NOW)).toBe(false)
+  })
+})
+
+describe('readAreaRun', () => {
+  /** How long the server says notes are still taken after an entry ends, in minutes. */
+  const GRACE_MINUTES = 30
+
+  it('reads nothing off an entry given up for the problems', () => {
+    // No clock ran on it, so the run is the entry and carries not one reading beside it
+    expect(readAreaRun({ kind: 'forfeited' }, GRACE_MINUTES, NOW)).toEqual({ kind: 'forfeited' })
+  })
+
+  it('carries a sat entry through with what its clock decides', () => {
+    // An hour still to run, so it is neither over nor past taking notes
+    const entry: AreaEntry = {
+      kind: 'sat',
+      endsAt: new Date(NOW + HOUR_MS).toISOString(),
+      wasHandedIn: false,
+    }
+
+    // Read it against the instant the page is drawn at
+    const run = readAreaRun(entry, GRACE_MINUTES, NOW)
+
+    // Which hands back the entry itself, with the two things the clock settles beside it
+    expect(run).toEqual({ ...entry, hasEnded: false, areNotesOpen: true })
   })
 })
 

@@ -252,6 +252,10 @@
       "shortName": "September",
       "fullName": "September"
     },
+    "mc-elementary-2": {
+      "shortName": "October",
+      "fullName": "October"
+    },
     "mc-intermediate": {
       "shortName": "Intermediate",
       "fullName": "Intermediate category"
@@ -260,6 +264,10 @@
       "shortName": "September",
       "fullName": "September"
     },
+    "mc-intermediate-2": {
+      "shortName": "October",
+      "fullName": "October"
+    },
     "mc-advanced": {
       "shortName": "Advanced",
       "fullName": "Advanced category"
@@ -267,6 +275,10 @@
     "mc-advanced-1": {
       "shortName": "September",
       "fullName": "September"
+    },
+    "mc-advanced-2": {
+      "shortName": "October",
+      "fullName": "October"
     }
   },
   "seasonFormat": "Edition {number} ({start}/{end})"
