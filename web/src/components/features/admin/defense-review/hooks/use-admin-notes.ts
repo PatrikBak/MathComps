@@ -75,6 +75,37 @@ type NoteResolve = {
 type NoteWrite = NoteCreate | NoteUpdate | NoteDelete | NoteResolve
 
 /**
+ * How far a write moves the note count on the conversation it lands on.
+ *
+ * @param write - The write being run.
+ *
+ * @returns One up, one down, or zero where the count does not move.
+ */
+function noteCountDelta(write: NoteWrite): number {
+  switch (write.kind) {
+    // A note the reviewer has just written
+    case 'create':
+      return 1
+
+    // One they have taken off
+    case 'delete':
+      return -1
+
+    // Rewording a note leaves it where it was
+    case 'update':
+      return 0
+
+    // So does marking one dealt with, which the note survives
+    case 'resolve':
+      return 0
+
+    // Every write is handled above
+    default:
+      return assertNever(write)
+  }
+}
+
+/**
  * One write against a conversation's notes, carried together with the conversation it was issued against.
  *
  * The conversation travels with the write rather than being read off the hook's argument when the write lands,
@@ -167,12 +198,15 @@ export function useAdminNotes(sessionId: string): UseAdminNotesResult {
       // The feed reads newest-first across every conversation, which a patch can't keep in order
       invalidateNoteFeed(queryClient)
 
-      // Only writing or dropping one changes how many the queue's row reports
-      if (write.kind === 'create' || write.kind === 'delete') {
-        // The row's count, one up or one down
+      // What the write does to how many notes the queue's row reports
+      const countDelta = noteCountDelta(write)
+
+      // Only a write that moves the count reaches the row
+      if (countDelta !== 0) {
+        // The row's count, moved by what the write added or took away
         patchCachedQueueConversation(queryClient, writtenAgainst, (conversation) => ({
           ...conversation,
-          noteCount: conversation.noteCount + (write.kind === 'create' ? 1 : -1),
+          noteCount: conversation.noteCount + countDelta,
         }))
       }
     },

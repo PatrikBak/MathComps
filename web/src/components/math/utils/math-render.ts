@@ -180,9 +180,24 @@ export function renderMathContentToHtml(content: string): string {
         `</span>`
     })
 
-    // Assemble: escape text segments, emit math HTML verbatim
+    // Assemble the segments into the one string the caller renders
     return segments
-      .map((segment) => (segment.kind === 'text' ? escapeHtml(segment.text) : segment.html))
+      .map((segment) => {
+        switch (segment.kind) {
+          // Prose the author typed, which has to be escaped before it goes out
+          case 'text':
+            return escapeHtml(segment.text)
+
+          // Already rendered by KaTeX, so it travels as it stands
+          case 'inlineMath':
+          case 'displayMath':
+            return segment.html
+
+          // Every segment is handled above
+          default:
+            return assertNever(segment)
+        }
+      })
       .join('')
   } catch {
     // Hand back the unprocessed source so the caller still shows something

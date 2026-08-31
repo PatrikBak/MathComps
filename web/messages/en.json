@@ -389,6 +389,7 @@
     "loadFailed": "The competitions could not be loaded.",
     "mySolutions": "My solutions",
     "noCompetitions": "There are no competitions here yet.",
+    "officialSolution": "Official solution",
     "opensIn": "opens in {remaining}",
     "practiceIntro": "See what a real competition feels like. This practice one works the same way, except nothing is graded and you can run it again and pick up your earlier defenses.",
     "practiceIntroDismiss": "Got it",
@@ -435,7 +436,6 @@
     "startDefense": "Write your solution",
     "try": "Try it",
     "tryAgain": "Take it again",
-    "turnsSpent": "{spent}/{max} messages",
     "typedSolutionsOnly": "You type your solution in here. Photos of handwritten work are not supported yet."
   },
   "contact": {

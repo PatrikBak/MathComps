@@ -252,6 +252,10 @@
       "shortName": "Září",
       "fullName": "Září"
     },
+    "mc-elementary-2": {
+      "shortName": "Říjen",
+      "fullName": "Říjen"
+    },
     "mc-intermediate": {
       "shortName": "Střední",
       "fullName": "Střední kategorie"
@@ -260,6 +264,10 @@
       "shortName": "Září",
       "fullName": "Září"
     },
+    "mc-intermediate-2": {
+      "shortName": "Říjen",
+      "fullName": "Říjen"
+    },
     "mc-advanced": {
       "shortName": "Pokročilá",
       "fullName": "Pokročilá kategorie"
@@ -267,6 +275,10 @@
     "mc-advanced-1": {
       "shortName": "Září",
       "fullName": "Září"
+    },
+    "mc-advanced-2": {
+      "shortName": "Říjen",
+      "fullName": "Říjen"
     }
   },
   "seasonFormat": "{number}. ročník ({start}/{end})"

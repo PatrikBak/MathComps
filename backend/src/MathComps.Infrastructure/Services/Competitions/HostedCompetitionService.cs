@@ -30,9 +30,6 @@ public sealed class HostedCompetitionService(
     IOptions<HostedCompetitionOptions> options)
     : IHostedCompetitionService
 {
-    /// <inheritdoc cref="DefenseLimitsDto.MaxTurnsPerSession" path="/summary"/>
-    private readonly int _maxTurnsPerSession = limits.Value.MaxTurnsPerSession;
-
     /// <inheritdoc cref="DefenseLimitsDto.MaxFeedbackCommentChars" path="/summary"/>
     private readonly int _maxCommentChars = limits.Value.MaxFeedbackCommentChars;
 
@@ -190,8 +187,25 @@ public sealed class HostedCompetitionService(
         // The problems are the embargoed thing, so what may be read is settled before anything is read.
         await EnsureEntitledAsync(dbContext, userId, roundId, cancellationToken);
 
+        // Their entry with the clock it was given, absent on a set they are reading without one, which is a
+        // competition that has closed.
+        var entry = await dbContext.HostedEntries
+            .AsNoTracking()
+            .Where(candidate => candidate.UserId == userId && candidate.RoundId == roundId)
+            .Select(candidate => new
+            {
+                candidate.StartedAt,
+                candidate.FinishedAt,
+                candidate.Round.HostedGroup!.ClockMinutes,
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // Whether they are past competing here, which is what the official solution waits on.
+        var isSolutionOpen = entry is null || HostedEntryRules.IsSolutionOpen(
+            entry.StartedAt, entry.FinishedAt, entry.ClockMinutes, DateTimeOffset.UtcNow);
+
         // The set, in the order the competition sets it.
-        return await ReadProblemsAsync(dbContext, userId, roundId, cancellationToken);
+        return await ReadProblemsAsync(dbContext, userId, roundId, isSolutionOpen, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -284,6 +298,7 @@ public sealed class HostedCompetitionService(
                 round.HostedGroup!.OpensAt,
                 round.HostedGroup.ClosesAt,
                 round.HostedGroup.AllowsReentry,
+                round.HostedGroup.ClockMinutes,
             })
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new HostedCompetitionNotFoundException();
@@ -320,8 +335,14 @@ public sealed class HostedCompetitionService(
         entry.FinishedAt = null;
 
         // The set the entry buys, read before the entry is written: a competition the site cannot serve has to
-        // refuse the attempt rather than consume what the student spent on it.
-        var problems = await ReadProblemsAsync(dbContext, userId, roundId, cancellationToken);
+        // refuse the attempt rather than consume what the student spent on it. The timestamps this entry has
+        // just been given decide the solution, the row in the database still holding the run this one replaced.
+        var problems = await ReadProblemsAsync(
+            dbContext,
+            userId,
+            roundId,
+            HostedEntryRules.IsSolutionOpen(entry.StartedAt, entry.FinishedAt, group.ClockMinutes, now),
+            cancellationToken);
 
         // The write itself. An attempt racing another meets it at the index rather than at the read above, which
         // happened before either of them wrote.
@@ -414,13 +435,17 @@ public sealed class HostedCompetitionService(
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="userId">The student reading.</param>
     /// <param name="roundId">The competition whose problems these are.</param>
+    /// <param name="isSolutionOpen">
+    /// Whether the reader is past competing here, which <see cref="HostedEntryRules.IsSolutionOpen"/> settles.
+    /// </param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The problems, in the order the competition sets them.</returns>
     private async Task<IReadOnlyList<HostedCompetitionProblemDto>> ReadProblemsAsync(
-        MathCompsDbContext dbContext, Guid userId, Guid roundId, CancellationToken cancellationToken)
+        MathCompsDbContext dbContext, Guid userId, Guid roundId, bool isSolutionOpen,
+        CancellationToken cancellationToken)
     {
-        // The set, each problem with its statement in every language. Markdown is what the site renders, the raw
-        // source standing in on a row that carries none.
+        // The set, each problem with its statement in every language, and its solution too where the reader is
+        // owed one. Markdown is what the site renders, the raw source standing in on a row that carries none.
         var problems = await dbContext.Problems
             .AsNoTracking()
             .Where(problem => problem.RoundId == roundId)
@@ -431,16 +456,24 @@ public sealed class HostedCompetitionService(
                 problem.Number,
                 Statements = problem.Texts
                     .Where(text => text.DocumentType == DocumentType.Statement)
-                    .Select(text => new StatementText(text.Language, text.MarkdownText ?? text.RawText))
+                    .Select(text => new ProblemBody(text.Language, text.MarkdownText ?? text.RawText))
                     .ToList(),
+
+                // Left unread while a clock is running, so nothing withheld ever leaves the database.
+                Solutions = isSolutionOpen
+                    ? problem.Texts
+                        .Where(text => text.DocumentType == DocumentType.Solution)
+                        .Select(text => new ProblemBody(text.Language, text.MarkdownText ?? text.RawText))
+                        .ToList()
+                    : new List<ProblemBody>(),
             })
             .ToListAsync(cancellationToken);
 
         // The ids the conversations are looked up by.
         var problemIds = problems.Select(problem => problem.Id).ToList();
 
-        // The student's conversations about those problems, most recently active first, each counted down to what
-        // a row on the problem says. Nothing of what was said comes back: the last line is usually the examiner's
+        // The student's conversations about those problems, most recently active first, each cut down to what a
+        // row on the problem says. Nothing of what was said comes back: the last line is usually the examiner's
         // challenge, and handing it over would spoil it.
         var defenses = await dbContext.ProblemDefenses
             .AsNoTracking()
@@ -451,10 +484,8 @@ public sealed class HostedCompetitionService(
             {
                 defense.ProblemId,
                 Line = new HostedCompetitionDefenseLineDto(
-                    defense.DefenseSessionId,
-                    defense.DefenseSession.CreatedAt,
-                    defense.DefenseSession.Turns.Count(turn => turn.Role == TranscriptRole.Candidate),
-                    _maxTurnsPerSession),
+                    SessionId: defense.DefenseSessionId,
+                    StartedAt: defense.DefenseSession.CreatedAt),
             })
             .ToListAsync(cancellationToken);
 
@@ -472,18 +503,30 @@ public sealed class HostedCompetitionService(
         return
         [
             .. problems.Select(problem => new HostedCompetitionProblemDto(
-                problem.Id,
-                problem.Number,
-                Enum.GetValues<Language>().ToDictionary(
+                Id: problem.Id,
+                Position: problem.Number,
+
+                // The statement in every language the site is read in.
+                Statement: Enum.GetValues<Language>().ToDictionary(
                     language => language,
-                    language => BodyIn(problem.Statements, language)),
+                    language => BodyIn(problem.Statements, language, DocumentType.Statement)),
+
+                // Withheld while a clock of theirs is running, and read in every language otherwise.
+                Solution: isSolutionOpen
+                    ? Enum.GetValues<Language>().ToDictionary(
+                        language => language,
+                        language => BodyIn(problem.Solutions, language, DocumentType.Solution))
+                    : null,
+
+                // The conversations held about this one problem, most recently active first.
+                Defenses:
                 [
                     .. defenses
                         .Where(defense => defense.ProblemId == problem.Id)
                         .Select(defense => defense.Line),
                 ],
-                assessments.GetValueOrDefault(problem.Id),
-                _maxCommentChars)),
+                SelfAssessment: assessments.GetValueOrDefault(problem.Id),
+                MaxCommentChars: _maxCommentChars)),
         ];
     }
 
@@ -579,26 +622,29 @@ public sealed class HostedCompetitionService(
     }
 
     /// <summary>
-    /// One language's statement of one problem.
+    /// One language's text of one kind of one problem, a statement or a solution.
     /// </summary>
     /// <param name="Language">The language it is written in.</param>
-    /// <param name="Body">The statement's text, null on a row that holds none.</param>
-    private sealed record StatementText(Language Language, string? Body);
+    /// <param name="Body">The text itself, null on a row that holds none.</param>
+    private sealed record ProblemBody(Language Language, string? Body);
 
     /// <summary>
-    /// Picks one language's statement out of a problem's texts.
+    /// Picks one language out of one kind of a problem's texts.
     /// </summary>
     /// <remarks>
-    /// A hosted problem is written in every language the site is read in, which the declaration refuses a group
-    /// without. A gap throws rather than serving a blank, which would put an empty statement in front of a
-    /// student sitting a clock.
+    /// A hosted problem carries a statement and a solution in every language the site is read in, which the
+    /// declaration refuses a group without. A gap throws rather than serving a blank: an empty statement in
+    /// front of a student sitting a clock, or a set that says it has been answered and then shows nothing.
     /// </remarks>
-    /// <param name="texts">The problem's statements, one per language it has been written in.</param>
+    /// <param name="texts">The problem's texts of one kind, one per language it has been written in.</param>
     /// <param name="language">The language wanted.</param>
-    /// <returns>The statement.</returns>
-    private static string BodyIn(IEnumerable<StatementText> texts, Language language) =>
+    /// <param name="documentType"><inheritdoc cref="ProblemText.DocumentType" path="/summary"/></param>
+    /// <returns>The text.</returns>
+    private static string BodyIn(
+        IEnumerable<ProblemBody> texts, Language language, DocumentType documentType) =>
         texts.FirstOrDefault(text => text.Language == language)?.Body
-        ?? throw new InvalidOperationException($"A hosted problem carries no {language} statement.");
+        ?? throw new InvalidOperationException(
+            $"A hosted problem carries no {language} {documentType.ToString().ToLowerInvariant()}.");
 
     /// <summary>
     /// Reads a node's name in every language the site is read in.

@@ -1,10 +1,13 @@
 import { BACKEND_ORIGIN } from './support/backend-routes'
-import { areaCopy, LIST_PATH } from './support/competitions'
+import { areaCopy, areaPath, LIST_PATH } from './support/competitions'
 import { installHostedBackend } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 15_000
+
+/** A competition that closed a month ago, whose problems the list offers to anybody. */
+const CLOSED_COMPETITION_ID = 'closed-special-set'
 
 test.describe('the competitions list', () => {
   test('asks a reader with no account for one rather than opening the entry', async ({ page }) => {
@@ -31,6 +34,19 @@ test.describe('the competitions list', () => {
 
     // And no entry dialog opened behind the prompt
     await expect(page.getByRole('dialog')).toHaveCount(0)
+  })
+
+  test('sends a reader with no account back from a closed competition it offers them', async ({
+    page,
+  }) => {
+    // The competitions surface, read without a session
+    await installHostedBackend(page, 'first-entry')
+
+    // The area of a competition that closed a month ago, which the list links them to
+    await page.goto(areaPath(CLOSED_COMPETITION_ID))
+
+    // Back on the list, the set being read as the reader and there being nobody to read it as
+    await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
   })
 
   test('says the list failed to load rather than that nothing is scheduled', async ({ page }) => {

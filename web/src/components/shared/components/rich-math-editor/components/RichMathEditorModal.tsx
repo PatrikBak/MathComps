@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl'
+import type { ReactNode } from 'react'
 import { useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -36,6 +37,8 @@ type RichMathEditorExpandedModalProps = {
   onStop?: () => void
   /** Whether the editor is in a loading state */
   isLoading?: boolean
+  /** What the surface counts of its own, shown beside the draft's counters. */
+  footerMeta: ReactNode
 }
 
 /**
@@ -54,6 +57,7 @@ export function RichMathEditorExpandedModal({
   onCancel,
   onStop,
   isLoading = false,
+  footerMeta,
 }: RichMathEditorExpandedModalProps) {
   // Get translations
   const tEditor = useTranslations('ui.editor')
@@ -206,6 +210,7 @@ export function RichMathEditorExpandedModal({
                   }
                 : undefined
             }
+            meta={footerMeta}
             onStop={onStop}
             isValid={state.isValid && canSend}
             isLoading={isLoading}

@@ -14,8 +14,9 @@ import { MATHILDA_NAME } from '@/constants/mathilda'
 import type { Locale } from '@/i18n/i18n'
 
 import type { HostedCompetitionsReaderKey } from '../hooks/hosted-competition-cache'
-import type { AreaEntry } from '../model/hosted-competition-state'
+import type { AreaRun } from '../model/hosted-competition-state'
 import type { HostedCompetitionProblem } from '../model/hosted-competition-types'
+import { CompetitionSolution } from './CompetitionSolution'
 import { ProblemSelfAssessmentNote } from './ProblemSelfAssessmentNote'
 
 /**
@@ -28,10 +29,8 @@ type CompetitionProblemPanelProps = {
   readerKey: HostedCompetitionsReaderKey
   /** The problem, and the conversations held about it. */
   problem: HostedCompetitionProblem
-  /** The entry it is being solved inside. */
-  entry: AreaEntry
-  /** Whether a note about the solution can still be written, which closes shortly after the entry does. */
-  areNotesOpen: boolean
+  /** The run it is being solved inside, or null on a closed competition the reader was never in. */
+  run: AreaRun | null
   /** Whether the student is graded on this run. */
   isGraded: boolean
 }
@@ -43,8 +42,7 @@ export function CompetitionProblemPanel({
   competitionId,
   readerKey,
   problem,
-  entry,
-  areNotesOpen,
+  run,
   isGraded,
 }: CompetitionProblemPanelProps) {
   // Competitions copy
@@ -80,15 +78,26 @@ export function CompetitionProblemPanel({
         <RichMathEditorRenderer content={problem.statement[locale]} lightImageBackground={false} />
       </div>
 
-      {/* Every conversation held about it, oldest press last. Pulled out by the row padding, so that what
-          a row says starts on the same left edge as the statement above it rather than inside it */}
+      {/* The solution and every conversation held about the problem, the oldest conversation last. Pulled
+          out by the row padding, so that what a row says starts on the same left edge as the statement
+          above it rather than inside it */}
       <div className="-mx-3 flex flex-col gap-0.5">
+        {/* How it was meant to go, once the student is no longer competing for it */}
+        {problem.solution !== null && (
+          <CompetitionSolution
+            position={problem.position}
+            statement={problem.statement}
+            solution={problem.solution}
+          />
+        )}
+
         {problem.defenses.map((defense) => (
           <button
             key={defense.sessionId}
             type="button"
             onClick={() => openDefense(defense.sessionId)}
-            className="focus flex items-center justify-between gap-4 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5"
+            data-defense-session-id={defense.sessionId}
+            className="focus flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5"
           >
             {/* When the student opened it */}
             <span className="inline-flex items-center gap-2 text-foreground">
@@ -97,11 +106,6 @@ export function CompetitionProblemPanel({
                 dateStyle: 'short',
                 timeStyle: 'short',
               })}
-            </span>
-
-            {/* How much room is left in it */}
-            <span className="tabular-nums text-muted">
-              {t('turnsSpent', { spent: defense.turnsSpent, max: defense.maxTurns })}
             </span>
           </button>
         ))}
@@ -124,7 +128,7 @@ export function CompetitionProblemPanel({
           competitionId={competitionId}
           problemId={problem.id}
           assessment={problem.selfAssessment}
-          areNotesOpen={areNotesOpen}
+          areNotesOpen={run?.kind === 'sat' && run.areNotesOpen}
           isGraded={isGraded}
           maxCommentChars={problem.maxCommentChars}
         />
@@ -153,7 +157,9 @@ export function CompetitionProblemPanel({
                 ? { kind: 'fresh' }
                 : { kind: 'named', sessionId: openedSessionId }
             }
-            competition={{ entry, isGraded }}
+            // Nothing of the reader's own is being spent on a competition they never entered, so the
+            // conversation is held on the same terms any other problem's is
+            competition={run === null ? null : { entry: run, isGraded }}
           />
         </Modal>
       )}

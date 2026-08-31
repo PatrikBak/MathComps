@@ -76,11 +76,7 @@ export const UserInfoHeader = ({
         )}
         {email !== null && (
           <p
-            className={cn(
-              'text-popover-foreground/60 truncate',
-              username !== null ? 'mt-0.5' : '',
-              config.handle
-            )}
+            className={cn('text-muted truncate', username !== null ? 'mt-0.5' : '', config.handle)}
           >
             {email}
           </p>

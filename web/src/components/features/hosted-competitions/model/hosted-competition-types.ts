@@ -26,8 +26,8 @@ export type HostedCompetition = {
 }
 
 /**
- * One problem of a competition's set, as an entrant reads it: the statement, and nothing it is measured
- * against.
+ * One problem of a competition's set, as an entrant reads it: the statement, and the official solution once
+ * they are no longer competing for it.
  */
 export type HostedCompetitionProblem = {
   /** Stable identifier, unique within its competition. */
@@ -36,6 +36,11 @@ export type HostedCompetitionProblem = {
   position: number
   /** The statement as markdown/math source, in every language the site is read in. */
   statement: LocalizedString
+  /**
+   * The official solution as markdown/math source, in every language the site is read in; null while the
+   * student is still competing here.
+   */
+  solution: LocalizedString | null
   /** The conversations the student has held about it, most recently active first. */
   defenses: HostedCompetitionDefenseLine[]
   /**
@@ -50,18 +55,15 @@ export type HostedCompetitionProblem = {
 /**
  * One conversation a student has held about one problem, as its row on the problem says it.
  *
- * Enough to choose between them and no more. What was last said stays out: the most recent line is
- * usually the examiner's challenge, and reading it back on the page would spoil it.
+ * Enough to tell it from the others and no more. What was last said stays out: the most recent line is
+ * usually the examiner's challenge, and reading it back on the page would spoil it. How much room is left
+ * stays out too, the conversation itself saying so where the student is about to spend it.
  */
 type HostedCompetitionDefenseLine = {
   /** The defense session it leads to. */
   sessionId: string
   /** When the student opened it, as an ISO-8601 string. */
   startedAt: string
-  /** How many turns the student has spent in it. */
-  turnsSpent: number
-  /** The most turns it will take, so a row can say how much room is left. */
-  maxTurns: number
 }
 
 /**

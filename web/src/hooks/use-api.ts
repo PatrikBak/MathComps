@@ -2,6 +2,7 @@ import { useAuth } from '@clerk/nextjs'
 import { useLocale } from 'next-intl'
 import { useCallback } from 'react'
 
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { readErrorCode } from '@/lib/api/api-error-codes'
 import type { ApiResult } from '@/types/api'
 
@@ -49,6 +50,33 @@ type ApiReadyState = {
  * Represents the state of the API client.
  */
 export type ApiState = ApiLoadingState | ApiUnauthenticatedState | ApiReadyState
+
+/**
+ * The caller an API client hands out, which only a ready one has.
+ *
+ * @param api - The client as it currently stands.
+ *
+ * @returns The caller, or null while the client has none to give.
+ */
+export function apiCallOf(api: ApiState): ApiCaller | null {
+  switch (api.state) {
+    // The caller it was built with
+    case 'ready':
+      return api.apiCall
+
+    // Still working out who is asking
+    case 'loading':
+      return null
+
+    // Needs a signed-in user and has none
+    case 'unauthenticated':
+      return null
+
+    // Every state is handled above
+    default:
+      return assertNever(api)
+  }
+}
 
 /**
  * Configuration options for the API client.

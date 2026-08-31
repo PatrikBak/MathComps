@@ -389,6 +389,7 @@
     "loadFailed": "Soutěže se nepodařilo načíst.",
     "mySolutions": "Moje řešení",
     "noCompetitions": "Zatím tu není žádná soutěž.",
+    "officialSolution": "Oficiální řešení",
     "opensIn": "otevírá se za {remaining}",
     "practiceIntro": "Vyzkoušej si, jaké to je v ostrých soutěžích. V této zkušební soutěži to funguje stejně, až na to, že se nic nehodnotí a že ji můžeš spustit vícekrát a pokračovat ve svých předchozích obhajobách.",
     "practiceIntroDismiss": "Rozumím",
@@ -435,7 +436,6 @@
     "startDefense": "Napsat řešení",
     "try": "Vyzkoušet",
     "tryAgain": "Zkusit znovu",
-    "turnsSpent": "{spent}/{max} zpráv",
     "typedSolutionsOnly": "Řešení píšeš přímo tady. Fotky ručně psaného řešení zatím nepodporujeme."
   },
   "contact": {

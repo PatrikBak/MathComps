@@ -416,8 +416,9 @@ type EntryActionProps = {
 /**
  * The one thing a student can do with one competition, whichever of its lives it is currently in.
  *
- * A group still taking entries offers one press. A group that is over offers the public results, plus
- * either the reader's own work or the problems in the archive.
+ * A group still taking entries offers one press. A group that is over offers the public results, plus the
+ * same area: the reader's own work where they were in it, and, once the problems are public, the set with
+ * its official solutions where they were not.
  *
  * The press keeps the same word whatever stands in the way, and is never disabled: what it turns into is
  * the guard's call rather than this button's.
@@ -450,10 +451,11 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
           />
         ) : (
           competition.problemsPublished && (
-            <Button variant="link">
-              <FileText size={15} />
-              {t('problems')}
-            </Button>
+            <AreaLink
+              href={competitionAreaHref(competition.id)}
+              icon={FileText}
+              label={t('problems')}
+            />
           )
         )}
 
@@ -469,13 +471,15 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
 
   // Whatever the standing leaves them to press
   switch (standing.kind) {
-    // Given up for the problems, which is what is waiting for them in there
+    // Given up for the problems, which is what is waiting for them in there, with the solutions beside
+    // them: giving the entry up is saying they are not competing here
     case 'forfeited':
       return (
-        <Button variant="link">
-          <FileText size={15} />
-          {t('problems')}
-        </Button>
+        <AreaLink
+          href={competitionAreaHref(competition.id)}
+          icon={FileText}
+          label={t('problems')}
+        />
       )
 
     // Inside, and the way back to the clock they left running. The loudest thing the page can offer while
@@ -485,20 +489,26 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
         <AreaLink href={competitionAreaHref(competition.id)} icon={Play} label={t('continue')} />
       )
 
-    // Taken. The practice one is the only competition anybody gets a second go at; every other one offers
-    // the student their own work back, which is in the area they spent the entry in
+    // Taken, so what the entry bought is back in the area it was spent in: their own work, and the
+    // solutions the end of a run opens. The practice one is the only competition anybody gets a second go
+    // at, and that offer comes second: taking it again starts a new clock, which closes the solutions the
+    // last run just opened
     case 'done':
-      return phase === 'practice' ? (
-        <Button variant="link" onClick={onEnter}>
-          <RotateCcw size={15} />
-          {t('tryAgain')}
-        </Button>
-      ) : (
-        <AreaLink
-          href={competitionAreaHref(competition.id)}
-          icon={NotebookPen}
-          label={t('mySolutions')}
-        />
+      return (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-5">
+          <AreaLink
+            href={competitionAreaHref(competition.id)}
+            icon={NotebookPen}
+            label={t('mySolutions')}
+          />
+
+          {phase === 'practice' && (
+            <Button variant="link" onClick={onEnter}>
+              <RotateCcw size={15} />
+              {t('tryAgain')}
+            </Button>
+          )}
+        </div>
       )
 
     // Untaken, so the group decides: one that has not opened yet has nothing to press, and an open one

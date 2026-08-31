@@ -133,9 +133,9 @@ export function ProblemSelfAssessmentNote({
       size="sm"
       shape="pill"
       onClick={note.open}
-      className="mt-3 min-h-0 gap-1.5 self-start px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+      className="mt-3 min-h-0 gap-2 self-start px-3 py-1 text-muted-foreground hover:text-foreground"
     >
-      <MessageSquareQuote size={13} className="shrink-0" />
+      <MessageSquareQuote size={15} className="shrink-0" />
       {t('selfAssessmentAsk')}
     </Button>
   ) : (

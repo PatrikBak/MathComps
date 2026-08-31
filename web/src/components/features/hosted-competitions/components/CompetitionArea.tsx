@@ -9,10 +9,10 @@ import { FetchStatePlaceholder } from '@/components/shared/components/FetchState
 import { Modal } from '@/components/shared/components/Modal'
 import { PRACTICE_INTRO_DISMISSED_STORAGE_KEY } from '@/constants/local-storage-constants'
 import type { Locale } from '@/i18n/i18n'
-import { useRouter } from '@/i18n/navigation'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { useCompetitionArea } from '../hooks/use-competition-area'
+import { clockEndsAt } from '../model/hosted-competition-state'
 import { COMPETITIONS_LIST_HREF } from '../services/hosted-competition-routes'
 import { CategoryBadge } from './CategoryBadge'
 import { CompetitionProblemPanel } from './CompetitionProblemPanel'
@@ -41,9 +41,6 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
   // The active locale, which decides what the group is called
   const locale = useLocale() as Locale
 
-  // The localized router
-  const router = useRouter()
-
   // Everything the page says about this competition and the entry spent on it
   const area = useCompetitionArea(competitionId)
 
@@ -70,19 +67,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
   }
 
   // What there is to draw, once both reads have landed
-  const {
-    readerKey,
-    group,
-    competition,
-    entry,
-    problems,
-    now,
-    endsAt,
-    isGraded,
-    wasHandedIn,
-    hasEnded,
-    areNotesOpen,
-  } = area
+  const { readerKey, group, competition, run, problems, now, isGraded } = area
 
   return (
     // Hyphenation off: the global setting is for article prose, and the words here are names and labels
@@ -101,10 +86,10 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
           out of sight, and a clock you have to scroll back up to read is one you stop reading */}
       <div className="sticky-below-header page-backdrop mb-6 py-2">
         <CompetitionStandingStrip
-          endsAt={endsAt}
+          endsAt={clockEndsAt(run)}
           now={now}
-          wasHandedIn={wasHandedIn}
-          onFinish={hasEnded || entry.kind !== 'sat' ? null : openFinish}
+          wasHandedIn={run?.kind === 'sat' && run.wasHandedIn}
+          onFinish={run?.kind === 'sat' && !run.hasEnded ? openFinish : null}
           onOpenRules={openRules}
           listHref={COMPETITIONS_LIST_HREF}
         />
@@ -136,12 +121,12 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
 
       {/* That the entry is closed, and what that does and does not stop. Only a graded run has a result
           to draw that line around */}
-      {hasEnded && isGraded && (
-        <AreaNote>{t(wasHandedIn ? 'areaFinished' : 'areaClockSpent')}</AreaNote>
+      {run?.kind === 'sat' && run.hasEnded && isGraded && (
+        <AreaNote>{t(run.wasHandedIn ? 'areaFinished' : 'areaClockSpent')}</AreaNote>
       )}
 
       {/* An entry given up for the problems, which never had a clock */}
-      {entry.kind === 'forfeited' && <AreaNote>{t('areaForfeited')}</AreaNote>}
+      {run?.kind === 'forfeited' && <AreaNote>{t('areaForfeited')}</AreaNote>}
 
       {/* The set, read top to bottom */}
       <div className="flex flex-col gap-4">
@@ -151,8 +136,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
             competitionId={competitionId}
             readerKey={readerKey}
             problem={problem}
-            entry={entry}
-            areNotesOpen={areNotesOpen}
+            run={run}
             isGraded={isGraded}
           />
         ))}
@@ -163,15 +147,11 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
         readerKey={readerKey}
         competitionId={competitionId}
         isAsked={isFinishAsked}
-        hasEnded={hasEnded}
+        hasEnded={run?.kind === 'sat' && run.hasEnded}
         onClose={closeFinish}
-        onFinished={() => {
-          // The question is answered
-          closeFinish()
-
-          // And out to the list, the way entering came in from it
-          router.push(COMPETITIONS_LIST_HREF)
-        }}
+        // The question is answered, and the official solutions the hand-in just opened are on the page
+        // behind it
+        onFinished={closeFinish}
       />
     </div>
   )

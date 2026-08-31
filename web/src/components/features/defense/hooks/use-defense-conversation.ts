@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 
 import { invalidateCompetitionProblems } from '@/components/features/hosted-competitions/hooks/hosted-competition-cache'
 import { assertNever } from '@/components/shared/utils/assert-never'
-import { useApi } from '@/hooks/use-api'
+import { apiCallOf, useApi } from '@/hooks/use-api'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { unwrap } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
@@ -96,7 +96,7 @@ export function useDefenseConversation(
 
   // The ready caller, or null while the client is still loading or the user is signed out. Stable across
   // renders (memoized inside useApi).
-  const apiCall = api.state === 'ready' ? api.apiCall : null
+  const apiCall = apiCallOf(api)
 
   // The backend calls bound to the current caller (unwrapped to data or a throw), or null when the caller
   // isn't ready. Memoized on the caller so it keeps a stable identity across renders.

@@ -1,6 +1,7 @@
 'use client'
 
 import { Resizable } from 're-resizable'
+import type { ReactNode } from 'react'
 import { useEffect, useImperativeHandle, useMemo, useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -101,6 +102,11 @@ type RichMathEditorProps = {
   autoExpandOnMobile?: boolean
   /** Whether the editor is in a loading state (e.g. sending) */
   isLoading?: boolean
+  /**
+   * What the surface using the editor counts of its own, shown in the footer beside the draft's
+   * counters
+   */
+  footerMeta?: ReactNode
   /** Handle onto the editor's imperative controls */
   ref?: React.Ref<RichMathEditorRef>
 }
@@ -125,6 +131,7 @@ export function RichMathEditor({
   onStop,
   autoExpandOnMobile,
   isLoading = false,
+  footerMeta,
   ref,
 }: RichMathEditorProps) {
   // The limits the model measures the content against, held stable so it rebuilds its state only when the
@@ -234,6 +241,7 @@ export function RichMathEditor({
                 maxCharacters={state.maxCharacters}
                 imageCount={state.metrics.imageCount}
                 attachmentCount={state.metrics.attachmentCount}
+                meta={footerMeta}
                 onSend={onSend}
                 onCancel={onCancel}
                 onStop={onStop}
@@ -257,6 +265,7 @@ export function RichMathEditor({
         onCancel={onCancel}
         onStop={onStop}
         isLoading={isLoading}
+        footerMeta={footerMeta}
       />
     </>
   )

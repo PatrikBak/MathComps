@@ -4,7 +4,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { DEFENSE_DRAFT_STORAGE_PREFIX } from '@/constants/local-storage-constants'
 import type { Locale } from '@/i18n/i18n'
 
-import type { DefenseSessionTarget } from './defense-types'
+import type { DefenseSessionTarget, NamedDefenseTarget } from './defense-types'
 
 /**
  * A defense held against one environment of a published handout.
@@ -34,6 +34,29 @@ type CompetitionDefenseTarget = {
  * What a defense is held against: a handout's environment, or a competition's problem.
  */
 export type DefenseTarget = HandoutDefenseTarget | CompetitionDefenseTarget
+
+/**
+ * Which competition a conversation was held in, read off what it was held against.
+ *
+ * @param target - What the defense was held against.
+ *
+ * @returns The competition's id, or null for a conversation no competition set.
+ */
+export function competitionIdOf(target: NamedDefenseTarget): string | null {
+  switch (target.kind) {
+    // An archive problem names the competition it was set in
+    case 'problem':
+      return target.competitionId
+
+    // A handout environment belongs to no competition
+    case 'handout':
+      return null
+
+    // Every target is handled above
+    default:
+      return assertNever(target)
+  }
+}
 
 /**
  * Turns a target the surface works in into the shape the API takes.

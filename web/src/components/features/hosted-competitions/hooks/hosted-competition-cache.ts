@@ -69,8 +69,8 @@ export function competitionProblemsQueryKey(
 /**
  * Refreshes every cached problem set, whichever reader or competition it belongs to.
  *
- * The rows under each statement say how many turns a conversation has spent, so anything that writes a
- * conversation moves them.
+ * A row appears under a statement for every conversation held about it, so anything that writes a
+ * conversation moves them, and the official solution arrives on the same read once a run is over.
  *
  * Narrower than {@link invalidateHostedCompetitions}: it leaves the view and readiness alone. Anything that
  * moves an entry wants that one instead.

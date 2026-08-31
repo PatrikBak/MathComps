@@ -4,7 +4,7 @@ import type { QueryKey, UseQueryOptions, UseQueryResult } from '@tanstack/react-
 import { useQuery } from '@tanstack/react-query'
 
 import type { ApiCaller } from '@/hooks/use-api'
-import { useApi } from '@/hooks/use-api'
+import { apiCallOf, useApi } from '@/hooks/use-api'
 import { unwrap } from '@/lib/api/api-error'
 import type { ApiResult } from '@/types/api'
 
@@ -48,7 +48,7 @@ export function useApiQuery<TData>({
   const api = useApi({ requireAuth })
 
   // The ready caller, or null while it is still loading or nobody is signed in
-  const apiCall = api.state === 'ready' ? api.apiCall : null
+  const apiCall = apiCallOf(api)
 
   // The read itself, which never runs without a caller
   return useQuery({
