@@ -18,7 +18,7 @@ import { usePendingCommentTarget } from '@/components/features/comments/hooks/us
 import { AppLink } from '@/components/shared/components/AppLink'
 import { Button } from '@/components/shared/components/Button'
 import { CountBadge } from '@/components/shared/components/CountBadge'
-import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
+import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useSmartLongPress } from '@/hooks/use-smart-long-press'
 import { useProblem } from '@/stores/problem-store'
@@ -319,11 +319,7 @@ export function ProblemCard({
       {/* Problem statement content with math rendering */}
       <div className="px-2.5 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 leading-relaxed text-muted-foreground text-[14px] sm:text-base">
         <div className="math-typography">
-          <RichMathEditorRenderer
-            content={problem.statementMarkdown}
-            imageContext="problems"
-            lightImageBackground
-          />
+          <ProblemMarkdown content={problem.statementMarkdown} />
         </div>
       </div>
 
