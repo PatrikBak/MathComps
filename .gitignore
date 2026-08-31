@@ -6,6 +6,9 @@
 # Playwright MCP scratch — screenshots, and a session injector holding live auth cookies
 .playwright-mcp/
 
+# Local secrets sitting at the root, which web/ ignores its own copy of
+.env.local
+
 # Python caches (from .claude tooling scripts, ruff, pytest)
 __pycache__/
 *.pyc

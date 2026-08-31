@@ -44,8 +44,10 @@ async function waitForClerk(page: Page): Promise<void> {
     // Name the likely cause, which a bare timeout never does
     throw new Error(
       `Clerk did not finish loading within ${CLERK_BOOT_TIMEOUT_MS}ms. The app and the Clerk instance ` +
-        'are usually looping over the handshake redirect, which a publishable key that no longer ' +
-        "matches the instance will do. Check web/.env.local and CI's copy of it against the Clerk dashboard."
+        'are usually looping over the handshake redirect, which they do while the dev-browser cookie ' +
+        'never lands. Clerk leaves the Secure attribute off that cookie for a browser calling itself ' +
+        'HeadlessChrome, and Chromium refuses a SameSite=None cookie without it, so check that ' +
+        'playwright.config.ts still hands the run a User-Agent.'
     )
   }
 }
