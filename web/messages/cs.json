@@ -367,7 +367,8 @@
     "enter": "Spustit",
     "entryAuthReason": "spuštění soutěže",
     "entryError": "Soutěž se nepodařilo spustit.",
-    "entryWindow": "vstup {range}",
+    "entryWindowLabel": "vstup",
+    "entryWindowMoment": "{date} {time}",
     "finishDialog": {
       "confirm": "Ukončit",
       "consequence": "Tvůj čas se tím zastaví a nic, co napíšeš potom, se už do soutěže nepočítá. Vrátit to zpět nejde.",
