@@ -44,7 +44,23 @@ Convenience scripts for working with the staging and production databases locall
 
 Relative paths (like `./my-draft`) resolve against your current directory, not the tool's project directory.
 
-Available commands: `embeddings`, `sync-users`, `bulk-import`.
+Run `./invoke-tool.sh` with no arguments for the current list of commands.
+
+### Importing a draft
+
+`apply-draft.sh` wraps the import in the one step that has to go with it. A defense session snapshots its problem's statement and reference solution when it starts and never re-reads them, so a session that predates a rewrite keeps arguing text the site no longer shows. `--clear-defenses` deletes every defense session on the draft's competition, after the import lands:
+
+```bash
+# Read-only: validate, and list the defense sessions the import would strand
+./apply-draft.sh --validate-only ./data/problems/mc-practice-2026
+
+# Import, and clear the defenses that would now hold the old text
+./apply-draft.sh -e prod --clear-defenses ./data/problems/mc-practice-2026
+```
+
+The competition comes from the draft's own `_meta.yaml`, so there is no second argument to keep in step. One tunnel serves the whole run: `invoke-tool.sh` finds the one this script opened and reuses it.
+
+`defense_spends` is left alone by `--clear-defenses`. It carries no session foreign key on purpose: it is the ledger the daily spend ceiling reads, and clearing it would make the ceiling evadable.
 
 ### Opening a standalone tunnel
 
