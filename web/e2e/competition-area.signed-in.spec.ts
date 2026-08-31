@@ -47,6 +47,12 @@ const SOLUTION_OPENING = 'Assume without loss of generality'
  */
 const STATEMENT_OPENING = 'Find all pairs of positive integers'
 
+/**
+ * How the second problem's official solution opens, which tells the two apart wherever a link is meant to
+ * have picked one of them out.
+ */
+const SECOND_SOLUTION_OPENING = 'lie on the circle with diameter'
+
 test.describe('the competition area', () => {
   test('puts the whole set on one page', async ({ page }) => {
     // A student inside a competition
@@ -1192,6 +1198,45 @@ test.describe('the competition area', () => {
 
     // And the solution is off the set
     await expect(page.getByText(SOLUTION_OPENING)).toHaveCount(0)
+  })
+
+  test('carries an open solution in the address, so the link opens it again', async ({ page }) => {
+    // A student who gave the entry up half an hour ago to read the problems
+    await installHostedBackend(page, 'forfeited')
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_ID))
+
+    // Once every problem offers one
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The second problem's, asked for
+    await page.getByRole('button', { name: areaCopy.officialSolution, exact: true }).nth(1).click()
+
+    // Which the address now names, by the place the problem sits in the set
+    await expect(page).toHaveURL(/\?solution=2$/)
+
+    // Followed as somebody else would follow it
+    await page.reload()
+
+    // Where it opens on the problem it named, before anything has been clicked
+    const solution = page.getByRole('dialog')
+    await expect(solution.getByText(SECOND_SOLUTION_OPENING)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // And on that one alone
+    await expect(solution.getByText(SOLUTION_OPENING)).toHaveCount(0)
+
+    // Closed again
+    await solution.getByRole('button', { name: modalCopy.close }).click()
+
+    // Which takes it back off the address, so a reload lands on the set rather than back inside it
+    await expect(page).not.toHaveURL(/solution=/)
   })
 
   test('opens the solutions the moment the clock runs out under a reader watching it', async ({

@@ -1,39 +1,12 @@
 'use client'
 
 import { useCallbackRef } from '@mantine/hooks'
-import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useTransition } from 'react'
 
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 
-import {
-  type DefenseReviewUrlState,
-  fromDefenseReviewQuery,
-  toDefenseReviewQuery,
-} from '../model/defense-review-url'
-
-/**
- * Reads what the address bar was asking for when the queue opened, which is what its state starts from.
- *
- * Held still: the queue's state is seeded from this, so reading the address again on a later render would fight
- * whatever the reader has done since.
- *
- * @returns What the address was asking for.
- */
-export function useDefenseReviewInitialAddress(): DefenseReviewUrlState {
-  // Whatever the address is asking for right now
-  const searchParams = useSearchParams()
-
-  // What it was asking for the first time anybody looked
-  const initialRef = useRef<DefenseReviewUrlState | null>(null)
-
-  // Read once, on the first render to reach here
-  initialRef.current ??= fromDefenseReviewQuery(searchParams)
-
-  // That first reading, whatever has happened since
-  return initialRef.current
-}
+import { type DefenseReviewUrlState, toDefenseReviewQuery } from '../model/defense-review-url'
 
 /**
  * Keeps the address bar saying what the queue is showing.
