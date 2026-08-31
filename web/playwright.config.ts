@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 
-import { defineConfig } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test'
 
 /** Where a developer's own secrets sit, which is a file only their machine has. */
 const LOCAL_ENV_FILE = '.env.local'
@@ -50,7 +50,23 @@ export default defineConfig({
   globalSetup: './e2e/support/global-setup.ts',
   // A retry keeps the trace of the attempt that failed, which is the whole of what a run nobody was
   // watching leaves behind.
-  use: { baseURL, trace: 'on-first-retry' },
+  //
+  // The browser names itself Chrome rather than HeadlessChrome, because Clerk reads the name off the
+  // User-Agent and drops the Secure attribute from the handshake cookies for the headless one. Chromium
+  // refuses a SameSite=None cookie that is not Secure, so the dev-browser cookie never lands and every
+  // navigation handshakes again. Clerk breaks that loop with a counter cookie living two seconds, which
+  // a handshake slower than that outlives, and the page then redirects until the browser gives up.
+  // Playwright's own descriptor is the version it ships, so this tracks the browser rather than pinning
+  // a version of its own.
+  //
+  // The browser names itself Chrome rather than HeadlessChrome, because Clerk reads the name off the
+  // User-Agent and drops the Secure attribute from the handshake cookies for the headless one. Chromium
+  // refuses a SameSite=None cookie that is not Secure, so the dev-browser cookie never lands and every
+  // navigation handshakes again. Clerk breaks that loop with a counter cookie living two seconds, which
+  // a handshake slower than that outlives, and the page then redirects until the browser gives up.
+  // Playwright's own descriptor is the version it ships, so this tracks the browser rather than pinning
+  // a version of its own.
+  use: { baseURL, trace: 'on-first-retry', userAgent: devices['Desktop Chrome'].userAgent },
   projects: [
     // Not a test: this run exists to produce a signed-in browser state.
     { name: 'session', testMatch: /.*\.setup\.ts/ },

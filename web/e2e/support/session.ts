@@ -22,16 +22,49 @@ function requireEnv(name: string): string {
   return value
 }
 
+/** How long Clerk gets to boot, held under a test's own timeout so this wait is the one that fires. */
+const CLERK_BOOT_TIMEOUT_MS = 15_000
+
 /**
- * Signs the test account in on a page that already has Clerk loaded.
+ * Waits for Clerk's client to finish booting, and names Clerk when it never does.
+ *
+ * Every helper here reaches through window.Clerk, and each simply waits while the client is still
+ * booting. A client that never finishes therefore surfaces as a bare test timeout on whichever line
+ * touched it first, and every test behind it reports a failure of its own, none of them naming Clerk.
+ *
+ * @param page - The page whose Clerk client to wait on.
+ */
+async function waitForClerk(page: Page): Promise<void> {
+  // Wait for the client to say it is up
+  try {
+    await page.waitForFunction(() => window.Clerk?.loaded === true, null, {
+      timeout: CLERK_BOOT_TIMEOUT_MS,
+    })
+  } catch {
+    // Name the likely cause, which a bare timeout never does
+    throw new Error(
+      `Clerk did not finish loading within ${CLERK_BOOT_TIMEOUT_MS}ms. The app and the Clerk instance ` +
+        'are usually looping over the handshake redirect, which they do while the dev-browser cookie ' +
+        'never lands. Clerk leaves the Secure attribute off that cookie for a browser calling itself ' +
+        'HeadlessChrome, and Chromium refuses a SameSite=None cookie without it, so check that ' +
+        'playwright.config.ts still hands the run a User-Agent.'
+    )
+  }
+}
+
+/**
+ * Signs the test account in, once Clerk's client on the page is up to sign it in with.
  *
  * The account is signed in through Clerk's own API rather than the form, since Turnstile deadlocks
  * an automated browser. The session this mints belongs to the page it was minted on, which is what
  * lets a test end it without taking any other test's session down with it.
  *
- * @param page - The page to sign in on, already sitting on a page that loads Clerk.
+ * @param page - The page to sign in on, sitting on a page of the app so that Clerk boots.
  */
 export async function signInTestUser(page: Page): Promise<void> {
+  // Nothing can be signed in until the client is up
+  await waitForClerk(page)
+
   // The account the suite runs as
   await clerk.signIn({
     page,
