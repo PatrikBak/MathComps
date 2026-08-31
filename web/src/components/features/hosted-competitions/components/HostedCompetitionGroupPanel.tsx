@@ -11,7 +11,7 @@ import {
   Timer,
   Trophy,
 } from 'lucide-react'
-import { useFormatter, useLocale, useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import type { ComponentProps } from 'react'
 import type { ReactNode } from 'react'
 
@@ -24,6 +24,7 @@ import { formatClockRemaining } from '@/components/shared/utils/duration-utils'
 import type { Locale } from '@/i18n/i18n'
 
 import { useClockLength } from '../hooks/use-clock-length'
+import { useEntryWindowLabel } from '../hooks/use-entry-window-label'
 import { useRemainingLabel } from '../hooks/use-remaining-label'
 import type { GroupPhase, HostedCompetitionStanding } from '../model/hosted-competition-state'
 import { derivePhase, deriveStanding } from '../model/hosted-competition-state'
@@ -74,28 +75,20 @@ export function HostedCompetitionGroupPanel({
   // Competitions copy
   const t = useTranslations('competitions')
 
-  // Date formatting for the reader's language
-  const format = useFormatter()
-
   // The language the group is named in
   const locale = useLocale() as Locale
 
   // Wording for how long is left
   const remainingLabel = useRemainingLabel()
 
+  // Wording for the window a group takes entries in
+  const entryWindowLabel = useEntryWindowLabel()
+
   // Where the group sits in its own life
   const phase = derivePhase(group, now)
 
   // The fortnight it takes entries in, from the first day to the last
-  const windowRange =
-    group.closesAt === null
-      ? null
-      : t('entryWindow', {
-          range: format.dateTimeRange(new Date(group.opensAt), new Date(group.closesAt), {
-            day: 'numeric',
-            month: 'long',
-          }),
-        })
+  const entryWindow = entryWindowLabel(group.opensAt, group.closesAt)
 
   // The one competition a group can hold instead of one per category, whose standing and action then ride
   // the header
@@ -162,10 +155,20 @@ export function HostedCompetitionGroupPanel({
 
         <div className="mt-3 flex flex-col items-start gap-2 text-sm sm:mt-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
           {/* When it takes entries */}
-          {windowRange !== null && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-foreground/5 px-2.5 py-1 font-medium tabular-nums text-foreground">
-              <CalendarRange size={14} className="text-muted" />
-              {windowRange}
+          {entryWindow !== null && (
+            <span className="inline-flex items-start gap-1.5 rounded-lg bg-foreground/5 px-2.5 py-1 font-medium tabular-nums text-foreground">
+              {/* 3px is where centring puts a 14px icon on a 20px line, so it keeps that spot on the
+                  first line once the range wraps */}
+              <CalendarRange size={14} className="mt-[3px] shrink-0 text-muted" aria-hidden />
+              {/* Names what the dates are for, which the icon does visually */}
+              <span className="sr-only">{t('entryWindowLabel')}</span>
+              {/* One box for the whole range: as separate children of the chip's flex the parts lay out
+                  in a row that never wraps */}
+              <span className="min-w-0">
+                <span className="whitespace-nowrap">{entryWindow.opens}</span>{' '}
+                <span className="mx-0.5 text-muted">&ndash;</span>{' '}
+                <span className="whitespace-nowrap">{entryWindow.closes}</span>
+              </span>
             </span>
           )}
 

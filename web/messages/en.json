@@ -365,7 +365,8 @@
     "enter": "Start",
     "entryAuthReason": "starting a competition",
     "entryError": "The competition could not be started.",
-    "entryWindow": "entry {range}",
+    "entryWindowLabel": "entry",
+    "entryWindowMoment": "{date}, {time}",
     "finishDialog": {
       "confirm": "Finish",
       "consequence": "Your clock stops here, and nothing you write afterwards counts towards your entry. This cannot be undone.",
