@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { ProblemBand } from '@/components/features/defense/components/ProblemBand'
 import { Button } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
-import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
+import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
 import type { Locale, LocalizedString } from '@/i18n/i18n'
 
 /**
@@ -107,7 +107,7 @@ export function CompetitionSolution({
           {/* And the solution itself, which scrolls in its own right once it outgrows the screen */}
           <div className="scrollbar-visible max-h-[60dvh] overflow-y-auto overscroll-contain px-4 py-3 sm:px-5">
             <div className="math-typography math-reference">
-              <RichMathEditorRenderer content={solution[locale]} lightImageBackground={false} />
+              <ProblemMarkdown content={solution[locale]} />
             </div>
           </div>
         </Modal>

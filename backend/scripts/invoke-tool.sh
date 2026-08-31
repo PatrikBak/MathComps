@@ -74,64 +74,13 @@ esac
 . "$script_dir/lib-env.sh"
 load_env "$environment"
 
-# Fail fast with a clear message if a variable the connection or tunnel needs is missing.
-require_var() {
-    # Name of the variable to check.
-    local name="$1"
-    if [ -z "${!name:-}" ]; then
-        echo "Error: required variable '$name' is not set (check .env / .env.$environment)." >&2
-        exit 1
-    fi
-}
-require_var SSH_HOST
-require_var SSH_REMOTE_HOST
-require_var SSH_REMOTE_PORT
-require_var DB_TUNNEL_PORT
-require_var DB_NAME
-require_var DB_USERNAME
-require_var DB_PASSWORD
+# Reach the database, reusing a tunnel that is already open.
+# shellcheck source=lib-tunnel.sh
+. "$script_dir/lib-tunnel.sh"
+ensure_tunnel
 
 # Point every tool's DB connection at the tunneled remote database.
 export ConnectionStrings__DefaultConnection="Host=localhost;Port=$DB_TUNNEL_PORT;Database=$DB_NAME;Username=$DB_USERNAME;Password=$DB_PASSWORD"
-
-# Succeeds when something is already accepting connections on the tunnel port.
-port_is_open() {
-    bash -c "echo > /dev/tcp/localhost/$DB_TUNNEL_PORT" 2>/dev/null
-}
-
-# Close only a tunnel we opened ourselves; a tunnel opened elsewhere (open-db-tunnel.sh)
-# is left running. Armed before we open anything so a startup failure still cleans up.
-tunnel_pid=""
-cleanup() {
-    if [ -n "$tunnel_pid" ]; then
-        kill "$tunnel_pid" 2>/dev/null || true
-        wait "$tunnel_pid" 2>/dev/null || true
-    fi
-}
-trap cleanup EXIT
-
-# Reuse an existing tunnel if one is already listening; otherwise open our own and wait for it.
-if port_is_open; then
-    echo "Reusing existing tunnel on localhost:$DB_TUNNEL_PORT (make sure it targets $environment)."
-else
-    # Nothing listening yet — open our own tunnel in the background and remember its PID so cleanup can kill it.
-    echo "Opening SSH tunnel to $environment database (localhost:$DB_TUNNEL_PORT -> $SSH_REMOTE_HOST:$SSH_REMOTE_PORT)..."
-    ssh -N -T \
-        -L "${DB_TUNNEL_PORT}:${SSH_REMOTE_HOST}:${SSH_REMOTE_PORT}" \
-        "$SSH_HOST" &
-    tunnel_pid=$!
-
-    # Wait for the tunnel to start accepting connections before running the tool.
-    attempts=0
-    until port_is_open; do
-        attempts=$((attempts + 1))
-        if [ "$attempts" -ge 50 ]; then
-            echo "Error: tunnel did not come up on localhost:$DB_TUNNEL_PORT within ~10s." >&2
-            exit 1
-        fi
-        sleep 0.2
-    done
-fi
 
 # Run a tool with dotnet run against its project, with a profile, no args, or passthrough args.
 # We run from the user's CWD so relative path args resolve against it; each tool finds its own

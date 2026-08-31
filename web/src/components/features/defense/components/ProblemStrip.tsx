@@ -3,7 +3,7 @@
 import { ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
+import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
 
 /**
  * Props for the {@link ProblemStrip}.
@@ -35,7 +35,7 @@ export function ProblemStrip({ statement }: ProblemStripProps) {
           so the statement's own paragraph margins sit it evenly between label and edge */}
       <div className="scrollbar-visible max-h-[30dvh] overflow-y-auto overscroll-contain px-4 pb-2.5 sm:px-5">
         <div className="math-typography">
-          <RichMathEditorRenderer content={statement} lightImageBackground={false} />
+          <ProblemMarkdown content={statement} />
         </div>
       </div>
     </details>

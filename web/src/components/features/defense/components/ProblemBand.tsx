@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
+import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
@@ -36,7 +36,7 @@ export function ProblemBand({ statement }: ProblemBandProps) {
       {isOpen && (
         <div className="scrollbar-visible max-h-[18dvh] overflow-y-auto overscroll-contain py-2.5 pl-4 pr-10 sm:pl-5">
           <div className="math-typography math-reference">
-            <RichMathEditorRenderer content={statement} lightImageBackground={false} />
+            <ProblemMarkdown content={statement} />
           </div>
         </div>
       )}
