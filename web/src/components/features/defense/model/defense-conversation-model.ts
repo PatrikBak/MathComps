@@ -216,8 +216,8 @@ export type ReadPassBoundary = {
    * from the moment above, which has nothing to name when the pass stops short of every turn.
    */
   firstNewTurnId: string | null
-  /** How many turns arrived after it. */
-  unreadTurnCount: number
+  /** How many of the student's own messages arrived after it. */
+  unreadStudentMessageCount: number
 }
 
 /**
@@ -238,7 +238,11 @@ export function findReadPassBefore(turns: readonly StoredTurn[], turnId: string)
 
   // A turn the conversation doesn't hold leaves the pass where a conversation nobody has read has it
   if (pickUpAt === undefined) {
-    return { readAt: null, firstNewTurnId: turns[0]?.id ?? null, unreadTurnCount: turns.length }
+    return {
+      readAt: null,
+      firstNewTurnId: turns[0]?.id ?? null,
+      unreadStudentMessageCount: countStudentMessages(turns),
+    }
   }
 
   // That moment as a timestamp
@@ -251,8 +255,20 @@ export function findReadPassBefore(turns: readonly StoredTurn[], turnId: string)
   return {
     readAt: read.at(-1)?.createdAt ?? null,
     firstNewTurnId: turns[read.length]?.id ?? null,
-    unreadTurnCount: turns.length - read.length,
+    // Only the student's own, so the examiner's replies past the pass count for nothing
+    unreadStudentMessageCount: countStudentMessages(turns) - countStudentMessages(read),
   }
+}
+
+/**
+ * Counts the student's own messages among a run of turns.
+ *
+ * @param turns - The turns to count over.
+ *
+ * @returns How many of them the student wrote.
+ */
+function countStudentMessages(turns: readonly StoredTurn[]): number {
+  return turns.filter((turn) => turn.role === 'candidate').length
 }
 
 /**

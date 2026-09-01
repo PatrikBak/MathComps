@@ -6,8 +6,8 @@ namespace MathComps.Domain.Contracts.Defense;
 /// </summary>
 /// <param name="MaxCandidateChars">The longest a single student message may be, in characters.</param>
 /// <param name="MaxFeedbackCommentChars">The longest a feedback comment may be, in characters.</param>
-/// <param name="MaxTurnsPerSession">The most student turns one conversation may hold.</param>
+/// <param name="MaxMessagesPerDefense">The most messages the student may send in one conversation.</param>
 public record DefenseLimitsDto(
     int MaxCandidateChars,
     int MaxFeedbackCommentChars,
-    int MaxTurnsPerSession);
+    int MaxMessagesPerDefense);

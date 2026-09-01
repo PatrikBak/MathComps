@@ -134,8 +134,8 @@ export type DefenseLimits = {
   maxCandidateChars: number
   /** The longest a feedback comment may be, in characters. */
   maxFeedbackCommentChars: number
-  /** The most student turns one conversation may hold. */
-  maxTurnsPerSession: number
+  /** The most messages the student may send in one conversation. */
+  maxMessagesPerDefense: number
 }
 
 /**

@@ -93,7 +93,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             limits.MaxHandoutContentIdChars = 100;
             limits.MaxEnvironmentIdChars = 100;
             limits.MaxFeedbackCommentChars = CommentCharCap;
-            limits.MaxTurnsPerSession = 20;
+            limits.MaxMessagesPerDefense = 20;
             limits.DailySpendCeilingPerUser = 1;
         });
 

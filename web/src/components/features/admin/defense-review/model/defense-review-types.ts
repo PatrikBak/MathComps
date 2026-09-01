@@ -30,16 +30,22 @@ export type DefenseReviewConversation = {
   target: NamedDefenseTarget
   /** Who held it. */
   user: DefenseReviewUser
-  /** The start of the student's most recent message; null when it holds no student turn. */
+  /** The start of the student's most recent message; null when they have sent none. */
   lastStudentMessage: string | null
-  /** How many turns it holds in total. */
-  turnCount: number
+  /** How many messages the student has sent in it. */
+  studentMessageCount: number
   /** When something was last said in it, as an ISO-8601 string. */
   lastActivityAt: string
   /** When it was last read, as an ISO-8601 string; null while it never has been. */
   readAt: string | null
-  /** How many of its turns arrived after it was last read; every turn when it never has been. */
-  unreadTurnCount: number
+  /**
+   * Whether anything at all has arrived in it since it was last read, the examiner's replies included. Separate
+   * from {@link DefenseReviewConversation.unreadStudentMessageCount}, which counts only what the student said: a
+   * conversation picked up again from one of the examiner's replies stands unread with none of theirs left in it.
+   */
+  isUnread: boolean
+  /** How many of those messages arrived after it was last read; every one of them when it never has been. */
+  unreadStudentMessageCount: number
   /** How many notes have been written about it. */
   noteCount: number
   /** Whether the student reported any of its replies. */

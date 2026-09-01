@@ -452,7 +452,7 @@ describe('DefenseConversationModel', () => {
     backend.nextSubmitError = new BackendApiError({
       message: 'too many turns',
       statusCode: 422,
-      errorCode: 'DefenseTurnLimit',
+      errorCode: 'DefenseMessageLimit',
     })
 
     // Send into the coded failure
@@ -461,7 +461,7 @@ describe('DefenseConversationModel', () => {
     backend.submitCalls[0].gate.resolve()
 
     // The send reports the failure carrying the backend's code
-    expect(await sent).toEqual({ kind: 'failed', errorCode: 'DefenseTurnLimit' })
+    expect(await sent).toEqual({ kind: 'failed', errorCode: 'DefenseMessageLimit' })
   })
 
   it('opens a stored session on resume', async () => {
@@ -1106,11 +1106,11 @@ describe('findReadPassBefore', () => {
     // Pick the conversation up from the last turn
     const boundary = findReadPassBefore(TURNS, 't4')
 
-    // The pass stops on the turn before it, leaving that one turn to read
+    // The pass stops on the turn before it, leaving the one message after it to read
     expect(boundary).toEqual({
       readAt: '2026-08-01T10:01:00.000Z',
       firstNewTurnId: 't4',
-      unreadTurnCount: 1,
+      unreadStudentMessageCount: 1,
     })
   })
 
@@ -1119,7 +1119,7 @@ describe('findReadPassBefore', () => {
     const boundary = findReadPassBefore(TURNS, 't2')
 
     // Which no moment can fall between, so the opener goes back to being unread too and names where to pick up
-    expect(boundary).toEqual({ readAt: null, firstNewTurnId: 't1', unreadTurnCount: 4 })
+    expect(boundary).toEqual({ readAt: null, firstNewTurnId: 't1', unreadStudentMessageCount: 2 })
   })
 
   it('leaves nothing read when the conversation opens on the turn', () => {
@@ -1127,7 +1127,25 @@ describe('findReadPassBefore', () => {
     const boundary = findReadPassBefore(TURNS, 't1')
 
     // Nothing precedes it, so the pass reaches nothing and the whole conversation is left to read
-    expect(boundary).toEqual({ readAt: null, firstNewTurnId: 't1', unreadTurnCount: 4 })
+    expect(boundary).toEqual({ readAt: null, firstNewTurnId: 't1', unreadStudentMessageCount: 2 })
+  })
+
+  it('counts no message when only the examiner spoke after the pass', () => {
+    // Pick it up from a reply nothing of the student's follows
+    const boundary = findReadPassBefore(
+      [
+        ...TURNS,
+        { id: 't5', role: 'examiner', content: 'Go on.', createdAt: '2026-08-01T10:03:00.000Z' },
+      ],
+      't5'
+    )
+
+    // Something is left to read, but none of it is theirs, which is the case the queue's own unread flag carries
+    expect(boundary).toEqual({
+      readAt: '2026-08-01T10:02:00.000Z',
+      firstNewTurnId: 't5',
+      unreadStudentMessageCount: 0,
+    })
   })
 
   it('leaves nothing read for a turn the conversation does not hold', () => {
@@ -1135,6 +1153,6 @@ describe('findReadPassBefore', () => {
     const boundary = findReadPassBefore(TURNS, 'gone')
 
     // Which names no moment to stop on
-    expect(boundary).toEqual({ readAt: null, firstNewTurnId: 't1', unreadTurnCount: 4 })
+    expect(boundary).toEqual({ readAt: null, firstNewTurnId: 't1', unreadStudentMessageCount: 2 })
   })
 })

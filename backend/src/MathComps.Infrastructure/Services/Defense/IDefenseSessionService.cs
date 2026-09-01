@@ -7,7 +7,7 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// Runs and persists a user's AI-examiner defense conversations: opening a session, continuing it turn by turn (each
 /// turn runs the examiner engine and records its spend), listing a user's sessions against one target or all of
 /// them, rewinding one to an earlier point, and deleting one.
-/// Guardrails (input sizes, turn count, per-user spend) are enforced before any model call.
+/// Guardrails (input sizes, the student's message count, per-user spend) are enforced before any model call.
 /// </summary>
 public interface IDefenseSessionService
 {
@@ -46,9 +46,9 @@ public interface IDefenseSessionService
 
     /// <summary>
     /// Lists all of a user's sessions, most recently active first, each summarized to its problem, statement,
-    /// last activity, most recent student message, and whether the student is graded on it. A competition conversation is among them: only the
-    /// student who held it is ever shown it, and the entry that let them hold it is what entitles them to its
-    /// problems for as long as the embargo runs.
+    /// last activity, most recent student message, and whether the student is graded on it. A competition
+    /// conversation is among them: only the student who held it is ever shown it, and the entry that let them
+    /// hold it is what entitles them to its problems for as long as the embargo runs.
     /// </summary>
     /// <param name="userId">The user whose sessions to list.</param>
     /// <param name="language">The language to name a competition problem in.</param>
@@ -101,9 +101,9 @@ public sealed class DefenseMessageTooLongException() : Exception("The message is
 public sealed class DefenseMessageEmptyException() : Exception("The message is empty");
 
 /// <summary>
-/// Thrown when a conversation has reached its configured turn limit and cannot be continued.
+/// Thrown when the student has sent every message a conversation is given and cannot continue it.
 /// </summary>
-public sealed class DefenseTurnLimitException() : Exception("This defense has reached its turn limit");
+public sealed class DefenseMessageLimitException() : Exception("This defense has reached its message limit");
 
 /// <summary>
 /// Thrown when the user has reached their configured daily spend ceiling.

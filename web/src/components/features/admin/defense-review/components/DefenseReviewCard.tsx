@@ -30,6 +30,9 @@ type DefenseReviewCardProps = {
  * foreground rather than from a colour: the page sits on a gradient fixed to the viewport, and a neutral tint is
  * the one that reads the same wherever down the queue the card has been scrolled to.
  *
+ * How much of it nobody has read counts the student's own messages, and falls back to a bare mark where there
+ * are none of theirs: a conversation picked up again from one of the examiner's replies still stands unread.
+ *
  * Held against its props, since naming the problem reads the handout index and the preview parses the opening
  * message: marking one conversation read redraws the queue, and the queue is redrawn once per conversation when
  * the reader clears a whole page of them.
@@ -48,7 +51,7 @@ export const DefenseReviewCard = memo(function DefenseReviewCard({
   const format = useFormatter()
 
   // Whether anything in it has arrived since it was last read
-  const isUnread = conversation.unreadTurnCount > 0
+  const isUnread = conversation.isUnread
 
   // A glimpse of the conversation, stripped to plain text. A student message that is nothing but
   // markup strips to nothing, which reads as the same absence as never having said anything.
@@ -111,7 +114,9 @@ export const DefenseReviewCard = memo(function DefenseReviewCard({
 
         {isUnread && (
           <span className="shrink-0 rounded-full bg-foreground/10 px-2 py-0.5 text-[11px] font-medium text-foreground">
-            {t('newTurns', { count: conversation.unreadTurnCount })}
+            {conversation.unreadStudentMessageCount > 0
+              ? t('newMessages', { count: conversation.unreadStudentMessageCount })
+              : t('unreadMark')}
           </span>
         )}
       </span>
@@ -128,8 +133,11 @@ export const DefenseReviewCard = memo(function DefenseReviewCard({
 
       {/* What the queue holds against it */}
       <span className="mt-2.5 flex items-center gap-3 pl-3.5 text-xs text-muted">
-        <Mark icon={MessagesSquare} label={t('turnCount', { count: conversation.turnCount })}>
-          {conversation.turnCount}
+        <Mark
+          icon={MessagesSquare}
+          label={t('studentMessageCount', { count: conversation.studentMessageCount })}
+        >
+          {conversation.studentMessageCount}
         </Mark>
 
         {conversation.noteCount > 0 && (

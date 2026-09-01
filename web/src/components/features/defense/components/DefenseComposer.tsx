@@ -15,7 +15,10 @@ import { CounterBadge } from '@/components/shared/components/rich-math-editor/co
 import { assertNever } from '@/components/shared/utils/assert-never'
 
 import type { DefenseComposerState } from '../model/defense-composer-state'
-import { REPLIES_LEFT_TO_ALARM_AT, REPLIES_LEFT_TO_WARN_AT } from '../model/defense-composer-state'
+import {
+  MESSAGES_LEFT_TO_ALARM_AT,
+  MESSAGES_LEFT_TO_WARN_AT,
+} from '../model/defense-composer-state'
 import { MathildaConsentGate } from './MathildaConsentGate'
 
 /**
@@ -47,10 +50,10 @@ type DefenseComposerProps = {
   editorRef: Ref<RichMathEditorRef>
   /** Whether a reply is in flight. */
   isThinking: boolean
-  /** The longest a single turn may be, or null while the caps are not known. */
+  /** The longest a single student message may be, or null while the caps are not known. */
   maxCharacters: number | null
-  /** The most turns the conversation may hold, or null while the caps are not known. */
-  maxReplies: number | null
+  /** The most messages the student may send in it, or null while the caps are not known. */
+  maxMessages: number | null
   /** Records the reader's acknowledgement. */
   onAcceptConsent: () => void
   /** Whether that acknowledgement is being recorded. */
@@ -79,7 +82,7 @@ export function DefenseComposer({
   editorRef,
   isThinking,
   maxCharacters,
-  maxReplies,
+  maxMessages,
   onAcceptConsent,
   isAcceptingConsent,
   onRetryConsent,
@@ -161,7 +164,7 @@ export function DefenseComposer({
     // Open for the next turn
     case 'open':
       return (
-        // Where the next reply is written, its footer counting the conversation's room beside the
+        // Where the next message is written, its footer counting the conversation's room beside the
         // draft's characters
         <RichMathEditor
           variant="card"
@@ -177,14 +180,14 @@ export function DefenseComposer({
           minHeightPx={editorMinHeightPx}
           placeholder={t('placeholder')}
           footerMeta={
-            state.repliesLeft !== null && maxReplies !== null ? (
+            state.messagesLeft !== null && maxMessages !== null ? (
               <CounterBadge
                 icon={MessageSquare}
-                count={maxReplies - state.repliesLeft}
-                max={maxReplies}
-                isOver={state.repliesLeft <= REPLIES_LEFT_TO_ALARM_AT}
-                isNear={state.repliesLeft <= REPLIES_LEFT_TO_WARN_AT}
-                title={t('repliesLeft', { count: state.repliesLeft })}
+                count={maxMessages - state.messagesLeft}
+                max={maxMessages}
+                isOver={state.messagesLeft <= MESSAGES_LEFT_TO_ALARM_AT}
+                isNear={state.messagesLeft <= MESSAGES_LEFT_TO_WARN_AT}
+                title={t('messagesLeft', { count: state.messagesLeft })}
                 tabular
               />
             ) : undefined

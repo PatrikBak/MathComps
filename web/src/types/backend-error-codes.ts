@@ -17,7 +17,7 @@ export const BACKEND_ERROR_CODES = [
   'DefenseContentNotFound',
   'DefenseMessageTooLong',
   'DefenseMessageEmpty',
-  'DefenseTurnLimit',
+  'DefenseMessageLimit',
   'DefenseSpendLimit',
   'DefenseRewindTarget',
   'DefenseReportTarget',

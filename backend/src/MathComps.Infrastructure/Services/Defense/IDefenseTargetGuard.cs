@@ -8,12 +8,15 @@ namespace MathComps.Infrastructure.Services.Defense;
 public interface IDefenseTargetGuard
 {
     /// <summary>
-    /// Throws unless the student may argue the target.
+    /// Throws unless the student may argue the target, and says whether they hold an entry into it.
     /// </summary>
     /// <param name="userId">The student asking.</param>
     /// <param name="target">What they want to argue.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    Task EnsureCanDefendAsync(Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
+    /// <returns>Whether the student has spent an entry into the round the target is set in; false for a
+    /// handout, which nobody enters.</returns>
+    Task<bool> EnsureCanDefendAsync(
+        Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
