@@ -108,7 +108,7 @@
       "markRead": "Označiť ako prečítané",
       "markUnread": "Označiť ako neprečítané",
       "markUnreadFromTurn": "Označiť ako neprečítané odtiaľto",
-      "newTurns": "+{count, plural, =1 {# nová} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
+      "newMessages": "+{count, plural, =1 {# nová} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
       "next": "Nasledujúca",
       "nextUnread": "Nasledujúca neprečítaná",
       "noStudentMessage": "Zatiaľ žiadna správa",
@@ -156,6 +156,7 @@
       },
       "student": "Študent",
       "studentFeedbackMark": "Študent zhodnotil konverzáciu",
+      "studentMessageCount": "Správ: {count}",
       "studentNoComment": "Bez komentára",
       "studentReportMark": "Študent nahlásil odpoveď",
       "studentVerdict": "Čo povedal študent",
@@ -167,8 +168,8 @@
       },
       "tabsLabel": "Časti konverzácie",
       "title": "Prechádzať konverzácie",
-      "turnCount": "Odpovedí: {count}",
-      "unreadDivider": "Nové od vášho posledného čítania"
+      "unreadDivider": "Nové od vášho posledného čítania",
+      "unreadMark": "Neprečítané"
     }
   },
   "apiErrors": {
@@ -184,12 +185,12 @@
     "DefenseFeedbackValue": "Táto spätná väzba nič nehovorí.",
     "DefenseGradedSessionImmutable": "Konverzácia z hodnotenej súťaže sa nedá vrátiť ani zmazať.",
     "DefenseMessageEmpty": "Tvoja správa je prázdna.",
+    "DefenseMessageLimit": "Táto konverzácia dosiahla limit počtu správ.",
     "DefenseMessageTooLong": "Tvoja správa je príliš dlhá.",
     "DefenseReportTarget": "Táto odpoveď už neexistuje.",
     "DefenseRewindTarget": "Tento bod na vrátenie už nie je platný.",
     "DefenseSessionNotFound": "Táto konverzácia už neexistuje.",
     "DefenseSpendLimit": "Dosiahol sa dnešný limit používania. Skús to znova zajtra.",
-    "DefenseTurnLimit": "Táto konverzácia dosiahla limit počtu správ.",
     "FavoritesRequireAuthentication": "Ak chcete vidieť obľúbené, prihláste sa.",
     "FILE_TOO_LARGE": "Súbor je príliš veľký. Maximum: {max} MB",
     "Forbidden": "Na túto akciu nemáte oprávnenie.",
@@ -473,7 +474,7 @@
     "SK": "Slovensko"
   },
   "defense": {
-    "capsUnavailable": "Nepodarilo sa nám načítať túto konverzáciu, takže nevieme, aká dlhá môže byť tvoja odpoveď.",
+    "capsUnavailable": "Nepodarilo sa nám načítať túto konverzáciu, takže nevieme, aká dlhá môže byť tvoja správa.",
     "competitionClockDivider": "Čas vypršal",
     "competitionClockSpent": "Toto sa už do súťaže nepočíta.",
     "consentAccept": "Rozumiem",
@@ -503,6 +504,7 @@
     "libraryEmptyLead": "Mathilda je AI tútorka",
     "libraryLoading": "Načítavam…",
     "loginPrompt": "Mathilda si tvoje konverzácie ukladá, takže na ňu potrebuješ účet.",
+    "messagesLeft": "{count, plural, one {V tejto konverzácii ti zostáva # správa} few {V tejto konverzácii ti zostávajú # správy} other {V tejto konverzácii ti zostáva # správ}}",
     "newDefense": "Nová konverzácia",
     "noReplyYet": "Zatiaľ bez odpovede",
     "outcomes": {
@@ -518,7 +520,6 @@
     "removeFeedbackTitle": "Odstrániť túto odpoveď?",
     "removeReportMessage": "Tvoja spätná väzba k tejto odpovedi sa natrvalo odstráni.",
     "removeReportTitle": "Odstrániť túto spätnú väzbu?",
-    "repliesLeft": "{count, plural, one {V tejto konverzácii ti zostáva # odpoveď} few {V tejto konverzácii ti zostávajú # odpovede} other {V tejto konverzácii ti zostáva # odpovedí}}",
     "report": "Niečo sa tu nepodarilo",
     "reportCategories": {
       "gaveAway": "Prezradila toho priveľa",

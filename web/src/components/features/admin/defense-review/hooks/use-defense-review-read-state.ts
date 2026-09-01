@@ -69,8 +69,10 @@ type ReadStateChange = {
 type ReadStateSnapshot = {
   /** When it was last read, as an ISO-8601 string; null while it never had been. */
   readAt: string | null
-  /** How many of its turns were new. */
-  unreadTurnCount: number
+  /** Whether anything in it stood unread. */
+  isUnread: boolean
+  /** How many of the student's messages were new. */
+  unreadStudentMessageCount: number
 }
 
 /**
@@ -110,18 +112,24 @@ function markedReadState(
   switch (mark.kind) {
     // Read as of then, with nothing left in it
     case 'read':
-      return { readAt, unreadTurnCount: 0 }
+      return { readAt, isUnread: false, unreadStudentMessageCount: 0 }
 
-    // Back to every reply standing unread
+    // Back to every message standing unread
     case 'unread':
-      return { readAt: null, unreadTurnCount: conversation.turnCount }
+      return {
+        readAt: null,
+        isUnread: true,
+        unreadStudentMessageCount: conversation.studentMessageCount,
+      }
 
     // Read as far as the turn before the one it is picked up from, which is what the boundary names. Taken
     // field by field, since the boundary also carries where the transcript draws its line.
     case 'unreadFromTurn':
       return {
         readAt: mark.boundary.readAt,
-        unreadTurnCount: mark.boundary.unreadTurnCount,
+        // The mark leaves the turn it names standing, so something is unread whichever role wrote it
+        isUnread: true,
+        unreadStudentMessageCount: mark.boundary.unreadStudentMessageCount,
       }
 
     // Nothing else is a mark
@@ -255,7 +263,8 @@ export function useDefenseReviewReadState(): UseDefenseReviewReadStateResult {
           // What the row said before any mark touched it
           marks.previous = {
             readAt: conversation.readAt,
-            unreadTurnCount: conversation.unreadTurnCount,
+            isUnread: conversation.isUnread,
+            unreadStudentMessageCount: conversation.unreadStudentMessageCount,
           }
         }
 
@@ -344,7 +353,8 @@ export function useDefenseReviewReadState(): UseDefenseReviewReadStateResult {
         // What this row said before
         previous.set(conversation.id, {
           readAt: conversation.readAt,
-          unreadTurnCount: conversation.unreadTurnCount,
+          isUnread: conversation.isUnread,
+          unreadStudentMessageCount: conversation.unreadStudentMessageCount,
         })
 
         // The row as the set's own mark leaves it, under the one moment they share

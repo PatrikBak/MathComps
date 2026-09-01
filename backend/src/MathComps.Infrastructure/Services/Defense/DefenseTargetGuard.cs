@@ -7,19 +7,21 @@ namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
 /// The database-backed <see cref="IDefenseTargetGuard"/>. A handout environment is open to anybody signed in, so
-/// the only arm with anything to check is a problem: its round is read first, and only a round still under
-/// embargo goes on to ask whether the student holds an entry into it.
+/// the only arm with anything to check is a problem: whether the site hosts its round and whether the student
+/// holds an entry into it are read in one go, and a round still under embargo is the one that turns that entry
+/// into the permission as well.
 /// </summary>
 /// <param name="dbContextFactory">Creates the contexts the checks run on.</param>
 public sealed class DefenseTargetGuard(IDbContextFactory<MathCompsDbContext> dbContextFactory)
     : IDefenseTargetGuard
 {
     /// <inheritdoc/>
-    public Task EnsureCanDefendAsync(
+    public Task<bool> EnsureCanDefendAsync(
         Guid userId, DefenseTarget target, CancellationToken cancellationToken = default) => target switch
         {
-            // A published handout is open to every signed-in reader, so there is nothing to weigh.
-            HandoutEnvironmentTarget => Task.CompletedTask,
+            // A published handout is open to every signed-in reader, so there is nothing to weigh and no entry
+            // to hold.
+            HandoutEnvironmentTarget => Task.FromResult(false),
 
             // A problem may be embargoed, and may not be one anybody is allowed to argue at all.
             ProblemTarget problem => EnsureCanDefendProblemAsync(userId, problem.ProblemId, cancellationToken),
@@ -34,13 +36,20 @@ public sealed class DefenseTargetGuard(IDbContextFactory<MathCompsDbContext> dbC
     /// <param name="userId">The student asking.</param>
     /// <param name="problemId">The problem they want to argue.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    private async Task EnsureCanDefendProblemAsync(
+    /// <returns>Whether the student has spent an entry into the problem's round.</returns>
+    private async Task<bool> EnsureCanDefendProblemAsync(
         Guid userId, Guid problemId, CancellationToken cancellationToken)
     {
         // A fresh context for this check.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The round the problem sits in, and whether the site hosts it at all.
+        // The set the projection below reads. Held as its own value so the expression tree captures a set rather
+        // than the context around it, which the analyzer reads as disposed by the time the tree runs.
+        var allEntries = dbContext.HostedEntries;
+
+        // The round the problem sits in, whether the site hosts it at all, and whether this student has spent an
+        // entry into it. The entry is read whatever the embargo says, since it decides the daily spend ceiling
+        // as well as the permission, and a group's problems go public the moment it closes.
         var round = await dbContext.Problems
             .AsNoTracking()
             .Where(problem => problem.Id == problemId)
@@ -49,6 +58,8 @@ public sealed class DefenseTargetGuard(IDbContextFactory<MathCompsDbContext> dbC
                 problem.RoundId,
                 IsHosted = problem.Round.HostedGroupId != null,
                 problem.Round.VisibleSince,
+                HoldsEntry = allEntries.Any(entry =>
+                    entry.UserId == userId && entry.RoundId == problem.RoundId),
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -59,5 +70,8 @@ public sealed class DefenseTargetGuard(IDbContextFactory<MathCompsDbContext> dbC
         // And past that it is the same rule the area serves its problems under.
         await HostedEntryRules.EnsureEntitledAsync(
             dbContext, userId, round.RoundId, round.VisibleSince, cancellationToken);
+
+        // Cleared, and the entry says whether the daily spend ceiling reaches this defense.
+        return round.HoldsEntry;
     }
 }

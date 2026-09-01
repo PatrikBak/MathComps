@@ -78,9 +78,9 @@ public enum ApiErrorCode
     DefenseMessageEmpty,
 
     /// <summary>
-    /// The defense conversation has reached its turn limit.
+    /// The defense conversation has reached its message limit.
     /// </summary>
-    DefenseTurnLimit,
+    DefenseMessageLimit,
 
     /// <summary>
     /// The user has reached their daily defense spend ceiling.

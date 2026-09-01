@@ -108,7 +108,7 @@
       "markRead": "Mark as read",
       "markUnread": "Mark as unread",
       "markUnreadFromTurn": "Mark as unread from here",
-      "newTurns": "+{count} new",
+      "newMessages": "+{count} new",
       "next": "Next",
       "nextUnread": "Next unread",
       "noStudentMessage": "Nothing said yet",
@@ -156,6 +156,7 @@
       },
       "student": "Student",
       "studentFeedbackMark": "The student rated the conversation",
+      "studentMessageCount": "Messages: {count}",
       "studentNoComment": "No comment",
       "studentReportMark": "The student reported a reply",
       "studentVerdict": "What the student said",
@@ -167,8 +168,8 @@
       },
       "tabsLabel": "Parts of the conversation",
       "title": "Review conversations",
-      "turnCount": "Turns: {count}",
-      "unreadDivider": "New since you last read this"
+      "unreadDivider": "New since you last read this",
+      "unreadMark": "Unread"
     }
   },
   "apiErrors": {
@@ -184,12 +185,12 @@
     "DefenseFeedbackValue": "That feedback doesn't say anything.",
     "DefenseGradedSessionImmutable": "A conversation from a graded competition can't be rewound or deleted.",
     "DefenseMessageEmpty": "Your message is empty.",
+    "DefenseMessageLimit": "This conversation has reached its message limit.",
     "DefenseMessageTooLong": "Your message is too long.",
     "DefenseReportTarget": "That reply is no longer there.",
     "DefenseRewindTarget": "That rewind point is no longer valid.",
     "DefenseSessionNotFound": "This conversation no longer exists.",
     "DefenseSpendLimit": "You've reached today's usage limit. Try again tomorrow.",
-    "DefenseTurnLimit": "This conversation has reached its turn limit.",
     "FavoritesRequireAuthentication": "Log in to see your favorites.",
     "FILE_TOO_LARGE": "File is too large. Maximum: {max} MB",
     "Forbidden": "You don't have permission to do that.",
@@ -473,7 +474,7 @@
     "SK": "Slovakia"
   },
   "defense": {
-    "capsUnavailable": "We couldn't load this conversation, so we don't know how long a reply may be.",
+    "capsUnavailable": "We couldn't load this conversation, so we don't know how long a message may be.",
     "competitionClockDivider": "Time's up",
     "competitionClockSpent": "This no longer counts towards the competition.",
     "consentAccept": "Got it",
@@ -503,6 +504,7 @@
     "libraryEmptyLead": "Mathilda is an AI tutor",
     "libraryLoading": "Loading…",
     "loginPrompt": "Mathilda keeps your conversations, so you will need an account.",
+    "messagesLeft": "{count, plural, one {# message left in this conversation} other {# messages left in this conversation}}",
     "newDefense": "New conversation",
     "noReplyYet": "No reply yet",
     "outcomes": {
@@ -518,7 +520,6 @@
     "removeFeedbackTitle": "Remove this answer?",
     "removeReportMessage": "Your feedback on this reply will be permanently removed.",
     "removeReportTitle": "Remove this feedback?",
-    "repliesLeft": "{count, plural, one {# reply left in this conversation} other {# replies left in this conversation}}",
     "report": "Something went wrong here",
     "reportCategories": {
       "gaveAway": "She gave away too much",

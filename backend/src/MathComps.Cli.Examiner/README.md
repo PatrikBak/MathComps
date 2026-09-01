@@ -6,7 +6,7 @@ The engine itself lives in `MathComps.Infrastructure` (`Services/Defense`) and i
 
 This CLI has no database of its own — it works entirely from fixture files. (Persistence is the API's concern, not the engine's.)
 
-The API's copy is open to any signed-in user, bounded by `DefenseLimits` in `appsettings.json`: a daily spend ceiling and a turn cap, both per user, plus length caps on everything the client sends. Nothing caps the day's total across all users. None of it applies here anyway — the CLI runs the engine directly and will spend whatever you ask it to.
+The API's copy is open to any signed-in user, bounded by `DefenseLimits` in `appsettings.json`: a daily spend ceiling per user, a message cap on one conversation, plus length caps on everything the client sends. A defense of a problem whose round the student holds an entry into sits outside the ceiling entirely. Nothing caps the day's total across all users. None of it applies here anyway — the CLI runs the engine directly and will spend whatever you ask it to.
 
 ## How It Works
 

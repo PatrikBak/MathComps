@@ -78,7 +78,7 @@ public class AdminDefenseReviewService(
                 IsUnread = readAt == null || lastActivityAt > readAt,
             };
 
-        // Conversations carrying turns this reviewer hasn't read.
+        // Conversations carrying anything this reviewer hasn't read.
         var rows = filter.Unread ? joined.Where(row => row.IsUnread) : joined;
 
         // How recently a conversation has to have moved. Measured from the last thing said rather than from when it
@@ -134,10 +134,13 @@ public class AdminDefenseReviewService(
                         .OrderByDescending(turn => turn.Sequence)
                         .Select(turn => turn.Content.Substring(0, LastStudentMessageChars))
                         .FirstOrDefault(),
-                    session.Turns.Count,
+                    session.Turns.Count(turn => turn.Role == TranscriptRole.Candidate),
                     row.LastActivityAt,
                     row.ReadAt,
-                    session.Turns.Count(turn => row.ReadAt == null || turn.CreatedAt > row.ReadAt),
+                    row.IsUnread,
+                    session.Turns.Count(turn =>
+                        turn.Role == TranscriptRole.Candidate
+                        && (row.ReadAt == null || turn.CreatedAt > row.ReadAt)),
                     allNotes.Count(note => note.SessionId == session.Id),
                     session.Reports.Any(),
                     session.Feedback != null))
@@ -156,10 +159,11 @@ public class AdminDefenseReviewService(
                 NamedDefenseTargets.Build(localization, language, row.Target),
                 row.User,
                 row.LastStudentMessage,
-                row.TurnCount,
+                row.StudentMessageCount,
                 row.LastActivityAt,
                 row.ReadAt,
-                row.UnreadTurnCount,
+                row.IsUnread,
+                row.UnreadStudentMessageCount,
                 row.NoteCount,
                 row.HasStudentReport,
                 row.HasStudentFeedback))
@@ -662,23 +666,31 @@ public class AdminDefenseReviewService(
     /// <param name="Id"><inheritdoc cref="AdminDefenseConversationDto.Id" path="/summary"/></param>
     /// <param name="Target"><inheritdoc cref="NamedDefenseTargets.Columns" path="/summary"/></param>
     /// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
-    /// <param name="LastStudentMessage"><inheritdoc cref="AdminDefenseConversationDto.LastStudentMessage" path="/summary"/></param>
-    /// <param name="TurnCount"><inheritdoc cref="AdminDefenseConversationDto.TurnCount" path="/summary"/></param>
-    /// <param name="LastActivityAt"><inheritdoc cref="AdminDefenseConversationDto.LastActivityAt" path="/summary"/></param>
+    /// <param name="LastStudentMessage">
+    /// <inheritdoc cref="AdminDefenseConversationDto.LastStudentMessage" path="/summary"/></param>
+    /// <param name="StudentMessageCount">
+    /// <inheritdoc cref="AdminDefenseConversationDto.StudentMessageCount" path="/summary"/></param>
+    /// <param name="LastActivityAt">
+    /// <inheritdoc cref="AdminDefenseConversationDto.LastActivityAt" path="/summary"/></param>
     /// <param name="ReadAt"><inheritdoc cref="AdminDefenseConversationDto.ReadAt" path="/summary"/></param>
-    /// <param name="UnreadTurnCount"><inheritdoc cref="AdminDefenseConversationDto.UnreadTurnCount" path="/summary"/></param>
+    /// <param name="IsUnread"><inheritdoc cref="AdminDefenseConversationDto.IsUnread" path="/summary"/></param>
+    /// <param name="UnreadStudentMessageCount">
+    /// <inheritdoc cref="AdminDefenseConversationDto.UnreadStudentMessageCount" path="/summary"/></param>
     /// <param name="NoteCount"><inheritdoc cref="AdminDefenseConversationDto.NoteCount" path="/summary"/></param>
-    /// <param name="HasStudentReport"><inheritdoc cref="AdminDefenseConversationDto.HasStudentReport" path="/summary"/></param>
-    /// <param name="HasStudentFeedback"><inheritdoc cref="AdminDefenseConversationDto.HasStudentFeedback" path="/summary"/></param>
+    /// <param name="HasStudentReport">
+    /// <inheritdoc cref="AdminDefenseConversationDto.HasStudentReport" path="/summary"/></param>
+    /// <param name="HasStudentFeedback">
+    /// <inheritdoc cref="AdminDefenseConversationDto.HasStudentFeedback" path="/summary"/></param>
     private sealed record QueueRow(
         Guid Id,
         NamedDefenseTargets.Columns Target,
         AdminDefenseUserDto User,
         string? LastStudentMessage,
-        int TurnCount,
+        int StudentMessageCount,
         DateTimeOffset LastActivityAt,
         DateTimeOffset? ReadAt,
-        int UnreadTurnCount,
+        bool IsUnread,
+        int UnreadStudentMessageCount,
         int NoteCount,
         bool HasStudentReport,
         bool HasStudentFeedback);

@@ -94,8 +94,8 @@ public sealed class GlobalExceptionHandler(
         DefenseFeedbackValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseFeedbackValue),
         DefenseFeedbackCommentTooLongException
             => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseFeedbackCommentTooLong),
-        // A maxed-out session permanently refuses more turns: a business-rule refusal, not a resolvable conflict
-        DefenseTurnLimitException => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.DefenseTurnLimit),
+        // A maxed-out defense permanently refuses more messages: a business-rule refusal, not a resolvable conflict
+        DefenseMessageLimitException => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.DefenseMessageLimit),
         // The per-user daily spend ceiling clears at the next midnight, so retrying later succeeds:
         // retry-after semantics
         DefenseSpendLimitException => (StatusCodes.Status429TooManyRequests, ApiErrorCode.DefenseSpendLimit),

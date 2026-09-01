@@ -374,14 +374,14 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             MsOptions.Create(new PaginationOptions { DefaultPageSize = 2 })));
 
     /// <summary>
-    /// Reading a conversation settles it, a turn arriving afterwards unsettles it again, and putting it back to
-    /// unread makes every turn new once more.
+    /// Reading a conversation settles it, a message arriving afterwards unsettles it again, and putting it back
+    /// to unread makes every message new once more.
     /// </summary>
     [Fact]
-    public Task Reading_a_conversation_holds_only_until_its_next_turn() => RunTestAsync(async service =>
+    public Task Reading_a_conversation_holds_only_until_its_next_message() => RunTestAsync(async service =>
     {
-        // Every turn of the newest conversation is unread to begin with
-        Assert.Equal(3, (await GetConversationAsync(service, _newestSessionId)).UnreadTurnCount);
+        // The one message the newest conversation holds is unread to begin with
+        Assert.Equal(1, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
 
         // Read it
         await service.MarkReadAsync(_reviewerId, _newestSessionId);
@@ -390,7 +390,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         var read = await GetConversationAsync(service, _newestSessionId);
 
         // Nothing in it is new now, and the read left a stamp behind
-        Assert.Equal(0, read.UnreadTurnCount);
+        Assert.Equal(0, read.UnreadStudentMessageCount);
         Assert.NotNull(read.ReadAt);
 
         // The student carries the conversation on
@@ -404,8 +404,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             await context.SaveChangesAsync();
         });
 
-        // Which brings it back with exactly the one new turn against it
-        Assert.Equal(1, (await GetConversationAsync(service, _newestSessionId)).UnreadTurnCount);
+        // Which brings it back with exactly the one new message against it
+        Assert.Equal(1, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
 
         // Read it a second time
         await service.MarkReadAsync(_reviewerId, _newestSessionId);
@@ -414,7 +414,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         var reread = await GetConversationAsync(service, _newestSessionId);
 
         // Which moves the stamp on rather than leaving it where the first pass stopped
-        Assert.Equal(0, reread.UnreadTurnCount);
+        Assert.Equal(0, reread.UnreadStudentMessageCount);
         Assert.True(reread.ReadAt > read.ReadAt);
 
         // Put it back to unread
@@ -423,15 +423,16 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // The conversation after it was put back
         var unread = await GetConversationAsync(service, _newestSessionId);
 
-        // Which makes all four turns new again, and leaves no stamp behind
-        Assert.Equal(4, unread.UnreadTurnCount);
+        // Which makes both of the student's messages new again, and leaves no stamp behind
+        Assert.Equal(2, unread.UnreadStudentMessageCount);
         Assert.Null(unread.ReadAt);
     });
 
     /// <summary>
     /// Picking a conversation up from one of its turns leaves that turn and everything after it new, and settles
     /// the ones before it. Naming a turn further down settles what stood unread above it, since where a reader
-    /// picks up is one place rather than a run of them.
+    /// picks up is one place rather than a run of them. A pick-up from one of the examiner's replies leaves the
+    /// row unread with none of the student's messages in it, and the unread filter still finds it.
     /// </summary>
     [Fact]
     public Task Picking_a_conversation_up_from_a_turn_leaves_it_and_the_rest_new() => RunTestAsync(async service =>
@@ -465,8 +466,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // The conversation as it stands after that
         var fromFollowUp = await GetConversationAsync(service, _newestSessionId);
 
-        // Which leaves the follow-up and the reply after it new
-        Assert.Equal(2, fromFollowUp.UnreadTurnCount);
+        // Which leaves the follow-up standing as the one message nobody has read
+        Assert.Equal(1, fromFollowUp.UnreadStudentMessageCount);
 
         // When the turn before the follow-up was recorded, read back rather than compared against the seeded
         // stamp, which carries finer ticks than the column keeps
@@ -483,8 +484,21 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Pick it up from the reply instead
         await service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, lastReplyId);
 
-        // Which moves where the reading stops down to it, leaving only it new
-        Assert.Equal(1, (await GetConversationAsync(service, _newestSessionId)).UnreadTurnCount);
+        // The conversation as it stands after that
+        var fromLastReply = await GetConversationAsync(service, _newestSessionId);
+
+        // Which moves where the reading stops down to it. Only the reply itself stands unread, and the count says
+        // messages, so it comes back empty while the row still says unread: what is left to read is the
+        // examiner's, and she is not the one being counted
+        Assert.Equal(0, fromLastReply.UnreadStudentMessageCount);
+        Assert.True(fromLastReply.IsUnread);
+
+        // The unread queue as the reviewer sees it now
+        var unread = await service.GetQueueAsync(
+            _reviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
+
+        // Which agrees with the row, so the reviewer who left it there can still find it
+        Assert.Contains(_newestSessionId, unread.Items.Select(row => row.Id));
     });
 
     /// <summary>
@@ -503,8 +517,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // The conversation as it stands after that
         var reopened = await GetConversationAsync(service, _newestSessionId);
 
-        // Which makes every turn new again and drops the stamp rather than leaving one nothing sits before
-        Assert.Equal(3, reopened.UnreadTurnCount);
+        // Which makes every message new again and drops the stamp rather than leaving one nothing sits before
+        Assert.Equal(1, reopened.UnreadStudentMessageCount);
         Assert.Null(reopened.ReadAt);
     });
 
@@ -522,8 +536,9 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Pick it up from the reply, which the message before it shares a moment with
         await service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, _newestReplyId);
 
-        // Both of them stand new, the stamp having landed on the opener before the pair
-        Assert.Equal(2, (await GetConversationAsync(service, _newestSessionId)).UnreadTurnCount);
+        // Both of them stand new, the stamp having landed on the opener before the pair, and the student's own
+        // message is the one of the two the count is over
+        Assert.Equal(1, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
     });
 
     /// <summary>
@@ -546,7 +561,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 _reviewerId, _newestSessionId, Guid.Parse("00000000-0000-0000-0000-0000000000bf")));
 
         // Neither of which moved the stamp the conversation already had
-        Assert.Equal(0, (await GetConversationAsync(service, _newestSessionId)).UnreadTurnCount);
+        Assert.Equal(0, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
     });
 
     /// <summary>
@@ -564,7 +579,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             _reviewerId, [_newestSessionId, _oldestSessionId, missingId, _newestSessionId], read: true);
 
         // Both real ones settled, rather than the missing id refusing the whole set
-        Assert.Equal(0, (await GetConversationAsync(service, _newestSessionId)).UnreadTurnCount);
+        Assert.Equal(0, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
         Assert.NotNull((await GetConversationAsync(service, _oldestSessionId)).ReadAt);
 
         // Put the set back
@@ -573,9 +588,9 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // The newest conversation as it stands after the set was put back
         var newest = await GetConversationAsync(service, _newestSessionId);
 
-        // Which leaves no stamp on either, so every turn is new again
+        // Which leaves no stamp on either, so every message is new again
         Assert.Null(newest.ReadAt);
-        Assert.Equal(3, newest.UnreadTurnCount);
+        Assert.Equal(1, newest.UnreadStudentMessageCount);
         Assert.Null((await GetConversationAsync(service, _oldestSessionId)).ReadAt);
     });
 
@@ -675,8 +690,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
     /// <summary>
     /// A queue row reports what the conversation holds: the student who held it, their most recent message rather
-    /// than the examiner's or an earlier one of their own, how many turns it ran to, what has been written about
-    /// it, and which of the two things a student can leave behind it carries.
+    /// than the examiner's or an earlier one of their own, how many of their messages it holds, what has been
+    /// written about it, and which of the two things a student can leave behind it carries.
     /// </summary>
     [Fact]
     public Task A_queue_row_reports_what_the_conversation_holds() => RunTestAsync(async service =>
@@ -705,8 +720,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Reads what the student last said, not the examiner's reply nor the message they opened with
         Assert.Equal("and here is my fix", row.LastStudentMessage);
 
-        // Counts every turn in it
-        Assert.Equal(4, row.TurnCount);
+        // Counts what the student has said in it
+        Assert.Equal(2, row.StudentMessageCount);
 
         // Carries the note
         Assert.Equal(1, row.NoteCount);

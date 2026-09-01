@@ -223,11 +223,11 @@ const SCRIPTED_REPLIES = [
   'Good. Now the other direction: what would have to be true for this to fail?',
 ]
 
-/** What one entry is held to, standing in for the competition's own setup. */
+/** The caps every defense here is held to, standing in for the deployment's own setup. */
 export const LIMITS: DefenseLimits = {
   maxCandidateChars: 4000,
   maxFeedbackCommentChars: 1000,
-  maxTurnsPerSession: 20,
+  maxMessagesPerDefense: 20,
 }
 
 /**

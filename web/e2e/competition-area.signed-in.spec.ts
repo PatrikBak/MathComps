@@ -1272,7 +1272,7 @@ test.describe('the competition area', () => {
     })
   })
 
-  test('counts the conversation down from its first turn inside a competition', async ({
+  test('counts the conversation down from its first message inside a competition', async ({
     page,
   }) => {
     // A student forty minutes into a two-hour clock
@@ -1285,16 +1285,16 @@ test.describe('the competition area', () => {
     await page.getByRole('button', { name: areaCopy.startDefense }).first().click()
 
     // The room the conversation has, said before a word of it is spent: a clock pushes a student to spend
-    // turns fast, and nothing undoes a conversation spent that way
-    await expect(page.getByText(`0/${LIMITS.maxTurnsPerSession}`, { exact: true })).toBeVisible({
+    // messages fast, and nothing undoes a conversation spent that way
+    await expect(page.getByText(`0/${LIMITS.maxMessagesPerDefense}`, { exact: true })).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // One turn spent
+    // One message spent
     await sendTurn(page, 'The bound follows from the pigeonhole on the residues')
 
     // And the count moves with it
-    await expect(page.getByText(`1/${LIMITS.maxTurnsPerSession}`, { exact: true })).toBeVisible({
+    await expect(page.getByText(`1/${LIMITS.maxMessagesPerDefense}`, { exact: true })).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
   })

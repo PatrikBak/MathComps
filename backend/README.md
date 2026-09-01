@@ -423,10 +423,10 @@ overrides and only needs the keys it changes.
 an image layer, and a mount that goes missing leaves the API on the base `appsettings.json`:
 
 - `src/MathComps.Api/appsettings.{Env}.json` → `appsettings.json` (`Cors`, `DefenseLimits`, `Examiner:UseFake`, …).
-  `DefenseLimits` holds what bounds the defense feature: a daily spend ceiling in dollars and a turn cap, both
-  reckoned **per user**. There is no aggregate ceiling, so they bound one account, not the day's total. The turn cap
-  and the two length caps ride to the browser on every session read, so once the API has restarted on the new value,
-  the UI follows on the next page load with no frontend deploy.
+  `DefenseLimits` holds what bounds the defense feature: a daily spend ceiling in dollars, reckoned **per user**,
+  and a message cap on one conversation. See [What the defense ceiling is for](#what-the-defense-ceiling-is-for)
+  for what it does and does not reach. The cap and the two length caps ride to the browser on every session read,
+  so once the API has restarted on the new value, the UI follows on the next page load with no frontend deploy.
 - `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models).
   Config binds arrays by index and merges rather than replaces, so restate a `FallbackModels` chain in full when
   overriding one.
@@ -436,6 +436,12 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
 - **First rollout:** create the files (`echo '{}' > …`) **before** the `up -d` that adds the mounts, else
   Docker turns each missing source into an empty directory. They're gitignored, so `git pull` won't bring them.
 - **Locally:** `ASPNETCORE_ENVIRONMENT=Production dotnet run` picks them up too.
+
+#### What the defense ceiling is for
+
+It guards against an honest user running away with the bill. It bounds one account, and sign-up is free, so a determined user opens another.
+
+A defense of a problem whose round the student holds a `HostedEntry` into runs past it entirely. The exemption reads only that the entry row exists, so it outlasts the clock the entry was sat under, and the practice group hands its entry out again and again. Those turns write `defense_spends` rows with `counts_against_ceiling = false`, which is what to sum if it ever starts to matter.
 
 #### What `deploy.sh` does around compose
 

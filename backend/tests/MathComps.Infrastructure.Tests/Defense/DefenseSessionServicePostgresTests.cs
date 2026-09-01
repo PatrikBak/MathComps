@@ -21,8 +21,8 @@ namespace MathComps.Infrastructure.Tests.Defense;
 /// (no live LLM): the conversation flow (start, continue, list, delete), that what the student has said about a
 /// conversation comes back with it, that each turn writes an independent spend row that outlives the session, that a
 /// turn records every draft it went through and drops them when the turn is rewound past, ownership isolation, the
-/// guardrails (message length, turn cap, per-user spend ceiling), and that a turn the client cancels still records the
-/// cost its calls billed so aborting can't dodge the ceiling.
+/// guardrails (message length, the student's message cap, per-user spend ceiling), and that a turn the client
+/// cancels still records the cost its calls billed so aborting can't dodge the ceiling.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture)
@@ -144,7 +144,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             limits.MaxHandoutContentIdChars = 30;
             limits.MaxEnvironmentIdChars = 200;
             limits.MaxFeedbackCommentChars = 50;
-            limits.MaxTurnsPerSession = 2;
+            limits.MaxMessagesPerDefense = 2;
             limits.DailySpendCeilingPerUser = 1.00m;
         });
 
@@ -552,7 +552,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // handing them over in the wrong order would otherwise sail past.
         Assert.Equal(100, listing.Limits.MaxCandidateChars);
         Assert.Equal(50, listing.Limits.MaxFeedbackCommentChars);
-        Assert.Equal(2, listing.Limits.MaxTurnsPerSession);
+        Assert.Equal(2, listing.Limits.MaxMessagesPerDefense);
     });
 
     /// <summary>
@@ -606,8 +606,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // The owner's second conversation, about a hosted problem whose round is still under embargo
         var competition = await service.StartAsync(
             _ownerId,
-            new DefenseSessionStart(
-                new StartDefenseRequest(new ProblemTarget(_problemId), "my defense"), Language.EN));
+            ProblemRequest(_problemId, "my defense"));
 
         // Listing the owner's conversations comes back with both, the competition one first
         var sessions = await service.ListAllAsync(_ownerId, Language.EN);
@@ -755,8 +754,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     {
         // Argue a problem the site hosts, which the seeded entry lets the owner do
         var session = await service.StartAsync(
-            _ownerId, new DefenseSessionStart(
-                new StartDefenseRequest(new ProblemTarget(_problemId), "my defense"), Language.EN));
+            _ownerId, ProblemRequest(_problemId, "my defense"));
 
         // The rewind is refused
         await Assert.ThrowsAsync<DefenseGradedSessionImmutableException>(
@@ -781,8 +779,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     {
         // Argue the graded problem while its round still belongs to the group
         var session = await service.StartAsync(
-            _ownerId, new DefenseSessionStart(
-                new StartDefenseRequest(new ProblemTarget(_problemId), "my defense"), Language.EN));
+            _ownerId, ProblemRequest(_problemId, "my defense"));
 
         // Then take the round out of the group, the way re-declaring a manifest that no longer names it does
         await QueryAsync(async context =>
@@ -815,8 +812,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     {
         // Argue a problem set in the round whose group never closes
         var session = await service.StartAsync(
-            _ownerId, new DefenseSessionStart(
-                new StartDefenseRequest(new ProblemTarget(_practiceProblemId), "my defense"), Language.EN));
+            _ownerId, ProblemRequest(_practiceProblemId, "my defense"));
 
         // The listing reports the conversation as nobody's to grade, so the surface offers the controls at all
         var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
@@ -880,8 +876,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // The other user never entered
         await Assert.ThrowsAsync<HostedEntryRequiredException>(
             () => service.StartAsync(
-                _otherId, new DefenseSessionStart(
-                    new StartDefenseRequest(new ProblemTarget(_problemId), "let me in"), Language.EN))));
+                _otherId, ProblemRequest(_problemId, "let me in"))));
 
     /// <summary>
     /// A session belonging to another user is treated as absent on both continue and delete.
@@ -949,7 +944,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Open a session with the student's first message
         var session = await service.StartAsync(_ownerId, Request("prob-1", "first"));
 
-        // Continue it to the two-student-turn cap: opener, student, examiner, student, examiner
+        // Continue it to the two-message cap: opener, student, examiner, student, examiner
         await service.ContinueAsync(_ownerId, session.Id, "second");
 
         // Rewind to the first examiner reply, dropping the second student turn and its reply
@@ -1140,19 +1135,19 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// A continue past the student-turn cap is refused.
+    /// A continue past the student-message cap is refused, the cap here being the configured two.
     /// </summary>
     [Fact]
-    public Task Continue_past_the_turn_cap_is_refused() => RunTestAsync(async service =>
+    public Task Continue_past_the_message_cap_is_refused() => RunTestAsync(async service =>
     {
-        // Start the session — the first student turn
+        // Start the session — the first student message
         var session = await service.StartAsync(_ownerId, Request("prob-1", "first"));
 
         // Continue once more, reaching the cap of two
         await service.ContinueAsync(_ownerId, session.Id, "second");
 
-        // A third student turn is over the cap
-        await Assert.ThrowsAsync<DefenseTurnLimitException>(
+        // A third student message is over the cap
+        await Assert.ThrowsAsync<DefenseMessageLimitException>(
             () => service.ContinueAsync(_ownerId, session.Id, "third"));
     });
 
@@ -1164,9 +1159,56 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     public Task Over_spend_ceiling_is_refused() => RunTestAsync(async service =>
     {
         // Seed spend that meets the ceiling, unattached to any session
+        await SeedSpendAtCeilingAsync();
+
+        // Starting a turn is refused
+        await Assert.ThrowsAsync<DefenseSpendLimitException>(
+            () => service.StartAsync(_ownerId, Request("prob-1", "my defense")));
+
+        // And refused early enough that no conversation was created
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+    });
+
+    /// <summary>
+    /// A student who holds an entry into the round runs past the ceiling: the conversation opens and carries on
+    /// with the day's allowance already spent. The turn's cost is still recorded, marked as outside the ceiling.
+    /// What changes is what the ceiling reaches, not what the ledger holds.
+    /// </summary>
+    [Fact]
+    public Task The_spend_ceiling_does_not_reach_a_competition_conversation() => RunTestAsync(async service =>
+    {
+        // Spend that meets the ceiling, the way a morning on handouts leaves it
+        await SeedSpendAtCeilingAsync();
+
+        // The competition conversation opens all the same
+        var session = await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
+
+        // And carries on, which is the turn a student mid-entry would otherwise lose
+        await service.ContinueAsync(_ownerId, session.Id, "second");
+
+        // Both turns billed on top of the seeded row
+        Assert.Equal(
+            1.00m + (2 * TurnCost),
+            await QueryValueAsync(context => context.DefenseSpends.SumAsync(spend => spend.Cost)));
+
+        // But marked as outside the ceiling, so neither is weighed against it
+        Assert.Equal(
+            2,
+            await QueryValueAsync(context => context.DefenseSpends
+                .CountAsync(spend => !spend.CountsAgainstCeiling)));
+    });
+
+    /// <summary>
+    /// A row already marked as outside the ceiling is not summed into it later, so an exempt morning cannot lock
+    /// a student out of their handout practice that afternoon.
+    /// </summary>
+    [Fact]
+    public Task A_competitions_spend_is_not_weighed_against_a_later_handout() => RunTestAsync(async service =>
+    {
+        // Seed spend from a competition turn that meets the ceiling on its own
         await QueryAsync(async context =>
         {
-            // A spend row that meets the ceiling
+            // A row the ceiling never reached
             context.DefenseSpends.Add(new DefenseSpend
             {
                 UserId = _ownerId,
@@ -1177,6 +1219,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 CachedPromptTokens = 0,
                 DurationMs = 0,
                 Revisions = 0,
+                CountsAgainstCeiling = false,
                 CreatedAt = DateTimeOffset.UtcNow,
             });
 
@@ -1184,12 +1227,67 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             await context.SaveChangesAsync();
         });
 
-        // Starting a turn is refused
-        await Assert.ThrowsAsync<DefenseSpendLimitException>(
-            () => service.StartAsync(_ownerId, Request("prob-1", "my defense")));
+        // The student's handout practice goes ahead all the same
+        var session = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
 
-        // And refused early enough that no conversation was created
+        // With the conversation written down under the id that came back
+        Assert.Single(await QueryValueAsync(context => context.DefenseSessions
+            .Where(candidate => candidate.Id == session.Id)
+            .ToListAsync()));
+    });
+
+    /// <summary>
+    /// The exemption is bought with an entry, not with the problem being one a group set. A group's problems go
+    /// public the moment it closes, so a reader who never sat it is held to the ceiling like anybody else.
+    /// Otherwise every past competition would be an unmetered examiner for anyone who signs up.
+    /// </summary>
+    [Fact]
+    public Task The_spend_ceiling_reaches_a_competition_problem_nobody_entered() => RunTestAsync(async service =>
+    {
+        // Lift the round's embargo, the way its group closing does, so the problem is open to everybody
+        await QueryAsync(async context =>
+        {
+            // The round as it stands
+            var round = await context.Rounds.SingleAsync(candidate => candidate.Id == _roundId);
+
+            // Its problems public, while the group that set them still owns it
+            round.VisibleSince = DateTimeOffset.UtcNow.AddDays(-1);
+
+            // Written down
+            await context.SaveChangesAsync();
+        });
+
+        // The other user, who never entered, is at the ceiling
+        await SeedSpendAtCeilingAsync(_otherId);
+
+        // And is refused, the open problem notwithstanding
+        await Assert.ThrowsAsync<DefenseSpendLimitException>(
+            () => service.StartAsync(_otherId, ProblemRequest(_problemId, "my defense")));
+
+        // Nothing was written for the refused start
         Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+    });
+
+    /// <summary>
+    /// The practice round's entry is an entry like any other, so a conversation about its problem runs past the
+    /// ceiling too. Only the per-conversation message cap still holds it, which is the trade: a practice group
+    /// hands its entry out again and again.
+    /// </summary>
+    [Fact]
+    public Task The_spend_ceiling_does_not_reach_a_practice_conversation() => RunTestAsync(async service =>
+    {
+        // Spend that meets the ceiling
+        await SeedSpendAtCeilingAsync();
+
+        // The practice conversation opens regardless
+        var session = await service.StartAsync(_ownerId, ProblemRequest(_practiceProblemId, "my defense"));
+
+        // And carries on
+        await service.ContinueAsync(_ownerId, session.Id, "second");
+
+        // Both of the student's messages are there
+        Assert.Equal(2, await QueryValueAsync(context => context.DefenseTurns
+            .CountAsync(turn => turn.SessionId == session.Id && turn.Role == TranscriptRole.Candidate)));
     });
 
     /// <summary>
@@ -1213,6 +1311,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 CachedPromptTokens = 0,
                 DurationMs = 0,
                 Revisions = 0,
+                CountsAgainstCeiling = true,
                 CreatedAt = new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero) - TimeSpan.FromSeconds(1),
             });
 
@@ -1250,6 +1349,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 CachedPromptTokens = 0,
                 DurationMs = 0,
                 Revisions = 0,
+                CountsAgainstCeiling = true,
                 CreatedAt = DateTimeOffset.UtcNow,
             });
 
@@ -1424,8 +1524,8 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     }
 
     /// <summary>
-    /// An examiner that runs up the standard cancel cost, cancels the request mid-turn, then throws the cancellation —
-    /// the shape a client abort takes once its calls have run.
+    /// An examiner that runs up the standard cancel cost, cancels the request mid-turn, then throws the
+    /// cancellation — the shape a client abort takes once its calls have run.
     /// </summary>
     /// <returns>The cancelling examiner.</returns>
     private CancellingExaminer CancellingAfterCost() =>
@@ -1469,6 +1569,41 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         string environmentId, string content, string handoutContentId = "handout-1") =>
         new(new StartDefenseRequest(new HandoutEnvironmentTarget(handoutContentId, environmentId), content),
             Language.EN);
+
+    /// <summary>
+    /// Builds a session start against one of the seeded competition problems.
+    /// </summary>
+    /// <param name="problemId">The problem being argued.</param>
+    /// <param name="content">The student's first message.</param>
+    /// <returns>The session start.</returns>
+    private static DefenseSessionStart ProblemRequest(Guid problemId, string content) =>
+        new(new StartDefenseRequest(new ProblemTarget(problemId), content), Language.EN);
+
+    /// <summary>
+    /// Puts one user's spend for the day exactly on the configured ceiling, attached to no conversation.
+    /// </summary>
+    /// <param name="userId">Whose spend to seed; the owner's by default.</param>
+    /// <returns>A task that completes once the row is written.</returns>
+    private Task SeedSpendAtCeilingAsync(Guid? userId = null) => QueryAsync(async context =>
+    {
+        // A spend row that meets the ceiling
+        context.DefenseSpends.Add(new DefenseSpend
+        {
+            UserId = userId ?? _ownerId,
+            Cost = 1.00m,
+            PromptTokens = 0,
+            CompletionTokens = 0,
+            ReasoningTokens = 0,
+            CachedPromptTokens = 0,
+            DurationMs = 0,
+            Revisions = 0,
+            CountsAgainstCeiling = true,
+            CreatedAt = DateTimeOffset.UtcNow,
+        });
+
+        // Commit the seeded spend
+        await context.SaveChangesAsync();
+    });
 
     /// <summary>
     /// Builds a report against one of a conversation's replies, as the feedback service would write it.

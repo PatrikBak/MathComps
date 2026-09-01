@@ -198,14 +198,14 @@ function DefenseConversationForTarget({
   // settles: a turn sent before it would open a second defense beside the one being continued.
   const canCompose = opening.kind !== 'named' || initialResumeSettled
 
-  // How many more replies the conversation has room for, or null while the caps are unknown. A reply still in
+  // How many more messages the conversation has room for, or null while the caps are unknown. One still in
   // flight counts against it: it is written the moment it's sent, whatever the examiner then makes of it
-  const repliesLeft =
+  const messagesLeft =
     limits === null
       ? null
-      : limits.maxTurnsPerSession - shownTurns.filter((turn) => turn.role === 'candidate').length
+      : limits.maxMessagesPerDefense - shownTurns.filter((turn) => turn.role === 'candidate').length
 
-  // Where the caps a turn is held to stand, the read's own failure included
+  // Where the caps a message is held to stand, the read's own failure included
   const capsStatus = resolveCapsStatus({ limits, isError: sessionsFailed })
 
   // Whether a fresh defense would have anything to be argued against
@@ -352,7 +352,7 @@ function DefenseConversationForTarget({
             consentStatus: consent.status,
             capsStatus,
             isThinking,
-            repliesLeft,
+            messagesLeft,
             competition: competition === null ? null : { isGraded: competition.isGraded },
           })}
           draft={turn.draft}
@@ -362,7 +362,7 @@ function DefenseConversationForTarget({
           editorRef={turn.editorRef}
           isThinking={isThinking}
           maxCharacters={limits?.maxCandidateChars ?? null}
-          maxReplies={limits?.maxTurnsPerSession ?? null}
+          maxMessages={limits?.maxMessagesPerDefense ?? null}
           onAcceptConsent={consent.accept}
           isAcceptingConsent={consent.isAccepting}
           onRetryConsent={consent.retry}

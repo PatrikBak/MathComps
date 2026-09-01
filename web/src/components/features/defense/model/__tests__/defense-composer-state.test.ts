@@ -16,7 +16,7 @@ describe('resolveComposerState', () => {
     consentStatus: 'given',
     capsStatus: 'known',
     isThinking: false,
-    repliesLeft: 12,
+    messagesLeft: 12,
     competition: null,
   }
 
@@ -77,8 +77,8 @@ describe('resolveComposerState', () => {
   })
 
   it('admits it could not read the acknowledgement ahead of saying the conversation is spent', () => {
-    // The turn count is beside the point while nothing can be written at all
-    expect(resolveComposerState({ ...READY, consentStatus: 'unknown', repliesLeft: 0 })).toEqual({
+    // The message count is beside the point while nothing can be written at all
+    expect(resolveComposerState({ ...READY, consentStatus: 'unknown', messagesLeft: 0 })).toEqual({
       kind: 'consentUnknown',
     })
   })
@@ -91,14 +91,14 @@ describe('resolveComposerState', () => {
         ...READY,
         isSignedIn: false,
         consentStatus: 'missing',
-        repliesLeft: 0,
+        messagesLeft: 0,
       })
     ).toEqual({ kind: 'signInRequired' })
   })
 
-  it('closes a conversation that has spent every turn it was given', () => {
+  it('closes a conversation that has spent every message it was given', () => {
     // Nothing left to write into, and saying so beats an editor whose send would be refused
-    expect(resolveComposerState({ ...READY, repliesLeft: 0 })).toEqual({
+    expect(resolveComposerState({ ...READY, messagesLeft: 0 })).toEqual({
       kind: 'full',
       isGraded: false,
     })
@@ -107,52 +107,52 @@ describe('resolveComposerState', () => {
   it('carries the grading through to a spent conversation', () => {
     // The sentence the composer shows there names a different way on, because grading takes rewind away
     expect(
-      resolveComposerState({ ...READY, repliesLeft: 0, competition: { isGraded: true } })
+      resolveComposerState({ ...READY, messagesLeft: 0, competition: { isGraded: true } })
     ).toEqual({
       kind: 'full',
       isGraded: true,
     })
   })
 
-  it('stays open on the last turn while its reply is still coming', () => {
+  it('stays open on the last message while its reply is still coming', () => {
     // Closing here would take the stop button away mid-flight, from the one turn most likely to want it
-    expect(resolveComposerState({ ...READY, repliesLeft: 0, isThinking: true })).toEqual({
+    expect(resolveComposerState({ ...READY, messagesLeft: 0, isThinking: true })).toEqual({
       kind: 'open',
-      repliesLeft: 0,
+      messagesLeft: 0,
     })
   })
 
-  it('carries the full count through on a competition very first turn', () => {
-    // A competition's clock pushes a student to spend turns fast, so the count stands before the first
-    // turn is spent
+  it('carries the full count through on a competition very first message', () => {
+    // A competition's clock pushes a student to spend messages fast, so the count stands before the first
+    // message is spent
     expect(
-      resolveComposerState({ ...READY, repliesLeft: 30, competition: { isGraded: false } })
+      resolveComposerState({ ...READY, messagesLeft: 30, competition: { isGraded: false } })
     ).toEqual({
       kind: 'open',
-      repliesLeft: 30,
+      messagesLeft: 30,
     })
   })
 
   it('holds the count back outside a competition until the wall is close', () => {
-    // Running out costs nothing here, so a count from the first turn only makes a reader ration
+    // Running out costs nothing here, so a count from the first message only makes a reader ration
     // questions they should be asking
-    expect(resolveComposerState({ ...READY, repliesLeft: 30 })).toEqual({
+    expect(resolveComposerState({ ...READY, messagesLeft: 30 })).toEqual({
       kind: 'open',
-      repliesLeft: null,
+      messagesLeft: null,
     })
   })
 
   it('says the count once the wall is close outside a competition', () => {
     // Cheap as it is, the wall still arrives without warning otherwise
-    expect(resolveComposerState({ ...READY, repliesLeft: 5 })).toEqual({
+    expect(resolveComposerState({ ...READY, messagesLeft: 5 })).toEqual({
       kind: 'open',
-      repliesLeft: 5,
+      messagesLeft: 5,
     })
   })
 
-  it('says so when the caps a turn is held to could not be read', () => {
-    // A turn written against no cap at all is a turn the server is free to refuse
-    expect(resolveComposerState({ ...READY, capsStatus: 'unknown', repliesLeft: null })).toEqual({
+  it('says so when the caps a message is held to could not be read', () => {
+    // A message written against no cap at all is one the server is free to refuse
+    expect(resolveComposerState({ ...READY, capsStatus: 'unknown', messagesLeft: null })).toEqual({
       kind: 'capsUnknown',
     })
   })
@@ -163,16 +163,16 @@ describe('resolveComposerState', () => {
         ...READY,
         consentStatus: 'missing',
         capsStatus: 'unknown',
-        repliesLeft: null,
+        messagesLeft: null,
       })
     ).toEqual({ kind: 'consentRequired' })
   })
 
   it('opens without saying how much room is left when nothing knows the caps', () => {
     // The warning is a number, so a composer with no number to show simply does not show one
-    expect(resolveComposerState({ ...READY, capsStatus: 'loading', repliesLeft: null })).toEqual({
+    expect(resolveComposerState({ ...READY, capsStatus: 'loading', messagesLeft: null })).toEqual({
       kind: 'open',
-      repliesLeft: null,
+      messagesLeft: null,
     })
   })
 })
@@ -210,7 +210,11 @@ describe('resolveConsentStatus', () => {
 
 describe('resolveCapsStatus', () => {
   /** The caps a defense here is held to. */
-  const LIMITS = { maxCandidateChars: 4000, maxFeedbackCommentChars: 2000, maxTurnsPerSession: 30 }
+  const LIMITS = {
+    maxCandidateChars: 4000,
+    maxFeedbackCommentChars: 2000,
+    maxMessagesPerDefense: 50,
+  }
 
   it('reads the caps off the answer that carries them', () => {
     expect(resolveCapsStatus({ limits: LIMITS, isError: false })).toBe('known')

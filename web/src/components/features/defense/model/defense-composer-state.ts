@@ -104,7 +104,7 @@ type ComposerConsentUnknown = {
 }
 
 /**
- * What a turn here is held to could not be read.
+ * What a message here is held to could not be read.
  */
 type ComposerCapsUnknown = {
   /** The discriminant. */
@@ -112,7 +112,7 @@ type ComposerCapsUnknown = {
 }
 
 /**
- * The conversation has spent every turn it was given.
+ * The conversation has spent every message it was given.
  */
 type ComposerFull = {
   /** The discriminant. */
@@ -125,25 +125,25 @@ type ComposerFull = {
 }
 
 /**
- * The conversation is open and the next turn can be written.
+ * The conversation is open and the next message can be written.
  */
 type ComposerOpen = {
   /** The discriminant. */
   kind: 'open'
-  /** How many turns are left, or null when that is unknown or not worth saying yet. */
-  repliesLeft: number | null
+  /** How many messages are left, or null when that is unknown or not worth saying yet. */
+  messagesLeft: number | null
 }
 
 /**
- * How few replies are left before running low is worth saying out loud. Outside a competition a count
- * carried from the first turn would only make a reader ration questions they should be asking.
+ * How few messages are left before running low is worth saying out loud. Outside a competition a count
+ * carried from the first message would only make a reader ration questions they should be asking.
  */
-export const REPLIES_LEFT_TO_WARN_AT = 5
+export const MESSAGES_LEFT_TO_WARN_AT = 5
 
 /**
- * How few replies are left before running low reads as the wall itself.
+ * How few messages are left before running low reads as the wall itself.
  */
-export const REPLIES_LEFT_TO_ALARM_AT = 1
+export const MESSAGES_LEFT_TO_ALARM_AT = 1
 
 /**
  * What the composer area currently is: a wait, a gate, a spent conversation, or a live editor.
@@ -179,10 +179,10 @@ export type DefenseComposerInput = {
   consentStatus: MathildaConsentStatus
   /** Whether a reply is in flight. */
   isThinking: boolean
-  /** Where the caps a turn here is held to stand. */
+  /** Where the caps a message here is held to stand. */
   capsStatus: DefenseCapsStatus
-  /** How many turns the conversation has left, or null while the caps are not known. */
-  repliesLeft: number | null
+  /** How many messages the conversation has left, or null while the caps are not known. */
+  messagesLeft: number | null
   /** The competition run it is being argued inside, or null outside one. */
   competition: ComposerCompetitionRun | null
 }
@@ -228,9 +228,9 @@ export function resolveComposerState(input: DefenseComposerInput): DefenseCompos
       return assertNever(input.consentStatus)
   }
 
-  // Where the caps a turn is held to stand
+  // Where the caps a message is held to stand
   switch (input.capsStatus) {
-    // The read that carries them failed with nothing behind it, so a turn has nothing to be held to
+    // The read that carries them failed with nothing behind it, so a message has nothing to be held to
     case 'unknown':
       return { kind: 'capsUnknown' }
 
@@ -244,18 +244,18 @@ export function resolveComposerState(input: DefenseComposerInput): DefenseCompos
       return assertNever(input.capsStatus)
   }
 
-  // Every turn spent, though a reply still coming is allowed to land
-  if (input.repliesLeft !== null && input.repliesLeft <= 0 && !input.isThinking) {
+  // Every message spent, though a reply still coming is allowed to land
+  if (input.messagesLeft !== null && input.messagesLeft <= 0 && !input.isThinking) {
     return { kind: 'full', isGraded: input.competition !== null && input.competition.isGraded }
   }
 
-  // A competition says the room left from the first turn, since its clock pushes a student to spend
-  // turns fast and nothing undoes a conversation spent that way. Elsewhere the count waits until the
+  // A competition says the room left from the first message, since its clock pushes a student to spend
+  // messages fast and nothing undoes a conversation spent that way. Elsewhere the count waits until the
   // wall is close
   const isRoomLeftWorthSaying =
-    input.repliesLeft !== null &&
-    (input.competition !== null || input.repliesLeft <= REPLIES_LEFT_TO_WARN_AT)
+    input.messagesLeft !== null &&
+    (input.competition !== null || input.messagesLeft <= MESSAGES_LEFT_TO_WARN_AT)
 
-  // Open for the next turn, carrying the count only where it is worth saying
-  return { kind: 'open', repliesLeft: isRoomLeftWorthSaying ? input.repliesLeft : null }
+  // Open for the next message, carrying the count only where it is worth saying
+  return { kind: 'open', messagesLeft: isRoomLeftWorthSaying ? input.messagesLeft : null }
 }

@@ -16,10 +16,10 @@ import type { DefenseReviewConversation } from '../model/defense-review-types'
 function toUnreadConversationIds(
   conversations: readonly DefenseReviewConversation[]
 ): ReadonlySet<string> {
-  // Anything carrying a turn nobody has read
+  // Anything carrying something nobody has read
   return new Set(
     conversations
-      .filter((conversation) => conversation.unreadTurnCount > 0)
+      .filter((conversation) => conversation.isUnread)
       .map((conversation) => conversation.id)
   )
 }
