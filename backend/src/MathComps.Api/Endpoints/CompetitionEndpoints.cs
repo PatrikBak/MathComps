@@ -81,8 +81,8 @@ public static class CompetitionEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Take the entry: the clock starts, and the problems it bought come back with it
-        app.MapPost($"{CompetitionsPath}/{{roundId:guid}}/entry", async (
-            Guid roundId,
+        app.MapPost($"{CompetitionsPath}/{{competitionSlug}}/entry", async (
+            string competitionSlug,
             HttpContext context,
             IUserManager userManager,
             IHostedCompetitionService competitionService) =>
@@ -91,7 +91,7 @@ public static class CompetitionEndpoints
             var userId = await userManager.RequireUserIdAsync(context);
 
             // Spend the entry by sitting it
-            var spent = await competitionService.EnterAsync(userId, roundId, context.RequestAborted);
+            var spent = await competitionService.EnterAsync(userId, competitionSlug, context.RequestAborted);
 
             // Return the entry and the problems it opens
             return Results.Ok(spent);
@@ -100,8 +100,8 @@ public static class CompetitionEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Give the entry up for the problems: no clock ever runs
-        app.MapPost($"{CompetitionsPath}/{{roundId:guid}}/forfeit", async (
-            Guid roundId,
+        app.MapPost($"{CompetitionsPath}/{{competitionSlug}}/forfeit", async (
+            string competitionSlug,
             HttpContext context,
             IUserManager userManager,
             IHostedCompetitionService competitionService) =>
@@ -110,7 +110,7 @@ public static class CompetitionEndpoints
             var userId = await userManager.RequireUserIdAsync(context);
 
             // Spend the entry by giving it up
-            var spent = await competitionService.ForfeitAsync(userId, roundId, context.RequestAborted);
+            var spent = await competitionService.ForfeitAsync(userId, competitionSlug, context.RequestAborted);
 
             // Return the entry and the problems it opens
             return Results.Ok(spent);
@@ -119,8 +119,8 @@ public static class CompetitionEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Close a running entry where the student says rather than where its clock does
-        app.MapPost($"{CompetitionsPath}/{{roundId:guid}}/finish", async (
-            Guid roundId,
+        app.MapPost($"{CompetitionsPath}/{{competitionSlug}}/finish", async (
+            string competitionSlug,
             HttpContext context,
             IUserManager userManager,
             IHostedCompetitionService competitionService) =>
@@ -129,7 +129,7 @@ public static class CompetitionEndpoints
             var userId = await userManager.RequireUserIdAsync(context);
 
             // Close the running entry
-            var entry = await competitionService.FinishAsync(userId, roundId, context.RequestAborted);
+            var entry = await competitionService.FinishAsync(userId, competitionSlug, context.RequestAborted);
 
             // Return the entry as it now stands
             return Results.Ok(entry);
@@ -138,8 +138,8 @@ public static class CompetitionEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // The problems an entry opens, with whatever the student has said about each
-        app.MapGet($"{CompetitionsPath}/{{roundId:guid}}/problems", async (
-            Guid roundId,
+        app.MapGet($"{CompetitionsPath}/{{competitionSlug}}/problems", async (
+            string competitionSlug,
             HttpContext context,
             IUserManager userManager,
             IHostedCompetitionService competitionService) =>
@@ -148,7 +148,7 @@ public static class CompetitionEndpoints
             var userId = await userManager.RequireUserIdAsync(context);
 
             // The problems the entry opens
-            var problems = await competitionService.GetProblemsAsync(userId, roundId, context.RequestAborted);
+            var problems = await competitionService.GetProblemsAsync(userId, competitionSlug, context.RequestAborted);
 
             // Return them
             return Results.Ok(problems);
@@ -157,8 +157,8 @@ public static class CompetitionEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Record what the student makes of their own solution to one of the set, replacing what they said before
-        app.MapPut($"{CompetitionsPath}/{{roundId:guid}}/problems/{{problemId:guid}}/assessment", async (
-            Guid roundId,
+        app.MapPut($"{CompetitionsPath}/{{competitionSlug}}/problems/{{problemId:guid}}/assessment", async (
+            string competitionSlug,
             Guid problemId,
             SetProblemSelfAssessmentRequest request,
             HttpContext context,
@@ -170,7 +170,7 @@ public static class CompetitionEndpoints
 
             // Record the claim
             await competitionService.SetSelfAssessmentAsync(
-                userId, roundId, problemId, request.Comment, context.RequestAborted);
+                userId, competitionSlug, problemId, request.Comment, context.RequestAborted);
 
             // Nothing to hand back: the claim is what the caller already holds
             return Results.NoContent();
@@ -179,8 +179,8 @@ public static class CompetitionEndpoints
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Take back what the student said about their own solution to one of the set
-        app.MapDelete($"{CompetitionsPath}/{{roundId:guid}}/problems/{{problemId:guid}}/assessment", async (
-            Guid roundId,
+        app.MapDelete($"{CompetitionsPath}/{{competitionSlug}}/problems/{{problemId:guid}}/assessment", async (
+            string competitionSlug,
             Guid problemId,
             HttpContext context,
             IUserManager userManager,
@@ -191,7 +191,7 @@ public static class CompetitionEndpoints
 
             // Drop the claim
             await competitionService.ClearSelfAssessmentAsync(
-                userId, roundId, problemId, context.RequestAborted);
+                userId, competitionSlug, problemId, context.RequestAborted);
 
             // Nothing stands against the problem now
             return Results.NoContent();

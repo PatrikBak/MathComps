@@ -242,7 +242,8 @@
     },
     "mc-practice": {
       "shortName": "Zkušební soutěž",
-      "fullName": "Zkušební soutěž"
+      "fullName": "Zkušební soutěž",
+      "urlSlug": "zkusebni"
     },
     "mc-elementary": {
       "shortName": "Základní",
@@ -250,15 +251,18 @@
     },
     "mc-elementary-1": {
       "shortName": "Září",
-      "fullName": "Září"
+      "fullName": "Září",
+      "urlSlug": "zakladni-1"
     },
     "mc-elementary-2": {
       "shortName": "Říjen",
-      "fullName": "Říjen"
+      "fullName": "Říjen",
+      "urlSlug": "zakladni-2"
     },
     "mc-elementary-3": {
       "shortName": "Listopad",
-      "fullName": "Listopad"
+      "fullName": "Listopad",
+      "urlSlug": "zakladni-3"
     },
     "mc-intermediate": {
       "shortName": "Střední",
@@ -266,15 +270,18 @@
     },
     "mc-intermediate-1": {
       "shortName": "Září",
-      "fullName": "Září"
+      "fullName": "Září",
+      "urlSlug": "stredni-1"
     },
     "mc-intermediate-2": {
       "shortName": "Říjen",
-      "fullName": "Říjen"
+      "fullName": "Říjen",
+      "urlSlug": "stredni-2"
     },
     "mc-intermediate-3": {
       "shortName": "Listopad",
-      "fullName": "Listopad"
+      "fullName": "Listopad",
+      "urlSlug": "stredni-3"
     },
     "mc-advanced": {
       "shortName": "Pokročilá",
@@ -282,15 +289,18 @@
     },
     "mc-advanced-1": {
       "shortName": "Září",
-      "fullName": "Září"
+      "fullName": "Září",
+      "urlSlug": "pokrocila-1"
     },
     "mc-advanced-2": {
       "shortName": "Říjen",
-      "fullName": "Říjen"
+      "fullName": "Říjen",
+      "urlSlug": "pokrocila-2"
     },
     "mc-advanced-3": {
       "shortName": "Listopad",
-      "fullName": "Listopad"
+      "fullName": "Listopad",
+      "urlSlug": "pokrocila-3"
     }
   },
   "seasonFormat": "{number}. ročník ({start}/{end})"

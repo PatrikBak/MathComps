@@ -176,7 +176,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task A_node_carrying_competitions_below_it_is_refused() => RunTestAsync(async service =>
     {
-        // A category, registered and named everywhere, with the group's own sittings below it
+        // A category, registered and labelled in every language, with the group's own sittings below it
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
             () => service.DeclareAsync(Manifest("mc-elementary-1", "mc-intermediate")));
 
@@ -877,7 +877,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
         // The student row.
         context.Users.Add(new User { Id = userId, ExternalId = $"ext-{userId:N}", Username = name });
 
-        // The last of the group's rounds, which the seeded ids make mc-advanced wherever a case names two.
+        // The last of the group's rounds, which the seeded ids make mc-advanced-1 wherever a case names two.
         var roundId = await context.Rounds
             .Where(round => round.HostedGroupId == groupId)
             .OrderBy(round => round.Id)

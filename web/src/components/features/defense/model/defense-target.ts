@@ -22,9 +22,7 @@ type HandoutDefenseTarget = {
 type CompetitionDefenseTarget = {
   /** The discriminant. */
   kind: 'competition'
-  /** The competition the problem is set in. */
-  competitionId: string
-  /** The problem's id within that competition. */
+  /** The problem's id. */
   problemId: string
   /** Whose entry it is being argued under, or null for a reader the program does not know. */
   readerKey: string | null
@@ -40,13 +38,13 @@ export type DefenseTarget = HandoutDefenseTarget | CompetitionDefenseTarget
  *
  * @param target - What the defense was held against.
  *
- * @returns The competition's id, or null for a conversation no competition set.
+ * @returns What addresses the competition, or null for a conversation no competition set.
  */
-export function competitionIdOf(target: NamedDefenseTarget): string | null {
+export function competitionSlugOf(target: NamedDefenseTarget): string | null {
   switch (target.kind) {
     // An archive problem names the competition it was set in
     case 'problem':
-      return target.competitionId
+      return target.competitionSlug
 
     // A handout environment belongs to no competition
     case 'handout':
@@ -157,7 +155,6 @@ export function defenseDraftStorageKey(target: DefenseTarget): string | null {
         DEFENSE_DRAFT_STORAGE_PREFIX,
         'competition',
         target.readerKey ?? 'anonymous',
-        target.competitionId,
         target.problemId,
       ].join(':')
 

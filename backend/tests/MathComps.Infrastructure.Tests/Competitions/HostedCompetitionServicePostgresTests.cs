@@ -46,7 +46,39 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     private readonly Guid _otherStudentId = Guid.CreateVersion7();
 
     /// <summary>
-    /// The round of the open group's harder category.
+    /// What addresses the open group's harder round, which is what every call about it is made under. English,
+    /// one of the names the taxonomy gives it, since the resolver takes any of them.
+    /// </summary>
+    private const string AdvancedSlug = "advanced-1-2026";
+
+    /// <summary>
+    /// What addresses the open group's easier round.
+    /// </summary>
+    private const string ElementarySlug = "elementary-1-2026";
+
+    /// <summary>
+    /// What addresses the round of the group that has not opened yet.
+    /// </summary>
+    private const string UpcomingSlug = "intermediate-1-2026";
+
+    /// <summary>
+    /// What addresses the practice round.
+    /// </summary>
+    private const string PracticeSlug = "practice-2026";
+
+    /// <summary>
+    /// What addresses the round whose embargo has passed, which ran a season before the open group's.
+    /// </summary>
+    private const string OpenedSlug = "advanced-1-2025";
+
+    /// <summary>
+    /// What addresses the round its group announced more problems than it holds, which ran two seasons before
+    /// the open group's.
+    /// </summary>
+    private const string UnfilledSlug = "elementary-1-2024";
+
+    /// <summary>
+    /// The round of the open group's harder category, which is what the rows are seeded and read back under.
     /// </summary>
     private readonly Guid _advancedRoundId = Guid.CreateVersion7();
 
@@ -112,7 +144,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Entering_starts_a_clock_and_opens_the_problems() => RunTestAsync(async service =>
     {
         // Take the entry
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // A sat entry, the kind that carries a clock
         var entry = Assert.IsType<SatEntryDto>(spent.Entry);
@@ -142,7 +174,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Forfeiting_opens_the_problems_without_a_clock() => RunTestAsync(async service =>
     {
         // Give the entry up
-        var spent = await service.ForfeitAsync(_studentId, _advancedRoundId);
+        var spent = await service.ForfeitAsync(_studentId, AdvancedSlug);
 
         // Which is its own kind of entry, with no clock to read
         Assert.IsType<ForfeitedEntryDto>(spent.Entry);
@@ -158,7 +190,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task An_upcoming_group_refuses_an_entry() => RunTestAsync(async service =>
         // Announced, and not open yet
         await Assert.ThrowsAsync<HostedGroupNotOpenException>(
-            () => service.EnterAsync(_studentId, _upcomingRoundId)));
+            () => service.EnterAsync(_studentId, UpcomingSlug)));
 
     /// <summary>
     /// Verifies that a group past its window refuses an entry. Its problems are already public by then, so an
@@ -168,7 +200,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_closed_group_refuses_an_entry() => RunTestAsync(async service =>
         // Over, and not taking entries any more
         await Assert.ThrowsAsync<HostedGroupNotOpenException>(
-            () => service.EnterAsync(_studentId, _openedRoundId)));
+            () => service.EnterAsync(_studentId, OpenedSlug)));
 
     /// <summary>
     /// Verifies that a competition short of the problems its group announced refuses an entry. A group goes on
@@ -181,7 +213,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     {
         // Open, and holding one problem where its group announced two
         await Assert.ThrowsAsync<HostedCompetitionNotReadyException>(
-            () => service.EnterAsync(_studentId, _unfilledRoundId));
+            () => service.EnterAsync(_studentId, UnfilledSlug));
 
         // Nor was an entry left behind by the attempt
         Assert.Equal(0, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
@@ -197,7 +229,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     {
         // Given up rather than sat, into the round holding one of its two problems
         await Assert.ThrowsAsync<HostedCompetitionNotReadyException>(
-            () => service.ForfeitAsync(_studentId, _unfilledRoundId));
+            () => service.ForfeitAsync(_studentId, UnfilledSlug));
 
         // Nor was an entry left behind by the attempt
         Assert.Equal(0, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
@@ -220,7 +252,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
 
         // And there is nothing to enter with
         await Assert.ThrowsAsync<HostedEntryProfileIncompleteException>(
-            () => service.EnterAsync(_studentId, _advancedRoundId));
+            () => service.EnterAsync(_studentId, AdvancedSlug));
 
         // Nor was an entry left behind by the attempt
         Assert.Equal(0, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
@@ -258,7 +290,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         Assert.True((await service.GetReadinessAsync(_studentId)).HasAnsweredGraduation);
 
         // And the entry goes through
-        await service.EnterAsync(_studentId, _advancedRoundId);
+        await service.EnterAsync(_studentId, AdvancedSlug);
 
         // Leaving the one entry behind
         Assert.Equal(1, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
@@ -274,8 +306,8 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     {
         // Two attempts at the same entry, neither waiting for the other
         var attempts = await Task.WhenAll(
-            Record.ExceptionAsync(() => service.EnterAsync(_studentId, _advancedRoundId)),
-            Record.ExceptionAsync(() => service.EnterAsync(_studentId, _advancedRoundId)));
+            Record.ExceptionAsync(() => service.EnterAsync(_studentId, AdvancedSlug)),
+            Record.ExceptionAsync(() => service.EnterAsync(_studentId, AdvancedSlug)));
 
         // One attempt took the entry
         Assert.Single(attempts, outcome => outcome is null);
@@ -307,7 +339,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
 
         // The request cannot be answered
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.EnterAsync(_studentId, _advancedRoundId));
+            () => service.EnterAsync(_studentId, AdvancedSlug));
 
         // And it cost the student nothing: no entry was written
         Assert.Equal(0, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
@@ -333,10 +365,10 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
 
         // The graded competition refuses them
         await Assert.ThrowsAsync<HostedEntryProfileIncompleteException>(
-            () => service.EnterAsync(_studentId, _advancedRoundId));
+            () => service.EnterAsync(_studentId, AdvancedSlug));
 
         // While the practice one takes them
-        await service.EnterAsync(_studentId, _practiceRoundId);
+        await service.EnterAsync(_studentId, PracticeSlug);
 
         // Leaving the one entry behind, which is the practice run
         Assert.Equal(1, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
@@ -386,8 +418,8 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     {
         // Two attempts at the practice group, neither waiting for the other
         await Task.WhenAll(
-            Record.ExceptionAsync(() => service.EnterAsync(_studentId, _practiceRoundId)),
-            Record.ExceptionAsync(() => service.EnterAsync(_studentId, _practiceRoundId)));
+            Record.ExceptionAsync(() => service.EnterAsync(_studentId, PracticeSlug)),
+            Record.ExceptionAsync(() => service.EnterAsync(_studentId, PracticeSlug)));
 
         // Leaving the student on exactly one run of it
         Assert.Equal(1, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
@@ -400,11 +432,11 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_second_entry_into_the_same_competition_is_refused() => RunTestAsync(async service =>
     {
         // Spend it
-        await service.EnterAsync(_studentId, _advancedRoundId);
+        await service.EnterAsync(_studentId, AdvancedSlug);
 
         // And there is nothing left to spend, even on the other way of spending it
         await Assert.ThrowsAsync<HostedEntryAlreadySpentException>(
-            () => service.ForfeitAsync(_studentId, _advancedRoundId));
+            () => service.ForfeitAsync(_studentId, AdvancedSlug));
     });
 
     /// <summary>
@@ -414,10 +446,10 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task The_practice_group_may_be_entered_again() => RunTestAsync(async service =>
     {
         // Sit it once
-        await service.EnterAsync(_studentId, _practiceRoundId);
+        await service.EnterAsync(_studentId, PracticeSlug);
 
         // And again, which anywhere else would be refused
-        var second = await service.EnterAsync(_studentId, _practiceRoundId);
+        var second = await service.EnterAsync(_studentId, PracticeSlug);
 
         // On the one row a student ever holds here, which the second run reset rather than added to
         Assert.Equal(
@@ -429,7 +461,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         var view = await service.GetViewAsync(_studentId);
 
         // The practice competition sitting in it
-        var practice = CompetitionIn(view, _practiceRoundId);
+        var practice = CompetitionIn(view, PracticeSlug);
 
         // Which reads the run they are on
         Assert.Equal(
@@ -446,13 +478,13 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Handing_in_closes_the_latest_entry() => RunTestAsync(async service =>
     {
         // An entry into the group that allows a second
-        await service.EnterAsync(_studentId, _practiceRoundId);
+        await service.EnterAsync(_studentId, PracticeSlug);
 
         // And that second one, which is the run they end up on
-        var second = await service.EnterAsync(_studentId, _practiceRoundId);
+        var second = await service.EnterAsync(_studentId, PracticeSlug);
 
         // Hand in
-        await service.FinishAsync(_studentId, _practiceRoundId);
+        await service.FinishAsync(_studentId, PracticeSlug);
 
         // The only entry carrying a hand-in stamp
         var closed = await QueryValueAsync(context => context.HostedEntries
@@ -495,19 +527,19 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Taking_the_practice_group_again_clears_the_run_before_it() => RunTestAsync(async service =>
     {
         // Sit it
-        await service.EnterAsync(_studentId, _practiceRoundId);
+        await service.EnterAsync(_studentId, PracticeSlug);
 
         // And hand it in
-        await service.FinishAsync(_studentId, _practiceRoundId);
+        await service.FinishAsync(_studentId, PracticeSlug);
 
         // Then start over
-        var again = await service.EnterAsync(_studentId, _practiceRoundId);
+        var again = await service.EnterAsync(_studentId, PracticeSlug);
 
         // Which is a clock running, not the one that was handed in
         Assert.Null(Assert.IsType<SatEntryDto>(again.Entry).FinishedAt);
 
         // And handing in is something they can do again, which a stale stamp would refuse
-        await service.FinishAsync(_studentId, _practiceRoundId);
+        await service.FinishAsync(_studentId, PracticeSlug);
     });
 
     /// <summary>
@@ -518,10 +550,10 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Sitting_the_practice_group_after_giving_it_up_starts_a_clock() => RunTestAsync(async service =>
     {
         // Give it up
-        await service.ForfeitAsync(_studentId, _practiceRoundId);
+        await service.ForfeitAsync(_studentId, PracticeSlug);
 
         // Then sit it
-        var sat = await service.EnterAsync(_studentId, _practiceRoundId);
+        var sat = await service.EnterAsync(_studentId, PracticeSlug);
 
         // Which is a clock running
         Assert.IsType<SatEntryDto>(sat.Entry);
@@ -541,10 +573,10 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Two_categories_of_one_group_may_both_be_entered() => RunTestAsync(async service =>
     {
         // One level
-        await service.EnterAsync(_studentId, _advancedRoundId);
+        await service.EnterAsync(_studentId, AdvancedSlug);
 
         // And the other, which nothing about the first stands in the way of
-        await service.EnterAsync(_studentId, _elementaryRoundId);
+        await service.EnterAsync(_studentId, ElementarySlug);
 
         // Both entries stand
         Assert.Equal(
@@ -562,7 +594,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         async service =>
             // Nothing spent, nothing to read
             await Assert.ThrowsAsync<HostedEntryRequiredException>(
-                () => service.GetProblemsAsync(_studentId, _advancedRoundId)));
+                () => service.GetProblemsAsync(_studentId, AdvancedSlug)));
 
     /// <summary>
     /// Verifies that an entry given up for the problems opens them as fully as one that was sat. The whole point
@@ -572,10 +604,10 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_forfeited_entry_opens_the_problems() => RunTestAsync(async service =>
     {
         // Give the entry up
-        await service.ForfeitAsync(_studentId, _advancedRoundId);
+        await service.ForfeitAsync(_studentId, AdvancedSlug);
 
         // And the problems read back like any other
-        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Which is the whole set
         Assert.Equal(2, problems.Count);
@@ -589,7 +621,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task An_opened_competitions_problems_need_no_entry() => RunTestAsync(async service =>
     {
         // Nobody has entered this one, and its problems open anyway
-        var problems = await service.GetProblemsAsync(_studentId, _openedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, OpenedSlug);
 
         // Which is the whole set
         Assert.Single(problems);
@@ -603,13 +635,13 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_running_clock_hands_back_no_solution() => RunTestAsync(async service =>
     {
         // Take the entry, which starts the clock
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // The answer it came back in carries the statements and nothing to check them against
         Assert.All(spent.Problems, problem => Assert.Null(problem.Solution));
 
         // Read the set again while the clock is still running
-        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Which holds nothing to check the statements against either
         Assert.All(problems, problem => Assert.Null(problem.Solution));
@@ -622,13 +654,13 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Handing_the_entry_in_opens_the_solutions() => RunTestAsync(async service =>
     {
         // Sit the entry
-        await service.EnterAsync(_studentId, _advancedRoundId);
+        await service.EnterAsync(_studentId, AdvancedSlug);
 
         // And close it
-        await service.FinishAsync(_studentId, _advancedRoundId);
+        await service.FinishAsync(_studentId, AdvancedSlug);
 
         // Read the set back
-        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Which now carries what the problems were measured against
         var solution = Assert.IsAssignableFrom<IReadOnlyDictionary<Language, string>>(problems[0].Solution);
@@ -649,7 +681,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Forfeiting_opens_the_solutions() => RunTestAsync(async service =>
     {
         // Give the entry up, which starts no clock
-        var spent = await service.ForfeitAsync(_studentId, _advancedRoundId);
+        var spent = await service.ForfeitAsync(_studentId, AdvancedSlug);
 
         // So the answer carries the solutions along with the statements
         Assert.All(spent.Problems, problem => Assert.NotNull(problem.Solution));
@@ -663,7 +695,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task An_opened_competitions_solutions_need_no_entry() => RunTestAsync(async service =>
     {
         // Nobody has entered this one, and its solutions open anyway
-        var problems = await service.GetProblemsAsync(_studentId, _openedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, OpenedSlug);
 
         // And there is no run of theirs a solution could spoil
         Assert.NotNull(problems[0].Solution);
@@ -678,19 +710,19 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_running_practice_clock_beats_the_public_problems() => RunTestAsync(async service =>
     {
         // Read the round before anything is entered
-        var beforehand = await service.GetProblemsAsync(_studentId, _practiceRoundId);
+        var beforehand = await service.GetProblemsAsync(_studentId, PracticeSlug);
 
         // Its problems are open to anybody, solution and all
         Assert.NotNull(beforehand[0].Solution);
 
         // Then sit the practice run, which starts a clock over that same public set
-        var spent = await service.EnterAsync(_studentId, _practiceRoundId);
+        var spent = await service.EnterAsync(_studentId, PracticeSlug);
 
         // And the solution goes away in the answer the entry came back in
         Assert.Null(spent.Problems[0].Solution);
 
         // As it does on every read while that clock runs
-        Assert.Null((await service.GetProblemsAsync(_studentId, _practiceRoundId))[0].Solution);
+        Assert.Null((await service.GetProblemsAsync(_studentId, PracticeSlug))[0].Solution);
     });
 
     /// <summary>
@@ -702,23 +734,23 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Taking_the_practice_group_again_closes_its_solutions() => RunTestAsync(async service =>
     {
         // Sit a run
-        await service.EnterAsync(_studentId, _practiceRoundId);
+        await service.EnterAsync(_studentId, PracticeSlug);
 
         // And close it, which opens the solutions
-        await service.FinishAsync(_studentId, _practiceRoundId);
+        await service.FinishAsync(_studentId, PracticeSlug);
 
         // And the set reads that solution back
-        Assert.NotNull((await service.GetProblemsAsync(_studentId, _practiceRoundId))[0].Solution);
+        Assert.NotNull((await service.GetProblemsAsync(_studentId, PracticeSlug))[0].Solution);
 
         // Then a second go at the same competition, which starts a fresh clock over the same problems
-        var again = await service.EnterAsync(_studentId, _practiceRoundId);
+        var again = await service.EnterAsync(_studentId, PracticeSlug);
 
         // The set it hands back holds nothing to measure them against
         Assert.All(again.Problems, problem => Assert.Null(problem.Solution));
 
         // And neither does reading it again
         Assert.All(
-            await service.GetProblemsAsync(_studentId, _practiceRoundId),
+            await service.GetProblemsAsync(_studentId, PracticeSlug),
             problem => Assert.Null(problem.Solution));
     });
 
@@ -739,21 +771,27 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
 
         // Which the read refuses to work around
         var thrown = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.GetProblemsAsync(_studentId, _openedRoundId));
+            () => service.GetProblemsAsync(_studentId, OpenedSlug));
 
         // Naming what the round is missing
         Assert.Contains("solution", thrown.Message, StringComparison.OrdinalIgnoreCase);
     });
 
     /// <summary>
-    /// Verifies that a round the site does not host answers as no competition at all, rather than leaking whether
-    /// an archive round exists under the id.
+    /// Verifies that a slug addressing no hosted round answers as no competition at all, rather than leaking
+    /// which part of it was wrong.
     /// </summary>
-    [Fact]
-    public Task A_round_the_site_does_not_host_is_no_competition() => RunTestAsync(async service =>
-        // An id that names nothing hosted
-        await Assert.ThrowsAsync<HostedCompetitionNotFoundException>(
-            () => service.GetProblemsAsync(_studentId, Guid.CreateVersion7())));
+    /// <param name="competitionSlug">What the caller addressed the competition by.</param>
+    [Theory]
+    [InlineData("advanced-1")]
+    [InlineData("advanced-1-x")]
+    [InlineData("nothing-is-called-this-2026")]
+    [InlineData("advanced-1-1999")]
+    public Task A_slug_addressing_no_hosted_round_is_no_competition(string competitionSlug) =>
+        RunTestAsync(async service =>
+            // Shaped wrong, naming a node nothing carries, or naming a season the site ran nothing in
+            await Assert.ThrowsAsync<HostedCompetitionNotFoundException>(
+                () => service.GetProblemsAsync(_studentId, competitionSlug)));
 
     /// <summary>
     /// Verifies that handing in closes a running entry, and that only a running one can be handed in.
@@ -763,20 +801,20 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     {
         // Nothing taken yet, so there is nothing to close
         await Assert.ThrowsAsync<HostedEntryNotRunningException>(
-            () => service.FinishAsync(_studentId, _advancedRoundId));
+            () => service.FinishAsync(_studentId, AdvancedSlug));
 
         // Take it
-        await service.EnterAsync(_studentId, _advancedRoundId);
+        await service.EnterAsync(_studentId, AdvancedSlug);
 
         // Then close it
-        var finished = await service.FinishAsync(_studentId, _advancedRoundId);
+        var finished = await service.FinishAsync(_studentId, AdvancedSlug);
 
         // Which stamps it
         Assert.NotNull(Assert.IsType<SatEntryDto>(finished).FinishedAt);
 
         // And a closed entry cannot close twice
         await Assert.ThrowsAsync<HostedEntryNotRunningException>(
-            () => service.FinishAsync(_studentId, _advancedRoundId));
+            () => service.FinishAsync(_studentId, AdvancedSlug));
     });
 
     /// <summary>
@@ -786,11 +824,11 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_forfeited_entry_cannot_be_handed_in() => RunTestAsync(async service =>
     {
         // Give it up
-        await service.ForfeitAsync(_studentId, _advancedRoundId);
+        await service.ForfeitAsync(_studentId, AdvancedSlug);
 
         // There is no clock on it to stop
         await Assert.ThrowsAsync<HostedEntryNotRunningException>(
-            () => service.FinishAsync(_studentId, _advancedRoundId));
+            () => service.FinishAsync(_studentId, AdvancedSlug));
     });
 
     /// <summary>
@@ -804,7 +842,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         Assert.False((await service.GetReadinessAsync(_studentId)).HasAcceptedRules);
 
         // The entry that carries the acceptance
-        await service.EnterAsync(_studentId, _advancedRoundId);
+        await service.EnterAsync(_studentId, AdvancedSlug);
 
         // When they accepted
         var acceptedAt = await QueryValueAsync(context => context.Users
@@ -816,7 +854,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         Assert.True((await service.GetReadinessAsync(_studentId)).HasAcceptedRules);
 
         // A second entry, into the other level
-        await service.EnterAsync(_studentId, _elementaryRoundId);
+        await service.EnterAsync(_studentId, ElementarySlug);
 
         // Which leaves the first acceptance standing, an acceptance being given once ever
         Assert.Equal(
@@ -838,19 +876,19 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         var view = await service.GetViewAsync(_studentId);
 
         // The level comes from the node the round hangs off
-        Assert.Equal(HostedCompetitionCategory.Advanced, CompetitionIn(view, _advancedRoundId).Category);
+        Assert.Equal(HostedCompetitionCategory.Advanced, CompetitionIn(view, AdvancedSlug).Category);
 
         // And the practice one hangs outside the levels entirely
-        Assert.Null(CompetitionIn(view, _practiceRoundId).Category);
+        Assert.Null(CompetitionIn(view, PracticeSlug).Category);
 
         // An embargoed competition's problems are not out
-        Assert.False(CompetitionIn(view, _advancedRoundId).ProblemsPublished);
+        Assert.False(CompetitionIn(view, AdvancedSlug).ProblemsPublished);
 
         // And one whose instant has passed has them out for everybody
-        Assert.True(CompetitionIn(view, _openedRoundId).ProblemsPublished);
+        Assert.True(CompetitionIn(view, OpenedSlug).ProblemsPublished);
 
         // Nothing has been entered, so nothing carries an entry
-        Assert.Null(CompetitionIn(view, _advancedRoundId).Entry);
+        Assert.Null(CompetitionIn(view, AdvancedSlug).Entry);
     });
 
     /// <summary>
@@ -861,10 +899,10 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Another_students_entry_is_not_read_as_this_students() => RunTestAsync(async service =>
     {
         // Somebody else takes the entry
-        await service.EnterAsync(_otherStudentId, _advancedRoundId);
+        await service.EnterAsync(_otherStudentId, AdvancedSlug);
 
         // And this student, who has spent nothing, is holding nothing
-        Assert.Null(CompetitionIn(await service.GetViewAsync(_studentId), _advancedRoundId).Entry);
+        Assert.Null(CompetitionIn(await service.GetViewAsync(_studentId), AdvancedSlug).Entry);
     });
 
     /// <summary>
@@ -892,10 +930,10 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         });
 
         // This student spends their own entry to reach the same set
-        await service.ForfeitAsync(_studentId, _advancedRoundId);
+        await service.ForfeitAsync(_studentId, AdvancedSlug);
 
         // The set that entry opens
-        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Where nothing anybody else said is theirs to see
         Assert.All(problems, problem => Assert.Empty(problem.Defenses));
@@ -908,16 +946,16 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_signed_out_visitor_reads_the_groups_and_no_entries() => RunTestAsync(async service =>
     {
         // A student takes an entry
-        await service.EnterAsync(_studentId, _advancedRoundId);
+        await service.EnterAsync(_studentId, AdvancedSlug);
 
         // What somebody with no account sees
         var view = await service.GetViewAsync(userId: null);
 
         // The same competitions
-        Assert.Equal(HostedCompetitionCategory.Advanced, CompetitionIn(view, _advancedRoundId).Category);
+        Assert.Equal(HostedCompetitionCategory.Advanced, CompetitionIn(view, AdvancedSlug).Category);
 
         // And none of anybody's entries
-        Assert.Null(CompetitionIn(view, _advancedRoundId).Entry);
+        Assert.Null(CompetitionIn(view, AdvancedSlug).Entry);
     });
 
     /// <summary>
@@ -935,7 +973,8 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // The one whose round holds one problem against the two it announced
         var unfilled = Assert.Single(
             groups,
-            candidate => candidate.Competitions.Any(competition => competition.Id == _unfilledRoundId));
+            candidate => candidate.Competitions.Any(
+                competition => competition.Slug.Values.Contains(UnfilledSlug)));
 
         // Which still says two, the number it was declared with rather than the one its round holds
         Assert.Equal(2, unfilled.ProblemCount);
@@ -943,7 +982,8 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // The group the two categories run in
         var group = Assert.Single(
             groups,
-            candidate => candidate.Competitions.Any(competition => competition.Id == _advancedRoundId));
+            candidate => candidate.Competitions.Any(
+                competition => competition.Slug.Values.Contains(AdvancedSlug)));
 
         // The size it was declared with
         Assert.Equal(2, group.ProblemCount);
@@ -963,21 +1003,21 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_claim_about_a_solution_reads_back_and_is_revised_in_place() => RunTestAsync(async service =>
     {
         // An entry, which is what a claim is made inside
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // The problem it is made about
         var problemId = spent.Problems[0].Id;
 
         // What the student first says
         await service.SetSelfAssessmentAsync(
-            _studentId, _advancedRoundId, problemId, "stuck on the last case");
+            _studentId, AdvancedSlug, problemId, "stuck on the last case");
 
         // And what they say once they have finished it
         await service.SetSelfAssessmentAsync(
-            _studentId, _advancedRoundId, problemId, "the last case works after all");
+            _studentId, AdvancedSlug, problemId, "the last case works after all");
 
         // The set as it now reads
-        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Which carries only what they currently say
         Assert.Equal(
@@ -1004,13 +1044,13 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_revised_claim_still_says_when_it_was_first_made() => RunTestAsync(async service =>
     {
         // An entry, which is what a claim is made inside
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // The problem it is made about
         var problemId = spent.Problems[0].Id;
 
         // What the student first says
-        await service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, problemId, "half of it");
+        await service.SetSelfAssessmentAsync(_studentId, AdvancedSlug, problemId, "half of it");
 
         // The row it left
         var first = await ReadClaimAsync(problemId);
@@ -1019,7 +1059,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         Assert.Equal(first.CreatedAt, first.UpdatedAt);
 
         // And what they say once they have finished it
-        await service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, problemId, "all of it");
+        await service.SetSelfAssessmentAsync(_studentId, AdvancedSlug, problemId, "all of it");
 
         // The row as it now stands
         var revised = await ReadClaimAsync(problemId);
@@ -1039,22 +1079,22 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_claim_can_be_taken_back_and_taking_back_nothing_passes() => RunTestAsync(async service =>
     {
         // An entry, which is what a claim is made inside
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // The problem it is made about
         var problemId = spent.Problems[0].Id;
 
         // Nothing stands yet, and dropping nothing is not a failure
-        await service.ClearSelfAssessmentAsync(_studentId, _advancedRoundId, problemId);
+        await service.ClearSelfAssessmentAsync(_studentId, AdvancedSlug, problemId);
 
         // Something the student then says
-        await service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, problemId, "no idea on this one");
+        await service.SetSelfAssessmentAsync(_studentId, AdvancedSlug, problemId, "no idea on this one");
 
         // And takes back
-        await service.ClearSelfAssessmentAsync(_studentId, _advancedRoundId, problemId);
+        await service.ClearSelfAssessmentAsync(_studentId, AdvancedSlug, problemId);
 
         // The set as it now reads
-        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Leaving the problem carrying nothing of theirs
         Assert.Null(Assert.Single(problems, problem => problem.Id == problemId).SelfAssessment);
@@ -1068,20 +1108,20 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_note_survives_the_entry_by_its_grace() => RunTestAsync(async service =>
     {
         // An entry, which is what a claim is made inside
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // The problem it is made about
         var problemId = spent.Problems[0].Id;
 
         // Closed where the student says
-        await service.FinishAsync(_studentId, _advancedRoundId);
+        await service.FinishAsync(_studentId, AdvancedSlug);
 
         // Which still takes what they have to say about it
         await service.SetSelfAssessmentAsync(
-            _studentId, _advancedRoundId, problemId, "one more thought on the way out");
+            _studentId, AdvancedSlug, problemId, "one more thought on the way out");
 
         // The set as it now reads
-        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Carrying what they said on the way out
         Assert.Equal(
@@ -1097,25 +1137,27 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_note_closes_once_the_grace_has_run_out() => RunTestAsync(async service =>
     {
         // An entry into the harder category
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // The problem the claim would be about
         var problemId = spent.Problems[0].Id;
 
         // Handed in
-        await service.FinishAsync(_studentId, _advancedRoundId);
+        await service.FinishAsync(_studentId, AdvancedSlug);
 
         // Long enough ago that even the grace is spent
         await BackdateEntryAsync(_advancedRoundId, ClockMinutes + NoteGraceMinutes + 1);
 
-        // Which leaves nothing more to say about it, or to take back
+        // Which leaves nothing more to say about it
         await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
-            service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, problemId, "too late"));
+            service.SetSelfAssessmentAsync(_studentId, AdvancedSlug, problemId, "too late"));
+
+        // Nor anything to take back
         await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
-            service.ClearSelfAssessmentAsync(_studentId, _advancedRoundId, problemId));
+            service.ClearSelfAssessmentAsync(_studentId, AdvancedSlug, problemId));
 
         // A second entry, into the easier category, left open rather than handed in
-        var other = await service.EnterAsync(_studentId, _elementaryRoundId);
+        var other = await service.EnterAsync(_studentId, ElementarySlug);
 
         // Started far enough back that its own clock and the grace after it have both run out
         await BackdateEntryAsync(_elementaryRoundId, ClockMinutes + NoteGraceMinutes + 1);
@@ -1123,7 +1165,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // Which closes it just as firmly
         await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
             service.SetSelfAssessmentAsync(
-                _studentId, _elementaryRoundId, other.Problems[0].Id, "written long after the buzzer"));
+                _studentId, ElementarySlug, other.Problems[0].Id, "written long after the buzzer"));
     });
 
     /// <summary>
@@ -1135,13 +1177,13 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task The_grace_after_an_early_hand_in_runs_from_the_hand_in() => RunTestAsync(async service =>
     {
         // An entry
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // The problem the claim would be about
         var problemId = spent.Problems[0].Id;
 
         // Closed at once, so nearly the whole clock is left standing on it
-        await service.FinishAsync(_studentId, _advancedRoundId);
+        await service.FinishAsync(_studentId, AdvancedSlug);
 
         // Moved back just past the grace, and nowhere near the end of the clock it never spent
         await BackdateEntryAsync(_advancedRoundId, NoteGraceMinutes + 1);
@@ -1149,7 +1191,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // Which is already too late: the entry ended where the student ended it
         await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
             service.SetSelfAssessmentAsync(
-                _studentId, _advancedRoundId, problemId, "written well after handing in"));
+                _studentId, AdvancedSlug, problemId, "written well after handing in"));
     });
 
     /// <summary>
@@ -1161,7 +1203,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_hand_in_after_the_buzzer_reopens_nothing() => RunTestAsync(async service =>
     {
         // An entry, left running
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // The problem the claim would be about
         var problemId = spent.Problems[0].Id;
@@ -1171,13 +1213,13 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         await BackdateEntryAsync(_advancedRoundId, ClockMinutes + NoteGraceMinutes + 1);
 
         // Closed only now, which stamps the hand-in at this moment rather than at the buzzer
-        await service.FinishAsync(_studentId, _advancedRoundId);
+        await service.FinishAsync(_studentId, AdvancedSlug);
 
         // And leaves the window shut: an entry ends at the buzzer at the latest, whenever the student got
         // around to saying so
         await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
             service.SetSelfAssessmentAsync(
-                _studentId, _advancedRoundId, problemId, "hours after the clock ran out"));
+                _studentId, AdvancedSlug, problemId, "hours after the clock ran out"));
     });
 
     /// <summary>
@@ -1187,12 +1229,12 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task An_entry_given_up_for_the_problems_takes_no_notes() => RunTestAsync(async service =>
     {
         // Given up rather than sat
-        var spent = await service.ForfeitAsync(_studentId, _advancedRoundId);
+        var spent = await service.ForfeitAsync(_studentId, AdvancedSlug);
 
         // So there is nothing of theirs to say anything about
         await Assert.ThrowsAsync<HostedEntryNotRunningException>(() =>
             service.SetSelfAssessmentAsync(
-                _studentId, _advancedRoundId, spent.Problems[0].Id, "read them without sitting them"));
+                _studentId, AdvancedSlug, spent.Problems[0].Id, "read them without sitting them"));
     });
 
     /// <summary>
@@ -1203,15 +1245,15 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_claim_about_another_competitions_problem_is_refused() => RunTestAsync(async service =>
     {
         // An entry into the harder category
-        var advanced = await service.EnterAsync(_studentId, _advancedRoundId);
+        var advanced = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // And one into the easier, so the refusal below is not about the entry
-        await service.EnterAsync(_studentId, _elementaryRoundId);
+        await service.EnterAsync(_studentId, ElementarySlug);
 
         // The harder category's problem, claimed under the easier one
         await Assert.ThrowsAsync<HostedProblemNotFoundException>(() =>
             service.SetSelfAssessmentAsync(
-                _studentId, _elementaryRoundId, advanced.Problems[0].Id, "filed under the wrong set"));
+                _studentId, ElementarySlug, advanced.Problems[0].Id, "filed under the wrong set"));
     });
 
     /// <summary>
@@ -1222,12 +1264,12 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_claim_takes_an_entry_even_where_the_problems_are_public() => RunTestAsync(async service =>
     {
         // The set whose embargo has passed, which anybody may read
-        var problems = await service.GetProblemsAsync(_studentId, _openedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, OpenedSlug);
 
         // And which nobody may speak in without having sat it
         await Assert.ThrowsAsync<HostedEntryRequiredException>(() =>
             service.SetSelfAssessmentAsync(
-                _studentId, _openedRoundId, problems[0].Id, "read it without entering"));
+                _studentId, OpenedSlug, problems[0].Id, "read it without entering"));
     });
 
     /// <summary>
@@ -1238,14 +1280,16 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task A_claim_survives_re_entry() => RunTestAsync(async service =>
     {
         // The practice run, which may be taken twice
-        var first = await service.EnterAsync(_studentId, _practiceRoundId);
+        var first = await service.EnterAsync(_studentId, PracticeSlug);
+
+        // The problem the claim is made about
         var problemId = first.Problems[0].Id;
 
         // Something said in the first run
-        await service.SetSelfAssessmentAsync(_studentId, _practiceRoundId, problemId, "half of it");
+        await service.SetSelfAssessmentAsync(_studentId, PracticeSlug, problemId, "half of it");
 
         // And the second run, which resets the entry row
-        var second = await service.EnterAsync(_studentId, _practiceRoundId);
+        var second = await service.EnterAsync(_studentId, PracticeSlug);
 
         // Still carrying what they said, the set coming back with the entry that bought it
         Assert.Equal(
@@ -1260,19 +1304,19 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Another_students_claim_is_not_read_back_as_yours() => RunTestAsync(async service =>
     {
         // This student sitting the competition
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // And the other one sitting it too
-        await service.EnterAsync(_otherStudentId, _advancedRoundId);
+        await service.EnterAsync(_otherStudentId, AdvancedSlug);
 
         // The problem both of them hold
         var problemId = spent.Problems[0].Id;
 
         // What the other one says about it
-        await service.SetSelfAssessmentAsync(_otherStudentId, _advancedRoundId, problemId, "I have it");
+        await service.SetSelfAssessmentAsync(_otherStudentId, AdvancedSlug, problemId, "I have it");
 
         // The set as this student reads it
-        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Which carries nothing of the other one's
         Assert.All(problems, problem => Assert.Null(problem.SelfAssessment));
@@ -1286,24 +1330,24 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Taking_a_claim_back_reaches_only_the_named_competition() => RunTestAsync(async service =>
     {
         // An entry into the harder category
-        var advanced = await service.EnterAsync(_studentId, _advancedRoundId);
+        var advanced = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // And one into the easier
-        var elementary = await service.EnterAsync(_studentId, _elementaryRoundId);
+        var elementary = await service.EnterAsync(_studentId, ElementarySlug);
 
         // A claim standing on the harder one's first problem
         await service.SetSelfAssessmentAsync(
-            _studentId, _advancedRoundId, advanced.Problems[0].Id, "the harder one");
+            _studentId, AdvancedSlug, advanced.Problems[0].Id, "the harder one");
 
         // And one on the easier one's
         await service.SetSelfAssessmentAsync(
-            _studentId, _elementaryRoundId, elementary.Problems[0].Id, "the easier one");
+            _studentId, ElementarySlug, elementary.Problems[0].Id, "the easier one");
 
         // The harder category's claim, asked to be dropped under the easier one
-        await service.ClearSelfAssessmentAsync(_studentId, _elementaryRoundId, advanced.Problems[0].Id);
+        await service.ClearSelfAssessmentAsync(_studentId, ElementarySlug, advanced.Problems[0].Id);
 
         // The harder category's set as it now reads
-        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Which leaves the claim standing, the competition it was made under not being the one that asked
         Assert.Equal(
@@ -1319,11 +1363,11 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Words_saying_nothing_are_refused() => RunTestAsync(async service =>
     {
         // An entry, which is what a claim would be made inside
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // Nothing but whitespace, which carries no claim
         await Assert.ThrowsAsync<DefenseFeedbackValueException>(() =>
-            service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, spent.Problems[0].Id, "   \n  "));
+            service.SetSelfAssessmentAsync(_studentId, AdvancedSlug, spent.Problems[0].Id, "   \n  "));
     });
 
     /// <summary>
@@ -1334,7 +1378,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     public Task Words_past_the_cap_are_refused_and_words_at_it_are_kept() => RunTestAsync(async service =>
     {
         // An entry, which is what a claim is made inside
-        var spent = await service.EnterAsync(_studentId, _advancedRoundId);
+        var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // The problem it is made about
         var problemId = spent.Problems[0].Id;
@@ -1342,16 +1386,16 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // One character over what the caps allow
         await Assert.ThrowsAsync<DefenseFeedbackCommentTooLongException>(() =>
             service.SetSelfAssessmentAsync(
-                _studentId, _advancedRoundId, problemId, new string('x', CommentCharCap + 1)));
+                _studentId, AdvancedSlug, problemId, new string('x', CommentCharCap + 1)));
 
         // Exactly what they allow, which is theirs to write
         var atTheCap = new string('x', CommentCharCap);
 
         // Written
-        await service.SetSelfAssessmentAsync(_studentId, _advancedRoundId, problemId, atTheCap);
+        await service.SetSelfAssessmentAsync(_studentId, AdvancedSlug, problemId, atTheCap);
 
         // The set as it now reads
-        var problems = await service.GetProblemsAsync(_studentId, _advancedRoundId);
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Carrying every character of it
         Assert.Equal(
@@ -1429,29 +1473,29 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             problemCount: 2);
 
         // Its rounds, one per level, embargoed until it closes.
-        SeedRound(context, season, open, _advancedRoundId, "mc-advanced", closesAt, problems: 2);
-        SeedRound(context, season, open, _elementaryRoundId, "mc-elementary", closesAt, problems: 2);
+        SeedRound(context, season, open, _advancedRoundId, "mc-advanced-1", closesAt, problems: 2);
+        SeedRound(context, season, open, _elementaryRoundId, "mc-elementary-1", closesAt, problems: 2);
 
         // A group that has been announced and is not taking entries yet.
         var upcoming = Group(
             context, "mc-upcoming", DateTimeOffset.UtcNow.AddDays(30), DateTimeOffset.UtcNow.AddDays(60),
             allowsReentry: false, problemCount: 2);
         SeedRound(
-            context, season, upcoming, _upcomingRoundId, "mc-intermediate",
+            context, season, upcoming, _upcomingRoundId, "mc-intermediate-1",
             DateTimeOffset.UtcNow.AddDays(60), problems: 2);
 
         // The practice group: no closing instant, so no embargo either, and takeable again.
         var practice = Group(
             context, "mc-practice", DateTimeOffset.UtcNow.AddDays(-30), closesAt: null, allowsReentry: true,
             problemCount: 1);
-        SeedRound(context, season, practice, _practiceRoundId, "mc", visibleSince: null, problems: 1);
+        SeedRound(context, season, practice, _practiceRoundId, "mc-practice", visibleSince: null, problems: 1);
 
         // A group whose problems have already come out, so its round is open to everybody.
         var opened = Group(
             context, "mc-opened", DateTimeOffset.UtcNow.AddDays(-60), DateTimeOffset.UtcNow.AddDays(-1),
             allowsReentry: false, problemCount: 1);
         SeedRound(
-            context, season, opened, _openedRoundId, "mc-advanced", DateTimeOffset.UtcNow.AddDays(-1),
+            context, season, opened, _openedRoundId, "mc-advanced-1", DateTimeOffset.UtcNow.AddDays(-1),
             problems: 1, seasonYear: 2025);
 
         // A group open for entries whose round is still a problem short of what it announced, which is what one
@@ -1460,7 +1504,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             context, "mc-unfilled", DateTimeOffset.UtcNow.AddDays(-1), closesAt, allowsReentry: false,
             problemCount: 2);
         SeedRound(
-            context, season, unfilled, _unfilledRoundId, "mc-elementary", closesAt, problems: 1,
+            context, season, unfilled, _unfilledRoundId, "mc-elementary-1", closesAt, problems: 1,
             seasonYear: 2024);
 
         // A group whose rounds have not been applied yet, which is what one looks like between the draft that
@@ -1510,7 +1554,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     /// <param name="context">The seeding context.</param>
     /// <param name="season">The season the round sits in.</param>
     /// <param name="group">The group the round runs in.</param>
-    /// <param name="roundId">The id the tests address the round by.</param>
+    /// <param name="roundId">The id the round's rows are seeded and read back under.</param>
     /// <param name="competitionPath">The node the round hangs off, which is what says its category.</param>
     /// <param name="visibleSince"><inheritdoc cref="Round.VisibleSince" path="/summary"/></param>
     /// <param name="problems">How many problems the round holds.</param>
@@ -1640,10 +1684,10 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     /// Finds one competition in a view, wherever its group sits.
     /// </summary>
     /// <param name="view">The view to read.</param>
-    /// <param name="roundId">Which competition to find.</param>
+    /// <param name="competitionSlug">What addresses the competition, in any of the languages it is named in.</param>
     /// <returns>The competition.</returns>
-    private static HostedCompetitionDto CompetitionIn(HostedCompetitionsViewDto view, Guid roundId) =>
+    private static HostedCompetitionDto CompetitionIn(HostedCompetitionsViewDto view, string competitionSlug) =>
         view.Groups
             .SelectMany(group => group.Competitions)
-            .Single(competition => competition.Id == roundId);
+            .Single(competition => competition.Slug.Values.Contains(competitionSlug));
 }

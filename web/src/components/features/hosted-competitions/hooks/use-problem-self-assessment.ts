@@ -47,7 +47,7 @@ type UseProblemSelfAssessmentResult = {
  * one is put back before the next one starts.
  *
  * @param readerKey - Who the cached set belongs to.
- * @param competitionId - Which competition the problem belongs to.
+ * @param competitionSlug - Which competition the problem belongs to.
  * @param problemId - Which problem the note is about.
  * @param assessment - What already stands, which is what the note opens on.
  *
@@ -55,7 +55,7 @@ type UseProblemSelfAssessmentResult = {
  */
 export function useProblemSelfAssessment(
   readerKey: HostedCompetitionsReaderKey,
-  competitionId: string,
+  competitionSlug: string,
   problemId: string,
   assessment: string | null
 ): UseProblemSelfAssessmentResult {
@@ -73,7 +73,7 @@ export function useProblemSelfAssessment(
 
   // Shows the row saying one thing, whatever the server later makes of it, handing back what it said before
   const show = (words: string | null) =>
-    writeCachedSelfAssessment(queryClient, readerKey, competitionId, problemId, words)
+    writeCachedSelfAssessment(queryClient, readerKey, competitionSlug, problemId, words)
 
   // What both writes say when they are refused, what they ask a signed-out reader for, and the queue they
   // share, the two of them writing the same row
@@ -88,7 +88,7 @@ export function useProblemSelfAssessment(
 
   // Recording the note
   const recording = useOptimisticMutation<void, string, string | null>({
-    apiFn: (apiCall, words) => setProblemSelfAssessment(apiCall, competitionId, problemId, words),
+    apiFn: (apiCall, words) => setProblemSelfAssessment(apiCall, competitionSlug, problemId, words),
     // The row carries the words from the moment they are sent
     onMutate: (words) => show(words),
     ...sharedHandling,
@@ -96,7 +96,7 @@ export function useProblemSelfAssessment(
 
   // Taking it back
   const withdrawal = useOptimisticMutation<void, void, string | null>({
-    apiFn: (apiCall) => clearProblemSelfAssessment(apiCall, competitionId, problemId),
+    apiFn: (apiCall) => clearProblemSelfAssessment(apiCall, competitionSlug, problemId),
     // And the row goes back to asking
     onMutate: () => show(null),
     ...sharedHandling,

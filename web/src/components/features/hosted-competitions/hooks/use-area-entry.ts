@@ -27,25 +27,25 @@ type UseAreaEntryResult = {
  *
  * @param readerKey - Who the answer belongs to, which is what it gets cached under.
  * @param isReaderKnown - Whether who the answer belongs to is settled yet.
- * @param competitionId - Which competition the entry is into, null while there is no competition in hand.
+ * @param competitionSlug - Which competition the entry is into, null while there is no competition in hand.
  *
  * @returns The entry, the competition it is into, and the state of the read.
  */
 export function useAreaEntry(
   readerKey: HostedCompetitionsReaderKey,
   isReaderKnown: boolean,
-  competitionId: string | null
+  competitionSlug: string | null
 ): UseAreaEntryResult {
   // Every competition the reader can see, which the board has usually already fetched. A caller with no
   // competition in hand has nothing to find in it, so it goes unread
   const { view, uiState } = useHostedCompetitionsView(
     readerKey,
-    isReaderKnown && competitionId !== null
+    isReaderKnown && competitionSlug !== null
   )
 
   // The one this entry is into, and the group whose terms it runs on
   const competitionInGroup =
-    competitionId === null ? undefined : findCompetitionInGroup(view, competitionId)
+    competitionSlug === null ? undefined : findCompetitionInGroup(view, competitionSlug)
 
   // What the reader spent on it, with the group's clock already applied
   const entry =

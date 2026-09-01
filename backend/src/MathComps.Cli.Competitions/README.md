@@ -47,7 +47,7 @@ A group carries no name of its own. Its rounds hang off competition nodes the ta
 
 Two steps.
 
-**1. Register the group's nodes.** In [`metadata.shared.json`](../MathComps.Infrastructure/Resources/metadata.shared.json), plus a `shortName` and `fullName` per node in `metadata.sk.json`, `metadata.cs.json` and `metadata.en.json`. A group is whatever the program runs as one batch. One run at every level gets one `mc-<category>-<group>` node per category, like `mc-elementary-1`, `mc-intermediate-1` and `mc-advanced-1`. A one-off at a single level is instead a single node directly under `mc`, like `mc-practice`, and carries no category at all. Names must be season-independent, `3. súťaž` and never `October 2026`, since the same node runs again next year. This is a code change, so build before running the tool.
+**1. Register the group's nodes.** In [`metadata.shared.json`](../MathComps.Infrastructure/Resources/metadata.shared.json), plus a `shortName`, a `fullName` and a `urlSlug` per node in `metadata.sk.json`, `metadata.cs.json` and `metadata.en.json`. The `urlSlug` is what the competition is addressed by, in that language and in ASCII: `pokrocila-1` in Slovak reaches `/sk/sutaze/pokrocila-1-2026`, the season's start year being appended to it. No two nodes may claim the same one, in any language, and the group node is the only kind that carries one. A group is whatever the program runs as one batch. One run at every level gets one `mc-<category>-<group>` node per category, like `mc-elementary-1`, `mc-intermediate-1` and `mc-advanced-1`. A one-off at a single level is instead a single node directly under `mc`, like `mc-practice`, and carries no category at all. Names must be season-independent, `3. súťaž` and never `October 2026`, since the same node runs again next year. This is a code change, so build before running the tool.
 
 **2. Run this tool** with the group manifest. It raises whatever the manifest names that is not there, and refuses a path step 1 did not register.
 
@@ -71,6 +71,7 @@ Then against what has actually landed:
 - A round holding a problem without a statement or a solution in one of the site's languages. Nothing downstream has a fallback for a language a problem was never written in.
 - A round holding problems, but not the `problemCount` the manifest announces. A round holding nothing yet passes: that is the case this tool exists for. The card promises that number to everybody who reads it, and every level of a group runs the same paper, so a draft that landed short has to be fixed rather than announced around.
 - A round another group already claims, since a round belongs to one group and moving it would silently start reading its clock off the group it landed in.
+- A round whose node carries no `urlSlug` in one of the site's languages. That name is the only way to the competition's page, and a reader of that language would have none.
 
 And the group as it already stands, once anyone has entered it:
 

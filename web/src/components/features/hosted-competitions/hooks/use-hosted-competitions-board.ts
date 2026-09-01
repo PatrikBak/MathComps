@@ -40,12 +40,12 @@ type UseHostedCompetitionsBoardResult = {
  * Every competition the program has run or will run, as the board reads them: the groups in the order a
  * reader wants them, what the reader still owes before any of it can be pressed, and where a press goes.
  *
- * @param entryIntentId - Which competition a press made before signing in was aimed at.
+ * @param entryIntentSlug - Which competition a press made before signing in was aimed at.
  *
  * @returns What the board draws, and the calls its presses go through.
  */
 export function useHostedCompetitionsBoard(
-  entryIntentId: string | undefined
+  entryIntentSlug: string | undefined
 ): UseHostedCompetitionsBoardResult {
   // Who is reading, and what the program knows about them
   const { reader, readerKey, isReaderKnown } = useEntryReader()
@@ -67,7 +67,7 @@ export function useHostedCompetitionsBoard(
     reader,
     groups,
     openDialog: dialog.open,
-    entryIntentId,
+    entryIntentSlug,
     hasView: view !== undefined,
   })
 

@@ -324,4 +324,59 @@ public class MetadataLocalizationServiceTests
 
     #endregion
 
+    #region URL names
+
+    /// <summary>
+    /// The nodes the site's own competitions run under carry a URL name in every language, which is what a
+    /// hosted round is addressed by. A gap would leave a whole language unable to reach the page.
+    /// </summary>
+    /// <param name="path">The round node's path.</param>
+    [Theory]
+    [InlineData("mc-practice")]
+    [InlineData("mc-elementary-1")]
+    [InlineData("mc-intermediate-1")]
+    [InlineData("mc-advanced-1")]
+    public void A_hosted_round_node_is_named_in_every_language(string path)
+    {
+        // No language leaves the node unnamed
+        Assert.Empty(_service.LocalesMissingUrlSlug(path));
+
+        // And a name for each language the site is read in
+        Assert.Equal(Enum.GetValues<Language>().Order(), _service.GetNodeUrlSlugs(path).Keys.Order());
+    }
+
+    /// <summary>
+    /// Every URL name in the files leads back to the node that claimed it, whichever language wrote it. This is
+    /// what makes a link pasted between readers of different languages resolve.
+    /// </summary>
+    [Fact]
+    public void Every_url_name_leads_back_to_its_own_node()
+    {
+        // Every node any language gives a URL name, paired with the name it gives it
+        var claims = Enum.GetValues<Language>()
+            .SelectMany(language => RealCompetitionPaths()
+                .Where(path => !_service.LocalesMissingUrlSlug(path).Contains(language))
+                .Select(path => (Path: path, UrlSlug: _service.GetNodeUrlSlugs(path)[language])));
+
+        // Each of them resolving to the node that wrote it
+        Assert.All(claims, claim =>
+            Assert.Equal(claim.Path, _service.FindNodePathByUrlSlug(claim.UrlSlug)));
+    }
+
+    /// <summary>
+    /// A node nothing addresses by name carries none in any language, which is how a round nobody could reach is
+    /// told apart from one that is reachable.
+    /// </summary>
+    [Fact]
+    public void A_node_nothing_addresses_by_name_carries_none() =>
+        Assert.Equal(Enum.GetValues<Language>(), _service.LocalesMissingUrlSlug("csmo-a-iii"));
+
+    /// <summary>
+    /// A name no language gives to anything resolves to nothing, which is how an unknown URL is turned away.
+    /// </summary>
+    [Fact]
+    public void A_name_nothing_carries_resolves_to_nothing() =>
+        Assert.Null(_service.FindNodePathByUrlSlug("nothing-is-called-this"));
+
+    #endregion
 }

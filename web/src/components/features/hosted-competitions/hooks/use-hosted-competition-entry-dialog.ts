@@ -1,8 +1,10 @@
 'use client'
 
+import { useLocale } from 'next-intl'
 import { useCallback, useState, useTransition } from 'react'
 
 import { useIsMountedRef } from '@/hooks/use-is-mounted-ref'
+import type { Locale } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 
 import type { PendingEntry } from '../model/hosted-competition-types'
@@ -45,6 +47,9 @@ export function useHostedCompetitionEntryDialog(
   // Which competition is being asked about
   const [pending, setPending] = useState<PendingEntry | null>(null)
 
+  // The reader's language
+  const locale = useLocale() as Locale
+
   // A function which drops the question
   const close = useCallback(() => setPending(null), [])
 
@@ -64,9 +69,9 @@ export function useHostedCompetitionEntryDialog(
       // And the page its answer lands on, fetched while the question is still on screen. Warmed no
       // earlier than that: this is the one route on the site whose arrival is measured against a clock
       // the reader is paying for
-      router.prefetch(competitionAreaHref(asked.competition.id))
+      router.prefetch(competitionAreaHref(asked.competition.slug[locale]))
     },
-    [router]
+    [locale, router]
   )
 
   // Whether the list is still on screen, which the continuation the press leaves behind has to ask
@@ -75,7 +80,7 @@ export function useHostedCompetitionEntryDialog(
   // Where a landed entry leaves the student: inside the competition, which is where the problems both
   // answers to the dialog spend it on are read
   const land = useCallback(
-    (competitionId: string) => {
+    (competitionSlug: string) => {
       // The student went somewhere else while the entry was landing, and where they went is their answer
       if (!isMountedRef.current) {
         return
@@ -87,7 +92,7 @@ export function useHostedCompetitionEntryDialog(
       // And the student is where the entry they spent is read. Held as a transition so the list knows
       // it is on its way out: the row they pressed counts a clock down from here where they sat it, and
       // a student meets their own clock beside the problems it is being spent on
-      startLeaving(() => router.push(competitionAreaHref(competitionId)))
+      startLeaving(() => router.push(competitionAreaHref(competitionSlug)))
     },
     [router, isMountedRef]
   )
@@ -103,8 +108,8 @@ export function useHostedCompetitionEntryDialog(
     }
 
     // Take the entry into whichever competition was asked about
-    enter(pending.competition.id)
-  }, [enter, pending])
+    enter(pending.competition.slug[locale])
+  }, [enter, locale, pending])
 
   // A function which answers it by giving the entry up for the problems
   const confirmForfeit = useCallback(() => {
@@ -114,8 +119,8 @@ export function useHostedCompetitionEntryDialog(
     }
 
     // Spend the entry on whichever competition was asked about
-    forfeit(pending.competition.id)
-  }, [forfeit, pending])
+    forfeit(pending.competition.slug[locale])
+  }, [forfeit, locale, pending])
 
   // What the dialog is asking about, and the ways to answer it
   return {

@@ -280,7 +280,6 @@ public class AdminNoteService(
                     note.Session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                     note.Session.EnvironmentTarget!.HandoutEnvironment.ContentId,
                     note.Session.ProblemTarget!.ProblemId,
-                    note.Session.ProblemTarget!.Problem.RoundId,
                     note.Session.ProblemTarget!.Problem.Slug,
                     note.Session.ProblemTarget!.Problem.Number,
                     note.Session.ProblemTarget!.Problem.Round.Competition.Path,

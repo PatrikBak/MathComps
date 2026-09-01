@@ -274,7 +274,7 @@ function CompetitionDefenseRow({
       label={<DefenseTargetLabel target={target} emphasis="strong" />}
       jump={
         <RowJump
-          href={competitionAreaHref(target.competitionId)}
+          href={competitionAreaHref(target.competitionSlug)}
           label={tCompetitions('goToArea')}
           onClick={onClose}
         />

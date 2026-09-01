@@ -242,7 +242,8 @@
     },
     "mc-practice": {
       "shortName": "Skúšobná súťaž",
-      "fullName": "Skúšobná súťaž"
+      "fullName": "Skúšobná súťaž",
+      "urlSlug": "skusobna"
     },
     "mc-elementary": {
       "shortName": "Základná",
@@ -250,15 +251,18 @@
     },
     "mc-elementary-1": {
       "shortName": "September",
-      "fullName": "September"
+      "fullName": "September",
+      "urlSlug": "zakladna-1"
     },
     "mc-elementary-2": {
       "shortName": "Október",
-      "fullName": "Október"
+      "fullName": "Október",
+      "urlSlug": "zakladna-2"
     },
     "mc-elementary-3": {
       "shortName": "November",
-      "fullName": "November"
+      "fullName": "November",
+      "urlSlug": "zakladna-3"
     },
     "mc-intermediate": {
       "shortName": "Stredná",
@@ -266,15 +270,18 @@
     },
     "mc-intermediate-1": {
       "shortName": "September",
-      "fullName": "September"
+      "fullName": "September",
+      "urlSlug": "stredna-1"
     },
     "mc-intermediate-2": {
       "shortName": "Október",
-      "fullName": "Október"
+      "fullName": "Október",
+      "urlSlug": "stredna-2"
     },
     "mc-intermediate-3": {
       "shortName": "November",
-      "fullName": "November"
+      "fullName": "November",
+      "urlSlug": "stredna-3"
     },
     "mc-advanced": {
       "shortName": "Pokročilá",
@@ -282,15 +289,18 @@
     },
     "mc-advanced-1": {
       "shortName": "September",
-      "fullName": "September"
+      "fullName": "September",
+      "urlSlug": "pokrocila-1"
     },
     "mc-advanced-2": {
       "shortName": "Október",
-      "fullName": "Október"
+      "fullName": "Október",
+      "urlSlug": "pokrocila-2"
     },
     "mc-advanced-3": {
       "shortName": "November",
-      "fullName": "November"
+      "fullName": "November",
+      "urlSlug": "pokrocila-3"
     }
   },
   "seasonFormat": "{number}. ročník ({start}/{end})"

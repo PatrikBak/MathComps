@@ -269,7 +269,6 @@ public class DefenseSessionService(
                     session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                     session.EnvironmentTarget!.HandoutEnvironment.ContentId,
                     session.ProblemTarget!.ProblemId,
-                    session.ProblemTarget!.Problem.RoundId,
                     session.ProblemTarget!.Problem.Slug,
                     session.ProblemTarget!.Problem.Number,
                     session.ProblemTarget!.Problem.Round.Competition.Path,

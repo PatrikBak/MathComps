@@ -330,7 +330,12 @@
     "areaClockSpent": "Tvoj čas vypršal. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",
     "areaFinished": "Súťaž máš ukončenú. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",
     "areaForfeited": "Už nemôžeš súťažiť. Úlohy si tu môžeš skúšať ďalej, len sa nepočítajú.",
+    "areaNotOpen": "Táto súťaž sa ešte neotvorila.",
+    "areaNotPublic": "Úlohy tejto súťaže ešte nie sú verejné.",
+    "areaNotStarted": "Túto súťaž ešte nemáš spustenú.",
     "areaProblemsFailed": "Úlohy sa nepodarilo načítať.",
+    "areaSignIn": "Túto súťaž otvoríš po prihlásení.",
+    "areaUnknown": "Súťaž s takým názvom neexistuje.",
     "backToCompetitions": "Späť na súťaže",
     "categories": {
       "advanced": "Pokročilá",

@@ -119,7 +119,6 @@ public class AdminDefenseReviewService(
                         session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                         session.EnvironmentTarget!.HandoutEnvironment.ContentId,
                         session.ProblemTarget!.ProblemId,
-                        session.ProblemTarget!.Problem.RoundId,
                         session.ProblemTarget!.Problem.Slug,
                         session.ProblemTarget!.Problem.Number,
                         session.ProblemTarget!.Problem.Round.Competition.Path,
@@ -226,7 +225,6 @@ public class AdminDefenseReviewService(
             .GroupBy(defense => new
             {
                 defense.ProblemId,
-                defense.Problem.RoundId,
                 defense.Problem.Slug,
                 defense.Problem.Number,
                 CompetitionPath = defense.Problem.Round.Competition.Path,
@@ -239,7 +237,6 @@ public class AdminDefenseReviewService(
                     null,
                     null,
                     group.Key.ProblemId,
-                    group.Key.RoundId,
                     group.Key.Slug,
                     group.Key.Number,
                     group.Key.CompetitionPath,
@@ -306,7 +303,6 @@ public class AdminDefenseReviewService(
                     session.EnvironmentTarget!.HandoutEnvironment.Handout.ContentId,
                     session.EnvironmentTarget!.HandoutEnvironment.ContentId,
                     session.ProblemTarget!.ProblemId,
-                    session.ProblemTarget!.Problem.RoundId,
                     session.ProblemTarget!.Problem.Slug,
                     session.ProblemTarget!.Problem.Number,
                     session.ProblemTarget!.Problem.Round.Competition.Path,

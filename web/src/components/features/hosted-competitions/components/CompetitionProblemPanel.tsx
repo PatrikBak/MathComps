@@ -25,7 +25,7 @@ import { ProblemSelfAssessmentNote } from './ProblemSelfAssessmentNote'
  */
 type CompetitionProblemPanelProps = {
   /** Which competition sets the problem. */
-  competitionId: string
+  competitionSlug: string
   /** Whose entry it is being solved under. */
   readerKey: HostedCompetitionsReaderKey
   /** The problem, and the conversations held about it. */
@@ -42,7 +42,7 @@ type CompetitionProblemPanelProps = {
  * One problem of a competition's set: its statement, and every conversation the entrant has held about it.
  */
 export function CompetitionProblemPanel({
-  competitionId,
+  competitionSlug,
   readerKey,
   problem,
   run,
@@ -132,7 +132,7 @@ export function CompetitionProblemPanel({
             about any one of the conversations above it */}
         <ProblemSelfAssessmentNote
           readerKey={readerKey}
-          competitionId={competitionId}
+          competitionSlug={competitionSlug}
           problemId={problem.id}
           assessment={problem.selfAssessment}
           areNotesOpen={run?.kind === 'sat' && run.areNotesOpen}
@@ -154,7 +154,7 @@ export function CompetitionProblemPanel({
           <DefenseConversation
             key={openedSessionId ?? 'fresh'}
             problem={{
-              target: { kind: 'competition', competitionId, problemId: problem.id, readerKey },
+              target: { kind: 'competition', problemId: problem.id, readerKey },
               statement: problem.statement[locale],
             }}
             onClose={close}

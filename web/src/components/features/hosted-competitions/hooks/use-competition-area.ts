@@ -2,7 +2,9 @@
 
 import { usePrevious } from '@mantine/hooks'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { useEffect } from 'react'
+import { toast } from 'sonner'
 
 import { SECOND_MS } from '@/components/shared/utils/time-units'
 import { useNow } from '@/hooks/use-now'
@@ -11,6 +13,7 @@ import type { QueryUiState } from '@/lib/query-ui-state'
 
 import type { AreaRun } from '../model/hosted-competition-state'
 import {
+  areaTurnAwayKey,
   clockEndsAt,
   derivePhase,
   hasEntryEnded,
@@ -28,6 +31,12 @@ import { invalidateCompetitionProblems } from './hosted-competition-cache'
 import { useAreaEntry } from './use-area-entry'
 import { useCompetitionProblems } from './use-competition-problems'
 import { useEntryReader } from './use-entry-reader'
+
+/**
+ * Names the notice raised when the area turns a reader away, so that two passes over the same turning-away
+ * leave one notice rather than a stack of them.
+ */
+const AREA_CLOSED_TOAST_ID = 'competition-area-closed'
 
 /**
  * The area while one of the two reads behind it is still out, or once one of them has given up.
@@ -74,14 +83,17 @@ type UseCompetitionAreaResult = PendingArea | ReadyArea
  *
  * Two reads stand behind all of it. A reader with no entry is sent back to the list rather than shown an
  * area with nothing in it, unless the competition has closed: its problems are public from that moment, so
- * anybody may read the set and the official solutions beside it.
+ * any reader with an account may read the set and the official solutions beside it.
  *
- * @param competitionId - Which competition the reader is inside.
+ * @param competitionSlug - Which competition the reader is inside.
  *
  * @returns What the page has to draw, or which read it is still waiting on.
  */
-export function useCompetitionArea(competitionId: string): UseCompetitionAreaResult {
-  // The localized router, for sending a reader with no entry back where they came from
+export function useCompetitionArea(competitionSlug: string): UseCompetitionAreaResult {
+  // Competitions copy
+  const t = useTranslations('competitions')
+
+  // The localized router
   const router = useRouter()
 
   // The React Query cache, for reading the set again once the clock stops counting
@@ -95,7 +107,7 @@ export function useCompetitionArea(competitionId: string): UseCompetitionAreaRes
     competitionInGroup,
     entry,
     uiState: viewState,
-  } = useAreaEntry(readerKey, isReaderKnown, competitionId)
+  } = useAreaEntry(readerKey, isReaderKnown, competitionSlug)
 
   // When the counted part ends, which nothing but a sat entry has
   const endsAt = clockEndsAt(entry)
@@ -104,6 +116,11 @@ export function useCompetitionArea(competitionId: string): UseCompetitionAreaRes
   // problems has none, and neither does a page still working out what it is showing
   const now = useNow(SECOND_MS, endsAt !== null)
 
+  // Where the group sits in its own life, undefined while the address names no competition the reader
+  // can see
+  const phase =
+    competitionInGroup === undefined ? undefined : derivePhase(competitionInGroup.group, now)
+
   // Whether the set may be read at all: an entry of their own buys it, and a competition that is over and
   // out of embargo hands it to every reader with an account, which is the one way onto this page without
   // one. The read behind it is made as the reader, so somebody signed out has no way to make it
@@ -111,13 +128,13 @@ export function useCompetitionArea(competitionId: string): UseCompetitionAreaRes
     entry !== null ||
     (readerKey !== null &&
       competitionInGroup !== undefined &&
-      derivePhase(competitionInGroup.group, now) === 'closed' &&
+      phase === 'closed' &&
       competitionInGroup.competition.problemsPublished)
 
   // This competition's problems, once there is something entitling the reader to them
   const { problems, uiState: problemsState } = useCompetitionProblems(
     readerKey,
-    competitionId,
+    competitionSlug,
     isReadable
   )
 
@@ -129,13 +146,17 @@ export function useCompetitionArea(competitionId: string): UseCompetitionAreaRes
   // the page from a page opened after one had
   const wasEnded = usePrevious(hasEnded)
 
-  // A reader with nothing to read here, the competition being neither theirs nor over, so the list is
-  // where they go instead
+  // Which sentence a turning-away carries, one of a handful of keys, so the effect below stands still
+  // while the clock ticks under it
+  const turnAwayKey = areaTurnAwayKey(phase, readerKey !== null)
+
+  // A reader with nothing to read here, so the list is where they go instead, told why
   useEffect(() => {
     if (viewState.kind === 'ready' && !isReadable) {
+      toast.warning(t(turnAwayKey), { id: AREA_CLOSED_TOAST_ID })
       router.replace(COMPETITIONS_LIST_HREF)
     }
-  }, [viewState, isReadable, router])
+  }, [viewState, isReadable, turnAwayKey, router, t])
 
   // A clock running out under the page opens the official solutions, and nothing was pressed to say so:
   // the set on screen was read while the entry still counted, so it is read again now that it does not.

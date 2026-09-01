@@ -8,8 +8,8 @@ import { DEFAULT_LOCALE, pathnames, SUPPORTED_LOCALES } from '@/i18n/i18n'
  *
  * @param canonicalPath - The canonical (English) route path (e.g., '/about')
  * @param locale - The target locale
- * @param slugTranslations - Optional map of localized slugs to replace [slug] with
- * @param routeParams - Optional values for the route's other dynamic segments, by segment name
+ * @param slugTranslations - Optional map of the [slug] segment's wording per locale
+ * @param routeParams - Optional values for the route's dynamic segments, by segment name
  *
  * @returns The resolved localized path, or undefined if a segment could not be filled in
  */
@@ -38,10 +38,11 @@ export function resolveLocalizedPath(
     localizedPath = canonicalPath
   }
 
-  // Replace [slug] with actual slug if present
-  if (localizedPath.includes('[slug]')) {
+  // Replace [slug] with this locale's wording of it, where one exists per locale; a slug that is one value
+  // for every locale is filled in below as a route param
+  if (localizedPath.includes('[slug]') && slugTranslations !== undefined) {
     // Use translation if available
-    const slug = slugTranslations?.[locale]
+    const slug = slugTranslations[locale]
     if (slug) {
       localizedPath = localizedPath.replace('[slug]', slug)
     } else {
@@ -50,8 +51,8 @@ export function resolveLocalizedPath(
     }
   }
 
-  // Fill in whatever other dynamic segments the route declares. A slug is translated per locale; anything
-  // else is one value the whole site shares, so it is substituted rather than looked up
+  // Fill in whatever dynamic segments are left. A translated slug is worded per locale; anything else is
+  // one value substituted into every locale's own path
   for (const [name, value] of Object.entries(routeParams ?? {})) {
     // Handed back from a function, so a value carrying a `$` is a value rather than a replacement pattern
     localizedPath = localizedPath.replace(`[${name}]`, () => encodeURIComponent(value))
@@ -86,8 +87,8 @@ export function toLocaleUrlSuffix(localizedPath: string): string {
  * Replaces [slug] placeholder with actual localized slug if translations are provided.
  *
  * @param canonicalPath - The canonical path for the route (e.g., '/problems')
- * @param slugTranslations - Optional map of localized slugs to replace [slug] with
- * @param routeParams - Optional values for the route's other dynamic segments, by segment name
+ * @param slugTranslations - Optional map of the [slug] segment's wording per locale
+ * @param routeParams - Optional values for the route's dynamic segments, by segment name
  *
  * @returns An object mapping locale codes to full URLs for alternates.languages
  */

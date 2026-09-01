@@ -11,6 +11,7 @@ import type {
 } from '@/components/features/defense/model/defense-types'
 import {
   entryEndsAt,
+  isCompetitionAddressedBy,
   isPracticeGroup,
 } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import type {
@@ -61,8 +62,24 @@ const WINDOW_DAYS = 13
 /** The category the entered states put the student inside. */
 const ENTERED_CATEGORY_INDEX = 1
 
-/** The competition the specs enter, one of those the open group runs. */
-export const COMPETITION_ID = 'open-intermediate'
+/** The competition the specs enter, one of those the open group runs, as English addresses it. */
+export const COMPETITION_SLUG = 'open-intermediate'
+
+/**
+ * Names one competition in every language.
+ *
+ * English carries the bare slug and every other language wears its own suffix, the way the real slugs differ
+ * per language. Every seeding path names a competition by its English one, so a lookup reading only the
+ * reader's own wording finds nothing rather than passing.
+ *
+ * @param name - The slug English addresses it by.
+ *
+ * @returns The slug in every language.
+ */
+function slugsOf(name: string): LocalizedString {
+  // The bare name, plus one per other language
+  return { sk: `${name}-sk`, cs: `${name}-cs`, en: name }
+}
 
 /** {@link PROBLEMS_PER_COMPETITION}, as the specs read it. */
 export const PROBLEM_COUNT = PROBLEMS_PER_COMPETITION
@@ -330,7 +347,7 @@ function buildCompetitions(
 ): HostedCompetition[] {
   // One competition per category, all of them on the same terms
   return HOSTED_COMPETITION_CATEGORIES.map((category, index) => ({
-    id: `${groupId}-${category}`,
+    slug: slugsOf(`${groupId}-${category}`),
     category,
     entry: entryFor(index),
     resultsPublished,
@@ -355,7 +372,9 @@ function buildSoloCompetition(
   problemsPublished: boolean
 ): HostedCompetition[] {
   // The one competition, named after its group since no category tells it apart
-  return [{ id: `${groupId}-set`, category: null, entry, resultsPublished, problemsPublished }]
+  return [
+    { slug: slugsOf(`${groupId}-set`), category: null, entry, resultsPublished, problemsPublished },
+  ]
 }
 
 /**
@@ -579,14 +598,14 @@ function buildReadiness(state: HostedState): EntryReadiness {
 /**
  * Names one problem of one competition's set.
  *
- * @param competitionId - Which competition the set belongs to.
+ * @param competitionSlug - Which competition the set belongs to.
  * @param position - Where the problem sits in it, counting from one.
  *
  * @returns The problem's id.
  */
-function problemIdOf(competitionId: string, position: number): string {
+function problemIdOf(competitionSlug: string, position: number): string {
   // Named after the competition it belongs to, so two sets never collide
-  return `${competitionId}-p${position}`
+  return `${competitionSlug}-p${position}`
 }
 
 /**
@@ -643,14 +662,14 @@ function transcriptsOf(state: FakeState, problemId: string): DefenseSession[] {
  * Builds one competition's problem set, with whatever has been said about each.
  *
  * @param state - The fake's memory.
- * @param competitionId - Which competition's set.
+ * @param competitionSlug - Which competition's set.
  * @param isSolutionOpen - Whether the set may carry its official solutions.
  *
  * @returns The problems, in the order the competition sets them.
  */
 function buildProblems(
   state: FakeState,
-  competitionId: string,
+  competitionSlug: string,
   isSolutionOpen: boolean
 ): HostedCompetitionProblem[] {
   // One problem per statement, as many of them as a competition sets
@@ -659,7 +678,7 @@ function buildProblems(
     const position = index + 1
 
     // The id the problem is named by
-    const id = problemIdOf(competitionId, position)
+    const id = problemIdOf(competitionSlug, position)
 
     // A row per conversation, saying enough to tell it from the others and no more
     const defenses = transcriptsOf(state, id).map((session) => ({
@@ -715,14 +734,14 @@ function isSolutionOpen(
  * The group one competition runs in, which is what sets the clock its entry is measured by.
  *
  * @param state - The fake's memory.
- * @param competitionId - Which competition's group.
+ * @param competitionSlug - Which competition's group.
  *
  * @returns The group, or undefined when nothing holds that competition.
  */
-function groupOf(state: FakeState, competitionId: string): HostedCompetitionGroup | undefined {
-  // Ids are unique across every group, so the first group holding it is the only one
+function groupOf(state: FakeState, competitionSlug: string): HostedCompetitionGroup | undefined {
+  // The first group holding it is the only one
   return state.view.groups.find((group) =>
-    group.competitions.some((competition) => competition.id === competitionId)
+    group.competitions.some((competition) => isCompetitionAddressedBy(competition, competitionSlug))
   )
 }
 
@@ -745,7 +764,7 @@ function buildLibrary(state: FakeState): DefenseSessionListItem[] {
   const competitionItems = state.view.groups.flatMap((group) =>
     group.competitions.flatMap((competition) =>
       Array.from({ length: PROBLEMS_PER_COMPETITION }, (_unused, index) => index + 1).flatMap(
-        (position) => libraryItemsOf(state, group, competition.id, position)
+        (position) => libraryItemsOf(state, group, competition.slug.en, position)
       )
     )
   )
@@ -775,7 +794,7 @@ const HANDOUT_ITEM: DefenseSessionListItem = {
  *
  * @param state - The fake's memory.
  * @param group - The group the competition runs in, which is what names it.
- * @param competitionId - The competition the problem belongs to.
+ * @param competitionSlug - The competition the problem belongs to.
  * @param position - Where the problem sits in the set, counting from one.
  *
  * @returns One row per conversation held about that problem.
@@ -783,11 +802,11 @@ const HANDOUT_ITEM: DefenseSessionListItem = {
 function libraryItemsOf(
   state: FakeState,
   group: HostedCompetitionGroup,
-  competitionId: string,
+  competitionSlug: string,
   position: number
 ): DefenseSessionListItem[] {
   // The problem the rows are about
-  const problemId = problemIdOf(competitionId, position)
+  const problemId = problemIdOf(competitionSlug, position)
 
   // A row per conversation, named the way the backend names one
   return transcriptsOf(state, problemId).map((session) => ({
@@ -795,14 +814,14 @@ function libraryItemsOf(
     target: {
       kind: 'problem' as const,
       problemId,
-      competitionId,
+      competitionSlug,
       slug: problemId,
       source: {
         season: { slug: '76', displayName: 'Edition 76 (2026/2027)', fullName: null },
         startYear: LIBRARY_SEASON_START_YEAR,
         competition: [
           { slug: 'mc', displayName: 'MathComps', fullName: null },
-          { slug: competitionId, displayName: group.name.en, fullName: null },
+          { slug: competitionSlug, displayName: group.name.en, fullName: null },
         ],
         number: position,
       },
@@ -901,15 +920,15 @@ async function think(page: Page): Promise<void> {
  * Finds one competition wherever its group sits.
  *
  * @param state - The fake's memory.
- * @param competitionId - Which competition to find.
+ * @param competitionSlug - Which competition to find.
  *
- * @returns The competition, or undefined when nothing is named by that id.
+ * @returns The competition, or undefined when nothing is addressed by that slug.
  */
-function competitionIn(state: FakeState, competitionId: string): HostedCompetition | undefined {
-  // Ids are unique across every group, so the first match is the only one
+function competitionIn(state: FakeState, competitionSlug: string): HostedCompetition | undefined {
+  // The first match is the only one
   return state.view.groups
     .flatMap((group) => group.competitions)
-    .find((candidate) => candidate.id === competitionId)
+    .find((candidate) => isCompetitionAddressedBy(candidate, competitionSlug))
 }
 
 /**
@@ -972,7 +991,7 @@ function seedStraddlingDefense(
   }
 
   // The problem it is held against, which is the first of the set
-  const problemId = problemIdOf(competition.id, 1)
+  const problemId = problemIdOf(competition.slug.en, 1)
 
   // A number no conversation before it took
   state.minted++
@@ -1047,7 +1066,7 @@ export async function installHostedBackend(
 
       // And whatever the student already claimed of the first solution in it
       if (options.standingNote !== undefined) {
-        state.assessments.set(problemIdOf(competition.id, 1), options.standingNote)
+        state.assessments.set(problemIdOf(competition.slug.en, 1), options.standingNote)
       }
     }
   }
@@ -1083,13 +1102,17 @@ export async function installHostedBackend(
 
   // Every call that spends or closes an entry, and the read that serves a spent one's problems
   await page.route(`${BACKEND_ORIGIN}/competitions/*/*`, async (route) => {
-    // Which competition, and which of its endpoints
+    // The address the call came in on
     const segments = new URL(route.request().url()).pathname.split('/')
+
+    // Which of the competition's endpoints
     const endpoint = segments.pop() ?? ''
-    const competitionId = segments.pop() ?? ''
+
+    // Which competition it names
+    const competitionSlug = segments.pop() ?? ''
 
     // The competition being acted on
-    const competition = competitionIn(state, competitionId)
+    const competition = competitionIn(state, competitionSlug)
 
     // One nobody can find is a failure the caller surfaces like any other
     if (competition === undefined) {
@@ -1118,7 +1141,7 @@ export async function installHostedBackend(
         // instant started
         await answer(page, route, {
           entry: competition.entry,
-          problems: buildProblems(state, competitionId, false),
+          problems: buildProblems(state, competition.slug.en, false),
         } satisfies SpentEntry)
 
         // Nothing else this call needs
@@ -1140,7 +1163,7 @@ export async function installHostedBackend(
         // saying they are not competing here
         await answer(page, route, {
           entry: competition.entry,
-          problems: buildProblems(state, competitionId, true),
+          problems: buildProblems(state, competition.slug.en, true),
         } satisfies SpentEntry)
 
         // Nothing else this call needs
@@ -1177,7 +1200,7 @@ export async function installHostedBackend(
       // The one place an embargoed statement is served
       case 'problems': {
         // How long a clock in this competition's group runs
-        const clockMinutes = groupOf(state, competitionId)?.clockMinutes ?? CLOCK_MINUTES
+        const clockMinutes = groupOf(state, competitionSlug)?.clockMinutes ?? CLOCK_MINUTES
 
         // Answered with the competition's whole set, carrying the solutions where they are owed them
         await answer(
@@ -1185,7 +1208,7 @@ export async function installHostedBackend(
           route,
           buildProblems(
             state,
-            competitionId,
+            competition.slug.en,
             isSolutionOpen(competition.entry, clockMinutes, await pageNow(page))
           )
         )

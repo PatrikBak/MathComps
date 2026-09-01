@@ -4,6 +4,7 @@ import { DAY_MS, HOUR_MS, MINUTE_MS, SECOND_MS } from '@/components/shared/utils
 
 import type { AreaEntry } from '../hosted-competition-state'
 import {
+  areaTurnAwayKey,
   areNotesOpen,
   clockDisplayMode,
   clockMinuteFraction,
@@ -12,6 +13,7 @@ import {
   deriveStanding,
   entryEndsAt,
   hasEntryEnded,
+  isCompetitionAddressedBy,
   orderForReading,
   readAreaRun,
   toAreaEntry,
@@ -74,7 +76,7 @@ function asSat(entry: HostedCompetitionEntry): SatEntry {
 function competitionOf(overrides: Partial<HostedCompetition> = {}): HostedCompetition {
   // Only what the derivations read, with the case's own facts on top
   return {
-    id: 'c',
+    slug: { sk: 'stredna-1-2026', cs: 'stredni-1-2026', en: 'intermediate-1-2026' },
     category: 'intermediate',
     entry: null,
     resultsPublished: false,
@@ -103,6 +105,64 @@ function groupOf(overrides: Partial<HostedCompetitionGroup> = {}): HostedCompeti
     ...overrides,
   }
 }
+
+describe('areaTurnAwayKey', () => {
+  it('reads a competition taking entries as one the reader has not started', () => {
+    // It is there and open, so they are early rather than refused
+    expect(areaTurnAwayKey('open', true)).toBe('areaNotStarted')
+
+    // And the practice one is open the same way for as long as it exists
+    expect(areaTurnAwayKey('practice', true)).toBe('areaNotStarted')
+  })
+
+  it('asks a reader with no account for one wherever having one would let them in', () => {
+    // A competition they could start is not theirs without it
+    expect(areaTurnAwayKey('open', false)).toBe('areaSignIn')
+
+    // Nor the practice one
+    expect(areaTurnAwayKey('practice', false)).toBe('areaSignIn')
+
+    // Nor a finished one they could otherwise read
+    expect(areaTurnAwayKey('closed', false)).toBe('areaSignIn')
+  })
+
+  it('reads a competition nobody is in yet as not open, account or no account', () => {
+    // Announced, with its window still ahead of it
+    expect(areaTurnAwayKey('upcoming', true)).toBe('areaNotOpen')
+
+    // Which signing in does nothing about
+    expect(areaTurnAwayKey('upcoming', false)).toBe('areaNotOpen')
+  })
+
+  it('never blames a finished competition for being finished', () => {
+    // Its problems are read by anybody with an account, so a reader holding one who is still turned away
+    // is looking at a set that never went public
+    expect(areaTurnAwayKey('closed', true)).toBe('areaNotPublic')
+  })
+
+  it('reads a name no competition answers to as the address being wrong', () => {
+    // Nothing was found to have a phase, which is a mistyped or stale link
+    expect(areaTurnAwayKey(undefined, true)).toBe('areaUnknown')
+  })
+})
+
+describe('isCompetitionAddressedBy', () => {
+  it("answers to the name any language gives it, not only the reader's own", () => {
+    // The Slovak name finds it
+    expect(isCompetitionAddressedBy(competitionOf(), 'stredna-1-2026')).toBe(true)
+
+    // And so does the English one
+    expect(isCompetitionAddressedBy(competitionOf(), 'intermediate-1-2026')).toBe(true)
+  })
+
+  it('answers to nothing else', () => {
+    // Another competition's name
+    expect(isCompetitionAddressedBy(competitionOf(), 'pokrocila-1-2026')).toBe(false)
+
+    // And a name of no competition at all
+    expect(isCompetitionAddressedBy(competitionOf(), '')).toBe(false)
+  })
+})
 
 describe('derivePhase', () => {
   it('reads a group past its window as closed', () => {

@@ -46,6 +46,34 @@ public interface IMetadataLocalizationService
     string GetNodeFullName(Language lang, string path);
 
     /// <summary>
+    /// Gets what a competition node is called in a URL, in every language.
+    /// </summary>
+    /// <param name="path">The node's path (e.g. "mc-advanced-1").</param>
+    /// <returns>The URL name in each language.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if any language gives the node no URL name.</exception>
+    IReadOnlyDictionary<Language, string> GetNodeUrlSlugs(string path);
+
+    /// <summary>
+    /// Finds the competition node one URL name addresses, whichever language it was written in.
+    /// </summary>
+    /// <remarks>
+    /// Language-blind on purpose. A link is pasted between readers who read the site in different languages, and
+    /// a name resolved against the reader's own language would refuse one written in somebody else's.
+    /// </remarks>
+    /// <param name="urlSlug">The URL name to resolve.</param>
+    /// <returns>The node's path, or null when no language gives that name to anything.</returns>
+    string? FindNodePathByUrlSlug(string urlSlug);
+
+    /// <summary>
+    /// Gets the languages that give a competition node no URL name.
+    /// </summary>
+    /// <param name="path">The node's path (e.g. "mc-advanced-1").</param>
+    /// <returns>
+    /// The languages where it is missing, in <see cref="Language"/> order, empty when they all carry one.
+    /// </returns>
+    IReadOnlyList<Language> LocalesMissingUrlSlug(string path);
+
+    /// <summary>
     /// Gets the localized name for a tag.
     /// </summary>
     /// <param name="lang">The language to get the name for.</param>

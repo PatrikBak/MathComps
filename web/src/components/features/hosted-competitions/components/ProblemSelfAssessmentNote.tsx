@@ -16,7 +16,7 @@ type ProblemSelfAssessmentNoteProps = {
   /** Who the cached set this writes into belongs to. */
   readerKey: HostedCompetitionsReaderKey
   /** Which competition the problem belongs to. */
-  competitionId: string
+  competitionSlug: string
   /** Which problem the note is about. */
   problemId: string
   /** What the student has already left, or null while they have left nothing. */
@@ -37,7 +37,7 @@ type ProblemSelfAssessmentNoteProps = {
  */
 export function ProblemSelfAssessmentNote({
   readerKey,
-  competitionId,
+  competitionSlug,
   problemId,
   assessment,
   areNotesOpen,
@@ -51,7 +51,7 @@ export function ProblemSelfAssessmentNote({
   const tActions = useTranslations('ui.actions')
 
   // The note, and the writes that put it on the record
-  const note = useProblemSelfAssessment(readerKey, competitionId, problemId, assessment)
+  const note = useProblemSelfAssessment(readerKey, competitionSlug, problemId, assessment)
 
   // A stem for the field's own ids, so several problems' notes can't share one
   const fieldId = useId()

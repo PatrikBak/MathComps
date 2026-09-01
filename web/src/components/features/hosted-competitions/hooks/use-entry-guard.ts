@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
@@ -9,10 +9,12 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { replaceQuery } from '@/components/shared/utils/url-utils'
 import { useCurrentUrl } from '@/hooks/use-current-url'
 import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
+import type { Locale } from '@/i18n/i18n'
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
 
 import { entryBlockerFor, type EntryReader } from '../model/entry-reader'
+import { isCompetitionAddressedBy } from '../model/hosted-competition-state'
 import type { HostedCompetitionGroup, PendingEntry } from '../model/hosted-competition-types'
 
 /**
@@ -31,7 +33,7 @@ type UseEntryGuardParams = {
   /** Asks the reader about a competition, only ever somebody who can actually enter it. */
   openDialog: (pending: PendingEntry) => void
   /** Which competition a press before a sign-in was aimed at, if the return URL carried one. */
-  entryIntentId: string | undefined
+  entryIntentSlug: string | undefined
   /**
    * Whether the list has actually arrived.
    *
@@ -61,11 +63,14 @@ export function useEntryGuard({
   reader,
   groups,
   openDialog,
-  entryIntentId,
+  entryIntentSlug,
   hasView,
 }: UseEntryGuardParams): (pending: PendingEntry) => void {
   // Competitions copy
   const t = useTranslations('competitions')
+
+  // The reader's language
+  const locale = useLocale() as Locale
 
   // The shared sign-in prompt
   const showLoginPrompt = useLoginPromptToast()
@@ -88,7 +93,7 @@ export function useEntryGuard({
           // This page, plus which competition was pressed
           const [path, search = ''] = getCurrentUrl().split('?')
           const query = new URLSearchParams(search)
-          query.set(ENTRY_INTENT_PARAM, pending.competition.id)
+          query.set(ENTRY_INTENT_PARAM, pending.competition.slug[locale])
 
           // Ask for the account, naming the competition to come back to
           showLoginPrompt({
@@ -134,7 +139,7 @@ export function useEntryGuard({
           return assertNever(blocker)
       }
     },
-    [getCurrentUrl, openDialog, reader, router, showLoginPrompt, t]
+    [getCurrentUrl, locale, openDialog, reader, router, showLoginPrompt, t]
   )
 
   // Whether the press carried across the sign-in has been answered, so it is answered once and not again
@@ -147,7 +152,7 @@ export function useEntryGuard({
   // Answering the press the reader made before they had an account, now that they have one
   useEffect(() => {
     // Nothing was carried, or it has been answered already
-    if (entryIntentId === undefined || hasResumed.current) {
+    if (entryIntentSlug === undefined || hasResumed.current) {
       return
     }
 
@@ -158,9 +163,13 @@ export function useEntryGuard({
 
     // Whichever competition was pressed, if it is still on the page
     const group = groups.find((candidate) =>
-      candidate.competitions.some((competition) => competition.id === entryIntentId)
+      candidate.competitions.some((competition) =>
+        isCompetitionAddressedBy(competition, entryIntentSlug)
+      )
     )
-    const competition = group?.competitions.find((candidate) => candidate.id === entryIntentId)
+    const competition = group?.competitions.find((candidate) =>
+      isCompetitionAddressedBy(candidate, entryIntentSlug)
+    )
 
     // Answered, whatever comes of it below
     hasResumed.current = true
@@ -177,7 +186,7 @@ export function useEntryGuard({
     if (group !== undefined && competition !== undefined) {
       guard({ group, competition })
     }
-  }, [reader, groups, entryIntentId, guard, hasView, searchParams])
+  }, [reader, groups, entryIntentSlug, guard, hasView, searchParams])
 
   // The call every entry press goes through
   return guard

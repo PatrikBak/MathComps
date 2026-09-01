@@ -4,8 +4,12 @@ import type { LocalizedString } from '@/i18n/i18n'
  * One competition: one category, one problem set, one clock.
  */
 export type HostedCompetition = {
-  /** Identifies the competition. */
-  id: string
+  /**
+   * What addresses the competition, in each language it is named in.
+   *
+   * One name per language the site is read in, any of which addresses it.
+   */
+  slug: LocalizedString
   /** Which level it runs at, or null for the practice one, which sits outside the levels entirely. */
   category: HostedCompetitionCategory | null
   /** The student's entry, or null while they have not taken it. */

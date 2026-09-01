@@ -8,9 +8,9 @@ namespace MathComps.Domain.Contracts.Defense;
 /// applies to any one conversation.
 /// </summary>
 /// <remarks>
-/// The handout arm carries ids and the problem arm carries names, because the two are named from different
-/// places: handout content is read on the reader's own side, while the taxonomy is not, and a competition
-/// still under embargo is absent from everything the reader's side could name it from.
+/// The handout arm carries only ids, while the problem arm carries names alongside them, because the two are
+/// named from different places: handout content is read on the reader's own side, while the taxonomy is not,
+/// and a competition still under embargo is absent from everything the reader's side could name it from.
 /// </remarks>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(NamedHandoutTarget), typeDiscriminator: "handout")]
@@ -27,8 +27,9 @@ public sealed record NamedHandoutTarget(string HandoutContentId, string Environm
 /// nothing to resolve a problem's identity against.
 /// </summary>
 /// <param name="ProblemId"><inheritdoc cref="ProblemTarget.ProblemId" path="/summary"/></param>
-/// <param name="CompetitionId">The competition it was set in, identified by the round it runs as.</param>
-/// <param name="Slug"><inheritdoc cref="EfCoreEntities.Problem.Slug" path="/summary"/></param>
+/// <param name="CompetitionSlug">
+/// What addresses the competition it was set in, in the same language as the rest of the target's names.</param>
+/// <param name="Slug">The problem's own address in the archive.</param>
 /// <param name="Source"><inheritdoc cref="ProblemSource" path="/summary"/></param>
 public sealed record NamedProblemTarget(
-    Guid ProblemId, Guid CompetitionId, string Slug, ProblemSource Source) : NamedDefenseTarget;
+    Guid ProblemId, string CompetitionSlug, string Slug, ProblemSource Source) : NamedDefenseTarget;

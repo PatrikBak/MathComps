@@ -15,7 +15,7 @@ type FinishEntryDialogProps = {
   /** Who the cached answers belong to. */
   readerKey: HostedCompetitionsReaderKey
   /** Which competition is being handed in. */
-  competitionId: string
+  competitionSlug: string
   /** Whether the student has been asked whether they really mean to hand the entry in. */
   isAsked: boolean
   /** Whether the counted part is already over. */
@@ -36,7 +36,7 @@ type FinishEntryDialogProps = {
  */
 export function FinishEntryDialog({
   readerKey,
-  competitionId,
+  competitionSlug,
   isAsked,
   hasEnded,
   onClose,
@@ -46,7 +46,7 @@ export function FinishEntryDialog({
   const t = useTranslations('competitions')
 
   // Closing the entry where the student says rather than where the clock does
-  const { finish, isFinishing } = useFinishHostedCompetition(readerKey, competitionId, onFinished)
+  const { finish, isFinishing } = useFinishHostedCompetition(readerKey, competitionSlug, onFinished)
 
   // Nothing left to ask about, unless the answer to the asking is still coming back
   if (!isAsked || (hasEnded && !isFinishing)) {

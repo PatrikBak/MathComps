@@ -167,8 +167,8 @@ export type NamedProblemTarget = {
   kind: 'problem'
   /** The problem being defended. */
   problemId: string
-  /** The competition it was set in, identified by the round it runs as. */
-  competitionId: string
+  /** What addresses the competition it was set in, in the language the target is named in. */
+  competitionSlug: string
   /** URL-safe identifier, unique across the archive. */
   slug: string
   /** Where the problem comes from. */

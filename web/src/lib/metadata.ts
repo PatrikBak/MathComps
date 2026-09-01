@@ -63,7 +63,7 @@ type PageAddress = {
   locale: Locale
   /** URL path for canonical URL generation. */
   path?: string
-  /** Values for the route's other dynamic segments, by segment name. */
+  /** Values for the route's dynamic segments, by segment name. */
   routeParams?: Record<string, string>
   /** Open Graph content type ('website' or 'article'). */
   type?: 'website' | 'article'

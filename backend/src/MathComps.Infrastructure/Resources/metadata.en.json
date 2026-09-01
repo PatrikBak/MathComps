@@ -242,7 +242,8 @@
     },
     "mc-practice": {
       "shortName": "Practice competition",
-      "fullName": "Practice competition"
+      "fullName": "Practice competition",
+      "urlSlug": "practice"
     },
     "mc-elementary": {
       "shortName": "Elementary",
@@ -250,15 +251,18 @@
     },
     "mc-elementary-1": {
       "shortName": "September",
-      "fullName": "September"
+      "fullName": "September",
+      "urlSlug": "elementary-1"
     },
     "mc-elementary-2": {
       "shortName": "October",
-      "fullName": "October"
+      "fullName": "October",
+      "urlSlug": "elementary-2"
     },
     "mc-elementary-3": {
       "shortName": "November",
-      "fullName": "November"
+      "fullName": "November",
+      "urlSlug": "elementary-3"
     },
     "mc-intermediate": {
       "shortName": "Intermediate",
@@ -266,15 +270,18 @@
     },
     "mc-intermediate-1": {
       "shortName": "September",
-      "fullName": "September"
+      "fullName": "September",
+      "urlSlug": "intermediate-1"
     },
     "mc-intermediate-2": {
       "shortName": "October",
-      "fullName": "October"
+      "fullName": "October",
+      "urlSlug": "intermediate-2"
     },
     "mc-intermediate-3": {
       "shortName": "November",
-      "fullName": "November"
+      "fullName": "November",
+      "urlSlug": "intermediate-3"
     },
     "mc-advanced": {
       "shortName": "Advanced",
@@ -282,15 +289,18 @@
     },
     "mc-advanced-1": {
       "shortName": "September",
-      "fullName": "September"
+      "fullName": "September",
+      "urlSlug": "advanced-1"
     },
     "mc-advanced-2": {
       "shortName": "October",
-      "fullName": "October"
+      "fullName": "October",
+      "urlSlug": "advanced-2"
     },
     "mc-advanced-3": {
       "shortName": "November",
-      "fullName": "November"
+      "fullName": "November",
+      "urlSlug": "advanced-3"
     }
   },
   "seasonFormat": "Edition {number} ({start}/{end})"

@@ -33,6 +33,42 @@ public class MetadataLocalizationService : IMetadataLocalizationService
             .SelectMany(tags => tags.Value)
             .ToImmutableDictionary(tag => tag.Slug, tag => tag);
 
+    /// <summary>
+    /// Every URL name any locale gives a node, pointing back at the node it names.
+    /// </summary>
+    private readonly ImmutableDictionary<string, string> _nodePathsByUrlSlug;
+
+    #endregion
+
+    #region Constructor
+
+    /// <summary>
+    /// Indexes the loaded locales by the URL names they give competition nodes.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when two nodes are given the same URL name.</exception>
+    public MetadataLocalizationService()
+    {
+        // Every URL name any locale gives a node, once per node it names.
+        var claims = _metadata.Values
+            .SelectMany(metadata => metadata.Nodes)
+            .Where(node => node.Value.UrlSlug is { Length: > 0 })
+            .Select(node => (UrlSlug: node.Value.UrlSlug!, Path: node.Key))
+            .Distinct()
+            .ToList();
+
+        // A name two different nodes both claim, which would send one competition's URL to the other.
+        var clash = claims.GroupBy(claim => claim.UrlSlug).FirstOrDefault(group => group.Count() > 1);
+
+        // Refuse to start on one, naming both nodes so the misconfiguration says what it is.
+        if (clash is not null)
+            throw new InvalidOperationException(
+                $"The URL name '{clash.Key}' is claimed by more than one competition node: " +
+                $"{string.Join(", ", clash.Select(claim => claim.Path))}.");
+
+        // Indexed by the name, so resolving one is a lookup.
+        _nodePathsByUrlSlug = claims.ToImmutableDictionary(claim => claim.UrlSlug, claim => claim.Path);
+    }
+
     #endregion
 
     #region Public properties
@@ -60,6 +96,22 @@ public class MetadataLocalizationService : IMetadataLocalizationService
     public string GetNodeFullName(Language language, string path) =>
         GetMetadata(language).GetNodeNames(path)?.FullName
             ?? throw MissingLocalization("competition", path, language);
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<Language, string> GetNodeUrlSlugs(string path) =>
+        Enum.GetValues<Language>().ToDictionary(
+            language => language,
+            language => GetMetadata(language).GetNodeNames(path)?.UrlSlug
+                ?? throw MissingLocalization("competition URL name", path, language));
+
+    /// <inheritdoc />
+    public string? FindNodePathByUrlSlug(string urlSlug) =>
+        _nodePathsByUrlSlug.GetValueOrDefault(urlSlug);
+
+    /// <inheritdoc />
+    public IReadOnlyList<Language> LocalesMissingUrlSlug(string path) =>
+        // A name the JSON omits deserializes to null, which no key check would catch.
+        LocalesMissing(metadata => metadata.GetNodeNames(path) is { UrlSlug.Length: > 0 });
 
     /// <inheritdoc />
     public string GetTagName(Language language, string slug) =>

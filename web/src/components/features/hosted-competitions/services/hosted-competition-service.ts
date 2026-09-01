@@ -60,42 +60,42 @@ export function dismissProfilePrompt(apiCall: ApiCaller): Promise<ApiResult<void
  * with it.
  *
  * @param apiCall - The authenticated API caller.
- * @param competitionId - Which competition is being entered.
+ * @param competitionSlug - Which competition is being entered.
  * @returns The entry that was created and the set it opens.
  */
 export function enterHostedCompetition(
   apiCall: ApiCaller,
-  competitionId: string
+  competitionSlug: string
 ): Promise<ApiResult<SpentEntry>> {
-  return apiCall<SpentEntry>(() => getEnterCompetitionUrl(competitionId), { method: 'POST' })
+  return apiCall<SpentEntry>(() => getEnterCompetitionUrl(competitionSlug), { method: 'POST' })
 }
 
 /**
  * Gives the student's entry up: the problems open to them and no clock is ever started.
  *
  * @param apiCall - The authenticated API caller.
- * @param competitionId - Which competition's entry is being given up.
+ * @param competitionSlug - Which competition's entry is being given up.
  * @returns The entry that was created and the set it opens.
  */
 export function forfeitHostedCompetition(
   apiCall: ApiCaller,
-  competitionId: string
+  competitionSlug: string
 ): Promise<ApiResult<SpentEntry>> {
-  return apiCall<SpentEntry>(() => getForfeitCompetitionUrl(competitionId), { method: 'POST' })
+  return apiCall<SpentEntry>(() => getForfeitCompetitionUrl(competitionSlug), { method: 'POST' })
 }
 
 /**
  * Closes a running entry where the student says rather than where its clock does.
  *
  * @param apiCall - The authenticated API caller.
- * @param competitionId - Which competition's entry is being handed in.
+ * @param competitionSlug - Which competition's entry is being handed in.
  * @returns The entry as it now stands.
  */
 export function finishHostedCompetition(
   apiCall: ApiCaller,
-  competitionId: string
+  competitionSlug: string
 ): Promise<ApiResult<HostedCompetitionEntry>> {
-  return apiCall<HostedCompetitionEntry>(() => getFinishCompetitionUrl(competitionId), {
+  return apiCall<HostedCompetitionEntry>(() => getFinishCompetitionUrl(competitionSlug), {
     method: 'POST',
   })
 }
@@ -104,32 +104,32 @@ export function finishHostedCompetition(
  * Reads one competition's problem set, with whatever the student has said about each.
  *
  * @param apiCall - The authenticated API caller.
- * @param competitionId - Which competition's problems to read.
+ * @param competitionSlug - Which competition's problems to read.
  * @returns The problems, in the order the competition sets them.
  */
 export function fetchCompetitionProblems(
   apiCall: ApiCaller,
-  competitionId: string
+  competitionSlug: string
 ): Promise<ApiResult<HostedCompetitionProblem[]>> {
-  return apiCall<HostedCompetitionProblem[]>(() => getCompetitionProblemsUrl(competitionId))
+  return apiCall<HostedCompetitionProblem[]>(() => getCompetitionProblemsUrl(competitionSlug))
 }
 
 /**
  * Records what the student makes of their own solution to one problem, replacing what they said before.
  *
  * @param apiCall - The authenticated API caller.
- * @param competitionId - Which competition the problem belongs to.
+ * @param competitionSlug - Which competition the problem belongs to.
  * @param problemId - Which problem the claim is about.
  * @param comment - What they say about the solution.
  * @returns Nothing, once the claim is recorded.
  */
 export function setProblemSelfAssessment(
   apiCall: ApiCaller,
-  competitionId: string,
+  competitionSlug: string,
   problemId: string,
   comment: string
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getProblemSelfAssessmentUrl(competitionId, problemId), {
+  return apiCall<void>(() => getProblemSelfAssessmentUrl(competitionSlug, problemId), {
     method: 'PUT',
     body: JSON.stringify({ comment }),
   })
@@ -139,16 +139,16 @@ export function setProblemSelfAssessment(
  * Takes back what the student said about their own solution to one problem.
  *
  * @param apiCall - The authenticated API caller.
- * @param competitionId - Which competition the problem belongs to.
+ * @param competitionSlug - Which competition the problem belongs to.
  * @param problemId - Which problem the claim was about.
  * @returns Nothing, once nothing of theirs stands against the problem.
  */
 export function clearProblemSelfAssessment(
   apiCall: ApiCaller,
-  competitionId: string,
+  competitionSlug: string,
   problemId: string
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getProblemSelfAssessmentUrl(competitionId, problemId), {
+  return apiCall<void>(() => getProblemSelfAssessmentUrl(competitionSlug, problemId), {
     method: 'DELETE',
   })
 }

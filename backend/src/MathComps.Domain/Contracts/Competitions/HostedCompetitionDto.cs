@@ -1,9 +1,13 @@
+using MathComps.Domain.Localization;
+
 namespace MathComps.Domain.Contracts.Competitions;
 
 /// <summary>
 /// One competition: one category, one problem set, one clock.
 /// </summary>
-/// <param name="Id">The competition's identifier, which is the round it runs as.</param>
+/// <param name="Slug">
+/// What addresses the competition, keyed by the language it is written in. Any of them addresses it, whichever
+/// language the reader is in.</param>
 /// <param name="Category">
 /// Which level it runs at, or null for the practice one, which sits outside the levels entirely.</param>
 /// <param name="Entry">
@@ -15,7 +19,7 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// <param name="ProblemsPublished">
 /// Whether the problems are public, which they become when the round's embargo passes.</param>
 public record HostedCompetitionDto(
-    Guid Id,
+    IReadOnlyDictionary<Language, string> Slug,
     HostedCompetitionCategory? Category,
     HostedEntryDto? Entry,
     bool ResultsPublished,

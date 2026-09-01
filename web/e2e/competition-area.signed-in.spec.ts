@@ -12,7 +12,7 @@ import {
   transcriptOf,
 } from './support/competitions'
 import {
-  COMPETITION_ID,
+  COMPETITION_SLUG,
   installHostedBackend,
   LIMITS,
   OPENER,
@@ -30,10 +30,10 @@ const NOTE = 'I think the last case holds, I just could not write it up in time'
 const REVISED_NOTE = 'On reflection the last case needs the bound the other way round'
 
 /** A competition no state ever holds an entry on, so the guard has something to turn away. */
-const UNENTERED_COMPETITION_ID = 'open-advanced'
+const UNENTERED_COMPETITION_SLUG = 'open-advanced'
 
 /** A competition that closed a month ago, which a newcomer has no entry on and may still read. */
-const CLOSED_COMPETITION_ID = 'closed-special-set'
+const CLOSED_COMPETITION_SLUG = 'closed-special-set'
 
 /**
  * How the first problem's official solution opens, which is prose rather than maths so a single string
@@ -59,7 +59,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Which draws every statement at once
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
@@ -72,7 +72,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // And the conversation already seeded on the first problem
     await openExistingDefense(page)
@@ -115,7 +115,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running', { hasConsented: false })
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // And the conversation the entry already holds
     await openExistingDefense(page)
@@ -158,7 +158,7 @@ test.describe('the competition area', () => {
     })
 
     // Open the competition's area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // And the conversation the entry already holds
     await openExistingDefense(page)
@@ -192,7 +192,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // And a conversation to write into
     await openExistingDefense(page)
@@ -218,7 +218,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'finished')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // And the conversation seeded across the boundary
     await openExistingDefense(page)
@@ -256,7 +256,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'expiring')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // And a conversation open across the instant it runs out
     await openExistingDefense(page)
@@ -302,7 +302,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'expiring')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // And a conversation to write into
     await openExistingDefense(page)
@@ -347,7 +347,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'expiring')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Once the set is there to pick a problem from
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
@@ -634,7 +634,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // The rules, agreed to once at the first entry ever and read here afterwards
     await page.getByRole('button', { name: areaCopy.rulesButton }).click()
@@ -652,7 +652,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // And a conversation to look for the controls in
     await openExistingDefense(page)
@@ -750,7 +750,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // The first problem's invitation to say something, which stands until something is said
     await page
@@ -778,7 +778,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // The first problem's invitation to say something
     await page
@@ -814,7 +814,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // The first problem's invitation to say something
     await page
@@ -860,7 +860,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'finished')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Which reads the same set as any other
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
@@ -876,7 +876,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'finished', { standingNote: NOTE })
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Which still shows them what they said, with nothing left to click on it
     await expect(page.getByText(NOTE)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
@@ -888,7 +888,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'forfeited')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Which reads the same set as any other
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
@@ -912,7 +912,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Hand the entry in
     await page.getByRole('button', { name: areaCopy.finishEntry }).click()
@@ -930,7 +930,7 @@ test.describe('the competition area', () => {
     await page.goto(LIST_PATH)
 
     // Where the row of the competition just handed in now offers the work back
-    await expect(page.locator(`a[href="/en/competitions/${COMPETITION_ID}"]`)).toHaveText(
+    await expect(page.locator(`a[href="/en/competitions/${COMPETITION_SLUG}"]`)).toHaveText(
       areaCopy.mySolutions,
       { timeout: SETTLE_TIMEOUT_MS }
     )
@@ -988,7 +988,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'expiring')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // The question, asked while there is still an entry to answer it about
     await page.getByRole('button', { name: areaCopy.finishEntry }).click()
@@ -1042,10 +1042,15 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open the area of a competition they never entered
-    await page.goto(areaPath(UNENTERED_COMPETITION_ID))
+    await page.goto(areaPath(UNENTERED_COMPETITION_SLUG))
 
     // Which sends them back to the list rather than serving them the statements
     await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Told the competition is one they have yet to start, which is an offer rather than a refusal
+    await expect(page.getByText(areaCopy.areaNotStarted)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
   })
 
   test('blames the read rather than the entry when the surface stops answering', async ({
@@ -1058,13 +1063,13 @@ test.describe('the competition area', () => {
     await page.route(`${BACKEND_ORIGIN}/competitions`, (route) => route.abort('connectionrefused'))
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Which says the read failed
     await expect(page.getByText(areaCopy.loadFailed)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // And leaves them on it: a page that could not read the entry is not one that found none
-    await expect(page).toHaveURL(new RegExp(`/competitions/${COMPETITION_ID}$`))
+    await expect(page).toHaveURL(new RegExp(`/competitions/${COMPETITION_SLUG}$`))
   })
 
   test('blames the problems read rather than the whole page when only it fails', async ({
@@ -1079,7 +1084,7 @@ test.describe('the competition area', () => {
     )
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Which says what actually failed
     await expect(page.getByText(areaCopy.areaProblemsFailed)).toBeVisible({
@@ -1107,7 +1112,7 @@ test.describe('the competition area', () => {
     })
 
     // Open the area of a competition they never entered
-    await page.goto(areaPath(UNENTERED_COMPETITION_ID))
+    await page.goto(areaPath(UNENTERED_COMPETITION_SLUG))
 
     // Which turns them away
     await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
@@ -1122,7 +1127,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Once the area is there to switch away from
     await expect(page.getByRole('article').first()).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
@@ -1133,8 +1138,8 @@ test.describe('the competition area', () => {
     // Taken to Slovak
     await page.getByRole('menuitem', { name: /Sloven/i }).click()
 
-    // Which re-expresses the route and keeps the competition its dynamic segment names
-    await expect(page).toHaveURL(new RegExp(`/sk/sutaze/${COMPETITION_ID}`), {
+    // Which re-expresses the route and the slug, both in the language switched to
+    await expect(page).toHaveURL(new RegExp(`/sk/sutaze/${COMPETITION_SLUG}-sk`), {
       timeout: SETTLE_TIMEOUT_MS,
     })
   })
@@ -1144,7 +1149,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Once the whole set is drawn
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
@@ -1167,7 +1172,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'forfeited')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Every problem now offers one
     await expect(
@@ -1205,7 +1210,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'forfeited')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Once every problem offers one
     await expect(
@@ -1249,7 +1254,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'expiring')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Which draws the set while the entry still counts
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
@@ -1279,7 +1284,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // And start a conversation about the first problem
     await page.getByRole('button', { name: areaCopy.startDefense }).first().click()
@@ -1306,7 +1311,7 @@ test.describe('the competition area', () => {
     await installHostedBackend(page, 'running')
 
     // Open its area
-    await page.goto(areaPath(COMPETITION_ID))
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // Once the whole set is drawn
     await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
@@ -1330,7 +1335,7 @@ test.describe('the competition area', () => {
     ).toHaveCount(PROBLEM_COUNT, { timeout: SETTLE_TIMEOUT_MS })
 
     // On the set the student just argued, which is the page they were already on
-    await expect(page).toHaveURL(new RegExp(`/competitions/${COMPETITION_ID}$`))
+    await expect(page).toHaveURL(new RegExp(`/competitions/${COMPETITION_SLUG}$`))
   })
 
   test('closes the solutions again when the practice run is taken a second time', async ({
@@ -1396,7 +1401,7 @@ test.describe('the competition area', () => {
     await page.goto(LIST_PATH)
 
     // The one link it leaves a reader who was never in it
-    const problems = page.locator(`a[href="/en/competitions/${CLOSED_COMPETITION_ID}"]`)
+    const problems = page.locator(`a[href="/en/competitions/${CLOSED_COMPETITION_SLUG}"]`)
 
     // Which reads as the offer of the problems
     await expect(problems).toHaveText(areaCopy.problems, { timeout: SETTLE_TIMEOUT_MS })
