@@ -1,10 +1,11 @@
 'use client'
 
+import { useUser } from '@clerk/nextjs'
 import { useDisclosure, useToggle } from '@mantine/hooks'
 import { Menu } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useTranslations } from 'next-intl'
-import { Suspense, useState } from 'react'
+import { Suspense } from 'react'
 
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher'
 import MathCompsLogo from '@/components/layout/MathCompsLogo'
@@ -65,22 +66,37 @@ function MathildaLibraryPlaceholder({ onClose }: MathildaLibraryPlaceholderProps
  *   height and the derived `--scroll-offset`. Change the height there, in one place.
  */
 export default function Header() {
+  // The signed-in user, and whether Clerk has answered yet
+  const { user, isLoaded } = useUser()
+
   // Keep track of whether the mobile menu is open
   const [isMobileNavigationOpen, toggleMobileNavigationOpen] = useToggle()
 
   // The defenses list's open state
   const [isDefensesOpen, { open: openDefenses, close: closeDefenses }] = useDisclosure(false)
 
-  // Whether the list has ever been opened
-  const [hasOpenedDefenses, setHasOpenedDefenses] = useState(false)
+  // Whether the defenses are mounted, open or not, and the way to mount them closed, which downloads
+  // their chunk and starts their list loading
+  const [isDefensesMounted, { open: prepareDefenses }] = useDisclosure(false)
 
-  // Opens the defenses list, mounting it on the first open
+  // Shows the defenses, mounting them if they are not up yet
   const handleOpenDefenses = () => {
     // Mount the list
-    setHasOpenedDefenses(true)
+    prepareDefenses()
 
     // Show it
     openDefenses()
+  }
+
+  // Opens or closes the mobile menu, loading the defenses the open one offers
+  const handleToggleMobileNavigation = () => {
+    // The menu going up carries them, for everyone but a reader Clerk has called signed out
+    if (!isMobileNavigationOpen && (!isLoaded || user)) {
+      prepareDefenses()
+    }
+
+    // Flip the menu
+    toggleMobileNavigationOpen()
   }
 
   // Translations for navigation
@@ -110,14 +126,14 @@ export default function Header() {
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-1">
               <LanguageSwitcher />
-              <UserMenu onOpenDefenses={handleOpenDefenses} />
+              <UserMenu onOpenDefenses={handleOpenDefenses} onPrepareDefenses={prepareDefenses} />
             </div>
 
             {/* Mobile Navigation Button */}
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => toggleMobileNavigationOpen()}
+              onClick={handleToggleMobileNavigation}
               className="lg:hidden text-foreground"
               aria-label={tNav('menuOpen')}
               aria-expanded={isMobileNavigationOpen}
@@ -136,7 +152,7 @@ export default function Header() {
       />
 
       {/* The user's defenses, over whichever menu opened them */}
-      {hasOpenedDefenses && (
+      {isDefensesMounted && (
         <Suspense
           fallback={isDefensesOpen ? <MathildaLibraryPlaceholder onClose={closeDefenses} /> : null}
         >

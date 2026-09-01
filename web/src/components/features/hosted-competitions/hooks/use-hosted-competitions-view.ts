@@ -27,13 +27,13 @@ type UseHostedCompetitionsViewResult = {
  * One read rather than two, so a half-arrived page cannot show a history with the open group missing.
  *
  * @param readerKey - Who the answer belongs to, which is what it gets cached under.
- * @param isReaderKnown - Whether who the answer belongs to is settled yet.
+ * @param shouldRead - Whether to read it at all.
  *
  * @returns The view and the state of the read.
  */
 export function useHostedCompetitionsView(
   readerKey: HostedCompetitionsReaderKey,
-  isReaderKnown: boolean
+  shouldRead: boolean
 ): UseHostedCompetitionsViewResult {
   // What the student can enter, and what they have behind them. Only the caller's own entries are ever
   // on it, so a signed-out visitor reads the groups and no history
@@ -42,8 +42,8 @@ export function useHostedCompetitionsView(
     fetch: fetchHostedCompetitionsView,
     // The groups are public, so this one read does not wait on an account
     requireAuth: false,
-    // Nothing is read until it is known whose answer it would be
-    enabled: isReaderKnown,
+    // Nothing is read until a caller asks for it
+    enabled: shouldRead,
     // An entry taken on another tab should show up here promptly
     ...cachePolicy.userData,
   })
