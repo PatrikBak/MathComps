@@ -25,7 +25,8 @@ type UseCompetitionProblemsResult = {
  *
  * @param readerKey - Who the answer belongs to, which is what it gets cached under.
  * @param competitionSlug - Which competition's problems to read.
- * @param isEntitled - Whether the reader has an entry these problems are theirs to see through.
+ * @param isEntitled - Whether the problems are the reader's to see, through an entry or through the
+ *   competition having closed with them made public.
  *
  * @returns The problems and the state of the read.
  */
@@ -38,8 +39,8 @@ export function useCompetitionProblems(
   const query = useApiQuery<HostedCompetitionProblem[]>({
     queryKey: competitionProblemsQueryKey(readerKey, competitionSlug),
     fetch: (apiCall) => fetchCompetitionProblems(apiCall, competitionSlug),
-    // Served through the reader's own entry, so it is read as them
-    requireAuth: true,
+    // A closed competition's set is public, so this read does not wait on an account
+    requireAuth: false,
     // Embargoed until an entry is spent on them, so nothing is asked for before there is one
     enabled: isEntitled,
     // A conversation held on another tab should show up here promptly

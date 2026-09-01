@@ -184,7 +184,7 @@ public sealed class HostedCompetitionService(
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<HostedCompetitionProblemDto>> GetProblemsAsync(
-        Guid userId, string competitionSlug, CancellationToken cancellationToken = default)
+        Guid? userId, string competitionSlug, CancellationToken cancellationToken = default)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -196,17 +196,19 @@ public sealed class HostedCompetitionService(
         await EnsureEntitledAsync(dbContext, userId, roundId, cancellationToken);
 
         // Their entry with the clock it was given, absent on a set they are reading without one, which is a
-        // competition that has closed.
-        var entry = await dbContext.HostedEntries
-            .AsNoTracking()
-            .Where(candidate => candidate.UserId == userId && candidate.RoundId == roundId)
-            .Select(candidate => new
-            {
-                candidate.StartedAt,
-                candidate.FinishedAt,
-                candidate.Round.HostedGroup!.ClockMinutes,
-            })
-            .FirstOrDefaultAsync(cancellationToken);
+        // competition that has closed. A reader with no account holds none, so there is nothing to look for.
+        var entry = userId is not null
+            ? await dbContext.HostedEntries
+                .AsNoTracking()
+                .Where(candidate => candidate.UserId == userId && candidate.RoundId == roundId)
+                .Select(candidate => new
+                {
+                    candidate.StartedAt,
+                    candidate.FinishedAt,
+                    candidate.Round.HostedGroup!.ClockMinutes,
+                })
+                .FirstOrDefaultAsync(cancellationToken)
+            : null;
 
         // Whether they are past competing here, which is what the official solution waits on.
         var isSolutionOpen = entry is null || HostedEntryRules.IsSolutionOpen(
@@ -459,7 +461,7 @@ public sealed class HostedCompetitionService(
     /// their own solution.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="userId">The student reading.</param>
+    /// <param name="userId">The student reading, null where the reader has no account.</param>
     /// <param name="roundId">The competition whose problems these are.</param>
     /// <param name="isSolutionOpen">
     /// Whether the reader is past competing here, which <see cref="HostedEntryRules.IsSolutionOpen"/> settles.
@@ -467,7 +469,7 @@ public sealed class HostedCompetitionService(
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The problems, in the order the competition sets them.</returns>
     private async Task<IReadOnlyList<HostedCompetitionProblemDto>> ReadProblemsAsync(
-        MathCompsDbContext dbContext, Guid userId, Guid roundId, bool isSolutionOpen,
+        MathCompsDbContext dbContext, Guid? userId, Guid roundId, bool isSolutionOpen,
         CancellationToken cancellationToken)
     {
         // The set, each problem with its statement in every language, and its solution too where the reader is
@@ -500,30 +502,35 @@ public sealed class HostedCompetitionService(
 
         // The student's conversations about those problems, most recently active first, each cut down to what a
         // row on the problem says. Nothing of what was said comes back: the last line is usually the examiner's
-        // challenge, and handing it over would spoil it.
-        var defenses = await dbContext.ProblemDefenses
-            .AsNoTracking()
-            .Where(defense => problemIds.Contains(defense.ProblemId)
-                && defense.DefenseSession.UserId == userId)
-            .OrderByDescending(defense => defense.DefenseSession.Turns.Max(turn => turn.CreatedAt))
-            .Select(defense => new
-            {
-                defense.ProblemId,
-                Line = new HostedCompetitionDefenseLineDto(
-                    SessionId: defense.DefenseSessionId,
-                    StartedAt: defense.DefenseSession.CreatedAt),
-            })
-            .ToListAsync(cancellationToken);
+        // challenge, and handing it over would spoil it. A reader with no account has held none.
+        var defenses = userId is not null
+            ? await dbContext.ProblemDefenses
+                .AsNoTracking()
+                .Where(defense => problemIds.Contains(defense.ProblemId)
+                    && defense.DefenseSession.UserId == userId)
+                .OrderByDescending(defense => defense.DefenseSession.Turns.Max(turn => turn.CreatedAt))
+                .Select(defense => new
+                {
+                    defense.ProblemId,
+                    Line = new HostedCompetitionDefenseLineDto(
+                        SessionId: defense.DefenseSessionId,
+                        StartedAt: defense.DefenseSession.CreatedAt),
+                })
+                .ToListAsync(cancellationToken)
+            : [];
 
         // What the student currently claims about each of those solutions, for the problems they have said
         // anything about. Keyed on them and the problem, so a claim made in an earlier run is still theirs.
-        var assessments = await dbContext.ProblemSelfAssessments
-            .AsNoTracking()
-            .Where(assessment => problemIds.Contains(assessment.ProblemId) && assessment.UserId == userId)
-            .ToDictionaryAsync(
-                assessment => assessment.ProblemId,
-                assessment => assessment.Comment,
-                cancellationToken);
+        var assessments = userId is not null
+            ? await dbContext.ProblemSelfAssessments
+                .AsNoTracking()
+                .Where(assessment => problemIds.Contains(assessment.ProblemId)
+                    && assessment.UserId == userId)
+                .ToDictionaryAsync(
+                    assessment => assessment.ProblemId,
+                    assessment => assessment.Comment,
+                    cancellationToken)
+            : [];
 
         // Each problem with the conversations held about it and what the student makes of their own solution.
         return
@@ -578,26 +585,32 @@ public sealed class HostedCompetitionService(
     }
 
     /// <summary>
-    /// Throws unless the student may read a competition's problems: its embargo has passed, or they hold an entry
-    /// they have spent into it.
+    /// Throws unless the reader may read a competition's problems, which is
+    /// <see cref="HostedEntryRules.EnsureEntitledAsync"/>'s rule asked of a round the site hosts. One it does
+    /// not host is no competition, and reads as absent rather than as refused.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="userId">The student reading.</param>
+    /// <param name="userId">The student reading, null where the reader has no account.</param>
     /// <param name="roundId">The competition whose problems they are reaching for.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     private static async Task EnsureEntitledAsync(
-        MathCompsDbContext dbContext, Guid userId, Guid roundId, CancellationToken cancellationToken)
+        MathCompsDbContext dbContext, Guid? userId, Guid roundId, CancellationToken cancellationToken)
     {
-        // The round, which is absent unless the site hosts it.
+        // The round with the window its group runs in, absent unless the site hosts it.
         var round = await dbContext.Rounds
             .AsNoTracking()
-            .FirstOrDefaultAsync(
-                candidate => candidate.Id == roundId && candidate.HostedGroupId != null, cancellationToken)
+            .Where(candidate => candidate.Id == roundId && candidate.HostedGroupId != null)
+            .Select(candidate => new
+            {
+                candidate.VisibleSince,
+                candidate.HostedGroup!.ClosesAt,
+            })
+            .FirstOrDefaultAsync(cancellationToken)
             ?? throw new HostedCompetitionNotFoundException();
 
         // And past that it is the same rule a conversation about one of its problems is opened under.
         await HostedEntryRules.EnsureEntitledAsync(
-            dbContext, userId, roundId, round.VisibleSince, cancellationToken);
+            dbContext, userId, roundId, round.VisibleSince, round.ClosesAt, cancellationToken);
     }
 
     /// <summary>

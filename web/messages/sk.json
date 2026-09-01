@@ -247,7 +247,7 @@
     },
     "loadingButton": "Načítavam účet",
     "login": "Prihlásiť sa",
-    "loginRequired": "Pre {reason} sa musíte prihlásiť",
+    "loginRequired": "Pre {reason} sa musíš prihlásiť",
     "newPassword": "Nové heslo",
     "or": "ALEBO",
     "password": "Heslo",
@@ -307,7 +307,6 @@
     "lastEdited": "Naposledy upravené {date}",
     "like": "Páči sa mi to",
     "loadError": "Nepodarilo sa načítať komentáre. Skúste to neskôr.",
-    "loginRequired": "Pre pridanie komentára musíte byť prihlásený.",
     "reply": "Odpovedať",
     "replyPlaceholder": "Napíš odpoveď...",
     "show": "Zobraziť",
@@ -327,6 +326,7 @@
     "signInStalled": "Prihlásenie sa nepodarilo dokončiť."
   },
   "competitions": {
+    "areaAuthReason": "otvorenie tejto súťaže",
     "areaClockSpent": "Tvoj čas vypršal. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",
     "areaFinished": "Súťaž máš ukončenú. Úlohy si môžeš riešiť ďalej a s Mathildou sa o nich rozprávať, ale do výsledkov sa ti nové správy nezapočítajú.",
     "areaForfeited": "Už nemôžeš súťažiť. Úlohy si tu môžeš skúšať ďalej, len sa nepočítajú.",
@@ -334,7 +334,6 @@
     "areaNotPublic": "Úlohy tejto súťaže ešte nie sú verejné.",
     "areaNotStarted": "Túto súťaž ešte nemáš spustenú.",
     "areaProblemsFailed": "Úlohy sa nepodarilo načítať.",
-    "areaSignIn": "Túto súťaž otvoríš po prihlásení.",
     "areaUnknown": "Súťaž s takým názvom neexistuje.",
     "backToCompetitions": "Späť na súťaže",
     "categories": {

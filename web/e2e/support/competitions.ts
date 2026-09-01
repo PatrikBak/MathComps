@@ -8,10 +8,13 @@ import messages from '../../messages/en.json'
  * The copy the assertions match on, taken from the app's own English messages: what each of them means is
  * that a particular message is on screen, not that a particular sentence is.
  */
-const { competitions: competitionsCopy, defense: defenseCopy, ui } = messages
+const { auth: authMessages, competitions: competitionsCopy, defense: defenseCopy, ui } = messages
 
 /** The copy the competitions surface reads under. */
 export const areaCopy = competitionsCopy
+
+/** The copy every prompt for an account reads under, whichever surface raises it. */
+export const authCopy = authMessages
 
 /** The copy the defense chat reads under. */
 export const chatCopy = defenseCopy

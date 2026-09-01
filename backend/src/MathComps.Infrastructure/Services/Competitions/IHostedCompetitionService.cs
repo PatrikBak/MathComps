@@ -72,14 +72,15 @@ public interface IHostedCompetitionService
 
     /// <summary>
     /// Reads one competition's problem set, with whatever the student has said about each. An embargoed set is
-    /// served only to a student who has spent an entry into it.
+    /// served only to a student who has spent an entry into it, and a competition still running only to an
+    /// account; once it is over the set reads for anybody, carrying nothing of anyone's own.
     /// </summary>
-    /// <param name="userId">The student reading.</param>
+    /// <param name="userId">The student reading, null where the reader has no account.</param>
     /// <param name="competitionSlug">What addresses the competition whose problems these are.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The problems, in the order the competition sets them.</returns>
     Task<IReadOnlyList<HostedCompetitionProblemDto>> GetProblemsAsync(
-        Guid userId, string competitionSlug, CancellationToken cancellationToken = default);
+        Guid? userId, string competitionSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Records what a student says about their own solution to one of a competition's problems, replacing

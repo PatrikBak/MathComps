@@ -318,24 +318,26 @@ export type CompetitionInGroup = {
 }
 
 /**
- * The competitions-copy keys a turning-away is worded by.
+ * The competitions-copy keys a turning-away is worded by: a sentence of its own, or, for
+ * `areaAuthReason`, what the account is for, which the shared login wording wraps.
  */
 export type AreaTurnAwayKey =
   | 'areaUnknown'
   | 'areaNotOpen'
   | 'areaNotStarted'
   | 'areaNotPublic'
-  | 'areaSignIn'
+  | 'areaAuthReason'
 
 /**
  * What the area says when it turns a reader away.
  *
- * A phase is a reason on its own where the address leads nowhere, or where signing in would not help.
- * Everywhere else the account is what the reader is missing first, a competition being neither started nor
- * read without one.
+ * A phase is a reason on its own where the address leads nowhere, or where signing in would not help. A
+ * competition already over is the second of those: its set is public or held back for everybody alike.
+ * Where one is still taking entries the account is what the reader is missing first, a competition being
+ * neither started nor read without one.
  *
  * @param phase - Where the group sits in its own life, undefined when the address names no competition.
- * @param isSignedIn - Whether the reader has the account every read here is made as.
+ * @param isSignedIn - Whether the reader has the account an entry is taken with.
  *
  * @returns The copy key naming why the reader is being sent to the list.
  */
@@ -357,12 +359,12 @@ export function areaTurnAwayKey(
     case 'open':
     // And the practice one takes them for as long as it exists, which is the same standing
     case 'practice':
-      return isSignedIn ? 'areaNotStarted' : 'areaSignIn'
+      return isSignedIn ? 'areaNotStarted' : 'areaAuthReason'
 
-    // Over, so the set is open to every account and the reader is either without one, or looking at
-    // problems whose embargo outlived the competition
+    // Over, so the set is open to anybody and the only thing left to turn a reader away is problems
+    // whose embargo outlived the competition
     case 'closed':
-      return isSignedIn ? 'areaNotPublic' : 'areaSignIn'
+      return 'areaNotPublic'
 
     // Every phase is handled above
     default:

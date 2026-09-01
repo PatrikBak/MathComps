@@ -117,13 +117,10 @@ describe('areaTurnAwayKey', () => {
 
   it('asks a reader with no account for one wherever having one would let them in', () => {
     // A competition they could start is not theirs without it
-    expect(areaTurnAwayKey('open', false)).toBe('areaSignIn')
+    expect(areaTurnAwayKey('open', false)).toBe('areaAuthReason')
 
     // Nor the practice one
-    expect(areaTurnAwayKey('practice', false)).toBe('areaSignIn')
-
-    // Nor a finished one they could otherwise read
-    expect(areaTurnAwayKey('closed', false)).toBe('areaSignIn')
+    expect(areaTurnAwayKey('practice', false)).toBe('areaAuthReason')
   })
 
   it('reads a competition nobody is in yet as not open, account or no account', () => {
@@ -135,9 +132,12 @@ describe('areaTurnAwayKey', () => {
   })
 
   it('never blames a finished competition for being finished', () => {
-    // Its problems are read by anybody with an account, so a reader holding one who is still turned away
-    // is looking at a set that never went public
+    // Its problems are read by anybody, so a reader turned away from one is looking at a set that never
+    // went public
     expect(areaTurnAwayKey('closed', true)).toBe('areaNotPublic')
+
+    // And an account would not have changed that, so it is no reason to ask for one
+    expect(areaTurnAwayKey('closed', false)).toBe('areaNotPublic')
   })
 
   it('reads a name no competition answers to as the address being wrong', () => {

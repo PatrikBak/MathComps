@@ -247,7 +247,7 @@
     },
     "loadingButton": "Načítám účet",
     "login": "Přihlásit se",
-    "loginRequired": "Pro {reason} se musíte přihlásit",
+    "loginRequired": "Pro {reason} se musíš přihlásit",
     "newPassword": "Nové heslo",
     "or": "NEBO",
     "password": "Heslo",
@@ -307,7 +307,6 @@
     "lastEdited": "Naposledy upraveno {date}",
     "like": "To se mi líbí",
     "loadError": "Nepodařilo se načíst komentáře. Zkuste to později.",
-    "loginRequired": "Pro přidání komentáře musíte být přihlášeni.",
     "reply": "Odpovědět",
     "replyPlaceholder": "Napiš odpověď...",
     "show": "Zobrazit",
@@ -327,6 +326,7 @@
     "signInStalled": "Přihlášení se nepodařilo dokončit."
   },
   "competitions": {
+    "areaAuthReason": "otevření této soutěže",
     "areaClockSpent": "Tvůj čas vypršel. Úlohy si můžeš řešit dál a s Mathildou se o nich bavit, ale do výsledků se ti nové zprávy nezapočítají.",
     "areaFinished": "Soutěž máš ukončenou. Úlohy si můžeš řešit dál a s Mathildou se o nich bavit, ale do výsledků se ti nové zprávy nezapočítají.",
     "areaForfeited": "Už nemůžeš soutěžit. Úlohy si tu můžeš zkoušet dál, jen se nepočítají.",
@@ -334,7 +334,6 @@
     "areaNotPublic": "Úlohy této soutěže ještě nejsou veřejné.",
     "areaNotStarted": "Tuto soutěž ještě nemáš spuštěnou.",
     "areaProblemsFailed": "Úlohy se nepodařilo načíst.",
-    "areaSignIn": "Tuto soutěž otevřeš po přihlášení.",
     "areaUnknown": "Soutěž s takovým názvem neexistuje.",
     "backToCompetitions": "Zpět na soutěže",
     "categories": {

@@ -26,7 +26,7 @@ import { ProblemSelfAssessmentNote } from './ProblemSelfAssessmentNote'
 type CompetitionProblemPanelProps = {
   /** Which competition sets the problem. */
   competitionSlug: string
-  /** Whose entry it is being solved under. */
+  /** Whose entry it is being solved under, null on a closed competition read without an account. */
   readerKey: HostedCompetitionsReaderKey
   /** The problem, and the conversations held about it. */
   problem: HostedCompetitionProblem
@@ -98,47 +98,53 @@ export function CompetitionProblemPanel({
           />
         )}
 
-        {problem.defenses.map((defense) => (
-          <button
-            key={defense.sessionId}
-            type="button"
-            onClick={() => openDefense(defense.sessionId)}
-            data-defense-session-id={defense.sessionId}
-            className="focus flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5"
-          >
-            {/* When the student opened it */}
-            <span className="inline-flex items-center gap-2 text-foreground">
-              <MessageSquare size={15} className="text-muted" />
-              {format.dateTime(new Date(defense.startedAt), {
-                dateStyle: 'short',
-                timeStyle: 'short',
-              })}
-            </span>
-          </button>
-        ))}
+        {/* Everything a reader does here they do as themselves, so a closed competition read without an
+            account is the statement and the solution and nothing else */}
+        {readerKey !== null && (
+          <>
+            {problem.defenses.map((defense) => (
+              <button
+                key={defense.sessionId}
+                type="button"
+                onClick={() => openDefense(defense.sessionId)}
+                data-defense-session-id={defense.sessionId}
+                className="focus flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5"
+              >
+                {/* When the student opened it */}
+                <span className="inline-flex items-center gap-2 text-foreground">
+                  <MessageSquare size={15} className="text-muted" />
+                  {format.dateTime(new Date(defense.startedAt), {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  })}
+                </span>
+              </button>
+            ))}
 
-        {/* One more conversation about the same problem */}
-        <Button
-          variant="link"
-          size="sm"
-          className="mt-1 ml-3 self-start"
-          onClick={() => openDefense(null)}
-        >
-          <Plus size={15} />
-          {problem.defenses.length === 0 ? t('startDefense') : t('startAnotherDefense')}
-        </Button>
+            {/* One more conversation about the same problem */}
+            <Button
+              variant="link"
+              size="sm"
+              className="mt-1 ml-3 self-start"
+              onClick={() => openDefense(null)}
+            >
+              <Plus size={15} />
+              {problem.defenses.length === 0 ? t('startDefense') : t('startAnotherDefense')}
+            </Button>
 
-        {/* What the student wants to say about their own solution, which is about the problem rather than
-            about any one of the conversations above it */}
-        <ProblemSelfAssessmentNote
-          readerKey={readerKey}
-          competitionSlug={competitionSlug}
-          problemId={problem.id}
-          assessment={problem.selfAssessment}
-          areNotesOpen={run?.kind === 'sat' && run.areNotesOpen}
-          isGraded={isGraded}
-          maxCommentChars={problem.maxCommentChars}
-        />
+            {/* What the student wants to say about their own solution, which is about the problem rather
+                than about any one of the conversations above it */}
+            <ProblemSelfAssessmentNote
+              readerKey={readerKey}
+              competitionSlug={competitionSlug}
+              problemId={problem.id}
+              assessment={problem.selfAssessment}
+              areNotesOpen={run?.kind === 'sat' && run.areNotesOpen}
+              isGraded={isGraded}
+              maxCommentChars={problem.maxCommentChars}
+            />
+          </>
+        )}
       </div>
 
       {/* The chat itself, keyed on the opening so resuming a different conversation remounts it */}

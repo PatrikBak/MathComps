@@ -47,9 +47,10 @@ public sealed class DefenseTargetGuard(IDbContextFactory<MathCompsDbContext> dbC
         // than the context around it, which the analyzer reads as disposed by the time the tree runs.
         var allEntries = dbContext.HostedEntries;
 
-        // The round the problem sits in, whether the site hosts it at all, and whether this student has spent an
-        // entry into it. The entry is read whatever the embargo says, since it decides the daily spend ceiling
-        // as well as the permission, and a group's problems go public the moment it closes.
+        // The round the problem sits in, the window its group runs in, whether the site hosts it at all, and
+        // whether this student has spent an entry into it. The entry is read whatever the embargo says, since it
+        // decides the daily spend ceiling as well as the permission, and a group's problems go public the moment
+        // it closes.
         var round = await dbContext.Problems
             .AsNoTracking()
             .Where(problem => problem.Id == problemId)
@@ -58,6 +59,7 @@ public sealed class DefenseTargetGuard(IDbContextFactory<MathCompsDbContext> dbC
                 problem.RoundId,
                 IsHosted = problem.Round.HostedGroupId != null,
                 problem.Round.VisibleSince,
+                problem.Round.HostedGroup!.ClosesAt,
                 HoldsEntry = allEntries.Any(entry =>
                     entry.UserId == userId && entry.RoundId == problem.RoundId),
             })
@@ -69,7 +71,7 @@ public sealed class DefenseTargetGuard(IDbContextFactory<MathCompsDbContext> dbC
 
         // And past that it is the same rule the area serves its problems under.
         await HostedEntryRules.EnsureEntitledAsync(
-            dbContext, userId, round.RoundId, round.VisibleSince, cancellationToken);
+            dbContext, userId, round.RoundId, round.VisibleSince, round.ClosesAt, cancellationToken);
 
         // Cleared, and the entry says whether the daily spend ceiling reaches this defense.
         return round.HoldsEntry;
