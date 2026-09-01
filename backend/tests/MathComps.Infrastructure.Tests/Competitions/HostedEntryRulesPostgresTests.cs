@@ -123,6 +123,28 @@ public class HostedEntryRulesPostgresTests(PostgresContainerFixture fixture)
         // No instant to compare against, so there is nothing to hold back
         await EnsureEntitledAsync(factory, _strangerId, _neverEmbargoedRoundId));
 
+    /// <summary>
+    /// A lifted embargo opens a round to every account, and a reader with none needs the competition to be over
+    /// as well. The practice group is what separates the two: its rounds carry no embargo and it never closes,
+    /// so its problems stay something to be competed for rather than something to be read.
+    /// </summary>
+    [Fact]
+    public Task A_reader_with_no_account_is_refused_a_group_still_running() => RunTestAsync(
+        async factory =>
+            // Nothing embargoed about it, and still nobody's to read without an account
+            await Assert.ThrowsAsync<HostedEntryRequiredException>(
+                () => EnsureEntitledAsync(factory, userId: null, _neverEmbargoedRoundId)));
+
+    /// <summary>
+    /// A reader with no account is let through once the group has closed, there being nothing left to spend an
+    /// entry on. This is the one door onto a competition's problems that asks for no account at all.
+    /// </summary>
+    [Fact]
+    public Task A_reader_with_no_account_reads_a_group_that_has_closed() => RunTestAsync(async factory =>
+        // Out of embargo and out of time, which is the pair that opens it to anybody
+        await EnsureEntitledAsync(
+            factory, userId: null, _openedRoundId, DateTimeOffset.UtcNow.AddDays(-1)));
+
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
@@ -198,13 +220,18 @@ public class HostedEntryRulesPostgresTests(PostgresContainerFixture fixture)
         });
 
     /// <summary>
-    /// Asks the rule about one student and one round, reading the round's embargo the way both consumers do.
+    /// Asks the rule about one reader and one round, reading the round's embargo the way both consumers do.
     /// </summary>
     /// <param name="factory">The factory minting the context the check runs on.</param>
-    /// <param name="userId">The student reading.</param>
+    /// <param name="userId">The student reading, null where the reader has no account.</param>
     /// <param name="roundId">The round they are reaching for.</param>
+    /// <param name="closesAt">
+    /// When the group running the round stops taking entries, null for one that never does. No group is seeded
+    /// here, so each test states the window it means.
+    /// </param>
     private static async Task EnsureEntitledAsync(
-        IDbContextFactory<MathCompsDbContext> factory, Guid userId, Guid roundId)
+        IDbContextFactory<MathCompsDbContext> factory, Guid? userId, Guid roundId,
+        DateTimeOffset? closesAt = null)
     {
         // A context of its own, as each consumer hands the rule.
         await using var context = await factory.CreateDbContextAsync();
@@ -218,6 +245,6 @@ public class HostedEntryRulesPostgresTests(PostgresContainerFixture fixture)
 
         // The rule itself.
         await HostedEntryRules.EnsureEntitledAsync(
-            context, userId, roundId, visibleSince, CancellationToken.None);
+            context, userId, roundId, visibleSince, closesAt, CancellationToken.None);
     }
 }

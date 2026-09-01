@@ -628,6 +628,76 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
+    /// Verifies that a competition past its embargo opens to a reader with no account at all, which is what the
+    /// site promises of one that is over. Everything on a problem that belongs to somebody comes back empty:
+    /// there is nobody to have said it, and a stranger's is not the reader's to see.
+    /// </summary>
+    [Fact]
+    public Task An_opened_competition_opens_to_a_reader_with_no_account() => RunTestAsync(async service =>
+    {
+        // A student who did read this one has argued its problem and said what they made of their own solution
+        await QueryAsync(async context =>
+        {
+            // The one problem the seed placed in this round.
+            var problemId = await context.Problems
+                .Where(problem => problem.RoundId == _openedRoundId)
+                .Select(problem => problem.Id)
+                .FirstAsync();
+
+            // Their conversation about it, with one turn so it has an instant to be ordered by.
+            SeedDefense(context, _studentId, problemId);
+
+            // And what they claim of their own solution, written straight in: saying it through the service
+            // takes an entry, and this round is past needing one.
+            context.ProblemSelfAssessments.Add(new ProblemSelfAssessment
+            {
+                UserId = _studentId,
+                ProblemId = problemId,
+                Comment = "solved it during the competition",
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow,
+            });
+
+            // Submit changes
+            await context.SaveChangesAsync();
+        });
+
+        // The set as somebody with no account reads it
+        var problems = await service.GetProblemsAsync(userId: null, OpenedSlug);
+
+        // Which is the whole of it, official solution and all, the competition being long over
+        var problem = Assert.Single(problems);
+        Assert.NotNull(problem.Solution);
+
+        // And carries nothing of the student who sat it
+        Assert.Empty(problem.Defenses);
+        Assert.Null(problem.SelfAssessment);
+    });
+
+    /// <summary>
+    /// Verifies that the embargo holds against a reader with no account. An entry is what lifts it early, and an
+    /// entry is something only an account can hold, so there is nothing this reader could have spent.
+    /// </summary>
+    [Fact]
+    public Task An_embargoed_competition_is_refused_to_a_reader_with_no_account() => RunTestAsync(
+        async service =>
+            // Nothing spent, nothing to read, and nobody to have spent it
+            await Assert.ThrowsAsync<HostedEntryRequiredException>(
+                () => service.GetProblemsAsync(userId: null, AdvancedSlug)));
+
+    /// <summary>
+    /// Verifies that a lifted embargo alone does not open a competition to a reader with no account: it has to
+    /// be over as well. The practice round is the case that separates the two, carrying no embargo and never
+    /// closing, and its problems are there to be competed for by somebody rather than read by anybody.
+    /// </summary>
+    [Fact]
+    public Task A_competition_still_running_is_refused_to_a_reader_with_no_account() => RunTestAsync(
+        async service =>
+            // Public to every account, and still nobody's to read without one
+            await Assert.ThrowsAsync<HostedEntryRequiredException>(
+                () => service.GetProblemsAsync(userId: null, PracticeSlug)));
+
+    /// <summary>
     /// Verifies that a student with a clock running is handed no official solution, on the answer the entry itself
     /// comes back in and on every read after it.
     /// </summary>

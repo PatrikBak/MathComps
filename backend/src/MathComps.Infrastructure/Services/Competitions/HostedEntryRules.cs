@@ -10,23 +10,40 @@ namespace MathComps.Infrastructure.Services.Competitions;
 public static class HostedEntryRules
 {
     /// <summary>
-    /// Throws unless the student may read a round's problems: its embargo has passed, or they hold an entry they
-    /// have spent into it.
+    /// Throws unless the reader may read a round's problems: its embargo has passed, or they hold an entry they
+    /// have spent into it. A reader with no account is held to competitions that are over.
     /// </summary>
     /// <param name="dbContext">The caller's database context.</param>
-    /// <param name="userId">The student reading.</param>
+    /// <param name="userId">The student reading, null where the reader has no account.</param>
     /// <param name="roundId">The round whose problems they are reaching for.</param>
     /// <param name="visibleSince"><inheritdoc cref="Round.VisibleSince" path="/summary"/></param>
+    /// <param name="closesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     public static async Task EnsureEntitledAsync(
-        MathCompsDbContext dbContext, Guid userId, Guid roundId, DateTimeOffset? visibleSince,
-        CancellationToken cancellationToken)
+        MathCompsDbContext dbContext, Guid? userId, Guid roundId, DateTimeOffset? visibleSince,
+        DateTimeOffset? closesAt, CancellationToken cancellationToken)
     {
-        // Once the embargo has passed the problems are public, and there is nothing left to hold back.
-        if (visibleSince is null || visibleSince <= DateTimeOffset.UtcNow)
-            return;
+        // The one instant both of the dates below are read against.
+        var now = DateTimeOffset.UtcNow;
 
-        // Otherwise the student needs an entry they have spent, whichever way they spent it.
+        // Once the embargo has passed there is nothing left to hold back.
+        if (visibleSince is null || visibleSince <= now)
+        {
+            // Which reaches every account, and a reader with none once the competition has ended too, one that
+            // is over having nothing left to be spent on.
+            if (userId is not null || (closesAt is { } ending && ending <= now))
+                return;
+
+            // One still running is not, whatever its embargo says: its problems are there to be competed for,
+            // and competing takes an account.
+            throw new HostedEntryRequiredException();
+        }
+
+        // Otherwise an entry is what opens them, and holding one is something only an account can do.
+        if (userId is null)
+            throw new HostedEntryRequiredException();
+
+        // The entry they hold here, spent whichever way they spent it.
         var hasEntry = await dbContext.HostedEntries
             .AsNoTracking()
             .AnyAsync(entry => entry.UserId == userId && entry.RoundId == roundId, cancellationToken);

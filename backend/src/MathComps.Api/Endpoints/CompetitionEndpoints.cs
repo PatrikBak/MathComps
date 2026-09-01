@@ -8,11 +8,13 @@ namespace MathComps.Api.Endpoints;
 /// <summary>
 /// Maps the endpoints behind the competitions the site hosts itself: reading the groups, reading what an entry
 /// needs of the caller, spending an entry (by sitting it or by giving it up for the problems), closing one early,
-/// reading the problems an entry opens, and recording what the student makes of their own solutions.
+/// reading a competition's problems, and recording what the student makes of their own solutions.
 /// </summary>
 /// <remarks>
 /// The problems route is the only place an embargoed problem is served, and it serves one only to a caller who
-/// has spent an entry into its competition. Everywhere else in the site an embargoed round stays invisible.
+/// has spent an entry into its competition. Everywhere else in the site an embargoed round stays invisible. Once
+/// a competition is over its set is something anybody may read, so that route also answers a caller with no
+/// account, as the groups list does.
 /// </remarks>
 public static class CompetitionEndpoints
 {
@@ -137,23 +139,22 @@ public static class CompetitionEndpoints
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // The problems an entry opens, with whatever the student has said about each
+        // A competition's problems, with whatever the student has said about each
         app.MapGet($"{CompetitionsPath}/{{competitionSlug}}/problems", async (
             string competitionSlug,
             HttpContext context,
             IUserManager userManager,
             IHostedCompetitionService competitionService) =>
         {
-            // Resolve the calling user
-            var userId = await userManager.RequireUserIdAsync(context);
+            // Resolve the calling user, a competition read after it closed often having none
+            var userId = await userManager.GetUserIdAsync(context);
 
-            // The problems the entry opens
+            // The problems this caller may read
             var problems = await competitionService.GetProblemsAsync(userId, competitionSlug, context.RequestAborted);
 
             // Return them
             return Results.Ok(problems);
         })
-        .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Record what the student makes of their own solution to one of the set, replacing what they said before

@@ -7,6 +7,8 @@ import { useEffect } from 'react'
 import { toast } from 'sonner'
 
 import { SECOND_MS } from '@/components/shared/utils/time-units'
+import { useCurrentUrl } from '@/hooks/use-current-url'
+import { useLoginPromptToast } from '@/hooks/use-login-prompt-toast'
 import { useNow } from '@/hooks/use-now'
 import { useRouter } from '@/i18n/navigation'
 import type { QueryUiState } from '@/lib/query-ui-state'
@@ -31,12 +33,6 @@ import { invalidateCompetitionProblems } from './hosted-competition-cache'
 import { useAreaEntry } from './use-area-entry'
 import { useCompetitionProblems } from './use-competition-problems'
 import { useEntryReader } from './use-entry-reader'
-
-/**
- * Names the notice raised when the area turns a reader away, so that two passes over the same turning-away
- * leave one notice rather than a stack of them.
- */
-const AREA_CLOSED_TOAST_ID = 'competition-area-closed'
 
 /**
  * The area while one of the two reads behind it is still out, or once one of them has given up.
@@ -83,7 +79,7 @@ type UseCompetitionAreaResult = PendingArea | ReadyArea
  *
  * Two reads stand behind all of it. A reader with no entry is sent back to the list rather than shown an
  * area with nothing in it, unless the competition has closed: its problems are public from that moment, so
- * any reader with an account may read the set and the official solutions beside it.
+ * anybody may read the set and the official solutions beside it, account or none.
  *
  * @param competitionSlug - Which competition the reader is inside.
  *
@@ -101,6 +97,12 @@ export function useCompetitionArea(competitionSlug: string): UseCompetitionAreaR
 
   // Whose answers these are, and whether that is settled yet
   const { readerKey, isReaderKnown } = useEntryReader()
+
+  // The shared sign-in prompt
+  const showLoginPrompt = useLoginPromptToast()
+
+  // The page to come back to once signed in
+  const getCurrentUrl = useCurrentUrl()
 
   // The competition, the group setting its terms, and the entry the reader spent on it
   const {
@@ -121,13 +123,12 @@ export function useCompetitionArea(competitionSlug: string): UseCompetitionAreaR
   const phase =
     competitionInGroup === undefined ? undefined : derivePhase(competitionInGroup.group, now)
 
-  // Whether the set may be read at all: an entry of their own buys it, and a competition that is over and
-  // out of embargo hands it to every reader with an account, which is the one way onto this page without
-  // one. The read behind it is made as the reader, so somebody signed out has no way to make it
+  // Whether the set may be read at all: an entry of their own buys it, and a competition that is over
+  // with its problems made public hands it to anybody, account or none. That second way is the only one
+  // onto this page without an entry
   const isReadable =
     entry !== null ||
-    (readerKey !== null &&
-      competitionInGroup !== undefined &&
+    (competitionInGroup !== undefined &&
       phase === 'closed' &&
       competitionInGroup.competition.problemsPublished)
 
@@ -146,17 +147,27 @@ export function useCompetitionArea(competitionSlug: string): UseCompetitionAreaR
   // the page from a page opened after one had
   const wasEnded = usePrevious(hasEnded)
 
-  // Which sentence a turning-away carries, one of a handful of keys, so the effect below stands still
-  // while the clock ticks under it
+  // Which copy a turning-away carries, one of a handful of keys, so the effect below stands still while
+  // the clock ticks under it
   const turnAwayKey = areaTurnAwayKey(phase, readerKey !== null)
 
   // A reader with nothing to read here, so the list is where they go instead, told why
   useEffect(() => {
-    if (viewState.kind === 'ready' && !isReadable) {
-      toast.warning(t(turnAwayKey), { id: AREA_CLOSED_TOAST_ID })
-      router.replace(COMPETITIONS_LIST_HREF)
+    if (viewState.kind !== 'ready' || isReadable) return
+
+    // An account is the whole of what stands in the way, so the way to get one comes with the reason.
+    // The address is taken now: by the time the prompt is pressed it names the list below
+    if (turnAwayKey === 'areaAuthReason') {
+      showLoginPrompt({ reason: t(turnAwayKey), redirectUrl: getCurrentUrl() })
     }
-  }, [viewState, isReadable, turnAwayKey, router, t])
+    // Anything else is about where the competition stands, which an account of theirs has no say in
+    else {
+      toast.warning(t(turnAwayKey))
+    }
+
+    // And back to the list either way
+    router.replace(COMPETITIONS_LIST_HREF)
+  }, [viewState, isReadable, turnAwayKey, router, t, showLoginPrompt, getCurrentUrl])
 
   // A clock running out under the page opens the official solutions, and nothing was pressed to say so:
   // the set on screen was read while the entry still counted, so it is read again now that it does not.
