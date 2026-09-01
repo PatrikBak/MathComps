@@ -21,8 +21,8 @@ type UseEditorModelProps = {
   canSend?: boolean
   /** Callback when Escape is pressed (if provided, enables cancel on Escape). */
   onCancel?: () => void
-  /** Optional configuration for editor limits (max characters, images, etc.). */
-  config?: EditorConfig
+  /** Configuration for editor limits (max characters, images, etc.). */
+  config: EditorConfig
 }
 
 /**
@@ -138,7 +138,7 @@ export function useEditorModel({
   onSend,
   canSend = true,
   onCancel,
-  config = {},
+  config,
 }: UseEditorModelProps): EditorViewModel {
   // Primary text state
   const [text, setTextInternal] = useState(value)

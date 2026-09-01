@@ -1,9 +1,5 @@
-import { MAX_ATTACHMENTS_PER_COMMENT, MAX_IMAGES_PER_COMMENT } from '../utils/attachment-utils'
-import {
-  type ContentMetrics,
-  getContentMetrics,
-  MAX_CHARACTERS_PER_COMMENT,
-} from '../utils/content-metrics'
+import { MAX_EDITOR_ATTACHMENTS, MAX_EDITOR_IMAGES } from '../utils/attachment-utils'
+import { type ContentMetrics, getContentMetrics } from '../utils/content-metrics'
 
 /**
  * The type of content that can be added to the editor.
@@ -12,15 +8,13 @@ type AddableContentType = 'image' | 'attachment'
 
 /**
  * Configuration for editor limits.
- *
- * All properties are optional and default to the global constants.
  */
 export type EditorConfig = {
-  /** Maximum character count. Defaults to {@link MAX_CHARACTERS_PER_COMMENT}. */
-  maxCharacters?: number
-  /** Maximum image count. Defaults to {@link MAX_IMAGES_PER_COMMENT}. */
+  /** Maximum character count, or `null` while the limit in force is not known. */
+  maxCharacters: number | null
+  /** Maximum image count. Defaults to {@link MAX_EDITOR_IMAGES}. */
   maxImages?: number
-  /** Maximum attachment count. Defaults to {@link MAX_ATTACHMENTS_PER_COMMENT}. */
+  /** Maximum attachment count. Defaults to {@link MAX_EDITOR_ATTACHMENTS}. */
   maxAttachments?: number
 }
 
@@ -59,15 +53,15 @@ export class EditorState {
    * during construction and cached as readonly properties.
    *
    * @param text - The current text content of the editor.
-   * @param config - Optional configuration for editor limits.
+   * @param config - Configuration for editor limits.
    */
-  constructor(text: string, config: EditorConfig = {}) {
+  constructor(text: string, config: EditorConfig) {
     this.text = text
     this.metrics = getContentMetrics(text)
     this.config = {
-      maxCharacters: config.maxCharacters ?? MAX_CHARACTERS_PER_COMMENT,
-      maxImages: config.maxImages ?? MAX_IMAGES_PER_COMMENT,
-      maxAttachments: config.maxAttachments ?? MAX_ATTACHMENTS_PER_COMMENT,
+      maxCharacters: config.maxCharacters,
+      maxImages: config.maxImages ?? MAX_EDITOR_IMAGES,
+      maxAttachments: config.maxAttachments ?? MAX_EDITOR_ATTACHMENTS,
     }
   }
 
@@ -83,24 +77,21 @@ export class EditorState {
   }
 
   /**
-   * The character limit in force, whether it was configured or left at the default.
+   * The character limit in force, or `null` while it is not known.
    *
    * @returns The most characters the content may hold.
    */
-  get maxCharacters(): number {
+  get maxCharacters(): number | null {
     return this.config.maxCharacters
   }
 
   /**
-   * Whether the character limit has been exceeded.
+   * Whether a known character limit has been exceeded.
    *
-   * Uses the "smart" character count from {@link metrics}, which excludes
-   * URL lengths in markdown links and images.
-   *
-   * @returns `true` if characters exceed the configured limit.
+   * @returns `true` if characters exceed a configured limit, `false` while there is none to exceed.
    */
   get isOverCharacterLimit(): boolean {
-    return this.metrics.charCount > this.config.maxCharacters
+    return this.config.maxCharacters !== null && this.metrics.charCount > this.config.maxCharacters
   }
 
   /**
@@ -126,15 +117,18 @@ export class EditorState {
    *
    * Content is valid when:
    * 1. There is some non-whitespace content ({@link hasContent})
-   * 2. Character limit is not exceeded ({@link isOverCharacterLimit})
-   * 3. Image limit is not exceeded ({@link isOverImageLimit})
-   * 4. Attachment limit is not exceeded ({@link isOverAttachmentLimit})
+   * 2. The character limit is known ({@link maxCharacters}), since there is nothing to hold the
+   *    content to until it is
+   * 3. Character limit is not exceeded ({@link isOverCharacterLimit})
+   * 4. Image limit is not exceeded ({@link isOverImageLimit})
+   * 5. Attachment limit is not exceeded ({@link isOverAttachmentLimit})
    *
    * @returns `true` if the content can be submitted, `false` otherwise.
    */
   get isValid(): boolean {
     return (
       this.hasContent &&
+      this.maxCharacters !== null &&
       !this.isOverCharacterLimit &&
       !this.isOverImageLimit &&
       !this.isOverAttachmentLimit

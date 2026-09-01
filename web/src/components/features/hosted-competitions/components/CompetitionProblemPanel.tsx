@@ -157,7 +157,6 @@ export function CompetitionProblemPanel({
               target: { kind: 'competition', competitionId, problemId: problem.id, readerKey },
               statement: problem.statement[locale],
             }}
-            isOpen={isOpen}
             onClose={close}
             opening={
               openedSessionId === null

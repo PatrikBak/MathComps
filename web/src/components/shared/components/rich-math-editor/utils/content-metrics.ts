@@ -1,16 +1,10 @@
 import { ATTACHMENT_REGEX, IMAGE_REGEX } from './attachment-utils'
 
-/** Maximum character count (smart count, ignoring image URLs) */
-export const MAX_CHARACTERS_PER_COMMENT = 5000
-
-/** Regex to match markdown links (including for images or attachments): [text](url) */
-const LINK_REGEX = /\[([^\]]*)\]\([^)]+\)/g
-
 /**
  * Result of content metrics calculation.
  */
 export type ContentMetrics = {
-  /** Character count (smart - ignoring URL lengths) */
+  /** Number of characters in the content, markup included, bar the whitespace around it */
   charCount: number
   /** Number of images in the content */
   imageCount: number
@@ -19,8 +13,7 @@ export type ContentMetrics = {
 }
 
 /**
- * Calculates "smart" character count, image count, and attachment count.
- * Smart here means not counting every character of a URL.
+ * Calculates character count, image count, and attachment count.
  *
  * @param text - The text to calculate metrics for
  * @returns An object containing the character count, image count, and attachment count
@@ -32,14 +25,9 @@ export function getContentMetrics(text: string): ContentMetrics {
   // Count attachments
   const attachmentCount = text.match(ATTACHMENT_REGEX)?.length || 0
 
-  // Replace links with just their text for character counting
-  // e.g., "[click here](https://very-long-url...)" → "click here"
-  // This should match both images and attachments
-  const textWithoutUrls = text.replace(LINK_REGEX, '$1')
-
-  // Return the metrics
+  // Return the metrics, the whitespace around the content counting for nothing
   return {
-    charCount: textWithoutUrls.length,
+    charCount: text.trim().length,
     imageCount,
     attachmentCount,
   }

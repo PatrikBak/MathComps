@@ -79,7 +79,7 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
             <RichMathEditorRenderer
               content={item.note.content}
               lightImageBackground={false}
-              imageContext="comments"
+              imageContext="userUploads"
             />
           </div>
         </div>

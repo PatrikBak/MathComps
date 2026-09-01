@@ -153,7 +153,7 @@ export function AdminNoteCard({
         <RichMathEditorRenderer
           content={note.content}
           lightImageBackground={false}
-          imageContext="comments"
+          imageContext="userUploads"
         />
       </div>
     </AdminNoteSurface>

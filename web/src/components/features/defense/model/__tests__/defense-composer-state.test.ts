@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import type { DefenseComposerInput } from '../defense-composer-state'
-import { resolveComposerState, resolveConsentStatus } from '../defense-composer-state'
+import {
+  resolveCapsStatus,
+  resolveComposerState,
+  resolveConsentStatus,
+} from '../defense-composer-state'
 
 describe('resolveComposerState', () => {
   /** A signed-in reader whose conversation is settled and has room left in it. */
@@ -10,6 +14,7 @@ describe('resolveComposerState', () => {
     isAuthSettled: true,
     isSignedIn: true,
     consentStatus: 'given',
+    capsStatus: 'known',
     isThinking: false,
     repliesLeft: 12,
     competition: null,
@@ -145,9 +150,27 @@ describe('resolveComposerState', () => {
     })
   })
 
+  it('says so when the caps a turn is held to could not be read', () => {
+    // A turn written against no cap at all is a turn the server is free to refuse
+    expect(resolveComposerState({ ...READY, capsStatus: 'unknown', repliesLeft: null })).toEqual({
+      kind: 'capsUnknown',
+    })
+  })
+
+  it('asks for the acknowledgement ahead of admitting it lost the caps', () => {
+    expect(
+      resolveComposerState({
+        ...READY,
+        consentStatus: 'missing',
+        capsStatus: 'unknown',
+        repliesLeft: null,
+      })
+    ).toEqual({ kind: 'consentRequired' })
+  })
+
   it('opens without saying how much room is left when nothing knows the caps', () => {
     // The warning is a number, so a composer with no number to show simply does not show one
-    expect(resolveComposerState({ ...READY, repliesLeft: null })).toEqual({
+    expect(resolveComposerState({ ...READY, capsStatus: 'loading', repliesLeft: null })).toEqual({
       kind: 'open',
       repliesLeft: null,
     })
@@ -182,5 +205,26 @@ describe('resolveConsentStatus', () => {
 
   it('waits while nothing has come back and nothing has failed', () => {
     expect(resolveConsentStatus({ data: undefined, isError: false })).toBe('loading')
+  })
+})
+
+describe('resolveCapsStatus', () => {
+  /** The caps a defense here is held to. */
+  const LIMITS = { maxCandidateChars: 4000, maxFeedbackCommentChars: 2000, maxTurnsPerSession: 30 }
+
+  it('reads the caps off the answer that carries them', () => {
+    expect(resolveCapsStatus({ limits: LIMITS, isError: false })).toBe('known')
+  })
+
+  it('keeps the caps it has through a read that failed after them', () => {
+    expect(resolveCapsStatus({ limits: LIMITS, isError: true })).toBe('known')
+  })
+
+  it('says it could not find them out when the failure is all there is', () => {
+    expect(resolveCapsStatus({ limits: null, isError: true })).toBe('unknown')
+  })
+
+  it('waits while nothing has come back and nothing has failed', () => {
+    expect(resolveCapsStatus({ limits: null, isError: false })).toBe('loading')
   })
 })

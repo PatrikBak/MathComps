@@ -179,7 +179,7 @@ export function RichMathEditorExpandedModal({
                     <RichMathEditorRenderer
                       content={state.text}
                       lightImageBackground={false}
-                      imageContext="comments"
+                      imageContext="userUploads"
                     />
                   )}
                 </div>

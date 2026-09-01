@@ -78,7 +78,6 @@ export function DefenseChatTrigger({ problem }: DefenseChatTriggerProps) {
         >
           <DefenseConversation
             problem={problem}
-            isOpen={isOpen}
             onClose={close}
             opening={{ kind: 'newest' }}
             competition={null}

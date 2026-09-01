@@ -473,6 +473,7 @@
     "SK": "Slovakia"
   },
   "defense": {
+    "capsUnavailable": "We couldn't load this conversation, so we don't know how long a reply may be.",
     "competitionClockDivider": "Time's up",
     "competitionClockSpent": "This no longer counts towards the competition.",
     "consentAccept": "Got it",

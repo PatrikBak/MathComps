@@ -22,6 +22,11 @@ import { NoteChoiceRow } from './NoteChoiceRow'
 const NOTE_CATEGORIES = Object.keys(REPORT_CATEGORY_KEYS) as readonly DefenseReportCategory[]
 
 /**
+ * The most characters a note may hold, which a remark about one reply stays well inside.
+ */
+const MAX_CHARACTERS_PER_NOTE = 1000
+
+/**
  * Props for the {@link AdminNoteComposer} component.
  */
 type AdminNoteComposerProps = {
@@ -97,6 +102,7 @@ export function AdminNoteComposer({
 
       {/* The editor the note is written and filed in */}
       <RichMathEditor
+        maxCharacters={MAX_CHARACTERS_PER_NOTE}
         value={content}
         onChange={setContent}
         placeholder={t('placeholder')}

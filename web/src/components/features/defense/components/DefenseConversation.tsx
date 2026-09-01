@@ -3,8 +3,7 @@
 import { useAuth } from '@clerk/nextjs'
 import { Plus, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useMemo } from 'react'
-import { toast } from 'sonner'
+import { useMemo } from 'react'
 
 import { CompetitionClock } from '@/components/features/hosted-competitions/components/CompetitionClock'
 import { Button } from '@/components/shared/components/Button'
@@ -18,7 +17,7 @@ import { useDefenseCopy } from '../hooks/use-defense-copy'
 import { useDefenseFeedback } from '../hooks/use-defense-feedback'
 import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
 import { useMathildaConsent } from '../hooks/use-mathilda-consent'
-import { resolveComposerState } from '../model/defense-composer-state'
+import { resolveCapsStatus, resolveComposerState } from '../model/defense-composer-state'
 import { draftTurn } from '../model/defense-conversation-model'
 import {
   defenseDraftStorageKey,
@@ -44,8 +43,6 @@ import { ProblemBand } from './ProblemBand'
 type DefenseConversationProps = {
   /** The problem being defended. */
   problem: DefenseProblem
-  /** Whether the hosting modal is open. */
-  isOpen: boolean
   /** Closes the conversation. */
   onClose: () => void
   /**
@@ -97,7 +94,6 @@ export function DefenseConversation(props: DefenseConversationProps) {
  */
 function DefenseConversationForTarget({
   problem,
-  isOpen,
   onClose,
   opening,
   competition,
@@ -125,6 +121,8 @@ function DefenseConversationForTarget({
     limits,
     initialResumeSettled,
     sessionsFailed,
+    retrySessions,
+    isRetryingSessions,
     currentSessionId,
     currentFeedback,
     reports,
@@ -182,14 +180,6 @@ function DefenseConversationForTarget({
   // Whether the student is graded on the run this defense is argued inside
   const isGraded = competition?.isGraded ?? false
 
-  // Surface a failed history load, but only while the modal is open: an empty history and a load failure
-  // look identical otherwise, and the mounted-but-closed modal keeps the query running in the background
-  useEffect(() => {
-    if (isOpen && sessionsFailed) {
-      toast.error(t('historyError'))
-    }
-  }, [isOpen, sessionsFailed, t])
-
   // Feedback, on one reply or on the whole conversation, is offered only on a saved one and never mid-turn;
   // a session id only ever names one the signed-in viewer owns, so there's no one else's to speak about.
   // Unknown caps mean the history hasn't arrived, and a report would have no cap to hold its comment to
@@ -214,6 +204,9 @@ function DefenseConversationForTarget({
     limits === null
       ? null
       : limits.maxTurnsPerSession - shownTurns.filter((turn) => turn.role === 'candidate').length
+
+  // Where the caps a turn is held to stand, the read's own failure included
+  const capsStatus = resolveCapsStatus({ limits, isError: sessionsFailed })
 
   // Whether a fresh defense would have anything to be argued against
   const canStartFresh = isSubjectReachable(problem.target, locale)
@@ -357,6 +350,7 @@ function DefenseConversationForTarget({
             // Undefined until the account settles, which `isAuthSettled` is the answer to
             isSignedIn: isSignedIn === true,
             consentStatus: consent.status,
+            capsStatus,
             isThinking,
             repliesLeft,
             competition: competition === null ? null : { isGraded: competition.isGraded },
@@ -367,11 +361,13 @@ function DefenseConversationForTarget({
           onStop={turn.stopReply}
           editorRef={turn.editorRef}
           isThinking={isThinking}
-          maxCharacters={limits?.maxCandidateChars}
-          maxReplies={limits?.maxTurnsPerSession}
+          maxCharacters={limits?.maxCandidateChars ?? null}
+          maxReplies={limits?.maxTurnsPerSession ?? null}
           onAcceptConsent={consent.accept}
           isAcceptingConsent={consent.isAccepting}
           onRetryConsent={consent.retry}
+          onRetryCaps={retrySessions}
+          isRetryingCaps={isRetryingSessions}
           isRetryingConsent={consent.isRetrying}
           editorMinHeightPx={COMPOSER_MIN_HEIGHT_PX}
         />

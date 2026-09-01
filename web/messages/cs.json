@@ -473,6 +473,7 @@
     "SK": "Slovensko"
   },
   "defense": {
+    "capsUnavailable": "Nepodařilo se nám načíst tuto konverzaci, takže nevíme, jak dlouhá může být tvoje odpověď.",
     "competitionClockDivider": "Čas vypršel",
     "competitionClockSpent": "Tohle se už do soutěže nepočítá.",
     "consentAccept": "Rozumím",
