@@ -333,6 +333,30 @@
   ],
   "otherCompetitions": [
     {
+      "id": "mathcomps",
+      "title": {
+        "sk": "Mathildovanie",
+        "cs": "Mathildování",
+        "en": "Mathilding"
+      },
+      "description": {
+        "kind": "text",
+        "value": {
+          "sk": "Naše online súťaže, kde sa riešenie obhajuje pred AI ešte v súťažnom čase",
+          "cs": "Naše online soutěže, kde se řešení obhajuje před AI ještě v soutěžním čase",
+          "en": "Our online competitions, where you defend your solution to an AI while your clock is still running"
+        }
+      },
+      "links": [
+        {
+          "url": "/mathilding"
+        }
+      ],
+      "levels": ["elementary", "highSchool"],
+      "countries": ["SK", "CZ", "INTERNATIONAL"],
+      "kind": "individual"
+    },
+    {
       "id": "naboj",
       "title": {
         "sk": "Náboj & Náboj Junior",

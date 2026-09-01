@@ -11,7 +11,7 @@
     },
     "next": {
       "registration": "Since April 2026, MathComps has also been a registered nonprofit association in the Czech Republic, MathComps z.s., IČO 249 37 924.",
-      "text1": "My long-term vision is more interactive tools. There's now Mathilda, an AI tutor who helps with solving the problems in the handouts, and who'll be in the competitions soon. I'm personally a big AI enthusiast and can see for myself how it helps me learn new things. Alongside that, I'd of course like to keep updating the archive and keep writing and adding to the materials and the competition guide.",
+      "text1": "My long-term vision is more interactive tools. There's now Mathilda, an AI chatbot with two roles: she helps with solving the problems in the <handouts>handouts</handouts>, and she is the opponent in our own competitions, <competitions>Mathilding</competitions>. I'm personally a big AI enthusiast and can see for myself how it helps me learn new things. Alongside that, I'd of course like to keep updating the archive, keep writing and adding to the materials and the competition guide, and do whatever else useful comes to mind.",
       "text2": "In an ideal world, I could see myself working on MathComps and related things like writing handouts full-time. This past year, that was ultimately made possible by a combination of a few income sources: the site itself was backed early on by <wincent>Wincent</wincent>, most of the site's handouts also grew out of <matika>Matika Česku</matika>'s math circles, and the newest addition is support from <gtf>Global Talent Fund</gtf>, which is sponsoring the upcoming competitions with AI feedback, starting 14 September 2026.",
       "text3": "If MathComps, or the thinking behind it, caught your interest and you'd like to help, financially or otherwise, or just want to talk, <link>get in touch</link>, every message makes my day ☺️",
       "title": "What's next"
@@ -20,7 +20,7 @@
       "text1": "For a while I kept telling myself it would be useful to have a searchable archive of Czech-Slovak problems, since I searched them often and digging through hundreds of PDF files isn't much fun. I also dreamed of how great it would be to search by keyword, quickly filter down to problems on sequences, and so on.",
       "text2": "It's much the same with handouts. I'm always writing some, for talks at events, and they stay unpublished, at best as PDF files that aren't the most practical: you can't easily hide hints or solutions and keep them close to the statements, or display them well on mobile.",
       "text3": "Beyond the personal angle, it always struck me that a single site where problems are easy to find and which also has handouts could be really useful for newcomers trying to figure out what the olympiad even is and what's out there. Some beginner-friendly materials would be welcome too, since I missed having a single place like this myself back when I was a student hunting down everything I could find about competitions.",
-      "text4": "These motivations are what the current version of the site grew out of, and it offers an archive of problems, handouts, and a guide for beginners. There'll be more and more of this going forward, not just a bigger archive and more handouts, but new features too 😇",
+      "text4": "These motivations are what the first version of the site grew out of, and it offered an archive of problems, handouts and a guide for beginners. Since that version the site has been growing to take in AI features.",
       "title": "Why MathComps started"
     }
   },
@@ -335,7 +335,7 @@
     "areaNotStarted": "You have not started this competition yet.",
     "areaProblemsFailed": "The problems could not be loaded.",
     "areaUnknown": "No competition goes by that name.",
-    "backToCompetitions": "Back to competitions",
+    "backToCompetitions": "Back to Mathilding",
     "categories": {
       "advanced": "Advanced",
       "elementary": "Elementary",
@@ -777,12 +777,16 @@
         "description": "An archive of problems, searchable by keywords and other criteria.",
         "title": "Archive"
       },
+      "competitions": {
+        "description": "Our own competitions, where you defend your solution to our AI opponent Mathilda while your clock is still running.",
+        "title": "Mathilding"
+      },
       "guide": {
         "description": "An overview of competitions, seminars, and useful links.",
         "title": "Guide"
       },
       "handouts": {
-        "description": "Study texts and problem sets, added to as I go.",
+        "description": "Study texts and problem sets, added to as I go, with an AI helper as you work through them.",
         "title": "Handouts"
       },
       "title": "What you'll find here"
@@ -794,11 +798,11 @@
         "ninePoint": "Nine-point circle"
       },
       "shuffle": "Show another construction",
-      "subtitle": "An archive of competition problems, handouts and useful resources, and gradually more and more.",
+      "subtitle": "An archive of competition problems and handouts, our own MathComps AI competitions, and all sorts of other things",
       "title": "The math olympiad, and everything around it"
     },
     "mathilda": {
-      "body": "An AI helper who'll give you advice on problems: show her your solution, or just an idea, and she'll check it or help you finish it. For now she works in the <link>handouts</link>, and we'll gradually bring her to the archive too.",
+      "body": "An AI helper who'll give you advice on problems: show her your solution, or just an idea, and she'll check it or help you finish it. She works in the <link>handouts</link>, and she also powers our own competitions, Mathilding.",
       "exchange": {
         "candidate": "Clearly $a \\le b$ and $b \\le a$, so $a = b$.",
         "examiner": "Does $a \\mid b$ always imply $a \\le b$ for every pair of integers?",
@@ -808,19 +812,11 @@
     "news": {
       "seeAll": "See all",
       "title": "Latest news"
-    },
-    "upcoming": {
-      "comingSoon": "14 September 2026",
-      "feature": {
-        "description": "Competitions where you present your solution to Mathilda, who corrects it while the competition is still running, leaving you room to refine it.",
-        "title": "Competitions with AI"
-      },
-      "title": "What's coming"
     }
   },
   "navigation": {
     "about": "About",
-    "competitions": "Competitions",
+    "competitions": "Mathilding",
     "contact": "Contact",
     "guide": "Guide",
     "handouts": "Handouts",
@@ -837,6 +833,7 @@
     "addComment": "Comment",
     "categories": {
       "archive": "Archive",
+      "competitions": "Mathilding",
       "development": "Development",
       "handouts": "Handouts",
       "misc": "Miscellaneous"
@@ -869,19 +866,19 @@
       "title": "Competition"
     },
     "competitions": {
-      "description": "Try competitions at several levels, where you defend your solutions to our AI Mathilda while your clock is still running.",
-      "title": "Competitions"
+      "description": "Our own competitions, where you defend your solution to our AI opponent Mathilda while your clock is still running. Three levels, plus a practice competition you can take any time.",
+      "title": "Mathilding"
     },
     "guide": {
       "description": "An overview of math competitions and correspondence seminars, how to start, and where to go next.",
       "title": "Guide"
     },
     "handouts": {
-      "description": "Handouts on topics in competition math.",
+      "description": "Study texts and problem sets on topics in competition math, with hints and solutions next to the statements.",
       "title": "Handouts"
     },
     "home": {
-      "description": "An archive of competition problems, handouts, and a guide to useful resources. Mathilda, our AI tutor, helps you with the problems.",
+      "description": "An archive of competition problems, plus handouts, our own Mathilding competitions, and a guide to useful resources. Mathilda, our AI tutor, helps you with the problems.",
       "title": "The math olympiad, and everything around it"
     },
     "login": {
@@ -897,7 +894,7 @@
       "title": "Privacy Policy and Terms of Use"
     },
     "problems": {
-      "description": "A searchable archive of problems from math competitions.",
+      "description": "An archive of problems from Czech, Slovak and international competitions, with search by keyword and other criteria.",
       "title": "Problems"
     },
     "profile": {
@@ -911,7 +908,7 @@
     "replies": "{count, plural, =1 {# reply} other {# replies}}"
   },
   "privacy": {
-    "lastUpdated": "Last updated: July 31, 2026",
+    "lastUpdated": "Last updated: September 2, 2026",
     "sections": {
       "cookies": {
         "text": "Cookies are used exclusively for website functionality (e.g., maintaining login sessions). They are not shared with third parties.",
@@ -919,7 +916,7 @@
       },
       "data": {
         "aiProcessor": "Mathilda's replies are generated using a third-party AI provider; your conversation content is sent to them to produce a response.",
-        "aiTutor": "<strong>AI tutor conversations:</strong> Mathilda is our AI tutor who discusses your solutions or ideas for handout problems with you. If you use her, your messages and her replies are stored so the conversation persists across visits. You can delete any conversation at any time from its history menu. We may also use conversations to improve Mathilda.",
+        "aiTutor": "<strong>AI tutor conversations:</strong> Mathilda is our AI tutor who discusses your solutions or ideas with you, both in the handouts and in the competitions. If you use her, your messages and her replies are stored so the conversation persists across visits. You can delete a handout conversation at any time from its history menu. A competition conversation cannot be deleted, as it is the record of your entry. If that is a problem for you, write to us. We may also use conversations to improve Mathilda.",
         "content": "<strong>Content:</strong> All content you submit to the website.",
         "intro": "We use and store the following data:",
         "login": "<strong>Login:</strong> Email, name, profile photo, and optionally connection with Google/Discord/GitHub if you sign in through them.",
@@ -1118,7 +1115,7 @@
     "competitionAuthReason": "save your profile",
     "competitionError": "Your details could not be saved. Please try again.",
     "competitionNote": "This information appears in the results listing.",
-    "competitionSection": "Competitions",
+    "competitionSection": "Mathilding",
     "country": "Country",
     "countryNoMatch": "No country matches",
     "countryPlaceholder": "Select your country",

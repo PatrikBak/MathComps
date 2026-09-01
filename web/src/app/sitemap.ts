@@ -27,6 +27,7 @@ const latestNewsDate = (newsData as NewsIndexEntry[])
 const STATIC_ROUTES = [
   ROUTES.HOME,
   ROUTES.ABOUT,
+  ROUTES.COMPETITIONS,
   ROUTES.GUIDE,
   ROUTES.HANDOUTS,
   ROUTES.PROBLEMS,

@@ -7,7 +7,13 @@ import type { NewsIconName } from './news-icons'
 /**
  * Available news article categories.
  */
-export const NEWS_CATEGORIES = ['archive', 'handouts', 'development', 'misc'] as const
+export const NEWS_CATEGORIES = [
+  'archive',
+  'handouts',
+  'competitions',
+  'development',
+  'misc',
+] as const
 
 /**
  * A news article category.

@@ -17,7 +17,7 @@ export default function MathildaSection() {
 
   return (
     <HomeSection className="py-10 sm:py-14">
-      <div className="grid items-start gap-8 md:grid-cols-[0.85fr_1.15fr] md:gap-12">
+      <div className="grid items-start gap-8 md:grid-cols-2 md:gap-12">
         {/* Who she is */}
         <div>
           {/* Her name */}

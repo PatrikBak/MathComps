@@ -4,6 +4,7 @@ import { ProseContactLink } from '@/components/features/contact/ProseContactLink
 import AnimatedSection from '@/components/shared/components/AnimatedSection'
 import { ProseLink } from '@/components/shared/components/ProseLink'
 import { GLOBAL_TALENT_FUND_URL, MATIKA_CESKU_URL, WINCENT_URL } from '@/constants/links'
+import { ROUTES } from '@/i18n/i18n'
 
 import { AboutProse } from './layout/AboutProse'
 import BeatLabel from './layout/BeatLabel'
@@ -20,7 +21,13 @@ export const NextSection = () => {
     <AnimatedSection id="mathcomps-next" eager>
       <BeatLabel>{t('title')}</BeatLabel>
       <AboutProse className="mt-5 space-y-5">
-        <p>{t('text1')}</p>
+        {/* The vision, with each of Mathilda's two homes linked */}
+        <p>
+          {t.rich('text1', {
+            handouts: (chunks) => <ProseLink href={ROUTES.HANDOUTS}>{chunks}</ProseLink>,
+            competitions: (chunks) => <ProseLink href={ROUTES.COMPETITIONS}>{chunks}</ProseLink>,
+          })}
+        </p>
         {/* Funders, each linked by name */}
         <p>
           {t.rich('text2', {

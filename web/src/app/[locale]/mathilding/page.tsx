@@ -9,8 +9,7 @@ import { withLocale } from '@/i18n/with-locale'
 import { createPageMetadata } from '@/lib/metadata'
 
 /**
- * Page-specific metadata. The program is not announced yet, so the page stays out of search until there is
- * something behind it worth finding.
+ * Page-specific metadata.
  */
 export async function generateMetadata({
   params,
@@ -25,7 +24,6 @@ export async function generateMetadata({
     locale: locale as Locale,
     namespace: 'pages.competitions',
     path: ROUTES.COMPETITIONS,
-    noindex: true,
   })
 }
 

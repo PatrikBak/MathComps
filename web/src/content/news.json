@@ -1,5 +1,20 @@
 [
   {
+    "id": "rwqnCD3Gd_ZH-qys6AKxV",
+    "slug": "competitions-open",
+    "title": {
+      "sk": "Mathildovanie začína",
+      "cs": "Mathildování začíná",
+      "en": "Mathilding begins"
+    },
+    "date": "2026-09-02",
+    "category": "competitions",
+    "cover": {
+      "kind": "icon",
+      "name": "trophy"
+    }
+  },
+  {
     "id": "pCChaO8I-OEWUz53EsBhx",
     "slug": "mathilda",
     "title": {

@@ -930,7 +930,7 @@ test.describe('the competition area', () => {
     await page.goto(LIST_PATH)
 
     // Where the row of the competition just handed in now offers the work back
-    await expect(page.locator(`a[href="/en/competitions/${COMPETITION_SLUG}"]`)).toHaveText(
+    await expect(page.locator(`a[href="/en/mathilding/${COMPETITION_SLUG}"]`)).toHaveText(
       areaCopy.mySolutions,
       { timeout: SETTLE_TIMEOUT_MS }
     )
@@ -1024,7 +1024,7 @@ test.describe('the competition area', () => {
     await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
 
     // The press lands them inside, since the list has no way to show what an entry is spent on
-    await expect(page).toHaveURL(/\/competitions\/[^?]+$/, {
+    await expect(page).toHaveURL(/\/mathilding\/[^?]+$/, {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
@@ -1045,7 +1045,7 @@ test.describe('the competition area', () => {
     await page.goto(areaPath(UNENTERED_COMPETITION_SLUG))
 
     // Which sends them back to the list rather than serving them the statements
-    await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
+    await expect(page).toHaveURL(/\/mathilding$/, { timeout: SETTLE_TIMEOUT_MS })
 
     // Told the competition is one they have yet to start, which is an offer rather than a refusal
     await expect(page.getByText(areaCopy.areaNotStarted)).toBeVisible({
@@ -1069,7 +1069,7 @@ test.describe('the competition area', () => {
     await expect(page.getByText(areaCopy.loadFailed)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // And leaves them on it: a page that could not read the entry is not one that found none
-    await expect(page).toHaveURL(new RegExp(`/competitions/${COMPETITION_SLUG}$`))
+    await expect(page).toHaveURL(new RegExp(`/mathilding/${COMPETITION_SLUG}$`))
   })
 
   test('blames the problems read rather than the whole page when only it fails', async ({
@@ -1115,7 +1115,7 @@ test.describe('the competition area', () => {
     await page.goto(areaPath(UNENTERED_COMPETITION_SLUG))
 
     // Which turns them away
-    await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
+    await expect(page).toHaveURL(/\/mathilding$/, { timeout: SETTLE_TIMEOUT_MS })
 
     // Having asked for none of its statements: they are embargoed until an entry is spent on them, and
     // a page that asks anyway leans on the backend to say no
@@ -1139,7 +1139,7 @@ test.describe('the competition area', () => {
     await page.getByRole('menuitem', { name: /Sloven/i }).click()
 
     // Which re-expresses the route and the slug, both in the language switched to
-    await expect(page).toHaveURL(new RegExp(`/sk/sutaze/${COMPETITION_SLUG}-sk`), {
+    await expect(page).toHaveURL(new RegExp(`/sk/mathildovanie/${COMPETITION_SLUG}-sk`), {
       timeout: SETTLE_TIMEOUT_MS,
     })
   })
@@ -1335,7 +1335,7 @@ test.describe('the competition area', () => {
     ).toHaveCount(PROBLEM_COUNT, { timeout: SETTLE_TIMEOUT_MS })
 
     // On the set the student just argued, which is the page they were already on
-    await expect(page).toHaveURL(new RegExp(`/competitions/${COMPETITION_SLUG}$`))
+    await expect(page).toHaveURL(new RegExp(`/mathilding/${COMPETITION_SLUG}$`))
   })
 
   test('closes the solutions again when the practice run is taken a second time', async ({
@@ -1401,7 +1401,7 @@ test.describe('the competition area', () => {
     await page.goto(LIST_PATH)
 
     // The one link it leaves a reader who was never in it
-    const problems = page.locator(`a[href="/en/competitions/${CLOSED_COMPETITION_SLUG}"]`)
+    const problems = page.locator(`a[href="/en/mathilding/${CLOSED_COMPETITION_SLUG}"]`)
 
     // Which reads as the offer of the problems
     await expect(problems).toHaveText(areaCopy.problems, { timeout: SETTLE_TIMEOUT_MS })

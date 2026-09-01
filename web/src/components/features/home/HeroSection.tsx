@@ -23,7 +23,7 @@ export default function HeroSection() {
           <h1 className="text-balance text-[clamp(1.875rem,4.2vw,2.5rem)] font-bold leading-[1.05] tracking-tight text-foreground hyphens-none">
             {t('title')}
           </h1>
-          <p className="mx-auto mt-5 max-w-md text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg md:mx-0">
+          <p className="mx-auto mt-5 max-w-md text-pretty text-base leading-relaxed text-muted-foreground hyphens-none sm:text-lg md:mx-0">
             {t('subtitle')}
           </p>
         </div>
