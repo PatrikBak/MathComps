@@ -36,8 +36,12 @@ export function useAreaEntry(
   isReaderKnown: boolean,
   competitionId: string | null
 ): UseAreaEntryResult {
-  // Every competition the reader can see, which the board has usually already fetched
-  const { view, uiState } = useHostedCompetitionsView(readerKey, isReaderKnown)
+  // Every competition the reader can see, which the board has usually already fetched. A caller with no
+  // competition in hand has nothing to find in it, so it goes unread
+  const { view, uiState } = useHostedCompetitionsView(
+    readerKey,
+    isReaderKnown && competitionId !== null
+  )
 
   // The one this entry is into, and the group whose terms it runs on
   const competitionInGroup =

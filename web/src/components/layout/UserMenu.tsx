@@ -45,6 +45,8 @@ UserMenuTrigger.displayName = 'UserMenuTrigger'
 type UserMenuProps = {
   /** Opens the user's defenses. */
   onOpenDefenses: () => void
+  /** Starts loading the user's defenses. */
+  onPrepareDefenses: () => void
 }
 
 /**
@@ -52,7 +54,7 @@ type UserMenuProps = {
  * Handles all auth states: loading, logged out (shows login), and logged in (shows dropdown).
  * Built with Radix UI Dropdown for better accessibility.
  */
-export default function UserMenu({ onOpenDefenses }: UserMenuProps) {
+export default function UserMenu({ onOpenDefenses, onPrepareDefenses }: UserMenuProps) {
   // Get the logged-in user
   const { user, isLoaded } = useUser()
 
@@ -70,6 +72,17 @@ export default function UserMenu({ onOpenDefenses }: UserMenuProps) {
   // Whether the user reviews defenses
   const isAdmin = useIsAdmin()
 
+  // Loads the defenses as the menu goes up, so they are in hand by the time their item is picked
+  const handleMenuOpenChange = (isMenuOpen: boolean) => {
+    // A menu on its way down has nothing to load
+    if (!isMenuOpen) {
+      return
+    }
+
+    // Start loading them
+    onPrepareDefenses()
+  }
+
   // Get translations
   const tUserMenu = useTranslations('ui.userMenu')
   const tProfile = useTranslations('profile')
@@ -86,7 +99,7 @@ export default function UserMenu({ onOpenDefenses }: UserMenuProps) {
   }
 
   return (
-    <DropdownMenu.Root modal={false}>
+    <DropdownMenu.Root modal={false} onOpenChange={handleMenuOpenChange}>
       {/* Trigger button */}
       <DropdownMenu.Trigger asChild>
         <UserMenuTrigger id="user-menu-trigger" aria-label={tUserMenu('label')}>

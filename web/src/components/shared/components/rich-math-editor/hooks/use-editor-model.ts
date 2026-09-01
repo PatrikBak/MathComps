@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { useAttachLastMounted } from '@/hooks/use-attach-last-mounted'
+
 import { ensureVisibleCaret } from '../../../utils/dom-utils'
 import { type RichMathEditorInputAreaRef } from '../components/RichMathEditorInputArea'
 import { type EditorConfig, EditorState } from '../model/EditorState'
@@ -50,6 +52,16 @@ export type EditorViewModel = {
    * picker dialogs for images and attachments.
    */
   inputAreaRef: React.RefObject<RichMathEditorInputAreaRef | null>
+  /**
+   * Attaches a textarea, as the callback ref each one is rendered with. Several of them can stand at
+   * once, and this is what leaves {@link textareaRef} on one that is still on screen.
+   */
+  attachTextarea: (element: HTMLTextAreaElement) => () => void
+  /**
+   * Attaches an input area, doing for {@link inputAreaRef} what {@link attachTextarea} does for the
+   * textarea.
+   */
+  attachInputArea: (element: RichMathEditorInputAreaRef) => () => void
   /**
    * Applies a text transformation and updates the editor state.
    *
@@ -159,8 +171,14 @@ export function useEditorModel({
   // Textarea DOM reference — for reading selection and setting cursor
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  // The callback ref each textarea is rendered with
+  const attachTextarea = useAttachLastMounted(textareaRef)
+
   // Input area component reference — for triggering file pickers
   const inputAreaRef = useRef<RichMathEditorInputAreaRef>(null)
+
+  // The callback ref each input area is rendered with
+  const attachInputArea = useAttachLastMounted(inputAreaRef)
 
   // Sync internal state when controlled value changes from parent
   // This handles cases where the parent resets or programmatically changes the value
@@ -472,6 +490,8 @@ export function useEditorModel({
     // DOM Refs
     textareaRef,
     inputAreaRef,
+    attachTextarea,
+    attachInputArea,
 
     // Text Operations
     applyTransform,
