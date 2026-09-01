@@ -47,10 +47,10 @@ type DefenseComposerProps = {
   editorRef: Ref<RichMathEditorRef>
   /** Whether a reply is in flight. */
   isThinking: boolean
-  /** The longest a single turn may be, or undefined while the caps are not known. */
-  maxCharacters: number | undefined
-  /** The most turns the conversation may hold, or undefined while the caps are not known. */
-  maxReplies: number | undefined
+  /** The longest a single turn may be, or null while the caps are not known. */
+  maxCharacters: number | null
+  /** The most turns the conversation may hold, or null while the caps are not known. */
+  maxReplies: number | null
   /** Records the reader's acknowledgement. */
   onAcceptConsent: () => void
   /** Whether that acknowledgement is being recorded. */
@@ -59,6 +59,10 @@ type DefenseComposerProps = {
   onRetryConsent: () => void
   /** Whether that re-read is in flight. */
   isRetryingConsent: boolean
+  /** Reads the caps again after the read for them failed. */
+  onRetryCaps: () => void
+  /** Whether a read of the caps is in flight. */
+  isRetryingCaps: boolean
   /** How tall the empty editor stands. */
   editorMinHeightPx: number
 }
@@ -80,6 +84,8 @@ export function DefenseComposer({
   isAcceptingConsent,
   onRetryConsent,
   isRetryingConsent,
+  onRetryCaps,
+  isRetryingCaps,
   editorMinHeightPx,
 }: DefenseComposerProps) {
   // Defense-surface copy
@@ -129,6 +135,20 @@ export function DefenseComposer({
         </div>
       )
 
+    // Nothing that could say how long a turn may be or how many are left
+    case 'capsUnknown':
+      return (
+        <div className="flex flex-col items-center gap-3 py-3 text-center">
+          {/* What could not be found out */}
+          <p className="max-w-[700px] text-pretty text-sm text-muted">{t('capsUnavailable')}</p>
+
+          {/* Asking again */}
+          <Button variant="secondary" size="sm" onClick={onRetryCaps} loading={isRetryingCaps}>
+            {tActions('retry')}
+          </Button>
+        </div>
+      )
+
     // Every turn spent, which a graded conversation says differently: rewind is gone there, so another
     // conversation on the problem is the way on
     case 'full':
@@ -157,7 +177,7 @@ export function DefenseComposer({
           minHeightPx={editorMinHeightPx}
           placeholder={t('placeholder')}
           footerMeta={
-            state.repliesLeft !== null && maxReplies !== undefined ? (
+            state.repliesLeft !== null && maxReplies !== null ? (
               <CounterBadge
                 icon={MessageSquare}
                 count={maxReplies - state.repliesLeft}

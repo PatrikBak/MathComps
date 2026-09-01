@@ -6,8 +6,8 @@ import { type ApiErrorTranslator, resolveErrorMessage } from '@/lib/api/api-erro
 import { type FileType, isAllowedMimeType, validateFile } from '@/lib/file-upload-utils'
 import { uploadAttachment, uploadImage } from '@/lib/file-upload-utils'
 
-/** Maximum number of attachments allowed per comment */
-export const MAX_ATTACHMENTS_PER_COMMENT = 3
+/** Maximum number of attachments the editor takes */
+export const MAX_EDITOR_ATTACHMENTS = 3
 
 /**
  * Toasts the localized copy for a failed upload, resolving the thrown error's code (with any
@@ -21,8 +21,8 @@ function toastUploadError(error: unknown, translate: ApiErrorTranslator): void {
   toast.error(resolveErrorMessage(errorCodeOf(error), translate, { data: errorDataOf(error) }))
 }
 
-/** Maximum number of images allowed per comment */
-export const MAX_IMAGES_PER_COMMENT = 5
+/** Maximum number of images the editor takes */
+export const MAX_EDITOR_IMAGES = 5
 
 /** Regex to match markdown images: ![alt text](url) */
 export const IMAGE_REGEX = /!\[.*?\]\([^)]+\)/g
@@ -53,7 +53,7 @@ type UploadConfig = {
  */
 const IMAGE_UPLOAD_CONFIG: UploadConfig = {
   fileType: 'image',
-  maxCount: MAX_IMAGES_PER_COMMENT,
+  maxCount: MAX_EDITOR_IMAGES,
   countRegex: IMAGE_REGEX,
   createMarkdown: (filename: string, key: string) => `![${filename}](media:${key}?scale=100)`,
   uploadFn: uploadImage,
@@ -64,7 +64,7 @@ const IMAGE_UPLOAD_CONFIG: UploadConfig = {
  */
 const ATTACHMENT_UPLOAD_CONFIG: UploadConfig = {
   fileType: 'attachment',
-  maxCount: MAX_ATTACHMENTS_PER_COMMENT,
+  maxCount: MAX_EDITOR_ATTACHMENTS,
   countRegex: ATTACHMENT_REGEX,
   createMarkdown: (filename: string, key: string) => `[📎 ${filename}](media:${key})`,
   uploadFn: uploadAttachment,

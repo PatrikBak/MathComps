@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import React from 'react'
 import { useCallback, useState } from 'react'
 
+import { MAX_CHARACTERS_PER_COMMENT } from '@/components/features/comments/model/comment-limits'
 import { UsernameGate } from '@/components/features/profile/components/UsernameGate'
 import { useUserProfile } from '@/components/features/profile/hooks/use-user-profile'
 import { LoginButton } from '@/components/login/LoginButton'
@@ -260,6 +261,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
             replyCommentId === comment.id && !isMobile ? (
               <RichMathEditor
                 variant={variant}
+                maxCharacters={MAX_CHARACTERS_PER_COMMENT}
                 value={replyInputText}
                 onChange={setReplyInputText}
                 onSend={handleSubmitReply}
@@ -390,6 +392,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
               ) : (
                 <RichMathEditor
                   variant={variant}
+                  maxCharacters={MAX_CHARACTERS_PER_COMMENT}
                   value={commentInputText}
                   onChange={setCommentInputText}
                   onSend={handleSubmitComment}
@@ -405,6 +408,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
       {isMobile && replyCommentId !== null && (
         <RichMathEditor
           variant={variant}
+          maxCharacters={MAX_CHARACTERS_PER_COMMENT}
           value={replyInputText}
           onChange={setReplyInputText}
           onSend={handleSubmitReply}

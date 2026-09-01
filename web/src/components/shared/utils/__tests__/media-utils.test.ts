@@ -61,14 +61,14 @@ describe('resolveMarkdownImageUrl', () => {
     // resolvable (absolute http, root-relative, dev-placeholder paths)
     it('returns absolute URLs unchanged for every context', () => {
       const url = 'https://cdn.example.com/img.png'
-      expect(resolveMarkdownImageUrl(url, 'comments')).toBe(url)
+      expect(resolveMarkdownImageUrl(url, 'userUploads')).toBe(url)
       expect(resolveMarkdownImageUrl(url, 'problems')).toBe(url)
       expect(resolveMarkdownImageUrl(url, 'handouts')).toBe(url)
     })
 
     it('returns root-relative URLs unchanged for every context', () => {
       const url = '/dev-placeholders/block.svg?width=800&height=400'
-      expect(resolveMarkdownImageUrl(url, 'comments')).toBe(url)
+      expect(resolveMarkdownImageUrl(url, 'userUploads')).toBe(url)
       expect(resolveMarkdownImageUrl(url, 'problems')).toBe(url)
       expect(resolveMarkdownImageUrl(url, 'handouts')).toBe(url)
     })
@@ -96,12 +96,12 @@ describe('resolveMarkdownImageUrl', () => {
     // concrete URL shape so we don't duplicate the string here
     it('matches resolveUserUploadMediaUrl for a bare user-uploads key', () => {
       const url = 'media:user-id-1/images/photo.png'
-      expect(resolveMarkdownImageUrl(url, 'comments')).toBe(resolveUserUploadMediaUrl(url))
+      expect(resolveMarkdownImageUrl(url, 'userUploads')).toBe(resolveUserUploadMediaUrl(url))
     })
 
     it('matches resolveUserUploadMediaUrl when query params ride along', () => {
       const url = 'media:user-id-1/images/photo.png?scale=100'
-      expect(resolveMarkdownImageUrl(url, 'comments')).toBe(resolveUserUploadMediaUrl(url))
+      expect(resolveMarkdownImageUrl(url, 'userUploads')).toBe(resolveUserUploadMediaUrl(url))
     })
   })
 

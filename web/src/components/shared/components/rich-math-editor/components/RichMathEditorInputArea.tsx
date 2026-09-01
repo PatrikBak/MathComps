@@ -11,8 +11,8 @@ import { ensureVisibleCaret } from '../../../utils/dom-utils'
 import { type EditorViewModel } from '../hooks/use-editor-model'
 import {
   handleFileUpload,
-  MAX_ATTACHMENTS_PER_COMMENT,
-  MAX_IMAGES_PER_COMMENT,
+  MAX_EDITOR_ATTACHMENTS,
+  MAX_EDITOR_IMAGES,
 } from '../utils/attachment-utils'
 import { processPaste } from '../utils/paste-utils'
 import { type EditContext } from '../utils/transforms'
@@ -190,10 +190,10 @@ export const RichMathEditorInputArea = forwardRef<
         if (!canAddMore) {
           switch (contentType) {
             case 'image':
-              toast.error(tEditor('maxImagesReached', { max: MAX_IMAGES_PER_COMMENT }))
+              toast.error(tEditor('maxImagesReached', { max: MAX_EDITOR_IMAGES }))
               break
             case 'attachment':
-              toast.error(tEditor('maxAttachmentsReached', { max: MAX_ATTACHMENTS_PER_COMMENT }))
+              toast.error(tEditor('maxAttachmentsReached', { max: MAX_EDITOR_ATTACHMENTS }))
               break
           }
         }

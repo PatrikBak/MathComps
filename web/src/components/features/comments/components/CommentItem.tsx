@@ -4,6 +4,7 @@ import { ChevronDown, Heart, Minus, Pencil, Reply, Trash2 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import { MAX_CHARACTERS_PER_COMMENT } from '@/components/features/comments/model/comment-limits'
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
@@ -336,6 +337,7 @@ export function CommentItem({
           {isEditing ? (
             <div className="mb-2">
               <RichMathEditor
+                maxCharacters={MAX_CHARACTERS_PER_COMMENT}
                 value={editText}
                 onChange={setEditText}
                 placeholder={tComments('editPlaceholder')}
@@ -352,7 +354,7 @@ export function CommentItem({
               <RichMathEditorRenderer
                 content={content}
                 lightImageBackground={false}
-                imageContext="comments"
+                imageContext="userUploads"
               />
             </div>
           )}

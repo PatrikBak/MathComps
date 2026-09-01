@@ -7,7 +7,7 @@ import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
 
-import { MAX_ATTACHMENTS_PER_COMMENT, MAX_IMAGES_PER_COMMENT } from '../utils/attachment-utils'
+import { MAX_EDITOR_ATTACHMENTS, MAX_EDITOR_IMAGES } from '../utils/attachment-utils'
 import type { RichMathEditorVariant } from './RichMathEditor'
 
 /**
@@ -96,8 +96,8 @@ type RichMathEditorFooterProps = {
   modeConfig: ModeConfig
   /** Current number of characters in the editor */
   charCount: number
-  /** The most characters the content may hold */
-  maxCharacters: number
+  /** The most characters the content may hold, or null while the limit in force is not known */
+  maxCharacters: number | null
   /** Current number of uploaded images */
   imageCount: number
   /** Current number of uploaded file attachments */
@@ -145,15 +145,16 @@ export function RichMathEditorFooter({
   const { isMobileOS, isMac } = useDeviceCapabilities()
 
   // Compute whether we're over limits
-  const isOverCharLimit = charCount > maxCharacters
-  const isOverImageLimit = imageCount > MAX_IMAGES_PER_COMMENT
-  const isOverAttachmentLimit = attachmentCount > MAX_ATTACHMENTS_PER_COMMENT
+  const isOverCharLimit = maxCharacters !== null && charCount > maxCharacters
+  const isOverImageLimit = imageCount > MAX_EDITOR_IMAGES
+  const isOverAttachmentLimit = attachmentCount > MAX_EDITOR_ATTACHMENTS
 
   // Compute whether we're close to limits
-  const isNearCharLimit = charCount / maxCharacters >= 0.8 && !isOverCharLimit
-  const isNearImageLimit = imageCount >= MAX_IMAGES_PER_COMMENT - 1 && !isOverImageLimit
+  const isNearCharLimit =
+    maxCharacters !== null && charCount / maxCharacters >= 0.8 && !isOverCharLimit
+  const isNearImageLimit = imageCount >= MAX_EDITOR_IMAGES - 1 && !isOverImageLimit
   const isNearAttachmentLimit =
-    attachmentCount >= MAX_ATTACHMENTS_PER_COMMENT - 1 && !isOverAttachmentLimit
+    attachmentCount >= MAX_EDITOR_ATTACHMENTS - 1 && !isOverAttachmentLimit
 
   return (
     <div
@@ -188,9 +189,15 @@ export function RichMathEditorFooter({
 
         {/* Metrics */}
         {(() => {
-          // The draft's own counters appear as the thing they count does. What the surface counts is
-          // none of the draft's, so it stands from the empty editor onwards
-          if (meta === undefined && charCount === 0 && imageCount === 0 && attachmentCount === 0)
+          // The image and attachment counters appear as the thing they count does. The characters
+          // and what the surface counts of its own both stand from the empty editor onwards, being
+          // the room a draft is written into
+          if (
+            meta === undefined &&
+            maxCharacters === null &&
+            imageCount === 0 &&
+            attachmentCount === 0
+          )
             return null
 
           return (
@@ -200,23 +207,23 @@ export function RichMathEditorFooter({
                 <CounterBadge
                   icon={Image}
                   count={imageCount}
-                  max={MAX_IMAGES_PER_COMMENT}
+                  max={MAX_EDITOR_IMAGES}
                   isOver={isOverImageLimit}
                   isNear={isNearImageLimit}
-                  title={tEditor('maxImages', { max: MAX_IMAGES_PER_COMMENT })}
+                  title={tEditor('maxImages', { max: MAX_EDITOR_IMAGES })}
                 />
               )}
               {attachmentCount > 0 && (
                 <CounterBadge
                   icon={Paperclip}
                   count={attachmentCount}
-                  max={MAX_ATTACHMENTS_PER_COMMENT}
+                  max={MAX_EDITOR_ATTACHMENTS}
                   isOver={isOverAttachmentLimit}
                   isNear={isNearAttachmentLimit}
-                  title={tEditor('maxAttachments', { max: MAX_ATTACHMENTS_PER_COMMENT })}
+                  title={tEditor('maxAttachments', { max: MAX_EDITOR_ATTACHMENTS })}
                 />
               )}
-              {charCount > 0 && (
+              {maxCharacters !== null && (
                 <CounterBadge
                   icon={Type}
                   count={charCount}

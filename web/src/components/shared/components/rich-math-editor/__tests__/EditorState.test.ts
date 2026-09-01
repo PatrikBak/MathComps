@@ -22,11 +22,6 @@ describe('EditorState', () => {
       const state = new EditorState('', TEST_CONFIG)
       expect(state.text).toBe('')
     })
-
-    it('should compute metrics on construction', () => {
-      const state = new EditorState('Hello World', TEST_CONFIG)
-      expect(state.metrics.charCount).toBe(11)
-    })
   })
 
   describe('hasContent', () => {
@@ -85,64 +80,88 @@ describe('EditorState', () => {
       expect(stateWithAttachment.metrics.attachmentCount).toBe(1)
     })
 
-    it('should use smart character count (excluding URLs)', () => {
-      // A link with long URL should only count the link text
-      const state = new EditorState(
-        '[click here](https://example.com/very-long-url-path)',
-        TEST_CONFIG
-      )
-      // "click here" = 10 characters (not including the URL)
-      expect(state.metrics.charCount).toBe(10)
+    it('should not count the whitespace around the content', () => {
+      const state = new EditorState('  Hello  \n', TEST_CONFIG)
+      expect(state.metrics.charCount).toBe(5)
+    })
+
+    it('should count a link whole, URL and all', () => {
+      const link = '[click here](https://example.com/very-long-url-path)'
+      const state = new EditorState(link, TEST_CONFIG)
+      expect(state.metrics.charCount).toBe(link.length)
     })
   })
 
   describe('isOverCharacterLimit', () => {
     it('should return false for short text', () => {
-      const state = new EditorState('Hello', { maxCharacters: 10 })
+      const state = new EditorState('Hello', { ...TEST_CONFIG, maxCharacters: 10 })
       expect(state.isOverCharacterLimit).toBe(false)
     })
 
     it('should return true when character limit is exceeded', () => {
-      const state = new EditorState('123456', { maxCharacters: 5 })
+      const state = new EditorState('123456', { ...TEST_CONFIG, maxCharacters: 5 })
       expect(state.isOverCharacterLimit).toBe(true)
     })
 
     it('should return false for text at exactly the limit', () => {
-      const state = new EditorState('12345', { maxCharacters: 5 })
+      const state = new EditorState('12345', { ...TEST_CONFIG, maxCharacters: 5 })
+      expect(state.isOverCharacterLimit).toBe(false)
+    })
+
+    it('should return true when only the URLs push the text over the limit', () => {
+      // The server counts what was typed, so a link the reader sees as ten characters is not ten
+      const state = new EditorState('[click here](https://example.com/pad)', {
+        ...TEST_CONFIG,
+        maxCharacters: 20,
+      })
+      expect(state.isOverCharacterLimit).toBe(true)
+    })
+
+    it('should return false while the limit is unknown', () => {
+      const state = new EditorState('123456', { ...TEST_CONFIG, maxCharacters: null })
       expect(state.isOverCharacterLimit).toBe(false)
     })
   })
 
   describe('isOverImageLimit', () => {
     it('should return false when under image limit', () => {
-      const state = new EditorState('![img](url)', { maxImages: 3 })
+      const state = new EditorState('![img](url)', { ...TEST_CONFIG, maxImages: 3 })
       expect(state.isOverImageLimit).toBe(false)
     })
 
     it('should return false at exactly the image limit', () => {
-      const state = new EditorState('![1](u1) ![2](u2) ![3](u3)', { maxImages: 3 })
+      const state = new EditorState('![1](u1) ![2](u2) ![3](u3)', { ...TEST_CONFIG, maxImages: 3 })
       expect(state.isOverImageLimit).toBe(false)
     })
 
     it('should return true when over image limit', () => {
-      const state = new EditorState('![1](u1) ![2](u2) ![3](u3) ![4](u4)', { maxImages: 3 })
+      const state = new EditorState('![1](u1) ![2](u2) ![3](u3) ![4](u4)', {
+        ...TEST_CONFIG,
+        maxImages: 3,
+      })
       expect(state.isOverImageLimit).toBe(true)
     })
   })
 
   describe('isOverAttachmentLimit', () => {
     it('should return false when under attachment limit', () => {
-      const state = new EditorState('[📎 file.pdf](url)', { maxAttachments: 2 })
+      const state = new EditorState('[📎 file.pdf](url)', { ...TEST_CONFIG, maxAttachments: 2 })
       expect(state.isOverAttachmentLimit).toBe(false)
     })
 
     it('should return false at exactly the attachment limit', () => {
-      const state = new EditorState('[📎 f1](u1) [📎 f2](u2)', { maxAttachments: 2 })
+      const state = new EditorState('[📎 f1](u1) [📎 f2](u2)', {
+        ...TEST_CONFIG,
+        maxAttachments: 2,
+      })
       expect(state.isOverAttachmentLimit).toBe(false)
     })
 
     it('should return true when over attachment limit', () => {
-      const state = new EditorState('[📎 f1](u1) [📎 f2](u2) [📎 f3](u3)', { maxAttachments: 2 })
+      const state = new EditorState('[📎 f1](u1) [📎 f2](u2) [📎 f3](u3)', {
+        ...TEST_CONFIG,
+        maxAttachments: 2,
+      })
       expect(state.isOverAttachmentLimit).toBe(true)
     })
   })
@@ -164,17 +183,25 @@ describe('EditorState', () => {
     })
 
     it('should return false when over character limit', () => {
-      const state = new EditorState('123456', { maxCharacters: 5 })
+      const state = new EditorState('123456', { ...TEST_CONFIG, maxCharacters: 5 })
+      expect(state.isValid).toBe(false)
+    })
+
+    it('should return false while the character limit is unknown', () => {
+      const state = new EditorState('Hello World', { ...TEST_CONFIG, maxCharacters: null })
       expect(state.isValid).toBe(false)
     })
 
     it('should return false when over image limit', () => {
-      const state = new EditorState('![1](u1) ![2](u2)', { maxImages: 1 })
+      const state = new EditorState('![1](u1) ![2](u2)', { ...TEST_CONFIG, maxImages: 1 })
       expect(state.isValid).toBe(false)
     })
 
     it('should return false when over attachment limit', () => {
-      const state = new EditorState('[📎 f1](u1) [📎 f2](u2)', { maxAttachments: 1 })
+      const state = new EditorState('[📎 f1](u1) [📎 f2](u2)', {
+        ...TEST_CONFIG,
+        maxAttachments: 1,
+      })
       expect(state.isValid).toBe(false)
     })
   })
@@ -182,44 +209,59 @@ describe('EditorState', () => {
   describe('canAddMore', () => {
     describe('for images', () => {
       it('should return true when no images exist', () => {
-        const state = new EditorState('Some text', { maxImages: 3 })
+        const state = new EditorState('Some text', { ...TEST_CONFIG, maxImages: 3 })
         expect(state.canAddMore('image')).toBe(true)
       })
 
       it('should return true when under image limit', () => {
-        const state = new EditorState('![img1](url1) ![img2](url2)', { maxImages: 3 })
+        const state = new EditorState('![img1](url1) ![img2](url2)', {
+          ...TEST_CONFIG,
+          maxImages: 3,
+        })
         expect(state.canAddMore('image')).toBe(true)
       })
 
       it('should return false when at image limit', () => {
-        const state = new EditorState('![1](u1) ![2](u2) ![3](u3)', { maxImages: 3 })
+        const state = new EditorState('![1](u1) ![2](u2) ![3](u3)', {
+          ...TEST_CONFIG,
+          maxImages: 3,
+        })
         expect(state.canAddMore('image')).toBe(false)
       })
 
       it('should return false when over image limit', () => {
-        const state = new EditorState('![1](u1) ![2](u2) ![3](u3) ![4](u4)', { maxImages: 3 })
+        const state = new EditorState('![1](u1) ![2](u2) ![3](u3) ![4](u4)', {
+          ...TEST_CONFIG,
+          maxImages: 3,
+        })
         expect(state.canAddMore('image')).toBe(false)
       })
     })
 
     describe('for attachments', () => {
       it('should return true when no attachments exist', () => {
-        const state = new EditorState('Some text', { maxAttachments: 2 })
+        const state = new EditorState('Some text', { ...TEST_CONFIG, maxAttachments: 2 })
         expect(state.canAddMore('attachment')).toBe(true)
       })
 
       it('should return true when under attachment limit', () => {
-        const state = new EditorState('[📎 file.pdf](url)', { maxAttachments: 2 })
+        const state = new EditorState('[📎 file.pdf](url)', { ...TEST_CONFIG, maxAttachments: 2 })
         expect(state.canAddMore('attachment')).toBe(true)
       })
 
       it('should return false when at attachment limit', () => {
-        const state = new EditorState('[📎 f1](u1) [📎 f2](u2)', { maxAttachments: 2 })
+        const state = new EditorState('[📎 f1](u1) [📎 f2](u2)', {
+          ...TEST_CONFIG,
+          maxAttachments: 2,
+        })
         expect(state.canAddMore('attachment')).toBe(false)
       })
 
       it('should return false when over attachment limit', () => {
-        const state = new EditorState('[📎 f1](u1) [📎 f2](u2) [📎 f3](u3)', { maxAttachments: 2 })
+        const state = new EditorState('[📎 f1](u1) [📎 f2](u2) [📎 f3](u3)', {
+          ...TEST_CONFIG,
+          maxAttachments: 2,
+        })
         expect(state.canAddMore('attachment')).toBe(false)
       })
     })

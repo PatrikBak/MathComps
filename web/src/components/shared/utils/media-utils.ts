@@ -6,11 +6,11 @@ import { getRequiredEnv } from './env-utils'
  * Which markdown surface a {@link RichMathEditorRenderer} is rendering: this
  * picks the host that bare `media:<id>` keys resolve against.
  *
- * - `comments` — user-uploaded images on R2 (`media:<userId>/<folder>/<file>`).
+ * - `userUploads` — user-uploaded images on R2 (`media:<userId>/<folder>/<file>`).
  * - `problems` — problem-image content IDs served from the backend API.
  * - `handouts` — handout-image content IDs served from R2.
  */
-export type ImageContext = 'comments' | 'problems' | 'handouts'
+export type ImageContext = 'userUploads' | 'problems' | 'handouts'
 
 /**
  * Resolves a `media:` URL minted by the rich-math editor's upload flow to the
@@ -20,10 +20,10 @@ export type ImageContext = 'comments' | 'problems' | 'handouts'
  * bucket layout actually uses. Non-`media:` URLs pass through unchanged so
  * absolute URLs and root-relative paths can share the same resolver call.
  *
- * Only call this for URLs that come from the user-uploads pipeline — comments
- * today, anywhere else editor uploads land tomorrow. For markdown image
- * resolution that needs to pick among problem / handout / user-upload hosts,
- * use {@link resolveMarkdownImageUrl} instead.
+ * Only call this for URLs that come from the user-uploads pipeline, which is
+ * where every editor upload lands. For markdown image resolution that needs to
+ * pick among problem / handout / user-upload hosts, use
+ * {@link resolveMarkdownImageUrl} instead.
  *
  * @param url - The URL to resolve, either a `media:<short-key>` or any URL.
  *
@@ -49,8 +49,8 @@ export function resolveUserUploadMediaUrl(url: string): string {
 
 /**
  * Resolves a markdown image URL to its concrete host, picking the host based
- * on which markdown surface the renderer is mounted in. Comments route through
- * {@link resolveUserUploadMediaUrl} (R2 user-uploads bucket); problems and
+ * on which markdown surface the renderer is mounted in. Editor uploads route
+ * through {@link resolveUserUploadMediaUrl} (R2 user-uploads bucket); problems and
  * handouts route through {@link getProblemImageUrl} (which already knows the
  * right per-type host for content-id-style keys). Non-`media:` URLs pass
  * through unchanged.
@@ -79,8 +79,8 @@ export function resolveMarkdownImageUrl(url: string, context?: ImageContext): st
   // through as-is so any media: that slips in fails loudly at fetch time
   if (context === undefined) return url
 
-  // Comments share the user-uploads pipeline used by editor uploads everywhere
-  if (context === 'comments') return resolveUserUploadMediaUrl(url)
+  // Whatever the editor's own upload flow minted, which lands in the user-uploads bucket
+  if (context === 'userUploads') return resolveUserUploadMediaUrl(url)
 
   // Problem and handout images use a contentId-style key, not a path key —
   // split off any ?query so the URL builder sees a clean contentId, then

@@ -56,6 +56,10 @@ type UseDefenseConversationResult = DefenseConversationState &
     initialResumeSettled: boolean
     /** Whether loading this problem's session history failed. */
     sessionsFailed: boolean
+    /** Reads this problem's session history again after a failed read. */
+    retrySessions: () => void
+    /** Whether a read of that history is in flight. */
+    isRetryingSessions: boolean
     /** Sends a student turn and folds in the examiner's reply. */
     send: (content: string) => Promise<SendOutcome>
     /** Deletes a session, dropping back to a fresh conversation when it was the open one. */
@@ -237,6 +241,12 @@ export function useDefenseConversation(
     [model, runWithServices]
   )
 
+  // The history query's own re-read
+  const { refetch: refetchSessions } = sessionsQuery
+
+  // A function which reads this problem's session history again
+  const retrySessions = useCallback(() => void refetchSessions(), [refetchSessions])
+
   // The conversation state, this problem's history, and the controls that drive it
   return {
     ...state,
@@ -244,6 +254,8 @@ export function useDefenseConversation(
     limits: sessionsQuery.data?.limits ?? null,
     initialResumeSettled,
     sessionsFailed: sessionsQuery.isError,
+    retrySessions,
+    isRetryingSessions: sessionsQuery.isFetching,
     send,
     stop: model.stop,
     startNew: model.startNew,

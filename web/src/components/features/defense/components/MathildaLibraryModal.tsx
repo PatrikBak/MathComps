@@ -116,7 +116,6 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
           <DefenseConversation
             key={selected.id}
             problem={conversation.problem}
-            isOpen={isOpen}
             onClose={clear}
             opening={{ kind: 'named', sessionId: selected.id }}
             competition={conversation.competition}

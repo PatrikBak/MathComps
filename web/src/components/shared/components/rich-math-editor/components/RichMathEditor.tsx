@@ -76,8 +76,8 @@ type RichMathEditorProps = {
   toolbar?: ToolbarConfig
   /** The editor's minimum height in px */
   minHeightPx?: number
-  /** The most characters the content may hold; defaults to the comment cap */
-  maxCharacters?: number
+  /** The most characters the content may hold, or null while the limit in force is not known */
+  maxCharacters: number | null
   /** Current text value */
   value: string
   /** Callback when the text changes */

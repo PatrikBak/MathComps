@@ -1,6 +1,6 @@
 import { assertNever } from '@/components/shared/utils/assert-never'
 
-import type { MathildaConsent, MathildaConsentStatus } from './defense-types'
+import type { DefenseLimits, MathildaConsent, MathildaConsentStatus } from './defense-types'
 
 /**
  * How a read of the standing acknowledgement came back.
@@ -35,6 +35,43 @@ export function resolveConsentStatus(read: ConsentRead): MathildaConsentStatus {
 }
 
 /**
+ * How a read of the caps a defense is held to came back.
+ */
+type CapsRead = {
+  /** The caps the last read that got through came back with, null while none has. */
+  limits: DefenseLimits | null
+  /** Whether the most recent attempt failed. */
+  isError: boolean
+}
+
+/**
+ * Where the caps a defense is held to stand: read, out of reach, or still coming.
+ */
+export type DefenseCapsStatus = 'known' | 'unknown' | 'loading'
+
+/**
+ * Reads where the caps stand off the read that asked.
+ *
+ * @param read - How the read of the caps came back.
+ *
+ * @returns What it establishes.
+ */
+export function resolveCapsStatus(read: CapsRead): DefenseCapsStatus {
+  // Caps already in hand, which a later read failing does not take back
+  if (read.limits !== null) {
+    return 'known'
+  }
+
+  // A failure with nothing behind it establishes nothing
+  if (read.isError) {
+    return 'unknown'
+  }
+
+  // Nothing back yet
+  return 'loading'
+}
+
+/**
  * The conversation is not ready to be written into yet.
  */
 type ComposerLoading = {
@@ -64,6 +101,14 @@ type ComposerConsentRequired = {
 type ComposerConsentUnknown = {
   /** The discriminant. */
   kind: 'consentUnknown'
+}
+
+/**
+ * What a turn here is held to could not be read.
+ */
+type ComposerCapsUnknown = {
+  /** The discriminant. */
+  kind: 'capsUnknown'
 }
 
 /**
@@ -108,6 +153,7 @@ export type DefenseComposerState =
   | ComposerSignInRequired
   | ComposerConsentRequired
   | ComposerConsentUnknown
+  | ComposerCapsUnknown
   | ComposerFull
   | ComposerOpen
 
@@ -133,6 +179,8 @@ export type DefenseComposerInput = {
   consentStatus: MathildaConsentStatus
   /** Whether a reply is in flight. */
   isThinking: boolean
+  /** Where the caps a turn here is held to stand. */
+  capsStatus: DefenseCapsStatus
   /** How many turns the conversation has left, or null while the caps are not known. */
   repliesLeft: number | null
   /** The competition run it is being argued inside, or null outside one. */
@@ -178,6 +226,22 @@ export function resolveComposerState(input: DefenseComposerInput): DefenseCompos
     // Every standing is handled above
     default:
       return assertNever(input.consentStatus)
+  }
+
+  // Where the caps a turn is held to stand
+  switch (input.capsStatus) {
+    // The read that carries them failed with nothing behind it, so a turn has nothing to be held to
+    case 'unknown':
+      return { kind: 'capsUnknown' }
+
+    // Still coming, or in hand: either way there is an editor to write into
+    case 'loading':
+    case 'known':
+      break
+
+    // Every standing is handled above
+    default:
+      return assertNever(input.capsStatus)
   }
 
   // Every turn spent, though a reply still coming is allowed to land
