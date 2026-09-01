@@ -978,7 +978,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Which is every competition down to the one that set it, each named in the language asked for
         Assert.Equal(
-            ["MathComps", "Advanced", "September"],
+            ["Mathilding", "Advanced", "September"],
             target.Source.Competition.Select(competition => competition.DisplayName));
 
         // Along with the season's own year and the problem's place in the competition
@@ -1017,7 +1017,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
             // Which is every competition down to the one that set it, each named in the language asked for
             Assert.Equal(
-                ["MathComps", "Advanced", "September"],
+                ["Mathilding", "Advanced", "September"],
                 target.Source.Competition.Select(competition => competition.DisplayName));
 
             // Along with the season's own year and the problem's place in the competition

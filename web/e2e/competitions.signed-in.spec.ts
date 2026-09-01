@@ -247,7 +247,7 @@ test.describe('the competitions list', () => {
     const row = page.locator(`[data-competition-slug="${COMPETITION_SLUG}"]`)
 
     // The way back, addressed by where it goes
-    const back = row.locator(`a[href="/en/competitions/${COMPETITION_SLUG}"]`)
+    const back = row.locator(`a[href="/en/mathilding/${COMPETITION_SLUG}"]`)
 
     // Which reads as a way back into the clock
     await expect(back).toHaveText(areaCopy.continue, { timeout: SETTLE_TIMEOUT_MS })
@@ -285,9 +285,10 @@ test.describe('the competitions list', () => {
 
     // Where the run they just spent offers the way back into it, beside the second go that would start a
     // clock and close the solutions it opened
-    await expect(
-      page.locator(`a[href="/en/competitions/${PRACTICE_COMPETITION_SLUG}"]`)
-    ).toHaveText(areaCopy.mySolutions, { timeout: SETTLE_TIMEOUT_MS })
+    await expect(page.locator(`a[href="/en/mathilding/${PRACTICE_COMPETITION_SLUG}"]`)).toHaveText(
+      areaCopy.mySolutions,
+      { timeout: SETTLE_TIMEOUT_MS }
+    )
 
     // And that second go is still offered beside it
     await expect(page.getByRole('button', { name: areaCopy.tryAgain })).toBeVisible()

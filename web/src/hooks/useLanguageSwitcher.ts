@@ -74,7 +74,7 @@ export function useLanguageSwitcher(): LanguageSwitcherReturn {
       // Change it while preserving the current path, query parameters, and dynamic route params.
       // The query rides in its own field rather than glued onto the pathname: a pathname carrying one
       // matches no known route, so next-intl stops filling the route's dynamic segments in and the reader
-      // lands on a literal '/sutaze/[slug]'
+      // lands on a literal '/mathildovanie/[slug]'
       router.replace(
         {
           pathname,

@@ -17,7 +17,7 @@ import { useIsAdmin } from '@/hooks/use-is-admin'
 import { usePathname } from '@/i18n/navigation'
 
 import { cn } from '../shared/utils/css-utils'
-import { visibleNavigationItems } from './navigation-items'
+import { NAVIGATION_ITEMS } from './navigation-items'
 
 /**
  * Props for the {@link MobileNavigationDrawer} component.
@@ -133,7 +133,7 @@ export const MobileNavigationDrawer = ({
 
                 {/* Main navigation */}
                 <nav className="flex flex-col">
-                  {visibleNavigationItems(isAdmin).map((item) => (
+                  {NAVIGATION_ITEMS.map((item) => (
                     <MobileLink key={item.href} href={item.href}>
                       {tNav(item.labelKey)}
                     </MobileLink>

@@ -54,7 +54,7 @@ test.describe('the competitions list', () => {
     })
 
     // And the area is where they stay, rather than being sent back to the list
-    await expect(page).toHaveURL(new RegExp(`/competitions/${CLOSED_COMPETITION_SLUG}$`))
+    await expect(page).toHaveURL(new RegExp(`/mathilding/${CLOSED_COMPETITION_SLUG}$`))
 
     // With how each of them was meant to go, nobody being in the middle of solving one
     await expect(
@@ -78,7 +78,7 @@ test.describe('the competitions list', () => {
     await page.goto(areaPath(OPEN_COMPETITION_SLUG))
 
     // Back on the list, an entry being what opens it and an account being what holds one
-    await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
+    await expect(page).toHaveURL(/\/mathilding$/, { timeout: SETTLE_TIMEOUT_MS })
 
     // Asked for that account, rather than told the competition is not theirs, which explains nothing
     await expect(page.getByText(areaCopy.areaAuthReason)).toBeVisible({

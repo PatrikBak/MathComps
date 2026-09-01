@@ -182,7 +182,7 @@ describe('generatePageMetadata - dynamic route segments', () => {
     // A competition's own area, whose path is worded per locale and whose [slug] is not
     const metadata = generatePageMetadata({
       locale: 'sk',
-      path: '/competitions/[slug]',
+      path: '/mathilding/[slug]',
       routeParams: { slug: 'open-intermediate' },
       title: 'Sutaz',
     })
@@ -191,15 +191,17 @@ describe('generatePageMetadata - dynamic route segments', () => {
     const languages = metadata.alternates?.languages as Record<string, string>
 
     // One value substituted into each locale's own path, canonical and alternates alike
-    expect(metadata.alternates?.canonical).toBe(`${TEST_SITE_URL}/sk/sutaze/open-intermediate`)
-    expect(languages['en']).toBe(`${TEST_SITE_URL}/en/competitions/open-intermediate`)
-    expect(languages['cs']).toBe(`${TEST_SITE_URL}/cs/souteze/open-intermediate`)
+    expect(metadata.alternates?.canonical).toBe(
+      `${TEST_SITE_URL}/sk/mathildovanie/open-intermediate`
+    )
+    expect(languages['en']).toBe(`${TEST_SITE_URL}/en/mathilding/open-intermediate`)
+    expect(languages['cs']).toBe(`${TEST_SITE_URL}/cs/mathildovani/open-intermediate`)
   })
 
   it('refuses a path whose dynamic segment nobody supplied a value for', () => {
     // The same route with nothing to put in its [slug]
     expect(() =>
-      generatePageMetadata({ locale: 'sk', path: '/competitions/[slug]', title: 'Sutaz' })
+      generatePageMetadata({ locale: 'sk', path: '/mathilding/[slug]', title: 'Sutaz' })
     ).toThrow()
   })
 })

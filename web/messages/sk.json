@@ -11,7 +11,7 @@
     },
     "next": {
       "registration": "Od apríla 2026 je MathComps zároveň registrovaným spolkom v Česku, MathComps z.s., IČO 249 37 924.",
-      "text1": "Moja dlhodobá vízia je mať viac interaktívnych nástrojov. Aktuálne existuje Mathilda, AI tútorka, ktorá pomáha pri riešení úloh v študijných materiáloch a čoskoro bude aj v súťažiach. Osobne som veľký nadšenec pre AI a na sebe vidím, ako mi pomáha pri učení sa nových vecí. Samozrejme mimo tieto vymoženosti by som rád pokračoval v aktualizovaní archívu, tvorbe a dopĺňaní materiálov a sprievodcu súťažami.",
+      "text1": "Moja dlhodobá vízia je mať viac interaktívnych nástrojov. Aktuálne existuje Mathilda, AI chatbotka, ktorá má dve roly: jednak pomáha pri riešení úloh v <handouts>študijných materiáloch</handouts>, a jednak je oponentkou v našich súťažiach, <competitions>Mathildovaní</competitions>. Osobne som veľký nadšenec pre AI a na sebe vidím, ako mi pomáha pri učení sa nových vecí. Samozrejme mimo tieto vymoženosti by som rád pokračoval v aktualizovaní archívu, tvorbe a dopĺňaní materiálov a sprievodcu súťažami, a robil čokoľvek užitočné, čo mi napadne.",
       "text2": "V ideálnom svete by som si vedel predstaviť, že budem na MathComps a súvisiacich aktivitách, ako je tvorba materiálov, pracovať na plný úväzok. To mi posledný rok bolo v konečnom dôsledku umožnené kombináciou niekoľkých zdrojov príjmu: samotný web podporila na začiatku jeho vzniku firma <wincent>Wincent</wincent>, ďalej väčšina materiálov na stránke vznikla v rámci krúžkov <matika>Matika Česku</matika>, no a poslednou novinkou je podpora od <gtf>Global Talent Fund</gtf>, ktorý sponzoruje nadchádzajúce súťaže s AI feedbackom, ktoré začnú od 14. septembra 2026.",
       "text3": "Ak vás MathComps prípadne moje myšlienky zaujali a chceli by ste pomôcť, finančne alebo iným spôsobom, alebo sa len tak porozprávať, <link>napíšte mi</link>, každá správa poteší ☺️",
       "title": "Čo bude ďalej"
@@ -20,7 +20,7 @@
       "text1": "Dlhšie som si hovoril, že by bolo užitočné mať prehľadávateľný archív česko-slovenských úloh, keďže som v nich hľadal často a hľadať v stovkách PDF súborov nie je zábava. Taktiež som sníval o tom, aké skvelé by bolo mať hľadanie podľa kľúčových slov, rýchlo si vyfiltrovať úlohy o postupnostiach a podobne.",
       "text2": "Podobne je to so študijnými materiálmi, priebežne ich vždy nejaké tvorím (k prednáškam na akciách) a zostávajú neverejné, maximálne ako PDF súbory, ktoré nie sú najpraktickejšie, napr. sa v nich nedajú ľahko skrývať návody alebo riešenia a mať ich blízko zadaní, prípadne dobre zobraziť na mobile.",
       "text3": "Okrem osobného hľadiska mi vždy prišlo, že jednotný web, na ktorom sa ľahko hľadajú úlohy a ktorý obsahuje študijné materiály, môže byť veľmi užitočný pre nováčikov hľadajúcich, čo tá olympiáda vlastne je a aké sú možnosti. Vítané by boli prípadne aj nejaké začiatočnícky prívetivé materiály, keďže samému mi takéto jednotné miesto chýbalo, kým som ešte bol študent hľadajúci všetko možné k súťažiam.",
-      "text4": "Na základe týchto motivácií vznikla aktuálna verzia webu, ktorá ponúka archív úloh, študijné materiály a sprievodcu pre začiatočníkov. Do budúcnosti toho bude viac a viac, nielen čo sa týka veľkosti archívu, počtu materiálov, ale aj nových funkcionalít 😇",
+      "text4": "Na základe týchto motivácií vznikla prvá verzia webu, ktorá ponúkala archív úloh, študijné materiály a sprievodcu pre začiatočníkov. Od tejto verzie sa web rozširuje o AI funkcie.",
       "title": "Prečo MathComps začal"
     }
   },
@@ -335,7 +335,7 @@
     "areaNotStarted": "Túto súťaž ešte nemáš spustenú.",
     "areaProblemsFailed": "Úlohy sa nepodarilo načítať.",
     "areaUnknown": "Súťaž s takým názvom neexistuje.",
-    "backToCompetitions": "Späť na súťaže",
+    "backToCompetitions": "Späť na Mathildovanie",
     "categories": {
       "advanced": "Pokročilá",
       "elementary": "Základná",
@@ -777,12 +777,16 @@
         "description": "Archív úloh s vyhľadávaním podľa kľúčových slov a ďalších kritérií.",
         "title": "Archív"
       },
+      "competitions": {
+        "description": "Naše vlastné súťaže, v ktorých riešenie obhajuješ pred našou AI oponentkou Mathildou v súťažnom čase.",
+        "title": "Mathildovanie"
+      },
       "guide": {
         "description": "Prehľad súťaží, seminárov a užitočných odkazov.",
         "title": "Sprievodca"
       },
       "handouts": {
-        "description": "Priebežne dopĺňané študijné texty a zbierky úloh.",
+        "description": "Priebežne dopĺňané študijné texty a zbierky úloh, s AI pomocníčkou pri riešení.",
         "title": "Materiály"
       },
       "title": "Čo tu nájdeš"
@@ -794,11 +798,11 @@
         "ninePoint": "Kružnica deviatich bodov"
       },
       "shuffle": "Zobraziť inú konštrukciu",
-      "subtitle": "Archív súťažných úloh, študijných materiálov, užitočných zdrojov, a postupne viac a viac.",
+      "subtitle": "Archív súťažných úloh a materiálov, vlastné MathCompsácke AI súťaže, a všeličo ďalšie",
       "title": "Matematická olympiáda a veci okolo nej"
     },
     "mathilda": {
-      "body": "AI tútorka, ktorá ti poradí s úlohami: predstav jej svoje riešenie alebo len nápad a ona ho skontroluje alebo ti pomôže dotiahnuť ho. Zatiaľ funguje v <link>študijných materiáloch</link>, postupne ju prinesieme aj do archívu.",
+      "body": "AI tútorka, ktorá ti poradí s úlohami: predstav jej svoje riešenie alebo len nápad a ona ho skontroluje alebo ti pomôže dotiahnuť ho. Funguje v <link>študijných materiáloch</link> a taktiež poháňa naše vlastné súťaže, Mathildovanie.",
       "exchange": {
         "candidate": "Zrejme $a \\le b$ a $b \\le a$, takže $a = b$.",
         "examiner": "Vyplýva z $a \\mid b$ vždy $a \\le b$ pre každú dvojicu celých čísel?",
@@ -808,19 +812,11 @@
     "news": {
       "seeAll": "Zobraziť všetky",
       "title": "Novinky"
-    },
-    "upcoming": {
-      "comingSoon": "14. septembra 2026",
-      "feature": {
-        "description": "Súťaže s prezentovaním riešenia Mathilde, ktorá ho priamo v súťaži opravuje a necháva priestor ešte ho doladiť.",
-        "title": "Súťaže s umelou inteligenciou"
-      },
-      "title": "Čo sa chystá"
     }
   },
   "navigation": {
     "about": "O projekte",
-    "competitions": "Súťaže",
+    "competitions": "Mathildovanie",
     "contact": "Kontakt",
     "guide": "Sprievodca",
     "handouts": "Materiály",
@@ -837,6 +833,7 @@
     "addComment": "Komentovať",
     "categories": {
       "archive": "Archív",
+      "competitions": "Mathildovanie",
       "development": "Vývoj",
       "handouts": "Materiály",
       "misc": "Rôzne"
@@ -869,19 +866,19 @@
       "title": "Súťaž"
     },
     "competitions": {
-      "description": "Vyskúšaj si súťaže rôznych úrovní, v ktorých svoje riešenie obhajuješ priamo v súťažnom čase pred našou umelou inteligenciou Mathildou.",
-      "title": "Súťaže"
+      "description": "Naše vlastné súťaže, v ktorých riešenie obhajuješ pred našou AI oponentkou Mathildou v súťažnom čase. Tri úrovne a k tomu skúšobná súťaž, ktorú si môžeš dať kedykoľvek.",
+      "title": "Mathildovanie"
     },
     "guide": {
       "description": "Prehľad matematických súťaží a korešpondenčných seminárov, ako začať a kam ďalej.",
       "title": "Sprievodca"
     },
     "handouts": {
-      "description": "Študijné texty k témam súťažnej matematiky.",
+      "description": "Študijné texty a zbierky úloh k témam súťažnej matematiky, s návodmi a riešeniami priamo pri zadaniach.",
       "title": "Materiály"
     },
     "home": {
-      "description": "Archív súťažných úloh, študijné materiály a sprievodca zdrojmi. S úlohami ti pomôže AI tútorka Mathilda.",
+      "description": "Archív súťažných úloh, študijné materiály, súťaže Mathildovanie a sprievodca zdrojmi. S úlohami ti pomôže AI tútorka Mathilda.",
       "title": "Matematická olympiáda a veci okolo nej"
     },
     "login": {
@@ -897,7 +894,7 @@
       "title": "Ochrana súkromia a podmienky používania"
     },
     "problems": {
-      "description": "Prehľadávateľný archív úloh z matematických súťaží.",
+      "description": "Archív úloh z česko-slovenských aj medzinárodných súťaží, s vyhľadávaním podľa kľúčových slov a ďalších kritérií.",
       "title": "Úlohy"
     },
     "profile": {
@@ -911,7 +908,7 @@
     "replies": "{count, plural, =1 {# odpoveď} =2 {# odpovede} =3 {# odpovede} =4 {# odpovede} other {# odpovedí}}"
   },
   "privacy": {
-    "lastUpdated": "Posledná aktualizácia: 31. júla 2026",
+    "lastUpdated": "Posledná aktualizácia: 2. septembra 2026",
     "sections": {
       "cookies": {
         "text": "Súbory cookies sú používané výhradne na funkcionality stránky (napr. udržanie prihlásenia). Nie sú postupované tretím stranám.",
@@ -919,7 +916,7 @@
       },
       "data": {
         "aiProcessor": "Odpovede Mathildy generuje externý poskytovateľ AI; obsah tvojej konverzácie sa mu posiela na spracovanie.",
-        "aiTutor": "<strong>Konverzácie s AI tútorkou:</strong> Mathilda je naša AI tútorka, s ktorou preberáš svoje riešenia alebo nápady k úlohám z materiálov. Ak ju používaš, tvoje správy aj jej odpovede sa ukladajú, aby konverzácia zostala zachovaná aj pri ďalšej návšteve. Ktorúkoľvek konverzáciu môžeš kedykoľvek zmazať z jej histórie. Konverzácie môžeme použiť aj na zlepšovanie Mathildy.",
+        "aiTutor": "<strong>Konverzácie s AI tútorkou:</strong> Mathilda je naša AI tútorka, s ktorou preberáš svoje riešenia alebo nápady k úlohám v materiáloch aj v súťažiach. Ak ju používaš, tvoje správy aj jej odpovede sa ukladajú, aby konverzácia zostala zachovaná aj pri ďalšej návšteve. Konverzácie z materiálov môžeš kedykoľvek zmazať z jej histórie. Konverzácie zo súťaží zmazať nejde, sú záznamom tvojej účasti v súťaži. Ak by to bol pre teba problém, napíš nám. Konverzácie môžeme použiť aj na zlepšovanie Mathildy.",
         "content": "<strong>Obsah:</strong> Všetok tvoj obsah, ktorý vkladáš na stránku.",
         "intro": "Používame a ukladáme nasledujúce údaje:",
         "login": "<strong>Login:</strong> Email, meno, profilová fotka, prípadne prepojenie s Google/Discord/GitHub, ak sa prihlásiš cez ne.",
@@ -1118,7 +1115,7 @@
     "competitionAuthReason": "uloženie profilu",
     "competitionError": "Údaje sa nepodarilo uložiť. Skús to prosím znova.",
     "competitionNote": "Tieto informácie sa zobrazia vo výsledkovej listine.",
-    "competitionSection": "Súťaže",
+    "competitionSection": "Mathildovanie",
     "country": "Krajina",
     "countryNoMatch": "Žiadna krajina nesedí",
     "countryPlaceholder": "Vyber krajinu",

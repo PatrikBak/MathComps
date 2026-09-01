@@ -628,7 +628,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Named as every competition down to the one that set it, in the language asked for
         Assert.Equal(
-            ["MathComps", "Advanced", "September"],
+            ["Mathilding", "Advanced", "September"],
             target.Source.Competition.Select(node => node.DisplayName));
 
         // Along with the season's own year and the problem's place in the competition

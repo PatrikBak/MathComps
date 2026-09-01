@@ -27,7 +27,7 @@ const EXCERPT_TURNS: ExcerptTurn[] = [
 
 /**
  * A sample defense, set in the same voices the real transcript uses: the student in a brand-tinted card,
- * Mathilda bare beneath it.
+ * Mathilda named beneath it.
  *
  * Its bodies are read raw, because a message holding LaTeX carries braces that ICU would otherwise parse
  * as its own argument placeholders.
@@ -36,13 +36,9 @@ export function MathildaExcerpt() {
   // Copy for the exchange
   const t = useTranslations('home.mathilda.exchange')
 
-  // Defense-surface copy
-  const tDefense = useTranslations('defense')
-
-  // The label each role speaks under
-  const roleLabels: Record<TurnRole, string> = {
+  // Only Mathilda is named; the student's card is tinted, which already says whose turn it is
+  const roleLabels: Partial<Record<TurnRole, string>> = {
     examiner: MATHILDA_NAME,
-    candidate: tDefense('roles.student'),
   }
 
   return (
@@ -64,7 +60,9 @@ export function MathildaExcerpt() {
               className={cn('space-y-1', style.container, style.hasOwnBox && 'px-3.5 py-2.5')}
             >
               {/* Who is speaking */}
-              <div className={cn(TURN_LABEL_CLASS, style.label)}>{roleLabels[turn.role]}</div>
+              {roleLabels[turn.role] !== undefined && (
+                <div className={cn(TURN_LABEL_CLASS, style.label)}>{roleLabels[turn.role]}</div>
+              )}
 
               {/* What they said */}
               <div className={cn(style.body, 'math-compact')}>
