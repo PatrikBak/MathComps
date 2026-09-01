@@ -102,4 +102,13 @@ When the starting point is a bad reply the app already produced, don't author a 
 
 Fan out one agent per fixture, each owning a distinct problem + candidate — they're independent, and each drives its CLI turns synchronously (a backgrounded run it then waits on stalls the fan-out). Vary the candidate across the set so the examiner meets the full range, not just flaw-catching. Vary the language too: the examiner follows the conversation's language on its own, so Slovak, Czech, and English fixtures need no prompt changes.
 
+**Sweeping the whole corpus destroys it, so copy and rewind first.** Every run appends the examiner's reply to `transcript.md`, so a second sweep measures a longer conversation than the first and the two are not comparable. Worse, a fixture left ending on `## Examiner` is refused outright, and the run prints nothing for it while every other fixture prints normally — which reads as a broken script, not as a mutated corpus. Copy each fixture to a scratch directory and rewind it there before the run:
+
+```bash
+cp -R data/defense-fixtures/<slug> "$SCRATCH/<slug>"
+dotnet run --project backend/src/MathComps.Cli.Examiner -- strip "$SCRATCH/<slug>" --keep <n>
+```
+
+The `--keep <n>` is what makes a before/after sweep mean anything: pick the turn count once per fixture and hold it across both arms, so the only thing that changed is the prompt.
+
 Name fixtures `<area>-<type>-<lang>` (e.g. `geo-bluffer-sk`) so the corpus reads at a glance, and have each agent return a fixed shape — candidate intent, exchange count, guard flags (wrong or shipped-dirty verdicts, with turn numbers), per-dimension judge verdict, top prompt-fix idea — so a sweep aggregates without re-reading transcripts.

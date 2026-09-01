@@ -16,7 +16,7 @@ namespace MathComps.Infrastructure.Services.Defense.Engine;
 /// math-checks, leak-checks and language-checks it — independently, every turn — and, when a guard flags it,
 /// regenerates the reply up to a cap, re-verifying each fresh attempt. If the cap runs out with a wrong claim or a
 /// mis-paid step still on the reply, a constrained fallback ships instead of the dirty draft: a claim-less holding
-/// reply, or a plain close when a withheld close is the only fault left. Every model call's billed cost and tokens
+/// reply, whichever fault survived. Every model call's billed cost and tokens
 /// are summed into the turn's outcome.
 /// </summary>
 /// <param name="chatCaller">The chat caller backing every step.</param>
@@ -31,9 +31,9 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// output spec.
     /// </summary>
     /// <remarks>
-    /// A withheld close takes this note too. Conceding is the most consequential thing the examiner can say and the
-    /// one claim the math guard never sees, so it never ships from a fallback nothing can reject; the conversation
-    /// holds one more turn, and the close lands on a draft a guard cleared.
+    /// A withheld close takes this note too. Ending the conversation is the most consequential thing the examiner
+    /// can say and the one move no guard verifies, so it never ships from a fallback nothing can reject; the
+    /// conversation holds one more turn, and the ending lands on a draft a guard cleared.
     /// </remarks>
     private const string SafeHoldNote =
         "REVISION REQUIRED — Set your previous draft aside and write a minimal holding reply instead: in the " +
@@ -424,9 +424,9 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // A withheld close ratchets the conversation past its end, so tell the generator it is over.
         if (leakCheck.WithholdsClose)
             notes.Add(
-                $"The candidate's solution is complete — nothing at the problem's level remains: " +
-                $"{leakCheck.Established.EnsureSentenceEnd()} Stop pressing; concede plainly, confirm what they " +
-                "established, and close.");
+                "Nothing at the problem's level is still open, so stop pressing and end the conversation: tell " +
+                "them you have nothing further to raise, in a sentence or two. Do not restate their argument back " +
+                "to them and do not assert that their proof is complete.");
 
         // A switched language leaves the candidate reading a reply they may not understand, so send it back. The note
         // points at their latest turn instead of naming the language the checker reported: between two close
