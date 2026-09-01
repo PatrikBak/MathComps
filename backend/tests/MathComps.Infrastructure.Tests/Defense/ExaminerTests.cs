@@ -181,11 +181,11 @@ public class ExaminerTests
 
     /// <summary>
     /// A reply that keeps pressing a candidate whose solution is already complete regenerates with the close
-    /// instruction — the note carries what the candidate established — and the loop stops once the fresh attempt
-    /// concedes.
+    /// instruction — the note bars the recap that would write their argument for them — and the loop stops once the
+    /// fresh attempt ends the conversation.
     /// </summary>
     [Fact]
-    public async Task A_withheld_close_regenerates_until_the_reply_concedes()
+    public async Task A_withheld_close_regenerates_until_the_reply_ends_the_conversation()
     {
         // Capture each generate call's request as it lands.
         var generateRequests = new List<ChatCallRequest>();
@@ -193,7 +193,7 @@ public class ExaminerTests
         caller.SetupSequence(mock => mock.CompleteTextAsync(
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result("keeps pressing."))
-            .ReturnsAsync(Result("conceding reply."));
+            .ReturnsAsync(Result("ending reply."));
 
         // The math stays clean; the leak-check flags the first attempt as withholding an earned close, then clears.
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
@@ -210,13 +210,13 @@ public class ExaminerTests
         // Run the turn.
         var outcome = await RunAsync(caller);
 
-        // It regenerated exactly once and shipped the conceding reply with a clean verdict.
+        // It regenerated exactly once and shipped the ending reply with a clean verdict.
         Assert.Equal(1, outcome.Revisions);
-        Assert.Equal("conceding reply.", outcome.Shipped.Reply);
+        Assert.Equal("ending reply.", outcome.Shipped.Reply);
         Assert.False(outcome.Shipped.LeakCheck.WithholdsClose);
 
-        // The regenerate's prompt carried what the candidate established, so the generator knows the exam is over.
-        Assert.Contains("the full divisor-pairing chain", generateRequests[1].SystemPrompt);
+        // The regenerate's prompt told the generator to end without recapping, which is what makes an ending safe.
+        Assert.Contains("Do not restate their argument back to them", generateRequests[1].SystemPrompt);
     }
 
     /// <summary>
@@ -225,7 +225,7 @@ public class ExaminerTests
     /// conversation never got to end.
     /// </summary>
     /// <remarks>
-    /// It holds rather than concedes on purpose: conceding is the one claim the math guard never sees, so it never
+    /// It holds rather than ends on purpose: ending is the one move no guard verifies, so it never
     /// ships from a fallback nothing can reject.
     /// </remarks>
     [Fact]
@@ -260,8 +260,8 @@ public class ExaminerTests
         // And it ran under the holding note, which asserts nothing.
         Assert.Contains("minimal holding reply", generateRequests[^1].SystemPrompt);
 
-        // Not under one conceding a solution no guard checked.
-        Assert.DoesNotContain("their solution stands", generateRequests[^1].SystemPrompt);
+        // Not under the note that would have it end a conversation no guard checked.
+        Assert.DoesNotContain("end the conversation", generateRequests[^1].SystemPrompt);
     }
 
     /// <summary>
