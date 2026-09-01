@@ -64,7 +64,7 @@ const ARCHIVE_PROBLEMS: DefenseReviewProblemOption[] = [2026, 2027].map((startYe
   target: {
     kind: 'problem',
     problemId: `problem-${startYear}`,
-    competitionId: `round-${startYear}`,
+    competitionSlug: `round-${startYear}`,
     slug: `${startYear}-mc-advanced-1-2`,
     source: {
       season: {

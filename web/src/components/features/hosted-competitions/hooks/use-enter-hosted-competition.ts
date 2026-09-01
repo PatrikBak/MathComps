@@ -27,9 +27,9 @@ import {
  */
 type UseEnterHostedCompetitionResult = {
   /** Takes the student's entry into one category. Referentially stable for the hook's lifetime. */
-  enter: (competitionId: string) => void
+  enter: (competitionSlug: string) => void
   /** Spends the entry on reading the problems instead. Referentially stable for the hook's lifetime. */
-  forfeit: (competitionId: string) => void
+  forfeit: (competitionSlug: string) => void
   /** Whether an entry or a forfeit is in flight. */
   isEntering: boolean
 }
@@ -49,7 +49,7 @@ type UseEnterHostedCompetitionResult = {
  */
 export function useEnterHostedCompetition(
   readerKey: HostedCompetitionsReaderKey,
-  onEntered: (competitionId: string) => void
+  onEntered: (competitionSlug: string) => void
 ): UseEnterHostedCompetitionResult {
   // Competitions copy
   const t = useTranslations('competitions')
@@ -59,27 +59,30 @@ export function useEnterHostedCompetition(
 
   // What a landed entry does to the page, whichever call carried it
   const land = useCallback(
-    (spent: SpentEntry, competitionId: string) => {
+    (spent: SpentEntry, competitionSlug: string) => {
       // The entry onto its own row, so nothing on the page waits for a round trip to show it
-      writeCachedEntry(queryClient, readerKey, competitionId, spent.entry)
+      writeCachedEntry(queryClient, readerKey, competitionSlug, spent.entry)
 
       // And the problems it bought, which came back with it: the clock is running from here, so the area
       // must not open on a read the student is the one paying for
-      writeCachedProblems(queryClient, readerKey, competitionId, spent.problems)
+      writeCachedProblems(queryClient, readerKey, competitionSlug, spent.problems)
 
       // Forget the conversation lists the last run left cached
-      forgetCompetitionDefenseLists(queryClient, competitionId)
+      forgetCompetitionDefenseLists(
+        queryClient,
+        spent.problems.map((problem) => problem.id)
+      )
 
       // And every half-written turn the last run left in a composer
       for (const problem of spent.problems) {
-        forgetDefenseDraft({ kind: 'competition', competitionId, problemId: problem.id, readerKey })
+        forgetDefenseDraft({ kind: 'competition', problemId: problem.id, readerKey })
       }
 
       // The acceptance that rode along with it, a first entry ever carrying one
       writeRulesAccepted(queryClient, readerKey)
 
       // And the student, sent where the entry they just spent is read
-      onEntered(competitionId)
+      onEntered(competitionSlug)
 
       // Then the server settles the view, an entry changing more than the entry: the problems can turn
       // public
@@ -90,7 +93,7 @@ export function useEnterHostedCompetition(
 
   // Taking the entry
   const entryMutation = useOptimisticMutation<SpentEntry, string>({
-    apiFn: (apiCall, competitionId) => enterHostedCompetition(apiCall, competitionId),
+    apiFn: (apiCall, competitionSlug) => enterHostedCompetition(apiCall, competitionSlug),
     onSuccess: land,
     authReason: t('entryAuthReason'),
     errorMessage: t('entryError'),
@@ -98,7 +101,7 @@ export function useEnterHostedCompetition(
 
   // Giving it up for the problems, which lands in the cache the same way an entry does
   const forfeitMutation = useOptimisticMutation<SpentEntry, string>({
-    apiFn: (apiCall, competitionId) => forfeitHostedCompetition(apiCall, competitionId),
+    apiFn: (apiCall, competitionSlug) => forfeitHostedCompetition(apiCall, competitionSlug),
     onSuccess: land,
     authReason: t('entryAuthReason'),
     errorMessage: t('forfeitError'),

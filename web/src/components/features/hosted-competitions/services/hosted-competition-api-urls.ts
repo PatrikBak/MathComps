@@ -38,58 +38,58 @@ export function getDismissProfilePromptUrl(): string {
 /**
  * Builds the URL for taking an entry into one competition.
  *
- * @param competitionId - Which competition is being entered.
+ * @param competitionSlug - Which competition is being entered.
  * @returns The entry URL.
  */
-export function getEnterCompetitionUrl(competitionId: string): string {
+export function getEnterCompetitionUrl(competitionSlug: string): string {
   // The entry endpoint for the competition
-  return buildApiUrl(`${COMPETITIONS_PATH}/${encodeURIComponent(competitionId)}/entry`)
+  return buildApiUrl(`${COMPETITIONS_PATH}/${encodeURIComponent(competitionSlug)}/entry`)
 }
 
 /**
  * Builds the URL for giving an entry up to read the problems.
  *
- * @param competitionId - Which competition's entry is being given up.
+ * @param competitionSlug - Which competition's entry is being given up.
  * @returns The forfeit URL.
  */
-export function getForfeitCompetitionUrl(competitionId: string): string {
+export function getForfeitCompetitionUrl(competitionSlug: string): string {
   // The forfeit endpoint for the competition
-  return buildApiUrl(`${COMPETITIONS_PATH}/${encodeURIComponent(competitionId)}/forfeit`)
+  return buildApiUrl(`${COMPETITIONS_PATH}/${encodeURIComponent(competitionSlug)}/forfeit`)
 }
 
 /**
  * Builds the URL for closing a running entry early.
  *
- * @param competitionId - Which competition's entry is being handed in.
+ * @param competitionSlug - Which competition's entry is being handed in.
  * @returns The hand-in URL.
  */
-export function getFinishCompetitionUrl(competitionId: string): string {
+export function getFinishCompetitionUrl(competitionSlug: string): string {
   // The finish endpoint for the competition
-  return buildApiUrl(`${COMPETITIONS_PATH}/${encodeURIComponent(competitionId)}/finish`)
+  return buildApiUrl(`${COMPETITIONS_PATH}/${encodeURIComponent(competitionSlug)}/finish`)
 }
 
 /**
  * Builds the URL for reading one competition's problems.
  *
- * @param competitionId - Which competition's problems to read.
+ * @param competitionSlug - Which competition's problems to read.
  * @returns The problems URL.
  */
-export function getCompetitionProblemsUrl(competitionId: string): string {
+export function getCompetitionProblemsUrl(competitionSlug: string): string {
   // The problems endpoint for the competition
-  return buildApiUrl(`${COMPETITIONS_PATH}/${encodeURIComponent(competitionId)}/problems`)
+  return buildApiUrl(`${COMPETITIONS_PATH}/${encodeURIComponent(competitionSlug)}/problems`)
 }
 
 /**
  * Builds the URL for what a student says about their own solution to one of a competition's problems, which
  * is the same address whether they are recording it or taking it back.
  *
- * @param competitionId - Which competition the problem belongs to.
+ * @param competitionSlug - Which competition the problem belongs to.
  * @param problemId - Which problem the claim is about.
  * @returns The self-assessment URL.
  */
-export function getProblemSelfAssessmentUrl(competitionId: string, problemId: string): string {
+export function getProblemSelfAssessmentUrl(competitionSlug: string, problemId: string): string {
   // The assessment endpoint for the problem
   return buildApiUrl(
-    `${COMPETITIONS_PATH}/${encodeURIComponent(competitionId)}/problems/${encodeURIComponent(problemId)}/assessment`
+    `${COMPETITIONS_PATH}/${encodeURIComponent(competitionSlug)}/problems/${encodeURIComponent(problemId)}/assessment`
   )
 }

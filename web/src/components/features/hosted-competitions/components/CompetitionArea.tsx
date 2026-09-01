@@ -26,7 +26,7 @@ import { RulesList } from './RulesList'
  */
 type CompetitionAreaProps = {
   /** Which competition the reader is inside. */
-  competitionId: string
+  competitionSlug: string
 }
 
 /**
@@ -35,15 +35,12 @@ type CompetitionAreaProps = {
  * Every statement is on the page at once, the first thing an entry is spent on being deciding where the
  * clock is worth going.
  */
-export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
+export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
   // Competitions copy
   const t = useTranslations('competitions')
 
   // The active locale, which decides what the group is called
   const locale = useLocale() as Locale
-
-  // Everything the page says about this competition and the entry spent on it
-  const area = useCompetitionArea(competitionId)
 
   // Whether the reader has the rules open
   const [areRulesOpen, { open: openRules, close: closeRules }] = useDisclosure(false)
@@ -59,6 +56,9 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
     key: PRACTICE_INTRO_DISMISSED_STORAGE_KEY,
     defaultValue: false,
   })
+
+  // Everything the page says about this competition and the entry spent on it
+  const area = useCompetitionArea(competitionSlug)
 
   // One of the two reads is still out, gave up, or turned up nothing to stay here for
   if (area.kind === 'pending') {
@@ -137,7 +137,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
         {problems.map((problem) => (
           <CompetitionProblemPanel
             key={problem.id}
-            competitionId={competitionId}
+            competitionSlug={competitionSlug}
             readerKey={readerKey}
             problem={problem}
             run={run}
@@ -150,7 +150,7 @@ export function CompetitionArea({ competitionId }: CompetitionAreaProps) {
       {/* What handing in costs, asked before it happens */}
       <FinishEntryDialog
         readerKey={readerKey}
-        competitionId={competitionId}
+        competitionSlug={competitionSlug}
         isAsked={isFinishAsked}
         hasEnded={run?.kind === 'sat' && run.hasEnded}
         onClose={closeFinish}

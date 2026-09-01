@@ -27,14 +27,14 @@ type UseFinishHostedCompetitionResult = {
  * the backend before it says the entry is closed.
  *
  * @param readerKey - Who the cached answers belong to.
- * @param competitionId - Which competition is being handed in.
+ * @param competitionSlug - Which competition is being handed in.
  * @param onFinished - Called once the entry is closed.
  *
  * @returns The press, and whether it is in flight.
  */
 export function useFinishHostedCompetition(
   readerKey: HostedCompetitionsReaderKey,
-  competitionId: string,
+  competitionSlug: string,
   onFinished: () => void
 ): UseFinishHostedCompetitionResult {
   // Competitions copy
@@ -46,7 +46,7 @@ export function useFinishHostedCompetition(
   // What a landed hand-in does to the page
   const land = (entry: HostedCompetitionEntry) => {
     // The clock stops on what came back, so nothing on screen waits for a round trip
-    writeCachedEntry(queryClient, readerKey, competitionId, entry)
+    writeCachedEntry(queryClient, readerKey, competitionSlug, entry)
 
     // And the caller takes the reader wherever a closed entry belongs
     onFinished()
@@ -57,7 +57,7 @@ export function useFinishHostedCompetition(
 
   // Handing it in
   const mutation = useOptimisticMutation<HostedCompetitionEntry, void>({
-    apiFn: (apiCall) => finishHostedCompetition(apiCall, competitionId),
+    apiFn: (apiCall) => finishHostedCompetition(apiCall, competitionSlug),
     onSuccess: land,
     authReason: t('entryAuthReason'),
     errorMessage: t('finishError'),

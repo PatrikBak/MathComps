@@ -11,7 +11,7 @@ import {
   sendTurn,
   transcriptOf,
 } from './support/competitions'
-import { COMPETITION_ID, installHostedBackend } from './support/hosted-backend'
+import { COMPETITION_SLUG, installHostedBackend } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
@@ -47,9 +47,11 @@ async function openLibrary(page: Page) {
 
 test.describe("the student's own list of conversations", () => {
   test('names a competition conversation the way its own area names it', async ({ page }) => {
-    // A student who has argued a competition problem, on the competition itself
+    // A student who has argued a competition problem
     await installHostedBackend(page, 'running')
-    await page.goto(areaPath(COMPETITION_ID))
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_SLUG))
 
     // What that competition is called, read off the page that is inside it
     const competitionName = await page

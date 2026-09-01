@@ -11,7 +11,6 @@ import {
 /** A defense held against a problem set by a competition. */
 const COMPETITION: DefenseTarget = {
   kind: 'competition',
-  competitionId: 'open-intermediate',
   problemId: 'open-intermediate-p2',
   readerKey: 'user_2abc',
 }
@@ -58,7 +57,7 @@ describe('defenseDraftStorageKey', () => {
   it('keeps a competition draft under its problem rather than its conversation', () => {
     // A student starting a second conversation about the same problem is still writing the same solution
     expect(defenseDraftStorageKey(COMPETITION)).toBe(
-      'defense-draft:competition:user_2abc:open-intermediate:open-intermediate-p2'
+      'defense-draft:competition:user_2abc:open-intermediate-p2'
     )
   })
 
@@ -116,13 +115,6 @@ describe('defenseTargetKey', () => {
     )
   })
 
-  it('keys the same problem alike whichever competition it was read inside', () => {
-    // A competition is where a problem was met, not what is being defended
-    expect(defenseTargetKey({ ...COMPETITION, competitionId: 'winter-senior' })).toBe(
-      defenseTargetKey(COMPETITION)
-    )
-  })
-
   it('tells two problems apart, and two environments of one handout', () => {
     // Two problems of one competition are two defenses
     expect(defenseTargetKey({ ...COMPETITION, problemId: 'open-intermediate-p3' })).not.toBe(
@@ -156,12 +148,11 @@ describe('defenseTargetKey', () => {
   })
 
   it('keys two targets alike exactly when the API cannot tell them apart', () => {
-    // Every way one target here differs from another: the reader, the competition, the problem, the
-    // handout and the environment within it
+    // Every way one target here differs from another: the reader, the problem, the handout and the
+    // environment within it
     const targets: DefenseTarget[] = [
       COMPETITION,
       { ...COMPETITION, readerKey: null },
-      { ...COMPETITION, competitionId: 'winter-senior' },
       { ...COMPETITION, problemId: 'open-intermediate-p3' },
       HANDOUT,
       {

@@ -1,6 +1,7 @@
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
+using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Problems;
 
@@ -20,7 +21,6 @@ public static class NamedDefenseTargets
     /// <param name="HandoutContentId"><inheritdoc cref="NamedHandoutTarget.HandoutContentId" path="/summary"/></param>
     /// <param name="EnvironmentId"><inheritdoc cref="NamedHandoutTarget.EnvironmentId" path="/summary"/></param>
     /// <param name="ProblemId"><inheritdoc cref="NamedProblemTarget.ProblemId" path="/summary"/></param>
-    /// <param name="RoundId"><inheritdoc cref="NamedProblemTarget.CompetitionId" path="/summary"/></param>
     /// <param name="ProblemSlug"><inheritdoc cref="NamedProblemTarget.Slug" path="/summary"/></param>
     /// <param name="ProblemNumber"><inheritdoc cref="Problem.Number" path="/summary"/></param>
     /// <param name="CompetitionPath"><inheritdoc cref="Competition.Path" path="/summary"/></param>
@@ -30,7 +30,6 @@ public static class NamedDefenseTargets
         string? HandoutContentId,
         string? EnvironmentId,
         Guid? ProblemId,
-        Guid? RoundId,
         string? ProblemSlug,
         int? ProblemNumber,
         string? CompetitionPath,
@@ -55,7 +54,6 @@ public static class NamedDefenseTargets
         if (columns is
             {
                 ProblemId: { } problemId,
-                RoundId: { } roundId,
                 ProblemSlug: { } slug,
                 ProblemNumber: { } number,
                 CompetitionPath: { } competitionPath,
@@ -67,8 +65,12 @@ public static class NamedDefenseTargets
             var source = ProblemSources.Build(
                 localization, editionNumber, startYear, competitionPath, number, language);
 
-            // The problem, addressed by its ids and the slug the archive addresses it by.
-            return new NamedProblemTarget(problemId, roundId, slug, source);
+            // What addresses the competition it was set in, in the language being named in.
+            var competitionSlug = HostedRoundSlug.Build(
+                localization.GetNodeUrlSlugs(competitionPath)[language], startYear);
+
+            // The problem, addressed by its id and by the competition and archive slugs.
+            return new NamedProblemTarget(problemId, competitionSlug, slug, source);
         }
 
         // Neither arm came back, which the queries reading this are written to rule out.

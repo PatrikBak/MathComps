@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { CompetitionArea } from '@/components/features/hosted-competitions/components/CompetitionArea'
+import { CompetitionRouteProvider } from '@/components/features/hosted-competitions/components/CompetitionRouteProvider'
 import Layout from '@/components/layout/Layout'
 import type { Locale } from '@/i18n/i18n'
 import { ROUTES } from '@/i18n/i18n'
@@ -15,17 +16,17 @@ import { createPageMetadata } from '@/lib/metadata'
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; id: string }>
+  params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
   // Resolve the locale and which competition this is from the path
-  const { locale, id } = await params
+  const { locale, slug } = await params
 
   // Generate locale-specific metadata
   return createPageMetadata({
     locale: locale as Locale,
     namespace: 'pages.competitionArea',
     path: ROUTES.COMPETITION_AREA,
-    routeParams: { id },
+    routeParams: { slug },
     noindex: true,
   })
 }
@@ -35,14 +36,16 @@ export async function generateMetadata({
  */
 export default withLocale(async function CompetitionAreaPage({
   params,
-}: PageProps<{ id: string }>) {
+}: PageProps<{ slug: string }>) {
   // Which competition the reader is inside
-  const { id } = await params
+  const { slug } = await params
 
-  // Render the area
+  // Render the area, under the provider that keeps a language switch inside this competition
   return (
-    <Layout>
-      <CompetitionArea competitionId={id} />
-    </Layout>
+    <CompetitionRouteProvider competitionSlug={slug}>
+      <Layout>
+        <CompetitionArea competitionSlug={slug} />
+      </Layout>
+    </CompetitionRouteProvider>
   )
 })

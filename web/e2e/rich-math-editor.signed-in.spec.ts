@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { areaPath, editorCopy, modalCopy, openExistingDefense } from './support/competitions'
-import { COMPETITION_ID, installHostedBackend } from './support/hosted-backend'
+import { COMPETITION_SLUG, installHostedBackend } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
@@ -20,7 +20,7 @@ async function expandAndCollapse(page: Page, dismiss: 'button' | 'escape') {
   await installHostedBackend(page, 'running')
 
   // Open its area
-  await page.goto(areaPath(COMPETITION_ID))
+  await page.goto(areaPath(COMPETITION_SLUG))
 
   // And the conversation already seeded on the first problem
   await openExistingDefense(page)

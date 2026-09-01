@@ -40,18 +40,18 @@ export function myDefensesQueryKey(userId: string | null, locale: string): Query
 }
 
 /**
- * The key every conversation list about one competition's problem hangs off.
+ * The key every conversation list about one competition problem hangs off.
  *
- * The full key below adds the problem and the user, and {@link forgetCompetitionDefenseLists} matches on
- * this much alone, so both of them follow whatever this says.
+ * The full key below adds the user, and {@link forgetCompetitionDefenseLists} matches on this much alone, so
+ * both of them follow whatever this says.
  *
- * @param competitionId - Which competition sets the problem.
+ * @param problemId - Which problem the conversations are about.
  *
  * @returns The key.
  */
-function competitionSessionsKeyPrefix(competitionId: string): QueryKey {
-  // The competition, under the root every defense list hangs off
-  return [...DEFENSE_QUERY_KEY, 'sessions', 'competition', competitionId] as const
+function problemSessionsKeyPrefix(problemId: string): QueryKey {
+  // The problem, under the sessions root every defense list hangs off
+  return [...DEFENSE_QUERY_KEY, 'sessions', 'competition', problemId] as const
 }
 
 /**
@@ -80,11 +80,7 @@ export function defenseSessionsQueryKey(target: DefenseTarget, userId: string | 
 
     // One key per user and competition problem
     case 'competition':
-      return [
-        ...competitionSessionsKeyPrefix(target.competitionId),
-        target.problemId,
-        userId,
-      ] as const
+      return [...problemSessionsKeyPrefix(target.problemId), userId] as const
 
     // Every target is handled above
     default:
@@ -93,21 +89,23 @@ export function defenseSessionsQueryKey(target: DefenseTarget, userId: string | 
 }
 
 /**
- * Forgets every cached list of the conversations held about one competition's problems.
+ * Forgets every cached list of the conversations held about the given problems.
  *
  * Their key names the problem, and the problem outlives the entry: a competition taken a second time
  * opens holding the previous run's conversations, offering them to be read and resumed under the fresh
  * clock, until the read behind them lands.
  *
  * @param queryClient - The cache to forget them from.
- * @param competitionId - Whose problems' lists to forget.
+ * @param problemIds - The problems whose lists to forget.
  */
 export function forgetCompetitionDefenseLists(
   queryClient: QueryClient,
-  competitionId: string
+  problemIds: string[]
 ): void {
-  // Every problem of that competition, whichever user the list belongs to
-  queryClient.removeQueries({ queryKey: competitionSessionsKeyPrefix(competitionId) })
+  // Each problem's lists, whichever user they belong to
+  for (const problemId of problemIds) {
+    queryClient.removeQueries({ queryKey: problemSessionsKeyPrefix(problemId) })
+  }
 }
 
 /**

@@ -42,54 +42,57 @@ public interface IHostedCompetitionService
     /// accepted along with it.
     /// </summary>
     /// <param name="userId">The student entering.</param>
-    /// <param name="roundId">The competition being entered.</param>
+    /// <param name="competitionSlug">What addresses the competition being entered.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The entry as it now stands, and the set it opens.</returns>
-    Task<SpentEntryDto> EnterAsync(Guid userId, Guid roundId, CancellationToken cancellationToken = default);
+    Task<SpentEntryDto> EnterAsync(
+        Guid userId, string competitionSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gives a student's entry up: the problems open to them and no clock is ever started. It spends the entry
     /// exactly as sitting it would, the rules accepted along with it on a first entry ever.
     /// </summary>
     /// <param name="userId">The student giving it up.</param>
-    /// <param name="roundId">The competition being given up.</param>
+    /// <param name="competitionSlug">What addresses the competition being given up.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The entry as it now stands, and the set it opens.</returns>
-    Task<SpentEntryDto> ForfeitAsync(Guid userId, Guid roundId, CancellationToken cancellationToken = default);
+    Task<SpentEntryDto> ForfeitAsync(
+        Guid userId, string competitionSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Closes a running entry where the student says rather than where its clock does. Nothing is added to what
     /// they have written; what it changes is that nothing more can be.
     /// </summary>
     /// <param name="userId">The student handing in.</param>
-    /// <param name="roundId">The competition whose entry is being handed in.</param>
+    /// <param name="competitionSlug">What addresses the competition whose entry is being handed in.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The entry as it now stands.</returns>
-    Task<HostedEntryDto> FinishAsync(Guid userId, Guid roundId, CancellationToken cancellationToken = default);
+    Task<HostedEntryDto> FinishAsync(
+        Guid userId, string competitionSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Reads one competition's problem set, with whatever the student has said about each. An embargoed set is
     /// served only to a student who has spent an entry into it.
     /// </summary>
     /// <param name="userId">The student reading.</param>
-    /// <param name="roundId">The competition whose problems these are.</param>
+    /// <param name="competitionSlug">What addresses the competition whose problems these are.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The problems, in the order the competition sets them.</returns>
     Task<IReadOnlyList<HostedCompetitionProblemDto>> GetProblemsAsync(
-        Guid userId, Guid roundId, CancellationToken cancellationToken = default);
+        Guid userId, string competitionSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Records what a student says about their own solution to one of a competition's problems, replacing
     /// whatever they said about it before. Offered while their entry runs and for a short grace after it ends.
     /// </summary>
     /// <param name="userId">The student saying it.</param>
-    /// <param name="roundId">The competition the problem belongs to.</param>
+    /// <param name="competitionSlug">What addresses the competition the problem belongs to.</param>
     /// <param name="problemId">The problem the claim is about.</param>
     /// <param name="comment">What they say about the solution, which is the whole of the claim.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once the claim is recorded.</returns>
     Task SetSelfAssessmentAsync(
-        Guid userId, Guid roundId, Guid problemId, string comment,
+        Guid userId, string competitionSlug, Guid problemId, string comment,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -98,16 +101,16 @@ public interface IHostedCompetitionService
     /// asked to be, so it passes for done.
     /// </summary>
     /// <param name="userId">The student taking it back.</param>
-    /// <param name="roundId">The competition the problem belongs to.</param>
+    /// <param name="competitionSlug">What addresses the competition the problem belongs to.</param>
     /// <param name="problemId">The problem the claim was about.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>A task that completes once nothing of theirs stands against the problem.</returns>
     Task ClearSelfAssessmentAsync(
-        Guid userId, Guid roundId, Guid problemId, CancellationToken cancellationToken = default);
+        Guid userId, string competitionSlug, Guid problemId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
-/// Thrown when a round is not one the site hosts, so there is no competition under the id.
+/// Thrown when a slug addresses no round the site hosts, so there is no competition under the name.
 /// </summary>
 public sealed class HostedCompetitionNotFoundException() : Exception("Competition not found");
 

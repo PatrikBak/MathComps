@@ -33,13 +33,13 @@ export const LIST_PATH = `/en${ROUTES.COMPETITIONS}`
 /**
  * One competition's own area.
  *
- * @param competitionId - Which competition's area.
+ * @param competitionSlug - Which competition's area.
  *
  * @returns The path.
  */
-export function areaPath(competitionId: string): string {
-  // An area hangs off the list under the competition's own id
-  return `${LIST_PATH}/${competitionId}`
+export function areaPath(competitionSlug: string): string {
+  // An area hangs off the list under the competition's own name
+  return `${LIST_PATH}/${competitionSlug}`
 }
 
 /**
@@ -53,6 +53,7 @@ export function areaPath(competitionId: string): string {
  * @returns The transcript.
  */
 export function transcriptOf(page: Page): Locator {
+  // The transcript, matched on its role so the new-conversation button does not answer to it
   return page.getByRole('log', { name: chatCopy.transcriptLabel })
 }
 

@@ -211,7 +211,7 @@ export function HostedCompetitionGroupPanel({
         <div className="divide-y divide-foreground/10 border-t border-foreground/10">
           {group.competitions.map((competition) => (
             <CompetitionRow
-              key={competition.id}
+              key={competition.slug[locale]}
               group={group}
               competition={competition}
               phase={phase}
@@ -245,6 +245,9 @@ type CompetitionRowProps = {
  * One competition: one category, where the student stands with it, and the one thing they can do about it.
  */
 function CompetitionRow({ group, competition, phase, now, onEnter }: CompetitionRowProps) {
+  // The active locale
+  const locale = useLocale() as Locale
+
   // Where the student stands with it
   const standing = deriveStanding(group, competition, now)
 
@@ -255,7 +258,7 @@ function CompetitionRow({ group, competition, phase, now, onEnter }: Competition
     // competition it is about, a category badge being absent on the practice one and worded on the rest
     <div
       className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 text-sm sm:px-6"
-      data-competition-id={competition.id}
+      data-competition-slug={competition.slug[locale]}
     >
       {/* Which category */}
       <span>
@@ -432,6 +435,12 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
   // Competitions copy
   const t = useTranslations('competitions')
 
+  // The active locale
+  const locale = useLocale() as Locale
+
+  // The way into the area
+  const areaHref = competitionAreaHref(competition.slug[locale])
+
   // Over, so the way in is gone and both of the things it left behind are open to everybody. They are its
   // own, not its group's: each category was a different problem set answered by a different set of people.
   // A clock still running outlives the window, an entry ending on its own length
@@ -447,18 +456,10 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
     return (
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-5">
         {wasInIt ? (
-          <AreaLink
-            href={competitionAreaHref(competition.id)}
-            icon={NotebookPen}
-            label={t('mySolutions')}
-          />
+          <AreaLink href={areaHref} icon={NotebookPen} label={t('mySolutions')} />
         ) : (
           competition.problemsPublished && (
-            <AreaLink
-              href={competitionAreaHref(competition.id)}
-              icon={FileText}
-              label={t('problems')}
-            />
+            <AreaLink href={areaHref} icon={FileText} label={t('problems')} />
           )
         )}
 
@@ -477,20 +478,12 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
     // Given up for the problems, which is what is waiting for them in there, with the solutions beside
     // them: giving the entry up is saying they are not competing here
     case 'forfeited':
-      return (
-        <AreaLink
-          href={competitionAreaHref(competition.id)}
-          icon={FileText}
-          label={t('problems')}
-        />
-      )
+      return <AreaLink href={areaHref} icon={FileText} label={t('problems')} />
 
     // Inside, and the way back to the clock they left running. The loudest thing the page can offer while
     // it is offering it: everything else here waits, and this one is being spent
     case 'running':
-      return (
-        <AreaLink href={competitionAreaHref(competition.id)} icon={Play} label={t('continue')} />
-      )
+      return <AreaLink href={areaHref} icon={Play} label={t('continue')} />
 
     // Taken, so what the entry bought is back in the area it was spent in: their own work, and the
     // solutions the end of a run opens. The practice one is the only competition anybody gets a second go
@@ -499,11 +492,7 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
     case 'done':
       return (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-5">
-          <AreaLink
-            href={competitionAreaHref(competition.id)}
-            icon={NotebookPen}
-            label={t('mySolutions')}
-          />
+          <AreaLink href={areaHref} icon={NotebookPen} label={t('mySolutions')} />
 
           {phase === 'practice' && (
             <Button variant="link" onClick={onEnter}>

@@ -20,7 +20,9 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// when it runs and the entries students have spent into it.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
-/// <param name="localization">Resolves the localized name of the node a competition runs under.</param>
+/// <param name="localization">
+/// The node a competition runs under: its localized name, and the URL name it is addressed by.
+/// </param>
 /// <param name="limits">The caps a defense is held to.</param>
 /// <param name="options">The terms a hosted competition runs on.</param>
 public sealed class HostedCompetitionService(
@@ -43,7 +45,8 @@ public sealed class HostedCompetitionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Every group with its rounds: the node each round runs under and when its problems open. Newest first.
+        // Every group with its rounds: the node each round runs under, the season it ran in, and when its
+        // problems open. Newest first.
         var groups = await dbContext.HostedGroups
             .AsNoTracking()
             .OrderByDescending(group => group.OpensAt)
@@ -60,6 +63,7 @@ public sealed class HostedCompetitionService(
                     {
                         round.Id,
                         CompetitionPath = round.Competition.Path,
+                        SeasonStartYear = round.Season.StartYear,
                         round.VisibleSince,
                     })
                     .ToList(),
@@ -88,7 +92,7 @@ public sealed class HostedCompetitionService(
                 group.ClosesAt,
                 [
                     .. group.Rounds.Select(round => new HostedCompetitionDto(
-                        round.Id,
+                        SlugOf(round.CompetitionPath, round.SeasonStartYear),
                         HostedTaxonomy.CategoryOf(round.CompetitionPath),
                         entries.GetValueOrDefault(round.Id),
                         // Nobody's results are out.
@@ -137,22 +141,25 @@ public sealed class HostedCompetitionService(
 
     /// <inheritdoc/>
     public Task<SpentEntryDto> EnterAsync(
-        Guid userId, Guid roundId, CancellationToken cancellationToken = default)
+        Guid userId, string competitionSlug, CancellationToken cancellationToken = default)
         // Spent by sitting it, so the clock starts here.
-        => SpendEntryAsync(userId, roundId, isForfeit: false, cancellationToken);
+        => SpendEntryAsync(userId, competitionSlug, isForfeit: false, cancellationToken);
 
     /// <inheritdoc/>
     public Task<SpentEntryDto> ForfeitAsync(
-        Guid userId, Guid roundId, CancellationToken cancellationToken = default)
+        Guid userId, string competitionSlug, CancellationToken cancellationToken = default)
         // Spent by giving it up, so no clock ever runs.
-        => SpendEntryAsync(userId, roundId, isForfeit: true, cancellationToken);
+        => SpendEntryAsync(userId, competitionSlug, isForfeit: true, cancellationToken);
 
     /// <inheritdoc/>
     public async Task<HostedEntryDto> FinishAsync(
-        Guid userId, Guid roundId, CancellationToken cancellationToken = default)
+        Guid userId, string competitionSlug, CancellationToken cancellationToken = default)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The competition the slug addresses.
+        var roundId = await ResolveRoundIdAsync(dbContext, competitionSlug, cancellationToken);
 
         // The entry the student holds in this competition, tracked so the stamp below saves.
         var entry = await dbContext.HostedEntries.FirstOrDefaultAsync(
@@ -177,10 +184,13 @@ public sealed class HostedCompetitionService(
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<HostedCompetitionProblemDto>> GetProblemsAsync(
-        Guid userId, Guid roundId, CancellationToken cancellationToken = default)
+        Guid userId, string competitionSlug, CancellationToken cancellationToken = default)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The competition the slug addresses.
+        var roundId = await ResolveRoundIdAsync(dbContext, competitionSlug, cancellationToken);
 
         // The problems are the embargoed thing, so what may be read is settled before anything is read.
         await EnsureEntitledAsync(dbContext, userId, roundId, cancellationToken);
@@ -208,7 +218,8 @@ public sealed class HostedCompetitionService(
 
     /// <inheritdoc/>
     public async Task SetSelfAssessmentAsync(
-        Guid userId, Guid roundId, Guid problemId, string comment, CancellationToken cancellationToken = default)
+        Guid userId, string competitionSlug, Guid problemId, string comment,
+        CancellationToken cancellationToken = default)
     {
         // What the student wrote, reduced to the text it carries. The words are the whole claim, so a blank
         // one is a bad request rather than a quiet way of dropping what stands.
@@ -220,6 +231,9 @@ public sealed class HostedCompetitionService(
 
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The competition the slug addresses.
+        var roundId = await ResolveRoundIdAsync(dbContext, competitionSlug, cancellationToken);
 
         // A note belongs to a run and closes shortly after it.
         await EnsureNotesOpenAsync(dbContext, userId, roundId, cancellationToken);
@@ -255,10 +269,13 @@ public sealed class HostedCompetitionService(
 
     /// <inheritdoc/>
     public async Task ClearSelfAssessmentAsync(
-        Guid userId, Guid roundId, Guid problemId, CancellationToken cancellationToken = default)
+        Guid userId, string competitionSlug, Guid problemId, CancellationToken cancellationToken = default)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The competition the slug addresses.
+        var roundId = await ResolveRoundIdAsync(dbContext, competitionSlug, cancellationToken);
 
         // Taking a note back is open for exactly as long as leaving one is.
         await EnsureNotesOpenAsync(dbContext, userId, roundId, cancellationToken);
@@ -277,15 +294,18 @@ public sealed class HostedCompetitionService(
     /// problems it opens.
     /// </summary>
     /// <param name="userId">The student spending it.</param>
-    /// <param name="roundId">The competition being entered.</param>
+    /// <param name="competitionSlug">What addresses the competition the entry is being spent into.</param>
     /// <param name="isForfeit">Whether they are giving the entry up rather than sitting it.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The entry as it now stands, and the set it opens.</returns>
     private async Task<SpentEntryDto> SpendEntryAsync(
-        Guid userId, Guid roundId, bool isForfeit, CancellationToken cancellationToken)
+        Guid userId, string competitionSlug, bool isForfeit, CancellationToken cancellationToken)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The competition the slug addresses.
+        var roundId = await ResolveRoundIdAsync(dbContext, competitionSlug, cancellationToken);
 
         // The group the competition runs in, which is what decides whether it is taking entries at all.
         var group = await dbContext.Rounds
@@ -664,6 +684,51 @@ public sealed class HostedCompetitionService(
             language => competitionPath is null
                 ? string.Empty
                 : localization.GetNodeShortName(language, competitionPath));
+
+    /// <summary>
+    /// Builds what one round is addressed by, in every language the site is read in.
+    /// </summary>
+    /// <param name="competitionPath">The path of the node the round runs under.</param>
+    /// <param name="seasonStartYear">The year the round's season starts in.</param>
+    /// <returns>The slug in each language.</returns>
+    private IReadOnlyDictionary<Language, string> SlugOf(string competitionPath, int seasonStartYear) =>
+        localization.GetNodeUrlSlugs(competitionPath).ToDictionary(
+            urlSlug => urlSlug.Key,
+            urlSlug => HostedRoundSlug.Build(urlSlug.Value, seasonStartYear));
+
+    /// <summary>
+    /// Reads a slug back into the round it addresses.
+    /// </summary>
+    /// <remarks>
+    /// A slug naming nothing the site hosts is the same answer as one naming nothing at all. Which of the two it
+    /// was is no business of the caller's, and saying would tell an unentitled reader that a competition exists.
+    /// </remarks>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="competitionSlug">What the caller addressed the competition by.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The round the slug addresses.</returns>
+    private async Task<Guid> ResolveRoundIdAsync(
+        MathCompsDbContext dbContext, string competitionSlug, CancellationToken cancellationToken)
+    {
+        // A slug not shaped like one this builds, or whose first half names no node in any language, addresses
+        // nothing.
+        if (!HostedRoundSlug.TryParse(competitionSlug, out var nodeUrlSlug, out var seasonStartYear)
+            || localization.FindNodePathByUrlSlug(nodeUrlSlug) is not { } competitionPath)
+            throw new HostedCompetitionNotFoundException();
+
+        // The one round that node ran in that season, which is one row: the index over the pair says so.
+        var roundId = await dbContext.Rounds
+            .AsNoTracking()
+            .Where(round => round.Competition.Path == competitionPath
+                && round.Season.StartYear == seasonStartYear
+                && round.HostedGroupId != null)
+            .Select(round => round.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // The round the slug named, absent when the node never ran that season, or ran it somewhere the site
+        // does not host.
+        return roundId == Guid.Empty ? throw new HostedCompetitionNotFoundException() : roundId;
+    }
 
     /// <summary>
     /// Picks the <see cref="HostedEntryDto"/> arm an entry's stamps say it is.

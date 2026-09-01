@@ -15,7 +15,9 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// </summary>
 /// <param name="dbContextFactory">Creates the context the declaration runs on.</param>
 /// <param name="tree">Raises the competition node and the season a manifest's round hangs off.</param>
-/// <param name="metadata">The registry, which says whether the taxonomy can place a path at all.</param>
+/// <param name="metadata">
+/// The registry: whether the taxonomy can place a path, and what names a node is addressed by.
+/// </param>
 public sealed class HostedGroupService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     ICompetitionTreeWriter tree,
@@ -159,6 +161,21 @@ public sealed class HostedGroupService(
             // One still waiting on its problems, which the outcome counts.
             if (written.Count == 0)
                 roundsAwaitingProblems += 1;
+        }
+
+        // A hosted round is reached by name, so the taxonomy has to give its node one in every language the
+        // site is read in. Missing, the competitions list throws for every visitor rather than for this author,
+        // so the declaration is where it is caught.
+        foreach (var reference in manifest.Rounds)
+        {
+            // The languages that give the node no URL name.
+            var unnamed = metadata.LocalesMissingUrlSlug(reference.CompetitionPath);
+
+            // A language short of one is a group nobody can declare.
+            if (unnamed.Count > 0)
+                throw new HostedGroupManifestException(
+                    $"'{reference.CompetitionPath}' has no urlSlug in {string.Join(", ", unnamed)}. "
+                    + "Add one to each metadata file.");
         }
 
         // The group as it already stands, if this manifest has been applied before.

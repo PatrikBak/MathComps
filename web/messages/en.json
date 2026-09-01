@@ -330,7 +330,12 @@
     "areaClockSpent": "Your time is up. You can keep solving the problems and talking to Mathilda about them, but new messages no longer count towards your result.",
     "areaFinished": "You have finished this competition. You can keep solving the problems and talking to Mathilda about them, but new messages no longer count towards your result.",
     "areaForfeited": "You can no longer compete. You can still work on the problems here, they just do not count.",
+    "areaNotOpen": "That competition has not opened yet.",
+    "areaNotPublic": "That competition's problems have not been made public.",
+    "areaNotStarted": "You have not started this competition yet.",
     "areaProblemsFailed": "The problems could not be loaded.",
+    "areaSignIn": "Sign in to open this competition.",
+    "areaUnknown": "No competition goes by that name.",
     "backToCompetitions": "Back to competitions",
     "categories": {
       "advanced": "Advanced",

@@ -7,7 +7,7 @@ import { expect, test } from './support/test'
 const SETTLE_TIMEOUT_MS = 15_000
 
 /** A competition that closed a month ago, whose problems the list offers to anybody. */
-const CLOSED_COMPETITION_ID = 'closed-special-set'
+const CLOSED_COMPETITION_SLUG = 'closed-special-set'
 
 test.describe('the competitions list', () => {
   test('asks a reader with no account for one rather than opening the entry', async ({ page }) => {
@@ -43,10 +43,13 @@ test.describe('the competitions list', () => {
     await installHostedBackend(page, 'first-entry')
 
     // The area of a competition that closed a month ago, which the list links them to
-    await page.goto(areaPath(CLOSED_COMPETITION_ID))
+    await page.goto(areaPath(CLOSED_COMPETITION_SLUG))
 
     // Back on the list, the set being read as the reader and there being nobody to read it as
     await expect(page).toHaveURL(/\/competitions$/, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Asked for the account that is the only thing between them and the problems
+    await expect(page.getByText(areaCopy.areaSignIn)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
   })
 
   test('says the list failed to load rather than that nothing is scheduled', async ({ page }) => {

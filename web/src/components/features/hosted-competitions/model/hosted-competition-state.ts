@@ -1,5 +1,6 @@
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { HOUR_MINUTES, MINUTE_MS, SECOND_MS } from '@/components/shared/utils/time-units'
+import { SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 import type {
   HostedCompetition,
@@ -317,27 +318,99 @@ export type CompetitionInGroup = {
 }
 
 /**
+ * The competitions-copy keys a turning-away is worded by.
+ */
+export type AreaTurnAwayKey =
+  | 'areaUnknown'
+  | 'areaNotOpen'
+  | 'areaNotStarted'
+  | 'areaNotPublic'
+  | 'areaSignIn'
+
+/**
+ * What the area says when it turns a reader away.
+ *
+ * A phase is a reason on its own where the address leads nowhere, or where signing in would not help.
+ * Everywhere else the account is what the reader is missing first, a competition being neither started nor
+ * read without one.
+ *
+ * @param phase - Where the group sits in its own life, undefined when the address names no competition.
+ * @param isSignedIn - Whether the reader has the account every read here is made as.
+ *
+ * @returns The copy key naming why the reader is being sent to the list.
+ */
+export function areaTurnAwayKey(
+  phase: GroupPhase | undefined,
+  isSignedIn: boolean
+): AreaTurnAwayKey {
+  switch (phase) {
+    // Nothing of that name is on this reader's list, so the address leads nowhere they can go
+    case undefined:
+      return 'areaUnknown'
+
+    // Announced, and taking nobody's entry yet
+    case 'upcoming':
+      return 'areaNotOpen'
+
+    // Taking entries, so the reader is not in it yet rather than shut out of it, once they have the
+    // account that taking one needs
+    case 'open':
+    // And the practice one takes them for as long as it exists, which is the same standing
+    case 'practice':
+      return isSignedIn ? 'areaNotStarted' : 'areaSignIn'
+
+    // Over, so the set is open to every account and the reader is either without one, or looking at
+    // problems whose embargo outlived the competition
+    case 'closed':
+      return isSignedIn ? 'areaNotPublic' : 'areaSignIn'
+
+    // Every phase is handled above
+    default:
+      return assertNever(phase)
+  }
+}
+
+/**
+ * Whether one competition is the one a slug addresses.
+ *
+ * Read against every language it is named in, the same way the server resolves one, since a link is pasted
+ * between readers who read the site in different languages.
+ *
+ * @param competition - The competition being asked about.
+ * @param competitionSlug - What arrived addressing one.
+ *
+ * @returns Whether the slug addresses this competition.
+ */
+export function isCompetitionAddressedBy(
+  competition: HostedCompetition,
+  competitionSlug: string
+): boolean {
+  // One name per language, any of which can be the one that arrived
+  return SUPPORTED_LOCALES.some((locale) => competition.slug[locale] === competitionSlug)
+}
+
+/**
  * Finds one competition in the view, along with the group whose terms it runs on. A competition is named on
  * its own everywhere a reader arrives at one, while everything about how it runs sits on its group.
  *
  * @param view - Every group the reader can see, undefined while the read has not landed.
- * @param competitionId - Which competition to find.
+ * @param competitionSlug - Which competition to find.
  *
  * @returns The competition and its group, or undefined when the view holds no such competition.
  */
 export function findCompetitionInGroup(
   view: HostedCompetitionsView | undefined,
-  competitionId: string
+  competitionSlug: string
 ): CompetitionInGroup | undefined {
   // Nothing has arrived, so there is nothing to find it in
   if (view === undefined) {
     return undefined
   }
 
-  // The one competition of that id, wherever in the groups it sits
+  // The one competition of that name, wherever in the groups it sits
   const found = view.groups
     .flatMap((group) => group.competitions.map((competition) => ({ group, competition })))
-    .find((candidate) => candidate.competition.id === competitionId)
+    .find((candidate) => isCompetitionAddressedBy(candidate.competition, competitionSlug))
 
   // With the terms the whole program runs on, which is where the note window is set
   return found === undefined ? undefined : { ...found, noteGraceMinutes: view.noteGraceMinutes }

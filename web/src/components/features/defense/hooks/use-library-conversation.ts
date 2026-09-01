@@ -6,7 +6,7 @@ import { useAreaEntry } from '@/components/features/hosted-competitions/hooks/us
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
-import { competitionIdOf } from '../model/defense-target'
+import { competitionSlugOf } from '../model/defense-target'
 import type {
   DefenseCompetitionRun,
   DefenseProblem,
@@ -54,10 +54,10 @@ export function useLibraryConversation(
   const { userId, isLoaded: isUserLoaded } = useAuth()
 
   // Which competition the chosen defense was held in, absent for a handout one
-  const competitionId = defense === null ? null : competitionIdOf(defense.target)
+  const competitionSlug = defense === null ? null : competitionSlugOf(defense.target)
 
-  // The entry it was argued under, which only a competition one has
-  const { entry, uiState } = useAreaEntry(userId ?? null, isUserLoaded, competitionId)
+  // The entry the chosen defense was argued under, which only a competition one has
+  const { entry, uiState } = useAreaEntry(userId ?? null, isUserLoaded, competitionSlug)
 
   // Nothing chosen, so there is nothing to open
   if (defense === null) {
@@ -85,7 +85,6 @@ export function useLibraryConversation(
             problem: {
               target: {
                 kind: 'competition',
-                competitionId: defense.target.competitionId,
                 problemId: defense.target.problemId,
                 readerKey: userId ?? null,
               },

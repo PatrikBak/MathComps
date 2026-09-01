@@ -21,14 +21,14 @@ import { RulesList } from './RulesList'
  * Props for the {@link HostedCompetitionsBoard} component.
  */
 type HostedCompetitionsBoardProps = {
-  /** Which competition a press made before signing in was aimed at, carried back by the return URL. */
-  entryIntentId: string | undefined
+  /** Which competition a press made before signing in was aimed at. */
+  entryIntentSlug: string | undefined
 }
 
 /**
  * Every competition the program has run or will run, and the way into whichever one is open.
  */
-export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoardProps) {
+export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsBoardProps) {
   // Competitions copy
   const t = useTranslations('competitions')
 
@@ -45,7 +45,7 @@ export function HostedCompetitionsBoard({ entryIntentId }: HostedCompetitionsBoa
     dialog,
     enterCompetition,
     dismissProfilePrompt,
-  } = useHostedCompetitionsBoard(entryIntentId)
+  } = useHostedCompetitionsBoard(entryIntentSlug)
 
   return (
     // Hyphenation off: the global setting is for article prose, and the words here are names and labels

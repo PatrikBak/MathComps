@@ -1,5 +1,6 @@
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 
+import { isCompetitionAddressedBy } from '../model/hosted-competition-state'
 import type {
   HostedCompetitionEntry,
   HostedCompetitionProblem,
@@ -54,16 +55,16 @@ const COMPETITION_PROBLEMS_QUERY_KEY = [...HOSTED_COMPETITIONS_QUERY_KEY, 'probl
  * The key one competition's problem set is cached under.
  *
  * @param readerKey - Who the answer is about, since it carries their own conversations.
- * @param competitionId - Which competition's problems these are.
+ * @param competitionSlug - Which competition's problems these are.
  *
  * @returns The cache key.
  */
 export function competitionProblemsQueryKey(
   readerKey: HostedCompetitionsReaderKey,
-  competitionId: string
+  competitionSlug: string
 ): QueryKey {
-  // Every language reads the same answer, the statements arriving in all of them at once
-  return [...COMPETITION_PROBLEMS_QUERY_KEY, readerKey, competitionId] as const
+  // The reader, and the name they addressed the competition under
+  return [...COMPETITION_PROBLEMS_QUERY_KEY, readerKey, competitionSlug] as const
 }
 
 /**
@@ -115,17 +116,18 @@ export function invalidateHostedCompetitions(queryClient: QueryClient): void {
  *
  * @param queryClient - The React Query cache.
  * @param readerKey - Who the cached set belongs to.
- * @param competitionId - Which competition's problems these are.
+ * @param competitionSlug - Which competition's problems these are.
  * @param problems - The set, in the order the competition sets them.
  */
 export function writeCachedProblems(
   queryClient: QueryClient,
   readerKey: HostedCompetitionsReaderKey,
-  competitionId: string,
+  competitionSlug: string,
   problems: HostedCompetitionProblem[]
 ): void {
+  // The set onto its own competition, over whatever was cached before it
   queryClient.setQueryData<HostedCompetitionProblem[]>(
-    competitionProblemsQueryKey(readerKey, competitionId),
+    competitionProblemsQueryKey(readerKey, competitionSlug),
     problems
   )
 }
@@ -138,15 +140,16 @@ export function writeCachedProblems(
  *
  * @param queryClient - The React Query cache.
  * @param readerKey - Who the cached view belongs to.
- * @param competitionId - Which competition the entry belongs to.
+ * @param competitionSlug - Which competition the entry belongs to.
  * @param entry - The entry as it now stands.
  */
 export function writeCachedEntry(
   queryClient: QueryClient,
   readerKey: HostedCompetitionsReaderKey,
-  competitionId: string,
+  competitionSlug: string,
   entry: HostedCompetitionEntry
 ): void {
+  // The view rewritten with the entry on its own row
   queryClient.setQueryData<HostedCompetitionsView>(
     hostedCompetitionsViewQueryKey(readerKey),
     (view) => {
@@ -161,7 +164,9 @@ export function writeCachedEntry(
         groups: view.groups.map((group) => ({
           ...group,
           competitions: group.competitions.map((competition) =>
-            competition.id === competitionId ? { ...competition, entry } : competition
+            isCompetitionAddressedBy(competition, competitionSlug)
+              ? { ...competition, entry }
+              : competition
           ),
         })),
       }
@@ -174,7 +179,7 @@ export function writeCachedEntry(
  *
  * @param queryClient - The React Query cache.
  * @param readerKey - Who the cached set belongs to.
- * @param competitionId - Which competition's problems these are.
+ * @param competitionSlug - Which competition's problems these are.
  * @param problemId - Which problem the claim is about.
  * @param assessment - What they now say, or null once they have taken it back.
  *
@@ -183,12 +188,12 @@ export function writeCachedEntry(
 export function writeCachedSelfAssessment(
   queryClient: QueryClient,
   readerKey: HostedCompetitionsReaderKey,
-  competitionId: string,
+  competitionSlug: string,
   problemId: string,
   assessment: string | null
 ): string | null {
   // Where the set is cached, which the read and the write below both go through
-  const key = competitionProblemsQueryKey(readerKey, competitionId)
+  const key = competitionProblemsQueryKey(readerKey, competitionSlug)
 
   // What the problem said a moment ago, read off the row rather than taken from the caller: the caller
   // reads it from this same row, so an optimistic write has already moved their copy on by the time a

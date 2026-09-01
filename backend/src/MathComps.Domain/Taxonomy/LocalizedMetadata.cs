@@ -5,12 +5,15 @@ namespace MathComps.Domain.Taxonomy;
 #region Building Blocks
 
 /// <summary>
-/// Display names (short and full) for localized metadata entities.
-/// Used for every competition node, whatever depth it sits at.
+/// The localized names a competition node goes by: what it is shown as, short and full, and what it is
+/// addressed by in a URL. Carried by every node, whatever depth it sits at.
 /// </summary>
 /// <param name="ShortName">Abbreviated name for compact displays (e.g., "MO" for "Matematická olympiáda").</param>
 /// <param name="FullName">Complete official name for formal contexts.</param>
-public record LocalizedNames(string ShortName, string FullName);
+/// <param name="UrlSlug">
+/// What the node is called in a URL, in this locale, ASCII and lowercase (e.g. <c>pokrocila-1</c>). Carried
+/// only by the nodes the site addresses by name, which are the rounds it hosts itself.</param>
+public record LocalizedNames(string ShortName, string FullName, string? UrlSlug = null);
 
 #endregion
 

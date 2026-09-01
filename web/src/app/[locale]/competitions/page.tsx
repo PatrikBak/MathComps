@@ -33,14 +33,16 @@ export async function generateMetadata({
  * Every competition open right now, and the press that puts a student inside one.
  */
 export default withLocale(async function CompetitionsPage({ searchParams }: PageProps) {
-  // Which competition the reader tried to enter before signing in, if any
+  // The address the reader came back to
   const query = await searchParams
-  const entryIntentId = typeof query?.enter === 'string' ? query.enter : undefined
+
+  // Which competition they tried to enter before signing in, if any
+  const entryIntentSlug = typeof query?.enter === 'string' ? query.enter : undefined
 
   // Render the board
   return (
     <Layout>
-      <HostedCompetitionsBoard entryIntentId={entryIntentId} />
+      <HostedCompetitionsBoard entryIntentSlug={entryIntentSlug} />
     </Layout>
   )
 })

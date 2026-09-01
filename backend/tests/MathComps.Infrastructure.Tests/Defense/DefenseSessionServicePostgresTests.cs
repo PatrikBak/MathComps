@@ -218,7 +218,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         context.Rounds.Add(new Round
         {
             Id = _roundId,
-            CompetitionId = CompetitionTreeSeed.Chain(context, "mc-advanced").Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "mc-advanced-1").Id,
             SeasonId = season.Id,
             Date = new DateOnly(2026, 10, 1),
             VisibleSince = group.ClosesAt,
@@ -608,21 +608,27 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             _ownerId,
             ProblemRequest(_problemId, "my defense"));
 
-        // Listing the owner's conversations comes back with both, the competition one first
+        // Listing the owner's conversations
         var sessions = await service.ListAllAsync(_ownerId, Language.EN);
+
+        // Which comes back with both, the competition one first
         Assert.Equal([competition.Id, handout.Id], sessions.Select(session => session.Id));
 
         // The competition one names a problem rather than a handout environment
         var target = Assert.IsType<NamedProblemTarget>(sessions[0].Target);
 
-        // Carrying the ids that address the problem and the competition, and the slug the archive uses
+        // Carrying what addresses the problem
         Assert.Equal(_problemId, target.ProblemId);
-        Assert.Equal(_roundId, target.CompetitionId);
+
+        // What addresses the competition it was set in
+        Assert.Equal("advanced-1-2026", target.CompetitionSlug);
+
+        // And the slug the archive knows the problem by
         Assert.Equal("mc-advanced-1", target.Slug);
 
         // Named as every competition down to the one that set it, in the language asked for
         Assert.Equal(
-            ["MathComps", "Advanced"],
+            ["MathComps", "Advanced", "September"],
             target.Source.Competition.Select(node => node.DisplayName));
 
         // Along with the season's own year and the problem's place in the competition

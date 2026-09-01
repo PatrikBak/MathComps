@@ -24,20 +24,20 @@ type UseCompetitionProblemsResult = {
  * One competition's problem set, with whatever the entrant has said about each of them.
  *
  * @param readerKey - Who the answer belongs to, which is what it gets cached under.
- * @param competitionId - Which competition's problems to read.
+ * @param competitionSlug - Which competition's problems to read.
  * @param isEntitled - Whether the reader has an entry these problems are theirs to see through.
  *
  * @returns The problems and the state of the read.
  */
 export function useCompetitionProblems(
   readerKey: HostedCompetitionsReaderKey,
-  competitionId: string,
+  competitionSlug: string,
   isEntitled: boolean
 ): UseCompetitionProblemsResult {
   // The set, each problem carrying its own conversations, keyed per reader and competition
   const query = useApiQuery<HostedCompetitionProblem[]>({
-    queryKey: competitionProblemsQueryKey(readerKey, competitionId),
-    fetch: (apiCall) => fetchCompetitionProblems(apiCall, competitionId),
+    queryKey: competitionProblemsQueryKey(readerKey, competitionSlug),
+    fetch: (apiCall) => fetchCompetitionProblems(apiCall, competitionSlug),
     // Served through the reader's own entry, so it is read as them
     requireAuth: true,
     // Embargoed until an entry is spent on them, so nothing is asked for before there is one

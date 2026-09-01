@@ -110,7 +110,7 @@ describe('encodeProblemKey/decodeProblemKey', () => {
     const target: NamedProblemTarget = {
       kind: 'problem',
       problemId: 'problem-1',
-      competitionId: 'round-1',
+      competitionSlug: 'round-1',
       slug: '76-mc-advanced-1-2',
       source: {
         season: { slug: '76', displayName: 'Edition 76 (2026/2027)', fullName: null },

@@ -1,6 +1,6 @@
 import { stubProblemSearch } from './support/backend-routes'
 import { areaCopy, areaPath, holdClock, LIST_PATH } from './support/competitions'
-import { COMPETITION_ID, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
+import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
@@ -10,7 +10,7 @@ const SETTLE_TIMEOUT_MS = 15_000
 const LANDING_WINDOW_MS = 1_000
 
 /** The practice run, the one competition anybody gets a second go at. */
-const PRACTICE_COMPETITION_ID = 'practice-set'
+const PRACTICE_COMPETITION_SLUG = 'practice-set'
 
 test.describe('the competitions list', () => {
   test('asks a reader with an unfilled profile for the fields a result would name them by', async ({
@@ -184,7 +184,7 @@ test.describe('the competitions list', () => {
 
     // Every read of the area's own route, the one warmed while the dialog was open included
     await page.route(
-      (url) => url.pathname === areaPath(COMPETITION_ID),
+      (url) => url.pathname === areaPath(COMPETITION_SLUG),
       async (route) => {
         await isAreaReleased
         await route.continue()
@@ -195,7 +195,7 @@ test.describe('the competitions list', () => {
     await page.goto(LIST_PATH)
 
     // The row of the competition being entered
-    const row = page.locator(`[data-competition-id="${COMPETITION_ID}"]`)
+    const row = page.locator(`[data-competition-slug="${COMPETITION_SLUG}"]`)
 
     // Press enter, which opens the dialog
     await row.getByRole('button', { name: areaCopy.enter, exact: true }).click()
@@ -210,7 +210,7 @@ test.describe('the competitions list', () => {
     // still owed
     await Promise.all([
       page.waitForResponse(
-        (response) => response.url().endsWith(`/competitions/${COMPETITION_ID}/entry`),
+        (response) => response.url().endsWith(`/competitions/${COMPETITION_SLUG}/entry`),
         { timeout: SETTLE_TIMEOUT_MS }
       ),
       confirm.click(),
@@ -244,10 +244,10 @@ test.describe('the competitions list', () => {
     await page.goto(LIST_PATH)
 
     // The row of the competition they are actually in
-    const row = page.locator(`[data-competition-id="${COMPETITION_ID}"]`)
+    const row = page.locator(`[data-competition-slug="${COMPETITION_SLUG}"]`)
 
     // The way back, addressed by where it goes
-    const back = row.locator(`a[href="/en/competitions/${COMPETITION_ID}"]`)
+    const back = row.locator(`a[href="/en/competitions/${COMPETITION_SLUG}"]`)
 
     // Which reads as a way back into the clock
     await expect(back).toHaveText(areaCopy.continue, { timeout: SETTLE_TIMEOUT_MS })
@@ -285,10 +285,9 @@ test.describe('the competitions list', () => {
 
     // Where the run they just spent offers the way back into it, beside the second go that would start a
     // clock and close the solutions it opened
-    await expect(page.locator(`a[href="/en/competitions/${PRACTICE_COMPETITION_ID}"]`)).toHaveText(
-      areaCopy.mySolutions,
-      { timeout: SETTLE_TIMEOUT_MS }
-    )
+    await expect(
+      page.locator(`a[href="/en/competitions/${PRACTICE_COMPETITION_SLUG}"]`)
+    ).toHaveText(areaCopy.mySolutions, { timeout: SETTLE_TIMEOUT_MS })
 
     // And that second go is still offered beside it
     await expect(page.getByRole('button', { name: areaCopy.tryAgain })).toBeVisible()
