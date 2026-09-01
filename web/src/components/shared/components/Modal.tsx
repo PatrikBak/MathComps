@@ -1,7 +1,7 @@
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 
 import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -80,8 +80,31 @@ export function Modal({
   // The dialog's panel
   const panelRef = useRef<HTMLDivElement>(null)
 
+  // The dialog's outermost element
+  const dialogRef = useRef<HTMLDivElement>(null)
+
+  /**
+   * Drops the container's focus so that a press decides how the trigger comes back.
+   *
+   * WebKit takes a scripted focus on an element only a script can focus for a keyboard one, and holds
+   * that reading document-wide until real pointer input replaces it. The container's own focus is such
+   * a landing. The trigger the dialog hands focus back to on close therefore comes back ringed after a
+   * click that never touched the keyboard.
+   *
+   * Releasing the container on the press hands the reading to that press: a click closes the dialog
+   * unringed, Escape still rings. Only the container goes, so a press aimed at a field inside the panel
+   * still carries the caret.
+   */
+  const releaseContainerFocus = useCallback(() => {
+    // Drop the container's focus, and only the container's
+    if (document.activeElement === dialogRef.current) {
+      dialogRef.current?.blur()
+    }
+  }, [])
+
   return (
     <Dialog
+      ref={dialogRef}
       open={isOpen}
       as="div"
       aria-label={ariaLabel}
@@ -90,6 +113,7 @@ export function Modal({
       // this falls back to skips anything the reader can't Tab to
       initialFocus={focusPanelOnOpen ? panelRef : undefined}
       onClose={onClose}
+      onMouseDownCapture={releaseContainerFocus}
     >
       {/* Backdrop with blur */}
       <div className={cn('fixed inset-0 bg-background/50 backdrop-blur-sm', ENTER_ANIMATION)} />
