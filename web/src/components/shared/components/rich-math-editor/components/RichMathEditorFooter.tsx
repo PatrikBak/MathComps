@@ -138,6 +138,9 @@ export function RichMathEditorFooter({
   // Get translations
   const tEditor = useTranslations('ui.editor')
 
+  // The labels every shared control reads under
+  const tActions = useTranslations('ui.actions')
+
   // Whether the in-flight submit can be stopped
   const isStoppable = isLoading && Boolean(onStop)
 
@@ -251,7 +254,7 @@ export function RichMathEditorFooter({
                 'bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground',
                 FOCUS_RING_CLASS
               )}
-              title={tEditor('cancelEsc')}
+              title={modeConfig.mode === 'expanded' ? tActions('cancel') : tEditor('cancelEsc')}
             >
               <X size={18} />
             </button>

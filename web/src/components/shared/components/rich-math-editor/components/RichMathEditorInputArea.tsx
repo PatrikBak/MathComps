@@ -88,7 +88,7 @@ export const RichMathEditorInputArea = forwardRef<
     const tApiErrors = useTranslations('apiErrors')
 
     // Get needed state from the view-model
-    const { textareaRef, state, applyTransform } = viewModel
+    const { textareaRef, attachTextarea, state, applyTransform } = viewModel
 
     // The ref for the hidden input elements for image and attachment uploads
     const imageFileInputRef = useRef<HTMLInputElement>(null)
@@ -479,7 +479,7 @@ export const RichMathEditorInputArea = forwardRef<
 
         {/* Main textarea */}
         <textarea
-          ref={textareaRef}
+          ref={attachTextarea}
           value={state.text}
           onChange={onChange}
           onKeyDown={onKeyDown}

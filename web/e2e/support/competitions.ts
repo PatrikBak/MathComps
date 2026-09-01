@@ -22,6 +22,9 @@ export const actionsCopy = ui.actions
 /** The chrome every modal carries, whatever it is holding. */
 export const modalCopy = ui.modal
 
+/** The labels the rich editor's own controls read under, on whichever surface it is embedded. */
+export const editorCopy = ui.editor
+
 /**
  * The competitions list in English, which is the canonical locale and so carries no route translation.
  */

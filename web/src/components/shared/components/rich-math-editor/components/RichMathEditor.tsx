@@ -143,7 +143,7 @@ export function RichMathEditor({
   const {
     state,
     textareaRef,
-    inputAreaRef,
+    attachInputArea,
     applyTransform,
     insertAtCursor,
     openImagePicker,
@@ -175,6 +175,22 @@ export function RichMathEditor({
 
   // Whether we're in mobile modal-only mode (no inline content)
   const isMobileModalOnly = autoExpandOnMobile && isMobile
+
+  /**
+   * A function which closes the expanded modal.
+   *
+   * Where the modal is the only editor, closing it is the reader putting the editor away, which is the
+   * surface's own cancel.
+   */
+  const closeModal = () => {
+    // Down to the editor underneath
+    setIsModalOpen(false)
+
+    // With no editor underneath, the whole thing is away
+    if (isMobileModalOnly) {
+      onCancel?.()
+    }
+  }
 
   // Whether this editor accepts image / attachment uploads
   const allowImageUpload = showsToolbarItem(toolbar, 'image')
@@ -220,7 +236,7 @@ export function RichMathEditor({
             {/* Editor input area */}
             <RichMathEditorInputArea
               variant={variant}
-              ref={inputAreaRef}
+              ref={attachInputArea}
               viewModel={viewModel}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
@@ -256,7 +272,11 @@ export function RichMathEditor({
       {/* The expanded modal, always mounted so its portal works */}
       <RichMathEditorExpandedModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeModal}
+        // The dialog hands focus back to the button that opened it, which is the footer's expand control,
+        // so the editor has to ask for the cursor itself once its own textarea is the one on screen again
+        onClosed={() => textareaRef.current?.focus()}
+        hasEditorBehind={!isMobileModalOnly}
         viewModel={viewModel}
         toolbarConfig={toolbar}
         placeholder={placeholder}

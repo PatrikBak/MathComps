@@ -21,6 +21,10 @@ type RichMathEditorExpandedModalProps = {
   isOpen: boolean
   /** Callback to close the modal */
   onClose: () => void
+  /** Called once the modal is gone and the page is the reader's again */
+  onClosed: () => void
+  /** Whether an editor stands behind this one, which is where closing it returns the reader */
+  hasEditorBehind: boolean
   /** Shared viewModel from the parent RichMathEditor */
   viewModel: EditorViewModel
   /** Which toolbar entries to show; every entry defaults to on */
@@ -49,6 +53,8 @@ type RichMathEditorExpandedModalProps = {
 export function RichMathEditorExpandedModal({
   isOpen,
   onClose,
+  onClosed,
+  hasEditorBehind,
   viewModel,
   toolbarConfig,
   placeholder,
@@ -71,7 +77,7 @@ export function RichMathEditorExpandedModal({
   // Extract viewModel properties
   const {
     state,
-    inputAreaRef,
+    attachInputArea,
     applyTransform,
     insertAtCursor,
     openImagePicker: openFilePicker,
@@ -80,10 +86,32 @@ export function RichMathEditorExpandedModal({
     handleKeyDown,
   } = viewModel
 
+  /**
+   * Handles a key pressed in the expanded editor.
+   *
+   * Escape is the way out of an expanded view, so it collapses to the editor behind it rather than
+   * reaching the editor's own cancel. With nothing behind it, this view is the whole editor, and the
+   * cancel is what Escape is for.
+   *
+   * @param event - The React keyboard event from the textarea.
+   */
+  const handleModalKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (event) => {
+    // The way back to the editor underneath
+    if (event.key === 'Escape' && hasEditorBehind) {
+      event.preventDefault()
+      onClose()
+      return
+    }
+
+    // Everything else is the editor's own
+    handleKeyDown(event)
+  }
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      onClosed={onClosed}
       title={tEditor('expandedEditor')}
       showCloseButton
       className="flex flex-col max-h-[95vh] md:max-h-[90vh] md:max-w-6xl"
@@ -141,12 +169,12 @@ export function RichMathEditorExpandedModal({
 
               {/* The text itself, grown to match the preview's height */}
               <RichMathEditorInputArea
-                ref={inputAreaRef}
+                ref={attachInputArea}
                 variant="card"
                 borderless
                 viewModel={viewModel}
                 onChange={handleChange}
-                onKeyDown={handleKeyDown}
+                onKeyDown={handleModalKeyDown}
                 placeholder={placeholder}
                 allowImageUpload={showsToolbarItem(toolbarConfig, 'image')}
                 allowAttachmentUpload={showsToolbarItem(toolbarConfig, 'attachment')}
@@ -206,7 +234,11 @@ export function RichMathEditorExpandedModal({
               onCancel
                 ? () => {
                     onClose()
-                    onCancel()
+
+                    // Closing only stepped back to the editor behind, so the cancel still has to run
+                    if (hasEditorBehind) {
+                      onCancel()
+                    }
                   }
                 : undefined
             }
