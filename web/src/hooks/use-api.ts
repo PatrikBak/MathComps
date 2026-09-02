@@ -110,12 +110,15 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
         }
       }
 
-      // Signed in, yet Clerk minted nothing to send
+      // Signed in as far as this render knows, yet Clerk minted nothing. Clerk reads the session live
+      // when it mints, while isSignedIn is the snapshot React last heard about, so a session that
+      // ended since then lands here rather than on the guard above
       if (requireAuth && !token) {
         return {
           success: false,
           error: {
-            message: 'Failed to retrieve authentication token.',
+            message: 'The session ended before a token could be minted.',
+            errorCode: 'Unauthenticated',
           },
         }
       }
