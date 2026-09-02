@@ -3,7 +3,7 @@
 import { LogIn } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { NavLink } from '@/components/shared/components/NavLink'
+import { AppLink } from '@/components/shared/components/AppLink'
 import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import { ROUTES } from '@/i18n/i18n'
 import { usePathname } from '@/i18n/navigation'
@@ -14,7 +14,7 @@ import { cn } from '../shared/utils/css-utils'
  * Props for the {@link LoginNavItem} component.
  */
 type LoginNavItemProps = {
-  /** Optional Tailwind classes forwarded to the underlying {@link NavLink}. */
+  /** Optional Tailwind classes forwarded to the underlying {@link AppLink}. */
   className?: string
   /** Click handler invoked after navigation (primarily for closing drawers). */
   onClick?: () => void
@@ -23,8 +23,8 @@ type LoginNavItemProps = {
 }
 
 /**
- * Navigation entry that links to the login route and pairs the {@link NavLink}
- * styling with the {@link LogIn} icon for both desktop and mobile menus.
+ * Navigation entry that links to the login route and pairs the {@link LogIn} icon with the label,
+ * for both desktop and mobile menus. The caller owns the appearance.
  * Automatically captures the current page to redirect back after login.
  */
 export const LoginNavItem = ({ className, onClick, isLoading }: LoginNavItemProps) => {
@@ -67,13 +67,14 @@ export const LoginNavItem = ({ className, onClick, isLoading }: LoginNavItemProp
 
   // Happy path - render the real button
   return (
-    <NavLink
+    <AppLink
+      plain
       href={loginUrl}
       className={cn(className, 'flex items-center gap-2 whitespace-nowrap')}
       onClick={onClick}
     >
       <LogIn className="w-5 h-5" />
       <span>{t('signIn')}</span>
-    </NavLink>
+    </AppLink>
   )
 }
