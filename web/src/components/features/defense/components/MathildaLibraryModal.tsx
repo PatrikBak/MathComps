@@ -3,7 +3,6 @@
 import { Bot } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { AppLink } from '@/components/shared/components/AppLink'
 import { Button } from '@/components/shared/components/Button'
@@ -83,19 +82,14 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
   }
 
   // Deletes the armed defense
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     // Nothing armed
     if (toDelete === null) {
       return
     }
 
     // Remove it
-    try {
-      await deleteDefense(toDelete.id)
-    } catch {
-      // Tell the student it didn't take
-      toast.error(t('deleteError'))
-    }
+    deleteDefense(toDelete.id)
   }
 
   return (

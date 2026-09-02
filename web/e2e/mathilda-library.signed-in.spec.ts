@@ -2,8 +2,10 @@ import type { Page } from '@playwright/test'
 
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
+import { recordNotices } from './support/backend-routes'
 import {
   actionsCopy,
+  apiErrorsCopy,
   areaCopy,
   areaPath,
   chatCopy,
@@ -136,6 +138,61 @@ test.describe("the student's own list of conversations", () => {
     // Leaving the list without it, and the graded rows behind it untouched
     await expect(practiceRows).toHaveCount(0, { timeout: SETTLE_TIMEOUT_MS })
     await expect(library.getByRole('button').filter({ hasText: SEASON_YEARS })).not.toHaveCount(0)
+  })
+
+  test('says why a drop was refused, once', async ({ page }) => {
+    // A student holding a conversation they may drop, against a backend that will not drop it
+    await installHostedBackend(page, 'running', {
+      refuseDropWith: 'DefenseGradedSessionImmutable',
+    })
+
+    // Every notice the page raises from here on
+    const notices = await recordNotices(page)
+
+    // Open the page the list is reached from
+    await page.goto(LIST_PATH)
+
+    // The row the drop is pressed on
+    const library = await openLibrary(page)
+    const handoutRow = library.getByRole('button').filter({ hasText: chatCopy.deletedHandout })
+
+    // Ask for it to go
+    await handoutRow.locator('..').getByRole('button', { name: chatCopy.deleteSession }).click()
+
+    // Confirmed
+    await page.getByRole('button', { name: actionsCopy.confirm }).click()
+
+    // Told the reason the backend gave, and told it once
+    await expect
+      .poll(() => notices(), { timeout: SETTLE_TIMEOUT_MS })
+      .toEqual([apiErrorsCopy.DefenseGradedSessionImmutable])
+  })
+
+  test('says nothing when the conversation was already gone', async ({ page }) => {
+    // A student dropping a conversation the store no longer holds, another tab having dropped it first
+    await installHostedBackend(page, 'running', { refuseDropWith: 'DefenseSessionNotFound' })
+
+    // Every notice the page raises from here on
+    const notices = await recordNotices(page)
+
+    // Open the page the list is reached from
+    await page.goto(LIST_PATH)
+
+    // The row the drop is pressed on
+    const library = await openLibrary(page)
+    const handoutRow = library.getByRole('button').filter({ hasText: chatCopy.deletedHandout })
+
+    // Ask for it to go
+    await handoutRow.locator('..').getByRole('button', { name: chatCopy.deleteSession }).click()
+
+    // Confirmed
+    await page.getByRole('button', { name: actionsCopy.confirm }).click()
+
+    // It leaves the list, which is what the student asked for
+    await expect(handoutRow).toHaveCount(0, { timeout: SETTLE_TIMEOUT_MS })
+
+    // And nothing tells them it went wrong, a conversation already gone being the outcome they wanted
+    expect(notices()).toEqual([])
   })
 
   test('opens a competition conversation on the terms its own area opens it on', async ({

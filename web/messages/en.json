@@ -489,6 +489,7 @@
     "consentUnavailable": "We couldn't check whether you've already agreed to talk to Mathilda.",
     "conversationFull": "This conversation has reached its limit. Start a new one, or rewind this one (the messages you drop are gone for good).",
     "conversationFullCompetition": "This conversation has had too many messages. You can start another one though, it all gets marked together.",
+    "deleteAuthReason": "remove a conversation",
     "deletedHandout": "Deleted handout",
     "deleteError": "The conversation couldn't be removed.",
     "deleteSession": "Remove from history",

@@ -8,7 +8,16 @@ import messages from '../../messages/en.json'
  * The copy the assertions match on, taken from the app's own English messages: what each of them means is
  * that a particular message is on screen, not that a particular sentence is.
  */
-const { auth: authMessages, competitions: competitionsCopy, defense: defenseCopy, ui } = messages
+const {
+  apiErrors: apiErrorMessages,
+  auth: authMessages,
+  competitions: competitionsCopy,
+  defense: defenseCopy,
+  ui,
+} = messages
+
+/** The copy every failure code resolves to, whichever call earned it. */
+export const apiErrorsCopy = apiErrorMessages
 
 /** The copy the competitions surface reads under. */
 export const areaCopy = competitionsCopy

@@ -1,12 +1,11 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useLocale } from 'next-intl'
+import { useQueryClient } from '@tanstack/react-query'
+import { useLocale, useTranslations } from 'next-intl'
 
-import { readyApiCall, useApi } from '@/hooks/use-api'
 import { useApiQuery } from '@/hooks/use-api-query'
-import { errorCodeOf, unwrap } from '@/lib/api/api-error'
+import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
@@ -23,7 +22,7 @@ type UseMyDefensesResult = {
   /** How far the read of the list got. */
   uiState: QueryUiState
   /** Deletes a defense, refreshing the list afterward. */
-  deleteDefense: (sessionId: string) => Promise<void>
+  deleteDefense: (sessionId: string) => void
   /** Re-fetches the list. */
   refresh: () => void
 }
@@ -34,14 +33,14 @@ type UseMyDefensesResult = {
  * @returns The user's defenses, the list's load state, and the controls over them.
  */
 export function useMyDefenses(): UseMyDefensesResult {
-  // The authenticated API client the delete is made through; 'ready' only when signed in
-  const api = useApi({ requireAuth: true })
-
   // Whose defenses these are, once Clerk knows
   const { userId, isLoaded: isUserLoaded } = useAuth()
 
   // The language the list is read in
   const locale = useLocale()
+
+  // Defense-surface copy
+  const t = useTranslations('defense')
 
   // Cache handle for the defenses list
   const queryClient = useQueryClient()
@@ -59,27 +58,32 @@ export function useMyDefenses(): UseMyDefensesResult {
   })
 
   // Removes a defense from the store
-  const deleteMutation = useMutation({
-    mutationFn: async (sessionId: string) => {
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
+  const deleteMutation = useOptimisticMutation<void, string>({
+    apiFn: async (apiCall, sessionId) => {
+      // The delete as the backend settled it
+      const result = await deleteSession(apiCall, sessionId)
 
-      // Delete it, unwrapped to a throw on failure
-      try {
-        unwrap(await deleteSession(apiCall, sessionId))
-      } catch (error) {
-        // A session that is already gone is the outcome the delete was after, not a failure to report
-        if (errorCodeOf(error) !== 'DefenseSessionNotFound') {
-          throw error
-        }
+      // A session that is already gone is the outcome the delete was after, not a failure to report
+      if (!result.success && result.error.errorCode === 'DefenseSessionNotFound') {
+        return { success: true, data: undefined }
       }
+
+      // The delete as it landed
+      return result
     },
+
     // Re-sync either way: a success drops the defense, a failure restores it
     onSettled: () => invalidateDefenseLists(queryClient),
+
+    // The reason shown in the auth prompt
+    authReason: t('deleteAuthReason'),
+
+    // Fallback copy when the failure carried no recognized code
+    errorMessage: t('deleteError'),
   })
 
   // A function which removes a defense
-  const deleteDefense = (sessionId: string) => deleteMutation.mutateAsync(sessionId)
+  const deleteDefense = deleteMutation.mutate
 
   // A function which reads the list again
   const refresh = () => invalidateDefenseLists(queryClient)
