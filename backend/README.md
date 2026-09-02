@@ -4,16 +4,18 @@ The .NET backend for the MathComps application. Includes a Web API and CLI tools
 
 ## Structure
 
-All projects live flat under `src/`, grouped by their `MathComps.*` names:
+Source projects live flat under `src/`, named `MathComps.*`:
 
 - **`src/MathComps.Api`** – Main Web API
   - See the [API README](src/MathComps.Api/README.md) for setup and running instructions
 - **`src/MathComps.Domain`**, **`src/MathComps.TexParser`** – Domain models and parsing logic
-- **`src/MathComps.Infrastructure`** – Database, EF Core, and data access
+- **`src/MathComps.Infrastructure`** – Persistence (EF Core, migrations) and the services the API and the CLIs share, the defense engine and its prompts among them
   - **`Resources/`** – Shared metadata files (e.g., `approved-tags.json`, `metadata.*.json`)
 - **`src/MathComps.Shared`**, **`src/MathComps.Shared.Cli`** – Shared utilities and CLI bootstrap
   - **`MathComps.Shared.Cli`** – `CliApp` host bootstrap, `CliRunner`, and `RepoPaths` (lets the CLI tools run from any directory)
 - **`src/MathComps.Cli.*`** – CLI tools for data processing (see below)
+- **`tests/`** – xunit test projects
+- **`scripts/`** – [Tunnel scripts](scripts/README.md) for running the CLIs against staging or production
 
 ### Shared Resources
 
@@ -94,8 +96,6 @@ cd backend/src/MathComps.Infrastructure
 # Run the migration tool
 dotnet ef database update
 ```
-
-This will create the database schema including the required PostgreSQL extensions (pgvector).
 
 #### Alternative: Seed from a Production Dump
 
@@ -215,7 +215,7 @@ dotnet user-secrets set "CloudflareR2:SecretAccessKey" "..."
 
 Every project shares one user-secrets store, so setting these once also covers the Handouts and Bulk
 Import CLIs; they all talk to the same bucket. Deployments pass the same values as the `R2_*`
-variables in `.env` (see [Environment Setup](#environment-setup)).
+variables in `.env` (see [Setting up a new server](#setting-up-a-new-server)).
 
 ### 7. Run the API
 
@@ -225,8 +225,6 @@ See the [API README](src/MathComps.Api/README.md) for running instructions.
 
 ### Code Formatting
 
-Format code using `dotnet format`:
-
 ```bash
 # From the backend directory
 cd backend
@@ -235,12 +233,13 @@ dotnet format
 
 ## CLI Tools
 
-Command-line tools for data processing, parsing, and AI features. Each tool has its own README with detailed instructions.
+Each tool has its own README.
 
 ### Data Pipeline Tools
 
 - **[Bulk Import](src/MathComps.Cli.BulkImport/README.md)** – Validates and applies problem-draft folders to the database
 - **[Competitions](src/MathComps.Cli.Competitions/README.md)** – Declares a hosted group from its manifest: raises the rounds it runs and sets the terms
+- **[User Sync](src/MathComps.Cli.UserSync/README.md)** – Syncs every Clerk user into the database
 
 ### AI-Powered Tools
 
@@ -252,6 +251,8 @@ Command-line tools for data processing, parsing, and AI features. Each tool has 
 ### Content Tools
 
 - **[Handouts Parser](src/MathComps.Cli.Handouts/README.md)** – Converts `.tex` handouts to `.json` for frontend
+
+To run any of them against staging or production, go through the [tunnel scripts](scripts/README.md).
 
 ## Deployment
 
@@ -322,7 +323,7 @@ what makes deploys automatic.
 
 6. Create the per-environment config overrides, empty if you have nothing to override, **before** the first
    `up -d`. Docker turns a missing bind-mount source into an empty directory, which the API then can't read.
-   See [Config overrides](#config-overrides) for what goes in them.
+   Empty is enough to bring the stack up, but `Cors:Origins` has to follow before the site can call the API. See [Config overrides](#config-overrides) for what goes in them.
 
    ```bash
    echo '{}' > src/MathComps.Api/appsettings.Production.json
@@ -423,6 +424,9 @@ overrides and only needs the keys it changes.
 an image layer, and a mount that goes missing leaves the API on the base `appsettings.json`:
 
 - `src/MathComps.Api/appsettings.{Env}.json` → `appsettings.json` (`Cors`, `DefenseLimits`, `Examiner:UseFake`, …).
+  `Cors:Origins` is the one a server cannot go without: the base file allows `http://localhost:3000` alone, so
+  until the override names the site's real origins the browser is refused on every API call while the API itself
+  looks healthy. An entry may carry `*` as a wildcard.
   `DefenseLimits` holds what bounds the defense feature: a daily spend ceiling in dollars, reckoned **per user**,
   and a message cap on one conversation. See [What the defense ceiling is for](#what-the-defense-ceiling-is-for)
   for what it does and does not reach. The cap and the two length caps ride to the browser on every session read,

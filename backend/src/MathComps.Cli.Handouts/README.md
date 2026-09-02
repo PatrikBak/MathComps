@@ -24,61 +24,19 @@ Once every matched file is processed, the tool regenerates the two artefacts der
 
 The tool uploads assets to Cloudflare R2, so it needs the `CloudflareR2` settings (see the [main backend README](../../README.md#6-configure-cloudflare-r2)). They live in the solution-wide user-secrets store, so setting them for any one project covers this one too. Only needed when uploading — use `--skip-upload` to skip.
 
-## How to Run
+## Usage
 
-Runs from any directory — the `<patterns>` are matched against the handout sources in `data/handouts` (not your working directory), and the tool finds its config and repo data from where the binary lives. The examples below use `dotnet run` from the tool's own folder; to run from elsewhere (e.g. the repo root), add `--project backend/src/MathComps.Cli.Handouts`.
-
-### Build All Slovak Handouts
+Patterns are matched against the handout sources in `data/handouts`, not your working directory.
 
 ```bash
-dotnet run -- *.sk.tex
+# Every locale
+dotnet run --project backend/src/MathComps.Cli.Handouts -- *.sk.tex *.en.tex *.cs.tex
+
+# One file, skipping the R2 upload
+dotnet run --project backend/src/MathComps.Cli.Handouts -- --skip-upload factorization.sk.tex
 ```
 
-### Build All Locales
-
-```bash
-dotnet run -- *.sk.tex *.en.tex *.cs.tex
-```
-
-### Build a Single File
-
-```bash
-dotnet run -- factorization.sk.tex
-```
-
-### Skip Compilation (Parse Only)
-
-```bash
-dotnet run -- --skip-compile *.sk.tex
-```
-
-### Skip Uploads (No R2 Credentials Needed)
-
-```bash
-dotnet run -- --skip-upload *.sk.tex
-```
-
-### Skip the Asymptote Figure Refresh
-
-For runs where you trust the on-disk figures (e.g. CI without an Asymptote toolchain), or to shave the per-handout dep scan:
-
-```bash
-dotnet run -- --skip-asy *.sk.tex
-```
-
-### Force-Recompile Every Figure
-
-Use after editing `Images/_common.asy` in a way that changes how existing figures render (palette tweak, modified helper). Such edits are deliberately not tracked by the dep graph — see [Image pipeline](#image-pipeline-asymptote):
-
-```bash
-dotnet run -- --force-asy *.sk.tex
-```
-
-### Custom Compiler
-
-```bash
-dotnet run -- --compiler pdfcsplain *.sk.tex
-```
+Every flag is below.
 
 ## Options
 
@@ -88,7 +46,7 @@ dotnet run -- --compiler pdfcsplain *.sk.tex
 | `--compiler`     | `pdfcsplain -interaction=nonstopmode -halt-on-error` | TeX compiler command (full string, including flags)                                               |
 | `--skip-compile` | `false`                                              | Skip TeX compilation, only parse and upload existing PDFs                                         |
 | `--skip-upload`  | `false`                                              | Skip uploading PDFs, images and defense content to R2                                             |
-| `--skip-asy`     | `false`                                              | Skip the Asymptote staleness check + recompilation entirely                                       |
+| `--skip-asy`     | `false`                                              | Skip the Asymptote staleness check + recompilation entirely (e.g. CI, which has no Asymptote toolchain) |
 | `--force-asy`    | `false`                                              | Recompile every `.asy`-backed figure regardless of staleness (used after a semantic `_common.asy` edit) |
 | `--skip-derived` | `false`                                              | Skip regenerating `handout-env-index.json` and the defense content (used in CI, which never installs `web/`'s dependencies) |
 | `--error-log`    | `errors.log`                                         | Path to the error log appended to on compiler failure                                             |

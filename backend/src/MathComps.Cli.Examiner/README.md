@@ -4,9 +4,7 @@ Runs the AI **examiner**: an oral-exam examiner that probes a student's defense 
 
 The engine itself lives in `MathComps.Infrastructure` (`Services/Defense`) and is shared by two drivers: this CLI, which runs it over fixture folders, and the API, which runs and persists it as per-user defense conversations. The model is reached through an OpenAI-compatible provider via `Microsoft.Extensions.AI`, using the shared chat plumbing in `MathComps.Infrastructure`. Each step of the loop routes to its own model and reasoning level, set in `appsettings.examiner.json` — so a step is tuned independently of the others.
 
-This CLI has no database of its own — it works entirely from fixture files. (Persistence is the API's concern, not the engine's.)
-
-The API's copy is open to any signed-in user, bounded by `DefenseLimits` in `appsettings.json`: a daily spend ceiling per user, a message cap on one conversation, plus length caps on everything the client sends. A defense of a problem whose round the student holds an entry into sits outside the ceiling entirely. Nothing caps the day's total across all users. None of it applies here anyway — the CLI runs the engine directly and will spend whatever you ask it to.
+This CLI has no database of its own: it works entirely from fixture files. It runs the engine directly and spends whatever you ask it to. The API's copy is bounded by `DefenseLimits`, and none of those caps reach here.
 
 ## How It Works
 
@@ -80,7 +78,9 @@ cd backend/src/MathComps.Cli.Examiner
 dotnet user-secrets set "Llm:ApiKey" "..."
 ```
 
-Each step's model lives in `appsettings.examiner.json`; swap any `Model` to another id the provider exposes to change backends.
+Each step's model lives in [`appsettings.examiner.json`](../MathComps.Infrastructure/appsettings.examiner.json); swap any `Model` to another id the provider exposes to change backends. The endpoint itself is in [`appsettings.llm.json`](../MathComps.Infrastructure/appsettings.llm.json) beside it, and both are required at startup.
+
+Every backend project shares one user-secrets store (see the [main backend README](../../README.md)).
 
 ## AI prompts
 
