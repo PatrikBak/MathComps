@@ -91,3 +91,21 @@ export async function endSessionInPlace(page: Page): Promise<void> {
     await window.Clerk.session?.remove()
   })
 }
+
+/**
+ * Takes the session away from Clerk's client while leaving React believing the reader is still signed
+ * in, which is the state a token mint fails in.
+ *
+ * Clerk reads `clerk.session` live every time it mints a token, while the app's `isSignedIn` is the
+ * snapshot React last heard about through Clerk's listeners. {@link endSessionInPlace} moves both,
+ * so the app takes its not-signed-in path and the mint is never attempted. Redefining the property
+ * tells nobody, so the snapshot stays put and the mint runs and comes back empty-handed.
+ *
+ * @param page - The page whose session to take away.
+ */
+export async function dropSessionWithoutNotifying(page: Page): Promise<void> {
+  // Clerk's own client is the object the token mint reaches through, so the session goes missing there
+  await page.evaluate(() => {
+    Object.defineProperty(window.Clerk, 'session', { configurable: true, get: () => null })
+  })
+}
