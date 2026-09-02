@@ -28,6 +28,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { formatMonthAndYear } from '@/components/shared/utils/date-utils'
 import { DAY_MS, MINUTE_MS, SECOND_MS } from '@/components/shared/utils/time-units'
 import type { LocalizedString } from '@/i18n/i18n'
+import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
 import { BACKEND_ORIGIN } from './backend-routes'
 
@@ -135,6 +136,17 @@ export type HostedState =
   | 'first-entry'
 
 /**
+ * The refusals a drop can earn, each against the status the backend answers it with.
+ */
+const DROP_REFUSAL_STATUSES = {
+  DefenseGradedSessionImmutable: 409,
+  DefenseSessionNotFound: 404,
+} as const satisfies Partial<Record<AppErrorCode, number>>
+
+/** A refusal a drop can be answered with. */
+type DropRefusal = keyof typeof DROP_REFUSAL_STATUSES
+
+/**
  * What to vary about the student beyond the state they are in.
  */
 export type HostedBackendOptions = {
@@ -149,6 +161,11 @@ export type HostedBackendOptions = {
    * is long over still has one to read back. Absent while they have left none.
    */
   standingNote?: string
+
+  /**
+   * How the backend refuses every drop. Absent while drops are taken.
+   */
+  refuseDropWith?: DropRefusal
 }
 
 /**
@@ -262,6 +279,11 @@ type FakeState = {
   transcripts: Map<string, DefenseSession[]>
   /** What the student left about each solution, by problem id, for the ones they have said anything about. */
   assessments: Map<string, string>
+  /**
+   * The conversation held about a handout, which belongs to no competition and so sits beside the
+   * transcripts. Null once it has been dropped.
+   */
+  handoutSession: DefenseSessionListItem | null
   /** How many ids have been minted, so nothing collides with anything minted before it. */
   minted: number
 }
@@ -769,17 +791,19 @@ function buildLibrary(state: FakeState): DefenseSessionListItem[] {
     )
   )
 
+  // Every conversation the student still holds, the handout one among them until it is dropped
+  const items =
+    state.handoutSession === null ? competitionItems : [...competitionItems, state.handoutSession]
+
   // Most recently spoken in first, the handout one oldest so the competition rows lead
-  return [...competitionItems, HANDOUT_ITEM].sort((first, second) =>
-    second.lastActivityAt.localeCompare(first.lastActivityAt)
-  )
+  return items.sort((first, second) => second.lastActivityAt.localeCompare(first.lastActivityAt))
 }
 
 /**
  * A conversation held about a handout the site no longer carries, so a spec can tell a control a graded
  * conversation is refused from one the list has lost altogether.
  */
-const HANDOUT_ITEM: DefenseSessionListItem = {
+const HANDOUT_SESSION: DefenseSessionListItem = {
   id: 'session-handout',
   target: { kind: 'handout', handoutContentId: 'gone', environmentId: 'gone-1' },
   statement: 'Prove that every positive integer has a unique factorisation into primes.',
@@ -1035,6 +1059,30 @@ type TurnRequestBody = {
 }
 
 /**
+ * Takes a conversation out of the backend's memory, so every list that reads it loses the row.
+ *
+ * @param state - What the backend holds.
+ * @param sessionId - The conversation to take out.
+ */
+function forgetSession(state: FakeState, sessionId: string): void {
+  // Every problem's conversations, only one of which is holding it
+  for (const sessions of state.transcripts.values()) {
+    // Where it sits among that problem's conversations, absent when it is another problem's
+    const index = sessions.findIndex((candidate) => candidate.id === sessionId)
+
+    // Taken out where it was found
+    if (index !== -1) {
+      sessions.splice(index, 1)
+    }
+  }
+
+  // The handout conversation, which no problem's transcripts hold
+  if (state.handoutSession?.id === sessionId) {
+    state.handoutSession = null
+  }
+}
+
+/**
  * Stands in for the whole competitions backend on one page.
  *
  * The competitions calls are answered from memory, as are the defense conversations and the student's
@@ -1055,6 +1103,7 @@ export async function installHostedBackend(
     readiness: buildReadiness(initial),
     transcripts: new Map(),
     assessments: new Map(),
+    handoutSession: HANDOUT_SESSION,
     minted: 0,
   }
 
@@ -1303,16 +1352,37 @@ export async function installHostedBackend(
     // Which conversation is being dropped
     const sessionId = new URL(route.request().url()).pathname.split('/').pop() ?? ''
 
-    // Out of whichever problem was holding it, so every list that reads the same memory follows
-    for (const sessions of state.transcripts.values()) {
-      // Where it sits among that problem's conversations, absent when it is another problem's
-      const index = sessions.findIndex((candidate) => candidate.id === sessionId)
+    // A drop this backend refuses
+    if (options.refuseDropWith !== undefined) {
+      switch (options.refuseDropWith) {
+        // One it cannot find is one the store no longer holds, so every list reading the same memory
+        // has lost it already
+        case 'DefenseSessionNotFound':
+          forgetSession(state, sessionId)
+          break
 
-      // Taken out where it was found
-      if (index !== -1) {
-        sessions.splice(index, 1)
+        // One it will not touch is still there for the next read to hand back
+        case 'DefenseGradedSessionImmutable':
+          break
+
+        // Every refusal is answered above
+        default:
+          assertNever(options.refuseDropWith)
       }
+
+      // The refusal, as the backend answers it
+      await route.fulfill({
+        status: DROP_REFUSAL_STATUSES[options.refuseDropWith],
+        contentType: 'application/json',
+        body: JSON.stringify({ errorCode: options.refuseDropWith }),
+      })
+
+      // Nothing was dropped
+      return
     }
+
+    // Out of memory, so every list that reads it follows
+    forgetSession(state, sessionId)
 
     // Answered with nothing, the way the backend answers a drop
     await route.fulfill({ status: 204, body: '' })
