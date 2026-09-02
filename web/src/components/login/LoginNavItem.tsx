@@ -67,7 +67,11 @@ export const LoginNavItem = ({ className, onClick, isLoading }: LoginNavItemProp
 
   // Happy path - render the real button
   return (
-    <NavLink href={loginUrl} className={cn(className, 'flex items-center gap-2')} onClick={onClick}>
+    <NavLink
+      href={loginUrl}
+      className={cn(className, 'flex items-center gap-2 whitespace-nowrap')}
+      onClick={onClick}
+    >
       <LogIn className="w-5 h-5" />
       <span>{t('signIn')}</span>
     </NavLink>
