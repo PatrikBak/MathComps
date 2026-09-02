@@ -168,7 +168,7 @@
       },
       "tabsLabel": "Části konverzace",
       "title": "Procházet konverzace",
-      "unreadDivider": "Nové od vašeho posledního čtení",
+      "unreadDivider": "Nové od tvého posledního čtení",
       "unreadMark": "Nepřečtené"
     }
   },
@@ -191,9 +191,9 @@
     "DefenseRewindTarget": "Tento bod pro vrácení už není platný.",
     "DefenseSessionNotFound": "Tato konverzace už neexistuje.",
     "DefenseSpendLimit": "Byl dosažen dnešní limit využití. Zkus to znovu zítra.",
-    "FavoritesRequireAuthentication": "Pro zobrazení oblíbených se přihlaste.",
+    "FavoritesRequireAuthentication": "Pro zobrazení oblíbených se přihlas.",
     "FILE_TOO_LARGE": "Soubor je příliš velký. Maximum: {max} MB",
-    "Forbidden": "K této akci nemáte oprávnění.",
+    "Forbidden": "K této akci nemáš oprávnění.",
     "HostedCompetitionNotFound": "Tato soutěž už neexistuje.",
     "HostedCompetitionNotReady": "Tato soutěž ještě nemá připravené úlohy.",
     "HostedEntryAlreadySpent": "Do této soutěže už nejde vstoupit.",
@@ -203,19 +203,19 @@
     "HostedGroupNotOpen": "Tato soutěž právě není otevřená.",
     "HostedProblemNotFound": "Tato úloha nepatří do žádné soutěže.",
     "INVALID_FILE_TYPE": "Nepovolený typ souboru",
-    "ListAccessDenied": "Tento seznam je soukromý. Pokud je to váš seznam, nejprve se přihlaste.",
+    "ListAccessDenied": "Tento seznam je soukromý. Pokud je to tvůj seznam, nejprve se přihlas.",
     "ListNotFound": "Seznam nebyl nalezen.",
-    "ListReorderMismatch": "Seznam se mezitím změnil. Obnovte stránku a zkuste to znovu.",
-    "MalformedRequest": "Požadavek se nepodařilo přečíst. Obnovte stránku a zkuste to znovu.",
-    "MarkStatusRequiresAuthentication": "Pro filtrování podle svého pokroku se přihlaste.",
+    "ListReorderMismatch": "Seznam se mezitím změnil. Obnov stránku a zkus to znovu.",
+    "MalformedRequest": "Požadavek se nepodařilo přečíst. Obnov stránku a zkus to znovu.",
+    "MarkStatusRequiresAuthentication": "Pro filtrování podle svého pokroku se přihlas.",
     "NotAdminNoteAuthor": "Upravovat nebo mazat můžeš jen vlastní poznámky.",
     "NotCommentAuthor": "Upravovat nebo mazat můžeš jen vlastní komentáře.",
     "ProblemNotFound": "Úloha nebyla nalezena.",
     "ProfileValueInvalid": "Tuto hodnotu nelze použít.",
-    "RateLimited": "Příliš mnoho požadavků. Chvíli počkejte a zkuste to znovu.",
+    "RateLimited": "Příliš mnoho požadavků. Chvíli počkej a zkus to znovu.",
     "SERVER_ERROR": "Chyba serveru",
-    "Unauthenticated": "Pro pokračování se přihlaste.",
-    "UNAUTHORIZED": "Pro tuto akci musíte být přihlášeni",
+    "Unauthenticated": "Pro pokračování se přihlas.",
+    "UNAUTHORIZED": "K této akci se musíš přihlásit",
     "UPLOAD_URL_FAILED": "Nepodařilo se získat URL pro nahrávání",
     "UsernameAlreadySet": "Přezdívku už máš nastavenou a nedá se změnit.",
     "UsernameRejected": "Tuto přezdívku nelze použít.",
@@ -230,16 +230,16 @@
     "continue": "Pokračovat",
     "continueWithEmail": "Pokračovat s emailem",
     "emailLabel": "Email",
-    "enterCode": "Zadejte 6místný kód",
-    "enterEmail": "Zadejte email",
-    "enterNewPassword": "Zadejte nové heslo",
-    "enterPassword": "Zadejte heslo",
-    "enterPasswordAgain": "Zadejte heslo znovu",
-    "forgotPassword": "Zapomněli jste heslo?",
+    "enterCode": "Zadej 6místný kód",
+    "enterEmail": "Zadej email",
+    "enterNewPassword": "Zadej nové heslo",
+    "enterPassword": "Zadej heslo",
+    "enterPasswordAgain": "Zadej heslo znovu",
+    "forgotPassword": "Zapomenuté heslo?",
     "headers": {
-      "createAccount": "VYTVOŘTE SI ÚČET",
+      "createAccount": "VYTVOŘ SI ÚČET",
       "enterCode": "ZADÁNÍ KÓDU",
-      "login": "PŘIHLASTE SE",
+      "login": "PŘIHLAS SE",
       "loginOrRegister": "PŘIHLÁŠENÍ / REGISTRACE",
       "newPassword": "NOVÉ HESLO",
       "passwordReset": "OBNOVENÍ HESLA",
@@ -252,17 +252,17 @@
     "or": "NEBO",
     "password": "Heslo",
     "passwordResetEmailSent": "Email s kódem pro obnovení hesla byl odeslán.",
-    "passwordResetSuccess": "Heslo bylo úspěšně změněno! Přesměrovávám vás...",
+    "passwordResetSuccess": "Heslo bylo úspěšně změněno! Přesměrovávám tě...",
     "register": "Registrovat se",
     "resetPassword": "Obnovit heslo",
     "sendCode": "Odeslat kód",
     "signIn": "Přihlásit se",
     "signOut": "Odhlásit se",
-    "termsAgreement": "Pokračováním souhlasíte s",
+    "termsAgreement": "Pokračováním souhlasíš s",
     "termsLink": "podmínkami a ochranou soukromí",
-    "useDiscord": "Použijte Discord účet",
-    "useGithub": "Použijte GitHub účet",
-    "useGoogle": "Použijte Google účet",
+    "useDiscord": "Použij Discord účet",
+    "useGithub": "Použij GitHub účet",
+    "useGoogle": "Použij Google účet",
     "verificationSent": "Ověřovací kód byl odeslán",
     "verifyCode": "Ověřit kód",
     "verifyEmail": "Ověřit email"
@@ -273,12 +273,12 @@
     "form_identifier_not_found": "Nesprávný email nebo heslo",
     "form_password_incorrect": "Nesprávný email nebo heslo",
     "form_password_length_too_short": "Heslo musí mít alespoň 8 znaků",
-    "form_password_pwned": "Toto heslo bylo nalezeno v databázi úniku dat. Použijte jiné heslo.",
-    "form_verification_failed": "Ověření kódu selhalo. Zkuste to prosím znovu.",
-    "generic": "Vyskytla se chyba. Zkuste to prosím znovu.",
-    "session_already_exists": "Už jste přihlášeni. Obnovte stránku.",
-    "session_exists": "Už jste přihlášeni. Obnovte stránku.",
-    "too_many_attempts": "Příliš mnoho pokusů. Zkuste to prosím později."
+    "form_password_pwned": "Toto heslo bylo nalezeno v databázi úniku dat. Použij jiné heslo.",
+    "form_verification_failed": "Ověření kódu selhalo. Zkus to prosím znovu.",
+    "generic": "Vyskytla se chyba. Zkus to prosím znovu.",
+    "session_already_exists": "Přihlášení už proběhlo. Obnov stránku.",
+    "session_exists": "Přihlášení už proběhlo. Obnov stránku.",
+    "too_many_attempts": "Příliš mnoho pokusů. Zkus to prosím později."
   },
   "comments": {
     "authReasons": {
@@ -291,7 +291,7 @@
     "cancelDelete": "Zrušit",
     "delete": "Smazat",
     "deleteComment": "Smazat komentář",
-    "deleteConfirmMessage": "Opravdu chcete smazat tento komentář? Tuto akci nelze vrátit zpět.",
+    "deleteConfirmMessage": "Opravdu chceš smazat tento komentář? Tuto akci nelze vrátit zpět.",
     "deleted": "Komentář byl smazán",
     "edit": "Upravit",
     "edited": "(upraveno)",
@@ -306,7 +306,7 @@
     "hideReplies": "Skrýt odpovědi",
     "lastEdited": "Naposledy upraveno {date}",
     "like": "To se mi líbí",
-    "loadError": "Nepodařilo se načíst komentáře. Zkuste to později.",
+    "loadError": "Nepodařilo se načíst komentáře. Zkus to později.",
     "reply": "Odpovědět",
     "replyPlaceholder": "Napiš odpověď...",
     "show": "Zobrazit",
@@ -449,9 +449,9 @@
   },
   "contact": {
     "email": "Email",
-    "emailPlaceholder": "vas@email.cz",
+    "emailPlaceholder": "tvuj@email.cz",
     "message": "Zpráva",
-    "messagePlaceholder": "Sem napište text vaší zprávy...",
+    "messagePlaceholder": "Sem napiš text své zprávy...",
     "name": "Jméno",
     "namePlaceholder": "Jan Novák",
     "reasons": {
@@ -463,11 +463,11 @@
     },
     "selectPlaceholder": "Vybrat...",
     "sendFailed": "Zprávu se nepodařilo odeslat",
-    "sendFailedRetry": "Zprávu se nepodařilo odeslat. Zkuste to znovu později.",
+    "sendFailedRetry": "Zprávu se nepodařilo odeslat. Zkus to znovu později.",
     "sendMessage": "Odeslat zprávu",
     "subject": "Předmět",
-    "successMessage": "Zpráva úspěšně poslána! Brzy se vám ozveme.",
-    "title": "Napište nám",
+    "successMessage": "Zpráva úspěšně poslána! Brzy se ti ozveme.",
+    "title": "Napiš nám",
     "websiteLabel": "Webová stránka"
   },
   "countries": {
@@ -557,22 +557,22 @@
       "privacy": "Soukromí a podmínky"
     },
     "passwordReset": {
-      "description": "Obdrželi jsme požadavek na obnovení hesla pro váš MathComps účet. Pro pokračování použijte tento ověřovací kód:",
-      "ignore": "Pokud jste nežádali o obnovení hesla, tento email ignorujte a vaše heslo zůstane nezměněno.",
-      "previewText": "Obnovení hesla pro váš MathComps účet",
+      "description": "Obdrželi jsme požadavek na obnovení hesla pro tvůj MathComps účet. Pro pokračování použij tento ověřovací kód:",
+      "ignore": "Pokud o obnovení hesla nežádáš, tento email ignoruj a heslo ti zůstane nezměněné.",
+      "previewText": "Obnovení hesla pro tvůj MathComps účet",
       "requestFor": "Požadavek pro:",
       "subject": "Obnovení hesla - MathComps",
       "title": "Obnovení hesla 🔐",
       "validity": "Tento kód je platný <strong>10 minut</strong>.",
-      "warning": "<strong>⚠️ Pokud jste o obnovení hesla nežádali, tento email ignorujte.</strong>"
+      "warning": "<strong>⚠️ Pokud o obnovení hesla nežádáš, tento email ignoruj.</strong>"
     },
     "signup": {
-      "description": "Pro dokončení registrace použijte tento ověřovací kód:",
-      "ignore": "Pokud jste nevytvářeli účet na MathComps, tento email ignorujte.",
-      "previewText": "Vítejte v MathComps! Dokončete svou registraci.",
+      "description": "Pro dokončení registrace použij tento ověřovací kód:",
+      "ignore": "Pokud se na MathComps neregistruješ, tento email ignoruj.",
+      "previewText": "Vítej v MathComps! Dokonči svou registraci.",
       "registrationFor": "Registrace pro:",
-      "subject": "Vítejte v MathComps - Ověřovací kód",
-      "title": "Vítejte v MathComps! 🎉",
+      "subject": "Vítej v MathComps - Ověřovací kód",
+      "title": "Vítej v MathComps! 🎉",
       "validity": "Tento kód je platný <strong>10 minut</strong>."
     }
   },
@@ -628,13 +628,13 @@
         "open": "Hledat v rozcestníku",
         "openHint": "otevřít odkaz",
         "openLink": "Otevřít odkaz",
-        "placeholder": "Hledejte soutěže, semináře, materiály…",
+        "placeholder": "Hledej soutěže, semináře, materiály…",
         "reveal": "přejít na něj"
       },
       "tipLabel": "Tip"
     },
     "hero": {
-      "description": "Seznam soutěží a různých užitečných odkazů týkajících se soutěžní matematiky. Pokud vám tu něco chybí, určitě <link>napište</link>.",
+      "description": "Seznam soutěží a různých užitečných odkazů týkajících se soutěžní matematiky. Pokud ti tu něco chybí, určitě <link>napiš</link>.",
       "title": "Rozcestník soutěžní matematiky"
     },
     "schoolLevels": {
@@ -679,7 +679,7 @@
             "Hostitelské země se obvykle střídají, takže se dá procestovat spoustu zajímavých míst ✈️",
             "Možnost poznat podobně nadšené lidi z různých koutů světa 🤝"
           ],
-          "hint": "Níže najdete seznam těch, kterých se Slovensko a Česko účastní, detaily po kliknutí na kartu.",
+          "hint": "Níže najdeš seznam těch, kterých se Slovensko a Česko účastní, detaily po kliknutí na kartu.",
           "intro": "Největším lákadlem jsou mezinárodní soutěže."
         },
         "organizations": {
@@ -740,7 +740,7 @@
     },
     "hero": {
       "body1": "Seznam studijních materiálů, které průběžně připravuji ke svým přednáškám, a také studijní texty ke <link>kroužkům Matiky Česku</link>. Ne všechny materiály mají úlohy s řešeními a ideálně bych chtěl průběžně doplnit řešení ke všem z nich.",
-      "outro": "Snad se vám budou líbit a přijdou vám užitečné. Určitě mi napište komentář nebo <feedback>pošlete zpětnou vazbu</feedback>, pokud najdete chybu. Také mi neváhejte napsat, pokud byste rádi přispěli svým textem.",
+      "outro": "Snad se ti budou líbit a přijdou ti užitečné. Určitě mi napiš komentář nebo <feedback>pošli zpětnou vazbu</feedback>, pokud najdeš chybu. Také mi neváhej napsat, pokud máš chuť přispět svým textem.",
       "title": "Studijní materiály"
     },
     "labels": {
@@ -757,7 +757,7 @@
       "sectionLabel": "Materiály",
       "solution": "Řešení"
     },
-    "mathilda": "S jednotlivými úlohami vám pomůže AI tutorka <name>Mathilda</name>, můžete jí svěřit své řešení nebo dílčí postup."
+    "mathilda": "S jednotlivými úlohami ti pomůže AI tutorka <name>Mathilda</name>, můžeš jí svěřit své řešení nebo dílčí postup."
   },
   "home": {
     "about": {
@@ -944,16 +944,16 @@
     "connectionFailed": "Připojení selhalo",
     "connectionFailedHint": "Nepodařilo se spojit se serverem.",
     "emptyState": {
-      "description": "Zkuste upravit filtry a vyhledat znovu.",
+      "description": "Zkus upravit filtry a vyhledat znovu.",
       "title": "Nic se nenašlo"
     },
     "errors": {
       "connectionProblem": "Problém s připojením. Zkouším znovu...",
-      "listAccessDenied": "Tento seznam je soukromý. Pokud je to váš seznam, nejprve se přihlaste.",
+      "listAccessDenied": "Tento seznam je soukromý. Pokud je to tvůj seznam, nejprve se přihlas.",
       "listNotFound": "Seznam nebyl nalezen",
-      "listSignInExpired": "Platnost vašeho přihlášení vypršela. Po přihlášení se vrátíte do seznamu.",
+      "listSignInExpired": "Platnost tvého přihlášení vypršela. Po přihlášení se vrátíš do seznamu.",
       "loadMoreFailed": "Nepodařilo se načíst další úlohy",
-      "maxFiltersExceeded": "Můžete vybrat maximálně {max} filtrů",
+      "maxFiltersExceeded": "Můžeš vybrat maximálně {max} filtrů",
       "problemNotFound": "Úloha \"{problemId}\" nebyla nalezena",
       "searchFailed": "Nepodařilo se načíst úlohy",
       "searchFailedHint": "Server neodpověděl.",
@@ -979,8 +979,8 @@
       "copyListLink": "Kopírovat odkaz",
       "createListError": "Nepodařilo se vytvořit seznam",
       "deleteList": "Odstranit",
-      "deleteListConfirm": "Klikněte znovu pro potvrzení odstranění",
-      "deleteListConfirmMessage": "Opravdu chcete odstranit seznam \"{name}\"? Tuto akci nelze vrátit zpět.",
+      "deleteListConfirm": "Klikni znovu pro potvrzení odstranění",
+      "deleteListConfirmMessage": "Opravdu chceš odstranit seznam \"{name}\"? Tuto akci nelze vrátit zpět.",
       "deleteListError": "Nepodařilo se odstranit seznam",
       "facets": {
         "allCompetitions": "Všechny soutěže",
@@ -997,7 +997,7 @@
         "logic": {
           "and": "Všechny",
           "andFull": "AND (všechny)",
-          "currentLogic": "Aktuálně: {mode}. Kliknutím přepnete na {nextMode}",
+          "currentLogic": "Aktuálně: {mode}. Kliknutím přepneš na {nextMode}",
           "logicLabel": "Logika: {mode}",
           "or": "Alespoň jedno",
           "orFull": "OR (alespoň jedno)",
@@ -1009,12 +1009,12 @@
         "searchSeasons": "Hledat ročníky…",
         "searchTags": "Hledat klíčová slova",
         "season": "Ročník",
-        "selectAuthors": "Vyberte autory",
-        "selectTags": "Vyberte klíčová slova",
+        "selectAuthors": "Vyber autory",
+        "selectTags": "Vyber klíčová slova",
         "tags": "Klíčová slova",
         "tagsTooltip": "Klíčová slova jsou přidělována částečně na základě heuristik a umělé inteligence, a proto mohou obsahovat nepřesnosti."
       },
-      "favoritesLoginRequired": "Pro zobrazení oblíbených úloh se musíte přihlásit.",
+      "favoritesLoginRequired": "Pro zobrazení oblíbených úloh se musíš přihlásit.",
       "hideFilters": "Skrýt filtry",
       "listActions": "Akce seznamu",
       "listLinkCopied": "Odkaz zkopírován",
@@ -1060,11 +1060,11 @@
         },
         "intro": "ve stromu soutěží nebo dalších filtrů vybere jen tuto možnost (běžné kliknutí položku přidává/odebírá). Funguje také na klíčová slova v kartičce s úlohami, jméno autora a v panelu s aktivními filtry.",
         "logic": {
-          "text": "V panelu s aktivními filtry můžete kliknutím na symbol <mono>∧</mono> (AND) nebo <mono>∨</mono> (OR) mezi filtry <hyphens>klí-čo-vých</hyphens> slov nebo autorů přepnout logiku. AND znamená, že musí platit všechny vybrané filtry, OR znamená, že stačí alespoň jeden.",
+          "text": "V panelu s aktivními filtry můžeš kliknutím na symbol <mono>∧</mono> (AND) nebo <mono>∨</mono> (OR) mezi filtry <hyphens>klí-čo-vých</hyphens> slov nebo autorů přepnout logiku. AND znamená, že musí platit všechny vybrané filtry, OR znamená, že stačí alespoň jeden.",
           "title": "Přepínání logiky filtrů"
         },
         "search": {
-          "text": "Vyhledávání funguje ve slovenštině, češtině a angličtině. Přednastaveně se hledá v textu úlohy, můžete však zapnout hledání i v řešení.",
+          "text": "Vyhledávání funguje ve slovenštině, češtině a angličtině. Přednastaveně se hledá v textu úlohy, můžeš však zapnout hledání i v řešení.",
           "title": "Vyhledávání"
         },
         "title": "Tipy a triky"
@@ -1088,8 +1088,8 @@
     "moreActions": "Další akce",
     "noCompetitions": "Žádné soutěže",
     "noSimilarProblems": "Nenašly se žádné podobné úlohy s dostatečnou relevancí.",
-    "offlineHint": "Načítání bude pokračovat, až se připojíte.",
-    "offlineTitle": "Jste offline",
+    "offlineHint": "Načítání bude pokračovat, až se připojíš.",
+    "offlineTitle": "Jsi offline",
     "relevance": "Relevance: {percentage}%",
     "relevanceNote": "Relevance je orientační",
     "removedFromList": "Úloha byla odstraněna ze seznamu",
@@ -1273,7 +1273,7 @@
       "close": "Zavřít"
     },
     "network": {
-      "offline": "Jste offline. Některé akce nebudou fungovat, dokud se znovu nepřipojíte.",
+      "offline": "Jsi offline. Některé akce nebudou fungovat, dokud se znovu nepřipojíš.",
       "offlineHint": "Načítání bude pokračovat, jakmile se připojení obnoví.",
       "offlineTitle": "Bez připojení",
       "retrying": "Zkouším znovu…"
@@ -1291,7 +1291,7 @@
     "codeLength": "Kód musí mít {count} znaků",
     "codeRequired": "Kód je povinný",
     "confirmPasswordRequired": "Potvrzení hesla je povinné",
-    "invalidEmail": "Zadejte platný email",
+    "invalidEmail": "Zadej platný email",
     "messageMinLength": "Zpráva musí mít alespoň {count} znaků",
     "messageRequired": "Zpráva je povinná",
     "nameMinLength": "Jméno musí mít alespoň {count} znaky",
@@ -1299,7 +1299,7 @@
     "passwordMinLength": "Heslo musí mít alespoň {count} znaků",
     "passwordRequired": "Heslo je povinné",
     "passwordsDoNotMatch": "Hesla se neshodují",
-    "selectValidSubject": "Prosím vyberte platný předmět",
+    "selectValidSubject": "Prosím vyber platný předmět",
     "usernameCharacters": "Použij pouze písmena, číslice, mezery, pomlčky a podtržítka",
     "usernameMaxLength": "Přezdívka může mít nejvýše {count} znaků",
     "usernameMinLength": "Přezdívka musí mít alespoň {count} znaků",
