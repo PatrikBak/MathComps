@@ -117,4 +117,4 @@ Exit `0` when clean, `1` on any error. Warnings (e.g. orphan images) don't fail 
 
 ## Examples
 
-`scripts/__fixtures__/preflight-draft/` holds runnable examples — `valid-basic`, `valid-multilang`, `valid-root-competition`, and many `invalid-*` folders that each demonstrate one error.
+`scripts/__fixtures__/preflight-draft/` holds a runnable example per rule: a `valid-*` folder for each shape that passes, and an `invalid-*` folder for each error.

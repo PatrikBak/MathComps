@@ -2,6 +2,8 @@
 
 Convenience scripts for working with the staging and production databases locally via an SSH tunnel. The remote Postgres only listens on the box's loopback, so every command reaches it through a tunnel.
 
+The tools these run live under [`backend/src/MathComps.Cli.*`](../README.md#cli-tools); the draft importer is the [Bulk Import CLI](../src/MathComps.Cli.BulkImport/README.md).
+
 ## Setup
 
 1. Copy `.env.example` to `.env` and fill in your SSH credentials:
@@ -89,4 +91,5 @@ The scripts load environment variables in this order (later files override earli
 
 - **`open-db-tunnel.sh`** – Opens an SSH tunnel to the database and holds it open.
 - **`invoke-tool.sh`** – Runs a CLI tool against the tunneled database (auto-manages its own tunnel).
-- **`lib-env.sh`** – Loads environment variables from the `.env` files (sourced by the other two).
+- **`apply-draft.sh`** – Runs a bulk-import draft against the tunneled database.
+- **`lib-env.sh`**, **`lib-tunnel.sh`** – Sourced by the three above; they load the environment and open the tunnel.

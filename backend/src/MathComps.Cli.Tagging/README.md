@@ -48,13 +48,13 @@ The `pN.yaml` slug list **is** the review surface: read it directly, or `apply` 
 
 The model is told to use only approved tags, but if it ever proposes a name outside the vocabulary, that name (and the problems it came from) is written to `tag-suggestions.json` in the draft folder for you to review — never into a `pN.yaml`. Add the slug to [`approved-tags.json`](../MathComps.Infrastructure/Resources/approved-tags.json) by hand if it's worth keeping.
 
-## Command Reference
+## Usage
 
 ```bash
 dotnet run --project backend/src/MathComps.Cli.Tagging -- ./my-draft
 ```
 
-The one argument is the draft folder. The only option is `--retag` (re-tag every problem, overwriting existing tags); the fit floor and the four prompt passes live in `appsettings.json`. Run it **before** `validate`, so the bulk-import preflight checks the slugs it wrote. Canonical sequence:
+The one argument is the draft folder. The only option is `--retag` (re-tag every problem, overwriting existing tags); the fit floor and the four prompt passes live in `appsettings.json`. Canonical sequence:
 
 ```
 author draft → tag → validate → apply (local) → eyeball on site → fix yaml → apply (prod)
@@ -72,6 +72,8 @@ author draft → tag → validate → apply (local) → eyeball on site → fix 
   The base URL lives in `appsettings.json` under `Llm`; each pass's `Model` lives under `TagDraftSettings` — swap any to a model the provider exposes (e.g. an Anthropic or OpenAI id) to change backends.
 
 - **Vocabulary** — the approved tags come from [`approved-tags.json`](../MathComps.Infrastructure/Resources/approved-tags.json), bundled into the build. No database connection is needed.
+
+Every backend project shares one user-secrets store (see the [main backend README](../../README.md)).
 
 ## AI prompts
 

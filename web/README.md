@@ -16,13 +16,16 @@ A Next.js application for browsing and searching mathematical competition proble
   - `animations/` – Animation components
   - `table-of-contents/` – ToC components for handouts
 - **`src/constants/`** – Application constants (OG metadata, etc.)
-- **`src/content/`** – Static content (handouts, news)
+- **`src/content/`** – Static content; the handout JSON is built by the [Handouts CLI](../backend/src/MathComps.Cli.Handouts/README.md)
 - **`src/i18n/`** – Internationalization config and routing
-- **`src/hooks/`** – Custom React hooks
+- **`src/hooks/`** – Hooks more than one feature uses
 - **`src/lib/`** – Shared utilities (email, metadata, etc.)
 - **`src/stores/`** – Zustand state stores
-- **`src/types/`** – TypeScript type definitions
+- **`src/types/`** – Types that cross a boundary: the API contract, the backend's error codes, webhook payloads, globals
 - **`messages/`** – Locale JSON files (cs.json, en.json, sk.json)
+- **`scripts/`** – Build-time validators and generators, plus the [draft-format spec](scripts/PREFLIGHT_README.md) the bulk importer reads
+
+Anything one feature owns lives with that feature under `src/components/features/`, hooks and types included. The top-level folders are for what several features share.
 
 ## Getting Started
 
@@ -44,6 +47,9 @@ To enable user authentication, configure Clerk in your `.env.local` file. The ne
 ```bash
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
 CLERK_SECRET_KEY=your_clerk_secret_key_here
+
+# Only the /api/webhooks/clerk route reads this one
+CLERK_WEBHOOK_SECRET=whsec_your_signing_secret
 ```
 
 **Development Mode:** Leave Clerk variables empty to disable authentication entirely. The app will work normally without login functionality.
@@ -64,6 +70,8 @@ NEXT_PUBLIC_CONTACT_EMAIL=contact@yourdomain.com
 
 **Development Mode:** Leave email variables empty for development - the contact form will work without sending actual emails. Form data will be logged to the console instead, and you'll get helpful error messages for configuration issues.
 
+Rate limiting on the form is Cloudflare's, not the app's.
+
 #### File Storage (Cloudflare R2)
 
 For file upload functionality (e.g., image attachments), configure Cloudflare R2 storage:
@@ -74,7 +82,7 @@ R2_BUCKET_NAME=your-bucket-name
 CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
 R2_ACCESS_KEY_ID=your-r2-access-key-id
 R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
-R2_PUBLIC_URL=https://your-bucket.r2.dev
+NEXT_PUBLIC_R2_URL=https://your-bucket.r2.dev
 ```
 
 These credentials can be obtained from the [Cloudflare Dashboard](https://dash.cloudflare.com/) under R2 Object Storage.
@@ -110,60 +118,21 @@ npm run build
 npm run preview
 ```
 
-## Available Commands
+## Commands
 
-### Development
+Most script names say what they do, and `package.json` has all of them. The ones with a catch:
 
-- `npm run dev` – Start development server with Turbopack
-- `npm run build` – Production build
-- `npm run preview` – Build and preview production version
-- `npm start` – Start production server (requires `npm run build` first)
-
-### Testing & Quality
-
-- `npm test` – Run tests in watch mode
-- `npm run test:run` – Run tests once (AI-agents-friendly)
-- `npm run type-check` – TypeScript type checking
-- `npm run lint` – Check for linting errors
-- `npm run lint:fix` – Fix linting errors automatically
-- `npm run format` – Format code with Prettier
-- `npm run format:check` – Check code formatting
+- `npm start` – Start the production server; needs `npm run build` first
+- `npm run test:run` – Run tests once, rather than `npm test`'s watch mode
 - `npm run knip` – Find unused files, exports, and dependencies
-- `npm run knip:fix` – Remove unused code (be careful!)
+- `npm run knip:fix` – Remove unused code (be careful, it deletes files)
 - `npm run e2e:session` – Sign in and save a browser session (see [Signed-in browser](#signed-in-browser))
-- `npm run e2e` – Run the whole Playwright suite (CI runs this in its own job, not through `ci`). Narrow it with Playwright's own flags, e.g. `--project=spec` or a filename
-
-### Combined Commands
-
-- `npm run check` – Run all quality checks (type-check, lint, format, knip)
+- `npm run e2e` – Run the whole Playwright suite (CI runs it as its own job). Narrow it with Playwright's own flags, e.g. `--project=spec` or a filename
+- `npm run check` – Type-check, lint, format check, knip, and every content validator
 - `npm run fix` – Auto-fix linting, formatting, and unused code
-- `npm run ci` – Full CI pipeline (check + build)
+- `npm run ci` – `check`, then the unit tests, then the build
 
-## Key Technologies
-
-- **Next.js 15** – React framework with App Router
-- **React 19** – UI library
-- **TypeScript** – Type safety
-- **Tailwind CSS 4** – Styling
-- **KaTeX** – Math rendering
-- **TanStack Query** – Data fetching and caching
-- **Resend** – Contact form email delivery
-- **Vitest** – Testing framework
-
-## Development Tips
-
-### Math Rendering
-
-All math content is rendered using KaTeX. See [`src/components/math/`](src/components/math/) for rendering utilities.
-
-### Problem Search
-
-The problem search feature is in [`src/components/features/problems/`](src/components/features/problems/). Key features:
-
-- URL-based filter state
-- Faceted search with tags and competitions
-- Virtual infinite scrolling
-- Similar problems integration
+## Gotchas
 
 ### Browser tests
 
@@ -171,20 +140,25 @@ Every backend call the specs make is answered by a stub, so the suite needs no A
 
 ### Signed-in browser
 
-`npm run e2e:session` produces a browser session for driving the app manually against local dev. It is not a test suite: it signs the E2E account in through Clerk's API (the sign-up form's Turnstile check deadlocks an automated browser) and writes `playwright/.clerk/user.json` plus a snippet at `.playwright-mcp/inject-session.mjs` that replays the session into a Playwright MCP browser. Both are git-ignored and hold live auth cookies.
+`npm run e2e:session` produces a browser session for driving the app manually against local dev. It is not a test suite: it signs the E2E account in through Clerk's API (the sign-up form's Turnstile check deadlocks an automated browser) and writes `playwright/.clerk/user.json` plus a snippet at the repo root's `.playwright-mcp/inject-session.mjs` that replays the session into a Playwright MCP browser. Both are git-ignored and hold live auth cookies.
 
 Needs `E2E_CLERK_USER_EMAIL` and `E2E_CLERK_USER_PASSWORD` in `.env.local`, a dev server on port 3000, and `npx playwright install chromium` once per machine.
 
 The same session is what the `signed-in` specs start from, minted fresh each run. A spec that needs to end a session mid-test signs in on its own instead, since ending one invalidates it for good and every spec sharing it would start out dead.
 
-### Webhooks
+### Mathilda (AI defense)
 
-**Purpose:** Handles `email.created` events to send custom-branded emails via Resend (replacing Clerk's default emails).
-**Events:** `email.created` (Signup, Password Reset)
+Mathilda is the AI examiner a student defends a handout solution to. The feature lives in [`src/components/features/defense/`](src/components/features/defense/) and talks to the backend's `/defense/sessions` routes.
 
-**Testing the webhook locally:**
+- **There is no defense route.** The whole feature is modals, opened from a handout environment card or from the user menu.
+- **The client names the problem rather than sending it.** A start carries the environment id; the backend resolves the statement, reference and hints and snapshots them onto the session.
+- **Reading the conversations back is a route:** [`/admin/defenses`](src/app/[locale]/admin/defenses/page.tsx), gated by the Clerk admin role.
 
-To test the webhook during development, you need to expose your local API to the internet so Clerk can send events to it:
+A turn is several LLM calls and takes about 40 seconds, so develop against `"Examiner:UseFake": true` in the backend config.
+
+## Webhooks
+
+`/api/webhooks/clerk` handles Clerk's `email.created` event, sending signup and password-reset mail through Resend. To exercise it locally, Clerk needs a public URL to reach:
 
 ```bash
 # From the web directory
@@ -195,41 +169,3 @@ npx localtunnel --port 3000
 ```
 
 This will give you a public URL (e.g., `https://random-name.loca.lt`) that you can use in the Clerk Dashboard webhook settings. Configure the webhook endpoint as `https://your-url.loca.lt/api/webhooks/clerk`.
-
-### Handouts
-
-Educational handouts are parsed from TeX and stored as JSON in [`src/content/handouts/`](src/content/handouts/). See the [Handouts CLI tool](../backend/src/MathComps.Cli.Handouts/README.md) for parsing instructions.
-
-### Mathilda (AI defense)
-
-Mathilda is the AI examiner a student defends a handout solution to; the feature lives in [`src/components/features/defense/`](src/components/features/defense/) and talks to the .NET backend's `/defense/sessions` routes. Three things surprise people reading it for the first time:
-
-- **There is no defense route.** The whole feature is modals. A per-problem trigger sits on each handout environment card ([`HandoutDetail.tsx`](src/components/features/handouts/HandoutDetail.tsx)), and a cross-problem library opens from the user menu. Every environment with a solution or proof gets one, `hideSolutionsAndProofs` handouts included.
-- **The client names the problem rather than sending it.** A start carries only the handout environment it is held against; the backend resolves the statement, reference and hints from the site's own content and snapshots them onto the session. That is why a defense can be started from the library, with no problem page in sight.
-- **Reading those conversations back is a route**, unlike the feature itself: [`/admin/defenses`](src/app/[locale]/admin/defenses/page.tsx) lists every student's, most recently spoken to first, for finding what keeps going wrong with the examiner. It lives in [`src/components/features/admin/defense-review/`](src/components/features/admin/defense-review/) and is gated by the Clerk admin role on both the page and every endpoint behind it.
-
-Any signed-in user can use her. A turn is several LLM calls and takes roughly 40 seconds by design, so develop against `"Examiner:UseFake": true` in the backend config — it serves scripted replies for free.
-
-### Contact Form
-
-The contact form feature includes:
-
-- Modal-based contact form with validation
-- Email submission via Resend API
-- Bot detection with honeypot fields
-- Form validation using Zod schemas
-- Rate limiting handled by Cloudflare
-
-Configuration is handled through environment variables (see [Environment Configuration](#2-environment-configuration-optional) section above).
-
-## Troubleshooting
-
-**Build fails:** Ensure dev server is stopped before running `npm run build`
-
-**Tests hang:** Use `npm run test:run` instead of `npm test` for non-interactive mode
-
-**Port 3000 busy:** Stop any running Next.js dev servers or change the port with `npm run dev -- -p 3001`
-
-**API connection issues:** Check `NEXT_PUBLIC_API_URL` and backend is running (see [Backend README](../backend/README.md))
-
-**Contact form not working:** Verify Resend API key and email configuration in `.env` file
