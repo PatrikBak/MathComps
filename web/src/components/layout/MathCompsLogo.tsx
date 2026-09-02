@@ -35,13 +35,13 @@ export default function MathCompsLogo({ className }: MathCompsLogoProps) {
           alt="MathComps Logo"
           width={48}
           height={48}
-          className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12"
+          className="w-8 h-8 sm:w-10 sm:h-10 xl:w-12 xl:h-12"
           role="img"
           aria-label="MathComps Logo"
           priority
           unoptimized
         />
-        <span className="text-xl sm:text-2xl lg:text-3xl tracking-[-0.035em] hyphens-none">
+        <span className="text-xl sm:text-2xl xl:text-3xl tracking-[-0.035em] hyphens-none">
           Math<span className="text-brand-mid">Comps</span>
         </span>
       </span>

@@ -110,8 +110,8 @@
   }
 }
 
-/* lg breakpoint */
-@media (min-width: 1024px) {
+/* xl breakpoint, where the logo and the navigation take their full size */
+@media (min-width: 1280px) {
   :root {
     --header-height: 80px;
   }
