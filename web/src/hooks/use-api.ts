@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { BackendApiError } from '@/lib/api/api-error'
-import { readErrorCode } from '@/lib/api/api-error-codes'
+import { fetchApiResult } from '@/lib/api/api-fetch'
 import type { ApiResult } from '@/types/api'
 
 /**
@@ -92,91 +92,47 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
         }
       }
 
-      try {
-        // The session token, which only a signed-in reader has one of
-        const token: string | null = isSignedIn ? await getToken() : null
+      // The session token, which only a signed-in reader has one of
+      let token: string | null = null
 
-        // Signed in, yet Clerk minted nothing to send
-        if (requireAuth && !token) {
+      // A reader with a session has one to mint, and Clerk goes to the network to do it
+      if (isSignedIn) {
+        try {
+          token = await getToken()
+        } catch (error) {
+          // Clerk could not answer, so the call this token was for is a failed one
           return {
             success: false,
             error: {
-              message: 'Failed to retrieve authentication token.',
+              message: error instanceof Error ? error.message : 'An unknown error occurred',
             },
           }
         }
+      }
 
-        // What every call carries, with the call site's own headers on top
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json',
-          'Accept-Language': locale,
-          ...options.headers,
-        }
-
-        // A token is what turns the call authenticated
-        if (token) {
-          ;(headers as Record<string, string>).Authorization = `Bearer ${token}`
-        }
-
-        // The request itself
-        const response = await fetch(endpoint(), {
-          ...options,
-          headers,
-        })
-
-        // The backend refused it
-        if (!response.ok) {
-          // Best-effort read of the problem body for the backend's machine-readable failure code
-          const errorCode = await readErrorCode(response)
-
-          // The refusal, carrying the status and whatever code came with it
-          return {
-            success: false,
-            error: {
-              message: `API request failed: ${response.statusText}`,
-              statusCode: response.status,
-              errorCode,
-            },
-          }
-        }
-
-        // A JSON body is the expected success shape
-        const contentType = response.headers.get('content-type')
-        if (contentType && contentType.includes('application/json')) {
-          // The payload the endpoint answered with
-          const data = await response.json()
-
-          // The answer, as a success
-          return { success: true, data }
-        }
-
-        // The body as text, since a bodyless 2xx (a 204, or a delete answering 200) is a legitimate
-        // void success
-        const body = await response.text()
-
-        // An empty body is a success carrying nothing
-        if (body.trim() === '') {
-          return { success: true, data: {} as T }
-        }
-
-        // A 2xx carrying something that is not JSON: a captive portal or a proxy's HTML page, which
-        // would land in the cache as an empty object if it were let through as a success
+      // Signed in, yet Clerk minted nothing to send
+      if (requireAuth && !token) {
         return {
           success: false,
           error: {
-            message: `Unexpected non-JSON response (${response.status})`,
-            statusCode: response.status,
-          },
-        }
-      } catch (error) {
-        // The connection dropped, or the body would not parse
-        return {
-          success: false,
-          error: {
-            message: error instanceof Error ? error.message : 'An unknown error occurred',
+            message: 'Failed to retrieve authentication token.',
           },
         }
       }
+
+      // What this client adds of its own, with the call site's headers on top
+      const headers: HeadersInit = {
+        'Accept-Language': locale,
+        ...options.headers,
+      }
+
+      // A token is what turns the call authenticated
+      if (token) {
+        ;(headers as Record<string, string>).Authorization = `Bearer ${token}`
+      }
+
+      // The request, settled into a result
+      return fetchApiResult<T>(endpoint(), { ...options, headers })
     },
     [getToken, isSignedIn, requireAuth, locale]
   )
