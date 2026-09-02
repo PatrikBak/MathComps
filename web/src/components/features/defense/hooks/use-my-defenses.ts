@@ -1,12 +1,14 @@
 'use client'
 
 import { useAuth } from '@clerk/nextjs'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLocale } from 'next-intl'
 
 import { readyApiCall, useApi } from '@/hooks/use-api'
+import { useApiQuery } from '@/hooks/use-api-query'
 import { errorCodeOf, unwrap } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
+import type { QueryUiState } from '@/lib/query-ui-state'
 
 import type { DefenseSessionListItem } from '../model/defense-types'
 import { deleteSession, listMyDefenses } from '../services/session-service'
@@ -18,10 +20,8 @@ import { invalidateDefenseLists, myDefensesQueryKey } from './defense-cache'
 type UseMyDefensesResult = {
   /** The user's sessions across every problem, most recently active first. */
   defenses: DefenseSessionListItem[]
-  /** Whether the list is still loading. */
-  isLoading: boolean
-  /** Whether loading the list failed. */
-  isError: boolean
+  /** How far the read of the list got. */
+  uiState: QueryUiState
   /** Deletes a defense, refreshing the list afterward. */
   deleteDefense: (sessionId: string) => Promise<void>
   /** Re-fetches the list. */
@@ -34,7 +34,7 @@ type UseMyDefensesResult = {
  * @returns The user's defenses, the list's load state, and the controls over them.
  */
 export function useMyDefenses(): UseMyDefensesResult {
-  // The authenticated API client; 'ready' only when signed in
+  // The authenticated API client the delete is made through; 'ready' only when signed in
   const api = useApi({ requireAuth: true })
 
   // Whose defenses these are, once Clerk knows
@@ -47,19 +47,15 @@ export function useMyDefenses(): UseMyDefensesResult {
   const queryClient = useQueryClient()
 
   // The user's sessions across every problem
-  const query = useQuery({
+  const { data: defenses, uiState } = useApiQuery({
     queryKey: myDefensesQueryKey(isUserLoaded ? (userId ?? null) : null, locale),
-    queryFn: async () => {
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
-
-      // Fetch the list, unwrapped to the sessions or a throw
-      return unwrap(await listMyDefenses(apiCall))
-    },
+    fetch: listMyDefenses,
+    // The user's own conversations, so they are read as them
+    requireAuth: true,
+    // Only fetch once the key's user is settled, or the list lands under the wrong one
+    enabled: isUserLoaded,
     // The user's own recent activity
     ...cachePolicy.userData,
-    // Only fetch once the client is ready and the key's user is settled
-    enabled: api.state === 'ready' && isUserLoaded,
   })
 
   // Removes a defense from the store
@@ -90,9 +86,8 @@ export function useMyDefenses(): UseMyDefensesResult {
 
   // The list, its load state, and the controls over it
   return {
-    defenses: query.data ?? [],
-    isLoading: api.state !== 'ready' || !isUserLoaded || query.isLoading,
-    isError: query.isError,
+    defenses: defenses ?? [],
+    uiState,
     deleteDefense,
     refresh,
   }

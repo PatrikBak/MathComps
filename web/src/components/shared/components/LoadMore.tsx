@@ -2,7 +2,7 @@
 
 import { useIntersection } from '@mantine/hooks'
 import { useTranslations } from 'next-intl'
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
@@ -46,10 +46,14 @@ export function LoadMore({ hasMore, isLoading, hasFailed, onLoadMore }: LoadMore
   // Whether the reader has reached it
   const isInView = entry?.isIntersecting === true
 
+  // The ask, held apart from what triggers it: a caller handing down a fresh function each render would
+  // re-run the effect below, and a page landing is exactly such a render
+  const askForNextPage = useEffectEvent(onLoadMore)
+
   // Ask for the next page as it approaches, until an attempt gives up and the reader has to say so themselves
   useEffect(() => {
-    if (isInView && !hasFailed) onLoadMore()
-  }, [isInView, hasFailed, onLoadMore])
+    if (isInView && !hasFailed) askForNextPage()
+  }, [isInView, hasFailed])
 
   // Nothing left to ask for
   if (!hasMore) return null

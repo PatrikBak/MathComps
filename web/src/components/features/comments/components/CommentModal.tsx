@@ -4,6 +4,7 @@ import { MessageSquare } from 'lucide-react'
 
 import { CountBadge } from '@/components/shared/components/CountBadge'
 import { Modal } from '@/components/shared/components/Modal'
+import { isAwaitingAnswer } from '@/lib/query-ui-state'
 
 import { useFetchComments } from '../hooks/use-fetch-comments'
 import type { CommentTarget } from '../services/comment-api-types'
@@ -31,11 +32,14 @@ type CommentModalProps = {
  * to provide context about what is being commented on.
  */
 export function CommentModal({ isOpen, onClose, title, target }: CommentModalProps) {
-  // Fetch comments to get count for display
-  const { data: comments, isLoading } = useFetchComments(target)
+  // The target's thread
+  const { comments, uiState } = useFetchComments(target)
 
-  // Calculate comment count from real data
-  const commentCount = comments ? countAllComments(comments) : 0
+  // How many comments still stand in the thread, replies included
+  const commentCount = countAllComments(comments)
+
+  // Whether the count on the badge may still change
+  const isCountLoading = isAwaitingAnswer(uiState)
 
   return (
     <Modal
@@ -51,7 +55,7 @@ export function CommentModal({ isOpen, onClose, title, target }: CommentModalPro
             count={commentCount}
             color="indigo"
             isHighlighted={commentCount > 0}
-            isLoading={isLoading}
+            isLoading={isCountLoading}
             className="mr-5"
           >
             <MessageSquare size={22} />

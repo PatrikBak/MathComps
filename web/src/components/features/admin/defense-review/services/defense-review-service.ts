@@ -35,19 +35,16 @@ import {
  * @param apiCall - The authenticated API caller.
  * @param filter - Which conversations to show.
  * @param pageNumber - 1-based page index to retrieve.
- * @param signal - Aborts the request when the query is dropped.
  * @returns The page of conversations.
  */
 export function fetchDefenseReviewQueue(
   apiCall: ApiCaller,
   filter: DefenseReviewFilter,
-  pageNumber: number,
-  signal: AbortSignal
+  pageNumber: number
 ): Promise<ApiResult<PagedList<DefenseReviewConversation>>> {
   return apiCall<PagedList<DefenseReviewConversation>>(() => getDefenseReviewQueueUrl(), {
     method: 'POST',
     body: JSON.stringify({ filter, pageNumber }),
-    signal,
   })
 }
 
@@ -68,15 +65,13 @@ export function fetchDefenseReviewFilterOptions(
  *
  * @param apiCall - The authenticated API caller.
  * @param sessionId - The conversation to read.
- * @param signal - Aborts the request when the read is dropped.
  * @returns The whole conversation.
  */
 export function fetchDefenseReviewDetail(
   apiCall: ApiCaller,
-  sessionId: string,
-  signal: AbortSignal
+  sessionId: string
 ): Promise<ApiResult<DefenseReviewDetail>> {
-  return apiCall<DefenseReviewDetail>(() => getDefenseReviewDetailUrl(sessionId), { signal })
+  return apiCall<DefenseReviewDetail>(() => getDefenseReviewDetailUrl(sessionId))
 }
 
 /**
@@ -215,16 +210,12 @@ export function setAdminNoteResolved(
  * @param apiCall - The authenticated API caller.
  * @param openOnly - Whether to leave out the notes already settled.
  * @param pageNumber - 1-based page index to retrieve.
- * @param signal - Aborts the request when the query is dropped.
  * @returns The page of notes.
  */
 export function fetchAdminNoteFeed(
   apiCall: ApiCaller,
   openOnly: boolean,
-  pageNumber: number,
-  signal: AbortSignal
+  pageNumber: number
 ): Promise<ApiResult<PagedList<AdminNoteFeedItem>>> {
-  return apiCall<PagedList<AdminNoteFeedItem>>(() => getAdminNoteFeedUrl(openOnly, pageNumber), {
-    signal,
-  })
+  return apiCall<PagedList<AdminNoteFeedItem>>(() => getAdminNoteFeedUrl(openOnly, pageNumber))
 }

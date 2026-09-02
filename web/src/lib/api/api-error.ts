@@ -68,12 +68,15 @@ export function errorCodeOf(error: unknown): AppErrorCode | undefined {
  * @returns Whether another attempt could plausibly succeed.
  */
 export function isTransientFailure(error: unknown): boolean {
-  // Only a BackendApiError carries a status; anything else is an opaque fault, so assume transient
+  // Only a BackendApiError carries either of the things this reads; anything else is an opaque fault
   const status = error instanceof BackendApiError ? error.statusCode : undefined
+  const errorCode = error instanceof BackendApiError ? error.errorCode : undefined
 
-  // A status-less failure never reached the server, which is the most transient case of all
+  // A failure that never reached the server says which it is by whether the client could name it: a
+  // named one (nobody signed in, a file the browser itself refused) is settled, and an unnamed one is
+  // the dropped connection another attempt is for
   if (status === undefined) {
-    return true
+    return errorCode === undefined
   }
 
   // Anything outside the client-error range is worth another attempt

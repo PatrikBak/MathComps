@@ -126,7 +126,12 @@ export function useDefenseConversation(
   }, [apiCall])
 
   // This problem's persisted sessions
-  const sessionsQuery = useApiQuery({
+  const {
+    data: sessionsData,
+    uiState: sessionsState,
+    isFetching: isFetchingSessions,
+    retry: retrySessions,
+  } = useApiQuery({
     queryKey: defenseSessionsQueryKey(problem.target, isUserLoaded ? (userId ?? null) : null),
     fetch: (caller) => listSessions(caller, problem.target),
     // The reader's own conversations, so they are read as them
@@ -171,17 +176,19 @@ export function useDefenseConversation(
   // Runs once: afterwards the persisted model keeps wherever the student navigated, whether a fresh chat or a
   // different session.
   useEffect(() => {
-    // Nothing to do until the first successful history load, and never more than once
-    if (didAutoResume.current || !sessionsQuery.isSuccess) {
+    // Nothing to do until a history has actually landed, and never more than once. A refresh that gave up
+    // leaves the old list in hand, and the session the caller named may be absent from it only because it
+    // is stale
+    if (didAutoResume.current || sessionsState.kind !== 'ready' || sessionsData === undefined) {
       return
     }
 
     // The saved defense to open on, which a fresh opening deliberately has none of
-    const target = resumeTargetOf(opening, sessionsQuery.data.sessions)
+    const target = resumeTargetOf(opening, sessionsData.sessions)
 
     // A named session missing from a list that is still being refreshed may yet arrive with it, so wait for the
     // refreshed list rather than settling on a stale one
-    if (opening.kind === 'named' && target === undefined && sessionsQuery.isFetching) {
+    if (opening.kind === 'named' && target === undefined && isFetchingSessions) {
       return
     }
 
@@ -199,7 +206,7 @@ export function useDefenseConversation(
 
     // Whatever the outcome, the conversation the caller asked for has had its chance to open
     setInitialResumeSettled(true)
-  }, [sessionsQuery.isSuccess, sessionsQuery.isFetching, sessionsQuery.data, model, opening])
+  }, [sessionsData, sessionsState, isFetchingSessions, model, opening])
 
   // Runs a model action against the ready services, or reports the shared not-ready failure when the
   // client is still loading or signed out. Every action's not-ready path collapses here. Stable across
@@ -241,21 +248,15 @@ export function useDefenseConversation(
     [model, runWithServices]
   )
 
-  // The history query's own re-read
-  const { refetch: refetchSessions } = sessionsQuery
-
-  // A function which reads this problem's session history again
-  const retrySessions = useCallback(() => void refetchSessions(), [refetchSessions])
-
   // The conversation state, this problem's history, and the controls that drive it
   return {
     ...state,
-    sessions: sessionsQuery.data?.sessions ?? [],
-    limits: sessionsQuery.data?.limits ?? null,
+    sessions: sessionsData?.sessions ?? [],
+    limits: sessionsData?.limits ?? null,
     initialResumeSettled,
-    sessionsFailed: sessionsQuery.isError,
+    sessionsFailed: sessionsState.kind === 'failed',
     retrySessions,
-    isRetryingSessions: sessionsQuery.isFetching,
+    isRetryingSessions: isFetchingSessions,
     send,
     stop: model.stop,
     startNew: model.startNew,

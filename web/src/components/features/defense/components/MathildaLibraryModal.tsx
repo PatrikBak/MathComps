@@ -44,7 +44,7 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
   const tActions = useTranslations('ui.actions')
 
   // The user's defenses across every problem, and the controls over them
-  const { defenses, isLoading, isError, deleteDefense, refresh } = useMyDefenses()
+  const { defenses, uiState, deleteDefense, refresh } = useMyDefenses()
 
   // Which defense is open, and the row focus returns to on the way back
   const { selected, open, clear, rowRef } = useLibrarySelection()
@@ -129,36 +129,39 @@ export function MathildaLibraryModal({ isOpen, onClose }: MathildaLibraryModalPr
             failed={<p className="text-sm text-error">{t('historyError')}</p>}
             className="flex flex-col items-center gap-3 py-8 text-center"
           />
-        ) : isLoading ? (
-          // Still fetching the list
-          <p className="py-8 text-center text-sm text-muted">{t('libraryLoading')}</p>
-        ) : isError && defenses.length === 0 ? (
-          // Nothing to fall back on, so the failure is all there is to show; a refetch is the way out
-          <div className="flex flex-col items-center gap-3 py-8 text-center">
-            <p className="text-sm text-error">{t('historyError')}</p>
-            <Button variant="secondary" size="sm" onClick={refresh}>
-              {tActions('retry')}
-            </Button>
-          </div>
         ) : defenses.length === 0 ? (
-          // No defenses held yet
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-foreground/10 bg-surface/30 px-8 py-14 text-center">
-            <Bot size={36} className="mb-4 text-brand-light" />
-            <p className="text-base font-medium text-foreground">{t('libraryEmptyLead')}</p>
-            <p className="mt-2 max-w-md text-sm leading-relaxed text-muted hyphens-none">
-              {t.rich('libraryEmpty', {
-                link: (chunks) => (
-                  <AppLink
-                    href={ROUTES.HANDOUTS}
-                    plain
-                    className="text-link underline transition-colors hover:text-link-hover"
-                  >
-                    {chunks}
-                  </AppLink>
-                ),
-              })}
-            </p>
-          </div>
+          // Nothing to list: still on its way, given up on, or genuinely none held yet
+          <FetchStatePlaceholder
+            uiState={uiState}
+            className="flex flex-col items-center gap-3 py-8 text-center"
+            empty={
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-foreground/10 bg-surface/30 px-8 py-14 text-center">
+                <Bot size={36} className="mb-4 text-brand-light" />
+                <p className="text-base font-medium text-foreground">{t('libraryEmptyLead')}</p>
+                <p className="mt-2 max-w-md text-sm leading-relaxed text-muted hyphens-none">
+                  {t.rich('libraryEmpty', {
+                    link: (chunks) => (
+                      <AppLink
+                        href={ROUTES.HANDOUTS}
+                        plain
+                        className="text-link underline transition-colors hover:text-link-hover"
+                      >
+                        {chunks}
+                      </AppLink>
+                    ),
+                  })}
+                </p>
+              </div>
+            }
+            failed={
+              <>
+                <p className="text-sm text-error">{t('historyError')}</p>
+                <Button variant="secondary" size="sm" onClick={refresh}>
+                  {tActions('retry')}
+                </Button>
+              </>
+            }
+          />
         ) : (
           // The defenses
           <div className="flex flex-col gap-2">

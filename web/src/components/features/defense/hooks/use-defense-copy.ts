@@ -27,7 +27,7 @@ export function useDefenseCopy(): UseDefenseCopyResult {
   const locale = useLocale()
 
   // The examiner's canned lines
-  const copyQuery = useApiQuery({
+  const { data: copy } = useApiQuery({
     queryKey: defenseCopyQueryKey(locale),
     fetch: (caller) => fetchDefenseCopy(caller),
     // The chat greets a visitor who has yet to sign in
@@ -38,5 +38,5 @@ export function useDefenseCopy(): UseDefenseCopyResult {
   })
 
   // The lines, or nothing while the read is still out or has failed
-  return { opener: copyQuery.data?.opener ?? null }
+  return { opener: copy?.opener ?? null }
 }

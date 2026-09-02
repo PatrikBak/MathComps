@@ -78,6 +78,43 @@ export type QueryUiStateInput = {
 }
 
 /**
+ * Whether a request is on its way, first attempt or otherwise. False once an answer arrived, once the
+ * read gave up, and while the connection holds it back, since none of those three ends on its own.
+ *
+ * This is the boolean for a surface with nowhere to put a five-way state. Anything that renders a
+ * placeholder switches on {@link QueryUiState} and says what each of offline, retrying and failed looks
+ * like.
+ *
+ * @param uiState - How far the read has got.
+ *
+ * @returns Whether something is in flight.
+ */
+export function isAwaitingAnswer(uiState: QueryUiState): boolean {
+  switch (uiState.kind) {
+    // An answer arrived
+    case 'ready':
+      return false
+
+    // Every attempt is spent, so nothing further is coming on its own
+    case 'failed':
+      return false
+
+    // A request is in flight, first time or otherwise
+    case 'loading':
+    case 'retrying':
+      return true
+
+    // Nothing is in flight, and nothing will be until the connection returns
+    case 'offline':
+      return false
+
+    // Every state is handled above
+    default:
+      return assertNever(uiState)
+  }
+}
+
+/**
  * Reduces a query's raw flags to the state its UI should reflect.
  *
  * The point of the exercise is that a spinner may only be shown while a request is actually in
@@ -89,8 +126,9 @@ export type QueryUiStateInput = {
  * @returns The state the UI should render.
  */
 export function deriveQueryUiState(input: QueryUiStateInput): QueryUiState {
-  // Data wins over everything else: a background refetch that stalls or fails must never blank out
-  // content the reader can already see
+  // Data wins over a fetch that is merely slow: a background refresh in flight, or held back by the
+  // connection, must never blank out content the reader can already see. A refresh that gives up does
+  // report as failed, since React Query keeps the data and moves the status
   if (input.status === 'success') {
     return { kind: 'ready' }
   }

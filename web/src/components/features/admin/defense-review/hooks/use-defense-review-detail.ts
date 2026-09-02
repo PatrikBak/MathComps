@@ -1,9 +1,7 @@
-import { skipToken, useQuery } from '@tanstack/react-query'
 import { useLocale } from 'next-intl'
 
-import { readyApiCall, useApi } from '@/hooks/use-api'
-import { useQueryUiState } from '@/hooks/use-query-ui-state'
-import { unwrap } from '@/lib/api/api-error'
+import { useApiQuery } from '@/hooks/use-api-query'
+import { BackendApiError } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
@@ -36,25 +34,28 @@ type UseDefenseReviewDetailResult = {
  * @returns The conversation as described by {@link UseDefenseReviewDetailResult}.
  */
 export function useDefenseReviewDetail(sessionId: string | null): UseDefenseReviewDetailResult {
-  // The authenticated caller
-  const api = useApi({ requireAuth: true })
-
   // The language it is read in
   const locale = useLocale()
 
-  // The conversation itself. The fetcher closes over the id the key was built from rather than reading the
-  // argument back, so it can't be reached with none open and needs no assertion that it wasn't.
-  const query = useQuery({
+  // The conversation itself
+  const { data: detail, uiState } = useApiQuery({
     queryKey: reviewDetailQueryKey(sessionId ?? NO_CONVERSATION, locale),
-    queryFn:
-      sessionId === null
-        ? skipToken
-        : async ({ signal }) =>
-            unwrap(await fetchDefenseReviewDetail(readyApiCall(api), sessionId, signal)),
+    fetch: (apiCall) => {
+      // The gate below keeps this from running with nothing open, so reaching here is a bug
+      if (sessionId === null) {
+        throw new BackendApiError({ message: 'No conversation is open', errorCode: 'SERVER_ERROR' })
+      }
+
+      // The transcript and everything read alongside it
+      return fetchDefenseReviewDetail(apiCall, sessionId)
+    },
+    // The transcript is an admin's own read, so it is made as them
+    requireAuth: true,
+    // Nothing is read while no conversation is open
+    enabled: sessionId !== null,
     ...cachePolicy.userData,
-    enabled: api.state === 'ready',
   })
 
   // The conversation once it has arrived, and how the fetch is going meanwhile
-  return { detail: query.data ?? null, uiState: useQueryUiState(query) }
+  return { detail: detail ?? null, uiState }
 }

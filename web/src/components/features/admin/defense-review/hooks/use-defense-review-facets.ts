@@ -1,8 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
 import { useLocale } from 'next-intl'
 
-import { readyApiCall, useApi } from '@/hooks/use-api'
-import { unwrap } from '@/lib/api/api-error'
+import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
 
 import type { DefenseReviewFilterOptions } from '../model/defense-review-types'
@@ -27,20 +25,18 @@ type UseDefenseReviewFacetsResult = {
  * @returns The options as described by {@link UseDefenseReviewFacetsResult}.
  */
 export function useDefenseReviewFacets(): UseDefenseReviewFacetsResult {
-  // The authenticated caller
-  const api = useApi({ requireAuth: true })
-
   // The language the options are named in
   const locale = useLocale()
 
   // The three option lists, which the queue needs the moment it opens
-  const query = useQuery({
+  const { data: options } = useApiQuery({
     queryKey: reviewFilterOptionsQueryKey(locale),
-    queryFn: async () => unwrap(await fetchDefenseReviewFilterOptions(readyApiCall(api))),
+    fetch: fetchDefenseReviewFilterOptions,
+    // The counts are an admin's own read, so they are made as them
+    requireAuth: true,
     ...cachePolicy.userData,
-    enabled: api.state === 'ready',
   })
 
   // The options, once there are any
-  return { options: query.data ?? null }
+  return { options: options ?? null }
 }

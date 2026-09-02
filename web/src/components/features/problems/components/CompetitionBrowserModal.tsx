@@ -132,7 +132,7 @@ export function CompetitionBrowserModal({
   onSelectCompetition,
 }: CompetitionBrowserModalProps) {
   // Get the data loader
-  const { data, isLoading, error } = useCompetitionBrowser(isOpen)
+  const { data, isAwaitingAnswer, uiState } = useCompetitionBrowser(isOpen)
 
   // The state for the current search query
   const [searchQuery, setSearchQuery] = useState('')
@@ -231,11 +231,11 @@ export function CompetitionBrowserModal({
 
       {/* Content */}
       <div className="h-[100vh] md:h-[60vh] overflow-hidden">
-        {isLoading ? (
+        {isAwaitingAnswer ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted" />
           </div>
-        ) : error ? (
+        ) : uiState.kind === 'failed' ? (
           <div className="text-center py-12 text-error">
             <p>{tProblems('loadCompetitionsFailed')}</p>
           </div>

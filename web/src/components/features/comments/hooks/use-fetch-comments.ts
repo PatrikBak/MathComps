@@ -1,50 +1,52 @@
 import { useAuth } from '@clerk/nextjs'
-import { useQuery } from '@tanstack/react-query'
 
-import { readyApiCall, useApi } from '@/hooks/use-api'
-import { unwrap } from '@/lib/api/api-error'
+import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
+import type { QueryUiState } from '@/lib/query-ui-state'
 
-import type { CommentTarget } from '../services/comment-api-types'
+import type { CommentDto, CommentTarget } from '../services/comment-api-types'
 import { getComments } from '../services/comment-service'
 import { commentQueryKeys } from './comment-query-keys'
 
 /**
- * Hook for fetching comments for a specific target.
- *
- * @param target - The target to fetch comments for.
- *
- * @returns React Query result with comments array.
+ * What {@link useFetchComments} hands back.
  */
-export function useFetchComments(target: CommentTarget) {
-  // Use the API, which doesn't require authentication
-  const api = useApi({ requireAuth: false })
+type UseFetchCommentsResult = {
+  /** The thread as it stands, empty until it has been read. */
+  comments: CommentDto[]
+  /** How far the read got, for whatever stands in the thread's place. */
+  uiState: QueryUiState
+}
 
-  // Get Clerk user ID and load state
+/**
+ * Reads one target's comment thread.
+ *
+ * Who is asking rides in the key, because a signed-in reader's own copy says which comments they have
+ * liked.
+ *
+ * @param target - What the thread hangs off.
+ *
+ * @returns The thread and the state of the read.
+ */
+export function useFetchComments(target: CommentTarget): UseFetchCommentsResult {
+  // Whose reading of the thread this is, once Clerk knows
   const { userId, isLoaded: isUserLoaded } = useAuth()
 
-  // Get user id or null if not loaded / not authenticated
-  const safeUserId = isUserLoaded ? (userId ?? null) : null
+  // Who is asking, held under nobody until Clerk has settled who that is
+  const readerId = isUserLoaded ? (userId ?? null) : null
 
-  // Fetch comments from API
-  const query = useQuery({
-    queryKey: commentQueryKeys.target(target, safeUserId),
-    queryFn: async () => {
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
-
-      // The target's comments, or throwing the backend failure
-      return unwrap(await getComments(apiCall, target))
-    },
-    // Wait for both API and auth to be ready before fetching
-    enabled: api.state === 'ready' && isUserLoaded,
-    // Threads should reflect new replies quickly
+  // The thread itself
+  const { data: comments, uiState } = useApiQuery({
+    queryKey: commentQueryKeys.target(target, readerId),
+    fetch: (apiCall) => getComments(apiCall, target),
+    // A thread reads the same to a visitor with no account
+    requireAuth: false,
+    // Only read once the key's reader is settled, or the thread lands under the wrong one
+    enabled: isUserLoaded,
+    // A reply posted elsewhere should show up here promptly
     ...cachePolicy.userData,
   })
 
-  // Return query with proper loading state that accounts for initialization
-  return {
-    ...query,
-    isLoading: api.state !== 'ready' || !isUserLoaded || query.isLoading,
-  }
+  // The thread and the state of the read
+  return { comments: comments ?? [], uiState }
 }

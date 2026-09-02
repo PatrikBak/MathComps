@@ -14,6 +14,7 @@ import { RichMathEditor } from '@/components/shared/components/rich-math-editor/
 import { hasValidContent } from '@/components/shared/components/rich-math-editor/utils/preprocessors'
 import { toggleSetItem } from '@/components/shared/utils/collection-utils'
 import { useIsMobile } from '@/hooks/use-breakpoint'
+import { isAwaitingAnswer } from '@/lib/query-ui-state'
 
 import { useCreateComment } from '../hooks/use-create-comment'
 import { useDeleteComment } from '../hooks/use-delete-comment'
@@ -60,15 +61,15 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
   const isMobile = useIsMobile()
 
   // Fetch comments from API
-  const { data: commentsDtos, isLoading, error } = useFetchComments(target)
+  const { comments: commentDtos, uiState } = useFetchComments(target)
 
   // Get translations for UI
   const tComments = useTranslations('comments')
 
   // Convert the comment into our custom structure
   const comments = React.useMemo(() => {
-    return commentsDtos?.map(convertToCommentData) || []
-  }, [commentsDtos])
+    return commentDtos.map(convertToCommentData)
+  }, [commentDtos])
 
   // Prepare functions to manipulate comments
   const { mutateAsync: createRootComment, isPending: isCreatingRootComment } = useCreateComment()
@@ -304,7 +305,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
   )
 
   // Show loading state
-  if (isLoading) {
+  if (isAwaitingAnswer(uiState)) {
     return (
       <div
         className={
@@ -322,7 +323,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
   }
 
   // Show error state
-  if (error) {
+  if (uiState.kind === 'failed') {
     return (
       <div
         className={
