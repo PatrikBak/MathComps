@@ -1,8 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
-import { type ApiState, readyApiCall, useApi } from '@/hooks/use-api'
-import { unwrap } from '@/lib/api/api-error'
+import { type ApiState, useApi } from '@/hooks/use-api'
+import { apiQueryOptions } from '@/hooks/use-api-query'
+import { useQueryUiState } from '@/hooks/use-query-ui-state'
+import { isAwaitingAnswer, type QueryUiState } from '@/lib/query-ui-state'
 
 import { getCompetitionsBySeasonApiUrl } from '../services/problem-api-urls'
 import type { SeasonCompetitionBrowserResult } from '../types/competition-browser-types'
@@ -13,69 +15,86 @@ import type { SeasonCompetitionBrowserResult } from '../types/competition-browse
 const competitionBrowserQueryKey = ['problems', 'competitions-by-season'] as const
 
 /**
- * Returns the shared query options for fetching competition browser data.
+ * The read of every competition grouped by season, built the once so that
+ * {@link usePrefetchCompetitionBrowser} warms the very key {@link useCompetitionBrowser} looks at.
  *
- * @param api - The API client to use.
+ * @param api - The client the read goes through.
  *
- * @returns Query options for React Query.
+ * @returns The options, ready for `useQuery` or `prefetchQuery`.
  */
-function getQueryOptions(api: ApiState) {
-  return {
+function competitionBrowserOptions(api: ApiState) {
+  // The competitions, read with whatever caller there is: nobody has to be signed in for these
+  return apiQueryOptions(api, {
     queryKey: competitionBrowserQueryKey,
-    queryFn: async () => {
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
+    fetch: (apiCall) =>
+      apiCall<SeasonCompetitionBrowserResult>(() => getCompetitionsBySeasonApiUrl(), {
+        method: 'GET',
+      }),
+  })
+}
 
-      // The competition browser data, or throwing the backend failure
-      return unwrap(
-        await apiCall<SeasonCompetitionBrowserResult>(() => getCompetitionsBySeasonApiUrl(), {
-          method: 'GET',
-        })
-      )
-    },
-    // Only fetch when the API is ready
-    enabled: api.state === 'ready',
+/**
+ * What {@link useCompetitionBrowser} hands back.
+ */
+type UseCompetitionBrowserResult = {
+  /** Every competition grouped by season, and nothing until the read has answered. */
+  data: SeasonCompetitionBrowserResult | undefined
+  /** Whether an answer may still be coming. */
+  isAwaitingAnswer: boolean
+  /** How far the read has got. */
+  uiState: QueryUiState
+}
+
+/**
+ * Every competition there is, grouped by the season it ran in.
+ *
+ * @param enabled - Whether the browser is open, since a closed one is not worth the read.
+ *
+ * @returns The competitions and the state of the fetch, as described by
+ *   {@link UseCompetitionBrowserResult}.
+ */
+export function useCompetitionBrowser(enabled: boolean): UseCompetitionBrowserResult {
+  // The API client, which this read needs nobody signed in behind
+  const api = useApi({ requireAuth: false })
+
+  // The read as React Query wants it
+  const options = competitionBrowserOptions(api)
+
+  // The read itself, held shut while the browser is closed as well as until there is a caller
+  const query = useQuery({ ...options, enabled: enabled && options.enabled })
+
+  // Reduce the raw flags to the one state that describes this fetch
+  const uiState = useQueryUiState(query)
+
+  // The competitions, and how the fetch is going
+  return {
+    data: query.data,
+    isAwaitingAnswer: isAwaitingAnswer(uiState),
+    uiState,
   }
 }
 
 /**
- * Hook to fetch and cache competition browser data (competitions grouped by season).
+ * Warms the competition browser's cache, so opening it finds the competitions already there.
  *
- * @param enabled - Whether to enable the query.
- *
- * @returns The React Query result object.
+ * @returns A function which warms the cache.
  */
-export function useCompetitionBrowser(enabled: boolean) {
-  // We need an API client to talk to the backend
+export function usePrefetchCompetitionBrowser(): () => void {
+  // The API client, which this read needs nobody signed in behind
   const api = useApi({ requireAuth: false })
 
-  // Get the query details
-  const options = getQueryOptions(api)
-
-  // Return the query, updating the enabled state based on the provided parameter
-  return useQuery({ ...options, enabled: enabled && options.enabled })
-}
-
-/**
- * Hook to prefetch competition browser data.
- * Call on hover to load data before the modal opens.
- */
-export function usePrefetchCompetitionBrowser() {
-  // We need an API client to talk to the backend
-  const api = useApi({ requireAuth: false })
-
-  // Get the React Query client
+  // What holds the cache the prefetch writes into
   const queryClient = useQueryClient()
 
-  // Return the function doing the prefetch
+  // The prefetch itself
   return useCallback(() => {
-    // Get the query details
-    const options = getQueryOptions(api)
+    // The read as React Query wants it
+    const options = competitionBrowserOptions(api)
 
-    // Ensure the query is ready
+    // Nothing to prefetch with until there is a caller
     if (!options.enabled) return
 
-    // Do the prefetch
-    queryClient.prefetchQuery(options)
+    // Warm the cache
+    void queryClient.prefetchQuery(options)
   }, [api, queryClient])
 }

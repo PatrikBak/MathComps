@@ -1,9 +1,8 @@
 import { useLocale } from 'next-intl'
 import { useCallback, useMemo } from 'react'
 
-import { readyApiCall, useApi } from '@/hooks/use-api'
+import type { ApiCaller } from '@/hooks/use-api'
 import { usePagedQuery } from '@/hooks/use-paged-query'
-import { unwrap } from '@/lib/api/api-error'
 import { dedupePagedItems } from '@/lib/api/paged-list'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
@@ -26,8 +25,6 @@ type UseDefenseReviewQueueResult = {
   hasMore: boolean
   /** Whether another page is on its way. */
   isLoadingMore: boolean
-  /** Whether the last attempt gave up. */
-  hasFailed: boolean
   /** The state of the fetch. */
   uiState: QueryUiState
   /** Loads the next page of conversations. */
@@ -43,24 +40,22 @@ type UseDefenseReviewQueueResult = {
  * @returns The queue as described by {@link UseDefenseReviewQueueResult}.
  */
 export function useDefenseReviewQueue(filter: DefenseReviewFilter): UseDefenseReviewQueueResult {
-  // The authenticated caller
-  const api = useApi({ requireAuth: true })
-
   // The language the queue is read in
   const locale = useLocale()
 
   // Fetches one page
   const fetchPage = useCallback(
-    async (pageNumber: number, signal: AbortSignal) =>
-      unwrap(await fetchDefenseReviewQueue(readyApiCall(api), filter, pageNumber, signal)),
-    [api, filter]
+    (apiCall: ApiCaller, pageNumber: number) =>
+      fetchDefenseReviewQueue(apiCall, filter, pageNumber),
+    [filter]
   )
 
   // The queue itself, a page of conversations at a time
   const paged = usePagedQuery({
     queryKey: reviewQueueQueryKey(filter, locale),
     fetchPage,
-    enabled: api.state === 'ready',
+    // The queue is an admin's own read, so it is made as them
+    requireAuth: true,
     cachePolicy: cachePolicy.userData,
   })
 
@@ -86,7 +81,6 @@ export function useDefenseReviewQueue(filter: DefenseReviewFilter): UseDefenseRe
     totalConversations: paged.totalCount,
     hasMore: paged.hasMore,
     isLoadingMore: paged.isLoadingMore,
-    hasFailed: paged.hasFailed,
     uiState: paged.uiState,
     loadMore: paged.loadMore,
     retry: paged.retry,

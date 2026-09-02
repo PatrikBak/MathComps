@@ -1,49 +1,57 @@
-import { useQuery } from '@tanstack/react-query'
-
-import { readyApiCall, useApi } from '@/hooks/use-api'
-import { unwrap } from '@/lib/api/api-error'
+import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
+import { isAwaitingAnswer } from '@/lib/query-ui-state'
+import type { ApiResult } from '@/types/api'
 
 import type { CommentTargetType } from '../services/comment-api-types'
 import { getCommentCounts } from '../services/comment-service'
 import { commentCountQueryKeys } from './comment-query-keys'
 
 /**
- * Hook for bulk-fetching comment counts for multiple targets of the same type.
- *
- * @param targetType - The type of targets (Handout, Problem, or News)
- * @param targetIds - Array of permanent target IDs to get counts for
- *
- * @returns React Query result with a targetId -> count mapping
+ * How many comments each of a set of targets carries.
  */
-export function useCommentCounts(targetType: CommentTargetType, targetIds: string[]) {
-  // The API client with no authentication (counts are general)
-  const api = useApi({ requireAuth: false })
+type CommentCounts = Record<string, number>
 
-  // Return React Query result with a targetId -> count mapping
-  const query = useQuery({
+/**
+ * What {@link useCommentCounts} hands back.
+ */
+type UseCommentCountsResult = {
+  /** How many comments each target carries, keyed by target id; empty until the read lands. */
+  counts: CommentCounts
+  /** Whether a count may still be coming, which is what a badge waits on. */
+  isLoading: boolean
+}
+
+/**
+ * Reads the comment count for a set of targets of one type in a single call.
+ *
+ * @param targetType - What kind of thing the targets are.
+ * @param targetIds - The targets to count for.
+ *
+ * @returns The counts and whether they may still be coming.
+ */
+export function useCommentCounts(
+  targetType: CommentTargetType,
+  targetIds: string[]
+): UseCommentCountsResult {
+  // The counts themselves
+  const { data: counts, uiState } = useApiQuery({
     queryKey: commentCountQueryKeys.forTargetIds(targetType, targetIds),
-    queryFn: async () => {
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
-
-      // No targets means no counts to fetch
+    fetch: (apiCall) => {
+      // No targets means no counts, and answering it here is what settles the query
       if (targetIds.length === 0) {
-        return {} as Record<string, number>
+        return Promise.resolve<ApiResult<CommentCounts>>({ success: true, data: {} })
       }
 
-      // The targetId -> count mapping, or throwing the backend failure
-      return unwrap(await getCommentCounts(apiCall, targetType, targetIds))
+      // How many comments each of the targets carries
+      return getCommentCounts(apiCall, targetType, targetIds)
     },
-    // Only fetch if API is ready and there are targetIds
-    enabled: api.state === 'ready' && targetIds.length > 0,
-    // Counts can lag a little
+    // A count reads the same to a visitor with no account
+    requireAuth: false,
+    // A count can lag a little behind the thread it counts
     ...cachePolicy.counts,
   })
 
-  // Ensure we report loading state when API is still initializing
-  return {
-    ...query,
-    isLoading: api.state !== 'ready' || query.isLoading,
-  }
+  // The counts and whether more may yet arrive
+  return { counts: counts ?? {}, isLoading: isAwaitingAnswer(uiState) }
 }

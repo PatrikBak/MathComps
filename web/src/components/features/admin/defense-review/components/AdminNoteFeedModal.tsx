@@ -78,7 +78,7 @@ export function AdminNoteFeedModal({ isOpen, onClose, onOpenNote }: AdminNoteFee
         <LoadMore
           hasMore={feed.hasMore}
           isLoading={feed.isLoadingMore}
-          hasFailed={feed.hasFailed}
+          hasFailed={feed.uiState.kind === 'failed'}
           onLoadMore={feed.loadMore}
         />
       </div>

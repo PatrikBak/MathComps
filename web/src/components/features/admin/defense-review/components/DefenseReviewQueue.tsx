@@ -227,7 +227,7 @@ export function DefenseReviewQueue() {
       <LoadMore
         hasMore={queue.hasMore}
         isLoading={queue.isLoadingMore}
-        hasFailed={queue.hasFailed}
+        hasFailed={queue.uiState.kind === 'failed'}
         onLoadMore={queue.loadMore}
       />
 

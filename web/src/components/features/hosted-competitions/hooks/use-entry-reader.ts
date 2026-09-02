@@ -85,7 +85,7 @@ export function useEntryReader(): UseEntryReaderResult {
   const readerKey: HostedCompetitionsReaderKey = userId ?? null
 
   // What the student has given, which only somebody signed in has any of
-  const query = useApiQuery({
+  const { data: readiness, uiState } = useApiQuery({
     queryKey: entryReadinessQueryKey(readerKey),
     fetch: fetchEntryReadiness,
     // The reader's own profile, so it is read as them
@@ -101,8 +101,8 @@ export function useEntryReader(): UseEntryReaderResult {
     reader: toReader({
       isKnown: isReaderKnown,
       isSignedIn,
-      readiness: query.data,
-      hasFailed: query.isError,
+      readiness,
+      hasFailed: uiState.kind === 'failed',
     }),
     readerKey,
     isReaderKnown,

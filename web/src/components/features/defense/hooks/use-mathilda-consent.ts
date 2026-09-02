@@ -1,11 +1,10 @@
 import { useAuth } from '@clerk/nextjs'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
 
-import { readyApiCall, useApi } from '@/hooks/use-api'
+import { useApiQuery } from '@/hooks/use-api-query'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
-import { unwrap } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 
 import { resolveConsentStatus } from '../model/defense-composer-state'
@@ -52,9 +51,6 @@ export function useMathildaConsent(): UseMathildaConsentResult {
   // The React Query cache
   const queryClient = useQueryClient()
 
-  // API client for the signed-in caller
-  const api = useApi({ requireAuth: true })
-
   // Whose acknowledgement it is, once Clerk knows
   const { userId, isLoaded: isUserLoaded } = useAuth()
 
@@ -62,19 +58,18 @@ export function useMathildaConsent(): UseMathildaConsentResult {
   const consentKey = mathildaConsentQueryKeys.forUser(isUserLoaded ? (userId ?? null) : null)
 
   // Where the student stands
-  const query = useQuery({
+  const {
+    data: consent,
+    uiState,
+    isFetching,
+    retry,
+  } = useApiQuery({
     queryKey: consentKey,
-    queryFn: async () => {
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
-
-      // The standing acknowledgement, or throwing the backend failure
-      return unwrap(await getMathildaConsent(apiCall))
-    },
+    fetch: getMathildaConsent,
+    // The student's own acknowledgement, so it is read as them
+    requireAuth: true,
     // An acknowledgement given on another device should show up here promptly
     ...cachePolicy.userData,
-    // Only fetch once there is a signed-in caller to ask about
-    enabled: api.state === 'ready',
   })
 
   // Recording the acknowledgement
@@ -102,18 +97,12 @@ export function useMathildaConsent(): UseMathildaConsentResult {
   // A function which records the acknowledgement
   const accept = useCallback(() => mutate(), [mutate])
 
-  // The query's own re-read
-  const { refetch } = query
-
-  // A function which reads the acknowledgement again
-  const retry = useCallback(() => void refetch(), [refetch])
-
   // Where the student stands, and the calls that record it and re-read it
   return {
-    status: resolveConsentStatus(query),
+    status: resolveConsentStatus({ data: consent, isError: uiState.kind === 'failed' }),
     accept,
     isAccepting: mutation.isPending,
     retry,
-    isRetrying: query.isFetching,
+    isRetrying: isFetching,
   }
 }

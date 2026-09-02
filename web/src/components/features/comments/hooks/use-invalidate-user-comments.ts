@@ -38,8 +38,11 @@ export function useInvalidateUserComments(): UseInvalidateUserCommentsResult {
           // Filter for comment queries
           if (query.queryKey[0] !== commentQueryKeys.all[0]) return false
 
-          // Get the comments from the query
-          const comments = query.state.data as CommentDto[]
+          // Get the comments from the query, which a thread still loading or failed has none of
+          const comments = query.state.data as CommentDto[] | undefined
+
+          // Nothing read means nothing of the user's to find
+          if (comments === undefined) return false
 
           // A helper function to recursively check for user comments
           const hasUserComment = (list: CommentDto[]): boolean => {

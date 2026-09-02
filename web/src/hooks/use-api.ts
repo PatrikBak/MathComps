@@ -3,6 +3,7 @@ import { useLocale } from 'next-intl'
 import { useCallback } from 'react'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { BackendApiError } from '@/lib/api/api-error'
 import { readErrorCode } from '@/lib/api/api-error-codes'
 import type { ApiResult } from '@/types/api'
 
@@ -11,45 +12,191 @@ import type { ApiResult } from '@/types/api'
  * response, a fetch or parse throw) resolves as an {@link ApiResult} failure. It never rejects, so a
  * caller branches on `success` (or hands the result to `unwrap`), never a try/catch.
  *
- * @template T - The type of the data returned by the API.
+ * @template T - What the endpoint answers with.
  *
- * @param endpoint - A function that returns the API endpoint path.
- * @param options - Optional fetch configuration (method, body, headers, etc.).
+ * @param endpoint - Builds the path to call, read at request time.
+ * @param options - The method, body and headers to send.
  *
- * @returns A promise that resolves to an {@link ApiResult<T>}.
+ * @returns The settled result of the call.
  */
 export type ApiCaller = <T>(endpoint: () => string, options?: RequestInit) => Promise<ApiResult<T>>
 
 /**
- * The API client is still initializing (Clerk auth state not yet loaded).
+ * Clerk has yet to settle who is asking, so the client has no caller to give out.
  */
 type ApiLoadingState = {
-  /** The discriminator */
+  /** The discriminant. */
   state: 'loading'
 }
 
 /**
- * The API client needs a signed-in user but none is present.
+ * The client needs a signed-in user and has none.
  */
 type ApiUnauthenticatedState = {
-  /** The discriminator */
+  /** The discriminant. */
   state: 'unauthenticated'
 }
 
 /**
- * The API client is ready to issue requests.
+ * The client is ready to issue requests.
  */
 type ApiReadyState = {
-  /** The discriminator */
+  /** The discriminant. */
   state: 'ready'
-  /** Makes an API call (authenticated if the user is signed in). */
+  /** The caller for issuing requests, authenticated whenever a signed-in user is behind it. */
   apiCall: ApiCaller
 }
 
 /**
- * Represents the state of the API client.
+ * How far the API client has got: waiting on Clerk, held shut for want of a signed-in user, or holding
+ * a caller.
  */
 export type ApiState = ApiLoadingState | ApiUnauthenticatedState | ApiReadyState
+
+/**
+ * What a call site asks of its API client.
+ */
+type ApiOptions = {
+  /**
+   * Whether the calls need a signed-in user. Without one the client reports itself unauthenticated and
+   * hands out no caller; turned off, it stays ready and calls anonymously.
+   */
+  requireAuth?: boolean
+}
+
+/**
+ * The API client for the current reader, minting a fresh Clerk token for every request it makes.
+ *
+ * @param options - What the call site asks of the client.
+ *
+ * @returns The client as it currently stands.
+ */
+export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
+  // Who is asking, and the token that proves it
+  const { getToken, isLoaded, isSignedIn } = useAuth()
+
+  // The reader's language, which the backend answers in
+  const locale = useLocale()
+
+  // The caller, rebuilt only when what it sends or who it sends it as moves underneath it
+  const apiCall = useCallback(
+    async <T>(endpoint: () => string, options: RequestInit = {}): Promise<ApiResult<T>> => {
+      // Nobody to authenticate as, on a call that insists on one
+      if (requireAuth && !isSignedIn) {
+        return {
+          success: false,
+          error: {
+            message: 'User is not signed in. Please authenticate first.',
+            errorCode: 'Unauthenticated',
+          },
+        }
+      }
+
+      try {
+        // The session token, which only a signed-in reader has one of
+        const token: string | null = isSignedIn ? await getToken() : null
+
+        // Signed in, yet Clerk minted nothing to send
+        if (requireAuth && !token) {
+          return {
+            success: false,
+            error: {
+              message: 'Failed to retrieve authentication token.',
+            },
+          }
+        }
+
+        // What every call carries, with the call site's own headers on top
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+          'Accept-Language': locale,
+          ...options.headers,
+        }
+
+        // A token is what turns the call authenticated
+        if (token) {
+          ;(headers as Record<string, string>).Authorization = `Bearer ${token}`
+        }
+
+        // The request itself
+        const response = await fetch(endpoint(), {
+          ...options,
+          headers,
+        })
+
+        // The backend refused it
+        if (!response.ok) {
+          // Best-effort read of the problem body for the backend's machine-readable failure code
+          const errorCode = await readErrorCode(response)
+
+          // The refusal, carrying the status and whatever code came with it
+          return {
+            success: false,
+            error: {
+              message: `API request failed: ${response.statusText}`,
+              statusCode: response.status,
+              errorCode,
+            },
+          }
+        }
+
+        // A JSON body is the expected success shape
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          // The payload the endpoint answered with
+          const data = await response.json()
+
+          // The answer, as a success
+          return { success: true, data }
+        }
+
+        // The body as text, since a bodyless 2xx (a 204, or a delete answering 200) is a legitimate
+        // void success
+        const body = await response.text()
+
+        // An empty body is a success carrying nothing
+        if (body.trim() === '') {
+          return { success: true, data: {} as T }
+        }
+
+        // A 2xx carrying something that is not JSON: a captive portal or a proxy's HTML page, which
+        // would land in the cache as an empty object if it were let through as a success
+        return {
+          success: false,
+          error: {
+            message: `Unexpected non-JSON response (${response.status})`,
+            statusCode: response.status,
+          },
+        }
+      } catch (error) {
+        // The connection dropped, or the body would not parse
+        return {
+          success: false,
+          error: {
+            message: error instanceof Error ? error.message : 'An unknown error occurred',
+          },
+        }
+      }
+    },
+    [getToken, isSignedIn, requireAuth, locale]
+  )
+
+  // Still waiting on Clerk to say who is asking
+  if (!isLoaded) {
+    return { state: 'loading' }
+  }
+
+  // Needs a signed-in user and has none
+  if (requireAuth && !isSignedIn) {
+    return { state: 'unauthenticated' }
+  }
+
+  // Ready to issue requests, signed in or anonymously
+  return {
+    state: 'ready',
+    apiCall,
+  }
+}
 
 /**
  * The caller an API client hands out, which only a ready one has.
@@ -79,158 +226,12 @@ export function apiCallOf(api: ApiState): ApiCaller | null {
 }
 
 /**
- * Configuration options for the API client.
- */
-type ApiOptions = {
-  /**
-   * Whether to require authentication.
-   * If true (default), the hook will return 'unauthenticated' state if the user is not signed in.
-   * If false, the hook will return 'ready' state even if the user is not signed in,
-   * and apiCall will attempt to fetch without a token.
-   */
-  requireAuth?: boolean
-}
-
-/**
- * API client hook that provides authenticated fetch with automatic token injection.
- * Handles authentication state and provides type-safe error handling.
- *
- * @param options - Configuration options
- * @returns The current state of the API client (loading, unauthenticated, or ready with apiCall)
- */
-export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
-  // Use Clerk hooks to get authentication state
-  const { getToken, isLoaded, isSignedIn } = useAuth()
-
-  // Get current locale for Accept-Language header
-  const locale = useLocale()
-
-  // Memoize the API call function
-  const apiCall = useCallback(
-    /**
-     * Makes an authenticated API call to the specified endpoint.
-     * Automatically includes the Clerk session token in the Authorization header if available.
-     *
-     * @template T - The expected response data type
-     * @param endpoint - A function that returns the API endpoint path
-     * @param options - Optional fetch configuration (method, body, headers, etc.)
-     * @returns Promise that resolves to an {@link ApiResult<T>}
-     */
-    async <T>(endpoint: () => string, options: RequestInit = {}): Promise<ApiResult<T>> => {
-      // Check if user is authenticated (if enforcement is enabled)
-      if (requireAuth && !isSignedIn) {
-        return {
-          success: false,
-          error: {
-            message: 'User is not signed in. Please authenticate first.',
-          },
-        }
-      }
-
-      try {
-        // Get the session token from Clerk if signed in
-        const token: string | null = isSignedIn ? await getToken() : null
-
-        // If enforcement is enabled and we failed to get a token, error out
-        if (requireAuth && !token) {
-          return {
-            success: false,
-            error: {
-              message: 'Failed to retrieve authentication token.',
-            },
-          }
-        }
-
-        // Prepare headers
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json',
-          'Accept-Language': locale,
-          ...options.headers,
-        }
-
-        // Add Authorization header if token exists
-        if (token) {
-          ;(headers as Record<string, string>).Authorization = `Bearer ${token}`
-        }
-
-        // Make the authenticated (or anonymous) request
-        const response = await fetch(endpoint(), {
-          ...options,
-          headers,
-        })
-
-        // Handle non-OK responses
-        if (!response.ok) {
-          // Best-effort read of the problem body for the backend's machine-readable failure code
-          const errorCode = await readErrorCode(response)
-
-          return {
-            success: false,
-            error: {
-              message: `API request failed: ${response.statusText}`,
-              statusCode: response.status,
-              errorCode,
-            },
-          }
-        }
-
-        // A JSON body is the expected success shape
-        const contentType = response.headers.get('content-type')
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json()
-          return { success: true, data }
-        }
-
-        // A non-JSON body: only an empty one is a legitimate void success (e.g. a 204 or a bodyless
-        // 200 from a delete). A non-empty non-JSON 2xx (a captive portal or proxy HTML page) is not
-        // real data, so surface it as a failure rather than poisoning the cache with an empty object.
-        const body = await response.text()
-        if (body.trim() === '') {
-          return { success: true, data: {} as T }
-        }
-
-        // A 2xx that answered with an unexpected non-JSON body
-        return {
-          success: false,
-          error: {
-            message: `Unexpected non-JSON response (${response.status})`,
-            statusCode: response.status,
-          },
-        }
-      } catch (error) {
-        // Handle network errors, JSON parsing errors, etc.
-        return {
-          success: false,
-          error: {
-            message: error instanceof Error ? error.message : 'An unknown error occurred',
-          },
-        }
-      }
-    },
-    [getToken, isSignedIn, requireAuth, locale]
-  )
-
-  // Still loading Clerk's data
-  if (!isLoaded) {
-    return { state: 'loading' }
-  }
-
-  // Oops, user is not signed in (and we are enforcing it)
-  if (requireAuth && !isSignedIn) {
-    return { state: 'unauthenticated' }
-  }
-
-  // We're authenticated (or allowing anonymous) and makes sense to return the API call function
-  return {
-    state: 'ready',
-    apiCall,
-  }
-}
-
-/**
  * Narrows the API client to its request caller, throwing when the client isn't ready to issue requests.
- * A query's `enabled` flag should already gate on readiness; this is the safety net inside the query
- * function that also lets the client narrow to a non-nullable {@link ApiCaller}.
+ * A query's `enabled` flag gates on readiness before the fetch is scheduled, so this is the net for the
+ * paths that skip that gate, and what lets the client narrow to a non-nullable {@link ApiCaller}.
+ *
+ * The failure it throws is coded, which is what stops it being retried and reported as a dropped
+ * connection. The code says nobody is signed in, which is the state a reader can act on.
  *
  * @param api - The current API client state.
  *
@@ -239,9 +240,25 @@ export function useApi({ requireAuth = true }: ApiOptions = {}): ApiState {
 export function readyApiCall(api: ApiState): ApiCaller {
   // A ready client is required to issue a request
   if (api.state !== 'ready') {
-    throw new Error('API not ready')
+    throw new BackendApiError({ message: 'API not ready', errorCode: 'Unauthenticated' })
   }
 
   // The ready client's caller
   return api.apiCall
+}
+
+/**
+ * Binds an abort signal to a caller, so every request it makes is dropped when the signal fires.
+ *
+ * React Query treats a consumed signal as a promise to cancel, and on unmount rolls the fetch back
+ * instead of keeping what came home, so a caller handed the signal has to honour it.
+ *
+ * @param apiCall - The caller to bind it to.
+ * @param signal - What says the answer is no longer wanted.
+ *
+ * @returns A caller that abandons its requests when the signal fires.
+ */
+export function abortableCall(apiCall: ApiCaller, signal: AbortSignal): ApiCaller {
+  // The same caller, with the signal riding on every request it makes
+  return (endpoint, options) => apiCall(endpoint, { ...options, signal })
 }

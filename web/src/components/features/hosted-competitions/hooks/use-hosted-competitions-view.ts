@@ -1,7 +1,6 @@
 'use client'
 
 import { useApiQuery } from '@/hooks/use-api-query'
-import { useQueryUiState } from '@/hooks/use-query-ui-state'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
@@ -37,7 +36,7 @@ export function useHostedCompetitionsView(
 ): UseHostedCompetitionsViewResult {
   // What the student can enter, and what they have behind them. Only the caller's own entries are ever
   // on it, so a signed-out visitor reads the groups and no history
-  const query = useApiQuery({
+  const { data: view, uiState } = useApiQuery({
     queryKey: hostedCompetitionsViewQueryKey(readerKey),
     fetch: fetchHostedCompetitionsView,
     // The groups are public, so this one read does not wait on an account
@@ -48,9 +47,6 @@ export function useHostedCompetitionsView(
     ...cachePolicy.userData,
   })
 
-  // How far the read got
-  const uiState = useQueryUiState(query)
-
   // The view and the state of the read
-  return { view: query.data, uiState }
+  return { view, uiState }
 }

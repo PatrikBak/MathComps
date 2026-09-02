@@ -1,9 +1,7 @@
 import { useAuth } from '@clerk/nextjs'
 import type { QueryKey } from '@tanstack/react-query'
-import { useQuery } from '@tanstack/react-query'
 
-import { readyApiCall, useApi } from '@/hooks/use-api'
-import { unwrap } from '@/lib/api/api-error'
+import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
 
 import { getUserListsApiUrl } from '../services/user-list-api-urls'
@@ -45,12 +43,13 @@ type UseUserListsResult = {
   lists: UserListsResponse['lists'] | undefined
   /** Number of problems the user has liked, undefined while loading */
   likedCount: number | undefined
-  /** Whether the lists are currently loading */
+  /**
+   * Whether an answer may still be coming, so an empty set of lists is not yet the answer. False for a
+   * visitor with no account, whose lists are never read for and whose wait would never end.
+   */
   isLoading: boolean
   /** Whether the query settled into an error after exhausting retries */
   isError: boolean
-  /** Whether the API client is ready (user is signed in) */
-  isReady: boolean
 }
 
 /**
@@ -60,34 +59,28 @@ type UseUserListsResult = {
  * @returns The user's lists data, loading state, and readiness state
  */
 export function useUserLists(): UseUserListsResult {
-  // API client — requires auth, so it will be 'ready' only when signed in
-  const api = useApi({ requireAuth: true })
-
   // Where this user's lists are cached
   const listsKey = useUserListsKey()
 
-  // React Query query
-  const query = useQuery({
+  // The user's own lists
+  const {
+    data: userLists,
+    uiState,
+    isAwaitingAnswer,
+  } = useApiQuery({
     queryKey: listsKey,
-    queryFn: async () => {
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
-
-      // The user's lists, or throwing the backend failure
-      return unwrap(await apiCall<UserListsResponse>(() => getUserListsApiUrl(), { method: 'GET' }))
-    },
+    fetch: (apiCall) => apiCall<UserListsResponse>(() => getUserListsApiUrl(), { method: 'GET' }),
+    // Their own lists, so they are read as them
+    requireAuth: true,
     // The user's own lists should reflect their edits quickly
     ...cachePolicy.userData,
-    // Only fetch when the API is ready (user is authenticated)
-    enabled: api.state === 'ready',
   })
 
   // Return the data
   return {
-    lists: query.data?.lists,
-    likedCount: query.data?.likedCount,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    isReady: api.state === 'ready',
+    lists: userLists?.lists,
+    likedCount: userLists?.likedCount,
+    isLoading: isAwaitingAnswer,
+    isError: uiState.kind === 'failed',
   }
 }

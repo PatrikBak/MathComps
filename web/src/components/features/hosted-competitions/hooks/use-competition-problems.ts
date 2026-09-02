@@ -1,7 +1,6 @@
 'use client'
 
 import { useApiQuery } from '@/hooks/use-api-query'
-import { useQueryUiState } from '@/hooks/use-query-ui-state'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
@@ -36,7 +35,7 @@ export function useCompetitionProblems(
   isEntitled: boolean
 ): UseCompetitionProblemsResult {
   // The set, each problem carrying its own conversations, keyed per reader and competition
-  const query = useApiQuery<HostedCompetitionProblem[]>({
+  const { data: problems, uiState } = useApiQuery<HostedCompetitionProblem[]>({
     queryKey: competitionProblemsQueryKey(readerKey, competitionSlug),
     fetch: (apiCall) => fetchCompetitionProblems(apiCall, competitionSlug),
     // A closed competition's set is public, so this read does not wait on an account
@@ -47,9 +46,6 @@ export function useCompetitionProblems(
     ...cachePolicy.userData,
   })
 
-  // How far the read got
-  const uiState = useQueryUiState(query)
-
   // The problems and the state of the read
-  return { problems: query.data, uiState }
+  return { problems, uiState }
 }

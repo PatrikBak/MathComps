@@ -2,10 +2,8 @@
 
 import { useAuth } from '@clerk/nextjs'
 import type { QueryKey } from '@tanstack/react-query'
-import { useQuery } from '@tanstack/react-query'
 
-import { readyApiCall, useApi } from '@/hooks/use-api'
-import { unwrap } from '@/lib/api/api-error'
+import { useApiQuery } from '@/hooks/use-api-query'
 
 import { getUserProfile } from '../services/profile-service'
 
@@ -50,7 +48,10 @@ type UseUserProfileResult = {
   hasLeftHighSchool: boolean
   /** Where they compete from as an ISO 3166-1 alpha-2 code, or null while they have not said. */
   countryCode: string | null
-  /** Whether the answer is still being read, so neither state is known yet. */
+  /**
+   * Whether an answer may still be coming, so nothing here is settled yet. False for a visitor with no
+   * account, who has no profile to wait for and whose wait would never end.
+   */
   isLoading: boolean
 }
 
@@ -63,36 +64,27 @@ type UseUserProfileResult = {
  * @returns Their profile, and whether it is known yet.
  */
 export function useUserProfile(): UseUserProfileResult {
-  // API client for the signed-in caller
-  const api = useApi({ requireAuth: true })
-
   // Where this user's profile is cached
   const profileKey = useUserProfileKey()
 
   // What the site holds on them
-  const query = useQuery({
+  const { data: profile, isAwaitingAnswer } = useApiQuery({
     queryKey: profileKey,
-    queryFn: async () => {
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
-
-      // Their profile, or throwing the backend failure
-      return unwrap(await getUserProfile(apiCall))
-    },
+    fetch: getUserProfile,
+    // Their own profile, so it is read as them
+    requireAuth: true,
     // Never stale: nothing outside this browser writes any of these, and every call that does echoes its own
     // answer straight into this cache, so there is never a newer one to go and ask for
     staleTime: Infinity,
-    // Only fetch once there is a signed-in caller to ask about
-    enabled: api.state === 'ready',
   })
 
   // Their profile, and whether it is known yet
   return {
-    email: query.data?.email ?? null,
-    username: query.data?.username ?? null,
-    graduationYear: query.data?.graduationYear ?? null,
-    hasLeftHighSchool: query.data?.hasLeftHighSchool ?? false,
-    countryCode: query.data?.countryCode ?? null,
-    isLoading: api.state === 'loading' || query.isLoading,
+    email: profile?.email ?? null,
+    username: profile?.username ?? null,
+    graduationYear: profile?.graduationYear ?? null,
+    hasLeftHighSchool: profile?.hasLeftHighSchool ?? false,
+    countryCode: profile?.countryCode ?? null,
+    isLoading: isAwaitingAnswer,
   }
 }

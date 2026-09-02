@@ -68,8 +68,12 @@ async function uploadFile(file: File, type: FileType = 'image'): Promise<string>
 
   // Handle bad API response
   if (!response.ok) {
-    // Use the route's coded failure, or fall back to a generic upload-url failure
-    throw new BackendApiError({ errorCode: errorCodeFromBody(responseData) ?? 'UPLOAD_URL_FAILED' })
+    // Use the route's coded failure, or fall back to a generic upload-url failure. The status rides along
+    // because this one did reach a server, and it is what says whether asking again could go differently
+    throw new BackendApiError({
+      errorCode: errorCodeFromBody(responseData) ?? 'UPLOAD_URL_FAILED',
+      statusCode: response.status,
+    })
   }
 
   // Extract upload URL and key from response
@@ -86,7 +90,7 @@ async function uploadFile(file: File, type: FileType = 'image'): Promise<string>
 
   // Handle bad upload response
   if (!uploadResponse.ok) {
-    throw new BackendApiError({ errorCode: 'SERVER_ERROR' })
+    throw new BackendApiError({ errorCode: 'SERVER_ERROR', statusCode: uploadResponse.status })
   }
 
   // Return the key (public URL can be derived from the key)

@@ -1,9 +1,8 @@
 import { useLocale } from 'next-intl'
 import { useCallback, useMemo, useState } from 'react'
 
-import { readyApiCall, useApi } from '@/hooks/use-api'
+import type { ApiCaller } from '@/hooks/use-api'
 import { usePagedQuery } from '@/hooks/use-paged-query'
-import { unwrap } from '@/lib/api/api-error'
 import { dedupePagedItems } from '@/lib/api/paged-list'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
@@ -24,8 +23,6 @@ type UseAdminNoteFeedResult = {
   hasMore: boolean
   /** Whether another page is on its way. */
   isLoadingMore: boolean
-  /** Whether the last attempt gave up. */
-  hasFailed: boolean
   /** Whether what is settled is being left out. */
   openOnly: boolean
   /** Leaves out what is settled, or puts it back. */
@@ -47,9 +44,6 @@ type UseAdminNoteFeedResult = {
  * @returns The feed as described by {@link UseAdminNoteFeedResult}.
  */
 export function useAdminNoteFeed(enabled: boolean): UseAdminNoteFeedResult {
-  // The authenticated caller
-  const api = useApi({ requireAuth: true })
-
   // The language the feed is read in
   const locale = useLocale()
 
@@ -58,16 +52,17 @@ export function useAdminNoteFeed(enabled: boolean): UseAdminNoteFeedResult {
 
   // Fetches one page of notes
   const fetchPage = useCallback(
-    async (pageNumber: number, signal: AbortSignal) =>
-      unwrap(await fetchAdminNoteFeed(readyApiCall(api), openOnly, pageNumber, signal)),
-    [api, openOnly]
+    (apiCall: ApiCaller, pageNumber: number) => fetchAdminNoteFeed(apiCall, openOnly, pageNumber),
+    [openOnly]
   )
 
   // The feed itself, a page of notes at a time
   const paged = usePagedQuery({
     queryKey: noteFeedQueryKey(openOnly, locale),
     fetchPage,
-    enabled: enabled && api.state === 'ready',
+    // The feed is an admin's own read, so it is made as them
+    requireAuth: true,
+    enabled,
     cachePolicy: cachePolicy.userData,
   })
 
@@ -83,7 +78,6 @@ export function useAdminNoteFeed(enabled: boolean): UseAdminNoteFeedResult {
     totalCount: paged.totalCount,
     hasMore: paged.hasMore,
     isLoadingMore: paged.isLoadingMore,
-    hasFailed: paged.hasFailed,
     openOnly,
     setOpenOnly,
     loadMore: paged.loadMore,

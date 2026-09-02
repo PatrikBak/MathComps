@@ -51,14 +51,8 @@ export function CommentCountProvider({
   targetIds,
   children,
 }: CommentCountProviderProps) {
-  // Fetch all counts in a single batch request
-  const { data: counts, isLoading } = useCommentCounts(targetType, targetIds)
-
-  // Provide the counts to children
-  const value: CommentCountContextValue = {
-    counts: counts ?? {},
-    isLoading,
-  }
+  // The count for every target, read in one call
+  const value: CommentCountContextValue = useCommentCounts(targetType, targetIds)
 
   // Provide the counts to children
   return <CommentCountContext value={value}>{children}</CommentCountContext>
