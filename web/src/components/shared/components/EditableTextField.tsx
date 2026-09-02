@@ -46,7 +46,7 @@ const IconButton = ({ onClick, className, label, children }: IconButtonProps) =>
 type EditableTextFieldProps = {
   /** The current value to display */
   value?: string
-  /** Async callback function to save the new value */
+  /** Async callback function to save the new value. It owns reporting its own failure. */
   onSave: (value?: string) => Promise<void>
   /** Zod schema for validation */
   schema: z.ZodString
@@ -176,9 +176,10 @@ export function EditableTextField({
 
       // Display a toast with a success message
       toast.success(tActions('savedSuccessfully'))
-    } catch (error) {
-      // Display a toast with an error message
-      toast.error(error instanceof Error ? error.message : tActions('saveFailed'))
+    } catch {
+      // The caller reports the failure, so nothing is shown here. The rejection is still swallowed: a
+      // blur-triggered save is never awaited, so letting it through would surface as an unhandled
+      // rejection. Edit mode stays on so the typed value survives another attempt.
     } finally {
       // Saving done in any case
       setIsSaving(false)
