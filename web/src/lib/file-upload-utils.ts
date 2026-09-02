@@ -2,7 +2,7 @@ export { type FileType, isAllowedMimeType } from '@/constants/file-upload-consta
 
 import { type FileType, getAllowedTypes, getMaxFileSize } from '@/constants/file-upload-constants'
 import { BackendApiError } from '@/lib/api/api-error'
-import { errorCodeFromBody } from '@/lib/api/api-error-codes'
+import { fetchApiResult } from '@/lib/api/api-fetch'
 
 /**
  * Response from the upload URL API.
@@ -52,9 +52,8 @@ async function uploadFile(file: File, type: FileType = 'image'): Promise<string>
   validateFile(file, type)
 
   // Get presigned URL from our API
-  const response = await fetch('/api/files/upload-url', {
+  const result = await fetchApiResult<UploadUrlResponse>('/api/files/upload-url', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       filename: file.name,
       contentType: file.type,
@@ -63,23 +62,22 @@ async function uploadFile(file: File, type: FileType = 'image'): Promise<string>
     }),
   })
 
-  // Parse API response
-  const responseData = await response.json()
-
   // Handle bad API response
-  if (!response.ok) {
-    // Use the route's coded failure, or fall back to a generic upload-url failure. The status rides along
-    // because this one did reach a server, and it is what says whether asking again could go differently
-    throw new BackendApiError({
-      errorCode: errorCodeFromBody(responseData) ?? 'UPLOAD_URL_FAILED',
-      statusCode: response.status,
-    })
+  if (!result.success) {
+    // A refusal carries a status, so an uncoded one falls back to a generic upload-url failure. A
+    // failure that never reached the server carries no status, and stays uncoded
+    throw new BackendApiError(
+      result.error.statusCode === undefined
+        ? result.error
+        : { ...result.error, errorCode: result.error.errorCode ?? 'UPLOAD_URL_FAILED' }
+    )
   }
 
   // Extract upload URL and key from response
-  const { uploadUrl, key } = responseData as UploadUrlResponse
+  const { uploadUrl, key } = result.data
 
-  // Upload directly to R2
+  // Upload directly to R2. A third-party store answers with no `errorCode` of its own, so the shared
+  // caller has nothing to add over the status this leg's own check reads
   const uploadResponse = await fetch(uploadUrl, {
     method: 'PUT',
     headers: {

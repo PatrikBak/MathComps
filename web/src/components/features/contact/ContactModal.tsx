@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { Modal } from '@/components/shared/components/Modal'
-import { readErrorCode } from '@/lib/api/api-error-codes'
 import { resolveErrorMessage } from '@/lib/api/api-error-utils'
+import { fetchApiResult } from '@/lib/api/api-fetch'
 
 import { type ReasonOption } from './contact-reasons'
 import { type ContactFormData } from './contact-schema'
@@ -35,40 +35,30 @@ export default function ContactModal({ isOpen, onClose, defaultReason }: Contact
 
   // Submit a validated payload and report the outcome
   const handleFormSubmit = async (data: ContactFormData) => {
-    // Try the request, surfacing a failure as a toast
-    try {
-      // POST the form data to the contact endpoint
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
+    // POST the form data to the contact endpoint
+    const result = await fetchApiResult('/api/contact', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
 
-      // A server-side failure
-      if (!response.ok) {
-        // Read the route's error code
-        const errorCode = await readErrorCode(response)
+    // A failed send
+    if (!result.success) {
+      // A failure carrying no status never reached the server, which is the offline case
+      const fallback =
+        result.error.statusCode === undefined ? tContact('sendFailedRetry') : tContact('sendFailed')
 
-        // Toast its localized copy
-        toast.error(
-          resolveErrorMessage(errorCode, tApiErrors, { fallback: tContact('sendFailed') })
-        )
+      // Toast the failure's localized copy
+      toast.error(resolveErrorMessage(result.error.errorCode, tApiErrors, { fallback }))
 
-        // Leave the modal open so they can retry
-        return
-      }
-
-      // Tell the user it worked
-      toast.success(tContact('successMessage'))
-
-      // Close the modal
-      onClose()
-    } catch {
-      // A thrown fetch/parse error (e.g. offline)
-      toast.error(tContact('sendFailedRetry'))
+      // Leave the modal open so they can retry
+      return
     }
+
+    // Tell the user it worked
+    toast.success(tContact('successMessage'))
+
+    // Close the modal
+    onClose()
   }
 
   // Render the form inside the modal shell

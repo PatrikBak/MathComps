@@ -44,7 +44,7 @@ function isAppErrorCode(value: unknown): value is AppErrorCode {
  *
  * @returns The recognized code, or undefined when the body carries none.
  */
-export function errorCodeFromBody(body: unknown): AppErrorCode | undefined {
+function errorCodeFromBody(body: unknown): AppErrorCode | undefined {
   // The code rides as a top-level field on both the C# problem body and our route bodies
   const errorCode = (body as { errorCode?: unknown } | null)?.errorCode
 
