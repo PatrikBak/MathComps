@@ -414,12 +414,14 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         if (!mathCheck.Holds)
             notes.Add($"One of your claims is wrong: {mathCheck.Correction.EnsureSentenceEnd()} Fix it.");
 
-        // A leak hands away earned progress, so tell the generator exactly what to withhold.
+        // A leak hands away earned progress, so name what to withhold and where to go instead. The redirect points
+        // at the candidate's own writing, because the generate prompt forbids retreating to a broader question
+        // about proof strategy.
         if (leakCheck.Leaks)
             notes.Add(
                 $"You gave away too much: {leakCheck.WhatLeaked.EnsureSentenceEnd()} Redo the reply without " +
-                "revealing it — and don't just rephrase the same hint more gently; move up a level and ask a " +
-                "broader, strategy-level question that leaves the discovery to the candidate.");
+                "revealing it. Don't rephrase the same hint more gently, and don't reach for another object of " +
+                "your own: ask about something the candidate has already written instead.");
 
         // A withheld close ratchets the conversation past its end, so tell the generator it is over.
         if (leakCheck.WithholdsClose)
