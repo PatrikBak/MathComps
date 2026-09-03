@@ -46,9 +46,3 @@ export const PENDING_COMMENT_TARGET_STORAGE_KEY = 'pending-comment-target'
  * {@link defenseDraftStorageKey}.
  */
 export const DEFENSE_DRAFT_STORAGE_PREFIX = 'defense-draft'
-
-/**
- * Key used to store that the practice competition has already introduced itself to this browser.
- * A courtesy rather than a record, so it is kept per browser and never sent anywhere.
- */
-export const PRACTICE_INTRO_DISMISSED_STORAGE_KEY = 'practiceIntroDismissed'

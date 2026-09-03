@@ -372,8 +372,8 @@
     "dialog": {
       "back": "Zpět",
       "confirm": "Spustit časomíru",
-      "consequence": "Časomíra se spustí po kliknutí na tlačítko. Nic, co Mathildě napíšeš, už nejde vrátit ani smazat.",
-      "consequencePractice": "Časomíra se spustí po kliknutí na tlačítko. Zkušební soutěž si můžeš dát znovu, kdykoli.",
+      "consequence": "Časomíra se spustí po kliknutí na tlačítko. Soutěž nepůjde zopakovat.",
+      "consequencePractice": "Časomíra se spustí po kliknutí na tlačítko. Zkušební soutěž se nehodnotí a můžeš si ji kdykoli zopakovat.",
       "forfeit": "Vzdát se a podívat se na úlohy",
       "forfeitConfirm": "Vzdát se",
       "forfeitConsequence": "Úlohy uvidíš hned a ve výsledcích se neobjevíš. Soutěžit v této kategorii už nebudeš moci.",
@@ -400,7 +400,7 @@
         "Kdykoli v typicky dvoutýdenním soutěžním okně si spustíš časomíru ⏲️",
         "Následně máš limitovaný čas na vyřešení příkladů 📋",
         "Svoje řešení prezentuješ Mathildě a ona ti poskytne zpětnou vazbu 🤖",
-        "Tvoje konverzace si přečte člověk a udělí ti body, za každou úlohu nejvýše 6. Při rovnosti rozhoduje čas tvé poslední zprávy u každé úlohy, takže když máš úlohu za sebou, konverzaci raději ukonči 🔢",
+        "Tvoje konverzace si přečte člověk a udělí ti body, za každou úlohu nejvýše 6. Při rovnosti rozhoduje čas tvé poslední zprávy u každé úlohy, takže když máš úlohu za sebou, přestaň k ní psát 🔢",
         "Neboj se poslat neúplné řešení nebo poprosit Mathildu o pomoc, když vůbec nevíš, jak začít. Za bod, ke kterému ti pomohla, dostaneš půl bodu, takže zkusit to se vyplatí vždycky 🙂"
       ],
       "title": "Jak to funguje?"
@@ -410,8 +410,8 @@
     "noCompetitions": "Zatím tu není žádná soutěž.",
     "officialSolution": "Oficiální řešení",
     "opensIn": "otevírá se za {remaining}",
-    "practiceIntro": "Vyzkoušej si, jaké to je v ostrých soutěžích. V této zkušební soutěži to funguje stejně, až na to, že se nic nehodnotí a že ji můžeš spustit vícekrát a pokračovat ve svých předchozích obhajobách.",
-    "practiceIntroDismiss": "Rozumím",
+    "practiceConversations": "Konverzace k jednotlivým úlohám se ukládají průběžně, kdykoli je můžeš zavřít a znovu se k nim vrátit. K jedné úloze můžeš mít několik konverzací, pokud chceš začít s čistým štítem.",
+    "practiceConversationsDismiss": "Rozumím",
     "practiceNote": "Zkušební soutěž s jednoduchými úlohami na vyzkoušení soutěžního prostředí.",
     "problemCount": "{count, plural, one {# úloha} few {# úlohy} other {# úloh}}",
     "problemHeading": "Úloha {position}",
@@ -455,7 +455,7 @@
     "startDefense": "Napsat řešení",
     "try": "Vyzkoušet",
     "tryAgain": "Zkusit znovu",
-    "typedSolutionsOnly": "Řešení píšeš přímo tady. Fotky ručně psaného řešení zatím nepodporujeme."
+    "typedSolutionsOnly": "Řešení píšeš přímo tady, fotky ručně psaného řešení raději nepodporujeme, AI je ve čtení ručně psaného textu poměrně nepřesná."
   },
   "contact": {
     "email": "Email",
@@ -512,6 +512,7 @@
     "feedbackThanks": "Díky, pomůže nám to Mathildu vylepšit.",
     "feedbackTitle": "Jak to jde?",
     "feedbackWithdrawn": "Odstraněno.",
+    "freshStartNote": "Mathilda tu začíná od nuly. Dosavadní konverzace najdeš v Historii.",
     "history": "Historie",
     "historyError": "Nepodařilo se načíst tvoje předchozí konverzace.",
     "jumpToLatest": "Přejít na nejnovější",
