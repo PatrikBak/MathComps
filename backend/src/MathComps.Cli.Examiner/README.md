@@ -67,7 +67,7 @@ Two Claude Code skills bracket the CLI:
 - **`generate-conversation`** — authors a new fixture and drives a full conversation by playing the candidate against the examiner CLI, turn by turn. Makes the fixtures.
 - **`judge`** — reads a finished transcript and grades the examiner: did it leak, were its challenges sharp, is every math claim correct — fanning out one blind reviewer per dimension, then proposing prompt fixes.
 
-The loop: `generate-conversation` drives a fresh conversation (you play the student, the CLI plays the examiner) → `judge` reads it and proposes prompt fixes → tweak `Prompts/*.txt` and generate again. A re-run is just another generate pass — the conversation is regenerated, since the student's turns depend on the examiner's and can't be replayed from a frozen script.
+The loop: `generate-conversation` drives a fresh conversation (you play the student, the CLI plays the examiner) → `judge` reads it and proposes prompt fixes → tweak the files under `Prompts/` and generate again. A re-run is just another generate pass — the conversation is regenerated, since the student's turns depend on the examiner's and can't be replayed from a frozen script.
 
 ## Setup
 
@@ -85,3 +85,5 @@ Every backend project shares one user-secrets store (see the [main backend READM
 ## AI prompts
 
 The prompt templates live in the engine's [`Prompts/`](../MathComps.Infrastructure/Prompts) folder: `generate.txt` (the examiner persona, filled with the problem, reference, and any revision note), `math-check.txt`, `leak-check.txt`, and `language-check.txt`. Each becomes a step's system message. The user message is the conversation so far — for the math- and leak-checks, with the proposed reply appended at the end; the language-check gets the candidate's latest turn and the proposed reply, and nothing else.
+
+Beside them, [`Prompts/Notes/`](../MathComps.Infrastructure/Prompts/Notes) holds the shorter pieces the generate prompt is filled with: one instruction per flaw a guard can raise, the wrapper that marks them to the examiner as a revision, the holding note a draft that outlasted the cap is replaced with, and the guidance for a reference carrying author's hints. Each note has its own config key, so `Examiner__Notes__Leak=/abs/path/to/note.txt` swaps one for a run the way `Examiner__Generate__Prompt` swaps a whole template. A note with a hole in it takes the same `{token}` syntax as a template, and one carrying a token nothing fills is refused when the turn reads it.

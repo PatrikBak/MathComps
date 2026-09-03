@@ -61,6 +61,16 @@
         "maxRevisions": "Revision cap",
         "model": "Model",
         "modelDefault": "default",
+        "notes": {
+          "authorHints": "Author's hints",
+          "languageSwitch": "Wrong language",
+          "leak": "Leak",
+          "revision": "Revision header",
+          "safeHold": "Fallback reply",
+          "title": "Notes",
+          "withheldClose": "Missed close",
+          "wrongClaim": "Wrong claim"
+        },
         "prompt": "Prompt",
         "promptChars": "{count, plural, one {# character} other {# characters}}",
         "reasoningEffort": "Reasoning",

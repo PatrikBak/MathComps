@@ -1,8 +1,10 @@
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Defense;
+using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Dtos;
 using MathComps.Infrastructure.Services.Defense.Engine;
+using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Moq;
 using MsOptions = Microsoft.Extensions.Options.Options;
 using ExaminerEngine = MathComps.Infrastructure.Services.Defense.Engine.Examiner;
@@ -471,6 +473,103 @@ public class ExaminerTests
     }
 
     /// <summary>
+    /// A reference carrying the author's hints reaches the generator with the shipped guidance for using them. The
+    /// builder writes that section and the loop keys the guidance off it, so this is the only test running that
+    /// path: drop either end and a stuck candidate's earned help goes silently ungoverned.
+    /// </summary>
+    [Fact]
+    public async Task A_reference_carrying_the_authors_hints_reaches_the_generator_with_the_guidance_for_them()
+    {
+        // A clean turn, capturing what the generator was told.
+        var generateRequests = new List<ChatCallRequest>();
+        var caller = new Mock<ILlmChatCaller>();
+        caller.Setup(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("a question."));
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
+
+        // The reference the site builds for a problem whose author wrote a hint ladder.
+        var reference = DefenseReferenceBuilder.BuildReference(
+            new DefenseProblemContent("statement", "reference", ["first stage", "second stage"]));
+
+        // Run the turn against that reference.
+        await RunAsync(caller, reference);
+
+        // The shipped guidance for using the author's hints.
+        var guidance = File.ReadAllText(
+            Path.Combine(AppContext.BaseDirectory, "Prompts", "Notes", "author-hints.txt")).Trim();
+
+        // The guidance reached the generator, alongside the hints themselves.
+        Assert.Contains(guidance, generateRequests[0].SystemPrompt);
+        Assert.Contains("first stage", generateRequests[0].SystemPrompt);
+        Assert.Contains("second stage", generateRequests[0].SystemPrompt);
+    }
+
+    /// <summary>
+    /// A reference with no author's hints leaves the guidance for using them out, so the examiner is never told to
+    /// pitch help at
+    /// stages the problem carries none of.
+    /// </summary>
+    [Fact]
+    public async Task A_reference_without_the_authors_hints_leaves_the_guidance_out()
+    {
+        // A clean turn, capturing what the generator was told.
+        var generateRequests = new List<ChatCallRequest>();
+        var caller = new Mock<ILlmChatCaller>();
+        caller.Setup(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("a question."));
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
+
+        // The reference a problem with no hints gets, which the builder hands back untouched.
+        var reference = DefenseReferenceBuilder.BuildReference(
+            new DefenseProblemContent("statement", "reference", []));
+
+        // Run the turn against that reference.
+        await RunAsync(caller, reference);
+
+        // The shipped guidance, which this turn had no reason to carry.
+        var guidance = File.ReadAllText(
+            Path.Combine(AppContext.BaseDirectory, "Prompts", "Notes", "author-hints.txt")).Trim();
+
+        // The guidance stayed out of the prompt.
+        Assert.DoesNotContain(guidance, generateRequests[0].SystemPrompt);
+    }
+
+    /// <summary>
+    /// A note carrying a placeholder the engine never fills is refused rather than read. Nothing downstream would
+    /// flag it: the fill leaves an unknown token alone, so the braces would ship to the model inside the examiner's
+    /// own instructions.
+    /// </summary>
+    [Fact]
+    public async Task A_note_carrying_a_placeholder_nothing_fills_is_refused()
+    {
+        // Run the turn under a note whose token is a typo of the one the engine fills.
+        var thrown = await RefusedNoteAsync("You gave away too much: {what_leakd} Redo the reply.");
+
+        // The failure names the token it could not fill.
+        Assert.Contains("what_leakd", thrown.Message);
+    }
+
+    /// <summary>
+    /// An empty note is refused. The revision note is the one that costs: it would still read as a note, so every
+    /// flagged draft would be sent back and the whole revision cap spent under no instruction.
+    /// </summary>
+    [Fact]
+    public async Task An_empty_note_is_refused()
+    {
+        // Run the turn under a note holding nothing but whitespace.
+        var thrown = await RefusedNoteAsync("   \n  ");
+
+        // The failure says the note was empty.
+        Assert.Contains("empty", thrown.Message);
+    }
+
+    /// <summary>
     /// The turn's outcome sums the cost and tokens of every model call it made — the generate step and every guard on
     /// a clean turn — so a caller can price the turn from a single figure.
     /// </summary>
@@ -551,8 +650,10 @@ public class ExaminerTests
     /// loop to throwaway prompt templates.
     /// </summary>
     /// <param name="caller">The fake chat caller with its steps set up.</param>
+    /// <param name="reference">The reference solution the turn runs against.</param>
     /// <returns>The turn's outcome.</returns>
-    private static async Task<ExaminerTurnOutcome> RunAsync(Mock<ILlmChatCaller> caller)
+    private static async Task<ExaminerTurnOutcome> RunAsync(
+        Mock<ILlmChatCaller> caller, string reference = "reference")
     {
         // A minimal transcript ending on a candidate turn.
         var transcript = Transcript.Parse("## Candidate\n\nmy defense");
@@ -560,17 +661,42 @@ public class ExaminerTests
         // Run the loop under throwaway prompt templates and hand back its outcome.
         return await WithTempSettingsAsync(settings =>
             new ExaminerEngine(caller.Object, MsOptions.Create(settings))
-                .NextReplyAsync("problem", "reference", transcript, new ModelUsageAccumulator()));
+                .NextReplyAsync("problem", reference, transcript, new ModelUsageAccumulator()));
+    }
+
+    /// <summary>
+    /// Runs a turn with a stand-in for the shipped leak note, and hands back what reading that note threw. The
+    /// caller is strict: the notes are read before the first model call, so a refused note never reaches it.
+    /// </summary>
+    /// <param name="leakNote">The stand-in note's text.</param>
+    /// <returns>The exception the turn threw.</returns>
+    private static async Task<InvalidOperationException> RefusedNoteAsync(string leakNote)
+    {
+        // A caller nothing should call.
+        var caller = new Mock<ILlmChatCaller>(MockBehavior.Strict);
+
+        // Run the turn under the stand-in and hand back what it threw.
+        return await Assert.ThrowsAsync<InvalidOperationException>(
+            () => WithTempSettingsAsync(
+                settings => new ExaminerEngine(caller.Object, MsOptions.Create(settings))
+                    .NextReplyAsync(
+                        "problem", "reference", Transcript.Parse("## Candidate\n\nmy defense"),
+                        new ModelUsageAccumulator()),
+                leakNote));
     }
 
     /// <summary>
     /// Writes throwaway prompt templates to a temp folder, builds settings pointing at them, runs the body, and cleans
-    /// up — the loop reads each step's prompt file before calling the model, so the files must exist.
+    /// up — the loop reads each step's prompt file before calling the model, so the files must exist. The notes are
+    /// the shipped ones by default, since the tests read the wording the engine actually runs under.
     /// </summary>
     /// <typeparam name="T">The body's result type.</typeparam>
     /// <param name="body">The work to run against the built settings.</param>
+    /// <param name="leakNote">Text to write into a stand-in for the shipped leak note, for a test exercising how a
+    /// malformed note is read; null leaves every note the shipped one.</param>
     /// <returns>The body's result.</returns>
-    private static async Task<T> WithTempSettingsAsync<T>(Func<ExaminerSettings, Task<T>> body)
+    private static async Task<T> WithTempSettingsAsync<T>(
+        Func<ExaminerSettings, Task<T>> body, string? leakNote = null)
     {
         // A temp folder to hold the throwaway prompt files.
         var directory = Directory.CreateTempSubdirectory("examiner-loop-tests");
@@ -582,19 +708,33 @@ public class ExaminerTests
             ChatStepSettings Step(string name)
             {
                 var path = Path.Combine(directory.FullName, name);
-                File.WriteAllText(path, "{problem} {reference} {revision_note}");
+                File.WriteAllText(path, "{problem} {reference} {hints_note} {revision_note}");
                 return new ChatStepSettings { Prompt = path, Model = ConfiguredModel };
             }
 
-            // Settings wired to the throwaway prompts.
+            // Settings wired to the throwaway prompts and the real notes.
             var settings = new ExaminerSettings
             {
                 Generate = Step("generate.txt"),
                 MathCheck = Step("math-check.txt"),
                 LeakCheck = Step("leak-check.txt"),
                 LanguageCheck = Step("language-check.txt"),
+                Notes = ExaminerNotesFixture.Shipped(),
                 MaxRevisions = RevisionCap,
             };
+
+            // Point the leak note at a stand-in when the test supplied one.
+            if (leakNote is not null)
+            {
+                // The stand-in's path, beside the throwaway prompts so it's cleaned up with them.
+                var notePath = Path.Combine(directory.FullName, "leak-note.txt");
+
+                // Write the supplied text into it.
+                File.WriteAllText(notePath, leakNote);
+
+                // The leak note now reads from the stand-in.
+                settings.Notes.Leak = notePath;
+            }
 
             // Run the body against them.
             return await body(settings);

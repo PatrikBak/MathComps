@@ -17,14 +17,26 @@ public sealed record ChatStepConfigSnapshot(
     string? ReasoningEffort, int? MaxOutputTokens);
 
 /// <summary>
+/// One note's recorded text in a session's snapshot, alongside where it was read from. The path alone can't tell a
+/// session run before an edit to that file apart from one run after.
+/// </summary>
+/// <param name="Path">Path to the note.</param>
+/// <param name="Text">The note's raw text, uninterpolated, as read when this was recorded.</param>
+public sealed record ExaminerNoteConfigSnapshot(string Path, string Text);
+
+/// <summary>
 /// The examiner engine's full config as recorded on a session at creation — the same shape as
-/// <see cref="Options.ExaminerSettings"/>, with each step's prompt template text captured alongside its path.
+/// <see cref="Options.ExaminerSettings"/>, with every prompt template's and note's text captured alongside its
+/// path.
 /// </summary>
 /// <param name="Generate">The recorded generate step.</param>
 /// <param name="MathCheck">The recorded math-check step.</param>
 /// <param name="LeakCheck">The recorded leak-check step.</param>
 /// <param name="LanguageCheck">The recorded language-check step.</param>
+/// <param name="Notes">The recorded notes, keyed by name in camelCase
+/// — the same names <see cref="Options.ExaminerNotesSettings"/> gives them.</param>
 /// <param name="MaxRevisions">The revision cap in force.</param>
 public sealed record ExaminerConfigSnapshot(
     ChatStepConfigSnapshot Generate, ChatStepConfigSnapshot MathCheck, ChatStepConfigSnapshot LeakCheck,
-    ChatStepConfigSnapshot LanguageCheck, int MaxRevisions);
+    ChatStepConfigSnapshot LanguageCheck, IReadOnlyDictionary<string, ExaminerNoteConfigSnapshot> Notes,
+    int MaxRevisions);

@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations;
 namespace MathComps.Infrastructure.Options;
 
 /// <summary>
-/// Settings for the examiner loop: the model configuration for each of its steps, plus the revision cap. The
+/// Settings for the examiner loop: the model configuration for each of its steps, the notes its prompts are filled
+/// with, plus the revision cap. The
 /// annotations make a missing <c>Examiner</c> section fail validation at startup rather than leaving a step null and
 /// faulting on the first turn.
 /// </summary>
@@ -38,6 +39,10 @@ public class ExaminerSettings
     /// </summary>
     [Required]
     public required ChatStepSettings LanguageCheck { get; set; }
+
+    /// <inheritdoc cref="ExaminerNotesSettings" path="/summary"/>
+    [Required]
+    public required ExaminerNotesSettings Notes { get; set; }
 
     /// <summary>
     /// How many times a flagged reply is regenerated before the last attempt ships regardless. The cap stops a

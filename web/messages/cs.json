@@ -61,6 +61,16 @@
         "maxRevisions": "Limit přepisů",
         "model": "Model",
         "modelDefault": "výchozí",
+        "notes": {
+          "authorHints": "Autorovy nápovědy",
+          "languageSwitch": "Jiný jazyk",
+          "leak": "Prozrazení",
+          "revision": "Hlavička přepisu",
+          "safeHold": "Nouzová odpověď",
+          "title": "Poznámky",
+          "withheldClose": "Neuznané řešení",
+          "wrongClaim": "Nesprávné tvrzení"
+        },
         "prompt": "Prompt",
         "promptChars": "{count, plural, one {# znak} few {# znaky} other {# znaků}}",
         "reasoningEffort": "Uvažování",
