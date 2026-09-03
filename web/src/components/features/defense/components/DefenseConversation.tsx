@@ -17,7 +17,7 @@ import { useDefenseCopy } from '../hooks/use-defense-copy'
 import { useDefenseFeedback } from '../hooks/use-defense-feedback'
 import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
 import { useMathildaConsent } from '../hooks/use-mathilda-consent'
-import { resolveCapsStatus, resolveComposerState } from '../model/defense-composer-state'
+import { resolveComposerState, resolveHistoryStatus } from '../model/defense-composer-state'
 import { draftTurn } from '../model/defense-conversation-model'
 import {
   defenseDraftStorageKey,
@@ -122,7 +122,6 @@ function DefenseConversationForTarget({
     initialResumeSettled,
     sessionsFailed,
     retrySessions,
-    isRetryingSessions,
     currentSessionId,
     currentFeedback,
     reports,
@@ -194,9 +193,9 @@ function DefenseConversationForTarget({
   const canAnswer =
     canGiveFeedback && (shownTurns.length >= TURNS_WORTH_ANSWERING_FOR || currentFeedback !== null)
 
-  // Whether a turn has somewhere to go. A conversation opened on a named defense writes nothing until its resume
-  // settles: a turn sent before it would open a second defense beside the one being continued.
-  const canCompose = opening.kind !== 'named' || initialResumeSettled
+  // Whether the conversation asked for on open has had its chance to be opened, which only a named
+  // opening waits on: no other kind names a conversation a turn could land in the wrong one of
+  const isResumeSettled = opening.kind !== 'named' || initialResumeSettled
 
   // How many more messages the conversation has room for, or null while the caps are unknown. One still in
   // flight counts against it: it is written the moment it's sent, whatever the examiner then makes of it
@@ -205,8 +204,8 @@ function DefenseConversationForTarget({
       ? null
       : limits.maxMessagesPerDefense - shownTurns.filter((turn) => turn.role === 'candidate').length
 
-  // Where the caps a message is held to stand, the read's own failure included
-  const capsStatus = resolveCapsStatus({ limits, isError: sessionsFailed })
+  // Where this problem's defense history stands, the read's own failure included
+  const historyStatus = resolveHistoryStatus({ limits, isError: sessionsFailed })
 
   // Whether a fresh defense would have anything to be argued against
   const canStartFresh = isSubjectReachable(problem.target, locale)
@@ -345,12 +344,12 @@ function DefenseConversationForTarget({
 
         <DefenseComposer
           state={resolveComposerState({
-            isConversationReady: canCompose,
             isAuthSettled: isAuthLoaded,
             // Undefined until the account settles, which `isAuthSettled` is the answer to
             isSignedIn: isSignedIn === true,
+            historyStatus,
+            isResumeSettled,
             consentStatus: consent.status,
-            capsStatus,
             isThinking,
             messagesLeft,
             competition: competition === null ? null : { isGraded: competition.isGraded },
@@ -366,9 +365,7 @@ function DefenseConversationForTarget({
           onAcceptConsent={consent.accept}
           isAcceptingConsent={consent.isAccepting}
           onRetryConsent={consent.retry}
-          onRetryCaps={retrySessions}
-          isRetryingCaps={isRetryingSessions}
-          isRetryingConsent={consent.isRetrying}
+          onRetryHistory={retrySessions}
           editorMinHeightPx={COMPOSER_MIN_HEIGHT_PX}
         />
       </div>

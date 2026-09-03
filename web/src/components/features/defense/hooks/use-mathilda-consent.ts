@@ -33,8 +33,6 @@ type UseMathildaConsentResult = {
   isAccepting: boolean
   /** Reads the acknowledgement again after a failed read. Referentially stable for the hook's lifetime. */
   retry: () => void
-  /** Whether a re-read is in flight. */
-  isRetrying: boolean
 }
 
 /**
@@ -61,7 +59,6 @@ export function useMathildaConsent(): UseMathildaConsentResult {
   const {
     data: consent,
     uiState,
-    isFetching,
     retry,
   } = useApiQuery({
     queryKey: consentKey,
@@ -103,6 +100,5 @@ export function useMathildaConsent(): UseMathildaConsentResult {
     accept,
     isAccepting: mutation.isPending,
     retry,
-    isRetrying: isFetching,
   }
 }

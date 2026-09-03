@@ -478,7 +478,6 @@
     "SK": "Slovakia"
   },
   "defense": {
-    "capsUnavailable": "We couldn't load this conversation, so we don't know how long a message may be.",
     "competitionClockDivider": "Time's up",
     "competitionClockSpent": "This no longer counts towards the competition.",
     "consentAccept": "Got it",
@@ -489,6 +488,7 @@
     "consentUnavailable": "We couldn't check whether you've already agreed to talk to Mathilda.",
     "conversationFull": "This conversation has reached its limit. Start a new one, or rewind this one (the messages you drop are gone for good).",
     "conversationFullCompetition": "This conversation has had too many messages. You can start another one though, it all gets marked together.",
+    "conversationUnavailable": "We couldn't load your conversations for this problem.",
     "deleteAuthReason": "remove a conversation",
     "deletedHandout": "Deleted handout",
     "deleteError": "The conversation couldn't be removed.",

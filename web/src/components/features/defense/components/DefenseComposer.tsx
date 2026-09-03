@@ -60,12 +60,8 @@ type DefenseComposerProps = {
   isAcceptingConsent: boolean
   /** Reads the acknowledgement again after the read for it failed. */
   onRetryConsent: () => void
-  /** Whether that re-read is in flight. */
-  isRetryingConsent: boolean
-  /** Reads the caps again after the read for them failed. */
-  onRetryCaps: () => void
-  /** Whether a read of the caps is in flight. */
-  isRetryingCaps: boolean
+  /** Reads this problem's defense history again after the read for it failed. */
+  onRetryHistory: () => void
   /** How tall the empty editor stands. */
   editorMinHeightPx: number
 }
@@ -86,9 +82,7 @@ export function DefenseComposer({
   onAcceptConsent,
   isAcceptingConsent,
   onRetryConsent,
-  isRetryingConsent,
-  onRetryCaps,
-  isRetryingCaps,
+  onRetryHistory,
   editorMinHeightPx,
 }: DefenseComposerProps) {
   // Defense-surface copy
@@ -115,6 +109,22 @@ export function DefenseComposer({
         </div>
       )
 
+    // Nothing came back about this problem's conversations, so there is nothing to write a turn into
+    case 'conversationUnavailable':
+      return (
+        <div className="flex flex-col items-center gap-3 py-3 text-center">
+          {/* What could not be read */}
+          <p className="max-w-[700px] text-pretty text-sm text-muted">
+            {t('conversationUnavailable')}
+          </p>
+
+          {/* Asking again */}
+          <Button variant="secondary" size="sm" onClick={onRetryHistory}>
+            {tActions('retry')}
+          </Button>
+        </div>
+      )
+
     // Nobody who has said what they are agreeing to
     case 'consentRequired':
       return <MathildaConsentGate onAccept={onAcceptConsent} isAccepting={isAcceptingConsent} />
@@ -127,26 +137,7 @@ export function DefenseComposer({
           <p className="max-w-[700px] text-pretty text-sm text-muted">{t('consentUnavailable')}</p>
 
           {/* Asking again */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onRetryConsent}
-            loading={isRetryingConsent}
-          >
-            {tActions('retry')}
-          </Button>
-        </div>
-      )
-
-    // Nothing that could say how long a turn may be or how many are left
-    case 'capsUnknown':
-      return (
-        <div className="flex flex-col items-center gap-3 py-3 text-center">
-          {/* What could not be found out */}
-          <p className="max-w-[700px] text-pretty text-sm text-muted">{t('capsUnavailable')}</p>
-
-          {/* Asking again */}
-          <Button variant="secondary" size="sm" onClick={onRetryCaps} loading={isRetryingCaps}>
+          <Button variant="secondary" size="sm" onClick={onRetryConsent}>
             {tActions('retry')}
           </Button>
         </div>

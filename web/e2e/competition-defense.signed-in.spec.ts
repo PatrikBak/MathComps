@@ -143,6 +143,59 @@ test.describe('the conversation inside a competition', () => {
     await expect(page.getByText(chatCopy.consentUnavailable)).toHaveCount(0)
   })
 
+  test('says it could not read the conversation rather than leaving the student waiting', async ({
+    page,
+  }) => {
+    // A student inside a competition, with a conversation already saved on its first problem
+    await installHostedBackend(page, 'running')
+
+    // Whether the read carrying that conversation gets through
+    let isHistoryReachable = false
+
+    // Registered after the backend standing in behind it, which is what puts this one first
+    await page.route(`${BACKEND_ORIGIN}/defense/sessions/problems/*`, async (route) => {
+      // Anything the outage is not about goes on to the backend behind this
+      if (isHistoryReachable) {
+        await route.fallback()
+        return
+      }
+
+      // An aborted connection is what a student sees when nothing is there to answer them
+      await route.abort('connectionrefused')
+    })
+
+    // Open the competition's area
+    await page.goto(areaPath(COMPETITION_SLUG))
+
+    // And the conversation the entry already holds
+    await openExistingDefense(page)
+
+    // The chat says what it could not read
+    await expect(page.getByText(chatCopy.conversationUnavailable)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Rather than a wait on a read that has already given up
+    await expect(page.getByText(chatCopy.libraryLoading)).toHaveCount(0)
+
+    // With nowhere to write in the meantime
+    await expect(page.locator('textarea')).toHaveCount(0)
+
+    // Something to answer the next read
+    isHistoryReachable = true
+
+    // Asked once more
+    await page.getByRole('button', { name: actionsCopy.retry }).click()
+
+    // After which the conversation they asked for opens on what was already argued in it
+    await expect(page.getByText('I claim the only solutions are')).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // And it is theirs to carry on with
+    await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
+  })
+
   test('keeps a half-written turn through a reload', async ({ page }) => {
     // A student inside a competition
     await installHostedBackend(page, 'running')

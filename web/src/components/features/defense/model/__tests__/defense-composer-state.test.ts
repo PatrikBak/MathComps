@@ -2,19 +2,19 @@ import { describe, expect, it } from 'vitest'
 
 import type { DefenseComposerInput } from '../defense-composer-state'
 import {
-  resolveCapsStatus,
   resolveComposerState,
   resolveConsentStatus,
+  resolveHistoryStatus,
 } from '../defense-composer-state'
 
 describe('resolveComposerState', () => {
   /** A signed-in reader whose conversation is settled and has room left in it. */
   const READY: DefenseComposerInput = {
-    isConversationReady: true,
     isAuthSettled: true,
     isSignedIn: true,
+    historyStatus: 'read',
+    isResumeSettled: true,
     consentStatus: 'given',
-    capsStatus: 'known',
     isThinking: false,
     messagesLeft: 12,
     competition: null,
@@ -150,27 +150,52 @@ describe('resolveComposerState', () => {
     })
   })
 
-  it('says so when the caps a message is held to could not be read', () => {
-    // A message written against no cap at all is one the server is free to refuse
-    expect(resolveComposerState({ ...READY, capsStatus: 'unknown', messagesLeft: null })).toEqual({
-      kind: 'capsUnknown',
+  it('waits while the conversation the reader asked to carry on is still being opened', () => {
+    // A turn taken before the named conversation is open would open a second one beside it
+    expect(resolveComposerState({ ...READY, isResumeSettled: false })).toEqual({
+      kind: 'loading',
     })
   })
 
-  it('asks for the acknowledgement ahead of admitting it lost the caps', () => {
+  it('says so when the defense history behind the conversation could not be read', () => {
+    expect(resolveComposerState({ ...READY, historyStatus: 'unavailable' })).toEqual({
+      kind: 'conversationUnavailable',
+    })
+  })
+
+  it('says the history could not be read rather than waiting on the resume it would have settled', () => {
+    // Waiting here is a spinner nothing ends: the read that settles the opening is the one that just
+    // failed, so nothing further is coming on its own
+    expect(
+      resolveComposerState({ ...READY, historyStatus: 'unavailable', isResumeSettled: false })
+    ).toEqual({ kind: 'conversationUnavailable' })
+  })
+
+  it('asks for an account ahead of admitting it could not read the history', () => {
+    // Nobody is signed in for the read to have been about, and no conversation of theirs was ever asked for
+    expect(
+      resolveComposerState({ ...READY, isSignedIn: false, historyStatus: 'unavailable' })
+    ).toEqual({ kind: 'signInRequired' })
+  })
+
+  it('admits it could not read the history ahead of asking for the acknowledgement', () => {
+    // The acknowledgement gates a turn there is nowhere to write, and its own gate would send the reader
+    // at a second endpoint when the one that failed is the one they need
     expect(
       resolveComposerState({
         ...READY,
         consentStatus: 'missing',
-        capsStatus: 'unknown',
+        historyStatus: 'unavailable',
         messagesLeft: null,
       })
-    ).toEqual({ kind: 'consentRequired' })
+    ).toEqual({ kind: 'conversationUnavailable' })
   })
 
-  it('opens without saying how much room is left when nothing knows the caps', () => {
+  it('opens without saying how much room is left while the history is still coming', () => {
     // The warning is a number, so a composer with no number to show simply does not show one
-    expect(resolveComposerState({ ...READY, capsStatus: 'loading', messagesLeft: null })).toEqual({
+    expect(
+      resolveComposerState({ ...READY, historyStatus: 'loading', messagesLeft: null })
+    ).toEqual({
       kind: 'open',
       messagesLeft: null,
     })
@@ -208,7 +233,7 @@ describe('resolveConsentStatus', () => {
   })
 })
 
-describe('resolveCapsStatus', () => {
+describe('resolveHistoryStatus', () => {
   /** The caps a defense here is held to. */
   const LIMITS = {
     maxCandidateChars: 4000,
@@ -216,19 +241,19 @@ describe('resolveCapsStatus', () => {
     maxMessagesPerDefense: 50,
   }
 
-  it('reads the caps off the answer that carries them', () => {
-    expect(resolveCapsStatus({ limits: LIMITS, isError: false })).toBe('known')
+  it('reads the history off the answer that carries it', () => {
+    expect(resolveHistoryStatus({ limits: LIMITS, isError: false })).toBe('read')
   })
 
-  it('keeps the caps it has through a read that failed after them', () => {
-    expect(resolveCapsStatus({ limits: LIMITS, isError: true })).toBe('known')
+  it('keeps the answer it has through a read that failed after it', () => {
+    expect(resolveHistoryStatus({ limits: LIMITS, isError: true })).toBe('read')
   })
 
-  it('says it could not find them out when the failure is all there is', () => {
-    expect(resolveCapsStatus({ limits: null, isError: true })).toBe('unknown')
+  it('says it could not be read when the failure is all there is', () => {
+    expect(resolveHistoryStatus({ limits: null, isError: true })).toBe('unavailable')
   })
 
   it('waits while nothing has come back and nothing has failed', () => {
-    expect(resolveCapsStatus({ limits: null, isError: false })).toBe('loading')
+    expect(resolveHistoryStatus({ limits: null, isError: false })).toBe('loading')
   })
 })

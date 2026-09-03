@@ -478,7 +478,6 @@
     "SK": "Slovensko"
   },
   "defense": {
-    "capsUnavailable": "Nepodarilo sa nám načítať túto konverzáciu, takže nevieme, aká dlhá môže byť tvoja správa.",
     "competitionClockDivider": "Čas vypršal",
     "competitionClockSpent": "Toto sa už do súťaže nepočíta.",
     "consentAccept": "Rozumiem",
@@ -489,6 +488,7 @@
     "consentUnavailable": "Nepodarilo sa nám načítať tvoje potvrdenie k rozhovoru s Mathildou.",
     "conversationFull": "Táto konverzácia dosiahla svoj limit. Začni novú alebo sa v tejto vráť späť (prídeš však o správy, tie sa natrvalo zmažú).",
     "conversationFullCompetition": "V tejto konverzácii už bolo priveľa správ. Môžeš ale začať ďalšiu, hodnotiť sa bude všetko spolu.",
+    "conversationUnavailable": "Nepodarilo sa nám načítať tvoje konverzácie k tejto úlohe.",
     "deleteAuthReason": "odstránenie konverzácie",
     "deletedHandout": "Odstránený materiál",
     "deleteError": "Konverzáciu sa nepodarilo odstrániť.",
