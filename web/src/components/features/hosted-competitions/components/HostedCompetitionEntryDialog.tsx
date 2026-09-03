@@ -119,7 +119,8 @@ export function HostedCompetitionEntryDialog({
             })
       }
       showCloseButton={false}
-      className="max-w-lg hyphens-none"
+      // The rules are the longest read the dialog holds, so they get more width
+      className={cn('hyphens-none', needsRulesAccept ? 'max-w-2xl' : 'max-w-lg')}
       // Nothing is focused ahead of the reader on a dialog whose primary button cannot be undone
       focusPanelOnOpen
     >

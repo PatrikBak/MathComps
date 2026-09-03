@@ -372,8 +372,8 @@
     "dialog": {
       "back": "Back",
       "confirm": "Start the clock",
-      "consequence": "The clock starts when you press the button. Nothing you write to Mathilda can be taken back or deleted.",
-      "consequencePractice": "The clock starts when you press the button. You can take the practice competition again whenever you like.",
+      "consequence": "The clock starts when you press the button. There is no second attempt at this competition.",
+      "consequencePractice": "The clock starts when you press the button. The practice competition is not graded and you can take it again any time.",
       "forfeit": "Give up and see the problems",
       "forfeitConfirm": "Give up",
       "forfeitConsequence": "You get the problems now and you will not appear in the results. You will not be able to compete in this category.",
@@ -400,7 +400,7 @@
         "Start your clock whenever you like inside the entry window, usually two weeks ⏲️",
         "From there you have a limited time to solve the problems 📋",
         "You present your solutions to Mathilda and she gives you feedback 🤖",
-        "A person reads your conversations and awards the points, up to 6 per problem. Ties are broken by the time of your last message on each problem, so end a conversation once the problem is done 🔢",
+        "A person reads your conversations and awards the points, up to 6 per problem. Ties are broken by the time of your last message on each problem, so stop writing about a problem once you are done with it 🔢",
         "Send a partial solution, or ask Mathilda for help if you cannot start at all. A point she helped you to is worth half a point, so trying is always worth it 🙂"
       ],
       "title": "How does it work?"
@@ -410,8 +410,8 @@
     "noCompetitions": "There are no competitions here yet.",
     "officialSolution": "Official solution",
     "opensIn": "opens in {remaining}",
-    "practiceIntro": "See what a real competition feels like. This practice one works the same way, except nothing is graded and you can run it again and pick up your earlier defenses.",
-    "practiceIntroDismiss": "Got it",
+    "practiceConversations": "Conversations about each problem are saved as you go, so you can close one and come back to it any time. You can have several conversations about one problem if you want a clean slate.",
+    "practiceConversationsDismiss": "Got it",
     "practiceNote": "A practice competition with easy problems, for trying out how the whole thing works.",
     "problemCount": "{count, plural, one {# problem} other {# problems}}",
     "problemHeading": "Problem {position}",
@@ -455,7 +455,7 @@
     "startDefense": "Write your solution",
     "try": "Try it",
     "tryAgain": "Take it again",
-    "typedSolutionsOnly": "You type your solution in here. Photos of handwritten work are not supported yet."
+    "typedSolutionsOnly": "You type your solution in here, photos of handwritten work we would rather not support, AI reads handwriting fairly inaccurately."
   },
   "contact": {
     "email": "Email",
@@ -512,6 +512,7 @@
     "feedbackThanks": "Thanks, that helps us make her better.",
     "feedbackTitle": "How's it going?",
     "feedbackWithdrawn": "Removed.",
+    "freshStartNote": "Mathilda starts from scratch here. Earlier conversations stay in History.",
     "history": "History",
     "historyError": "Couldn't load your past conversations.",
     "jumpToLatest": "Jump to latest",

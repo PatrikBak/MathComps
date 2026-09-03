@@ -216,6 +216,9 @@ function DefenseConversationForTarget({
   // nothing to start over.
   const canStartNew = canStartFresh && (currentSessionId !== null || turns.length > 0)
 
+  // Whether this is a blank conversation opened beside ones already saved
+  const isFreshBesideSaved = currentSessionId === null && turns.length === 0 && sessions.length > 0
+
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
     examiner: MATHILDA_NAME,
@@ -307,8 +310,18 @@ function DefenseConversationForTarget({
         // How long the examiner took is tuning data, and reads to a student as an apology for the wait
         turnDurationsMs={null}
         footer={
-          canAnswer ? (
-            <DefenseFeedbackPrompt isAnswered={currentFeedback !== null} onOpen={answer.open} />
+          canAnswer || isFreshBesideSaved ? (
+            <div className="flex flex-col items-center gap-2">
+              {/* How the conversation went */}
+              {canAnswer && (
+                <DefenseFeedbackPrompt isAnswered={currentFeedback !== null} onOpen={answer.open} />
+              )}
+
+              {/* What starting over leaves behind */}
+              {isFreshBesideSaved && (
+                <p className="text-center text-[11px] text-muted">{t('freshStartNote')}</p>
+              )}
+            </div>
           ) : null
         }
       />

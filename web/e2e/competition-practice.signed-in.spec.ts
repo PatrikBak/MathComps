@@ -76,7 +76,9 @@ test.describe('the practice run', () => {
     await expect(page.getByText(areaCopy.clockSpent)).toHaveCount(0)
   })
 
-  test('introduces the practice run once and then stops', async ({ page }) => {
+  test('clears the practice tips for the view and says them again on a fresh read', async ({
+    page,
+  }) => {
     // A student holding no practice entry yet
     await installHostedBackend(page, 'ready')
 
@@ -89,26 +91,26 @@ test.describe('the practice run', () => {
     // And confirm the dialog
     await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
 
-    // What the practice run says about itself
-    const intro = page.getByText(areaCopy.practiceIntro)
+    // What the practice run says about the conversations it holds
+    const tips = page.getByText(areaCopy.practiceConversations)
 
     // Which is said on arrival
-    await expect(intro).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+    await expect(tips).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
-    // Dismiss it, the reader having read it
-    await page.getByRole('button', { name: areaCopy.practiceIntroDismiss }).click()
+    // Clear them off the page, the reader having read them
+    await page.getByRole('button', { name: areaCopy.practiceConversationsDismiss }).click()
 
-    // After which the intro is gone
-    await expect(intro).toHaveCount(0)
+    // After which they are gone
+    await expect(tips).toHaveCount(0)
 
-    // A reload, which a component-local state would not survive
+    // A reload, which is a fresh read of the run
     await page.reload()
 
     // And once the area is back
     await expect(page.getByRole('article').first()).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
-    // The intro is still gone
-    await expect(intro).toHaveCount(0)
+    // The tips are there again, the dismissal having lasted only for that view
+    await expect(tips).toBeVisible()
   })
 
   test('says nothing about a result when a practice clock runs out', async ({ page }) => {

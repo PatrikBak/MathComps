@@ -1,13 +1,12 @@
 'use client'
 
-import { useDisclosure, useLocalStorage } from '@mantine/hooks'
+import { useDisclosure } from '@mantine/hooks'
 import { useLocale, useTranslations } from 'next-intl'
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { Modal } from '@/components/shared/components/Modal'
-import { PRACTICE_INTRO_DISMISSED_STORAGE_KEY } from '@/constants/local-storage-constants'
 import { useAddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 import type { Locale } from '@/i18n/i18n'
 import type { QueryUiState } from '@/lib/query-ui-state'
@@ -51,11 +50,9 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
   // Which problem's official solution is open, one answer for the whole set
   const solutionDisclosure = useAddressedDisclosure(SOLUTION_PARAM)
 
-  // Whether the practice run has already introduced itself to this browser
-  const [isIntroDismissed, setIsIntroDismissed] = useLocalStorage<boolean>({
-    key: PRACTICE_INTRO_DISMISSED_STORAGE_KEY,
-    defaultValue: false,
-  })
+  // Whether the reader has cleared the practice run's tips off the page. Held for this view alone, so a
+  // later run says them again
+  const [areTipsDismissed, setAreTipsDismissed] = useState(false)
 
   // Everything the page says about this competition and the entry spent on it
   const area = useCompetitionArea(competitionSlug)
@@ -112,13 +109,13 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
         </Modal>
       )}
 
-      {/* What the practice run is, said once to whoever has not met it before */}
-      {!isGraded && !isIntroDismissed && (
+      {/* How the conversations behave, said on the practice run */}
+      {!isGraded && !areTipsDismissed && (
         <AreaNote>
-          <p>{t('practiceIntro')}</p>
+          <p>{t('practiceConversations')}</p>
 
-          <Button variant="link" size="sm" onClick={() => setIsIntroDismissed(true)}>
-            {t('practiceIntroDismiss')}
+          <Button variant="link" size="sm" onClick={() => setAreTipsDismissed(true)}>
+            {t('practiceConversationsDismiss')}
           </Button>
         </AreaNote>
       )}
