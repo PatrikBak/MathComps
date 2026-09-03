@@ -20,20 +20,25 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// the gate held throughout so a user's concurrent turns can't each clear the spend check against the same
 /// pre-write total.
 /// </summary>
-/// <param name="dbContextFactory">The factory minting each operation's database context.</param>
-/// <param name="examiner">The engine that produces the examiner's reply.</param>
 /// <param name="limits">The input, message, and spend caps.</param>
+/// <param name="targetGuard">Says whether a student may argue what the target names.</param>
+/// <param name="contentResolver">Looks up what a new session's examiner is told about the problem.</param>
+/// <param name="defenseCopy">The examiner's own lines, in the student's language.</param>
 /// <param name="examinerConfigSnapshotProvider">The examiner engine's config snapshot, stamped onto each new
 /// session.</param>
 /// <param name="turnGate">Serializes a single user's turns.</param>
-/// <param name="contentResolver">Looks up what a new session's examiner is told about the problem.</param>
-/// <param name="defenseCopy">The examiner's own lines, in the student's language.</param>
-/// <param name="targetGuard">Says whether a student may argue what the target names.</param>
+/// <param name="dbContextFactory">The factory minting each operation's database context.</param>
+/// <param name="examiner">The engine that produces the examiner's reply.</param>
 /// <param name="localization">Resolves the localized names a competition problem is listed under.</param>
 public class DefenseSessionService(
-    IDbContextFactory<MathCompsDbContext> dbContextFactory, IExaminer examiner, IOptions<DefenseLimits> limits,
-    IExaminerConfigSnapshotProvider examinerConfigSnapshotProvider, IDefenseUserTurnGate turnGate,
-    IDefenseContentResolver contentResolver, IDefenseCopy defenseCopy, IDefenseTargetGuard targetGuard,
+    IOptions<DefenseLimits> limits,
+    IDefenseTargetGuard targetGuard,
+    IDefenseContentResolver contentResolver,
+    IDefenseCopy defenseCopy,
+    IExaminerConfigSnapshotProvider examinerConfigSnapshotProvider,
+    IDefenseUserTurnGate turnGate,
+    IDbContextFactory<MathCompsDbContext> dbContextFactory,
+    IExaminer examiner,
     IMetadataLocalizationService localization)
     : IDefenseSessionService
 {
@@ -72,7 +77,7 @@ public class DefenseSessionService(
             ?? throw new DefenseContentNotFoundException();
 
         // Fold the author's hints into the reference so the examiner reads them as staged, earned-only help.
-        var reference = AuthorHintsSection.BuildReference(problem.Reference, problem.Hints);
+        var reference = DefenseReferenceBuilder.BuildReference(problem);
 
         // The examiner's own greeting, in the language the student is working in.
         var opener = defenseCopy.GetOpener(start.Language);

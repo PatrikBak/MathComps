@@ -1,0 +1,1 @@
+You gave away too much: {what_leaked} Redo the reply without revealing it. Don't rephrase the same hint more gently, and don't reach for another object of your own: ask about something the candidate has already written instead.

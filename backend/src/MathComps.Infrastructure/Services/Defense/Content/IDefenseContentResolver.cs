@@ -4,9 +4,8 @@ using MathComps.Domain.Localization;
 namespace MathComps.Infrastructure.Services.Defense.Content;
 
 /// <summary>
-/// Looks up what the examiner is told about a problem from whatever the defense is held against, so a defense
-/// runs on the site's own content rather than on whatever text a caller supplied. Resolution is a point-in-time
-/// read, so an edit to the source reaches the next defense of that problem and never an open one.
+/// Looks up what the examiner is told about a problem, from whatever the defense is held against. Resolution is a
+/// point-in-time read, so an edit to the source reaches the next defense of that problem and never an open one.
 /// </summary>
 public interface IDefenseContentResolver
 {

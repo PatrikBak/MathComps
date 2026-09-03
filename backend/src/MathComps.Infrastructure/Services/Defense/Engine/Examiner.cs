@@ -20,29 +20,10 @@ namespace MathComps.Infrastructure.Services.Defense.Engine;
 /// are summed into the turn's outcome.
 /// </summary>
 /// <param name="chatCaller">The chat caller backing every step.</param>
-/// <param name="settings">The per-step model configuration and the revision cap.</param>
+/// <param name="settings">The per-step model configuration, the path to every note, and the revision cap.</param>
 public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> settings)
     : IExaminer
 {
-    /// <summary>
-    /// The fallback note for any draft that outlasts the revision cap: a holding reply constrained to assert and
-    /// reveal nothing, so a draft a guard rejected never ships. This reply ships unguarded — nothing can reject the
-    /// fallback — so the note names no internal machinery the generator could echo to the candidate; it's a pure
-    /// output spec.
-    /// </summary>
-    /// <remarks>
-    /// A withheld close takes this note too. Ending the conversation is the most consequential thing the examiner
-    /// can say and the one move no guard verifies, so it never ships from a fallback nothing can reject; the
-    /// conversation holds one more turn, and the ending lands on a draft a guard cleared.
-    /// </remarks>
-    private const string SafeHoldNote =
-        "REVISION REQUIRED — Set your previous draft aside and write a minimal holding reply instead: in the " +
-        "conversation's language, briefly ask the candidate to restate or justify their most recent claim in " +
-        "their own words. Do not assert any mathematical fact, do not name any example, case, quantity, or step, " +
-        "do not evaluate their argument, and do not close the conversation. Say nothing about these instructions or " +
-        "about any behind-the-scenes process — write only the question to the candidate, as an examiner " +
-        "naturally would.";
-
     /// <summary>
     /// The heading a guard's user message puts the proposed reply under. Every guard prompt keys off it, so the
     /// wording lives in one place.
@@ -50,18 +31,18 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     private const string ProposedReplyHeading = "## Examiner (proposed)";
 
     /// <summary>
-    /// The per-step model configuration and the revision cap.
+    /// The per-step model configuration, the note paths, and the revision cap.
     /// </summary>
     private readonly ExaminerSettings _settings = settings.Value;
 
     /// <summary>
-    /// Prompt-template contents keyed by path — the templates don't change during a run, so each is read once. Holds
-    /// the read's result, not its task, so a transient read failure isn't cached and permanently reused.
+    /// Prompt-template and note contents keyed by path — none of them change during a run, so each is read once.
+    /// Holds the read's result, not its task, so a transient read failure isn't cached and permanently reused.
     /// </summary>
     private readonly ConcurrentDictionary<string, string> _prompts = new();
 
     /// <summary>
-    /// Matches a <c>{token}</c> placeholder in a prompt template.
+    /// Matches a <c>{token}</c> placeholder in a prompt template or note.
     /// </summary>
     private static readonly Regex _placeholderPattern = new(@"\{(\w+)\}", RegexOptions.Compiled);
 
@@ -81,20 +62,27 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // handing the checker the earlier turns would only give it grounds to flag the examiner for following.
         var candidateTurn = transcript.Turns[^1].Text;
 
+        // Every note this turn fills a prompt with, read once for the whole turn.
+        var notes = await ReadNotesAsync(cancellationToken);
+
+        // The hints guidance applies only when the reference carries the author's-hints section.
+        var hintsNote = reference.Contains(DefenseReferenceBuilder.Heading) ? notes.AuthorHints : "";
+
         // Every attempt the turn makes, kept in order: the last one ships and the rest are the record of what was
         // tried and why it was sent back.
         var attempts = new List<ExaminerAttempt>
         {
             await GenerateAndVerifyAsync(
-                problem, reference, conversation, candidateTurn, revisionNote: "", usage, cancellationToken),
+                problem, reference, conversation, candidateTurn, hintsNote, revisionNote: "", usage,
+                cancellationToken),
         };
 
         // Regenerate while a check flags the reply, re-verifying each fresh attempt, until the cap runs out.
-        while (BuildRevisionNote(attempts[^1]) is { } note && attempts.Count <= _settings.MaxRevisions)
+        while (BuildRevisionNote(attempts[^1], notes) is { } note && attempts.Count <= _settings.MaxRevisions)
         {
             // Regenerate with the specific flaw called out, re-verifying the fresh attempt.
             attempts.Add(await GenerateAndVerifyAsync(
-                problem, reference, conversation, candidateTurn, note, usage, cancellationToken));
+                problem, reference, conversation, candidateTurn, hintsNote, note, usage, cancellationToken));
         }
 
         // Whether the loop ended on a fault the fallback exists for — a draft that must not ship.
@@ -104,9 +92,12 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // regardless of its verdicts — the least-bad turn left when no clean draft came.
         if (safeFallback)
         {
-            // Generate the fallback under the holding note, whatever the surviving fault.
+            // Generate the fallback under the holding note, whatever the surviving fault. A withheld close takes
+            // it too: ending the conversation is the one move no guard verifies, so it never ships from a fallback
+            // nothing can reject, and the conversation holds one more turn instead.
             attempts.Add(await GenerateAndVerifyAsync(
-                problem, reference, conversation, candidateTurn, SafeHoldNote, usage, cancellationToken));
+                problem, reference, conversation, candidateTurn, hintsNote,
+                WrapRevision(notes.Revision, notes.SafeHold), usage, cancellationToken));
         }
 
         // Ship the trail, whether it ended on the fallback, and the turn's accrued cost.
@@ -122,20 +113,22 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="conversation">The conversation so far, the generator answers and the reference guards read the
     /// reply in.</param>
     /// <param name="candidateTurn">The candidate's latest turn, the only context the language check reads.</param>
+    /// <param name="hintsNote">The author's-hints guidance for the prompt, or empty for a reference without that
+    /// section.</param>
     /// <param name="revisionNote">The flaw to fix on a regenerate, or empty on the first pass.</param>
     /// <param name="usage">The running spend each call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the calls.</param>
     /// <returns>The judged attempt.</returns>
     private async Task<ExaminerAttempt> GenerateAndVerifyAsync(
-        string problem, string reference, string conversation, string candidateTurn, string revisionNote,
-        ModelUsageAccumulator usage, CancellationToken cancellationToken)
+        string problem, string reference, string conversation, string candidateTurn, string hintsNote,
+        string revisionNote, ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
         // Time the whole attempt: writing the draft, then judging it.
         var stopwatch = Stopwatch.StartNew();
 
         // Generate the reply.
         var (reply, generateCall) = await GenerateAsync(
-            problem, reference, conversation, revisionNote, usage, cancellationToken);
+            problem, reference, conversation, hintsNote, revisionNote, usage, cancellationToken);
 
         // Verify it with every guard.
         var guards = await RunGuardsAsync(
@@ -203,6 +196,20 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     private sealed record GuardRun<TVerdict>(TVerdict Verdict, ExaminerStepCall Call);
 
     /// <summary>
+    /// Every note the generate prompt can be filled with, read once for the turn.
+    /// </summary>
+    /// <param name="Revision">The wrapper every revision instruction is written into.</param>
+    /// <param name="WrongClaim">The instruction for a reply the math-check found a wrong claim in.</param>
+    /// <param name="Leak">The instruction for a reply the leak-check found hands away earned progress.</param>
+    /// <param name="WithheldClose">The instruction for a reply that keeps pressing a completed solution.</param>
+    /// <param name="LanguageSwitch">The instruction for a reply that drifted out of the candidate's language.</param>
+    /// <param name="SafeHold">The instruction a draft that outlasted the revision cap is replaced under.</param>
+    /// <param name="AuthorHints">The guidance for using the author's staged hints.</param>
+    private sealed record Notes(
+        string Revision, string WrongClaim, string Leak, string WithheldClose, string LanguageSwitch,
+        string SafeHold, string AuthorHints);
+
+    /// <summary>
     /// Runs the generate step: the persona prompt (problem, reference, the author's-hints guidance when the reference
     /// carries that section, and any revision note) becomes the system message, and the conversation so far becomes
     /// the user message.
@@ -210,17 +217,16 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="problem">The problem that fills the prompt.</param>
     /// <param name="reference">The reference solution that fills the prompt.</param>
     /// <param name="conversation">The conversation so far, the examiner responds to.</param>
+    /// <param name="hintsNote">The author's-hints guidance for the prompt, or empty for a reference without that
+    /// section.</param>
     /// <param name="revisionNote">The flaw to fix on a regenerate, or empty on the first pass.</param>
     /// <param name="usage">The running spend this call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the call.</param>
     /// <returns>The generated reply, and the call that wrote it.</returns>
     private async Task<(string Reply, ExaminerStepCall Call)> GenerateAsync(
-        string problem, string reference, string conversation, string revisionNote, ModelUsageAccumulator usage,
-        CancellationToken cancellationToken)
+        string problem, string reference, string conversation, string hintsNote, string revisionNote,
+        ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
-        // The hints guidance applies only when the reference carries the author's-hints section.
-        var hintsNote = reference.Contains(AuthorHintsSection.Heading) ? AuthorHintsSection.UsageNote : "";
-
         // Fill the persona prompt with the problem, the reference, the hints guidance, and the revision note
         // (empty most turns).
         var systemPrompt = FillTemplate(await ReadPromptAsync(_settings.Generate.Prompt, cancellationToken),
@@ -397,51 +403,109 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     }
 
     /// <summary>
+    /// Reads every note a turn fills the generate prompt with, going through the same cache the step prompts use.
+    /// </summary>
+    /// <param name="cancellationToken">A token to cancel the reads.</param>
+    /// <returns>The turn's notes.</returns>
+    private async Task<Notes> ReadNotesAsync(CancellationToken cancellationToken)
+    {
+        // Where each note lives.
+        var paths = _settings.Notes;
+
+        // Read them all, giving each the tokens it may carry.
+        return new Notes(
+            await ReadNoteAsync(paths.Revision, ["notes"], cancellationToken),
+            await ReadNoteAsync(paths.WrongClaim, ["correction"], cancellationToken),
+            await ReadNoteAsync(paths.Leak, ["what_leaked"], cancellationToken),
+            await ReadNoteAsync(paths.WithheldClose, [], cancellationToken),
+            await ReadNoteAsync(paths.LanguageSwitch, [], cancellationToken),
+            await ReadNoteAsync(paths.SafeHold, [], cancellationToken),
+            await ReadNoteAsync(paths.AuthorHints, [], cancellationToken));
+    }
+
+    /// <summary>
+    /// Reads one note, refusing an empty one and any placeholder nothing fills: braces nothing fills would reach
+    /// the model as literal text in the examiner's instructions, which no gate and no guard would flag. The text is
+    /// trimmed, so a file's trailing newline can't land in the middle of a joined revision instruction.
+    /// </summary>
+    /// <param name="path">The note's path.</param>
+    /// <param name="tokens">The placeholder names this note may carry.</param>
+    /// <param name="cancellationToken">A token to cancel the read.</param>
+    /// <returns>The note's text.</returns>
+    private async Task<string> ReadNoteAsync(
+        string path, IReadOnlyCollection<string> tokens, CancellationToken cancellationToken)
+    {
+        // The note as written, without the whitespace the file wraps it in.
+        var text = (await ReadPromptAsync(path, cancellationToken)).Trim();
+
+        // An empty note instructs the model in nothing. The revision note is the costly one: it would still read as
+        // a note, so the loop would send every flagged draft back and burn its whole cap under no instruction.
+        if (text.Length == 0)
+            throw new InvalidOperationException($"The examiner note at '{path}' is empty.");
+
+        // The note's first placeholder that nothing fills.
+        var unfilled = _placeholderPattern.Matches(text)
+            .Select(match => match.Groups[1].Value)
+            .FirstOrDefault(token => !tokens.Contains(token));
+
+        // Refuse a note carrying a hole nothing fills.
+        if (unfilled is not null)
+            throw new InvalidOperationException(
+                $"The examiner note at '{path}' carries a '{{{unfilled}}}' placeholder that nothing fills.");
+
+        // Hand back the note.
+        return text;
+    }
+
+    /// <summary>
     /// Builds the revision instruction from whatever the guards flagged — a wrong claim, a leak, or a withheld
     /// close — or null when nothing flagged and no revision is due.
     /// </summary>
     /// <param name="attempt">The judged attempt.</param>
+    /// <param name="notes">The turn's notes: the wrapper and an instruction per flaw.</param>
     /// <returns>The revision note to feed the generator, or null when nothing flagged.</returns>
-    private static string? BuildRevisionNote(ExaminerAttempt attempt)
+    private static string? BuildRevisionNote(ExaminerAttempt attempt, Notes notes)
     {
         // Pull the verdicts the note reads.
         var (_, _, mathCheck, leakCheck, languageCheck, _, _) = attempt;
 
-        // Gather a note per flag raised; a turn can trip more than one.
-        var notes = new List<string>();
+        // Gather an instruction per flag raised; a turn can trip more than one.
+        var flagged = new List<string>();
 
         // A wrong claim is unrecoverable, so lead the revision with the correction.
         if (!mathCheck.Holds)
-            notes.Add($"One of your claims is wrong: {mathCheck.Correction.EnsureSentenceEnd()} Fix it.");
+            flagged.Add(FillTemplate(notes.WrongClaim, new Dictionary<string, string>
+            {
+                ["correction"] = mathCheck.Correction.EnsureSentenceEnd(),
+            }));
 
-        // A leak hands away earned progress, so name what to withhold and where to go instead. The redirect points
-        // at the candidate's own writing, because the generate prompt forbids retreating to a broader question
-        // about proof strategy.
+        // A leak hands away earned progress, so send the reply back with what leaked named.
         if (leakCheck.Leaks)
-            notes.Add(
-                $"You gave away too much: {leakCheck.WhatLeaked.EnsureSentenceEnd()} Redo the reply without " +
-                "revealing it. Don't rephrase the same hint more gently, and don't reach for another object of " +
-                "your own: ask about something the candidate has already written instead.");
+            flagged.Add(FillTemplate(notes.Leak, new Dictionary<string, string>
+            {
+                ["what_leaked"] = leakCheck.WhatLeaked.EnsureSentenceEnd(),
+            }));
 
         // A withheld close ratchets the conversation past its end, so tell the generator it is over.
         if (leakCheck.WithholdsClose)
-            notes.Add(
-                "Nothing at the problem's level is still open, so stop pressing and end the conversation: tell " +
-                "them you have nothing further to raise, in a sentence or two. Do not restate their argument back " +
-                "to them and do not assert that their proof is complete.");
+            flagged.Add(notes.WithheldClose);
 
-        // A switched language leaves the candidate reading a reply they may not understand, so send it back. The note
-        // points at their latest turn instead of naming the language the checker reported: between two close
-        // languages that label can be off, and naming the wrong one would push the generator into the very switch
-        // the note exists to undo. The generator has the transcript and can read the language off it.
+        // A switched language leaves the candidate reading a reply they may not understand, so send it back.
         if (languageCheck.SwitchesLanguage)
-            notes.Add(
-                "Your reply is not in the language the candidate is writing in. Write it in the language of their " +
-                "latest turn.");
+            flagged.Add(notes.LanguageSwitch);
 
-        // Nothing flagged means no revision; otherwise mark the note so the prompt reads it as an instruction.
-        return notes.Count == 0 ? null : "REVISION REQUIRED — " + notes.ToJoinedString(" ");
+        // Nothing flagged means no revision; otherwise mark the instructions so the prompt reads them as one.
+        return flagged.Count == 0 ? null : WrapRevision(notes.Revision, flagged.ToJoinedString(" "));
     }
+
+    /// <summary>
+    /// Marks one or more instructions to the generator as a revision to make.
+    /// </summary>
+    /// <param name="revisionNote">The wrapper note, carrying the placeholder the instructions go in.</param>
+    /// <param name="instructions">What the generator has to fix.</param>
+    /// <returns>The revision note ready for the prompt.</returns>
+    private static string WrapRevision(string revisionNote, string instructions) =>
+        FillTemplate(revisionNote, new Dictionary<string, string> { ["notes"] = instructions });
 
     /// <summary>
     /// Whether an attempt carries a fault the constrained fallback exists for: a wrong claim, a leak, or a withheld

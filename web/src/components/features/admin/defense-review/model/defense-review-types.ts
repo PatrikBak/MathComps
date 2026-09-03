@@ -280,6 +280,41 @@ export type ExaminerStepSnapshot = {
 }
 
 /**
+ * One note's recorded text, uninterpolated.
+ */
+type ExaminerNoteSnapshot = {
+  /** Path to the note. */
+  path?: string
+  /** The note's raw text, as read when this was recorded. */
+  text?: string
+}
+
+/**
+ * The notes the examiner read, for one conversation.
+ */
+export type ExaminerNotesSnapshot = {
+  /** The wrapper every revision instruction was written into. */
+  revision?: ExaminerNoteSnapshot
+  /** The instruction for a reply the math check found a wrong claim in. */
+  wrongClaim?: ExaminerNoteSnapshot
+  /** The instruction for a reply the leak check found hands away earned progress. */
+  leak?: ExaminerNoteSnapshot
+  /** The instruction for a reply that keeps pressing a completed solution. */
+  withheldClose?: ExaminerNoteSnapshot
+  /** The instruction for a reply that drifted out of the student's language. */
+  languageSwitch?: ExaminerNoteSnapshot
+  /** The instruction a draft that outlasted the revision cap was replaced under. */
+  safeHold?: ExaminerNoteSnapshot
+  /** The guidance for using the author's staged hints. */
+  authorHints?: ExaminerNoteSnapshot
+}
+
+/**
+ * One note the examiner reads, by the name the snapshot keys it under.
+ */
+export type ExaminerNote = keyof ExaminerNotesSnapshot
+
+/**
  * The examiner's recorded settings for one conversation. Empty for one held before settings were recorded at all.
  */
 export type ExaminerConfigSnapshot = {
@@ -291,6 +326,8 @@ export type ExaminerConfigSnapshot = {
   leakCheck?: ExaminerStepSnapshot
   /** The step that checks the reply is in the student's language. */
   languageCheck?: ExaminerStepSnapshot
+  /** The notes the examiner read. */
+  notes?: ExaminerNotesSnapshot
   /** How many times a flagged reply may be regenerated. */
   maxRevisions?: number
 }

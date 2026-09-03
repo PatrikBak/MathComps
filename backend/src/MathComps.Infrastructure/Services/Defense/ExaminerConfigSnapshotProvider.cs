@@ -6,9 +6,9 @@ using Microsoft.Extensions.Options;
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
-/// Implements <see cref="IExaminerConfigSnapshotProvider"/> by reading each step's prompt template once at
-/// construction and serializing the result — a singleton, so the snapshot is read from disk once per process
-/// rather than on every session.
+/// Implements <see cref="IExaminerConfigSnapshotProvider"/> by reading every prompt template and note once at
+/// construction and serializing the result. Registered as a singleton, so the snapshot is read from disk once per
+/// process rather than on every session.
 /// </summary>
 /// <param name="settings">The examiner engine's bound settings.</param>
 public class ExaminerConfigSnapshotProvider(IOptions<ExaminerSettings> settings) : IExaminerConfigSnapshotProvider
@@ -17,7 +17,7 @@ public class ExaminerConfigSnapshotProvider(IOptions<ExaminerSettings> settings)
     public string Json { get; } = BuildSnapshot(settings.Value).ToJson(writeIndented: false);
 
     /// <summary>
-    /// Builds the snapshot from the bound settings, reading each step's prompt template.
+    /// Builds the snapshot from the bound settings, reading every prompt template and note.
     /// </summary>
     /// <param name="settings">The examiner engine's bound settings.</param>
     /// <returns>The snapshot ready to serialize.</returns>
@@ -26,6 +26,7 @@ public class ExaminerConfigSnapshotProvider(IOptions<ExaminerSettings> settings)
         BuildStepSnapshot(settings.MathCheck),
         BuildStepSnapshot(settings.LeakCheck),
         BuildStepSnapshot(settings.LanguageCheck),
+        BuildNotesSnapshot(settings.Notes),
         settings.MaxRevisions);
 
     /// <summary>
@@ -42,4 +43,30 @@ public class ExaminerConfigSnapshotProvider(IOptions<ExaminerSettings> settings)
         return new ChatStepConfigSnapshot(
             step.Prompt, promptText, step.Model, step.FallbackModels, step.ReasoningEffort, step.MaxOutputTokens);
     }
+
+    /// <summary>
+    /// Builds the notes' snapshot, reading every one of them. Each is keyed by its
+    /// <see cref="ExaminerNotesSettings"/> property name in camelCase.
+    /// </summary>
+    /// <param name="notes">The bound paths, one per note.</param>
+    /// <returns>The notes' snapshot, keyed by name.</returns>
+    private static IReadOnlyDictionary<string, ExaminerNoteConfigSnapshot> BuildNotesSnapshot(
+        ExaminerNotesSettings notes) => new Dictionary<string, ExaminerNoteConfigSnapshot>
+        {
+            ["revision"] = BuildNoteSnapshot(notes.Revision),
+            ["wrongClaim"] = BuildNoteSnapshot(notes.WrongClaim),
+            ["leak"] = BuildNoteSnapshot(notes.Leak),
+            ["withheldClose"] = BuildNoteSnapshot(notes.WithheldClose),
+            ["languageSwitch"] = BuildNoteSnapshot(notes.LanguageSwitch),
+            ["safeHold"] = BuildNoteSnapshot(notes.SafeHold),
+            ["authorHints"] = BuildNoteSnapshot(notes.AuthorHints),
+        };
+
+    /// <summary>
+    /// Builds one note's snapshot, reading the same file the engine reads it from.
+    /// </summary>
+    /// <param name="path">The note's path.</param>
+    /// <returns>The note's snapshot.</returns>
+    private static ExaminerNoteConfigSnapshot BuildNoteSnapshot(string path) =>
+        new(path, FileUtilities.ReadAppFile(path));
 }

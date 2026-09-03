@@ -149,7 +149,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         });
 
         // A minimal examiner config so the session's snapshot is a real settings object, not null members. The
-        // prompt paths point at the real templates, since the snapshot provider below actually reads them.
+        // paths point at the real templates and notes, since the snapshot provider below actually reads them.
         services.Configure<ExaminerSettings>(examiner =>
         {
             examiner.Generate = new ChatStepSettings { Prompt = "Prompts/generate.txt", Model = "fake/model" };
@@ -157,6 +157,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             examiner.LeakCheck = new ChatStepSettings { Prompt = "Prompts/leak-check.txt", Model = "fake/model" };
             examiner.LanguageCheck =
                 new ChatStepSettings { Prompt = "Prompts/language-check.txt", Model = "fake/model" };
+            examiner.Notes = ExaminerNotesFixture.Shipped();
             examiner.MaxRevisions = 3;
         });
 
