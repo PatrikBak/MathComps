@@ -51,15 +51,14 @@ type UseDefenseConversationResult = DefenseConversationState &
     limits: DefenseLimits | null
     /**
      * Whether the conversation asked for on open has had its chance to be resumed: the history has
-     * loaded and the resume has either happened or been passed over.
+     * loaded and the resume has either happened or been passed over. A read that failed never settles
+     * it, and sessionsFailed is what says so.
      */
     initialResumeSettled: boolean
     /** Whether loading this problem's session history failed. */
     sessionsFailed: boolean
     /** Reads this problem's session history again after a failed read. */
     retrySessions: () => void
-    /** Whether a read of that history is in flight. */
-    isRetryingSessions: boolean
     /** Sends a student turn and folds in the examiner's reply. */
     send: (content: string) => Promise<SendOutcome>
     /** Deletes a session, dropping back to a fresh conversation when it was the open one. */
@@ -256,7 +255,6 @@ export function useDefenseConversation(
     initialResumeSettled,
     sessionsFailed: sessionsState.kind === 'failed',
     retrySessions,
-    isRetryingSessions: isFetchingSessions,
     send,
     stop: model.stop,
     startNew: model.startNew,

@@ -35,9 +35,10 @@ export function resolveConsentStatus(read: ConsentRead): MathildaConsentStatus {
 }
 
 /**
- * How a read of the caps a defense is held to came back.
+ * How the read of this problem's defense history came back. One read carries both the conversations
+ * saved against the problem and the caps a further one is held to.
  */
-type CapsRead = {
+type HistoryRead = {
   /** The caps the last read that got through came back with, null while none has. */
   limits: DefenseLimits | null
   /** Whether the most recent attempt failed. */
@@ -45,26 +46,27 @@ type CapsRead = {
 }
 
 /**
- * Where the caps a defense is held to stand: read, out of reach, or still coming.
+ * Where this problem's defense history stands: read, out of reach, or still coming.
  */
-export type DefenseCapsStatus = 'known' | 'unknown' | 'loading'
+export type DefenseHistoryStatus = 'read' | 'unavailable' | 'loading'
 
 /**
- * Reads where the caps stand off the read that asked.
+ * Reads where this problem's defense history stands off the read that asked for it.
  *
- * @param read - How the read of the caps came back.
+ * @param read - How the read of this problem's defense history came back.
  *
  * @returns What it establishes.
  */
-export function resolveCapsStatus(read: CapsRead): DefenseCapsStatus {
-  // Caps already in hand, which a later read failing does not take back
+export function resolveHistoryStatus(read: HistoryRead): DefenseHistoryStatus {
+  // An answer already in hand, which a later read failing does not take back
   if (read.limits !== null) {
-    return 'known'
+    return 'read'
   }
 
-  // A failure with nothing behind it establishes nothing
+  // A failure with nothing behind it leaves neither a transcript to argue on top of nor a cap to hold a
+  // message to
   if (read.isError) {
-    return 'unknown'
+    return 'unavailable'
   }
 
   // Nothing back yet
@@ -88,6 +90,15 @@ type ComposerSignInRequired = {
 }
 
 /**
+ * This problem's defense history could not be read, so there is neither a conversation to carry on nor a
+ * cap to hold a message to.
+ */
+type ComposerConversationUnavailable = {
+  /** The discriminant. */
+  kind: 'conversationUnavailable'
+}
+
+/**
  * The student has not yet acknowledged what talking to the examiner entails.
  */
 type ComposerConsentRequired = {
@@ -101,14 +112,6 @@ type ComposerConsentRequired = {
 type ComposerConsentUnknown = {
   /** The discriminant. */
   kind: 'consentUnknown'
-}
-
-/**
- * What a message here is held to could not be read.
- */
-type ComposerCapsUnknown = {
-  /** The discriminant. */
-  kind: 'capsUnknown'
 }
 
 /**
@@ -151,9 +154,9 @@ export const MESSAGES_LEFT_TO_ALARM_AT = 1
 export type DefenseComposerState =
   | ComposerLoading
   | ComposerSignInRequired
+  | ComposerConversationUnavailable
   | ComposerConsentRequired
   | ComposerConsentUnknown
-  | ComposerCapsUnknown
   | ComposerFull
   | ComposerOpen
 
@@ -169,18 +172,21 @@ type ComposerCompetitionRun = {
  * What the composer is being asked to be.
  */
 export type DefenseComposerInput = {
-  /** Whether the conversation it writes into has settled. */
-  isConversationReady: boolean
   /** Whether the reader's account is known one way or the other. */
   isAuthSettled: boolean
   /** Whether the reader has an account. */
   isSignedIn: boolean
+  /** Where this problem's defense history stands. */
+  historyStatus: DefenseHistoryStatus
+  /**
+   * Whether the conversation asked for on open has had its chance to be opened, which a fresh opening
+   * has by construction.
+   */
+  isResumeSettled: boolean
   /** Where the reader stands on acknowledging what talking to the examiner entails. */
   consentStatus: MathildaConsentStatus
   /** Whether a reply is in flight. */
   isThinking: boolean
-  /** Where the caps a message here is held to stand. */
-  capsStatus: DefenseCapsStatus
   /** How many messages the conversation has left, or null while the caps are not known. */
   messagesLeft: number | null
   /** The competition run it is being argued inside, or null outside one. */
@@ -195,14 +201,38 @@ export type DefenseComposerInput = {
  * @returns The state to render.
  */
 export function resolveComposerState(input: DefenseComposerInput): DefenseComposerState {
-  // Nothing to write into yet
-  if (!input.isConversationReady || !input.isAuthSettled) {
+  // Still working out who the reader is
+  if (!input.isAuthSettled) {
     return { kind: 'loading' }
   }
 
-  // Nobody to write the turn as, asked ahead of the acknowledgement, which never reads for such a reader
+  // Nobody to write the turn as, asked ahead of every read that needs an account, since none of them
+  // fires for such a reader
   if (!input.isSignedIn) {
     return { kind: 'signInRequired' }
+  }
+
+  // Where this problem's defense history stands, asked ahead of the resume below, which waits on this
+  // very read to settle it
+  switch (input.historyStatus) {
+    // Nothing came back, so there is neither a conversation to carry on nor a cap to write against
+    case 'unavailable':
+      return { kind: 'conversationUnavailable' }
+
+    // Still coming, or in hand: either way the resume below is what decides
+    case 'loading':
+    case 'read':
+      break
+
+    // Every standing is handled above
+    default:
+      return assertNever(input.historyStatus)
+  }
+
+  // A conversation opened on a named defense writes nothing until its resume settles: a turn sent
+  // before it would open a second defense beside the one being continued
+  if (!input.isResumeSettled) {
+    return { kind: 'loading' }
   }
 
   // Where the reader stands on the acknowledgement
@@ -226,22 +256,6 @@ export function resolveComposerState(input: DefenseComposerInput): DefenseCompos
     // Every standing is handled above
     default:
       return assertNever(input.consentStatus)
-  }
-
-  // Where the caps a message is held to stand
-  switch (input.capsStatus) {
-    // The read that carries them failed with nothing behind it, so a message has nothing to be held to
-    case 'unknown':
-      return { kind: 'capsUnknown' }
-
-    // Still coming, or in hand: either way there is an editor to write into
-    case 'loading':
-    case 'known':
-      break
-
-    // Every standing is handled above
-    default:
-      return assertNever(input.capsStatus)
   }
 
   // Every message spent, though a reply still coming is allowed to land
