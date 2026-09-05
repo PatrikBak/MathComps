@@ -37,6 +37,7 @@ async function expectCleanLineStarts(page: Page, label: string): Promise<void> {
   // Open every disclosure, since collapsed prose is never laid out
   await page
     .locator('main details')
+    .filter({ visible: true })
     .evaluateAll((panels) =>
       panels.forEach((panel) => (panel as HTMLDetailsElement).setAttribute('open', ''))
     )
@@ -77,8 +78,10 @@ test.describe('handout prose', () => {
       // Open the handout
       await page.goto(handoutPath)
 
-      // The prose only settles once KaTeX has laid every formula out
-      await expect(page.locator(PROSE_BLOCKS).first()).toBeVisible({ timeout: RENDER_TIMEOUT_MS })
+      // The prose only settles once KaTeX has laid every formula out, and only the shown copy of
+      // the page counts, since React streams a hidden duplicate of it before swapping the real one in
+      const prose = page.locator(PROSE_BLOCKS).filter({ visible: true })
+      await expect(prose.first()).toBeVisible({ timeout: RENDER_TIMEOUT_MS })
       await expect(page.locator('.katex').first()).toBeAttached({ timeout: RENDER_TIMEOUT_MS })
 
       // Audit the handout at every width
