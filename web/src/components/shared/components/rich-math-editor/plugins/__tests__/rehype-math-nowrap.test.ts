@@ -82,6 +82,14 @@ describe('rehypeMathNowrap', () => {
     expect(html).toContain('</span>)</span>')
   })
 
+  it('pulls a period after a bolded formula inside the bold run', async () => {
+    // Render a bolded formula with the sentence's period written outside the bold
+    const html = await render('a **$x$**. more')
+
+    // The period renders inside the bold, right after the formula it belongs to
+    expect(html).toContain('.</span></strong> more')
+  })
+
   it('does not wrap display math', async () => {
     // Render a standalone display-math block
     const html = await render('$$x$$')

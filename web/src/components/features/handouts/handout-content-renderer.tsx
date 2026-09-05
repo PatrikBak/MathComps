@@ -4,11 +4,14 @@ import React from 'react'
 import type {
   HandoutImage,
   ListStyleType,
+  MathBlock,
   RawContentBlock,
 } from '@/components/features/handouts/handout-content-types'
 import FootnoteRef from '@/components/math/FootnoteRef'
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { parseDimensions } from '@/components/math/utils/dimension-parser'
+import type { MathGlueReader, MathGlueResult } from '@/components/math/utils/math-nowrap'
+import { MATH_NOWRAP_CLASS, planMathGlue } from '@/components/math/utils/math-nowrap'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { ImageWithLoader } from '@/components/shared/components/ImageWithLoader'
 import { assertNever } from '@/components/shared/utils/assert-never'
@@ -16,6 +19,89 @@ import { getDocumentUrl, getProblemImageUrl } from '@/components/shared/utils/as
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { HIGHLIGHTED_PARAGRAPH_CLASSES } from './handout-colors'
+
+/** One handout block, with whatever punctuation an inline formula claimed from it. */
+type GluedContentBlock = MathGlueResult<RawContentBlock, MathBlock, GlueWrapperBlock>
+
+/** A block whose markup only wraps the content it holds. */
+type WrapperBlock = Extract<RawContentBlock, { type: 'bold' | 'italic' | 'quote' | 'link' }>
+
+/** A {@link WrapperBlock} a formula inside it may take punctuation in through. */
+type GlueWrapperBlock = Extract<WrapperBlock, { type: 'bold' | 'italic' }>
+
+/**
+ * Which blocks {@link MathGlueReader.isWrapper} holds for, in the handout AST's vocabulary. A quote
+ * writes quotation marks around its content, a link underlines it, and a footnote opens it in a
+ * popover, so each of those moves where the punctuation renders.
+ */
+const IS_GLUE_WRAPPER = {
+  bold: true,
+  italic: true,
+  quote: false,
+  link: false,
+  footnote: false,
+  paragraph: false,
+  list: false,
+  math: false,
+  image: false,
+  text: false,
+} as const satisfies Record<RawContentBlock['type'], boolean>
+
+/**
+ * Whether a formula inside a block may take punctuation written outside it in through its markup.
+ *
+ * @param block The block to classify.
+ * @returns True when punctuation moved inside the block still renders where it was written.
+ */
+function isGlueWrapper(block: RawContentBlock): block is GlueWrapperBlock {
+  // The table above answers for every block type there is
+  return IS_GLUE_WRAPPER[block.type]
+}
+
+/** Answers the glue pass's questions about a handout's blocks. */
+const HANDOUT_GLUE_READER: MathGlueReader<RawContentBlock, MathBlock, GlueWrapperBlock> = {
+  isInlineMath: (block): block is MathBlock => block.type === 'math' && !block.isDisplay,
+  readText: (block) => (block.type === 'text' ? block.text : null),
+  isWrapper: isGlueWrapper,
+  readChildren: (wrapper) => wrapper.content,
+}
+
+/**
+ * Renders a {@link WrapperBlock}'s own markup around content already rendered.
+ *
+ * @param block The wrapping block whose markup to emit.
+ * @param children The rendered content to put inside it.
+ * @returns The rendered React node for the block.
+ */
+function renderWrapperBlock(block: WrapperBlock, children: React.ReactNode): React.ReactNode {
+  switch (block.type) {
+    // Bold and italic are the plain phrasing elements
+    case 'bold':
+      return <strong>{children}</strong>
+    case 'italic':
+      return <em>{children}</em>
+    // `<q>` provides locale-aware quotation marks; italics match our visual style.
+    case 'quote':
+      return <q className="italic">{children}</q>
+    case 'link': {
+      // Internal references are identifiers — expand them to an absolute API URL
+      // so AppLink's own external-vs-internal detection picks the right element.
+      const href = /^https?:\/\//i.test(block.url) ? block.url : getDocumentUrl(block.url)
+
+      return (
+        <AppLink
+          href={href}
+          className="text-link hover:text-link-hover underline transition-colors"
+          newTab
+        >
+          {children}
+        </AppLink>
+      )
+    }
+    default:
+      return assertNever(block)
+  }
+}
 
 /**
  * Maps a {@link ListStyleType} to the Tailwind class that drives the matching
@@ -65,55 +151,15 @@ export function renderRawContentBlock(
   imageMissingText: string
 ): React.ReactNode {
   switch (block.type) {
+    // Prose renders verbatim; the surrounding markup owns its whitespace
     case 'text':
-      // Replace a leading space with a non-breaking space so it survives the
-      // whitespace collapsing that happens when text sits inside a flex parent.
-      return <>{block.text.replace(/^ /, '\u00A0')}</>
+      return <>{block.text}</>
+    // A wrapping block renders its own markup around its rendered content
     case 'bold':
-      // Wrap each child in its own keyed span so the React keys stay stable
-      // when the bolded run mixes text with other inline blocks.
-      return (
-        <strong>
-          {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById, imageMissingText)}</span>
-          ))}
-        </strong>
-      )
     case 'italic':
-      // Same per-child keyed span treatment as bold above.
-      return (
-        <em>
-          {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById, imageMissingText)}</span>
-          ))}
-        </em>
-      )
     case 'quote':
-      // `<q>` provides locale-aware quotation marks; italics match our visual style.
-      return (
-        <q className="italic">
-          {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById, imageMissingText)}</span>
-          ))}
-        </q>
-      )
-    case 'link': {
-      // Internal references are identifiers — expand them to an absolute API URL
-      // so AppLink's own external-vs-internal detection picks the right element.
-      const href = /^https?:\/\//i.test(block.url) ? block.url : getDocumentUrl(block.url)
-
-      return (
-        <AppLink
-          href={href}
-          className="text-link hover:text-link-hover underline transition-colors"
-          newTab
-        >
-          {block.content.map((child, index) => (
-            <span key={index}>{renderRawContentBlock(child, imagesById, imageMissingText)}</span>
-          ))}
-        </AppLink>
-      )
-    }
+    case 'link':
+      return renderWrapperBlock(block, renderSequence(block.content, imagesById, imageMissingText))
     case 'footnote': {
       // Wrap the footnote children as a synthetic paragraph so nested formatting
       // (bold, math, links, ...) routes through the standard renderer path.
@@ -178,20 +224,26 @@ export function renderRawContentBlock(
         }
       }
 
-      // Classify each child as block-level or inline and route accordingly.
-      for (let childIndex = 0; childIndex < block.content.length; childIndex++) {
-        const childBlock = block.content[childIndex]
+      // Each inline formula arrives already fused with the punctuation hugging it.
+      const inlineItems = planMathGlue(block.content, HANDOUT_GLUE_READER)
+
+      // Classify each item as block-level or inline and route accordingly.
+      for (let itemIndex = 0; itemIndex < inlineItems.length; itemIndex++) {
+        const item = inlineItems[itemIndex]
 
         // Block content here means content that cannot legally sit inside a
         // `<p>`: display math gets centred on its own line, lists open a `<ul>`,
         // plain (non-highlighted) nested paragraphs already emit their own `<p>`,
         // and block-mode images are wrapped in a centring `<div>`. Inline math,
         // inline images and highlighted paragraphs all flow inside the current `<p>`.
+        // A glued formula is inline by construction, and so is trimmed prose, so
+        // only an untouched block can be block-level.
         const isBlockContent =
-          (childBlock.type === 'math' && childBlock.isDisplay) ||
-          childBlock.type === 'list' ||
-          (childBlock.type === 'paragraph' && !childBlock.highligted) ||
-          (childBlock.type === 'image' && !childBlock.isInline)
+          item.kind === 'unchanged' &&
+          ((item.node.type === 'math' && item.node.isDisplay) ||
+            item.node.type === 'list' ||
+            (item.node.type === 'paragraph' && !item.node.highligted) ||
+            (item.node.type === 'image' && !item.node.isInline))
 
         if (isBlockContent) {
           // Seal the current inline run as its own `<p>` first, then emit the
@@ -200,15 +252,15 @@ export function renderRawContentBlock(
           flushInlineRun()
           paragraphParts.push(
             <div key={`b-${paragraphParts.length}`}>
-              {renderRawContentBlock(childBlock, imagesById, imageMissingText)}
+              {renderGluedItem(item, imagesById, imageMissingText)}
             </div>
           )
         } else {
           // Inline child — append to the buffer; it joins the next `<p>` the
           // moment we hit a block sibling or fall out of the loop.
           inlineRun.push(
-            <React.Fragment key={childIndex}>
-              {renderRawContentBlock(childBlock, imagesById, imageMissingText)}
+            <React.Fragment key={itemIndex}>
+              {renderGluedItem(item, imagesById, imageMissingText)}
             </React.Fragment>
           )
         }
@@ -288,6 +340,87 @@ export function renderRawContentBlock(
 }
 
 /**
+ * Renders one {@link GluedContentBlock}. A formula and its punctuation share a
+ * nowrap wrapper so neither orphans onto a line of its own; everything else
+ * falls straight through to {@link renderRawContentBlock}.
+ *
+ * @param item The block to render, with whatever the glue pass made of it.
+ * @param imagesById Lookup of image metadata keyed by content ID.
+ * @param imageMissingText Fallback text shown for missing images.
+ * @returns The rendered React node for the block.
+ */
+function renderGluedItem(
+  item: GluedContentBlock,
+  imagesById: Record<string, HandoutImage>,
+  imageMissingText: string
+): React.ReactNode {
+  switch (item.kind) {
+    // An untouched block renders exactly as it always did
+    case 'unchanged':
+      return renderRawContentBlock(item.node, imagesById, imageMissingText)
+    // Prose renders as whatever a neighbouring formula left of it
+    case 'trimmed':
+      return <>{item.text}</>
+    // A walked run keeps its own markup and takes back the children the pass planned
+    case 'wrapper':
+      return renderWrapperBlock(
+        item.node,
+        renderPlanned(item.children, imagesById, imageMissingText)
+      )
+    // The formula and its hugging punctuation become one unbreakable run
+    case 'glued':
+      return (
+        <span className={MATH_NOWRAP_CLASS}>
+          {item.glue.leading}
+          {renderRawContentBlock(item.math, imagesById, imageMissingText)}
+          {item.glue.trailing}
+        </span>
+      )
+    default:
+      return assertNever(item)
+  }
+}
+
+/**
+ * Renders a content sequence, fusing each inline formula with the punctuation
+ * hugging it before handing the pieces to {@link renderGluedItem}.
+ *
+ * @param blocks The blocks to render in order.
+ * @param imagesById Lookup of image metadata keyed by content ID.
+ * @param imageMissingText Fallback text shown for missing images.
+ * @returns One keyed node per rendered item.
+ */
+function renderSequence(
+  blocks: RawContentBlock[],
+  imagesById: Record<string, HandoutImage>,
+  imageMissingText: string
+): React.ReactNode[] {
+  // Plan what every formula in the sequence holds on to, then render the plan
+  return renderPlanned(planMathGlue(blocks, HANDOUT_GLUE_READER), imagesById, imageMissingText)
+}
+
+/**
+ * Renders an already-planned content sequence.
+ *
+ * @param items The planned blocks to render in order.
+ * @param imagesById Lookup of image metadata keyed by content ID.
+ * @param imageMissingText Fallback text shown for missing images.
+ * @returns One keyed node per rendered item.
+ */
+function renderPlanned(
+  items: GluedContentBlock[],
+  imagesById: Record<string, HandoutImage>,
+  imageMissingText: string
+): React.ReactNode[] {
+  // A fragment per item, keyed by the position its block held
+  return items.map((item, index) => (
+    <React.Fragment key={index}>
+      {renderGluedItem(item, imagesById, imageMissingText)}
+    </React.Fragment>
+  ))
+}
+
+/**
  * Renders an array of {@link RawContentBlock}s as flat inline content — any
  * nested paragraph is unwrapped so the result never produces a block-level
  * `<p>`. Suitable for list items, badges, titles, and other inline-only slots.
@@ -302,42 +435,14 @@ function renderInlineContent(
   imagesById: Record<string, HandoutImage>,
   imageMissingText: string
 ): React.ReactNode {
-  // Collects every walked block's rendered output as a flat sequence of nodes.
-  const inlineNodes: React.ReactNode[] = []
+  // Splice each paragraph's children in directly — an enclosing `<p>` would split
+  // whichever inline parent rendered us.
+  const inlineBlocks = content.flatMap((block) =>
+    block.type === 'paragraph' ? block.content : [block]
+  )
 
-  // Walk each top-level block; paragraph blocks get unwrapped so their children
-  // are emitted directly without an enclosing `<p>`.
-  for (let i = 0; i < content.length; i++) {
-    const block = content[i]
-
-    if (block.type === 'paragraph') {
-      // Unwrap the paragraph — pushing its children one by one keeps the inline
-      // context valid (a `<p>` would split whichever inline parent rendered us).
-      for (let j = 0; j < block.content.length; j++) {
-        const child = block.content[j]
-
-        // Compound key on both indices so unwrapped children stay uniquely
-        // identifiable across multiple sibling paragraphs in the same `content`.
-        inlineNodes.push(
-          <React.Fragment key={`p-${i}-${j}`}>
-            {renderRawContentBlock(child, imagesById, imageMissingText)}
-          </React.Fragment>
-        )
-      }
-    } else {
-      // Everything that isn't a paragraph (text, math, image, link, bold, ...)
-      // is already inline-safe, so we pass it through unchanged.
-      inlineNodes.push(
-        <React.Fragment key={i}>
-          {renderRawContentBlock(block, imagesById, imageMissingText)}
-        </React.Fragment>
-      )
-    }
-  }
-
-  // Wrap the collection in a single Fragment so the caller always gets back
-  // exactly one ReactNode regardless of how many blocks we walked.
-  return <>{inlineNodes}</>
+  // One fragment, so the caller always gets back exactly one node
+  return <>{renderSequence(inlineBlocks, imagesById, imageMissingText)}</>
 }
 
 /**
@@ -355,14 +460,9 @@ export function renderBlocks(
   imagesById: Record<string, HandoutImage>,
   imageMissingText: string
 ): React.ReactNode {
+  // Optional content fields arrive absent, and render as nothing
   if (!blocks) return null
-  return (
-    <>
-      {blocks.map((block, index) => (
-        <React.Fragment key={index}>
-          {renderRawContentBlock(block, imagesById, imageMissingText)}
-        </React.Fragment>
-      ))}
-    </>
-  )
+
+  // One fragment, so the caller always gets back exactly one node
+  return <>{renderSequence(blocks, imagesById, imageMissingText)}</>
 }

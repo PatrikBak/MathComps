@@ -52,7 +52,7 @@ type ListBlock = {
 }
 
 /** A mathematical expression block. */
-type MathBlock = {
+export type MathBlock = {
   /** Discriminator */
   type: 'math'
   /** The LaTeX/KaTeX source string */

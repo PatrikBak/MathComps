@@ -3,7 +3,8 @@ import katex from 'katex'
 import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
-import { MATH_NOWRAP_CLASS, takeLeadingGlue, takeTrailingGlue } from './math-nowrap'
+import type { MathGlueReader } from './math-nowrap'
+import { MATH_NOWRAP_CLASS, planMathGlue } from './math-nowrap'
 
 /** A run of plain prose between formulas, awaiting HTML-escaping. */
 type TextSegment = {
@@ -31,6 +32,14 @@ type DisplayMathSegment = {
 
 /** One classified piece of split math content. */
 type ContentSegment = TextSegment | InlineMathSegment | DisplayMathSegment
+
+/** Answers the glue pass's questions about the segments a split string breaks into. */
+const SEGMENT_GLUE_READER: MathGlueReader<ContentSegment, InlineMathSegment, never> = {
+  isInlineMath: (segment): segment is InlineMathSegment => segment.kind === 'inlineMath',
+  readText: (segment) => (segment.kind === 'text' ? segment.text : null),
+  isWrapper: (_segment): _segment is never => false,
+  readChildren: () => [],
+}
 
 /**
  * Flattens a parsed inline content block back to its raw source string, wrapping
@@ -149,53 +158,42 @@ export function renderMathContentToHtml(content: string): string {
       }
     }
 
-    // Glue pass: pull the punctuation hugging each inline formula into a nowrap
-    // wrapper so a trailing period or leading bracket can't orphan to its own line
-    segments.forEach((segment, index) => {
-      // Only inline math needs the nowrap treatment
-      if (segment.kind !== 'inlineMath') return
+    // Glue pass: work out the punctuation hugging each inline formula, so a
+    // trailing period or leading bracket can't orphan to its own line
+    const glued = planMathGlue(segments, SEGMENT_GLUE_READER)
 
-      // Pull the trailing run off the preceding text segment (e.g. an opening bracket)
-      let leadingGlue = ''
-      const previous = segments[index - 1]
-      if (previous?.kind === 'text') {
-        const split = takeTrailingGlue(previous.text)
-        leadingGlue = split.glue
-        previous.text = split.rest
-      }
-
-      // Pull the leading run off the following text segment (e.g. a trailing period)
-      let trailingGlue = ''
-      const next = segments[index + 1]
-      if (next?.kind === 'text') {
-        const split = takeLeadingGlue(next.text)
-        trailingGlue = split.glue
-        next.text = split.rest
-      }
-
-      // Wrap the formula plus its hugging punctuation in one nowrap span
-      segment.html =
-        `<span class="${MATH_NOWRAP_CLASS}">` +
-        `${escapeHtml(leadingGlue)}${segment.html}${escapeHtml(trailingGlue)}` +
-        `</span>`
-    })
-
-    // Assemble the segments into the one string the caller renders
-    return segments
-      .map((segment) => {
-        switch (segment.kind) {
-          // Prose the author typed, which has to be escaped before it goes out
-          case 'text':
-            return escapeHtml(segment.text)
-
-          // Already rendered by KaTeX, so it travels as it stands
-          case 'inlineMath':
-          case 'displayMath':
-            return segment.html
-
-          // Every segment is handled above
+    // Assemble: escape prose, emit math HTML verbatim, wrap each formula with its glue
+    return glued
+      .map((item) => {
+        switch (item.kind) {
+          // Prose renders as whatever a neighbouring formula left of it
+          case 'trimmed':
+            return escapeHtml(item.text)
+          // A formula and its hugging punctuation share one nowrap span
+          case 'glued':
+            return (
+              `<span class="${MATH_NOWRAP_CLASS}">` +
+              `${escapeHtml(item.glue.leading)}${item.math.html}${escapeHtml(item.glue.trailing)}` +
+              `</span>`
+            )
+          // A split string is one flat run, so it holds no node the pass walks into
+          case 'wrapper':
+            return assertNever(item.node)
+          // Anything the glue pass left alone is prose or display math
+          case 'unchanged':
+            switch (item.node.kind) {
+              // Prose the author typed, which has to be escaped before it goes out
+              case 'text':
+                return escapeHtml(item.node.text)
+              // Already rendered by KaTeX, so it travels as it stands
+              case 'inlineMath':
+              case 'displayMath':
+                return item.node.html
+              default:
+                return assertNever(item.node)
+            }
           default:
-            return assertNever(segment)
+            return assertNever(item)
         }
       })
       .join('')
