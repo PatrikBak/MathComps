@@ -60,10 +60,11 @@ test.describe('handout prose', () => {
   test('never opens a line with a stray character', async ({ page }) => {
     test.setTimeout(WALK_TIMEOUT_MS)
 
-    // The index lists every handout, and each row links by the internal route,
-    // which the SK reader reaches through a redirect.
+    // The index lists every handout, and each row links by the internal route, which the SK reader
+    // reaches through a redirect. React streams the page into a hidden placeholder before swapping
+    // the real copy in, and that placeholder holds rows of its own, so only the shown ones count.
     await page.goto(`/sk${ROUTES.HANDOUTS}`)
-    const rows = page.locator(`a[href*="${ROUTES.HANDOUTS}/"]`)
+    const rows = page.locator(`a[href*="${ROUTES.HANDOUTS}/"]`).filter({ visible: true })
     await expect(rows.first()).toBeVisible({ timeout: RENDER_TIMEOUT_MS })
     // The path each row links to
     const handoutPaths = await rows.evaluateAll((links) =>
