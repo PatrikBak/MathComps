@@ -4,7 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { notFound } from 'next/navigation'
-import { hasLocale, type Locale, NextIntlClientProvider } from 'next-intl'
+import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { type ReactNode, Suspense } from 'react'
 
@@ -18,7 +18,7 @@ import { ToastProvider } from '@/components/shared/providers/ToastProvider'
 import { cn } from '@/components/shared/utils/css-utils'
 import { getCanonicalUrl } from '@/components/shared/utils/url-utils'
 import { SITE_NAME, SITE_THEME_COLOR, SITE_TITLE } from '@/constants/og-metadata'
-import { DEFAULT_LOCALE, routing, SUPPORTED_LOCALES } from '@/i18n/i18n'
+import { routing, SUPPORTED_LOCALES } from '@/i18n/i18n'
 import { generatePageMetadata, getSiteMetadata } from '@/lib/metadata'
 import { buildSiteJsonLd } from '@/lib/structured-data'
 
@@ -42,10 +42,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   // Get the locale from params
-  const { locale: localeString } = await params
+  const { locale } = await params
 
-  // Cast to our custom type, or the default locale if language is unknown
-  const locale = (localeString as Locale) ?? DEFAULT_LOCALE
+  // A locale the site does not speak is a missing page
+  if (!hasLocale(routing.locales, locale)) {
+    notFound()
+  }
 
   // Get locale-aware site metadata
   const siteMetadata = await getSiteMetadata(locale)
@@ -94,10 +96,7 @@ type LayoutProps = {
  */
 export default async function LocaleLayout({ children, params }: LayoutProps) {
   // Get the current locale from the /locale/path
-  const { locale: localeString } = await params
-
-  // Cast the locale to our type
-  const locale = (localeString as Locale) ?? DEFAULT_LOCALE
+  const { locale } = await params
 
   // Validate the locale - trigger 404 for invalid ones
   if (!hasLocale(routing.locales, locale)) {

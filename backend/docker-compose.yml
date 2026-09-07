@@ -1,11 +1,20 @@
 # Base configuration - merge with docker-compose.prod.yml or docker-compose.staging.yml
 # Usage: ./deploy.sh prod up -d  OR  ./deploy.sh staging up -d
 
+# Docker never trims a container's json log file. The api's dies with its container on every deploy, but
+# postgres lives across them, so uncapped its file grows for the life of the server.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   # PostgreSQL database, accessible via localhost only
   postgres:
     image: pgvector/pgvector:pg16
     restart: unless-stopped
+    logging: *default-logging
     environment:
       POSTGRES_DB: mathcomps
       POSTGRES_USER: mathcomps
@@ -29,6 +38,7 @@ services:
       dockerfile: Dockerfile
     image: mathcomps-api
     restart: "no"
+    logging: *default-logging
     entrypoint: ["./efbundle"]
     # efbundle reads its connection string from this env var.
     # Command Timeout=300 keeps long index builds from aborting at the 30s default.
@@ -47,6 +57,7 @@ services:
       dockerfile: Dockerfile
     image: mathcomps-api
     restart: unless-stopped
+    logging: *default-logging
     environment:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Host=postgres;Database=mathcomps;Username=mathcomps;Password=${DB_PASSWORD:?set it in .env}

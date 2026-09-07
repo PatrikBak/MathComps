@@ -284,6 +284,12 @@ The health wait proves the container came up and can reach the database, since `
 
 A red `deploy` job is an alert, not a gate. `up -d` swaps the container and applies migrations before the health wait starts, so prod is already serving the new build and failing its healthcheck. Fix forward, or roll back as below.
 
+[deploy.sh](deploy.sh) brings the shared Traefik stack up when no `traefik` container is running. Where it is already up, an edit to [docker-compose.traefik.yml](docker-compose.traefik.yml) reaches the proxy by hand, on the server:
+
+```bash
+docker compose -f docker-compose.traefik.yml --env-file .env up -d
+```
+
 ### Rolling back
 
 To roll back, run `git checkout main && git reset --hard <sha>` on the server, then rebuild. Plain `git checkout <sha>` leaves a detached HEAD, which the next automatic deploy cannot fast-forward, so every later merge fails at that line until someone moves the checkout back onto `main`.
