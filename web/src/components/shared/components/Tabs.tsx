@@ -62,7 +62,8 @@ export function Tabs<TId extends string>({
       <TabList
         aria-label={ariaLabel}
         className={cn(
-          'flex shrink-0 gap-1 overflow-x-auto border-b border-foreground/10 px-2',
+          'flex shrink-0 gap-0.5 overflow-x-auto border-b border-foreground/10 px-1.5',
+          'sm:gap-1 sm:px-2',
           '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
         )}
       >
@@ -70,7 +71,8 @@ export function Tabs<TId extends string>({
           <Tab
             key={item.id}
             className={cn(
-              'flex items-center gap-1.5 whitespace-nowrap rounded-t-md px-3 py-2 text-sm',
+              'flex items-center gap-1.5 whitespace-nowrap rounded-t-md px-2.5 py-2 text-[0.8125rem]',
+              'sm:px-3 sm:text-sm',
               'border-b-2 border-transparent transition-colors',
               'text-muted hover:text-foreground',
               'data-selected:border-foreground data-selected:font-semibold data-selected:text-foreground',
