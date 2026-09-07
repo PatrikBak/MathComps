@@ -65,6 +65,7 @@ services:
       Clerk__SecretKey: ${CLERK_SECRET_KEY:?set it in .env}
       Clerk__WebhookSecret: ${CLERK_WEBHOOK_SECRET:?set it in .env}
       Llm__ApiKey: ${LLM_API_KEY:?set it in .env}
+      Sentry__Dsn: ${SENTRY_DSN:-}
       # Read-only access to the bucket the handouts CLI publishes the examiner's problem content to.
       CloudflareR2__AccountId: ${R2_ACCOUNT_ID:?set it in .env}
       CloudflareR2__BucketName: ${R2_BUCKET_NAME:?set it in .env}

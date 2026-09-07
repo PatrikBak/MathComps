@@ -4,6 +4,7 @@ using MathComps.Api.Extensions;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
@@ -12,6 +13,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using MathComps.Domain.Localization;
+using Sentry.Extensibility;
 
 // Standard ASP.NET Core app
 var builder = WebApplication.CreateBuilder(args);
@@ -110,6 +112,34 @@ builder.Services.AddAuthorizationBuilder()
 
 // Basic observability
 builder.Services.AddLogging();
+
+// Errors reach Better Stack over the Sentry protocol, out of the LogError in GlobalExceptionHandler.
+// That handler answers business failures too, and the SDK's middleware finds every one of them again on
+// IExceptionHandlerFeature once the pipeline unwinds, so a bad slug's 404 would file as an error.
+builder.WebHost.UseSentry(options =>
+{
+    // Send the request body with every event. A defense turn's own words and a Clerk webhook's account
+    // data go with it, deliberately.
+    options.MaxRequestBodySize = RequestSize.Always;
+
+    // The last pass over an event before it leaves
+    options.SetBeforeSend((sentryEvent, _) =>
+    {
+        // Drop the middleware's second capture, and with it the business failures. nameof lands on the
+        // right string because Sentry's label for that feature happens to be the type's name.
+        if (sentryEvent.SentryExceptions?.Any(
+                entry => entry.Mechanism?.Type == nameof(IExceptionHandlerFeature)) is true)
+            return null;
+
+        // The SDK forwards every request header it wasn't told to redact, and Traefik writes the caller's
+        // address into both of these, so a student's IP would ride out to a third party on every error.
+        sentryEvent.Request.Headers.Remove("X-Real-Ip");
+        sentryEvent.Request.Headers.Remove("X-Forwarded-For");
+
+        // What survives is a fault GlobalExceptionHandler logged
+        return sentryEvent;
+    });
+});
 
 // The database check makes /health mean the API can serve a request.
 builder.Services.AddHealthChecks()
