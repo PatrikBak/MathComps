@@ -59,7 +59,6 @@ export async function generateMetadata({
 
     // Root layout specific overrides
     title: { default: SITE_TITLE, template: `%s | ${SITE_NAME}` },
-    icons: { icon: '/icon.svg' },
     metadataBase: new URL(getCanonicalUrl()),
   }
 }
