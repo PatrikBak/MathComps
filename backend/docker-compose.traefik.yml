@@ -7,6 +7,13 @@ services:
     image: traefik:v3.2
     container_name: traefik
     restart: unless-stopped
+    # Docker never trims a container's json log file, and no deploy recreates this one, so uncapped its
+    # file grows for the life of the server.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"

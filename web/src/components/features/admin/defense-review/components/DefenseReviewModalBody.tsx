@@ -206,7 +206,7 @@ export function DefenseReviewModalBody({
     {
       id: 'notes' as const,
       label: t('tabs.notes'),
-      count: detail.notes.length,
+      count: detail.notes.length === 0 ? null : detail.notes.length,
       panel: (
         <DefenseReviewNotesTab
           key={detail.id}

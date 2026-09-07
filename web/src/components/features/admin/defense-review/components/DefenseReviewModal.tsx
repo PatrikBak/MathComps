@@ -7,6 +7,7 @@ import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { Modal } from '@/components/shared/components/Modal'
+import { cn } from '@/components/shared/utils/css-utils'
 import { useKeyedState } from '@/hooks/use-keyed-state'
 
 import { useDefenseReviewDetail } from '../hooks/use-defense-review-detail'
@@ -111,9 +112,14 @@ export function DefenseReviewModal({
       }}
     >
       {/* The header: who held it, and the way through the queue */}
-      <header className="flex shrink-0 items-center gap-3 border-b border-foreground/10 px-4 py-2.5 sm:px-5">
-        {/* Who held it, and what it was about */}
-        <div className="min-w-0 flex-1" aria-live="polite">
+      <header
+        className={cn(
+          'flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-foreground/10',
+          'px-4 py-2.5 sm:flex-nowrap sm:px-5'
+        )}
+      >
+        {/* Who held it, and what it was about, opted out of the hyphenation the page turns on globally */}
+        <div className="w-full min-w-0 hyphens-none sm:w-auto sm:flex-1" aria-live="polite">
           <p className="truncate font-bold text-foreground">
             {detail === null ? ' ' : describeReviewUser(detail.user, tProfile('defaultUser'))}
           </p>
@@ -142,7 +148,7 @@ export function DefenseReviewModal({
         </Button>
 
         {/* The way through the queue, in the order the list shows it */}
-        <div className="flex shrink-0 items-center gap-1 text-xs text-muted">
+        <div className="mx-auto flex shrink-0 items-center gap-1 text-xs text-muted sm:mx-0">
           {/* Back one */}
           <Button
             variant="ghost"
@@ -191,10 +197,12 @@ export function DefenseReviewModal({
           </Button>
         </div>
 
-        {/* Out of the conversation */}
+        {/* Out of the conversation. Last of the controls, so a narrow header wraps it to the far end of
+          their row */}
         <Button
           variant="ghost"
           size="icon"
+          className="ml-auto sm:ml-0"
           aria-label={tActions('close')}
           onClick={selection.close}
         >
