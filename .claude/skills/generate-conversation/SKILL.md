@@ -96,7 +96,7 @@ Then drive Steps 3-4 and judge the result. Because the candidate is re-authored 
 
 When the starting point is a bad reply the app already produced, don't author a fresh fixture — rebuild that session from the dev DB so the examiner faces the identical context. Everything needed is on localhost: `defense_sessions.problem_statement` / `.problem_reference` (the reference already has any `## AUTHOR'S HINTS` folded in) become `problem.md` / `reference.md`, and `defense_turns` (`sequence`, `role`, `content`) rebuilds `transcript.md` — `'## ' || initcap(role::text)` needs the cast, since `role` is an enum. Truncate at the candidate turn that triggered the reply, then drive it as Step 3.
 
-`defense_turn_attempts` has no fixture equivalent: it holds every draft the turn made with each guard's verdict and revision note, so it's the only record of a leak the guard caught before shipping. The CLI prints that trail live but names each rejected attempt's model calls without its text, so a rejected draft is gone once the run ends — read the DB for a reply that already happened, and never filter the CLI's per-attempt output while watching one happen.
+`defense_turn_attempts` holds every draft the turn made with each guard's verdict and revision note. Read it for a reply the app already produced. The CLI prints rejected drafts and their failed verdicts alongside the model calls; retain that output when running a fixture.
 
 ## Building a corpus
 

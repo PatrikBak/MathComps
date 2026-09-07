@@ -55,14 +55,14 @@ public class FakeExaminer(ModelUsage usage = default)
         // Fold the configured usage in like a real call would, so the accumulator matches the reported outcome.
         turnUsage.Add(usage);
 
-        // A fake reply always holds, never leaks, and stays in the candidate's language, so it ships on its first
-        // attempt with no calls behind it and nothing to wait for; report the configured usage.
+        // The scripted reply with clean guard verdicts.
         var attempt = new ExaminerAttempt(
             reply,
             RevisionNote: "",
             new MathCheckResult(true, ""),
             new LeakCheckResult(false, "", false, ""),
             new LanguageCheckResult(false, ""),
+            new RouteCheckResult("", "", "", false),
             [],
             DurationMs: 0);
 

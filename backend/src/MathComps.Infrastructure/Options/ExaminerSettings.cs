@@ -40,6 +40,13 @@ public class ExaminerSettings
     [Required]
     public required ChatStepSettings LanguageCheck { get; set; }
 
+    /// <summary>
+    /// The route-check step: reads the reply against the whole transcript and says whether it presses the argument
+    /// the candidate brought or walks them through the examiner's own.
+    /// </summary>
+    [Required]
+    public required ChatStepSettings RouteCheck { get; set; }
+
     /// <inheritdoc cref="ExaminerNotesSettings" path="/summary"/>
     [Required]
     public required ExaminerNotesSettings Notes { get; set; }

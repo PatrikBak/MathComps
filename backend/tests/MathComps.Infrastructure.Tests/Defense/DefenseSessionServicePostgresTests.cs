@@ -157,6 +157,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             examiner.LeakCheck = new ChatStepSettings { Prompt = "Prompts/leak-check.txt", Model = "fake/model" };
             examiner.LanguageCheck =
                 new ChatStepSettings { Prompt = "Prompts/language-check.txt", Model = "fake/model" };
+            examiner.RouteCheck = new ChatStepSettings { Prompt = "Prompts/route-check.txt", Model = "fake/model" };
             examiner.Notes = ExaminerNotesFixture.Shipped();
             examiner.MaxRevisions = 3;
         });
@@ -1709,6 +1710,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 new MathCheckResult(true, ""),
                 new LeakCheckResult(true, "the counterexample", false, ""),
                 new LanguageCheckResult(false, "English"),
+                new RouteCheckResult("", "", "", false),
                 [_draftCall],
                 _draftDurationsMs[0]);
 
@@ -1727,6 +1729,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 new MathCheckResult(true, ""),
                 new LeakCheckResult(false, "", false, ""),
                 new LanguageCheckResult(false, "English"),
+                new RouteCheckResult("", "", "", false),
                 [_draftCall],
                 _draftDurationsMs[2]);
 

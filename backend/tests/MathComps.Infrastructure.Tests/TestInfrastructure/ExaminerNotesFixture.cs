@@ -20,6 +20,7 @@ internal static class ExaminerNotesFixture
         Leak = Note("leak.txt"),
         WithheldClose = Note("withheld-close.txt"),
         LanguageSwitch = Note("language-switch.txt"),
+        Route = Note("route.txt"),
         SafeHold = Note("safe-hold.txt"),
         AuthorHints = Note("author-hints.txt"),
     };

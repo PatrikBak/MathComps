@@ -140,6 +140,7 @@ public class LlmChatCallerTests
             ApiKey = "test-key",
             MaxRetries = 0,
             RetryDelay = TimeSpan.Zero,
+            RequestTimeout = TimeSpan.FromSeconds(30),
         };
 
         // The real caller over that client.

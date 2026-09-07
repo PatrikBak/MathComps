@@ -44,6 +44,11 @@ public record AdminDefenseAttemptCallDto(
 /// <param name="Established"><inheritdoc cref="DefenseTurnAttempt.Established" path="/summary"/></param>
 /// <param name="SwitchesLanguage"><inheritdoc cref="DefenseTurnAttempt.SwitchesLanguage" path="/summary"/></param>
 /// <param name="CandidateLanguage"><inheritdoc cref="DefenseTurnAttempt.CandidateLanguage" path="/summary"/></param>
+/// <param name="TakesOver"><inheritdoc cref="DefenseTurnAttempt.TakesOver" path="/summary"/></param>
+/// <param name="CandidateWork"><inheritdoc cref="DefenseTurnAttempt.CandidateWork" path="/summary"/></param>
+/// <param name="RestatedReferenceStep">
+/// <inheritdoc cref="DefenseTurnAttempt.RestatedReferenceStep" path="/summary"/>
+/// </param>
 /// <param name="IsSafeFallback"><inheritdoc cref="DefenseTurnAttempt.IsSafeFallback" path="/summary"/></param>
 /// <param name="Calls"><inheritdoc cref="DefenseTurnAttempt.Calls" path="/summary"/></param>
 /// <param name="DurationMs"><inheritdoc cref="DefenseTurnAttempt.DurationMs" path="/summary"/></param>
@@ -60,6 +65,9 @@ public record AdminDefenseAttemptDto(
     string Established,
     bool SwitchesLanguage,
     string CandidateLanguage,
+    bool TakesOver,
+    string CandidateWork,
+    string RestatedReferenceStep,
     bool IsSafeFallback,
     IReadOnlyList<AdminDefenseAttemptCallDto> Calls,
     int DurationMs);

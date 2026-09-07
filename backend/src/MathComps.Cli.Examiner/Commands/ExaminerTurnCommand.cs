@@ -18,9 +18,9 @@ namespace MathComps.Cli.Examiner.Commands;
 /// <param name="examiner">The engine that runs the per-turn loop.</param>
 [Description("""
     Produce the examiner's next reply for a fixture folder and append it to transcript.md. The fixture's problem,
-    reference, and transcript feed the loop; the reply is math-checked, leak-checked and language-checked, and
-    regenerated up to a cap if a check flags it. The transcript's last turn must be a '## Candidate' turn — the
-    examiner replies to the candidate.
+    reference, and transcript feed the loop; the reply is math-checked, leak-checked, language-checked and
+    route-checked, and regenerated up to a cap if a check flags it. The transcript's last turn must be a
+    '## Candidate' turn — the examiner replies to the candidate.
 """)]
 public class ExaminerTurnCommand(IExaminer examiner)
     : AsyncCommand<ExaminerTurnCommand.Settings>
@@ -105,6 +105,9 @@ public class ExaminerTurnCommand(IExaminer examiner)
         // The language-check line: the candidate's language, and whether the reply held it.
         RenderLanguageCheck(outcome.Shipped.LanguageCheck);
 
+        // The route verdict and any reference step the question asks for.
+        RenderRouteCheck(outcome.Shipped.RouteCheck);
+
         // How many times a flagged check forced a regeneration.
         AnsiConsole.MarkupLine(outcome.Revisions == 0
             ? "[green]Revised:[/] no"
@@ -151,7 +154,55 @@ public class ExaminerTurnCommand(IExaminer examiner)
                 AnsiConsole.MarkupLineInterpolated(
                     $"[grey]  {call.Step} — {call.Model}, reasoning {effort}, ${call.Usage.Cost:0.00000}, {spent}[/]");
             }
+
+            // Show each rejected draft with its failed verdicts.
+            if (index < outcome.Attempts.Count - 1)
+            {
+                // The rejected reply.
+                AnsiConsole.MarkupLineInterpolated($"Draft {index + 1}: {Flatten(attempt.Reply)}");
+
+                // The verdicts that rejected the reply.
+                AnsiConsole.MarkupLineInterpolated(
+                    $"Draft {index + 1} rejected by: {string.Join("; ", Rejections(attempt))}");
+            }
         }
+    }
+
+    /// <summary>
+    /// Joins a reply's lines into one, so a draft stays on a single line of the output.
+    /// </summary>
+    /// <param name="reply">The reply text.</param>
+    /// <returns>The reply with its line breaks replaced by a separator.</returns>
+    private static string Flatten(string reply) =>
+        string.Join(" / ", reply.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(line => line.Trim()));
+
+    /// <summary>
+    /// Names every guard verdict that rejected an attempt, in the order the guards are rendered for the shipped reply.
+    /// </summary>
+    /// <param name="attempt">The rejected attempt.</param>
+    /// <returns>One phrase per failed verdict, each carrying what the guard reported.</returns>
+    private static IEnumerable<string> Rejections(ExaminerAttempt attempt)
+    {
+        // A false claim, with the correction.
+        if (!attempt.MathCheck.Holds)
+            yield return $"math-check fails — {attempt.MathCheck.Correction}";
+
+        // A leak, with what was given away.
+        if (attempt.LeakCheck.Leaks)
+            yield return $"leak-check leaks — {attempt.LeakCheck.WhatLeaked}";
+
+        // A withheld close, with what the candidate had established.
+        if (attempt.LeakCheck.WithholdsClose)
+            yield return $"leak-check withholds the close — {attempt.LeakCheck.Established}";
+
+        // A language switch, with the language the candidate wrote in.
+        if (attempt.LanguageCheck.SwitchesLanguage)
+            yield return
+                $"language-check switched — the candidate wrote in {attempt.LanguageCheck.CandidateLanguage}";
+
+        // A takeover, with the reference step the question fished for.
+        if (attempt.RouteCheck.TakesOver)
+            yield return $"route-check takes over — fishes for: {attempt.RouteCheck.Restates}";
     }
 
     /// <summary>
@@ -211,5 +262,23 @@ public class ExaminerTurnCommand(IExaminer examiner)
 
         // Matched — name the language it stayed in.
         AnsiConsole.MarkupLineInterpolated($"[green]Language-check:[/] {languageCheck.CandidateLanguage}");
+    }
+
+    /// <summary>
+    /// Renders the route verdict and any reference step the question asks for.
+    /// </summary>
+    /// <param name="routeCheck">The route-check verdict on the reply.</param>
+    private static void RenderRouteCheck(RouteCheckResult routeCheck)
+    {
+        // Taken over — the question kept nothing of theirs and its answer is a line of the reference.
+        if (routeCheck.TakesOver)
+        {
+            AnsiConsole.MarkupLineInterpolated(
+                $"[red]Route-check:[/] takes over — fishes for: {routeCheck.Restates}");
+            return;
+        }
+
+        // Held — say the reply stayed on the candidate's route.
+        AnsiConsole.MarkupLine("[green]Route-check:[/] no takeover");
     }
 }

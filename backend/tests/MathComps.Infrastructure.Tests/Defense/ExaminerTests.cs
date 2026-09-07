@@ -48,6 +48,7 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -57,9 +58,11 @@ public class ExaminerTests
         VerifyStepCalled<MathCheckResult>(caller, Times.Once());
         VerifyStepCalled<LeakCheckResult>(caller, Times.Once());
         VerifyStepCalled<LanguageCheckResult>(caller, Times.Once());
+        VerifyStepCalled<RouteCheckResult>(caller, Times.Once());
         Assert.True(outcome.Shipped.MathCheck.Holds);
         Assert.False(outcome.Shipped.LeakCheck.Leaks);
         Assert.False(outcome.Shipped.LanguageCheck.SwitchesLanguage);
+        Assert.False(outcome.Shipped.RouteCheck.TakesOver);
         Assert.Equal(0, outcome.Revisions);
     }
 
@@ -76,6 +79,7 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -103,6 +107,7 @@ public class ExaminerTests
             .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -135,6 +140,7 @@ public class ExaminerTests
             .ReturnsAsync(Result(CleanLeak() with { Leaks = true, WhatLeaked = "named the two-corners counterexample" }))
             .ReturnsAsync(Result(CleanLeak()));
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -165,6 +171,7 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, CleanLeak() with { Leaks = true, WhatLeaked = "still gives away the counterexample" });
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -208,6 +215,7 @@ public class ExaminerTests
             }))
             .ReturnsAsync(Result(CleanLeak()));
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -247,6 +255,7 @@ public class ExaminerTests
             Established = "the full divisor-pairing chain",
         });
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -291,6 +300,7 @@ public class ExaminerTests
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(CleanLanguage() with { SwitchesLanguage = true, CandidateLanguage = "Slovak" }))
             .ReturnsAsync(Result(CleanLanguage()));
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -321,6 +331,7 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage() with { SwitchesLanguage = true, CandidateLanguage = "Slovak" });
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -333,6 +344,84 @@ public class ExaminerTests
         Assert.False(outcome.SafeFallback);
         Assert.True(outcome.Shipped.LanguageCheck.SwitchesLanguage);
         Assert.Equal("eine Frage.", outcome.Shipped.Reply);
+    }
+
+    /// <summary>
+    /// A takeover regenerates under a note naming the candidate's own work.
+    /// </summary>
+    [Fact]
+    public async Task A_takeover_regenerates_under_a_note_naming_the_candidates_own_work()
+    {
+        // The captured generation requests.
+        var generateRequests = new List<ChatCallRequest>();
+
+        // The scripted chat caller.
+        var caller = new Mock<ILlmChatCaller>();
+
+        // A takeover followed by a question about the candidate's list.
+        caller.SetupSequence(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("what must hold for the last digit?"))
+            .ReturnsAsync(Result("read me the ones on your list ending in four."));
+
+        // The other guards clear each draft.
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
+
+        // The route check flags the takeover and clears the revision.
+        caller.SetupSequence(mock => mock.CompleteAsync<RouteCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanRoute() with
+            {
+                Taken = "",
+                Restates = "a number is even exactly when its last digit is",
+                TakesOver = true,
+            }))
+            .ReturnsAsync(Result(CleanRoute()));
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // One revision ships the reply about the candidate's list.
+        Assert.Equal(1, outcome.Revisions);
+        Assert.Equal("read me the ones on your list ending in four.", outcome.Shipped.Reply);
+        Assert.False(outcome.Shipped.RouteCheck.TakesOver);
+
+        // The revision instruction names the candidate's own work.
+        Assert.Contains("listed every case and counted.", generateRequests[1].SystemPrompt);
+    }
+
+    /// <summary>
+    /// A persistent takeover ships the last draft after exhausting the revision cap.
+    /// </summary>
+    [Fact]
+    public async Task A_persistent_takeover_ships_the_reply_without_the_fallback()
+    {
+        // The scripted chat caller.
+        var caller = new Mock<ILlmChatCaller>();
+
+        // A reply that always leaves the candidate's argument.
+        SetupTextStep(caller, "what must hold for the last digit?");
+
+        // The other guards clear each draft.
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
+
+        // The route check flags every draft.
+        SetupStep(caller, CleanRoute() with { Taken = "", Restates = "the last digit is even", TakesOver = true });
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // Generation stops after the initial attempt and the capped revisions.
+        VerifyTextStepCalled(caller, Times.Exactly(RevisionCap + 1));
+
+        // The reply itself shipped, still carrying the flagged verdict.
+        Assert.Equal(RevisionCap, outcome.Revisions);
+        Assert.False(outcome.SafeFallback);
+        Assert.True(outcome.Shipped.RouteCheck.TakesOver);
     }
 
     /// <summary>
@@ -361,6 +450,7 @@ public class ExaminerTests
             .ReturnsAsync(Result(CleanLeak() with { Leaks = true, WhatLeaked = "named the two-corners counterexample" }))
             .ReturnsAsync(Result(CleanLeak()));
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -399,6 +489,7 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // A minimal transcript ending on a candidate turn.
         var transcript = Transcript.Parse("## Candidate\n\nmy defense");
@@ -462,6 +553,7 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, CleanLeak() with { WithholdsClose = true, Established = "the pairing chain" });
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // Run the turn. The throwaway template is the note and nothing else, so each request is one note.
         await RunAsync(caller);
@@ -489,6 +581,7 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // The reference the site builds for a problem whose author wrote a hint ladder.
         var reference = DefenseReferenceBuilder.BuildReference(
@@ -524,6 +617,7 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // The reference a problem with no hints gets, which the builder hands back untouched.
         var reference = DefenseReferenceBuilder.BuildReference(
@@ -582,6 +676,7 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""), cost: 0.02m, promptTokens: 200, completionTokens: 30);
         SetupStep(caller, CleanLeak(), cost: 0.03m, promptTokens: 300, completionTokens: 40);
         SetupStep(caller, CleanLanguage(), cost: 0.04m, promptTokens: 400, completionTokens: 50);
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -606,6 +701,7 @@ public class ExaminerTests
         SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
@@ -719,6 +815,7 @@ public class ExaminerTests
                 MathCheck = Step("math-check.txt"),
                 LeakCheck = Step("leak-check.txt"),
                 LanguageCheck = Step("language-check.txt"),
+                RouteCheck = Step("route-check.txt"),
                 Notes = ExaminerNotesFixture.Shipped(),
                 MaxRevisions = RevisionCap,
             };
@@ -759,6 +856,13 @@ public class ExaminerTests
     /// <returns>The clean verdict.</returns>
     private static LanguageCheckResult CleanLanguage() =>
         new(SwitchesLanguage: false, CandidateLanguage: "English");
+
+    /// <summary>
+    /// A route-check verdict that finds the reply on the candidate's own route.
+    /// </summary>
+    /// <returns>The clean verdict.</returns>
+    private static RouteCheckResult CleanRoute() =>
+        new(Work: "listed every case and counted", Taken: "every case", Restates: "", TakesOver: false);
 
     /// <summary>
     /// Wraps a value in a chat-call result carrying the given cost and tokens, the shape a caller hands back.
