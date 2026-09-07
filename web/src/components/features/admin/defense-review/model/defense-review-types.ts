@@ -187,9 +187,15 @@ export type DefenseReviewDetail = {
 }
 
 /**
- * The examiner's steps, in the order they run.
+ * The examiner's steps in display order.
  */
-export const EXAMINER_STEPS = ['generate', 'mathCheck', 'leakCheck', 'languageCheck'] as const
+export const EXAMINER_STEPS = [
+  'generate',
+  'mathCheck',
+  'leakCheck',
+  'languageCheck',
+  'routeCheck',
+] as const
 
 /**
  * One step of the examiner's turn: the call that writes the reply, or one of the guards that judges it. Each routes
@@ -249,6 +255,12 @@ export type DefenseTurnAttempt = {
   switchesLanguage: boolean
   /** The language the student's latest turn was written in. */
   candidateLanguage: string
+  /** Whether the reply left the student's argument to walk them through the examiner's own. */
+  takesOver: boolean
+  /** The student's own work; empty when they had brought nothing. */
+  candidateWork: string
+  /** The reference sentence the reply's question fished for; empty when its answer is nowhere in the reference. */
+  restatedReferenceStep: string
   /** Whether this attempt is the constrained fallback the revision cap fell back to. */
   isSafeFallback: boolean
   /** The model calls this attempt made. */
@@ -303,6 +315,8 @@ export type ExaminerNotesSnapshot = {
   withheldClose?: ExaminerNoteSnapshot
   /** The instruction for a reply that drifted out of the student's language. */
   languageSwitch?: ExaminerNoteSnapshot
+  /** The instruction for a reply that left the student's argument for the examiner's own. */
+  route?: ExaminerNoteSnapshot
   /** The instruction a draft that outlasted the revision cap was replaced under. */
   safeHold?: ExaminerNoteSnapshot
   /** The guidance for using the author's staged hints. */
@@ -326,6 +340,8 @@ export type ExaminerConfigSnapshot = {
   leakCheck?: ExaminerStepSnapshot
   /** The step that checks the reply is in the student's language. */
   languageCheck?: ExaminerStepSnapshot
+  /** The step that checks the reply presses the student's own argument. */
+  routeCheck?: ExaminerStepSnapshot
   /** The notes the examiner read. */
   notes?: ExaminerNotesSnapshot
   /** How many times a flagged reply may be regenerated. */

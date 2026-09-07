@@ -34,6 +34,10 @@ public class LlmChatCaller(
     /// The resilience pipeline every call runs through, re-issuing a failed call on any non-cancellation fault. A retry
     /// count below one means no retries — the call runs once through an empty pipeline.
     /// </summary>
+    /// <remarks>
+    /// The endpoint caps requests per second, and a caller that fans out fills that budget at once, so several calls
+    /// are refused at the same instant. Jitter is what keeps their retries from landing in the same second.
+    /// </remarks>
     private readonly ResiliencePipeline _retryPipeline = settings.Value.MaxRetries < 1
         ? ResiliencePipeline.Empty
         : new ResiliencePipelineBuilder()
@@ -42,9 +46,9 @@ public class LlmChatCaller(
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(
                     exception => exception is not OperationCanceledException),
                 MaxRetryAttempts = settings.Value.MaxRetries,
-                BackoffType = DelayBackoffType.Linear,
+                BackoffType = DelayBackoffType.Exponential,
                 Delay = settings.Value.RetryDelay,
-                UseJitter = false,
+                UseJitter = true,
             })
             .Build();
 

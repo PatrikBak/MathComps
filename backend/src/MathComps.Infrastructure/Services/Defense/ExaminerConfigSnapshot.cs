@@ -33,10 +33,11 @@ public sealed record ExaminerNoteConfigSnapshot(string Path, string Text);
 /// <param name="MathCheck">The recorded math-check step.</param>
 /// <param name="LeakCheck">The recorded leak-check step.</param>
 /// <param name="LanguageCheck">The recorded language-check step.</param>
+/// <param name="RouteCheck">The recorded route-check step.</param>
 /// <param name="Notes">The recorded notes, keyed by name in camelCase
 /// — the same names <see cref="Options.ExaminerNotesSettings"/> gives them.</param>
 /// <param name="MaxRevisions">The revision cap in force.</param>
 public sealed record ExaminerConfigSnapshot(
     ChatStepConfigSnapshot Generate, ChatStepConfigSnapshot MathCheck, ChatStepConfigSnapshot LeakCheck,
-    ChatStepConfigSnapshot LanguageCheck, IReadOnlyDictionary<string, ExaminerNoteConfigSnapshot> Notes,
-    int MaxRevisions);
+    ChatStepConfigSnapshot LanguageCheck, ChatStepConfigSnapshot RouteCheck,
+    IReadOnlyDictionary<string, ExaminerNoteConfigSnapshot> Notes, int MaxRevisions);

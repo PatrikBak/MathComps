@@ -1,4 +1,5 @@
 using System.ClientModel;
+using System.ClientModel.Primitives;
 using Clerk.BackendAPI;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.BulkImport;
@@ -347,10 +348,16 @@ public static class ServiceCollectionExtensions
             // Pull the connection settings.
             var settings = serviceProvider.GetRequiredService<IOptions<LlmSettings>>().Value;
 
-            // Build the OpenAI client against the configured endpoint.
+            // Build the OpenAI client against the configured endpoint. The retry pipeline in LlmChatCaller is
+            // the only place retrying is configured: the client's own retries would multiply against it.
             return new OpenAIClient(
                 new ApiKeyCredential(settings.ApiKey),
-                new OpenAIClientOptions { Endpoint = new Uri(settings.BaseUrl) });
+                new OpenAIClientOptions
+                {
+                    Endpoint = new Uri(settings.BaseUrl),
+                    NetworkTimeout = settings.RequestTimeout,
+                    RetryPolicy = new ClientRetryPolicy(maxRetries: 0),
+                });
         });
 
         // The retrying structured-completion caller every chat consumer drives.

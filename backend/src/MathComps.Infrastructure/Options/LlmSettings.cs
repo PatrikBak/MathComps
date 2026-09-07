@@ -31,4 +31,10 @@ public class LlmSettings
     /// The base delay a retry waits before re-issuing the call.
     /// </summary>
     public required TimeSpan RetryDelay { get; set; }
+
+    /// <summary>
+    /// How long one request may hang before it counts as failed. Set it well above a normal call, since it is
+    /// there to end one that never answers.
+    /// </summary>
+    public required TimeSpan RequestTimeout { get; set; }
 }

@@ -25,4 +25,9 @@ public enum ExaminerStep
     /// Judges whether the reply is written in the language the candidate is writing in.
     /// </summary>
     LanguageCheck,
+
+    /// <summary>
+    /// Judges whether the reply presses the argument the candidate brought or walks them through the examiner's own.
+    /// </summary>
+    RouteCheck,
 }

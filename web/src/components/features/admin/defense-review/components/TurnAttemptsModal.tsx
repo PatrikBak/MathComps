@@ -242,6 +242,19 @@ function Attempt({ attempt, status }: AttemptProps) {
           flagged={t('verdicts.switchesLanguage', { language: attempt.candidateLanguage })}
           clean={attempt.candidateLanguage || t('verdicts.languageUnknown')}
         />
+        {/* Route. An attempt with no route-check call was never judged, so a false flag says nothing about it */}
+        <Verdict
+          label={t('verdicts.route')}
+          isFlagged={attempt.takesOver}
+          flagged={t('verdicts.takesOver', {
+            restatedReferenceStep: attempt.restatedReferenceStep,
+          })}
+          clean={
+            attempt.calls.some((call) => call.step === 'routeCheck')
+              ? t('verdicts.routeClean')
+              : t('verdicts.routeUnknown')
+          }
+        />
       </ul>
 
       {/* What writing and judging it cost, per step */}

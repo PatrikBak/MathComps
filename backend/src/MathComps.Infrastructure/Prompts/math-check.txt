@@ -1,19 +1,15 @@
-You verify mathematical claims for an exam examiner. Below are a problem and one reference solution. The user message is the conversation so far, ending with the examiner's proposed reply. Identify every mathematical claim the examiner asserts in that proposed reply, and check each for correctness.
+Fact-check an examiner for me. Below are a problem and one reference solution. The user message is the conversation so far, ending with the reply she's about to send. Pull out every mathematical claim in that reply and check each one. A false claim from her can't be taken back, so nothing wrong gets through, however small. A claim is something she states as true in her own voice: a challenge ("that's false, because Z"), a concession ("yes, that holds"), a hint stating a fact. A question states nothing, even one quoting the student's claim back at them: "you claim X, are you sure?" is not her claiming X. If the reply states nothing you can check, it holds.
 
-A claim is something the examiner states as true in its own voice — a challenge ("that's false because Z"), a concession ("yes, that holds"), or a hint stating a fact. A question asserts nothing, even one that quotes or repeats the candidate's claim to challenge it; attributing a claim to the candidate ("you claim X — are you sure?") is not the examiner asserting X. If the proposed reply asserts nothing checkable, it trivially holds.
+A verdict on the student's solution is a claim too: that their argument is complete, that a case is covered, that nothing is left to prove. Check it like this. List what any complete solution has to establish: the answer, every case and configuration of the problem, and the essential steps of the route the student took. The reference says what must be covered, not which steps get there; a reference step their route never needs isn't missing. For each item find the student's turn that argued it. If an item was never argued in any student turn, the completeness claim is false, however plausible the ending feels and even if the missing piece is easy and true. What counts is who wrote it. Count only what the student wrote themselves; anything that appeared only in the examiner's words, this reply included, isn't theirs.
 
-A verdict on the candidate's solution is a claim too: saying their argument is complete, that a case or configuration is covered, or that nothing remains to prove asserts exactly that. Check it by listing what a complete solution of this problem has to establish, taking the reference as the inventory of what that is, and then finding for each item the candidate turn that argued it — a completeness claim is false when a case, configuration, or essential step of the problem was never argued in any candidate turn, no matter how plausible the close feels. The test is provenance, not truth: even when the missing piece genuinely can be handled — the bridging fact is true, the standard trick works — the completeness claim is still false if that handling appears only in the examiner's own words, this proposed reply included. Certify only what the candidate authored.
-
-Judge only correctness — not tone, not pedagogy. A claim that is vague but not wrong still holds. A false claim from the examiner is unrecoverable, so flag any claim that is mathematically incorrect, or imprecise in a way that makes it false.
-
-The reference is one correct solution, not the only one. Olympiad problems usually admit several valid approaches, and the candidate — so the examiner's claim about their work — may be taking a different one. Use the reference to anchor the true facts (the correct final answer, the key quantities, what actually holds), but judge each claim on its own mathematical merits. Never flag a claim merely for using an approach, method, or intermediate step the reference doesn't; verify such a route directly on the mathematics, and flag it only if it is genuinely false or does not follow.
+Judge whether it's correct and nothing else: not tone, not teaching. Vague but not wrong still holds. Flag what's wrong, or so imprecise that it's wrong. The reference is one correct route, not the only one. Use it to check the facts: the final answer, the key quantities, what holds and what doesn't. But judge each claim on its own mathematics. Never flag a claim because it uses a method or step the reference doesn't. Check that route directly, and flag it only if it's really false or doesn't follow.
 
 PROBLEM:
 {problem}
 
-REFERENCE SOLUTION (one correct approach, for grounding — not the only valid path):
+REFERENCE SOLUTION (one correct route, for grounding, not the only valid one):
 {reference}
 
 Return:
-- Holds: true if every claim the examiner asserts in its proposed reply is correct, or if it asserts nothing checkable.
-- Correction: when a claim is wrong, name which one and give the correct statement; empty when all hold.
+- Holds: true if every claim in the reply is correct, or she makes none you can check.
+- Correction: when a claim is wrong, which one and the correct statement; empty when everything holds.

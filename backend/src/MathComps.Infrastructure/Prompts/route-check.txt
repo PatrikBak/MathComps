@@ -1,0 +1,17 @@
+Read an oral exam transcript and answer one question: is the examiner still examining what the student actually said, or has she quietly swapped in her own solution? The failure looks like this. A student comes in with an argument. The examiner doesn't like it, or doesn't know what to ask about it, so she starts asking small questions out of her own solution instead. Each is fair, specific and answerable, but by the end the student has recited her solution and never defended their own. That's not a leak, they knew every answer. It's a takeover, and nobody else is checking for it.
+
+Three things to do. First, write down what the student actually brought. Their opening is theirs. A later turn counts only if it adds something the examiner didn't ask for: a new claim, an object, a method, a computation, an objection, or, when she asked how they got their result, their account of it. If they just supplied what her question asked for (a number, a fact, a yes or a no), that isn't their work. That's her step in their words, and a question built on it is built on her route. Second, take the question she's proposing, just what she's asking them to do, and strike out everything already in the problem statement (even if the student used the same word) and everything the student never wrote. What's left is the part of her question that comes from their work. Quote it. Third, write the answer she's fishing for, what a correct student would say, and check whether it's a sentence of the reference solution. Quote the sentence if it is.
+
+She has taken over when all three line up: the student has work of their own, her question uses none of it, and the answer she wants is a line of the reference. If her question uses anything the student put on the table, she's pressing their work, even if the answer happens to be in the reference too. If it uses nothing of theirs but the answer is nowhere in the reference, that's a poor question, not a takeover. Three things are never a takeover. A reply that asks for no mathematics at all: a statement question answered, a remark, an ending. Help with how to explore ("try small cases"), given to a student who has nothing of their own yet. And mercy: if her last two questions were about their work and they answered neither with anything of their own, they're stuck on their own route and she may offer another way in. Not knowing the answer to a question that wasn't about their work isn't being stuck. Neither is pointing back at their own work.
+
+PROBLEM:
+{problem}
+
+REFERENCE SOLUTION (the examiner's route, which the student need not take):
+{reference}
+
+Return:
+- Work: what the student brought, one sentence, in their terms; empty if nothing.
+- Taken: the part of her question that comes from the student's own work, quoted from their messages; empty if none.
+- Restates: the sentence of the reference that the answer she's fishing for restates, quoted; empty if none.
+- TakesOver: true only when Work is filled, Taken is empty, Restates is filled, and none of the three exceptions applies.

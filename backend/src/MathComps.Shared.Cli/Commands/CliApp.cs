@@ -130,7 +130,7 @@ public sealed class CliApp
     }
 
     /// <summary>
-    /// Runs the shared bootstrap — console encoding, banner, configuration, and service registration —
+    /// Runs the shared bootstrap — console setup, banner, configuration, and service registration —
     /// and returns the registrar the command app resolves dependencies from.
     /// </summary>
     /// <returns>The dependency-injection registrar wrapping the configured service collection.</returns>
@@ -139,6 +139,11 @@ public sealed class CliApp
         // Force UTF-8 so diacritics (e.g. Slovak) render even where the default console code page can't.
         Console.InputEncoding = Encoding.UTF8;
         Console.OutputEncoding = Encoding.UTF8;
+
+        // Redirected output is a file something else reads back, and Spectre wraps it to 80 columns, which splits
+        // every long line into continuation lines the reader has no way to rejoin. A terminal keeps its own width.
+        if (Console.IsOutputRedirected)
+            AnsiConsole.Profile.Width = 10_000;
 
         // Render the tool's banner.
         AnsiConsole.Write(new FigletText(_bannerText).Centered().Color(Color.Aqua));

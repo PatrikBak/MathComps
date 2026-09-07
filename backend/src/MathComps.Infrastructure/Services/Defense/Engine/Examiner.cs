@@ -12,12 +12,8 @@ using Microsoft.Extensions.Options;
 namespace MathComps.Infrastructure.Services.Defense.Engine;
 
 /// <summary>
-/// Implements <see cref="IExaminer"/> over an <see cref="ILlmChatCaller"/>. Each turn generates a reply, then
-/// math-checks, leak-checks and language-checks it — independently, every turn — and, when a guard flags it,
-/// regenerates the reply up to a cap, re-verifying each fresh attempt. If the cap runs out with a wrong claim or a
-/// mis-paid step still on the reply, a constrained fallback ships instead of the dirty draft: a claim-less holding
-/// reply, whichever fault survived. Every model call's billed cost and tokens
-/// are summed into the turn's outcome.
+/// Implements <see cref="IExaminer"/> over an <see cref="ILlmChatCaller"/> with concurrent guards and capped
+/// revisions. <see cref="NeedsSafeFallback"/> determines when the last draft needs a holding reply.
 /// </summary>
 /// <param name="chatCaller">The chat caller backing every step.</param>
 /// <param name="settings">The per-step model configuration, the path to every note, and the revision cap.</param>
@@ -144,14 +140,13 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
             guards.Math.Verdict,
             guards.Leak.Verdict,
             guards.Language.Verdict,
-            [generateCall, guards.Math.Call, guards.Leak.Call, guards.Language.Call],
+            guards.Route.Verdict,
+            [generateCall, guards.Math.Call, guards.Leak.Call, guards.Language.Call, guards.Route.Call],
             (int)stopwatch.ElapsedMilliseconds);
     }
 
     /// <summary>
-    /// Runs every guard over one reply concurrently, since they judge the same reply from unrelated angles. The
-    /// math-check finds and verifies whatever the reply asserts; the leak-check scans it for over-explaining; the
-    /// language check reads it against the candidate's latest turn alone.
+    /// Runs every guard concurrently over the proposed reply.
     /// </summary>
     /// <param name="problem">The problem the reference guards judge against.</param>
     /// <param name="reference">The reference solution the reference guards judge against.</param>
@@ -161,8 +156,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="usage">The running spend each guard call folds its cost into.</param>
     /// <param name="cancellationToken">A token to cancel the calls.</param>
     /// <returns>Every guard's verdict, each paired with the call that produced it.</returns>
-    private async Task<(GuardRun<MathCheckResult> Math, GuardRun<LeakCheckResult> Leak,
-        GuardRun<LanguageCheckResult> Language)> RunGuardsAsync(
+    private async Task<GuardRuns> RunGuardsAsync(
         string problem, string reference, string conversation, string candidateTurn, string reply,
         ModelUsageAccumulator usage, CancellationToken cancellationToken)
     {
@@ -179,12 +173,31 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // Start the language check against the candidate's latest turn, concurrent with the others.
         var languageCheckTask = RunLanguageGuardAsync(candidateTurn, reply, usage, cancellationToken);
 
+        // Check whether the reply follows the candidate's argument.
+        var routeCheckTask = RunGuardAsync<RouteCheckResult>(
+            ExaminerStep.RouteCheck, _settings.RouteCheck, problem, reference, conversation, reply, usage,
+            cancellationToken);
+
         // Await them all before reading their results.
-        await Task.WhenAll(mathCheckTask, leakCheckTask, languageCheckTask);
+        await Task.WhenAll(mathCheckTask, leakCheckTask, languageCheckTask, routeCheckTask);
 
         // Hand back every guard's run.
-        return (mathCheckTask.Result, leakCheckTask.Result, languageCheckTask.Result);
+        return new GuardRuns(
+            mathCheckTask.Result, leakCheckTask.Result, languageCheckTask.Result, routeCheckTask.Result);
     }
+
+    /// <summary>
+    /// Every guard's run over one reply, each reachable by the guard's name.
+    /// </summary>
+    /// <param name="Math">The math-check's run.</param>
+    /// <param name="Leak">The leak-check's run.</param>
+    /// <param name="Language">The language check's run.</param>
+    /// <param name="Route">The route-check's run.</param>
+    private sealed record GuardRuns(
+        GuardRun<MathCheckResult> Math,
+        GuardRun<LeakCheckResult> Leak,
+        GuardRun<LanguageCheckResult> Language,
+        GuardRun<RouteCheckResult> Route);
 
     /// <summary>
     /// One guard's verdict paired with the call that produced it, so an attempt can record what each guard said and
@@ -203,11 +216,18 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="Leak">The instruction for a reply the leak-check found hands away earned progress.</param>
     /// <param name="WithheldClose">The instruction for a reply that keeps pressing a completed solution.</param>
     /// <param name="LanguageSwitch">The instruction for a reply that drifted out of the candidate's language.</param>
+    /// <param name="Route">The revision instruction for a takeover.</param>
     /// <param name="SafeHold">The instruction a draft that outlasted the revision cap is replaced under.</param>
     /// <param name="AuthorHints">The guidance for using the author's staged hints.</param>
     private sealed record Notes(
-        string Revision, string WrongClaim, string Leak, string WithheldClose, string LanguageSwitch,
-        string SafeHold, string AuthorHints);
+        string Revision,
+        string WrongClaim,
+        string Leak,
+        string WithheldClose,
+        string LanguageSwitch,
+        string Route,
+        string SafeHold,
+        string AuthorHints);
 
     /// <summary>
     /// Runs the generate step: the persona prompt (problem, reference, the author's-hints guidance when the reference
@@ -419,6 +439,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
             await ReadNoteAsync(paths.Leak, ["what_leaked"], cancellationToken),
             await ReadNoteAsync(paths.WithheldClose, [], cancellationToken),
             await ReadNoteAsync(paths.LanguageSwitch, [], cancellationToken),
+            await ReadNoteAsync(paths.Route, ["work"], cancellationToken),
             await ReadNoteAsync(paths.SafeHold, [], cancellationToken),
             await ReadNoteAsync(paths.AuthorHints, [], cancellationToken));
     }
@@ -458,8 +479,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     }
 
     /// <summary>
-    /// Builds the revision instruction from whatever the guards flagged — a wrong claim, a leak, or a withheld
-    /// close — or null when nothing flagged and no revision is due.
+    /// Combines the guards' revision instructions, or returns null when every guard clears the reply.
     /// </summary>
     /// <param name="attempt">The judged attempt.</param>
     /// <param name="notes">The turn's notes: the wrapper and an instruction per flaw.</param>
@@ -467,7 +487,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     private static string? BuildRevisionNote(ExaminerAttempt attempt, Notes notes)
     {
         // Pull the verdicts the note reads.
-        var (_, _, mathCheck, leakCheck, languageCheck, _, _) = attempt;
+        var (_, _, mathCheck, leakCheck, languageCheck, routeCheck, _, _) = attempt;
 
         // Gather an instruction per flag raised; a turn can trip more than one.
         var flagged = new List<string>();
@@ -490,6 +510,13 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         if (leakCheck.WithholdsClose)
             flagged.Add(notes.WithheldClose);
 
+        // Bring a takeover back to the candidate's own work.
+        if (routeCheck.TakesOver)
+            flagged.Add(FillTemplate(notes.Route, new Dictionary<string, string>
+            {
+                ["work"] = routeCheck.Work.EnsureSentenceEnd(),
+            }));
+
         // A switched language leaves the candidate reading a reply they may not understand, so send it back.
         if (languageCheck.SwitchesLanguage)
             flagged.Add(notes.LanguageSwitch);
@@ -508,12 +535,12 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         FillTemplate(revisionNote, new Dictionary<string, string> { ["notes"] = instructions });
 
     /// <summary>
-    /// Whether an attempt carries a fault the constrained fallback exists for: a wrong claim, a leak, or a withheld
-    /// close. A switched language deliberately isn't one, which is why this reads the reference guards and not the
-    /// note the loop runs on. The generator never sees its own rejected draft, so the fallback can only replace a
-    /// drifted reply with a claim-less hold, and losing a sharp question over a translation slip is the worse trade:
-    /// a wrong-language challenge the candidate can paste into a translator still carries the exam forward.
+    /// Checks whether a wrong claim, a leak, or a withheld close requires a holding reply.
     /// </summary>
+    /// <remarks>
+    /// Language and route flags use the revision budget; the last challenge still advances the defense when
+    /// that budget runs out.
+    /// </remarks>
     /// <param name="attempt">The judged attempt.</param>
     /// <returns>True when the attempt must not ship as it stands.</returns>
     private static bool NeedsSafeFallback(ExaminerAttempt attempt) =>

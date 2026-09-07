@@ -1,1 +1,1 @@
-REVISION REQUIRED — {notes}
+Before you write, fix this: {notes}

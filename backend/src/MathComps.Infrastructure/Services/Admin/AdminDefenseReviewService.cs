@@ -336,6 +336,9 @@ public class AdminDefenseReviewService(
                         attempt.Established,
                         attempt.SwitchesLanguage,
                         attempt.CandidateLanguage,
+                        attempt.TakesOver,
+                        attempt.CandidateWork,
+                        attempt.RestatedReferenceStep,
                         attempt.IsSafeFallback,
                         attempt.Calls
                             .Select(call => new AdminDefenseAttemptCallDto(

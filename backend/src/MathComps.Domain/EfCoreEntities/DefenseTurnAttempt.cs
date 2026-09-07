@@ -98,6 +98,23 @@ public class DefenseTurnAttempt
     public required string CandidateLanguage { get; set; }
 
     /// <summary>
+    /// Whether the reply left the candidate's argument to walk them through the examiner's own: its question kept
+    /// nothing of what they brought, and its answer is a line of the reference.
+    /// </summary>
+    public required bool TakesOver { get; set; }
+
+    /// <summary>
+    /// The candidate's own work in a sentence; empty when they had brought nothing.
+    /// </summary>
+    public required string CandidateWork { get; set; }
+
+    /// <summary>
+    /// The reference sentence a correct answer to the reply's question would restate; empty when the answer is
+    /// nowhere in the reference.
+    /// </summary>
+    public required string RestatedReferenceStep { get; set; }
+
+    /// <summary>
     /// Whether this attempt is the constrained fallback, drafted under a note that retreats rather than a correction,
     /// after the revision cap ran out with the reply still flagged.
     /// </summary>

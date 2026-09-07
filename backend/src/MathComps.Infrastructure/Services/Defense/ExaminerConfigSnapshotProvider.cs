@@ -26,6 +26,7 @@ public class ExaminerConfigSnapshotProvider(IOptions<ExaminerSettings> settings)
         BuildStepSnapshot(settings.MathCheck),
         BuildStepSnapshot(settings.LeakCheck),
         BuildStepSnapshot(settings.LanguageCheck),
+        BuildStepSnapshot(settings.RouteCheck),
         BuildNotesSnapshot(settings.Notes),
         settings.MaxRevisions);
 
@@ -58,6 +59,7 @@ public class ExaminerConfigSnapshotProvider(IOptions<ExaminerSettings> settings)
             ["leak"] = BuildNoteSnapshot(notes.Leak),
             ["withheldClose"] = BuildNoteSnapshot(notes.WithheldClose),
             ["languageSwitch"] = BuildNoteSnapshot(notes.LanguageSwitch),
+            ["route"] = BuildNoteSnapshot(notes.Route),
             ["safeHold"] = BuildNoteSnapshot(notes.SafeHold),
             ["authorHints"] = BuildNoteSnapshot(notes.AuthorHints),
         };

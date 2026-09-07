@@ -49,7 +49,11 @@
           "math": "Matematika",
           "mathFails": "chyba: {correction}",
           "mathHolds": "všechna tvrzení platí",
+          "route": "Cesta",
+          "routeClean": "na cestě studenta",
+          "routeUnknown": "nekontrolováno",
           "switchesLanguage": "odchýlila se; student psal jazykem {language}",
+          "takesOver": "odvedla studenta na vlastní cestu; odpověď, kterou chce: {restatedReferenceStep}",
           "withholdsClose": "už je hotové: {established}"
         }
       },
@@ -66,6 +70,7 @@
           "languageSwitch": "Jiný jazyk",
           "leak": "Prozrazení",
           "revision": "Hlavička přepisu",
+          "route": "Vlastní cesta",
           "safeHold": "Nouzová odpověď",
           "title": "Poznámky",
           "withheldClose": "Neuznané řešení",
@@ -79,7 +84,8 @@
           "generate": "Odpověď",
           "languageCheck": "Kontrola jazyka",
           "leakCheck": "Kontrola prozrazení",
-          "mathCheck": "Kontrola matematiky"
+          "mathCheck": "Kontrola matematiky",
+          "routeCheck": "Kontrola cesty"
         },
         "unknown": "Tato konverzace proběhla dřív, než se nastavení zaznamenávala."
       },
