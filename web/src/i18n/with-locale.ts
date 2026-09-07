@@ -1,7 +1,9 @@
+import { notFound } from 'next/navigation'
+import { hasLocale } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 import type { ReactNode } from 'react'
 
-import type { Locale } from './i18n'
+import { type Locale, routing } from './i18n'
 
 /**
  * Base props injected by {@link withLocale} into wrapped page components.
@@ -31,8 +33,9 @@ export type PageProps<TParams = object> = {
  *
  * **What it does:**
  * 1. Extracts `locale` from the async route params
- * 2. Calls `setRequestLocale()` to configure next-intl for server components
- * 3. Passes the resolved `locale` prop to your page component
+ * 2. Answers a locale the site does not speak with the 404 page
+ * 3. Calls `setRequestLocale()` to configure next-intl for server components
+ * 4. Passes the resolved `locale` prop to your page component
  *
  * @param PageComponent - Your page component (sync or async).
  *
@@ -45,10 +48,16 @@ export function withLocale<P extends LocaleProps>(
     // Resolve the current locale from the params
     const { locale } = await params
 
+    // A locale the site does not speak is a missing page. The middleware skips the static extensions
+    // it lists, so a stray `/favicon.ico` reaches a page with `favicon.ico` as its locale.
+    if (!hasLocale(routing.locales, locale)) {
+      notFound()
+    }
+
     // Configure next-intl for server components
-    setRequestLocale(locale as Locale)
+    setRequestLocale(locale)
 
     // Pass the locale and any other props to the wrapped component
-    return PageComponent({ locale: locale as Locale, params, ...rest } as unknown as P)
+    return PageComponent({ locale, params, ...rest } as unknown as P)
   }
 }
