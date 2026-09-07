@@ -447,6 +447,10 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
   Docker turns each missing source into an empty directory. They're gitignored, so `git pull` won't bring them.
 - **Locally:** `ASPNETCORE_ENVIRONMENT=Production dotnet run` picks them up too.
 
+#### Error tracking
+
+`Sentry.AspNetCore` ships every `LogError` to Better Stack, which is the route an unhandled exception takes out of [GlobalExceptionHandler](src/MathComps.Api/Extensions/GlobalExceptionHandler.cs). The business failures that handler maps to a status are filtered back out in [Program.cs](src/MathComps.Api/Program.cs). `SENTRY_DSN` in `.env` turns it on, and an empty one leaves the SDK disabled.
+
 #### What the defense ceiling is for
 
 It guards against an honest user running away with the bill. It bounds one account, and sign-up is free, so a determined user opens another.
