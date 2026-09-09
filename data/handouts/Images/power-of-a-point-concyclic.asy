@@ -12,8 +12,7 @@ pair O1 = (-halfSeparation, 0);
 pair O2 = (halfSeparation, 0);
 
 // The crossing X is put on the radical axis, so its two powers agree and the
-// four secant points come out concyclic on their own — the figure shows the
-// theorem rather than being fitted to it.
+// four secant points come out concyclic on their own.
 pair[] axis = RadicalAxis(O1, r1, O2, r2, crossingHeight);
 pair X = axis[0];
 
@@ -25,11 +24,9 @@ pair[] hitsL = LineCircleIntersections(X, Polar(X, secantAngleL, 1), O2, r2);
 pair L1 = hitsL[0];
 pair L2 = hitsL[1];
 
-pair S = Circumcenter(K1, K2, L1);
-
 Circle(O1, r1, LightBlue);
 Circle(O2, r2, LightBlue);
-Circle(S, abs(K1 - S), LightPurple);
+CircleThrough(K1, K2, L1, LightPurple);
 
 Draw(ExtendPast(axis[1], axis[0], axisOverhang), ExtendPast(axis[0], axis[1], axisOverhang), Red);
 

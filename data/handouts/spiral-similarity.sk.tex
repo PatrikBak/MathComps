@@ -1,0 +1,683 @@
+\input _template
+
+\let\angle\sphericalangle
+
+\setlanguage{SK}
+
+\Title{Špirálna podobnosť}
+\MathcompsLink{spiralna-podobnost}
+
+\Author{Patrik Bak}
+
+\sec Teória
+
+\EnvId{T3lP4FN1zTf6lOQz9Ddq_-spiralna-podobnost}
+\Definition{Špirálna podobnosť}{
+    Geometrické zobrazenie, ktoré je zložením otočenia a~rovnoľahlosti. Je určená stredom, orientovaným uhlom otočenia~$\phi$ a~koeficientom rovnoľahlosti $k>0$.
+
+    \Image{spiral-definition.pdf}
+}
+
+Z~tejto definície vyplýva:
+\begitems
+\i Pre $\phi=0^\circ$ dostávame rovnoľahlosť s~koeficientom~$k$.
+   \Image{spiral-definition-homothety.pdf}
+\i Ak $\phi=180^\circ$, dostávame rovnoľahlosť s~koeficientom~$-k$.
+   \Image{spiral-definition-homothety-negative.pdf}
+\i Ak $k=1$, dostávame otočenie o~uhol~$\phi$.
+   \Image{spiral-definition-rotation.pdf}
+\enditems
+
+\EnvId{JmA51D6zLoKYiJEsuQBWn-spiralna-podobnost-v-paroch}
+\Theorem{Špirálna podobnosť chodí \uv{v~pároch}}{
+    Nech špirálna podobnosť so~stredom~$O$ prevádza $AB$ na $A'B'$. Potom $O$ je tiež stred špirálnej podobnosti, ktorá prevádza $AA'$ na $BB'$.
+
+    \Image{spiral-pairs.pdf}
+}{}
+
+\EnvId{7w5OPOXaDCNOVEgIpddYa-spiralna-podobnost-a-podobne-body}
+\Theorem{Špirálna podobnosť prenáša \uv{podobné body}}{
+    Nech $S$ je špirálna podobnosť so~stredom~$O$ prevádzajúca $AB$ na $A'B'$. Nech $X$ a~$X'$ sú body na úsečkách $AB$ a~$A'B'$ také, že $|AX|:|BX|=|A'X'|:|B'X'|$. Potom $S$ prenáša $X$ na $X'$ a~trojuholníky $OAA'$, $OXX'$, $OBB'$ sú navzájom podobné.
+
+    \Image{spiral-similar-points.pdf}
+}{}
+
+\EnvId{eAqIhVm0OVC2uVXDRxMpJ-stred-spiralnej-podobnosti}
+\Theorem{Stred špirálnej podobnosti}{
+    Nech $A,B,C,D$ sú body v~rovine také, že $AB \nparallel CD$. Nech sa priamky $AB$ a~$CD$ pretínajú v~$X$. Nech sa kružnice opísané trojuholníkom $XAC$ a~$XBD$ pretínajú znova v~$O$. Potom $O$ je stred jednoznačnej špirálnej podobnosti, ktorá zobrazuje $AB$ na $CD$.
+
+    \Image{spiral-center.pdf}
+}{}
+
+Keďže špirálna podobnosť chodí v~pároch, ten istý bod $O$ je aj stredom špirálnej podobnosti, ktorá zobrazuje $AC$ na $BD$. Ak naviac $AC \nparallel BD$, dáva rovnaký postup pre túto dvojicu: priamky $AC$ a~$BD$ sa pretnú v~bode $Y$ a~$O$ je druhým priesečníkom kružníc opísaných trojuholníkom $ABY$ a~$CDY$.
+
+\Image{spiral-center-corollary.pdf}
+
+Špeciálne prípady tejto druhej konštrukcie:
+\begitems
+\i Ak je $Y$ jedným z~bodov~$A$, $B$, $C$, $D$, napr. $Y=D$, tak kružnica $CDY$ sa degeneruje na kružnicu prechádzajúcu cez $C$, $D$ dotýkajúcu sa priamky~$BD$.
+   \Image{spiral-center-degenerate.pdf}
+\i Ak sa kružnice $ABY$ a~$CDY$ dotýkajú, tak nutne v~$Y$, a~vtedy je špirálna podobnosť zobrazujúca $AB$ na $CD$ rovnoľahlosťou so stredom $Y$.
+   \Image{spiral-center-tangent.pdf}
+\enditems
+
+\sec Miquelove body
+
+\EnvId{bOA6eKiwIlUrb_5f3ft0o-miquelova-veta}
+\Theorem{Miquelova veta}{
+    Nech $D$, $E$, $F$ sú body po rade na stranách $BC$, $CA$, $AB$ trojuholníka $ABC$. Potom kružnice opísané trojuholníkom $AEF$, $BFD$, $CDE$ prechádzajú jedným bodom.
+
+    \Image{spiral-miquel-triangle.pdf}
+}{}
+
+\EnvId{LBhDImhjL32nZ7fyN8V3M-miquelov-bod}
+\Theorem{Miquelov bod}{
+    V~štvoruholníku $ABCD$ sa priamky $AB,CD$ pretínajú v~$Q$ a~priamky $AD,BC$ v~$R$. Potom kružnice opísané trojuholníkom $RAB, RDC, QAD, QBC$ prechádzajú jedným bodom~$M$. Tento bod sa nazýva \textit{Miquelov bod} štvoruholníka $ABCD$ a~je stredom špirálnej podobnosti zobrazujúcej $AB$ na~$DC$, resp. $AD$ na~$BC$.
+
+    \Image{spiral-miquel-point.pdf}
+}{}
+
+\EnvId{igG5PzGmeZw8PD3AWDpuL-miquelov-bod-tetivoveho-stvoruholnika}
+\Theorem{Miquelov bod tetivového štvoruholníka}{
+    Nech $M$ je Miquelov bod štvoruholníka $ABCD$, v~ktorom sa priamky $AB,CD$ pretínajú v~$Q$ a~priamky $AD,BC$ v~$R$. Potom $M$ leží na $QR$ práve vtedy, keď $ABCD$ je tetivový.
+
+    \Image{spiral-miquel-on-qr.pdf}
+}{}
+
+Označme ešte $P = AC \cap BD$. Ten istý postup pre zvyšné dve dvojice priamok dáva dva ďalšie Miquelove body:
+\begitems
+\i Kružnice opísané trojuholníkom $PAB, PCD, QAC, QBD$ prechádzajú jedným bodom, stredom špirálnej podobnosti zobrazujúcej $AB$ na $CD$, resp. $AC$ na $BD$. Tento bod leží na $PQ$ práve vtedy, keď $ABCD$ je tetivový.
+   \Image{spiral-miquel-others-pq.pdf}
+\i Kružnice opísané trojuholníkom $PAD, PCB, RAC, RDB$ prechádzajú jedným bodom, stredom špirálnej podobnosti zobrazujúcej $AD$ na $CB$, resp. $AC$ na $DB$. Tento bod leží na $PR$ práve vtedy, keď $ABCD$ je tetivový.
+   \Image{spiral-miquel-others-pr.pdf}
+\enditems
+
+Štvoruholník $ABCD$ má teda tri Miquelove body, po jednom pre každú z~dvojíc $QR$, $PQ$, $PR$, a~pri tetivovom $ABCD$ leží každý z~nich na svojej priamke. Nasledujúce tvrdenia vyslovíme pre bod $M$ na $QR$ a~zvyšný bod $P$; pre druhé dva platia analogicky, s~$P$ nahradeným $R$, resp. $Q$.
+
+\EnvId{MmyK4gHpuLqLFIWRTsfw7-om-kolme-na-qr}
+\Theorem{$OM \perp QR$}{
+    Je daný tetivový štvoruholník $ABCD$ so stredom kružnice opísanej $O$ a~Miquelovým bodom $M$. Označme $R=AD \cap BC$ a~$Q=AB \cap CD$. Potom $OM \perp QR$.
+
+    \Image{spiral-miquel-om-perpendicular.pdf}
+}{}
+
+\EnvId{0E6PUv99s_uEcAjd8CC6I-o-p-m-na-priamke}
+\Theorem{$O$, $P$, $M$ na priamke}{
+    Je daný tetivový štvoruholník $ABCD$ so stredom kružnice opísanej $O$ a~Miquelovým bodom $M$. Označme $P=AC \cap BD$, $R=AD \cap BC$ a~$Q=AB \cap CD$. Potom $O$, $P$, $M$ ležia na priamke, takže $OP \perp QR$.
+
+    \Image{spiral-miquel-opm-line.pdf}
+}{}
+
+Podľa analógie pre Miquelov bod na $PR$ je aj $OQ \perp PR$. Bod $O$ tak leží na dvoch výškach trojuholníka $PQR$, čiže je jeho ortocentrom.
+
+\Image{spiral-miquel-orthocenter.pdf}
+
+\EnvId{8WFRq4Y9hX4Xf2REA_qfL-polara}
+\Theorem{Polára}{
+    Nech $ABCD$ je tetivový štvoruholník. Označme $P=AC \cap BD$, $R=AD \cap BC$ a~$Q=AB \cap CD$. Potom $QR$ je polára k~bodu $P$ vzhľadom na kružnicu opísanú $ABCD$, analogicky $PR$ je polára ku $Q$ a~$PQ$ je polára ku $R$.
+
+    \Image{spiral-miquel-polar.pdf}
+}{}
+
+\sec Ďalšie známe konfigurácie
+
+\EnvId{tQ6r-YBHII2hYOcd0jnzC-ptolemaiova-veta}
+\Example{Ptolemaiova veta}{
+    Nech $ABCD$ je štvoruholník so stranami $a=|AB|$, $b=|BC|$, $c=|CD|$, $d=|DA|$ a~uhlopriečkami $e=|AC|$, $f=|BD|$. Potom
+    $$
+    ef \leq ac + bd,
+    $$
+    pričom rovnosť nastáva práve vtedy, keď je $ABCD$ tetivový.
+
+    \Image{spiral-ptolemy.pdf}
+}{}
+
+\EnvId{ECXlxtdJwECBnuRZW8E-V-simsonova-priamka}
+\Example{Simsonova priamka}{
+    Nech $ABCD$ je tetivový štvoruholník. Potom kolmé priemety bodu $D$ na priamky $AB$, $AC$, $BC$ ležia na jednej priamke.
+
+    \Image{spiral-simson.pdf}
+}{}
+
+\EnvId{J67DMaac8DHSjoZgc7hzh-sharky-devil}
+\Example{Sharky-Devil}{
+    Nech sa kružnica vpísaná trojuholníku $ABC$ dotýka strán $BC$, $CA$, $AB$ po rade v~bodoch $D$, $E$, $F$ a~nech sa kružnice opísané trojuholníkom $AEF$ a~$ABC$ pretínajú znova v~bode $S$. Potom priamka $SD$ prechádza stredom oblúka $BC$ neobsahujúceho $A$, čiže $SD$ je osou uhla $BSC$.
+
+    \Image{spiral-sharky-devil.pdf}
+}{}
+
+\EnvId{DKBXD5k0KpD8gJ1WTK5OL-rovnake-useky-bd-ce}
+\Example{}{
+    Nech $D$ a~$E$ sú body na stranách $AB$ a~$AC$ trojuholníka $ABC$ také, že $|BD| = |CE|$. Potom sa kružnice opísané trojuholníkom $ADE$ a~$ABC$ pretínajú znova v~strede oblúka $BC$ obsahujúceho $A$.
+
+    \Image{spiral-arc-midpoint.pdf}
+}{}
+
+\sec Prax
+
+\EnvId{xE-clCysUPOoVq5pYkO8l-podobne-pravouhle-trojuholniky}
+\Problem{0}{}{
+    Pravouhlé trojuholníky $ABC$ a~$AB'C'$ s~pravým uhlom pri vrchole~$A$ sú podobné a~rovnako orientované. Dokážte, že $BB' \perp CC'$.
+}{
+    Využijeme, že $A$ je stredom zaujímavých špirálok. Skúste vypísať, že akých.
+}{
+    Zo zadania hneď máme, že $A$ je stredom špirálky zobrazujúcej $BC$ na $B'C'$. Tým pádom je ale aj stredom špirálky, ktorá zobrazuje $BB'$ na $CC'$. Uhol týchto úsečiek je uhol našej špirálky. Aký je?
+}%
+{
+    Priama podobnosť $A \mapsto A$, $B \mapsto B'$, $C \mapsto C'$ je špirálna podobnosť so stredom $A$ (nie je to identita, keďže $B \neq B'$) a~zobrazuje $BC$ na $B'C'$.
+
+    \Image{spiral-similar-right-triangles.pdf}
+
+    Špirálka chodí v~pároch, takže $A$ je aj stredom špirálnej podobnosti $T$, ktorá zobrazuje $BB'$ na $CC'$ a~$B \mapsto C$. Jej uhol otočenia je preto $|\angle BAC| = 90^\circ$, teda $CC' = T(BB') \perp BB'$.
+}
+
+\EnvId{FzqGadPM1rzLyHJyRoWFb-tazisko-a-dva-rovnoramenne-trojuholniky}
+\Problem{0}{Česko-slovenská olympiáda 2024}{
+    Nech $T$ je ťažisko trojuholníka $ABC$. Nech $K$ je bod polroviny $BTC$ taký, že $BTK$ je pravouhlý rovnoramenný trojuholník so~základňou $BT$. Nech $L$ je bod polroviny $CTA$ taký, že $CTL$ je pravouhlý rovnoramenný trojuholník so~základňou $CT$. Označme $D$ stred strany $BC$ a~$E$ stred úsečky $KL$. Určte všetky možné hodnoty pomeru $|AT| : |DE|$.
+}{
+    Pravouhlé rovnoramenné trojuholníky sú podobné. Nie sú podobné špirálne?
+}{
+    $T$ je stred špirálky, ktorá naše pravouhlé rovnoramenné trojuholníky zobrazuje na seba. Špirálka ale chodí po dvoch.
+}{
+    $T$ je stred špirálky, ktorá prenáša $BK$ na $CL$. Keďže chodí po dvoch, tak je tiež stred špirálky, ktorá prenáša $BC$ na $KL$. Čo sa deje so stredmi?
+}{
+    $D$ ako stred $BC$ ide na $E$ ako stred $KL$. Takže $BD$ ide na $KE$. Nevieme z~toho niečo zaujímavé odvodiť?
+}{
+    Špirálka chodí po dvoch, z~$BD$ na $KE$ máme, že $T$ je stred špirálky, ktorá berie $BK$ na $DE$. Čo to znamená v~reči podobnosti?
+}%
+{
+    \Answer{$|AT| : |DE| = 2\sqrt2$.}
+
+    Trojuholníky $TBK$ a~$TCL$ sú pravouhlé rovnoramenné s~pravým uhlom pri $K$, resp. $L$, a~keďže $K$ a~$L$ ležia v~polrovinách $BTC$ a~$CTA$ a~$T$ je vnútorný bod trojuholníka $ABC$, sú orientované súhlasne. Existuje teda špirálna podobnosť so stredom $T$ prevádzajúca $BK$ na $CL$. Špirálka chodí v~pároch, takže $T$ je aj stredom špirálnej podobnosti $\sigma$, ktorá prevádza $BC$ na $KL$.
+
+    \Image{spiral-centroid-isosceles.pdf}
+
+    Podobnosť zachováva stredy úsečiek, preto $\sigma(D) = E$, a~podľa vety o~pároch je $T$ aj stredom špirálnej podobnosti prevádzajúcej $BK$ na $DE$. Trojuholníky $TBK$ a~$TDE$ sú tak podobné, čiže $TDE$ je pravouhlý rovnoramenný s~preponou $TD$ a~$|TD| = \sqrt2 \, |DE|$. Ťažisko delí ťažnicu $AD$ v~pomere $|AT| : |TD| = 2 : 1$, a~tak
+    $$
+    |AT| : |DE| = 2\sqrt2.
+    $$
+}
+
+\EnvId{SIutAov-jyomJVC3WszN0-vyska-a-dve-opisane-kruznice}
+\Problem{0}{PraSe 27-3-8}{
+    Nech $ABC$ je ostrouhlý trojuholník s~výškou $AD$. Body~$X$, $Y$ ležia po rade na~kružniciach opísaných trojuholníkom~$ABD$, $ACD$ tak, že $X,D,Y$ ležia na priamke rôznej od priamok~$AD$ a~$BC$, pričom $X \not \equiv D$, $Y \not \equiv D$. Označme ďalej~$M$ stred strany~$BC$ a~$M'$ stred úsečky~$XY$. Dokážte, že priamky~$MM'$, $AM'$ sú na seba kolmé.
+}{
+    Kedykoľvek máme dve kružnice podozrivo sa pretínajúce v~jednom bode, je veľká šanca, že je to Miquelov bod nejakého štvoruholníka.
+}{
+    Kľúčom je, že $A$ je jeden z~Miquelov pre štvoruholník z~bodov $B,X,C,Y$. Tým pádom je stredom rôznych špirálok. Tie sa kamarátia so stredmi.
+}{
+    Kľúčová špirálka je tá, ktorá prenáša $XY$ na $BC$. Tá totiž prenáša aj stredy na seba. Tým pádom je stredom ďalších dobrých špirálok. Trikom je uvedomiť si, ako zostrojiť jej stred.
+}{
+    Finálne pozorovanie je, že $A$ je stredom špirálky, ktorá zobrazuje napr. $BM$ na $XM'$. Aplikujeme algoritmus nájdenia stredu, najprv tieto úsečky pretneme, a~potom zostrojujeme kružnice. Takto šikovne získame tetivovosť.
+}%
+{
+    Priamky $XY$ a~$BC$ sa pretínajú v~$D$, takže podľa vety o~strede špirálnej podobnosti je druhý priesečník kružníc $(XBD) = (ABD)$ a~$(YCD) = (ACD)$, teda bod $A$, stredom špirálnej podobnosti zobrazujúcej $XB$ na $YC$. Špirálka chodí v~pároch, takže $A$ je aj stredom špirálnej podobnosti $S$ zobrazujúcej $XY$ na $BC$.
+
+    Body $M'$ a~$M$ sú stredy úsečiek $XY$ a~$BC$, a~keďže špirálka prenáša podobné body, $S(M') = M$. Podobnosť $S$ teda zobrazuje $XM'$ na $BM$ a~podľa vety o~pároch je $A$ stredom špirálnej podobnosti zobrazujúcej $XB$ na $M'M$.
+
+    \Image{spiral-altitude-two-circles.pdf}
+
+    Pre $M' = D$ je tvrdenie zrejmé; inak sa priamky $XM'$ a~$BM$ pretínajú v~$D$, takže $A$ leží na kružnici $(M'MD)$. Keďže $|\angle ADM| = 90^\circ$, je $AM$ jej priemerom, a~preto
+    $$
+    |\angle AM'M| = 90^\circ.
+    $$
+    Ak $M = D$ (teda $|AB| = |AC|$), kružnica $(M'MD)$ sa degeneruje na kružnicu cez $M'$ a~$D$ dotýkajúcu sa priamky $BC$; jej priemerom je $AD$ a~záver platí rovnako.
+}
+
+\EnvId{f0S-c_ZWlDc0tqyE8b16q-dva-obdlzniky-nad-stranami}
+\Problem{0}{}{
+    Je daný ostrouhlý trojuholník $ABC$. Mimo neho zostrojíme obdĺžniky $ABKL$ a~$ACMN$ tak, že $|BK| = |AC|$ a~$|CM| = |AB|$. Dokážte, že priamky $BN$, $CL$ a~$KM$ prechádzajú jedným bodom.
+}{
+    Naše obdĺžniky sú sugestívne podobné. Nie sú dokonca špirálne podobné?
+}{
+    $A$ je stred špirálky, ktorá prenáša $ABKL$ na $ANMC$, to hneď plynie z~podmienok zo zadania. Lenže špirálka chodí po dvoch. Akých špirálok je ešte stred a~ako to použijeme?
+}{
+    Keďže $A$ je stred špirálky, ktorá berie $BK$ na $NM$, tak je tiež stred špirálky, ktorá berie $BN$ na $KM$. Čo spätne dáva algoritmus pre zostrojenie stredu?
+}{
+    Ak označíme $X$ priesečník $BN$ a~$MK$, tak podľa nášho algoritmu $A$ leží na kružniciach $XBK$ a~$XNM$. Posledné, čo potrebujeme, je uvedomiť si, prečo $X$ leží na $CL$.
+}%
+{
+    Obdĺžniky $ABKL$ a~$ANMC$ sú zhodné v~tomto poradí vrcholov (lebo $|AN| = |AB|$ a~$|NM| = |BK|$), majú spoločný vrchol $A$ a~sú súhlasne orientované, lebo oba ležia mimo trojuholníka. Otočenie so stredom $A$ tak zobrazuje $BK$ na $NM$. Špirálka chodí v~pároch, takže $A$ je aj stredom špirálnej podobnosti zobrazujúcej $BN$ na $KM$; jej uhol $|\angle BAK|$ nie je ani nulový, ani priamy, a~preto $BN \nparallel KM$. Ich priesečník označme $X$. Otočenie, ktoré zobrazuje $B$ na $N$, má uhol $90^\circ + |\angle BAC| < 180^\circ$, takže $A$ neleží na priamke $BN$ a~$X \neq A$. Podľa vety o~strede špirálnej podobnosti je $A$ druhým priesečníkom kružníc $XBK$ a~$XNM$.
+
+    \Image{spiral-two-rectangles.pdf}
+
+    Kružnica $XBK$ prechádza bodom $A$, je to teda kružnica opísaná obdĺžniku $ABKL$ s~priemerom $BL$. Rovnako kružnica $XNM$ je kružnica opísaná obdĺžniku $ACMN$ s~priemerom $NC$. Podľa Talesovej vety je $|\angle BXL| = |\angle NXC| = 90^\circ$, a~keďže $B$, $X$, $N$ ležia na jednej priamke, sú $XL$ aj $XC$ kolmice na $BN$ v~bode $X$ a~splývajú. Bod $X$ tak leží aj na priamke $CL$. (Ak $X$ splynie s~$L$ alebo s~$C$, sme hotoví hneď. Ak $X = B$, dá dotykový prípad vety o~strede kružnicu cez $B$, $K$ dotýkajúcu sa priamky $BN$; tá prechádza bodom $A$, je to teda kružnica $ABKL$ a~$BL \perp BN$. Druhá kružnica je stále $ACMN$, takže $|\angle NBC| = 90^\circ$ a~bod $B$ leží na $CL$. Symetricky pre $X = N$.)
+}
+
+\EnvId{u6D86fr9DYWaempL4uPN3-patuholnik-s-vnutornym-bodom}
+\Problem{0}{}{
+    Nech $ABCDE$ je päťuholník s~vnútorným bodom $X$ taký, že trojuholníky $ABC$, $AXE$, $CDE$ sú priamo podobné. Dokážte, že $BCDX$ je rovnobežník.
+}{
+    Máme plno špirálok a~tie chodia po dvoch.
+}{
+    Pozrime sa na $ABC$, $AXE$. Tie sú priamo podobné, teda špirálka dáva, že $ABX$ a~$ACE$ sú podobné. Nedáva nám to nejaké dobré uhly?
+}{
+    Stačí nám rovnosť $|\angle XBA| = |\angle ECA|$. Z toho sa už dá vyuhliť $BX \parallel CD$.
+}{
+    Počítame s~orientovanými uhlami priamok modulo $180^\circ$; priama podobnosť ich zachováva.
+
+    \Image{spiral-pentagon-parallelogram.pdf}
+
+    Podobnosť $ABC \sim AXE$ je špirálna podobnosť so stredom $A$ zobrazujúca $BC$ na $XE$, a~keďže špirálka chodí v~pároch, $A$ je aj stredom špirálnej podobnosti zobrazujúcej $BX$ na $CE$. Trojuholníky $ABX$ a~$ACE$ sú tak priamo podobné, čo spolu s~$ABC \sim CDE$ dáva
+    $$
+    \angle(BA, BX) = \angle(CA, CE), \qquad \angle(AB, AC) = \angle(CD, CE).
+    $$
+    Preto
+    $$
+    \gather
+    \angle(BX, CD) = \angle(BX, BA) + \angle(AB, AC) \\
+    + \angle(CA, CE) + \angle(CE, CD) = 0,
+    \endgather
+    $$
+    čiže $BX \parallel CD$.
+
+    Rovnako je $E$ stredom špirálnej podobnosti zobrazujúcej $AX$ na $CD$, a~teda aj $AC$ na $XD$, takže $EAC \sim EXD$ a~$\angle(CE, CA) = \angle(DE, DX)$. Uhly pri $E$ v~$AXE \sim CDE$ a~pri $C$, $E$ v~$ABC \sim AXE$ dávajú $\angle(EC, ED) = \angle(EA, EX) = \angle(CA, CB)$. Preto
+    $$
+    \gather
+    \angle(DX, CB) = \angle(DX, DE) + \angle(DE, EC) + \angle(EC, CB) \\
+    = \angle(CA, CE) + \angle(CB, CA) + \angle(CE, CB) = 0,
+    \endgather
+    $$
+    čiže $BC \parallel XD$.
+
+    Body $B$, $C$, $X$ nie sú kolineárne (inak by z~$CD \parallel BX$ ležal na priamke $BC$ aj bod $D$), takže $D$ je jediný spoločný bod rovnobežky s~$BX$ cez $C$ a~rovnobežky s~$BC$ cez $X$, a~$BCDX$ je rovnobežník.
+}
+
+\EnvId{xjAYdKzTN_Q5-h0ddUoDR-stredy-vpisanych-kruznic-bfd-a-ced}
+\Problem{0}{}{
+    Je daný ostrouhlý trojuholník~$ABC$. Označme $D,E,F$ po rade päty výšok z~vrcholov $A,B,C$. Nech $I_1$ a~$I_2$ sú po rade stredy kružníc vpísaných trojuholníkom $BFD$ a~$CED$. Dokážte, že $B,C,I_1,I_2$ ležia na kružnici.
+}{
+    Spočítajte nejaké uhly, veľa uhlov je na veľa pekných miestach. Asi nikoho neprekvapí, že hľadáme podobnosť.
+}{
+    Päty výšok nám dávajú tetiváky, Talesove kružnice. Vďaka nim vieme nahliadnuť, že uhly v~našich trojuholníkoch $BFD$ a~$CED$ sú vlastne pekné.
+}{
+    Kľúčové podobné trojuholníky sú $DBF$ a~$DEC$. Dokonca špirálne. Čo všetko táto špirálka prenáša?
+}{
+    $D$ je stred špirálky, ktorá prenáša $DBF$ na $DEC$, takže prenáša $I_1$ na $I_2$. To nám dáva ďalšie dobré podobnosti. Nezabúdajme, že špirálka chodí po dvoch.
+}{
+    $D$ prenáša $BI_1$ na $EI_2$, tým pádom nejaká iná špirálka so stredom $D$ prenáša $BE$ na $I_1I_2$. Táto špirálka nám už dáva dobrú podobnosť.
+}{
+    Zvyšok je už uhlenie, z~podobnosti $DBE$ a~$DI_1I_2$ vieme vyjadriť predtým problematický uhol $|\angle DI_1I_2|$ pomocou nejakého pekného. Dôkaz dokončíme uvedomením, že $|\angle BI_1I_2| + |\angle I_2CB| = 180^\circ$.
+}%
+{
+    Štvoruholníky $AFDC$ a~$ABDE$ sú tetivové (pravé uhly pri $D$, $E$, $F$), takže $|\angle BDF| = |\angle CDE| = \alpha$ a~trojuholníky $DBF$ a~$DEC$ majú pri vrcholoch $D$, $B$, $F$, resp. $D$, $E$, $C$ uhly $\alpha$, $\beta$, $\gamma$. Keďže $\alpha < 90^\circ$, idú polpriamky okolo $D$ v~poradí $DB$, $DF$, $DE$, $DC$, takže existuje špirálna podobnosť $S$ so stredom $D$ zobrazujúca $B$ na $E$ a~$F$ na $C$. Tá zobrazuje kružnicu vpísanú trojuholníku $DBF$ na kružnicu vpísanú $DEC$, teda $S(I_1) = I_2$.
+
+    \Image{spiral-two-incenters.pdf}
+
+    Špirálna podobnosť chodí v~pároch, takže $D$ je aj stredom špirálnej podobnosti zobrazujúcej $BE$ na $I_1I_2$, a~preto $|\angle DI_1I_2| = |\angle DBE| = 90^\circ - \gamma$. V~trojuholníku $BI_1D$ je $|\angle BI_1D| = 180^\circ - \alpha/2 - \beta/2 = 90^\circ + \gamma/2$. Polpriamky $DI_1$ a~$DI_2$ ležia v~uhloch $BDF$ a~$EDC$, takže $B$ a~$I_2$ sú v~opačných polrovinách určených priamkou $DI_1$ a
+    $$
+    |\angle BI_1I_2| = |\angle BI_1D| + |\angle DI_1I_2| = 180^\circ - \gamma/2.
+    $$
+    Ďalej $CI_2$ je os uhla $DCE$ veľkosti $\gamma$, takže $|\angle I_2CB| = \gamma/2$. Body $I_1$ a~$I_2$ ležia na osiach uhlov $ABC$ a~$ACB$, a~keďže $DEC \sim ABC$ so spoločným vrcholom $C$ a~koeficientom $|CD| : |CA| < 1$, je $I_2$ bližšie k~$C$ než priesečník $I$ týchto osí, teda vo vnútri uhla $CBI_1$. Body $I_1$ a~$C$ preto ležia v~opačných polrovinách určených priamkou $BI_2$ a~zo súčtu $|\angle BI_1I_2| + |\angle I_2CB| = 180^\circ$ ležia $B$, $I_1$, $I_2$, $C$ na kružnici.
+}
+
+\EnvId{uvtxLeNA257wih8VqN3o0-rovnake-uhly-a-body-m-n}
+\Problem{0}{CPS 2014, 3, zovšeobecnená}{
+    Nech $ABCD$ je konvexný štvoruholník, pričom $|\angle ABC| = |\angle ADC|$ a~$|AB| \neq |AD|$. Na polpriamkach $AB,AD$ sú postupne zvolené body $M,N$ také, že $|\angle MCD| = |\angle NCB|$ a~$|\angle MCB| = |\angle NCD|$. Kružnice opísané trojuholníkom $AMN$ a~$ABD$ sa druhýkrát pretnú v~bode~$K \not \equiv A$. Dokážte, že $AK \perp KC$.
+}{
+    $K$ je priesečník dvoch kružníc, podozrivé, nie je to Miquelák?
+}{
+    Samozrejme, že je, $K$ je vlastne definovaný ako stred špirálky, ktorá ťahá $BM$ na $DN$. To bude dôležité. Špirálka ako taká prenáša kdečo, potrebujeme preniesť viac vecí. Trik je niečo dokresliť.
+}{
+    Stále nevieme, čo s pravými uhlami, skúsme dokresliť niečo, čo pravé uhly vyrobí. V~ďalšom hinte prezradím.
+}{
+    Trikom je označiť päty z~$C$ na $BM$ a~$DN$, označme $X$ a~$Y$. Vďaka pravým uhlom stačí nejaká tetivovosť. Nie je jasné, ako sme si pomohli, ale faktom je, že sme ešte vôbec nepoužili uhlové podmienky zo zadania.
+}{
+    Uhlové podmienky zo zadania skryto znamenajú, že $CMB$ a~$CND$ sú podobné trojuholníky (žiaľ nie špirálne, sú zle orientované). Čo ale táto podobnosť znamená pre $X$ a~$Y$?
+}{
+    Znamená, že $X$ rozdeľuje $BM$ v~rovnakom pomere ako $Y$ rozdeľuje $DN$. Takže naša krásna špirálka prenáša $X$ na $Y$. Už sme skoro v~cieli. Spojme to, čo prenáša, s~tým, ako sa nájde jej stred.
+}%
+{
+    Priamky $BM$ a~$DN$ sa pretínajú v~$A$, takže podľa vety o~strede špirálnej podobnosti je $K$ stredom špirálnej podobnosti zobrazujúcej $BD$ na $MN$. Špirálna podobnosť chodí \uv{v~pároch}, takže $K$ je aj stredom špirálnej podobnosti $\sigma$ zobrazujúcej $BM$ na $DN$.
+
+    \Image{spiral-quadrilateral-feet.pdf}
+
+    Označme $X$ a~$Y$ päty kolmíc z~$C$ na priamky $AB$ a~$AD$. Ležia na kružnici $\omega$ s~priemerom $AC$ (pri $X = A$ sa $\omega$ dotýka $AB$ v~$A$, degenerovaný prípad vety o~strede; podobne pre $Y = A$). Stačí ukázať, že $K \in \omega$.
+
+    \Image{spiral-quadrilateral-feet-right-angle.pdf}
+
+    Polpriamky $CM$ a~$CN$ sú súmerne združené podľa osi uhla $BCD$, ktorá vymieňa polpriamky $CB$ a~$CD$, takže $M$ leží vo vnútri úsečky $AB$ práve vtedy, keď $N$ leží vo vnútri úsečky $AD$; z~$|\angle ABC| = |\angle ADC|$ je preto $|\angle MBC| = |\angle NDC|$ a~$\triangle CMB \sim \triangle CND$ (nesúhlasne orientované, berieme z~nej len pomer). Zodpovedajú si v~nej päty výšok z~$C$, teda
+    $$
+    |BX| : |MX| = |DY| : |NY|,
+    $$
+    a~špirálna podobnosť prenáša \uv{podobné body}, takže $\sigma(X) = Y$.
+
+    Teda $\sigma$ zobrazuje $XB$ na $YD$ a~podľa \uv{párov} je $K$ aj stredom špirálnej podobnosti zobrazujúcej $XY$ na $BD$. Priamky $XB$ a~$YD$ sa pretínajú v~$A$, takže podľa vety o~strede je tento stred druhým priesečníkom kružníc $(AXY) = \omega$ a~$(ABD)$. Preto $K \in \omega$, čiže $|\angle AKC| = 90^\circ$.
+}
+
+\EnvId{xt9itZAMHcJDcCVjylaYP-taziska-rovnostrannych-trojuholnikov}
+\Problem{0}{Napoleonova veta}{
+    Zvonku trojuholníka $ABC$ ležia body $D$, $E$, $F$ také, že trojuholníky $BCD$, $CAE$ a $ABF$ sú rovnostranné. Dokážte, že ťažiská týchto trojuholníkov taktiež tvoria rovnostranný trojuholník.
+}{
+    Rovnostranné trojuholníky sú vždy špirálne podobné, dokonca aj ťažiská sa takto zobrazujú na seba. Nájdite vhodné trojuholníky.
+}{
+    Nech $E$ a~$F$ sú vrcholy rovnostranných trojuholníkov nad $AC$, $AB$ a~nech $X$ a~$Y$ sú postupne ich ťažiská. Nahliadnite, že $AXC$ a~$AYF$ sú špirálne podobné. No a~špirálka chodí po dvoch.
+}{
+    Z toho, že špirálka chodí po dvoch, máme, že $AXY$ je podobné s~$ACF$. To nám umožní vyjadriť $XY$ pekne. Je tam ešte jedno pozorovanie, ktoré potrebujeme.
+}{
+    Spočítame, že $|XY| = |CF| \cdot |AX| / |AC|$. Číslo $|AX|/|AC|$ je konštantné číslo. $CF$ je nejaká divná úsečka. Na to, aby nám ale vyšlo, že $XY$ \uv{nezávisí od strany}, tak musí aj $CF$ nezávisieť od strany. Napríklad teda $|CF| = |BE|$, a~to stačí dokázať. To už je ľahké.
+}%
+{
+    Označme $X$, $Y$, $Z$ postupne ťažiská trojuholníkov $CAE$, $ABF$ a~$BCD$ a~nech $k$ je pomer vzdialenosti ťažiska rovnostranného trojuholníka od vrcholu k~dĺžke jeho strany. Ťažisko leží na osi uhla pri vrchole, teda $|\angle XAC| = |\angle YAF| = 30^\circ$, a~z~poradia lúčov $AE$, $AX$, $AC$, $AB$, $AY$, $AF$ okolo $A$ sú tieto uhly orientované rovnako. Navyše
+    $$
+    |AX| : |AC| = |AY| : |AF| = k,
+    $$
+    takže trojuholníky $AXC$ a~$AYF$ sú súhlasne podobné a~špirálka so stredom $A$ zobrazuje $X$ na $Y$ a~$C$ na $F$.
+
+    Špirálka chodí v~pároch, a~tak je $A$ aj stredom špirálky zobrazujúcej $XY$ na $CF$, teda
+    $$
+    |XY| : |CF| = |AX| : |AC| = k.
+    $$
+    Rovnako $|YZ| = k \cdot |AD|$ a~$|ZX| = k \cdot |BE|$.
+
+    \Image{spiral-napoleon.pdf}
+
+    Otočenie so stredom $A$ o~$60^\circ$ zobrazujúce $F$ na $B$ zobrazuje aj $C$ na $E$, lebo oba trojuholníky ležia zvonku; preto $|CF| = |BE|$. Rovnako otočenie so stredom $C$ o~$60^\circ$ zobrazuje $A$ na $E$ a~$D$ na $B$, takže $|AD| = |BE|$. Preto $|XY| = |YZ| = |ZX|$ a~trojuholník $XYZ$ je rovnostranný.
+}
+
+\EnvId{lGiQKLrC3o5CyNXlJkyMT-stredy-kruznic-opisanych-a1a2c}
+\Problem{0}{ISL 2002, G4}{
+    Kružnice~$\omega_1$ a~$\omega_2$ sa pretínajú v~bodoch~$P$ a~$Q$. Rôzne body~$A_1$ a~$B_1$ (rôzne aj od~$P$ a~$Q$) sú zvolené na~$\omega_1$. Priamky~$A_1P$ a~$B_1P$ pretínajú~$\omega_2$ znova v~$A_2$ a~$B_2$, a~priamky~$A_1B_1$ a~$A_2B_2$ sa pretínajú v~$C$. Dokážte, že s~meniacimi sa bodmi~$A_1$ a~$B_1$ ležia stredy kružníc opísaných trojuholníkom $A_1A_2C$ na~fixnej kružnici.
+}{
+    Povedomá situácia, pretínajúce sa priamky a~kružnice. Trikom je, že tých kružníc je tam viac.
+}{
+    Ukazuje sa, že $Q$ je stred špirálky, ktorá berie $A_1A_2$ na $B_1B_2$, je tak zostrojený. To nám dáva ďalšie kružnice, lebo je aj stred špirálky berúcej $A_1B_1$ na $A_2B_2$, takže leží aj na $CA_1A_2$ a~$CB_1B_2$. Prvá z~nich je ale predsa kružnica opísaná trojuholníku, o~ktorom niečo dokazujeme.
+}{
+    Nech $O$ je stred kružnice opísanej $QA_1A_2C$, ktorú skúmame. Skúsme nájsť čo najviac pevných vecí súvisiacich s~$O$.
+}{
+    Kľúčom je všimnúť si trojuholník $QA_1O$, aké sú jeho uhly?
+}{
+    Ukazuje sa, že jeho uhly sú fixné, z~vety o~obvodovom a~stredovom uhle $|\angle A_1OQ| = 2|\angle A_1A_2Q| = 2|\angle PA_2Q|$. To nám vie dobre naznačiť, prečo sa $O$ pohybuje ako tvrdí zadanie.
+}{
+    Idea je uvedomiť si, že $O$ je obraz vhodného bodu v~nejakej vhodnej špirálke.
+}%
+{
+    Priamky $A_1A_2$ a~$B_1B_2$ sa pretínajú v~$P$ a~kružnice opísané trojuholníkom $A_1B_1P$ a~$A_2B_2P$ sú $\omega_1$ a~$\omega_2$, takže podľa vety o~strede špirálnej podobnosti je ich druhý priesečník $Q$ stredom špirálnej podobnosti $\sigma$ zobrazujúcej $A_1A_2$ na $B_1B_2$. Špirálka chodí \uv{v~pároch}, a~tak je $Q$ aj stredom špirálnej podobnosti zobrazujúcej $A_1B_1$ na $A_2B_2$.
+
+    Tieto dve priamky sa pretínajú v~$C$, takže podľa tej istej vety je $Q$ druhým priesečníkom kružníc opísaných trojuholníkom $CA_1A_2$ a~$CB_1B_2$. Body $Q$, $A_1$, $A_2$ sú rôzne ($A_2 = Q$ by dalo $A_1 \in PQ$ a~$A_2 = A_1$ bod na oboch kružniciach), takže kružnica $A_1A_2C$ je kružnica $QA_1A_2$. Tá už bod $B_1$ vôbec nespomína, čiže kružnica zo zadania závisí len od $A_1$. Označme $O$ jej stred.
+
+    \Image{spiral-two-circles-circumcenters.pdf}
+
+    Zostáva ukázať, že bod $O$ vznikne z~$A_1$ vždy tým istým predpisom. Body $A_1$, $P$, $A_2$ ležia na priamke, takže $|\angle A_1A_2Q| = |\angle PA_2Q|$, a~to je obvodový uhol nad tetivou $PQ$ v~kružnici $\omega_2$. Od voľby $A_1$ teda nezávisí.
+
+    Trojuholník $QOA_1$ je rovnoramenný, lebo $|OQ| = |OA_1|$, a~podľa vety o~obvodovom a~stredovom uhle je jeho uhol pri vrchole
+    $$
+    |\angle A_1OQ| = 2|\angle A_1A_2Q|
+    $$
+    tiež pevný. Rovnoramenný trojuholník s~daným uhlom pri hlavnom vrchole má daný tvar, takže pomer $|QO| : |QA_1|$ aj orientovaný uhol z~polpriamky $QA_1$ na polpriamku $QO$ vyjdú pre každé $A_1$ rovnako.
+
+    Zobrazenie $A_1 \mapsto O$ je preto jedna pevná špirálna podobnosť $\tau$ so stredom $Q$. Keď $A_1$ prebehne $\omega_1$, prebehne $O$ kružnicu $\tau(\omega_1)$, a~tá je pevná.
+}
+
+\EnvId{JKoWMSfsf0O8L5L0mRHxz-trojuholniky-pqr-pri-pohybe-e-a-f}
+\Problem{0}{IMO 2005, 5}{
+    Nech $ABCD$ je daný konvexný štvoruholník s~rovnako dlhými nerovnobežnými stranami~$BC$ a~$AD$. Nech~$E$ a~$F$ sú po rade vnútorné body strán~$BC$ a~$AD$ také, že $|BE|=|DF|$. Priamky~$AC$ a~$BD$ sa pretínajú v~$P$, priamky~$BD$ a~$EF$ v~$Q$, a~priamky~$EF$ a~$AC$ v~$R$. Uvážme všetky trojuholníky~$PQR$ pri meniacej sa polohe bodov~$E$ a~$F$. Dokážte, že kružnice opísané týmto trojuholníkom majú spoločný bod rôzny od~$P$.
+}{
+    Body $E$ a~$F$ ležia na $BC$ a~$DA$ podozrivo. $B$, $E$, $C$ sú v~rovnakom pomere ako $D$, $F$, $A$. To nás môže naviesť na dobrú špirálku.
+}{
+    Vezmime stred $S$ špirálky, ktorá zobrazuje $AD$ na $CB$, tá prenáša $F$ na $E$. My tu všade pretíname priamky. Bude milión kružníc. Chce to systematický prístup na zorientovanie sa.
+}{
+    Systematický prístup vyzerá napr. tak, že: keďže $S$ je stred špirálky, ktorá dáva $AF$ na $CE$, tak je stred špirálky, ktorá dáva $AC$ na $FE$, keď teda tieto pretneme, v~$R$, máme $S$, $R$, $A$, $F$ a~$S$, $R$, $C$, $E$ na kružnici. Podobne vieme vyčarovať ďalšie dve kružnice. Čo keď nie je náhoda, že $S$ je taký dobrý?
+}{
+    Ako nápadne naznačuje predošlý hint, chceme dokázať, že $S$ je na ešte jednej kružnici, tej zo zadania. To už je jednoduché uhlenie, len v~tom bordeli nemusí byť hneď vidieť.
+}%
+{
+    Z~$|AD| = |CB|$ a~$|DF| = |BE|$ je $|AF| = |CE|$, takže $F$ a~$E$ delia úsečky $AD$ a~$CB$ v~rovnakom pomere. Keďže $AD \nparallel CB$, priama podobnosť $\sigma$ zobrazujúca $A$ na $C$ a~$D$ na $B$ nie je posunutím; jej stred označme $S$. Podľa vety o~prenášaní podobných bodov zobrazuje $\sigma$ bod $F$ na $E$.
+
+    Zobrazenie $\sigma$ prevádza $AF$ na $CE$, takže podľa vety o~špirálke chodiacej v~pároch je $S$ aj stredom špirálnej podobnosti zobrazujúcej $AC$ na $FE$. Tieto priamky sa pretínajú v~$R$, a~tak podľa vety o~strede špirálnej podobnosti leží $S$ na kružnici $AFR$. Rovnako $\sigma$ prevádza $DF$ na $BE$, teda $DB$ na $FE$, a~$S$ leží na kružnici $DFQ$.
+
+    \Image{spiral-moving-ef-pqr.pdf}
+
+    Počítame s~orientovanými uhlami priamok modulo $180^\circ$. Z~kružníc $SRAF$ a~$SQDF$ a~z~toho, že $P$ leží na $RA$ aj na $QD$ a~$F$ na $AD$, je
+    $$
+    \gather
+    \angle(RS, RP) = \angle(RS, RA) = \angle(FS, FA) \\
+    = \angle(FS, FD) = \angle(QS, QD) = \angle(QS, QP),
+    \endgather
+    $$
+    takže $S$ leží na kružnici $PQR$. Bod $S$ je určený štvoruholníkom $ABCD$, teda od $E$ a~$F$ nezávisí, a~od $P$ je rôzny: pre $S = P$ by stred $\sigma$ ležal na priamke $AC$ spájajúcej $A$ so $\sigma(A)$, takže $\sigma$ by bola rovnoľahlosťou a~$AD \parallel CB$.
+}
+
+\EnvId{x9VsKUKWUheOiFauQHUGg-tetivovy-stvoruholnik-a-rovnobeznik}
+\Problem{0}{MEMO 2010, T6}{
+    Nech $A,B,C,D,E$ sú také body, že $ABCD$ je tetivový štvoruholník a~$ABDE$ je rovnobežník. Uhlopriečky $AC$ a~$BD$ sa pretínajú v~bode~$S$ a~polpriamky $AB$ a~$DC$ v~bode~$F$. Dokážte, že $|\angle AFS|=|\angle ECD|$.
+}{
+    Dokazujeme niečo o~uhle $AFS$, preto sa oplatí zamyslieť nad priamkou $FS$. Nevieme o~nej niečo zaujímavé?
+}{
+    Z~dokázaných vlastností máme, že $FS$ prechádza jedným z~Miquelových bodov $ABCD$, na akých všemožných kružniciach leží?
+}{
+    Nech $G$ je tento Miquelov bod, ktorý zobrazuje $AB$ na $CD$. Ten leží na kružniciach $ABS$, $CDS$, $ACF$, $BDF$. Ktorá z~nich je pre nás dobrá vzhľadom na uhly, ktoré dokazujeme?
+}{
+    Vyuhlite, že stačí $|\angle GCA| = |\angle ECD|$. Z~čoho by niečo také mohlo plynúť?
+}{
+    Trik je dokázať, že trojuholníky $GCA$ a~$DCE$ sú podobné. Jeden uhol sa dá nájsť ľahko. Čo potom?
+}{
+    Cez existujúce tetiváky a~rovnobežnosť zo zadania nie je ťažké nájsť $|\angle CDE| = |\angle AGC|$. Potom stačí $|ED|/|DC| = |AG|/|GC|$. Tu zrazu vieme znova použiť rovnobežník.
+}{
+    $ED/DC = AG/GC$ vieme cez $ED = AB$ upraviť na $AB/DC = AG/GC$. Tento vzťah sa dá nádherne interpretovať.
+}%
+{
+    Nech $G$ je stred špirálnej podobnosti zobrazujúcej $AB$ na $CD$. Podľa vety o~ďalších Miquelových bodoch leží $G$ na kružniciach $ABS$, $CDS$, $ACF$, $BDF$ a~keďže $ABCD$ je tetivový, aj na priamke $SF$, a~to na tej istej strane od $F$ ako $S$.
+
+    \Image{spiral-cyclic-parallelogram.pdf}
+
+    Body $F$ a~$C$ ležia na tom istom oblúku tetivy $AG$ a~body $G$, $F$ na opačných oblúkoch tetivy $AC$ tetivového štvoruholníka $AGCF$, takže
+    $$
+    |\angle AFS| = |\angle AFG| = |\angle GCA|
+    $$
+    a~keďže $AB \parallel ED$ a~$A$, $E$ ležia v~tej istej polrovine s~hraničnou priamkou $DF$, aj
+    $$
+    |\angle AGC| = 180^\circ - |\angle AFC| = |\angle CDE|.
+    $$
+
+    Koeficient špirálnej podobnosti je $|CD| : |AB|$ aj $|GC| : |GA|$ a~z~rovnobežníka $|AB| = |ED|$, takže
+    $$
+    |AG| : |GC| = |ED| : |DC|.
+    $$
+    Trojuholníky $AGC$ a~$EDC$ sú teda podobné a~$|\angle GCA| = |\angle DCE|$.
+}
+
+\EnvId{ZDGMuI_DRsxG-nsBTDSvc-dotycnice-v-b-a-c}
+\Problem{0}{USA TST 2007}{
+    Trojuholník $ABC$ je vpísaný do kružnice~$\omega$. Dotyčnice k~$\omega$ v~$B$ a~$C$ sa pretínajú v~$T$, pričom $A$ a~$T$ ležia v~opačných polrovinách určených priamkou $BC$. Bod~$S$ leží na polpriamke $BC$ tak, že $AS \perp AT$. Body $B_1$ a~$C_1$ ležia na polpriamke $ST$ tak, že $|B_1T|=|BT|=|C_1T|$, a~$C_1$ je medzi $B_1$ a~$S$. Dokážte, že trojuholníky $ABC$ a~$AB_1C_1$ sú podobné.
+}{
+    Dokazujeme vlastne špirálku, konkrétne že bod $A$ je Miquelov bod v~$B_1C_1CB$. Rozumný plán je zistiť o~$A$ dosť vlastností na to, aby už bolo jasné, že je to on.
+}{
+    Jedna z~vlastností Miquela nejako súvisí s~pravými uhlami, skúsme ju nájsť.
+}{
+    Všimnime si, že $T$ je stred kružnice opísanej $B_1C_1CB$, takže $|\angle TAS| = 90^\circ$ je jedna z~našich vlastností, ktoré sme dokazovali. K~ďalším by sa hodili ešte nejaké kružnice. Naskytajú sa $SC_1CA$, $SB_1BA$. Tie sa ale nedajú ľahko vyuhliť (myslím). Našťastie ich je fakt dosť.
+}{
+    Čo sa vyuhliť dá, je, že priesečník $X$ priamok $B_1B$ a~$C_1C$ leží na kružnici $ABC$. Nebude to už stačiť?
+}{
+    Odpoveď je, že už by to stačilo, lebo $A$ bude jednak na kružnici s~priemerom $TS$ a~jednak na kružnici $XBC$ a~jednak mimo $B_1C_1CB$, dva objekty a~len jeden možný priesečník. No a~douhlenie toho, že $B_1B$ a~$C_1C$ sú na kružnici už pôjde, napr. cez rovnoramenné trojuholníky $TBB_1$, $TCC_1$ a~fakt, že $|\angle CTB| = 180^\circ - 2|\angle A|$.
+}{
+    Označme $\gamma$ kružnicu so stredom $T$ a~polomerom $r=|TB|$ a~nech $\alpha=|\angle BAC|$. Z~$|TC|=|TB|=|B_1T|=|C_1T|$ ležia $B$, $C$, $B_1$, $C_1$ na $\gamma$ a~$B_1C_1$ je jej priemer. Keďže $C_1$ je medzi $B_1$ a~$S$, je $|ST| > r$, takže $S$ leží mimo $\gamma$, a~teda mimo úsečky $BC$: bod $C$ je medzi $B$ a~$S$. Na polpriamke $ST$ idú body v~poradí $S$, $C_1$, $T$, $B_1$, takže $B_1$, $C_1$ ležia v~polrovine určenej $BC$ s~bodom $T$, a~z~dvoch sečníc z~bodu $S$ ležia na $\gamma$ body v~poradí $C_1$, $C$, $B$, $B_1$. Podľa vety o~úsekovom uhle je $|\angle TBC|=|\angle TCB|=\alpha$, takže $\alpha<90^\circ$ a~pre $\theta_1=|\angle B_1TB|$, $\theta_2=|\angle C_1TC|$ je $\theta_1+\theta_2=180^\circ-|\angle BTC|=2\alpha$.
+
+    \Image{spiral-tangents-b-c.pdf}
+
+    Bod $T$ leží na úsečke $B_1C_1$ a~$C_1$ na oblúku $B_1C$ neobsahujúcom $B$, takže polpriamka $BT$ leží vnútri uhla $B_1BC$; rovnako $CT$ vnútri uhla $C_1CB$. Z~rovnoramenných trojuholníkov $TBB_1$ a~$TCC_1$ je preto $|\angle B_1BC|=90^\circ-\theta_1/2+\alpha$ a~$|\angle C_1CB|=90^\circ-\theta_2/2+\alpha$, so súčtom $180^\circ+\alpha$. Súčet je väčší ako $180^\circ$, takže sa priamky $B_1B$ a~$C_1C$ pretínajú v~bode $X$ v~tej istej polrovine určenej $BC$ ako $A$, a~to na polpriamkach opačných k~$BB_1$ a~$CC_1$. Preto $|\angle XBC| = 180^\circ - |\angle B_1BC|$, $|\angle XCB| = 180^\circ - |\angle C_1CB|$ a
+    $$
+    \gather
+    |\angle BXC| = 180^\circ - |\angle XBC| - |\angle XCB| \\
+    = |\angle B_1BC| + |\angle C_1CB| - 180^\circ = \alpha,
+    \endgather
+    $$
+    takže $X$ leží na $\omega$.
+
+    Nech $M$ je Miquelov bod štvoruholníka $B_1C_1CB$: leží na kružnici opísanej trojuholníku $XBC$, teda na $\omega$, a~je stredom špirálnej podobnosti zobrazujúcej $B_1C_1$ na $BC$. Štvoruholník je vpísaný do $\gamma$ so stredom $T$, takže $M$ leží na $SX$ a~$TM \perp SX$, čiže na kružnici $\delta$ s~priemerom $TS$. Bod $A$ leží na $\omega$ a~z~$AS \perp AT$ aj na $\delta$; ostáva ukázať $A=M$.
+
+    \Image{spiral-tangents-b-c-miquel.pdf}
+
+    Bod $M$ leží na $\omega$ aj na priamke $SX$. Keďže $S$ leží mimo $\omega$, ležia obidva priesečníky priamky $SX$ s~$\omega$ na tej istej polpriamke z~$S$, a~jedným z~nich je $X$. Bod $M$ teda leží v~tej istej polrovine určenej $BC$ ako $X$, čiže ako $A$. Napokon $|\angle TBS|=\alpha<90^\circ$ a~$|\angle TCS|=180^\circ-\alpha>90^\circ$, takže $B$ je mimo $\delta$ a~$C$ vnútri $\delta$; kružnica $\omega$ preto pretína $\delta$ práve v~dvoch bodoch, po jednom v~každej polrovine určenej $BC$. Preto $A=M$ a~$\triangle AB_1C_1 \sim \triangle ABC$.
+}
+
+\EnvId{ASfGvh5sNuepotkCkzT4V-dotyk-kruznice-mef-s-bc}
+\Problem{0}{}{
+    Nech $ABC$ je ostrouhlý trojuholník, v~ktorom $|AB| < |AC|$, a~nech $M$ je stred úsečky $BC$. Body $E$ a~$F$ ležia postupne na úsečkách $AB$ a~$AC$ tak, že kružnica opísaná trojuholníku $MEF$ sa dotýka priamky $BC$. Kružnice opísané trojuholníkom $AEF$ a~$ABC$ sa pretínajú v~bode $P \not \equiv A$. Bod $Q$ leží na kružnici opísanej trojuholníku $AEF$ tak, že $AQ \perp BC$. Dokážte, že priamka $PQ$ prechádza stredom $O$ kružnice opísanej trojuholníku $MEF$.
+}{
+    $P$ je zjavne Miquelov bod, takže sa oplatí dokresliť bod, ktorý nám zdarma dá ďalšie dve kružnice.
+}{
+    Dokreslime $R$ ako priesečník $BC$ a~$EF$, tak máme $RCFP$ a~$RBEP$ tetiváky. Nemáme zhodou okolností ešte nejaký tetivák na obrázku?
+}{
+    Na obrázku ešte máme tetivák $POMR$. Na jeho dôkaz ešte potrebujeme jeden stred, ale potom je to vďaka špirálke ľahké.
+}{
+    Ak dokreslíme stred $D$ úsečky $EF$, tak špirálka presúvajúca $EDF$ na $BMC$ má stred v~$P$, takže $P$, $M$, $D$, $R$ sú na kružnici, vďaka pravým uhlom prechádza aj $O$. Verte či nie, už sa to dá elegantne vyuhliť.
+}{
+    Douhlime tak, že si uvedomíme, že stačí $|\angle EPO| = 90^\circ - \beta$. Ten ale vyjadríme ako $|\angle EPR| - |\angle OPR|$.
+}%
+{
+    Kružnica opísaná trojuholníku $MEF$ sa dotýka priamky $BC$ v~$M$, takže $OM \perp BC$. Priamky $EF$ a~$BC$ nie sú rovnobežné, inak by rovnoľahlosť so stredom $A$ zobrazila kružnicu $ABC$ na kružnicu $AEF$ a~bod $P$ by neexistoval; označme $R = EF \cap BC$. Mocnosť bodu $B$ vzhľadom na kružnicu $MEF$ je $|BM|^2 \neq 0$, takže $E \neq B$ a~rovnako $F \neq C$; preto $R \neq B, C$ (inak by $EF$ splynula s~$AB$, resp. $AC$), $R$ neleží na kružnici $ABC$ a~$P \neq R$.
+
+    Miquelov bod štvoruholníka $BEFC$ (s~$A = BE \cap CF$ a~$R = BC \cap EF$) leží na kružniciach $ABC$, $AEF$, $RBE$ a~$RCF$; keďže $A$ na kružnici $RBE$ neleží, je ním $P$. Štvoruholníky $RBEP$ a~$RCFP$ sú teda tetivové a~$P$ je stred špirálnej podobnosti zobrazujúcej $EF$ na $BC$.
+
+    Nech $D$ je stred úsečky $EF$. Podľa vety o~prenášaní podobných bodov ide $D$ na $M$, teda $DE$ na $MB$, a~keďže špirálna podobnosť chodí v~pároch, je $P$ aj stredom špirálnej podobnosti zobrazujúcej $DM$ na $EB$. Priamky $DE$ a~$MB$ sa pretínajú v~$R$ a~$M$ na $EF$ neleží, takže podľa vety o~strede špirálnej podobnosti je $P$ druhý priesečník kružníc $DMR$ a~$EBR$.
+
+    \Image{spiral-tangent-mef.pdf}
+
+    Z~$OD \perp EF$ a~$OM \perp BC$ ležia $D$, $M$, $R$ na kružnici s~priemerom $OR$, čo je práve kružnica $DMR$, takže na nej leží aj $P$. Pre $P = O$ niet čo dokazovať; nech $P \neq O$, potom $\angle(PO,PR) = 90^\circ$. Ďalej počítame s~orientovanými uhlami priamok modulo $180^\circ$.
+
+    Z~tetivového štvoruholníka $RBEP$ je $\angle(PE,PR) = \angle(BE,BR) = \angle(AB,BC)$, a~tak
+    $$
+    \gather
+    \angle(PE,PO) = \angle(PE,PR) - \angle(PO,PR) = \\ =
+    \angle(AB,BC) - 90^\circ.
+    \endgather
+    $$
+    Z~kružnice $AEPQ$ je $\angle(PE,PQ) = \angle(AE,AQ) = \angle(AB,AQ)$, a~z~$AQ \perp BC$ je
+    $$
+    \gather
+    \angle(PE,PQ) = \angle(AB,BC) + \angle(BC,AQ) = \\ =
+    \angle(AB,BC) + 90^\circ.
+    \endgather
+    $$
+    Modulo $180^\circ$ je $90^\circ = -90^\circ$, takže $\angle(PE,PQ) = \angle(PE,PO)$ a~$O$ leží na priamke $PQ$.
+}
+
+\EnvId{pn8vj1u6UmWY3vagNIZEg-rovnoramenne-trojuholniky-nad-stranami}
+\Problem{0}{ISL 1992}{
+    V~konvexnom štvoruholníku sú uhlopriečky rovnako dlhé. Dokážte, že ak zvonku každej strany pripíšeme navzájom podobné rovnoramenné trojuholníky, tak spojnice protiľahlých dopísaných vrcholov týchto trojuholníkov sú na seba kolmé.
+}{
+    Podobné trojuholníky naznačujú špirálnu podobnosť. Je treba uvažovať takú, ktorá vie pekne využiť rovnako dlhé uhlopriečky.
+}{
+    Nech náš štvoruholník je $ABCD$. Kľúčom je špirálka so stredom $S$, ktorá zobrazuje $AC$ na $BD$. Čo je to za špirálku?
+}{
+    Predsa $|AC| = |BD|$, takže je to otočenie. To nám dáva ďalšie dobré rovnosti dĺžok.
+}{
+    Keďže otočenie so stredom $S$ prenáša $A$ na $B$ a~$C$ na $D$, tak $|SA| = |SB|$ a~$|SC| = |SD|$. To už trochu súvisí s~rovnoramennými trojuholníkmi?
+}{
+    $S$ je stred špirálky, ktorá prenáša $AB$ na $CD$. Čo ešte v~tejto špirálke ide kam? Je toho viac a~je to zaujímavé.
+}{
+    V~špirálke, ktorá prenáša $AB$ na $CD$, sa $P$ prenáša na $Q$, keďže $ABP$ a~$CDQ$ sú priamo podobné. Celý štvoruholník $SAPB$ ide na $SCQD$. Dokonca aj priesečníky uhlopriečok sa prenášajú, nech sú to body $X$ a~$Y$. Čo sú to za body?
+}{
+    Z~$|SA| = |SB|$ a~rovnoramennosti $ABP$ a~$CDQ$ sú $X$ a~$Y$ stredy $AB$ a~$CD$. Začína sa to spájať. Predposledný krok je uvedomiť si, ako súvisia $X$, $Y$, $P$, $Q$?
+}{
+    Z~podobnosti $APBS$ a~$CQDS$ dokážte, že $XY$ a~$PQ$ sú rovnobežné. Nezbavili sme sa takto $P$ a~$Q$?
+}{
+    Finálny krok je uvedomiť si, že zrazu riešime o~dosť inú úlohu: dokazujeme, že keď máme štvoruholník s~rovnako dlhými uhlopriečkami, tak spojnice stredov protiľahlých strán sú na seba kolmé. To už je polo-známe. V~ďalších hintoch priblížim viac.
+}{
+    Základná idea je hľadať stredné priečky, tie dávajú jednak rovnobežnosti a~jednak dĺžky.
+}{
+    Cez strednú priečku sa dá ľahko dokázať, že stredy strán každého konvexného štvoruholníka tvoria rovnobežník. Jediná záplatka v~našom prípade je, že uhlopriečky sú rovnaké, vtedy bude kosoštvorec.
+}%
+{
+    Nech $P$, $Q$, $R$, $T$ sú po rade hlavné vrcholy trojuholníkov pripísaných stranám $AB$, $CD$, $BC$, $DA$ štvoruholníka $ABCD$.
+
+    Špirálna podobnosť so stredom $S$ zobrazujúca $AC$ na $BD$ má vďaka $|AC| = |BD|$ koeficient $1$, je to teda otočenie (nie posunutie, lebo $ABDC$ nie je rovnobežník: $AD$ a~$BC$ sa nepretínajú), a~tak
+    $$
+    |SA| = |SB|, \qquad |SC| = |SD|.
+    $$
+
+    Špirálka chodí v~pároch, takže $S$ je aj stredom špirálnej podobnosti $\sigma$ zobrazujúcej $AB$ na $CD$. Trojuholníky $ABP$ a~$CDQ$ sú priamo podobné (oba rovnoramenné s~rovnakým uhlom pri vrchole, pripísané zvonku k~stranám $AB$ a~$CD$ obiehaným po obvode súhlasne), takže $\sigma$ zobrazuje $P$ na $Q$, a~keďže podobnosť zachováva stredy úsečiek, zobrazuje stred $X$ úsečky $AB$ na stred $Y$ úsečky $CD$.
+
+    \Image{spiral-isosceles-on-sides.pdf}
+
+    Z~$|SA| = |SB|$ a~$|PA| = |PB|$ ležia $S$, $P$, $X$ na osi $o$ úsečky $AB$. Keďže $\sigma$ zobrazuje $XP$ na $YQ$, je $S$ podľa vety o~pároch stredom špirálnej podobnosti $\tau$ zobrazujúcej $XY$ na $PQ$; pritom $S \neq X$ (lebo $\sigma(X) = Y \neq X$) a~$S \neq P$ (inak $Q = \sigma(S) = P$). Uhol otočenia $\tau$ je uhol polpriamok $SX$ a~$SP$ ležiacich na $o$, teda $0^\circ$ alebo $180^\circ$, takže $\tau$ je rovnoľahlosť a~$XY \parallel PQ$.
+
+    Rovnako otočenie so stredom $S'$ zobrazujúce $B$ na $C$ a~$D$ na $A$ má párovú špirálku zobrazujúcu $BC$ na $DA$; tá zobrazuje $R$ na $T$ a~stred $M$ strany $BC$ na stred $N$ strany $DA$, takže $MN \parallel RT$.
+
+    \Image{spiral-isosceles-on-sides-rhombus.pdf}
+
+    Stredné priečky $XM$, $NY$ trojuholníkov $ABC$, $ACD$ sú rovnobežné s~$AC$ dĺžky $|AC|/2$, rovnako $MY$, $XN$ sú rovnobežné s~$BD$ dĺžky $|BD|/2$, takže $XMYN$ je rovnobežník (nedegenerovaný, lebo $AC \nparallel BD$) a~vďaka $|AC| = |BD|$ kosoštvorec. Jeho uhlopriečky $XY$, $MN$ sú na seba kolmé, a~teda $PQ \perp RT$.
+}
+
+\EnvId{vR5yJpOiIUsHlAOir-mgU-body-na-stranach-trojuholnika}
+\Problem{0}{ISL 2006, G9}{
+    Body $A_1$, $B_1$ a~$C_1$ sú zvolené po rade na stranách $BC$, $CA$ a~$AB$ trojuholníka $ABC$. Kružnice opísané trojuholníkom $AB_1C_1$, $BC_1A_1$ a~$CA_1B_1$ znova pretínajú kružnicu opísanú trojuholníku $ABC$ po rade v~bodoch~$A_2 \not \equiv A$, $B_2 \not \equiv B$ a~$C_2 \not \equiv C$. Body~$A_3$, $B_3$ a~$C_3$ sú po rade obrazy~$A_1$, $B_1$ a~$C_1$ v~stredových súmernostiach podľa stredov strán~$BC$, $CA$ a~$AB$. Dokážte, že trojuholníky $A_2B_2C_2$ a~$A_3B_3C_3$ sú podobné.
+}{
+    $A_2$ je zjavne stred špirálky, ktorá zobrazuje $BC$ na $C_1B_1$. Skúste vymyslieť, čo by nám to pomohlo dať, čo nám umožní napojiť body $B_3C_3$.
+}{
+    Trik je, že špirálka chodí po dvoch, takže $A_2BC_1$ a~$A_2CB_1$ sú podobné. Nič prekvapivé. Čo je ale prekvapivé je, ako sa to dá spojiť s~$B_3$ a~$C_3$. Totiž, $|BC_1| = |AC_3|$ a~podobne na druhej strane.
+}{
+    Naša podobnosť dáva $|A_2C_1|/|A_2B_1| = |BC_1|/|CB_1| = |AC_3|/|AB_3|$. Nedáva nám to niečo zaujímavé?
+}{
+    Vzťah $|A_2C_1|/|A_2B_1| = |AC_3|/|AB_3|$ spolu s~ľahkým douhlením dá $A_2BC$ podobné $AC_3B_3$. To nám prenáša uhly okolo $B_3$ a~$C_3$. Samozrejme podobne je to okolo ďalších vrcholov. Vieme už poprenášať uhly $A_3B_3C_3$?
+}{
+    Kľúčom k~vyjadreniu napr. $|\angle B_3A_3C_3|$ je povedať, že je to $180^\circ - |\angle C_3A_3B| - |\angle CA_3B_3|$, a~to sa dá z~našich pomocných podobností preniesť na uhly len na vrcholoch $A$, $B$, $C$, $A_2$, $B_2$, $C_2$. To už pôjde len uhlením.
+}%
+{
+    Podľa vety o~strede špirálnej podobnosti (s~$X = A$) je $A_2$ stredom špirálky, ktorá zobrazuje $C_1B_1$ na $BC$. Špirálka chodí v~pároch, takže $A_2$ je aj stredom špirálky zobrazujúcej $C_1B$ na $B_1C$, teda $A_2C_1B \sim A_2B_1C$ a
+    $$
+    |A_2B| : |A_2C| = |BC_1| : |CB_1| = |AC_3| : |AB_3|,
+    $$
+    kde posledná rovnosť plynie zo stredových súmerností podľa stredov strán $AB$ a~$AC$.
+
+    \Image{spiral-points-on-sides.pdf}
+
+    Keďže $A_2$ leží na oblúku $BC$ obsahujúcom $A$, je $|\angle BA_2C| = |\angle BAC| = |\angle C_3AB_3|$, a~preto $A_2BC \sim AC_3B_3$. Cyklické posunutie $A \to B \to C \to A$ posúva aj $A_1 \to B_1 \to C_1$, $A_2 \to B_2 \to C_2$ a~$A_3 \to B_3 \to C_3$, takže rovnako $B_2CA \sim BA_3C_3$ a~$C_2AB \sim CB_3A_3$.
+
+    Tieto dve podobnosti dávajú $|\angle C_3A_3B| = |\angle B_2CA|$ a~$|\angle B_3A_3C| = |\angle C_2BA|$. Keďže $A_3$ leží na úsečke $BC$ a~body $B_3$, $C_3$ na úsečkách $CA$, $AB$, je
+    $$
+    \eqalign{
+    |\angle B_3A_3C_3| &= 180^\circ - |\angle B_2CA| - |\angle C_2BA| \cr
+    &= 180^\circ - |\angle AC_2B_2| - |\angle AB_2C_2| = |\angle B_2AC_2| = |\angle B_2A_2C_2|,
+    }
+    $$
+    kde druhá a~posledná rovnosť sú obvodové uhly nad tetivami $AB_2$, $AC_2$ a~$B_2C_2$ (vrcholy ležia vždy na tom istom oblúku).
+
+    \Image{spiral-points-on-sides-angles.pdf}
+
+    Rovnako $|\angle A_3B_3C_3| = |\angle A_2B_2C_2|$, a~zhoda v~dvoch uhloch dáva $A_2B_2C_2 \sim A_3B_3C_3$.
+}
+
+\EnvId{HD30gF-LHGoVB7nEs6412-bod-x-vnutri-stvoruholnika}
+\Problem{0}{ISL 2000, G6}{
+    Nech $ABCD$ je konvexný štvoruholník taký, že $AB \nparallel CD$, a~nech $X$ je bod vnútri $ABCD$ taký, že $|\angle ADX| = |\angle BCX| < 90^\circ$ a~$|\angle DAX| = |\angle CBX| < 90^\circ$. Ak sa osi úsečiek $AB$ a~$CD$ pretínajú v~bode $Y$, tak dokážte, že $|\angle AYB| = 2 |\angle ADX|$.
+}{
+    Dvojnásobok uhla sa dokazuje ťažšie, skúste si preformulovať ľahkým dokreslením na rovnosť uhlov.
+}{
+    Nech $M$ je stred $AB$. My vlastne chceme $|\angle ADX| = |\angle AYM|$. To už je skoro špirálka, chce to bod navyše. Prezradím v~ďalšom hinte.
+}{
+    Trikový bod je bod $T$ na polpriamke $YM$ taký, že $ADX$ a~$AYT$ sú priamo podobné. Lenže my vlastne nevieme, či $|\angle AYT| = |\angle ADX|$, takže nemáme istotu, že existuje. Bod $Y$ však vieme predefinovať, aby to bolo fajn.
+}{
+    Predefinovanie, ktoré funguje, je že v~polrovine $ABC$ uvážime $Y'$ tak, že $|\angle AY'M| = |\angle ADX|$. Potom stačí $|Y'C| = |Y'D|$. To už ale pôjde, lebo máme na oboch stranách špirálku, a~tá chodí po dvoch.
+}{
+    Z~$ATY' \sim AXD$ máme $ATX \sim AY'D$, takže spočítame $|Y'D|$ cez pomery.
+}%
+{
+    Označme $\delta = |\angle ADX| = |\angle BCX|$ a~$\alpha = |\angle DAX| = |\angle CBX|$. Trojuholníky $ADX$ a~$BCX$ sú podľa uhlov $\alpha$, $\delta$ podobné a~nesúhlasne orientované, lebo $X$ leží vnútri konvexného $ABCD$; platí teda $|AD| : |AX| = |BC| : |BX|$.
+
+    Nech $M$ je stred úsečky $AB$. Pre každý bod $P$ osi úsečky $AB$ rôzny od $M$ je $|\angle APB| = 2|\angle APM|$. Nech $Y'$ je bod tejto osi v~polrovine $ABC$, pre ktorý $|\angle AY'M| = \delta$; existuje, lebo $0^\circ < \delta < 90^\circ$. Stačí dokázať $|Y'C| = |Y'D|$: potom $Y'$ leží aj na osi úsečky $CD$ a~kvôli $AB \nparallel CD$ je $Y' = Y$.
+
+    Nech $T$ je obraz bodu $X$ v~špirálnej podobnosti so stredom $A$, ktorá zobrazuje $D$ na $Y'$. Potom $ADX \sim AY'T$ súhlasne orientované, takže $|\angle AY'T| = \delta = |\angle AY'M|$, a~keďže $X$ leží vnútri $ABCD$ a~$Y'$ v~polrovine $ABC$, čo je pre konvexný $ABCD$ polrovina $ABD$, sú trojice $A, D, X$ a~$A, Y', M$ obe orientované ako $A, D, B$ a~$T$ leží na polpriamke $Y'M$.
+
+    \Image{spiral-interior-point-x.pdf}
+
+    Osová súmernosť podľa $Y'M$ zobrazuje $A$ na $B$ a~body $Y'$, $T$ necháva na mieste, takže $BY'T$ je nesúhlasne zhodný s~$AY'T$, a~preto $BCX \sim BY'T$ súhlasne orientované.
+
+    Špirálna podobnosť so stredom $A$ zobrazuje $DX$ na $Y'T$, a~keďže špirálna podobnosť chodí v~pároch, je $A$ aj stredom tej, ktorá zobrazuje $DY'$ na $XT$. Odtiaľ $AY'D \sim ATX$, čiže
+    $$
+    |Y'D| : |TX| = |AD| : |AX|.
+    $$
+    Rovnako so stredom $B$ dostávame $BY'C \sim BTX$, čiže
+    $$
+    |Y'C| : |TX| = |BC| : |BX|.
+    $$
+
+    Pravé strany sú rovnaké, takže $|Y'D| = |Y'C|$, $Y' = Y$ a~$|\angle AYB| = 2|\angle AY'M| = 2\delta$.
+}
+
+\DisplayHints
+
+\DisplayProblemSolutions
+
+\bye

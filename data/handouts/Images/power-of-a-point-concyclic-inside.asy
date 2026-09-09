@@ -11,9 +11,9 @@ real axisHalfLength = 57;
 pair O1 = (-halfSeparation, 0);
 pair O2 = (halfSeparation, 0);
 
-// The crossing X sits on the radical axis again, but this time between the two
-// circle intersections, so it lies inside both circles and the two secants meet
-// as crossing chords rather than as rays from an outside point.
+// The crossing X sits on the radical axis between the two circle intersections,
+// so it lies inside both circles and the two secants meet as crossing chords
+// rather than as rays from an outside point.
 pair[] axis = RadicalAxis(O1, r1, O2, r2, axisHalfLength);
 pair[] crossing = RadicalAxis(O1, r1, O2, r2, crossingHeight);
 pair X = crossing[0];
@@ -26,11 +26,9 @@ pair[] hitsL = LineCircleIntersections(X, Polar(X, chordAngleL, 1), O2, r2);
 pair L1 = hitsL[0];
 pair L2 = hitsL[1];
 
-pair S = Circumcenter(K1, K2, L1);
-
 Circle(O1, r1, LightBlue);
 Circle(O2, r2, LightBlue);
-Circle(S, abs(K1 - S), LightPurple);
+CircleThrough(K1, K2, L1, LightPurple);
 
 Draw(axis[0], axis[1], Red);
 

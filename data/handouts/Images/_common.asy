@@ -151,6 +151,11 @@ real parallelMarkSpacing = 3;
 real parallelMarkAngle = 80;
 
 //
+// Arrowhead size for Arc's optional direction indicator.
+//
+real arcArrowSize = 10;
+
+//
 // Geometric point constructors
 //
 
@@ -248,6 +253,18 @@ pair[] LineCircleIntersections(
 }
 
 //
+// Picks the one of the two points `hits` that is not `known`. The intersection
+// helpers order their result geometrically, so a construction starting from a
+// known common point cannot use an index to reach the other one.
+//
+pair OtherIntersection(
+    pair[] hits,
+    pair known)
+{
+    return abs(hits[0] - known) > abs(hits[1] - known) ? hits[0] : hits[1];
+}
+
+//
 // Returns two points on the radical axis of the non-concentric circles
 // (O1, r1) and (O2, r2), placed symmetrically about the line O1O2 at distance
 // `halfLength` on either side of it.
@@ -292,6 +309,23 @@ pair Circumcenter(
     return extension(
         Mab, Mab + rotate(90) * (B - A),
         Mac, Mac + rotate(90) * (C - A));
+}
+
+//
+// Returns the centre of the circle inscribed in the non-degenerate triangle
+// ABC, as the average of the vertices weighted by the side lengths opposite
+// them.
+//
+pair Incenter(
+    pair A,
+    pair B,
+    pair C)
+{
+    real a = abs(B - C);
+    real b = abs(C - A);
+    real c = abs(A - B);
+
+    return (a * A + b * B + c * C) / (a + b + c);
 }
 
 //
@@ -545,13 +579,30 @@ void Circle(
 }
 
 //
+// Draws the circle through the non-collinear points A, B, C. Reach for
+// Circumcenter instead when the centre is also needed as a named point.
+//
+void CircleThrough(
+    pair A,
+    pair B,
+    pair C,
+    pen color = black)
+{
+    pair center = Circumcenter(A, B, C);
+
+    Circle(center, abs(A - center), color);
+}
+
+//
 // Draws an arc of the circle centered at `center` (radius taken from
 // |start - center|) running from near `start`, through `through`, to near
-// `end`. The arc direction is chosen so it actually passes through `through`.
-// `bufferDeg` extends the arc past `start` and `end` by that many degrees,
-// away from `through` on both ends — useful when the visual cue is the
-// tangent/anchor points and a tail past them keeps the arc from looking
-// truncated.
+// `end`, in that travel order. `bufferDeg` extends the arc past `start` and
+// `end` by that many degrees, away from `through` on both ends — useful when
+// the visual cue is the tangent/anchor points and a tail past them keeps the
+// arc from looking truncated. Pass `arrow = true` to mark the direction of
+// travel with a single arrowhead at `end`.
+//
+// Used global variables: arcArrowSize
 //
 void Arc(
     pair center,
@@ -559,7 +610,8 @@ void Arc(
     pair through,
     pair end,
     real bufferDeg = 0,
-    pen color = black)
+    pen color = black,
+    bool arrow = false)
 {
     real r = abs(start - center);
     real a0 = degrees(start - center);
@@ -573,15 +625,20 @@ void Arc(
 
     if (a1 < a2) {
         // CCW from start hits through, then end — draw CCW with buffer on both ends.
-        draw(arc(center, r, a0 - bufferDeg, a2 + bufferDeg), color);
+        // The drawn path runs start -> end, so the arrowhead belongs at its end.
+        draw(arc(center, r, a0 - bufferDeg, a2 + bufferDeg), color,
+            arrow ? EndArrow(size = arcArrowSize) : None);
     } else {
         // CCW from start would hit end first, so the path through `through` is the
         // CW one. Swap the endpoint roles: redraw CCW starting from `end`, which
-        // now reaches `through` before reaching `start`.
+        // now reaches `through` before reaching `start`. The drawn path runs
+        // end -> start, so the arrowhead (still marking travel toward `end`) goes
+        // at its beginning.
         real b0 = degrees(end - center);
         real b2 = degrees(start - center);
         while (b2 < b0) b2 += 360;
-        draw(arc(center, r, b0 - bufferDeg, b2 + bufferDeg), color);
+        draw(arc(center, r, b0 - bufferDeg, b2 + bufferDeg), color,
+            arrow ? BeginArrow(size = arcArrowSize) : None);
     }
 }
 

@@ -192,6 +192,7 @@ textdollar
 textit
 tfrac
 tg
+theta
 times
 to
 triangle
