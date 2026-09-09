@@ -12,13 +12,10 @@ pair B = Polar(P, 0, lenPA + lenAB);
 
 // T is placed so that |PT|^2 = |PA| * |PB| holds by construction, which is
 // exactly the hypothesis of the criterion — the circle (TAB) then touches PT
-// at T, rather than the figure having to be fitted to a chosen circle.
+// at T.
 pair T = Polar(P, tangentAngle, sqrt(lenPA * (lenPA + lenAB)));
 
-pair O = Circumcenter(T, A, B);
-real R = abs(A - O);
-
-Circle(O, R, LightBlue);
+CircleThrough(T, A, B, LightBlue);
 
 Draw(P, ExtendPast(A, B, pastB), Green);
 Draw(P, ExtendPast(P, T, pastT), Green);

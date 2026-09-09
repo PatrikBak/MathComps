@@ -2523,6 +2523,238 @@
       }
     }
   },
+  "f9akXZxfNwlFMPasEvzp7": {
+    "T3lP4FN1zTf6lOQz9Ddq_": {
+      "type": "definition",
+      "number": 1,
+      "slug": { "sk": "spiralna-podobnost", "cs": "spiralni-podobnost", "en": "spiral-similarity" }
+    },
+    "JmA51D6zLoKYiJEsuQBWn": {
+      "type": "theorem",
+      "number": 1,
+      "slug": {
+        "sk": "spiralna-podobnost-v-paroch",
+        "cs": "spiralni-podobnost-v-parech",
+        "en": "spiral-similarity-in-pairs"
+      }
+    },
+    "7w5OPOXaDCNOVEgIpddYa": {
+      "type": "theorem",
+      "number": 2,
+      "slug": {
+        "sk": "spiralna-podobnost-a-podobne-body",
+        "cs": "spiralni-podobnost-a-podobne-body",
+        "en": "spiral-similarity-and-similar-points"
+      }
+    },
+    "eAqIhVm0OVC2uVXDRxMpJ": {
+      "type": "theorem",
+      "number": 3,
+      "slug": {
+        "sk": "stred-spiralnej-podobnosti",
+        "cs": "stred-spiralni-podobnosti",
+        "en": "center-of-spiral-similarity"
+      }
+    },
+    "bOA6eKiwIlUrb_5f3ft0o": {
+      "type": "theorem",
+      "number": 4,
+      "slug": { "sk": "miquelova-veta", "cs": "miquelova-veta", "en": "miquels-theorem" }
+    },
+    "LBhDImhjL32nZ7fyN8V3M": {
+      "type": "theorem",
+      "number": 5,
+      "slug": { "sk": "miquelov-bod", "cs": "miqueluv-bod", "en": "miquel-point" }
+    },
+    "igG5PzGmeZw8PD3AWDpuL": {
+      "type": "theorem",
+      "number": 6,
+      "slug": {
+        "sk": "miquelov-bod-tetivoveho-stvoruholnika",
+        "cs": "miqueluv-bod-tetivoveho-ctyruhelniku",
+        "en": "miquel-point-of-cyclic-quadrilateral"
+      }
+    },
+    "MmyK4gHpuLqLFIWRTsfw7": {
+      "type": "theorem",
+      "number": 7,
+      "slug": { "sk": "om-kolme-na-qr", "cs": "om-kolme-na-qr", "en": "om-perpendicular-to-qr" }
+    },
+    "0E6PUv99s_uEcAjd8CC6I": {
+      "type": "theorem",
+      "number": 8,
+      "slug": { "sk": "o-p-m-na-priamke", "cs": "o-p-m-na-primce", "en": "o-p-m-collinear" }
+    },
+    "8WFRq4Y9hX4Xf2REA_qfL": {
+      "type": "theorem",
+      "number": 9,
+      "slug": { "sk": "polara", "cs": "polara", "en": "polar" }
+    },
+    "tQ6r-YBHII2hYOcd0jnzC": {
+      "type": "example",
+      "number": 1,
+      "slug": { "sk": "ptolemaiova-veta", "cs": "ptolemaiova-veta", "en": "ptolemys-theorem" }
+    },
+    "ECXlxtdJwECBnuRZW8E-V": {
+      "type": "example",
+      "number": 2,
+      "slug": { "sk": "simsonova-priamka", "cs": "simsonova-primka", "en": "simson-line" }
+    },
+    "J67DMaac8DHSjoZgc7hzh": {
+      "type": "example",
+      "number": 3,
+      "slug": { "sk": "sharky-devil", "cs": "sharky-devil", "en": "sharky-devil" }
+    },
+    "DKBXD5k0KpD8gJ1WTK5OL": {
+      "type": "example",
+      "number": 4,
+      "slug": {
+        "sk": "rovnake-useky-bd-ce",
+        "cs": "stejne-usecky-bd-ce",
+        "en": "equal-segments-bd-ce"
+      }
+    },
+    "xE-clCysUPOoVq5pYkO8l": {
+      "type": "problem",
+      "number": 1,
+      "slug": {
+        "sk": "podobne-pravouhle-trojuholniky",
+        "cs": "podobne-pravouhle-trojuhelniky",
+        "en": "similar-right-triangles"
+      }
+    },
+    "FzqGadPM1rzLyHJyRoWFb": {
+      "type": "problem",
+      "number": 2,
+      "slug": {
+        "sk": "tazisko-a-dva-rovnoramenne-trojuholniky",
+        "cs": "teziste-a-dva-rovnoramenne-trojuhelniky",
+        "en": "centroid-and-two-isosceles-triangles"
+      }
+    },
+    "SIutAov-jyomJVC3WszN0": {
+      "type": "problem",
+      "number": 3,
+      "slug": {
+        "sk": "vyska-a-dve-opisane-kruznice",
+        "cs": "vyska-a-dve-opsane-kruznice",
+        "en": "altitude-and-two-circumcircles"
+      }
+    },
+    "f0S-c_ZWlDc0tqyE8b16q": {
+      "type": "problem",
+      "number": 4,
+      "slug": {
+        "sk": "dva-obdlzniky-nad-stranami",
+        "cs": "dva-obdelniky-nad-stranami",
+        "en": "two-rectangles-on-the-sides"
+      }
+    },
+    "u6D86fr9DYWaempL4uPN3": {
+      "type": "problem",
+      "number": 5,
+      "slug": {
+        "sk": "patuholnik-s-vnutornym-bodom",
+        "cs": "petiuhelnik-s-vnitrnim-bodem",
+        "en": "pentagon-with-interior-point"
+      }
+    },
+    "xjAYdKzTN_Q5-h0ddUoDR": {
+      "type": "problem",
+      "number": 6,
+      "slug": {
+        "sk": "stredy-vpisanych-kruznic-bfd-a-ced",
+        "cs": "stredy-vepsanych-kruznic-bfd-a-ced",
+        "en": "incenters-of-bfd-and-ced"
+      }
+    },
+    "uvtxLeNA257wih8VqN3o0": {
+      "type": "problem",
+      "number": 7,
+      "slug": {
+        "sk": "rovnake-uhly-a-body-m-n",
+        "cs": "stejne-uhly-a-body-m-n",
+        "en": "equal-angles-and-points-m-n"
+      }
+    },
+    "xt9itZAMHcJDcCVjylaYP": {
+      "type": "problem",
+      "number": 8,
+      "slug": {
+        "sk": "taziska-rovnostrannych-trojuholnikov",
+        "cs": "teziste-rovnostrannych-trojuhelniku",
+        "en": "centroids-of-equilateral-triangles"
+      }
+    },
+    "lGiQKLrC3o5CyNXlJkyMT": {
+      "type": "problem",
+      "number": 9,
+      "slug": {
+        "sk": "stredy-kruznic-opisanych-a1a2c",
+        "cs": "stredy-kruznic-opsanych-a1a2c",
+        "en": "circumcenters-of-a1a2c"
+      }
+    },
+    "JKoWMSfsf0O8L5L0mRHxz": {
+      "type": "problem",
+      "number": 10,
+      "slug": {
+        "sk": "trojuholniky-pqr-pri-pohybe-e-a-f",
+        "cs": "trojuhelniky-pqr-pri-pohybu-ef",
+        "en": "triangles-pqr-as-ef-moves"
+      }
+    },
+    "x9VsKUKWUheOiFauQHUGg": {
+      "type": "problem",
+      "number": 11,
+      "slug": {
+        "sk": "tetivovy-stvoruholnik-a-rovnobeznik",
+        "cs": "tetivovy-ctyruhelnik-a-rovnobeznik",
+        "en": "cyclic-quadrilateral-and-parallelogram"
+      }
+    },
+    "ZDGMuI_DRsxG-nsBTDSvc": {
+      "type": "problem",
+      "number": 12,
+      "slug": { "sk": "dotycnice-v-b-a-c", "cs": "tecny-v-b-a-c", "en": "tangents-at-b-and-c" }
+    },
+    "ASfGvh5sNuepotkCkzT4V": {
+      "type": "problem",
+      "number": 13,
+      "slug": {
+        "sk": "dotyk-kruznice-mef-s-bc",
+        "cs": "dotyk-kruznice-mef-s-bc",
+        "en": "circle-mef-tangent-to-bc"
+      }
+    },
+    "pn8vj1u6UmWY3vagNIZEg": {
+      "type": "problem",
+      "number": 14,
+      "slug": {
+        "sk": "rovnoramenne-trojuholniky-nad-stranami",
+        "cs": "rovnoramenne-trojuhelniky-nad-stranami",
+        "en": "isosceles-triangles-on-sides"
+      }
+    },
+    "vR5yJpOiIUsHlAOir-mgU": {
+      "type": "problem",
+      "number": 15,
+      "slug": {
+        "sk": "body-na-stranach-trojuholnika",
+        "cs": "body-na-stranach-trojuhelniku",
+        "en": "points-on-triangle-sides"
+      }
+    },
+    "HD30gF-LHGoVB7nEs6412": {
+      "type": "problem",
+      "number": 16,
+      "slug": {
+        "sk": "bod-x-vnutri-stvoruholnika",
+        "cs": "bod-x-uvnitr-ctyruhelnika",
+        "en": "point-x-inside-quadrilateral"
+      }
+    }
+  },
   "xT7kWqNv3Lm8RpYfHs2Jg": {
     "M_uB_nIoAD4XsWdDgD24w": {
       "type": "problem",

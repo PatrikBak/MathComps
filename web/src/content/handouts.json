@@ -292,6 +292,29 @@
           "authors": ["Patrik Bak"],
           "publishedAt": "2026-08-01",
           "updatedAt": "2026-08-01"
+        },
+        {
+          "id": "f9akXZxfNwlFMPasEvzp7",
+          "hideSolutionsAndProofs": true,
+          "slug": {
+            "sk": "spiralna-podobnost",
+            "cs": "spiralni-podobnost",
+            "en": "spiral-similarity"
+          },
+          "title": {
+            "sk": "Špirálna podobnosť",
+            "cs": "Spirální podobnost",
+            "en": "Spiral Similarity"
+          },
+          "description": {
+            "sk": "Špirálna podobnosť ako zloženie otočenia a rovnoľahlosti: prečo chodí v pároch, ako nájsť jej stred, a Miquelove body tetivového štvoruholníka spolu s ich súvislosťami s polárou a ortocentrom. Aplikácie na olympiádne úlohy vrátane IMO 2005, ISL, MEMO, USA TST a česko-slovenskej olympiády.",
+            "cs": "Spirální podobnost jako složení otočení a stejnolehlosti: proč chodí v párech, jak najít její střed, a Miquelovy body tětivového čtyřúhelníku spolu s jejich souvislostmi s polárou a ortocentrem. Aplikace na olympiádní úlohy včetně IMO 2005, ISL, MEMO, USA TST a česko-slovenské olympiády.",
+            "en": "Spiral similarity as a rotation composed with a homothety: why it comes in pairs, how to find its center, and the Miquel points of a cyclic quadrilateral together with their links to polars and the orthocenter. Applied to olympiad problems including IMO 2005, ISL, MEMO, USA TST, and Czech-Slovak olympiads."
+          },
+          "difficulty": 3,
+          "authors": ["Patrik Bak"],
+          "publishedAt": "2026-09-09",
+          "updatedAt": "2026-09-09"
         }
       ]
     },
