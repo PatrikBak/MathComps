@@ -2,6 +2,7 @@ import katex from 'katex'
 
 import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
+import type { Locale } from '@/i18n/i18n'
 
 import type { MathGlueReader } from './math-nowrap'
 import { MATH_NOWRAP_CLASS, planMathGlue } from './math-nowrap'
@@ -41,18 +42,29 @@ const SEGMENT_GLUE_READER: MathGlueReader<ContentSegment, InlineMathSegment, nev
   readChildren: () => [],
 }
 
+/** The opening and closing quotation marks each locale writes, matching a `<q>` element's own. */
+const QUOTATION_MARKS: Record<Locale, readonly [string, string]> = {
+  sk: ['\u201e', '\u201c'],
+  cs: ['\u201e', '\u201c'],
+  en: ['\u201c', '\u201d'],
+}
+
 /**
  * Flattens a parsed inline content block back to its raw source string, wrapping
- * math nodes in `$...$` / `$$...$$` and recursing through paragraph/bold/italic
+ * math nodes in `$...$` / `$$...$$` and recursing through paragraph/bold/italic/quote
  * containers. The result can be fed straight into {@link renderMathContentToHtml}
  * (or a `MathRendererClient`) so text and math render on the same baseline as a
  * single KaTeX-aware string.
  *
  * @param block The inline content block to flatten, or null/undefined if absent.
+ * @param locale The locale whose quotation marks a quoted run carries.
  *
  * @returns The reconstructed source string, or `''` if the block is absent or unsupported.
  */
-export function inlineBlockToMathSource(block: RawContentBlock | null | undefined): string {
+export function inlineBlockToMathSource(
+  block: RawContentBlock | null | undefined,
+  locale: Locale
+): string {
   // No block
   if (!block) return ''
 
@@ -67,12 +79,20 @@ export function inlineBlockToMathSource(block: RawContentBlock | null | undefine
     case 'paragraph':
     case 'bold':
     case 'italic':
-      return block.content.map(inlineBlockToMathSource).join('')
+      return block.content.map((child) => inlineBlockToMathSource(child, locale)).join('')
+    // A quote writes its marks straight into the text
+    case 'quote': {
+      const [openingMark, closingMark] = QUOTATION_MARKS[locale]
+
+      // The quoted run, flattened the same way as any other container
+      const quoted = block.content.map((child) => inlineBlockToMathSource(child, locale)).join('')
+
+      return `${openingMark}${quoted}${closingMark}`
+    }
     // Block-level and non-inline types don't appear in inline titles
     case 'link':
     case 'list':
     case 'image':
-    case 'quote':
     case 'footnote':
       return ''
     default:
