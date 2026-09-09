@@ -67,14 +67,15 @@ type HandoutDetailProps = {
  * document title is rendered.
  *
  * @param title The optional inline title block, or null/undefined if absent.
+ * @param locale The locale the handout is rendered in.
  * @returns The rendered React node, or null if no title was provided.
  */
-function renderTitle(title: RawContentBlock | null | undefined): React.ReactNode {
+function renderTitle(title: RawContentBlock | null | undefined, locale: Locale): React.ReactNode {
   // No title
   if (!title) return null
 
   // Reconstruct the raw source string so KaTeX sees the whole title at once
-  const rawString = inlineBlockToMathSource(title)
+  const rawString = inlineBlockToMathSource(title, locale)
   if (!rawString) return null
 
   // Single MathRendererClient pass keeps text and math on the same baseline
@@ -109,6 +110,7 @@ function renderDifficultyStars(difficulty: number): React.ReactNode {
  * @param imageMissingText Fallback text for missing images.
  * @param contentId The handout's content id.
  * @param hideSolutionsAndProofs Whether solutions, proofs and answers stay hidden.
+ * @param locale The locale the handout is rendered in.
  * @returns The rendered document tree wrapped in a math-styled container.
  */
 function renderDocumentSections(
@@ -118,7 +120,8 @@ function renderDocumentSections(
   t: HandoutsTranslator,
   imageMissingText: string,
   contentId: string,
-  hideSolutionsAndProofs: boolean
+  hideSolutionsAndProofs: boolean,
+  locale: Locale
 ): React.ReactNode {
   // Translate the environment labels
   const localizedEnvironmentLabelByType = buildEnvironmentLabels(t)
@@ -163,7 +166,7 @@ function renderDocumentSections(
             const environmentBaseTitle = localizedEnvironmentLabelByType[contentBlock.type]
 
             // The optional inline name authored in TeX (e.g. \Definition{Aritmetický průměr}).
-            const userProvidedTitle = renderTitle(contentBlock.title)
+            const userProvidedTitle = renderTitle(contentBlock.title, locale)
 
             // Difficulty asterisks are problem-only (e.g. "Úloha 4**").
             const difficultyStars =
@@ -392,7 +395,8 @@ export default function HandoutDetail({
         t,
         imageMissingText,
         contentId,
-        hideSolutionsAndProofs
+        hideSolutionsAndProofs,
+        locale
       )}
 
       {/* Comments Section */}

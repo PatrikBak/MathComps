@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import type { RawContentBlock } from '@/components/features/handouts/handout-content-types'
+
 import { inlineBlockToMathSource, renderMathContentToHtml } from '../utils/math-render'
 
 describe('renderMathContentToHtml', () => {
@@ -103,7 +105,7 @@ describe('renderMathContentToHtml', () => {
 describe('inlineBlockToMathSource', () => {
   it('returns an empty string for a null block', () => {
     // Flatten an absent block
-    const source = inlineBlockToMathSource(null)
+    const source = inlineBlockToMathSource(null, 'en')
 
     // Absent input flattens to nothing
     expect(source).toBe('')
@@ -111,7 +113,7 @@ describe('inlineBlockToMathSource', () => {
 
   it('passes plain text through verbatim', () => {
     // Flatten a bare text leaf
-    const source = inlineBlockToMathSource({ type: 'text', text: 'Pythagoras' })
+    const source = inlineBlockToMathSource({ type: 'text', text: 'Pythagoras' }, 'en')
 
     // Text is reproduced as-is
     expect(source).toBe('Pythagoras')
@@ -119,7 +121,10 @@ describe('inlineBlockToMathSource', () => {
 
   it('wraps inline math in single-dollar delimiters', () => {
     // Flatten an inline math leaf
-    const source = inlineBlockToMathSource({ type: 'math', text: 'a^2+b^2', isDisplay: false })
+    const source = inlineBlockToMathSource(
+      { type: 'math', text: 'a^2+b^2', isDisplay: false },
+      'en'
+    )
 
     // Inline math comes back delimited for re-rendering
     expect(source).toBe('$a^2+b^2$')
@@ -127,7 +132,7 @@ describe('inlineBlockToMathSource', () => {
 
   it('wraps display math in double-dollar delimiters', () => {
     // Flatten a display math leaf
-    const source = inlineBlockToMathSource({ type: 'math', text: 'a^2+b^2', isDisplay: true })
+    const source = inlineBlockToMathSource({ type: 'math', text: 'a^2+b^2', isDisplay: true }, 'en')
 
     // Display math comes back in its own delimiters
     expect(source).toBe('$$a^2+b^2$$')
@@ -135,15 +140,18 @@ describe('inlineBlockToMathSource', () => {
 
   it('flattens a paragraph by concatenating its children in order', () => {
     // Flatten a paragraph mixing prose and an inline formula
-    const source = inlineBlockToMathSource({
-      type: 'paragraph',
-      highligted: false,
-      content: [
-        { type: 'text', text: 'The ' },
-        { type: 'math', text: 'x', isDisplay: false },
-        { type: 'text', text: ' case' },
-      ],
-    })
+    const source = inlineBlockToMathSource(
+      {
+        type: 'paragraph',
+        highligted: false,
+        content: [
+          { type: 'text', text: 'The ' },
+          { type: 'math', text: 'x', isDisplay: false },
+          { type: 'text', text: ' case' },
+        ],
+      },
+      'en'
+    )
 
     // The children flatten left-to-right with math re-delimited
     expect(source).toBe('The $x$ case')
@@ -151,18 +159,40 @@ describe('inlineBlockToMathSource', () => {
 
   it('recurses through bold and italic wrappers', () => {
     // Flatten a bold wrapper around an italic wrapper around text
-    const source = inlineBlockToMathSource({
-      type: 'bold',
-      content: [{ type: 'italic', content: [{ type: 'text', text: 'deep' }] }],
-    })
+    const source = inlineBlockToMathSource(
+      {
+        type: 'bold',
+        content: [{ type: 'italic', content: [{ type: 'text', text: 'deep' }] }],
+      },
+      'en'
+    )
 
     // Formatting wrappers contribute only their flattened children
     expect(source).toBe('deep')
   })
 
+  it("writes the locale's quotation marks around a quoted run", () => {
+    // Flatten a title holding a quoted phrase, once per locale
+    const quote = {
+      type: 'paragraph',
+      highligted: false,
+      content: [
+        { type: 'text', text: 'Comes ' },
+        { type: 'quote', content: [{ type: 'text', text: 'in pairs' }] },
+      ],
+    } satisfies RawContentBlock
+
+    // Each locale writes its own marks
+    expect(inlineBlockToMathSource(quote, 'en')).toBe('Comes \u201cin pairs\u201d')
+    expect(inlineBlockToMathSource(quote, 'sk')).toBe('Comes \u201ein pairs\u201c')
+  })
+
   it('returns an empty string for block types without an inline source', () => {
     // Flatten an image reference, which has no inline-title representation
-    const source = inlineBlockToMathSource({ type: 'image', id: 'fig-1', scale: 1, isInline: true })
+    const source = inlineBlockToMathSource(
+      { type: 'image', id: 'fig-1', scale: 1, isInline: true },
+      'en'
+    )
 
     // Unsupported block types flatten to nothing
     expect(source).toBe('')
