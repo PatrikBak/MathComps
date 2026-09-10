@@ -236,71 +236,71 @@
       "shortName": "SŠ",
       "fullName": "Kategorie SŠ"
     },
-    "mc": {
+    "mathcomps": {
       "shortName": "Mathildování",
       "fullName": "MathComps AI soutěže"
     },
-    "mc-practice": {
+    "mathcomps-practice": {
       "shortName": "Zkušební soutěž",
       "fullName": "Zkušební soutěž",
       "urlSlug": "zkusebni"
     },
-    "mc-elementary": {
+    "mathcomps-elementary": {
       "shortName": "Základní",
       "fullName": "Základní kategorie"
     },
-    "mc-elementary-1": {
+    "mathcomps-elementary-september": {
       "shortName": "Září",
       "fullName": "Září",
-      "urlSlug": "zakladni-1"
+      "urlSlug": "zakladni-zari"
     },
-    "mc-elementary-2": {
+    "mathcomps-elementary-october": {
       "shortName": "Říjen",
       "fullName": "Říjen",
-      "urlSlug": "zakladni-2"
+      "urlSlug": "zakladni-rijen"
     },
-    "mc-elementary-3": {
+    "mathcomps-elementary-november": {
       "shortName": "Listopad",
       "fullName": "Listopad",
-      "urlSlug": "zakladni-3"
+      "urlSlug": "zakladni-listopad"
     },
-    "mc-intermediate": {
+    "mathcomps-intermediate": {
       "shortName": "Střední",
       "fullName": "Střední kategorie"
     },
-    "mc-intermediate-1": {
+    "mathcomps-intermediate-september": {
       "shortName": "Září",
       "fullName": "Září",
-      "urlSlug": "stredni-1"
+      "urlSlug": "stredni-zari"
     },
-    "mc-intermediate-2": {
+    "mathcomps-intermediate-october": {
       "shortName": "Říjen",
       "fullName": "Říjen",
-      "urlSlug": "stredni-2"
+      "urlSlug": "stredni-rijen"
     },
-    "mc-intermediate-3": {
+    "mathcomps-intermediate-november": {
       "shortName": "Listopad",
       "fullName": "Listopad",
-      "urlSlug": "stredni-3"
+      "urlSlug": "stredni-listopad"
     },
-    "mc-advanced": {
+    "mathcomps-advanced": {
       "shortName": "Pokročilá",
       "fullName": "Pokročilá kategorie"
     },
-    "mc-advanced-1": {
+    "mathcomps-advanced-september": {
       "shortName": "Září",
       "fullName": "Září",
-      "urlSlug": "pokrocila-1"
+      "urlSlug": "pokrocila-zari"
     },
-    "mc-advanced-2": {
+    "mathcomps-advanced-october": {
       "shortName": "Říjen",
       "fullName": "Říjen",
-      "urlSlug": "pokrocila-2"
+      "urlSlug": "pokrocila-rijen"
     },
-    "mc-advanced-3": {
+    "mathcomps-advanced-november": {
       "shortName": "Listopad",
       "fullName": "Listopad",
-      "urlSlug": "pokrocila-3"
+      "urlSlug": "pokrocila-listopad"
     }
   },
   "seasonFormat": "{number}. ročník ({start}/{end})"

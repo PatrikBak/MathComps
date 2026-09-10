@@ -54,10 +54,10 @@ Run `./invoke-tool.sh` with no arguments for the current list of commands.
 
 ```bash
 # Read-only: validate, and list the defense sessions the import would strand
-./apply-draft.sh --validate-only ./data/problems/mc-practice-2026
+./apply-draft.sh --validate-only ./data/problems/mathcomps-practice-2026
 
 # Import, and clear the defenses that would now hold the old text
-./apply-draft.sh -e prod --clear-defenses ./data/problems/mc-practice-2026
+./apply-draft.sh -e prod --clear-defenses ./data/problems/mathcomps-practice-2026
 ```
 
 The competition comes from the draft's own `_meta.yaml`, so there is no second argument to keep in step. One tunnel serves the whole run: `invoke-tool.sh` finds the one this script opened and reuses it.

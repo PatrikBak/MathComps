@@ -6,9 +6,9 @@ namespace MathComps.Domain.EfCoreEntities;
 /// </summary>
 /// <remarks>
 /// The group carries no name of its own. Its rounds hang off competition nodes that already have a localized
-/// name in the taxonomy metadata, and its categories share that name by construction (<c>mc-elementary-3</c>,
-/// <c>mc-intermediate-3</c> and <c>mc-advanced-3</c> are all "3. súťaž"), so the group's name is read from the
-/// taxonomy.
+/// name in the taxonomy metadata, and its categories share that name by construction
+/// (<c>mathcomps-elementary-november</c>, <c>mathcomps-intermediate-november</c> and
+/// <c>mathcomps-advanced-november</c> are all "November"), so the group's name is read from the taxonomy.
 /// </remarks>
 public class HostedGroup
 {

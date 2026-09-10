@@ -14,10 +14,10 @@ public static class HostedTaxonomy
     /// <remarks>
     /// Below it sits one node per category, and below each of those one node per group the site runs. A group
     /// node is shared across every season it runs in, so its registered name has to be season-independent:
-    /// <c>3. súťaž</c>, never <c>October 2026</c>. Which year a group ran in is its round's season, and a name
+    /// <c>November</c>, never <c>November 2026</c>. Which year a group ran in is its round's season, and a name
     /// carrying a year would be wrong for every season but the first.
     /// </remarks>
-    public const string RootSlug = "mc";
+    public const string RootSlug = "mathcomps";
 
     /// <summary>
     /// The level each category node stands for, keyed by that node's slug. A node outside this map is outside
@@ -33,7 +33,7 @@ public static class HostedTaxonomy
     /// <summary>
     /// Reads which level a hosted round runs at from the path of the node it hangs off.
     /// </summary>
-    /// <param name="competitionPath">The node's path (e.g. <c>mc-advanced-3</c>).</param>
+    /// <param name="competitionPath">The node's path (e.g. <c>mathcomps-advanced-november</c>).</param>
     /// <returns>The category, or null for a node that sits outside the levels.</returns>
     public static HostedCompetitionCategory? CategoryOf(string competitionPath)
     {

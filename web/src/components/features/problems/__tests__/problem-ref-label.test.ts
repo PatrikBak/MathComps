@@ -11,9 +11,9 @@ const SOURCE: ProblemSource = {
   season: { slug: '76', displayName: 'Edition 76 (2026/2027)', fullName: null },
   startYear: 2026,
   competition: [
-    { slug: 'mc', displayName: 'MathComps', fullName: null },
-    { slug: 'mc-advanced', displayName: 'Advanced', fullName: null },
-    { slug: 'mc-advanced-1', displayName: 'September', fullName: null },
+    { slug: 'mathcomps', displayName: 'MathComps', fullName: null },
+    { slug: 'mathcomps-advanced', displayName: 'Advanced', fullName: null },
+    { slug: 'mathcomps-advanced-september', displayName: 'September', fullName: null },
   ],
   number: 2,
 }

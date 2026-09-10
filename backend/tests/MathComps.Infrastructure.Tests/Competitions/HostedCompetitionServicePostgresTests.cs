@@ -60,17 +60,17 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     /// What addresses the open group's harder round, which is what every call about it is made under. English,
     /// one of the names the taxonomy gives it, since the resolver takes any of them.
     /// </summary>
-    private const string AdvancedSlug = "advanced-1-2026";
+    private const string AdvancedSlug = "advanced-september-2026";
 
     /// <summary>
     /// What addresses the open group's easier round.
     /// </summary>
-    private const string ElementarySlug = "elementary-1-2026";
+    private const string ElementarySlug = "elementary-september-2026";
 
     /// <summary>
     /// What addresses the round of the group that has not opened yet.
     /// </summary>
-    private const string UpcomingSlug = "intermediate-1-2026";
+    private const string UpcomingSlug = "intermediate-september-2026";
 
     /// <summary>
     /// What addresses the practice round.
@@ -80,13 +80,13 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     /// <summary>
     /// What addresses the round whose embargo has passed, which ran a season before the open group's.
     /// </summary>
-    private const string OpenedSlug = "advanced-1-2025";
+    private const string OpenedSlug = "advanced-september-2025";
 
     /// <summary>
     /// What addresses the round its group announced more problems than it holds, which ran two seasons before
     /// the open group's.
     /// </summary>
-    private const string UnfilledSlug = "elementary-1-2024";
+    private const string UnfilledSlug = "elementary-september-2024";
 
     /// <summary>
     /// The round of the open group's harder category, which is what the rows are seeded and read back under.
@@ -470,7 +470,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         await QueryAsync(async context =>
         {
             // The problem the round is missing
-            SeedProblem(context, _unfilledRoundId, "mc-elementary-1", number: 1);
+            SeedProblem(context, _unfilledRoundId, "mathcomps-elementary-september", number: 1);
 
             // Where the round now sits
             await context.SaveChangesAsync();
@@ -1854,7 +1854,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         context.Seasons.Add(season);
 
         // The root the site's own competitions hang off, placed high so it sorts after the archive's.
-        CompetitionTreeSeed.Root(context, "mc", 100);
+        CompetitionTreeSeed.Root(context, "mathcomps", 100);
 
         // When the open group's problems come out, which is also when it stops taking entries.
         var closesAt = DateTimeOffset.UtcNow.AddYears(1);
@@ -1865,29 +1865,29 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             problemCount: 2);
 
         // Its rounds, one per level, embargoed until it closes.
-        SeedRound(context, season, open, _advancedRoundId, "mc-advanced-1", closesAt, problems: 2);
-        SeedRound(context, season, open, _elementaryRoundId, "mc-elementary-1", closesAt, problems: 2);
+        SeedRound(context, season, open, _advancedRoundId, "mathcomps-advanced-september", closesAt, problems: 2);
+        SeedRound(context, season, open, _elementaryRoundId, "mathcomps-elementary-september", closesAt, problems: 2);
 
         // A group that has been announced and is not taking entries yet.
         var upcoming = Group(
             context, "mc-upcoming", DateTimeOffset.UtcNow.AddDays(30), DateTimeOffset.UtcNow.AddDays(60),
             allowsReentry: false, problemCount: 2);
         SeedRound(
-            context, season, upcoming, _upcomingRoundId, "mc-intermediate-1",
+            context, season, upcoming, _upcomingRoundId, "mathcomps-intermediate-september",
             DateTimeOffset.UtcNow.AddDays(60), problems: 2);
 
         // The practice group: no closing instant, so no embargo either, and takeable again.
         var practice = Group(
             context, "mc-practice", DateTimeOffset.UtcNow.AddDays(-30), closesAt: null, allowsReentry: true,
             problemCount: 1);
-        SeedRound(context, season, practice, _practiceRoundId, "mc-practice", visibleSince: null, problems: 1);
+        SeedRound(context, season, practice, _practiceRoundId, "mathcomps-practice", visibleSince: null, problems: 1);
 
         // A group whose problems have already come out, so its round is open to everybody.
         var opened = Group(
             context, "mc-opened", DateTimeOffset.UtcNow.AddDays(-60), DateTimeOffset.UtcNow.AddDays(-1),
             allowsReentry: false, problemCount: 1);
         SeedRound(
-            context, season, opened, _openedRoundId, "mc-advanced-1", DateTimeOffset.UtcNow.AddDays(-1),
+            context, season, opened, _openedRoundId, "mathcomps-advanced-september", DateTimeOffset.UtcNow.AddDays(-1),
             problems: 1, seasonYear: 2025);
 
         // A group open for entries whose round holds none of what it announced, which is what one looks like
@@ -1896,7 +1896,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             context, "mc-unfilled", DateTimeOffset.UtcNow.AddDays(-1), closesAt, allowsReentry: false,
             problemCount: 2);
         SeedRound(
-            context, season, unfilled, _unfilledRoundId, "mc-elementary-1", closesAt, problems: 0,
+            context, season, unfilled, _unfilledRoundId, "mathcomps-elementary-september", closesAt, problems: 0,
             seasonYear: 2024);
 
         // A group whose rounds have not been applied yet, which is what one looks like between the draft that

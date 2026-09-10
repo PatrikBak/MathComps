@@ -10,15 +10,15 @@ namespace MathComps.Domain.Tests;
 public class HostedRoundSlugTests
 {
     /// <summary>
-    /// Every slug this builds reads back into the two things it was built from, the node names that end in a
-    /// number included. Those are the ones a naive split on the last separator would take the number off.
+    /// Every slug this builds reads back into the two things it was built from, whatever shape the node's
+    /// name takes, a name that is nothing but a number included.
     /// </summary>
     /// <param name="nodeUrlSlug">What the node is called.</param>
     /// <param name="seasonStartYear">The year the season starts in.</param>
     [Theory]
     [InlineData("practice", 2026)]
-    [InlineData("pokrocila-1", 2026)]
-    [InlineData("advanced-1", 2025)]
+    [InlineData("pokrocila-september", 2026)]
+    [InlineData("advanced-november", 2025)]
     [InlineData("2", 1999)]
     public void A_built_slug_reads_back_into_what_built_it(string nodeUrlSlug, int seasonStartYear)
     {

@@ -27,6 +27,8 @@ public record HostedGroupManifest(
 /// Names one of the rounds a group runs, one already imported. Its problems may still be on their way: a round
 /// stands empty from the moment its draft raises it until the ones it will ask are picked.
 /// </summary>
-/// <param name="CompetitionPath">The path of the node the round hangs off (e.g. <c>mc-advanced-3</c>).</param>
+/// <param name="CompetitionPath">
+/// The path of the node the round hangs off (e.g. <c>mathcomps-advanced-november</c>).
+/// </param>
 /// <param name="SeasonYear">The calendar year the round's season starts in.</param>
 public record HostedGroupRoundRef(string CompetitionPath, int SeasonYear);

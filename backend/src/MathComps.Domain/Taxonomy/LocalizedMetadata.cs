@@ -11,7 +11,7 @@ namespace MathComps.Domain.Taxonomy;
 /// <param name="ShortName">Abbreviated name for compact displays (e.g., "MO" for "Matematická olympiáda").</param>
 /// <param name="FullName">Complete official name for formal contexts.</param>
 /// <param name="UrlSlug">
-/// What the node is called in a URL, in this locale, ASCII and lowercase (e.g. <c>pokrocila-1</c>). Carried
+/// What the node is called in a URL, in this locale, ASCII and lowercase (e.g. <c>pokrocila-september</c>). Carried
 /// only by the nodes the site addresses by name, which are the rounds it hosts itself.</param>
 public record LocalizedNames(string ShortName, string FullName, string? UrlSlug = null);
 

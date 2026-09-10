@@ -69,12 +69,21 @@
       "children": [{ "slug": "zs" }, { "slug": "ss" }]
     },
     {
-      "slug": "mc",
+      "slug": "mathcomps",
       "children": [
         { "slug": "practice" },
-        { "slug": "elementary", "children": [{ "slug": "1" }, { "slug": "2" }, { "slug": "3" }] },
-        { "slug": "intermediate", "children": [{ "slug": "1" }, { "slug": "2" }, { "slug": "3" }] },
-        { "slug": "advanced", "children": [{ "slug": "1" }, { "slug": "2" }, { "slug": "3" }] }
+        {
+          "slug": "elementary",
+          "children": [{ "slug": "september" }, { "slug": "october" }, { "slug": "november" }]
+        },
+        {
+          "slug": "intermediate",
+          "children": [{ "slug": "september" }, { "slug": "october" }, { "slug": "november" }]
+        },
+        {
+          "slug": "advanced",
+          "children": [{ "slug": "september" }, { "slug": "october" }, { "slug": "november" }]
+        }
       ]
     }
   ]
