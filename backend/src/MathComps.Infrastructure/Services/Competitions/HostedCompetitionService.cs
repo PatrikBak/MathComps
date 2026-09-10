@@ -7,6 +7,7 @@ using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Users;
 using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -23,11 +24,13 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// <param name="localization">
 /// The node a competition runs under: its localized name, and the URL name it is addressed by.
 /// </param>
+/// <param name="grants">Reads whether a student is let past the gates a competition is entered through.</param>
 /// <param name="limits">The caps a defense is held to.</param>
 /// <param name="options">The terms a hosted competition runs on.</param>
 public sealed class HostedCompetitionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
+    IUserGrantService grants,
     IOptions<DefenseLimits> limits,
     IOptions<HostedCompetitionOptions> options)
     : IHostedCompetitionService
@@ -45,8 +48,8 @@ public sealed class HostedCompetitionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Every group with its rounds: the node each round runs under, the season it ran in, and when its
-        // problems open. Newest first.
+        // Every group with its rounds: the node each round runs under, the season it ran in, when its problems
+        // open, and how many it holds against the number its group announced. Newest first.
         var groups = await dbContext.HostedGroups
             .AsNoTracking()
             .OrderByDescending(group => group.OpensAt)
@@ -65,6 +68,7 @@ public sealed class HostedCompetitionService(
                         CompetitionPath = round.Competition.Path,
                         SeasonStartYear = round.Season.StartYear,
                         round.VisibleSince,
+                        ProblemsHeld = round.Problems.Count,
                     })
                     .ToList(),
             })
@@ -78,6 +82,10 @@ public sealed class HostedCompetitionService(
 
         // When the embargoes are read against.
         var now = DateTimeOffset.UtcNow;
+
+        // Whether the reader is let past the embargoes altogether, which only an account can be.
+        var bypassesGates = userId is { } holder
+            && await grants.HasAsync(holder, UserCapability.BypassCompetitionGates, cancellationToken);
 
         // The view, one group at a time.
         return new HostedCompetitionsViewDto(
@@ -97,10 +105,14 @@ public sealed class HostedCompetitionService(
                         entries.GetValueOrDefault(round.Id),
                         // Nobody's results are out.
                         ResultsPublished: false,
-                        ProblemsPublished: round.VisibleSince is null || round.VisibleSince <= now)),
+                        ProblemsPublished: bypassesGates
+                            || round.VisibleSince is null
+                            || round.VisibleSince <= now,
+                        ProblemsReady: AreProblemsReady(round.ProblemsHeld, group.ProblemCount))),
                 ])),
             ],
-            _noteGraceMinutes);
+            _noteGraceMinutes,
+            bypassesGates);
     }
 
     /// <inheritdoc/>
@@ -192,8 +204,18 @@ public sealed class HostedCompetitionService(
         // The competition the slug addresses.
         var roundId = await ResolveRoundIdAsync(dbContext, competitionSlug, cancellationToken);
 
+        // The reader, with whether the embargo below reaches them at all.
+        var reader = new HostedReader(
+            userId,
+            userId is { } holder
+                && await grants.HasAsync(holder, UserCapability.BypassCompetitionGates, cancellationToken));
+
+        // One instant for everything this read weighs, so the embargo cannot lift between the check that lets
+        // the reader in and the one that decides what the set carries.
+        var now = DateTimeOffset.UtcNow;
+
         // The problems are the embargoed thing, so what may be read is settled before anything is read.
-        await EnsureEntitledAsync(dbContext, userId, roundId, cancellationToken);
+        var access = await EnsureEntitledAsync(dbContext, reader, roundId, now, cancellationToken);
 
         // Their entry with the clock it was given, absent on a set they are reading without one, which is a
         // competition that has closed. A reader with no account holds none, so there is nothing to look for.
@@ -210,9 +232,12 @@ public sealed class HostedCompetitionService(
                 .FirstOrDefaultAsync(cancellationToken)
             : null;
 
-        // Whether they are past competing here, which is what the official solution waits on.
-        var isSolutionOpen = entry is null || HostedEntryRules.IsSolutionOpen(
-            entry.StartedAt, entry.FinishedAt, entry.ClockMinutes, DateTimeOffset.UtcNow);
+        // Whether they are past competing here, which is what the official solution waits on. Holding no entry
+        // leaves the round's own embargo to say it: a set already public carries its answers to anybody, and
+        // one still embargoed is reached only by a reader let past the gates, whose run has yet to start.
+        var isSolutionOpen = entry is not null
+            ? HostedEntryRules.IsSolutionOpen(entry.StartedAt, entry.FinishedAt, entry.ClockMinutes, now)
+            : access.VisibleSince is null || access.VisibleSince <= now;
 
         // The set, in the order the competition sets it.
         return await ReadProblemsAsync(dbContext, userId, roundId, isSolutionOpen, cancellationToken);
@@ -329,8 +354,14 @@ public sealed class HostedCompetitionService(
         // will be held, so the entry this returns matches the same entry read back.
         var now = DateTimeOffset.UtcNow.TruncateToMicroseconds();
 
-        // Announced but not yet open, or past its window: either way there is no entry to take.
-        if (group.OpensAt > now || (group.ClosesAt is { } closesAt && closesAt <= now))
+        // The student, with whether the entry window below reaches them at all.
+        var reader = new HostedReader(
+            userId,
+            await grants.HasAsync(userId, UserCapability.BypassCompetitionGates, cancellationToken));
+
+        // Announced but not yet open, or past its window: either way there is no entry to take, unless the
+        // student is one the window does not hold.
+        if (!reader.BypassesGates && (group.OpensAt > now || (group.ClosesAt is { } closesAt && closesAt <= now)))
             throw new HostedGroupNotOpenException();
 
         // Whatever the student already holds here, which is at most one row.
@@ -344,12 +375,13 @@ public sealed class HostedCompetitionService(
         // A competition may stand on the site before its problems are picked, so a round short of the number its
         // group announced cannot serve the paper the card promised. Spending an entry into it would cost the
         // student the whole competition for a set nobody finished writing.
-        if (group.ProblemsHeld < group.ProblemCount)
+        if (!AreProblemsReady(group.ProblemsHeld, group.ProblemCount))
             throw new HostedCompetitionNotReadyException();
 
         // What an entry asks of the student's account, settled before anything is written. A group with no
-        // closing instant is never graded, so it has no result to name a student in and asks for no fields.
-        if (group.ClosesAt is not null)
+        // closing instant is never graded, so it has no result to name a student in and asks for no fields, and
+        // neither does one taken by somebody who will never be ranked.
+        if (group.ClosesAt is not null && !reader.BypassesGates)
             await EnsureReadyToEnterAsync(dbContext, userId, cancellationToken);
 
         // The row the student's run is recorded in, which is the one they already hold when they are taking the
@@ -386,13 +418,38 @@ public sealed class HostedCompetitionService(
 
         // Spending an entry is where the rules are put in front of a student, so the first one they spend is
         // where they accept them. After the entry, so an acceptance is only ever recorded against one taken.
-        await dbContext.Users
-            .Where(user => user.Id == userId && user.RulesAcceptedAt == null)
-            .ExecuteUpdateAsync(
-                update => update.SetProperty(user => user.RulesAcceptedAt, now), cancellationToken);
+        // Nothing is recorded for a student who was never shown them.
+        if (!reader.BypassesGates)
+        {
+            await dbContext.Users
+                .Where(user => user.Id == userId && user.RulesAcceptedAt == null)
+                .ExecuteUpdateAsync(
+                    update => update.SetProperty(user => user.RulesAcceptedAt, now), cancellationToken);
+        }
 
         // The stamped row paired with the problems read above.
         return new SpentEntryDto(ToEntryDto(entry), problems);
+    }
+
+    /// <summary>
+    /// Whether a round holds the paper its group announced.
+    /// </summary>
+    /// <remarks>
+    /// A round short of its group's count is a database nothing here can serve or put right.
+    /// </remarks>
+    /// <param name="problemsHeld">How many problems the round actually holds.</param>
+    /// <param name="problemCount"><inheritdoc cref="HostedGroup.ProblemCount" path="/summary"/></param>
+    /// <returns>Whether the problems are there to be handed out.</returns>
+    /// <exception cref="InvalidOperationException">The round landed short of the count its group announces.</exception>
+    private static bool AreProblemsReady(int problemsHeld, int problemCount)
+    {
+        // A part-filled round is nobody's legal state, so it is said out loud rather than read as unfinished.
+        if (problemsHeld != 0 && problemsHeld != problemCount)
+            throw new InvalidOperationException(
+                $"A hosted round holds {problemsHeld} problem(s) where its group announces {problemCount}.");
+
+        // Whether the round holds its problems at all.
+        return problemsHeld != 0;
     }
 
     /// <summary>
@@ -586,17 +643,28 @@ public sealed class HostedCompetitionService(
 
     /// <summary>
     /// Throws unless the reader may read a competition's problems, which is
-    /// <see cref="HostedEntryRules.EnsureEntitledAsync"/>'s rule asked of a round the site hosts. One it does
-    /// not host is no competition, and reads as absent rather than as refused.
+    /// <see cref="HostedEntryRules.EnsureEntitled"/>'s rule asked of a round the site hosts. One it does not
+    /// host is no competition, and reads as absent rather than as refused.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="userId">The student reading, null where the reader has no account.</param>
+    /// <param name="reader">The reader asking.</param>
     /// <param name="roundId">The competition whose problems they are reaching for.</param>
+    /// <param name="now">The instant the dates are read against.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    private static async Task EnsureEntitledAsync(
-        MathCompsDbContext dbContext, Guid? userId, Guid roundId, CancellationToken cancellationToken)
+    /// <returns>The round's embargo, its group's close, and whether the reader holds an entry.</returns>
+    private static async Task<RoundAccess> EnsureEntitledAsync(
+        MathCompsDbContext dbContext, HostedReader reader, Guid roundId, DateTimeOffset now,
+        CancellationToken cancellationToken)
     {
-        // The round with the window its group runs in, absent unless the site hosts it.
+        // The set the projection below reads. Held as its own value so the expression tree captures a set rather
+        // than the context around it, which the analyzer reads as disposed by the time the tree runs.
+        var allEntries = dbContext.HostedEntries;
+
+        // The student reading.
+        var userId = reader.UserId;
+
+        // The round with the window its group runs in and whatever the reader spent into it, absent unless the
+        // site hosts it.
         var round = await dbContext.Rounds
             .AsNoTracking()
             .Where(candidate => candidate.Id == roundId && candidate.HostedGroupId != null)
@@ -604,13 +672,20 @@ public sealed class HostedCompetitionService(
             {
                 candidate.VisibleSince,
                 candidate.HostedGroup!.ClosesAt,
+                HoldsEntry = allEntries.Any(entry =>
+                    entry.UserId == userId && entry.RoundId == candidate.Id),
             })
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new HostedCompetitionNotFoundException();
 
+        // The round's answer in the shape the rule reads.
+        var access = new RoundAccess(round.VisibleSince, round.ClosesAt, round.HoldsEntry);
+
         // And past that it is the same rule a conversation about one of its problems is opened under.
-        await HostedEntryRules.EnsureEntitledAsync(
-            dbContext, userId, roundId, round.VisibleSince, round.ClosesAt, cancellationToken);
+        HostedEntryRules.EnsureEntitled(reader, access, now);
+
+        // The round's window and the reader's entry, as the rule read them.
+        return access;
     }
 
     /// <summary>
@@ -629,6 +704,10 @@ public sealed class HostedCompetitionService(
     private async Task EnsureNotesOpenAsync(
         MathCompsDbContext dbContext, Guid userId, Guid roundId, CancellationToken cancellationToken)
     {
+        // Nobody grades a run the site let past the gates, so a note under one has no reader.
+        if (await grants.HasAsync(userId, UserCapability.BypassCompetitionGates, cancellationToken))
+            throw new HostedEntryNotGradedException();
+
         // Their entry with the clock it was given, absent unless the site hosts the round and they spent one.
         var entry = await dbContext.HostedEntries
             .AsNoTracking()

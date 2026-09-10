@@ -21,12 +21,20 @@ export type HostedCompetition = {
    */
   resultsPublished: boolean
   /**
-   * Whether the problems are public.
+   * Whether the problems are open to this reader without an entry.
    *
-   * They open to everybody once the competition is over. Before that, the only way to them is to spend the
-   * entry, by sitting it or by giving it up to read them.
+   * They open to everybody once the round's embargo has lifted, and to a reader let past the gates whenever
+   * they like. Before that, the only way to them is to spend the entry, by sitting it or by giving it up to
+   * read them.
    */
   problemsPublished: boolean
+  /**
+   * Whether it holds as many problems as its group announced, and so has a paper to serve at all.
+   *
+   * A group goes on the site before anybody has picked its problems, so a window can open over a competition
+   * still being filled. An entry is spent once, so it cannot be spent on a set nobody has finished writing.
+   */
+  problemsReady: boolean
 }
 
 /**
@@ -173,6 +181,13 @@ export type HostedCompetitionsView = {
    * Served rather than held here, so the page offers exactly the window the server keeps.
    */
   noteGraceMinutes: number
+  /**
+   * Whether this reader is let past everything a competition puts in the way, which the site grants an
+   * account so it can reach one with nothing standing between it and the problems.
+   *
+   * A fact about the reader rather than about any group.
+   */
+  bypassesGates: boolean
 }
 
 /**

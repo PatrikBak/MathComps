@@ -149,6 +149,11 @@ public enum ApiErrorCode
     HostedEntryNotRunning,
 
     /// <summary>
+    /// A note for the graders was left or taken back under an entry taken past a competition's gates.
+    /// </summary>
+    HostedEntryNotGraded,
+
+    /// <summary>
     /// An entry was taken by a student whose account is missing a username, an email address, or an answer
     /// about graduating high school.
     /// </summary>

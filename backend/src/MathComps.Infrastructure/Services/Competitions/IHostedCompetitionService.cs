@@ -138,6 +138,12 @@ public sealed class HostedEntryAlreadySpentException() : Exception("This entry h
 public sealed class HostedEntryNotRunningException() : Exception("There is no entry to hand in");
 
 /// <summary>
+/// Thrown when a note for the graders is left or taken back under an entry taken past a competition's gates.
+/// </summary>
+public sealed class HostedEntryNotGradedException()
+    : Exception("This entry is not being graded, so there is nobody to leave a note for");
+
+/// <summary>
 /// Thrown when a student enters without the account details an entry asks of them.
 /// </summary>
 public sealed class HostedEntryProfileIncompleteException()

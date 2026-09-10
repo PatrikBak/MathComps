@@ -1,5 +1,6 @@
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Ai;
@@ -174,6 +175,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Serializes a user's concurrent turns.
         services.AddSingleton<IDefenseUserTurnGate, DefenseUserTurnGate>();
+
+        // What the guard asks about the student arguing.
+        services.AddUserGrants();
 
         // Says whether the target being argued may be argued at all.
         services.AddScoped<IDefenseTargetGuard, DefenseTargetGuard>();

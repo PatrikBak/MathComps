@@ -46,6 +46,17 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     private readonly Guid _otherStudentId = Guid.CreateVersion7();
 
     /// <summary>
+    /// A student the site lets past the gates its competitions are entered through.
+    /// </summary>
+    private readonly Guid _grantedStudentId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A student let past those gates whose account is still short of what an entry asks for, which is what
+    /// separates the timing the grant waives from the fields it does not.
+    /// </summary>
+    private readonly Guid _grantedStrangerId = Guid.CreateVersion7();
+
+    /// <summary>
     /// What addresses the open group's harder round, which is what every call about it is made under. English,
     /// one of the names the taxonomy gives it, since the resolver takes any of them.
     /// </summary>
@@ -108,7 +119,8 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     private readonly Guid _emptyGroupId = Guid.CreateVersion7();
 
     /// <summary>
-    /// The round of an open group whose problems have not all landed, holding one where its group announces two.
+    /// The round of an open group whose problems have not landed at all, holding none where its group
+    /// announces two.
     /// </summary>
     private readonly Guid _unfilledRoundId = Guid.CreateVersion7();
 
@@ -132,6 +144,9 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // The window a note about a solution stays open in, past the end of the entry.
         services.Configure<HostedCompetitionOptions>(
             options => options.NoteGraceMinutes = NoteGraceMinutes);
+
+        // What the service asks about the student calling it.
+        services.AddUserGrants();
 
         // The service under test.
         services.AddScoped<IHostedCompetitionService, HostedCompetitionService>();
@@ -203,6 +218,228 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             () => service.EnterAsync(_studentId, OpenedSlug)));
 
     /// <summary>
+    /// Verifies that a student let past the gates enters a group that has not opened yet, which is the whole
+    /// point of the grant: they are there to hammer the examiner on a competition's problems before anybody else
+    /// has them.
+    /// </summary>
+    [Fact]
+    public Task A_granted_student_enters_a_group_that_has_not_opened() => RunTestAsync(async service =>
+    {
+        // The same group that refuses everybody else
+        var spent = await service.EnterAsync(_grantedStudentId, UpcomingSlug);
+
+        // Which hands them a clock and the problems like any other entry
+        Assert.IsType<SatEntryDto>(spent.Entry);
+        Assert.Equal(2, spent.Problems.Count);
+    });
+
+    /// <summary>
+    /// Verifies that the grant reaches a group past its window too. One check refuses a window not yet open and
+    /// one already past, so a grant reading only one end would be a second rule.
+    /// </summary>
+    [Fact]
+    public Task A_granted_student_enters_a_group_that_has_closed() => RunTestAsync(async service =>
+        // Over, and still open to them
+        await service.EnterAsync(_grantedStudentId, OpenedSlug));
+
+    /// <summary>
+    /// Verifies that a granted student reads an embargoed competition's problems holding no entry at all,
+    /// which nothing but the grant opens.
+    /// </summary>
+    [Fact]
+    public Task A_granted_student_reads_embargoed_problems_without_an_entry() => RunTestAsync(
+        async service =>
+        {
+            // Nothing spent, and the embargoed set answers anyway
+            var problems = await service.GetProblemsAsync(_grantedStudentId, AdvancedSlug);
+
+            // Which is the whole set
+            Assert.Equal(2, problems.Count);
+        });
+
+    /// <summary>
+    /// Verifies that a granted student's own clock still holds the official solution back, which is the one
+    /// thing <see cref="UserCapability.BypassCompetitionGates"/> does not waive.
+    /// </summary>
+    [Fact]
+    public Task A_granted_students_clock_still_holds_the_solution_back() => RunTestAsync(async service =>
+    {
+        // Take the entry, which starts a clock like anybody else's
+        var spent = await service.EnterAsync(_grantedStudentId, AdvancedSlug);
+
+        // The answer it came back in carries no solution
+        Assert.All(spent.Problems, problem => Assert.Null(problem.Solution));
+
+        // Nor does a read while that clock runs
+        var problems = await service.GetProblemsAsync(_grantedStudentId, AdvancedSlug);
+
+        // Still holding them back
+        Assert.All(problems, problem => Assert.Null(problem.Solution));
+    });
+
+    /// <summary>
+    /// Verifies that a granted student cannot leave a note for the graders at all, whatever their clock says.
+    /// A refusal that regressed would collect notes for a run nobody is going to read.
+    /// </summary>
+    [Fact]
+    public Task A_granted_student_leaves_no_note_for_the_graders() => RunTestAsync(async service =>
+    {
+        // An entry
+        var spent = await service.EnterAsync(_grantedStudentId, AdvancedSlug);
+
+        // The problem the claim would be about
+        var problemId = spent.Problems[0].Id;
+
+        // Refused with a clock of theirs still running, which is when anybody else's note is taken
+        await Assert.ThrowsAsync<HostedEntryNotGradedException>(
+            () => service.SetSelfAssessmentAsync(
+                _grantedStudentId, AdvancedSlug, problemId, "nobody is reading this"));
+
+        // And refused the same when they reach to take one back
+        await Assert.ThrowsAsync<HostedEntryNotGradedException>(
+            () => service.ClearSelfAssessmentAsync(_grantedStudentId, AdvancedSlug, problemId));
+    });
+
+    /// <summary>
+    /// Verifies that a granted student reads the solutions of a set no embargo holds back without spending
+    /// anything on it, exactly as any other reader does. The grant only ever adds, so a set anybody may read
+    /// cannot carry less for the account that holds one.
+    /// </summary>
+    [Fact]
+    public Task A_granted_student_reads_a_public_sets_solutions() => RunTestAsync(async service =>
+    {
+        // The practice round, which no embargo ever held back and no window ever closes
+        var problems = await service.GetProblemsAsync(_grantedStudentId, PracticeSlug);
+
+        // Carrying its answers, the same as they reach anybody else
+        Assert.All(problems, problem => Assert.NotNull(problem.Solution));
+    });
+
+    /// <summary>
+    /// Verifies that a granted student who has not entered yet reads an embargoed set without its solutions.
+    /// Holding no entry ordinarily means reading a competition whose embargo has lifted; the grant reaches the
+    /// same set while it is still embargoed, so the run they came to sit would be over before it started.
+    /// </summary>
+    [Fact]
+    public Task A_granted_student_reads_no_solution_before_entering() => RunTestAsync(async service =>
+    {
+        // The set of a competition still under embargo, read without spending anything on it
+        var problems = await service.GetProblemsAsync(_grantedStudentId, UpcomingSlug);
+
+        // Which is the whole set
+        Assert.Equal(2, problems.Count);
+
+        // Carrying none of its answers
+        Assert.All(problems, problem => Assert.Null(problem.Solution));
+    });
+
+    /// <summary>
+    /// Verifies that the grant waives the timing and nothing else: a round short of the problems its group
+    /// announced still cannot be entered, the paper not existing being a different complaint from the window.
+    /// </summary>
+    [Fact]
+    public Task A_granted_student_is_refused_a_competition_short_of_its_problems() => RunTestAsync(
+        async service =>
+            // Open to them on the clock, and still holding no problem where its group announced two
+            await Assert.ThrowsAsync<HostedCompetitionNotReadyException>(
+                () => service.EnterAsync(_grantedStudentId, UnfilledSlug)));
+
+    /// <summary>
+    /// Verifies that a student let past the gates enters with an account holding nothing but a name. The fields
+    /// exist to name a student in a published result, and nothing of theirs is ever published.
+    /// </summary>
+    [Fact]
+    public Task A_granted_student_enters_with_an_unfinished_profile() => RunTestAsync(async service =>
+    {
+        // No email and no graduation answer, at a group that will be graded
+        var spent = await service.EnterAsync(_grantedStrangerId, UpcomingSlug);
+
+        // Which takes the entry anyway
+        Assert.IsType<SatEntryDto>(spent.Entry);
+
+        // The same account without the grant, which is what the fields are wanted from
+        await QueryAsync(context => context.UserGrants
+            .Where(grant => grant.UserId == _grantedStrangerId)
+            .ExecuteDeleteAsync());
+
+        // Held at the next group it reaches for
+        await Assert.ThrowsAsync<HostedEntryProfileIncompleteException>(
+            () => service.EnterAsync(_grantedStrangerId, ElementarySlug));
+    });
+
+    /// <summary>
+    /// Verifies that nothing records a student let past the gates as having accepted the competition rules. They
+    /// were never shown them, so a stamp saying otherwise would be a record of something that never happened.
+    /// </summary>
+    [Fact]
+    public Task A_granted_students_entry_accepts_no_rules() => RunTestAsync(async service =>
+    {
+        // An entry, which is where an ordinary student accepts them
+        await service.EnterAsync(_grantedStudentId, UpcomingSlug);
+
+        // And nothing written against the account to say they did
+        Assert.Null(await QueryValueAsync(context => context.Users
+            .Where(user => user.Id == _grantedStudentId)
+            .Select(user => user.RulesAcceptedAt)
+            .SingleAsync()));
+    });
+
+    /// <summary>
+    /// Verifies that the view says which competitions have a paper to serve. The screen offers no way into one
+    /// that has not, so a flag the wire never carried would leave a reader pressing into a refusal.
+    /// </summary>
+    [Fact]
+    public Task The_view_says_which_competitions_hold_their_problems() => RunTestAsync(async service =>
+    {
+        // The board as anybody reads it
+        var view = await service.GetViewAsync(_studentId);
+
+        // A competition holding the number its group announced has its paper
+        Assert.True(CompetitionIn(view, AdvancedSlug).ProblemsReady);
+
+        // And one holding fewer does not
+        Assert.False(CompetitionIn(view, UnfilledSlug).ProblemsReady);
+    });
+
+    /// <summary>
+    /// Verifies that a granted student's entry is still spent once. Re-entry is the group's to allow, and a grant
+    /// that quietly reset a run would hand them a second clock in a group that forbids one.
+    /// </summary>
+    [Fact]
+    public Task A_granted_student_cannot_take_a_second_entry() => RunTestAsync(async service =>
+    {
+        // The first one, into a group that has not opened
+        await service.EnterAsync(_grantedStudentId, UpcomingSlug);
+
+        // And a second, which the group refuses as it refuses everybody
+        await Assert.ThrowsAsync<HostedEntryAlreadySpentException>(
+            () => service.EnterAsync(_grantedStudentId, UpcomingSlug));
+    });
+
+    /// <summary>
+    /// Verifies that the view tells a granted reader the problems are out, and tells everybody else they are not.
+    /// The screen decides what it offers from this, so a grant the wire never mentions would leave them looking
+    /// at a competition they can enter and a card that hides the way in.
+    /// </summary>
+    [Fact]
+    public Task The_view_says_a_granted_reader_ignores_the_timing() => RunTestAsync(async service =>
+    {
+        // The board as the granted student reads it
+        var granted = await service.GetViewAsync(_grantedStudentId);
+
+        // Which says so outright, and calls the embargoed competition's problems published
+        Assert.True(granted.BypassesGates);
+        Assert.True(CompetitionIn(granted, AdvancedSlug).ProblemsPublished);
+
+        // The same board as anybody else reads it
+        var ordinary = await service.GetViewAsync(_studentId);
+
+        // Where neither holds
+        Assert.False(ordinary.BypassesGates);
+        Assert.False(CompetitionIn(ordinary, AdvancedSlug).ProblemsPublished);
+    });
+
+    /// <summary>
     /// Verifies that a competition short of the problems its group announced refuses an entry. A group goes on
     /// the site before its problems are picked, so a window can open over a round that is still being filled, and
     /// an entry is spent once: buying a paper the card promised and the round cannot serve costs the student the
@@ -211,12 +448,37 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     [Fact]
     public Task A_competition_short_of_its_problems_refuses_an_entry() => RunTestAsync(async service =>
     {
-        // Open, and holding one problem where its group announced two
+        // Open, and holding no problem where its group announced two
         await Assert.ThrowsAsync<HostedCompetitionNotReadyException>(
             () => service.EnterAsync(_studentId, UnfilledSlug));
 
         // Nor was an entry left behind by the attempt
         Assert.Equal(0, await QueryValueAsync(context => context.HostedEntries.CountAsync()));
+    });
+
+    /// <summary>
+    /// Verifies that a round holding some of its group's problems is refused as the broken state it is, rather
+    /// than read as one still being filled. A declaration lands a round's whole paper or none of it, so anything
+    /// between is a database no student's request can be served against, and quietly calling it unfinished would
+    /// leave a half-written competition sitting on the board.
+    /// </summary>
+    [Fact]
+    public Task A_round_holding_part_of_its_paper_is_refused_outright() => RunTestAsync(async service =>
+    {
+        // One whole problem written into the round that holds none, so the count is the only thing wrong with
+        // it and no declaration would ever have left it behind
+        await QueryAsync(async context =>
+        {
+            // The problem the round is missing
+            SeedProblem(context, _unfilledRoundId, "mc-elementary-1", number: 1);
+
+            // Where the round now sits
+            await context.SaveChangesAsync();
+        });
+
+        // Which is said out loud rather than served
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.EnterAsync(_studentId, UnfilledSlug));
     });
 
     /// <summary>
@@ -227,7 +489,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     [Fact]
     public Task A_competition_short_of_its_problems_refuses_a_forfeit() => RunTestAsync(async service =>
     {
-        // Given up rather than sat, into the round holding one of its two problems
+        // Given up rather than sat, into the round holding neither of its two problems
         await Assert.ThrowsAsync<HostedCompetitionNotReadyException>(
             () => service.ForfeitAsync(_studentId, UnfilledSlug));
 
@@ -595,6 +857,37 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             // Nothing spent, nothing to read
             await Assert.ThrowsAsync<HostedEntryRequiredException>(
                 () => service.GetProblemsAsync(_studentId, AdvancedSlug)));
+
+    /// <summary>
+    /// Verifies that an entry buys one competition and not the one beside it. Both categories of a group are
+    /// embargoed until the same instant, so a read that matched an entry without checking which competition it
+    /// was taken into would hand a student who entered one level the other level's problems as well.
+    /// </summary>
+    [Fact]
+    public Task An_entry_into_one_competition_does_not_open_another() => RunTestAsync(async service =>
+    {
+        // An entry into the harder category
+        await service.EnterAsync(_studentId, AdvancedSlug);
+
+        // Which buys nothing in the easier one, embargoed until the same instant
+        await Assert.ThrowsAsync<HostedEntryRequiredException>(
+            () => service.GetProblemsAsync(_studentId, ElementarySlug));
+    });
+
+    /// <summary>
+    /// Verifies that an entry belongs to the student who spent it. A read that only asked whether the
+    /// competition had been entered at all would open it to everybody the moment the first student walked in.
+    /// </summary>
+    [Fact]
+    public Task Another_students_entry_does_not_open_the_competition() => RunTestAsync(async service =>
+    {
+        // Somebody else's entry into exactly this competition
+        await service.EnterAsync(_otherStudentId, AdvancedSlug);
+
+        // Which is not this student's to spend
+        await Assert.ThrowsAsync<HostedEntryRequiredException>(
+            () => service.GetProblemsAsync(_studentId, AdvancedSlug));
+    });
 
     /// <summary>
     /// Verifies that an entry given up for the problems opens them as fully as one that was sat. The whole point
@@ -1030,9 +1323,9 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
 
     /// <summary>
     /// Verifies that a group's heading comes off its rounds, which share it by construction, while the size it
-    /// announces is its own. Read off the group whose round is still a problem short, since that is the only one
-    /// where the two answers differ: counting the round would say one, and the card has to keep saying two from
-    /// the day the dates were set.
+    /// announces is its own. Read off the group whose round holds nothing yet, since that is the only one where
+    /// the two answers differ: counting the round would say none, and the card has to keep saying two from the
+    /// day the dates were set.
     /// </summary>
     [Fact]
     public Task A_group_reads_its_name_off_its_rounds_and_its_size_off_itself() => RunTestAsync(async service =>
@@ -1040,7 +1333,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // Every group on the page
         var groups = (await service.GetViewAsync(_studentId)).Groups;
 
-        // The one whose round holds one problem against the two it announced
+        // The one whose round holds nothing against the two it announced
         var unfilled = Assert.Single(
             groups,
             candidate => candidate.Competitions.Any(
@@ -1491,7 +1784,8 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     /// <param name="roundId">The competition their entry is into.</param>
     /// <param name="minutes">How far back to move both of its stamps.</param>
     /// <returns>A task that completes once the entry sits that far back.</returns>
-    private Task BackdateEntryAsync(Guid roundId, int minutes) => QueryAsync(async context =>
+    private Task BackdateEntryAsync(Guid roundId, int minutes) => QueryAsync(
+        async context =>
     {
         // The one row a student ever holds in a round
         var entry = await context.HostedEntries.SingleAsync(
@@ -1525,6 +1819,34 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
                 Username = "OtherStudent",
                 Email = "other@example.com",
                 GraduationYear = 2027,
+            },
+            new User
+            {
+                Id = _grantedStudentId,
+                ExternalId = "ext-granted-student",
+                Username = "GrantedStudent",
+                Email = "granted@example.com",
+                GraduationYear = 2027,
+            },
+            // Named and nothing else, so the profile gate has something to refuse.
+            new User
+            {
+                Id = _grantedStrangerId,
+                ExternalId = "ext-granted-stranger",
+                Username = "GrantedStranger",
+            });
+
+        // What lets the two of them past the gates every group here is entered through.
+        context.UserGrants.AddRange(
+            new UserGrant
+            {
+                UserId = _grantedStudentId,
+                Capability = UserCapability.BypassCompetitionGates,
+            },
+            new UserGrant
+            {
+                UserId = _grantedStrangerId,
+                Capability = UserCapability.BypassCompetitionGates,
             });
 
         // The one season every round below sits in.
@@ -1568,13 +1890,13 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             context, season, opened, _openedRoundId, "mc-advanced-1", DateTimeOffset.UtcNow.AddDays(-1),
             problems: 1, seasonYear: 2025);
 
-        // A group open for entries whose round is still a problem short of what it announced, which is what one
-        // looks like when the window opens before the authoring is finished.
+        // A group open for entries whose round holds none of what it announced, which is what one looks like
+        // when the window opens before the authoring is finished.
         var unfilled = Group(
             context, "mc-unfilled", DateTimeOffset.UtcNow.AddDays(-1), closesAt, allowsReentry: false,
             problemCount: 2);
         SeedRound(
-            context, season, unfilled, _unfilledRoundId, "mc-elementary-1", closesAt, problems: 1,
+            context, season, unfilled, _unfilledRoundId, "mc-elementary-1", closesAt, problems: 0,
             seasonYear: 2024);
 
         // A group whose rounds have not been applied yet, which is what one looks like between the draft that
@@ -1651,40 +1973,51 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
 
         // Its problems, each written in every language the site is read in.
         for (var number = 1; number <= problems; number += 1)
-        {
-            // The problem row.
-            var problem = new Problem
-            {
-                Id = Guid.CreateVersion7(),
-                RoundId = roundId,
-                Number = number,
-                Slug = $"{competitionPath}-{roundId:N}-{number}",
-            };
-            context.Problems.Add(problem);
+            SeedProblem(context, roundId, competitionPath, number);
+    }
 
-            // Its statement and its solution in each language, so the answer can be checked for carrying all of
-            // them. A hosted round holds both throughout, the declaration refusing a group whose problems do not.
-            foreach (var (documentType, language, prefix) in new[]
-                     {
-                         (DocumentType.Statement, Language.SK, "Zadanie"),
-                         (DocumentType.Statement, Language.CS, "Zadání"),
-                         (DocumentType.Statement, Language.EN, "Statement"),
-                         (DocumentType.Solution, Language.SK, "Riešenie"),
-                         (DocumentType.Solution, Language.CS, "Řešení"),
-                         (DocumentType.Solution, Language.EN, "Solution"),
-                     })
+    /// <summary>
+    /// Tracks one problem of a round, written in every language the site is read in.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="roundId">The round the problem belongs to.</param>
+    /// <param name="competitionPath">The node that round hangs off, which its slug is built from.</param>
+    /// <param name="number"><inheritdoc cref="Problem.Number" path="/summary"/></param>
+    private static void SeedProblem(
+        MathCompsDbContext context, Guid roundId, string competitionPath, int number)
+    {
+        // The problem row.
+        var problem = new Problem
+        {
+            Id = Guid.CreateVersion7(),
+            RoundId = roundId,
+            Number = number,
+            Slug = $"{competitionPath}-{roundId:N}-{number}",
+        };
+        context.Problems.Add(problem);
+
+        // Its statement and its solution in each language, so the answer can be checked for carrying all of
+        // them. A hosted round holds both throughout, the declaration refusing a group whose problems do not.
+        foreach (var (documentType, language, prefix) in new[]
+                 {
+                     (DocumentType.Statement, Language.SK, "Zadanie"),
+                     (DocumentType.Statement, Language.CS, "Zadání"),
+                     (DocumentType.Statement, Language.EN, "Statement"),
+                     (DocumentType.Solution, Language.SK, "Riešenie"),
+                     (DocumentType.Solution, Language.CS, "Řešení"),
+                     (DocumentType.Solution, Language.EN, "Solution"),
+                 })
+        {
+            context.ProblemTexts.Add(new ProblemText
             {
-                context.ProblemTexts.Add(new ProblemText
-                {
-                    Id = Guid.NewGuid(),
-                    ProblemId = problem.Id,
-                    DocumentType = documentType,
-                    Language = language,
-                    MarkdownText = $"{prefix} {number}",
-                    IsOriginal = language == Language.SK,
-                    DateModified = DateTime.UtcNow,
-                });
-            }
+                Id = Guid.NewGuid(),
+                ProblemId = problem.Id,
+                DocumentType = documentType,
+                Language = language,
+                MarkdownText = $"{prefix} {number}",
+                IsOriginal = language == Language.SK,
+                DateModified = DateTime.UtcNow,
+            });
         }
     }
 

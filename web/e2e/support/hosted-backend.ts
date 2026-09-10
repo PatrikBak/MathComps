@@ -13,12 +13,14 @@ import type { AppErrorCode } from '@/lib/api/api-error-codes'
 import { BACKEND_ORIGIN } from './backend-routes'
 import { HANDOUT_SESSION, LIMITS, OPENER, SCRIPTED_REPLIES } from './hosted-backend-content'
 import {
+  areProblemsReadable,
   buildLibrary,
   buildProblems,
   competitionIn,
   type FakeState,
   forgetSession,
   groupOf,
+  isGroupTakingEntries,
   isSolutionOpen,
   problemIdOf,
   seedStraddlingDefense,
@@ -26,9 +28,9 @@ import {
   transcriptsOf,
 } from './hosted-backend-memory'
 import {
+  asServedView,
   buildReadiness,
   buildView,
-  CLOCK_MINUTES,
   COMPETITION_SLUG,
   type HostedState,
   PROBLEMS_PER_COMPETITION,
@@ -282,7 +284,9 @@ export async function installHostedBackend(
   })
 
   // The whole surface in one read
-  await page.route(`${BACKEND_ORIGIN}/competitions`, (route) => answer(page, route, state.view))
+  await page.route(`${BACKEND_ORIGIN}/competitions`, (route) =>
+    answer(page, route, asServedView(state.view))
+  )
 
   // What the student's account already holds
   await page.route(`${BACKEND_ORIGIN}/competitions/readiness`, (route) =>
@@ -312,10 +316,30 @@ export async function installHostedBackend(
       return
     }
 
+    // The window the competition's group takes entries in, and the clock its solutions wait on. Absent only
+    // where nothing holds the competition, which the lookup above has already refused
+    const group = groupOf(state, competitionSlug)
+
     // What is being asked of that competition
     switch (endpoint) {
       // The clock starts now, and the call carries the acceptance with it
       case 'entry': {
+        // A group outside its window takes nobody's entry, which is the refusal the page has to survive
+        if (
+          group !== undefined &&
+          !isGroupTakingEntries(group, state.view.bypassesGates, await pageNow(page))
+        ) {
+          // Answered as the backend answers it
+          await route.fulfill({
+            status: 422,
+            contentType: 'application/json',
+            body: JSON.stringify({ errorCode: 'HostedGroupNotOpen' }),
+          })
+
+          // Nothing was spent
+          return
+        }
+
         // The entry, started where the page's clock stands
         competition.entry = {
           kind: 'sat',
@@ -323,8 +347,10 @@ export async function installHostedBackend(
           finishedAt: null,
         }
 
-        // Taking one is agreeing to the rules
-        state.readiness.hasAcceptedRules = true
+        // Taking one is agreeing to the rules, which a reader let past the gates was never shown
+        if (!state.view.bypassesGates) {
+          state.readiness.hasAcceptedRules = true
+        }
 
         // Answered with the entry and the problems it bought, which carry no solution: the clock has this
         // instant started
@@ -345,8 +371,10 @@ export async function installHostedBackend(
           forfeitedAt: new Date(await pageNow(page)).toISOString(),
         }
 
-        // Giving one up is agreeing to the rules just as taking it is
-        state.readiness.hasAcceptedRules = true
+        // Giving one up is agreeing to them just as taking it is, and the same reader is asked neither way
+        if (!state.view.bypassesGates) {
+          state.readiness.hasAcceptedRules = true
+        }
 
         // Answered with the entry and the problems it bought, solutions and all: giving the entry up is
         // saying they are not competing here
@@ -388,8 +416,18 @@ export async function installHostedBackend(
 
       // The one place an embargoed statement is served
       case 'problems': {
-        // How long a clock in this competition's group runs
-        const clockMinutes = groupOf(state, competitionSlug)?.clockMinutes ?? CLOCK_MINUTES
+        // An embargoed set takes an entry, a grant, or the embargo having lifted
+        if (!areProblemsReadable(competition, state.view.bypassesGates)) {
+          // Answered as the backend answers it
+          await route.fulfill({
+            status: 403,
+            contentType: 'application/json',
+            body: JSON.stringify({ errorCode: 'HostedEntryRequired' }),
+          })
+
+          // Nothing to read
+          return
+        }
 
         // Answered with the competition's whole set, carrying the solutions where they are owed them
         await answer(
@@ -398,7 +436,7 @@ export async function installHostedBackend(
           buildProblems(
             state,
             competition.slug.en,
-            isSolutionOpen(competition.entry, clockMinutes, await pageNow(page))
+            isSolutionOpen(group, competition, state.view.bypassesGates, await pageNow(page))
           )
         )
 
@@ -418,6 +456,19 @@ export async function installHostedBackend(
   await page.route(`${BACKEND_ORIGIN}/competitions/*/problems/*/assessment`, async (route) => {
     // Which problem is being claimed about
     const problemId = new URL(route.request().url()).pathname.split('/').at(-2) ?? ''
+
+    // A note is written for whoever grades the entry, and one taken past the gates is never graded
+    if (state.view.bypassesGates) {
+      // Answered as the backend answers it
+      await route.fulfill({
+        status: 422,
+        contentType: 'application/json',
+        body: JSON.stringify({ errorCode: 'HostedEntryNotGraded' }),
+      })
+
+      // Nothing was written
+      return
+    }
 
     // Recording a note replaces whatever stood, and the delete drops it
     if (route.request().method() === 'PUT') {

@@ -31,6 +31,7 @@ export const BACKEND_ERROR_CODES = [
   'HostedCompetitionNotReady',
   'HostedEntryAlreadySpent',
   'HostedEntryNotRunning',
+  'HostedEntryNotGraded',
   'HostedEntryProfileIncomplete',
   'AdminNoteValue',
   'AdminNoteTarget',

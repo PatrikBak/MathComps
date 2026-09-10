@@ -11,7 +11,6 @@ import {
 import type {
   EntryReadiness,
   HostedCompetition,
-  HostedCompetitionEntry,
   HostedCompetitionGroup,
   HostedCompetitionProblem,
   HostedCompetitionsView,
@@ -19,7 +18,7 @@ import type {
 import { MINUTE_MS } from '@/components/shared/utils/time-units'
 
 import { LIMITS, OPENER, SCRIPTED_REPLIES, SOLUTIONS, STATEMENTS } from './hosted-backend-content'
-import { PROBLEMS_PER_COMPETITION } from './hosted-backend-world'
+import { CLOCK_MINUTES, PROBLEMS_PER_COMPETITION } from './hosted-backend-world'
 
 /**
  * What one page's fake backend remembers, and everything that reads or writes it.
@@ -155,23 +154,33 @@ export function buildProblems(
 }
 
 /**
- * Mirrors the rule the real backend serves an official solution under: it is open unless the student has a
- * clock of their own still running.
+ * Mirrors the rule the real backend serves an official solution under: it is open unless a clock of the
+ * student's own is still running, or a reader let past the gates is reaching a set still embargoed.
  *
- * @param entry - The entry the student holds here, null while they hold none.
- * @param clockMinutes - How long a clock in this group runs, in minutes.
+ * @param group - The group the competition runs in, whose clock the run is held to, absent only where nothing
+ * holds the competition at all.
+ * @param competition - The competition whose set is being read, carrying the entry the student holds in it.
+ * @param bypassesGates - Whether this reader is let past the gates the competition is entered through.
  * @param now - The instant to read the clock against, in epoch milliseconds.
  *
  * @returns Whether the set may carry its solutions.
  */
 export function isSolutionOpen(
-  entry: HostedCompetitionEntry | null,
-  clockMinutes: number,
+  group: HostedCompetitionGroup | undefined,
+  competition: HostedCompetition,
+  bypassesGates: boolean,
   now: number
 ): boolean {
-  // No entry at all, so this is a competition read after it closed; and one given up for the problems never
-  // ran a clock to protect
-  if (entry === null || entry.kind === 'forfeited') {
+  // The entry the student holds here, absent while they hold none
+  const entry = competition.entry
+
+  // No entry means a public set, except for a reader let past the gates, whose own run has yet to start
+  if (entry === null) {
+    return !bypassesGates || competition.problemsPublished
+  }
+
+  // Given up for the problems, so no clock ever ran to protect
+  if (entry.kind === 'forfeited') {
     return true
   }
 
@@ -181,7 +190,53 @@ export function isSolutionOpen(
   }
 
   // Otherwise the clock says it
-  return Date.parse(entry.startedAt) + clockMinutes * MINUTE_MS <= now
+  return Date.parse(entry.startedAt) + (group?.clockMinutes ?? CLOCK_MINUTES) * MINUTE_MS <= now
+}
+
+/**
+ * Mirrors the rule the real backend takes an entry under: a group takes them inside its own window, and a
+ * reader let past the gates is held to neither end of it.
+ *
+ * @param group - The group the entry would be spent into.
+ * @param bypassesGates - Whether this reader is let past the gates.
+ * @param now - The instant to read the window against, in epoch milliseconds.
+ *
+ * @returns Whether the entry may be spent.
+ */
+export function isGroupTakingEntries(
+  group: HostedCompetitionGroup,
+  bypassesGates: boolean,
+  now: number
+): boolean {
+  // Nothing about the window reaches a reader let past it
+  if (bypassesGates) {
+    return true
+  }
+
+  // Announced and not started yet
+  if (Date.parse(group.opensAt) > now) {
+    return false
+  }
+
+  // Over, which the practice one never is
+  return group.closesAt === null || Date.parse(group.closesAt) > now
+}
+
+/**
+ * Mirrors the rule the real backend serves a signed-in reader a competition's problems under: an entry of
+ * their own opens them, so does a lifted embargo, and so does being let past the gates.
+ *
+ * @param competition - The competition whose set is being read.
+ * @param bypassesGates - Whether this reader is let past the gates.
+ *
+ * @returns Whether the set may be served at all.
+ */
+export function areProblemsReadable(
+  competition: HostedCompetition,
+  bypassesGates: boolean
+): boolean {
+  // Any one of the three opens the set
+  return bypassesGates || competition.entry !== null || competition.problemsPublished
 }
 
 /**
@@ -318,7 +373,7 @@ export function seedStraddlingDefense(
     return
   }
 
-  // The instant the counted part ends
+  // The instant the counted part ends, which is what this fixture exists to straddle
   const endsAtMs = Date.parse(entryEndsAt(group, competition.entry))
 
   // Whether it has already passed, which is what makes a straddling transcript possible at all
