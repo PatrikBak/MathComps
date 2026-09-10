@@ -2092,7 +2092,7 @@
         "text": {
           "content": [
             {
-              "type": "example",
+              "type": "theorem",
               "id": "tQ6r-YBHII2hYOcd0jnzC",
               "slug": "ptolemaiova-veta",
               "title": {
@@ -2216,10 +2216,10 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             },
             {
-              "type": "example",
+              "type": "theorem",
               "id": "ECXlxtdJwECBnuRZW8E-V",
               "slug": "simsonova-priamka",
               "title": {
@@ -2301,10 +2301,10 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             },
             {
-              "type": "example",
+              "type": "theorem",
               "id": "J67DMaac8DHSjoZgc7hzh",
               "slug": "sharky-devil",
               "title": {
@@ -2476,10 +2476,10 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             },
             {
-              "type": "example",
+              "type": "theorem",
               "id": "DKBXD5k0KpD8gJ1WTK5OL",
               "slug": "rovnake-useky-bd-ce",
               "body": [
@@ -2596,7 +2596,7 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             }
           ]
         }
@@ -4289,7 +4289,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Mimo neho zostrojíme obdĺžniky "
+                      "text": ". Zostrojíme obdĺžniky "
                     },
                     {
                       "type": "math",
@@ -4307,7 +4307,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " tak, že "
+                      "text": " také, že "
                     },
                     {
                       "type": "math",
@@ -4321,6 +4321,78 @@
                     {
                       "type": "math",
                       "text": "|CM| = |AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pričom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "K",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "L",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ležia v\u00A0polrovine určenej priamkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktorá neobsahuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ležia v\u00A0polrovine určenej priamkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktorá neobsahuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
                       "isDisplay": false
                     },
                     {
@@ -7630,7 +7702,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Zvonku trojuholníka "
+                      "text": "Nech "
                     },
                     {
                       "type": "math",
@@ -7639,7 +7711,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " ležia body "
+                      "text": " je trojuholník a\u00A0nech body "
                     },
                     {
                       "type": "math",
@@ -7666,7 +7738,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " také, že trojuholníky "
+                      "text": " sú také, že trojuholníky "
                     },
                     {
                       "type": "math",
@@ -7684,7 +7756,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a "
+                      "text": " a\u00A0"
                     },
                     {
                       "type": "math",
@@ -7693,7 +7765,88 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú rovnostranné. Dokážte, že ťažiská týchto trojuholníkov taktiež tvoria rovnostranný trojuholník."
+                      "text": " sú rovnostranné, pričom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ležia v\u00A0opačných polrovinách určených priamkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", body "
+                    },
+                    {
+                      "type": "math",
+                      "text": "E",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ležia v\u00A0opačných polrovinách určených priamkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0body "
+                    },
+                    {
+                      "type": "math",
+                      "text": "F",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ležia v\u00A0opačných polrovinách určených priamkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dokážte, že ťažiská týchto trojuholníkov taktiež tvoria rovnostranný trojuholník."
                     }
                   ],
                   "highligted": false
@@ -8280,7 +8433,25 @@
                     },
                     {
                       "type": "text",
-                      "text": ", lebo oba trojuholníky ležia zvonku; preto "
+                      "text": ", lebo otočenie zobrazujúce "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "E",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má vďaka podmienke na polroviny rovnaký smer; preto "
                     },
                     {
                       "type": "math",
@@ -13903,7 +14074,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "V\u00A0konvexnom štvoruholníku sú uhlopriečky rovnako dlhé. Dokážte, že ak zvonku každej strany pripíšeme navzájom podobné rovnoramenné trojuholníky, tak spojnice protiľahlých dopísaných vrcholov týchto trojuholníkov sú na seba kolmé."
+                      "text": "Konvexný štvoruholník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má rovnako dlhé uhlopriečky. Nad každou jeho stranou zostrojíme rovnoramenný trojuholník, ktorého základňou je táto strana a\u00A0ktorého hlavný vrchol leží v\u00A0polrovine určenej priamkou tejto strany, ktorá neobsahuje zvyšné dva vrcholy štvoruholníka. Všetky štyri trojuholníky sú navzájom podobné. Dokážte, že spojnice hlavných vrcholov trojuholníkov nad protiľahlými stranami sú na seba kolmé."
                     }
                   ],
                   "highligted": false

@@ -2591,23 +2591,23 @@
       "slug": { "sk": "polara", "cs": "polara", "en": "polar" }
     },
     "tQ6r-YBHII2hYOcd0jnzC": {
-      "type": "example",
-      "number": 1,
+      "type": "theorem",
+      "number": 10,
       "slug": { "sk": "ptolemaiova-veta", "cs": "ptolemaiova-veta", "en": "ptolemys-theorem" }
     },
     "ECXlxtdJwECBnuRZW8E-V": {
-      "type": "example",
-      "number": 2,
+      "type": "theorem",
+      "number": 11,
       "slug": { "sk": "simsonova-priamka", "cs": "simsonova-primka", "en": "simson-line" }
     },
     "J67DMaac8DHSjoZgc7hzh": {
-      "type": "example",
-      "number": 3,
+      "type": "theorem",
+      "number": 12,
       "slug": { "sk": "sharky-devil", "cs": "sharky-devil", "en": "sharky-devil" }
     },
     "DKBXD5k0KpD8gJ1WTK5OL": {
-      "type": "example",
-      "number": 4,
+      "type": "theorem",
+      "number": 13,
       "slug": {
         "sk": "rovnake-useky-bd-ce",
         "cs": "stejne-usecky-bd-ce",

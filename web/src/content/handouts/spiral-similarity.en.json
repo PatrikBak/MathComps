@@ -2101,7 +2101,7 @@
         "text": {
           "content": [
             {
-              "type": "example",
+              "type": "theorem",
               "id": "tQ6r-YBHII2hYOcd0jnzC",
               "slug": "ptolemys-theorem",
               "title": {
@@ -2225,10 +2225,10 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             },
             {
-              "type": "example",
+              "type": "theorem",
               "id": "ECXlxtdJwECBnuRZW8E-V",
               "slug": "simson-line",
               "title": {
@@ -2310,10 +2310,10 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             },
             {
-              "type": "example",
+              "type": "theorem",
               "id": "J67DMaac8DHSjoZgc7hzh",
               "slug": "sharky-devil",
               "title": {
@@ -2485,10 +2485,10 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             },
             {
-              "type": "example",
+              "type": "theorem",
               "id": "DKBXD5k0KpD8gJ1WTK5OL",
               "slug": "equal-segments-bd-ce",
               "body": [
@@ -2605,7 +2605,7 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             }
           ]
         }
@@ -4298,7 +4298,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " be an acute triangle. Outside it we construct rectangles "
+                      "text": " be an acute triangle. We construct rectangles "
                     },
                     {
                       "type": "math",
@@ -4330,6 +4330,78 @@
                     {
                       "type": "math",
                       "text": "CM = AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", where "
+                    },
+                    {
+                      "type": "math",
+                      "text": "K",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "L",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lie in the half-plane determined by the line "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " that does not contain "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lie in the half-plane determined by the line "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " that does not contain "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
                       "isDisplay": false
                     },
                     {
@@ -7657,7 +7729,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Points "
+                      "text": "Let "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " be a triangle and let "
                     },
                     {
                       "type": "math",
@@ -7684,16 +7765,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " lie outside triangle "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ABC",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " so that the triangles "
+                      "text": " be points such that the triangles "
                     },
                     {
                       "type": "math",
@@ -7720,7 +7792,88 @@
                     },
                     {
                       "type": "text",
-                      "text": " are equilateral. Prove that the centroids of these triangles also form an equilateral triangle."
+                      "text": " are equilateral, where "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lie in opposite half-planes determined by the line "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", the points "
+                    },
+                    {
+                      "type": "math",
+                      "text": "E",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lie in opposite half-planes determined by the line "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", and the points "
+                    },
+                    {
+                      "type": "math",
+                      "text": "F",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " and "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " lie in opposite half-planes determined by the line "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Prove that the centroids of these triangles also form an equilateral triangle."
                     }
                   ],
                   "highligted": false
@@ -8307,7 +8460,25 @@
                     },
                     {
                       "type": "text",
-                      "text": " as well, because both triangles lie outside; therefore "
+                      "text": " as well, because by the half-plane condition the rotation taking "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " to "
+                    },
+                    {
+                      "type": "math",
+                      "text": "E",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " has the same direction; therefore "
                     },
                     {
                       "type": "math",
@@ -13908,7 +14079,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Suppose the diagonals of a convex quadrilateral have equal length. Prove that if we erect mutually similar isosceles triangles outwardly on its sides, then the segments joining the apexes of the triangles on opposite sides are perpendicular to each other."
+                      "text": "A convex quadrilateral "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " has diagonals of equal length. On each of its sides we erect an isosceles triangle whose base is that side and whose apex lies in the half-plane determined by the line of that side that does not contain the other two vertices of the quadrilateral. All four triangles are mutually similar. Prove that the segments joining the apexes of the triangles on opposite sides are perpendicular to each other."
                     }
                   ],
                   "highligted": false
