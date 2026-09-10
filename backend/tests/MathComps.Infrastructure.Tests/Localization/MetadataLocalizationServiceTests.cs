@@ -28,7 +28,7 @@ public class MetadataLocalizationServiceTests
     public void Shared_roots_are_in_display_order() =>
         // CSMO first … the site's own competitions last, placed after the archive's on purpose.
         Assert.Equal(
-            ["csmo", "tst", "memo", "imo", "caps", "emo", "egmo", "tstc", "cpsj", "duogeo", "mc"],
+            ["csmo", "tst", "memo", "imo", "caps", "emo", "egmo", "tstc", "cpsj", "duogeo", "mathcomps"],
             [.. _service.Shared.ChildSlugs(parentPath: null)]);
 
     /// <summary>
@@ -332,10 +332,10 @@ public class MetadataLocalizationServiceTests
     /// </summary>
     /// <param name="path">The round node's path.</param>
     [Theory]
-    [InlineData("mc-practice")]
-    [InlineData("mc-elementary-1")]
-    [InlineData("mc-intermediate-1")]
-    [InlineData("mc-advanced-1")]
+    [InlineData("mathcomps-practice")]
+    [InlineData("mathcomps-elementary-september")]
+    [InlineData("mathcomps-intermediate-september")]
+    [InlineData("mathcomps-advanced-september")]
     public void A_hosted_round_node_is_named_in_every_language(string path)
     {
         // No language leaves the node unnamed

@@ -9,9 +9,9 @@
 #
 # Usage: ./apply-draft.sh [-e prod|staging] [--clear-defenses] [--validate-only] <draft-folder>
 # Examples:
-#   ./apply-draft.sh --validate-only ./data/problems/mc-practice-2026
-#   ./apply-draft.sh -e staging ./data/problems/mc-practice-2026
-#   ./apply-draft.sh -e prod --clear-defenses ./data/problems/mc-practice-2026
+#   ./apply-draft.sh --validate-only ./data/problems/mathcomps-practice-2026
+#   ./apply-draft.sh -e staging ./data/problems/mathcomps-practice-2026
+#   ./apply-draft.sh -e prod --clear-defenses ./data/problems/mathcomps-practice-2026
 
 set -euo pipefail
 

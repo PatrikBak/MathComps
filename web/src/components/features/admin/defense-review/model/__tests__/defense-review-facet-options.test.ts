@@ -65,7 +65,7 @@ const ARCHIVE_PROBLEMS: DefenseReviewProblemOption[] = [2026, 2027].map((startYe
     kind: 'problem',
     problemId: `problem-${startYear}`,
     competitionSlug: `round-${startYear}`,
-    slug: `${startYear}-mc-advanced-1-2`,
+    slug: `${startYear}-mathcomps-advanced-september-2`,
     source: {
       season: {
         slug: '76',
@@ -74,9 +74,9 @@ const ARCHIVE_PROBLEMS: DefenseReviewProblemOption[] = [2026, 2027].map((startYe
       },
       startYear,
       competition: [
-        { slug: 'mc', displayName: 'MathComps', fullName: null },
-        { slug: 'mc-advanced', displayName: 'Advanced', fullName: null },
-        { slug: 'mc-advanced-1', displayName: 'September', fullName: null },
+        { slug: 'mathcomps', displayName: 'MathComps', fullName: null },
+        { slug: 'mathcomps-advanced', displayName: 'Advanced', fullName: null },
+        { slug: 'mathcomps-advanced-september', displayName: 'September', fullName: null },
       ],
       number: 2,
     },

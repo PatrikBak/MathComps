@@ -17,9 +17,9 @@ public class HostedTaxonomyTests
     /// <param name="competitionPath">The node's path.</param>
     /// <param name="expected">The level it runs at.</param>
     [Theory]
-    [InlineData("mc-elementary-3", HostedCompetitionCategory.Elementary)]
-    [InlineData("mc-intermediate-3", HostedCompetitionCategory.Intermediate)]
-    [InlineData("mc-advanced-3", HostedCompetitionCategory.Advanced)]
+    [InlineData("mathcomps-elementary-november", HostedCompetitionCategory.Elementary)]
+    [InlineData("mathcomps-intermediate-november", HostedCompetitionCategory.Intermediate)]
+    [InlineData("mathcomps-advanced-november", HostedCompetitionCategory.Advanced)]
     public void Each_levels_node_names_its_category(
         string competitionPath, HostedCompetitionCategory expected) =>
         Assert.Equal(expected, HostedTaxonomy.CategoryOf(competitionPath));
@@ -30,9 +30,9 @@ public class HostedTaxonomyTests
     /// </summary>
     /// <param name="competitionPath">The node's path.</param>
     [Theory]
-    [InlineData("mc")]
-    [InlineData("mc-practice")]
-    [InlineData("mc-practice-1")]
+    [InlineData("mathcomps")]
+    [InlineData("mathcomps-practice")]
+    [InlineData("mathcomps-practice-september")]
     public void A_node_outside_the_levels_names_none(string competitionPath) =>
         Assert.Null(HostedTaxonomy.CategoryOf(competitionPath));
 
@@ -42,5 +42,5 @@ public class HostedTaxonomyTests
     /// </summary>
     [Fact]
     public void A_segment_merely_starting_with_a_level_is_not_that_level() =>
-        Assert.Null(HostedTaxonomy.CategoryOf("mc-advancedextra-3"));
+        Assert.Null(HostedTaxonomy.CategoryOf("mathcomps-advancedextra-november"));
 }

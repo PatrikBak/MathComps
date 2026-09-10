@@ -2,7 +2,7 @@ namespace MathComps.Domain.Taxonomy;
 
 /// <summary>
 /// Builds and reads the slug a hosted competition is addressed by in a URL: the localized name of the node it
-/// runs under, and the year its season starts in (<c>pokrocila-1-2026</c>).
+/// runs under, and the year its season starts in (<c>pokrocila-september-2026</c>).
 /// </summary>
 /// <remarks>
 /// The node and the season are what a round is unique by, and the slug is a rendering of that key. The year is
@@ -29,8 +29,9 @@ public static class HostedRoundSlug
     /// Reads a slug back into the two things it was built from.
     /// </summary>
     /// <remarks>
-    /// A node name may itself end in a number (<c>pokrocila-1</c>), so the year is taken as exactly the last
-    /// four digits rather than as whatever trails the last dash.
+    /// The tail is measured against the year's own length rather than found by looking for a separator, so a
+    /// tail of any other length carries no year at all: <c>practice-26</c> and <c>practice-20267</c> read as
+    /// no slug.
     /// </remarks>
     /// <param name="slug">The slug to read.</param>
     /// <param name="nodeUrlSlug">What the node is called, set only when the slug reads.</param>

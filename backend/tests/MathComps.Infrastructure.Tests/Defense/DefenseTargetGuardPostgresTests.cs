@@ -196,7 +196,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
 
         // The roots the rounds' nodes hang off: the archive's, and the site's own.
         CompetitionTreeSeed.Root(context, "imo", 1);
-        CompetitionTreeSeed.Root(context, "mc", 100);
+        CompetitionTreeSeed.Root(context, "mathcomps", 100);
 
         // An ordinary archive round: no hosted group, and no embargo either, so the only thing that can refuse
         // its problem is the check for whether the site hosts it.
@@ -238,7 +238,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
         context.Rounds.Add(new Round
         {
             Id = hostedRoundId,
-            CompetitionId = CompetitionTreeSeed.Chain(context, "mc").Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "mathcomps").Id,
             SeasonId = season.Id,
             Date = new DateOnly(2026, 10, 1),
             VisibleSince = closesAt,
@@ -251,7 +251,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             Id = _embargoedProblemId,
             RoundId = hostedRoundId,
             Number = 1,
-            Slug = "mc-2026-1",
+            Slug = "mathcomps-2026-1",
         });
 
         // A second round of the same group, embargoed until the same instant: the other side of every
@@ -260,7 +260,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
         context.Rounds.Add(new Round
         {
             Id = neighbourRoundId,
-            CompetitionId = CompetitionTreeSeed.Chain(context, "mc-elementary").Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "mathcomps-elementary").Id,
             SeasonId = season.Id,
             Date = new DateOnly(2026, 10, 1),
             VisibleSince = closesAt,
@@ -273,7 +273,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             Id = _enteredProblemId,
             RoundId = neighbourRoundId,
             Number = 1,
-            Slug = "mc-elementary-2026-1",
+            Slug = "mathcomps-elementary-2026-1",
         });
 
         // That entry, spent into the second round and no other.

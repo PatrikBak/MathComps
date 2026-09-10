@@ -111,11 +111,11 @@ describe('encodeProblemKey/decodeProblemKey', () => {
       kind: 'problem',
       problemId: 'problem-1',
       competitionSlug: 'round-1',
-      slug: '76-mc-advanced-1-2',
+      slug: '76-mathcomps-advanced-september-2',
       source: {
         season: { slug: '76', displayName: 'Edition 76 (2026/2027)', fullName: null },
         startYear: 2026,
-        competition: [{ slug: 'mc', displayName: 'MathComps', fullName: null }],
+        competition: [{ slug: 'mathcomps', displayName: 'MathComps', fullName: null }],
         number: 2,
       },
     }
@@ -155,7 +155,7 @@ describe('problemKeyOf', () => {
     const key = problemKeyOf({
       handoutContentId: 'handout-1',
       environmentId: 'problem-1',
-      problemSlug: '76-mc-advanced-1-2',
+      problemSlug: '76-mathcomps-advanced-september-2',
     })
 
     // The handout is the one the option stands for, matching what the address itself keeps

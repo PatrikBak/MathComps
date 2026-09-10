@@ -320,7 +320,7 @@ function libraryItemsOf(
         season: { slug: '76', displayName: 'Edition 76 (2026/2027)', fullName: null },
         startYear: LIBRARY_SEASON_START_YEAR,
         competition: [
-          { slug: 'mc', displayName: 'MathComps', fullName: null },
+          { slug: 'mathcomps', displayName: 'MathComps', fullName: null },
           { slug: competitionSlug, displayName: group.name.en, fullName: null },
         ],
         number: position,

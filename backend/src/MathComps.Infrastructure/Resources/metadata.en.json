@@ -236,71 +236,71 @@
       "shortName": "High School",
       "fullName": "High School"
     },
-    "mc": {
+    "mathcomps": {
       "shortName": "Mathilding",
       "fullName": "MathComps AI competitions"
     },
-    "mc-practice": {
+    "mathcomps-practice": {
       "shortName": "Practice competition",
       "fullName": "Practice competition",
       "urlSlug": "practice"
     },
-    "mc-elementary": {
+    "mathcomps-elementary": {
       "shortName": "Elementary",
       "fullName": "Elementary category"
     },
-    "mc-elementary-1": {
+    "mathcomps-elementary-september": {
       "shortName": "September",
       "fullName": "September",
-      "urlSlug": "elementary-1"
+      "urlSlug": "elementary-september"
     },
-    "mc-elementary-2": {
+    "mathcomps-elementary-october": {
       "shortName": "October",
       "fullName": "October",
-      "urlSlug": "elementary-2"
+      "urlSlug": "elementary-october"
     },
-    "mc-elementary-3": {
+    "mathcomps-elementary-november": {
       "shortName": "November",
       "fullName": "November",
-      "urlSlug": "elementary-3"
+      "urlSlug": "elementary-november"
     },
-    "mc-intermediate": {
+    "mathcomps-intermediate": {
       "shortName": "Intermediate",
       "fullName": "Intermediate category"
     },
-    "mc-intermediate-1": {
+    "mathcomps-intermediate-september": {
       "shortName": "September",
       "fullName": "September",
-      "urlSlug": "intermediate-1"
+      "urlSlug": "intermediate-september"
     },
-    "mc-intermediate-2": {
+    "mathcomps-intermediate-october": {
       "shortName": "October",
       "fullName": "October",
-      "urlSlug": "intermediate-2"
+      "urlSlug": "intermediate-october"
     },
-    "mc-intermediate-3": {
+    "mathcomps-intermediate-november": {
       "shortName": "November",
       "fullName": "November",
-      "urlSlug": "intermediate-3"
+      "urlSlug": "intermediate-november"
     },
-    "mc-advanced": {
+    "mathcomps-advanced": {
       "shortName": "Advanced",
       "fullName": "Advanced category"
     },
-    "mc-advanced-1": {
+    "mathcomps-advanced-september": {
       "shortName": "September",
       "fullName": "September",
-      "urlSlug": "advanced-1"
+      "urlSlug": "advanced-september"
     },
-    "mc-advanced-2": {
+    "mathcomps-advanced-october": {
       "shortName": "October",
       "fullName": "October",
-      "urlSlug": "advanced-2"
+      "urlSlug": "advanced-october"
     },
-    "mc-advanced-3": {
+    "mathcomps-advanced-november": {
       "shortName": "November",
       "fullName": "November",
-      "urlSlug": "advanced-3"
+      "urlSlug": "advanced-november"
     }
   },
   "seasonFormat": "Edition {number} ({start}/{end})"

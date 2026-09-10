@@ -60,7 +60,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
 
         // Declared, which is where the provider would refuse a non-zero offset
         var declared = await service.DeclareAsync(
-            Manifest("mc-advanced-1") with { OpensAt = opensAt, ClosesAt = closesAt });
+            Manifest("mathcomps-advanced-september") with { OpensAt = opensAt, ClosesAt = closesAt });
 
         // The group as it was stored
         var stored = await QueryValueAsync(context => context.HostedGroups
@@ -80,7 +80,8 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_manifest_creates_the_group_and_links_its_rounds() => RunTestAsync(async service =>
     {
         // Declare it
-        var outcome = await service.DeclareAsync(Manifest("mc-elementary-1", "mc-advanced-1"));
+        var outcome = await service.DeclareAsync(
+            Manifest("mathcomps-elementary-september", "mathcomps-advanced-september"));
 
         // Which put the group there
         Assert.True(outcome.Created);
@@ -106,10 +107,11 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task Re_declaring_updates_the_group_and_releases_a_dropped_round() => RunTestAsync(async service =>
     {
         // The group as first authored
-        var first = await service.DeclareAsync(Manifest("mc-elementary-1", "mc-advanced-1"));
+        var first = await service.DeclareAsync(
+            Manifest("mathcomps-elementary-september", "mathcomps-advanced-september"));
 
         // The same slug with one round taken out and a longer clock
-        var second = await service.DeclareAsync(Manifest("mc-advanced-1") with { ClockMinutes = 240 });
+        var second = await service.DeclareAsync(Manifest("mathcomps-advanced-september") with { ClockMinutes = 240 });
 
         // The same group, updated rather than replaced
         Assert.Equal(first.GroupId, second.GroupId);
@@ -141,7 +143,8 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_dry_run_reports_what_it_would_do_and_writes_nothing() => RunTestAsync(async service =>
     {
         // The same manifest, run without writing
-        var outcome = await service.DeclareAsync(Manifest("mc-elementary-1", "mc-advanced-1"), dryRun: true);
+        var outcome = await service.DeclareAsync(
+            Manifest("mathcomps-elementary-september", "mathcomps-advanced-september"), dryRun: true);
 
         // Answered as the real run would answer it
         Assert.True(outcome.Created);
@@ -166,7 +169,8 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_dry_run_refuses_a_manifest_the_declaration_would() => RunTestAsync(async service =>
         // A node the registry gives competitions below it, which no run may put a round on
         await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-elementary-1", "mc-intermediate"), dryRun: true)));
+            () => service.DeclareAsync(
+                Manifest("mathcomps-elementary-september", "mathcomps-intermediate"), dryRun: true)));
 
     /// <summary>
     /// Verifies that a manifest naming a node the registry gives competitions below it is refused. Such a node is
@@ -178,11 +182,11 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     {
         // A category, registered and labelled in every language, with the group's own sittings below it
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-elementary-1", "mc-intermediate")));
+            () => service.DeclareAsync(Manifest("mathcomps-elementary-september", "mathcomps-intermediate")));
 
         // Pointed at the competitions below it rather than at a registration to go and write, which is the one
         // gap of the three that is not the author's to fix in a file
-        Assert.Contains("mc-intermediate", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("mathcomps-intermediate", exception.Message, StringComparison.Ordinal);
         Assert.Contains("nested below it", exception.Message, StringComparison.Ordinal);
         Assert.DoesNotContain("metadata.shared.json", exception.Message, StringComparison.Ordinal);
 
@@ -216,7 +220,8 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     {
         // A manifest closing an hour after its rounds' problems come out
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-advanced-1") with { ClosesAt = _closesAt.AddHours(1) }));
+            () => service.DeclareAsync(
+                Manifest("mathcomps-advanced-september") with { ClosesAt = _closesAt.AddHours(1) }));
 
         // Said in terms of the field the author has to fix
         Assert.Contains("visibleSince", exception.Message, StringComparison.Ordinal);
@@ -231,14 +236,14 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_group_that_never_closes_may_keep_its_problems_back() => RunTestAsync(async service =>
     {
         // A manifest naming no closing date, over a round whose problems are still held back
-        var outcome = await service.DeclareAsync(Manifest("mc-advanced-1") with { ClosesAt = null });
+        var outcome = await service.DeclareAsync(Manifest("mathcomps-advanced-september") with { ClosesAt = null });
 
         // The round is linked rather than refused
         Assert.Equal(1, outcome.RoundsLinked);
 
         // The embargo the round carries
         var visibleSince = await QueryValueAsync(context => context.Rounds
-            .Where(round => round.Competition.Path == "mc-advanced-1")
+            .Where(round => round.Competition.Path == "mathcomps-advanced-september")
             .Select(round => round.VisibleSince)
             .SingleAsync());
 
@@ -256,7 +261,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     {
         // One round holds three problems where the manifest announces two
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-advanced-1", "mc-intermediate-1")));
+            () => service.DeclareAsync(Manifest("mathcomps-advanced-september", "mathcomps-intermediate-september")));
 
         // Said in terms of both numbers, so the author knows which side to fix
         Assert.Contains("holds 3 problem(s)", exception.Message, StringComparison.Ordinal);
@@ -274,11 +279,11 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     {
         // The round whose problems carry statements and no solutions
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-elementary-2")));
+            () => service.DeclareAsync(Manifest("mathcomps-elementary-october")));
 
         // Said in terms of the problems the author has to finish. The size refusal names the path too, so the
         // path alone would not tell which check fired
-        Assert.Contains("mc-elementary-2", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("mathcomps-elementary-october", exception.Message, StringComparison.Ordinal);
         Assert.Contains("lack a statement", exception.Message, StringComparison.Ordinal);
 
         // And nothing was written
@@ -294,7 +299,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_manifest_raises_a_round_that_is_not_there_yet() => RunTestAsync(async service =>
     {
         // A node November's registration carries and no draft has ever raised
-        var outcome = await service.DeclareAsync(Manifest("mc-elementary-3"));
+        var outcome = await service.DeclareAsync(Manifest("mathcomps-elementary-november"));
 
         // Which the declaration put there, running one round
         Assert.True(outcome.Created);
@@ -307,7 +312,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(
             1,
             await QueryValueAsync(context => context.Competitions
-                .CountAsync(node => node.Path == "mc-elementary-3")));
+                .CountAsync(node => node.Path == "mathcomps-elementary-november")));
 
         // And the round hangs off it, embargoed until the group closes
         Assert.Equal(
@@ -327,7 +332,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_group_that_never_closes_may_raise_a_round() => RunTestAsync(async service =>
     {
         // A node nothing has raised yet, under a manifest naming no closing date
-        var outcome = await service.DeclareAsync(Manifest("mc-elementary-3") with { ClosesAt = null });
+        var outcome = await service.DeclareAsync(Manifest("mathcomps-elementary-november") with { ClosesAt = null });
 
         // Which the declaration put there
         Assert.Equal(1, outcome.RoundsLinked);
@@ -350,7 +355,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_round_is_dated_the_day_it_opens_where_it_is_written() => RunTestAsync(async service =>
     {
         // Midnight on the 16th in central Europe, which is the 15th at 23:00 UTC
-        var outcome = await service.DeclareAsync(Manifest("mc-elementary-3") with
+        var outcome = await service.DeclareAsync(Manifest("mathcomps-elementary-november") with
         {
             OpensAt = new DateTimeOffset(2026, 11, 16, 0, 0, 0, TimeSpan.FromHours(1)),
             ClosesAt = new DateTimeOffset(2026, 11, 30, 23, 59, 59, TimeSpan.FromHours(1)),
@@ -374,10 +379,10 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task An_announced_groups_window_may_still_move() => RunTestAsync(async service =>
     {
         // Announced on one window
-        await service.DeclareAsync(Manifest("mc-elementary-3"));
+        await service.DeclareAsync(Manifest("mathcomps-elementary-november"));
 
         // And corrected onto another, a day later at both ends
-        var moved = Manifest("mc-elementary-3") with
+        var moved = Manifest("mathcomps-elementary-november") with
         {
             OpensAt = _closesAt.AddDays(-29),
             ClosesAt = _closesAt.AddDays(1),
@@ -404,7 +409,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     {
         // A round a draft filled, under a manifest closing an hour off its embargo
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-elementary-1", "mc-advanced-1") with
+            () => service.DeclareAsync(Manifest("mathcomps-elementary-september", "mathcomps-advanced-september") with
             {
                 ClosesAt = _closesAt.AddHours(1),
             }));
@@ -422,7 +427,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_dry_run_raising_a_round_writes_nothing() => RunTestAsync(async service =>
     {
         // A node no draft has ever raised, run without writing
-        var outcome = await service.DeclareAsync(Manifest("mc-elementary-3"), dryRun: true);
+        var outcome = await service.DeclareAsync(Manifest("mathcomps-elementary-november"), dryRun: true);
 
         // Which the run reports it would have created
         Assert.True(outcome.Created);
@@ -432,14 +437,14 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(
             0,
             await QueryValueAsync(context => context.Competitions
-                .CountAsync(node => node.Path == "mc-elementary-3")));
+                .CountAsync(node => node.Path == "mathcomps-elementary-november")));
 
         // As is the group, and the round it would have run
         Assert.Equal(0, await QueryValueAsync(context => context.HostedGroups.CountAsync()));
         Assert.Equal(
             0,
             await QueryValueAsync(context => context.Rounds
-                .CountAsync(round => round.Competition.Path == "mc-elementary-3")));
+                .CountAsync(round => round.Competition.Path == "mathcomps-elementary-november")));
     });
 
     /// <summary>
@@ -450,9 +455,9 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_manifest_raises_a_season_that_is_not_there_yet() => RunTestAsync(async service =>
     {
         // The same node, a year on from every season the seed placed
-        var outcome = await service.DeclareAsync(Manifest("mc-elementary-3") with
+        var outcome = await service.DeclareAsync(Manifest("mathcomps-elementary-november") with
         {
-            Rounds = [new HostedGroupRoundRef("mc-elementary-3", SeasonYear + 1)],
+            Rounds = [new HostedGroupRoundRef("mathcomps-elementary-november", SeasonYear + 1)],
         });
 
         // The season now stands
@@ -480,7 +485,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Under the hosted root, so it clears the manifest's own checks, and registered nowhere
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-nonesuch")));
+            () => service.DeclareAsync(Manifest("mathcomps-nonesuch")));
 
         // Said in terms of the file the author has to add it to
         Assert.Contains("metadata.shared.json", exception.Message, StringComparison.Ordinal);
@@ -490,7 +495,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(
             0,
             await QueryValueAsync(context => context.Competitions
-                .CountAsync(node => node.Path == "mc-nonesuch")));
+                .CountAsync(node => node.Path == "mathcomps-nonesuch")));
     });
 
     /// <summary>
@@ -503,7 +508,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     {
         // One problem where the manifest announces two
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-advanced-2")));
+            () => service.DeclareAsync(Manifest("mathcomps-advanced-october")));
 
         // Said in terms of both numbers
         Assert.Contains("holds 1 problem(s)", exception.Message, StringComparison.Ordinal);
@@ -523,7 +528,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_group_stands_before_its_problems_land() => RunTestAsync(async service =>
     {
         // A round the draft placed with no problems under it
-        var outcome = await service.DeclareAsync(Manifest("mc-intermediate-2"));
+        var outcome = await service.DeclareAsync(Manifest("mathcomps-intermediate-october"));
 
         // Which put the group there anyway
         Assert.True(outcome.Created);
@@ -552,7 +557,8 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_group_may_run_a_filled_round_beside_empty_ones() => RunTestAsync(async service =>
     {
         // One category authored, two still to come
-        var outcome = await service.DeclareAsync(Manifest("mc-advanced-1", "mc-intermediate-2", "mc-intermediate-3"));
+        var outcome = await service.DeclareAsync(Manifest(
+            "mathcomps-advanced-september", "mathcomps-intermediate-october", "mathcomps-intermediate-november"));
 
         // All three run in the group
         Assert.Equal(3, outcome.RoundsLinked);
@@ -570,10 +576,12 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_dry_run_over_a_standing_group_writes_nothing() => RunTestAsync(async service =>
     {
         // The group as it really stands
-        var outcome = await service.DeclareAsync(Manifest("mc-elementary-1", "mc-advanced-1"));
+        var outcome = await service.DeclareAsync(
+            Manifest("mathcomps-elementary-september", "mathcomps-advanced-september"));
 
         // A moved clock over a dropped round, run without writing
-        await service.DeclareAsync(Manifest("mc-elementary-1") with { ClockMinutes = 240 }, dryRun: true);
+        await service.DeclareAsync(
+            Manifest("mathcomps-elementary-september") with { ClockMinutes = 240 }, dryRun: true);
 
         // The clock the group was declared with, which the dry run assigned over on the tracked row
         Assert.Equal(
@@ -598,10 +606,10 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task An_unentered_groups_size_may_be_corrected() => RunTestAsync(async service =>
     {
         // Announced over a round still holding nothing
-        var announced = await service.DeclareAsync(Manifest("mc-intermediate-2"));
+        var announced = await service.DeclareAsync(Manifest("mathcomps-intermediate-october"));
 
         // Re-announced at a different size
-        await service.DeclareAsync(Manifest("mc-intermediate-2") with { ProblemCount = 5 });
+        await service.DeclareAsync(Manifest("mathcomps-intermediate-october") with { ProblemCount = 5 });
 
         // Which the group now carries
         Assert.Equal(
@@ -621,22 +629,22 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task Re_declaring_once_the_problems_land_changes_nothing() => RunTestAsync(async service =>
     {
         // Announced while its round holds nothing
-        var announced = await service.DeclareAsync(Manifest("mc-intermediate-2"));
+        var announced = await service.DeclareAsync(Manifest("mathcomps-intermediate-october"));
 
         // The problems landing on it, the way applying its draft would
         await QueryAsync(async context =>
         {
             // The round that was announced empty
             var round = await context.Rounds
-                .SingleAsync(candidate => candidate.Competition.Path == "mc-intermediate-2");
+                .SingleAsync(candidate => candidate.Competition.Path == "mathcomps-intermediate-october");
 
             // Filled to exactly what the group announced
-            SeedProblems(context, round, "mc-intermediate-2", ProblemCount, withSolutions: true);
+            SeedProblems(context, round, "mathcomps-intermediate-october", ProblemCount, withSolutions: true);
             await context.SaveChangesAsync();
         });
 
         // The same manifest run a second time
-        var redeclared = await service.DeclareAsync(Manifest("mc-intermediate-2"));
+        var redeclared = await service.DeclareAsync(Manifest("mathcomps-intermediate-october"));
 
         // Which updated the group it already put there rather than adding a second
         Assert.False(redeclared.Created);
@@ -661,14 +669,14 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task An_entered_groups_terms_can_no_longer_be_changed() => RunTestAsync(async service =>
     {
         // The group as declared
-        var declared = await service.DeclareAsync(Manifest("mc-advanced-1"));
+        var declared = await service.DeclareAsync(Manifest("mathcomps-advanced-september"));
 
         // One student's entry into the group
         await SeedEntryAsync(declared.GroupId);
 
         // The same manifest with a shorter clock
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-advanced-1") with { ClockMinutes = 30 }));
+            () => service.DeclareAsync(Manifest("mathcomps-advanced-september") with { ClockMinutes = 30 }));
 
         // Said in terms of the group it is too late for
         Assert.Contains("mc-2026-3", exception.Message, StringComparison.Ordinal);
@@ -691,13 +699,13 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task An_entered_group_may_be_declared_again_on_the_same_terms() => RunTestAsync(async service =>
     {
         // The group as declared
-        var declared = await service.DeclareAsync(Manifest("mc-advanced-1"));
+        var declared = await service.DeclareAsync(Manifest("mathcomps-advanced-september"));
 
         // One student's entry into the group
         await SeedEntryAsync(declared.GroupId);
 
         // The same manifest again
-        var again = await service.DeclareAsync(Manifest("mc-advanced-1"));
+        var again = await service.DeclareAsync(Manifest("mathcomps-advanced-september"));
 
         // Which lands on the group already there
         Assert.Equal(declared.GroupId, again.GroupId);
@@ -713,17 +721,18 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_round_students_have_entered_cannot_be_dropped() => RunTestAsync(async service =>
     {
         // The group as declared, running two rounds
-        var declared = await service.DeclareAsync(Manifest("mc-elementary-1", "mc-advanced-1"));
+        var declared = await service.DeclareAsync(
+            Manifest("mathcomps-elementary-september", "mathcomps-advanced-september"));
 
-        // One student's entry into the group's last round, which is mc-advanced
+        // One student's entry into the group's last round, which is mathcomps-advanced
         await SeedEntryAsync(declared.GroupId);
 
         // A corrected manifest without it
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-elementary-1")));
+            () => service.DeclareAsync(Manifest("mathcomps-elementary-september")));
 
         // Said in terms of the round it would strand
-        Assert.Contains("mc-advanced-1", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("mathcomps-advanced-september", exception.Message, StringComparison.Ordinal);
 
         // And the group still runs both
         Assert.Equal(
@@ -741,14 +750,14 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_round_another_group_already_runs_is_refused() => RunTestAsync(async service =>
     {
         // The group that has the round
-        await service.DeclareAsync(Manifest("mc-advanced-1"));
+        await service.DeclareAsync(Manifest("mathcomps-advanced-september"));
 
         // A second manifest reaching for the same one
         var exception = await Assert.ThrowsAsync<HostedGroupManifestException>(
-            () => service.DeclareAsync(Manifest("mc-advanced-1") with { Slug = "mc-2026-3-fixed" }));
+            () => service.DeclareAsync(Manifest("mathcomps-advanced-september") with { Slug = "mc-2026-3-fixed" }));
 
         // Said in terms of the round that is not going anywhere
-        Assert.Contains("mc-advanced-1", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("mathcomps-advanced-september", exception.Message, StringComparison.Ordinal);
 
         // And only the group that declared it stands
         Assert.Equal(1, await QueryValueAsync(context => context.HostedGroups.CountAsync()));
@@ -787,7 +796,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     private static HostedGroupManifest Without(string field)
     {
         // The manifest every case starts from.
-        var manifest = Manifest("mc-advanced-1");
+        var manifest = Manifest("mathcomps-advanced-september");
 
         // Blanked the way the reader leaves an unnamed field, which for the closing instant means one that
         // cannot be met rather than one that is absent.
@@ -799,7 +808,7 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
             "problems" => manifest with { ProblemCount = 0 },
             "rounds" => manifest with { Rounds = null! },
             "competitionPath" => manifest with { Rounds = [new HostedGroupRoundRef(null!, SeasonYear)] },
-            "seasonYear" => manifest with { Rounds = [new HostedGroupRoundRef("mc-advanced-1", 0)] },
+            "seasonYear" => manifest with { Rounds = [new HostedGroupRoundRef("mathcomps-advanced-september", 0)] },
             "before it opens" => manifest with { ClosesAt = _closesAt.AddYears(-5) },
             _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Unknown manifest field."),
         };
@@ -818,27 +827,27 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
         context.Seasons.Add(season);
 
         // The root the site's own competitions hang off, and an archive one to test the boundary with.
-        CompetitionTreeSeed.Root(context, "mc", 100);
+        CompetitionTreeSeed.Root(context, "mathcomps", 100);
         CompetitionTreeSeed.Root(context, "csmo", 101);
 
         // Two rounds of the same size, embargoed to the instant the manifest closes at.
-        SeedRound(context, season, "mc-elementary-1", _closesAt, problems: 2);
-        SeedRound(context, season, "mc-advanced-1", _closesAt, problems: 2);
+        SeedRound(context, season, "mathcomps-elementary-september", _closesAt, problems: 2);
+        SeedRound(context, season, "mathcomps-advanced-september", _closesAt, problems: 2);
 
         // A round of a different size, for the disagreement the declaration has to catch.
-        SeedRound(context, season, "mc-intermediate-1", _closesAt, problems: 3);
+        SeedRound(context, season, "mathcomps-intermediate-september", _closesAt, problems: 3);
 
         // A round whose problems were never given solutions, so it is not ready to be argued.
-        SeedRound(context, season, "mc-elementary-2", _closesAt, problems: 2, withSolutions: false);
+        SeedRound(context, season, "mathcomps-elementary-october", _closesAt, problems: 2, withSolutions: false);
 
         // A round the draft placed with no problems under it.
-        SeedRound(context, season, "mc-intermediate-2", _closesAt, problems: 0);
+        SeedRound(context, season, "mathcomps-intermediate-october", _closesAt, problems: 0);
 
         // A round whose draft landed one short of what a group announces.
-        SeedRound(context, season, "mc-advanced-2", _closesAt, problems: ProblemCount - 1);
+        SeedRound(context, season, "mathcomps-advanced-october", _closesAt, problems: ProblemCount - 1);
 
         // A second round nobody has authored yet, so a group can wait on more than one of them.
-        SeedRound(context, season, "mc-intermediate-3", _closesAt, problems: 0);
+        SeedRound(context, season, "mathcomps-intermediate-november", _closesAt, problems: 0);
 
         // An archive round, which no group may claim.
         SeedRound(context, season, "csmo-a-i", visibleSince: null, problems: 2);
@@ -877,7 +886,8 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
         // The student row.
         context.Users.Add(new User { Id = userId, ExternalId = $"ext-{userId:N}", Username = name });
 
-        // The last of the group's rounds, which the seeded ids make mc-advanced-1 wherever a case names two.
+        // The last of the group's rounds, which the seeded ids make mathcomps-advanced-september wherever a
+        // case names two.
         var roundId = await context.Rounds
             .Where(round => round.HostedGroupId == groupId)
             .OrderBy(round => round.Id)

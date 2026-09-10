@@ -68,7 +68,7 @@ describe('toDefenseReviewQuery', () => {
 
   it('round-trips a queue narrowed to an archive problem', () => {
     // A problem out of the archive, which one slug addresses
-    const filter: DefenseReviewFilter = { problemSlug: '76-mc-advanced-1-2' }
+    const filter: DefenseReviewFilter = { problemSlug: '76-mathcomps-advanced-september-2' }
 
     // Which comes back naming the same problem
     expect(read(toDefenseReviewQuery({ filter, openId: null })).filter).toEqual(filter)
@@ -80,7 +80,7 @@ describe('toDefenseReviewQuery', () => {
       filter: {
         handoutContentId: 'handout-1',
         environmentId: 'problem-1',
-        problemSlug: '76-mc-advanced-1-2',
+        problemSlug: '76-mathcomps-advanced-september-2',
       },
       openId: null,
     })

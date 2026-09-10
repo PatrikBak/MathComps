@@ -205,7 +205,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         context.Seasons.Add(season);
 
         // The root the competition node hangs off.
-        CompetitionTreeSeed.Root(context, "mc", 100);
+        CompetitionTreeSeed.Root(context, "mathcomps", 100);
 
         // The graded group running it, open and not yet closed, so nothing but the entry decides who may argue.
         var group = new HostedGroup
@@ -224,7 +224,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         context.Rounds.Add(new Round
         {
             Id = _roundId,
-            CompetitionId = CompetitionTreeSeed.Chain(context, "mc-advanced-1").Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "mathcomps-advanced-september").Id,
             SeasonId = season.Id,
             Date = new DateOnly(2026, 10, 1),
             VisibleSince = group.ClosesAt,
@@ -237,7 +237,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             Id = _problemId,
             RoundId = _roundId,
             Number = 1,
-            Slug = "mc-advanced-1",
+            Slug = "mathcomps-advanced-september",
         });
 
         // The entry that lets the owner argue the problem, and which the other user has not taken.
@@ -267,7 +267,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         context.Rounds.Add(new Round
         {
             Id = _practiceRoundId,
-            CompetitionId = CompetitionTreeSeed.Chain(context, "mc-practice").Id,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "mathcomps-practice").Id,
             SeasonId = season.Id,
             Date = new DateOnly(2026, 10, 1),
             VisibleSince = DateTimeOffset.MaxValue,
@@ -280,7 +280,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             Id = _practiceProblemId,
             RoundId = _practiceRoundId,
             Number = 1,
-            Slug = "mc-practice-1",
+            Slug = "mathcomps-practice-september",
         });
 
         // The entry that buys the owner past the practice round's embargo, which the practice group hands out
@@ -627,10 +627,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         Assert.Equal(_problemId, target.ProblemId);
 
         // What addresses the competition it was set in
-        Assert.Equal("advanced-1-2026", target.CompetitionSlug);
+        Assert.Equal("advanced-september-2026", target.CompetitionSlug);
 
         // And the slug the archive knows the problem by
-        Assert.Equal("mc-advanced-1", target.Slug);
+        Assert.Equal("mathcomps-advanced-september", target.Slug);
 
         // Named as every competition down to the one that set it, in the language asked for
         Assert.Equal(

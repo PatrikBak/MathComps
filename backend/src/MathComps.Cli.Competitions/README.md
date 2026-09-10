@@ -28,9 +28,9 @@ Exits `0` when the group is declared (or would be), `1` on anything else: a refu
   "allowsReentry": false,
   "problemCount": 4,
   "rounds": [
-    { "competitionPath": "mc-elementary-1", "seasonYear": 2026 },
-    { "competitionPath": "mc-intermediate-1", "seasonYear": 2026 },
-    { "competitionPath": "mc-advanced-1", "seasonYear": 2026 }
+    { "competitionPath": "mathcomps-elementary-september", "seasonYear": 2026 },
+    { "competitionPath": "mathcomps-intermediate-september", "seasonYear": 2026 },
+    { "competitionPath": "mathcomps-advanced-september", "seasonYear": 2026 }
   ]
 }
 ```
@@ -47,7 +47,7 @@ A group carries no name of its own. Its rounds hang off competition nodes the ta
 
 Two steps.
 
-**1. Register the group's nodes.** In [`metadata.shared.json`](../MathComps.Infrastructure/Resources/metadata.shared.json), plus a `shortName`, a `fullName` and a `urlSlug` per node in `metadata.sk.json`, `metadata.cs.json` and `metadata.en.json`. The `urlSlug` is what the competition is addressed by, in that language and in ASCII: `pokrocila-1` in Slovak reaches `/sk/mathildovanie/pokrocila-1-2026`, the season's start year being appended to it. No two nodes may claim the same one, in any language, and the group node is the only kind that carries one. A group is whatever the program runs as one batch. One run at every level gets one `mc-<category>-<group>` node per category, like `mc-elementary-1`, `mc-intermediate-1` and `mc-advanced-1`. A one-off at a single level is instead a single node directly under `mc`, like `mc-practice`, and carries no category at all. A name must hold for every year the node runs, so `September` and never `September 2026`. This is a code change, so build before running the tool.
+**1. Register the group's nodes.** In [`metadata.shared.json`](../MathComps.Infrastructure/Resources/metadata.shared.json), plus a `shortName`, a `fullName` and a `urlSlug` per node in `metadata.sk.json`, `metadata.cs.json` and `metadata.en.json`. The `urlSlug` is what the competition is addressed by, in that language and in ASCII: `pokrocila-september` in Slovak reaches `/sk/mathildovanie/pokrocila-september-2026`, the season's start year being appended to it. No two nodes may claim the same one, in any language, and the group node is the only kind that carries one. A group is whatever the program runs as one batch. One run at every level gets one `mathcomps-<category>-<month>` node per category, like `mathcomps-elementary-september`, `mathcomps-intermediate-september` and `mathcomps-advanced-september`. A one-off at a single level is instead a single node directly under `mathcomps`, like `mathcomps-practice`, and carries no category at all. A name must hold for every year the node runs, so `September` and never `September 2026`. This is a code change, so build before running the tool.
 
 **2. Run this tool** with the group manifest. It raises whatever the manifest names that is not there, and refuses a path step 1 did not register.
 
@@ -62,7 +62,7 @@ The document on its own, before the database is opened at all:
 - A manifest carrying no `slug`, no `opensAt`, or a `clockMinutes` or `problemCount` that isn't positive. A field the JSON never named arrives as a blank rather than as a complaint, so each of these is checked by hand.
 - A `closesAt` at or before `opensAt`.
 - A manifest naming no rounds, or an entry in `rounds` carrying no `competitionPath` or no `seasonYear`.
-- A round outside the `mc` root, which would have the group claiming rounds of a competition the site only carries.
+- A round outside the `mathcomps` root, which would have the group claiming rounds of a competition the site only carries.
 
 Then against what has actually landed:
 

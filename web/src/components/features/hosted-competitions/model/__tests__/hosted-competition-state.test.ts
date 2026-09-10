@@ -78,7 +78,11 @@ function asSat(entry: HostedCompetitionEntry): SatEntry {
 function competitionOf(overrides: Partial<HostedCompetition> = {}): HostedCompetition {
   // Only what the derivations read, with the case's own facts on top
   return {
-    slug: { sk: 'stredna-1-2026', cs: 'stredni-1-2026', en: 'intermediate-1-2026' },
+    slug: {
+      sk: 'stredna-september-2026',
+      cs: 'stredni-zari-2026',
+      en: 'intermediate-september-2026',
+    },
     category: 'intermediate',
     entry: null,
     resultsPublished: false,
@@ -152,15 +156,15 @@ describe('areaTurnAwayKey', () => {
 describe('isCompetitionAddressedBy', () => {
   it("answers to the name any language gives it, not only the reader's own", () => {
     // The Slovak name finds it
-    expect(isCompetitionAddressedBy(competitionOf(), 'stredna-1-2026')).toBe(true)
+    expect(isCompetitionAddressedBy(competitionOf(), 'stredna-september-2026')).toBe(true)
 
     // And so does the English one
-    expect(isCompetitionAddressedBy(competitionOf(), 'intermediate-1-2026')).toBe(true)
+    expect(isCompetitionAddressedBy(competitionOf(), 'intermediate-september-2026')).toBe(true)
   })
 
   it('answers to nothing else', () => {
     // Another competition's name
-    expect(isCompetitionAddressedBy(competitionOf(), 'pokrocila-1-2026')).toBe(false)
+    expect(isCompetitionAddressedBy(competitionOf(), 'pokrocila-september-2026')).toBe(false)
 
     // And a name of no competition at all
     expect(isCompetitionAddressedBy(competitionOf(), '')).toBe(false)
@@ -559,7 +563,7 @@ describe('findCompetitionInGroup', () => {
     // A reader let past the gates, reading a competition by the name one language gives it
     const found = findCompetitionInGroup(
       viewOf({ noteGraceMinutes: 45, bypassesGates: true }),
-      'stredni-1-2026'
+      'stredni-zari-2026'
     )
 
     // Each term sits on the view, and the found competition carries it out
@@ -569,11 +573,11 @@ describe('findCompetitionInGroup', () => {
 
   it('finds nothing for a name no group holds', () => {
     // A real-looking name of a competition the reader cannot see
-    expect(findCompetitionInGroup(viewOf(), 'pokrocila-1-2026')).toBeUndefined()
+    expect(findCompetitionInGroup(viewOf(), 'pokrocila-september-2026')).toBeUndefined()
   })
 
   it('finds nothing while the read has not landed', () => {
     // Nothing to search yet, so nothing is found
-    expect(findCompetitionInGroup(undefined, 'stredni-1-2026')).toBeUndefined()
+    expect(findCompetitionInGroup(undefined, 'stredni-zari-2026')).toBeUndefined()
   })
 })

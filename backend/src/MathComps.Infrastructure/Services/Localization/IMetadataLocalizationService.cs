@@ -48,7 +48,7 @@ public interface IMetadataLocalizationService
     /// <summary>
     /// Gets what a competition node is called in a URL, in every language.
     /// </summary>
-    /// <param name="path">The node's path (e.g. "mc-advanced-1").</param>
+    /// <param name="path">The node's path (e.g. "mathcomps-advanced-september").</param>
     /// <returns>The URL name in each language.</returns>
     /// <exception cref="InvalidOperationException">Thrown if any language gives the node no URL name.</exception>
     IReadOnlyDictionary<Language, string> GetNodeUrlSlugs(string path);
@@ -67,7 +67,7 @@ public interface IMetadataLocalizationService
     /// <summary>
     /// Gets the languages that give a competition node no URL name.
     /// </summary>
-    /// <param name="path">The node's path (e.g. "mc-advanced-1").</param>
+    /// <param name="path">The node's path (e.g. "mathcomps-advanced-september").</param>
     /// <returns>
     /// The languages where it is missing, in <see cref="Language"/> order, empty when they all carry one.
     /// </returns>

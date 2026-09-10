@@ -67,13 +67,13 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// <summary>
     /// The slug addressing the archive problem, which is what the queue is narrowed to it by.
     /// </summary>
-    private const string ArchiveProblemSlug = "76-mc-advanced-1-2";
+    private const string ArchiveProblemSlug = "76-mathcomps-advanced-september-2";
 
     /// <summary>
     /// The node the archive problem's competition sits at. Registered in the taxonomy, since naming the
     /// competition is the whole of what this arm adds.
     /// </summary>
-    private const string ArchiveCompetitionPath = "mc-advanced-1";
+    private const string ArchiveCompetitionPath = "mathcomps-advanced-september";
 
     /// <summary>
     /// The handout environment two of the conversations were held against.

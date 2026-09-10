@@ -69,12 +69,12 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
     /// <summary>
     /// How the archive addresses that problem.
     /// </summary>
-    private const string ArchiveProblemSlug = "76-mc-advanced-1-2";
+    private const string ArchiveProblemSlug = "76-mathcomps-advanced-september-2";
 
     /// <summary>
     /// The competition it was set in, which has to be one the taxonomy knows for its names to resolve.
     /// </summary>
-    private const string ArchiveCompetitionPath = "mc-advanced-1";
+    private const string ArchiveCompetitionPath = "mathcomps-advanced-september";
 
     /// <summary>
     /// The reply the notes are written against.
