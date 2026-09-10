@@ -2092,7 +2092,7 @@
         "text": {
           "content": [
             {
-              "type": "example",
+              "type": "theorem",
               "id": "tQ6r-YBHII2hYOcd0jnzC",
               "slug": "ptolemaiova-veta",
               "title": {
@@ -2216,10 +2216,10 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             },
             {
-              "type": "example",
+              "type": "theorem",
               "id": "ECXlxtdJwECBnuRZW8E-V",
               "slug": "simsonova-primka",
               "title": {
@@ -2301,10 +2301,10 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             },
             {
-              "type": "example",
+              "type": "theorem",
               "id": "J67DMaac8DHSjoZgc7hzh",
               "slug": "sharky-devil",
               "title": {
@@ -2476,10 +2476,10 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             },
             {
-              "type": "example",
+              "type": "theorem",
               "id": "DKBXD5k0KpD8gJ1WTK5OL",
               "slug": "stejne-usecky-bd-ce",
               "body": [
@@ -2596,7 +2596,7 @@
                   "highligted": false
                 }
               ],
-              "solution": []
+              "proof": []
             }
           ]
         }
@@ -4289,7 +4289,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Vně něj sestrojíme obdélníky "
+                      "text": ". Sestrojíme obdélníky "
                     },
                     {
                       "type": "math",
@@ -4307,7 +4307,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " tak, že "
+                      "text": " takové, že "
                     },
                     {
                       "type": "math",
@@ -4321,6 +4321,78 @@
                     {
                       "type": "math",
                       "text": "|CM| = |AB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", přičemž "
+                    },
+                    {
+                      "type": "math",
+                      "text": "K",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "L",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží v\u00A0polorovině určené přímkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", která neobsahuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží v\u00A0polorovině určené přímkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", která neobsahuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
                       "isDisplay": false
                     },
                     {
@@ -7639,7 +7711,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Vně trojúhelníku "
+                      "text": "Nechť "
                     },
                     {
                       "type": "math",
@@ -7648,7 +7720,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " leží body "
+                      "text": " je trojúhelník a\u00A0nechť body "
                     },
                     {
                       "type": "math",
@@ -7675,7 +7747,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " takové, že trojúhelníky "
+                      "text": " jsou takové, že trojúhelníky "
                     },
                     {
                       "type": "math",
@@ -7693,7 +7765,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a "
+                      "text": " a\u00A0"
                     },
                     {
                       "type": "math",
@@ -7702,7 +7774,88 @@
                     },
                     {
                       "type": "text",
-                      "text": " jsou rovnostranné. Dokažte, že těžiště těchto trojúhelníků rovněž tvoří rovnostranný trojúhelník."
+                      "text": " jsou rovnostranné, přičemž "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží v\u00A0opačných polorovinách určených přímkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", body "
+                    },
+                    {
+                      "type": "math",
+                      "text": "E",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží v\u00A0opačných polorovinách určených přímkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CA",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0body "
+                    },
+                    {
+                      "type": "math",
+                      "text": "F",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží v\u00A0opačných polorovinách určených přímkou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Dokažte, že těžiště těchto trojúhelníků rovněž tvoří rovnostranný trojúhelník."
                     }
                   ],
                   "highligted": false
@@ -8289,7 +8442,25 @@
                     },
                     {
                       "type": "text",
-                      "text": ", protože oba trojúhelníky leží vně; proto "
+                      "text": ", protože otočení zobrazující "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "E",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má díky podmínce na poloroviny stejný směr; proto "
                     },
                     {
                       "type": "math",
@@ -13912,7 +14083,16 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Konvexní čtyřúhelník má stejně dlouhé úhlopříčky. Dokažte, že sestrojíme-li vně nad jeho stranami navzájem podobné rovnoramenné trojúhelníky, jsou spojnice protilehlých hlavních vrcholů těchto trojúhelníků na sebe kolmé."
+                      "text": "Konvexní čtyřúhelník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " má stejně dlouhé úhlopříčky. Nad každou jeho stranou sestrojíme rovnoramenný trojúhelník, jehož základnou je tato strana a\u00A0jehož hlavní vrchol leží v\u00A0polorovině určené přímkou této strany, která neobsahuje zbylé dva vrcholy čtyřúhelníku. Všechny čtyři trojúhelníky jsou navzájem podobné. Dokažte, že spojnice hlavních vrcholů trojúhelníků nad protilehlými stranami jsou na sebe kolmé."
                     }
                   ],
                   "highligted": false

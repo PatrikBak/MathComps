@@ -122,7 +122,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 \sec Other Known Configurations
 
 \EnvId{tQ6r-YBHII2hYOcd0jnzC-ptolemys-theorem}
-\Example{Ptolemy's theorem}{
+\Theorem{Ptolemy's theorem}{
     Let $ABCD$ be a quadrilateral with sides $a=AB$, $b=BC$, $c=CD$, $d=DA$ and diagonals $e=AC$, $f=BD$. Then
     $$
     ef \leq ac + bd,
@@ -133,21 +133,21 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{}
 
 \EnvId{ECXlxtdJwECBnuRZW8E-V-simson-line}
-\Example{Simson line}{
+\Theorem{Simson line}{
     Let $ABCD$ be a cyclic quadrilateral. Then the orthogonal projections of $D$ onto the lines $AB$, $AC$, $BC$ are collinear.
 
     \Image{spiral-simson.pdf}
 }{}
 
 \EnvId{J67DMaac8DHSjoZgc7hzh-sharky-devil}
-\Example{Sharky-Devil}{
+\Theorem{Sharky-Devil}{
     Let the incircle of triangle $ABC$ touch the sides $BC$, $CA$, $AB$ at the points $D$, $E$, $F$ respectively, and let the circumcircles of triangles $AEF$ and $ABC$ meet again at a point $S$. Then the line $SD$ passes through the midpoint of the arc $BC$ not containing $A$, that is, $SD$ is the bisector of the angle $BSC$.
 
     \Image{spiral-sharky-devil.pdf}
 }{}
 
 \EnvId{DKBXD5k0KpD8gJ1WTK5OL-equal-segments-bd-ce}
-\Example{}{
+\Theorem{}{
     Let $D$ and $E$ be points on the sides $AB$ and $AC$ of triangle $ABC$ such that $BD = CE$. Then the circumcircles of triangles $ADE$ and $ABC$ meet again at the midpoint of the arc $BC$ containing $A$.
 
     \Image{spiral-arc-midpoint.pdf}
@@ -226,7 +226,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
 \EnvId{f0S-c_ZWlDc0tqyE8b16q-two-rectangles-on-the-sides}
 \Problem{0}{}{
-    Let $ABC$ be an acute triangle. Outside it we construct rectangles $ABKL$ and $ACMN$ such that $BK = AC$ and $CM = AB$. Prove that the lines $BN$, $CL$ and $KM$ pass through a common point.
+    Let $ABC$ be an acute triangle. We construct rectangles $ABKL$ and $ACMN$ such that $BK = AC$ and $CM = AB$, where $K$ and $L$ lie in the half-plane determined by the line $AB$ that does not contain $C$, and $M$ and $N$ lie in the half-plane determined by the line $AC$ that does not contain $B$. Prove that the lines $BN$, $CL$ and $KM$ pass through a common point.
 }{
     Our rectangles are suspiciously similar. Aren't they even spirally similar?
 }{
@@ -347,7 +347,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
 \EnvId{xt9itZAMHcJDcCVjylaYP-centroids-of-equilateral-triangles}
 \Problem{0}{Napoleon's theorem}{
-    Points $D$, $E$, $F$ lie outside triangle $ABC$ so that the triangles $BCD$, $CAE$ and $ABF$ are equilateral. Prove that the centroids of these triangles also form an equilateral triangle.
+    Let $ABC$ be a triangle and let $D$, $E$, $F$ be points such that the triangles $BCD$, $CAE$ and $ABF$ are equilateral, where $D$ and $A$ lie in opposite half-planes determined by the line $BC$, the points $E$ and $B$ lie in opposite half-planes determined by the line $CA$, and the points $F$ and $C$ lie in opposite half-planes determined by the line $AB$. Prove that the centroids of these triangles also form an equilateral triangle.
 }{
     Equilateral triangles are always spirally similar, and the spiral similarity even carries the centroids onto each other. Find suitable triangles.
 }{
@@ -372,7 +372,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
     \Image{spiral-napoleon.pdf}
 
-    The rotation with center $A$ by $60^\circ$ mapping $F$ to $B$ maps $C$ to $E$ as well, because both triangles lie outside; therefore $CF = BE$. Likewise the rotation with center $C$ by $60^\circ$ maps $A$ to $E$ and $D$ to $B$, so $AD = BE$. Therefore $XY = YZ = ZX$ and the triangle $XYZ$ is equilateral.
+    The rotation with center $A$ by $60^\circ$ mapping $F$ to $B$ maps $C$ to $E$ as well, because by the half-plane condition the rotation taking $C$ to $E$ has the same direction; therefore $CF = BE$. Likewise the rotation with center $C$ by $60^\circ$ maps $A$ to $E$ and $D$ to $B$, so $AD = BE$. Therefore $XY = YZ = ZX$ and the triangle $XYZ$ is equilateral.
 }
 
 \EnvId{lGiQKLrC3o5CyNXlJkyMT-circumcenters-of-a1a2c}
@@ -555,7 +555,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
 \EnvId{pn8vj1u6UmWY3vagNIZEg-isosceles-triangles-on-sides}
 \Problem{0}{ISL 1992}{
-    Suppose the diagonals of a convex quadrilateral have equal length. Prove that if we erect mutually similar isosceles triangles outwardly on its sides, then the segments joining the apexes of the triangles on opposite sides are perpendicular to each other.
+    A convex quadrilateral $ABCD$ has diagonals of equal length. On each of its sides we erect an isosceles triangle whose base is that side and whose apex lies in the half-plane determined by the line of that side that does not contain the other two vertices of the quadrilateral. All four triangles are mutually similar. Prove that the segments joining the apexes of the triangles on opposite sides are perpendicular to each other.
 }{
     Similar triangles hint at a spiral similarity. We need one that can make good use of the diagonals of equal length.
 }{

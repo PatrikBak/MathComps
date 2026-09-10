@@ -122,7 +122,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 \sec Další známé konfigurace
 
 \EnvId{tQ6r-YBHII2hYOcd0jnzC-ptolemaiova-veta}
-\Example{Ptolemaiova věta}{
+\Theorem{Ptolemaiova věta}{
     Nechť $ABCD$ je čtyřúhelník se stranami $a=|AB|$, $b=|BC|$, $c=|CD|$, $d=|DA|$ a~úhlopříčkami $e=|AC|$, $f=|BD|$. Potom
     $$
     ef \leq ac + bd,
@@ -133,21 +133,21 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{}
 
 \EnvId{ECXlxtdJwECBnuRZW8E-V-simsonova-primka}
-\Example{Simsonova přímka}{
+\Theorem{Simsonova přímka}{
     Nechť $ABCD$ je tětivový čtyřúhelník. Potom kolmé průměty bodu $D$ na přímky $AB$, $AC$, $BC$ leží na jedné přímce.
 
     \Image{spiral-simson.pdf}
 }{}
 
 \EnvId{J67DMaac8DHSjoZgc7hzh-sharky-devil}
-\Example{Sharky-Devil}{
+\Theorem{Sharky-Devil}{
     Nechť se kružnice vepsaná trojúhelníku $ABC$ dotýká stran $BC$, $CA$, $AB$ po řadě v~bodech $D$, $E$, $F$ a~nechť se kružnice opsané trojúhelníkům $AEF$ a~$ABC$ protínají znovu v~bodě $S$. Potom přímka $SD$ prochází středem oblouku $BC$ neobsahujícího $A$, čili $SD$ je osou úhlu $BSC$.
 
     \Image{spiral-sharky-devil.pdf}
 }{}
 
 \EnvId{DKBXD5k0KpD8gJ1WTK5OL-stejne-usecky-bd-ce}
-\Example{}{
+\Theorem{}{
     Nechť $D$ a~$E$ jsou body na stranách $AB$ a~$AC$ trojúhelníku $ABC$ takové, že $|BD| = |CE|$. Potom se kružnice opsané trojúhelníkům $ADE$ a~$ABC$ protínají znovu ve středu oblouku $BC$ obsahujícího $A$.
 
     \Image{spiral-arc-midpoint.pdf}
@@ -226,7 +226,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 
 \EnvId{f0S-c_ZWlDc0tqyE8b16q-dva-obdelniky-nad-stranami}
 \Problem{0}{}{
-    Je dán ostroúhlý trojúhelník $ABC$. Vně něj sestrojíme obdélníky $ABKL$ a~$ACMN$ tak, že $|BK| = |AC|$ a~$|CM| = |AB|$. Dokažte, že přímky $BN$, $CL$ a~$KM$ procházejí jedním bodem.
+    Je dán ostroúhlý trojúhelník $ABC$. Sestrojíme obdélníky $ABKL$ a~$ACMN$ takové, že $|BK| = |AC|$ a~$|CM| = |AB|$, přičemž $K$ a~$L$ leží v~polorovině určené přímkou $AB$, která neobsahuje $C$, a~$M$ a~$N$ leží v~polorovině určené přímkou $AC$, která neobsahuje $B$. Dokažte, že přímky $BN$, $CL$ a~$KM$ procházejí jedním bodem.
 }{
     Naše obdélníky jsou sugestivně podobné. Nejsou dokonce spirálně podobné?
 }{
@@ -347,7 +347,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 
 \EnvId{xt9itZAMHcJDcCVjylaYP-teziste-rovnostrannych-trojuhelniku}
 \Problem{0}{Napoleonova věta}{
-    Vně trojúhelníku $ABC$ leží body $D$, $E$, $F$ takové, že trojúhelníky $BCD$, $CAE$ a $ABF$ jsou rovnostranné. Dokažte, že těžiště těchto trojúhelníků rovněž tvoří rovnostranný trojúhelník.
+    Nechť $ABC$ je trojúhelník a~nechť body $D$, $E$, $F$ jsou takové, že trojúhelníky $BCD$, $CAE$ a~$ABF$ jsou rovnostranné, přičemž $D$ a~$A$ leží v~opačných polorovinách určených přímkou $BC$, body $E$ a~$B$ leží v~opačných polorovinách určených přímkou $CA$ a~body $F$ a~$C$ leží v~opačných polorovinách určených přímkou $AB$. Dokažte, že těžiště těchto trojúhelníků rovněž tvoří rovnostranný trojúhelník.
 }{
     Rovnostranné trojúhelníky jsou vždy spirálně podobné, dokonce i~těžiště se takhle zobrazují na sebe. Najděte vhodné trojúhelníky.
 }{
@@ -372,7 +372,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 
     \Image{spiral-napoleon.pdf}
 
-    Otočení se středem $A$ o~$60^\circ$ zobrazující $F$ na $B$ zobrazuje i~$C$ na $E$, protože oba trojúhelníky leží vně; proto $|CF| = |BE|$. Stejně tak otočení se středem $C$ o~$60^\circ$ zobrazuje $A$ na $E$ a~$D$ na $B$, takže $|AD| = |BE|$. Proto $|XY| = |YZ| = |ZX|$ a~trojúhelník $XYZ$ je rovnostranný.
+    Otočení se středem $A$ o~$60^\circ$ zobrazující $F$ na $B$ zobrazuje i~$C$ na $E$, protože otočení zobrazující $C$ na $E$ má díky podmínce na poloroviny stejný směr; proto $|CF| = |BE|$. Stejně tak otočení se středem $C$ o~$60^\circ$ zobrazuje $A$ na $E$ a~$D$ na $B$, takže $|AD| = |BE|$. Proto $|XY| = |YZ| = |ZX|$ a~trojúhelník $XYZ$ je rovnostranný.
 }
 
 \EnvId{lGiQKLrC3o5CyNXlJkyMT-stredy-kruznic-opsanych-a1a2c}
@@ -555,7 +555,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 
 \EnvId{pn8vj1u6UmWY3vagNIZEg-rovnoramenne-trojuhelniky-nad-stranami}
 \Problem{0}{ISL 1992}{
-    Konvexní čtyřúhelník má stejně dlouhé úhlopříčky. Dokažte, že sestrojíme-li vně nad jeho stranami navzájem podobné rovnoramenné trojúhelníky, jsou spojnice protilehlých hlavních vrcholů těchto trojúhelníků na sebe kolmé.
+    Konvexní čtyřúhelník $ABCD$ má stejně dlouhé úhlopříčky. Nad každou jeho stranou sestrojíme rovnoramenný trojúhelník, jehož základnou je tato strana a~jehož hlavní vrchol leží v~polorovině určené přímkou této strany, která neobsahuje zbylé dva vrcholy čtyřúhelníku. Všechny čtyři trojúhelníky jsou navzájem podobné. Dokažte, že spojnice hlavních vrcholů trojúhelníků nad protilehlými stranami jsou na sebe kolmé.
 }{
     Podobné trojúhelníky naznačují spirální podobnost. Je třeba uvažovat takovou, která umí pěkně využít stejně dlouhé úhlopříčky.
 }{
