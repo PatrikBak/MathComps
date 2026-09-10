@@ -17,10 +17,15 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// Whether its results are out. A fact about the competition rather than the reader: once out, they are out for
 /// everybody. Nothing grades a competition, so it is false everywhere.</param>
 /// <param name="ProblemsPublished">
-/// Whether the problems are public, which they become when the round's embargo passes.</param>
+/// Whether the problems are out from under the round's embargo for this reader: it has passed, or the site
+/// lets them past its gates.</param>
+/// <param name="ProblemsReady">
+/// Whether the competition holds as many problems as its group announced, and so has a paper to serve at
+/// all.</param>
 public record HostedCompetitionDto(
     IReadOnlyDictionary<Language, string> Slug,
     HostedCompetitionCategory? Category,
     HostedEntryDto? Entry,
     bool ResultsPublished,
-    bool ProblemsPublished);
+    bool ProblemsPublished,
+    bool ProblemsReady);

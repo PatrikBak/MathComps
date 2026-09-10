@@ -54,6 +54,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Users synced from Clerk.</summary>
     public DbSet<User> Users => Set<User>();
 
+    /// <summary>Capabilities handed to individual users.</summary>
+    public DbSet<UserGrant> UserGrants => Set<UserGrant>();
+
     /// <summary>Likes on problems by users.</summary>
     public DbSet<ProblemLike> ProblemLikes => Set<ProblemLike>();
 
@@ -828,6 +831,25 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion HostedEntry
+
+        #region UserGrant
+
+        modelBuilder.Entity<UserGrant>(e =>
+        {
+            // Owner of the grant, cascading so deleting a user drops what they were allowed.
+            e.HasOne(grant => grant.User)
+             .WithMany()
+             .HasForeignKey(grant => grant.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Every read asks whether one account holds one capability, and a second row would leave two
+            // places to revoke it from.
+            e.HasIndex(grant => new { grant.UserId, grant.Capability })
+             .IsUnique()
+             .HasDatabaseName("ux_user_grant_user_id_capability");
+        });
+
+        #endregion UserGrant
 
         #region ProblemDefense
 

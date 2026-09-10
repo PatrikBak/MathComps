@@ -74,6 +74,12 @@ export type HostedState =
   | 'gate-blocked'
   /** Everything in place except the rules, which is a first entry ever. */
   | 'first-entry'
+  /**
+   * Let past everything a competition puts in the way, with an account holding nothing but a name and no
+   * rules ever accepted. What the site grants an account that hammers the examiner rather than competes,
+   * and the fields it is never asked for are part of what the grant is.
+   */
+  | 'gates-bypassed'
 
 /**
  * What the student did in one group that has closed.
@@ -155,6 +161,7 @@ function openEntry(state: HostedState, now: number): HostedCompetitionEntry | nu
     case 'ready':
     case 'gate-blocked':
     case 'first-entry':
+    case 'gates-bypassed':
       return null
 
     // Every state is handled above
@@ -179,13 +186,15 @@ function buildCompetitions(
   resultsPublished: boolean,
   problemsPublished: boolean
 ): HostedCompetition[] {
-  // One competition per category, all of them on the same terms
+  // One competition per category, all of them on the same terms, the upcoming group overriding one of them
+  // below
   return HOSTED_COMPETITION_CATEGORIES.map((category, index) => ({
     slug: slugsOf(`${groupId}-${category}`),
     category,
     entry: entryFor(index),
     resultsPublished,
     problemsPublished,
+    problemsReady: true,
   }))
 }
 
@@ -207,7 +216,14 @@ function buildSoloCompetition(
 ): HostedCompetition[] {
   // The one competition, named after its group since no category tells it apart
   return [
-    { slug: slugsOf(`${groupId}-set`), category: null, entry, resultsPublished, problemsPublished },
+    {
+      slug: slugsOf(`${groupId}-set`),
+      category: null,
+      entry,
+      resultsPublished,
+      problemsPublished,
+      problemsReady: true,
+    },
   ]
 }
 
@@ -246,6 +262,9 @@ export function buildView(state: HostedState): HostedCompetitionsView {
   // A student on their very first visit has taken nothing at all
   const isNewcomer = state === 'first-entry'
 
+  // Whether this reader is let past the gates
+  const bypassesGates = state === 'gates-bypassed'
+
   // The practice one, which never closes and never publishes results
   const practice: HostedCompetitionGroup = {
     id: 'practice',
@@ -282,7 +301,12 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     clockMinutes: CLOCK_MINUTES,
     opensAt: new Date(upcomingOpensAt).toISOString(),
     closesAt: new Date(upcomingOpensAt + WINDOW_DAYS * DAY_MS).toISOString(),
-    competitions: buildCompetitions('upcoming', () => null, false, false),
+    // Its hardest category was announced before anybody picked its problems, which offers a way in to
+    // nobody, however far past the gates the reader is
+    competitions: buildCompetitions('upcoming', () => null, false, false).map((competition) => ({
+      ...competition,
+      problemsReady: competition.category !== 'advanced',
+    })),
   }
 
   // The one taking entries, plus whatever the state put on it
@@ -372,10 +396,43 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     }
   })
 
-  // Every group there is to show, on the terms the whole program runs on
+  // Every group there is to show, on the terms the program runs on and this reader's standing against
+  // them
   return {
     groups: [practice, preparation, upcoming, open, openSpecial, closedSpecial, ...past],
     noteGraceMinutes: NOTE_GRACE_MINUTES,
+    bypassesGates,
+  }
+}
+
+/**
+ * The view as the real backend puts it on the wire, which reads {@link HostedCompetition.problemsPublished}
+ * as `bypassesGates || the embargo has lifted` and so hands a reader let past the gates every round as
+ * published.
+ *
+ * Folded in here rather than into what {@link buildView} builds, so the fake keeps each round's own embargo
+ * to answer its other rules with.
+ *
+ * @param view - The view the fake holds.
+ *
+ * @returns The view as this reader receives it.
+ */
+export function asServedView(view: HostedCompetitionsView): HostedCompetitionsView {
+  // A reader the gates hold like everybody else receives what the fake holds
+  if (!view.bypassesGates) {
+    return view
+  }
+
+  // One let past them reads every set as published, however far off its own instant is
+  return {
+    ...view,
+    groups: view.groups.map((group) => ({
+      ...group,
+      competitions: group.competitions.map((competition) => ({
+        ...competition,
+        problemsPublished: true,
+      })),
+    })),
   }
 }
 
@@ -405,6 +462,16 @@ export function buildReadiness(state: HostedState): EntryReadiness {
         hasUsername: true,
         hasAnsweredGraduation: true,
         hasEmail: true,
+        hasAcceptedRules: false,
+        hasHiddenProfilePrompt: false,
+      }
+
+    // Named and nothing else, and never shown the rules: a grant is what carries them past each of them
+    case 'gates-bypassed':
+      return {
+        hasUsername: true,
+        hasAnsweredGraduation: false,
+        hasEmail: false,
         hasAcceptedRules: false,
         hasHiddenProfilePrompt: false,
       }

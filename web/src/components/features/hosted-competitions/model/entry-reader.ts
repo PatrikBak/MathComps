@@ -68,16 +68,18 @@ type UnreadReader = {
  *
  * A profile nobody could read counts as one still owed. The practice group publishes nothing, so it never
  * asks for the fields a published result would name a student by; an account it still wants, an entry
- * having to belong to somebody.
+ * having to belong to somebody. Nor are those fields asked of a reader who will never be ranked.
  *
  * @param reader - Who is reading, and what is known about them.
  * @param group - The group they are reaching for.
+ * @param bypassesGates - Whether the site lets this reader past everything a competition puts in the way.
  *
  * @returns What is in the way, null when nothing is, and undefined while that is still being settled.
  */
 export function entryBlockerFor(
   reader: EntryReader,
-  group: HostedCompetitionGroup
+  group: HostedCompetitionGroup,
+  bypassesGates: boolean
 ): EntryBlocker | null | undefined {
   switch (reader.kind) {
     // Nothing to say about somebody nobody has identified yet
@@ -88,14 +90,17 @@ export function entryBlockerFor(
     case 'signedOut':
       return 'signIn'
 
-    // An account, but nothing came back to say what it holds, which only a graded group needs to know
+    // An account, but nothing came back to say what it holds, which a graded group needs of anybody it
+    // will rank
     case 'unread':
-      return isPracticeGroup(group) ? null : 'profile'
+      return isPracticeGroup(group) || bypassesGates ? null : 'profile'
 
-    // An account, so it comes down to what the student has given of themselves, and to whether this group
-    // would ever publish it
+    // An account, so it comes down to what the student has given of themselves, to whether this group would
+    // ever publish it, and to whether this reader will ever be ranked
     case 'signedIn':
-      return isProfileComplete(reader.readiness) || isPracticeGroup(group) ? null : 'profile'
+      return isProfileComplete(reader.readiness) || isPracticeGroup(group) || bypassesGates
+        ? null
+        : 'profile'
 
     // Every reader is handled above
     default:
@@ -112,12 +117,14 @@ export function entryBlockerFor(
  *
  * @param reader - Who is reading, and what is known about them.
  * @param groups - Every group on the board.
+ * @param bypassesGates - Whether the site lets this reader past everything a competition puts in the way.
  *
  * @returns The step to name, or null when there is none.
  */
 export function headerBlocker(
   reader: EntryReader,
-  groups: HostedCompetitionGroup[]
+  groups: HostedCompetitionGroup[],
+  bypassesGates: boolean
 ): EntryBlocker | null {
   // The group the sentence is about. Every graded one asks the same, and a board holding only the practice
   // one still wants an account for it
@@ -129,7 +136,7 @@ export function headerBlocker(
   }
 
   // What that group asks of them. An answer still being settled is no step to name either
-  const blocker = entryBlockerFor(reader, subject) ?? null
+  const blocker = entryBlockerFor(reader, subject, bypassesGates) ?? null
 
   // Whether they have asked to stop being told about their profile
   const hasHiddenProfilePrompt =

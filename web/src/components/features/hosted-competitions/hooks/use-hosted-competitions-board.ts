@@ -20,6 +20,10 @@ import { useHostedCompetitionsView } from './use-hosted-competitions-view'
 type UseHostedCompetitionsBoardResult = {
   /** Every group the reader can see, most actionable first. */
   groups: HostedCompetitionGroup[]
+  /**
+   * Whether this reader is let past the gates a competition is entered through.
+   */
+  bypassesGates: boolean
   /** How far the list has got, which who is reading decides as much as the read does. */
   listState: QueryUiState
   /** The one instant every deadline on the page is read against, in epoch milliseconds. */
@@ -53,6 +57,9 @@ export function useHostedCompetitionsBoard(
   // Every competition the student can see
   const { view, uiState } = useHostedCompetitionsView(readerKey, isReaderKnown)
 
+  // Whether this reader is let past everything a competition puts in the way, false until the read lands
+  const bypassesGates = view?.bypassesGates ?? false
+
   // The question standing between a press and a running clock
   const dialog = useHostedCompetitionEntryDialog(readerKey)
 
@@ -66,6 +73,7 @@ export function useHostedCompetitionsBoard(
   const enterCompetition = useEntryGuard({
     reader,
     groups,
+    bypassesGates,
     openDialog: dialog.open,
     entryIntentSlug,
     hasView: view !== undefined,
@@ -81,16 +89,19 @@ export function useHostedCompetitionsBoard(
   const { dismissProfilePrompt } = useDismissProfilePrompt(readerKey)
 
   // A reader the program does not know yet has accepted nothing, so everyone but a signed-in student who
-  // already has is asked again
-  const needsRulesAccept = reader.kind !== 'signedIn' || !reader.readiness.hasAcceptedRules
+  // already has is asked again. A reader who will never be ranked is asked nothing: the rules are the terms
+  // a competitor is held to, and they are not competing
+  const needsRulesAccept =
+    !bypassesGates && (reader.kind !== 'signedIn' || !reader.readiness.hasAcceptedRules)
 
   // What the board draws, and what its presses go through
   return {
     groups,
+    bypassesGates,
     listState,
     now,
     needsRulesAccept,
-    gateBlocker: headerBlocker(reader, groups),
+    gateBlocker: headerBlocker(reader, groups, bypassesGates),
     dialog,
     enterCompetition,
     dismissProfilePrompt,

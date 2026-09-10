@@ -66,6 +66,7 @@ public static class ServiceCollectionExtensions
                     .MapEnum<DefenseReportCategory>("defense_report_category")
                     .MapEnum<DefenseOutcome>("defense_outcome")
                     .MapEnum<ExaminerStep>("examiner_step")
+                    .MapEnum<UserCapability>("user_capability")
             )
         );
 
@@ -163,6 +164,21 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers what reads the capabilities handed to individual accounts. Expects the DbContext from
+    /// <see cref="AddMathCompsDbContext"/>.
+    /// </summary>
+    /// <param name="services">The service collection to add the grant reader to.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddUserGrants(this IServiceCollection services)
+    {
+        // The grant reader.
+        services.TryAddScoped<IUserGrantService, UserGrantService>();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
     /// Registers the user account services — the user manager, the user's saved problems and lists, and comments.
     /// Pulls in <see cref="AddClerkApi"/> since the user manager reads upstream users through the Clerk client. Expects
     /// the DbContext from <see cref="AddMathCompsDbContext"/>.
@@ -173,6 +189,9 @@ public static class ServiceCollectionExtensions
     {
         // The user manager reads upstream users through the Clerk client, so bring it along
         services.AddClerkApi();
+
+        // Capabilities hang off an account, so they come with the account services.
+        services.AddUserGrants();
 
         // User account DB services
         services.TryAddScoped<IUserManager, UserManager>();
@@ -455,6 +474,10 @@ public static class ServiceCollectionExtensions
         // The service that records what students thought of those conversations.
         services.TryAddScoped<IDefenseFeedbackService, DefenseFeedbackService>();
 
+        // What the defense target guard asks about a reader before it weighs a competition's gates against
+        // them.
+        services.AddUserGrants();
+
         // Says whether a student may argue what a defense target names.
         services.TryAddScoped<IDefenseTargetGuard, DefenseTargetGuard>();
 
@@ -483,6 +506,10 @@ public static class ServiceCollectionExtensions
                 options => options.NoteGraceMinutes >= 0,
                 $"{nameof(HostedCompetitionOptions.NoteGraceMinutes)} must be >= 0.")
             .ValidateOnStart();
+
+        // What the hosted competition service asks about a student before it holds them to a competition's
+        // gates.
+        services.AddUserGrants();
 
         // Runs the competitions the site hosts itself.
         services.TryAddScoped<IHostedCompetitionService, HostedCompetitionService>();

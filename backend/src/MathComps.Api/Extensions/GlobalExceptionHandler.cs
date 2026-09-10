@@ -109,6 +109,8 @@ public sealed class GlobalExceptionHandler(
         HostedEntryAlreadySpentException => (StatusCodes.Status409Conflict, ApiErrorCode.HostedEntryAlreadySpent),
         HostedEntryNotRunningException
             => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedEntryNotRunning),
+        HostedEntryNotGradedException
+            => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedEntryNotGraded),
         HostedEntryProfileIncompleteException
             => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedEntryProfileIncomplete),
 

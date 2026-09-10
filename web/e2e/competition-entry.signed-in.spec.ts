@@ -9,6 +9,12 @@ const SETTLE_TIMEOUT_MS = 15_000
 /** A competition no state ever holds an entry on, so the guard has something to turn away. */
 const UNENTERED_COMPETITION_SLUG = 'open-advanced'
 
+/** A competition of the group that has not opened yet, which nobody ordinary can enter or read. */
+const UPCOMING_COMPETITION_SLUG = 'upcoming-intermediate'
+
+/** A competition of the group that has not opened yet, announced before anybody picked its problems. */
+const UNFILLED_COMPETITION_SLUG = 'upcoming-advanced'
+
 test.describe('the entry and the area it opens', () => {
   test('puts the whole set on one page', async ({ page }) => {
     // A student inside a competition
@@ -298,5 +304,159 @@ test.describe('the entry and the area it opens', () => {
     await expect(page).toHaveURL(new RegExp(`/sk/mathildovanie/${COMPETITION_SLUG}-sk`), {
       timeout: SETTLE_TIMEOUT_MS,
     })
+  })
+
+  test('refuses an entry into a group that has not opened', async ({ page }) => {
+    // An ordinary student, held to every window
+    await installHostedBackend(page, 'ready')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // The row of the competition whose group is still only announced
+    const row = page.locator(`[data-competition-slug="${UPCOMING_COMPETITION_SLUG}"]`)
+
+    // Which is there to read
+    await expect(row).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // And offers no way in: the group decides, and this one takes nobody yet
+    await expect(row.getByRole('button', { name: areaCopy.enter, exact: true })).toHaveCount(0)
+  })
+
+  test('turns a reader away from a competition that has not opened', async ({ page }) => {
+    // An ordinary student, held to every window
+    await installHostedBackend(page, 'ready')
+
+    // How many reads of a set reach the backend, whoever they were for
+    let problemReads = 0
+
+    // Counting each one on its way past
+    await page.route(`${BACKEND_ORIGIN}/competitions/*/problems`, (route) => {
+      // The read was made, whatever becomes of it
+      problemReads++
+
+      // And is answered by the fake behind this
+      return route.fallback()
+    })
+
+    // Walk straight at the area of a competition nobody can be in yet
+    await page.goto(areaPath(UPCOMING_COMPETITION_SLUG))
+
+    // Which sends them back to the list
+    await expect(page).toHaveURL(/\/mathilding$/, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Told the competition has yet to open, rather than that they have yet to start it
+    await expect(page.getByText(areaCopy.areaNotOpen)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Having asked for none of its statements, which are embargoed until the competition is over
+    expect(problemReads).toBe(0)
+  })
+
+  test('takes an entry from a reader past the gates before the group opens', async ({ page }) => {
+    // One of the accounts the site lets past the gates its competitions are entered through
+    await installHostedBackend(page, 'gates-bypassed')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // The row of the competition whose group is still only announced
+    const row = page.locator(`[data-competition-slug="${UPCOMING_COMPETITION_SLUG}"]`)
+
+    // The way in they are offered
+    const enter = row.getByRole('button', { name: areaCopy.enter, exact: true })
+
+    // Which is there, with nothing said about the profile they never filled in
+    await expect(enter).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // On a card still counting down to the day the group opens: the grant decides what is offered, and the
+    // board goes on saying what the schedule is
+    await expect(page.getByText(/opens in/i).first()).toBeVisible()
+
+    // Press it, which raises the question rather than the profile the fields would otherwise be wanted for
+    await enter.click()
+
+    // The question itself
+    const confirm = page.getByRole('button', { name: areaCopy.dialog.confirm })
+    await expect(confirm).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Carrying no rules to accept: they are the terms a competitor is held to, and this one is not one
+    await expect(page.getByText(areaCopy.rules.title)).toHaveCount(0)
+
+    // Answered
+    await confirm.click()
+
+    // Which lands them in the area with the whole set, the window having refused nobody
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+  })
+
+  test('lets a reader past the gates into a competition that has not opened', async ({ page }) => {
+    // One of the accounts the site lets past the gates its competitions are entered through
+    await installHostedBackend(page, 'gates-bypassed')
+
+    // Walk straight at the area of the competition nobody else can be in yet
+    await page.goto(areaPath(UPCOMING_COMPETITION_SLUG))
+
+    // Which draws the whole set rather than sending them back to the list
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // And none of the official solutions: the round's embargo still stands and no run of theirs has ended
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(0)
+  })
+
+  test('offers no way into a competition whose problems are not picked yet', async ({ page }) => {
+    // A reader let past everything a competition puts in the way
+    await installHostedBackend(page, 'gates-bypassed')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // The row of the category announced before its problems were chosen
+    const row = page.locator(`[data-competition-slug="${UNFILLED_COMPETITION_SLUG}"]`)
+
+    // Which is on the board to read
+    await expect(row).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // And offers no press, the site having no paper to hand back for the entry
+    await expect(row.getByRole('button', { name: areaCopy.enter, exact: true })).toHaveCount(0)
+
+    // While the category beside it, on the same dates in the same group, does offer one
+    await expect(
+      page
+        .locator(`[data-competition-slug="${UPCOMING_COMPETITION_SLUG}"]`)
+        .getByRole('button', { name: areaCopy.enter, exact: true })
+    ).toBeVisible()
+  })
+
+  test('runs a clock on a reader who entered past the gates', async ({ page }) => {
+    // A reader let past the gates, taking the entry into a competition nobody else can be in yet
+    await installHostedBackend(page, 'gates-bypassed')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // The row of the competition whose group is still only announced
+    const row = page.locator(`[data-competition-slug="${UPCOMING_COMPETITION_SLUG}"]`)
+
+    // Press in through the card, which is the only way a clock ever starts
+    await row.getByRole('button', { name: areaCopy.enter, exact: true }).click()
+
+    // And answer the question it raises
+    await page.getByRole('button', { name: areaCopy.dialog.confirm }).click()
+
+    // Which serves them the whole set
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Holding the answers back behind the clock that just started, the same as anybody else's
+    await expect(
+      page.getByRole('button', { name: areaCopy.officialSolution, exact: true })
+    ).toHaveCount(0)
   })
 })

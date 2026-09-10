@@ -1,6 +1,8 @@
 using MathComps.Domain.Contracts.Defense;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
+using MathComps.Infrastructure.Services.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Defense;
@@ -12,7 +14,9 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// into the permission as well.
 /// </summary>
 /// <param name="dbContextFactory">Creates the contexts the checks run on.</param>
-public sealed class DefenseTargetGuard(IDbContextFactory<MathCompsDbContext> dbContextFactory)
+/// <param name="grants">Reads whether the student is let past the gates a competition is entered through.</param>
+public sealed class DefenseTargetGuard(
+    IDbContextFactory<MathCompsDbContext> dbContextFactory, IUserGrantService grants)
     : IDefenseTargetGuard
 {
     /// <inheritdoc/>
@@ -56,7 +60,6 @@ public sealed class DefenseTargetGuard(IDbContextFactory<MathCompsDbContext> dbC
             .Where(problem => problem.Id == problemId)
             .Select(problem => new
             {
-                problem.RoundId,
                 IsHosted = problem.Round.HostedGroupId != null,
                 problem.Round.VisibleSince,
                 problem.Round.HostedGroup!.ClosesAt,
@@ -69,9 +72,15 @@ public sealed class DefenseTargetGuard(IDbContextFactory<MathCompsDbContext> dbC
         if (round is null || !round.IsHosted)
             throw new HostedProblemNotFoundException();
 
+        // Whether the student is let past the gates this competition is entered through.
+        var bypassesGates = await grants.HasAsync(
+            userId, UserCapability.BypassCompetitionGates, cancellationToken);
+
         // And past that it is the same rule the area serves its problems under.
-        await HostedEntryRules.EnsureEntitledAsync(
-            dbContext, userId, round.RoundId, round.VisibleSince, round.ClosesAt, cancellationToken);
+        HostedEntryRules.EnsureEntitled(
+            new HostedReader(userId, bypassesGates),
+            new RoundAccess(round.VisibleSince, round.ClosesAt, round.HoldsEntry),
+            DateTimeOffset.UtcNow);
 
         // Cleared, and the entry says whether the daily spend ceiling reaches this defense.
         return round.HoldsEntry;

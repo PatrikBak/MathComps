@@ -12,6 +12,7 @@ import {
   derivePhase,
   deriveStanding,
   entryEndsAt,
+  findCompetitionInGroup,
   hasEntryEnded,
   isCompetitionAddressedBy,
   orderForReading,
@@ -23,6 +24,7 @@ import type {
   HostedCompetition,
   HostedCompetitionEntry,
   HostedCompetitionGroup,
+  HostedCompetitionsView,
   SatEntry,
 } from '../hosted-competition-types'
 
@@ -81,6 +83,7 @@ function competitionOf(overrides: Partial<HostedCompetition> = {}): HostedCompet
     entry: null,
     resultsPublished: false,
     problemsPublished: false,
+    problemsReady: true,
     ...overrides,
   }
 }
@@ -389,7 +392,9 @@ describe('readAreaRun', () => {
 
   it('reads nothing off an entry given up for the problems', () => {
     // No clock ran on it, so the run is the entry and carries not one reading beside it
-    expect(readAreaRun({ kind: 'forfeited' }, GRACE_MINUTES, NOW)).toEqual({ kind: 'forfeited' })
+    expect(readAreaRun({ kind: 'forfeited' }, GRACE_MINUTES, NOW, false)).toEqual({
+      kind: 'forfeited',
+    })
   })
 
   it('carries a sat entry through with what its clock decides', () => {
@@ -401,10 +406,25 @@ describe('readAreaRun', () => {
     }
 
     // Read it against the instant the page is drawn at
-    const run = readAreaRun(entry, GRACE_MINUTES, NOW)
+    const run = readAreaRun(entry, GRACE_MINUTES, NOW, false)
 
     // Which hands back the entry itself, with the two things the clock settles beside it
     expect(run).toEqual({ ...entry, hasEnded: false, areNotesOpen: true })
+  })
+
+  it('takes no note under an entry nobody will grade', () => {
+    // An entry with an hour still to run, which takes notes from any ordinary reader
+    const entry: AreaEntry = {
+      kind: 'sat',
+      endsAt: new Date(NOW + HOUR_MS).toISOString(),
+      wasHandedIn: false,
+    }
+
+    // Read for somebody the site let past the gates
+    const run = readAreaRun(entry, GRACE_MINUTES, NOW, true)
+
+    // Whose clock still runs, and whose note has nobody at the other end of it
+    expect(run).toEqual({ ...entry, hasEnded: false, areNotesOpen: false })
   })
 })
 
@@ -514,5 +534,46 @@ describe('clockMinutesLeft', () => {
   it('reads the last whole minute as one rather than as none', () => {
     // The boundary the seconds take over at, which still has a minute to name
     expect(clockMinutesLeft(MINUTE_MS)).toEqual({ hours: 0, minutes: 1 })
+  })
+})
+
+describe('findCompetitionInGroup', () => {
+  /**
+   * Builds the view a case is read out of.
+   *
+   * @param overrides - Whatever the case under test cares about.
+   *
+   * @returns The view.
+   */
+  function viewOf(overrides: Partial<HostedCompetitionsView> = {}): HostedCompetitionsView {
+    // One group holding one competition, with the case's own facts on top
+    return {
+      groups: [groupOf()],
+      noteGraceMinutes: 30,
+      bypassesGates: false,
+      ...overrides,
+    }
+  }
+
+  it('carries the terms the whole program runs on onto the competition it finds', () => {
+    // A reader let past the gates, reading a competition by the name one language gives it
+    const found = findCompetitionInGroup(
+      viewOf({ noteGraceMinutes: 45, bypassesGates: true }),
+      'stredni-1-2026'
+    )
+
+    // Each term sits on the view, and the found competition carries it out
+    expect(found?.noteGraceMinutes).toBe(45)
+    expect(found?.bypassesGates).toBe(true)
+  })
+
+  it('finds nothing for a name no group holds', () => {
+    // A real-looking name of a competition the reader cannot see
+    expect(findCompetitionInGroup(viewOf(), 'pokrocila-1-2026')).toBeUndefined()
+  })
+
+  it('finds nothing while the read has not landed', () => {
+    // Nothing to search yet, so nothing is found
+    expect(findCompetitionInGroup(undefined, 'stredni-1-2026')).toBeUndefined()
   })
 })

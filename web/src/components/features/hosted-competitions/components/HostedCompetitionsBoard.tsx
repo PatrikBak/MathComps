@@ -38,6 +38,7 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
   // What there is to draw, and what its presses go through
   const {
     groups,
+    bypassesGates,
     listState,
     now,
     gateBlocker,
@@ -99,6 +100,7 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
                 key={group.id}
                 group={group}
                 now={now}
+                bypassesGates={bypassesGates}
                 onEnter={enterCompetition}
               />
             ))}

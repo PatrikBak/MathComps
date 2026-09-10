@@ -213,6 +213,7 @@
     "HostedCompetitionNotFound": "Táto súťaž už neexistuje.",
     "HostedCompetitionNotReady": "Táto súťaž ešte nemá pripravené úlohy.",
     "HostedEntryAlreadySpent": "Do tejto súťaže už nejde vstúpiť.",
+    "HostedEntryNotGraded": "Táto súťaž sa ti nehodnotí, takže poznámky sú vypnuté.",
     "HostedEntryNotRunning": "Túto súťaž už máš za sebou.",
     "HostedEntryProfileIncomplete": "Pred vstupom si doplň meno, rok maturity a e-mail.",
     "HostedEntryRequired": "Úlohy uvidíš, až keď vstúpiš do súťaže.",

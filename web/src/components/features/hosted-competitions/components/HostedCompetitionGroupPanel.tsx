@@ -54,6 +54,8 @@ type HostedCompetitionGroupPanelProps = {
   group: HostedCompetitionGroup
   /** The instant every clock on the page is read against, in epoch milliseconds. */
   now: number
+  /** Whether the reader is let past the gates this group is entered through. */
+  bypassesGates: boolean
   /** Opens the question that has to be answered before any clock starts. */
   onEnter: (pending: PendingEntry) => void
 }
@@ -70,6 +72,7 @@ type HostedCompetitionGroupPanelProps = {
 export function HostedCompetitionGroupPanel({
   group,
   now,
+  bypassesGates,
   onEnter,
 }: HostedCompetitionGroupPanelProps) {
   // Competitions copy
@@ -200,6 +203,7 @@ export function HostedCompetitionGroupPanel({
               competition={soleCompetition}
               phase={phase}
               standing={deriveStanding(group, soleCompetition, now)}
+              bypassesGates={bypassesGates}
               onEnter={() => onEnter({ group, competition: soleCompetition })}
             />
           </div>
@@ -216,6 +220,7 @@ export function HostedCompetitionGroupPanel({
               competition={competition}
               phase={phase}
               now={now}
+              bypassesGates={bypassesGates}
               onEnter={() => onEnter({ group, competition })}
             />
           ))}
@@ -237,6 +242,8 @@ type CompetitionRowProps = {
   phase: GroupPhase
   /** The instant its clock is read against, in epoch milliseconds. */
   now: number
+  /** Whether the reader is let past the gates this competition is entered through. */
+  bypassesGates: boolean
   /** Opens the question that has to be answered before the clock starts. */
   onEnter: () => void
 }
@@ -244,7 +251,14 @@ type CompetitionRowProps = {
 /**
  * One competition: one category, where the student stands with it, and the one thing they can do about it.
  */
-function CompetitionRow({ group, competition, phase, now, onEnter }: CompetitionRowProps) {
+function CompetitionRow({
+  group,
+  competition,
+  phase,
+  now,
+  bypassesGates,
+  onEnter,
+}: CompetitionRowProps) {
   // The active locale
   const locale = useLocale() as Locale
 
@@ -279,6 +293,7 @@ function CompetitionRow({ group, competition, phase, now, onEnter }: Competition
             competition={competition}
             phase={phase}
             standing={standing}
+            bypassesGates={bypassesGates}
             onEnter={onEnter}
           />
         </div>
@@ -415,6 +430,8 @@ type EntryActionProps = {
   phase: GroupPhase
   /** Where the student stands with it. */
   standing: HostedCompetitionStanding
+  /** Whether the reader is let past the gates this competition is entered through. */
+  bypassesGates: boolean
   /** Takes the press on the way in. */
   onEnter: () => void
 }
@@ -431,7 +448,7 @@ type EntryActionProps = {
  *
  * The results are still being built, so that link renders dead.
  */
-function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps) {
+function EntryAction({ competition, phase, standing, bypassesGates, onEnter }: EntryActionProps) {
   // Competitions copy
   const t = useTranslations('competitions')
 
@@ -504,14 +521,21 @@ function EntryAction({ competition, phase, standing, onEnter }: EntryActionProps
       )
 
     // Untaken, so the group decides: one that has not opened yet has nothing to press, and an open one
-    // offers the way in
-    case 'none':
-      return phase === 'upcoming' ? null : (
+    // offers the way in. A reader let past the gates is offered it either way
+    case 'none': {
+      // No paper picked yet, or a group not yet open to this reader: the entry would be spent on a set the
+      // site cannot serve
+      const hasNothingToPress =
+        !competition.problemsReady || (phase === 'upcoming' && !bypassesGates)
+
+      // Which leaves the press itself, worded for what the group is
+      return hasNothingToPress ? null : (
         <Button variant="link" onClick={onEnter}>
           <ArrowRight size={15} />
           {phase === 'practice' ? t('try') : t('enter')}
         </Button>
       )
+    }
 
     // Every standing is handled above
     default:

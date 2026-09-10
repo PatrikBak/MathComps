@@ -213,6 +213,7 @@
     "HostedCompetitionNotFound": "This competition no longer exists.",
     "HostedCompetitionNotReady": "This competition's problems aren't ready yet.",
     "HostedEntryAlreadySpent": "You can no longer enter this competition.",
+    "HostedEntryNotGraded": "You aren't being graded here, so notes are off.",
     "HostedEntryNotRunning": "You've already finished this competition.",
     "HostedEntryProfileIncomplete": "Fill in your name, graduation year and email before entering.",
     "HostedEntryRequired": "You'll see the problems once you enter the competition.",

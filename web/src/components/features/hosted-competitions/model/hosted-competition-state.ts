@@ -282,17 +282,24 @@ export function clockEndsAt(entry: AreaEntry | null): string | null {
  * @param entry - The entry the student spent.
  * @param graceMinutes - How long past the end of the entry notes are still taken.
  * @param now - The instant to read it against, in epoch milliseconds.
+ * @param bypassesGates - Whether the site let this reader past the gates the competition is entered through.
  *
  * @returns The entry, with what the clock decides on it already settled.
  */
-export function readAreaRun(entry: AreaEntry, graceMinutes: number, now: number): AreaRun {
+export function readAreaRun(
+  entry: AreaEntry,
+  graceMinutes: number,
+  now: number,
+  bypassesGates: boolean
+): AreaRun {
   switch (entry.kind) {
-    // A clock ran on it, so where it stands and whether notes are still taken both follow from it
+    // A clock ran on it, so where it stands follows from it, and so does whether notes are still taken:
+    // no note is taken from a reader the site lets past the gates, nobody grading their run
     case 'sat':
       return {
         ...entry,
         hasEnded: hasEntryEnded(entry, now),
-        areNotesOpen: areNotesOpen(entry, graceMinutes, now),
+        areNotesOpen: !bypassesGates && areNotesOpen(entry, graceMinutes, now),
       }
 
     // No clock ran on it, so there is nothing to read that the entry does not already say
@@ -315,6 +322,8 @@ export type CompetitionInGroup = {
   competition: HostedCompetition
   /** How long past the end of an entry notes are still taken, in minutes; the program's own term. */
   noteGraceMinutes: number
+  /** Whether this reader is let past the gates the competition runs on. */
+  bypassesGates: boolean
 }
 
 /**
@@ -414,8 +423,11 @@ export function findCompetitionInGroup(
     .flatMap((group) => group.competitions.map((competition) => ({ group, competition })))
     .find((candidate) => isCompetitionAddressedBy(candidate.competition, competitionSlug))
 
-  // With the terms the whole program runs on, which is where the note window is set
-  return found === undefined ? undefined : { ...found, noteGraceMinutes: view.noteGraceMinutes }
+  // With the terms the whole program runs on: the note window, and whether this reader is let past the
+  // gates
+  return found === undefined
+    ? undefined
+    : { ...found, noteGraceMinutes: view.noteGraceMinutes, bypassesGates: view.bypassesGates }
 }
 
 /**
@@ -493,9 +505,9 @@ export function deriveStanding(
       const endsAt = entryEndsAt(group, entry)
 
       // Still inside, with time left on the clock. Closing the entry is asked about separately, the stamp
-      // saying so being enough on its own: it can sit ahead of the clock this is read against, a browser
-      // and whatever wrote the stamp never agreeing to the second, and an entry the student has closed
-      // must not read as one they are still sitting
+      // saying so being enough on its own: it can sit ahead of the clock this is read against, a browser and
+      // whatever wrote the stamp never agreeing to the second, and an entry the student has closed must not
+      // read as one they are still sitting
       if (entry.finishedAt === null && Date.parse(endsAt) > now) {
         return { kind: 'running', endsAt }
       }
