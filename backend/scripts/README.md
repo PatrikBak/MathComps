@@ -50,7 +50,7 @@ Run `./invoke-tool.sh` with no arguments for the current list of commands.
 
 ### Importing a draft
 
-`apply-draft.sh` wraps the import in the one step that has to go with it. A defense session snapshots its problem's statement and reference solution when it starts and never re-reads them, so a session that predates a rewrite keeps arguing text the site no longer shows. `--clear-defenses` deletes every defense session on the draft's competition, after the import lands:
+`apply-draft.sh` wraps the import in the one step that has to go with it. A defense session snapshots its problem's statement and reference solution when it starts and never re-reads them, so a session that predates a rewrite keeps arguing text the site no longer shows. `--clear-defenses` deletes every defense session on the draft's competition, after the import lands. It also lets the import rewrite a defended problem, which `apply` otherwise refuses:
 
 ```bash
 # Read-only: validate, and list the defense sessions the import would strand

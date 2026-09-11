@@ -25,7 +25,8 @@ Usage: ./apply-draft.sh [-e <prod|staging>] [--clear-defenses] [--validate-only]
 
 Options:
   -e, --env             Environment (prod or staging, default: prod)
-      --clear-defenses  Delete every defense session on the draft's competition, after the import
+      --clear-defenses  Delete every defense session on the draft's competition, after the import.
+                        Also lets the import rewrite a defended problem, which apply otherwise refuses
       --validate-only   Stop after validate; write nothing
 EOF
 }
@@ -155,7 +156,13 @@ fi
 # The real import: problems created or overwritten, figures uploaded.
 echo
 echo "=== Applying $draft_folder to $environment ==="
-"$script_dir/invoke-tool.sh" -e "$environment" bulk-import apply "$draft_folder"
+
+# A run that clears the defenses wants the rewrite they would otherwise block.
+if [ "$clear_defenses" = "true" ]; then
+    "$script_dir/invoke-tool.sh" -e "$environment" bulk-import apply "$draft_folder" --allow-restating
+else
+    "$script_dir/invoke-tool.sh" -e "$environment" bulk-import apply "$draft_folder"
+fi
 
 # The delete runs after the import, so nothing that snapshotted the old text is left behind.
 if [ "$clear_defenses" = "true" ]; then
