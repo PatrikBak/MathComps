@@ -30,6 +30,13 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
         [CommandArgument(0, "<folders>")]
         [Description("Draft folder path(s) or glob(s) to import. Example: ./my-draft OR 'data/problems/skmo-2025-*'")]
         public required string[] Folders { get; set; }
+
+        /// <summary>
+        /// Whether to proceed when the import would rewrite the text of a problem that already carries a defense.
+        /// </summary>
+        [CommandOption("--allow-restating")]
+        [Description("Proceed when a problem that already has defenses would have its statement or solution rewritten.")]
+        public bool AllowRestating { get; set; }
     }
 
     /// <inheritdoc/>
@@ -37,18 +44,21 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
         // Import every matched folder; the runner owns the glob expansion, per-folder header and tally.
         await MultiFolderRunner.RunAsync(
             settings.Folders, okLabel: "applied", failLabel: "failed",
-            ApplyFolderAsync);
+            folder => ApplyFolderAsync(folder, settings.AllowRestating));
 
     /// <summary>
     /// Validates then imports a single draft folder, rendering its report. Validation runs first — apply never
     /// mutates a draft it hasn't checked — so a folder that fails validation writes nothing.
     /// </summary>
     /// <param name="folder">The draft-folder path to import.</param>
+    /// <param name="allowRestating">
+    /// Whether rewriting the text of a problem that already carries a defense is permitted.
+    /// </param>
     /// <returns>Whether the folder was imported — false when validation failed and it was skipped.</returns>
-    private async Task<bool> ApplyFolderAsync(string folder)
+    private async Task<bool> ApplyFolderAsync(string folder, bool allowRestating)
     {
         // Validate first with the shared pipeline — apply never mutates a draft it hasn't checked.
-        var outcome = await pipeline.RunAsync(folder);
+        var outcome = await pipeline.RunAsync(folder, allowRestating);
 
         // Abort this folder on any error: surface the issues exactly as validate would, and write nothing.
         if (!outcome.Result.Ok)

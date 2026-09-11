@@ -97,10 +97,62 @@ public class DraftResolutionService(
         // The taxonomy rows apply would renumber to match the registry, plus any row the registry can't place.
         var (sortOrderChanges, orphans) = await PreviewSortOrderAsync(context, target.CompetitionPath);
 
+        // The texts this import would rewrite on a problem someone has already defended.
+        var defendedRestatements = await PreviewDefendedRestatementsAsync(context, textResolutions);
+
         // Hand back the create-vs-reuse picture, the per-text resolutions for colliding slugs, the round's gaps,
-        // and the sort-order reconciliation apply would perform.
+        // the sort-order reconciliation apply would perform, and the rewrites landing on defended problems.
         return new DraftDbPreview(
-            resolutions, textResolutions, missingProblemOrders, sortOrderChanges, orphans);
+            resolutions, textResolutions, missingProblemOrders, sortOrderChanges, orphans, defendedRestatements);
+    }
+
+    /// <summary>
+    /// Finds the rewrites that would land on a problem students have already defended. A defense names its problem by
+    /// id, and a re-import rewrites texts under the id the slug already holds, so rewriting one of those texts leaves
+    /// every defense of it pointing at a statement it was never argued about.
+    /// </summary>
+    /// <param name="context">The read-only context.</param>
+    /// <param name="textResolutions">
+    /// The per-text resolutions, whose overwrite outcomes name the texts that change.
+    /// </param>
+    /// <returns>
+    /// One entry per changed text on a defended problem; empty when nothing changes or nothing is defended.
+    /// </returns>
+    private static async Task<ImmutableArray<DefendedProblemRestatement>> PreviewDefendedRestatementsAsync(
+        MathCompsDbContext context, ImmutableArray<ProblemTextResolution> textResolutions)
+    {
+        // The texts whose stored body would change; an add, an unchanged re-import and a create conflict all leave
+        // whatever a defense was argued against exactly where it is.
+        var rewrites = textResolutions
+            .Where(resolution => resolution.Action
+                is DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation)
+            .ToList();
+
+        // Nothing would be rewritten, so no defense can be stranded.
+        if (rewrites.Count == 0)
+            return [];
+
+        // The problems those rewrites land on.
+        var rewrittenSlugs = rewrites.Select(resolution => resolution.Slug).Distinct().ToList();
+
+        // How many defenses each of them already carries, counting only the ones that have any.
+        var defenseCountBySlug = await context.ProblemDefenses.AsNoTracking()
+            .Where(defense => rewrittenSlugs.Contains(defense.Problem.Slug))
+            .GroupBy(defense => defense.Problem.Slug)
+            .Select(group => new { Slug = group.Key, Count = group.Count() })
+            .ToDictionaryAsync(row => row.Slug, row => row.Count);
+
+        // Pair each rewrite that lands on a defended problem with that problem's defense count.
+        return
+        [
+            .. rewrites
+                .Where(resolution => defenseCountBySlug.ContainsKey(resolution.Slug))
+                .Select(resolution => new DefendedProblemRestatement(
+                    resolution.Slug,
+                    resolution.DocumentType,
+                    resolution.Language,
+                    defenseCountBySlug[resolution.Slug]))
+        ];
     }
 
     /// <summary>

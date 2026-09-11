@@ -24,8 +24,12 @@ public class DraftValidationPipeline(
     /// collected (never fail-fast) and ordered. Writes nothing.
     /// </summary>
     /// <param name="folder">Path to the draft folder.</param>
+    /// <param name="allowRestating">
+    /// Whether rewriting the text of a problem that already carries a defense is permitted, reported as a warning
+    /// rather than refused.
+    /// </param>
     /// <returns>The preflight manifest plus the aggregated result (issues + DB preview).</returns>
-    public async Task<DraftValidationOutcome> RunAsync(string folder)
+    public async Task<DraftValidationOutcome> RunAsync(string folder, bool allowRestating)
     {
         // One Node subprocess does the whole draft-format read; we consume its manifest.
         var manifest = await PreflightRunner.RunAsync(folder);
@@ -52,7 +56,7 @@ public class DraftValidationPipeline(
         issues.AddRange(RegistryLinkValidator.Check(metadata, manifest.Meta));
 
         // Read-only DB preview: create-vs-reuse plus the per-half import outcomes.
-        var (dbPreview, dbIssues) = await PreviewDbAsync(manifest, folder);
+        var (dbPreview, dbIssues) = await PreviewDbAsync(manifest, folder, allowRestating);
 
         // Fold the preview's flagged outcomes into the issue list.
         issues.AddRange(dbIssues);
@@ -68,9 +72,12 @@ public class DraftValidationPipeline(
     /// </summary>
     /// <param name="manifest">The preflight manifest whose taxonomy and problems are previewed.</param>
     /// <param name="folder">The draft folder, against which the preview reproduces image references.</param>
+    /// <param name="allowRestating">
+    /// Whether rewriting the text of a defended problem is permitted, reported as a warning rather than refused.
+    /// </param>
     /// <returns>The preview (null when the database was unreachable) and the issues it produced.</returns>
     private async Task<(DraftDbPreview? Preview, IReadOnlyList<VerdictError> Issues)> PreviewDbAsync(
-        DraftManifest manifest, string folder)
+        DraftManifest manifest, string folder, bool allowRestating)
     {
         try
         {
@@ -119,6 +126,21 @@ public class DraftValidationPipeline(
                     ManifestMeta.FileName, Half: null, Line: null, Col: null, "taxonomy-orphan",
                     $"competition '{orphan.Path}' exists in the DB but not in metadata.shared.json — register it "
                     + "(or remove the row) before importing", VerdictSeverity.Error));
+
+            // A rewrite landing on a problem someone has already defended.
+            foreach (var restatement in preview.DefendedProblemRestatements)
+            {
+                // The half and language, lower-cased to match the rest of the report.
+                var changed = $"{restatement.Language} {restatement.DocumentType}".ToLowerInvariant();
+
+                // Refused by default, advisory once the run opts in.
+                previewIssues.Add(new VerdictError(
+                    ManifestMeta.FileName, Half: null, Line: null, Col: null, "restates-defended-problem",
+                    $"problem '{restatement.Slug}' already has {restatement.DefenseCount} defense(s) and its "
+                    + $"{changed} would change. Rewriting it keeps those defenses attached, so they would read "
+                    + "back text nobody argued about. Pass --allow-restating if the rewrite is intended.",
+                    allowRestating ? VerdictSeverity.Warning : VerdictSeverity.Error));
+            }
 
             // Hand back the preview and the issues it surfaced.
             return (preview, previewIssues);

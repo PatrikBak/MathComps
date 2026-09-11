@@ -556,6 +556,188 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
+    /// Rewriting the statement of a problem someone has already defended is surfaced, naming the half and language
+    /// that would change and how many defenses hang off it. A defense names its problem by id and a re-import keeps
+    /// that id, so the rewrite would leave those conversations pointing at text they were never argued about. Two
+    /// conversations, since the count is what the refusal quotes.
+    /// </summary>
+    [Fact]
+    public Task A_changed_statement_on_a_defended_problem_is_flagged() => RunTestAsync(async service =>
+    {
+        // Two conversations held about the seeded problem.
+        await SeedDefenseAsync(SeededProblemSlug);
+        await SeedDefenseAsync(SeededProblemSlug);
+
+        // Re-import its Slovak original with a different body.
+        var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
+
+        // The rewrite is reported against the statement, in the language it would change, with both defenses counted.
+        Assert.Equal(
+            new DefendedProblemRestatement(SeededProblemSlug, DocumentType.Statement, Language.SK, 2),
+            Assert.Single(preview.DefendedProblemRestatements));
+    });
+
+    /// <summary>
+    /// A translation counts as much as the original. A student defends a problem in the language they read it in, so
+    /// rewriting the English text strands the conversations held against English exactly as rewriting the Slovak
+    /// original strands the Slovak ones.
+    /// </summary>
+    [Fact]
+    public Task A_changed_translation_on_a_defended_problem_is_flagged() => RunTestAsync(async service =>
+    {
+        // One conversation held about the seeded problem.
+        await SeedDefenseAsync(SeededProblemSlug);
+
+        // Re-import its English translation with a different body, leaving the Slovak original alone.
+        var preview = await PreviewAsync(service, Problem(1, Translation(Language.EN)));
+
+        // The rewrite is reported against the English statement.
+        Assert.Equal(
+            new DefendedProblemRestatement(SeededProblemSlug, DocumentType.Statement, Language.EN, 1),
+            Assert.Single(preview.DefendedProblemRestatements));
+    });
+
+    /// <summary>
+    /// Re-importing a defended problem with the body it already holds is silent — the check reads the same
+    /// overwrite-vs-unchanged decision the rest of the preview does, so a no-op re-import of a whole round doesn't
+    /// have to be waived problem by problem.
+    /// </summary>
+    [Fact]
+    public Task An_unchanged_statement_on_a_defended_problem_is_quiet() => RunTestAsync(async service =>
+    {
+        // One conversation held about the seeded problem.
+        await SeedDefenseAsync(SeededProblemSlug);
+
+        // Re-import its Slovak original with the stored body, byte for byte.
+        var preview = await PreviewAsync(service, Problem(1, Original(Language.SK, SeededBody)));
+
+        // Nothing would change, so nothing is flagged.
+        Assert.Empty(preview.DefendedProblemRestatements);
+    });
+
+    /// <summary>
+    /// The solution counts as much as the statement: a defense is argued against both halves, so rewriting the
+    /// reference solution alone is flagged the same way.
+    /// </summary>
+    [Fact]
+    public Task A_changed_solution_on_a_defended_problem_is_flagged() => RunTestAsync(async service =>
+    {
+        // A stored Slovak solution, so the draft's solution lands as a rewrite rather than a first add.
+        await QueryAsync(async context =>
+        {
+            // The problem the solution hangs off.
+            var problemId = await context.Problems
+                .Where(problem => problem.Slug == SeededProblemSlug)
+                .Select(problem => problem.Id)
+                .SingleAsync();
+
+            // The solution row itself.
+            context.ProblemTexts.Add(
+                SeedText(problemId, DocumentType.Solution, Language.SK, isOriginal: true));
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // One conversation held about the seeded problem.
+        await SeedDefenseAsync(SeededProblemSlug);
+
+        // Re-import the statement it already holds alongside a changed solution.
+        var preview = await PreviewAsync(
+            service, Problem(1, Original(Language.SK, SeededBody, hasSolution: true)));
+
+        // Only the solution would change, and that alone is flagged.
+        Assert.Equal(
+            new DefendedProblemRestatement(SeededProblemSlug, DocumentType.Solution, Language.SK, 1),
+            Assert.Single(preview.DefendedProblemRestatements));
+    });
+
+    /// <summary>
+    /// Landing a solution onto a defended problem that has none is quiet. The check reads rewrites, and an added half
+    /// leaves everything the conversation was argued against where it is. Solutions routinely arrive after the
+    /// statements, so a guard that fired on adds would refuse that ordinary second pass.
+    /// </summary>
+    [Fact]
+    public Task A_solution_added_to_a_defended_problem_is_quiet() => RunTestAsync(async service =>
+    {
+        // One conversation held about the seeded problem, which carries a statement and no solution.
+        await SeedDefenseAsync(SeededProblemSlug);
+
+        // Re-import the statement it already holds, now with a solution beside it.
+        var preview = await PreviewAsync(
+            service, Problem(1, Original(Language.SK, SeededBody, hasSolution: true)));
+
+        // The solution is a clean add rather than a rewrite, so nothing is flagged.
+        Assert.Equal(DraftTextAction.AddOriginal, ResolutionFor(preview, DocumentType.Solution).Action);
+        Assert.Empty(preview.DefendedProblemRestatements);
+    });
+
+    /// <summary>
+    /// A problem nobody has defended is rewritten as freely as before — the check turns on the defenses, not on the
+    /// rewrite, so ordinary corrections stay unflagged.
+    /// </summary>
+    [Fact]
+    public Task A_changed_statement_on_an_undefended_problem_is_quiet() => RunTestAsync(async service =>
+    {
+        // Re-import the seeded problem's Slovak original with a different body, with no conversation held about it.
+        var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
+
+        // The text would change, but nothing is defended, so nothing is flagged.
+        Assert.Empty(preview.DefendedProblemRestatements);
+    });
+
+    /// <summary>
+    /// Seeds one defense conversation held about a problem: a student, the session stamped with the kind its target
+    /// row attaches to, and the row naming the problem.
+    /// </summary>
+    /// <param name="problemSlug">The slug of the problem the conversation was held about.</param>
+    /// <returns>A task completing once the rows are persisted.</returns>
+    private Task SeedDefenseAsync(string problemSlug) => QueryAsync(async context =>
+    {
+        // The student holding the conversation. A unique index covers username and email, so each call seeds
+        // its own.
+        var studentId = Guid.NewGuid();
+        var user = new User
+        {
+            Id = studentId,
+            ExternalId = $"ext-{studentId:N}",
+            Username = $"s{studentId:N}"[..20],
+            Email = $"{studentId:N}@example.com",
+            GraduationYear = 2027
+        };
+        context.Users.Add(user);
+
+        // The conversation, stamped with the kind its target row is allowed to attach to.
+        var session = new DefenseSession
+        {
+            Id = Guid.CreateVersion7(),
+            UserId = user.Id,
+            TargetKind = DefenseTargetKind.Problem,
+            ProblemStatement = "Zadanie",
+            ProblemReference = "Vzorové riešenie",
+            ExaminerConfig = "{}",
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        context.DefenseSessions.Add(session);
+
+        // The problem it was held about.
+        var problemId = await context.Problems
+            .Where(problem => problem.Slug == problemSlug)
+            .Select(problem => problem.Id)
+            .SingleAsync();
+
+        // What the conversation defends.
+        context.ProblemDefenses.Add(new ProblemDefense
+        {
+            DefenseSessionId = session.Id,
+            ProblemId = problemId
+        });
+
+        // Persist the seed.
+        await context.SaveChangesAsync();
+    });
+
+    /// <summary>
     /// Builds a draft target for the seeded csmo-a-iii · 2024 round.
     /// </summary>
     /// <returns>The configured target.</returns>

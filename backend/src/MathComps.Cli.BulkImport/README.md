@@ -12,6 +12,8 @@ Imports authored problem drafts into the database and image storage: `validate` 
 
 `apply` runs all three, aborts on any error, then uploads images to R2, rewrites their refs (relative `images/…` → a `media:` id the site resolves to the uploaded copy), and upserts the taxonomy, problems, texts and authors. A re-import overwrites only the texts that actually changed and leaves identical ones untouched (idempotent).
 
+Apply finds a problem by its slug and rewrites its texts under the id that slug already holds. So a draft regenerated after the problems were rearranged can rewrite one problem's text under another's id, and every defense of that problem then reads back text nobody argued about. A run that would change the statement or solution of a defended problem is refused, naming the problem, the half and language that would change, and the defense count. `--allow-restating` turns that refusal into a warning, which is what a typo fix wants; it covers every folder in the run.
+
 Image uploads are deduplicated against a ledger kept beside the draft sources (`data/problems/.r2-uploads.json`, gitignored), keyed by storage key → source mtime, so re-applying a draft skips images whose bytes are already on R2 and only re-uploads ones you've changed. Delete the ledger to force a fresh upload of everything. The apply report's `Images` line shows the uploaded and skipped counts.
 
 Tag the draft before importing it: the [Tagging CLI](../MathComps.Cli.Tagging/README.md) writes a `tags:` list into each `pN.yaml`, which `apply` turns into the problem's tags. Run it *before* `validate`, so the preflight checks the slugs.
@@ -54,6 +56,8 @@ dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate 'data/prob
 
 Exits `0` when every folder is clean, `1` when any folder has an error-severity issue.
 
+`--allow-restating` reports a rewrite of a defended problem's text as a warning instead of refusing the folder.
+
 ### apply
 
 Import a draft: validate first, then write to the database and upload images.
@@ -62,6 +66,8 @@ Import a draft: validate first, then write to the database and upload images.
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- apply ./my-draft
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- apply 'data/problems/skmo-2025-*'
 ```
+
+`--allow-restating` lets the import rewrite the text of a problem that already carries defenses, which it otherwise refuses.
 
 Each folder is validated then applied in turn; a folder that fails validation writes nothing and the batch moves on to the rest. Exits `0` only when every folder imported, `1` if any failed.
 
