@@ -100,10 +100,15 @@ public class DraftResolutionService(
         // The texts this import would rewrite on a problem someone has already defended.
         var defendedRestatements = await PreviewDefendedRestatementsAsync(context, textResolutions);
 
+        // How the round's post-import count would sit against its group's promise, null whenever nothing is amiss.
+        var countDisagreement = await PreviewHostedCountAsync(context, target, postImportOrders.Count);
+
         // Hand back the create-vs-reuse picture, the per-text resolutions for colliding slugs, the round's gaps,
-        // the sort-order reconciliation apply would perform, and the rewrites landing on defended problems.
+        // the sort-order reconciliation apply would perform, the rewrites landing on defended problems, and the
+        // promise the round would break.
         return new DraftDbPreview(
-            resolutions, textResolutions, missingProblemOrders, sortOrderChanges, orphans, defendedRestatements);
+            resolutions, textResolutions, missingProblemOrders, sortOrderChanges, orphans, defendedRestatements,
+            countDisagreement);
     }
 
     /// <summary>
@@ -153,6 +158,34 @@ public class DraftResolutionService(
                     resolution.Language,
                     defenseCountBySlug[resolution.Slug]))
         ];
+    }
+
+    /// <summary>
+    /// Reads how many problems the round's group announces and compares it against the count the round would hold
+    /// once this import lands. See <see cref="HostedGroupCountDisagreement"/> for what a mismatch costs.
+    /// </summary>
+    /// <param name="context">The read-only context.</param>
+    /// <param name="target">The taxonomy the draft lands in, naming the round.</param>
+    /// <param name="postImportCount">How many problems the round would hold once this import lands.</param>
+    /// <returns>The disagreement, or null when the counts agree or no group runs the round.</returns>
+    private static async Task<HostedGroupCountDisagreement?> PreviewHostedCountAsync(
+        MathCompsDbContext context, DraftTarget target, int postImportCount)
+    {
+        // What the round's group announces, null both when the round runs in no group and when it isn't there yet.
+        var announced = await context.Rounds.AsNoTracking()
+            .Where(round => round.Competition.Path == target.CompetitionPath
+                            && round.Season.StartYear == target.SeasonYear)
+            .Select(round => (int?)round.HostedGroup!.ProblemCount)
+            .FirstOrDefaultAsync();
+
+        // Nothing announced anything, so the round's count answers to nobody.
+        if (announced is not { } groupAnnounces)
+            return null;
+
+        // Report the mismatch, or nothing when the import lands the paper the group promised.
+        return postImportCount == groupAnnounces
+            ? null
+            : new HostedGroupCountDisagreement(postImportCount, groupAnnounces);
     }
 
     /// <summary>

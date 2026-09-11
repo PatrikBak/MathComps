@@ -308,27 +308,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
             CsmoTarget(), RoundDate, closesAt,
             [Problem(1, Original(Language.SK, "same"))], Path.GetTempPath());
 
-        // The group taking the round over, the way a declaration does.
-        await QueryAsync(async context =>
-        {
-            // The group on the terms it runs.
-            var group = new HostedGroup
-            {
-                Slug = "mc-2026-1",
-                OpensAt = closesAt.AddDays(-14),
-                ClosesAt = closesAt,
-                ClockMinutes = 120,
-                AllowsReentry = false,
-                ProblemCount = 1,
-            };
-            context.HostedGroups.Add(group);
-
-            // The round it now runs.
-            (await context.Rounds.SingleAsync()).HostedGroup = group;
-
-            // Submit changes.
-            await context.SaveChangesAsync();
-        });
+        // The group taking the round over on a one-problem paper, the way a declaration does.
+        await HostTheRoundAsync(closesAt, problemCount: 1);
 
         // Re-import the identical draft with the embargo moved an hour on.
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -343,6 +324,120 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // And the round still carries the instant the group declared.
         await QueryAsync(async context =>
             Assert.Equal(closesAt, (await context.Rounds.SingleAsync()).VisibleSince));
+    });
+
+    /// <summary>
+    /// A draft that would leave a round the site runs itself holding a different number of problems than its group
+    /// announces is refused, and nothing is written.
+    /// </summary>
+    [Fact]
+    public Task Applying_a_draft_short_of_the_groups_problem_count_is_refused() => RunTestAsync(async service =>
+    {
+        // When the group closes, which is also the embargo its round carries.
+        var closesAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero);
+
+        // Import the round's first problem under that embargo.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, closesAt,
+            [Problem(1, Original(Language.SK, "first"))], Path.GetTempPath());
+
+        // The group taking the round over on a two-problem paper, the way a declaration does.
+        await HostTheRoundAsync(closesAt, problemCount: 2);
+
+        // Re-import the first problem alone, which would leave the round one short of the announced paper.
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.ApplyAsync(
+                CsmoTarget(), RoundDate, closesAt,
+                [Problem(1, Original(Language.SK, "corrected"))], Path.GetTempPath()));
+
+        // And the round still holds exactly what it did, body included.
+        var stored = await QueryValueAsync(async context =>
+            (await context.ProblemTexts.SingleAsync()).MarkdownText);
+        Assert.Equal("first", stored);
+    });
+
+    /// <summary>
+    /// Adding the problem a hosted round is still missing brings it up to the number its group announces, so the
+    /// import lands.
+    /// </summary>
+    [Fact]
+    public Task Applying_the_draft_that_completes_a_hosted_rounds_paper_is_allowed() => RunTestAsync(async service =>
+    {
+        // When the group closes, which is also the embargo its round carries.
+        var closesAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero);
+
+        // Import the round's first problem under that embargo.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, closesAt,
+            [Problem(1, Original(Language.SK, "first"))], Path.GetTempPath());
+
+        // The group taking the round over on a two-problem paper, the way a declaration does.
+        await HostTheRoundAsync(closesAt, problemCount: 2);
+
+        // Import the second problem, the one the announced paper is still waiting on.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, closesAt,
+            [Problem(2, Original(Language.SK, "second"))], Path.GetTempPath());
+
+        // The round now holds the paper its group announced.
+        var held = await QueryValueAsync(context => context.Problems.CountAsync());
+        Assert.Equal(2, held);
+    });
+
+    /// <summary>
+    /// The first import into a round a declaration raised — one holding nothing yet, already in its group — lands
+    /// when the draft carries the whole announced paper. This is the shape every real hosted import takes: the
+    /// group goes on the site with its rounds empty, and the problems arrive afterwards.
+    /// </summary>
+    [Fact]
+    public Task The_first_draft_filling_an_empty_hosted_round_is_applied() => RunTestAsync(async service =>
+    {
+        // When the group closes, which is also the embargo the declaration stamps on its empty round.
+        var closesAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero);
+
+        // The empty round a declaration leaves behind: taxonomy, season and a problem-less round in a group
+        // announcing a two-problem paper.
+        await QueryAsync(async context =>
+        {
+            // The season the round sits in.
+            var season = new Season { Id = Guid.NewGuid(), StartYear = 2024, EditionNumber = 74 };
+            context.Seasons.Add(season);
+
+            // The group on the terms it runs.
+            var group = new HostedGroup
+            {
+                Slug = "mc-2026-1",
+                OpensAt = closesAt.AddDays(-14),
+                ClosesAt = closesAt,
+                ClockMinutes = 120,
+                AllowsReentry = false,
+                ProblemCount = 2,
+            };
+            context.HostedGroups.Add(group);
+
+            // The round itself, carrying the group's closing instant as its embargo and holding no problems.
+            context.Rounds.Add(new Round
+            {
+                CompetitionId = CompetitionTreeSeed.Chain(context, "csmo-a-iii").Id,
+                SeasonId = season.Id,
+                Date = RoundDate,
+                VisibleSince = closesAt,
+                HostedGroup = group,
+            });
+
+            // Submit changes.
+            await context.SaveChangesAsync();
+        });
+
+        // Import the whole announced paper in one go.
+        await service.ApplyAsync(
+            CsmoTarget(), RoundDate, closesAt,
+            [Problem(1, Original(Language.SK, "first")), Problem(2, Original(Language.SK, "second"))],
+            Path.GetTempPath());
+
+        // The round now holds the paper its group announced.
+        var held = await QueryValueAsync(context => context.Problems.CountAsync());
+        Assert.Equal(2, held);
     });
 
     /// <summary>
@@ -1337,6 +1432,34 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(
             predicted.OrderBy(change => change.Path),
             result.SortOrderChanges.OrderBy(change => change.Path));
+    });
+
+    /// <summary>
+    /// Puts the one round the test has imported into a hosted group announcing the given number of problems, the
+    /// way a group declaration does, with the group closing at the instant that round is already embargoed to.
+    /// </summary>
+    /// <param name="closesAt">When the group closes, which is also the embargo its round carries.</param>
+    /// <param name="problemCount">The number of problems the group announces.</param>
+    /// <returns>A task representing the seeding.</returns>
+    private Task HostTheRoundAsync(DateTimeOffset closesAt, int problemCount) => QueryAsync(async context =>
+    {
+        // The group on the terms it runs.
+        var group = new HostedGroup
+        {
+            Slug = "mc-2026-1",
+            OpensAt = closesAt.AddDays(-14),
+            ClosesAt = closesAt,
+            ClockMinutes = 120,
+            AllowsReentry = false,
+            ProblemCount = problemCount,
+        };
+        context.HostedGroups.Add(group);
+
+        // The round it now runs.
+        (await context.Rounds.SingleAsync()).HostedGroup = group;
+
+        // Submit changes.
+        await context.SaveChangesAsync();
     });
 
     /// <summary>
