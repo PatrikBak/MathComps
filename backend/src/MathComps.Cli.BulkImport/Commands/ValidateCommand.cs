@@ -27,6 +27,13 @@ public class ValidateCommand(DraftValidationPipeline pipeline)
         [CommandArgument(0, "<folders>")]
         [Description("Draft folder path(s) or glob(s) to validate. Example: ./my-draft OR 'data/problems/skmo-2025-*'")]
         public required string[] Folders { get; set; }
+
+        /// <summary>
+        /// Whether to proceed when the import would rewrite the text of a problem that already carries a defense.
+        /// </summary>
+        [CommandOption("--allow-restating")]
+        [Description("Proceed when a problem that already has defenses would have its statement or solution rewritten.")]
+        public bool AllowRestating { get; set; }
     }
 
     /// <inheritdoc/>
@@ -37,7 +44,7 @@ public class ValidateCommand(DraftValidationPipeline pipeline)
             async folder =>
             {
                 // Run the shared pipeline — preflight, registry-link, read-only DB preview, all issues aggregated.
-                var outcome = await pipeline.RunAsync(folder);
+                var outcome = await pipeline.RunAsync(folder, settings.AllowRestating);
 
                 // Render the report.
                 ValidateReport.Render(outcome.Manifest.Meta, outcome.Result);

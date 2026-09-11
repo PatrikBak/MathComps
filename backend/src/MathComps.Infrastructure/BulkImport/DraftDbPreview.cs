@@ -108,6 +108,21 @@ public record SortOrderChange(string Path, int FromOrder, int ToOrder);
 public record TaxonomyOrphan(string Path);
 
 /// <summary>
+/// One stored text a re-import would rewrite on a problem students have already defended. Apply matches a problem by
+/// slug and overwrites its texts under the same id, so a draft regenerated after the problems were rearranged
+/// rewrites the text under an id every defense of the old problem still points at.
+/// </summary>
+/// <param name="Slug">The problem slug whose text would change.</param>
+/// <param name="DocumentType">The half that would change (statement or solution).</param>
+/// <param name="Language">The language of the text variant that would change.</param>
+/// <param name="DefenseCount">How many defenses the problem already carries.</param>
+public record DefendedProblemRestatement(
+    string Slug,
+    DocumentType DocumentType,
+    Language Language,
+    int DefenseCount);
+
+/// <summary>
 /// A read-only snapshot of how a draft would land in the database: which taxonomy entities already exist versus
 /// would need creating, and — for every text variant whose problem slug already exists — what the import would do
 /// to it given that text's language and originality. Produced by querying only — no rows written.
@@ -132,9 +147,13 @@ public record TaxonomyOrphan(string Path);
 /// The existing competition nodes whose path is absent from <c>metadata.shared.json</c> — empty in the normal case;
 /// non-empty blocks the import.
 /// </param>
+/// <param name="DefendedProblemRestatements">
+/// The texts this import would rewrite on problems that already carry a defense — empty in the normal case.
+/// </param>
 public record DraftDbPreview(
     ImmutableArray<EntityResolution> Entities,
     ImmutableArray<ProblemTextResolution> TextResolutions,
     ImmutableArray<int> MissingProblemOrders,
     ImmutableArray<SortOrderChange> SortOrderChanges,
-    ImmutableArray<TaxonomyOrphan> Orphans);
+    ImmutableArray<TaxonomyOrphan> Orphans,
+    ImmutableArray<DefendedProblemRestatement> DefendedProblemRestatements);
