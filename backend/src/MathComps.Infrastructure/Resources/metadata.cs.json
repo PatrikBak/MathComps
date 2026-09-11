@@ -301,6 +301,11 @@
       "shortName": "Listopad",
       "fullName": "Listopad",
       "urlSlug": "pokrocila-listopad"
+    },
+    "mathcomps-proposals": {
+      "shortName": "Náměty",
+      "fullName": "Náměty úloh",
+      "urlSlug": "namety"
     }
   },
   "seasonFormat": "{number}. ročník ({start}/{end})"

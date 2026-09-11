@@ -1,3 +1,6 @@
+using MathComps.Domain.EfCoreEntities;
+using MathComps.Domain.Taxonomy;
+
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
@@ -9,18 +12,33 @@ namespace MathComps.Infrastructure.Services.Defense;
 public sealed record DefenseGrading(DefenseProblemRound? Round)
 {
     /// <summary>
-    /// Whether the student is graded on what they argued. A conversation about a problem is graded unless that
-    /// problem is set in a group that never closes, which is the practice one and grades nobody. A handout is
-    /// argued under no round at all, so nobody is graded on it either.
+    /// Whether the student is graded on what they argued. A handout, a proposal and the practice group each
+    /// grade nobody; everything else was argued under a round somebody was grading.
     /// </summary>
-    public bool IsGraded => Round is not null and not { IsHosted: true, GroupClosesAt: null };
+    public bool IsGraded => Round switch
+    {
+        // A handout, argued under no round at all.
+        null => false,
+
+        // A proposal, which belongs to no competition anybody sits.
+        { CompetitionPath: var path } when TaxonomySlugs.IsAtOrUnder(path, HostedTaxonomy.ProposalsPath) =>
+            false,
+
+        // The practice group, which never closes and grades nobody.
+        { IsHosted: true, GroupClosesAt: null } => false,
+
+        // A round somebody was grading, whether or not it still belongs to the group that ran it.
+        _ => true,
+    };
 }
 
 /// <summary>
 /// The round a competition problem is set in.
 /// </summary>
+/// <param name="CompetitionPath"><inheritdoc cref="Competition.Path" path="/summary"/></param>
 /// <param name="IsHosted">Whether the site itself runs the round the problem was set in.</param>
 /// <param name="GroupClosesAt">When the group the round belongs to stops taking entries. Null for the practice
 /// group, which never closes, and null again on a round the site does not host, which belongs to no group at
 /// all.</param>
-public sealed record DefenseProblemRound(bool IsHosted, DateTimeOffset? GroupClosesAt);
+public sealed record DefenseProblemRound(
+    string CompetitionPath, bool IsHosted, DateTimeOffset? GroupClosesAt);

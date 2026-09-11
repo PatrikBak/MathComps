@@ -46,6 +46,12 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
     private readonly Guid _embargoedProblemId = Guid.CreateVersion7();
 
     /// <summary>
+    /// A problem parked among the proposals, sitting in a round no hosted group runs and whose embargo has not
+    /// lifted.
+    /// </summary>
+    private readonly Guid _proposedProblemId = Guid.CreateVersion7();
+
+    /// <summary>
     /// A problem of a second hosted round, embargoed until the same instant, which the student does hold an
     /// entry into. What the scoping cases vary against the one above.
     /// </summary>
@@ -91,6 +97,22 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
         // An id the archive has never held
         await Assert.ThrowsAsync<HostedProblemNotFoundException>(
             () => guard.EnsureCanDefendAsync(_studentId, new ProblemTarget(Guid.CreateVersion7()))));
+
+    /// <summary>
+    /// A parked problem is argued by anybody signed in, holding neither an entry nor a grant. It belongs to no
+    /// competition, so the rules a competition is entered through never reach it: the round below carries an
+    /// embargo that has not lifted, which is what a hosted problem is refused over.
+    /// </summary>
+    [Fact]
+    public Task A_problem_among_the_proposals_can_be_argued_by_anybody() => RunTestAsync(async guard =>
+    {
+        // Cleared, on a round nobody has entered or could
+        var holdsEntry = await guard.EnsureCanDefendAsync(
+            _studentId, new ProblemTarget(_proposedProblemId));
+
+        // And the ceiling reaches them, there being no entry to lift it
+        Assert.False(holdsEntry);
+    });
 
     /// <summary>
     /// An embargoed hosted problem cannot be argued by a student holding no entry into its round, which is the
@@ -252,6 +274,27 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             RoundId = hostedRoundId,
             Number = 1,
             Slug = "mathcomps-2026-1",
+        });
+
+        // A round of the proposals node: no group runs it, and its embargo has not lifted either, so a
+        // problem of it reaches the entitlement rule only if the guard fails to recognise where it sits.
+        var proposalsRoundId = Guid.CreateVersion7();
+        context.Rounds.Add(new Round
+        {
+            Id = proposalsRoundId,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "mathcomps-proposals").Id,
+            SeasonId = season.Id,
+            Date = new DateOnly(2026, 10, 1),
+            VisibleSince = closesAt,
+        });
+
+        // Its problem, the one the proposals case argues.
+        context.Problems.Add(new Problem
+        {
+            Id = _proposedProblemId,
+            RoundId = proposalsRoundId,
+            Number = 1,
+            Slug = "mathcomps-proposals-2026-1",
         });
 
         // A second round of the same group, embargoed until the same instant: the other side of every

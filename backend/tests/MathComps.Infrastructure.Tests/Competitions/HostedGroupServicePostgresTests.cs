@@ -211,6 +211,22 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// Verifies that a round of the proposals node is refused. The node sits under the hosted root, so a
+    /// manifest can name it, and this check is the only thing standing between a group and a round of problems
+    /// no competition runs.
+    /// </summary>
+    [Fact]
+    public Task A_round_of_the_proposals_node_is_refused() => RunTestAsync(async service =>
+    {
+        // A node whose problems belong to nobody's competition, named as if one ran them
+        await Assert.ThrowsAsync<HostedGroupManifestException>(
+            () => service.DeclareAsync(Manifest("mathcomps-proposals")));
+
+        // And nothing was written
+        Assert.Equal(0, await QueryValueAsync(context => context.HostedGroups.CountAsync()));
+    });
+
+    /// <summary>
     /// Verifies that a round whose embargo disagrees with the group's closing instant is refused. The embargo is
     /// what actually holds the problems back, so a group promising a date its rounds do not keep would publish
     /// them early or late with nothing saying so.

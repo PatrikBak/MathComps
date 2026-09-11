@@ -132,6 +132,11 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     /// </summary>
     private readonly Guid _practiceRoundId = Guid.CreateVersion7();
 
+    /// <summary>
+    /// The problem parked among the proposals, which no competition sets.
+    /// </summary>
+    private readonly Guid _proposedProblemId = Guid.CreateVersion7();
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
@@ -291,6 +296,27 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             UserId = _ownerId,
             RoundId = _practiceRoundId,
             StartedAt = DateTimeOffset.UtcNow,
+        });
+
+        // A round of the proposals node, which no group runs. It reads as released from a group the way an
+        // archive round does, and unlike one it is nobody's to grade.
+        var proposalsRoundId = Guid.CreateVersion7();
+        context.Rounds.Add(new Round
+        {
+            Id = proposalsRoundId,
+            CompetitionId = CompetitionTreeSeed.Chain(context, "mathcomps-proposals").Id,
+            SeasonId = season.Id,
+            Date = new DateOnly(2026, 10, 1),
+            VisibleSince = DateTimeOffset.MaxValue,
+        });
+
+        // And the problem the proposals conversations argue.
+        context.Problems.Add(new Problem
+        {
+            Id = _proposedProblemId,
+            RoundId = proposalsRoundId,
+            Number = 1,
+            Slug = "mathcomps-proposals-1",
         });
 
         // Commit the seed.
@@ -813,6 +839,32 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // And the listing says so, so the surface offers no control the backend would turn down
         var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
         Assert.True(listed.IsGraded);
+    });
+
+    /// <summary>
+    /// A proposal grades nobody either, and it reads to the database exactly as a round released from its group
+    /// does: neither is hosted and neither has a closing instant. A released round's conversation stays refused,
+    /// so the two are told apart by where the round sits and by nothing else.
+    /// </summary>
+    [Fact]
+    public Task A_proposals_conversation_can_be_rewound_and_deleted() => RunTestAsync(async service =>
+    {
+        // Argue a problem parked among the proposals, which needs neither an entry nor a grant
+        var session = await service.StartAsync(
+            _ownerId, ProblemRequest(_proposedProblemId, "my defense"));
+
+        // The listing reports it as nobody's to grade, so the surface offers the controls at all
+        var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
+        Assert.False(listed.IsGraded);
+
+        // Rewind to the examiner's opener
+        await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 0);
+
+        // And drop it altogether
+        await service.DeleteAsync(_ownerId, session.Id);
+
+        // Which leaves nothing behind
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
     });
 
     /// <summary>

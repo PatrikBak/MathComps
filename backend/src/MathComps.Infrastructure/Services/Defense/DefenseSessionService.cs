@@ -283,6 +283,7 @@ public class DefenseSessionService(
                     session.ProblemTarget == null
                         ? null
                         : new DefenseProblemRound(
+                            session.ProblemTarget.Problem.Round.Competition.Path,
                             session.ProblemTarget.Problem.Round.HostedGroupId != null,
                             session.ProblemTarget.Problem.Round.HostedGroup!.ClosesAt)),
                 session.ProblemStatement,
@@ -408,6 +409,7 @@ public class DefenseSessionService(
                 session.ProblemTarget == null
                     ? null
                     : new DefenseProblemRound(
+                        session.ProblemTarget.Problem.Round.Competition.Path,
                         session.ProblemTarget.Problem.Round.HostedGroupId != null,
                         session.ProblemTarget.Problem.Round.HostedGroup!.ClosesAt)))
             .FirstOrDefaultAsync(cancellationToken);

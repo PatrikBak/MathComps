@@ -80,7 +80,7 @@ dotnet run --project backend/src/MathComps.Cli.BulkImport -- swap 75-csmo-a-iii-
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- swap 75-csmo-a-iii-1 75-csmo-a-iii-3
 ```
 
-It moves the rows, so every defense, comment and mark travels with the problem it belongs to, and each problem takes the slug its new position calls for. The two may share a round or sit in different competitions and seasons. Figures keep resolving, since the markdown holds their storage key rather than deriving it from the slug.
+It moves the rows, so every defense, comment and mark travels with the problem it belongs to, and each problem takes the slug its new position calls for. The two may share a round or sit in different competitions and seasons. Figures keep resolving, since the markdown holds their storage key rather than deriving it from the slug. Swapping a problem out of a MathComps cycle means trading it with one on `mathcomps-proposals`, the node holding problems no competition runs, so the candidate going in has to be parked there first.
 
 Reach for this rather than `apply` whenever a round has been defended. Re-importing a rearranged draft rewrites text under the positions it finds, leaving every conversation attached to the problem that used to be there.
 

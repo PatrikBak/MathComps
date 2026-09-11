@@ -3,8 +3,9 @@ using MathComps.Domain.Contracts.Competitions;
 namespace MathComps.Domain.Taxonomy;
 
 /// <summary>
-/// Where the site's own competitions sit in the taxonomy. They are ordinary competition nodes with ordinary
-/// rounds and problems, so the only thing that needs naming is which node is which.
+/// Where the site's own competitions and the problems written for them sit in the taxonomy. They are ordinary
+/// competition nodes with ordinary rounds and problems, so the only thing that needs naming is which node is
+/// which.
 /// </summary>
 public static class HostedTaxonomy
 {
@@ -18,6 +19,16 @@ public static class HostedTaxonomy
     /// carrying a year would be wrong for every season but the first.
     /// </remarks>
     public const string RootSlug = "mathcomps";
+
+    /// <summary>
+    /// The node holding problems none of the site's competitions run.
+    /// </summary>
+    /// <remarks>
+    /// A problem written for a cycle and then swapped out is parked here, as is a candidate waiting to be
+    /// swapped in, and either keeps the row it has always had. Nothing is entered into it, so no hosted group
+    /// may claim its rounds.
+    /// </remarks>
+    public const string ProposalsPath = $"{RootSlug}-proposals";
 
     /// <summary>
     /// The level each category node stands for, keyed by that node's slug. A node outside this map is outside
