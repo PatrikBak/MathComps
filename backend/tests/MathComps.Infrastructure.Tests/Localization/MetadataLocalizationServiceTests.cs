@@ -254,6 +254,7 @@ public class MetadataLocalizationServiceTests
     [InlineData("memo-i")]
     [InlineData("tst-d1")]
     [InlineData("imo")]
+    [InlineData("mathcomps-proposals")]
     public void Registered_competition_has_no_issues(string competitionPath) =>
         Assert.Empty(_service.ValidateTaxonomyRegistration(competitionPath));
 
@@ -327,16 +328,18 @@ public class MetadataLocalizationServiceTests
     #region URL names
 
     /// <summary>
-    /// The nodes the site's own competitions run under carry a URL name in every language, which is what a
-    /// hosted round is addressed by. A gap would leave a whole language unable to reach the page.
+    /// Every node a problem of the site's own is addressed under carries a URL name in every language, which is
+    /// what a defense against one is named by. The naming throws on the first language missing one, so a gap
+    /// takes down the whole list a student reads their conversations back from.
     /// </summary>
-    /// <param name="path">The round node's path.</param>
+    /// <param name="path">The node's path.</param>
     [Theory]
     [InlineData("mathcomps-practice")]
     [InlineData("mathcomps-elementary-september")]
     [InlineData("mathcomps-intermediate-september")]
     [InlineData("mathcomps-advanced-september")]
-    public void A_hosted_round_node_is_named_in_every_language(string path)
+    [InlineData("mathcomps-proposals")]
+    public void A_node_a_problem_is_addressed_under_is_named_in_every_language(string path)
     {
         // No language leaves the node unnamed
         Assert.Empty(_service.LocalesMissingUrlSlug(path));

@@ -83,7 +83,8 @@
         {
           "slug": "advanced",
           "children": [{ "slug": "september" }, { "slug": "october" }, { "slug": "november" }]
-        }
+        },
+        { "slug": "proposals" }
       ]
     }
   ]

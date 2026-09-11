@@ -339,6 +339,12 @@ public sealed class HostedGroupService(
                 throw new HostedGroupManifestException(
                     $"'{reference.CompetitionPath}' is not under '{HostedTaxonomy.RootSlug}'.");
 
+            // Parked problems, so a group claiming the node would enter students into a round of problems no
+            // competition runs.
+            if (TaxonomySlugs.IsAtOrUnder(reference.CompetitionPath, HostedTaxonomy.ProposalsPath))
+                throw new HostedGroupManifestException(
+                    $"'{reference.CompetitionPath}' is under '{HostedTaxonomy.ProposalsPath}'.");
+
             // A blank year, which the declaration would otherwise raise as a season and lose to the sanity check
             // on the column, in a fault naming a constraint rather than the field the author left out.
             if (reference.SeasonYear <= 0)

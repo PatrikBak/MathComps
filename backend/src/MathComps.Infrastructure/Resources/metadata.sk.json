@@ -301,6 +301,11 @@
       "shortName": "November",
       "fullName": "November",
       "urlSlug": "pokrocila-november"
+    },
+    "mathcomps-proposals": {
+      "shortName": "Návrhy",
+      "fullName": "Návrhy úloh",
+      "urlSlug": "navrhy"
     }
   },
   "seasonFormat": "{number}. ročník ({start}/{end})"

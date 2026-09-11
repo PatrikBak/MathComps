@@ -301,6 +301,11 @@
       "shortName": "November",
       "fullName": "November",
       "urlSlug": "advanced-november"
+    },
+    "mathcomps-proposals": {
+      "shortName": "Proposals",
+      "fullName": "Problem proposals",
+      "urlSlug": "proposals"
     }
   },
   "seasonFormat": "Edition {number} ({start}/{end})"

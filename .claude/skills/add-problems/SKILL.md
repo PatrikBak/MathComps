@@ -47,7 +47,7 @@ The preflight checks **format only**; the DB-aware `validate` is the gate (so it
 Check `backend/src/MathComps.Infrastructure/Resources/metadata.shared.json`. If the competition slug isn't there, add it to **all four** metadata files, or the registry check fails with "no structural entry":
 
 - `metadata.shared.json` — a tree of nodes, `{ "nodes": [ { "slug": "csmo", "children": [ … ] } ] }`. Array position = sort order **at every level**, and `children` is omitted at a leaf.
-- `metadata.{cs,sk,en}.json` — one `nodes["<path>"] = { shortName, fullName }` entry per node, a path being the slugs from the competition down, hyphen-joined: the competition (`csmo`), each of its categories (`csmo-a`), and each round (`csmo-a-iii`, `memo-i`).
+- `metadata.{cs,sk,en}.json` — one `nodes["<path>"] = { shortName, fullName }` entry per node, a path being the slugs from the competition down, hyphen-joined: the competition (`csmo`), each of its categories (`csmo-a`), and each round (`csmo-a-iii`, `memo-i`). A node the site addresses by URL carries a third key, `urlSlug`, unique across the whole tree and every locale.
 
 **The two files must list exactly the same paths** — a test asserts it in both directions, so a node added to one and forgotten in the other fails the suite.
 
@@ -57,6 +57,8 @@ Decide the shape. The tree nests as deep as the competition really does — thre
 - **One flat sitting** — a competition with no sub-rounds (IMO/EGMO) omits `children` entirely; its problems hang off the competition itself, and its own `nodes` entry is the only name needed.
 
 Every slug is lowercase alphanumeric with **no hyphen in it** — a hyphen is what joins a slug to its parent's path, so one inside a slug would make the path ambiguous. Path composition throws on it, and a check constraint refuses the row underneath.
+
+**A problem belonging to no competition goes under `mathcomps-proposals`** — one swapped out of a MathComps cycle, or a candidate waiting to be swapped in. It is registered already, so a draft just names it as its `competition`. Give that draft a `visibleSince` far out: the round is what hides the problems, so one parked without a date is browsable and defendable by any student.
 
 Add a test row for any new competition/round/name to `MetadataLocalizationServiceTests` (display order, leaf/child shape, name resolution, `Registered_taxonomy_has_no_issues`). A new root also needs its slug in `Shared_roots_are_in_display_order`; the parity sweep walks the registry itself, so it needs no edit.
 
