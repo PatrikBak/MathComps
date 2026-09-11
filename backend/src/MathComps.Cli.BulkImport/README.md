@@ -1,10 +1,10 @@
 # Bulk Import CLI
 
-Imports authored problem drafts into the database and image storage. Two modes: `validate` (dry-run, writes nothing) and `apply` (the real import).
+Imports authored problem drafts into the database and image storage: `validate` (dry-run, writes nothing) and `apply` (the real import). A third command, `swap`, moves problems already in the database around rather than importing anything.
 
 ## How It Works
 
-Both commands run the same checks, so a clean `validate` all but guarantees a clean `apply`:
+`validate` and `apply` run the same checks, so a clean `validate` all but guarantees a clean `apply`:
 
 1. **Preflight** — shells out to the `web/` TypeScript preflight (`npm run draft:preflight`), which reads the draft folder and reports any format, markdown or image-reference problems.
 2. **Registry check** — every competition on the path in `_meta.yaml` must be registered in the shared taxonomy and carry a localized name in each locale, and the one the path ends at must be a leaf — nothing nested below it.
@@ -41,7 +41,7 @@ my-draft/
 
 Run these from the repo root — the `--project` and folder paths are relative to your shell. (The `web/` preflight itself is located automatically, so the tool doesn't care which directory you launch it from.)
 
-Both commands take one or more draft folders, given as literal paths and/or globs (the glob's leaf selects sibling directories). One invocation can sweep a whole batch — each matched folder runs through the pipeline independently, in its own report block, with a closing tally.
+`validate` and `apply` take one or more draft folders, given as literal paths and/or globs (the glob's leaf selects sibling directories). One invocation can sweep a whole batch — each matched folder runs through the pipeline independently, in its own report block, with a closing tally. `swap` takes two problem slugs instead.
 
 ### validate
 
@@ -65,10 +65,27 @@ dotnet run --project backend/src/MathComps.Cli.BulkImport -- apply 'data/problem
 
 Each folder is validated then applied in turn; a folder that fails validation writes nothing and the batch moves on to the rest. Exits `0` only when every folder imported, `1` if any failed.
 
+### swap
+
+Exchange two problems' positions. Takes two problem slugs rather than folders.
+
+```bash
+dotnet run --project backend/src/MathComps.Cli.BulkImport -- swap 75-csmo-a-iii-1 75-csmo-a-iii-3 --dry-run
+dotnet run --project backend/src/MathComps.Cli.BulkImport -- swap 75-csmo-a-iii-1 75-csmo-a-iii-3
+```
+
+It moves the rows, so every defense, comment and mark travels with the problem it belongs to, and each problem takes the slug its new position calls for. The two may share a round or sit in different competitions and seasons. Figures keep resolving, since the markdown holds their storage key rather than deriving it from the slug.
+
+Reach for this rather than `apply` whenever a round has been defended. Re-importing a rearranged draft rewrites text under the positions it finds, leaving every conversation attached to the problem that used to be there.
+
+It refuses a slug that names no problem, a slug two problems carry, the same slug twice, and a destination slug a third problem already holds. A hosted group or an embargo is not a reason to refuse. `--dry-run` runs every check and prints what would move, writing nothing.
+
+Exits `0` when the exchange went through (or a dry run came back clean), `1` when it was refused.
+
 ## Setup
 
 - **Node + npm** — the preflight runs the `web/` project's `draft:preflight` script, so `npm` must be on your PATH with `web/` dependencies installed.
-- **Database** — set the connection string in user secrets (see the [main backend README](../../README.md)). Both commands need a reachable DB: the safety checks (contiguity, problem existence, second-original) are DB-aware, so `validate` fails — not just warns — when it can't reach one, and `apply` requires it.
+- **Database** — set the connection string in user secrets (see the [main backend README](../../README.md)). Every command needs a reachable DB: the safety checks (contiguity, problem existence, second-original) are DB-aware, so `validate` fails — not just warns — when it can't reach one, `apply` requires it, and `swap` reads and writes rows outright.
 - **Cloudflare R2** (`apply` only) — image uploads need the `CloudflareR2` settings (see the
   [main backend README](../../README.md#6-configure-cloudflare-r2)). They live in the solution-wide user-secrets
   store, so setting them for any one project covers this one too.

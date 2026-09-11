@@ -237,7 +237,7 @@ Each tool has its own README.
 
 ### Data Pipeline Tools
 
-- **[Bulk Import](src/MathComps.Cli.BulkImport/README.md)** – Validates and applies problem-draft folders to the database
+- **[Bulk Import](src/MathComps.Cli.BulkImport/README.md)** – Validates and applies problem-draft folders to the database, and exchanges two stored problems' positions
 - **[Competitions](src/MathComps.Cli.Competitions/README.md)** – Declares a hosted group from its manifest: raises the rounds it runs and sets the terms
 - **[User Sync](src/MathComps.Cli.UserSync/README.md)** – Syncs every Clerk user into the database
 

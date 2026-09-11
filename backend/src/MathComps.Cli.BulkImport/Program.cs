@@ -28,7 +28,10 @@ return await CliApp.Create<Program>("Bulk Import")
         // The apply service that writes a resolved draft to the database.
         services.AddScoped<IDraftApplyService, DraftApplyService>();
 
-        // The validation pipeline both commands share.
+        // The service that exchanges two problems' positions.
+        services.AddScoped<IProblemSwapService, ProblemSwapService>();
+
+        // The validation pipeline validate and apply share.
         services.AddScoped<DraftValidationPipeline>();
     })
     .RunAsync(args, config =>
@@ -36,4 +39,7 @@ return await CliApp.Create<Program>("Bulk Import")
         // The dry-run command and its mutating sibling, the import.
         config.AddCommand<ValidateCommand>("validate");
         config.AddCommand<ApplyCommand>("apply");
+
+        // The command that moves two existing problems onto each other's positions.
+        config.AddCommand<SwapCommand>("swap");
     });
