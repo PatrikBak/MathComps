@@ -119,6 +119,14 @@ public class DraftValidationPipeline(
                     VerdictSeverity.Error));
             }
 
+            // A round the site runs owes its group a fixed number of problems; short or long breaks the listing.
+            if (preview.HostedGroupCountDisagreement is { } disagreement)
+                previewIssues.Add(new VerdictError(
+                    ManifestMeta.FileName, Half: null, Line: null, Col: null, "hosted-group-count",
+                    $"importing would leave the round holding {disagreement.RoundWouldHold} problem(s), but its "
+                    + $"hosted group announces {disagreement.GroupAnnounces} — fix the draft, or correct the "
+                    + "group manifest", VerdictSeverity.Error));
+
             // A stored competition node the registry can't place blocks the import — its sort order can't be
             // reconciled, and leaving it risks the very collision the re-sequencing exists to prevent.
             foreach (var orphan in preview.Orphans)

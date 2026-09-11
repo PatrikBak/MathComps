@@ -52,6 +52,9 @@ public class DraftApplyService(
             context, competition.Id, target.CompetitionPath, season.Id, date, visibleSince);
         entities.Add(new EntityResolution("round", $"{target.CompetitionPath} {target.SeasonYear}", roundAction));
 
+        // A round the site runs owes its group a fixed number of problems; refuse before a single one is written.
+        await EnsureHostedProblemCountAsync(context, round, target.CompetitionPath, problems);
+
         // Write the problems, tallying the per-text outcomes and the insert/update/image counts.
         var appliedTexts = ImmutableArray.CreateBuilder<AppliedText>();
         var authorsCache = new Dictionary<string, Author>();
@@ -168,6 +171,48 @@ public class DraftApplyService(
         };
         await context.Rounds.AddAsync(created);
         return (created, ResolutionAction.Create);
+    }
+
+    /// <summary>
+    /// Refuses an import that would leave a round the site runs itself holding a different number of problems than
+    /// its group announces, before a single problem is written. See <see cref="HostedGroupCountDisagreement"/> for
+    /// what such a round costs.
+    /// </summary>
+    /// <param name="context">The write context.</param>
+    /// <param name="round">The round the draft's problems land in.</param>
+    /// <param name="competitionPath">The path of the competition node whose sitting that round is.</param>
+    /// <param name="problems">The draft's problems.</param>
+    /// <exception cref="InvalidOperationException">
+    /// The import would break the group's announced problem count.
+    /// </exception>
+    private static async Task EnsureHostedProblemCountAsync(
+        MathCompsDbContext context, Round round, string competitionPath, IReadOnlyList<DraftProblemContent> problems)
+    {
+        // A round no group runs answers to nobody for how many problems it holds — a fresh one included, since a
+        // group only ever takes a round over by declaration.
+        if (round.HostedGroupId is not { } groupId)
+            return;
+
+        // The number that group announces.
+        var announced = await context.HostedGroups
+            .Where(group => group.Id == groupId)
+            .Select(group => group.ProblemCount)
+            .SingleAsync();
+
+        // The orders the round already holds.
+        var existingOrders = await context.Problems
+            .Where(problem => problem.RoundId == round.Id)
+            .Select(problem => problem.Number)
+            .ToListAsync();
+
+        // What the round would hold once this import lands: its own orders plus the draft's, counted once each.
+        var postImportCount = existingOrders.Concat(problems.Select(problem => problem.Order)).ToHashSet().Count;
+
+        // A paper the group never promised.
+        if (postImportCount != announced)
+            throw new InvalidOperationException(
+                $"Round '{competitionPath}' runs in a hosted group announcing {announced} problem(s), but this "
+                + $"import would leave it holding {postImportCount}. Fix the draft, or correct the group manifest.");
     }
 
     /// <summary>

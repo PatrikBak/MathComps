@@ -738,6 +738,123 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
+    /// A draft leaving a round the site runs itself holding fewer problems than its group announces is flagged.
+    /// </summary>
+    [Fact]
+    public Task A_draft_leaving_a_hosted_round_short_is_flagged() => RunTestAsync(async service =>
+    {
+        // Put the seeded round, which holds problems 1 and 2, into a group announcing a three-problem paper.
+        await HostSeededRoundAsync(problemCount: 3);
+
+        // Correct problem 1 — the round would still hold only the two it has.
+        var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
+
+        // Both numbers are reported, the way the group declaration reports them.
+        Assert.Equal(new HostedGroupCountDisagreement(2, 3), preview.HostedGroupCountDisagreement);
+    });
+
+    /// <summary>
+    /// Correcting one problem of a hosted round that already holds the paper its group announced is not flagged —
+    /// the count the import would leave behind is what the rule reads, not how many problems the draft carries.
+    /// </summary>
+    [Fact]
+    public Task A_subset_reimport_of_a_complete_hosted_round_is_not_flagged() => RunTestAsync(async service =>
+    {
+        // Put the seeded round, which holds problems 1 and 2, into a group announcing exactly those two.
+        await HostSeededRoundAsync(problemCount: 2);
+
+        // Correct problem 1 — the round goes on holding the announced two.
+        var preview = await PreviewAsync(service, Problem(1, Original(Language.SK)));
+
+        // Nothing to report.
+        Assert.Null(preview.HostedGroupCountDisagreement);
+    });
+
+    /// <summary>
+    /// A round no group runs answers to nobody for how many problems it holds, so an ordinary archive import is
+    /// never measured against a count. This is the case every import outside the site's own competitions takes.
+    /// </summary>
+    [Fact]
+    public Task A_round_outside_a_hosted_group_is_measured_against_no_count() => RunTestAsync(async service =>
+    {
+        // Append problem 3 to the seeded round, which runs in no group.
+        var preview = await PreviewAsync(service, Problem(3, Original(Language.SK)));
+
+        // Nothing to report.
+        Assert.Null(preview.HostedGroupCountDisagreement);
+    });
+
+    /// <summary>
+    /// The first import into a round a declaration raised — one holding nothing yet, already in its group — is not
+    /// flagged when the draft carries the whole announced paper. This is the shape every real hosted import takes:
+    /// the group goes on the site with its rounds empty, and the problems land afterwards.
+    /// </summary>
+    [Fact]
+    public Task The_first_draft_filling_an_empty_hosted_round_is_not_flagged() => RunTestAsync(async service =>
+    {
+        // The seeded memo-i · 2024 round holds nothing; put it in a group announcing a one-problem paper.
+        await QueryAsync(async context =>
+        {
+            // The group on the terms it runs.
+            var group = new HostedGroup
+            {
+                Slug = "mc-2026-1",
+                OpensAt = new DateTimeOffset(2026, 8, 31, 18, 0, 0, TimeSpan.Zero),
+                ClosesAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero),
+                ClockMinutes = 120,
+                AllowsReentry = false,
+                ProblemCount = 1,
+            };
+            context.HostedGroups.Add(group);
+
+            // The empty round it now runs.
+            var round = await context.Rounds.SingleAsync(
+                candidate => candidate.Competition.Path == "memo-i");
+            round.HostedGroup = group;
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // The draft carrying that one problem.
+        var preview = await PreviewAsync(
+            service, new DraftTarget("memo-i", 2024), Problem(1, Original(Language.SK)));
+
+        // Nothing to report.
+        Assert.Null(preview.HostedGroupCountDisagreement);
+    });
+
+    /// <summary>
+    /// Puts the seeded csmo-a-iii · 2024 round into a hosted group announcing the given number of problems, the way
+    /// a group declaration does.
+    /// </summary>
+    /// <param name="problemCount">The number of problems the group announces.</param>
+    /// <returns>A task representing the seeding.</returns>
+    private Task HostSeededRoundAsync(int problemCount) => QueryAsync(async context =>
+    {
+        // The group on the terms it runs.
+        var group = new HostedGroup
+        {
+            Slug = "mc-2026-1",
+            OpensAt = new DateTimeOffset(2026, 8, 31, 18, 0, 0, TimeSpan.Zero),
+            ClosesAt = new DateTimeOffset(2026, 9, 14, 18, 0, 0, TimeSpan.Zero),
+            ClockMinutes = 120,
+            AllowsReentry = false,
+            ProblemCount = problemCount,
+        };
+        context.HostedGroups.Add(group);
+
+        // The round it now runs.
+        var round = await context.Rounds.SingleAsync(
+            candidate => candidate.Competition.Path == "csmo-a-iii");
+        round.HostedGroup = group;
+
+        // Persist the seed.
+        await context.SaveChangesAsync();
+    });
+
+
+    /// <summary>
     /// Builds a draft target for the seeded csmo-a-iii · 2024 round.
     /// </summary>
     /// <returns>The configured target.</returns>

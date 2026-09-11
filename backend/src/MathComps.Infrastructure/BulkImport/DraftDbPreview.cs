@@ -123,6 +123,16 @@ public record DefendedProblemRestatement(
     int DefenseCount);
 
 /// <summary>
+/// A round the site runs itself whose problem count would not match what its group announces once this import
+/// lands. A group promises the same number of problems in every one of its competitions, and the board reads that
+/// promise off the group while serving the problems off the round, so a round holding anything else breaks the
+/// listing for every visitor. A hard error.
+/// </summary>
+/// <param name="RoundWouldHold">How many problems the round would hold once this import lands.</param>
+/// <param name="GroupAnnounces"><inheritdoc cref="HostedGroup.ProblemCount" path="/summary"/></param>
+public record HostedGroupCountDisagreement(int RoundWouldHold, int GroupAnnounces);
+
+/// <summary>
 /// A read-only snapshot of how a draft would land in the database: which taxonomy entities already exist versus
 /// would need creating, and — for every text variant whose problem slug already exists — what the import would do
 /// to it given that text's language and originality. Produced by querying only — no rows written.
@@ -150,10 +160,15 @@ public record DefendedProblemRestatement(
 /// <param name="DefendedProblemRestatements">
 /// The texts this import would rewrite on problems that already carry a defense — empty in the normal case.
 /// </param>
+/// <param name="HostedGroupCountDisagreement">
+/// How the round's post-import problem count would differ from what its group announces — null when the counts
+/// agree, and null for a round no group runs.
+/// </param>
 public record DraftDbPreview(
     ImmutableArray<EntityResolution> Entities,
     ImmutableArray<ProblemTextResolution> TextResolutions,
     ImmutableArray<int> MissingProblemOrders,
     ImmutableArray<SortOrderChange> SortOrderChanges,
     ImmutableArray<TaxonomyOrphan> Orphans,
-    ImmutableArray<DefendedProblemRestatement> DefendedProblemRestatements);
+    ImmutableArray<DefendedProblemRestatement> DefendedProblemRestatements,
+    HostedGroupCountDisagreement? HostedGroupCountDisagreement);
