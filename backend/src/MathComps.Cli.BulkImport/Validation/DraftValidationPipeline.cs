@@ -67,8 +67,7 @@ public class DraftValidationPipeline(
 
     /// <summary>
     /// Runs the read-only DB preview for a resolvable draft and maps its per-half resolutions to the issues
-    /// worth flagging. Best-effort: an unreachable database degrades to a single warning so the format and
-    /// registry results still stand, instead of failing the dry run.
+    /// worth flagging. An unreachable database is an error of its own, since every check here needs one.
     /// </summary>
     /// <param name="manifest">The preflight manifest whose taxonomy and problems are previewed.</param>
     /// <param name="folder">The draft folder, against which the preview reproduces image references.</param>

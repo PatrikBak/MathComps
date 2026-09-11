@@ -1,97 +1,91 @@
 # Bulk Import CLI
 
-Imports authored problem drafts into the database and image storage: `validate` (dry-run, writes nothing) and `apply` (the real import). A third command, `swap`, moves problems already in the database around rather than importing anything.
+Imports authored problem drafts into the database and image storage, through `validate` (a dry run that writes nothing) and `apply` (the import). `swap` exchanges the positions of two problems already in the database.
+
+The draft format lives in [the draft format reference](../../../web/scripts/PREFLIGHT_README.md), which owns the folder layout, `_meta.yaml`, the image rules and the embargo field.
 
 ## How It Works
 
-`validate` and `apply` run the same checks, so a clean `validate` all but guarantees a clean `apply`:
+`validate` and `apply` run the same pipeline, so a clean dry run all but guarantees a clean import. It checks, in order:
 
-1. **Preflight** — shells out to the `web/` TypeScript preflight (`npm run draft:preflight`), which reads the draft folder and reports any format, markdown or image-reference problems.
-2. **Registry check** — every competition on the path in `_meta.yaml` must be registered in the shared taxonomy and carry a localized name in each locale, and the one the path ends at must be a leaf — nothing nested below it.
-3. **DB preview** — a read-only look at what each problem would create, overwrite, or leave unchanged (it compares the would-be body against what's stored, so a no-op re-import isn't flagged as an overwrite). Being DB-aware, this is also where the safety checks the format preflight can't make live: the import must leave the round's problem orders contiguous (`1..N`, no gap — so a `p4` whose problem doesn't exist yet is rejected), a newly-created problem must carry a `pN.yaml` sidecar, an original may not collide with a stored original in another language, and a round the site runs itself must be left holding exactly the number of problems its group announces.
+- **Preflight** — the `web/` TypeScript preflight (`npm run draft:preflight`) reads the folder and reports any format, markdown or image problem.
+- **Figures** — every referenced image must size cleanly, the same read `apply` performs on import.
+- **Tag slugs** — every slug in a `pN.yaml` must be in the approved vocabulary, which the preflight cannot see.
+- **Registry** — every competition on the path must be registered in the shared taxonomy and carry both names in all three locales, and the last one must be a leaf.
+- **DB preview** — what each problem would create, overwrite, or leave unchanged, compared by content so a no-op re-import isn't flagged. It also carries the checks needing a database: round contiguity, the `pN.yaml` a new problem must have, a second original, a stored taxonomy node the registry can't place, and the problem count a hosted round's group announced.
 
-`apply` runs all three, aborts on any error, then uploads images to R2, rewrites their refs (relative `images/…` → a `media:` id the site resolves to the uploaded copy), and upserts the taxonomy, problems, texts and authors. A re-import overwrites only the texts that actually changed and leaves identical ones untouched (idempotent).
+`apply` upserts what the draft describes: the taxonomy and its sort order, the round, the problems, their texts, authors and tags. Figures upload to R2 as each problem is written, and their refs are rewritten to the `media:` keys the site resolves. Only texts that actually changed are rewritten.
 
-Apply finds a problem by its slug and rewrites its texts under the id that slug already holds. So a draft regenerated after the problems were rearranged can rewrite one problem's text under another's id, and every defense of that problem then reads back text nobody argued about. A run that would change the statement or solution of a defended problem is refused, naming the problem, the half and language that would change, and the defense count. `--allow-restating` turns that refusal into a warning, which is what a typo fix wants; it covers every folder in the run.
+A run that would change a defended problem's statement or solution is refused, since those defenses would then read back text nobody argued about. `--allow-restating` downgrades it to a warning, which is what a typo fix wants. The flag covers every folder the run matched, so a batch takes it all at once.
 
-Image uploads are deduplicated against a ledger kept beside the draft sources (`data/problems/.r2-uploads.json`, gitignored), keyed by storage key → source mtime, so re-applying a draft skips images whose bytes are already on R2 and only re-uploads ones you've changed. Delete the ledger to force a fresh upload of everything. The apply report's `Images` line shows the uploaded and skipped counts.
+Image uploads are deduplicated against a gitignored ledger (`data/problems/.r2-uploads.json`) mapping each storage key to a hash of the bytes last pushed under it. The report's `Images` line counts what was uploaded and skipped; delete the ledger to force a fresh upload of everything.
 
-Tag the draft before importing it: the [Tagging CLI](../MathComps.Cli.Tagging/README.md) writes a `tags:` list into each `pN.yaml`, which `apply` turns into the problem's tags. Run it *before* `validate`, so the preflight checks the slugs.
-
-## Embargoing a round
-
-A `visibleSince` in `_meta.yaml` loads a round ahead of the day it opens. The problems land complete, and the archive starts serving them once that instant passes, with no job to run and nothing to flip. The draft owns the field outright: re-applying without it lifts a stored embargo, the same way a corrected `date` overwrites a stored one. On a round the site runs itself that ownership passes to the group: its closing instant is the embargo, so a draft carrying a different one is refused rather than applied.
-
-It hides the problems, not their images. Figures go to public storage the moment `apply` runs, under a key derived from the problem's slug (`problems/75-csmo-a-iii-1-incircle`), and the browser fetches them from there directly rather than through the API. Someone who guesses both the slug and the figure's filename stem can fetch a figure early; the statement, solution, tags, authors, the round's presence in every listing and its problem pages are all gone until it opens.
-
-## Draft folder
-
-A folder of plain files — one round's problems plus their images. Full authoring spec: [the draft format reference](../../../web/scripts/PREFLIGHT_README.md).
-
-```
-my-draft/
-  _meta.yaml        # competition / season / date / visibleSince / language
-  p1.sk.md          # problem 1 — statement + solution (one file per language)
-  p1.yaml           # problem 1 metadata — authors, solution link, tags
-  p2.sk.md
-  p2.yaml
-  images/           # referenced images (flat)
-    incircle.svg
-```
+Tag the draft before `validate`, so the [Tagging CLI](../MathComps.Cli.Tagging/README.md)'s slugs get checked on the dry run.
 
 ## Command Reference
 
-Run these from the repo root — the `--project` and folder paths are relative to your shell. (The `web/` preflight itself is located automatically, so the tool doesn't care which directory you launch it from.)
-
-`validate` and `apply` take one or more draft folders, given as literal paths and/or globs (the glob's leaf selects sibling directories). One invocation can sweep a whole batch — each matched folder runs through the pipeline independently, in its own report block, with a closing tally. `swap` takes two problem slugs instead.
+Run from the repo root. `validate` and `apply` take draft folders as paths and/or globs, the wildcard matching sibling directories only. Match more than one and each folder gets its own report block, with a tally at the end.
 
 ### validate
 
 Dry-run a draft: run the checks and report issues. Writes nothing.
 
 ```bash
+# one folder
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate ./my-draft
+# every sibling folder the glob matches
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- validate 'data/problems/skmo-2025-*'
 ```
 
-Exits `0` when every folder is clean, `1` when any folder has an error-severity issue.
+- `--allow-restating` — report a rewrite of a defended problem's text as a warning instead of refusing the folder.
 
-`--allow-restating` reports a rewrite of a defended problem's text as a warning instead of refusing the folder.
+Exits `0` when every folder is clean, `1` when any folder errored, crashed, or nothing matched.
 
 ### apply
 
 Import a draft: validate first, then write to the database and upload images.
 
 ```bash
+# one folder
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- apply ./my-draft
+# every sibling folder the glob matches
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- apply 'data/problems/skmo-2025-*'
 ```
 
-`--allow-restating` lets the import rewrite the text of a problem that already carries defenses, which it otherwise refuses.
+- `--allow-restating` — as above, and it applies to every folder in the run.
 
-Each folder is validated then applied in turn; a folder that fails validation writes nothing and the batch moves on to the rest. Exits `0` only when every folder imported, `1` if any failed.
+A folder that fails validation writes nothing and the batch moves on. There is no transaction around the import itself, so a folder that crashes part-way can leave rows written and figures uploaded. Exits `0` only when every folder imported.
 
 ### swap
 
-Exchange two problems' positions. Takes two problem slugs rather than folders.
+Exchange two problems' positions. Takes two slugs rather than folders.
 
 ```bash
+# report what would move, writing nothing
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- swap 75-csmo-a-iii-1 75-csmo-a-iii-3 --dry-run
 dotnet run --project backend/src/MathComps.Cli.BulkImport -- swap 75-csmo-a-iii-1 75-csmo-a-iii-3
 ```
 
-It moves the rows, so every defense, comment and mark travels with the problem it belongs to, and each problem takes the slug its new position calls for. The two may share a round or sit in different competitions and seasons. Figures keep resolving, since the markdown holds their storage key rather than deriving it from the slug. Swapping a problem out of a MathComps cycle means trading it with one on `mathcomps-proposals`, the node holding problems no competition runs, so the candidate going in has to be parked there first.
+- `--dry-run` — run every check and print what would move. Writes nothing.
 
-Reach for this rather than `apply` whenever a round has been defended. Re-importing a rearranged draft rewrites text under the positions it finds, leaving every conversation attached to the problem that used to be there.
+It moves the rows, so every defense, comment and self-assessment travels with the problem it belongs to, and each takes the slug its new position calls for. Figures keep resolving: the markdown holds their storage key. The two problems may sit in different competitions and seasons, which is what lets you trade one out of a MathComps cycle against a problem parked on `mathcomps-proposals`, the node holding problems no competition runs.
 
-It refuses a slug that names no problem, a slug two problems carry, the same slug twice, and a destination slug a third problem already holds. A hosted group or an embargo is not a reason to refuse. `--dry-run` runs every check and prints what would move, writing nothing.
+This is how to rearrange a defended round. `apply` would rewrite text under the positions it finds, leaving every conversation on the problem that used to be there.
 
-Exits `0` when the exchange went through (or a dry run came back clean), `1` when it was refused.
+It refuses a slug that names no problem, a slug two problems carry, the same slug twice, and a destination slug a third problem holds. It checks nothing else: a problem keeps neither its embargo nor its hosted group, it inherits the destination round's. Exits `0` when the exchange went through, or a dry run came back clean.
+
+## Embargoing a round
+
+A `visibleSince` in `_meta.yaml` holds a round back until the instant it names, and the draft owns the field: re-applying without it lifts a stored embargo.
+
+On a round a hosted group runs, the embargo stops being the draft's to move: `apply` refuses unless the draft's `visibleSince` equals the instant already stored on the round. Declaring the group stamps that instant from its `closesAt`, but the check reads the stored value, not the manifest. `validate` does not see this at all, so the refusal lands on the import.
+
+The embargo hides the problems, not their figures. Those go to public storage the moment `apply` runs, keyed by the problem's slug and the figure's filename (`problems/75-csmo-a-iii-1-incircle`), so anyone guessing both can fetch a figure early. Everything else stays withheld until the round opens.
 
 ## Setup
 
-- **Node + npm** — the preflight runs the `web/` project's `draft:preflight` script, so `npm` must be on your PATH with `web/` dependencies installed.
-- **Database** — set the connection string in user secrets (see the [main backend README](../../README.md)). Every command needs a reachable DB: the safety checks (contiguity, problem existence, second-original) are DB-aware, so `validate` fails — not just warns — when it can't reach one, `apply` requires it, and `swap` reads and writes rows outright.
-- **Cloudflare R2** (`apply` only) — image uploads need the `CloudflareR2` settings (see the
-  [main backend README](../../README.md#6-configure-cloudflare-r2)). They live in the solution-wide user-secrets
-  store, so setting them for any one project covers this one too.
+- **Node + npm** — the preflight runs `web/`'s `draft:preflight` script, so `npm` must be on your PATH with `web/` dependencies installed.
+- **Database** — every command needs a reachable one, and `validate` fails rather than warns without it.
+- **Cloudflare R2** (`apply` only) — uploads need the `CloudflareR2` settings, see [step 6 of the main backend README](../../README.md#6-configure-cloudflare-r2).
+
+Every backend project shares one user-secrets store (see the [main backend README](../../README.md)).

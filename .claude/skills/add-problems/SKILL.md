@@ -116,7 +116,7 @@ Mechanical parity only proves the math and structure survived; a prose-level mea
 
 ## Step 5 — Tag the draft
 
-Tag the problems before validating, so the preflight checks the slugs:
+Tag the problems before validating, so `validate` checks the slugs against the approved vocabulary:
 
 ```bash
 dotnet run --project backend/src/MathComps.Cli.Tagging -- ./data/problems/my-draft
