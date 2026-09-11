@@ -10,9 +10,10 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// <summary>
 /// Service for managing user comments on content.
 /// </summary>
-/// <param name="dbContext">The database context.</param>
+/// <param name="dbContextFactory">The factory minting a context per operation.</param>
 /// <param name="logger">The logger.</param>
-public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService> logger) : ICommentService
+public class CommentService(
+    IDbContextFactory<MathCompsDbContext> dbContextFactory, ILogger<CommentService> logger) : ICommentService
 {
     #region Private Types
 
@@ -47,6 +48,9 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
     /// <inheritdoc />
     public async Task<ImmutableList<CommentDto>> GetCommentsAsync(CommentTarget target, Guid? userId)
     {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
         // Build the CTE-based query to fetch all comments for the target
         var (sql, parameters) = BuildCommentsCte(target);
 
@@ -141,6 +145,9 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
     /// <inheritdoc />
     public async Task<CommentDto> CreateCommentAsync(CommentTarget target, Guid authorId, string content, Guid? parentCommentId = null)
     {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
         // Create the comment entity
         var comment = new Comment
         {
@@ -238,6 +245,9 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
     /// <inheritdoc />
     public async Task<UpdateCommentResult> UpdateCommentAsync(CommentTarget target, Guid commentId, Guid userId, string content)
     {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
         // Get the existing comment
         var existingComment = await dbContext.Comments.FirstOrDefaultAsync(comment => comment.Id == commentId)
             // It must exist
@@ -340,6 +350,9 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
     /// <inheritdoc />
     public async Task DeleteCommentAsync(Guid commentId, Guid userId)
     {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
         // Get the comment
         var comment = await dbContext.Comments.FirstOrDefaultAsync(comment => comment.Id == commentId)
             // It must exist
@@ -365,6 +378,9 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
     /// <inheritdoc />
     public async Task ToggleLikeAsync(Guid commentId, Guid userId)
     {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
         // Check if comment exists
         var commentExists = await dbContext.Comments.AnyAsync(comment => comment.Id == commentId);
 
@@ -406,6 +422,9 @@ public class CommentService(MathCompsDbContext dbContext, ILogger<CommentService
     /// <inheritdoc />
     public async Task<ImmutableDictionary<string, int>> GetCommentCountsAsync(CommentTargetType targetType, ImmutableList<string> targetIds)
     {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
         // Build the query based on the target type
         // Include only active comments
         var query = targetType switch
