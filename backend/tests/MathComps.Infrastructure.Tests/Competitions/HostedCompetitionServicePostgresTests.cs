@@ -134,8 +134,6 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         services.Configure<DefenseLimits>(limits =>
         {
             limits.MaxCandidateChars = 4000;
-            limits.MaxHandoutContentIdChars = 100;
-            limits.MaxEnvironmentIdChars = 100;
             limits.MaxFeedbackCommentChars = CommentCharCap;
             limits.MaxMessagesPerDefense = 20;
             limits.DailySpendCeilingPerUser = 1;

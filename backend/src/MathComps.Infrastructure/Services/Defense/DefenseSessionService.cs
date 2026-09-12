@@ -58,7 +58,7 @@ public class DefenseSessionService(
     {
         // Every field a start needs must be present and non-blank; a missing one (null through JSON) or a blank one
         // is a bad request, not a server fault.
-        DefenseInputs.EnsureTargetPresent(start.Request.Target, _limits);
+        DefenseInputs.EnsureTargetPresent(start.Request.Target);
         DefenseInputs.EnsureNotBlank(start.Request.Content);
 
         // Bound the student's message before doing anything with it.

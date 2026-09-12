@@ -1,5 +1,5 @@
 using MathComps.Domain.Contracts.Defense;
-using MathComps.Infrastructure.Options;
+using MathComps.Domain.EfCoreEntities;
 
 namespace MathComps.Infrastructure.Services.Defense;
 
@@ -36,8 +36,7 @@ internal static class DefenseInputs
     /// Throws when what is being defended is missing, or when the target the caller sent cannot address anything.
     /// </summary>
     /// <param name="target">The target to check, null when the request omitted it entirely.</param>
-    /// <param name="limits">The caps a target's own text is held to.</param>
-    public static void EnsureTargetPresent(DefenseTarget? target, DefenseLimits limits)
+    public static void EnsureTargetPresent(DefenseTarget? target)
     {
         // Each arm is addressed by different fields, so each has its own way of naming nothing.
         switch (target)
@@ -46,8 +45,8 @@ internal static class DefenseInputs
             case HandoutEnvironmentTarget handout:
                 EnsureNotBlank(handout.HandoutContentId);
                 EnsureNotBlank(handout.EnvironmentId);
-                EnsureWithinLength(handout.HandoutContentId, limits.MaxHandoutContentIdChars);
-                EnsureWithinLength(handout.EnvironmentId, limits.MaxEnvironmentIdChars);
+                EnsureWithinLength(handout.HandoutContentId, Handout.MaxContentIdChars);
+                EnsureWithinLength(handout.EnvironmentId, HandoutEnvironment.MaxContentIdChars);
                 break;
 
             // An empty id addresses no problem, and the binder writes one for a field the request left out.
