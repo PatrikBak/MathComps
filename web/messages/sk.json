@@ -218,6 +218,8 @@
     "HostedEntryProfileIncomplete": "Pred vstupom si doplň meno, rok maturity a e-mail.",
     "HostedEntryRequired": "Úlohy uvidíš, až keď vstúpiš do súťaže.",
     "HostedGroupNotOpen": "Táto súťaž práve nie je otvorená.",
+    "HostedNoteEmpty": "Tvoja poznámka je prázdna.",
+    "HostedNoteTooLong": "Tvoja poznámka je príliš dlhá.",
     "HostedProblemNotFound": "Táto úloha nepatrí do žiadnej súťaže.",
     "INVALID_FILE_TYPE": "Nepovolený typ súboru",
     "ListAccessDenied": "Tento zoznam je súkromný. Ak je to tvoj zoznam, najprv sa prihlás.",

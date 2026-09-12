@@ -144,6 +144,16 @@ public sealed class HostedEntryNotGradedException()
     : Exception("This entry is not being graded, so there is nobody to leave a note for");
 
 /// <summary>
+/// Thrown when what a student says about their own solution carries no words, so nothing stands to record.
+/// </summary>
+public sealed class HostedNoteEmptyException() : Exception("A note has to say something");
+
+/// <summary>
+/// Thrown when what a student says about their own solution runs past the longest note a competition takes.
+/// </summary>
+public sealed class HostedNoteTooLongException() : Exception("The note is too long");
+
+/// <summary>
 /// Thrown when a student enters without the account details an entry asks of them.
 /// </summary>
 public sealed class HostedEntryProfileIncompleteException()

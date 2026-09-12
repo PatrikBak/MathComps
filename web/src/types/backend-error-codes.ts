@@ -32,6 +32,8 @@ export const BACKEND_ERROR_CODES = [
   'HostedEntryAlreadySpent',
   'HostedEntryNotRunning',
   'HostedEntryNotGraded',
+  'HostedNoteEmpty',
+  'HostedNoteTooLong',
   'HostedEntryProfileIncomplete',
   'AdminNoteValue',
   'AdminNoteTarget',

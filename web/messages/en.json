@@ -218,6 +218,8 @@
     "HostedEntryProfileIncomplete": "Fill in your name, graduation year and email before entering.",
     "HostedEntryRequired": "You'll see the problems once you enter the competition.",
     "HostedGroupNotOpen": "This competition isn't open right now.",
+    "HostedNoteEmpty": "Your note is empty.",
+    "HostedNoteTooLong": "Your note is too long.",
     "HostedProblemNotFound": "This problem isn't part of a competition.",
     "INVALID_FILE_TYPE": "Invalid file type",
     "ListAccessDenied": "This list is private. If it is your list, log in first.",

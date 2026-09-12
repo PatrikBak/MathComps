@@ -20,4 +20,9 @@ public class HostedCompetitionOptions
     /// means moving <c>selfAssessmentNote</c> and <c>selfAssessmentPracticeNote</c> in all three locales too.
     /// </remarks>
     public int NoteGraceMinutes { get; set; } = 30;
+
+    /// <summary>
+    /// The longest what a student says about their own solution may be, in characters.
+    /// </summary>
+    public int MaxNoteChars { get; set; } = 2000;
 }

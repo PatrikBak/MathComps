@@ -114,6 +114,10 @@ public sealed class GlobalExceptionHandler(
         HostedEntryProfileIncompleteException
             => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedEntryProfileIncomplete),
 
+        // A note on a student's own solution the contract can't take: no words at all, or too many of them
+        HostedNoteEmptyException => (StatusCodes.Status400BadRequest, ApiErrorCode.HostedNoteEmpty),
+        HostedNoteTooLongException => (StatusCodes.Status400BadRequest, ApiErrorCode.HostedNoteTooLong),
+
         // A review note the contract can't take: what it says, or the reply it stands against
         AdminNoteValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminNoteValue),
         AdminNoteTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminNoteTarget),
