@@ -9,6 +9,11 @@ namespace MathComps.Domain.EfCoreEntities;
 public class Handout
 {
     /// <summary>
+    /// The longest a handout's content id may be, in characters. This is the width of the column it is stored in.
+    /// </summary>
+    public const int MaxContentIdChars = 30;
+
+    /// <summary>
     /// Primary key (Guid v7).
     /// </summary>
     public Guid Id { get; set; } = Guid.CreateVersion7();
@@ -16,7 +21,7 @@ public class Handout
     /// <summary>
     /// Identifier matching the file-based handout.
     /// </summary>
-    [MaxLength(30)]
+    [MaxLength(MaxContentIdChars)]
     public required string ContentId { get; set; }
 
     /// <summary>

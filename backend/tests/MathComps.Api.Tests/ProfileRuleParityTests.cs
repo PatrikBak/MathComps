@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Users;
 using MathComps.Shared.Cli;
 
@@ -50,7 +51,7 @@ public class ProfileRuleParityTests
 
         // And the ceiling it has to stay under
         Assert.Equal(
-            UserManager.MaxUsernameLength.ToString(),
+            User.MaxUsernameLength.ToString(),
             ReadTsConstant("username-schema.ts", "MAX_USERNAME_LENGTH"));
     }
 

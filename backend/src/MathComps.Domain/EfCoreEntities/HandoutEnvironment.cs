@@ -9,6 +9,12 @@ namespace MathComps.Domain.EfCoreEntities;
 public class HandoutEnvironment
 {
     /// <summary>
+    /// The longest an environment's content id may be, in characters. This is the width of the column it is
+    /// stored in.
+    /// </summary>
+    public const int MaxContentIdChars = 200;
+
+    /// <summary>
     /// Primary key (Guid v7).
     /// </summary>
     public Guid Id { get; set; } = Guid.CreateVersion7();
@@ -27,7 +33,7 @@ public class HandoutEnvironment
     /// Identifier matching the environment's permanent id in the handout source (its <c>\EnvId</c>). Unique per
     /// handout, not site-wide.
     /// </summary>
-    [MaxLength(200)]
+    [MaxLength(MaxContentIdChars)]
     public required string ContentId { get; set; }
 
     /// <summary>

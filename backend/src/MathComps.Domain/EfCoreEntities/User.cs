@@ -8,6 +8,12 @@ namespace MathComps.Domain.EfCoreEntities;
 public class User
 {
     /// <summary>
+    /// The longest a username may be, in characters, short enough to sit in a results row. The column it is
+    /// stored in is exactly this wide.
+    /// </summary>
+    public const int MaxUsernameLength = 20;
+
+    /// <summary>
     /// Internal primary key (Guid v7).
     /// </summary>
     public Guid Id { get; set; } = Guid.CreateVersion7();
@@ -35,7 +41,7 @@ public class User
     /// circulation. Anything that shows a username therefore has to hand over null once
     /// <see cref="IsDeleted"/> is set.
     /// </remarks>
-    [MaxLength(20)]
+    [MaxLength(MaxUsernameLength)]
     public string? Username { get; set; }
 
     /// <summary>

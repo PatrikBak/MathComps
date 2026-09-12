@@ -26,16 +26,12 @@ public partial class UserManager(
     /// The shortest a username may be.
     /// </summary>
     /// <remarks>
-    /// This and the two rules below it are public so <c>UsernameRuleParityTests</c> can read them. The frontend
-    /// keeps its own copy in <c>username-schema.ts</c>, to refuse a name while it can still be retyped, and that
-    /// test is what stops the two drifting.
+    /// This and <see cref="UsernamePattern"/> are public so <c>ProfileRuleParityTests</c> can read them,
+    /// alongside <see cref="User.MaxUsernameLength"/>. The frontend keeps its own copy in
+    /// <c>username-schema.ts</c>, to refuse a name while it can still be retyped, and that test is what stops
+    /// the two drifting.
     /// </remarks>
     public const int MinUsernameLength = 3;
-
-    /// <summary>
-    /// The longest a username may be, short enough to sit in a results row.
-    /// </summary>
-    public const int MaxUsernameLength = 20;
 
     /// <summary>
     /// The characters a username may be built from: letters in any alphabet, digits, and the separators a name
@@ -333,7 +329,7 @@ public partial class UserManager(
         var normalizedUsername = WhitespaceRunPattern().Replace(trimmedUsername, " ");
 
         // Long enough to be a name, short enough to sit in a results row
-        if (normalizedUsername.Length is < MinUsernameLength or > MaxUsernameLength)
+        if (normalizedUsername.Length is < MinUsernameLength or > User.MaxUsernameLength)
             throw new UsernameRejectedException();
 
         // Letters, digits, and the separators a written-out name needs

@@ -147,8 +147,6 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         services.Configure<DefenseLimits>(limits =>
         {
             limits.MaxCandidateChars = 100;
-            limits.MaxHandoutContentIdChars = 30;
-            limits.MaxEnvironmentIdChars = 200;
             limits.MaxFeedbackCommentChars = 50;
             limits.MaxMessagesPerDefense = 2;
             limits.DailySpendCeilingPerUser = 1.00m;
