@@ -1,5 +1,4 @@
 using MathComps.Domain.Contracts.Competitions;
-using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
@@ -25,18 +24,16 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// The node a competition runs under: its localized name, and the URL name it is addressed by.
 /// </param>
 /// <param name="grants">Reads whether a student is let past the gates a competition is entered through.</param>
-/// <param name="limits">The caps a defense is held to.</param>
 /// <param name="options">The terms a hosted competition runs on.</param>
 public sealed class HostedCompetitionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
     IUserGrantService grants,
-    IOptions<DefenseLimits> limits,
     IOptions<HostedCompetitionOptions> options)
     : IHostedCompetitionService
 {
-    /// <inheritdoc cref="DefenseLimitsDto.MaxFeedbackCommentChars" path="/summary"/>
-    private readonly int _maxCommentChars = limits.Value.MaxFeedbackCommentChars;
+    /// <inheritdoc cref="HostedCompetitionOptions.MaxNoteChars" path="/summary"/>
+    private readonly int _maxNoteChars = options.Value.MaxNoteChars;
 
     /// <inheritdoc cref="HostedCompetitionOptions.NoteGraceMinutes" path="/summary"/>
     private readonly int _noteGraceMinutes = options.Value.NoteGraceMinutes;
@@ -250,11 +247,11 @@ public sealed class HostedCompetitionService(
     {
         // What the student wrote, reduced to the text it carries. The words are the whole claim, so a blank
         // one is a bad request rather than a quiet way of dropping what stands.
-        var written = comment.TrimToNull() ?? throw new DefenseFeedbackValueException();
+        var written = comment.TrimToNull() ?? throw new HostedNoteEmptyException();
 
-        // Held to the same cap as everything else a student writes about a defense.
-        if (written.Length > _maxCommentChars)
-            throw new DefenseFeedbackCommentTooLongException();
+        // Held to the longest note the competition takes.
+        if (written.Length > _maxNoteChars)
+            throw new HostedNoteTooLongException();
 
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -616,7 +613,7 @@ public sealed class HostedCompetitionService(
                         .Select(defense => defense.Line),
                 ],
                 SelfAssessment: assessments.GetValueOrDefault(problem.Id),
-                MaxCommentChars: _maxCommentChars)),
+                MaxCommentChars: _maxNoteChars)),
         ];
     }
 

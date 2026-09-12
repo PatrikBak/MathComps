@@ -21,9 +21,9 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     : PostgresTestBase<IHostedCompetitionService>(fixture)
 {
     /// <summary>
-    /// The longest comment this class's caps allow, which is what the cap test writes against.
+    /// The longest note this class allows, which is what the cap test writes against.
     /// </summary>
-    private const int CommentCharCap = 1000;
+    private const int NoteCharCap = 1000;
 
     /// <summary>
     /// How long the seeded groups' clocks run, which is what a test spending one has to get past.
@@ -130,18 +130,12 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // The registry the group's name is read out of.
         services.AddLocalization();
 
-        // The caps a problem's conversation rows report.
-        services.Configure<DefenseLimits>(limits =>
+        // The window a note about a solution stays open in, and the longest a note may be.
+        services.Configure<HostedCompetitionOptions>(options =>
         {
-            limits.MaxCandidateChars = 4000;
-            limits.MaxFeedbackCommentChars = CommentCharCap;
-            limits.MaxMessagesPerDefense = 20;
-            limits.DailySpendCeilingPerUser = 1;
+            options.NoteGraceMinutes = NoteGraceMinutes;
+            options.MaxNoteChars = NoteCharCap;
         });
-
-        // The window a note about a solution stays open in, past the end of the entry.
-        services.Configure<HostedCompetitionOptions>(
-            options => options.NoteGraceMinutes = NoteGraceMinutes);
 
         // What the service asks about the student calling it.
         services.AddUserGrants();
@@ -1727,7 +1721,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         var spent = await service.EnterAsync(_studentId, AdvancedSlug);
 
         // Nothing but whitespace, which carries no claim
-        await Assert.ThrowsAsync<DefenseFeedbackValueException>(() =>
+        await Assert.ThrowsAsync<HostedNoteEmptyException>(() =>
             service.SetSelfAssessmentAsync(_studentId, AdvancedSlug, spent.Problems[0].Id, "   \n  "));
     });
 
@@ -1744,13 +1738,13 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // The problem it is made about
         var problemId = spent.Problems[0].Id;
 
-        // One character over what the caps allow
-        await Assert.ThrowsAsync<DefenseFeedbackCommentTooLongException>(() =>
+        // One character over what the cap allows
+        await Assert.ThrowsAsync<HostedNoteTooLongException>(() =>
             service.SetSelfAssessmentAsync(
-                _studentId, AdvancedSlug, problemId, new string('x', CommentCharCap + 1)));
+                _studentId, AdvancedSlug, problemId, new string('x', NoteCharCap + 1)));
 
-        // Exactly what they allow, which is theirs to write
-        var atTheCap = new string('x', CommentCharCap);
+        // Exactly what the cap allows, which is theirs to write
+        var atTheCap = new string('x', NoteCharCap);
 
         // Written
         await service.SetSelfAssessmentAsync(_studentId, AdvancedSlug, problemId, atTheCap);

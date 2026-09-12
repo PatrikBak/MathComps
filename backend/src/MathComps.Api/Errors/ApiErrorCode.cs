@@ -154,6 +154,16 @@ public enum ApiErrorCode
     HostedEntryNotGraded,
 
     /// <summary>
+    /// What a student said about their own solution carried no words.
+    /// </summary>
+    HostedNoteEmpty,
+
+    /// <summary>
+    /// What a student said about their own solution ran past the longest note a competition takes.
+    /// </summary>
+    HostedNoteTooLong,
+
+    /// <summary>
     /// An entry was taken by a student whose account is missing a username, an email address, or an answer
     /// about graduating high school.
     /// </summary>
