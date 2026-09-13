@@ -64,16 +64,19 @@ test.describe("the author's hints", () => {
     // Carrying the problem it leads to, up where a conversation about the same problem carries it
     await expect(hints.getByText(STATEMENT_OPENING)).toBeVisible()
 
-    // A rung per hint, each labelled as one and still folded away, so reading the first costs nothing of
-    // the second
-    await expect(hints.locator('summary')).toHaveCount(2)
-    await expect(hints.locator('summary').first()).toContainText(areaCopy.hint)
-    await expect(hints.getByText(FIRST_HINT)).toBeHidden()
+    // A number per hint, the ladder standing on the first of them
+    const rungs = hints.getByRole('tab')
+    await expect(rungs).toHaveCount(2)
+    await expect(rungs.first()).toHaveAttribute('aria-selected', 'true')
 
-    // The first, unfolded on its own, the second staying folded behind it
-    await hints.locator('summary').first().click()
-    await expect(hints.getByText(FIRST_HINT)).toBeVisible()
-    await expect(hints.getByText(SECOND_HINT)).toBeHidden()
+    // So the weakest nudge is what a student who asked for the ladder is reading
+    const shownRung = hints.locator('[role="tabpanel"]:not([inert])')
+    await expect(shownRung).toContainText(FIRST_HINT)
+
+    // And stepping on reads the second in the first's place, one rung being shown at a time
+    await hints.getByRole('button', { name: areaCopy.nextHint }).click()
+    await expect(shownRung).toContainText(SECOND_HINT)
+    await expect(shownRung).not.toContainText(FIRST_HINT)
 
     // And the solution it leads towards is not on this surface
     await expect(hints.getByText(SOLUTION_OPENING)).toHaveCount(0)
@@ -127,7 +130,7 @@ test.describe("the author's hints", () => {
     await expect(hints.getByText(STATEMENT_OPENING)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // With its rungs
-    await expect(hints.locator('summary')).toHaveCount(2)
+    await expect(hints.getByRole('tab')).toHaveCount(2)
 
     // Closed again
     await hints.getByRole('button', { name: modalCopy.close }).click()

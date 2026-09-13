@@ -21,18 +21,17 @@ import {
 import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { inlineBlockToMathSource } from '@/components/math/utils/math-render'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
+import type { DisclosurePanelProps } from '@/components/shared/components/DisclosurePanel'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { getProblemImageUrl } from '@/components/shared/utils/asset-urls'
 import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
 
-import { CollapsibleCard, type DisclosurePanelProps } from './Cards'
+import { CollapsibleCard } from './Cards'
 import {
-  ANSWER_BADGE,
-  ANSWER_TEXT_COLOR,
-  ENVIRONMENT_BADGE,
+  ANSWER_ACCENT,
+  ENVIRONMENT_ACCENT,
   ENVIRONMENT_TEXT_COLOR,
-  HINT_BADGE,
-  HINT_TEXT_COLOR,
+  HINT_ACCENT,
 } from './handout-colors'
 import { renderBlocks, renderRawContentBlock } from './handout-content-renderer'
 import { blockSequenceToMarkdown } from './handout-content-source'
@@ -213,8 +212,7 @@ function renderDocumentSections(
                 if (!hideSolutionsAndProofs && contentBlock.proof.length > 0) {
                   disclosures.push({
                     label: t('labels.proof'),
-                    textColorClass: ENVIRONMENT_TEXT_COLOR.theorem,
-                    badge: ENVIRONMENT_BADGE.theorem,
+                    accent: ENVIRONMENT_ACCENT.theorem,
                     badgeContent: (
                       <span className="w-[8px] h-[8px] bg-current rounded-[2px]"></span>
                     ),
@@ -231,8 +229,7 @@ function renderDocumentSections(
                 ) {
                   disclosures.push({
                     label: t('labels.answer'),
-                    textColorClass: ANSWER_TEXT_COLOR,
-                    badge: ANSWER_BADGE,
+                    accent: ANSWER_ACCENT,
                     badgeContent: '=',
                     children: renderBlocks(contentBlock.answer, imagesById, imageMissingText),
                   })
@@ -240,8 +237,7 @@ function renderDocumentSections(
                 if (!hideSolutionsAndProofs && contentBlock.solution.length > 0) {
                   disclosures.push({
                     label: t('labels.solution'),
-                    textColorClass: ENVIRONMENT_TEXT_COLOR[contentBlock.type],
-                    badge: ENVIRONMENT_BADGE[contentBlock.type],
+                    accent: ENVIRONMENT_ACCENT[contentBlock.type],
                     badgeContent: '✓',
                     children: renderBlocks(contentBlock.solution, imagesById, imageMissingText),
                   })
@@ -251,8 +247,7 @@ function renderDocumentSections(
                 contentBlock.hints.forEach((hint, hintIndex) => {
                   disclosures.push({
                     label: t('labels.hint'),
-                    textColorClass: HINT_TEXT_COLOR,
-                    badge: HINT_BADGE,
+                    accent: HINT_ACCENT,
                     badgeContent: hintIndex + 1,
                     children: renderBlocks(hint, imagesById, imageMissingText),
                   })
@@ -264,8 +259,7 @@ function renderDocumentSections(
                 ) {
                   disclosures.push({
                     label: t('labels.answer'),
-                    textColorClass: ANSWER_TEXT_COLOR,
-                    badge: ANSWER_BADGE,
+                    accent: ANSWER_ACCENT,
                     badgeContent: '=',
                     children: renderBlocks(contentBlock.answer, imagesById, imageMissingText),
                   })
@@ -273,8 +267,7 @@ function renderDocumentSections(
                 if (!hideSolutionsAndProofs && contentBlock.solution.length > 0) {
                   disclosures.push({
                     label: t('labels.solution'),
-                    textColorClass: ENVIRONMENT_TEXT_COLOR.problem,
-                    badge: ENVIRONMENT_BADGE.problem,
+                    accent: ENVIRONMENT_ACCENT.problem,
                     badgeContent: '✓',
                     children: renderBlocks(contentBlock.solution, imagesById, imageMissingText),
                   })

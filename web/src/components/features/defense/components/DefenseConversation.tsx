@@ -283,7 +283,7 @@ function DefenseConversationForTarget({
       </div>
 
       {/* Re-readable problem statement */}
-      <ProblemBand statement={problem.statement} />
+      <ProblemBand statement={problem.statement} height="shared" />
 
       {/* The conversation so far */}
       <DefenseTranscript
