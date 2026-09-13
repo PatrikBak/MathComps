@@ -16,6 +16,5 @@ namespace MathComps.Infrastructure.Services.Defense.Dtos;
 /// <inheritdoc cref="Domain.EfCoreEntities.DefenseTurnAttempt.RestatedReferenceStep" path="/summary"/>
 /// </param>
 /// <param name="TakesOver">Whether the reply takes over: the candidate has work, the question keeps none of it, and
-/// its answer is a line of the reference. A close, an answer about the statement, exploration help to a blank page
-/// and mercy after repeated stalls all come back false.</param>
+/// its answer is a line of the reference. Every exception the step's prompt carves out comes back false.</param>
 public record RouteCheckResult(string Work, string Taken, string Restates, bool TakesOver);
