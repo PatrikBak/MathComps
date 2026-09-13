@@ -163,6 +163,35 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// The author's hints land as one document per language, and reading the row back through
+    /// <see cref="HintsDocument"/> gives the ladder the draft carried, in order. A text without hints gets no such row,
+    /// so the examiner's hint list is empty for it rather than a blank document.
+    /// </summary>
+    [Fact]
+    public Task Hints_land_as_one_document_and_read_back_in_order() => RunTestAsync(async service =>
+    {
+        // Import one problem whose Slovak original carries a two-rung ladder, with an English translation that has none.
+        await ApplyOpenAsync(service, CsmoTarget(), RoundDate,
+            [Problem(1,
+                Original(Language.SK, "statement", "solution", "first nudge", "the key idea"),
+                Translation(Language.EN, "statement"))],
+            Path.GetTempPath());
+
+        // The Slovak ladder is one row, and the English text has none.
+        await QueryAsync(async context =>
+        {
+            // Every hints row the import wrote.
+            var rows = await context.ProblemTexts.Where(text => text.DocumentType == DocumentType.Hints).ToListAsync();
+
+            // One row, Slovak, original, reading back as the ladder in the order it was written.
+            var hints = Assert.Single(rows);
+            Assert.Equal(Language.SK, hints.Language);
+            Assert.True(hints.IsOriginal);
+            Assert.Equal(["first nudge", "the key idea"], HintsDocument.Split(hints.MarkdownText));
+        });
+    });
+
+    /// <summary>
     /// Re-importing byte-identical content changes nothing: the problem counts as unchanged rather than updated,
     /// every text reports unchanged, and the stored row's modified timestamp isn't bumped.
     /// </summary>
@@ -1560,9 +1589,11 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// <param name="language">The original's language.</param>
     /// <param name="statement">The statement markdown.</param>
     /// <param name="solution">The solution markdown, or null when absent.</param>
+    /// <param name="hints">The author's hints, weakest nudge first.</param>
     /// <returns>The original text content.</returns>
-    private static DraftTextContent Original(Language language, string statement, string? solution = null) =>
-        new(language, Original: true, statement, solution);
+    private static DraftTextContent Original(
+        Language language, string statement, string? solution = null, params string[] hints) =>
+        new(language, Original: true, statement, solution, [.. hints]);
 
     /// <summary>
     /// Builds a translation text variant.
@@ -1572,7 +1603,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// <param name="solution">The solution markdown, or null when absent.</param>
     /// <returns>The translation text content.</returns>
     private static DraftTextContent Translation(Language language, string statement, string? solution = null) =>
-        new(language, Original: false, statement, solution);
+        new(language, Original: false, statement, solution, Hints: []);
 
     /// <summary>
     /// The statement among a problem's texts.

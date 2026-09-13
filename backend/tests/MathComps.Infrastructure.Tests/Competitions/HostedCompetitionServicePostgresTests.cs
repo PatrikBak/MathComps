@@ -259,14 +259,16 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // Take the entry, which starts a clock like anybody else's
         var spent = await service.EnterAsync(_grantedStudentId, AdvancedSlug);
 
-        // The answer it came back in carries no solution
+        // The answer it came back in carries neither the solution nor the ladder up to it
         Assert.All(spent.Problems, problem => Assert.Null(problem.Solution));
+        Assert.All(spent.Problems, problem => Assert.Null(problem.Hints));
 
         // Nor does a read while that clock runs
         var problems = await service.GetProblemsAsync(_grantedStudentId, AdvancedSlug);
 
-        // Still holding them back
+        // Still holding both back
         Assert.All(problems, problem => Assert.Null(problem.Solution));
+        Assert.All(problems, problem => Assert.Null(problem.Hints));
     });
 
     /// <summary>
@@ -303,8 +305,9 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // The practice round, which no embargo ever held back and no window ever closes
         var problems = await service.GetProblemsAsync(_grantedStudentId, PracticeSlug);
 
-        // Carrying its answers, the same as they reach anybody else
+        // Carrying its answers and the ladders up to them, the same as they reach anybody else
         Assert.All(problems, problem => Assert.NotNull(problem.Solution));
+        Assert.All(problems, problem => Assert.NotNull(problem.Hints));
     });
 
     /// <summary>
@@ -321,8 +324,9 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // Which is the whole set
         Assert.Equal(2, problems.Count);
 
-        // Carrying none of its answers
+        // Carrying none of its answers, and no ladder towards one either
         Assert.All(problems, problem => Assert.Null(problem.Solution));
+        Assert.All(problems, problem => Assert.Null(problem.Hints));
     });
 
     /// <summary>
@@ -995,11 +999,15 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // The answer it came back in carries the statements and nothing to check them against
         Assert.All(spent.Problems, problem => Assert.Null(problem.Solution));
 
+        // Nor the ladder up to one, which answers the problem in stages
+        Assert.All(spent.Problems, problem => Assert.Null(problem.Hints));
+
         // Read the set again while the clock is still running
         var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
 
         // Which holds nothing to check the statements against either
         Assert.All(problems, problem => Assert.Null(problem.Solution));
+        Assert.All(problems, problem => Assert.Null(problem.Hints));
     });
 
     /// <summary>
@@ -1038,8 +1046,9 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // Give the entry up, which starts no clock
         var spent = await service.ForfeitAsync(_studentId, AdvancedSlug);
 
-        // So the answer carries the solutions along with the statements
+        // So the answer carries the solutions along with the statements, and the ladders up to them
         Assert.All(spent.Problems, problem => Assert.NotNull(problem.Solution));
+        Assert.All(spent.Problems, problem => Assert.NotNull(problem.Hints));
     });
 
     /// <summary>
@@ -1067,17 +1076,23 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // Read the round before anything is entered
         var beforehand = await service.GetProblemsAsync(_studentId, PracticeSlug);
 
-        // Its problems are open to anybody, solution and all
+        // Its problems are open to anybody, solution and hints and all
         Assert.NotNull(beforehand[0].Solution);
+        Assert.NotNull(beforehand[0].Hints);
 
         // Then sit the practice run, which starts a clock over that same public set
         var spent = await service.EnterAsync(_studentId, PracticeSlug);
 
-        // And the solution goes away in the answer the entry came back in
+        // And the solution goes away in the answer the entry came back in, the hints with it
         Assert.Null(spent.Problems[0].Solution);
+        Assert.Null(spent.Problems[0].Hints);
 
-        // As it does on every read while that clock runs
-        Assert.Null((await service.GetProblemsAsync(_studentId, PracticeSlug))[0].Solution);
+        // Read again while that clock runs
+        var midRun = (await service.GetProblemsAsync(_studentId, PracticeSlug))[0];
+
+        // Which holds both back too
+        Assert.Null(midRun.Solution);
+        Assert.Null(midRun.Hints);
     });
 
     /// <summary>
@@ -1102,11 +1117,14 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
 
         // The set it hands back holds nothing to measure them against
         Assert.All(again.Problems, problem => Assert.Null(problem.Solution));
+        Assert.All(again.Problems, problem => Assert.Null(problem.Hints));
 
-        // And neither does reading it again
-        Assert.All(
-            await service.GetProblemsAsync(_studentId, PracticeSlug),
-            problem => Assert.Null(problem.Solution));
+        // Read again
+        var reread = await service.GetProblemsAsync(_studentId, PracticeSlug);
+
+        // Which holds neither either
+        Assert.All(reread, problem => Assert.Null(problem.Solution));
+        Assert.All(reread, problem => Assert.Null(problem.Hints));
     });
 
     /// <summary>
@@ -1130,6 +1148,84 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
 
         // Naming what the round is missing
         Assert.Contains("solution", thrown.Message, StringComparison.OrdinalIgnoreCase);
+    });
+
+    /// <summary>
+    /// Verifies that handing the entry in opens the author's hints, in order and in every language the site is
+    /// read in. The ladder is positional, a rung answering the one before it, so its order is part of it.
+    /// </summary>
+    [Fact]
+    public Task Handing_the_entry_in_opens_the_hints() => RunTestAsync(async service =>
+    {
+        // Sit the entry
+        await service.EnterAsync(_studentId, AdvancedSlug);
+
+        // And close it
+        await service.FinishAsync(_studentId, AdvancedSlug);
+
+        // Read the set back
+        var problems = await service.GetProblemsAsync(_studentId, AdvancedSlug);
+
+        // Which now carries the ladder up to the first problem's solution
+        var hints = Assert.IsAssignableFrom<IReadOnlyDictionary<Language, IReadOnlyList<string>>>(
+            problems[0].Hints);
+
+        // Answered for in every language the site is read in, the way the statement beside it is
+        Assert.Equal(Enum.GetValues<Language>().Order(), hints.Keys.Order());
+
+        // Weakest nudge first, and whole
+        Assert.Equal(["Napoveda 1", "Napoveda 2"], hints[Language.SK]);
+        Assert.Equal(["Hint 1", "Hint 2"], hints[Language.EN]);
+    });
+
+    /// <summary>
+    /// Verifies that a problem nobody wrote a ladder for answers with no hints. A ladder is optional, so most of
+    /// the archive carries none, and a problem without one is ordinary.
+    /// </summary>
+    [Fact]
+    public Task A_problem_with_no_ladder_reads_as_no_hints() => RunTestAsync(async service =>
+    {
+        // Give the entry up, which opens everything the run was holding back
+        var spent = await service.ForfeitAsync(_studentId, AdvancedSlug);
+
+        // The second problem of the set, which was seeded without a ladder
+        var hints = Assert.IsAssignableFrom<IReadOnlyDictionary<Language, IReadOnlyList<string>>>(
+            spent.Problems[1].Hints);
+
+        // Still answered for in every language
+        Assert.Equal(Enum.GetValues<Language>().Order(), hints.Keys.Order());
+
+        // And empty in each
+        Assert.All(hints.Values, Assert.Empty);
+    });
+
+    /// <summary>
+    /// Verifies that a ladder written in some of the site's languages and not others is still served, which is
+    /// where hints part from the statement and the solution beside them: the declaration insists on those two in
+    /// every language, and a ladder is optional.
+    /// </summary>
+    [Fact]
+    public Task A_hint_ladder_missing_a_language_does_not_stop_the_read() => RunTestAsync(async service =>
+    {
+        // The English hints of every problem in an open competition, taken away
+        await QueryAsync(context => context.ProblemTexts
+            .Where(text => text.Problem.RoundId == _openedRoundId
+                && text.DocumentType == DocumentType.Hints
+                && text.Language == Language.EN)
+            .ExecuteDeleteAsync());
+
+        // Which the read serves anyway
+        var problems = await service.GetProblemsAsync(_studentId, OpenedSlug);
+
+        // The ladder, read back
+        var hints = Assert.IsAssignableFrom<IReadOnlyDictionary<Language, IReadOnlyList<string>>>(
+            problems[0].Hints);
+
+        // Gone where it was taken away
+        Assert.Empty(hints[Language.EN]);
+
+        // And standing where it was not
+        Assert.Equal(["Napoveda 1", "Napoveda 2"], hints[Language.SK]);
     });
 
     /// <summary>
@@ -1990,15 +2086,26 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
 
         // Its statement and its solution in each language, so the answer can be checked for carrying all of
         // them. A hosted round holds both throughout, the declaration refusing a group whose problems do not.
-        foreach (var (documentType, language, prefix) in new[]
-                 {
-                     (DocumentType.Statement, Language.SK, "Zadanie"),
-                     (DocumentType.Statement, Language.CS, "Zadání"),
-                     (DocumentType.Statement, Language.EN, "Statement"),
-                     (DocumentType.Solution, Language.SK, "Riešenie"),
-                     (DocumentType.Solution, Language.CS, "Řešení"),
-                     (DocumentType.Solution, Language.EN, "Solution"),
-                 })
+        var texts = new List<(DocumentType DocumentType, Language Language, string? Body)>
+        {
+            (DocumentType.Statement, Language.SK, $"Zadanie {number}"),
+            (DocumentType.Statement, Language.CS, $"Zadání {number}"),
+            (DocumentType.Statement, Language.EN, $"Statement {number}"),
+            (DocumentType.Solution, Language.SK, $"Riešenie {number}"),
+            (DocumentType.Solution, Language.CS, $"Řešení {number}"),
+            (DocumentType.Solution, Language.EN, $"Solution {number}"),
+        };
+
+        // A ladder on the first problem alone, so one problem of the set answers with hints and the rest with none.
+        if (number == 1)
+        {
+            texts.Add((DocumentType.Hints, Language.SK, HintsDocument.Join(["Napoveda 1", "Napoveda 2"])));
+            texts.Add((DocumentType.Hints, Language.CS, HintsDocument.Join(["Napoveda 1", "Napoveda 2"])));
+            texts.Add((DocumentType.Hints, Language.EN, HintsDocument.Join(["Hint 1", "Hint 2"])));
+        }
+
+        // Each as a row of its own.
+        foreach (var (documentType, language, body) in texts)
         {
             context.ProblemTexts.Add(new ProblemText
             {
@@ -2006,7 +2113,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
                 ProblemId = problem.Id,
                 DocumentType = documentType,
                 Language = language,
-                MarkdownText = $"{prefix} {number}",
+                MarkdownText = body,
                 IsOriginal = language == Language.SK,
                 DateModified = DateTime.UtcNow,
             });

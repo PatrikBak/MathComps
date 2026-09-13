@@ -12,6 +12,12 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// The official solution as markdown, keyed by the language it is written in; null while the student is still
 /// competing here.
 /// </param>
+/// <param name="Hints">
+/// The author's hints as markdown, weakest nudge first, keyed by the language they are written in; null while the
+/// student is still competing here, on the same terms as <paramref name="Solution"/>. Every language is answered
+/// for, one nobody wrote a ladder in reading as no hints, a ladder being optional where a statement and a solution
+/// are not.
+/// </param>
 /// <param name="Defenses">The conversations the student has held about it, most recently active first.</param>
 /// <param name="SelfAssessment">What the student says about their own solution, or null while they have said nothing.</param>
 /// <param name="MaxCommentChars">The longest what they say about it may be, in characters.</param>
@@ -20,6 +26,7 @@ public record HostedCompetitionProblemDto(
     int Position,
     IReadOnlyDictionary<Language, string> Statement,
     IReadOnlyDictionary<Language, string>? Solution,
+    IReadOnlyDictionary<Language, IReadOnlyList<string>>? Hints,
     IReadOnlyList<HostedCompetitionDefenseLineDto> Defenses,
     string? SelfAssessment,
     int MaxCommentChars);

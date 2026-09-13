@@ -32,6 +32,9 @@ const ALLOWED_IMAGE_REF_PARAMS = ['inline']
 /** HTML-comment line that separates a problem's statement from its solution. */
 const SOLUTION_SENTINEL = '<!-- solution -->'
 
+/** HTML-comment line that opens one of the author's hints. Each hint has its own. */
+const HINT_SENTINEL = '<!-- hint -->'
+
 /** Typed metadata fields from a problem's `pN.yaml`. */
 type ProblemMeta = {
   /** Author display names, or `null` when no `authors:` key is present — kept distinct from `[]` (an explicit clear). */
@@ -50,14 +53,34 @@ type ProblemMetaParse = {
   error: string | null
 }
 
-/** A body split on the solution sentinel, tracking where the solution half begins. */
+/** One of the author's hints, tracking where in the body it begins. */
+type SentinelHint = {
+  /** The hint's markdown, everything under its sentinel up to the next one. */
+  markdown: string
+  /** 0-based body-relative line index where the hint starts. */
+  bodyLine0: number
+}
+
+/** One section a sentinel opens, as the split finds it: the sentinel's line and the lines under it. */
+type SentinelSection = {
+  /** Which sentinel opened it. */
+  sentinel: typeof SOLUTION_SENTINEL | typeof HINT_SENTINEL
+  /** 0-based body-relative line index of the sentinel itself. */
+  line0: number
+  /** The lines under the sentinel, up to the next one. */
+  lines: string[]
+}
+
+/** A body split on its sentinels, tracking where the solution half and each hint begin. */
 type SentinelSplit = {
-  /** Statement markdown (everything before the sentinel). */
+  /** Statement markdown (everything before the first sentinel). */
   statement: string
-  /** Solution markdown (everything after the sentinel), or `null` when there is no sentinel. */
+  /** Solution markdown (everything under the solution sentinel), or `null` when there is no sentinel. */
   solution: string | null
   /** 0-based body-relative line index where the solution half starts, or `null`. */
   solutionBodyLine0: number | null
+  /** The author's hints in body order; empty when the body has no hint sentinel. */
+  hints: SentinelHint[]
 }
 
 /** Metadata values for a problem whose `pN.yaml` declares none. */
@@ -194,28 +217,54 @@ export function parseProblemMeta(yamlText: string): ProblemMetaParse {
 }
 
 /**
- * Splits a problem body into its statement and solution halves on the solution
- * sentinel, remembering where the solution half begins.
+ * Splits a problem body on its sentinels: the statement is everything before the
+ * first one, and the solution and each hint are the sections their sentinels
+ * open, in whichever order they come. Each section remembers where it begins.
  *
  * @param body - The body file's full contents.
  *
- * @returns The statement, the solution (or `null` when there is no sentinel),
- *   and the solution half's 0-based body-relative start line.
+ * @returns The statement, the solution (or `null` when there is no solution
+ *   sentinel) with its 0-based body-relative start line, and the hints.
  */
-export function splitOnSentinel(body: string): SentinelSplit {
-  // Work line by line so the solution's start line is exact
+export function splitOnSentinels(body: string): SentinelSplit {
+  // Work line by line so every section's start line is exact
   const lines = body.split('\n')
 
-  // The sentinel is a standalone comment line; without it the whole body is the statement
-  const sentinelIndex = lines.findIndex((line) => line.trim() === SOLUTION_SENTINEL)
-  if (sentinelIndex === -1) {
-    return { statement: body, solution: null, solutionBodyLine0: null }
-  }
+  // Every sentinel line, in body order, with the lines it owns
+  const sections = lines.reduce<SentinelSection[]>((found, line, index) => {
+    // A sentinel is a standalone comment line, and opens a section of its own
+    const trimmed = line.trim()
+    if (trimmed === SOLUTION_SENTINEL || trimmed === HINT_SENTINEL) {
+      return [...found, { sentinel: trimmed, line0: index, lines: [] }]
+    }
 
-  // Statement is everything above the sentinel; solution everything below it
-  const statement = lines.slice(0, sentinelIndex).join('\n')
-  const solution = lines.slice(sentinelIndex + 1).join('\n')
-  return { statement, solution, solutionBodyLine0: sentinelIndex + 1 }
+    // Every other line belongs to the last section opened, or to the statement while none is
+    found.at(-1)?.lines.push(line)
+
+    // The same sections, one line longer
+    return found
+  }, [])
+
+  // Statement is everything above the first sentinel; without one the whole body is the statement
+  const firstSentinel = sections[0]
+  const statement =
+    firstSentinel === undefined ? body : lines.slice(0, firstSentinel.line0).join('\n')
+
+  // The first solution sentinel owns the solution; a body carries at most one
+  const solutionSection = sections.find((section) => section.sentinel === SOLUTION_SENTINEL)
+
+  // Every hint sentinel is one rung of the ladder, in body order
+  const hints = sections
+    .filter((section) => section.sentinel === HINT_SENTINEL)
+    .map((section) => ({ markdown: section.lines.join('\n'), bodyLine0: section.line0 + 1 }))
+
+  // Each section as the text under its sentinel, starting on the line after it
+  return {
+    statement,
+    solution: solutionSection === undefined ? null : solutionSection.lines.join('\n'),
+    solutionBodyLine0: solutionSection === undefined ? null : solutionSection.line0 + 1,
+    hints,
+  }
 }
 
 /**

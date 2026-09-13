@@ -22,8 +22,8 @@ public sealed class ProblemDefenseContentResolver(IDbContextFactory<MathCompsDbC
         // A fresh context for this lookup.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The problem's statement and solution in this language. Markdown is what the site renders and what the
-        // examiner reads; the raw source is what a row without markdown carries.
+        // The problem's statement, solution and hints in this language. Markdown is what the site renders and what
+        // the examiner reads; the raw source is what a row without markdown carries.
         var texts = await dbContext.ProblemTexts
             .AsNoTracking()
             .Where(text => text.ProblemId == target.ProblemId && text.Language == language)
@@ -43,7 +43,11 @@ public sealed class ProblemDefenseContentResolver(IDbContextFactory<MathCompsDbC
         if (string.IsNullOrWhiteSpace(statement) || string.IsNullOrWhiteSpace(reference))
             return null;
 
-        // Hints are a handout's authored ladder; an archive problem carries none.
-        return new DefenseProblemContent(statement, reference, []);
+        // The author's ladder, stored as one document and read back as the list the examiner is given.
+        var hints = HintsDocument.Split(texts
+            .FirstOrDefault(text => text.DocumentType == DocumentType.Hints)?.Body);
+
+        // Everything the examiner reads about the problem.
+        return new DefenseProblemContent(statement, reference, hints);
     }
 }

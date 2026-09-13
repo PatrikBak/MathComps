@@ -17,6 +17,7 @@ import type { Locale } from '@/i18n/i18n'
 import type { HostedCompetitionsReaderKey } from '../hooks/hosted-competition-cache'
 import type { AreaRun } from '../model/hosted-competition-state'
 import type { HostedCompetitionProblem } from '../model/hosted-competition-types'
+import { CompetitionHints } from './CompetitionHints'
 import { CompetitionSolution } from './CompetitionSolution'
 import { ProblemSelfAssessmentNote } from './ProblemSelfAssessmentNote'
 
@@ -36,6 +37,8 @@ type CompetitionProblemPanelProps = {
   isGraded: boolean
   /** Which problem of the set has its official solution open, by position. */
   solutionDisclosure: AddressedDisclosure
+  /** Which problem of the set has its hints open, by position. */
+  hintsDisclosure: AddressedDisclosure
 }
 
 /**
@@ -48,6 +51,7 @@ export function CompetitionProblemPanel({
   run,
   isGraded,
   solutionDisclosure,
+  hintsDisclosure,
 }: CompetitionProblemPanelProps) {
   // Competitions copy
   const t = useTranslations('competitions')
@@ -86,7 +90,20 @@ export function CompetitionProblemPanel({
           out by the row padding, so that what a row says starts on the same left edge as the statement
           above it rather than inside it */}
       <div className="-mx-3 flex flex-col gap-0.5">
-        {/* How it was meant to go, once the student is no longer competing for it */}
+        {/* The ladder up to the solution, once the student is no longer competing for it, off the page where
+            the reader's own language has none */}
+        {problem.hints !== null && problem.hints[locale].length > 0 && (
+          <CompetitionHints
+            position={problem.position}
+            statement={problem.statement}
+            hints={problem.hints}
+            isOpen={hintsDisclosure.openedValue === String(problem.position)}
+            onOpen={() => hintsDisclosure.open(String(problem.position))}
+            onClose={hintsDisclosure.close}
+          />
+        )}
+
+        {/* The official solution, once the student is no longer competing for it */}
         {problem.solution !== null && (
           <CompetitionSolution
             position={problem.position}

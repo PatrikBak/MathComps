@@ -41,7 +41,7 @@ It hides the problems, not their images. Figures go to public storage under a ke
 
 ## Problem body — `pN.<lang>.md`
 
-Markdown with inline TeX. **No frontmatter** — metadata lives in `pN.yaml`. The statement comes first; an optional `<!-- solution -->` line on its own splits off the solution:
+Markdown with inline TeX. **No frontmatter** — metadata lives in `pN.yaml`. The statement comes first; an optional `<!-- solution -->` line on its own splits off the solution, and each `<!-- hint -->` line opens one of the author's hints:
 
 ```markdown
 Let $x \ne y$ be positive reals. Prove the inequality.
@@ -51,7 +51,19 @@ Let $x \ne y$ be positive reals. Prove the inequality.
 <!-- solution -->
 
 By AM–GM, $a^2 + b^2 \ge 2ab$, and the claim follows.
+
+<!-- hint -->
+
+What does the inequality say when $x = y$?
+
+<!-- hint -->
+
+Expand $(x - y)^2 \ge 0$.
 ```
+
+Hints are the author's route to the solution, weakest nudge first. The AI examiner works from them in a defense, and a student reads them in the competition area on the same terms as the official solution. A hint sentinel with nothing under it is refused (`empty-hint`), a hint may carry figures like either half, and the solution and the hints may come in either order after the statement.
+
+The ladder is positional, a rung answering the one before it, so every language that carries the solution carries the same number of hints (`hint-count-mismatch`). A problem nobody wrote hints for is unaffected, and a statement-only translation is exempt.
 
 The problem number and language come from the filename. The file whose `<lang>` matches `_meta.yaml`'s `language` is the **original**; any others (`p1.en.md`, `p1.cs.md`) are **translations**. A translation may be statement-only, but it can only carry a solution if the in-draft original does too.
 
@@ -97,7 +109,7 @@ A ref is bare except for an optional `?inline=true` (inline display). `apply` au
 
 ## Markdown & math checks
 
-Each half runs through the same pipeline the site renders with. The preflight reports failures with file and line:
+Each half and each hint runs through the same pipeline the site renders with. The preflight reports failures with file and line:
 
 - **Math delimiters** — an odd number of unescaped `$` is an error.
 - **Parse** — malformed markdown or directives.

@@ -403,6 +403,8 @@
     "finishError": "The entry could not be closed. Please try again.",
     "forfeitError": "Could not give up the competition.",
     "goToArea": "Open in the competition",
+    "hint": "Hint",
+    "hints": "Hints",
     "howItWorks": {
       "steps": [
         "Pick an open competition (how to choose a level is right below) 🎮",

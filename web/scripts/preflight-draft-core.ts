@@ -22,7 +22,7 @@ import {
   IMAGES_DIRNAME,
   MAX_IMAGE_MB,
   parseProblemMeta,
-  splitOnSentinel,
+  splitOnSentinels,
   SUPPORTED_IMAGE_EXTENSIONS,
   toAbsoluteLine,
 } from './preflight-draft-parse'
@@ -305,6 +305,31 @@ async function parseProblem(
       })
   }
 
+  // The ladder is positional, a rung answering the one before it, so a language carrying a different number of
+  // rungs carries a different ladder. Only checked once somebody has written one, most problems carrying no
+  // hints. A body is in scope when it carries the solution or hints of its own, so a statement-only translation
+  // is exempt.
+  const rungs = Math.max(0, ...parsedBodies.map((entry) => entry.text.hints.length))
+  if (rungs > 0) {
+    parsedBodies
+      .filter(
+        (entry) =>
+          (entry.text.solutionMarkdown !== null || entry.text.hints.length > 0) &&
+          entry.text.hints.length !== rungs
+      )
+      .forEach((entry) => {
+        errors.push(
+          problemIssue(
+            `p${group.order}.${entry.text.language}.md`,
+            'hint',
+            'hint-count-mismatch',
+            `the ${entry.text.language} text carries ${entry.text.hints.length} hint(s) where the problem's ` +
+              `ladder has ${rungs}; every language carrying the solution carries the same rungs`
+          )
+        )
+      })
+  }
+
   // Order the variants original-first, then translations in supported-locale order
   const texts = parsedBodies
     .map((entry) => entry.text)
@@ -350,8 +375,8 @@ type ParsedBody = {
 }
 
 /**
- * Parses one body file into a {@link ManifestText}, validating both markdown
- * halves and resolving its image references against disk. Returns `null` when
+ * Parses one body file into a {@link ManifestText}, validating its markdown
+ * halves and hints and resolving its image references against disk. Returns `null` when
  * the filename's language token is not a supported locale.
  *
  * @param folderPath - Path to the draft folder.
@@ -394,8 +419,8 @@ async function parseBody(
     )
   }
 
-  // Split the body into statement and solution
-  const { statement, solution, solutionBodyLine0 } = splitOnSentinel(content)
+  // Split the body into statement, solution and hints
+  const { statement, solution, solutionBodyLine0, hints } = splitOnSentinels(content)
   if (statement.trim() === '') {
     errors.push(problemIssue(body.file, 'statement', 'empty-statement', 'statement is empty'))
   }
@@ -406,10 +431,27 @@ async function parseBody(
     await validateHalf(solution, body.file, 'solution', solutionBodyLine0 ?? 0, errors)
   }
 
-  // Gather this body's image references across both halves and validate each — it must exist on disk, be a supported
-  // format, and stay under the size cap — so a bad figure fails in preflight rather than mid-import.
-  const solutionImages = solution !== null ? collectImageNames(solution) : []
-  const images = [...new Set([...collectImageNames(statement), ...solutionImages])]
+  // Validate each hint the same way
+  for (const [index, hint] of hints.entries()) {
+    // A sentinel with nothing under it is a rung nobody wrote
+    if (hint.markdown.trim() === '') {
+      errors.push(problemIssue(body.file, 'hint', 'empty-hint', `hint ${index + 1} is empty`))
+    }
+
+    // The markdown and math checks a half gets, positions mapped from where the rung starts
+    await validateHalf(hint.markdown, body.file, 'hint', hint.bodyLine0, errors)
+  }
+
+  // Every piece of markdown the body carries, for the image checks below
+  const pieces = [
+    statement,
+    ...(solution !== null ? [solution] : []),
+    ...hints.map((hint) => hint.markdown),
+  ]
+
+  // Gather this body's image references across every piece and validate each — it must exist on disk, be a
+  // supported format, and stay under the size cap — so a bad figure fails in preflight rather than mid-import.
+  const images = [...new Set(pieces.flatMap(collectImageNames))]
   images.forEach((name) => {
     // Get the full image path
     const imagePath = path.join(folderPath, IMAGES_DIRNAME, name)
@@ -456,12 +498,9 @@ async function parseBody(
     }
   })
 
-  // Collect refs carrying a query param other than ?inline= across both halves — width/height are auto-derived on
+  // Collect refs carrying a query param other than ?inline= across every piece — width/height are auto-derived on
   // import and scale has no role here, so anything else would corrupt the stored URL.
-  const disallowedRefs = [
-    ...collectDisallowedImageRefParams(statement),
-    ...(solution !== null ? collectDisallowedImageRefParams(solution) : []),
-  ]
+  const disallowedRefs = pieces.flatMap(collectDisallowedImageRefParams)
   disallowedRefs.forEach((entry) => {
     // Flag each as a blocking error, steering the author back to a bare ref
     errors.push(
@@ -477,12 +516,13 @@ async function parseBody(
     )
   })
 
-  // Assemble the text variant, halves kept verbatim
+  // Assemble the text variant, halves and hints kept verbatim
   const text: ManifestText = {
     language,
     original: language === originalLanguage,
     statementMarkdown: statement,
     solutionMarkdown: solution,
+    hints: hints.map((hint) => hint.markdown),
   }
 
   // Hand back the variant with its referenced images

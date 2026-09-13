@@ -25,7 +25,7 @@ public enum AppliedTextAction
 /// What the import did to one <c>(problem, document type, language)</c> text.
 /// </summary>
 /// <param name="Slug">The problem slug the text belongs to.</param>
-/// <param name="DocumentType">The half (statement or solution).</param>
+/// <param name="DocumentType">The half (statement, solution or hints).</param>
 /// <param name="Language">The text's language.</param>
 /// <param name="Action">Whether the row was inserted or overwritten.</param>
 public record AppliedText(

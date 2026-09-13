@@ -21,7 +21,7 @@ import {
   collectImageNames,
   hasLeadingFrontmatter,
   parseProblemMeta,
-  splitOnSentinel,
+  splitOnSentinels,
   toAbsoluteLine,
 } from '../preflight-draft-parse'
 import type { DraftManifest, VerdictError } from '../preflight-draft-types'
@@ -323,12 +323,51 @@ describe('valid drafts — parsed manifest content', () => {
   })
 })
 
+describe('valid drafts — hints', () => {
+  it('carries each hint verbatim, in body order, per language', async () => {
+    const manifest = await loadFixture('valid-hints')
+    const [problem] = manifest.problems
+    const original = problem?.texts.find((text) => text.original)
+    const translation = problem?.texts.find((text) => !text.original)
+    expect(original?.hints).toEqual(['\nSkús malé prípady.\n', '\nPozri sa na paritu $x + y$.\n'])
+    expect(translation?.hints).toEqual([
+      '\nTry small cases.\n',
+      '\nLook at the parity of $x + y$.\n',
+    ])
+  })
+
+  it('leaves a statement-only translation out of the ladder count', async () => {
+    const manifest = await loadFixture('valid-hints-statement-only')
+    const [problem] = manifest.problems
+    const translation = problem?.texts.find((text) => !text.original)
+
+    // Carrying no solution, it is not a language the ladder is owed in
+    expect(translation?.solutionMarkdown).toBeNull()
+    expect(translation?.hints).toEqual([])
+    expect(isOk(manifest.verdict.errors)).toBe(true)
+  })
+})
+
 describe('invalid drafts — specific issues', () => {
+  it('flags a language whose hint ladder disagrees with the others', async () => {
+    const manifest = await loadFixture('invalid-hint-count-mismatch')
+    const error = findError(manifest, (entry) => entry.rule === 'hint-count-mismatch')
+    expect(error?.file).toBe('p1.en.md')
+    expect(error?.half).toBe('hint')
+  })
+
   it('flags a missing image file', async () => {
     const manifest = await loadFixture('invalid-missing-image')
     const error = findError(manifest, (entry) => entry.rule === 'missing-image')
     expect(error?.severity).toBe('error')
     expect(error?.message).toContain('missing.svg')
+  })
+
+  it('flags an empty hint', async () => {
+    const manifest = await loadFixture('invalid-empty-hint')
+    const error = findError(manifest, (entry) => entry.rule === 'empty-hint')
+    expect(error?.severity).toBe('error')
+    expect(error?.half).toBe('hint')
   })
 
   it('flags an unsupported image format', async () => {
@@ -534,30 +573,50 @@ describe('hasLeadingFrontmatter', () => {
   })
 })
 
-describe('splitOnSentinel', () => {
+describe('splitOnSentinels', () => {
   it('returns the whole body as the statement when there is no sentinel', () => {
-    const result = splitOnSentinel('line one\nline two')
+    const result = splitOnSentinels('line one\nline two')
     expect(result.statement).toBe('line one\nline two')
     expect(result.solution).toBeNull()
     expect(result.solutionBodyLine0).toBeNull()
+    expect(result.hints).toEqual([])
   })
 
   it('splits statement and solution on the sentinel', () => {
-    const result = splitOnSentinel('statement\n<!-- solution -->\nsolution')
+    const result = splitOnSentinels('statement\n<!-- solution -->\nsolution')
     expect(result.statement).toBe('statement')
     expect(result.solution).toBe('solution')
     expect(result.solutionBodyLine0).toBe(2)
   })
 
   it('yields an empty statement when the sentinel comes first', () => {
-    const result = splitOnSentinel('<!-- solution -->\nonly solution')
+    const result = splitOnSentinels('<!-- solution -->\nonly solution')
     expect(result.statement).toBe('')
     expect(result.solution).toBe('only solution')
   })
 
   it('keeps a whitespace-only solution half', () => {
-    const result = splitOnSentinel('statement\n<!-- solution -->\n   ')
+    const result = splitOnSentinels('statement\n<!-- solution -->\n   ')
     expect(result.solution).toBe('   ')
+  })
+
+  it('cuts each hint at the next sentinel and keeps the solution whole', () => {
+    const result = splitOnSentinels(
+      'statement\n<!-- solution -->\nsolution\n<!-- hint -->\nfirst\n<!-- hint -->\nsecond\nline'
+    )
+    expect(result.solution).toBe('solution')
+    expect(result.hints).toEqual([
+      { markdown: 'first', bodyLine0: 4 },
+      { markdown: 'second\nline', bodyLine0: 6 },
+    ])
+  })
+
+  it('reads hints placed before the solution', () => {
+    const result = splitOnSentinels('statement\n<!-- hint -->\nnudge\n<!-- solution -->\nsolution')
+    expect(result.statement).toBe('statement')
+    expect(result.hints).toEqual([{ markdown: 'nudge', bodyLine0: 2 }])
+    expect(result.solution).toBe('solution')
+    expect(result.solutionBodyLine0).toBe(4)
   })
 })
 
@@ -789,7 +848,7 @@ describe('toAbsoluteLine', () => {
     )
 
     // The solution half begins on the body line after the sentinel
-    const { solutionBodyLine0 } = splitOnSentinel(body)
+    const { solutionBodyLine0 } = splitOnSentinels(body)
     expect(solutionBodyLine0).toBe(2)
 
     // The second solution line therefore maps to source line 4

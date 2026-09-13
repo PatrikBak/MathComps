@@ -17,7 +17,14 @@ import type {
 } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { MINUTE_MS } from '@/components/shared/utils/time-units'
 
-import { LIMITS, OPENER, SCRIPTED_REPLIES, SOLUTIONS, STATEMENTS } from './hosted-backend-content'
+import {
+  HINTS,
+  LIMITS,
+  OPENER,
+  SCRIPTED_REPLIES,
+  SOLUTIONS,
+  STATEMENTS,
+} from './hosted-backend-content'
 import { CLOCK_MINUTES, PROBLEMS_PER_COMPETITION } from './hosted-backend-world'
 
 /**
@@ -146,6 +153,7 @@ export function buildProblems(
       position,
       statement,
       solution: isSolutionOpen ? (SOLUTIONS[index] ?? null) : null,
+      hints: isSolutionOpen ? (HINTS[index] ?? null) : null,
       defenses,
       selfAssessment: state.assessments.get(id) ?? null,
       maxCommentChars: LIMITS.maxFeedbackCommentChars,
