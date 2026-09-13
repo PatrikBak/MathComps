@@ -1,3 +1,5 @@
+import type { DisclosureAccent } from '@/components/shared/components/DisclosurePanel'
+
 import type { HandoutEnvironmentType } from './handout-content-types'
 
 export type { HandoutEnvironmentType }
@@ -10,16 +12,6 @@ type CardPaletteEntry = {
   title: string
   /** Summary/details text color, typically matches the title. */
   summary: string
-}
-
-/** Color classes for a badge's text, background, and border. */
-export type BadgePaletteEntry = {
-  /** Badge text color (e.g., `text-green-200`). */
-  text: string
-  /** Badge background fill (e.g., `bg-green-500/15`). */
-  bg: string
-  /** Badge outline border (e.g., `border-green-400/20`). */
-  border: string
 }
 
 /**
@@ -66,35 +58,49 @@ export const ENVIRONMENT_TEXT_COLOR: Record<HandoutEnvironmentType, string> = {
 }
 
 /**
- * Badge colors for each environment's collapsible solution/proof button in the detail view.
- * The cross-cutting hint and answer buttons get their own palettes ({@link HINT_BADGE},
- * {@link ANSWER_BADGE}).
+ * How each environment's own collapsible row reads: its proof, or its solution. The hint and answer rows
+ * cut across every environment and carry accents of their own ({@link HINT_ACCENT}, {@link ANSWER_ACCENT}).
  */
-export const ENVIRONMENT_BADGE: Record<HandoutEnvironmentType, BadgePaletteEntry> = {
+export const ENVIRONMENT_ACCENT: Record<HandoutEnvironmentType, DisclosureAccent> = {
   theorem: {
-    text: 'text-green-200',
-    bg: 'bg-green-500/15',
-    border: 'border-green-400/20',
+    textColorClass: ENVIRONMENT_TEXT_COLOR.theorem,
+    badge: {
+      text: 'text-green-200',
+      bg: 'bg-green-500/15',
+      border: 'border-green-400/20',
+    },
   },
   exercise: {
-    text: 'text-yellow-200',
-    bg: 'bg-yellow-500/15',
-    border: 'border-yellow-400/20',
+    textColorClass: ENVIRONMENT_TEXT_COLOR.exercise,
+    badge: {
+      text: 'text-yellow-200',
+      bg: 'bg-yellow-500/15',
+      border: 'border-yellow-400/20',
+    },
   },
   example: {
-    text: 'text-blue-200',
-    bg: 'bg-blue-500/15',
-    border: 'border-blue-400/20',
+    textColorClass: ENVIRONMENT_TEXT_COLOR.example,
+    badge: {
+      text: 'text-blue-200',
+      bg: 'bg-blue-500/15',
+      border: 'border-blue-400/20',
+    },
   },
   problem: {
-    text: 'text-purple-200',
-    bg: 'bg-purple-500/15',
-    border: 'border-purple-400/20',
+    textColorClass: ENVIRONMENT_TEXT_COLOR.problem,
+    badge: {
+      text: 'text-purple-200',
+      bg: 'bg-purple-500/15',
+      border: 'border-purple-400/20',
+    },
   },
   definition: {
-    text: 'text-orange-200',
-    bg: 'bg-orange-500/15',
-    border: 'border-orange-400/20',
+    textColorClass: ENVIRONMENT_TEXT_COLOR.definition,
+    badge: {
+      text: 'text-orange-200',
+      bg: 'bg-orange-500/15',
+      border: 'border-orange-400/20',
+    },
   },
 }
 
@@ -106,29 +112,25 @@ export const HIGHLIGHTED_PARAGRAPH_CLASSES =
   'border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10'
 
 /**
- * Text color for hint headings in the detail view.
+ * How a hint's collapsible row reads, whichever environment it hangs off.
  */
-export const HINT_TEXT_COLOR = 'text-yellow-300'
-
-/**
- * Badge colors for hint toggle buttons in the detail view.
- */
-export const HINT_BADGE: BadgePaletteEntry = {
-  text: 'text-yellow-200',
-  bg: 'bg-yellow-500/15',
-  border: 'border-yellow-400/20',
+export const HINT_ACCENT: DisclosureAccent = {
+  textColorClass: 'text-yellow-300',
+  badge: {
+    text: 'text-yellow-200',
+    bg: 'bg-yellow-500/15',
+    border: 'border-yellow-400/20',
+  },
 }
 
 /**
- * Text color for answer headings in the detail view.
+ * How an answer's collapsible row reads, whichever environment it hangs off.
  */
-export const ANSWER_TEXT_COLOR = 'text-teal-300'
-
-/**
- * Badge colors for the answer toggle button in the detail view.
- */
-export const ANSWER_BADGE: BadgePaletteEntry = {
-  text: 'text-teal-200',
-  bg: 'bg-teal-500/15',
-  border: 'border-teal-400/20',
+export const ANSWER_ACCENT: DisclosureAccent = {
+  textColorClass: 'text-teal-300',
+  badge: {
+    text: 'text-teal-200',
+    bg: 'bg-teal-500/15',
+    border: 'border-teal-400/20',
+  },
 }

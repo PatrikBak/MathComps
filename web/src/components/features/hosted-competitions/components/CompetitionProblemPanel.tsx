@@ -6,10 +6,11 @@ import { useFormatter, useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { DefenseConversation } from '@/components/features/defense/components/DefenseConversation'
-import { Button } from '@/components/shared/components/Button'
+import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
 import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
+import { cn } from '@/components/shared/utils/css-utils'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 import type { AddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 import type { Locale } from '@/i18n/i18n'
@@ -125,7 +126,10 @@ export function CompetitionProblemPanel({
                 type="button"
                 onClick={() => openDefense(defense.sessionId)}
                 data-defense-session-id={defense.sessionId}
-                className="focus flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5"
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5',
+                  FOCUS_RING_CLASS
+                )}
               >
                 {/* When the student opened it */}
                 <span className="inline-flex items-center gap-2 text-foreground">

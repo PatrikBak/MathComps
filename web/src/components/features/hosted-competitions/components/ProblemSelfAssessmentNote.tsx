@@ -4,7 +4,8 @@ import { MessageSquareQuote } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useId } from 'react'
 
-import { Button } from '@/components/shared/components/Button'
+import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
+import { cn } from '@/components/shared/utils/css-utils'
 
 import type { HostedCompetitionsReaderKey } from '../hooks/hosted-competition-cache'
 import { useProblemSelfAssessment } from '../hooks/use-problem-self-assessment'
@@ -144,7 +145,10 @@ export function ProblemSelfAssessmentNote({
     <button
       type="button"
       onClick={note.open}
-      className="focus mt-1 rounded-lg px-3 py-2 text-left text-sm text-muted hover:bg-foreground/5 hover:text-foreground"
+      className={cn(
+        'mt-1 rounded-lg px-3 py-2 text-left text-sm text-muted hover:bg-foreground/5 hover:text-foreground',
+        FOCUS_RING_CLASS
+      )}
     >
       <NoteWords>{assessment}</NoteWords>
     </button>

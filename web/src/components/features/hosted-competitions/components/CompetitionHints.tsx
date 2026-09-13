@@ -3,13 +3,11 @@
 import { Lightbulb } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
-import { DisclosurePanel } from '@/components/features/handouts/Cards'
-import { HINT_BADGE, HINT_TEXT_COLOR } from '@/components/features/handouts/handout-colors'
-import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
 import type { Locale, LocalizedString } from '@/i18n/i18n'
 
 import type { LocalizedHints } from '../model/hosted-competition-types'
 import { CompetitionProblemSurface } from './CompetitionProblemSurface'
+import { HintLadder } from './HintLadder'
 
 /**
  * Props for the {@link CompetitionHints} component.
@@ -35,9 +33,6 @@ type CompetitionHintsProps = {
  *
  * Only ever drawn once the student is no longer competing here, which is when a ladder reaches the page at
  * all.
- *
- * Each rung folds away on its own, the way a handout lays out a ladder, down to the colour and the numbered
- * badge.
  */
 export function CompetitionHints({
   position,
@@ -63,21 +58,7 @@ export function CompetitionHints({
       onOpen={onOpen}
       onClose={onClose}
     >
-      {/* One rung per hint, each folded away until it is asked for, the badge saying which rung it is. The
-          reference typography sits on the list so that a rung's label takes the same size as its text */}
-      <div className="math-typography math-reference divide-y divide-foreground/10 overflow-hidden rounded-xl border border-foreground/10">
-        {hints[locale].map((hint, index) => (
-          <DisclosurePanel
-            key={index}
-            label={t('hint')}
-            textColorClass={HINT_TEXT_COLOR}
-            badge={HINT_BADGE}
-            badgeContent={index + 1}
-          >
-            <ProblemMarkdown content={hint} />
-          </DisclosurePanel>
-        ))}
-      </div>
+      <HintLadder hints={hints[locale]} />
     </CompetitionProblemSurface>
   )
 }

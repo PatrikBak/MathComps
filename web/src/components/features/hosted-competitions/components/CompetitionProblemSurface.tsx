@@ -5,8 +5,9 @@ import { X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { ProblemBand } from '@/components/features/defense/components/ProblemBand'
-import { Button } from '@/components/shared/components/Button'
+import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
+import { cn } from '@/components/shared/utils/css-utils'
 import type { Locale, LocalizedString } from '@/i18n/i18n'
 
 /**
@@ -63,7 +64,10 @@ export function CompetitionProblemSurface({
       <button
         type="button"
         onClick={onOpen}
-        className="focus flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5"
+        className={cn(
+          'flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5',
+          FOCUS_RING_CLASS
+        )}
       >
         <span className="inline-flex items-center gap-2 text-foreground">
           <Icon size={15} className="text-muted" />
@@ -104,8 +108,9 @@ export function CompetitionProblemSurface({
             </Button>
           </div>
 
-          {/* The problem, re-readable above what is said about it, exactly as it is above a conversation */}
-          <ProblemBand statement={statement[locale]} />
+          {/* The problem, re-readable above what is said about it. Nothing under it is being written, so
+              it stands at its own height */}
+          <ProblemBand statement={statement[locale]} height="own" />
 
           {/* And the thing itself, which scrolls in its own right once it outgrows the screen */}
           <div className="scrollbar-visible max-h-[60dvh] overflow-y-auto overscroll-contain px-4 py-3 sm:px-5">

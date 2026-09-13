@@ -1,65 +1,13 @@
-import { ChevronRight } from 'lucide-react'
 import React from 'react'
 
 import { CopyLinkButton } from '@/components/shared/components/CopyLinkButton'
+import {
+  DisclosurePanel,
+  type DisclosurePanelProps,
+} from '@/components/shared/components/DisclosurePanel'
 import { cn } from '@/components/shared/utils/css-utils'
 
-import { type BadgePaletteEntry, CARD_PALETTE, type HandoutEnvironmentType } from './handout-colors'
-
-/**
- * Props for a single disclosure panel (proof / solution / hint).
- */
-export type DisclosurePanelProps = {
-  /** Translated label, e.g. "Proof", "Solution", "Hint". */
-  label: string
-  /** Tailwind text color class for the summary row. */
-  textColorClass: string
-  /** Badge palette data for the badge circle (small square / `✓)`. */
-  badge: BadgePaletteEntry
-  /** Content rendered inside the badge circle */
-  badgeContent: React.ReactNode
-  /** Panel body shown when expanded. */
-  children: React.ReactNode
-}
-
-/**
- * A single disclosure panel: a badged, labelled row that folds its body away.
- */
-export function DisclosurePanel({
-  label,
-  textColorClass,
-  badge,
-  badgeContent,
-  children,
-}: DisclosurePanelProps) {
-  return (
-    <details className="group">
-      <summary
-        className={cn(
-          'ui-text flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-foreground/5 cursor-pointer [&::-webkit-details-marker]:hidden leading-6 font-medium',
-          textColorClass
-        )}
-      >
-        <span
-          className={cn(
-            'inline-flex h-5 min-w-5 items-center justify-center rounded-full text-xs font-semibold border',
-            badge.bg,
-            badge.text,
-            badge.border
-          )}
-        >
-          {badgeContent}
-        </span>
-        {label}
-        <ChevronRight
-          size={16}
-          className="ml-auto opacity-70 transition-transform group-open:rotate-90"
-        />
-      </summary>
-      <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 text-foreground/70">{children}</div>
-    </details>
-  )
-}
+import { CARD_PALETTE, type HandoutEnvironmentType } from './handout-colors'
 
 /**
  * Props for the {@link CollapsibleCard} component.
