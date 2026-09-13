@@ -68,7 +68,7 @@ public class DraftResolutionService(
                 .ToListAsync())
             .ToDictionary(existing => existing.Slug, existing => existing.Texts);
 
-        // Classify every text-variant half the draft writes (statement always; solution only when present).
+        // Classify every text-variant half the draft writes (statement always; solution and hints when present).
         var textResolutions = problems
             .SelectMany(problem => ClassifyProblem(
                 slugByOrder[problem.Order],
@@ -127,10 +127,12 @@ public class DraftResolutionService(
         MathCompsDbContext context, ImmutableArray<ProblemTextResolution> textResolutions)
     {
         // The texts whose stored body would change; an add, an unchanged re-import and a create conflict all leave
-        // whatever a defense was argued against exactly where it is.
+        // whatever a defense was argued against exactly where it is. Hints are the examiner's material, never what
+        // a student argued against, so rewriting them strands nothing.
         var rewrites = textResolutions
             .Where(resolution => resolution.Action
                 is DraftTextAction.OverwriteOriginal or DraftTextAction.OverwriteTranslation)
+            .Where(resolution => resolution.DocumentType != DocumentType.Hints)
             .ToList();
 
         // Nothing would be rewritten, so no defense can be stranded.
@@ -280,7 +282,7 @@ public class DraftResolutionService(
 
     /// <summary>
     /// Classifies the halves one text variant of an existing problem would write: a statement always, plus a
-    /// solution when the draft carries one.
+    /// solution and a hints document when the draft carries them.
     /// </summary>
     /// <param name="slug">The problem slug.</param>
     /// <param name="text">The draft text variant.</param>
@@ -301,6 +303,11 @@ public class DraftResolutionService(
         if (text.SolutionMarkdown is { } solutionMarkdown)
             yield return Classify(slug, DocumentType.Solution, text,
                 MarkdownImageRewriter.Rewrite(solutionMarkdown, replacements), existingTexts);
+
+        // The hints, as the one document they are stored in, only when the draft carries any.
+        if (HintsDocument.Join(text.Hints) is { } hintsDocument)
+            yield return Classify(slug, DocumentType.Hints, text,
+                MarkdownImageRewriter.Rewrite(hintsDocument, replacements), existingTexts);
     }
 
     /// <summary>

@@ -403,6 +403,8 @@
     "finishError": "Soutěž se nepodařilo ukončit. Zkus to prosím znovu.",
     "forfeitError": "Soutěž se nepodařilo vzdát.",
     "goToArea": "Otevřít v soutěži",
+    "hint": "Nápověda",
+    "hints": "Nápovědy",
     "howItWorks": {
       "steps": [
         "Vybereš si aktivní soutěž (níže je návod, jak si vybrat kategorii) 🎮",

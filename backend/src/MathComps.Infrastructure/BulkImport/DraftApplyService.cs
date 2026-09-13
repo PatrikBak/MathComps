@@ -288,7 +288,7 @@ public class DraftApplyService(
         };
         await context.Problems.AddAsync(newProblem);
 
-        // Each language variant contributes a statement (always) and a solution (when present).
+        // Each language variant contributes a statement (always), a solution and hints (when present).
         foreach (var text in problem.Texts)
         {
             // The statement half — rewrite its image refs and add it.
@@ -299,6 +299,11 @@ public class DraftApplyService(
             if (text.SolutionMarkdown is { } solutionMarkdown)
                 AddText(context, newProblem.Id, slug, DocumentType.Solution, text,
                     MarkdownImageRewriter.Rewrite(solutionMarkdown, replacements), appliedTexts);
+
+            // The hints, as the one document they are stored in, only when the draft carries any.
+            if (HintsDocument.Join(text.Hints) is { } hintsDocument)
+                AddText(context, newProblem.Id, slug, DocumentType.Hints, text,
+                    MarkdownImageRewriter.Rewrite(hintsDocument, replacements), appliedTexts);
         }
 
         // Assign the draft's authors when it declares any — a brand-new problem has none to clear, so null and the
@@ -367,6 +372,11 @@ public class DraftApplyService(
             if (text.SolutionMarkdown is { } solutionMarkdown)
                 textsChanged |= UpsertText(context, existing, DocumentType.Solution, text,
                     MarkdownImageRewriter.Rewrite(solutionMarkdown, replacements), appliedTexts);
+
+            // The hints, as the one document they are stored in, only when the draft carries any.
+            if (HintsDocument.Join(text.Hints) is { } hintsDocument)
+                textsChanged |= UpsertText(context, existing, DocumentType.Hints, text,
+                    MarkdownImageRewriter.Rewrite(hintsDocument, replacements), appliedTexts);
         }
 
         // Bring the author set into line with the draft.

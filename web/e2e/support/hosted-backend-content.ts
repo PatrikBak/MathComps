@@ -2,6 +2,7 @@ import type {
   DefenseLimits,
   DefenseSessionListItem,
 } from '@/components/features/defense/model/defense-types'
+import type { LocalizedHints } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { LocalizedString } from '@/i18n/i18n'
 
 /**
@@ -55,6 +56,32 @@ export const SOLUTIONS: LocalizedString[] = [
     cs: 'Sledujme součet čísel na tabuli. Krok nahrazující $x$ a $y$ číslem $\\frac{x+y}{4}$ jej zmenší přesně o $\\frac{3(x+y)}{4}$, takže součet nikdy neroste. Odtud lze omezit poslední číslo a dopočítat, pro která $n$ je hranice $\\frac{1}{n}$ ještě dosažitelná.',
     en: 'Follow the sum of the numbers on the board. A step replacing $x$ and $y$ by $\\frac{x+y}{4}$ decreases it by exactly $\\frac{3(x+y)}{4}$, so the sum never grows. That bounds the final number, and the bound settles which $n$ can still reach $\\frac{1}{n}$.',
   },
+]
+
+/**
+ * The author's hints towards each of {@link STATEMENTS}, weakest nudge first, in the order the competition
+ * sets the problems.
+ *
+ * The first problem carries a ladder and the rest carry none, so a run exercises both the row that is drawn
+ * and the row that is not.
+ */
+export const HINTS: LocalizedHints[] = [
+  {
+    sk: [
+      'Skúste najskôr malé hodnoty $a$ a $b$.',
+      'Bez ujmy na všeobecnosti nech $a \\le b$ a ohraničte $b^2 + a$.',
+    ],
+    cs: [
+      'Zkuste nejprve malé hodnoty $a$ a $b$.',
+      'Bez újmy na obecnosti nechť $a \\le b$ a omezte $b^2 + a$.',
+    ],
+    en: [
+      'Try small values of $a$ and $b$ first.',
+      'Assume $a \\le b$ and bound $b^2 + a$ between two squares.',
+    ],
+  },
+  { sk: [], cs: [], en: [] },
+  { sk: [], cs: [], en: [] },
 ]
 
 /** The examiner's opening line, which the backend serves and every transcript starts on. */

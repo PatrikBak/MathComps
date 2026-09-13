@@ -16,8 +16,8 @@ The format spec is the single source of truth — read it first: `web/scripts/PR
 ```
 my-draft/
   _meta.yaml        # the competition's path + season / date / language (the original language, e.g. sk)
-  p1.sk.md          # problem 1 in its original language (the locale matching _meta's language): statement, optional "<!-- solution -->", solution
-  p1.cs.md          # problem 1 in another locale (cs, en, …) — a translation; statement-only ok, solution only if the original has one
+  p1.sk.md          # problem 1 in its original language (the locale matching _meta's language): statement, optional "<!-- solution -->" and solution, optional "<!-- hint -->" rungs
+  p1.cs.md          # problem 1 in another locale (cs, en, …) — a translation; statement-only ok, solution only if the original has one, and then the same hint count as every other language
   p1.yaml           # problem 1's authors / solutionLink / tags — all optional; the file itself is required only for a newly-created problem
   images/           # referenced figures (flat): .svg / .png / .jpg / .jpeg / .webp, each < 2 MB
 ```
@@ -29,7 +29,7 @@ Filenames are `p<number>.<locale>.md`, locale one of `sk` / `cs` / `en`. The fil
 Each problem is matched to the DB by slug (`{edition}-{competitionPath}-{order}`). The one fork is **does it already exist?**
 
 - **New problem** → the import _creates_ it: it needs its original-language body **and** a `pN.yaml`; translations optional.
-- **Existing problem** → the import _patches_ it: ship only the bodies you're changing, and `pN.yaml` is optional (omit = leave authors/tags/link untouched). Statement and solution are independent halves, so adding just a solution is fine.
+- **Existing problem** → the import _patches_ it: ship only the bodies you're changing, and `pN.yaml` is optional (omit = leave authors/tags/link untouched). Statement and solution are independent halves, so adding just a solution is fine. Hints are a third piece, but one that ships in every language at once.
 
 | Intent | `pN.<orig>.md` (e.g. `p4.sk.md`) | `pN.<trans>.md` (cs/en) | `pN.yaml` |
 | --- | --- | --- | --- |
@@ -37,6 +37,7 @@ Each problem is matched to the DB by slug (`{edition}-{competitionPath}-{order}`
 | Correct an existing original | the corrected body | optional | optional |
 | Add / fix a translation (leave the original) | omit | the translation(s) | optional |
 | Add a solution to an existing problem | the body, now with `<!-- solution -->` | — | optional |
+| Add hints to an existing problem | the body, now with `<!-- hint -->` rungs | the same rungs, translated | optional |
 
 A full fresh import is `p1..pN` contiguous; a re-import carries any **subset** (e.g. just `p4`, or `p3` + `p7`) since the rest already exist. A draft is just per-problem ops — mix freely; the only cross-problem rule is round contiguity, enforced by `validate` below.
 
@@ -87,7 +88,7 @@ Season year is the academic start, not the event year: a March-2026 event ⇒ `y
 
 ## Step 3 — Write the problems
 
-Each `pN.<lang>.md`: statement (markdown + inline `$…$` / display `$$…$$` TeX), an optional lone `<!-- solution -->` line, then the solution. No frontmatter — metadata lives in `pN.yaml`. Reference images with a **bare** ref — `![alt](images/file.png)` — the only legal query param is `?inline=true` (inline display); `width`/`height`/`scale` on a ref are a preflight error (see "Sizing figures" below). Every `$…$` must render in KaTeX; an odd number of unescaped `$` is an error.
+Each `pN.<lang>.md`: statement (markdown + inline `$…$` / display `$$…$$` TeX), an optional lone `<!-- solution -->` line, then the solution, then optionally one lone `<!-- hint -->` line before each hint, weakest nudge first. Each rung is one concrete step, never a second solution. No frontmatter — metadata lives in `pN.yaml`. Reference images with a **bare** ref — `![alt](images/file.png)` — the only legal query param is `?inline=true` (inline display); `width`/`height`/`scale` on a ref are a preflight error (see "Sizing figures" below). Every `$…$` must render in KaTeX; an odd number of unescaped `$` is an error.
 
 **Statement shape:** the closing question/task is the last sentence of the final text paragraph — not a paragraph of its own. Split it off only when it must follow a block (bullet list, figure, or display math), where there's no sentence to attach it to.
 
@@ -105,11 +106,11 @@ Generate the original first, preflight it clean, **then** translate. Spawn paral
 
 - Translate only the natural-language prose; render correct target-language math terminology.
 - COPY every `$…$` / `$$…$$` span character-for-character (prose inside `\text{…}` may be translated, keep the wrapper).
-- Keep `![alt](images/…)`, the `<!-- solution -->` line, and `---` rules byte-identical and in place; same paragraph count; body only.
+- Keep `![alt](images/…)`, the `<!-- solution -->` and `<!-- hint -->` lines, and `---` rules byte-identical and in place; same paragraph count; body only.
 
 Then verify in **two passes** — both mandatory, neither self-graded by the translator agent:
 
-1. **Mechanical parity** (deterministic, you run it): per problem, assert original vs translation have equal `$` count, equal `$$` count, byte-identical `$…$`/`$$…$$` span multiset, identical image-ref set, equal `<!-- solution -->` and `---` counts, and translation ≠ original.
+1. **Mechanical parity** (deterministic, you run it): per problem, assert original vs translation have equal `$` count, equal `$$` count, byte-identical `$…$`/`$$…$$` span multiset, identical image-ref set, equal `<!-- solution -->`, `<!-- hint -->` and `---` counts, and translation ≠ original. The hint count is also what the preflight enforces (`hint-count-mismatch`), since rung *n* of one language has to be rung *n* of every other.
 2. **Independent semantic verification** (fan out fresh `general-purpose` agents, blind to the translators' reasoning, covering **every** problem — not a spot-check): each reads original + translation and hunts meaning differences mechanical parity can't catch — flipped quantifiers (for all / for some, exists), negations, a dropped "distinct", "at most" vs "at least", changed domain/range or conditions, wrong proper names. It reports discrepancies; you triage and fix.
 
 Mechanical parity only proves the math and structure survived; a prose-level meaning flip leaves the math byte-identical and sails through it. The semantic pass is where the real translation bugs surface, so it is not optional.

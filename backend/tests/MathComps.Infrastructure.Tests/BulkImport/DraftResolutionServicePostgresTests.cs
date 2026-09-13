@@ -598,6 +598,27 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     });
 
     /// <summary>
+    /// Hints are the examiner's material and no student ever argued against them, so a ladder arriving on a defended
+    /// problem is written like any other half and is never a restatement.
+    /// </summary>
+    [Fact]
+    public Task New_hints_on_a_defended_problem_are_not_a_restatement() => RunTestAsync(async service =>
+    {
+        // One conversation held about the seeded problem.
+        await SeedDefenseAsync(SeededProblemSlug);
+
+        // Re-import its Slovak original with the stored body plus a ladder it never had.
+        var preview = await PreviewAsync(service,
+            Problem(1, Original(Language.SK, SeededBody, hasSolution: false, "first nudge", "second nudge")));
+
+        // The ladder is a clean add on the hints half, and nothing is flagged as restated.
+        Assert.Contains(
+            new ProblemTextResolution(SeededProblemSlug, DocumentType.Hints, Language.SK, DraftTextAction.AddOriginal),
+            preview.TextResolutions);
+        Assert.Empty(preview.DefendedProblemRestatements);
+    });
+
+    /// <summary>
     /// Re-importing a defended problem with the body it already holds is silent — the check reads the same
     /// overwrite-vs-unchanged decision the rest of the preview does, so a no-op re-import of a whole round doesn't
     /// have to be waived problem by problem.
@@ -907,9 +928,11 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     /// <param name="language">The original's language.</param>
     /// <param name="statement">The statement markdown.</param>
     /// <param name="hasSolution">Whether the original carries a solution half.</param>
+    /// <param name="hints">The author's hints the original carries, weakest nudge first.</param>
     /// <returns>The original text content.</returns>
-    private static DraftTextContent Original(Language language, string statement = "changed", bool hasSolution = false) =>
-        new(language, Original: true, statement, hasSolution ? "solution" : null);
+    private static DraftTextContent Original(
+        Language language, string statement = "changed", bool hasSolution = false, params string[] hints) =>
+        new(language, Original: true, statement, hasSolution ? "solution" : null, [.. hints]);
 
     /// <summary>
     /// Builds a translation text variant. The body defaults to one that differs from the seeded body, so a
@@ -919,7 +942,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     /// <param name="statement">The statement markdown.</param>
     /// <returns>The translation text content.</returns>
     private static DraftTextContent Translation(Language language, string statement = "changed") =>
-        new(language, Original: false, statement, SolutionMarkdown: null);
+        new(language, Original: false, statement, SolutionMarkdown: null, Hints: []);
 
     /// <summary>
     /// Builds a seed <see cref="ProblemText"/> row with the fields the resolution check reads.

@@ -7,8 +7,7 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { type BadgePaletteEntry, CARD_PALETTE, type HandoutEnvironmentType } from './handout-colors'
 
 /**
- * Props for a single disclosure panel (proof / solution / hint) rendered
- * inside a {@link CollapsibleCard}.
+ * Props for a single disclosure panel (proof / solution / hint).
  */
 export type DisclosurePanelProps = {
   /** Translated label, e.g. "Proof", "Solution", "Hint". */
@@ -24,9 +23,9 @@ export type DisclosurePanelProps = {
 }
 
 /**
- * A single disclosure panel rendered inside a {@link CollapsibleCard}.
+ * A single disclosure panel: a badged, labelled row that folds its body away.
  */
-function DisclosurePanel({
+export function DisclosurePanel({
   label,
   textColorClass,
   badge,

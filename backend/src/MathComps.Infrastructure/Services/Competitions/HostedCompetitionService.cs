@@ -548,6 +548,14 @@ public sealed class HostedCompetitionService(
                         .Select(text => new ProblemBody(text.Language, text.MarkdownText ?? text.RawText))
                         .ToList()
                     : new List<ProblemBody>(),
+
+                // Withheld with the solution, a ladder being the solution told in stages.
+                Hints = isSolutionOpen
+                    ? problem.Texts
+                        .Where(text => text.DocumentType == DocumentType.Hints)
+                        .Select(text => new ProblemBody(text.Language, text.MarkdownText ?? text.RawText))
+                        .ToList()
+                    : new List<ProblemBody>(),
             })
             .ToListAsync(cancellationToken);
 
@@ -603,6 +611,13 @@ public sealed class HostedCompetitionService(
                     ? Enum.GetValues<Language>().ToDictionary(
                         language => language,
                         language => BodyIn(problem.Solutions, language, DocumentType.Solution))
+                    : null,
+
+                // Withheld with the solution, and read in every language otherwise.
+                Hints: isSolutionOpen
+                    ? Enum.GetValues<Language>().ToDictionary(
+                        language => language,
+                        language => HintsIn(problem.Hints, language))
                     : null,
 
                 // The conversations held about this one problem, most recently active first.
@@ -737,7 +752,7 @@ public sealed class HostedCompetitionService(
     }
 
     /// <summary>
-    /// One language's text of one kind of one problem, a statement or a solution.
+    /// One language's text of one kind of one problem: a statement, a solution or a hint document.
     /// </summary>
     /// <param name="Language">The language it is written in.</param>
     /// <param name="Body">The text itself, null on a row that holds none.</param>
@@ -760,6 +775,19 @@ public sealed class HostedCompetitionService(
         texts.FirstOrDefault(text => text.Language == language)?.Body
         ?? throw new InvalidOperationException(
             $"A hosted problem carries no {language} {documentType.ToString().ToLowerInvariant()}.");
+
+    /// <summary>
+    /// Reads one language's hints out of a problem's hint documents.
+    /// </summary>
+    /// <remarks>
+    /// A language the ladder was never written in reads as no hints, where <see cref="BodyIn"/> refuses the read:
+    /// a ladder is optional, and most problems carry none.
+    /// </remarks>
+    /// <param name="texts">The problem's hint documents, one per language a ladder was written in.</param>
+    /// <param name="language">The language wanted.</param>
+    /// <returns>The hints, weakest nudge first; empty where none were written.</returns>
+    private static IReadOnlyList<string> HintsIn(IEnumerable<ProblemBody> texts, Language language) =>
+        HintsDocument.Split(texts.FirstOrDefault(text => text.Language == language)?.Body);
 
     /// <summary>
     /// Reads a node's name in every language the site is read in.

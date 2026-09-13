@@ -1,4 +1,4 @@
-import type { LocalizedString } from '@/i18n/i18n'
+import type { Locale, LocalizedString } from '@/i18n/i18n'
 
 /**
  * One competition: one category, one problem set, one clock.
@@ -38,8 +38,15 @@ export type HostedCompetition = {
 }
 
 /**
- * One problem of a competition's set, as an entrant reads it: the statement, and the official solution once
- * they are no longer competing for it.
+ * One problem's hint ladder, weakest nudge first, in every language the site is read in.
+ *
+ * Empty for a language nobody wrote one in, a ladder being optional where a statement and a solution are not.
+ */
+export type LocalizedHints = Record<Locale, string[]>
+
+/**
+ * One problem of a competition's set, as an entrant reads it: the statement, and the official solution and the
+ * hints towards it once they are no longer competing for it.
  */
 export type HostedCompetitionProblem = {
   /** Stable identifier, unique within its competition. */
@@ -53,6 +60,11 @@ export type HostedCompetitionProblem = {
    * student is still competing here.
    */
   solution: LocalizedString | null
+  /**
+   * The author's hints, weakest nudge first, in every language the site is read in; null while the student is
+   * still competing here, on the same terms as the solution.
+   */
+  hints: LocalizedHints | null
   /** The conversations the student has held about it, most recently active first. */
   defenses: HostedCompetitionDefenseLine[]
   /**

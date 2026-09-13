@@ -5,20 +5,22 @@ using MathComps.Domain.Localization;
 namespace MathComps.Infrastructure.BulkImport;
 
 /// <summary>
-/// One language variant a draft problem imports: its language, whether it is the original, and the statement /
-/// solution markdown carried verbatim (still with relative <c>images/…</c> refs). Carries the content to write,
-/// shared by both the read-only preview and the apply path.
+/// One language variant a draft problem imports: its language, whether it is the original, and the statement,
+/// solution and hint markdown carried verbatim (still with relative <c>images/…</c> refs). Carries the content to
+/// write, shared by both the read-only preview and the apply path.
 /// </summary>
 /// <param name="Language">The text's language.</param>
 /// <param name="Original">Whether this text is the original (maps 1:1 to
 /// <see cref="ProblemText.IsOriginal"/>).</param>
 /// <param name="StatementMarkdown">Statement markdown verbatim.</param>
 /// <param name="SolutionMarkdown">Solution markdown verbatim, or null when this text has no solution.</param>
+/// <param name="Hints">The author's hints, weakest nudge first, each verbatim; empty when this text has none.</param>
 public record DraftTextContent(
     Language Language,
     bool Original,
     string StatementMarkdown,
-    string? SolutionMarkdown);
+    string? SolutionMarkdown,
+    ImmutableArray<string> Hints);
 
 /// <summary>
 /// Everything needed to write one draft problem: its position and language-invariant facts (authors, solution

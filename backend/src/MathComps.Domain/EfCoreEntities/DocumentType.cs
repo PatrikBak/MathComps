@@ -13,5 +13,10 @@ public enum DocumentType
     /// <summary>
     /// Problem solution text.
     /// </summary>
-    Solution = 1
+    Solution = 1,
+
+    /// <summary>
+    /// The author's hint ladder, every hint in one document in the shape <see cref="HintsDocument"/> defines.
+    /// </summary>
+    Hints = 2
 }

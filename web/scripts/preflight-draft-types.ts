@@ -5,8 +5,8 @@
 
 import type { Locale } from '../src/i18n/i18n'
 
-/** A problem's two markdown halves. */
-export type ProblemHalf = 'statement' | 'solution'
+/** The parts of a problem body an issue can sit in: the two halves, or one of the author's hints. */
+export type ProblemHalf = 'statement' | 'solution' | 'hint'
 
 /** Whether a verdict entry blocks import (`error`) or is merely advisory (`warning`). */
 export type VerdictSeverity = 'error' | 'warning'
@@ -38,7 +38,7 @@ export type ManifestMeta = {
   language: Locale
 }
 
-/** One language variant of a problem — the original or a translation, body parsed into its two halves. */
+/** One language variant of a problem — the original or a translation, body parsed into its halves and hints. */
 export type ManifestText = {
   /** Language of this text, taken from its `pN.<lang>.md` filename. */
   language: Locale
@@ -48,6 +48,8 @@ export type ManifestText = {
   statementMarkdown: string
   /** Solution markdown verbatim, or `null` when this text has no solution sentinel. */
   solutionMarkdown: string | null
+  /** One entry per hint sentinel, the markdown under it verbatim, in body order; empty when the body has none. */
+  hints: string[]
 }
 
 /** One problem's normalized content. */

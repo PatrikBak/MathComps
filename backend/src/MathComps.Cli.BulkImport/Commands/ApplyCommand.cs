@@ -104,7 +104,7 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
                 problem.SolutionLink,
                 problem.Tags,
                 [.. problem.Texts.Select(text => new DraftTextContent(
-                    text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown))],
+                    text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown, text.Hints))],
                 problem.Images))
             .ToList();
 

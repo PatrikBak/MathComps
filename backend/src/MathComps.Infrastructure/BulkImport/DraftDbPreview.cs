@@ -81,7 +81,7 @@ public enum DraftTextAction
 /// exists in the DB.
 /// </summary>
 /// <param name="Slug">The would-be problem slug that already exists.</param>
-/// <param name="DocumentType">The document half this resolution is about (statement or solution).</param>
+/// <param name="DocumentType">The document half this resolution is about (statement, solution or hints).</param>
 /// <param name="Language">The language of the text variant this resolution is about.</param>
 /// <param name="Action">What the import would do to it.</param>
 public record ProblemTextResolution(
@@ -113,7 +113,7 @@ public record TaxonomyOrphan(string Path);
 /// rewrites the text under an id every defense of the old problem still points at.
 /// </summary>
 /// <param name="Slug">The problem slug whose text would change.</param>
-/// <param name="DocumentType">The half that would change (statement or solution).</param>
+/// <param name="DocumentType">The half that would change (statement or solution; hints never count).</param>
 /// <param name="Language">The language of the text variant that would change.</param>
 /// <param name="DefenseCount">How many defenses the problem already carries.</param>
 public record DefendedProblemRestatement(

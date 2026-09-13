@@ -7,13 +7,18 @@ import { type ReactNode, useState } from 'react'
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { Modal } from '@/components/shared/components/Modal'
+import type { AddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 import { useAddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 import type { Locale } from '@/i18n/i18n'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { useCompetitionArea } from '../hooks/use-competition-area'
 import { clockEndsAt } from '../model/hosted-competition-state'
-import { COMPETITIONS_LIST_HREF, SOLUTION_PARAM } from '../services/hosted-competition-routes'
+import {
+  COMPETITIONS_LIST_HREF,
+  HINTS_PARAM,
+  SOLUTION_PARAM,
+} from '../services/hosted-competition-routes'
 import { CategoryBadge } from './CategoryBadge'
 import { CompetitionProblemPanel } from './CompetitionProblemPanel'
 import { CompetitionStandingStrip } from './CompetitionStandingStrip'
@@ -47,8 +52,28 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
   // Whether the reader has been asked whether they really mean to hand the entry in
   const [isFinishAsked, { open: openFinish, close: closeFinish }] = useDisclosure(false)
 
-  // Which problem's official solution is open, one answer for the whole set
-  const solutionDisclosure = useAddressedDisclosure(SOLUTION_PARAM)
+  // Which problem's official solution is open, and which problem's hints are, one answer each for the set
+  const openedSolution = useAddressedDisclosure(SOLUTION_PARAM)
+  const openedHints = useAddressedDisclosure(HINTS_PARAM)
+
+  // The solution's disclosure, closing the hints as it opens, so the set never has both open at once
+  const solutionDisclosure: AddressedDisclosure = {
+    ...openedSolution,
+    open: (value) => {
+      openedHints.close()
+      openedSolution.open(value)
+    },
+  }
+
+  // The hints' disclosure, closing the solution as it opens, and yielding to it where an address names both
+  const hintsDisclosure: AddressedDisclosure = {
+    ...openedHints,
+    openedValue: openedSolution.openedValue === null ? openedHints.openedValue : null,
+    open: (value) => {
+      openedSolution.close()
+      openedHints.open(value)
+    },
+  }
 
   // Whether the reader has cleared the practice run's tips off the page. Held for this view alone, so a
   // later run says them again
@@ -140,6 +165,7 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
             run={run}
             isGraded={isGraded}
             solutionDisclosure={solutionDisclosure}
+            hintsDisclosure={hintsDisclosure}
           />
         ))}
       </div>

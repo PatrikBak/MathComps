@@ -46,3 +46,9 @@ export function competitionAreaHref(competitionSlug: string): CompetitionAreaHre
  * Inert for a reader the solution is not out for yet: nothing on their page answers to it.
  */
 export const SOLUTION_PARAM = 'solution'
+
+/**
+ * The query parameter naming which problem's hints are open, on the terms {@link SOLUTION_PARAM} sets: it
+ * carries the problem's position, and is inert for a reader the hints are not out for yet.
+ */
+export const HINTS_PARAM = 'hints'

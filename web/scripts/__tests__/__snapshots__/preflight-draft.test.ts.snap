@@ -161,6 +161,29 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-duplicate-order
 }
 `;
 
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-empty-hint 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.sk.md",
+      "half": "hint",
+      "rule": "empty-hint",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
 exports[`preflight-draft fixtures (verdict + snapshot) > invalid-empty-statement 1`] = `
 {
   "errors": [
@@ -176,6 +199,30 @@ exports[`preflight-draft fixtures (verdict + snapshot) > invalid-empty-statement
   "problemLanguages": [
     [
       "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > invalid-hint-count-mismatch 1`] = `
+{
+  "errors": [
+    {
+      "file": "p1.en.md",
+      "half": "hint",
+      "rule": "hint-count-mismatch",
+      "severity": "error",
+    },
+  ],
+  "ok": false,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+      "en",
     ],
   ],
   "problemOrders": [
@@ -521,6 +568,40 @@ exports[`preflight-draft fixtures (verdict + snapshot) > valid-external-image 1`
   "problemLanguages": [
     [
       "sk",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-hints 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+      "en",
+    ],
+  ],
+  "problemOrders": [
+    1,
+  ],
+}
+`;
+
+exports[`preflight-draft fixtures (verdict + snapshot) > valid-hints-statement-only 1`] = `
+{
+  "errors": [],
+  "ok": true,
+  "problemCount": 1,
+  "problemLanguages": [
+    [
+      "sk",
+      "en",
     ],
   ],
   "problemOrders": [
