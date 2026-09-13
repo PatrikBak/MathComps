@@ -638,6 +638,7 @@ public class DefenseSessionService(
             Established = attempt.LeakCheck.Established,
             SwitchesLanguage = attempt.LanguageCheck.SwitchesLanguage,
             CandidateLanguage = attempt.LanguageCheck.CandidateLanguage,
+            GendersTheReader = attempt.LanguageCheck.GendersTheReader,
             TakesOver = attempt.RouteCheck.TakesOver,
             CandidateWork = attempt.RouteCheck.Work,
             RestatedReferenceStep = attempt.RouteCheck.Restates,

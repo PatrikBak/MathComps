@@ -195,6 +195,10 @@ public class ExaminerTurnCommand(IExaminer examiner)
         if (attempt.LeakCheck.WithholdsClose)
             yield return $"leak-check withholds the close — {attempt.LeakCheck.Established}";
 
+        // A guessed gender.
+        if (attempt.LanguageCheck.GendersTheReader)
+            yield return "language-check genders the reader";
+
         // A language switch, with the language the candidate wrote in.
         if (attempt.LanguageCheck.SwitchesLanguage)
             yield return
@@ -247,7 +251,8 @@ public class ExaminerTurnCommand(IExaminer examiner)
     }
 
     /// <summary>
-    /// Renders the language-check line: the language the candidate wrote in, and whether the reply drifted out of it.
+    /// Renders the language-check line: the language the candidate wrote in, whether the reply drifted out of it, and
+    /// whether its wording assumes the candidate's gender.
     /// </summary>
     /// <param name="languageCheck">The language-check verdict on the reply.</param>
     private static void RenderLanguageCheck(LanguageCheckResult languageCheck)
@@ -257,6 +262,14 @@ public class ExaminerTurnCommand(IExaminer examiner)
         {
             AnsiConsole.MarkupLineInterpolated(
                 $"[red]Language-check:[/] switched — the candidate wrote in {languageCheck.CandidateLanguage}");
+            return;
+        }
+
+        // Matched the language but guessed who it is talking to.
+        if (languageCheck.GendersTheReader)
+        {
+            AnsiConsole.MarkupLineInterpolated(
+                $"[red]Language-check:[/] genders the reader — the candidate wrote in {languageCheck.CandidateLanguage}");
             return;
         }
 

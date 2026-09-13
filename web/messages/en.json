@@ -39,8 +39,11 @@
         "tokens": "Tokens",
         "total": "In total",
         "verdicts": {
+          "address": "Address",
+          "addressClean": "leaves the student ungendered",
           "close": "Close",
           "closeClean": "not yet earned",
+          "gendersTheReader": "took the student for a man or a woman",
           "language": "Language",
           "languageUnknown": "not named",
           "leak": "Leak",
@@ -67,6 +70,7 @@
         "modelDefault": "default",
         "notes": {
           "authorHints": "Author's hints",
+          "genderedAddress": "Gendered address",
           "languageSwitch": "Wrong language",
           "leak": "Leak",
           "revision": "Revision header",

@@ -39,8 +39,11 @@
         "tokens": "Tokeny",
         "total": "Celkem",
         "verdicts": {
+          "address": "Oslovení",
+          "addressClean": "bez určení pohlaví",
           "close": "Uzavření",
           "closeClean": "zatím není zasloužené",
+          "gendersTheReader": "určila pohlaví studenta",
           "language": "Jazyk",
           "languageUnknown": "neurčen",
           "leak": "Prozrazení",
@@ -67,6 +70,7 @@
         "modelDefault": "výchozí",
         "notes": {
           "authorHints": "Autorovy nápovědy",
+          "genderedAddress": "Oslovení podle pohlaví",
           "languageSwitch": "Jiný jazyk",
           "leak": "Prozrazení",
           "revision": "Hlavička přepisu",

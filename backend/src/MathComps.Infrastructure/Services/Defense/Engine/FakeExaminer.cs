@@ -61,7 +61,7 @@ public class FakeExaminer(ModelUsage usage = default)
             RevisionNote: "",
             new MathCheckResult(true, ""),
             new LeakCheckResult(false, "", false, ""),
-            new LanguageCheckResult(false, ""),
+            new LanguageCheckResult(false, "", false),
             new RouteCheckResult("", "", "", false),
             [],
             DurationMs: 0);

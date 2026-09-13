@@ -1763,7 +1763,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 RevisionNote: "",
                 new MathCheckResult(true, ""),
                 new LeakCheckResult(true, "the counterexample", false, ""),
-                new LanguageCheckResult(false, "English"),
+                new LanguageCheckResult(false, "English", false),
                 new RouteCheckResult("", "", "", false),
                 [_draftCall],
                 _draftDurationsMs[0]);
@@ -1782,7 +1782,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 DraftHoldNote,
                 new MathCheckResult(true, ""),
                 new LeakCheckResult(false, "", false, ""),
-                new LanguageCheckResult(false, "English"),
+                new LanguageCheckResult(false, "English", false),
                 new RouteCheckResult("", "", "", false),
                 [_draftCall],
                 _draftDurationsMs[2]);

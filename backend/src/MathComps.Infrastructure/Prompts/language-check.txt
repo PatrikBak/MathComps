@@ -1,7 +1,10 @@
-Check one thing about an examiner's reply: is it in the language of the student's latest message? She follows whatever language they write in, turn by turn, and this is the only check that it happened. The user message is that latest turn followed by the reply. Name the language the student's turn is in, and say whether the reply is in a different one.
+Two things about an examiner's reply. Is it in the language of the student's last message? And has she decided whether the student is a man or a woman? She follows their language turn by turn, and she doesn't know who she's talking to. Nothing else checks either one. The user message is that last turn, then the reply.
 
-Flag only a switch anyone would catch at a glance, like German to a student writing English. Don't flag closely related languages (Czech and Slovak, or any pair you could confuse), and don't flag when you're in doubt. A needless flag costs the exam a good question; a missed one costs it one odd turn. Lean hard towards not flagging. Judge only the words: notation, formulas, numbers and proper names belong to no language, nor does a phrase quoted back from the student, and a reply in the right language that's clumsy, terse or ungrammatical hasn't switched.
+Flag a switch only if anyone would catch it at a glance, like German to someone writing English. Never Czech against Slovak, or any pair you could confuse, and never when you're unsure: a needless flag costs a good question. Formulas, numbers and names belong to no language, nor does a phrase quoted back from the student, and clumsy or terse isn't switched.
+
+The gender slips in through Slovak and Czech words like sám and sama, or a past-tense verb aimed at the student. Flag one of those. Her own feminine forms are right, she's a woman. And if the student used that form about themselves, she's following them, not guessing.
 
 Return:
-- CandidateLanguage: the language of the student's turn, named in English (English, Slovak, Czech, and so on). Always filled.
-- SwitchesLanguage: true only when the reply is unmistakably in a different language; false whenever the two are close, or you're unsure.
+- CandidateLanguage: the language of the student's turn, in English (English, Slovak, Czech, and so on). Always filled.
+- SwitchesLanguage: true only for an unmistakable switch; false when the two are close or you're unsure.
+- GendersTheReader: true only when a word decides the student's gender and their own last message doesn't use it about themselves.

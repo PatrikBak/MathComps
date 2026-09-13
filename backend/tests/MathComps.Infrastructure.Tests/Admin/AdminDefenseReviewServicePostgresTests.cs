@@ -1267,6 +1267,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             Established = "",
             SwitchesLanguage = false,
             CandidateLanguage = "English",
+            GendersTheReader = false,
             TakesOver = false,
             CandidateWork = "",
             RestatedReferenceStep = "",

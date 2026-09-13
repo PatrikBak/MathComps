@@ -11,18 +11,18 @@ One turn is a loop, not one call.
 1. **Generate** writes the reply.
 2. **Math-check** verifies every claim in it against the reference.
 3. **Leak-check** looks for a step handed over unearned, and for a solution already complete that the reply keeps pressing.
-4. **Language-check** says whether the reply drifted out of the language the candidate wrote in.
+4. **Language-check** says whether the reply drifted out of the language the candidate wrote in, and whether a word in it takes the candidate for a man or a woman.
 5. **Route-check** says whether the question left the candidate's own work to ask for a reference step.
 
 The guards run concurrently on every reply. When one flags it, the reply is regenerated with that flaw named and checked again, up to `Examiner.MaxRevisions` times.
 
-What ships when the cap runs out depends on the flag. A wrong claim, a leak or a withheld close gets a constrained holding reply in place of the flagged draft. A language switch or a route takeover ships the last draft as it stands, so its challenge still carries the exam forward.
+What ships when the cap runs out depends on the flag. A wrong claim, a leak or a withheld close gets a constrained holding reply in place of the flagged draft. A language switch, a guessed gender or a route takeover ships the last draft as it stands, so its challenge still carries the exam forward.
 
 ### Per-step models
 
 Each step sets its own `Model`, `FallbackModels`, `ReasoningEffort` and `MaxOutputTokens` in `appsettings.examiner.json`, so you tune one without touching the others. `MaxOutputTokens` bounds a runaway generation, and on a thinking model it also sets how deep the step thinks.
 
-The language check is the only step that runs cheap, at `low` effort: naming the language of two short pieces of prose needs no depth. Everything else wants a strong reasoning model.
+The language check is the only step that runs cheap, at `low` effort: it reads two short pieces of prose and reports what is on their surface. Everything else wants a strong reasoning model.
 
 `FallbackModels` is the chain the provider walks when the primary never answers, which is the one failure the retry cannot cover. Make every hop a different vendor that takes a JSON schema and a system message. A sibling model shares the primary's outage, and a model the provider will not carry a system message to answers with the persona missing and calls it a success.
 
