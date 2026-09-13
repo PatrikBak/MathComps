@@ -216,6 +216,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <param name="Leak">The instruction for a reply the leak-check found hands away earned progress.</param>
     /// <param name="WithheldClose">The instruction for a reply that keeps pressing a completed solution.</param>
     /// <param name="LanguageSwitch">The instruction for a reply that drifted out of the candidate's language.</param>
+    /// <param name="GenderedAddress">The instruction for a reply whose wording assumes the candidate's gender.</param>
     /// <param name="Route">The revision instruction for a takeover.</param>
     /// <param name="SafeHold">The instruction a draft that outlasted the revision cap is replaced under.</param>
     /// <param name="AuthorHints">The guidance for using the author's staged hints.</param>
@@ -225,6 +226,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         string Leak,
         string WithheldClose,
         string LanguageSwitch,
+        string GenderedAddress,
         string Route,
         string SafeHold,
         string AuthorHints);
@@ -439,6 +441,7 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
             await ReadNoteAsync(paths.Leak, ["what_leaked"], cancellationToken),
             await ReadNoteAsync(paths.WithheldClose, [], cancellationToken),
             await ReadNoteAsync(paths.LanguageSwitch, [], cancellationToken),
+            await ReadNoteAsync(paths.GenderedAddress, [], cancellationToken),
             await ReadNoteAsync(paths.Route, ["work"], cancellationToken),
             await ReadNoteAsync(paths.SafeHold, [], cancellationToken),
             await ReadNoteAsync(paths.AuthorHints, [], cancellationToken));
@@ -520,6 +523,10 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
         // A switched language leaves the candidate reading a reply they may not understand, so send it back.
         if (languageCheck.SwitchesLanguage)
             flagged.Add(notes.LanguageSwitch);
+
+        // A guessed gender tells the candidate something about themselves the examiner cannot know, so send it back.
+        if (languageCheck.GendersTheReader)
+            flagged.Add(notes.GenderedAddress);
 
         // Nothing flagged means no revision; otherwise mark the instructions so the prompt reads them as one.
         return flagged.Count == 0 ? null : WrapRevision(notes.Revision, flagged.ToJoinedString(" "));

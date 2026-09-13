@@ -14,8 +14,9 @@ namespace MathComps.Infrastructure.Tests.Defense;
 /// <summary>
 /// Tests the examiner loop's guard dispatch through its public entry point with a fake chat caller: every guard runs on
 /// every reply, a flagged guard triggers regeneration — re-verified each time and capped, so a persistent flaw ships
-/// after the cap — a revision carries the specific correction back to the generator, a language switch is sent back for
-/// a rewrite but never costs the reply its content, and the turn sums the cost and tokens of every call it made.
+/// after the cap — a revision carries the specific correction back to the generator, a language switch and a guessed
+/// gender are sent back for a rewrite but never cost the reply its content, and the turn sums the cost and tokens of
+/// every call it made.
 /// </summary>
 public class ExaminerTests
 {
@@ -344,6 +345,75 @@ public class ExaminerTests
         Assert.False(outcome.SafeFallback);
         Assert.True(outcome.Shipped.LanguageCheck.SwitchesLanguage);
         Assert.Equal("eine Frage.", outcome.Shipped.Reply);
+    }
+
+    /// <summary>
+    /// A reply that decides whether the candidate is a man or a woman is sent back to be written without the word.
+    /// The note names neither the form the reply picked nor the language it picked it in: told which one it used, the
+    /// generator would simply swap in the other, which is the same guess the note exists to undo.
+    /// </summary>
+    [Fact]
+    public async Task A_gendered_reply_regenerates_under_a_note_naming_no_form_of_its_own()
+    {
+        // Capture each generate call's request as it lands.
+        var generateRequests = new List<ChatCallRequest>();
+        var caller = new Mock<ILlmChatCaller>();
+        caller.SetupSequence(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("Ukázal si to pekne, čo ďalej?"))
+            .ReturnsAsync(Result("To vychádza pekne, čo ďalej?"));
+
+        // The reference guards stay clean; the language check catches the guessed gender once, then clears.
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanLeak());
+        caller.SetupSequence(mock => mock.CompleteAsync<LanguageCheckResult>(
+                It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result(CleanLanguage() with { GendersTheReader = true, CandidateLanguage = "Slovak" }))
+            .ReturnsAsync(Result(CleanLanguage()));
+        SetupStep(caller, CleanRoute());
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // It regenerated exactly once and shipped the attempt that assumes nothing.
+        Assert.Equal(1, outcome.Revisions);
+        Assert.Equal("To vychádza pekne, čo ďalej?", outcome.Shipped.Reply);
+        Assert.False(outcome.Shipped.LanguageCheck.GendersTheReader);
+
+        // The regenerate's prompt said what the reply had assumed...
+        Assert.Contains("man or a woman", generateRequests[1].SystemPrompt);
+
+        // ...and handed back neither the form it had picked nor the language the checker named.
+        Assert.DoesNotContain("Ukázal", generateRequests[1].SystemPrompt);
+        Assert.DoesNotContain("Slovak", generateRequests[1].SystemPrompt);
+    }
+
+    /// <summary>
+    /// A reply that keeps deciding the candidate's gender burns through the revision cap and then ships as it stands,
+    /// the same trade the language switch takes: one word aimed at the wrong person costs less than retreating to a
+    /// holding reply that asks nothing.
+    /// </summary>
+    [Fact]
+    public async Task A_persistent_gendered_reply_ships_without_the_fallback()
+    {
+        // A reply that always comes back gendered, clean on every other count.
+        var caller = new Mock<ILlmChatCaller>();
+        SetupTextStep(caller, "Ukázal si to pekne, čo ďalej?");
+        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage() with { GendersTheReader = true, CandidateLanguage = "Slovak" });
+        SetupStep(caller, CleanRoute());
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // Generate ran the initial attempt and the capped revisions, with no fallback generation on top.
+        VerifyTextStepCalled(caller, Times.Exactly(RevisionCap + 1));
+
+        // The gendered reply itself shipped, still carrying the flagged verdict.
+        Assert.Equal(RevisionCap, outcome.Revisions);
+        Assert.False(outcome.SafeFallback);
+        Assert.True(outcome.Shipped.LanguageCheck.GendersTheReader);
     }
 
     /// <summary>
@@ -855,7 +925,7 @@ public class ExaminerTests
     /// </summary>
     /// <returns>The clean verdict.</returns>
     private static LanguageCheckResult CleanLanguage() =>
-        new(SwitchesLanguage: false, CandidateLanguage: "English");
+        new(SwitchesLanguage: false, CandidateLanguage: "English", GendersTheReader: false);
 
     /// <summary>
     /// A route-check verdict that finds the reply on the candidate's own route.

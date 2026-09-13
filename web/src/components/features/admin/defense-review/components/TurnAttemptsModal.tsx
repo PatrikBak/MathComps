@@ -242,6 +242,12 @@ function Attempt({ attempt, status }: AttemptProps) {
           flagged={t('verdicts.switchesLanguage', { language: attempt.candidateLanguage })}
           clean={attempt.candidateLanguage || t('verdicts.languageUnknown')}
         />
+        <Verdict
+          label={t('verdicts.address')}
+          isFlagged={attempt.gendersTheReader}
+          flagged={t('verdicts.gendersTheReader')}
+          clean={t('verdicts.addressClean')}
+        />
         {/* Route. An attempt with no route-check call was never judged, so a false flag says nothing about it */}
         <Verdict
           label={t('verdicts.route')}

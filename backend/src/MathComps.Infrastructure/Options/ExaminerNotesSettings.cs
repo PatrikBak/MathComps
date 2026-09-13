@@ -36,6 +36,11 @@ public class ExaminerNotesSettings
     public required string LanguageSwitch { get; set; }
 
     /// <summary>
+    /// Path to the instruction for a reply whose wording assumes the candidate's gender.
+    /// </summary>
+    public required string GenderedAddress { get; set; }
+
+    /// <summary>
     /// Path to the instruction for a reply that left the candidate's argument for the examiner's own. Carries a
     /// <c>{work}</c> placeholder for the checker's account of what the candidate actually brought.
     /// </summary>

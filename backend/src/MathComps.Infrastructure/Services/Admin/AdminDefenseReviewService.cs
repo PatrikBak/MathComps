@@ -336,6 +336,7 @@ public class AdminDefenseReviewService(
                         attempt.Established,
                         attempt.SwitchesLanguage,
                         attempt.CandidateLanguage,
+                        attempt.GendersTheReader,
                         attempt.TakesOver,
                         attempt.CandidateWork,
                         attempt.RestatedReferenceStep,

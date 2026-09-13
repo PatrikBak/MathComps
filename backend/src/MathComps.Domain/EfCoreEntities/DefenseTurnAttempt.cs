@@ -98,6 +98,11 @@ public class DefenseTurnAttempt
     public required string CandidateLanguage { get; set; }
 
     /// <summary>
+    /// Whether a word in the reply took the candidate for a man or a woman.
+    /// </summary>
+    public required bool GendersTheReader { get; set; }
+
+    /// <summary>
     /// Whether the reply left the candidate's argument to walk them through the examiner's own: its question kept
     /// nothing of what they brought, and its answer is a line of the reference.
     /// </summary>

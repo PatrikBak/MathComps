@@ -44,6 +44,7 @@ public record AdminDefenseAttemptCallDto(
 /// <param name="Established"><inheritdoc cref="DefenseTurnAttempt.Established" path="/summary"/></param>
 /// <param name="SwitchesLanguage"><inheritdoc cref="DefenseTurnAttempt.SwitchesLanguage" path="/summary"/></param>
 /// <param name="CandidateLanguage"><inheritdoc cref="DefenseTurnAttempt.CandidateLanguage" path="/summary"/></param>
+/// <param name="GendersTheReader"><inheritdoc cref="DefenseTurnAttempt.GendersTheReader" path="/summary"/></param>
 /// <param name="TakesOver"><inheritdoc cref="DefenseTurnAttempt.TakesOver" path="/summary"/></param>
 /// <param name="CandidateWork"><inheritdoc cref="DefenseTurnAttempt.CandidateWork" path="/summary"/></param>
 /// <param name="RestatedReferenceStep">
@@ -65,6 +66,7 @@ public record AdminDefenseAttemptDto(
     string Established,
     bool SwitchesLanguage,
     string CandidateLanguage,
+    bool GendersTheReader,
     bool TakesOver,
     string CandidateWork,
     string RestatedReferenceStep,

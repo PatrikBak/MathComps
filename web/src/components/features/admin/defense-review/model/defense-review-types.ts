@@ -255,6 +255,8 @@ export type DefenseTurnAttempt = {
   switchesLanguage: boolean
   /** The language the student's latest turn was written in. */
   candidateLanguage: string
+  /** Whether a word in the reply took the student for a man or a woman. */
+  gendersTheReader: boolean
   /** Whether the reply left the student's argument to walk them through the examiner's own. */
   takesOver: boolean
   /** The student's own work; empty when they had brought nothing. */
@@ -315,6 +317,8 @@ export type ExaminerNotesSnapshot = {
   withheldClose?: ExaminerNoteSnapshot
   /** The instruction for a reply that drifted out of the student's language. */
   languageSwitch?: ExaminerNoteSnapshot
+  /** The instruction for a reply that took the student for a man or a woman. */
+  genderedAddress?: ExaminerNoteSnapshot
   /** The instruction for a reply that left the student's argument for the examiner's own. */
   route?: ExaminerNoteSnapshot
   /** The instruction a draft that outlasted the revision cap was replaced under. */
