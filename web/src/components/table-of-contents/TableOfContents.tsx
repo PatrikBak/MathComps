@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -77,6 +78,9 @@ function TocLinks({ items, activeIndex, onItemClick, registerLinkElementRef }: T
  * - Automatic highlighting of current section
  */
 export function TableOfContents({ items }: TableOfContentsProps) {
+  // Translations for UI labels
+  const t = useTranslations('navigation')
+
   // Use shared navigation hook
   const { activeIndex, handleNavigationClick } = useTableOfContentsNavigation({
     items,
@@ -102,7 +106,7 @@ export function TableOfContents({ items }: TableOfContentsProps) {
         >
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-focus"></span>
-            Obsah
+            {t('tableOfContents')}
           </h3>
           <nav className="text-sm">
             <TocLinks
