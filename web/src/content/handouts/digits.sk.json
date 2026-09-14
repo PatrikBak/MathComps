@@ -3823,7 +3823,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ", ak viete, že\u00A07 je jeho predposledná číslica."
+                      "text": ", ak viete, že predposledná číslica čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je\u00A07."
                     }
                   ],
                   "highligted": false
@@ -4194,7 +4203,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Existujú dve rôzne mocniny dvojky s rovnakým počtom cifier, z ktorých by sa jedna dala získať iba preusporiadaním cifier tej druhej."
+                      "text": "Existujú dve rôzne mocniny dvojky s rovnakým počtom cifier, z ktorých by sa jedna dala získať iba preusporiadaním cifier tej druhej?"
                     }
                   ],
                   "highligted": false
@@ -4855,7 +4864,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " prilepením cifry rôznej od\u00A09. Dokážte, že v\u00A0tejto postupnosti bude nevyhnutne existovať nekonečne veľa zložených čísel."
+                      "text": " prilepením cifry rôznej od\u00A09 na jeho koniec. Dokážte, že v\u00A0tejto postupnosti bude nevyhnutne existovať nekonečne veľa zložených čísel."
                     }
                   ],
                   "highligted": false
