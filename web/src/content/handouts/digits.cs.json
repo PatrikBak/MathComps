@@ -3823,7 +3823,16 @@
                     },
                     {
                       "type": "text",
-                      "text": ", pokud víte, že\u00A07 je jeho předposlední číslice."
+                      "text": ", pokud víte, že předposlední číslice čísla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "n^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je\u00A07."
                     }
                   ],
                   "highligted": false
@@ -4855,7 +4864,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " přilepením číslice různé od\u00A09. Dokažte, že v\u00A0této posloupnosti bude nevyhnutelně existovat nekonečně mnoho složených čísel."
+                      "text": " přilepením číslice různé od\u00A09 na jeho konec. Dokažte, že v\u00A0této posloupnosti bude nevyhnutelně existovat nekonečně mnoho složených čísel."
                     }
                   ],
                   "highligted": false
