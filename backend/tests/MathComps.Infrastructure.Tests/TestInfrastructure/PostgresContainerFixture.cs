@@ -1,9 +1,9 @@
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Testcontainers.PostgreSql;
 
 namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
@@ -17,7 +17,7 @@ public sealed class PostgresContainerFixture : IAsyncLifetime
     /// <summary>
     /// The Docker container running PostgreSQL for testing.
     /// </summary>
-    private readonly IContainer _postgresContainer;
+    private readonly PostgreSqlContainer _postgresContainer;
 
     /// <summary>
     /// The username for the database.
@@ -57,21 +57,16 @@ public sealed class PostgresContainerFixture : IAsyncLifetime
     {
         try
         {
-            // Create PostgreSQL container with pgvector extension for vector similarity operations.
-            _postgresContainer = new ContainerBuilder()
-                // Use pgvector image with PostgreSQL 16 for embedding similarity
+            // The Postgres module's builder, for its wait strategy: pg_isready over TCP, which the socket-only
+            // server the image's entrypoint runs for its init scripts cannot answer
+            _postgresContainer = new PostgreSqlBuilder()
+                // pgvector's image: Postgres 16 with the vector extension
                 .WithImage("pgvector/pgvector:pg16")
-                // The required envs
-                .WithEnvironment("POSTGRES_USER", DbUser)
-                .WithEnvironment("POSTGRES_PASSWORD", DbPassword)
-                .WithEnvironment("POSTGRES_DB", "postgres")
-                // Bind to random available port (0) to avoid conflicts with other services
-                .WithPortBinding(0, InternalPort)
-                // Wait for PostgreSQL to be fully ready (not just the port)
-                // pg_isready returns 0 when the server is accepting connections
-                .WithWaitStrategy(
-                    Wait.ForUnixContainer()
-                        .UntilCommandIsCompleted("pg_isready", "-U", DbUser))
+                // The server's credentials
+                .WithUsername(DbUser)
+                .WithPassword(DbPassword)
+                // The database the server always has
+                .WithDatabase(MaintenanceDatabase)
                 .Build();
         }
         catch (DockerUnavailableException)
