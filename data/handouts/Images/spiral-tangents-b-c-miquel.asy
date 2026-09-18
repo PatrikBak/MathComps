@@ -9,15 +9,19 @@ real deltaRadius = abs(T - S) / 2;
 BaseFills();
 
 BaseEdges();
+Circle(T, r, LightBlue);
 Circle(deltaCenter, deltaRadius, LightBlue);
 DashedDraw(S, X, Purple);
 Draw(B1, C1, Green);
 Draw(B, C, Red);
-Draw(C, S, vertexPen);
 
+Draw(T, B);
+Draw(T, C);
+Draw(A, B);
+Draw(A, C);
 Draw(B1, X);
 Draw(C1, X);
 
 BaseDots();
-LabeledDot(C, "C", N, (1,0), 3);
+LabeledDot(C, "C", (0,-1), distanceOffset = 3, offset = (-2.3, -0.4));
 LabeledDot(X, "X", N);

@@ -1,6 +1,6 @@
 include "spiral-definition-shared.asy";
 
-real phi = 60;
+real phi = 70;
 
 // The same layout turn as spiral-definition.asy, so the series shares one orientation.
 transform layout = rotate(30);
@@ -10,8 +10,8 @@ pair B = layout * B;
 pair Ap = SpiralImage(A, phi, 1);
 pair Bp = SpiralImage(B, phi, 1);
 
-AngleMark(A, O, Ap, LightBlue, radius = Radius3);
-AngleMark(B, O, Bp, LightPurple, radius = Radius2);
+AngleMark(A, O, Ap, LightBlue, "\phi", radius = Radius4, labelFraction = 1, labelOffset = 8, labelPen = Blue);
+AngleMark(B, O, Bp, Blue, "\phi", radius = Radius2, labelFraction = 1, labelOffset = 8, labelPen = DarkBlue);
 
 // The paths A and B travel under the rotation: arcs about O through the
 // midway direction.
@@ -26,8 +26,8 @@ DashedDraw(O, B);
 DashedDraw(O, Ap);
 DashedDraw(O, Bp);
 
-LabeledDot(O, "O", S, 4);
+LabeledDot(O, "O", S, 3);
 LabeledDot(A, "A", S);
 LabeledDot(B, "B", E);
 LabeledDot(Ap, "A'", N);
-LabeledDot(Bp, "B'", NW);
+LabeledDot(Bp, "B'", NW, 1, offset = (2.4, -5.3));

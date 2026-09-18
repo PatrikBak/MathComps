@@ -1,10 +1,9 @@
 import _common;
 
-// Triangle angles in degrees (sum to 180): scalene and acute so D, E, F land
-// clear of the vertices and I1, I2 separate from D and from each other.
-real alphaDeg = 50;
+// Triangle angles in degrees (sum to 180): acute and clearly scalene.
+real alphaDeg = 60;
 real betaDeg = 70;
-real gammaDeg = 60;
+real gammaDeg = 50;
 
 real lenBC = 175;
 
@@ -19,10 +18,6 @@ pair F = Foot(C, A, B);
 pair I1 = Incenter(B, F, D);
 pair I2 = Incenter(C, E, D);
 
-// The bisectors from B and C in ABC are the same rays as BI1 and CI2, so
-// they meet at the incentre of ABC.
-pair I = Incenter(A, B, C);
-
 pair circleCenter = Circumcenter(B, C, I1);
 
 // Right-angle fills for the three altitude feet.
@@ -34,6 +29,8 @@ RightAngleMark(A, E, B, radius = Radius2);
 // extent would dwarf the triangle. Only the near arc (through I1 and I2)
 // carries the concyclicity, so that is the part we draw.
 Arc(circleCenter, B, I1, C, color = LightBlue);
+Circle(I1, abs(I1 - Foot(I1, B, D)), LightPink);
+Circle(I2, abs(I2 - Foot(I2, C, D)), LightPink);
 
 DashedDraw(D, F, Purple);
 DashedDraw(D, E, Purple);
@@ -48,16 +45,14 @@ Draw(B, C);
 Draw(C, A);
 Draw(A, D);
 Draw(C, F);
-Draw(B, I, vertexPen);
-Draw(C, I, vertexPen);
-Draw(B, I2, vertexPen);
+Draw(B, I1, vertexPen);
+Draw(C, I2, vertexPen);
 
 LabeledDot(A, "A", N);
-LabeledDot(B, "B", SW);
-LabeledDot(C, "C", SE);
+LabeledDot(B, "B", SW, 1);
+LabeledDot(C, "C", SE, 1);
 LabeledDot(D, "D", S);
-LabeledDot(E, "E", NE);
-LabeledDot(F, "F", NW);
-LabeledDot(I1, "I_1", N, distanceOffset = 5);
-LabeledDot(I2, "I_2", N, distanceOffset = 5);
-LabeledDot(I, "I", NE, distanceOffset = 5);
+LabeledDot(E, "E", NE, 1);
+LabeledDot(F, "F", NW, 1);
+LabeledDot(I1, "I_1", N, distanceOffset = 3, halo = true, haloPad = 0.8, offset = (-0.4, 2.2));
+LabeledDot(I2, "I_2", N, distanceOffset = 3, halo = true, offset = (0.8, 0));

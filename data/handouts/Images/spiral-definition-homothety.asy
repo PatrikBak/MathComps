@@ -11,7 +11,7 @@ Draw(Ap, Bp, Red);
 DashedDraw(O, Ap);
 DashedDraw(O, Bp);
 
-LabeledDot(O, "O", W, 4);
+LabeledDot(O, "O", W, 3);
 LabeledDot(A, "A", S);
 LabeledDot(B, "B", N);
 LabeledDot(Ap, "A'", S);

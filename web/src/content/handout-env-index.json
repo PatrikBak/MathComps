@@ -2533,9 +2533,9 @@
       "type": "theorem",
       "number": 1,
       "slug": {
-        "sk": "spiralna-podobnost-v-paroch",
-        "cs": "spiralni-podobnost-v-parech",
-        "en": "spiral-similarity-in-pairs"
+        "sk": "spiralna-podobnost-po-dvoch",
+        "cs": "spiralni-podobnost-po-dvou",
+        "en": "spiral-similarity-two-at-a-time"
       }
     },
     "7w5OPOXaDCNOVEgIpddYa": {
@@ -2556,19 +2556,14 @@
         "en": "center-of-spiral-similarity"
       }
     },
-    "bOA6eKiwIlUrb_5f3ft0o": {
-      "type": "theorem",
-      "number": 4,
-      "slug": { "sk": "miquelova-veta", "cs": "miquelova-veta", "en": "miquels-theorem" }
-    },
     "LBhDImhjL32nZ7fyN8V3M": {
       "type": "theorem",
-      "number": 5,
+      "number": 4,
       "slug": { "sk": "miquelov-bod", "cs": "miqueluv-bod", "en": "miquel-point" }
     },
     "igG5PzGmeZw8PD3AWDpuL": {
       "type": "theorem",
-      "number": 6,
+      "number": 5,
       "slug": {
         "sk": "miquelov-bod-tetivoveho-stvoruholnika",
         "cs": "miqueluv-bod-tetivoveho-ctyruhelniku",
@@ -2577,37 +2572,42 @@
     },
     "MmyK4gHpuLqLFIWRTsfw7": {
       "type": "theorem",
-      "number": 7,
+      "number": 6,
       "slug": { "sk": "om-kolme-na-qr", "cs": "om-kolme-na-qr", "en": "om-perpendicular-to-qr" }
     },
     "0E6PUv99s_uEcAjd8CC6I": {
       "type": "theorem",
-      "number": 8,
+      "number": 7,
       "slug": { "sk": "o-p-m-na-priamke", "cs": "o-p-m-na-primce", "en": "o-p-m-collinear" }
+    },
+    "1LKVhRCTK_6pAfJ02sHWt": {
+      "type": "definition",
+      "number": 2,
+      "slug": { "sk": "inverzia-a-polara", "cs": "inverze-a-polara", "en": "inversion-and-polar" }
     },
     "8WFRq4Y9hX4Xf2REA_qfL": {
       "type": "theorem",
-      "number": 9,
+      "number": 8,
       "slug": { "sk": "polara", "cs": "polara", "en": "polar" }
     },
     "tQ6r-YBHII2hYOcd0jnzC": {
       "type": "theorem",
-      "number": 10,
+      "number": 9,
       "slug": { "sk": "ptolemaiova-veta", "cs": "ptolemaiova-veta", "en": "ptolemys-theorem" }
     },
     "ECXlxtdJwECBnuRZW8E-V": {
       "type": "theorem",
-      "number": 11,
+      "number": 10,
       "slug": { "sk": "simsonova-priamka", "cs": "simsonova-primka", "en": "simson-line" }
     },
     "J67DMaac8DHSjoZgc7hzh": {
       "type": "theorem",
-      "number": 12,
+      "number": 11,
       "slug": { "sk": "sharky-devil", "cs": "sharky-devil", "en": "sharky-devil" }
     },
     "DKBXD5k0KpD8gJ1WTK5OL": {
       "type": "theorem",
-      "number": 13,
+      "number": 12,
       "slug": {
         "sk": "rovnake-useky-bd-ce",
         "cs": "stejne-usecky-bd-ce",

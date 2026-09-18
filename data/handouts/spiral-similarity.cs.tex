@@ -13,7 +13,7 @@
 
 \EnvId{T3lP4FN1zTf6lOQz9Ddq_-spiralni-podobnost}
 \Definition{Spirální podobnost}{
-    Geometrické zobrazení, které je složením otočení a~stejnolehlosti. Je určena středem, orientovaným úhlem otočení $\phi$ a~koeficientem stejnolehlosti $k>0$.
+    \textit{Spirální podobnost} je geometrické zobrazení, které je složením otočení a~stejnolehlosti. Je určena středem, orientovaným úhlem otočení $\phi$ a~koeficientem stejnolehlosti $k>0$.
 
     \Image{spiral-definition.pdf}
 }
@@ -28,28 +28,42 @@ Z~této definice plyne:
    \Image{spiral-definition-rotation.pdf}
 \enditems
 
-\EnvId{JmA51D6zLoKYiJEsuQBWn-spiralni-podobnost-v-parech}
-\Theorem{Spirální podobnost chodí \uv{v~párech}}{
+\EnvId{JmA51D6zLoKYiJEsuQBWn-spiralni-podobnost-po-dvou}
+\Theorem{Spirální podobnost chodí \uv{po dvou}}{
     Nechť spirální podobnost se středem $O$ převádí $AB$ na $A'B'$. Potom je $O$ také středem spirální podobnosti, která převádí $AA'$ na $BB'$.
 
     \Image{spiral-pairs.pdf}
-}{}
+}{
+    Nechť má spirální podobnost úhel $\phi$ a~koeficient $k$. Přímo z~definice je $\angle AOA' = \angle BOB' = \phi$ (orientované úhly) a~$|OA'| : |OA| = |OB'| : |OB| = k$.
+
+    Přičtením úhlu $A'OB$ k~oběma stranám první rovnosti máme $\angle AOB = \angle A'OB'$ a~úpravou druhé $|OB| : |OA| = |OB'| : |OA'|$. Spirální podobnost se středem $O$, úhlem $\angle AOB$ a~koeficientem $|OB| : |OA|$ tedy zobrazuje $A$ na $B$ a~$A'$ na $B'$, čili $AA'$ na $BB'$.
+}
 
 \EnvId{7w5OPOXaDCNOVEgIpddYa-spiralni-podobnost-a-podobne-body}
 \Theorem{Spirální podobnost přenáší \uv{podobné body}}{
-    Nechť $S$ je spirální podobnost se středem $O$ převádějící $AB$ na $A'B'$. Nechť $X$ a~$X'$ jsou body na úsečkách $AB$ a~$A'B'$ takové, že $|AX|:|BX|=|A'X'|:|B'X'|$. Potom $S$ přenáší $X$ na $X'$ a~trojúhelníky $OAA'$, $OXX'$, $OBB'$ jsou navzájem podobné.
+    Nechť $S$ je spirální podobnost se středem $O$ převádějící $AB$ na $A'B'$. Nechť $X$ a~$X'$ jsou body na úsečkách $AB$ a~$A'B'$ takové, že $|AX|:|BX|=|A'X'|:|B'X'|$. Potom $S$ přenáší $X$ na $X'$, a~pokud $S$ není stejnolehlost a~$O$ není žádný z~bodů $A$, $B$, $X$, jsou trojúhelníky $OAA'$, $OXX'$, $OBB'$ navzájem podobné.
 
     \Image{spiral-similar-points.pdf}
-}{}
+}{
+    Podobnost $S$ zobrazuje úsečku $AB$ na úsečku $A'B'$ a~zachovává poměry délek, takže $S(X)$ je bod úsečky $A'B'$, který ji dělí v~poměru $|AX| : |BX|$. Takový bod je jediný, proto $S(X) = X'$.
+
+    Trojúhelníky $OAA'$, $OXX'$, $OBB'$ mají u~vrcholu $O$ tentýž úhel $\phi$ spirální podobnosti a~tentýž poměr stran $|OA'| : |OA| = |OX'| : |OX| = |OB'| : |OB| = k$, takže jsou podobné podle věty $sus$.
+}
 
 \EnvId{eAqIhVm0OVC2uVXDRxMpJ-stred-spiralni-podobnosti}
 \Theorem{Střed spirální podobnosti}{
-    Nechť $A,B,C,D$ jsou body v~rovině takové, že $AB \nparallel CD$. Nechť se přímky $AB$ a~$CD$ protínají v~$X$. Nechť se kružnice opsané trojúhelníkům $XAC$ a~$XBD$ protínají znovu v~$O$. Potom $O$ je střed jednoznačné spirální podobnosti, která zobrazuje $AB$ na $CD$.
+    Nechť $A,B,C,D$ jsou body v~rovině takové, že $AB \nparallel CD$. Nechť se přímky $AB$ a~$CD$ protínají v~$X$, který je různý od $A$, $B$, $C$, $D$. Nechť se kružnice opsané trojúhelníkům $XAC$ a~$XBD$ protínají znovu v~$O$; pokud se v~$X$ dotýkají, položme $O = X$. Potom je $O$ středem jediné spirální podobnosti, která zobrazuje $AB$ na $CD$.
 
     \Image{spiral-center.pdf}
-}{}
+}{
+    Počítáme s~orientovanými úhly přímek modulo $180^\circ$. Z~kružnice $XAOC$ je $\angle(AO, AB) = \angle(AO, AX) = \angle(CO, CX) = \angle(CO, CD)$ a~stejně tak z~kružnice $XBOD$ je $\angle(BO, BA) = \angle(DO, DC)$, takže trojúhelníky $OAB$ a~$OCD$ jsou souhlasně podobné. (Pokud se kružnice v~$X$ dotýkají, převádí jednu na druhou stejnolehlost se středem $X$; ta zobrazuje $A$ na $B$ a~$C$ na $D$, protože přímka $AB$ protíná první kružnici v~$X$ a~$A$ a~druhou v~$X$ a~$B$, a~podobně pro $CD$. Proto $|XB| : |XA| = |XD| : |XC|$ a~spirální podobnost se středem $X$ zobrazující $A$ na $C$ zobrazuje i~$B$ na $D$.)
 
-Jelikož spirální podobnost chodí v~párech, tentýž bod $O$ je i středem spirální podobnosti, která zobrazuje $AC$ na $BD$. Pokud navíc $AC \nparallel BD$, dává stejný postup pro tuto dvojici: přímky $AC$ a~$BD$ se protnou v~bodě $Y$ a~$O$ je druhým průsečíkem kružnic opsaných trojúhelníkům $ABY$ a~$CDY$.
+    \Image{spiral-center-proof.pdf}
+
+    Ze souhlasné podobnosti je $|OA| : |OC| = |OB| : |OD|$ a~rovnají se i~orientované úhly polopřímek $\angle AOB = \angle COD$, čili po přičtení úhlu $BOC$ také $\angle AOC = \angle BOD$. Podle věty $sus$ jsou proto souhlasně podobné i~trojúhelníky $OAC$ a~$OBD$, což přesně znamená, že spirální podobnost se středem $O$, úhlem $\angle AOC$ a~koeficientem $|OC| : |OA|$ zobrazuje $A$ na $C$ a~$B$ na $D$. Jiná spirální podobnost zobrazující $AB$ na $CD$ neexistuje: přímá podobnost je určena obrazy dvou bodů, protože každý další bod je určen vzdálenostmi od nich a~orientací.
+}
+
+Jelikož spirální podobnost chodí po dvou, tentýž bod $O$ je i~středem spirální podobnosti, která zobrazuje $AC$ na $BD$. Pokud navíc $AC \nparallel BD$, funguje stejný postup i~pro tuto dvojici: přímky $AC$ a~$BD$ se protnou v~bodě $Y$ a~$O$ je druhým průsečíkem kružnic opsaných trojúhelníkům $ABY$ a~$CDY$.
 
 \Image{spiral-center-corollary.pdf}
 
@@ -57,38 +71,49 @@ Speciální případy této druhé konstrukce:
 \begitems
 \i Je-li $Y$ jedním z~bodů $A$, $B$, $C$, $D$, např. $Y=D$, pak se kružnice $CDY$ degeneruje na kružnici procházející body $C$, $D$ a~dotýkající se přímky $BD$.
    \Image{spiral-center-degenerate.pdf}
-\i Pokud se kružnice $ABY$ a~$CDY$ dotýkají, pak nutně v~$Y$ a~spirální podobnost zobrazující $AB$ na $CD$ je stejnolehlostí se středem $Y$.
+\i Pokud $AB \parallel CD$ a~$AC \nparallel BD$, první konstrukce selže (přímky $AB$ a~$CD$ se neprotínají), druhá však funguje: středem je $Y$ a~spirální podobnost zobrazující $AB$ na $CD$ je stejnolehlostí se středem $Y$, se záporným koeficientem, leží-li $Y$ mezi $A$ a~$C$, a~s~kladným, leží-li mimo úsečku $AC$. Kružnice $ABY$ a~$CDY$ se pak v~$Y$ dotýkají zvnějšku, resp. zevnitř.
    \Image{spiral-center-tangent.pdf}
+   \Image{spiral-center-tangent-internal.pdf}
+\i Pokud $AB \parallel CD$ a~zároveň $AC \parallel BD$, selžou obě konstrukce. Čtyřúhelník $ABDC$ je pak rovnoběžník a~zobrazení $A$ na $C$, $B$ na $D$ je posunutí, které střed nemá.
 \enditems
 
 \sec Miquelovy body
-
-\EnvId{bOA6eKiwIlUrb_5f3ft0o-miquelova-veta}
-\Theorem{Miquelova věta}{
-    Nechť $D$, $E$, $F$ jsou po řadě body na stranách $BC$, $CA$, $AB$ trojúhelníku $ABC$. Potom kružnice opsané trojúhelníkům $AEF$, $BFD$, $CDE$ procházejí jedním bodem.
-
-    \Image{spiral-miquel-triangle.pdf}
-}{}
 
 \EnvId{LBhDImhjL32nZ7fyN8V3M-miqueluv-bod}
 \Theorem{Miquelův bod}{
     Ve čtyřúhelníku $ABCD$ se přímky $AB,CD$ protínají v~$Q$ a~přímky $AD,BC$ v~$R$. Potom kružnice opsané trojúhelníkům $RAB, RDC, QAD, QBC$ procházejí jedním bodem $M$. Tento bod se nazývá \textit{Miquelův bod} čtyřúhelníku $ABCD$ a~je středem spirální podobnosti zobrazující $AB$ na $DC$, resp. $AD$ na $BC$.
 
     \Image{spiral-miquel-point.pdf}
-}{}
+}{
+    Přímky $AB$ a~$DC$ se protínají v~$Q$, takže podle věty o~středu spirální podobnosti je střed $M$ spirální podobnosti zobrazující $AB$ na $DC$ druhým průsečíkem kružnic $QAD$ a~$QBC$.
+
+    Spirálka chodí po dvou, takže $M$ je i~středem spirální podobnosti zobrazující $AD$ na $BC$. Přímky $AD$ a~$BC$ se protínají v~$R$, a~tak tatáž věta dává, že $M$ je druhým průsečíkem kružnic $RAB$ a~$RDC$. Všechny čtyři kružnice tedy procházejí bodem $M$.
+}
 
 \EnvId{igG5PzGmeZw8PD3AWDpuL-miqueluv-bod-tetivoveho-ctyruhelniku}
 \Theorem{Miquelův bod tětivového čtyřúhelníku}{
     Nechť $M$ je Miquelův bod čtyřúhelníku $ABCD$, v~němž se přímky $AB,CD$ protínají v~$Q$ a~přímky $AD,BC$ v~$R$. Potom $M$ leží na $QR$ právě tehdy, když je $ABCD$ tětivový.
 
     \Image{spiral-miquel-on-qr.pdf}
-}{}
+}{
+    Počítáme s~orientovanými úhly přímek modulo $180^\circ$. Z~kružnic $QADM$ a~$RABM$, které dává předchozí věta, je
+    $$
+    \gather
+    \angle(MQ, MA) = \angle(DQ, DA) = \angle(DC, DA), \\
+    \angle(MR, MA) = \angle(BR, BA) = \angle(BC, BA).
+    \endgather
+    $$
+
+    \Image{spiral-miquel-on-qr-proof.pdf}
+
+    Bod $M$ leží na $QR$ právě tehdy, když přímky $MQ$ a~$MR$ splývají, tedy když $\angle(MQ, MA) = \angle(MR, MA)$. Podle vypsaných rovností to nastane právě tehdy, když $\angle(DC, DA) = \angle(BC, BA)$, a~to je přesně podmínka tětivovosti $ABCD$.
+}
 
 Označme ještě $P = AC \cap BD$. Tentýž postup pro zbývající dvě dvojice přímek dává dva další Miquelovy body:
 \begitems
-\i Kružnice opsané trojúhelníkům $PAB, PCD, QAC, QBD$ mají společný bod, který je středem spirální podobnosti zobrazující $AB$ na $CD$, resp. $AC$ na $BD$. Tento bod leží na $PQ$ právě tehdy, když je $ABCD$ tětivový.
+\i Kružnice opsané trojúhelníkům $PAB, PCD, QAC, QBD$ mají společný bod $M_1$, který je středem spirální podobnosti zobrazující $AB$ na $CD$, resp. $AC$ na $BD$. Tento bod leží na $PQ$ právě tehdy, když je $ABCD$ tětivový.
    \Image{spiral-miquel-others-pq.pdf}
-\i Kružnice opsané trojúhelníkům $PAD, PCB, RAC, RDB$ mají společný bod, který je středem spirální podobnosti zobrazující $AD$ na $CB$, resp. $AC$ na $DB$. Tento bod leží na $PR$ právě tehdy, když je $ABCD$ tětivový.
+\i Kružnice opsané trojúhelníkům $PAD, PCB, RAC, RDB$ mají společný bod $M_2$, který je středem spirální podobnosti zobrazující $AD$ na $CB$, resp. $AC$ na $DB$. Tento bod leží na $PR$ právě tehdy, když je $ABCD$ tětivový.
    \Image{spiral-miquel-others-pr.pdf}
 \enditems
 
@@ -99,59 +124,125 @@ Označme ještě $P = AC \cap BD$. Tentýž postup pro zbývající dvě dvojice
     Je dán tětivový čtyřúhelník $ABCD$ se středem kružnice opsané $O$ a~Miquelovým bodem $M$. Označme $R=AD \cap BC$ a~$Q=AB \cap CD$. Potom $OM \perp QR$.
 
     \Image{spiral-miquel-om-perpendicular.pdf}
-}{}
+}{
+    Označme $X$ a~$Y$ středy úseček $AD$ a~$BC$. Bod $M$ je středem spirální podobnosti zobrazující $AD$ na $BC$ a~ta podle věty o~přenášení podobných bodů zobrazuje $X$ na $Y$, tedy i~úsečku $XD$ na $YC$. Přímky $XD = AD$ a~$YC = BC$ se protínají v~$R$, takže podle věty o~středu spirální podobnosti je $M$ druhým průsečíkem kružnic $RXY$ a~$RDC$.
+
+    \Image{spiral-miquel-om-perpendicular-proof.pdf}
+
+    Střed $O$ kružnice opsané leží na osách tětiv $AD$ a~$BC$, takže u~$X$ i~$Y$ je pravý úhel a~kružnice $RXY$ má průměr $OR$. Leží na ní i~$M$, a~proto $|\angle OMR| = 90^\circ$. Bod $M$ leží na $QR$ (předchozí věta), takže $OM \perp QR$.
+}
 
 \EnvId{0E6PUv99s_uEcAjd8CC6I-o-p-m-na-primce}
 \Theorem{$O$, $P$, $M$ na přímce}{
     Je dán tětivový čtyřúhelník $ABCD$ se středem kružnice opsané $O$ a~Miquelovým bodem $M$. Označme $P=AC \cap BD$, $R=AD \cap BC$ a~$Q=AB \cap CD$. Potom $O$, $P$, $M$ leží na jedné přímce, takže $OP \perp QR$.
 
     \Image{spiral-miquel-opm-line.pdf}
-}{}
+}{
+    Nejprve ukážeme, že $A$, $O$, $M$, $C$ leží na kružnici; počítáme s~orientovanými úhly přímek modulo $180^\circ$. Bod $M$ je středem spirální podobnosti zobrazující $A$ na $D$ a~$B$ na $C$, jejíž úhel je $\angle(AB, DC)$, a~zároveň spirální podobnosti zobrazující $A$ na $B$ a~$D$ na $C$ s~úhlem $\angle(AD, BC)$. Proto je $\angle(MA, MD) = \angle(AB, DC)$ a~zároveň $\angle(MD, MC) = \angle(AD, BC)$. Z~tětivovosti $ABCD$ je navíc $\angle(BC, DC) = \angle(AB, AD)$, a~tak
+    $$
+    \gather
+    \angle(MA, MC) = \angle(AB, DC) + \angle(AD, BC) = \\
+    = \angle(AB, BC) + \angle(AB, AD) + \angle(AD, BC) = 2\angle(AB, BC).
+    \endgather
+    $$
+    Podle věty o~obvodovém a~středovém úhlu je $2\angle(AB, BC) = \angle(OA, OC)$, takže $A$, $O$, $M$, $C$ leží na kružnici. Stejně tak leží na kružnici i~$B$, $O$, $M$, $D$. (Je-li $AC$ nebo $BD$ průměr, plyne z~téže rovnosti, že $M$ leží na tomto průměru, a~$O$, $P$, $M$ na něm leží přímo.)
+
+    \Image{spiral-miquel-opm-line-proof.pdf}
+
+    Obě kružnice procházejí body $O$ a~$M$, jejich chordálou je tedy přímka $OM$. Bod $P$ leží uvnitř tětiv $AC$ a~$BD$, tedy uvnitř obou kružnic, a~jeho mocnost vzhledem k~nim je $-|PA| \cdot |PC|$, resp. $-|PB| \cdot |PD|$; obě hodnoty se rovnají mocnosti $P$ vzhledem ke kružnici opsané $ABCD$. Bod $P$ tedy leží na chordále $OM$ a~kolmost $OP \perp QR$ plyne z~předchozí věty.
+}
 
 Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží na dvou výškách trojúhelníku $PQR$, čili je jeho ortocentrem.
 
 \Image{spiral-miquel-orthocenter.pdf}
 
+Ukážeme ještě jednu důležitou vlastnost z~projektivní geometrie, která souvisí s~polárami.
+
+\EnvId{1LKVhRCTK_6pAfJ02sHWt-inverze-a-polara}
+\Definition{Polára}{
+    Nechť $\omega$ je kružnice se středem $O$ a~poloměrem $r$ a~nechť $P \neq O$ je bod. Obrazem bodu $P$ v~\textit{inverzi} vzhledem k~$\omega$ je bod $P'$ polopřímky $OP$, pro který platí $|OP| \cdot |OP'| = r^2$. \textit{Polára} bodu $P$ vzhledem k~$\omega$ je přímka procházející bodem $P'$ a~kolmá na $OP$.
+}
+
 \EnvId{8WFRq4Y9hX4Xf2REA_qfL-polara}
 \Theorem{Polára}{
-    Nechť $ABCD$ je tětivový čtyřúhelník. Označme $P=AC \cap BD$, $R=AD \cap BC$ a~$Q=AB \cap CD$. Potom $QR$ je polára k~bodu $P$ vzhledem ke kružnici opsané $ABCD$, analogicky $PR$ je polára ke $Q$ a~$PQ$ je polára k~$R$.
+    Nechť $ABCD$ je tětivový čtyřúhelník. Označme $P=AC \cap BD$, $R=AD \cap BC$ a~$Q=AB \cap CD$. Potom $QR$ je polára bodu $P$ vzhledem ke kružnici opsané $ABCD$ se středem $O$, analogicky $PR$ je polára bodu $Q$ a~$PQ$ je polára bodu $R$.
 
     \Image{spiral-miquel-polar.pdf}
-}{}
+}{
+    Označme $r$ poloměr kružnice opsané a~$M$ Miquelův bod na $QR$. Podle předchozí věty leží $O$, $P$, $M$ na přímce a~$A$, $O$, $M$, $C$ na kružnici (je-li $AC$ průměr, vezmeme kružnici $BOMD$ a~všude dále píšeme $BD$ místo $AC$); bod $P$ leží uvnitř tětivy $AC$, tedy uvnitř této kružnice, a~tak i~uvnitř její tětivy $OM$. Mocnost bodu $P$ vzhledem k~ní dává $|PO| \cdot |PM| = |PA| \cdot |PC| = r^2 - |OP|^2$, čili
+    $$
+    |OP| \cdot |OM| = |OP| \cdot \bigl(|OP| + |PM|\bigr) = r^2.
+    $$
+    Bod $M$ je tedy obrazem bodu $P$ v~inverzi vzhledem ke kružnici opsané.
+
+    \Image{spiral-miquel-polar-proof.pdf}
+
+    Polára bodu $P$ je proto přímka procházející bodem $M$ a~kolmá na $OM$. Bod $M$ leží na $QR$ a~$OM \perp QR$, takže touto přímkou je $QR$. Pro body $Q$ a~$R$ je úvaha analogická, jen ty leží vně kružnice opsané, takže jejich mocnost je kladná a~obraz v~inverzi padne mezi střed a~daný bod.
+}
 
 \sec Další známé konfigurace
 
 \EnvId{tQ6r-YBHII2hYOcd0jnzC-ptolemaiova-veta}
 \Theorem{Ptolemaiova věta}{
-    Nechť $ABCD$ je čtyřúhelník se stranami $a=|AB|$, $b=|BC|$, $c=|CD|$, $d=|DA|$ a~úhlopříčkami $e=|AC|$, $f=|BD|$. Potom
+    Nechť $ABCD$ je konvexní čtyřúhelník se stranami $a=|AB|$, $b=|BC|$, $c=|CD|$, $d=|DA|$ a~úhlopříčkami $e=|AC|$, $f=|BD|$. Potom
     $$
-    ef \leq ac + bd,
+    ac + bd \geq ef,
     $$
     přičemž rovnost nastává právě tehdy, když je $ABCD$ tětivový.
 
     \Image{spiral-ptolemy.pdf}
-}{}
+}{
+    Nechť $X$ je obraz bodu $D$ ve spirální podobnosti se středem $A$, která zobrazuje $C$ na $B$. Trojúhelníky $ACD$ a~$ABX$ jsou pak souhlasně podobné s~koeficientem $a/e$, takže $|BX| = ac/e$. Spirálka chodí po dvou, a~tak je $A$ i~středem spirální podobnosti zobrazující $CB$ na $DX$: trojúhelníky $ACB$ a~$ADX$ jsou souhlasně podobné s~koeficientem $d/e$ a~$|DX| = bd/e$.
+
+    \Image{spiral-ptolemy-proof.pdf}
+
+    Z~trojúhelníkové nerovnosti je
+    $$
+    f = |BD| \leq |BX| + |XD| = {ac + bd \over e},
+    $$
+    přičemž rovnost nastává právě tehdy, když $X$ leží na úsečce $BD$. Z~podobností je $|\angle ABX| = |\angle ACD|$ a~$|\angle ADX| = |\angle ACB|$, a~pro konvexní $ABCD$ jsou trojúhelníky $ABX$ a~$ABD$ souhlasně orientované a~stejně tak $ADX$ a~$ADB$. Bod $X$ tak leží na polopřímce $BD$ právě tehdy, když $|\angle ABD| = |\angle ACD|$, a~na polopřímce $DB$ právě tehdy, když $|\angle ADB| = |\angle ACB|$. Úsečka $BD$ je průnikem těchto dvou polopřímek a~každá z~rovností je ekvivalentní s~tětivovostí $ABCD$, takže rovnost nastává právě pro tětivový $ABCD$.
+}
 
 \EnvId{ECXlxtdJwECBnuRZW8E-V-simsonova-primka}
 \Theorem{Simsonova přímka}{
     Nechť $ABCD$ je tětivový čtyřúhelník. Potom kolmé průměty bodu $D$ na přímky $AB$, $AC$, $BC$ leží na jedné přímce.
 
     \Image{spiral-simson.pdf}
-}{}
+}{
+    Označme $X$, $Y$, $Z$ paty kolmic z~bodu $D$ na přímky $AB$, $AC$, $BC$ a~počítejme s~orientovanými úhly přímek modulo $180^\circ$. Z~tětivovosti $ABCD$ plyne $\angle(BD, BX) = \angle(BD, BA) = \angle(CD, CA) = \angle(CD, CY)$ a~u~$X$ i~$Y$ je pravý úhel, takže pravoúhlé trojúhelníky $DXB$ a~$DYC$ jsou souhlasně podobné. Spirální podobnost $\sigma$ se středem $D$ zobrazující $B$ na $X$ proto zobrazuje $C$ na $Y$. (Pro $X = B$ je $AD$ průměr, pak je i~$Y = C$ a~všechny tři paty leží na $BC$.)
+
+    \Image{spiral-simson-proof.pdf}
+
+    Nechť $P$ je vzor bodu $Z$ v~$\sigma$. Trojúhelník $DZP$ je souhlasně podobný s~$DXB$, takže $|\angle DZP| = 90^\circ$ a~$P$ leží na přímce kolmé na $DZ$ v~bodě $Z$, což je přímka $BC$. Body $B$, $P$, $C$ tedy leží na přímce, a~tak na přímce leží i~jejich obrazy $X$, $Z$, $Y$.
+}
 
 \EnvId{J67DMaac8DHSjoZgc7hzh-sharky-devil}
 \Theorem{Sharky-Devil}{
-    Nechť se kružnice vepsaná trojúhelníku $ABC$ dotýká stran $BC$, $CA$, $AB$ po řadě v~bodech $D$, $E$, $F$ a~nechť se kružnice opsané trojúhelníkům $AEF$ a~$ABC$ protínají znovu v~bodě $S$. Potom přímka $SD$ prochází středem oblouku $BC$ neobsahujícího $A$, čili $SD$ je osou úhlu $BSC$.
+    Nechť se kružnice vepsaná trojúhelníku $ABC$ dotýká stran $BC$, $CA$, $AB$ po řadě v~bodech $D$, $E$, $F$ a~nechť se kružnice opsané trojúhelníkům $AEF$ a~$ABC$ protínají znovu v~bodě $S$ (pro $|AB| = |AC|$ se dotýkají v~$A$ a~tehdy je $S = A$). Potom přímka $SD$ prochází středem oblouku $BC$ neobsahujícího $A$, čili $SD$ je osou úhlu $BSC$.
 
     \Image{spiral-sharky-devil.pdf}
-}{}
+}{
+    Přímky $FB$ a~$EC$ se protínají v~$A$ a~kružnice $AFE$ a~$ABC$ se protínají znovu v~$S$, takže podle věty o~středu spirální podobnosti je $S$ středem spirální podobnosti zobrazující $FB$ na $EC$. Její úhel je orientovaný úhel od polopřímky $FB$ k~polopřímce $EC$, čili orientovaný úhel $BAC$, a~rovná se orientovanému úhlu $BSC$; bod $S$ tedy vidí $BC$ pod stejným orientovaným úhlem jako $A$ a~leží na oblouku $BC$ obsahujícím $A$.
+
+    Trojúhelníky $SFB$ a~$SEC$ jsou podobné a~tečny z~jednoho bodu jsou stejně dlouhé, $|BF| = |BD|$ a~$|CE| = |CD|$, takže
+    $$
+    {|SB| \over |SC|} = {|FB| \over |EC|} = {|DB| \over |DC|}.
+    $$
+    Podle obrácené věty o~ose úhlu je $SD$ osou úhlu $BSC$ a~osa obvodového úhlu $BSC$ prochází středem $N$ oblouku $BC$ neobsahujícího $S$, tedy neobsahujícího $A$.
+}
 
 \EnvId{DKBXD5k0KpD8gJ1WTK5OL-stejne-usecky-bd-ce}
 \Theorem{}{
     Nechť $D$ a~$E$ jsou body na stranách $AB$ a~$AC$ trojúhelníku $ABC$ takové, že $|BD| = |CE|$. Potom se kružnice opsané trojúhelníkům $ADE$ a~$ABC$ protínají znovu ve středu oblouku $BC$ obsahujícího $A$.
 
     \Image{spiral-arc-midpoint.pdf}
-}{}
+}{
+    Označme $N$ druhý průsečík kružnic $ADE$ a~$ABC$ (pro $|AB| = |AC|$ se dotýkají v~$A$ a~ten je pak sám středem oblouku $BAC$). Přímky $DB$ a~$EC$ se protínají v~$A$, takže podle věty o~středu spirální podobnosti je $N$ středem spirální podobnosti zobrazující $DB$ na $EC$. Její koeficient je $|EC| : |DB| = 1$, jde tedy o~otočení a~trojúhelníky $NDB$ a~$NEC$ jsou shodné. Speciálně $|NB| = |NC|$, čili $N$ je středem jednoho z~oblouků $BC$.
+
+    \Image{spiral-arc-midpoint-proof.pdf}
+
+    Úhel otočení je orientovaný úhel od polopřímky $DB$ k~polopřímce $EC$, čili orientovaný úhel $BAC$, a~rovná se orientovanému úhlu $BNC$. Bod $N$ tedy vidí $BC$ pod stejným orientovaným úhlem jako $A$ a~leží na oblouku $BC$ obsahujícím $A$.
+}
 
 \sec Praxe
 
@@ -168,7 +259,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 
     \Image{spiral-similar-right-triangles.pdf}
 
-    Spirálka chodí v~párech, takže $A$ je i~středem spirální podobnosti $T$, která zobrazuje $BB'$ na $CC'$ a~$B \mapsto C$. Její úhel otočení je proto $|\angle BAC| = 90^\circ$, tedy $CC' = T(BB') \perp BB'$.
+    Spirálka chodí po dvou, takže $A$ je i~středem spirální podobnosti $T$, která zobrazuje $BB'$ na $CC'$ a~$B \mapsto C$. Její úhel otočení je proto $|\angle BAC| = 90^\circ$, tedy $CC' = T(BB') \perp BB'$.
 }
 
 \EnvId{FzqGadPM1rzLyHJyRoWFb-teziste-a-dva-rovnoramenne-trojuhelniky}
@@ -183,16 +274,16 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     $D$ jako střed $BC$ jde na $E$ jako střed $KL$. Takže $BD$ jde na $KE$. Nejde z~toho něco zajímavého odvodit?
 }{
-    Spirálka chodí po dvou, z~$BD$ na $KE$ máme, že $T$ je střed spirálky, která bere $BK$ na $DE$. Co to znamená v~řeči podobnosti?
+    Spirálka chodí po dvou, a~tak ze zobrazení $BD$ na $KE$ máme, že $T$ je střed spirálky, která bere $BK$ na $DE$. Co to znamená v~řeči podobnosti?
 }%
 {
     \Answer{$|AT| : |DE| = 2\sqrt2$.}
 
-    Trojúhelníky $TBK$ a~$TCL$ jsou pravoúhlé rovnoramenné s~pravým úhlem u~$K$, resp. $L$, a~jelikož $K$ a~$L$ leží v~polorovinách $BTC$ a~$CTA$ a~$T$ je vnitřní bod trojúhelníku $ABC$, jsou orientované souhlasně. Existuje tedy spirální podobnost se středem $T$ převádějící $BK$ na $CL$. Spirálka chodí v~párech, takže $T$ je i~středem spirální podobnosti $\sigma$, která převádí $BC$ na $KL$.
+    Trojúhelníky $TBK$ a~$TCL$ jsou pravoúhlé rovnoramenné s~pravým úhlem u~$K$, resp. $L$, a~jelikož $K$ a~$L$ leží v~polorovinách $BTC$ a~$CTA$ a~$T$ je vnitřní bod trojúhelníku $ABC$, jsou orientované souhlasně. Existuje tedy spirální podobnost se středem $T$ převádějící $BK$ na $CL$. Spirálka chodí po dvou, takže $T$ je i~středem spirální podobnosti $\sigma$, která převádí $BC$ na $KL$.
 
     \Image{spiral-centroid-isosceles.pdf}
 
-    Podobnost zachovává středy úseček, proto $\sigma(D) = E$, a~podle věty o~párech je $T$ i~středem spirální podobnosti převádějící $BK$ na $DE$. Trojúhelníky $TBK$ a~$TDE$ jsou tak podobné, čili $TDE$ je pravoúhlý rovnoramenný s~přeponou $TD$ a~$|TD| = \sqrt2 \, |DE|$. Těžiště dělí těžnici $AD$ v~poměru $|AT| : |TD| = 2 : 1$, a~tak
+    Podobnost zachovává středy úseček, proto $\sigma(D) = E$, a~jelikož spirálka chodí po dvou, je $T$ i~středem spirální podobnosti převádějící $BK$ na $DE$. Trojúhelníky $TBK$ a~$TDE$ jsou tak podobné, čili $TDE$ je pravoúhlý rovnoramenný s~přeponou $TD$ a~$|TD| = \sqrt2 \, |DE|$. Těžiště dělí těžnici $AD$ v~poměru $|AT| : |TD| = 2 : 1$, a~tak
     $$
     |AT| : |DE| = 2\sqrt2.
     $$
@@ -202,18 +293,18 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 \Problem{0}{PraSe 27-3-8}{
     Nechť $ABC$ je ostroúhlý trojúhelník s~výškou $AD$. Body $X$, $Y$ leží po řadě na kružnicích opsaných trojúhelníkům $ABD$, $ACD$ tak, že $X,D,Y$ leží na přímce různé od přímek $AD$ a~$BC$, přičemž $X \not \equiv D$, $Y \not \equiv D$. Označme dále $M$ střed strany $BC$ a~$M'$ střed úsečky $XY$. Dokažte, že přímky $MM'$, $AM'$ jsou na sebe kolmé.
 }{
-    Kdykoli máme dvě kružnice podezřele se protínající v~jednom bodě, je velká šance, že je to Miquelův bod nějakého čtyřúhelníku.
+    Kdykoli se dvě kružnice podezřele protínají v~jednom bodě, je velká šance, že je to Miquelův bod nějakého čtyřúhelníku.
 }{
-    Klíčem je, že $A$ je jeden z~Miquelů pro čtyřúhelník z~bodů $B,X,C,Y$. Tím pádem je středem různých spirálek. Ty se kamarádí se středy.
+    Klíčem je, že $A$ je jeden z~Miquelů pro čtyřúhelník s~vrcholy $B,X,C,Y$. Tím pádem je středem různých spirálek. Ty se kamarádí se středy.
 }{
-    Klíčová spirálka je ta, která přenáší $XY$ na $BC$. Ta totiž přenáší i~středy na sebe. Tím pádem je středem dalších dobrých spirálek. Trikem je uvědomit si, jak sestrojit její střed.
+    Klíčová spirálka je ta, která přenáší $XY$ na $BC$. Ta totiž přenáší i~středy na sebe. Její střed je tím pádem středem dalších dobrých spirálek. Trikem je uvědomit si, jak sestrojit její střed.
 }{
-    Finální pozorování je, že $A$ je středem spirálky, která zobrazuje např. $BM$ na $XM'$. Aplikujeme algoritmus na nalezení středu, nejprve tyto úsečky protneme a~potom sestrojíme kružnice. Takto šikovně získáme tětivovost.
+    Poslední pozorování je, že $A$ je středem spirálky, která zobrazuje např. $BM$ na $XM'$. Aplikujeme algoritmus na nalezení středu, nejprve tyto úsečky protneme a~potom sestrojíme kružnice. Takto šikovně získáme tětivovost.
 }%
 {
-    Přímky $XY$ a~$BC$ se protínají v~$D$, takže podle věty o~středu spirální podobnosti je druhý průsečík kružnic $(XBD) = (ABD)$ a~$(YCD) = (ACD)$, tedy bod $A$, středem spirální podobnosti zobrazující $XB$ na $YC$. Spirálka chodí v~párech, takže $A$ je i~středem spirální podobnosti $S$ zobrazující $XY$ na $BC$.
+    Přímky $XY$ a~$BC$ se protínají v~$D$, takže podle věty o~středu spirální podobnosti je druhý průsečík kružnic $(XBD) = (ABD)$ a~$(YCD) = (ACD)$, tedy bod $A$, středem spirální podobnosti zobrazující $XB$ na $YC$. Spirálka chodí po dvou, takže $A$ je i~středem spirální podobnosti $S$ zobrazující $XY$ na $BC$.
 
-    Body $M'$ a~$M$ jsou středy úseček $XY$ a~$BC$, a~jelikož spirálka přenáší podobné body, $S(M') = M$. Podobnost $S$ tedy zobrazuje $XM'$ na $BM$ a~podle věty o~párech je $A$ středem spirální podobnosti zobrazující $XB$ na $M'M$.
+    Body $M'$ a~$M$ jsou středy úseček $XY$ a~$BC$, a~jelikož spirálka přenáší podobné body, $S(M') = M$. Podobnost $S$ tedy zobrazuje $XM'$ na $BM$, a~jelikož spirálka chodí po dvou, je $A$ středem spirální podobnosti zobrazující $XB$ na $M'M$.
 
     \Image{spiral-altitude-two-circles.pdf}
 
@@ -237,7 +328,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
     Pokud označíme $X$ průsečík $BN$ a~$MK$, pak podle našeho algoritmu $A$ leží na kružnicích $XBK$ a~$XNM$. Poslední věc, kterou potřebujeme, je uvědomit si, proč $X$ leží na $CL$.
 }%
 {
-    Obdélníky $ABKL$ a~$ANMC$ jsou shodné v~tomto pořadí vrcholů (protože $|AN| = |AB|$ a~$|NM| = |BK|$), mají společný vrchol $A$ a~jsou souhlasně orientované, protože oba leží vně trojúhelníku. Otočení se středem $A$ tak zobrazuje $BK$ na $NM$. Spirálka chodí v~párech, takže $A$ je i~středem spirální podobnosti zobrazující $BN$ na $KM$; její úhel $|\angle BAK|$ není ani nulový, ani přímý, a~proto $BN \nparallel KM$. Jejich průsečík označme $X$. Otočení, které zobrazuje $B$ na $N$, má úhel $90^\circ + |\angle BAC| < 180^\circ$, takže $A$ neleží na přímce $BN$ a~$X \neq A$. Podle věty o~středu spirální podobnosti je $A$ druhým průsečíkem kružnic $XBK$ a~$XNM$.
+    Obdélníky $ABKL$ a~$ANMC$ jsou shodné v~tomto pořadí vrcholů (protože $|AN| = |AB|$ a~$|NM| = |BK|$), mají společný vrchol $A$ a~jsou souhlasně orientované, protože oba leží vně trojúhelníku. Otočení se středem $A$ tak zobrazuje $BK$ na $NM$. Spirálka chodí po dvou, takže $A$ je i~středem spirální podobnosti zobrazující $BN$ na $KM$; její úhel $|\angle BAK|$ není ani nulový, ani přímý, a~proto $BN \nparallel KM$. Jejich průsečík označme $X$. Otočení, které zobrazuje $B$ na $N$, má úhel $90^\circ + |\angle BAC| < 180^\circ$, takže $A$ neleží na přímce $BN$ a~$X \neq A$. Podle věty o~středu spirální podobnosti je $A$ druhým průsečíkem kružnic $XBK$ a~$XNM$.
 
     \Image{spiral-two-rectangles.pdf}
 
@@ -250,15 +341,15 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     Máme plno spirálek a~ty chodí po dvou.
 }{
-    Podívejme se na $ABC$, $AXE$. Ty jsou přímo podobné, tedy spirálka dává, že $ABX$ a~$ACE$ jsou podobné. Nedává nám to nějaké dobré úhly?
+    Podívejme se na $ABC$ a~$AXE$. Ty jsou přímo podobné, tedy spirálka dává, že $ABX$ a~$ACE$ jsou podobné. Nedává nám to nějaké dobré úhly?
 }{
-    Stačí nám rovnost $|\angle XBA| = |\angle ECA|$. Z toho už se dá vyúhlit $BX \parallel CD$.
+    Stačí nám rovnost $|\angle XBA| = |\angle ECA|$. Z~toho už se dá vyúhlit $BX \parallel CD$.
 }{
     Počítáme s~orientovanými úhly přímek modulo $180^\circ$; přímá podobnost je zachovává.
 
     \Image{spiral-pentagon-parallelogram.pdf}
 
-    Podobnost $ABC \sim AXE$ je spirální podobnost se středem $A$ zobrazující $BC$ na $XE$, a~jelikož spirálka chodí v~párech, $A$ je i~středem spirální podobnosti zobrazující $BX$ na $CE$. Trojúhelníky $ABX$ a~$ACE$ jsou tak přímo podobné, což spolu s~$ABC \sim CDE$ dává
+    Podobnost $ABC \sim AXE$ je spirální podobnost se středem $A$ zobrazující $BC$ na $XE$, a~jelikož spirálka chodí po dvou, $A$ je i~středem spirální podobnosti zobrazující $BX$ na $CE$. Trojúhelníky $ABX$ a~$ACE$ jsou tak přímo podobné, což spolu s~$ABC \sim CDE$ dává
     $$
     \angle(BA, BX) = \angle(CA, CE), \qquad \angle(AB, AC) = \angle(CD, CE).
     $$
@@ -295,20 +386,20 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     $D$ je střed spirálky, která přenáší $DBF$ na $DEC$, takže přenáší $I_1$ na $I_2$. To nám dává další dobré podobnosti. Nezapomínejme, že spirálka chodí po dvou.
 }{
-    $D$ přenáší $BI_1$ na $EI_2$, tím pádem nějaká jiná spirálka se středem $D$ přenáší $BE$ na $I_1I_2$. Tahle spirálka nám už dává dobrou podobnost.
+    Naše spirálka přenáší $BI_1$ na $EI_2$, tím pádem nějaká jiná spirálka se středem $D$ přenáší $BE$ na $I_1I_2$. Tahle spirálka nám už dává dobrou podobnost.
 }{
     Zbytek je už úhlení, z~podobnosti $DBE$ a~$DI_1I_2$ umíme vyjádřit dříve problematický úhel $|\angle DI_1I_2|$ pomocí nějakého pěkného. Důkaz dokončíme tím, že si uvědomíme rovnost $|\angle BI_1I_2| + |\angle I_2CB| = 180^\circ$.
 }%
 {
-    Čtyřúhelníky $AFDC$ a~$ABDE$ jsou tětivové (pravé úhly u~$D$, $E$, $F$), takže $|\angle BDF| = |\angle CDE| = \alpha$ a~trojúhelníky $DBF$ a~$DEC$ mají u vrcholů $D$, $B$, $F$, resp. $D$, $E$, $C$ úhly $\alpha$, $\beta$, $\gamma$. Jelikož $\alpha < 90^\circ$, jdou polopřímky kolem $D$ v~pořadí $DB$, $DF$, $DE$, $DC$, takže existuje spirální podobnost $S$ se středem $D$ zobrazující $B$ na $E$ a~$F$ na $C$. Ta zobrazuje kružnici vepsanou trojúhelníku $DBF$ na kružnici vepsanou $DEC$, tedy $S(I_1) = I_2$.
+    Čtyřúhelníky $AFDC$ a~$ABDE$ jsou tětivové (pravé úhly u~$D$, $E$, $F$), takže $|\angle BDF| = |\angle CDE| = \alpha$ a~trojúhelníky $DBF$ a~$DEC$ mají u~vrcholů $D$, $B$, $F$, resp. $D$, $E$, $C$ úhly $\alpha$, $\beta$, $\gamma$. Jelikož $\alpha < 90^\circ$, jdou polopřímky kolem $D$ v~pořadí $DB$, $DF$, $DE$, $DC$, takže existuje spirální podobnost $S$ se středem $D$ zobrazující $B$ na $E$ a~$F$ na $C$. Ta zobrazuje kružnici vepsanou trojúhelníku $DBF$ na kružnici vepsanou $DEC$, tedy $S(I_1) = I_2$.
 
     \Image{spiral-two-incenters.pdf}
 
-    Spirální podobnost chodí v~párech, takže $D$ je i~středem spirální podobnosti zobrazující $BE$ na $I_1I_2$, a~proto $|\angle DI_1I_2| = |\angle DBE| = 90^\circ - \gamma$. V~trojúhelníku $BI_1D$ je $|\angle BI_1D| = 180^\circ - \alpha/2 - \beta/2 = 90^\circ + \gamma/2$. Polopřímky $DI_1$ a~$DI_2$ leží v~úhlech $BDF$ a~$EDC$, takže $B$ a~$I_2$ jsou v~opačných polorovinách určených přímkou $DI_1$ a
+    Spirální podobnost chodí po dvou, takže $D$ je i~středem spirální podobnosti zobrazující $BE$ na $I_1I_2$, a~proto $|\angle DI_1I_2| = |\angle DBE| = 90^\circ - \gamma$. Bod $I_1$ je střed kružnice vepsané trojúhelníku $BFD$, takže $|\angle BI_1D| = 90^\circ + |\angle BFD|/2 = 90^\circ + \gamma/2$. Polopřímky $DI_1$ a~$DI_2$ leží v~úhlech $BDF$ a~$EDC$, takže $B$ a~$I_2$ jsou v~opačných polorovinách určených přímkou $DI_1$ a
     $$
     |\angle BI_1I_2| = |\angle BI_1D| + |\angle DI_1I_2| = 180^\circ - \gamma/2.
     $$
-    Dále $CI_2$ je osa úhlu $DCE$ velikosti $\gamma$, takže $|\angle I_2CB| = \gamma/2$. Body $I_1$ a~$I_2$ leží na osách úhlů $ABC$ a~$ACB$, a~jelikož $DEC \sim ABC$ se společným vrcholem $C$ a~koeficientem $|CD| : |CA| < 1$, je $I_2$ blíž k~$C$ než průsečík $I$ těchto os, tedy uvnitř úhlu $CBI_1$. Body $I_1$ a~$C$ proto leží v~opačných polorovinách určených přímkou $BI_2$ a~ze součtu $|\angle BI_1I_2| + |\angle I_2CB| = 180^\circ$ leží $B$, $I_1$, $I_2$, $C$ na kružnici.
+    Dále $CI_2$ je osa úhlu $DCE$ velikosti $\gamma$, takže $|\angle I_2CB| = \gamma/2$. Bod $I_2$ leží uvnitř úhlu $CBI_1$, takže $I_1$ a~$C$ jsou v~opačných polorovinách určených přímkou $BI_2$, a~ze součtu $|\angle BI_1I_2| + |\angle I_2CB| = 180^\circ$ leží $B$, $I_1$, $I_2$, $C$ na kružnici.
 }
 
 \EnvId{uvtxLeNA257wih8VqN3o0-stejne-uhly-a-body-m-n}
@@ -319,16 +410,16 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     Samozřejmě že je, $K$ je vlastně definovaný jako střed spirálky, která táhne $BM$ na $DN$. To bude důležité. Spirálka jako taková přenáší leccos, potřebujeme přenést víc věcí. Trik je něco dokreslit.
 }{
-    Pořád nevíme, co s pravými úhly, zkusme dokreslit něco, co pravé úhly vyrobí. V~dalším hintu prozradím.
+    Pořád nevíme, co s~pravými úhly, zkusme dokreslit něco, co pravé úhly vyrobí. V~dalším hintu to prozradím.
 }{
-    Trikem je označit paty z~$C$ na $BM$ a~$DN$, označme $X$ a~$Y$. Díky pravým úhlům stačí nějaká tětivovost. Není jasné, jak jsme si pomohli, ale faktem je, že jsme ještě vůbec nepoužili úhlové podmínky ze zadání.
+    Trikem je označit paty z~$C$ na $BM$ a~$DN$, označme je $X$ a~$Y$. Díky pravým úhlům stačí nějaká tětivovost. Není jasné, jak jsme si pomohli, ale faktem je, že jsme ještě vůbec nepoužili úhlové podmínky ze zadání.
 }{
     Úhlové podmínky ze zadání skrytě znamenají, že $CMB$ a~$CND$ jsou podobné trojúhelníky (bohužel ne spirálně, jsou špatně orientované). Co ale tahle podobnost znamená pro $X$ a~$Y$?
 }{
-    Znamená, že $X$ dělí $BM$ ve stejném poměru jako $Y$ dělí $DN$. Takže naše krásná spirálka přenáší $X$ na $Y$. Už jsme skoro v~cíli. Spojme to, co přenáší, s~tím, jak se najde její střed.
+    Znamená to, že $X$ dělí $BM$ ve stejném poměru jako $Y$ dělí $DN$. Takže naše krásná spirálka přenáší $X$ na $Y$. Už jsme skoro v~cíli. Spojme to, co přenáší, s~tím, jak se najde její střed.
 }%
 {
-    Přímky $BM$ a~$DN$ se protínají v~$A$, takže podle věty o~středu spirální podobnosti je $K$ středem spirální podobnosti zobrazující $BD$ na $MN$. Spirální podobnost chodí \uv{v~párech}, takže $K$ je i~středem spirální podobnosti $\sigma$ zobrazující $BM$ na $DN$.
+    Přímky $BM$ a~$DN$ se protínají v~$A$, takže podle věty o~středu spirální podobnosti je $K$ středem spirální podobnosti zobrazující $BD$ na $MN$. Spirální podobnost chodí \uv{po dvou}, takže $K$ je i~středem spirální podobnosti $\sigma$ zobrazující $BM$ na $DN$.
 
     \Image{spiral-quadrilateral-feet.pdf}
 
@@ -336,13 +427,13 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 
     \Image{spiral-quadrilateral-feet-right-angle.pdf}
 
-    Polopřímky $CM$ a~$CN$ jsou souměrně sdružené podle osy úhlu $BCD$, která vyměňuje polopřímky $CB$ a~$CD$, takže $M$ leží uvnitř úsečky $AB$ právě tehdy, když $N$ leží uvnitř úsečky $AD$; z~$|\angle ABC| = |\angle ADC|$ je proto $|\angle MBC| = |\angle NDC|$ a~$\triangle CMB \sim \triangle CND$ (nesouhlasně orientované, bereme z~ní jen poměr). Odpovídají si v~ní paty výšek z~$C$, tedy
+    Polopřímky $CM$ a~$CN$ jsou souměrně sdružené podle osy úhlu $BCD$, která zaměňuje polopřímky $CB$ a~$CD$, takže $M$ leží uvnitř úsečky $AB$ právě tehdy, když $N$ leží uvnitř úsečky $AD$; z~$|\angle ABC| = |\angle ADC|$ je proto $|\angle MBC| = |\angle NDC|$ a~$\triangle CMB \sim \triangle CND$ (nesouhlasně orientované, bereme z~ní jen poměr). Odpovídají si v~ní paty výšek z~$C$, tedy
     $$
     |BX| : |MX| = |DY| : |NY|,
     $$
     a~spirální podobnost přenáší \uv{podobné body}, takže $\sigma(X) = Y$.
 
-    Tedy $\sigma$ zobrazuje $XB$ na $YD$ a~podle \uv{párů} je $K$ i~středem spirální podobnosti zobrazující $XY$ na $BD$. Přímky $XB$ a~$YD$ se protínají v~$A$, takže podle věty o~středu je tento střed druhým průsečíkem kružnic $(AXY) = \omega$ a~$(ABD)$. Proto $K \in \omega$, čili $|\angle AKC| = 90^\circ$.
+    Tedy $\sigma$ zobrazuje $XB$ na $YD$ a~jelikož spirálka chodí po dvou, je $K$ i~středem spirální podobnosti zobrazující $XY$ na $BD$. Přímky $XB$ a~$YD$ se protínají v~$A$, takže podle věty o~středu je tento střed druhým průsečíkem kružnic $(AXY) = \omega$ a~$(ABD)$. Proto $K \in \omega$, čili $|\angle AKC| = 90^\circ$.
 }
 
 \EnvId{xt9itZAMHcJDcCVjylaYP-teziste-rovnostrannych-trojuhelniku}
@@ -353,7 +444,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     Nechť $E$ a~$F$ jsou vrcholy rovnostranných trojúhelníků nad $AC$, $AB$ a~nechť $X$ a~$Y$ jsou po řadě jejich těžiště. Nahlédněte, že $AXC$ a~$AYF$ jsou spirálně podobné. No a~spirálka chodí po dvou.
 }{
-    Z toho, že spirálka chodí po dvou, máme, že $AXY$ je podobný trojúhelníku $ACF$. To nám umožní vyjádřit $XY$ pěkně. Je tam ještě jedno pozorování, které potřebujeme.
+    Z~toho, že spirálka chodí po dvou, máme, že $AXY$ je podobný trojúhelníku $ACF$. To nám umožní vyjádřit $XY$ pěkně. Je tam ještě jedno pozorování, které potřebujeme.
 }{
     Spočítáme, že $|XY| = |CF| \cdot |AX| / |AC|$. Číslo $|AX|/|AC|$ je konstantní. $CF$ je nějaká divná úsečka. Aby nám ale vyšlo, že $XY$ \uv{nezávisí na straně}, nesmí na straně záviset ani $CF$. Například tedy $|CF| = |BE|$, a~to stačí dokázat. To už je snadné.
 }%
@@ -364,7 +455,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
     $$
     takže trojúhelníky $AXC$ a~$AYF$ jsou souhlasně podobné a~spirálka se středem $A$ zobrazuje $X$ na $Y$ a~$C$ na $F$.
 
-    Spirálka chodí v~párech, a~tak je $A$ i~středem spirálky zobrazující $XY$ na $CF$, tedy
+    Spirálka chodí po dvou, a~tak je $A$ i~středem spirálky zobrazující $XY$ na $CF$, tedy
     $$
     |XY| : |CF| = |AX| : |AC| = k.
     $$
@@ -387,12 +478,12 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     Klíčem je všimnout si trojúhelníku $QA_1O$, jaké jsou jeho úhly?
 }{
-    Ukazuje se, že jeho úhly jsou pevné, z~věty o~obvodovém a~středovém úhlu $|\angle A_1OQ| = 2|\angle A_1A_2Q| = 2|\angle PA_2Q|$. To nám může dobře naznačit, proč se $O$ pohybuje tak, jak tvrdí zadání.
+    Ukazuje se, že jeho úhly jsou pevné, z~věty o~obvodovém a~středovém úhlu je $|\angle A_1OQ| = 2|\angle A_1A_2Q| = 2|\angle PA_2Q|$. To nám může dobře naznačit, proč se $O$ pohybuje tak, jak tvrdí zadání.
 }{
     Idea je uvědomit si, že $O$ je obraz vhodného bodu v~nějaké vhodné spirálce.
 }%
 {
-    Přímky $A_1A_2$ a~$B_1B_2$ se protínají v~$P$ a~kružnice opsané trojúhelníkům $A_1B_1P$ a~$A_2B_2P$ jsou $\omega_1$ a~$\omega_2$, takže podle věty o~středu spirální podobnosti je jejich druhý průsečík $Q$ středem spirální podobnosti $\sigma$ zobrazující $A_1A_2$ na $B_1B_2$. Spirálka chodí \uv{v~párech}, a~tak je $Q$ i~středem spirální podobnosti zobrazující $A_1B_1$ na $A_2B_2$.
+    Přímky $A_1A_2$ a~$B_1B_2$ se protínají v~$P$ a~kružnice opsané trojúhelníkům $A_1B_1P$ a~$A_2B_2P$ jsou $\omega_1$ a~$\omega_2$, takže podle věty o~středu spirální podobnosti je jejich druhý průsečík $Q$ středem spirální podobnosti $\sigma$ zobrazující $A_1A_2$ na $B_1B_2$. Spirálka chodí \uv{po dvou}, a~tak je $Q$ i~středem spirální podobnosti zobrazující $A_1B_1$ na $A_2B_2$.
 
     Tyto dvě přímky se protínají v~$C$, takže podle téže věty je $Q$ druhým průsečíkem kružnic opsaných trojúhelníkům $CA_1A_2$ a~$CB_1B_2$. Body $Q$, $A_1$, $A_2$ jsou různé ($A_2 = Q$ by dalo $A_1 \in PQ$ a~$A_2 = A_1$ bod na obou kružnicích), takže kružnice $A_1A_2C$ je kružnice $QA_1A_2$. Ta už bod $B_1$ vůbec nezmiňuje, čili kružnice ze zadání závisí jen na $A_1$. Označme $O$ její střed.
 
@@ -404,7 +495,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
     $$
     |\angle A_1OQ| = 2|\angle A_1A_2Q|
     $$
-    také pevný. Rovnoramenný trojúhelník s~daným úhlem při hlavním vrcholu má daný tvar, takže poměr $|QO| : |QA_1|$ i~orientovaný úhel z~polopřímky $QA_1$ na polopřímku $QO$ vyjdou pro každé $A_1$ stejně.
+    také pevný. Rovnoramenný trojúhelník s~daným úhlem při hlavním vrcholu má daný tvar, takže poměr $|QO| : |QA_1|$ i~orientovaný úhel od polopřímky $QA_1$ k~polopřímce $QO$ vyjdou pro každé $A_1$ stejně.
 
     Zobrazení $A_1 \mapsto O$ je proto jedna pevná spirální podobnost $\tau$ se středem $Q$. Když $A_1$ proběhne $\omega_1$, proběhne $O$ kružnici $\tau(\omega_1)$, a~ta je pevná.
 }
@@ -419,12 +510,12 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     Systematický přístup vypadá např. takhle. Jelikož $S$ je střed spirálky, která dává $AF$ na $CE$, je i~středem spirálky, která dává $AC$ na $FE$; protneme-li tedy tyhle dvě přímky v~$R$, máme $S$, $R$, $A$, $F$ a~$S$, $R$, $C$, $E$ na kružnici. Podobně vyčarujeme další dvě kružnice. Co když není náhoda, že $S$ je tak dobrý?
 }{
-    Jak nápadně naznačuje předchozí hint, chceme dokázat, že $S$ je na ještě jedné kružnici, té ze zadání. To už je jednoduché úhlení, jen v~tom bordelu nemusí být hned vidět.
+    Jak nápadně naznačuje předchozí hint, chceme dokázat, že $S$ je ještě na jedné kružnici, té ze zadání. To už je jednoduché úhlení, jen v~tom bordelu nemusí být hned vidět.
 }%
 {
     Z~$|AD| = |CB|$ a~$|DF| = |BE|$ je $|AF| = |CE|$, takže $F$ a~$E$ dělí úsečky $AD$ a~$CB$ ve stejném poměru. Jelikož $AD \nparallel CB$, přímá podobnost $\sigma$ zobrazující $A$ na $C$ a~$D$ na $B$ není posunutím; její střed označme $S$. Podle věty o~přenášení podobných bodů zobrazuje $\sigma$ bod $F$ na $E$.
 
-    Zobrazení $\sigma$ převádí $AF$ na $CE$, takže podle věty o~spirálce chodící v~párech je $S$ i~středem spirální podobnosti zobrazující $AC$ na $FE$. Tyto přímky se protínají v~$R$, a~tak podle věty o~středu spirální podobnosti leží $S$ na kružnici $AFR$. Stejně tak $\sigma$ převádí $DF$ na $BE$, tedy $DB$ na $FE$, a~$S$ leží na kružnici $DFQ$.
+    Zobrazení $\sigma$ převádí $AF$ na $CE$, a~jelikož spirálka chodí po dvou, je $S$ i~středem spirální podobnosti zobrazující $AC$ na $FE$. Tyto přímky se protínají v~$R$, a~tak podle věty o~středu spirální podobnosti leží $S$ na kružnici $AFR$. Stejně tak $\sigma$ převádí $DF$ na $BE$, tedy $DB$ na $FE$, a~$S$ leží na kružnici $DFQ$.
 
     \Image{spiral-moving-ef-pqr.pdf}
 
@@ -444,20 +535,20 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     Dokazujeme něco o~úhlu $AFS$, proto stojí za to zamyslet se nad přímkou $FS$. Nevíme o~ní něco zajímavého?
 }{
-    Z~dokázaných vlastností máme, že $FS$ prochází jedním z~Miquelových bodů $ABCD$, na jakých všemožných kružnicích leží?
+    Z~dokázaných vlastností máme, že $FS$ prochází jedním z~Miquelových bodů $ABCD$. Na jakých všemožných kružnicích ten bod leží?
 }{
     Nechť $G$ je tento Miquelův bod, který zobrazuje $AB$ na $CD$. Ten leží na kružnicích $ABS$, $CDS$, $ACF$, $BDF$. Která z~nich je pro nás dobrá vzhledem k~úhlům, které dokazujeme?
 }{
     Vyúhlete, že stačí $|\angle GCA| = |\angle ECD|$. Z~čeho by něco takového mohlo plynout?
 }{
-    Trik je dokázat, že trojúhelníky $GCA$ a~$DCE$ jsou podobné. Jeden úhel se dá najít snadno. Co potom?
+    Trik je dokázat, že trojúhelníky $GCA$ a~$DCE$ jsou podobné. Jeden úhel se dá najít snadno. Co dál?
 }{
     Tětiváky, co už máme, a~rovnoběžnost ze zadání snadno dají $|\angle CDE| = |\angle AGC|$. Potom stačí $|ED|/|DC| = |AG|/|GC|$. Tady najednou můžeme znovu použít rovnoběžník.
 }{
     $ED/DC = AG/GC$ můžeme přes $ED = AB$ upravit na $AB/DC = AG/GC$. Tento vztah se dá nádherně interpretovat.
 }%
 {
-    Nechť $G$ je střed spirální podobnosti zobrazující $AB$ na $CD$. Podle věty o~dalších Miquelových bodech leží $G$ na kružnicích $ABS$, $CDS$, $ACF$, $BDF$ a~jelikož $ABCD$ je tětivový, i~na přímce $SF$, a~to na téže straně od $F$ jako $S$.
+    Nechť $G$ je střed spirální podobnosti zobrazující $AB$ na $CD$. Podle věty o~dalších Miquelových bodech leží $G$ na kružnici $ACF$ a~jelikož $ABCD$ je tětivový, i~na přímce $SF$, a~to na téže straně od $F$ jako $S$.
 
     \Image{spiral-cyclic-parallelogram.pdf}
 
@@ -485,11 +576,11 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     Jedna z~vlastností Miquela nějak souvisí s~pravými úhly, zkusme ji najít.
 }{
-    Všimněme si, že $T$ je střed kružnice opsané $B_1C_1CB$, takže $|\angle TAS| = 90^\circ$ je jedna z~našich vlastností, které jsme dokazovali. K~dalším by se hodily ještě nějaké kružnice. Nabízejí se $SC_1CA$, $SB_1BA$. Ty se ale nedají snadno vyúhlit (myslím). Naštěstí jich je fakt dost.
+    Všimněme si, že $T$ je střed kružnice opsané $B_1C_1CB$, takže $|\angle TAS| = 90^\circ$ je jedna z~našich vlastností, které jsme dokazovali. K~dalším by se hodily ještě nějaké kružnice. Nabízejí se $SC_1CA$ a~$SB_1BA$. Ty se ale nedají snadno vyúhlit (myslím). Naštěstí jich je fakt dost.
 }{
-    Co se vyúhlit dá, je, že průsečík $X$ přímek $B_1B$ a~$C_1C$ leží na kružnici $ABC$. Nebude to už stačit?
+    Co se vyúhlit dá, je to, že průsečík $X$ přímek $B_1B$ a~$C_1C$ leží na kružnici $ABC$. Nebude to už stačit?
 }{
-    Odpověď je, že už by to stačilo, protože $A$ bude jednak na kružnici s~průměrem $TS$, jednak na kružnici $XBC$, a~navíc vně $B_1C_1CB$, dva objekty a~jen jeden možný průsečík. No a~doúhlení toho, že se $B_1B$ a~$C_1C$ protínají na kružnici, už půjde, např. přes rovnoramenné trojúhelníky $TBB_1$, $TCC_1$ a~fakt, že $|\angle CTB| = 180^\circ - 2|\angle A|$.
+    Odpověď je, že už by to stačilo, protože $A$ bude jednak na kružnici s~průměrem $TS$, jednak na kružnici $XBC$, a~navíc vně $B_1C_1CB$: dva objekty a~jen jeden možný průsečík. No a~doúhlení toho, že se $B_1B$ a~$C_1C$ protínají na kružnici, už půjde, např. přes rovnoramenné trojúhelníky $TBB_1$, $TCC_1$ a~fakt, že $|\angle CTB| = 180^\circ - 2|\angle A|$.
 }{
     Označme $\gamma$ kružnici se středem $T$ a~poloměrem $r=|TB|$ a~nechť $\alpha=|\angle BAC|$. Z~$|TC|=|TB|=|B_1T|=|C_1T|$ leží $B$, $C$, $B_1$, $C_1$ na $\gamma$ a~$B_1C_1$ je jejím průměrem. Jelikož $C_1$ leží mezi $B_1$ a~$S$, je $|ST| > r$, takže $S$ leží vně $\gamma$, a~tedy i~vně úsečky $BC$: bod $C$ leží mezi $B$ a~$S$. Na polopřímce $ST$ jdou body v~pořadí $S$, $C_1$, $T$, $B_1$, takže $B_1$, $C_1$ leží v~polorovině určené $BC$ obsahující $T$, a~na dvou sečnách z~bodu $S$ jdou body kružnice $\gamma$ v~pořadí $C_1$, $C$, $B$, $B_1$. Podle věty o~úsekovém úhlu je $|\angle TBC|=|\angle TCB|=\alpha$, takže $\alpha<90^\circ$ a~pro $\theta_1=|\angle B_1TB|$, $\theta_2=|\angle C_1TC|$ je $\theta_1+\theta_2=180^\circ-|\angle BTC|=2\alpha$.
 
@@ -521,16 +612,16 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     Na obrázku ještě máme tětivák $POMR$. K~jeho důkazu ještě potřebujeme jeden střed, ale pak už je to díky spirálce snadné.
 }{
-    Když dokreslíme střed $D$ úsečky $EF$, tak spirálka převádějící $EDF$ na $BMC$ má střed v~$P$, takže $P$, $M$, $D$, $R$ jsou na kružnici, a~díky pravým úhlům prochází i~$O$. Věřte nebo ne, už se to dá elegantně vyúhlit.
+    Když dokreslíme střed $D$ úsečky $EF$, tak spirálka převádějící $EDF$ na $BMC$ má střed v~$P$, takže $P$, $M$, $D$, $R$ jsou na kružnici, která díky pravým úhlům prochází i~bodem $O$. Věřte nebo ne, už se to dá elegantně vyúhlit.
 }{
-    Doúhleme to tak, že si uvědomíme, že stačí $|\angle EPO| = 90^\circ - \beta$. Ten ale vyjádříme jako $|\angle EPR| - |\angle OPR|$.
+    Doúhleme to tak, že si uvědomíme, že stačí $|\angle EPO| = 90^\circ - |\angle ABC|$. Ten ale vyjádříme jako $|\angle EPR| - |\angle OPR|$.
 }%
 {
     Kružnice opsaná trojúhelníku $MEF$ se dotýká přímky $BC$ v~$M$, takže $OM \perp BC$. Přímky $EF$ a~$BC$ nejsou rovnoběžné, jinak by stejnolehlost se středem $A$ zobrazila kružnici $ABC$ na kružnici $AEF$ a~bod $P$ by neexistoval; označme $R = EF \cap BC$. Mocnost bodu $B$ vzhledem ke kružnici $MEF$ je $|BM|^2 \neq 0$, takže $E \neq B$ a~stejně tak $F \neq C$; proto $R \neq B, C$ (jinak by $EF$ splynula s~$AB$, resp. $AC$), $R$ neleží na kružnici $ABC$ a~$P \neq R$.
 
-    Miquelův bod čtyřúhelníku $BEFC$ (s~$A = BE \cap CF$ a~$R = BC \cap EF$) leží na kružnicích $ABC$, $AEF$, $RBE$ a~$RCF$; jelikož $A$ na kružnici $RBE$ neleží, je jím $P$. Čtyřúhelníky $RBEP$ a~$RCFP$ jsou tedy tětivové a~$P$ je střed spirální podobnosti zobrazující $EF$ na $BC$.
+    Miquelův bod čtyřúhelníku $BEFC$ (s~$A = BE \cap CF$ a~$R = BC \cap EF$) leží na kružnicích $ABC$, $AEF$ a~$RBE$; jelikož $A$ na kružnici $RBE$ neleží, je jím $P$. Čtyřúhelník $RBEP$ je tedy tětivový a~$P$ je střed spirální podobnosti zobrazující $EF$ na $BC$.
 
-    Nechť $D$ je střed úsečky $EF$. Podle věty o~přenášení podobných bodů jde $D$ na $M$, tedy $DE$ na $MB$, a~jelikož spirální podobnost chodí v~párech, je $P$ i~středem spirální podobnosti zobrazující $DM$ na $EB$. Přímky $DE$ a~$MB$ se protínají v~$R$ a~$M$ na $EF$ neleží, takže podle věty o~středu spirální podobnosti je $P$ druhý průsečík kružnic $DMR$ a~$EBR$.
+    Nechť $D$ je střed úsečky $EF$. Podle věty o~přenášení podobných bodů jde $D$ na $M$, tedy $DE$ na $MB$. Přímky $DE$ a~$MB$ se protínají v~$R$ a~$M$ na $EF$ neleží, takže podle věty o~středu spirální podobnosti je $P$ druhý průsečík kružnic $DMR$ a~$EBR$.
 
     \Image{spiral-tangent-mef.pdf}
 
@@ -555,7 +646,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 
 \EnvId{pn8vj1u6UmWY3vagNIZEg-rovnoramenne-trojuhelniky-nad-stranami}
 \Problem{0}{ISL 1992}{
-    Konvexní čtyřúhelník $ABCD$ má stejně dlouhé úhlopříčky. Nad každou jeho stranou sestrojíme rovnoramenný trojúhelník, jehož základnou je tato strana a~jehož hlavní vrchol leží v~polorovině určené přímkou této strany, která neobsahuje zbylé dva vrcholy čtyřúhelníku. Všechny čtyři trojúhelníky jsou navzájem podobné. Dokažte, že spojnice hlavních vrcholů trojúhelníků nad protilehlými stranami jsou na sebe kolmé.
+    Konvexní čtyřúhelník $ABCD$ má stejně dlouhé úhlopříčky. Nad každou jeho stranou sestrojíme rovnoramenný trojúhelník, jehož základnou je tato strana a~jehož hlavní vrchol leží v~té z~polorovin určených přímkou této strany, která neobsahuje zbylé dva vrcholy čtyřúhelníku. Všechny čtyři trojúhelníky jsou navzájem podobné. Dokažte, že spojnice hlavních vrcholů trojúhelníků nad protilehlými stranami jsou na sebe kolmé.
 }{
     Podobné trojúhelníky naznačují spirální podobnost. Je třeba uvažovat takovou, která umí pěkně využít stejně dlouhé úhlopříčky.
 }{
@@ -573,7 +664,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     Z~podobnosti $APBS$ a~$CQDS$ dokažte, že $XY$ a~$PQ$ jsou rovnoběžné. Nezbavili jsme se takhle $P$ a~$Q$?
 }{
-    Finální krok je uvědomit si, že najednou řešíme o~dost jinou úlohu: dokazujeme, že když máme čtyřúhelník se stejně dlouhými úhlopříčkami, tak spojnice středů protilehlých stran jsou na sebe kolmé. To už je poloznámé. V~dalších hintech to rozvedu víc.
+    Poslední krok je uvědomit si, že najednou řešíme o~dost jinou úlohu: dokazujeme, že když máme čtyřúhelník se stejně dlouhými úhlopříčkami, tak spojnice středů protilehlých stran jsou na sebe kolmé. To už je poloznámé. V~dalších hintech to rozvedu víc.
 }{
     Základní idea je hledat střední příčky, ty dávají jednak rovnoběžnosti a~jednak délky.
 }{
@@ -587,13 +678,13 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
     |SA| = |SB|, \qquad |SC| = |SD|.
     $$
 
-    Spirálka chodí v~párech, takže $S$ je i~středem spirální podobnosti $\sigma$ zobrazující $AB$ na $CD$. Trojúhelníky $ABP$ a~$CDQ$ jsou přímo podobné (oba rovnoramenné se stejným úhlem u~vrcholu, sestrojené vně nad stranami $AB$ a~$CD$, které obíháme po obvodu souhlasně), takže $\sigma$ zobrazuje $P$ na $Q$, a~jelikož podobnost zachovává středy úseček, zobrazuje střed $X$ úsečky $AB$ na střed $Y$ úsečky $CD$.
+    Spirálka chodí po dvou, takže $S$ je i~středem spirální podobnosti $\sigma$ zobrazující $AB$ na $CD$. Trojúhelníky $ABP$ a~$CDQ$ jsou přímo podobné (oba rovnoramenné se stejným úhlem u~vrcholu, sestrojené vně nad stranami $AB$ a~$CD$, které obíháme po obvodu souhlasně), takže $\sigma$ zobrazuje $P$ na $Q$, a~jelikož podobnost zachovává středy úseček, zobrazuje střed $X$ úsečky $AB$ na střed $Y$ úsečky $CD$.
 
     \Image{spiral-isosceles-on-sides.pdf}
 
-    Z~$|SA| = |SB|$ a~$|PA| = |PB|$ leží $S$, $P$, $X$ na ose $o$ úsečky $AB$. Jelikož $\sigma$ zobrazuje $XP$ na $YQ$, je $S$ podle věty o~párech středem spirální podobnosti $\tau$ zobrazující $XY$ na $PQ$; přitom $S \neq X$ (protože $\sigma(X) = Y \neq X$) a~$S \neq P$ (jinak $Q = \sigma(S) = P$). Úhel otočení $\tau$ je úhel polopřímek $SX$ a~$SP$ ležících na $o$, tedy $0^\circ$ nebo $180^\circ$, takže $\tau$ je stejnolehlost a~$XY \parallel PQ$.
+    Z~$|SA| = |SB|$ a~$|PA| = |PB|$ leží $S$, $P$, $X$ na ose $o$ úsečky $AB$. Jelikož $\sigma$ zobrazuje $XP$ na $YQ$, je $S$ středem spirální podobnosti $\tau$ (spirálka chodí po dvou) zobrazující $XY$ na $PQ$; přitom $S \neq X$ (protože $\sigma(X) = Y \neq X$) a~$S \neq P$ (jinak $Q = \sigma(S) = P$). Úhel otočení $\tau$ je úhel polopřímek $SX$ a~$SP$ ležících na $o$, tedy $0^\circ$ nebo $180^\circ$, takže $\tau$ je stejnolehlost a~$XY \parallel PQ$.
 
-    Stejně tak otočení se středem $S'$ zobrazující $B$ na $C$ a~$D$ na $A$ má párovou spirálku zobrazující $BC$ na $DA$; ta zobrazuje $R$ na $T$ a~střed $M$ strany $BC$ na střed $N$ strany $DA$, takže $MN \parallel RT$.
+    Stejně tak otočení se středem $S'$ zobrazující $B$ na $C$ a~$D$ na $A$ chodí po dvou, takže $S'$ je i~středem spirální podobnosti zobrazující $BC$ na $DA$; ta zobrazuje $R$ na $T$ a~střed $M$ strany $BC$ na střed $N$ strany $DA$, takže $MN \parallel RT$.
 
     \Image{spiral-isosceles-on-sides-rhombus.pdf}
 
@@ -615,7 +706,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
     Klíčem k~vyjádření např. $|\angle B_3A_3C_3|$ je říct, že je to $180^\circ - |\angle C_3A_3B| - |\angle CA_3B_3|$, a~to se dá z~našich pomocných podobností přenést na úhly jen ve vrcholech $A$, $B$, $C$, $A_2$, $B_2$, $C_2$. To už půjde jen úhlením.
 }%
 {
-    Podle věty o~středu spirální podobnosti (s~$X = A$) je $A_2$ středem spirálky, která zobrazuje $C_1B_1$ na $BC$. Spirálka chodí v~párech, takže $A_2$ je i~středem spirálky zobrazující $C_1B$ na $B_1C$, tedy $A_2C_1B \sim A_2B_1C$ a
+    Podle věty o~středu spirální podobnosti (s~$X = A$) je $A_2$ středem spirálky, která zobrazuje $C_1B_1$ na $BC$. Spirálka chodí po dvou, takže $A_2$ je i~středem spirálky zobrazující $C_1B$ na $B_1C$, tedy $A_2C_1B \sim A_2B_1C$ a
     $$
     |A_2B| : |A_2C| = |BC_1| : |CB_1| = |AC_3| : |AB_3|,
     $$
@@ -647,7 +738,7 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 }{
     Nechť $M$ je střed $AB$. My vlastně chceme $|\angle ADX| = |\angle AYM|$. To už je skoro spirálka, chce to bod navíc. Prozradím ho v~dalším hintu.
 }{
-    Trikový bod je bod $T$ na polopřímce $YM$ takový, že $ADX$ a~$AYT$ jsou přímo podobné. Jenže my vlastně nevíme, jestli $|\angle AYT| = |\angle ADX|$, takže nemáme jistotu, že existuje. Bod $Y$ ale umíme předefinovat, aby to bylo fajn.
+    Trikem je vzít na polopřímce $YM$ bod $T$ takový, že $ADX$ a~$AYT$ jsou přímo podobné. Jenže my vlastně nevíme, jestli $|\angle AYT| = |\angle ADX|$, takže nemáme jistotu, že existuje. Bod $Y$ ale umíme předefinovat, aby to bylo fajn.
 }{
     Předefinování, které funguje, je vzít v~polorovině $ABC$ bod $Y'$ tak, že $|\angle AY'M| = |\angle ADX|$. Potom stačí $|Y'C| = |Y'D|$. To už ale půjde, protože máme na obou stranách spirálku, a~ta chodí po dvou.
 }{
@@ -658,13 +749,13 @@ Analogicky pro Miquelův bod na $PR$ dostaneme $OQ \perp PR$. Bod $O$ tak leží
 
     Nechť $M$ je střed úsečky $AB$. Pro každý bod $P$ osy úsečky $AB$ různý od $M$ je $|\angle APB| = 2|\angle APM|$. Nechť $Y'$ je bod této osy v~polorovině $ABC$, pro který $|\angle AY'M| = \delta$; existuje, protože $0^\circ < \delta < 90^\circ$. Stačí dokázat $|Y'C| = |Y'D|$: potom $Y'$ leží i~na ose úsečky $CD$ a~kvůli $AB \nparallel CD$ je $Y' = Y$.
 
-    Nechť $T$ je obraz bodu $X$ ve spirální podobnosti se středem $A$, která zobrazuje $D$ na $Y'$. Potom $ADX \sim AY'T$ souhlasně orientované, takže $|\angle AY'T| = \delta = |\angle AY'M|$, a~jelikož $X$ leží uvnitř $ABCD$ a~$Y'$ v~polorovině $ABC$, což je pro konvexní $ABCD$ polorovina $ABD$, jsou trojice $A, D, X$ a~$A, Y', M$ obě orientované jako $A, D, B$ a~$T$ leží na polopřímce $Y'M$.
+    Nechť $T$ je obraz bodu $X$ ve spirální podobnosti se středem $A$, která zobrazuje $D$ na $Y'$. Potom platí $ADX \sim AY'T$ a~oba trojúhelníky jsou souhlasně orientované, takže $|\angle AY'T| = \delta = |\angle AY'M|$, a~jelikož $X$ leží uvnitř $ABCD$ a~$Y'$ v~polorovině $ABC$, což je pro konvexní $ABCD$ polorovina $ABD$, jsou trojice $A, D, X$ a~$A, Y', M$ obě orientované jako $A, D, B$ a~$T$ leží na polopřímce $Y'M$.
 
     \Image{spiral-interior-point-x.pdf}
 
-    Osová souměrnost podle $Y'M$ zobrazuje $A$ na $B$ a~body $Y'$, $T$ nechává na místě, takže $BY'T$ je nesouhlasně shodný s~$AY'T$, a~proto $BCX \sim BY'T$ souhlasně orientované.
+    Osová souměrnost podle $Y'M$ zobrazuje $A$ na $B$ a~body $Y'$, $T$ nechává na místě, takže $BY'T$ je nesouhlasně shodný s~$AY'T$, a~proto platí $BCX \sim BY'T$ a~také tyto trojúhelníky jsou souhlasně orientované.
 
-    Spirální podobnost se středem $A$ zobrazuje $DX$ na $Y'T$, a~jelikož spirální podobnost chodí v~párech, je $A$ i~středem té, která zobrazuje $DY'$ na $XT$. Odtud $AY'D \sim ATX$, čili
+    Spirální podobnost se středem $A$ zobrazuje $DX$ na $Y'T$, a~jelikož spirální podobnost chodí po dvou, je $A$ i~středem té, která zobrazuje $DY'$ na $XT$. Odtud $AY'D \sim ATX$, čili
     $$
     |Y'D| : |TX| = |AD| : |AX|.
     $$

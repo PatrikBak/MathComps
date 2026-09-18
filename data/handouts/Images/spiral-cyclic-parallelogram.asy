@@ -44,11 +44,11 @@ Draw(C, E);
 Draw(A, G, vertexPen);
 Draw(C, G, vertexPen);
 
-LabeledDot(A, "A", SW);
+LabeledDot(A, "A", SW, 1);
 LabeledDot(B, "B", W);
-LabeledDot(C, "C", NE);
-LabeledDot(D, "D", (0.91, 0.41));
-LabeledDot(S, "S", SE);
-LabeledDot(F, "F", NW);
+LabeledDot(C, "C", NE, 1, offset = (-2.3, 1.5));
+LabeledDot(D, "D", (0.91, 0.41), 1);
+LabeledDot(S, "S", (0.79, -0.61), 3);
+LabeledDot(F, "F", NW, 1);
 LabeledDot(E, "E", SE, 1);
-LabeledDot(G, "G", (1, -0.2));
+LabeledDot(G, "G", (1, -0.2), 1);

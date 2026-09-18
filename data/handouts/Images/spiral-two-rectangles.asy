@@ -24,7 +24,10 @@ pair N = A + lenAB * nAC;
 
 pair X = extension(B, N, K, M);
 
-// omega1, omega2: the circumcircles the solution routes the whole argument through.
+RightAngleMark(B, K, L, Radius1);
+RightAngleMark(K, L, A, Radius1);
+RightAngleMark(C, M, N, Radius1);
+RightAngleMark(M, N, A, Radius1);
 
 CircleThrough(A, B, K, LightBlue);
 CircleThrough(A, C, M, LightBlue);
@@ -44,11 +47,11 @@ Draw(M, N);
 Draw(N, A);
 Draw(A, K, vertexPen);
 
-LabeledDot(A, "A", (0.9, -0.42), distanceOffset = 6);
-LabeledDot(B, "B", SW);
+LabeledDot(A, "A", (-0.2, 1.4), 2, halo=true);
+LabeledDot(B, "B", SW, 1);
 LabeledDot(C, "C", S);
-LabeledDot(K, "K", SW);
-LabeledDot(L, "L", NW);
-LabeledDot(M, "M", SE);
-LabeledDot(N, "N", NE);
-LabeledDot(X, "X", (-0.4, -0.9), distanceOffset = 6, halo = true);
+LabeledDot(K, "K", SW, 1);
+LabeledDot(L, "L", NW, 1);
+LabeledDot(M, "M", SE, 1);
+LabeledDot(N, "N", NE, 1);
+LabeledDot(X, "X", (-0.5,-1.2), distanceOffset = 1.5, halo = true, haloPad=1.2, offset = (-0.7, -2.8));

@@ -5,15 +5,28 @@ DashedDraw(M, Y, Purple);
 DashedDraw(Y, N, Purple);
 DashedDraw(N, X, Purple);
 
+Draw(A, C, vertexPen);
+Draw(B, D, vertexPen);
+Draw(X, Y, vertexPen);
+Draw(M, N, vertexPen);
 BaseEdges();
+Draw(P, A);
+Draw(P, B);
+Draw(R, B);
+Draw(R, C);
+Draw(Q, C);
+Draw(Q, D);
+Draw(T, D);
+Draw(T, A);
 
 BaseDots();
-LabeledDot(X, "X", NE);
-LabeledDot(M, "M", NW);
-LabeledDot(Y, "Y", (0.57, 0.82), distanceOffset = 5);
-LabeledDot(N, "N", SE, (-2,3));
+LabeledDot(X, "X", NE, 1, offset = (-1, -0.1));
+LabeledDot(M, "M", NW, 1, offset = (1.5, 0.7));
+// Compass S is shadowed by point S, so its align direction is spelled out.
+LabeledDot(Y, "Y", (0, -1), offset = (-3.2, 1.2));
+LabeledDot(N, "N", SE, 1, (-0.8, 2.4));
 
-ParallelMark(X, M, count = 1);
-ParallelMark(M, Y, count = 1);
-ParallelMark(Y, N, count = 1);
-ParallelMark(N, X, count = 1);
+EqualMark(X, M);
+EqualMark(M, Y);
+EqualMark(Y, N);
+EqualMark(N, X);

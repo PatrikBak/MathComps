@@ -6,7 +6,6 @@ real R = 76;
 real angleA = 112;
 real alpha = 25;
 real angleD = 246;
-real pastFoot = 12;
 
 pair O = (0, 0);
 pair A = Polar(O, angleA, R);
@@ -28,15 +27,15 @@ DashedDraw(D, X);
 DashedDraw(D, Y);
 DashedDraw(D, Z);
 
-Draw(A, ExtendPast(A, X, pastFoot));
+Draw(A, X);
 Draw(A, C);
 Draw(B, C);
-Draw(ExtendPast(Z, X, pastFoot), ExtendPast(X, Y, pastFoot));
+Draw(X, Y);
 
 LabeledDot(A, "A", N);
 LabeledDot(B, "B", W);
 LabeledDot(C, "C", E);
 LabeledDot(D, "D", S);
-LabeledDot(X, "X", SW, distanceOffset = pointLabelDistance + 4);
+LabeledDot(X, "X", SW, distanceOffset = 1);
 LabeledDot(Y, "Y", N);
 LabeledDot(Z, "Z", N);

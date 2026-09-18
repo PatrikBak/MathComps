@@ -1,16 +1,13 @@
 import _common;
 
-real lenBC = 146;
+real lenBC = 160;
 real angleB = 64;
 real angleC = 33;
 
 // The secant through D leaves each circle on the side where that circle's
 // centre projects, so X and Y land on opposite sides of D exactly when the
-// direction lies between the normals of DO1 and DO2, at 180 - angleB + 90
-// and angleC + 90. This direction sits near the steep end of that wedge, so
-// |DX| and |DY| differ and the midpoint M' of XY lands above BC, clear of
-// both D and M.
-real secantAngleDeg = 135;
+// direction lies between the normals of DO1 and DO2.
+real secantAngleDeg = 136;
 
 pair B = (0, 0);
 pair C = (lenBC, 0);
@@ -46,23 +43,25 @@ Circle(O2, r2, LightBlue);
 CircleThrough(A, D, M, LightBlue);
 
 RightAngleMark(A, Mp, M, Radius1, LightBlue);
+RightAngleMark(A, D, C, Radius1, LightBlue);
 
-Draw(X, Y, Green);
-Draw(B, C, Red);
+Draw(X, B, Green);
+Draw(Y, C, Red);
 
 Draw(A, D);
 Draw(A, B);
 Draw(A, C);
-Draw(A, X);
-Draw(A, Y);
+Draw(X, Y);
+Draw(B, C);
 Draw(A, Mp);
+Draw(A, M);
 Draw(M, Mp);
 
-LabeledDot(A, "A", N);
-LabeledDot(B, "B", SW);
-LabeledDot(C, "C", SE);
-LabeledDot(D, "D", (-0.3, -1));
-LabeledDot(X, "X", W);
-LabeledDot(Y, "Y", S);
-LabeledDot(M, "M", S);
-LabeledDot(Mp, "M'", S, (-5,2));
+LabeledDot(A, "A", N, offset = (-3.4, -0.8));
+LabeledDot(B, "B", SW, 1, offset = (-1.8, 2.7));
+LabeledDot(C, "C", SE, 1, offset = (-1.9, 0));
+LabeledDot(D, "D", S, offset = (-5.8, 1.6));
+LabeledDot(X, "X", W, offset = (7.1, 8.9));
+LabeledDot(Y, "Y", SE, 1, offset = (-12.2, -2.6));
+LabeledDot(M, "M", S, offset = (3, 3.3));
+LabeledDot(Mp, "M'", S, offset = (-7.3, 2.2));

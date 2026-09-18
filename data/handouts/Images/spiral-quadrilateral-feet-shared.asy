@@ -1,18 +1,19 @@
 import _common;
 
-real lenAB = 62;
-real lenAD = 85;
+real lenAB = 63;
+real lenAD = 87;
 real angleBAD = 105;
 real angleABC = 70;
-real tM = 1.4;
+real tM = 1.3;
 
 // The triangle ABD is laid out with AB horizontal and then turned so that BD
-// stands vertical, D above B; every other point is derived from these three,
-// so the turn carries the whole configuration.
+// lies horizontal, D left of B, with A hanging below it and C above; every
+// other point is derived from these three, so the turn carries the whole
+// configuration.
 pair A = (0, 0);
 pair B = A + lenAB * dir(0);
 pair D = A + lenAD * dir(angleBAD);
-transform upright = rotate(90 - degrees(D - B));
+transform upright = rotate(180 - degrees(D - B));
 B = upright * B;
 D = upright * D;
 
@@ -48,6 +49,9 @@ pair K = OtherIntersection(circleHits, A);
 real labelGap = 3;
 pen ptPen = Blue;
 
+//
+// Draws the four sides of the quadrilateral ABCD.
+//
 void BaseEdges()
 {
     Draw(A, B);
@@ -56,11 +60,13 @@ void BaseEdges()
     Draw(D, A);
 }
 
-// B is labelled by each figure separately.
+//
+// Labels A, C and K. B and D are labelled by each figure separately.
+//
 void BaseDots()
 {
-    LabeledDot(A, "A", SW, labelGap, color = ptPen);
-    LabeledDot(C, "C", E, labelGap, color = ptPen);
-    LabeledDot(D, "D", S, 4, color = ptPen);
-    LabeledDot(K, "K", W, labelGap, color = ptPen);
+    LabeledDot(A, "A", S, 1, color = ptPen);
+    // Point N shadows the compass constant, so north is spelled out.
+    LabeledDot(C, "C", (0, 1), 1, color = ptPen, offset = (0, 1.2));
+    LabeledDot(K, "K", S, 1, color = ptPen);
 }

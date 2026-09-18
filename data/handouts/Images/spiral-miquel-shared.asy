@@ -75,26 +75,44 @@ void BaseEdgesThroughR()
 }
 
 //
-// Draws the four circles (RAB), (RDC), (QAD), (QBC) that all pass through
-// the Miquel point M.
+// Draws the four circles that all pass through the Miquel point M, coloured by
+// the pair they form: the two through R in purple, the two through Q in orange.
 //
 void MiquelCircles()
 {
-    CircleThrough(R, A, B, LightBlue);
-    CircleThrough(R, D, C, LightBlue);
-    CircleThrough(Q, A, D, LightBlue);
-    CircleThrough(Q, B, C, LightBlue);
+    CircleThrough(R, A, B, LightPurple);
+    CircleThrough(R, D, C, LightPurple);
+    CircleThrough(Q, A, D, LightOrange);
+    CircleThrough(Q, B, C, LightOrange);
 }
 
 //
-// Labels A, B, D and the two outer intersection points. C, O, P and M are
-// left to each figure.
+// Labels the quadrilateral's vertices and the two outer intersection points.
+// O, P and M are left to each figure, since not every frame draws them, and a
+// figure that places C itself passes labelC = false.
 //
-void BaseDots()
+void BaseDots(bool labelC = true)
 {
-    LabeledDot(A, "A", W, 3);
-    LabeledDot(B, "B", (0.62, -0.79), 5);
-    LabeledDot(D, "D", NW, 3);
-    LabeledDot(Q, "Q", S, 5);
-    LabeledDot(R, "R", N, 4);
+    LabeledDot(A, "A", SW, 1);
+    LabeledDot(B, "B", SE, 1, halo = true, offset = (-2.5, -0.5));
+    if (labelC) LabeledDot(C, "C", NE, 1, halo = true, offset = (-0.4, -2.8));
+    LabeledDot(D, "D", NW, 1, offset = (-0.7, -4.7));
+    LabeledDot(Q, "Q", E, 2, offset = (-1, -2.6));
+    LabeledDot(R, "R", N, 3);
+}
+
+//
+// Labels O, in the same place in every figure that draws it.
+//
+void LabelO()
+{
+    LabeledDot(O, "O", SW, 1, halo = true, offset = (6.4, -2.6));
+}
+
+//
+// Labels P, in the same place in every figure that draws it.
+//
+void LabelP()
+{
+    LabeledDot(P, "P", E, 3, (0.1, -1.9), halo = true, haloPad = 0.8);
 }

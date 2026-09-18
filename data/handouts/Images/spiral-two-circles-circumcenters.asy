@@ -1,8 +1,8 @@
 import _common;
 
-real r1 = 66;            // radius of omega_1
-real r2 = 52;            // radius of omega_2
-real centerDist = 89;    // distance between the centres of omega_1 and omega_2
+real r1 = 49;            // radius of omega_1
+real r2 = 39;            // radius of omega_2
+real centerDist = 66;    // distance between the centres of omega_1 and omega_2
 real angleA1Deg = 190;   // angular position of A1 on omega_1, from the centre
 real angleB1Deg = 95;   // angular position of B1 on omega_1, from the centre
 real axisProbeLength = 50; // arbitrary positive length; only fixes a direction below
@@ -45,17 +45,13 @@ Circle(O2, r2, LightBlue);
 Circle(O, rO, LightBlue);
 Circle(O2circle, r2circle, LightBlue);
 
-// Triangle QA1O: the solution's whole argument is that its angles are fixed.
 DashedDraw(Q, A1, Purple);
 DashedDraw(Q, O, Purple);
 DashedDraw(O, A1, Purple);
 
-// The two remaining spokes from Q.
 DashedDraw(Q, A2, Purple);
 DashedDraw(Q, B1, Purple);
 
-// The spiral similarity centred at Q takes A1A2 (green) to B1B2 (red);
-// P sits strictly between the two named points on each segment.
 Draw(A1, A2, Green);
 Draw(B1, B2, Red);
 
@@ -63,10 +59,10 @@ Draw(A1, C);
 Draw(C, B2);
 
 LabeledDot(A1, "A_1", W);
-LabeledDot(B1, "B_1", NW);
-LabeledDot(P, "P", S);
+LabeledDot(B1, "B_1", NW, 1);
+LabeledDot(P, "P", S+(-0.1, 0), offset = (-1.2, -0.3));
 LabeledDot(Q, "Q", S);
-LabeledDot(A2, "A_2", NE);
+LabeledDot(A2, "A_2", NE, 1);
 LabeledDot(B2, "B_2", E);
 LabeledDot(C, "C", N);
-LabeledDot(O, "O", W, halo = true);
+LabeledDot(O, "O", NE, distanceOffset = 1.1, offset = (1.2, -0.1));

@@ -1,8 +1,8 @@
 import _common;
 
 // Base triangle ABC, chosen freely and scalene.
-real lenAB = 108;
-real lenAC = 97;
+real lenAB = 92;
+real lenAC = 82;
 real angleA = 45;
 
 // Spiral similarity centered at A with B -> X, C -> E: sigma(z) = A + spiralAtA*(z - A).
@@ -39,11 +39,11 @@ Draw(B, X);
 Draw(D, X);
 
 LabeledDot(A, "A", S);
-LabeledDot(B, "B", SE);
-LabeledDot(C, "C", NE);
-LabeledDot(D, "D", NW);
+LabeledDot(B, "B", SE, 1);
+LabeledDot(C, "C", NE, 1);
+LabeledDot(D, "D", NW, 1);
 LabeledDot(E, "E", W);
-LabeledDot(X, "X", (0.35, 1));
+LabeledDot(X, "X", NE, 1, offset = (-2.1, 0.9));
 
 ParallelMark(B, X);
 ParallelMark(C, D);

@@ -20,10 +20,6 @@ Draw(Q, R);
 
 BaseEdges();
 
-LabeledDot(A, "A", W, 5);
-LabeledDot(B, "B", (0.3, -0.35), 2, halo=true);
-LabeledDot(D, "D", NW, 5);
-LabeledDot(Q, "Q", (0.99, -0.16), 5);
-LabeledDot(R, "R", N, 4);
-LabeledDot(C, "C", SW, 8);
-LabeledDot(M, "M", (0.3, 0.87), 5);
+BaseDots(labelC = false);
+LabeledDot(M, "M", NE, 1, halo = true);
+LabeledDot(C, "C", NE, 1, offset = (0.1, -3.1), halo = true);

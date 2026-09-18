@@ -36,9 +36,9 @@ DashedDraw(O, B);
 DashedDraw(O, C);
 DashedDraw(O, D);
 
-LabeledDot(X, "X", NE);
-LabeledDot(A, "A", NW);
-LabeledDot(B, "B", SW);
+LabeledDot(X, "X", NE, 1);
+LabeledDot(A, "A", NW, 1);
+LabeledDot(B, "B", SW, 1);
 LabeledDot(D, "D", E);
-LabeledDot(C, "C", SE);
+LabeledDot(C, "C", SE, 1);
 LabeledDot(O, "O", S);

@@ -4,10 +4,10 @@ import _common;
 // AB -> CD: C and D sit on rays YA and YB reflected through Y, scaled by
 // homothetyRatio. |YA| and |YB| are kept close so the circles' common tangent
 // at Y bisects angle AYB.
-real distYA = 85;
-real distYB = 75;
-real angleYA = 195;
-real angleYB = 255;
+real distYA = 68;
+real distYB = 60;
+real angleYA = 185;
+real angleYB = 265;
 real homothetyRatio = 0.8;
 
 pair Y = (0, 0);
@@ -28,8 +28,8 @@ Draw(C, D, Red);
 Draw(A, C);
 Draw(B, D);
 
-LabeledDot(A, "A", W);
+LabeledDot(A, "A", W, offset = (-0.7, 6.5));
 LabeledDot(B, "B", S);
 LabeledDot(C, "C", E);
-LabeledDot(D, "D", N);
-LabeledDot(Y, "Y", SW, 6);
+LabeledDot(D, "D", N, offset = (-4, 1.8));
+LabeledDot(Y, "Y", SW, 1);

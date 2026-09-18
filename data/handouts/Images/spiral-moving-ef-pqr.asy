@@ -53,6 +53,10 @@ DashedDraw(S, E, Purple);
 
 Draw(A, D, Green);
 Draw(C, B, Red);
+EqualMark(A, D, placement = 0.25);
+EqualMark(C, B, placement = 0.25);
+EqualMark(D, F, 2);
+EqualMark(B, E, 2);
 
 Draw(S, R, vertexPen);
 Draw(S, Q, vertexPen);
@@ -63,13 +67,13 @@ Draw(A, C);
 Draw(B, D);
 Draw(E, F);
 
-LabeledDot(A, "A", SW);
-LabeledDot(B, "B", SE);
-LabeledDot(C, "C", NE);
-LabeledDot(D, "D", NW);
-LabeledDot(E, "E", SE, distanceOffset = 5);
-LabeledDot(F, "F", W, distanceOffset = 5);
-LabeledDot(P, "P", (-0.4, -1), distanceOffset = 5);
-LabeledDot(Q, "Q", SW, distanceOffset = 5);
-LabeledDot(R, "R", SE, distanceOffset = 4.5);
-LabeledDot(S, "S", (0, 1), distanceOffset = 5);
+LabeledDot(A, "A", SW, 1);
+LabeledDot(B, "B", SE, 1);
+LabeledDot(C, "C", NE, 1);
+LabeledDot(D, "D", NW, 1);
+LabeledDot(E, "E", SE, distanceOffset = 1);
+LabeledDot(F, "F", W, halo = true);
+LabeledDot(P, "P", (-0.4, -1), distanceOffset = 3);
+LabeledDot(Q, "Q", SW, distanceOffset = 3);
+LabeledDot(R, "R", SE, distanceOffset = 1, offset = (0.6, 2.4), halo = true);
+LabeledDot(S, "S", dir(25), distanceOffset = 8, offset = (-5.1, 0));
