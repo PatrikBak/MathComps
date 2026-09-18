@@ -1,6 +1,6 @@
 import _common;
 
-real R = 74;
+real R = 78;
 real angleA = 100;
 real angleB = 205;
 real angleC = 335;
@@ -31,6 +31,9 @@ pair A2 = ReflectAcross(A, O, O2);
 pair B3 = 2 * Midpoint(C, A) - B1;
 pair C3 = 2 * Midpoint(A, B) - C1;
 
+//
+// Draws omega and the three sides of the triangle ABC.
+//
 void BaseEdges()
 {
     Circle(O, R, LightBlue);
@@ -39,9 +42,12 @@ void BaseEdges()
     Draw(C, A);
 }
 
+//
+// Labels the triangle's vertices, common to every frame.
+//
 void BaseDots()
 {
     LabeledDot(A, "A", N);
-    LabeledDot(B, "B", SW);
-    LabeledDot(C, "C", SE);
+    LabeledDot(B, "B", SW, offset = (0, 2.1));
+    LabeledDot(C, "C", SE, offset = (0, 5.4));
 }

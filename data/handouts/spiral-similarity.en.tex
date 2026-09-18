@@ -13,7 +13,7 @@
 
 \EnvId{T3lP4FN1zTf6lOQz9Ddq_-spiral-similarity}
 \Definition{Spiral similarity}{
-    A map that is a composition of a rotation and a homothety. It is determined by its center, the directed angle of rotation $\phi$ and the ratio $k>0$.
+    A \textit{spiral similarity} is a map that is a composition of a rotation and a homothety. It is determined by its center, the directed angle of rotation $\phi$ and the ratio $k>0$.
 
     \Image{spiral-definition.pdf}
 }
@@ -28,28 +28,42 @@ The definition immediately gives the following:
    \Image{spiral-definition-rotation.pdf}
 \enditems
 
-\EnvId{JmA51D6zLoKYiJEsuQBWn-spiral-similarity-in-pairs}
-\Theorem{Spiral similarity comes \uv{in pairs}}{
+\EnvId{JmA51D6zLoKYiJEsuQBWn-spiral-similarity-two-at-a-time}
+\Theorem{Spiral similarity comes \uv{two at a time}}{
     Let a spiral similarity with center $O$ take $AB$ to $A'B'$. Then $O$ is also the center of a spiral similarity that takes $AA'$ to $BB'$.
 
     \Image{spiral-pairs.pdf}
-}{}
+}{
+    Let the spiral similarity have angle $\phi$ and ratio $k$. Directly from the definition, $\angle AOA' = \angle BOB' = \phi$ (directed angles) and $OA' : OA = OB' : OB = k$.
+
+    Adding the angle $A'OB$ to both sides of the first equality gives $\angle AOB = \angle A'OB'$, and rearranging the second one gives $OB : OA = OB' : OA'$. So the spiral similarity with center $O$, angle $\angle AOB$ and ratio $OB : OA$ takes $A$ to $B$ and $A'$ to $B'$, that is, $AA'$ to $BB'$.
+}
 
 \EnvId{7w5OPOXaDCNOVEgIpddYa-spiral-similarity-and-similar-points}
 \Theorem{Spiral similarity carries \uv{similar points}}{
-    Let $S$ be the spiral similarity with center $O$ taking $AB$ to $A'B'$. Let $X$ and $X'$ be points on the segments $AB$ and $A'B'$ such that $AX:BX=A'X':B'X'$. Then $S$ carries $X$ to $X'$ and the triangles $OAA'$, $OXX'$, $OBB'$ are mutually similar.
+    Let $S$ be the spiral similarity with center $O$ taking $AB$ to $A'B'$. Let $X$ and $X'$ be points on the segments $AB$ and $A'B'$ such that $AX:BX=A'X':B'X'$. Then $S$ carries $X$ to $X'$, and if $S$ is not a homothety and $O$ is none of the points $A$, $B$, $X$, the triangles $OAA'$, $OXX'$, $OBB'$ are pairwise similar.
 
     \Image{spiral-similar-points.pdf}
-}{}
+}{
+    The similarity $S$ maps the segment $AB$ to the segment $A'B'$ and preserves ratios of lengths, so $S(X)$ is the point on the segment $A'B'$ that divides it in the ratio $AX : BX$. Such a point is unique, hence $S(X) = X'$.
+
+    The triangles $OAA'$, $OXX'$, $OBB'$ have the same angle $\phi$ of the spiral similarity at the vertex $O$ and the same ratio of sides $OA' : OA = OX' : OX = OB' : OB = k$, so they are similar by SAS.
+}
 
 \EnvId{eAqIhVm0OVC2uVXDRxMpJ-center-of-spiral-similarity}
 \Theorem{Center of a spiral similarity}{
-    Let $A,B,C,D$ be points in the plane such that $AB \nparallel CD$. Let the lines $AB$ and $CD$ meet at $X$. Let the circumcircles of triangles $XAC$ and $XBD$ meet again at $O$. Then $O$ is the center of the unique spiral similarity that maps $AB$ to $CD$.
+    Let $A,B,C,D$ be points in the plane such that $AB \nparallel CD$. Let the lines $AB$ and $CD$ meet at $X$, distinct from $A$, $B$, $C$, $D$. Let the circumcircles of triangles $XAC$ and $XBD$ meet again at $O$; if they are tangent at $X$, set $O = X$. Then $O$ is the center of the unique spiral similarity that maps $AB$ to $CD$.
 
     \Image{spiral-center.pdf}
-}{}
+}{
+    We work with directed angles between lines modulo $180^\circ$. From the circle $XAOC$ we get $\angle(AO, AB) = \angle(AO, AX) = \angle(CO, CX) = \angle(CO, CD)$ and likewise, from the circle $XBOD$, $\angle(BO, BA) = \angle(DO, DC)$, so the triangles $OAB$ and $OCD$ are directly similar. (If the circles are tangent at $X$, a homothety with center $X$ carries one to the other; it takes $A$ to $B$ and $C$ to $D$, because the line $AB$ meets the first circle at $X$ and $A$ and the second at $X$ and $B$, and likewise for $CD$. Hence $XB : XA = XD : XC$, and the spiral similarity with center $X$ taking $A$ to $C$ takes $B$ to $D$ as well.)
 
-Since spiral similarity comes in pairs, the same point $O$ is also the center of the spiral similarity that maps $AC$ to $BD$. If moreover $AC \nparallel BD$, the same construction works for this pair: the lines $AC$ and $BD$ meet at a point $Y$ and $O$ is the second intersection point of the circumcircles of triangles $ABY$ and $CDY$.
+    \Image{spiral-center-proof.pdf}
+
+    The direct similarity gives $OA : OC = OB : OD$, and the directed angles of rays satisfy $\angle AOB = \angle COD$, so adding the angle $BOC$ to both gives $\angle AOC = \angle BOD$. By SAS the triangles $OAC$ and $OBD$ are therefore directly similar too, which says precisely that the spiral similarity with center $O$, angle $\angle AOC$ and ratio $OC : OA$ maps $A$ to $C$ and $B$ to $D$. No other spiral similarity maps $AB$ to $CD$: a direct similarity is determined by the images of two points, since any other point is determined by its distances from them and by orientation.
+}
+
+Since spiral similarity comes two at a time, the same point $O$ is also the center of the spiral similarity that maps $AC$ to $BD$. If in addition $AC \nparallel BD$, the same construction works for this pair: the lines $AC$ and $BD$ meet at a point $Y$ and $O$ is the second intersection point of the circumcircles of triangles $ABY$ and $CDY$.
 
 \Image{spiral-center-corollary.pdf}
 
@@ -57,38 +71,49 @@ Special cases of this second construction:
 \begitems
 \i If $Y$ is one of the points $A$, $B$, $C$, $D$, say $Y=D$, then the circle $CDY$ degenerates into the circle through $C$, $D$ tangent to the line $BD$.
    \Image{spiral-center-degenerate.pdf}
-\i If the circles $ABY$ and $CDY$ are tangent, they are necessarily tangent at $Y$, and then the spiral similarity mapping $AB$ to $CD$ is a homothety with center $Y$.
+\i If $AB \parallel CD$ and $AC \nparallel BD$, the first construction fails (the lines $AB$ and $CD$ do not meet), but the second one works: the center is $Y$ and the spiral similarity mapping $AB$ to $CD$ is a homothety with center $Y$, with a negative ratio if $Y$ lies between $A$ and $C$ and a positive one if it lies outside the segment $AC$. The circles $ABY$ and $CDY$ are then tangent at $Y$, externally and internally respectively.
    \Image{spiral-center-tangent.pdf}
+   \Image{spiral-center-tangent-internal.pdf}
+\i If $AB \parallel CD$ and $AC \parallel BD$ as well, both constructions fail. The quadrilateral $ABDC$ is then a parallelogram and the map taking $A$ to $C$ and $B$ to $D$ is a translation, which has no center.
 \enditems
 
 \sec Miquel Points
-
-\EnvId{bOA6eKiwIlUrb_5f3ft0o-miquels-theorem}
-\Theorem{Miquel's theorem}{
-    Let $D$, $E$, $F$ be points on the sides $BC$, $CA$, $AB$ of triangle $ABC$, respectively. Then the circumcircles of triangles $AEF$, $BFD$, $CDE$ pass through a common point.
-
-    \Image{spiral-miquel-triangle.pdf}
-}{}
 
 \EnvId{LBhDImhjL32nZ7fyN8V3M-miquel-point}
 \Theorem{Miquel point}{
     In a quadrilateral $ABCD$, the lines $AB,CD$ meet at $Q$ and the lines $AD,BC$ meet at $R$. Then the circumcircles of triangles $RAB, RDC, QAD, QBC$ pass through a common point $M$. This point is called the \textit{Miquel point} of the quadrilateral $ABCD$ and it is the center of the spiral similarity mapping $AB$ to $DC$, and likewise $AD$ to $BC$.
 
     \Image{spiral-miquel-point.pdf}
-}{}
+}{
+    The lines $AB$ and $DC$ meet at $Q$, so by the theorem on the center of a spiral similarity, the center $M$ of the spiral similarity mapping $AB$ to $DC$ is the second intersection point of the circles $QAD$ and $QBC$.
+
+    Spiral similarity comes two at a time, so $M$ is also the center of the spiral similarity mapping $AD$ to $BC$. The lines $AD$ and $BC$ meet at $R$, so the same theorem makes $M$ the second intersection point of the circles $RAB$ and $RDC$. All four circles therefore pass through $M$.
+}
 
 \EnvId{igG5PzGmeZw8PD3AWDpuL-miquel-point-of-cyclic-quadrilateral}
 \Theorem{Miquel point of a cyclic quadrilateral}{
     Let $M$ be the Miquel point of a quadrilateral $ABCD$ in which the lines $AB,CD$ meet at $Q$ and the lines $AD,BC$ meet at $R$. Then $M$ lies on $QR$ if and only if $ABCD$ is cyclic.
 
     \Image{spiral-miquel-on-qr.pdf}
-}{}
+}{
+    We work with directed angles of lines modulo $180^\circ$. The circles $QADM$ and $RABM$ from the previous theorem give
+    $$
+    \gather
+    \angle(MQ, MA) = \angle(DQ, DA) = \angle(DC, DA), \\
+    \angle(MR, MA) = \angle(BR, BA) = \angle(BC, BA).
+    \endgather
+    $$
+
+    \Image{spiral-miquel-on-qr-proof.pdf}
+
+    The point $M$ lies on $QR$ if and only if the lines $MQ$ and $MR$ coincide, that is, if and only if $\angle(MQ, MA) = \angle(MR, MA)$. By the equalities above this happens exactly when $\angle(DC, DA) = \angle(BC, BA)$, which is precisely the condition for $ABCD$ to be cyclic.
+}
 
 Let us also put $P = AC \cap BD$. The same construction for the remaining two pairs of lines gives two more Miquel points:
 \begitems
-\i The circumcircles of triangles $PAB, PCD, QAC, QBD$ pass through a common point, the center of the spiral similarity mapping $AB$ to $CD$, and likewise $AC$ to $BD$. This point lies on $PQ$ if and only if $ABCD$ is cyclic.
+\i The circumcircles of triangles $PAB, PCD, QAC, QBD$ pass through a common point $M_1$, the center of the spiral similarity mapping $AB$ to $CD$, and likewise $AC$ to $BD$. This point lies on $PQ$ if and only if $ABCD$ is cyclic.
    \Image{spiral-miquel-others-pq.pdf}
-\i The circumcircles of triangles $PAD, PCB, RAC, RDB$ pass through a common point, the center of the spiral similarity mapping $AD$ to $CB$, and likewise $AC$ to $DB$. This point lies on $PR$ if and only if $ABCD$ is cyclic.
+\i The circumcircles of triangles $PAD, PCB, RAC, RDB$ pass through a common point $M_2$, the center of the spiral similarity mapping $AD$ to $CB$, and likewise $AC$ to $DB$. This point lies on $PR$ if and only if $ABCD$ is cyclic.
    \Image{spiral-miquel-others-pr.pdf}
 \enditems
 
@@ -99,59 +124,125 @@ A quadrilateral $ABCD$ therefore has three Miquel points, one for each of the pa
     Let $ABCD$ be a cyclic quadrilateral with circumcenter $O$ and Miquel point $M$. Let $R=AD \cap BC$ and $Q=AB \cap CD$. Then $OM \perp QR$.
 
     \Image{spiral-miquel-om-perpendicular.pdf}
-}{}
+}{
+    Let $X$ and $Y$ be the midpoints of the segments $AD$ and $BC$. The point $M$ is the center of the spiral similarity mapping $AD$ to $BC$, and by the similar-points theorem that similarity maps $X$ to $Y$, hence also the segment $XD$ to $YC$. The lines $XD = AD$ and $YC = BC$ meet at $R$, so by the theorem on the center of a spiral similarity, $M$ is the second intersection point of the circles $RXY$ and $RDC$.
+
+    \Image{spiral-miquel-om-perpendicular-proof.pdf}
+
+    The circumcenter $O$ lies on the perpendicular bisectors of the chords $AD$ and $BC$, so the angles at $X$ and $Y$ are right and the circle $RXY$ is the circle with diameter $OR$. The point $M$ lies on it too, so $\angle OMR = 90^\circ$. Since $M$ lies on $QR$ (the previous theorem), $OM \perp QR$.
+}
 
 \EnvId{0E6PUv99s_uEcAjd8CC6I-o-p-m-collinear}
 \Theorem{$O$, $P$, $M$ collinear}{
-    Let $ABCD$ be a cyclic quadrilateral with circumcenter $O$ and Miquel point $M$. Let $P=AC \cap BD$, $R=AD \cap BC$ and $Q=AB \cap CD$. Then $O$, $P$, $M$ lie on one line, so $OP \perp QR$.
+    Let $ABCD$ be a cyclic quadrilateral with circumcenter $O$ and Miquel point $M$. Let $P=AC \cap BD$, $R=AD \cap BC$ and $Q=AB \cap CD$. Then $O$, $P$, $M$ are collinear, so $OP \perp QR$.
 
     \Image{spiral-miquel-opm-line.pdf}
-}{}
+}{
+    We first show that $A$, $O$, $M$, $C$ lie on a circle; we work with directed angles of lines modulo $180^\circ$. The point $M$ is the center of the spiral similarity taking $A$ to $D$ and $B$ to $C$, whose angle is $\angle(AB, DC)$, and also the center of the spiral similarity taking $A$ to $B$ and $D$ to $C$, whose angle is $\angle(AD, BC)$. Hence $\angle(MA, MD) = \angle(AB, DC)$ and $\angle(MD, MC) = \angle(AD, BC)$. As $ABCD$ is cyclic, we also have $\angle(BC, DC) = \angle(AB, AD)$, and so
+    $$
+    \gather
+    \angle(MA, MC) = \angle(AB, DC) + \angle(AD, BC) = \\
+    = \angle(AB, BC) + \angle(AB, AD) + \angle(AD, BC) = 2\angle(AB, BC).
+    \endgather
+    $$
+    By the inscribed angle theorem $2\angle(AB, BC) = \angle(OA, OC)$, so $A$, $O$, $M$, $C$ lie on a circle. In the same way $B$, $O$, $M$, $D$ lie on a circle. (If $AC$ or $BD$ is a diameter, the same equality puts $M$ on that diameter and $O$, $P$, $M$ lie on it directly.)
+
+    \Image{spiral-miquel-opm-line-proof.pdf}
+
+    Both circles pass through $O$ and $M$, so their radical axis is the line $OM$. The point $P$ lies on the chords $AC$ and $BD$ strictly between their endpoints, hence inside both circles, and its powers with respect to them are $-PA \cdot PC$ and $-PB \cdot PD$; both are equal to the power of $P$ with respect to the circumcircle of $ABCD$. So $P$ lies on the radical axis $OM$, and the perpendicularity $OP \perp QR$ is the previous theorem.
+}
 
 By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The point $O$ thus lies on two altitudes of triangle $PQR$, that is, it is the orthocenter of $PQR$.
 
 \Image{spiral-miquel-orthocenter.pdf}
 
+We now show one more important property from projective geometry, this one about polars.
+
+\EnvId{1LKVhRCTK_6pAfJ02sHWt-inversion-and-polar}
+\Definition{Polar}{
+    Let $\omega$ be a circle with center $O$ and radius $r$, and let $P \neq O$ be a point. The image of $P$ under the \textit{inversion} with respect to $\omega$ is the point $P'$ on the ray $OP$ for which $OP \cdot OP' = r^2$. The \textit{polar} of $P$ with respect to $\omega$ is the line through $P'$ perpendicular to $OP$.
+}
+
 \EnvId{8WFRq4Y9hX4Xf2REA_qfL-polar}
 \Theorem{Polar}{
-    Let $ABCD$ be a cyclic quadrilateral. Let $P=AC \cap BD$, $R=AD \cap BC$ and $Q=AB \cap CD$. Then $QR$ is the polar of the point $P$ with respect to the circumcircle of $ABCD$, analogously $PR$ is the polar of $Q$ and $PQ$ is the polar of $R$.
+    Let $ABCD$ be a cyclic quadrilateral. Let $P=AC \cap BD$, $R=AD \cap BC$ and $Q=AB \cap CD$. Then $QR$ is the polar of the point $P$ with respect to the circumcircle of $ABCD$, whose center is $O$; analogously, $PR$ is the polar of $Q$ and $PQ$ is the polar of $R$.
 
     \Image{spiral-miquel-polar.pdf}
-}{}
+}{
+    Let $r$ be the circumradius and let $M$ be the Miquel point on $QR$. By the previous theorem $O$, $P$, $M$ are collinear and $A$, $O$, $M$, $C$ lie on a circle (if $AC$ is a diameter, take the circle $BOMD$ and write $BD$ instead of $AC$ everywhere below); the point $P$ lies strictly between $A$ and $C$, hence inside this circle, so it lies on the chord $OM$ between $O$ and $M$. The power of $P$ with respect to that circle gives $PO \cdot PM = PA \cdot PC = r^2 - OP^2$, that is,
+    $$
+    OP \cdot OM = OP \cdot (OP + PM) = r^2.
+    $$
+    So $M$ is the image of $P$ under the inversion with respect to the circumcircle.
+
+    \Image{spiral-miquel-polar-proof.pdf}
+
+    The polar of $P$ is therefore the line through $M$ perpendicular to $OM$. Since $M$ lies on $QR$ and $OM \perp QR$, that line is $QR$. For the points $Q$ and $R$ the argument is the same, except that they lie outside the circumcircle, so their power is positive and the inverse point falls between the center and the given point.
+}
 
 \sec Other Known Configurations
 
 \EnvId{tQ6r-YBHII2hYOcd0jnzC-ptolemys-theorem}
 \Theorem{Ptolemy's theorem}{
-    Let $ABCD$ be a quadrilateral with sides $a=AB$, $b=BC$, $c=CD$, $d=DA$ and diagonals $e=AC$, $f=BD$. Then
+    Let $ABCD$ be a convex quadrilateral with sides $a=AB$, $b=BC$, $c=CD$, $d=DA$ and diagonals $e=AC$, $f=BD$. Then
     $$
-    ef \leq ac + bd,
+    ac + bd \geq ef,
     $$
     with equality if and only if $ABCD$ is cyclic.
 
     \Image{spiral-ptolemy.pdf}
-}{}
+}{
+    Let $X$ be the image of $D$ under the spiral similarity with center $A$ mapping $C$ to $B$. The triangles $ACD$ and $ABX$ are then directly similar with ratio $a/e$, so $BX = ac/e$. Spiral similarity comes two at a time, so $A$ is also the center of the spiral similarity mapping $CB$ to $DX$: the triangles $ACB$ and $ADX$ are directly similar with ratio $d/e$ and $DX = bd/e$.
+
+    \Image{spiral-ptolemy-proof.pdf}
+
+    By the triangle inequality
+    $$
+    f = BD \leq BX + XD = {ac + bd \over e},
+    $$
+    with equality if and only if $X$ lies on the segment $BD$. The two similarities give $\angle ABX = \angle ACD$ and $\angle ADX = \angle ACB$, and for convex $ABCD$ the triangles $ABX$ and $ABD$ are equally oriented, and so are $ADX$ and $ADB$. So $X$ lies on the ray $BD$ if and only if $\angle ABD = \angle ACD$, and on the ray $DB$ if and only if $\angle ADB = \angle ACB$. The segment $BD$ is the intersection of these two rays and each of the equalities is equivalent to $ABCD$ being cyclic, so equality holds exactly for cyclic $ABCD$.
+}
 
 \EnvId{ECXlxtdJwECBnuRZW8E-V-simson-line}
 \Theorem{Simson line}{
     Let $ABCD$ be a cyclic quadrilateral. Then the orthogonal projections of $D$ onto the lines $AB$, $AC$, $BC$ are collinear.
 
     \Image{spiral-simson.pdf}
-}{}
+}{
+    Let $X$, $Y$, $Z$ be the feet of the perpendiculars from $D$ to the lines $AB$, $AC$, $BC$, and let us work with directed angles between lines modulo $180^\circ$. Since $ABCD$ is cyclic, $\angle(BD, BX) = \angle(BD, BA) = \angle(CD, CA) = \angle(CD, CY)$, and the angles at $X$ and $Y$ are right, so the right triangles $DXB$ and $DYC$ are directly similar. The spiral similarity $\sigma$ with center $D$ mapping $B$ to $X$ therefore maps $C$ to $Y$. (If $X = B$, the segment $AD$ is a diameter; then $Y = C$ as well, and all three feet lie on $BC$.)
+
+    \Image{spiral-simson-proof.pdf}
+
+    Let $P$ be the preimage of $Z$ under $\sigma$. The triangle $DZP$ is directly similar to $DXB$, so $\angle DZP = 90^\circ$ and $P$ lies on the perpendicular to $DZ$ at $Z$, which is the line $BC$. So $B$, $P$, $C$ lie on a line, and therefore so do their images $X$, $Z$, $Y$.
+}
 
 \EnvId{J67DMaac8DHSjoZgc7hzh-sharky-devil}
 \Theorem{Sharky-Devil}{
-    Let the incircle of triangle $ABC$ touch the sides $BC$, $CA$, $AB$ at the points $D$, $E$, $F$ respectively, and let the circumcircles of triangles $AEF$ and $ABC$ meet again at a point $S$. Then the line $SD$ passes through the midpoint of the arc $BC$ not containing $A$, that is, $SD$ is the bisector of the angle $BSC$.
+    Let the incircle of triangle $ABC$ touch the sides $BC$, $CA$, $AB$ at the points $D$, $E$, $F$ respectively, and let the circumcircles of triangles $AEF$ and $ABC$ meet again at a point $S$ (if $AB = AC$ they are tangent at $A$ and then $S = A$). Then the line $SD$ passes through the midpoint of the arc $BC$ not containing $A$, that is, $SD$ is the bisector of the angle $BSC$.
 
     \Image{spiral-sharky-devil.pdf}
-}{}
+}{
+    The lines $FB$ and $EC$ meet at $A$ and the circles $AFE$ and $ABC$ meet again at $S$, so by the spiral center theorem $S$ is the center of the spiral similarity mapping $FB$ to $EC$. Its angle is the directed angle from the ray $FB$ to the ray $EC$, that is, the directed angle $BAC$, and it equals the directed angle $BSC$; so $BC$ subtends the same directed angle at $S$ as at $A$, and $S$ lies on the arc $BC$ containing $A$.
+
+    The triangles $SFB$ and $SEC$ are similar, and since tangent segments from a point are equal, $BF = BD$ and $CE = CD$, so
+    $$
+    {SB \over SC} = {FB \over EC} = {DB \over DC}.
+    $$
+    By the converse of the angle bisector theorem $SD$ is the bisector of the angle $BSC$, and the bisector of the inscribed angle $BSC$ passes through the midpoint $N$ of the arc $BC$ not containing $S$, hence not containing $A$.
+}
 
 \EnvId{DKBXD5k0KpD8gJ1WTK5OL-equal-segments-bd-ce}
 \Theorem{}{
     Let $D$ and $E$ be points on the sides $AB$ and $AC$ of triangle $ABC$ such that $BD = CE$. Then the circumcircles of triangles $ADE$ and $ABC$ meet again at the midpoint of the arc $BC$ containing $A$.
 
     \Image{spiral-arc-midpoint.pdf}
-}{}
+}{
+    Let $N$ be the second intersection point of the circles $ADE$ and $ABC$ (if $AB = AC$ they are tangent at $A$, which is then itself the midpoint of the arc $BAC$). The lines $DB$ and $EC$ meet at $A$, so by the spiral center theorem $N$ is the center of the spiral similarity mapping $DB$ to $EC$. Its ratio is $EC : DB = 1$, so it is a rotation and the triangles $NDB$ and $NEC$ are congruent. In particular $NB = NC$, that is, $N$ is the midpoint of one of the arcs $BC$.
+
+    \Image{spiral-arc-midpoint-proof.pdf}
+
+    The angle of the rotation is the directed angle from the ray $DB$ to the ray $EC$, that is, the directed angle $BAC$, and it equals the directed angle $BNC$. So $BC$ subtends the same directed angle at $N$ as at $A$, and $N$ lies on the arc $BC$ containing $A$.
+}
 
 \sec Practice
 
@@ -168,7 +259,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
     \Image{spiral-similar-right-triangles.pdf}
 
-    Spiral similarity comes in pairs, so $A$ is also the center of a spiral similarity $T$ that maps $BB'$ to $CC'$ and $B \mapsto C$. Its angle of rotation is therefore $\angle BAC = 90^\circ$, hence $CC' = T(BB') \perp BB'$.
+    Spiral similarity comes two at a time, so $A$ is also the center of a spiral similarity $T$ that maps $BB'$ to $CC'$, with $B \mapsto C$. Its angle of rotation is therefore $\angle BAC = 90^\circ$, hence $CC' = T(BB') \perp BB'$.
 }
 
 \EnvId{FzqGadPM1rzLyHJyRoWFb-centroid-and-two-isosceles-triangles}
@@ -177,22 +268,22 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     Right isosceles triangles are similar. Couldn't ours be spirally similar?
 }{
-    $T$ is the center of the spiral similarity that maps our right isosceles triangles onto each other. But spiral similarity comes in pairs.
+    $T$ is the center of the spiral similarity that takes one of our right isosceles triangles to the other. But spiral similarity comes two at a time.
 }{
-    $T$ is the center of the spiral similarity that carries $BK$ to $CL$. Since it comes in pairs, it is also the center of the spiral similarity that carries $BC$ to $KL$. What happens to the midpoints?
+    $T$ is the center of the spiral similarity that carries $BK$ to $CL$. Since it comes two at a time, it is also the center of the spiral similarity that carries $BC$ to $KL$. What happens to the midpoints?
 }{
-    $D$ as the midpoint of $BC$ goes to $E$ as the midpoint of $KL$. So $BD$ goes to $KE$. Can't we squeeze something interesting out of that?
+    $D$, the midpoint of $BC$, goes to $E$, the midpoint of $KL$. So $BD$ goes to $KE$. Can't we squeeze something interesting out of that?
 }{
-    Spiral similarity comes in pairs, so from $BD$ to $KE$ we get that $T$ is the center of the spiral similarity taking $BK$ to $DE$. What does that mean in the language of similarity?
+    Spiral similarity comes two at a time, so from $BD$ going to $KE$ we get that $T$ is the center of the spiral similarity taking $BK$ to $DE$. What does that mean in the language of similarity?
 }%
 {
     \Answer{$AT : DE = 2\sqrt2$.}
 
-    Triangles $TBK$ and $TCL$ are right isosceles with the right angle at $K$ and $L$ respectively, and since $K$ and $L$ lie in the half-planes $BTC$ and $CTA$ and $T$ is an interior point of triangle $ABC$, they are equally oriented. Hence there is a spiral similarity with center $T$ taking $BK$ to $CL$. Spiral similarity comes in pairs, so $T$ is also the center of a spiral similarity $\sigma$ taking $BC$ to $KL$.
+    The triangles $TBK$ and $TCL$ are right isosceles with the right angle at $K$ and $L$ respectively, and since $K$ and $L$ lie in the half-planes $BTC$ and $CTA$ and $T$ is an interior point of triangle $ABC$, they are equally oriented. Hence there is a spiral similarity with center $T$ taking $BK$ to $CL$. Spiral similarity comes two at a time, so $T$ is also the center of a spiral similarity $\sigma$ taking $BC$ to $KL$.
 
     \Image{spiral-centroid-isosceles.pdf}
 
-    A similarity preserves midpoints of segments, so $\sigma(D) = E$, and by the pairs theorem $T$ is also the center of a spiral similarity taking $BK$ to $DE$. Triangles $TBK$ and $TDE$ are therefore similar, that is, $TDE$ is right isosceles with hypotenuse $TD$ and $TD = \sqrt2 \, DE$. The centroid divides the median $AD$ in the ratio $AT : TD = 2 : 1$, and so
+    A similarity preserves midpoints of segments, so $\sigma(D) = E$, and since spiral similarity comes two at a time, $T$ is also the center of a spiral similarity taking $BK$ to $DE$. The triangles $TBK$ and $TDE$ are therefore similar, that is, $TDE$ is right isosceles with hypotenuse $TD$ and $TD = \sqrt2 \, DE$. The centroid divides the median $AD$ in the ratio $AT : TD = 2 : 1$, and so
     $$
     AT : DE = 2\sqrt2.
     $$
@@ -200,24 +291,24 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
 \EnvId{SIutAov-jyomJVC3WszN0-altitude-and-two-circumcircles}
 \Problem{0}{PraSe 27-3-8}{
-    Let $ABC$ be an acute triangle with altitude $AD$. Points $X$, $Y$ lie respectively on the circumcircles of triangles $ABD$, $ACD$ so that $X,D,Y$ lie on a line different from the lines $AD$ and $BC$, where $X \not \equiv D$, $Y \not \equiv D$. Further let $M$ be the midpoint of the side $BC$ and $M'$ the midpoint of the segment $XY$. Prove that the lines $MM'$, $AM'$ are perpendicular to each other.
+    Let $ABC$ be an acute triangle with altitude $AD$. Points $X$, $Y$ lie on the circumcircles of triangles $ABD$, $ACD$ respectively, so that $X,D,Y$ lie on a line different from the lines $AD$ and $BC$, where $X \not \equiv D$, $Y \not \equiv D$. Further let $M$ be the midpoint of the side $BC$ and $M'$ the midpoint of the segment $XY$. Prove that the lines $MM'$, $AM'$ are perpendicular to each other.
 }{
     Whenever two circles meet suspiciously at one point, there is a good chance it is the Miquel point of some quadrilateral.
 }{
-    The key is that $A$ is one of the Miquel points for the quadrilateral on the points $B,X,C,Y$. So it is the center of various spiral similarities. And those get along well with midpoints.
+    The key is that $A$ is one of the Miquel points of the quadrilateral on the points $B,X,C,Y$. So it is the center of various spiral similarities. And those get along well with midpoints.
 }{
-    The key spiral similarity is the one that carries $XY$ to $BC$. That one carries the midpoints to each other as well. So it is the center of further good spiral similarities. The trick is to realize how to construct its center.
+    The key spiral similarity is the one that carries $XY$ to $BC$. That one carries the midpoint of $XY$ to the midpoint of $BC$ as well. So it is the center of further good spiral similarities. The trick is to realize how to construct its center.
 }{
     The final observation is that $A$ is the center of the spiral similarity that maps, say, $BM$ to $XM'$. Apply the algorithm for finding the center: first intersect these segments, then construct the circles. That neatly gets us a concyclicity.
 }%
 {
-    The lines $XY$ and $BC$ meet at $D$, so by the spiral center theorem the second intersection point of the circles $(XBD) = (ABD)$ and $(YCD) = (ACD)$, that is, the point $A$, is the center of the spiral similarity mapping $XB$ to $YC$. Spiral similarity comes in pairs, so $A$ is also the center of a spiral similarity $S$ mapping $XY$ to $BC$.
+    The lines $XY$ and $BC$ meet at $D$, so by the spiral center theorem the second intersection point of the circles $(XBD) = (ABD)$ and $(YCD) = (ACD)$, that is, the point $A$, is the center of the spiral similarity mapping $XB$ to $YC$. Spiral similarity comes two at a time, so $A$ is also the center of a spiral similarity $S$ mapping $XY$ to $BC$.
 
-    The points $M'$ and $M$ are the midpoints of the segments $XY$ and $BC$, and since spiral similarity carries similar points, $S(M') = M$. So the similarity $S$ maps $XM'$ to $BM$, and by the pairs theorem $A$ is the center of the spiral similarity mapping $XB$ to $M'M$.
+    The points $M'$ and $M$ are the midpoints of the segments $XY$ and $BC$, and since spiral similarity carries similar points, $S(M') = M$. So the similarity $S$ maps $XM'$ to $BM$, and since spiral similarity comes two at a time, $A$ is the center of the spiral similarity mapping $XB$ to $M'M$.
 
     \Image{spiral-altitude-two-circles.pdf}
 
-    For $M' = D$ the claim is obvious; otherwise the lines $XM'$ and $BM$ meet at $D$, so $A$ lies on the circle $(M'MD)$. Since $\angle ADM = 90^\circ$, $AM$ is its diameter, and therefore
+    If $M' = D$, the claim is obvious; otherwise the lines $XM'$ and $BM$ meet at $D$, so $A$ lies on the circle $(M'MD)$. Since $\angle ADM = 90^\circ$, $AM$ is its diameter, and therefore
     $$
     \angle AM'M = 90^\circ.
     $$
@@ -230,14 +321,14 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     Our rectangles are suspiciously similar. Aren't they even spirally similar?
 }{
-    $A$ is the center of the spiral similarity that carries $ABKL$ to $ANMC$, which follows at once from the conditions in the statement. But spiral similarity comes in pairs. Which other spiral similarities is it the center of, and how do we use that?
+    $A$ is the center of the spiral similarity that carries $ABKL$ to $ANMC$, which follows at once from the conditions in the statement. But spiral similarity comes two at a time. Which other spiral similarities is it the center of, and how do we use that?
 }{
     Since $A$ is the center of the spiral similarity taking $BK$ to $NM$, it is also the center of the spiral similarity taking $BN$ to $KM$. What does the algorithm for constructing the center give us?
 }{
     If we let $X$ be the intersection point of $BN$ and $MK$, then by our algorithm $A$ lies on the circles $XBK$ and $XNM$. The last thing we need is to realize why $X$ lies on $CL$.
 }%
 {
-    The rectangles $ABKL$ and $ANMC$ are congruent under this correspondence of vertices (because $AN = AB$ and $NM = BK$), they share the vertex $A$ and they are equally oriented, because both lie outside the triangle. So the rotation with center $A$ maps $BK$ to $NM$. Spiral similarity comes in pairs, so $A$ is also the center of a spiral similarity mapping $BN$ to $KM$; its angle $\angle BAK$ is neither zero nor straight, and therefore $BN \nparallel KM$. Let $X$ be their intersection point. The rotation that maps $B$ to $N$ has angle $90^\circ + \angle BAC < 180^\circ$, so $A$ does not lie on the line $BN$ and $X \neq A$. By the spiral center theorem, $A$ is the second intersection point of the circles $XBK$ and $XNM$.
+    The rectangles $ABKL$ and $ANMC$ are congruent under this correspondence of vertices (because $AN = AB$ and $NM = BK$), share the vertex $A$ and are equally oriented, because both lie outside the triangle. So the rotation with center $A$ maps $BK$ to $NM$. Spiral similarity comes two at a time, so $A$ is also the center of a spiral similarity mapping $BN$ to $KM$; its angle $\angle BAK$ is neither zero nor straight, and therefore $BN \nparallel KM$. Let $X$ be their intersection point. The rotation that maps $B$ to $N$ has angle $90^\circ + \angle BAC < 180^\circ$, so $A$ does not lie on the line $BN$ and $X \neq A$. By the spiral center theorem, $A$ is the second intersection point of the circles $XBK$ and $XNM$.
 
     \Image{spiral-two-rectangles.pdf}
 
@@ -248,7 +339,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 \Problem{0}{}{
     Let $ABCDE$ be a pentagon with an interior point $X$ such that the triangles $ABC$, $AXE$, $CDE$ are directly similar. Prove that $BCDX$ is a parallelogram.
 }{
-    We have loads of spiral similarities and they come in pairs.
+    We have plenty of spiral similarities and they come two at a time.
 }{
     Look at $ABC$, $AXE$. They are directly similar, so the spiral similarity gives that $ABX$ and $ACE$ are similar. Doesn't that hand us some nice angles?
 }{
@@ -258,7 +349,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
     \Image{spiral-pentagon-parallelogram.pdf}
 
-    The similarity $ABC \sim AXE$ is a spiral similarity with center $A$ mapping $BC$ to $XE$, and since spiral similarity comes in pairs, $A$ is also the center of the spiral similarity mapping $BX$ to $CE$. The triangles $ABX$ and $ACE$ are thus directly similar, which together with $ABC \sim CDE$ gives
+    The similarity $ABC \sim AXE$ is a spiral similarity with center $A$ mapping $BC$ to $XE$, and since spiral similarity comes two at a time, $A$ is also the center of the spiral similarity mapping $BX$ to $CE$. The triangles $ABX$ and $ACE$ are thus directly similar, which together with $ABC \sim CDE$ gives
     $$
     \angle(BA, BX) = \angle(CA, CE), \qquad \angle(AB, AC) = \angle(CD, CE).
     $$
@@ -293,9 +384,9 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     The key similar triangles are $DBF$ and $DEC$. Spirally similar, even. And what does this spiral similarity carry?
 }{
-    $D$ is the center of the spiral similarity that carries $DBF$ to $DEC$, so it carries $I_1$ to $I_2$. That gives us further good similarities. And let's not forget that spiral similarity comes in pairs.
+    $D$ is the center of the spiral similarity that carries $DBF$ to $DEC$, so it carries $I_1$ to $I_2$. That gives us further good similarities. And let's not forget that spiral similarity comes two at a time.
 }{
-    $D$ carries $BI_1$ to $EI_2$, which means some other spiral similarity with center $D$ carries $BE$ to $I_1I_2$. That one already gives us a good similarity.
+    Our similarity carries $BI_1$ to $EI_2$, which means some other spiral similarity with center $D$ carries $BE$ to $I_1I_2$. That one already gives us a good similarity.
 }{
     The rest is an angle chase: from the similarity of $DBE$ and $DI_1I_2$ we can express the previously awkward angle $\angle DI_1I_2$ in terms of a nice one. The proof is finished by realizing that $\angle BI_1I_2 + \angle I_2CB = 180^\circ$.
 }%
@@ -304,11 +395,11 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
     \Image{spiral-two-incenters.pdf}
 
-    Spiral similarity comes in pairs, so $D$ is also the center of the spiral similarity mapping $BE$ to $I_1I_2$, and therefore $\angle DI_1I_2 = \angle DBE = 90^\circ - \gamma$. In the triangle $BI_1D$ we have $\angle BI_1D = 180^\circ - \alpha/2 - \beta/2 = 90^\circ + \gamma/2$. The rays $DI_1$ and $DI_2$ lie inside the angles $BDF$ and $EDC$, so $B$ and $I_2$ are in opposite half-planes bounded by the line $DI_1$ and
+    Spiral similarity comes two at a time, so $D$ is also the center of the spiral similarity mapping $BE$ to $I_1I_2$, and therefore $\angle DI_1I_2 = \angle DBE = 90^\circ - \gamma$. The point $I_1$ is the incenter of the triangle $BFD$, so $\angle BI_1D = 90^\circ + \angle BFD/2 = 90^\circ + \gamma/2$. The rays $DI_1$ and $DI_2$ lie inside the angles $BDF$ and $EDC$, so $B$ and $I_2$ are in opposite half-planes bounded by the line $DI_1$ and
     $$
     \angle BI_1I_2 = \angle BI_1D + \angle DI_1I_2 = 180^\circ - \gamma/2.
     $$
-    Further, $CI_2$ is the bisector of the angle $DCE$, whose measure is $\gamma$, so $\angle I_2CB = \gamma/2$. The points $I_1$ and $I_2$ lie on the bisectors of the angles $ABC$ and $ACB$, and since $DEC \sim ABC$ with the common vertex $C$ and ratio $CD : CA < 1$, the point $I_2$ is closer to $C$ than the intersection point $I$ of these bisectors, hence inside the angle $CBI_1$. The points $I_1$ and $C$ therefore lie in opposite half-planes bounded by the line $BI_2$, and since $\angle BI_1I_2 + \angle I_2CB = 180^\circ$, the points $B$, $I_1$, $I_2$, $C$ lie on a circle.
+    Further, $CI_2$ is the bisector of the angle $DCE$, whose measure is $\gamma$, so $\angle I_2CB = \gamma/2$. The point $I_2$ lies inside the angle $CBI_1$, so $I_1$ and $C$ are in opposite half-planes bounded by the line $BI_2$, and since $\angle BI_1I_2 + \angle I_2CB = 180^\circ$, the points $B$, $I_1$, $I_2$, $C$ lie on a circle.
 }
 
 \EnvId{uvtxLeNA257wih8VqN3o0-equal-angles-and-points-m-n}
@@ -317,7 +408,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     $K$ is the intersection point of two circles, suspicious, isn't it a Miquel point?
 }{
-    Of course it is, $K$ is really defined as the center of the spiral similarity that pulls $BM$ to $DN$. That will matter. A spiral similarity carries all kinds of stuff, and we need it to carry more. The trick is to draw something in.
+    Of course it is, $K$ is really defined as the center of the spiral similarity that takes $BM$ to $DN$. That will matter. A spiral similarity carries all kinds of stuff, and we need it to carry more. The trick is to draw something in.
 }{
     We still don't know what to do with the right angles, so let's try to draw in something that produces right angles. I'll reveal it in the next hint.
 }{
@@ -328,43 +419,43 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
     It means that $X$ divides $BM$ in the same ratio as $Y$ divides $DN$. So our beautiful spiral similarity carries $X$ to $Y$. We are almost home. Combine what it carries with how its center is found.
 }%
 {
-    The lines $BM$ and $DN$ meet at $A$, so by the spiral center theorem $K$ is the center of the spiral similarity mapping $BD$ to $MN$. Spiral similarity comes \uv{in pairs}, so $K$ is also the center of the spiral similarity $\sigma$ mapping $BM$ to $DN$.
+    The lines $BM$ and $DN$ meet at $A$, so by the spiral center theorem $K$ is the center of the spiral similarity mapping $BD$ to $MN$. Spiral similarity comes \uv{two at a time}, so $K$ is also the center of the spiral similarity $\sigma$ mapping $BM$ to $DN$.
 
     \Image{spiral-quadrilateral-feet.pdf}
 
-    Let $X$ and $Y$ be the feet of the perpendiculars from $C$ to the lines $AB$ and $AD$. They lie on the circle $\omega$ with diameter $AC$ (for $X = A$ the circle $\omega$ is tangent to $AB$ at $A$, the degenerate case of the spiral center theorem; similarly for $Y = A$). It suffices to show that $K \in \omega$.
+    Let $X$ and $Y$ be the feet of the perpendiculars from $C$ to the lines $AB$ and $AD$. They lie on the circle $\omega$ with diameter $AC$ (if $X = A$, the circle $\omega$ is tangent to $AB$ at $A$, the degenerate case of the spiral center theorem; similarly for $Y = A$). It suffices to show that $K \in \omega$.
 
     \Image{spiral-quadrilateral-feet-right-angle.pdf}
 
-    The rays $CM$ and $CN$ are reflections of each other in the bisector of the angle $BCD$, which swaps the rays $CB$ and $CD$, so $M$ lies in the interior of the segment $AB$ if and only if $N$ lies in the interior of the segment $AD$; from $\angle ABC = \angle ADC$ we therefore get $\angle MBC = \angle NDC$ and $\triangle CMB \sim \triangle CND$ (oppositely oriented, we take only the ratio from it). The feet $X$ and $Y$ of the altitudes from $C$ correspond to each other under it, hence
+    The rays $CM$ and $CN$ are reflections of each other in the bisector of the angle $BCD$, which swaps the rays $CB$ and $CD$, so $M$ lies in the interior of the segment $AB$ if and only if $N$ lies in the interior of the segment $AD$; from $\angle ABC = \angle ADC$ we therefore get $\angle MBC = \angle NDC$ and $\triangle CMB \sim \triangle CND$ (oppositely oriented; we take only the ratio from it). The feet $X$ and $Y$ of the altitudes from $C$ correspond to each other under it, hence
     $$
     BX : MX = DY : NY,
     $$
     and spiral similarity carries \uv{similar points}, so $\sigma(X) = Y$.
 
-    So $\sigma$ maps $XB$ to $YD$ and by \uv{pairs} $K$ is also the center of the spiral similarity mapping $XY$ to $BD$. The lines $XB$ and $YD$ meet at $A$, so by the spiral center theorem this center is the second intersection point of the circles $(AXY) = \omega$ and $(ABD)$. Therefore $K \in \omega$, that is, $\angle AKC = 90^\circ$.
+    So $\sigma$ maps $XB$ to $YD$, and since spiral similarity comes two at a time, $K$ is also the center of the spiral similarity mapping $XY$ to $BD$. The lines $XB$ and $YD$ meet at $A$, so by the spiral center theorem this center is the second intersection point of the circles $(AXY) = \omega$ and $(ABD)$. Therefore $K \in \omega$, that is, $\angle AKC = 90^\circ$.
 }
 
 \EnvId{xt9itZAMHcJDcCVjylaYP-centroids-of-equilateral-triangles}
 \Problem{0}{Napoleon's theorem}{
     Let $ABC$ be a triangle and let $D$, $E$, $F$ be points such that the triangles $BCD$, $CAE$ and $ABF$ are equilateral, where $D$ and $A$ lie in opposite half-planes determined by the line $BC$, the points $E$ and $B$ lie in opposite half-planes determined by the line $CA$, and the points $F$ and $C$ lie in opposite half-planes determined by the line $AB$. Prove that the centroids of these triangles also form an equilateral triangle.
 }{
-    Equilateral triangles are always spirally similar, and the spiral similarity even carries the centroids onto each other. Find suitable triangles.
+    Equilateral triangles are always spirally similar, and the spiral similarity even carries one centroid to the other. Find suitable triangles.
 }{
-    Let $E$ and $F$ be the vertices of the equilateral triangles on $AC$, $AB$ and let $X$ and $Y$ be their centroids respectively. Convince yourself that $AXC$ and $AYF$ are spirally similar. And spiral similarity comes in pairs.
+    Let $E$ and $F$ be the vertices of the equilateral triangles on $AC$, $AB$ and let $X$ and $Y$ be their centroids respectively. Convince yourself that $AXC$ and $AYF$ are spirally similar. And spiral similarity comes two at a time.
 }{
-    Since spiral similarity comes in pairs, $AXY$ is similar to $ACF$. That lets us express $XY$ nicely. There is one more observation we need.
+    Since spiral similarity comes two at a time, $AXY$ is similar to $ACF$. That lets us express $XY$ nicely. There is one more observation we need.
 }{
     We compute that $XY = CF \cdot AX / AC$. The number $AX/AC$ is a constant. $CF$ is some weird segment. But for $XY$ to come out \uv{not depending on the side}, $CF$ must not depend on the side either. So for instance $CF = BE$, and that is all we need to prove. That part is already easy.
 }%
 {
-    Let $X$, $Y$, $Z$ be the centroids of the triangles $CAE$, $ABF$ and $BCD$ respectively, and let $k$ be the distance from the centroid of an equilateral triangle to a vertex, divided by the side length. The centroid lies on the angle bisector at the vertex, hence $\angle XAC = \angle YAF = 30^\circ$, and from the order of the rays $AE$, $AX$, $AC$, $AB$, $AY$, $AF$ around $A$ these angles are equally oriented. Moreover
+    Let $X$, $Y$, $Z$ be the centroids of the triangles $CAE$, $ABF$ and $BCD$ respectively, and let $k$ be the distance from the centroid of an equilateral triangle to a vertex, divided by the side length. The centroid lies on the angle bisector at the vertex, hence $\angle XAC = \angle YAF = 30^\circ$, and the order of the rays $AE$, $AX$, $AC$, $AB$, $AY$, $AF$ around $A$ makes these angles equally oriented. Moreover
     $$
     AX : AC = AY : AF = k,
     $$
     so the triangles $AXC$ and $AYF$ are directly similar and the spiral similarity with center $A$ maps $X$ to $Y$ and $C$ to $F$.
 
-    Spiral similarity comes in pairs, so $A$ is also the center of the spiral similarity mapping $XY$ to $CF$, hence
+    Spiral similarity comes two at a time, so $A$ is also the center of the spiral similarity mapping $XY$ to $CF$, hence
     $$
     XY : CF = AX : AC = k.
     $$
@@ -372,7 +463,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
     \Image{spiral-napoleon.pdf}
 
-    The rotation with center $A$ by $60^\circ$ mapping $F$ to $B$ maps $C$ to $E$ as well, because by the half-plane condition the rotation taking $C$ to $E$ has the same direction; therefore $CF = BE$. Likewise the rotation with center $C$ by $60^\circ$ maps $A$ to $E$ and $D$ to $B$, so $AD = BE$. Therefore $XY = YZ = ZX$ and the triangle $XYZ$ is equilateral.
+    The rotation with center $A$ by $60^\circ$ that maps $F$ to $B$ maps $C$ to $E$ as well, because the half-plane condition makes the rotation taking $C$ to $E$ go in the same direction; therefore $CF = BE$. Likewise the rotation with center $C$ by $60^\circ$ maps $A$ to $E$ and $D$ to $B$, so $AD = BE$. Therefore $XY = YZ = ZX$ and the triangle $XYZ$ is equilateral.
 }
 
 \EnvId{lGiQKLrC3o5CyNXlJkyMT-circumcenters-of-a1a2c}
@@ -392,13 +483,13 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
     The idea is to realize that $O$ is the image of a suitable point under a suitable spiral similarity.
 }%
 {
-    The lines $A_1A_2$ and $B_1B_2$ meet at $P$ and the circumcircles of the triangles $A_1B_1P$ and $A_2B_2P$ are $\omega_1$ and $\omega_2$, so by the spiral center theorem their second intersection point $Q$ is the center of the spiral similarity $\sigma$ mapping $A_1A_2$ to $B_1B_2$. Spiral similarity comes \uv{in pairs}, so $Q$ is also the center of the spiral similarity mapping $A_1B_1$ to $A_2B_2$.
+    The lines $A_1A_2$ and $B_1B_2$ meet at $P$ and the circumcircles of the triangles $A_1B_1P$ and $A_2B_2P$ are $\omega_1$ and $\omega_2$, so by the spiral center theorem their second intersection point $Q$ is the center of the spiral similarity $\sigma$ mapping $A_1A_2$ to $B_1B_2$. Spiral similarity comes \uv{two at a time}, so $Q$ is also the center of the spiral similarity mapping $A_1B_1$ to $A_2B_2$.
 
-    These two lines meet at $C$, so by the same theorem $Q$ is the second intersection point of the circumcircles of the triangles $CA_1A_2$ and $CB_1B_2$. The points $Q$, $A_1$, $A_2$ are distinct ($A_2 = Q$ would give $A_1 \in PQ$, and $A_2 = A_1$ a point on both circles), so the circle $A_1A_2C$ is the circle $QA_1A_2$. That one no longer mentions the point $B_1$ at all, that is, the circle from the statement depends only on $A_1$. Let $O$ be its center.
+    These two lines meet at $C$, so by the same theorem $Q$ is the second intersection point of the circumcircles of the triangles $CA_1A_2$ and $CB_1B_2$. The points $Q$, $A_1$, $A_2$ are distinct ($A_2 = Q$ would give $A_1 \in PQ$, and $A_2 = A_1$ a point on both circles), so the circle $A_1A_2C$ is the circle $QA_1A_2$. That description no longer involves the point $B_1$ at all, that is, the circle from the statement depends only on $A_1$. Let $O$ be its center.
 
     \Image{spiral-two-circles-circumcenters.pdf}
 
-    It remains to show that $O$ arises from $A_1$ by the same rule every time. The points $A_1$, $P$, $A_2$ lie on a line, so $\angle A_1A_2Q = \angle PA_2Q$, and that is an inscribed angle over the chord $PQ$ in the circle $\omega_2$. Hence it does not depend on the choice of $A_1$.
+    It remains to show that $O$ arises from $A_1$ by the same rule every time. The points $A_1$, $P$, $A_2$ lie on a line, so $\angle A_1A_2Q = \angle PA_2Q$, and that is an inscribed angle subtending the chord $PQ$ in the circle $\omega_2$. Hence it does not depend on the choice of $A_1$.
 
     The triangle $QOA_1$ is isosceles because $OQ = OA_1$, and by the inscribed angle theorem its apex angle
     $$
@@ -406,7 +497,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
     $$
     is fixed too. An isosceles triangle with a given apex angle has a given shape, so both the ratio $QO : QA_1$ and the directed angle from the ray $QA_1$ to the ray $QO$ come out the same for every $A_1$.
 
-    The map $A_1 \mapsto O$ is therefore one fixed spiral similarity $\tau$ with center $Q$. As $A_1$ runs over $\omega_1$, the point $O$ runs over the circle $\tau(\omega_1)$, and that one is fixed.
+    The map $A_1 \mapsto O$ is therefore a single fixed spiral similarity $\tau$ with center $Q$. As $A_1$ runs over $\omega_1$, the point $O$ runs over the circle $\tau(\omega_1)$, and that circle is fixed.
 }
 
 \EnvId{JKoWMSfsf0O8L5L0mRHxz-triangles-pqr-as-ef-moves}
@@ -417,14 +508,14 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     Take the center $S$ of the spiral similarity mapping $AD$ to $CB$, it carries $F$ to $E$. We are intersecting lines all over the place here. There will be a million circles. This calls for a systematic approach to get your bearings.
 }{
-    A systematic approach looks e.g. like this: since $S$ is the center of the spiral similarity taking $AF$ to $CE$, it is the center of the spiral similarity taking $AC$ to $FE$, so once we intersect those, at $R$, we have $S$, $R$, $A$, $F$ and $S$, $R$, $C$, $E$ on a circle. Similarly we can conjure up two more circles. What if it is no accident that $S$ is this good?
+    A systematic approach might look like this: since $S$ is the center of the spiral similarity taking $AF$ to $CE$, it is the center of the spiral similarity taking $AC$ to $FE$, so once we intersect those, at $R$, we have $S$, $R$, $A$, $F$ and $S$, $R$, $C$, $E$ on a circle. Similarly we can conjure up two more circles. What if it is no accident that $S$ is this good?
 }{
     As the previous hint all but says outright, we want to prove that $S$ lies on one more circle, the one from the statement. That is a simple angle chase, it just isn't easy to see in all that mess.
 }%
 {
     From $AD = CB$ and $DF = BE$ we get $AF = CE$, so $F$ and $E$ divide the segments $AD$ and $CB$ in the same ratio. Since $AD \nparallel CB$, the direct similarity $\sigma$ mapping $A$ to $C$ and $D$ to $B$ is not a translation; let $S$ be its center. By the similar-points theorem $\sigma$ maps the point $F$ to $E$.
 
-    The map $\sigma$ takes $AF$ to $CE$, so by the pairs theorem $S$ is also the center of the spiral similarity mapping $AC$ to $FE$. These lines meet at $R$, so by the spiral center theorem $S$ lies on the circle $AFR$. Likewise $\sigma$ takes $DF$ to $BE$, hence $DB$ to $FE$, and $S$ lies on the circle $DFQ$.
+    The map $\sigma$ takes $AF$ to $CE$, and since spiral similarity comes two at a time, $S$ is also the center of the spiral similarity mapping $AC$ to $FE$. These lines meet at $R$, so by the spiral center theorem $S$ lies on the circle $AFR$. Likewise $\sigma$ takes $DF$ to $BE$, hence $DB$ to $FE$, and $S$ lies on the circle $DFQ$.
 
     \Image{spiral-moving-ef-pqr.pdf}
 
@@ -435,7 +526,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
     = \angle(FS, FD) = \angle(QS, QD) = \angle(QS, QP),
     \endgather
     $$
-    so $S$ lies on the circle $PQR$. The point $S$ is determined by the quadrilateral $ABCD$, hence it does not depend on $E$ and $F$, and it differs from $P$: for $S = P$ the center of $\sigma$ would lie on the line $AC$ joining $A$ to $\sigma(A)$, so $\sigma$ would be a homothety and $AD \parallel CB$.
+    so $S$ lies on the circle $PQR$. The point $S$ is determined by the quadrilateral $ABCD$, hence it does not depend on $E$ and $F$, and it differs from $P$: if $S = P$, the center of $\sigma$ would lie on the line $AC$ joining $A$ to $\sigma(A)$, so $\sigma$ would be a homothety and $AD \parallel CB$.
 }
 
 \EnvId{x9VsKUKWUheOiFauQHUGg-cyclic-quadrilateral-and-parallelogram}
@@ -454,10 +545,10 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     Using the cyclic quads we already have and the parallelism from the statement, it is not hard to find $\angle CDE = \angle AGC$. Then $ED/DC = AG/GC$ suffices. And here, all of a sudden, we can use the parallelogram again.
 }{
-    $ED/DC = AG/GC$ can be rewritten via $ED = AB$ into $AB/DC = AG/GC$. That relation has a beautiful interpretation.
+    Using $ED = AB$, we can rewrite $ED/DC = AG/GC$ as $AB/DC = AG/GC$. That relation has a beautiful interpretation.
 }%
 {
-    Let $G$ be the center of the spiral similarity mapping $AB$ to $CD$. By the theorem on the other Miquel points $G$ lies on the circles $ABS$, $CDS$, $ACF$, $BDF$, and since $ABCD$ is cyclic, also on the line $SF$, on the same side of $F$ as $S$.
+    Let $G$ be the center of the spiral similarity mapping $AB$ to $CD$. By the theorem on the other Miquel points $G$ lies on the circle $ACF$ and, since $ABCD$ is cyclic, also on the line $SF$, on the same side of $F$ as $S$.
 
     \Image{spiral-cyclic-parallelogram.pdf}
 
@@ -465,12 +556,12 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
     $$
     \angle AFS = \angle AFG = \angle GCA
     $$
-    and since $AB \parallel ED$ and $A$, $E$ lie in the same half-plane with boundary line $DF$, also
+    and since $AB \parallel ED$ and $A$, $E$ lie in the same half-plane determined by the line $DF$, also
     $$
     \angle AGC = 180^\circ - \angle AFC = \angle CDE.
     $$
 
-    The ratio of the spiral similarity is $CD : AB$ and also $GC : GA$, and from the parallelogram $AB = ED$, so
+    The ratio of the spiral similarity is $CD : AB$ and also $GC : GA$, and the parallelogram gives $AB = ED$, so
     $$
     AG : GC = ED : DC.
     $$
@@ -491,7 +582,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     The answer is that it would be enough, because $A$ will be on the circle with diameter $TS$, and on the circle $XBC$, and outside $B_1C_1CB$: two objects and only one possible intersection point. And the angle chase showing that $B_1B$ and $C_1C$ meet on the circle does work out, e.g. via the isosceles triangles $TBB_1$, $TCC_1$ and the fact that $\angle CTB = 180^\circ - 2\angle A$.
 }{
-    Let $\gamma$ be the circle with center $T$ and radius $r=TB$, and let $\alpha=\angle BAC$. From $TC=TB=B_1T=C_1T$ the points $B$, $C$, $B_1$, $C_1$ lie on $\gamma$ and $B_1C_1$ is its diameter. Since $C_1$ is between $B_1$ and $S$, we have $ST > r$, so $S$ lies outside $\gamma$, hence outside the segment $BC$: the point $C$ is between $B$ and $S$. On the ray $ST$ the points come in the order $S$, $C_1$, $T$, $B_1$, so $B_1$, $C_1$ lie in the half-plane determined by $BC$ that contains $T$, and on the two secants from $S$ the points of $\gamma$ come in the order $C_1$, $C$, $B$, $B_1$. By the tangent-chord angle theorem $\angle TBC=\angle TCB=\alpha$, so $\alpha<90^\circ$, and for $\theta_1=\angle B_1TB$, $\theta_2=\angle C_1TC$ we have $\theta_1+\theta_2=180^\circ-\angle BTC=2\alpha$.
+    Let $\gamma$ be the circle with center $T$ and radius $r=TB$, and let $\alpha=\angle BAC$. Since $TC=TB=B_1T=C_1T$, the points $B$, $C$, $B_1$, $C_1$ lie on $\gamma$ and $B_1C_1$ is its diameter. Since $C_1$ is between $B_1$ and $S$, we have $ST > r$, so $S$ lies outside $\gamma$, hence outside the segment $BC$: the point $C$ is between $B$ and $S$. On the ray $ST$ the points come in the order $S$, $C_1$, $T$, $B_1$, so $B_1$, $C_1$ lie in the half-plane determined by $BC$ that contains $T$, and on the two secants from $S$ the points of $\gamma$ come in the order $C_1$, $C$, $B$, $B_1$. By the tangent-chord angle theorem $\angle TBC=\angle TCB=\alpha$, so $\alpha<90^\circ$, and for $\theta_1=\angle B_1TB$, $\theta_2=\angle C_1TC$ we have $\theta_1+\theta_2=180^\circ-\angle BTC=2\alpha$.
 
     \Image{spiral-tangents-b-c.pdf}
 
@@ -513,7 +604,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
 \EnvId{ASfGvh5sNuepotkCkzT4V-circle-mef-tangent-to-bc}
 \Problem{0}{}{
-    Let $ABC$ be an acute triangle with $AB < AC$, and let $M$ be the midpoint of the segment $BC$. The points $E$ and $F$ lie respectively on the segments $AB$ and $AC$ so that the circumcircle of triangle $MEF$ is tangent to the line $BC$. The circumcircles of triangles $AEF$ and $ABC$ meet at a point $P \not \equiv A$. The point $Q$ lies on the circumcircle of triangle $AEF$ so that $AQ \perp BC$. Prove that the line $PQ$ passes through the circumcenter $O$ of triangle $MEF$.
+    Let $ABC$ be an acute triangle with $AB < AC$, and let $M$ be the midpoint of the segment $BC$. The points $E$ and $F$ lie on the segments $AB$ and $AC$ respectively so that the circumcircle of triangle $MEF$ is tangent to the line $BC$. The circumcircles of triangles $AEF$ and $ABC$ meet at a point $P \not \equiv A$. The point $Q$ lies on the circumcircle of triangle $AEF$ so that $AQ \perp BC$. Prove that the line $PQ$ passes through the circumcenter $O$ of triangle $MEF$.
 }{
     $P$ is obviously the Miquel point, so it pays to draw in the point that hands us two more circles for free.
 }{
@@ -523,18 +614,18 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     If we draw in the midpoint $D$ of the segment $EF$, then the spiral similarity taking $EDF$ to $BMC$ has its center at $P$, so $P$, $M$, $D$, $R$ are on a circle, and thanks to the right angles it passes through $O$ as well. Believe it or not, from here it can be angle-chased elegantly.
 }{
-    Finish the angle chase by realizing that $\angle EPO = 90^\circ - \beta$ suffices. And that one we express as $\angle EPR - \angle OPR$.
+    Finish the angle chase by realizing that $\angle EPO = 90^\circ - \angle ABC$ suffices. And we express that one as $\angle EPR - \angle OPR$.
 }%
 {
-    The circumcircle of triangle $MEF$ is tangent to the line $BC$ at $M$, so $OM \perp BC$. The lines $EF$ and $BC$ are not parallel, for otherwise the homothety with center $A$ would map the circle $ABC$ to the circle $AEF$ and the point $P$ would not exist; let $R = EF \cap BC$. The power of the point $B$ with respect to the circle $MEF$ is $BM^2 \neq 0$, so $E \neq B$ and likewise $F \neq C$; therefore $R \neq B, C$ (otherwise $EF$ would coincide with $AB$, or with $AC$ respectively), $R$ does not lie on the circle $ABC$ and $P \neq R$.
+    The circumcircle of triangle $MEF$ is tangent to the line $BC$ at $M$, so $OM \perp BC$. The lines $EF$ and $BC$ are not parallel, for otherwise the homothety with center $A$ would map the circle $ABC$ to the circle $AEF$ and the point $P$ would not exist; let $R = EF \cap BC$. The power of the point $B$ with respect to the circle $MEF$ is $BM^2 \neq 0$, so $E \neq B$ and likewise $F \neq C$; therefore $R \neq B, C$ (otherwise $EF$ would coincide with $AB$ or with $AC$), $R$ does not lie on the circle $ABC$ and $P \neq R$.
 
-    The Miquel point of the quadrilateral $BEFC$ (with $A = BE \cap CF$ and $R = BC \cap EF$) lies on the circles $ABC$, $AEF$, $RBE$ and $RCF$; since $A$ does not lie on the circle $RBE$, that point is $P$. The quadrilaterals $RBEP$ and $RCFP$ are therefore cyclic and $P$ is the center of the spiral similarity mapping $EF$ to $BC$.
+    The Miquel point of the quadrilateral $BEFC$ (with $A = BE \cap CF$ and $R = BC \cap EF$) lies on the circles $ABC$, $AEF$ and $RBE$; since $A$ does not lie on the circle $RBE$, that point is $P$. The quadrilateral $RBEP$ is therefore cyclic and $P$ is the center of the spiral similarity mapping $EF$ to $BC$.
 
-    Let $D$ be the midpoint of the segment $EF$. By the similar-points theorem $D$ goes to $M$, hence $DE$ to $MB$, and since spiral similarity comes in pairs, $P$ is also the center of the spiral similarity mapping $DM$ to $EB$. The lines $DE$ and $MB$ meet at $R$ and $M$ does not lie on $EF$, so by the spiral center theorem $P$ is the second intersection point of the circles $DMR$ and $EBR$.
+    Let $D$ be the midpoint of the segment $EF$. By the similar-points theorem $D$ goes to $M$, hence $DE$ to $MB$. The lines $DE$ and $MB$ meet at $R$ and $M$ does not lie on $EF$, so by the spiral center theorem $P$ is the second intersection point of the circles $DMR$ and $EBR$.
 
     \Image{spiral-tangent-mef.pdf}
 
-    From $OD \perp EF$ and $OM \perp BC$ the points $D$, $M$, $R$ lie on the circle with diameter $OR$, which is exactly the circle $DMR$, so $P$ lies on it too. For $P = O$ there is nothing to prove; let $P \neq O$, then $\angle(PO,PR) = 90^\circ$. From here on we work with directed angles between lines modulo $180^\circ$.
+    Since $OD \perp EF$ and $OM \perp BC$, the points $D$, $M$, $R$ lie on the circle with diameter $OR$, which is exactly the circle $DMR$, so $P$ lies on it too. If $P = O$ there is nothing to prove, so assume $P \neq O$; then $\angle(PO,PR) = 90^\circ$. From here on we work with directed angles between lines modulo $180^\circ$.
 
     The cyclic quadrilateral $RBEP$ gives $\angle(PE,PR) = \angle(BE,BR) = \angle(AB,BC)$, and so
     $$
@@ -555,7 +646,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 
 \EnvId{pn8vj1u6UmWY3vagNIZEg-isosceles-triangles-on-sides}
 \Problem{0}{ISL 1992}{
-    A convex quadrilateral $ABCD$ has diagonals of equal length. On each of its sides we erect an isosceles triangle whose base is that side and whose apex lies in the half-plane determined by the line of that side that does not contain the other two vertices of the quadrilateral. All four triangles are mutually similar. Prove that the segments joining the apexes of the triangles on opposite sides are perpendicular to each other.
+    A convex quadrilateral $ABCD$ has diagonals of equal length. On each of its sides we erect an isosceles triangle whose base is that side and whose apex lies in the half-plane determined by the line of that side not containing the other two vertices of the quadrilateral. All four triangles are pairwise similar. Prove that the segments joining the apexes of the triangles on opposite sides are perpendicular to each other.
 }{
     Similar triangles hint at a spiral similarity. We need one that can make good use of the diagonals of equal length.
 }{
@@ -569,9 +660,9 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     Under the spiral similarity that carries $AB$ to $CD$, the point $P$ is carried to $Q$, since $ABP$ and $CDQ$ are directly similar. The whole quadrilateral $SAPB$ goes to $SCQD$. Even the intersection points of the diagonals are carried along, call them $X$ and $Y$. What are those points?
 }{
-    From $SA = SB$ and the isosceles triangles $ABP$ and $CDQ$, the points $X$ and $Y$ are the midpoints of $AB$ and $CD$. It is starting to fit together. Second-to-last step: how are $X$, $Y$, $P$, $Q$ related?
+    From $SA = SB$ and the isosceles triangles $ABP$ and $CDQ$ we get that $X$ and $Y$ are the midpoints of $AB$ and $CD$. It is starting to fit together. Second-to-last step: how are $X$, $Y$, $P$, $Q$ related?
 }{
-    From the similarity of $APBS$ and $CQDS$ prove that $XY$ and $PQ$ are parallel. Haven't we just got rid of $P$ and $Q$ this way?
+    From the similarity of $APBS$ and $CQDS$ prove that $XY$ and $PQ$ are parallel. Haven't we just gotten rid of $P$ and $Q$ this way?
 }{
     The final step is to realize that we are suddenly solving quite a different problem: we are proving that if a quadrilateral has diagonals of equal length, then the segments joining the midpoints of opposite sides are perpendicular. That one is semi-famous. I'll say more in the next hints.
 }{
@@ -580,24 +671,24 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
     A midline makes it easy to prove that the midpoints of the sides of any convex quadrilateral form a parallelogram. The extra ingredient in our case is that the diagonals are equal, which makes that parallelogram a rhombus.
 }%
 {
-    Let $P$, $Q$, $R$, $T$ be respectively the apexes of the triangles erected on the sides $AB$, $CD$, $BC$, $DA$ of the quadrilateral $ABCD$.
+    Let $P$, $Q$, $R$, $T$ be the apexes of the triangles erected on the sides $AB$, $CD$, $BC$, $DA$ of the quadrilateral $ABCD$, respectively.
 
-    The spiral similarity with center $S$ mapping $AC$ to $BD$ has ratio $1$ thanks to $AC = BD$, hence it is a rotation (not a translation, because $ABDC$ is not a parallelogram: $AD$ and $BC$ do not meet), and so
+    The spiral similarity with center $S$ mapping $AC$ to $BD$ has ratio $1$ because $AC = BD$, hence it is a rotation (not a translation, because $ABDC$ is not a parallelogram: $AD$ and $BC$ do not meet), and so
     $$
     SA = SB, \qquad SC = SD.
     $$
 
-    Spiral similarity comes in pairs, so $S$ is also the center of the spiral similarity $\sigma$ mapping $AB$ to $CD$. The triangles $ABP$ and $CDQ$ are directly similar (both isosceles with the same apex angle, erected outwardly on the sides $AB$ and $CD$, which are traversed in the same direction around the perimeter), so $\sigma$ maps $P$ to $Q$, and since a similarity preserves midpoints of segments, it maps the midpoint $X$ of the segment $AB$ to the midpoint $Y$ of the segment $CD$.
+    Spiral similarity comes two at a time, so $S$ is also the center of the spiral similarity $\sigma$ mapping $AB$ to $CD$. The triangles $ABP$ and $CDQ$ are directly similar (both isosceles with the same apex angle, erected outward on the sides $AB$ and $CD$, which are traversed in the same direction around the perimeter), so $\sigma$ maps $P$ to $Q$, and since a similarity preserves midpoints of segments, it maps the midpoint $X$ of the segment $AB$ to the midpoint $Y$ of the segment $CD$.
 
     \Image{spiral-isosceles-on-sides.pdf}
 
-    From $SA = SB$ and $PA = PB$ the points $S$, $P$, $X$ lie on the perpendicular bisector $o$ of the segment $AB$. Since $\sigma$ maps $XP$ to $YQ$, by the pairs theorem $S$ is the center of the spiral similarity $\tau$ mapping $XY$ to $PQ$; here $S \neq X$ (because $\sigma(X) = Y \neq X$) and $S \neq P$ (otherwise $Q = \sigma(S) = P$). The angle of rotation of $\tau$ is the angle between the rays $SX$ and $SP$, both lying on $o$, hence $0^\circ$ or $180^\circ$, so $\tau$ is a homothety and $XY \parallel PQ$.
+    The points $S$ and $P$ lie on the perpendicular bisector $o$ of the segment $AB$, since $SA = SB$ and $PA = PB$, and so does the midpoint $X$ of $AB$. Since $\sigma$ maps $XP$ to $YQ$ and spiral similarity comes two at a time, $S$ is also the center of the spiral similarity $\tau$ mapping $XY$ to $PQ$; here $S \neq X$ (because $\sigma(X) = Y \neq X$) and $S \neq P$ (otherwise $Q = \sigma(S) = P$). The angle of rotation of $\tau$ is the angle between the rays $SX$ and $SP$, both lying on $o$, hence $0^\circ$ or $180^\circ$, so $\tau$ is a homothety and $XY \parallel PQ$.
 
-    Likewise the rotation with center $S'$ mapping $B$ to $C$ and $D$ to $A$ has a paired spiral similarity mapping $BC$ to $DA$; that one maps $R$ to $T$ and the midpoint $M$ of the side $BC$ to the midpoint $N$ of the side $DA$, so $MN \parallel RT$.
+    Likewise the rotation with center $S'$ that maps $B$ to $C$ and $D$ to $A$ comes two at a time, so $S'$ is also the center of the spiral similarity mapping $BC$ to $DA$; that similarity maps $R$ to $T$ and the midpoint $M$ of the side $BC$ to the midpoint $N$ of the side $DA$, so $MN \parallel RT$.
 
     \Image{spiral-isosceles-on-sides-rhombus.pdf}
 
-    The midlines $XM$, $NY$ of the triangles $ABC$, $ACD$ are parallel to $AC$ and of length $AC/2$, likewise $MY$, $XN$ are parallel to $BD$ and of length $BD/2$, so $XMYN$ is a parallelogram (non-degenerate, because $AC \nparallel BD$) and, thanks to $AC = BD$, a rhombus. Its diagonals $XY$, $MN$ are perpendicular to each other, hence $PQ \perp RT$.
+    The midlines $XM$, $NY$ of the triangles $ABC$, $ACD$ are parallel to $AC$ and of length $AC/2$; likewise $MY$, $XN$ are parallel to $BD$ and of length $BD/2$, so $XMYN$ is a parallelogram (non-degenerate, because $AC \nparallel BD$) and, since $AC = BD$, a rhombus. Its diagonals $XY$, $MN$ are perpendicular to each other, hence $PQ \perp RT$.
 }
 
 \EnvId{vR5yJpOiIUsHlAOir-mgU-points-on-triangle-sides}
@@ -606,16 +697,16 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     $A_2$ is clearly the center of the spiral similarity mapping $BC$ to $C_1B_1$. Try to work out what that could get us, something that lets us hook onto the points $B_3$, $C_3$.
 }{
-    The trick is that spiral similarity comes in pairs, so $A_2BC_1$ and $A_2CB_1$ are similar. Nothing surprising. What is surprising is how this can be tied to $B_3$ and $C_3$. Namely, $BC_1 = AC_3$, and similarly on the other side.
+    The trick is that spiral similarity comes two at a time, so $A_2BC_1$ and $A_2CB_1$ are similar. Nothing surprising. What is surprising is how this can be tied to $B_3$ and $C_3$. Namely, $BC_1 = AC_3$, and similarly on the other side.
 }{
     Our similarity gives $A_2C_1/A_2B_1 = BC_1/CB_1 = AC_3/AB_3$. Doesn't that give us something interesting?
 }{
     The relation $A_2C_1/A_2B_1 = AC_3/AB_3$ together with an easy angle chase to finish gives $A_2BC$ similar to $AC_3B_3$. That carries over the angles around $B_3$ and $C_3$. Of course it is the same around the other vertices. Can we now carry over the angles of $A_3B_3C_3$?
 }{
-    The key to expressing, say, $\angle B_3A_3C_3$ is to say that it is $180^\circ - \angle C_3A_3B - \angle CA_3B_3$, and our auxiliary similarities carry that over to angles at the vertices $A$, $B$, $C$, $A_2$, $B_2$, $C_2$ only. From there it is just an angle chase.
+    The key to expressing, say, $\angle B_3A_3C_3$ is to say that it is $180^\circ - \angle C_3A_3B - \angle CA_3B_3$, and our auxiliary similarities carry that over to angles at the vertices $A$, $B$, $C$, $A_2$, $B_2$, $C_2$ alone. From there it is just an angle chase.
 }%
 {
-    By the spiral center theorem (with $X = A$), $A_2$ is the center of the spiral similarity mapping $C_1B_1$ to $BC$. Spiral similarity comes in pairs, so $A_2$ is also the center of the spiral similarity mapping $C_1B$ to $B_1C$, hence $A_2C_1B \sim A_2B_1C$ and
+    By the spiral center theorem (with $X = A$), $A_2$ is the center of the spiral similarity mapping $C_1B_1$ to $BC$. Spiral similarity comes two at a time, so $A_2$ is also the center of the spiral similarity mapping $C_1B$ to $B_1C$, hence $A_2C_1B \sim A_2B_1C$ and
     $$
     A_2B : A_2C = BC_1 : CB_1 = AC_3 : AB_3,
     $$
@@ -632,7 +723,7 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
     &= 180^\circ - \angle AC_2B_2 - \angle AB_2C_2 = \angle B_2AC_2 = \angle B_2A_2C_2,
     }
     $$
-    where the second and the last equality are inscribed angles over the chords $AB_2$, $AC_2$ and $B_2C_2$ (the vertices always lie on the same arc).
+    where the second and the last equality come from the inscribed angle theorem applied to the chords $AB_2$, $AC_2$ and $B_2C_2$ (the vertices always lie on the same arc).
 
     \Image{spiral-points-on-sides-angles.pdf}
 
@@ -649,22 +740,22 @@ By the analogue for the Miquel point on $PR$, we also have $OQ \perp PR$. The po
 }{
     The trick is to take the point $T$ on the ray $YM$ with $ADX$ and $AYT$ directly similar. Only, we don't actually know whether $\angle AYT = \angle ADX$, so we have no guarantee it exists. But we can redefine the point $Y$ to make everything work.
 }{
-    The redefinition that works is to take $Y'$ in the half-plane $ABC$ with $\angle AY'M = \angle ADX$. Then it suffices to have $Y'C = Y'D$. And that will go through, because we have a spiral similarity on both sides, and it comes in pairs.
+    The redefinition that works is to take $Y'$ in the half-plane $ABC$ with $\angle AY'M = \angle ADX$. Then it suffices to have $Y'C = Y'D$. And that will go through, because we have a spiral similarity on both sides, and it comes two at a time.
 }{
     From $ATY' \sim AXD$ we get $ATX \sim AY'D$, so we compute $Y'D$ from the ratios.
 }%
 {
     Let $\delta = \angle ADX = \angle BCX$ and $\alpha = \angle DAX = \angle CBX$. The equal angles $\alpha$ and $\delta$ make the triangles $ADX$ and $BCX$ similar, and they are oppositely oriented because $X$ lies inside the convex quadrilateral $ABCD$; hence $AD : AX = BC : BX$.
 
-    Let $M$ be the midpoint of the segment $AB$. For every point $P$ of the perpendicular bisector of the segment $AB$ other than $M$ we have $\angle APB = 2\angle APM$. Let $Y'$ be the point of this bisector in the half-plane $ABC$ with $\angle AY'M = \delta$; it exists because $0^\circ < \delta < 90^\circ$. It suffices to prove $Y'C = Y'D$: then $Y'$ lies on the perpendicular bisector of the segment $CD$ as well, and because $AB \nparallel CD$ we get $Y' = Y$.
+    Let $M$ be the midpoint of the segment $AB$. For every point $P$ on the perpendicular bisector of the segment $AB$ other than $M$ we have $\angle APB = 2\angle APM$. Let $Y'$ be the point on this bisector in the half-plane $ABC$ with $\angle AY'M = \delta$; it exists because $0^\circ < \delta < 90^\circ$. It suffices to prove $Y'C = Y'D$: then $Y'$ lies on the perpendicular bisector of the segment $CD$ as well, and because $AB \nparallel CD$ we get $Y' = Y$.
 
-    Let $T$ be the image of the point $X$ under the spiral similarity with center $A$ that maps $D$ to $Y'$. Then $ADX \sim AY'T$ equally oriented, so $\angle AY'T = \delta = \angle AY'M$, and since $X$ lies inside $ABCD$ and $Y'$ in the half-plane $ABC$, which for a convex $ABCD$ is the half-plane $ABD$, the triples $A, D, X$ and $A, Y', M$ are both oriented like $A, D, B$ and $T$ lies on the ray $Y'M$.
+    Let $T$ be the image of the point $X$ under the spiral similarity with center $A$ that maps $D$ to $Y'$. Then $ADX \sim AY'T$ equally oriented, so $\angle AY'T = \delta = \angle AY'M$, and since $X$ lies inside $ABCD$ and $Y'$ in the half-plane $ABC$, which for convex $ABCD$ is the half-plane $ABD$, the triples $A, D, X$ and $A, Y', M$ are both oriented like $A, D, B$ and $T$ lies on the ray $Y'M$.
 
     \Image{spiral-interior-point-x.pdf}
 
     The reflection in $Y'M$ maps $A$ to $B$ and leaves the points $Y'$, $T$ fixed, so $BY'T$ is oppositely congruent to $AY'T$, and therefore $BCX \sim BY'T$ equally oriented.
 
-    The spiral similarity with center $A$ maps $DX$ to $Y'T$, and since spiral similarity comes in pairs, $A$ is also the center of the one mapping $DY'$ to $XT$. Hence $AY'D \sim ATX$, that is
+    The spiral similarity with center $A$ maps $DX$ to $Y'T$, and since spiral similarity comes two at a time, $A$ is also the center of the one mapping $DY'$ to $XT$. Hence $AY'D \sim ATX$, that is
     $$
     Y'D : TX = AD : AX.
     $$

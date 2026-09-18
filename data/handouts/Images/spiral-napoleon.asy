@@ -24,10 +24,17 @@ pair X = (C + A + E) / 3;
 pair Y = (A + B + F) / 3;
 pair Z = (B + C + D) / 3;
 
+AngleMark(C, A, X, LightGreen, radius = Radius2);
+AngleMark(F, A, Y, LightGreen, radius = Radius2);
+
 DashedDraw(A, X, Purple);
 DashedDraw(A, Y, Purple);
 Draw(X, Y, Green);
 Draw(C, F, Red);
+Draw(X, C, vertexPen);
+Draw(Y, F, vertexPen);
+Draw(A, D, vertexPen);
+Draw(B, E, vertexPen);
 
 Draw(A, B);
 Draw(B, C);
@@ -42,12 +49,12 @@ Draw(Y, Z);
 Draw(Z, X);
 
 LabeledDot(A, "A", N);
-LabeledDot(B, "B", SW);
-LabeledDot(C, "C", SE);
+LabeledDot(B, "B", SW, 1);
+LabeledDot(C, "C", SE, 1);
 LabeledDot(D, "D", S);
 // Point E shadows the compass constant, so east is spelled out.
-LabeledDot(E, "E", (1, 0));
+LabeledDot(E, "E", (1, 0), offset = (-2.3, 1.2));
 LabeledDot(F, "F", W);
-LabeledDot(X, "X", (1, 0));
+LabeledDot(X, "X", (1, 0), offset = (-3, 0));
 LabeledDot(Y, "Y", W);
-LabeledDot(Z, "Z", S);
+LabeledDot(Z, "Z", S, offset = (-4.1, 0.6));

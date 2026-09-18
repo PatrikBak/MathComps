@@ -43,25 +43,26 @@ pair Y = extension(M, M + rotate(90) * (B - A), midCD, midCD + rotate(90) * (D -
 // rotate()/scale.
 pair T = A + (X - A) * (Y - A) / (D - A);
 
-pen hypPen = LightGreen;
-pen concPen = LightRed;
+pen deltaPen = LightGreen;
+pen alphaPen = LightYellow;
 pen anglePen = Red + Font2;
 
-AngleMark(A, D, X, hypPen, "\delta", radius = Radius2, labelPen = anglePen);
-AngleMark(X, C, B, hypPen, "\delta", radius = Radius2, labelPen = anglePen);
+AngleMark(A, D, X, deltaPen, "\delta", radius = Radius2, labelPen = anglePen);
+AngleMark(X, C, B, deltaPen, "\delta", radius = Radius2, labelPen = anglePen);
 // The two wedges at Y share ray YM.
-AngleMark(A, Y, M, concPen, "\delta", radius = Radius1, labelOffset = 2, labelPen = anglePen);
-AngleMark(M, Y, B, concPen, "\delta", radius = Radius1Nudged, labelOffset = 2, labelPen = anglePen);
+AngleMark(A, Y, M, deltaPen, "\delta", radius = Radius1, labelOffset = 2, labelPen = anglePen);
+AngleMark(M, Y, B, deltaPen, "\delta", radius = Radius1Nudged, labelOffset = 2, labelPen = anglePen);
+AngleMark(X, A, D, alphaPen, "\alpha", radius = Radius2, labelPen = anglePen, offset = (-4, 1.8));
+AngleMark(C, B, X, alphaPen, "\alpha", radius = Radius2, labelPen = anglePen, offset = (3.1, 0.1));
 
 // The perpendicular bisector of CD, carried a little past CD.
 DashedDraw(ExtendPast(Y, midCD, 12), Y, Purple);
 
-// T lies on ray YM -- that is exactly what this figure shows -- so the segment
-// YT and the AB-bisector's Y-to-M stretch are one line, drawn once as the
-// bisector carried past M out to T.
-DashedDraw(Y, T, Purple);
+// T lies on ray YM, so the image segment YT covers the AB-bisector's Y-to-M stretch.
+Draw(Y, T, Red);
 
 Draw(D, X, Green);
+Draw(A, T);
 
 Draw(A, B);
 Draw(B, C);
@@ -73,11 +74,11 @@ Draw(C, X);
 Draw(A, Y);
 Draw(B, Y);
 
-LabeledDot(A, "A", SW);
-LabeledDot(B, "B", SE);
-LabeledDot(C, "C", NE);
-LabeledDot(D, "D", NW);
+LabeledDot(A, "A", SW, 1);
+LabeledDot(B, "B", SE, 1);
+LabeledDot(C, "C", NE, 1);
+LabeledDot(D, "D", NW, 1);
 LabeledDot(X, "X", S);
-LabeledDot(Y, "Y", W);
-LabeledDot(M, "M", SW);
-LabeledDot(T, "T", SW);
+LabeledDot(Y, "Y", W, offset = (2.5, 3.5));
+LabeledDot(M, "M", SW, 1);
+LabeledDot(T, "T", SW, 1);

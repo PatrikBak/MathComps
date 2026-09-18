@@ -76,11 +76,11 @@ void BaseDots()
     LabeledDot(A, "A", E);
     // B: compass N is shadowed by point N, so its align direction is spelled out.
     LabeledDot(B, "B", (0, 1));
-    LabeledDot(C, "C", SW);
+    LabeledDot(C, "C", SW, 1);
     // D: compass S is shadowed by point S, so its align direction is spelled out.
     LabeledDot(D, "D", (0, -1));
-    LabeledDot(P, "P", NE);
-    LabeledDot(R, "R", NW);
-    LabeledDot(Q, "Q", SW);
-    LabeledDot(T, "T", SE);
+    LabeledDot(P, "P", NE, 1);
+    LabeledDot(R, "R", NW, 1);
+    LabeledDot(Q, "Q", SW, 1);
+    LabeledDot(T, "T", SE, 1);
 }

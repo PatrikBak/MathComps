@@ -1,8 +1,5 @@
 import _common;
 
-// A sits well left of the top so the triangle is clearly scalene: the
-// Sharky-Devil point S lands on the arc near A, and only a large gap between
-// |AB| and |AC| pushes it away from A.
 real R = 78;
 real alpha = 35;
 real angleA = 118;
@@ -28,6 +25,9 @@ pair S = ReflectAcross(A, O, AIcenter);
 // circumcircle again there, i.e. the far hit when walking from A through I.
 pair N = LineCircleIntersections(A, I, O, R)[1];
 
+AngleMark(B, S, N, LightGreen, radius = Radius3);
+AngleMark(N, S, C, LightGreen, radius = Radius3Nudged);
+
 Circle(O, R, LightBlue);
 Circle(I, inradius, LightBlue);
 Circle(AIcenter, abs(A - I) / 2, LightBlue);
@@ -36,12 +36,14 @@ Draw(A, B);
 Draw(B, C);
 Draw(C, A);
 Draw(S, N);
+Draw(S, B, vertexPen);
+Draw(S, C, vertexPen);
 
-LabeledDot(A, "A", NW);
-LabeledDot(B, "B", SW);
-LabeledDot(C, "C", SE);
-LabeledDot(D, "D", SW);
-LabeledDot(E, "E", NE);
-LabeledDot(F, "F", W);
+LabeledDot(A, "A", NW, 1);
+LabeledDot(B, "B", SW, 1);
+LabeledDot(C, "C", SE, 1);
+LabeledDot(D, "D", SW, 1);
+LabeledDot(E, "E", NE, 1, halo = true, offset = (2.5, -1.8));
+LabeledDot(F, "F", W, halo = true);
 LabeledDot(S, "S", W);
 LabeledDot(N, "N", (0, -1));

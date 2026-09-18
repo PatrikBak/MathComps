@@ -66,6 +66,7 @@ RightAngleMark(O, P, R, radius = Radius1);
 Circle(Oabc, rABC, LightBlue);
 Circle(Oaef, rAEF, LightBlue);
 Circle(O, rMEF, LightBlue);
+Arc(Circumcenter(R, B, E), B, E, R, 12, LightBlue);
 Circle(centerOR, radiusOR, LightPurple);
 
 DashedDraw(P, Q, Purple);
@@ -80,17 +81,18 @@ Draw(O, M);
 Draw(O, D);
 Draw(A, Q);
 Draw(P, E, vertexPen);
+Draw(P, F, vertexPen);
 Draw(P, R, vertexPen);
 
-// Point E shadows the compass constant; no label below needs east.
+// Point E shadows the compass constant, so east must be spelled out as a vector.
 LabeledDot(A, "A", N);
-LabeledDot(B, "B", SW);
+LabeledDot(B, "B", SW, 1);
 LabeledDot(C, "C", S);
-LabeledDot(M, "M", SW);
-LabeledDot(R, "R", S);
+LabeledDot(M, "M", SW, 1);
+LabeledDot(R, "R", (1,0), distanceOffset = 2);
 LabeledDot(E, "E", W);
-LabeledDot(F, "F", N, distanceOffset = 5);
-LabeledDot(O, "O", NW, (-3,-3),distanceOffset=-2);
-LabeledDot(D, "D", (-1, -0.35), distanceOffset = 4);
-LabeledDot(P, "P", (1, 0.6), distanceOffset = 5);
-LabeledDot(Q, "Q", S, (1,0), halo = true);
+LabeledDot(F, "F", S, distanceOffset = 3, offset = (-2.4, 0));
+LabeledDot(O, "O", NW, distanceOffset = 1, offset = (16.9, -11.8));
+LabeledDot(D, "D", S, distanceOffset = 3, offset = (-4.3, 2.3), halo = true);
+LabeledDot(P, "P", NE, distanceOffset = 1);
+LabeledDot(Q, "Q", SW, distanceOffset = 1, offset = (2, 1.6), halo = true, haloPad = 0.8);

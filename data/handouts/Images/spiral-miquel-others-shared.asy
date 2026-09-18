@@ -45,14 +45,12 @@ void BaseEdgesThroughR()
 }
 
 //
-// Labels the four vertices, in the same place in both figures. P, the outer
-// point and the spiral centre are left to each figure, since they depend on
-// which circles it draws.
+// Labels C and D, in the same place in both figures. A, B, P, the outer point
+// and the spiral centre are left to each figure, since the circles it draws
+// pass through them.
 //
 void BaseDots()
 {
-    LabeledDot(A, "A", (-0.93, -0.37), 4);
-    LabeledDot(B, "B", (0.5, -0.87), 4);
-    LabeledDot(C, "C", (0.88, 0.47), 4);
-    LabeledDot(D, "D", (-0.03, 1), 4);
+    LabeledDot(C, "C", E, 1, halo = true);
+    LabeledDot(D, "D", N, 3);
 }

@@ -32,6 +32,12 @@
 \ReviewModetrue
 \ifdefined\PUBLISH\ReviewModefalse\fi
 
+% Toggle to print each figure's file name under it, so a figure in the compiled
+% PDF maps straight back to its Images/<name>.asy source. Review mode only: the
+% publish build never shows it.
+\newif\ifShowImageIds
+\ShowImageIdstrue
+
 % Render #1 if solutions should be inline (review mode OR display-texts), else #2
 \long\def\IfShowingTexts#1#2{\ifReviewMode#1\else\ifDisplayTexts#1\else#2\fi\fi}
 
@@ -331,9 +337,12 @@
 % Prints a left-aligned bar with the given text, splitting it over a page
 % boundary when it does not fit (see \leftbarShip).
 % Default tail: two breakable medskips (page break allowed between blocks).
-% When \LeftbarOpentrue was set first: a non-breakable kern of the same
-% size, so the closing \endblock diamond cannot land on a fresh page away
-% from its content.
+% When \LeftbarOpentrue was set first: one medskip, still breakable. A
+% section title, the statement and its whole first proof paragraph would
+% otherwise form one unbreakable block (OPmac forbids breaks after a title
+% and inside a short paragraph), which pushes all of it onto the next page
+% and leaves the current one half empty. \endblock glues the diamond to the
+% last line on its own.
 \long\def\leftbar#1{%
   \safepar\medskip\medskip%
   % The text width inside the bar: the page less the rule and the gap after it
@@ -352,7 +361,7 @@
   \splittopskip=\leftbarSavedSplittop%
   \safepar%
   \ifLeftbarOpen%
-    \nobreak\kern\medskipamount\nobreak%
+    \medskip%
     \LeftbarOpenfalse%
   \else%
     \medskip\medskip%
@@ -704,6 +713,12 @@
   % Center the image horizontally using \line with \hss
   \safepar\medskip%
   \line{\hss\pdfrefximage\pdflastximage\hss}%
+  % The file name, for review compiles only. \detokenize keeps a name holding
+  % an underscore printable; \nobreak glues the line to the image above it.
+  \ifReviewMode\ifShowImageIds%
+    \nobreak\vskip2pt%
+    \line{\hss{\typosize[12/]\tt\detokenize{#1}}\hss}%
+  \fi\fi%
   \safepar\medskip%
 }
 

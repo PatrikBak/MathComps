@@ -10,6 +10,7 @@ Draw(C, M, vertexPen);
 Draw(C, N, vertexPen);
 
 BaseDots();
-LabeledDot(B, "B", (-0.17, 1), 6, color = ptPen);
-LabeledDot(M, "M", S, labelGap, color = ptPen);
-LabeledDot(N, "N", NW, labelGap, color = ptPen);
+LabeledDot(B, "B", SE, 1, color = ptPen);
+LabeledDot(D, "D", SW, 1, color = ptPen);
+LabeledDot(M, "M", E, 1, color = ptPen);
+LabeledDot(N, "N", NW, 1, color = ptPen);

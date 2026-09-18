@@ -39,8 +39,8 @@ DashedDraw(O, D);
 Draw(A, D);
 Draw(B, Dpast);
 
-LabeledDot(A, "A", SW);
-LabeledDot(B, "B", SE);
-LabeledDot(C, "C", N);
-LabeledDot(D, "D", S, 5);
-LabeledDot(O, "O", S + 0.2left, 5);
+LabeledDot(A, "A", SW, 1);
+LabeledDot(B, "B", SE, 1, offset = (-0.6, 3.4));
+LabeledDot(C, "C", N, offset = (1.6, 2.1));
+LabeledDot(D, "D", S, 4.5, offset = (-17, 16.3));
+LabeledDot(O, "O", S + 0.2left, 5, offset = (15.3, 17));

@@ -44,12 +44,16 @@ void BaseFills()
 }
 
 //
-// Draws omega and the dashed AT segment, common to every frame.
+// Draws omega, the dashed AT segment and the two thin segments from S: one
+// back to C along line BC, one along ST as far as C1, where the green
+// diameter takes over.
 //
 void BaseEdges()
 {
     Circle(O, R, LightBlue);
     DashedDraw(A, T, Purple);
+    Draw(C, S, vertexPen);
+    Draw(S, C1, vertexPen);
 }
 
 //
@@ -59,10 +63,10 @@ void BaseEdges()
 void BaseDots()
 {
     // Point S shadows the compass constant, so south must be spelled out as a vector.
-    LabeledDot(A, "A", NE);
+    LabeledDot(A, "A", NE, 1, offset = (-2.8, 1.9));
     LabeledDot(B, "B", W);
-    LabeledDot(T, "T", (-0.5, -0.85));
+    LabeledDot(T, "T", (-0.5, -0.85), 1);
     LabeledDot(S, "S", E);
-    LabeledDot(B1, "B_1", SW);
-    LabeledDot(C1, "C_1", SE);
+    LabeledDot(B1, "B_1", SW, 1);
+    LabeledDot(C1, "C_1", SE, 1);
 }

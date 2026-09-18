@@ -26,8 +26,17 @@
                   "type": "paragraph",
                   "content": [
                     {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Špirálna podobnosť"
+                        }
+                      ]
+                    },
+                    {
                       "type": "text",
-                      "text": "Geometrické zobrazenie, ktoré je zložením otočenia a\u00A0rovnoľahlosti. Je určená stredom, orientovaným uhlom otočenia\u00A0"
+                      "text": " je geometrické zobrazenie, ktoré je zložením otočenia a\u00A0rovnoľahlosti. Je určená stredom, orientovaným uhlom otočenia\u00A0"
                     },
                     {
                       "type": "math",
@@ -191,7 +200,7 @@
             {
               "type": "theorem",
               "id": "JmA51D6zLoKYiJEsuQBWn",
-              "slug": "spiralna-podobnost-v-paroch",
+              "slug": "spiralna-podobnost-po-dvoch",
               "title": {
                 "type": "paragraph",
                 "content": [
@@ -204,7 +213,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "v\u00A0pároch"
+                        "text": "po dvoch"
                       }
                     ]
                   }
@@ -289,7 +298,172 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech má špirálna podobnosť uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\phi",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0koeficient "
+                    },
+                    {
+                      "type": "math",
+                      "text": "k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Priamo z\u00A0definície je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle AOA' = \\angle BOB' = \\phi",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (orientované uhly) a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OA'| : |OA| = |OB'| : |OB| = k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Pripočítaním uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A'OB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " k\u00A0obom stranám prvej rovnosti dostávame "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle AOB = \\angle A'OB'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0preusporiadaním druhej "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OB| : |OA| = |OB'| : |OA'|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Špirálna podobnosť so stredom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", uhlom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle AOB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0koeficientom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OB| : |OA|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " teda zobrazuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AA'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BB'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "theorem",
@@ -428,7 +602,52 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0trojuholníky "
+                      "text": ", a\u00A0ak "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nie je rovnoľahlosť a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " nie je žiadny z\u00A0bodov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", sú trojuholníky "
                     },
                     {
                       "type": "math",
@@ -455,7 +674,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " sú navzájom podobné."
+                      "text": " navzájom podobné."
                     }
                   ],
                   "highligted": false
@@ -473,7 +692,154 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podobnosť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zobrazuje úsečku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na úsečku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A'B'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zachováva pomery dĺžok, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S(X)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je bod úsečky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A'B'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktorý ju delí v\u00A0pomere "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AX| : |BX|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Taký bod je jediný, preto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S(X) = X'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OAA'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OXX'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OBB'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " majú pri vrchole "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ten istý uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\phi",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " špirálnej podobnosti a\u00A0ten istý pomer strán "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OA'| : |OA| = |OX'| : |OX| = |OB'| : |OB| = k",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže sú podobné podľa vety "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "theorem",
@@ -540,6 +906,42 @@
                     },
                     {
                       "type": "text",
+                      "text": ", ktorý je rôzny od "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
                       "text": ". Nech sa kružnice opísané trojuholníkom "
                     },
                     {
@@ -563,6 +965,24 @@
                     {
                       "type": "math",
                       "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; ak sa v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dotýkajú, položme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O = X",
                       "isDisplay": false
                     },
                     {
@@ -612,14 +1032,416 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Počítame s\u00A0orientovanými uhlami priamok modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0kružnice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XAOC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle(AO, AB) = \\angle(AO, AX) = \\angle(CO, CX) = \\angle(CO, CD)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0z\u00A0kružnice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XBOD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " rovnako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle(BO, BA) = \\angle(DO, DC)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OAB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "OCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú súhlasne podobné. (Ak sa kružnice v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " dotýkajú, prevedie ich jedna na druhú rovnoľahlosť so stredom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; tá zobrazuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", lebo priamka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pretína prvú kružnicu v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0druhú v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0podobne pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Preto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|XB| : |XA| = |XD| : |XC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0špirálna podobnosť so stredom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zobrazujúca "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zobrazuje aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ".)"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "spiral-similarity/spiral-center-proof.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Zo súhlasnej podobnosti je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OA| : |OC| = |OB| : |OD|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0rovnajú sa aj orientované uhly polpriamok "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle AOB = \\angle COD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže po pripočítaní uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BOC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle AOC = \\angle BOD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podľa vety "
+                    },
+                    {
+                      "type": "math",
+                      "text": "sus",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú preto súhlasne podobné aj trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OAC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "OBD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0to presne znamená, že špirálna podobnosť so stredom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", uhlom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle AOC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0koeficientom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OC| : |OA|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zobrazuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Iná špirálna podobnosť zobrazujúca "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " neexistuje: priama podobnosť je určená obrazmi dvoch bodov, lebo každý ďalší bod je určený vzdialenosťami od nich a\u00A0orientáciou."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "paragraph",
               "content": [
                 {
                   "type": "text",
-                  "text": "Keďže špirálna podobnosť chodí v\u00A0pároch, ten istý bod "
+                  "text": "Keďže špirálna podobnosť chodí po dvoch, ten istý bod "
                 },
                 {
                   "type": "math",
@@ -853,11 +1675,11 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Ak sa kružnice "
+                        "text": "Ak "
                       },
                       {
                         "type": "math",
-                        "text": "ABY",
+                        "text": "AB \\parallel CD",
                         "isDisplay": false
                       },
                       {
@@ -866,12 +1688,30 @@
                       },
                       {
                         "type": "math",
-                        "text": "CDY",
+                        "text": "AC \\nparallel BD",
                         "isDisplay": false
                       },
                       {
                         "type": "text",
-                        "text": " dotýkajú, tak nutne v\u00A0"
+                        "text": ", prvá konštrukcia zlyhá (priamky "
+                      },
+                      {
+                        "type": "math",
+                        "text": "AB",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "CD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " sa nepretínajú), druhá však funguje: stredom je "
                       },
                       {
                         "type": "math",
@@ -880,7 +1720,7 @@
                       },
                       {
                         "type": "text",
-                        "text": ", a\u00A0vtedy je špirálna podobnosť zobrazujúca "
+                        "text": " a\u00A0špirálna podobnosť zobrazujúca "
                       },
                       {
                         "type": "math",
@@ -898,7 +1738,7 @@
                       },
                       {
                         "type": "text",
-                        "text": " rovnoľahlosťou so stredom "
+                        "text": " je rovnoľahlosťou so stredom "
                       },
                       {
                         "type": "math",
@@ -907,13 +1747,161 @@
                       },
                       {
                         "type": "text",
-                        "text": ". "
+                        "text": ", so záporným koeficientom, ak "
+                      },
+                      {
+                        "type": "math",
+                        "text": "Y",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " leží medzi "
+                      },
+                      {
+                        "type": "math",
+                        "text": "A",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "C",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", s\u00A0kladným, ak mimo úsečky "
+                      },
+                      {
+                        "type": "math",
+                        "text": "AC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Kružnice "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ABY",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "CDY",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " sa vtedy v\u00A0"
+                      },
+                      {
+                        "type": "math",
+                        "text": "Y",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " dotýkajú, zvonka, resp. zvnútra. "
                       },
                       {
                         "type": "image",
                         "id": "spiral-similarity/spiral-center-tangent.svg",
                         "scale": 1.0,
                         "isInline": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " "
+                      },
+                      {
+                        "type": "image",
+                        "id": "spiral-similarity/spiral-center-tangent-internal.svg",
+                        "scale": 1.0,
+                        "isInline": false
+                      }
+                    ],
+                    "highligted": false
+                  }
+                ],
+                [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ak "
+                      },
+                      {
+                        "type": "math",
+                        "text": "AB \\parallel CD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " a\u00A0zároveň "
+                      },
+                      {
+                        "type": "math",
+                        "text": "AC \\parallel BD",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", zlyhajú obe konštrukcie. Štvoruholník "
+                      },
+                      {
+                        "type": "math",
+                        "text": "ABDC",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je vtedy rovnobežník a\u00A0zobrazenie "
+                      },
+                      {
+                        "type": "math",
+                        "text": "A",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " na "
+                      },
+                      {
+                        "type": "math",
+                        "text": "C",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", "
+                      },
+                      {
+                        "type": "math",
+                        "text": "B",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " na "
+                      },
+                      {
+                        "type": "math",
+                        "text": "D",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": " je posunutie, ktoré stred nemá."
                       }
                     ],
                     "highligted": false
@@ -930,136 +1918,6 @@
         "level": 1,
         "text": {
           "content": [
-            {
-              "type": "theorem",
-              "id": "bOA6eKiwIlUrb_5f3ft0o",
-              "slug": "miquelova-veta",
-              "title": {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "Miquelova veta"
-                  }
-                ],
-                "highligted": false
-              },
-              "body": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "Nech "
-                    },
-                    {
-                      "type": "math",
-                      "text": "D",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "E",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "F",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " sú body po rade na stranách "
-                    },
-                    {
-                      "type": "math",
-                      "text": "BC",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "CA",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "AB",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " trojuholníka "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ABC",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ". Potom kružnice opísané trojuholníkom "
-                    },
-                    {
-                      "type": "math",
-                      "text": "AEF",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "BFD",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "CDE",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " prechádzajú jedným bodom."
-                    }
-                  ],
-                  "highligted": false
-                },
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "image",
-                      "id": "spiral-similarity/spiral-miquel-triangle.svg",
-                      "scale": 1.0,
-                      "isInline": false
-                    }
-                  ],
-                  "highligted": false
-                }
-              ],
-              "proof": []
-            },
             {
               "type": "theorem",
               "id": "LBhDImhjL32nZ7fyN8V3M",
@@ -1219,7 +2077,190 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Priamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "DC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa pretínajú v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže podľa vety o\u00A0strede špirálnej podobnosti je stred "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " špirálnej podobnosti zobrazujúcej "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " druhým priesečníkom kružníc "
+                    },
+                    {
+                      "type": "math",
+                      "text": "QAD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "QBC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Špirálka chodí po dvoch, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je aj stredom špirálnej podobnosti zobrazujúcej "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Priamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa pretínajú v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "R",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0tak tá istá veta dáva, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je druhým priesečníkom kružníc "
+                    },
+                    {
+                      "type": "math",
+                      "text": "RAB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "RDC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Všetky štyri kružnice teda prechádzajú bodom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "theorem",
@@ -1340,7 +2381,135 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Počítame s\u00A0orientovanými uhlami priamok modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0kružníc "
+                    },
+                    {
+                      "type": "math",
+                      "text": "QADM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "RABM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktoré dáva predošlá veta, je"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n\\angle(MQ, MA) = \\angle(DQ, DA) = \\angle(DC, DA), \\\\\n\\angle(MR, MA) = \\angle(BR, BA) = \\angle(BC, BA).\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "spiral-similarity/spiral-miquel-on-qr-proof.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "QR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " práve vtedy, keď priamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "MQ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "MR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " splývajú, teda keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle(MQ, MA) = \\angle(MR, MA)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". To je podľa vypísaných rovností práve vtedy, keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle(DC, DA) = \\angle(BC, BA)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0to je presne podmienka tetivovosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "paragraph",
@@ -1379,7 +2548,16 @@
                       },
                       {
                         "type": "text",
-                        "text": " prechádzajú jedným bodom, stredom špirálnej podobnosti zobrazujúcej "
+                        "text": " prechádzajú jedným bodom "
+                      },
+                      {
+                        "type": "math",
+                        "text": "M_1",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", stredom špirálnej podobnosti zobrazujúcej "
                       },
                       {
                         "type": "math",
@@ -1460,7 +2638,16 @@
                       },
                       {
                         "type": "text",
-                        "text": " prechádzajú jedným bodom, stredom špirálnej podobnosti zobrazujúcej "
+                        "text": " prechádzajú jedným bodom "
+                      },
+                      {
+                        "type": "math",
+                        "text": "M_2",
+                        "isDisplay": false
+                      },
+                      {
+                        "type": "text",
+                        "text": ", stredom špirálnej podobnosti zobrazujúcej "
                       },
                       {
                         "type": "math",
@@ -1731,7 +2918,301 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " stredy úsečiek "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je stredom špirálnej podobnosti zobrazujúcej "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0tá podľa vety o\u00A0prenášaní podobných bodov zobrazuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda aj úsečku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "YC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Priamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "XD = AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "YC = BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa pretínajú v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "R",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže podľa vety o\u00A0strede špirálnej podobnosti je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " druhým priesečníkom kružníc "
+                    },
+                    {
+                      "type": "math",
+                      "text": "RXY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "RDC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "spiral-similarity/spiral-miquel-om-perpendicular-proof.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Stred "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " kružnice opísanej leží na osiach tetív "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže pri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je pravý uhol a\u00A0kružnica "
+                    },
+                    {
+                      "type": "math",
+                      "text": "RXY",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je kružnicou s\u00A0priemerom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Leží na nej aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0preto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle OMR| = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "QR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (predošlá veta), takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OM \\perp QR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "theorem",
@@ -1884,7 +3365,487 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Najprv ukážeme, že "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ležia na kružnici; počítame s\u00A0orientovanými uhlami priamok modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je stredom špirálnej podobnosti zobrazujúcej "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktorej uhol je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle(AB, DC)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0zároveň špirálnej podobnosti zobrazujúcej "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " s\u00A0uhlom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle(AD, BC)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Preto je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle(MA, MD) = \\angle(AB, DC)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0zároveň "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle(MD, MC) = \\angle(AD, BC)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0tetivovosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je navyše "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle(BC, DC) = \\angle(AB, AD)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0tak"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "\\begin{gather*}\n\\angle(MA, MC) = \\angle(AB, DC) + \\angle(AD, BC) = \\\\\n= \\angle(AB, BC) + \\angle(AB, AD) + \\angle(AD, BC) = 2\\angle(AB, BC).\n\\end{gather*}",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podľa vety o\u00A0obvodovom a\u00A0stredovom uhle je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "2\\angle(AB, BC) = \\angle(OA, OC)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ležia na kružnici. Rovnako ležia na kružnici aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". (Ak je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " alebo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " priemer, dáva tá istá rovnosť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na tomto priemere a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " ležia na ňom priamo.)"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "spiral-similarity/spiral-miquel-opm-line-proof.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Obe kružnice prechádzajú bodmi "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ich chordálou je teda priamka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží vnútri tetív "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda vnútri oboch kružníc, a\u00A0jeho mocnosť vzhľadom na ne je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "-|PA| \\cdot |PC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", resp. "
+                    },
+                    {
+                      "type": "math",
+                      "text": "-|PB| \\cdot |PD|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; obe sa rovnajú mocnosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vzhľadom na kružnicu opísanú "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " teda leží na chordále "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0kolmosť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OP \\perp QR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je predošlá veta."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "paragraph",
@@ -1943,6 +3904,186 @@
                 }
               ],
               "highligted": false
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Ukážeme ešte jednu dôležitú vlastnosť z\u00A0projektívnej geometrie súvisiacu s\u00A0polárami."
+                }
+              ],
+              "highligted": false
+            },
+            {
+              "type": "definition",
+              "id": "1LKVhRCTK_6pAfJ02sHWt",
+              "slug": "inverzia-a-polara",
+              "title": {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Polára"
+                  }
+                ],
+                "highligted": false
+              },
+              "body": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\omega",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je kružnica so stredom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0polomerom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P \\neq O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je bod. Obraz bodu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " v\u00A0"
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "inverzii"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " vzhľadom na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\omega",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " polpriamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", pre ktorý "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|OP| \\cdot |OP'| = r^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". "
+                    },
+                    {
+                      "type": "italic",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Polára"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " bodu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vzhľadom na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\omega",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je priamka prechádzajúca bodom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " kolmá na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "theorem",
@@ -2009,7 +4150,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je polára k\u00A0bodu "
+                      "text": " je polára bodu "
                     },
                     {
                       "type": "math",
@@ -2023,6 +4164,15 @@
                     {
                       "type": "math",
                       "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " so stredom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
                       "isDisplay": false
                     },
                     {
@@ -2081,7 +4231,325 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "r",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " polomer kružnice opísanej a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " Miquelov bod na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "QR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Podľa predošlej vety ležia "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na priamke a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "O",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na kružnici (ak je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " priemer, vezmeme kružnicu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BOMD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0všade ďalej píšeme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " namiesto "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "); bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží vnútri tetivy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda vnútri tejto kružnice, a\u00A0tak aj vnútri jej tetivy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Mocnosť bodu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " vzhľadom na ňu dáva "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|PO| \\cdot |PM| = |PA| \\cdot |PC| = r^2 - |OP|^2",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "|OP| \\cdot |OM| = |OP| \\cdot \\bigl(|OP| + |PM|\\bigr) = r^2.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je teda obrazom bodu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " v\u00A0inverzii vzhľadom na kružnicu opísanú."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "spiral-similarity/spiral-miquel-polar-proof.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Polára bodu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je preto priamka prechádzajúca bodom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " kolmá na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "OM",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "M",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "QR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "OM \\perp QR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže touto priamkou je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "QR",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Pre body "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Q",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "R",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je úvaha analogická, len tie ležia mimo kružnice opísanej, takže ich mocnosť je kladná a\u00A0obraz v\u00A0inverzii padne medzi stred a\u00A0daný bod."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             }
           ]
         }
@@ -2120,7 +4588,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " je štvoruholník so stranami "
+                      "text": " je konvexný štvoruholník so stranami "
                     },
                     {
                       "type": "math",
@@ -2181,7 +4649,7 @@
                 },
                 {
                   "type": "math",
-                  "text": "ef \\leq ac + bd,",
+                  "text": "ac + bd \\geq ef,",
                   "isDisplay": true
                 },
                 {
@@ -2216,7 +4684,352 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je obraz bodu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " v\u00A0špirálnej podobnosti so stredom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktorá zobrazuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ACD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú potom súhlasne podobné s\u00A0koeficientom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "a/e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BX| = ac/e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Špirálka chodí po dvoch, a\u00A0tak je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aj stredom špirálnej podobnosti zobrazujúcej "
+                    },
+                    {
+                      "type": "math",
+                      "text": "CB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ": trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ACB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ADX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú súhlasne podobné s\u00A0koeficientom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "d/e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|DX| = bd/e",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "spiral-similarity/spiral-ptolemy-proof.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Z\u00A0trojuholníkovej nerovnosti je"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "f = |BD| \\leq |BX| + |XD| = {ac + bd \\over e},",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "pričom rovnosť nastáva práve vtedy, keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na úsečke "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0podobností je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABX| = |\\angle ACD|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ADX| = |\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0pre konvexný "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " súhlasne orientované a\u00A0rovnako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ADX",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ADB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " tak leží na polpriamke "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " práve vtedy, keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ABD| = |\\angle ACD|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0na polpriamke "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " práve vtedy, keď "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle ADB| = |\\angle ACB|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Úsečka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je prienikom týchto dvoch polpriamok a\u00A0každá z\u00A0rovností je ekvivalentná s\u00A0tetivovosťou "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže rovnosť nastáva práve pre tetivový "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "theorem",
@@ -2301,7 +5114,400 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " päty kolmíc z\u00A0bodu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na priamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0počítajme s\u00A0orientovanými uhlami priamok modulo "
+                    },
+                    {
+                      "type": "math",
+                      "text": "180^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Z\u00A0tetivovosti "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABCD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\angle(BD, BX) = \\angle(BD, BA) = \\angle(CD, CA) = \\angle(CD, CY)",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0pri "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je pravý uhol, takže pravouhlé trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DXB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "DYC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú súhlasne podobné. Špirálna podobnosť "
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sigma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " so stredom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "D",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " zobrazujúca "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " preto zobrazuje "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". (Pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X = B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " priemer, vtedy aj "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y = C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0všetky tri päty ležia na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ".)"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "spiral-similarity/spiral-simson-proof.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nech "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je vzor bodu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "\\sigma",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Trojuholník "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DZP",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je súhlasne podobný s\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "DXB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle DZP| = 90^\\circ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " leží na kolmici na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DZ",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " v\u00A0bode "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čo je priamka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Body "
+                    },
+                    {
+                      "type": "math",
+                      "text": "B",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "P",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "C",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " teda ležia na priamke, a\u00A0tak na priamke ležia aj ich obrazy "
+                    },
+                    {
+                      "type": "math",
+                      "text": "X",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Z",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", "
+                    },
+                    {
+                      "type": "math",
+                      "text": "Y",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "theorem",
@@ -2413,7 +5619,34 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Potom priamka "
+                      "text": " (pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa dotýkajú v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0vtedy je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S = A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Potom priamka "
                     },
                     {
                       "type": "math",
@@ -2476,7 +5709,304 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Priamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "FB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "EC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa pretínajú v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0kružnice "
+                    },
+                    {
+                      "type": "math",
+                      "text": "AFE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa pretínajú znova v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže podľa vety o\u00A0strede špirálnej podobnosti je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " stredom špirálnej podobnosti zobrazujúcej "
+                    },
+                    {
+                      "type": "math",
+                      "text": "FB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "EC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jej uhol je orientovaný uhol od polpriamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "FB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " k\u00A0polpriamke "
+                    },
+                    {
+                      "type": "math",
+                      "text": "EC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže orientovaný uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BAC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0rovná sa orientovanému uhlu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BSC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "; bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " teda vidí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pod rovnakým orientovaným uhlom ako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0leží na oblúku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " obsahujúcom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SFB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "SEC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú podobné a\u00A0dotyčnice z\u00A0jedného bodu sú rovnako dlhé, "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|BF| = |BD|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "|CE| = |CD|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže"
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "math",
+                  "text": "{|SB| \\over |SC|} = {|FB| \\over |EC|} = {|DB| \\over |DC|}.",
+                  "isDisplay": true
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Podľa obrátenej vety o\u00A0osi uhla je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "SD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " osou uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BSC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0os obvodového uhla "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BSC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " prechádza stredom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " oblúka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " neobsahujúceho "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", teda neobsahujúceho "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             },
             {
               "type": "theorem",
@@ -2596,7 +6126,283 @@
                   "highligted": false
                 }
               ],
-              "proof": []
+              "proof": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Označme "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " druhý priesečník kružníc "
+                    },
+                    {
+                      "type": "math",
+                      "text": "ADE",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "ABC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " (pre "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|AB| = |AC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa dotýkajú v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ktoré je vtedy samo stredom oblúka "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BAC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "). Priamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "EC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sa pretínajú v\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže podľa vety o\u00A0strede špirálnej podobnosti je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " stredom špirálnej podobnosti zobrazujúcej "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " na "
+                    },
+                    {
+                      "type": "math",
+                      "text": "EC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Jej koeficient je "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|EC| : |DB| = 1",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", ide teda o\u00A0otočenie a\u00A0trojuholníky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "NDB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0"
+                    },
+                    {
+                      "type": "math",
+                      "text": "NEC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " sú zhodné. Špeciálne "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|NB| = |NC|",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je stredom jedného z\u00A0oblúkov "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "image",
+                      "id": "spiral-similarity/spiral-arc-midpoint-proof.svg",
+                      "scale": 1.0,
+                      "isInline": false
+                    }
+                  ],
+                  "highligted": false
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Uhol otočenia je orientovaný uhol od polpriamky "
+                    },
+                    {
+                      "type": "math",
+                      "text": "DB",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " k\u00A0polpriamke "
+                    },
+                    {
+                      "type": "math",
+                      "text": "EC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", čiže orientovaný uhol "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BAC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", a\u00A0rovná sa orientovanému uhlu "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BNC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ". Bod "
+                    },
+                    {
+                      "type": "math",
+                      "text": "N",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " teda vidí "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " pod rovnakým orientovaným uhlom ako "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " a\u00A0leží na oblúku "
+                    },
+                    {
+                      "type": "math",
+                      "text": "BC",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " obsahujúcom "
+                    },
+                    {
+                      "type": "math",
+                      "text": "A",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ],
+                  "highligted": false
+                }
+              ]
             }
           ]
         }
@@ -2830,7 +6636,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Špirálka chodí v\u00A0pároch, takže "
+                      "text": "Špirálka chodí po dvoch, takže "
                     },
                     {
                       "type": "math",
@@ -3405,7 +7211,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Špirálka chodí v\u00A0pároch, takže "
+                      "text": ". Špirálka chodí po dvoch, takže "
                     },
                     {
                       "type": "math",
@@ -3472,7 +7278,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0podľa vety o\u00A0pároch je "
+                      "text": ", a\u00A0keďže špirálka chodí po dvoch, je "
                     },
                     {
                       "type": "math",
@@ -3945,7 +7751,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Špirálka chodí v\u00A0pároch, takže "
+                      "text": ". Špirálka chodí po dvoch, takže "
                     },
                     {
                       "type": "math",
@@ -4063,7 +7869,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0podľa vety o\u00A0pároch je "
+                      "text": ", a\u00A0keďže špirálka chodí po dvoch, je "
                     },
                     {
                       "type": "math",
@@ -4698,7 +8504,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Špirálka chodí v\u00A0pároch, takže "
+                      "text": ". Špirálka chodí po dvoch, takže "
                     },
                     {
                       "type": "math",
@@ -5386,7 +9192,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0keďže špirálka chodí v\u00A0pároch, "
+                      "text": ", a\u00A0keďže špirálka chodí po dvoch, "
                     },
                     {
                       "type": "math",
@@ -6397,7 +10203,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Špirálna podobnosť chodí v\u00A0pároch, takže "
+                      "text": "Špirálna podobnosť chodí po dvoch, takže "
                     },
                     {
                       "type": "math",
@@ -6433,20 +10239,29 @@
                     },
                     {
                       "type": "text",
-                      "text": ". V\u00A0trojuholníku "
+                      "text": ". Bod "
                     },
                     {
                       "type": "math",
-                      "text": "BI_1D",
+                      "text": "I_1",
                       "isDisplay": false
                     },
                     {
                       "type": "text",
-                      "text": " je "
+                      "text": " je stred kružnice vpísanej trojuholníku "
                     },
                     {
                       "type": "math",
-                      "text": "|\\angle BI_1D| = 180^\\circ - \\alpha/2 - \\beta/2 = 90^\\circ + \\gamma/2",
+                      "text": "BFD",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": ", takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "|\\angle BI_1D| = 90^\\circ + |\\angle BFD|/2 = 90^\\circ + \\gamma/2",
                       "isDisplay": false
                     },
                     {
@@ -6565,16 +10380,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Body "
-                    },
-                    {
-                      "type": "math",
-                      "text": "I_1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " a\u00A0"
+                      "text": ". Bod "
                     },
                     {
                       "type": "math",
@@ -6583,79 +10389,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " ležia na osiach uhlov "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ABC",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " a\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "ACB",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", a\u00A0keďže "
-                    },
-                    {
-                      "type": "math",
-                      "text": "DEC \\sim ABC",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " so spoločným vrcholom "
-                    },
-                    {
-                      "type": "math",
-                      "text": "C",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " a\u00A0koeficientom "
-                    },
-                    {
-                      "type": "math",
-                      "text": "|CD| : |CA| < 1",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", je "
-                    },
-                    {
-                      "type": "math",
-                      "text": "I_2",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " bližšie k\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "C",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " než priesečník "
-                    },
-                    {
-                      "type": "math",
-                      "text": "I",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " týchto osí, teda vo vnútri uhla "
+                      "text": " leží vo vnútri uhla "
                     },
                     {
                       "type": "math",
@@ -6664,7 +10398,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Body "
+                      "text": ", takže "
                     },
                     {
                       "type": "math",
@@ -6682,7 +10416,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " preto ležia v\u00A0opačných polrovinách určených priamkou "
+                      "text": " sú v\u00A0opačných polrovinách určených priamkou "
                     },
                     {
                       "type": "math",
@@ -6691,7 +10425,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0zo súčtu "
+                      "text": ", a\u00A0zo súčtu "
                     },
                     {
                       "type": "math",
@@ -7177,7 +10911,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "v\u00A0pároch"
+                          "text": "po dvoch"
                         }
                       ]
                     },
@@ -7571,20 +11305,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0podľa "
-                    },
-                    {
-                      "type": "quote",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "párov"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "text": " je "
+                      "text": " a\u00A0keďže špirálka chodí po dvoch, je "
                     },
                     {
                       "type": "math",
@@ -8297,7 +12018,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Špirálka chodí v\u00A0pároch, a\u00A0tak je "
+                      "text": "Špirálka chodí po dvoch, a\u00A0tak je "
                     },
                     {
                       "type": "math",
@@ -8927,7 +12648,7 @@
                       },
                       {
                         "type": "text",
-                        "text": " pohybuje ako tvrdí zadanie."
+                        "text": " pohybuje, ako tvrdí zadanie."
                       }
                     ],
                     "highligted": false
@@ -9067,7 +12788,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "v\u00A0pároch"
+                          "text": "po dvoch"
                         }
                       ]
                     },
@@ -10248,7 +13969,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", takže podľa vety o\u00A0špirálke chodiacej v\u00A0pároch je "
+                      "text": ", a\u00A0keďže špirálka chodí po dvoch, je "
                     },
                     {
                       "type": "math",
@@ -11019,38 +14740,11 @@
                     },
                     {
                       "type": "text",
-                      "text": " na kružniciach "
-                    },
-                    {
-                      "type": "math",
-                      "text": "ABS",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "CDS",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
+                      "text": " na kružnici "
                     },
                     {
                       "type": "math",
                       "text": "ACF",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "BDF",
                       "isDisplay": false
                     },
                     {
@@ -11751,7 +15445,7 @@
                       },
                       {
                         "type": "text",
-                        "text": " sú na kružnici už pôjde, napr. cez rovnoramenné trojuholníky "
+                        "text": " sú na kružnici, už pôjde, napr. cez rovnoramenné trojuholníky "
                       },
                       {
                         "type": "math",
@@ -13244,7 +16938,7 @@
                       },
                       {
                         "type": "math",
-                        "text": "|\\angle EPO| = 90^\\circ - \\beta",
+                        "text": "|\\angle EPO| = 90^\\circ - |\\angle ABC|",
                         "isDisplay": false
                       },
                       {
@@ -13533,20 +17227,11 @@
                     },
                     {
                       "type": "text",
-                      "text": ", "
-                    },
-                    {
-                      "type": "math",
-                      "text": "RBE",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
                       "text": " a\u00A0"
                     },
                     {
                       "type": "math",
-                      "text": "RCF",
+                      "text": "RBE",
                       "isDisplay": false
                     },
                     {
@@ -13578,7 +17263,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Štvoruholníky "
+                      "text": ". Štvoruholník "
                     },
                     {
                       "type": "math",
@@ -13587,16 +17272,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " a\u00A0"
-                    },
-                    {
-                      "type": "math",
-                      "text": "RCFP",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " sú teda tetivové a\u00A0"
+                      "text": " je teda tetivový a\u00A0"
                     },
                     {
                       "type": "math",
@@ -13683,33 +17359,6 @@
                     {
                       "type": "math",
                       "text": "MB",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": ", a\u00A0keďže špirálna podobnosť chodí v\u00A0pároch, je "
-                    },
-                    {
-                      "type": "math",
-                      "text": "P",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " aj stredom špirálnej podobnosti zobrazujúcej "
-                    },
-                    {
-                      "type": "math",
-                      "text": "DM",
-                      "isDisplay": false
-                    },
-                    {
-                      "type": "text",
-                      "text": " na "
-                    },
-                    {
-                      "type": "math",
-                      "text": "EB",
                       "isDisplay": false
                     },
                     {
@@ -14781,7 +18430,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Špirálka chodí v\u00A0pároch, takže "
+                      "text": "Špirálka chodí po dvoch, takže "
                     },
                     {
                       "type": "math",
@@ -15037,7 +18686,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " podľa vety o\u00A0pároch stredom špirálnej podobnosti "
+                      "text": " stredom špirálnej podobnosti "
                     },
                     {
                       "type": "math",
@@ -15046,7 +18695,7 @@
                     },
                     {
                       "type": "text",
-                      "text": " zobrazujúcej "
+                      "text": " (špirálka chodí po dvoch) zobrazujúcej "
                     },
                     {
                       "type": "math",
@@ -15227,7 +18876,16 @@
                     },
                     {
                       "type": "text",
-                      "text": " má párovú špirálku zobrazujúcu "
+                      "text": " chodí po dvoch, takže "
+                    },
+                    {
+                      "type": "math",
+                      "text": "S'",
+                      "isDisplay": false
+                    },
+                    {
+                      "type": "text",
+                      "text": " je aj stredom špirálnej podobnosti zobrazujúcej "
                     },
                     {
                       "type": "math",
@@ -16049,7 +19707,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ". Špirálka chodí v\u00A0pároch, takže "
+                      "text": ". Špirálka chodí po dvoch, takže "
                     },
                     {
                       "type": "math",
@@ -16651,7 +20309,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "Predefinovanie, ktoré funguje, je že v\u00A0polrovine "
+                        "text": "Predefinovanie, ktoré funguje, je, že v\u00A0polrovine "
                       },
                       {
                         "type": "math",
@@ -17268,7 +20926,7 @@
                     },
                     {
                       "type": "text",
-                      "text": ", a\u00A0keďže špirálna podobnosť chodí v\u00A0pároch, je "
+                      "text": ", a\u00A0keďže špirálna podobnosť chodí po dvoch, je "
                     },
                     {
                       "type": "math",
@@ -17395,29 +21053,29 @@
     {
       "contentId": "spiral-similarity/spiral-definition.svg",
       "originalId": "spiral-definition.pdf",
-      "width": "137.398045pt",
-      "height": "127.601716pt",
+      "width": "169.885976pt",
+      "height": "140.594735pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-definition-homothety.svg",
       "originalId": "spiral-definition-homothety.pdf",
-      "width": "141.750703pt",
-      "height": "115.808712pt",
+      "width": "136.713336pt",
+      "height": "132.433753pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-definition-homothety-negative.svg",
       "originalId": "spiral-definition-homothety-negative.pdf",
-      "width": "158.228947pt",
-      "height": "93.576367pt",
+      "width": "153.140151pt",
+      "height": "105.891211pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-definition-rotation.svg",
       "originalId": "spiral-definition-rotation.pdf",
-      "width": "127.243896pt",
-      "height": "119.176079pt",
+      "width": "139.675317pt",
+      "height": "107.724239pt",
       "scale": 1.0
     },
     {
@@ -17437,56 +21095,70 @@
     {
       "contentId": "spiral-similarity/spiral-center.svg",
       "originalId": "spiral-center.pdf",
-      "width": "189.949656pt",
+      "width": "188.540726pt",
+      "height": "161.134045pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "spiral-similarity/spiral-center-proof.svg",
+      "originalId": "spiral-center-proof.pdf",
+      "width": "191.230639pt",
       "height": "161.134045pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-center-corollary.svg",
       "originalId": "spiral-center-corollary.pdf",
-      "width": "190.172102pt",
-      "height": "161.663435pt",
+      "width": "187.80719pt",
+      "height": "160.254505pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-center-degenerate.svg",
       "originalId": "spiral-center-degenerate.pdf",
-      "width": "136.658378pt",
-      "height": "177.400874pt",
+      "width": "133.242759pt",
+      "height": "179.493029pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-center-tangent.svg",
       "originalId": "spiral-center-tangent.pdf",
-      "width": "184.164893pt",
-      "height": "165.03377pt",
+      "width": "159.106442pt",
+      "height": "144.101307pt",
       "scale": 1.0
     },
     {
-      "contentId": "spiral-similarity/spiral-miquel-triangle.svg",
-      "originalId": "spiral-miquel-triangle.pdf",
-      "width": "188.845934pt",
-      "height": "168.328508pt",
+      "contentId": "spiral-similarity/spiral-center-tangent-internal.svg",
+      "originalId": "spiral-center-tangent-internal.pdf",
+      "width": "131.062413pt",
+      "height": "127.334269pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-miquel-point.svg",
       "originalId": "spiral-miquel-point.pdf",
-      "width": "201.888485pt",
-      "height": "179.469698pt",
+      "width": "202.150162pt",
+      "height": "179.693483pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-miquel-on-qr.svg",
       "originalId": "spiral-miquel-on-qr.pdf",
-      "width": "181.249083pt",
-      "height": "184.110393pt",
+      "width": "172.324863pt",
+      "height": "183.114129pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "spiral-similarity/spiral-miquel-on-qr-proof.svg",
+      "originalId": "spiral-miquel-on-qr-proof.pdf",
+      "width": "172.324863pt",
+      "height": "183.114129pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-miquel-others-pq.svg",
       "originalId": "spiral-miquel-others-pq.pdf",
-      "width": "181.991673pt",
+      "width": "181.566542pt",
       "height": "182.960895pt",
       "scale": 1.0
     },
@@ -17500,197 +21172,239 @@
     {
       "contentId": "spiral-similarity/spiral-miquel-om-perpendicular.svg",
       "originalId": "spiral-miquel-om-perpendicular.pdf",
-      "width": "198.164839pt",
-      "height": "145.729957pt",
+      "width": "204.816505pt",
+      "height": "144.733693pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "spiral-similarity/spiral-miquel-om-perpendicular-proof.svg",
+      "originalId": "spiral-miquel-om-perpendicular-proof.pdf",
+      "width": "204.816505pt",
+      "height": "144.733693pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-miquel-opm-line.svg",
       "originalId": "spiral-miquel-opm-line.pdf",
-      "width": "198.164839pt",
-      "height": "145.729957pt",
+      "width": "204.816505pt",
+      "height": "144.733693pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "spiral-similarity/spiral-miquel-opm-line-proof.svg",
+      "originalId": "spiral-miquel-opm-line-proof.pdf",
+      "width": "209.753095pt",
+      "height": "144.733693pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-miquel-orthocenter.svg",
       "originalId": "spiral-miquel-orthocenter.pdf",
-      "width": "198.164839pt",
-      "height": "145.729957pt",
+      "width": "204.816505pt",
+      "height": "144.733693pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-miquel-polar.svg",
       "originalId": "spiral-miquel-polar.pdf",
-      "width": "198.164839pt",
-      "height": "145.729957pt",
+      "width": "204.816505pt",
+      "height": "144.733693pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "spiral-similarity/spiral-miquel-polar-proof.svg",
+      "originalId": "spiral-miquel-polar-proof.pdf",
+      "width": "209.753095pt",
+      "height": "144.733693pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-ptolemy.svg",
       "originalId": "spiral-ptolemy.pdf",
-      "width": "187.18331pt",
-      "height": "129.58311pt",
+      "width": "161.202311pt",
+      "height": "111.97073pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "spiral-similarity/spiral-ptolemy-proof.svg",
+      "originalId": "spiral-ptolemy-proof.pdf",
+      "width": "184.365449pt",
+      "height": "126.76525pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-simson.svg",
       "originalId": "spiral-simson.pdf",
-      "width": "184.539209pt",
+      "width": "180.312418pt",
+      "height": "174.493736pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "spiral-similarity/spiral-simson-proof.svg",
+      "originalId": "spiral-simson-proof.pdf",
+      "width": "180.312418pt",
       "height": "174.493736pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-sharky-devil.svg",
       "originalId": "spiral-sharky-devil.pdf",
-      "width": "161.437673pt",
-      "height": "179.358172pt",
+      "width": "160.028743pt",
+      "height": "177.949242pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-arc-midpoint.svg",
       "originalId": "spiral-arc-midpoint.pdf",
-      "width": "149.606589pt",
+      "width": "146.788729pt",
+      "height": "163.415398pt",
+      "scale": 1.0
+    },
+    {
+      "contentId": "spiral-similarity/spiral-arc-midpoint-proof.svg",
+      "originalId": "spiral-arc-midpoint-proof.pdf",
+      "width": "146.788729pt",
       "height": "161.522495pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-similar-right-triangles.svg",
       "originalId": "spiral-similar-right-triangles.pdf",
-      "width": "201.245858pt",
-      "height": "160.159519pt",
+      "width": "155.021068pt",
+      "height": "122.88964pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-centroid-isosceles.svg",
       "originalId": "spiral-centroid-isosceles.pdf",
-      "width": "204.900788pt",
+      "width": "202.082928pt",
       "height": "173.276208pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-altitude-two-circles.svg",
       "originalId": "spiral-altitude-two-circles.pdf",
-      "width": "200.71168pt",
-      "height": "139.151154pt",
+      "width": "206.691138pt",
+      "height": "151.194915pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-two-rectangles.svg",
       "originalId": "spiral-two-rectangles.pdf",
-      "width": "202.031654pt",
-      "height": "117.385158pt",
+      "width": "199.213794pt",
+      "height": "115.976228pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-pentagon-parallelogram.svg",
       "originalId": "spiral-pentagon-parallelogram.pdf",
-      "width": "187.784727pt",
-      "height": "165.682319pt",
+      "width": "163.566931pt",
+      "height": "144.178673pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-two-incenters.svg",
       "originalId": "spiral-two-incenters.pdf",
-      "width": "207.88958pt",
-      "height": "220.335451pt",
+      "width": "205.07172pt",
+      "height": "180.038726pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-quadrilateral-feet.svg",
       "originalId": "spiral-quadrilateral-feet.pdf",
-      "width": "173.634951pt",
-      "height": "182.241603pt",
+      "width": "180.924303pt",
+      "height": "163.715094pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-quadrilateral-feet-right-angle.svg",
       "originalId": "spiral-quadrilateral-feet-right-angle.pdf",
-      "width": "132.570471pt",
-      "height": "159.091384pt",
+      "width": "154.053305pt",
+      "height": "137.893935pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-napoleon.svg",
       "originalId": "spiral-napoleon.pdf",
-      "width": "177.234513pt",
+      "width": "174.943106pt",
       "height": "181.963689pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-two-circles-circumcenters.svg",
       "originalId": "spiral-two-circles-circumcenters.pdf",
-      "width": "252.064691pt",
-      "height": "193.179699pt",
+      "width": "199.544721pt",
+      "height": "147.392293pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-moving-ef-pqr.svg",
       "originalId": "spiral-moving-ef-pqr.pdf",
-      "width": "200.746003pt",
-      "height": "165.585959pt",
+      "width": "197.928143pt",
+      "height": "164.177029pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-cyclic-parallelogram.svg",
       "originalId": "spiral-cyclic-parallelogram.pdf",
-      "width": "183.990727pt",
-      "height": "178.648829pt",
+      "width": "182.174071pt",
+      "height": "177.239899pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-tangents-b-c.svg",
       "originalId": "spiral-tangents-b-c.pdf",
-      "width": "205.454143pt",
+      "width": "204.045213pt",
       "height": "160.256782pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-tangents-b-c-miquel.svg",
       "originalId": "spiral-tangents-b-c-miquel.pdf",
-      "width": "205.454143pt",
-      "height": "173.98135pt",
+      "width": "204.045213pt",
+      "height": "175.598134pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-tangent-mef.svg",
       "originalId": "spiral-tangent-mef.pdf",
-      "width": "205.390698pt",
+      "width": "216.389228pt",
       "height": "180.183335pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-isosceles-on-sides.svg",
       "originalId": "spiral-isosceles-on-sides.pdf",
-      "width": "176.775602pt",
-      "height": "181.470923pt",
+      "width": "175.366672pt",
+      "height": "180.061993pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-isosceles-on-sides-rhombus.svg",
       "originalId": "spiral-isosceles-on-sides-rhombus.pdf",
-      "width": "176.775602pt",
-      "height": "181.470923pt",
+      "width": "175.366672pt",
+      "height": "180.061993pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-points-on-sides.svg",
       "originalId": "spiral-points-on-sides.pdf",
-      "width": "173.402556pt",
-      "height": "164.387526pt",
+      "width": "180.597941pt",
+      "height": "172.297095pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-points-on-sides-angles.svg",
       "originalId": "spiral-points-on-sides-angles.pdf",
-      "width": "179.182653pt",
-      "height": "181.017541pt",
+      "width": "179.077995pt",
+      "height": "192.65036pt",
       "scale": 1.0
     },
     {
       "contentId": "spiral-similarity/spiral-interior-point-x.svg",
       "originalId": "spiral-interior-point-x.pdf",
-      "width": "181.981026pt",
-      "height": "152.054454pt",
+      "width": "179.163165pt",
+      "height": "149.236593pt",
       "scale": 1.0
     }
   ]

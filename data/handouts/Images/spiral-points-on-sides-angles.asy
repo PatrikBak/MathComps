@@ -24,6 +24,10 @@ Draw(A3, B3, Red);
 Draw(B3, C3, Red);
 Draw(C3, A3, Red);
 
+Circle(O2, r2, LightBlue);
+Circle(O3, r3, LightBlue);
+Circle(O4, r4, LightBlue);
+
 BaseEdges();
 Draw(C, B2, vertexPen);
 Draw(B, C2, vertexPen);
@@ -31,9 +35,12 @@ Draw(A, B2, vertexPen);
 Draw(A, C2, vertexPen);
 
 BaseDots();
-LabeledDot(A2, "A_2", E);
-LabeledDot(B2, "B_2", W);
-LabeledDot(C2, "C_2", S);
-LabeledDot(A3, "A_3", S);
-LabeledDot(B3, "B_3", NE);
-LabeledDot(C3, "C_3", W);
+LabeledDot(A1, "A_1", NW, 4, offset = (5.3, -1.2));
+LabeledDot(B1, "B_1", NE, 5, offset = (0, -11.8));
+LabeledDot(C1, "C_1", E, distanceOffset = 5, offset = (-27.1, 4.1), halo = true, haloPad = 0.8);
+LabeledDot(A2, "A_2", NE, 3, offset = (-1.1, -3.9));
+LabeledDot(B2, "B_2", NW, 3, offset = (2, -1.4));
+LabeledDot(C2, "C_2", SW, 4, offset = (5.3, 2.6));
+LabeledDot(A3, "A_3", S, offset = (2.7, 1.4));
+LabeledDot(B3, "B_3", NE, 3, offset = (-3.4, -3.1));
+LabeledDot(C3, "C_3", dir(190), 10, offset = (13, 12.8), halo = true, haloPad = 0.9);

@@ -37,6 +37,10 @@ RightAngleMark(T, E, D, radius = Radius1);
 
 Draw(B, C, Green);
 Draw(K, L, Red);
+EqualMark(K, B);
+EqualMark(K, T);
+EqualMark(L, C, 2);
+EqualMark(L, T, 2);
 
 Draw(A, B);
 Draw(A, C);
@@ -51,10 +55,10 @@ Draw(B, K);
 Draw(C, L);
 
 LabeledDot(A, "A", N);
-LabeledDot(B, "B", SW);
-LabeledDot(C, "C", SE);
+LabeledDot(B, "B", SW, 1);
+LabeledDot(C, "C", SE, 1);
 LabeledDot(D, "D", S);
-LabeledDot(T, "T", NW);
+LabeledDot(T, "T", NW, 1, offset = (-2.2, -0.8));
 LabeledDot(K, "K", S);
-LabeledDot(L, "L", NE);
-LabeledDot(E, "E", SE);
+LabeledDot(L, "L", NE, 1);
+LabeledDot(E, "E", SE, 1);

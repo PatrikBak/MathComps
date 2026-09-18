@@ -10,10 +10,10 @@ pair Opcb = Circumcenter(P, C, B);
 // (RDB) too, and, because ABCD is cyclic, on line PR.
 pair M2 = ReflectAcross(P, Opad, Opcb);
 
-CircleThrough(P, A, D, LightBlue);
-CircleThrough(P, C, B, LightBlue);
-CircleThrough(R, A, C, LightBlue);
-CircleThrough(R, D, B, LightBlue);
+CircleThrough(P, A, D, LightOrange);
+CircleThrough(P, C, B, LightOrange);
+CircleThrough(R, A, C, LightPurple);
+CircleThrough(R, D, B, LightPurple);
 
 BaseEdgesThroughR();
 Draw(A, C);
@@ -21,6 +21,8 @@ Draw(B, D);
 Draw(R, ExtendPast(R, M2, pastM2));
 
 BaseDots();
-LabeledDot(P, "P", (-0.5, 0.2), 3);
-LabeledDot(M2, "M_2", (-0.99, 0.14), 3, halo = true);
-LabeledDot(R, "R", (0.44, 0.9), 3);
+LabeledDot(A, "A", SW, 1);
+LabeledDot(B, "B", S, 1, offset = (0.5, -1.4));
+LabeledDot(P, "P", NW, 1, (0, -4.7));
+LabeledDot(M2, "M_2", W, 3, halo = true, offset = (0, 1.5));
+LabeledDot(R, "R", NE, 1, (-2.5, 2.3));

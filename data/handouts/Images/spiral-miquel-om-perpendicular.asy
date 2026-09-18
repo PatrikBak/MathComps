@@ -8,6 +8,5 @@ Draw(Q, R);
 Draw(O, M);
 
 BaseDots();
-LabeledDot(C, "C", (0.74, 0.67), 2);
-LabeledDot(O, "O", W);
-LabeledDot(M, "M", NE);
+LabelO();
+LabeledDot(M, "M", NE, 1);

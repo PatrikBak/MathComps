@@ -24,6 +24,5 @@ Draw(R, footQ);
 Draw(Q, footR);
 
 BaseDots();
-LabeledDot(C, "C", (0.74, 0.67), 2);
-LabeledDot(P, "P", E, 3, (0,-1), halo = true, haloPad=0.8);
-LabeledDot(O, "O", SW, 0, halo = true);
+LabelP();
+LabelO();

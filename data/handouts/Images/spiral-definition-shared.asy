@@ -5,8 +5,8 @@ import _common;
 // it, so the images under the series' transformations land on distinct sides.
 real distOA = 66;
 real distOB = 90;
-real angleOA = -25;
-real angleOB = 20;
+real angleOA = -30;
+real angleOB = 25;
 
 pair O = (0, 0);
 pair A = Polar(O, angleOA, distOA);

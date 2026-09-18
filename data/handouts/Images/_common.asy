@@ -23,7 +23,7 @@ real ThickWidth = 1.5;
 defaultpen(fontsize(13pt) + linewidth(NormalWidth));
 
 //
-// Palette: 5 hue families × Light/Normal/Dark. Pick the closest hue and shade.
+// Palette: 7 hue families × Light/Normal/Dark. Pick the closest hue and shade.
 // AngleMark / RightAngleMark fills want a `Light*` pen so the sector reads softly.
 //
 pen LightBlue = rgb(0.5, 0.5, 1);
@@ -49,6 +49,10 @@ pen DarkPink = rgb(0.75, 0.25, 0.5);
 pen LightYellow = rgb(1, 1, 0.5);
 pen Yellow = rgb(0.5, 0.5, 0);
 pen DarkYellow = rgb(0.25, 0.25, 0);
+
+pen LightOrange = rgb(1, 0.65, 0.25);
+pen Orange = rgb(0.9, 0.45, 0);
+pen DarkOrange = rgb(0.5, 0.25, 0);
 
 //
 // Diagonal-hatch fill pattern. Use as `fill(path, HatchedFill)` to shade a
@@ -123,7 +127,7 @@ real pointLabelDistance = 3;
 // the white ellipse relative to the text's bbox (1.0 ≈ inscribed in bbox,
 // ~1.3 clears the letter's corners cleanly, ~sqrt(2) ≈ circumscribed).
 //
-real pointLabelHaloPad = 1.1;
+real pointLabelHaloPad = 1;
 
 //
 // Default shift along alignDir for edge labels
@@ -149,6 +153,16 @@ real parallelMarkSpacing = 3;
 // Rotation angle of each tick relative to the segment direction.
 //
 real parallelMarkAngle = 80;
+
+//
+// Length of each tick in an equal-segments mark.
+//
+real equalMarkLength = 6;
+
+//
+// Distance between adjacent ticks in an equal-segments mark.
+//
+real equalMarkSpacing = 3;
 
 //
 // Arrowhead size for Arc's optional direction indicator.
@@ -449,9 +463,11 @@ pair[] CommonInternalTangent(
 // Fills the angle sector ∠XYZ with vertex Y, sweeping CCW from ray YX to ray YZ.
 // Pass a `Light*` pen for `color` so the filled sector reads softly. When `lab`
 // is non-empty, "$lab$" is placed on the angular bisector at distance
-// labelFraction * radius + labelOffset from Y.
+// labelFraction * radius + labelOffset from Y, then shifted by the absolute
+// `offset` vector. `halo` / `haloPad` paint a white ellipse behind that label,
+// the same as PointLabel's.
 //
-// Used global variables: Radius3, angleMarkLabelFraction
+// Used global variables: Radius3, angleMarkLabelFraction, pointLabelHaloPad
 //
 void AngleMark(
     pair X,
@@ -462,7 +478,10 @@ void AngleMark(
     real radius = Radius3,
     real labelFraction = angleMarkLabelFraction,
     real labelOffset = 0,
-    pen labelPen = black)
+    pen labelPen = black,
+    bool halo = false,
+    real haloPad = pointLabelHaloPad,
+    pair offset = (0, 0))
 {
     // Compute start/end angles (CCW from +x)
     real d1 = degrees(X - Y);
@@ -478,7 +497,23 @@ void AngleMark(
     if (lab != "") {
         real mid = (d1 + d2) / 2;
         real labelR = radius * labelFraction + labelOffset;
-        label("$" + lab + "$", Y + labelR * dir(mid), labelPen);
+        pair labelPos = Y + labelR * dir(mid) + offset;
+        if (halo) {
+            picture lpic;
+            label(lpic, "$" + lab + "$", (0, 0), labelPen);
+            frame lframe = lpic.fit();
+            pair fmin = min(lframe);
+            pair fmax = max(lframe);
+            pair haloCenter = (fmin + fmax) / 2;
+            pair haloAxes = (fmax - fmin) / 2 * haloPad;
+
+            frame composite;
+            fill(composite, shift(haloCenter) * scale(haloAxes.x, haloAxes.y) * unitcircle, white);
+            add(composite, lframe);
+            add(currentpicture, composite, labelPos);
+        } else {
+            label("$" + lab + "$", labelPos, labelPen);
+        }
     }
 }
 
@@ -679,7 +714,7 @@ void VertexDots(
 // ellipse relative to the text's bounding box (1.0 ≈ inscribed in bbox, ~1.3
 // clears the letter's corners cleanly, ~sqrt(2) ≈ circumscribed).
 //
-// Used global variables: pointLabelDistance
+// Used global variables: pointLabelDistance, pointLabelHaloPad
 //
 void PointLabel(
     pair P,
@@ -724,11 +759,10 @@ void PointLabel(
 }
 
 //
-// Draws a vertex dot at P plus its "$name$" label, both in the same colour.
-// Replaces the VertexDot + PointLabel pair that appears for every named point.
-// `halo` / `haloPad` forward to PointLabel; see its docstring.
+// Draws a vertex dot at P plus its "$name$" label, both in `color`. Every
+// placement parameter forwards straight to PointLabel, which documents them.
 //
-// Used global variables: pointLabelDistance
+// Used global variables: pointLabelDistance, pointLabelHaloPad
 //
 void LabeledDot(
     pair P,
@@ -783,8 +817,9 @@ void RightAngleMark(
 // Places "$name$" near the midpoint of segment AB. `alignDir` (compass: N, S,
 // E, W, …) both nudges the position `distanceOffset` units off the segment AND
 // aligns the label box on that side, so it reads cleanly. `placement` shifts
-// away from the midpoint as a parametric position in 0..1. `fontScale` picks a
-// font tier (Font1..Font5); default matches the 13pt set by defaultpen.
+// away from the midpoint as a parametric position in 0..1, `offset` by an
+// absolute vector. `fontScale` picks a font tier (Font1..Font5); default
+// matches the 13pt set by defaultpen.
 //
 // Used global variables: edgeLabelDistance
 //
@@ -796,16 +831,42 @@ void EdgeLabel(
     real distanceOffset = edgeLabelDistance,
     real placement = 0.5,
     pen color = black,
-    pen fontScale = Font3)
+    pen fontScale = Font3,
+    pair offset = (0, 0))
 {
     // Start from the parametric position along AB
-    pair pos = A + placement * (B - A);
+    pair pos = A + placement * (B - A) + offset;
 
     // Push perpendicular off the segment if a compass direction was given
     if (alignDir != (0, 0)) pos += distanceOffset * unit(alignDir);
 
     // Render the LaTeX-wrapped name there
     label("$" + name + "$", pos, alignDir, color + fontScale);
+}
+
+//
+// Draws `count` short ticks across segment AB, perpendicular to it and centred
+// at parametric position `placement`, the usual mark for equal segments.
+//
+// Used global variables: equalMarkLength, equalMarkSpacing
+//
+void EqualMark(
+    pair A,
+    pair B,
+    int count = 1,
+    real placement = 0.5,
+    pen color = edgePen)
+{
+    pair u = unit(B - A);
+    pair mid = A + placement * (B - A);
+    pair tickDir = rotate(90) * u;
+    real half = equalMarkLength / 2;
+    real start = -(count - 1) / 2.0;
+
+    for (int i = 0; i < count; ++i) {
+        pair c = mid + (start + i) * equalMarkSpacing * u;
+        draw((c - half * tickDir) -- (c + half * tickDir), color);
+    }
 }
 
 //

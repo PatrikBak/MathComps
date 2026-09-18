@@ -10,7 +10,6 @@ Draw(A, C);
 Draw(B, D);
 
 BaseDots();
-LabeledDot(C, "C", (0.74, 0.67), 2);
-LabeledDot(O, "O", (-0.87, -0.16), 2);
-LabeledDot(P, "P", S, 2);
-LabeledDot(M, "M", NE);
+LabelO();
+LabelP();
+LabeledDot(M, "M", NE, 1);

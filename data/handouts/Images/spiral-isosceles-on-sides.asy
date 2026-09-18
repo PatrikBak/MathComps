@@ -19,9 +19,16 @@ Draw(Q, D);
 Draw(T, D);
 Draw(T, A);
 
-BaseDots();
-LabeledDot(S, "S", SW, (9,-2));
-LabeledDot(Sprime, "S'", E, (-1,1));
+Draw(S, A, vertexPen);
+Draw(S, B, vertexPen);
+Draw(S, C, vertexPen);
+Draw(S, D, vertexPen);
 
-ParallelMark(A, C, count = 1, placement = 0.85);
-ParallelMark(B, D, count = 1, placement = 0.85);
+BaseDots();
+LabeledDot(S, "S", SW, 1, (11.6, -2));
+LabeledDot(Sprime, "S'", E, (-1,1));
+LabeledDot(X, "X", NE, 1);
+LabeledDot(Y, "Y", NE, distanceOffset = 1);
+
+EqualMark(A, C, placement = 0.85);
+EqualMark(B, D, placement = 0.85);
