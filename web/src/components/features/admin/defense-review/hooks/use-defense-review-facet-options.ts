@@ -10,13 +10,29 @@ import {
   toPromptVersionFacetOptions,
   toUserFacetOptions,
 } from '../model/defense-review-facet-options'
-import type { DefenseReviewFilterOptions } from '../model/defense-review-types'
+import {
+  type DefenseReviewFilterOptions,
+  EXAMINER_FLAWS,
+  type ExaminerFlaw,
+} from '../model/defense-review-types'
 
 /**
  * How many days each of the period options covers. A day and a year are the ends a reader actually asks for;
  * everything between them is there so no filter has to be approximated by the option next to it.
  */
 const PERIOD_DAYS = [1, 7, 14, 30, 90, 365]
+
+/**
+ * The message key naming each flaw: the label of the verdict it is caught under.
+ */
+const FLAW_LABEL_KEYS = {
+  wrongClaim: 'attempts.verdicts.math',
+  leak: 'attempts.verdicts.leak',
+  withheldClose: 'attempts.verdicts.close',
+  languageSwitch: 'attempts.verdicts.language',
+  genderedAddress: 'attempts.verdicts.address',
+  route: 'attempts.verdicts.route',
+} as const satisfies Record<ExaminerFlaw, string>
 
 /**
  * How a problem's options are sectioned, one section per handout.
@@ -42,6 +58,8 @@ type UseDefenseReviewFacetOptionsResult = {
   promptVersionOptions: FacetOption[]
   /** What the student left behind. */
   signalOptions: FacetOption[]
+  /** The flaws a guard can have caught. */
+  flawOptions: FacetOption[]
   /** How long ago a conversation may have last moved. */
   periodOptions: FacetOption[]
 }
@@ -133,6 +151,12 @@ export function useDefenseReviewFacetOptions(
     [t]
   )
 
+  // The flaws a guard can have caught, in display order
+  const flawOptions = useMemo(
+    () => EXAMINER_FLAWS.map((flaw) => ({ id: flaw, displayName: t(FLAW_LABEL_KEYS[flaw]) })),
+    [t]
+  )
+
   // How long ago a conversation may have last moved
   const periodOptions = useMemo(
     () =>
@@ -150,6 +174,7 @@ export function useDefenseReviewFacetOptions(
     problemGrouping,
     promptVersionOptions,
     signalOptions,
+    flawOptions,
     periodOptions,
   }
 }

@@ -34,6 +34,7 @@ const FULLY_NARROWED: FullyNarrowedQueue = {
     environmentId: 'problem-1',
     withinDays: 30,
     promptVersion: 'abc123',
+    caughtFlaws: ['wrongClaim', 'route'],
   },
   openId: 'session-1',
 }
@@ -163,6 +164,11 @@ describe('fromDefenseReviewQuery', () => {
   it('ignores a period reaching further back than any queue does', () => {
     // Past the cap, which is somebody's typing rather than a period
     expect(read('withinDays=99999999999').filter.withinDays).toBeUndefined()
+  })
+
+  it('drops a flaw it does not know and keeps the ones it does', () => {
+    // The wire refuses a whole request over one unknown flaw, so only the real one reaches it
+    expect(read('caughtFlaws=typo&caughtFlaws=leak').filter.caughtFlaws).toEqual(['leak'])
   })
 
   it('drops a problem named without its handout', () => {

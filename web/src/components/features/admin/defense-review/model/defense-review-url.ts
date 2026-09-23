@@ -1,3 +1,4 @@
+import { toCaughtFlaws } from './defense-review-filters'
 import type { DefenseReviewFilter } from './defense-review-types'
 
 /**
@@ -108,6 +109,9 @@ export function toDefenseReviewQuery(state: DefenseReviewUrlState): string {
     params.set('withinDays', String(state.filter.withinDays))
   }
 
+  // The flaws a guard must have caught, one parameter per flaw
+  state.filter.caughtFlaws?.forEach((flaw) => params.append('caughtFlaws', flaw))
+
   // And which one is open, so a link lands on the conversation rather than on the queue around it
   if (state.openId !== null) params.set(OPEN_PARAM, state.openId)
 
@@ -175,6 +179,12 @@ export function fromDefenseReviewQuery(params: URLSearchParams): DefenseReviewUr
     // Narrow to it as typed
     filter.withinDays = withinDays
   }
+
+  // The flaws a guard must have caught, those the address names that are flaws at all
+  const caughtFlaws = toCaughtFlaws(params.getAll('caughtFlaws'))
+
+  // Narrow by the surviving flaws, if any survived
+  if (caughtFlaws !== undefined) filter.caughtFlaws = caughtFlaws
 
   // A problem's id only means anything alongside its handout's, so a half-named problem narrows nothing
   if (filter.environmentId !== undefined && filter.handoutContentId === undefined) {

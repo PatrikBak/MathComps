@@ -16,6 +16,7 @@ import {
   decodeProblemKey,
   problemKeyOf,
   readSignalSelection,
+  toCaughtFlaws,
   toSignalSelection,
 } from '../model/defense-review-filters'
 import type { DefenseReviewFilter, DefenseReviewFilterOptions } from '../model/defense-review-types'
@@ -46,8 +47,8 @@ type DefenseReviewFilterBarProps = {
  * worked with, and burying the one thing the reader reaches for constantly behind two clicks is the wrong
  * trade even though it costs a slot in the row.
  *
- * Every facet but signals holds at most one option, and a single-select facet still hands its selection back as
- * an array, so throughout the row the pick is the last of it and an empty array is nothing picked.
+ * A single-select facet still hands its selection back as an array, so on one of those the pick is the last of
+ * the array and an empty array is nothing picked.
  */
 export function DefenseReviewFilterBar({
   filter,
@@ -66,6 +67,7 @@ export function DefenseReviewFilterBar({
     problemGrouping,
     promptVersionOptions,
     signalOptions,
+    flawOptions,
     periodOptions,
   } = useDefenseReviewFacetOptions(options)
 
@@ -111,6 +113,17 @@ export function DefenseReviewFilterBar({
         options={signalOptions}
         selected={selectedSignals}
         onChange={applySignals}
+        showSearch={false}
+      />
+
+      {/* Which flaws a guard caught in it, on any of its drafts */}
+      <MultiSelectFacet
+        variant="pill"
+        title={t('filters.caughtFlaws')}
+        closedLabel={t('filters.any')}
+        options={flawOptions}
+        selected={filter.caughtFlaws ?? []}
+        onChange={(selected) => onFieldChange('caughtFlaws', toCaughtFlaws(selected))}
         showSearch={false}
       />
 

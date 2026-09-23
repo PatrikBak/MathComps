@@ -79,6 +79,11 @@ export type DefenseReviewFilter = {
   withinDays?: number
   /** Which examiner settings the conversation ran on. */
   promptVersion?: string
+  /**
+   * Which flaws a guard must have caught in the conversation. Every one listed must have been caught, each in any of
+   * the conversation's drafts, the ones sent back to be rewritten included.
+   */
+  caughtFlaws?: ExaminerFlaw[]
 }
 
 /**
@@ -202,6 +207,23 @@ export const EXAMINER_STEPS = [
  * to its own model and reasoning level, so this is the axis a turn's cost breaks down along.
  */
 export type ExaminerStep = (typeof EXAMINER_STEPS)[number]
+
+/**
+ * The flaws a guard can catch in a draft, in display order.
+ */
+export const EXAMINER_FLAWS = [
+  'wrongClaim',
+  'leak',
+  'withheldClose',
+  'languageSwitch',
+  'genderedAddress',
+  'route',
+] as const
+
+/**
+ * A flaw one of the examiner's guards can catch in a reply it drafted.
+ */
+export type ExaminerFlaw = (typeof EXAMINER_FLAWS)[number]
 
 /**
  * One model call an attempt made, what it billed and how long it took.

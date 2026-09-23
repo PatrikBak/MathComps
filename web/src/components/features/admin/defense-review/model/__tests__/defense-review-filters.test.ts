@@ -13,6 +13,7 @@ import {
   problemKeyOf,
   readSignalSelection,
   serializeFilter,
+  toCaughtFlaws,
   toSignalSelection,
   withFilterField,
 } from '../defense-review-filters'
@@ -205,5 +206,24 @@ describe('readSignalSelection', () => {
 
     // Read out as options and back again, it narrows the same conversations
     expect(readSignalSelection(toSignalSelection(filter), filter)).toEqual(filter)
+  })
+})
+
+describe('toCaughtFlaws', () => {
+  it('lists the flaws in display order whichever was picked first, so one set keys one query', () => {
+    // Picked the other way round from how they are listed
+    const flaws = toCaughtFlaws(['route', 'wrongClaim'])
+
+    // The same flaws in the same order as picking them the other way round
+    expect(flaws).toEqual(toCaughtFlaws(['wrongClaim', 'route']))
+    expect(flaws).toEqual(['wrongClaim', 'route'])
+  })
+
+  it('drops an id naming no flaw and a flaw named twice, narrowing nothing once none is left', () => {
+    // Typed into the address: an unknown id beside a real flaw repeated
+    expect(toCaughtFlaws(['leak', 'typo', 'leak'])).toEqual(['leak'])
+
+    // Nothing but unknown ids, which leaves the field narrowing nothing rather than asking for no flaws
+    expect(toCaughtFlaws(['typo'])).toBeUndefined()
   })
 })

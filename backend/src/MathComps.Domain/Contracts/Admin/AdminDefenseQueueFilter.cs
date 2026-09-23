@@ -24,6 +24,10 @@ namespace MathComps.Domain.Contracts.Admin;
 /// <param name="PromptVersion">
 /// Which examiner settings the conversation ran on, or null for any of them.
 /// </param>
+/// <param name="CaughtFlaws">
+/// Which flaws a guard must have caught in the conversation, or null for any. Every one listed must have been caught,
+/// each in any of the conversation's drafts, the ones sent back to be rewritten included.
+/// </param>
 public record AdminDefenseQueueFilter(
     bool Unread,
     bool? HasNotes,
@@ -34,4 +38,5 @@ public record AdminDefenseQueueFilter(
     string? EnvironmentId,
     string? ProblemSlug,
     int? WithinDays,
-    string? PromptVersion);
+    string? PromptVersion,
+    IReadOnlyList<ExaminerFlaw>? CaughtFlaws);

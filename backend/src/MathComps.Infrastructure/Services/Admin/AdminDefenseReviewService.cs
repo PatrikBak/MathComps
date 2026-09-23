@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Text.Json;
 using MathComps.Domain.Contracts.Admin;
 using MathComps.Domain.Contracts.Defense;
@@ -626,6 +627,16 @@ public class AdminDefenseReviewService(
             sessions = sessions.Where(session =>
                 PostgresDbFunctions.ExaminerConfigVersion(session.ExaminerConfig) == promptVersion);
 
+        // Conversations a guard caught every named flaw in, each in whichever draft it turned up.
+        foreach (var flaw in filter.CaughtFlaws ?? [])
+        {
+            // The drafts a guard caught this flaw in.
+            var caughtDrafts = dbContext.DefenseTurnAttempts.Where(CaughtIn(flaw));
+
+            // Only the conversations holding one of the caught drafts.
+            sessions = sessions.Where(session => caughtDrafts.Any(attempt => attempt.SessionId == session.Id));
+        }
+
         // Hand back the query, still unrun, for the projection that reads it.
         return sessions;
     }
@@ -659,6 +670,27 @@ public class AdminDefenseReviewService(
         return [.. rows.Select(row => new AdminDefensePromptVersionOptionDto(
             row.Version, row.FirstSeenAt, row.LastSeenAt, row.ConversationCount))];
     }
+
+    /// <summary>
+    /// Builds the filter picking out the drafts a guard caught one flaw in.
+    /// </summary>
+    /// <param name="flaw">The flaw caught.</param>
+    /// <returns>The predicate, over the drafts.</returns>
+    private static Expression<Func<DefenseTurnAttempt, bool>> CaughtIn(ExaminerFlaw flaw) => flaw switch
+    {
+        // The math-check records whether the claims held, so a wrong one is that verdict read the other way round.
+        ExaminerFlaw.WrongClaim => attempt => !attempt.MathHolds,
+
+        // Every other flaw is a flag its guard raises.
+        ExaminerFlaw.Leak => attempt => attempt.Leaks,
+        ExaminerFlaw.WithheldClose => attempt => attempt.WithholdsClose,
+        ExaminerFlaw.LanguageSwitch => attempt => attempt.SwitchesLanguage,
+        ExaminerFlaw.GenderedAddress => attempt => attempt.GendersTheReader,
+        ExaminerFlaw.Route => attempt => attempt.TakesOver,
+
+        // A flaw nothing here knows.
+        _ => throw new ArgumentOutOfRangeException(nameof(flaw), flaw, "Unknown examiner flaw."),
+    };
 
     /// <summary>
     /// One conversation as the page comes back, its problem still as the columns naming it.
