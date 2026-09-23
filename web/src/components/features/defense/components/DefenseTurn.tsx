@@ -1,7 +1,7 @@
 'use client'
 
 import { useReducedMotion } from '@mantine/hooks'
-import { Flag, Layers, Mail, Undo2 } from 'lucide-react'
+import { Flag, Layers, Mail, StickyNote, Undo2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -14,14 +14,13 @@ import type { Turn } from '../model/defense-types'
 import { TURN_LABEL_CLASS, TURN_STYLES } from './turn-styles'
 
 /**
- * The control offering to pick the conversation up again from a turn, and what it is called. Held apart from the
- * affordance above because it answers a different question: not whether the conversation can still be acted on,
- * but whether whoever is reading it keeps their own place in it.
+ * A control a turn offers its reader, and what it is called. What pressing it does to the turn is the caller's to
+ * say.
  */
-export type TurnUnreadMark = {
+export type TurnMark = {
   /** The accessible label for the control. */
   label: string
-  /** Leaves the named turn unread, along with every turn after it. */
+  /** Acts on the named turn. */
   onMark: (turnId: string) => void
 }
 
@@ -43,6 +42,37 @@ export type TurnDraftsMark = {
 }
 
 /**
+ * Props for a {@link TurnControl}.
+ */
+type TurnControlProps = {
+  /** The control's accessible name, which its icon stands in for on screen. */
+  label: string
+  /** What pressing it does. */
+  onClick: () => void
+  /** Classes of its own, laid over the look every turn control shares. */
+  className?: string
+  /** The icon, with anything drawn over it. */
+  children: React.ReactNode
+}
+
+/**
+ * One of a turn's controls: a small icon button, faint until hovered.
+ */
+function TurnControl({ label, onClick, className, children }: TurnControlProps) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label={label}
+      onClick={onClick}
+      className={cn('size-6 text-muted/60 hover:text-foreground', className)}
+    >
+      {children}
+    </Button>
+  )
+}
+
+/**
  * Props for a single {@link DefenseTurn}.
  */
 type DefenseTurnProps = {
@@ -57,7 +87,9 @@ type DefenseTurnProps = {
   /** Whether something outside the conversation currently points at this turn. */
   isPointedAt: boolean
   /** Picking the conversation up again from here; null where the reader keeps no place in it. */
-  unreadMark: TurnUnreadMark | null
+  unreadMark: TurnMark | null
+  /** Writing a note about this reply; null where the reader writes none, or on a turn no note stands against. */
+  noteMark: TurnMark | null
   /** Reading the drafts behind this reply; null where the reader isn't allowed to see them. */
   draftsMark: TurnDraftsMark | null
   /** How long the examiner took over this reply, in milliseconds; null where the reader is shown no timings. */
@@ -100,6 +132,7 @@ export function DefenseTurn({
   onRewind,
   onReport,
   unreadMark,
+  noteMark,
   draftsMark,
   durationMs,
 }: DefenseTurnProps) {
@@ -177,6 +210,7 @@ export function DefenseTurn({
           canRewind ||
           isReported ||
           draftCount !== null ||
+          (noteMark !== null && turnId !== null) ||
           (unreadMark !== null && turnId !== null)) && (
           <div
             className={cn(
@@ -189,18 +223,13 @@ export function DefenseTurn({
             {/* Say what went wrong with a reply. A reported one keeps the control and carries a filled flag,
                 so the student can see what they said and change it */}
             {canGiveFeedback && onReport !== null && (
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={isReported ? t('reported') : t('report')}
+              <TurnControl
+                label={isReported ? t('reported') : t('report')}
                 onClick={onReport}
-                className={cn(
-                  'size-6 hover:text-foreground',
-                  isReported ? 'text-muted-foreground' : 'text-muted/60'
-                )}
+                className={cn(isReported && 'text-muted-foreground')}
               >
                 <Flag size={14} className={cn(isReported && 'fill-current')} />
-              </Button>
+              </TurnControl>
             )}
 
             {/* The same mark with nothing to click, for a reader who is only reading */}
@@ -216,26 +245,18 @@ export function DefenseTurn({
 
             {/* Rewind the conversation to this turn */}
             {canRewind && (
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t('rewind')}
-                onClick={onRewind}
-                className="size-6 text-muted/60 hover:text-foreground"
-              >
+              <TurnControl label={t('rewind')} onClick={onRewind}>
                 <Undo2 size={14} />
-              </Button>
+              </TurnControl>
             )}
 
             {/* Read the drafts this reply went through before it was sent. A reply that took more than one
                 carries how many, since a run that had to be sent back is the one worth opening */}
             {draftCount !== null && turnId !== null && draftsMark !== null && (
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={draftsMark.label(draftCount)}
+              <TurnControl
+                label={draftsMark.label(draftCount)}
                 onClick={() => draftsMark.onOpen(turnId)}
-                className="relative size-6 text-muted/60 hover:text-foreground"
+                className="relative"
               >
                 <Layers size={14} />
                 {draftCount > 1 && (
@@ -243,21 +264,22 @@ export function DefenseTurn({
                     {draftCount}
                   </span>
                 )}
-              </Button>
+              </TurnControl>
+            )}
+
+            {/* Write a note about this reply */}
+            {noteMark !== null && turnId !== null && (
+              <TurnControl label={noteMark.label} onClick={() => noteMark.onMark(turnId)}>
+                <StickyNote size={14} />
+              </TurnControl>
             )}
 
             {/* Pick the conversation up again from here. Every turn's reads the same: the line drawn across
                 the transcript is what says where the reading currently stops */}
             {unreadMark !== null && turnId !== null && (
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={unreadMark.label}
-                onClick={() => unreadMark.onMark(turnId)}
-                className="size-6 text-muted/60 hover:text-foreground"
-              >
+              <TurnControl label={unreadMark.label} onClick={() => unreadMark.onMark(turnId)}>
                 <Mail size={14} />
-              </Button>
+              </TurnControl>
             )}
           </div>
         )}

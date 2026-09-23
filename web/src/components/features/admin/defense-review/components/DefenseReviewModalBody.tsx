@@ -12,6 +12,7 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import type { UseDefenseReviewPanelsResult } from '../hooks/use-defense-review-panels'
+import { useNoteOnReply } from '../hooks/use-note-on-reply'
 import type { DefenseReviewTabId } from '../model/defense-review-tabs'
 import type { DefenseReviewDetail, DefenseTurnAttempt } from '../model/defense-review-types'
 import { DefenseReviewConfigTab } from './DefenseReviewConfigTab'
@@ -62,6 +63,9 @@ export function DefenseReviewModalBody({
 
   // Whose drafts are being read; null while none are
   const [draftsTurnId, setDraftsTurnId] = useState<string | null>(null)
+
+  // Starting a note from the reply it is about
+  const { composerRef, startNoteOn } = useNoteOnReply(panels.selectTab, onNoteTurnIdChange)
 
   // The drafts kept per reply, grouped once rather than filtered on every turn's render. Hand-folded rather
   // than through Map.groupBy, which no browser older than Safari 17.4 has and nothing here polyfills
@@ -120,6 +124,8 @@ export function DefenseReviewModalBody({
         dividerBeforeTurn={newSince}
         // Where the next pass through it starts is the reviewer's to move, reply by reply
         unreadMark={{ label: t('markUnreadFromTurn'), onMark: onMarkUnreadFrom }}
+        // A note about one of the examiner's replies can be started from the reply itself
+        noteMark={{ label: t('notes.writeOnTurn'), onMark: startNoteOn }}
         // How each reply was arrived at, offered only on the replies that kept their drafts
         draftsMark={{
           label: (draftCount) => t('attempts.open', { draftCount }),
@@ -215,6 +221,7 @@ export function DefenseReviewModalBody({
           turns={detail.turns}
           turnId={noteTurnId}
           landingNoteId={landingNoteId}
+          composerRef={composerRef}
           onTurnIdChange={onNoteTurnIdChange}
         />
       ),

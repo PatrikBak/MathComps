@@ -2,11 +2,13 @@
 
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useMemo, useRef } from 'react'
+import { type Ref, useMemo, useRef } from 'react'
 
+import { examinerReplyId } from '@/components/features/defense/model/defense-conversation-model'
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
+import type { RichMathEditorRef } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 
 import { useAdminNoteEditing } from '../hooks/use-admin-note-editing'
 import { useAdminNotes } from '../hooks/use-admin-notes'
@@ -30,6 +32,8 @@ type DefenseReviewNotesTabProps = {
   turnId: string | null
   /** The note the reader was sent to; null when they came in for the conversation itself. */
   landingNoteId: string | null
+  /** The editor a new note is written in. */
+  composerRef: Ref<RichMathEditorRef>
   /** Points a new note at another reply, or at the conversation as a whole. */
   onTurnIdChange: (turnId: string | null) => void
 }
@@ -37,9 +41,9 @@ type DefenseReviewNotesTabProps = {
 /**
  * Everything written about one conversation, and where more gets written.
  *
- * A note can stand against the conversation as a whole or against one of its replies; which reply is picked
- * here rather than from the transcript, so the reply the note is about stays on screen while it is written.
- * Which one is picked lives above this tab, since the transcript marks it as the reply being written about.
+ * A note can stand against the conversation as a whole or against one of its replies. The reply is picked here,
+ * or from its own control in the transcript. Which one is picked lives above this tab, since the transcript marks
+ * it as the reply being written about.
  *
  * One note is written at a time: opening an old one for revision stands the composer down to the way back out
  * of it, since a second editor identical to the first says nothing about which note either belongs to.
@@ -53,6 +57,7 @@ export function DefenseReviewNotesTab({
   turns,
   turnId,
   landingNoteId,
+  composerRef,
   onTurnIdChange,
 }: DefenseReviewNotesTabProps) {
   // Review-surface copy
@@ -67,13 +72,16 @@ export function DefenseReviewNotesTab({
   // Where each turn sits in the conversation
   const turnPlaces = useMemo(() => new Map(turns.map((turn, index) => [turn.id, index])), [turns])
 
-  // The replies a note can stand against: the examiner's turns rather than the student's own, and not the
-  // opener, which is a canned greeting reading the same in every conversation
+  // The replies a note can stand against, which are the examiner's
   const targets = useMemo(
     () =>
-      turns.flatMap((turn, index) =>
-        turn.role === 'examiner' && index > 0 ? [{ id: turn.id, sequence: index + 1 }] : []
-      ),
+      turns.flatMap((turn, index) => {
+        // Which of the examiner's replies the turn is, if any
+        const replyId = examinerReplyId(turn, index)
+
+        // A target per reply, at its place in the conversation
+        return replyId === null ? [] : [{ id: replyId, sequence: index + 1 }]
+      }),
     [turns]
   )
 
@@ -92,7 +100,10 @@ export function DefenseReviewNotesTab({
           <NoteTargetRow targets={targets} turnId={turnId} onTurnIdChange={onTurnIdChange} />
 
           {/* The composer itself */}
-          <AdminNoteComposer onSubmit={(content, category) => create(turnId, content, category)} />
+          <AdminNoteComposer
+            editorRef={composerRef}
+            onSubmit={(content, category) => create(turnId, content, category)}
+          />
         </div>
       ) : (
         /* The way back out of the revision to writing a new note */

@@ -1,11 +1,14 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { type KeyboardEvent, useId } from 'react'
+import { type KeyboardEvent, type Ref, useId } from 'react'
 
 import { REPORT_CATEGORY_KEYS } from '@/components/features/defense/model/defense-feedback-options'
 import type { DefenseReportCategory } from '@/components/features/defense/model/defense-types'
-import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
+import {
+  RichMathEditor,
+  type RichMathEditorRef,
+} from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 
 import { useAdminNoteDraft } from '../hooks/use-admin-note-draft'
 import { NoteChoiceChip } from './NoteChoiceChip'
@@ -38,6 +41,8 @@ type AdminNoteComposerProps = {
   onSubmit: (content: string, category: DefenseReportCategory | null) => Promise<boolean>
   /** Abandons it, when there is something to go back to. */
   onCancel?: () => void
+  /** Handle onto the editor the note is written in. */
+  editorRef?: Ref<RichMathEditorRef>
 }
 
 /**
@@ -59,6 +64,7 @@ export function AdminNoteComposer({
   initialCategory = null,
   onSubmit,
   onCancel,
+  editorRef,
 }: AdminNoteComposerProps) {
   // Review-surface copy
   const t = useTranslations('admin.defenseReview.notes')
@@ -102,6 +108,7 @@ export function AdminNoteComposer({
 
       {/* The editor the note is written and filed in */}
       <RichMathEditor
+        ref={editorRef}
         maxCharacters={MAX_CHARACTERS_PER_NOTE}
         value={content}
         onChange={setContent}
