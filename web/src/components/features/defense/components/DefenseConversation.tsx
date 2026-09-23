@@ -305,6 +305,7 @@ function DefenseConversationForTarget({
               }
         }
         unreadMark={null}
+        noteMark={null}
         // A rejected draft is what a guard kept from the student, so their own view never offers one
         draftsMark={null}
         // How long the examiner took is tuning data, and reads to a student as an apology for the wait

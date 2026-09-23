@@ -178,6 +178,26 @@ export function indexReports(
   return new Map(reports.map((report) => [report.turnId, report]))
 }
 
+/** Which authors' turns are replies: the examiner's, since the student's are what she replies to. */
+const IS_REPLY_ROLE: Record<TurnRole, boolean> = {
+  examiner: true,
+  candidate: false,
+}
+
+/**
+ * Works out which of the examiner's replies a turn is. The opener is none of them: it is a canned greeting reading
+ * the same in every conversation, so it says nothing about this one.
+ *
+ * @param turn - The turn.
+ * @param index - Its 0-based place in the conversation.
+ *
+ * @returns The turn's id, or null for the student's own turns, the opener, and a draft the backend hasn't taken.
+ */
+export function examinerReplyId(turn: Turn, index: number): string | null {
+  // An examiner turn past the opener, identified once the backend has taken it
+  return IS_REPLY_ROLE[turn.role] && index > 0 ? turn.id : null
+}
+
 /**
  * Finds the first turn to have arrived after a given moment, which is where a reader coming back to the
  * conversation picks up.

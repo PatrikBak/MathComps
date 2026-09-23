@@ -88,6 +88,9 @@ export function NoteTargetScrubber({ targets, turnId, onTurnIdChange }: NoteTarg
   // Which reply the note stands against, and -1 while it stands against the conversation
   const pickedIndex = targets.findIndex((target) => target.id === turnId)
 
+  // Whichever way a reply was picked, the thumb waits on it from then on
+  if (pickedIndex !== -1 && pickedIndex !== waitingIndex) setWaitingIndex(pickedIndex)
+
   // So where the thumb sits, falling back to where it was left when nothing is picked
   const thumbIndex = pickedIndex === -1 ? waitingIndex : pickedIndex
 
@@ -103,10 +106,7 @@ export function NoteTargetScrubber({ targets, turnId, onTurnIdChange }: NoteTarg
     // Where it landed
     const index = Number(event.target.value)
 
-    // Which is where it waits from here on
-    setWaitingIndex(index)
-
-    // And the reply standing there
+    // The note pointed at the reply standing there
     onTurnIdChange(targets[index]?.id ?? null)
   }
 

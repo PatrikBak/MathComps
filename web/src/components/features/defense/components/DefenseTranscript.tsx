@@ -9,15 +9,10 @@ import { Button } from '@/components/shared/components/Button'
 import { useFollowTail } from '@/hooks/use-follow-tail'
 
 import { useRevealPointedTurn } from '../hooks/use-reveal-pointed-turn'
+import { examinerReplyId } from '../model/defense-conversation-model'
 import type { DefenseTurnReport, Turn, TurnRole } from '../model/defense-types'
-import { DefenseTurn, type TurnDraftsMark, type TurnUnreadMark } from './DefenseTurn'
+import { DefenseTurn, type TurnDraftsMark, type TurnMark } from './DefenseTurn'
 import { ThinkingIndicator } from './ThinkingIndicator'
-
-/** Which authors' messages can be reported. */
-const IS_REPORTABLE_ROLE: Record<TurnRole, boolean> = {
-  examiner: true,
-  candidate: false,
-}
 
 /**
  * Props for the {@link TranscriptDivider}.
@@ -78,7 +73,9 @@ type DefenseTranscriptProps = {
   /** Where the line goes and what it says; null when nothing divides the conversation. */
   dividerBeforeTurn: TranscriptDivider | null
   /** Moving where the reader picks the conversation up; null where nobody keeps a place in it. */
-  unreadMark: TurnUnreadMark | null
+  unreadMark: TurnMark | null
+  /** Writing a note about a reply; null where the reader writes none. */
+  noteMark: TurnMark | null
   /** Reading the drafts behind a reply; null where the reader isn't allowed to see them. */
   draftsMark: TurnDraftsMark | null
   /** How long each reply took the examiner, by reply; null where the reader isn't shown timings. */
@@ -109,6 +106,7 @@ export function DefenseTranscript({
   onReportTurn,
   dividerBeforeTurn,
   unreadMark,
+  noteMark,
   draftsMark,
   turnDurationsMs,
   showPositions = false,
@@ -193,9 +191,8 @@ export function DefenseTranscript({
           >
             {/* Every turn in order */}
             {turns.map((turn, index) => {
-              // The reply this turn can be reported as, null when it is the student's own, the canned
-              // opener, or a draft the backend hasn't taken yet
-              const reportableId = IS_REPORTABLE_ROLE[turn.role] && index > 0 ? turn.id : null
+              // Which of the examiner's replies this turn is, null when it is not one
+              const replyId = examinerReplyId(turn, index)
 
               // Whether the line, if there is one, sits above this turn
               const startsWhatIsDivided =
@@ -215,12 +212,13 @@ export function DefenseTranscript({
                     isPointedAt={isPointedAt}
                     label={roleLabels[turn.role]}
                     animate={index === justArrivedIndex}
-                    isReported={reportableId !== null && reports.has(reportableId)}
+                    isReported={replyId !== null && reports.has(replyId)}
                     canGiveFeedback={canGiveFeedback}
                     canRewind={canRewind}
                     onRewind={() => onRewindTurn(index)}
-                    onReport={reportableId === null ? null : () => onReportTurn(reportableId)}
+                    onReport={replyId === null ? null : () => onReportTurn(replyId)}
                     unreadMark={unreadMark}
+                    noteMark={replyId === null ? null : noteMark}
                     draftsMark={draftsMark}
                     durationMs={turn.id === null ? null : (turnDurationsMs?.get(turn.id) ?? null)}
                   />

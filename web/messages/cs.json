@@ -160,7 +160,8 @@
         "target": "Odpověď",
         "wholeConversation": "Celá konverzace",
         "write": "Napsat poznámku",
-        "writeFailed": "Poznámku se nepodařilo uložit"
+        "writeFailed": "Poznámku se nepodařilo uložit",
+        "writeOnTurn": "Napsat poznámku k této odpovědi"
       },
       "openNotes": "Poznámky",
       "position": "{index} / {total}",
