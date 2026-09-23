@@ -109,6 +109,7 @@
       },
       "filters": {
         "any": "Libovolné",
+        "caughtFlaws": "Neúspěšné kontroly",
         "period": "Období",
         "periodDays": "{days, plural, =1 {Posledních 24 hodin} =365 {Poslední rok} few {Poslední # dny} other {Posledních # dní}}",
         "problem": "Úloha",

@@ -109,6 +109,7 @@
       },
       "filters": {
         "any": "Any",
+        "caughtFlaws": "Failed checks",
         "period": "Period",
         "periodDays": "{days, plural, =1 {Last 24 hours} =365 {Last year} other {Last # days}}",
         "problem": "Problem",

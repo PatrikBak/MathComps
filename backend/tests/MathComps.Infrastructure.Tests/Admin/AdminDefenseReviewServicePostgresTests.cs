@@ -265,10 +265,9 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // somewhere to read back empty from. Written in the reverse of the order they were drafted, so a read that
         // takes the database's own order for the run's order has something to get wrong.
         context.DefenseTurnAttempts.AddRange(
-            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 1, "her reply", leaks: false,
-                _attemptDurationsMs[1]),
-            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 0, "her leaky draft", leaks: true,
-                _attemptDurationsMs[0]));
+            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 1, "her reply", _attemptDurationsMs[1]),
+            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 0, "her leaky draft", _attemptDurationsMs[0],
+                leaks: true));
 
         // Which handout problem each of those conversations was held against, the targetless one deliberately
         // naming nothing.
@@ -767,8 +766,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
     /// <summary>
     /// Each filter narrows the queue to what it names, and nothing else. Run together rather than one test each
-    /// because they are eleven near-identical clauses written in one sitting, which is exactly where an inverted one
-    /// hides; comparing the whole set at once still names which clause was wrong.
+    /// because they are near-identical clauses written in one sitting, which is exactly where an inverted one hides;
+    /// comparing the whole set at once still names which clause was wrong.
     /// </summary>
     [Fact]
     public Task Each_filter_narrows_the_queue_to_what_it_names() => RunTestAsync(async service =>
@@ -786,6 +785,59 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 _newestSessionId, TranscriptRole.Candidate, "one more thing", 3, DateTimeOffset.UtcNow));
 
             // Commit it
+            await context.SaveChangesAsync();
+        });
+
+        // One more reply in every conversation the queue can return, with drafts the guards caught things in. Every
+        // flaw lands on its own set of conversations, so a flaw read off another one's verdict leaves the wrong set.
+        // Each reply is stamped alongside the last thing already said in its conversation, so the periods keep their
+        // answers
+        await QueryAsync(async context =>
+        {
+            // The replies the drafts were written for
+            var oldestReply = NewTurn(
+                _oldestSessionId, TranscriptRole.Examiner, "a closing reply", 2, _now.AddDays(-10));
+            var newerReply = NewTurn(
+                _newerSessionId, TranscriptRole.Examiner, "a careful reply", 2, _now.AddDays(-5));
+            var newestReply = NewTurn(
+                _newestSessionId, TranscriptRole.Examiner, "a last reply", 4, DateTimeOffset.UtcNow);
+            var competitionReply = NewTurn(
+                _archiveSessionId, TranscriptRole.Examiner, "follow the reference", 2, _now.AddDays(-3));
+
+            // Each added to its conversation
+            context.DefenseTurns.AddRange(oldestReply, newerReply, newestReply, competitionReply);
+
+            // The oldest pressed on past a finished proof, in the wrong language and taking the student for a man or
+            // a woman, before the draft that went out
+            context.DefenseTurnAttempts.AddRange(
+                NewAttempt(_oldestSessionId, oldestReply.Id, attemptIndex: 0, "keep going",
+                    withholdsClose: true, switchesLanguage: true, gendersTheReader: true),
+                NewAttempt(_oldestSessionId, oldestReply.Id, attemptIndex: 1, "a closing reply"));
+
+            // The newer got a claim wrong in the wrong language, then gave something away, and only then went out
+            // clean, so the switched language and the leak never share a draft
+            context.DefenseTurnAttempts.AddRange(
+                NewAttempt(_newerSessionId, newerReply.Id, attemptIndex: 0, "a wrong draft",
+                    mathHolds: false, switchesLanguage: true),
+                NewAttempt(_newerSessionId, newerReply.Id, attemptIndex: 1, "a leaky draft", leaks: true),
+                NewAttempt(_newerSessionId, newerReply.Id, attemptIndex: 2, "a careful reply"));
+
+            // The newest walked the student onto the examiner's own route and took them for a man or a woman, before a
+            // clean draft went out
+            context.DefenseTurnAttempts.AddRange(
+                NewAttempt(_newestSessionId, newestReply.Id, attemptIndex: 0, "follow my way",
+                    gendersTheReader: true, takesOver: true),
+                NewAttempt(_newestSessionId, newestReply.Id, attemptIndex: 1, "a last reply"));
+
+            // The competition one drifted out of the student's language, and its rewrite took over their route and
+            // went out anyway once the revisions ran out, so its takeover sits on no draft that was sent back
+            context.DefenseTurnAttempts.AddRange(
+                NewAttempt(_archiveSessionId, competitionReply.Id, attemptIndex: 0, "a drifted draft",
+                    switchesLanguage: true),
+                NewAttempt(_archiveSessionId, competitionReply.Id, attemptIndex: 1, "follow the reference",
+                    takesOver: true));
+
+            // Commit them
             await context.SaveChangesAsync();
         });
 
@@ -818,6 +870,20 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 NewFilter() with { WithinDays = int.MaxValue }, 4, "newest, competition, newer, oldest"),
             ("and a period of no days is held to one day, which the one carried on just now falls inside",
                 NewFilter() with { WithinDays = 0 }, 1, "newest"),
+            ("a wrong claim was caught in one, though the reply it was caught behind went out clean",
+                NewFilter() with { CaughtFlaws = [ExaminerFlaw.WrongClaim] }, 1, "newer"),
+            ("a leak in two, one of them the seed's own sent-back draft",
+                NewFilter() with { CaughtFlaws = [ExaminerFlaw.Leak] }, 2, "newest, newer"),
+            ("a withheld close in one",
+                NewFilter() with { CaughtFlaws = [ExaminerFlaw.WithheldClose] }, 1, "oldest"),
+            ("a switched language in three",
+                NewFilter() with { CaughtFlaws = [ExaminerFlaw.LanguageSwitch] }, 3, "competition, newer, oldest"),
+            ("a gendered address in two",
+                NewFilter() with { CaughtFlaws = [ExaminerFlaw.GenderedAddress] }, 2, "newest, oldest"),
+            ("and a takeover in two, one only on the reply that went out, which counts as much as one sent back",
+                NewFilter() with { CaughtFlaws = [ExaminerFlaw.Route] }, 2, "newest, competition"),
+            ("naming two flaws leaves the one both were caught in, though never on the same draft",
+                NewFilter() with { CaughtFlaws = [ExaminerFlaw.Leak, ExaminerFlaw.LanguageSwitch] }, 1, "newer"),
         ];
 
         // What each filter left, labelled so a mismatch says which clause was wrong
@@ -1160,7 +1226,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// </summary>
     /// <returns>The filter.</returns>
     private static AdminDefenseQueueFilter NewFilter() =>
-        new(false, null, false, false, null, null, null, null, null, null);
+        new(false, null, false, false, null, null, null, null, null, null, null);
 
     /// <summary>
     /// Builds one seeded conversation, held against a handout environment.
@@ -1245,13 +1311,20 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// <param name="turnId">The reply it was drafted for.</param>
     /// <param name="attemptIndex">Its place in that reply's run.</param>
     /// <param name="reply">The drafted text.</param>
-    /// <param name="leaks">Whether the leak-check flagged it, which is what sends a draft back.</param>
     /// <param name="durationMs">How long the draft took end to end.</param>
+    /// <param name="mathHolds"><inheritdoc cref="DefenseTurnAttempt.MathHolds" path="/summary"/></param>
+    /// <param name="leaks"><inheritdoc cref="DefenseTurnAttempt.Leaks" path="/summary"/></param>
+    /// <param name="withholdsClose"><inheritdoc cref="DefenseTurnAttempt.WithholdsClose" path="/summary"/></param>
+    /// <param name="switchesLanguage"><inheritdoc cref="DefenseTurnAttempt.SwitchesLanguage" path="/summary"/></param>
+    /// <param name="gendersTheReader"><inheritdoc cref="DefenseTurnAttempt.GendersTheReader" path="/summary"/></param>
+    /// <param name="takesOver"><inheritdoc cref="DefenseTurnAttempt.TakesOver" path="/summary"/></param>
     /// <returns>The draft, ready to add.</returns>
     private static DefenseTurnAttempt NewAttempt(
-        Guid sessionId, Guid turnId, int attemptIndex, string reply, bool leaks, int durationMs)
+        Guid sessionId, Guid turnId, int attemptIndex, string reply, int durationMs = 0, bool mathHolds = true,
+        bool leaks = false, bool withholdsClose = false, bool switchesLanguage = false, bool gendersTheReader = false,
+        bool takesOver = false)
     {
-        // The draft and every verdict passed on it, clean but for the leak the test asks for.
+        // The draft and every verdict passed on it, clean but for the flaws the test names.
         var attempt = new DefenseTurnAttempt
         {
             SessionId = sessionId,
@@ -1259,18 +1332,18 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             AttemptIndex = attemptIndex,
             Reply = reply,
             RevisionNote = attemptIndex == 0 ? "" : "REVISION REQUIRED — you gave away the counterexample.",
-            MathHolds = true,
-            MathCorrection = "",
+            MathHolds = mathHolds,
+            MathCorrection = mathHolds ? "" : "the sum is even",
             Leaks = leaks,
             WhatLeaked = leaks ? "the counterexample" : "",
-            WithholdsClose = false,
-            Established = "",
-            SwitchesLanguage = false,
+            WithholdsClose = withholdsClose,
+            Established = withholdsClose ? "the whole proof" : "",
+            SwitchesLanguage = switchesLanguage,
             CandidateLanguage = "English",
-            GendersTheReader = false,
-            TakesOver = false,
+            GendersTheReader = gendersTheReader,
+            TakesOver = takesOver,
             CandidateWork = "",
-            RestatedReferenceStep = "",
+            RestatedReferenceStep = takesOver ? "the reference's second step" : "",
             IsSafeFallback = false,
             CreatedAt = _now,
             DurationMs = durationMs,

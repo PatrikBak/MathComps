@@ -1,7 +1,7 @@
 import type { NamedDefenseTarget } from '@/components/features/defense/model/defense-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
-import type { DefenseReviewFilter } from './defense-review-types'
+import { type DefenseReviewFilter, EXAMINER_FLAWS, type ExaminerFlaw } from './defense-review-types'
 
 /**
  * Sits between the parts of a problem's key. Every part is a slug or a nanoid, so it can't appear inside one.
@@ -130,6 +130,24 @@ export function readSignalSelection(
     studentReported: selected.includes('reported') ? true : undefined,
     studentFeedback: selected.includes('feedback') ? true : undefined,
   }
+}
+
+/**
+ * Reads the ids a selection holds as the flaws they name.
+ *
+ * Kept in display order whichever order they were picked in, so one set of flaws always keys one query and writes
+ * one address. An id naming no flaw, or naming one twice, is somebody's typing in the address, and the backend
+ * refuses a whole request over a single flaw it doesn't know.
+ *
+ * @param ids - The ids to read, whether or not they name a flaw.
+ * @returns The flaws named, or undefined when none is, so the field stops narrowing.
+ */
+export function toCaughtFlaws(ids: readonly string[]): ExaminerFlaw[] | undefined {
+  // Every flaw the ids name, each once, in display order
+  const flaws = EXAMINER_FLAWS.filter((flaw) => ids.includes(flaw))
+
+  // Nothing named narrows nothing
+  return flaws.length === 0 ? undefined : flaws
 }
 
 /**
