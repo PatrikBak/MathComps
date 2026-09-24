@@ -15,8 +15,11 @@ export type LocalizedString = Record<Locale, string>
 /** A string value that may exist in only a subset of supported locales. */
 export type PartialLocalizedString = Partial<Record<Locale, string>>
 
-/** Default (fallback) locale for the application. */
+/** Primary locale of the application. */
 export const DEFAULT_LOCALE = 'sk' as const satisfies Locale
+
+/** Locale for a visitor whose browser languages include no supported one, or who sends none. */
+export const UNMATCHED_VISITOR_LOCALE = 'en' as const satisfies Locale
 
 /** Canonical locale whose paths match the folder names in app/[locale]/. */
 const CANONICAL_LOCALE = 'en' as const satisfies Locale

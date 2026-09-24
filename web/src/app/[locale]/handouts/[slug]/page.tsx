@@ -4,7 +4,11 @@ import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 
 import type { HandoutData } from '@/components/features/handouts/handout-content-types'
-import type { HandoutIndex } from '@/components/features/handouts/handout-metadata-types'
+import type {
+  HandoutIndex,
+  HandoutMetadata,
+  HandoutSection,
+} from '@/components/features/handouts/handout-metadata-types'
 import {
   getContentFileBasename,
   supportsLocale,
@@ -18,12 +22,62 @@ import handoutIndex from '@/content/handouts.json'
 import { LocalizedRouteProvider } from '@/hooks/useLocalizedRoute'
 import { ANCHORS, getLocalizedAnchor, type Locale, ROUTES, SUPPORTED_LOCALES } from '@/i18n/i18n'
 import { resolveLocalizedPath } from '@/i18n/localized-paths'
+import { permanentRedirect } from '@/i18n/navigation'
 import { type PageProps, withLocale } from '@/i18n/with-locale'
 import { generatePageMetadata } from '@/lib/metadata'
 import { buildBreadcrumbJsonLd, buildHandoutJsonLd } from '@/lib/structured-data'
 
 /** Typed access to the handout index */
 const index = handoutIndex as unknown as HandoutIndex
+
+/** A handout together with the section listing it. */
+type HandoutEntry = {
+  /** The handout. */
+  handout: HandoutMetadata
+  /** The section listing the handout. */
+  section: HandoutSection
+}
+
+/**
+ * The handout a detail URL names. A slug worded for another locale, as an old unprefixed Slovak link
+ * arrives, redirects to this locale's own wording; a slug no handout in this locale goes by is not found.
+ *
+ * @param slug - The slug in the URL.
+ * @param locale - The locale of the URL.
+ *
+ * @returns The handout whose slug in this locale is the one asked for, with its section.
+ */
+function resolveHandout(slug: string, locale: Locale): HandoutEntry {
+  // Every handout this locale has, with its section
+  const entries = index.sections.flatMap((section) =>
+    section.handouts
+      .filter((handout) => supportsLocale(handout, locale))
+      .map((handout) => ({ handout, section }))
+  )
+
+  // The handout going by this slug in this locale
+  const ownMatch = entries.find(({ handout }) => handout.slug[locale] === slug)
+
+  // The handout, when the slug is this locale's own
+  if (ownMatch) return ownMatch
+
+  // The handout going by this slug in some other locale
+  const otherMatch = entries.find(({ handout }) => Object.values(handout.slug).includes(slug))
+
+  // No handout in this locale goes by the slug
+  if (!otherMatch) notFound()
+
+  // The handout's path in this locale, under its own slug
+  const localizedPath = resolveLocalizedPath(ROUTES.HANDOUT_DETAIL, locale, otherMatch.handout.slug)
+
+  // resolveLocalizedPath widens to undefined for an unresolved slug; this handout supports the locale
+  if (localizedPath === undefined) {
+    throw new Error(`[Redirect] Missing handout detail path for locale '${locale}'.`)
+  }
+
+  // Sent to the handout under this locale's own slug
+  return permanentRedirect({ href: localizedPath, locale })
+}
 
 /**
  * Provides static params for pre-rendering available handouts.
@@ -57,30 +111,22 @@ export async function generateMetadata({
   // Extract the slug and locale from URL parameters
   const { slug, locale } = await params
 
-  // Search each section for the requested handout
-  for (const section of index.sections) {
-    for (const handout of section.handouts) {
-      // Check for a handout with a matching slug in the current locale
-      if (supportsLocale(handout, locale) && handout.slug[locale] === slug) {
-        // Load translations for the section label
-        const tHandouts = await getTranslations({ locale, namespace: 'handouts.labels' })
+  // The handout the URL names, with its section
+  const { handout, section } = resolveHandout(slug, locale)
 
-        // Return locale-specific metadata for the handout
-        return generatePageMetadata({
-          title: handout.title[locale],
-          description: handout.description[locale],
-          path: ROUTES.HANDOUT_DETAIL,
-          type: 'article',
-          section: `${tHandouts('sectionLabel')} • ${section.category[locale]}`,
-          locale,
-          slugTranslations: handout.slug,
-        })
-      }
-    }
-  }
+  // Load translations for the section label
+  const tHandouts = await getTranslations({ locale, namespace: 'handouts.labels' })
 
-  // No matching handout found for this slug + locale
-  notFound()
+  // Return locale-specific metadata for the handout
+  return generatePageMetadata({
+    title: handout.title[locale],
+    description: handout.description[locale],
+    path: ROUTES.HANDOUT_DETAIL,
+    type: 'article',
+    section: `${tHandouts('sectionLabel')} • ${section.category[locale]}`,
+    locale,
+    slugTranslations: handout.slug,
+  })
 }
 
 /**
@@ -93,11 +139,8 @@ export default withLocale(async function RenderPage({
   // Extract the slug from the async params object
   const { slug } = await params
 
-  // Find the handout metadata by matching slug and locale
-  const handoutMeta = index.sections
-    .flatMap((section) => section.handouts)
-    .find((handout) => supportsLocale(handout, locale) && handout.slug[locale] === slug)
-  if (!handoutMeta) notFound()
+  // The handout the URL names
+  const { handout: handoutMeta } = resolveHandout(slug, locale)
 
   // Load the handout content file for this locale
   const fileBasename = getContentFileBasename(handoutMeta)

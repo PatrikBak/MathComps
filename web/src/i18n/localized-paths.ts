@@ -1,6 +1,6 @@
 import { getRequiredEnv } from '@/components/shared/utils/env-utils'
 import type { Locale, PartialLocalizedString } from '@/i18n/i18n'
-import { DEFAULT_LOCALE, pathnames, SUPPORTED_LOCALES } from '@/i18n/i18n'
+import { pathnames, SUPPORTED_LOCALES, UNMATCHED_VISITOR_LOCALE } from '@/i18n/i18n'
 
 /**
  * Resolves the localized path for a given canonical path and locale.
@@ -118,9 +118,9 @@ export function buildAlternateLanguages(
   // Collect the URLs that actually resolved
   const resolvedUrls = Object.values(languages)
 
-  // Point x-default at the default locale, falling back to the first resolved alternate
+  // Point x-default where an unmatched visitor lands, falling back to the first resolved alternate
   if (resolvedUrls.length > 0) {
-    languages['x-default'] = languages[DEFAULT_LOCALE] ?? resolvedUrls[0]
+    languages['x-default'] = languages[UNMATCHED_VISITOR_LOCALE] ?? resolvedUrls[0]
   }
 
   // Return the built map
