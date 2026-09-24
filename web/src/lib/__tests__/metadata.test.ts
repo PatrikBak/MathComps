@@ -110,8 +110,8 @@ describe('generatePageMetadata - hreflang alternates', () => {
     expect(languages['en']).toBe(`${TEST_SITE_URL}/en/about`)
     expect(languages['cs']).toBe(`${TEST_SITE_URL}/cs/o-projektu`)
 
-    // x-default should point to the default locale (sk)
-    expect(languages['x-default']).toBe(languages['sk'])
+    // x-default should point where a visitor with no supported language lands (en)
+    expect(languages['x-default']).toBe(`${TEST_SITE_URL}/en/about`)
   })
 
   it('generates correct slug-based alternate URLs', () => {
@@ -136,7 +136,7 @@ describe('generatePageMetadata - hreflang alternates', () => {
     expect(languages['cs']).toBe(`${TEST_SITE_URL}/cs/materialy/faktorizace`)
   })
 
-  it('emits trailing-slash-free home alternates with an x-default of the default locale', () => {
+  it('emits trailing-slash-free home alternates with an English x-default', () => {
     // Generate metadata for the home page
     const metadata = generatePageMetadata({
       locale: 'sk',
@@ -151,29 +151,29 @@ describe('generatePageMetadata - hreflang alternates', () => {
     expect(languages['cs']).toBe(`${TEST_SITE_URL}/cs`)
     expect(languages['en']).toBe(`${TEST_SITE_URL}/en`)
 
-    // x-default should point to the default locale (sk)
-    expect(languages['x-default']).toBe(`${TEST_SITE_URL}/sk`)
+    // x-default should point where a visitor with no supported language lands (en)
+    expect(languages['x-default']).toBe(`${TEST_SITE_URL}/en`)
   })
 
   it('falls back x-default to the only resolved locale for a single-language handout', () => {
-    // Generate metadata for an English-only handout (no sk/cs slug)
+    // Generate metadata for a Slovak-only handout (no cs/en slug)
     const metadata = generatePageMetadata({
-      locale: 'en',
+      locale: 'sk',
       path: '/handouts/[slug]',
-      title: 'Adding Points',
-      slugTranslations: { en: 'adding-points' } as Record<Locale, string>,
+      title: 'Pridávanie bodov',
+      slugTranslations: { sk: 'pridavanie-bodov' } as Record<Locale, string>,
     })
 
     // Extract alternate languages
     const languages = metadata.alternates?.languages as Record<string, string>
 
-    // Only the English alternate resolves; sk/cs are absent
-    expect(languages['en']).toBe(`${TEST_SITE_URL}/en/handouts/adding-points`)
-    expect(languages['sk']).toBeUndefined()
+    // Only the Slovak alternate resolves; cs/en are absent
+    expect(languages['sk']).toBe(`${TEST_SITE_URL}/sk/materialy/pridavanie-bodov`)
     expect(languages['cs']).toBeUndefined()
+    expect(languages['en']).toBeUndefined()
 
-    // x-default falls back to the English URL rather than an undefined sk URL
-    expect(languages['x-default']).toBe(`${TEST_SITE_URL}/en/handouts/adding-points`)
+    // x-default falls back to the Slovak URL rather than an undefined en URL
+    expect(languages['x-default']).toBe(`${TEST_SITE_URL}/sk/materialy/pridavanie-bodov`)
   })
 })
 

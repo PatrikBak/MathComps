@@ -2,15 +2,17 @@ import { clerkMiddleware } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 
-import { DEFAULT_LOCALE, localePrefix, pathnames, SUPPORTED_LOCALES } from '@/i18n/i18n'
+import { localePrefix, pathnames, SUPPORTED_LOCALES, UNMATCHED_VISITOR_LOCALE } from '@/i18n/i18n'
 
 /** Handles locale detection, URL rewriting, and localized pathnames. */
 const intlMiddleware = createMiddleware({
   locales: SUPPORTED_LOCALES,
-  defaultLocale: DEFAULT_LOCALE,
+  defaultLocale: UNMATCHED_VISITOR_LOCALE,
   localePrefix,
   pathnames,
   localeDetection: true,
+  // Hreflang alternates come from each page's metadata, which knows every locale's slug
+  alternateLinks: false,
 })
 
 /** Matches any locale-prefixed path under /dev/ (e.g. /en/dev/renderer-preview). */
