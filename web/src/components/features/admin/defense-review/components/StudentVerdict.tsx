@@ -1,6 +1,7 @@
 import { Flag, MessageSquareQuote } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { replyNumber } from '@/components/features/defense/model/defense-conversation-model'
 import {
   OUTCOME_KEYS,
   REPORT_CATEGORY_KEYS,
@@ -76,7 +77,7 @@ export function StudentVerdict({ feedback, reports, turns }: StudentVerdictProps
           <Flag size={13} className="shrink-0 text-muted" aria-hidden="true" />
           <span className="text-foreground">
             {t('notes.onTurn', {
-              sequence: turns.findIndex((turn) => turn.id === report.turnId) + 1,
+              sequence: replyNumber(turns.findIndex((turn) => turn.id === report.turnId)),
             })}
           </span>
           <span className="text-muted-foreground">

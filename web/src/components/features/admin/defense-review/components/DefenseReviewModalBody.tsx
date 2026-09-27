@@ -129,8 +129,8 @@ export function DefenseReviewModalBody({
         }}
         // And how long each turn took whoever wrote it, where that was measured
         turnDurationsMs={turnDurationsMs}
-        // Notes hang off a reply by its place, so the reader needs the places to be there to read
-        showPositions
+        // Notes hang off a reply by its number, so the reader needs the numbers there to read
+        showReplyNumbers
         // And the one a note is being written against is marked, but only while that is what the
         // reader is doing: a chip left selected under another panel points at nothing they can see
         pointedAtTurnId={panels.sideTabId === 'notes' ? noteTurnId : null}

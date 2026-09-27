@@ -1,6 +1,8 @@
 import { Check } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
+import { replyNumber } from '@/components/features/defense/model/defense-conversation-model'
+
 import type { AdminNote } from '../model/defense-review-types'
 
 /**
@@ -16,9 +18,11 @@ export function useNoteAnchorLabel(): (turnSequence: number | null) => string {
   // Review-surface copy
   const t = useTranslations('admin.defenseReview.notes')
 
-  // Against the conversation as a whole, or against one reply counted the way the conversation reads
+  // Against the conversation as a whole, or against one reply under its number
   return (turnSequence) =>
-    turnSequence === null ? t('wholeConversation') : t('reply', { sequence: turnSequence + 1 })
+    turnSequence === null
+      ? t('wholeConversation')
+      : t('reply', { sequence: replyNumber(turnSequence) })
 }
 
 /**

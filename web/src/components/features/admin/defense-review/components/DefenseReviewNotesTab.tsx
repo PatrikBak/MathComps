@@ -4,7 +4,10 @@ import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { type Ref, useMemo, useRef } from 'react'
 
-import { examinerReplyId } from '@/components/features/defense/model/defense-conversation-model'
+import {
+  examinerReplyId,
+  replyNumber,
+} from '@/components/features/defense/model/defense-conversation-model'
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import { Button } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
@@ -79,8 +82,8 @@ export function DefenseReviewNotesTab({
         // Which of the examiner's replies the turn is, if any
         const replyId = examinerReplyId(turn, index)
 
-        // A target per reply, at its place in the conversation
-        return replyId === null ? [] : [{ id: replyId, sequence: index + 1 }]
+        // A target per reply, under its number
+        return replyId === null ? [] : [{ id: replyId, number: replyNumber(index) }]
       }),
     [turns]
   )
