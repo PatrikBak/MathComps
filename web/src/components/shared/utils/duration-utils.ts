@@ -1,8 +1,15 @@
-import { DAY_SECONDS, HOUR_SECONDS, MINUTE_MS, MINUTE_SECONDS, SECOND_MS } from './time-units'
+import {
+  DAY_SECONDS,
+  HOUR_MINUTES,
+  HOUR_SECONDS,
+  MINUTE_MS,
+  MINUTE_SECONDS,
+  SECOND_MS,
+} from './time-units'
 
 /**
  * Writes how long something took, at the scale the span falls in: milliseconds while it is one, seconds to a
- * tenth once it passes one, and minutes and seconds once it passes one of those.
+ * tenth once it passes one, minutes and seconds once it passes one of those, and hours and minutes past an hour.
  *
  * @param durationMs - The span, in milliseconds.
  *
@@ -19,12 +26,19 @@ export function formatDurationMs(durationMs: number): string {
     return `${(durationMs / SECOND_MS).toFixed(1)} s`
   }
 
-  // Past a minute, whole minutes and the seconds left over
-  const minutes = Math.floor(durationMs / MINUTE_MS)
-  const seconds = Math.round((durationMs % MINUTE_MS) / SECOND_MS)
+  // Past a minute, whole seconds. Rounded before splitting, so 119.7 s carries into "2 m 0 s", never "1 m 60 s"
+  const totalSeconds = Math.round(durationMs / SECOND_MS)
 
-  // The leftover seconds can round up to a whole minute, which reads as "1 m 60 s" unless it's carried
-  return seconds === MINUTE_SECONDS ? `${minutes + 1} m 0 s` : `${minutes} m ${seconds} s`
+  // Under an hour, whole minutes and the seconds left over
+  if (totalSeconds < HOUR_SECONDS) {
+    return `${Math.floor(totalSeconds / MINUTE_SECONDS)} m ${totalSeconds % MINUTE_SECONDS} s`
+  }
+
+  // Past an hour, seconds are noise, so the span is read in whole minutes, rounded before splitting too
+  const totalMinutes = Math.round(durationMs / MINUTE_MS)
+
+  // Whole hours and the minutes left over
+  return `${Math.floor(totalMinutes / HOUR_MINUTES)} h ${totalMinutes % HOUR_MINUTES} m`
 }
 
 /**

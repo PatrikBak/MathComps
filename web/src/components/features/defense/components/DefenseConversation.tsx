@@ -308,7 +308,8 @@ function DefenseConversationForTarget({
         noteMark={null}
         // A rejected draft is what a guard kept from the student, so their own view never offers one
         draftsMark={null}
-        // How long the examiner took is tuning data, and reads to a student as an apology for the wait
+        // How long each turn took is review data. The examiner's reads to a student as an apology for the wait,
+        // and their own as being watched
         turnDurationsMs={null}
         footer={
           canAnswer || isFreshBesideSaved ? (

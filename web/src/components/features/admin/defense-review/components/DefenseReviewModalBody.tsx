@@ -15,6 +15,7 @@ import type { UseDefenseReviewPanelsResult } from '../hooks/use-defense-review-p
 import { useNoteOnReply } from '../hooks/use-note-on-reply'
 import type { DefenseReviewTabId } from '../model/defense-review-tabs'
 import type { DefenseReviewDetail, DefenseTurnAttempt } from '../model/defense-review-types'
+import { resolveTurnDurationsMs } from '../model/defense-turn-durations'
 import { DefenseReviewConfigTab } from './DefenseReviewConfigTab'
 import { DefenseReviewNotesTab } from './DefenseReviewNotesTab'
 import { StudentVerdict } from './StudentVerdict'
@@ -85,16 +86,10 @@ export function DefenseReviewModalBody({
     [attemptsByTurn]
   )
 
-  // How long each reply took, which is its drafts added up: they are drafted one after another
+  // How long each turn took its author
   const turnDurationsMs = useMemo(
-    () =>
-      new Map(
-        [...attemptsByTurn].map(([turnId, attempts]) => [
-          turnId,
-          attempts.reduce((total, attempt) => total + attempt.durationMs, 0),
-        ])
-      ),
-    [attemptsByTurn]
+    () => resolveTurnDurationsMs(detail.turns, attemptsByTurn),
+    [detail.turns, attemptsByTurn]
   )
 
   // Where the reading stops, drawn only where it has read turns above it: over the whole conversation it
@@ -132,7 +127,7 @@ export function DefenseReviewModalBody({
           draftCounts: draftCounts,
           onOpen: setDraftsTurnId,
         }}
-        // And how long each took, on the replies that kept their drafts
+        // And how long each turn took whoever wrote it, where that was measured
         turnDurationsMs={turnDurationsMs}
         // Notes hang off a reply by its place, so the reader needs the places to be there to read
         showPositions

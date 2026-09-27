@@ -9,6 +9,7 @@ import { formatDurationMs } from '@/components/shared/utils/duration-utils'
 
 import type { DefenseAttemptCall, DefenseTurnAttempt } from '../model/defense-review-types'
 import { EXAMINER_STEPS } from '../model/defense-review-types'
+import { totalDurationMs } from '../model/defense-turn-durations'
 
 /**
  * Props for the {@link TurnAttemptsModal} component.
@@ -78,17 +79,6 @@ export function TurnAttemptsModal({ attempts, onClose }: TurnAttemptsModalProps)
       </div>
     </Modal>
   )
-}
-
-/**
- * How long a run took: its drafts added up, since they're written one after another.
- *
- * @param drafts - The run's drafts.
- *
- * @returns The run's duration, in milliseconds.
- */
-function totalDurationMs(drafts: DefenseTurnAttempt[]): number {
-  return drafts.reduce((total, draft) => total + draft.durationMs, 0)
 }
 
 /**
