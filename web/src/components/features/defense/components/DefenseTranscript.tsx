@@ -78,7 +78,7 @@ type DefenseTranscriptProps = {
   noteMark: TurnMark | null
   /** Reading the drafts behind a reply; null where the reader isn't allowed to see them. */
   draftsMark: TurnDraftsMark | null
-  /** How long each reply took the examiner, by reply; null where the reader isn't shown timings. */
+  /** How long each turn took its author, by turn; null where the reader isn't shown timings. */
   turnDurationsMs: ReadonlyMap<string, number> | null
   /** Whether to number the turns, so something outside the conversation can refer to one by its place. */
   showPositions?: boolean

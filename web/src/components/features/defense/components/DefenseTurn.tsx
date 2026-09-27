@@ -92,7 +92,7 @@ type DefenseTurnProps = {
   noteMark: TurnMark | null
   /** Reading the drafts behind this reply; null where the reader isn't allowed to see them. */
   draftsMark: TurnDraftsMark | null
-  /** How long the examiner took over this reply, in milliseconds; null where the reader is shown no timings. */
+  /** How long its author took over this turn, in milliseconds; null where no timing is shown for it. */
   durationMs: number | null
   /** The localized role label shown above the message. */
   label: string

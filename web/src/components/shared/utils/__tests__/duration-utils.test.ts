@@ -32,6 +32,22 @@ describe('formatDurationMs', () => {
     // 119.7s would otherwise read as "1 m 60 s"
     expect(formatDurationMs(119_700)).toBe('2 m 0 s')
   })
+
+  it('switches to hours at one hour', () => {
+    // The boundary itself belongs to hours
+    expect(formatDurationMs(3_600_000)).toBe('1 h 0 m')
+    // Just under it is still minutes
+    expect(formatDurationMs(3_599_000)).toBe('59 m 59 s')
+    // And a span past a day stays in hours
+    expect(formatDurationMs(25 * 3_600_000 + 12 * 60_000)).toBe('25 h 12 m')
+  })
+
+  it('carries a span that rounds up to a whole hour', () => {
+    // 3599.6s would otherwise read as "60 m 0 s"
+    expect(formatDurationMs(3_599_600)).toBe('1 h 0 m')
+    // And 119m 40s as "1 h 60 m"
+    expect(formatDurationMs(7_180_000)).toBe('2 h 0 m')
+  })
 })
 
 describe('formatClockRemaining', () => {
