@@ -13,8 +13,8 @@ import { noteChoiceChipClass } from './NoteChoiceChip'
 type NoteTarget = {
   /** The reply itself. */
   id: string
-  /** Where it sits in the conversation, 1-based. */
-  sequence: number
+  /** Which of the examiner's replies it is, counted by the student message it answers. */
+  number: number
 }
 
 /**
@@ -134,7 +134,7 @@ export function NoteTargetScrubber({ targets, turnId, onTurnIdChange }: NoteTarg
         onChange={pickThumbTarget}
         aria-label={t('target')}
         aria-valuetext={
-          thumbTarget === undefined ? undefined : t('reply', { sequence: thumbTarget.sequence })
+          thumbTarget === undefined ? undefined : t('reply', { sequence: thumbTarget.number })
         }
         className={cn(
           'h-4 min-w-0 flex-1 cursor-pointer appearance-none bg-transparent',
@@ -152,9 +152,9 @@ export function NoteTargetScrubber({ targets, turnId, onTurnIdChange }: NoteTarg
           'shrink-0 text-right text-xs tabular-nums',
           turnId === null ? 'text-muted' : 'font-medium text-foreground'
         )}
-        style={{ width: `${String(targets.at(-1)?.sequence ?? '').length}ch` }}
+        style={{ width: `${String(targets.at(-1)?.number ?? '').length}ch` }}
       >
-        {thumbTarget?.sequence}
+        {thumbTarget?.number}
       </span>
     </div>
   )

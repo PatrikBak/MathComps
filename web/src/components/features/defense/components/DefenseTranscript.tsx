@@ -9,7 +9,7 @@ import { Button } from '@/components/shared/components/Button'
 import { useFollowTail } from '@/hooks/use-follow-tail'
 
 import { useRevealPointedTurn } from '../hooks/use-reveal-pointed-turn'
-import { examinerReplyId } from '../model/defense-conversation-model'
+import { examinerReplyId, replyNumber } from '../model/defense-conversation-model'
 import type { DefenseTurnReport, Turn, TurnRole } from '../model/defense-types'
 import { DefenseTurn, type TurnDraftsMark, type TurnMark } from './DefenseTurn'
 import { ThinkingIndicator } from './ThinkingIndicator'
@@ -80,8 +80,8 @@ type DefenseTranscriptProps = {
   draftsMark: TurnDraftsMark | null
   /** How long each turn took its author, by turn; null where the reader isn't shown timings. */
   turnDurationsMs: ReadonlyMap<string, number> | null
-  /** Whether to number the turns, so something outside the conversation can refer to one by its place. */
-  showPositions?: boolean
+  /** Whether to number the examiner's replies, so something outside the conversation can refer to one. */
+  showReplyNumbers?: boolean
   /** The turn something outside the conversation currently points at; null when nothing does. */
   pointedAtTurnId?: string | null
   /** Rendered at the foot of the pane, where the conversation ends; null when there is nothing to say. */
@@ -109,7 +109,7 @@ export function DefenseTranscript({
   noteMark,
   draftsMark,
   turnDurationsMs,
-  showPositions = false,
+  showReplyNumbers = false,
   pointedAtTurnId = null,
   footer,
 }: DefenseTranscriptProps) {
@@ -208,7 +208,7 @@ export function DefenseTranscript({
 
                   <DefenseTurn
                     turn={turn}
-                    position={showPositions ? index + 1 : null}
+                    replyNumber={showReplyNumbers && replyId !== null ? replyNumber(index) : null}
                     isPointedAt={isPointedAt}
                     label={roleLabels[turn.role]}
                     animate={index === justArrivedIndex}

@@ -199,6 +199,21 @@ export function examinerReplyId(turn: Turn, index: number): string | null {
 }
 
 /**
+ * Counts one of the examiner's replies by the student message it answers, so her first answer is reply 1.
+ *
+ * Leans on the conversation alternating: the opener sits at 0, and every student message is stored together with
+ * the reply to it, so the reply at 2k answers the student's k-th message.
+ *
+ * @param sequence - The reply's 0-based place in the conversation.
+ *
+ * @returns Which of the student's messages it answers, 1-based.
+ */
+export function replyNumber(sequence: number): number {
+  // Each student message and its reply take two places after the opener
+  return sequence / 2
+}
+
+/**
  * Finds the first turn to have arrived after a given moment, which is where a reader coming back to the
  * conversation picks up.
  *

@@ -82,8 +82,11 @@ type DefenseTurnProps = {
   canRewind: boolean
   /** The message this turn renders. */
   turn: Turn
-  /** Its 1-based place in the conversation, shown beside the role; null where nothing counts turns. */
-  position: number | null
+  /**
+   * Which of the examiner's replies it is, shown beside the role; null on any other turn, or where the replies go
+   * unnumbered.
+   */
+  replyNumber: number | null
   /** Whether something outside the conversation currently points at this turn. */
   isPointedAt: boolean
   /** Picking the conversation up again from here; null where the reader keeps no place in it. */
@@ -122,7 +125,7 @@ type DefenseTurnProps = {
  */
 export function DefenseTurn({
   turn,
-  position,
+  replyNumber,
   isPointedAt,
   label,
   animate,
@@ -157,8 +160,8 @@ export function DefenseTurn({
     draftsMark === null || turnId === null ? null : (draftsMark.draftCounts.get(turnId) ?? null)
 
   // Whether anything is written across the top of the turn: its author on a turn with no box to say who
-  // wrote it, its place where something outside the conversation counts turns, or how long it took
-  const hasHeaderRow = !style.hasOwnBox || position !== null || durationMs !== null
+  // wrote it, its number where the replies are counted, or how long it took
+  const hasHeaderRow = !style.hasOwnBox || replyNumber !== null || durationMs !== null
 
   return (
     <div
@@ -189,10 +192,10 @@ export function DefenseTurn({
           !hasHeaderRow && 'pointer-events-none absolute inset-x-0 top-0 justify-end px-3.5 py-2'
         )}
       >
-        {/* Where the turn sits, who authored it, and how long it took them */}
+        {/* Which reply the turn is, who authored it, and how long it took them */}
         <div className={cn('flex min-w-0 items-baseline gap-2', !hasHeaderRow && 'hidden')}>
-          {position !== null && (
-            <span className="text-[11px] font-bold tabular-nums text-muted">{position}</span>
+          {replyNumber !== null && (
+            <span className="text-[11px] font-bold tabular-nums text-muted">{replyNumber}</span>
           )}
 
           {!style.hasOwnBox && <div className={cn(TURN_LABEL_CLASS, style.label)}>{label}</div>}

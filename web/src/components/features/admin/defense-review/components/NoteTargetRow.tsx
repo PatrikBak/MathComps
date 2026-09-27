@@ -30,9 +30,9 @@ function NoteTargetChips({ targets, turnId, onTurnIdChange }: NoteTargetChoicePr
         <NoteChoiceChip
           key={target?.id ?? 'conversation'}
           groupName={groupName}
-          label={target === null ? t('wholeConversation') : String(target.sequence)}
+          label={target === null ? t('wholeConversation') : String(target.number)}
           accessibleLabel={
-            target === null ? t('onConversation') : t('onTurn', { sequence: target.sequence })
+            target === null ? t('onConversation') : t('onTurn', { sequence: target.number })
           }
           isSelected={turnId === (target?.id ?? null)}
           onSelect={() => onTurnIdChange(target?.id ?? null)}
