@@ -25,12 +25,14 @@ type UseDefenseReviewQueueResult = {
   hasMore: boolean
   /** Whether another page is on its way. */
   isLoadingMore: boolean
+  /** Whether the conversations already loaded are being read again. */
+  isRefreshing: boolean
   /** The state of the fetch. */
   uiState: QueryUiState
   /** Loads the next page of conversations. */
   loadMore: () => void
-  /** Runs the query again after it failed. */
-  retry: () => void
+  /** Reads the queue again, every page loaded so far included. */
+  refetch: () => void
 }
 
 /**
@@ -81,8 +83,9 @@ export function useDefenseReviewQueue(filter: DefenseReviewFilter): UseDefenseRe
     totalConversations: paged.totalCount,
     hasMore: paged.hasMore,
     isLoadingMore: paged.isLoadingMore,
+    isRefreshing: paged.isRefreshing,
     uiState: paged.uiState,
     loadMore: paged.loadMore,
-    retry: paged.retry,
+    refetch: paged.refetch,
   }
 }

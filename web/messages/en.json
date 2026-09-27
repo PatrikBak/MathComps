@@ -171,6 +171,7 @@
         "solution": "Reference solution and hints",
         "statement": "Statement"
       },
+      "refresh": "Refresh",
       "shortcuts": {
         "next": "next",
         "nextUnread": "next unread",

@@ -50,10 +50,12 @@ type UsePagedQueryResult<TItem> = {
   hasMore: boolean
   /** Whether another page is on its way. */
   isLoadingMore: boolean
+  /** Whether the pages already loaded are being read again. */
+  isRefreshing: boolean
   /** Asks for the next page, ignoring an ask there is nothing to answer. */
   loadMore: () => void
-  /** Runs the query again after it gave up. */
-  retry: () => void
+  /** Reads the query again, every page loaded so far included. */
+  refetch: () => void
   /** The state of the fetch. */
   uiState: QueryUiState
 }
@@ -107,18 +109,24 @@ export function usePagedQuery<TItem>({
   const uiState = useQueryUiState(query)
 
   // The query's own handles, which stay put across renders where the result object around them doesn't
-  const { hasNextPage, isFetchingNextPage, fetchNextPage, refetch } = query
+  const {
+    hasNextPage,
+    isFetchingNextPage,
+    isRefetching,
+    fetchNextPage,
+    refetch: refetchPages,
+  } = query
 
   // Asks for the next page, unless one is already on its way
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) void fetchNextPage()
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  // Runs the query again after it gave up. React Query's own refetch ignores `enabled`, so the readiness
-  // the gate above stands for has to be asked again here
-  const retry = useCallback(() => {
-    if (enabled && apiCall !== null) void refetch()
-  }, [enabled, apiCall, refetch])
+  // Reads every loaded page again. React Query's own refetch ignores `enabled`, so the readiness the gate
+  // above stands for has to be asked again here
+  const refetch = useCallback(() => {
+    if (enabled && apiCall !== null) void refetchPages()
+  }, [enabled, apiCall, refetchPages])
 
   // The pages as loaded, left for the caller to flatten: what a page holds is its own business. Held steady
   // across renders so a caller memoizing off it isn't recomputing against a fresh empty array every time.
@@ -130,8 +138,9 @@ export function usePagedQuery<TItem>({
     totalCount: pages.length === 0 ? 0 : pages[0].totalCount,
     hasMore: hasNextPage,
     isLoadingMore: isFetchingNextPage,
+    isRefreshing: isRefetching,
     loadMore,
-    retry,
+    refetch,
     uiState,
   }
 }

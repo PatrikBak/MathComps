@@ -1,7 +1,7 @@
 'use client'
 
 import { type HotkeyItem, useHotkeys } from '@mantine/hooks'
-import { MailOpen, StickyNote } from 'lucide-react'
+import { MailOpen, RefreshCw, StickyNote } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -148,7 +148,7 @@ export function DefenseReviewQueue() {
         <h1 className="text-2xl font-bold text-foreground hyphens-none">{t('title')}</h1>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* Clearing what is loaded, disabled rather than absent so the button beside it never shifts */}
+          {/* Clearing what is loaded, disabled rather than absent so the buttons after it never shift */}
           <Button
             variant="outline"
             size="sm"
@@ -170,6 +170,20 @@ export function DefenseReviewQueue() {
           >
             <StickyNote size={14} aria-hidden="true" />
             {t('openNotes')}
+          </Button>
+
+          {/* Reading the queue again, for conversations that moved since it loaded. Only an icon, so
+              it carries its name as a hover hint too */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8 sm:size-9"
+            loading={queue.isRefreshing}
+            aria-label={t('refresh')}
+            title={t('refresh')}
+            onClick={queue.refetch}
+          >
+            <RefreshCw size={14} aria-hidden="true" />
           </Button>
         </div>
       </div>
@@ -218,7 +232,7 @@ export function DefenseReviewQueue() {
         <DefenseReviewPlaceholder
           uiState={queue.uiState}
           isFiltered={activeCount > 0}
-          onRetry={queue.retry}
+          onRetry={queue.refetch}
           onClearFilters={clearAll}
         />
       )}
