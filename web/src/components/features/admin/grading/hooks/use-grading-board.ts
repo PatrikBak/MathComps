@@ -2,7 +2,10 @@ import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
 import { describeUser } from '@/components/features/admin/model/user-identity'
+import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import { useAddressSync } from '@/hooks/use-address-sync'
 import { useApiQuery } from '@/hooks/use-api-query'
+import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 import { useSteppedSelection, type UseSteppedSelectionResult } from '@/hooks/use-stepped-selection'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
@@ -20,9 +23,18 @@ import {
   sortRows,
   walkOrder,
 } from '../model/grading-board'
-import type { GradeSummary, GradingCompetition, GradingPair } from '../model/grading-types'
+import {
+  type GradeSummary,
+  type GradingCompetition,
+  type GradingGroup,
+  type GradingPair,
+  pairKey,
+  splitPairKey,
+} from '../model/grading-types'
+import { fromGradingQuery, toGradingQuery } from '../model/grading-url'
 import { fetchGradingBoard } from '../services/grading-service'
 import { gradingBoardQueryKey } from './grading-cache'
+import { useGradeConversation } from './use-grade-conversation'
 
 /** Stands in for any map while there is no competition to fill it. */
 const EMPTY_MAP = new Map<string, never>()
@@ -31,14 +43,18 @@ const EMPTY_MAP = new Map<string, never>()
  * What {@link useGradingBoard} hands back.
  */
 type UseGradingBoardResult = {
+  /** The group being graded; null until it has been read. */
+  group: GradingGroup | null
   /** The group's competitions; empty until they have been read. */
   competitions: GradingCompetition[]
+  /** How many students entered any of the group's competitions, each counted once however many they entered. */
+  studentCount: number
   /** How reading the group's competitions is going. */
   uiState: QueryUiState
   /** The competition on screen; null while there is none. */
   competition: GradingCompetition | null
-  /** Puts another competition on screen, by its round. */
-  selectCompetition: (roundId: string) => void
+  /** Puts another competition on screen, by its category. */
+  selectCategory: (category: HostedCompetitionCategory) => void
   /** The rows of the competition on screen, in the order asked for. */
   rows: BoardRow[]
   /** How the rows are ordered. */
@@ -53,11 +69,20 @@ type UseGradingBoardResult = {
   progress: GradingProgress
   /** Which pair is open, and the walk through every pair with a conversation. */
   selection: UseSteppedSelectionResult
+  /** Which of the open pair's conversations is showing, counting from one. */
+  conversation: number
+  /** Shows another of the open pair's conversations, by its number. */
+  selectConversation: (number: number) => void
 }
 
 /**
  * One group's grading board: its competitions, the one on screen laid out entrant by problem, and the walk
  * through every pair with a conversation.
+ *
+ * The address carries the category on screen, the open pair and its conversation, so a reload lands back where
+ * the grader was and a link can be sent to another. Whatever an address names that the board doesn't hold falls
+ * away once the board arrives: a category the group doesn't run, a pair the competition on screen doesn't walk,
+ * and a conversation past the ones the pair held.
  *
  * @param groupSlug - What addresses the group.
  *
@@ -67,7 +92,7 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
   // Profile copy
   const tProfile = useTranslations('profile')
 
-  // The group's competitions, entrants and grades
+  // The group, its competitions, entrants and grades
   const { data, uiState } = useApiQuery({
     queryKey: gradingBoardQueryKey(groupSlug),
     fetch: (apiCall) => fetchGradingBoard(apiCall, groupSlug),
@@ -76,17 +101,41 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
     ...cachePolicy.userData,
   })
 
-  // The competitions, none until they arrive
-  const competitions = useMemo(() => data ?? [], [data])
+  // The group, once it has arrived
+  const group = data ?? null
 
-  // The round picked; null until one is
-  const [selectedRoundId, selectCompetition] = useState<string | null>(null)
+  // The competitions, none until they arrive
+  const competitions = useMemo(() => data?.competitions ?? [], [data])
+
+  // Everybody who entered anything, each once
+  const studentCount = useMemo(
+    () =>
+      new Set(competitions.flatMap((candidate) => candidate.entrants.map((entrant) => entrant.id)))
+        .size,
+    [competitions]
+  )
+
+  // What the address was asking for when the board opened
+  const initialAddress = useInitialUrlState(fromGradingQuery)
+
+  // The category picked; null until one is
+  const [selectedCategory, selectCategory] = useState(initialAddress.category)
 
   // The competition on screen: the one picked, else the first
   const competition =
-    competitions.find((candidate) => candidate.roundId === selectedRoundId) ??
+    competitions.find((candidate) => candidate.category === selectedCategory) ??
     competitions[0] ??
     null
+
+  // A category the group doesn't run falls away
+  if (
+    competition !== null &&
+    selectedCategory !== null &&
+    competition.category !== selectedCategory
+  ) {
+    // Back on the first
+    selectCategory(null)
+  }
 
   // How the rows are ordered, kept across competitions
   const [sort, setSort] = useState<BoardSort>({ by: 'name', ascending: true })
@@ -118,8 +167,44 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
     [competition, rowsByName, grades]
   )
 
+  // The pair the address opened on, by its key; null where it named none
+  const initialOpenKey =
+    initialAddress.open === null
+      ? null
+      : pairKey(initialAddress.open.userId, initialAddress.open.problemId)
+
   // Which pair is open, and the walk from it
-  const selection = useSteppedSelection(order, null)
+  const selection = useSteppedSelection(order, initialOpenKey)
+
+  // A pair the competition on screen doesn't walk falls away
+  if (competition !== null && selection.openId !== null && !order.includes(selection.openId)) {
+    // Back to the board
+    selection.close()
+  }
+
+  // Which of the open pair's conversations is showing
+  const { conversation, selectConversation } = useGradeConversation(
+    selection.openId,
+    initialAddress.open?.conversation ?? 1
+  )
+
+  // A conversation past the ones the open pair held falls away
+  if (
+    competition !== null &&
+    selection.openId !== null &&
+    conversation > 1 &&
+    conversation > (grades.get(selection.openId)?.conversationCount ?? 0)
+  ) {
+    // Back on the first
+    selectConversation(1)
+  }
+
+  // The open pair as the address names it
+  const open =
+    selection.openId === null ? null : { ...splitPairKey(selection.openId), conversation }
+
+  // Keep the address saying what is on screen, so a reload comes back to it and it can be handed on
+  useAddressSync(toGradingQuery({ category: selectedCategory, open }))
 
   // A function which orders the rows by a column
   const sortBy = (by: SortBy) => setSort((current) => nextSort(current, by))
@@ -132,10 +217,12 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
 
   // The board, and every way of moving about it
   return {
+    group,
     competitions,
+    studentCount,
     uiState,
     competition,
-    selectCompetition,
+    selectCategory,
     rows,
     sort,
     sortBy,
@@ -143,5 +230,7 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
     pairs,
     progress,
     selection,
+    conversation,
+    selectConversation,
   }
 }

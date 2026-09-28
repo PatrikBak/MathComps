@@ -4,7 +4,7 @@ import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
 import { LIST_PATH } from './support/competitions'
-import { installGradingBackend } from './support/grading-backend'
+import { GROUP_NAME, installGradingBackend } from './support/grading-backend'
 import { installHostedBackend } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
@@ -68,6 +68,75 @@ async function openGrade(page: Page, student: string, problemNumber: number): Pr
   return dialog
 }
 
+/**
+ * Reads where the page's address stands, its path and query without the origin.
+ *
+ * @param page - The page.
+ *
+ * @returns The path and the query, the query with its question mark.
+ */
+function addressOf(page: Page): string {
+  // The address as the page holds it
+  const address = new URL(page.url())
+
+  // Everything past the origin
+  return `${address.pathname}${address.search}`
+}
+
+declare global {
+  interface Window {
+    /** Tells the test run that a dialog has reached the page. */
+    reportDialog: () => void
+  }
+}
+
+/**
+ * Counts every dialog that reaches the page, however briefly.
+ *
+ * A dialog opened and closed again before an assertion is reached leaves the page looking as if it never
+ * opened, so a check taken afterwards passes either way. Watching for them as they arrive is what tells a
+ * link that opened nothing from one that opened a dialog and took it back down.
+ *
+ * @param page - The page to watch, before it loads anything.
+ *
+ * @returns How many dialogs have reached the page so far.
+ */
+async function countDialogs(page: Page): Promise<() => number> {
+  // Every dialog that reached the page
+  let dialogs = 0
+
+  // The channel the page reports each one through
+  await page.exposeFunction('reportDialog', () => {
+    dialogs += 1
+  })
+
+  // Every document from the next one on, since the one under test is about to load
+  await page.addInitScript(() => {
+    // The dialogs already reported, so one that stays up counts once
+    const reported = new WeakSet<Element>()
+
+    // A function which reports every dialog on the page not reported yet
+    const reportNewDialogs = () => {
+      document.querySelectorAll('[role="dialog"]').forEach((dialog) => {
+        // Already counted
+        if (reported.has(dialog)) return
+
+        // Remembered, so it counts once
+        reported.add(dialog)
+
+        // And counted
+        window.reportDialog()
+      })
+    }
+
+    // The document itself, whose root does not exist yet this early
+    new MutationObserver(reportNewDialogs).observe(document, { childList: true, subtree: true })
+  })
+
+  // Hand back the count on each read
+  return () => dialogs
+}
+
 test.describe('the way into grading', () => {
   test('leads from the open and closed rounds on the Mathilding page, and from no other', async ({
     page,
@@ -101,11 +170,11 @@ test.describe('the way into grading', () => {
     // Followed
     await page.locator('a[href="/en/admin/grading/past-21"]').click()
 
-    // Onto that round's board
+    // Onto that round's board, named the way the Mathilding page names it, with the days it took entries
     await expect(page.getByRole('heading', { name: copy.title })).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
-    await expect(page.getByText('past-21', { exact: true })).toBeVisible()
+    await expect(page.getByText(new RegExp(`^${GROUP_NAME}, .+ – .+$`))).toBeVisible()
     await expect(page.getByRole('rowheader', { name: 'Ada' })).toBeVisible()
   })
 })
@@ -124,6 +193,9 @@ test.describe('the grading board', () => {
     // By name to begin with
     await expect(names).toHaveText(['Ada', 'Bruno', 'Cyril'], { timeout: SETTLE_TIMEOUT_MS })
 
+    // Five entries by four students, Ada having entered both, counted once
+    await expect(page.getByText('4 students', { exact: true })).toBeVisible()
+
     // Sorted by total
     await page.getByRole('button', { name: copy.grid.total }).click()
 
@@ -134,7 +206,7 @@ test.describe('the grading board', () => {
     await page.getByRole('button', { name: /^Intermediate/ }).click()
 
     // Its own students
-    await expect(names).toHaveText(['Dora'])
+    await expect(names).toHaveText(['Ada', 'Dora'])
   })
 
   test('reads a pair whole, and walks every pair with a conversation', async ({ page }) => {
@@ -183,6 +255,173 @@ test.describe('the grading board', () => {
     await expect(dialog.getByText('5 of 5', { exact: true })).toBeVisible()
     await expect(dialog.getByRole('button', { name: NEXT, exact: true })).toBeDisabled()
   })
+})
+
+test.describe("the board's address", () => {
+  test('opens on the category, the grade and the conversation a link names', async ({ page }) => {
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // A link to Dora's second conversation, on the competition that isn't first
+    await page.goto(`${BOARD_PATH}?category=intermediate&student=dora&problem=q1&conversation=2`)
+
+    // Which opens her grade
+    const dialog = page.getByRole('dialog')
+    await expect(dialog.getByText('Intermediate, problem 1')).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+    await expect(dialog.getByText('Dora', { exact: true })).toBeVisible()
+
+    // On her second conversation
+    await expect(dialog.getByRole('button', { name: /^Conversation 2/ })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+    await expect(dialog.getByText('Answer 2 by dora on q1.')).toBeVisible()
+
+    // The dialog closed
+    await page.keyboard.press('Escape')
+
+    // Onto the competition the link named
+    await expect(page.getByRole('button', { name: /^Intermediate/ })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+    await expect(page.getByRole('rowheader')).toHaveText(['Ada', 'Dora'])
+
+    // Whose address now names the competition alone
+    await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?category=intermediate`)
+  })
+
+  test('says what is on screen, without adding to the history', async ({ page }) => {
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // Ada's first problem, opened from its cell
+    const dialog = await openGrade(page, 'Ada', 1)
+
+    // How many entries the history holds with the board open
+    const historyLength = await page.evaluate(() => history.length)
+
+    // Named by the student and the problem, the competition being the first
+    await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?student=ada&problem=p1`)
+
+    // Her second conversation, picked
+    await dialog.getByRole('button', { name: /^Conversation 2/ }).click()
+
+    // Named too
+    await expect
+      .poll(() => addressOf(page))
+      .toBe(`${BOARD_PATH}?student=ada&problem=p1&conversation=2`)
+
+    // One step along the walk
+    await page.keyboard.press('j')
+
+    // Onto Bruno, on his only conversation, which needs no number
+    await expect(dialog.getByText('Bruno', { exact: true })).toBeVisible()
+    await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?student=bruno&problem=p1`)
+
+    // And back
+    await page.keyboard.press('k')
+
+    // Onto Ada's first conversation, where every grade opens, whichever was showing when she was left
+    await expect(dialog.getByText('Answer 1 by ada on p1.')).toBeVisible()
+    await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?student=ada&problem=p1`)
+
+    // The dialog closed
+    await page.keyboard.press('Escape')
+
+    // Which leaves the bare board
+    await expect.poll(() => addressOf(page)).toBe(BOARD_PATH)
+
+    // The other competition
+    await page.getByRole('button', { name: /^Intermediate/ }).click()
+
+    // Named
+    await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?category=intermediate`)
+
+    // Every change written over the one entry rather than onto a new one
+    expect(await page.evaluate(() => history.length)).toBe(historyLength)
+
+    // Reloaded
+    await page.reload()
+
+    // Back on the competition it was showing
+    await expect(page.getByRole('button', { name: /^Intermediate/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+      { timeout: SETTLE_TIMEOUT_MS }
+    )
+  })
+
+  test('falls back to the first competition and the first conversation where a link names neither', async ({
+    page,
+  }) => {
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // A link to Ada's first problem naming a competition the group doesn't run and a conversation she never held
+    await page.goto(`${BOARD_PATH}?category=advanced&student=ada&problem=p1&conversation=9`)
+
+    // Which opens her grade
+    const dialog = page.getByRole('dialog')
+    await expect(dialog.getByText('Elementary, problem 1')).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // On her first conversation
+    await expect(dialog.getByRole('button', { name: /^Conversation 1/ })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+    await expect(dialog.getByText('Answer 1 by ada on p1.')).toBeVisible()
+
+    // Whose address drops both, naming what is on screen
+    await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?student=ada&problem=p1`)
+
+    // The dialog closed
+    await page.keyboard.press('Escape')
+
+    // Over the first competition
+    await expect(page.getByRole('button', { name: /^Elementary/ })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+  })
+
+  // Links naming a grade the board on screen doesn't walk, and the address each leaves once the board says so
+  const unwalked = [
+    ['a pair nobody spoke about', 'student=bruno&problem=p2', ''],
+    ['a student nobody is', 'student=nobody&problem=p1', ''],
+    [
+      'a pair on another competition',
+      'category=intermediate&student=ada&problem=p1',
+      '?category=intermediate',
+    ],
+  ] as const
+
+  // One test per link
+  for (const [label, query, settled] of unwalked) {
+    test(`opens nothing for ${label}`, async ({ page }) => {
+      // Every dialog the page puts up, from the first document on
+      const dialogs = await countDialogs(page)
+
+      // A backend serving the test group's board
+      await installGradingBackend(page, GROUP_SLUG)
+
+      // The link
+      await page.goto(`${BOARD_PATH}?${query}`)
+
+      // The board, once it has arrived
+      await expect(page.getByRole('rowheader').first()).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+      // Its address, the grade dropped
+      await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}${settled}`)
+
+      // And no dialog, not even for a moment
+      expect(dialogs()).toBe(0)
+    })
+  }
 })
 
 test.describe('a grade', () => {

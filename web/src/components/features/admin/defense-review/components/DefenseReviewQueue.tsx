@@ -7,10 +7,10 @@ import { useState } from 'react'
 import { Button } from '@/components/shared/components/Button'
 import { Kbd } from '@/components/shared/components/Kbd'
 import { LoadMore } from '@/components/shared/components/LoadMore'
+import { useAddressSync } from '@/hooks/use-address-sync'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 import { STEP_KEYS, useStepHotkeys } from '@/hooks/use-step-hotkeys'
 
-import { useDefenseReviewAddressSync } from '../hooks/use-defense-review-address'
 import { useDefenseReviewFacets } from '../hooks/use-defense-review-facets'
 import { useDefenseReviewFilters } from '../hooks/use-defense-review-filters'
 import { useDefenseReviewFocusReturn } from '../hooks/use-defense-review-focus-return'
@@ -19,7 +19,7 @@ import { useDefenseReviewReadState } from '../hooks/use-defense-review-read-stat
 import { useDefenseReviewSelection } from '../hooks/use-defense-review-selection'
 import { useDefenseReviewUnread } from '../hooks/use-defense-review-unread'
 import { NEXT_UNREAD_KEY } from '../model/defense-review-stepping'
-import { fromDefenseReviewQuery } from '../model/defense-review-url'
+import { fromDefenseReviewQuery, toDefenseReviewQuery } from '../model/defense-review-url'
 import { AdminNoteFeedModal } from './AdminNoteFeedModal'
 import { DefenseReviewCard } from './DefenseReviewCard'
 import { DefenseReviewFilterBar } from './DefenseReviewFilterBar'
@@ -99,7 +99,7 @@ export function DefenseReviewQueue() {
   )
 
   // Keep the address saying what is on screen, so a reload comes back to it and it can be handed on
-  useDefenseReviewAddressSync({ filter, openId: selection.openId })
+  useAddressSync(toDefenseReviewQuery({ filter, openId: selection.openId }))
 
   // Whether every note ever written is showing
   const [isFeedOpen, setIsFeedOpen] = useState(false)

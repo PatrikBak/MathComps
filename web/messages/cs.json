@@ -209,6 +209,7 @@
         "student": "Student",
         "total": "Celkem"
       },
+      "groupSubtitle": "{name}, {opens} – {closes}",
       "loadFailed": "Hodnocení se nepodařilo načíst",
       "pairSubtitle": "{category}, úloha {number}",
       "panel": {
@@ -981,7 +982,8 @@
   "plurals": {
     "conversations": "{count, plural, =1 {# konverzace} =2 {# konverzace} =3 {# konverzace} =4 {# konverzace} other {# konverzací}}",
     "problems": "{count, plural, =1 {# úloha} =2 {# úlohy} =3 {# úlohy} =4 {# úlohy} other {# úloh}}",
-    "replies": "{count, plural, =1 {# odpověď} =2 {# odpovědi} =3 {# odpovědi} =4 {# odpovědi} other {# odpovědí}}"
+    "replies": "{count, plural, =1 {# odpověď} =2 {# odpovědi} =3 {# odpovědi} =4 {# odpovědi} other {# odpovědí}}",
+    "students": "{count, plural, =1 {# student} =2 {# studenti} =3 {# studenti} =4 {# studenti} other {# studentů}}"
   },
   "privacy": {
     "lastUpdated": "Poslední aktualizace: 2. září 2026",

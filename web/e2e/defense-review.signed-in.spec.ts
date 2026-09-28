@@ -127,6 +127,53 @@ test.describe('the conversation dialog', () => {
     await expect(dialog).toBeHidden()
   })
 
+  test('keeps the open conversation in the address, and opens on the one a link names', async ({
+    page,
+  }) => {
+    // Two conversations to walk
+    await installQueueBackend(page, [
+      conversationOf('first@students.test', '2026-09-27T10:00:00Z'),
+      conversationOf('second@students.test', '2026-09-27T09:00:00Z'),
+    ])
+
+    // A function which reads the query the address carries
+    const queryOf = () => new URL(page.url()).search
+
+    // Open the queue
+    await page.goto(QUEUE_PATH)
+
+    // Open the first conversation from its card
+    await page.getByText('first@students.test').click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The dialog it opens in
+    const dialog = page.getByRole('dialog')
+    await expect(dialog.getByText('1 of 2', { exact: true })).toBeVisible()
+
+    // Named in the address
+    await expect.poll(queryOf).toBe('?open=session-first%40students.test')
+
+    // One along
+    await page.keyboard.press('j')
+
+    // Named in its place
+    await expect.poll(queryOf).toBe('?open=session-second%40students.test')
+
+    // Closed
+    await dialog.getByRole('button', { name: messages.ui.actions.close }).click()
+
+    // Which leaves the bare queue
+    await expect.poll(queryOf).toBe('')
+
+    // A link to the second conversation
+    await page.goto(`${QUEUE_PATH}?open=session-second%40students.test`)
+
+    // Which opens on it
+    await expect(dialog.getByText('second@students.test', { exact: true })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+    await expect(dialog.getByText('2 of 2', { exact: true })).toBeVisible()
+  })
+
   test('stands the parts of a conversation side by side as the viewport widens', async ({
     page,
   }) => {

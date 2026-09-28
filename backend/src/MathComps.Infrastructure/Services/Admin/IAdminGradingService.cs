@@ -19,11 +19,11 @@ public interface IAdminGradingService
     /// <param name="groupSlug">What addresses the group.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>
-    /// Each competition of the group with every graded entrant on every problem, in the order the taxonomy sets
-    /// the categories out.
+    /// The group's name and dates, and each of its competitions with every graded entrant on every problem, in
+    /// the order the taxonomy sets the categories out.
     /// </returns>
     /// <exception cref="HostedGroupNotFoundException">No group the site grades goes by the slug.</exception>
-    Task<IReadOnlyList<GradingCompetitionDto>> GetBoardAsync(
+    Task<GradingBoardDto> GetBoardAsync(
         string groupSlug, CancellationToken cancellationToken = default);
 
     /// <summary>

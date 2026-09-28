@@ -1,15 +1,17 @@
 'use client'
 
 import { ArrowDown, ArrowUp, Check } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import { useCategoryName } from '@/components/features/hosted-competitions/hooks/use-category-name'
+import { useEntryWindowLabel } from '@/components/features/hosted-competitions/hooks/use-entry-window-label'
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useStepHotkeys } from '@/hooks/use-step-hotkeys'
+import type { Locale } from '@/i18n/i18n'
 
 import { useGradingBoard } from '../hooks/use-grading-board'
 import {
@@ -24,6 +26,7 @@ import {
   type Grade,
   type GradeSummary,
   type GradingCompetition,
+  type GradingGroup,
   pairKey,
   scoreOf,
 } from '../model/grading-types'
@@ -44,6 +47,9 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
   // Grading copy
   const t = useTranslations('admin.grading')
 
+  // Counted nouns, which decline with the number in front of them
+  const tPlurals = useTranslations('plurals')
+
   // What each level is called
   const categoryName = useCategoryName()
 
@@ -57,7 +63,7 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
     <div className="mx-auto w-full max-w-4xl">
       {/* What this is */}
       <h1 className="text-xl font-bold text-foreground hyphens-none sm:text-2xl">{t('title')}</h1>
-      <p className="mt-1 text-xs text-muted sm:text-sm">{groupSlug}</p>
+      <GroupSubtitle group={board.group} />
 
       {/* The board, or whatever stands in its place */}
       {board.competition === null ? (
@@ -71,6 +77,7 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
         <>
           {/* The competitions of the group */}
           <div className="mt-4 flex flex-wrap items-center gap-1 sm:mt-6 sm:gap-2">
+            {/* Each competition, with how many entered it */}
             {board.competitions.map((candidate) => (
               <Button
                 key={candidate.roundId}
@@ -79,7 +86,7 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
                 className="min-h-7 gap-1 px-2.5 text-xs sm:min-h-9 sm:gap-2 sm:px-3 sm:text-sm"
                 variant={candidate.roundId === board.competition?.roundId ? 'primary' : 'secondary'}
                 aria-pressed={candidate.roundId === board.competition?.roundId}
-                onClick={() => board.selectCompetition(candidate.roundId)}
+                onClick={() => board.selectCategory(candidate.category)}
               >
                 {categoryName(candidate.category)}
                 <span className="text-[10px] text-muted sm:text-xs">
@@ -87,6 +94,11 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
                 </span>
               </Button>
             ))}
+
+            {/* Students across every competition, each once */}
+            <span className="ml-1 text-xs text-muted sm:ml-2 sm:text-sm">
+              {tPlurals('students', { count: board.studentCount })}
+            </span>
           </div>
 
           {/* How far it has got */}
@@ -116,10 +128,50 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
             pairs={board.pairs}
             grades={board.grades}
             selection={board.selection}
+            conversation={board.conversation}
+            onSelectConversation={board.selectConversation}
           />
         </>
       )}
     </div>
+  )
+}
+
+/**
+ * Props for the {@link GroupSubtitle} component.
+ */
+type GroupSubtitleProps = {
+  /** The group being graded; null until it has been read. */
+  group: GradingGroup | null
+}
+
+/**
+ * Which group is being graded, by its name and the days it took entries. The line stands empty while the group
+ * loads, so the board under it doesn't jump when the name arrives.
+ */
+function GroupSubtitle({ group }: GroupSubtitleProps) {
+  // Grading copy
+  const t = useTranslations('admin.grading')
+
+  // The language the group is named in
+  const locale = useLocale() as Locale
+
+  // Wording for the window a group takes entries in
+  const entryWindowLabel = useEntryWindowLabel()
+
+  // The days the group took entries, once it has arrived
+  const entryWindow = group === null ? null : entryWindowLabel(group.opensAt, group.closesAt)
+
+  return (
+    <p className="mt-1 min-h-4 text-xs text-muted sm:min-h-5 sm:text-sm">
+      {group !== null &&
+        entryWindow !== null &&
+        t('groupSubtitle', {
+          name: group.name[locale],
+          opens: entryWindow.opens,
+          closes: entryWindow.closes,
+        })}
+    </p>
   )
 }
 
