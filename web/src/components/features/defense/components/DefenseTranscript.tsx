@@ -84,15 +84,17 @@ export type DefenseTranscriptProps = {
   showReplyNumbers?: boolean
   /** The turn something outside the conversation currently points at; null when nothing does. */
   pointedAtTurnId?: string | null
+  /** Whether each conversation opens on its first turn instead of its newest. */
+  startsAtTop?: boolean
   /** Rendered at the foot of the pane, where the conversation ends; null when there is nothing to say. */
   footer: React.ReactNode
 }
 
 /**
  * The scrolling conversation: every turn in order, the mark where a reader's last pass stopped, the thinking
- * indicator while the examiner replies, and the caller's footer at the foot of the pane. Keeps the newest
- * content in view while the reader is at the bottom, but yields control (and offers a jump-back affordance)
- * once they scroll up to re-read.
+ * indicator while the examiner replies, and the caller's footer at the foot of the pane. Opens on the newest
+ * turn unless asked to start at the top. Keeps the newest content in view while the reader is at the bottom,
+ * but yields control (and offers a jump-back affordance) once they scroll up to re-read.
  */
 export function DefenseTranscript({
   turns,
@@ -111,13 +113,14 @@ export function DefenseTranscript({
   turnDurationsMs,
   showReplyNumbers = false,
   pointedAtTurnId = null,
+  startsAtTop = false,
   footer,
 }: DefenseTranscriptProps) {
   // Defense copy
   const t = useTranslations('defense')
 
   // The scroll region, kept pinned to the newest turn while the reader sits at the bottom
-  const { scrollRef, contentRef, isScrolledUp, scrollToBottom } = useFollowTail()
+  const { scrollRef, contentRef, isScrolledUp, scrollToBottom } = useFollowTail(!startsAtTop)
 
   // A handle on that same region
   const paneRef = useRef<HTMLDivElement>(null)
