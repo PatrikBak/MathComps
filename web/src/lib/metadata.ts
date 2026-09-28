@@ -203,6 +203,7 @@ type PageNamespace =
   | 'pages.competitionArea'
   | 'pages.competitions'
   | 'pages.adminDefenses'
+  | 'pages.adminGrading'
 
 /**
  * Options for creating page metadata with automatic translations.

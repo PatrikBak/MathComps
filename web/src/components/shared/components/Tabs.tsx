@@ -6,7 +6,7 @@ import { cn } from '@/components/shared/utils/css-utils'
 /**
  * One tab and what it reveals.
  */
-type TabItem<TId extends string> = {
+export type TabItem<TId extends string> = {
   /** Stable identity of the tab, distinct within one group. */
   id: TId
   /** How the tab reads. */

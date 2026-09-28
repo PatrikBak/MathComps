@@ -25,6 +25,21 @@
     }
   },
   "admin": {
+    "conversation": {
+      "next": "Nasledujúca",
+      "position": "{index} / {total}",
+      "previous": "Predchádzajúca",
+      "reference": {
+        "solution": "Referenčné riešenie a nápovedy",
+        "statement": "Zadanie"
+      },
+      "student": "Študent",
+      "tabs": {
+        "conversation": "Konverzácia",
+        "reference": "Riešenie"
+      },
+      "tabsLabel": "Časti konverzácie"
+    },
     "defenseReview": {
       "attempts": {
         "attempt": "Návrh {index}",
@@ -130,7 +145,6 @@
       "markUnread": "Označiť ako neprečítané",
       "markUnreadFromTurn": "Označiť ako neprečítané odtiaľto",
       "newMessages": "+{count, plural, =1 {# nová} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
-      "next": "Nasledujúca",
       "nextUnread": "Nasledujúca neprečítaná",
       "noStudentMessage": "Zatiaľ žiadna správa",
       "noteCount": "Poznámky: {count}",
@@ -164,20 +178,13 @@
         "writeOnTurn": "Napísať poznámku k tejto odpovedi"
       },
       "openNotes": "Poznámky",
-      "position": "{index} / {total}",
-      "previous": "Predchádzajúca",
       "readStateFailed": "Nepodarilo sa zaznamenať prečítanie",
-      "reference": {
-        "solution": "Referenčné riešenie a nápovedy",
-        "statement": "Zadanie"
-      },
       "refresh": "Obnoviť",
       "shortcuts": {
         "next": "ďalšia",
         "nextUnread": "ďalšia neprečítaná",
         "previous": "predchádzajúca"
       },
-      "student": "Študent",
       "studentFeedbackMark": "Študent zhodnotil konverzáciu",
       "studentMessageCount": "Správ: {count}",
       "studentNoComment": "Bez komentára",
@@ -185,14 +192,42 @@
       "studentVerdict": "Čo povedal študent",
       "tabs": {
         "config": "Nastavenia",
-        "conversation": "Konverzácia",
-        "notes": "Poznámky",
-        "reference": "Riešenie"
+        "notes": "Poznámky"
       },
-      "tabsLabel": "Časti konverzácie",
       "title": "Prechádzať konverzácie",
       "unreadDivider": "Nové od tvojho posledného čítania",
       "unreadMark": "Neprečítané"
+    },
+    "grading": {
+      "conversationNumber": "Konverzácia {number}",
+      "detailFailed": "Konverzácie sa nepodarilo načítať",
+      "dialogTitle": "Hodnotenie: {student}",
+      "empty": "V tejto skupine nie je koho hodnotiť.",
+      "grid": {
+        "final": "finálne",
+        "problem": "Ú{number}",
+        "student": "Študent",
+        "total": "Spolu"
+      },
+      "loadFailed": "Hodnotenie sa nepodarilo načítať",
+      "pairSubtitle": "{category}, úloha {number}",
+      "panel": {
+        "changedBy": "Posledná zmena: <name>{grader}</name>",
+        "comment": "Komentár pre hodnotiteľov",
+        "commentPlaceholder": "Čítajú ho len admini.",
+        "final": "Finálne",
+        "help": "Z toho od Mathildy",
+        "helpHint": "Každý taký bod sa počíta za polovicu.",
+        "mark": "Body",
+        "score": "Skóre",
+        "selfAssessment": "Komentár študenta"
+      },
+      "progress": "Ohodnotené: <count>{graded}</count> z {total}, finálne: <count>{final}</count>",
+      "saveFailed": "Hodnotenie sa nepodarilo uložiť",
+      "tabs": {
+        "grade": "Hodnotenie"
+      },
+      "title": "Hodnotenie"
     }
   },
   "apiErrors": {
@@ -413,6 +448,7 @@
     "finishError": "Súťaž sa nepodarilo ukončiť. Skús to prosím znova.",
     "forfeitError": "Súťaž sa nepodarilo vzdať.",
     "goToArea": "Otvoriť v súťaži",
+    "grade": "Hodnotiť",
     "hint": "Nápoveda",
     "hints": "Nápovedy",
     "howItWorks": {
@@ -896,6 +932,10 @@
     "adminDefenses": {
       "description": "Prehľad obhajob vedených s AI skúšajúcou.",
       "title": "Konverzácie s Mathildou"
+    },
+    "adminGrading": {
+      "description": "Hodnotenie jednej skupiny súťaží Mathildovania.",
+      "title": "Hodnotenie"
     },
     "competitionArea": {
       "description": "Úlohy, tvoj čas a obhajoby, ktoré o nich vedieš.",

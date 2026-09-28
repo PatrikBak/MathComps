@@ -73,6 +73,7 @@ export const ROUTES = {
   PRIVACY: '/privacy',
   NEWS: '/news',
   ADMIN_DEFENSES: '/admin/defenses',
+  ADMIN_GRADING: '/admin/grading/[slug]',
 } as const
 
 /** Union type of all possible route paths. */
@@ -100,6 +101,7 @@ const ROUTE_TRANSLATIONS: Record<RouteKey, NonCanonicalLocaleTranslations> = {
   '/privacy': { sk: '/ochrana-sukromia', cs: '/ochrana-soukromi' },
   '/news': { sk: '/novinky', cs: '/novinky' },
   '/admin/defenses': { sk: '/admin/obhajoby', cs: '/admin/obhajoby' },
+  '/admin/grading/[slug]': { sk: '/admin/hodnotenie/[slug]', cs: '/admin/hodnoceni/[slug]' },
 }
 
 /** Common anchor fragments used for in-page navigation. English is canonical. */

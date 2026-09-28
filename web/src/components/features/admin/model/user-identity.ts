@@ -1,5 +1,6 @@
 /**
- * Somebody an admin surface names. The username can be missing, so the address rides alongside it.
+ * Somebody an admin surface names. The username can be missing, so the address rides alongside it; a deleted
+ * account has neither.
  */
 export type UserIdentity = {
   /** Stable identifier. */

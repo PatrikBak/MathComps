@@ -51,7 +51,7 @@ type TranscriptDivider = {
 /**
  * Props for the {@link DefenseTranscript}.
  */
-type DefenseTranscriptProps = {
+export type DefenseTranscriptProps = {
   /** Whether to offer each turn's report control, which leaves the conversation as it stands. */
   canGiveFeedback: boolean
   /** Whether to offer each turn's rewind control, which drops everything after it. */

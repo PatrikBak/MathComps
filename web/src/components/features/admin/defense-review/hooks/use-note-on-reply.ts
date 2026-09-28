@@ -1,9 +1,10 @@
 import { type RefObject, useRef } from 'react'
 import { flushSync } from 'react-dom'
 
+import type { ConversationPanelId } from '@/components/features/admin/hooks/use-conversation-panels'
 import type { RichMathEditorRef } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 
-import type { DefenseReviewTabId } from '../model/defense-review-tabs'
+import type { DefenseReviewPanelId } from './use-defense-review-panels'
 
 /**
  * What {@link useNoteOnReply} hands back.
@@ -28,7 +29,7 @@ export type UseNoteOnReplyResult = {
  * @returns The editor's handle and the way to start a note, as described by {@link UseNoteOnReplyResult}.
  */
 export function useNoteOnReply(
-  selectTab: (tabId: DefenseReviewTabId) => void,
+  selectTab: (tabId: ConversationPanelId<DefenseReviewPanelId>) => void,
   onNoteTurnIdChange: (turnId: string | null) => void
 ): UseNoteOnReplyResult {
   // The editor a new note is written in

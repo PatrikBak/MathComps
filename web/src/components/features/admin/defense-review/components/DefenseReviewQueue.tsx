@@ -1,6 +1,5 @@
 'use client'
 
-import { type HotkeyItem, useHotkeys } from '@mantine/hooks'
 import { MailOpen, RefreshCw, StickyNote } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -9,6 +8,7 @@ import { Button } from '@/components/shared/components/Button'
 import { Kbd } from '@/components/shared/components/Kbd'
 import { LoadMore } from '@/components/shared/components/LoadMore'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
+import { STEP_KEYS, useStepHotkeys } from '@/hooks/use-step-hotkeys'
 
 import { useDefenseReviewAddressSync } from '../hooks/use-defense-review-address'
 import { useDefenseReviewFacets } from '../hooks/use-defense-review-facets'
@@ -16,11 +16,9 @@ import { useDefenseReviewFilters } from '../hooks/use-defense-review-filters'
 import { useDefenseReviewFocusReturn } from '../hooks/use-defense-review-focus-return'
 import { useDefenseReviewQueue } from '../hooks/use-defense-review-queue'
 import { useDefenseReviewReadState } from '../hooks/use-defense-review-read-state'
-import {
-  useDefenseReviewSelection,
-  type UseDefenseReviewSelectionResult,
-} from '../hooks/use-defense-review-selection'
+import { useDefenseReviewSelection } from '../hooks/use-defense-review-selection'
 import { useDefenseReviewUnread } from '../hooks/use-defense-review-unread'
+import { NEXT_UNREAD_KEY } from '../model/defense-review-stepping'
 import { fromDefenseReviewQuery } from '../model/defense-review-url'
 import { AdminNoteFeedModal } from './AdminNoteFeedModal'
 import { DefenseReviewCard } from './DefenseReviewCard'
@@ -29,35 +27,24 @@ import { DefenseReviewModal } from './DefenseReviewModal'
 import { DefenseReviewPlaceholder } from './DefenseReviewPlaceholder'
 
 /**
- * One key that walks the queue, what it is called, and the move it makes.
+ * One key that walks the queue, and what its hint calls it.
  */
-type StepShortcut = {
+type ShortcutHint = {
   /** The key as it is printed on the keyboard. */
   key: string
   /** Which of the shortcut names says what it does. */
   name: 'next' | 'previous' | 'nextUnread'
-  /** The move the key makes on the queue. */
-  run: (selection: UseDefenseReviewSelectionResult) => void
 }
 
-/** The keys that walk the queue, in the order they read. */
-const STEP_SHORTCUTS: StepShortcut[] = [
-  { key: 'j', name: 'next', run: (selection) => selection.step(1) },
-  { key: 'k', name: 'previous', run: (selection) => selection.step(-1) },
-  { key: 'u', name: 'nextUnread', run: (selection) => selection.stepUnread() },
+/** The hints naming each key that walks the queue, in the order they read. */
+const SHORTCUT_HINTS: ShortcutHint[] = [
+  { key: STEP_KEYS.next, name: 'next' },
+  { key: STEP_KEYS.previous, name: 'previous' },
+  { key: NEXT_UNREAD_KEY, name: 'nextUnread' },
 ]
 
 /** Button sizing tightened to the width a phone has to spare. */
 const COMPACT_ACTION_CLASS = 'min-h-8 gap-1.5 px-2 text-xs sm:min-h-9 sm:gap-2 sm:px-3 sm:text-sm'
-
-/**
- * How many dialogs currently stand over the page, counted off the document itself.
- * @returns The number of dialogs on screen.
- */
-function countOpenDialogs(): number {
-  // Every dialog on screen, which is what each one announces itself as
-  return document.querySelectorAll('[role="dialog"]').length
-}
 
 /**
  * The review queue: every student's defense conversations, the ones spoken to most recently first.
@@ -127,19 +114,8 @@ export function DefenseReviewQueue() {
     selection.open
   )
 
-  // A test of whether a key is the reader walking the queue or a stray press behind something standing over
-  // it. The conversation dialog is the queue's own and is stepped from happily; anything past that count was
-  // stacked on top of it, from the feed to a question waiting on an answer, and walking the queue out from
-  // under one of those answers something nobody asked. Counting them keeps that true of the next one too.
-  const canStep = () => countOpenDialogs() <= (selection.openId === null ? 0 : 1)
-
-  // Walking the queue from the keyboard, which works with none open too, so a reading session never has to
-  // begin with a click
-  useHotkeys(
-    STEP_SHORTCUTS.map(
-      (shortcut): HotkeyItem => [shortcut.key, () => canStep() && shortcut.run(selection)]
-    )
-  )
+  // Walking the queue from the keyboard, skipping to the next unread one included
+  useStepHotkeys(selection, [[NEXT_UNREAD_KEY, () => selection.stepUnread()]])
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
@@ -207,7 +183,7 @@ export function DefenseReviewQueue() {
 
           {/* The shortcut hints, only where there is a keyboard to press them on */}
           <span className="hidden items-center gap-4 text-xs text-muted-foreground sm:flex">
-            {STEP_SHORTCUTS.map((shortcut) => (
+            {SHORTCUT_HINTS.map((shortcut) => (
               <span key={shortcut.key} className="flex items-center gap-1">
                 <Kbd>{shortcut.key}</Kbd>
                 {t(`shortcuts.${shortcut.name}`)}

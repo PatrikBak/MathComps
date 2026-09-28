@@ -1,7 +1,7 @@
 'use client'
 
 import { Resizable } from 're-resizable'
-import type { ReactNode } from 'react'
+import type { FocusEvent, ReactNode } from 'react'
 import { useEffect, useImperativeHandle, useMemo, useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
@@ -82,6 +82,10 @@ type RichMathEditorProps = {
   value: string
   /** Callback when the text changes */
   onChange: (value: string) => void
+  /** Callback when focus leaves the inline editor, its toolbar and footer included */
+  onBlur?: () => void
+  /** The id of the text field */
+  id?: string
   /** Placeholder text */
   placeholder?: string
   /** Whether to auto-focus */
@@ -121,6 +125,8 @@ export function RichMathEditor({
   maxCharacters,
   value,
   onChange,
+  onBlur,
+  id,
   placeholder = '',
   autoFocus = false,
   className,
@@ -196,11 +202,25 @@ export function RichMathEditor({
   const allowImageUpload = showsToolbarItem(toolbar, 'image')
   const allowAttachmentUpload = showsToolbarItem(toolbar, 'attachment')
 
+  /**
+   * A function which reports focus leaving the editor. Focus moving from the text field to a toolbar button is
+   * still inside it, so only focus landing outside counts.
+   *
+   * @param event - The focus leaving one of the editor's parts.
+   */
+  const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
+    // Still somewhere inside the editor
+    if (event.currentTarget.contains(event.relatedTarget)) return
+
+    // Focus has left the editor
+    onBlur?.()
+  }
+
   return (
     <>
       {/* The inline editor, absent on mobile in modal-only mode */}
       {!isMobileModalOnly && (
-        <div className={cn('flex-1 flex flex-col w-full max-w-4xl', className)}>
+        <div className={cn('flex-1 flex flex-col w-full max-w-4xl', className)} onBlur={handleBlur}>
           <Resizable
             defaultSize={{ width: '100%', height: 'auto' }}
             minHeight={minHeightPx}
@@ -240,31 +260,30 @@ export function RichMathEditor({
               viewModel={viewModel}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
+              id={id}
               placeholder={placeholder}
               autoFocus={autoFocus}
               allowImageUpload={allowImageUpload}
               allowAttachmentUpload={allowAttachmentUpload}
               containerClassName="flex-1 min-h-0"
-              className={cn('h-full', onSend && 'rounded-b-none')}
+              className="h-full rounded-b-none"
             />
 
             {/* Footer bar */}
-            {onSend && (
-              <RichMathEditorFooter
-                variant={variant}
-                modeConfig={{ mode: 'inline', onExpand: () => setIsModalOpen(true) }}
-                charCount={state.metrics.charCount}
-                maxCharacters={state.maxCharacters}
-                imageCount={state.metrics.imageCount}
-                attachmentCount={state.metrics.attachmentCount}
-                meta={footerMeta}
-                onSend={onSend}
-                onCancel={onCancel}
-                onStop={onStop}
-                isValid={state.isValid && canSend}
-                isLoading={isLoading}
-              />
-            )}
+            <RichMathEditorFooter
+              variant={variant}
+              modeConfig={{ mode: 'inline', onExpand: () => setIsModalOpen(true) }}
+              charCount={state.metrics.charCount}
+              maxCharacters={state.maxCharacters}
+              imageCount={state.metrics.imageCount}
+              attachmentCount={state.metrics.attachmentCount}
+              meta={footerMeta}
+              onSend={onSend}
+              onCancel={onCancel}
+              onStop={onStop}
+              isValid={state.isValid && canSend}
+              isLoading={isLoading}
+            />
           </Resizable>
         </div>
       )}
