@@ -85,6 +85,8 @@ public sealed class GlobalExceptionHandler(
         HostedCompetitionNotFoundException
             => (StatusCodes.Status404NotFound, ApiErrorCode.HostedCompetitionNotFound),
         HostedProblemNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.HostedProblemNotFound),
+        HostedGroupNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.HostedGroupNotFound),
+        HostedGradeTargetException => (StatusCodes.Status404NotFound, ApiErrorCode.HostedGradeTarget),
 
         // Defense guardrails: the request doesn't hold up, or the user's usage is over a cap
         DefenseMessageTooLongException => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseMessageTooLong),
@@ -124,6 +126,9 @@ public sealed class GlobalExceptionHandler(
 
         // A reviewer's reading moved back to a turn its conversation doesn't hold
         AdminReviewTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminReviewTarget),
+
+        // A grade change leaving a grade that breaks its rules
+        HostedGradeValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.HostedGradeValue),
 
         // Forbidden actions — the caller is known, they're just not allowed
         NotCommentAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotCommentAuthor),

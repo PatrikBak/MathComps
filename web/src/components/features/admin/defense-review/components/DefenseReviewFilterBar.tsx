@@ -62,7 +62,7 @@ export function DefenseReviewFilterBar({
 
   // What the facets can be set to
   const {
-    userOptions,
+    studentOptions,
     problemOptions,
     problemGrouping,
     promptVersionOptions,
@@ -130,10 +130,10 @@ export function DefenseReviewFilterBar({
       {/* Whose conversation it is */}
       <MultiSelectFacet
         variant="pill"
-        title={t('filters.user')}
+        title={t('filters.student')}
         closedLabel={t('filters.any')}
-        searchPlaceholder={t('filters.searchUser')}
-        options={userOptions}
+        searchPlaceholder={t('filters.searchStudent')}
+        options={studentOptions}
         selectionMode="single"
         selected={filter.userId === undefined ? [] : [filter.userId]}
         onChange={(selected) => onFieldChange('userId', selected.at(-1))}

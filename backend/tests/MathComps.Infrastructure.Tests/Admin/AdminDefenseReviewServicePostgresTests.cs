@@ -1122,8 +1122,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // Both students who held one, the one holding three ahead of the one holding one, and neither reviewer
         Assert.Equal(
             [_studentId, _otherStudentId],
-            options.Users.Select(option => option.User.Id));
-        Assert.Equal([3, 1], options.Users.Select(option => option.ConversationCount));
+            options.Students.Select(option => option.User.Id));
+        Assert.Equal([3, 1], options.Students.Select(option => option.ConversationCount));
 
         // The handout environments one was held against, the shared one ahead of the other
         var handoutOptions = options.Problems

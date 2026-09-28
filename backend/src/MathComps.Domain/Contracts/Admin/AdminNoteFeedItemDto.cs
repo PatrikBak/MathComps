@@ -13,4 +13,4 @@ namespace MathComps.Domain.Contracts.Admin;
 /// Where in the conversation the reply it is against sits, or null when it is against the conversation as a whole.
 /// </param>
 public record AdminNoteFeedItemDto(
-    AdminNoteDto Note, NamedDefenseTarget Target, AdminDefenseUserDto User, int? TurnSequence);
+    AdminNoteDto Note, NamedDefenseTarget Target, UserIdentityDto User, int? TurnSequence);

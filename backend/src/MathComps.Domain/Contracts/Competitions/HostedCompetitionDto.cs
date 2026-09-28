@@ -15,7 +15,7 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// re-entry, taking it again resets the entry rather than adding a second.</param>
 /// <param name="ResultsPublished">
 /// Whether its results are out. A fact about the competition rather than the reader: once out, they are out for
-/// everybody. Nothing grades a competition, so it is false everywhere.</param>
+/// everybody. Nothing publishes results, so it is false everywhere.</param>
 /// <param name="ProblemsPublished">
 /// Whether the problems are out from under the round's embargo for this reader: it has passed, or the site
 /// lets them past its gates.</param>

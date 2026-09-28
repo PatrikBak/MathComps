@@ -1,10 +1,11 @@
 import { Check, Pencil, Trash2, Undo2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { describeUser } from '@/components/features/admin/model/user-identity'
 import { Button } from '@/components/shared/components/Button'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 
-import { type AdminNote, describeReviewUser } from '../model/defense-review-types'
+import { type AdminNote } from '../model/defense-review-types'
 import { AdminNoteHeader, useNoteAnchorLabel } from './AdminNoteHeader'
 import { AdminNoteSurface } from './AdminNoteSurface'
 
@@ -99,7 +100,7 @@ export function AdminNoteCard({
         // The only name on this header, so it reads as a signature
         author={
           <span className="text-muted-foreground">
-            {describeReviewUser(note.author, tProfile('defaultUser'))}
+            {describeUser(note.author, tProfile('defaultUser'))}
           </span>
         }
         actions={

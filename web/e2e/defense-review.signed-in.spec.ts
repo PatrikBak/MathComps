@@ -22,7 +22,7 @@ const SETTLE_TIMEOUT_MS = 15_000
 
 /** Filters with nothing to offer, since no test here is about narrowing the queue. */
 const NO_FILTER_OPTIONS: DefenseReviewFilterOptions = {
-  users: [],
+  students: [],
   problems: [],
   promptVersions: [],
 }

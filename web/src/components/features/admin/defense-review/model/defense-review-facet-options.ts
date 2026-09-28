@@ -1,3 +1,4 @@
+import { describeUser } from '@/components/features/admin/model/user-identity'
 import type {
   NamedHandoutTarget,
   NamedProblemTarget,
@@ -13,8 +14,7 @@ import { encodeProblemKey } from './defense-review-filters'
 import {
   type DefenseReviewProblemOption,
   type DefenseReviewPromptVersionOption,
-  type DefenseReviewUserOption,
-  describeReviewUser,
+  type DefenseReviewStudentOption,
 } from './defense-review-types'
 
 /**
@@ -23,21 +23,21 @@ import {
  * The address rides inside the label rather than beside it, since the label is also what the facet's search
  * reads, so either half finds the student.
  *
- * @param users - The students, as the backend counted them.
+ * @param students - The students, as the backend counted them.
  * @param unnamedLabel - What to call a student the site holds neither a name nor an address for.
  *
  * @returns The options, ready for the facet.
  */
-export function toUserFacetOptions(
-  users: DefenseReviewUserOption[],
+export function toStudentFacetOptions(
+  students: DefenseReviewStudentOption[],
   unnamedLabel: string
 ): FacetOption[] {
   // One option per student, carrying whichever halves the site holds so the search reads them
-  return users.map((option) => ({
+  return students.map((option) => ({
     id: option.user.id,
     displayName:
       option.user.username === null || option.user.email === null
-        ? describeReviewUser(option.user, unnamedLabel)
+        ? describeUser(option.user, unnamedLabel)
         : `${option.user.username} (${option.user.email})`,
     count: option.conversationCount,
   }))

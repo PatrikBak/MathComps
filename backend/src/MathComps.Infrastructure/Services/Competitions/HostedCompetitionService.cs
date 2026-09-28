@@ -53,6 +53,7 @@ public sealed class HostedCompetitionService(
             .Select(group => new
             {
                 group.Id,
+                group.Slug,
                 group.OpensAt,
                 group.ClosesAt,
                 group.ClockMinutes,
@@ -89,6 +90,7 @@ public sealed class HostedCompetitionService(
             [
             .. groups.Select(group => new HostedGroupDto(
                 group.Id,
+                group.Slug,
                 // Every round of a group runs under a node of the same name, so the first names the group.
                 NameOf(group.Rounds.Count == 0 ? null : group.Rounds[0].CompetitionPath),
                 group.ProblemCount,
@@ -375,10 +377,9 @@ public sealed class HostedCompetitionService(
         if (!AreProblemsReady(group.ProblemsHeld, group.ProblemCount))
             throw new HostedCompetitionNotReadyException();
 
-        // What an entry asks of the student's account, settled before anything is written. A group with no
-        // closing instant is never graded, so it has no result to name a student in and asks for no fields, and
-        // neither does one taken by somebody who will never be ranked.
-        if (group.ClosesAt is not null && !reader.BypassesGates)
+        // What an entry asks of the student's account, settled before anything is written. Only a graded run has
+        // a result to name the student in, so only a graded one asks anything of the account.
+        if (HostedEntryRules.IsGraded(group.ClosesAt, reader.BypassesGates))
             await EnsureReadyToEnterAsync(dbContext, userId, cancellationToken);
 
         // The row the student's run is recorded in, which is the one they already hold when they are taking the
@@ -740,11 +741,8 @@ public sealed class HostedCompetitionService(
         if (entry.StartedAt is not { } startedAt)
             throw new HostedEntryNotRunningException();
 
-        // Where the entry stopped counting: the clock running out, or the student closing it ahead of that.
-        var clockRunsOutAt = startedAt.AddMinutes(entry.ClockMinutes);
-        var endedAt = entry.FinishedAt is { } finishedAt && finishedAt < clockRunsOutAt
-            ? finishedAt
-            : clockRunsOutAt;
+        // Where the entry stopped counting.
+        var endedAt = HostedEntryRules.EndedAt(startedAt, entry.FinishedAt, entry.ClockMinutes);
 
         // Past the grace that follows it, so the note and the transcript have both settled.
         if (endedAt.AddMinutes(_noteGraceMinutes) <= DateTimeOffset.UtcNow)

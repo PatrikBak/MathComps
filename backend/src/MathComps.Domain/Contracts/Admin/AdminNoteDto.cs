@@ -22,7 +22,7 @@ public record AdminNoteDto(
     Guid Id,
     Guid SessionId,
     Guid? TurnId,
-    AdminDefenseUserDto Author,
+    UserIdentityDto Author,
     bool IsOwn,
     string Content,
     DefenseReportCategory? Category,

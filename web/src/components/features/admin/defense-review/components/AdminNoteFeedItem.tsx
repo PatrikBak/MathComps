@@ -3,14 +3,12 @@
 import { ArrowUpRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { describeUser } from '@/components/features/admin/model/user-identity'
 import { DefenseTargetLabel } from '@/components/features/defense/components/DefenseTargetLabel'
 import { Button } from '@/components/shared/components/Button'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 
-import {
-  type AdminNoteFeedItem as FeedItem,
-  describeReviewUser,
-} from '../model/defense-review-types'
+import { type AdminNoteFeedItem as FeedItem } from '../model/defense-review-types'
 import { AdminNoteHeader } from './AdminNoteHeader'
 import { AdminNoteSurface } from './AdminNoteSurface'
 
@@ -52,7 +50,7 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
           {/* Which conversation it was written about */}
           <p className="flex min-w-0 items-baseline gap-2 text-sm">
             <span className="truncate font-medium text-foreground">
-              {describeReviewUser(item.user, tProfile('defaultUser'))}
+              {describeUser(item.user, tProfile('defaultUser'))}
             </span>
 
             <DefenseTargetLabel target={item.target} emphasis="muted" />
@@ -67,7 +65,7 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
               author={
                 <span className="text-muted-foreground">
                   {t('notes.byAuthor', {
-                    author: describeReviewUser(item.note.author, tProfile('defaultUser')),
+                    author: describeUser(item.note.author, tProfile('defaultUser')),
                   })}
                 </span>
               }

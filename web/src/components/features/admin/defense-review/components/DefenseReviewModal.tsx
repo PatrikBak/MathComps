@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, Mail, MailOpen, MailPlus, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { describeUser } from '@/components/features/admin/model/user-identity'
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
@@ -15,7 +16,6 @@ import { useDefenseReviewPanels } from '../hooks/use-defense-review-panels'
 import { useDefenseReviewReadMarking } from '../hooks/use-defense-review-read-marking'
 import type { MarkUnreadFrom } from '../hooks/use-defense-review-read-state'
 import type { UseDefenseReviewSelectionResult } from '../hooks/use-defense-review-selection'
-import { describeReviewUser } from '../model/defense-review-types'
 import { ActionLabel } from './ActionLabel'
 import { DefenseReviewModalBody } from './DefenseReviewModalBody'
 import { DefenseTargetRef } from './DefenseTargetRef'
@@ -102,7 +102,7 @@ export function DefenseReviewModal({
         detail === null
           ? t('detailTitle')
           : t('detailTitleFor', {
-              student: describeReviewUser(detail.user, tProfile('defaultUser')),
+              student: describeUser(detail.user, tProfile('defaultUser')),
             })
       }
       onClosed={() => {
@@ -121,7 +121,7 @@ export function DefenseReviewModal({
         {/* Who held it, and what it was about, opted out of the hyphenation the page turns on globally */}
         <div className="w-full min-w-0 hyphens-none sm:w-auto sm:flex-1" aria-live="polite">
           <p className="truncate font-bold text-foreground">
-            {detail === null ? ' ' : describeReviewUser(detail.user, tProfile('defaultUser'))}
+            {detail === null ? ' ' : describeUser(detail.user, tProfile('defaultUser'))}
           </p>
           <p className="flex items-baseline gap-2 text-xs text-muted">
             {detail === null ? (
