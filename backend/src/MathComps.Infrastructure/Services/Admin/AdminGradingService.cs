@@ -5,6 +5,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
+using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Users;
 using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -15,9 +16,11 @@ namespace MathComps.Infrastructure.Services.Admin;
 /// Implements <see cref="IAdminGradingService"/> over the database.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
+/// <param name="localization">The names the taxonomy gives the nodes a group's rounds run under.</param>
 /// <param name="grants">Reads whether a student is let past the gates a competition is entered through.</param>
 public class AdminGradingService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
+    IMetadataLocalizationService localization,
     IUserGrantService grants) : IAdminGradingService
 {
     /// <summary>
@@ -26,7 +29,7 @@ public class AdminGradingService(
     private static readonly GradeState _blank = new(null, 0, string.Empty, false);
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<GradingCompetitionDto>> GetBoardAsync(
+    public async Task<GradingBoardDto> GetBoardAsync(
         string groupSlug, CancellationToken cancellationToken = default)
     {
         // This read's own context, since reading a board is a unit of work in itself.
@@ -39,7 +42,9 @@ public class AdminGradingService(
             .Select(candidate => new
             {
                 candidate.Id,
-                candidate.ClosesAt,
+                candidate.OpensAt,
+                // Set on every group that grades anybody, which is the only kind the filter lets through.
+                ClosesAt = candidate.ClosesAt!.Value,
                 candidate.ClockMinutes,
                 Rounds = candidate.Rounds
                     .OrderBy(round => round.Competition.SortPath)
@@ -131,34 +136,39 @@ public class AdminGradingService(
                 dbContext, grade => entryIds.Contains(grade.EntryId), cancellationToken))
             .ToDictionary(current => (current.EntryId, current.ProblemId), current => current.Grade);
 
-        // The board, one competition per round.
-        return
-        [
-            .. group.Rounds.Select(round =>
-            {
-                // The round's graded entries, by username.
-                var roundEntries = graded.Where(entry => entry.RoundId == round.Id).ToList();
+        // The board: which group it is, then one competition per round.
+        return new GradingBoardDto(
+            HostedGroupName.Of(localization, group.Rounds.FirstOrDefault()?.CompetitionPath),
+            group.OpensAt,
+            group.ClosesAt,
+            [
+                .. group.Rounds.Select(round =>
+                {
+                    // The round's graded entries, by username.
+                    var roundEntries = graded.Where(entry => entry.RoundId == round.Id).ToList();
 
-                // The competition.
-                return new GradingCompetitionDto(
-                    round.Id,
-                    // A group that closes runs its rounds at the levels, so a round outside them is not one this
-                    // site set up.
-                    HostedTaxonomy.CategoryOf(round.CompetitionPath)
-                        ?? throw new InvalidOperationException($"Round {round.Id} of a graded group has no level."),
-                    round.Problems,
-                    // The round's graded entrants.
-                    [.. roundEntries.Select(entry => entry.User)],
-                    // Every graded entrant on every problem.
-                    [
-                        .. roundEntries.SelectMany(entry => round.Problems.Select(problem => new GradeSummaryDto(
-                            entry.User.Id,
-                            problem.Id,
-                            conversationCounts.GetValueOrDefault((entry.User.Id, problem.Id)),
-                            grades.GetValueOrDefault((entry.Id, problem.Id))))),
-                    ]);
-            }),
-        ];
+                    // The competition.
+                    return new GradingCompetitionDto(
+                        round.Id,
+                        // A group that closes runs its rounds at the levels, so a round outside them is not one
+                        // this site set up.
+                        HostedTaxonomy.CategoryOf(round.CompetitionPath)
+                            ?? throw new InvalidOperationException(
+                                $"Round {round.Id} of a graded group has no level."),
+                        round.Problems,
+                        // The round's graded entrants.
+                        [.. roundEntries.Select(entry => entry.User)],
+                        // Every graded entrant on every problem.
+                        [
+                            .. roundEntries.SelectMany(entry => round.Problems.Select(problem =>
+                                new GradeSummaryDto(
+                                    entry.User.Id,
+                                    problem.Id,
+                                    conversationCounts.GetValueOrDefault((entry.User.Id, problem.Id)),
+                                    grades.GetValueOrDefault((entry.Id, problem.Id))))),
+                        ]);
+                }),
+            ]);
     }
 
     /// <inheritdoc/>

@@ -91,8 +91,7 @@ public sealed class HostedCompetitionService(
             .. groups.Select(group => new HostedGroupDto(
                 group.Id,
                 group.Slug,
-                // Every round of a group runs under a node of the same name, so the first names the group.
-                NameOf(group.Rounds.Count == 0 ? null : group.Rounds[0].CompetitionPath),
+                HostedGroupName.Of(localization, group.Rounds.FirstOrDefault()?.CompetitionPath),
                 group.ProblemCount,
                 group.ClockMinutes,
                 group.OpensAt,
@@ -786,19 +785,6 @@ public sealed class HostedCompetitionService(
     /// <returns>The hints, weakest nudge first; empty where none were written.</returns>
     private static IReadOnlyList<string> HintsIn(IEnumerable<ProblemBody> texts, Language language) =>
         HintsDocument.Split(texts.FirstOrDefault(text => text.Language == language)?.Body);
-
-    /// <summary>
-    /// Reads a node's name in every language the site is read in.
-    /// </summary>
-    /// <param name="competitionPath">The node's path, or null when the group runs no rounds to take it from.</param>
-    /// <returns>The name in each language, blank throughout for a group with nothing under it.</returns>
-    private IReadOnlyDictionary<Language, string> NameOf(string? competitionPath) =>
-        Enum.GetValues<Language>().ToDictionary(
-            language => language,
-            // A group with no rounds has no node to take a name from.
-            language => competitionPath is null
-                ? string.Empty
-                : localization.GetNodeShortName(language, competitionPath));
 
     /// <summary>
     /// Builds what one round is addressed by, in every language the site is read in.

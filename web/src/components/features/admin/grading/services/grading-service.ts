@@ -1,7 +1,7 @@
 import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
-import type { Grade, GradeChange, GradeDetail, GradingCompetition } from '../model/grading-types'
+import type { Grade, GradeChange, GradeDetail, GradingBoard } from '../model/grading-types'
 import { getGradeUrl, getGradingBoardUrl } from './grading-api-urls'
 
 /**
@@ -9,13 +9,13 @@ import { getGradeUrl, getGradingBoardUrl } from './grading-api-urls'
  *
  * @param apiCall - The authenticated API caller.
  * @param groupSlug - What addresses the group.
- * @returns Each competition of the group with every entrant on every problem.
+ * @returns The group's name and dates, and each of its competitions with every entrant on every problem.
  */
 export function fetchGradingBoard(
   apiCall: ApiCaller,
   groupSlug: string
-): Promise<ApiResult<GradingCompetition[]>> {
-  return apiCall<GradingCompetition[]>(() => getGradingBoardUrl(groupSlug))
+): Promise<ApiResult<GradingBoard>> {
+  return apiCall<GradingBoard>(() => getGradingBoardUrl(groupSlug))
 }
 
 /**

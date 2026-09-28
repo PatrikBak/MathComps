@@ -4,7 +4,7 @@ import type {
   Grade,
   GradeChange,
   GradeDetail,
-  GradingCompetition,
+  GradingBoard,
 } from '@/components/features/admin/grading/model/grading-types'
 
 import { createAnswerGate } from './answer-gate'
@@ -23,46 +23,61 @@ const PRE_GRADED: Grade = {
   updatedBy: GRADER,
 }
 
+/** What the fake's group is called, in English. */
+export const GROUP_NAME = 'September round'
+
 /**
  * The board the fake opens on: two competitions, the first with three students on two problems. Ada spoke about
  * her first problem twice and was pre-graded on her second, Bruno was graded final on his first and never spoke
- * about his second, and Cyril is not graded yet. The second competition holds Dora alone.
+ * about his second, and Cyril is not graded yet. The second competition holds Dora, who spoke about its problem
+ * twice, and Ada again, who entered it too and never spoke about it, so four students made five entries.
  */
-const BOARD: GradingCompetition[] = [
-  {
-    roundId: 'elementary-round',
-    category: 'elementary',
-    problems: [
-      { id: 'p1', slug: 'elementary-1', number: 1 },
-      { id: 'p2', slug: 'elementary-2', number: 2 },
-    ],
-    entrants: [
-      { id: 'ada', username: 'Ada', email: null },
-      { id: 'bruno', username: 'Bruno', email: null },
-      { id: 'cyril', username: 'Cyril', email: null },
-    ],
-    grades: [
-      { userId: 'ada', problemId: 'p1', conversationCount: 2, grade: null },
-      { userId: 'ada', problemId: 'p2', conversationCount: 1, grade: PRE_GRADED },
-      {
-        userId: 'bruno',
-        problemId: 'p1',
-        conversationCount: 1,
-        grade: { ...PRE_GRADED, mark: 6, isFinal: true },
-      },
-      { userId: 'bruno', problemId: 'p2', conversationCount: 0, grade: null },
-      { userId: 'cyril', problemId: 'p1', conversationCount: 1, grade: null },
-      { userId: 'cyril', problemId: 'p2', conversationCount: 1, grade: null },
-    ],
-  },
-  {
-    roundId: 'intermediate-round',
-    category: 'intermediate',
-    problems: [{ id: 'q1', slug: 'intermediate-1', number: 1 }],
-    entrants: [{ id: 'dora', username: 'Dora', email: null }],
-    grades: [{ userId: 'dora', problemId: 'q1', conversationCount: 1, grade: null }],
-  },
-]
+const BOARD: GradingBoard = {
+  name: { sk: 'Septembrové kolo', cs: 'Zářijové kolo', en: GROUP_NAME },
+  opensAt: '2026-09-01T00:00:00Z',
+  closesAt: '2026-09-14T22:00:00Z',
+  competitions: [
+    {
+      roundId: 'elementary-round',
+      category: 'elementary',
+      problems: [
+        { id: 'p1', slug: 'elementary-1', number: 1 },
+        { id: 'p2', slug: 'elementary-2', number: 2 },
+      ],
+      entrants: [
+        { id: 'ada', username: 'Ada', email: null },
+        { id: 'bruno', username: 'Bruno', email: null },
+        { id: 'cyril', username: 'Cyril', email: null },
+      ],
+      grades: [
+        { userId: 'ada', problemId: 'p1', conversationCount: 2, grade: null },
+        { userId: 'ada', problemId: 'p2', conversationCount: 1, grade: PRE_GRADED },
+        {
+          userId: 'bruno',
+          problemId: 'p1',
+          conversationCount: 1,
+          grade: { ...PRE_GRADED, mark: 6, isFinal: true },
+        },
+        { userId: 'bruno', problemId: 'p2', conversationCount: 0, grade: null },
+        { userId: 'cyril', problemId: 'p1', conversationCount: 1, grade: null },
+        { userId: 'cyril', problemId: 'p2', conversationCount: 1, grade: null },
+      ],
+    },
+    {
+      roundId: 'intermediate-round',
+      category: 'intermediate',
+      problems: [{ id: 'q1', slug: 'intermediate-1', number: 1 }],
+      entrants: [
+        { id: 'ada', username: 'Ada', email: null },
+        { id: 'dora', username: 'Dora', email: null },
+      ],
+      grades: [
+        { userId: 'ada', problemId: 'q1', conversationCount: 0, grade: null },
+        { userId: 'dora', problemId: 'q1', conversationCount: 2, grade: null },
+      ],
+    },
+  ],
+}
 
 /**
  * One change the page sent, and which grade it was sent to.
@@ -215,7 +230,7 @@ export async function installGradingBackend(
     const userId = segments.at(-1) ?? ''
 
     // Where the board holds it
-    const summary = board
+    const summary = board.competitions
       .flatMap((competition) => competition.grades)
       .find((candidate) => candidate.userId === userId && candidate.problemId === problemId)
 

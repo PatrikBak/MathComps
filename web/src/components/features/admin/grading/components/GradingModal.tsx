@@ -1,7 +1,6 @@
 'use client'
 
 import { useFormatter, useTranslations } from 'next-intl'
-import { useState } from 'react'
 
 import { ConversationModal } from '@/components/features/admin/components/ConversationModal'
 import { ConversationPanes } from '@/components/features/admin/components/ConversationPanes'
@@ -50,6 +49,10 @@ type GradingModalProps = {
   grades: ReadonlyMap<string, GradeSummary>
   /** Which pair is open, and the walk through every pair with a conversation. */
   selection: UseSteppedSelectionResult
+  /** Which of the open pair's conversations is showing, counting from one. */
+  conversation: number
+  /** Shows another of the open pair's conversations, by its number. */
+  onSelectConversation: (number: number) => void
 }
 
 /**
@@ -62,6 +65,8 @@ export function GradingModal({
   pairs,
   grades,
   selection,
+  conversation,
+  onSelectConversation,
 }: GradingModalProps) {
   // Grading copy
   const t = useTranslations('admin.grading')
@@ -107,9 +112,11 @@ export function GradingModal({
         // The open pair, once its conversations have arrived and there is one to read
         pair === null || detail === null || detail.conversations.length === 0 ? null : (
           <GradingModalBody
-            // A new pair starts on its first conversation, and saves the last one's comment on the way out
+            // A new pair saves the last one's comment on the way out
             key={selection.openId}
             detail={detail}
+            conversationNumber={conversation}
+            onSelectConversation={onSelectConversation}
             panels={panels}
             grade={grade}
             onChange={(change) => changeGrade(pair.user.id, pair.problem.id, change)}
@@ -128,6 +135,10 @@ export function GradingModal({
 type GradingModalBodyProps = {
   /** Everything the grade is read from. */
   detail: GradeDetail
+  /** Which conversation is showing, counting from one; the first where there are fewer. */
+  conversationNumber: number
+  /** Shows another conversation, by its number. */
+  onSelectConversation: (number: number) => void
   /** How much stands on screen at once, and which part the reader is looking at. */
   panels: UseConversationPanelsResult<'grade'>
   /** The grade; null while none is given. */
@@ -140,18 +151,26 @@ type GradingModalBodyProps = {
  * The conversations, the reference, and the grade, side by side where the screen allows. Several conversations
  * on one problem are switched between above the transcript.
  */
-function GradingModalBody({ detail, panels, grade, onChange }: GradingModalBodyProps) {
+function GradingModalBody({
+  detail,
+  conversationNumber,
+  onSelectConversation,
+  panels,
+  grade,
+  onChange,
+}: GradingModalBodyProps) {
   // Grading copy
   const t = useTranslations('admin.grading')
 
   // Dates in the reader's language
   const format = useFormatter()
 
-  // Which conversation is showing, by position
-  const [conversationIndex, setConversationIndex] = useState(0)
+  // Which conversation is showing, by position, the first where the number runs past the list
+  const conversationIndex =
+    conversationNumber <= detail.conversations.length ? conversationNumber - 1 : 0
 
-  // The conversation showing, the first where the position has run past the list
-  const conversation = detail.conversations[conversationIndex] ?? detail.conversations[0]
+  // The conversation showing
+  const conversation = detail.conversations[conversationIndex]
 
   // Whether there is more than one conversation to switch between
   const hasSeveral = detail.conversations.length > 1
@@ -172,7 +191,7 @@ function GradingModalBody({ detail, panels, grade, onChange }: GradingModalBodyP
                     size="sm"
                     variant={candidateIndex === conversationIndex ? 'subtle' : 'ghost'}
                     aria-pressed={candidateIndex === conversationIndex}
-                    onClick={() => setConversationIndex(candidateIndex)}
+                    onClick={() => onSelectConversation(candidateIndex + 1)}
                   >
                     {t('conversationNumber', { number: candidateIndex + 1 })}
                     <span className="text-xs text-muted">

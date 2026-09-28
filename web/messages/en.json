@@ -209,6 +209,7 @@
         "student": "Student",
         "total": "Total"
       },
+      "groupSubtitle": "{name}, {opens} – {closes}",
       "loadFailed": "Couldn't load the grading",
       "pairSubtitle": "{category}, problem {number}",
       "panel": {
@@ -981,7 +982,8 @@
   "plurals": {
     "conversations": "{count, plural, =1 {# conversation} other {# conversations}}",
     "problems": "{count, plural, =1 {# problem} other {# problems}}",
-    "replies": "{count, plural, =1 {# reply} other {# replies}}"
+    "replies": "{count, plural, =1 {# reply} other {# replies}}",
+    "students": "{count, plural, =1 {# student} other {# students}}"
   },
   "privacy": {
     "lastUpdated": "Last updated: September 2, 2026",

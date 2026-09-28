@@ -1,6 +1,6 @@
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 
-import type { Grade, GradingCompetition } from '../model/grading-types'
+import type { Grade, GradingBoard } from '../model/grading-types'
 
 /** The root every grading query key hangs off. */
 const GRADING_QUERY_KEY = ['adminGrading'] as const
@@ -52,14 +52,12 @@ export function readCachedGrade(
   address: CachedGradeAddress
 ): Grade | null {
   // The board the grade sits on
-  const board = queryClient.getQueryData<GradingCompetition[]>(
-    gradingBoardQueryKey(address.groupSlug)
-  )
+  const board = queryClient.getQueryData<GradingBoard>(gradingBoardQueryKey(address.groupSlug))
 
   // The grade among every competition's grades
   return (
-    board
-      ?.flatMap((competition) => competition.grades)
+    board?.competitions
+      .flatMap((competition) => competition.grades)
       .find(
         (summary) => summary.userId === address.userId && summary.problemId === address.problemId
       )?.grade ?? null
@@ -79,14 +77,20 @@ export function writeCachedGrade(
   grade: Grade | null
 ): void {
   // The board with that one grade replaced, and every other left as it was
-  queryClient.setQueryData<GradingCompetition[]>(gradingBoardQueryKey(address.groupSlug), (board) =>
-    board?.map((competition) => ({
-      ...competition,
-      grades: competition.grades.map((summary) =>
-        summary.userId === address.userId && summary.problemId === address.problemId
-          ? { ...summary, grade }
-          : summary
-      ),
-    }))
+  queryClient.setQueryData<GradingBoard>(gradingBoardQueryKey(address.groupSlug), (board) =>
+    // Nothing to rewrite while the board isn't cached
+    board === undefined
+      ? undefined
+      : {
+          ...board,
+          competitions: board.competitions.map((competition) => ({
+            ...competition,
+            grades: competition.grades.map((summary) =>
+              summary.userId === address.userId && summary.problemId === address.problemId
+                ? { ...summary, grade }
+                : summary
+            ),
+          })),
+        }
   )
 }

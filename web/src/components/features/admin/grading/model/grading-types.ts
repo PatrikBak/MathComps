@@ -1,6 +1,7 @@
 import type { UserIdentity } from '@/components/features/admin/model/user-identity'
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import type { LocalizedString } from '@/i18n/i18n'
 
 /**
  * One problem of a competition being graded.
@@ -60,6 +61,26 @@ export type GradingCompetition = {
   entrants: UserIdentity[]
   /** Every entrant's grade on every problem. */
   grades: GradeSummary[]
+}
+
+/**
+ * The group being graded: what it is called, and when it took entries.
+ */
+export type GradingGroup = {
+  /** What a heading calls the group, in every language the site is read in. */
+  name: LocalizedString
+  /** When the group started taking entries, as an ISO-8601 string. */
+  opensAt: string
+  /** When it stopped, as an ISO-8601 string. */
+  closesAt: string
+}
+
+/**
+ * Everything grading one group starts from: which group it is, and each of its competitions.
+ */
+export type GradingBoard = GradingGroup & {
+  /** Its competitions, in the order it sets the categories out. */
+  competitions: GradingCompetition[]
 }
 
 /**
@@ -152,12 +173,38 @@ export function formatScore(score: number): string {
 }
 
 /**
+ * The ids naming one entrant on one problem.
+ */
+export type PairIds = {
+  /** The entrant. */
+  userId: string
+  /** The problem. */
+  problemId: string
+}
+
+/** What stands between the two ids of a pair's key, a character neither id holds. */
+const PAIR_KEY_SEPARATOR = '|'
+
+/**
  * The key naming one entrant on one problem.
  * @param userId - The entrant.
  * @param problemId - The problem.
  * @returns The key.
  */
 export function pairKey(userId: string, problemId: string): string {
-  // Both ids, split by a character neither id holds
-  return `${userId}|${problemId}`
+  // Both ids, split by the separator
+  return `${userId}${PAIR_KEY_SEPARATOR}${problemId}`
+}
+
+/**
+ * Reads a key {@link pairKey} built back into the ids it was built from.
+ * @param key - The key.
+ * @returns The entrant's id and the problem's.
+ */
+export function splitPairKey(key: string): PairIds {
+  // Where the entrant's id ends
+  const separatorIndex = key.indexOf(PAIR_KEY_SEPARATOR)
+
+  // The ids either side of it
+  return { userId: key.slice(0, separatorIndex), problemId: key.slice(separatorIndex + 1) }
 }

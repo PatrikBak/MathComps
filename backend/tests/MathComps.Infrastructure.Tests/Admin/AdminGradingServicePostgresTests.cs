@@ -1,9 +1,11 @@
 using MathComps.Domain.Contracts.Admin;
 using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Admin;
+using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -142,6 +144,9 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // The service under test.
         services.AddScoped<IAdminGradingService, AdminGradingService>();
+
+        // The names a group is called by.
+        services.AddSingleton<IMetadataLocalizationService, MetadataLocalizationService>();
     }
 
     /// <summary>
@@ -159,10 +164,10 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Both competitions, in the order the taxonomy sets them out
         Assert.Equal(
             [HostedCompetitionCategory.Elementary, HostedCompetitionCategory.Advanced],
-            board.Select(competition => competition.Category));
+            board.Competitions.Select(competition => competition.Category));
 
         // The advanced competition, second in that order
-        var advanced = board[1];
+        var advanced = board.Competitions[1];
 
         // Carrying the advanced round's id
         Assert.Equal(_advancedRoundId, advanced.RoundId);
@@ -192,7 +197,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(1, GradeOf(board, _bobId, _advancedSecondId).ConversationCount);
 
         // The elementary competition grades Dan alone
-        Assert.Equal([_danId], board[0].Entrants.Select(entrant => entrant.Id));
+        Assert.Equal([_danId], board.Competitions[0].Entrants.Select(entrant => entrant.Id));
 
         // Dan's one conversation on its first problem
         Assert.Equal(1, GradeOf(board, _danId, _elementaryFirstId).ConversationCount);
@@ -202,8 +207,39 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // And nobody has graded anything yet
         Assert.All(
-            board.SelectMany(competition => competition.Grades),
+            board.Competitions.SelectMany(competition => competition.Grades),
             summary => Assert.Null(summary.Grade));
+    });
+
+    /// <summary>
+    /// The board names its group by the node its first round runs under, in every language, and says when the group
+    /// took entries.
+    /// </summary>
+    [Fact]
+    public Task The_board_names_its_group_and_when_it_took_entries() => RunTestAsync(async service =>
+    {
+        // Read the graded group's board
+        var board = await service.GetBoardAsync(GradedSlug);
+
+        // The names the taxonomy gives its nodes
+        var localization = new MetadataLocalizationService();
+
+        // What it calls the node the first round runs under, language by language
+        var expected = Enum.GetValues<Language>().ToDictionary(
+            language => language,
+            language => localization.GetNodeShortName(language, "mathcomps-elementary-september"));
+
+        // The board names its group that
+        Assert.Equal(expected, board.Name);
+
+        // No language leaves it blank
+        Assert.All(board.Name.Values, name => Assert.NotEqual(string.Empty, name));
+
+        // Opened when the group was seeded to open
+        Assert.Equal(_startedAt.AddDays(-5), board.OpensAt);
+
+        // Closed when the group was seeded to close
+        Assert.Equal(_closesAt, board.ClosesAt);
     });
 
     /// <summary>
@@ -218,7 +254,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         var board = await service.GetBoardAsync(GradedSlug);
 
         // Everybody it grades, across every competition
-        var graded = board
+        var graded = board.Competitions
             .SelectMany(competition => competition.Entrants)
             .Select(entrant => entrant.Id)
             .ToList();
@@ -606,7 +642,9 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         var board = await service.GetBoardAsync(GradedSlug);
 
         // Dan graded in every competition
-        Assert.All(board, competition => Assert.Contains(_danId, competition.Entrants.Select(entrant => entrant.Id)));
+        Assert.All(
+            board.Competitions,
+            competition => Assert.Contains(_danId, competition.Entrants.Select(entrant => entrant.Id)));
 
         // His advanced conversation counted on the advanced problem
         Assert.Equal(1, GradeOf(board, _danId, _advancedFirstId).ConversationCount);
@@ -846,8 +884,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// <param name="userId">The entrant.</param>
     /// <param name="problemId">The problem.</param>
     /// <returns>The grade as the board lists it.</returns>
-    private static GradeSummaryDto GradeOf(IReadOnlyList<GradingCompetitionDto> board, Guid userId, Guid problemId) =>
-        board
+    private static GradeSummaryDto GradeOf(GradingBoardDto board, Guid userId, Guid problemId) =>
+        board.Competitions
             .SelectMany(competition => competition.Grades)
             .Single(summary => summary.UserId == userId && summary.ProblemId == problemId);
 
