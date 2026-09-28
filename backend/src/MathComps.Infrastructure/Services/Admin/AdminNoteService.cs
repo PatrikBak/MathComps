@@ -165,7 +165,7 @@ public class AdminNoteService(
             note.Id,
             note.SessionId,
             note.TurnId,
-            new AdminDefenseUserDto(
+            new UserIdentityDto(
                 note.Author.Id, note.Author.IsDeleted ? null : note.Author.Username, note.Author.Email),
             // The gate above leaves only the author here.
             true,
@@ -266,7 +266,7 @@ public class AdminNoteService(
                     note.Id,
                     note.SessionId,
                     note.TurnId,
-                    new AdminDefenseUserDto(
+                    new UserIdentityDto(
                         note.Author.Id,
                         note.Author.IsDeleted ? null : note.Author.Username,
                         note.Author.Email),
@@ -285,7 +285,7 @@ public class AdminNoteService(
                     note.Session.ProblemTarget!.Problem.Round.Competition.Path,
                     note.Session.ProblemTarget!.Problem.Round.Season.EditionNumber,
                     note.Session.ProblemTarget!.Problem.Round.Season.StartYear),
-                new AdminDefenseUserDto(
+                new UserIdentityDto(
                     note.Session.User.Id,
                     note.Session.User.IsDeleted ? null : note.Session.User.Username,
                     note.Session.User.Email),
@@ -314,13 +314,13 @@ public class AdminNoteService(
     /// <param name="userId">Who to read.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>Them, or null when there is nobody under the id.</returns>
-    private static Task<AdminDefenseUserDto?> ReadUserAsync(
+    private static Task<UserIdentityDto?> ReadUserAsync(
         MathCompsDbContext dbContext, Guid userId, CancellationToken cancellationToken)
     {
-        // Whoever sits under the id, and only the three fields a byline is made of.
+        // Whoever sits under the id, as a byline names them.
         return dbContext.Users
             .Where(user => user.Id == userId)
-            .Select(user => new AdminDefenseUserDto(
+            .Select(user => new UserIdentityDto(
                 user.Id, user.IsDeleted ? null : user.Username, user.Email))
             .FirstOrDefaultAsync(cancellationToken);
     }
@@ -330,11 +330,11 @@ public class AdminNoteService(
     /// </summary>
     /// <param name="Note"><inheritdoc cref="AdminNoteDto" path="/summary"/></param>
     /// <param name="Target"><inheritdoc cref="NamedDefenseTargets.Columns" path="/summary"/></param>
-    /// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
+    /// <param name="User"><inheritdoc cref="AdminNoteFeedItemDto.User" path="/summary"/></param>
     /// <param name="TurnSequence"><inheritdoc cref="AdminNoteFeedItemDto.TurnSequence" path="/summary"/></param>
     private sealed record FeedRow(
         AdminNoteDto Note,
         NamedDefenseTargets.Columns Target,
-        AdminDefenseUserDto User,
+        UserIdentityDto User,
         int? TurnSequence);
 }

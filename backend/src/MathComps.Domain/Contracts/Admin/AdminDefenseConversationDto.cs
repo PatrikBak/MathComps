@@ -8,7 +8,7 @@ namespace MathComps.Domain.Contracts.Admin;
 /// </summary>
 /// <param name="Id">The conversation's identifier.</param>
 /// <param name="Target"><inheritdoc cref="NamedDefenseTarget" path="/summary"/></param>
-/// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
+/// <param name="User">The student who held it.</param>
 /// <param name="LastStudentMessage">
 /// The start of the student's most recent message, cut short. Null when they have sent none.
 /// </param>
@@ -29,7 +29,7 @@ namespace MathComps.Domain.Contracts.Admin;
 public record AdminDefenseConversationDto(
     Guid Id,
     NamedDefenseTarget Target,
-    AdminDefenseUserDto User,
+    UserIdentityDto User,
     string? LastStudentMessage,
     int StudentMessageCount,
     DateTimeOffset LastActivityAt,

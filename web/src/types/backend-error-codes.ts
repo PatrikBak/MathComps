@@ -40,6 +40,8 @@ export const BACKEND_ERROR_CODES = [
   'AdminNoteNotFound',
   'NotAdminNoteAuthor',
   'AdminReviewTarget',
+  'HostedGroupNotFound',
+  'HostedGradeTarget',
   'HostedGradeValue',
   'MalformedRequest',
   'UserNotResolved',

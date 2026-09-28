@@ -15,7 +15,7 @@ const PAGE_SIZE = 2
 
 /** Filters with nothing to offer. */
 const NO_FILTER_OPTIONS: DefenseReviewFilterOptions = {
-  users: [],
+  students: [],
   problems: [],
   promptVersions: [],
 }

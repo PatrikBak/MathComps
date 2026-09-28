@@ -113,7 +113,7 @@ export type DefenseReviewPromptVersionOption = {
  */
 export type DefenseReviewFilterOptions = {
   /** Everyone who has held a conversation. */
-  users: DefenseReviewStudentOption[]
+  students: DefenseReviewStudentOption[]
   /** Every problem one has been held against. */
   problems: DefenseReviewProblemOption[]
   /** Every set of examiner settings one has run on. */

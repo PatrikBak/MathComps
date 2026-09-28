@@ -52,6 +52,17 @@ public class UserGrantServicePostgresTests(PostgresContainerFixture fixture)
         // Nothing was ever written for them
         Assert.False(await grants.HasAsync(_plainId, UserCapability.BypassCompetitionGates)));
 
+    /// <summary>
+    /// Asked about several accounts at once, only the one a grant names comes back. A read letting an ungranted
+    /// one in would hand the capability to every account asked about alongside a granted one.
+    /// </summary>
+    [Fact]
+    public Task Of_several_accounts_only_the_granted_one_holds_it() => RunTestAsync(async grants =>
+        // Both accounts asked about, the grant written for one
+        Assert.Equal(
+            [_grantedId],
+            await grants.GetHoldersAsync([_grantedId, _plainId], UserCapability.BypassCompetitionGates)));
+
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
