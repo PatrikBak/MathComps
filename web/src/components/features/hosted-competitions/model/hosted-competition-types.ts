@@ -164,6 +164,8 @@ export type PendingEntry = {
 export type HostedCompetitionGroup = {
   /** Identifies the group. */
   id: string
+  /** What addresses the group (e.g. `mc-2026-3`). */
+  slug: string
   /** What a heading calls it, in every language the site is read in. */
   name: LocalizedString
   /** How many problems each of its competitions asks, announced rather than counted. */

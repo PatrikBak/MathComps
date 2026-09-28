@@ -1,13 +1,11 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, Mail, MailOpen, MailPlus, X } from 'lucide-react'
+import { Mail, MailOpen, MailPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { ConversationModal } from '@/components/features/admin/components/ConversationModal'
+import { describeUser } from '@/components/features/admin/model/user-identity'
 import { Button } from '@/components/shared/components/Button'
-import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
-import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
-import { Modal } from '@/components/shared/components/Modal'
-import { cn } from '@/components/shared/utils/css-utils'
 import { useKeyedState } from '@/hooks/use-keyed-state'
 
 import { useDefenseReviewDetail } from '../hooks/use-defense-review-detail'
@@ -15,7 +13,7 @@ import { useDefenseReviewPanels } from '../hooks/use-defense-review-panels'
 import { useDefenseReviewReadMarking } from '../hooks/use-defense-review-read-marking'
 import type { MarkUnreadFrom } from '../hooks/use-defense-review-read-state'
 import type { UseDefenseReviewSelectionResult } from '../hooks/use-defense-review-selection'
-import { describeReviewUser } from '../model/defense-review-types'
+import { NEXT_UNREAD_KEY } from '../model/defense-review-stepping'
 import { ActionLabel } from './ActionLabel'
 import { DefenseReviewModalBody } from './DefenseReviewModalBody'
 import { DefenseTargetRef } from './DefenseTargetRef'
@@ -41,18 +39,8 @@ type DefenseReviewModalProps = {
 /**
  * One conversation, read back in full.
  *
- * The dialog itself never unmounts while the reader works through the queue: stepping from one conversation to
- * the next swaps what is inside it, so the focus trap never re-runs and the arrow that was just pressed stays
- * under the reader's finger. The header holds its height across that swap by keeping a blank line where the
- * problem goes, since what the conversation was about is one of the things still being read.
- *
  * The read toggle carries words beside its envelope wherever the header has room for them: an envelope on its
  * own says nothing about which way it is about to go.
- *
- * It opens with focus on the panel and on no control at all. The transcript would be the place to land, since
- * paging through it is what the reader came to do, but its scroll region takes no focus of its own, and left to
- * itself the dialog lands on the first control in the header, which writes a read state to the server the moment
- * a reader pages with the space bar.
  */
 export function DefenseReviewModal({
   selection,
@@ -67,9 +55,6 @@ export function DefenseReviewModal({
 
   // Profile copy
   const tProfile = useTranslations('profile')
-
-  // The shared names for doing things to something
-  const tActions = useTranslations('ui.actions')
 
   // The conversation itself
   const { detail, uiState } = useDefenseReviewDetail(selection.openId)
@@ -89,50 +74,31 @@ export function DefenseReviewModal({
   // Which reply a new note will stand against, held above the notes tab because the transcript marks it too
   const [noteTurnId, setNoteTurnId] = useKeyedState<string | null>(selection.openId, null)
 
-  return (
-    <Modal
-      isOpen={selection.openId !== null}
-      onClose={selection.close}
-      showCloseButton={false}
-      padded={false}
-      tall
-      focusPanelOnOpen
-      className="sm:max-w-6xl 2xl:max-w-[102rem]"
-      ariaLabel={
-        detail === null
-          ? t('detailTitle')
-          : t('detailTitleFor', {
-              student: describeReviewUser(detail.user, tProfile('defaultUser')),
-            })
-      }
-      onClosed={() => {
-        panels.reset()
-        readMarking.reset()
-        onClosed()
-      }}
-    >
-      {/* The header: who held it, and the way through the queue */}
-      <header
-        className={cn(
-          'flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-foreground/10',
-          'px-4 py-2.5 sm:flex-nowrap sm:px-5'
-        )}
-      >
-        {/* Who held it, and what it was about, opted out of the hyphenation the page turns on globally */}
-        <div className="w-full min-w-0 hyphens-none sm:w-auto sm:flex-1" aria-live="polite">
-          <p className="truncate font-bold text-foreground">
-            {detail === null ? ' ' : describeReviewUser(detail.user, tProfile('defaultUser'))}
-          </p>
-          <p className="flex items-baseline gap-2 text-xs text-muted">
-            {detail === null ? (
-              <span>&nbsp;</span>
-            ) : (
-              <DefenseTargetRef target={detail.target} emphasis="muted" />
-            )}
-          </p>
-        </div>
+  // The student's name, once the conversation has arrived
+  const student = detail === null ? null : describeUser(detail.user, tProfile('defaultUser'))
 
-        {/* Whether it counts as read */}
+  // A function which wipes the dialog session once the dialog has finished leaving
+  const handleClosed = () => {
+    // Back on the conversation for the next open
+    panels.reset()
+
+    // Forget every conversation this dialog session went through
+    readMarking.reset()
+
+    // Report the dialog as gone
+    onClosed()
+  }
+
+  return (
+    <ConversationModal
+      selection={selection}
+      ariaLabel={student === null ? t('detailTitle') : t('detailTitleFor', { student })}
+      title={student}
+      subtitle={
+        detail === null ? null : <DefenseTargetRef target={detail.target} emphasis="muted" />
+      }
+      actions={
+        // Whether it counts as read
         <Button
           variant="ghost"
           size="sm"
@@ -146,92 +112,37 @@ export function DefenseReviewModal({
           )}
           <ActionLabel>{readMarking.isRead ? t('markUnread') : t('markRead')}</ActionLabel>
         </Button>
-
-        {/* The way through the queue, in the order the list shows it */}
-        <div className="mx-auto flex shrink-0 items-center gap-1 text-xs text-muted sm:mx-0">
-          {/* Back one */}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t('previous')}
-            aria-keyshortcuts="k"
-            disabled={!selection.canStep(-1)}
-            onClick={() => selection.step(-1)}
-          >
-            <ChevronLeft size={16} />
-          </Button>
-
-          {/* Where it sits in the queue */}
-          {selection.position !== null && (
-            <span className="tabular-nums">
-              {t('position', {
-                index: selection.position.index,
-                total: selection.position.total,
-              })}
-            </span>
-          )}
-
-          {/* On one */}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t('next')}
-            aria-keyshortcuts="j"
-            disabled={!selection.canStep(1)}
-            onClick={() => selection.step(1)}
-          >
-            <ChevronRight size={16} />
-          </Button>
-
-          {/* Past everything already read */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="shrink-0 gap-1.5 px-2"
-            aria-keyshortcuts="u"
-            disabled={!selection.canStepUnread}
-            onClick={selection.stepUnread}
-          >
-            <MailPlus size={16} aria-hidden="true" />
-            <ActionLabel>{t('nextUnread')}</ActionLabel>
-          </Button>
-        </div>
-
-        {/* Out of the conversation. Last of the controls, so a narrow header wraps it to the far end of
-          their row */}
+      }
+      stepActions={
+        // Past everything already read
         <Button
           variant="ghost"
-          size="icon"
-          className="ml-auto sm:ml-0"
-          aria-label={tActions('close')}
-          onClick={selection.close}
+          size="sm"
+          className="shrink-0 gap-1.5 px-2"
+          aria-keyshortcuts={NEXT_UNREAD_KEY}
+          disabled={!selection.canStepUnread}
+          onClick={selection.stepUnread}
         >
-          <X size={16} />
+          <MailPlus size={16} aria-hidden="true" />
+          <ActionLabel>{t('nextUnread')}</ActionLabel>
         </Button>
-      </header>
-
-      {/* What it holds, once it has arrived */}
-      {detail === null ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
-          <FetchStatePlaceholder
-            uiState={uiState}
-            className="flex flex-col items-center gap-2 text-center"
-            // A conversation that arrived empty reads the same way as one still on its way
-            empty={<LoadingSpinner />}
-            failed={<p className="text-sm text-muted">{t('detailFailed')}</p>}
+      }
+      body={
+        detail === null ? null : (
+          <DefenseReviewModalBody
+            detail={detail}
+            panels={panels}
+            firstNewTurnId={readMarking.firstNewTurnId}
+            noteTurnId={noteTurnId}
+            landingNoteId={landingNoteId}
+            onMarkUnreadFrom={readMarking.markUnreadFrom}
+            onNoteTurnIdChange={setNoteTurnId}
           />
-        </div>
-      ) : (
-        <DefenseReviewModalBody
-          detail={detail}
-          panels={panels}
-          firstNewTurnId={readMarking.firstNewTurnId}
-          noteTurnId={noteTurnId}
-          landingNoteId={landingNoteId}
-          onMarkUnreadFrom={readMarking.markUnreadFrom}
-          onNoteTurnIdChange={setNoteTurnId}
-        />
-      )}
-    </Modal>
+        )
+      }
+      uiState={uiState}
+      failedMessage={t('detailFailed')}
+      onClosed={handleClosed}
+    />
   )
 }

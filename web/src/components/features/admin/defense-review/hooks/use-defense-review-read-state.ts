@@ -1,11 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import { useCallback, useRef } from 'react'
+import { useCallback, useState } from 'react'
 
 import type { ReadPassBoundary } from '@/components/features/defense/model/defense-conversation-model'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { ApiCaller } from '@/hooks/use-api'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
+import { createSettlingWrites } from '@/lib/settling-writes'
 import type { ApiResult } from '@/types/api'
 
 import type { DefenseReviewConversation } from '../model/defense-review-types'
@@ -73,18 +74,6 @@ type ReadStateSnapshot = {
   isUnread: boolean
   /** How many of the student's messages were new. */
   unreadStudentMessageCount: number
-}
-
-/**
- * Every mark still settling on one conversation, held together so a failure puts back what the server holds
- * rather than what the mark before it optimistically wrote.
- */
-type ReadStateMarks = {
-  /** The last state the server is known to hold: what the row said before the first mark, then whatever each
-   * mark that lands leaves behind. Null while the row was never on screen. */
-  previous: ReadStateSnapshot | null
-  /** How many of them have yet to settle. */
-  outstanding: number
 }
 
 /**
@@ -228,9 +217,8 @@ export function useDefenseReviewReadState(): UseDefenseReviewReadStateResult {
   // The cache the rows live in
   const queryClient = useQueryClient()
 
-  // The marks still settling, per conversation. A second mark on one reads a row the first has already
-  // rewritten, so the snapshot the first took is the one they all roll back to, and it outlives each of them.
-  const inFlight = useRef(new Map<string, ReadStateMarks>())
+  // The marks still settling on each conversation, and what its row goes back to when one is refused
+  const [settling] = useState(() => createSettlingWrites<ReadStateSnapshot>())
 
   // The write itself, which rewrites the row first and puts it back if the write fails
   const { mutate } = useOptimisticMutation<void, ReadStateChange, ReadStateSnapshot | null>({
@@ -239,17 +227,8 @@ export function useDefenseReviewReadState(): UseDefenseReviewReadStateResult {
     // clicks landing out of order would leave the server holding the earlier one and nothing on screen saying so
     scope: { id: 'defense-review-read-state' },
     onMutate: ({ sessionId, mark }) => {
-      // Whatever is already settling on this conversation, whose snapshot predates all of it
-      const existing = inFlight.current.get(sessionId)
-
-      // This mark joins them, or opens the set
-      const marks = existing ?? { previous: null, outstanding: 0 }
-
-      // One more mark to settle before the row is nobody's business
-      marks.outstanding += 1
-
-      // Held under the conversation it is settling on
-      inFlight.current.set(sessionId, marks)
+      // One more mark to settle on this conversation, which may be the one opening the set
+      const opensSet = settling.begin(sessionId)
 
       // What this mark writes, held so that landing it can make it the state a later failure falls back to
       const written: WrittenReadState = { value: null }
@@ -259,13 +238,12 @@ export function useDefenseReviewReadState(): UseDefenseReviewReadStateResult {
         // Only the mark that opened the set sees the row as the server last left it, and only off one copy
         // of it: the conversation is cached once per filtering and language, and copies read at different
         // moments disagree about how much of it is unread
-        if (existing === undefined && marks.previous === null) {
-          // What the row said before any mark touched it
-          marks.previous = {
+        if (opensSet) {
+          settling.holdBefore(sessionId, {
             readAt: conversation.readAt,
             isUnread: conversation.isUnread,
             unreadStudentMessageCount: conversation.unreadStudentMessageCount,
-          }
+          })
         }
 
         // What the mark leaves the row saying, computed once so every copy of it says the same thing
@@ -279,20 +257,16 @@ export function useDefenseReviewReadState(): UseDefenseReviewReadStateResult {
       return written.value
     },
     onSuccess: (_data, { sessionId }, written) => {
-      // What this mark was settling alongside
-      const marks = inFlight.current.get(sessionId)
+      // Nothing to move on if the mark wrote nothing
+      if (written == null) return
 
-      // Nothing to move on if the row was never on screen
-      if (marks?.previous == null || written == null) return
-
-      // This mark is on the server now, so it and not the state before the set is what a mark failing behind
-      // it has to put back: rolling past a committed write leaves the row saying the opposite of the truth
-      marks.previous = written
+      // This mark is on the server now, so it is what a mark refused behind it puts back
+      const isLastToSettle = settling.land(sessionId, written)
 
       // Nothing behind it is left to decide what the row says, so it says what actually landed. Which the
       // rewrite on the way out already wrote, except where a mark refused since then skipped its own rollback
       // or a read of the whole queue landed over it.
-      if (marks.outstanding === 1) {
+      if (isLastToSettle) {
         patchCachedQueueConversation(queryClient, sessionId, (conversation) => ({
           ...conversation,
           ...written,
@@ -300,34 +274,20 @@ export function useDefenseReviewReadState(): UseDefenseReviewReadStateResult {
       }
     },
     onError: (_error, { sessionId }) => {
-      // What the row said before any of the marks still settling touched it
-      const marks = inFlight.current.get(sessionId)
+      // What the server still holds, unless a mark behind this one decides
+      const confirmed = settling.refuse(sessionId)
 
-      // Nothing to put back if the row was never on screen
-      if (marks?.previous == null) return
-
-      // A mark behind this one settles later and decides what the row ends up saying
-      if (marks.outstanding > 1) return
+      // Nothing to put back if the row was never on screen or a later mark settles it
+      if (confirmed === null) return
 
       // Put the row back the way it was
       patchCachedQueueConversation(queryClient, sessionId, (conversation) => ({
         ...conversation,
-        ...marks.previous,
+        ...confirmed.state,
       }))
     },
-    onSettled: (_data, _error, { sessionId }) => {
-      // What this mark was settling alongside
-      const marks = inFlight.current.get(sessionId)
-
-      // Nothing to settle if the row was never on screen
-      if (marks === undefined) return
-
-      // One fewer outstanding
-      marks.outstanding -= 1
-
-      // The snapshot goes with the last of them, since there is no longer anything to put back
-      if (marks.outstanding === 0) inFlight.current.delete(sessionId)
-    },
+    // One mark fewer settling on the conversation, whichever way it went
+    onSettled: (_data, _error, { sessionId }) => settling.settle(sessionId),
     authReason: t('readStateFailed'),
     errorMessage: t('readStateFailed'),
   })

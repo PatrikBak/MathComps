@@ -103,6 +103,7 @@ function groupOf(overrides: Partial<HostedCompetitionGroup> = {}): HostedCompeti
   // A group open right now, with the case's own facts on top
   return {
     id: 'september',
+    slug: 'september',
     problemCount: 3,
     clockMinutes: CLOCK_MINUTES,
     name: { sk: 'September 2026', cs: 'Září 2026', en: 'September 2026' },

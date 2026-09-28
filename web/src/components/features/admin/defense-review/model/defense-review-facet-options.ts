@@ -1,3 +1,4 @@
+import { describeUser } from '@/components/features/admin/model/user-identity'
 import type {
   NamedHandoutTarget,
   NamedProblemTarget,
@@ -13,8 +14,7 @@ import { encodeProblemKey } from './defense-review-filters'
 import {
   type DefenseReviewProblemOption,
   type DefenseReviewPromptVersionOption,
-  type DefenseReviewUserOption,
-  describeReviewUser,
+  type DefenseReviewStudentOption,
 } from './defense-review-types'
 
 /**
@@ -29,7 +29,7 @@ import {
  * @returns The options, ready for the facet.
  */
 export function toUserFacetOptions(
-  users: DefenseReviewUserOption[],
+  users: DefenseReviewStudentOption[],
   unnamedLabel: string
 ): FacetOption[] {
   // One option per student, carrying whichever halves the site holds so the search reads them
@@ -37,7 +37,7 @@ export function toUserFacetOptions(
     id: option.user.id,
     displayName:
       option.user.username === null || option.user.email === null
-        ? describeReviewUser(option.user, unnamedLabel)
+        ? describeUser(option.user, unnamedLabel)
         : `${option.user.username} (${option.user.email})`,
     count: option.conversationCount,
   }))

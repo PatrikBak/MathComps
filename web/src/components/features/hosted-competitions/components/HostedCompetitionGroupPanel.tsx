@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react'
 import {
   ArrowRight,
   CalendarRange,
+  ClipboardCheck,
   FileText,
   NotebookPen,
   Play,
@@ -16,12 +17,13 @@ import type { ComponentProps } from 'react'
 import type { ReactNode } from 'react'
 
 import { AppLink } from '@/components/shared/components/AppLink'
-import { Button } from '@/components/shared/components/Button'
+import { Button, buttonVariants } from '@/components/shared/components/Button'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { formatClockRemaining } from '@/components/shared/utils/duration-utils'
-import type { Locale } from '@/i18n/i18n'
+import { useIsAdmin } from '@/hooks/use-is-admin'
+import { type Locale, ROUTES } from '@/i18n/i18n'
 
 import { useClockLength } from '../hooks/use-clock-length'
 import { useEntryWindowLabel } from '../hooks/use-entry-window-label'
@@ -44,6 +46,17 @@ const PHASE_PANEL_CLASS: Record<GroupPhase, string> = {
   upcoming: '',
   open: 'border-brand/30 bg-brand/5',
   closed: '',
+}
+
+/**
+ * Whether a phase can hold work to grade. Grading starts with the first entry, so an open group can already have
+ * some, and the practice group is never graded.
+ */
+const PHASE_HOLDS_GRADED_WORK: Record<GroupPhase, boolean> = {
+  practice: false,
+  upcoming: false,
+  open: true,
+  closed: true,
 }
 
 /**
@@ -83,6 +96,9 @@ export function HostedCompetitionGroupPanel({
 
   // Wording for how long is left
   const remainingLabel = useRemainingLabel()
+
+  // Whether the reader is an admin
+  const isAdmin = useIsAdmin()
 
   // Wording for the window a group takes entries in
   const entryWindowLabel = useEntryWindowLabel()
@@ -180,6 +196,21 @@ export function HostedCompetitionGroupPanel({
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <CompetitionTerms problemCount={group.problemCount} clockMinutes={group.clockMinutes} />
           </div>
+
+          {/* The way into grading the round, for admins, once the round opens */}
+          {isAdmin && PHASE_HOLDS_GRADED_WORK[phase] && (
+            <AppLink
+              href={{ pathname: ROUTES.ADMIN_GRADING, params: { slug: group.slug } }}
+              plain
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'sm' }),
+                '-mx-2 min-h-8 gap-1.5 px-2 sm:mx-0 sm:ml-auto'
+              )}
+            >
+              <ClipboardCheck size={16} aria-hidden />
+              {t('grade')}
+            </AppLink>
+          )}
         </div>
 
         {/* What the practice group is for */}

@@ -268,6 +268,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
   // The practice one, which never closes and never publishes results
   const practice: HostedCompetitionGroup = {
     id: 'practice',
+    slug: 'practice',
     name: { sk: 'Skúšobná súťaž', cs: 'Zkušební soutěž', en: 'Practice competition' },
     problemCount: PROBLEMS_PER_COMPETITION,
     clockMinutes: PRACTICE_CLOCK_MINUTES,
@@ -280,6 +281,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
   const preparationOpensAt = now + 9 * DAY_MS
   const preparation: HostedCompetitionGroup = {
     id: 'preparation',
+    slug: 'preparation',
     name: {
       sk: 'Príprava na celoštátne kolo A',
       cs: 'Příprava na celostátní kolo A',
@@ -296,6 +298,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
   const upcomingOpensAt = now + 24 * DAY_MS
   const upcoming: HostedCompetitionGroup = {
     id: 'upcoming',
+    slug: 'upcoming',
     name: monthNames(upcomingOpensAt),
     problemCount: PROBLEMS_PER_COMPETITION,
     clockMinutes: CLOCK_MINUTES,
@@ -313,6 +316,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
   const openOpensAt = now - 6 * DAY_MS
   const open: HostedCompetitionGroup = {
     id: 'open',
+    slug: 'open',
     name: monthNames(openOpensAt),
     problemCount: PROBLEMS_PER_COMPETITION,
     clockMinutes: CLOCK_MINUTES,
@@ -330,6 +334,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
   const openSpecialOpensAt = now - 3 * DAY_MS
   const openSpecial: HostedCompetitionGroup = {
     id: 'open-special',
+    slug: 'open-special',
     name: {
       sk: 'Príprava na krajské kolo A',
       cs: 'Příprava na krajské kolo A',
@@ -346,6 +351,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
   const closedSpecialClosedAt = now - 34 * DAY_MS
   const closedSpecial: HostedCompetitionGroup = {
     id: 'closed-special',
+    slug: 'closed-special',
     name: {
       sk: 'Príprava na školské kolo A',
       cs: 'Příprava na školní kolo A',
@@ -375,6 +381,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     // The group, named after the month it opened in
     return {
       id,
+      slug: id,
       name: monthNames(opensAt),
       problemCount: PROBLEMS_PER_COMPETITION,
       clockMinutes: CLOCK_MINUTES,

@@ -3,17 +3,14 @@
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
-import { DefenseTranscript } from '@/components/features/defense/components/DefenseTranscript'
-import { ProblemStrip } from '@/components/features/defense/components/ProblemStrip'
+import { ConversationPanes } from '@/components/features/admin/components/ConversationPanes'
+import { ReferencePane } from '@/components/features/admin/components/ReferencePane'
+import { TranscriptPane } from '@/components/features/admin/components/TranscriptPane'
+import type { UseConversationPanelsResult } from '@/components/features/admin/hooks/use-conversation-panels'
 import { indexReports } from '@/components/features/defense/model/defense-conversation-model'
-import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
-import { Tabs } from '@/components/shared/components/Tabs'
-import { cn } from '@/components/shared/utils/css-utils'
-import { MATHILDA_NAME } from '@/constants/mathilda'
 
-import type { UseDefenseReviewPanelsResult } from '../hooks/use-defense-review-panels'
+import type { DefenseReviewPanelId } from '../hooks/use-defense-review-panels'
 import { useNoteOnReply } from '../hooks/use-note-on-reply'
-import type { DefenseReviewTabId } from '../model/defense-review-tabs'
 import type { DefenseReviewDetail, DefenseTurnAttempt } from '../model/defense-review-types'
 import { resolveTurnDurationsMs } from '../model/defense-turn-durations'
 import { DefenseReviewConfigTab } from './DefenseReviewConfigTab'
@@ -28,7 +25,7 @@ type DefenseReviewModalBodyProps = {
   /** The conversation, as it arrived. */
   detail: DefenseReviewDetail
   /** How much of it stands on screen at once, and which part the reader is looking at. */
-  panels: UseDefenseReviewPanelsResult
+  panels: UseConversationPanelsResult<DefenseReviewPanelId>
   /** The first turn left to read since the reader's last pass; null while nothing marks one. */
   firstNewTurnId: string | null
   /** Picks the conversation up again from one of its turns. */
@@ -44,11 +41,6 @@ type DefenseReviewModalBodyProps = {
 /**
  * One conversation as it is read: the exchange itself, the solution it is judged against, what the examiner was
  * running on, and what has been written about it.
- *
- * How many of those stand on screen at once is what the viewport decides, so the same panels are laid out two
- * ways: everything behind tabs where a split would leave neither half readable, and side by side where there is
- * room for it. Judging a reply against the reference, or writing a note about one, is the job this surface
- * exists for, and behind tabs that means holding the reply in your head while you look at the other half.
  */
 export function DefenseReviewModalBody({
   detail,
@@ -99,187 +91,83 @@ export function DefenseReviewModalBody({
       ? null
       : { turnId: firstNewTurnId, label: t('unreadDivider') }
 
-  // The conversation itself
-  const transcriptPane = (
-    <div className="flex min-h-0 flex-1 flex-col">
-      {/* The problem, re-readable above the conversation */}
-      <ProblemStrip statement={detail.statement} />
-
-      {/* What was said, and what the student made of it */}
-      <DefenseTranscript
-        turns={detail.turns}
-        conversationKey={detail.id}
-        roleLabels={{ examiner: MATHILDA_NAME, candidate: t('student') }}
-        isThinking={false}
-        reports={indexReports(detail.reports)}
-        canGiveFeedback={false}
-        canRewind={false}
-        onRewindTurn={() => undefined}
-        onReportTurn={() => undefined}
-        dividerBeforeTurn={newSince}
-        // Where the next pass through it starts is the reviewer's to move, reply by reply
-        unreadMark={{ label: t('markUnreadFromTurn'), onMark: onMarkUnreadFrom }}
-        // A note about one of the examiner's replies can be started from the reply itself
-        noteMark={{ label: t('notes.writeOnTurn'), onMark: startNoteOn }}
-        // How each reply was arrived at, offered only on the replies that kept their drafts
-        draftsMark={{
-          label: (draftCount) => t('attempts.open', { draftCount }),
-          draftCounts: draftCounts,
-          onOpen: setDraftsTurnId,
-        }}
-        // And how long each turn took whoever wrote it, where that was measured
-        turnDurationsMs={turnDurationsMs}
-        // Notes hang off a reply by its number, so the reader needs the numbers there to read
-        showReplyNumbers
-        // And the one a note is being written against is marked, but only while that is what the
-        // reader is doing: a chip left selected under another panel points at nothing they can see
-        pointedAtTurnId={panels.sideTabId === 'notes' ? noteTurnId : null}
-        footer={
-          <StudentVerdict
-            feedback={detail.feedback}
-            reports={detail.reports}
-            turns={detail.turns}
-          />
-        }
-      />
-    </div>
-  )
-
-  // The solution the conversation is judged against. It names itself and takes focus, since a pane that only
-  // scrolls is otherwise out of reach from the keyboard and a long solution ends where the viewport does.
-  const referencePane = (
-    <div
-      tabIndex={0}
-      role="region"
-      aria-label={t('tabs.reference')}
-      className="math-typography flex-1 overflow-y-auto overscroll-contain px-5 py-4"
-    >
-      {/* The statement, only where the transcript's own strip isn't already showing it */}
-      {!panels.isSplit && (
-        <>
-          {/* Section heading */}
-          <h3 className="mb-2 text-sm font-semibold text-foreground">{t('reference.statement')}</h3>
-
-          {/* The statement itself */}
-          <RichMathEditorRenderer
-            content={detail.statement}
-            lightImageBackground={false}
-            imageContext="handouts"
-          />
-        </>
-      )}
-
-      {/* Section heading */}
-      <h3 className={cn('mb-2 text-sm font-semibold text-foreground', !panels.isSplit && 'mt-5')}>
-        {t('reference.solution')}
-      </h3>
-
-      {/* The solution itself */}
-      <RichMathEditorRenderer
-        content={detail.reference}
-        lightImageBackground={false}
-        imageContext="handouts"
-      />
-    </div>
-  )
-
-  // Everything read or written against the conversation. The reference drops out of the set once it has a
-  // column of its own rather than being offered twice.
-  const sidePanels = [
-    ...(panels.hasReferenceColumn
-      ? []
-      : [
-          {
-            id: 'reference' as const,
-            label: t('tabs.reference'),
-            count: null,
-            panel: referencePane,
-          },
-        ]),
-    {
-      id: 'config' as const,
-      label: t('tabs.config'),
-      count: null,
-      // Tied to the conversation, since the panel stays mounted across a step and a template left open on
-      // screen would go on standing under its old title with the next conversation's text in it
-      panel: <DefenseReviewConfigTab key={detail.id} config={detail.examinerConfig} />,
-    },
-    {
-      id: 'notes' as const,
-      label: t('tabs.notes'),
-      count: detail.notes.length === 0 ? null : detail.notes.length,
-      panel: (
-        <DefenseReviewNotesTab
-          key={detail.id}
-          sessionId={detail.id}
-          notes={detail.notes}
-          turns={detail.turns}
-          turnId={noteTurnId}
-          landingNoteId={landingNoteId}
-          composerRef={composerRef}
-          onTurnIdChange={onNoteTurnIdChange}
-        />
-      ),
-    },
-  ]
-
-  // Whichever reply's drafts are being read, over whatever layout is underneath
-  const attemptsModal = (
-    <TurnAttemptsModal
-      attempts={draftsTurnId === null ? null : (attemptsByTurn.get(draftsTurnId) ?? null)}
-      onClose={() => setDraftsTurnId(null)}
-    />
-  )
-
-  // Narrow: everything is a tab, since a split would leave neither half readable
-  if (!panels.isSplit) {
-    return (
-      <>
-        <Tabs<DefenseReviewTabId>
-          ariaLabel={t('tabsLabel')}
-          selectedId={panels.selectedTabId}
-          onSelect={panels.selectTab}
-          items={[
-            {
-              id: 'conversation',
-              label: t('tabs.conversation'),
-              count: null,
-              panel: transcriptPane,
-            },
-            ...sidePanels,
-          ]}
-        />
-        {attemptsModal}
-      </>
-    )
-  }
-
-  // Wide: the transcript and whatever is being read or written against it, side by side
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-row">
-        {/* The conversation */}
-        {transcriptPane}
-
-        {/* The solution in a column of its own, once there is room for one. The pane inside carries the name,
-          so the column around it is layout and nothing else */}
-        {panels.hasReferenceColumn && (
-          <div className="flex min-h-0 w-[26rem] shrink-0 flex-col border-l border-foreground/10">
-            {referencePane}
-          </div>
-        )}
-
-        {/* Everything else read or written against it */}
-        <div className="flex min-h-0 w-[28rem] shrink-0 flex-col border-l border-foreground/10">
-          <Tabs<DefenseReviewTabId>
-            ariaLabel={t('tabsLabel')}
-            selectedId={panels.sideTabId}
-            onSelect={panels.selectTab}
-            items={sidePanels}
+      {/* The conversation and everything read or written against it, laid out by the room there is */}
+      <ConversationPanes
+        panels={panels}
+        transcript={
+          <TranscriptPane
+            statement={detail.statement}
+            turns={detail.turns}
+            conversationKey={detail.id}
+            reports={indexReports(detail.reports)}
+            dividerBeforeTurn={newSince}
+            // Where the next pass through it starts is the reviewer's to move, reply by reply
+            unreadMark={{ label: t('markUnreadFromTurn'), onMark: onMarkUnreadFrom }}
+            // A note about one of the examiner's replies can be started from the reply itself
+            noteMark={{ label: t('notes.writeOnTurn'), onMark: startNoteOn }}
+            // How each reply was arrived at, offered only on the replies that kept their drafts
+            draftsMark={{
+              label: (draftCount) => t('attempts.open', { draftCount }),
+              draftCounts: draftCounts,
+              onOpen: setDraftsTurnId,
+            }}
+            // And how long each turn took whoever wrote it, where that was measured
+            turnDurationsMs={turnDurationsMs}
+            // The reply a note is being written against is marked, but only while that is what the reader is
+            // doing: a chip left selected under another panel points at nothing they can see
+            pointedAtTurnId={panels.sideTabId === 'notes' ? noteTurnId : null}
+            footer={
+              <StudentVerdict
+                feedback={detail.feedback}
+                reports={detail.reports}
+                turns={detail.turns}
+              />
+            }
           />
-        </div>
-      </div>
-      {attemptsModal}
+        }
+        transcriptCount={null}
+        reference={
+          <ReferencePane
+            statement={detail.statement}
+            reference={detail.reference}
+            isSplit={panels.isSplit}
+            imageContext="handouts"
+          />
+        }
+        ownPanels={{
+          config: {
+            label: t('tabs.config'),
+            count: null,
+            // Tied to the conversation, since the panel stays mounted across a step and a template left open
+            // on screen would go on standing under its old title with the next conversation's text in it
+            panel: <DefenseReviewConfigTab key={detail.id} config={detail.examinerConfig} />,
+          },
+          notes: {
+            label: t('tabs.notes'),
+            count: detail.notes.length === 0 ? null : detail.notes.length,
+            panel: (
+              <DefenseReviewNotesTab
+                key={detail.id}
+                sessionId={detail.id}
+                notes={detail.notes}
+                turns={detail.turns}
+                turnId={noteTurnId}
+                landingNoteId={landingNoteId}
+                composerRef={composerRef}
+                onTurnIdChange={onNoteTurnIdChange}
+              />
+            ),
+          },
+        }}
+      />
+
+      {/* Whichever reply's drafts are being read, over whatever layout is underneath */}
+      <TurnAttemptsModal
+        attempts={draftsTurnId === null ? null : (attemptsByTurn.get(draftsTurnId) ?? null)}
+        onClose={() => setDraftsTurnId(null)}
+      />
     </>
   )
 }

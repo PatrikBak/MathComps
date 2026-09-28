@@ -25,6 +25,21 @@
     }
   },
   "admin": {
+    "conversation": {
+      "next": "Následující",
+      "position": "{index} / {total}",
+      "previous": "Předchozí",
+      "reference": {
+        "solution": "Referenční řešení a nápovědy",
+        "statement": "Zadání"
+      },
+      "student": "Student",
+      "tabs": {
+        "conversation": "Konverzace",
+        "reference": "Řešení"
+      },
+      "tabsLabel": "Části konverzace"
+    },
     "defenseReview": {
       "attempts": {
         "attempt": "Návrh {index}",
@@ -130,7 +145,6 @@
       "markUnread": "Označit jako nepřečtené",
       "markUnreadFromTurn": "Označit jako nepřečtené odsud",
       "newMessages": "+{count, plural, =1 {# nová} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
-      "next": "Následující",
       "nextUnread": "Následující nepřečtená",
       "noStudentMessage": "Zatím žádná zpráva",
       "noteCount": "Poznámky: {count}",
@@ -164,20 +178,13 @@
         "writeOnTurn": "Napsat poznámku k této odpovědi"
       },
       "openNotes": "Poznámky",
-      "position": "{index} / {total}",
-      "previous": "Předchozí",
       "readStateFailed": "Nepodařilo se zaznamenat přečtení",
-      "reference": {
-        "solution": "Referenční řešení a nápovědy",
-        "statement": "Zadání"
-      },
       "refresh": "Obnovit",
       "shortcuts": {
         "next": "další",
         "nextUnread": "další nepřečtená",
         "previous": "předchozí"
       },
-      "student": "Student",
       "studentFeedbackMark": "Student zhodnotil konverzaci",
       "studentMessageCount": "Zpráv: {count}",
       "studentNoComment": "Bez komentáře",
@@ -185,14 +192,42 @@
       "studentVerdict": "Co řekl student",
       "tabs": {
         "config": "Nastavení",
-        "conversation": "Konverzace",
-        "notes": "Poznámky",
-        "reference": "Řešení"
+        "notes": "Poznámky"
       },
-      "tabsLabel": "Části konverzace",
       "title": "Procházet konverzace",
       "unreadDivider": "Nové od tvého posledního čtení",
       "unreadMark": "Nepřečtené"
+    },
+    "grading": {
+      "conversationNumber": "Konverzace {number}",
+      "detailFailed": "Konverzace se nepodařilo načíst",
+      "dialogTitle": "Hodnocení: {student}",
+      "empty": "V této skupině není koho hodnotit.",
+      "grid": {
+        "final": "finální",
+        "problem": "Ú{number}",
+        "student": "Student",
+        "total": "Celkem"
+      },
+      "loadFailed": "Hodnocení se nepodařilo načíst",
+      "pairSubtitle": "{category}, úloha {number}",
+      "panel": {
+        "changedBy": "Poslední změna: <name>{grader}</name>",
+        "comment": "Komentář pro hodnotitele",
+        "commentPlaceholder": "Čtou ho jen admini.",
+        "final": "Finální",
+        "help": "Z toho od Mathildy",
+        "helpHint": "Každý takový bod se počítá za polovinu.",
+        "mark": "Body",
+        "score": "Skóre",
+        "selfAssessment": "Komentář studenta"
+      },
+      "progress": "Ohodnoceno: <count>{graded}</count> z {total}, finální: <count>{final}</count>",
+      "saveFailed": "Hodnocení se nepodařilo uložit",
+      "tabs": {
+        "grade": "Hodnocení"
+      },
+      "title": "Hodnocení"
     }
   },
   "apiErrors": {
@@ -224,6 +259,7 @@
     "HostedEntryNotRunning": "Tuto soutěž už máš za sebou.",
     "HostedEntryProfileIncomplete": "Před vstupem si doplň jméno, rok maturity a e-mail.",
     "HostedEntryRequired": "Úlohy uvidíš, až když vstoupíš do soutěže.",
+    "HostedGradeValue": "Toto hodnocení není platné.",
     "HostedGroupNotOpen": "Tato soutěž právě není otevřená.",
     "HostedNoteEmpty": "Tvoje poznámka je prázdná.",
     "HostedNoteTooLong": "Tvoje poznámka je příliš dlouhá.",
@@ -410,6 +446,7 @@
     "finishError": "Soutěž se nepodařilo ukončit. Zkus to prosím znovu.",
     "forfeitError": "Soutěž se nepodařilo vzdát.",
     "goToArea": "Otevřít v soutěži",
+    "grade": "Hodnotit",
     "hint": "Nápověda",
     "hints": "Nápovědy",
     "howItWorks": {
@@ -893,6 +930,10 @@
     "adminDefenses": {
       "description": "Přehled obhajob vedených s AI zkoušející.",
       "title": "Konverzace s Mathildou"
+    },
+    "adminGrading": {
+      "description": "Hodnocení jedné skupiny soutěží Mathildování.",
+      "title": "Hodnocení"
     },
     "competitionArea": {
       "description": "Úlohy, tvůj čas a obhajoby, které o nich vedeš.",

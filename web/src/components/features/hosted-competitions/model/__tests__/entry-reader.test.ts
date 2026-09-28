@@ -14,6 +14,7 @@ function groupOf(closesAt: string | null): HostedCompetitionGroup {
   // Nothing below reads any of the rest, so they stay at whatever a group would hold
   return {
     id: 'group',
+    slug: 'group',
     name: { sk: 'Skupina', cs: 'Skupina', en: 'Group' },
     problemCount: 3,
     clockMinutes: 120,

@@ -25,6 +25,21 @@
     }
   },
   "admin": {
+    "conversation": {
+      "next": "Next",
+      "position": "{index} of {total}",
+      "previous": "Previous",
+      "reference": {
+        "solution": "Reference solution and hints",
+        "statement": "Statement"
+      },
+      "student": "Student",
+      "tabs": {
+        "conversation": "Conversation",
+        "reference": "Solution"
+      },
+      "tabsLabel": "Parts of the conversation"
+    },
     "defenseReview": {
       "attempts": {
         "attempt": "Draft {index}",
@@ -130,7 +145,6 @@
       "markUnread": "Mark as unread",
       "markUnreadFromTurn": "Mark as unread from here",
       "newMessages": "+{count} new",
-      "next": "Next",
       "nextUnread": "Next unread",
       "noStudentMessage": "Nothing said yet",
       "noteCount": "Notes: {count}",
@@ -164,20 +178,13 @@
         "writeOnTurn": "Write a note on this reply"
       },
       "openNotes": "Notes",
-      "position": "{index} of {total}",
-      "previous": "Previous",
       "readStateFailed": "Couldn't record that it was read",
-      "reference": {
-        "solution": "Reference solution and hints",
-        "statement": "Statement"
-      },
       "refresh": "Refresh",
       "shortcuts": {
         "next": "next",
         "nextUnread": "next unread",
         "previous": "previous"
       },
-      "student": "Student",
       "studentFeedbackMark": "The student rated the conversation",
       "studentMessageCount": "Messages: {count}",
       "studentNoComment": "No comment",
@@ -185,14 +192,42 @@
       "studentVerdict": "What the student said",
       "tabs": {
         "config": "Settings",
-        "conversation": "Conversation",
-        "notes": "Notes",
-        "reference": "Solution"
+        "notes": "Notes"
       },
-      "tabsLabel": "Parts of the conversation",
       "title": "Review conversations",
       "unreadDivider": "New since you last read this",
       "unreadMark": "Unread"
+    },
+    "grading": {
+      "conversationNumber": "Conversation {number}",
+      "detailFailed": "Couldn't load the conversations",
+      "dialogTitle": "Grading: {student}",
+      "empty": "Nobody to grade in this group.",
+      "grid": {
+        "final": "final",
+        "problem": "P{number}",
+        "student": "Student",
+        "total": "Total"
+      },
+      "loadFailed": "Couldn't load the grading",
+      "pairSubtitle": "{category}, problem {number}",
+      "panel": {
+        "changedBy": "Changed by <name>{grader}</name>",
+        "comment": "Comment for graders",
+        "commentPlaceholder": "Only admins read this.",
+        "final": "Final",
+        "help": "Of which from Mathilda",
+        "helpHint": "Each such point counts half.",
+        "mark": "Mark",
+        "score": "Score",
+        "selfAssessment": "Student's comment"
+      },
+      "progress": "<count>{graded}</count> of {total} graded, <count>{final}</count> final",
+      "saveFailed": "Couldn't save the grade",
+      "tabs": {
+        "grade": "Grade"
+      },
+      "title": "Grading"
     }
   },
   "apiErrors": {
@@ -224,6 +259,7 @@
     "HostedEntryNotRunning": "You've already finished this competition.",
     "HostedEntryProfileIncomplete": "Fill in your name, graduation year and email before entering.",
     "HostedEntryRequired": "You'll see the problems once you enter the competition.",
+    "HostedGradeValue": "That grade isn't valid.",
     "HostedGroupNotOpen": "This competition isn't open right now.",
     "HostedNoteEmpty": "Your note is empty.",
     "HostedNoteTooLong": "Your note is too long.",
@@ -410,6 +446,7 @@
     "finishError": "The entry could not be closed. Please try again.",
     "forfeitError": "Could not give up the competition.",
     "goToArea": "Open in the competition",
+    "grade": "Grade",
     "hint": "Hint",
     "hints": "Hints",
     "howItWorks": {
@@ -893,6 +930,10 @@
     "adminDefenses": {
       "description": "An overview of the defenses held with the AI examiner.",
       "title": "Conversations with Mathilda"
+    },
+    "adminGrading": {
+      "description": "Grading one group of Mathilding competitions.",
+      "title": "Grading"
     },
     "competitionArea": {
       "description": "The problems, your clock, and the defenses you hold about them.",

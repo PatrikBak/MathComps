@@ -10,7 +10,7 @@ import {
 import type {
   DefenseReviewProblemOption,
   DefenseReviewPromptVersionOption,
-  DefenseReviewUserOption,
+  DefenseReviewStudentOption,
 } from '../defense-review-types'
 
 /**
@@ -158,7 +158,7 @@ describe('toPromptVersionFacetOptions', () => {
 describe('toUserFacetOptions', () => {
   it('names a student by their username and their address', () => {
     // A student the site holds both halves of
-    const users: DefenseReviewUserOption[] = [
+    const users: DefenseReviewStudentOption[] = [
       { user: { id: '1', username: 'peto', email: 'peto@example.com' }, conversationCount: 3 },
     ]
 
@@ -168,7 +168,7 @@ describe('toUserFacetOptions', () => {
 
   it('falls back to whichever half is left', () => {
     // One student who has yet to choose a name, and one whose account is deleted so the address is gone
-    const users: DefenseReviewUserOption[] = [
+    const users: DefenseReviewStudentOption[] = [
       { user: { id: '1', username: null, email: 'nameless@example.com' }, conversationCount: 1 },
       { user: { id: '2', username: 'quiet', email: null }, conversationCount: 1 },
     ]
@@ -182,7 +182,7 @@ describe('toUserFacetOptions', () => {
 
   it('falls back to the label when neither half is left', () => {
     // A deleted account that never chose a name, which leaves nothing to name it by
-    const users: DefenseReviewUserOption[] = [
+    const users: DefenseReviewStudentOption[] = [
       { user: { id: '1', username: null, email: null }, conversationCount: 1 },
     ]
 
