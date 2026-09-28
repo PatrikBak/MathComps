@@ -190,6 +190,7 @@ function GradingModalBody({ detail, panels, grade, onChange }: GradingModalBodyP
           }
           turns={conversation.turns}
           conversationKey={conversation.id}
+          startsAtTop
           reports={NO_REPORTS}
           dividerBeforeTurn={null}
           unreadMark={null}

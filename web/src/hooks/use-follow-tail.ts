@@ -39,17 +39,20 @@ function isAtBottom(region: HTMLDivElement): boolean {
  * threshold cannot read as "scrolled up" and break the follow. Content dropping away re-pins on its
  * own, since the reader can end up back at the bottom without ever scrolling there.
  *
+ * @param startsPinned - Whether a freshly mounted region opens on its newest content. Unpinned, it
+ * opens at its start and follows nothing until the reader is at the bottom.
+ *
  * @returns The region and content refs, whether the reader has scrolled up, and a jump-to-bottom control.
  */
-export function useFollowTail(): UseFollowTailResult {
+export function useFollowTail(startsPinned: boolean): UseFollowTailResult {
   // The mounted region and content elements, held as state so every subscription re-binds when the
   // consumer remounts them
   const [region, setRegion] = useState<HTMLDivElement | null>(null)
   const [content, setContent] = useState<HTMLDivElement | null>(null)
 
-  // Whether the reader sat at the bottom after their last scroll; starts pinned so the first content
-  // lands scrolled into view
-  const pinnedRef = useRef(true)
+  // Whether the reader sat at the bottom after their last scroll; a pinned start lands the first content
+  // scrolled into view
+  const pinnedRef = useRef(startsPinned)
 
   // The store's change notifier
   const notifyRef = useRef<() => void>(() => {})
@@ -60,16 +63,20 @@ export function useFollowTail(): UseFollowTailResult {
     notifyRef.current()
   }, [])
 
-  // Binds the region, re-pinning first: a freshly mounted region starts at its tail
-  const scrollRef = useCallback((element: HTMLDivElement | null) => {
-    // A new region begins pinned, before any subscription reads the flag
-    if (element) {
-      pinnedRef.current = true
-    }
+  // Binds the region, resetting the pin first: a freshly mounted region starts at its tail only when it
+  // starts pinned
+  const scrollRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      // A new region begins pinned exactly when startsPinned says so, before any subscription reads the flag
+      if (element) {
+        pinnedRef.current = startsPinned
+      }
 
-    // Track the element so the subscriptions re-bind to it
-    setRegion(element)
-  }, [])
+      // Track the element so the subscriptions re-bind to it
+      setRegion(element)
+    },
+    [startsPinned]
+  )
 
   // Snaps the region to the newest content
   const scrollToBottom = useCallback(() => {
