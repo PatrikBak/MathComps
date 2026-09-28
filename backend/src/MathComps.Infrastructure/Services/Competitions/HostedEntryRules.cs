@@ -26,7 +26,8 @@ public readonly record struct RoundAccess(
     DateTimeOffset? VisibleSince, DateTimeOffset? ClosesAt, bool HoldsEntry);
 
 /// <summary>
-/// The rule saying who may read a hosted competition's problems, stated once for everything that has to ask it.
+/// The rules a hosted competition holds its readers and their entries to, each stated once for everything that
+/// has to ask it.
 /// </summary>
 public static class HostedEntryRules
 {
@@ -100,6 +101,34 @@ public static class HostedEntryRules
         // Otherwise the clock says it: one still running is a student still competing.
         return clockStartedAt.AddMinutes(clockMinutes) <= now;
     }
+
+    /// <summary>
+    /// When a sat entry stopped counting: the clock running out, or the student closing it ahead of that.
+    /// </summary>
+    /// <param name="startedAt">When the entry's clock started.</param>
+    /// <param name="finishedAt"><inheritdoc cref="HostedEntry.FinishedAt" path="/summary"/></param>
+    /// <param name="clockMinutes"><inheritdoc cref="HostedGroup.ClockMinutes" path="/summary"/></param>
+    /// <returns>The earlier of the clock running out and the student's hand-in.</returns>
+    public static DateTimeOffset EndedAt(DateTimeOffset startedAt, DateTimeOffset? finishedAt, int clockMinutes)
+    {
+        // Where the clock would have ended it anyway.
+        var clockRunsOutAt = startedAt.AddMinutes(clockMinutes);
+
+        // A hand-in counts only when it came first.
+        return finishedAt is { } handedInAt && handedInAt < clockRunsOutAt ? handedInAt : clockRunsOutAt;
+    }
+
+    /// <summary>
+    /// Whether a student's run in a hosted group is one somebody grades: a group with no closing instant grades
+    /// nobody, nor anybody the site lets past its gates.
+    /// </summary>
+    /// <param name="groupClosesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
+    /// <param name="bypassesGates">
+    /// Whether the student holds <see cref="UserCapability.BypassCompetitionGates"/>.
+    /// </param>
+    /// <returns>Whether the run is graded.</returns>
+    public static bool IsGraded(DateTimeOffset? groupClosesAt, bool bypassesGates) =>
+        groupClosesAt is not null && !bypassesGates;
 }
 
 /// <summary>

@@ -521,10 +521,10 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds the admin-only review of defense conversations: reading every student's conversations back,
-    /// recording which have been read, and keeping the notes written about them.
+    /// Adds the admin-only services: reading every student's defense conversations back, recording which have
+    /// been read, keeping the notes written about them, and grading the hosted groups.
     /// </summary>
-    /// <param name="services">The service collection to add the review feature to.</param>
+    /// <param name="services">The service collection to add the admin services to.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddAdminServices(this IServiceCollection services)
     {
@@ -536,6 +536,12 @@ public static class ServiceCollectionExtensions
 
         // The service that keeps what gets written down about them.
         services.TryAddScoped<IAdminNoteService, AdminNoteService>();
+
+        // What the grading service asks about a student before it grades them.
+        services.AddUserGrants();
+
+        // The service that grades the hosted groups.
+        services.TryAddScoped<IAdminGradingService, AdminGradingService>();
 
         // Builder pattern
         return services;

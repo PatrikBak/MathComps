@@ -6,6 +6,7 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// The batch of competitions that open and close together, one per category.
 /// </summary>
 /// <param name="Id">The group's identifier.</param>
+/// <param name="Slug">What addresses the group (e.g. <c>mc-2026-3</c>).</param>
 /// <param name="Name">The group's name, keyed by the language it is written in.</param>
 /// <param name="ProblemCount"><inheritdoc cref="EfCoreEntities.HostedGroup.ProblemCount" path="/summary"/></param>
 /// <param name="ClockMinutes"><inheritdoc cref="EfCoreEntities.HostedGroup.ClockMinutes" path="/summary"/></param>
@@ -14,6 +15,7 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// <param name="Competitions">Its competitions, in the order the taxonomy sets the categories out.</param>
 public record HostedGroupDto(
     Guid Id,
+    string Slug,
     IReadOnlyDictionary<Language, string> Name,
     int ProblemCount,
     int ClockMinutes,

@@ -8,7 +8,7 @@ import type { Locale } from '@/i18n/i18n'
 import {
   toProblemFacet,
   toPromptVersionFacetOptions,
-  toUserFacetOptions,
+  toStudentFacetOptions,
 } from '../model/defense-review-facet-options'
 import {
   type DefenseReviewFilterOptions,
@@ -49,7 +49,7 @@ type ProblemGrouping = {
  */
 type UseDefenseReviewFacetOptionsResult = {
   /** The students who have held a conversation. */
-  userOptions: FacetOption[]
+  studentOptions: FacetOption[]
   /** The problems one has been held against. */
   problemOptions: FacetOption[]
   /** The handouts those problems sit under. */
@@ -105,8 +105,9 @@ export function useDefenseReviewFacetOptions(
   )
 
   // The students who have held a conversation
-  const userOptions = useMemo(
-    () => (options === null ? [] : toUserFacetOptions(options.users, tProfile('defaultUser'))),
+  const studentOptions = useMemo(
+    () =>
+      options === null ? [] : toStudentFacetOptions(options.students, tProfile('defaultUser')),
     [options, tProfile]
   )
 
@@ -169,7 +170,7 @@ export function useDefenseReviewFacetOptions(
 
   // Every filter's options, named the way a reader would recognise them
   return {
-    userOptions,
+    studentOptions,
     problemOptions,
     problemGrouping,
     promptVersionOptions,

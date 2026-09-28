@@ -1,3 +1,4 @@
+import type { UserIdentity } from '@/components/features/admin/model/user-identity'
 import type {
   DefenseFeedback,
   DefenseReportCategory,
@@ -5,19 +6,6 @@ import type {
   NamedDefenseTarget,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
-
-/**
- * Somebody the review names: the student who held a conversation, or the reviewer who wrote a note about
- * one. The username can be missing, so the address rides alongside it; a deleted account has neither.
- */
-export type DefenseReviewUser = {
-  /** Stable identifier. */
-  id: string
-  /** The name the site calls them by; null while they have chosen none, and once their account is deleted. */
-  username: string | null
-  /** Their address; null once their account is deleted. */
-  email: string | null
-}
 
 /**
  * One conversation as the review queue lists it: who held it, what it was against, how it opened, and every mark
@@ -29,7 +17,7 @@ export type DefenseReviewConversation = {
   /** The problem it was held against. */
   target: NamedDefenseTarget
   /** Who held it. */
-  user: DefenseReviewUser
+  user: UserIdentity
   /** The start of the student's most recent message; null when they have sent none. */
   lastStudentMessage: string | null
   /** How many messages the student has sent in it. */
@@ -89,9 +77,9 @@ export type DefenseReviewFilter = {
 /**
  * One student the queue can be filtered to.
  */
-export type DefenseReviewUserOption = {
+export type DefenseReviewStudentOption = {
   /** The student. */
-  user: DefenseReviewUser
+  user: UserIdentity
   /** How many conversations they have held. */
   conversationCount: number
 }
@@ -125,7 +113,7 @@ export type DefenseReviewPromptVersionOption = {
  */
 export type DefenseReviewFilterOptions = {
   /** Everyone who has held a conversation. */
-  users: DefenseReviewUserOption[]
+  students: DefenseReviewStudentOption[]
   /** Every problem one has been held against. */
   problems: DefenseReviewProblemOption[]
   /** Every set of examiner settings one has run on. */
@@ -143,7 +131,7 @@ export type AdminNote = {
   /** The reply it is against; null when it is against the conversation as a whole. */
   turnId: string | null
   /** The reviewer who wrote it. */
-  author: DefenseReviewUser
+  author: UserIdentity
   /** Whether the reviewer reading it wrote it, which is what decides whether it can be revised or dropped. */
   isOwn: boolean
   /** The note as markdown/math source. */
@@ -168,7 +156,7 @@ export type DefenseReviewDetail = {
   /** The problem it was held against. */
   target: NamedDefenseTarget
   /** Who held it. */
-  user: DefenseReviewUser
+  user: UserIdentity
   /** The problem statement as it stood when it was started. */
   statement: string
   /** The reference solution the examiner held, the author's hints already folded into it. */
@@ -383,20 +371,7 @@ export type AdminNoteFeedItem = {
   /** The problem its conversation was held against. */
   target: NamedDefenseTarget
   /** Who held that conversation. */
-  user: DefenseReviewUser
+  user: UserIdentity
   /** Where the reply it is against sits; null when it is against the conversation as a whole. */
   turnSequence: number | null
-}
-
-/**
- * Names somebody on a review surface, since either half of what identifies them can be missing.
- *
- * @param user - The person to name.
- * @param unnamedLabel - What to call somebody the site holds neither a name nor an address for.
- *
- * @returns Their username, their address when they have chosen no name, and the label when neither is left.
- */
-export function describeReviewUser(user: DefenseReviewUser, unnamedLabel: string): string {
-  // Whichever half the site still holds, and the label when it holds neither
-  return user.username ?? user.email ?? unnamedLabel
 }

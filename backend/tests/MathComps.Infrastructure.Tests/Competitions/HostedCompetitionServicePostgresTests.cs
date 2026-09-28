@@ -1439,6 +1439,9 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         // The size it was declared with
         Assert.Equal(2, group.ProblemCount);
 
+        // And the slug it is addressed by, its own as well
+        Assert.Equal("mc-open", group.Slug);
+
         // And the heading carries every language the site is read in
         Assert.Equal(Enum.GetValues<Language>().Order(), group.Name.Keys.Order());
 

@@ -41,6 +41,9 @@ public static class EndpointExtensions
         // What gets written down while reviewing those conversations
         app.MapAdminNoteEndpoints();
 
+        // Grading the hosted groups from the students' defense conversations
+        app.MapAdminGradingEndpoints();
+
         // Add health check endpoint for monitoring
         app.MapHealthChecks("/health");
 

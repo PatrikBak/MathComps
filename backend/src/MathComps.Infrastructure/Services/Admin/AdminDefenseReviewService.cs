@@ -125,7 +125,7 @@ public class AdminDefenseReviewService(
                         session.ProblemTarget!.Problem.Round.Competition.Path,
                         session.ProblemTarget!.Problem.Round.Season.EditionNumber,
                         session.ProblemTarget!.Problem.Round.Season.StartYear),
-                    new AdminDefenseUserDto(
+                    new UserIdentityDto(
                         session.User.Id,
                         session.User.IsDeleted ? null : session.User.Username,
                         session.User.Email),
@@ -248,9 +248,9 @@ public class AdminDefenseReviewService(
             .ToListAsync(cancellationToken);
 
         // The students, each with how many conversations they hold.
-        var users = userRows
-            .Select(row => new AdminDefenseUserOptionDto(
-                new AdminDefenseUserDto(row.UserId, row.Username, row.Email), row.ConversationCount))
+        var students = userRows
+            .Select(row => new AdminDefenseStudentOptionDto(
+                new UserIdentityDto(row.UserId, row.Username, row.Email), row.ConversationCount))
             .ToList();
 
         // The handout problems, each with how many conversations were held against it.
@@ -274,8 +274,8 @@ public class AdminDefenseReviewService(
         // And every set of settings one has run on.
         var promptVersions = await GetPromptVersionOptionsAsync(dbContext, cancellationToken);
 
-        // Hand back all three, since the queue needs them together the moment it opens.
-        return new AdminDefenseFilterOptionsDto(users, problems, promptVersions);
+        // Hand back every option list, since the queue needs them together the moment it opens.
+        return new AdminDefenseFilterOptionsDto(students, problems, promptVersions);
     }
 
     /// <inheritdoc/>
@@ -309,7 +309,7 @@ public class AdminDefenseReviewService(
                     session.ProblemTarget!.Problem.Round.Competition.Path,
                     session.ProblemTarget!.Problem.Round.Season.EditionNumber,
                     session.ProblemTarget!.Problem.Round.Season.StartYear),
-                User = new AdminDefenseUserDto(
+                User = new UserIdentityDto(
                     session.User.Id,
                     session.User.IsDeleted ? null : session.User.Username,
                     session.User.Email),
@@ -368,7 +368,7 @@ public class AdminDefenseReviewService(
                         note.Id,
                         note.SessionId,
                         note.TurnId,
-                        new AdminDefenseUserDto(
+                        new UserIdentityDto(
                             note.Author.Id,
                             note.Author.IsDeleted ? null : note.Author.Username,
                             note.Author.Email),
@@ -697,7 +697,7 @@ public class AdminDefenseReviewService(
     /// </summary>
     /// <param name="Id"><inheritdoc cref="AdminDefenseConversationDto.Id" path="/summary"/></param>
     /// <param name="Target"><inheritdoc cref="NamedDefenseTargets.Columns" path="/summary"/></param>
-    /// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
+    /// <param name="User"><inheritdoc cref="AdminDefenseConversationDto.User" path="/summary"/></param>
     /// <param name="LastStudentMessage">
     /// <inheritdoc cref="AdminDefenseConversationDto.LastStudentMessage" path="/summary"/></param>
     /// <param name="StudentMessageCount">
@@ -716,7 +716,7 @@ public class AdminDefenseReviewService(
     private sealed record QueueRow(
         Guid Id,
         NamedDefenseTargets.Columns Target,
-        AdminDefenseUserDto User,
+        UserIdentityDto User,
         string? LastStudentMessage,
         int StudentMessageCount,
         DateTimeOffset LastActivityAt,

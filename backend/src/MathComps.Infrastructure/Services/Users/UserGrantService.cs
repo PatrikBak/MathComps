@@ -24,4 +24,22 @@ public sealed class UserGrantService(IDbContextFactory<MathCompsDbContext> dbCon
                 grant => grant.UserId == userId && grant.Capability == capability,
                 cancellationToken);
     }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlySet<Guid>> GetHoldersAsync(
+        IReadOnlyCollection<Guid> userIds, UserCapability capability, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this read.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The accounts among them a grant of this capability stands against.
+        var holders = await dbContext.UserGrants
+            .AsNoTracking()
+            .Where(grant => userIds.Contains(grant.UserId) && grant.Capability == capability)
+            .Select(grant => grant.UserId)
+            .ToListAsync(cancellationToken);
+
+        // The holders.
+        return holders.ToHashSet();
+    }
 }

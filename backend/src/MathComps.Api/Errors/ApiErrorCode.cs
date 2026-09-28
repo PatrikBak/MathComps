@@ -196,6 +196,21 @@ public enum ApiErrorCode
     AdminReviewTarget,
 
     /// <summary>
+    /// No group the site grades exists under the slug.
+    /// </summary>
+    HostedGroupNotFound,
+
+    /// <summary>
+    /// A grade was read or changed for a student and a problem nobody grades.
+    /// </summary>
+    HostedGradeTarget,
+
+    /// <summary>
+    /// A change would leave a grade breaking its rules.
+    /// </summary>
+    HostedGradeValue,
+
+    /// <summary>
     /// The request body could not be read into what the route expects: broken JSON, a field of the wrong
     /// type, a value no member of an enumeration names, or no body at all.
     /// </summary>

@@ -129,6 +129,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Students' entries into the rounds those groups run.</summary>
     public DbSet<HostedEntry> HostedEntries => Set<HostedEntry>();
 
+    /// <summary>Every version of the grades those entries earn, one grade per entry per problem.</summary>
+    public DbSet<HostedGrade> HostedGrades => Set<HostedGrade>();
+
     /// <summary>Links from a defense session to the archive problem it defends.</summary>
     public DbSet<ProblemDefense> ProblemDefenses => Set<ProblemDefense>();
 
@@ -831,6 +834,54 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion HostedEntry
+
+        #region HostedGrade
+
+        modelBuilder.Entity<HostedGrade>(e =>
+        {
+            // The entry graded, cascading, since a grade means nothing without the run it was given for.
+            e.HasOne(grade => grade.Entry)
+             .WithMany()
+             .HasForeignKey(grade => grade.EntryId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The problem graded. Restricted, on the same terms as the conversations the grade was read from: a
+            // grade given under an entry must outlive any tidying of the archive row it was given against.
+            e.HasOne(grade => grade.Problem)
+             .WithMany()
+             .HasForeignKey(grade => grade.ProblemId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // Who wrote the version, restricted so a mark can't lose the grader standing behind it.
+            e.HasOne(grade => grade.Author)
+             .WithMany()
+             .HasForeignKey(grade => grade.AuthorId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // Every read wants the newest version of one entry's grade on one problem. Unique, so exactly one
+            // version is ever the newest.
+            e.HasIndex(grade => new { grade.EntryId, grade.ProblemId, grade.CreatedAt })
+             .IsUnique()
+             .HasDatabaseName("ux_hosted_grade_entry_id_problem_id_created_at");
+
+            // DB-side invariants
+            e.ToTable(t =>
+            {
+                // A mark from 0 to the ceiling, when there is one
+                t.HasCheckConstraint(
+                    "ck_hosted_grade_mark_in_range", $"\"mark\" BETWEEN 0 AND {HostedGrade.MaxMark}");
+
+                // Help that is a part of the mark, and none without one
+                t.HasCheckConstraint(
+                    "ck_hosted_grade_help_within_mark", "\"help\" BETWEEN 0 AND coalesce(\"mark\", 0)");
+
+                // Nothing settled that carries no mark to settle
+                t.HasCheckConstraint(
+                    "ck_hosted_grade_final_has_mark", "NOT \"is_final\" OR \"mark\" IS NOT NULL");
+            });
+        });
+
+        #endregion HostedGrade
 
         #region UserGrant
 

@@ -9,7 +9,7 @@ namespace MathComps.Domain.Contracts.Admin;
 /// </summary>
 /// <param name="Id">The conversation's identifier.</param>
 /// <param name="Target"><inheritdoc cref="NamedDefenseTarget" path="/summary"/></param>
-/// <param name="User"><inheritdoc cref="AdminDefenseUserDto" path="/summary"/></param>
+/// <param name="User">The student who held it.</param>
 /// <param name="Statement">The problem statement as it stood when the conversation was started.</param>
 /// <param name="Reference">
 /// The reference solution the examiner held, the author's hints already folded into it.
@@ -34,7 +34,7 @@ namespace MathComps.Domain.Contracts.Admin;
 public record AdminDefenseDetailDto(
     Guid Id,
     NamedDefenseTarget Target,
-    AdminDefenseUserDto User,
+    UserIdentityDto User,
     string Statement,
     string Reference,
     JsonElement ExaminerConfig,
