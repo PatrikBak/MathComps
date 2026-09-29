@@ -201,7 +201,7 @@ public enum ApiErrorCode
     HostedGroupNotFound,
 
     /// <summary>
-    /// A grade was read or changed for a student and a problem nobody grades.
+    /// A grade was changed for a student and a problem nobody grades.
     /// </summary>
     HostedGradeTarget,
 

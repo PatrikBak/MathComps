@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.Admin;
+using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.Contracts.Helpers;
 using MathComps.Domain.Localization;
 
@@ -48,6 +49,18 @@ public interface IAdminDefenseReviewService
         Guid reviewerId, Guid sessionId, Language language, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Reads every conversation one student held against one problem, oldest first. Where somebody grades them on
+    /// it, which of the conversations count toward the grade comes along, with where the grade stands and what they
+    /// said about their solution.
+    /// </summary>
+    /// <param name="userId">The student.</param>
+    /// <param name="target">The problem the conversations were held against.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The conversations, and how the student is graded on the problem.</returns>
+    Task<StudentConversationsDto> GetStudentConversationsAsync(
+        Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Records that a reviewer has read a conversation as of now, replacing any earlier stamp of theirs. Turns
     /// arriving after this bring it back to be read again.
     /// </summary>
@@ -79,19 +92,17 @@ public interface IAdminDefenseReviewService
         Guid reviewerId, Guid sessionId, Guid turnId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Marks a whole set of conversations at once, which is what clearing a backlog and taking that back are.
-    /// An id naming no conversation is skipped rather than refused, since a set is marked for the sake of the
-    /// conversations in it and one gone since the queue was read says nothing about the rest. Marking the same
-    /// set twice is the same outcome as marking it once.
+    /// Stamps a whole set of conversations as read as of now, which is what clearing a backlog is. An id naming
+    /// no conversation is skipped rather than refused, since a set is marked for the sake of the conversations in
+    /// it and one gone since the queue was read says nothing about the rest. Marking the same set twice is the
+    /// same outcome as marking it once.
     /// </summary>
     /// <param name="reviewerId">The reviewer marking them.</param>
     /// <param name="sessionIds">The conversations to mark, bounded by the caller.</param>
-    /// <param name="read">True to stamp them as read as of now, false to take this reviewer's stamps back.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    Task MarkManyAsync(
+    Task MarkManyReadAsync(
         Guid reviewerId,
         IReadOnlyCollection<Guid> sessionIds,
-        bool read,
         CancellationToken cancellationToken = default);
 }
 

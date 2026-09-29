@@ -9,6 +9,7 @@ import { DefenseTargetLabel } from '@/components/features/defense/components/Def
 import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
 import { toPlainTextPreview } from '@/components/shared/utils/string-utils'
+import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 
 import { type DefenseReviewConversation } from '../model/defense-review-types'
 
@@ -71,9 +72,8 @@ export const DefenseReviewCard = memo(function DefenseReviewCard({
     <button
       type="button"
       onClick={() => onOpen(conversation.id)}
-      // Named so the queue can put focus back on whichever conversation was last open, which is not the card
-      // the reader clicked once they have stepped along from it
-      data-conversation-id={conversation.id}
+      // Named so closing the dialog can put focus back on whichever conversation was last open
+      {...OPEN_ID_ATTRIBUTE.stamp(conversation.id)}
       className={cn(
         'w-full rounded-xl border border-foreground/10 bg-foreground/[0.03] px-4 py-3 text-left',
         'transition-colors hover:border-foreground/25 hover:bg-foreground/[0.07]',

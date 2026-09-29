@@ -1,0 +1,297 @@
+import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
+import { useCallback, useState } from 'react'
+
+import type { ReadPassBoundary } from '@/components/features/defense/model/defense-conversation-model'
+import { assertNever } from '@/components/shared/utils/assert-never'
+import type { ApiCaller } from '@/hooks/use-api'
+import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
+import { createSettlingWrites } from '@/lib/settling-writes'
+import type { ApiResult } from '@/types/api'
+
+import type { DefenseReviewConversation } from '../../defense-review/model/defense-review-types'
+import {
+  setConversationReadState,
+  setConversationUnreadFromTurn,
+} from '../services/conversation-service'
+import { patchCachedQueueConversation } from './conversation-cache'
+
+/**
+ * Stamping a conversation as read as of now.
+ */
+type MarkRead = {
+  /** The discriminator. */
+  kind: 'read'
+}
+
+/**
+ * Leaving a conversation unread, as though the reader had never opened it.
+ */
+type MarkUnread = {
+  /** The discriminator. */
+  kind: 'unread'
+}
+
+/**
+ * Picking a conversation up again from one of its turns, leaving that turn and everything after it to read.
+ */
+type MarkUnreadFromTurn = {
+  /** The discriminator. */
+  kind: 'unreadFromTurn'
+  /** The turn to leave unread, along with every turn after it. */
+  turnId: string
+  /** Where that leaves the reader's pass through the conversation. */
+  boundary: ReadPassBoundary
+}
+
+/**
+ * One of the moves a reader can make on where they stand with a conversation.
+ */
+type ReadMark = MarkRead | MarkUnread | MarkUnreadFromTurn
+
+/**
+ * What one call to mark a conversation says.
+ */
+type ReadStateChange = {
+  /** The conversation. */
+  sessionId: string
+  /** The move being made on it. */
+  mark: ReadMark
+}
+
+/**
+ * What a row said about having been read, kept so a failed write can put it back.
+ */
+export type ReadStateSnapshot = {
+  /** When it was last read, as an ISO-8601 string; null while it never had been. */
+  readAt: string | null
+  /** Whether anything in it stood unread. */
+  isUnread: boolean
+  /** How many of the student's messages were new. */
+  unreadStudentMessageCount: number
+}
+
+/**
+ * What a mark has written, held in a slot the cache rewrite can fill and the caller can read back out.
+ */
+type WrittenReadState = {
+  /** The row as this mark left it; null while it has written nothing. */
+  value: ReadStateSnapshot | null
+}
+
+/**
+ * Works out what a row says once a mark has been made on it.
+ *
+ * @param conversation - The row as it stands.
+ * @param mark - The move being made on it.
+ * @param readAt - The moment a read is recorded as of.
+ *
+ * @returns The row's read state as the mark leaves it.
+ */
+export function markedReadState(
+  conversation: DefenseReviewConversation,
+  mark: ReadMark,
+  readAt: string
+): ReadStateSnapshot {
+  switch (mark.kind) {
+    // Read as of then, with nothing left in it
+    case 'read':
+      return { readAt, isUnread: false, unreadStudentMessageCount: 0 }
+
+    // Back to every message standing unread
+    case 'unread':
+      return {
+        readAt: null,
+        isUnread: true,
+        unreadStudentMessageCount: conversation.studentMessageCount,
+      }
+
+    // Read as far as the turn before the one it is picked up from, which is what the boundary names. Taken
+    // field by field, since the boundary also carries where the transcript draws its line.
+    case 'unreadFromTurn':
+      return {
+        readAt: mark.boundary.readAt,
+        // The mark leaves the turn it names standing, so something is unread whichever role wrote it
+        isUnread: true,
+        unreadStudentMessageCount: mark.boundary.unreadStudentMessageCount,
+      }
+
+    // Nothing else is a mark
+    default:
+      return assertNever(mark)
+  }
+}
+
+/**
+ * Sends one mark to the server.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param change - The conversation and the move being made on it.
+ *
+ * @returns Nothing on success.
+ */
+function sendReadStateChange(
+  apiCall: ApiCaller,
+  { sessionId, mark }: ReadStateChange
+): Promise<ApiResult<void>> {
+  switch (mark.kind) {
+    // Stamped as read
+    case 'read':
+      return setConversationReadState(apiCall, sessionId, true)
+
+    // The stamp taken back
+    case 'unread':
+      return setConversationReadState(apiCall, sessionId, false)
+
+    // The stamp moved back to just before a turn
+    case 'unreadFromTurn':
+      return setConversationUnreadFromTurn(apiCall, sessionId, mark.turnId)
+
+    // Nothing else is a mark
+    default:
+      return assertNever(mark)
+  }
+}
+
+/**
+ * Picks a conversation up again from one of its turns, leaving it and everything after it to read.
+ *
+ * @param sessionId - The conversation.
+ * @param turnId - As in {@link MarkUnreadFromTurn.turnId}.
+ * @param boundary - As in {@link MarkUnreadFromTurn.boundary}.
+ * @param onRefused - Puts back whatever the caller holds of its own, for a write the server turns down.
+ */
+export type MarkUnreadFrom = (
+  sessionId: string,
+  turnId: string,
+  boundary: ReadPassBoundary,
+  onRefused: () => void
+) => void
+
+/**
+ * What {@link useConversationReadState} hands back.
+ */
+type UseConversationReadStateResult = {
+  /** Stamps a conversation as read as of now. */
+  markRead: (sessionId: string) => void
+  /** Leaves a conversation unread. */
+  markUnread: (sessionId: string) => void
+  /** {@link MarkUnreadFrom}. */
+  markUnreadFrom: MarkUnreadFrom
+}
+
+/**
+ * Records which conversations have been read.
+ *
+ * The review queue's rows are patched in place, for the reason {@link patchCachedQueueConversation} gives.
+ *
+ * @returns The marks as described by {@link UseConversationReadStateResult}.
+ */
+export function useConversationReadState(): UseConversationReadStateResult {
+  // Shared conversation-dialog copy
+  const t = useTranslations('admin.conversation')
+
+  // The cache the rows live in
+  const queryClient = useQueryClient()
+
+  // The marks still settling on each conversation, and what its row goes back to when one is refused
+  const [settling] = useState(() => createSettlingWrites<ReadStateSnapshot>())
+
+  // The write itself, which rewrites the row first and puts it back if the write fails
+  const { mutate } = useOptimisticMutation<void, ReadStateChange, ReadStateSnapshot | null>({
+    apiFn: sendReadStateChange,
+    // Marks on one conversation all write the same row, so they run one at a time rather than racing: two
+    // clicks landing out of order would leave the server holding the earlier one and nothing on screen saying so
+    scope: { id: 'conversation-read-state' },
+    onMutate: ({ sessionId, mark }) => {
+      // One more mark to settle on this conversation, which may be the one opening the set
+      const opensSet = settling.begin(sessionId)
+
+      // What this mark writes, held so that landing it can make it the state a later failure falls back to
+      const written: WrittenReadState = { value: null }
+
+      // Rewrite it to what the reader has already seen happen
+      patchCachedQueueConversation(queryClient, sessionId, (conversation) => {
+        // Only the mark that opened the set sees the row as the server last left it, and only off one copy
+        // of it: the conversation is cached once per filtering and language, and copies read at different
+        // moments disagree about how much of it is unread
+        if (opensSet) {
+          settling.holdBefore(sessionId, {
+            readAt: conversation.readAt,
+            isUnread: conversation.isUnread,
+            unreadStudentMessageCount: conversation.unreadStudentMessageCount,
+          })
+        }
+
+        // What the mark leaves the row saying, computed once so every copy of it says the same thing
+        written.value ??= markedReadState(conversation, mark, new Date().toISOString())
+
+        // The row as this mark leaves it
+        return { ...conversation, ...written.value }
+      })
+
+      // Handed on so this mark's own write is recoverable once it lands
+      return written.value
+    },
+    onSuccess: (_data, { sessionId }, written) => {
+      // Nothing to move on if the mark wrote nothing
+      if (written == null) return
+
+      // This mark is on the server now, so it is what a mark refused behind it puts back
+      const isLastToSettle = settling.land(sessionId, written)
+
+      // Nothing behind it is left to decide what the row says, so it says what actually landed. Which the
+      // rewrite on the way out already wrote, except where a mark refused since then skipped its own rollback
+      // or a read of the whole queue landed over it.
+      if (isLastToSettle) {
+        patchCachedQueueConversation(queryClient, sessionId, (conversation) => ({
+          ...conversation,
+          ...written,
+        }))
+      }
+    },
+    onError: (_error, { sessionId }) => {
+      // What the server still holds, unless a mark behind this one decides
+      const confirmed = settling.refuse(sessionId)
+
+      // Nothing to put back if the row was never on screen or a later mark settles it
+      if (confirmed === null) return
+
+      // Put the row back the way it was
+      patchCachedQueueConversation(queryClient, sessionId, (conversation) => ({
+        ...conversation,
+        ...confirmed.state,
+      }))
+    },
+    // One mark fewer settling on the conversation, whichever way it went
+    onSettled: (_data, _error, { sessionId }) => settling.settle(sessionId),
+    authReason: t('readStateFailed'),
+    errorMessage: t('readStateFailed'),
+  })
+
+  // Stamps a conversation as read
+  const markRead = useCallback(
+    (sessionId: string) => mutate({ sessionId, mark: { kind: 'read' } }),
+    [mutate]
+  )
+
+  // Leaves a conversation unread
+  const markUnread = useCallback(
+    (sessionId: string) => mutate({ sessionId, mark: { kind: 'unread' } }),
+    [mutate]
+  )
+
+  // Picks a conversation up again from one of its turns. The refusal goes back to the caller as well as to the
+  // row, since the open conversation holds a mark of its own that the row's rollback doesn't reach.
+  const markUnreadFrom = useCallback(
+    (sessionId: string, turnId: string, boundary: ReadPassBoundary, onRefused: () => void) =>
+      mutate(
+        { sessionId, mark: { kind: 'unreadFromTurn', turnId, boundary } },
+        { onError: onRefused }
+      ),
+    [mutate]
+  )
+
+  // The marks, each landing on screen before it lands on the server
+  return { markRead, markUnread, markUnreadFrom }
+}

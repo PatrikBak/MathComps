@@ -27,20 +27,6 @@ public interface IAdminGradingService
         string groupSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Reads one entrant's grade on one problem, with everything it is read from.
-    /// </summary>
-    /// <param name="problemId">The problem.</param>
-    /// <param name="userId">The entrant.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>
-    /// The conversations the grade is read from, what the entrant said about their solution, and where the grade
-    /// stands.
-    /// </returns>
-    /// <exception cref="HostedGradeTargetException">Nobody grades the entrant on the problem.</exception>
-    Task<GradeDetailDto> GetGradeAsync(
-        Guid problemId, Guid userId, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Changes one entrant's grade on one problem, applying only what the change carries to the grade as it
     /// stands when the write lands, so two changes to different parts of the grade arriving together both
     /// survive. Lowering the mark below the help pulls the help down to it unless the change sets the help too,
@@ -69,7 +55,7 @@ public interface IAdminGradingService
 public sealed class HostedGroupNotFoundException() : Exception("No graded group goes by this slug");
 
 /// <summary>
-/// Thrown when a grade is read or changed for a student and a problem nobody grades.
+/// Thrown when a grade is changed for a student and a problem nobody grades.
 /// </summary>
 public sealed class HostedGradeTargetException() : Exception("Nobody grades this student on this problem");
 

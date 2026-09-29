@@ -10,6 +10,7 @@ import { RichMathEditorRenderer } from '@/components/shared/components/rich-math
 import { cn } from '@/components/shared/utils/css-utils'
 import { formatDurationMs } from '@/components/shared/utils/duration-utils'
 
+import { TURN_ID_ATTRIBUTE } from '../hooks/use-reveal-pointed-turn'
 import type { Turn } from '../model/defense-types'
 import { TURN_LABEL_CLASS, TURN_STYLES } from './turn-styles'
 
@@ -25,9 +26,9 @@ export type TurnMark = {
 }
 
 /**
- * The way into the drafts a reply went through before it was sent. Only a reviewer gets this: a rejected draft
- * is the leak or the wrong claim a guard caught, so a turn only offers it where the reader is allowed to see
- * what the student was kept from.
+ * The way into the drafts a reply went through before it was sent. Only an admin gets this: a rejected draft is
+ * one a guard sent back, so a turn only offers it where the reader is allowed to see what the student was kept
+ * from.
  */
 export type TurnDraftsMark = {
   /**
@@ -165,7 +166,7 @@ export function DefenseTurn({
 
   return (
     <div
-      data-turn-id={turnId ?? undefined}
+      {...TURN_ID_ATTRIBUTE.stamp(turnId)}
       className={cn(
         'space-y-0.5',
         style.container,

@@ -41,8 +41,9 @@ public static class ServiceCollectionExtensions
                     "You have made too many requests. Please try again shortly.");
             };
 
-            // General API rate limiting, one bucket per caller
-            options.AddPolicy(RateLimiterPolicies.ApiRateLimit, PartitionByCaller(permitLimit: 60, queueLimit: 10));
+            // General API rate limiting, one bucket per caller. Roomy enough for an admin stepping through
+            // conversations about once a second, a few requests a step.
+            options.AddPolicy(RateLimiterPolicies.ApiRateLimit, PartitionByCaller(permitLimit: 300, queueLimit: 10));
 
             // More restrictive limit for search endpoints (heavier operations), one bucket per caller
             options.AddPolicy(RateLimiterPolicies.SearchRateLimit, PartitionByCaller(permitLimit: 20, queueLimit: 5));

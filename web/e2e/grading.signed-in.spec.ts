@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
+import { expectOnlyNotCounting } from './support/admin-conversation'
 import { LIST_PATH } from './support/competitions'
 import { GROUP_NAME, installGradingBackend } from './support/grading-backend'
 import { installHostedBackend } from './support/hosted-backend'
@@ -19,6 +20,9 @@ const SETTLE_TIMEOUT_MS = 15_000
 
 /** The grading copy, in English. */
 const copy = messages.admin.grading
+
+/** The copy of one grade, in English. */
+const gradeCopy = messages.admin.grades
 
 /** The name of the step forward through the pairs. */
 const NEXT = messages.admin.conversation.next
@@ -60,7 +64,7 @@ async function openGrade(page: Page, student: string, problemNumber: number): Pr
   const dialog = page.getByRole('dialog')
 
   // Waited on until the grade's controls are up
-  await expect(dialog.getByRole('group', { name: copy.panel.mark })).toBeVisible({
+  await expect(dialog.getByRole('group', { name: gradeCopy.panel.mark })).toBeVisible({
     timeout: SETTLE_TIMEOUT_MS,
   })
 
@@ -218,7 +222,7 @@ test.describe('the grading board', () => {
 
     // Who and what, and where it sits on the walk
     await expect(dialog.getByText('Ada', { exact: true })).toBeVisible()
-    await expect(dialog.getByText('Elementary, problem 1')).toBeVisible()
+    await expect(dialog.getByText('Problem 1', { exact: true })).toBeVisible()
     await expect(dialog.getByText('1 of 5', { exact: true })).toBeVisible()
 
     // What she said about her own solution
@@ -235,49 +239,103 @@ test.describe('the grading board', () => {
 
     // Down the first problem, then the second, passing Bruno, who never spoke about it
     const walk = [
-      ['Bruno', 'Elementary, problem 1'],
-      ['Cyril', 'Elementary, problem 1'],
-      ['Ada', 'Elementary, problem 2'],
-      ['Cyril', 'Elementary, problem 2'],
+      ['Bruno', 'Problem 1'],
+      ['Cyril', 'Problem 1'],
+      ['Ada', 'Problem 2'],
+      ['Cyril', 'Problem 2'],
     ]
 
     // Each pair along the walk, one step at a time
-    for (const [student, subtitle] of walk) {
+    for (const [student, problem] of walk) {
       // One step along
       await page.keyboard.press('j')
 
       // Lands on the next pair
       await expect(dialog.getByText(student, { exact: true })).toBeVisible()
-      await expect(dialog.getByText(subtitle)).toBeVisible()
+      await expect(dialog.getByText(problem, { exact: true })).toBeVisible()
     }
 
     // The end of the walk, with nothing past it
     await expect(dialog.getByText('5 of 5', { exact: true })).toBeVisible()
     await expect(dialog.getByRole('button', { name: NEXT, exact: true })).toBeDisabled()
   })
-})
 
-test.describe("the board's address", () => {
-  test('opens on the category, the grade and the conversation a link names', async ({ page }) => {
+  test('marks a conversation read by opening it', async ({ page }) => {
+    // A backend serving the test group's board
+    const backend = await installGradingBackend(page, GROUP_SLUG)
+
+    // Ada's first problem, open on her first conversation
+    const dialog = await openGrade(page, 'Ada', 1)
+
+    // Recorded as read
+    await expect.poll(() => backend.readMarks()).toEqual(['ada-p1-1'])
+
+    // Which the toggle offers to take back
+    await expect(
+      dialog.getByRole('button', { name: messages.admin.conversation.markUnread, exact: true })
+    ).toBeVisible()
+  })
+
+  test('lists a conversation started after the hand-in, marked as not counting', async ({
+    page,
+  }) => {
     // A backend serving the test group's board
     await installGradingBackend(page, GROUP_SLUG)
 
-    // A link to Dora's second conversation, on the competition that isn't first
-    await page.goto(`${BOARD_PATH}?category=intermediate&student=dora&problem=q1&conversation=2`)
+    // Ada's first problem, whose third conversation she started after handing in
+    const dialog = await openGrade(page, 'Ada', 1)
 
-    // Which opens her grade
+    // That conversation, picked
+    await dialog.getByRole('button', { name: /^Conversation 3/ }).click()
+
+    // Which shows her answer in it
+    await expect(dialog.getByText('Answer 3 by ada on p1.')).toBeVisible()
+
+    // Listed with the two that count, and marked as the one that doesn't
+    await expectOnlyNotCounting(dialog, 3, 3)
+  })
+
+  test('hands focus back to the cell of the pair the walk ended on', async ({ page }) => {
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // Ada's first problem, the first pair on the walk
+    const dialog = await openGrade(page, 'Ada', 1)
+
+    // One step along the walk
+    await page.keyboard.press('j')
+
+    // Onto Bruno
+    await expect(dialog.getByText('Bruno', { exact: true })).toBeVisible()
+
+    // Another step along the walk
+    await page.keyboard.press('j')
+
+    // Onto Cyril
+    await expect(dialog.getByText('Cyril', { exact: true })).toBeVisible()
+
+    // The dialog closed
+    await page.keyboard.press('Escape')
+
+    // Focus on Cyril's cell rather than on Ada's, which was the one clicked
+    await expect(cellOf(page, 'Cyril', 1)).toBeFocused()
+  })
+})
+
+test.describe("the board's address", () => {
+  test('opens on the category and the grade a link names', async ({ page }) => {
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // A link to Dora's grade, on the competition that isn't first
+    await page.goto(`${BOARD_PATH}?category=intermediate&student=dora&problem=q1`)
+
+    // Which opens her grade, on her first conversation
     const dialog = page.getByRole('dialog')
-    await expect(dialog.getByText('Intermediate, problem 1')).toBeVisible({
+    await expect(dialog.getByText('Answer 1 by dora on q1.')).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
     await expect(dialog.getByText('Dora', { exact: true })).toBeVisible()
-
-    // On her second conversation
-    await expect(dialog.getByRole('button', { name: /^Conversation 2/ })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    )
-    await expect(dialog.getByText('Answer 2 by dora on q1.')).toBeVisible()
 
     // The dialog closed
     await page.keyboard.press('Escape')
@@ -309,15 +367,13 @@ test.describe("the board's address", () => {
     // Her second conversation, picked
     await dialog.getByRole('button', { name: /^Conversation 2/ }).click()
 
-    // Named too
-    await expect
-      .poll(() => addressOf(page))
-      .toBe(`${BOARD_PATH}?student=ada&problem=p1&conversation=2`)
+    // Which shows her answer in it
+    await expect(dialog.getByText('Answer 2 by ada on p1.')).toBeVisible()
 
     // One step along the walk
     await page.keyboard.press('j')
 
-    // Onto Bruno, on his only conversation, which needs no number
+    // Onto Bruno
     await expect(dialog.getByText('Bruno', { exact: true })).toBeVisible()
     await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?student=bruno&problem=p1`)
 
@@ -354,29 +410,22 @@ test.describe("the board's address", () => {
     )
   })
 
-  test('falls back to the first competition and the first conversation where a link names neither', async ({
+  test('falls back to the first competition where a link names one the group does not run', async ({
     page,
   }) => {
     // A backend serving the test group's board
     await installGradingBackend(page, GROUP_SLUG)
 
-    // A link to Ada's first problem naming a competition the group doesn't run and a conversation she never held
-    await page.goto(`${BOARD_PATH}?category=advanced&student=ada&problem=p1&conversation=9`)
+    // A link to Ada's first problem naming a competition the group doesn't run
+    await page.goto(`${BOARD_PATH}?category=advanced&student=ada&problem=p1`)
 
     // Which opens her grade
     const dialog = page.getByRole('dialog')
-    await expect(dialog.getByText('Elementary, problem 1')).toBeVisible({
+    await expect(dialog.getByText('Answer 1 by ada on p1.')).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // On her first conversation
-    await expect(dialog.getByRole('button', { name: /^Conversation 1/ })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    )
-    await expect(dialog.getByText('Answer 1 by ada on p1.')).toBeVisible()
-
-    // Whose address drops both, naming what is on screen
+    // Whose address drops the competition, naming what is on screen
     await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?student=ada&problem=p1`)
 
     // The dialog closed
@@ -433,9 +482,9 @@ test.describe('a grade', () => {
     const dialog = await openGrade(page, 'Ada', 1)
 
     // Its controls
-    const marks = dialog.getByRole('group', { name: copy.panel.mark })
-    const help = dialog.getByRole('group', { name: copy.panel.help })
-    const final = dialog.getByRole('checkbox', { name: copy.panel.final })
+    const marks = dialog.getByRole('group', { name: gradeCopy.panel.mark })
+    const help = dialog.getByRole('group', { name: gradeCopy.panel.help })
+    const final = dialog.getByRole('checkbox', { name: gradeCopy.panel.final })
 
     // Nothing to be final about before there is a mark
     await expect(final).toBeDisabled()
@@ -501,8 +550,8 @@ test.describe('a grade', () => {
     const dialog = await openGrade(page, 'Ada', 1)
 
     // Its mark and help
-    const marks = dialog.getByRole('group', { name: copy.panel.mark })
-    const help = dialog.getByRole('group', { name: copy.panel.help })
+    const marks = dialog.getByRole('group', { name: gradeCopy.panel.mark })
+    const help = dialog.getByRole('group', { name: gradeCopy.panel.help })
 
     // A 5
     await marks.getByRole('button', { name: '5', exact: true }).click()
@@ -547,7 +596,7 @@ test.describe('a grade', () => {
     const dialog = await openGrade(page, 'Ada', 1)
 
     // The comment field
-    const comment = dialog.getByRole('textbox', { name: copy.panel.comment })
+    const comment = dialog.getByRole('textbox', { name: gradeCopy.panel.comment })
 
     // Written, which sends nothing yet
     await comment.fill('Check the case n = 1.')
@@ -604,7 +653,7 @@ test.describe('a grade', () => {
     const dialog = await openGrade(page, 'Ada', 1)
 
     // The comment field
-    const comment = dialog.getByRole('textbox', { name: copy.panel.comment })
+    const comment = dialog.getByRole('textbox', { name: gradeCopy.panel.comment })
 
     // Written
     await comment.fill('Check the case n = 1.')

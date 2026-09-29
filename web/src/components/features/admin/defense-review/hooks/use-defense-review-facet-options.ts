@@ -79,6 +79,9 @@ export function useDefenseReviewFacetOptions(
   // Review-surface copy
   const t = useTranslations('admin.defenseReview')
 
+  // Shared conversation-dialog copy
+  const tConversation = useTranslations('admin.conversation')
+
   // Handout-surface copy
   const tHandouts = useTranslations('handouts')
 
@@ -154,8 +157,12 @@ export function useDefenseReviewFacetOptions(
 
   // The flaws a guard can have caught, in display order
   const flawOptions = useMemo(
-    () => EXAMINER_FLAWS.map((flaw) => ({ id: flaw, displayName: t(FLAW_LABEL_KEYS[flaw]) })),
-    [t]
+    () =>
+      EXAMINER_FLAWS.map((flaw) => ({
+        id: flaw,
+        displayName: tConversation(FLAW_LABEL_KEYS[flaw]),
+      })),
+    [tConversation]
   )
 
   // How long ago a conversation may have last moved

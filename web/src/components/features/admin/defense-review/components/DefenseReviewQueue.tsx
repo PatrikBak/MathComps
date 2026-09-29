@@ -2,7 +2,6 @@
 
 import { MailOpen, RefreshCw, StickyNote } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { Kbd } from '@/components/shared/components/Kbd'
@@ -11,16 +10,15 @@ import { useAddressSync } from '@/hooks/use-address-sync'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 import { STEP_KEYS, useStepHotkeys } from '@/hooks/use-step-hotkeys'
 
+import { AdminNoteFeedModal } from '../../notes/components/AdminNoteFeedModal'
 import { useDefenseReviewFacets } from '../hooks/use-defense-review-facets'
 import { useDefenseReviewFilters } from '../hooks/use-defense-review-filters'
-import { useDefenseReviewFocusReturn } from '../hooks/use-defense-review-focus-return'
+import { useDefenseReviewNoteFeed } from '../hooks/use-defense-review-note-feed'
 import { useDefenseReviewQueue } from '../hooks/use-defense-review-queue'
-import { useDefenseReviewReadState } from '../hooks/use-defense-review-read-state'
 import { useDefenseReviewSelection } from '../hooks/use-defense-review-selection'
 import { useDefenseReviewUnread } from '../hooks/use-defense-review-unread'
 import { NEXT_UNREAD_KEY } from '../model/defense-review-stepping'
 import { fromDefenseReviewQuery, toDefenseReviewQuery } from '../model/defense-review-url'
-import { AdminNoteFeedModal } from './AdminNoteFeedModal'
 import { DefenseReviewCard } from './DefenseReviewCard'
 import { DefenseReviewFilterBar } from './DefenseReviewFilterBar'
 import { DefenseReviewModal } from './DefenseReviewModal'
@@ -55,10 +53,6 @@ const COMPACT_ACTION_CLASS = 'min-h-8 gap-1.5 px-2 text-xs sm:min-h-9 sm:gap-2 s
  * The filter bar sticks under the site header, since re-filtering two hundred cards down should not mean
  * scrolling back to the top to reach the controls, and it carries no fill of its own: the page sits on a
  * gradient fixed to the viewport, which any tint there reads as a band across.
- *
- * Closing a conversation hands focus back from here rather than leaving it to the dialog, whose own restore
- * points at whatever was clicked however far along the reader has walked from it, and points at nothing at all
- * for one opened from the feed.
  */
 export function DefenseReviewQueue() {
   // Review-surface copy
@@ -82,14 +76,8 @@ export function DefenseReviewQueue() {
   // Whether anything matched
   const hasConversations = queue.conversations.length > 0
 
-  // Which conversations have been read
-  const { markRead, markUnread, markUnreadFrom, markMany } = useDefenseReviewReadState()
-
   // Which of the loaded ones are still unread, and the way to clear the lot of them
-  const { unreadConversationIds, markLoadedRead } = useDefenseReviewUnread(
-    queue.conversations,
-    markMany
-  )
+  const { unreadConversationIds, markLoadedRead } = useDefenseReviewUnread(queue.conversations)
 
   // Which conversation is being read
   const selection = useDefenseReviewSelection(
@@ -101,18 +89,8 @@ export function DefenseReviewQueue() {
   // Keep the address saying what is on screen, so a reload comes back to it and it can be handed on
   useAddressSync(toDefenseReviewQuery({ filter, openId: selection.openId }))
 
-  // Whether every note ever written is showing
-  const [isFeedOpen, setIsFeedOpen] = useState(false)
-
-  // The note the reader was sent to out of the feed, which the conversation then opens on; null for one
-  // opened on its own account
-  const [landingNoteId, setLandingNoteId] = useState<string | null>(null)
-
-  // Where closing a conversation hands focus back to
-  const { feedButtonRef, openFromCard, openFromFeed, restoreFocus } = useDefenseReviewFocusReturn(
-    selection.openId,
-    selection.open
-  )
+  // The notes feed, and the way from one of its notes into its conversation and back
+  const feed = useDefenseReviewNoteFeed(selection.open)
 
   // Walking the queue from the keyboard, skipping to the next unread one included
   useStepHotkeys(selection, [[NEXT_UNREAD_KEY, () => selection.stepUnread()]])
@@ -138,11 +116,11 @@ export function DefenseReviewQueue() {
 
           {/* The way into every note already written */}
           <Button
-            ref={feedButtonRef}
+            ref={feed.feedButtonRef}
             variant="outline"
             size="sm"
             className={COMPACT_ACTION_CLASS}
-            onClick={() => setIsFeedOpen(true)}
+            onClick={feed.openFeed}
           >
             <StickyNote size={14} aria-hidden="true" />
             {t('openNotes')}
@@ -200,7 +178,7 @@ export function DefenseReviewQueue() {
             <DefenseReviewCard
               key={conversation.id}
               conversation={conversation}
-              onOpen={openFromCard}
+              onOpen={selection.open}
             />
           ))}
         </div>
@@ -224,29 +202,15 @@ export function DefenseReviewQueue() {
       {/* One conversation, read back in full */}
       <DefenseReviewModal
         selection={selection}
-        landingNoteId={landingNoteId}
-        onMarkRead={markRead}
-        onMarkUnread={markUnread}
-        onMarkUnreadFrom={markUnreadFrom}
-        onClosed={() => {
-          // Whatever the reader was sent to has been read by now, so the next open is nobody's note
-          setLandingNoteId(null)
-          restoreFocus()
-        }}
+        landingNoteId={feed.landingNoteId}
+        onClosed={feed.handleConversationClosed}
       />
 
       {/* Every note already written, across every conversation */}
       <AdminNoteFeedModal
-        isOpen={isFeedOpen}
-        onClose={() => setIsFeedOpen(false)}
-        onOpenNote={(sessionId, noteId) => {
-          // The feed goes on the way through, since a conversation opened under it would stack two dialogs
-          setIsFeedOpen(false)
-
-          // Which note the conversation is being opened for, and then the conversation itself
-          setLandingNoteId(noteId)
-          openFromFeed(sessionId)
-        }}
+        isOpen={feed.isFeedOpen}
+        onClose={feed.closeFeed}
+        onOpenNote={feed.openNote}
       />
     </div>
   )

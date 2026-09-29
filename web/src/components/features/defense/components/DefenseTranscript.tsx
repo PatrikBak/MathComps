@@ -8,7 +8,7 @@ import { Fragment, useRef } from 'react'
 import { Button } from '@/components/shared/components/Button'
 import { useFollowTail } from '@/hooks/use-follow-tail'
 
-import { useRevealPointedTurn } from '../hooks/use-reveal-pointed-turn'
+import { DIVIDER_BEFORE_ATTRIBUTE, useRevealPointedTurn } from '../hooks/use-reveal-pointed-turn'
 import { examinerReplyId, replyNumber } from '../model/defense-conversation-model'
 import type { DefenseTurnReport, Turn, TurnRole } from '../model/defense-types'
 import { DefenseTurn, type TurnDraftsMark, type TurnMark } from './DefenseTurn'
@@ -18,16 +18,21 @@ import { ThinkingIndicator } from './ThinkingIndicator'
  * Props for the {@link TranscriptDivider}.
  */
 type TranscriptDividerProps = {
-  /** What the line says. */
-  label: string
+  /** Where the line goes and what it says. */
+  divider: TranscriptDivider
 }
 
 /**
  * A labelled line drawn across the transcript before one turn. What it means is the caller's word.
  */
-function TranscriptDivider({ label }: TranscriptDividerProps) {
+function TranscriptDivider({ divider: { turnId, label } }: TranscriptDividerProps) {
   return (
-    <div className="flex items-center gap-3" role="separator" aria-label={label}>
+    <div
+      className="flex items-center gap-3"
+      role="separator"
+      aria-label={label}
+      {...DIVIDER_BEFORE_ATTRIBUTE.stamp(turnId)}
+    >
       <span className="h-px flex-1 bg-foreground/20" aria-hidden="true" />
       <span className="text-[11px] font-medium uppercase tracking-wide text-muted">{label}</span>
       <span className="h-px flex-1 bg-foreground/20" aria-hidden="true" />
@@ -84,8 +89,8 @@ export type DefenseTranscriptProps = {
   showReplyNumbers?: boolean
   /** The turn something outside the conversation currently points at; null when nothing does. */
   pointedAtTurnId?: string | null
-  /** Whether each conversation opens on its first turn instead of its newest. */
-  startsAtTop?: boolean
+  /** The turn each conversation opens with at the top, the line above it included; null to open on the newest. */
+  openingTurnId?: string | null
   /** Rendered at the foot of the pane, where the conversation ends; null when there is nothing to say. */
   footer: React.ReactNode
 }
@@ -93,7 +98,7 @@ export type DefenseTranscriptProps = {
 /**
  * The scrolling conversation: every turn in order, the mark where a reader's last pass stopped, the thinking
  * indicator while the examiner replies, and the caller's footer at the foot of the pane. Opens on the newest
- * turn unless asked to start at the top. Keeps the newest content in view while the reader is at the bottom,
+ * turn unless given a turn to open at. Keeps the newest content in view while the reader is at the bottom,
  * but yields control (and offers a jump-back affordance) once they scroll up to re-read.
  */
 export function DefenseTranscript({
@@ -113,14 +118,16 @@ export function DefenseTranscript({
   turnDurationsMs,
   showReplyNumbers = false,
   pointedAtTurnId = null,
-  startsAtTop = false,
+  openingTurnId = null,
   footer,
 }: DefenseTranscriptProps) {
   // Defense copy
   const t = useTranslations('defense')
 
   // The scroll region, kept pinned to the newest turn while the reader sits at the bottom
-  const { scrollRef, contentRef, isScrolledUp, scrollToBottom } = useFollowTail(!startsAtTop)
+  const { scrollRef, contentRef, isScrolledUp, scrollToBottom } = useFollowTail(
+    openingTurnId === null
+  )
 
   // A handle on that same region
   const paneRef = useRef<HTMLDivElement>(null)
@@ -128,8 +135,8 @@ export function DefenseTranscript({
   // The one ref the region can take, standing for both of them
   const setPane = useMergedRef(scrollRef, paneRef)
 
-  // Move to whichever turn is being pointed at
-  useRevealPointedTurn(paneRef, pointedAtTurnId)
+  // Open at the opening turn, and move to whichever turn is being pointed at
+  useRevealPointedTurn(paneRef, pointedAtTurnId, openingTurnId)
 
   // The transcript length on the previous render
   const previousLength = usePrevious(turns.length)
@@ -207,7 +214,7 @@ export function DefenseTranscript({
 
               return (
                 <Fragment key={index}>
-                  {startsWhatIsDivided && <TranscriptDivider label={dividerBeforeTurn.label} />}
+                  {startsWhatIsDivided && <TranscriptDivider divider={dividerBeforeTurn} />}
 
                   <DefenseTurn
                     turn={turn}
