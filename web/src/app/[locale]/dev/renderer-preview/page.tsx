@@ -4,6 +4,7 @@ import { type ReactNode, useState } from 'react'
 
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
+import type { ImageContext } from '@/components/shared/utils/media-utils'
 
 /**
  * Props for the {@link ToggleButton} component.
@@ -180,30 +181,37 @@ Inline images inside a custom-marker list:
 
 /**
  * Dev-only visual catalog of the markdown renderer. The toggle at the top
- * flips the {@link RichMathEditorRenderer} `lightImageBackground` prop so the
- * two image-wrap modes can be inspected in place.
+ * flips the {@link RichMathEditorRenderer} `imageContext` between none and
+ * problems, so images with and without the white card can be inspected in
+ * place. The sample's images are plain URLs, so only the card changes.
  */
 export default function RendererPreviewPage() {
-  // Selected value for the lightImageBackground prop
-  const [lightImageBackground, setLightImageBackground] = useState(false)
+  // Selected image source, none or problems
+  const [imageContext, setImageContext] = useState<ImageContext | undefined>(undefined)
 
   // Trimmed markdown body for the renderer
   const trimmedSample = SAMPLE_MARKDOWN.trim()
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 math-typography math-prose">
-      {/* Segmented toggle for the lightImageBackground prop, sticky at the top */}
+      {/* Segmented toggle for the image source, sticky at the top */}
       <div className="sticky top-0 z-10 mb-6 inline-flex rounded-md border border-foreground/10 bg-surface overflow-hidden">
-        <ToggleButton active={!lightImageBackground} onClick={() => setLightImageBackground(false)}>
-          lightImageBackground = false
+        <ToggleButton
+          active={imageContext === undefined}
+          onClick={() => setImageContext(undefined)}
+        >
+          imageContext = none
         </ToggleButton>
-        <ToggleButton active={lightImageBackground} onClick={() => setLightImageBackground(true)}>
-          lightImageBackground = true
+        <ToggleButton
+          active={imageContext === 'problems'}
+          onClick={() => setImageContext('problems')}
+        >
+          imageContext = problems
         </ToggleButton>
       </div>
 
       {/* Single renderer instance driven by the toggle state */}
-      <RichMathEditorRenderer content={trimmedSample} lightImageBackground={lightImageBackground} />
+      <RichMathEditorRenderer content={trimmedSample} imageContext={imageContext} />
     </div>
   )
 }

@@ -77,11 +77,7 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
 
           {/* What it says */}
           <div className="mt-1.5 text-sm text-muted-foreground">
-            <RichMathEditorRenderer
-              content={item.note.content}
-              lightImageBackground={false}
-              imageContext="userUploads"
-            />
+            <RichMathEditorRenderer content={item.note.content} imageContext="userUploads" />
           </div>
         </div>
 

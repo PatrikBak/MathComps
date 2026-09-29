@@ -2,6 +2,7 @@
 
 import { useFormatter, useTranslations } from 'next-intl'
 
+import { TURN_STYLES } from '@/components/features/defense/components/turn-styles'
 import { Modal } from '@/components/shared/components/Modal'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -199,12 +200,14 @@ function Attempt({ attempt, status }: AttemptProps) {
           so it carries whatever math that guard wrote */}
       {attempt.revisionNote !== '' && (
         <div className="mb-3 border-l-2 border-border pl-3 text-sm italic text-muted">
-          <RichMathEditorRenderer content={attempt.revisionNote} lightImageBackground={false} />
+          <RichMathEditorRenderer content={attempt.revisionNote} />
         </div>
       )}
 
       {/* The draft itself, read as the student would have */}
-      <RichMathEditorRenderer content={attempt.reply} lightImageBackground={false} />
+      <div className={TURN_STYLES.examiner.body}>
+        <RichMathEditorRenderer content={attempt.reply} />
+      </div>
 
       {/* What each guard made of it */}
       <ul className="mt-6 flex flex-col gap-1.5 text-sm">
@@ -285,10 +288,7 @@ function Verdict({ label, isFlagged, flagged, clean }: VerdictProps) {
       <span className="w-24 shrink-0 text-muted">{label}</span>
 
       <div className={isFlagged ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}>
-        <RichMathEditorRenderer
-          content={isFlagged ? flagged : clean}
-          lightImageBackground={false}
-        />
+        <RichMathEditorRenderer content={isFlagged ? flagged : clean} />
       </div>
     </li>
   )

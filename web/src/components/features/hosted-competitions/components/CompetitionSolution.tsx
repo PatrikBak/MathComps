@@ -3,7 +3,7 @@
 import { BookOpen } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
-import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
+import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import type { Locale, LocalizedString } from '@/i18n/i18n'
 
 import { CompetitionProblemSurface } from './CompetitionProblemSurface'
@@ -58,7 +58,7 @@ export function CompetitionSolution({
       onClose={onClose}
     >
       <div className="math-typography math-reference">
-        <ProblemMarkdown content={solution[locale]} />
+        <RichMathEditorRenderer content={solution[locale]} imageContext="problems" />
       </div>
     </CompetitionProblemSurface>
   )
