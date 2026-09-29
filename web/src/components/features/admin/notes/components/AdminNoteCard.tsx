@@ -151,11 +151,7 @@ export function AdminNoteCard({
 
       {/* What it says, rendered the way it was written */}
       <div className="mt-1.5 text-sm text-muted-foreground">
-        <RichMathEditorRenderer
-          content={note.content}
-          lightImageBackground={false}
-          imageContext="userUploads"
-        />
+        <RichMathEditorRenderer content={note.content} imageContext="userUploads" />
       </div>
     </AdminNoteSurface>
   )

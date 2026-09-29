@@ -25,16 +25,21 @@ type RichMathEditorRendererProps = {
   /** The markdown content to render */
   content: string
   /**
-   * Whether rendered images are wrapped in a white-background container.
-   * Suited to diagrams whose strokes assume a light backdrop.
-   */
-  lightImageBackground: boolean
-  /**
    * Which markdown surface owns this content — picks the host that bare
-   * `media:<id>` image keys resolve against. Omit when the content has no
-   * `media:` URLs to dispatch (e.g. a dev catalog).
+   * `media:<id>` image keys resolve against, and whether its images sit on a
+   * white card. Omit only for content that carries no figures.
    */
   imageContext?: ImageContext
+}
+
+/**
+ * Whether images from each source sit on a white card. Problem and handout figures are black ink on a
+ * transparent background, which the dark page would swallow; a user's upload is shown as it came.
+ */
+const LIGHT_IMAGE_BACKGROUND: Record<ImageContext, boolean> = {
+  problems: true,
+  handouts: true,
+  userUploads: false,
 }
 
 /**
@@ -75,11 +80,13 @@ function resolveListClassName(className: string | undefined, defaultMarker: stri
  */
 export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
   content,
-  lightImageBackground,
   imageContext,
 }: RichMathEditorRendererProps) {
   // Get translations
   const t = useTranslations('ui.editor')
+
+  // Whether this content's images sit on a white card
+  const lightImageBackground = imageContext !== undefined && LIGHT_IMAGE_BACKGROUND[imageContext]
 
   // Preprocess display math before parsing
   const processedContent = preprocessDisplayMath(content)
@@ -155,8 +162,13 @@ export const RichMathEditorRenderer = memo(function RichMathEditorRenderer({
             // Otherwise, render as paragraph
             return <p className="mb-2 last:mb-0">{children}</p>
           },
+          h2: ({ children }) => (
+            <h2 className="text-[1.25em] font-semibold text-foreground mt-5 mb-2 first:mt-0">
+              {children}
+            </h2>
+          ),
           h3: ({ children }) => (
-            <h3 className="text-lg font-semibold text-foreground mt-4 mb-2 first:mt-0">
+            <h3 className="text-[1.125em] font-semibold text-foreground mt-4 mb-2 first:mt-0">
               {children}
             </h3>
           ),

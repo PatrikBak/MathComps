@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import { DefenseTranscript } from '@/components/features/defense/components/DefenseTranscript'
-import { ProblemStrip } from '@/components/features/defense/components/ProblemStrip'
+import { ProblemBand } from '@/components/features/defense/components/ProblemBand'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import { useAdminTranscript } from '../hooks/use-admin-transcript'
@@ -67,7 +67,7 @@ export function TranscriptPane({
       {aboveStatement}
 
       {/* The problem, re-readable above the conversation */}
-      <ProblemStrip statement={conversation.statement} />
+      <ProblemBand statement={conversation.statement} height="shared" />
 
       {/* What was said */}
       <DefenseTranscript

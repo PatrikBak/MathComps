@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { useId, useState } from 'react'
 
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
-import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
+import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
@@ -115,7 +115,7 @@ export function HintLadder({ hints }: HintLadderProps) {
               rung === index ? 'opacity-100' : 'opacity-0'
             )}
           >
-            <ProblemMarkdown content={hint} />
+            <RichMathEditorRenderer content={hint} imageContext="problems" />
           </div>
         ))}
       </div>

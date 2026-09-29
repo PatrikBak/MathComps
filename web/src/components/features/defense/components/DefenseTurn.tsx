@@ -291,7 +291,7 @@ export function DefenseTurn({
 
       {/* The message body as read-only rich math */}
       <div className={style.body}>
-        <RichMathEditorRenderer content={turn.content} lightImageBackground={false} />
+        <RichMathEditorRenderer content={turn.content} />
       </div>
     </div>
   )

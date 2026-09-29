@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
+import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
@@ -61,7 +61,7 @@ export function ProblemBand({ statement, height }: ProblemBandProps) {
           )}
         >
           <div className="math-typography math-reference">
-            <ProblemMarkdown content={statement} />
+            <RichMathEditorRenderer content={statement} imageContext="problems" />
           </div>
         </div>
       )}

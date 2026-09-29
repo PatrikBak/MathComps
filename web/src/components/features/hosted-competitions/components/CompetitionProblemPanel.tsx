@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { DefenseConversation } from '@/components/features/defense/components/DefenseConversation'
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
-import { ProblemMarkdown } from '@/components/shared/components/rich-math-editor/components/ProblemMarkdown'
+import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { cn } from '@/components/shared/utils/css-utils'
 import { MATHILDA_NAME } from '@/constants/mathilda'
@@ -84,7 +84,7 @@ export function CompetitionProblemPanel({
 
       {/* The problem itself */}
       <div className="math-typography mb-4">
-        <ProblemMarkdown content={problem.statement[locale]} />
+        <RichMathEditorRenderer content={problem.statement[locale]} imageContext="problems" />
       </div>
 
       {/* The solution and every conversation held about the problem, the oldest conversation last. Pulled

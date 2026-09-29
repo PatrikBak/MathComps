@@ -14,11 +14,16 @@ type ReferencePaneProps = {
   statement: string
   /** The solution the conversation is judged against. */
   reference: string
-  /** Whether the transcript stands beside this pane, carrying the statement in its own strip. */
+  /** Whether the transcript stands beside this pane, carrying the statement in its own band. */
   isSplit: boolean
   /** Where the images the statement and the solution name are kept. */
   imageContext: ImageContext
 }
+
+/**
+ * The classes each part of the pane is labelled in, set quieter than any heading in the solution under it.
+ */
+const SECTION_LABEL_CLASS = 'mb-2 text-[11px] font-bold uppercase tracking-wide text-muted'
 
 /**
  * The solution a conversation is judged against. It names itself and takes focus, since a pane that only
@@ -33,34 +38,28 @@ export function ReferencePane({ statement, reference, isSplit, imageContext }: R
       tabIndex={0}
       role="region"
       aria-label={t('tabs.reference')}
-      className="math-typography flex-1 overflow-y-auto overscroll-contain px-5 py-4"
+      className="flex-1 overflow-y-auto overscroll-contain px-5 py-4"
     >
-      {/* The statement, only where the transcript's own strip isn't already showing it */}
+      {/* The statement, only where the transcript's own band isn't already showing it */}
       {!isSplit && (
         <>
-          {/* Section heading */}
-          <h3 className="mb-2 text-sm font-semibold text-foreground">{t('reference.statement')}</h3>
+          {/* Section label */}
+          <h3 className={SECTION_LABEL_CLASS}>{t('reference.statement')}</h3>
 
           {/* The statement itself */}
-          <RichMathEditorRenderer
-            content={statement}
-            lightImageBackground={false}
-            imageContext={imageContext}
-          />
+          <div className="math-typography math-reference">
+            <RichMathEditorRenderer content={statement} imageContext={imageContext} />
+          </div>
         </>
       )}
 
-      {/* Section heading */}
-      <h3 className={cn('mb-2 text-sm font-semibold text-foreground', !isSplit && 'mt-5')}>
-        {t('reference.solution')}
-      </h3>
+      {/* Section label */}
+      <h3 className={cn(SECTION_LABEL_CLASS, !isSplit && 'mt-6')}>{t('reference.solution')}</h3>
 
       {/* The solution itself */}
-      <RichMathEditorRenderer
-        content={reference}
-        lightImageBackground={false}
-        imageContext={imageContext}
-      />
+      <div className="math-typography math-reference">
+        <RichMathEditorRenderer content={reference} imageContext={imageContext} />
+      </div>
     </div>
   )
 }
