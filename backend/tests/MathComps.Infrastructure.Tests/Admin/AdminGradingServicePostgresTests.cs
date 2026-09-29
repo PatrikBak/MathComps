@@ -1,5 +1,6 @@
 using MathComps.Domain.Contracts.Admin;
 using MathComps.Domain.Contracts.Competitions;
+using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Extensions;
@@ -14,8 +15,9 @@ namespace MathComps.Infrastructure.Tests.Admin;
 
 /// <summary>
 /// Integration tests for <see cref="AdminGradingService"/> against a real PostgreSQL database: who a group's board
-/// grades and which conversations it counts for them, what one grade is read from, and how a grade takes a change,
-/// keeps every version, and holds two changes sent together.
+/// grades and which conversations it counts for them, which of a student's conversations one grade is read from as
+/// <see cref="AdminDefenseReviewService"/> lists them, and how a grade takes a change, keeps every version, and holds
+/// two changes sent together.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
@@ -136,6 +138,11 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     private readonly Guid _aliceSecondSessionId = Guid.CreateVersion7();
 
+    /// <summary>
+    /// Alice's third conversation about the advanced round's first problem, started half an hour after she handed in.
+    /// </summary>
+    private readonly Guid _aliceLateSessionId = Guid.CreateVersion7();
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
@@ -144,6 +151,12 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // The service under test.
         services.AddScoped<IAdminGradingService, AdminGradingService>();
+
+        // The bounds the review service is built with.
+        services.AddPaginationOptions();
+
+        // The service listing a student's conversations on a problem with their grading.
+        services.AddScoped<IAdminDefenseReviewService, AdminDefenseReviewService>();
 
         // The names a group is called by.
         services.AddSingleton<IMetadataLocalizationService, MetadataLocalizationService>();
@@ -286,75 +299,90 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A grade is read from the conversations the entrant started while their entry counted, oldest first, each whole
-    /// with its turns in order, and leaves out the one started after the hand-in. It carries what the entrant said
-    /// about their own solution too, nothing where they said nothing, and no grade while nobody has given one.
+    /// A student's conversations on a problem are listed oldest first, the one started after the hand-in too, while
+    /// only those started inside the entry count toward the grade. What the student said about their solution comes
+    /// along, nothing where they said nothing, and no grade while nobody has given one.
     /// </summary>
     [Fact]
-    public Task A_grade_is_read_from_the_conversations_started_inside_the_entry() => RunTestAsync(async service =>
+    public Task A_grade_counts_only_the_listed_conversations_started_inside_the_entry() => RunTestAsync(async _ =>
     {
-        // Read Alice's grade on the first advanced problem
-        var detail = await service.GetGradeAsync(_advancedFirstId, _aliceId);
+        // Read Alice's conversations on the first advanced problem
+        var read = await ReadConversationsAsync(_aliceId, _advancedFirstId);
 
-        // Her two conversations from inside the entry, oldest first
+        // All three, oldest first, each when she started it
         Assert.Equal(
-            [_aliceFirstSessionId, _aliceSecondSessionId],
-            detail.Conversations.Select(conversation => conversation.Id));
+            [
+                new StudentConversationDto(_aliceFirstSessionId, _startedAt.AddMinutes(10)),
+                new StudentConversationDto(_aliceSecondSessionId, _startedAt.AddMinutes(30)),
+                new StudentConversationDto(_aliceLateSessionId, _startedAt.AddMinutes(90)),
+            ],
+            read.Conversations);
 
-        // The first of them
-        var first = detail.Conversations[0];
+        // Graded, since her entry is
+        Assert.NotNull(read.Grading);
 
-        // Carrying the statement she saw
-        Assert.Equal("Statement", first.Statement);
-
-        // Carrying the reference the examiner held
-        Assert.Equal("Reference", first.Reference);
-
-        // The first conversation's turns in the order they were said, whatever order they were stored in
-        Assert.Equal(["opening", "reply"], first.Turns.Select(turn => turn.Content));
+        // Counting the two from inside the entry, the one after her hand-in left out
+        Assert.Equal([_aliceFirstSessionId, _aliceSecondSessionId], read.Grading.CountingConversationIds);
 
         // What she said about her solution
-        Assert.Equal("The second case is complete.", detail.SelfAssessment?.Comment);
+        Assert.Equal("The second case is complete.", read.Grading.SelfAssessment?.Comment);
 
         // Stamped with when she last changed it
-        Assert.Equal(_startedAt.AddMinutes(55), detail.SelfAssessment?.UpdatedAt);
+        Assert.Equal(_startedAt.AddMinutes(55), read.Grading.SelfAssessment?.UpdatedAt);
 
         // Nothing graded yet
-        Assert.Null(detail.Grade);
+        Assert.Null(read.Grading.Grade);
 
-        // On the problem she said nothing about, there is nothing to carry
-        Assert.Null((await service.GetGradeAsync(_advancedSecondId, _aliceId)).SelfAssessment);
+        // Her conversations on the problem she said nothing about
+        var other = await ReadConversationsAsync(_aliceId, _advancedSecondId);
+
+        // Graded all the same
+        Assert.NotNull(other.Grading);
+
+        // With nothing she said to carry
+        Assert.Null(other.Grading.SelfAssessment);
     });
 
     /// <summary>
-    /// A grade nobody gives is refused: an entry given up, a run let past the gates, a student who never entered, and
-    /// the practice group. An id naming no problem at all is refused too, and a write for a given-up entry is refused
-    /// and leaves no version.
+    /// A student nobody grades on a problem still has their conversations on it listed, with no grading: an entry
+    /// given up, a run let past the gates, a student who never entered, and the practice group.
+    /// </summary>
+    [Fact]
+    public Task A_student_nobody_grades_has_their_conversations_listed_ungraded() => RunTestAsync(async _ =>
+    {
+        // A function which finds a student's conversations on a problem listed, and graded by nobody
+        async Task AssertListedUngradedAsync(Guid userId, Guid problemId)
+        {
+            // Their conversations on the problem
+            var read = await ReadConversationsAsync(userId, problemId);
+
+            // Listed all the same
+            Assert.NotEmpty(read.Conversations);
+
+            // With no grading
+            Assert.Null(read.Grading);
+        }
+
+        // Carol gave her entry up
+        await AssertListedUngradedAsync(_carolId, _advancedFirstId);
+
+        // The granted student was let past the gates
+        await AssertListedUngradedAsync(_grantedId, _advancedFirstId);
+
+        // The stranger never entered
+        await AssertListedUngradedAsync(_strangerId, _advancedFirstId);
+
+        // Dan's practice run grades nothing
+        await AssertListedUngradedAsync(_danId, _practiceProblemId);
+    });
+
+    /// <summary>
+    /// A grade nobody gives, such as one for an entry given up, is refused and leaves no version.
     /// </summary>
     [Fact]
     public Task A_grade_nobody_gives_is_refused() => RunTestAsync(async service =>
     {
-        // Carol gave her entry up
-        await Assert.ThrowsAsync<HostedGradeTargetException>(
-            () => service.GetGradeAsync(_advancedFirstId, _carolId));
-
-        // The granted student was let past the gates
-        await Assert.ThrowsAsync<HostedGradeTargetException>(
-            () => service.GetGradeAsync(_advancedFirstId, _grantedId));
-
-        // The stranger never entered
-        await Assert.ThrowsAsync<HostedGradeTargetException>(
-            () => service.GetGradeAsync(_advancedFirstId, _strangerId));
-
-        // Dan's practice run grades nothing
-        await Assert.ThrowsAsync<HostedGradeTargetException>(
-            () => service.GetGradeAsync(_practiceProblemId, _danId));
-
-        // An id naming no problem at all
-        await Assert.ThrowsAsync<HostedGradeTargetException>(
-            () => service.GetGradeAsync(Guid.CreateVersion7(), _aliceId));
-
-        // The same refusal meets a write
+        // A mark for Carol, who gave her entry up
         await Assert.ThrowsAsync<HostedGradeTargetException>(
             () => service.UpdateGradeAsync(_graderId, _advancedFirstId, _carolId, WithMark(3)));
 
@@ -363,8 +391,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// The first change writes the grade, carrying the grader who made it, and both the board and the grade's own
-    /// read hand it back as it stands.
+    /// The first change writes the grade, carrying the grader who made it, and both the board and the student's
+    /// conversations on the problem hand it back as it stands.
     /// </summary>
     [Fact]
     public Task The_first_change_writes_the_grade_with_its_grader() => RunTestAsync(async service =>
@@ -399,8 +427,11 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // The board carries the grade for Alice's first problem
         Assert.Equal(grade, GradeOf(board, _aliceId, _advancedFirstId).Grade);
 
-        // The grade's own read carries it too
-        Assert.Equal(grade, (await service.GetGradeAsync(_advancedFirstId, _aliceId)).Grade);
+        // Alice's conversations on the problem, read after the change
+        var read = await ReadConversationsAsync(_aliceId, _advancedFirstId);
+
+        // Which carry the grade too
+        Assert.Equal(grade, read.Grading?.Grade);
     });
 
     /// <summary>
@@ -607,13 +638,16 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// <summary>
     /// A student who sat two rounds of the group is weighed by each round's own clock: their advanced conversation
     /// counts on the advanced problem, and an elementary one held while only the advanced clock ran counts nowhere,
-    /// on the board or in the grade read. They are graded in both competitions.
+    /// on the board or among the conversations a grade is read from. They are graded in both competitions.
     /// </summary>
     [Fact]
     public Task A_student_in_two_rounds_is_weighed_by_each_rounds_own_clock() => RunTestAsync(async service =>
     {
         // When Dan's advanced clock starts, a day after the rest
         var advancedStartedAt = _startedAt.AddDays(1);
+
+        // His conversation on the advanced problem
+        var advancedSessionId = Guid.CreateVersion7();
 
         // Dan, who sat the elementary round, sits the advanced one too
         await QueryAsync(async context =>
@@ -627,8 +661,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
             });
 
             // Arguing an advanced problem inside it
-            NewConversation(
-                context, Guid.CreateVersion7(), _danId, _advancedFirstId, advancedStartedAt.AddMinutes(10));
+            NewConversation(context, advancedSessionId, _danId, _advancedFirstId, advancedStartedAt.AddMinutes(10));
 
             // And an elementary one meanwhile, long after his elementary clock ran out
             NewConversation(
@@ -652,11 +685,23 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // The elementary one held on the advanced clock counted for nothing
         Assert.Equal(0, GradeOf(board, _danId, _elementarySecondId).ConversationCount);
 
-        // Reading that grade finds nothing either
-        Assert.Empty((await service.GetGradeAsync(_elementarySecondId, _danId)).Conversations);
+        // His conversations on the elementary problem
+        var elementary = await ReadConversationsAsync(_danId, _elementarySecondId);
 
-        // Reading his advanced grade finds the conversation it counted
-        Assert.Single((await service.GetGradeAsync(_advancedFirstId, _danId)).Conversations);
+        // Graded, since his elementary entry is
+        Assert.NotNull(elementary.Grading);
+
+        // Counting none of them
+        Assert.Empty(elementary.Grading.CountingConversationIds);
+
+        // His conversations on the advanced problem
+        var advanced = await ReadConversationsAsync(_danId, _advancedFirstId);
+
+        // Graded, since his advanced entry is
+        Assert.NotNull(advanced.Grading);
+
+        // Counting the one held on the advanced clock
+        Assert.Equal([advancedSessionId], advanced.Grading.CountingConversationIds);
     });
 
     /// <summary>
@@ -809,9 +854,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
             FinishedAt = _startedAt.AddMinutes(60),
         });
 
-        // Her first conversation inside it, its turns stored out of order
-        NewConversation(context, _aliceFirstSessionId, _aliceId, _advancedFirstId, _startedAt.AddMinutes(10),
-            [(1, TranscriptRole.Examiner, "reply"), (0, TranscriptRole.Candidate, "opening")]);
+        // Her first conversation inside it
+        NewConversation(context, _aliceFirstSessionId, _aliceId, _advancedFirstId, _startedAt.AddMinutes(10));
 
         // Her second conversation inside it
         NewConversation(context, _aliceSecondSessionId, _aliceId, _advancedFirstId, _startedAt.AddMinutes(30));
@@ -827,7 +871,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         });
 
         // A conversation she started after handing in
-        NewConversation(context, Guid.CreateVersion7(), _aliceId, _advancedFirstId, _startedAt.AddMinutes(90));
+        NewConversation(context, _aliceLateSessionId, _aliceId, _advancedFirstId, _startedAt.AddMinutes(90));
 
         // Her practice on the other problem after the close
         NewConversation(context, Guid.CreateVersion7(), _aliceId, _advancedSecondId, _closesAt.AddDays(1));
@@ -888,6 +932,25 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         board.Competitions
             .SelectMany(competition => competition.Grades)
             .Single(summary => summary.UserId == userId && summary.ProblemId == problemId);
+
+    /// <summary>
+    /// Reads one student's conversations on one problem, with how they are graded on it.
+    /// </summary>
+    /// <param name="userId">The student.</param>
+    /// <param name="problemId">The problem.</param>
+    /// <returns>The conversations and their grading.</returns>
+    private async Task<StudentConversationsDto> ReadConversationsAsync(Guid userId, Guid problemId)
+    {
+        // A fresh scope over the same database
+        await using var provider = CreateServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+
+        // The review service, which lists a student's conversations
+        var review = scope.ServiceProvider.GetRequiredService<IAdminDefenseReviewService>();
+
+        // The student's conversations on the problem
+        return await review.GetStudentConversationsAsync(userId, new ProblemTarget(problemId));
+    }
 
     /// <summary>
     /// A change setting the mark or taking it back, and nothing else.
@@ -1027,14 +1090,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// <param name="userId">The student holding it.</param>
     /// <param name="problemId">The problem it is about.</param>
     /// <param name="createdAt">When it started.</param>
-    /// <param name="turns">What was said in it, by sequence; one opening line when left out.</param>
     private static void NewConversation(
-        MathCompsDbContext context,
-        Guid sessionId,
-        Guid userId,
-        Guid problemId,
-        DateTimeOffset createdAt,
-        (int Sequence, TranscriptRole Role, string Content)[]? turns = null)
+        MathCompsDbContext context, Guid sessionId, Guid userId, Guid problemId, DateTimeOffset createdAt)
     {
         // The session, stamped with the kind its target row is allowed to attach to
         context.DefenseSessions.Add(new DefenseSession
@@ -1051,16 +1108,15 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // What it is about
         context.ProblemDefenses.Add(new ProblemDefense { DefenseSessionId = sessionId, ProblemId = problemId });
 
-        // And what was said in it
-        foreach (var (sequence, role, content) in turns ?? [(0, TranscriptRole.Candidate, "opening")])
-            context.DefenseTurns.Add(new DefenseTurn
-            {
-                Id = Guid.CreateVersion7(),
-                SessionId = sessionId,
-                Role = role,
-                Content = content,
-                Sequence = sequence,
-                CreatedAt = createdAt.AddMinutes(sequence),
-            });
+        // And the student's opening line
+        context.DefenseTurns.Add(new DefenseTurn
+        {
+            Id = Guid.CreateVersion7(),
+            SessionId = sessionId,
+            Role = TranscriptRole.Candidate,
+            Content = "opening",
+            Sequence = 0,
+            CreatedAt = createdAt,
+        });
     }
 }

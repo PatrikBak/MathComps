@@ -1,5 +1,6 @@
 using MathComps.Api.Constants;
 using MathComps.Domain.Contracts.Admin;
+using MathComps.Domain.Contracts.Defense;
 using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Users;
 
@@ -96,8 +97,47 @@ public static class AdminDefenseReviewEndpoints
         .RequireAuthorization(AuthorizationPolicies.Admin)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // Record that a conversation has been read. Kept off the read above on purpose: that response carries the
-        // previous stamp, which is what marks where the last pass stopped, and stamping there would erase it.
+        // List one student's conversations against one handout environment
+        app.MapGet($"{ReviewPath}/students/{{userId:guid}}/sessions", async (
+            Guid userId,
+            string handoutContentId,
+            string environmentId,
+            IAdminDefenseReviewService reviewService,
+            CancellationToken cancellationToken) =>
+        {
+            // The environment the conversations are held against
+            var target = new HandoutEnvironmentTarget(handoutContentId, environmentId);
+
+            // The student's conversations against it
+            var conversations = await reviewService.GetStudentConversationsAsync(userId, target, cancellationToken);
+
+            // Return them
+            return Results.Ok(conversations);
+        })
+        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // List one student's conversations against one archive problem, with how they are graded on it
+        app.MapGet($"{ReviewPath}/students/{{userId:guid}}/sessions/problems/{{problemId:guid}}", async (
+            Guid userId,
+            Guid problemId,
+            IAdminDefenseReviewService reviewService,
+            CancellationToken cancellationToken) =>
+        {
+            // The problem the conversations are held against
+            var target = new ProblemTarget(problemId);
+
+            // The student's conversations against it, with their grading
+            var conversations = await reviewService.GetStudentConversationsAsync(userId, target, cancellationToken);
+
+            // Return them
+            return Results.Ok(conversations);
+        })
+        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Record that a conversation has been read. Kept off reading it in full on purpose: that response carries
+        // the previous stamp, which is what marks where the last pass stopped, and stamping there would erase it.
         app.MapPut($"{ReviewPath}/sessions/{{id:guid}}/review", async (
             Guid id,
             HttpContext context,
@@ -117,9 +157,8 @@ public static class AdminDefenseReviewEndpoints
         .RequireAuthorization(AuthorizationPolicies.Admin)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // Mark a whole set at once, which clearing a backlog and taking that back both are. One request rather
-        // than one per conversation, since these endpoints are rate limited per caller and a scrolled queue is
-        // more conversations than a limiter window holds.
+        // Mark a whole set read at once. One request rather than one per conversation, since these endpoints are
+        // rate limited per caller and a scrolled queue can hold more conversations than a limiter window does.
         app.MapPut($"{ReviewPath}/sessions/review", async (
             MarkDefenseReviewsRequest request,
             HttpContext context,
@@ -127,10 +166,9 @@ public static class AdminDefenseReviewEndpoints
             IAdminDefenseReviewService reviewService,
             CancellationToken cancellationToken) =>
         {
-            // A body naming no conversations, or neither outcome, names no mark to make. The wire can express
-            // both and the service's own contract can't, so they are refused here.
-            if (request.SessionIds is not { Count: > 0 } sessionIds || request.Read is not { } read)
-                throw new BadHttpRequestException("A bulk mark must name the conversations and the outcome.");
+            // A body naming no conversations names no mark to make
+            if (request.SessionIds is not { Count: > 0 } sessionIds)
+                throw new BadHttpRequestException("A bulk mark must name the conversations.");
 
             // Bounded so one body can't ask for a write the size of the table
             if (sessionIds.Count > MaxBulkMarkSessions)
@@ -140,8 +178,8 @@ public static class AdminDefenseReviewEndpoints
             // The reviewer whose marks these are
             var reviewerId = await userManager.RequireUserIdAsync(context);
 
-            // Mark the lot of them
-            await reviewService.MarkManyAsync(reviewerId, sessionIds, read, cancellationToken);
+            // Mark the lot of them read
+            await reviewService.MarkManyReadAsync(reviewerId, sessionIds, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();

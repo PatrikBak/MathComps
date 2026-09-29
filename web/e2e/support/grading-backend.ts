@@ -1,14 +1,23 @@
 import type { Page } from '@playwright/test'
 
 import type {
-  Grade,
-  GradeChange,
-  GradeDetail,
+  AdminConversation,
+  StudentGrading,
+} from '@/components/features/admin/conversation/model/admin-conversation'
+import {
+  type Grade,
+  type GradeChange,
+  pairKey,
+} from '@/components/features/admin/grades/model/grade-types'
+import type {
+  GradeSummary,
   GradingBoard,
-} from '@/components/features/admin/grading/model/grading-types'
+} from '@/components/features/admin/grading-board/model/grading-types'
 
+import { wholeConversationOf } from './admin-conversation'
 import { createAnswerGate } from './answer-gate'
 import { BACKEND_ORIGIN } from './backend-routes'
+import { type ConversationBackend, installConversationBackend } from './conversation-backend'
 
 /** The grader every grade the fake writes is stamped by. */
 const GRADER = { id: 'grader', username: 'Grader', email: null }
@@ -28,9 +37,10 @@ export const GROUP_NAME = 'September round'
 
 /**
  * The board the fake opens on: two competitions, the first with three students on two problems. Ada spoke about
- * her first problem twice and was pre-graded on her second, Bruno was graded final on his first and never spoke
- * about his second, and Cyril is not graded yet. The second competition holds Dora, who spoke about its problem
- * twice, and Ada again, who entered it too and never spoke about it, so four students made five entries.
+ * her first problem twice while her entry counted and once more after she handed in, and was pre-graded on her
+ * second; Bruno was graded final on his first and never spoke about his second; and Cyril is not graded yet. The
+ * second competition holds Dora, who spoke about its problem twice, and Ada again, who entered it too and never
+ * spoke about it, so four students made five entries.
  */
 const BOARD: GradingBoard = {
   name: { sk: 'Septembrové kolo', cs: 'Zářijové kolo', en: GROUP_NAME },
@@ -79,6 +89,9 @@ const BOARD: GradingBoard = {
   ],
 }
 
+/** How many conversations each student started about each problem after handing in, by `user|problem`. */
+const AFTER_HAND_IN: Record<string, number> = { 'ada|p1': 1 }
+
 /**
  * One change the page sent, and which grade it was sent to.
  */
@@ -92,7 +105,7 @@ type SentChange = {
 /**
  * The grading backend, held in memory, and what the page has asked of it.
  */
-type GradingBackend = {
+type GradingBackend = ConversationBackend & {
   /** Every change sent so far, oldest first. */
   changes: () => SentChange[]
   /** Keeps every change from here on waiting, until the function handed back lets them through. */
@@ -145,42 +158,86 @@ function applyAsBackend(grade: Grade | null, change: GradeChange): Grade | null 
 }
 
 /**
- * Builds everything one student's grade on one problem is read from.
+ * Builds every conversation the board's students held about its problems: the ones their entries counted, then
+ * the ones started after they handed in, oldest first. Each first answer names the student, problem and
+ * conversation it belongs to.
  *
+ * @param board - The board the students and problems are read off.
+ *
+ * @returns The conversations, by the pair they belong to.
+ */
+function conversationsOf(board: GradingBoard): ReadonlyMap<string, AdminConversation[]> {
+  // Every entrant on every problem of every competition, each with the conversations it holds
+  return new Map(
+    board.competitions.flatMap((competition) =>
+      competition.grades.flatMap((summary): [string, AdminConversation[]][] => {
+        // The student, as the competition names them
+        const user = competition.entrants.find((entrant) => entrant.id === summary.userId)
+
+        // The problem, with its place in the competition
+        const problem = competition.problems.find((candidate) => candidate.id === summary.problemId)
+
+        // Nothing to build for a pair the board doesn't name in full
+        if (user === undefined || problem === undefined) return []
+
+        // How many conversations the pair holds, those after the hand-in last
+        const count = summary.conversationCount + (AFTER_HAND_IN[`${user.id}|${problem.id}`] ?? 0)
+
+        // Each conversation whole, oldest first, its first answer saying whose it is
+        const conversations = Array.from({ length: count }, (_unused, index) => {
+          // The conversation, held against the archive problem the pair is graded on
+          return wholeConversationOf({
+            id: `${user.id}-${problem.id}-${index + 1}`,
+            user,
+            target: {
+              kind: 'problem',
+              problemId: problem.id,
+              competitionSlug: 'mathilding',
+              slug: problem.slug,
+              source: {
+                season: { slug: '1', displayName: 'Season 1', fullName: null },
+                startYear: 2026,
+                competition: [{ slug: 'mathilding', displayName: 'Mathilding', fullName: null }],
+                number: problem.number,
+              },
+            },
+            statement: `The statement of ${problem.id}.`,
+            reference: `The reference for ${problem.id}.`,
+            answer: `Answer ${index + 1} by ${user.id} on ${problem.id}.`,
+            startedAt: `2026-09-2${index + 1}T10:00:00Z`,
+          })
+        })
+
+        // Held under the pair they belong to
+        return [[pairKey(user.id, problem.id), conversations]]
+      })
+    )
+  )
+}
+
+/**
+ * Reads where one student stands on the grade for one problem, as the board holds it.
+ *
+ * @param grades - Every grade the board holds, as the backend holds them.
+ * @param held - The pair's conversations, oldest first, the ones the entry counted leading.
  * @param userId - The student.
  * @param problemId - The problem.
- * @param count - How many conversations they held about it.
  *
- * @returns The detail, each conversation's answer naming the student, problem and conversation it belongs to.
+ * @returns The grading, with the conversations the entry counted; null for a pair the board doesn't hold.
  */
-function detailOf(userId: string, problemId: string, count: number): GradeDetail {
-  // As many conversations as the student held, oldest first
-  const conversations = Array.from({ length: count }, (_unused, index) => {
-    // The conversation's id, naming the student, the problem and its place counting from 1
-    const id = `${userId}-${problemId}-${index + 1}`
+function gradingOf(
+  grades: readonly GradeSummary[],
+  held: readonly AdminConversation[],
+  userId: string,
+  problemId: string
+): StudentGrading | null {
+  // Where the board holds the grade
+  const summary = grades.find(
+    (candidate) => candidate.userId === userId && candidate.problemId === problemId
+  )
 
-    // The conversation: an opener and one answer, the answer saying whose it is
-    return {
-      id,
-      createdAt: `2026-09-2${index + 1}T10:00:00Z`,
-      statement: `The statement of ${problemId}.`,
-      reference: `The reference for ${problemId}.`,
-      turns: [
-        {
-          id: `${id}-opener`,
-          role: 'examiner' as const,
-          content: 'Walk me through it.',
-          createdAt: '2026-09-21T10:00:00Z',
-        },
-        {
-          id: `${id}-answer`,
-          role: 'candidate' as const,
-          content: `Answer ${index + 1} by ${userId} on ${problemId}.`,
-          createdAt: '2026-09-21T10:01:00Z',
-        },
-      ],
-    }
-  })
+  // A pair the board doesn't hold is nobody's to grade
+  if (summary === undefined) return null
 
   // Ada said something about her first solution, and nobody else said anything
   const selfAssessment =
@@ -190,12 +247,19 @@ function detailOf(userId: string, problemId: string, count: number): GradeDetail
       : // Nothing, from everyone else
         null
 
-  // Everything the grade is read from
-  return { conversations, selfAssessment }
+  // The grade as it stands, read from the conversations the entry counted
+  return {
+    countingConversationIds: held
+      .slice(0, summary.conversationCount)
+      .map((conversation) => conversation.id),
+    grade: summary.grade,
+    selfAssessment,
+  }
 }
 
 /**
- * Stands in for the grading endpoints of one group: its board, each grade read in full, and each change.
+ * Stands in for the grading endpoints of one group: its board, each change to a grade, and everything the
+ * conversation dialog reads and writes.
  *
  * @param page - The page to intercept requests on.
  * @param groupSlug - The group the board is served for.
@@ -211,6 +275,15 @@ export async function installGradingBackend(
   // The board as the backend holds it, written to by every change it takes
   const board = structuredClone(BOARD)
 
+  // Every grade on it, the same objects the board holds so a change lands on both
+  const grades = board.competitions.flatMap((competition) => competition.grades)
+
+  // Every conversation the board's students held, by the pair it belongs to
+  const conversationsByPair = conversationsOf(board)
+
+  // Every conversation, in one list
+  const conversations = [...conversationsByPair.values()].flat()
+
   // Every change sent, in the order it arrived
   const sent: SentChange[] = []
 
@@ -222,7 +295,20 @@ export async function installGradingBackend(
     route.fulfill({ json: board })
   )
 
-  // One grade, read in full or changed
+  // What the conversation dialog reads, graded the way the board stands
+  const { readMarks } = await installConversationBackend(
+    page,
+    () => conversations,
+    (userId, problemId) =>
+      gradingOf(
+        grades,
+        conversationsByPair.get(pairKey(userId, problemId)) ?? [],
+        userId,
+        problemId
+      )
+  )
+
+  // One grade, changed
   await page.route(`${BACKEND_ORIGIN}/admin/grading/problems/*/students/*`, async (route) => {
     // Which grade, named by the path's problem and student
     const segments = new URL(route.request().url()).pathname.split('/')
@@ -230,17 +316,12 @@ export async function installGradingBackend(
     const userId = segments.at(-1) ?? ''
 
     // Where the board holds it
-    const summary = board.competitions
-      .flatMap((competition) => competition.grades)
-      .find((candidate) => candidate.userId === userId && candidate.problemId === problemId)
+    const summary = grades.find(
+      (candidate) => candidate.userId === userId && candidate.problemId === problemId
+    )
 
     // A grade the board doesn't hold, answered as not found
     if (summary === undefined) return route.fulfill({ status: 404 })
-
-    // A read, answered whole
-    if (route.request().method() === 'GET') {
-      return route.fulfill({ json: detailOf(userId, problemId, summary.conversationCount) })
-    }
 
     // What the page sent
     const change = route.request().postDataJSON() as GradeChange
@@ -275,5 +356,5 @@ export async function installGradingBackend(
   const changes = () => [...sent]
 
   // The backend, to watch and to hold
-  return { changes, hold: answers.hold }
+  return { changes, hold: answers.hold, readMarks }
 }

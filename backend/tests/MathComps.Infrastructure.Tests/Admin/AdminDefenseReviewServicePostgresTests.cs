@@ -172,6 +172,9 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // The bounds the queue cuts its page by, left at their defaults, which hold the whole seed.
         services.AddPaginationOptions();
 
+        // The reader of who is let past the gates.
+        services.AddUserGrants();
+
         // The service under test.
         services.AddScoped<IAdminDefenseReviewService, AdminDefenseReviewService>();
 
@@ -564,8 +567,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
-    /// Marking a set settles every conversation in it at once, an id naming none is passed over rather than
-    /// taking the set down with it, and putting the set back leaves no stamp behind.
+    /// Marking a set settles every conversation in it at once, and an id naming none is passed over rather than
+    /// taking the set down with it.
     /// </summary>
     [Fact]
     public Task Marking_a_set_settles_every_conversation_in_it() => RunTestAsync(async service =>
@@ -574,43 +577,12 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         var missingId = Guid.Parse("00000000-0000-0000-0000-0000000000ff");
 
         // Mark the two real conversations read, alongside one that is gone and one named twice
-        await service.MarkManyAsync(
-            _reviewerId, [_newestSessionId, _oldestSessionId, missingId, _newestSessionId], read: true);
+        await service.MarkManyReadAsync(
+            _reviewerId, [_newestSessionId, _oldestSessionId, missingId, _newestSessionId]);
 
         // Both real ones settled, rather than the missing id refusing the whole set
         Assert.Equal(0, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
         Assert.NotNull((await GetConversationAsync(service, _oldestSessionId)).ReadAt);
-
-        // Put the set back
-        await service.MarkManyAsync(_reviewerId, [_newestSessionId, _oldestSessionId], read: false);
-
-        // The newest conversation as it stands after the set was put back
-        var newest = await GetConversationAsync(service, _newestSessionId);
-
-        // Which leaves no stamp on either, so every message is new again
-        Assert.Null(newest.ReadAt);
-        Assert.Equal(1, newest.UnreadStudentMessageCount);
-        Assert.Null((await GetConversationAsync(service, _oldestSessionId)).ReadAt);
-    });
-
-    /// <summary>
-    /// One reviewer's set mark is theirs alone: it settles nothing for anybody else, and taking it back leaves
-    /// another reviewer's own stamps standing.
-    /// </summary>
-    [Fact]
-    public Task Marking_a_set_reaches_only_the_reviewer_who_marked_it() => RunTestAsync(async service =>
-    {
-        // The other reviewer has read the newest conversation
-        await service.MarkReadAsync(_otherReviewerId, _newestSessionId);
-
-        // This reviewer marks the same set read
-        await service.MarkManyAsync(_reviewerId, [_newestSessionId], read: true);
-
-        // And puts it straight back
-        await service.MarkManyAsync(_reviewerId, [_newestSessionId], read: false);
-
-        // The other reviewer's own stamp survived both
-        Assert.NotNull((await GetConversationAsync(service, _newestSessionId, _otherReviewerId)).ReadAt);
     });
 
     /// <summary>
@@ -970,6 +942,28 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
+    /// The detail carries what the student held against a reply, standing against that reply.
+    /// </summary>
+    [Fact]
+    public Task The_detail_carries_what_the_student_reported_on_a_reply() => RunTestAsync(async service =>
+    {
+        // Read the conversation whose last reply the student reported
+        var detail = await service.GetDetailAsync(_reviewerId, _newestSessionId, Language.EN);
+
+        // Its one report
+        var report = Assert.Single(detail.Reports);
+
+        // Standing against the reply
+        Assert.Equal(_newestReplyId, report.TurnId);
+
+        // Saying what they held against it
+        Assert.Equal([DefenseReportCategory.GaveAway], report.Categories);
+
+        // In their own words too
+        Assert.Equal("she just told me", report.Comment);
+    });
+
+    /// <summary>
     /// A conversation held before the drafts were kept reads back holding none, rather than failing on their absence.
     /// Every conversation already in the database is one of those, so the empty case is the ordinary one for a while
     /// yet, and it has to reach the review surface as "nothing to show" rather than as an error.
@@ -1141,6 +1135,26 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
+    /// A student's conversations on a handout environment are their own on that environment alone, and carry no
+    /// grading, since nobody grades a handout.
+    /// </summary>
+    [Fact]
+    public Task A_students_conversations_on_a_handout_environment_carry_no_grading() => RunTestAsync(async service =>
+    {
+        // The environment the other student argued too
+        var target = new HandoutEnvironmentTarget(HandoutContentId, "problem-one");
+
+        // Read the student's conversations on it
+        var read = await service.GetStudentConversationsAsync(_studentId, target);
+
+        // Only their own there, the other student's and the other environment's left out
+        Assert.Equal([_oldestSessionId], read.Conversations.Select(conversation => conversation.Id));
+
+        // Graded by nobody
+        Assert.Null(read.Grading);
+    });
+
+    /// <summary>
     /// A conversation held against no environment is out of the reviewer's reach altogether: it never reaches the
     /// queue, which has nothing to name it by, and asking for it outright reads as absent rather than opening it.
     /// </summary>
@@ -1199,13 +1213,12 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// </summary>
     /// <param name="service">The service under test.</param>
     /// <param name="sessionId">The conversation to find.</param>
-    /// <param name="reviewerId">Whose marks the row is read against; the usual reviewer unless named.</param>
     /// <returns>Its row.</returns>
     private static async Task<AdminDefenseConversationDto> GetConversationAsync(
-        IAdminDefenseReviewService service, Guid sessionId, Guid? reviewerId = null)
+        IAdminDefenseReviewService service, Guid sessionId)
     {
         // The whole queue, since a row only exists as part of it
-        var queue = await service.GetQueueAsync(reviewerId ?? _reviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
 
         // The row under that id
         return queue.Items.Single(conversation => conversation.Id == sessionId);

@@ -26,21 +26,6 @@
   },
   "admin": {
     "conversation": {
-      "next": "Next",
-      "position": "{index} of {total}",
-      "previous": "Previous",
-      "reference": {
-        "solution": "Reference solution and hints",
-        "statement": "Statement"
-      },
-      "student": "Student",
-      "tabs": {
-        "conversation": "Conversation",
-        "reference": "Solution"
-      },
-      "tabsLabel": "Parts of the conversation"
-    },
-    "defenseReview": {
       "attempts": {
         "attempt": "Draft {index}",
         "cost": "Cost",
@@ -75,13 +60,11 @@
           "withholdsClose": "already complete: {established}"
         }
       },
-      "clearFilters": "Clear filters",
       "config": {
         "fallbackModels": "Fallbacks",
         "fallbackModelsNone": "none",
         "maxOutputTokens": "Output cap",
         "maxRevisions": "Revision cap",
-        "model": "Model",
         "modelDefault": "default",
         "notes": {
           "authorHints": "Author's hints",
@@ -97,6 +80,14 @@
         },
         "prompt": "Prompt",
         "promptChars": "{count, plural, one {# character} other {# characters}}",
+        "unknown": "This conversation ran before the settings were recorded."
+      },
+      "conversationNumber": "Conversation {number}",
+      "detailFailed": "Couldn't load the conversation",
+      "dialogTitle": "Conversation",
+      "dialogTitleFor": "Conversation: {student}",
+      "examiner": {
+        "model": "Model",
         "reasoningEffort": "Reasoning",
         "reasoningEffortNone": "none",
         "steps": {
@@ -105,12 +96,34 @@
           "leakCheck": "Leak check",
           "mathCheck": "Math check",
           "routeCheck": "Route check"
-        },
-        "unknown": "This conversation ran before the settings were recorded."
+        }
       },
-      "detailFailed": "Couldn't load the conversation",
-      "detailTitle": "Conversation",
-      "detailTitleFor": "Conversation: {student}",
+      "markRead": "Mark as read",
+      "markUnread": "Mark as unread",
+      "markUnreadFromTurn": "Mark as unread from here",
+      "next": "Next",
+      "notCounting": "doesn't count",
+      "onTurn": "On reply {sequence}",
+      "position": "{index} of {total}",
+      "previous": "Previous",
+      "readStateFailed": "Couldn't record that it was read",
+      "reference": {
+        "solution": "Reference solution and hints",
+        "statement": "Statement"
+      },
+      "student": "Student",
+      "studentNoComment": "No comment",
+      "studentVerdict": "What the student said",
+      "tabs": {
+        "config": "Settings",
+        "conversation": "Conversation",
+        "reference": "Solution"
+      },
+      "tabsLabel": "Parts of the conversation",
+      "unreadDivider": "New since you last read this"
+    },
+    "defenseReview": {
+      "clearFilters": "Clear filters",
       "empty": "No conversations yet",
       "emptyFiltered": "No conversation matches these filters.",
       "emptyHint": "One will show up here as soon as somebody starts a defense.",
@@ -141,44 +154,11 @@
       },
       "markAllRead": "Mark all read",
       "markedRead": "{count, plural, =1 {1 conversation marked read} other {# conversations marked read}}",
-      "markRead": "Mark as read",
-      "markUnread": "Mark as unread",
-      "markUnreadFromTurn": "Mark as unread from here",
       "newMessages": "+{count} new",
       "nextUnread": "Next unread",
       "noStudentMessage": "Nothing said yet",
       "noteCount": "Notes: {count}",
-      "notes": {
-        "byAuthor": "by {author}",
-        "categories": {
-          "gaveAway": "Gave away too much",
-          "missedTheMistake": "Missed the mistake",
-          "misunderstood": "Misunderstood",
-          "other": "Other",
-          "saidSomethingWrong": "Said something wrong",
-          "tone": "Tone"
-        },
-        "category": "About",
-        "categoryNone": "Unspecified",
-        "deleteMessage": "The note will be deleted for good.",
-        "deleteTitle": "Delete the note",
-        "empty": "No notes yet",
-        "onConversation": "On the whole conversation",
-        "onTurn": "On reply {sequence}",
-        "placeholder": "What did you notice?",
-        "reopen": "Reopen",
-        "reply": "Reply {sequence}",
-        "resolve": "Mark as resolved",
-        "resolved": "Resolved",
-        "resolvedOn": "Resolved {date}",
-        "target": "Reply",
-        "wholeConversation": "Whole conversation",
-        "write": "Write a note",
-        "writeFailed": "Couldn't save the note",
-        "writeOnTurn": "Write a note on this reply"
-      },
       "openNotes": "Notes",
-      "readStateFailed": "Couldn't record that it was read",
       "refresh": "Refresh",
       "shortcuts": {
         "next": "next",
@@ -187,31 +167,11 @@
       },
       "studentFeedbackMark": "The student rated the conversation",
       "studentMessageCount": "Messages: {count}",
-      "studentNoComment": "No comment",
       "studentReportMark": "The student reported a reply",
-      "studentVerdict": "What the student said",
-      "tabs": {
-        "config": "Settings",
-        "notes": "Notes"
-      },
       "title": "Review conversations",
-      "unreadDivider": "New since you last read this",
       "unreadMark": "Unread"
     },
-    "grading": {
-      "conversationNumber": "Conversation {number}",
-      "detailFailed": "Couldn't load the conversations",
-      "dialogTitle": "Grading: {student}",
-      "empty": "Nobody to grade in this group.",
-      "grid": {
-        "final": "final",
-        "problem": "P{number}",
-        "student": "Student",
-        "total": "Total"
-      },
-      "groupSubtitle": "{name}, {opens} – {closes}",
-      "loadFailed": "Couldn't load the grading",
-      "pairSubtitle": "{category}, problem {number}",
+    "grades": {
       "panel": {
         "changedBy": "Changed by <name>{grader}</name>",
         "comment": "Comment for graders",
@@ -223,12 +183,50 @@
         "score": "Score",
         "selfAssessment": "Student's comment"
       },
-      "progress": "<count>{graded}</count> of {total} graded, <count>{final}</count> final",
       "saveFailed": "Couldn't save the grade",
-      "tabs": {
-        "grade": "Grade"
+      "tab": "Grade"
+    },
+    "grading": {
+      "empty": "Nobody to grade in this group.",
+      "grid": {
+        "final": "final",
+        "problem": "P{number}",
+        "student": "Student",
+        "total": "Total"
       },
+      "groupSubtitle": "{name}, {opens} – {closes}",
+      "loadFailed": "Couldn't load the grading",
+      "progress": "<count>{graded}</count> of {total} graded, <count>{final}</count> final",
       "title": "Grading"
+    },
+    "notes": {
+      "byAuthor": "by {author}",
+      "categories": {
+        "gaveAway": "Gave away too much",
+        "missedTheMistake": "Missed the mistake",
+        "misunderstood": "Misunderstood",
+        "other": "Other",
+        "saidSomethingWrong": "Said something wrong",
+        "tone": "Tone"
+      },
+      "category": "About",
+      "categoryNone": "Unspecified",
+      "deleteMessage": "The note will be deleted for good.",
+      "deleteTitle": "Delete the note",
+      "empty": "No notes yet",
+      "onConversation": "On the whole conversation",
+      "placeholder": "What did you notice?",
+      "reopen": "Reopen",
+      "reply": "Reply {sequence}",
+      "resolve": "Mark as resolved",
+      "resolved": "Resolved",
+      "resolvedOn": "Resolved {date}",
+      "tab": "Notes",
+      "target": "Reply",
+      "wholeConversation": "Whole conversation",
+      "write": "Write a note",
+      "writeFailed": "Couldn't save the note",
+      "writeOnTurn": "Write a note on this reply"
     }
   },
   "apiErrors": {

@@ -132,6 +132,9 @@ export function useFollowTail(startsPinned: boolean): UseFollowTailResult {
     // Follow the bottom whenever the content resizes, unless the reader had scrolled up before it
     // grew; the observer also fires once on observe, which lands the initial content in view
     const observer = new ResizeObserver(() => {
+      // A hidden region has no box, which says nothing about where the reader is in it
+      if (region.clientHeight === 0) return
+
       // Reading back up the region is not interrupted by new content. Content dropping away is the
       // exception: it can put the bottom back within reach without moving the scroll position, so no
       // scroll event records it. Re-pinning only, so growth still can't pull the reader down.

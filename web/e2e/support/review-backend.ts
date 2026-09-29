@@ -1,14 +1,19 @@
 import type { Page } from '@playwright/test'
 
 import type {
+  AdminConversation,
+  StudentGrading,
+} from '@/components/features/admin/conversation/model/admin-conversation'
+import type {
   DefenseReviewConversation,
-  DefenseReviewDetail,
   DefenseReviewFilterOptions,
 } from '@/components/features/admin/defense-review/model/defense-review-types'
 import type { PagedList } from '@/lib/api/paged-list'
 
+import { partlyReadConversationOf, wholeConversationOf } from './admin-conversation'
 import { createAnswerGate } from './answer-gate'
 import { BACKEND_ORIGIN } from './backend-routes'
+import { installConversationBackend } from './conversation-backend'
 
 /** How many conversations a page of the queue holds, few enough that a short queue runs onto a second page. */
 const PAGE_SIZE = 2
@@ -29,6 +34,14 @@ type QueuePageRequest = {
 }
 
 /**
+ * What the page sends to mark a whole set of conversations read at once.
+ */
+type MarkManyRequest = {
+  /** The conversations to mark read. */
+  sessionIds: string[]
+}
+
+/**
  * The review queue's backend, held in memory, and what the page has asked of it.
  */
 type QueueBackend = {
@@ -38,20 +51,37 @@ type QueueBackend = {
   hold: () => () => void
   /** Which page each read of the queue asked for, oldest first. */
   pagesAsked: () => number[]
+  /** The body of each request marking a whole set at once, oldest first, as the page sent it. */
+  bulkMarks: () => MarkManyRequest[]
 }
 
 /**
- * Builds one conversation as the queue lists it, told apart from the others by who held it.
+ * What to vary about the fake.
+ */
+type QueueBackendOptions = {
+  /** Where each student stands on the grade, by the student; a student left out is graded nowhere. */
+  grading?: Record<string, StudentGrading>
+  /** The conversations read halfway, by their ids. */
+  partlyRead?: string[]
+}
+
+/**
+ * Builds one conversation as the queue lists it, told apart from the others by its id.
  *
  * @param email - The address of the student who held it.
  * @param lastActivityAt - When something was last said in it.
+ * @param id - Its id, for a student who held more than one.
  *
  * @returns The conversation.
  */
-export function conversationOf(email: string, lastActivityAt: string): DefenseReviewConversation {
-  // The conversation, told apart by its student's address and dated by its last activity
+export function conversationOf(
+  email: string,
+  lastActivityAt: string,
+  id = `session-${email}`
+): DefenseReviewConversation {
+  // The conversation, told apart by its id and dated by its last activity
   return {
-    id: `session-${email}`,
+    id,
     target: {
       kind: 'problem',
       problemId: 'problem-1',
@@ -82,64 +112,35 @@ export function conversationOf(email: string, lastActivityAt: string): DefenseRe
  *
  * @param conversation - The conversation as the queue lists it.
  *
- * @returns The conversation in full: one opener and one answer, nothing written about it yet.
+ * @returns The conversation in full.
  */
-function detailOf(conversation: DefenseReviewConversation): DefenseReviewDetail {
-  // The same conversation, with the exchange itself and nothing yet read or written about it
-  return {
+function detailOf(conversation: DefenseReviewConversation): AdminConversation {
+  // The same conversation, whole, started when it was last spoken in
+  return wholeConversationOf({
     id: conversation.id,
-    target: conversation.target,
     user: conversation.user,
+    target: conversation.target,
     statement: 'Find every x with x + x = 4.',
     reference: 'Halve both sides.',
-    examinerConfig: {},
-    turns: [
-      {
-        id: `${conversation.id}-opener`,
-        role: 'examiner',
-        content: 'Walk me through it.',
-        createdAt: conversation.lastActivityAt,
-      },
-      {
-        id: `${conversation.id}-answer`,
-        role: 'candidate',
-        content: 'The answer is 2.',
-        createdAt: conversation.lastActivityAt,
-      },
-    ],
-    attempts: [],
-    reports: [],
-    feedback: null,
-    notes: [],
-    readAt: null,
-    createdAt: conversation.lastActivityAt,
-  }
+    answer: 'The answer is 2.',
+    startedAt: conversation.lastActivityAt,
+  })
 }
 
 /**
- * Reads where on the backend a request goes.
- *
- * @param url - The request's address.
- *
- * @returns Everything past the backend's origin, query included, or an empty string for a request going anywhere
- * else.
- */
-function backendPathOf(url: URL): string {
-  // Only the backend's own calls have a path worth matching
-  return url.href.startsWith(BACKEND_ORIGIN) ? url.href.slice(BACKEND_ORIGIN.length) : ''
-}
-
-/**
- * Stands in for the review queue, its filters, and each conversation in it, serving the queue a page at a time.
+ * Stands in for the review queue, its filters, each conversation in it, and marking a whole set read, serving the
+ * queue a page at a time.
  *
  * @param page - The page to intercept requests on.
  * @param initial - The conversations already in the queue, most recently active first.
+ * @param options - What to vary about the fake.
  *
  * @returns The backend, to add to, to hold and to watch.
  */
 export async function installQueueBackend(
   page: Page,
-  initial: DefenseReviewConversation[]
+  initial: DefenseReviewConversation[],
+  options: QueueBackendOptions = {}
 ): Promise<QueueBackend> {
   // The queue as the backend holds it, most recently active first
   const conversations = [...initial]
@@ -181,30 +182,47 @@ export async function installQueueBackend(
     await route.fulfill({ json: body })
   })
 
-  // One conversation in full, found among those the queue holds
-  await page.route(
-    (url) => /^\/admin\/defense\/sessions\/session-[^/]+$/.test(backendPathOf(url)),
-    (route) => {
-      // Which conversation the dialog asked for
-      const id = decodeURIComponent(new URL(route.request().url()).pathname.split('/').at(-1) ?? '')
+  // A function which builds each conversation the queue holds in full, read halfway where the options say so
+  const details = () =>
+    conversations.map((conversation) =>
+      options.partlyRead?.includes(conversation.id) === true
+        ? // Read halfway
+          partlyReadConversationOf(detailOf(conversation))
+        : // As built, nothing yet read
+          detailOf(conversation)
+    )
 
-      // The conversation, among those the queue holds
-      const conversation = conversations.find((candidate) => candidate.id === id)
+  // What the conversation dialog reads, graded where the options say so
+  await installConversationBackend(page, details, (userId) => options.grading?.[userId] ?? null)
 
-      // Served whole where the queue holds it
-      return conversation === undefined
-        ? // Answered as not found
-          route.fulfill({ status: 404 })
-        : // The conversation in full
-          route.fulfill({ json: detailOf(conversation) })
-    }
-  )
+  // Every request marking a whole set, as each body arrived
+  const bulkBodies: MarkManyRequest[] = []
 
-  // Marking one read, which opening it does on its own, or unread
-  await page.route(
-    (url) => /^\/admin\/defense\/sessions\/session-[^/]+\/review$/.test(backendPathOf(url)),
-    (route) => route.fulfill({ status: 204 })
-  )
+  // A whole set marked read at once
+  await page.route(`${BACKEND_ORIGIN}/admin/defense/sessions/review`, (route) => {
+    // What the page sent
+    const body = route.request().postDataJSON() as MarkManyRequest
+
+    // Recorded as it arrives
+    bulkBodies.push(body)
+
+    // Every conversation the set names, read as of now in the queue the backend holds
+    conversations.forEach((conversation, index) => {
+      // Left alone unless the set names it
+      if (!body.sessionIds.includes(conversation.id)) return
+
+      // Read, with nothing new in it
+      conversations[index] = {
+        ...conversation,
+        readAt: new Date().toISOString(),
+        isUnread: false,
+        unreadStudentMessageCount: 0,
+      }
+    })
+
+    // Taken
+    return route.fulfill({ status: 204 })
+  })
 
   // A function which puts a conversation on top of the queue
   const arrive = (conversation: DefenseReviewConversation) => {
@@ -214,6 +232,9 @@ export async function installQueueBackend(
   // A function which snapshots the asks so far, so the list cannot grow underneath an assertion
   const pagesAsked = () => [...asked]
 
+  // A function which snapshots the bulk marks so far, so the list cannot grow underneath an assertion
+  const bulkMarks = () => [...bulkBodies]
+
   // The backend, to add to, to hold and to watch
-  return { arrive, hold: answers.hold, pagesAsked }
+  return { arrive, hold: answers.hold, pagesAsked, bulkMarks }
 }

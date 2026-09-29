@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { GradingBoard } from '@/components/features/admin/grading/components/GradingBoard'
+import { GradingBoard } from '@/components/features/admin/grading-board/components/GradingBoard'
 import Layout from '@/components/layout/Layout'
 import type { Locale } from '@/i18n/i18n'
 import { ROUTES } from '@/i18n/i18n'

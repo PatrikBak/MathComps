@@ -531,14 +531,14 @@ public static class ServiceCollectionExtensions
         // Both the queue and the notes feed are read a page at a time, by the server's bounds.
         services.AddPaginationOptions();
 
+        // Who the site lets past its gates, which decides whether anybody grades a student.
+        services.AddUserGrants();
+
         // The service that reads every student's conversations back and records which have been read.
         services.TryAddScoped<IAdminDefenseReviewService, AdminDefenseReviewService>();
 
         // The service that keeps what gets written down about them.
         services.TryAddScoped<IAdminNoteService, AdminNoteService>();
-
-        // What the grading service asks about a student before it grades them.
-        services.AddUserGrants();
 
         // The service that grades the hosted groups.
         services.TryAddScoped<IAdminGradingService, AdminGradingService>();

@@ -3,9 +3,9 @@ import { useLocale } from 'next-intl'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
 
+import { ADMIN_DEFENSE_QUERY_KEY } from '../../conversation/hooks/conversation-cache'
 import type { DefenseReviewFilterOptions } from '../model/defense-review-types'
 import { fetchDefenseReviewFilterOptions } from '../services/defense-review-service'
-import { reviewFilterOptionsQueryKey } from './defense-review-cache'
 
 /**
  * What {@link useDefenseReviewFacets} hands back.
@@ -30,7 +30,8 @@ export function useDefenseReviewFacets(): UseDefenseReviewFacetsResult {
 
   // The three option lists, which the queue needs the moment it opens
   const { data: options } = useApiQuery({
-    queryKey: reviewFilterOptionsQueryKey(locale),
+    // One list per language
+    queryKey: [...ADMIN_DEFENSE_QUERY_KEY, 'filters', locale],
     fetch: fetchDefenseReviewFilterOptions,
     // The counts are an admin's own read, so they are made as them
     requireAuth: true,

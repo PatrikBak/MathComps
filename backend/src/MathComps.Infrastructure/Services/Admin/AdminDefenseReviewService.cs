@@ -11,6 +11,7 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -22,12 +23,14 @@ namespace MathComps.Infrastructure.Services.Admin;
 /// can't drift apart.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
-/// <param name="paginationOptions">The bounds a page of the queue is cut by.</param>
 /// <param name="localization">The resolver of localized display names.</param>
+/// <param name="grants">Reads whether a student is let past the gates a competition is entered through.</param>
+/// <param name="paginationOptions">The bounds a page of the queue is cut by.</param>
 public class AdminDefenseReviewService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IOptions<PaginationOptions> paginationOptions,
-    IMetadataLocalizationService localization)
+    IMetadataLocalizationService localization,
+    IUserGrantService grants,
+    IOptions<PaginationOptions> paginationOptions)
     : IAdminDefenseReviewService
 {
     /// <summary>
@@ -410,6 +413,42 @@ public class AdminDefenseReviewService(
     }
 
     /// <inheritdoc/>
+    public async Task<StudentConversationsDto> GetStudentConversationsAsync(
+        Guid userId, DefenseTarget target, CancellationToken cancellationToken = default)
+    {
+        // This read's own context, since listing one student's conversations is a unit of work in itself.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The student's conversations against the target, oldest first. The ids break ties so that two started in
+        // the same instant keep one order between reads.
+        var conversations = await dbContext.DefenseSessions
+            .AsNoTracking()
+            .Where(session => session.UserId == userId)
+            .Where(DefenseTargets.HeldAgainst(target))
+            .OrderBy(session => session.CreatedAt)
+            .ThenBy(session => session.Id)
+            .Select(session => new StudentConversationDto(session.Id, session.CreatedAt))
+            .ToListAsync(cancellationToken);
+
+        // How the student is graded on the target.
+        var grading = target switch
+        {
+            // An archive problem, graded where the student sat it under an entry somebody grades.
+            ProblemTarget problem =>
+                await ReadGradingAsync(dbContext, problem.ProblemId, userId, conversations, cancellationToken),
+
+            // A handout environment, which nobody grades.
+            HandoutEnvironmentTarget => null,
+
+            // A target nothing here knows, which is a bug rather than a bad request.
+            _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unknown defense target."),
+        };
+
+        // The conversations, with how they are graded.
+        return new StudentConversationsDto(conversations, grading);
+    }
+
+    /// <inheritdoc/>
     public async Task MarkReadAsync(
         Guid reviewerId, Guid sessionId, CancellationToken cancellationToken = default)
     {
@@ -509,10 +548,9 @@ public class AdminDefenseReviewService(
     }
 
     /// <inheritdoc/>
-    public async Task MarkManyAsync(
+    public async Task MarkManyReadAsync(
         Guid reviewerId,
         IReadOnlyCollection<Guid> sessionIds,
-        bool read,
         CancellationToken cancellationToken = default)
     {
         // The same conversation named twice is one conversation, and it would be one row either way.
@@ -524,19 +562,6 @@ public class AdminDefenseReviewService(
 
         // This write's own context, since marking a set is a unit of work in itself.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        // Taking the stamps back reaches only rows this reviewer already has, so an id naming no conversation
-        // matches nothing and needs no checking first.
-        if (!read)
-        {
-            // Drop them, for the same reason marking one unread drops rather than blanks.
-            await dbContext.AdminSessionReviews
-                .Where(review => distinctIds.Contains(review.SessionId) && review.ReviewerId == reviewerId)
-                .ExecuteDeleteAsync(cancellationToken);
-
-            // Nothing left.
-            return;
-        }
 
         // Which of them the database still holds, since a stamp is keyed to a conversation and one gone since
         // the queue was read would take the whole set down with it.
@@ -669,6 +694,49 @@ public class AdminDefenseReviewService(
         // Each set of settings, with its span and how many conversations ran on it.
         return [.. rows.Select(row => new AdminDefensePromptVersionOptionDto(
             row.Version, row.FirstSeenAt, row.LastSeenAt, row.ConversationCount))];
+    }
+
+    /// <summary>
+    /// Reads how one student is graded on one archive problem.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="problemId">The problem.</param>
+    /// <param name="userId">The student.</param>
+    /// <param name="conversations">Every conversation the student held against the problem.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The grading, or null when nobody grades the student on the problem.</returns>
+    private async Task<StudentGradingDto?> ReadGradingAsync(
+        MathCompsDbContext dbContext,
+        Guid problemId,
+        Guid userId,
+        IReadOnlyList<StudentConversationDto> conversations,
+        CancellationToken cancellationToken)
+    {
+        // The entry the grade belongs to, if anybody grades the student on the problem.
+        var entry = await HostedGrading.FindGradedEntryAsync(dbContext, grants, problemId, userId, cancellationToken);
+
+        // Nobody grades the student on the problem, so there is no grading to read.
+        if (entry is null)
+            return null;
+
+        // The conversations the grade is read from: those started while the entry counted.
+        var countingIds = conversations
+            .Where(conversation => entry.Window.Holds(conversation.CreatedAt))
+            .Select(conversation => conversation.Id)
+            .ToList();
+
+        // Where the grade stands.
+        var grade = await HostedGrading.ReadCurrentGradeAsync(dbContext, entry.Id, problemId, cancellationToken);
+
+        // What the student said about their own solution, if anything.
+        var selfAssessment = await dbContext.ProblemSelfAssessments
+            .AsNoTracking()
+            .Where(assessment => assessment.UserId == userId && assessment.ProblemId == problemId)
+            .Select(assessment => new SelfAssessmentDto(assessment.Comment, assessment.UpdatedAt))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // The grading.
+        return new StudentGradingDto(countingIds, grade, selfAssessment);
     }
 
     /// <summary>

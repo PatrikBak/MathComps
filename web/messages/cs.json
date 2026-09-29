@@ -26,21 +26,6 @@
   },
   "admin": {
     "conversation": {
-      "next": "Následující",
-      "position": "{index} / {total}",
-      "previous": "Předchozí",
-      "reference": {
-        "solution": "Referenční řešení a nápovědy",
-        "statement": "Zadání"
-      },
-      "student": "Student",
-      "tabs": {
-        "conversation": "Konverzace",
-        "reference": "Řešení"
-      },
-      "tabsLabel": "Části konverzace"
-    },
-    "defenseReview": {
       "attempts": {
         "attempt": "Návrh {index}",
         "cost": "Cena",
@@ -75,13 +60,11 @@
           "withholdsClose": "už je hotové: {established}"
         }
       },
-      "clearFilters": "Zrušit filtry",
       "config": {
         "fallbackModels": "Náhradní modely",
         "fallbackModelsNone": "žádné",
         "maxOutputTokens": "Limit výstupu",
         "maxRevisions": "Limit přepisů",
-        "model": "Model",
         "modelDefault": "výchozí",
         "notes": {
           "authorHints": "Autorovy nápovědy",
@@ -97,6 +80,14 @@
         },
         "prompt": "Prompt",
         "promptChars": "{count, plural, one {# znak} few {# znaky} other {# znaků}}",
+        "unknown": "Tato konverzace proběhla dřív, než se nastavení zaznamenávala."
+      },
+      "conversationNumber": "Konverzace {number}",
+      "detailFailed": "Konverzaci se nepodařilo načíst",
+      "dialogTitle": "Konverzace",
+      "dialogTitleFor": "Konverzace: {student}",
+      "examiner": {
+        "model": "Model",
         "reasoningEffort": "Uvažování",
         "reasoningEffortNone": "žádné",
         "steps": {
@@ -105,12 +96,34 @@
           "leakCheck": "Kontrola prozrazení",
           "mathCheck": "Kontrola matematiky",
           "routeCheck": "Kontrola cesty"
-        },
-        "unknown": "Tato konverzace proběhla dřív, než se nastavení zaznamenávala."
+        }
       },
-      "detailFailed": "Konverzaci se nepodařilo načíst",
-      "detailTitle": "Konverzace",
-      "detailTitleFor": "Konverzace: {student}",
+      "markRead": "Označit jako přečtené",
+      "markUnread": "Označit jako nepřečtené",
+      "markUnreadFromTurn": "Označit jako nepřečtené odsud",
+      "next": "Následující",
+      "notCounting": "nepočítá se",
+      "onTurn": "K odpovědi č. {sequence}",
+      "position": "{index} / {total}",
+      "previous": "Předchozí",
+      "readStateFailed": "Nepodařilo se zaznamenat přečtení",
+      "reference": {
+        "solution": "Referenční řešení a nápovědy",
+        "statement": "Zadání"
+      },
+      "student": "Student",
+      "studentNoComment": "Bez komentáře",
+      "studentVerdict": "Co řekl student",
+      "tabs": {
+        "config": "Nastavení",
+        "conversation": "Konverzace",
+        "reference": "Řešení"
+      },
+      "tabsLabel": "Části konverzace",
+      "unreadDivider": "Nové od tvého posledního čtení"
+    },
+    "defenseReview": {
+      "clearFilters": "Zrušit filtry",
       "empty": "Zatím žádné konverzace",
       "emptyFiltered": "Těmto filtrům neodpovídá žádná konverzace.",
       "emptyHint": "Jakmile někdo začne obhajobu, objeví se tady.",
@@ -141,44 +154,11 @@
       },
       "markAllRead": "Označit vše jako přečtené",
       "markedRead": "{count, plural, =1 {1 konverzace označena jako přečtená} few {# konverzace označeny jako přečtené} other {# konverzací označeno jako přečtených}}",
-      "markRead": "Označit jako přečtené",
-      "markUnread": "Označit jako nepřečtené",
-      "markUnreadFromTurn": "Označit jako nepřečtené odsud",
       "newMessages": "+{count, plural, =1 {# nová} =2 {# nové} =3 {# nové} =4 {# nové} other {# nových}}",
       "nextUnread": "Následující nepřečtená",
       "noStudentMessage": "Zatím žádná zpráva",
       "noteCount": "Poznámky: {count}",
-      "notes": {
-        "byAuthor": "od {author}",
-        "categories": {
-          "gaveAway": "Prozradila příliš",
-          "missedTheMistake": "Přehlédla chybu",
-          "misunderstood": "Nepochopila",
-          "other": "Jiné",
-          "saidSomethingWrong": "Řekla nepravdu",
-          "tone": "Tón"
-        },
-        "category": "Téma",
-        "categoryNone": "Neuvedeno",
-        "deleteMessage": "Poznámka se smaže natrvalo.",
-        "deleteTitle": "Smazat poznámku",
-        "empty": "Zatím žádné poznámky",
-        "onConversation": "K celé konverzaci",
-        "onTurn": "K odpovědi č. {sequence}",
-        "placeholder": "Co tu stojí za poznámku?",
-        "reopen": "Znovu otevřít",
-        "reply": "Odpověď {sequence}",
-        "resolve": "Označit jako vyřešené",
-        "resolved": "Vyřešeno",
-        "resolvedOn": "Vyřešeno {date}",
-        "target": "Odpověď",
-        "wholeConversation": "Celá konverzace",
-        "write": "Napsat poznámku",
-        "writeFailed": "Poznámku se nepodařilo uložit",
-        "writeOnTurn": "Napsat poznámku k této odpovědi"
-      },
       "openNotes": "Poznámky",
-      "readStateFailed": "Nepodařilo se zaznamenat přečtení",
       "refresh": "Obnovit",
       "shortcuts": {
         "next": "další",
@@ -187,31 +167,11 @@
       },
       "studentFeedbackMark": "Student zhodnotil konverzaci",
       "studentMessageCount": "Zpráv: {count}",
-      "studentNoComment": "Bez komentáře",
       "studentReportMark": "Student nahlásil odpověď",
-      "studentVerdict": "Co řekl student",
-      "tabs": {
-        "config": "Nastavení",
-        "notes": "Poznámky"
-      },
       "title": "Procházet konverzace",
-      "unreadDivider": "Nové od tvého posledního čtení",
       "unreadMark": "Nepřečtené"
     },
-    "grading": {
-      "conversationNumber": "Konverzace {number}",
-      "detailFailed": "Konverzace se nepodařilo načíst",
-      "dialogTitle": "Hodnocení: {student}",
-      "empty": "V této skupině není koho hodnotit.",
-      "grid": {
-        "final": "finální",
-        "problem": "Ú{number}",
-        "student": "Student",
-        "total": "Celkem"
-      },
-      "groupSubtitle": "{name}, {opens} – {closes}",
-      "loadFailed": "Hodnocení se nepodařilo načíst",
-      "pairSubtitle": "{category}, úloha {number}",
+    "grades": {
       "panel": {
         "changedBy": "Poslední změna: <name>{grader}</name>",
         "comment": "Komentář pro hodnotitele",
@@ -223,12 +183,50 @@
         "score": "Skóre",
         "selfAssessment": "Komentář studenta"
       },
-      "progress": "Ohodnoceno: <count>{graded}</count> z {total}, finální: <count>{final}</count>",
       "saveFailed": "Hodnocení se nepodařilo uložit",
-      "tabs": {
-        "grade": "Hodnocení"
+      "tab": "Hodnocení"
+    },
+    "grading": {
+      "empty": "V této skupině není koho hodnotit.",
+      "grid": {
+        "final": "finální",
+        "problem": "Ú{number}",
+        "student": "Student",
+        "total": "Celkem"
       },
+      "groupSubtitle": "{name}, {opens} – {closes}",
+      "loadFailed": "Hodnocení se nepodařilo načíst",
+      "progress": "Ohodnoceno: <count>{graded}</count> z {total}, finální: <count>{final}</count>",
       "title": "Hodnocení"
+    },
+    "notes": {
+      "byAuthor": "od {author}",
+      "categories": {
+        "gaveAway": "Prozradila příliš",
+        "missedTheMistake": "Přehlédla chybu",
+        "misunderstood": "Nepochopila",
+        "other": "Jiné",
+        "saidSomethingWrong": "Řekla nepravdu",
+        "tone": "Tón"
+      },
+      "category": "Téma",
+      "categoryNone": "Neuvedeno",
+      "deleteMessage": "Poznámka se smaže natrvalo.",
+      "deleteTitle": "Smazat poznámku",
+      "empty": "Zatím žádné poznámky",
+      "onConversation": "K celé konverzaci",
+      "placeholder": "Co tu stojí za poznámku?",
+      "reopen": "Znovu otevřít",
+      "reply": "Odpověď {sequence}",
+      "resolve": "Označit jako vyřešené",
+      "resolved": "Vyřešeno",
+      "resolvedOn": "Vyřešeno {date}",
+      "tab": "Poznámky",
+      "target": "Odpověď",
+      "wholeConversation": "Celá konverzace",
+      "write": "Napsat poznámku",
+      "writeFailed": "Poznámku se nepodařilo uložit",
+      "writeOnTurn": "Napsat poznámku k této odpovědi"
     }
   },
   "apiErrors": {

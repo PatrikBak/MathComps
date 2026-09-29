@@ -23,6 +23,7 @@ import {
   defenseDraftStorageKey,
   defenseTargetKey,
   isSubjectReachable,
+  toWireTarget,
 } from '../model/defense-target'
 import type {
   DefenseCompetitionRun,
@@ -76,10 +77,16 @@ const COMPOSER_MIN_HEIGHT_PX = 120
  *
  * {@link DefenseConversationForTarget} builds its conversation once per mount and keeps writing under the
  * problem it was built with, so a defense about another problem is another mount. Keying on the target is
- * what makes that hold wherever the chat is opened from.
+ * what makes that hold wherever the chat is opened from. The key is read off the wire target, which leaves
+ * the reader out, so a session expiring mid-chat keeps the transcript the student is part-way through arguing.
  */
 export function DefenseConversation(props: DefenseConversationProps) {
-  return <DefenseConversationForTarget key={defenseTargetKey(props.problem.target)} {...props} />
+  return (
+    <DefenseConversationForTarget
+      key={defenseTargetKey(toWireTarget(props.problem.target))}
+      {...props}
+    />
+  )
 }
 
 /**

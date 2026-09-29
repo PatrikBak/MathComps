@@ -1,32 +1,21 @@
-import type { DefenseReportCategory } from '@/components/features/defense/model/defense-types'
 import type { ApiCaller } from '@/hooks/use-api'
 import type { PagedList } from '@/lib/api/paged-list'
 import type { ApiResult } from '@/types/api'
 
 import type {
-  AdminNote,
-  AdminNoteFeedItem,
   DefenseReviewConversation,
-  DefenseReviewDetail,
   DefenseReviewFilter,
   DefenseReviewFilterOptions,
 } from '../model/defense-review-types'
 import {
-  getAdminNoteFeedUrl,
-  getAdminNoteResolutionUrl,
-  getAdminNoteUrl,
-  getCreateAdminNoteUrl,
-  getDefenseReviewBulkReadStateUrl,
-  getDefenseReviewDetailUrl,
+  getConversationsReadStateUrl,
   getDefenseReviewFilterOptionsUrl,
   getDefenseReviewQueueUrl,
-  getDefenseReviewReadStateUrl,
-  getDefenseReviewUnreadFromUrl,
 } from './defense-review-api-urls'
 
 /**
- * The backend for reviewing defense conversations: authenticated calls to the .NET API, every one of them
- * behind the admin policy.
+ * The backend for the review queue: authenticated calls to the .NET API, every one of them behind the admin
+ * policy.
  */
 
 /**
@@ -61,161 +50,21 @@ export function fetchDefenseReviewFilterOptions(
 }
 
 /**
- * Reads one conversation in full, along with the read stamp as it stood before this read.
- *
- * @param apiCall - The authenticated API caller.
- * @param sessionId - The conversation to read.
- * @returns The whole conversation.
- */
-export function fetchDefenseReviewDetail(
-  apiCall: ApiCaller,
-  sessionId: string
-): Promise<ApiResult<DefenseReviewDetail>> {
-  return apiCall<DefenseReviewDetail>(() => getDefenseReviewDetailUrl(sessionId))
-}
-
-/**
- * Records that a conversation has been read as of now, or takes that record back.
- *
- * @param apiCall - The authenticated API caller.
- * @param sessionId - The conversation.
- * @param read - True to stamp it as read, false to leave it unread.
- * @returns Nothing on success.
- */
-export function setDefenseReviewReadState(
-  apiCall: ApiCaller,
-  sessionId: string,
-  read: boolean
-): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getDefenseReviewReadStateUrl(sessionId), {
-    method: read ? 'PUT' : 'DELETE',
-  })
-}
-
-/**
- * Moves where a reviewer picks a conversation up back to just before one of its turns, leaving that turn and
- * everything after it to be read again.
- *
- * @param apiCall - The authenticated API caller.
- * @param sessionId - The conversation.
- * @param turnId - The turn to leave unread, along with every turn after it.
- * @returns Nothing on success.
- */
-export function setDefenseReviewUnreadFromTurn(
-  apiCall: ApiCaller,
-  sessionId: string,
-  turnId: string
-): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getDefenseReviewUnreadFromUrl(sessionId, turnId), { method: 'PUT' })
-}
-
-/**
- * Marks a whole set of conversations read, or takes this reviewer's stamps back off the lot of them.
+ * Stamps a whole set of conversations as read as of now.
  *
  * One request rather than one per conversation: the endpoints behind this surface are rate limited per caller,
  * and a queue scrolled through a backlog holds more conversations than one limiter window allows.
  *
  * @param apiCall - The authenticated API caller.
  * @param sessionIds - The conversations to mark.
- * @param read - True to stamp them as read, false to leave them unread.
  * @returns Nothing on success.
  */
-export function setDefenseReviewReadStates(
+export function setConversationsRead(
   apiCall: ApiCaller,
-  sessionIds: readonly string[],
-  read: boolean
+  sessionIds: readonly string[]
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getDefenseReviewBulkReadStateUrl(), {
+  return apiCall<void>(() => getConversationsReadStateUrl(), {
     method: 'PUT',
-    body: JSON.stringify({ sessionIds, read }),
+    body: JSON.stringify({ sessionIds }),
   })
-}
-
-/**
- * Writes a note about a conversation, optionally against one of its replies.
- *
- * @param apiCall - The authenticated API caller.
- * @param sessionId - The conversation to write about.
- * @param turnId - The reply to write against, or null for the conversation as a whole.
- * @param content - The note as markdown/math source.
- * @param category - Which failure it names, or null to name none.
- * @returns The note as written.
- */
-export function createAdminNote(
-  apiCall: ApiCaller,
-  sessionId: string,
-  turnId: string | null,
-  content: string,
-  category: DefenseReportCategory | null
-): Promise<ApiResult<AdminNote>> {
-  return apiCall<AdminNote>(() => getCreateAdminNoteUrl(), {
-    method: 'POST',
-    body: JSON.stringify({ sessionId, turnId, content, category }),
-  })
-}
-
-/**
- * Revises a note, replacing both what it says and which failure it names.
- *
- * @param apiCall - The authenticated API caller.
- * @param noteId - The note to revise.
- * @param content - What it should now say.
- * @param category - Which failure it should now name, or null to name none.
- * @returns The note as revised.
- */
-export function updateAdminNote(
-  apiCall: ApiCaller,
-  noteId: string,
-  content: string,
-  category: DefenseReportCategory | null
-): Promise<ApiResult<AdminNote>> {
-  return apiCall<AdminNote>(() => getAdminNoteUrl(noteId), {
-    method: 'PUT',
-    body: JSON.stringify({ content, category }),
-  })
-}
-
-/**
- * Drops a note.
- *
- * @param apiCall - The authenticated API caller.
- * @param noteId - The note to drop.
- * @returns Nothing on success.
- */
-export function deleteAdminNote(apiCall: ApiCaller, noteId: string): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getAdminNoteUrl(noteId), { method: 'DELETE' })
-}
-
-/**
- * Marks a note settled, or puts it back to standing.
- *
- * @param apiCall - The authenticated API caller.
- * @param noteId - The note to mark.
- * @param resolved - True to settle it, false to put it back to standing.
- * @returns Nothing on success.
- */
-export function setAdminNoteResolved(
-  apiCall: ApiCaller,
-  noteId: string,
-  resolved: boolean
-): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getAdminNoteResolutionUrl(noteId), {
-    method: resolved ? 'PUT' : 'DELETE',
-  })
-}
-
-/**
- * Reads notes across every conversation, newest first.
- *
- * @param apiCall - The authenticated API caller.
- * @param openOnly - Whether to leave out the notes already settled.
- * @param pageNumber - 1-based page index to retrieve.
- * @returns The page of notes.
- */
-export function fetchAdminNoteFeed(
-  apiCall: ApiCaller,
-  openOnly: boolean,
-  pageNumber: number
-): Promise<ApiResult<PagedList<AdminNoteFeedItem>>> {
-  return apiCall<PagedList<AdminNoteFeedItem>>(() => getAdminNoteFeedUrl(openOnly, pageNumber))
 }

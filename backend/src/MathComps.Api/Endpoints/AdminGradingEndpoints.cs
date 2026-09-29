@@ -17,11 +17,6 @@ public static class AdminGradingEndpoints
     private const string GradingPath = "/admin/grading";
 
     /// <summary>
-    /// The path of one student's grade on one problem.
-    /// </summary>
-    private const string GradePath = $"{GradingPath}/problems/{{problemId:guid}}/students/{{userId:guid}}";
-
-    /// <summary>
     /// Maps the <c>/admin/grading</c> endpoints onto the route builder.
     /// </summary>
     /// <param name="app">The route builder to register the endpoints on.</param>
@@ -42,24 +37,8 @@ public static class AdminGradingEndpoints
         .RequireAuthorization(AuthorizationPolicies.Admin)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // Read one student's grade on one problem, with everything it is read from
-        app.MapGet(GradePath, async (
-            Guid problemId,
-            Guid userId,
-            IAdminGradingService gradingService,
-            CancellationToken cancellationToken) =>
-        {
-            // The grade in full
-            var grade = await gradingService.GetGradeAsync(problemId, userId, cancellationToken);
-
-            // Return it
-            return Results.Ok(grade);
-        })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
-        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
-
         // Change one student's grade on one problem
-        app.MapPatch(GradePath, async (
+        app.MapPatch($"{GradingPath}/problems/{{problemId:guid}}/students/{{userId:guid}}", async (
             Guid problemId,
             Guid userId,
             UpdateGradeRequest request,

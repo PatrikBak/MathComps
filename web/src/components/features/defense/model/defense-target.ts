@@ -82,19 +82,17 @@ export function toWireTarget(target: DefenseTarget): DefenseSessionTarget {
 /**
  * Names what a defense would be opened against, which is what a conversation may not change under.
  *
- * Read off the wire target, so two targets the API cannot tell apart are the same defense and key alike.
+ * Built from the ids alone, so two targets the API cannot tell apart are the same defense and key alike,
+ * whatever display names either of them carries.
  *
  * The ids travel as a JSON array, which keeps them bounded whatever characters an id turns out to hold:
  * joined by a separator, `a` and `b:c` would key alike with `a:b` and `c`.
  *
- * @param target - What the defense is held against.
+ * @param wireTarget - What the defense is held against, as the API names it.
  *
  * @returns The key.
  */
-export function defenseTargetKey(target: DefenseTarget): string {
-  // The target as the API names it
-  const wireTarget = toWireTarget(target)
-
+export function defenseTargetKey(wireTarget: DefenseSessionTarget): string {
   // Name it by the ids its kind carries
   switch (wireTarget.kind) {
     // A handout environment is named by the handout and the environment within it

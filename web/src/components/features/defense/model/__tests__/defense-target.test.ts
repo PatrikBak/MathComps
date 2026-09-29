@@ -93,55 +93,48 @@ describe('defenseTargetKey', () => {
 
   it('names a handout defense by its handout and the environment within it', () => {
     // Both ids are in the key, so two environments of one handout are two defenses
-    expect(defenseTargetKey(HANDOUT)).toContain('inverses-mod-p')
-    expect(defenseTargetKey(HANDOUT)).toContain('ab12cd34')
+    expect(defenseTargetKey(toWireTarget(HANDOUT))).toContain('inverses-mod-p')
+    expect(defenseTargetKey(toWireTarget(HANDOUT))).toContain('ab12cd34')
   })
 
   it('names a competition defense by the archive problem alone', () => {
     // The problem id is the whole of what a first turn writes under
-    expect(defenseTargetKey(COMPETITION)).toContain('open-intermediate-p2')
-  })
-
-  it('keys the same problem alike for two readers', () => {
-    // The reader is not on the wire, so one student's key is another's
-    expect(defenseTargetKey({ ...COMPETITION, readerKey: 'user_9zzz' })).toBe(
-      defenseTargetKey(COMPETITION)
-    )
-
-    // And a reader the program has lost track of keys the same, so a session expiring mid-chat does not
-    // throw away the transcript the student is part-way through arguing
-    expect(defenseTargetKey({ ...COMPETITION, readerKey: null })).toBe(
-      defenseTargetKey(COMPETITION)
-    )
+    expect(defenseTargetKey(toWireTarget(COMPETITION))).toContain('open-intermediate-p2')
   })
 
   it('tells two problems apart, and two environments of one handout', () => {
     // Two problems of one competition are two defenses
-    expect(defenseTargetKey({ ...COMPETITION, problemId: 'open-intermediate-p3' })).not.toBe(
-      defenseTargetKey(COMPETITION)
-    )
+    expect(
+      defenseTargetKey(toWireTarget({ ...COMPETITION, problemId: 'open-intermediate-p3' }))
+    ).not.toBe(defenseTargetKey(toWireTarget(COMPETITION)))
 
     // As are two environments of one handout, and sharing a key would hand one the other's conversation
     expect(
-      defenseTargetKey({
-        kind: 'handout',
-        environment: { handoutContentId: 'inverses-mod-p', environmentId: 'ef56gh78' },
-      })
-    ).not.toBe(defenseTargetKey(HANDOUT))
+      defenseTargetKey(
+        toWireTarget({
+          kind: 'handout',
+          environment: { handoutContentId: 'inverses-mod-p', environmentId: 'ef56gh78' },
+        })
+      )
+    ).not.toBe(defenseTargetKey(toWireTarget(HANDOUT)))
   })
 
   it('keeps ids apart that a joined key would run together', () => {
     // An environment whose own id holds the separator
-    const split = defenseTargetKey({
-      kind: 'handout',
-      environment: { handoutContentId: 'a', environmentId: 'b:c' },
-    })
+    const split = defenseTargetKey(
+      toWireTarget({
+        kind: 'handout',
+        environment: { handoutContentId: 'a', environmentId: 'b:c' },
+      })
+    )
 
     // And a different environment whose ids run to the same letters either side of it
-    const otherSplit = defenseTargetKey({
-      kind: 'handout',
-      environment: { handoutContentId: 'a:b', environmentId: 'c' },
-    })
+    const otherSplit = defenseTargetKey(
+      toWireTarget({
+        kind: 'handout',
+        environment: { handoutContentId: 'a:b', environmentId: 'c' },
+      })
+    )
 
     // The key has to keep the boundary the ids themselves have lost
     expect(split).not.toBe(otherSplit)
@@ -169,9 +162,9 @@ describe('defenseTargetKey', () => {
     // so it changes when a conversation would be written somewhere new and holds still when it would not
     for (const target of targets) {
       for (const other of targets) {
-        expect(defenseTargetKey(target) === defenseTargetKey(other)).toBe(
-          wireIdentity(target) === wireIdentity(other)
-        )
+        expect(
+          defenseTargetKey(toWireTarget(target)) === defenseTargetKey(toWireTarget(other))
+        ).toBe(wireIdentity(target) === wireIdentity(other))
       }
     }
   })
