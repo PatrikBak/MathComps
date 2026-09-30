@@ -56,6 +56,11 @@ export type AdminConversation = StudentConversation & {
 export type StudentGrading = {
   /** The conversations the entry's window holds, which are the ones the grade is read from. */
   countingConversationIds: string[]
+  /**
+   * When the entry stopped counting: its clock running out, or the student handing it in ahead of that. What they
+   * said after it counts toward nothing, even inside a conversation the grade is read from.
+   */
+  endedAt: string
   /** The grade; null while nobody has given one. */
   grade: Grade | null
   /** What the student said about their own solution; null when they said nothing. */

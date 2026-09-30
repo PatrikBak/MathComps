@@ -252,6 +252,8 @@ function gradingOf(
     countingConversationIds: held
       .slice(0, summary.conversationCount)
       .map((conversation) => conversation.id),
+    // Ended after the last turn of every conversation, so none of them stops counting partway
+    endedAt: '2026-09-30T00:00:00Z',
     grade: summary.grade,
     selfAssessment,
   }

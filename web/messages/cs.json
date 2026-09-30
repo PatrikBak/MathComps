@@ -83,6 +83,7 @@
         "unknown": "Tato konverzace proběhla dřív, než se nastavení zaznamenávala."
       },
       "conversationNumber": "Konverzace {number}",
+      "countsUntilDivider": "Odsud se nepočítá",
       "detailFailed": "Konverzaci se nepodařilo načíst",
       "dialogTitle": "Konverzace",
       "dialogTitleFor": "Konverzace: {student}",

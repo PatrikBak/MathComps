@@ -83,6 +83,7 @@
         "unknown": "This conversation ran before the settings were recorded."
       },
       "conversationNumber": "Conversation {number}",
+      "countsUntilDivider": "Nothing from here counts",
       "detailFailed": "Couldn't load the conversation",
       "dialogTitle": "Conversation",
       "dialogTitleFor": "Conversation: {student}",
