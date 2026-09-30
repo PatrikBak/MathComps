@@ -300,8 +300,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A student's conversations on a problem are listed oldest first, the one started after the hand-in too, while
-    /// only those started inside the entry count toward the grade. What the student said about their solution comes
-    /// along, nothing where they said nothing, and no grade while nobody has given one.
+    /// only those started inside the entry count toward the grade. The entry ends at the hand-in. What the student said
+    /// about their solution comes along, nothing where they said nothing, and no grade while nobody has given one.
     /// </summary>
     [Fact]
     public Task A_grade_counts_only_the_listed_conversations_started_inside_the_entry() => RunTestAsync(async _ =>
@@ -323,6 +323,9 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // Counting the two from inside the entry, the one after her hand-in left out
         Assert.Equal([_aliceFirstSessionId, _aliceSecondSessionId], read.Grading.CountingConversationIds);
+
+        // Ended by her hand-in, well ahead of her clock
+        Assert.Equal(_startedAt.AddMinutes(60), read.Grading.EndedAt);
 
         // What she said about her solution
         Assert.Equal("The second case is complete.", read.Grading.SelfAssessment?.Comment);

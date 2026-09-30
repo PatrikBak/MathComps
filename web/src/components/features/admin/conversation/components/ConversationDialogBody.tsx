@@ -91,7 +91,7 @@ type ConversationDialogBodyProps = {
  * about it, and what the examiner was running on.
  *
  * Where the student is graded, a conversation started outside their entry's window is marked as not counting
- * toward the grade.
+ * toward the grade, and one the student kept talking in after the entry ended marks where it did.
  */
 export function ConversationDialogBody({
   detail,
@@ -175,6 +175,9 @@ export function ConversationDialogBody({
             )
           }
           firstNewTurnId={firstNewTurnId}
+          // Only a conversation the grade is read from has words that stop counting partway; the switch already
+          // says a whole one doesn't count
+          countsUntil={grading !== null && counts(detail.id) ? grading.endedAt : null}
           onMarkUnreadFrom={onMarkUnreadFrom}
           onStartNote={startNoteOn}
           // The reply a note is being written against is marked, but only while that is what the reader is

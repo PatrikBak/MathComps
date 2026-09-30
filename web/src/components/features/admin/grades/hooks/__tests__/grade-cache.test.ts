@@ -78,7 +78,12 @@ function cacheConversations(queryClient: QueryClient, userId: string): void {
   // One conversation, counted toward a grade nobody has given yet
   const conversations: StudentConversations = {
     conversations: [{ id: `${userId}-1`, createdAt: '2026-09-02T10:00:00Z' }],
-    grading: { countingConversationIds: [`${userId}-1`], grade: null, selfAssessment: null },
+    grading: {
+      countingConversationIds: [`${userId}-1`],
+      endedAt: '2026-09-02T12:00:00Z',
+      grade: null,
+      selfAssessment: null,
+    },
   }
 
   // Kept under the problem carrying everything that names it

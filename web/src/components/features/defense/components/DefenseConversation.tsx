@@ -303,13 +303,15 @@ function DefenseConversationForTarget({
         canRewind={canRewind}
         onRewindTurn={turn.requestRewind}
         onReportTurn={report.open}
-        dividerBeforeTurn={
+        dividers={
           competitionMode.firstUncountedTurnId === null
-            ? null
-            : {
-                turnId: competitionMode.firstUncountedTurnId,
-                label: t('competitionClockDivider'),
-              }
+            ? []
+            : [
+                {
+                  turnId: competitionMode.firstUncountedTurnId,
+                  label: t('competitionClockDivider'),
+                },
+              ]
         }
         unreadMark={null}
         noteMark={null}

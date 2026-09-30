@@ -43,8 +43,8 @@ function TranscriptDivider({ divider: { turnId, label } }: TranscriptDividerProp
 /**
  * A line drawn before one turn, setting what follows it apart from what came before.
  *
- * The transcript draws it and the caller says what it means: a reader's last pass stopped here, or an entry's
- * clock did.
+ * The transcript draws it and the caller says what it means: a reader's last pass stopped here, or the entry the
+ * conversation was held in stopped counting.
  */
 type TranscriptDivider = {
   /** The turn the line sits above. */
@@ -75,8 +75,8 @@ export type DefenseTranscriptProps = {
   onRewindTurn: (index: number) => void
   /** Says what went wrong with the named reply, or revises what was already said. */
   onReportTurn: (turnId: string) => void
-  /** Where the line goes and what it says; null when nothing divides the conversation. */
-  dividerBeforeTurn: TranscriptDivider | null
+  /** The lines dividing the conversation, drawn in this order where several sit above one turn. */
+  dividers: readonly TranscriptDivider[]
   /** Moving where the reader picks the conversation up; null where nobody keeps a place in it. */
   unreadMark: TurnMark | null
   /** Writing a note about a reply; null where the reader writes none. */
@@ -96,7 +96,7 @@ export type DefenseTranscriptProps = {
 }
 
 /**
- * The scrolling conversation: every turn in order, the mark where a reader's last pass stopped, the thinking
+ * The scrolling conversation: every turn in order, the lines the caller divides it with, the thinking
  * indicator while the examiner replies, and the caller's footer at the foot of the pane. Opens on the newest
  * turn unless given a turn to open at. Keeps the newest content in view while the reader is at the bottom,
  * but yields control (and offers a jump-back affordance) once they scroll up to re-read.
@@ -111,7 +111,7 @@ export function DefenseTranscript({
   canRewind,
   onRewindTurn,
   onReportTurn,
-  dividerBeforeTurn,
+  dividers,
   unreadMark,
   noteMark,
   draftsMark,
@@ -204,9 +204,8 @@ export function DefenseTranscript({
               // Which of the examiner's replies this turn is, null when it is not one
               const replyId = examinerReplyId(turn, index)
 
-              // Whether the line, if there is one, sits above this turn
-              const startsWhatIsDivided =
-                dividerBeforeTurn !== null && turn.id === dividerBeforeTurn.turnId
+              // The lines sitting above this turn
+              const dividersAbove = dividers.filter((divider) => divider.turnId === turn.id)
 
               // Whether whatever points into the conversation points at this turn. A draft the backend
               // hasn't taken yet is no turn in particular, so nothing can be pointing at it
@@ -214,7 +213,9 @@ export function DefenseTranscript({
 
               return (
                 <Fragment key={index}>
-                  {startsWhatIsDivided && <TranscriptDivider divider={dividerBeforeTurn} />}
+                  {dividersAbove.map((divider) => (
+                    <TranscriptDivider key={divider.label} divider={divider} />
+                  ))}
 
                   <DefenseTurn
                     turn={turn}
