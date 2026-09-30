@@ -4,45 +4,42 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
+import { preventFocusLoss } from '@/components/shared/utils/dom-utils'
 
-import { preventFocusLoss } from '../utils/keyboard-utils'
 import { RichMathEditorPicker } from './RichMathEditorPicker'
 
 /**
- * Symbol definition with argument count for commands.
- * - 0: Simple symbol or pre-filled command (e.g., alpha, mathbb{N})
- * - 1: Single-argument command (e.g., hat)
- * - 2: Two-argument command (e.g., frac)
- *
- * The `latex` field should contain the command WITHOUT the leading backslash.
- * For pre-filled commands like `mathbb{N}`, include the braces and content.
+ * A symbol the picker offers, and the command it writes.
  */
 type LatexSymbol = {
-  /** LaTeX command without backslash (e.g., 'alpha', 'frac', 'mathbb{N}') */
+  /**
+   * LaTeX command without backslash (e.g., 'alpha', 'frac'), with its braces and content for one that
+   * comes filled in (e.g., 'mathbb{N}')
+   */
   latex: string
-  /** Unicode display character */
+  /** How the symbol reads */
   display: string
-  /** Number of arguments for cursor positioning. Defaults to 0 (cursor after). */
+  /** How many arguments the command takes in braces; none where left out */
   args?: 0 | 1 | 2
 }
 
 /**
- * Category key for translation lookup.
+ * A category the symbols are grouped under.
  */
 type CategoryKey = 'greek' | 'operators' | 'relations' | 'sets' | 'geometry' | 'other'
 
 /**
- * Array of symbols grouped by category.
+ * A category, and the symbols under it.
  */
 type LatexSymbolCategory = {
-  /** Category key for translation lookup */
+  /** Which category it is */
   key: CategoryKey
-  /** Array of symbols in the category */
+  /** The symbols under it, in the order they stand */
   symbols: LatexSymbol[]
 }
 
 /**
- * LaTeX symbols organized by category.
+ * Every symbol the picker offers, by category, in the order the tabs stand.
  */
 const SYMBOL_CATEGORIES: LatexSymbolCategory[] = [
   {
@@ -154,7 +151,7 @@ const SYMBOL_CATEGORIES: LatexSymbolCategory[] = [
       { latex: 'perp', display: '⊥' },
       { latex: 'parallel', display: '∥' },
       { latex: 'nparallel', display: '∦' },
-      { latex: 'circ', display: '°' },
+      { latex: 'degree', display: '°' },
     ],
   },
   {
@@ -185,36 +182,41 @@ const SYMBOL_CATEGORIES: LatexSymbolCategory[] = [
 ]
 
 /**
- * Props for {@link RichMathEditorLaTeXSymbolPicker}.
+ * Props for the {@link RichMathEditorLaTeXSymbolPicker} component.
  */
 type RichMathEditorLaTeXSymbolPickerProps = {
+  /** Whether the picker's button is a row of a list */
+  isRow: boolean
   /** Callback when a symbol is selected. Receives the command (without backslash) and argument count. */
   onSymbolClick: (command: string, args: 0 | 1 | 2) => void
 }
 
 /**
- * A LaTeX symbol picker with categorized symbols.
+ * A tool of the editor's toolbar picking a LaTeX symbol to write into the text, its symbols in tabs by
+ * category.
  */
 export function RichMathEditorLaTeXSymbolPicker({
+  isRow,
   onSymbolClick,
 }: RichMathEditorLaTeXSymbolPickerProps) {
-  // Get translations
+  // The picker's translations, and its categories'
   const tLatexPicker = useTranslations('ui.editor.latexPicker')
   const tCategories = useTranslations('ui.editor.latexPicker.categories')
 
-  // Track the currently active category
+  // The category on show
   const [activeCategory, setActiveCategory] = useState(SYMBOL_CATEGORIES[0])
 
   return (
     <RichMathEditorPicker
-      triggerContent={<span className="font-mono font-semibold text-sm">π</span>}
-      triggerTitle={tLatexPicker('title')}
-      popupClassName="bg-surface w-[320px] sm:w-[420px]"
+      mark="π"
+      title={tLatexPicker('title')}
+      isRow={isRow}
+      popupClassName="w-[320px] sm:w-[420px] overflow-hidden"
     >
-      {({ close }) => (
+      {(close) => (
         <>
-          {/* Category Tabs */}
-          <div className="flex flex-wrap gap-1 p-2 border-b border-foreground/10 bg-surface/80">
+          {/* Category tabs */}
+          <div className="flex flex-wrap gap-1 p-2 border-b border-foreground/10">
             {SYMBOL_CATEGORIES.map((category) => (
               <button
                 key={category.key}
@@ -233,15 +235,18 @@ export function RichMathEditorLaTeXSymbolPicker({
             ))}
           </div>
 
-          {/* Symbols Grid */}
+          {/* Symbols grid */}
           <div className="p-2 max-h-[240px] overflow-y-auto">
             <div className="grid">
+              {/* Every category, stacked in one cell so the panel keeps the height of the tallest. Only the
+                  one on show can be reached */}
               {SYMBOL_CATEGORIES.map((category) => (
                 <div
                   key={category.key}
+                  inert={activeCategory !== category}
                   className={cn(
                     'grid grid-cols-6 sm:grid-cols-8 gap-1 col-start-1 row-start-1 content-start',
-                    activeCategory === category ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    activeCategory === category ? 'opacity-100' : 'opacity-0'
                   )}
                 >
                   {category.symbols.map((symbol) => (
@@ -250,10 +255,16 @@ export function RichMathEditorLaTeXSymbolPicker({
                       type="button"
                       onMouseDown={preventFocusLoss}
                       onClick={() => {
-                        onSymbolClick(symbol.latex, symbol.args ?? 0)
+                        // The panel closes first
                         close()
+
+                        // And the picked symbol is handed over
+                        onSymbolClick(symbol.latex, symbol.args ?? 0)
                       }}
-                      className="flex items-center justify-center w-10 h-10 text-lg rounded hover:bg-foreground/5 transition-colors text-foreground"
+                      className={cn(
+                        'flex items-center justify-center w-10 h-10 rounded transition-colors',
+                        'text-lg text-foreground hover:bg-foreground/5'
+                      )}
                     >
                       {symbol.display}
                     </button>

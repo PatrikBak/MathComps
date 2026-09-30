@@ -1,249 +1,138 @@
+import { Eye } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
-import { useState } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import { useIsMobile } from '@/hooks/use-breakpoint'
 
 import { Modal } from '../../Modal'
-import { type EditorViewModel } from '../hooks/use-editor-model'
-import { showsToolbarItem, type ToolbarConfig } from './RichMathEditor'
+import { type UseEditorTextResult } from '../hooks/use-editor-text'
+import { type UseEditorUploadsResult } from '../hooks/use-editor-uploads'
+import { type UseExpandedEditorResult } from '../hooks/use-expanded-editor'
+import { type ToolbarConfig } from './RichMathEditor'
 import { RichMathEditorFooter } from './RichMathEditorFooter'
-import { RichMathEditorInputArea } from './RichMathEditorInputArea'
-import { RichMathEditorRenderer } from './RichMathEditorRenderer'
-import { RichMathEditorToolbar } from './RichMathEditorToolbar'
+import { RichMathEditorFrame } from './RichMathEditorFrame'
+import { RichMathEditorPane } from './RichMathEditorPane'
+import { RichMathEditorPreview } from './RichMathEditorPreview'
 
 /**
  * Props for the {@link RichMathEditorExpandedModal} component.
  */
 type RichMathEditorExpandedModalProps = {
-  /** Whether the modal is currently open */
-  isOpen: boolean
-  /** Callback to close the modal */
-  onClose: () => void
-  /** Called once the modal is gone and the page is the reader's again */
+  /** The expanded view's state and the ways in and out of it */
+  expanded: UseExpandedEditorResult
+  /** Called once the dialog closes, as in {@link Modal} */
   onClosed: () => void
-  /** Whether an editor stands behind this one, which is where closing it returns the reader */
-  hasEditorBehind: boolean
-  /** Shared viewModel from the parent RichMathEditor */
-  viewModel: EditorViewModel
-  /** Which toolbar entries to show; every entry defaults to on */
-  toolbarConfig?: ToolbarConfig
+  /** The text the expanded view shows and edits */
+  text: UseEditorTextResult
+  /** The ways content other than typing reaches the text */
+  uploads: UseEditorUploadsResult
+  /** Which toolbar entries to show */
+  toolbarConfig: ToolbarConfig | undefined
   /** Placeholder text shown when the editor is empty */
   placeholder: string
-  /** Callback triggered when the send button is clicked */
-  onSend?: () => void
-  /** Whether a send is currently allowed; the editor's own validity gates on top of it */
-  canSend?: boolean
-  /** Callback triggered when the cancel button is clicked */
-  onCancel?: () => void
-  /** Callback that stops the in-flight submit. */
-  onStop?: () => void
-  /** Whether the editor is in a loading state */
-  isLoading?: boolean
-  /** What the surface counts of its own, shown beside the draft's counters. */
+  /** Callback that stops the in-flight submit */
+  onStop: (() => void) | undefined
+  /** Whether a submit is in flight */
+  isLoading: boolean
+  /** What the surface counts of its own */
   footerMeta: ReactNode
 }
 
 /**
- * Expanded modal view for the {@link RichMathEditor}. Uses the same
- * {@link EditorViewModel} as the inline editor which is the way to ensure
- * consistent functionality.
+ * Expanded modal view for the rich math editor. Where there is room, the preview stands beside the
+ * text; on a phone the toolbar's own preview toggle swaps between them.
  */
 export function RichMathEditorExpandedModal({
-  isOpen,
-  onClose,
+  expanded,
   onClosed,
-  hasEditorBehind,
-  viewModel,
+  text,
+  uploads,
   toolbarConfig,
   placeholder,
-  onSend,
-  canSend = true,
-  onCancel,
   onStop,
-  isLoading = false,
+  isLoading,
   footerMeta,
 }: RichMathEditorExpandedModalProps) {
-  // Get translations
+  // Editor translations
   const tEditor = useTranslations('ui.editor')
 
-  // Check if we're on mobile where we have editor and preview as tabs
+  // Whether the viewport is phone-width
   const isMobile = useIsMobile()
 
-  // Keep track of which view we're in on mobile
-  const [mobileModalView, setMobileModalView] = useState<'editor' | 'preview'>('editor')
-
-  // Extract viewModel properties
-  const {
-    state,
-    attachInputArea,
-    applyTransform,
-    insertAtCursor,
-    openImagePicker: openFilePicker,
-    openAttachmentPicker,
-    handleChange,
-    handleKeyDown,
-  } = viewModel
-
-  /**
-   * Handles a key pressed in the expanded editor.
-   *
-   * Escape is the way out of an expanded view, so it collapses to the editor behind it rather than
-   * reaching the editor's own cancel. With nothing behind it, this view is the whole editor, and the
-   * cancel is what Escape is for.
-   *
-   * @param event - The React keyboard event from the textarea.
-   */
-  const handleModalKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (event) => {
-    // The way back to the editor underneath
-    if (event.key === 'Escape' && hasEditorBehind) {
-      event.preventDefault()
-      onClose()
-      return
-    }
-
-    // Everything else is the editor's own
-    handleKeyDown(event)
-  }
-
+  // The expanded editor, in a dialog of its own
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
+      isOpen={expanded.isOpen}
+      onClose={expanded.close}
       onClosed={onClosed}
       title={tEditor('expandedEditor')}
       showCloseButton
-      className="flex flex-col max-h-[95vh] md:max-h-[90vh] md:max-w-6xl"
+      className="md:max-w-6xl"
     >
-      <div className="flex flex-col flex-1 min-h-0 overflow-hidden -mx-6 -mb-6 px-4 md:px-6 pb-4 md:pb-6">
-        {/* The editor/preview switcher, on mobile where the two can't stand side by side */}
-        <div className="md:hidden flex border-b border-foreground/10 mb-2">
-          <button
-            type="button"
-            onClick={() => setMobileModalView('editor')}
-            className={cn(
-              'flex-1 py-1.5 text-xs font-medium transition-colors',
-              mobileModalView === 'editor'
-                ? 'text-brand-light border-b-2 border-brand-light'
-                : 'text-muted hover:text-foreground'
-            )}
-          >
-            {tEditor('expandedEditor')}
-          </button>
-          <button
-            type="button"
-            onClick={() => setMobileModalView('preview')}
-            className={cn(
-              'flex-1 py-1.5 text-xs font-medium transition-colors',
-              mobileModalView === 'preview'
-                ? 'text-brand-light border-b-2 border-brand-light'
-                : 'text-muted hover:text-foreground'
-            )}
-          >
-            {tEditor('preview')}
-          </button>
-        </div>
-
-        {/* The editor and its preview */}
-        <div className="flex-1 flex flex-col overflow-hidden border border-foreground/10 rounded-lg">
-          {/* The two panels */}
-          <div className="flex-1 grid grid-cols-1 grid-rows-1 md:flex md:flex-row min-h-0 overflow-hidden">
-            {/* The editor, on the left */}
-            <div
-              className={cn(
-                'col-start-1 row-start-1 flex flex-col min-h-0 md:flex-1 md:max-h-[calc(90vh-10rem)] overflow-hidden',
-                isMobile && mobileModalView !== 'editor' && 'invisible'
-              )}
-            >
-              {/* Toolbar */}
-              <RichMathEditorToolbar
-                variant="card"
-                config={toolbarConfig}
-                borderless
-                onEdit={applyTransform}
-                onInsert={insertAtCursor}
-                onImageClick={openFilePicker}
-                onAttachmentClick={openAttachmentPicker}
-              />
-
-              {/* The text itself, grown to match the preview's height */}
-              <RichMathEditorInputArea
-                ref={attachInputArea}
-                variant="card"
-                borderless
-                viewModel={viewModel}
-                onChange={handleChange}
-                onKeyDown={handleModalKeyDown}
+      <div className="-mx-6 -mb-6 px-4 md:px-6 pt-0.5 pb-4 md:pb-6">
+        {/* The editor, its preview and its footer, in one frame */}
+        <RichMathEditorFrame
+          variant="card"
+          minHeightPx={undefined}
+          opensTall
+          // Held by its middle, the dialog standing in the middle of the screen
+          resizeRatio={2}
+          // As tall as the screen has room for under the dialog's own heading and margins
+          className="max-h-[calc(100dvh-9rem)]"
+        >
+          {/* The panels */}
+          <div className="flex-1 flex min-h-0 overflow-hidden">
+            {/* The text */}
+            <div className="flex flex-1 flex-col min-h-0 overflow-hidden">
+              <RichMathEditorPane
+                text={text}
+                uploads={uploads}
+                toolbarConfig={toolbarConfig}
                 placeholder={placeholder}
-                allowImageUpload={showsToolbarItem(toolbarConfig, 'image')}
-                allowAttachmentUpload={showsToolbarItem(toolbarConfig, 'attachment')}
-                containerClassName="flex-1 min-h-0 min-h-[200px]"
-                className="h-full"
                 autoFocus
+                onKeyDown={expanded.handleKeyDown}
+                canPreview={isMobile}
+                onExpand={null}
+                // The text under a rule where the preview stands beside it, level with the preview's own
+                textClassName={cn(
+                  'min-h-[200px]',
+                  !isMobile && 'mt-1 border-t border-foreground/10'
+                )}
               />
             </div>
 
-            {/* The line between them, where they stand side by side */}
-            <div className="hidden md:block w-px bg-foreground/10 flex-shrink-0" />
-
-            {/* The preview, on the right */}
-            <div
-              className={cn(
-                'col-start-1 row-start-1 md:col-auto md:row-auto md:w-1/2 md:flex-shrink-0 md:max-h-[calc(90vh-8rem)] overflow-hidden flex flex-col',
-                isMobile && mobileModalView !== 'preview' && 'invisible',
-                !isMobile && 'md:block'
-              )}
-            >
-              <div className="h-full flex flex-col overflow-y-auto">
-                {/* Its heading, where the switcher above isn't already naming it */}
-                <div className="hidden md:block sticky top-0 z-10 px-4 pt-3 pb-2 bg-surface/80 text-xs text-muted uppercase tracking-wide font-medium">
+            {/* The preview beside the text, where there is room for both */}
+            {!isMobile && (
+              <div className="hidden md:flex md:w-1/2 md:flex-shrink-0 flex-col min-h-0 border-l border-foreground/10">
+                {/* The preview's heading, level with the toolbar */}
+                <div className="mt-1 flex h-7 shrink-0 items-center gap-1.5 px-3 text-xs text-muted">
+                  <Eye size={14} aria-hidden="true" />
                   {tEditor('preview')}
                 </div>
 
                 {/* What the text renders as */}
-                <div className="flex-1 px-4 py-3 text-sm text-muted-foreground leading-relaxed min-h-[200px] bg-surface-inset/50">
-                  {state.hasContent && (
-                    <RichMathEditorRenderer content={state.text} imageContext="userUploads" />
-                  )}
-                </div>
+                <RichMathEditorPreview
+                  content={text.state.text}
+                  className="mt-1 min-h-[200px] flex-1 overflow-y-auto border-t border-foreground/10"
+                />
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Footer */}
+          {/* Footer, under a rule where the preview stands beside the text */}
           <RichMathEditorFooter
-            variant="card"
-            borderless
-            modeConfig={{ mode: 'expanded' }}
-            charCount={state.metrics.charCount}
-            maxCharacters={state.maxCharacters}
-            imageCount={state.metrics.imageCount}
-            attachmentCount={state.metrics.attachmentCount}
-            onSend={() => {
-              onClose()
-              onSend?.()
-            }}
-            onCancel={
-              // Only wire a cancel when there's a real one to run; otherwise the footer X would just
-              // close the modal, duplicating the header's close button
-              onCancel
-                ? () => {
-                    onClose()
-
-                    // Closing only stepped back to the editor behind, so the cancel still has to run
-                    if (hasEditorBehind) {
-                      onCancel()
-                    }
-                  }
-                : undefined
-            }
+            state={text.state}
+            escapeCancels={expanded.isOnlyEditor}
             meta={footerMeta}
+            onSend={expanded.send}
+            onCancel={expanded.cancel}
             onStop={onStop}
-            isValid={state.isValid && canSend}
+            isSendable={text.isSendable}
             isLoading={isLoading}
+            className={cn(!isMobile && 'border-t border-foreground/10')}
           />
-        </div>
+        </RichMathEditorFrame>
       </div>
     </Modal>
   )

@@ -1,63 +1,53 @@
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import type { ReactNode } from 'react'
 
+import { FLOATING_PANEL_CLASS } from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
 
-import { preventFocusLoss } from '../utils/keyboard-utils'
+import { ToolbarButton, type ToolbarButtonProps } from './RichMathEditorToolbarButton'
 
 /**
  * Props for the {@link RichMathEditorPicker} component.
  */
-type RichMathEditorPickerProps = {
-  /** Content to display inside the trigger button */
-  triggerContent: ReactNode
-  /** Title/tooltip for the trigger button */
-  triggerTitle: string
-  /** Render prop children that receive close function for closing after selection */
-  children: (props: { close: () => void }) => ReactNode
-  /** Additional className for the popup container */
-  popupClassName?: string
+type RichMathEditorPickerProps = Required<Pick<ToolbarButtonProps, 'mark' | 'title' | 'isRow'>> & {
+  /**
+   * Renders what there is to pick from, given the function that closes the picker. Closing hands the
+   * cursor to the picker's button, so a pick closes it before handing anything over
+   */
+  children: (close: () => void) => ReactNode
+  /** Classes for the panel the picker opens */
+  popupClassName: string
 }
 
 /**
- * A reusable picker wrapper using Headless UI Popover.
+ * A tool of the editor's toolbar that opens a panel to pick from: its button, a square on the toolbar's
+ * row or a row of the overflow's list, and the panel it opens.
  */
 export function RichMathEditorPicker({
-  triggerContent,
-  triggerTitle,
+  mark,
+  title,
+  isRow,
   children,
   popupClassName,
 }: RichMathEditorPickerProps) {
+  // The button, and the panel it opens
   return (
     <Popover>
-      {({ open, close }) => (
-        <>
-          <PopoverButton
-            title={triggerTitle}
-            onMouseDown={preventFocusLoss}
-            className={cn(
-              'flex items-center gap-1.5 px-2 py-1 rounded transition-colors text-xs',
-              open
-                ? 'text-brand-light bg-brand/10'
-                : 'text-muted hover:text-foreground hover:bg-foreground/10'
-            )}
-          >
-            {triggerContent}
-          </PopoverButton>
+      {/* The button that opens the picker */}
+      <PopoverButton as={ToolbarButton} mark={mark} title={title} isRow={isRow} />
 
-          <PopoverPanel
-            anchor="bottom start"
-            transition
-            className={cn(
-              'z-floating mt-1 shadow-2xl border border-foreground/10 rounded-xl overflow-hidden',
-              'origin-top-left transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0',
-              popupClassName
-            )}
-          >
-            {children({ close })}
-          </PopoverPanel>
-        </>
-      )}
+      {/* What there is to pick from */}
+      <PopoverPanel
+        anchor={{ to: 'bottom start', gap: 4, padding: 8 }}
+        transition
+        className={cn(
+          FLOATING_PANEL_CLASS,
+          'origin-top-left transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0',
+          popupClassName
+        )}
+      >
+        {({ close }) => <>{children(() => close())}</>}
+      </PopoverPanel>
     </Popover>
   )
 }

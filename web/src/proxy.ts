@@ -18,19 +18,26 @@ const intlMiddleware = createMiddleware({
 /** Matches any locale-prefixed path under /dev/ (e.g. /en/dev/renderer-preview). */
 const DEV_ROUTE_PATTERN = /^\/(?:sk|cs|en)\/dev(?:\/|$)/
 
+/** Matches the app's own API routes (e.g. /api/files/upload-url). */
+const API_ROUTE_PATTERN = /^\/api(?:\/|$)/
+
 /**
  * Combined middleware: dev-route gate + Clerk auth + next-intl routing.
  *
- * Outside development, any `/<locale>/dev/...` URL is 404'd so internal preview
- * pages don't ship to production. In development the gate is bypassed and the
- * request flows through normal locale routing.
+ * Outside development, any `/<locale>/dev/...` URL answers 404, keeping internal
+ * preview pages unreachable in production and out of search indexes. In development
+ * the gate is bypassed and the request flows through normal locale routing.
  *
- * Clerk wraps the request so `auth()` works in server components, then
- * delegates to next-intl for locale handling.
+ * Clerk wraps the request so `auth()` works in server components and API routes. A page
+ * then goes on to next-intl for locale handling, which an API route has no part in.
  */
 export default clerkMiddleware(async (_auth, request) => {
-  // Block dev-only preview pages outside development — keeps internal previews
-  // out of production builds and search indexes
+  // An API route goes straight on to its handler, with no locale to route by
+  if (API_ROUTE_PATTERN.test(request.nextUrl.pathname)) {
+    return NextResponse.next()
+  }
+
+  // Dev-only preview pages answer 404 outside development
   if (process.env.NODE_ENV !== 'development' && DEV_ROUTE_PATTERN.test(request.nextUrl.pathname)) {
     return new NextResponse(null, { status: 404 })
   }
@@ -42,7 +49,9 @@ export default clerkMiddleware(async (_auth, request) => {
 /** Paths the middleware should run on. */
 export const config = {
   matcher: [
-    // Skip Next.js internals, static files (incl. robots.txt/sitemap.xml), and API routes
-    '/((?!_next|api|trpc|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|txt|xml|docx?|xlsx?|zip|webmanifest)).*)',
+    // Skip Next.js internals and static files (incl. robots.txt/sitemap.xml)
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|txt|xml|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes, whatever their path ends in
+    '/api(.*)',
   ],
 }

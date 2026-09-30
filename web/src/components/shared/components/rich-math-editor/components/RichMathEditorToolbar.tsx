@@ -1,21 +1,26 @@
 import {
   Bold,
+  Expand,
+  Eye,
   Heading3,
-  Image,
+  Image as ImageIcon,
   Italic,
   Link,
   List,
   ListOrdered,
   MessageSquareQuote,
   Paperclip,
+  Plus,
   SquareSlash,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import type { ComponentType } from 'react'
+import { Fragment, type ReactNode } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
+import { useRowOverflow } from '@/hooks/use-row-overflow'
 
+import { type UseEditorPreviewResult } from '../hooks/use-editor-preview'
 import {
   applyBold,
   applyBulletList,
@@ -32,196 +37,235 @@ import {
   insertSpoiler,
   type TransformLabels,
 } from '../utils/transforms'
-import {
-  type RichMathEditorVariant,
-  showsToolbarItem,
-  type ToolbarConfig,
-  type ToolbarItem,
-} from './RichMathEditor'
+import { showsToolbarItem, type ToolbarConfig, type ToolbarItem } from './RichMathEditor'
 import { RichMathEditorEmojiPicker } from './RichMathEditorEmojiPicker'
 import { RichMathEditorLaTeXSymbolPicker } from './RichMathEditorLaTeXSymbolPicker'
-import { RichMathEditorOverflowMenu } from './RichMathEditorOverflowMenu'
+import { RichMathEditorPicker } from './RichMathEditorPicker'
 import { ToolbarButton } from './RichMathEditorToolbarButton'
 
 /**
  * Props for the {@link RichMathEditorToolbar} component.
  */
 type RichMathEditorToolbarProps = {
-  /** Visual variant of the editor */
-  variant: RichMathEditorVariant
-  /** Which toolbar entries to show; every entry defaults to on */
-  config?: ToolbarConfig
-  /** When true, omits border styling (for use in containers that handle their own borders) */
-  borderless?: boolean
-  /** Function to apply a transform to the textarea content */
+  /** Which toolbar entries to show */
+  config: ToolbarConfig | undefined
+  /** The text's in-place preview, or null where the editor offers none */
+  preview: UseEditorPreviewResult | null
+  /** Opens the expanded editor, or null where there is none to open */
+  onExpand: (() => void) | null
+  /** Applies a transform to the text where the selection stands */
   onEdit: (transform: (context: EditContext) => EditResult) => void
-  /** Function to insert text directly at the cursor position (used for picker items) */
+  /** Writes text at the cursor, over any selection */
   onInsert: (text: string) => void
-  /** Callback triggered when the image picker button is clicked */
+  /** Opens the picker for an image to upload */
   onImageClick: () => void
-  /** Callback triggered when the attachment picker button is clicked */
+  /** Opens the picker for an attachment to upload */
   onAttachmentClick: () => void
 }
 
 /**
- * A toolbar entry in the wide-only group.
+ * A tool of the toolbar.
  */
-type WideToolbarItem = {
-  /** The icon shown for the entry. */
-  icon: ComponentType<{ size?: number }>
-  /** The entry's localized label / tooltip. */
-  label: string
-  /** Runs the entry's edit. */
-  onClick: () => void
+type ToolbarTool = {
+  /** The toolbar entry the tool stands for. */
+  item: ToolbarItem
+  /**
+   * Renders the tool. On the toolbar's row it takes null and is a square around its mark. Listed in the
+   * overflow it takes the function that closes the list, which it calls as it is used, and is a row
+   * reading its name.
+   */
+  render: (closeOverflow: (() => void) | null) => ReactNode
 }
 
 /**
- * A toolbar for the {@link RichMathEditor} component.
+ * Builds a tool that is pressed for one effect.
+ *
+ * @param item - The toolbar entry the tool stands for.
+ * @param mark - The icon the tool reads as, or the glyph it is written with.
+ * @param title - What the tool does.
+ * @param onUse - Runs the tool.
+ *
+ * @returns The tool.
+ */
+function pressTool(
+  item: ToolbarItem,
+  mark: ReactNode,
+  title: string,
+  onUse: () => void
+): ToolbarTool {
+  // A button on the row, or a row of the overflow's list
+  return {
+    item,
+    render: (closeOverflow) => (
+      <ToolbarButton
+        mark={mark}
+        title={title}
+        isRow={closeOverflow !== null}
+        onClick={() => {
+          // The list it was picked from, if any, goes first, since closing it moves the cursor to its
+          // control
+          closeOverflow?.()
+
+          // And the tool runs, one that edits the text taking the cursor back into it
+          onUse()
+        }}
+      />
+    ),
+  }
+}
+
+/**
+ * A toolbar for the rich math editor: its tools on one row, kept there at any width by
+ * {@link useRowOverflow}, and the ways of looking at the text beside them.
  */
 export function RichMathEditorToolbar({
-  variant,
   config,
-  borderless = false,
+  preview,
+  onExpand,
   onEdit,
   onInsert,
   onImageClick,
   onAttachmentClick,
 }: RichMathEditorToolbarProps) {
-  // Translations for editor
+  // Editor translations
   const tEditor = useTranslations('ui.editor')
 
-  // Whether a toolbar entry is shown (every entry defaults to on)
-  const shows = (item: ToolbarItem) => showsToolbarItem(config, item)
-
-  // Modifier key symbol (⌘ on Mac, Ctrl elsewhere)
+  // Whether the reader is on a Mac
   const { isMac } = useDeviceCapabilities()
+
+  // The modifier key's symbol (⌘ on Mac, Ctrl elsewhere)
   const modifier = isMac ? '⌘' : 'Ctrl'
 
-  // Build localized labels for transforms that insert text into the editor
+  // The localized words some tools write into the text
   const transformLabels: TransformLabels = {
     spoilerLabel: tEditor('hiddenText'),
     spoilerPlaceholder: tEditor('hiddenContentPlaceholder'),
     headingPlaceholder: tEditor('headingPlaceholder'),
   }
 
-  // The wide-only group, each entry present only when shown
-  const wideItems: (WideToolbarItem | false)[] = [
-    shows('numberedList') && {
-      icon: ListOrdered,
-      label: tEditor('numberedList'),
-      onClick: () => onEdit(applyNumberedList),
+  // Every tool there is, in the order they stand, which is also the order a narrowing toolbar holds on to
+  // them in
+  const everyTool: ToolbarTool[] = [
+    pressTool('bold', <Bold />, tEditor('bold', { modifier }), () => onEdit(applyBold)),
+    pressTool('italic', <Italic />, tEditor('italic', { modifier }), () => onEdit(applyItalic)),
+    pressTool('inlineMath', '$', tEditor('inlineMath', { modifier }), () =>
+      onEdit(applyInlineMath)
+    ),
+    pressTool('blockMath', '$$', tEditor('blockMath'), () => onEdit(insertBlockMath)),
+    {
+      item: 'symbols',
+      render: (closeOverflow) => (
+        <RichMathEditorLaTeXSymbolPicker
+          isRow={closeOverflow !== null}
+          onSymbolClick={(command, args) => {
+            // The list the picker was opened from, if any, goes first, as it does for a pressed tool
+            closeOverflow?.()
+
+            // And the symbol lands where the cursor stands
+            onEdit((context) => insertLatexCommand(context, command, args))
+          }}
+        />
+      ),
     },
-    shows('bulletList') && {
-      icon: List,
-      label: tEditor('bulletList'),
-      onClick: () => onEdit(applyBulletList),
+    pressTool('image', <ImageIcon />, tEditor('image'), onImageClick),
+    {
+      item: 'emoji',
+      render: (closeOverflow) => (
+        <RichMathEditorEmojiPicker
+          isRow={closeOverflow !== null}
+          onEmojiClick={(emoji) => {
+            // The list the picker was opened from, if any, goes first, as it does for a pressed tool
+            closeOverflow?.()
+
+            // And the emoji lands where the cursor stands
+            onInsert(emoji)
+          }}
+        />
+      ),
     },
-    shows('quote') && {
-      icon: MessageSquareQuote,
-      label: tEditor('quote'),
-      onClick: () => onEdit(applyQuote),
-    },
-    shows('heading') && {
-      icon: Heading3,
-      label: tEditor('heading'),
-      onClick: () => onEdit((context) => insertHeading(context, transformLabels)),
-    },
-    shows('link') && {
-      icon: Link,
-      label: tEditor('link', { modifier }),
-      onClick: () => onEdit(insertLink),
-    },
-    shows('spoiler') && {
-      icon: SquareSlash,
-      label: tEditor('spoiler'),
-      onClick: () => onEdit((context) => insertSpoiler(context, transformLabels)),
-    },
-    shows('attachment') && {
-      icon: Paperclip,
-      label: tEditor('attachment'),
-      onClick: onAttachmentClick,
-    },
+    pressTool('numberedList', <ListOrdered />, tEditor('numberedList'), () =>
+      onEdit(applyNumberedList)
+    ),
+    pressTool('bulletList', <List />, tEditor('bulletList'), () => onEdit(applyBulletList)),
+    pressTool('quote', <MessageSquareQuote />, tEditor('quote'), () => onEdit(applyQuote)),
+    pressTool('heading', <Heading3 />, tEditor('heading'), () =>
+      onEdit((context) => insertHeading(context, transformLabels))
+    ),
+    pressTool('link', <Link />, tEditor('link', { modifier }), () => onEdit(insertLink)),
+    pressTool('spoiler', <SquareSlash />, tEditor('spoiler'), () =>
+      onEdit((context) => insertSpoiler(context, transformLabels))
+    ),
+    pressTool('attachment', <Paperclip />, tEditor('attachment'), onAttachmentClick),
   ]
 
-  // Just the shown entries
-  const overflowItems = wideItems.filter((item): item is WideToolbarItem => item !== false)
+  // The tools this editor shows
+  const tools = everyTool.filter((tool) => showsToolbarItem(config, tool.item))
 
+  // How many tools the row has room for, and whether the controls beside it go down to their marks
+  const { attachRow, visibleCount, isNeighbourCompact } = useRowOverflow<HTMLDivElement>(
+    tools.length
+  )
+
+  // Whether the preview stands in for the text
+  const isPreviewShown = preview?.isShown ?? false
+
+  // The tools, then the ways of looking at the text
   return (
-    <div
-      className={cn(
-        '@container flex items-center gap-0.5 px-1 py-1 flex-wrap sticky top-0 z-10',
-        {
-          card: cn(
-            'bg-surface/50',
-            !borderless && 'rounded-t-lg border border-b-0 border-foreground/10'
-          ),
-          inline: 'pb-1',
-        }[variant]
-      )}
-    >
-      {/* Core formatting: Bold, Italic */}
-      {shows('bold') && (
-        <ToolbarButton
-          onClick={() => onEdit(applyBold)}
-          icon={Bold}
-          title={tEditor('bold', { modifier })}
-        />
-      )}
-      {shows('italic') && (
-        <ToolbarButton
-          onClick={() => onEdit(applyItalic)}
-          icon={Italic}
-          title={tEditor('italic', { modifier })}
-        />
-      )}
+    <div className="flex items-center gap-2 px-1 pt-1">
+      {/* The tools on their one row, set aside while the preview is up */}
+      <div
+        ref={attachRow}
+        // Nothing for the tools to act on while the preview stands in for the text
+        inert={isPreviewShown}
+        className={cn(
+          'flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden transition-opacity',
+          isPreviewShown && 'opacity-40'
+        )}
+      >
+        {/* The tools the row has room for */}
+        {tools.slice(0, visibleCount).map((tool) => (
+          <Fragment key={tool.item}>{tool.render(null)}</Fragment>
+        ))}
 
-      {/* Math: $, $$, and symbol picker */}
-      {shows('inlineMath') && (
-        <ToolbarButton
-          onClick={() => onEdit(applyInlineMath)}
-          text="$"
-          title={tEditor('inlineMath', { modifier })}
-        />
-      )}
-      {shows('blockMath') && (
-        <ToolbarButton
-          onClick={() => onEdit(insertBlockMath)}
-          text="$$"
-          title={tEditor('blockMath')}
-        />
-      )}
-      {shows('symbols') && (
-        <RichMathEditorLaTeXSymbolPicker
-          onSymbolClick={(command, args) =>
-            onEdit((context) => insertLatexCommand(context, command, args))
-          }
-        />
-      )}
+        {/* The tools the row has no room for, listed behind a control of their own */}
+        {visibleCount < tools.length && (
+          <RichMathEditorPicker
+            mark={<Plus />}
+            title={tEditor('moreOptions')}
+            isRow={false}
+            popupClassName="w-72 overflow-y-auto p-1"
+          >
+            {(close) =>
+              tools
+                .slice(visibleCount)
+                .map((tool) => <Fragment key={tool.item}>{tool.render(close)}</Fragment>)
+            }
+          </RichMathEditorPicker>
+        )}
+      </div>
 
-      {/* Wide-only group, shown when the container is wide enough */}
-      {overflowItems.length > 0 && (
-        <div className="hidden items-center gap-0.5 @[480px]:flex">
-          {overflowItems.map((item) => (
+      {/* The ways of looking at the text */}
+      {(preview || onExpand) && (
+        <div className="flex shrink-0 items-center gap-0.5">
+          {/* The switch between the text and its preview */}
+          {preview && (
             <ToolbarButton
-              key={item.label}
-              onClick={item.onClick}
-              icon={item.icon}
-              title={item.label}
-            />
-          ))}
-        </div>
-      )}
+              onClick={preview.toggle}
+              mark={<Eye />}
+              title={tEditor('preview')}
+              isPressed={preview.isShown}
+              disabled={!preview.isEnabled}
+            >
+              {!isNeighbourCompact && tEditor('preview')}
+            </ToolbarButton>
+          )}
 
-      {/* Image and emoji icons */}
-      {shows('image') && (
-        <ToolbarButton onClick={onImageClick} icon={Image} title={tEditor('image')} />
-      )}
-      {shows('emoji') && <RichMathEditorEmojiPicker onEmojiClick={onInsert} />}
-
-      {/* Overflow menu for the wide-only group on narrow containers */}
-      {overflowItems.length > 0 && (
-        <div className="@[480px]:hidden">
-          <RichMathEditorOverflowMenu items={overflowItems} />
+          {/* The control that opens the expanded editor */}
+          {onExpand && (
+            <ToolbarButton onClick={onExpand} mark={<Expand />} title={tEditor('expandEditor')}>
+              {!isNeighbourCompact && tEditor('expand')}
+            </ToolbarButton>
+          )}
         </div>
       )}
     </div>

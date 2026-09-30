@@ -1,25 +1,24 @@
 import { isUrl } from '@/components/shared/utils/string-utils'
 
-import { type FileUploadParams, type FileValid, handleFileUpload } from './attachment-utils'
 import { createMarkdownLink, type EditContext, type EditResult } from './transforms'
 
-/** Action to replace content with an image upload */
+/** Action to upload the image a paste carries */
 type PasteImageAction = {
   /** Discriminator */
   type: 'image'
-  /** The result of the file upload initiation */
-  result: FileValid
+  /** The pasted image */
+  file: File
 }
 
 /** Action to replace selection with a markdown link */
 type PasteLinkAction = {
   /** Discriminator */
   type: 'link'
-  /** The result of the text edit operation creating the link */
+  /** The edit wrapping the selection in a link to the pasted URL */
   result: EditResult
 }
 
-/** Default action - let the browser handle the paste natively */
+/** The browser's own paste */
 type PasteDefaultAction = {
   /** Discriminator */
   type: 'default'
@@ -31,56 +30,33 @@ type PasteDefaultAction = {
 type PasteAction = PasteImageAction | PasteLinkAction | PasteDefaultAction
 
 /**
- * Common parameters for paste handling.
+ * The paste and the editor it lands in.
  */
 type PasteHandlerParams = {
-  /** Clipboard data from the paste event */
+  /** What the paste carries */
   clipboardData: DataTransfer
-  /** Current editor context (selection, full text) */
+  /** The selection the paste lands on, and the text around it */
   context: EditContext
-  /** Current scroll position of the textarea */
-  scrollTop: number
   /** Whether an image in the clipboard may be uploaded */
   allowImageUpload: boolean
-  /** Callback to update editor content */
-  onChange: FileUploadParams['onChange']
-  /** Callback to push new state to history */
-  pushState: FileUploadParams['pushState']
-  /** Callback to get fresh textarea state during async ops */
-  getTextareaState: FileUploadParams['getTextareaState']
-  /** Translation function for UI strings */
-  tEditor: FileUploadParams['tEditor']
-  /** Translation function for API errors */
-  tApiErrors: FileUploadParams['tApiErrors']
 }
 
 /**
- * Processes a paste event and returns the appropriate action.
+ * Works out what a paste into the text comes to, checked in this order:
  *
- * Handles three cases:
+ * - Image paste (screenshot) → the image to upload
+ * - URL paste over selected text → creates markdown link
+ * - Default → let browser handle normal paste
  *
- * 1. Image paste (screenshot) → uploads image with placeholder
- * 2. URL paste over selected text → creates markdown link
- * 3. Default → let browser handle normal paste
- *
- * @param params - Parameters for paste handling
+ * @param params - The paste and the editor it lands in
  *
  * @returns The appropriate action for the paste event
  */
 export function processPaste({
   clipboardData,
   context,
-  scrollTop,
   allowImageUpload,
-  onChange,
-  pushState,
-  getTextareaState,
-  tEditor,
-  tApiErrors,
 }: PasteHandlerParams): PasteAction {
-  // Get text area context data
-  const { start, selectedText } = context
-
   // Check for the first image in clipboard (screenshot paste)
   const items = Array.from(clipboardData.items)
   const imageItem = items.find((item) => item.type.startsWith('image/'))
@@ -88,38 +64,23 @@ export function processPaste({
   // If image is found and this editor takes image uploads...
   if (imageItem && allowImageUpload) {
     // ...try to get the image file
-    const blob = imageItem.getAsFile()
+    const file = imageItem.getAsFile()
 
-    // If file is extracted...
-    if (blob) {
-      // Upload with translated filename
-      const url = handleFileUpload({
-        file: blob,
-        filename: tEditor('pastedImage'),
-        currentText: context.fullText,
-        selectionStart: start,
-        scrollTop,
-        onChange,
-        pushState,
-        getTextareaState,
-        tEditor,
-        tApiErrors,
-      })
-
-      // Return the new state
-      return { type: 'image', result: url }
+    // If file is extracted, it is the one to upload
+    if (file) {
+      return { type: 'image', file }
     }
   }
 
-  // Check for URL paste over selected text
+  // The pasted text
   const pastedText = clipboardData.getData('text/plain')
 
   // If URL is found over selected text...
-  if (selectedText && isUrl(pastedText)) {
-    // ...create a markdown link for that text
+  if (context.selectedText && isUrl(pastedText)) {
+    // ...the edit wrapping the selected text in a link to the URL
     const result = createMarkdownLink(context, pastedText)
 
-    // Return the new state
+    // The paste becomes a link
     return { type: 'link', result }
   }
 

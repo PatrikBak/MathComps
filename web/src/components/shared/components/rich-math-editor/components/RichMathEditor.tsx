@@ -1,22 +1,23 @@
 'use client'
 
-import { Resizable } from 're-resizable'
 import type { FocusEvent, ReactNode } from 'react'
-import { useEffect, useImperativeHandle, useMemo, useState } from 'react'
+import { useImperativeHandle, useMemo } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
-import { useIsMobile } from '@/hooks/use-breakpoint'
 
-import { useEditorModel } from '../hooks/use-editor-model'
+import { useEditorKeyboard } from '../hooks/use-editor-keyboard'
+import { useEditorText } from '../hooks/use-editor-text'
+import { useEditorUploads } from '../hooks/use-editor-uploads'
+import { useExpandedEditor } from '../hooks/use-expanded-editor'
 import { RichMathEditorFooter } from './RichMathEditorFooter'
-import { RichMathEditorInputArea } from './RichMathEditorInputArea'
+import { RichMathEditorFrame } from './RichMathEditorFrame'
 import { RichMathEditorExpandedModal } from './RichMathEditorModal'
-import { RichMathEditorToolbar } from './RichMathEditorToolbar'
+import { RichMathEditorPane } from './RichMathEditorPane'
 
 /**
- * Visual variants for the RichMathEditor.
- * - 'card': Default card-style with background and borders (for modals/cards)
- * - 'inline': Minimal styling that blends with page content (for handouts)
+ * Visual variants for the {@link RichMathEditor}, each a fill, or none, for the frame its parts sit in.
+ * - 'card': a card-style fill
+ * - 'inline': no fill of its own, the page showing through
  */
 export type RichMathEditorVariant = 'card' | 'inline'
 
@@ -40,13 +41,12 @@ export type ToolbarItem =
   | 'emoji'
 
 /**
- * Which toolbar entries an editor shows. Every entry defaults to on, so an omitted or partial config
- * leaves the full toolbar in place; set an entry to `false` to hide it.
+ * Which toolbar entries an editor shows: every entry is on unless set to `false`.
  */
 export type ToolbarConfig = Partial<Record<ToolbarItem, boolean>>
 
 /**
- * Whether a toolbar entry is shown under a config, every entry defaulting to on.
+ * Whether a toolbar entry is shown under a config.
  *
  * @param config - The editor's toolbar config, if any.
  * @param item - The entry to check.
@@ -72,11 +72,11 @@ export type RichMathEditorRef = {
 type RichMathEditorProps = {
   /** Visual variant of the editor */
   variant?: RichMathEditorVariant
-  /** Which toolbar entries to show; every entry defaults to on */
+  /** Which toolbar entries to show */
   toolbar?: ToolbarConfig
   /** The editor's minimum height in px */
   minHeightPx?: number
-  /** The most characters the content may hold, or null while the limit in force is not known */
+  /** The most characters the content may hold, or null for no limit */
   maxCharacters: number | null
   /** Current text value */
   value: string
@@ -92,31 +92,30 @@ type RichMathEditorProps = {
   autoFocus?: boolean
   /** Additional className for the wrapper */
   className?: string
-  /** Callback when the content validity changes */
-  onValidChange?: (isValid: boolean) => void
-  /** Callback when send button is clicked (shows send button when provided) */
+  /** Sends the draft, from the send button or ⌘/Ctrl+Enter; the button shows only where this is given */
   onSend?: () => void
-  /** Whether a send is currently allowed; the editor's own validity gates on top of it */
+  /**
+   * Whether the surface allows a send now; the editor's own validity and a send in flight gate on top
+   * of it
+   */
   canSend?: boolean
-  /** Callback when cancel button is clicked (shows cancel button when provided) */
+  /** Cancels the editor, from the cancel button beside the send or from Escape */
   onCancel?: () => void
-  /** Callback that stops the in-flight submit. */
+  /** Callback that stops the in-flight submit */
   onStop?: () => void
-  /** Auto-expand to modal on mobile (for replies on small screens) */
+  /** Whether a phone opens the editor straight into its expanded view, with no inline one under it */
   autoExpandOnMobile?: boolean
   /** Whether the editor is in a loading state (e.g. sending) */
   isLoading?: boolean
-  /**
-   * What the surface using the editor counts of its own, shown in the footer beside the draft's
-   * counters
-   */
+  /** What the surface using the editor counts of its own */
   footerMeta?: ReactNode
   /** Handle onto the editor's imperative controls */
   ref?: React.Ref<RichMathEditorRef>
 }
 
 /**
- * A Markdown-based editor with an expanded view with a preview.
+ * A Markdown editor for writing with math, with a preview of what the text renders as: in place of the
+ * text, or beside it in an expanded view.
  */
 export function RichMathEditor({
   variant = 'card',
@@ -130,178 +129,104 @@ export function RichMathEditor({
   placeholder = '',
   autoFocus = false,
   className,
-  onValidChange,
   onSend,
   canSend = true,
   onCancel,
   onStop,
-  autoExpandOnMobile,
+  autoExpandOnMobile = false,
   isLoading = false,
   footerMeta,
   ref,
 }: RichMathEditorProps) {
-  // The limits the model measures the content against, held stable so it rebuilds its state only when the
-  // text or a limit actually changes
+  // The limits the text is held to, the same object until a limit changes
   const config = useMemo(() => ({ maxCharacters }), [maxCharacters])
 
-  // All the logic is in the view-model and provided to the view
-  const viewModel = useEditorModel({ value, onChange, onSend, canSend, onCancel, config })
-  const {
-    state,
-    textareaRef,
-    attachInputArea,
-    applyTransform,
-    insertAtCursor,
-    openImagePicker,
-    openAttachmentPicker,
-    handleChange,
-    handleKeyDown,
-  } = viewModel
+  // The text, what it measures up to and the edits it takes. No send may go while one is on its way
+  const text = useEditorText({ value, onChange, canSend: canSend && !isLoading, config })
+
+  // The keys the text answers
+  const { handleKeyDown } = useEditorKeyboard({ text, onSend, onCancel })
+
+  // The ways content other than typing reaches the text, taking only the files its toolbar offers
+  const uploads = useEditorUploads({
+    text,
+    allowImageUpload: showsToolbarItem(toolbar, 'image'),
+    allowAttachmentUpload: showsToolbarItem(toolbar, 'attachment'),
+  })
 
   // Hand the caller the cursor on demand; autoFocus only offers it at mount
-  useImperativeHandle(ref, () => ({ focus: () => textareaRef.current?.focus() }), [textareaRef])
+  useImperativeHandle(ref, () => ({ focus: () => text.textareaRef.current?.focus() }), [
+    text.textareaRef,
+  ])
 
-  // Track modal state
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
-  // Check if we are on mobile where we might want to expand to modal
-  const isMobile = useIsMobile()
-
-  // Auto-expand to modal on mobile
-  useEffect(() => {
-    if (autoExpandOnMobile && isMobile) {
-      setIsModalOpen(true)
-    }
-  }, [autoExpandOnMobile, isMobile])
-
-  // Notify parent of validity changes
-  useEffect(() => {
-    onValidChange?.(state.isValid)
-  }, [state.isValid, onValidChange])
-
-  // Whether we're in mobile modal-only mode (no inline content)
-  const isMobileModalOnly = autoExpandOnMobile && isMobile
+  // The expanded view
+  const expanded = useExpandedEditor({ text, autoExpandOnMobile, onSend, onCancel })
 
   /**
-   * A function which closes the expanded modal.
+   * A function which reports focus leaving the inline editor. Focus moving from the text field to a
+   * toolbar button is still inside it, so only focus landing outside counts.
    *
-   * Where the modal is the only editor, closing it is the reader putting the editor away, which is the
-   * surface's own cancel.
-   */
-  const closeModal = () => {
-    // Down to the editor underneath
-    setIsModalOpen(false)
-
-    // With no editor underneath, the whole thing is away
-    if (isMobileModalOnly) {
-      onCancel?.()
-    }
-  }
-
-  // Whether this editor accepts image / attachment uploads
-  const allowImageUpload = showsToolbarItem(toolbar, 'image')
-  const allowAttachmentUpload = showsToolbarItem(toolbar, 'attachment')
-
-  /**
-   * A function which reports focus leaving the editor. Focus moving from the text field to a toolbar button is
-   * still inside it, so only focus landing outside counts.
-   *
-   * @param event - The focus leaving one of the editor's parts.
+   * @param event - The focus leaving one of the inline editor's parts.
    */
   const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
-    // Still somewhere inside the editor
+    // Focus still somewhere inside the inline editor
     if (event.currentTarget.contains(event.relatedTarget)) return
 
-    // Focus has left the editor
+    // Focus has left the inline editor
     onBlur?.()
   }
 
+  // The inline editor, and the expanded view it opens into
   return (
     <>
-      {/* The inline editor, absent on mobile in modal-only mode */}
-      {!isMobileModalOnly && (
+      {/* The inline editor, absent where the expanded view is the whole editor */}
+      {!expanded.isOnlyEditor && (
         <div className={cn('flex-1 flex flex-col w-full max-w-4xl', className)} onBlur={handleBlur}>
-          <Resizable
-            defaultSize={{ width: '100%', height: 'auto' }}
-            minHeight={minHeightPx}
-            enable={{
-              top: false,
-              right: false,
-              bottom: true,
-              left: false,
-              topRight: false,
-              bottomRight: false,
-              bottomLeft: false,
-              topLeft: false,
-            }}
-            handleComponent={{
-              bottom: (
-                <div className="relative w-full h-1.5 cursor-ns-resize group/resizer flex justify-center -mb-1">
-                  <div className="w-12 h-1 bg-foreground/10 rounded-full transition-colors group-hover/resizer:bg-brand/50 mt-0.5" />
-                </div>
-              ),
-            }}
-            className="flex flex-col relative"
+          <RichMathEditorFrame
+            variant={variant}
+            minHeightPx={minHeightPx}
+            opensTall={false}
+            resizeRatio={1}
           >
-            {/* Toolbar */}
-            <RichMathEditorToolbar
-              variant={variant}
-              config={toolbar}
-              onEdit={applyTransform}
-              onInsert={insertAtCursor}
-              onImageClick={openImagePicker}
-              onAttachmentClick={openAttachmentPicker}
-            />
-
-            {/* Editor input area */}
-            <RichMathEditorInputArea
-              variant={variant}
-              ref={attachInputArea}
-              viewModel={viewModel}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
+            {/* Toolbar and text */}
+            <RichMathEditorPane
+              text={text}
+              uploads={uploads}
+              toolbarConfig={toolbar}
               id={id}
               placeholder={placeholder}
               autoFocus={autoFocus}
-              allowImageUpload={allowImageUpload}
-              allowAttachmentUpload={allowAttachmentUpload}
-              containerClassName="flex-1 min-h-0"
-              className="h-full rounded-b-none"
+              onKeyDown={handleKeyDown}
+              canPreview
+              onExpand={expanded.open}
             />
 
             {/* Footer bar */}
             <RichMathEditorFooter
-              variant={variant}
-              modeConfig={{ mode: 'inline', onExpand: () => setIsModalOpen(true) }}
-              charCount={state.metrics.charCount}
-              maxCharacters={state.maxCharacters}
-              imageCount={state.metrics.imageCount}
-              attachmentCount={state.metrics.attachmentCount}
+              state={text.state}
+              escapeCancels
               meta={footerMeta}
               onSend={onSend}
               onCancel={onCancel}
               onStop={onStop}
-              isValid={state.isValid && canSend}
+              isSendable={text.isSendable}
               isLoading={isLoading}
             />
-          </Resizable>
+          </RichMathEditorFrame>
         </div>
       )}
 
-      {/* The expanded modal, always mounted so its portal works */}
+      {/* The expanded view, mounted throughout so it can say when it has closed */}
       <RichMathEditorExpandedModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        // The dialog hands focus back to the button that opened it, which is the footer's expand control,
-        // so the editor has to ask for the cursor itself once its own textarea is the one on screen again
-        onClosed={() => textareaRef.current?.focus()}
-        hasEditorBehind={!isMobileModalOnly}
-        viewModel={viewModel}
+        expanded={expanded}
+        // The dialog hands focus back to what had it before it opened, which can be the toolbar's expand
+        // control, so the editor has to ask for the cursor itself once its own textarea is the one on screen
+        // again
+        onClosed={() => text.textareaRef.current?.focus()}
+        text={text}
+        uploads={uploads}
         toolbarConfig={toolbar}
         placeholder={placeholder}
-        onSend={onSend}
-        canSend={canSend}
-        onCancel={onCancel}
         onStop={onStop}
         isLoading={isLoading}
         footerMeta={footerMeta}
