@@ -161,6 +161,8 @@ export function DefenseComposer({
           variant="card"
           toolbar={DEFENSE_TOOLBAR}
           maxCharacters={maxCharacters}
+          // Nothing sends until the caps are known, there being nothing to hold the turn to before then
+          canSend={maxCharacters !== null}
           value={draft}
           onChange={onDraftChange}
           onSend={onSend}
@@ -176,7 +178,7 @@ export function DefenseComposer({
                 icon={MessageSquare}
                 count={maxMessages - state.messagesLeft}
                 max={maxMessages}
-                isOver={state.messagesLeft <= MESSAGES_LEFT_TO_ALARM_AT}
+                isSpent={state.messagesLeft <= MESSAGES_LEFT_TO_ALARM_AT}
                 isNear={state.messagesLeft <= MESSAGES_LEFT_TO_WARN_AT}
                 title={t('messagesLeft', { count: state.messagesLeft })}
                 tabular

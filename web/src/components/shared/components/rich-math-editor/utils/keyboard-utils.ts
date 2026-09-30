@@ -11,18 +11,18 @@ import {
 } from './transforms'
 
 /**
- * A formatting shortcut was applied (bold, italic, code, etc.).
- * The result contains the new text and cursor position.
+ * A key answered with an edit: a formatting shortcut (bold, italic, code, etc.), or Enter carrying on
+ * or ending a list or quote.
  */
 type HandledAction = {
-  /** Discriminator for formatting actions */
+  /** Discriminator for a key answered with an edit */
   type: 'handled'
-  /** The edit result with new text and cursor position */
+  /** The edit the key comes to */
   result: EditResult
 }
 
 /**
- * Ctrl+Z was pressed, trigger undo from the history stack.
+ * A key asking to undo the last edit: ⌘/Ctrl+Z.
  */
 type UndoAction = {
   /** Discriminator for undo */
@@ -30,7 +30,7 @@ type UndoAction = {
 }
 
 /**
- * Ctrl+Y or Ctrl+Shift+Z was pressed, trigger redo from the history stack.
+ * A key asking to redo the last undone edit: ⌘/Ctrl+Y or ⌘/Ctrl+Shift+Z.
  */
 type RedoAction = {
   /** Discriminator for redo */
@@ -38,7 +38,7 @@ type RedoAction = {
 }
 
 /**
- * No keyboard shortcut matched, let the browser handle the event normally.
+ * A key none of the shortcuts answer.
  */
 type PassthroughAction = {
   /** Discriminator for passthrough */
@@ -51,56 +51,60 @@ type PassthroughAction = {
 type KeyboardAction = HandledAction | UndoAction | RedoAction | PassthroughAction
 
 /**
- * Processes keyboard shortcuts for text formatting.
+ * Works out what a key pressed in the text comes to: a formatting edit, Enter carrying on or ending a
+ * list or quote, undo, redo, or passing through.
  *
  * @param event - The keyboard event
- * @param context - The current edit context (cursor position, selection, text)
+ * @param context - The selection and the text it sits in
+ *
  * @returns The action to take based on the keyboard input
  */
 export function processKeyboardShortcut(
   event: React.KeyboardEvent<HTMLTextAreaElement>,
   context: EditContext
 ): KeyboardAction {
-  // Extract keyboard state. metaKey covers Cmd on Mac so that Mac users get the
-  // platform-native modifier alongside Ctrl on Windows/Linux.
+  // The key pressed and the modifiers held with it. Meta is ⌘ on a Mac, taken everywhere alongside Ctrl
   const { key, ctrlKey, metaKey, shiftKey, altKey } = event
 
-  // Handle Enter key for smart list continuation
-  if (key === 'Enter' && !shiftKey && !ctrlKey && !altKey) {
-    // A helper function will handle this and return whether
-    // any list continuation was performed
+  // A bare Enter, no modifier held, carries on or ends a list or quote
+  if (key === 'Enter' && !shiftKey && !ctrlKey && !metaKey && !altKey) {
+    // The edit Enter makes on a list or quote line, null on any other
     const result = handleListContinuation(context)
 
-    // If yeah, return the new result of the text area
+    // Enter on a list or quote line comes to that edit
     if (result) {
       return { type: 'handled', result }
     }
 
-    // Otherwise, let the browser handle the event normally
+    // Otherwise Enter writes a new line of its own
     return { type: 'passthrough' }
   }
 
+  // The letter pressed, whichever case it arrives in: Shift held with Ctrl names it in upper case, and so
+  // does Caps Lock
+  const letter = key.toLowerCase()
+
   // Handle Ctrl/Cmd+Z (Undo)
-  if ((ctrlKey || metaKey) && key === 'z' && !shiftKey) {
+  if ((ctrlKey || metaKey) && letter === 'z' && !shiftKey) {
     return { type: 'undo' }
   }
 
   // Handle Ctrl/Cmd+Y or Ctrl/Cmd+Shift+Z (Redo)
-  if (((ctrlKey || metaKey) && key === 'y') || ((ctrlKey || metaKey) && shiftKey && key === 'z')) {
+  if ((ctrlKey || metaKey) && (letter === 'y' || (shiftKey && letter === 'z'))) {
     return { type: 'redo' }
   }
 
   // Keyboard shortcuts for formatting (Ctrl/Cmd+Shift combos)
   if ((ctrlKey || metaKey) && shiftKey && !altKey) {
-    switch (key.toLowerCase()) {
-      case 'c': // Inline Code (Ctrl+Shift+C)
+    switch (letter) {
+      case 'c': // Inline Code (Ctrl/Cmd+Shift+C)
         return { type: 'handled', result: applyInlineCode(context) }
     }
   }
 
   // Keyboard shortcuts for formatting (Ctrl/Cmd only)
   if ((ctrlKey || metaKey) && !shiftKey && !altKey) {
-    switch (key.toLowerCase()) {
+    switch (letter) {
       case 'b': // Bold
         return { type: 'handled', result: applyBold(context) }
       case 'i': // Italic
@@ -114,16 +118,6 @@ export function processKeyboardShortcut(
     }
   }
 
-  // If no keyboard shortcut was matched, let the browser handle the event normally
+  // Any other key passes through
   return { type: 'passthrough' }
-}
-
-/**
- * Prevents default mouse down behavior to maintain focus on the textarea.
- * Use as `onMouseDown={preventFocusLoss}` on toolbar buttons, pickers, etc.
- *
- * @param event - The mouse event
- */
-export function preventFocusLoss(event: React.MouseEvent) {
-  event.preventDefault()
 }

@@ -1268,12 +1268,11 @@
           "symbols": "Symbols",
           "travel": "Travel & Places"
         },
-        "searchPlaceholder": "Search emoji...",
         "title": "Emoji"
       },
+      "expand": "Expand",
       "expandedEditor": "Expanded editor",
       "expandEditor": "Expand editor with preview",
-      "expandWithPreview": "Expand + Preview",
       "fileTooLarge": "File is too large. Maximum: {max} MB",
       "heading": "Heading",
       "headingPlaceholder": "Heading",

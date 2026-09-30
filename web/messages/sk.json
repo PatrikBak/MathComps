@@ -1268,12 +1268,11 @@
           "symbols": "Symboly",
           "travel": "Cestovanie a miesta"
         },
-        "searchPlaceholder": "Hľadať smajlíka...",
         "title": "Smajlík"
       },
+      "expand": "Rozšíriť",
       "expandedEditor": "Rozšírený editor",
       "expandEditor": "Rozšíriť editor s náhľadom",
-      "expandWithPreview": "Rozšíriť + Náhľad",
       "fileTooLarge": "Súbor je príliš veľký. Maximum: {max} MB",
       "heading": "Nadpis",
       "headingPlaceholder": "Nadpis",

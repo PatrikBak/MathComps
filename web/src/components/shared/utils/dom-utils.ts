@@ -1,18 +1,74 @@
+import type { MouseEvent } from 'react'
+
 /**
- * Forces the browser to scroll the textarea so the caret is visible.
+ * Scrolls a textarea just far enough for its caret to be in its view, and not at all where it already is.
  *
- * This works by blurring and immediately re-focusing the element,
- * which triggers the browser's native scroll-to-caret behavior.
+ * A textarea says nothing about where its caret sits, so the depth is read off a copy of it holding the
+ * text up to the caret: with no height of its own, the copy stands as tall as the caret is deep plus the
+ * padding under the text.
  *
- * Use this after programmatically changing the cursor position
- * (e.g., after inserting text or restoring from history) to ensure
- * the user can see where they're typing.
+ * Use this after placing the cursor from code, which a browser does not always follow with its view.
  *
- * @param textarea - The textarea element to affect.
+ * @param textarea - The textarea whose caret should show.
  */
 export function ensureVisibleCaret(textarea: HTMLTextAreaElement): void {
-  textarea.blur()
-  textarea.focus()
+  // Where the word under the caret ends, since a word cut short could wrap onto another line than the
+  // whole one does
+  const { value, selectionEnd } = textarea
+  const wordEnd = selectionEnd + value.slice(selectionEnd).search(/\s|$/)
+
+  // A copy of the textarea, holding its text up to the end of the caret's word
+  const copy = textarea.cloneNode() as HTMLTextAreaElement
+  copy.value = value.slice(0, wordEnd)
+
+  // The copy goes by no id, the page already having an element of that one
+  copy.removeAttribute('id')
+
+  // The copy stands out of sight with no height of its own, exactly as wide as the original's text is
+  // given
+  Object.assign(copy.style, {
+    position: 'absolute',
+    visibility: 'hidden',
+    boxSizing: 'border-box',
+    border: '0',
+    overflow: 'hidden',
+    width: `${textarea.clientWidth}px`,
+    height: '0',
+    minHeight: '0',
+  })
+
+  // The copy laid out beside the textarea
+  textarea.after(copy)
+
+  // How deep the caret's line reaches, the padding under the text included
+  const caretBottom = copy.scrollHeight
+
+  // The copy gone again, once measured
+  copy.remove()
+
+  // The caret's line starts one line above where it ends, the padding around the text set aside
+  const { lineHeight, paddingTop, paddingBottom } = getComputedStyle(textarea)
+  const caretTop =
+    caretBottom - parseFloat(lineHeight) - parseFloat(paddingTop) - parseFloat(paddingBottom)
+
+  // A caret under the view comes up to its bottom edge
+  if (caretBottom > textarea.scrollTop + textarea.clientHeight) {
+    textarea.scrollTop = caretBottom - textarea.clientHeight
+  }
+  // A caret over the view comes down to its top edge
+  else if (caretTop < textarea.scrollTop) {
+    textarea.scrollTop = caretTop
+  }
+}
+
+/**
+ * Keeps the cursor where it is as a control is pressed. Goes on the control's `onMouseDown`.
+ *
+ * @param event - The press.
+ */
+export function preventFocusLoss(event: MouseEvent) {
+  // The press moves no focus
+  event.preventDefault()
 }
 
 /**
@@ -46,6 +102,6 @@ export function dataAttribute<TName extends `data-${string}`>(name: TName): Data
   // The selector matching every element carrying the attribute
   const anySelector = `[${name}]`
 
-  // The ways to stamp it and to find by it
+  // The ways to stamp the attribute and to find by it
   return { stamp, selectorFor, anySelector }
 }

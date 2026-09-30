@@ -44,10 +44,6 @@ type HistoryManagerConfig = {
  * methods to navigate through them. It implements debouncing to avoid
  * creating excessive history entries during rapid typing.
  *
- * This class should be instantiated via `useRef` since it maintains internal
- * state that doesn't need to trigger React re-renders. The consuming hook
- * is responsible for updating React state when undo/redo is performed.
- *
  * @see {@link HistoryEntry} for the structure of each history entry
  * @see {@link HistoryManagerConfig} for configuration options
  */

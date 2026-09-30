@@ -1,4 +1,4 @@
-import { CornerDownLeft, Expand, Eye, Image, Paperclip, Square, Type, X } from 'lucide-react'
+import { CornerDownLeft, Image, type LucideIcon, Paperclip, Square, Type, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
@@ -7,21 +7,20 @@ import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
 
-import { MAX_EDITOR_ATTACHMENTS, MAX_EDITOR_IMAGES } from '../utils/attachment-utils'
-import type { RichMathEditorVariant } from './RichMathEditor'
+import { type EditorState } from '../model/EditorState'
 
 /**
  * Props for the {@link CounterBadge} component.
  */
 type CounterBadgeProps = {
-  /** Icon component to display */
-  icon: React.ComponentType<{ size: number }>
+  /** The icon of what the badge counts */
+  icon: LucideIcon
   /** Current count value */
   count: number
   /** Maximum allowed value */
   max: number
-  /** Whether the count has reached the point it reads as spent */
-  isOver: boolean
+  /** Whether the count reads as spent */
+  isSpent: boolean
   /** Whether the count is approaching the limit */
   isNear: boolean
   /** Tooltip text for the badge */
@@ -31,24 +30,25 @@ type CounterBadgeProps = {
 }
 
 /**
- * Badge component displaying a count with an icon.
- * Automatically colors based on proximity to limit.
+ * A count against its limit beside the icon of what it counts, coloured by how close to the limit it
+ * stands.
  */
 export function CounterBadge({
   icon: Icon,
   count,
   max,
-  isOver,
+  isSpent,
   isNear,
   title,
   tabular = false,
 }: CounterBadgeProps) {
+  // The count against its limit, coloured as it closes in
   return (
     <span
       className={cn(
         'flex items-center gap-1 transition-colors',
         tabular && 'tabular-nums',
-        isOver ? 'text-error font-medium' : isNear ? 'text-warning' : 'text-muted'
+        isSpent ? 'text-error font-medium' : isNear ? 'text-warning' : 'text-muted'
       )}
       title={title}
     >
@@ -61,200 +61,124 @@ export function CounterBadge({
 }
 
 /**
- * Mode configuration for the inline editor view.
- * Shows an expand button to open the modal view.
- */
-type InlineModeConfig = {
-  /** The discriminator */
-  mode: 'inline'
-  /** Callback to expand the editor to a modal */
-  onExpand?: () => void
-}
-
-/**
- * Mode configuration for the expanded modal view.
- */
-type ExpandedModeConfig = {
-  /** The discriminator */
-  mode: 'expanded'
-}
-
-/**
- * Discriminated union for mode-specific configuration.
- */
-type ModeConfig = InlineModeConfig | ExpandedModeConfig
-
-/**
  * Props for the {@link RichMathEditorFooter} component.
  */
 type RichMathEditorFooterProps = {
-  /** Visual variant of the editor */
-  variant: RichMathEditorVariant
-  /** When true, omits border styling (for use in containers that handle their own borders) */
-  borderless?: boolean
-  /** Mode-specific configuration (inline or expanded) */
-  modeConfig: ModeConfig
-  /** Current number of characters in the editor */
-  charCount: number
-  /** The most characters the content may hold, or null while the limit in force is not known */
-  maxCharacters: number | null
-  /** Current number of uploaded images */
-  imageCount: number
-  /** Current number of uploaded file attachments */
-  attachmentCount: number
-  /** What the surface counts of its own, shown beside the draft's counters. */
+  /** The draft's state */
+  state: EditorState
+  /** Whether Escape runs the cancel, which the cancel's tooltip then names */
+  escapeCancels: boolean
+  /** What the surface counts of its own, shown beside the draft's counters */
   meta: ReactNode
-  /** Callback triggered when the send button is clicked */
-  onSend?: () => void
+  /**
+   * Callback triggered when the send button is clicked. The action buttons, cancel included, show only
+   * where it is given
+   */
+  onSend: (() => void) | undefined
   /** Callback triggered when the cancel button is clicked */
-  onCancel?: () => void
-  /** Callback that stops the in-flight submit. */
-  onStop?: () => void
-  /** Whether the content is valid and the send button should be enabled */
-  isValid: boolean
-  /** Whether the editor is in a loading state */
-  isLoading?: boolean
+  onCancel: (() => void) | undefined
+  /** Callback that stops the in-flight submit */
+  onStop: (() => void) | undefined
+  /** Whether the draft can be sent now */
+  isSendable: boolean
+  /** Whether a submit is in flight */
+  isLoading: boolean
+  /** Classes for where the footer stands */
+  className?: string
 }
 
 /**
- * Footer component for the rich math editor.
- * Displays character and attachment counters, and action buttons.
+ * The editor's footer: its counters beside its cancel and send controls, and nothing at all where it has
+ * neither to show.
  */
 export function RichMathEditorFooter({
-  variant,
-  borderless = false,
-  modeConfig,
-  charCount,
-  maxCharacters,
-  imageCount,
-  attachmentCount,
+  state,
+  escapeCancels,
   meta,
   onSend,
   onCancel,
   onStop,
-  isValid,
-  isLoading = false,
+  isSendable,
+  isLoading,
+  className,
 }: RichMathEditorFooterProps) {
-  // Get translations
+  // Editor translations
   const tEditor = useTranslations('ui.editor')
 
-  // The labels every shared control reads under
+  // Shared action labels
   const tActions = useTranslations('ui.actions')
 
   // Whether the in-flight submit can be stopped
   const isStoppable = isLoading && Boolean(onStop)
 
-  // OS detection
+  // Which platform the reader is on
   const { isMobileOS, isMac } = useDeviceCapabilities()
 
-  // Compute whether we're over limits
-  const isOverCharLimit = maxCharacters !== null && charCount > maxCharacters
-  const isOverImageLimit = imageCount > MAX_EDITOR_IMAGES
-  const isOverAttachmentLimit = attachmentCount > MAX_EDITOR_ATTACHMENTS
+  // The draft's character, image and attachment counts
+  const { charCount, imageCount, attachmentCount } = state.metrics
 
-  // Compute whether we're close to limits
-  const isNearCharLimit =
-    maxCharacters !== null && charCount / maxCharacters >= 0.8 && !isOverCharLimit
-  const isNearImageLimit = imageCount >= MAX_EDITOR_IMAGES - 1 && !isOverImageLimit
-  const isNearAttachmentLimit =
-    attachmentCount >= MAX_EDITOR_ATTACHMENTS - 1 && !isOverAttachmentLimit
+  // Whether any counter shows. The image and attachment ones show once the draft holds one; the
+  // surface's own, and the characters where there is a limit, show from the empty editor on
+  const hasMetrics =
+    meta !== undefined || state.maxCharacters !== null || imageCount > 0 || attachmentCount > 0
 
+  // Nothing to count and nothing to send, so no row to give it
+  if (!hasMetrics && !onSend) return null
+
+  // The counters, then the actions
   return (
-    <div
-      className={cn(
-        '@container grid grid-cols-[1fr_auto] items-center gap-2 px-2 py-1.5',
-        {
-          card: cn(
-            'bg-surface/50',
-            !borderless && 'rounded-b-lg border border-t-0 border-foreground/10'
-          ),
-          inline: 'bg-inset border border-foreground/10 rounded-b-lg',
-        }[variant]
+    <div className={cn('flex items-center justify-end gap-3 pb-1.5 pl-3 pr-1.5 pt-1', className)}>
+      {/* Metrics */}
+      {hasMetrics && (
+        <div className="flex min-w-0 items-center gap-3 text-xs">
+          {meta}
+          {imageCount > 0 && (
+            <CounterBadge
+              icon={Image}
+              count={imageCount}
+              max={state.maxImages}
+              isSpent={state.isOverImageLimit}
+              isNear={state.isNearImageLimit}
+              title={tEditor('maxImages', { max: state.maxImages })}
+            />
+          )}
+          {attachmentCount > 0 && (
+            <CounterBadge
+              icon={Paperclip}
+              count={attachmentCount}
+              max={state.maxAttachments}
+              isSpent={state.isOverAttachmentLimit}
+              isNear={state.isNearAttachmentLimit}
+              title={tEditor('maxAttachments', { max: state.maxAttachments })}
+            />
+          )}
+          {state.maxCharacters !== null && (
+            <CounterBadge
+              icon={Type}
+              count={charCount}
+              max={state.maxCharacters}
+              isSpent={state.isOverCharacterLimit}
+              isNear={state.isNearCharacterLimit}
+              title={tEditor('maxCharacters', { max: state.maxCharacters })}
+              tabular
+            />
+          )}
+        </div>
       )}
-    >
-      {/* Column 1: Expand + Metrics */}
-      <div className="flex min-w-0 items-center justify-between gap-2">
-        {/* Expand button */}
-        {modeConfig.mode === 'inline' && modeConfig.onExpand && (
-          <button
-            type="button"
-            onClick={modeConfig.onExpand}
-            className="flex min-w-0 items-center gap-1.5 pl-0.5 pr-2 sm:px-2 py-1 rounded text-xs transition-colors text-muted hover:text-foreground hover:bg-foreground/10"
-            title={tEditor('expandEditor')}
-          >
-            <Expand size={12} className="shrink-0" />
-            <span className="hidden whitespace-nowrap @[480px]:inline">
-              {tEditor('expandWithPreview')}
-            </span>
-            <Eye size={12} className="hidden shrink-0 @[480px]:block" />
-          </button>
-        )}
 
-        {/* Metrics */}
-        {(() => {
-          // The image and attachment counters appear as the thing they count does. The characters
-          // and what the surface counts of its own both stand from the empty editor onwards, being
-          // the room a draft is written into
-          if (
-            meta === undefined &&
-            maxCharacters === null &&
-            imageCount === 0 &&
-            attachmentCount === 0
-          )
-            return null
-
-          return (
-            <div className="flex shrink-0 items-center gap-3 text-xs">
-              {meta}
-              {imageCount > 0 && (
-                <CounterBadge
-                  icon={Image}
-                  count={imageCount}
-                  max={MAX_EDITOR_IMAGES}
-                  isOver={isOverImageLimit}
-                  isNear={isNearImageLimit}
-                  title={tEditor('maxImages', { max: MAX_EDITOR_IMAGES })}
-                />
-              )}
-              {attachmentCount > 0 && (
-                <CounterBadge
-                  icon={Paperclip}
-                  count={attachmentCount}
-                  max={MAX_EDITOR_ATTACHMENTS}
-                  isOver={isOverAttachmentLimit}
-                  isNear={isNearAttachmentLimit}
-                  title={tEditor('maxAttachments', { max: MAX_EDITOR_ATTACHMENTS })}
-                />
-              )}
-              {maxCharacters !== null && (
-                <CounterBadge
-                  icon={Type}
-                  count={charCount}
-                  max={maxCharacters}
-                  isOver={isOverCharLimit}
-                  isNear={isNearCharLimit}
-                  title={tEditor('maxCharacters', { max: maxCharacters })}
-                  tabular
-                />
-              )}
-            </div>
-          )
-        })()}
-      </div>
-
-      {/* Column 2: Action buttons (fixed on right) */}
+      {/* Action buttons */}
       {onSend && (
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
               className={cn(
                 'flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-200',
-                'bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground',
+                'text-muted hover:bg-foreground/10 hover:text-foreground',
                 FOCUS_RING_CLASS
               )}
-              title={modeConfig.mode === 'expanded' ? tActions('cancel') : tEditor('cancelEsc')}
+              title={escapeCancels ? tEditor('cancelEsc') : tActions('cancel')}
             >
               <X size={18} />
             </button>
@@ -262,18 +186,20 @@ export function RichMathEditorFooter({
           <button
             type="button"
             onClick={isStoppable ? onStop : onSend}
-            disabled={isStoppable ? false : !isValid || isLoading}
+            disabled={!isStoppable && !isSendable}
             aria-label={isStoppable ? tEditor('stop') : tEditor('submit')}
             className={cn(
               'flex h-9 min-w-9 items-center justify-center gap-1 rounded-md px-2.5',
               'text-xs font-semibold transition-all duration-200',
               'active:scale-95 motion-reduce:active:scale-100',
-              isValid || isStoppable
+              // Lit while a send can go, and while one is on its way
+              isSendable || isLoading
                 ? 'bg-brand/40 text-brand-foreground border border-brand-light/20 hover:bg-brand/60'
-                : 'bg-foreground/5 text-muted border border-transparent cursor-not-allowed',
+                : 'text-muted border border-transparent cursor-not-allowed',
               isLoading && !isStoppable && 'cursor-wait opacity-90',
               FOCUS_RING_CLASS
             )}
+            // The stop while there is one, else the send, naming its shortcut off a mobile OS
             title={
               isStoppable
                 ? tEditor('stop')
@@ -282,13 +208,15 @@ export function RichMathEditorFooter({
                   : tEditor('submitShortcut', { modifier: isMac ? '⌘' : 'Ctrl' })
             }
           >
+            {/* The button's face, by where the send stands */}
             {isStoppable ? (
               // In-flight: stop button
               <Square size={13} className="fill-current" />
             ) : isLoading ? (
+              // In flight with no way to stop it: a spinner
               <LoadingSpinner className="w-5 h-5 border-foreground/20 border-t-foreground" />
             ) : isMobileOS ? (
-              // Touch: action label
+              // Mobile OS: action label
               tEditor('submit')
             ) : (
               // Desktop: ⌘/Ctrl + Enter keycap

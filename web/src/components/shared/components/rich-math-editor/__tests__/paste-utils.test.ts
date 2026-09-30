@@ -1,23 +1,25 @@
 import { describe, expect, it } from 'vitest'
 
-import { type FileUploadParams } from '../utils/attachment-utils'
 import { processPaste } from '../utils/paste-utils'
 import { type EditContext } from '../utils/transforms'
 
 /** What the editor holds, with a word selected for a paste to land on. */
 const SELECTED = { fullText: 'a bound', start: 2, end: 7 }
 
+/** The image a screenshot paste carries. */
+const SCREENSHOT = new File([], 'screenshot.png', { type: 'image/png' })
+
 /**
  * Builds the clipboard a paste arrives with.
  *
- * @param text - The plain text on it.
- * @param withImage - Whether it also carries an image, as a screenshot paste does.
+ * @param text - The plain text on the clipboard.
+ * @param withImage - Whether the clipboard also carries an image, as a screenshot paste does.
  *
  * @returns The clipboard.
  */
 function clipboardOf(text: string, withImage = false): DataTransfer {
-  // The image the clipboard reports, which nothing here reads a file off
-  const items = withImage ? [{ type: 'image/png', getAsFile: () => null }] : []
+  // The clipboard's items: the screenshot, or none
+  const items = withImage ? [{ type: 'image/png', getAsFile: () => SCREENSHOT }] : []
 
   // The clipboard as a paste reads it
   return {
@@ -33,7 +35,7 @@ function clipboardOf(text: string, withImage = false): DataTransfer {
  *
  * @returns The context.
  */
-function contextOf(selection: { fullText: string; start: number; end: number }): EditContext {
+function contextOf(selection: Omit<EditContext, 'selectedText'>): EditContext {
   // The context, with the selection read off the text
   return {
     ...selection,
@@ -41,34 +43,14 @@ function contextOf(selection: { fullText: string; start: number; end: number }):
   }
 }
 
-/**
- * Runs a paste, with the callbacks its upload path would need standing by unused.
- *
- * @param clipboardData - The clipboard the paste arrives with.
- * @param context - The editor context it lands in.
- * @param allowImageUpload - Whether this editor takes images at all.
- *
- * @returns The action the paste asks for.
- */
-function paste(clipboardData: DataTransfer, context: EditContext, allowImageUpload: boolean) {
-  // The action, with the upload callbacks standing by
-  return processPaste({
-    clipboardData,
-    context,
-    scrollTop: 0,
-    allowImageUpload,
-    onChange: () => {},
-    pushState: () => {},
-    getTextareaState: () => null,
-    tEditor: (() => '') as unknown as FileUploadParams['tEditor'],
-    tApiErrors: (() => '') as unknown as FileUploadParams['tApiErrors'],
-  })
-}
-
 describe('processPaste', () => {
-  it('turns a URL dropped on selected text into a link around it', () => {
+  it('turns a URL pasted over selected text into a link around it', () => {
     // A URL pasted over the selected word
-    const action = paste(clipboardOf('https://example.com'), contextOf(SELECTED), true)
+    const action = processPaste({
+      clipboardData: clipboardOf('https://example.com'),
+      context: contextOf(SELECTED),
+      allowImageUpload: true,
+    })
 
     // Which becomes the link's target
     expect(action).toEqual({
@@ -81,19 +63,50 @@ describe('processPaste', () => {
     // A cursor with nothing selected
     const cursor = contextOf({ fullText: 'a bound', start: 7, end: 7 })
 
-    // Where the URL goes in as plain text
-    expect(paste(clipboardOf('https://example.com'), cursor, true).type).toBe('default')
+    // A URL pasted there
+    const action = processPaste({
+      clipboardData: clipboardOf('https://example.com'),
+      context: cursor,
+      allowImageUpload: true,
+    })
+
+    // Which goes in as plain text
+    expect(action.type).toBe('default')
   })
 
-  it('leaves plain text dropped on a selection to the browser', () => {
-    expect(paste(clipboardOf('another bound'), contextOf(SELECTED), true).type).toBe('default')
+  it('leaves plain text pasted over a selection to the browser', () => {
+    // Plain words pasted over the selected word
+    const action = processPaste({
+      clipboardData: clipboardOf('another bound'),
+      context: contextOf(SELECTED),
+      allowImageUpload: true,
+    })
+
+    // Which replace it the way any paste does
+    expect(action.type).toBe('default')
+  })
+
+  it('hands over the image of a screenshot paste, ahead of any text beside it', () => {
+    // A clipboard carrying both an image and its URL, pasted over the selected word
+    const action = processPaste({
+      clipboardData: clipboardOf('https://example.com', true),
+      context: contextOf(SELECTED),
+      allowImageUpload: true,
+    })
+
+    // The image is what the paste is for
+    expect(action).toEqual({ type: 'image', file: SCREENSHOT })
   })
 
   it('reads the text of a screenshot paste where the editor takes no images', () => {
     // A clipboard carrying both an image and its URL
-    const clipboard = clipboardOf('https://example.com', true)
+    const action = processPaste({
+      clipboardData: clipboardOf('https://example.com', true),
+      context: contextOf(SELECTED),
+      allowImageUpload: false,
+    })
 
     // Where an editor that takes no images falls to the text
-    expect(paste(clipboard, contextOf(SELECTED), false).type).toBe('link')
+    expect(action.type).toBe('link')
   })
 })

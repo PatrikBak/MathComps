@@ -1,16 +1,19 @@
+import { assertNever } from '@/components/shared/utils/assert-never'
+import { type FileType } from '@/lib/file-upload-utils'
+
 import { MAX_EDITOR_ATTACHMENTS, MAX_EDITOR_IMAGES } from '../utils/attachment-utils'
 import { type ContentMetrics, getContentMetrics } from '../utils/content-metrics'
 
 /**
- * The type of content that can be added to the editor.
+ * The share of the character limit from which the count is near it.
  */
-type AddableContentType = 'image' | 'attachment'
+const NEAR_CHARACTER_LIMIT_SHARE = 0.8
 
 /**
  * Configuration for editor limits.
  */
 export type EditorConfig = {
-  /** Maximum character count, or `null` while the limit in force is not known. */
+  /** Maximum character count, or `null` for none. */
   maxCharacters: number | null
   /** Maximum image count. Defaults to {@link MAX_EDITOR_IMAGES}. */
   maxImages?: number
@@ -19,45 +22,34 @@ export type EditorConfig = {
 }
 
 /**
- * Immutable value object representing the current state of the editor.
- *
- * This class is created fresh on each render from the current text content.
- * All properties are derived from the text and are read-only.
- *
- * @see {@link ContentMetrics} for the structure of computed metrics
+ * What an editor's text measures up to against its limits: what it holds, how near each limit it
+ * stands, and whether it can be sent. Built from one text under one set of limits, and never changed
+ * after.
  */
 export class EditorState {
-  /**
-   * The current text content of the editor.
-   *
-   * This is the source of truth from which all other properties are derived.
-   */
+  /** The text this state measures. */
   public readonly text: string
 
-  /**
-   * Computed metrics for the current text content.
-   *
-   * @see {@link getContentMetrics} for the computation logic
-   */
+  /** The text's counts. */
   public readonly metrics: ContentMetrics
 
-  /**
-   * Configuration for editor limits.
-   */
+  /** The limits, each one left out filled in with its default. */
   private readonly config: Required<EditorConfig>
 
   /**
-   * Creates a new {@link EditorState} from the given text content.
-   *
-   * All derived properties (metrics, validation flags) are computed
-   * during construction and cached as readonly properties.
+   * Creates the state of a text under the given limits, counting what the text holds once, here.
    *
    * @param text - The current text content of the editor.
    * @param config - Configuration for editor limits.
    */
   constructor(text: string, config: EditorConfig) {
+    // The text itself
     this.text = text
+
+    // What it holds, counted once
     this.metrics = getContentMetrics(text)
+
+    // The limits, the images and attachments held to the editor's own where none are given
     this.config = {
       maxCharacters: config.maxCharacters,
       maxImages: config.maxImages ?? MAX_EDITOR_IMAGES,
@@ -68,30 +60,65 @@ export class EditorState {
   /**
    * Whether the editor contains any meaningful content.
    *
-   * Returns `false` for empty strings or strings containing only whitespace.
-   *
    * @returns `true` if the text has non-whitespace content, `false` otherwise.
    */
   get hasContent(): boolean {
+    // Whitespace alone is not content
     return this.text.trim().length > 0
   }
 
   /**
-   * The character limit in force, or `null` while it is not known.
+   * The character limit, or `null` where there is none.
    *
    * @returns The most characters the content may hold.
    */
   get maxCharacters(): number | null {
+    // The limit the editor was given
     return this.config.maxCharacters
   }
 
   /**
-   * Whether a known character limit has been exceeded.
+   * The most images the content may hold.
    *
-   * @returns `true` if characters exceed a configured limit, `false` while there is none to exceed.
+   * @returns The image limit.
+   */
+  get maxImages(): number {
+    // The limit the editor holds images to
+    return this.config.maxImages
+  }
+
+  /**
+   * The most attachments the content may hold.
+   *
+   * @returns The attachment limit.
+   */
+  get maxAttachments(): number {
+    // The limit the editor holds attachments to
+    return this.config.maxAttachments
+  }
+
+  /**
+   * Whether the character limit has been exceeded.
+   *
+   * @returns `true` if the characters exceed the limit, `false` where there is none.
    */
   get isOverCharacterLimit(): boolean {
+    // Past the limit, where there is one
     return this.config.maxCharacters !== null && this.metrics.charCount > this.config.maxCharacters
+  }
+
+  /**
+   * Whether the characters are closing in on the limit, short of exceeding it.
+   *
+   * @returns `true` from {@link NEAR_CHARACTER_LIMIT_SHARE} of the limit up to the limit itself.
+   */
+  get isNearCharacterLimit(): boolean {
+    // Into the last stretch of the limit, where there is one, short of passing it
+    return (
+      this.config.maxCharacters !== null &&
+      this.metrics.charCount / this.config.maxCharacters >= NEAR_CHARACTER_LIMIT_SHARE &&
+      !this.isOverCharacterLimit
+    )
   }
 
   /**
@@ -100,7 +127,18 @@ export class EditorState {
    * @returns `true` if image count exceeds the configured limit.
    */
   get isOverImageLimit(): boolean {
+    // More images than the limit allows
     return this.metrics.imageCount > this.config.maxImages
+  }
+
+  /**
+   * Whether the images are one short of their limit or at it.
+   *
+   * @returns `true` from one below the limit up to the limit itself.
+   */
+  get isNearImageLimit(): boolean {
+    // One below the limit, or at it
+    return this.metrics.imageCount >= this.config.maxImages - 1 && !this.isOverImageLimit
   }
 
   /**
@@ -109,26 +147,31 @@ export class EditorState {
    * @returns `true` if attachment count exceeds the configured limit.
    */
   get isOverAttachmentLimit(): boolean {
+    // More attachments than the limit allows
     return this.metrics.attachmentCount > this.config.maxAttachments
   }
 
   /**
-   * Whether the content is valid for submission.
+   * Whether the attachments are one short of their limit or at it.
    *
-   * Content is valid when:
-   * 1. There is some non-whitespace content ({@link hasContent})
-   * 2. The character limit is known ({@link maxCharacters}), since there is nothing to hold the
-   *    content to until it is
-   * 3. Character limit is not exceeded ({@link isOverCharacterLimit})
-   * 4. Image limit is not exceeded ({@link isOverImageLimit})
-   * 5. Attachment limit is not exceeded ({@link isOverAttachmentLimit})
+   * @returns `true` from one below the limit up to the limit itself.
+   */
+  get isNearAttachmentLimit(): boolean {
+    // One below the limit, or at it
+    return (
+      this.metrics.attachmentCount >= this.config.maxAttachments - 1 && !this.isOverAttachmentLimit
+    )
+  }
+
+  /**
+   * Whether the content can be sent: it holds something, and it is past no limit.
    *
-   * @returns `true` if the content can be submitted, `false` otherwise.
+   * @returns `true` if the content can be sent, `false` otherwise.
    */
   get isValid(): boolean {
+    // Something to send, and nothing past any limit
     return (
       this.hasContent &&
-      this.maxCharacters !== null &&
       !this.isOverCharacterLimit &&
       !this.isOverImageLimit &&
       !this.isOverAttachmentLimit
@@ -138,20 +181,23 @@ export class EditorState {
   /**
    * Checks whether more items of a given type can be added.
    *
-   * This is useful for disabling "add image" or "add attachment" buttons
-   * when the respective limits have been reached.
+   * @param fileType - The kind of file to check.
    *
-   * @param contentType - The type of content to check.
-   *
-   * @returns `true` if more items of the specified type can be added,
-   *          `false` if the limit has been reached.
+   * @returns `true` if more items of the specified type can be added, `false` if the limit has been
+   *   reached.
    */
-  canAddMore(contentType: AddableContentType): boolean {
-    switch (contentType) {
+  canAddMore(fileType: FileType): boolean {
+    // Each kind of file is counted against its own limit
+    switch (fileType) {
+      // Room for another image
       case 'image':
         return this.metrics.imageCount < this.config.maxImages
+      // Room for another attachment
       case 'attachment':
         return this.metrics.attachmentCount < this.config.maxAttachments
+      // Every kind of file is handled above
+      default:
+        return assertNever(fileType)
     }
   }
 }

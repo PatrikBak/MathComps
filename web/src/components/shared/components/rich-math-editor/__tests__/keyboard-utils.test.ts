@@ -19,7 +19,7 @@ type Modifiers = {
  * Builds the keyboard event a shortcut is read off.
  *
  * @param key - The key pressed, as the browser names it.
- * @param modifiers - The modifiers held with it, each defaulting to released.
+ * @param modifiers - The modifiers held with the key, each released unless set.
  *
  * @returns The event.
  */
@@ -40,7 +40,7 @@ function press(key: string, modifiers: Modifiers = {}) {
  *
  * @param fullText - Everything in the editor.
  * @param start - Where the selection starts.
- * @param end - Where it ends, defaulting to a bare cursor at the start.
+ * @param end - Where the selection ends.
  *
  * @returns The context.
  */
@@ -54,7 +54,7 @@ function createContext(fullText: string, start: number, end: number = start): Ed
   }
 }
 
-/** The cursor sitting in the middle of a word, which most shortcuts wrap. */
+/** The word `bound` selected, for a formatting shortcut to wrap. */
 const context = createContext('a bound', 2, 7)
 
 describe('processKeyboardShortcut', () => {
@@ -70,16 +70,17 @@ describe('processKeyboardShortcut', () => {
     })
 
     it('reads Cmd+Y as redo', () => {
+      // Cmd+Y steps forward
       expect(processKeyboardShortcut(press('y', { metaKey: true }), context).type).toBe('redo')
     })
 
-    it('reads Ctrl the same as Cmd', () => {
+    it('reads Ctrl the same as Cmd, in whichever case the key is named', () => {
       // Ctrl+Z steps back
       expect(processKeyboardShortcut(press('z', { ctrlKey: true }), context).type).toBe('undo')
 
-      // And Ctrl+Shift+Z steps forward
+      // And Ctrl+Shift+Z steps forward, the Shift naming the key in upper case
       expect(
-        processKeyboardShortcut(press('z', { ctrlKey: true, shiftKey: true }), context).type
+        processKeyboardShortcut(press('Z', { ctrlKey: true, shiftKey: true }), context).type
       ).toBe('redo')
     })
   })
@@ -96,7 +97,7 @@ describe('processKeyboardShortcut', () => {
       })
     })
 
-    it('takes the shortcut with the key the shifted press reports', () => {
+    it('wraps the selection in code on Cmd+Shift+C, its key arriving in upper case', () => {
       // The uppercase key a shifted press reports
       const action = processKeyboardShortcut(press('C', { metaKey: true, shiftKey: true }), context)
 
@@ -108,18 +109,21 @@ describe('processKeyboardShortcut', () => {
     })
 
     it('leaves Cmd+C to the browser, since only Cmd+Shift+C belongs to the editor', () => {
+      // Copy stays the browser's
       expect(processKeyboardShortcut(press('c', { metaKey: true }), context).type).toBe(
         'passthrough'
       )
     })
 
-    it('leaves a shortcut alone once Alt joins it', () => {
+    it('leaves a formatting shortcut alone once Alt joins it', () => {
+      // Cmd+Alt+B goes to the browser
       expect(
         processKeyboardShortcut(press('b', { metaKey: true, altKey: true }), context).type
       ).toBe('passthrough')
     })
 
     it('leaves a bare letter alone', () => {
+      // A plain B is just typing
       expect(processKeyboardShortcut(press('b'), context).type).toBe('passthrough')
     })
   })
@@ -140,15 +144,26 @@ describe('processKeyboardShortcut', () => {
     })
 
     it('leaves Enter to the browser outside a list', () => {
+      // Enter over a word that sits in no list
       expect(processKeyboardShortcut(press('Enter'), context).type).toBe('passthrough')
     })
 
-    it('leaves Shift+Enter to the browser inside one', () => {
-      // The same cursor at the end of a list item
+    it('leaves Shift+Enter inside a list to the browser', () => {
+      // The cursor at the end of a list item
       const list = createContext('- first', 7)
 
       // Where a shifted Enter breaks the line instead
       expect(processKeyboardShortcut(press('Enter', { shiftKey: true }), list).type).toBe(
+        'passthrough'
+      )
+    })
+
+    it('leaves Cmd+Enter inside a list to the send', () => {
+      // The cursor at the end of a list item
+      const list = createContext('- first', 7)
+
+      // Where Cmd+Enter is left for the send
+      expect(processKeyboardShortcut(press('Enter', { metaKey: true }), list).type).toBe(
         'passthrough'
       )
     })
