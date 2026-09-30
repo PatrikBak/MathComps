@@ -57,10 +57,6 @@ type TranscriptDivider = {
  * Props for the {@link DefenseTranscript}.
  */
 export type DefenseTranscriptProps = {
-  /** Whether to offer each turn's report control, which leaves the conversation as it stands. */
-  canGiveFeedback: boolean
-  /** Whether to offer each turn's rewind control, which drops everything after it. */
-  canRewind: boolean
   /** The conversation so far, oldest first. */
   turns: readonly Turn[]
   /** An id for the current conversation, distinct across conversations. */
@@ -71,10 +67,13 @@ export type DefenseTranscriptProps = {
   isThinking: boolean
   /** What the student holds against the conversation's replies, by reply. */
   reports: ReadonlyMap<string, DefenseTurnReport>
-  /** Rewinds the conversation to the turn at the given index. */
-  onRewindTurn: (index: number) => void
-  /** Says what went wrong with the named reply, or revises what was already said. */
-  onReportTurn: (turnId: string) => void
+  /** Rewinds the conversation to the turn at the given index; null where the reader can't rewind. */
+  onRewindTurn: ((index: number) => void) | null
+  /**
+   * Says what went wrong with the named reply, or revises what was already said, leaving the conversation as it
+   * stands; null where the reader can't report.
+   */
+  onReportTurn: ((turnId: string) => void) | null
   /** The lines dividing the conversation, drawn in this order where several sit above one turn. */
   dividers: readonly TranscriptDivider[]
   /** Moving where the reader picks the conversation up; null where nobody keeps a place in it. */
@@ -107,8 +106,6 @@ export function DefenseTranscript({
   roleLabels,
   isThinking,
   reports,
-  canGiveFeedback,
-  canRewind,
   onRewindTurn,
   onReportTurn,
   dividers,
@@ -224,10 +221,10 @@ export function DefenseTranscript({
                     label={roleLabels[turn.role]}
                     animate={index === justArrivedIndex}
                     isReported={replyId !== null && reports.has(replyId)}
-                    canGiveFeedback={canGiveFeedback}
-                    canRewind={canRewind}
-                    onRewind={() => onRewindTurn(index)}
-                    onReport={replyId === null ? null : () => onReportTurn(replyId)}
+                    onRewind={onRewindTurn === null ? null : () => onRewindTurn(index)}
+                    onReport={
+                      onReportTurn === null || replyId === null ? null : () => onReportTurn(replyId)
+                    }
                     unreadMark={unreadMark}
                     noteMark={replyId === null ? null : noteMark}
                     draftsMark={draftsMark}

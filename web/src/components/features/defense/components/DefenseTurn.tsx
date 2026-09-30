@@ -77,10 +77,6 @@ function TurnControl({ label, onClick, className, children }: TurnControlProps) 
  * Props for a single {@link DefenseTurn}.
  */
 type DefenseTurnProps = {
-  /** Whether to offer the report control, which sits beside the turn and leaves it as it stands. */
-  canGiveFeedback: boolean
-  /** Whether to offer the rewind control, which drops this turn and everything after it. */
-  canRewind: boolean
   /** The message this turn renders. */
   turn: Turn
   /**
@@ -104,11 +100,11 @@ type DefenseTurnProps = {
   animate: boolean
   /** Whether this reply has already been reported. */
   isReported: boolean
-  /** Rewinds the conversation to this turn. */
-  onRewind: () => void
+  /** Rewinds the conversation to this turn; null where the reader can't rewind. */
+  onRewind: (() => void) | null
   /**
-   * Says what went wrong with this reply, or revises what was already said; null on a turn with nothing to
-   * report.
+   * Says what went wrong with this reply, or revises what was already said, leaving the turn as it stands; null
+   * on a turn with nothing to report, or where the reader can't report.
    */
   onReport: (() => void) | null
 }
@@ -131,8 +127,6 @@ export function DefenseTurn({
   label,
   animate,
   isReported,
-  canGiveFeedback,
-  canRewind,
   onRewind,
   onReport,
   unreadMark,
@@ -210,8 +204,8 @@ export function DefenseTurn({
 
         {/* The turn's controls, and whatever has already been said about it. They are pulled in past
             their own box so the label beside them, not their height, is what the row stands at */}
-        {(canGiveFeedback ||
-          canRewind ||
+        {(onReport !== null ||
+          onRewind !== null ||
           isReported ||
           draftCount !== null ||
           (noteMark !== null && turnId !== null) ||
@@ -226,7 +220,7 @@ export function DefenseTurn({
           >
             {/* Say what went wrong with a reply. A reported one keeps the control and carries a filled flag,
                 so the student can see what they said and change it */}
-            {canGiveFeedback && onReport !== null && (
+            {onReport !== null && (
               <TurnControl
                 label={isReported ? t('reported') : t('report')}
                 onClick={onReport}
@@ -237,7 +231,7 @@ export function DefenseTurn({
             )}
 
             {/* The same mark with nothing to click, for a reader who is only reading */}
-            {!canGiveFeedback && isReported && (
+            {onReport === null && isReported && (
               <span
                 role="img"
                 aria-label={t('reported')}
@@ -248,7 +242,7 @@ export function DefenseTurn({
             )}
 
             {/* Rewind the conversation to this turn */}
-            {canRewind && (
+            {onRewind !== null && (
               <TurnControl label={t('rewind')} onClick={onRewind}>
                 <Undo2 size={14} />
               </TurnControl>

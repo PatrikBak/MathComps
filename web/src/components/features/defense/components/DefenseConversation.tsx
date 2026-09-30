@@ -299,10 +299,8 @@ function DefenseConversationForTarget({
         roleLabels={roleLabels}
         isThinking={isThinking}
         reports={reports}
-        canGiveFeedback={canGiveFeedback}
-        canRewind={canRewind}
-        onRewindTurn={turn.requestRewind}
-        onReportTurn={report.open}
+        onRewindTurn={canRewind ? turn.requestRewind : null}
+        onReportTurn={canGiveFeedback ? report.open : null}
         dividers={
           competitionMode.firstUncountedTurnId === null
             ? []
