@@ -301,13 +301,15 @@ function DefenseConversationForTarget({
         reports={reports}
         onRewindTurn={canRewind ? turn.requestRewind : null}
         onReportTurn={canGiveFeedback ? report.open : null}
-        dividerBeforeTurn={
+        dividers={
           competitionMode.firstUncountedTurnId === null
-            ? null
-            : {
-                turnId: competitionMode.firstUncountedTurnId,
-                label: t('competitionClockDivider'),
-              }
+            ? []
+            : [
+                {
+                  turnId: competitionMode.firstUncountedTurnId,
+                  label: t('competitionClockDivider'),
+                },
+              ]
         }
         unreadMark={null}
         noteMark={null}

@@ -317,7 +317,8 @@ test.describe('the conversation dialog', () => {
   test("lists the student's other conversations, the one after the hand-in not counting", async ({
     page,
   }) => {
-    // One student's two conversations about the problem, the later one started after they handed in
+    // One student's two conversations about the problem, the later one started after they handed in, and the
+    // hand-in landing inside the earlier one, ahead of its follow-up
     await installQueueBackend(
       page,
       [
@@ -328,6 +329,7 @@ test.describe('the conversation dialog', () => {
         grading: {
           'user-ada@students.test': {
             countingConversationIds: ['session-early'],
+            endedAt: '2026-09-27T09:01:00Z',
             grade: null,
             selfAssessment: null,
           },
@@ -344,6 +346,11 @@ test.describe('the conversation dialog', () => {
     // The dialog it opens in
     const dialog = page.getByRole('dialog')
 
+    // The line marking where the student's words stop counting
+    const countsUntilLine = dialog.getByRole('separator', {
+      name: messages.admin.conversation.countsUntilDivider,
+    })
+
     // Both listed oldest first, the later one marked as not counting
     await expectOnlyNotCounting(dialog, 2, 2)
 
@@ -352,6 +359,12 @@ test.describe('the conversation dialog', () => {
       'aria-pressed',
       'true'
     )
+
+    // Its transcript on screen
+    await expect(dialog.getByText('Because halving can be undone.')).toBeVisible()
+
+    // No line in it, since the switch already says none of it counts
+    await expect(countsUntilLine).toHaveCount(0)
 
     // The earlier one, picked
     await dialog.getByRole('button', { name: /^Conversation 1/ }).click()
@@ -362,6 +375,11 @@ test.describe('the conversation dialog', () => {
       'true'
     )
     await expect(dialog.getByText('1 of 2', { exact: true })).toBeVisible()
+
+    // The line sitting right above the follow-up the student sent after handing in
+    await expect(countsUntilLine.locator('xpath=following-sibling::*[1]')).toContainText(
+      'Because halving can be undone.'
+    )
   })
 
   test('shows the grade of a graded student, and none of an ungraded one', async ({ page }) => {
@@ -381,6 +399,7 @@ test.describe('the conversation dialog', () => {
         grading: {
           'user-graded@students.test': {
             countingConversationIds: ['session-graded@students.test'],
+            endedAt: '2026-09-27T12:00:00Z',
             grade: null,
             selfAssessment: null,
           },

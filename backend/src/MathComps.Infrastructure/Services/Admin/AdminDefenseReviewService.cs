@@ -736,7 +736,7 @@ public class AdminDefenseReviewService(
             .FirstOrDefaultAsync(cancellationToken);
 
         // The grading.
-        return new StudentGradingDto(countingIds, grade, selfAssessment);
+        return new StudentGradingDto(countingIds, entry.Window.EndedAt, grade, selfAssessment);
     }
 
     /// <summary>
