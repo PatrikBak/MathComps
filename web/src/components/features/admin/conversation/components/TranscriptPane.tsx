@@ -98,10 +98,8 @@ export function TranscriptPane({
         pointedAtTurnId={pointedAtTurnId}
         roleLabels={{ examiner: MATHILDA_NAME, candidate: t('student') }}
         isThinking={false}
-        canGiveFeedback={false}
-        canRewind={false}
-        onRewindTurn={() => undefined}
-        onReportTurn={() => undefined}
+        onRewindTurn={null}
+        onReportTurn={null}
         showReplyNumbers
       />
 
