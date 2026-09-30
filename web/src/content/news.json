@@ -1,5 +1,20 @@
 [
   {
+    "id": "dgWHrzf8Rj5O1RA_n92Sq",
+    "slug": "mathilding-round-1",
+    "title": {
+      "sk": "Prvé kolo Mathildovania je za nami",
+      "cs": "První kolo Mathildování je za námi",
+      "en": "First Mathilding round is over"
+    },
+    "date": "2026-09-29",
+    "category": "competitions",
+    "cover": {
+      "kind": "icon",
+      "name": "messages-square"
+    }
+  },
+  {
     "id": "rwqnCD3Gd_ZH-qys6AKxV",
     "slug": "competitions-open",
     "title": {
