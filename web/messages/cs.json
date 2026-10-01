@@ -240,6 +240,7 @@
     "AdminReviewTarget": "Tato odpověď už neexistuje.",
     "CannotLikeOwnComment": "Nemůžeš dát to se mi líbí vlastnímu komentáři.",
     "CommentNotFound": "Tento komentář už neexistuje.",
+    "CommentProfileIncomplete": "Před komentováním si v profilu vyber přezdívku.",
     "CommentTargetNotFound": "Obsah, ke kterému komentář patří, už neexistuje.",
     "DefenseContentNotFound": "Toto zadání už není k dispozici.",
     "DefenseFeedbackCommentTooLong": "Tvůj komentář je příliš dlouhý.",

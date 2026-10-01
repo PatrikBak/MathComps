@@ -27,6 +27,11 @@ public enum ApiErrorCode
     CommentTargetNotFound,
 
     /// <summary>
+    /// A comment was written from an account with no username to sign it.
+    /// </summary>
+    CommentProfileIncomplete,
+
+    /// <summary>
     /// The referenced problem does not exist.
     /// </summary>
     ProblemNotFound,

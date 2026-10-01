@@ -65,7 +65,8 @@ export function CommentModal({ isOpen, onClose, title, target }: CommentModalPro
         </>
       }
     >
-      <CommentSection target={target} />
+      {/* The thread, opened to be written in */}
+      <CommentSection target={target} autoFocus />
     </Modal>
   )
 }

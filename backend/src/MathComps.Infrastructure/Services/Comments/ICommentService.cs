@@ -27,7 +27,8 @@ public interface ICommentService
 
     /// <summary>
     /// Creates a new comment or reply. A reply whose parent sits in another thread is refused as though the
-    /// parent did not exist.
+    /// parent did not exist, and an author with no username to sign it with is refused with
+    /// <see cref="CommentProfileIncompleteException"/>.
     /// </summary>
     /// <param name="target">The target of the comment.</param>
     /// <param name="viewer">The user creating the comment.</param>
@@ -97,3 +98,8 @@ public sealed class NotCommentAuthorException() : Exception("Only the author can
 /// Thrown when the caller tries to like their own comment.
 /// </summary>
 public sealed class CannotLikeOwnCommentException() : Exception("You cannot like your own comment");
+
+/// <summary>
+/// Thrown when a comment is written from an account with no username to sign it.
+/// </summary>
+public sealed class CommentProfileIncompleteException() : Exception("A comment needs a username to sign it");
