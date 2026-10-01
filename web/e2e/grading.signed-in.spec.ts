@@ -4,7 +4,7 @@ import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
 import { expectOnlyNotCounting } from './support/admin-conversation'
-import { LIST_PATH } from './support/competitions'
+import { LIST_PATH, showRoundHolding } from './support/competitions'
 import { GROUP_NAME, installGradingBackend } from './support/grading-backend'
 import { installHostedBackend } from './support/hosted-backend'
 import { expect, test } from './support/test'
@@ -154,25 +154,34 @@ test.describe('the way into grading', () => {
     // The Mathilding page
     await page.goto(LIST_PATH)
 
-    // Every way into grading on it
-    const links = page.getByRole('link', { name: messages.competitions.grade })
+    // The way into grading on the round showing
+    const gradeLink = page
+      .getByRole('tabpanel')
+      .getByRole('link', { name: messages.competitions.grade })
 
-    // Once the page has drawn them, since reading where they lead waits for nothing
-    await expect(links.first()).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+    // A round taking entries, brought into view
+    await showRoundHolding(page, page.locator('[data-competition-slug="open-intermediate"]'))
 
-    // Where each one leads
-    const targets = await links.evaluateAll((anchors) =>
-      anchors.map((anchor) => anchor.getAttribute('href'))
-    )
+    // Which leads into its grading
+    await expect(gradeLink).toHaveAttribute('href', '/en/admin/grading/open')
 
-    // On a closed round and on one taking entries, and not on the practice or an upcoming one
-    expect(targets).toContain('/en/admin/grading/past-21')
-    expect(targets).toContain('/en/admin/grading/open')
-    expect(targets).not.toContain('/en/admin/grading/practice')
-    expect(targets).not.toContain('/en/admin/grading/upcoming')
+    // A round still to come, brought into view
+    await showRoundHolding(page, page.locator('[data-competition-slug="upcoming-intermediate"]'))
+
+    // Which has nothing to grade yet
+    await expect(gradeLink).toHaveCount(0)
+
+    // Nor does the practice one, which is never graded
+    await expect(page.locator('a[href="/en/admin/grading/practice"]')).toHaveCount(0)
+
+    // The round closed three weeks back, brought into view
+    await showRoundHolding(page, page.locator('[data-competition-slug="past-21-intermediate"]'))
+
+    // Which leads into its grading too
+    await expect(gradeLink).toHaveAttribute('href', '/en/admin/grading/past-21')
 
     // Followed
-    await page.locator('a[href="/en/admin/grading/past-21"]').click()
+    await gradeLink.click()
 
     // Onto that round's board, named the way the Mathilding page names it, with the days it took entries
     await expect(page.getByRole('heading', { name: copy.title })).toBeVisible({

@@ -1,4 +1,4 @@
-import { areaCopy, areaPath, LIST_PATH, modalCopy } from './support/competitions'
+import { areaCopy, areaPath, LIST_PATH, modalCopy, showRoundHolding } from './support/competitions'
 import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
@@ -258,6 +258,9 @@ test.describe('the official solutions', () => {
 
     // The one link it leaves a reader who was never in it
     const problems = page.locator(`a[href="/en/mathilding/${CLOSED_COMPETITION_SLUG}"]`)
+
+    // Its round, brought into view
+    await showRoundHolding(page, problems)
 
     // Which reads as the offer of the problems
     await expect(problems).toHaveText(areaCopy.problems, { timeout: SETTLE_TIMEOUT_MS })
