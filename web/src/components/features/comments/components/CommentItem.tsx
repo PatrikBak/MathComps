@@ -2,7 +2,7 @@
 
 import { ChevronDown, Heart, Minus, Pencil, Reply, Trash2 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import { MAX_CHARACTERS_PER_COMMENT } from '@/components/features/comments/model/comment-limits'
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
@@ -19,56 +19,58 @@ const AVATAR_SIZE = 28
  * Data representing a single comment.
  */
 export type CommentData = {
-  /** Unique identifier for the comment. */
+  /** The id of the comment's current version. */
   id: string
-  /** Unique identifier for the author (used for ownership checks). */
+  /** The author's id with the sign-in provider. */
   authorId: string
-  /** The username of the person who wrote the comment, or null when there is none to show. */
+  /** The author's username, or null when they have chosen none or their account is deleted. */
   author: string | null
-  /** URL of the author's avatar image. */
-  avatarUrl?: string | null
+  /** URL of the author's avatar image, or null when they have none. */
+  avatarUrl: string | null
   /** The markdown-formatted text content of the comment. */
   content: string
   /** The date and time when the comment was originally posted. */
   timestamp: Date
-  /** The date and time when the comment was last edited, if applicable. */
-  editedAt?: Date
+  /** The date and time when the comment was last edited, or null when it never was. */
+  editedAt: Date | null
   /** The total number of likes this comment has received. */
   likes: number
   /** Whether the currently authenticated user has liked this comment. */
   isLiked: boolean
-  /** Soft-delete flag - if true, shows that it was deleted instead of content. */
+  /** Whether the comment has been deleted. */
   isDeleted: boolean
-  /** List of replies to this comment (nested comments). */
-  replies?: CommentData[]
+  /** The comment's replies. */
+  replies: CommentData[]
 }
 
 /**
  * Props for the {@link CommentItem} presentation component.
  */
-type CommentItemProps = Omit<CommentData, 'id' | 'replies'> & {
-  /** Whether this comment's replies are collapsed */
+type CommentItemProps = Omit<CommentData, 'id' | 'authorId' | 'replies'> & {
+  /** Whether the comment shows its likes. */
+  showLikes: boolean
+  /** Whether the comment's replies are collapsed. */
   isCollapsed: boolean
-  /** Number of nested replies (for "Show X replies" text) */
+  /** Number of replies beneath the comment at any depth, deleted ones not counted. */
   replyCount: number
-  /** Called when collapse/expand button is clicked */
+  /** A function which collapses or expands the comment's replies. */
   onToggleCollapse: () => void
-  /** Called when reply button is clicked (only provided for not-deleted comments) */
+  /** A function which opens a reply to the comment, absent when replying isn't offered. */
   onReply?: () => void
-  /** Called when like button is clicked */
+  /** A function which toggles the viewer's like, absent when the comment can't be liked. */
   onLike?: () => void
-  /** Called when edit is submitted (only provided for own comments) */
-  onEdit?: (newContent: string) => void | Promise<void>
-  /** Called when delete is clicked (only provided for own comments) */
+  /** A function which saves the comment's new content, absent when it can't be edited. */
+  onEdit?: (newContent: string) => Promise<void>
+  /** A function which deletes the comment, absent when it can't be deleted. */
   onDelete?: () => void
-  /** The component handling reply input (only provided for not-deleted comments) */
+  /** The editor for a reply to the comment, while one is open beneath it. */
   replyInputNode?: React.ReactNode
-  /** The recursively rendered replies (should they exist) */
-  repliesNode?: React.ReactNode
+  /** The comment's rendered replies. */
+  repliesNode: React.ReactNode
 }
 
 /**
- * A single comment item with replies threading.
+ * A comment in a thread, editable in place, with its replies collapsible beneath it.
  */
 export function CommentItem({
   author,
@@ -79,6 +81,7 @@ export function CommentItem({
   likes,
   isLiked,
   isDeleted,
+  showLikes,
   isCollapsed,
   replyCount,
   onToggleCollapse,
@@ -91,88 +94,98 @@ export function CommentItem({
 }: CommentItemProps) {
   // Whether the comment is currently being edited
   const [isEditing, setIsEditing] = useState(false)
-  // Whether the comment is currently being saved (edit mode)
+
+  // Whether the edited text is being saved
   const [isSaving, setIsSaving] = useState(false)
+
   // The current content of the comment being edited
   const [editText, setEditText] = useState(content)
+
   // Whether the delete confirmation dialog is open
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
   // Whether the line connecting the comment to its replies is hovered over
   const [isLineHovered, setIsLineHovered] = useState(false)
 
-  // Translations for plurals and UI text
+  // Plural copy
   const tPlurals = useTranslations('plurals')
+
+  // Comment copy
   const tComments = useTranslations('comments')
 
   // Profile copy
   const tProfile = useTranslations('profile')
 
-  // Date formatter (uses current locale automatically)
+  // Date formatter
   const format = useFormatter()
 
-  // The name the comment is signed with, standing in when the site has none to show
+  // The author's username, or the default user's name when they have none
   const authorName = author ?? tProfile('defaultUser')
 
-  // Reset hover state when expanding
-  useEffect(() => {
-    setIsLineHovered(false)
-  }, [isCollapsed])
+  // Whether the comment's replies are showing
+  const areRepliesShown = replyCount > 0 && !isCollapsed
 
-  /**
-   * Handles submitting the edit action.
-   */
+  // A function which formats a comment time, giving the year only outside the current one
+  const formatCommentTime = (date: Date) =>
+    format.dateTime(date, {
+      day: 'numeric',
+      month: 'numeric',
+      year: date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+
+  // A function which collapses or expands the comment's replies
+  const handleToggleCollapse = () => {
+    // Clear the line's hover, which the line can't clear itself once it unmounts under the pointer
+    setIsLineHovered(false)
+
+    // Collapse or expand the replies
+    onToggleCollapse()
+  }
+
+  // A function which saves the edited text
   const handleEditSubmit = useCallback(async () => {
-    // Only submit non-empty edits and if an edit handler is provided
+    // Only a non-empty edit is saved, and only where the comment can be edited
     if (!editText.trim() || !onEdit) return
 
+    // Save the edit, staying in edit mode when it fails
     try {
       // Start saving
       setIsSaving(true)
 
-      // Resolve the edit action
-      const result = onEdit(editText.trim())
+      // Save the trimmed text
+      await onEdit(editText.trim())
 
-      // If it returns a promise, wait for it to resolve
-      if (result instanceof Promise) {
-        await result
-      }
-
-      // Quit edit mode after saved
+      // Leave edit mode once saved
       setIsEditing(false)
     } catch {
       // Stay in edit mode so the text can be resubmitted; reporting the failure is the handler's
     } finally {
-      // Reset the saving state regardless of success or failure
+      // Mark the save as over
       setIsSaving(false)
     }
   }, [editText, onEdit])
 
-  /**
-   * Handles canceling the edit action.
-   */
+  // A function which abandons the edit
   const handleEditCancel = useCallback(() => {
-    // Reset edit state
+    // Leave edit mode
     setIsEditing(false)
+  }, [])
 
-    // Reset edit text
-    setEditText(content)
-  }, [content])
-
-  /**
-   * Handles starting the edit action.
-   */
+  // A function which opens the editor on the comment's content
   const handleEditStart = useCallback(() => {
     // Enter edit mode
     setIsEditing(true)
 
-    // Set edit text to current content
+    // Start from the comment as it stands
     setEditText(content)
   }, [content])
 
   return (
     <div className="relative">
       {/* Line spanning the comment thread */}
-      {replyCount > 0 && !isCollapsed && (
+      {areRepliesShown && (
         <div
           className={cn(
             'absolute transition-colors cursor-pointer',
@@ -187,14 +200,14 @@ export function CommentItem({
             paddingRight: '7.5px',
             backgroundClip: 'content-box',
           }}
-          onClick={onToggleCollapse}
+          onClick={handleToggleCollapse}
           onMouseEnter={() => setIsLineHovered(true)}
           onMouseLeave={() => setIsLineHovered(false)}
         />
       )}
 
       {/* Collapse button on the line, hidden until hover */}
-      {replyCount > 0 && !isCollapsed && (
+      {areRepliesShown && (
         <button
           className={cn(
             'absolute flex items-center justify-center w-5 h-5 rounded-full border-2 z-20 transition-all duration-150',
@@ -206,7 +219,7 @@ export function CommentItem({
             left: `${AVATAR_SIZE / 2 - 10}px`,
             top: `calc(50% + 10px)`,
           }}
-          onClick={onToggleCollapse}
+          onClick={handleToggleCollapse}
           onMouseEnter={() => setIsLineHovered(true)}
           onMouseLeave={() => setIsLineHovered(false)}
           title={tComments('hideReplies')}
@@ -228,38 +241,20 @@ export function CommentItem({
 
         {/* Comment body */}
         <div className="flex-1 min-w-0">
-          {/* Header - progressive wrapping: [1+2+3] → [1+2][3] → [1][2][3] */}
+          {/* Header, dropping the actions to a new line before splitting the name from the time */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-0.5">
-            {/* Group: Author + Timestamp (wraps together first, then individually) */}
+            {/* Author and time */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-              {/* (1) Author */}
+              {/* Author */}
               <span className="text-sm font-medium text-foreground">{authorName}</span>
 
-              {/* (2) Timestamp + edited */}
+              {/* Time and edited mark */}
               <span className="text-xs text-muted flex items-center gap-1">
-                {format.dateTime(timestamp, {
-                  day: 'numeric',
-                  month: 'numeric',
-                  year:
-                    timestamp.getFullYear() === new Date().getFullYear() ? undefined : 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {formatCommentTime(timestamp)}
                 {editedAt && !isDeleted && (
                   <Tooltip
                     placement="top"
-                    content={tComments('lastEdited', {
-                      date: format.dateTime(editedAt, {
-                        day: 'numeric',
-                        month: 'numeric',
-                        year:
-                          editedAt.getFullYear() === new Date().getFullYear()
-                            ? undefined
-                            : 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      }),
-                    })}
+                    content={tComments('lastEdited', { date: formatCommentTime(editedAt) })}
                   >
                     <span className="ml-1 cursor-help opacity-80 hover:opacity-100 italic">
                       {tComments('edited')}
@@ -269,33 +264,36 @@ export function CommentItem({
               </span>
             </div>
 
-            {/* (3) Actions - wraps as a unit after (1+2) group */}
+            {/* Actions, wrapping as one unit */}
             {!isEditing && !isDeleted && (
               <div className="flex items-center gap-3">
-                {/* Like button */}
-                {onLike ? (
-                  <button
-                    onClick={onLike}
-                    className={cn(
-                      'flex items-center gap-1 text-xs transition-colors',
-                      isLiked ? 'text-error' : 'text-muted hover:text-foreground'
-                    )}
-                    title={tComments('like')}
-                  >
-                    <Heart size={14} className={cn(isLiked && 'fill-current')} />
-                    <span>{likes}</span>
-                  </button>
-                ) : (
-                  <div
-                    className={cn(
-                      'flex items-center gap-1 text-xs cursor-default',
-                      isLiked ? 'text-error' : 'text-muted'
-                    )}
-                  >
-                    <Heart size={14} className={cn(isLiked && 'fill-current')} />
-                    <span>{likes}</span>
-                  </div>
-                )}
+                {/* Likes */}
+                {showLikes &&
+                  (onLike ? (
+                    // A button where the comment can be liked
+                    <button
+                      onClick={onLike}
+                      className={cn(
+                        'flex items-center gap-1 text-xs transition-colors',
+                        isLiked ? 'text-error' : 'text-muted hover:text-foreground'
+                      )}
+                      title={tComments('like')}
+                    >
+                      <Heart size={14} className={cn(isLiked && 'fill-current')} />
+                      <span>{likes}</span>
+                    </button>
+                  ) : (
+                    // A plain count otherwise
+                    <div
+                      className={cn(
+                        'flex items-center gap-1 text-xs cursor-default',
+                        isLiked ? 'text-error' : 'text-muted'
+                      )}
+                    >
+                      <Heart size={14} className={cn(isLiked && 'fill-current')} />
+                      <span>{likes}</span>
+                    </div>
+                  ))}
 
                 {/* Reply button */}
                 {onReply && (
@@ -335,6 +333,7 @@ export function CommentItem({
 
           {/* Content */}
           {isEditing ? (
+            // The editor while editing
             <div className="mb-2">
               <RichMathEditor
                 maxCharacters={MAX_CHARACTERS_PER_COMMENT}
@@ -348,8 +347,10 @@ export function CommentItem({
               />
             </div>
           ) : isDeleted ? (
+            // The deleted mark for a deleted comment
             <div className="text-sm text-muted italic mb-1.5">[{tComments('deleted')}]</div>
           ) : (
+            // The comment's content otherwise
             <div className="text-sm text-muted-foreground leading-relaxed mb-1.5">
               <RichMathEditorRenderer content={content} imageContext="userUploads" />
             </div>
@@ -363,14 +364,14 @@ export function CommentItem({
           className="relative"
           style={{
             marginLeft: `${AVATAR_SIZE / 2 + 20}px`,
-            paddingTop: replyCount > 0 && !isCollapsed ? '8px' : '0',
-            paddingBottom: replyCount > 0 && !isCollapsed ? '8px' : '0',
+            paddingTop: areRepliesShown ? '8px' : '0',
+            paddingBottom: areRepliesShown ? '8px' : '0',
           }}
         >
-          {/* Collapsed state: show expand button with reply count */}
+          {/* While collapsed, a button saying how many replies are hidden */}
           {replyCount > 0 && isCollapsed ? (
             <button
-              onClick={onToggleCollapse}
+              onClick={handleToggleCollapse}
               className="flex items-center gap-1.5 py-2 text-xs text-link hover:text-link-hover transition-colors"
             >
               <ChevronDown size={14} />
@@ -379,11 +380,11 @@ export function CommentItem({
               </span>
             </button>
           ) : (
-            // Expanded state: render children (replies) provided by parent
+            // Otherwise the replies
             repliesNode
           )}
 
-          {/* Reply input  */}
+          {/* Reply editor */}
           {replyInputNode && <div className="pt-4 pb-2">{replyInputNode}</div>}
         </div>
       )}

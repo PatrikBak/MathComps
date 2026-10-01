@@ -13,6 +13,7 @@ import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { hasValidContent } from '@/components/shared/components/rich-math-editor/utils/preprocessors'
 import { toggleSetItem } from '@/components/shared/utils/collection-utils'
+import { cn } from '@/components/shared/utils/css-utils'
 import { useIsMobile } from '@/hooks/use-breakpoint'
 import { isAwaitingAnswer } from '@/lib/query-ui-state'
 
@@ -28,8 +29,8 @@ import { convertToCommentData, countAllComments, shouldHideComment } from '../ut
 import { type CommentData, CommentItem } from './CommentItem'
 
 /**
- * Visual variants for the CommentSection.
- * - 'card': Default card-style with background, border, and shadow
+ * Visual variants for the {@link CommentSection}.
+ * - 'card': a card of its own (background, border, shadow) from the small breakpoint up
  * - 'inline': Minimal styling that blends with the page content
  */
 type CommentSectionVariant = 'card' | 'inline'
@@ -40,40 +41,60 @@ type CommentSectionVariant = 'card' | 'inline'
 type CommentSectionProps = {
   /** The target entity being commented on. */
   target: CommentTarget
-  /** Visual variant of the comment section. */
+  /** How the section sits on the page. */
   variant?: CommentSectionVariant
+  /** Whether comments show their likes and can be liked. */
+  showLikes?: boolean
+  /** What the box for a new comment says before anything is typed in it. */
+  newCommentPlaceholder?: string
+  /** Whether a thread with no comments says so, and offers a visitor the sign-in button. */
+  showEmptyText?: boolean
 }
 
 /**
- * A comment section component with threaded replies.
+ * One target's comment thread: the comments with their nested replies, and a box for writing a new one.
  */
-export function CommentSection({ target, variant = 'card' }: CommentSectionProps) {
-  // Get current user ID for ownership checks
+export function CommentSection({
+  target,
+  variant = 'card',
+  showLikes = true,
+  newCommentPlaceholder,
+  showEmptyText = true,
+}: CommentSectionProps) {
+  // The reader, and whether Clerk has settled who they are
   const { userId, isLoaded: isUserLoaded } = useAuth()
 
-  // The name this comment would be signed with, absent until they have chosen one
+  // The reader's username, null until they choose one, and whether their profile is still loading
   const { username, isLoading: isUsernameLoading } = useUserProfile()
 
   // Whether we know who is here and what they are called, since a missing name reads the same as an unread one
   const isIdentityLoaded = isUserLoaded && !isUsernameLoading
 
-  // Check if we are on mobile (used for conditional UI behavior)
+  // Whether the viewport is phone-sized
   const isMobile = useIsMobile()
 
-  // Fetch comments from API
+  // The thread as the server has it, and how far its read got
   const { comments: commentDtos, uiState } = useFetchComments(target)
 
-  // Get translations for UI
+  // Comment copy
   const tComments = useTranslations('comments')
 
-  // Convert the comment into our custom structure
-  const comments = React.useMemo(() => {
-    return commentDtos.map(convertToCommentData)
-  }, [commentDtos])
+  // The thread as CommentData, replies nested
+  const comments = React.useMemo(() => commentDtos.map(convertToCommentData), [commentDtos])
 
-  // Prepare functions to manipulate comments
+  // Whether any comment is there to show
+  const hasVisibleComments = comments.some((comment) => !shouldHideComment(comment))
+
+  // Whether the list region shows: the comments, or the note that there are none
+  const showsList = hasVisibleComments || showEmptyText
+
+  // The create behind a new top-level comment
   const { mutateAsync: createRootComment, isPending: isCreatingRootComment } = useCreateComment()
+
+  // A second create, so the reply editor spins on its own send
   const { mutateAsync: createReply, isPending: isCreatingReplyComment } = useCreateComment()
+
+  // The edit, the delete and the like behind the reader's actions on a comment
   const { mutateAsync: updateComment } = useUpdateComment()
   const { mutate: deleteComment } = useDeleteComment()
   const toggleLike = useToggleCommentLike().mutate
@@ -81,32 +102,33 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
   // Handle pending like restoration (if user liked a comment while not logged in)
   usePendingCommentLike(comments, target)
 
-  // We need a function to save the target to the pending comment target
-  // so we can restore the page after logging in
+  // The store for the thread to come back to after signing in
   const { savePendingTarget } = usePendingCommentTarget()
+
+  // A function which remembers this thread before the sign-in redirect
   const handleBeforeLoginRedirect = useCallback(
     () => savePendingTarget(target),
     [savePendingTarget, target]
   )
 
-  // The text for the editor at the bottom (for new non-reply comments)
+  // The draft of a new top-level comment
   const [commentInputText, setCommentInputText] = useState('')
 
   // The ID of the comment that is being replied to (null if none)
   const [replyCommentId, setReplyCommentId] = useState<string | null>(null)
 
-  // The text for the reply editor (for replies to specific comments)
+  // The draft of the open reply
   const [replyInputText, setReplyInputText] = useState('')
 
-  // The IDs of comments that are collapsed (to support collapsing threads)
+  // The IDs of comments whose replies are collapsed
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set())
 
-  /** Handles submitting a new top-level comment */
+  // A function which posts the new top-level comment
   const handleSubmitComment = useCallback(async () => {
-    // Guard against empty comments or only whitespace/<br> tags
+    // Nothing to send in a draft with no text in it
     if (!hasValidContent(commentInputText)) return
 
-    // Create the comment via API
+    // Post the comment
     await createRootComment(
       {
         target,
@@ -120,12 +142,12 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
     )
   }, [commentInputText, createRootComment, target])
 
-  /** Handles submitting a reply to a specific comment */
+  // A function which posts the open reply
   const handleSubmitReply = useCallback(async () => {
-    // Guard against empty replies or no reply state
+    // Nothing to send without an open reply holding some text
     if (!hasValidContent(replyInputText) || replyCommentId === null) return
 
-    // Create the reply via API
+    // Post the reply
     await createReply(
       {
         target,
@@ -135,30 +157,35 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
       {
         // Clear reply state only after successful creation
         onSuccess: () => {
+          // Close the reply
           setReplyCommentId(null)
+
+          // Drop the reply draft
           setReplyInputText('')
         },
       }
     )
   }, [replyInputText, replyCommentId, createReply, target])
 
-  /**
-   * Opens reply input for a specific comment
-   */
+  // A function which opens an empty reply under a comment
   const handleOpenReply = useCallback((commentId: string) => {
+    // Open the reply under the comment
     setReplyCommentId(commentId)
+
+    // Start the reply draft empty
     setReplyInputText('')
   }, [])
 
-  /** Cancels the current reply */
+  // A function which closes the reply and drops its draft
   const handleCancelReply = useCallback(() => {
+    // Close the reply
     setReplyCommentId(null)
+
+    // Drop the reply draft
     setReplyInputText('')
   }, [])
 
-  /**
-   * Handles editing a comment.
-   */
+  // A function which saves a comment's new text
   const handleEditComment = useCallback(
     async (commentId: string, newContent: string) => {
       await updateComment({
@@ -170,9 +197,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
     [updateComment, target]
   )
 
-  /**
-   * Handles soft-deleting a comment.
-   */
+  // A function which deletes a comment
   const handleDeleteComment = useCallback(
     (commentId: string) => {
       deleteComment({
@@ -183,9 +208,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
     [deleteComment, target]
   )
 
-  /**
-   * Handles toggling like on a comment.
-   */
+  // A function which likes or unlikes a comment
   const handleLikeComment = useCallback(
     (commentId: string, isCurrentlyLiked: boolean) => {
       toggleLike({
@@ -197,37 +220,32 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
     [toggleLike, target]
   )
 
-  /**
-   * Toggles the collapsed state of a comment.
-   */
+  // A function which collapses or expands a comment's replies
   const handleToggleCollapse = useCallback((commentId: string) => {
     setCollapsedIds((previous) => toggleSetItem(previous, commentId))
   }, [])
 
-  /**
-   * Renders a single comment with its replies recursively.
-   */
+  // A function which renders a comment and, under it, its replies
   const renderSingleComment = useCallback(
     (comment: CommentData): React.ReactNode => {
-      // If the comment should be hidden according to our rules, don't render it
+      // A deleted comment with nothing visible under it drops out of the thread
       if (shouldHideComment(comment)) {
         return null
       }
 
-      // Get the replies as an array
-      const replies = comment.replies || []
+      // The comment's direct replies
+      const replies = comment.replies
 
-      // Count the total number of replies (including nested replies)
+      // How many live replies sit under the comment, nested ones included
       const replyCount = countAllComments(replies)
 
-      // Check if the current user is the author of this comment
+      // Whether the reader wrote the comment
       const isOwnComment = isUserLoaded && comment.authorId === userId
 
       // Render the comment
       return (
         <CommentItem
           key={comment.id}
-          authorId={comment.authorId}
           author={comment.author}
           avatarUrl={comment.avatarUrl}
           content={comment.content}
@@ -236,11 +254,13 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
           likes={comment.likes}
           isLiked={comment.isLiked}
           isDeleted={comment.isDeleted}
+          showLikes={showLikes}
           isCollapsed={collapsedIds.has(comment.id)}
           replyCount={replyCount}
           onToggleCollapse={() => handleToggleCollapse(comment.id)}
           onReply={
-            // Replying is offered once there is somebody to sign it, which is a signed-in user with a name
+            // Replying is offered on a comment still standing, once there is somebody to sign it: a signed-in
+            // user with a name
             comment.isDeleted || !isIdentityLoaded || !userId || !username
               ? undefined
               : () => handleOpenReply(comment.id)
@@ -257,8 +277,8 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
             isOwnComment && !comment.isDeleted ? () => handleDeleteComment(comment.id) : undefined
           }
           replyInputNode={
-            // On mobile, reply is handled by the standalone modal below (not inline)
-            // On desktop, render the inline editor
+            // The inline reply editor under the comment being replied to, on desktop; a phone gets the
+            // editor at the bottom
             replyCommentId === comment.id && !isMobile ? (
               <RichMathEditor
                 variant={variant}
@@ -275,7 +295,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
           }
           repliesNode={
             <>
-              {/* Child comments rendered recursively */}
+              {/* Replies */}
               {replies.map((reply) => renderSingleComment(reply))}
             </>
           }
@@ -289,6 +309,7 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
       userId,
       username,
       variant,
+      showLikes,
       collapsedIds,
       replyCommentId,
       replyInputText,
@@ -338,8 +359,14 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
     )
   }
 
+  // Whether the new-comment box shows: hidden while a signed-in reader replies on desktop, and for a visitor
+  // on an empty thread
+  const showsNewCommentBox =
+    !(userId && replyCommentId !== null && !isMobile) && (userId || hasVisibleComments)
+
   return (
     <>
+      {/* Thread */}
       <div
         className={
           {
@@ -348,64 +375,73 @@ export function CommentSection({ target, variant = 'card' }: CommentSectionProps
           }[variant]
         }
       >
-        {/* Comments list */}
-        <div
-          className={
-            {
-              card: 'px-2 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-6',
-              inline: 'pt-0 pb-6',
-            }[variant]
-          }
-        >
-          {!comments || !comments.some((comment) => !shouldHideComment(comment)) ? (
-            <div className="py-6 flex flex-col items-center gap-3 text-center text-muted text-sm">
-              <span>{tComments('empty')}</span>
-              {isUserLoaded && !userId && (
-                <LoginButton onBeforeRedirect={handleBeforeLoginRedirect} />
-              )}
-            </div>
-          ) : (
-            comments.map((comment) => renderSingleComment(comment))
-          )}
-        </div>
-
-        {/* New comment input - hidden when replying on desktop (mobile uses modal instead) */}
-        {!(userId && replyCommentId !== null && !isMobile) &&
-          (userId || comments.some((comment) => !shouldHideComment(comment))) && (
-            <div
-              className={
-                {
-                  card: 'px-2 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5 border-t border-foreground/10',
-                  inline: 'pt-4 border-t border-foreground/10',
-                }[variant]
-              }
-            >
-              {!isIdentityLoaded ? (
-                <div className="flex justify-center py-4">
-                  <LoadingSpinner />
-                </div>
-              ) : !userId ? (
-                <div className="flex justify-center py-4">
+        {/* Comments list, or the note that there are none */}
+        {showsList && (
+          <div
+            className={
+              {
+                card: 'px-2 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-6',
+                inline: 'pt-0 pb-6',
+              }[variant]
+            }
+          >
+            {hasVisibleComments ? (
+              // The thread
+              comments.map((comment) => renderSingleComment(comment))
+            ) : (
+              // The note that there are none, with a sign-in button for a visitor
+              <div className="py-6 flex flex-col items-center gap-3 text-center text-muted text-sm">
+                <span>{tComments('empty')}</span>
+                {isUserLoaded && !userId && (
                   <LoginButton onBeforeRedirect={handleBeforeLoginRedirect} />
-                </div>
-              ) : !username ? (
-                <UsernameGate />
-              ) : (
-                <RichMathEditor
-                  variant={variant}
-                  maxCharacters={MAX_CHARACTERS_PER_COMMENT}
-                  value={commentInputText}
-                  onChange={setCommentInputText}
-                  onSend={handleSubmitComment}
-                  placeholder={tComments('writePlaceholder')}
-                  isLoading={isCreatingRootComment}
-                />
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* New comment box */}
+        {showsNewCommentBox && (
+          <div
+            className={cn(
+              {
+                card: 'px-2 py-2 sm:px-4 sm:py-4 lg:px-6 lg:py-5',
+                inline: 'pt-4',
+              }[variant],
+              // A rule between the list and the box
+              showsList && 'border-t border-foreground/10'
+            )}
+          >
+            {!isIdentityLoaded ? (
+              // Still settling who is reading
+              <div className="flex justify-center py-4">
+                <LoadingSpinner />
+              </div>
+            ) : !userId ? (
+              // A visitor, offered sign-in
+              <div className="flex justify-center py-4">
+                <LoginButton onBeforeRedirect={handleBeforeLoginRedirect} />
+              </div>
+            ) : !username ? (
+              // Signed in with no username yet
+              <UsernameGate />
+            ) : (
+              // The editor for a new comment
+              <RichMathEditor
+                variant={variant}
+                maxCharacters={MAX_CHARACTERS_PER_COMMENT}
+                value={commentInputText}
+                onChange={setCommentInputText}
+                onSend={handleSubmitComment}
+                placeholder={newCommentPlaceholder ?? tComments('writePlaceholder')}
+                isLoading={isCreatingRootComment}
+              />
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Mobile reply editor - rendered outside CommentItem to avoid padding issues */}
+      {/* Mobile reply editor, outside the thread so no empty padded slot is left under the comment */}
       {isMobile && replyCommentId !== null && (
         <RichMathEditor
           variant={variant}

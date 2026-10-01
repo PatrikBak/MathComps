@@ -113,6 +113,7 @@
         "statement": "Statement"
       },
       "student": "Student",
+      "studentCantSeeYet": "can't see it yet",
       "studentNoComment": "No comment",
       "studentVerdict": "What the student said",
       "tabs": {
@@ -121,7 +122,8 @@
         "reference": "Solution"
       },
       "tabsLabel": "Parts of the conversation",
-      "unreadDivider": "New since you last read this"
+      "unreadDivider": "New since you last read this",
+      "withStudent": "With the student"
     },
     "defenseReview": {
       "clearFilters": "Clear filters",
@@ -173,6 +175,7 @@
       "unreadMark": "Unread"
     },
     "grades": {
+      "conversationPlaceholder": "Write to the student...",
       "panel": {
         "changedBy": "Changed by <name>{grader}</name>",
         "comment": "Comment for graders",

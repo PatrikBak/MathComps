@@ -16,8 +16,8 @@ type CreateCommentParams = {
   target: CommentTarget
   /** The content of the comment. */
   content: string
-  /** Optional parent comment ID for replies. */
-  parentCommentId?: string | null
+  /** The comment this replies to, or null for a top-level comment. */
+  parentCommentId: string | null
 }
 
 /**

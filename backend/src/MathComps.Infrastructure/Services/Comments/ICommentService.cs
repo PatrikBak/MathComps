@@ -5,73 +5,86 @@ using System.Collections.Immutable;
 namespace MathComps.Infrastructure.Services.Comments;
 
 /// <summary>
-/// Defines the contract for managing user comments on content.
+/// A service for reading and writing comment threads.
 /// </summary>
+/// <remarks>
+/// Every operation is told who is asking, which for a read can be nobody. A thread the viewer may not reach,
+/// and every comment in it, is refused as though it did not exist: <see cref="CommentTargetNotFoundException"/>
+/// for a target, <see cref="CommentNotFoundException"/> for a comment. Problems, handouts and news are open to
+/// anybody; a grade conversation only to admins. A version an edit has replaced is refused with
+/// <see cref="CommentNotFoundException"/> too.
+/// </remarks>
 public interface ICommentService
 {
-    /// <summary>    
-    /// Gets all comments for a target as a threaded tree. Does not return 
-    /// <see cref="CommentStatus.Superseded"/> comments. It does return 
-    /// <see cref="CommentStatus.Deleted"/> comments but without content.
+    /// <summary>
+    /// Reads a target's thread as a tree of replies. A version an edit has replaced is left out, and a deleted
+    /// comment comes back with its content emptied.
     /// </summary>
     /// <param name="target">The target of the comments.</param>
-    /// <param name="userId">The ID of the currently logged-in user (optional).</param>
-    /// <returns>A response containing the threaded comment tree.</returns>
-    Task<ImmutableList<CommentDto>> GetCommentsAsync(CommentTarget target, Guid? userId);
+    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
+    /// <returns>The thread's top-level comments, each carrying its replies.</returns>
+    Task<ImmutableList<CommentDto>> GetCommentsAsync(CommentTarget target, CommentViewer? viewer);
 
     /// <summary>
-    /// Creates a new comment or reply.
+    /// Creates a new comment or reply. A reply whose parent sits in another thread is refused as though the
+    /// parent did not exist.
     /// </summary>
     /// <param name="target">The target of the comment.</param>
-    /// <param name="authorId">The ID of the user creating the comment.</param>
-    /// <param name="content">The content of the comment.</param>
-    /// <param name="parentCommentId">The optional ID of the parent comment being replied to.</param>
+    /// <param name="viewer">The user creating the comment.</param>
+    /// <param name="content"><inheritdoc cref="Comment.Content" path="/summary"/></param>
+    /// <param name="parentCommentId"><inheritdoc cref="Comment.ParentCommentId" path="/summary"/></param>
     /// <returns>The created comment.</returns>
-    Task<CommentDto> CreateCommentAsync(CommentTarget target, Guid authorId, string content, Guid? parentCommentId = null);
+    Task<CommentDto> CreateCommentAsync(
+        CommentTarget target, CommentViewer viewer, string content, Guid? parentCommentId = null);
 
     /// <summary>
-    /// Updates a comment's content (creates a new version, marks old as <see cref="CommentStatus.Superseded"/>).
+    /// Edits a comment by writing a new version of it. The new version stays in the thread the comment was
+    /// written in and keeps its replies and its posting time. A deleted comment is refused as though it did not
+    /// exist.
     /// </summary>
-    /// <param name="target">The target the comment belongs to.</param>
     /// <param name="commentId">The ID of the comment to update.</param>
-    /// <param name="userId">The ID of the user making the edit (must be the author).</param>
-    /// <param name="content">The new content of the comment.</param>
-    /// <returns>The data created by the update operation.</returns>
-    Task<UpdateCommentResult> UpdateCommentAsync(CommentTarget target, Guid commentId, Guid userId, string content);
+    /// <param name="viewer">The user making the edit (must be the author).</param>
+    /// <param name="content"><inheritdoc cref="Comment.Content" path="/summary"/></param>
+    /// <returns>The new version's id and when it was written.</returns>
+    Task<UpdateCommentResult> UpdateCommentAsync(Guid commentId, CommentViewer viewer, string content);
 
     /// <summary>
-    /// Soft-deletes a comment (sets status to <see cref="CommentStatus.Deleted"/>).
+    /// Deletes a comment, which stays in its thread with its content hidden and its replies kept.
     /// </summary>
     /// <param name="commentId">The ID of the comment to delete.</param>
-    /// <param name="userId">The ID of the user deleting (must be the author).</param>
-    Task DeleteCommentAsync(Guid commentId, Guid userId);
+    /// <param name="viewer">The user deleting (must be the author).</param>
+    Task DeleteCommentAsync(Guid commentId, CommentViewer viewer);
 
     /// <summary>
-    /// Toggles a like on a comment. Creates a like if it doesn't exist, removes it if it does.
+    /// Toggles a like on a comment. Creates a like if it doesn't exist, removes it if it does. A comment in a
+    /// grade conversation takes no likes and is refused as though it did not exist.
     /// </summary>
     /// <param name="commentId">The ID of the comment to like/unlike.</param>
-    /// <param name="userId">The ID of the user toggling the like.</param>
-    Task ToggleLikeAsync(Guid commentId, Guid userId);
+    /// <param name="viewer">The user toggling the like.</param>
+    Task ToggleLikeAsync(Guid commentId, CommentViewer viewer);
 
     /// <summary>
-    /// Gets the comment count for multiple targets of the same type. Only returns active comments.
+    /// Counts the active comments on each of several targets of one type. Only handouts and news articles are
+    /// counted in bulk, and any other type throws <see cref="ArgumentException"/>.
     /// </summary>
     /// <param name="targetType">The type of the targets.</param>
     /// <param name="targetIds">The ids of the targets.</param>
-    /// <returns>A dictionary mapping target ids to comment counts.</returns>
-    Task<ImmutableDictionary<string, int>> GetCommentCountsAsync(CommentTargetType targetType, ImmutableList<string> targetIds);
+    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
+    /// <returns>Each target's active comment count by its id, a target with none left out.</returns>
+    Task<ImmutableDictionary<string, int>> GetCommentCountsAsync(
+        CommentTargetType targetType, ImmutableList<string> targetIds, CommentViewer? viewer);
 }
 
 /// <summary>
-/// Thrown when the referenced comment does not exist.
+/// Thrown when a comment does not exist, or is refused as though it did not.
 /// </summary>
 public sealed class CommentNotFoundException() : Exception("Comment not found");
 
 /// <summary>
-/// Thrown when the content a comment is attached to does not exist.
+/// Thrown when a comment target does not exist, or is refused as though it did not.
 /// </summary>
-/// <param name="targetType">The kind of content the comment targets.</param>
-/// <param name="targetId">The identifier that matched no content.</param>
+/// <param name="targetType">The kind of target asked for.</param>
+/// <param name="targetId">The identifier, or comma-separated identifiers, asked for.</param>
 public sealed class CommentTargetNotFoundException(CommentTargetType targetType, string targetId)
     : Exception($"{targetType} target '{targetId}' not found");
 

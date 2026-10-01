@@ -1,6 +1,8 @@
 using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Admin;
+using MathComps.Infrastructure.Services.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
@@ -8,17 +10,21 @@ using System.Collections.Immutable;
 namespace MathComps.Infrastructure.Services.Comments;
 
 /// <summary>
-/// Service for managing user comments on content.
+/// An <see cref="ICommentService"/> over EF Core, reading a thread with one recursive SQL query and toggling a
+/// like in one statement.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting a context per operation.</param>
+/// <param name="grants"><inheritdoc cref="IUserGrantService" path="/summary"/></param>
 /// <param name="logger">The logger.</param>
 public class CommentService(
-    IDbContextFactory<MathCompsDbContext> dbContextFactory, ILogger<CommentService> logger) : ICommentService
+    IDbContextFactory<MathCompsDbContext> dbContextFactory,
+    IUserGrantService grants,
+    ILogger<CommentService> logger) : ICommentService
 {
     #region Private Types
 
     /// <summary>
-    /// Internal type for mapping raw SQL query results.
+    /// One comment of a thread as the tree query returns it, flat, with its author.
     /// </summary>
     /// <param name="Id"><inheritdoc cref="Comment.Id" path="/summary"/></param>
     /// <param name="ParentCommentId"><inheritdoc cref="Comment.ParentCommentId" path="/summary"/></param>
@@ -27,8 +33,9 @@ public class CommentService(
     /// <param name="AuthorAvatarUrl"><inheritdoc cref="CommentAuthorDto.AvatarUrl" path="/summary"/></param>
     /// <param name="Content"><inheritdoc cref="Comment.Content" path="/summary"/></param>
     /// <param name="Status"><inheritdoc cref="Comment.Status" path="/summary"/></param>
-    /// <param name="CreatedAt"><inheritdoc cref="Comment.CreatedAt" path="/summary"/></param>
-    /// <param name="PreviousVersionId"><inheritdoc cref="Comment.PreviousVersionId" path="/summary" /></param>
+    /// <param name="PostedAt"><inheritdoc cref="CommentDto.CreatedAt" path="/summary"/></param>
+    /// <param name="CreatedAt">When this version was written.</param>
+    /// <param name="PreviousVersionId"><inheritdoc cref="Comment.PreviousVersionId" path="/summary"/></param>
     private record CommentRow(
         Guid Id,
         Guid? ParentCommentId,
@@ -37,54 +44,90 @@ public class CommentService(
         string? AuthorAvatarUrl,
         string Content,
         CommentStatus Status,
+        DateTimeOffset PostedAt,
         DateTimeOffset CreatedAt,
         Guid? PreviousVersionId
     );
+
+    /// <summary>
+    /// The thread a comment belongs to, by the ids its link points at.
+    /// </summary>
+    /// <param name="TargetType">The kind of thread.</param>
+    private abstract record CommentAnchor(CommentTargetType TargetType);
+
+    /// <summary>
+    /// A problem's thread.
+    /// </summary>
+    /// <param name="ProblemId"><inheritdoc cref="ProblemComment.ProblemId" path="/summary"/></param>
+    private sealed record ProblemAnchor(Guid ProblemId) : CommentAnchor(CommentTargetType.Problem);
+
+    /// <summary>
+    /// A handout's thread.
+    /// </summary>
+    /// <param name="HandoutId"><inheritdoc cref="HandoutComment.HandoutId" path="/summary"/></param>
+    private sealed record HandoutAnchor(Guid HandoutId) : CommentAnchor(CommentTargetType.Handout);
+
+    /// <summary>
+    /// A news article's thread.
+    /// </summary>
+    /// <param name="NewsArticleId"><inheritdoc cref="NewsArticleComment.NewsArticleId" path="/summary"/></param>
+    private sealed record NewsAnchor(Guid NewsArticleId) : CommentAnchor(CommentTargetType.News);
+
+    /// <summary>
+    /// The conversation between the graders and one student about one problem the student was graded on.
+    /// </summary>
+    /// <param name="EntryId"><inheritdoc cref="HostedGradeComment.EntryId" path="/summary"/></param>
+    /// <param name="ProblemId"><inheritdoc cref="HostedGradeComment.ProblemId" path="/summary"/></param>
+    private sealed record GradeAnchor(Guid EntryId, Guid ProblemId) : CommentAnchor(CommentTargetType.HostedGrade);
 
     #endregion
 
     #region ICommentService Implementation
 
     /// <inheritdoc />
-    public async Task<ImmutableList<CommentDto>> GetCommentsAsync(CommentTarget target, Guid? userId)
+    public async Task<ImmutableList<CommentDto>> GetCommentsAsync(CommentTarget target, CommentViewer? viewer)
     {
+        // Only a thread the viewer may reach is read
+        EnsureOpen(target, viewer);
+
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // Build the CTE-based query to fetch all comments for the target
-        var (sql, parameters) = BuildCommentsCte(target);
+        // The query reading the target's thread, replaced versions left out
+        var (sql, parameters) = await BuildCommentsCteAsync(dbContext, target);
 
-        // Execute the raw SQL query and map to a helper type
+        // The thread's comments, flat, each with its author
         var flatComments = await dbContext.Database
             .SqlQueryRaw<CommentRow>(sql, parameters)
             .ToListAsync();
 
-        // Get all comment IDs for fetching like counts and user like status
+        // The ids of the thread's comments
         var commentIds = flatComments.Select(comment => comment.Id).ToHashSet();
 
-        // Fetch like counts for all comments
+        // Each thread comment's like count, by comment id
         var likeCounts = await dbContext.CommentLikes
             .Where(commentLike => commentIds.Contains(commentLike.CommentId))
             .GroupBy(commentLike => commentLike.CommentId)
             .Select(group => new { CommentId = group.Key, Count = group.Count() })
             .ToDictionaryAsync(group => group.CommentId, group => group.Count);
 
-        // Fetch user's likes (if authenticated)
-        var userLikes = userId.HasValue
+        // The thread comments the viewer has liked, when someone signed in is asking
+        var userLikes = viewer is not null
+            // The viewer's likes among the thread's comments
             ? await dbContext.CommentLikes
-                .Where(commentLike => commentIds.Contains(commentLike.CommentId) && commentLike.UserId == userId.Value)
+                .Where(commentLike => commentIds.Contains(commentLike.CommentId) && commentLike.UserId == viewer.UserId)
                 .Select(commentLike => commentLike.CommentId)
                 .ToHashSetAsync()
+            // A signed-out caller has liked nothing
             : [];
 
-        // Build the threaded tree structure, a dictionary of comment IDs to their children
+        // Each comment's direct replies, by the parent's id
         var childrenMap = flatComments
             .Where(comment => comment.ParentCommentId != null)
             .GroupBy(comment => comment.ParentCommentId!.Value)
             .ToDictionary(group => group.Key, group => group.ToList());
 
-        // A helper function to recursively build the final DTOs to be returned
-        // The final object already has its children built
+        // A function building a comment with its whole reply subtree nested under it
         CommentDto BuildDto(CommentRow row)
         {
             // Get the children of the comment
@@ -92,11 +135,11 @@ public class CommentService(
 
             // Build chronological replies
             var replies = children
-                .OrderBy(comment => comment.CreatedAt)
+                .OrderBy(comment => comment.PostedAt)
                 .Select(BuildDto)
                 .ToImmutableList();
 
-            // Create the author DTO directly from row data
+            // The comment's author
             var author = new CommentAuthorDto(
                 row.AuthorExternalId,
                 row.AuthorName,
@@ -111,12 +154,12 @@ public class CommentService(
             // Strip content if deleted
             var content = isDeleted ? string.Empty : row.Content;
 
-            // Build the comment object
+            // The comment as the thread shows it
             return new CommentDto(
                 Id: row.Id,
                 Author: author,
                 Content: content,
-                CreatedAt: row.CreatedAt,
+                CreatedAt: row.PostedAt,
                 EditedAt: row.PreviousVersionId.HasValue ? row.CreatedAt : null,
                 IsDeleted: isDeleted,
                 LikeCount: likeCount,
@@ -128,7 +171,7 @@ public class CommentService(
         // Get the top-level comments, ordered chronologically
         var topLevel = flatComments
             .Where(comment => comment.ParentCommentId == null)
-            .OrderBy(comment => comment.CreatedAt)
+            .OrderBy(comment => comment.PostedAt)
             .Select(BuildDto)
             .ToImmutableList();
 
@@ -143,15 +186,26 @@ public class CommentService(
     }
 
     /// <inheritdoc />
-    public async Task<CommentDto> CreateCommentAsync(CommentTarget target, Guid authorId, string content, Guid? parentCommentId = null)
+    public async Task<CommentDto> CreateCommentAsync(
+        CommentTarget target, CommentViewer viewer, string content, Guid? parentCommentId = null)
     {
+        // Only a thread the viewer may reach is written in
+        EnsureOpen(target, viewer);
+
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // Create the comment entity
+        // The thread the target names
+        var anchor = await ResolveAnchorAsync(dbContext, target);
+
+        // A reply stays in its parent's thread, since a thread pulls its replies in by their parent alone
+        if (parentCommentId is { } parentId && await ReadAnchorAsync(dbContext, parentId) != anchor)
+            throw new CommentNotFoundException();
+
+        // The new comment
         var comment = new Comment
         {
-            AuthorId = authorId,
+            AuthorId = viewer.UserId,
             ParentCommentId = parentCommentId,
             Content = content,
             Status = CommentStatus.Active,
@@ -161,72 +215,28 @@ public class CommentService(
         // Add the comment to the database
         dbContext.Comments.Add(comment);
 
-        // Create the join table entry based on target type
-        switch (target.TargetType)
-        {
-            case CommentTargetType.Handout:
-                // The row standing in for the handout, minted now if nothing has hung off it yet
-                var handoutId = await ContentAnchors.EnsureHandoutAsync(dbContext, target.TargetId);
-
-                // Add a comment
-                dbContext.HandoutComments.Add(new HandoutComment
-                {
-                    HandoutId = handoutId,
-                    CommentId = comment.Id
-                });
-
-                break;
-
-            case CommentTargetType.News:
-                // The row standing in for the article, minted now if nothing has hung off it yet
-                var newsArticleId = await ContentAnchors.EnsureNewsArticleAsync(dbContext, target.TargetId);
-
-                // Add a comment
-                dbContext.NewsArticleComments.Add(new NewsArticleComment
-                {
-                    NewsArticleId = newsArticleId,
-                    CommentId = comment.Id
-                });
-
-                break;
-
-            case CommentTargetType.Problem:
-                // Fetch the problem's id
-                var problemId = (await dbContext.Problems
-                    .Where(problem => problem.Slug == target.TargetId)
-                    .Select(problem => (Guid?)problem.Id)
-                    .FirstOrDefaultAsync())
-                    // It must exist
-                    ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
-
-                // Add a comment
-                dbContext.ProblemComments.Add(new ProblemComment
-                {
-                    ProblemId = problemId,
-                    CommentId = comment.Id
-                });
-
-                break;
-
-            // Unhandled target type
-            default:
-                throw new ArgumentOutOfRangeException(nameof(target), target.TargetType, "Invalid comment target type");
-        }
+        // Hang the comment off its thread
+        Attach(dbContext, anchor, comment.Id);
 
         // Save the comment
         await dbContext.SaveChangesAsync();
 
         // Fetch author info
         var author = (await dbContext.Users
-            .Where(user => user.Id == authorId)
+            .Where(user => user.Id == viewer.UserId)
             .Select(user => new CommentAuthorDto(
                 user.ExternalId, user.IsDeleted ? null : user.Username, user.AvatarUrl))
             .FirstOrDefaultAsync())
-            // It must exist
-            ?? throw new InvalidOperationException($"Author with id '{authorId}' not found");
+            // The viewer's user row, which must exist
+            ?? throw new InvalidOperationException($"Author with id '{viewer.UserId}' not found");
 
         // Log the creation of the comment
-        logger.LogInformation("Created comment {CommentId} by user {AuthorId} on {TargetType}:{TargetId}", comment.Id, authorId, target.TargetType, target.TargetId);
+        logger.LogInformation(
+            "Created comment {CommentId} by user {AuthorId} on {TargetType}:{TargetId}",
+            comment.Id,
+            viewer.UserId,
+            target.TargetType,
+            target.TargetId);
 
         // Return the comment's data
         return new CommentDto(
@@ -243,24 +253,29 @@ public class CommentService(
     }
 
     /// <inheritdoc />
-    public async Task<UpdateCommentResult> UpdateCommentAsync(CommentTarget target, Guid commentId, Guid userId, string content)
+    public async Task<UpdateCommentResult> UpdateCommentAsync(Guid commentId, CommentViewer viewer, string content)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
+        // The thread the comment was written in, where the viewer may reach it
+        var anchor = await ReadOpenAnchorAsync(dbContext, commentId, viewer);
+
         // Get the existing comment
-        var existingComment = await dbContext.Comments.FirstOrDefaultAsync(comment => comment.Id == commentId)
-            // It must exist
-            ?? throw new CommentNotFoundException();
+        var existingComment = await dbContext.Comments.SingleAsync(comment => comment.Id == commentId);
 
         // Verify ownership
-        if (existingComment.AuthorId != userId)
+        if (existingComment.AuthorId != viewer.UserId)
             throw new NotCommentAuthorException();
+
+        // A deleted comment stays deleted, refused like a comment that is not there
+        if (existingComment.Status == CommentStatus.Deleted)
+            throw new CommentNotFoundException();
 
         // Create new version
         var newComment = new Comment
         {
-            AuthorId = userId,
+            AuthorId = viewer.UserId,
             ParentCommentId = existingComment.ParentCommentId,
             PreviousVersionId = existingComment.Id,
             Content = content,
@@ -274,64 +289,17 @@ public class CommentService(
         // Add the new comment
         dbContext.Comments.Add(newComment);
 
-        // Link the new comment to the same target
-        switch (target.TargetType)
-        {
-            case CommentTargetType.Handout:
-                // Get the handout's id
-                var handoutId = (await dbContext.Handouts
-                    .Where(handout => handout.ContentId == target.TargetId)
-                    .Select(handout => (Guid?)handout.Id)
-                    .FirstOrDefaultAsync())
-                    // It must exist
-                    ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
+        // Link the new version into the thread the comment was written in
+        Attach(dbContext, anchor, newComment.Id);
 
-                // Add the comment to the handout
-                dbContext.HandoutComments.Add(new HandoutComment
-                {
-                    HandoutId = handoutId,
-                    CommentId = newComment.Id
-                });
-                break;
+        // The replies to the old version
+        var replies = await dbContext.Comments
+            .Where(reply => reply.ParentCommentId == existingComment.Id)
+            .ToListAsync();
 
-            case CommentTargetType.News:
-                // Get the news article's id
-                var newsArticleId = (await dbContext.NewsArticles
-                    .Where(newsArticle => newsArticle.ContentId == target.TargetId)
-                    .Select(newsArticle => (Guid?)newsArticle.Id)
-                    .FirstOrDefaultAsync())
-                    // It must exist
-                    ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
-
-                // Add the comment to the news article
-                dbContext.NewsArticleComments.Add(new NewsArticleComment
-                {
-                    NewsArticleId = newsArticleId,
-                    CommentId = newComment.Id
-                });
-                break;
-
-            case CommentTargetType.Problem:
-                // Get the problem's id
-                var problemId = (await dbContext.Problems
-                    .Where(problem => problem.Slug == target.TargetId)
-                    .Select(problem => (Guid?)problem.Id)
-                    .FirstOrDefaultAsync())
-                    // It must exist
-                    ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
-
-                // Add the comment to the problem
-                dbContext.ProblemComments.Add(new ProblemComment
-                {
-                    ProblemId = problemId,
-                    CommentId = newComment.Id
-                });
-                break;
-
-            // Unhandled target type
-            default:
-                throw new ArgumentOutOfRangeException(nameof(target), target.TargetType, "Invalid comment target type");
-        }
+        // Each reply moved under the new version, since a thread skips a replaced comment and everything under it
+        foreach (var reply in replies)
+            reply.ParentCommentId = newComment.Id;
 
         // Save all changes
         await dbContext.SaveChangesAsync();
@@ -341,25 +309,26 @@ public class CommentService(
             "Updated comment {OldCommentId} -> {NewCommentId} by user {UserId}",
             commentId,
             newComment.Id,
-            userId);
+            viewer.UserId);
 
-        // Return just the essential data (new ID and editedAt timestamp)
+        // Return the new version's id and when it was written
         return new UpdateCommentResult(newComment.Id, newComment.CreatedAt);
     }
 
     /// <inheritdoc />
-    public async Task DeleteCommentAsync(Guid commentId, Guid userId)
+    public async Task DeleteCommentAsync(Guid commentId, CommentViewer viewer)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
+        // Only a comment in a thread the viewer may reach is touched
+        await ReadOpenAnchorAsync(dbContext, commentId, viewer);
+
         // Get the comment
-        var comment = await dbContext.Comments.FirstOrDefaultAsync(comment => comment.Id == commentId)
-            // It must exist
-            ?? throw new CommentNotFoundException();
+        var comment = await dbContext.Comments.SingleAsync(comment => comment.Id == commentId);
 
         // Verify ownership
-        if (comment.AuthorId != userId)
+        if (comment.AuthorId != viewer.UserId)
             throw new NotCommentAuthorException();
 
         // Soft-delete
@@ -372,83 +341,92 @@ public class CommentService(
         logger.LogInformation(
             "Soft-deleted comment {CommentId} by user {UserId}",
             commentId,
-            userId);
+            viewer.UserId);
     }
 
     /// <inheritdoc />
-    public async Task ToggleLikeAsync(Guid commentId, Guid userId)
+    public async Task ToggleLikeAsync(Guid commentId, CommentViewer viewer)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // Check if comment exists
-        var commentExists = await dbContext.Comments.AnyAsync(comment => comment.Id == commentId);
+        // Only a comment in a thread the viewer may reach is liked
+        var anchor = await ReadOpenAnchorAsync(dbContext, commentId, viewer);
 
-        // If the comment doesn't exist, we're sad
-        if (!commentExists)
+        // A grade conversation takes no likes, refused like a comment that is not there
+        if (anchor is GradeAnchor)
             throw new CommentNotFoundException();
 
-        // Check if the user is the author of the comment
+        // The comment's author
         var authorId = await dbContext.Comments
             .Where(comment => comment.Id == commentId)
             .Select(comment => comment.AuthorId)
-            .FirstOrDefaultAsync();
+            .SingleAsync();
 
         // If the user is the author, we're sad
-        if (authorId == userId)
+        if (authorId == viewer.UserId)
             throw new CannotLikeOwnCommentException();
 
-        // Execute atomic toggle operation using a single SQL statement
-        // This prevents race conditions by doing the entire operation atomically at the database level
+        // Toggle the viewer's like in one statement: delete it when there, insert it otherwise
         await dbContext.Database.ExecuteSqlInterpolatedAsync($@"
             WITH deleted AS (
-                DELETE FROM comment_likes 
-                WHERE user_id = {userId}
+                DELETE FROM comment_likes
+                WHERE user_id = {viewer.UserId}
                   AND comment_id = {commentId}
                 RETURNING *
             )
             INSERT INTO comment_likes (user_id, comment_id, created_at)
-            SELECT {userId}, {commentId}, {DateTimeOffset.UtcNow}
+            SELECT {viewer.UserId}, {commentId}, {DateTimeOffset.UtcNow}
             WHERE NOT EXISTS (SELECT 1 FROM deleted)
         ");
 
         // Log the toggle
         logger.LogInformation(
             "Toggled like for user {UserId} on comment {CommentId}",
-            userId,
+            viewer.UserId,
             commentId);
     }
 
     /// <inheritdoc />
-    public async Task<ImmutableDictionary<string, int>> GetCommentCountsAsync(CommentTargetType targetType, ImmutableList<string> targetIds)
+    public async Task<ImmutableDictionary<string, int>> GetCommentCountsAsync(
+        CommentTargetType targetType, ImmutableList<string> targetIds, CommentViewer? viewer)
     {
+        // Only threads the viewer may reach are counted, refused like targets that are not there
+        if (!IsOpenTo(targetType, viewer))
+            throw new CommentTargetNotFoundException(targetType, string.Join(", ", targetIds));
+
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // Build the query based on the target type
-        // Include only active comments
+        // Each requested target's active-comment count, by its content id
         var query = targetType switch
         {
+            // Each article's active comments
             CommentTargetType.News => dbContext.NewsArticleComments
                 .Where(newsArticleComment => targetIds.Contains(newsArticleComment.NewsArticle.ContentId))
                 .Where(newsArticleComment => newsArticleComment.Comment.Status == CommentStatus.Active)
                 .GroupBy(newsArticleComment => newsArticleComment.NewsArticle.ContentId)
                 .Select(group => new KeyValuePair<string, int>(group.Key, group.Count())),
 
+            // Each handout's active comments
             CommentTargetType.Handout => dbContext.HandoutComments
                 .Where(handoutComment => targetIds.Contains(handoutComment.Handout.ContentId))
                 .Where(handoutComment => handoutComment.Comment.Status == CommentStatus.Active)
                 .GroupBy(handoutComment => handoutComment.Handout.ContentId)
                 .Select(group => new KeyValuePair<string, int>(group.Key, group.Count())),
 
+            // Threads with no bulk count
+            CommentTargetType.Problem or CommentTargetType.HostedGrade
+                => throw new ArgumentException("Unsupported target type for bulk counts", nameof(targetType)),
+
             // Unhandled target type
-            _ => throw new ArgumentException("Unsupported target type for bulk counts", nameof(targetType))
+            _ => throw new ArgumentOutOfRangeException(nameof(targetType), targetType, "Invalid comment target type")
         };
 
-        // Execute the query
+        // Each target's count, by its id
         var counts = await query.ToDictionaryAsync(pair => pair.Key, pair => pair.Value);
 
-        // Return the counts as an immutable dictionary
+        // Return the counts
         return counts.ToImmutableDictionary();
     }
 
@@ -457,63 +435,325 @@ public class CommentService(
     #region Private Methods
 
     /// <summary>
-    /// Builds a recursive CTE query for fetching comments on any target type.
+    /// Resolves the thread a target names, minting the anchor of file-based content the first time anything is
+    /// attached to it.
     /// </summary>
-    /// <param name="target">The target of the comments.</param>
-    /// <returns>A tuple containing the parameterized SQL query and the parameter array.</returns>
-    private static (string Sql, object[] Parameters) BuildCommentsCte(CommentTarget target)
-    {
-        // Define target-specific JOIN and WHERE fragments
-        var (joinFragment, whereFragment) = target.TargetType switch
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="target">The thread's target.</param>
+    /// <returns>The thread the target names.</returns>
+    private async Task<CommentAnchor> ResolveAnchorAsync(MathCompsDbContext dbContext, CommentTarget target) =>
+        // The thread the target names, per kind of target
+        target.TargetType switch
         {
-            CommentTargetType.Handout => (
-                "JOIN handout_comments hc ON c.id = hc.comment_id JOIN handouts h ON hc.handout_id = h.id",
-                "h.content_id = @p0"
-            ),
-            CommentTargetType.Problem => (
-                "JOIN problem_comments pc ON c.id = pc.comment_id JOIN problems p ON pc.problem_id = p.id",
-                "p.slug = @p0"
-            ),
-            CommentTargetType.News => (
-                "JOIN news_article_comments nc ON c.id = nc.comment_id JOIN news_articles n ON nc.news_article_id = n.id",
-                "n.content_id = @p0"
-            ),
-            _ => throw new ArgumentOutOfRangeException(nameof(target))
+            // The row standing in for the handout, minted now if nothing has hung off it yet
+            CommentTargetType.Handout => new HandoutAnchor(
+                await ContentAnchors.EnsureHandoutAsync(dbContext, target.TargetId)),
+
+            // The row standing in for the article, minted now if nothing has hung off it yet
+            CommentTargetType.News => new NewsAnchor(
+                await ContentAnchors.EnsureNewsArticleAsync(dbContext, target.TargetId)),
+
+            // The problem with the slug, which must exist
+            CommentTargetType.Problem => new ProblemAnchor(
+                await dbContext.Problems
+                    .Where(problem => problem.Slug == target.TargetId)
+                    .Select(problem => (Guid?)problem.Id)
+                    .FirstOrDefaultAsync()
+                ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId)),
+
+            // The grade conversation, by the student's entry and the problem
+            CommentTargetType.HostedGrade => await ResolveGradeAnchorAsync(dbContext, target),
+
+            // Unhandled target type
+            _ => throw new ArgumentOutOfRangeException(nameof(target), target.TargetType, "Invalid comment target type")
         };
 
-        // Build the SQL with the target-specific fragments
-        // Note: We filter out 'superseded' (old edit versions) but keep 'deleted' (soft-deleted, shown as placeholders)
+    /// <summary>
+    /// Resolves a grade conversation, named like the grade itself by its problem and student, to the problem and
+    /// the student's graded entry, found by <see cref="HostedGrading.FindGradedEntryAsync"/>.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="target">The conversation, identified as <c>{problemId}:{userId}</c>.</param>
+    /// <returns>The conversation.</returns>
+    private async Task<GradeAnchor> ResolveGradeAnchorAsync(MathCompsDbContext dbContext, CommentTarget target)
+    {
+        // The problem and the student, refused like a missing thread when the id doesn't name them
+        if (target.TargetId.Split(':') is not [var problemText, var userText]
+            || !Guid.TryParse(problemText, out var problemId)
+            || !Guid.TryParse(userText, out var userId))
+            throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
+
+        // The entry the student is graded under, refused like a missing thread when nobody grades them on it
+        var entry = await HostedGrading.FindGradedEntryAsync(
+                dbContext, grants, problemId, userId, CancellationToken.None)
+            ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
+
+        // The conversation with the student about the problem
+        return new GradeAnchor(entry.Id, problemId);
+    }
+
+    /// <summary>
+    /// Reads the thread a comment was written in, refusing a comment in a thread the viewer may not reach as
+    /// though it did not exist.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="commentId">The comment.</param>
+    /// <param name="viewer">Who is asking.</param>
+    /// <returns>The thread the comment belongs to.</returns>
+    private static async Task<CommentAnchor> ReadOpenAnchorAsync(
+        MathCompsDbContext dbContext, Guid commentId, CommentViewer viewer)
+    {
+        // The thread the comment is stored in
+        var anchor = await ReadAnchorAsync(dbContext, commentId);
+
+        // The thread, where the viewer may reach it; refused like a comment that is not there otherwise
+        return IsOpenTo(anchor.TargetType, viewer) ? anchor : throw new CommentNotFoundException();
+    }
+
+    /// <summary>
+    /// Reads the thread a comment was written in off its stored link. A version an edit has replaced counts as
+    /// missing.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="commentId">The comment.</param>
+    /// <returns>The thread the comment belongs to.</returns>
+    private static async Task<CommentAnchor> ReadAnchorAsync(MathCompsDbContext dbContext, Guid commentId)
+    {
+        // The live comment's link into each kind of thread, of which it has exactly one
+        var links = await dbContext.Comments
+            .Where(comment => comment.Id == commentId && comment.Status != CommentStatus.Superseded)
+            .Select(comment => new
+            {
+                ProblemId = dbContext.ProblemComments
+                    .Where(link => link.CommentId == comment.Id)
+                    .Select(link => (Guid?)link.ProblemId)
+                    .FirstOrDefault(),
+                HandoutId = dbContext.HandoutComments
+                    .Where(link => link.CommentId == comment.Id)
+                    .Select(link => (Guid?)link.HandoutId)
+                    .FirstOrDefault(),
+                NewsArticleId = dbContext.NewsArticleComments
+                    .Where(link => link.CommentId == comment.Id)
+                    .Select(link => (Guid?)link.NewsArticleId)
+                    .FirstOrDefault(),
+                Grade = dbContext.HostedGradeComments
+                    .Where(link => link.CommentId == comment.Id)
+                    .Select(link => new { link.EntryId, link.ProblemId })
+                    .FirstOrDefault(),
+            })
+            .FirstOrDefaultAsync()
+            // A missing or replaced comment is refused as not found
+            ?? throw new CommentNotFoundException();
+
+        // The thread the comment's link points into
+        return links switch
+        {
+            // A problem's thread
+            { ProblemId: { } problemId } => new ProblemAnchor(problemId),
+
+            // A handout's thread
+            { HandoutId: { } handoutId } => new HandoutAnchor(handoutId),
+
+            // A news article's thread
+            { NewsArticleId: { } newsArticleId } => new NewsAnchor(newsArticleId),
+
+            // A grade conversation
+            { Grade: { } grade } => new GradeAnchor(grade.EntryId, grade.ProblemId),
+
+            // A comment in no thread is one nobody can reach
+            _ => throw new CommentNotFoundException()
+        };
+    }
+
+    /// <summary>
+    /// Links a comment into its thread.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="anchor">The thread.</param>
+    /// <param name="commentId">The comment.</param>
+    private static void Attach(MathCompsDbContext dbContext, CommentAnchor anchor, Guid commentId)
+    {
+        // A link from the comment into its kind of thread
+        switch (anchor)
+        {
+            // A problem's thread
+            case ProblemAnchor problem:
+                dbContext.ProblemComments.Add(new ProblemComment
+                {
+                    ProblemId = problem.ProblemId,
+                    CommentId = commentId
+                });
+                break;
+
+            // A handout's thread
+            case HandoutAnchor handout:
+                dbContext.HandoutComments.Add(new HandoutComment
+                {
+                    HandoutId = handout.HandoutId,
+                    CommentId = commentId
+                });
+                break;
+
+            // A news article's thread
+            case NewsAnchor news:
+                dbContext.NewsArticleComments.Add(new NewsArticleComment
+                {
+                    NewsArticleId = news.NewsArticleId,
+                    CommentId = commentId
+                });
+                break;
+
+            // A grade conversation
+            case GradeAnchor grade:
+                dbContext.HostedGradeComments.Add(new HostedGradeComment
+                {
+                    EntryId = grade.EntryId,
+                    ProblemId = grade.ProblemId,
+                    CommentId = commentId
+                });
+                break;
+
+            // Unhandled anchor
+            default:
+                throw new ArgumentOutOfRangeException(nameof(anchor), anchor, "Invalid comment anchor");
+        }
+    }
+
+    /// <summary>
+    /// Builds a recursive CTE query for fetching comments on any target type.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="target">The target of the comments.</param>
+    /// <returns>The thread's SQL and the values it binds.</returns>
+    private async Task<(string Sql, object[] Parameters)> BuildCommentsCteAsync(
+        MathCompsDbContext dbContext, CommentTarget target)
+    {
+        // Define target-specific JOIN and WHERE fragments, with the values the WHERE compares against
+        var (joinFragment, whereFragment, parameters) = target.TargetType switch
+        {
+            // A handout's thread, by its content id
+            CommentTargetType.Handout => (
+                "JOIN handout_comments hc ON c.id = hc.comment_id JOIN handouts h ON hc.handout_id = h.id",
+                "h.content_id = @p0",
+                new object[] { target.TargetId }
+            ),
+
+            // A problem's thread, by its slug
+            CommentTargetType.Problem => (
+                "JOIN problem_comments pc ON c.id = pc.comment_id JOIN problems p ON pc.problem_id = p.id",
+                "p.slug = @p0",
+                [target.TargetId]
+            ),
+
+            // A news article's thread, by its content id
+            CommentTargetType.News => (
+                "JOIN news_article_comments nc ON c.id = nc.comment_id "
+                + "JOIN news_articles n ON nc.news_article_id = n.id",
+                "n.content_id = @p0",
+                [target.TargetId]
+            ),
+
+            // A grade conversation, by the entry and the problem it resolves to
+            CommentTargetType.HostedGrade => GradeThreadFragments(await ResolveGradeAnchorAsync(dbContext, target)),
+
+            // Unhandled target type
+            _ => throw new ArgumentOutOfRangeException(nameof(target), target.TargetType, "Invalid comment target type")
+        };
+
+        // The thread's SQL, which skips a replaced version and keeps a deleted comment so the replies under it
+        // stay reachable. Each comment is walked back through its earlier versions to the first one, whose time
+        // is when the comment was posted.
         var sql = $@"
             WITH RECURSIVE comment_tree AS (
                 SELECT c.id, c.parent_comment_id, c.author_id, c.content, c.status, c.created_at, c.previous_version_id
                 FROM comments c
                 {joinFragment}
                 WHERE {whereFragment} AND c.parent_comment_id IS NULL AND c.status != 'superseded'::comment_status
-                
+
                 UNION ALL
-                
+
                 SELECT c.id, c.parent_comment_id, c.author_id, c.content, c.status, c.created_at, c.previous_version_id
                 FROM comments c
                 JOIN comment_tree ct ON c.parent_comment_id = ct.id
                 WHERE c.status != 'superseded'::comment_status
+            ),
+            comment_versions AS (
+                SELECT ct.id AS comment_id, ct.previous_version_id, ct.created_at
+                FROM comment_tree ct
+
+                UNION ALL
+
+                SELECT cv.comment_id, v.previous_version_id, v.created_at
+                FROM comment_versions cv
+                JOIN comments v ON v.id = cv.previous_version_id
             )
-            SELECT 
-                ct.id, 
-                ct.parent_comment_id, 
-                u.external_id AS author_external_id, 
-                CASE WHEN u.is_deleted THEN NULL ELSE u.username END AS author_name, 
-                u.avatar_url AS author_avatar_url, 
-                ct.content, 
-                ct.status, 
-                ct.created_at, 
+            SELECT
+                ct.id,
+                ct.parent_comment_id,
+                u.external_id AS author_external_id,
+                CASE WHEN u.is_deleted THEN NULL ELSE u.username END AS author_name,
+                u.avatar_url AS author_avatar_url,
+                ct.content,
+                ct.status,
+                first_version.created_at AS posted_at,
+                ct.created_at,
                 ct.previous_version_id
             FROM comment_tree ct
+            JOIN comment_versions first_version
+                ON first_version.comment_id = ct.id AND first_version.previous_version_id IS NULL
             JOIN users u ON ct.author_id = u.id
-            ORDER BY ct.created_at";
+            ORDER BY first_version.created_at";
 
-        // Return the query and the target slug as a parameter
-        return (sql, [target.TargetId]);
+        // Return the query and the values its fragments compare against
+        return (sql, parameters);
     }
+
+    /// <summary>
+    /// Whether a viewer may read and write in a kind of thread. The one place comment access is decided: every
+    /// public method asks it before touching a thread.
+    /// </summary>
+    /// <param name="targetType">The kind of thread.</param>
+    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
+    /// <returns>Whether the thread is open to them.</returns>
+    private static bool IsOpenTo(CommentTargetType targetType, CommentViewer? viewer) =>
+        // Whether the kind of thread is open to the viewer
+        targetType switch
+        {
+            // Public content, open to anybody
+            CommentTargetType.Problem or CommentTargetType.Handout or CommentTargetType.News => true,
+
+            // A grade conversation, open to admins alone
+            CommentTargetType.HostedGrade => viewer is { IsAdmin: true },
+
+            // Unhandled target type
+            _ => throw new ArgumentOutOfRangeException(nameof(targetType), targetType, "Invalid comment target type")
+        };
+
+    /// <summary>
+    /// Refuses a thread the viewer may not reach as though it did not exist, so that a refusal does not confirm
+    /// there is anything there.
+    /// </summary>
+    /// <param name="target">The thread asked for.</param>
+    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
+    private static void EnsureOpen(CommentTarget target, CommentViewer? viewer)
+    {
+        // A thread the viewer may not reach, refused like one that is not there
+        if (!IsOpenTo(target.TargetType, viewer))
+            throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
+    }
+
+    /// <summary>
+    /// The JOIN and WHERE picking out one grade conversation's comments.
+    /// </summary>
+    /// <param name="anchor">The conversation.</param>
+    /// <returns>The JOIN and WHERE fragments, with the values the WHERE compares against.</returns>
+    private static (string Join, string Where, object[] Parameters) GradeThreadFragments(GradeAnchor anchor) =>
+        // The conversation's links, matched on both of its keys
+        (
+            "JOIN hosted_grade_comments gc ON c.id = gc.comment_id",
+            "gc.entry_id = @p0 AND gc.problem_id = @p1",
+            [anchor.EntryId, anchor.ProblemId]
+        );
 
     #endregion
 }
