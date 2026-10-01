@@ -38,9 +38,10 @@ export async function getComments(
  *
  * @param apiCall - The authenticated API caller function.
  * @param targetType - The type of targets.
- * @param slugs - Array of target slugs to get counts for.
+ * @param targetIds - The ids of the targets to count.
  *
- * @returns A promise resolving to a slug->count mapping or an error.
+ * @returns A promise resolving to the comment count of each target that has any, keyed by target id, or an
+ * error.
  */
 export async function getCommentCounts(
   apiCall: ApiCaller,
@@ -51,7 +52,7 @@ export async function getCommentCounts(
     method: 'POST',
     body: JSON.stringify({
       targetType,
-      targetIds: targetIds,
+      targetIds,
     }),
   })
 }
@@ -62,7 +63,7 @@ export async function getCommentCounts(
  * @param apiCall - The authenticated API caller function.
  * @param target - The target to create the comment on.
  * @param content - The markdown content of the comment.
- * @param parentCommentId - Optional parent comment ID for replies.
+ * @param parentCommentId - The comment this replies to, or null for a top-level comment.
  *
  * @returns A promise resolving to the created comment or an error.
  */
@@ -70,14 +71,14 @@ export async function createComment(
   apiCall: ApiCaller,
   target: CommentTarget,
   content: string,
-  parentCommentId?: string | null
+  parentCommentId: string | null
 ): Promise<ApiResult<CommentDto>> {
   return apiCall<CommentDto>(() => getCreateCommentUrl(), {
     method: 'POST',
     body: JSON.stringify({
       target,
       content,
-      parentCommentId: parentCommentId ?? null,
+      parentCommentId,
     }),
   })
 }
@@ -87,27 +88,24 @@ export async function createComment(
  *
  * @param apiCall - The authenticated API caller function.
  * @param commentId - The ID of the comment to update.
- * @param target - The target the comment belongs to.
  * @param content - The new markdown content.
- * @returns A promise resolving to the new comment ID and editedAt timestamp, or an error.
+ * @returns A promise resolving to the comment's new version ({@link UpdateCommentResult}), or an error.
  */
 export async function updateComment(
   apiCall: ApiCaller,
   commentId: string,
-  target: CommentTarget,
   content: string
 ): Promise<ApiResult<UpdateCommentResult>> {
   return apiCall<UpdateCommentResult>(() => getUpdateCommentUrl(commentId), {
     method: 'PUT',
     body: JSON.stringify({
-      target,
       content,
     }),
   })
 }
 
 /**
- * Soft-deletes a comment.
+ * Deletes a comment.
  *
  * @param apiCall - The authenticated API caller function.
  * @param commentId - The ID of the comment to delete.

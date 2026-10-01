@@ -6,8 +6,7 @@ using MathComps.Infrastructure.Services.Users;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the comment endpoints — reading threaded comments, bulk counts, and the authenticated
-/// create/edit/delete/like operations on a comment.
+/// Maps the endpoints for reading and writing comment threads.
 /// </summary>
 public static class CommentEndpoints
 {
@@ -22,7 +21,7 @@ public static class CommentEndpoints
     /// <param name="app">The route builder to register the endpoints on.</param>
     public static void MapCommentEndpoints(this IEndpointRouteBuilder app)
     {
-        // Get threaded comments for a target (handout, problem, news)
+        // Get a target's comment thread
         app.MapGet(CommentsPath, async (
             CommentTargetType targetType,
             string targetId,
@@ -30,13 +29,13 @@ public static class CommentEndpoints
             HttpContext context,
             ICommentService commentService) =>
         {
-            // Get user ID... might be null
-            var userId = await userManager.GetUserIdAsync(context);
+            // Who is asking... might be nobody
+            var viewer = await GetViewerAsync(userManager, context);
 
             // Get the comments
             var comments = await commentService.GetCommentsAsync(
                 new CommentTarget(targetType, targetId),
-                userId
+                viewer
             );
 
             // Return the comments
@@ -44,13 +43,18 @@ public static class CommentEndpoints
         })
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // Get comment counts for multiple targets in bulk (useful for news feed or handout list)
+        // Get comment counts for many targets of one type
         app.MapPost($"{CommentsPath}/counts", async (
             GetCommentCountsRequest request,
+            IUserManager userManager,
+            HttpContext context,
             ICommentService commentService) =>
         {
-            // Get the slug->count mapping
-            var counts = await commentService.GetCommentCountsAsync(request.TargetType, request.TargetIds);
+            // Who is asking... might be nobody
+            var viewer = await GetViewerAsync(userManager, context);
+
+            // Each target's active comment count by its id
+            var counts = await commentService.GetCommentCountsAsync(request.TargetType, request.TargetIds, viewer);
 
             // Return the mapping
             return Results.Ok(counts);
@@ -65,12 +69,12 @@ public static class CommentEndpoints
             ICommentService commentService) =>
         {
             // Resolve the caller, faulting when the request has no user behind it
-            var userId = await userManager.RequireUserIdAsync(context);
+            var viewer = await RequireViewerAsync(userManager, context);
 
             // Create comment
             var comment = await commentService.CreateCommentAsync(
                 request.Target,
-                userId,
+                viewer,
                 request.Content,
                 request.ParentCommentId);
 
@@ -89,22 +93,21 @@ public static class CommentEndpoints
             ICommentService commentService) =>
         {
             // Resolve the caller, faulting when the request has no user behind it
-            var userId = await userManager.RequireUserIdAsync(context);
+            var viewer = await RequireViewerAsync(userManager, context);
 
             // Update comment
             var updatedCommentData = await commentService.UpdateCommentAsync(
-                request.Target,
                 id,
-                userId,
+                viewer,
                 request.Content);
 
-            // Return the updated comment
+            // Return the new version's id and edit time
             return Results.Ok(updatedCommentData);
         })
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // Soft-delete a comment
+        // Delete a comment
         app.MapDelete($"{CommentsPath}/{{id:guid}}", async (
             Guid id,
             HttpContext context,
@@ -112,10 +115,10 @@ public static class CommentEndpoints
             ICommentService commentService) =>
         {
             // Resolve the caller, faulting when the request has no user behind it
-            var userId = await userManager.RequireUserIdAsync(context);
+            var viewer = await RequireViewerAsync(userManager, context);
 
             // Perform delete
-            await commentService.DeleteCommentAsync(id, userId);
+            await commentService.DeleteCommentAsync(id, viewer);
 
             // No reason to return anything
             return Results.NoContent();
@@ -131,10 +134,10 @@ public static class CommentEndpoints
             ICommentService commentService) =>
         {
             // Resolve the caller, faulting when the request has no user behind it
-            var userId = await userManager.RequireUserIdAsync(context);
+            var viewer = await RequireViewerAsync(userManager, context);
 
             // Perform toggle
-            await commentService.ToggleLikeAsync(id, userId);
+            await commentService.ToggleLikeAsync(id, viewer);
 
             // No reason to return anything
             return Results.NoContent();
@@ -142,4 +145,27 @@ public static class CommentEndpoints
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
     }
+
+    /// <summary>
+    /// Resolves who is asking, for a request anybody may make.
+    /// </summary>
+    /// <param name="userManager">Resolves an external provider id to the internal user id.</param>
+    /// <param name="context">The HTTP context carrying the caller's claims.</param>
+    /// <returns>The viewer, or null when the request carries no resolvable user.</returns>
+    private static async Task<CommentViewer?> GetViewerAsync(IUserManager userManager, HttpContext context) =>
+        // The user with their role, where there is one
+        await userManager.GetUserIdAsync(context) is { } userId
+            ? new CommentViewer(userId, context.User.IsInRole(ClerkClaims.AdminRole))
+            : null;
+
+    /// <summary>
+    /// Resolves who is asking, for a request only a user may make, throwing
+    /// <see cref="UserNotResolvedException"/> when the caller can't be resolved to one.
+    /// </summary>
+    /// <param name="userManager">Resolves an external provider id to the internal user id.</param>
+    /// <param name="context">The HTTP context carrying the caller's claims.</param>
+    /// <returns>The viewer.</returns>
+    private static async Task<CommentViewer> RequireViewerAsync(IUserManager userManager, HttpContext context) =>
+        // The user with their role, who must be there
+        await GetViewerAsync(userManager, context) ?? throw new UserNotResolvedException();
 }

@@ -295,6 +295,35 @@ test.describe('the grading board', () => {
     await expectOnlyNotCounting(dialog, 3, 3)
   })
 
+  test('offers the conversation with the student beside a lone conversation', async ({ page }) => {
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // Cyril's first problem, which he spoke about once
+    const dialog = await openGrade(page, 'Cyril', 1)
+
+    // His one conversation, open to begin with
+    await expect(dialog.getByText('Answer 1 by cyril on p1.')).toBeVisible()
+
+    // The way to the conversation with him, on a switch his one conversation would not need
+    const withStudent = dialog.getByRole('button', {
+      name: new RegExp(`^${messages.admin.conversation.withStudent}`),
+    })
+
+    // Picked
+    await withStudent.click()
+
+    // Standing in place of his conversation
+    await expect(withStudent).toHaveAttribute('aria-pressed', 'true')
+    await expect(dialog.getByText('Answer 1 by cyril on p1.')).toHaveCount(0)
+
+    // His conversation, picked again
+    await dialog.getByRole('button', { name: /^Conversation 1/ }).click()
+
+    // Back on screen
+    await expect(dialog.getByText('Answer 1 by cyril on p1.')).toBeVisible()
+  })
+
   test('hands focus back to the cell of the pair the walk ended on', async ({ page }) => {
     // A backend serving the test group's board
     await installGradingBackend(page, GROUP_SLUG)

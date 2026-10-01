@@ -113,6 +113,7 @@
         "statement": "Zadanie"
       },
       "student": "Študent",
+      "studentCantSeeYet": "zatiaľ to nevidí",
       "studentNoComment": "Bez komentára",
       "studentVerdict": "Čo povedal študent",
       "tabs": {
@@ -121,7 +122,8 @@
         "reference": "Riešenie"
       },
       "tabsLabel": "Časti konverzácie",
-      "unreadDivider": "Nové od tvojho posledného čítania"
+      "unreadDivider": "Nové od tvojho posledného čítania",
+      "withStudent": "So študentom"
     },
     "defenseReview": {
       "clearFilters": "Zrušiť filtre",
@@ -173,6 +175,7 @@
       "unreadMark": "Neprečítané"
     },
     "grades": {
+      "conversationPlaceholder": "Napíš študentovi...",
       "panel": {
         "changedBy": "Posledná zmena: <name>{grader}</name>",
         "comment": "Komentár pre hodnotiteľov",

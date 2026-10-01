@@ -1,15 +1,18 @@
 /**
- * The type of content that can be commented on.
+ * The kind of target a comment thread belongs to.
  */
-export type CommentTargetType = 'Handout' | 'Problem' | 'News'
+export type CommentTargetType = 'Handout' | 'Problem' | 'News' | 'HostedGrade'
 
 /**
- * The target that a comment is / will be made on.
+ * What a comment thread hangs off: the kind of thing, and which one.
  */
 export type CommentTarget = {
-  /** The type of target (Handout, Problem, or News). */
+  /** The type of target. */
   targetType: CommentTargetType
-  /** Permanent identifier of the target (nanoid for handouts/news, slug for problems). */
+  /**
+   * Permanent identifier of the target: a nanoid for handouts and news, a slug for problems, and
+   * `{problemId}:{userId}` for one student's grade on one problem.
+   */
   targetId: string
 }
 
@@ -17,11 +20,11 @@ export type CommentTarget = {
  * Author information for a comment.
  */
 type CommentAuthorDto = {
-  /** Unique identifier for the author. */
+  /** The author's id with the sign-in provider. */
   id: string
   /** The author's username, or null when they have chosen none or their account is deleted. */
   name: string | null
-  /** Optional URL to the author's avatar image. */
+  /** URL to the author's avatar image, or null when they have none. */
   avatarUrl: string | null
 }
 
@@ -29,23 +32,23 @@ type CommentAuthorDto = {
  * A single comment with nested replies.
  */
 export type CommentDto = {
-  /** Unique identifier for the comment. */
+  /** The id of the comment's current version; an edit gives it a new one. */
   id: string
-  /** The comment's author data. */
+  /** The comment's author. */
   author: CommentAuthorDto
-  /** The markdown content of the comment. */
+  /** The comment's markdown, empty once it is deleted. */
   content: string
   /** When the comment was created (ISO 8601 string). */
   createdAt: string
-  /** When the comment was last edited, if applicable (ISO 8601 string). */
+  /** When the comment was last edited (ISO 8601 string), or null if never. */
   editedAt: string | null
-  /** Whether the comment has been soft-deleted. */
+  /** Whether the comment was deleted; a deleted one keeps its place in the thread. */
   isDeleted: boolean
   /** Total number of likes on this comment. */
   likeCount: number
-  /** Whether the viewing user has liked this comment. False if no user. */
+  /** Whether the viewing user has liked this comment. False for a signed-out viewer. */
   isLiked: boolean
-  /** Nested reply comments (recursive). */
+  /** The comment's replies. */
   replies: CommentDto[]
 }
 

@@ -20,8 +20,7 @@ type UpdateCommentParams = {
 /**
  * Hook for updating a comment with optimistic updates.
  *
- * After the server responds, the cache is updated with the server-returned
- * editedAt timestamp to ensure accurate display.
+ * Once the server answers, the cached comment takes its new version's id and edit time.
  *
  * @returns A React Query mutation object.
  */
@@ -32,8 +31,7 @@ export function useUpdateComment() {
   // Reuse the base comment mutation
   return useCommentMutation<UpdateCommentResult, UpdateCommentParams>({
     // Call the API
-    apiFn: (apiCall, { commentId, target, content }) =>
-      updateComment(apiCall, commentId, target, content),
+    apiFn: (apiCall, { commentId, content }) => updateComment(apiCall, commentId, content),
 
     // Optimistically update the cache
     optimisticUpdate: (comments, { commentId, content }) =>
@@ -42,6 +40,7 @@ export function useUpdateComment() {
     // After success, update with server's actual ID and timestamp
     onSuccess: (result, { commentId }, context) => {
       context?.queryClient.setQueryData<CommentDto[]>(context.queryKey, (comments) =>
+        // A cached thread takes the new version, one not in the cache stays as it is
         comments
           ? updateCommentInTree(comments, commentId, { id: result.id, editedAt: result.editedAt })
           : comments
@@ -51,7 +50,7 @@ export function useUpdateComment() {
     // The reason shown in the auth prompt
     authReason: t('authReasons.editComment'),
 
-    // The error message shown when the server craps out
+    // The fallback message for when the server craps out without saying why
     errorMessage: t('errors.editFailed'),
   })
 }

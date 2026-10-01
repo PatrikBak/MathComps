@@ -132,6 +132,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Every version of the grades those entries earn, one grade per entry per problem.</summary>
     public DbSet<HostedGrade> HostedGrades => Set<HostedGrade>();
 
+    /// <summary>Join table: comments in the conversations between graders and a student about one problem.</summary>
+    public DbSet<HostedGradeComment> HostedGradeComments => Set<HostedGradeComment>();
+
     /// <summary>Links from a defense session to the archive problem it defends.</summary>
     public DbSet<ProblemDefense> ProblemDefenses => Set<ProblemDefense>();
 
@@ -882,6 +885,37 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion HostedGrade
+
+        #region HostedGradeComment
+
+        modelBuilder.Entity<HostedGradeComment>(e =>
+        {
+            // One link per comment in one conversation
+            e.HasKey(link => new { link.EntryId, link.ProblemId, link.CommentId });
+
+            // The entry the conversation is with, cascading like the grade does
+            e.HasOne(link => link.Entry)
+             .WithMany()
+             .HasForeignKey(link => link.EntryId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The problem it is about, restricted on the same terms as the grade
+            e.HasOne(link => link.Problem)
+             .WithMany()
+             .HasForeignKey(link => link.ProblemId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // The comment, going with it
+            e.HasOne(link => link.Comment)
+             .WithMany()
+             .HasForeignKey(link => link.CommentId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Each comment belongs to at most one conversation
+            e.HasIndex(link => link.CommentId).IsUnique().HasDatabaseName("ux_hosted_grade_comment_comment_id");
+        });
+
+        #endregion HostedGradeComment
 
         #region UserGrant
 

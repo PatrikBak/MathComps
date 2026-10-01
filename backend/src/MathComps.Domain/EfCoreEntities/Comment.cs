@@ -1,7 +1,7 @@
 namespace MathComps.Domain.EfCoreEntities;
 
 /// <summary>
-/// A user comment on content (Problem, Handout, NewsArticle).
+/// A user comment in a thread.
 /// </summary>
 public class Comment
 {

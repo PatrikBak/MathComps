@@ -1,394 +1,284 @@
-using MathComps.Infrastructure.Tests.TestInfrastructure;
 using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Comments;
+using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Immutable;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MathComps.Infrastructure.Tests.Comments;
 
 /// <summary>
-/// Integration tests for the EF-backed <see cref="ICommentService"/> using a shared PostgreSQL container.
+/// Integration tests for the public comment threads as <see cref="ICommentService"/> keeps them against a real
+/// PostgreSQL database: who a comment is signed by, likes, deletion, edits that write a new version and keep its
+/// replies, nesting, and bulk counts.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<ICommentService>(fixture)
 {
+    /// <summary>
+    /// The id of the user who writes most of the comments.
+    /// </summary>
+    private static readonly Guid _user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+    /// <summary>
+    /// The id of a second user, who likes, replies and tries the author-only actions.
+    /// </summary>
+    private static readonly Guid _user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+    /// <summary>
+    /// The first user, signed in and no admin.
+    /// </summary>
+    private static readonly CommentViewer _user1 = new(_user1Id, IsAdmin: false);
+
+    /// <summary>
+    /// The second user, signed in and no admin.
+    /// </summary>
+    private static readonly CommentViewer _user2 = new(_user2Id, IsAdmin: false);
+
+    /// <summary>
+    /// The first user's <see cref="User.ExternalId"/>.
+    /// </summary>
+    private const string User1ExternalId = "user1";
+
+    /// <summary>
+    /// The second user's <see cref="User.ExternalId"/>.
+    /// </summary>
+    private const string User2ExternalId = "user2";
+
+    /// <summary>
+    /// The first user's <see cref="User.AvatarUrl"/>.
+    /// </summary>
+    private const string User1AvatarUrl = "https://example.com/avatars/user1.png";
+
+    /// <summary>
+    /// A handout nothing seeds, so its first comment creates its row.
+    /// </summary>
+    private const string HandoutId = "test-handout";
+
+    /// <summary>
+    /// The seeded news article's content id.
+    /// </summary>
+    private const string NewsId = "test-news";
+
+    /// <summary>
+    /// The seeded problem's slug, which names its thread.
+    /// </summary>
+    private const string ProblemSlug = "p1";
+
+    /// <summary>
+    /// The thread of the handout nothing seeds.
+    /// </summary>
+    private static readonly CommentTarget _handoutThread = new(CommentTargetType.Handout, HandoutId);
+
+    /// <summary>
+    /// The seeded problem's thread.
+    /// </summary>
+    private static readonly CommentTarget _problemThread = new(CommentTargetType.Problem, ProblemSlug);
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
         // Register the user services module the test resolves from
         services.AddUserServices();
 
     /// <summary>
-    /// Test user ID 1.
-    /// </summary>
-    private static readonly Guid _user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
-    /// <summary>
-    /// Test user ID 2.
-    /// </summary>
-    private static readonly Guid _user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
-
-    /// <summary>
-    /// Test user external ID 1.
-    /// </summary>
-    private static readonly string _user1ExternalId = "user1";
-
-    /// <summary>
-    /// Test user external ID 2.
-    /// </summary>
-    private static readonly string _user2ExternalId = "user2";
-
-    /// <summary>
-    /// Test handout content id.
-    /// </summary>
-    private static readonly string _testHandoutId = "test-handout";
-
-    /// <summary>
-    /// Test news article content id.
-    /// </summary>
-    private static readonly string _testNewsId = "test-news";
-
-    /// <summary>
-    /// Test problem slug.
-    /// </summary>
-    private static readonly string _testProblemSlug = "p1";
-
-    /// <summary>
-    /// Test avatar URL for user 1.
-    /// </summary>
-    private static readonly string _user1AvatarUrl = "https://example.com/avatars/user1.png";
-
-    /// <summary>
-    /// Verifies that GetCommentsAsync returns an empty list when no comments exist.
+    /// A handout nobody has commented on reads as an empty thread, though no row stands for it yet.
     /// </summary>
     [Fact]
     public Task GetCommentsAsync_ReturnsEmptyListWhenNoComments() => RunTestAsync(async commentService =>
     {
-        // Act
-        var response = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id
-        );
+        // The untouched handout's thread, as the first user reads it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user1);
 
-        // Assert
-        Assert.NotNull(response);
-        Assert.Empty(response);
+        // Nothing in it
+        Assert.Empty(thread);
     });
 
     /// <summary>
-    /// Verifies that GetCommentsAsync works with a null viewer ID (anonymous access).
+    /// A signed-out reader reads a thread like anyone else, with nothing marked as liked by them.
     /// </summary>
     [Fact]
-    public Task GetCommentsAsync_AllowsNullViewerId() => RunTestAsync(async commentService =>
+    public Task GetCommentsAsync_AllowsASignedOutReader() => RunTestAsync(async commentService =>
     {
-        // Create a comment
-        await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id,
-            "Public comment"
-        );
+        // The first user comments on the handout
+        await commentService.CreateCommentAsync(_handoutThread, _user1, "Public comment");
 
-        // Act
-        var response = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            null
-        );
+        // The thread as a signed-out reader gets it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, null);
 
-        // Assert
-        Assert.NotNull(response);
-        Assert.Single(response);
-        Assert.Equal("Public comment", response[0].Content);
-        Assert.False(response[0].IsLiked);
+        // The comment, readable
+        var comment = Assert.Single(thread);
+        Assert.Equal("Public comment", comment.Content);
+
+        // Not marked liked, with no reader to have liked it
+        Assert.False(comment.IsLiked);
     });
 
     /// <summary>
-    /// A comment is signed with the author's username. The two projections that
-    /// name an author are written separately, one in LINQ for the comment just created and one in raw SQL for
-    /// the thread read back, so both are asserted here: a fix applied to one and not the other renames a
-    /// student's comment the moment the page reloads.
+    /// A comment is signed with the author's username. Each projection that names an author is written on its
+    /// own, LINQ for the comment just created and raw SQL for the thread read back, so each is asserted here: a
+    /// fix that misses one renames a student's comment the moment the page reloads.
     /// </summary>
     [Fact]
-    public Task CommentsAreSignedWithTheUsername() => RunTestAsync(async commentService =>
+    public Task CreateCommentAsync_SignsTheCommentWithTheUsername() => RunTestAsync(async commentService =>
     {
         // The author has taken a name of their own
-        await QueryAsync(async context =>
-        {
-            var user = await context.Users.SingleAsync(user => user.Id == _user1Id);
-            user.Username = "Peťo Novák";
-            await context.SaveChangesAsync();
-        });
+        await NameTheAuthorAsync("Peťo Novák");
 
-        // Who writes something
-        var created = await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId), _user1Id, "Signed.");
+        // The author writes something
+        var created = await commentService.CreateCommentAsync(_handoutThread, _user1, "Signed.");
 
-        // The comment comes back carrying it
+        // The new comment comes back signed with that name
         Assert.Equal("Peťo Novák", created.Author.Name);
 
-        // And so does the thread it lands in
-        var thread = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId), _user1Id);
+        // The thread the comment lands in
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user1);
+
+        // Signed with the same name
         Assert.Equal("Peťo Novák", thread[0].Author.Name);
     });
 
     /// <summary>
-    /// A deleted account stops being named. Deletion leaves the username standing, so the projection withholding
-    /// it is the only thing keeping somebody who asked to be gone from still signing every comment they wrote.
+    /// A deleted account stops being named. Deletion leaves the username standing, so the thread's projection
+    /// withholding it is all that keeps somebody who asked to be gone from still signing every comment they wrote.
     /// </summary>
     [Fact]
     public Task GetCommentsAsync_DoesNotNameADeletedAuthorByTheirUsername() => RunTestAsync(async commentService =>
     {
         // An author with a name of their own
+        await NameTheAuthorAsync("Peťo Novák");
+
+        // The author writes something
+        await commentService.CreateCommentAsync(_handoutThread, _user1, "Written before leaving.");
+
+        // The author deletes their account, the username left standing
         await QueryAsync(async context =>
         {
-            var user = await context.Users.SingleAsync(user => user.Id == _user1Id);
-            user.Username = "Peťo Novák";
-            await context.SaveChangesAsync();
-        });
-
-        // Who writes something
-        await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId), _user1Id, "Written before leaving.");
-
-        // And then leaves, with the username still standing
-        await QueryAsync(async context =>
-        {
-            // Their row
+            // The author's row
             var user = await context.Users.SingleAsync(user => user.Id == _user1Id);
 
-            // Marked gone
+            // Marked deleted
             user.IsDeleted = true;
 
-            // Commit it
+            // Save the deletion
             await context.SaveChangesAsync();
         });
 
-        // Read the thread back
-        var thread = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId), null);
+        // The thread as a signed-out reader gets it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, null);
 
         // The comment stands, signed by nobody in particular
         Assert.Null(thread[0].Author.Name);
     });
 
     /// <summary>
-    /// Verifies that creating a top-level comment works and can be retrieved.
+    /// A new top-level comment comes back as written, signed with its author's id, username and avatar, with
+    /// nothing on it yet, and the thread then holds it.
     /// </summary>
     [Fact]
     public Task CreateCommentAsync_CreatesTopLevelComment() => RunTestAsync(async commentService =>
     {
-        // Arrange
+        // The comment's text
         var content = "This is a test comment.";
 
-        // Act
-        var createdComment = await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id,
-            content
-        );
+        // The first user comments on the handout
+        var created = await commentService.CreateCommentAsync(_handoutThread, _user1, content);
 
-        // Assert
-        Assert.NotNull(createdComment);
-        Assert.Equal(content, createdComment.Content);
-        Assert.Equal(_user1ExternalId, createdComment.Author.Id);
-        Assert.Equal("User 1", createdComment.Author.Name);
-        Assert.Equal(_user1AvatarUrl, createdComment.Author.AvatarUrl);
-        Assert.Empty(createdComment.Replies);
-        Assert.False(createdComment.IsDeleted);
-        Assert.Equal(0, createdComment.LikeCount);
-        Assert.False(createdComment.IsLiked);
+        // The text as written
+        Assert.Equal(content, created.Content);
 
-        // Fetch comments to verify
-        var response = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id
-        );
+        // Signed with the author's id, username and avatar
+        Assert.Equal(User1ExternalId, created.Author.Id);
+        Assert.Equal("User 1", created.Author.Name);
+        Assert.Equal(User1AvatarUrl, created.Author.AvatarUrl);
 
-        // Assert
-        Assert.Single(response);
-        Assert.Equal(content, response[0].Content);
+        // Nothing on it yet: no replies, no deletion, no likes
+        Assert.Empty(created.Replies);
+        Assert.False(created.IsDeleted);
+        Assert.Equal(0, created.LikeCount);
+        Assert.False(created.IsLiked);
+
+        // The handout's thread as the author reads it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user1);
+
+        // Holding just the new comment
+        Assert.Equal(content, Assert.Single(thread).Content);
     });
 
     /// <summary>
-    /// Verifies that creating a comment works (Note: Replies are currently not supported by the interface).
-    /// </summary>
-    [Fact]
-    public Task CreateCommentAsync_CreatesComment() => RunTestAsync(async commentService =>
-    {
-        // Create comment
-        var comment = await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id,
-            "Test comment"
-        );
-
-        // Assert
-        Assert.NotNull(comment);
-        Assert.Equal("Test comment", comment.Content);
-        Assert.Equal(_user1ExternalId, comment.Author.Id);
-
-        // Fetch comments to verify
-        var response = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id
-        );
-
-        // Assert
-        Assert.Single(response);
-    });
-
-    /// <summary>
-    /// Verifies that toggling a like adds and removes likes correctly.
+    /// A like toggles: the first toggle adds the reader's like and the second takes it back, and both the count
+    /// and the reader's own mark follow.
     /// </summary>
     [Fact]
     public Task ToggleLikeAsync_AddsAndRemovesLike() => RunTestAsync(async commentService =>
     {
-        // Create comment
-        var comment = await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id,
-            "Test comment");
+        // The first user's comment on the handout
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Test comment");
 
-        // Act 1 - add like
-        await commentService.ToggleLikeAsync(comment.Id, _user2Id);
+        // The second user likes the comment
+        await commentService.ToggleLikeAsync(comment.Id, _user2);
 
-        // Assert 1 - like is added
-        var response1 = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user2Id
-        );
-        Assert.Equal(1, response1[0].LikeCount);
-        Assert.True(response1[0].IsLiked);
+        // The thread as the second user reads it
+        var liked = await commentService.GetCommentsAsync(_handoutThread, _user2);
 
-        // Act 2 - remove like
-        await commentService.ToggleLikeAsync(comment.Id, _user2Id);
+        // One like, marked as the second user's
+        Assert.Equal(1, liked[0].LikeCount);
+        Assert.True(liked[0].IsLiked);
 
-        // Assert 2 - like is removed
-        var response2 = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user2Id
-        );
-        Assert.Equal(0, response2[0].LikeCount);
-        Assert.False(response2[0].IsLiked);
+        // The second user toggles the like again
+        await commentService.ToggleLikeAsync(comment.Id, _user2);
+
+        // The thread as the second user reads it now
+        var unliked = await commentService.GetCommentsAsync(_handoutThread, _user2);
+
+        // No likes, none marked as the second user's
+        Assert.Equal(0, unliked[0].LikeCount);
+        Assert.False(unliked[0].IsLiked);
     });
 
     /// <summary>
-    /// Verifies that a user cannot like their own comment.
+    /// An author's like on their own comment is refused.
     /// </summary>
     [Fact]
     public Task ToggleLikeAsync_ThrowsWhenLikingOwnComment() => RunTestAsync(async commentService =>
     {
-        // Create comment
-        var comment = await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id,
-            "Test comment");
+        // The first user's comment
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Test comment");
 
-        // Act & Assert - liking your own comment is rejected
+        // The author likes their own comment
         await Assert.ThrowsAsync<CannotLikeOwnCommentException>(
-            () => commentService.ToggleLikeAsync(comment.Id, _user1Id));
+            () => commentService.ToggleLikeAsync(comment.Id, _user1));
     });
 
     /// <summary>
-    /// Verifies that liking a non-existent comment throws a not-found error.
+    /// A like on a comment that does not exist is refused as not found.
     /// </summary>
     [Fact]
     public Task ToggleLikeAsync_ThrowsWhenCommentMissing() => RunTestAsync(async commentService =>
     {
-        // Act & Assert - the missing comment is reported
+        // The first user likes a comment nobody wrote
         await Assert.ThrowsAsync<CommentNotFoundException>(
-            () => commentService.ToggleLikeAsync(Guid.NewGuid(), _user1Id));
+            () => commentService.ToggleLikeAsync(Guid.NewGuid(), _user1));
     });
 
     /// <summary>
-    /// Verifies that deleting a comment sets IsDeleted flag.
-    /// </summary>
-    [Fact]
-    public Task DeleteCommentAsync_SoftDeletesComment() => RunTestAsync(async commentService =>
-    {
-        // Create comment
-        var comment = await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id,
-            "Test comment");
-
-        // Act
-        await commentService.DeleteCommentAsync(comment.Id, _user1Id);
-
-        // Fetch comments to verify
-        var response = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id
-        );
-
-        // Assert
-        Assert.Single(response);
-        Assert.True(response[0].IsDeleted);
-    });
-
-    /// <summary>
-    /// Verifies that only the author can delete their comment.
+    /// A delete by anyone but the author is refused.
     /// </summary>
     [Fact]
     public Task DeleteCommentAsync_ThrowsWhenNotAuthor() => RunTestAsync(async commentService =>
     {
-        // Create comment
-        var comment = await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id,
-            "Test comment");
+        // The first user's comment
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Test comment");
 
-        // Act & Assert - the non-author is rejected
+        // The second user deletes the first one's comment
         await Assert.ThrowsAsync<NotCommentAuthorException>(
-            () => commentService.DeleteCommentAsync(comment.Id, _user2Id));
+            () => commentService.DeleteCommentAsync(comment.Id, _user2));
     });
 
     /// <summary>
-    /// Verifies that creating a reply works and creates the correct hierarchy.
-    /// </summary>
-    [Fact]
-    public Task CreateCommentAsync_CreatesReply() => RunTestAsync(async commentService =>
-    {
-        // Create parent comment
-        var parent = await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id,
-            "Parent comment"
-        );
-
-        // Create reply
-        var reply = await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user2Id,
-            "Reply comment",
-            parent.Id
-        );
-
-        // Assert
-        Assert.NotNull(reply);
-        Assert.Equal("Reply comment", reply.Content);
-
-        // Fetch comments to verify structure
-        var response = await commentService.GetCommentsAsync(
-            new CommentTarget(CommentTargetType.Handout, _testHandoutId),
-            _user1Id
-        );
-
-        // Assert
-        Assert.Single(response);
-        Assert.Equal(parent.Id, response[0].Id);
-        Assert.Single(response[0].Replies);
-        Assert.Equal(reply.Id, response[0].Replies[0].Id);
-        Assert.Equal("Reply comment", response[0].Replies[0].Content);
-    });
-
-    /// <summary>
-    /// Verifies that creating a complex threaded discussion works correctly.
-    /// Hierarchy:
+    /// A thread reads back as the tree its replies were written into, each reply under its own parent at any depth:
     /// - Root 1 (User 1)
     ///   - Reply 1.1 (User 2)
     ///     - Reply 1.1.1 (User 1)
@@ -397,322 +287,406 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     ///   - Reply 2.1 (User 1)
     /// </summary>
     [Fact]
-    public Task GetCommentsAsync_HandlesComplexDiscussionThreads() => RunTestAsync(async commentService =>
+    public Task GetCommentsAsync_NestsEachReplyUnderItsParent() => RunTestAsync(async commentService =>
     {
-        // Arrange
-        var target = new CommentTarget(CommentTargetType.Handout, _testHandoutId);
-
-        // --- Root 1 Branch ---
-        var root1 = await commentService.CreateCommentAsync(target, _user1Id, "Root 1");
+        // Root 1
+        var root1 = await commentService.CreateCommentAsync(_handoutThread, _user1, "Root 1");
 
         // Reply 1.1 -> Root 1
-        var reply1_1 = await commentService.CreateCommentAsync(target, _user2Id, "Reply 1.1", root1.Id);
+        var reply1_1 = await commentService.CreateCommentAsync(_handoutThread, _user2, "Reply 1.1", root1.Id);
 
         // Reply 1.1.1 -> Reply 1.1
-        await commentService.CreateCommentAsync(target, _user1Id, "Reply 1.1.1", reply1_1.Id);
+        await commentService.CreateCommentAsync(_handoutThread, _user1, "Reply 1.1.1", reply1_1.Id);
 
         // Reply 1.2 -> Root 1
-        var reply1_2 = await commentService.CreateCommentAsync(target, _user1Id, "Reply 1.2", root1.Id);
+        var reply1_2 = await commentService.CreateCommentAsync(_handoutThread, _user1, "Reply 1.2", root1.Id);
 
-        // --- Root 2 Branch ---
-        var root2 = await commentService.CreateCommentAsync(target, _user2Id, "Root 2");
+        // Root 2
+        var root2 = await commentService.CreateCommentAsync(_handoutThread, _user2, "Root 2");
 
         // Reply 2.1 -> Root 2
-        await commentService.CreateCommentAsync(target, _user1Id, "Reply 2.1", root2.Id);
+        await commentService.CreateCommentAsync(_handoutThread, _user1, "Reply 2.1", root2.Id);
 
+        // The whole thread, as the first user reads it
+        var response = await commentService.GetCommentsAsync(_handoutThread, _user1);
 
-        // --- Retrieval & Verification ---
-        var response = await commentService.GetCommentsAsync(target, _user1Id);
-
-        // Expect 2 top-level comments
+        // Both roots at the top
         Assert.Equal(2, response.Count);
 
-        // Verify Root 1
-        var root1Dto = response.Single(c => c.Id == root1.Id);
+        // Root 1, holding both its replies
+        var root1Dto = response.Single(comment => comment.Id == root1.Id);
         Assert.Equal("Root 1", root1Dto.Content);
         Assert.Equal(2, root1Dto.Replies.Count);
 
-        // Verify Reply 1.1
-        var reply1_1Dto = root1Dto.Replies.Single(c => c.Id == reply1_1.Id);
+        // Reply 1.1, by the second user, holding its one reply
+        var reply1_1Dto = root1Dto.Replies.Single(comment => comment.Id == reply1_1.Id);
         Assert.Equal("Reply 1.1", reply1_1Dto.Content);
-        Assert.Equal(_user2ExternalId, reply1_1Dto.Author.Id);
+        Assert.Equal(User2ExternalId, reply1_1Dto.Author.Id);
         Assert.Single(reply1_1Dto.Replies);
 
-        // Verify Reply 1.1.1
+        // Reply 1.1.1, by the first user, a leaf
         var reply1_1_1Dto = reply1_1Dto.Replies[0];
         Assert.Equal("Reply 1.1.1", reply1_1_1Dto.Content);
-        Assert.Equal(_user1ExternalId, reply1_1_1Dto.Author.Id);
+        Assert.Equal(User1ExternalId, reply1_1_1Dto.Author.Id);
         Assert.Empty(reply1_1_1Dto.Replies);
 
-        // Verify Reply 1.2
-        var reply1_2Dto = root1Dto.Replies.Single(c => c.Id == reply1_2.Id);
+        // Reply 1.2, by the first user, a leaf
+        var reply1_2Dto = root1Dto.Replies.Single(comment => comment.Id == reply1_2.Id);
         Assert.Equal("Reply 1.2", reply1_2Dto.Content);
-        Assert.Equal(_user1ExternalId, reply1_2Dto.Author.Id);
+        Assert.Equal(User1ExternalId, reply1_2Dto.Author.Id);
         Assert.Empty(reply1_2Dto.Replies);
 
-        // Verify Root 2
-        var root2Dto = response.Single(c => c.Id == root2.Id);
+        // Root 2, holding its one reply
+        var root2Dto = response.Single(comment => comment.Id == root2.Id);
         Assert.Equal("Root 2", root2Dto.Content);
         Assert.Single(root2Dto.Replies);
 
-        // Verify Reply 2.1
+        // Reply 2.1, a leaf
         var reply2_1Dto = root2Dto.Replies[0];
         Assert.Equal("Reply 2.1", reply2_1Dto.Content);
         Assert.Empty(reply2_1Dto.Replies);
     });
 
     /// <summary>
-    /// Verifies that updating a comment changes its content and that 
-    /// we have created a new version of the comment.
+    /// An edit writes a new version under its own id, stamped with the edit time, and the thread shows that
+    /// version with the new text.
     /// </summary>
     [Fact]
     public Task UpdateCommentAsync_UpdatesContent() => RunTestAsync(async commentService =>
     {
-        // Arrange
-        var target = new CommentTarget(CommentTargetType.Handout, _testHandoutId);
+        // The first user's comment
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Original content");
 
-        // Create comment
-        var comment = await commentService.CreateCommentAsync(
-            target,
-            _user1Id,
-            "Original content"
-        );
+        // The author edits the comment
+        var result = await commentService.UpdateCommentAsync(comment.Id, _user1, "Updated content");
 
-        // Act - update
-        var result = await commentService.UpdateCommentAsync(target, comment.Id, _user1Id, "Updated content");
-
-        // Assert result
+        // A new version, under its own id
         Assert.NotEqual(comment.Id, result.Id);
-        Assert.NotNull(result.EditedAt);
 
-        // Verify via fetch
-        var response = await commentService.GetCommentsAsync(target, _user1Id);
+        // The thread as the author reads it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user1);
 
-        // Assert 
-        Assert.Single(response);
-        Assert.Equal(result.Id, response[0].Id);
-        Assert.Equal("Updated content", response[0].Content);
-        // Truncate to microseconds (PostgreSQL's precision) for comparison
+        // Only the new version, with the new text
+        var root = Assert.Single(thread);
+        Assert.Equal(result.Id, root.Id);
+        Assert.Equal("Updated content", root.Content);
+
+        // Stamped with the edit's time, to the microsecond the column keeps
         Assert.Equal(
             result.EditedAt.TruncateToMicroseconds(),
-            response[0].EditedAt!.Value.TruncateToMicroseconds());
+            root.EditedAt!.Value.TruncateToMicroseconds());
     });
 
     /// <summary>
-    /// Verifies that only the author can update a comment.
+    /// An edit by anyone but the author is refused.
     /// </summary>
     [Fact]
     public Task UpdateCommentAsync_ThrowsWhenNotAuthor() => RunTestAsync(async commentService =>
     {
-        // Arrange
-        var target = new CommentTarget(CommentTargetType.Handout, _testHandoutId);
+        // The first user's comment
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Original content");
 
-        // Create comment
-        var comment = await commentService.CreateCommentAsync(
-            target,
-            _user1Id,
-            "Original content"
-        );
-
-        // Act & Assert - the non-author is rejected
+        // The second user edits the first one's comment
         await Assert.ThrowsAsync<NotCommentAuthorException>(
-            () => commentService.UpdateCommentAsync(target, comment.Id, _user2Id, "Hacked content"));
+            () => commentService.UpdateCommentAsync(comment.Id, _user2, "Hacked content"));
     });
 
     /// <summary>
-    /// Verifies that Handouts and NewsArticles are created automatically when referenced.
+    /// An edited comment keeps its replies. An edit writes a new version and supersedes the old one, while the
+    /// replies were written against the old id, so a thread that follows only live versions loses every reply
+    /// the moment its parent is edited.
+    /// </summary>
+    [Fact]
+    public Task UpdateCommentAsync_KeepsReplies() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment on the problem
+        var comment = await commentService.CreateCommentAsync(_problemThread, _user1, "Original content");
+
+        // The second user's reply to it
+        var reply = await commentService.CreateCommentAsync(_problemThread, _user2, "A reply", comment.Id);
+
+        // The author fixes a typo
+        var edited = await commentService.UpdateCommentAsync(comment.Id, _user1, "Fixed content");
+
+        // The thread as the next reader gets it
+        var thread = await commentService.GetCommentsAsync(_problemThread, null);
+
+        // The edited version stands in the thread, with the reply still under it
+        var root = Assert.Single(thread);
+        Assert.Equal(edited.Id, root.Id);
+        Assert.Equal(reply.Id, Assert.Single(root.Replies).Id);
+    });
+
+    /// <summary>
+    /// A version an edit replaced is gone for good. A reader whose page still shows it acts on its id, and the
+    /// thread never reaches a superseded version: a reply under it would vanish, a second edit would show the
+    /// comment twice, and a delete would leave the live version standing.
+    /// </summary>
+    [Fact]
+    public Task UpdateCommentAsync_RetiresTheOldVersion() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment on the problem
+        var comment = await commentService.CreateCommentAsync(_problemThread, _user1, "Original content");
+
+        // The author edits it
+        var edited = await commentService.UpdateCommentAsync(comment.Id, _user1, "Fixed content");
+
+        // Someone replies to the old version from a page loaded before the edit
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => commentService.CreateCommentAsync(_problemThread, _user2, "A reply", comment.Id));
+
+        // The author edits the old version again from that stale page
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => commentService.UpdateCommentAsync(comment.Id, _user1, "Fixed again"));
+
+        // The author deletes the old version from that stale page
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => commentService.DeleteCommentAsync(comment.Id, _user1));
+
+        // The thread as the next reader gets it
+        var thread = await commentService.GetCommentsAsync(_problemThread, null);
+
+        // Only the edited version, untouched and alone
+        var root = Assert.Single(thread);
+        Assert.Equal(edited.Id, root.Id);
+        Assert.False(root.IsDeleted);
+    });
+
+    /// <summary>
+    /// An edited comment keeps its posting time and its place in the thread. Each edit writes a new version with
+    /// its own time, and the posting time is the first version's however many edits stand between.
+    /// </summary>
+    [Fact]
+    public Task UpdateCommentAsync_KeepsThePostingTimeAndPlace() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment on the problem
+        var first = await commentService.CreateCommentAsync(_problemThread, _user1, "First");
+
+        // The second user's comment after it
+        var second = await commentService.CreateCommentAsync(_problemThread, _user2, "Second");
+
+        // The author edits the first comment
+        var edited = await commentService.UpdateCommentAsync(first.Id, _user1, "First, fixed");
+
+        // The author edits the comment again, leaving its first version two edits back
+        var editedAgain = await commentService.UpdateCommentAsync(edited.Id, _user1, "First, fixed again");
+
+        // The thread as the next reader gets it
+        var thread = await commentService.GetCommentsAsync(_problemThread, null);
+
+        // The edited comment still first, ahead of the one posted after it
+        Assert.Equal(2, thread.Count);
+        Assert.Equal(editedAgain.Id, thread[0].Id);
+        Assert.Equal(second.Id, thread[1].Id);
+
+        // The edited comment stamped with when it was first posted, to the microsecond the column keeps
+        Assert.Equal(first.CreatedAt.TruncateToMicroseconds(), thread[0].CreatedAt.TruncateToMicroseconds());
+    });
+
+    /// <summary>
+    /// A deleted comment stays deleted. An edit writes a new live version, so editing a deleted comment would
+    /// bring it back.
+    /// </summary>
+    [Fact]
+    public Task UpdateCommentAsync_RefusesADeletedComment() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Original content");
+
+        // The author deletes the comment
+        await commentService.DeleteCommentAsync(comment.Id, _user1);
+
+        // The author edits the deleted comment
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => commentService.UpdateCommentAsync(comment.Id, _user1, "Back again"));
+
+        // The thread as the author reads it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user1);
+
+        // The comment still deleted
+        Assert.True(Assert.Single(thread).IsDeleted);
+    });
+
+    /// <summary>
+    /// The first comment on a handout or news article nobody has seeded creates its <see cref="Handout"/> or
+    /// <see cref="NewsArticle"/> row.
     /// </summary>
     [Fact]
     public Task CreateCommentAsync_AutoCreatesHandoutAndNewsArticleAnchors() => RunTestAsync(async commentService =>
     {
-        // Arrange
+        // A handout with no row yet
         var newHandoutId = "brand-new-handout";
+
+        // A news article with no row yet
         var newNewsId = "brand-new-news";
 
-        // 1. Create comment on brand new handout
+        // The first user comments on the new handout
         await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.Handout, newHandoutId), _user1Id, "handout comm");
+            new CommentTarget(CommentTargetType.Handout, newHandoutId), _user1, "handout comm");
 
-        // 2. Create comment on brand new news
+        // The first user comments on the new news article
         await commentService.CreateCommentAsync(
-            new CommentTarget(CommentTargetType.News, newNewsId), _user1Id, "news comm");
+            new CommentTarget(CommentTargetType.News, newNewsId), _user1, "news comm");
 
-        // Verify they were created in DB
-        using var scope = CreateServiceProvider().CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<MathCompsDbContext>();
-        Assert.True(await context.Handouts.AnyAsync(handout => handout.ContentId == newHandoutId), "Handout anchor should be created");
-        Assert.True(await context.NewsArticles.AnyAsync(news => news.ContentId == newNewsId), "News article anchor should be created");
+        // A row now stands for the new handout
+        Assert.True(await QueryValueAsync(context =>
+            context.Handouts.AnyAsync(handout => handout.ContentId == newHandoutId)));
+
+        // And one for the new news article
+        Assert.True(await QueryValueAsync(context =>
+            context.NewsArticles.AnyAsync(news => news.ContentId == newNewsId)));
     });
 
     /// <summary>
-    /// Verifies that comments work correctly for Problem target (exists) and News target (slug).
+    /// A comment on the seeded problem or the seeded news article reads back from that thread.
     /// </summary>
     [Fact]
-    public Task CreateCommentAsync_WorksForProblemAndNewsTargets() => RunTestAsync(async commentService =>
+    public Task CreateCommentAsync_LandsInProblemAndNewsThreads() => RunTestAsync(async commentService =>
     {
-        // Arrange
-        var problemTarget = new CommentTarget(CommentTargetType.Problem, _testProblemSlug);
-        var newsTarget = new CommentTarget(CommentTargetType.News, _testNewsId);
+        // The seeded article's thread
+        var newsThread = new CommentTarget(CommentTargetType.News, NewsId);
 
-        // Act
-        await commentService.CreateCommentAsync(problemTarget, _user1Id, "Problem comment");
-        await commentService.CreateCommentAsync(newsTarget, _user1Id, "News comment");
+        // The first user comments on the problem
+        await commentService.CreateCommentAsync(_problemThread, _user1, "Problem comment");
 
-        // Verify problem
-        var problemResponse = await commentService.GetCommentsAsync(problemTarget, _user1Id);
-        Assert.Single(problemResponse);
-        Assert.Equal("Problem comment", problemResponse[0].Content);
+        // The first user comments on the news article
+        await commentService.CreateCommentAsync(newsThread, _user1, "News comment");
 
-        // Verify news
-        var newsResponse = await commentService.GetCommentsAsync(newsTarget, _user1Id);
-        Assert.Single(newsResponse);
-        Assert.Equal("News comment", newsResponse[0].Content);
+        // The problem's thread
+        var problemComments = await commentService.GetCommentsAsync(_problemThread, _user1);
+
+        // Holding just the problem's comment
+        Assert.Equal("Problem comment", Assert.Single(problemComments).Content);
+
+        // The article's thread
+        var newsComments = await commentService.GetCommentsAsync(newsThread, _user1);
+
+        // Holding just the article's comment
+        Assert.Equal("News comment", Assert.Single(newsComments).Content);
     });
 
     /// <summary>
-    /// Verifies that GetCommentCountsAsync returns correct counts for multiple news articles.
+    /// Counts come back per news article, and only for articles that have comments.
     /// </summary>
     [Fact]
-    public Task GetCommentCountsAsync_ReturnsCorrectCountsForNews() => RunTestAsync(async commentService =>
+    public Task GetCommentCountsAsync_CountsEachNewsArticle() => RunTestAsync(async commentService =>
     {
-        // Arrange
+        // Three news articles' content ids
         var id1 = "news-1";
         var id2 = "news-2";
         var id3 = "news-3";
 
-        // Create comments
-        await commentService.CreateCommentAsync(new CommentTarget(CommentTargetType.News, id1), _user1Id, "c1");
-        await commentService.CreateCommentAsync(new CommentTarget(CommentTargetType.News, id1), _user2Id, "c2");
-        await commentService.CreateCommentAsync(new CommentTarget(CommentTargetType.News, id2), _user1Id, "c3");
+        // Two comments on the first article
+        await commentService.CreateCommentAsync(new CommentTarget(CommentTargetType.News, id1), _user1, "c1");
+        await commentService.CreateCommentAsync(new CommentTarget(CommentTargetType.News, id1), _user2, "c2");
 
-        // Act
-        var counts = await commentService.GetCommentCountsAsync(
-            CommentTargetType.News,
-            ImmutableList.Create(id1, id2, id3)
-        );
+        // One comment on the second article
+        await commentService.CreateCommentAsync(new CommentTarget(CommentTargetType.News, id2), _user1, "c3");
 
-        // Assert - only slugs with comments are returned
-        Assert.Equal(2, counts.Count);
+        // The counts for all three, read signed out
+        var counts = await commentService.GetCommentCountsAsync(CommentTargetType.News, [id1, id2, id3], null);
+
+        // Each commented article's count
         Assert.Equal(2, counts[id1]);
         Assert.Equal(1, counts[id2]);
+
+        // The uncommented article left out
+        Assert.Equal(2, counts.Count);
         Assert.False(counts.ContainsKey(id3));
     });
 
     /// <summary>
-    /// Verifies that GetCommentsAsync does not return Superseded comments (old edit versions).
-    /// </summary>
-    [Fact]
-    public Task GetCommentsAsync_ExcludesSupersededComments() => RunTestAsync(async commentService =>
-    {
-        // Arrange
-        var target = new CommentTarget(CommentTargetType.Handout, _testHandoutId);
-
-        // Create original comment
-        var original = await commentService.CreateCommentAsync(target, _user1Id, "Original content");
-
-        // Update the comment (this supersedes the original)
-        await commentService.UpdateCommentAsync(target, original.Id, _user1Id, "Updated content");
-
-        // Act
-        var response = await commentService.GetCommentsAsync(target, _user1Id);
-
-        // Assert - should only have 1 comment (the new version), not the superseded one
-        Assert.Single(response);
-        Assert.Equal("Updated content", response[0].Content);
-        Assert.NotEqual(original.Id, response[0].Id);
-    });
-
-    /// <summary>
-    /// Verifies that GetCommentsAsync returns Deleted comments, but with empty content.
+    /// A deleted comment keeps its place in the thread, its text blanked.
     /// </summary>
     [Fact]
     public Task GetCommentsAsync_ReturnsDeletedCommentsWithEmptyContent() => RunTestAsync(async commentService =>
     {
-        // Arrange
-        var target = new CommentTarget(CommentTargetType.Handout, _testHandoutId);
+        // The first user's comment
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Original content");
 
-        // Create a comment
-        var comment = await commentService.CreateCommentAsync(target, _user1Id, "Original content");
+        // The author deletes the comment
+        await commentService.DeleteCommentAsync(comment.Id, _user1);
 
-        // Soft-delete it
-        await commentService.DeleteCommentAsync(comment.Id, _user1Id);
+        // The thread as the author reads it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user1);
 
-        // Act
-        var response = await commentService.GetCommentsAsync(target, _user1Id);
+        // The comment still there, marked deleted
+        var root = Assert.Single(thread);
+        Assert.True(root.IsDeleted);
 
-        // Assert - comment should be returned but with empty content
-        Assert.Single(response);
-        Assert.True(response[0].IsDeleted);
-        Assert.Equal(string.Empty, response[0].Content);
+        // The comment's text blanked
+        Assert.Equal(string.Empty, root.Content);
     });
 
     /// <summary>
-    /// Verifies that GetCommentCountsAsync only counts Active comments.
-    /// Deleted and Superseded comments should not be counted.
+    /// A count takes only live comments: a deleted one drops out, and an edited one counts once, its replaced
+    /// version being <see cref="CommentStatus.Superseded"/>.
     /// </summary>
     [Fact]
     public Task GetCommentCountsAsync_OnlyCountsActiveComments() => RunTestAsync(async commentService =>
     {
-        // Arrange
+        // A news article's content id
         var id = "test-count-active";
+
+        // The article's thread
         var target = new CommentTarget(CommentTargetType.News, id);
 
-        // Create 3 comments
-        _ = await commentService.CreateCommentAsync(target, _user1Id, "Active 1");
-        var comment2 = await commentService.CreateCommentAsync(target, _user1Id, "Active 2");
-        var comment3 = await commentService.CreateCommentAsync(target, _user2Id, "Will be deleted");
+        // A comment left as written
+        await commentService.CreateCommentAsync(target, _user1, "Active 1");
 
-        // Delete comment3
-        await commentService.DeleteCommentAsync(comment3.Id, _user2Id);
+        // A comment its author will edit
+        var edited = await commentService.CreateCommentAsync(target, _user1, "Active 2");
 
-        // Update comment2 (this creates a new version and supersedes the old one)
-        await commentService.UpdateCommentAsync(target, comment2.Id, _user1Id, "Updated 2");
+        // A comment its author will delete
+        var deleted = await commentService.CreateCommentAsync(target, _user2, "Will be deleted");
 
-        // Now we have: 1 active (comment1), 1 new active from update, 1 superseded (old comment2), 1 deleted (comment3)
-        // Total active: 2
+        // The second user deletes that comment
+        await commentService.DeleteCommentAsync(deleted.Id, _user2);
 
-        // Act
-        var counts = await commentService.GetCommentCountsAsync(
-            CommentTargetType.News,
-            [id]
-        );
+        // The first user edits the other
+        await commentService.UpdateCommentAsync(edited.Id, _user1, "Updated 2");
 
-        // Assert - should only count 2 active comments
+        // The article's count, read signed out
+        var counts = await commentService.GetCommentCountsAsync(CommentTargetType.News, [id], null);
+
+        // The comment as written and the edit's new version
         Assert.Equal(2, counts[id]);
     });
 
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
-        // Create News Article
+        // The seeded news article
         context.NewsArticles.Add(new NewsArticle
         {
             Id = Guid.NewGuid(),
-            ContentId = _testNewsId
-        });
-        // Create test users
-        context.Users.Add(new User
-        {
-            Id = _user1Id,
-            ExternalId = _user1ExternalId,
-            Username = "User 1",
-            Email = "user1@example.com",
-            AvatarUrl = _user1AvatarUrl,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
-        });
-        context.Users.Add(new User
-        {
-            Id = _user2Id,
-            ExternalId = _user2ExternalId,
-            Username = "User 2",
-            Email = "user2@example.com",
-            AvatarUrl = null,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
+            ContentId = NewsId
         });
 
-        // Create Season
+        // The users who comment, the first with an avatar
+        context.Users.AddRange(
+            new User
+            {
+                Id = _user1Id,
+                ExternalId = User1ExternalId,
+                Username = "User 1",
+                Email = "user1@example.com",
+                AvatarUrl = User1AvatarUrl,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
+            },
+            new User
+            {
+                Id = _user2Id,
+                ExternalId = User2ExternalId,
+                Username = "User 2",
+                Email = "user2@example.com",
+                AvatarUrl = null,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
+            });
+
+        // The season the round sits in
         var season = new Season
         {
             Id = Guid.NewGuid(),
@@ -721,7 +695,7 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         };
         context.Seasons.Add(season);
 
-        // Create Round
+        // A round of a test competition, for the problem to sit in
         var round = new Round
         {
             Id = Guid.NewGuid(),
@@ -731,16 +705,33 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         };
         context.Rounds.Add(round);
 
-        // Create Problem
+        // The problem whose thread the problem tests write in
         var problem = new Problem
         {
             RoundId = round.Id,
             Number = 1,
-            Slug = _testProblemSlug
+            Slug = ProblemSlug
         };
         context.Problems.Add(problem);
 
-        // Submit changes
+        // Save the seed
         await context.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// Gives the first user a username of their own.
+    /// </summary>
+    /// <param name="username">The username they take.</param>
+    /// <returns>A task completing once the username is saved.</returns>
+    private Task NameTheAuthorAsync(string username) => QueryAsync(async context =>
+    {
+        // The author's row
+        var user = await context.Users.SingleAsync(user => user.Id == _user1Id);
+
+        // Renamed
+        user.Username = username;
+
+        // Save the rename
+        await context.SaveChangesAsync();
+    });
 }

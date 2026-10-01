@@ -8,6 +8,7 @@ using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
+using static MathComps.Infrastructure.Tests.TestInfrastructure.HostedSeed;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,11 +24,6 @@ namespace MathComps.Infrastructure.Tests.Admin;
 public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IAdminGradingService>(fixture)
 {
-    /// <summary>
-    /// How long the seeded groups' clocks run.
-    /// </summary>
-    private const int ClockMinutes = 180;
-
     /// <summary>
     /// What addresses the graded group.
     /// </summary>
@@ -828,7 +824,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         CompetitionTreeSeed.Root(context, "mathcomps", 100);
 
         // The graded group, closed
-        var graded = NewGroup(context, GradedSlug, _closesAt);
+        var graded = NewGroup(context, GradedSlug, _startedAt.AddDays(-5), _closesAt);
 
         // Its elementary round, placed first
         NewRound(context, season, graded, _elementaryRoundId, "mathcomps-elementary-september",
@@ -839,7 +835,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
             _advancedFirstId, _advancedSecondId);
 
         // The practice group, which never closes
-        var practice = NewGroup(context, PracticeSlug, closesAt: null);
+        var practice = NewGroup(context, PracticeSlug, _startedAt.AddDays(-5), closesAt: null);
 
         // The practice round's id
         var practiceRoundId = Guid.CreateVersion7();
@@ -880,7 +876,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         NewConversation(context, Guid.CreateVersion7(), _aliceId, _advancedSecondId, _closesAt.AddDays(1));
 
         // Bob ran the whole clock
-        context.HostedEntries.Add(NewEntry(_bobId, _advancedRoundId));
+        context.HostedEntries.Add(NewEntry(_bobId, _advancedRoundId, _startedAt));
 
         // A conversation of his just inside the clock
         NewConversation(context, Guid.CreateVersion7(), _bobId, _advancedSecondId, _startedAt.AddMinutes(170));
@@ -900,19 +896,19 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         NewConversation(context, Guid.CreateVersion7(), _carolId, _advancedFirstId, _startedAt.AddMinutes(5));
 
         // The granted student sat the advanced round past the gates
-        context.HostedEntries.Add(NewEntry(_grantedId, _advancedRoundId));
+        context.HostedEntries.Add(NewEntry(_grantedId, _advancedRoundId, _startedAt));
 
         // Arguing a problem inside the clock
         NewConversation(context, Guid.CreateVersion7(), _grantedId, _advancedFirstId, _startedAt.AddMinutes(5));
 
         // Dan sat the elementary round
-        context.HostedEntries.Add(NewEntry(_danId, _elementaryRoundId));
+        context.HostedEntries.Add(NewEntry(_danId, _elementaryRoundId, _startedAt));
 
         // Arguing its first problem inside the clock
         NewConversation(context, Guid.CreateVersion7(), _danId, _elementaryFirstId, _startedAt.AddMinutes(20));
 
         // Dan sat the practice round too
-        context.HostedEntries.Add(NewEntry(_danId, practiceRoundId));
+        context.HostedEntries.Add(NewEntry(_danId, practiceRoundId, _startedAt));
 
         // Arguing its problem
         NewConversation(context, Guid.CreateVersion7(), _danId, _practiceProblemId, _startedAt.AddMinutes(20));
@@ -995,94 +991,6 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // Nothing ever queued, which is what a change taking no lock looks like
         throw new TimeoutException("No change ever waited on the entry.");
-    }
-
-    /// <summary>
-    /// Builds one user, every field derived from their username.
-    /// </summary>
-    /// <param name="userId">The user's id.</param>
-    /// <param name="username">The user's username.</param>
-    /// <returns>The user.</returns>
-    private static User NewUser(Guid userId, string username) => new()
-    {
-        Id = userId,
-        ExternalId = $"ext-{username}",
-        Username = username,
-        Email = $"{username.ToLowerInvariant()}@example.com",
-    };
-
-    /// <summary>
-    /// Builds one sat entry whose clock started with everybody else's and was never handed in.
-    /// </summary>
-    /// <param name="userId">The student.</param>
-    /// <param name="roundId">The round entered.</param>
-    /// <returns>The entry.</returns>
-    private static HostedEntry NewEntry(Guid userId, Guid roundId) => new()
-    {
-        UserId = userId,
-        RoundId = roundId,
-        StartedAt = _startedAt,
-    };
-
-    /// <summary>
-    /// Tracks one hosted group.
-    /// </summary>
-    /// <param name="context">The seeding context.</param>
-    /// <param name="slug">What addresses the group.</param>
-    /// <param name="closesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
-    /// <returns>The tracked group.</returns>
-    private static HostedGroup NewGroup(MathCompsDbContext context, string slug, DateTimeOffset? closesAt)
-    {
-        // The group row
-        var group = new HostedGroup
-        {
-            Id = Guid.CreateVersion7(),
-            Slug = slug,
-            OpensAt = _startedAt.AddDays(-5),
-            ClosesAt = closesAt,
-            ClockMinutes = ClockMinutes,
-            AllowsReentry = closesAt is null,
-            ProblemCount = 2,
-        };
-        context.HostedGroups.Add(group);
-
-        // The tracked group
-        return group;
-    }
-
-    /// <summary>
-    /// Tracks one round of a group with its problems, numbered in the order given.
-    /// </summary>
-    /// <param name="context">The seeding context.</param>
-    /// <param name="season">The season the round sits in.</param>
-    /// <param name="group">The group it runs in.</param>
-    /// <param name="roundId">The round's id.</param>
-    /// <param name="competitionPath">The path of the competition it hangs under, which says its level.</param>
-    /// <param name="problemIds">Its problems' ids, in order.</param>
-    private static void NewRound(
-        MathCompsDbContext context, Season season, HostedGroup group, Guid roundId, string competitionPath,
-        params Guid[] problemIds)
-    {
-        // The round, under the deepest node its path names
-        context.Rounds.Add(new Round
-        {
-            Id = roundId,
-            CompetitionId = CompetitionTreeSeed.Chain(context, competitionPath).Id,
-            SeasonId = season.Id,
-            Date = new DateOnly(2026, 9, 15),
-            VisibleSince = group.ClosesAt,
-            HostedGroupId = group.Id,
-        });
-
-        // Its problems
-        for (var index = 0; index < problemIds.Length; index += 1)
-            context.Problems.Add(new Problem
-            {
-                Id = problemIds[index],
-                RoundId = roundId,
-                Number = index + 1,
-                Slug = $"{competitionPath}-{index + 1}",
-            });
     }
 
     /// <summary>

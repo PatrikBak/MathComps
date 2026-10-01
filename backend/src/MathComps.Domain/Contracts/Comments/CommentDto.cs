@@ -9,7 +9,7 @@ namespace MathComps.Domain.Contracts.Comments;
 /// <param name="Id"><inheritdoc cref="Comment.Id" path="/summary"/></param>
 /// <param name="Author">The comment's author data.</param>
 /// <param name="Content"><inheritdoc cref="Comment.Content" path="/summary"/></param>
-/// <param name="CreatedAt"><inheritdoc cref="Comment.CreatedAt" path="/summary"/></param>
+/// <param name="CreatedAt">When the comment was posted, which an edit leaves as it is.</param>
 /// <param name="EditedAt">When the comment was last edited, if applicable.</param>
 /// <param name="IsDeleted">Whether the comment has been soft-deleted.</param>
 /// <param name="LikeCount">Total number of likes on this comment.</param>

@@ -68,7 +68,7 @@ export function convertToCommentData(dto: CommentDto): CommentData {
     avatarUrl: dto.author.avatarUrl,
     content: dto.content,
     timestamp: new Date(dto.createdAt),
-    editedAt: dto.editedAt ? new Date(dto.editedAt) : undefined,
+    editedAt: dto.editedAt ? new Date(dto.editedAt) : null,
     likes: dto.likeCount,
     isLiked: dto.isLiked,
     isDeleted: dto.isDeleted,
@@ -179,7 +179,7 @@ export const findCommentInTree = (
     if (comment.id === commentId) return comment
 
     // If the comment has any replies...
-    if (comment.replies && comment.replies.length > 0) {
+    if (comment.replies.length > 0) {
       // Recurse down to find the right parent
       const found = findCommentInTree(comment.replies, commentId)
 
