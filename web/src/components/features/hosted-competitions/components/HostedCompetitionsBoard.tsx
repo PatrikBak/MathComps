@@ -13,8 +13,9 @@ import { DisclosureNote } from './DisclosureNote'
 import { EntryGate } from './EntryGate'
 import { HeaderDisclosure } from './HeaderDisclosure'
 import { HostedCompetitionEntryDialog } from './HostedCompetitionEntryDialog'
-import { HostedCompetitionGroupPanel } from './HostedCompetitionGroupPanel'
+import { HostedCompetitionSeason } from './HostedCompetitionSeason'
 import { HowItWorks } from './HowItWorks'
+import { PracticeBar } from './PracticeBar'
 import { RulesList } from './RulesList'
 
 /**
@@ -27,6 +28,9 @@ type HostedCompetitionsBoardProps = {
 
 /**
  * Every competition the program has run or will run, and the way into whichever one is open.
+ *
+ * The practice competition leads, being open to anybody at any time. Under it the graded rounds sit in
+ * tabs, one school year at a time.
  */
 export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsBoardProps) {
   // Competitions copy
@@ -37,7 +41,7 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
 
   // What there is to draw, and what its presses go through
   const {
-    groups,
+    layout,
     bypassesGates,
     listState,
     now,
@@ -86,7 +90,7 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
 
       {/* The list, once there is one to draw */}
       <div className="mt-8 sm:mt-10">
-        {listState.kind !== 'ready' || groups.length === 0 ? (
+        {listState.kind !== 'ready' || layout === null ? (
           <FetchStatePlaceholder
             uiState={listState}
             className="flex flex-col items-center gap-3 py-16 text-center"
@@ -94,9 +98,10 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
             failed={<p className="text-sm text-muted">{t('loadFailed')}</p>}
           />
         ) : (
-          <div className="space-y-4">
-            {groups.map((group) => (
-              <HostedCompetitionGroupPanel
+          <div className="space-y-8">
+            {/* The practice competition */}
+            {layout.practice.map((group) => (
+              <PracticeBar
                 key={group.id}
                 group={group}
                 now={now}
@@ -104,6 +109,14 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
                 onEnter={enterCompetition}
               />
             ))}
+
+            {/* And the graded rounds, a tab each */}
+            <HostedCompetitionSeason
+              years={layout.years}
+              now={now}
+              bypassesGates={bypassesGates}
+              onEnter={enterCompetition}
+            />
           </div>
         )}
       </div>

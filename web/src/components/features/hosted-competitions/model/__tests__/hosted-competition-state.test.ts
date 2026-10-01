@@ -15,8 +15,9 @@ import {
   findCompetitionInGroup,
   hasEntryEnded,
   isCompetitionAddressedBy,
-  orderForReading,
+  layOutBoard,
   readAreaRun,
+  roundToShow,
   toAreaEntry,
   wasHandedInEarly,
 } from '../hosted-competition-state'
@@ -433,60 +434,99 @@ describe('readAreaRun', () => {
   })
 })
 
-describe('orderForReading', () => {
-  /** One of each phase, deliberately listed in the wrong order. */
+/**
+ * Builds a group over a window given as days from {@link NOW}.
+ *
+ * @param id - The group's id.
+ * @param opensInDays - When it opens, in days from now, negative for the past.
+ * @param closesInDays - When it closes, in days from now, negative for the past.
+ * @param competitions - Its competitions, one nobody has entered when left out.
+ *
+ * @returns The group.
+ */
+function windowGroup(
+  id: string,
+  opensInDays: number,
+  closesInDays: number,
+  competitions: HostedCompetition[] = [competitionOf()]
+): HostedCompetitionGroup {
+  // The window as the wire carries it
+  return groupOf({
+    id,
+    opensAt: new Date(NOW + opensInDays * DAY_MS).toISOString(),
+    closesAt: new Date(NOW + closesInDays * DAY_MS).toISOString(),
+    competitions,
+  })
+}
+
+describe('layOutBoard', () => {
+  /** Last school year's round, three of this year's, the practice one, out of order. */
   const GROUPS: HostedCompetitionGroup[] = [
-    groupOf({
-      id: 'older',
-      opensAt: new Date(NOW - 60 * DAY_MS).toISOString(),
-      closesAt: new Date(NOW - 47 * DAY_MS).toISOString(),
-    }),
-    groupOf({
-      id: 'later',
-      opensAt: new Date(NOW + 40 * DAY_MS).toISOString(),
-      closesAt: new Date(NOW + 53 * DAY_MS).toISOString(),
-    }),
-    groupOf({
-      id: 'sooner',
-      opensAt: new Date(NOW + 10 * DAY_MS).toISOString(),
-      closesAt: new Date(NOW + 23 * DAY_MS).toISOString(),
-    }),
-    groupOf({
-      id: 'newer',
-      opensAt: new Date(NOW - 30 * DAY_MS).toISOString(),
-      closesAt: new Date(NOW - 17 * DAY_MS).toISOString(),
-    }),
-    groupOf({ id: 'open' }),
+    windowGroup('later', 40, 53),
+    windowGroup('june', -100, -86),
+    windowGroup('open', -6, 7),
     groupOf({ id: 'practice', closesAt: null }),
+    windowGroup('august', -30, -16),
   ]
 
-  it('leads with what can be taken right now', () => {
-    // The practice one first, then the group taking entries, whatever the calendar says
-    expect(orderForReading(GROUPS, NOW).map((group) => group.id)).toEqual([
-      'practice',
-      'open',
-      'sooner',
-      'later',
-      'newer',
-      'older',
+  it('sets the practice one apart and leads with the newest school year, each read forward', () => {
+    // The layout itself
+    const layout = layOutBoard(GROUPS)
+
+    // The practice one on its own
+    expect(layout.practice.map((group) => group.id)).toEqual(['practice'])
+
+    // The year turning over in August, so the June round belongs to the year before
+    expect(layout.years.map((year) => year.groups.map((group) => group.id))).toEqual([
+      ['august', 'open', 'later'],
+      ['june'],
     ])
-  })
-
-  it('counts down to the next one and back from the last', () => {
-    // Two still to come read soonest first, since the next to happen is the one being waited for
-    const ids = orderForReading(GROUPS, NOW).map((group) => group.id)
-    expect(ids.indexOf('sooner')).toBeLessThan(ids.indexOf('later'))
-
-    // Two already over read the other way, the one that just closed being the one still talked about
-    expect(ids.indexOf('newer')).toBeLessThan(ids.indexOf('older'))
   })
 
   it('sorts a copy rather than the array it was handed', () => {
     // It is the query cache's own, so sorting it in place would reorder what the cache holds
-    orderForReading(GROUPS, NOW)
+    layOutBoard(GROUPS)
 
     // The one that was listed first is still first
-    expect(GROUPS[0].id).toBe('older')
+    expect(GROUPS[0].id).toBe('later')
+  })
+})
+
+describe('roundToShow', () => {
+  /** A finished round, one taking entries, and one still to come, in the order they run. */
+  const ROUNDS: HostedCompetitionGroup[] = [
+    windowGroup('finished', -30, -16),
+    windowGroup('open', -6, 7),
+    windowGroup('later', 40, 53),
+  ]
+
+  it('shows the latest round to have opened', () => {
+    // The open one, not the one that finished before it nor the one still to come
+    expect(roundToShow(ROUNDS, NOW)?.id).toBe('open')
+
+    // And a finished round, once it is the latest to have opened
+    expect(roundToShow(ROUNDS.slice(0, 1), NOW)?.id).toBe('finished')
+  })
+
+  it('shows a round the reader is sitting over a later one', () => {
+    // A round opened two days ago, the reader's clock still running in it
+    const sitting = windowGroup('sitting', -2, 5, [
+      competitionOf({ entry: entryOf(HOUR_MS, null) }),
+    ])
+
+    // And a special opened since
+    const special = windowGroup('special', -1, 4)
+
+    // The reader is taken to their running clock
+    expect(roundToShow([sitting, special], NOW)?.id).toBe('sitting')
+  })
+
+  it('shows the first round to come before any has opened', () => {
+    // Two announced rounds
+    const announced = [windowGroup('sooner', 10, 23), windowGroup('later', 40, 53)]
+
+    // The sooner of them
+    expect(roundToShow(announced, NOW)?.id).toBe('sooner')
   })
 })
 
