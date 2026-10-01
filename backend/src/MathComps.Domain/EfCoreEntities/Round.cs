@@ -40,8 +40,7 @@ public class Round
 
     /// <summary>
     /// The instant this round opens to readers, or null when it is already open. A round stamped with a future
-    /// instant is embargoed: it sits in the database complete, and the archive begins serving it once the instant
-    /// passes, with nothing having to flip it.
+    /// instant is embargoed: it sits in the database complete, and nothing has to flip it once the instant passes.
     /// </summary>
     /// <remarks>
     /// A different axis from <see cref="Date"/>, which is the wall-clock day the round ran and only ever sorts.
