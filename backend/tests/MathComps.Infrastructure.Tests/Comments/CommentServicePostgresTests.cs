@@ -174,6 +174,43 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// An author with no username is refused, a reply as much as a top-level comment, since a comment nobody can
+    /// be named for reads like one from a deleted account. The refusal comes before anything is written, so not
+    /// even the row standing for an uncommented handout is minted.
+    /// </summary>
+    [Fact]
+    public Task CreateCommentAsync_RefusesAnAuthorWithNoUsername() => RunTestAsync(async commentService =>
+    {
+        // The first user has never taken a name
+        await QueryAsync(context => context.Users
+            .Where(user => user.Id == _user1Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(user => user.Username, (string?)null)));
+
+        // The first user writes on the handout nobody has commented on
+        await Assert.ThrowsAsync<CommentProfileIncompleteException>(
+            () => commentService.CreateCommentAsync(_handoutThread, _user1, "Nameless."));
+
+        // The handout still has no row standing for it
+        Assert.False(await QueryValueAsync(context =>
+            context.Handouts.AnyAsync(handout => handout.ContentId == HandoutId)));
+
+        // The second user, who has a name, comments on the problem
+        var named = await commentService.CreateCommentAsync(_problemThread, _user2, "Signed.");
+
+        // The first user replies to the second user's comment
+        await Assert.ThrowsAsync<CommentProfileIncompleteException>(
+            () => commentService.CreateCommentAsync(_problemThread, _user1, "Nameless reply.", named.Id));
+
+        // The problem's thread as the next reader gets it
+        var thread = await commentService.GetCommentsAsync(_problemThread, null);
+
+        // Holding the second user's comment alone, with nothing under it
+        var root = Assert.Single(thread);
+        Assert.Equal(named.Id, root.Id);
+        Assert.Empty(root.Replies);
+    });
+
+    /// <summary>
     /// A new top-level comment comes back as written, signed with its author's id, username and avatar, with
     /// nothing on it yet, and the thread then holds it.
     /// </summary>

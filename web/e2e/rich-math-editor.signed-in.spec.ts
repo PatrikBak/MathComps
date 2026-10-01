@@ -797,7 +797,7 @@ async function openDiscussion(page: Page): Promise<Locator> {
   // Its composer, live once the reader's name has come back
   await expect(discussion.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
 
-  // Where the upload tests write
+  // The discussion, ready for the reader
   return discussion
 }
 
@@ -926,5 +926,15 @@ test.describe('an image the editor uploads', () => {
 
     // Done with the caller
     await anonymous.dispose()
+  })
+})
+
+test.describe('a problem’s discussion', () => {
+  test('opens with the cursor in its composer', async ({ page }) => {
+    // The discussion, open
+    const discussion = await openDiscussion(page)
+
+    // Its composer, ready to type into with no click first
+    await expect(discussion.locator('textarea')).toBeFocused()
   })
 })

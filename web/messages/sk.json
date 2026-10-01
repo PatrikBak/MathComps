@@ -240,6 +240,7 @@
     "AdminReviewTarget": "Táto odpoveď už neexistuje.",
     "CannotLikeOwnComment": "Nemôžeš dať páči sa mi vlastnému komentáru.",
     "CommentNotFound": "Tento komentár už neexistuje.",
+    "CommentProfileIncomplete": "Pred komentovaním si v profile vyber prezývku.",
     "CommentTargetNotFound": "Obsah, ku ktorému komentár patrí, už neexistuje.",
     "DefenseContentNotFound": "Toto zadanie už nie je k dispozícii.",
     "DefenseFeedbackCommentTooLong": "Tvoj komentár je príliš dlhý.",
