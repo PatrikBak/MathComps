@@ -490,6 +490,7 @@
     "remainingMinutes": "{minutes} min {seconds} s",
     "results": "Results",
     "resultsPending": "marking in progress",
+    "rounds": "Rounds",
     "rules": {
       "accept": "I agree to the rules and will follow them.",
       "contact": "Anything unclear? <link>Write to us</link> rather than guessing.",
@@ -506,6 +507,7 @@
       "title": "Before you start"
     },
     "rulesButton": "Rules",
+    "schoolYear": "School year",
     "selfAssessmentAsk": "Comment on your solution",
     "selfAssessmentError": "That couldn't be saved.",
     "selfAssessmentNote": "The person who grades this problem reads it. You can edit it while your clock is running, and for half an hour after it stops.",

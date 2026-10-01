@@ -1,5 +1,5 @@
 import { BACKEND_ORIGIN } from './support/backend-routes'
-import { areaCopy, areaPath, LIST_PATH } from './support/competitions'
+import { areaCopy, areaPath, LIST_PATH, showRoundHolding } from './support/competitions'
 import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
@@ -316,6 +316,9 @@ test.describe('the entry and the area it opens', () => {
     // The row of the competition whose group is still only announced
     const row = page.locator(`[data-competition-slug="${UPCOMING_COMPETITION_SLUG}"]`)
 
+    // Its round, brought into view
+    await showRoundHolding(page, row)
+
     // Which is there to read
     await expect(row).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
@@ -362,6 +365,9 @@ test.describe('the entry and the area it opens', () => {
     // The row of the competition whose group is still only announced
     const row = page.locator(`[data-competition-slug="${UPCOMING_COMPETITION_SLUG}"]`)
 
+    // Its round, brought into view
+    await showRoundHolding(page, row)
+
     // The way in they are offered
     const enter = row.getByRole('button', { name: areaCopy.enter, exact: true })
 
@@ -370,7 +376,7 @@ test.describe('the entry and the area it opens', () => {
 
     // On a card still counting down to the day the group opens: the grant decides what is offered, and the
     // board goes on saying what the schedule is
-    await expect(page.getByText(/opens in/i).first()).toBeVisible()
+    await expect(page.getByRole('tabpanel').getByText(/opens in/i)).toBeVisible()
 
     // Press it, which raises the question rather than the profile the fields would otherwise be wanted for
     await enter.click()
@@ -419,6 +425,9 @@ test.describe('the entry and the area it opens', () => {
     // The row of the category announced before its problems were chosen
     const row = page.locator(`[data-competition-slug="${UNFILLED_COMPETITION_SLUG}"]`)
 
+    // Its round, brought into view
+    await showRoundHolding(page, row)
+
     // Which is on the board to read
     await expect(row).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
@@ -442,6 +451,9 @@ test.describe('the entry and the area it opens', () => {
 
     // The row of the competition whose group is still only announced
     const row = page.locator(`[data-competition-slug="${UPCOMING_COMPETITION_SLUG}"]`)
+
+    // Its round, brought into view
+    await showRoundHolding(page, row)
 
     // Press in through the card, which is the only way a clock ever starts
     await row.getByRole('button', { name: areaCopy.enter, exact: true }).click()

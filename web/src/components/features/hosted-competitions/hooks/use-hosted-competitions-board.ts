@@ -5,8 +5,9 @@ import type { QueryUiState } from '@/lib/query-ui-state'
 
 import type { EntryBlocker } from '../model/entry-reader'
 import { headerBlocker } from '../model/entry-reader'
-import { orderForReading } from '../model/hosted-competition-state'
-import type { HostedCompetitionGroup, PendingEntry } from '../model/hosted-competition-types'
+import type { BoardLayout } from '../model/hosted-competition-state'
+import { layOutBoard } from '../model/hosted-competition-state'
+import type { PendingEntry } from '../model/hosted-competition-types'
 import { useDismissProfilePrompt } from './use-dismiss-profile-prompt'
 import { useEntryGuard } from './use-entry-guard'
 import { useEntryReader } from './use-entry-reader'
@@ -18,8 +19,8 @@ import { useHostedCompetitionsView } from './use-hosted-competitions-view'
  * Return type for {@link useHostedCompetitionsBoard}.
  */
 type UseHostedCompetitionsBoardResult = {
-  /** Every group the reader can see, most actionable first. */
-  groups: HostedCompetitionGroup[]
+  /** Every group the reader can see, sorted into what the board draws; null while there are none. */
+  layout: BoardLayout | null
   /**
    * Whether this reader is let past the gates a competition is entered through.
    */
@@ -41,8 +42,8 @@ type UseHostedCompetitionsBoardResult = {
 }
 
 /**
- * Every competition the program has run or will run, as the board reads them: the groups in the order a
- * reader wants them, what the reader still owes before any of it can be pressed, and where a press goes.
+ * Every competition the program has run or will run, as the board reads them: the groups sorted into what
+ * the board draws, what the reader still owes before any of it can be pressed, and where a press goes.
  *
  * @param entryIntentSlug - Which competition a press made before signing in was aimed at.
  *
@@ -66,8 +67,11 @@ export function useHostedCompetitionsBoard(
   // One clock for the page, so every deadline on it moves on the same tick
   const now = useNow()
 
-  // Every group, most actionable first
-  const groups = view === undefined ? [] : orderForReading(view.groups, now)
+  // Every group the read brought back
+  const groups = view?.groups ?? []
+
+  // The same groups sorted into what the board draws, or null while there are none to draw
+  const layout = groups.length === 0 ? null : layOutBoard(groups)
 
   // What a press turns into, given what the group they pressed asks of them
   const enterCompetition = useEntryGuard({
@@ -96,7 +100,7 @@ export function useHostedCompetitionsBoard(
 
   // What the board draws, and what its presses go through
   return {
-    groups,
+    layout,
     bypassesGates,
     listState,
     now,

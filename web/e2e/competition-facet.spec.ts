@@ -55,20 +55,32 @@ test.describe('the competition facet', () => {
     // Open the archive on a search of the reader's own, which is what the counts are counted under
     await page.goto(`${PROBLEMS_PATH}?${KEPT_FILTER.param}`)
 
-    // That search is answered before the facet is opened, so the counts start out settled
+    // That search reaches the archive before the facet is opened
     await expect.poll(() => searches().length, { timeout: SETTLE_TIMEOUT_MS }).toBeGreaterThan(0)
 
     // Open the facet
     await page.getByRole('button', { name: COMPETITION_FACET_BUTTON }).click()
 
-    // Wait for the tree to draw, since until it has there are no counts to hold anything to
-    await expect.poll(() => readings().length, { timeout: SETTLE_TIMEOUT_MS }).toBeGreaterThan(0)
+    // The row of the competition the search found
+    const foundRow = page.locator(`[data-facet-row-id="${FOUND_COMPETITION}"]`)
+
+    // Its count once the search's own answer is painted, the fixture's one problem: until then the tree
+    // can still show the counts the page was first drawn with, and a slow machine opens the facet on those
+    await expect(foundRow).toHaveAttribute('aria-label', /\(1\)$/, { timeout: SETTLE_TIMEOUT_MS })
+
+    // That count as the reader is given it
+    const settledLabel = (await foundRow.getAttribute('aria-label')) ?? ''
+
+    // The watcher caught up with it, since the counts are only held still from that reading on
+    await expect
+      .poll(() => readings().at(-1) ?? '', { timeout: SETTLE_TIMEOUT_MS })
+      .toContain(settledLabel)
 
     // How many readings the counts had taken before anything was picked
     const readingsBeforePick = readings().length
 
     // Pick the competition the search found, which is a filter the archive counts this facet without
-    await page.locator(`[data-facet-row-id="${FOUND_COMPETITION}"]`).click()
+    await foundRow.click()
 
     // The pick reaches the archive
     await expect

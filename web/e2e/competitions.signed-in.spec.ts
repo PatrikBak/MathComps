@@ -1,5 +1,5 @@
 import { stubProblemSearch } from './support/backend-routes'
-import { areaCopy, areaPath, holdClock, LIST_PATH } from './support/competitions'
+import { areaCopy, areaPath, holdClock, LIST_PATH, showRoundHolding } from './support/competitions'
 import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
@@ -196,6 +196,9 @@ test.describe('the competitions list', () => {
 
     // The row of the competition being entered
     const row = page.locator(`[data-competition-slug="${COMPETITION_SLUG}"]`)
+
+    // Its round, brought into view
+    await showRoundHolding(page, row)
 
     // Press enter, which opens the dialog
     await row.getByRole('button', { name: areaCopy.enter, exact: true }).click()

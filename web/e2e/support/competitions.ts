@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../../messages/en.json'
+import { expect } from './test'
 
 /**
  * The copy the assertions match on, taken from the app's own English messages: what each of them means is
@@ -52,6 +53,84 @@ export const LIST_PATH = `/en${ROUTES.COMPETITIONS}`
 export function areaPath(competitionSlug: string): string {
   // An area hangs off the list under the competition's own name
   return `${LIST_PATH}/${competitionSlug}`
+}
+
+/** How long the list gets to draw its rounds before one is looked for among them. */
+const ROUNDS_TIMEOUT_MS = 15_000
+
+/**
+ * Brings the round holding something on the list into view: its school year picked from the menu while
+ * another one is showing, then the round's own tab.
+ *
+ * The list shows one round at a time and draws the rounds of one school year, so anything in another
+ * round is hidden, and anything in another school year is not on the page at all.
+ *
+ * @param page - The page the list is open on.
+ * @param target - Something inside the round, such as a competition's row or a link it offers.
+ */
+export async function showRoundHolding(page: Page, target: Locator): Promise<void> {
+  // The rounds, once the list has drawn them
+  await expect(page.getByRole('tablist', { name: competitionsCopy.rounds })).toBeVisible({
+    timeout: ROUNDS_TIMEOUT_MS,
+  })
+
+  // The menu of school years, which the list offers once there is more than one
+  const yearMenu = page.getByRole('button', { name: competitionsCopy.schoolYear, exact: true })
+
+  // Every school year on offer, none while the list holds a single one
+  const years = (await yearMenu.count()) === 0 ? [] : await readSchoolYears(page, yearMenu)
+
+  // Each year in turn, until one draws the target
+  for (const year of years) {
+    // Drawn in the year showing
+    if ((await target.count()) > 0) break
+
+    // The menu, opened
+    await yearMenu.click()
+
+    // That year, picked from it
+    await page.getByRole('menuitemcheckbox', { name: year, exact: true }).click()
+
+    // Once the list shows it
+    await expect(yearMenu).toHaveText(year)
+  }
+
+  // The tab of the round whose panel holds the target
+  const tabId = await target
+    .first()
+    .locator('xpath=ancestor::*[@role="tabpanel"][1]')
+    .getAttribute('aria-labelledby')
+
+  // Picked
+  await page.locator(`[id="${tabId}"]`).click()
+}
+
+/**
+ * Reads the school years the list's menu offers.
+ *
+ * @param page - The page the list is open on.
+ * @param yearMenu - The button opening the menu.
+ *
+ * @returns The years as the menu names them, newest first.
+ */
+async function readSchoolYears(page: Page, yearMenu: Locator): Promise<string[]> {
+  // The menu, opened
+  await yearMenu.click()
+
+  // The years it lists
+  const items = page.getByRole('menuitemcheckbox')
+
+  // Once drawn
+  await expect(items.first()).toBeVisible()
+
+  // Every one of them by name
+  const years = await items.allTextContents()
+
+  // The menu, shut again
+  await page.keyboard.press('Escape')
+
+  // The years
+  return years
 }
 
 /**

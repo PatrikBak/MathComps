@@ -490,6 +490,7 @@
     "remainingMinutes": "{minutes} min {seconds} s",
     "results": "Výsledky",
     "resultsPending": "výsledky sa pripravujú",
+    "rounds": "Kolá",
     "rules": {
       "accept": "Súhlasím s pravidlami a budem sa nimi riadiť.",
       "contact": "Nie je niečo jasné? <link>Napíš nám</link>, radšej sa opýtaj vopred.",
@@ -506,6 +507,7 @@
       "title": "Než začneš"
     },
     "rulesButton": "Pravidlá",
+    "schoolYear": "Školský rok",
     "selfAssessmentAsk": "Komentár k riešeniu",
     "selfAssessmentError": "Nepodarilo sa to uložiť.",
     "selfAssessmentNote": "Číta to človek, ktorý bude úlohu hodnotiť. Upravovať sa dá, kým ti beží čas, a ešte pol hodiny po jeho skončení.",

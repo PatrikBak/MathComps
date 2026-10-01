@@ -523,43 +523,131 @@ export function deriveStanding(
 }
 
 /**
- * The order the phases are read in, most actionable first and regardless of the calendar.
+ * The groups of one school year.
  */
-const PHASE_ORDER: Record<GroupPhase, number> = {
-  practice: 0,
-  open: 1,
-  upcoming: 2,
-  closed: 3,
+export type SchoolYearRun = {
+  /** The calendar year the school year starts in. */
+  startYear: number
+  /** Its groups, in the order they run. */
+  groups: HostedCompetitionGroup[]
 }
 
 /**
- * Puts groups in the order a reader wants them.
- *
- * @param groups - The groups being listed.
- * @param now - The instant their phases are read against, in epoch milliseconds.
- *
- * @returns The groups, most actionable first, then by when each of them opens.
+ * Every group on the board, sorted into what the board draws: the practice competition apart, and the graded
+ * rounds one school year at a time.
  */
-export function orderForReading(
+export type BoardLayout = {
+  /** The groups open to anybody at any time, which sit outside the calendar. */
+  practice: HostedCompetitionGroup[]
+  /** Every graded group, one run per school year, the newest year first. */
+  years: SchoolYearRun[]
+}
+
+/**
+ * Sorts the board's groups into what the board draws: the practice competition apart, and the graded
+ * rounds one school year at a time, each year reading forward through the calendar.
+ *
+ * @param groups - Every group on the board, in any order.
+ *
+ * @returns The layout.
+ */
+export function layOutBoard(groups: HostedCompetitionGroup[]): BoardLayout {
+  // The graded groups, in the order they run. Filtered first, so the sort reorders a copy and leaves the
+  // caller's array as it was
+  const graded = groups
+    .filter((group) => !isPracticeGroup(group))
+    .sort((left, right) => Date.parse(left.opensAt) - Date.parse(right.opensAt))
+
+  // Each group where the board draws it
+  return {
+    practice: groups.filter(isPracticeGroup),
+    years: groupBySchoolYear(graded).reverse(),
+  }
+}
+
+/**
+ * The round a reader most likely came for, out of rounds in the order they run: one where their own clock
+ * is running, or else the latest to have opened, which is the one taking entries or the one that just
+ * finished and whose problems are the newest to read. Before any has opened, the first to come.
+ *
+ * @param groups - The rounds, in the order they run.
+ * @param now - The instant their clocks and dates are read against, in epoch milliseconds.
+ *
+ * @returns The round, or undefined when there are none.
+ */
+export function roundToShow(
   groups: HostedCompetitionGroup[],
   now: number
-): HostedCompetitionGroup[] {
-  // Sorting a copy, the caller's array being the query cache's own
-  return [...groups].sort((left, right) => {
-    // What each of them is currently doing
-    const phase = derivePhase(left, now)
-    const byPhase = PHASE_ORDER[phase] - PHASE_ORDER[derivePhase(right, now)]
+): HostedCompetitionGroup | undefined {
+  // A round the reader is sitting right now, whatever else is on
+  const running = groups.find((group) =>
+    group.competitions.some(
+      (competition) => deriveStanding(group, competition, now).kind === 'running'
+    )
+  )
 
-    // Phase decides it wherever the two differ
-    if (byPhase !== 0) return byPhase
+  // That one, or the latest to have opened, or the first to come
+  return running ?? groups.findLast((group) => Date.parse(group.opensAt) <= now) ?? groups[0]
+}
 
-    // Two still to come read soonest first, since the one being waited for is the next to happen.
-    // Everywhere else the newer leads: a competition that just closed is the one still being talked
-    // about, and the one before it matters less the further back it goes.
-    return phase === 'upcoming'
-      ? Date.parse(left.opensAt) - Date.parse(right.opensAt)
-      : Date.parse(right.opensAt) - Date.parse(left.opensAt)
-  })
+/**
+ * The month the board starts a school year in, counting January as zero. August rather than September, since
+ * an opening date is read in UTC, where a round opening at local midnight on the first of September is still in
+ * August.
+ */
+const SCHOOL_YEAR_START_MONTH = 7
+
+/**
+ * The calendar year a group's school year starts in: 2026 for anything opening from August 2026 to July 2027.
+ *
+ * @param group - The group being read.
+ *
+ * @returns The year.
+ */
+function schoolYearStartOf(group: HostedCompetitionGroup): number {
+  // When it opens, as a calendar date
+  const opensAt = new Date(group.opensAt)
+
+  // The months before August still belong to the year that started the summer before
+  return opensAt.getUTCMonth() >= SCHOOL_YEAR_START_MONTH
+    ? opensAt.getUTCFullYear()
+    : opensAt.getUTCFullYear() - 1
+}
+
+/**
+ * Cuts groups already in calendar order into one run per school year, oldest first.
+ *
+ * @param groups - The groups, in the order they run.
+ *
+ * @returns One run per school year.
+ */
+function groupBySchoolYear(groups: HostedCompetitionGroup[]): SchoolYearRun[] {
+  // Each group onto the end of its year's run, opening a new run where the year changes
+  return groups.reduce<SchoolYearRun[]>((runs, group) => {
+    // The year this group belongs to, and the run currently open
+    const startYear = schoolYearStartOf(group)
+    const lastRun = runs.at(-1)
+
+    // The same year as the group before it
+    if (lastRun?.startYear === startYear) {
+      return [...runs.slice(0, -1), { startYear, groups: [...lastRun.groups, group] }]
+    }
+
+    // A new year
+    return [...runs, { startYear, groups: [group] }]
+  }, [])
+}
+
+/**
+ * A school year named the way a school names it.
+ *
+ * @param startYear - The calendar year it starts in.
+ *
+ * @returns Its name, like 2026/27.
+ */
+export function schoolYearName(startYear: number): string {
+  // Both years, the second shortened to its last two digits
+  return `${startYear}/${String((startYear + 1) % 100).padStart(2, '0')}`
 }
 
 /**

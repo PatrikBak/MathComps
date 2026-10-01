@@ -3,7 +3,6 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   ArrowRight,
-  CalendarRange,
   ClipboardCheck,
   FileText,
   NotebookPen,
@@ -74,13 +73,15 @@ type HostedCompetitionGroupPanelProps = {
 }
 
 /**
- * One group of the program: when it runs, and the competitions running inside it.
+ * One graded group of the program, named by whatever holds it: when it runs, and the competitions running
+ * inside it.
  *
- * The header carries everything the group's competitions share: its name, the entry window, the problem
- * count and the clock. Each row under it carries one competition's category, standing and action.
+ * The header carries everything the group's competitions share, the facts on the left and where things stand
+ * on the right: the entry window beside how long is left, then the problem count and the clock. Each row under
+ * it carries one competition's category, standing and action.
  *
- * A group holding a single competition has no rows, and its standing and action take a line of their own
- * under the header.
+ * A group holding a single competition has no rows, and its standing and action close the header, under how
+ * long is left.
  */
 export function HostedCompetitionGroupPanel({
   group,
@@ -106,7 +107,7 @@ export function HostedCompetitionGroupPanel({
   // Where the group sits in its own life
   const phase = derivePhase(group, now)
 
-  // The fortnight it takes entries in, from the first day to the last
+  // The window it takes entries in, from the first day to the last
   const entryWindow = entryWindowLabel(group.opensAt, group.closesAt)
 
   // The one competition a group can hold instead of one per category, whose standing and action then ride
@@ -142,7 +143,7 @@ export function HostedCompetitionGroupPanel({
 
       // Over, with nothing left to count down to
       case 'closed':
-        return <span className="text-muted/80">{t('closedLabel')}</span>
+        return <span className="text-muted">{t('closedLabel')}</span>
 
       // Every phase is handled above
       default:
@@ -155,42 +156,24 @@ export function HostedCompetitionGroupPanel({
 
   return (
     <SurfacePanel radius="xl" className={cn('overflow-hidden', PHASE_PANEL_CLASS[phase])}>
-      {/* Which group, when it runs, how long is left of it, and what holds for everything inside it */}
-      <div className="px-4 py-4 sm:px-6">
-        {/* The countdown holds the top right corner whatever the name's length, which a long name
-            wraps as text underneath */}
-        <div className="flex items-baseline justify-between gap-x-4">
-          <h2
-            className={cn(
-              'min-w-0 text-pretty text-lg font-semibold',
-              phase === 'closed' ? 'text-muted-foreground' : 'text-foreground'
-            )}
-          >
-            {group.name[locale]}
-          </h2>
-
-          {countdown !== null && <div className="shrink-0 text-sm">{countdown}</div>}
-        </div>
-
-        <div className="mt-3 flex flex-col items-start gap-2 text-sm sm:mt-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
-          {/* When it takes entries */}
+      {/* What the group's competitions share */}
+      <div className="space-y-2 px-4 py-4 text-sm sm:px-6">
+        {/* When it takes entries, and how long is left of whatever it is doing */}
+        <div className="flex items-baseline gap-x-4">
           {entryWindow !== null && (
-            <span className="inline-flex items-start gap-1.5 rounded-lg bg-foreground/5 px-2.5 py-1 font-medium tabular-nums text-foreground">
-              {/* 3px is where centring puts a 14px icon on a 20px line, so it keeps that spot on the
-                  first line once the range wraps */}
-              <CalendarRange size={14} className="mt-[3px] shrink-0 text-muted" aria-hidden />
-              {/* Names what the dates are for, which the icon does visually */}
+            <p className="min-w-0 text-base font-semibold tabular-nums text-foreground">
               <span className="sr-only">{t('entryWindowLabel')}</span>
-              {/* One box for the whole range: as separate children of the chip's flex the parts lay out
-                  in a row that never wraps */}
-              <span className="min-w-0">
-                <span className="whitespace-nowrap">{entryWindow.opens}</span>{' '}
-                <span className="mx-0.5 text-muted">&ndash;</span>{' '}
-                <span className="whitespace-nowrap">{entryWindow.closes}</span>
-              </span>
-            </span>
+              <span className="whitespace-nowrap">{entryWindow.opens}</span>{' '}
+              <span className="mx-0.5 text-muted">&ndash;</span>{' '}
+              <span className="whitespace-nowrap">{entryWindow.closes}</span>
+            </p>
           )}
 
+          {countdown !== null && <div className="ml-auto shrink-0 text-right">{countdown}</div>}
+        </div>
+
+        {/* What it asks, and what can be done about it */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           {/* What it asks of whoever takes it, kept in a box of their own so a narrow screen breaks
               before the pair rather than between them */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -204,41 +187,35 @@ export function HostedCompetitionGroupPanel({
               plain
               className={cn(
                 buttonVariants({ variant: 'ghost', size: 'sm' }),
-                '-mx-2 min-h-8 gap-1.5 px-2 sm:mx-0 sm:ml-auto'
+                '-mx-2 min-h-8 gap-1.5 px-2'
               )}
             >
               <ClipboardCheck size={16} aria-hidden />
               {t('grade')}
             </AppLink>
           )}
+
+          {/* Where the student stands with a single competition and the way into it, under how long is
+              left, or on a line of their own once this one runs out of room */}
+          {soleCompetition !== undefined && (
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-x-4 gap-y-1 empty:hidden sm:gap-x-5">
+              <StandingLabel
+                competition={soleCompetition}
+                phase={phase}
+                standing={deriveStanding(group, soleCompetition, now)}
+                now={now}
+              />
+
+              <EntryAction
+                competition={soleCompetition}
+                phase={phase}
+                standing={deriveStanding(group, soleCompetition, now)}
+                bypassesGates={bypassesGates}
+                onEnter={() => onEnter({ group, competition: soleCompetition })}
+              />
+            </div>
+          )}
         </div>
-
-        {/* What the practice group is for */}
-        {phase === 'practice' && (
-          <p className="mt-3 text-sm leading-relaxed text-foreground/70">{t('practiceNote')}</p>
-        )}
-
-        {/* Where the student stands with the single competition, and the way into it. It takes the line a
-            row would have given it, so both shapes of card put the action in the same place. Several
-            states leave both of them with nothing to say, and an empty line still carries its margin */}
-        {soleCompetition !== undefined && (
-          <div className="mt-3 flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm empty:hidden sm:gap-x-5">
-            <StandingLabel
-              competition={soleCompetition}
-              phase={phase}
-              standing={deriveStanding(group, soleCompetition, now)}
-              now={now}
-            />
-
-            <EntryAction
-              competition={soleCompetition}
-              phase={phase}
-              standing={deriveStanding(group, soleCompetition, now)}
-              bypassesGates={bypassesGates}
-              onEnter={() => onEnter({ group, competition: soleCompetition })}
-            />
-          </div>
-        )}
       </div>
 
       {/* And the competitions themselves, one per category */}
@@ -353,7 +330,7 @@ type StandingLabelProps = {
  *
  * Its own component because a group holding a single competition has no row and still has a standing.
  */
-function StandingLabel({ competition, phase, standing, now }: StandingLabelProps) {
+export function StandingLabel({ competition, phase, standing, now }: StandingLabelProps) {
   // Competitions copy
   const t = useTranslations('competitions')
 
@@ -404,7 +381,7 @@ type CompetitionTermsProps = {
  *
  * Two facts rather than one string, each behind the icon its own kind carries elsewhere on the page.
  */
-function CompetitionTerms({ problemCount, clockMinutes }: CompetitionTermsProps) {
+export function CompetitionTerms({ problemCount, clockMinutes }: CompetitionTermsProps) {
   // Competitions copy
   const t = useTranslations('competitions')
 
@@ -479,7 +456,13 @@ type EntryActionProps = {
  *
  * The results are still being built, so that link renders dead.
  */
-function EntryAction({ competition, phase, standing, bypassesGates, onEnter }: EntryActionProps) {
+export function EntryAction({
+  competition,
+  phase,
+  standing,
+  bypassesGates,
+  onEnter,
+}: EntryActionProps) {
   // Competitions copy
   const t = useTranslations('competitions')
 
