@@ -4,6 +4,7 @@ using MathComps.Domain.Contracts.SearchBar;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Tagging;
+using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Problems;
@@ -13,8 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Infrastructure.Tests.Problems;
 
 /// <summary>
-/// Integration tests for the round embargo: that a round stamped to open later is absent from everything the
-/// archive serves, and that one whose instant has passed is served like any other.
+/// Integration tests for what the archive leaves out: that a round stamped to open later, and a round the site
+/// hosted even once it has opened, are absent from everything the archive serves, and that any other round whose
+/// instant has passed is served like the rest.
 /// </summary>
 /// <remarks>
 /// A class of its own rather than more facts on <see cref="ProblemFilterServicePostgresTests"/>, whose seed is
@@ -46,18 +48,24 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
     private const string EmbargoedSlug = "75-csmo-a-ii-3";
 
     /// <summary>
-    /// Verifies that the page holds both open rounds' problems and none of the embargoed round's.
+    /// Slug of the problem whose round the site hosted, and which has already opened.
+    /// </summary>
+    private const string HostedSlug = "75-mathcomps-elementary-september-4";
+
+    /// <summary>
+    /// Verifies that the page holds the unstamped and the opened round's problems, and none of the embargoed or the
+    /// hosted round's.
     /// </summary>
     [Fact]
-    public Task An_embargoed_rounds_problems_are_absent_from_the_page() => RunTestAsync(async service =>
+    public Task A_hidden_rounds_problems_are_absent_from_the_page() => RunTestAsync(async service =>
     {
         // Ask the library for everything it holds
         var result = await service.FilterAsync(EverythingQuery());
 
-        // Only the two open rounds answer
+        // Only the unstamped and the opened round answer
         Assert.Equal([OpenSlug, OpenedSlug], result.Problems.Items.Select(problem => problem.Slug).Order());
 
-        // And the total agrees, so the embargoed one is filtered rather than merely paged out
+        // And the total agrees, so the hidden ones are filtered rather than merely paged out
         Assert.Equal(2, result.Problems.TotalCount);
     });
 
@@ -76,11 +84,11 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Verifies that no facet counts an embargoed round's problems. Each of them is the only holder of its tag,
-    /// author and number, so a facet that reached past the gate would have to advertise one.
+    /// Verifies that no facet counts a hidden round's problems. Each of them is the only holder of its tag, author
+    /// and number, so a facet that reached past the gate would have to advertise one.
     /// </summary>
     [Fact]
-    public Task No_facet_counts_an_embargoed_rounds_problems() => RunTestAsync(async service =>
+    public Task No_facet_counts_a_hidden_rounds_problems() => RunTestAsync(async service =>
     {
         // Ask the library for everything it holds, which is the request that builds the base options
         var result = await service.FilterAsync(EverythingQuery());
@@ -103,7 +111,20 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
         // Its competition holds nothing else either, so the tree must not carry that node
         Assert.DoesNotContain(CompetitionPaths(options.Competitions), path => path == "csmo-a-ii");
 
-        // The season is shared with the open rounds, so it stays
+        // The hosted problem's tag is its alone too
+        Assert.DoesNotContain(options.Tags, tag => tag.Slug == "combinatorics");
+
+        // Nor its author
+        Assert.DoesNotContain(options.Authors, author => author.Slug == "dave-hosted");
+
+        // Nor its number
+        Assert.DoesNotContain(options.ProblemNumbers, number => number.Slug == "4");
+
+        // And no node of its branch reaches the tree, the root included
+        Assert.DoesNotContain(
+            CompetitionPaths(options.Competitions), path => TaxonomySlugs.IsAtOrUnder(path, "mathcomps"));
+
+        // The season is shared with the rounds the archive serves, so it stays
         var season = Assert.Single(options.Seasons);
 
         // Counting only the problems that can be reached through it
@@ -112,10 +133,10 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Verifies that the competition browser, which reads the problems on its own rather than through the filter,
-    /// leaves an embargoed round out too.
+    /// leaves the hidden rounds out too.
     /// </summary>
     [Fact]
-    public Task The_competition_browser_leaves_an_embargoed_round_out() => RunTestAsync(async service =>
+    public Task The_competition_browser_leaves_a_hidden_round_out() => RunTestAsync(async service =>
     {
         // The browser's own view of the library
         var result = await service.GetCompetitionsBySeasonAsync(Language.SK);
@@ -123,29 +144,29 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
         // The one season the seed holds
         var season = Assert.Single(result.Seasons);
 
-        // Only the two open rounds' competitions are offered
+        // Only the unstamped and the opened round's competitions are offered
         Assert.Equal(
             ["csmo-a-i", "csmo-a-iii"],
             season.Competitions.Select(competition => competition.Path).Order());
 
-        // And they carry one problem each, so the embargoed one is counted nowhere
+        // And they carry one problem each, so the hidden ones are counted nowhere
         Assert.All(season.Competitions, competition => Assert.Equal(1, competition.ProblemCount));
     });
 
     /// <summary>
-    /// Verifies that a similar-problem edge cannot carry an embargoed neighbour out beside a visible problem.
-    /// This is the one place the gate reaches the edges between problems rather than the problems themselves.
+    /// Verifies that a similar-problem edge cannot carry a hidden neighbour out beside a visible problem. This is
+    /// the one place the gate reaches the edges between problems rather than the problems themselves.
     /// </summary>
     [Fact]
-    public Task A_similar_problem_edge_does_not_surface_an_embargoed_neighbour() => RunTestAsync(async service =>
+    public Task A_similar_problem_edge_does_not_surface_a_hidden_neighbour() => RunTestAsync(async service =>
     {
         // Ask the library for everything it holds
         var result = await service.FilterAsync(EverythingQuery());
 
-        // The problem both edges hang off
+        // The problem every edge hangs off
         var open = result.Problems.Items.Single(problem => problem.Slug == OpenSlug);
 
-        // Its visible neighbour comes through, and the embargoed one is dropped along with its statement
+        // Its visible neighbour comes through, and the hidden ones are dropped along with their statements
         Assert.Equal([OpenedSlug], open.SimilarProblems.Select(similar => similar.Slug));
     });
 
@@ -183,7 +204,7 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
-        // The one season all three rounds sat in, so the season facet can show what it still counts.
+        // The one season every round sat in, so the season facet can show what it still counts.
         var season = new Season
         {
             Id = Guid.NewGuid(),
@@ -192,7 +213,7 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
         };
         context.Seasons.Add(season);
 
-        // The competition the three rounds hang under, placed as a root so its children sort beneath it.
+        // The competition the archive's own rounds hang under, placed as a root so its children sort beneath it.
         CompetitionTreeSeed.Root(context, "csmo", 100);
 
         // A round carrying no stamp, which is the ordinary case and the one the archive must keep serving.
@@ -206,15 +227,37 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
         var openedRound = Round(
             context, season, "csmo-a-iii", new DateOnly(2025, 9, 3), DateTimeOffset.UtcNow.AddDays(-1));
 
+        // A group of competitions the site ran, closed yesterday, so its own embargo has lifted.
+        var hostedGroup = new HostedGroup
+        {
+            Id = Guid.CreateVersion7(),
+            Slug = "mc-2025-1",
+            OpensAt = DateTimeOffset.UtcNow.AddDays(-15),
+            ClosesAt = DateTimeOffset.UtcNow.AddDays(-1),
+            ClockMinutes = 120,
+            AllowsReentry = false,
+            ProblemCount = 1,
+        };
+        context.HostedGroups.Add(hostedGroup);
+
+        // Its round, open since the close, which only the hosting can keep out of the archive.
+        var hostedRound = Round(
+            context, season, "mathcomps-elementary-september", new DateOnly(2025, 9, 14), hostedGroup.ClosesAt);
+
+        // The round runs in that group.
+        hostedRound.HostedGroupId = hostedGroup.Id;
+
         // One author per problem, so an author surfacing at all names which problem leaked.
         var alice = Author(context, "Alice Open", "alice-open");
         var bob = Author(context, "Bob Opened", "bob-opened");
         var carol = Author(context, "Carol Hidden", "carol-hidden");
+        var dave = Author(context, "Dave Hosted", "dave-hosted");
 
         // One tag per problem, so a tag surfacing at all names which problem leaked.
         var algebra = Tag(context, "algebra");
         var geometry = Tag(context, "geometry");
         var numberTheory = Tag(context, "number-theory");
+        var combinatorics = Tag(context, "combinatorics");
 
         // The problem in the unstamped round.
         var open = Problem(context, OpenSlug, openRound, number: 1, alice, algebra, "Nech je dané prvočíslo.");
@@ -226,7 +269,11 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
         var embargoed = Problem(
             context, EmbargoedSlug, embargoedRound, number: 3, carol, numberTheory, "Nech je dané celé číslo.");
 
-        // Both edges hang off the visible problem and score well past the threshold, so only the gate can drop one.
+        // The problem in the round the site hosted.
+        var hosted = Problem(
+            context, HostedSlug, hostedRound, number: 4, dave, combinatorics, "Nech je daná tabuľka.");
+
+        // Every edge hangs off the visible problem and scores well past the threshold, so only the gate can drop one.
         open.SimilarProblems.Add(new ProblemSimilarity
         {
             SourceProblemId = open.Id,
@@ -238,6 +285,12 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
             SourceProblemId = open.Id,
             SimilarProblemId = embargoed.Id,
             SimilarityScore = 0.99
+        });
+        open.SimilarProblems.Add(new ProblemSimilarity
+        {
+            SourceProblemId = open.Id,
+            SimilarProblemId = hosted.Id,
+            SimilarityScore = 0.97
         });
 
         // Submit changes
