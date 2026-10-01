@@ -39,9 +39,9 @@ public class ProblemLookupService(IDbContextFactory<MathCompsDbContext> dbContex
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // Query for the season, the competition the problem sits in, and its number, among the problems the
-        // archive may serve. An embargoed round's problem drops out here, taking its taxonomy with it
+        // archive may serve. Any other problem drops out here, taking its taxonomy with it
         var problem = await dbContext.Problems
-            .WhereRoundHasOpened(DateTimeOffset.UtcNow)
+            .WhereArchiveServes(DateTimeOffset.UtcNow)
             .Where(candidate => candidate.Slug == problemSlug)
             .Select(candidate => new
             {

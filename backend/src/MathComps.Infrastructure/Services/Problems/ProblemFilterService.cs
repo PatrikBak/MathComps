@@ -43,10 +43,10 @@ public class ProblemFilterService(
         // The instant this whole request judges visibility at, so every query it runs agrees on it.
         var now = DateTimeOffset.UtcNow;
 
-        // Every problem the archive may serve. The embargo sits here, on the root set, rather than among the
-        // criteria: it is not something the person asking narrowed by, so counting the "whole library" has to mean
-        // counting this, or the base options would advertise problems no query can reach.
-        var visibleProblems = dbContext.Problems.WhereRoundHasOpened(now);
+        // Every problem the archive may serve. The rule picking them sits here, on the root set, rather than among
+        // the criteria: it is not something the person asking narrowed by, so counting the "whole library" has to
+        // mean counting this, or the base options would advertise problems no query can reach.
+        var visibleProblems = dbContext.Problems.WhereArchiveServes(now);
 
         // The problems the text search leaves, or all of them when nothing was searched for
         IQueryable<Problem> textFilteredQuery;
@@ -145,11 +145,12 @@ public class ProblemFilterService(
 
                 // Similar Problems
                 data.problem.SimilarProblems
-                    // Only neighbours whose own round has opened, since an edge would otherwise carry an embargoed
-                    // problem's slug and statement out beside a visible one. WhereRoundHasOpened owns the rule.
+                    // Only neighbours the archive serves too, since an edge would otherwise carry a hidden problem's
+                    // slug and statement out beside a visible one. WhereArchiveServes owns the rule.
                     .Where(similarProblem =>
-                        similarProblem.SimilarProblem.Round.VisibleSince == null
-                        || similarProblem.SimilarProblem.Round.VisibleSince <= now)
+                        similarProblem.SimilarProblem.Round.HostedGroupId == null
+                        && (similarProblem.SimilarProblem.Round.VisibleSince == null
+                            || similarProblem.SimilarProblem.Round.VisibleSince <= now))
                     // Only similar enough problems
                     .Where(similarProblem =>
                         similarProblem.SimilarityScore >= similarityOptions.Value.MinSimilarityScore)
@@ -798,7 +799,7 @@ public class ProblemFilterService(
         // Group the problems the archive may serve by the season and the competition they belong to
         // We will then take only these data + problem count to build the result
         var competitionData = await dbContext.Problems
-            .WhereRoundHasOpened(DateTimeOffset.UtcNow)
+            .WhereArchiveServes(DateTimeOffset.UtcNow)
             .GroupBy(problem => new
             {
                 problem.Round.Season.EditionNumber,
