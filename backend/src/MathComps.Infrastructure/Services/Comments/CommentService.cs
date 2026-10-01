@@ -195,6 +195,16 @@ public class CommentService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
+        // The author, who needs a username to sign the comment with. Read before the thread is resolved, since
+        // resolving a handout's or an article's thread can mint its row, so a refused comment writes nothing.
+        var author = await dbContext.Users
+            .Where(user => user.Id == viewer.UserId && user.Username != null)
+            .Select(user => new CommentAuthorDto(
+                user.ExternalId, user.IsDeleted ? null : user.Username, user.AvatarUrl))
+            .FirstOrDefaultAsync()
+            // With no name to sign it, there is no comment to write
+            ?? throw new CommentProfileIncompleteException();
+
         // The thread the target names
         var anchor = await ResolveAnchorAsync(dbContext, target);
 
@@ -220,15 +230,6 @@ public class CommentService(
 
         // Save the comment
         await dbContext.SaveChangesAsync();
-
-        // Fetch author info
-        var author = (await dbContext.Users
-            .Where(user => user.Id == viewer.UserId)
-            .Select(user => new CommentAuthorDto(
-                user.ExternalId, user.IsDeleted ? null : user.Username, user.AvatarUrl))
-            .FirstOrDefaultAsync())
-            // The viewer's user row, which must exist
-            ?? throw new InvalidOperationException($"Author with id '{viewer.UserId}' not found");
 
         // Log the creation of the comment
         logger.LogInformation(

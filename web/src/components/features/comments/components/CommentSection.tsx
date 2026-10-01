@@ -49,6 +49,8 @@ type CommentSectionProps = {
   newCommentPlaceholder?: string
   /** Whether a thread with no comments says so, and offers a visitor the sign-in button. */
   showEmptyText?: boolean
+  /** Whether the box for a new comment takes the cursor as it appears. */
+  autoFocus?: boolean
 }
 
 /**
@@ -60,6 +62,7 @@ export function CommentSection({
   showLikes = true,
   newCommentPlaceholder,
   showEmptyText = true,
+  autoFocus = false,
 }: CommentSectionProps) {
   // The reader, and whether Clerk has settled who they are
   const { userId, isLoaded: isUserLoaded } = useAuth()
@@ -359,10 +362,11 @@ export function CommentSection({
     )
   }
 
-  // Whether the new-comment box shows: hidden while a signed-in reader replies on desktop, and for a visitor
-  // on an empty thread
-  const showsNewCommentBox =
-    !(userId && replyCommentId !== null && !isMobile) && (userId || hasVisibleComments)
+  // Whether the new-comment box is there at all, which a visitor on an empty thread goes without
+  const showsNewCommentBox = userId || hasVisibleComments
+
+  // Whether a signed-in reader is replying on desktop, with the reply editor under its comment
+  const isReplyingInline = userId && replyCommentId !== null && !isMobile
 
   return (
     <>
@@ -409,7 +413,10 @@ export function CommentSection({
                 inline: 'pt-4',
               }[variant],
               // A rule between the list and the box
-              showsList && 'border-t border-foreground/10'
+              showsList && 'border-t border-foreground/10',
+              // Out of sight while the reply editor sits under its comment. Kept on the page, so the box
+              // doesn't take the cursor again once the reply closes
+              isReplyingInline && 'hidden'
             )}
           >
             {!isIdentityLoaded ? (
@@ -434,6 +441,7 @@ export function CommentSection({
                 onChange={setCommentInputText}
                 onSend={handleSubmitComment}
                 placeholder={newCommentPlaceholder ?? tComments('writePlaceholder')}
+                autoFocus={autoFocus}
                 isLoading={isCreatingRootComment}
               />
             )}

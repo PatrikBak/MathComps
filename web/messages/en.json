@@ -240,6 +240,7 @@
     "AdminReviewTarget": "That reply is no longer there.",
     "CannotLikeOwnComment": "You can't like your own comment.",
     "CommentNotFound": "This comment no longer exists.",
+    "CommentProfileIncomplete": "Choose a username in your profile before commenting.",
     "CommentTargetNotFound": "The item this comment belongs to no longer exists.",
     "DefenseContentNotFound": "This statement is no longer available.",
     "DefenseFeedbackCommentTooLong": "Your comment is too long.",
