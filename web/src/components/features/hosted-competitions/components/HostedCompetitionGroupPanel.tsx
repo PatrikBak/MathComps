@@ -180,14 +180,15 @@ export function HostedCompetitionGroupPanel({
             <CompetitionTerms problemCount={group.problemCount} clockMinutes={group.clockMinutes} />
           </div>
 
-          {/* The way into grading the round, for admins, once the round opens */}
+          {/* The way into grading the round, for admins, once the round opens. Its box pulled back to the
+              line of words beside it, so a round offering it stands as tall as one that does not */}
           {isAdmin && PHASE_HOLDS_GRADED_WORK[phase] && (
             <AppLink
               href={{ pathname: ROUTES.ADMIN_GRADING, params: { slug: group.slug } }}
               plain
               className={cn(
                 buttonVariants({ variant: 'ghost', size: 'sm' }),
-                '-mx-2 min-h-8 gap-1.5 px-2'
+                '-mx-2 -my-1.5 min-h-8 gap-1.5 px-2'
               )}
             >
               <ClipboardCheck size={16} aria-hidden />
