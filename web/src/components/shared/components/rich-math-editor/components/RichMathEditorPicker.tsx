@@ -1,7 +1,10 @@
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import type { ReactNode } from 'react'
 
-import { FLOATING_PANEL_CLASS } from '@/components/shared/components/DropdownMenu'
+import {
+  FLOATING_PANEL_CLASS,
+  FLOATING_PANEL_FILLS,
+} from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { ToolbarButton, type ToolbarButtonProps } from './RichMathEditorToolbarButton'
@@ -42,6 +45,7 @@ export function RichMathEditorPicker({
         transition
         className={cn(
           FLOATING_PANEL_CLASS,
+          FLOATING_PANEL_FILLS.page,
           'origin-top-left transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0',
           popupClassName
         )}

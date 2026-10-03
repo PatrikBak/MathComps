@@ -2,9 +2,8 @@ import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { type RefObject, useCallback } from 'react'
 
+import { FLOATING_PANEL_FILL_CLASS } from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
-
-import { FACET_SURFACE_CLASS } from './FacetPopover'
 
 /** How many options a facet has to offer before searching them is worth the row it costs. */
 export const SEARCH_THRESHOLD = 12
@@ -55,7 +54,7 @@ export function FacetSearchRow({
     <div
       className={cn(
         'relative flex items-center gap-2 border-b border-foreground/10 px-2.5 sm:px-3 py-1.5 sm:py-2',
-        FACET_SURFACE_CLASS
+        FLOATING_PANEL_FILL_CLASS
       )}
     >
       <div className="relative flex-1">

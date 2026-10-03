@@ -31,9 +31,11 @@ export const FACET_PILL_CLASS = cn(
 )
 
 /**
- * How a pill reads once it is narrowing something.
+ * How a pill reads once it is narrowing something: tinted in the focus hue, hover included, so it stays
+ * tinted under the pointer.
  */
-export const FACET_PILL_ACTIVE_CLASS = 'border-foreground/40 bg-foreground/10 text-foreground'
+export const FACET_PILL_ACTIVE_CLASS =
+  'border-focus/70 bg-focus/30 text-foreground hover:border-focus hover:bg-focus/40'
 
 /**
  * How one trigger shape sits on the page and what it says about itself.

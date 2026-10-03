@@ -80,11 +80,7 @@ export function AddToListMenu({ problemSlug, onSelectList }: AddToListMenuProps)
           </button>
         </PopoverTrigger>
 
-        <PopoverContent
-          align="end"
-          className="min-w-48 !animate-none"
-          onCloseAutoFocus={(event) => event.preventDefault()}
-        >
+        <PopoverContent align="end" opensOver="card" className="min-w-48 !animate-none">
           <UserListMenuItems mode="membership" problemSlug={problemSlug} onManage={handleManage} />
         </PopoverContent>
       </Popover>

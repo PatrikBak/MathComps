@@ -10,6 +10,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { memo, type MouseEvent, type ReactNode, useCallback, useMemo, useRef } from 'react'
 
 import { FOCUS_RING_ROW_CLASS } from '@/components/shared/components/Button'
+import { FLOATING_PANEL_FILL_CLASS } from '@/components/shared/components/DropdownMenu'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
@@ -45,7 +46,7 @@ import type {
 import { FacetHeader } from './FacetHeader'
 import { FacetItemCount, FacetItemLabel } from './FacetItem'
 import { FacetList } from './FacetList'
-import { FACET_SURFACE_CLASS, FacetPopover, FacetPopoverHeader } from './FacetPopover'
+import { FacetPopover, FacetPopoverHeader } from './FacetPopover'
 import { FacetSearchRow, SEARCH_THRESHOLD } from './FacetSearchRow'
 import { FacetTrigger, type FacetTriggerVariant } from './FacetTrigger'
 
@@ -341,7 +342,7 @@ function LogicToggle({ value, onChange, labels }: LogicToggleProps) {
     <div
       className={cn(
         'flex items-center justify-between gap-2 border-b border-foreground/10 px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs text-muted',
-        FACET_SURFACE_CLASS
+        FLOATING_PANEL_FILL_CLASS
       )}
     >
       {/* What the choice is about */}
@@ -420,7 +421,7 @@ function GroupSection({
         // it past the right edge and leave the whole list with a horizontal scrollbar for those few pixels
         className={cn(
           '-ml-0.5 sm:-ml-1 px-3 sm:px-4 py-1.5 sm:py-2 border-b border-foreground/10 sticky top-0 z-10 flex items-center gap-2',
-          FACET_SURFACE_CLASS
+          FLOATING_PANEL_FILL_CLASS
         )}
       >
         {/* The name, which rolls the section up and unrolls it */}

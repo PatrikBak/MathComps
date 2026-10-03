@@ -38,6 +38,9 @@ export const modalCopy = ui.modal
 /** The labels the rich editor's own controls read under, on whichever surface it is embedded. */
 export const editorCopy = ui.editor
 
+/** The labels the header's user menu reads under. */
+export const userMenuCopy = ui.userMenu
+
 /**
  * The competitions list in English, which is the canonical locale and so carries no route translation.
  */

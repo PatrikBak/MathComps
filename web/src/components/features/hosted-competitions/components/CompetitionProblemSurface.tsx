@@ -75,7 +75,8 @@ export function CompetitionProblemSurface({
         </span>
       </button>
 
-      {/* Sized to the argument: what is read here runs from three lines to three pages */}
+      {/* Sized to the argument, up to nearly the whole screen: what is read here runs from three lines to
+          three pages */}
       {isOpen && (
         <Modal
           isOpen
@@ -83,11 +84,11 @@ export function CompetitionProblemSurface({
           showCloseButton={false}
           padded={false}
           ariaLabel={label}
-          className="sm:max-w-4xl"
+          className="flex max-h-[100dvh] flex-col sm:max-h-[94vh] sm:max-w-5xl"
         >
           {/* Which of the surfaces this is, which of the set it belongs to, and the way out of it. Whose
               work it is has to be said, everything else under a problem being the student's own */}
-          <div className="flex items-center gap-3 border-b border-foreground/10 px-4 py-2 sm:px-5">
+          <div className="flex shrink-0 items-center gap-3 border-b border-foreground/10 px-4 py-2 sm:px-5">
             <div className="flex min-w-0 items-baseline gap-2">
               <span className="shrink-0 text-base font-bold text-foreground sm:text-lg">
                 {label}
@@ -113,7 +114,7 @@ export function CompetitionProblemSurface({
           <ProblemBand statement={statement[locale]} height="own" />
 
           {/* And the thing itself, which scrolls in its own right once it outgrows the screen */}
-          <div className="scrollbar-visible max-h-[60dvh] overflow-y-auto overscroll-contain px-4 py-3 sm:px-5">
+          <div className="scrollbar-visible min-h-0 overflow-y-auto overscroll-contain px-4 py-3 sm:px-5">
             {children}
           </div>
         </Modal>

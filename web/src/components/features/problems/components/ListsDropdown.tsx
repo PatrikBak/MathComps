@@ -168,8 +168,8 @@ export function ListsDropdown({
         {/* Popover content */}
         <PopoverContent
           align="start"
+          opensOver="card"
           className="w-[var(--radix-popover-trigger-width)]"
-          onCloseAutoFocus={(event) => event.preventDefault()}
           onEscapeKeyDown={(event) => {
             // While a list is being named, Escape belongs to that field, which cancels it itself
             if (isCreating) event.preventDefault()
@@ -179,7 +179,7 @@ export function ListsDropdown({
           <PopoverItem
             disabled={isCreating}
             onClick={handleSelectAll}
-            className={cn(isAllActive && 'text-focus/80')}
+            className={cn(isAllActive && 'text-focus-light')}
           >
             <div className="flex w-full items-center gap-2">
               <List className={cn('h-4 w-4', isAllActive ? 'text-focus' : 'text-muted')} />
@@ -191,7 +191,7 @@ export function ListsDropdown({
           <PopoverItem
             disabled={isCreating}
             onClick={handleSelectLiked}
-            className={cn(filters.favoritesOnly && 'text-focus/80')}
+            className={cn(filters.favoritesOnly && 'text-focus-light')}
           >
             <div className="flex w-full items-center justify-between gap-2">
               <div className="flex items-center gap-2">

@@ -38,7 +38,6 @@ export function LanguageSwitcher() {
     <DropdownMenu.Root modal={false}>
       {/* Trigger Button */}
       <DropdownMenu.Trigger
-        id="language-switcher-trigger"
         className={cn(
           'flex items-center gap-1.5 px-2 py-1.5 rounded-lg outline-none',
           'text-sm font-medium text-foreground',
@@ -65,13 +64,7 @@ export function LanguageSwitcher() {
       </DropdownMenu.Trigger>
 
       {/* Dropdown Content, its rows running the full width of the panel */}
-      <DropdownMenuContent
-        id="language-switcher-content"
-        className="min-w-[140px] p-0 py-1.5"
-        sideOffset={8}
-        align="end"
-        onCloseAutoFocus={(event) => event.preventDefault()}
-      >
+      <DropdownMenuContent className="min-w-[140px] p-0 py-1.5" sideOffset={8} align="end">
         {SUPPORTED_LOCALES.map((locale) => {
           // We will highlight the currently active locale
           const isActive = locale === currentLocale

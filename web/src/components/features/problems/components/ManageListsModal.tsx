@@ -41,6 +41,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   FLOATING_PANEL_CLASS,
+  FLOATING_PANEL_FILLS,
 } from '@/components/shared/components/DropdownMenu'
 import { EditableTextField } from '@/components/shared/components/EditableTextField'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
@@ -236,7 +237,7 @@ function SortableListRow({
               <MoreVertical size={15} />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" opensOver="card" className="w-48">
             {/* Share / Copy link */}
             <DropdownMenuItem onSelect={list.isShared ? handleCopyLink : handleEnableSharing}>
               <div className="flex items-center gap-2">
@@ -288,7 +289,11 @@ function SortableListRow({
           </PopoverButton>
           <PopoverPanel
             anchor="bottom"
-            className={cn(FLOATING_PANEL_CLASS, 'mt-1 p-1 min-w-[160px]')}
+            className={cn(
+              FLOATING_PANEL_CLASS,
+              FLOATING_PANEL_FILLS.card,
+              'mt-1 p-1 min-w-[160px]'
+            )}
           >
             {({ close }) => (
               <>

@@ -4,7 +4,7 @@ import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import messages from '../messages/en.json'
 import { BACKEND_ORIGIN, PROBLEMS_PATH, recordNotices } from './support/backend-routes'
-import { apiErrorsCopy, chatCopy, LIST_PATH } from './support/competitions'
+import { apiErrorsCopy, chatCopy, LIST_PATH, userMenuCopy } from './support/competitions'
 import { installHostedBackend } from './support/hosted-backend'
 import { searchAnswerWith, stubProblemActions, stubSearchAnswer } from './support/problem-actions'
 import { dropSessionWithoutNotifying } from './support/session'
@@ -94,7 +94,7 @@ test.describe('a reader whose session died under them', () => {
     await page.goto(LIST_PATH)
 
     // The menu the conversations hang off, which appears only once Clerk resolves a user
-    const userMenu = page.locator('#user-menu-trigger')
+    const userMenu = page.getByRole('button', { name: userMenuCopy.label })
     await expect(userMenu).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
 
     // Watch for the copy a read shows between attempts

@@ -633,11 +633,7 @@ export default function ActiveFiltersBar({
                 <ChevronDown className="h-3 w-3 flex-shrink-0" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-40"
-              onCloseAutoFocus={(event) => event.preventDefault()}
-            >
+            <DropdownMenuContent align="end" opensOver="card" className="w-40">
               <DropdownMenuItem
                 className="cursor-pointer"
                 onSelect={() => handleMarkStatusChange(null)}
