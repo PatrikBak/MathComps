@@ -252,31 +252,32 @@ test.describe('the conversation dialog', () => {
     // Open the conversation from its card
     await page.getByText('first@students.test').click({ timeout: SETTLE_TIMEOUT_MS })
 
-    // The dialog, its tabs, and what each one is called
+    // The dialog, its tabs, and what each one is called. A tab's text is read as drawn, since each one also
+    // holds a hidden copy of its name
     const dialog = page.getByRole('dialog')
     const tabs = dialog.getByRole('tab')
     const tabNames = { ...messages.admin.conversation.tabs, notes: messages.admin.notes.tab }
 
     // Narrow, so every part is a tab and the conversation is one of them
-    await expect(tabs).toHaveText([
-      tabNames.conversation,
-      tabNames.reference,
-      tabNames.notes,
-      tabNames.config,
-    ])
+    await expect(tabs).toHaveText(
+      [tabNames.conversation, tabNames.reference, tabNames.notes, tabNames.config],
+      { useInnerText: true }
+    )
 
     // Wide enough to split
     await page.setViewportSize({ width: 1400, height: 800 })
 
     // The conversation stands on its own, and the rest are tabs beside it
-    await expect(tabs).toHaveText([tabNames.reference, tabNames.notes, tabNames.config])
+    await expect(tabs).toHaveText([tabNames.reference, tabNames.notes, tabNames.config], {
+      useInnerText: true,
+    })
     await expect(dialog.getByText('The answer is 2.')).toBeVisible()
 
     // Wide enough for the solution to have a column of its own
     await page.setViewportSize({ width: 1700, height: 900 })
 
     // The solution stays on screen, and stops being a tab
-    await expect(tabs).toHaveText([tabNames.notes, tabNames.config])
+    await expect(tabs).toHaveText([tabNames.notes, tabNames.config], { useInnerText: true })
     await expect(dialog.getByRole('region', { name: tabNames.reference })).toBeVisible()
   })
 

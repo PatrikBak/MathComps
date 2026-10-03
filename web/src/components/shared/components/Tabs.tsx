@@ -118,8 +118,14 @@ export function Tabs<TId extends string>({
                 'focus:outline-none data-focus:ring-2 data-focus:ring-inset data-focus:ring-focus'
               )}
             >
-              {/* The tab's name */}
-              {item.label}
+              {/* The tab's name, over a hidden copy set at the chosen weight, which holds the tab at its
+                  chosen width whether or not it is chosen, so choosing one never nudges the tabs after it */}
+              <span className="inline-grid justify-items-center">
+                <span className="col-start-1 row-start-1">{item.label}</span>
+                <span aria-hidden className="invisible col-start-1 row-start-1 font-semibold">
+                  {item.label}
+                </span>
+              </span>
 
               {/* And what it holds, where it counts */}
               {item.count !== null && <span className="text-xs text-muted">{item.count}</span>}
