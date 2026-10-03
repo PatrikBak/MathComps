@@ -26,6 +26,33 @@ type UserAvatarImageProps = {
   className?: string
 }
 
+/** The host Clerk serves avatars from, which resizes a user's photo on request. */
+const CLERK_IMAGE_HOST = 'img.clerk.com'
+
+/**
+ * The avatar at twice the size it is drawn, enough for a sharp circle on a dense screen. Clerk hands back the
+ * uploaded original otherwise, up to a few hundred kilobytes for a circle twenty pixels wide.
+ *
+ * @param imageUrl - The avatar as Clerk gave it.
+ * @param size - How wide it is drawn, in CSS pixels.
+ *
+ * @returns The address of the smaller rendition, or the one given where it is not Clerk's.
+ */
+function sizedAvatarUrl(imageUrl: string, size: number): string {
+  // The avatar's address, null when it isn't a valid one
+  const url = URL.parse(imageUrl)
+
+  // Anything not Clerk's goes out as it came
+  if (url?.hostname !== CLERK_IMAGE_HOST) return imageUrl
+
+  // Clerk's, asked for at the drawn size, doubled for dense screens
+  url.searchParams.set('width', String(size * 2))
+  url.searchParams.set('height', String(size * 2))
+
+  // The sized rendition's address
+  return url.toString()
+}
+
 /**
  * Shared avatar renderer that wraps the Next image component and
  * infuses our fallback behavior.
@@ -36,11 +63,14 @@ export const UserAvatarImage = ({ imageUrl, altText, size, className }: UserAvat
 
   return (
     <Image
-      src={imageUrl || defaultAvatar}
+      src={imageUrl ? sizedAvatarUrl(imageUrl, size) : defaultAvatar}
       alt={altText}
       width={size}
       height={size}
-      className={cn('rounded-full ring-2 ring-foreground/20 object-cover flex-none', className)}
+      className={cn(
+        'flex-none rounded-full bg-foreground/10 object-cover ring-2 ring-foreground/20',
+        className
+      )}
       style={{ width: size, height: size }}
       onError={(event) => {
         // Ensure future renders use the fallback when the original image fails
