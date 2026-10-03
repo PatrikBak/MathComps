@@ -53,11 +53,7 @@ export function ActionsMenu({ showTechniqueTags, onShowTagsChange, filters }: Ac
           <MoreVertical className="h-4 w-4" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-60 share-custom-hide-content"
-        onCloseAutoFocus={(event) => event.preventDefault()}
-      >
+      <DropdownMenuContent align="end" opensOver="card" className="w-60 share-custom-hide-content">
         {/* Share Button - only visible on small screens (below custom breakpoint) */}
         <ShareButton filters={filters}>
           <DropdownMenuItem>

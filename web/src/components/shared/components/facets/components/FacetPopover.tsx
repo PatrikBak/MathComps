@@ -9,6 +9,10 @@ import { FilterX } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { CSSProperties, KeyboardEvent, ReactNode } from 'react'
 
+import {
+  FLOATING_PANEL_FILL_CLASS,
+  FLOATING_PANEL_FILLS,
+} from '@/components/shared/components/DropdownMenu'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import type { FacetTriggerVariant } from './FacetTrigger'
@@ -18,22 +22,15 @@ import type { FacetTriggerVariant } from './FacetTrigger'
  * panel its column sits in, a pill opens over the page itself.
  */
 const FACET_POPOVER_SURFACES: Record<FacetTriggerVariant, string> = {
-  stacked: '[--facet-surface:var(--color-surface)]',
-  pill: '[--facet-surface:var(--color-surface-raised)]',
+  stacked: FLOATING_PANEL_FILLS.card,
+  pill: FLOATING_PANEL_FILLS.page,
 }
-
-/**
- * The panel's own fill, which everything inside it shares. One unbroken surface, divided by hairlines
- * rather than by tone, and opaque whatever the panel is given, so the rows never show through the
- * chrome they scroll under.
- */
-export const FACET_SURFACE_CLASS = 'bg-[var(--facet-surface)]'
 
 /**
  * The panel itself.
  */
 const FACET_PANEL_CLASS = cn(
-  FACET_SURFACE_CLASS,
+  FLOATING_PANEL_FILL_CLASS,
   // Everything in here is control text, which the hyphenation the document sets for prose would break mid-word
   'hyphens-none'
 )
@@ -157,7 +154,7 @@ export function FacetPopoverHeader({ title, titleId, onClear, count }: FacetPopo
     <div
       className={cn(
         'sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-foreground/10 px-2.5 sm:px-3 py-1.5 sm:py-2',
-        FACET_SURFACE_CLASS
+        FLOATING_PANEL_FILL_CLASS
       )}
     >
       {/* The facet's name */}

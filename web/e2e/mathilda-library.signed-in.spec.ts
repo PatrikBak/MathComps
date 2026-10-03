@@ -12,6 +12,7 @@ import {
   LIST_PATH,
   sendTurn,
   transcriptOf,
+  userMenuCopy,
 } from './support/competitions'
 import { COMPETITION_SLUG, installHostedBackend } from './support/hosted-backend'
 import { expect, test } from './support/test'
@@ -34,7 +35,7 @@ const PRACTICE_NAME = 'Practice competition'
  */
 async function openLibrary(page: Page) {
   // The menu the list hangs off
-  await page.locator('#user-menu-trigger').click()
+  await page.getByRole('button', { name: userMenuCopy.label }).click()
 
   // And the list itself, which the menu offers by her name
   await page.getByRole('menuitem', { name: MATHILDA_NAME }).click()

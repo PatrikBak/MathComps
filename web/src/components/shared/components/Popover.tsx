@@ -2,7 +2,12 @@ import * as PopoverPrimitive from '@radix-ui/react-popover'
 import * as React from 'react'
 
 import { cn } from '../utils/css-utils'
-import { FLOATING_PANEL_CLASS, FLOATING_PANEL_MOTION_CLASS } from './DropdownMenu'
+import {
+  FLOATING_PANEL_CLASS,
+  FLOATING_PANEL_FILLS,
+  FLOATING_PANEL_MOTION_CLASS,
+  type FloatingPanelContentProps,
+} from './DropdownMenu'
 
 /** Root component that manages open/close state of the popover. */
 const Popover = PopoverPrimitive.Root
@@ -16,8 +21,8 @@ const PopoverTrigger = PopoverPrimitive.Trigger
  */
 const PopoverContent = React.forwardRef<
   React.ComponentRef<typeof PopoverPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
->(({ className, align = 'start', sideOffset = 4, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & FloatingPanelContentProps
+>(({ className, align = 'start', sideOffset = 4, opensOver = 'page', ...props }, ref) => (
   <PopoverPrimitive.Portal>
     <PopoverPrimitive.Content
       ref={ref}
@@ -25,6 +30,7 @@ const PopoverContent = React.forwardRef<
       sideOffset={sideOffset}
       className={cn(
         FLOATING_PANEL_CLASS,
+        FLOATING_PANEL_FILLS[opensOver],
         FLOATING_PANEL_MOTION_CLASS,
         'min-w-[8rem] p-1',
         className

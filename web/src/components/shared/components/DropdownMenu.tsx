@@ -2,14 +2,48 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { Check } from 'lucide-react'
 import * as React from 'react'
 
+import { usePointerPressTarget } from '@/hooks/use-pointer-press-target'
+
 import { cn } from '../utils/css-utils'
 
 /**
- * What a panel anchored to a trigger is made of: a translucent slab that blurs whatever it covers,
- * on the ladder's floating rung so it clears the dialog it may have been opened from.
+ * What an anchored panel opens over: the page itself, or a card laid on it.
  */
-export const FLOATING_PANEL_CLASS =
-  'z-floating rounded-lg border border-foreground/10 bg-surface/25 text-foreground shadow-lg backdrop-blur-md'
+export type FloatingPanelSurface = 'page' | 'card'
+
+/**
+ * The fill a panel takes over each surface, set as `--floating-panel-fill` so that chrome inside the panel
+ * can share it. Over the page the panel stands a step above it; over a card it takes the card's own colour.
+ */
+export const FLOATING_PANEL_FILLS: Record<FloatingPanelSurface, string> = {
+  page: '[--floating-panel-fill:var(--color-surface-raised)]',
+  card: '[--floating-panel-fill:var(--color-surface)]',
+}
+
+/**
+ * A background in the surrounding panel's fill, worn by the panel itself and by any chrome inside it.
+ * Opaque, so nothing under the panel shows through its rows, and no row shows through the chrome it
+ * scrolls under.
+ */
+export const FLOATING_PANEL_FILL_CLASS = 'bg-[var(--floating-panel-fill)]'
+
+/**
+ * What a panel anchored to a trigger is made of: a slab on the ladder's floating rung, so it clears the
+ * dialog it may have been opened from. Its colour comes from whichever of {@link FLOATING_PANEL_FILLS} is
+ * set beside it.
+ */
+export const FLOATING_PANEL_CLASS = cn(
+  'z-floating rounded-lg border border-foreground/10 text-foreground shadow-lg',
+  FLOATING_PANEL_FILL_CLASS
+)
+
+/**
+ * What an anchored content panel takes on top of its Radix props.
+ */
+export type FloatingPanelContentProps = {
+  /** What the panel opens over, which picks its fill. */
+  opensOver?: FloatingPanelSurface
+}
 
 /**
  * How an anchored panel arrives and leaves: fading and growing out of the edge it hangs from, and
@@ -33,25 +67,74 @@ const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
 /**
  * Positioned content panel rendered inside a portal.
  * Provides the house panel chrome, its motion, and the padding its rows sit in.
+ *
+ * A pointer closing it hands focus back to the trigger unringed. Radix's own hand-back is a bare
+ * `focus()`, which the browser rings unless the last focus it saw came from the mouse, and the click
+ * that opened the menu never counts as one, because the trigger cancels its `pointerdown`.
+ *
+ * A press out on the page closing a non-modal menu leaves focus where it landed, as Radix does. A modal
+ * menu switches the page's pointer events off while it is open, so a press outside one lands on the root
+ * element instead, and its trigger gets focus back unringed like after any other pointer close.
  */
 const DropdownMenuContent = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        FLOATING_PANEL_CLASS,
-        FLOATING_PANEL_MOTION_CLASS,
-        'min-w-[8rem] overflow-hidden p-1',
-        className
-      )}
-      {...props}
-    />
-  </DropdownMenuPrimitive.Portal>
-))
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & FloatingPanelContentProps
+>(({ className, sideOffset = 4, opensOver = 'page', onCloseAutoFocus, ...props }, ref) => {
+  // Where the user's latest press landed, while it was a pointer's
+  const pressTargetRef = usePointerPressTarget()
+
+  // A function which focuses the trigger without a ring once a pointer has closed the menu
+  const handleCloseAutoFocus = (event: Event) => {
+    // The close handler passed in runs first, and may claim the hand-back
+    onCloseAutoFocus?.(event)
+
+    // The element the closing press landed on, absent when a key closed the menu
+    const pressTarget = pressTargetRef.current
+
+    // A claimed hand-back, or a menu closed from the keyboard, is left to Radix
+    if (event.defaultPrevented || !(pressTarget instanceof Node)) return
+
+    // The closed panel
+    const panel = event.target as Element
+
+    // The trigger the closed panel is labelled by
+    const trigger = document.getElementById(panel.getAttribute('aria-labelledby') ?? '')
+
+    // A focus already held elsewhere, or a trigger nowhere to be found, is left to Radix too
+    if (trigger === null || document.activeElement !== document.body) return
+
+    // Whether the press landed on the page, which a press outside a modal menu never does
+    const isPressOnPage = document.body.contains(pressTarget)
+
+    // A press out on the page, away from both the panel and its trigger, is left to Radix as well
+    if (isPressOnPage && !panel.contains(pressTarget) && !trigger.contains(pressTarget)) return
+
+    // Claim the hand-back from Radix
+    event.preventDefault()
+
+    // Hand the focus back without the ring, and without scrolling to a trigger the page has left behind
+    trigger.focus({ focusVisible: false, preventScroll: true })
+  }
+
+  // The panel, portalled to the end of the page
+  return (
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content
+        ref={ref}
+        sideOffset={sideOffset}
+        className={cn(
+          FLOATING_PANEL_CLASS,
+          FLOATING_PANEL_FILLS[opensOver],
+          FLOATING_PANEL_MOTION_CLASS,
+          'min-w-[8rem] overflow-hidden p-1',
+          className
+        )}
+        onCloseAutoFocus={handleCloseAutoFocus}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
+  )
+})
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
 
 /**

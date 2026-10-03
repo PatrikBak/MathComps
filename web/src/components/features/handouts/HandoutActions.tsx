@@ -224,11 +224,7 @@ export function HandoutActions({ pdfFilenameStem, hideSolutionsAndProofs }: Hand
               <MoreVertical className="h-4 w-4" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-56 bg-surface/40 backdrop-blur-xl border-foreground/10"
-            onCloseAutoFocus={(event) => event.preventDefault()}
-          >
+          <DropdownMenuContent align="end" className="w-56">
             {primaryActions.map((action) => (
               <ActionDropdownItem key={action.key} action={action} />
             ))}

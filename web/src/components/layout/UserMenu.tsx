@@ -102,7 +102,7 @@ export default function UserMenu({ onOpenDefenses, onPrepareDefenses }: UserMenu
     <DropdownMenu.Root modal={false} onOpenChange={handleMenuOpenChange}>
       {/* Trigger button */}
       <DropdownMenu.Trigger asChild>
-        <UserMenuTrigger id="user-menu-trigger" aria-label={tUserMenu('label')}>
+        <UserMenuTrigger aria-label={tUserMenu('label')}>
           <UserAvatarImage
             imageUrl={user.imageUrl}
             altText={tProfile('defaultUser')}
@@ -120,13 +120,7 @@ export default function UserMenu({ onOpenDefenses, onPrepareDefenses }: UserMenu
       </DropdownMenu.Trigger>
 
       {/* Dropdown content, laid out edge to edge so its divider spans the panel */}
-      <DropdownMenuContent
-        id="user-menu-content"
-        className="w-full p-0"
-        sideOffset={16}
-        align="end"
-        onCloseAutoFocus={(event) => event.preventDefault()}
-      >
+      <DropdownMenuContent className="w-full p-0" sideOffset={16} align="end">
         {/* Who is signed in */}
         <div className="px-4 py-3 border-b border-foreground/10">
           <UserInfoHeader user={user} size="sm" />
