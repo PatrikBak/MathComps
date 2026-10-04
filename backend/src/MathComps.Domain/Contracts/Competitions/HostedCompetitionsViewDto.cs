@@ -8,7 +8,7 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// How long after an entry ends a student may still say something about their own solutions, in minutes.
 /// </param>
 /// <param name="BypassesGates">
-/// Whether this reader holds <see cref="EfCoreEntities.UserCapability.BypassCompetitionGates"/>. A fact about
+/// Whether this reader holds <see cref="EfCoreEntities.UserCapability.PrepareCompetitions"/>. A fact about
 /// the reader rather than about any group.
 /// </param>
 public record HostedCompetitionsViewDto(

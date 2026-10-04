@@ -141,6 +141,21 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>What students say about their own solutions, one claim per student per problem.</summary>
     public DbSet<ProblemSelfAssessment> ProblemSelfAssessments => Set<ProblemSelfAssessment>();
 
+    /// <summary>Problems proposed for the hosted competitions' papers.</summary>
+    public DbSet<Proposal> Proposals => Set<Proposal>();
+
+    /// <summary>Join table: the reviewers' comments on the proposals.</summary>
+    public DbSet<ProposalComment> ProposalComments => Set<ProposalComment>();
+
+    /// <summary>The boards papers are selected on.</summary>
+    public DbSet<SelectionBoard> SelectionBoards => Set<SelectionBoard>();
+
+    /// <summary>The papers on the selection boards.</summary>
+    public DbSet<SelectionPaper> SelectionPapers => Set<SelectionPaper>();
+
+    /// <summary>The filled slots of the draft papers.</summary>
+    public DbSet<SelectionSlot> SelectionSlots => Set<SelectionSlot>();
+
     #endregion DbSets
 
     #region OnConfiguring
@@ -995,6 +1010,129 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion ProblemSelfAssessment
+
+        #region Proposal
+
+        modelBuilder.Entity<Proposal>(entity =>
+        {
+            // A problem is proposed once, so its own id doubles as this row's key.
+            entity.HasKey(proposal => proposal.ProblemId);
+
+            // The problem proposed. Restricted, since what the reviewers said about it must outlive any tidying
+            // of the row it was said about.
+            entity.HasOne(proposal => proposal.Problem)
+                  .WithMany()
+                  .HasForeignKey(proposal => proposal.ProblemId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            // The number a reviewer quotes names one problem.
+            entity.HasIndex(proposal => proposal.Number)
+                  .IsUnique()
+                  .HasDatabaseName("ux_proposal_number");
+
+            // DB-side guard mirroring [Range]
+            entity.ToTable(table => table.HasCheckConstraint("ck_proposal_number_positive", "\"number\" > 0"));
+        });
+
+        #endregion Proposal
+
+        #region ProposalComment
+
+        modelBuilder.Entity<ProposalComment>(entity =>
+        {
+            // The proposal and the comment name the link
+            entity.HasKey(link => new { link.ProposalId, link.CommentId });
+
+            // The proposal discussed, going with it
+            entity.HasOne(link => link.Proposal)
+                  .WithMany(proposal => proposal.Comments)
+                  .HasForeignKey(link => link.ProposalId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // The comment, going with it
+            entity.HasOne(link => link.Comment)
+                  .WithMany()
+                  .HasForeignKey(link => link.CommentId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Each comment belongs to at most one proposal
+            entity.HasIndex(link => link.CommentId).IsUnique().HasDatabaseName("ux_proposal_comment_comment_id");
+        });
+
+        #endregion ProposalComment
+
+        #region SelectionBoard
+
+        modelBuilder.Entity<SelectionBoard>(entity =>
+        {
+            // The group it was finalized into. Restricted: a group whose problems a board picked is not something
+            // a delete should quietly take the board with.
+            entity.HasOne(board => board.HostedGroup)
+                  .WithMany()
+                  .HasForeignKey(board => board.HostedGroupId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            // One board per group, since the board reads its slots off the group's rounds.
+            entity.HasIndex(board => board.HostedGroupId)
+                  .IsUnique()
+                  .HasDatabaseName("ux_selection_board_hosted_group_id");
+        });
+
+        #endregion SelectionBoard
+
+        #region SelectionPaper
+
+        modelBuilder.Entity<SelectionPaper>(entity =>
+        {
+            // The board holding it, cascading so deleting the board drops its papers.
+            entity.HasOne(paper => paper.Board)
+                  .WithMany(board => board.Papers)
+                  .HasForeignKey(paper => paper.BoardId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Each paper stands in its own place on the board.
+            entity.HasIndex(paper => new { paper.BoardId, paper.Position })
+                  .IsUnique()
+                  .HasDatabaseName("ux_selection_paper_board_id_position");
+
+            // DB-side guards: positions count from zero, and the slot count mirrors [Range]
+            entity.ToTable(table =>
+            {
+                table.HasCheckConstraint("ck_selection_paper_position_non_negative", "\"position\" >= 0");
+                table.HasCheckConstraint("ck_selection_paper_slot_count_positive", "\"slot_count\" > 0");
+            });
+        });
+
+        #endregion SelectionPaper
+
+        #region SelectionSlot
+
+        modelBuilder.Entity<SelectionSlot>(entity =>
+        {
+            // A slot holds one problem, so the paper and the position name the row.
+            entity.HasKey(slot => new { slot.PaperId, slot.Position });
+
+            // The paper holding it, cascading so deleting the paper empties its slots.
+            entity.HasOne(slot => slot.Paper)
+                  .WithMany(paper => paper.Slots)
+                  .HasForeignKey(slot => slot.PaperId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // The proposal standing in it, cascading so a proposal gone for good leaves no slot behind.
+            entity.HasOne(slot => slot.Proposal)
+                  .WithMany()
+                  .HasForeignKey(slot => slot.ProblemId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Every slot a problem stands in, which a problem leaving the pool empties.
+            entity.HasIndex(slot => slot.ProblemId).HasDatabaseName("ix_selection_slot_problem_id");
+
+            // Positions count from zero.
+            entity.ToTable(table => table.HasCheckConstraint(
+                "ck_selection_slot_position_non_negative", "\"position\" >= 0"));
+        });
+
+        #endregion SelectionSlot
 
         #region NewsArticle
 

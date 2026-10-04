@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
+using MathComps.Domain.Taxonomy;
 
 namespace MathComps.Infrastructure.BulkImport;
 
@@ -146,8 +147,9 @@ public record HostedGroupCountDisagreement(int RoundWouldHold, int GroupAnnounce
 /// </param>
 /// <param name="MissingProblemOrders">
 /// The problem orders missing from the round once this import lands — the gaps in <c>1..N</c> of the union of the
-/// orders already in the DB and the draft's orders. Empty when the round would be contiguous; non-empty flags an
-/// import that would leave (or create) a gap-numbered round.
+/// orders already in the DB and the draft's orders. Empty when the round would be contiguous, and always for a round
+/// under <see cref="HostedTaxonomy.ProposalsPath"/>; non-empty flags an import that would leave (or create) a
+/// gap-numbered round.
 /// </param>
 /// <param name="SortOrderChanges">
 /// The existing competition nodes whose stored sort order applying the draft would renumber to match the registry —

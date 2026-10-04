@@ -41,7 +41,7 @@ public class UserGrantServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task The_account_a_grant_names_holds_it() => RunTestAsync(async grants =>
         // The row the seed wrote against this account
-        Assert.True(await grants.HasAsync(_grantedId, UserCapability.BypassCompetitionGates)));
+        Assert.True(await grants.HasAsync(_grantedId, UserCapability.PrepareCompetitions)));
 
     /// <summary>
     /// Every other account holds nothing, with a row for somebody else standing in the same table. That is the
@@ -50,7 +50,7 @@ public class UserGrantServicePostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task Another_students_grant_is_not_theirs() => RunTestAsync(async grants =>
         // Nothing was ever written for them
-        Assert.False(await grants.HasAsync(_plainId, UserCapability.BypassCompetitionGates)));
+        Assert.False(await grants.HasAsync(_plainId, UserCapability.PrepareCompetitions)));
 
     /// <summary>
     /// Asked about several accounts at once, only the one a grant names comes back. A read letting an ungranted
@@ -61,7 +61,7 @@ public class UserGrantServicePostgresTests(PostgresContainerFixture fixture)
         // Both accounts asked about, the grant written for one
         Assert.Equal(
             [_grantedId],
-            await grants.GetHoldersAsync([_grantedId, _plainId], UserCapability.BypassCompetitionGates)));
+            await grants.GetHoldersAsync([_grantedId, _plainId], UserCapability.PrepareCompetitions)));
 
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
@@ -75,7 +75,7 @@ public class UserGrantServicePostgresTests(PostgresContainerFixture fixture)
         context.UserGrants.Add(new UserGrant
         {
             UserId = _grantedId,
-            Capability = UserCapability.BypassCompetitionGates,
+            Capability = UserCapability.PrepareCompetitions,
         });
 
         // Submit changes

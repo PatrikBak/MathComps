@@ -54,7 +54,7 @@ internal static class HostedGrading
             return null;
 
         // Whether the site lets the student past its gates.
-        var bypassesGates = await grants.HasAsync(userId, UserCapability.BypassCompetitionGates, cancellationToken);
+        var bypassesGates = await grants.HasAsync(userId, UserCapability.PrepareCompetitions, cancellationToken);
 
         // The entry and when its conversations count, where anybody grades it.
         return GradedEntry.Of(

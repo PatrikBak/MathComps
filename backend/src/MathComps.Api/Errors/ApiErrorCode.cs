@@ -216,8 +216,49 @@ public enum ApiErrorCode
     HostedGradeValue,
 
     /// <summary>
+    /// No board, paper, slot, live proposal or cycle of the problem selection answers to the id.
+    /// </summary>
+    SelectionTargetNotFound,
+
+    /// <summary>
+    /// A board was changed after the competitions it was finalized into opened.
+    /// </summary>
+    SelectionBoardOpened,
+
+    /// <summary>
+    /// A paper has already taken the problem.
+    /// </summary>
+    SelectionProposalUsed,
+
+    /// <summary>
+    /// A finalized paper was asked to stand part-filled.
+    /// </summary>
+    SelectionPaperFinalized,
+
+    /// <summary>
+    /// A board already finalized into a cycle was finalized again.
+    /// </summary>
+    SelectionBoardFinalized,
+
+    /// <summary>
+    /// A problem going into a round lacks a statement or a solution in some language.
+    /// </summary>
+    SelectionProblemIncomplete,
+
+    /// <summary>
+    /// A board cannot be finalized into the cycle: a slot is empty, the papers don't fit its rounds, or it no
+    /// longer takes a board.
+    /// </summary>
+    SelectionFinalizeBlocked,
+
+    /// <summary>
+    /// A move would write a slug a problem outside it already carries.
+    /// </summary>
+    ProblemSlugTaken,
+
+    /// <summary>
     /// The request body could not be read into what the route expects: broken JSON, a field of the wrong
-    /// type, a value no member of an enumeration names, or no body at all.
+    /// type, a value no member of an enumeration names, a required field left out, or no body at all.
     /// </summary>
     MalformedRequest,
 

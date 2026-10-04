@@ -1,5 +1,6 @@
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Problems;
@@ -34,6 +35,11 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
     /// Slug of the seeded problem whose round is embargoed.
     /// </summary>
     private const string EmbargoedProblemSlug = "embargoed-lookup-problem";
+
+    /// <summary>
+    /// Slug of the seeded problem parked among the proposals.
+    /// </summary>
+    private const string ProposalProblemSlug = "76-mathcomps-proposals-1";
 
     /// <summary>
     /// Verifies that slug-to-id resolution returns the row for a known slug and null for an unknown one.
@@ -94,6 +100,15 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
         // The id lookup still resolves it, since a write against a problem nobody can read yet is allowed
         Assert.True((await service.GetProblemIdBySlugAsync(EmbargoedProblemSlug)).HasValue);
     });
+
+    /// <summary>
+    /// Verifies that a problem parked among the proposals has no page, even in a round carrying no embargo. Its slug
+    /// is spelled from its number, so a page would let anybody read the proposals by counting.
+    /// </summary>
+    [Fact]
+    public Task ProposalProblemIsUnreadable() => RunTestAsync(async service =>
+        // The detail lookup treats it as though it were not there
+        Assert.Null(await service.GetProblemLookupDataAsync(ProposalProblemSlug)));
 
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
@@ -160,6 +175,24 @@ public class ProblemLookupServicePostgresTests(PostgresContainerFixture fixture)
             RoundId = embargoedRound.Id,
             Number = 1,
             Slug = EmbargoedProblemSlug
+        });
+
+        // A round of the proposals carrying no embargo, so only its place in the taxonomy can keep it unread.
+        var proposalsRound = new Round
+        {
+            Id = Guid.NewGuid(),
+            CompetitionId = CompetitionTreeSeed.Chain(context, HostedTaxonomy.ProposalsPath).Id,
+            SeasonId = season.Id,
+            Date = DateOnly.FromDateTime(DateTime.Today)
+        };
+        context.Rounds.Add(proposalsRound);
+
+        // One problem in it
+        context.Problems.Add(new Problem
+        {
+            RoundId = proposalsRound.Id,
+            Number = 1,
+            Slug = ProposalProblemSlug
         });
 
         // Submit changes

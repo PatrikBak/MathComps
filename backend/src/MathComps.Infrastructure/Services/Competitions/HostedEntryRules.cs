@@ -8,7 +8,7 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// </summary>
 /// <param name="UserId">The student reading, null where the reader has no account.</param>
 /// <param name="BypassesGates">
-/// Whether they hold <see cref="UserCapability.BypassCompetitionGates"/>, which only an account can do.
+/// Whether they hold <see cref="UserCapability.PrepareCompetitions"/>, which only an account can do.
 /// </param>
 public readonly record struct HostedReader(Guid? UserId, bool BypassesGates);
 
@@ -76,7 +76,7 @@ public static class HostedEntryRules
     /// problems, and a competition that has closed, which anybody may then read.
     ///
     /// A reader let past the gates is held to their clock like everybody else
-    /// (<see cref="UserCapability.BypassCompetitionGates"/>).
+    /// (<see cref="UserCapability.PrepareCompetitions"/>).
     ///
     /// The round's embargo is a separate gate, deciding whether the problems may be reached at all, and
     /// <see cref="EnsureEntitled"/> has settled it by the time anything asks this.
@@ -124,7 +124,7 @@ public static class HostedEntryRules
     /// </summary>
     /// <param name="groupClosesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
     /// <param name="bypassesGates">
-    /// Whether the student holds <see cref="UserCapability.BypassCompetitionGates"/>.
+    /// Whether the student holds <see cref="UserCapability.PrepareCompetitions"/>.
     /// </param>
     /// <returns>Whether the run is graded.</returns>
     public static bool IsGraded(DateTimeOffset? groupClosesAt, bool bypassesGates) =>

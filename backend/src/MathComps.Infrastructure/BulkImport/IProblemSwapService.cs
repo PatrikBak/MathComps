@@ -1,4 +1,5 @@
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Infrastructure.Services.Problems;
 
 namespace MathComps.Infrastructure.BulkImport;
 
@@ -18,11 +19,13 @@ public interface IProblemSwapService
     /// Exchanges the two problems' rounds and numbers, and recomputes each one's slug for the position it lands on.
     /// Both rows keep their ids, so every row pointing at either problem follows it. The exchange leaves each round
     /// holding exactly the problems it held before, which is what a round running as part of a hosted group requires.
+    /// A problem leaving the proposals leaves every draft selection board it stood on.
     /// </summary>
     /// <remarks>
     /// The two problems may share a round or sit in different ones, and either may belong to a competition the site
     /// hosts. Neither a hosted group nor an embargo is a reason to refuse: moving a problem between rounds is what
-    /// the exchange is for.
+    /// the exchange is for. A hosted round does take only a problem with a statement and a solution in every
+    /// language, and a group a selection board was finalized into only proposals still in the selection.
     /// </remarks>
     /// <param name="slugA">The slug of one problem to move.</param>
     /// <param name="slugB">The slug of the other problem to move.</param>
@@ -31,13 +34,19 @@ public interface IProblemSwapService
     /// clean dry run is the same answer the real one gives.
     /// </param>
     /// <returns>Where each problem stood and what it moves to, or would have on a dry run.</returns>
-    /// <exception cref="ProblemSwapRefusedException">Thrown when the exchange cannot be carried out.</exception>
+    /// <exception cref="ProblemSwapRefusedException">
+    /// Thrown when the exchange cannot be carried out as asked.
+    /// </exception>
+    /// <exception cref="ProblemSlugTakenException">
+    /// Thrown when a slug the exchange would write is already held by a third problem.
+    /// </exception>
     Task<ProblemSwapResult> SwapAsync(string slugA, string slugB, bool dryRun = false);
 }
 
 /// <summary>
-/// Thrown when an exchange cannot be carried out: a slug names no problem, one problem is named twice, or a slug
-/// the exchange would write is already held by a third problem.
+/// Thrown when an exchange cannot be carried out as asked: a slug names no problem or more than one, one problem is
+/// named twice, a problem missing a language would land in a hosted round, or a problem outside the selection would
+/// land in a round a selection board filled.
 /// </summary>
 /// <param name="message">What stands in the way of the exchange.</param>
 public sealed class ProblemSwapRefusedException(string message) : Exception(message);

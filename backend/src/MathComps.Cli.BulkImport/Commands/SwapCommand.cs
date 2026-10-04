@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using MathComps.Infrastructure.BulkImport;
+using MathComps.Infrastructure.Services.Problems;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using static Spectre.Console.Markup;
@@ -53,8 +54,8 @@ public class SwapCommand(IProblemSwapService swap) : AsyncCommand<SwapCommand.Se
             // Move the two problems onto each other's positions, or work out what that would do.
             result = await swap.SwapAsync(settings.SlugA, settings.SlugB, settings.DryRun);
         }
-        // The pair is the caller's to correct.
-        catch (ProblemSwapRefusedException exception)
+        // The pair is the caller's to correct, and so is a third problem holding a slug one of them would take.
+        catch (Exception exception) when (exception is ProblemSwapRefusedException or ProblemSlugTakenException)
         {
             // Say what stands in the way, in the words the refusal used.
             AnsiConsole.MarkupLine($"[red]{Escape(exception.Message)}[/]");

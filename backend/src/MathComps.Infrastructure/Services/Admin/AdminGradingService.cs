@@ -79,7 +79,7 @@ public class AdminGradingService(
 
         // The entrants the site lets past its gates.
         var bypassing = await grants.GetHoldersAsync(
-            [.. entries.Select(entry => entry.User.Id)], UserCapability.BypassCompetitionGates, cancellationToken);
+            [.. entries.Select(entry => entry.User.Id)], UserCapability.PrepareCompetitions, cancellationToken);
 
         // Only the graded entries, each with the window its conversations count in.
         var graded = entries

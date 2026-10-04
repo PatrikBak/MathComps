@@ -83,7 +83,7 @@ public sealed class HostedCompetitionService(
 
         // Whether the reader is let past the embargoes altogether, which only an account can be.
         var bypassesGates = userId is { } holder
-            && await grants.HasAsync(holder, UserCapability.BypassCompetitionGates, cancellationToken);
+            && await grants.HasAsync(holder, UserCapability.PrepareCompetitions, cancellationToken);
 
         // The view, one group at a time.
         return new HostedCompetitionsViewDto(
@@ -206,7 +206,7 @@ public sealed class HostedCompetitionService(
         var reader = new HostedReader(
             userId,
             userId is { } holder
-                && await grants.HasAsync(holder, UserCapability.BypassCompetitionGates, cancellationToken));
+                && await grants.HasAsync(holder, UserCapability.PrepareCompetitions, cancellationToken));
 
         // One instant for everything this read weighs, so the embargo cannot lift between the check that lets
         // the reader in and the one that decides what the set carries.
@@ -355,7 +355,7 @@ public sealed class HostedCompetitionService(
         // The student, with whether the entry window below reaches them at all.
         var reader = new HostedReader(
             userId,
-            await grants.HasAsync(userId, UserCapability.BypassCompetitionGates, cancellationToken));
+            await grants.HasAsync(userId, UserCapability.PrepareCompetitions, cancellationToken));
 
         // Announced but not yet open, or past its window: either way there is no entry to take, unless the
         // student is one the window does not hold.
@@ -717,7 +717,7 @@ public sealed class HostedCompetitionService(
         MathCompsDbContext dbContext, Guid userId, Guid roundId, CancellationToken cancellationToken)
     {
         // Nobody grades a run the site let past the gates, so a note under one has no reader.
-        if (await grants.HasAsync(userId, UserCapability.BypassCompetitionGates, cancellationToken))
+        if (await grants.HasAsync(userId, UserCapability.PrepareCompetitions, cancellationToken))
             throw new HostedEntryNotGradedException();
 
         // Their entry with the clock it was given, absent unless the site hosts the round and they spent one.

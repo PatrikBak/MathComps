@@ -1,6 +1,8 @@
 using MathComps.Domain.EfCoreEntities;
+using MathComps.Domain.Localization;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,9 +11,9 @@ namespace MathComps.Infrastructure.Tests.BulkImport;
 
 /// <summary>
 /// Integration tests for <see cref="ProblemSwapService"/> against a real Postgres database. These pin what only a
-/// real database can show: that the rows keep their ids while their positions change, so everything hanging off a
-/// problem follows it; that the non-deferrable unique index over (round, number) survives an exchange inside one
-/// round; that a slug a third problem already carries is refused; and that a dry run leaves the database alone.
+/// real database can show, such as the rows keeping their ids while their positions change, so everything hanging
+/// off a problem follows it, and the non-deferrable unique index over (round, number) surviving an exchange inside
+/// one round.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class ProblemSwapServicePostgresTests(PostgresContainerFixture fixture)
@@ -183,6 +185,40 @@ public class ProblemSwapServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// An exchange waits for any other move of a problem to commit, the problem selection's included, so a swap
+    /// run beside a reviewer finalizing a board cannot both take one problem and leave a round a problem short.
+    /// </summary>
+    [Fact]
+    public Task An_exchange_waits_for_a_move_holding_the_lock() => RunTestAsync(async service =>
+    {
+        // A move still running, on a context of its own.
+        await using var provider = CreateServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+        var running = scope.ServiceProvider.GetRequiredService<MathCompsDbContext>();
+
+        // The running move's transaction, held open.
+        await using var transaction = await running.Database.BeginTransactionAsync();
+
+        // The running move holding the lock every move waits for.
+        await ProblemPositions.LockAsync(running, CancellationToken.None);
+
+        // An exchange, started meanwhile.
+        var swap = service.SwapAsync(CsmoFirstSlug, CsmoThirdSlug);
+
+        // A while later.
+        await Task.Delay(TimeSpan.FromMilliseconds(500));
+
+        // The exchange still waiting.
+        Assert.False(swap.IsCompleted);
+
+        // The running move commits.
+        await transaction.CommitAsync();
+
+        // The exchange goes through.
+        await swap;
+    });
+
+    /// <summary>
     /// An exchange whose destination slug a third problem already carries is refused, and nothing is written. The
     /// schema does not enforce slug uniqueness, so nothing downstream would catch it until the next import of
     /// either problem resolved the slug to two rows.
@@ -191,7 +227,7 @@ public class ProblemSwapServicePostgresTests(PostgresContainerFixture fixture)
     public Task A_slug_a_third_problem_carries_is_refused() => RunTestAsync(async service =>
     {
         // The memo round's second position calls for a slug its third problem is already sitting on.
-        await Assert.ThrowsAsync<ProblemSwapRefusedException>(
+        await Assert.ThrowsAsync<ProblemSlugTakenException>(
             () => service.SwapAsync(MemoFirstSlug, MemoDriftedSlug));
 
         // The memo round is exactly as it was seeded.
@@ -210,8 +246,7 @@ public class ProblemSwapServicePostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     /// <remarks>
     /// The pair exchanged here has free destination slugs and the duplicate sits on neither of them, so the lookup
-    /// is the only thing that can refuse it. A pair whose slugs collide would be refused by the collision check,
-    /// which would pass with no duplicate handling at all.
+    /// is the only thing that can refuse it.
     /// </remarks>
     [Fact]
     public Task A_slug_more_than_one_problem_carries_is_refused() => RunTestAsync(async service =>
@@ -249,6 +284,122 @@ public class ProblemSwapServicePostgresTests(PostgresContainerFixture fixture)
             Assert.Equal(_memoRoundId, stray.RoundId);
             Assert.Equal(3, stray.Number);
         });
+    });
+
+    /// <summary>
+    /// A round a selection board filled holds proposals alone, since the selection reads its problems as its own. An
+    /// archive problem swapped into one would stand in a slot as a problem the selection cannot show, so the exchange
+    /// is refused and nothing moves.
+    /// </summary>
+    [Fact]
+    public Task A_problem_outside_the_selection_cannot_land_in_a_round_a_board_filled() => RunTestAsync(
+        async service =>
+        {
+            // A group not yet open, its first round holding one proposal, and the board finalized into it.
+            var proposalId = await QueryValueAsync(async context =>
+            {
+                // The group, with its empty rounds.
+                var group = SelectionSeed.NewGroup(
+                    context, SelectionSeed.NewSeason(context), "october", DateTimeOffset.UtcNow.AddDays(10));
+
+                // The proposal standing first in its first round.
+                var problemId = SelectionSeed.NewProposal(context, group.Rounds.First(), 1, 1);
+
+                // The board that filled the group.
+                SelectionSeed.NewBoard(context, "October").HostedGroupId = group.Id;
+
+                // The archive problem written in every language, so the board alone stands in its way.
+                foreach (var language in Enum.GetValues<Language>())
+                    foreach (var documentType in new[] { DocumentType.Statement, DocumentType.Solution })
+                        context.ProblemTexts.Add(SelectionSeed.NewText(_imoSecondId, documentType, language, 2));
+
+                // Commit the seed.
+                await context.SaveChangesAsync();
+
+                // The proposal, which is what the exchange names.
+                return problemId;
+            });
+
+            // Exchanging the proposal with an archive problem would put the archive problem in the board's round.
+            await Assert.ThrowsAsync<ProblemSwapRefusedException>(
+                async () => await service.SwapAsync(await SlugOfAsync(proposalId), ImoSecondSlug));
+
+            // So the archive problem never left its round.
+            Assert.Equal(_imoRoundId, await QueryValueAsync(context => context.Problems
+                .Where(problem => problem.Id == _imoSecondId)
+                .Select(problem => problem.RoundId)
+                .SingleAsync()));
+        });
+
+    /// <summary>
+    /// A hosted round serves its problems in every language, so a problem missing one cannot be swapped into it.
+    /// </summary>
+    [Fact]
+    public Task A_problem_missing_a_language_cannot_land_in_a_hosted_round() => RunTestAsync(async service =>
+    {
+        // A group not yet open with one problem in its first round, and a pool proposal written in English alone.
+        var (hostedId, pooledId) = await QueryValueAsync(async context =>
+        {
+            // The season both rounds sit in.
+            var season = SelectionSeed.NewSeason(context);
+
+            // The group, with its empty rounds.
+            var group = SelectionSeed.NewGroup(context, season, "october", DateTimeOffset.UtcNow.AddDays(10));
+
+            // The group's problem, standing first in its first round.
+            var hosted = SelectionSeed.NewProposal(context, group.Rounds.First(), 1, 1);
+
+            // The English-only proposal, parked in the pool.
+            var pooled = SelectionSeed.NewProposal(
+                context, SelectionSeed.NewProposalsRound(context, season), 2, 1, Language.EN);
+
+            // Commit the seed.
+            await context.SaveChangesAsync();
+
+            // Both, which is what the exchange names.
+            return (hosted, pooled);
+        });
+
+        // Exchanging the group's problem with the English-only proposal would put the proposal into the hosted round.
+        await Assert.ThrowsAsync<ProblemSwapRefusedException>(
+            async () => await service.SwapAsync(await SlugOfAsync(hostedId), await SlugOfAsync(pooledId)));
+
+        // So the English-only proposal never left the pool.
+        Assert.Equal("mathcomps-proposals", await QueryValueAsync(context => context.Problems
+            .Where(problem => problem.Id == pooledId)
+            .Select(problem => problem.Round.Competition.Path)
+            .SingleAsync()));
+    });
+
+    /// <summary>
+    /// A problem the exchange takes out of the pool leaves every draft board it stood on. Left there, a draft would
+    /// hold a slot for a problem that is no longer in the pool.
+    /// </summary>
+    [Fact]
+    public Task A_problem_leaving_the_pool_leaves_the_draft_boards() => RunTestAsync(async service =>
+    {
+        // A pool proposal standing on a draft board.
+        var proposalId = await QueryValueAsync(async context =>
+        {
+            // The proposal, parked in the pool's round.
+            var problemId = SelectionSeed.NewProposal(
+                context, SelectionSeed.NewProposalsRound(context, SelectionSeed.NewSeason(context)), 1, 1);
+
+            // The draft holding the proposal in its first slot.
+            SelectionSeed.NewBoard(context, "Draft", problemId);
+
+            // Commit the seed.
+            await context.SaveChangesAsync();
+
+            // The proposal, which is what the exchange names.
+            return problemId;
+        });
+
+        // The proposal exchanged with an archive problem, which takes it out of the pool.
+        await service.SwapAsync(await SlugOfAsync(proposalId), ImoSecondSlug);
+
+        // So the draft no longer holds the proposal.
+        Assert.Equal(0, await QueryValueAsync(context => context.SelectionSlots.CountAsync()));
     });
 
     /// <summary>
@@ -418,4 +569,16 @@ public class ProblemSwapServicePostgresTests(PostgresContainerFixture fixture)
     private static Task<int> NumberOfAsync(MathCompsDbContext context, string slug) =>
         // The stored position of the one problem carrying that slug.
         context.Problems.Where(problem => problem.Slug == slug).Select(problem => problem.Number).SingleAsync();
+
+    /// <summary>
+    /// Reads the slug a problem carries.
+    /// </summary>
+    /// <param name="problemId">The problem.</param>
+    /// <returns>Its slug.</returns>
+    private Task<string> SlugOfAsync(Guid problemId) =>
+        // The one problem's slug.
+        QueryValueAsync(context => context.Problems
+            .Where(problem => problem.Id == problemId)
+            .Select(problem => problem.Slug)
+            .SingleAsync());
 }

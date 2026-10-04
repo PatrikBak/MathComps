@@ -27,6 +27,9 @@ public static class HostedTaxonomy
     /// A problem written for a cycle and then swapped out is parked here, as is a candidate waiting to be
     /// swapped in, and either keeps the row it has always had. Nothing is entered into it, so no hosted group
     /// may claim its rounds.
+    ///
+    /// A proposal parked here is quoted by its <see cref="EfCoreEntities.Proposal.Number"/>, so the problem numbers
+    /// in these rounds only say where the rows are stored, and may run with gaps.
     /// </remarks>
     public const string ProposalsPath = $"{RootSlug}-proposals";
 

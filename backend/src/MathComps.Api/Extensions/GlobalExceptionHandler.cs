@@ -5,6 +5,7 @@ using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Problems;
+using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Diagnostics;
 
@@ -87,6 +88,8 @@ public sealed class GlobalExceptionHandler(
         HostedProblemNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.HostedProblemNotFound),
         HostedGroupNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.HostedGroupNotFound),
         HostedGradeTargetException => (StatusCodes.Status404NotFound, ApiErrorCode.HostedGradeTarget),
+        SelectionTargetNotFoundException
+            => (StatusCodes.Status404NotFound, ApiErrorCode.SelectionTargetNotFound),
 
         // Defense guardrails: the request doesn't hold up, or the user's usage is over a cap
         DefenseMessageTooLongException => (StatusCodes.Status400BadRequest, ApiErrorCode.DefenseMessageTooLong),
@@ -144,6 +147,17 @@ public sealed class GlobalExceptionHandler(
 
         // State conflicts
         CannotLikeOwnCommentException => (StatusCodes.Status409Conflict, ApiErrorCode.CannotLikeOwnComment),
+        SelectionBoardOpenedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionBoardOpened),
+        SelectionProposalUsedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionProposalUsed),
+        SelectionPaperFinalizedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionPaperFinalized),
+        SelectionBoardFinalizedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionBoardFinalized),
+        ProblemSlugTakenException => (StatusCodes.Status409Conflict, ApiErrorCode.ProblemSlugTaken),
+
+        // A problem a round can't carry, or a board the cycle can't take
+        SelectionProblemIncompleteException
+            => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.SelectionProblemIncomplete),
+        SelectionFinalizeBlockedException
+            => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.SelectionFinalizeBlocked),
 
         // Malformed requests
         ListReorderMismatchException => (StatusCodes.Status400BadRequest, ApiErrorCode.ListReorderMismatch),
@@ -159,8 +173,8 @@ public sealed class GlobalExceptionHandler(
         UsernameRejectedException => (StatusCodes.Status400BadRequest, ApiErrorCode.UsernameRejected),
         ProfileValueInvalidException => (StatusCodes.Status400BadRequest, ApiErrorCode.ProfileValueInvalid),
 
-        // A body the route can't be built from never reaches an endpoint, so the framework is the one that
-        // judged it; carrying its own status through is what stops a caller's bad JSON reading as our fault
+        // A request the route can't use, refused by the framework or by the endpoint itself; carrying its own
+        // status through is what stops a caller's bad request reading as our fault
         BadHttpRequestException badRequest => (badRequest.StatusCode, ApiErrorCode.MalformedRequest),
 
         // Not a known business failure — treat as an unexpected fault

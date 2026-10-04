@@ -10,38 +10,43 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Api.Tests;
 
 /// <summary>
-/// Guards that every route under <c>/admin</c> is closed to everybody but admins and rate-limited. Each route
-/// opts in with its own call, so a route left without it serves whatever it reads (students' emails, reference
-/// solutions, grades) to anybody who asks, and nothing else fails: the admin pages keep working for the admins
-/// using them.
+/// Guards that every route of a gated area is closed to everybody but the accounts its policy lets in, and
+/// rate-limited. Each route opts in with its own call, so a route left without it serves whatever it reads
+/// (students' emails, reference solutions, grades, the problems competitions are picked from) to anybody who asks,
+/// and nothing else fails: the pages keep working for the accounts using them.
 /// </summary>
-public class AdminEndpointSecurityTests
+public class GatedEndpointSecurityTests
 {
     /// <summary>
-    /// Every admin route carries the admin policy and a rate limit, and none lets an anonymous caller through.
+    /// Every route of a gated area carries the area's policy and a rate limit, and none lets an anonymous caller
+    /// through.
     /// </summary>
-    [Fact]
-    public void Every_admin_route_requires_an_admin_and_is_rate_limited()
+    /// <param name="area">The path every route of the area starts with.</param>
+    /// <param name="policy">The policy closing the area.</param>
+    [Theory]
+    [InlineData("/admin", AuthorizationPolicies.Admin)]
+    [InlineData("/problem-selection", AuthorizationPolicies.PreparesCompetitions)]
+    public void Every_gated_route_requires_its_policy_and_is_rate_limited(string area, string policy)
     {
-        // The admin routes as the API maps them
-        var adminRoutes = MapRoutes()
-            .Where(route => route.RoutePattern.RawText?.StartsWith("/admin", StringComparison.Ordinal) == true)
+        // The area's routes as the API maps them
+        var gatedRoutes = MapRoutes()
+            .Where(route => route.RoutePattern.RawText?.StartsWith(area, StringComparison.Ordinal) == true)
             .ToList();
 
         // Found, so the checks below have routes to read
-        Assert.NotEmpty(adminRoutes);
+        Assert.NotEmpty(gatedRoutes);
 
         // Each one, checked on its own so a failure names the route
-        foreach (var route in adminRoutes)
+        foreach (var route in gatedRoutes)
         {
             // The route's name
             var name = route.DisplayName;
 
-            // Admins only
+            // The area's accounts only
             Assert.True(
                 route.Metadata.GetOrderedMetadata<IAuthorizeData>()
-                    .Any(authorize => authorize.Policy == AuthorizationPolicies.Admin),
-                $"{name} does not require the admin policy.");
+                    .Any(authorize => authorize.Policy == policy),
+                $"{name} does not require the {policy} policy.");
 
             // With nothing opening it back up
             Assert.True(route.Metadata.GetMetadata<IAllowAnonymous>() is null, $"{name} allows anonymous callers.");
