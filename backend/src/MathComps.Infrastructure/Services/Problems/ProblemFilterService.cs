@@ -146,11 +146,9 @@ public class ProblemFilterService(
                 // Similar Problems
                 data.problem.SimilarProblems
                     // Only neighbours the archive serves too, since an edge would otherwise carry a hidden problem's
-                    // slug and statement out beside a visible one. WhereArchiveServes owns the rule.
+                    // slug and statement out beside a visible one
                     .Where(similarProblem =>
-                        similarProblem.SimilarProblem.Round.HostedGroupId == null
-                        && (similarProblem.SimilarProblem.Round.VisibleSince == null
-                            || similarProblem.SimilarProblem.Round.VisibleSince <= now))
+                        visibleProblems.Any(visible => visible.Id == similarProblem.SimilarProblemId))
                     // Only similar enough problems
                     .Where(similarProblem =>
                         similarProblem.SimilarityScore >= similarityOptions.Value.MinSimilarityScore)

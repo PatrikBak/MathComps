@@ -813,7 +813,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         context.UserGrants.Add(new UserGrant
         {
             UserId = _grantedId,
-            Capability = UserCapability.BypassCompetitionGates,
+            Capability = UserCapability.PrepareCompetitions,
         });
 
         // The one season every round sits in

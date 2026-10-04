@@ -729,6 +729,32 @@ public class HostedGroupServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// Verifies that a group a selection board was finalized into cannot be declared again, not even on the same
+    /// terms. The board reads its papers off the group's rounds, so a manifest releasing one would strand a paper,
+    /// and send its problems to the archive once the group closes.
+    /// </summary>
+    [Fact]
+    public Task A_group_a_board_was_finalized_into_cannot_be_declared_again() => RunTestAsync(async service =>
+    {
+        // The group as declared
+        var declared = await service.DeclareAsync(Manifest("mathcomps-advanced-september"));
+
+        // A selection board finalized into it
+        await QueryAsync(async context =>
+        {
+            // The board, tied to the group
+            SelectionSeed.NewBoard(context, "September").HostedGroupId = declared.GroupId;
+
+            // Written
+            await context.SaveChangesAsync();
+        });
+
+        // The same manifest again is refused
+        await Assert.ThrowsAsync<HostedGroupManifestException>(
+            () => service.DeclareAsync(Manifest("mathcomps-advanced-september")));
+    });
+
+    /// <summary>
     /// Verifies that a round somebody has entered cannot be dropped. Releasing it closes its problems to
     /// everybody, both the area and the defense engine requiring a hosted round, so the student loses what they
     /// paid for.

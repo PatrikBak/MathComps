@@ -39,7 +39,7 @@ Leave `closesAt` out for a group that never closes, the way `mc-practice.group.j
 
 `problemCount` is how many problems each of the group's competitions asks. It is announced rather than counted, because a group goes on the site the day its dates are set and the problems are picked later. Every round the manifest names then holds either nothing yet or exactly that many, and a student is refused an entry into one still short of it.
 
-The slug is what the group is addressed by, so re-running the manifest updates the same group, and a round the manifest no longer names is released. That freedom lasts until somebody enters: from the first entry on, the window, the clock, the re-entry rule and the size can no longer change, and a round that has been entered can no longer be dropped. Everything else stays editable, and re-running an unchanged manifest is always fine.
+The slug is what the group is addressed by, so re-running the manifest updates the same group, and a round the manifest no longer names is released. That freedom lasts until somebody enters: from the first entry on, the window, the clock, the re-entry rule and the size can no longer change, and a round that has been entered can no longer be dropped. Everything else stays editable, and re-running an unchanged manifest is fine. Once a selection board is finalized into the group, the group can't be declared again at all.
 
 A group carries no name of its own. Its rounds hang off competition nodes the taxonomy already names, and the heading is read off whichever of them sorts first in the taxonomy. Nothing checks that the rest agree, so registering every category of a group under the same name is on you.
 
@@ -73,10 +73,11 @@ Then against what has actually landed:
 - A round another group already claims, since a round belongs to one group and moving it would silently start reading its clock off the group it landed in.
 - A round whose node carries no `urlSlug` in one of the site's languages. That name is the only way to the competition's page, and a reader of that language would have none.
 
-And the group as it already stands, once anyone has entered it:
+And the group as it already stands:
 
 - A manifest changing the window, the clock, the re-entry rule or the size of a group somebody has already entered. An entry was spent on the terms that stood when it was spent.
 - A manifest dropping a round somebody has already entered. A round the manifest no longer names is released, and a released round's problems are closed to everybody, so dropping an entered one takes back what the entry bought.
+- Any manifest for a group a selection board was finalized into, an unchanged one included. The board reads its papers off the group's rounds.
 
 ## Setup
 

@@ -15,7 +15,7 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// that entry into the permission as well.
 /// </summary>
 /// <param name="dbContextFactory">Creates the contexts the checks run on.</param>
-/// <param name="grants">Reads whether the student is let past the gates a competition is entered through.</param>
+/// <param name="grants">Reads whether the student prepares the competitions.</param>
 public sealed class DefenseTargetGuard(
     IDbContextFactory<MathCompsDbContext> dbContextFactory, IUserGrantService grants)
     : IDefenseTargetGuard
@@ -49,15 +49,16 @@ public sealed class DefenseTargetGuard(
         // A fresh context for this check.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The set the projection below reads. Held as its own value so the expression tree captures a set rather
-        // than the context around it, which the analyzer reads as disposed by the time the tree runs.
+        // The sets the projection below reads. Held as their own values so the expression tree captures a set
+        // rather than the context around it, which the analyzer reads as disposed by the time the tree runs.
         var allEntries = dbContext.HostedEntries;
+        var allProposals = dbContext.Proposals;
 
         // The round the problem sits in: where in the taxonomy it hangs, the window its group runs in, whether
-        // the site hosts it at all, and whether this student has spent an entry into it. The entry is read
-        // whatever the embargo says, since it decides the daily spend ceiling as well as the permission, and a
-        // group's problems go public the moment it closes. An id naming nothing gets the answer an unarguable
-        // problem gets.
+        // the site hosts it at all, whether this student has spent an entry into it, and whether a live proposal
+        // files the problem. The entry is read whatever the embargo says, since it decides the daily spend ceiling
+        // as well as the permission, and a group's problems go public the moment it closes. An id naming nothing
+        // gets the answer an unarguable problem gets.
         var round = await dbContext.Problems
             .AsNoTracking()
             .Where(problem => problem.Id == problemId)
@@ -69,26 +70,35 @@ public sealed class DefenseTargetGuard(
                 problem.Round.HostedGroup!.ClosesAt,
                 HoldsEntry = allEntries.Any(entry =>
                     entry.UserId == userId && entry.RoundId == problem.RoundId),
+                IsLiveProposal = allProposals.Any(proposal =>
+                    proposal.ProblemId == problem.Id && proposal.DeletedAt == null),
             })
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new HostedProblemNotFoundException();
 
-        // A proposal belongs to no competition anybody enters, so nothing weighs it beyond the student being
-        // signed in, and no entry stands to lift what it costs them.
-        if (TaxonomySlugs.IsAtOrUnder(round.CompetitionPath, HostedTaxonomy.ProposalsPath))
-            return false;
+        // Whether the problem sits among the proposals.
+        var isProposal = TaxonomySlugs.IsAtOrUnder(round.CompetitionPath, HostedTaxonomy.ProposalsPath);
 
-        // Anything else is arguable only where the site hosts its round.
-        if (!round.IsHosted)
+        // Anything outside the proposals is arguable only where the site hosts its round.
+        if (!isProposal && !round.IsHosted)
             throw new HostedProblemNotFoundException();
 
-        // Whether the student is let past the gates this competition is entered through.
-        var bypassesGates = await grants.HasAsync(
-            userId, UserCapability.BypassCompetitionGates, cancellationToken);
+        // Whether the student prepares the competitions, which opens the proposals and the gates to them.
+        var preparesCompetitions = await grants.HasAsync(
+            userId, UserCapability.PrepareCompetitions, cancellationToken);
+
+        // A problem among the proposals is a reviewer's to argue, and only while a live proposal files it. Anybody
+        // else, and any problem parked there with none, gets the answer an unarguable problem gets.
+        if (isProposal && (!preparesCompetitions || !round.IsLiveProposal))
+            throw new HostedProblemNotFoundException();
+
+        // A proposal belongs to no competition anybody enters, so no entry stands to lift what it costs them.
+        if (isProposal)
+            return false;
 
         // And past that it is the same rule the area serves its problems under.
         HostedEntryRules.EnsureEntitled(
-            new HostedReader(userId, bypassesGates),
+            new HostedReader(userId, preparesCompetitions),
             new RoundAccess(round.VisibleSince, round.ClosesAt, round.HoldsEntry),
             DateTimeOffset.UtcNow);
 

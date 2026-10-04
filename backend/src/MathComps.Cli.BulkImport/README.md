@@ -72,7 +72,7 @@ It moves the rows, so every defense, comment and self-assessment travels with th
 
 This is how to rearrange a defended round. `apply` would rewrite text under the positions it finds, leaving every conversation on the problem that used to be there.
 
-It refuses a slug that names no problem, a slug two problems carry, the same slug twice, and a destination slug a third problem holds. It checks nothing else: a problem keeps neither its embargo nor its hosted group, it inherits the destination round's. Exits `0` when the exchange went through, or a dry run came back clean.
+It refuses a slug that names no problem, a slug two problems carry, the same slug twice, and a destination slug a third problem holds. It also refuses to put a problem missing a statement or solution in some language into a hosted round, and anything but a proposal still in the selection into a round a selection board filled. A problem keeps neither its embargo nor its hosted group, it inherits the destination round's. A problem leaving `mathcomps-proposals` also leaves every draft selection board it stood on. Exits `0` when the exchange went through, or a dry run came back clean.
 
 ## Embargoing a round
 

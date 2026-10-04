@@ -14,9 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Infrastructure.Tests.Problems;
 
 /// <summary>
-/// Integration tests for what the archive leaves out: that a round stamped to open later, and a round the site
-/// hosted even once it has opened, are absent from everything the archive serves, and that any other round whose
-/// instant has passed is served like the rest.
+/// Integration tests for what the archive leaves out: that a round stamped to open later, a round the site hosted
+/// even once it has opened, and a round of the proposals whatever its stamp says, are absent from everything the
+/// archive serves, and that any other round whose instant has passed is served like the rest.
 /// </summary>
 /// <remarks>
 /// A class of its own rather than more facts on <see cref="ProblemFilterServicePostgresTests"/>, whose seed is
@@ -53,8 +53,13 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
     private const string HostedSlug = "75-mathcomps-elementary-september-4";
 
     /// <summary>
-    /// Verifies that the page holds the unstamped and the opened round's problems, and none of the embargoed or the
-    /// hosted round's.
+    /// Slug of the problem parked among the proposals, whose round carries no stamp.
+    /// </summary>
+    private const string ProposedSlug = "75-mathcomps-proposals-5";
+
+    /// <summary>
+    /// Verifies that the page holds the unstamped and the opened round's problems, and none of the embargoed, the
+    /// hosted or the proposals round's.
     /// </summary>
     [Fact]
     public Task A_hidden_rounds_problems_are_absent_from_the_page() => RunTestAsync(async service =>
@@ -70,17 +75,17 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Verifies that a stamp already in the past leaves its round open. This is what makes the embargo a
-    /// comparison against the clock rather than a null check that any stamp at all would fail.
+    /// Verifies that a text search cannot find a proposal by its statement. The search reads the texts on a path of
+    /// its own, so only the archive's rule applied after it keeps one out.
     /// </summary>
     [Fact]
-    public Task A_round_whose_instant_has_passed_is_served() => RunTestAsync(async service =>
+    public Task A_text_search_does_not_find_a_proposal() => RunTestAsync(async service =>
     {
-        // Ask the library for everything it holds
-        var result = await service.FilterAsync(EverythingQuery());
+        // Search for a word only the proposal's statement holds
+        var result = await service.FilterAsync(EverythingQuery("kladné"));
 
-        // The round stamped to open yesterday is served just like the one carrying no stamp
-        Assert.Contains(result.Problems.Items, problem => problem.Slug == OpenedSlug);
+        // Nothing answers
+        Assert.Equal(0, result.Problems.TotalCount);
     });
 
     /// <summary>
@@ -120,7 +125,17 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
         // Nor its number
         Assert.DoesNotContain(options.ProblemNumbers, number => number.Slug == "4");
 
-        // And no node of its branch reaches the tree, the root included
+        // The proposal's tag is its alone as well
+        Assert.DoesNotContain(options.Tags, tag => tag.Slug == "graph-theory");
+
+        // Nor its author
+        Assert.DoesNotContain(options.Authors, author => author.Slug == "erin-proposed");
+
+        // Nor its number
+        Assert.DoesNotContain(options.ProblemNumbers, number => number.Slug == "5");
+
+        // And no node of the site's own branch, which the hosted problem and the proposal hang under, reaches the
+        // tree, the root included
         Assert.DoesNotContain(
             CompetitionPaths(options.Competitions), path => TaxonomySlugs.IsAtOrUnder(path, "mathcomps"));
 
@@ -179,13 +194,14 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
         competitions.SelectMany(competition => CompetitionPaths(competition.Children).Prepend(competition.Path));
 
     /// <summary>
-    /// A query that asks the library for everything it holds.
+    /// A query that asks the library for everything it holds, narrowed to a search text where one is given.
     /// </summary>
+    /// <param name="searchText">The text the statements are searched for, empty to run no search.</param>
     /// <returns>The query.</returns>
-    private static ProblemFilterOptions EverythingQuery() => new(
+    private static ProblemFilterOptions EverythingQuery(string searchText = "") => new(
         new FilterQuery(
             new FilterParameters(
-                SearchText: string.Empty,
+                SearchText: searchText,
                 SearchInSolution: false,
                 OlympiadYears: [],
                 CompetitionPaths: [],
@@ -247,17 +263,24 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
         // The round runs in that group.
         hostedRound.HostedGroupId = hostedGroup.Id;
 
+        // A round of the proposals carrying no stamp, as one would after an import that dropped it, so only its
+        // place in the taxonomy can keep it out.
+        var proposalsRound = Round(
+            context, season, "mathcomps-proposals", new DateOnly(2025, 9, 15), visibleSince: null);
+
         // One author per problem, so an author surfacing at all names which problem leaked.
         var alice = Author(context, "Alice Open", "alice-open");
         var bob = Author(context, "Bob Opened", "bob-opened");
         var carol = Author(context, "Carol Hidden", "carol-hidden");
         var dave = Author(context, "Dave Hosted", "dave-hosted");
+        var erin = Author(context, "Erin Proposed", "erin-proposed");
 
         // One tag per problem, so a tag surfacing at all names which problem leaked.
         var algebra = Tag(context, "algebra");
         var geometry = Tag(context, "geometry");
         var numberTheory = Tag(context, "number-theory");
         var combinatorics = Tag(context, "combinatorics");
+        var graphTheory = Tag(context, "graph-theory");
 
         // The problem in the unstamped round.
         var open = Problem(context, OpenSlug, openRound, number: 1, alice, algebra, "Nech je dané prvočíslo.");
@@ -272,6 +295,10 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
         // The problem in the round the site hosted.
         var hosted = Problem(
             context, HostedSlug, hostedRound, number: 4, dave, combinatorics, "Nech je daná tabuľka.");
+
+        // The problem parked among the proposals.
+        var proposed = Problem(
+            context, ProposedSlug, proposalsRound, number: 5, erin, graphTheory, "Nech sú dané kladné čísla.");
 
         // Every edge hangs off the visible problem and scores well past the threshold, so only the gate can drop one.
         open.SimilarProblems.Add(new ProblemSimilarity
@@ -291,6 +318,12 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
             SourceProblemId = open.Id,
             SimilarProblemId = hosted.Id,
             SimilarityScore = 0.97
+        });
+        open.SimilarProblems.Add(new ProblemSimilarity
+        {
+            SourceProblemId = open.Id,
+            SimilarProblemId = proposed.Id,
+            SimilarityScore = 0.98
         });
 
         // Submit changes

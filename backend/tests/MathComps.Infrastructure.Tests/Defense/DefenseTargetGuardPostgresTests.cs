@@ -46,14 +46,24 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
     private readonly Guid _embargoedProblemId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A problem parked among the proposals, sitting in a round no hosted group runs and whose embargo has not
-    /// lifted.
+    /// A problem parked among the proposals and filed by a live proposal, sitting in a round no hosted group runs
+    /// and whose embargo has not lifted.
     /// </summary>
     private readonly Guid _proposedProblemId = Guid.CreateVersion7();
 
     /// <summary>
+    /// A problem parked among the proposals whose proposal has been deleted.
+    /// </summary>
+    private readonly Guid _deletedProposalProblemId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A problem parked among the proposals that no proposal files.
+    /// </summary>
+    private readonly Guid _unfiledProblemId = Guid.CreateVersion7();
+
+    /// <summary>
     /// A problem of a second hosted round, embargoed until the same instant, which the student does hold an
-    /// entry into. What the scoping cases vary against the one above.
+    /// entry into. What the scoping cases vary against the embargoed problem.
     /// </summary>
     private readonly Guid _enteredProblemId = Guid.CreateVersion7();
 
@@ -99,20 +109,53 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             () => guard.EnsureCanDefendAsync(_studentId, new ProblemTarget(Guid.CreateVersion7()))));
 
     /// <summary>
-    /// A parked problem is argued by anybody signed in, holding neither an entry nor a grant. It belongs to no
-    /// competition, so the rules a competition is entered through never reach it: the round below carries an
-    /// embargo that has not lifted, which is what a hosted problem is refused over.
+    /// A parked problem is the reviewers' alone, so a student without the grant is told it is not there, the
+    /// answer an archive problem gets, rather than the embargo refusal a hosted problem gets.
     /// </summary>
     [Fact]
-    public Task A_problem_among_the_proposals_can_be_argued_by_anybody() => RunTestAsync(async guard =>
+    public Task A_problem_among_the_proposals_is_not_there_for_a_student_without_the_grant() => RunTestAsync(
+        async guard =>
+            // Signed in, holding no grant
+            await Assert.ThrowsAsync<HostedProblemNotFoundException>(
+                () => guard.EnsureCanDefendAsync(_studentId, new ProblemTarget(_proposedProblemId))));
+
+    /// <summary>
+    /// A holder of the grant argues a parked problem a live proposal files, and the spend ceiling still reaches
+    /// them, there being no entry to lift it. Every refusal of a proposal varies one thing from this case, so a
+    /// guard turning the reviewers away too fails here.
+    /// </summary>
+    [Fact]
+    public Task A_problem_among_the_proposals_can_be_argued_by_a_grant_holder() => RunTestAsync(async guard =>
     {
         // Cleared, on a round nobody has entered or could
         var holdsEntry = await guard.EnsureCanDefendAsync(
-            _studentId, new ProblemTarget(_proposedProblemId));
+            _grantedStudentId, new ProblemTarget(_proposedProblemId));
 
         // And the ceiling reaches them, there being no entry to lift it
         Assert.False(holdsEntry);
     });
+
+    /// <summary>
+    /// A deleted proposal is gone from the selection, so even a holder of the grant is told its problem is not
+    /// there. The problem still sits in the proposals round, so a guard reading only where a problem sits would
+    /// clear it as it clears the holder case above.
+    /// </summary>
+    [Fact]
+    public Task A_problem_whose_proposal_was_deleted_cannot_be_argued_by_a_grant_holder() => RunTestAsync(
+        async guard =>
+            // Preparing the competitions, on a problem the pool dropped
+            await Assert.ThrowsAsync<HostedProblemNotFoundException>(
+                () => guard.EnsureCanDefendAsync(_grantedStudentId, new ProblemTarget(_deletedProposalProblemId))));
+
+    /// <summary>
+    /// A problem parked in the proposals round with no proposal filing it was never taken into the pool, so a
+    /// holder of the grant is told it is not there either.
+    /// </summary>
+    [Fact]
+    public Task A_problem_no_proposal_files_cannot_be_argued_by_a_grant_holder() => RunTestAsync(async guard =>
+        // Preparing the competitions, on a problem nobody proposed
+        await Assert.ThrowsAsync<HostedProblemNotFoundException>(
+            () => guard.EnsureCanDefendAsync(_grantedStudentId, new ProblemTarget(_unfiledProblemId))));
 
     /// <summary>
     /// An embargoed hosted problem cannot be argued by a student holding no entry into its round, which is the
@@ -209,7 +252,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
         context.UserGrants.Add(new UserGrant
         {
             UserId = _grantedStudentId,
-            Capability = UserCapability.BypassCompetitionGates,
+            Capability = UserCapability.PrepareCompetitions,
         });
 
         // The season the round below sits in.
@@ -288,13 +331,52 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             VisibleSince = closesAt,
         });
 
-        // Its problem, the one the proposals case argues.
+        // Its first problem, the one a student without the grant is refused and a holder is cleared on.
         context.Problems.Add(new Problem
         {
             Id = _proposedProblemId,
             RoundId = proposalsRoundId,
             Number = 1,
             Slug = "mathcomps-proposals-2026-1",
+        });
+
+        // The proposal filing it in the pool.
+        context.Proposals.Add(new Proposal
+        {
+            ProblemId = _proposedProblemId,
+            Number = 1,
+            Title = "Live proposal",
+            Area = ProposalArea.Algebra,
+            Recommended = [],
+        });
+
+        // A second problem of the round.
+        context.Problems.Add(new Problem
+        {
+            Id = _deletedProposalProblemId,
+            RoundId = proposalsRoundId,
+            Number = 2,
+            Slug = "mathcomps-proposals-2026-2",
+        });
+
+        // Its proposal, deleted.
+        context.Proposals.Add(new Proposal
+        {
+            ProblemId = _deletedProposalProblemId,
+            Number = 2,
+            Title = "Deleted proposal",
+            Area = ProposalArea.Algebra,
+            Recommended = [],
+            DeletedAt = DateTimeOffset.UtcNow,
+        });
+
+        // And a third, which no proposal files.
+        context.Problems.Add(new Problem
+        {
+            Id = _unfiledProblemId,
+            RoundId = proposalsRoundId,
+            Number = 3,
+            Slug = "mathcomps-proposals-2026-3",
         });
 
         // A second round of the same group, embargoed until the same instant: the other side of every
@@ -317,6 +399,17 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             RoundId = neighbourRoundId,
             Number = 1,
             Slug = "mathcomps-elementary-2026-1",
+        });
+
+        // Its proposal, which a problem keeps once a board finalizes it into a round, so a live proposal alone
+        // must not make a hosted problem the reviewers' alone.
+        context.Proposals.Add(new Proposal
+        {
+            ProblemId = _enteredProblemId,
+            Number = 4,
+            Title = "Picked proposal",
+            Area = ProposalArea.Algebra,
+            Recommended = [],
         });
 
         // That entry, spent into the second round and no other.

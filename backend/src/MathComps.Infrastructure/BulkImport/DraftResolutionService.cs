@@ -14,7 +14,7 @@ namespace MathComps.Infrastructure.BulkImport;
 /// probe; for the problem halves it loads the existing texts' <c>(document type, language, is-original, markdown)</c>
 /// for the slugs that already exist, reproduces the markdown the import would write (the same image-ref rewrite),
 /// then classifies each half in memory — including spotting a re-import that changes nothing. It also loads the
-/// round's full set of problem orders to check that the import would leave the round contiguous.
+/// round's full set of problem orders to check that the import would leave a round outside the proposals contiguous.
 /// </summary>
 /// <param name="dbContextFactory">Factory for creating read-only database contexts.</param>
 /// <param name="metadata">The registry, source of the structural sort orders the preview reconciles against.</param>
@@ -77,22 +77,30 @@ public class DraftResolutionService(
                 existingTextsBySlug.GetValueOrDefault(slugByOrder[problem.Order])))
             .ToImmutableArray();
 
-        // Contiguity is a post-import property: once this import lands, the round's problem orders — those already
-        // in the DB plus the draft's — must run 1..N with no gap. Loading every order in the round (not just the
-        // draft's candidate slugs) is what lets a fresh import that skipped a problem, or a subset re-import onto a
-        // slug that doesn't exist yet, be told apart from a legitimate correction or append.
+        // Contiguity is a post-import property: once this import lands, the problem orders of a round outside the
+        // proposals — those already in the DB plus the draft's — must run 1..N with no gap. Loading every order in
+        // the round (not just the draft's candidate slugs) is what lets a fresh import that skipped a problem, or a
+        // subset re-import onto a slug that doesn't exist yet, be told apart from a legitimate correction or append.
         var existingOrders = await context.Problems.AsNoTracking()
             .Where(problem => problem.Round.Competition.Path == target.CompetitionPath
                               && problem.Round.Season.StartYear == target.SeasonYear)
             .Select(problem => problem.Number)
             .ToListAsync();
 
-        // The orders present after the import, and the gaps in 1..N that would remain.
+        // The orders present after the import.
         var postImportOrders = existingOrders.Concat(problems.Select(problem => problem.Order)).ToHashSet();
+
+        // The highest of them, zero for an empty round.
         var highestOrder = postImportOrders.Count == 0 ? 0 : postImportOrders.Max();
-        var missingProblemOrders = Enumerable.Range(1, highestOrder)
-            .Where(order => !postImportOrders.Contains(order))
-            .ToImmutableArray();
+
+        // The gaps in 1..N the import would leave, which only a round outside the proposals reports.
+        var missingProblemOrders = TaxonomySlugs.IsAtOrUnder(target.CompetitionPath, HostedTaxonomy.ProposalsPath)
+            // None for a round of the proposals, whose numbering may run with gaps.
+            ? []
+            // Anywhere else the numbers are what a reader quotes, so a gap is a problem missing.
+            : Enumerable.Range(1, highestOrder)
+                .Where(order => !postImportOrders.Contains(order))
+                .ToImmutableArray();
 
         // The taxonomy rows apply would renumber to match the registry, plus any row the registry can't place.
         var (sortOrderChanges, orphans) = await PreviewSortOrderAsync(context, target.CompetitionPath);

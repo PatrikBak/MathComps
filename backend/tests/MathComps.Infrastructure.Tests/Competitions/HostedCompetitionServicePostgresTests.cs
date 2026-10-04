@@ -251,7 +251,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
 
     /// <summary>
     /// Verifies that a granted student's own clock still holds the official solution back, which is the one
-    /// thing <see cref="UserCapability.BypassCompetitionGates"/> does not waive.
+    /// thing <see cref="UserCapability.PrepareCompetitions"/> does not waive.
     /// </summary>
     [Fact]
     public Task A_granted_students_clock_still_holds_the_solution_back() => RunTestAsync(async service =>
@@ -1932,12 +1932,12 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             new UserGrant
             {
                 UserId = _grantedStudentId,
-                Capability = UserCapability.BypassCompetitionGates,
+                Capability = UserCapability.PrepareCompetitions,
             },
             new UserGrant
             {
                 UserId = _grantedStrangerId,
-                Capability = UserCapability.BypassCompetitionGates,
+                Capability = UserCapability.PrepareCompetitions,
             });
 
         // The one season every round below sits in.

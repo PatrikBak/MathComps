@@ -1,6 +1,8 @@
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Competitions;
+using MathComps.Infrastructure.Services.Problems;
+using MathComps.Infrastructure.Services.Selection;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.BulkImport;
@@ -14,13 +16,6 @@ namespace MathComps.Infrastructure.BulkImport;
 /// <param name="dbContextFactory">Factory for the tracking write context.</param>
 public class ProblemSwapService(IDbContextFactory<MathCompsDbContext> dbContextFactory) : IProblemSwapService
 {
-    /// <summary>
-    /// The number a problem is parked on while the other one claims the slot it vacated. The unique index over
-    /// (round, number) is not deferrable, so the two rows cannot trade numbers directly; the park is a slot no real
-    /// paper reaches, and it satisfies the positive-number check the column carries.
-    /// </summary>
-    private const int ParkingNumber = int.MaxValue;
-
     /// <inheritdoc/>
     public async Task<ProblemSwapResult> SwapAsync(string slugA, string slugB, bool dryRun = false)
     {
@@ -32,33 +27,62 @@ public class ProblemSwapService(IDbContextFactory<MathCompsDbContext> dbContextF
         // One tracking context for the whole exchange.
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
+        // One transaction for the lock, the reads and the writes, so the lock spans them all and a failure part-way
+        // cannot leave one problem parked.
+        await using var transaction = await context.Database.BeginTransactionAsync();
+
+        // Wait for every other move to finish, so nothing moves either problem between the reads below and the writes.
+        await ProblemPositions.LockAsync(context, CancellationToken.None);
+
         // Both problems, each with the round, competition and season its slug is derived from.
         var first = await LoadProblemAsync(context, slugA);
         var second = await LoadProblemAsync(context, slugB);
 
-        // The slug each one takes on at the position it lands on, keyed by the destination round's competition and
-        // season and by the number it inherits there.
-        var firstNewSlug = SlugFor(second.Round, second.Number);
-        var secondNewSlug = SlugFor(first.Round, first.Number);
+        // Each problem with the round it lands in.
+        (Problem Moving, Round Destination)[] moves = [(first, second.Round), (second, first.Round)];
 
-        // Nothing enforces slug uniqueness in the schema, while the import resolves a draft to a single problem by
-        // slug — so a third problem already holding one of these would not fail here, it would fail the next import.
-        await RefuseSlugCollisionAsync(context, firstNewSlug, first.Id, second.Id);
-        await RefuseSlugCollisionAsync(context, secondNewSlug, first.Id, second.Id);
+        // Neither may land in a round it cannot stand in.
+        foreach (var (moving, destination) in moves)
+        {
+            // A board's round takes only a proposal the selection still reads.
+            await RefuseNonProposalInBoardRoundAsync(context, moving, destination);
+
+            // A hosted round takes only a problem written in every language.
+            await RefuseIncompleteInHostedRoundAsync(context, moving, destination);
+        }
+
+        // The slug each takes on where it lands, refused when a third problem already holds one.
+        var exchange = await ProblemPositions.PlanExchangeAsync(context, first, second, CancellationToken.None);
 
         // Where both problems stand, read before anything moves them.
         var result = new ProblemSwapResult(
             await DescribeAsync(context, first),
             await DescribeAsync(context, second),
-            firstNewSlug,
-            secondNewSlug);
+            exchange.FirstNewSlug,
+            exchange.SecondNewSlug);
 
         // A dry run has now run every refusal and worked out the whole answer, which is all it promises to do.
         if (dryRun)
             return result;
 
+        // The problems the exchange takes out of the pool, read while each still stands where it started.
+        var leavingPool = moves
+            .Where(move => SelectionRules.IsInPool(move.Moving.Round.Competition.Path)
+                && !SelectionRules.IsInPool(move.Destination.Competition.Path))
+            .Select(move => move.Moving.Id)
+            .ToList();
+
         // Perform the exchange.
-        await ExchangeAsync(context, first, second, firstNewSlug, secondNewSlug);
+        await ProblemPositions.ExchangeAsync(context, first, second, exchange, CancellationToken.None);
+
+        // A problem leaving the pool leaves every draft board it stood on.
+        await SelectionRules.RemoveSlotsAsync(context, leavingPool, CancellationToken.None);
+
+        // Save the emptied board slots.
+        await context.SaveChangesAsync();
+
+        // Commit the exchange.
+        await transaction.CommitAsync();
 
         // What the exchange did.
         return result;
@@ -97,28 +121,62 @@ public class ProblemSwapService(IDbContextFactory<MathCompsDbContext> dbContextF
     }
 
     /// <summary>
-    /// Refuses a slug that a problem outside the exchange already carries. The import resolves a draft to one
-    /// problem by slug, so a second row holding it turns the next import of either problem into a failure whose
-    /// cause sits nowhere near the draft being imported.
+    /// Refuses to move a problem into a round a selection board filled unless it is a proposal still in the
+    /// selection. The selection reads that round's problems as its own, so anything else would stand in a slot as a
+    /// problem it cannot show.
     /// </summary>
     /// <param name="context">The tracking write context.</param>
-    /// <param name="slug">The slug the exchange would write.</param>
-    /// <param name="firstId">The id of the first problem in the exchange, which may hold the slug today.</param>
-    /// <param name="secondId">The id of the second problem in the exchange, which may hold the slug today.</param>
-    /// <returns>A task representing the check.</returns>
-    /// <exception cref="ProblemSwapRefusedException">Thrown when a third problem already carries the slug.</exception>
-    private static async Task RefuseSlugCollisionAsync(
-        MathCompsDbContext context, string slug, Guid firstId, Guid secondId)
+    /// <param name="moving">The problem being moved.</param>
+    /// <param name="destination">The round it lands in.</param>
+    /// <returns>A task that completes once the move has passed.</returns>
+    /// <exception cref="ProblemSwapRefusedException">Thrown when the problem may not land there.</exception>
+    private static async Task RefuseNonProposalInBoardRoundAsync(
+        MathCompsDbContext context, Problem moving, Round destination)
     {
-        // Whether a problem outside this exchange already answers to the slug.
-        var taken = await context.Problems.AnyAsync(candidate =>
-            candidate.Slug == slug && candidate.Id != firstId && candidate.Id != secondId);
+        // A problem staying in its round, or landing in one no group runs, changes nothing the selection reads.
+        if (destination.Id == moving.RoundId || destination.HostedGroupId is not { } groupId)
+            return;
 
-        // Writing it would leave two problems answering to one slug, which the next import of either would hit.
-        if (taken)
+        // Whether a board was finalized into the destination's group.
+        var filledByBoard = await context.SelectionBoards.AnyAsync(board => board.HostedGroupId == groupId);
+
+        // Whether the problem is a proposal the selection still reads.
+        var isLiveProposal = await context.Proposals.AnyAsync(
+            proposal => proposal.ProblemId == moving.Id && proposal.DeletedAt == null);
+
+        // Only such a proposal may stand in a board's round.
+        if (filledByBoard && !isLiveProposal)
             throw new ProblemSwapRefusedException(
-                $"The slug '{slug}' is already carried by another problem, so the exchange would leave two "
-                + "problems answering to it.");
+                $"'{moving.Slug}' is not a proposal in the selection, and the round it would land in was filled by a "
+                + "selection board, which holds proposals alone.");
+    }
+
+    /// <summary>
+    /// Refuses to move a problem missing a statement or a solution in some language into a hosted round, which
+    /// <see cref="HostedProblemTexts"/> says no hosted round can carry.
+    /// </summary>
+    /// <param name="context">The tracking write context.</param>
+    /// <param name="moving">The problem being moved.</param>
+    /// <param name="destination">The round it lands in.</param>
+    /// <returns>A task that completes once the move has passed.</returns>
+    /// <exception cref="ProblemSwapRefusedException">Thrown when the problem may not land there.</exception>
+    private static async Task RefuseIncompleteInHostedRoundAsync(
+        MathCompsDbContext context, Problem moving, Round destination)
+    {
+        // A problem staying in its round, or landing in one no group runs, reaches no reader it did not already.
+        if (destination.Id == moving.RoundId || destination.HostedGroupId is null)
+            return;
+
+        // Whether the moving problem lacks a statement or a solution in some language.
+        var isIncomplete = await context.Problems
+            .Where(problem => problem.Id == moving.Id)
+            .AnyAsync(HostedProblemTexts.IsIncomplete);
+
+        // A hosted round can't carry such a problem.
+        if (isIncomplete)
+            throw new ProblemSwapRefusedException(
+                $"'{moving.Slug}' lacks a statement or a solution in some language, and the round it would land in "
+                + "is hosted, so it would serve that language a blank.");
     }
 
     /// <summary>
@@ -148,64 +206,4 @@ public class ProblemSwapService(IDbContextFactory<MathCompsDbContext> dbContextF
             comments,
             selfAssessments);
     }
-
-    /// <summary>
-    /// Moves each problem onto the other's round and number, writing the slug that position calls for.
-    /// </summary>
-    /// <remarks>
-    /// The unique index over (round, number) is checked per statement rather than at commit, so the two rows cannot
-    /// trade numbers in one batch and EF does not order the updates within one anyway. The first problem is parked
-    /// and flushed on its own, which frees its slot for the second, and the second is flushed before the first
-    /// claims the slot it vacated. One transaction covers all three, so nothing can observe a parked row.
-    /// </remarks>
-    /// <param name="context">The tracking write context.</param>
-    /// <param name="first">The first problem in the exchange.</param>
-    /// <param name="second">The second problem in the exchange.</param>
-    /// <param name="firstNewSlug">The slug the first problem takes on in the second's position.</param>
-    /// <param name="secondNewSlug">The slug the second problem takes on in the first's position.</param>
-    /// <returns>A task representing the exchange.</returns>
-    private static async Task ExchangeAsync(
-        MathCompsDbContext context,
-        Problem first,
-        Problem second,
-        string firstNewSlug,
-        string secondNewSlug)
-    {
-        // Where each one is headed, captured before either is moved off it.
-        var (firstRoundId, firstNumber) = (first.RoundId, first.Number);
-        var (secondRoundId, secondNumber) = (second.RoundId, second.Number);
-
-        // The transaction the three writes land in.
-        await using var transaction = await context.Database.BeginTransactionAsync();
-
-        // Park the first problem, freeing the slot the second is about to claim.
-        first.Number = ParkingNumber;
-        await context.SaveChangesAsync();
-
-        // Move the second onto the slot the first just vacated.
-        second.RoundId = firstRoundId;
-        second.Number = firstNumber;
-        second.Slug = secondNewSlug;
-        await context.SaveChangesAsync();
-
-        // Move the first onto the slot the second vacated, off the parking number.
-        first.RoundId = secondRoundId;
-        first.Number = secondNumber;
-        first.Slug = firstNewSlug;
-        await context.SaveChangesAsync();
-
-        // Commit the exchange.
-        await transaction.CommitAsync();
-    }
-
-    /// <summary>
-    /// Derives the slug a problem carries at a position, from the competition and season the round belongs to.
-    /// </summary>
-    /// <param name="round">The round the problem sits in, with its competition and season loaded.</param>
-    /// <param name="number">The problem's position within that round.</param>
-    /// <returns>The slug that position calls for.</returns>
-    private static string SlugFor(Round round, int number) =>
-        // The same formula the import builds a draft's slugs with, so a re-import of the rearranged paper matches.
-        TaxonomySlugs.ProblemSlug(
-            Season.EditionFromStartYear(round.Season.StartYear), round.Competition.Path, number);
 }

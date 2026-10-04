@@ -44,6 +44,9 @@ public static class EndpointExtensions
         // Grading the hosted groups from the students' defense conversations
         app.MapAdminGradingEndpoints();
 
+        // Picking the hosted competitions' papers from the proposals
+        app.MapProblemSelectionEndpoints();
+
         // Add health check endpoint for monitoring
         app.MapHealthChecks("/health");
 

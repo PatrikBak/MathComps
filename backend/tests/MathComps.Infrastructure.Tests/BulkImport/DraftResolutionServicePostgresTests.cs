@@ -6,6 +6,7 @@ using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MathComps.Domain.Localization;
+using MathComps.Domain.Taxonomy;
 
 namespace MathComps.Infrastructure.Tests.BulkImport;
 
@@ -312,6 +313,22 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
 
         // The post-import round would run 1, 2, 4 — order 3 is the gap.
         Assert.Equal(3, Assert.Single(preview.MissingProblemOrders));
+    });
+
+    /// <summary>
+    /// A gap in a round of the proposals is not flagged, a proposal being quoted by its own number. Finalizing a
+    /// board takes its problems out of that round from wherever they stand, so flagging the gaps it leaves would
+    /// block every import that doesn't fill them.
+    /// </summary>
+    [Fact]
+    public Task A_gap_in_a_round_of_the_proposals_is_not_flagged() => RunTestAsync(async service =>
+    {
+        // Problem 4 of a proposals round that doesn't exist yet, which leaves 1 to 3 empty.
+        var preview = await PreviewAsync(
+            service, new DraftTarget(HostedTaxonomy.ProposalsPath, 2024), Problem(4, Original(Language.SK)));
+
+        // Nothing to flag.
+        Assert.Empty(preview.MissingProblemOrders);
     });
 
     /// <summary>

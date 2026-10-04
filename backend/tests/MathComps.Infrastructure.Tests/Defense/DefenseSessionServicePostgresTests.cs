@@ -317,6 +317,16 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             Slug = "mathcomps-proposals-1",
         });
 
+        // The proposal filing it in the pool.
+        context.Proposals.Add(new Proposal
+        {
+            ProblemId = _proposedProblemId,
+            Number = 1,
+            Title = "Proposal 1",
+            Area = ProposalArea.Algebra,
+            Recommended = [],
+        });
+
         // Commit the seed.
         await context.SaveChangesAsync();
     }
@@ -847,7 +857,18 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     [Fact]
     public Task A_proposals_conversation_can_be_rewound_and_deleted() => RunTestAsync(async service =>
     {
-        // Argue a problem parked among the proposals, which needs neither an entry nor a grant
+        // The owner reviews the proposals, which takes the grant
+        await QueryAsync(async context =>
+        {
+            // The owner's grant
+            context.UserGrants.Add(
+                new UserGrant { UserId = _ownerId, Capability = UserCapability.PrepareCompetitions });
+
+            // Commit the grant
+            await context.SaveChangesAsync();
+        });
+
+        // Argue a problem parked among the proposals, which needs no entry
         var session = await service.StartAsync(
             _ownerId, ProblemRequest(_proposedProblemId, "my defense"));
 

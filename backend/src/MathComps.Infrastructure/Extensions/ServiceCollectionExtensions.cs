@@ -1,6 +1,7 @@
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using Clerk.BackendAPI;
+using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Options;
@@ -15,6 +16,7 @@ using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Engine;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Problems;
+using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Services.Users;
 using MathComps.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +69,8 @@ public static class ServiceCollectionExtensions
                     .MapEnum<DefenseOutcome>("defense_outcome")
                     .MapEnum<ExaminerStep>("examiner_step")
                     .MapEnum<UserCapability>("user_capability")
+                    .MapEnum<ProposalArea>("proposal_area")
+                    .MapEnum<HostedCompetitionCategory>("hosted_competition_category")
             )
         );
 
@@ -515,6 +519,31 @@ public static class ServiceCollectionExtensions
 
         // Runs the competitions the site hosts itself.
         services.TryAddScoped<IHostedCompetitionService, HostedCompetitionService>();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the problem selection: reading all of it, changing what the reviewers record about
+    /// the proposals, and filling and finalizing the boards. Expects the DbContext from
+    /// <see cref="AddMathCompsDbContext"/>.
+    /// </summary>
+    /// <param name="services">The service collection to add the selection services to.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddProblemSelectionServices(this IServiceCollection services)
+    {
+        // A cycle is named after the node its rounds run under, so bring the metadata registry along.
+        services.AddLocalization();
+
+        // The read.
+        services.TryAddScoped<IProblemSelectionService, ProblemSelectionService>();
+
+        // The changes to the proposals.
+        services.TryAddScoped<IProposalService, ProposalService>();
+
+        // The changes to the boards.
+        services.TryAddScoped<ISelectionBoardService, SelectionBoardService>();
 
         // Builder pattern
         return services;

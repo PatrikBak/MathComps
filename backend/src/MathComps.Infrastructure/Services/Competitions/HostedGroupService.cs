@@ -1,5 +1,4 @@
 using MathComps.Domain.EfCoreEntities;
-using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Persistence;
@@ -98,42 +97,30 @@ public sealed class HostedGroupService(
                 dbContext.Rounds.Add(round);
             }
 
-            // What each of the round's problems is written in. Only the kinds a competition needs: the site
-            // serves the statement and the examiner reasons from the solution.
-            var written = await dbContext.Problems
-                .Where(problem => problem.RoundId == round.Id)
-                .Select(problem => new
-                {
-                    problem.Number,
-                    Written = problem.Texts.Count(text =>
-                        text.DocumentType == DocumentType.Statement
-                        || text.DocumentType == DocumentType.Solution),
-                })
-                .ToListAsync(cancellationToken);
-
-            // A problem is one statement and one solution per language, and a problem text is unique in its
-            // problem, kind and language together, so anything short of that number is a gap rather than a repeat.
-            var expected = Enum.GetValues<Language>().Length * 2;
+            // The round's problems.
+            var roundProblems = dbContext.Problems.Where(problem => problem.RoundId == round.Id);
 
             // The numbers of the round's problems missing a statement or a solution in some language.
-            var incomplete = written
-                .Where(problem => problem.Written < expected)
+            var incomplete = await roundProblems
+                .Where(HostedProblemTexts.IsIncomplete)
                 .Select(problem => problem.Number)
-                .ToList();
+                .ToListAsync(cancellationToken);
 
-            // Nothing downstream has a fallback for a language a problem was never written in: the site would
-            // serve a blank statement and the examiner would refuse the conversation, both mid-competition. An
-            // empty round has no problem to be missing one, so it passes here on its own.
+            // A hosted round can't carry a problem missing a language. An empty round has no problem to be missing
+            // one, so it passes here on its own.
             if (incomplete.Count > 0)
                 throw new HostedGroupManifestException(
                     $"'{reference.CompetitionPath}' problem(s) {string.Join(", ", incomplete)} lack a statement "
                     + "or a solution in one of the site's languages.");
 
+            // How many problems the round holds.
+            var held = await roundProblems.CountAsync(cancellationToken);
+
             // A round holding nothing has no draft behind it yet, so its dates are still this declaration's own to
             // write: it put the round there, and nothing has been published off it that moving them could take
             // back. The embargo below would otherwise disagree with every corrected manifest, freezing a group's
             // window the moment it was announced.
-            if (written.Count == 0)
+            if (held == 0)
             {
                 round.Date = opensOn;
                 round.VisibleSince = manifest.ClosesAt ?? DateTimeOffset.MaxValue;
@@ -150,16 +137,16 @@ public sealed class HostedGroupService(
 
             // A round is either still waiting on its problems or holding exactly the number the group announces.
             // Anything between is a draft that landed short, and the card would go on promising the full paper.
-            if (written.Count != 0 && written.Count != manifest.ProblemCount)
+            if (held != 0 && held != manifest.ProblemCount)
                 throw new HostedGroupManifestException(
-                    $"'{reference.CompetitionPath}' holds {written.Count} problem(s), but the group announces "
+                    $"'{reference.CompetitionPath}' holds {held} problem(s), but the group announces "
                     + $"{manifest.ProblemCount}.");
 
             // The round stands, so keep it.
             rounds.Add(round);
 
             // One still waiting on its problems, which the outcome counts.
-            if (written.Count == 0)
+            if (held == 0)
                 roundsAwaitingProblems += 1;
         }
 
@@ -187,6 +174,13 @@ public sealed class HostedGroupService(
 
         // The group's key, or null when nothing stands under the slug yet.
         var groupId = group?.Id;
+
+        // A group a selection board was finalized into holds the papers the reviewers picked, and the board reads
+        // its slots off the group's rounds, so no manifest touches it again.
+        if (groupId is not null
+            && await dbContext.SelectionBoards.AnyAsync(board => board.HostedGroupId == groupId, cancellationToken))
+            throw new HostedGroupManifestException(
+                $"A selection board was finalized into '{manifest.Slug}', so it can no longer be declared.");
 
         // What the group already owes its students, read before anything moves. An entry was spent on the terms
         // and the rounds that stood when it was spent, so both stop being the manifest's to change freely.
