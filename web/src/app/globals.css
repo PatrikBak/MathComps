@@ -141,6 +141,12 @@
     overscroll-behavior: none;
   }
 
+  /* Typed text never hyphenates. A hyphen at a line break exists only on screen, and Chromium's
+     ArrowDown can stall on a hyphenated word */
+  textarea {
+    hyphens: none;
+  }
+
   @supports (scrollbar-width: thin) {
     * {
       scrollbar-width: thin;
