@@ -187,7 +187,7 @@
         "selfAssessment": "Student's comment"
       },
       "saveFailed": "Couldn't save the grade",
-      "studentCantSeeYet": "The student can't see this yet.",
+      "studentSeesOnceFinal": "The student sees this once the competition has closed and the grade is final.",
       "tab": "Grade"
     },
     "grading": {
@@ -270,6 +270,7 @@
     "HostedNoteEmpty": "Your note is empty.",
     "HostedNoteTooLong": "Your note is too long.",
     "HostedProblemNotFound": "This problem isn't part of a competition.",
+    "HostedResultsNotOut": "The results come out once the competition closes.",
     "INVALID_FILE_TYPE": "Invalid file type",
     "ListAccessDenied": "This list is private. If it is your list, log in first.",
     "ListNotFound": "List not found.",
@@ -1205,7 +1206,7 @@
     "avatarUpdated": "Profile photo uploaded, update will take a few seconds",
     "competitionAuthReason": "save your profile",
     "competitionError": "Your details could not be saved. Please try again.",
-    "competitionNote": "This information appears in the results listing.",
+    "competitionNote": "This information and your profile photo appear in the results listing.",
     "competitionSection": "Mathilding",
     "country": "Country",
     "countryNoMatch": "No country matches",

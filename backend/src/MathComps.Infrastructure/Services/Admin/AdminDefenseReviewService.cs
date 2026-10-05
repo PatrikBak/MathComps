@@ -8,6 +8,7 @@ using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Pagination;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Localization;

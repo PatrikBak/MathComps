@@ -15,7 +15,11 @@ public abstract record HostedEntryDto;
 /// </summary>
 /// <param name="StartedAt">When the student entered, which is when their clock started.</param>
 /// <param name="FinishedAt"><inheritdoc cref="EfCoreEntities.HostedEntry.FinishedAt" path="/summary"/></param>
-public sealed record SatEntryDto(DateTimeOffset StartedAt, DateTimeOffset? FinishedAt) : HostedEntryDto;
+/// <param name="Cells">
+/// The student's own cells, one per problem in the order the competition sets them; null until the group has
+/// closed, and where nobody grades them.</param>
+public sealed record SatEntryDto(
+    DateTimeOffset StartedAt, DateTimeOffset? FinishedAt, IReadOnlyList<ResultCellDto>? Cells) : HostedEntryDto;
 
 /// <summary>
 /// An entry the student gave up to read the problems, so no clock ever ran.

@@ -36,6 +36,7 @@ export const BACKEND_ERROR_CODES = [
   'HostedNoteEmpty',
   'HostedNoteTooLong',
   'HostedEntryProfileIncomplete',
+  'HostedResultsNotOut',
   'AdminNoteValue',
   'AdminNoteTarget',
   'AdminNoteNotFound',

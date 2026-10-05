@@ -43,6 +43,31 @@ public static class HostedSeed
     };
 
     /// <summary>
+    /// Builds one version of a grade, with nothing written for the other graders.
+    /// </summary>
+    /// <param name="entryId"><inheritdoc cref="HostedGrade.EntryId" path="/summary"/></param>
+    /// <param name="problemId"><inheritdoc cref="HostedGrade.ProblemId" path="/summary"/></param>
+    /// <param name="authorId"><inheritdoc cref="HostedGrade.AuthorId" path="/summary"/></param>
+    /// <param name="mark">The mark the work earns on its competition's scale, however much the examiner helped.</param>
+    /// <param name="help"><inheritdoc cref="HostedGrade.Help" path="/summary"/></param>
+    /// <param name="isFinal"><inheritdoc cref="HostedGrade.IsFinal" path="/summary"/></param>
+    /// <param name="createdAt"><inheritdoc cref="HostedGrade.CreatedAt" path="/summary"/></param>
+    /// <returns>The version.</returns>
+    public static HostedGrade NewGrade(
+        Guid entryId, Guid problemId, Guid authorId, int mark, int help, bool isFinal, DateTimeOffset createdAt) =>
+        new()
+        {
+            EntryId = entryId,
+            ProblemId = problemId,
+            Mark = mark,
+            Help = help,
+            InternalComment = string.Empty,
+            IsFinal = isFinal,
+            AuthorId = authorId,
+            CreatedAt = createdAt,
+        };
+
+    /// <summary>
     /// Tracks one hosted group of two problems per round, which lets students re-enter only while it never closes.
     /// </summary>
     /// <param name="context">The seeding context.</param>
@@ -132,14 +157,27 @@ public static class HostedSeed
         context.ProblemDefenses.Add(new ProblemDefense { DefenseSessionId = sessionId, ProblemId = problemId });
 
         // And the student's opening line
+        NewTurn(context, sessionId, 0, TranscriptRole.Candidate, createdAt);
+    }
+
+    /// <summary>
+    /// Tracks one line of a conversation.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="sessionId">The conversation.</param>
+    /// <param name="sequence"><inheritdoc cref="DefenseTurn.Sequence" path="/summary"/></param>
+    /// <param name="role"><inheritdoc cref="DefenseTurn.Role" path="/summary"/></param>
+    /// <param name="createdAt"><inheritdoc cref="DefenseTurn.CreatedAt" path="/summary"/></param>
+    public static void NewTurn(
+        MathCompsDbContext context, Guid sessionId, int sequence, TranscriptRole role, DateTimeOffset createdAt) =>
+        // The line, saying nothing anybody reads
         context.DefenseTurns.Add(new DefenseTurn
         {
             Id = Guid.CreateVersion7(),
             SessionId = sessionId,
-            Role = TranscriptRole.Candidate,
-            Content = "opening",
-            Sequence = 0,
+            Role = role,
+            Content = "line",
+            Sequence = sequence,
             CreatedAt = createdAt,
         });
-    }
 }

@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Clerk.BackendAPI;
+using MathComps.Domain;
 using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
@@ -261,6 +262,11 @@ public partial class UserManager(
     {
         // Somebody past school has no year to sit, so saying both is saying one of them by mistake
         var graduationYear = request.HasLeftHighSchool ? null : request.GraduationYear;
+
+        // No maturita later than that of a child starting first grade this school year, so their grade never
+        // falls below 1
+        if (graduationYear > SchoolYear.LatestGraduationYear(DateTimeOffset.UtcNow))
+            throw new ProfileValueInvalidException();
 
         // The country as it will be stored, refused here when it is not a country
         var countryCode = NormalizeCountryCode(request.CountryCode);

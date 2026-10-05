@@ -16,5 +16,5 @@ public record GradingCompetitionDto(
     Guid RoundId,
     HostedCompetitionCategory Category,
     IReadOnlyList<GradingProblemDto> Problems,
-    IReadOnlyList<UserIdentityDto> Entrants,
+    IReadOnlyList<GradingEntrantDto> Entrants,
     IReadOnlyList<GradeSummaryDto> Grades);

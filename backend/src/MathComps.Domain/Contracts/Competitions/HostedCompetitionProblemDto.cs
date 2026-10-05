@@ -21,6 +21,10 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// <param name="Defenses">The conversations the student has held about it, most recently active first.</param>
 /// <param name="SelfAssessment">What the student says about their own solution, or null while they have said nothing.</param>
 /// <param name="MaxCommentChars">The longest what they say about it may be, in characters.</param>
+/// <param name="Result">
+/// The reader's own result on it; null until the competition's group has closed, and for a reader nobody grades in
+/// it.
+/// </param>
 public record HostedCompetitionProblemDto(
     Guid Id,
     int Position,
@@ -29,4 +33,5 @@ public record HostedCompetitionProblemDto(
     IReadOnlyDictionary<Language, IReadOnlyList<string>>? Hints,
     IReadOnlyList<HostedCompetitionDefenseLineDto> Defenses,
     string? SelfAssessment,
-    int MaxCommentChars);
+    int MaxCommentChars,
+    ProblemResultDto? Result);

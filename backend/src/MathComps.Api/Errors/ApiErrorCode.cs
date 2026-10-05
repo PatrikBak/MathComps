@@ -175,6 +175,11 @@ public enum ApiErrorCode
     HostedEntryProfileIncomplete,
 
     /// <summary>
+    /// A competition's results were read before its group closed, or for a group that never closes.
+    /// </summary>
+    HostedResultsNotOut,
+
+    /// <summary>
     /// A review note the contract cannot take: no text at all, more text than a note may carry, or a category
     /// outside the ones it names.
     /// </summary>

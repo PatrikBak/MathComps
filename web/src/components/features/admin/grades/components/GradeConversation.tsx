@@ -16,7 +16,8 @@ type GradeConversationProps = {
 
 /**
  * The conversation between the graders and one student about one problem they were graded on: a comment thread
- * any admin writes in, which the student cannot see yet. Likes mean nothing between them, so there are none.
+ * any admin writes in, which opens to the student once the competition has closed, while the grade is final. Likes
+ * mean nothing between them, so there are none.
  */
 export function GradeConversation({ problemId, userId }: GradeConversationProps) {
   // Grades copy
@@ -25,7 +26,7 @@ export function GradeConversation({ problemId, userId }: GradeConversationProps)
   return (
     <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
       {/* Who can read it */}
-      <p className="mb-3 text-xs text-muted">{t('studentCantSeeYet')}</p>
+      <p className="mb-3 text-xs text-muted">{t('studentSeesOnceFinal')}</p>
 
       {/* The thread, named by the problem and the student like the grade itself */}
       <CommentSection

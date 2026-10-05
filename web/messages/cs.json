@@ -187,7 +187,7 @@
         "selfAssessment": "Komentář studenta"
       },
       "saveFailed": "Hodnocení se nepodařilo uložit",
-      "studentCantSeeYet": "Student to zatím nevidí.",
+      "studentSeesOnceFinal": "Student to uvidí, až soutěž skončí a hodnocení bude finální.",
       "tab": "Hodnocení"
     },
     "grading": {
@@ -270,6 +270,7 @@
     "HostedNoteEmpty": "Tvoje poznámka je prázdná.",
     "HostedNoteTooLong": "Tvoje poznámka je příliš dlouhá.",
     "HostedProblemNotFound": "Tato úloha nepatří do žádné soutěže.",
+    "HostedResultsNotOut": "Výsledky budou zveřejněny po skončení soutěže.",
     "INVALID_FILE_TYPE": "Nepovolený typ souboru",
     "ListAccessDenied": "Tento seznam je soukromý. Pokud je to tvůj seznam, nejprve se přihlas.",
     "ListNotFound": "Seznam nebyl nalezen.",
@@ -1205,7 +1206,7 @@
     "avatarUpdated": "Profilová fotka nahrána, aktualizace potrvá pár sekund",
     "competitionAuthReason": "uložení profilu",
     "competitionError": "Údaje se nepodařilo uložit. Zkus to prosím znovu.",
-    "competitionNote": "Tyto informace se zobrazí ve výsledkové listině.",
+    "competitionNote": "Tyto informace i tvoje profilová fotka se zobrazí ve výsledkové listině.",
     "competitionSection": "Mathildování",
     "country": "Země",
     "countryNoMatch": "Žádná země nesedí",

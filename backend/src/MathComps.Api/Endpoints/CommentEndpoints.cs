@@ -46,15 +46,10 @@ public static class CommentEndpoints
         // Get comment counts for many targets of one type
         app.MapPost($"{CommentsPath}/counts", async (
             GetCommentCountsRequest request,
-            IUserManager userManager,
-            HttpContext context,
             ICommentService commentService) =>
         {
-            // Who is asking... might be nobody
-            var viewer = await GetViewerAsync(userManager, context);
-
             // Each target's active comment count by its id
-            var counts = await commentService.GetCommentCountsAsync(request.TargetType, request.TargetIds, viewer);
+            var counts = await commentService.GetCommentCountsAsync(request.TargetType, request.TargetIds);
 
             // Return the mapping
             return Results.Ok(counts);

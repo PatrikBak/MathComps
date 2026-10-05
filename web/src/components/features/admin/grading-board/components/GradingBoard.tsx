@@ -254,7 +254,7 @@ function GradingGrid({ competition, rows, grades, sort, onSort, onOpen }: Gradin
             <tr key={row.user.id} className="border-t border-foreground/5">
               {/* Where they stand */}
               <td className="w-px whitespace-nowrap py-0.5 pl-4 pr-1 text-right tabular-nums text-muted sm:pl-3 sm:py-1.5">
-                {rankOf(rows, row.total) ?? <span className="text-muted/50">–</span>}
+                {rankOf(rows, row) ?? <span className="text-muted/50">–</span>}
               </td>
 
               {/* Who */}

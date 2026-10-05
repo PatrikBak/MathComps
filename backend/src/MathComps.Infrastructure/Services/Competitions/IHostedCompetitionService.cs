@@ -3,17 +3,19 @@ using MathComps.Domain.Contracts.Competitions;
 namespace MathComps.Infrastructure.Services.Competitions;
 
 /// <summary>
-/// Runs the competitions the site hosts itself: what a student can see of them, what an entry needs of them, and
-/// what they can do with an entry — sit it, give it up for the problems, or close it early.
+/// Runs the competitions the site hosts itself: what a student can see of them, what an entry needs of them, what
+/// they can do with an entry — sit it, give it up for the problems, or close it early — and the results once a
+/// group has closed.
 /// </summary>
 /// <remarks>
-/// Nothing here grades anything. An entry is a window and a set of problems; what a student argued inside it is
-/// their defense conversations.
+/// Nothing here writes a grade. An entry is a window and a set of problems; what a student argued inside it is
+/// their defense conversations, and the results read the grades the graders give those.
 /// </remarks>
 public interface IHostedCompetitionService
 {
     /// <summary>
-    /// Reads every group a student can see, with the entry they currently hold in each competition.
+    /// Reads every group a student can see, with the entry they currently hold in each competition and their own
+    /// cells in its results once those are out.
     /// </summary>
     /// <param name="userId">The student reading, or null for a signed-out visitor, who holds no entries.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
@@ -71,15 +73,31 @@ public interface IHostedCompetitionService
         Guid userId, string competitionSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Reads one competition's problem set, with whatever the student has said about each. An embargoed set is
-    /// served only to a student who has spent an entry into it, and a competition still running only to an
-    /// account; once it is over the set reads for anybody, carrying nothing of anyone's own.
+    /// Reads one competition's problem set, with whatever the student has said about each and their own result on
+    /// it once the results are out. An embargoed set is served only to a student who has spent an entry into it,
+    /// and a competition still running only to an account; once it is over the set reads for anybody, carrying
+    /// nothing of anyone's own.
     /// </summary>
     /// <param name="userId">The student reading, null where the reader has no account.</param>
     /// <param name="competitionSlug">What addresses the competition whose problems these are.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The problems, in the order the competition sets them.</returns>
     Task<IReadOnlyList<HostedCompetitionProblemDto>> GetProblemsAsync(
+        Guid? userId, string competitionSlug, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reads one competition's results, open to anybody once its group has closed. They list every student the
+    /// graders grade who held a conversation about its problems inside their entry, placed by the sum of their
+    /// final scores, a tie going to the smaller sum, over the problems, of how far into their own clock they last
+    /// wrote about each.
+    /// </summary>
+    /// <param name="userId">
+    /// The reader, whose own row is marked as theirs; null where the reader has no account.
+    /// </param>
+    /// <param name="competitionSlug">What addresses the competition whose results these are.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The results, in the order the students stand.</returns>
+    Task<CompetitionResultsDto> GetResultsAsync(
         Guid? userId, string competitionSlug, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -152,6 +170,11 @@ public sealed class HostedNoteEmptyException() : Exception("A note has to say so
 /// Thrown when what a student says about their own solution runs past the longest note a competition takes.
 /// </summary>
 public sealed class HostedNoteTooLongException() : Exception("The note is too long");
+
+/// <summary>
+/// Thrown when a competition's results are read before its group has closed, or for one that never closes.
+/// </summary>
+public sealed class HostedResultsNotOutException() : Exception("This competition's results are not out yet");
 
 /// <summary>
 /// Thrown when a student enters without the account details an entry asks of them.

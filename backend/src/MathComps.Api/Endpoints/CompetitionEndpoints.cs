@@ -8,13 +8,14 @@ namespace MathComps.Api.Endpoints;
 /// <summary>
 /// Maps the endpoints behind the competitions the site hosts itself: reading the groups, reading what an entry
 /// needs of the caller, spending an entry (by sitting it or by giving it up for the problems), closing one early,
-/// reading a competition's problems, and recording what the student makes of their own solutions.
+/// reading a competition's problems and its results, and recording what the student makes of their own
+/// solutions.
 /// </summary>
 /// <remarks>
 /// The problems route is the only place an embargoed problem is served, and it serves one only to a caller who
 /// has spent an entry into its competition. Everywhere else in the site an embargoed round stays invisible. Once
 /// a competition is over its set is something anybody may read, so that route also answers a caller with no
-/// account, as the groups list does.
+/// account, as the groups list and the results do.
 /// </remarks>
 public static class CompetitionEndpoints
 {
@@ -154,6 +155,24 @@ public static class CompetitionEndpoints
 
             // Return them
             return Results.Ok(problems);
+        })
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // A competition's results, once its group has closed, with the caller's own row marked
+        app.MapGet($"{CompetitionsPath}/{{competitionSlug}}/results", async (
+            string competitionSlug,
+            HttpContext context,
+            IUserManager userManager,
+            IHostedCompetitionService competitionService) =>
+        {
+            // Resolve the calling user, results being read by plenty of people with no account
+            var userId = await userManager.GetUserIdAsync(context);
+
+            // The results as they stand
+            var results = await competitionService.GetResultsAsync(userId, competitionSlug, context.RequestAborted);
+
+            // Return them
+            return Results.Ok(results);
         })
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 

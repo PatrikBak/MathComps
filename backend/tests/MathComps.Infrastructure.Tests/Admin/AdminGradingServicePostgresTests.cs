@@ -162,7 +162,9 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// The board sets out each competition of the group, its problems in order, and every graded entrant who spoke
     /// about one of those problems, each on every problem, counting only the conversations each entrant started while
     /// their entry counted: Alice's third conversation came after she handed in, her practice on the second problem
-    /// after the close, and Bob's second after his clock ran out. Nobody holds a grade yet.
+    /// after the close, and Bob's second after his clock ran out. Each entrant carries how far into their own clock
+    /// they last wrote about each problem while the entry counted, summed.
+    /// Nobody holds a grade yet.
     /// </summary>
     [Fact]
     public Task The_board_sets_out_on_every_problem_every_entrant_who_spoke() => RunTestAsync(async service =>
@@ -188,7 +190,11 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal([1, 2], advanced.Problems.Select(problem => problem.Number));
 
         // Graded are Alice and Bob, by username
-        Assert.Equal(["Alice", "Bob"], advanced.Entrants.Select(entrant => entrant.Username));
+        Assert.Equal(["Alice", "Bob"], advanced.Entrants.Select(entrant => entrant.User.Username));
+
+        // Alice finished half an hour in, what she wrote after handing in left out, and Bob just inside his clock,
+        // what he wrote past it left out
+        Assert.Equal([30d, 170d], advanced.Entrants.Select(entrant => entrant.FinishedAfterSeconds / 60));
 
         // Each of them on each problem
         Assert.Equal(4, advanced.Grades.Count);
@@ -206,7 +212,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(1, GradeOf(board, _bobId, _advancedSecondId).ConversationCount);
 
         // The elementary competition grades Dan alone
-        Assert.Equal([_danId], board.Competitions[0].Entrants.Select(entrant => entrant.Id));
+        Assert.Equal([_danId], board.Competitions[0].Entrants.Select(entrant => entrant.User.Id));
 
         // Dan's one conversation on its first problem
         Assert.Equal(1, GradeOf(board, _danId, _elementaryFirstId).ConversationCount);
@@ -265,7 +271,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Everybody it grades, across every competition
         var graded = board.Competitions
             .SelectMany(competition => competition.Entrants)
-            .Select(entrant => entrant.Id)
+            .Select(entrant => entrant.User.Id)
             .ToList();
 
         // Not Carol, who gave her entry up
@@ -642,7 +648,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// <summary>
     /// A student who sat two rounds of the group is weighed by each round's own clock: their advanced conversation
     /// counts on the advanced problem, and an elementary one held while only the advanced clock ran counts nowhere,
-    /// on the board or among the conversations a grade is read from. They are graded in both competitions.
+    /// on the board or among the conversations a grade is read from. They are graded in both competitions, and
+    /// finished in each as far into that round's own clock as they last wrote there.
     /// </summary>
     [Fact]
     public Task A_student_in_two_rounds_is_weighed_by_each_rounds_own_clock() => RunTestAsync(async service =>
@@ -681,7 +688,14 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Dan graded in every competition
         Assert.All(
             board.Competitions,
-            competition => Assert.Contains(_danId, competition.Entrants.Select(entrant => entrant.Id)));
+            competition => Assert.Contains(_danId, competition.Entrants.Select(entrant => entrant.User.Id)));
+
+        // Twenty minutes into his elementary clock, the line written on the advanced one adding nothing, and ten
+        // into the advanced one
+        Assert.Equal(
+            [20d, 10d],
+            board.Competitions.Select(competition =>
+                competition.Entrants.Single(entrant => entrant.User.Id == _danId).FinishedAfterSeconds / 60));
 
         // His advanced conversation counted on the advanced problem
         Assert.Equal(1, GradeOf(board, _danId, _advancedFirstId).ConversationCount);
@@ -745,13 +759,13 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         var advanced = board.Competitions[1];
 
         // Dan not among the advanced competition's students
-        Assert.DoesNotContain(_danId, advanced.Entrants.Select(entrant => entrant.Id));
+        Assert.DoesNotContain(_danId, advanced.Entrants.Select(entrant => entrant.User.Id));
 
         // Nor among the advanced competition's grades
         Assert.DoesNotContain(_danId, advanced.Grades.Select(summary => summary.UserId));
 
         // Still graded in the elementary competition, where he spoke
-        Assert.Contains(_danId, board.Competitions[0].Entrants.Select(entrant => entrant.Id));
+        Assert.Contains(_danId, board.Competitions[0].Entrants.Select(entrant => entrant.User.Id));
     });
 
     /// <summary>

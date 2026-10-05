@@ -316,8 +316,8 @@ test.describe('the grading board', () => {
       .getByRole('tab', { name: messages.admin.conversation.tabs.feedback, exact: true })
       .click()
 
-    // The thread saying the student can't read it yet
-    await expect(dialog.getByText(gradeCopy.studentCantSeeYet)).toBeVisible()
+    // The thread saying when the student gets to read it
+    await expect(dialog.getByText(gradeCopy.studentSeesOnceFinal)).toBeVisible()
 
     // His conversation with Mathilda still on screen beside the thread
     await expect(dialog.getByText('Answer 1 by cyril on p1.')).toBeVisible()

@@ -13,9 +13,6 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// <param name="Entry">
 /// The student's entry into it, or null while they have not taken one. Never more than one: where a group allows
 /// re-entry, taking it again resets the entry rather than adding a second.</param>
-/// <param name="ResultsPublished">
-/// Whether its results are out. A fact about the competition rather than the reader: once out, they are out for
-/// everybody. Nothing publishes results, so it is false everywhere.</param>
 /// <param name="ProblemsPublished">
 /// Whether the problems are out from under the round's embargo for this reader: it has passed, or the site
 /// lets them past its gates.</param>
@@ -26,6 +23,5 @@ public record HostedCompetitionDto(
     IReadOnlyDictionary<Language, string> Slug,
     HostedCompetitionCategory? Category,
     HostedEntryDto? Entry,
-    bool ResultsPublished,
     bool ProblemsPublished,
     bool ProblemsReady);

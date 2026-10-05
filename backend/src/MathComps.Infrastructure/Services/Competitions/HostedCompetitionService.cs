@@ -1,3 +1,4 @@
+using MathComps.Domain;
 using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
@@ -17,7 +18,7 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// <summary>
 /// Implements <see cref="IHostedCompetitionService"/> over the database. A hosted competition is a round of the
 /// taxonomy like any other, so everything here is the ordinary archive shape read through the group that says
-/// when it runs and the entries students have spent into it.
+/// when it runs, the entries students have spent into it, and the grades those entries earn.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="localization">
@@ -46,7 +47,7 @@ public sealed class HostedCompetitionService(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // Every group with its rounds: the node each round runs under, the season it ran in, when its problems
-        // open, and how many it holds against the number its group announced. Newest first.
+        // open, and the problems it holds against the number its group announced. Newest first.
         var groups = await dbContext.HostedGroups
             .AsNoTracking()
             .OrderByDescending(group => group.OpensAt)
@@ -66,7 +67,10 @@ public sealed class HostedCompetitionService(
                         CompetitionPath = round.Competition.Path,
                         SeasonStartYear = round.Season.StartYear,
                         round.VisibleSince,
-                        ProblemsHeld = round.Problems.Count,
+                        ProblemIds = round.Problems
+                            .OrderBy(problem => problem.Number)
+                            .Select(problem => problem.Id)
+                            .ToList(),
                     })
                     .ToList(),
             })
@@ -85,6 +89,23 @@ public sealed class HostedCompetitionService(
         var bypassesGates = userId is { } holder
             && await grants.HasAsync(holder, UserCapability.PrepareCompetitions, cancellationToken);
 
+        // The reader's own cells in every competition they sat whose results are out, by round.
+        var cells = await ReadCellsAsync(
+            dbContext,
+            [
+                .. groups.SelectMany(group => group.Rounds.SelectMany(round =>
+                    entries.GetValueOrDefault(round.Id) is { } entry
+                        ? new[]
+                        {
+                            new EntryInRound(
+                                entry,
+                                new RoundTerms(group.OpensAt, group.ClosesAt, group.ClockMinutes, round.ProblemIds)),
+                        }
+                        : [])),
+            ],
+            now,
+            cancellationToken);
+
         // The view, one group at a time.
         return new HostedCompetitionsViewDto(
             [
@@ -100,13 +121,13 @@ public sealed class HostedCompetitionService(
                     .. group.Rounds.Select(round => new HostedCompetitionDto(
                         SlugOf(round.CompetitionPath, round.SeasonStartYear),
                         HostedTaxonomy.CategoryOf(round.CompetitionPath),
-                        entries.GetValueOrDefault(round.Id),
-                        // Nobody's results are out.
-                        ResultsPublished: false,
+                        entries.GetValueOrDefault(round.Id) is { } entry
+                            ? ToEntryDto(entry, cells.GetValueOrDefault(round.Id))
+                            : null,
                         ProblemsPublished: bypassesGates
                             || round.VisibleSince is null
                             || round.VisibleSince <= now,
-                        ProblemsReady: AreProblemsReady(round.ProblemsHeld, group.ProblemCount))),
+                        ProblemsReady: AreProblemsReady(round.ProblemIds.Count, group.ProblemCount))),
                 ])),
             ],
             _noteGraceMinutes,
@@ -188,8 +209,19 @@ public sealed class HostedCompetitionService(
         // The close itself.
         await dbContext.SaveChangesAsync(cancellationToken);
 
+        // The round the student's own cells are read against. A clock started just before the close runs past it,
+        // so a hand-in can come after the results are out.
+        var round = await ReadRoundTermsAsync(dbContext, roundId, cancellationToken);
+
+        // Their own cells, where the results are out.
+        var cells = await ReadCellsAsync(
+            dbContext,
+            [new EntryInRound(entry, round)],
+            DateTimeOffset.UtcNow,
+            cancellationToken);
+
         // The entry as the hand-in left it.
-        return ToEntryDto(entry);
+        return ToEntryDto(entry, cells.GetValueOrDefault(roundId));
     }
 
     /// <inheritdoc/>
@@ -223,6 +255,8 @@ public sealed class HostedCompetitionService(
                 .Where(candidate => candidate.UserId == userId && candidate.RoundId == roundId)
                 .Select(candidate => new
                 {
+                    candidate.Id,
+                    candidate.UserId,
                     candidate.StartedAt,
                     candidate.FinishedAt,
                     candidate.Round.HostedGroup!.ClockMinutes,
@@ -237,8 +271,94 @@ public sealed class HostedCompetitionService(
             ? HostedEntryRules.IsSolutionOpen(entry.StartedAt, entry.FinishedAt, entry.ClockMinutes, now)
             : access.VisibleSince is null || access.VisibleSince <= now;
 
+        // Their entry once the results are out, which is what their own result on each problem waits on.
+        var resultEntry = entry is not null && HostedEntryRules.AreResultsOut(access.ClosesAt, now)
+            ? new HostedGrading.SpentEntry(
+                entry.Id,
+                entry.UserId,
+                roundId,
+                entry.StartedAt,
+                entry.FinishedAt,
+                access.ClosesAt,
+                entry.ClockMinutes)
+            : null;
+
         // The set, in the order the competition sets it.
-        return await ReadProblemsAsync(dbContext, userId, roundId, isSolutionOpen, cancellationToken);
+        return await ReadProblemsAsync(dbContext, userId, roundId, isSolutionOpen, resultEntry, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<CompetitionResultsDto> GetResultsAsync(
+        Guid? userId, string competitionSlug, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The competition the slug addresses.
+        var roundId = await ResolveRoundIdAsync(dbContext, competitionSlug, cancellationToken);
+
+        // The round's problems in order, and its group's opening, close and clock.
+        var round = await ReadRoundTermsAsync(dbContext, roundId, cancellationToken);
+
+        // Nothing is out before the group closes.
+        if (!HostedEntryRules.AreResultsOut(round.ClosesAt, DateTimeOffset.UtcNow))
+            throw new HostedResultsNotOutException();
+
+        // Every entry sat into the round, with what the results say about whoever sat it.
+        var entries = await dbContext.HostedEntries
+            .AsNoTracking()
+            .Where(entry => entry.RoundId == roundId && entry.StartedAt != null)
+            // A fixed order, so rows the placing leaves level come out the same on every read.
+            .OrderBy(entry => entry.Id)
+            .Select(entry => new
+            {
+                entry.Id,
+                entry.UserId,
+                entry.StartedAt,
+                entry.FinishedAt,
+                // A deleted account's name and country stay off its row.
+                Username = entry.User.IsDeleted ? null : entry.User.Username,
+                entry.User.AvatarUrl,
+                CountryCode = entry.User.IsDeleted ? null : entry.User.CountryCode,
+                entry.User.GraduationYear,
+                entry.User.HasLeftHighSchool,
+            })
+            .ToListAsync(cancellationToken);
+
+        // Where each entry anybody grades stands on each problem, and how far into its clock its student last wrote
+        // about each.
+        var gradings = await HostedGrading.ReadProblemGradingsAsync(
+            dbContext,
+            grants,
+            [
+                .. entries.Select(entry => new HostedGrading.SpentEntry(
+                    entry.Id,
+                    entry.UserId,
+                    roundId,
+                    entry.StartedAt,
+                    entry.FinishedAt,
+                    round.ClosesAt,
+                    round.ClockMinutes)),
+            ],
+            cancellationToken);
+
+        // A row for each graded student who held a conversation about any of the problems inside their entry, with
+        // where they were in school read at the group's opening, so the passing of time never moves it.
+        var rows = entries
+            .Where(entry => gradings.HasSpoken(entry.Id))
+            .Select(entry => new HostedResults.UnplacedRow(
+                new ResultStudentDto(
+                    entry.Username,
+                    entry.AvatarUrl,
+                    entry.CountryCode,
+                    SchoolYear.GradeAt(entry.GraduationYear, entry.HasLeftHighSchool, round.OpensAt)),
+                IsReader: entry.UserId == userId,
+                [.. round.ProblemIds.Select(problemId => gradings.Of(entry.Id, problemId).Cell)],
+                gradings.FinishedAfter(entry.Id)))
+            .ToList();
+
+        // The rows in the order they stand.
+        return new CompetitionResultsDto(HostedResults.Place(rows));
     }
 
     /// <inheritdoc/>
@@ -399,6 +519,8 @@ public sealed class HostedCompetitionService(
             userId,
             roundId,
             HostedEntryRules.IsSolutionOpen(entry.StartedAt, entry.FinishedAt, group.ClockMinutes, now),
+            // No result: an entry is spent only into a group still open, unless nobody grades the reader spending it.
+            resultEntry: null,
             cancellationToken);
 
         // The write itself. An attempt racing another meets it at the index rather than at the read above, which
@@ -424,8 +546,8 @@ public sealed class HostedCompetitionService(
                     update => update.SetProperty(user => user.RulesAcceptedAt, now), cancellationToken);
         }
 
-        // The stamped row paired with the problems read above.
-        return new SpentEntryDto(ToEntryDto(entry), problems);
+        // The stamped row paired with the problems read above, with no cells.
+        return new SpentEntryDto(ToEntryDto(entry, cells: null), problems);
     }
 
     /// <summary>
@@ -511,8 +633,8 @@ public sealed class HostedCompetitionService(
         };
 
     /// <summary>
-    /// Reads one competition's problems with the student's conversations about each, and what they claim of
-    /// their own solution.
+    /// Reads one competition's problems with the student's conversations about each, what they claim of their own
+    /// solution, and their result on it once the results are out.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="userId">The student reading, null where the reader has no account.</param>
@@ -520,11 +642,14 @@ public sealed class HostedCompetitionService(
     /// <param name="isSolutionOpen">
     /// Whether the reader is past competing here, which <see cref="HostedEntryRules.IsSolutionOpen"/> settles.
     /// </param>
+    /// <param name="resultEntry">
+    /// The reader's entry into the competition where its results are out; null where they have no result.
+    /// </param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The problems, in the order the competition sets them.</returns>
     private async Task<IReadOnlyList<HostedCompetitionProblemDto>> ReadProblemsAsync(
         MathCompsDbContext dbContext, Guid? userId, Guid roundId, bool isSolutionOpen,
-        CancellationToken cancellationToken)
+        HostedGrading.SpentEntry? resultEntry, CancellationToken cancellationToken)
     {
         // The set, each problem with its statement in every language, and its solution too where the reader is
         // owed one. Markdown is what the site renders, the raw source standing in on a row that carries none.
@@ -594,7 +719,13 @@ public sealed class HostedCompetitionService(
                     cancellationToken)
             : [];
 
-        // Each problem with the conversations held about it and what the student makes of their own solution.
+        // The student's result on each problem, where they have one.
+        var results = resultEntry is not null
+            ? await ReadProblemResultsAsync(dbContext, resultEntry, problemIds, cancellationToken)
+            : null;
+
+        // Each problem with the conversations held about it, what the student makes of their own solution, and their
+        // result on it.
         return
         [
             .. problems.Select(problem => new HostedCompetitionProblemDto(
@@ -628,8 +759,48 @@ public sealed class HostedCompetitionService(
                         .Select(defense => defense.Line),
                 ],
                 SelfAssessment: assessments.GetValueOrDefault(problem.Id),
-                MaxCommentChars: _maxNoteChars)),
+                MaxCommentChars: _maxNoteChars,
+                Result: results?[problem.Id])),
         ];
+    }
+
+    /// <summary>
+    /// Reads a student's result on each problem of the round they hold an entry in, where anybody grades it.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="entry">The student's entry, into a group whose results are out.</param>
+    /// <param name="problemIds">The round's problems.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The result, keyed by the problem; null where nobody grades the entry.</returns>
+    private async Task<Dictionary<Guid, ProblemResultDto>?> ReadProblemResultsAsync(
+        MathCompsDbContext dbContext,
+        HostedGrading.SpentEntry entry,
+        IReadOnlyList<Guid> problemIds,
+        CancellationToken cancellationToken)
+    {
+        // Where the entry stands on each problem.
+        var gradings = await HostedGrading.ReadProblemGradingsAsync(dbContext, grants, [entry], cancellationToken);
+
+        // Nobody grades it, so there is no result to read.
+        if (!gradings.IsGraded(entry.Id))
+            return null;
+
+        // How many messages stand in the conversation about each of its grades, where anything was written.
+        var messageCounts = await dbContext.HostedGradeComments
+            .AsNoTracking()
+            .Where(link => link.EntryId == entry.Id && link.Comment.Status == CommentStatus.Active)
+            .GroupBy(link => link.ProblemId)
+            .Select(thread => new { ProblemId = thread.Key, Count = thread.Count() })
+            .ToDictionaryAsync(thread => thread.ProblemId, thread => thread.Count, cancellationToken);
+
+        // Each problem's result.
+        return problemIds.ToDictionary(
+            problemId => problemId,
+            problemId => HostedResults.ResultOf(
+                gradings.Of(entry.Id, problemId),
+                problemId,
+                entry.UserId,
+                messageCounts.GetValueOrDefault(problemId)));
     }
 
     /// <summary>
@@ -640,7 +811,7 @@ public sealed class HostedCompetitionService(
     /// <param name="userId">The student reading.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The entry, keyed by the round it was taken into.</returns>
-    private static async Task<Dictionary<Guid, HostedEntryDto>> ReadCurrentEntriesAsync(
+    private static async Task<Dictionary<Guid, HostedEntry>> ReadCurrentEntriesAsync(
         MathCompsDbContext dbContext, Guid userId, CancellationToken cancellationToken)
     {
         // Every entry the student holds.
@@ -650,7 +821,7 @@ public sealed class HostedCompetitionService(
             .ToListAsync(cancellationToken);
 
         // One per competition, the index over the pair being what makes that so.
-        return entries.ToDictionary(entry => entry.RoundId, ToEntryDto);
+        return entries.ToDictionary(entry => entry.RoundId);
     }
 
     /// <summary>
@@ -832,13 +1003,99 @@ public sealed class HostedCompetitionService(
     }
 
     /// <summary>
+    /// Reads a round's problems in order, with its group's opening, close and clock.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="roundId">The round.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The round, with its group's opening, close and clock.</returns>
+    private static Task<RoundTerms> ReadRoundTermsAsync(
+        MathCompsDbContext dbContext, Guid roundId, CancellationToken cancellationToken) =>
+        // The one round, read through the group it runs in
+        dbContext.Rounds
+            .AsNoTracking()
+            .Where(round => round.Id == roundId)
+            .Select(round => new RoundTerms(
+                round.HostedGroup!.OpensAt,
+                round.HostedGroup.ClosesAt,
+                round.HostedGroup.ClockMinutes,
+                round.Problems.OrderBy(problem => problem.Number).Select(problem => problem.Id).ToList()))
+            .SingleAsync(cancellationToken);
+
+    /// <summary>
+    /// Reads the reader's own cells in each competition they sat whose results are out, one per problem in the
+    /// order the competition sets them. A competition nobody grades them in has none.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="entries">The reader's entries, each with what reading its cells takes.</param>
+    /// <param name="now">The instant the closes are read against.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The cells, keyed by the round.</returns>
+    private async Task<Dictionary<Guid, IReadOnlyList<ResultCellDto>>> ReadCellsAsync(
+        MathCompsDbContext dbContext,
+        IReadOnlyCollection<EntryInRound> entries,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        // The entries whose results are out.
+        var entriesWithResults = entries
+            .Where(entryInRound => HostedEntryRules.AreResultsOut(entryInRound.Round.ClosesAt, now))
+            .ToList();
+
+        // Where the ones anybody grades stand on each problem of their rounds.
+        var gradings = await HostedGrading.ReadProblemGradingsAsync(
+            dbContext,
+            grants,
+            [
+                .. entriesWithResults.Select(entryInRound => new HostedGrading.SpentEntry(
+                    entryInRound.Entry.Id,
+                    entryInRound.Entry.UserId,
+                    entryInRound.Entry.RoundId,
+                    entryInRound.Entry.StartedAt,
+                    entryInRound.Entry.FinishedAt,
+                    entryInRound.Round.ClosesAt,
+                    entryInRound.Round.ClockMinutes)),
+            ],
+            cancellationToken);
+
+        // Each graded entry's cells, by its round.
+        return entriesWithResults
+            .Where(entryInRound => gradings.IsGraded(entryInRound.Entry.Id))
+            .ToDictionary(
+                entryInRound => entryInRound.Entry.RoundId,
+                IReadOnlyList<ResultCellDto> (entryInRound) =>
+                [
+                    .. entryInRound.Round.ProblemIds.Select(problemId =>
+                        gradings.Of(entryInRound.Entry.Id, problemId).Cell),
+                ]);
+    }
+
+    /// <summary>
     /// Picks the <see cref="HostedEntryDto"/> arm an entry's stamps say it is.
     /// </summary>
     /// <param name="entry">The entry to project.</param>
+    /// <param name="cells"><inheritdoc cref="SatEntryDto.Cells" path="/summary"/></param>
     /// <returns>The arm matching the way the entry was spent.</returns>
-    private static HostedEntryDto ToEntryDto(HostedEntry entry) =>
+    private static HostedEntryDto ToEntryDto(HostedEntry entry, IReadOnlyList<ResultCellDto>? cells) =>
         // A forfeit stamp is what separates the two, no clock ever having run on one given up.
         entry.ForfeitedAt is { } forfeitedAt
             ? new ForfeitedEntryDto(forfeitedAt)
-            : new SatEntryDto(entry.StartedAt!.Value, entry.FinishedAt);
+            : new SatEntryDto(entry.StartedAt!.Value, entry.FinishedAt, cells);
+
+    /// <summary>
+    /// One of the reader's entries, with what reading their own cells in it takes.
+    /// </summary>
+    /// <param name="Entry">The entry.</param>
+    /// <param name="Round">The round it was spent into.</param>
+    private sealed record EntryInRound(HostedEntry Entry, RoundTerms Round);
+
+    /// <summary>
+    /// A round's problems in order, with its group's opening, close and clock.
+    /// </summary>
+    /// <param name="OpensAt"><inheritdoc cref="HostedGroup.OpensAt" path="/summary"/></param>
+    /// <param name="ClosesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
+    /// <param name="ClockMinutes"><inheritdoc cref="HostedGroup.ClockMinutes" path="/summary"/></param>
+    /// <param name="ProblemIds">The round's problems, in the order the competition sets them.</param>
+    private sealed record RoundTerms(
+        DateTimeOffset OpensAt, DateTimeOffset? ClosesAt, int ClockMinutes, IReadOnlyList<Guid> ProblemIds);
 }
