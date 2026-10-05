@@ -22,6 +22,7 @@ import { MathRendererClient } from '@/components/math/MathRendererClient'
 import { inlineBlockToMathSource } from '@/components/math/utils/math-render'
 import { ArticleSection } from '@/components/shared/components/ArticleSection'
 import type { DisclosurePanelProps } from '@/components/shared/components/DisclosurePanel'
+import { ScrollToHashTarget } from '@/components/shared/components/ScrollToHashTarget'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { getProblemImageUrl } from '@/components/shared/utils/asset-urls'
 import { ANCHORS, getLocalizedAnchor, type Locale } from '@/i18n/i18n'
@@ -401,6 +402,9 @@ export default function HandoutDetail({
       >
         <CommentSection variant="inline" target={{ targetType: 'Handout', targetId: contentId }} />
       </ArticleSection>
+
+      {/* Hash link landing */}
+      <ScrollToHashTarget />
     </>
   )
 }
