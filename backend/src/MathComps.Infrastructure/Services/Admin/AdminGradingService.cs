@@ -15,7 +15,7 @@ namespace MathComps.Infrastructure.Services.Admin;
 /// </summary>
 /// <param name="dbContextFactory">The factory minting each operation's database context.</param>
 /// <param name="localization">The names the taxonomy gives the nodes a group's rounds run under.</param>
-/// <param name="grants">Reads whether a student is let past the gates a competition is entered through.</param>
+/// <param name="grants">Reads when a student started preparing the competitions.</param>
 public class AdminGradingService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,

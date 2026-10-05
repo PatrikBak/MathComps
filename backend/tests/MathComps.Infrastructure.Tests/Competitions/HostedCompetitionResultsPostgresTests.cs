@@ -126,9 +126,10 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
     /// Students level on the total and on when they finished share a place, and the student after them takes the
     /// place after all of them, as in any ranking. When they finished counts from each one's own start, so Dora and Emil
     /// share a place though Emil sat down an hour later. A total of 0 is still a place. Only the students the
-    /// graders grade who wrote about the problems inside their own window are listed. Left out: a student let past
-    /// the gates, a student who sat the entry and said nothing, a student whose only conversation started after
-    /// their clock ran out, though graded on it, and a student who gave the entry up. A deleted account with no
+    /// graders grade who wrote about the problems inside their own window are listed. Left out: a student already
+    /// preparing the competitions when their clock started, a student who sat the entry and said nothing, a student
+    /// whose only conversation started after their clock ran out, though graded on it, and a student who gave the
+    /// entry up. A deleted account with no
     /// final grade stands last, after the named ones, its name and country withheld, and the reader finds their own row marked as theirs and nobody else's.
     /// </summary>
     [Fact]
@@ -154,6 +155,52 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
 
         // Bob's row alone is the reader's
         Assert.Equal(["Bob"], results.Rows.Where(row => row.IsReader).Select(row => row.Student.Username));
+    });
+
+    /// <summary>
+    /// A grant handed over once the group has closed moves nobody: Filip keeps his place and so does everybody below
+    /// him, and his own result still carries its grade and its conversation. Only a grant already held when the
+    /// clock started keeps a run off the results, as Ivo's does.
+    /// </summary>
+    [Fact]
+    public Task A_grant_handed_over_after_the_close_moves_nobody() => RunTestAsync(async service =>
+    {
+        // Every row's place before the grant
+        var before = (await service.GetResultsAsync(null, RoundSlug)).Rows
+            .Select(row => (row.Student.Username, row.Place))
+            .ToList();
+
+        // Filip granted the capability six days after the group closed
+        await QueryAsync(async context =>
+        {
+            // The grant
+            context.UserGrants.Add(new UserGrant
+            {
+                UserId = _filipId,
+                Capability = UserCapability.PrepareCompetitions,
+                GrantedAt = _startedAt.AddDays(25),
+            });
+
+            // Commit the grant
+            await context.SaveChangesAsync();
+        });
+
+        // The results after the grant
+        var after = await service.GetResultsAsync(null, RoundSlug);
+
+        // Every row where it stood
+        Assert.Equal(before, after.Rows.Select(row => (row.Student.Username, row.Place)));
+
+        // Filip still sixth
+        Assert.Equal(6, RowOf(after, "Filip").Place);
+
+        // Ivo still left out
+        Assert.DoesNotContain(after.Rows, row => row.Student.Username == "Ivo");
+
+        // Filip's own result on the first problem, final, with the two messages standing in its conversation
+        Assert.Equal(
+            new FinalResultDto(2, 0, new GradeConversationDto($"{_firstId}:{_filipId}", 2)),
+            (await service.GetProblemsAsync(_filipId, RoundSlug))[0].Result);
     });
 
     /// <summary>
@@ -388,12 +435,17 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
         var gone = Student(context, Guid.CreateVersion7(), "Gone", roundId, isDeleted: true);
         Conversation(context, gone, _firstId, 10);
 
-        // Ivo: seven on the first, but let past the gates
+        // Ivo: seven on the first, but preparing the competitions since the day before his clock started
         var ivoId = Guid.CreateVersion7();
         var ivo = Student(context, ivoId, "Ivo", roundId);
         Conversation(context, ivo, _firstId, 10);
         Grade(context, ivo, _firstId, mark: 7, help: 0);
-        context.UserGrants.Add(new UserGrant { UserId = ivoId, Capability = UserCapability.PrepareCompetitions });
+        context.UserGrants.Add(new UserGrant
+        {
+            UserId = ivoId,
+            Capability = UserCapability.PrepareCompetitions,
+            GrantedAt = _startedAt.AddDays(-1),
+        });
 
         // Jana: sat it and said nothing
         Student(context, Guid.CreateVersion7(), "Jana", roundId);

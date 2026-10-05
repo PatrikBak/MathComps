@@ -26,20 +26,32 @@ public sealed class UserGrantService(IDbContextFactory<MathCompsDbContext> dbCon
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlySet<Guid>> GetHoldersAsync(
+    public async Task<DateTimeOffset?> GetGrantedAtAsync(
+        Guid userId, UserCapability capability, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this read.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // When the account's one grant of this capability was handed over, if it stands.
+        return await dbContext.UserGrants
+            .AsNoTracking()
+            .Where(grant => grant.UserId == userId && grant.Capability == capability)
+            .Select(grant => (DateTimeOffset?)grant.GrantedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetGrantedAtAsync(
         IReadOnlyCollection<Guid> userIds, UserCapability capability, CancellationToken cancellationToken = default)
     {
         // A fresh context for this read.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The accounts among them a grant of this capability stands against.
-        var holders = await dbContext.UserGrants
+        // When each account among them was handed its one grant of this capability, for those it stands against.
+        return await dbContext.UserGrants
             .AsNoTracking()
             .Where(grant => userIds.Contains(grant.UserId) && grant.Capability == capability)
-            .Select(grant => grant.UserId)
-            .ToListAsync(cancellationToken);
-
-        // The holders.
-        return holders.ToHashSet();
+            .Select(grant => new { grant.UserId, grant.GrantedAt })
+            .ToDictionaryAsync(grant => grant.UserId, grant => grant.GrantedAt, cancellationToken);
     }
 }
