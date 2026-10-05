@@ -1239,7 +1239,7 @@
     "email": "Email",
     "graduationYear": "Rok maturity",
     "graduationYearHelp": "Pýtame sa preto, aby bolo vo výsledkovej listine vidieť, ako si stojíš medzi rovesníkmi.",
-    "graduationYearPastSchool": "Už nie som na strednej",
+    "graduationYearOrEarlier": "{year} alebo skôr",
     "graduationYearPlaceholder": "Vyber rok maturity",
     "loading": "Načítavam používateľské menu",
     "memberSince": "Členom od",
