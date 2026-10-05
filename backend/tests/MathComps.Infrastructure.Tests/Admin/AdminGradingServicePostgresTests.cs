@@ -17,8 +17,8 @@ namespace MathComps.Infrastructure.Tests.Admin;
 /// <summary>
 /// Integration tests for <see cref="AdminGradingService"/> against a real PostgreSQL database: who a group's board
 /// grades and which conversations it counts for them, which of a student's conversations one grade is read from as
-/// <see cref="AdminDefenseReviewService"/> lists them, and how a grade takes a change, keeps every version, and holds
-/// two changes sent together.
+/// <see cref="AdminDefenseReviewService"/> lists them, how a grade takes a change, keeps every version, and holds
+/// two changes sent together, and how a whole problem is made final at once.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
@@ -856,6 +856,178 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
             Assert.Equal(4, grade.Mark);
 
             // Carrying the comment too
+            Assert.Equal("Late.", grade.InternalComment);
+        });
+    });
+
+    /// <summary>
+    /// Making a problem final settles the marked grade of each student listed on it, as it stands and by the grader
+    /// who made it final, and hands back every listed student's grade on the problem. A grade on another problem
+    /// stays as it was.
+    /// </summary>
+    [Fact]
+    public Task Making_a_problem_final_settles_each_listed_marked_grade_on_it() => RunTestAsync(async service =>
+    {
+        // A mark and a comment for Alice's first problem
+        await service.UpdateGradeAsync(
+            _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(new GradeMarkChange(4), 1, "Neat.", null));
+
+        // A mark for Bob's second
+        await service.UpdateGradeAsync(_graderId, _advancedSecondId, _bobId, WithMark(3));
+
+        // The first problem made final by another grader, both students listed
+        var grades = await service.FinalizeGradesAsync(_otherGraderId, _advancedFirstId, [_aliceId, _bobId]);
+
+        // Handed back for Alice alone, Bob holding nothing on the problem
+        var alice = Assert.Single(grades);
+
+        // Named by her
+        Assert.Equal(_aliceId, alice.UserId);
+
+        // Final
+        Assert.True(alice.Grade.IsFinal);
+
+        // Otherwise as it stood
+        Assert.Equal((4, 1, "Neat."), (alice.Grade.Mark, alice.Grade.Help, alice.Grade.InternalComment));
+
+        // By the grader who made it final
+        Assert.Equal(_otherGraderId, alice.Grade.UpdatedBy.Id);
+
+        // The graded group's board, read after
+        var board = await service.GetBoardAsync(GradedSlug);
+
+        // Bob's second problem still not final
+        Assert.False(GradeOf(board, _bobId, _advancedSecondId).Grade?.IsFinal);
+    });
+
+    /// <summary>
+    /// Making a problem final writes no version for a grade without a mark, for a student not listed, or for a grade
+    /// already final, so pressing it twice does not pad the history.
+    /// </summary>
+    [Fact]
+    public Task Making_a_problem_final_skips_unmarked_unlisted_and_final_grades() => RunTestAsync(async service =>
+    {
+        // Only a comment for Alice's first problem
+        await service.UpdateGradeAsync(
+            _graderId, _advancedFirstId, _aliceId, new UpdateGradeRequest(null, null, "Look again.", null));
+
+        // The problem made final with her listed
+        var unmarked = await service.FinalizeGradesAsync(_graderId, _advancedFirstId, [_aliceId]);
+
+        // Her grade handed back still not final
+        Assert.False(Assert.Single(unmarked).Grade.IsFinal);
+
+        // Then a mark for it
+        await service.UpdateGradeAsync(_graderId, _advancedFirstId, _aliceId, WithMark(4));
+
+        // The problem made final with only Bob listed
+        var unlisted = await service.FinalizeGradesAsync(_graderId, _advancedFirstId, [_bobId]);
+
+        // Nothing handed back, Bob holding nothing on the problem
+        Assert.Empty(unlisted);
+
+        // Her comment and her mark, two versions and no more
+        Assert.Equal(2, await CountGradeRowsAsync());
+
+        // The problem made final with her listed
+        await service.FinalizeGradesAsync(_graderId, _advancedFirstId, [_aliceId]);
+
+        // And again by another grader
+        var again = await service.FinalizeGradesAsync(_otherGraderId, _advancedFirstId, [_aliceId]);
+
+        // One version more, from the first time alone
+        Assert.Equal(3, await CountGradeRowsAsync());
+
+        // Still the first grader's
+        Assert.Equal(_graderId, Assert.Single(again).Grade.UpdatedBy.Id);
+    });
+
+    /// <summary>
+    /// Making a problem final lands even where the version it builds on is stamped later than the clock now reads,
+    /// as it is once the clock has stepped back, since the newest stamp is what makes a version the grade.
+    /// </summary>
+    [Fact]
+    public Task Making_a_problem_final_lands_even_after_the_clock_stepped_back() => RunTestAsync(async service =>
+    {
+        // A mark stamped an hour ahead of the clock
+        await QueryAsync(async context =>
+        {
+            // The version
+            context.HostedGrades.Add(new HostedGrade
+            {
+                EntryId = _aliceEntryId,
+                ProblemId = _advancedFirstId,
+                Mark = 3,
+                Help = 0,
+                InternalComment = string.Empty,
+                IsFinal = false,
+                AuthorId = _otherGraderId,
+                CreatedAt = DateTimeOffset.UtcNow.AddHours(1).TruncateToMicroseconds(),
+            });
+
+            // Submit changes
+            await context.SaveChangesAsync();
+        });
+
+        // The problem made final
+        var grades = await service.FinalizeGradesAsync(_graderId, _advancedFirstId, [_aliceId]);
+
+        // Alice's grade, handed back
+        var grade = Assert.Single(grades).Grade;
+
+        // Final, by the grader who made it so
+        Assert.Equal((true, _graderId), (grade.IsFinal, grade.UpdatedBy.Id));
+    });
+
+    /// <summary>
+    /// Making a problem final waits while a change holds one of the entries, and then settles the grade the change
+    /// left rather than the one it would have read before.
+    /// </summary>
+    [Fact]
+    public Task Making_a_problem_final_waits_on_a_change_to_one_of_its_entries() => RunTestAsync(async service =>
+    {
+        // Another grader's change, held open on Alice's entry while the problem is made final
+        await QueryAsync(async context =>
+        {
+            // Another grader in the middle of a change
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            // Holding Alice's entry
+            await context.Database.ExecuteSqlAsync(
+                $"SELECT 1 FROM hosted_entries WHERE id = {_aliceEntryId} FOR UPDATE");
+
+            // The problem made final meanwhile, left waiting on the entry
+            var waiting = service.FinalizeGradesAsync(_graderId, _advancedFirstId, [_aliceId]);
+
+            // Wait until it is queued behind the held entry
+            await WaitForLockWaiterAsync();
+
+            // The other grader's mark and comment
+            context.HostedGrades.Add(new HostedGrade
+            {
+                EntryId = _aliceEntryId,
+                ProblemId = _advancedFirstId,
+                Mark = 4,
+                Help = 0,
+                InternalComment = "Late.",
+                IsFinal = false,
+                AuthorId = _otherGraderId,
+                CreatedAt = DateTimeOffset.UtcNow.TruncateToMicroseconds(),
+            });
+
+            // Written inside the held change
+            await context.SaveChangesAsync();
+
+            // The other change finished, letting the problem be made final
+            await transaction.CommitAsync();
+
+            // Alice's grade, once let through
+            var grade = Assert.Single(await waiting).Grade;
+
+            // The mark the other grader gave, made final
+            Assert.Equal((4, true), (grade.Mark, grade.IsFinal));
+
+            // Their comment kept
             Assert.Equal("Late.", grade.InternalComment);
         });
     });

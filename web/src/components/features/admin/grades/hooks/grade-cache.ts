@@ -34,7 +34,8 @@ function studentConversationsKeyOf(address: PairIds): QueryKey {
 }
 
 /**
- * Reads one grade as the student's conversations about the problem hold it.
+ * Reads one grade wherever it is cached: beside the student's conversations about the problem, else on any board
+ * that holds it.
  *
  * @param queryClient - The cache.
  * @param address - Which grade.
@@ -44,8 +45,19 @@ export function readCachedGrade(queryClient: QueryClient, address: PairIds): Gra
   // The student's conversations about the problem, with the grading beside them
   const cached = queryClient.getQueryData<StudentConversations>(studentConversationsKeyOf(address))
 
-  // The grade, if they are cached and graded
-  return cached?.grading?.grade ?? null
+  // The grade as they hold it, where they are cached and graded
+  if (cached?.grading != null) return cached.grading.grade
+
+  // Otherwise the grade as a cached board lists it
+  return (
+    queryClient
+      .getQueriesData<GradingBoard>({ queryKey: BOARD_QUERY_KEY })
+      .flatMap(([, board]) => board?.competitions ?? [])
+      .flatMap((competition) => competition.grades)
+      .find(
+        (summary) => summary.userId === address.userId && summary.problemId === address.problemId
+      )?.grade ?? null
+  )
 }
 
 /**

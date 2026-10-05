@@ -103,11 +103,23 @@ type SentChange = {
 }
 
 /**
+ * One request the page sent to make several grades on one problem final.
+ */
+type SentFinal = {
+  /** The problem. */
+  problemId: string
+  /** The students named. */
+  userIds: string[]
+}
+
+/**
  * The grading backend, held in memory, and what the page has asked of it.
  */
 type GradingBackend = ConversationBackend & {
   /** Every change sent so far, oldest first. */
   changes: () => SentChange[]
+  /** Every request to make grades final sent so far, oldest first. */
+  finals: () => SentFinal[]
   /** Keeps every change from here on waiting, until the function handed back lets them through. */
   hold: () => () => void
 }
@@ -118,6 +130,8 @@ type GradingBackend = ConversationBackend & {
 type GradingBackendOptions = {
   /** Which changes the backend refuses as leaving a grade invalid. Absent while every change is taken. */
   refuses?: (change: GradeChange) => boolean
+  /** Whether the backend fails every request to make grades final. Absent while it takes them. */
+  failsFinals?: boolean
 }
 
 /**
@@ -262,8 +276,8 @@ function gradingOf(
 }
 
 /**
- * Stands in for the grading endpoints of one group: its board, each change to a grade, and everything the
- * conversation dialog reads and writes.
+ * Stands in for the grading endpoints of one group: its board, each change to a grade, a problem's grades made
+ * final together, and everything the conversation dialog reads and writes.
  *
  * @param page - The page to intercept requests on.
  * @param groupSlug - The group the board is served for.
@@ -290,6 +304,9 @@ export async function installGradingBackend(
 
   // Every change sent, in the order it arrived
   const sent: SentChange[] = []
+
+  // Every request to make grades final, in the order it arrived
+  const sentFinals: SentFinal[] = []
 
   // What a change waits at before it is answered
   const answers = createAnswerGate()
@@ -356,9 +373,48 @@ export async function installGradingBackend(
         route.fulfill({ json: summary.grade })
   })
 
+  // Several grades on one problem, made final together
+  await page.route(`${BACKEND_ORIGIN}/admin/grading/problems/*/final`, async (route) => {
+    // Which problem, named by the path
+    const problemId = new URL(route.request().url()).pathname.split('/').at(-2) ?? ''
+
+    // The students the page named
+    const { userIds } = route.request().postDataJSON() as { userIds: string[] }
+
+    // Recorded as it arrives, so a held request is still seen
+    sentFinals.push({ problemId, userIds })
+
+    // Answered only once whatever holds it lets go
+    await answers.passed()
+
+    // A backend failing it, as with nothing to say why
+    if (options.failsFinals === true) return route.fulfill({ status: 500 })
+
+    // The grades the board holds for the students named on the problem
+    const named = grades.filter(
+      (summary) => summary.problemId === problemId && userIds.includes(summary.userId)
+    )
+
+    // Each one carrying a mark made final, the rest left as they stand
+    named.forEach((summary) => {
+      // Final only beside a mark
+      if (summary.grade?.mark != null) summary.grade = { ...summary.grade, isFinal: true }
+    })
+
+    // Answered with where each named student's grade now stands, none for one holding no grade
+    return route.fulfill({
+      json: named.flatMap((summary) =>
+        summary.grade === null ? [] : [{ userId: summary.userId, grade: summary.grade }]
+      ),
+    })
+  })
+
   // A function which snapshots the changes so far, so the list cannot grow underneath an assertion
   const changes = () => [...sent]
 
+  // A function which snapshots the requests to make grades final so far
+  const finals = () => [...sentFinals]
+
   // The backend, to watch and to hold
-  return { changes, hold: answers.hold, readMarks }
+  return { changes, finals, hold: answers.hold, readMarks }
 }

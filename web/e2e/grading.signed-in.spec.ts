@@ -705,3 +705,95 @@ test.describe('a grade', () => {
       ])
   })
 })
+
+test.describe('a column made final', () => {
+  test('makes every mark in the column final once the grader confirms', async ({ page }) => {
+    // A backend serving the test group's board
+    const backend = await installGradingBackend(page, GROUP_SLUG)
+
+    // The board
+    await page.goto(BOARD_PATH)
+
+    // The second problem's column, holding Ada's pre-graded mark beside Cyril's missing one
+    const column = page.getByRole('button', { name: 'Make 1 mark on P2 final' })
+
+    // Asked about
+    await column.click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The question
+    const dialog = page.getByRole('dialog')
+
+    // Saying who sees their mark and who is left out
+    await expect(dialog).toContainText(
+      '1 student will see their mark on P2. 1 student without a mark is left out.'
+    )
+
+    // Confirmed
+    await dialog.getByRole('button', { name: copy.finalize.confirm }).click()
+
+    // Ada's mark final
+    await expect(cellOf(page, 'Ada', 2).getByLabel(copy.grid.final)).toBeVisible()
+
+    // Nothing left in the column to make final
+    await expect(column).toHaveCount(0)
+
+    // Sent once, naming Ada alone
+    await expect.poll(() => backend.finals()).toEqual([{ problemId: 'p2', userIds: ['ada'] }])
+  })
+
+  test('hands focus back to the column once it is made final', async ({ page }) => {
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // The board
+    await page.goto(BOARD_PATH)
+
+    // The second problem's column, reached from the keyboard
+    await page
+      .getByRole('button', { name: 'Make 1 mark on P2 final' })
+      .focus({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Asked about
+    await page.keyboard.press('Enter')
+
+    // Confirmed from the keyboard
+    await page.getByRole('dialog').getByRole('button', { name: copy.finalize.confirm }).focus()
+    await page.keyboard.press('Enter')
+
+    // Focus on the column's cell under the board, its button gone
+    await expect(page.getByRole('row').last().getByRole('cell').nth(2)).toBeFocused()
+  })
+
+  test('shows the column final at once, and puts it back when the server fails', async ({
+    page,
+  }) => {
+    // A backend failing every request to make grades final
+    const backend = await installGradingBackend(page, GROUP_SLUG, { failsFinals: true })
+
+    // The board
+    await page.goto(BOARD_PATH)
+
+    // The second problem's column
+    const column = page.getByRole('button', { name: 'Make 1 mark on P2 final' })
+
+    // Asked about
+    await column.click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The server holds its answer to what comes next
+    const release = backend.hold()
+
+    // Confirmed
+    await page.getByRole('dialog').getByRole('button', { name: copy.finalize.confirm }).click()
+
+    // Ada's mark final while the server still thinks it over
+    await expect(cellOf(page, 'Ada', 2).getByLabel(copy.grid.final)).toBeVisible()
+
+    // Failed
+    release()
+
+    // Said so, Ada's mark back to pre-graded, and the column's button back
+    await expect(page.getByText(gradeCopy.finalizeFailed)).toBeVisible()
+    await expect(cellOf(page, 'Ada', 2).getByLabel(copy.grid.final)).toHaveCount(0)
+    await expect(column).toBeVisible()
+  })
+})

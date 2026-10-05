@@ -49,6 +49,21 @@ public interface IAdminGradingService
         Guid userId,
         UpdateGradeRequest change,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Makes final every grade on one problem among the listed entrants that carries a mark and is not final yet,
+    /// all of them or none. A grade with no mark, and one already final, is left as it stands.
+    /// </summary>
+    /// <param name="graderId">The grader making them final.</param>
+    /// <param name="problemId">The problem.</param>
+    /// <param name="userIds">The entrants.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The grade each listed entrant now holds on the problem, leaving out those holding none.</returns>
+    Task<IReadOnlyList<StudentGradeDto>> FinalizeGradesAsync(
+        Guid graderId,
+        Guid problemId,
+        IReadOnlyCollection<Guid> userIds,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>

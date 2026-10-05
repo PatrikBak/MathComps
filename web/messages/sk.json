@@ -175,6 +175,7 @@
     },
     "grades": {
       "conversationPlaceholder": "Napíš študentovi...",
+      "finalizeFailed": "Hodnotenia sa nepodarilo finalizovať",
       "panel": {
         "changedBy": "Posledná zmena: <name>{grader}</name>",
         "comment": "Komentár pre hodnotiteľov",
@@ -192,8 +193,16 @@
     },
     "grading": {
       "empty": "V tejto skupine nie je koho hodnotiť.",
+      "finalize": {
+        "confirm": "Finalizovať",
+        "message": "{count, plural, one {# študent uvidí svoje body} few {# študenti uvidia svoje body} other {# študentov uvidí svoje body}} z Ú{number}.{unmarked, plural, =0 {} one { # študenta bez bodov sa to netýka.} other { # študentov bez bodov sa to netýka.}}",
+        "title": "Finalizovať Ú{number}?"
+      },
       "grid": {
+        "columnFinal": "Všetky hodnotenia Ú{number} sú finálne",
         "final": "finálne",
+        "makeColumnFinal": "Finalizovať {count, plural, one {# hodnotenie} few {# hodnotenia} other {# hodnotení}} v Ú{number}",
+        "makeFinal": "Finalizovať",
         "problem": "Ú{number}",
         "student": "Študent",
         "total": "Spolu"

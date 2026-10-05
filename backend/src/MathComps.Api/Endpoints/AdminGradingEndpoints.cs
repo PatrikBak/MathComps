@@ -63,5 +63,30 @@ public static class AdminGradingEndpoints
         })
         .RequireAuthorization(AuthorizationPolicies.Admin)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Make several students' grades on one problem final at once
+        app.MapPost($"{GradingPath}/problems/{{problemId:guid}}/final", async (
+            Guid problemId,
+            FinalizeGradesRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IAdminGradingService gradingService,
+            CancellationToken cancellationToken) =>
+        {
+            // A body naming no students names no grade to make final
+            if (request.UserIds is not { Count: > 0 } userIds)
+                throw new BadHttpRequestException("Making grades final must name the students.");
+
+            // The grader making them final, taken from the caller rather than from what they sent
+            var graderId = await userManager.RequireUserIdAsync(context);
+
+            // Make them final
+            var grades = await gradingService.FinalizeGradesAsync(graderId, problemId, userIds, cancellationToken);
+
+            // Return where they now stand
+            return Results.Ok(grades);
+        })
+        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
     }
 }
