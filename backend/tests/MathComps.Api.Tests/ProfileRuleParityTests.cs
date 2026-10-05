@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using MathComps.Domain;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Users;
 using MathComps.Shared.Cli;
@@ -6,7 +7,8 @@ using MathComps.Shared.Cli;
 namespace MathComps.Api.Tests;
 
 /// <summary>
-/// Guards that the frontend refuses exactly the usernames the backend refuses.
+/// Guards that the frontend holds the backend's profile rules: the usernames it refuses and the earliest
+/// graduation year it takes.
 /// </summary>
 /// <remarks>
 /// These rules live twice on purpose: the browser has to say what is wrong with a value while it can still be
@@ -67,4 +69,14 @@ public class ProfileRuleParityTests
         // The same thing as a JavaScript literal: Unicode property escapes need the u flag to mean anything
         Assert.Equal($"/{backendPattern}/u", ReadTsConstant("username-schema.ts", "USERNAME_PATTERN"));
     }
+
+    /// <summary>
+    /// Both ends start the graduation years at the same one.
+    /// </summary>
+    [Fact]
+    public void Ts_earliest_graduation_year_matches_the_backend() =>
+        // The first year the form offers is the first the backend takes
+        Assert.Equal(
+            SchoolYear.EarliestGraduationYear.ToString(),
+            ReadTsConstant("graduation-year.ts", "EARLIEST_GRADUATION_YEAR"));
 }

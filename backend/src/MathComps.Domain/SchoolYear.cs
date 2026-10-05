@@ -40,6 +40,16 @@ public static class SchoolYear
     }
 
     /// <summary>
+    /// The earliest maturita a student may give: that of the first school year the competition ran. Anybody who
+    /// finished before it answers <see cref="User.HasLeftHighSchool"/> instead.
+    /// </summary>
+    /// <remarks>
+    /// Public so <c>ProfileRuleParityTests</c> can read it. The frontend keeps its own copy in
+    /// <c>graduation-year.ts</c> to build the years it offers, and that test is what stops the two drifting.
+    /// </remarks>
+    public const int EarliestGraduationYear = 2026;
+
+    /// <summary>
     /// The latest maturita anybody in school can be heading for at an instant: that of a student in the first year
     /// of primary school.
     /// </summary>

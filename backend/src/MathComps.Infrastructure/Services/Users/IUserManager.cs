@@ -74,8 +74,9 @@ public interface IUserManager
     /// </summary>
     /// <remarks>
     /// Every field is written every time, so a null clears what stood before. None of it is permanent the way a
-    /// username is. A graduation year past <see cref="SchoolYear.LatestGraduationYear"/> or a country that is not
-    /// one is refused with <see cref="ProfileValueInvalidException"/>.
+    /// username is. A graduation year before <see cref="SchoolYear.EarliestGraduationYear"/> or past
+    /// <see cref="SchoolYear.LatestGraduationYear"/>, or a country that is not one, is refused with
+    /// <see cref="ProfileValueInvalidException"/>.
     /// </remarks>
     /// <param name="userId">The internal user ID.</param>
     /// <param name="request">What they are saying about themselves now.</param>

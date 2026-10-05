@@ -1215,7 +1215,7 @@
     "email": "Email",
     "graduationYear": "Graduation year",
     "graduationYearHelp": "We ask so the results listing can show how you stand among people your own age.",
-    "graduationYearPastSchool": "I've left high school",
+    "graduationYearOrEarlier": "{year} or earlier",
     "graduationYearPlaceholder": "Select your graduation year",
     "loading": "Loading user menu",
     "memberSince": "Member since",

@@ -1215,7 +1215,7 @@
     "email": "Email",
     "graduationYear": "Rok maturity",
     "graduationYearHelp": "Ptáme se proto, aby ve výsledkové listině bylo vidět, jak si stojíš mezi vrstevníky.",
-    "graduationYearPastSchool": "Už nejsem na střední",
+    "graduationYearOrEarlier": "{year} nebo dříve",
     "graduationYearPlaceholder": "Vyber rok maturity",
     "loading": "Načítám uživatelské menu",
     "memberSince": "Členem od",

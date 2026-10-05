@@ -263,6 +263,11 @@ public partial class UserManager(
         // Somebody past school has no year to sit, so saying both is saying one of them by mistake
         var graduationYear = request.HasLeftHighSchool ? null : request.GraduationYear;
 
+        // No maturita before the first school year the competition ran, since anybody who finished by then says
+        // they are past school
+        if (graduationYear < SchoolYear.EarliestGraduationYear)
+            throw new ProfileValueInvalidException();
+
         // No maturita later than that of a child starting first grade this school year, so their grade never
         // falls below 1
         if (graduationYear > SchoolYear.LatestGraduationYear(DateTimeOffset.UtcNow))

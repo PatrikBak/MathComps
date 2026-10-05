@@ -42,9 +42,15 @@ type UseUserProfileResult = {
   email: string | null
   /** The name the site calls them by, or null while they have yet to choose one. */
   username: string | null
-  /** The year they finish secondary school, or null while they have not said or already have. */
+  /**
+   * The year they finish secondary school, or null while they have not said or when they finished before
+   * the competition first ran.
+   */
   graduationYear: number | null
-  /** Whether they are past high school, and so have no age group to be listed against. */
+  /**
+   * Whether they finished high school before the competition first ran, and so were past it at every
+   * round.
+   */
   hasLeftHighSchool: boolean
   /** Where they compete from as an ISO 3166-1 alpha-2 code, or null while they have not said. */
   countryCode: string | null
