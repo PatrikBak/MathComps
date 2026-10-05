@@ -4,7 +4,8 @@ using MathComps.Infrastructure.Persistence;
 namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
 /// <summary>
-/// Seeds the site's own competitions: the groups it runs, their rounds and problems, and the students entering them.
+/// Seeds the site's own competitions: the groups it runs, their rounds and problems, the students entering them, and
+/// the conversations they hold about the problems.
 /// </summary>
 public static class HostedSeed
 {
@@ -102,5 +103,43 @@ public static class HostedSeed
                 Number = index + 1,
                 Slug = $"{competitionPath}-{index + 1}",
             });
+    }
+
+    /// <summary>
+    /// Tracks one conversation about one problem.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="sessionId">The conversation's id.</param>
+    /// <param name="userId">The student holding it.</param>
+    /// <param name="problemId">The problem it is about.</param>
+    /// <param name="createdAt">When it started.</param>
+    public static void NewConversation(
+        MathCompsDbContext context, Guid sessionId, Guid userId, Guid problemId, DateTimeOffset createdAt)
+    {
+        // The session, stamped with the kind its target row is allowed to attach to
+        context.DefenseSessions.Add(new DefenseSession
+        {
+            Id = sessionId,
+            UserId = userId,
+            TargetKind = DefenseTargetKind.Problem,
+            ProblemStatement = "Statement",
+            ProblemReference = "Reference",
+            ExaminerConfig = "{}",
+            CreatedAt = createdAt,
+        });
+
+        // What it is about
+        context.ProblemDefenses.Add(new ProblemDefense { DefenseSessionId = sessionId, ProblemId = problemId });
+
+        // And the student's opening line
+        context.DefenseTurns.Add(new DefenseTurn
+        {
+            Id = Guid.CreateVersion7(),
+            SessionId = sessionId,
+            Role = TranscriptRole.Candidate,
+            Content = "opening",
+            Sequence = 0,
+            CreatedAt = createdAt,
+        });
     }
 }

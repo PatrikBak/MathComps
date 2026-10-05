@@ -3,10 +3,11 @@ import { useCallback, useState } from 'react'
 import { useMinWidth } from '@/hooks/use-breakpoint'
 
 /**
- * A part that can stand beside a conversation rather than in place of it: the grade, the solution it is judged
- * against, what has been written about it, or the settings the examiner ran on.
+ * A part that can stand beside a conversation rather than in place of it: the grade, the graders' conversation
+ * with the student about the grade, the solution it is judged against, what has been written about it, or the settings
+ * the examiner ran on.
  */
-export type SidePanelId = 'grade' | 'reference' | 'notes' | 'config'
+export type SidePanelId = 'grade' | 'feedback' | 'reference' | 'notes' | 'config'
 
 /**
  * One of the parts a conversation is read in. The conversation itself is never beside anything, since it is what
@@ -37,8 +38,10 @@ export type UseConversationPanelsResult = {
 /** The side panels every conversation has, in the order their tabs read. */
 const SIDE_PANELS: readonly SidePanelId[] = ['reference', 'notes', 'config']
 
-/** The side panels where there is a grade to give, the grade first. */
-const GRADED_SIDE_PANELS: readonly SidePanelId[] = ['grade', ...SIDE_PANELS]
+/**
+ * The side panels where there is a grade to give, the grade first and the conversation with the student after it.
+ */
+const GRADED_SIDE_PANELS: readonly SidePanelId[] = ['grade', 'feedback', ...SIDE_PANELS]
 
 /**
  * Decides how much of a conversation stands on screen at once, and which part the reader is looking at.
@@ -46,7 +49,8 @@ const GRADED_SIDE_PANELS: readonly SidePanelId[] = ['grade', ...SIDE_PANELS]
  * Which part stands beside the conversation is not simply the part the reader picked, since what the viewport
  * can give changes which parts are tabs at all: a reader who picked the reference on a narrow screen is looking
  * straight at it on a wide one, so the side falls to the first tab left. The grade stands first wherever there is
- * one, and a pick of it falls the same way where there isn't.
+ * one, the conversation with the student right behind it, and a pick of either falls the same way where there
+ * isn't.
  *
  * The pick is held for as long as the dialog stays up, so stepping to the next item stays on the part being read.
  * Being sent to a note turns to the notes.

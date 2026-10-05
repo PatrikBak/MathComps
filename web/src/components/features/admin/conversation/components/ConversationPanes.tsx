@@ -58,6 +58,7 @@ export function ConversationPanes({
   // What each side panel's tab is called
   const sideLabels: Record<SidePanelId, string> = {
     grade: tGrades('tab'),
+    feedback: t('tabs.feedback'),
     reference: t('tabs.reference'),
     notes: tNotes('tab'),
     config: t('tabs.config'),
@@ -102,8 +103,8 @@ export function ConversationPanes({
         </div>
       )}
 
-      {/* Everything else read or written against it */}
-      <div className="flex min-h-0 w-[28rem] shrink-0 flex-col border-l border-foreground/10">
+      {/* Everything else read or written against it, wide enough for every tab's name in every language */}
+      <div className="flex min-h-0 w-[34rem] shrink-0 flex-col border-l border-foreground/10">
         <Tabs<SidePanelId>
           ariaLabel={t('tabsLabel')}
           selectedId={panels.sideTabId}

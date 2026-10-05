@@ -471,7 +471,7 @@ public class CommentService(
 
     /// <summary>
     /// Resolves a grade conversation, named like the grade itself by its problem and student, to the problem and
-    /// the student's graded entry, found by <see cref="HostedGrading.FindGradedEntryAsync"/>.
+    /// the student's graded entry, found by <see cref="HostedGrading.FindGradableEntryAsync"/>.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="target">The conversation, identified as <c>{problemId}:{userId}</c>.</param>
@@ -484,8 +484,8 @@ public class CommentService(
             || !Guid.TryParse(userText, out var userId))
             throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
 
-        // The entry the student is graded under, refused like a missing thread when nobody grades them on it
-        var entry = await HostedGrading.FindGradedEntryAsync(
+        // The entry the student is graded under, refused like a missing thread where there is nothing to grade
+        var entry = await HostedGrading.FindGradableEntryAsync(
                 dbContext, grants, problemId, userId, CancellationToken.None)
             ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
 

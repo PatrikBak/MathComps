@@ -376,7 +376,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A grade nobody gives, such as one for an entry given up, is refused and leaves no version.
+    /// A grade nobody gives, such as one for an entry given up or for a problem the student said nothing about
+    /// while their entry counted, is refused and leaves no version.
     /// </summary>
     [Fact]
     public Task A_grade_nobody_gives_is_refused() => RunTestAsync(async service =>
@@ -384,6 +385,10 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // A mark for Carol, who gave her entry up
         await Assert.ThrowsAsync<HostedGradeTargetException>(
             () => service.UpdateGradeAsync(_graderId, _advancedFirstId, _carolId, WithMark(3)));
+
+        // A mark for Alice on the problem she argued only after the group closed
+        await Assert.ThrowsAsync<HostedGradeTargetException>(
+            () => service.UpdateGradeAsync(_graderId, _advancedSecondId, _aliceId, WithMark(3)));
 
         // The refused write left no version
         Assert.Equal(0, await CountGradeRowsAsync());
@@ -991,43 +996,5 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // Nothing ever queued, which is what a change taking no lock looks like
         throw new TimeoutException("No change ever waited on the entry.");
-    }
-
-    /// <summary>
-    /// Tracks one conversation about one problem.
-    /// </summary>
-    /// <param name="context">The seeding context.</param>
-    /// <param name="sessionId">The conversation's id.</param>
-    /// <param name="userId">The student holding it.</param>
-    /// <param name="problemId">The problem it is about.</param>
-    /// <param name="createdAt">When it started.</param>
-    private static void NewConversation(
-        MathCompsDbContext context, Guid sessionId, Guid userId, Guid problemId, DateTimeOffset createdAt)
-    {
-        // The session, stamped with the kind its target row is allowed to attach to
-        context.DefenseSessions.Add(new DefenseSession
-        {
-            Id = sessionId,
-            UserId = userId,
-            TargetKind = DefenseTargetKind.Problem,
-            ProblemStatement = "Statement",
-            ProblemReference = "Reference",
-            ExaminerConfig = "{}",
-            CreatedAt = createdAt,
-        });
-
-        // What it is about
-        context.ProblemDefenses.Add(new ProblemDefense { DefenseSessionId = sessionId, ProblemId = problemId });
-
-        // And the student's opening line
-        context.DefenseTurns.Add(new DefenseTurn
-        {
-            Id = Guid.CreateVersion7(),
-            SessionId = sessionId,
-            Role = TranscriptRole.Candidate,
-            Content = "opening",
-            Sequence = 0,
-            CreatedAt = createdAt,
-        });
     }
 }

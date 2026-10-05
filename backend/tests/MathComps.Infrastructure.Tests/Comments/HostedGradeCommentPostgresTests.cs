@@ -159,9 +159,10 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A grade conversation is found by the lookup grading uses, so an id naming no graded entry is refused like
+    /// A grade conversation is found by the lookup grading uses, so an id naming nothing to grade is refused like
     /// any thread that is not there, to an admin as well: one that doesn't parse, a student who never entered the
-    /// round, and a problem outside every hosted round.
+    /// round, a problem outside every hosted round, and a problem a student argued only once their clock had run
+    /// out.
     /// </summary>
     [Fact]
     public Task A_conversation_naming_no_graded_entry_is_refused() => RunTestAsync(async service =>
@@ -173,6 +174,7 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
             new(CommentTargetType.HostedGrade, $"{_problemId}:{_problemId}:{_problemId}"),
             GradeConversation(_problemId, _stranger),
             GradeConversation(Guid.CreateVersion7(), _student),
+            GradeConversation(_otherProblemId, _classmate),
         ];
 
         // Each is refused for reading and for writing alike
@@ -298,6 +300,17 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
         context.HostedEntries.AddRange(
             NewEntry(_student.UserId, _roundId, _startedAt),
             NewEntry(_classmate.UserId, _roundId, _startedAt));
+
+        // The student argued both problems inside the clock
+        NewConversation(context, Guid.CreateVersion7(), _student.UserId, _problemId, _startedAt.AddMinutes(10));
+        NewConversation(context, Guid.CreateVersion7(), _student.UserId, _otherProblemId, _startedAt.AddMinutes(20));
+
+        // The classmate argued one problem inside the clock
+        NewConversation(context, Guid.CreateVersion7(), _classmate.UserId, _problemId, _startedAt.AddMinutes(10));
+
+        // The classmate argued the other problem only once the clock had run out
+        NewConversation(
+            context, Guid.CreateVersion7(), _classmate.UserId, _otherProblemId, _startedAt.AddMinutes(200));
 
         // Save seeded data
         await context.SaveChangesAsync();

@@ -180,8 +180,9 @@ public class AdminGradingService(
         // This write's own context.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The entry the grade belongs to, refused where nobody grades the student on the problem.
-        var entry = await HostedGrading.FindGradedEntryAsync(dbContext, grants, problemId, userId, cancellationToken)
+        // The entry the grade belongs to, refused where there is nothing to grade.
+        var entry = await HostedGrading.FindGradableEntryAsync(
+                dbContext, grants, problemId, userId, cancellationToken)
             ?? throw new HostedGradeTargetException();
 
         // One transaction for the read and the write, so the lock below spans both.
