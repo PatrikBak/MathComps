@@ -1,7 +1,6 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useRef } from 'react'
 
 import { cn } from '@/components/shared/utils/css-utils'
 
@@ -24,14 +23,12 @@ type TocLinksProps = {
   activeIndex: number | undefined
   /** Callback invoked when a TOC link is clicked */
   onItemClick: (id: string) => void
-  /** Ref registrar to allow auto-scrolling the active link into view */
-  registerLinkElementRef: (index: number) => (element: HTMLAnchorElement | null) => void
 }
 
 /**
  * List of  table-of-contents links.
  */
-function TocLinks({ items, activeIndex, onItemClick, registerLinkElementRef }: TocLinksProps) {
+function TocLinks({ items, activeIndex, onItemClick }: TocLinksProps) {
   return (
     <ul className="space-y-0">
       {items.map((item, index) => {
@@ -41,7 +38,6 @@ function TocLinks({ items, activeIndex, onItemClick, registerLinkElementRef }: T
         return (
           <li key={item.id}>
             <a
-              ref={registerLinkElementRef(index)}
               href={`#${item.id}`}
               onClick={(event) => {
                 event.preventDefault()
@@ -86,19 +82,10 @@ export function TableOfContents({ items }: TableOfContentsProps) {
     items,
   })
 
-  // Store references to the container and individual link elements so we can keep
-  // the active link visible inside the sidebar when the main page scrolls.
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const linkElementRefs = useRef<(HTMLAnchorElement | null)[]>([])
-  const registerLinkElementRef = (index: number) => (element: HTMLAnchorElement | null) => {
-    linkElementRefs.current[index] = element
-  }
-
   return (
     <>
       <div className="hidden lg:block lg:sticky lg:top-24">
         <div
-          ref={containerRef}
           className={cn(
             TOC_CONTAINER_STYLES,
             'p-5 font-variant-numeric-tabular-nums hyphens-none leading-relaxed text-[0.95rem] max-h-[80vh] overflow-y-auto'
@@ -109,12 +96,7 @@ export function TableOfContents({ items }: TableOfContentsProps) {
             {t('tableOfContents')}
           </h3>
           <nav className="text-sm">
-            <TocLinks
-              items={items}
-              activeIndex={activeIndex}
-              onItemClick={handleNavigationClick}
-              registerLinkElementRef={registerLinkElementRef}
-            />
+            <TocLinks items={items} activeIndex={activeIndex} onItemClick={handleNavigationClick} />
           </nav>
         </div>
       </div>
