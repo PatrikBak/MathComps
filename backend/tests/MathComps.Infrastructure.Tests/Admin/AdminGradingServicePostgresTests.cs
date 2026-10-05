@@ -159,13 +159,13 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     }
 
     /// <summary>
-    /// The board sets out each competition of the group, its problems in order, and every graded entrant on every
-    /// problem, counting only the conversations each entrant started while their entry counted: Alice's third
-    /// conversation came after she handed in, her practice on the second problem after the close, and Bob's second
-    /// after his clock ran out. Nobody holds a grade yet.
+    /// The board sets out each competition of the group, its problems in order, and every graded entrant who spoke
+    /// about one of those problems, each on every problem, counting only the conversations each entrant started while
+    /// their entry counted: Alice's third conversation came after she handed in, her practice on the second problem
+    /// after the close, and Bob's second after his clock ran out. Nobody holds a grade yet.
     /// </summary>
     [Fact]
-    public Task The_board_sets_out_every_graded_entrant_on_every_problem() => RunTestAsync(async service =>
+    public Task The_board_sets_out_on_every_problem_every_entrant_who_spoke() => RunTestAsync(async service =>
     {
         // Read the graded group's board
         var board = await service.GetBoardAsync(GradedSlug);
@@ -706,6 +706,52 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // Counting the one held on the advanced clock
         Assert.Equal([advancedSessionId], advanced.Grading.CountingConversationIds);
+    });
+
+    /// <summary>
+    /// A student who sat a round but said nothing about its problems while their entry counted is left off its
+    /// board, even where they spoke about one after handing in, and stays on the board of a round they did speak in.
+    /// </summary>
+    [Fact]
+    public Task A_student_who_said_nothing_inside_a_round_is_not_on_its_board() => RunTestAsync(async service =>
+    {
+        // When Dan's advanced clock starts, a day after the rest
+        var advancedStartedAt = _startedAt.AddDays(1);
+
+        // Dan, who sat the elementary round, sits the advanced one too
+        await QueryAsync(async context =>
+        {
+            // His advanced entry, handed in an hour into the clock
+            context.HostedEntries.Add(new HostedEntry
+            {
+                UserId = _danId,
+                RoundId = _advancedRoundId,
+                StartedAt = advancedStartedAt,
+                FinishedAt = advancedStartedAt.AddMinutes(60),
+            });
+
+            // His only advanced conversation, started after he handed in
+            NewConversation(
+                context, Guid.CreateVersion7(), _danId, _advancedFirstId, advancedStartedAt.AddMinutes(90));
+
+            // Submit changes
+            await context.SaveChangesAsync();
+        });
+
+        // Read the board
+        var board = await service.GetBoardAsync(GradedSlug);
+
+        // The advanced competition, second in the taxonomy's order
+        var advanced = board.Competitions[1];
+
+        // Dan not among the advanced competition's students
+        Assert.DoesNotContain(_danId, advanced.Entrants.Select(entrant => entrant.Id));
+
+        // Nor among the advanced competition's grades
+        Assert.DoesNotContain(_danId, advanced.Grades.Select(summary => summary.UserId));
+
+        // Still graded in the elementary competition, where he spoke
+        Assert.Contains(_danId, board.Competitions[0].Entrants.Select(entrant => entrant.Id));
     });
 
     /// <summary>

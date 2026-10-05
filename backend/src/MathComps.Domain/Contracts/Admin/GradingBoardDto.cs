@@ -3,8 +3,8 @@ using MathComps.Domain.Localization;
 namespace MathComps.Domain.Contracts.Admin;
 
 /// <summary>
-/// Everything grading one group starts from: which group it is, and each of its competitions with every graded
-/// entrant on every problem.
+/// Everything grading one group starts from: which group it is, and each of its competitions with its entrants'
+/// grades.
 /// </summary>
 /// <param name="Name">The group's name, keyed by the language it is written in.</param>
 /// <param name="OpensAt"><inheritdoc cref="EfCoreEntities.HostedGroup.OpensAt" path="/summary"/></param>

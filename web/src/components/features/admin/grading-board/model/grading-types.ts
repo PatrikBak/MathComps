@@ -31,7 +31,7 @@ export type GradeSummary = {
 }
 
 /**
- * One competition of a group, with its graded entrants and their grade on every problem.
+ * One competition of a group, with its entrants and their grade on every problem.
  */
 export type GradingCompetition = {
   /** The round that is the competition. */
@@ -40,7 +40,7 @@ export type GradingCompetition = {
   category: HostedCompetitionCategory
   /** Its problems in order. */
   problems: GradingProblem[]
-  /** Everyone graded in it. */
+  /** Everyone graded in it who spoke about any of its problems while their entry counted. */
   entrants: UserIdentity[]
   /** Every entrant's grade on every problem. */
   grades: GradeSummary[]

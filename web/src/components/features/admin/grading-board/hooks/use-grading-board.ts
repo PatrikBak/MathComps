@@ -44,7 +44,7 @@ type UseGradingBoardResult = {
   group: GradingGroup | null
   /** The group's competitions; empty until they have been read. */
   competitions: GradingCompetition[]
-  /** How many students entered any of the group's competitions, each counted once however many they entered. */
+  /** How many students the group's competitions list, each counted once however many list them. */
   studentCount: number
   /** How reading the group's competitions is going. */
   uiState: QueryUiState
@@ -99,7 +99,7 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
   // The competitions, none until they arrive
   const competitions = useMemo(() => data?.competitions ?? [], [data])
 
-  // Everybody who entered anything, each once
+  // Everybody any competition lists, each once
   const studentCount = useMemo(
     () =>
       new Set(competitions.flatMap((candidate) => candidate.entrants.map((entrant) => entrant.id)))
