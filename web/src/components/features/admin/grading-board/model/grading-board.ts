@@ -7,12 +7,13 @@ import { type GradeSummary, type GradingCompetition } from './grading-types'
 /**
  * Which column the rows are ordered by.
  */
-export type SortBy = 'name' | 'total'
+export type SortBy = 'rank' | 'name' | 'total'
 
 /**
- * Which way each column reads when it is first pressed: names from A, totals from the best.
+ * Which way each column reads when it is first pressed: places from the first, names from A, totals from the best.
  */
 const STARTS_ASCENDING: Record<SortBy, boolean> = {
+  rank: true,
   name: true,
   total: false,
 }
@@ -148,8 +149,8 @@ function compareStanding(first: BoardRow, second: BoardRow): number {
 }
 
 /**
- * Orders the rows as asked. By total, the unplaced stay last either way round, the rest read in the order they
- * stand or its reverse, and names settle a shared place.
+ * Orders the rows as asked. By place or by total, the unplaced stay last either way round, the rest read in the
+ * order they stand or its reverse, and names settle a shared place.
  *
  * @param rows - The rows.
  * @param sort - The order asked for.
@@ -164,25 +165,43 @@ export function sortRows(rows: readonly BoardRow[], sort: BoardSort): BoardRow[]
   return [...rows].sort((first, second) => {
     // Which column decides
     switch (sort.by) {
+      // By place, the first place first unless turned round
+      case 'rank':
+        return compareByStanding(first, second, direction)
+
       // By name, which every row has
       case 'name':
         return direction * first.name.localeCompare(second.name)
 
-      // By total
+      // By total, the best first unless turned round
       case 'total':
-        // The rows without one staying last whichever way round
-        if (first.total === null || second.total === null) {
-          return (first.total === null ? 1 : 0) - (second.total === null ? 1 : 0)
-        }
-
-        // Where they stand, the best first unless turned round, and names where two are level
-        return -direction * compareStanding(first, second) || first.name.localeCompare(second.name)
+        return compareByStanding(first, second, -direction)
 
       // Every column is handled above
       default:
         return assertNever(sort.by)
     }
   })
+}
+
+/**
+ * Compares two rows by where they stand. The rows without a total stay last whichever way round, and names settle
+ * a shared place.
+ *
+ * @param first - One row.
+ * @param second - The other row.
+ * @param direction - 1 to put the row standing ahead first, -1 to put the one standing behind first.
+ *
+ * @returns Negative when the first row goes first, positive when the second one does.
+ */
+function compareByStanding(first: BoardRow, second: BoardRow, direction: number): number {
+  // The rows without a total staying last whichever way round
+  if (first.total === null || second.total === null) {
+    return (first.total === null ? 1 : 0) - (second.total === null ? 1 : 0)
+  }
+
+  // Where they stand, and names where two are level
+  return direction * compareStanding(first, second) || first.name.localeCompare(second.name)
 }
 
 /**

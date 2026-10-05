@@ -195,6 +195,7 @@
       "grid": {
         "final": "final",
         "problem": "P{number}",
+        "rank": "Rank",
         "student": "Student",
         "total": "Total"
       },

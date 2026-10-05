@@ -195,6 +195,7 @@
       "grid": {
         "final": "finální",
         "problem": "Ú{number}",
+        "rank": "Pořadí",
         "student": "Student",
         "total": "Celkem"
       },
