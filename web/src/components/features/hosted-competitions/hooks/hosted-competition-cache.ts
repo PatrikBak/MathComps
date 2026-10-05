@@ -68,6 +68,22 @@ export function competitionProblemsQueryKey(
 }
 
 /**
+ * The key one competition's results are cached under.
+ *
+ * @param readerKey - Who is reading, since one row of the answer is marked as theirs.
+ * @param competitionSlug - Which competition's results these are.
+ *
+ * @returns The cache key.
+ */
+export function competitionResultsQueryKey(
+  readerKey: HostedCompetitionsReaderKey,
+  competitionSlug: string
+): QueryKey {
+  // The reader, and the name they addressed the competition under
+  return [...HOSTED_COMPETITIONS_QUERY_KEY, 'results', readerKey, competitionSlug] as const
+}
+
+/**
  * Refreshes every cached problem set, whichever reader or competition it belongs to.
  *
  * A row appears under a statement for every conversation held about it, so anything that writes a

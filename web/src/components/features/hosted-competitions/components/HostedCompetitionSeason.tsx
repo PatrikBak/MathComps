@@ -32,6 +32,8 @@ type HostedCompetitionSeasonProps = {
   bypassesGates: boolean
   /** Opens the question that has to be answered before any clock starts. */
   onEnter: (pending: PendingEntry) => void
+  /** Opens one competition's results, by its slug. */
+  onOpenResults: (competitionSlug: string) => void
 }
 
 /**
@@ -45,6 +47,7 @@ export function HostedCompetitionSeason({
   now,
   bypassesGates,
   onEnter,
+  onOpenResults,
 }: HostedCompetitionSeasonProps) {
   // Competitions copy
   const t = useTranslations('competitions')
@@ -111,6 +114,7 @@ export function HostedCompetitionSeason({
               now={now}
               bypassesGates={bypassesGates}
               onEnter={onEnter}
+              onOpenResults={onOpenResults}
             />
           </div>
         ),

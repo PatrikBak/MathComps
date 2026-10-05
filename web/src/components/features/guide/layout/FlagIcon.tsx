@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl'
 
+import { CountryFlag } from '@/components/shared/components/CountryFlag'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { type Country, COUNTRY_FLAG_CODES } from '../content/guide-content-types'
@@ -42,17 +43,14 @@ export function FlagIcon({
   // Localized country name for the title
   const title = t(country)
 
-  // Render the flag as a styled span
+  // The flag, softened at the corners and lifted off the page
   return (
-    <span
-      className={cn(`fi fi-${code}`, 'rounded-sm shadow-sm', className)}
-      title={title}
-      style={{
-        width: `${flagWidth}px`,
-        height: `${flagHeight}px`,
-        display: 'inline-block',
-        backgroundSize: 'cover',
-      }}
+    <CountryFlag
+      code={code}
+      name={title}
+      width={flagWidth}
+      height={flagHeight}
+      className={cn('rounded-sm shadow-sm', className)}
     />
   )
 }

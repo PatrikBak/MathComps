@@ -89,21 +89,19 @@ type PastSeed = {
   closedDaysAgo: number
   /** Which categories they entered, by index. */
   entries: number[]
-  /** Whether their results have been published. */
-  resultsPublished: boolean
 }
 
 /**
  * Every group behind the open one, newest first.
  *
  * Written out rather than generated, the point being the states they cover: two categories taken in one
- * group, results published and results still being written, and one group skipped entirely.
+ * group, one taken in each of two others, and one group skipped entirely.
  */
 const PAST_SEEDS: PastSeed[] = [
-  { closedDaysAgo: 21, entries: [0, 1], resultsPublished: false },
-  { closedDaysAgo: 52, entries: [1], resultsPublished: true },
-  { closedDaysAgo: 83, entries: [2], resultsPublished: true },
-  { closedDaysAgo: 114, entries: [], resultsPublished: true },
+  { closedDaysAgo: 21, entries: [0, 1] },
+  { closedDaysAgo: 52, entries: [1] },
+  { closedDaysAgo: 83, entries: [2] },
+  { closedDaysAgo: 114, entries: [] },
 ]
 
 /**
@@ -119,6 +117,7 @@ function pastEntry(endedAtMs: number): HostedCompetitionEntry {
     kind: 'sat',
     startedAt: new Date(endedAtMs - CLOCK_MINUTES * MINUTE_MS).toISOString(),
     finishedAt: new Date(endedAtMs).toISOString(),
+    cells: null,
   }
 }
 
@@ -139,6 +138,7 @@ function openEntry(state: HostedState, now: number): HostedCompetitionEntry | nu
         kind: 'sat',
         startedAt: new Date(now - 40 * MINUTE_MS).toISOString(),
         finishedAt: null,
+        cells: null,
       }
 
     // A minute and a half off running out
@@ -147,6 +147,7 @@ function openEntry(state: HostedState, now: number): HostedCompetitionEntry | nu
         kind: 'sat',
         startedAt: new Date(now - CLOCK_MINUTES * MINUTE_MS + 90 * SECOND_MS).toISOString(),
         finishedAt: null,
+        cells: null,
       }
 
     // Closed early, an hour ago
@@ -175,7 +176,6 @@ function openEntry(state: HostedState, now: number): HostedCompetitionEntry | nu
  *
  * @param groupId - Which group they belong to.
  * @param entryFor - The entry each category carries, by index.
- * @param resultsPublished - Whether their results have been published.
  * @param problemsPublished - Whether their problems can be read, which only a closed group's can.
  *
  * @returns One competition per category.
@@ -183,7 +183,6 @@ function openEntry(state: HostedState, now: number): HostedCompetitionEntry | nu
 function buildCompetitions(
   groupId: string,
   entryFor: (index: number) => HostedCompetitionEntry | null,
-  resultsPublished: boolean,
   problemsPublished: boolean
 ): HostedCompetition[] {
   // One competition per category, all of them on the same terms, the upcoming group overriding one of them
@@ -192,7 +191,6 @@ function buildCompetitions(
     slug: slugsOf(`${groupId}-${category}`),
     category,
     entry: entryFor(index),
-    resultsPublished,
     problemsPublished,
     problemsReady: true,
   }))
@@ -203,7 +201,6 @@ function buildCompetitions(
  *
  * @param groupId - Which group it belongs to.
  * @param entry - The entry it carries, if any.
- * @param resultsPublished - Whether its results have been published.
  * @param problemsPublished - Whether its problems can be read.
  *
  * @returns The one competition, which carries no category: the group's own name says who it is for.
@@ -211,7 +208,6 @@ function buildCompetitions(
 function buildSoloCompetition(
   groupId: string,
   entry: HostedCompetitionEntry | null,
-  resultsPublished: boolean,
   problemsPublished: boolean
 ): HostedCompetition[] {
   // The one competition, named after its group since no category tells it apart
@@ -220,7 +216,6 @@ function buildSoloCompetition(
       slug: slugsOf(`${groupId}-set`),
       category: null,
       entry,
-      resultsPublished,
       problemsPublished,
       problemsReady: true,
     },
@@ -274,7 +269,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     clockMinutes: PRACTICE_CLOCK_MINUTES,
     opensAt: new Date(now - 200 * DAY_MS).toISOString(),
     closesAt: null,
-    competitions: buildSoloCompetition('practice', null, false, false),
+    competitions: buildSoloCompetition('practice', null, false),
   }
 
   // One the program named itself rather than after a month, running a single competition
@@ -291,7 +286,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     clockMinutes: CLOCK_MINUTES,
     opensAt: new Date(preparationOpensAt).toISOString(),
     closesAt: new Date(preparationOpensAt + WINDOW_DAYS * DAY_MS).toISOString(),
-    competitions: buildSoloCompetition('preparation', null, false, false),
+    competitions: buildSoloCompetition('preparation', null, false),
   }
 
   // The one announced but not started
@@ -306,7 +301,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     closesAt: new Date(upcomingOpensAt + WINDOW_DAYS * DAY_MS).toISOString(),
     // Its hardest category was announced before anybody picked its problems, which offers a way in to
     // nobody, however far past the gates the reader is
-    competitions: buildCompetitions('upcoming', () => null, false, false).map((competition) => ({
+    competitions: buildCompetitions('upcoming', () => null, false).map((competition) => ({
       ...competition,
       problemsReady: competition.category !== 'advanced',
     })),
@@ -325,7 +320,6 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     competitions: buildCompetitions(
       'open',
       (index) => (index === ENTERED_CATEGORY_INDEX ? openEntry(state, now) : null),
-      false,
       false
     ),
   }
@@ -344,7 +338,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     clockMinutes: CLOCK_MINUTES,
     opensAt: new Date(openSpecialOpensAt).toISOString(),
     closesAt: new Date(openSpecialOpensAt + WINDOW_DAYS * DAY_MS).toISOString(),
-    competitions: buildSoloCompetition('open-special', openEntry(state, now), false, false),
+    competitions: buildSoloCompetition('open-special', openEntry(state, now), false),
   }
 
   // And one that is over, sat by everybody but the newcomer
@@ -364,7 +358,6 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     competitions: buildSoloCompetition(
       'closed-special',
       isNewcomer ? null : pastEntry(closedSpecialClosedAt - 3 * DAY_MS),
-      true,
       true
     ),
   }
@@ -397,7 +390,6 @@ export function buildView(state: HostedState): HostedCompetitionsView {
             : // The entry they sat, two days before the group closed
               pastEntry(closedAt - 2 * DAY_MS)
         },
-        seed.resultsPublished,
         true
       ),
     }

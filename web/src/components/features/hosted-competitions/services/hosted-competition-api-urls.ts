@@ -16,6 +16,17 @@ export function getHostedCompetitionsViewUrl(): string {
 }
 
 /**
+ * Builds the URL for reading one competition's results.
+ *
+ * @param competitionSlug - Which competition's results are read.
+ * @returns The results URL.
+ */
+export function getCompetitionResultsUrl(competitionSlug: string): string {
+  // The results endpoint for the competition
+  return buildApiUrl(`${COMPETITIONS_PATH}/${encodeURIComponent(competitionSlug)}/results`)
+}
+
+/**
  * Builds the URL for reading what an entry still needs of the student.
  *
  * @returns The readiness URL.

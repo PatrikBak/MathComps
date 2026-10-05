@@ -13,12 +13,10 @@ import {
   formatScore,
   type Grade,
   type GradeChange,
+  MAX_MARK,
   scoreOf,
   type SelfAssessment,
 } from '../model/grade-types'
-
-/** The full mark a problem can earn. */
-const MAX_MARK = 6
 
 /** Every mark a problem can earn, from nothing to full. */
 const MARKS = Array.from({ length: MAX_MARK + 1 }, (_unused, mark) => mark)

@@ -19,6 +19,7 @@ import type { HostedCompetitionsReaderKey } from '../hooks/hosted-competition-ca
 import type { AreaRun } from '../model/hosted-competition-state'
 import type { HostedCompetitionProblem } from '../model/hosted-competition-types'
 import { CompetitionHints } from './CompetitionHints'
+import { GradeComments, ProblemScore } from './CompetitionProblemResult'
 import { CompetitionSolution } from './CompetitionSolution'
 import { ProblemSelfAssessmentNote } from './ProblemSelfAssessmentNote'
 
@@ -77,10 +78,14 @@ export function CompetitionProblemPanel({
 
   return (
     <SurfacePanel as="article" radius="xl" className="p-4 sm:p-6">
-      {/* Which of the set this is */}
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
-        {t('problemHeading', { position: problem.position })}
-      </h2>
+      {/* Which of the set this is, and how the reader did on it once the marks are in */}
+      <div className="mb-3 flex items-start justify-between gap-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
+          {t('problemHeading', { position: problem.position })}
+        </h2>
+
+        {problem.result !== null && <ProblemScore result={problem.result} />}
+      </div>
 
       {/* The problem itself */}
       <div className="math-typography mb-4">
@@ -141,6 +146,15 @@ export function CompetitionProblemPanel({
                 </span>
               </button>
             ))}
+
+            {/* The conversation with the graders about the mark, once it is final */}
+            {problem.result?.kind === 'final' && (
+              <GradeComments
+                position={problem.position}
+                statement={problem.statement}
+                conversation={problem.result.conversation}
+              />
+            )}
 
             {/* One more conversation about the same problem */}
             <Button
