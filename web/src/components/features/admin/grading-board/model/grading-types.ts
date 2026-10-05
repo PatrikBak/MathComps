@@ -7,7 +7,7 @@ import type { Grade } from '../../grades/model/grade-types'
 /**
  * One problem of a competition being graded.
  */
-type GradingProblem = {
+export type GradingProblem = {
   /** Stable identifier. */
   id: string
   /** Its slug. */

@@ -18,3 +18,14 @@ export function getGradeUrl(problemId: string, userId: string): string {
     `${GRADING_PATH}/problems/${encodeURIComponent(problemId)}/students/${encodeURIComponent(userId)}`
   )
 }
+
+/**
+ * Builds the URL that makes several entrants' grades on one problem final.
+ *
+ * @param problemId - The problem.
+ * @returns The URL.
+ */
+export function getProblemFinalUrl(problemId: string): string {
+  // The problem's grades, made final
+  return buildApiUrl(`${GRADING_PATH}/problems/${encodeURIComponent(problemId)}/final`)
+}

@@ -57,6 +57,39 @@ export type GradingProgress = {
 }
 
 /**
+ * A problem's column holding marks that aren't final yet.
+ */
+export type ColumnReady = {
+  /** Which state the column is in. */
+  kind: 'ready'
+  /** The entrants whose mark on the problem is not final yet. */
+  userIds: string[]
+  /** How many entrants discussed the problem and carry no mark on it. */
+  unmarked: number
+}
+
+/**
+ * A problem's column whose every pair with a conversation is final.
+ */
+type ColumnDone = {
+  /** Which state the column is in. */
+  kind: 'done'
+}
+
+/**
+ * A problem's column with no mark to make final, while it still has pairs without one or nobody discussed it.
+ */
+type ColumnIdle = {
+  /** Which state the column is in. */
+  kind: 'idle'
+}
+
+/**
+ * Where a problem's column stands on being made final.
+ */
+export type ColumnFinality = ColumnReady | ColumnDone | ColumnIdle
+
+/**
  * Files every entrant's grade on every problem under its {@link pairKey}.
  * @param competition - The competition.
  * @returns The grades, by pair.
@@ -240,6 +273,49 @@ export function walkOrder(
       .map((row) => pairKey(row.user.id, problem.id))
       .filter((key) => (grades.get(key)?.conversationCount ?? 0) > 0)
   )
+}
+
+/**
+ * Works out where a problem's column stands on being made final.
+ *
+ * @param competition - The competition.
+ * @param problemId - The problem.
+ * @param grades - The competition's grades, by pair.
+ *
+ * @returns Ready while some mark in the column isn't final, done once every pair with a conversation is, and idle
+ * otherwise.
+ */
+export function columnFinality(
+  competition: GradingCompetition,
+  problemId: string,
+  grades: ReadonlyMap<string, GradeSummary>
+): ColumnFinality {
+  // The column's pairs with a conversation
+  const discussed = competition.entrants
+    .map(({ user }) => grades.get(pairKey(user.id, problemId)))
+    .filter((summary): summary is GradeSummary => (summary?.conversationCount ?? 0) > 0)
+
+  // The entrants whose mark isn't final yet
+  const userIds = discussed
+    .filter((summary) => summary.grade?.mark != null && !summary.grade.isFinal)
+    .map((summary) => summary.userId)
+
+  // Marks to make final, beside however many pairs carry none
+  if (userIds.length > 0) {
+    return {
+      kind: 'ready',
+      userIds,
+      unmarked: discussed.filter((summary) => summary.grade?.mark == null).length,
+    }
+  }
+
+  // Every pair final, once there is a pair to be final
+  if (discussed.length > 0 && discussed.every((summary) => summary.grade?.isFinal === true)) {
+    return { kind: 'done' }
+  }
+
+  // Nothing to make final
+  return { kind: 'idle' }
 }
 
 /**

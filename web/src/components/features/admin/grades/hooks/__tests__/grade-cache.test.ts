@@ -1,4 +1,5 @@
-// The grade cache's writer: which cached copies of a grade it reaches, and which it leaves where they are.
+// The grade cache: which cached copies of a grade its writer reaches and which it leaves where they are, and where
+// its reader finds a grade.
 
 import { QueryClient } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
@@ -139,5 +140,21 @@ describe('writeCachedGrade', () => {
     // Bruno's grade on the first group's problem, left as it was in both places
     expect(readCachedGrade(queryClient, { userId: 'bruno', problemId: 'p1' })).toBeNull()
     expect(boardGradeOf(queryClient, 'first', { userId: 'bruno', problemId: 'p1' })).toBeNull()
+  })
+})
+
+describe('readCachedGrade', () => {
+  it("reads a grade off the board where the student's conversations aren't cached", () => {
+    // A board on which Ada is graded, with nobody's conversations cached
+    const queryClient = new QueryClient()
+    const board = boardOf('first', 'p1')
+    board.competitions[0].grades[0].grade = GRADE
+    queryClient.setQueryData(gradingBoardQueryKey('first'), board)
+
+    // Ada's grade, read off the board
+    expect(readCachedGrade(queryClient, { userId: 'ada', problemId: 'p1' })).toEqual(GRADE)
+
+    // Bruno's, which the board holds as none
+    expect(readCachedGrade(queryClient, { userId: 'bruno', problemId: 'p1' })).toBeNull()
   })
 })
