@@ -15,10 +15,11 @@ namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
 /// Implements <see cref="IDefenseSessionService"/> over the database and the examiner engine. A turn checks its
-/// inputs first, then takes the user's serialization gate, weighs the message and spend caps under it, runs the engine
-/// (no DB work while it runs), and persists the turns and one <see cref="DefenseSpend"/> row from the turn's cost —
-/// the gate held throughout so a user's concurrent turns can't each clear the spend check against the same
-/// pre-write total.
+/// inputs and stamps the student's message before it takes the user's serialization gate: the gate can keep the
+/// message waiting while the examiner answers another of their conversations, and a hosted competition counts what
+/// they wrote by when they wrote it. Under the gate it weighs the message and spend caps, runs the engine (no DB work
+/// while it runs), and persists the turns and one <see cref="DefenseSpend"/> row from the turn's cost — the gate held
+/// throughout so a user's concurrent turns can't each clear the spend check against the same pre-write total.
 /// </summary>
 /// <param name="limits">The input, message, and spend caps.</param>
 /// <param name="targetGuard">Says whether a student may argue what the target names.</param>
@@ -56,6 +57,10 @@ public class DefenseSessionService(
     public async Task<DefenseSessionDto> StartAsync(
         Guid userId, DefenseSessionStart start, CancellationToken cancellationToken = default)
     {
+        // The moment the student sent this, taken on arrival, before anything below can keep it waiting. One
+        // timestamp for the session and its seed turns.
+        var seededAt = DateTimeOffset.UtcNow;
+
         // Every field a start needs must be present and non-blank; a missing one (null through JSON) or a blank one
         // is a bad request, not a server fault.
         DefenseInputs.EnsureTargetPresent(start.Request.Target);
@@ -93,9 +98,6 @@ public class DefenseSessionService(
         // least one.
         if (!holdsHostedEntry)
             await EnsureUnderSpendCeilingAsync(dbContext, userId, cancellationToken);
-
-        // One timestamp for the session and its seed turns.
-        var seededAt = DateTimeOffset.UtcNow;
 
         // A fresh session holding the problem and its reference for this and later turns.
         var session = new DefenseSession
@@ -139,6 +141,9 @@ public class DefenseSessionService(
 
         // Bound the message before doing anything with it.
         DefenseInputs.EnsureWithinLength(content, _limits.MaxCandidateChars);
+
+        // The moment the student sent this, taken before the gate below can keep it waiting.
+        var sentAt = DateTimeOffset.UtcNow;
 
         // Serialize this user's turns for the rest of the operation, so concurrent continues can't both clear the
         // message cap and spend check against the same pre-write state.
@@ -191,8 +196,12 @@ public class DefenseSessionService(
         if (!loaded.HoldsHostedEntry)
             await EnsureUnderSpendCeilingAsync(dbContext, userId, cancellationToken);
 
+        // When the student sent the message, or the stamp of a reply in this same conversation that landed while it
+        // waited, if that is later: the message goes in below that reply, and the stamps keep to turn order.
+        var stampedAt = session.Turns.Select(turn => turn.CreatedAt).Append(sentAt).Max();
+
         // Append the student's message.
-        AppendTurn(session, TranscriptRole.Candidate, content, DateTimeOffset.UtcNow);
+        AppendTurn(session, TranscriptRole.Candidate, content, stampedAt);
 
         // Run the engine over the whole conversation and stage its reply and spend row.
         await RunExaminerAndStageAsync(

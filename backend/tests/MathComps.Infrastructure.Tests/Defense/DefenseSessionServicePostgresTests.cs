@@ -112,6 +112,12 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     private readonly FakeDefenseContentResolver _content = new();
 
     /// <summary>
+    /// The gate serializing a user's turns, which a test can hold to stand in for another of the user's turns
+    /// under way.
+    /// </summary>
+    private readonly DefenseUserTurnGate _gate = new();
+
+    /// <summary>
     /// The problem of a hosted competition, which is what a session defending something other than a handout
     /// environment is pointed at.
     /// </summary>
@@ -177,7 +183,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         services.AddSingleton<IDefenseCopy, DefenseCopy>();
 
         // Serializes a user's concurrent turns.
-        services.AddSingleton<IDefenseUserTurnGate, DefenseUserTurnGate>();
+        services.AddSingleton<IDefenseUserTurnGate>(_gate);
 
         // What the guard asks about the student arguing.
         services.AddUserGrants();
@@ -1458,6 +1464,113 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             Assert.Equal(2, await context.DefenseSpends.CountAsync(spend => spend.UserId == _ownerId));
         });
     });
+
+    /// <summary>
+    /// A conversation counts as started when the student sends its first message, however long another of their
+    /// turns keeps the gate. A hosted competition counts a conversation by when it started, so one opened just before
+    /// the clock runs out still counts while the examiner finishes answering another problem.
+    /// </summary>
+    [Fact]
+    public Task Start_stamps_the_conversation_before_waiting_on_the_turn_gate() => RunTestAsync(async service =>
+    {
+        // Another of the user's turns under way, holding their gate
+        var otherTurn = await _gate.AcquireAsync(_ownerId, CancellationToken.None);
+
+        // Open a conversation, which has to wait for that turn
+        var starting = service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // A moment before the gate lets it through
+        var waitingAt = DateTimeOffset.UtcNow;
+
+        // The other turn finishes, letting it through
+        otherTurn.Dispose();
+
+        // The conversation, once it got through
+        var started = await starting;
+
+        // When it is stored as having started
+        var startedAt = await QueryValueAsync(context => context.DefenseSessions
+            .Where(session => session.Id == started.Id)
+            .Select(session => session.CreatedAt)
+            .SingleAsync());
+
+        // The stored start is from before the gate let it through
+        Assert.True(startedAt <= waitingAt);
+    });
+
+    /// <summary>
+    /// A student's message is stamped when they send it, however long another of their turns keeps the gate. A hosted
+    /// competition counts what they wrote by when they wrote it, so a message sent just before the clock runs out
+    /// still counts while the examiner finishes answering another problem.
+    /// </summary>
+    [Fact]
+    public Task Continue_stamps_the_message_before_waiting_on_the_turn_gate() => RunTestAsync(async service =>
+    {
+        // A conversation to carry on
+        var started = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // Another of the user's turns under way, holding their gate
+        var otherTurn = await _gate.AcquireAsync(_ownerId, CancellationToken.None);
+
+        // A moment just before the message is sent
+        var beforeSending = DateTimeOffset.UtcNow;
+
+        // Send the next message, which has to wait for that turn
+        var continuing = service.ContinueAsync(_ownerId, started.Id, "my next point");
+
+        // A moment before the gate lets it through
+        var waitingAt = DateTimeOffset.UtcNow;
+
+        // The other turn finishes, letting it through
+        otherTurn.Dispose();
+
+        // The conversation, once the message got through
+        var continued = await continuing;
+
+        // The message carries the moment it was sent: not the earlier stamp of the reply above it, and not the later
+        // moment the gate let it through
+        Assert.InRange(continued.Turns[3].CreatedAt, beforeSending, waitingAt);
+    });
+
+    /// <summary>
+    /// Two messages sent into one conversation at once, as from two tabs, leave its stamps rising turn by turn. Both
+    /// are sent before either is answered, so the one let through second goes in below a reply that landed after it
+    /// was sent. Anything that reads the stamps as the order of the turns would otherwise see that conversation step
+    /// back.
+    /// </summary>
+    [Fact]
+    public Task Messages_sent_into_one_conversation_at_once_keep_its_stamps_in_order() => RunTestAsync(
+        async service =>
+        {
+            // A conversation to send into
+            var started = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+            // Another of the user's turns under way, holding their gate, so both messages are sent before either is
+            // answered
+            var otherTurn = await _gate.AcquireAsync(_ownerId, CancellationToken.None);
+
+            // Send from both tabs
+            var sending = Task.WhenAll(
+                service.ContinueAsync(_ownerId, started.Id, "from one tab"),
+                service.ContinueAsync(_ownerId, started.Id, "from the other"));
+
+            // The other turn finishes, letting them through one after the other
+            otherTurn.Dispose();
+
+            // Wait for both to be answered
+            await sending;
+
+            // The conversation's stamps as stored, in turn order
+            var stamps = Assert.Single((await service.ListAsync(
+                    _ownerId, new HandoutEnvironmentTarget("handout-1", "prob-1"))).Sessions)
+                .Turns.Select(turn => turn.CreatedAt)
+                .ToList();
+
+            // The stamps never step back from one turn to the next
+            Assert.Equal(stamps.Order(), stamps);
+        },
+        // A message cap with room for both tabs' messages after the first one
+        services => services.Configure<DefenseLimits>(limits => limits.MaxMessagesPerDefense = 3));
 
     /// <summary>
     /// A turn aborted after its calls have cost us still records the accrued spend — on its own row, with no session
