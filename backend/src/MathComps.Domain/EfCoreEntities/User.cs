@@ -45,18 +45,19 @@ public class User
     public string? Username { get; set; }
 
     /// <summary>
-    /// The calendar year this student finishes secondary school, or null when they have not said or already
-    /// have.
+    /// The calendar year this student finishes secondary school, or null when they have not said or when they
+    /// finished before the competition first ran.
     /// </summary>
     /// <remarks>
     /// A year and not a grade, because a grade is only true until September while the year it ends in stays
-    /// true. Never later than <see cref="SchoolYear.LatestGraduationYear"/>; how far back a student may pick is the
-    /// form's to decide.
+    /// true. Never earlier than <see cref="SchoolYear.EarliestGraduationYear"/> nor later than
+    /// <see cref="SchoolYear.LatestGraduationYear"/>.
     /// </remarks>
     public int? GraduationYear { get; set; }
 
     /// <summary>
-    /// Whether this person is past high school, and so has no age group to be listed against.
+    /// Whether this person finished high school before the competition first ran, and so was past it at every
+    /// round.
     /// </summary>
     /// <remarks>
     /// Exclusive with <see cref="GraduationYear"/>: setting this clears that.

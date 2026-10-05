@@ -17,6 +17,7 @@ import {
   isCompetitionAddressedBy,
   layOutBoard,
   readAreaRun,
+  resultTotal,
   roundToShow,
   toAreaEntry,
   wasHandedInEarly,
@@ -49,6 +50,7 @@ function entryOf(endsInMs: number, finishedAt: string | null): HostedCompetition
     kind: 'sat',
     startedAt: new Date(NOW + endsInMs - CLOCK_MINUTES * MINUTE_MS).toISOString(),
     finishedAt,
+    cells: null,
   }
 }
 
@@ -86,7 +88,6 @@ function competitionOf(overrides: Partial<HostedCompetition> = {}): HostedCompet
     },
     category: 'intermediate',
     entry: null,
-    resultsPublished: false,
     problemsPublished: false,
     problemsReady: true,
     ...overrides,
@@ -620,5 +621,25 @@ describe('findCompetitionInGroup', () => {
   it('finds nothing while the read has not landed', () => {
     // Nothing to search yet, so nothing is found
     expect(findCompetitionInGroup(undefined, 'stredni-zari-2026')).toBeUndefined()
+  })
+})
+
+describe('resultTotal', () => {
+  it('sums the half points of the marked problems and skips the rest', () => {
+    // A full mark, one helped to a half point, one still being marked and one never written about
+    const total = resultTotal([
+      { kind: 'scored', score: 6 },
+      { kind: 'scored', score: 4.5 },
+      { kind: 'pending' },
+      { kind: 'none' },
+    ])
+
+    // Only the two marked for good count
+    expect(total).toBe(10.5)
+  })
+
+  it('gives no total while nothing is marked, which is not the same as a total of nought', () => {
+    // Written about, but nothing marked for good yet
+    expect(resultTotal([{ kind: 'pending' }, { kind: 'none' }])).toBeNull()
   })
 })

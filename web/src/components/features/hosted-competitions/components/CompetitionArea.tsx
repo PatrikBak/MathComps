@@ -13,14 +13,16 @@ import type { Locale } from '@/i18n/i18n'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { useCompetitionArea } from '../hooks/use-competition-area'
-import { clockEndsAt } from '../model/hosted-competition-state'
+import { clockEndsAt, derivePhase } from '../model/hosted-competition-state'
 import {
   COMPETITIONS_LIST_HREF,
   HINTS_PARAM,
+  RESULTS_PARAM,
   SOLUTION_PARAM,
 } from '../services/hosted-competition-routes'
 import { CategoryBadge } from './CategoryBadge'
 import { CompetitionProblemPanel } from './CompetitionProblemPanel'
+import { CompetitionResultsModal } from './CompetitionResults'
 import { CompetitionStandingStrip } from './CompetitionStandingStrip'
 import { FinishEntryDialog } from './FinishEntryDialog'
 import { RulesList } from './RulesList'
@@ -55,6 +57,9 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
   // Which problem's official solution is open, and which problem's hints are, one answer each for the set
   const openedSolution = useAddressedDisclosure(SOLUTION_PARAM)
   const openedHints = useAddressedDisclosure(HINTS_PARAM)
+
+  // Which competition's results are open, this one's or another category's picked inside them
+  const openedResults = useAddressedDisclosure(RESULTS_PARAM)
 
   // The solution's disclosure, closing the hints as it opens, so the set never has both open at once
   const solutionDisclosure: AddressedDisclosure = {
@@ -95,6 +100,9 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
   // What there is to draw, once both reads have landed
   const { readerKey, group, competition, run, problems, now, isGraded } = area
 
+  // Whether the group is over, which is when its results open
+  const isClosed = derivePhase(group, now) === 'closed'
+
   return (
     // Hyphenation off: the global setting is for article prose, and the words here are names and labels
     <div className="mx-auto max-w-4xl hyphens-none">
@@ -117,6 +125,7 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
           wasHandedIn={run?.kind === 'sat' && run.wasHandedIn}
           onFinish={run?.kind === 'sat' && !run.hasEnded ? openFinish : null}
           onOpenRules={openRules}
+          onOpenResults={isClosed ? () => openedResults.open(competitionSlug) : null}
           listHref={COMPETITIONS_LIST_HREF}
         />
       </div>
@@ -181,6 +190,9 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
         // behind it
         onFinished={closeFinish}
       />
+
+      {/* How everybody did, once the strip asks */}
+      <CompetitionResultsModal disclosure={openedResults} />
     </div>
   )
 }

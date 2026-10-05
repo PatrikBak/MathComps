@@ -6,13 +6,14 @@ using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using static MathComps.Infrastructure.Tests.TestInfrastructure.HostedSeed;
 
 namespace MathComps.Infrastructure.Tests.Comments;
 
 /// <summary>
 /// Integration tests for the public comment threads as <see cref="ICommentService"/> keeps them against a real
 /// PostgreSQL database: who a comment is signed by, likes, deletion, edits that write a new version and keep its
-/// replies, nesting, and bulk counts.
+/// replies, nesting, bulk counts, and a hosted problem, which has no thread.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class CommentServicePostgresTests(PostgresContainerFixture fixture)
@@ -77,6 +78,21 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     /// The seeded problem's thread.
     /// </summary>
     private static readonly CommentTarget _problemThread = new(CommentTargetType.Problem, ProblemSlug);
+
+    /// <summary>
+    /// The slug of the problem in a hosted round still running.
+    /// </summary>
+    private const string HostedProblemSlug = "mathcomps-advanced-october-1";
+
+    /// <summary>
+    /// The thread the hosted problem's slug names.
+    /// </summary>
+    private static readonly CommentTarget _hostedThread = new(CommentTargetType.Problem, HostedProblemSlug);
+
+    /// <summary>
+    /// The problem in a hosted round still running.
+    /// </summary>
+    private readonly Guid _hostedProblemId = Guid.CreateVersion7();
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
@@ -690,6 +706,49 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(2, counts[id]);
     });
 
+    /// <summary>
+    /// A problem of a running hosted round has no thread, so reading and writing are refused like a thread that is
+    /// not there, and so is editing a comment already standing on the problem. The round's slugs are guessable, so
+    /// an open thread would let anybody post a hint mid-round and anybody read it.
+    /// </summary>
+    [Fact]
+    public Task HostedProblemThread_IsRefusedToReadAndWrite() => RunTestAsync(async commentService =>
+    {
+        // A comment by the first user already standing on the hosted problem
+        var standing = new Comment
+        {
+            AuthorId = _user1Id,
+            Content = "Try induction.",
+            Status = CommentStatus.Active,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        // The comment written straight into the database
+        await QueryAsync(async context =>
+        {
+            // The comment
+            context.Comments.Add(standing);
+
+            // The comment's link to the hosted problem
+            context.ProblemComments.Add(new ProblemComment { ProblemId = _hostedProblemId, CommentId = standing.Id });
+
+            // Save the comment and its link
+            await context.SaveChangesAsync();
+        });
+
+        // A signed-out reader reads the hosted problem's thread
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(
+            () => commentService.GetCommentsAsync(_hostedThread, null));
+
+        // The second user posts a hint in the hosted problem's thread
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(
+            () => commentService.CreateCommentAsync(_hostedThread, _user2, "The answer is 42."));
+
+        // The first user edits the standing comment
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => commentService.UpdateCommentAsync(standing.Id, _user1, "Try strong induction."));
+    });
+
     /// <inheritdoc />
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
@@ -750,6 +809,13 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
             Slug = ProblemSlug
         };
         context.Problems.Add(problem);
+
+        // A hosted group whose round runs now, opened yesterday and closing tomorrow
+        var group = NewGroup(
+            context, "mc-running", DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+
+        // The group's round, holding the hosted problem
+        NewRound(context, season, group, Guid.CreateVersion7(), "mathcomps-advanced-october", _hostedProblemId);
 
         // Save the seed
         await context.SaveChangesAsync();

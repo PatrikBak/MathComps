@@ -70,7 +70,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     private readonly Guid _carolId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A student the site let past its gates, who sat the advanced round that way.
+    /// A student already preparing the competitions when they sat the advanced round, which made it a test run.
     /// </summary>
     private readonly Guid _grantedId = Guid.CreateVersion7();
 
@@ -142,7 +142,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services)
     {
-        // The reader of who is let past the gates.
+        // The reader of when a student started preparing the competitions.
         services.AddUserGrants();
 
         // The service under test.
@@ -259,8 +259,8 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// Only a run held to the gates is graded: an entry given up for the problems is no run whatever was argued
-    /// under it, a run the site let past its gates is nobody's to grade, and a student who never entered is no
-    /// entrant however much they practised afterwards.
+    /// under it, a test run is nobody's to grade, and a student who never entered is no entrant however much they
+    /// practised afterwards.
     /// </summary>
     [Fact]
     public Task Nobody_but_an_entrant_held_to_the_gates_is_on_the_board() => RunTestAsync(async service =>
@@ -277,7 +277,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Not Carol, who gave her entry up
         Assert.DoesNotContain(_carolId, graded);
 
-        // Not the granted student, let past the gates
+        // Not the granted student, whose run was a test run
         Assert.DoesNotContain(_grantedId, graded);
 
         // Not the stranger, who never entered
@@ -350,7 +350,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
     /// <summary>
     /// A student nobody grades on a problem still has their conversations on it listed, with no grading: an entry
-    /// given up, a run let past the gates, a student who never entered, and the practice group.
+    /// given up, a test run, a student who never entered, and the practice group.
     /// </summary>
     [Fact]
     public Task A_student_nobody_grades_has_their_conversations_listed_ungraded() => RunTestAsync(async _ =>
@@ -371,7 +371,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Carol gave her entry up
         await AssertListedUngradedAsync(_carolId, _advancedFirstId);
 
-        // The granted student was let past the gates
+        // The granted student's run was a test run
         await AssertListedUngradedAsync(_grantedId, _advancedFirstId);
 
         // The stranger never entered
@@ -379,6 +379,34 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
 
         // Dan's practice run grades nothing
         await AssertListedUngradedAsync(_danId, _practiceProblemId);
+    });
+
+    /// <summary>
+    /// A grant handed over once the group has closed leaves a student's grading where it was.
+    /// </summary>
+    [Fact]
+    public Task A_grant_handed_over_after_the_close_leaves_the_grading_as_it_was() => RunTestAsync(async _ =>
+    {
+        // Alice granted the capability three days after the group closed
+        await QueryAsync(async context =>
+        {
+            // The grant
+            context.UserGrants.Add(new UserGrant
+            {
+                UserId = _aliceId,
+                Capability = UserCapability.PrepareCompetitions,
+                GrantedAt = _closesAt.AddDays(3),
+            });
+
+            // Commit the grant
+            await context.SaveChangesAsync();
+        });
+
+        // Her conversations on the first problem
+        var read = await ReadConversationsAsync(_aliceId, _advancedFirstId);
+
+        // Graded all the same
+        Assert.NotNull(read.Grading);
     });
 
     /// <summary>
@@ -1046,11 +1074,12 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
             NewUser(_danId, "Dan"),
             NewUser(_strangerId, "Stranger"));
 
-        // What lets one of them past the gates
+        // The grant one of them held from the day before every clock started
         context.UserGrants.Add(new UserGrant
         {
             UserId = _grantedId,
             Capability = UserCapability.PrepareCompetitions,
+            GrantedAt = _startedAt.AddDays(-1),
         });
 
         // The one season every round sits in
@@ -1132,7 +1161,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // Carol argued one of them anyway
         NewConversation(context, Guid.CreateVersion7(), _carolId, _advancedFirstId, _startedAt.AddMinutes(5));
 
-        // The granted student sat the advanced round past the gates
+        // The granted student sat the advanced round as a test run
         context.HostedEntries.Add(NewEntry(_grantedId, _advancedRoundId, _startedAt));
 
         // Arguing a problem inside the clock

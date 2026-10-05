@@ -71,6 +71,9 @@ export function scoreOf(grade: Grade | null): number | null {
   return grade === null || grade.mark === null ? null : grade.mark - grade.help / 2
 }
 
+/** The full mark a problem can earn. */
+export const MAX_MARK = 6
+
 /**
  * Formats a score to at most one decimal, the half points being the only fractions there are.
  * @param score - The score.

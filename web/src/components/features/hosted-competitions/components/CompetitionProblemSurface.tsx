@@ -28,6 +28,10 @@ type CompetitionProblemSurfaceProps = {
   onOpen: () => void
   /** Closes the surface. */
   onClose: () => void
+  /** How many things are on the surface, said on the row; null where the row counts nothing. */
+  count: number | null
+  /** Whether the surface fills the screen's height, for one that is written in rather than only read. */
+  isTall: boolean
   /** What is read on the surface. */
   children: React.ReactNode
 }
@@ -47,6 +51,8 @@ export function CompetitionProblemSurface({
   isOpen,
   onOpen,
   onClose,
+  count,
+  isTall,
   children,
 }: CompetitionProblemSurfaceProps) {
   // Shared modal chrome copy
@@ -72,6 +78,11 @@ export function CompetitionProblemSurface({
         <span className="inline-flex items-center gap-2 text-foreground">
           <Icon size={15} className="text-muted" />
           {label}
+          {count !== null && count > 0 && (
+            <span className="rounded-full bg-brand/15 px-1.5 text-xs font-semibold tabular-nums text-brand-light">
+              {count}
+            </span>
+          )}
         </span>
       </button>
 
@@ -85,6 +96,7 @@ export function CompetitionProblemSurface({
           padded={false}
           ariaLabel={label}
           className="flex max-h-[100dvh] flex-col sm:max-h-[94vh] sm:max-w-5xl"
+          tall={isTall}
         >
           {/* Which of the surfaces this is, which of the set it belongs to, and the way out of it. Whose
               work it is has to be said, everything else under a problem being the student's own */}
@@ -114,7 +126,12 @@ export function CompetitionProblemSurface({
           <ProblemBand statement={statement[locale]} height="own" />
 
           {/* And the thing itself, which scrolls in its own right once it outgrows the screen */}
-          <div className="scrollbar-visible min-h-0 overflow-y-auto overscroll-contain px-4 py-3 sm:px-5">
+          <div
+            className={cn(
+              'scrollbar-visible min-h-0 overflow-y-auto overscroll-contain px-4 py-3 sm:px-5',
+              isTall && 'flex-1'
+            )}
+          >
             {children}
           </div>
         </Modal>

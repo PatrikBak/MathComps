@@ -18,7 +18,7 @@ import { useLoginRedirect } from '@/hooks/use-login-redirect'
 
 import { UsernameForm } from './components/UsernameForm'
 import { getCountryOptions } from './countries'
-import { getGraduationYears, PAST_SCHOOL_VALUE } from './graduation-year'
+import { EARLIEST_GRADUATION_YEAR, getGraduationYears, PAST_SCHOOL_VALUE } from './graduation-year'
 import { useSetUsername } from './hooks/use-set-username'
 import { useUpdateProfile } from './hooks/use-update-profile'
 import { useUserProfile } from './hooks/use-user-profile'
@@ -121,14 +121,17 @@ export default function ProfilePageContent() {
   // A function which saves what they say about their competing
   const { updateProfile } = useUpdateProfile()
 
-  // The years on offer, with being past school as one of the answers
+  // The years on offer, with finishing school before the first of them as one more answer
   const graduationYearOptions = useMemo(
     () => [
       ...getGraduationYears(new Date().getUTCFullYear()).map((year) => ({
         value: String(year),
         label: String(year),
       })),
-      { value: PAST_SCHOOL_VALUE, label: tProfile('graduationYearPastSchool') },
+      {
+        value: PAST_SCHOOL_VALUE,
+        label: tProfile('graduationYearOrEarlier', { year: EARLIEST_GRADUATION_YEAR - 1 }),
+      },
     ],
     [tProfile]
   )

@@ -14,8 +14,9 @@ namespace MathComps.Infrastructure.Tests.Users;
 /// <summary>
 /// Integration tests for what a student says about their competing against a real PostgreSQL database: that
 /// every field round-trips, that clearing one is a thing they can do, that a year and a school left cannot both
-/// stand, that a year past a first-grader's maturita and a code which is not a country are refused, that the address Clerk sent reads back with it, and
-/// that a resync from Clerk carries none of it away.
+/// stand, that a year before the first school year the competition ran or past a first-grader's maturita and a
+/// code which is not a country are refused, that the address Clerk sent reads back with it, and that a resync
+/// from Clerk carries none of it away.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class UserManagerProfilePostgresTests(PostgresContainerFixture fixture)
@@ -139,6 +140,24 @@ public class UserManagerProfilePostgresTests(PostgresContainerFixture fixture)
         // The one after it is refused
         await Assert.ThrowsAsync<ProfileValueInvalidException>(
             () => service.UpdateProfileAsync(userId, new UpdateUserProfileRequest(latest + 1, false, null)));
+    });
+
+    /// <summary>
+    /// A graduation year goes no further back than the maturita of the first school year the competition ran,
+    /// since anybody done before it says they are past school instead.
+    /// </summary>
+    [Fact]
+    public Task UpdateProfileAsync_RefusesAYearBeforeTheFirstSchoolYear() => RunTestAsync(async service =>
+    {
+        // A user with nothing said yet
+        var userId = await service.SyncUserAsync(new UserSyncDto("user_early", "early@example.com", null));
+
+        // The maturita of the first school year the competition ran is taken
+        await service.UpdateProfileAsync(userId, new UpdateUserProfileRequest(2026, false, null));
+
+        // The one before it is refused
+        await Assert.ThrowsAsync<ProfileValueInvalidException>(
+            () => service.UpdateProfileAsync(userId, new UpdateUserProfileRequest(2025, false, null)));
     });
 
     /// <summary>
