@@ -64,9 +64,9 @@ const COMPETITION: GradingCompetition = {
     { id: 'p2', slug: 'p-2', number: 2 },
   ],
   entrants: [
-    { id: 'zora', username: 'Zora', email: null },
-    { id: 'adam', username: 'Adam', email: null },
-    { id: 'emil', username: 'Emil', email: null },
+    { user: { id: 'zora', username: 'Zora', email: null }, finishedAfterSeconds: 2400 },
+    { user: { id: 'adam', username: 'Adam', email: null }, finishedAfterSeconds: 600 },
+    { user: { id: 'emil', username: 'Emil', email: null }, finishedAfterSeconds: 1200 },
   ],
   grades: [
     summaryOf('zora', 'p1', 1, gradeOf(6, 0, true)),
@@ -104,6 +104,20 @@ describe('buildRows', () => {
     expect(rowOf('Emil')?.total).toBeNull()
   })
 
+  it('keeps a total of 0 apart from having no total', () => {
+    // Zora graded a final 0 on the first problem, and nothing else graded
+    const competition = {
+      ...COMPETITION,
+      grades: [summaryOf('zora', 'p1', 1, gradeOf(0, 0, true))],
+    }
+
+    // Its rows, named by username
+    const rows = buildRows(competition, indexGrades(competition), (user) => user.username ?? '')
+
+    // A total of 0, where the others have none
+    expect(rows.map((row) => row.total)).toEqual([null, null, 0])
+  })
+
   it('calls a row final only once everything discussed is final', () => {
     // Every problem Zora discussed is final, and the one Adam discussed is still pre-graded
     expect(rowOf('Zora')?.isFinal).toBe(true)
@@ -112,12 +126,21 @@ describe('buildRows', () => {
 })
 
 describe('rankOf', () => {
-  it('shares a place on a tie and places nobody without a total', () => {
-    // Totals of 9, 9, 5, and one not in yet
-    const rows = [9, 9, 5, null].map((total) => ({ ...ROWS[0], total }))
+  it('breaks a tie by the finishing time, sharing a place only when level on both', () => {
+    // Totals of 9 finished at 100 s twice and at 50 s, a 5 finished earliest of all, a 0, and one not in yet that
+    // finished before the 0
+    const rows = [
+      { ...ROWS[0], total: 9, finishedAfterSeconds: 100 },
+      { ...ROWS[0], total: 9, finishedAfterSeconds: 100 },
+      { ...ROWS[0], total: 9, finishedAfterSeconds: 50 },
+      { ...ROWS[0], total: 5, finishedAfterSeconds: 10 },
+      { ...ROWS[0], total: 0, finishedAfterSeconds: 20 },
+      { ...ROWS[0], total: null, finishedAfterSeconds: 10 },
+    ]
 
-    // First, first, third, and unplaced
-    expect(rows.map((row) => rankOf(rows, row.total))).toEqual([1, 1, 3, null])
+    // The earlier 9 first, the two level on both sharing second, the 5 fourth, the 0 fifth, and nobody placed
+    // without a total
+    expect(rows.map((row) => rankOf(rows, row))).toEqual([2, 2, 1, 4, 5, null])
   })
 })
 
@@ -132,6 +155,25 @@ describe('sortRows', () => {
     // The totals turn round, and the one without a total stays behind them
     expect(best).toEqual(['Zora', 'Adam', 'Emil'])
     expect(worst).toEqual(['Adam', 'Zora', 'Emil'])
+  })
+
+  it('puts the earlier finisher ahead on a tie, with names settling a shared place', () => {
+    // Three level on the total, Cyril finishing first and the other two level on both
+    const rows = [
+      { ...ROWS[0], name: 'Adam', total: 9, finishedAfterSeconds: 300 },
+      { ...ROWS[0], name: 'Bea', total: 9, finishedAfterSeconds: 300 },
+      { ...ROWS[0], name: 'Cyril', total: 9, finishedAfterSeconds: 100 },
+    ]
+
+    // Best first
+    const best = sortRows(rows, { by: 'total', ascending: false }).map((row) => row.name)
+
+    // Worst first
+    const worst = sortRows(rows, { by: 'total', ascending: true }).map((row) => row.name)
+
+    // The earlier finisher ahead, turned round with the totals, and the shared place read by name either way
+    expect(best).toEqual(['Cyril', 'Adam', 'Bea'])
+    expect(worst).toEqual(['Adam', 'Bea', 'Cyril'])
   })
 })
 

@@ -55,8 +55,8 @@ function boardOf(name: string, problemId: string): GradingBoard {
         category: 'elementary',
         problems: [{ id: problemId, slug: problemId, number: 1 }],
         entrants: [
-          { id: 'ada', username: 'Ada', email: null },
-          { id: 'bruno', username: 'Bruno', email: null },
+          { user: { id: 'ada', username: 'Ada', email: null }, finishedAfterSeconds: 600 },
+          { user: { id: 'bruno', username: 'Bruno', email: null }, finishedAfterSeconds: 900 },
         ],
         grades: [
           { userId: 'ada', problemId, conversationCount: 1, grade: null },

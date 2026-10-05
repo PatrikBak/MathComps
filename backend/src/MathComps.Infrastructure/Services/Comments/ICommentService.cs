@@ -8,10 +8,11 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// A service for reading and writing comment threads.
 /// </summary>
 /// <remarks>
-/// Every operation is told who is asking, which for a read can be nobody. A thread the viewer may not reach,
-/// and every comment in it, is refused as though it did not exist: <see cref="CommentTargetNotFoundException"/>
-/// for a target, <see cref="CommentNotFoundException"/> for a comment. Problems, handouts and news are open to
-/// anybody; a grade conversation only to admins. A version an edit has replaced is refused with
+/// Every operation on one thread is told who is asking, which for a read can be nobody. A thread the viewer may
+/// not reach, and every comment in it, is refused as though it did not exist:
+/// <see cref="CommentTargetNotFoundException"/> for a target, <see cref="CommentNotFoundException"/> for a comment.
+/// Problems, handouts and news are open to anybody; a grade conversation to admins, and to the student it is with
+/// once their group has closed, while the grade is final. A version an edit has replaced is refused with
 /// <see cref="CommentNotFoundException"/> too.
 /// </remarks>
 public interface ICommentService
@@ -66,14 +67,14 @@ public interface ICommentService
 
     /// <summary>
     /// Counts the active comments on each of several targets of one type. Only handouts and news articles are
-    /// counted in bulk, and any other type throws <see cref="ArgumentException"/>.
+    /// counted in bulk: grade conversations are refused like targets that are not there, and any other type throws
+    /// <see cref="ArgumentException"/>.
     /// </summary>
     /// <param name="targetType">The type of the targets.</param>
     /// <param name="targetIds">The ids of the targets.</param>
-    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
     /// <returns>Each target's active comment count by its id, a target with none left out.</returns>
     Task<ImmutableDictionary<string, int>> GetCommentCountsAsync(
-        CommentTargetType targetType, ImmutableList<string> targetIds, CommentViewer? viewer);
+        CommentTargetType targetType, ImmutableList<string> targetIds);
 }
 
 /// <summary>

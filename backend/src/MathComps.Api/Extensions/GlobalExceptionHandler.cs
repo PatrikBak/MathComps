@@ -119,6 +119,10 @@ public sealed class GlobalExceptionHandler(
         HostedEntryProfileIncompleteException
             => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedEntryProfileIncomplete),
 
+        // A competition's results read before they are out
+        HostedResultsNotOutException
+            => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.HostedResultsNotOut),
+
         // A comment from an account with no username to sign it
         CommentProfileIncompleteException
             => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.CommentProfileIncomplete),

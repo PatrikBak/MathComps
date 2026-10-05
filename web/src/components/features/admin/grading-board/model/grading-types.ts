@@ -17,6 +17,19 @@ type GradingProblem = {
 }
 
 /**
+ * One entrant of a competition being graded.
+ */
+type GradingEntrant = {
+  /** Who they are. */
+  user: UserIdentity
+  /**
+   * The sum, over the competition's problems, of how far into their own clock they last wrote about each one while
+   * their entry counted, in seconds.
+   */
+  finishedAfterSeconds: number
+}
+
+/**
  * One entrant's grade on one problem, with how many conversations it is read from.
  */
 export type GradeSummary = {
@@ -41,7 +54,7 @@ export type GradingCompetition = {
   /** Its problems in order. */
   problems: GradingProblem[]
   /** Everyone graded in it who spoke about any of its problems while their entry counted. */
-  entrants: UserIdentity[]
+  entrants: GradingEntrant[]
   /** Every entrant's grade on every problem. */
   grades: GradeSummary[]
 }

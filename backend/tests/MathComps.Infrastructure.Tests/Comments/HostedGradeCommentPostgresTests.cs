@@ -12,8 +12,9 @@ namespace MathComps.Infrastructure.Tests.Comments;
 /// <summary>
 /// Integration tests for the grade conversation, the private thread between the graders and one student about one
 /// problem they were graded on, as <see cref="ICommentService"/> keeps it against a real PostgreSQL database: that
-/// admins read and write it, that nobody else reaches it and a refusal reads like a thread that is not there, that
-/// each conversation keeps to itself and no reply crosses into another thread, and that it takes no likes.
+/// admins read and write it, that its student joins once their group has closed, while the grade is final, that
+/// nobody else reaches it and a refusal reads like a thread that is not there, that each conversation keeps to
+/// itself and no reply crosses into another thread, and that it takes no likes and is never counted in bulk.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
@@ -50,12 +51,12 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
     private readonly CommentViewer _stranger = new(Guid.CreateVersion7(), IsAdmin: false);
 
     /// <summary>
-    /// The graded problem the conversation is about.
+    /// The graded problem the conversation is about, whose grade went final and was then taken back.
     /// </summary>
     private readonly Guid _problemId = Guid.CreateVersion7();
 
     /// <summary>
-    /// The round's other problem.
+    /// The round's other problem, whose grade is final.
     /// </summary>
     private readonly Guid _otherProblemId = Guid.CreateVersion7();
 
@@ -68,6 +69,11 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
     /// The graded round.
     /// </summary>
     private readonly Guid _roundId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// The problem of a round whose group is still taking entries, which the student has a final grade on already.
+    /// </summary>
+    private readonly Guid _openProblemId = Guid.CreateVersion7();
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
@@ -105,11 +111,13 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Nobody but an admin reaches a grade conversation: not the student it is with, not a classmate, not anybody
-    /// signed out. Each refusal is the one a thread or comment that is not there gets, so it confirms nothing.
+    /// Before its grade is final, nobody but an admin reaches a grade conversation: not the student it is with, whose
+    /// grade went final once and was taken back, not a classmate, not anybody signed out, and not a student whose
+    /// grade nobody has given yet, in their own conversation. Each refusal is the one a thread or comment that is
+    /// not there gets, so it confirms nothing.
     /// </summary>
     [Fact]
-    public Task Nobody_but_an_admin_reaches_a_grade_conversation() => RunTestAsync(async service =>
+    public Task Before_its_grade_is_final_only_admins_reach_a_grade_conversation() => RunTestAsync(async service =>
     {
         // The conversation with the student, with one comment in it
         var target = GradeConversation(_problemId, _student);
@@ -121,6 +129,10 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
         // None of them reads it
         foreach (var outsider in outsiders)
             await Assert.ThrowsAsync<CommentTargetNotFoundException>(() => service.GetCommentsAsync(target, outsider));
+
+        // Nor does the classmate read their own conversation about the problem, which nobody has graded
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(
+            () => service.GetCommentsAsync(GradeConversation(_problemId, _classmate), _classmate));
 
         // Every signed-in one of them
         CommentViewer[] signedIn = [_student, _classmate, _stranger];
@@ -156,6 +168,115 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
         var root = Assert.Single(thread);
         Assert.Equal(comment.Id, root.Id);
         Assert.False(root.IsDeleted);
+    });
+
+    /// <summary>
+    /// Once the grade is final, the student reads the conversation about it, answers in it, and edits and deletes
+    /// what they wrote there, and the graders read the answer.
+    /// </summary>
+    [Fact]
+    public Task Once_its_grade_is_final_the_student_reads_and_writes_the_conversation() => RunTestAsync(async service =>
+    {
+        // The conversation about the final grade
+        var target = GradeConversation(_otherProblemId, _student);
+
+        // A grader's explanation in it
+        var explanation = await service.CreateCommentAsync(target, _grader, "Five points.");
+
+        // The student reads it
+        var thread = await service.GetCommentsAsync(target, _student);
+
+        // The explanation
+        Assert.Equal(explanation.Id, Assert.Single(thread).Id);
+
+        // The student answers it
+        var answer = await service.CreateCommentAsync(target, _student, "Why not six?", explanation.Id);
+
+        // And rewords the answer
+        var reworded = await service.UpdateCommentAsync(answer.Id, _student, "Why not six points?");
+
+        // And adds an aside
+        var aside = await service.CreateCommentAsync(target, _student, "Never mind.");
+
+        // Which they delete
+        await service.DeleteCommentAsync(aside.Id, _student);
+
+        // The conversation as the grader reads it
+        var gradersThread = await service.GetCommentsAsync(target, _grader);
+
+        // The explanation and the aside, in the order written
+        Assert.Equal([explanation.Id, aside.Id], gradersThread.Select(comment => comment.Id));
+
+        // The reworded answer under the explanation
+        Assert.Equal(reworded.Id, Assert.Single(gradersThread[0].Replies).Id);
+
+        // The aside deleted
+        Assert.True(gradersThread[1].IsDeleted);
+    });
+
+    /// <summary>
+    /// A final grade opens the conversation to the student it is with and to nobody else: a classmate, a stranger
+    /// and anybody signed out are refused, reading, writing and touching a comment alike.
+    /// </summary>
+    [Fact]
+    public Task A_final_grade_opens_the_conversation_to_its_own_student_alone() => RunTestAsync(async service =>
+    {
+        // The conversation about the student's final grade
+        var target = GradeConversation(_otherProblemId, _student);
+
+        // A grader's explanation in it
+        var comment = await service.CreateCommentAsync(target, _grader, "Five points.");
+
+        // Every caller but the student, short of an admin
+        CommentViewer?[] outsiders = [_classmate, _stranger, null];
+
+        // None of them reads it
+        foreach (var outsider in outsiders)
+            await Assert.ThrowsAsync<CommentTargetNotFoundException>(() => service.GetCommentsAsync(target, outsider));
+
+        // Nor does the classmate write in it
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(
+            () => service.CreateCommentAsync(target, _classmate, "Why?"));
+
+        // Nor does the classmate reach the comment in it
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => service.UpdateCommentAsync(comment.Id, _classmate, "Six points."));
+    });
+
+    /// <summary>
+    /// A grade ticked final while the student's group is still taking entries keeps its conversation from the
+    /// student until the group closes, their own clock having run out long before.
+    /// </summary>
+    [Fact]
+    public Task A_final_grade_opens_nothing_to_its_student_before_the_group_closes() => RunTestAsync(async service =>
+    {
+        // The conversation about the final grade in the running group
+        var target = GradeConversation(_openProblemId, _student);
+
+        // The student does not read it
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(() => service.GetCommentsAsync(target, _student));
+
+        // Nor write in it
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(
+            () => service.CreateCommentAsync(target, _student, "Why?"));
+    });
+
+    /// <summary>
+    /// Grade conversations are never counted in bulk, since the counts are read without asking who is reading:
+    /// a count is refused as though the threads were not there, even for a conversation open to its student.
+    /// </summary>
+    [Fact]
+    public Task Grade_conversations_are_never_counted() => RunTestAsync(async service =>
+    {
+        // A conversation about a final grade
+        var target = GradeConversation(_otherProblemId, _student);
+
+        // A grader's comment in it
+        await service.CreateCommentAsync(target, _grader, "Five points.");
+
+        // Its count, refused
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(
+            () => service.GetCommentCountsAsync(CommentTargetType.HostedGrade, [target.TargetId]));
     });
 
     /// <summary>
@@ -297,9 +418,43 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
         NewRound(context, season, group, _roundId, "mathcomps-advanced-september", _problemId, _otherProblemId);
 
         // The student and the classmate both sat it
-        context.HostedEntries.AddRange(
-            NewEntry(_student.UserId, _roundId, _startedAt),
-            NewEntry(_classmate.UserId, _roundId, _startedAt));
+        var studentsEntry = NewEntry(_student.UserId, _roundId, _startedAt);
+        context.HostedEntries.AddRange(studentsEntry, NewEntry(_classmate.UserId, _roundId, _startedAt));
+
+        // When the grades were given, a day after the group closed
+        var gradedAt = _startedAt.AddDays(6);
+
+        // The student's grade on the problem, final for a moment and then taken back to a draft
+        context.HostedGrades.AddRange(
+            NewGrade(studentsEntry.Id, _problemId, _grader.UserId, mark: 2, help: 0, isFinal: true, gradedAt),
+            NewGrade(
+                studentsEntry.Id, _problemId, _grader.UserId, mark: 2, help: 0, isFinal: false,
+                gradedAt.AddMinutes(1)));
+
+        // And on the other problem, final
+        context.HostedGrades.Add(
+            NewGrade(studentsEntry.Id, _otherProblemId, _grader.UserId, mark: 5, help: 0, isFinal: true, gradedAt));
+
+        // A group still taking entries
+        var openGroup = NewGroup(
+            context, "mc-open", DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(30));
+
+        // Its round, with one problem
+        var openRoundId = Guid.CreateVersion7();
+        NewRound(context, season, openGroup, openRoundId, "mathcomps-advanced-october", _openProblemId);
+
+        // The student sat it four hours ago, so their clock has run out
+        var openStartedAt = DateTimeOffset.UtcNow.AddHours(-4);
+        var openEntry = NewEntry(_student.UserId, openRoundId, openStartedAt);
+        context.HostedEntries.Add(openEntry);
+
+        // And argued its problem inside the clock
+        NewConversation(context, Guid.CreateVersion7(), _student.UserId, _openProblemId, openStartedAt.AddMinutes(10));
+
+        // And a grader has already marked them final there
+        context.HostedGrades.Add(NewGrade(
+            openEntry.Id, _openProblemId, _grader.UserId, mark: 7, help: 0, isFinal: true,
+            DateTimeOffset.UtcNow.AddMinutes(-5)));
 
         // The student argued both problems inside the clock
         NewConversation(context, Guid.CreateVersion7(), _student.UserId, _problemId, _startedAt.AddMinutes(10));

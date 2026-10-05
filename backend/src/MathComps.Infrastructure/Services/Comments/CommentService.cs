@@ -1,7 +1,7 @@
 using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Infrastructure.Services.Admin;
+using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -78,7 +78,9 @@ public class CommentService(
     /// </summary>
     /// <param name="EntryId"><inheritdoc cref="HostedGradeComment.EntryId" path="/summary"/></param>
     /// <param name="ProblemId"><inheritdoc cref="HostedGradeComment.ProblemId" path="/summary"/></param>
-    private sealed record GradeAnchor(Guid EntryId, Guid ProblemId) : CommentAnchor(CommentTargetType.HostedGrade);
+    /// <param name="StudentId">The student the conversation is with.</param>
+    private sealed record GradeAnchor(Guid EntryId, Guid ProblemId, Guid StudentId)
+        : CommentAnchor(CommentTargetType.HostedGrade);
 
     #endregion
 
@@ -87,11 +89,11 @@ public class CommentService(
     /// <inheritdoc />
     public async Task<ImmutableList<CommentDto>> GetCommentsAsync(CommentTarget target, CommentViewer? viewer)
     {
-        // Only a thread the viewer may reach is read
-        EnsureOpen(target, viewer);
-
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        // Only a thread the viewer may reach is read
+        await EnsureOpenAsync(dbContext, target, viewer);
 
         // The query reading the target's thread, replaced versions left out
         var (sql, parameters) = await BuildCommentsCteAsync(dbContext, target);
@@ -189,11 +191,11 @@ public class CommentService(
     public async Task<CommentDto> CreateCommentAsync(
         CommentTarget target, CommentViewer viewer, string content, Guid? parentCommentId = null)
     {
-        // Only a thread the viewer may reach is written in
-        EnsureOpen(target, viewer);
-
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        // Only a thread the viewer may reach is written in
+        await EnsureOpenAsync(dbContext, target, viewer);
 
         // The author, who needs a username to sign the comment with. Read before the thread is resolved, since
         // resolving a handout's or an article's thread can mint its row, so a refused comment writes nothing.
@@ -390,12 +392,8 @@ public class CommentService(
 
     /// <inheritdoc />
     public async Task<ImmutableDictionary<string, int>> GetCommentCountsAsync(
-        CommentTargetType targetType, ImmutableList<string> targetIds, CommentViewer? viewer)
+        CommentTargetType targetType, ImmutableList<string> targetIds)
     {
-        // Only threads the viewer may reach are counted, refused like targets that are not there
-        if (!IsOpenTo(targetType, viewer))
-            throw new CommentTargetNotFoundException(targetType, string.Join(", ", targetIds));
-
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -416,9 +414,14 @@ public class CommentService(
                 .GroupBy(handoutComment => handoutComment.Handout.ContentId)
                 .Select(group => new KeyValuePair<string, int>(group.Key, group.Count())),
 
-            // Threads with no bulk count
-            CommentTargetType.Problem or CommentTargetType.HostedGrade
+            // A problem's thread, with no bulk count
+            CommentTargetType.Problem
                 => throw new ArgumentException("Unsupported target type for bulk counts", nameof(targetType)),
+
+            // Grade conversations, each closed to all but admins and its student, refused like targets that are
+            // not there
+            CommentTargetType.HostedGrade
+                => throw new CommentTargetNotFoundException(targetType, string.Join(", ", targetIds)),
 
             // Unhandled target type
             _ => throw new ArgumentOutOfRangeException(nameof(targetType), targetType, "Invalid comment target type")
@@ -479,9 +482,7 @@ public class CommentService(
     private async Task<GradeAnchor> ResolveGradeAnchorAsync(MathCompsDbContext dbContext, CommentTarget target)
     {
         // The problem and the student, refused like a missing thread when the id doesn't name them
-        if (target.TargetId.Split(':') is not [var problemText, var userText]
-            || !Guid.TryParse(problemText, out var problemId)
-            || !Guid.TryParse(userText, out var userId))
+        if (!HostedGrading.TryParseConversationTargetId(target.TargetId, out var problemId, out var userId))
             throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
 
         // The entry the student is graded under, refused like a missing thread where there is nothing to grade
@@ -490,7 +491,7 @@ public class CommentService(
             ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
 
         // The conversation with the student about the problem
-        return new GradeAnchor(entry.Id, problemId);
+        return new GradeAnchor(entry.Id, problemId, userId);
     }
 
     /// <summary>
@@ -508,7 +509,7 @@ public class CommentService(
         var anchor = await ReadAnchorAsync(dbContext, commentId);
 
         // The thread, where the viewer may reach it; refused like a comment that is not there otherwise
-        return IsOpenTo(anchor.TargetType, viewer) ? anchor : throw new CommentNotFoundException();
+        return await IsOpenToAsync(dbContext, anchor, viewer) ? anchor : throw new CommentNotFoundException();
     }
 
     /// <summary>
@@ -539,7 +540,7 @@ public class CommentService(
                     .FirstOrDefault(),
                 Grade = dbContext.HostedGradeComments
                     .Where(link => link.CommentId == comment.Id)
-                    .Select(link => new { link.EntryId, link.ProblemId })
+                    .Select(link => new { link.EntryId, link.ProblemId, link.Entry.UserId })
                     .FirstOrDefault(),
             })
             .FirstOrDefaultAsync()
@@ -559,7 +560,7 @@ public class CommentService(
             { NewsArticleId: { } newsArticleId } => new NewsAnchor(newsArticleId),
 
             // A grade conversation
-            { Grade: { } grade } => new GradeAnchor(grade.EntryId, grade.ProblemId),
+            { Grade: { } grade } => new GradeAnchor(grade.EntryId, grade.ProblemId, grade.UserId),
 
             // A comment in no thread is one nobody can reach
             _ => throw new CommentNotFoundException()
@@ -710,36 +711,93 @@ public class CommentService(
     }
 
     /// <summary>
-    /// Whether a viewer may read and write in a kind of thread. The one place comment access is decided: every
-    /// public method asks it before touching a thread.
+    /// Whether a kind of thread is open to anybody. Every other kind is a grade conversation.
     /// </summary>
     /// <param name="targetType">The kind of thread.</param>
-    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
-    /// <returns>Whether the thread is open to them.</returns>
-    private static bool IsOpenTo(CommentTargetType targetType, CommentViewer? viewer) =>
-        // Whether the kind of thread is open to the viewer
+    /// <returns>Whether anybody may read and write in it.</returns>
+    private static bool IsPublic(CommentTargetType targetType) =>
+        // Whether the kind is open to anybody
         targetType switch
         {
-            // Public content, open to anybody
+            // Public content
             CommentTargetType.Problem or CommentTargetType.Handout or CommentTargetType.News => true,
 
-            // A grade conversation, open to admins alone
-            CommentTargetType.HostedGrade => viewer is { IsAdmin: true },
+            // A conversation between the graders and one student
+            CommentTargetType.HostedGrade => false,
 
             // Unhandled target type
             _ => throw new ArgumentOutOfRangeException(nameof(targetType), targetType, "Invalid comment target type")
         };
 
     /// <summary>
+    /// Whether a viewer is somebody a grade conversation is between: an admin, or the student it is with.
+    /// </summary>
+    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
+    /// <param name="studentId">The student the conversation is with.</param>
+    /// <returns>Whether the conversation is between them and the graders.</returns>
+    private static bool IsBetween(CommentViewer? viewer, Guid studentId) =>
+        // Any admin, or the student themselves
+        viewer is { IsAdmin: true } || viewer?.UserId == studentId;
+
+    /// <summary>
+    /// Whether a viewer may read and write in a thread whose anchor is known.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="anchor">The thread.</param>
+    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
+    /// <returns>Whether the thread is open to them.</returns>
+    private static async Task<bool> IsOpenToAsync(
+        MathCompsDbContext dbContext, CommentAnchor anchor, CommentViewer? viewer) =>
+        // Public content, open to anybody; a grade conversation, open to admins, and to its student once their group
+        // has closed, while the grade is final
+        IsPublic(anchor.TargetType)
+        || (anchor is GradeAnchor grade
+            && IsBetween(viewer, grade.StudentId)
+            && (viewer is { IsAdmin: true } || await IsOutToStudentAsync(dbContext, grade)));
+
+    /// <summary>
+    /// Whether a grade conversation is open to the student it is with: once their group has closed, and while the
+    /// grade is final.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="grade">The conversation.</param>
+    /// <returns>Whether the student may read and write in it.</returns>
+    private static async Task<bool> IsOutToStudentAsync(MathCompsDbContext dbContext, GradeAnchor grade)
+    {
+        // When the student's group closes
+        var closesAt = await dbContext.HostedEntries
+            .AsNoTracking()
+            .Where(entry => entry.Id == grade.EntryId)
+            .Select(entry => entry.Round.HostedGroup!.ClosesAt)
+            .FirstAsync();
+
+        // Nothing of the student's results is out before their group closes, a final grade included
+        if (!HostedEntryRules.AreResultsOut(closesAt, DateTimeOffset.UtcNow))
+            return false;
+
+        // Open while the grade is final
+        return await HostedGrading.IsFinalAsync(dbContext, grade.EntryId, grade.ProblemId, CancellationToken.None);
+    }
+
+    /// <summary>
     /// Refuses a thread the viewer may not reach as though it did not exist, so that a refusal does not confirm
     /// there is anything there.
     /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
     /// <param name="target">The thread asked for.</param>
     /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
-    private static void EnsureOpen(CommentTarget target, CommentViewer? viewer)
+    private async Task EnsureOpenAsync(MathCompsDbContext dbContext, CommentTarget target, CommentViewer? viewer)
     {
+        // Public content, open whichever item it is, so no thread is resolved to decide it. A grade conversation is
+        // looked up only for somebody it is between, so not even how long a refusal takes tells anybody else whether
+        // there is one.
+        var isOpen = IsPublic(target.TargetType)
+            || (HostedGrading.TryParseConversationTargetId(target.TargetId, out _, out var studentId)
+                && IsBetween(viewer, studentId)
+                && await IsOpenToAsync(dbContext, await ResolveGradeAnchorAsync(dbContext, target), viewer));
+
         // A thread the viewer may not reach, refused like one that is not there
-        if (!IsOpenTo(target.TargetType, viewer))
+        if (!isOpen)
             throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
     }
 

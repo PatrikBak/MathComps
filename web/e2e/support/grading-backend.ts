@@ -55,9 +55,9 @@ const BOARD: GradingBoard = {
         { id: 'p2', slug: 'elementary-2', number: 2 },
       ],
       entrants: [
-        { id: 'ada', username: 'Ada', email: null },
-        { id: 'bruno', username: 'Bruno', email: null },
-        { id: 'cyril', username: 'Cyril', email: null },
+        { user: { id: 'ada', username: 'Ada', email: null }, finishedAfterSeconds: 2400 },
+        { user: { id: 'bruno', username: 'Bruno', email: null }, finishedAfterSeconds: 1800 },
+        { user: { id: 'cyril', username: 'Cyril', email: null }, finishedAfterSeconds: 3000 },
       ],
       grades: [
         { userId: 'ada', problemId: 'p1', conversationCount: 2, grade: null },
@@ -78,8 +78,8 @@ const BOARD: GradingBoard = {
       category: 'intermediate',
       problems: [{ id: 'q1', slug: 'intermediate-1', number: 1 }],
       entrants: [
-        { id: 'ada', username: 'Ada', email: null },
-        { id: 'dora', username: 'Dora', email: null },
+        { user: { id: 'ada', username: 'Ada', email: null }, finishedAfterSeconds: 900 },
+        { user: { id: 'dora', username: 'Dora', email: null }, finishedAfterSeconds: 1200 },
       ],
       grades: [
         { userId: 'ada', problemId: 'q1', conversationCount: 1, grade: null },
@@ -172,7 +172,9 @@ function conversationsOf(board: GradingBoard): ReadonlyMap<string, AdminConversa
     board.competitions.flatMap((competition) =>
       competition.grades.flatMap((summary): [string, AdminConversation[]][] => {
         // The student, as the competition names them
-        const user = competition.entrants.find((entrant) => entrant.id === summary.userId)
+        const user = competition.entrants.find(
+          (entrant) => entrant.user.id === summary.userId
+        )?.user
 
         // The problem, with its place in the competition
         const problem = competition.problems.find((candidate) => candidate.id === summary.problemId)

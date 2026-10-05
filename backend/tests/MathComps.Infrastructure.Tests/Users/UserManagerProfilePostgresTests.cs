@@ -1,4 +1,5 @@
 using Clerk.BackendAPI;
+using MathComps.Domain;
 using MathComps.Domain.Contracts.Users;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
@@ -13,7 +14,7 @@ namespace MathComps.Infrastructure.Tests.Users;
 /// <summary>
 /// Integration tests for what a student says about their competing against a real PostgreSQL database: that
 /// every field round-trips, that clearing one is a thing they can do, that a year and a school left cannot both
-/// stand, that a code which is not a country is refused, that the address Clerk sent reads back with it, and
+/// stand, that a year past a first-grader's maturita and a code which is not a country are refused, that the address Clerk sent reads back with it, and
 /// that a resync from Clerk carries none of it away.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
@@ -117,6 +118,27 @@ public class UserManagerProfilePostgresTests(PostgresContainerFixture fixture)
         // Only one of the two does
         Assert.True(profile?.HasLeftHighSchool);
         Assert.Null(profile?.GraduationYear);
+    });
+
+    /// <summary>
+    /// A graduation year goes no further out than the maturita of a student in the first year of primary school
+    /// this school year.
+    /// </summary>
+    [Fact]
+    public Task UpdateProfileAsync_RefusesAYearPastAFirstGradersMaturita() => RunTestAsync(async service =>
+    {
+        // A user with nothing said yet
+        var userId = await service.SyncUserAsync(new UserSyncDto("user_far", "far@example.com", null));
+
+        // The maturita of somebody starting primary school this school year
+        var latest = SchoolYear.LatestGraduationYear(DateTimeOffset.UtcNow);
+
+        // That year is taken
+        await service.UpdateProfileAsync(userId, new UpdateUserProfileRequest(latest, false, null));
+
+        // The one after it is refused
+        await Assert.ThrowsAsync<ProfileValueInvalidException>(
+            () => service.UpdateProfileAsync(userId, new UpdateUserProfileRequest(latest + 1, false, null)));
     });
 
     /// <summary>

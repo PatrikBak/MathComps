@@ -129,6 +129,17 @@ public static class HostedEntryRules
     /// <returns>Whether the run is graded.</returns>
     public static bool IsGraded(DateTimeOffset? groupClosesAt, bool bypassesGates) =>
         groupClosesAt is not null && !bypassesGates;
+
+    /// <summary>
+    /// Whether a group's results are out, which they are for anybody once it has closed. A group with no closing
+    /// instant grades nobody, so it has none.
+    /// </summary>
+    /// <param name="groupClosesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
+    /// <param name="now">The instant to read the close against.</param>
+    /// <returns>Whether the results are out.</returns>
+    public static bool AreResultsOut(DateTimeOffset? groupClosesAt, DateTimeOffset now) =>
+        // Out from the closing instant on
+        groupClosesAt is { } closesAt && closesAt <= now;
 }
 
 /// <summary>

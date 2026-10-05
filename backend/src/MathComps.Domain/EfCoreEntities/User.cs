@@ -50,7 +50,8 @@ public class User
     /// </summary>
     /// <remarks>
     /// A year and not a grade, because a grade is only true until September while the year it ends in stays
-    /// true. Unbounded: which years a student may pick from is the form's to decide.
+    /// true. Never later than <see cref="SchoolYear.LatestGraduationYear"/>; how far back a student may pick is the
+    /// form's to decide.
     /// </remarks>
     public int? GraduationYear { get; set; }
 

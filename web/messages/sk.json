@@ -187,7 +187,7 @@
         "selfAssessment": "Komentár študenta"
       },
       "saveFailed": "Hodnotenie sa nepodarilo uložiť",
-      "studentCantSeeYet": "Študent to zatiaľ nevidí.",
+      "studentSeesOnceFinal": "Študent to uvidí, keď sa súťaž skončí a hodnotenie bude finálne.",
       "tab": "Hodnotenie"
     },
     "grading": {
@@ -270,6 +270,7 @@
     "HostedNoteEmpty": "Tvoja poznámka je prázdna.",
     "HostedNoteTooLong": "Tvoja poznámka je príliš dlhá.",
     "HostedProblemNotFound": "Táto úloha nepatrí do žiadnej súťaže.",
+    "HostedResultsNotOut": "Výsledky budú zverejnené po skončení súťaže.",
     "INVALID_FILE_TYPE": "Nepovolený typ súboru",
     "ListAccessDenied": "Tento zoznam je súkromný. Ak je to tvoj zoznam, najprv sa prihlás.",
     "ListNotFound": "Zoznam nebol nájdený.",
@@ -1205,7 +1206,7 @@
     "avatarUpdated": "Profilová fotka nahraná, aktualizácia potrvá pár sekúnd",
     "competitionAuthReason": "uloženie profilu",
     "competitionError": "Údaje sa nepodarilo uložiť. Skús to prosím znova.",
-    "competitionNote": "Tieto informácie sa zobrazia vo výsledkovej listine.",
+    "competitionNote": "Tieto informácie aj tvoja profilová fotka sa zobrazia vo výsledkovej listine.",
     "competitionSection": "Mathildovanie",
     "country": "Krajina",
     "countryNoMatch": "Žiadna krajina nesedí",

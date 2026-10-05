@@ -39,6 +39,8 @@ export type BoardRow = {
   total: number | null
   /** Whether they discussed at least one problem, and every one they discussed has a final grade. */
   isFinal: boolean
+  /** How far into their own clock they last wrote about each problem, summed, in seconds. */
+  finishedAfterSeconds: number
 }
 
 /**
@@ -80,7 +82,7 @@ export function buildRows(
   nameOf: (user: UserIdentity) => string
 ): BoardRow[] {
   // One row per entrant
-  const rows = competition.entrants.map((user) => {
+  const rows = competition.entrants.map(({ user, finishedAfterSeconds }) => {
     // Their grades, problem by problem, including the problems they never discussed
     const summaries = competition.problems.map((problem) =>
       grades.get(pairKey(user.id, problem.id))
@@ -102,7 +104,7 @@ export function buildRows(
       discussed.length > 0 && discussed.every((summary) => summary?.grade?.isFinal === true)
 
     // The row
-    return { user, name: nameOf(user), total, isFinal }
+    return { user, name: nameOf(user), total, isFinal, finishedAfterSeconds }
   })
 
   // Read by name
@@ -110,23 +112,44 @@ export function buildRows(
 }
 
 /**
- * Places an entrant by their total, sharing a place on a tie (1, 2, 2, 4).
+ * Places an entrant by where they stand, sharing a place only with whoever is level on both the total and the
+ * finishing time (1, 2, 2, 4).
  *
  * @param rows - Every row.
- * @param total - The total to place.
+ * @param row - The row to place.
  *
  * @returns The place; null for an entrant with no mark yet.
  */
-export function rankOf(rows: readonly BoardRow[], total: number | null): number | null {
+export function rankOf(rows: readonly BoardRow[], row: BoardRow): number | null {
   // Unplaced until there is something to place by
-  if (total === null) return null
+  if (row.total === null) return null
 
-  // One more than everybody strictly ahead
-  return 1 + rows.filter((other) => other.total !== null && other.total > total).length
+  // One more than everybody standing strictly ahead
+  return 1 + rows.filter((other) => compareStanding(other, row) < 0).length
 }
 
 /**
- * Orders the rows as asked. The unplaced stay last either way round, and a tie on the total falls back to names.
+ * Compares where two rows stand: the better total ahead, the earlier finisher ahead of a row level with it on the
+ * total, and every row with a total ahead of one without.
+ *
+ * @param first - One row.
+ * @param second - The other row.
+ *
+ * @returns Negative when the first row stands ahead, positive when the second one does, zero when they are level.
+ */
+function compareStanding(first: BoardRow, second: BoardRow): number {
+  // A row without a total stands behind every row with one
+  if (first.total === null || second.total === null) {
+    return (first.total === null ? 1 : 0) - (second.total === null ? 1 : 0)
+  }
+
+  // The better total ahead, and the earlier finisher where the totals tie
+  return second.total - first.total || first.finishedAfterSeconds - second.finishedAfterSeconds
+}
+
+/**
+ * Orders the rows as asked. By total, the unplaced stay last either way round, the rest read in the order they
+ * stand or its reverse, and names settle a shared place.
  *
  * @param rows - The rows.
  * @param sort - The order asked for.
@@ -152,8 +175,8 @@ export function sortRows(rows: readonly BoardRow[], sort: BoardSort): BoardRow[]
           return (first.total === null ? 1 : 0) - (second.total === null ? 1 : 0)
         }
 
-        // The totals themselves, and names where they tie
-        return direction * (first.total - second.total) || first.name.localeCompare(second.name)
+        // Where they stand, the best first unless turned round, and names where two are level
+        return -direction * compareStanding(first, second) || first.name.localeCompare(second.name)
 
       // Every column is handled above
       default:

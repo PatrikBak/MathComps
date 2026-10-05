@@ -77,62 +77,29 @@ public class AdminGradingService(
             })
             .ToListAsync(cancellationToken);
 
-        // The entrants the site lets past its gates.
-        var bypassing = await grants.GetHoldersAsync(
-            [.. entries.Select(entry => entry.User.Id)], UserCapability.PrepareCompetitions, cancellationToken);
-
-        // Only the graded entries, each with the window its conversations count in.
-        var graded = entries
-            .SelectMany(entry => HostedGrading.GradedEntry.Of(
+        // Where every entry anybody grades stands on each problem of its round, and how far into its clock its
+        // student last wrote about each.
+        var gradings = await HostedGrading.ReadProblemGradingsAsync(
+            dbContext,
+            grants,
+            [
+                .. entries.Select(entry => new HostedGrading.SpentEntry(
                     entry.Id,
+                    entry.User.Id,
+                    entry.RoundId,
                     entry.StartedAt,
                     entry.FinishedAt,
                     group.ClosesAt,
-                    group.ClockMinutes,
-                    bypassing.Contains(entry.User.Id)) is { } gradedEntry
-                ? new[] { new { entry.RoundId, entry.User, Entry = gradedEntry } }
-                : [])
-            .ToList();
+                    group.ClockMinutes)),
+            ],
+            cancellationToken);
 
-        // Which round each problem sits in.
-        var roundOfProblem = group.Rounds
-            .SelectMany(round => round.Problems.Select(problem => (ProblemId: problem.Id, RoundId: round.Id)))
-            .ToDictionary(placement => placement.ProblemId, placement => placement.RoundId);
+        // The graded entries with a counted conversation about any problem of their round, by username.
+        var spoken = entries.Where(entry => gradings.HasSpoken(entry.Id)).ToList();
 
-        // The graded students.
-        var gradedUserIds = graded.Select(row => row.User.Id).ToList();
-
-        // When every conversation a graded student held about the group's problems started, and who held it.
-        var conversations = await dbContext.ProblemDefenses
-            .AsNoTracking()
-            .Where(defense => roundOfProblem.Keys.Contains(defense.ProblemId)
-                && gradedUserIds.Contains(defense.DefenseSession.UserId))
-            .Select(defense => new
-            {
-                defense.DefenseSession.UserId,
-                defense.ProblemId,
-                defense.DefenseSession.CreatedAt,
-            })
-            .ToListAsync(cancellationToken);
-
-        // Each graded entry's window, by student and round.
-        var windows = graded.ToDictionary(row => (row.User.Id, row.RoundId), row => row.Entry.Window);
-
-        // The conversations counted per student and problem, only those inside the student's window.
-        var conversationCounts = conversations
-            .Where(conversation =>
-                windows.TryGetValue((conversation.UserId, roundOfProblem[conversation.ProblemId]), out var window)
-                && window.Holds(conversation.CreatedAt))
-            .CountBy(conversation => (conversation.UserId, conversation.ProblemId))
-            .ToDictionary(count => count.Key, count => count.Value);
-
-        // The graded entries' ids.
-        var entryIds = graded.Select(row => row.Entry.Id).ToList();
-
-        // Where the graded entries' grades stand, by entry and problem.
-        var grades = (await HostedGrading.ReadCurrentGradesAsync(
-                dbContext, grade => entryIds.Contains(grade.EntryId), cancellationToken))
-            .ToDictionary(current => (current.EntryId, current.ProblemId), current => current.Grade);
+        // Their grades, everything the graders wrote included.
+        var grades = await HostedGrading.ReadCurrentGradesAsync(
+            dbContext, [.. spoken.Select(entry => entry.Id)], cancellationToken);
 
         // The board: which group it is, then one competition per round.
         return new GradingBoardDto(
@@ -142,12 +109,8 @@ public class AdminGradingService(
             [
                 .. group.Rounds.Select(round =>
                 {
-                    // The round's graded entries with a counted conversation about any of its problems, by username.
-                    var roundEntries = graded
-                        .Where(row => row.RoundId == round.Id
-                            && round.Problems.Any(problem =>
-                                conversationCounts.ContainsKey((row.User.Id, problem.Id))))
-                        .ToList();
+                    // The round's entries among them.
+                    var roundEntries = spoken.Where(entry => entry.RoundId == round.Id).ToList();
 
                     // The competition.
                     return new GradingCompetitionDto(
@@ -158,16 +121,19 @@ public class AdminGradingService(
                             ?? throw new InvalidOperationException(
                                 $"Round {round.Id} of a graded group has no level."),
                         round.Problems,
-                        // The round's entrants who spoke while their entry counted.
-                        [.. roundEntries.Select(row => row.User)],
-                        // Every entrant who spoke, on every problem.
+                        // The round's entrants who spoke while their entry counted, each with how far into their
+                        // clock they last wrote about each problem, summed.
                         [
-                            .. roundEntries.SelectMany(row => round.Problems.Select(problem =>
-                                new GradeSummaryDto(
-                                    row.User.Id,
-                                    problem.Id,
-                                    conversationCounts.GetValueOrDefault((row.User.Id, problem.Id)),
-                                    grades.GetValueOrDefault((row.Entry.Id, problem.Id))))),
+                            .. roundEntries.Select(entry =>
+                                new GradingEntrantDto(entry.User, gradings.FinishedAfter(entry.Id).TotalSeconds)),
+                        ],
+                        // Every entrant who spoke, on every problem: their conversations about it and the grade.
+                        [
+                            .. roundEntries.SelectMany(entry => round.Problems.Select(problem => new GradeSummaryDto(
+                                entry.User.Id,
+                                problem.Id,
+                                gradings.Of(entry.Id, problem.Id).Conversations,
+                                grades.GetValueOrDefault((entry.Id, problem.Id))))),
                         ]);
                 }),
             ]);

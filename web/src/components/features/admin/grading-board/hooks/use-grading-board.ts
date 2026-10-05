@@ -102,8 +102,9 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
   // Everybody any competition lists, each once
   const studentCount = useMemo(
     () =>
-      new Set(competitions.flatMap((candidate) => candidate.entrants.map((entrant) => entrant.id)))
-        .size,
+      new Set(
+        competitions.flatMap((candidate) => candidate.entrants.map((entrant) => entrant.user.id))
+      ).size,
     [competitions]
   )
 
@@ -178,7 +179,7 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
   const openStudent =
     open === null
       ? null
-      : (competition?.entrants.find((entrant) => entrant.id === open.userId) ?? null)
+      : (competition?.entrants.find((entrant) => entrant.user.id === open.userId)?.user ?? null)
 
   // The open pair as a student and a problem; null until both are known
   const studentProblem: StudentProblem | null =
