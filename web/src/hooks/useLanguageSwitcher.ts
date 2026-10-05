@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useLocale } from 'next-intl'
 
 import { type Locale } from '@/i18n/i18n'
@@ -32,9 +32,6 @@ export function useLanguageSwitcher(): LanguageSwitcherReturn {
   // Get the current pathname to preserve it when changing the locale
   const pathname = usePathname()
 
-  // Get the current search params to preserve them when changing the locale
-  const searchParams = useSearchParams()
-
   // Get the current route params (e.g., { slug: 'some-value' }) for dynamic routes
   const params = useParams()
 
@@ -61,14 +58,14 @@ export function useLanguageSwitcher(): LanguageSwitcherReturn {
         )
       }
 
+      // The query on the address bar right now. Read at click time: reading it during render
+      // (useSearchParams) leaves every prerendered page to be rendered in the browser
+      const searchParams = new URLSearchParams(window.location.search)
+
       // Preserve the query, re-expressing it for the new locale when the route owns a translator
       // (the guide's deep-link tokens are localized); otherwise carry the params over verbatim
       const queryString = localizedRoute?.translateSearchParams
-        ? localizedRoute.translateSearchParams(
-            new URLSearchParams(searchParams.toString()),
-            currentLocale,
-            newLocale
-          )
+        ? localizedRoute.translateSearchParams(searchParams, currentLocale, newLocale)
         : searchParams.toString()
 
       // Change it while preserving the current path, query parameters, and dynamic route params.

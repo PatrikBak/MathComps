@@ -46,6 +46,14 @@
   --color-glow-cool: var(--color-green-500);
 }
 
+/* The scroll offset, registered as a length so it computes to resolved pixels script can read. An
+   unregistered property computes to its raw calc() text */
+@property --scroll-offset {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
 :root {
   scroll-behavior: smooth;
 

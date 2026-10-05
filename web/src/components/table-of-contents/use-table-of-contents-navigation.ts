@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { useCustomScrollSpy } from '@/hooks/use-custom-scroll-spy'
 import { useScrollOffset } from '@/hooks/use-scroll-offset'
 
@@ -15,9 +17,12 @@ type UseTableOfContentsNavigationOptions = {
  * A hook providing table-of-contents navigation: scroll-spy tracking and navigation clicks.
  */
 export function useTableOfContentsNavigation({ items }: UseTableOfContentsNavigationOptions) {
+  // The sections' anchor ids, the same array across renders
+  const itemIds = useMemo(() => items.map((item) => item.id), [items])
+
   // Track the active section via scroll-spy, offset to clear the sticky header
-  const activeIndex = useCustomScrollSpy({
-    itemIds: items.map((item) => item.id),
+  const { activeIndex, selectItem } = useCustomScrollSpy({
+    itemIds,
     offset: useScrollOffset(),
   })
 
@@ -34,6 +39,10 @@ export function useTableOfContentsNavigation({ items }: UseTableOfContentsNaviga
     if (element) {
       // Update URL hash for deep-linking support
       window.history.pushState(null, '', `#${id}`)
+
+      // Mark the section as the reader's pick, which wins at the bottom of the page where its
+      // heading may never reach the top
+      selectItem(id)
 
       // Smooth-scroll; CSS scroll-margin-top handles the header offset
       element.scrollIntoView({ behavior: 'smooth' })
