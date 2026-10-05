@@ -439,6 +439,50 @@ test.describe('the conversation dialog', () => {
     await expect(conversationTab).toHaveAttribute('aria-selected', 'true')
   })
 
+  test('offers neither a grade nor feedback where nothing the student said counts', async ({
+    page,
+  }) => {
+    // A graded student whose one conversation came after they handed in
+    await installQueueBackend(
+      page,
+      [conversationOf('late@students.test', '2026-09-27T10:00:00Z')],
+      {
+        grading: {
+          'user-late@students.test': {
+            countingConversationIds: [],
+            endedAt: '2026-09-27T09:00:00Z',
+            grade: null,
+            selfAssessment: null,
+          },
+        },
+      }
+    )
+
+    // Read on a screen narrow enough that every part is a tab
+    await page.setViewportSize({ width: 1024, height: 800 })
+
+    // Open the queue
+    await page.goto(QUEUE_PATH)
+
+    // Open the conversation from its card
+    await page.getByText('late@students.test').click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The dialog
+    const dialog = page.getByRole('dialog')
+
+    // What each of its tabs is called
+    const tabNames = { ...messages.admin.conversation.tabs, notes: messages.admin.notes.tab }
+
+    // The conversation marked as not counting, which says the student is graded
+    await expectOnlyNotCounting(dialog, 1, 1)
+
+    // Neither a grade nor feedback among the tabs
+    await expect(dialog.getByRole('tab')).toHaveText(
+      [tabNames.conversation, tabNames.reference, tabNames.notes, tabNames.config],
+      { useInnerText: true }
+    )
+  })
+
   test('opens a half-read conversation where reading stopped, and stays put once marked unread', async ({
     page,
   }) => {

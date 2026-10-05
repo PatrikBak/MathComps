@@ -113,17 +113,16 @@
         "statement": "Zadanie"
       },
       "student": "Študent",
-      "studentCantSeeYet": "zatiaľ to nevidí",
       "studentNoComment": "Bez komentára",
       "studentVerdict": "Čo povedal študent",
       "tabs": {
         "config": "Nastavenia",
         "conversation": "Konverzácia",
+        "feedback": "Spätná väzba",
         "reference": "Riešenie"
       },
       "tabsLabel": "Časti konverzácie",
-      "unreadDivider": "Nové od tvojho posledného čítania",
-      "withStudent": "So študentom"
+      "unreadDivider": "Nové od tvojho posledného čítania"
     },
     "defenseReview": {
       "clearFilters": "Zrušiť filtre",
@@ -188,6 +187,7 @@
         "selfAssessment": "Komentár študenta"
       },
       "saveFailed": "Hodnotenie sa nepodarilo uložiť",
+      "studentCantSeeYet": "Študent to zatiaľ nevidí.",
       "tab": "Hodnotenie"
     },
     "grading": {

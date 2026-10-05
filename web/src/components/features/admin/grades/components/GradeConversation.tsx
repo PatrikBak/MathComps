@@ -24,6 +24,9 @@ export function GradeConversation({ problemId, userId }: GradeConversationProps)
 
   return (
     <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
+      {/* Who can read it */}
+      <p className="mb-3 text-xs text-muted">{t('studentCantSeeYet')}</p>
+
       {/* The thread, named by the problem and the student like the grade itself */}
       <CommentSection
         variant="inline"

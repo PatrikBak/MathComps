@@ -62,6 +62,45 @@ internal static class HostedGrading
     }
 
     /// <summary>
+    /// Finds the entry one student's grade on one problem belongs to, where there is something to grade: anybody
+    /// grades them on it, and they started a conversation about it while the entry counted.
+    /// </summary>
+    /// <param name="dbContext"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='dbContext']"/></param>
+    /// <param name="grants"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='grants']"/></param>
+    /// <param name="problemId"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='problemId']"/></param>
+    /// <param name="userId"><inheritdoc cref="FindGradedEntryAsync" path="/param[@name='userId']"/></param>
+    /// <param name="cancellationToken">
+    /// <inheritdoc cref="FindGradedEntryAsync" path="/param[@name='cancellationToken']"/></param>
+    /// <returns>
+    /// The entry and the window its conversations count in, or null when nobody grades the student on the problem
+    /// or nothing they said about it counts.
+    /// </returns>
+    public static async Task<GradedEntry?> FindGradableEntryAsync(
+        MathCompsDbContext dbContext,
+        IUserGrantService grants,
+        Guid problemId,
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        // The entry the grade belongs to, if anybody grades the student on the problem.
+        var entry = await FindGradedEntryAsync(dbContext, grants, problemId, userId, cancellationToken);
+
+        // Nobody grades the student on the problem.
+        if (entry is null)
+            return null;
+
+        // When each of the student's conversations about the problem started.
+        var startedAts = await dbContext.ProblemDefenses
+            .AsNoTracking()
+            .Where(defense => defense.ProblemId == problemId && defense.DefenseSession.UserId == userId)
+            .Select(defense => defense.DefenseSession.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        // The entry, where one of them started while it counted.
+        return startedAts.Any(entry.Window.Holds) ? entry : null;
+    }
+
+    /// <summary>
     /// Reads where one entry's grade on one problem stands.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>

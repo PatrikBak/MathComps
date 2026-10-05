@@ -39,7 +39,9 @@ public interface IAdminGradingService
     /// <param name="change">What changed.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The grade as it now stands, or null while there still is none.</returns>
-    /// <exception cref="HostedGradeTargetException">Nobody grades the entrant on the problem.</exception>
+    /// <exception cref="HostedGradeTargetException">
+    /// Nobody grades the entrant on the problem, or nothing they said about it counts.
+    /// </exception>
     /// <exception cref="HostedGradeValueException">The grade the change leaves breaks its rules.</exception>
     Task<GradeDto?> UpdateGradeAsync(
         Guid graderId,
@@ -55,9 +57,10 @@ public interface IAdminGradingService
 public sealed class HostedGroupNotFoundException() : Exception("No graded group goes by this slug");
 
 /// <summary>
-/// Thrown when a grade is changed for a student and a problem nobody grades.
+/// Thrown when a grade is changed for a student and a problem nobody grades, or one the student said nothing about
+/// while their entry counted.
 /// </summary>
-public sealed class HostedGradeTargetException() : Exception("Nobody grades this student on this problem");
+public sealed class HostedGradeTargetException() : Exception("Nobody grades this student on this problem, or nothing they said about it counts");
 
 /// <summary>
 /// Thrown when a change would leave a grade breaking the rules its fields state (<see cref="HostedGrade"/>).
