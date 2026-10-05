@@ -32,6 +32,8 @@ type CompetitionStandingStripProps = {
   onFinish: (() => void) | null
   /** Opens the terms the entry runs on. */
   onOpenRules: () => void
+  /** Opens how everybody did; null until its group has closed. */
+  onOpenResults: (() => void) | null
   /** The way back out to the list. */
   listHref: ComponentProps<typeof AppLink>['href']
 }
@@ -52,6 +54,7 @@ export function CompetitionStandingStrip({
   wasHandedIn,
   onFinish,
   onOpenRules,
+  onOpenResults,
   listHref,
 }: CompetitionStandingStripProps) {
   // Competitions copy
@@ -77,6 +80,13 @@ export function CompetitionStandingStrip({
       <button type="button" className={ACTION_CLASS} onClick={onOpenRules}>
         {t('rulesButton')}
       </button>
+
+      {/* How everybody did, once the group is over */}
+      {onOpenResults !== null && (
+        <button type="button" className={ACTION_CLASS} onClick={onOpenResults}>
+          {t('results')}
+        </button>
+      )}
 
       {/* And the way back out */}
       <AppLink href={listHref} plain className={ACTION_CLASS}>

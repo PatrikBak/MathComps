@@ -7,7 +7,10 @@ import type {
   HostedCompetitionEntry,
   HostedCompetitionGroup,
   HostedCompetitionsView,
+  ResultCell,
+  ResultRow,
   SatEntry,
+  ScoredCell,
 } from './hosted-competition-types'
 
 /**
@@ -49,6 +52,8 @@ type StandingForfeited = {
 type StandingDone = {
   /** The discriminant. */
   kind: 'done'
+  /** The student's own row of the results; null until the group has closed, and where nobody grades them. */
+  cells: ResultCell[] | null
 }
 
 /**
@@ -512,8 +517,8 @@ export function deriveStanding(
         return { kind: 'running', endsAt }
       }
 
-      // Over, whether they closed it themselves or the clock did
-      return { kind: 'done' }
+      // Over, whether they closed it themselves or the clock did, with however far its marking has got
+      return { kind: 'done', cells: entry.cells }
     }
 
     // Every entry is handled above
@@ -741,4 +746,33 @@ export function clockMinuteFraction(remainingMs: number): number {
 
   // How far into that minute the clock has run
   return 1 - (minutesLeft * MINUTE_MS - left) / MINUTE_MS
+}
+
+/**
+ * A student's total in a competition's results.
+ *
+ * @param cells - Their row, one cell per problem.
+ *
+ * @returns The sum of the problems marked for good; null while none is.
+ */
+export function resultTotal(cells: ResultCell[]): number | null {
+  // What the problems marked for good scored
+  const scores = cells
+    .filter((cell): cell is ScoredCell => cell.kind === 'scored')
+    .map((cell) => cell.score)
+
+  // The sum, or no total while nothing is marked
+  return scores.length === 0 ? null : scores.reduce((sum, score) => sum + score, 0)
+}
+
+/**
+ * Whether a competition's results are settled, which is when the order stops moving.
+ *
+ * @param rows - Every row of the results.
+ *
+ * @returns Whether no problem anybody wrote about is still waiting on its final mark.
+ */
+export function areResultsComplete(rows: ResultRow[]): boolean {
+  // Every cell either marked for good or never written about
+  return rows.every((row) => row.cells.every((cell) => cell.kind !== 'pending'))
 }

@@ -6,9 +6,12 @@ import { useTranslations } from 'next-intl'
 import { ProseContactLink } from '@/components/features/contact/ProseContactLink'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { PageHeader } from '@/components/shared/components/PageHeader'
+import { useAddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 
 import { useHostedCompetitionsBoard } from '../hooks/use-hosted-competitions-board'
+import { RESULTS_PARAM } from '../services/hosted-competition-routes'
 import { CategoryLegend } from './CategoryLegend'
+import { CompetitionResultsModal } from './CompetitionResults'
 import { DisclosureNote } from './DisclosureNote'
 import { EntryGate } from './EntryGate'
 import { HeaderDisclosure } from './HeaderDisclosure'
@@ -51,6 +54,9 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
     enterCompetition,
     dismissProfilePrompt,
   } = useHostedCompetitionsBoard(entryIntentSlug)
+
+  // Which competition's results are open, one answer for every row on the page
+  const openedResults = useAddressedDisclosure(RESULTS_PARAM)
 
   return (
     // Hyphenation off: the global setting is for article prose, and the words here are names and labels
@@ -116,6 +122,7 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
               now={now}
               bypassesGates={bypassesGates}
               onEnter={enterCompetition}
+              onOpenResults={openedResults.open}
             />
           </div>
         )}
@@ -133,6 +140,9 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
           isEntering={dialog.isEntering}
         />
       )}
+
+      {/* How everybody did in one competition, once a row asks */}
+      <CompetitionResultsModal disclosure={openedResults} />
     </div>
   )
 }

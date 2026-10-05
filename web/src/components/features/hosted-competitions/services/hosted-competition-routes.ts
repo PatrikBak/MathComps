@@ -52,3 +52,9 @@ export const SOLUTION_PARAM = 'solution'
  * carries the problem's position, and is inert for a reader the hints are not out for yet.
  */
 export const HINTS_PARAM = 'hints'
+
+/**
+ * The query parameter naming whose results are open, by the competition's slug, so that the address bar of
+ * open results is a link straight back to them.
+ */
+export const RESULTS_PARAM = 'results'

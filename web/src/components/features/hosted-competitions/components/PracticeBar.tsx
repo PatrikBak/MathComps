@@ -58,13 +58,15 @@ export function PracticeBar({ group, now, bypassesGates, onEnter }: PracticeBarP
             key={competition.slug[locale]}
             className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-1 text-sm"
           >
-            <StandingLabel competition={competition} phase={phase} standing={standing} now={now} />
+            <StandingLabel phase={phase} standing={standing} now={now} />
             <EntryAction
               competition={competition}
               phase={phase}
               standing={standing}
               bypassesGates={bypassesGates}
               onEnter={() => onEnter({ group, competition })}
+              // Never over, so nobody's results are ever kept
+              onOpenResults={null}
             />
           </div>
         )
