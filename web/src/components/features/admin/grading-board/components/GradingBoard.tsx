@@ -193,19 +193,25 @@ function GroupSubtitle({ group }: GroupSubtitleProps) {
 }
 
 /**
+ * How the rows are ordered, and the way to change it.
+ */
+type BoardSortControls = {
+  /** How the rows are ordered. */
+  sort: BoardSort
+  /** Orders the rows by a column, or turns the current order round. */
+  onSort: (by: SortBy) => void
+}
+
+/**
  * Props for the {@link GradingGrid} component.
  */
-type GradingGridProps = {
+type GradingGridProps = BoardSortControls & {
   /** The competition. */
   competition: GradingCompetition
   /** The competition's rows, in the order asked for. */
   rows: BoardRow[]
   /** The competition's grades, by pair. */
   grades: ReadonlyMap<string, GradeSummary>
-  /** How the rows are ordered. */
-  sort: BoardSort
-  /** Orders the rows by a column, or turns the current order round. */
-  onSort: (by: SortBy) => void
   /** Opens a pair, by its key. */
   onOpen: (key: string) => void
   /** Asks to make a problem's column final. */
@@ -228,47 +234,23 @@ function GradingGrid({
   // Grading copy
   const t = useTranslations('admin.grading.grid')
 
-  // A function which draws a header that orders the rows, lit while it is the one ordering them
-  const sortHeader = (label: ReactNode, by: SortBy, className?: string, ariaLabel?: string) => (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      onClick={() => onSort(by)}
-      aria-pressed={sort.by === by}
-      className={cn(
-        'relative uppercase tracking-wide transition-colors hover:text-foreground',
-        sort.by === by && 'text-foreground',
-        className
-      )}
-    >
-      {label}
-      {/* Direction arrow, dimmed on a header not ordering the rows, where it points the way a click would
-          order them. It hangs off the label's end so the label stays over its column */}
-      <span
-        className={cn(
-          'absolute left-full top-1/2 ml-0.5 -translate-y-1/2',
-          sort.by !== by && 'opacity-30'
-        )}
-      >
-        {(sort.by === by ? sort.ascending : nextSort(sort, by).ascending) ? (
-          <ArrowUp size={11} strokeWidth={2.5} aria-hidden />
-        ) : (
-          <ArrowDown size={11} strokeWidth={2.5} aria-hidden />
-        )}
-      </span>
-    </button>
-  )
-
   return (
     <div className="-mx-4 mt-3 overflow-x-auto bg-surface/30 sm:mx-0 sm:rounded-lg">
       <table className="w-full border-collapse text-xs hyphens-none sm:text-sm">
         <thead>
           <tr className="text-left text-[10px] uppercase tracking-wide text-muted sm:text-xs">
-            <th className="w-px whitespace-nowrap py-2 pl-4 pr-1 text-right font-medium sm:pl-3">
-              #
+            <th className="w-px whitespace-nowrap py-2 pl-5 pr-1 text-right font-medium sm:pl-6">
+              <SortHeader
+                label="#"
+                by="rank"
+                sort={sort}
+                onSort={onSort}
+                ariaLabel={t('rank')}
+                arrowBefore
+              />
             </th>
             <th className="w-full whitespace-nowrap py-2 pl-2 pr-2 font-medium sm:px-3">
-              {sortHeader(t('student'), 'name')}
+              <SortHeader label={t('student')} by="name" sort={sort} onSort={onSort} />
             </th>
             {competition.problems.map((problem) => (
               <th key={problem.id} className="w-px px-0.5 py-2 text-center font-medium sm:px-2">
@@ -276,14 +258,18 @@ function GradingGrid({
               </th>
             ))}
             <th className="w-px whitespace-nowrap py-2 pl-2 pr-5 text-center text-sm font-medium normal-case sm:pl-3 sm:pr-6">
-              {sortHeader(
-                <abbr title={t('total')} className="no-underline">
-                  Σ
-                </abbr>,
-                'total',
-                'normal-case',
-                t('total')
-              )}
+              <SortHeader
+                label={
+                  <abbr title={t('total')} className="no-underline">
+                    Σ
+                  </abbr>
+                }
+                by="total"
+                sort={sort}
+                onSort={onSort}
+                ariaLabel={t('total')}
+                className="normal-case"
+              />
             </th>
           </tr>
         </thead>
@@ -291,7 +277,7 @@ function GradingGrid({
           {rows.map((row) => (
             <tr key={row.user.id} className="border-t border-foreground/5">
               {/* Where they stand */}
-              <td className="w-px whitespace-nowrap py-0.5 pl-4 pr-1 text-right tabular-nums text-muted sm:pl-3 sm:py-1.5">
+              <td className="w-px whitespace-nowrap py-0.5 pl-5 pr-1 text-right tabular-nums text-muted sm:pl-6 sm:py-1.5">
                 {rankOf(rows, row) ?? <span className="text-muted/50">–</span>}
               </td>
 
@@ -383,6 +369,72 @@ function GradingGrid({
         </tfoot>
       </table>
     </div>
+  )
+}
+
+/**
+ * Props for the {@link SortHeader} component.
+ */
+type SortHeaderProps = BoardSortControls & {
+  /** What the header reads. */
+  label: ReactNode
+  /** The column the header orders the rows by. */
+  by: SortBy
+  /** Whether the direction arrow hangs before the label, which a right-aligned column needs to keep it clear. */
+  arrowBefore?: boolean
+  /** What the header is called, where its label doesn't say it in words. */
+  ariaLabel?: string
+  /** Classes on top of the header's own. */
+  className?: string
+}
+
+/**
+ * A column header which orders the rows, lit while it is the one ordering them. Its direction arrow hangs off the
+ * label so the label stays over its column. On a header not ordering the rows the arrow is dimmed and points the
+ * way a click would order them.
+ */
+function SortHeader({
+  label,
+  by,
+  sort,
+  onSort,
+  arrowBefore = false,
+  ariaLabel,
+  className,
+}: SortHeaderProps) {
+  // Whether this header's column is the one ordering the rows
+  const isActive = sort.by === by
+
+  // Which way the arrow points: the order standing, or the one a click would bring
+  const ascending = isActive ? sort.ascending : nextSort(sort, by).ascending
+
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onClick={() => onSort(by)}
+      aria-pressed={isActive}
+      className={cn(
+        'relative uppercase tracking-wide transition-colors hover:text-foreground',
+        isActive && 'text-foreground',
+        className
+      )}
+    >
+      {label}
+      <span
+        className={cn(
+          'absolute top-1/2 -translate-y-1/2',
+          arrowBefore ? 'right-full mr-0.5' : 'left-full ml-0.5',
+          !isActive && 'opacity-30'
+        )}
+      >
+        {ascending ? (
+          <ArrowUp size={11} strokeWidth={2.5} aria-hidden />
+        ) : (
+          <ArrowDown size={11} strokeWidth={2.5} aria-hidden />
+        )}
+      </span>
+    </button>
   )
 }
 

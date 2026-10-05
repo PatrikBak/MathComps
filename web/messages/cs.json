@@ -204,6 +204,7 @@
         "makeColumnFinal": "Finalizovat {count, plural, one {# hodnocení} few {# hodnocení} other {# hodnocení}} v Ú{number}",
         "makeFinal": "Finalizovat",
         "problem": "Ú{number}",
+        "rank": "Pořadí",
         "student": "Student",
         "total": "Celkem"
       },

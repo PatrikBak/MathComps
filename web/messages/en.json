@@ -204,6 +204,7 @@
         "makeColumnFinal": "Make {count, plural, one {# mark} other {# marks}} on P{number} final",
         "makeFinal": "Make final",
         "problem": "P{number}",
+        "rank": "Rank",
         "student": "Student",
         "total": "Total"
       },
