@@ -18,7 +18,7 @@ internal static class HostedGrading
     /// Finds the entry one student's grade on one problem belongs to, if anybody grades them on it.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="grants">Reads whether a student is let past the gates a competition is entered through.</param>
+    /// <param name="grants">Reads when a student started preparing the competitions.</param>
     /// <param name="problemId">The problem.</param>
     /// <param name="userId">The student.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
@@ -54,8 +54,9 @@ internal static class HostedGrading
         if (lookup?.Entry is not { } entry)
             return null;
 
-        // Whether the site lets the student past its gates.
-        var bypassesGates = await grants.HasAsync(userId, UserCapability.PrepareCompetitions, cancellationToken);
+        // When the student started preparing the competitions, if they ever did.
+        var preparerSince = await grants.GetGrantedAtAsync(
+            userId, UserCapability.PrepareCompetitions, cancellationToken);
 
         // The entry and when its conversations count, where anybody grades it.
         return GradedEntry.Of(
@@ -67,7 +68,7 @@ internal static class HostedGrading
                 entry.FinishedAt,
                 lookup.ClosesAt,
                 lookup.ClockMinutes),
-            bypassesGates);
+            preparerSince);
     }
 
     /// <summary>
@@ -133,15 +134,16 @@ internal static class HostedGrading
         if (entries.Count == 0)
             return ProblemGradings.None;
 
-        // The entrants the site lets past its gates.
-        var bypassing = await grants.GetHoldersAsync(
+        // When each entrant who prepares the competitions started doing so.
+        var preparerSince = await grants.GetGrantedAtAsync(
             [.. entries.Select(entry => entry.UserId).Distinct()],
             UserCapability.PrepareCompetitions,
             cancellationToken);
 
         // The entries anybody grades, each with the window its conversations count in.
         var graded = entries
-            .Select(entry => GradedEntry.Of(entry, bypassing.Contains(entry.UserId)))
+            .Select(entry => GradedEntry.Of(
+                entry, preparerSince.TryGetValue(entry.UserId, out var since) ? since : null))
             .OfType<GradedEntry>()
             .ToList();
 
@@ -480,12 +482,13 @@ internal static class HostedGrading
         /// One entry as it is graded: an entry the student sat, in a run somebody grades.
         /// </summary>
         /// <param name="entry">The entry.</param>
-        /// <param name="bypassesGates">
-        /// <inheritdoc cref="HostedEntryRules.IsGraded" path="/param[@name='bypassesGates']"/></param>
+        /// <param name="preparerSince">
+        /// <inheritdoc cref="HostedEntryRules.IsTestRun" path="/param[@name='preparerSince']"/></param>
         /// <returns>The entry and its window; null when nobody grades it.</returns>
-        public static GradedEntry? Of(SpentEntry entry, bool bypassesGates) =>
+        public static GradedEntry? Of(SpentEntry entry, DateTimeOffset? preparerSince) =>
             // Graded only when the student sat the entry and somebody grades the run.
-            entry.StartedAt is { } clockStartedAt && HostedEntryRules.IsGraded(entry.ClosesAt, bypassesGates)
+            entry.StartedAt is { } clockStartedAt
+            && HostedEntryRules.IsGraded(entry.ClosesAt, HostedEntryRules.IsTestRun(preparerSince, clockStartedAt))
                 ? new GradedEntry(
                     entry.Id,
                     entry.UserId,

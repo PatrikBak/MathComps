@@ -36,6 +36,7 @@ import type {
 } from '../model/hosted-competition-types'
 import { competitionAreaHref } from '../services/hosted-competition-routes'
 import { CategoryBadge } from './CategoryBadge'
+import { MarkingLabel } from './CompetitionResults'
 
 /**
  * How each phase tints its panel. Only the group taking entries and the practice one are tinted.
@@ -70,6 +71,8 @@ type HostedCompetitionGroupPanelProps = {
   bypassesGates: boolean
   /** Opens the question that has to be answered before any clock starts. */
   onEnter: (pending: PendingEntry) => void
+  /** Opens one competition's results, by its slug. */
+  onOpenResults: (competitionSlug: string) => void
 }
 
 /**
@@ -88,6 +91,7 @@ export function HostedCompetitionGroupPanel({
   now,
   bypassesGates,
   onEnter,
+  onOpenResults,
 }: HostedCompetitionGroupPanelProps) {
   // Competitions copy
   const t = useTranslations('competitions')
@@ -201,7 +205,6 @@ export function HostedCompetitionGroupPanel({
           {soleCompetition !== undefined && (
             <div className="ml-auto flex flex-wrap items-center justify-end gap-x-4 gap-y-1 empty:hidden sm:gap-x-5">
               <StandingLabel
-                competition={soleCompetition}
                 phase={phase}
                 standing={deriveStanding(group, soleCompetition, now)}
                 now={now}
@@ -213,15 +216,17 @@ export function HostedCompetitionGroupPanel({
                 standing={deriveStanding(group, soleCompetition, now)}
                 bypassesGates={bypassesGates}
                 onEnter={() => onEnter({ group, competition: soleCompetition })}
+                onOpenResults={() => onOpenResults(soleCompetition.slug[locale])}
               />
             </div>
           )}
         </div>
       </div>
 
-      {/* And the competitions themselves, one per category */}
+      {/* And the competitions themselves, one per category, sharing their columns on a wider screen so
+          every standing starts where the widest category ends */}
       {soleCompetition === undefined && (
-        <div className="divide-y divide-foreground/10 border-t border-foreground/10">
+        <div className="divide-y divide-foreground/10 border-t border-foreground/10 sm:grid sm:grid-cols-[auto_1fr_auto]">
           {group.competitions.map((competition) => (
             <CompetitionRow
               key={competition.slug[locale]}
@@ -231,6 +236,7 @@ export function HostedCompetitionGroupPanel({
               now={now}
               bypassesGates={bypassesGates}
               onEnter={() => onEnter({ group, competition })}
+              onOpenResults={() => onOpenResults(competition.slug[locale])}
             />
           ))}
         </div>
@@ -255,6 +261,8 @@ type CompetitionRowProps = {
   bypassesGates: boolean
   /** Opens the question that has to be answered before the clock starts. */
   onEnter: () => void
+  /** Opens how everybody did in it. */
+  onOpenResults: () => void
 }
 
 /**
@@ -267,6 +275,7 @@ function CompetitionRow({
   now,
   bypassesGates,
   onEnter,
+  onOpenResults,
 }: CompetitionRowProps) {
   // The active locale
   const locale = useLocale() as Locale
@@ -275,37 +284,35 @@ function CompetitionRow({
   const standing = deriveStanding(group, competition, now)
 
   return (
-    // The category on the left and the way onward pinned right, at every width. On a narrow screen the
-    // standing drops to a line of its own beneath them, so every row's action sits at the same end of
-    // the same line; on a wider one the two re-form as the single right-hand cluster. The row names which
-    // competition it is about, a category badge being absent on the practice one and worded on the rest
+    // Laid out alike whatever it says. On a narrow screen it is two columns, each stacked: the category over
+    // where the student stands on the left, the presses under each other on the right. On a wider one it
+    // takes the panel's three shared columns, category, standing and presses, so the rows line up. The row
+    // names which competition it is about, a category badge being absent on the practice one and worded on
+    // the rest
     <div
-      className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 text-sm sm:px-6"
+      className="flex items-center gap-x-4 px-4 py-3 text-sm sm:col-span-3 sm:grid sm:grid-cols-subgrid sm:px-6"
       data-competition-slug={competition.slug[locale]}
     >
-      {/* Which category */}
-      <span>
-        {competition.category !== null && <CategoryBadge category={competition.category} />}
-      </span>
+      {/* The category, and where the student stands, which several states leave nothing to say. No box of
+          its own on a wider screen, where the two take a shared column each */}
+      <div className="flex min-w-0 flex-col items-start gap-1 sm:contents">
+        <span>
+          {competition.category !== null && <CategoryBadge category={competition.category} />}
+        </span>
 
-      {/* No box of its own on a narrow screen: it hands its two children straight to the row, which is
-          what lets them take separate lines there and one cluster here */}
-      <div className="contents sm:ml-auto sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-x-5">
-        {/* Where the student stands, which several states leave nothing to say */}
-        <div className="order-2 w-full text-right empty:hidden sm:order-none sm:w-auto">
-          <StandingLabel competition={competition} phase={phase} standing={standing} now={now} />
-        </div>
+        <StandingLabel phase={phase} standing={standing} now={now} />
+      </div>
 
-        {/* And the one way onward */}
-        <div className="order-1 ml-auto empty:hidden sm:order-none sm:ml-0">
-          <EntryAction
-            competition={competition}
-            phase={phase}
-            standing={standing}
-            bypassesGates={bypassesGates}
-            onEnter={onEnter}
-          />
-        </div>
+      {/* The ways onward, under each other on a phone, where two never fit beside the category */}
+      <div className="ml-auto flex shrink-0 flex-col items-end gap-1 empty:hidden sm:col-start-3 sm:flex-row sm:items-center sm:gap-x-5">
+        <EntryAction
+          competition={competition}
+          phase={phase}
+          standing={standing}
+          bypassesGates={bypassesGates}
+          onEnter={onEnter}
+          onOpenResults={onOpenResults}
+        />
       </div>
     </div>
   )
@@ -315,8 +322,6 @@ function CompetitionRow({
  * Props for the {@link StandingLabel} component.
  */
 type StandingLabelProps = {
-  /** The competition being stood in. */
-  competition: HostedCompetition
   /** Where its group sits in its own life. */
   phase: GroupPhase
   /** Where the student stands with it. */
@@ -327,11 +332,11 @@ type StandingLabelProps = {
 
 /**
  * Where the student stands with one competition, said only when the row's action does not already say it:
- * a clock still running, and marks that have not landed.
+ * a clock still running, and how far marking has got.
  *
  * Its own component because a group holding a single competition has no row and still has a standing.
  */
-export function StandingLabel({ competition, phase, standing, now }: StandingLabelProps) {
+export function StandingLabel({ phase, standing, now }: StandingLabelProps) {
   // Competitions copy
   const t = useTranslations('competitions')
 
@@ -355,11 +360,14 @@ export function StandingLabel({ competition, phase, standing, now }: StandingLab
     case 'forfeited':
       return null
 
-    // Over, so the only thing left to say is that the marks have not landed yet
+    // Over, so what is left to say is how the marks stand
     case 'done':
-      return phase === 'closed' && !competition.resultsPublished ? (
+      if (phase !== 'closed') return null
+      return standing.cells !== null ? (
+        <MarkingLabel cells={standing.cells} />
+      ) : (
         <span className="text-muted/80">{t('resultsPending')}</span>
-      ) : null
+      )
 
     // Every standing is handled above
     default:
@@ -443,6 +451,8 @@ type EntryActionProps = {
   bypassesGates: boolean
   /** Takes the press on the way in. */
   onEnter: () => void
+  /** Opens how everybody did in it; null for the practice run, which keeps no results. */
+  onOpenResults: (() => void) | null
 }
 
 /**
@@ -454,8 +464,6 @@ type EntryActionProps = {
  *
  * The press keeps the same word whatever stands in the way, and is never disabled: what it turns into is
  * the guard's call rather than this button's.
- *
- * The results are still being built, so that link renders dead.
  */
 export function EntryAction({
   competition,
@@ -463,6 +471,7 @@ export function EntryAction({
   standing,
   bypassesGates,
   onEnter,
+  onOpenResults,
 }: EntryActionProps) {
   // Competitions copy
   const t = useTranslations('competitions')
@@ -486,7 +495,7 @@ export function EntryAction({
     const wasInIt = standing.kind !== 'none'
 
     return (
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-5">
+      <>
         {wasInIt ? (
           <AreaLink href={areaHref} icon={NotebookPen} label={t('mySolutions')} />
         ) : (
@@ -495,13 +504,13 @@ export function EntryAction({
           )
         )}
 
-        {competition.resultsPublished && (
-          <Button variant="link">
+        {onOpenResults !== null && (
+          <Button variant="link" onClick={onOpenResults}>
             <Trophy size={15} />
             {t('results')}
           </Button>
         )}
-      </div>
+      </>
     )
   }
 
@@ -523,7 +532,7 @@ export function EntryAction({
     // last run just opened
     case 'done':
       return (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-5">
+        <>
           <AreaLink href={areaHref} icon={NotebookPen} label={t('mySolutions')} />
 
           {phase === 'practice' && (
@@ -532,7 +541,7 @@ export function EntryAction({
               {t('tryAgain')}
             </Button>
           )}
-        </div>
+        </>
       )
 
     // Untaken, so the group decides: one that has not opened yet has nothing to press, and an open one

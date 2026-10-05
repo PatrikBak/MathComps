@@ -2,6 +2,7 @@ import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
 import type {
+  CompetitionResults,
   EntryReadiness,
   HostedCompetitionEntry,
   HostedCompetitionProblem,
@@ -10,6 +11,7 @@ import type {
 } from '../model/hosted-competition-types'
 import {
   getCompetitionProblemsUrl,
+  getCompetitionResultsUrl,
   getDismissProfilePromptUrl,
   getEnterCompetitionUrl,
   getEntryReadinessUrl,
@@ -33,6 +35,20 @@ export function fetchHostedCompetitionsView(
   apiCall: ApiCaller
 ): Promise<ApiResult<HostedCompetitionsView>> {
   return apiCall<HostedCompetitionsView>(() => getHostedCompetitionsViewUrl())
+}
+
+/**
+ * Reads one competition's results, as anybody may once its group has closed.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param competitionSlug - Which competition's results to read.
+ * @returns The results.
+ */
+export function fetchCompetitionResults(
+  apiCall: ApiCaller,
+  competitionSlug: string
+): Promise<ApiResult<CompetitionResults>> {
+  return apiCall<CompetitionResults>(() => getCompetitionResultsUrl(competitionSlug))
 }
 
 /**

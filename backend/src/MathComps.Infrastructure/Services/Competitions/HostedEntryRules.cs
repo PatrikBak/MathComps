@@ -119,16 +119,27 @@ public static class HostedEntryRules
     }
 
     /// <summary>
+    /// Whether a student's run is a test run: they already held <see cref="UserCapability.PrepareCompetitions"/>
+    /// when its clock started. A grant handed over later leaves a run they sat for real as it was.
+    /// </summary>
+    /// <param name="preparerSince">
+    /// When the student was handed <see cref="UserCapability.PrepareCompetitions"/>, null where they do not hold it.
+    /// </param>
+    /// <param name="startedAt">When the run's clock started.</param>
+    /// <returns>Whether the run is a test run.</returns>
+    public static bool IsTestRun(DateTimeOffset? preparerSince, DateTimeOffset startedAt) =>
+        // Granted by the time the clock started, which an account without a grant never was
+        preparerSince <= startedAt;
+
+    /// <summary>
     /// Whether a student's run in a hosted group is one somebody grades: a group with no closing instant grades
-    /// nobody, nor anybody the site lets past its gates.
+    /// nobody, and nobody grades a test run.
     /// </summary>
     /// <param name="groupClosesAt"><inheritdoc cref="HostedGroup.ClosesAt" path="/summary"/></param>
-    /// <param name="bypassesGates">
-    /// Whether the student holds <see cref="UserCapability.PrepareCompetitions"/>.
-    /// </param>
+    /// <param name="isTestRun"><inheritdoc cref="IsTestRun" path="/summary"/></param>
     /// <returns>Whether the run is graded.</returns>
-    public static bool IsGraded(DateTimeOffset? groupClosesAt, bool bypassesGates) =>
-        groupClosesAt is not null && !bypassesGates;
+    public static bool IsGraded(DateTimeOffset? groupClosesAt, bool isTestRun) =>
+        groupClosesAt is not null && !isTestRun;
 
     /// <summary>
     /// Whether a group's results are out, which they are for anybody once it has closed. A group with no closing

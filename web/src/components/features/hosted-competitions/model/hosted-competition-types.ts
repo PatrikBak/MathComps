@@ -15,12 +15,6 @@ export type HostedCompetition = {
   /** The student's entry, or null while they have not taken it. */
   entry: HostedCompetitionEntry | null
   /**
-   * Whether its results have been published.
-   *
-   * A fact about the competition rather than the reader: once out, they are out for everybody.
-   */
-  resultsPublished: boolean
-  /**
    * Whether the problems are open to this reader without an entry.
    *
    * They open to everybody once the round's embargo has lifted, and to a reader let past the gates whenever
@@ -35,6 +29,152 @@ export type HostedCompetition = {
    * still being filled. An entry is spent once, so it cannot be spent on a set nobody has finished writing.
    */
   problemsReady: boolean
+}
+
+/**
+ * One student on one problem, as the results show it to anybody.
+ */
+export type ResultCell = NoConversationCell | PendingCell | ScoredCell
+
+/**
+ * A problem the student never wrote to Mathilda about, so there is nothing to mark.
+ */
+type NoConversationCell = {
+  /** Marks a problem with nothing to mark. */
+  kind: 'none'
+}
+
+/**
+ * A problem the student wrote about, with no final mark on it yet.
+ */
+type PendingCell = {
+  /** Marks a problem still being marked. */
+  kind: 'pending'
+}
+
+/**
+ * A problem marked for good.
+ */
+export type ScoredCell = {
+  /** Marks a problem with a final mark. */
+  kind: 'scored'
+  /** The mark less half of what came from Mathilda. */
+  score: number
+}
+
+/**
+ * Who a row of the results belongs to: everything the profile promised would appear in the listing.
+ */
+export type ResultStudent = {
+  /** The permanent name, or null for an account since deleted. */
+  username: string | null
+  /** The avatar, or null when there is none. */
+  avatarUrl: string | null
+  /** Where they compete from, as an ISO 3166-1 alpha-2 code; null while unsaid. */
+  countryCode: string | null
+  /** Where they were in school when the round was held. */
+  grade: SchoolGrade
+}
+
+/**
+ * Where a student is in school, counted the Slovak and Czech way: nine years of primary school, then four of
+ * high school ending in the maturita.
+ */
+export type SchoolGrade = PrimarySchoolGrade | HighSchoolGrade | PastHighSchool
+
+/**
+ * A year of primary school, or the matching year of an eight-year gymnasium.
+ */
+type PrimarySchoolGrade = {
+  /** Marks a year of primary school. */
+  kind: 'primarySchool'
+  /** Which one, from 1. */
+  year: number
+}
+
+/**
+ * A year of high school.
+ */
+type HighSchoolGrade = {
+  /** Marks a year of high school. */
+  kind: 'highSchool'
+  /** Which one, from 1; the fourth ends in the maturita. */
+  year: number
+}
+
+/**
+ * Done with high school.
+ */
+type PastHighSchool = {
+  /** Marks somebody past high school. */
+  kind: 'pastHighSchool'
+}
+
+/**
+ * One student's row of a competition's results.
+ */
+export type ResultRow = {
+  /** Where they stand, ties broken by the rules; null while nothing of theirs is marked for good. */
+  place: number | null
+  /** Who. */
+  student: ResultStudent
+  /** Whether the row is the reader's own. */
+  isReader: boolean
+  /** One per problem, in the set's order. */
+  cells: ResultCell[]
+}
+
+/**
+ * One competition's results, readable by anybody once its group has closed.
+ */
+export type CompetitionResults = {
+  /** Every student who sat it, in the order they stand. */
+  rows: ResultRow[]
+}
+
+/**
+ * The reader's own result on one problem, once their group has closed.
+ */
+export type ProblemResult = NoConversationResult | PendingResult | FinalResult
+
+/**
+ * A problem the reader never wrote to Mathilda about.
+ */
+type NoConversationResult = {
+  /** Marks a problem with nothing to mark. */
+  kind: 'none'
+}
+
+/**
+ * A problem the reader wrote about, with no final mark on it yet.
+ */
+type PendingResult = {
+  /** Marks a problem still being marked. */
+  kind: 'pending'
+}
+
+/**
+ * A problem marked for good, with the conversation about the marking that opens with it.
+ */
+type FinalResult = {
+  /** Marks a problem with a final mark. */
+  kind: 'final'
+  /** The whole mark. */
+  mark: number
+  /** The part of it that came from Mathilda. */
+  help: number
+  /** The conversation with the graders about the mark. */
+  conversation: GradeConversation
+}
+
+/**
+ * The conversation between the graders and one student about one mark.
+ */
+export type GradeConversation = {
+  /** The comment thread it is, `{problemId}:{userId}`. */
+  targetId: string
+  /** How many messages stand in it. */
+  messageCount: number
 }
 
 /**
@@ -74,6 +214,11 @@ export type HostedCompetitionProblem = {
   selfAssessment: string | null
   /** The longest what they say about it may be, in characters. */
   maxCommentChars: number
+  /**
+   * The reader's result on it; null until the group has closed, and for an entry nobody grades or nobody
+   * sat.
+   */
+  result: ProblemResult | null
 }
 
 /**
@@ -118,6 +263,11 @@ export type SatEntry = {
   startedAt: string
   /** When the student closed the entry themselves, as an ISO-8601 string; null while they have not. */
   finishedAt: string | null
+  /**
+   * The student's own row of the results, one cell per problem; null until the group has closed, and where
+   * nobody grades them.
+   */
+  cells: ResultCell[] | null
 }
 
 /**

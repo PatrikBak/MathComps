@@ -24,7 +24,7 @@ namespace MathComps.Infrastructure.Services.Competitions;
 /// <param name="localization">
 /// The node a competition runs under: its localized name, and the URL name it is addressed by.
 /// </param>
-/// <param name="grants">Reads whether a student is let past the gates a competition is entered through.</param>
+/// <param name="grants">Reads whether a student prepares the competitions, and since when.</param>
 /// <param name="options">The terms a hosted competition runs on.</param>
 public sealed class HostedCompetitionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
@@ -497,7 +497,8 @@ public sealed class HostedCompetitionService(
             throw new HostedCompetitionNotReadyException();
 
         // What an entry asks of the student's account, settled before anything is written. Only a graded run has
-        // a result to name the student in, so only a graded one asks anything of the account.
+        // a result to name the student in, so only a graded one asks anything of the account. The grant is read as
+        // the clock starts, so holding one makes the run a test run.
         if (HostedEntryRules.IsGraded(group.ClosesAt, reader.BypassesGates))
             await EnsureReadyToEnterAsync(dbContext, userId, cancellationToken);
 
@@ -873,7 +874,7 @@ public sealed class HostedCompetitionService(
 
     /// <summary>
     /// Throws unless the student may still say something about a round's solutions: they sat an entry into it
-    /// rather than giving it up, and its grace has not run out, if it has ended at all.
+    /// rather than giving it up, the run is no test run, and its grace has not run out, if it has ended at all.
     /// </summary>
     /// <remarks>
     /// Stricter than the read rule above, which lets anybody read a set out of embargo. What a student says
@@ -887,10 +888,6 @@ public sealed class HostedCompetitionService(
     private async Task EnsureNotesOpenAsync(
         MathCompsDbContext dbContext, Guid userId, Guid roundId, CancellationToken cancellationToken)
     {
-        // Nobody grades a run the site let past the gates, so a note under one has no reader.
-        if (await grants.HasAsync(userId, UserCapability.PrepareCompetitions, cancellationToken))
-            throw new HostedEntryNotGradedException();
-
         // Their entry with the clock it was given, absent unless the site hosts the round and they spent one.
         var entry = await dbContext.HostedEntries
             .AsNoTracking()
@@ -910,6 +907,14 @@ public sealed class HostedCompetitionService(
         // An entry given up for the problems was never a run, so nothing was argued in it to speak about.
         if (entry.StartedAt is not { } startedAt)
             throw new HostedEntryNotRunningException();
+
+        // When the student started preparing the competitions, if they ever did.
+        var preparerSince = await grants.GetGrantedAtAsync(
+            userId, UserCapability.PrepareCompetitions, cancellationToken);
+
+        // Nobody grades a test run, so a note under one has no reader.
+        if (HostedEntryRules.IsTestRun(preparerSince, startedAt))
+            throw new HostedEntryNotGradedException();
 
         // Where the entry stopped counting.
         var endedAt = HostedEntryRules.EndedAt(startedAt, entry.FinishedAt, entry.ClockMinutes);

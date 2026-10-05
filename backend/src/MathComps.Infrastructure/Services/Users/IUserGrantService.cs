@@ -18,12 +18,22 @@ public interface IUserGrantService
     Task<bool> HasAsync(Guid userId, UserCapability capability, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Which of several accounts hold a capability.
+    /// When an account was handed a capability it holds.
+    /// </summary>
+    /// <param name="userId">The account the capability is read for.</param>
+    /// <param name="capability">The capability being read for.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>When it was handed over, or null where the account does not hold it.</returns>
+    Task<DateTimeOffset?> GetGrantedAtAsync(
+        Guid userId, UserCapability capability, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// When each of several accounts was handed a capability it holds.
     /// </summary>
     /// <param name="userIds">The accounts the capability is read for.</param>
     /// <param name="capability">The capability being read for.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The ones among them who hold it.</returns>
-    Task<IReadOnlySet<Guid>> GetHoldersAsync(
+    /// <returns>When it was handed over, by account, for the ones among them who hold it.</returns>
+    Task<IReadOnlyDictionary<Guid, DateTimeOffset>> GetGrantedAtAsync(
         IReadOnlyCollection<Guid> userIds, UserCapability capability, CancellationToken cancellationToken = default);
 }

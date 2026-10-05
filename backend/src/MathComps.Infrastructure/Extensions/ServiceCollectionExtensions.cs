@@ -560,7 +560,8 @@ public static class ServiceCollectionExtensions
         // Both the queue and the notes feed are read a page at a time, by the server's bounds.
         services.AddPaginationOptions();
 
-        // Who the site lets past its gates, which decides whether anybody grades a student.
+        // The reader of when a student started preparing the competitions, which decides whether anybody grades
+        // their runs.
         services.AddUserGrants();
 
         // The service that reads every student's conversations back and records which have been read.

@@ -20,6 +20,11 @@ public class UserGrantServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IUserGrantService>(fixture)
 {
     /// <summary>
+    /// When the grant was handed over.
+    /// </summary>
+    private static readonly DateTimeOffset _grantedAt = new(2026, 9, 1, 12, 0, 0, TimeSpan.Zero);
+
+    /// <summary>
     /// The student the grant was written for.
     /// </summary>
     private readonly Guid _grantedId = Guid.CreateVersion7();
@@ -53,15 +58,16 @@ public class UserGrantServicePostgresTests(PostgresContainerFixture fixture)
         Assert.False(await grants.HasAsync(_plainId, UserCapability.PrepareCompetitions)));
 
     /// <summary>
-    /// Asked about several accounts at once, only the one a grant names comes back. A read letting an ungranted
-    /// one in would hand the capability to every account asked about alongside a granted one.
+    /// Asked about several accounts at once, only the one a grant names comes back, with when it was handed over.
+    /// A read letting an ungranted one in would hand the capability to every account asked about alongside a
+    /// granted one.
     /// </summary>
     [Fact]
     public Task Of_several_accounts_only_the_granted_one_holds_it() => RunTestAsync(async grants =>
         // Both accounts asked about, the grant written for one
         Assert.Equal(
-            [_grantedId],
-            await grants.GetHoldersAsync([_grantedId, _plainId], UserCapability.PrepareCompetitions)));
+            new Dictionary<Guid, DateTimeOffset> { [_grantedId] = _grantedAt },
+            await grants.GetGrantedAtAsync([_grantedId, _plainId], UserCapability.PrepareCompetitions)));
 
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
@@ -76,6 +82,7 @@ public class UserGrantServicePostgresTests(PostgresContainerFixture fixture)
         {
             UserId = _grantedId,
             Capability = UserCapability.PrepareCompetitions,
+            GrantedAt = _grantedAt,
         });
 
         // Submit changes

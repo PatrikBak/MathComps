@@ -157,6 +157,7 @@ export function buildProblems(
       defenses,
       selfAssessment: state.assessments.get(id) ?? null,
       maxCommentChars: LIMITS.maxFeedbackCommentChars,
+      result: null,
     }
   })
 }

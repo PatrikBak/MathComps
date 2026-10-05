@@ -61,9 +61,9 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
     private readonly Guid _otherProblemId = Guid.CreateVersion7();
 
     /// <summary>
-    /// The graded problem's slug, which names its public thread.
+    /// The slug of a problem the archive serves, which names its public thread.
     /// </summary>
-    private const string ProblemSlug = "mathcomps-advanced-september-1";
+    private const string ArchiveProblemSlug = "testcomp-1";
 
     /// <summary>
     /// The graded round.
@@ -346,8 +346,8 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
     [Fact]
     public Task A_reply_to_a_comment_in_another_thread_is_refused() => RunTestAsync(async service =>
     {
-        // The problem's public thread and the conversation about it
-        var publicThread = new CommentTarget(CommentTargetType.Problem, ProblemSlug);
+        // A problem's public thread, and the conversation about the graded problem
+        var publicThread = new CommentTarget(CommentTargetType.Problem, ArchiveProblemSlug);
         var conversation = GradeConversation(_problemId, _student);
 
         // A comment in each
@@ -466,6 +466,19 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
         // The classmate argued the other problem only once the clock had run out
         NewConversation(
             context, Guid.CreateVersion7(), _classmate.UserId, _otherProblemId, _startedAt.AddMinutes(200));
+
+        // A round the site did not host, for a problem the archive serves
+        var archiveRound = new Round
+        {
+            Id = Guid.CreateVersion7(),
+            CompetitionId = CompetitionTreeSeed.Chain(context, "testcomp").Id,
+            SeasonId = season.Id,
+            Date = new DateOnly(2026, 9, 1)
+        };
+        context.Rounds.Add(archiveRound);
+
+        // The round's one problem, whose thread is public
+        context.Problems.Add(new Problem { RoundId = archiveRound.Id, Number = 1, Slug = ArchiveProblemSlug });
 
         // Save seeded data
         await context.SaveChangesAsync();

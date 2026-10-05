@@ -11,8 +11,9 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// Every operation on one thread is told who is asking, which for a read can be nobody. A thread the viewer may
 /// not reach, and every comment in it, is refused as though it did not exist:
 /// <see cref="CommentTargetNotFoundException"/> for a target, <see cref="CommentNotFoundException"/> for a comment.
-/// Problems, handouts and news are open to anybody; a grade conversation to admins, and to the student it is with
-/// once their group has closed, while the grade is final. A version an edit has replaced is refused with
+/// Handouts, news and the problems the archive serves are open to anybody, and no other problem has a thread. A
+/// grade conversation is open to admins, and to the student it is with once their group has closed, while the
+/// grade is final. A version an edit has replaced is refused with
 /// <see cref="CommentNotFoundException"/> too.
 /// </remarks>
 public interface ICommentService

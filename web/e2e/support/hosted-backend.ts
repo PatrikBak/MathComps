@@ -345,6 +345,7 @@ export async function installHostedBackend(
           kind: 'sat',
           startedAt: new Date(await pageNow(page)).toISOString(),
           finishedAt: null,
+          cells: null,
         }
 
         // Taking one is agreeing to the rules, which a reader let past the gates was never shown

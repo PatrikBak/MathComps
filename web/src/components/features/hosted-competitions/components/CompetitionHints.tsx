@@ -57,6 +57,8 @@ export function CompetitionHints({
       isOpen={isOpen}
       onOpen={onOpen}
       onClose={onClose}
+      count={null}
+      isTall={false}
     >
       <HintLadder hints={hints[locale]} />
     </CompetitionProblemSurface>
