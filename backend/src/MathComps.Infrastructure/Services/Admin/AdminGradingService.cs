@@ -142,8 +142,12 @@ public class AdminGradingService(
             [
                 .. group.Rounds.Select(round =>
                 {
-                    // The round's graded entries, by username.
-                    var roundEntries = graded.Where(row => row.RoundId == round.Id).ToList();
+                    // The round's graded entries with a counted conversation about any of its problems, by username.
+                    var roundEntries = graded
+                        .Where(row => row.RoundId == round.Id
+                            && round.Problems.Any(problem =>
+                                conversationCounts.ContainsKey((row.User.Id, problem.Id))))
+                        .ToList();
 
                     // The competition.
                     return new GradingCompetitionDto(
@@ -154,9 +158,9 @@ public class AdminGradingService(
                             ?? throw new InvalidOperationException(
                                 $"Round {round.Id} of a graded group has no level."),
                         round.Problems,
-                        // The round's graded entrants.
+                        // The round's entrants who spoke while their entry counted.
                         [.. roundEntries.Select(row => row.User)],
-                        // Every graded entrant on every problem.
+                        // Every entrant who spoke, on every problem.
                         [
                             .. roundEntries.SelectMany(row => round.Problems.Select(problem =>
                                 new GradeSummaryDto(

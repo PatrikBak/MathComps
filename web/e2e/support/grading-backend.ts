@@ -39,8 +39,8 @@ export const GROUP_NAME = 'September round'
  * The board the fake opens on: two competitions, the first with three students on two problems. Ada spoke about
  * her first problem twice while her entry counted and once more after she handed in, and was pre-graded on her
  * second; Bruno was graded final on his first and never spoke about his second; and Cyril is not graded yet. The
- * second competition holds Dora, who spoke about its problem twice, and Ada again, who entered it too and never
- * spoke about it, so four students made five entries.
+ * second competition holds Dora, who spoke about its problem twice, and Ada again, who entered it too and spoke
+ * about it once, so four students made five entries.
  */
 const BOARD: GradingBoard = {
   name: { sk: 'Septembrové kolo', cs: 'Zářijové kolo', en: GROUP_NAME },
@@ -82,7 +82,7 @@ const BOARD: GradingBoard = {
         { id: 'dora', username: 'Dora', email: null },
       ],
       grades: [
-        { userId: 'ada', problemId: 'q1', conversationCount: 0, grade: null },
+        { userId: 'ada', problemId: 'q1', conversationCount: 1, grade: null },
         { userId: 'dora', problemId: 'q1', conversationCount: 2, grade: null },
       ],
     },

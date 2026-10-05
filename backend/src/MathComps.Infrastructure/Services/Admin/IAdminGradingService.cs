@@ -19,8 +19,8 @@ public interface IAdminGradingService
     /// <param name="groupSlug">What addresses the group.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>
-    /// The group's name and dates, and each of its competitions with every graded entrant on every problem, in
-    /// the order the taxonomy sets the categories out.
+    /// The group's name and dates, and each of its competitions with its entrants' grades
+    /// (<see cref="GradingCompetitionDto"/>), in the order the taxonomy sets the categories out.
     /// </returns>
     /// <exception cref="HostedGroupNotFoundException">No group the site grades goes by the slug.</exception>
     Task<GradingBoardDto> GetBoardAsync(

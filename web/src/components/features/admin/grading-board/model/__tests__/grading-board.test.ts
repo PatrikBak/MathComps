@@ -53,8 +53,8 @@ function summaryOf(
 }
 
 /**
- * Two problems, and an entrant of each kind: one graded final on both, one pre-graded with half points, one who spoke on
- * neither, and one not graded yet.
+ * Two problems, and an entrant of each kind: one graded final on both, one pre-graded with half points, and one not
+ * graded yet.
  */
 const COMPETITION: GradingCompetition = {
   roundId: 'round',
@@ -66,7 +66,6 @@ const COMPETITION: GradingCompetition = {
   entrants: [
     { id: 'zora', username: 'Zora', email: null },
     { id: 'adam', username: 'Adam', email: null },
-    { id: 'mute', username: 'Mute', email: null },
     { id: 'emil', username: 'Emil', email: null },
   ],
   grades: [
@@ -74,8 +73,6 @@ const COMPETITION: GradingCompetition = {
     summaryOf('zora', 'p2', 2, gradeOf(3, 0, true)),
     summaryOf('adam', 'p1', 1, gradeOf(6, 1, false)),
     summaryOf('adam', 'p2', 0, null),
-    summaryOf('mute', 'p1', 0, null),
-    summaryOf('mute', 'p2', 0, null),
     summaryOf('emil', 'p1', 1, null),
     summaryOf('emil', 'p2', 1, null),
   ],
@@ -111,9 +108,6 @@ describe('buildRows', () => {
     // Every problem Zora discussed is final, and the one Adam discussed is still pre-graded
     expect(rowOf('Zora')?.isFinal).toBe(true)
     expect(rowOf('Adam')?.isFinal).toBe(false)
-
-    // Nothing discussed, so nothing to be final about
-    expect(rowOf('Mute')?.isFinal).toBe(false)
   })
 })
 
@@ -128,16 +122,16 @@ describe('rankOf', () => {
 })
 
 describe('sortRows', () => {
-  it('keeps the rows without a total last whichever way round', () => {
+  it('keeps a row without a total last whichever way round', () => {
     // Best first
     const best = sortRows(ROWS, { by: 'total', ascending: false }).map((row) => row.name)
 
     // Worst first
     const worst = sortRows(ROWS, { by: 'total', ascending: true }).map((row) => row.name)
 
-    // The totals turn round, and the two without one stay behind them in the order they came
-    expect(best).toEqual(['Zora', 'Adam', 'Emil', 'Mute'])
-    expect(worst).toEqual(['Adam', 'Zora', 'Emil', 'Mute'])
+    // The totals turn round, and the one without a total stays behind them
+    expect(best).toEqual(['Zora', 'Adam', 'Emil'])
+    expect(worst).toEqual(['Adam', 'Zora', 'Emil'])
   })
 })
 
