@@ -457,13 +457,8 @@ public class CommentService(
             CommentTargetType.News => new NewsAnchor(
                 await ContentAnchors.EnsureNewsArticleAsync(dbContext, target.TargetId)),
 
-            // The problem with the slug, which must exist
-            CommentTargetType.Problem => new ProblemAnchor(
-                await dbContext.Problems
-                    .Where(problem => problem.Slug == target.TargetId)
-                    .Select(problem => (Guid?)problem.Id)
-                    .FirstOrDefaultAsync()
-                ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId)),
+            // The problem with the slug, which the archive must serve
+            CommentTargetType.Problem => await ResolveProblemAnchorAsync(dbContext, target),
 
             // The grade conversation, by the student's entry and the problem
             CommentTargetType.HostedGrade => await ResolveGradeAnchorAsync(dbContext, target),
@@ -471,6 +466,24 @@ public class CommentService(
             // Unhandled target type
             _ => throw new ArgumentOutOfRangeException(nameof(target), target.TargetType, "Invalid comment target type")
         };
+
+    /// <summary>
+    /// Resolves a problem's thread by the problem's slug. Only a problem the archive serves, by
+    /// <see cref="ProblemQueryableExtensions.WhereArchiveServes"/>, has a thread, and any other is refused like a
+    /// missing one.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="target">The thread, identified by the problem's slug.</param>
+    /// <returns>The problem's thread.</returns>
+    private static async Task<ProblemAnchor> ResolveProblemAnchorAsync(
+        MathCompsDbContext dbContext, CommentTarget target) =>
+        // The served problem with the slug, refused like a missing thread when there is none
+        new(await dbContext.Problems
+                .WhereArchiveServes(DateTimeOffset.UtcNow)
+                .Where(problem => problem.Slug == target.TargetId)
+                .Select(problem => (Guid?)problem.Id)
+                .FirstOrDefaultAsync()
+            ?? throw new CommentTargetNotFoundException(target.TargetType, target.TargetId));
 
     /// <summary>
     /// Resolves a grade conversation, named like the grade itself by its problem and student, to the problem and
@@ -514,20 +527,24 @@ public class CommentService(
 
     /// <summary>
     /// Reads the thread a comment was written in off its stored link. A version an edit has replaced counts as
-    /// missing.
+    /// missing, and so does a comment on a problem the archive does not serve, which has no thread.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="commentId">The comment.</param>
     /// <returns>The thread the comment belongs to.</returns>
     private static async Task<CommentAnchor> ReadAnchorAsync(MathCompsDbContext dbContext, Guid commentId)
     {
+        // The problems the archive serves, the only ones with a thread
+        var servedProblems = dbContext.Problems.WhereArchiveServes(DateTimeOffset.UtcNow);
+
         // The live comment's link into each kind of thread, of which it has exactly one
         var links = await dbContext.Comments
             .Where(comment => comment.Id == commentId && comment.Status != CommentStatus.Superseded)
             .Select(comment => new
             {
                 ProblemId = dbContext.ProblemComments
-                    .Where(link => link.CommentId == comment.Id)
+                    .Where(link => link.CommentId == comment.Id
+                        && servedProblems.Any(problem => problem.Id == link.ProblemId))
                     .Select(link => (Guid?)link.ProblemId)
                     .FirstOrDefault(),
                 HandoutId = dbContext.HandoutComments
@@ -562,7 +579,7 @@ public class CommentService(
             // A grade conversation
             { Grade: { } grade } => new GradeAnchor(grade.EntryId, grade.ProblemId, grade.UserId),
 
-            // A comment in no thread is one nobody can reach
+            // A comment in no thread, or on a problem the archive does not serve, is one nobody can reach
             _ => throw new CommentNotFoundException()
         };
     }
@@ -640,11 +657,11 @@ public class CommentService(
                 new object[] { target.TargetId }
             ),
 
-            // A problem's thread, by its slug
+            // A problem's thread, by the problem its slug resolves to
             CommentTargetType.Problem => (
-                "JOIN problem_comments pc ON c.id = pc.comment_id JOIN problems p ON pc.problem_id = p.id",
-                "p.slug = @p0",
-                [target.TargetId]
+                "JOIN problem_comments pc ON c.id = pc.comment_id",
+                "pc.problem_id = @p0",
+                [(await ResolveProblemAnchorAsync(dbContext, target)).ProblemId]
             ),
 
             // A news article's thread, by its content id
@@ -788,9 +805,9 @@ public class CommentService(
     /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
     private async Task EnsureOpenAsync(MathCompsDbContext dbContext, CommentTarget target, CommentViewer? viewer)
     {
-        // Public content, open whichever item it is, so no thread is resolved to decide it. A grade conversation is
-        // looked up only for somebody it is between, so not even how long a refusal takes tells anybody else whether
-        // there is one.
+        // Public content, open to anybody, so no thread is resolved to decide it. A grade conversation is looked up
+        // only for somebody it is between, so not even how long a refusal takes tells anybody else whether there is
+        // one.
         var isOpen = IsPublic(target.TargetType)
             || (HostedGrading.TryParseConversationTargetId(target.TargetId, out _, out var studentId)
                 && IsBetween(viewer, studentId)
