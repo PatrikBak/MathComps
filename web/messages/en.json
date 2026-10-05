@@ -175,6 +175,7 @@
     },
     "grades": {
       "conversationPlaceholder": "Write to the student...",
+      "finalizeFailed": "Couldn't make the marks final",
       "panel": {
         "changedBy": "Changed by <name>{grader}</name>",
         "comment": "Comment for graders",
@@ -192,8 +193,16 @@
     },
     "grading": {
       "empty": "Nobody to grade in this group.",
+      "finalize": {
+        "confirm": "Make final",
+        "message": "{count, plural, one {# student} other {# students}} will see their mark on P{number}.{unmarked, plural, =0 {} one { # student without a mark is left out.} other { # students without a mark are left out.}}",
+        "title": "Make P{number} final?"
+      },
       "grid": {
+        "columnFinal": "Every mark on P{number} is final",
         "final": "final",
+        "makeColumnFinal": "Make {count, plural, one {# mark} other {# marks}} on P{number} final",
+        "makeFinal": "Make final",
         "problem": "P{number}",
         "student": "Student",
         "total": "Total"

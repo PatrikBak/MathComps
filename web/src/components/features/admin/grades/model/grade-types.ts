@@ -19,6 +19,16 @@ export type Grade = {
 }
 
 /**
+ * One entrant's grade on a problem named elsewhere.
+ */
+export type StudentGrade = {
+  /** The entrant. */
+  userId: string
+  /** Where the grade stands. */
+  grade: Grade
+}
+
+/**
  * What a student said about their own solution to one problem.
  */
 export type SelfAssessment = {

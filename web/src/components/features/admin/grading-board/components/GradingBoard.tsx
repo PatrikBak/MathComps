@@ -1,14 +1,16 @@
 'use client'
 
-import { ArrowDown, ArrowUp, Check } from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, CheckCheck } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import { useCategoryName } from '@/components/features/hosted-competitions/hooks/use-category-name'
 import { useEntryWindowLabel } from '@/components/features/hosted-competitions/hooks/use-entry-window-label'
-import { Button } from '@/components/shared/components/Button'
+import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
+import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import { useStepHotkeys } from '@/hooks/use-step-hotkeys'
@@ -16,10 +18,13 @@ import type { Locale } from '@/i18n/i18n'
 
 import { ConversationDialog } from '../../conversation/components/ConversationDialog'
 import { formatScore, type Grade, pairKey, scoreOf } from '../../grades/model/grade-types'
+import { type ColumnToFinalize, useColumnFinalizing } from '../hooks/use-column-finalizing'
 import { useGradingBoard } from '../hooks/use-grading-board'
 import {
   type BoardRow,
   type BoardSort,
+  type ColumnFinality,
+  columnFinality,
   nextSort,
   rankOf,
   type SortBy,
@@ -28,6 +33,7 @@ import {
   type GradeSummary,
   type GradingCompetition,
   type GradingGroup,
+  type GradingProblem,
 } from '../model/grading-types'
 
 /**
@@ -56,6 +62,9 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
 
   // Walking the pairs from the keyboard
   useStepHotkeys(board.selection)
+
+  // Making a whole column final, once confirmed
+  const finalizing = useColumnFinalizing()
 
   return (
     <div className="mx-auto w-full max-w-4xl">
@@ -117,10 +126,28 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
             sort={board.sort}
             onSort={board.sortBy}
             onOpen={board.selection.open}
+            onFinalize={finalizing.ask}
           />
 
           {/* The pair being graded */}
           <ConversationDialog selection={board.selection} studentProblem={board.studentProblem} />
+
+          {/* The question before a column is made final */}
+          {finalizing.asking !== null && (
+            <ConfirmDialog
+              isOpen
+              onClose={finalizing.dismiss}
+              onConfirm={finalizing.confirm}
+              title={t('finalize.title', { number: finalizing.asking.problem.number })}
+              message={t('finalize.message', {
+                number: finalizing.asking.problem.number,
+                count: finalizing.asking.column.userIds.length,
+                unmarked: finalizing.asking.column.unmarked,
+              })}
+              confirmText={t('finalize.confirm')}
+              variant="default"
+            />
+          )}
         </>
       )}
     </div>
@@ -181,12 +208,23 @@ type GradingGridProps = {
   onSort: (by: SortBy) => void
   /** Opens a pair, by its key. */
   onOpen: (key: string) => void
+  /** Asks to make a problem's column final. */
+  onFinalize: (column: ColumnToFinalize) => void
 }
 
 /**
- * Students down the side, problems across the top, a total at the end.
+ * Students down the side, problems across the top, a total at the end, and a row under them for making a whole
+ * problem's column final.
  */
-function GradingGrid({ competition, rows, grades, sort, onSort, onOpen }: GradingGridProps) {
+function GradingGrid({
+  competition,
+  rows,
+  grades,
+  sort,
+  onSort,
+  onOpen,
+  onFinalize,
+}: GradingGridProps) {
   // Grading copy
   const t = useTranslations('admin.grading.grid')
 
@@ -313,9 +351,103 @@ function GradingGrid({ competition, rows, grades, sort, onSort, onOpen }: Gradin
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          <tr className="border-t border-foreground/10">
+            {/* What the row does, over the place and the name */}
+            <td
+              colSpan={2}
+              className="py-1 pl-4 pr-2 text-right text-[10px] font-medium uppercase tracking-wide text-muted sm:py-2 sm:px-3 sm:text-xs"
+            >
+              {t('makeFinal')}
+            </td>
+
+            {/* Each problem's column, named so focus can come back to it once it is made final */}
+            {competition.problems.map((problem) => (
+              <td
+                key={problem.id}
+                tabIndex={-1}
+                {...OPEN_ID_ATTRIBUTE.stamp(problem.id)}
+                className="w-px px-0.5 py-1 text-center sm:px-1 sm:py-2"
+              >
+                <FinalizeCell
+                  problem={problem}
+                  finality={columnFinality(competition, problem.id, grades)}
+                  onFinalize={onFinalize}
+                />
+              </td>
+            ))}
+
+            {/* Nothing under the sum */}
+            <td />
+          </tr>
+        </tfoot>
       </table>
     </div>
   )
+}
+
+/**
+ * Props for the {@link FinalizeCell} component.
+ */
+type FinalizeCellProps = {
+  /** The problem whose column this is. */
+  problem: GradingProblem
+  /** Where the column stands on being made final. */
+  finality: ColumnFinality
+  /** Asks to make a problem's column final. */
+  onFinalize: (column: ColumnToFinalize) => void
+}
+
+/**
+ * One problem's column, under its last pair: a button with how many marks it would make final, a check once every
+ * pair in it is final, or a dash while it has no mark to make final.
+ */
+function FinalizeCell({ problem, finality, onFinalize }: FinalizeCellProps) {
+  // Grading copy
+  const t = useTranslations('admin.grading.grid')
+
+  // Which state the column is in
+  switch (finality.kind) {
+    // Marks to make final
+    case 'ready':
+      return (
+        <button
+          type="button"
+          onClick={() => onFinalize({ problem, column: finality })}
+          aria-label={t('makeColumnFinal', {
+            number: problem.number,
+            count: finality.userIds.length,
+          })}
+          className={cn(
+            'inline-flex min-h-6 min-w-7 items-center justify-center gap-1 rounded px-1 tabular-nums sm:min-h-8 sm:min-w-16 sm:rounded-md sm:px-2',
+            'bg-foreground/5 text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground',
+            FOCUS_RING_CLASS
+          )}
+        >
+          {finality.userIds.length}
+          <CheckCheck size={14} strokeWidth={2.5} className="hidden sm:block" aria-hidden />
+        </button>
+      )
+
+    // Every pair final
+    case 'done':
+      return (
+        <Check
+          size={14}
+          strokeWidth={3}
+          className="inline-block text-success"
+          aria-label={t('columnFinal', { number: problem.number })}
+        />
+      )
+
+    // No mark to make final
+    case 'idle':
+      return <span className="text-muted/50">–</span>
+
+    // Every state is handled above
+    default:
+      return assertNever(finality)
+  }
 }
 
 /**

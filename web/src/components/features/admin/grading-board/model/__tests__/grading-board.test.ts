@@ -4,6 +4,7 @@ import type { Grade } from '../../../grades/model/grade-types'
 import {
   type BoardRow,
   buildRows,
+  columnFinality,
   countProgress,
   indexGrades,
   rankOf,
@@ -198,5 +199,48 @@ describe('countProgress', () => {
       graded: 3,
       final: 2,
     })
+  })
+})
+
+describe('columnFinality', () => {
+  it('lists the marks not yet final, counting the pairs without a mark beside them', () => {
+    // Adam pre-graded on the first problem, Zora final, Emil not graded
+    expect(columnFinality(COMPETITION, 'p1', GRADES)).toEqual({
+      kind: 'ready',
+      userIds: ['adam'],
+      unmarked: 1,
+    })
+  })
+
+  it('is idle while a pair without a mark sits beside final ones', () => {
+    // Zora final on the second problem, Emil not graded
+    expect(columnFinality(COMPETITION, 'p2', GRADES)).toEqual({ kind: 'idle' })
+  })
+
+  it('is done once every pair with a conversation is final', () => {
+    // Emil graded final on the second problem too, Adam never having discussed it
+    const competition = {
+      ...COMPETITION,
+      grades: COMPETITION.grades.map((summary) =>
+        summary.userId === 'emil' && summary.problemId === 'p2'
+          ? { ...summary, grade: gradeOf(2, 0, true) }
+          : summary
+      ),
+    }
+
+    // Nothing left to make final
+    expect(columnFinality(competition, 'p2', indexGrades(competition))).toEqual({ kind: 'done' })
+  })
+
+  it('is idle, not done, where nobody discussed the problem', () => {
+    // A third problem nobody held a conversation about
+    const competition = {
+      ...COMPETITION,
+      problems: [...COMPETITION.problems, { id: 'p3', slug: 'p-3', number: 3 }],
+      grades: [...COMPETITION.grades, summaryOf('zora', 'p3', 0, null)],
+    }
+
+    // Nothing to be final about
+    expect(columnFinality(competition, 'p3', indexGrades(competition))).toEqual({ kind: 'idle' })
   })
 })

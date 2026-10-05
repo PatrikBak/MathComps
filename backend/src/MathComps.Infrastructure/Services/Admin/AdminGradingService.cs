@@ -181,10 +181,6 @@ public class AdminGradingService(
         // The present, to the microsecond the database keeps.
         var now = DateTimeOffset.UtcNow.TruncateToMicroseconds();
 
-        // When the version is written: now, unless the clock is not past the version it builds on, in which case
-        // just past that one, since the newest stamp is what makes a version the grade.
-        var createdAt = current is not null && current.UpdatedAt >= now ? current.UpdatedAt.AddMicroseconds(1) : now;
-
         // The new version.
         dbContext.HostedGrades.Add(new HostedGrade
         {
@@ -195,7 +191,7 @@ public class AdminGradingService(
             InternalComment = after.InternalComment,
             IsFinal = after.IsFinal,
             AuthorId = graderId,
-            CreatedAt = createdAt,
+            CreatedAt = NextVersionAt(current, now),
         });
 
         // Write the version.
@@ -206,6 +202,78 @@ public class AdminGradingService(
 
         // Hand back the grade as the board reads it, byline included.
         return await HostedGrading.ReadCurrentGradeAsync(dbContext, entry.Id, problemId, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<StudentGradeDto>> FinalizeGradesAsync(
+        Guid graderId,
+        Guid problemId,
+        IReadOnlyCollection<Guid> userIds,
+        CancellationToken cancellationToken = default)
+    {
+        // This write's own context.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The listed students' entries into the round the problem belongs to, each with its student.
+        var studentByEntry = await dbContext.HostedEntries
+            .AsNoTracking()
+            .Where(entry => userIds.Contains(entry.UserId)
+                && entry.Round.Problems.Any(problem => problem.Id == problemId))
+            .Select(entry => new { entry.Id, entry.UserId })
+            .ToDictionaryAsync(entry => entry.Id, entry => entry.UserId, cancellationToken);
+
+        // Nobody listed entered the round, so nobody holds a grade on the problem.
+        if (studentByEntry.Count == 0)
+            return [];
+
+        // The entries in the order they are locked in, which two writes locking several of them then share.
+        Guid[] entryIds = [.. studentByEntry.Keys.Order()];
+
+        // One transaction for the read and the write, so the lock below spans both.
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        // Lock the entries, as a change to one of their grades does, so such a change lands wholly before or after.
+        await dbContext.Database.ExecuteSqlAsync(
+            $"SELECT 1 FROM hosted_entries WHERE id = ANY({entryIds}) ORDER BY id FOR UPDATE", cancellationToken);
+
+        // Where their grades stand now that nobody else can move them.
+        var current = await HostedGrading.ReadCurrentGradesAsync(dbContext, entryIds, cancellationToken);
+
+        // The present, to the microsecond the database keeps.
+        var now = DateTimeOffset.UtcNow.TruncateToMicroseconds();
+
+        // A final version of every grade on the problem that carries a mark and is not final yet, otherwise as it
+        // stands.
+        dbContext.HostedGrades.AddRange(current
+            .Where(grade => grade.Key.ProblemId == problemId && grade.Value is { Mark: not null, IsFinal: false })
+            .Select(grade => new HostedGrade
+            {
+                EntryId = grade.Key.EntryId,
+                ProblemId = problemId,
+                Mark = grade.Value.Mark,
+                Help = grade.Value.Help,
+                InternalComment = grade.Value.InternalComment,
+                IsFinal = true,
+                AuthorId = graderId,
+                CreatedAt = NextVersionAt(grade.Value, now),
+            }));
+
+        // Write the versions.
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        // Land them and release the entries.
+        await transaction.CommitAsync(cancellationToken);
+
+        // Where the entries' grades stand now.
+        var after = await HostedGrading.ReadCurrentGradesAsync(dbContext, entryIds, cancellationToken);
+
+        // Those on the problem, each named by its student.
+        return
+        [
+            .. after
+                .Where(grade => grade.Key.ProblemId == problemId)
+                .Select(grade => new StudentGradeDto(studentByEntry[grade.Key.EntryId], grade.Value)),
+        ];
     }
 
     /// <summary>
@@ -243,6 +311,17 @@ public class AdminGradingService(
         // What the grade becomes.
         return new GradeState(mark, help, internalComment, isFinal);
     }
+
+    /// <summary>
+    /// Works out when a new version of a grade is written: now, unless the clock is not past the version it builds
+    /// on, in which case just past that one, since the newest stamp is what makes a version the grade.
+    /// </summary>
+    /// <param name="current">The grade the version builds on, or null where nobody has graded yet.</param>
+    /// <param name="now">The present, to the microsecond the database keeps.</param>
+    /// <returns>When the version is written.</returns>
+    private static DateTimeOffset NextVersionAt(GradeDto? current, DateTimeOffset now) =>
+        // Now, or just past the version it builds on where the clock is not past that
+        current is not null && current.UpdatedAt >= now ? current.UpdatedAt.AddMicroseconds(1) : now;
 
     /// <summary>
     /// What one grade holds, apart from who wrote it and when: what a change is applied to and compared by.
