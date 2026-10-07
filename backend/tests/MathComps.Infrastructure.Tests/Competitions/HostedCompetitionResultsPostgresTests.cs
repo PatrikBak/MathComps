@@ -96,7 +96,7 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
             options.MaxNoteChars = 1000;
         });
 
-        // Who the site lets past its gates
+        // Who prepares competitions
         services.AddUserGrants();
 
         // The service under test

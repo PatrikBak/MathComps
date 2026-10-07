@@ -28,8 +28,8 @@ type HostedCompetitionSeasonProps = {
   years: SchoolYearRun[]
   /** The instant every clock on the page is read against, in epoch milliseconds. */
   now: number
-  /** Whether the reader is let past the gates the rounds are entered through. */
-  bypassesGates: boolean
+  /** Whether the reader prepares competitions. */
+  preparesCompetitions: boolean
   /** Opens the question that has to be answered before any clock starts. */
   onEnter: (pending: PendingEntry) => void
   /** Opens one competition's results, by its slug. */
@@ -45,7 +45,7 @@ type HostedCompetitionSeasonProps = {
 export function HostedCompetitionSeason({
   years,
   now,
-  bypassesGates,
+  preparesCompetitions,
   onEnter,
   onOpenResults,
 }: HostedCompetitionSeasonProps) {
@@ -112,7 +112,7 @@ export function HostedCompetitionSeason({
             <HostedCompetitionGroupPanel
               group={group}
               now={now}
-              bypassesGates={bypassesGates}
+              preparesCompetitions={preparesCompetitions}
               onEnter={onEnter}
               onOpenResults={onOpenResults}
             />

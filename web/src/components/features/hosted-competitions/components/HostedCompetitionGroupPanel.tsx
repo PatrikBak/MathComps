@@ -67,8 +67,8 @@ type HostedCompetitionGroupPanelProps = {
   group: HostedCompetitionGroup
   /** The instant every clock on the page is read against, in epoch milliseconds. */
   now: number
-  /** Whether the reader is let past the gates this group is entered through. */
-  bypassesGates: boolean
+  /** Whether the reader prepares competitions. */
+  preparesCompetitions: boolean
   /** Opens the question that has to be answered before any clock starts. */
   onEnter: (pending: PendingEntry) => void
   /** Opens one competition's results, by its slug. */
@@ -89,7 +89,7 @@ type HostedCompetitionGroupPanelProps = {
 export function HostedCompetitionGroupPanel({
   group,
   now,
-  bypassesGates,
+  preparesCompetitions,
   onEnter,
   onOpenResults,
 }: HostedCompetitionGroupPanelProps) {
@@ -214,7 +214,7 @@ export function HostedCompetitionGroupPanel({
                 competition={soleCompetition}
                 phase={phase}
                 standing={deriveStanding(group, soleCompetition, now)}
-                bypassesGates={bypassesGates}
+                preparesCompetitions={preparesCompetitions}
                 onEnter={() => onEnter({ group, competition: soleCompetition })}
                 onOpenResults={() => onOpenResults(soleCompetition.slug[locale])}
               />
@@ -234,7 +234,7 @@ export function HostedCompetitionGroupPanel({
               competition={competition}
               phase={phase}
               now={now}
-              bypassesGates={bypassesGates}
+              preparesCompetitions={preparesCompetitions}
               onEnter={() => onEnter({ group, competition })}
               onOpenResults={() => onOpenResults(competition.slug[locale])}
             />
@@ -257,8 +257,8 @@ type CompetitionRowProps = {
   phase: GroupPhase
   /** The instant its clock is read against, in epoch milliseconds. */
   now: number
-  /** Whether the reader is let past the gates this competition is entered through. */
-  bypassesGates: boolean
+  /** Whether the reader prepares competitions. */
+  preparesCompetitions: boolean
   /** Opens the question that has to be answered before the clock starts. */
   onEnter: () => void
   /** Opens how everybody did in it. */
@@ -273,7 +273,7 @@ function CompetitionRow({
   competition,
   phase,
   now,
-  bypassesGates,
+  preparesCompetitions,
   onEnter,
   onOpenResults,
 }: CompetitionRowProps) {
@@ -309,7 +309,7 @@ function CompetitionRow({
           competition={competition}
           phase={phase}
           standing={standing}
-          bypassesGates={bypassesGates}
+          preparesCompetitions={preparesCompetitions}
           onEnter={onEnter}
           onOpenResults={onOpenResults}
         />
@@ -447,8 +447,8 @@ type EntryActionProps = {
   phase: GroupPhase
   /** Where the student stands with it. */
   standing: HostedCompetitionStanding
-  /** Whether the reader is let past the gates this competition is entered through. */
-  bypassesGates: boolean
+  /** Whether the reader prepares competitions. */
+  preparesCompetitions: boolean
   /** Takes the press on the way in. */
   onEnter: () => void
   /** Opens how everybody did in it; null for the practice run, which keeps no results. */
@@ -469,7 +469,7 @@ export function EntryAction({
   competition,
   phase,
   standing,
-  bypassesGates,
+  preparesCompetitions,
   onEnter,
   onOpenResults,
 }: EntryActionProps) {
@@ -545,12 +545,12 @@ export function EntryAction({
       )
 
     // Untaken, so the group decides: one that has not opened yet has nothing to press, and an open one
-    // offers the way in. A reader let past the gates is offered it either way
+    // offers the way in. A reader who prepares competitions is offered it either way
     case 'none': {
       // No paper picked yet, or a group not yet open to this reader: the entry would be spent on a set the
       // site cannot serve
       const hasNothingToPress =
-        !competition.problemsReady || (phase === 'upcoming' && !bypassesGates)
+        !competition.problemsReady || (phase === 'upcoming' && !preparesCompetitions)
 
       // Which leaves the press itself, worded for what the group is
       return hasNothingToPress ? null : (

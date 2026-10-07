@@ -172,7 +172,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // The bounds the queue cuts its page by, left at their defaults, which hold the whole seed.
         services.AddPaginationOptions();
 
-        // The reader of who is let past the gates.
+        // The reader of who prepares competitions.
         services.AddUserGrants();
 
         // The service under test.

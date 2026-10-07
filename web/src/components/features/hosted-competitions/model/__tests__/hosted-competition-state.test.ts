@@ -427,7 +427,7 @@ describe('readAreaRun', () => {
       wasHandedIn: false,
     }
 
-    // Read for somebody the site let past the gates
+    // Read for somebody who prepares competitions
     const run = readAreaRun(entry, GRACE_MINUTES, NOW, true)
 
     // Whose clock still runs, and whose note has nobody at the other end of it
@@ -596,21 +596,21 @@ describe('findCompetitionInGroup', () => {
     return {
       groups: [groupOf()],
       noteGraceMinutes: 30,
-      bypassesGates: false,
+      preparesCompetitions: false,
       ...overrides,
     }
   }
 
   it('carries the terms the whole program runs on onto the competition it finds', () => {
-    // A reader let past the gates, reading a competition by the name one language gives it
+    // A reader who prepares competitions, reading a competition by the name one language gives it
     const found = findCompetitionInGroup(
-      viewOf({ noteGraceMinutes: 45, bypassesGates: true }),
+      viewOf({ noteGraceMinutes: 45, preparesCompetitions: true }),
       'stredni-zari-2026'
     )
 
     // Each term sits on the view, and the found competition carries it out
     expect(found?.noteGraceMinutes).toBe(45)
-    expect(found?.bypassesGates).toBe(true)
+    expect(found?.preparesCompetitions).toBe(true)
   })
 
   it('finds nothing for a name no group holds', () => {

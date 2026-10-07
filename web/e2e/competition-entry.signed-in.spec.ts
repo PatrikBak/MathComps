@@ -355,9 +355,11 @@ test.describe('the entry and the area it opens', () => {
     expect(problemReads).toBe(0)
   })
 
-  test('takes an entry from a reader past the gates before the group opens', async ({ page }) => {
-    // One of the accounts the site lets past the gates its competitions are entered through
-    await installHostedBackend(page, 'gates-bypassed')
+  test('takes an entry from a reader who prepares competitions before the group opens', async ({
+    page,
+  }) => {
+    // One of the accounts that prepare competitions
+    await installHostedBackend(page, 'prepares-competitions')
 
     // Open the list
     await page.goto(LIST_PATH)
@@ -397,9 +399,11 @@ test.describe('the entry and the area it opens', () => {
     })
   })
 
-  test('lets a reader past the gates into a competition that has not opened', async ({ page }) => {
-    // One of the accounts the site lets past the gates its competitions are entered through
-    await installHostedBackend(page, 'gates-bypassed')
+  test('lets a reader who prepares competitions into a competition that has not opened', async ({
+    page,
+  }) => {
+    // One of the accounts that prepare competitions
+    await installHostedBackend(page, 'prepares-competitions')
 
     // Walk straight at the area of the competition nobody else can be in yet
     await page.goto(areaPath(UPCOMING_COMPETITION_SLUG))
@@ -416,8 +420,8 @@ test.describe('the entry and the area it opens', () => {
   })
 
   test('offers no way into a competition whose problems are not picked yet', async ({ page }) => {
-    // A reader let past everything a competition puts in the way
-    await installHostedBackend(page, 'gates-bypassed')
+    // A reader who prepares competitions
+    await installHostedBackend(page, 'prepares-competitions')
 
     // Open the list
     await page.goto(LIST_PATH)
@@ -443,8 +447,8 @@ test.describe('the entry and the area it opens', () => {
   })
 
   test('runs a clock on a reader who entered past the gates', async ({ page }) => {
-    // A reader let past the gates, taking the entry into a competition nobody else can be in yet
-    await installHostedBackend(page, 'gates-bypassed')
+    // A reader who prepares competitions, taking the entry into a competition nobody else can be in yet
+    await installHostedBackend(page, 'prepares-competitions')
 
     // Open the list
     await page.goto(LIST_PATH)

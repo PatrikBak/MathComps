@@ -75,11 +75,11 @@ export type HostedState =
   /** Everything in place except the rules, which is a first entry ever. */
   | 'first-entry'
   /**
-   * Let past everything a competition puts in the way, with an account holding nothing but a name and no
-   * rules ever accepted. What the site grants an account that hammers the examiner rather than competes,
-   * and the fields it is never asked for are part of what the grant is.
+   * Prepares competitions, with an account holding nothing but a name and no rules ever accepted. The site
+   * grants that to an account that hammers the examiner rather than competes, and the fields it is never
+   * asked for are part of what the grant is.
    */
-  | 'gates-bypassed'
+  | 'prepares-competitions'
 
 /**
  * What the student did in one group that has closed.
@@ -162,7 +162,7 @@ function openEntry(state: HostedState, now: number): HostedCompetitionEntry | nu
     case 'ready':
     case 'gate-blocked':
     case 'first-entry':
-    case 'gates-bypassed':
+    case 'prepares-competitions':
       return null
 
     // Every state is handled above
@@ -257,8 +257,8 @@ export function buildView(state: HostedState): HostedCompetitionsView {
   // A student on their very first visit has taken nothing at all
   const isNewcomer = state === 'first-entry'
 
-  // Whether this reader is let past the gates
-  const bypassesGates = state === 'gates-bypassed'
+  // Whether this reader prepares competitions
+  const preparesCompetitions = state === 'prepares-competitions'
 
   // The practice one, which never closes and never publishes results
   const practice: HostedCompetitionGroup = {
@@ -300,7 +300,7 @@ export function buildView(state: HostedState): HostedCompetitionsView {
     opensAt: new Date(upcomingOpensAt).toISOString(),
     closesAt: new Date(upcomingOpensAt + WINDOW_DAYS * DAY_MS).toISOString(),
     // Its hardest category was announced before anybody picked its problems, which offers a way in to
-    // nobody, however far past the gates the reader is
+    // nobody, a reader who prepares competitions included
     competitions: buildCompetitions('upcoming', () => null, false).map((competition) => ({
       ...competition,
       problemsReady: competition.category !== 'advanced',
@@ -400,14 +400,14 @@ export function buildView(state: HostedState): HostedCompetitionsView {
   return {
     groups: [practice, preparation, upcoming, open, openSpecial, closedSpecial, ...past],
     noteGraceMinutes: NOTE_GRACE_MINUTES,
-    bypassesGates,
+    preparesCompetitions,
   }
 }
 
 /**
  * The view as the real backend puts it on the wire, which reads {@link HostedCompetition.problemsPublished}
- * as `bypassesGates || the embargo has lifted` and so hands a reader let past the gates every round as
- * published.
+ * as `preparesCompetitions || the embargo has lifted` and so hands a reader who prepares competitions every
+ * round as published.
  *
  * Folded in here rather than into what {@link buildView} builds, so the fake keeps each round's own embargo
  * to answer its other rules with.
@@ -417,12 +417,12 @@ export function buildView(state: HostedState): HostedCompetitionsView {
  * @returns The view as this reader receives it.
  */
 export function asServedView(view: HostedCompetitionsView): HostedCompetitionsView {
-  // A reader the gates hold like everybody else receives what the fake holds
-  if (!view.bypassesGates) {
+  // An ordinary reader receives what the fake holds
+  if (!view.preparesCompetitions) {
     return view
   }
 
-  // One let past them reads every set as published, however far off its own instant is
+  // A reader who prepares competitions reads every set as published, however far off its own instant is
   return {
     ...view,
     groups: view.groups.map((group) => ({
@@ -466,7 +466,7 @@ export function buildReadiness(state: HostedState): EntryReadiness {
       }
 
     // Named and nothing else, and never shown the rules: a grant is what carries them past each of them
-    case 'gates-bypassed':
+    case 'prepares-competitions':
       return {
         hasUsername: true,
         hasAnsweredGraduation: false,

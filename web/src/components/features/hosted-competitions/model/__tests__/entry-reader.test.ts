@@ -109,12 +109,12 @@ describe('entryBlockerFor', () => {
     // Held, as everybody else is
     expect(entryBlockerFor(unfilled, GRADED, false)).toBe('profile')
 
-    // And let through once the site lets them past the gates: the fields exist to name a student in a
+    // And let through once the same account prepares competitions: the fields exist to name a student in a
     // result, and this one is never in one
     expect(entryBlockerFor(unfilled, GRADED, true)).toBeNull()
   })
 
-  it('asks a reader let past the gates for an account all the same', () => {
+  it('asks a reader who prepares competitions for an account all the same', () => {
     // An entry has to belong to somebody, which no grant can supply
     expect(entryBlockerFor({ kind: 'signedOut' }, GRADED, true)).toBe('signIn')
   })
@@ -156,7 +156,7 @@ describe('entryBlockerFor', () => {
 })
 
 describe('headerBlocker', () => {
-  it('names no step for a reader let past the gates', () => {
+  it('names no step for a reader who prepares competitions', () => {
     // The header's sentence is the same question the press asks, so it has to answer the same way
     expect(headerBlocker({ kind: 'signedIn', readiness: UNFILLED }, [GRADED], true)).toBeNull()
   })

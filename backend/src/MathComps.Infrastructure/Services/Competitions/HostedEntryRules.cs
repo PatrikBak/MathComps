@@ -3,14 +3,13 @@ using MathComps.Domain.EfCoreEntities;
 namespace MathComps.Infrastructure.Services.Competitions;
 
 /// <summary>
-/// The reader a hosted competition's rules are weighed for: who they are, and whether the site lets them past
-/// the gates a competition is entered through.
+/// The reader a hosted competition's rules are weighed for: who they are, and whether they prepare competitions.
 /// </summary>
 /// <param name="UserId">The student reading, null where the reader has no account.</param>
-/// <param name="BypassesGates">
+/// <param name="PreparesCompetitions">
 /// Whether they hold <see cref="UserCapability.PrepareCompetitions"/>, which only an account can do.
 /// </param>
-public readonly record struct HostedReader(Guid? UserId, bool BypassesGates);
+public readonly record struct HostedReader(Guid? UserId, bool PreparesCompetitions);
 
 /// <summary>
 /// What the rules read about one round to settle whether its problems may be reached: when it opens, when the
@@ -32,7 +31,7 @@ public readonly record struct RoundAccess(
 public static class HostedEntryRules
 {
     /// <summary>
-    /// Throws unless the reader may read a round's problems: they are let past the gates, its embargo has
+    /// Throws unless the reader may read a round's problems: they prepare competitions, its embargo has
     /// passed, or they hold an entry they have spent into it. A reader with no account is held to competitions
     /// that are over.
     /// </summary>
@@ -41,8 +40,8 @@ public static class HostedEntryRules
     /// <param name="now">The instant the dates are read against.</param>
     public static void EnsureEntitled(HostedReader reader, RoundAccess access, DateTimeOffset now)
     {
-        // A reader let past the gates reads the set whatever its embargo says.
-        if (reader.BypassesGates)
+        // A reader who prepares competitions reads the set whatever its embargo says.
+        if (reader.PreparesCompetitions)
             return;
 
         // Once the embargo has passed there is nothing left to hold back.
@@ -75,8 +74,8 @@ public static class HostedEntryRules
     /// Everything else opens it: an entry they handed in, a clock that ran out, an entry they gave up for the
     /// problems, and a competition that has closed, which anybody may then read.
     ///
-    /// A reader let past the gates is held to their clock like everybody else
-    /// (<see cref="UserCapability.PrepareCompetitions"/>).
+    /// A reader who prepares competitions (<see cref="UserCapability.PrepareCompetitions"/>) is held to their
+    /// clock like everybody else.
     ///
     /// The round's embargo is a separate gate, deciding whether the problems may be reached at all, and
     /// <see cref="EnsureEntitled"/> has settled it by the time anything asks this.

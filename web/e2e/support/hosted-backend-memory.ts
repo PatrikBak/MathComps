@@ -186,12 +186,12 @@ export function withFinalMarks(problems: HostedCompetitionProblem[]): HostedComp
 
 /**
  * Mirrors the rule the real backend serves an official solution under: it is open unless a clock of the
- * student's own is still running, or a reader let past the gates is reaching a set still embargoed.
+ * student's own is still running, or a reader who prepares competitions is reaching a set still embargoed.
  *
  * @param group - The group the competition runs in, whose clock the run is held to, absent only where nothing
  * holds the competition at all.
  * @param competition - The competition whose set is being read, carrying the entry the student holds in it.
- * @param bypassesGates - Whether this reader is let past the gates the competition is entered through.
+ * @param preparesCompetitions - Whether this reader prepares competitions.
  * @param now - The instant to read the clock against, in epoch milliseconds.
  *
  * @returns Whether the set may carry its solutions.
@@ -199,15 +199,16 @@ export function withFinalMarks(problems: HostedCompetitionProblem[]): HostedComp
 export function isSolutionOpen(
   group: HostedCompetitionGroup | undefined,
   competition: HostedCompetition,
-  bypassesGates: boolean,
+  preparesCompetitions: boolean,
   now: number
 ): boolean {
   // The entry the student holds here, absent while they hold none
   const entry = competition.entry
 
-  // No entry means a public set, except for a reader let past the gates, whose own run has yet to start
+  // No entry means a public set, except for a reader who prepares competitions, whose own run has yet to
+  // start
   if (entry === null) {
-    return !bypassesGates || competition.problemsPublished
+    return !preparesCompetitions || competition.problemsPublished
   }
 
   // Given up for the problems, so no clock ever ran to protect
@@ -226,21 +227,21 @@ export function isSolutionOpen(
 
 /**
  * Mirrors the rule the real backend takes an entry under: a group takes them inside its own window, and a
- * reader let past the gates is held to neither end of it.
+ * reader who prepares competitions is held to neither end of it.
  *
  * @param group - The group the entry would be spent into.
- * @param bypassesGates - Whether this reader is let past the gates.
+ * @param preparesCompetitions - Whether this reader prepares competitions.
  * @param now - The instant to read the window against, in epoch milliseconds.
  *
  * @returns Whether the entry may be spent.
  */
 export function isGroupTakingEntries(
   group: HostedCompetitionGroup,
-  bypassesGates: boolean,
+  preparesCompetitions: boolean,
   now: number
 ): boolean {
-  // Nothing about the window reaches a reader let past it
-  if (bypassesGates) {
+  // Nothing about the window reaches a reader who prepares competitions
+  if (preparesCompetitions) {
     return true
   }
 
@@ -255,19 +256,19 @@ export function isGroupTakingEntries(
 
 /**
  * Mirrors the rule the real backend serves a signed-in reader a competition's problems under: an entry of
- * their own opens them, so does a lifted embargo, and so does being let past the gates.
+ * their own opens them, so does a lifted embargo, and so does preparing competitions.
  *
  * @param competition - The competition whose set is being read.
- * @param bypassesGates - Whether this reader is let past the gates.
+ * @param preparesCompetitions - Whether this reader prepares competitions.
  *
  * @returns Whether the set may be served at all.
  */
 export function areProblemsReadable(
   competition: HostedCompetition,
-  bypassesGates: boolean
+  preparesCompetitions: boolean
 ): boolean {
   // Any one of the three opens the set
-  return bypassesGates || competition.entry !== null || competition.problemsPublished
+  return preparesCompetitions || competition.entry !== null || competition.problemsPublished
 }
 
 /**

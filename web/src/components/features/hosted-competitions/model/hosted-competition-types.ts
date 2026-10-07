@@ -17,9 +17,9 @@ export type HostedCompetition = {
   /**
    * Whether the problems are open to this reader without an entry.
    *
-   * They open to everybody once the round's embargo has lifted, and to a reader let past the gates whenever
-   * they like. Before that, the only way to them is to spend the entry, by sitting it or by giving it up to
-   * read them.
+   * They open to everybody once the round's embargo has lifted, and to a reader who prepares competitions
+   * whenever they like. Before that, the only way to them is to spend the entry, by sitting it or by giving
+   * it up to read them.
    */
   problemsPublished: boolean
   /**
@@ -346,12 +346,12 @@ export type HostedCompetitionsView = {
    */
   noteGraceMinutes: number
   /**
-   * Whether this reader is let past everything a competition puts in the way, which the site grants an
-   * account so it can reach one with nothing standing between it and the problems.
+   * Whether this reader prepares competitions, which lets them reach one with nothing standing between
+   * them and the problems.
    *
    * A fact about the reader rather than about any group.
    */
-  bypassesGates: boolean
+  preparesCompetitions: boolean
 }
 
 /**

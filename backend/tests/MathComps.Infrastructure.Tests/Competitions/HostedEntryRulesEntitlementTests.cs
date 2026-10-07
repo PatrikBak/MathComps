@@ -37,17 +37,17 @@ public class HostedEntryRulesEntitlementTests
     /// <summary>
     /// An ordinary student, held to every gate a competition is entered through.
     /// </summary>
-    private static readonly HostedReader _student = new(Guid.CreateVersion7(), BypassesGates: false);
+    private static readonly HostedReader _student = new(Guid.CreateVersion7(), PreparesCompetitions: false);
 
     /// <summary>
     /// A reader with no account at all.
     /// </summary>
-    private static readonly HostedReader _visitor = new(UserId: null, BypassesGates: false);
+    private static readonly HostedReader _visitor = new(UserId: null, PreparesCompetitions: false);
 
     /// <summary>
-    /// A student the site lets past a competition's gates.
+    /// A student who prepares competitions.
     /// </summary>
-    private static readonly HostedReader _timingGranted = new(Guid.CreateVersion7(), BypassesGates: true);
+    private static readonly HostedReader _timingGranted = new(Guid.CreateVersion7(), PreparesCompetitions: true);
 
     /// <summary>
     /// An embargoed set stays out of reach of a student who spent nothing on it, which is the whole point
