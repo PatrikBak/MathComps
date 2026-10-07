@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { RETURN_URL_PARAM } from '@/constants/auth-constants'
 import { useCurrentUrl } from '@/hooks/use-current-url'
 import { ROUTES } from '@/i18n/i18n'
 import { useRouter } from '@/i18n/navigation'
@@ -42,7 +43,7 @@ export function useLoginRedirect(): UseLoginRedirectResult {
    */
   const getLoginUrl = useCallback(
     (returnUrl?: string) => {
-      return `${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(returnUrl ?? getCurrentUrl())}`
+      return `${ROUTES.LOGIN}?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl ?? getCurrentUrl())}`
     },
     [getCurrentUrl]
   )

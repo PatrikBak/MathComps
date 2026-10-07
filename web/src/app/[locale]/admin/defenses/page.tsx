@@ -33,7 +33,7 @@ export async function generateMetadata({
  * Reads every student's defense conversations back, for finding what keeps going wrong with the examiner.
  */
 export default withLocale(async function AdminDefensesPage() {
-  // Anyone who isn't the reviewer goes home. The claim behind this is also what every endpoint the page calls
+  // Only the reviewer gets in. The claim behind this is also what every endpoint the page calls
   // checks for itself, so the guard here is what saves the trip rather than what does the gating.
   await requireAdmin()
 

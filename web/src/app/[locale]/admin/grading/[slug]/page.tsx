@@ -34,7 +34,7 @@ export async function generateMetadata({
  * Grading one group: every student on every problem of each of its competitions.
  */
 export default withLocale(async function AdminGradingPage({ params }: PageProps<{ slug: string }>) {
-  // Anyone who isn't an admin goes home. Every grading endpoint checks the same claim for itself, so the guard
+  // Only admins get in. Every grading endpoint checks the same claim for itself, so the guard
   // here saves the trip rather than doing the gating.
   await requireAdmin()
 
