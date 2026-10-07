@@ -16,4 +16,15 @@ public interface IProblemSelectionService
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The selection.</returns>
     Task<SelectionDto> GetSelectionAsync(Language language, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reads everything said in one conversation about a proposal still in the selection.
+    /// </summary>
+    /// <param name="conversationId">The conversation.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The conversation's statement and turns.</returns>
+    /// <exception cref="SelectionTargetNotFoundException">
+    /// Thrown when no conversation has the id, or it was about a problem outside the selection.
+    /// </exception>
+    Task<ReviewTranscriptDto> GetTranscriptAsync(Guid conversationId, CancellationToken cancellationToken = default);
 }

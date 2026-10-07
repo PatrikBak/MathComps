@@ -24,5 +24,10 @@ public enum CommentTargetType
     /// The conversation between the graders and one student about one problem the student was graded on,
     /// identified as <c>{problemId}:{userId}</c>.
     /// </summary>
-    HostedGrade
+    HostedGrade,
+
+    /// <summary>
+    /// The reviewers' discussion of a proposal in the problem selection, identified by the proposal's id.
+    /// </summary>
+    Proposal
 }

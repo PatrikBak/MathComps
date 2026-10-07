@@ -636,8 +636,8 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         // One comment on the second article
         await commentService.CreateCommentAsync(new CommentTarget(CommentTargetType.News, id2), _user1, "c3");
 
-        // The counts for all three
-        var counts = await commentService.GetCommentCountsAsync(CommentTargetType.News, [id1, id2, id3]);
+        // The counts for all three, read signed out
+        var counts = await commentService.GetCommentCountsAsync(CommentTargetType.News, [id1, id2, id3], null);
 
         // Each commented article's count
         Assert.Equal(2, counts[id1]);
@@ -699,8 +699,8 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         // The first user edits the other
         await commentService.UpdateCommentAsync(edited.Id, _user1, "Updated 2");
 
-        // The article's count
-        var counts = await commentService.GetCommentCountsAsync(CommentTargetType.News, [id]);
+        // The article's count, read signed out
+        var counts = await commentService.GetCommentCountsAsync(CommentTargetType.News, [id], null);
 
         // The comment as written and the edit's new version
         Assert.Equal(2, counts[id]);

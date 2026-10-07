@@ -1,14 +1,14 @@
 using MathComps.Api.Constants;
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Infrastructure.Services.Selection;
-using MathComps.Infrastructure.Services.Users;
 
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the endpoints of the problem selection: one read returning the whole of it, and one write per change a
-/// reviewer makes. Every route is gated by the <see cref="AuthorizationPolicies.PreparesCompetitions"/> policy,
-/// since the proposals are problems no student may see.
+/// Maps the endpoints of the problem selection: one read returning the whole of it, one returning a conversation
+/// held about a proposal in full, and one write per change a reviewer makes. Every route is gated by the
+/// <see cref="AuthorizationPolicies.PreparesCompetitions"/> policy, since the proposals are problems no student may
+/// see.
 /// </summary>
 public static class ProblemSelectionEndpoints
 {
@@ -45,6 +45,21 @@ public static class ProblemSelectionEndpoints
 
             // Return it
             return Results.Ok(selection);
+        })
+        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Read everything said in one conversation about a proposal
+        app.MapGet($"{SelectionPath}/conversations/{{conversationId:guid}}", async (
+            Guid conversationId,
+            IProblemSelectionService selectionService,
+            CancellationToken cancellationToken) =>
+        {
+            // The conversation's statement and turns
+            var transcript = await selectionService.GetTranscriptAsync(conversationId, cancellationToken);
+
+            // Return the transcript
+            return Results.Ok(transcript);
         })
         .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
@@ -178,31 +193,6 @@ public static class ProblemSelectionEndpoints
         {
             // Delete it
             await proposalService.DeleteAsync(proposalId, cancellationToken);
-
-            // Nothing to return
-            return Results.NoContent();
-        })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
-        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
-
-        // Comment on a proposal
-        app.MapPost($"{ProposalPath}/comments", async (
-            Guid proposalId,
-            AddProposalCommentRequest request,
-            HttpContext context,
-            IUserManager userManager,
-            IProposalService proposalService,
-            CancellationToken cancellationToken) =>
-        {
-            // A comment saying nothing says nothing
-            if (string.IsNullOrWhiteSpace(request.Content))
-                throw new BadHttpRequestException("A comment must say something.");
-
-            // The reviewer writing it, taken from the caller rather than from what they sent
-            var userId = await userManager.RequireUserIdAsync(context);
-
-            // Write it
-            await proposalService.AddCommentAsync(userId, proposalId, request.Content, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();

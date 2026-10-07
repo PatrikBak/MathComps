@@ -12,8 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
-/// Covers <see cref="ProblemSelectionService"/>: the field mapping of the one read, and which proposals, boards
-/// and cycles it holds once groups open.
+/// Covers <see cref="ProblemSelectionService"/>: the field mapping of the one read, which proposals, boards and
+/// cycles it holds once groups open, and which conversations it reads out in full.
 /// </summary>
 /// <remarks>
 /// The seed is a pool of three proposals with a draft holding one. The October group has not opened and its
@@ -46,9 +46,24 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     private readonly List<Guid> _november = [];
 
     /// <summary>
-    /// A problem of the opened September group, with a conversation and a comment of its own.
+    /// A problem of the opened September group, with a conversation of its own.
     /// </summary>
     private Guid _openedId;
+
+    /// <summary>
+    /// The first proposal's newest conversation, held by the live reviewer about its English statement.
+    /// </summary>
+    private Guid _newestConversationId;
+
+    /// <summary>
+    /// The conversation about the September problem.
+    /// </summary>
+    private Guid _openedConversationId;
+
+    /// <summary>
+    /// A conversation about the deleted third proposal.
+    /// </summary>
+    private Guid _deletedConversationId;
 
     /// <summary>
     /// The October group, which still takes a board.
@@ -170,9 +185,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // The September problem gone from the proposals
         Assert.DoesNotContain(selection.Proposals, proposal => proposal.Id == _openedId);
 
-        // The September problem's conversation and comment are gone with it
+        // The September problem's conversation is gone with it
         Assert.DoesNotContain(selection.Conversations, conversation => conversation.ProposalId == _openedId);
-        Assert.False(selection.Comments.ContainsKey(_openedId));
     });
 
     /// <summary>
@@ -251,35 +265,60 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     });
 
     /// <summary>
-    /// Conversations read newest first with their turns in order; comments read oldest first, live ones only.
-    /// Either one's author is their username, and nobody once their account is deleted. A deleted account keeps
-    /// its username, so a read that skipped the check would still sign the deleted reviewer's words.
+    /// Conversations read newest first, each with how many messages it holds and whether the problem still has the
+    /// statement it was argued against, in any of its languages. The author is their username, and nobody once
+    /// their account is deleted. A deleted account keeps its username, so a read that skipped the check would still
+    /// sign the deleted reviewer's words.
     /// </summary>
     [Fact]
-    public Task Conversations_and_comments_read_with_their_authors() => RunTestAsync(async service =>
+    public Task Conversations_read_with_their_authors_and_whether_their_statement_stands() =>
+        RunTestAsync(async service =>
+        {
+            // The selection
+            var selection = await service.GetSelectionAsync(Language.EN);
+
+            // The first proposal's conversations
+            var conversations = selection.Conversations
+                .Where(conversation => conversation.ProposalId == _pool[1])
+                .ToList();
+
+            // Newest first: the English statement and the Slovak one still stand, the deleted reviewer's is gone
+            Assert.Equal(
+                [("Reviewer", 2, false), ("Reviewer", 1, false), (null, 1, true)],
+                conversations.Select(conversation =>
+                    (conversation.Author, conversation.MessageCount, conversation.HasOlderStatement)));
+        });
+
+    /// <summary>
+    /// A conversation reads out in full: the statement it was argued against and its turns in the order they were
+    /// said. The turns are stored last first, so a read keeping their stored order would reverse them.
+    /// </summary>
+    [Fact]
+    public Task A_transcript_reads_its_statement_and_its_turns_in_order() => RunTestAsync(async service =>
     {
-        // The selection
-        var selection = await service.GetSelectionAsync(Language.EN);
+        // The newest conversation in full
+        var transcript = await service.GetTranscriptAsync(_newestConversationId);
 
-        // The first proposal's conversations
-        var conversations = selection.Conversations
-            .Where(conversation => conversation.ProposalId == _pool[1])
-            .ToList();
+        // Its statement, and what was said in order
+        Assert.Equal("Statement 1 in EN", transcript.SavedStatement);
+        Assert.Equal(["First", "Second"], transcript.Turns.Select(turn => turn.Content));
+    });
 
-        // Newest first, the deleted reviewer's unsigned
-        Assert.Equal(
-            [("Reviewer", "Statement 1 in EN"), (null, "Older statement")],
-            conversations.Select(conversation => (conversation.Author, conversation.SavedStatement)));
+    /// <summary>
+    /// Only a conversation about a proposal the selection holds reads out: not one about the problem of a group that
+    /// has opened, nor one about a deleted proposal, nor an id naming none. The list leaves the first two out, so the
+    /// transcript must too.
+    /// </summary>
+    [Fact]
+    public Task A_transcript_outside_the_selection_is_refused() => RunTestAsync(async service =>
+    {
+        // The September problem's conversation, the deleted proposal's, and an id naming none
+        Guid[] outside = [_openedConversationId, _deletedConversationId, Guid.CreateVersion7()];
 
-        // The newer one's turns in the order they were said
-        Assert.Equal(
-            ["First", "Second"],
-            conversations.First().Turns.Select(turn => turn.Content));
-
-        // The first proposal's live comments, oldest first, the deleted reviewer's unsigned
-        Assert.Equal(
-            [("Reviewer", "Earlier"), (null, "Later")],
-            selection.Comments[_pool[1]].Select(comment => (comment.Author, comment.Content)));
+        // Each refused like a missing one
+        foreach (var conversationId in outside)
+            await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
+                () => service.GetTranscriptAsync(conversationId));
     });
 
     /// <inheritdoc/>
@@ -309,7 +348,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         _pool[3] = SelectionSeed.NewProposal(context, pool, 3, 3);
         context.Proposals.Local.Single(proposal => proposal.ProblemId == _pool[3]).DeletedAt = DateTimeOffset.UtcNow;
 
-        // The instant the groups, conversations and comments are dated from
+        // The instant the groups and conversations are dated from
         var now = DateTimeOffset.UtcNow;
 
         // October, still taking a board
@@ -336,23 +375,24 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         SeedFinalizedBoard(context, september);
 
         // A conversation about the September problem
-        SeedConversation(context, _openedId, _reviewerId, "Statement", now, "Turn");
+        _openedConversationId = SeedConversation(context, _openedId, _reviewerId, "Statement", now, "Turn");
 
-        // And a comment under the September problem
-        SeedComment(context, _openedId, _reviewerId, "About September", now, CommentStatus.Active);
+        // And one about the deleted proposal
+        _deletedConversationId = SeedConversation(
+            context, _pool[3], _reviewerId, "Statement 3 in EN", now.AddDays(-3), "Turn");
 
         // A draft holding the second proposal in its second slot
         SelectionSeed.NewBoard(context, "Draft", null, _pool[2]);
 
-        // The first proposal's two conversations, the older one by the deleted reviewer
+        // The first proposal's oldest conversation, by the deleted reviewer about a statement since changed
         SeedConversation(context, _pool[1], _goneReviewerId, "Older statement", now.AddDays(-2), "Old");
-        SeedConversation(context, _pool[1], _reviewerId, "Statement 1 in EN", now.AddDays(-1), "First", "Second");
 
-        // And its comments: two live ones, one deleted, one replaced by an edit
-        SeedComment(context, _pool[1], _reviewerId, "Earlier", now.AddHours(-3), CommentStatus.Active);
-        SeedComment(context, _pool[1], _goneReviewerId, "Later", now.AddHours(-1), CommentStatus.Active);
-        SeedComment(context, _pool[1], _reviewerId, "Deleted", now.AddHours(-2), CommentStatus.Deleted);
-        SeedComment(context, _pool[1], _reviewerId, "Superseded", now.AddHours(-2), CommentStatus.Superseded);
+        // The first proposal's conversation about its Slovak statement
+        SeedConversation(context, _pool[1], _reviewerId, "Statement 1 in SK", now.AddDays(-1).AddHours(-1), "Hi");
+
+        // The first proposal's newest conversation, about its English statement
+        _newestConversationId = SeedConversation(
+            context, _pool[1], _reviewerId, "Statement 1 in EN", now.AddDays(-1), "First", "Second");
 
         // Written
         await context.SaveChangesAsync();
@@ -415,7 +455,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// <param name="statement">The statement the conversation was argued on.</param>
     /// <param name="createdAt">When the conversation started.</param>
     /// <param name="turns">What was said, in order.</param>
-    private static void SeedConversation(
+    /// <returns>The conversation's id.</returns>
+    private static Guid SeedConversation(
         MathCompsDbContext context, Guid problemId, Guid userId, string statement, DateTimeOffset createdAt,
         params string[] turns)
     {
@@ -445,26 +486,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
                 Sequence = index,
                 CreatedAt = createdAt.AddMinutes(index),
             });
-    }
 
-    /// <summary>
-    /// Tracks a comment under a proposal.
-    /// </summary>
-    /// <param name="context">The seeding context.</param>
-    /// <param name="proposalId">The proposal.</param>
-    /// <param name="authorId">Who wrote the comment.</param>
-    /// <param name="content">What the comment says.</param>
-    /// <param name="createdAt">When the comment was written.</param>
-    /// <param name="status">Whether the comment is live, deleted or replaced.</param>
-    private static void SeedComment(
-        MathCompsDbContext context, Guid proposalId, Guid authorId, string content, DateTimeOffset createdAt,
-        CommentStatus status)
-    {
-        // The comment
-        var comment = new Comment { AuthorId = authorId, Content = content, CreatedAt = createdAt, Status = status };
-        context.Comments.Add(comment);
-
-        // Under the proposal
-        context.ProposalComments.Add(new ProposalComment { ProposalId = proposalId, CommentId = comment.Id });
+        // The id
+        return sessionId;
     }
 }

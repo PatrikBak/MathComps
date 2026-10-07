@@ -94,6 +94,20 @@ internal static class SelectionRules
         TaxonomySlugs.IsAtOrUnder(competitionPath, HostedTaxonomy.ProposalsPath);
 
     /// <summary>
+    /// Whether a proposal that has not been deleted is still in the selection: in the pool, or in a round of a
+    /// hosted group that has not opened.
+    /// </summary>
+    /// <param name="competitionPath">The path of the competition the problem's round hangs off.</param>
+    /// <param name="groupOpensAt">
+    /// When the hosted group the round belongs to opens; null for a round of no hosted group.
+    /// </param>
+    /// <param name="now">The instant the group's opening is read against.</param>
+    /// <returns>Whether the selection still holds it.</returns>
+    public static bool IsInSelection(string competitionPath, DateTimeOffset? groupOpensAt, DateTimeOffset now) =>
+        // Among the proposals, or in a round still to open
+        IsInPool(competitionPath) || groupOpensAt > now;
+
+    /// <summary>
     /// Whether a hosted group still takes a board: it has not opened, it closes at some point, and it runs rounds
     /// nothing has filled yet. A group that never closes is the practice one, which nobody picks papers for.
     /// </summary>
