@@ -107,3 +107,6 @@ venv.bak/
 **/appsettings.*Development.json
 **/appsettings.*Staging.json
 **/appsettings.*Production.json
+
+# What Verify writes beside a snapshot the test no longer matches, until the test passes again
+*.received.*

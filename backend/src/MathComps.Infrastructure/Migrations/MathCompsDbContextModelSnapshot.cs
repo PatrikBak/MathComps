@@ -33,6 +33,7 @@ namespace MathComps.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "examiner_step", new[] { "generate", "language_check", "leak_check", "math_check", "route_check" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "hosted_competition_category", new[] { "advanced", "elementary", "intermediate" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "language", new[] { "cs", "en", "sk" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "outgoing_mail_status", new[] { "failed", "pending", "sent" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "proposal_area", new[] { "algebra", "combinatorics", "geometry", "number_theory" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "tag_type", new[] { "area", "goal", "technique", "type" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transcript_role", new[] { "candidate", "examiner" });
@@ -660,6 +661,44 @@ namespace MathComps.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.GradeMessageNotice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("comment_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("MailId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mail_id");
+
+                    b.Property<Guid>("RecipientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recipient_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_grade_message_notices");
+
+                    b.HasIndex("CommentId")
+                        .HasDatabaseName("ix_grade_message_notice_comment_id");
+
+                    b.HasIndex("MailId")
+                        .HasDatabaseName("ix_grade_message_notice_mail_id");
+
+                    b.HasIndex("RecipientId")
+                        .HasDatabaseName("ix_grade_message_notice_recipient_id_unclaimed")
+                        .HasFilter("\"mail_id\" IS NULL");
+
+                    b.ToTable("grade_message_notices", (string)null);
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Handout", b =>
                 {
                     b.Property<Guid>("Id")
@@ -973,6 +1012,74 @@ namespace MathComps.Infrastructure.Migrations
                         .HasDatabaseName("ux_news_article_comment_comment_id");
 
                     b.ToTable("news_article_comments", (string)null);
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.OutgoingMail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Html")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("html");
+
+                    b.Property<string>("LastError")
+                        .HasColumnType("text")
+                        .HasColumnName("last_error");
+
+                    b.Property<DateTimeOffset?>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at");
+
+                    b.Property<string>("ProviderId")
+                        .HasColumnType("text")
+                        .HasColumnName("provider_id");
+
+                    b.Property<string>("RecipientAddress")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recipient_address");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_at");
+
+                    b.Property<OutgoingMailStatus>("Status")
+                        .HasColumnType("outgoing_mail_status")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("subject");
+
+                    b.HasKey("Id")
+                        .HasName("pk_outgoing_mails");
+
+                    b.HasIndex("NextAttemptAt")
+                        .HasDatabaseName("ix_outgoing_mail_next_attempt_at_pending")
+                        .HasFilter("\"status\" = 'pending'");
+
+                    b.ToTable("outgoing_mails", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_outgoing_mail_attempts_non_negative", "\"attempts\" >= 0");
+
+                            t.HasCheckConstraint("ck_outgoing_mail_next_attempt_at_when_pending", "(\"status\" = 'pending') = (\"next_attempt_at\" IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_outgoing_mail_provider_id_when_sent", "\"status\" = 'sent' OR \"provider_id\" IS NULL");
+
+                            t.HasCheckConstraint("ck_outgoing_mail_sent_at_when_sent", "(\"status\" = 'sent') = (\"sent_at\" IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Problem", b =>
@@ -2006,6 +2113,35 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Session");
 
                     b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.GradeMessageNotice", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Comment", "Comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_grade_message_notices_comments_comment_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.OutgoingMail", "Mail")
+                        .WithMany()
+                        .HasForeignKey("MailId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_grade_message_notices_outgoing_mails_mail_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "Recipient")
+                        .WithMany()
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_grade_message_notices_users_recipient_id");
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("Mail");
+
+                    b.Navigation("Recipient");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.HandoutComment", b =>

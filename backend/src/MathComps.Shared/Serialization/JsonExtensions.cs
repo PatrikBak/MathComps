@@ -1,5 +1,7 @@
+using System.Collections.Immutable;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace MathComps.Shared.Serialization;
@@ -62,4 +64,33 @@ public static class JsonExtensions
     public static T FromJson<T>(this string json)
         => JsonSerializer.Deserialize<T>(json, _compactOptions)
             ?? throw new InvalidOperationException($"Failed to deserialize JSON to type {typeof(T).Name}");
+
+    /// <summary>
+    /// Reads a JSON document of objects nested to any depth, with text at every leaf, as each text under its path:
+    /// the names of the properties leading down to it, joined by dots.
+    /// </summary>
+    /// <param name="json">The document.</param>
+    /// <returns>Each text by its path.</returns>
+    public static ImmutableDictionary<string, string> FlattenJson(this string json)
+        // Every leaf under the document's root
+        => Leaves(JsonNode.Parse(json), path: "").ToImmutableDictionary();
+
+    /// <summary>
+    /// Walks one node of a document of nested objects down to the texts at its leaves.
+    /// </summary>
+    /// <param name="node">The node.</param>
+    /// <param name="path">The node's path, empty for the document's root.</param>
+    /// <returns>Each text under the node, by its path.</returns>
+    private static IEnumerable<KeyValuePair<string, string>> Leaves(JsonNode? node, string path) => node switch
+    {
+        // An object leads on to each of its properties, under its own path
+        JsonObject properties => properties.SelectMany(property =>
+            Leaves(property.Value, path.Length == 0 ? property.Key : $"{path}.{property.Key}")),
+
+        // Text is a leaf
+        JsonValue text when text.GetValueKind() == JsonValueKind.String => [new(path, text.GetValue<string>())],
+
+        // A list, a number, a boolean or a null has no place in such a document
+        _ => throw new JsonException($"'{path}' holds neither an object nor text."),
+    };
 }

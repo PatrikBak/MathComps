@@ -1,0 +1,21 @@
+{
+  "defense": {
+    "opener": "Hi, I'm Mathilda. Start explaining your solution, or just the idea you have so far. You can write formulas in plain text too, like x^2 or square root of 2, I'll understand them. I take a moment over each reply, so I don't give too much away or say something wrong 😇"
+  },
+  "mail": {
+    "about": "About",
+    "privacy": "Privacy and terms"
+  },
+  "gradeMessageMail": {
+    "subject": "New comments on the marking",
+    "greeting": "Hi {name},",
+    "greetingWithoutName": "Hi,",
+    "intro": "there are new comments on the marking:",
+    "competition": "{competition} ({category}, {season})",
+    "problem": "Problem {number}",
+    "messages": "{count, plural, one {# new message} other {# new messages}}",
+    "messagesFrom": "{student}: {messages}",
+    "unnamedStudent": "User",
+    "optOut": "Don't want these emails? Just reply and tell me."
+  }
+}

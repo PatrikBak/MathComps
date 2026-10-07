@@ -483,14 +483,4 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
         // Save seeded data
         await context.SaveChangesAsync();
     }
-
-    /// <summary>
-    /// Names the conversation with a student about a problem, the way the client names it.
-    /// </summary>
-    /// <param name="problemId">The problem.</param>
-    /// <param name="student">The student.</param>
-    /// <returns>The conversation's target.</returns>
-    private static CommentTarget GradeConversation(Guid problemId, CommentViewer student) =>
-        // Keyed by the problem and the student, like the grade itself
-        new(CommentTargetType.HostedGrade, $"{problemId}:{student.UserId}");
 }

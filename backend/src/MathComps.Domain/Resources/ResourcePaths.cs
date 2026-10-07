@@ -1,7 +1,9 @@
+using MathComps.Domain.Localization;
+
 namespace MathComps.Domain.Resources;
 
 /// <summary>
-/// Shared constants for resource paths used by both API and CLI tools.
+/// Shared resource paths used by both API and CLI tools.
 /// Paths are relative to the application base directory.
 /// </summary>
 public static class ResourcePaths
@@ -12,9 +14,12 @@ public static class ResourcePaths
     public const string ApprovedTags = "Resources/approved-tags.json";
 
     /// <summary>
-    /// Path to the defense-copy.json file holding the AI examiner's own localized lines.
+    /// Path to one language's copy file, holding lines the backend writes to people in its own words, one section
+    /// per feature.
     /// </summary>
-    public const string DefenseCopy = "Resources/defense-copy.json";
+    /// <param name="language">The language.</param>
+    /// <returns>The path, as copy.sk.json for Slovak.</returns>
+    public static string Copy(Language language) => $"Resources/copy.{language.ToString().ToLowerInvariant()}.json";
 
     /// <summary>
     /// The metadata.shared.json file name — the language-neutral taxonomy structure (competitions, their

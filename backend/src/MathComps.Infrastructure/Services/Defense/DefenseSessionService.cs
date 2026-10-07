@@ -24,7 +24,6 @@ namespace MathComps.Infrastructure.Services.Defense;
 /// <param name="limits">The input, message, and spend caps.</param>
 /// <param name="targetGuard">Says whether a student may argue what the target names.</param>
 /// <param name="contentResolver">Looks up what a new session's examiner is told about the problem.</param>
-/// <param name="defenseCopy">The examiner's own lines, in the student's language.</param>
 /// <param name="examinerConfigSnapshotProvider">The examiner engine's config snapshot, stamped onto each new
 /// session.</param>
 /// <param name="turnGate">Serializes a single user's turns.</param>
@@ -35,7 +34,6 @@ public class DefenseSessionService(
     IOptions<DefenseLimits> limits,
     IDefenseTargetGuard targetGuard,
     IDefenseContentResolver contentResolver,
-    IDefenseCopy defenseCopy,
     IExaminerConfigSnapshotProvider examinerConfigSnapshotProvider,
     IDefenseUserTurnGate turnGate,
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
@@ -84,8 +82,9 @@ public class DefenseSessionService(
         // Fold the author's hints into the reference so the examiner reads them as staged, earned-only help.
         var reference = DefenseReferenceBuilder.BuildReference(problem);
 
-        // The examiner's own greeting, in the language the student is working in.
-        var opener = defenseCopy.GetOpener(start.Language);
+        // The examiner's own greeting in the student's language, from the site's copy so nothing a client sends
+        // enters the transcript in her voice.
+        var opener = IDefenseSessionService.Opener(start.Language);
 
         // Serialize this user's turns for the rest of the operation, so concurrent starts each see the other's spend.
         using var turnLock = await turnGate.AcquireAsync(userId, cancellationToken);

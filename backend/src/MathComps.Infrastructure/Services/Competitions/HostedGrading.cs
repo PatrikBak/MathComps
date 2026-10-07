@@ -9,8 +9,8 @@ namespace MathComps.Infrastructure.Services.Competitions;
 
 /// <summary>
 /// What grading reads about hosted entries: which entry a student's grade on a problem belongs to, when that
-/// entry's conversations count, where grades stand, how far into their clock students last wrote about each
-/// problem, and what the conversation about a grade is called.
+/// entry's conversations count, where grades stand and who gave their marks, how far into their clock students last
+/// wrote about each problem, what the conversation about a grade is called, and when its student can see it.
 /// </summary>
 internal static class HostedGrading
 {
@@ -260,18 +260,63 @@ internal static class HostedGrading
             .ToDictionary(current => (current.EntryId, current.ProblemId), current => current.Grade);
 
     /// <summary>
-    /// Whether one entry's grade on one problem stands final.
+    /// Reads who gave one entry's grade on one problem its mark as it stands: the grader of the version that set the
+    /// current mark and help. A later version that keeps the mark and help leaves the mark theirs, whatever else it
+    /// changes.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="entryId">The entry.</param>
     /// <param name="problemId">The problem.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>Whether the newest version is final; false while nobody has given one.</returns>
-    public static Task<bool> IsFinalAsync(
-        MathCompsDbContext dbContext, Guid entryId, Guid problemId, CancellationToken cancellationToken) =>
-        // The newest version of this one grade, final
-        CurrentVersions(dbContext, grade => grade.EntryId == entryId && grade.ProblemId == problemId)
-            .AnyAsync(grade => grade.IsFinal, cancellationToken);
+    /// <returns>The grader, or null while nobody has given a grade.</returns>
+    public static async Task<Guid?> ReadMarkGiverAsync(
+        MathCompsDbContext dbContext, Guid entryId, Guid problemId, CancellationToken cancellationToken)
+    {
+        // Every version of the grade, the newest first
+        var versions = await dbContext.HostedGrades
+            .AsNoTracking()
+            .Where(grade => grade.EntryId == entryId && grade.ProblemId == problemId)
+            .OrderByDescending(grade => grade.CreatedAt)
+            .Select(grade => new { grade.AuthorId, grade.Mark, grade.Help })
+            .ToListAsync(cancellationToken);
+
+        // The oldest of the newest versions carrying the mark and help as they stand, which is the one that set them
+        return versions
+            .TakeWhile(version => version.Mark == versions[0].Mark && version.Help == versions[0].Help)
+            .LastOrDefault()?.AuthorId;
+    }
+
+    /// <summary>
+    /// Whether the conversation about one entry's grade on one problem is open to the student it is with: once
+    /// their group has closed, and while the grade is final.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="entryId">The entry.</param>
+    /// <param name="problemId">The problem.</param>
+    /// <param name="now">The instant to read the group's close against.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>Whether the student may read and write in it.</returns>
+    public static async Task<bool> IsOutToStudentAsync(
+        MathCompsDbContext dbContext,
+        Guid entryId,
+        Guid problemId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        // When the student's group closes
+        var closesAt = await dbContext.HostedEntries
+            .AsNoTracking()
+            .Where(entry => entry.Id == entryId)
+            .Select(entry => entry.Round.HostedGroup!.ClosesAt)
+            .FirstAsync(cancellationToken);
+
+        // Nothing of the student's results is out before their group closes, a final grade included
+        if (!HostedEntryRules.AreResultsOut(closesAt, now))
+            return false;
+
+        // Open while the grade is final
+        return await IsFinalAsync(dbContext, entryId, problemId, cancellationToken);
+    }
 
     /// <summary>
     /// Names the conversation between the graders and one student about one problem, one per grade.
@@ -327,6 +372,20 @@ internal static class HostedGrading
                     new UserIdentityDto(
                         grade.Author.Id, grade.Author.IsDeleted ? null : grade.Author.Username, grade.Author.Email))))
             .ToListAsync(cancellationToken);
+
+    /// <summary>
+    /// Whether one entry's grade on one problem stands final.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="entryId">The entry.</param>
+    /// <param name="problemId">The problem.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>Whether the newest version is final; false while nobody has given one.</returns>
+    private static Task<bool> IsFinalAsync(
+        MathCompsDbContext dbContext, Guid entryId, Guid problemId, CancellationToken cancellationToken) =>
+        // The newest version of this one grade, final
+        CurrentVersions(dbContext, grade => grade.EntryId == entryId && grade.ProblemId == problemId)
+            .AnyAsync(grade => grade.IsFinal, cancellationToken);
 
     /// <summary>
     /// The versions of grades in scope that nothing newer replaces, which is where each grade stands.

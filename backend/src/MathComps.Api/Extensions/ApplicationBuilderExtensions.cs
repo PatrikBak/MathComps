@@ -1,4 +1,6 @@
+using MathComps.Infrastructure.Options;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Options;
 
 namespace MathComps.Api.Extensions;
 
@@ -34,6 +36,13 @@ public static class ApplicationBuilderExtensions
         if (environment.IsProduction())
             app.UseHsts();
 
+        // The site's own mail address
+        var contactAddress = app.ApplicationServices.GetRequiredService<IOptions<SiteSettings>>().Value.ContactAddress;
+
+        // Friendly invite for anyone scripting against the API
+        var apiContact =
+            $"If you'd like to use our API, it would be very kind if you dropped us an email at {contactAddress}";
+
         // Add security headers to protect against common attacks
         app.Use((context, next) =>
         {
@@ -44,9 +53,8 @@ public static class ApplicationBuilderExtensions
                 // No need to index API
                 context.Response.Headers.Append("X-Robots-Tag", "noindex, nofollow");
 
-                // Friendly invite for anyone scripting against the API
-                context.Response.Headers.Append("X-Api-Contact",
-                    "If you'd like to use our API, it would be very kind if you dropped us an email at contact@mathcomps.fun");
+                // Invite anyone scripting against the API to get in touch
+                context.Response.Headers.Append("X-Api-Contact", apiContact);
 
                 // Prevent clickjacking attacks
                 context.Response.Headers.Append("X-Frame-Options", "DENY");

@@ -2,6 +2,7 @@ using MathComps.Api.Authorization;
 using MathComps.Api.Constants;
 using MathComps.Api.Errors;
 using MathComps.Api.Extensions;
+using MathComps.Api.Workers;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
@@ -192,6 +193,17 @@ builder.Services.AddProblemSelectionServices();
 
 // The Clerk webhook handler
 builder.Services.AddClerkWebhook();
+
+// Where the site lives and how it is reached
+builder.Services.AddSiteSettings(builder.Configuration);
+
+// The site's mail, and the loop sending whatever is due
+builder.Services.AddMail(builder.Configuration, builder.Environment);
+builder.Services.AddHostedService<MailOutboxWorker>();
+
+// The mail about new messages in grade conversations, and the loop writing it
+builder.Services.AddGradeMessageMail(builder.Configuration);
+builder.Services.AddHostedService<GradeMessageMailWorker>();
 
 // Request localization for Accept-Language header support
 // Auto-detect supported cultures from the Language enum
