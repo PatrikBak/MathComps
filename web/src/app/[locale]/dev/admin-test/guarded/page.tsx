@@ -2,7 +2,7 @@ import { requireAdmin } from '@/lib/auth/admin-auth'
 
 /**
  * Dev-only page guarded by {@link requireAdmin} — admins see the body, everyone
- * else is redirected home before it renders.
+ * else is redirected away before it renders.
  */
 export default async function GuardedAdminPage() {
   // Redirect non-admins away before rendering anything

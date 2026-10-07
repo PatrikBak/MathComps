@@ -14,6 +14,7 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { delay } from '@/components/shared/utils/async-utils'
 import { getClerkErrorMessage } from '@/components/shared/utils/clerk-utils'
 import { SECOND_MS } from '@/components/shared/utils/time-units'
+import { RETURN_URL_PARAM } from '@/constants/auth-constants'
 import { AUTH_RETURN_URL_STORAGE_KEY } from '@/constants/local-storage-constants'
 import { type Locale, ROUTES } from '@/i18n/i18n'
 import { getPathname } from '@/i18n/navigation'
@@ -118,8 +119,8 @@ export default function AuthForm() {
 
   // Capture return URL on mount and persist in session storage for OAuth flows
   useEffect(() => {
-    // Get return URL from query param (passed by LoginNavItem)
-    const urlParam = searchParams.get('returnUrl')
+    // Get return URL from query param
+    const urlParam = searchParams.get(RETURN_URL_PARAM)
 
     // Use query param if available, otherwise the locale-prefixed profile page
     const determinedUrl = urlParam || getPathname({ href: ROUTES.PROFILE, locale })

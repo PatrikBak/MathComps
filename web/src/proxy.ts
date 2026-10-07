@@ -2,6 +2,7 @@ import { clerkMiddleware } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
 
+import { REQUEST_URL_HEADER } from '@/constants/auth-constants'
 import { localePrefix, pathnames, SUPPORTED_LOCALES, UNMATCHED_VISITOR_LOCALE } from '@/i18n/i18n'
 
 /** Handles locale detection, URL rewriting, and localized pathnames. */
@@ -29,7 +30,9 @@ const API_ROUTE_PATTERN = /^\/api(?:\/|$)/
  * the gate is bypassed and the request flows through normal locale routing.
  *
  * Clerk wraps the request so `auth()` works in server components and API routes. A page
- * then goes on to next-intl for locale handling, which an API route has no part in.
+ * then goes on to next-intl for locale handling, which an API route has no part in. A page
+ * request also carries its own address in {@link REQUEST_URL_HEADER}, and next-intl forwards
+ * every request header on to the page.
  */
 export default clerkMiddleware(async (_auth, request) => {
   // An API route goes straight on to its handler, with no locale to route by
@@ -41,6 +44,9 @@ export default clerkMiddleware(async (_auth, request) => {
   if (process.env.NODE_ENV !== 'development' && DEV_ROUTE_PATTERN.test(request.nextUrl.pathname)) {
     return new NextResponse(null, { status: 404 })
   }
+
+  // Stamp the request with the address it asks for, query included
+  request.headers.set(REQUEST_URL_HEADER, `${request.nextUrl.pathname}${request.nextUrl.search}`)
 
   // Otherwise hand off to the locale-routing middleware
   return intlMiddleware(request)
