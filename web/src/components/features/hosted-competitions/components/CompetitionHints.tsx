@@ -1,11 +1,8 @@
 'use client'
 
 import { Lightbulb } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
-import type { Locale, LocalizedString } from '@/i18n/i18n'
-
-import type { LocalizedHints } from '../model/hosted-competition-types'
 import { CompetitionProblemSurface } from './CompetitionProblemSurface'
 import { HintLadder } from './HintLadder'
 
@@ -13,12 +10,12 @@ import { HintLadder } from './HintLadder'
  * Props for the {@link CompetitionHints} component.
  */
 type CompetitionHintsProps = {
-  /** Which of the set the hints lead into, counting from one. */
+  /** The number the problem goes by. */
   position: number
-  /** The statement as markdown/math source, in every language the site is read in. */
-  statement: LocalizedString
-  /** The author's hints, weakest nudge first, in every language the site is read in. */
-  hints: LocalizedHints
+  /** The statement as markdown/math source. */
+  statement: string
+  /** The author's hints, weakest nudge first. */
+  hints: string[]
   /** Whether this problem is the one whose hints are being read. */
   isOpen: boolean
   /** Opens the hints. */
@@ -28,11 +25,7 @@ type CompetitionHintsProps = {
 }
 
 /**
- * The author's hints towards one of a competition's problems: a line on the problem, and the ladder itself
- * on a surface of its own.
- *
- * Only ever drawn once the student is no longer competing here, which is when a ladder reaches the page at
- * all.
+ * The author's hints towards one problem: a line on the problem, and the ladder itself on a surface of its own.
  */
 export function CompetitionHints({
   position,
@@ -44,9 +37,6 @@ export function CompetitionHints({
 }: CompetitionHintsProps) {
   // Competitions copy
   const t = useTranslations('competitions')
-
-  // The active locale, which decides which language the ladder is read in
-  const locale = useLocale() as Locale
 
   return (
     <CompetitionProblemSurface
@@ -60,7 +50,7 @@ export function CompetitionHints({
       count={null}
       isTall={false}
     >
-      <HintLadder hints={hints[locale]} />
+      <HintLadder hints={hints} />
     </CompetitionProblemSurface>
   )
 }

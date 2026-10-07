@@ -47,6 +47,11 @@ export const userMenuCopy = ui.userMenu
 export const LIST_PATH = `/en${ROUTES.COMPETITIONS}`
 
 /**
+ * The problem selection in English, which is the canonical locale and so carries no route translation.
+ */
+export const SELECTION_PATH = `/en${ROUTES.PROBLEM_SELECTION}`
+
+/**
  * One competition's own area.
  *
  * @param competitionSlug - Which competition's area.

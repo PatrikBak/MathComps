@@ -6,6 +6,7 @@ import {
   failEveryBackendCall,
   PROBLEMS_PATH,
   refuseEveryBackendCall,
+  returnToTab,
   SEARCH_PATH,
 } from './support/backend-routes'
 import {
@@ -30,30 +31,6 @@ const { problems: problemsCopy, ui: uiCopy } = messages
 
 /** A word no problem carries, which is how a search is made to come back with nothing. */
 const NOTHING_MATCHES = 'qwertyuiopasdfgh'
-
-/**
- * Simulates leaving the tab and coming back, which is what React Query watches to revive a query
- * that gave up.
- *
- * @param page - The page to switch away from and back to.
- */
-async function returnToTab(page: Page): Promise<void> {
-  // React Query reads document.visibilityState and listens for the event on window, so overriding
-  // the one and dispatching the other is the whole of a tab switch as far as it is concerned
-  await page.evaluate(() => {
-    // A function which puts the document into a visibility state and announces it
-    const setVisibility = (state: string) => {
-      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => state })
-      window.dispatchEvent(new Event('visibilitychange'))
-    }
-
-    // Leave the tab
-    setVisibility('hidden')
-
-    // Come back to it
-    setVisibility('visible')
-  })
-}
 
 /**
  * Cuts the browser's own offline signal, which is what tells React Query to hold requests back.

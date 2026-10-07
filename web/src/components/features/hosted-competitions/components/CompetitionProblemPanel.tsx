@@ -61,7 +61,7 @@ export function CompetitionProblemPanel({
   // Competitions copy
   const t = useTranslations('competitions')
 
-  // The active locale, which decides which language the statement is read in
+  // The active locale
   const locale = useLocale() as Locale
 
   // Dates and times, worded for the reader
@@ -104,8 +104,8 @@ export function CompetitionProblemPanel({
         {problem.hints !== null && problem.hints[locale].length > 0 && (
           <CompetitionHints
             position={problem.position}
-            statement={problem.statement}
-            hints={problem.hints}
+            statement={problem.statement[locale]}
+            hints={problem.hints[locale]}
             isOpen={hintsDisclosure.openedValue === String(problem.position)}
             onOpen={() => hintsDisclosure.open(String(problem.position))}
             onClose={hintsDisclosure.close}
@@ -116,8 +116,8 @@ export function CompetitionProblemPanel({
         {problem.solution !== null && (
           <CompetitionSolution
             position={problem.position}
-            statement={problem.statement}
-            solution={problem.solution}
+            statement={problem.statement[locale]}
+            solution={problem.solution[locale]}
             isOpen={solutionDisclosure.openedValue === String(problem.position)}
             onOpen={() => solutionDisclosure.open(String(problem.position))}
             onClose={solutionDisclosure.close}
@@ -154,7 +154,7 @@ export function CompetitionProblemPanel({
             {problem.result?.kind === 'final' && (
               <GradeComments
                 position={problem.position}
-                statement={problem.statement}
+                statement={problem.statement[locale]}
                 conversation={problem.result.conversation}
                 isOpen={feedbackDisclosure.openedValue === problem.id}
                 onOpen={() => feedbackDisclosure.open(problem.id)}

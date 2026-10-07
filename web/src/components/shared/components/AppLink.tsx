@@ -12,7 +12,7 @@ import { isExternalHref } from '../utils/url-utils'
  * localized route with a dynamic segment can be named in: a built path matches no route, so next-intl
  * carries it through as itself and the reader reaches the localized one by being redirected off it.
  */
-type RouteHref = {
+export type RouteHref = {
   /** The canonical route, dynamic segments and all. */
   pathname: string
   /** What fills those segments, by segment name. */

@@ -2,13 +2,12 @@
 
 import type { LucideIcon } from 'lucide-react'
 import { X } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 import { ProblemBand } from '@/components/features/defense/components/ProblemBand'
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
-import type { Locale, LocalizedString } from '@/i18n/i18n'
 
 /**
  * Props for the {@link CompetitionProblemSurface} component.
@@ -18,10 +17,10 @@ type CompetitionProblemSurfaceProps = {
   label: string
   /** The mark on the row, which is what tells one surface from another at a glance. */
   icon: LucideIcon
-  /** Which of the set this is about, counting from one. */
+  /** The number the problem goes by. */
   position: number
-  /** The statement as markdown/math source, in every language the site is read in. */
-  statement: LocalizedString
+  /** The statement as markdown/math source. */
+  statement: string
   /** Whether this problem is the one whose surface is being read. */
   isOpen: boolean
   /** Opens the surface. */
@@ -37,10 +36,10 @@ type CompetitionProblemSurfaceProps = {
 }
 
 /**
- * What the competition area reads about one problem away from the problem itself: a line among the rows
- * under it, and the thing itself on a surface of its own.
+ * Something read about one problem away from the problem itself: a line among the rows under it, and the
+ * thing itself on a surface of its own.
  *
- * The surface is laid out the way the conversation about the same problem is: the statement above, folded
+ * The surface is laid out the way a conversation about a problem is: the statement above, folded
  * away by the same control, and what is said about it underneath.
  */
 export function CompetitionProblemSurface({
@@ -61,12 +60,9 @@ export function CompetitionProblemSurface({
   // Competitions copy
   const t = useTranslations('competitions')
 
-  // The active locale, which decides which language the statement is read in
-  const locale = useLocale() as Locale
-
   return (
     <>
-      {/* Drawn as the conversation rows beside it are, down to the icon and the size */}
+      {/* The row, drawn as a conversation row is, down to the icon and the size */}
       <button
         type="button"
         onClick={onOpen}
@@ -98,8 +94,7 @@ export function CompetitionProblemSurface({
           className="flex max-h-[100dvh] flex-col sm:max-h-[94vh] sm:max-w-5xl"
           tall={isTall}
         >
-          {/* Which of the surfaces this is, which of the set it belongs to, and the way out of it. Whose
-              work it is has to be said, everything else under a problem being the student's own */}
+          {/* Which of the surfaces this is, the problem it is about, and the way out of it */}
           <div className="flex shrink-0 items-center gap-3 border-b border-foreground/10 px-4 py-2 sm:px-5">
             <div className="flex min-w-0 items-baseline gap-2">
               <span className="shrink-0 text-base font-bold text-foreground sm:text-lg">
@@ -123,7 +118,7 @@ export function CompetitionProblemSurface({
 
           {/* The problem, re-readable above what is said about it. Nothing under it is being written, so
               it stands at its own height */}
-          <ProblemBand statement={statement[locale]} height="own" />
+          <ProblemBand statement={statement} height="own" />
 
           {/* And the thing itself, which scrolls in its own right once it outgrows the screen */}
           <div

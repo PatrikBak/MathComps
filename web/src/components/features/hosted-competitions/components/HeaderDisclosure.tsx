@@ -7,6 +7,14 @@ import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
 
 /**
+ * The look of one row in the page header.
+ */
+export const HEADER_ROW_CLASS = cn(
+  'inline-flex items-center gap-1 rounded text-sm text-link hover:text-link-hover hover:underline',
+  FOCUS_RING_CLASS
+)
+
+/**
  * Props for the {@link HeaderDisclosure} component.
  */
 type HeaderDisclosureProps = {
@@ -26,9 +34,8 @@ export function HeaderDisclosure({ label, children }: HeaderDisclosureProps) {
     <details className="group open:pb-3">
       <summary
         className={cn(
-          'inline-flex cursor-pointer list-none items-center gap-1 rounded text-sm text-link',
-          'hover:text-link-hover hover:underline [&::-webkit-details-marker]:hidden',
-          FOCUS_RING_CLASS
+          HEADER_ROW_CLASS,
+          'cursor-pointer list-none [&::-webkit-details-marker]:hidden'
         )}
       >
         <ChevronRight

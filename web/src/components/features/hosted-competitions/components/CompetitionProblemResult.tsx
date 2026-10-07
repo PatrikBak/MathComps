@@ -7,7 +7,6 @@ import { useTranslations } from 'next-intl'
 import { formatScore, MAX_MARK } from '@/components/features/admin/grades/model/grade-types'
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
 import { assertNever } from '@/components/shared/utils/assert-never'
-import type { LocalizedString } from '@/i18n/i18n'
 
 import { invalidateCompetitionProblems } from '../hooks/hosted-competition-cache'
 import type { GradeConversation, ProblemResult } from '../model/hosted-competition-types'
@@ -72,8 +71,8 @@ export function ProblemScore({ result }: ProblemScoreProps) {
 type GradeCommentsProps = {
   /** Which of the set this is, counting from one. */
   position: number
-  /** The statement as markdown/math source, in every language the site is read in. */
-  statement: LocalizedString
+  /** The statement as markdown/math source, in the language being read. */
+  statement: string
   /** The conversation with the graders about the mark. */
   conversation: GradeConversation
   /** Whether this problem is the one whose thread is being read. */
