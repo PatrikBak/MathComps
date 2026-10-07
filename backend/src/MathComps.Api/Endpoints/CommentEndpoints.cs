@@ -46,10 +46,15 @@ public static class CommentEndpoints
         // Get comment counts for many targets of one type
         app.MapPost($"{CommentsPath}/counts", async (
             GetCommentCountsRequest request,
+            IUserManager userManager,
+            HttpContext context,
             ICommentService commentService) =>
         {
+            // Who is asking... might be nobody
+            var viewer = await GetViewerAsync(userManager, context);
+
             // Each target's active comment count by its id
-            var counts = await commentService.GetCommentCountsAsync(request.TargetType, request.TargetIds);
+            var counts = await commentService.GetCommentCountsAsync(request.TargetType, request.TargetIds, viewer);
 
             // Return the mapping
             return Results.Ok(counts);
@@ -63,6 +68,10 @@ public static class CommentEndpoints
             IUserManager userManager,
             ICommentService commentService) =>
         {
+            // A comment saying nothing says nothing
+            if (string.IsNullOrWhiteSpace(request.Content))
+                throw new BadHttpRequestException("A comment must say something.");
+
             // Resolve the caller, faulting when the request has no user behind it
             var viewer = await RequireViewerAsync(userManager, context);
 
@@ -87,6 +96,10 @@ public static class CommentEndpoints
             IUserManager userManager,
             ICommentService commentService) =>
         {
+            // A comment saying nothing says nothing
+            if (string.IsNullOrWhiteSpace(request.Content))
+                throw new BadHttpRequestException("A comment must say something.");
+
             // Resolve the caller, faulting when the request has no user behind it
             var viewer = await RequireViewerAsync(userManager, context);
 

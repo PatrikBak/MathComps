@@ -1,5 +1,4 @@
 using MathComps.Domain.Contracts.Competitions;
-using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Selection;
@@ -17,11 +16,6 @@ namespace MathComps.Infrastructure.Tests.Selection;
 public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     : PostgresTestBase<IProposalService>(fixture)
 {
-    /// <summary>
-    /// The reviewer writing the comments.
-    /// </summary>
-    private readonly Guid _reviewerId = Guid.CreateVersion7();
-
     /// <summary>
     /// A proposal in the pool, standing on a draft board and recommended for the advanced category.
     /// </summary>
@@ -94,8 +88,8 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         await Assert.ThrowsAsync<SelectionProposalUsedException>(() => service.DeleteAsync(_usedId)));
 
     /// <summary>
-    /// A deleted proposal is gone from the selection, so it can be neither set aside nor commented on. A change
-    /// slipping through would be recorded against a proposal the selection no longer shows.
+    /// A deleted proposal is gone from the selection, so it can't be set aside. A change slipping through would be
+    /// recorded against a proposal the selection no longer shows.
     /// </summary>
     [Fact]
     public Task A_deleted_proposal_takes_no_change() => RunTestAsync(async service =>
@@ -106,40 +100,11 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         // Setting the deleted proposal aside, refused
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
             () => service.SetAsideAsync(_pooledId, isSetAside: true));
-
-        // Commenting on the deleted proposal, refused too
-        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-            () => service.AddCommentAsync(_reviewerId, _pooledId, "Too late."));
-    });
-
-    /// <summary>
-    /// A comment is written under its proposal, live and signed by the reviewer who wrote it. Written under the
-    /// problem instead, it would reach the problem's readers once the problem is published.
-    /// </summary>
-    [Fact]
-    public Task A_comment_is_written_under_its_proposal() => RunTestAsync(async service =>
-    {
-        // Written
-        await service.AddCommentAsync(_reviewerId, _pooledId, "Fits the advanced paper.");
-
-        // The one comment hung off the pooled proposal
-        var comment = await QueryValueAsync(context => context.ProposalComments
-            .Where(link => link.ProposalId == _pooledId)
-            .Select(link => new { link.Comment.AuthorId, link.Comment.Content, link.Comment.Status })
-            .SingleAsync());
-
-        // Signed by the reviewer, saying what was written, and live
-        Assert.Equal(
-            (_reviewerId, "Fits the advanced paper.", CommentStatus.Active),
-            (comment.AuthorId, comment.Content, comment.Status));
     });
 
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
-        // The reviewer
-        context.Users.Add(HostedSeed.NewUser(_reviewerId, "Reviewer"));
-
         // The season every round sits in
         var season = SelectionSeed.NewSeason(context);
 

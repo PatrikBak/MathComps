@@ -1,5 +1,4 @@
 using MathComps.Domain.Contracts.Competitions;
-using MathComps.Domain.EfCoreEntities;
 
 namespace MathComps.Infrastructure.Services.Selection;
 
@@ -34,8 +33,8 @@ public interface IProposalService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes a proposal from the selection, emptying every slot it stands in. Its problem, conversations and
-    /// comments stay where they are.
+    /// Deletes a proposal from the selection, emptying every slot it stands in. Its problem and conversations stay
+    /// where they are, and the reviewers' discussion of it closes with it.
     /// </summary>
     /// <param name="proposalId">The proposal.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
@@ -43,18 +42,6 @@ public interface IProposalService
     /// <exception cref="SelectionTargetNotFoundException">Thrown when no live proposal has the id.</exception>
     /// <exception cref="SelectionProposalUsedException">Thrown when a paper has taken it.</exception>
     Task DeleteAsync(Guid proposalId, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Adds a reviewer's comment under a proposal.
-    /// </summary>
-    /// <param name="userId">The reviewer writing the comment.</param>
-    /// <param name="proposalId">The proposal.</param>
-    /// <param name="content"><inheritdoc cref="Comment.Content" path="/summary"/></param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>A task that completes once the comment is saved.</returns>
-    /// <exception cref="SelectionTargetNotFoundException">Thrown when no live proposal has the id.</exception>
-    Task AddCommentAsync(
-        Guid userId, Guid proposalId, string content, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

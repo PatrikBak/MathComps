@@ -262,8 +262,8 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Grade conversations are never counted in bulk, since the counts are read without asking who is reading:
-    /// a count is refused as though the threads were not there, even for a conversation open to its student.
+    /// Grade conversations are never counted in bulk: a count is refused as though the threads were not there, even
+    /// to the student a conversation is open to.
     /// </summary>
     [Fact]
     public Task Grade_conversations_are_never_counted() => RunTestAsync(async service =>
@@ -276,7 +276,7 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
 
         // Its count, refused
         await Assert.ThrowsAsync<CommentTargetNotFoundException>(
-            () => service.GetCommentCountsAsync(CommentTargetType.HostedGrade, [target.TargetId]));
+            () => service.GetCommentCountsAsync(CommentTargetType.HostedGrade, [target.TargetId], _student));
     });
 
     /// <summary>

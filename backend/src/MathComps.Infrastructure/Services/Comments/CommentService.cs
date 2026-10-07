@@ -82,6 +82,12 @@ public class CommentService(
     private sealed record GradeAnchor(Guid EntryId, Guid ProblemId, Guid StudentId)
         : CommentAnchor(CommentTargetType.HostedGrade);
 
+    /// <summary>
+    /// The reviewers' discussion of a proposal.
+    /// </summary>
+    /// <param name="ProposalId"><inheritdoc cref="ProposalComment.ProposalId" path="/summary"/></param>
+    private sealed record ProposalAnchor(Guid ProposalId) : CommentAnchor(CommentTargetType.Proposal);
+
     #endregion
 
     #region ICommentService Implementation
@@ -356,8 +362,8 @@ public class CommentService(
         // Only a comment in a thread the viewer may reach is liked
         var anchor = await ReadOpenAnchorAsync(dbContext, commentId, viewer);
 
-        // A grade conversation takes no likes, refused like a comment that is not there
-        if (anchor is GradeAnchor)
+        // A grade conversation and a proposal's discussion take no likes, refused like a comment that is not there
+        if (anchor is GradeAnchor or ProposalAnchor)
             throw new CommentNotFoundException();
 
         // The comment's author
@@ -392,12 +398,12 @@ public class CommentService(
 
     /// <inheritdoc />
     public async Task<ImmutableDictionary<string, int>> GetCommentCountsAsync(
-        CommentTargetType targetType, ImmutableList<string> targetIds)
+        CommentTargetType targetType, ImmutableList<string> targetIds, CommentViewer? viewer)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        // Each requested target's active-comment count, by its content id
+        // Each requested target's active-comment count, by its id
         var query = targetType switch
         {
             // Each article's active comments
@@ -413,6 +419,12 @@ public class CommentService(
                 .Where(handoutComment => handoutComment.Comment.Status == CommentStatus.Active)
                 .GroupBy(handoutComment => handoutComment.Handout.ContentId)
                 .Select(group => new KeyValuePair<string, int>(group.Key, group.Count())),
+
+            // Each live proposal's active comments, counted for the accounts preparing the competitions alone and
+            // refused like targets that are not there to anybody else
+            CommentTargetType.Proposal => await IsPreparingCompetitionsAsync(viewer)
+                ? ProposalCounts(dbContext, targetIds)
+                : throw new CommentTargetNotFoundException(targetType, string.Join(", ", targetIds)),
 
             // A problem's thread, with no bulk count
             CommentTargetType.Problem
@@ -463,6 +475,9 @@ public class CommentService(
             // The grade conversation, by the student's entry and the problem
             CommentTargetType.HostedGrade => await ResolveGradeAnchorAsync(dbContext, target),
 
+            // The proposal's discussion, while the proposal stands
+            CommentTargetType.Proposal => await ResolveProposalAnchorAsync(dbContext, target),
+
             // Unhandled target type
             _ => throw new ArgumentOutOfRangeException(nameof(target), target.TargetType, "Invalid comment target type")
         };
@@ -508,6 +523,29 @@ public class CommentService(
     }
 
     /// <summary>
+    /// Resolves a proposal's discussion, named by the proposal's id, to a proposal that has not been deleted. A
+    /// deleted proposal's discussion goes with it.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="target">The discussion, identified by the proposal's id.</param>
+    /// <returns>The discussion.</returns>
+    private static async Task<ProposalAnchor> ResolveProposalAnchorAsync(
+        MathCompsDbContext dbContext, CommentTarget target)
+    {
+        // An id that is no GUID names no proposal, refused like a missing thread
+        if (!Guid.TryParse(target.TargetId, out var proposalId))
+            throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
+
+        // Whether the proposal stands
+        var stands = await dbContext.Proposals
+            .AnyAsync(proposal => proposal.ProblemId == proposalId && proposal.DeletedAt == null);
+
+        // The proposal's discussion, or a missing thread when no standing proposal has the id
+        return stands ? new ProposalAnchor(proposalId) : throw new CommentTargetNotFoundException(
+            target.TargetType, target.TargetId);
+    }
+
+    /// <summary>
     /// Reads the thread a comment was written in, refusing a comment in a thread the viewer may not reach as
     /// though it did not exist.
     /// </summary>
@@ -515,7 +553,7 @@ public class CommentService(
     /// <param name="commentId">The comment.</param>
     /// <param name="viewer">Who is asking.</param>
     /// <returns>The thread the comment belongs to.</returns>
-    private static async Task<CommentAnchor> ReadOpenAnchorAsync(
+    private async Task<CommentAnchor> ReadOpenAnchorAsync(
         MathCompsDbContext dbContext, Guid commentId, CommentViewer viewer)
     {
         // The thread the comment is stored in
@@ -527,7 +565,8 @@ public class CommentService(
 
     /// <summary>
     /// Reads the thread a comment was written in off its stored link. A version an edit has replaced counts as
-    /// missing, and so does a comment on a problem the archive does not serve, which has no thread.
+    /// missing. So does a comment on a problem the archive does not serve, which has no thread, and one in a
+    /// deleted proposal's discussion.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="commentId">The comment.</param>
@@ -559,6 +598,10 @@ public class CommentService(
                     .Where(link => link.CommentId == comment.Id)
                     .Select(link => new { link.EntryId, link.ProblemId, link.Entry.UserId })
                     .FirstOrDefault(),
+                ProposalId = dbContext.ProposalComments
+                    .Where(link => link.CommentId == comment.Id && link.Proposal.DeletedAt == null)
+                    .Select(link => (Guid?)link.ProposalId)
+                    .FirstOrDefault(),
             })
             .FirstOrDefaultAsync()
             // A missing or replaced comment is refused as not found
@@ -578,6 +621,9 @@ public class CommentService(
 
             // A grade conversation
             { Grade: { } grade } => new GradeAnchor(grade.EntryId, grade.ProblemId, grade.UserId),
+
+            // A proposal's discussion
+            { ProposalId: { } proposalId } => new ProposalAnchor(proposalId),
 
             // A comment in no thread, or on a problem the archive does not serve, is one nobody can reach
             _ => throw new CommentNotFoundException()
@@ -632,6 +678,15 @@ public class CommentService(
                 });
                 break;
 
+            // A proposal's discussion
+            case ProposalAnchor proposal:
+                dbContext.ProposalComments.Add(new ProposalComment
+                {
+                    ProposalId = proposal.ProposalId,
+                    CommentId = commentId
+                });
+                break;
+
             // Unhandled anchor
             default:
                 throw new ArgumentOutOfRangeException(nameof(anchor), anchor, "Invalid comment anchor");
@@ -674,6 +729,10 @@ public class CommentService(
 
             // A grade conversation, by the entry and the problem it resolves to
             CommentTargetType.HostedGrade => GradeThreadFragments(await ResolveGradeAnchorAsync(dbContext, target)),
+
+            // A proposal's discussion, while the proposal stands
+            CommentTargetType.Proposal => ProposalThreadFragments(
+                await ResolveProposalAnchorAsync(dbContext, target)),
 
             // Unhandled target type
             _ => throw new ArgumentOutOfRangeException(nameof(target), target.TargetType, "Invalid comment target type")
@@ -728,7 +787,7 @@ public class CommentService(
     }
 
     /// <summary>
-    /// Whether a kind of thread is open to anybody. Every other kind is a grade conversation.
+    /// Whether a kind of thread is open to anybody.
     /// </summary>
     /// <param name="targetType">The kind of thread.</param>
     /// <returns>Whether anybody may read and write in it.</returns>
@@ -741,6 +800,9 @@ public class CommentService(
 
             // A conversation between the graders and one student
             CommentTargetType.HostedGrade => false,
+
+            // A discussion among the accounts preparing the competitions
+            CommentTargetType.Proposal => false,
 
             // Unhandled target type
             _ => throw new ArgumentOutOfRangeException(nameof(targetType), targetType, "Invalid comment target type")
@@ -757,20 +819,31 @@ public class CommentService(
         viewer is { IsAdmin: true } || viewer?.UserId == studentId;
 
     /// <summary>
+    /// Whether a viewer is one of the accounts preparing the competitions.
+    /// </summary>
+    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
+    /// <returns>Whether they prepare the competitions.</returns>
+    private async Task<bool> IsPreparingCompetitionsAsync(CommentViewer? viewer) =>
+        // A signed-in account holding the PrepareCompetitions grant
+        viewer is not null && await grants.HasAsync(viewer.UserId, UserCapability.PrepareCompetitions);
+
+    /// <summary>
     /// Whether a viewer may read and write in a thread whose anchor is known.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="anchor">The thread.</param>
     /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
     /// <returns>Whether the thread is open to them.</returns>
-    private static async Task<bool> IsOpenToAsync(
+    private async Task<bool> IsOpenToAsync(
         MathCompsDbContext dbContext, CommentAnchor anchor, CommentViewer? viewer) =>
         // Public content, open to anybody; a grade conversation, open to admins, and to its student once their group
-        // has closed, while the grade is final
+        // has closed, while the grade is final; a proposal's discussion, open to the accounts preparing the
+        // competitions
         IsPublic(anchor.TargetType)
         || (anchor is GradeAnchor grade
             && IsBetween(viewer, grade.StudentId)
-            && (viewer is { IsAdmin: true } || await IsOutToStudentAsync(dbContext, grade)));
+            && (viewer is { IsAdmin: true } || await IsOutToStudentAsync(dbContext, grade)))
+        || (anchor is ProposalAnchor && await IsPreparingCompetitionsAsync(viewer));
 
     /// <summary>
     /// Whether a grade conversation is open to the student it is with: once their group has closed, and while the
@@ -807,9 +880,11 @@ public class CommentService(
     {
         // Public content, open to anybody, so no thread is resolved to decide it. A grade conversation is looked up
         // only for somebody it is between, so not even how long a refusal takes tells anybody else whether there is
-        // one.
+        // one. A proposal's discussion is open to the accounts preparing the competitions, whichever proposal it is.
         var isOpen = IsPublic(target.TargetType)
-            || (HostedGrading.TryParseConversationTargetId(target.TargetId, out _, out var studentId)
+            || (target.TargetType == CommentTargetType.Proposal && await IsPreparingCompetitionsAsync(viewer))
+            || (target.TargetType == CommentTargetType.HostedGrade
+                && HostedGrading.TryParseConversationTargetId(target.TargetId, out _, out var studentId)
                 && IsBetween(viewer, studentId)
                 && await IsOpenToAsync(dbContext, await ResolveGradeAnchorAsync(dbContext, target), viewer));
 
@@ -830,6 +905,43 @@ public class CommentService(
             "gc.entry_id = @p0 AND gc.problem_id = @p1",
             [anchor.EntryId, anchor.ProblemId]
         );
+
+    /// <summary>
+    /// The JOIN and WHERE picking out one proposal's discussion.
+    /// </summary>
+    /// <param name="anchor">The discussion.</param>
+    /// <returns>The JOIN and WHERE fragments, with the value the WHERE compares against.</returns>
+    private static (string Join, string Where, object[] Parameters) ProposalThreadFragments(
+        ProposalAnchor anchor) =>
+        // The discussion's links, matched on the proposal
+        (
+            "JOIN proposal_comments prc ON c.id = prc.comment_id",
+            "prc.proposal_id = @p0",
+            [anchor.ProposalId]
+        );
+
+    /// <summary>
+    /// The query counting the active comments in each discussion of a proposal that has not been deleted.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="targetIds">The proposals, by id, where an id that doesn't parse names none.</param>
+    /// <returns>The query, each discussed proposal's count keyed by its id.</returns>
+    private static IQueryable<KeyValuePair<string, int>> ProposalCounts(
+        MathCompsDbContext dbContext, ImmutableList<string> targetIds)
+    {
+        // The ids naming a proposal at all
+        var proposalIds = targetIds
+            .Select(targetId => Guid.TryParse(targetId, out var proposalId) ? proposalId : (Guid?)null)
+            .OfType<Guid>()
+            .ToList();
+
+        // Each standing proposal's active comments, keyed by its id
+        return dbContext.ProposalComments
+            .Where(link => proposalIds.Contains(link.ProposalId) && link.Proposal.DeletedAt == null)
+            .Where(link => link.Comment.Status == CommentStatus.Active)
+            .GroupBy(link => link.ProposalId)
+            .Select(group => new KeyValuePair<string, int>(group.Key.ToString(), group.Count()));
+    }
 
     #endregion
 }

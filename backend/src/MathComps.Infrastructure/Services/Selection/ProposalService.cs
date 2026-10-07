@@ -1,5 +1,4 @@
 using MathComps.Domain.Contracts.Competitions;
-using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,35 +53,10 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
             if (!SelectionRules.IsInPool(proposal.Problem.Round.Competition.Path))
                 throw new SelectionProposalUsedException();
 
-            // The proposal gone from the selection, its problem, conversations and comments kept
+            // The proposal gone from the selection and its discussion closed, its problem and conversations kept
             proposal.DeletedAt = DateTimeOffset.UtcNow;
 
             // And the proposal off every board it stood on
             await SelectionRules.RemoveSlotsAsync(dbContext, [proposal.ProblemId], cancellationToken);
-        }, cancellationToken);
-
-    /// <inheritdoc/>
-    public Task AddCommentAsync(
-        Guid userId, Guid proposalId, string content, CancellationToken cancellationToken = default) =>
-        // The comment, as one selection write
-        SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
-        {
-            // Only a live proposal takes a comment
-            await SelectionRules.ReadProposalAsync(dbContext, proposalId, cancellationToken);
-
-            // The comment
-            var comment = new Comment
-            {
-                AuthorId = userId,
-                Content = content,
-                Status = CommentStatus.Active,
-                CreatedAt = DateTimeOffset.UtcNow,
-            };
-
-            // The comment, saved with the write
-            dbContext.Comments.Add(comment);
-
-            // Hung off the proposal
-            dbContext.ProposalComments.Add(new ProposalComment { ProposalId = proposalId, CommentId = comment.Id });
         }, cancellationToken);
 }

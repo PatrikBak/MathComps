@@ -8,12 +8,13 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// A service for reading and writing comment threads.
 /// </summary>
 /// <remarks>
-/// Every operation on one thread is told who is asking, which for a read can be nobody. A thread the viewer may
-/// not reach, and every comment in it, is refused as though it did not exist:
-/// <see cref="CommentTargetNotFoundException"/> for a target, <see cref="CommentNotFoundException"/> for a comment.
-/// Handouts, news and the problems the archive serves are open to anybody, and no other problem has a thread. A
-/// grade conversation is open to admins, and to the student it is with once their group has closed, while the
-/// grade is final. A version an edit has replaced is refused with
+/// Every operation is told who is asking, which for a read can be nobody. A thread the viewer may not reach,
+/// and every comment in it, is refused as though it did not exist: <see cref="CommentTargetNotFoundException"/>
+/// for a target, <see cref="CommentNotFoundException"/> for a comment. Handouts, news and the problems the archive
+/// serves are open to anybody, and no other problem has a thread. A grade conversation is open to admins, and to
+/// the student it is with once their group has closed, while the grade is final. A proposal's discussion is open
+/// only to the accounts preparing the competitions, and to nobody once the proposal is deleted. A version an edit
+/// has replaced is refused with
 /// <see cref="CommentNotFoundException"/> too.
 /// </remarks>
 public interface ICommentService
@@ -60,22 +61,24 @@ public interface ICommentService
 
     /// <summary>
     /// Toggles a like on a comment. Creates a like if it doesn't exist, removes it if it does. A comment in a
-    /// grade conversation takes no likes and is refused as though it did not exist.
+    /// grade conversation or a proposal's discussion takes no likes and is refused as though it did not exist.
     /// </summary>
     /// <param name="commentId">The ID of the comment to like/unlike.</param>
     /// <param name="viewer">The user toggling the like.</param>
     Task ToggleLikeAsync(Guid commentId, CommentViewer viewer);
 
     /// <summary>
-    /// Counts the active comments on each of several targets of one type. Only handouts and news articles are
-    /// counted in bulk: grade conversations are refused like targets that are not there, and any other type throws
+    /// Counts the active comments on each of several targets of one type. Only handouts, news articles and
+    /// proposals are counted in bulk: grade conversations are refused like targets that are not there, and so are
+    /// proposals to anybody but the accounts preparing the competitions. Any other type throws
     /// <see cref="ArgumentException"/>.
     /// </summary>
     /// <param name="targetType">The type of the targets.</param>
     /// <param name="targetIds">The ids of the targets.</param>
+    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
     /// <returns>Each target's active comment count by its id, a target with none left out.</returns>
     Task<ImmutableDictionary<string, int>> GetCommentCountsAsync(
-        CommentTargetType targetType, ImmutableList<string> targetIds);
+        CommentTargetType targetType, ImmutableList<string> targetIds, CommentViewer? viewer);
 }
 
 /// <summary>

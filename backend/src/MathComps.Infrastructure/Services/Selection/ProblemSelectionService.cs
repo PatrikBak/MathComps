@@ -14,8 +14,7 @@ namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
 /// Implements <see cref="IProblemSelectionService"/> over the database. The hosted groups that have not opened are
-/// read first, since they decide which finalized boards are still in play and which proposals have left the
-/// selection with an opened one.
+/// read first, since they decide which finalized boards are still in play.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context the read runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
@@ -89,7 +88,7 @@ public sealed class ProblemSelectionService(
                 proposal.Recommended,
                 proposal.IsSetAside,
                 CompetitionPath = proposal.Problem.Round.Competition.Path,
-                proposal.Problem.Round.HostedGroupId,
+                GroupOpensAt = (DateTimeOffset?)proposal.Problem.Round.HostedGroup!.OpensAt,
                 Texts = proposal.Problem.Texts
                     .Select(text => new ProblemBody(
                         text.DocumentType, text.Language, text.MarkdownText ?? text.RawText))
@@ -102,16 +101,16 @@ public sealed class ProblemSelectionService(
             group => group.Id,
             group => HostedGroupName.Of(localization, group.Rounds.FirstOrDefault()?.CompetitionPath)[language]);
 
-        // The proposals still in the selection: in the pool, or in a round of a group that has not opened.
+        // The proposals still in the selection.
         var selected = proposals
-            .Where(proposal => SelectionRules.IsInPool(proposal.CompetitionPath)
-                || (proposal.HostedGroupId is { } groupId && groupNames.ContainsKey(groupId)))
+            .Where(proposal => SelectionRules.IsInSelection(proposal.CompetitionPath, proposal.GroupOpensAt, now))
             .ToList();
 
         // The selected proposals' ids.
         var selectedIds = selected.Select(proposal => proposal.ProblemId).ToList();
 
-        // Every conversation held about a selected proposal, newest first, with everything said in it.
+        // Every conversation held about a selected proposal, newest first, with how much was said and whether the
+        // statement it was argued against is one the problem still has in some language.
         var conversations = await dbContext.ProblemDefenses
             .AsNoTracking()
             .Where(defense => selectedIds.Contains(defense.ProblemId))
@@ -121,27 +120,9 @@ public sealed class ProblemSelectionService(
                 defense.ProblemId,
                 defense.DefenseSession.User.IsDeleted ? null : defense.DefenseSession.User.Username,
                 defense.DefenseSession.CreatedAt,
-                defense.DefenseSession.ProblemStatement,
-                defense.DefenseSession.Turns
-                    .OrderBy(turn => turn.Sequence)
-                    .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))
-                    .ToList()))
-            .ToListAsync(cancellationToken);
-
-        // Every live comment under a selected proposal, oldest first, with the proposal it sits under.
-        var comments = await dbContext.ProposalComments
-            .AsNoTracking()
-            .Where(link => selectedIds.Contains(link.ProposalId) && link.Comment.Status == CommentStatus.Active)
-            .OrderBy(link => link.Comment.CreatedAt)
-            .Select(link => new
-            {
-                link.ProposalId,
-                Comment = new ReviewCommentDto(
-                    link.CommentId,
-                    link.Comment.Author.IsDeleted ? null : link.Comment.Author.Username,
-                    link.Comment.Content,
-                    link.Comment.CreatedAt),
-            })
+                defense.DefenseSession.Turns.Count,
+                !defense.Problem.Texts.Any(text => text.DocumentType == DocumentType.Statement
+                    && (text.MarkdownText ?? text.RawText) == defense.DefenseSession.ProblemStatement)))
             .ToListAsync(cancellationToken);
 
         // Every board with its papers and their slot rows, oldest first.
@@ -234,12 +215,46 @@ public sealed class ProblemSelectionService(
                         ],
                         group.ProblemCount)),
             ],
-            conversations,
-            comments
-                .GroupBy(row => row.ProposalId)
-                .ToDictionary(
-                    thread => thread.Key,
-                    IReadOnlyList<ReviewCommentDto> (thread) => [.. thread.Select(row => row.Comment)]));
+            conversations);
+    }
+
+    /// <inheritdoc/>
+    public async Task<ReviewTranscriptDto> GetTranscriptAsync(
+        Guid conversationId, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this read.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The conversation with everything said in it, and where its problem sits, read only where a proposal that
+        // has not been deleted files the problem.
+        var conversation = await dbContext.ProblemDefenses
+            .AsNoTracking()
+            .Where(defense => defense.DefenseSessionId == conversationId)
+            .Join(
+                dbContext.Proposals.Where(proposal => proposal.DeletedAt == null),
+                defense => defense.ProblemId,
+                proposal => proposal.ProblemId,
+                (defense, proposal) => new
+                {
+                    CompetitionPath = proposal.Problem.Round.Competition.Path,
+                    GroupOpensAt = (DateTimeOffset?)proposal.Problem.Round.HostedGroup!.OpensAt,
+                    Transcript = new ReviewTranscriptDto(
+                        defense.DefenseSession.ProblemStatement,
+                        defense.DefenseSession.Turns
+                            .OrderBy(turn => turn.Sequence)
+                            .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))
+                            .ToList()),
+                })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // A conversation about anything but a proposal the selection still holds is one it has no business with.
+        if (conversation is null
+            || !SelectionRules.IsInSelection(
+                conversation.CompetitionPath, conversation.GroupOpensAt, DateTimeOffset.UtcNow))
+            throw new SelectionTargetNotFoundException();
+
+        // What was said.
+        return conversation.Transcript;
     }
 
     /// <summary>
