@@ -24,8 +24,11 @@ const SELECTION_ENDPOINT = `${BACKEND_ORIGIN}/problem-selection`
 /** The copy the selection reads under. */
 const selectionCopy = messages.problemSelection
 
-/** How many paragraphs an English statement runs to, which gives the pool and a problem room to scroll. */
-const STATEMENT_PARAGRAPHS = 24
+/**
+ * How many paragraphs an English statement runs to, enough that a problem's own page scrolls well past
+ * {@link POOL_SPOT} on any machine, CI's runner included.
+ */
+const STATEMENT_PARAGRAPHS = 48
 
 /** Where the pool is left when a problem is opened from it, in pixels from the top. */
 const POOL_SPOT = 400
