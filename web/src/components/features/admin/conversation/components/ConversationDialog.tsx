@@ -14,6 +14,7 @@ import { STEP_KEYS } from '@/hooks/use-step-hotkeys'
 import type { UseSteppedSelectionResult } from '@/hooks/use-stepped-selection'
 
 import { useConversationDialog } from '../hooks/use-conversation-dialog'
+import type { SidePanelId } from '../hooks/use-conversation-panels'
 import type { StudentProblem } from '../hooks/use-student-conversations'
 import { ActionLabel } from './ActionLabel'
 import { ConversationDialogBody } from './ConversationDialogBody'
@@ -36,6 +37,8 @@ type ConversationDialogProps = {
   stepActions?: ReactNode
   /** The note the reader was sent to; null when they came in for the conversation itself. */
   landingNoteId?: string | null
+  /** The part the dialog's first opening starts on; null for the conversation. */
+  initialTabId?: SidePanelId | null
   /**
    * Runs once the dialog has finished leaving, after focus has gone back to whatever stands for the item the
    * reader ended on, so it can send focus somewhere else.
@@ -67,6 +70,7 @@ export function ConversationDialog({
   itemsAreConversations = false,
   stepActions,
   landingNoteId = null,
+  initialTabId = null,
   onClosed,
 }: ConversationDialogProps) {
   // Shared conversation-dialog copy
@@ -95,6 +99,7 @@ export function ConversationDialog({
     studentProblem,
     itemsAreConversations,
     landingNoteId,
+    initialTabId,
     onClosed
   )
 

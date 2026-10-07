@@ -130,7 +130,11 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
           />
 
           {/* The pair being graded */}
-          <ConversationDialog selection={board.selection} studentProblem={board.studentProblem} />
+          <ConversationDialog
+            selection={board.selection}
+            studentProblem={board.studentProblem}
+            initialTabId={board.landingTabId}
+          />
 
           {/* The question before a column is made final */}
           {finalizing.asking !== null && (

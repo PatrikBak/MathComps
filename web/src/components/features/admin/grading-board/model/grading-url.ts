@@ -14,6 +14,12 @@ const STUDENT_PARAM = 'student'
 /** The query parameter naming the problem whose grade is open. */
 const PROBLEM_PARAM = 'problem'
 
+/** The query parameter naming the part of the open grade a link lands on. */
+const TAB_PARAM = 'tab'
+
+/** The conversation with the student about a grade, as the address names it. */
+const FEEDBACK_TAB = 'feedback'
+
 /**
  * What the grading board is showing, as the address bar carries it.
  */
@@ -22,6 +28,17 @@ export type GradingUrlState = {
   category: HostedCompetitionCategory | null
   /** The grade open; null while none is. */
   open: PairIds | null
+}
+
+/**
+ * What a link to the grading board asks for: what the board shows, and the part of the open grade it lands on.
+ */
+export type GradingLanding = GradingUrlState & {
+  /**
+   * The part the open grade lands on; null for wherever the grade starts. Only ever read off the address: once
+   * the grade is up, which part shows is the grader's to change.
+   */
+  tab: typeof FEEDBACK_TAB | null
 }
 
 /**
@@ -50,8 +67,9 @@ export function toGradingQuery(state: GradingUrlState): string {
 }
 
 /**
- * Reads back what {@link toGradingQuery} wrote. Anything the address carries that isn't one of ours, or isn't
- * shaped like the field it names, is left out rather than trusted: a query string is somebody's typing.
+ * Reads back what {@link toGradingQuery} wrote, and the part of the open grade a link lands on. Anything the
+ * address carries that isn't one of ours, or isn't shaped like the field it names, is left out rather than
+ * trusted: a query string is somebody's typing.
  *
  * Whether the ids name anybody on the board is not for the address to say. The board only has that once it has
  * arrived, and it is what decides whether the grade opens.
@@ -59,7 +77,7 @@ export function toGradingQuery(state: GradingUrlState): string {
  * @param params - The address's query parameters.
  * @returns What the board should show.
  */
-export function fromGradingQuery(params: URLSearchParams): GradingUrlState {
+export function fromGradingQuery(params: URLSearchParams): GradingLanding {
   // What the address names the category as
   const categoryParam = params.get(CATEGORY_PARAM)
 
@@ -71,11 +89,14 @@ export function fromGradingQuery(params: URLSearchParams): GradingUrlState {
   const userId = params.get(STUDENT_PARAM)
   const problemId = params.get(PROBLEM_PARAM)
 
-  // A grade takes both to name, so half of one names none
+  // A grade takes both to name, so half of one names none, and no part of it to land on either
   if (userId === null || userId === '' || problemId === null || problemId === '') {
-    return { category, open: null }
+    return { category, open: null, tab: null }
   }
 
-  // The grade
-  return { category, open: { userId, problemId } }
+  // The part to land on, where the address names the conversation with the student
+  const tab = params.get(TAB_PARAM) === FEEDBACK_TAB ? FEEDBACK_TAB : null
+
+  // The grade, and where in it to land
+  return { category, open: { userId, problemId }, tab }
 }

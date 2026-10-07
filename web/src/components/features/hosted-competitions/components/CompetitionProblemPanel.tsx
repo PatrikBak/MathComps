@@ -41,6 +41,8 @@ type CompetitionProblemPanelProps = {
   solutionDisclosure: AddressedDisclosure
   /** Which problem of the set has its hints open, by position. */
   hintsDisclosure: AddressedDisclosure
+  /** Which problem of the set has its conversation with the graders open, by id. */
+  feedbackDisclosure: AddressedDisclosure
 }
 
 /**
@@ -54,6 +56,7 @@ export function CompetitionProblemPanel({
   isGraded,
   solutionDisclosure,
   hintsDisclosure,
+  feedbackDisclosure,
 }: CompetitionProblemPanelProps) {
   // Competitions copy
   const t = useTranslations('competitions')
@@ -153,6 +156,9 @@ export function CompetitionProblemPanel({
                 position={problem.position}
                 statement={problem.statement}
                 conversation={problem.result.conversation}
+                isOpen={feedbackDisclosure.openedValue === problem.id}
+                onOpen={() => feedbackDisclosure.open(problem.id)}
+                onClose={feedbackDisclosure.close}
               />
             )}
 

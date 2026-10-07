@@ -1,6 +1,5 @@
 'use client'
 
-import { useDisclosure } from '@mantine/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { MessagesSquare } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -77,18 +76,28 @@ type GradeCommentsProps = {
   statement: LocalizedString
   /** The conversation with the graders about the mark. */
   conversation: GradeConversation
+  /** Whether this problem is the one whose thread is being read. */
+  isOpen: boolean
+  /** Opens the thread. */
+  onOpen: () => void
+  /** Closes the thread. */
+  onClose: () => void
 }
 
 /**
  * The conversation with the graders about one mark: a row among the problem's others, opening onto the
  * thread.
  */
-export function GradeComments({ position, statement, conversation }: GradeCommentsProps) {
+export function GradeComments({
+  position,
+  statement,
+  conversation,
+  isOpen,
+  onOpen,
+  onClose,
+}: GradeCommentsProps) {
   // Results copy
   const t = useTranslations('competitions.resultsView')
-
-  // Whether the thread is open
-  const [isOpen, { open, close }] = useDisclosure(false)
 
   // The React Query cache
   const queryClient = useQueryClient()
@@ -96,7 +105,7 @@ export function GradeComments({ position, statement, conversation }: GradeCommen
   // A function which closes the thread, then reads the problem again so the row counts what was written
   const closeThread = () => {
     // The thread, off the screen
-    close()
+    onClose()
 
     // The problem read again, its message count with it
     invalidateCompetitionProblems(queryClient)
@@ -109,7 +118,7 @@ export function GradeComments({ position, statement, conversation }: GradeCommen
       position={position}
       statement={statement}
       isOpen={isOpen}
-      onOpen={open}
+      onOpen={onOpen}
       onClose={closeThread}
       count={conversation.messageCount}
       isTall

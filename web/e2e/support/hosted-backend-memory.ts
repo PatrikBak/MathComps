@@ -1,3 +1,4 @@
+import { MAX_MARK } from '@/components/features/admin/grades/model/grade-types'
 import type {
   DefenseSession,
   DefenseSessionListItem,
@@ -160,6 +161,27 @@ export function buildProblems(
       result: null,
     }
   })
+}
+
+/**
+ * Marks every problem of a set final for good, the way the real backend hands a student their marks once they
+ * are out: a full mark with none of it from Mathilda, and a thread with the graders nobody has written in yet.
+ *
+ * @param problems - The set as the student reads it.
+ *
+ * @returns The same set, every problem marked.
+ */
+export function withFinalMarks(problems: HostedCompetitionProblem[]): HostedCompetitionProblem[] {
+  // Each problem, carrying its mark and the thread that opens with it
+  return problems.map((problem) => ({
+    ...problem,
+    result: {
+      kind: 'final',
+      mark: MAX_MARK,
+      help: 0,
+      conversation: { targetId: `${problem.id}:student`, messageCount: 0 },
+    },
+  }))
 }
 
 /**

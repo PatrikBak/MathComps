@@ -57,15 +57,20 @@ const GRADED_SIDE_PANELS: readonly SidePanelId[] = ['grade', 'feedback', ...SIDE
  *
  * @param hasGradeToGive - Whether there is a grade to give on the problem.
  * @param landingNoteId - The note the reader was sent to; null when they came in for the conversation itself.
+ * @param initialTabId - The part the dialog's first opening starts on; null for the conversation. Every later
+ * opening starts on the conversation.
  *
  * @returns The layout as described by {@link UseConversationPanelsResult}.
  */
 export function useConversationPanels(
   hasGradeToGive: boolean,
-  landingNoteId: string | null
+  landingNoteId: string | null,
+  initialTabId: SidePanelId | null
 ): UseConversationPanelsResult {
-  // The part the reader picked
-  const [selectedTabId, setSelectedTabId] = useState<ConversationPanelId>('conversation')
+  // The part the reader picked, starting where the first opening was sent
+  const [selectedTabId, setSelectedTabId] = useState<ConversationPanelId>(
+    initialTabId ?? 'conversation'
+  )
 
   // Which note the reader has already been taken to, so that being sent to one is what moves them rather
   // than its still being named after they have walked off it

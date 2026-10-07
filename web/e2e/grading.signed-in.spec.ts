@@ -24,8 +24,11 @@ const copy = messages.admin.grading
 /** The copy of one grade, in English. */
 const gradeCopy = messages.admin.grades
 
+/** The copy of the conversation dialog, in English. */
+const conversationCopy = messages.admin.conversation
+
 /** The name of the step forward through the pairs. */
-const NEXT = messages.admin.conversation.next
+const NEXT = conversationCopy.next
 
 /**
  * Finds the button of one student's grade on one problem.
@@ -281,7 +284,7 @@ test.describe('the grading board', () => {
 
     // Which the toggle offers to take back
     await expect(
-      dialog.getByRole('button', { name: messages.admin.conversation.markUnread, exact: true })
+      dialog.getByRole('button', { name: conversationCopy.markUnread, exact: true })
     ).toBeVisible()
   })
 
@@ -312,9 +315,7 @@ test.describe('the grading board', () => {
     const dialog = await openGrade(page, 'Cyril', 1)
 
     // The conversation with him, picked among the side tabs
-    await dialog
-      .getByRole('tab', { name: messages.admin.conversation.tabs.feedback, exact: true })
-      .click()
+    await dialog.getByRole('tab', { name: conversationCopy.tabs.feedback, exact: true }).click()
 
     // The thread saying when the student gets to read it
     await expect(dialog.getByText(gradeCopy.studentSeesOnceFinal)).toBeVisible()
@@ -377,6 +378,74 @@ test.describe("the board's address", () => {
 
     // Whose address now names the competition alone
     await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?category=intermediate`)
+  })
+
+  test('lands on the conversation with the student a link names, and only from the link', async ({
+    page,
+  }) => {
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // A link straight into the thread about Cyril's first problem
+    await page.goto(`${BOARD_PATH}?student=cyril&problem=p1&tab=feedback`)
+
+    // The dialog the grade opens in
+    const dialog = page.getByRole('dialog')
+
+    // The tab of its thread
+    const feedbackTab = dialog.getByRole('tab', {
+      name: conversationCopy.tabs.feedback,
+      exact: true,
+    })
+
+    // Which opens his grade on that thread
+    await expect(dialog.getByText(gradeCopy.studentSeesOnceFinal)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+    await expect(feedbackTab).toHaveAttribute('aria-selected', 'true')
+
+    // The dialog closed
+    await page.keyboard.press('Escape')
+
+    // Which leaves the bare board, the thread dropped with the grade
+    await expect.poll(() => addressOf(page)).toBe(BOARD_PATH)
+
+    // The same grade, opened again from its cell
+    await cellOf(page, 'Cyril', 1).click()
+
+    // Up on his conversation once more
+    await expect(dialog.getByText('Answer 1 by cyril on p1.')).toBeVisible()
+
+    // And off the thread, which only the link asked for
+    await expect(feedbackTab).toHaveAttribute('aria-selected', 'false')
+  })
+
+  test('lands on no thread later where the grade a link names is not on the board', async ({
+    page,
+  }) => {
+    // A backend serving the test group's board
+    await installGradingBackend(page, GROUP_SLUG)
+
+    // A link into the thread about a pair nobody spoke about
+    await page.goto(`${BOARD_PATH}?student=bruno&problem=p2&tab=feedback`)
+
+    // The board, the pair dropped from its address
+    await expect(page.getByRole('rowheader').first()).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+    await expect.poll(() => addressOf(page)).toBe(BOARD_PATH)
+
+    // Cyril's first problem, opened from its cell
+    await cellOf(page, 'Cyril', 1).click()
+
+    // The dialog the grade opens in
+    const dialog = page.getByRole('dialog')
+
+    // Up on his conversation
+    await expect(dialog.getByText('Answer 1 by cyril on p1.')).toBeVisible()
+
+    // Off the thread, which the link asked for on a pair that never opened
+    await expect(
+      dialog.getByRole('tab', { name: conversationCopy.tabs.feedback, exact: true })
+    ).toHaveAttribute('aria-selected', 'false')
   })
 
   test('says what is on screen, without adding to the history', async ({ page }) => {

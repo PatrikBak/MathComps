@@ -10,6 +10,7 @@ import { useSteppedSelection, type UseSteppedSelectionResult } from '@/hooks/use
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
+import type { SidePanelId } from '../../conversation/hooks/use-conversation-panels'
 import type { StudentProblem } from '../../conversation/hooks/use-student-conversations'
 import { gradingBoardQueryKey } from '../../grades/hooks/grade-cache'
 import { pairKey, splitPairKey } from '../../grades/model/grade-types'
@@ -64,6 +65,8 @@ type UseGradingBoardResult = {
   progress: GradingProgress
   /** Which pair is open, and the walk through every pair with a conversation. */
   selection: UseSteppedSelectionResult
+  /** The part the board's own address lands the pair it names on, while that pair is open; null otherwise. */
+  landingTabId: SidePanelId | null
   /** The open pair's student and problem; null while none is open or no competition is on screen. */
   studentProblem: StudentProblem | null
 }
@@ -196,6 +199,9 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
   // How far grading the competition has got
   const progress = countProgress(order, grades)
 
+  // The part the board's own address lands the pair it names on, which holds only while that pair is open
+  const landingTabId = selection.openId === initialOpenKey ? initialAddress.tab : null
+
   // The board, and every way of moving about it
   return {
     group,
@@ -210,6 +216,7 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
     grades,
     progress,
     selection,
+    landingTabId,
     studentProblem,
   }
 }

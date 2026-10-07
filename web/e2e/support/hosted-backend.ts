@@ -6,6 +6,7 @@ import type {
   DefenseSessionList,
   MathildaConsent,
 } from '@/components/features/defense/model/defense-types'
+import { derivePhase } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import type { SpentEntry } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
@@ -26,6 +27,7 @@ import {
   seedStraddlingDefense,
   storedTurn,
   transcriptsOf,
+  withFinalMarks,
 } from './hosted-backend-memory'
 import {
   asServedView,
@@ -50,7 +52,7 @@ import {
  */
 
 // Re-exported so a spec reads them off the module it installs the fake from
-export { COMPETITION_SLUG, LIMITS, OPENER }
+export { COMPETITION_SLUG, LIMITS, OPENER, problemIdOf }
 
 /** {@link PROBLEMS_PER_COMPETITION}, as the specs read it. */
 export const PROBLEM_COUNT = PROBLEMS_PER_COMPETITION
@@ -114,6 +116,12 @@ export type HostedBackendOptions = {
    * How the backend refuses every drop. Absent while drops are taken.
    */
   refuseDropWith?: DropRefusal
+
+  /**
+   * Whether the student's marks are out, final on every problem of a competition they sat that has closed.
+   * Absent while no mark is out, so no problem carries a result.
+   */
+  areMarksOut?: boolean
 }
 
 /**
@@ -430,16 +438,26 @@ export async function installHostedBackend(
           return
         }
 
-        // Answered with the competition's whole set, carrying the solutions where they are owed them
-        await answer(
-          page,
-          route,
-          buildProblems(
-            state,
-            competition.slug.en,
-            isSolutionOpen(group, competition, state.view.bypassesGates, await pageNow(page))
-          )
+        // Where the page's clock stands
+        const now = await pageNow(page)
+
+        // The competition's whole set, carrying the solutions where they are owed them
+        const problems = buildProblems(
+          state,
+          competition.slug.en,
+          isSolutionOpen(group, competition, state.view.bypassesGates, now)
         )
+
+        // Whether the student's marks on it are out: the backend has them out, the student sat it, and it has
+        // closed
+        const hasMarks =
+          options.areMarksOut === true &&
+          competition.entry?.kind === 'sat' &&
+          group !== undefined &&
+          derivePhase(group, now) === 'closed'
+
+        // Answered with the set, marked where the marks are out
+        await answer(page, route, hasMarks ? withFinalMarks(problems) : problems)
 
         // Nothing else this read needs
         return

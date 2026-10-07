@@ -13,6 +13,7 @@ import type { Locale } from '@/i18n/i18n'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { useCompetitionArea } from '../hooks/use-competition-area'
+import { useFeedbackDisclosure } from '../hooks/use-feedback-disclosure'
 import { clockEndsAt, derivePhase } from '../model/hosted-competition-state'
 import {
   COMPETITIONS_LIST_HREF,
@@ -86,6 +87,10 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
 
   // Everything the page says about this competition and the entry spent on it
   const area = useCompetitionArea(competitionSlug)
+
+  // Which problem's conversation with the graders is open, which only a signed-in reader has; nobody is signed
+  // in once the area is drawn with no reader
+  const openedFeedback = useFeedbackDisclosure(area.kind === 'ready' && area.readerKey === null)
 
   // One of the two reads is still out, gave up, or turned up nothing to stay here for
   if (area.kind === 'pending') {
@@ -175,6 +180,7 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
             isGraded={isGraded}
             solutionDisclosure={solutionDisclosure}
             hintsDisclosure={hintsDisclosure}
+            feedbackDisclosure={openedFeedback}
           />
         ))}
       </div>

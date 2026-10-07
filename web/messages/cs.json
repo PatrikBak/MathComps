@@ -461,6 +461,7 @@
     "entryError": "Soutěž se nepodařilo spustit.",
     "entryWindowLabel": "vstup",
     "entryWindowMoment": "{date} {time}",
+    "feedbackAuthReason": "čtení komentářů k hodnocení",
     "finishDialog": {
       "confirm": "Ukončit",
       "consequence": "Tvůj čas se tím zastaví a nic, co napíšeš potom, se už do soutěže nepočítá. Vrátit to zpět nejde.",
