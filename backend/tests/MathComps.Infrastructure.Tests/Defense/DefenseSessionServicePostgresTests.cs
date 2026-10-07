@@ -179,9 +179,6 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         // Stands in for the site's own content the examiner is served from.
         services.AddSingleton<IDefenseContentResolver>(_ => _content);
 
-        // The examiner's own lines, read from the real resource so a missing translation shows up here.
-        services.AddSingleton<IDefenseCopy, DefenseCopy>();
-
         // Serializes a user's concurrent turns.
         services.AddSingleton<IDefenseUserTurnGate>(_gate);
 

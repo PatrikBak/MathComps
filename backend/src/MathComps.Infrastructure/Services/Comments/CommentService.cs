@@ -2,6 +2,7 @@ using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
+using MathComps.Infrastructure.Services.GradeMessages;
 using MathComps.Infrastructure.Services.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -236,6 +237,11 @@ public class CommentService(
         // Hang the comment off its thread
         Attach(dbContext, anchor, comment.Id);
 
+        // A message in a grade conversation is owed to the other side of it by mail
+        if (anchor is GradeAnchor grade)
+            await GradeMessageNotices.QueueAsync(
+                dbContext, grade.EntryId, grade.ProblemId, grade.StudentId, comment, CancellationToken.None);
+
         // Save the comment
         await dbContext.SaveChangesAsync();
 
@@ -309,6 +315,19 @@ public class CommentService(
         // Each reply moved under the new version, since a thread skips a replaced comment and everything under it
         foreach (var reply in replies)
             reply.ParentCommentId = newComment.Id;
+
+        // In a grade conversation, the message's notices follow it, since the mail reads whichever version is current
+        if (anchor is GradeAnchor)
+        {
+            // The old version's notices
+            var notices = await dbContext.GradeMessageNotices
+                .Where(notice => notice.CommentId == existingComment.Id)
+                .ToListAsync();
+
+            // Each notice moved onto the new version
+            foreach (var notice in notices)
+                notice.CommentId = newComment.Id;
+        }
 
         // Save all changes
         await dbContext.SaveChangesAsync();
@@ -842,32 +861,10 @@ public class CommentService(
         IsPublic(anchor.TargetType)
         || (anchor is GradeAnchor grade
             && IsBetween(viewer, grade.StudentId)
-            && (viewer is { IsAdmin: true } || await IsOutToStudentAsync(dbContext, grade)))
+            && (viewer is { IsAdmin: true }
+                || await HostedGrading.IsOutToStudentAsync(
+                    dbContext, grade.EntryId, grade.ProblemId, DateTimeOffset.UtcNow, CancellationToken.None)))
         || (anchor is ProposalAnchor && await IsPreparingCompetitionsAsync(viewer));
-
-    /// <summary>
-    /// Whether a grade conversation is open to the student it is with: once their group has closed, and while the
-    /// grade is final.
-    /// </summary>
-    /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="grade">The conversation.</param>
-    /// <returns>Whether the student may read and write in it.</returns>
-    private static async Task<bool> IsOutToStudentAsync(MathCompsDbContext dbContext, GradeAnchor grade)
-    {
-        // When the student's group closes
-        var closesAt = await dbContext.HostedEntries
-            .AsNoTracking()
-            .Where(entry => entry.Id == grade.EntryId)
-            .Select(entry => entry.Round.HostedGroup!.ClosesAt)
-            .FirstAsync();
-
-        // Nothing of the student's results is out before their group closes, a final grade included
-        if (!HostedEntryRules.AreResultsOut(closesAt, DateTimeOffset.UtcNow))
-            return false;
-
-        // Open while the grade is final
-        return await HostedGrading.IsFinalAsync(dbContext, grade.EntryId, grade.ProblemId, CancellationToken.None);
-    }
 
     /// <summary>
     /// Refuses a thread the viewer may not reach as though it did not exist, so that a refusal does not confirm

@@ -1,0 +1,21 @@
+{
+  "defense": {
+    "opener": "Ahoj, jsem Mathilda. Začni mi vysvětlovat svoje řešení, nebo aspoň nápad, který zatím máš. Vzorce můžeš psát i obyčejně, například x^2 nebo odmocnina ze 2, pochopím je. Nad každou odpovědí chvíli přemýšlím, abych toho neprozradila příliš nebo neřekla něco špatně 😇"
+  },
+  "mail": {
+    "about": "O projektu",
+    "privacy": "Soukromí a podmínky"
+  },
+  "gradeMessageMail": {
+    "subject": "Nové komentáře k hodnocení",
+    "greeting": "Ahoj {name},",
+    "greetingWithoutName": "Ahoj,",
+    "intro": "v komentářích k hodnocení máš nové zprávy:",
+    "competition": "{competition} ({category}, {season})",
+    "problem": "Úloha {number}",
+    "messages": "{count, plural, one {# nová zpráva} few {# nové zprávy} other {# nových zpráv}}",
+    "messagesFrom": "{student}: {messages}",
+    "unnamedStudent": "Uživatel",
+    "optOut": "Nechceš tyhle e-maily? Stačí mi odepsat."
+  }
+}

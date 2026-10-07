@@ -135,6 +135,12 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Join table: comments in the conversations between graders and a student about one problem.</summary>
     public DbSet<HostedGradeComment> HostedGradeComments => Set<HostedGradeComment>();
 
+    /// <summary>The notices of new messages in grade conversations, each waiting for a mail to claim it.</summary>
+    public DbSet<GradeMessageNotice> GradeMessageNotices => Set<GradeMessageNotice>();
+
+    /// <summary>The mails the site sends, and the record of each.</summary>
+    public DbSet<OutgoingMail> OutgoingMails => Set<OutgoingMail>();
+
     /// <summary>Links from a defense session to the archive problem it defends.</summary>
     public DbSet<ProblemDefense> ProblemDefenses => Set<ProblemDefense>();
 
@@ -931,6 +937,74 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion HostedGradeComment
+
+        #region GradeMessageNotice
+
+        modelBuilder.Entity<GradeMessageNotice>(e =>
+        {
+            // The recipient, restricted so a notice can't lose who it is owed to
+            e.HasOne(notice => notice.Recipient)
+             .WithMany()
+             .HasForeignKey(notice => notice.RecipientId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // The message, going with it
+            e.HasOne(notice => notice.Comment)
+             .WithMany()
+             .HasForeignKey(notice => notice.CommentId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The mail carrying it, restricted since the notices are all that ties a mail to the person it went to
+            e.HasOne(notice => notice.Mail)
+             .WithMany()
+             .HasForeignKey(notice => notice.MailId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // Every pass of the grade message mail looks for the recipients whose unclaimed notices have gone quiet
+            e.HasIndex(notice => notice.RecipientId)
+             .HasFilter("\"mail_id\" IS NULL")
+             .HasDatabaseName("ix_grade_message_notice_recipient_id_unclaimed");
+
+            // The time since somebody's last mail is read through the notices it claimed
+            e.HasIndex(notice => notice.MailId).HasDatabaseName("ix_grade_message_notice_mail_id");
+
+            // An edit moves the notices of the version it replaces
+            e.HasIndex(notice => notice.CommentId).HasDatabaseName("ix_grade_message_notice_comment_id");
+        });
+
+        #endregion GradeMessageNotice
+
+        #region OutgoingMail
+
+        modelBuilder.Entity<OutgoingMail>(e =>
+        {
+            // Every pass of the outbox looks for the pending mails that are due
+            e.HasIndex(mail => mail.NextAttemptAt)
+             .HasFilter("\"status\" = 'pending'")
+             .HasDatabaseName("ix_outgoing_mail_next_attempt_at_pending");
+
+            // DB-side invariants
+            e.ToTable(t =>
+            {
+                // A next attempt exactly on the mails still waiting to go
+                t.HasCheckConstraint(
+                    "ck_outgoing_mail_next_attempt_at_when_pending",
+                    "(\"status\" = 'pending') = (\"next_attempt_at\" IS NOT NULL)");
+
+                // A sending instant exactly on the mails that went
+                t.HasCheckConstraint(
+                    "ck_outgoing_mail_sent_at_when_sent", "(\"status\" = 'sent') = (\"sent_at\" IS NOT NULL)");
+
+                // The provider's id only on a mail that went
+                t.HasCheckConstraint(
+                    "ck_outgoing_mail_provider_id_when_sent", "\"status\" = 'sent' OR \"provider_id\" IS NULL");
+
+                // Never a negative count of failed attempts
+                t.HasCheckConstraint("ck_outgoing_mail_attempts_non_negative", "\"attempts\" >= 0");
+            });
+        });
+
+        #endregion OutgoingMail
 
         #region UserGrant
 

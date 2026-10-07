@@ -36,6 +36,7 @@ The API supports multiple languages via the `Accept-Language` HTTP header. The f
 | ------------------------ | ----------------------------------------------- |
 | `metadata.shared.json`   | Language-neutral taxonomy structure & order     |
 | `metadata.{locale}.json` | Localized competition names, round labels, etc. |
+| `copy.{locale}.json`     | What the backend writes to people, by feature   |
 | `approved-tags.json`     | Tag vocabulary with English slugs (canonical)   |
 
 **Problem translations:**
@@ -45,9 +46,10 @@ Problem statements and solutions are stored in the `problem_texts` table with pe
 **Adding a new language:**
 
 1. Create `metadata.{locale}.json` with translated competition/round names
-2. Add the locale to the `Language` enum (`src/MathComps.Domain/Localization/Language.cs`)
-3. Author the problem translations for the new locale and apply them via bulk-import
-4. The API will automatically serve content based on `Accept-Language`
+2. Create `copy.{locale}.json` holding every line the other copy files hold
+3. Add the locale to the `Language` enum (`src/MathComps.Domain/Localization/Language.cs`)
+4. Author the problem translations for the new locale and apply them via bulk-import
+5. The API will automatically serve content based on `Accept-Language`
 
 ## Getting Started
 
@@ -424,7 +426,8 @@ Migrations are applied automatically on every deploy: a migration bundle (`efbun
 
 Per-environment `appsettings.{Production|Staging}.json` files, gitignored and bind-mounted over the
 baked-in config, so you can change a value without rebuilding the image. Each sits next to the base file it
-overrides and only needs the keys it changes.
+overrides and only needs the keys it changes. Config binds arrays by index and merges them, so an override changes
+or adds entries but never drops the base's extra ones: restate an array in full, and shorten one in the base file.
 
 `.dockerignore` keeps them out of the build context, so the mount is the only copy. Prod secrets never reach
 an image layer, and a mount that goes missing leaves the API on the base `appsettings.json`:
@@ -438,8 +441,6 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
   for what it does and does not reach. The cap and the two length caps ride to the browser on every session read,
   so once the API has restarted on the new value, the UI follows on the next page load with no frontend deploy.
 - `src/MathComps.Infrastructure/appsettings.examiner.{Env}.json` → `appsettings.examiner.json` (per-step models).
-  Config binds arrays by index and merges rather than replaces, so restate a `FallbackModels` chain in full when
-  overriding one.
 - `src/MathComps.Infrastructure/appsettings.llm.{Env}.json` → `appsettings.llm.json` (LLM endpoint, retries)
 
 - **Apply a change:** edit the file, `./deploy.sh <env> restart api` — no `up -d`, no `--build`. `restart` takes the deploy lock, so it waits if an automatic deploy is in flight.
@@ -450,6 +451,18 @@ an image layer, and a mount that goes missing leaves the API on the base `appset
 #### Error tracking
 
 `Sentry.AspNetCore` ships every `LogError` to Better Stack, which is the route an unhandled exception takes out of [GlobalExceptionHandler](src/MathComps.Api/Extensions/GlobalExceptionHandler.cs). The business failures that handler maps to a status are filtered back out in [Program.cs](src/MathComps.Api/Program.cs). `SENTRY_DSN` in `.env` turns it on, and an empty one leaves the SDK disabled.
+
+#### Mail
+
+Every mail the API sends waits in `outgoing_mails` until a background loop sends it, and stays there as the record of it. A failed mail is tried again on the schedule in the `MailOutbox` section of `appsettings.json`. Students and graders are mailed about new messages in grade conversations, one mail per person once a quiet while passes with nothing new for them, and never two in quick succession, timed by the `GradeMessageMail` section. Mail goes out from `Site:ContactAddress` in `appsettings.json`, through Resend wherever `RESEND_API_KEY` is set. On the server only `.env.prod` sets it. Without a key every mail goes to the log, so an API running on a copy of prod data mails nobody. To try Resend for real outside prod, set the key with a redirect, and the API refuses to start outside Production with a key alone:
+
+```bash
+# On your machine, from backend/src/MathComps.Api
+dotnet user-secrets set "Mail:ResendApiKey" "re_..."
+dotnet user-secrets set "Mail:RedirectTo" "delivered@resend.dev"
+```
+
+`delivered@resend.dev` is Resend's own test inbox, and a real inbox of yours works the same way. Every send counts against the daily cap. Resend's free plan allows 100 mails a day across Clerk's login mails too, and a mail over the cap waits for the next UTC day.
 
 #### What the defense ceiling is for
 

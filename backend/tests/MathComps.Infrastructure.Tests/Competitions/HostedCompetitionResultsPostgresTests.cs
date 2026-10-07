@@ -53,6 +53,11 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
     private static readonly DateTimeOffset _startedAt = new(2026, 9, 10, 10, 0, 0, TimeSpan.Zero);
 
     /// <summary>
+    /// When every message about a grade was written, after the grades were given.
+    /// </summary>
+    private static readonly DateTimeOffset _messagedAt = _startedAt.AddDays(21);
+
+    /// <summary>
     /// The grader every grade is written by.
     /// </summary>
     private readonly Guid _graderId = Guid.CreateVersion7();
@@ -364,7 +369,7 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
         Grade(context, ada, _secondId, mark: 4, help: 1);
 
         // A word with Ada on the first problem, no part of anybody else's conversation
-        Message(context, ada, _firstId, _graderId, CommentStatus.Active);
+        NewMessage(context, ada.Id, _firstId, _graderId, _messagedAt);
 
         // Bob: done 30 minutes in on the first
         var bob = Student(context, _bobId, "Bob", roundId);
@@ -408,17 +413,18 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
         Grade(context, filip, _firstId, mark: 2, help: 0);
 
         // The graders' word on Filip's first problem
-        var explanation = Message(context, filip, _firstId, _graderId, CommentStatus.Active);
+        var explanation = NewMessage(context, filip.Id, _firstId, _graderId, _messagedAt);
 
         // Filip's answer as he first wrote it
-        var firstWording = Message(context, filip, _firstId, _filipId, CommentStatus.Superseded, explanation);
+        var firstWording = NewMessage(
+            context, filip.Id, _firstId, _filipId, _messagedAt, CommentStatus.Superseded, explanation);
 
         // The same answer reworded, standing in its place
-        Message(context, filip, _firstId, _filipId, CommentStatus.Active, explanation).PreviousVersionId =
-            firstWording.Id;
+        NewMessage(context, filip.Id, _firstId, _filipId, _messagedAt, CommentStatus.Active, explanation)
+            .PreviousVersionId = firstWording.Id;
 
         // And an aside of his, deleted
-        Message(context, filip, _firstId, _filipId, CommentStatus.Deleted);
+        NewMessage(context, filip.Id, _firstId, _filipId, _messagedAt, CommentStatus.Deleted);
 
         // Gita: a draft grade on the first, nothing on the second
         var gita = Student(context, Guid.CreateVersion7(), "Gita", roundId);
@@ -571,39 +577,6 @@ public class HostedCompetitionResultsPostgresTests(PostgresContainerFixture fixt
         MathCompsDbContext context, HostedEntry entry, Guid problemId, int mark, int help, bool isFinal = true) =>
         // Written by the grader
         context.HostedGrades.Add(NewGrade(entry.Id, problemId, _graderId, mark, help, isFinal, _startedAt.AddDays(20)));
-
-    /// <summary>
-    /// Tracks one message of the conversation between the graders and a student about a grade.
-    /// </summary>
-    /// <param name="context">The seeding context.</param>
-    /// <param name="entry">The student's entry.</param>
-    /// <param name="problemId">The problem the grade is on.</param>
-    /// <param name="authorId"><inheritdoc cref="Comment.AuthorId" path="/summary"/></param>
-    /// <param name="status"><inheritdoc cref="Comment.Status" path="/summary"/></param>
-    /// <param name="parent">The message it answers, or null for one that opens a thread of its own.</param>
-    /// <returns>The message.</returns>
-    private static Comment Message(
-        MathCompsDbContext context, HostedEntry entry, Guid problemId, Guid authorId, CommentStatus status,
-        Comment? parent = null)
-    {
-        // The message
-        var message = new Comment
-        {
-            AuthorId = authorId,
-            ParentCommentId = parent?.Id,
-            Content = "message",
-            Status = status,
-            CreatedAt = _startedAt.AddDays(21),
-        };
-        context.Comments.Add(message);
-
-        // Hung off the conversation about the grade
-        context.HostedGradeComments.Add(
-            new HostedGradeComment { EntryId = entry.Id, ProblemId = problemId, CommentId = message.Id });
-
-        // The tracked message
-        return message;
-    }
 
     /// <summary>
     /// Tracks a problem's statement and solution in every language the site is read in, which reading the

@@ -31,7 +31,8 @@ public interface ICommentService
     /// <summary>
     /// Creates a new comment or reply. A reply whose parent sits in another thread is refused as though the
     /// parent did not exist, and an author with no username to sign it with is refused with
-    /// <see cref="CommentProfileIncompleteException"/>.
+    /// <see cref="CommentProfileIncompleteException"/>. A message in a grade conversation is queued to be mailed to
+    /// the other side of it, a grader's only while the student can see the conversation.
     /// </summary>
     /// <param name="target">The target of the comment.</param>
     /// <param name="viewer">The user creating the comment.</param>
@@ -43,8 +44,8 @@ public interface ICommentService
 
     /// <summary>
     /// Edits a comment by writing a new version of it. The new version stays in the thread the comment was
-    /// written in and keeps its replies and its posting time. A deleted comment is refused as though it did not
-    /// exist.
+    /// written in and keeps its replies, its posting time and any mail still owed about it, and queues none of its
+    /// own. A deleted comment is refused as though it did not exist.
     /// </summary>
     /// <param name="commentId">The ID of the comment to update.</param>
     /// <param name="viewer">The user making the edit (must be the author).</param>

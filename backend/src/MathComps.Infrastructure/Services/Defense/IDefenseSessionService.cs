@@ -1,16 +1,26 @@
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.Localization;
+using MathComps.Infrastructure.Services.Localization;
 
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
-/// Runs and persists a user's AI-examiner defense conversations: opening a session, continuing it turn by turn (each
-/// turn runs the examiner engine and records its spend), listing a user's sessions against one target or all of
-/// them, rewinding one to an earlier point, and deleting one.
+/// Runs and persists a user's AI-examiner defense conversations: the greeting each one opens with, opening a session,
+/// continuing it turn by turn (each turn runs the examiner engine and records its spend), listing a user's sessions
+/// against one target or all of them, rewinding one to an earlier point, and deleting one.
 /// Guardrails (input sizes, the student's message count, per-user spend) are enforced before any model call.
 /// </summary>
 public interface IDefenseSessionService
 {
+    /// <summary>
+    /// The examiner's greeting that opens every defense, the line a new session saves as its first turn.
+    /// </summary>
+    /// <param name="language">The language the student works in.</param>
+    /// <returns>The greeting.</returns>
+    static string Opener(Language language) =>
+        // The greeting from the site's copy
+        new LocalizedCopy(language, "defense").Format("opener");
+
     /// <summary>
     /// Opens a session: seeds the examiner's opener and the student's first message, runs the examiner for its reply,
     /// and returns the full three-turn conversation.

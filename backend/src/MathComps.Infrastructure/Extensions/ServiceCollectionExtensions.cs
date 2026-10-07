@@ -1,5 +1,6 @@
 using System.ClientModel;
 using System.ClientModel.Primitives;
+using System.Net.Http.Headers;
 using Clerk.BackendAPI;
 using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
@@ -14,7 +15,9 @@ using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Engine;
+using MathComps.Infrastructure.Services.GradeMessages;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Mail;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Services.Users;
@@ -23,6 +26,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MathComps.Domain.Tagging;
 using MathComps.Domain.Localization;
@@ -71,6 +75,7 @@ public static class ServiceCollectionExtensions
                     .MapEnum<UserCapability>("user_capability")
                     .MapEnum<ProposalArea>("proposal_area")
                     .MapEnum<HostedCompetitionCategory>("hosted_competition_category")
+                    .MapEnum<OutgoingMailStatus>("outgoing_mail_status")
             )
         );
 
@@ -431,11 +436,10 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers the defense feature: the examiner engine, the input/turn/spend caps, the per-user turn gate, the
-    /// lookup of what the examiner is told about a problem, her own localized lines, the guard saying whether a
-    /// student may argue a given target, the service that runs and persists defense conversations, and the service
-    /// that records the students' feedback on them. Assumes the chat stack is registered (see
-    /// <see cref="AddLlmChat"/>) and, since the problem content is read back out of object storage, that
-    /// <see cref="AddStorage"/> has run.
+    /// lookup of what the examiner is told about a problem, the guard saying whether a student may argue a given
+    /// target, the service that runs and persists defense conversations, and the service that records the students'
+    /// feedback on them. Assumes the chat stack is registered (see <see cref="AddLlmChat"/>) and, since the problem
+    /// content is read back out of object storage, that <see cref="AddStorage"/> has run.
     /// </summary>
     /// <param name="services">The service collection to add the defense feature to.</param>
     /// <param name="configuration">The application configuration carrying the <c>Examiner</c>,
@@ -465,9 +469,6 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IHandoutDefenseContentResolver, HandoutDefenseContentResolver>();
         services.TryAddSingleton<IProblemDefenseContentResolver, ProblemDefenseContentResolver>();
         services.TryAddSingleton<IDefenseContentResolver, DefenseContentResolver>();
-
-        // The examiner's own lines, read from disk once; a singleton for the same reason.
-        services.TryAddSingleton<IDefenseCopy, DefenseCopy>();
 
         // Serializes a user's concurrent turns; shared process-wide, so a singleton.
         services.TryAddSingleton<IDefenseUserTurnGate, DefenseUserTurnGate>();
@@ -572,6 +573,121 @@ public static class ServiceCollectionExtensions
 
         // The service that grades the hosted groups.
         services.TryAddScoped<IAdminGradingService, AdminGradingService>();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Registers where the site lives and how it is reached, checked at startup.
+    /// </summary>
+    /// <param name="services">The service collection to add the site settings to.</param>
+    /// <param name="configuration">The application configuration carrying the <c>Site</c> section.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddSiteSettings(this IServiceCollection services, IConfiguration configuration)
+    {
+        // The site's address and its own mail address, checked at startup
+        services.AddOptions<SiteSettings>()
+            .Bind(configuration.GetSection(SiteSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the site's mail: the sender, and the outbox a background loop sends from. Mail goes out through
+    /// Resend only where a Resend key is configured, and only to the log anywhere else. Outside production a key also
+    /// needs <see cref="MailSettings.RedirectTo"/>, and startup fails without it. Expects the DbContext from
+    /// <see cref="AddMathCompsDbContext"/> and the site from <see cref="AddSiteSettings"/>.
+    /// </summary>
+    /// <param name="services">The service collection to add the mail to.</param>
+    /// <param name="configuration">
+    /// The application configuration carrying the <c>Mail</c> and <c>MailOutbox</c> sections.
+    /// </param>
+    /// <param name="environment">The environment the host runs in.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddMail(
+        this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
+    {
+        // The key and the redirect, checked at startup
+        services.AddOptions<MailSettings>()
+            .Bind(configuration.GetSection(MailSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // The settings as bound, read here because the key decides which sender there is at all
+        var settings = configuration.GetSection(MailSettings.SectionName).Get<MailSettings>();
+
+        // A key outside production with nowhere to redirect would mail the real people in a copy of the data
+        if (!environment.IsProduction()
+            && !string.IsNullOrWhiteSpace(settings?.ResendApiKey)
+            && string.IsNullOrWhiteSpace(settings.RedirectTo))
+            throw new InvalidOperationException(
+                $"{MailSettings.SectionName}:{nameof(MailSettings.ResendApiKey)} is set in the "
+                + $"{environment.EnvironmentName} environment without "
+                + $"{MailSettings.SectionName}:{nameof(MailSettings.RedirectTo)}. Set it, say to delivered@resend.dev.");
+
+        // Without a key, the log is the only place mail goes
+        if (string.IsNullOrWhiteSpace(settings?.ResendApiKey))
+            services.TryAddSingleton<IMailSender, LoggingMailSender>();
+
+        // With a key, mail goes out through Resend
+        else
+        {
+            // The client Resend is reached through, carrying its address and the key
+            services.AddHttpClient(ResendMailSender.HttpClientName, client =>
+            {
+                // Resend's API
+                client.BaseAddress = new Uri("https://api.resend.com/");
+
+                // Every request signed with the key
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", settings.ResendApiKey);
+
+                // Who is calling, which Resend refuses a request without
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("MathComps");
+            });
+
+            // The sender posting through the Resend client
+            services.TryAddSingleton<IMailSender, ResendMailSender>();
+        }
+
+        // How the outbox sends, checked at startup
+        services.AddOptions<MailOutboxSettings>()
+            .Bind(configuration.GetSection(MailOutboxSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // The outbox every mail waits in until it goes
+        services.TryAddSingleton<IMailOutbox, MailOutbox>();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the mail about new messages in grade conversations, which a background loop writes and queues in
+    /// the outbox from <see cref="AddMail"/>. Expects the DbContext from <see cref="AddMathCompsDbContext"/> and the
+    /// site from <see cref="AddSiteSettings"/>.
+    /// </summary>
+    /// <param name="services">The service collection to add the mail to.</param>
+    /// <param name="configuration">The application configuration carrying the <c>GradeMessageMail</c> section.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddGradeMessageMail(this IServiceCollection services, IConfiguration configuration)
+    {
+        // When each mail is written, checked at startup
+        services.AddOptions<GradeMessageMailSettings>()
+            .Bind(configuration.GetSection(GradeMessageMailSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // The competitions' names and addresses the mail is written with
+        services.AddLocalization();
+
+        // The mailer writing the notices into mails
+        services.TryAddSingleton<IGradeMessageMailer, GradeMessageMailer>();
 
         // Builder pattern
         return services;

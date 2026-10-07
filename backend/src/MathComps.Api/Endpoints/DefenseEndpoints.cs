@@ -32,10 +32,10 @@ public static class DefenseEndpoints
     public static void MapDefenseEndpoints(this IEndpointRouteBuilder app)
     {
         // Read the examiner's canned lines, which a visitor with no account is served too
-        app.MapGet(CopyPath, (IDefenseCopy defenseCopy) =>
+        app.MapGet(CopyPath, () =>
         {
             // The greeting in the language the request asked for
-            var opener = defenseCopy.GetOpener(EndpointHelpers.GetRequestLanguage());
+            var opener = IDefenseSessionService.Opener(EndpointHelpers.GetRequestLanguage());
 
             // Return it
             return Results.Ok(new DefenseCopyDto(opener));

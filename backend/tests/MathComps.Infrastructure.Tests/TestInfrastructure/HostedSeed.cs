@@ -1,5 +1,7 @@
+using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Comments;
 
 namespace MathComps.Infrastructure.Tests.TestInfrastructure;
 
@@ -66,6 +68,55 @@ public static class HostedSeed
             AuthorId = authorId,
             CreatedAt = createdAt,
         };
+
+    /// <summary>
+    /// Tracks one message of the conversation between the graders and a student about a grade.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="entryId"><inheritdoc cref="HostedGradeComment.EntryId" path="/summary"/></param>
+    /// <param name="problemId"><inheritdoc cref="HostedGradeComment.ProblemId" path="/summary"/></param>
+    /// <param name="authorId"><inheritdoc cref="Comment.AuthorId" path="/summary"/></param>
+    /// <param name="createdAt"><inheritdoc cref="Comment.CreatedAt" path="/summary"/></param>
+    /// <param name="status"><inheritdoc cref="Comment.Status" path="/summary"/></param>
+    /// <param name="parent">The message it answers, or null for one that opens a thread of its own.</param>
+    /// <returns>The tracked message.</returns>
+    public static Comment NewMessage(
+        MathCompsDbContext context,
+        Guid entryId,
+        Guid problemId,
+        Guid authorId,
+        DateTimeOffset createdAt,
+        CommentStatus status = CommentStatus.Active,
+        Comment? parent = null)
+    {
+        // The message
+        var message = new Comment
+        {
+            AuthorId = authorId,
+            ParentCommentId = parent?.Id,
+            Content = "message",
+            Status = status,
+            CreatedAt = createdAt,
+        };
+        context.Comments.Add(message);
+
+        // Hung off the conversation about the grade
+        context.HostedGradeComments.Add(
+            new HostedGradeComment { EntryId = entryId, ProblemId = problemId, CommentId = message.Id });
+
+        // The tracked message
+        return message;
+    }
+
+    /// <summary>
+    /// Names the conversation with a student about a problem, the way the client names it.
+    /// </summary>
+    /// <param name="problemId">The problem.</param>
+    /// <param name="student">The student.</param>
+    /// <returns>The conversation's target.</returns>
+    public static CommentTarget GradeConversation(Guid problemId, CommentViewer student) =>
+        // Keyed by the problem and the student, like the grade itself
+        new(CommentTargetType.HostedGrade, $"{problemId}:{student.UserId}");
 
     /// <summary>
     /// Tracks one hosted group of two problems per round, which lets students re-enter only while it never closes.
