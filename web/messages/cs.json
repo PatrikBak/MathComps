@@ -1023,6 +1023,10 @@
       "description": "Archiv úloh z česko-slovenských i mezinárodních soutěží, s vyhledáváním podle klíčových slov a dalších kritérií.",
       "title": "Úlohy"
     },
+    "problemSelection": {
+      "description": "Navržené úlohy a jejich výběr do soutěží.",
+      "title": "Výběr úloh"
+    },
     "profile": {
       "description": "Tvůj účet na MathComps.",
       "title": "Profil"
@@ -1234,6 +1238,41 @@
     "toggleSimilar": "Zobrazit/skrýt podobné úlohy",
     "tryingToConnect": "Pokouším se připojit...",
     "unlike": "Zrušit lajk"
+  },
+  "problemSelection": {
+    "access": {
+      "failed": "Výběr úloh se nepodařilo načíst.",
+      "forbidden": "Výběr úloh je pro ty, kdo vybírají úlohy do soutěží.",
+      "signIn": "Výběr úloh uvidíš po <link>přihlášení</link>."
+    },
+    "areas": {
+      "algebra": "Algebra",
+      "combinatorics": "Kombinatorika",
+      "geometry": "Geometrie",
+      "numberTheory": "Teorie čísel"
+    },
+    "detail": {
+      "backToPool": "Zásobník",
+      "notInPool": "Tato úloha není v zásobníku."
+    },
+    "filing": {
+      "noSolution": "bez řešení: {languages}",
+      "setAside": "odložená",
+      "unwritten": "bez {languages}",
+      "used": "použitá v kole"
+    },
+    "language": {
+      "label": "Jazyk",
+      "unwritten": "V tomto jazyce zatím není"
+    },
+    "pool": {
+      "emptyPool": "Zatím tu nejsou žádné úlohy.",
+      "loading": "Načítám úlohy"
+    },
+    "text": {
+      "fallback": "Zatím chybí {missing}, zobrazuje se {shown}.",
+      "none": "Zatím bez textu."
+    }
   },
   "profile": {
     "accountNote": "Tyto informace nejsou viditelné veřejně.",

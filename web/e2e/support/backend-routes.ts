@@ -267,6 +267,33 @@ export async function recordNotices(page: Page): Promise<() => string[]> {
 }
 
 /**
+ * Simulates leaving the tab and coming back, which React Query watches to decide whether to read a query
+ * again.
+ *
+ * @param page - The page to switch away from and back to.
+ */
+export async function returnToTab(page: Page): Promise<void> {
+  // React Query reads document.visibilityState and listens for the event on window, so overriding
+  // the one and dispatching the other is the whole of a tab switch as far as it is concerned
+  await page.evaluate(() => {
+    // A function which puts the document into a visibility state and announces it
+    const setVisibility = (state: string) => {
+      // The document reporting the state
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => state })
+
+      // The change announced
+      window.dispatchEvent(new Event('visibilitychange'))
+    }
+
+    // Leave the tab
+    setVisibility('hidden')
+
+    // Come back to it
+    setVisibility('visible')
+  })
+}
+
+/**
  * Stands in for the endpoint the reader's own lists are drawn from, answering it afresh each time it
  * is asked.
  *

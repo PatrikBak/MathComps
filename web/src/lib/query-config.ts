@@ -1,4 +1,9 @@
-import { type DefaultOptions, type Query, QueryClient } from '@tanstack/react-query'
+import {
+  type DefaultOptions,
+  type Query,
+  QueryClient,
+  type QueryState,
+} from '@tanstack/react-query'
 
 import { MINUTE_MS, SECOND_MS } from '@/components/shared/utils/time-units'
 import { isTransientFailure } from '@/lib/api/api-error'
@@ -43,6 +48,18 @@ function shouldRetry(failureCount: number, error: unknown): boolean {
 function isWorthWakingUp(query: Query): boolean {
   // Only a settled failure needs recovering, and only one that could plausibly succeed next time
   return query.state.status === 'error' && isTransientFailure(query.state.error)
+}
+
+/**
+ * Whether a query has settled on a failure that another attempt can only repeat.
+ *
+ * @param state - Where the query stands.
+ *
+ * @returns Whether the query has failed for good.
+ */
+export function hasFailedForGood(state: QueryState): boolean {
+  // A settled failure, and one no repeat of the request could change
+  return state.status === 'error' && !isTransientFailure(state.error)
 }
 
 /**

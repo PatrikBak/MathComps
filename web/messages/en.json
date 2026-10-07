@@ -1023,6 +1023,10 @@
       "description": "An archive of problems from Czech, Slovak and international competitions, with search by keyword and other criteria.",
       "title": "Problems"
     },
+    "problemSelection": {
+      "description": "Proposed problems, and picking them for competitions.",
+      "title": "Problem selection"
+    },
     "profile": {
       "description": "Your MathComps account.",
       "title": "Profile"
@@ -1234,6 +1238,41 @@
     "toggleSimilar": "Show/hide similar problems",
     "tryingToConnect": "Trying to connect...",
     "unlike": "Unlike problem"
+  },
+  "problemSelection": {
+    "access": {
+      "failed": "The selection could not be loaded.",
+      "forbidden": "The problem selection is for the people picking the competitions' problems.",
+      "signIn": "<link>Sign in</link> to see the problem selection."
+    },
+    "areas": {
+      "algebra": "Algebra",
+      "combinatorics": "Combinatorics",
+      "geometry": "Geometry",
+      "numberTheory": "Number theory"
+    },
+    "detail": {
+      "backToPool": "Pool",
+      "notInPool": "This problem is not in the pool."
+    },
+    "filing": {
+      "noSolution": "no solution in {languages}",
+      "setAside": "set aside",
+      "unwritten": "no {languages}",
+      "used": "used in a round"
+    },
+    "language": {
+      "label": "Language",
+      "unwritten": "Not written yet"
+    },
+    "pool": {
+      "emptyPool": "No problems here yet.",
+      "loading": "Loading the pool"
+    },
+    "text": {
+      "fallback": "Not in {missing} yet, showing {shown}.",
+      "none": "No text yet."
+    }
   },
   "profile": {
     "accountNote": "This information is not publicly visible.",

@@ -1,5 +1,13 @@
+import messages from '../messages/en.json'
 import { stubProblemSearch } from './support/backend-routes'
-import { areaCopy, areaPath, holdClock, LIST_PATH, showRoundHolding } from './support/competitions'
+import {
+  areaCopy,
+  areaPath,
+  holdClock,
+  LIST_PATH,
+  SELECTION_PATH,
+  showRoundHolding,
+} from './support/competitions'
 import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
@@ -11,6 +19,9 @@ const LANDING_WINDOW_MS = 1_000
 
 /** The practice run, the one competition anybody gets a second go at. */
 const PRACTICE_COMPETITION_SLUG = 'practice-set'
+
+/** What the page the competitions' problems are picked on is called. */
+const SELECTION_TITLE = messages.pages.problemSelection.title
 
 test.describe('the competitions list', () => {
   test('asks a reader with an unfilled profile for the fields a result would name them by', async ({
@@ -381,5 +392,38 @@ test.describe('the competitions list', () => {
 
     // And it stays gone, the answer having been kept against the account rather than the tab
     await expect(page.getByRole('button', { name: areaCopy.readiness.dismiss })).toHaveCount(0)
+  })
+
+  test('shows an account that prepares competitions the way to where the problems are picked', async ({
+    page,
+  }) => {
+    // One of the accounts that prepare competitions
+    await installHostedBackend(page, 'prepares-competitions')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // The way to the problem selection, in English
+    await expect(page.getByRole('link', { name: SELECTION_TITLE, exact: true })).toHaveAttribute(
+      'href',
+      SELECTION_PATH,
+      { timeout: SETTLE_TIMEOUT_MS }
+    )
+  })
+
+  test('shows a student no way to where the problems are picked', async ({ page }) => {
+    // A student with everything an entry needs
+    await installHostedBackend(page, 'ready')
+
+    // Open the list
+    await page.goto(LIST_PATH)
+
+    // Wait for the list itself, which arrives with the answer to whether the reader prepares competitions
+    await expect(page.getByRole('button', { name: areaCopy.try }).first()).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Nothing leads to the problem selection, which would only turn them away
+    await expect(page.getByRole('link', { name: SELECTION_TITLE, exact: true })).toHaveCount(0)
   })
 })

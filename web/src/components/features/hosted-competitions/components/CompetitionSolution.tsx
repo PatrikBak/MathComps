@@ -1,10 +1,9 @@
 'use client'
 
 import { BookOpen } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
-import type { Locale, LocalizedString } from '@/i18n/i18n'
 
 import { CompetitionProblemSurface } from './CompetitionProblemSurface'
 
@@ -12,12 +11,12 @@ import { CompetitionProblemSurface } from './CompetitionProblemSurface'
  * Props for the {@link CompetitionSolution} component.
  */
 type CompetitionSolutionProps = {
-  /** Which of the set it solves, counting from one. */
+  /** The number the problem goes by. */
   position: number
-  /** The statement as markdown/math source, in every language the site is read in. */
-  statement: LocalizedString
-  /** The official solution, in every language the site is read in. */
-  solution: LocalizedString
+  /** The statement as markdown/math source. */
+  statement: string
+  /** The official solution. */
+  solution: string
   /** Whether this problem is the one whose solution is being read. */
   isOpen: boolean
   /** Opens the solution. */
@@ -27,11 +26,7 @@ type CompetitionSolutionProps = {
 }
 
 /**
- * The official solution to one of a competition's problems: a line on the problem, and the solution itself
- * on a surface of its own.
- *
- * Only ever drawn once the student is no longer competing here, which is when a solution reaches the page
- * at all.
+ * The official solution to one problem: a line on the problem, and the solution itself on a surface of its own.
  */
 export function CompetitionSolution({
   position,
@@ -43,9 +38,6 @@ export function CompetitionSolution({
 }: CompetitionSolutionProps) {
   // Competitions copy
   const t = useTranslations('competitions')
-
-  // The active locale, which decides which language the solution is read in
-  const locale = useLocale() as Locale
 
   return (
     <CompetitionProblemSurface
@@ -60,7 +52,7 @@ export function CompetitionSolution({
       isTall={false}
     >
       <div className="math-typography math-reference">
-        <RichMathEditorRenderer content={solution[locale]} imageContext="problems" />
+        <RichMathEditorRenderer content={solution} imageContext="problems" />
       </div>
     </CompetitionProblemSurface>
   )

@@ -116,9 +116,32 @@ export function toUrlSearchParams(
  * @param query - The query string, without its `?`; an empty one leaves the address bare.
  */
 export function replaceQuery(query: string): void {
-  // The address the reader is on
+  // The query on the address, leaving the page where it stands
+  window.history.replaceState(null, '', addressWithQuery(query))
+}
+
+/**
+ * Puts a query string on the address the reader is on as a new step in history, so the back button returns to
+ * the address as it stood. Written straight to history for the same reason as {@link replaceQuery}.
+ *
+ * @param query - The query string, without its `?`; an empty one leaves the address bare.
+ */
+export function pushQuery(query: string): void {
+  // The query on the address, as a new step in history
+  window.history.pushState(null, '', addressWithQuery(query))
+}
+
+/**
+ * The path the reader is on with a query string on it, in place of whatever query and fragment the address had.
+ *
+ * @param query - The query string, without its `?`; an empty one leaves the address bare.
+ *
+ * @returns The address.
+ */
+function addressWithQuery(query: string): string {
+  // The path the reader is on
   const { pathname } = window.location
 
-  // Put the query on it, leaving the page where it stands
-  window.history.replaceState(null, '', query ? `${pathname}?${query}` : pathname)
+  // With the query on it, or bare
+  return query ? `${pathname}?${query}` : pathname
 }

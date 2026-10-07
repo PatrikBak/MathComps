@@ -1,12 +1,14 @@
 'use client'
 
-import { MessageSquarePlus } from 'lucide-react'
+import { ArrowRight, MessageSquarePlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { ProseContactLink } from '@/components/features/contact/ProseContactLink'
+import { AppLink } from '@/components/shared/components/AppLink'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { PageHeader } from '@/components/shared/components/PageHeader'
 import { useAddressedDisclosure } from '@/hooks/use-addressed-disclosure'
+import { ROUTES } from '@/i18n/i18n'
 
 import { useHostedCompetitionsBoard } from '../hooks/use-hosted-competitions-board'
 import { RESULTS_PARAM } from '../services/hosted-competition-routes'
@@ -14,7 +16,7 @@ import { CategoryLegend } from './CategoryLegend'
 import { CompetitionResultsModal } from './CompetitionResults'
 import { DisclosureNote } from './DisclosureNote'
 import { EntryGate } from './EntryGate'
-import { HeaderDisclosure } from './HeaderDisclosure'
+import { HEADER_ROW_CLASS, HeaderDisclosure } from './HeaderDisclosure'
 import { HostedCompetitionEntryDialog } from './HostedCompetitionEntryDialog'
 import { HostedCompetitionSeason } from './HostedCompetitionSeason'
 import { HowItWorks } from './HowItWorks'
@@ -42,6 +44,9 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
   // The page's own name and description
   const tPage = useTranslations('pages.competitions')
 
+  // The name and description of the page the competitions' problems are picked on
+  const tSelection = useTranslations('pages.problemSelection')
+
   // What there is to draw, and what its presses go through
   const {
     layout,
@@ -65,9 +70,12 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
       <PageHeader title={tPage('title')} className="mb-0">
         <p>{tPage('description')}</p>
 
-        {/* What the thing is, which category to pick, and what an entry agrees to */}
+        {/* The header's rows */}
         <div className="space-y-2">
+          {/* What the thing is */}
           <HowItWorks />
+
+          {/* Which category to pick */}
           <CategoryLegend />
 
           {/* The rules, readable without going near an irreversible press. The same lines appear inside
@@ -83,6 +91,14 @@ export function HostedCompetitionsBoard({ entryIntentSlug }: HostedCompetitionsB
               })}
             </DisclosureNote>
           </HeaderDisclosure>
+
+          {/* The way to where the problems are picked, for the accounts that prepare competitions */}
+          {preparesCompetitions && (
+            <AppLink href={ROUTES.PROBLEM_SELECTION} plain className={HEADER_ROW_CLASS}>
+              <ArrowRight size={15} />
+              {tSelection('title')}
+            </AppLink>
+          )}
         </div>
 
         {/* What the reader still owes, said before they reach for a button */}

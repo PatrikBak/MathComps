@@ -16,25 +16,37 @@ const CATEGORY_BADGE_CLASS: Record<HostedCompetitionCategory, string> = {
   advanced: 'bg-rose-400/10 text-rose-200',
 }
 
+/** How large a badge is drawn. */
+type CategoryBadgeSize = 'regular' | 'small'
+
+/** The padding and text size of each badge size. */
+const SIZE_CLASS: Record<CategoryBadgeSize, string> = {
+  regular: 'px-2 py-0.5 text-sm',
+  small: 'px-1.5 py-0.5 text-xs',
+}
+
 /**
  * Props for the {@link CategoryBadge} component.
  */
 type CategoryBadgeProps = {
   /** The level being named. */
   category: HostedCompetitionCategory
+  /** How large the badge is drawn. */
+  size?: CategoryBadgeSize
 }
 
 /**
  * One level, named and coloured. Nothing about the reader tints it.
  */
-export function CategoryBadge({ category }: CategoryBadgeProps) {
+export function CategoryBadge({ category, size = 'regular' }: CategoryBadgeProps) {
   // What the level is called
   const categoryName = useCategoryName()
 
   return (
     <span
       className={cn(
-        'inline-flex rounded-md px-2 py-0.5 text-sm font-semibold',
+        'inline-flex rounded-md font-semibold',
+        SIZE_CLASS[size],
         CATEGORY_BADGE_CLASS[category]
       )}
     >

@@ -55,6 +55,18 @@ export function invertByLocale<TId extends string>(
 }
 
 /**
+ * Locales as their codes, upper-cased, in a list.
+ *
+ * @param locales - The locales.
+ *
+ * @returns The list, like `EN, SK`.
+ */
+export function localeCodeList(locales: readonly Locale[]): string {
+  // Every code in capitals, separated by commas
+  return locales.map((locale) => locale.toUpperCase()).join(', ')
+}
+
+/**
  * Centralized route constants for the application.
  * English paths are canonical (matching folder names in app/[locale]/).
  */
@@ -74,6 +86,7 @@ export const ROUTES = {
   NEWS: '/news',
   ADMIN_DEFENSES: '/admin/defenses',
   ADMIN_GRADING: '/admin/grading/[slug]',
+  PROBLEM_SELECTION: '/problem-selection',
 } as const
 
 /** Union type of all possible route paths. */
@@ -102,6 +115,7 @@ const ROUTE_TRANSLATIONS: Record<RouteKey, NonCanonicalLocaleTranslations> = {
   '/news': { sk: '/novinky', cs: '/novinky' },
   '/admin/defenses': { sk: '/admin/obhajoby', cs: '/admin/obhajoby' },
   '/admin/grading/[slug]': { sk: '/admin/hodnotenie/[slug]', cs: '/admin/hodnoceni/[slug]' },
+  '/problem-selection': { sk: '/vyber-uloh', cs: '/vyber-uloh' },
 }
 
 /** Common anchor fragments used for in-page navigation. English is canonical. */

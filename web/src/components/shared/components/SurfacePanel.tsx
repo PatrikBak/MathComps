@@ -12,7 +12,7 @@ type SurfacePanelRadius = 'xl' | '2xl'
  */
 type SurfacePanelProps = {
   /** The rendered element type. */
-  as?: 'div' | 'article'
+  as?: 'div' | 'article' | 'section'
   /** Corner radius. */
   radius: SurfacePanelRadius
   /** Extra classes. */
