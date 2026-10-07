@@ -1,6 +1,6 @@
 import { BACKEND_ORIGIN } from './support/backend-routes'
 import { areaCopy, areaPath, authCopy, LIST_PATH } from './support/competitions'
-import { installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
+import { installHostedBackend, PROBLEM_COUNT, problemIdOf } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
@@ -87,6 +87,33 @@ test.describe('the competitions list', () => {
 
     // And handed the way to get one
     await expect(page.getByRole('button', { name: authCopy.login })).toBeVisible()
+  })
+
+  test('asks a reader with no account to sign in for the thread a link names, and back to it', async ({
+    page,
+  }) => {
+    // The competitions surface, read without a session
+    await installHostedBackend(page, 'first-entry')
+
+    // A link into the thread about the first problem of the competition that closed a month ago
+    const link = `${areaPath(CLOSED_COMPETITION_SLUG)}?feedback=${problemIdOf(CLOSED_COMPETITION_SLUG, 1)}`
+    await page.goto(link)
+
+    // The set, drawn as it is for anybody
+    await expect(page.getByRole('article')).toHaveCount(PROBLEM_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Asked to sign in for the thread, which only an account has
+    await expect(page.getByText(areaCopy.feedbackAuthReason)).toBeVisible()
+
+    // Signing in from there
+    await page.getByRole('button', { name: authCopy.login }).click()
+
+    // Which comes back to the link, thread and all
+    await expect
+      .poll(() => new URL(page.url()).searchParams.get('returnUrl'), { timeout: SETTLE_TIMEOUT_MS })
+      .toBe(link)
   })
 
   test('says the list failed to load rather than that nothing is scheduled', async ({ page }) => {

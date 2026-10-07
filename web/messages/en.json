@@ -461,6 +461,7 @@
     "entryError": "The competition could not be started.",
     "entryWindowLabel": "entry",
     "entryWindowMoment": "{date}, {time}",
+    "feedbackAuthReason": "read the comments on the marking",
     "finishDialog": {
       "confirm": "Finish",
       "consequence": "Your clock stops here, and nothing you write afterwards counts towards your entry. This cannot be undone.",

@@ -58,3 +58,12 @@ export const HINTS_PARAM = 'hints'
  * open results is a link straight back to them.
  */
 export const RESULTS_PARAM = 'results'
+
+/**
+ * The query parameter naming which problem's conversation with the graders is open, so that a link can lead a
+ * student straight into the thread about one of their marks.
+ *
+ * Carries the problem's id rather than its position, unlike {@link SOLUTION_PARAM}: the site makes these
+ * addresses, so nobody has to read or type them. Inert wherever the reader has no thread on that problem.
+ */
+export const FEEDBACK_PARAM = 'feedback'

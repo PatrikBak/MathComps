@@ -5,7 +5,11 @@ import type { QueryUiState } from '@/lib/query-ui-state'
 import { useUpdateGrade, type UseUpdateGradeResult } from '../../grades/hooks/use-update-grade'
 import type { AdminConversation, StudentConversations } from '../model/admin-conversation'
 import { useConversationDetail } from './use-conversation-detail'
-import { useConversationPanels, type UseConversationPanelsResult } from './use-conversation-panels'
+import {
+  type SidePanelId,
+  useConversationPanels,
+  type UseConversationPanelsResult,
+} from './use-conversation-panels'
 import {
   useConversationReadMarking,
   type UseConversationReadMarkingResult,
@@ -54,6 +58,7 @@ export type UseConversationDialogResult = {
  * @param itemsAreConversations - Whether each item is itself one of a student's conversations, which the dialog
  * then starts on rather than on the first they held.
  * @param landingNoteId - The note the reader was sent to; null when they came in for the conversation itself.
+ * @param initialTabId - The part the dialog's first opening starts on; null for the conversation.
  * @param onClosed - Runs once the dialog has finished leaving, after focus has gone back to the page.
  * @returns The dialog's state as described by {@link UseConversationDialogResult}.
  */
@@ -62,6 +67,7 @@ export function useConversationDialog(
   studentProblem: StudentProblem | null,
   itemsAreConversations: boolean,
   landingNoteId: string | null,
+  initialTabId: SidePanelId | null,
   onClosed: (() => void) | undefined
 ): UseConversationDialogResult {
   // Every conversation the student held about the problem, and where their grade on it stands
@@ -96,7 +102,7 @@ export function useConversationDialog(
   const hasGradeToGive = grading !== null && grading.countingConversationIds.length > 0
 
   // How much of the conversation stands on screen at once, and which part the reader is looking at
-  const panels = useConversationPanels(hasGradeToGive, landingNoteId)
+  const panels = useConversationPanels(hasGradeToGive, landingNoteId, initialTabId)
 
   // Recording which conversations have been read
   const { markRead, markUnread, markUnreadFrom } = useConversationReadState()
