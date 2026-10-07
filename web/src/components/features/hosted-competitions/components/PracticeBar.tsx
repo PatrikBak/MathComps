@@ -16,8 +16,8 @@ type PracticeBarProps = {
   group: HostedCompetitionGroup
   /** The instant its clock is read against, in epoch milliseconds. */
   now: number
-  /** Whether the reader is let past the gates it is entered through. */
-  bypassesGates: boolean
+  /** Whether the reader prepares competitions. */
+  preparesCompetitions: boolean
   /** Opens the question that has to be answered before its clock starts. */
   onEnter: (pending: PendingEntry) => void
 }
@@ -25,7 +25,7 @@ type PracticeBarProps = {
 /**
  * The practice competition as one bar: its name, terms and purpose, and the way in, which never closes.
  */
-export function PracticeBar({ group, now, bypassesGates, onEnter }: PracticeBarProps) {
+export function PracticeBar({ group, now, preparesCompetitions, onEnter }: PracticeBarProps) {
   // Competitions copy
   const t = useTranslations('competitions')
 
@@ -63,7 +63,7 @@ export function PracticeBar({ group, now, bypassesGates, onEnter }: PracticeBarP
               competition={competition}
               phase={phase}
               standing={standing}
-              bypassesGates={bypassesGates}
+              preparesCompetitions={preparesCompetitions}
               onEnter={() => onEnter({ group, competition })}
               // Never over, so nobody's results are ever kept
               onOpenResults={null}

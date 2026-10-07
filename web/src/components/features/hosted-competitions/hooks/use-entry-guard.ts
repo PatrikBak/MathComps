@@ -30,8 +30,8 @@ type UseEntryGuardParams = {
   reader: EntryReader
   /** Every group on screen. */
   groups: HostedCompetitionGroup[]
-  /** Whether the site lets this reader past everything a competition puts in the way. */
-  bypassesGates: boolean
+  /** Whether this reader prepares competitions. */
+  preparesCompetitions: boolean
   /** Asks the reader about a competition, only ever somebody who can actually enter it. */
   openDialog: (pending: PendingEntry) => void
   /** Which competition a press before a sign-in was aimed at, if the return URL carried one. */
@@ -64,7 +64,7 @@ type UseEntryGuardParams = {
 export function useEntryGuard({
   reader,
   groups,
-  bypassesGates,
+  preparesCompetitions,
   openDialog,
   entryIntentSlug,
   hasView,
@@ -88,7 +88,7 @@ export function useEntryGuard({
   const guard = useCallback(
     (pending: PendingEntry) => {
       // What the group they pressed asks of them
-      const blocker = entryBlockerFor(reader, pending.group, bypassesGates)
+      const blocker = entryBlockerFor(reader, pending.group, preparesCompetitions)
 
       switch (blocker) {
         // No account yet, so the press goes to one and brings this same competition back with it
@@ -142,7 +142,7 @@ export function useEntryGuard({
           return assertNever(blocker)
       }
     },
-    [bypassesGates, getCurrentUrl, locale, openDialog, reader, router, showLoginPrompt, t]
+    [preparesCompetitions, getCurrentUrl, locale, openDialog, reader, router, showLoginPrompt, t]
   )
 
   // Whether the press carried across the sign-in has been answered, so it is answered once and not again

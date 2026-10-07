@@ -14,8 +14,8 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// The student's entry into it, or null while they have not taken one. Never more than one: where a group allows
 /// re-entry, taking it again resets the entry rather than adding a second.</param>
 /// <param name="ProblemsPublished">
-/// Whether the problems are out from under the round's embargo for this reader: it has passed, or the site
-/// lets them past its gates.</param>
+/// Whether the problems are out from under the round's embargo for this reader: it has passed, or they prepare
+/// competitions.</param>
 /// <param name="ProblemsReady">
 /// Whether the competition holds as many problems as its group announced, and so has a paper to serve at
 /// all.</param>

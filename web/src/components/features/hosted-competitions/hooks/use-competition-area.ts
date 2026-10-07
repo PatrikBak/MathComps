@@ -124,13 +124,13 @@ export function useCompetitionArea(competitionSlug: string): UseCompetitionAreaR
     competitionInGroup === undefined ? undefined : derivePhase(competitionInGroup.group, now)
 
   // Whether the set may be read at all: an entry of their own buys it, a competition that is over with its
-  // problems open to this reader hands it to anybody, account or none, and a reader let past the gates reads
-  // it whenever they like. A grant can arrive before the paper does, so it is the one way in that has to
-  // check the set exists
+  // problems open to this reader hands it to anybody, account or none, and a reader who prepares
+  // competitions reads it whenever they like. A grant can arrive before the paper does, so it is the one
+  // way in that has to check the set exists
   const isReadable =
     entry !== null ||
     (competitionInGroup !== undefined &&
-      ((competitionInGroup.bypassesGates && competitionInGroup.competition.problemsReady) ||
+      ((competitionInGroup.preparesCompetitions && competitionInGroup.competition.problemsReady) ||
         (phase === 'closed' && competitionInGroup.competition.problemsPublished)))
 
   // This competition's problems, once there is something entitling the reader to them
@@ -192,12 +192,12 @@ export function useCompetitionArea(competitionSlug: string): UseCompetitionAreaR
   }
 
   // The group setting the terms, the competition itself, how long past an entry notes are taken, and
-  // whether this reader was let past the gates it is entered through
-  const { group, competition, noteGraceMinutes, bypassesGates } = competitionInGroup
+  // whether this reader prepares competitions
+  const { group, competition, noteGraceMinutes, preparesCompetitions } = competitionInGroup
 
   // The run the page draws from, or nothing at all where the reader spent no entry here
   const run: AreaRun | null =
-    entry === null ? null : readAreaRun(entry, noteGraceMinutes, now, bypassesGates)
+    entry === null ? null : readAreaRun(entry, noteGraceMinutes, now, preparesCompetitions)
 
   // What the page draws
   return {

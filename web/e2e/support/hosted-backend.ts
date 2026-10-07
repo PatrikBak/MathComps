@@ -335,7 +335,7 @@ export async function installHostedBackend(
         // A group outside its window takes nobody's entry, which is the refusal the page has to survive
         if (
           group !== undefined &&
-          !isGroupTakingEntries(group, state.view.bypassesGates, await pageNow(page))
+          !isGroupTakingEntries(group, state.view.preparesCompetitions, await pageNow(page))
         ) {
           // Answered as the backend answers it
           await route.fulfill({
@@ -356,8 +356,8 @@ export async function installHostedBackend(
           cells: null,
         }
 
-        // Taking one is agreeing to the rules, which a reader let past the gates was never shown
-        if (!state.view.bypassesGates) {
+        // Taking one is agreeing to the rules, which a reader who prepares competitions was never shown
+        if (!state.view.preparesCompetitions) {
           state.readiness.hasAcceptedRules = true
         }
 
@@ -381,7 +381,7 @@ export async function installHostedBackend(
         }
 
         // Giving one up is agreeing to them just as taking it is, and the same reader is asked neither way
-        if (!state.view.bypassesGates) {
+        if (!state.view.preparesCompetitions) {
           state.readiness.hasAcceptedRules = true
         }
 
@@ -426,7 +426,7 @@ export async function installHostedBackend(
       // The one place an embargoed statement is served
       case 'problems': {
         // An embargoed set takes an entry, a grant, or the embargo having lifted
-        if (!areProblemsReadable(competition, state.view.bypassesGates)) {
+        if (!areProblemsReadable(competition, state.view.preparesCompetitions)) {
           // Answered as the backend answers it
           await route.fulfill({
             status: 403,
@@ -445,7 +445,7 @@ export async function installHostedBackend(
         const problems = buildProblems(
           state,
           competition.slug.en,
-          isSolutionOpen(group, competition, state.view.bypassesGates, now)
+          isSolutionOpen(group, competition, state.view.preparesCompetitions, now)
         )
 
         // Whether the student's marks on it are out: the backend has them out, the student sat it, and it has
@@ -477,7 +477,7 @@ export async function installHostedBackend(
     const problemId = new URL(route.request().url()).pathname.split('/').at(-2) ?? ''
 
     // A note is written for whoever grades the entry, and one taken past the gates is never graded
-    if (state.view.bypassesGates) {
+    if (state.view.preparesCompetitions) {
       // Answered as the backend answers it
       await route.fulfill({
         status: 422,

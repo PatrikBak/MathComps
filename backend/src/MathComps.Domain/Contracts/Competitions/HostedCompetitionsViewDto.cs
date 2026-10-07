@@ -7,9 +7,9 @@ namespace MathComps.Domain.Contracts.Competitions;
 /// <param name="NoteGraceMinutes">
 /// How long after an entry ends a student may still say something about their own solutions, in minutes.
 /// </param>
-/// <param name="BypassesGates">
+/// <param name="PreparesCompetitions">
 /// Whether this reader holds <see cref="EfCoreEntities.UserCapability.PrepareCompetitions"/>. A fact about
 /// the reader rather than about any group.
 /// </param>
 public record HostedCompetitionsViewDto(
-    IReadOnlyList<HostedGroupDto> Groups, int NoteGraceMinutes, bool BypassesGates);
+    IReadOnlyList<HostedGroupDto> Groups, int NoteGraceMinutes, bool PreparesCompetitions);

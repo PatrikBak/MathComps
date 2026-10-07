@@ -46,13 +46,13 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     private readonly Guid _otherStudentId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A student the site lets past the gates its competitions are entered through.
+    /// A student who prepares competitions.
     /// </summary>
     private readonly Guid _grantedStudentId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A student let past those gates whose account is still short of what an entry asks for, which is what
-    /// separates the timing the grant waives from the fields it does not.
+    /// A student who prepares competitions and whose account is still short of what an entry asks for, which is
+    /// what separates the timing the grant waives from the fields it does not.
     /// </summary>
     private readonly Guid _grantedStrangerId = Guid.CreateVersion7();
 
@@ -210,7 +210,7 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
             () => service.EnterAsync(_studentId, OpenedSlug)));
 
     /// <summary>
-    /// Verifies that a student let past the gates enters a group that has not opened yet, which is the whole
+    /// Verifies that a student who prepares competitions enters a group that has not opened yet, which is the whole
     /// point of the grant: they are there to hammer the examiner on a competition's problems before anybody else
     /// has them.
     /// </summary>
@@ -341,8 +341,8 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
                 () => service.EnterAsync(_grantedStudentId, UnfilledSlug)));
 
     /// <summary>
-    /// Verifies that a student let past the gates enters with an account holding nothing but a name. The fields
-    /// exist to name a student in a published result, and nothing of theirs is ever published.
+    /// Verifies that a student who prepares competitions enters with an account holding nothing but a name. The
+    /// fields exist to name a student in a published result, and nothing of theirs is ever published.
     /// </summary>
     [Fact]
     public Task A_granted_student_enters_with_an_unfinished_profile() => RunTestAsync(async service =>
@@ -364,8 +364,9 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
     });
 
     /// <summary>
-    /// Verifies that nothing records a student let past the gates as having accepted the competition rules. They
-    /// were never shown them, so a stamp saying otherwise would be a record of something that never happened.
+    /// Verifies that nothing records a student who prepares competitions as having accepted the competition
+    /// rules. They were never shown them, so a stamp saying otherwise would be a record of something that never
+    /// happened.
     /// </summary>
     [Fact]
     public Task A_granted_students_entry_accepts_no_rules() => RunTestAsync(async service =>
@@ -424,14 +425,14 @@ public class HostedCompetitionServicePostgresTests(PostgresContainerFixture fixt
         var granted = await service.GetViewAsync(_grantedStudentId);
 
         // Which says so outright, and calls the embargoed competition's problems published
-        Assert.True(granted.BypassesGates);
+        Assert.True(granted.PreparesCompetitions);
         Assert.True(CompetitionIn(granted, AdvancedSlug).ProblemsPublished);
 
         // The same board as anybody else reads it
         var ordinary = await service.GetViewAsync(_studentId);
 
         // Where neither holds
-        Assert.False(ordinary.BypassesGates);
+        Assert.False(ordinary.PreparesCompetitions);
         Assert.False(CompetitionIn(ordinary, AdvancedSlug).ProblemsPublished);
     });
 

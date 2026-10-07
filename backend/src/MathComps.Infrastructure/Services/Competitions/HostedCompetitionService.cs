@@ -85,8 +85,8 @@ public sealed class HostedCompetitionService(
         // When the embargoes are read against.
         var now = DateTimeOffset.UtcNow;
 
-        // Whether the reader is let past the embargoes altogether, which only an account can be.
-        var bypassesGates = userId is { } holder
+        // Whether the reader prepares competitions, which lifts every embargo and which only an account can do.
+        var preparesCompetitions = userId is { } holder
             && await grants.HasAsync(holder, UserCapability.PrepareCompetitions, cancellationToken);
 
         // The reader's own cells in every competition they sat whose results are out, by round.
@@ -124,14 +124,14 @@ public sealed class HostedCompetitionService(
                         entries.GetValueOrDefault(round.Id) is { } entry
                             ? ToEntryDto(entry, cells.GetValueOrDefault(round.Id))
                             : null,
-                        ProblemsPublished: bypassesGates
+                        ProblemsPublished: preparesCompetitions
                             || round.VisibleSince is null
                             || round.VisibleSince <= now,
                         ProblemsReady: AreProblemsReady(round.ProblemIds.Count, group.ProblemCount))),
                 ])),
             ],
             _noteGraceMinutes,
-            bypassesGates);
+            preparesCompetitions);
     }
 
     /// <inheritdoc/>
@@ -266,7 +266,7 @@ public sealed class HostedCompetitionService(
 
         // Whether they are past competing here, which is what the official solution waits on. Holding no entry
         // leaves the round's own embargo to say it: a set already public carries its answers to anybody, and
-        // one still embargoed is reached only by a reader let past the gates, whose run has yet to start.
+        // one still embargoed is reached only by a reader who prepares competitions, whose run has yet to start.
         var isSolutionOpen = entry is not null
             ? HostedEntryRules.IsSolutionOpen(entry.StartedAt, entry.FinishedAt, entry.ClockMinutes, now)
             : access.VisibleSince is null || access.VisibleSince <= now;
@@ -479,7 +479,8 @@ public sealed class HostedCompetitionService(
 
         // Announced but not yet open, or past its window: either way there is no entry to take, unless the
         // student is one the window does not hold.
-        if (!reader.BypassesGates && (group.OpensAt > now || (group.ClosesAt is { } closesAt && closesAt <= now)))
+        if (!reader.PreparesCompetitions
+            && (group.OpensAt > now || (group.ClosesAt is { } closesAt && closesAt <= now)))
             throw new HostedGroupNotOpenException();
 
         // Whatever the student already holds here, which is at most one row.
@@ -499,7 +500,7 @@ public sealed class HostedCompetitionService(
         // What an entry asks of the student's account, settled before anything is written. Only a graded run has
         // a result to name the student in, so only a graded one asks anything of the account. The grant is read as
         // the clock starts, so holding one makes the run a test run.
-        if (HostedEntryRules.IsGraded(group.ClosesAt, reader.BypassesGates))
+        if (HostedEntryRules.IsGraded(group.ClosesAt, reader.PreparesCompetitions))
             await EnsureReadyToEnterAsync(dbContext, userId, cancellationToken);
 
         // The row the student's run is recorded in, which is the one they already hold when they are taking the
@@ -539,7 +540,7 @@ public sealed class HostedCompetitionService(
         // Spending an entry is where the rules are put in front of a student, so the first one they spend is
         // where they accept them. After the entry, so an acceptance is only ever recorded against one taken.
         // Nothing is recorded for a student who was never shown them.
-        if (!reader.BypassesGates)
+        if (!reader.PreparesCompetitions)
         {
             await dbContext.Users
                 .Where(user => user.Id == userId && user.RulesAcceptedAt == null)

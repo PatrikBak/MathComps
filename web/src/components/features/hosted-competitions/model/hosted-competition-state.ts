@@ -287,7 +287,7 @@ export function clockEndsAt(entry: AreaEntry | null): string | null {
  * @param entry - The entry the student spent.
  * @param graceMinutes - How long past the end of the entry notes are still taken.
  * @param now - The instant to read it against, in epoch milliseconds.
- * @param bypassesGates - Whether the site let this reader past the gates the competition is entered through.
+ * @param preparesCompetitions - Whether this reader prepares competitions.
  *
  * @returns The entry, with what the clock decides on it already settled.
  */
@@ -295,16 +295,16 @@ export function readAreaRun(
   entry: AreaEntry,
   graceMinutes: number,
   now: number,
-  bypassesGates: boolean
+  preparesCompetitions: boolean
 ): AreaRun {
   switch (entry.kind) {
     // A clock ran on it, so where it stands follows from it, and so does whether notes are still taken:
-    // no note is taken from a reader the site lets past the gates, nobody grading their run
+    // no note is taken from a reader who prepares competitions, nobody grading their run
     case 'sat':
       return {
         ...entry,
         hasEnded: hasEntryEnded(entry, now),
-        areNotesOpen: !bypassesGates && areNotesOpen(entry, graceMinutes, now),
+        areNotesOpen: !preparesCompetitions && areNotesOpen(entry, graceMinutes, now),
       }
 
     // No clock ran on it, so there is nothing to read that the entry does not already say
@@ -327,8 +327,8 @@ export type CompetitionInGroup = {
   competition: HostedCompetition
   /** How long past the end of an entry notes are still taken, in minutes; the program's own term. */
   noteGraceMinutes: number
-  /** Whether this reader is let past the gates the competition runs on. */
-  bypassesGates: boolean
+  /** Whether this reader prepares competitions. */
+  preparesCompetitions: boolean
 }
 
 /**
@@ -428,11 +428,15 @@ export function findCompetitionInGroup(
     .flatMap((group) => group.competitions.map((competition) => ({ group, competition })))
     .find((candidate) => isCompetitionAddressedBy(candidate.competition, competitionSlug))
 
-  // With the terms the whole program runs on: the note window, and whether this reader is let past the
-  // gates
+  // With the terms the whole program runs on: the note window, and whether this reader prepares
+  // competitions
   return found === undefined
     ? undefined
-    : { ...found, noteGraceMinutes: view.noteGraceMinutes, bypassesGates: view.bypassesGates }
+    : {
+        ...found,
+        noteGraceMinutes: view.noteGraceMinutes,
+        preparesCompetitions: view.preparesCompetitions,
+      }
 }
 
 /**

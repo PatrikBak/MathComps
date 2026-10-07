@@ -31,7 +31,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
     private readonly Guid _studentId = Guid.CreateVersion7();
 
     /// <summary>
-    /// A student the site lets past the gates its competitions are entered through.
+    /// A student who prepares competitions.
     /// </summary>
     private readonly Guid _grantedStudentId = Guid.CreateVersion7();
 
@@ -212,7 +212,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             await guard.EnsureCanDefendAsync(_forfeiterId, new ProblemTarget(_enteredProblemId))));
 
     /// <summary>
-    /// A student let past the gates argues an embargoed problem holding no entry, and still counts against
+    /// A student who prepares competitions argues an embargoed problem holding no entry, and still counts against
     /// the daily spend ceiling. The grant says when a competition may be reached; what a conversation costs is the entry's to
     /// answer, and they hold none.
     /// </summary>
@@ -234,7 +234,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     [Fact]
     public Task A_granted_student_still_cannot_argue_an_archive_problem() => RunTestAsync(async guard =>
-        // Let past the gates, and this problem was never one of the site's own
+        // A student who prepares competitions, on a problem that was never one of the site's own
         await Assert.ThrowsAsync<HostedProblemNotFoundException>(
             () => guard.EnsureCanDefendAsync(_grantedStudentId, new ProblemTarget(_archiveProblemId))));
 
@@ -248,7 +248,7 @@ public class DefenseTargetGuardPostgresTests(PostgresContainerFixture fixture)
             new User { Id = _neighbourId, ExternalId = "ext-neighbour", Username = "Neighbour" },
             new User { Id = _forfeiterId, ExternalId = "ext-forfeiter", Username = "Forfeiter" });
 
-        // The grant letting the granted student past those gates.
+        // The grant letting the granted student past a competition's gates.
         context.UserGrants.Add(new UserGrant
         {
             UserId = _grantedStudentId,
