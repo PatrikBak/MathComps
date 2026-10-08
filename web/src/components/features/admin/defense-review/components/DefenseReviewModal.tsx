@@ -3,6 +3,7 @@
 import { MailPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { toSessionTarget } from '@/components/features/defense/model/defense-target'
 import { Button } from '@/components/shared/components/Button'
 
 import { ActionLabel } from '../../conversation/components/ActionLabel'
@@ -41,7 +42,9 @@ export function DefenseReviewModal({
   return (
     <ConversationDialog
       selection={selection}
-      studentProblem={opened === null ? null : { user: opened.user, target: opened.target }}
+      studentProblem={
+        opened === null ? null : { user: opened.user, target: toSessionTarget(opened.target) }
+      }
       itemsAreConversations
       stepActions={
         // Past everything already read

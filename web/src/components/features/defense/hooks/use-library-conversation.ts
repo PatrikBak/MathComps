@@ -94,6 +94,17 @@ export function useLibraryConversation(
             uiState,
           }
 
+    // A proposal, argued under nothing and open whenever
+    case 'proposal':
+      return {
+        problem: {
+          target: { kind: 'proposal', problemId: defense.target.problemId },
+          statement: defense.statement,
+        },
+        competition: null,
+        uiState: READY,
+      }
+
     // Every target is handled above
     default:
       return assertNever(defense.target)

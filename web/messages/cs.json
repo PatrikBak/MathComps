@@ -1277,6 +1277,7 @@
       "unwritten": "bez {languages}",
       "used": "použitá v kole"
     },
+    "goToSelection": "Otevřít ve výběru úloh",
     "language": {
       "label": "Jazyk",
       "unwritten": "V tomto jazyce zatím není"

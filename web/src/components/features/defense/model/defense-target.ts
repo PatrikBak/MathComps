@@ -56,8 +56,9 @@ export function competitionSlugOf(target: NamedDefenseTarget): string | null {
     case 'problem':
       return target.competitionSlug
 
-    // A handout environment belongs to no competition
+    // A handout environment belongs to no competition, and no competition has set a proposal
     case 'handout':
+    case 'proposal':
       return null
 
     // Every target is handled above
@@ -81,6 +82,30 @@ export function toWireTarget(target: DefenseTarget): DefenseSessionTarget {
 
     // A competition's problem and a proposed one are both archive problems, so each travels as its own id
     case 'competition':
+    case 'proposal':
+      return { kind: 'problem', problemId: target.problemId }
+
+    // Every target is handled above
+    default:
+      return assertNever(target)
+  }
+}
+
+/**
+ * Turns what a conversation was held against, as a surface names it, into the shape the API takes.
+ *
+ * @param target - What the conversation was held against.
+ *
+ * @returns The same target, its names dropped.
+ */
+export function toSessionTarget(target: NamedDefenseTarget): DefenseSessionTarget {
+  switch (target.kind) {
+    // A handout environment is named by its ids alone, which is what travels
+    case 'handout':
+      return target
+
+    // An archive problem and a proposed one both travel as the problem's id
+    case 'problem':
     case 'proposal':
       return { kind: 'problem', problemId: target.problemId }
 

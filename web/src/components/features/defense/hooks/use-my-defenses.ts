@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/nextjs'
 import { useQueryClient } from '@tanstack/react-query'
 import { useLocale, useTranslations } from 'next-intl'
 
+import { invalidateSelection } from '@/components/features/problem-selection/hooks/selection-cache'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { cachePolicy } from '@/lib/query-config'
@@ -73,7 +74,13 @@ export function useMyDefenses(): UseMyDefensesResult {
     },
 
     // Re-sync either way: a success drops the defense, a failure restores it
-    onSettled: () => invalidateDefenseLists(queryClient),
+    onSettled: () => {
+      // The defense surface's own lists
+      invalidateDefenseLists(queryClient)
+
+      // And the problem selection, which lists every reviewer's conversations about a proposal
+      invalidateSelection(queryClient)
+    },
 
     // The reason shown in the auth prompt
     authReason: t('deleteAuthReason'),

@@ -62,6 +62,11 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
     private static readonly Guid _archiveSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a4");
 
     /// <summary>
+    /// A conversation held against a proposal, which the feed names by the proposal rather than by a competition.
+    /// </summary>
+    private static readonly Guid _proposalSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a5");
+
+    /// <summary>
     /// The archive problem that conversation was held against.
     /// </summary>
     private static readonly Guid _archiveProblemId = Guid.Parse("00000000-0000-0000-0000-0000000000d1");
@@ -122,7 +127,7 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
 
         // The competition an archive problem was set in, and the season it ran in.
         var competitionId = Guid.CreateVersion7();
-        var seasonId = Guid.CreateVersion7();
+        var season = new Season { Id = Guid.CreateVersion7(), StartYear = 2026, EditionNumber = 76 };
         var roundId = Guid.CreateVersion7();
         context.Competitions.Add(new Competition
         {
@@ -132,12 +137,12 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
             SortPath = ArchiveCompetitionPath,
             SortOrder = 1,
         });
-        context.Seasons.Add(new Season { Id = seasonId, StartYear = 2026, EditionNumber = 76 });
+        context.Seasons.Add(season);
         context.Rounds.Add(new Round
         {
             Id = roundId,
             CompetitionId = competitionId,
-            SeasonId = seasonId,
+            SeasonId = season.Id,
             Date = new DateOnly(2026, 9, 28),
         });
 
@@ -150,12 +155,17 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
             Slug = ArchiveProblemSlug,
         });
 
-        // Four conversations, the first shaped like a real one: opener, the student, the reply.
+        // A problem parked among the proposals, quoted by a number its own row doesn't share.
+        var proposedProblemId = SelectionSeed.NewProposal(
+            context, SelectionSeed.NewProposalsRound(context, season), number: 21, position: 3);
+
+        // The conversations, the first shaped like a real one: opener, the student, the reply.
         context.DefenseSessions.AddRange(
             NewSession(_sessionId),
             NewSession(_otherSessionId),
             NewSession(_untargetedSessionId),
-            NewSession(_archiveSessionId, DefenseTargetKind.Problem));
+            NewSession(_archiveSessionId, DefenseTargetKind.Problem),
+            NewSession(_proposalSessionId, DefenseTargetKind.Problem));
 
         // The turns of the conversation under test.
         context.DefenseTurns.AddRange(
@@ -181,12 +191,10 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
                 HandoutEnvironmentId = environmentId,
             });
 
-        // And the archive problem the fourth was held against.
-        context.ProblemDefenses.Add(new ProblemDefense
-        {
-            DefenseSessionId = _archiveSessionId,
-            ProblemId = _archiveProblemId,
-        });
+        // The problems the archive conversation and the proposal one were held against.
+        context.ProblemDefenses.AddRange(
+            new ProblemDefense { DefenseSessionId = _archiveSessionId, ProblemId = _archiveProblemId },
+            new ProblemDefense { DefenseSessionId = _proposalSessionId, ProblemId = proposedProblemId });
 
         // Commit the seed.
         await context.SaveChangesAsync();
@@ -590,6 +598,26 @@ public class AdminNoteServicePostgresTests(PostgresContainerFixture fixture)
 
         // And counts it alone, so the pager promises no line it won't serve
         Assert.Equal(1, feed.TotalCount);
+    });
+
+    /// <summary>
+    /// A note on a conversation held against a proposal names the proposal, by the number and the working name the
+    /// reviewers quote it by, since no competition has set it.
+    /// </summary>
+    [Fact]
+    public Task The_feed_names_a_proposals_conversation_by_the_proposal() => RunTestAsync(async service =>
+    {
+        // A note about the proposal conversation
+        await service.CreateAsync(_reviewerId, _proposalSessionId, null, "about a proposal", null);
+
+        // Read the feed
+        var feed = await service.GetFeedAsync(_reviewerId, openOnly: false, 1, Language.EN);
+
+        // The note's problem, which is a proposal rather than a competition problem
+        var proposal = Assert.IsType<NamedProposalTarget>(Assert.Single(feed.Items).Target);
+
+        // Named by the proposal filing it
+        Assert.Equal((21, "Proposal 21"), (proposal.Number, proposal.Title));
     });
 
     /// <summary>

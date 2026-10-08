@@ -26,6 +26,7 @@ import { TranscriptPane } from './TranscriptPane'
 const IMAGE_CONTEXTS = {
   handout: 'handouts',
   problem: 'problems',
+  proposal: 'problems',
 } as const satisfies Record<NamedDefenseTarget['kind'], ImageContext>
 
 /**
@@ -43,7 +44,7 @@ const WRITES_NOTES = {
  * Reads the archive problem a conversation is graded on, if it is held against one.
  *
  * @param target - What the conversation was held against.
- * @returns The problem's id; null for a handout environment, which nobody is graded on.
+ * @returns The problem's id; null for a handout environment or a proposal, which nobody is graded on.
  */
 function gradedProblemIdOf(target: NamedDefenseTarget): string | null {
   switch (target.kind) {
@@ -51,8 +52,9 @@ function gradedProblemIdOf(target: NamedDefenseTarget): string | null {
     case 'problem':
       return target.problemId
 
-    // A handout environment, which nobody is graded on
+    // A handout environment or a proposal, which nobody is graded on
     case 'handout':
+    case 'proposal':
       return null
 
     // A target nothing here knows

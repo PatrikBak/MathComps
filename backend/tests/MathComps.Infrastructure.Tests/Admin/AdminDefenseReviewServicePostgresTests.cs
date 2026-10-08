@@ -21,7 +21,8 @@ namespace MathComps.Infrastructure.Tests.Admin;
 /// orders and pages the conversations by when they were last spoken to, that its counts follow the filters, that
 /// whether a conversation counts as unread is derived from its turns rather than stored, that a row and the whole
 /// conversation behind it carry what has been written and said about them, that conversations group by the settings
-/// they ran on, and that one held against nothing at all stays out of reach entirely.
+/// they ran on, that one held against a proposal goes by the proposal, and that one held against nothing at all
+/// stays out of reach entirely.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fixture)
@@ -1171,6 +1172,73 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // And asking for it by name is refused the same way an id nothing was seeded under is
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
             () => service.GetDetailAsync(_reviewerId, _targetlessSessionId, Language.EN));
+    });
+
+    /// <summary>
+    /// A conversation held against a proposal goes by the proposal wherever the review surface names it: its row in
+    /// the queue, its option among the filters, and the conversation opened in full. Each of those reads the problem
+    /// on its own, so one naming it right says nothing of the others. Its slug narrows the queue to it the way an
+    /// archive problem's does.
+    /// </summary>
+    [Fact]
+    public Task A_proposals_conversation_goes_by_the_proposal() => RunTestAsync(async service =>
+    {
+        // The conversation about the proposal
+        var sessionId = Guid.CreateVersion7();
+
+        // The problem the proposal files, once it is written
+        var problemId = Guid.Empty;
+
+        // The student's conversation about a problem parked among the proposals
+        await QueryAsync(async context =>
+        {
+            // A round among the proposals
+            var round = SelectionSeed.NewProposalsRound(context, await context.Seasons.SingleAsync());
+
+            // The proposal in it, quoted by a number its problem's own row doesn't share
+            problemId = SelectionSeed.NewProposal(context, round, number: 21, position: 3);
+
+            // The conversation
+            context.DefenseSessions.Add(NewSession(sessionId, _studentId, ExaminerConfig, DefenseTargetKind.Problem));
+
+            // With the one message the student opened it with
+            context.DefenseTurns.Add(NewTurn(sessionId, TranscriptRole.Candidate, "my proposal defense", 0, _now));
+
+            // Held against that problem
+            context.ProblemDefenses.Add(new ProblemDefense { DefenseSessionId = sessionId, ProblemId = problemId });
+
+            // Written down
+            await context.SaveChangesAsync();
+        });
+
+        // Read the whole queue
+        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
+
+        // The row of the conversation about the proposal, which names a proposal rather than a competition problem
+        var proposal = Assert.IsType<NamedProposalTarget>(
+            Assert.Single(queue.Items, conversation => conversation.Id == sessionId).Target);
+
+        // By the proposal filing the problem: the number and the working name the reviewers quote it by
+        Assert.Equal((problemId, 21, "Proposal 21"), (proposal.ProblemId, proposal.Number, proposal.Title));
+
+        // Read what the filters can be set to
+        var options = await service.GetFilterOptionsAsync(Language.EN);
+
+        // The proposal is offered among them, named the same way
+        Assert.Contains(options.Problems, option => option.Target == proposal);
+
+        // Narrow the queue by the proposal's slug
+        var narrowed = await service.GetQueueAsync(
+            _reviewerId, NewFilter() with { ProblemSlug = proposal.Slug }, 1, Language.EN);
+
+        // Which leaves the one conversation held against it
+        Assert.Equal([sessionId], narrowed.Items.Select(conversation => conversation.Id));
+
+        // Open the conversation in full
+        var detail = await service.GetDetailAsync(_reviewerId, sessionId, Language.EN);
+
+        // Which names it the same way again
+        Assert.Equal(proposal, detail.Target);
     });
 
     /// <summary>

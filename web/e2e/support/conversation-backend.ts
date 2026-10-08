@@ -67,8 +67,9 @@ function isHeldAgainst(
         target.environmentId === url.searchParams.get('environmentId')
       )
 
-    // An archive problem, which the path names
+    // An archive problem or a proposed one, which the path names
     case 'problem':
+    case 'proposal':
       return target.problemId === problemId
 
     // A target nothing here knows
