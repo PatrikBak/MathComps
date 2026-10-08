@@ -37,6 +37,9 @@ const ENTERED_CATEGORY_INDEX = 1
 /** The competition the specs enter, one of those the open group runs, as English addresses it. */
 export const COMPETITION_SLUG = 'open-intermediate'
 
+/** A competition of the group that has not opened yet, which nobody ordinary can enter or read. */
+export const UPCOMING_COMPETITION_SLUG = 'upcoming-intermediate'
+
 /**
  * Names one competition in every language.
  *

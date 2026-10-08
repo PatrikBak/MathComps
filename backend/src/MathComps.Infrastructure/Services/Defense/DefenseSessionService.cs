@@ -281,7 +281,8 @@ public class DefenseSessionService(
         var deletedProposals = dbContext.Proposals.Where(proposal => proposal.DeletedAt != null);
 
         // The user's sessions, most recently active first, each with the columns of both target arms, the round
-        // it was argued under, its statement, last activity, and the student's most recent message.
+        // it was argued under and when it started, its statement, last activity, and the student's most recent
+        // message.
         var rows = await dbContext.DefenseSessions
             .AsNoTracking()
             .Where(session => session.UserId == userId)
@@ -312,7 +313,9 @@ public class DefenseSessionService(
                         : new DefenseProblemRound(
                             session.ProblemTarget.Problem.Round.Competition.Path,
                             session.ProblemTarget.Problem.Round.HostedGroupId != null,
-                            session.ProblemTarget.Problem.Round.HostedGroup!.ClosesAt)),
+                            session.ProblemTarget.Problem.Round.HostedGroup!.OpensAt,
+                            session.ProblemTarget.Problem.Round.HostedGroup!.ClosesAt),
+                    session.CreatedAt),
                 session.ProblemStatement,
                 session.Turns.Max(turn => turn.CreatedAt),
                 session.Turns
@@ -431,9 +434,9 @@ public class DefenseSessionService(
     private static async Task EnsureNotGradedAsync(
         MathCompsDbContext dbContext, Guid userId, Guid sessionId, CancellationToken cancellationToken)
     {
-        // What the caller's session was argued under, down to the closing instant of the group its round runs
-        // in. A session that isn't theirs matches nothing and falls through to whatever the caller was doing,
-        // which answers not-found on its own.
+        // What the caller's session was argued under, down to when the group its round runs in opens and closes,
+        // and when the session started. A session that isn't theirs matches nothing and falls through to whatever
+        // the caller was doing, which answers not-found on its own.
         var grading = await dbContext.DefenseSessions
             .Where(DefenseSessionWrites.IsOwnedBy(userId, sessionId))
             .Select(session => new DefenseGrading(
@@ -442,7 +445,9 @@ public class DefenseSessionService(
                     : new DefenseProblemRound(
                         session.ProblemTarget.Problem.Round.Competition.Path,
                         session.ProblemTarget.Problem.Round.HostedGroupId != null,
-                        session.ProblemTarget.Problem.Round.HostedGroup!.ClosesAt)))
+                        session.ProblemTarget.Problem.Round.HostedGroup!.OpensAt,
+                        session.ProblemTarget.Problem.Round.HostedGroup!.ClosesAt),
+                session.CreatedAt))
             .FirstOrDefaultAsync(cancellationToken);
 
         // Refused whenever the student is graded on the round it was argued under, whatever state that entry is

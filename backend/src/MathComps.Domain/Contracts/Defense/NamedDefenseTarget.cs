@@ -37,8 +37,8 @@ public sealed record NamedProblemTarget(
     Guid ProblemId, string CompetitionSlug, string Slug, ProblemSource Source) : NamedDefenseTarget;
 
 /// <summary>
-/// The proposal a conversation was held against: a problem parked among the proposals, named by what the
-/// reviewers quote it by, since no competition has set it.
+/// The proposal a conversation was held against: a problem the selection still holds, named by what the reviewers
+/// quote it by.
 /// </summary>
 /// <param name="ProblemId"><inheritdoc cref="ProblemTarget.ProblemId" path="/summary"/></param>
 /// <param name="Slug"><inheritdoc cref="EfCoreEntities.Problem.Slug" path="/summary"/></param>

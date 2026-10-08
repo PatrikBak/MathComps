@@ -5,6 +5,7 @@ using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Problems;
+using MathComps.Infrastructure.Services.Selection;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Defense;
@@ -41,9 +42,8 @@ public static class NamedDefenseTargets
 
     /// <summary>
     /// Reads the proposals among the problems some conversations were held against, each as the target that
-    /// names it. A problem counts as one while its round hangs under
-    /// <see cref="HostedTaxonomy.ProposalsPath"/>, deleted proposals included, since a deleted one keeps its row
-    /// and its name.
+    /// names it. A problem counts as one while the selection holds it (<see cref="SelectionRules.IsInSelection"/>),
+    /// deleted proposals included, since a deleted one keeps its row and its name.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
     /// <param name="columns">What the database holds about each conversation's problem.</param>
@@ -52,10 +52,8 @@ public static class NamedDefenseTargets
     public static async Task<IReadOnlyDictionary<Guid, NamedProposalTarget>> LoadProposalsAsync(
         MathCompsDbContext dbContext, IEnumerable<Columns> columns, CancellationToken cancellationToken)
     {
-        // The problems parked among the proposals
+        // The problems the conversations were held against
         var problemIds = columns
-            .Where(column => column.CompetitionPath is { } path
-                && TaxonomySlugs.IsAtOrUnder(path, HostedTaxonomy.ProposalsPath))
             .Select(column => column.ProblemId)
             .OfType<Guid>()
             .Distinct()
@@ -65,13 +63,31 @@ public static class NamedDefenseTargets
         if (problemIds.Count == 0)
             return new Dictionary<Guid, NamedProposalTarget>();
 
-        // The proposals filing them, by the problem each one files
-        return await dbContext.Proposals
+        // The instant every group's opening is read against
+        var now = DateTimeOffset.UtcNow;
+
+        // The proposals filing them, each with where its problem sits
+        var proposals = await dbContext.Proposals
             .AsNoTracking()
             .Where(proposal => problemIds.Contains(proposal.ProblemId))
-            .Select(proposal => new NamedProposalTarget(
-                proposal.ProblemId, proposal.Problem.Slug, proposal.Number, proposal.Title))
-            .ToDictionaryAsync(proposal => proposal.ProblemId, cancellationToken);
+            .Select(proposal => new
+            {
+                proposal.ProblemId,
+                proposal.Problem.Slug,
+                proposal.Number,
+                proposal.Title,
+                CompetitionPath = proposal.Problem.Round.Competition.Path,
+                GroupOpensAt = (DateTimeOffset?)proposal.Problem.Round.HostedGroup!.OpensAt,
+            })
+            .ToListAsync(cancellationToken);
+
+        // The ones the selection still holds, by the problem each one files
+        return proposals
+            .Where(proposal => SelectionRules.IsInSelection(proposal.CompetitionPath, proposal.GroupOpensAt, now))
+            .ToDictionary(
+                proposal => proposal.ProblemId,
+                proposal => new NamedProposalTarget(
+                    proposal.ProblemId, proposal.Slug, proposal.Number, proposal.Title));
     }
 
     /// <summary>
@@ -93,7 +109,7 @@ public static class NamedDefenseTargets
         if (columns is { HandoutContentId: { } handoutContentId, EnvironmentId: { } environmentId })
             return new NamedHandoutTarget(handoutContentId, environmentId);
 
-        // A proposal, which no competition has set, so it goes by what the reviewers quote it by.
+        // A proposal the selection still holds, which goes by what the reviewers quote it by.
         if (columns.ProblemId is { } proposedProblemId && proposals.TryGetValue(proposedProblemId, out var proposal))
             return proposal;
 

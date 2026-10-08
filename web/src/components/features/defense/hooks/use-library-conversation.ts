@@ -23,8 +23,8 @@ const READY: QueryUiState = { kind: 'ready' }
  */
 type UseLibraryConversationResult = {
   /**
-   * The problem to open the conversation on; null while nothing is chosen, and while a competition problem
-   * is still waiting on the entry it was argued under.
+   * The problem to open the conversation on; null while nothing is chosen, while a competition problem is
+   * still waiting on the entry it was argued under, and for a graded one with no entry to read it against.
    */
   problem: DefenseProblem | null
   /** The run the conversation is being argued inside, or null outside a competition. */
@@ -41,7 +41,9 @@ type UseLibraryConversationResult = {
  * the entry and its clock included, so the same conversation reads the same wherever it was reached from.
  *
  * That entry is read before the conversation is handed over rather than alongside it: without one the chat
- * offers to rewind and delete a graded conversation the backend refuses to change.
+ * offers to rewind and delete a graded conversation the backend refuses to change. A conversation nobody
+ * grades, held by a reader who never entered, opens without one once the read says there is none, which is
+ * how the area opens it too.
  *
  * @param defense - The defense the student chose, or null while they are still on the list.
  *
@@ -77,22 +79,36 @@ export function useLibraryConversation(
         uiState: READY,
       }
 
-    // A competition problem, which waits for the entry rather than opening without it
-    case 'problem':
-      return entry === null
-        ? { problem: null, competition: null, uiState }
-        : {
-            problem: {
-              target: {
-                kind: 'competition',
-                problemId: defense.target.problemId,
-                readerKey: userId ?? null,
-              },
-              statement: defense.statement,
-            },
-            competition: { entry, isGraded: defense.isGraded },
-            uiState,
-          }
+    // A competition problem, opened against the entry the reader spent on it, if they spent one
+    case 'problem': {
+      // The problem as the competition's own area opens it
+      const problem: DefenseProblem = {
+        target: {
+          kind: 'competition',
+          problemId: defense.target.problemId,
+          readerKey: userId ?? null,
+        },
+        statement: defense.statement,
+      }
+
+      // An entry spent, so the conversation is argued inside the run it bought
+      if (entry !== null) {
+        return { problem, competition: { entry, isGraded: defense.isGraded }, uiState }
+      }
+
+      // The read behind the entry still going or given up on, so it waits rather than opening without one
+      if (uiState.kind !== 'ready') {
+        return { problem: null, competition: null, uiState }
+      }
+
+      // No entry, and nobody grades it, so nothing of the reader's own is spent on it
+      if (!defense.isGraded) {
+        return { problem, competition: null, uiState }
+      }
+
+      // Graded, with no entry to hold the conversation to
+      return { problem: null, competition: null, uiState }
+    }
 
     // A proposal, argued under nothing and open whenever
     case 'proposal':
