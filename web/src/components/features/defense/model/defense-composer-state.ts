@@ -1,6 +1,7 @@
 import { assertNever } from '@/components/shared/utils/assert-never'
 
-import type { DefenseLimits, MathildaConsent, MathildaConsentStatus } from './defense-types'
+import type { DefenseHistoryRead, DefenseOpeningStatus } from './defense-opening'
+import type { MathildaConsent, MathildaConsentStatus } from './defense-types'
 
 /**
  * How a read of the standing acknowledgement came back.
@@ -35,45 +36,6 @@ export function resolveConsentStatus(read: ConsentRead): MathildaConsentStatus {
 }
 
 /**
- * How the read of this problem's defense history came back. One read carries both the conversations
- * saved against the problem and the caps a further one is held to.
- */
-type HistoryRead = {
-  /** The caps the last read that got through came back with, null while none has. */
-  limits: DefenseLimits | null
-  /** Whether the most recent attempt failed. */
-  isError: boolean
-}
-
-/**
- * Where this problem's defense history stands: read, out of reach, or still coming.
- */
-export type DefenseHistoryStatus = 'read' | 'unavailable' | 'loading'
-
-/**
- * Reads where this problem's defense history stands off the read that asked for it.
- *
- * @param read - How the read of this problem's defense history came back.
- *
- * @returns What it establishes.
- */
-export function resolveHistoryStatus(read: HistoryRead): DefenseHistoryStatus {
-  // An answer already in hand, which a later read failing does not take back
-  if (read.limits !== null) {
-    return 'read'
-  }
-
-  // A failure with nothing behind it leaves neither a transcript to argue on top of nor a cap to hold a
-  // message to
-  if (read.isError) {
-    return 'unavailable'
-  }
-
-  // Nothing back yet
-  return 'loading'
-}
-
-/**
  * The conversation is not ready to be written into yet.
  */
 type ComposerLoading = {
@@ -90,8 +52,7 @@ type ComposerSignInRequired = {
 }
 
 /**
- * This problem's defense history could not be read, so there is neither a conversation to carry on nor a
- * cap to hold a message to.
+ * This problem's defense history could not be read, so the conversation to write into is out of reach.
  */
 type ComposerConversationUnavailable = {
   /** The discriminant. */
@@ -176,13 +137,10 @@ export type DefenseComposerInput = {
   isAuthSettled: boolean
   /** Whether the reader has an account. */
   isSignedIn: boolean
-  /** Where this problem's defense history stands. */
-  historyStatus: DefenseHistoryStatus
-  /**
-   * Whether the conversation asked for on open has had its chance to be opened, which a fresh opening
-   * has by construction.
-   */
-  isResumeSettled: boolean
+  /** How far this problem's defense history has been read. */
+  history: DefenseHistoryRead['kind']
+  /** Where the conversation the chat opens on stands. */
+  opening: DefenseOpeningStatus['kind']
   /** Where the reader stands on acknowledging what talking to the examiner entails. */
   consentStatus: MathildaConsentStatus
   /** Whether a reply is in flight. */
@@ -212,27 +170,39 @@ export function resolveComposerState(input: DefenseComposerInput): DefenseCompos
     return { kind: 'signInRequired' }
   }
 
-  // Where this problem's defense history stands, asked ahead of the resume below, which waits on this
-  // very read to settle it
-  switch (input.historyStatus) {
+  // Where this problem's defense history stands
+  switch (input.history) {
     // Nothing came back, so there is neither a conversation to carry on nor a cap to write against
-    case 'unavailable':
+    case 'unreadable':
       return { kind: 'conversationUnavailable' }
 
-    // Still coming, or in hand: either way the resume below is what decides
-    case 'loading':
-    case 'read':
+    // Still coming, or in hand: either way the opening below is what decides
+    case 'awaited':
+    case 'inHand':
       break
 
     // Every standing is handled above
     default:
-      return assertNever(input.historyStatus)
+      return assertNever(input.history)
   }
 
-  // A conversation opened on a named defense writes nothing until its resume settles: a turn sent
-  // before it would open a second defense beside the one being continued
-  if (!input.isResumeSettled) {
-    return { kind: 'loading' }
+  // Where the conversation being opened stands
+  switch (input.opening) {
+    // Not known yet, and a turn sent now could open a second conversation beside the one being carried on
+    case 'waiting':
+      return { kind: 'loading' }
+
+    // Never to be known, the history that decides it having failed
+    case 'unreachable':
+      return { kind: 'conversationUnavailable' }
+
+    // Known, so on to the reader's acknowledgement
+    case 'decided':
+      break
+
+    // Every standing is handled above
+    default:
+      return assertNever(input.opening)
   }
 
   // Where the reader stands on the acknowledgement

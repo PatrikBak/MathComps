@@ -5,9 +5,21 @@ import type { UserProfile } from '@/components/features/profile/model/profile-ty
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import messages from '../messages/en.json'
+import type { AnswerGate } from './support/answer-gate'
 import { answerJson, BACKEND_ORIGIN } from './support/backend-routes'
-import { chatCopy, SELECTION_PATH, sendTurn, transcriptOf } from './support/competitions'
-import { installHostedBackend } from './support/hosted-backend'
+import {
+  actionsCopy,
+  chatCopy,
+  closeChat,
+  SELECTION_PATH,
+  sendTurn,
+  transcriptOf,
+} from './support/competitions'
+import {
+  gateSessionReads,
+  installHostedBackend,
+  SESSION_LIST_ADDRESS,
+} from './support/hosted-backend'
 import { SCRIPTED_REPLIES } from './support/hosted-backend-content'
 import {
   ARGUED,
@@ -50,6 +62,40 @@ const NEW_COMMENT = 'Too long for the elementary paper as it stands.'
 function conversationRows(page: Page) {
   // The buttons in the panel showing, each opening one conversation
   return page.getByRole('tabpanel').getByRole('button')
+}
+
+/**
+ * Opens Mathilda on {@link BILINGUAL}, which nobody has talked to her about yet, and waits until the chat has
+ * read that.
+ *
+ * @param page - The page.
+ *
+ * @returns The gate in front of every later read of the problem's conversations, open until the test holds it.
+ */
+async function openMathildaOnBilingual(page: Page): Promise<AnswerGate> {
+  // The backend the chat talks to, which keeps what is said to Mathilda
+  const chat = await installHostedBackend(page, 'ready')
+
+  // A reviewer whose selection holds a pool of problems
+  await stubSelection(page, 'selection', rememberedSelection(chat))
+
+  // What every read of a problem's conversations waits at
+  const history = await gateSessionReads(page)
+
+  // The problem, solved in English
+  await page.goto(`${SELECTION_PATH}?problem=${BILINGUAL.id}`)
+
+  // The read the chat opens with
+  const firstRead = page.waitForResponse(SESSION_LIST_ADDRESS)
+
+  // A conversation with her, opened
+  await page.getByRole('button', { name: MATHILDA_NAME, exact: true }).click()
+
+  // Once it has found none held yet
+  await firstRead
+
+  // The gate, for the test to hold
+  return history
 }
 
 test.describe('what reviewers said about a problem', () => {
@@ -414,6 +460,252 @@ test.describe('what reviewers said about a problem', () => {
 
     // Unmarked, its statement being the one the problem has now
     await expect(page.getByRole('dialog')).not.toContainText(chatCopy.editedSince)
+  })
+
+  test('opens again on the conversation just held, closed before the list of them was read again', async ({
+    page,
+  }) => {
+    // A conversation with Mathilda about a problem nobody has talked to her about yet
+    const history = await openMathildaOnBilingual(page)
+
+    // Every read from here on held, so the one her reply sets off is still in flight when the chat closes
+    const release = history.hold()
+
+    // An argument put to her
+    await sendTurn(page, ARGUED)
+
+    // Her reply
+    await expect(transcriptOf(page)).toContainText(SCRIPTED_REPLIES[0]!, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Still taking arguments while the list of conversations is read again behind it
+    await expect(page.locator('textarea')).toBeVisible()
+
+    // The chat, closed straight away
+    await closeChat(page)
+
+    // And opened again
+    await page.getByRole('button', { name: MATHILDA_NAME, exact: true }).click()
+
+    // Taking no argument while it cannot yet tell which conversation it is carrying on
+    await expect(page.getByRole('dialog')).toContainText(chatCopy.libraryLoading)
+    await expect(page.locator('textarea')).toHaveCount(0)
+
+    // The list of conversations read at last
+    release()
+
+    // Carrying on the one just held
+    await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
+
+    // And taking the next argument
+    await expect(page.locator('textarea')).toBeVisible()
+  })
+
+  test('opens again on the newer of two conversations, the second closed before the list was read again', async ({
+    page,
+  }) => {
+    // A conversation with Mathilda about a problem nobody has talked to her about yet
+    const history = await openMathildaOnBilingual(page)
+
+    // An argument put to her
+    await sendTurn(page, ARGUED)
+
+    // Saved, and listed among the problem's conversations once the list has been read again
+    await expect(page.getByRole('button', { name: chatCopy.history })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // A second conversation beside it
+    await page.getByRole('button', { name: chatCopy.newDefense }).click()
+
+    // Every read from here on held, so the one the second reply sets off is still in flight when the chat closes
+    const release = history.hold()
+
+    // What the second one argues
+    const secondArgument = 'Pairing the numbers up leaves the second player a reply to every move.'
+
+    // Put to her
+    await sendTurn(page, secondArgument)
+
+    // And answered
+    await expect(transcriptOf(page)).toContainText(SCRIPTED_REPLIES[0]!, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The chat, closed straight away
+    await closeChat(page)
+
+    // And opened again
+    await page.getByRole('button', { name: MATHILDA_NAME, exact: true }).click()
+
+    // The list of conversations read at last
+    release()
+
+    // Carrying on the second conversation
+    await expect(transcriptOf(page)).toContainText(secondArgument, { timeout: SETTLE_TIMEOUT_MS })
+  })
+
+  test('opens again on the conversation in hand when the list of them cannot be read again', async ({
+    page,
+  }) => {
+    // A clock the spec can walk forward, so the list read with the conversation can grow old
+    await page.clock.install()
+
+    // A conversation with Mathilda about a problem nobody has talked to her about yet
+    await openMathildaOnBilingual(page)
+
+    // An argument put to her
+    await sendTurn(page, ARGUED)
+
+    // Saved, and listed among the problem's conversations once the list has been read again
+    await expect(page.getByRole('button', { name: chatCopy.history })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The chat, closed
+    await closeChat(page)
+
+    // Registered after the backend standing in behind it, which is what puts this one first
+    await page.route(SESSION_LIST_ADDRESS, async (route) => {
+      // An aborted connection is what a student sees when nothing is there to answer them
+      await route.abort('connectionrefused')
+    })
+
+    // Long enough for the list in hand to count as old, so opening the chat reads it again
+    await page.clock.fastForward('01:00')
+
+    // And opened again
+    await page.getByRole('button', { name: MATHILDA_NAME, exact: true }).click()
+
+    // On the conversation the list in hand holds, the new read never getting through
+    await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
+  })
+
+  test('says so when the list a reopened chat waits on cannot be read, and opens on the conversation once it can', async ({
+    page,
+  }) => {
+    // A conversation with Mathilda about a problem nobody has talked to her about yet
+    const history = await openMathildaOnBilingual(page)
+
+    // Every read from here on held, so the one her reply sets off is still in flight when the chat closes
+    const release = history.hold()
+
+    // An argument put to her
+    await sendTurn(page, ARGUED)
+
+    // Her reply
+    await expect(transcriptOf(page)).toContainText(SCRIPTED_REPLIES[0]!, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The chat, closed straight away
+    await closeChat(page)
+
+    // The gate let go, leaving the outage below as what every later read meets
+    release()
+
+    // Whether the list can be read, which it cannot until the test says so
+    let isListReachable = false
+
+    // Registered after the gate in front of the backend, which is what puts this one first
+    await page.route(SESSION_LIST_ADDRESS, async (route) => {
+      // Once reachable, on to the backend behind this
+      if (isListReachable) {
+        await route.fallback()
+        return
+      }
+
+      // An aborted connection is what a student sees when nothing is there to answer them
+      await route.abort('connectionrefused')
+    })
+
+    // The chat, opened again
+    await page.getByRole('button', { name: MATHILDA_NAME, exact: true }).click()
+
+    // Saying so once the read gives up
+    await expect(page.getByRole('dialog')).toContainText(chatCopy.conversationUnavailable, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The list reachable again
+    isListReachable = true
+
+    // And asked for again
+    await page.getByRole('dialog').getByRole('button', { name: actionsCopy.retry }).click()
+
+    // Carrying on the one just held
+    await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
+  })
+
+  test('opens again straight on the conversation just held, once the list of them has been read again', async ({
+    page,
+  }) => {
+    // A conversation with Mathilda about a problem nobody has talked to her about yet
+    await openMathildaOnBilingual(page)
+
+    // An argument put to her
+    await sendTurn(page, ARGUED)
+
+    // Saved, and listed among the problem's conversations once the list has been read again
+    await expect(page.getByRole('button', { name: chatCopy.history })).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The chat, closed
+    await closeChat(page)
+
+    // And opened again, on the list in hand, which already holds it
+    await page.getByRole('button', { name: MATHILDA_NAME, exact: true }).click()
+
+    // Carrying on the one just held
+    await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
+
+    // And taking the next argument
+    await expect(page.locator('textarea')).toBeVisible()
+  })
+
+  test('waits for the connection before opening on a list known to miss the conversation just held', async ({
+    page,
+  }) => {
+    // A conversation with Mathilda about a problem nobody has talked to her about yet
+    const history = await openMathildaOnBilingual(page)
+
+    // Every read from here on held, so the one her reply sets off is still in flight when the chat closes
+    const release = history.hold()
+
+    // An argument put to her
+    await sendTurn(page, ARGUED)
+
+    // Her reply
+    await expect(transcriptOf(page)).toContainText(SCRIPTED_REPLIES[0]!, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The chat, closed straight away
+    await closeChat(page)
+
+    // Every later read let through the gate
+    release()
+
+    // The connection lost, which is what holds the next read back now
+    await page.context().setOffline(true)
+
+    // The chat, opened again
+    await page.getByRole('button', { name: MATHILDA_NAME, exact: true }).click()
+
+    // Taking no argument while it cannot yet tell which conversation it is carrying on
+    await expect(page.getByRole('dialog')).toContainText(chatCopy.libraryLoading)
+    await expect(page.locator('textarea')).toHaveCount(0)
+
+    // The connection back
+    await page.context().setOffline(false)
+
+    // Carrying on the one just held
+    await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
+
+    // And taking the next argument
+    await expect(page.locator('textarea')).toBeVisible()
   })
 
   test("writes a comment into a problem's discussion, and counts it on the problem's card", async ({

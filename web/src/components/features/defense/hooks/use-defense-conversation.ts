@@ -2,7 +2,7 @@
 
 import { useAuth } from '@clerk/nextjs'
 import { useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 
 import { invalidateCompetitionProblems } from '@/components/features/hosted-competitions/hooks/hosted-competition-cache'
 import { invalidateSelection } from '@/components/features/problem-selection/hooks/selection-cache'
@@ -20,6 +20,12 @@ import {
   type RewindOutcome,
   type SendOutcome,
 } from '../model/defense-conversation-model'
+import {
+  type DefenseHistoryRead,
+  type DefenseOpeningStatus,
+  type OpeningDecided,
+  resolveOpening,
+} from '../model/defense-opening'
 import type {
   DefenseLimits,
   DefenseOpening,
@@ -37,6 +43,20 @@ import { defenseSessionsQueryKey, invalidateDefenseLists } from './defense-cache
 const NOT_READY_OUTCOME = { kind: 'failed' as const, errorCode: undefined }
 
 /**
+ * How the read of a problem's saved conversations is going, as the query behind it reports it.
+ */
+type HistoryQueryState = {
+  /** The conversations the last read that got through came back with, undefined while none has. */
+  sessions: readonly DefenseSession[] | undefined
+  /** Whether the latest read gave up. */
+  isFailed: boolean
+  /** Whether a read is on its way. */
+  isFetching: boolean
+  /** Whether what is in hand is known to miss a write made since it was read. */
+  isOutdated: boolean
+}
+
+/**
  * The live defense conversation and the controls that drive it: the model's observable state and
  * actions, each documented at its home on {@link DefenseConversationState} and
  * {@link DefenseConversationModel}, plus this problem's session history.
@@ -46,18 +66,14 @@ type UseDefenseConversationResult = DefenseConversationState &
     DefenseConversationModel,
     'stop' | 'startNew' | 'resume' | 'setFeedback' | 'setReport' | 'clearReport'
   > & {
-    /** This problem's persisted sessions, oldest first. */
+    /** This problem's persisted sessions, most recently active first. */
     sessions: DefenseSession[]
     /** The caps a defense here is held to, or null until the history has been read. */
     limits: DefenseLimits | null
-    /**
-     * Whether the conversation asked for on open has had its chance to be resumed: the history has
-     * loaded and the resume has either happened or been passed over. A read that failed never settles
-     * it, and sessionsFailed is what says so.
-     */
-    initialResumeSettled: boolean
-    /** Whether loading this problem's session history failed. */
-    sessionsFailed: boolean
+    /** What is known of this problem's saved conversations. */
+    history: DefenseHistoryRead
+    /** Where the conversation the chat opens on stands, held from the moment it is decided. */
+    openingStatus: DefenseOpeningStatus
     /** Reads this problem's session history again after a failed read. */
     retrySessions: () => void
     /** Sends a student turn and folds in the examiner's reply. */
@@ -79,7 +95,7 @@ type UseDefenseConversationResult = DefenseConversationState &
  * keys itself on that target.
  *
  * @param problem - The problem being defended.
- * @param opening - Which conversation to open on; a named one this problem's history doesn't hold opens
+ * @param opening - Which conversation to open on; a named one this problem's history never turns up opens
  *   none.
  *
  * @returns The live conversation, its send flow, what the student says about it, and this problem's
@@ -125,6 +141,12 @@ export function useDefenseConversation(
     }
   }, [apiCall])
 
+  // Where this problem's persisted sessions are cached, under whoever is reading them
+  const sessionsQueryKey = defenseSessionsQueryKey(
+    problem.target,
+    isUserLoaded ? (userId ?? null) : null
+  )
+
   // This problem's persisted sessions
   const {
     data: sessionsData,
@@ -132,7 +154,7 @@ export function useDefenseConversation(
     isFetching: isFetchingSessions,
     retry: retrySessions,
   } = useApiQuery({
-    queryKey: defenseSessionsQueryKey(problem.target, isUserLoaded ? (userId ?? null) : null),
+    queryKey: sessionsQueryKey,
     fetch: (caller) => listSessions(caller, problem.target),
     // The reader's own conversations, so they are read as them
     requireAuth: true,
@@ -180,49 +202,40 @@ export function useDefenseConversation(
   // as the server-render snapshot
   const state = useSyncExternalStore(model.subscribe, model.getSnapshot, model.getSnapshot)
 
-  // Whether the one-time auto-resume has already run
-  const didAutoResume = useRef(false)
+  // What is known of this problem's saved conversations
+  const history = historyReadOf({
+    sessions: sessionsData?.sessions,
+    isFailed: sessionsState.kind === 'failed',
+    isFetching: isFetchingSessions,
+    isOutdated: queryClient.getQueryState(sessionsQueryKey)?.isInvalidated === true,
+  })
 
-  // Whether that resume has settled: the asked-for conversation is open, or known not to be coming
-  const [initialResumeSettled, setInitialResumeSettled] = useState(false)
+  // The opening once decided, held from then on so no later read of the history moves it
+  const [decidedOpening, setDecidedOpening] = useState<OpeningDecided | null>(null)
 
-  // Auto-resume a saved defense the first time this problem's history loads: the one the caller named, else the
-  // most recently active, so opening a problem you have defended before continues that conversation rather than
-  // a blank one.
-  // Runs once: afterwards the persisted model keeps wherever the student navigated, whether a fresh chat or a
-  // different session.
+  // Where the opening stands: as decided, or as what is known of the history decides it now
+  const openingStatus = decidedOpening ?? resolveOpening(opening, history)
+
+  // Carry on the decided conversation the moment there is one, so opening a problem you have defended before
+  // continues that conversation. Once only: afterwards the model keeps wherever the student navigated
   useEffect(() => {
-    // Nothing to do until a history has actually landed, and never more than once. A refresh that gave up
-    // leaves the old list in hand, and the session the caller named may be absent from it only because it
-    // is stale
-    if (didAutoResume.current || sessionsState.kind !== 'ready' || sessionsData === undefined) {
+    // Nothing to carry on until the opening is decided, and nothing more once it has been
+    if (decidedOpening !== null || openingStatus.kind !== 'decided') {
       return
     }
 
-    // The saved defense to open on, which a fresh opening deliberately has none of
-    const target = resumeTargetOf(opening, sessionsData.sessions)
-
-    // A named session missing from a list that is still being refreshed may yet arrive with it, so wait for the
-    // refreshed list rather than settling on a stale one
-    if (opening.kind === 'named' && target === undefined && isFetchingSessions) {
-      return
-    }
-
-    // Latch before resuming so this never runs a second time
-    didAutoResume.current = true
+    // Held, so the decision stands
+    setDecidedOpening(openingStatus)
 
     // The live conversation state
     const { currentSessionId, isThinking } = model.getSnapshot()
 
-    // Resume it only on an untouched fresh conversation: an open session or an in-flight turn means
-    // the student is mid-interaction and must not be pulled away
-    if (currentSessionId === null && !isThinking && target !== undefined) {
-      model.resume(target)
+    // Resume the decided conversation only over an untouched fresh one: an open session or an in-flight
+    // turn means the student is mid-interaction and must not be pulled away
+    if (currentSessionId === null && !isThinking && openingStatus.conversation !== null) {
+      model.resume(openingStatus.conversation)
     }
-
-    // Whatever the outcome, the conversation the caller asked for has had its chance to open
-    setInitialResumeSettled(true)
-  }, [sessionsData, sessionsState, isFetchingSessions, model, opening])
+  }, [decidedOpening, openingStatus, model])
 
   // Runs a model action against the ready services, or reports the shared not-ready failure when the
   // client is still loading or signed out. Every action's not-ready path collapses here. Stable across
@@ -269,8 +282,8 @@ export function useDefenseConversation(
     ...state,
     sessions: sessionsData?.sessions ?? [],
     limits: sessionsData?.limits ?? null,
-    initialResumeSettled,
-    sessionsFailed: sessionsState.kind === 'failed',
+    history,
+    openingStatus,
     retrySessions,
     send,
     stop: model.stop,
@@ -285,32 +298,33 @@ export function useDefenseConversation(
 }
 
 /**
- * Picks the saved conversation an opening asks for.
+ * Gathers how the read of a problem's saved conversations is going into what is known of them.
  *
- * @param opening - Which conversation the chat is opening on.
- * @param sessions - This problem's saved conversations, most recently active first.
+ * @param query - How the read is going, as the query behind it reports it.
  *
- * @returns The one to resume, or undefined when the opening wants none or the named one is not here.
+ * @returns What is known of the conversations.
  */
-function resumeTargetOf(
-  opening: DefenseOpening,
-  sessions: readonly DefenseSession[]
-): DefenseSession | undefined {
-  switch (opening.kind) {
-    // Continue where the student left off, which is what reopening a problem usually means
-    case 'newest':
-      return sessions[0]
+function historyReadOf(query: HistoryQueryState): DefenseHistoryRead {
+  // Nothing in hand, so either a read is still to come or it gave up
+  if (query.sessions === undefined) {
+    return query.isFailed ? { kind: 'unreadable' } : { kind: 'awaited' }
+  }
 
-    // Continue one in particular
-    case 'named':
-      return sessions.find((session) => session.id === opening.sessionId)
+  // A list in hand, whose newer read gave up
+  if (query.isFailed) {
+    return {
+      kind: 'inHand',
+      sessions: query.sessions,
+      isOutdated: query.isOutdated,
+      refresh: 'failed',
+    }
+  }
 
-    // Start over beside whatever is already saved
-    case 'fresh':
-      return undefined
-
-    // Every opening is handled above
-    default:
-      return assertNever(opening)
+  // A list in hand, with a newer read on its way or none asked for
+  return {
+    kind: 'inHand',
+    sessions: query.sessions,
+    isOutdated: query.isOutdated,
+    refresh: query.isFetching ? 'coming' : 'none',
   }
 }

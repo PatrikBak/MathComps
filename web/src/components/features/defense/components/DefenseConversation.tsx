@@ -17,7 +17,7 @@ import { useDefenseCopy } from '../hooks/use-defense-copy'
 import { useDefenseFeedback } from '../hooks/use-defense-feedback'
 import { useDefenseTurnControls } from '../hooks/use-defense-turn-controls'
 import { useMathildaConsent } from '../hooks/use-mathilda-consent'
-import { resolveComposerState, resolveHistoryStatus } from '../model/defense-composer-state'
+import { resolveComposerState } from '../model/defense-composer-state'
 import { draftTurn } from '../model/defense-conversation-model'
 import {
   defenseDraftStorageKey,
@@ -127,8 +127,8 @@ function DefenseConversationForTarget({
     isThinking,
     sessions,
     limits,
-    initialResumeSettled,
-    sessionsFailed,
+    history,
+    openingStatus,
     retrySessions,
     currentSessionId,
     currentFeedback,
@@ -201,19 +201,12 @@ function DefenseConversationForTarget({
   const canAnswer =
     canGiveFeedback && (shownTurns.length >= TURNS_WORTH_ANSWERING_FOR || currentFeedback !== null)
 
-  // Whether the conversation asked for on open has had its chance to be opened, which only a named
-  // opening waits on: no other kind names a conversation a turn could land in the wrong one of
-  const isResumeSettled = opening.kind !== 'named' || initialResumeSettled
-
   // How many more messages the conversation has room for, or null while the caps are unknown. One still in
   // flight counts against it: it is written the moment it's sent, whatever the examiner then makes of it
   const messagesLeft =
     limits === null
       ? null
       : limits.maxMessagesPerDefense - shownTurns.filter((turn) => turn.role === 'candidate').length
-
-  // Where this problem's defense history stands, the read's own failure included
-  const historyStatus = resolveHistoryStatus({ limits, isError: sessionsFailed })
 
   // Whether a fresh defense would have anything to be argued against
   const canStartFresh = isSubjectReachable(problem.target, locale)
@@ -377,8 +370,8 @@ function DefenseConversationForTarget({
             isAuthSettled: isAuthLoaded,
             // Undefined until the account settles, which `isAuthSettled` is the answer to
             isSignedIn: isSignedIn === true,
-            historyStatus,
-            isResumeSettled,
+            history: history.kind,
+            opening: openingStatus.kind,
             consentStatus: consent.status,
             isThinking,
             messagesLeft,
