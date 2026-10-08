@@ -2,8 +2,11 @@ import type { StoredTurn } from '@/components/features/defense/model/defense-typ
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { Locale } from '@/i18n/i18n'
 
+/** Every area a proposal can be filed under. */
+export const PROPOSAL_AREAS = ['algebra', 'combinatorics', 'geometry', 'numberTheory'] as const
+
 /** One area a proposal is filed under. */
-export type ProposalArea = 'algebra' | 'combinatorics' | 'geometry' | 'numberTheory'
+export type ProposalArea = (typeof PROPOSAL_AREAS)[number]
 
 /** The language most proposals are authored in. */
 export const PROPOSAL_AUTHORING_LANGUAGE = 'en' as const satisfies Locale
@@ -43,6 +46,45 @@ export type Proposal = {
 }
 
 /**
+ * One paper on a board: a named run of numbered slots.
+ */
+export type Paper = {
+  /** Identity of the paper. */
+  id: string
+  /** What the paper is called. */
+  name: string
+  /** The MathComps category the paper fills, null for a paper outside the categories, which no round takes. */
+  category: HostedCompetitionCategory | null
+  /** The problem in each slot, by id, null where the slot stands empty. */
+  slots: (string | null)[]
+}
+
+/**
+ * The rounds a board was finalized into.
+ */
+type Finalization = {
+  /** The name of the cycle whose rounds took the papers, in the language the site is read in. */
+  cycleName: string
+  /** When those rounds open, as an ISO-8601 string; the board leaves the selection once they do. */
+  opensAt: string
+}
+
+/**
+ * One board of the selection: a named set of papers whose slots are filled from the pool, tied to no cycle
+ * until it is finalized into one.
+ */
+export type Board = {
+  /** Identity of the board. */
+  id: string
+  /** What the board is called. */
+  name: string
+  /** Its papers, in the order the board sets them out. */
+  papers: Paper[]
+  /** The rounds it was finalized into, null while it is still a draft. */
+  finalization: Finalization | null
+}
+
+/**
  * A summary of one reviewer's conversation with Mathilda about a proposal, whose full text is a
  * {@link ReviewTranscript}.
  */
@@ -77,6 +119,8 @@ export type ReviewTranscript = {
 export type SelectionData = {
   /** Every proposal still in the selection, the set-aside and used ones included, lowest number first. */
   proposals: Proposal[]
+  /** Every board still in the selection, oldest first. */
+  boards: Board[]
   /** Every conversation about a proposal still in the selection, newest first. */
   conversations: ReviewConversation[]
 }

@@ -5,10 +5,10 @@ import { createContext, type ReactNode, use, useMemo } from 'react'
 import { CommentCountProvider } from '@/components/features/comments/components/CommentCountContext'
 
 import {
+  type LoadedSelection,
   type SelectionWorkspace,
   useSelectionWorkspaceState,
 } from '../hooks/use-selection-workspace-state'
-import type { SelectionIndex } from '../model/selection-state'
 
 /** The selection's shared state, null outside a provider. */
 const SelectionWorkspaceContext = createContext<SelectionWorkspace | null>(null)
@@ -68,7 +68,7 @@ export function useSelectionWorkspace(): SelectionWorkspace {
  *
  * @returns The loaded selection.
  */
-export function useLoadedSelection(): SelectionIndex {
+export function useLoadedSelection(): LoadedSelection {
   // The selection, if its read has landed
   const { selection } = useSelectionWorkspace()
 

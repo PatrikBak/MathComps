@@ -8,6 +8,9 @@ export const OPEN_PROPOSAL_PARAM = 'problem'
 /** The query parameter naming the tab a problem opens on. */
 const DETAIL_TAB_PARAM = 'tab'
 
+/** Every query parameter the problem open over the pool owns. */
+export const PROPOSAL_PARAMS = [OPEN_PROPOSAL_PARAM, DETAIL_TAB_PARAM] as const
+
 /** The tabs of a problem's page, the first being the one a problem opens on by default. */
 export const DETAIL_TABS = ['conversations', 'comments'] as const
 

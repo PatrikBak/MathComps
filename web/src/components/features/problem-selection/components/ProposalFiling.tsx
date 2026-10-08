@@ -11,10 +11,11 @@ import { localeCodeList } from '@/i18n/i18n'
 import { useAreaName } from '../hooks/use-area-name'
 import { useDetailTabCounts } from '../hooks/use-detail-tab-counts'
 import type { DetailTab } from '../model/selection-routes'
-import { unreadyLanguages, unwrittenLanguages } from '../model/selection-state'
+import { placementsOf, unreadyLanguages, unwrittenLanguages } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
-import { RecommendedMarks, WARNING_MARK_CLASS } from './CategoryMarks'
+import { PlacementMark, RecommendedMarks, WARNING_MARK_CLASS } from './CategoryMarks'
 import { ProposalLink } from './SelectionLinks'
+import { useLoadedSelection } from './SelectionWorkspaceProvider'
 
 /** The icon in front of each tab's count. */
 const COUNT_ICONS: Record<DetailTab, ReactNode> = {
@@ -33,8 +34,8 @@ type ProposalFilingProps = {
 }
 
 /**
- * One line saying what a problem is filed under, whether it is on offer, what it still lacks and, where asked, how
- * much it has been talked about.
+ * One line saying what a problem is filed under, where it sits, whether it is on offer, what it still lacks and,
+ * where asked, how much it has been talked about.
  */
 export function ProposalFiling({ proposal, showCounts }: ProposalFilingProps) {
   // Filing-line copy
@@ -42,6 +43,12 @@ export function ProposalFiling({ proposal, showCounts }: ProposalFilingProps) {
 
   // What each area is called
   const areaName = useAreaName()
+
+  // Every board
+  const { boards } = useLoadedSelection()
+
+  // Every slot the problem fills, across every board
+  const placements = placementsOf(boards, proposal.id)
 
   // The languages nothing of the problem can be read in
   const unwritten = unwrittenLanguages(proposal)
@@ -56,6 +63,14 @@ export function ProposalFiling({ proposal, showCounts }: ProposalFilingProps) {
 
       {/* The problem's area */}
       <Chip className="border-transparent py-px leading-4 sm:py-px">{areaName(proposal.area)}</Chip>
+
+      {/* Every slot the problem fills */}
+      {placements.map((placement) => (
+        <PlacementMark
+          key={`${placement.board.id}-${placement.paper.id}-${placement.index}`}
+          placement={placement}
+        />
+      ))}
 
       {/* A note for a problem the reviewers set aside */}
       {proposal.isSetAside && <FilingWarning>{t('setAside')}</FilingWarning>}

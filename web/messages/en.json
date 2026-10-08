@@ -1252,6 +1252,17 @@
       "geometry": "Geometry",
       "numberTheory": "Number theory"
     },
+    "board": {
+      "draft": "Draft",
+      "empty": "Empty",
+      "finalized": "Finalized",
+      "fold": "Fold the board",
+      "label": "Board",
+      "missingLanguages": "No statement or solution in {languages}",
+      "none": "No board yet.",
+      "progress": "{filled} of {total}",
+      "unfold": "Unfold the board"
+    },
     "comments": {
       "placeholder": "What do you think of it, and where does it fit?"
     },
@@ -1277,14 +1288,27 @@
       "unwritten": "no {languages}",
       "used": "used in a round"
     },
+    "filters": {
+      "any": "Any",
+      "area": "Area",
+      "category": "Category",
+      "notSelected": "Not selected",
+      "setAside": "Set aside {count}"
+    },
     "goToSelection": "Open in the problem selection",
     "language": {
       "label": "Language",
       "unwritten": "Not written yet"
     },
     "pool": {
+      "empty": "No problem matches these filters.",
       "emptyPool": "No problems here yet.",
-      "loading": "Loading the pool"
+      "emptySetAside": "Nothing is set aside.",
+      "emptySetAsideFiltered": "No set-aside problem matches these filters.",
+      "loading": "Loading the pool",
+      "search": "Search the pool",
+      "searchPlaceholder": "Number, name or text",
+      "setAsideCount": "{count, plural, one {# problem set aside} other {# problems set aside}}"
     },
     "text": {
       "fallback": "Not in {missing} yet, showing {shown}.",
@@ -1427,6 +1451,7 @@
     "filters": {
       "apply": "Apply Filters",
       "clear": "Clear",
+      "clearFilters": "Clear filters",
       "clearSearch": "Clear search in {name}",
       "close": "Close filters",
       "closePopover": "Close selection",

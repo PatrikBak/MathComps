@@ -1,7 +1,25 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveText, unreadyLanguages } from '../selection-state'
-import type { Proposal } from '../selection-types'
+import { pickActiveBoard, resolveText, unreadyLanguages } from '../selection-state'
+import type { Board, Proposal } from '../selection-types'
+
+/**
+ * A board holding no papers.
+ *
+ * @param id - The board's id, doubling as its name.
+ * @param isFinalized - Whether it has been finalized into a cycle's rounds.
+ *
+ * @returns The board.
+ */
+function board(id: string, isFinalized = false): Board {
+  // The board, finalized into October's rounds when asked
+  return {
+    id,
+    name: id,
+    papers: [],
+    finalization: isFinalized ? { cycleName: 'October', opensAt: '2026-10-18T22:00:00Z' } : null,
+  }
+}
 
 /**
  * A proposal holding the given texts and nothing else of note.
@@ -84,5 +102,40 @@ describe('resolveText', () => {
     // Czech stands in, coming before English
     expect(resolved?.language).toBe('cs')
     expect(resolved?.text.statement).toBe('cs')
+  })
+})
+
+describe('pickActiveBoard', () => {
+  it('keeps the picked board on screen over a draft', () => {
+    // A finalized board ahead of a draft
+    const boards = [board('round', true), board('draft')]
+
+    // The finalized board picked
+    const active = pickActiveBoard(boards, 'round')
+
+    // The finalized board stays on screen, though a draft waits
+    expect(active?.id).toBe('round')
+  })
+
+  it('falls back to the first draft once the picked board is gone', () => {
+    // A finalized board ahead of a draft
+    const boards = [board('round', true), board('draft')]
+
+    // Picked a board the selection no longer holds
+    const active = pickActiveBoard(boards, 'gone')
+
+    // The draft goes on screen, the finalized board being passed over
+    expect(active?.id).toBe('draft')
+  })
+
+  it('takes the first board when every board is finalized', () => {
+    // Every board finalized
+    const boards = [board('first', true), board('second', true)]
+
+    // Nothing picked
+    const active = pickActiveBoard(boards, null)
+
+    // The first one goes on screen
+    expect(active?.id).toBe('first')
   })
 })

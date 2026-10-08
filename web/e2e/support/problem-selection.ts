@@ -6,7 +6,10 @@ import type {
   CommentTargetType,
 } from '@/components/features/comments/services/comment-api-types'
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
+import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type {
+  Board,
+  Paper,
   Proposal,
   ReviewConversation,
   ReviewTranscript,
@@ -110,13 +113,45 @@ export const BILINGUAL = proposalNumbered(2, {
 export const UNWRITTEN = proposalNumbered(9, { texts: {} })
 
 /** The pool's first problem. */
-const FIRST = proposalNumbered(1)
+export const FIRST = proposalNumbered(1)
 
 /** The problem the reviewers have set aside. */
 export const SET_ASIDE = proposalNumbered(3, { isSetAside: true })
 
-/** The problem a round has taken. */
-export const USED = proposalNumbered(7, { isUsed: true })
+/**
+ * A problem's texts written and solved in every language, as a round needs them.
+ *
+ * @param number - The number of the problem they belong to.
+ *
+ * @returns The texts.
+ */
+function textsInEveryLanguage(number: number): Proposal['texts'] {
+  // A statement and a solution in each language
+  return {
+    en: {
+      statement: statementOf(number),
+      solution: 'Pair every number with the next one.',
+      hints: [],
+    },
+    sk: { statement: 'Hra so zotieraním čísel.', solution: 'Spárujte susedné čísla.', hints: [] },
+    cs: { statement: 'Hra se škrtáním čísel.', solution: 'Spárujte sousední čísla.', hints: [] },
+  }
+}
+
+/** A problem written and solved in every language, which no round would refuse. */
+export const READY = proposalNumbered(5, { texts: textsInEveryLanguage(5) })
+
+/** The pool's one geometry problem, recommended for the advanced category alone. */
+export const GEOMETRY = proposalNumbered(6, { area: 'geometry', recommended: ['advanced'] })
+
+/** The problem a round has taken, written and solved in every language as the round needed it. */
+export const USED = proposalNumbered(7, { isUsed: true, texts: textsInEveryLanguage(7) })
+
+/** The pool's one algebra problem, recommended for the elementary category and the intermediate one. */
+export const ALGEBRA = proposalNumbered(8, {
+  area: 'algebra',
+  recommended: ['elementary', 'intermediate'],
+})
 
 /** Every problem the selection holds, lowest number first, {@link SET_ASIDE} and {@link USED} among them. */
 const SELECTION: Proposal[] = [
@@ -124,15 +159,104 @@ const SELECTION: Proposal[] = [
   BILINGUAL,
   SET_ASIDE,
   OPENED,
-  proposalNumbered(5),
-  proposalNumbered(6),
+  READY,
+  GEOMETRY,
   USED,
-  proposalNumbered(8),
+  ALGEBRA,
   UNWRITTEN,
 ]
 
 /** How many problems the pool offers: every one in the selection neither set aside nor taken by a round. */
 export const ON_OFFER_COUNT = 7
+
+/**
+ * One paper on a board, its slots naming their problems by id as the backend sends them.
+ *
+ * @param index - Which of the fake's papers it is, which its id is built from.
+ * @param name - What the paper is called.
+ * @param category - The category it fills; null for a paper outside the categories.
+ * @param slots - The problem in each slot, null where the slot stands empty.
+ *
+ * @returns The paper.
+ */
+function paperOf(
+  index: number,
+  name: string,
+  category: HostedCompetitionCategory | null,
+  slots: (Proposal | null)[]
+): Paper {
+  // The paper, its id built from its index so every paper gets its own
+  return {
+    id: `00000000-0000-4000-8000-a${String(index).padStart(11, '0')}`,
+    name,
+    category,
+    slots: slots.map((proposal) => proposal?.id ?? null),
+  }
+}
+
+/**
+ * A board finalized into October's rounds, the oldest one. Its paper's slots are what the round took, so
+ * {@link USED} is there and no slot stands empty, the way the backend reads a finalized board off its rounds.
+ */
+export const FINALIZED_BOARD: Board = {
+  id: '00000000-0000-4000-8000-b00000000001',
+  name: 'October 2026',
+  papers: [paperOf(1, 'Elementary', 'elementary', [USED])],
+  finalization: { cycleName: 'October', opensAt: '2026-10-18T22:00:00+00:00' },
+}
+
+/** The first draft: {@link FIRST} in E1, {@link READY} in I2, and the advanced paper still empty. */
+export const DRAFT_BOARD: Board = {
+  id: '00000000-0000-4000-8000-b00000000002',
+  name: 'November 2026',
+  papers: [
+    paperOf(2, 'Elementary', 'elementary', [FIRST, null, null]),
+    paperOf(3, 'Intermediate', 'intermediate', [null, READY, null]),
+    paperOf(4, 'Advanced', 'advanced', [null, null, null]),
+  ],
+  finalization: null,
+}
+
+/**
+ * A draft after {@link DRAFT_BOARD}: {@link READY}, which that board holds too, {@link GEOMETRY}, and
+ * {@link SET_ASIDE} in a paper outside the categories.
+ */
+export const LATER_DRAFT: Board = {
+  id: '00000000-0000-4000-8000-b00000000003',
+  name: 'December 2026',
+  papers: [
+    paperOf(5, 'Elementary', 'elementary', [READY, null]),
+    paperOf(6, 'Advanced', 'advanced', [GEOMETRY, null]),
+    paperOf(7, 'Spare', null, [null, SET_ASIDE]),
+  ],
+  finalization: null,
+}
+
+/** The boards most replies hold, oldest first as the backend sends them, the finalized one ahead of the drafts. */
+const BOARDS: Board[] = [FINALIZED_BOARD, DRAFT_BOARD, LATER_DRAFT]
+
+/** A draft older than {@link LATER_DRAFT} whose one paper is full, {@link READY} in it, ready to be finalized. */
+export const FULL_DRAFT: Board = {
+  id: '00000000-0000-4000-8000-b00000000004',
+  name: 'Autumn 2026',
+  papers: [paperOf(8, 'Elementary', 'elementary', [READY])],
+  finalization: null,
+}
+
+/** {@link FULL_DRAFT} finalized into November's rounds, its slot now the round's problem. */
+const FULL_DRAFT_FINALIZED: Board = {
+  ...FULL_DRAFT,
+  finalization: { cycleName: 'November', opensAt: '2026-11-15T23:00:00+00:00' },
+}
+
+/** {@link LATER_DRAFT} once {@link FULL_DRAFT}'s round has taken {@link READY}, which leaves every draft it stood on. */
+const LATER_DRAFT_WITHOUT_READY: Board = {
+  ...LATER_DRAFT,
+  papers: LATER_DRAFT.papers.map((paper) => ({
+    ...paper,
+    slots: paper.slots.map((slot) => (slot === READY.id ? null : slot)),
+  })),
+}
 
 /** {@link OPENED} as its author revised it, with a paragraph added at the end. */
 const REVISED = proposalNumbered(OPENED.number, {
@@ -322,15 +446,20 @@ function heldConversations(memory: SelectionMemory, proposals: Proposal[]): Held
 }
 
 /**
- * The selection as the backend reads it: the problems, and every conversation held about them in the shape the
- * list of them takes.
+ * The selection as the backend reads it: the problems, the boards, and every conversation held about the problems
+ * in the shape the list of them takes.
  *
  * @param memory - What the backend keeps.
  * @param proposals - Every problem the selection holds.
+ * @param boards - Every board the selection holds, oldest first.
  *
  * @returns The selection.
  */
-function selectionOf(memory: SelectionMemory, proposals: Proposal[]): SelectionData {
+function selectionOf(
+  memory: SelectionMemory,
+  proposals: Proposal[],
+  boards: Board[]
+): SelectionData {
   // Each conversation listed, with how much was said and whether the statement it was argued against is
   // gone from the problem in every language
   const conversations = heldConversations(memory, proposals).map(
@@ -350,9 +479,10 @@ function selectionOf(memory: SelectionMemory, proposals: Proposal[]): SelectionD
     })
   )
 
-  // The problems, and the conversations newest first
+  // The problems, the boards, and the conversations newest first
   return {
     proposals,
+    boards,
     conversations: conversations.sort((first, second) =>
       second.startedAt.localeCompare(first.startedAt)
     ),
@@ -369,6 +499,10 @@ type SelectionReply =
   | 'later'
   /** With every problem in the selection, one of them revised in English, and the conversations about them. */
   | 'revisedInEnglish'
+  /** With every problem in the selection, and {@link FULL_DRAFT} ahead of {@link LATER_DRAFT} as the only boards. */
+  | 'fullDraft'
+  /** With {@link FULL_DRAFT} finalized meanwhile, its round having taken {@link READY}. */
+  | 'fullDraftFinalized'
   /** Refused with the code an account that does not prepare competitions earns. */
   | 'forbidden'
   /** Refused for good with no code at all, as an address the backend does not serve is. */
@@ -385,9 +519,16 @@ function proposalsHeldAt(reply: SelectionReply): Proposal[] {
   switch (reply) {
     // Every problem as first read, which a refusal or a failure of the read leaves as it stands
     case 'selection':
+    case 'fullDraft':
     case 'forbidden':
     case 'failure':
       return SELECTION
+
+    // Every problem as first read, but for the ready one, which the full draft's round has taken
+    case 'fullDraftFinalized':
+      return SELECTION.map((proposal) =>
+        proposal === READY ? { ...READY, isUsed: true } : proposal
+      )
 
     // Every problem as a later read finds them, one revised and another set aside
     case 'later':
@@ -396,6 +537,37 @@ function proposalsHeldAt(reply: SelectionReply): Proposal[] {
     // Every problem as first read, but for the one revised in English
     case 'revisedInEnglish':
       return SELECTION.map((proposal) => (proposal === BILINGUAL ? BILINGUAL_REVISED : proposal))
+
+    // Every reply is handled above
+    default:
+      return assertNever(reply)
+  }
+}
+
+/**
+ * Every board the backend holds while it answers the selection's read a given way.
+ *
+ * @param reply - How the read is answered.
+ *
+ * @returns The boards, oldest first.
+ */
+function boardsHeldAt(reply: SelectionReply): Board[] {
+  switch (reply) {
+    // The finalized board and the drafts after it, however the problems stand
+    case 'selection':
+    case 'later':
+    case 'revisedInEnglish':
+    case 'forbidden':
+    case 'failure':
+      return BOARDS
+
+    // The full draft, ahead of the later one
+    case 'fullDraft':
+      return [FULL_DRAFT, LATER_DRAFT]
+
+    // The full draft finalized, still ahead of the later one, which its problem has left
+    case 'fullDraftFinalized':
+      return [FULL_DRAFT_FINALIZED, LATER_DRAFT_WITHOUT_READY]
 
     // Every reply is handled above
     default:
@@ -466,11 +638,17 @@ export async function stubSelection(
   await page.route(SELECTION_ENDPOINT, async (route) => {
     // Answered the way the test last asked for
     switch (reply) {
-      // Every problem the reply holds, with the conversations held about them
+      // Every problem and board the reply holds, with the conversations held about the problems
       case 'selection':
       case 'later':
       case 'revisedInEnglish':
-        return answerJson(route, 200, selectionOf(memory, proposalsHeldAt(reply)))
+      case 'fullDraft':
+      case 'fullDraftFinalized':
+        return answerJson(
+          route,
+          200,
+          selectionOf(memory, proposalsHeldAt(reply), boardsHeldAt(reply))
+        )
 
       // Refused, in the shape the backend writes an authorization failure as
       case 'forbidden':

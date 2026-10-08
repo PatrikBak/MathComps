@@ -8,10 +8,12 @@ import { cachePolicy, hasFailedForGood } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import { indexSelection, type SelectionIndex } from '../model/selection-state'
-import type { SelectionData } from '../model/selection-types'
+import type { Board, SelectionData } from '../model/selection-types'
 import { getSelection } from '../services/selection-service'
 import { useSelectionQueryKey } from './selection-cache'
+import { useBoardPicking, type UseBoardPickingResult } from './use-board-picking'
 import { useOpenProposal, type UseOpenProposalResult } from './use-open-proposal'
+import { usePoolFilters, type UsePoolFiltersResult } from './use-pool-filters'
 
 /**
  * How often the selection is read again while the page is in view, so it keeps up with the other reviewers.
@@ -19,16 +21,28 @@ import { useOpenProposal, type UseOpenProposalResult } from './use-open-proposal
 const SELECTION_REFRESH_MS = 30 * SECOND_MS
 
 /**
- * What every part of the selection shares: the read, and the problem open in full.
+ * The selection once its read has landed, with the board on screen.
  */
-export type SelectionWorkspace = UseOpenProposalResult & {
-  /** How far the read of the selection has got. */
-  uiState: QueryUiState
-  /** Reads the selection again after the read gave up. */
-  retry: () => void
-  /** The selection; null until its read lands. */
-  selection: SelectionIndex | null
+export type LoadedSelection = SelectionIndex & {
+  /** The board on screen; null when the selection holds no board. */
+  activeBoard: Board | null
 }
+
+/**
+ * What every part of the selection shares: the read, the problem open in full, what the pool is narrowed to, and
+ * the way to put another board on screen.
+ */
+export type SelectionWorkspace = UseOpenProposalResult &
+  Omit<UseBoardPickingResult, 'activeBoard'> & {
+    /** How far the read of the selection has got. */
+    uiState: QueryUiState
+    /** Reads the selection again after the read gave up. */
+    retry: () => void
+    /** The selection; null until its read lands. */
+    selection: LoadedSelection | null
+    /** What the pool is narrowed to, and the ways of changing it. */
+    poolFilters: UsePoolFiltersResult
+  }
 
 /**
  * The selection's shared state, read in one go: every part draws from the same read, so opening a problem
@@ -57,8 +71,20 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   // The problem open in full, and the ways in and out of it
   const { openProposalId, openProposal, closeProposal } = useOpenProposal()
 
+  // What the pool is narrowed to, and the ways of changing it
+  const poolFilters = usePoolFilters()
+
   // The selection with its lookups by proposal, rebuilt only when a new read lands
-  const selection = useMemo(() => (data === undefined ? null : indexSelection(data)), [data])
+  const index = useMemo(() => (data === undefined ? null : indexSelection(data)), [data])
+
+  // The board being filled, and the way to put another on screen
+  const { activeBoard, selectBoard } = useBoardPicking(index?.boards ?? [])
+
+  // The selection with the board on screen, once the read has landed
+  const selection = useMemo(
+    () => (index === null ? null : { ...index, activeBoard }),
+    [index, activeBoard]
+  )
 
   // Everything the parts share, held steady while none of it moves
   return useMemo(
@@ -69,7 +95,18 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       openProposalId,
       openProposal,
       closeProposal,
+      poolFilters,
+      selectBoard,
     }),
-    [uiState, retry, selection, openProposalId, openProposal, closeProposal]
+    [
+      uiState,
+      retry,
+      selection,
+      openProposalId,
+      openProposal,
+      closeProposal,
+      poolFilters,
+      selectBoard,
+    ]
   )
 }

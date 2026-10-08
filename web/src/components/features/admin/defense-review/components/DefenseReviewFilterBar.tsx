@@ -2,14 +2,11 @@
 
 import { useTranslations } from 'next-intl'
 
-import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import {
-  FACET_CONTROL_CLASS,
-  FACET_PILL_ACTIVE_CLASS,
-  FACET_PILL_CLASS,
-} from '@/components/shared/components/facets/components/FacetTrigger'
+  FacetClearButton,
+  FacetTogglePill,
+} from '@/components/shared/components/facets/components/FacetBarControls'
 import { MultiSelectFacet } from '@/components/shared/components/facets/components/MultiSelectFacet'
-import { cn } from '@/components/shared/utils/css-utils'
 
 import { useDefenseReviewFacetOptions } from '../hooks/use-defense-review-facet-options'
 import {
@@ -92,18 +89,12 @@ export function DefenseReviewFilterBar({
     <div className="flex flex-wrap items-center gap-2">
       {/* Unread only, dropped back out of the filter when toggled off,
           since false would ask for the read ones instead */}
-      <button
-        type="button"
-        onClick={() => onFieldChange('unread', filter.unread === true ? undefined : true)}
-        aria-pressed={filter.unread === true}
-        className={cn(
-          FACET_CONTROL_CLASS,
-          FACET_PILL_CLASS,
-          filter.unread === true && FACET_PILL_ACTIVE_CLASS
-        )}
+      <FacetTogglePill
+        isOn={filter.unread === true}
+        onToggle={() => onFieldChange('unread', filter.unread === true ? undefined : true)}
       >
         {t('filters.unread')}
-      </button>
+      </FacetTogglePill>
 
       {/* What the conversation carries, three of the filter's fields offered as one set of options */}
       <MultiSelectFacet
@@ -194,18 +185,7 @@ export function DefenseReviewFilterBar({
       />
 
       {/* The way back to showing everything, offered only once something is narrowing */}
-      {activeCount > 0 && (
-        <button
-          type="button"
-          onClick={onClearAll}
-          className={cn(
-            'shrink-0 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:text-foreground',
-            FOCUS_RING_CLASS
-          )}
-        >
-          {t('clearFilters')}
-        </button>
-      )}
+      {activeCount > 0 && <FacetClearButton onClear={onClearAll} />}
     </div>
   )
 }
