@@ -6,7 +6,7 @@ import { AppLink } from '@/components/shared/components/AppLink'
 import { isPlainClick } from '@/components/shared/utils/event-utils'
 import { ROUTES } from '@/i18n/i18n'
 
-import { proposalHref } from '../model/selection-routes'
+import { type DetailTab, proposalHref } from '../model/selection-routes'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
@@ -56,19 +56,21 @@ function SelectionLink({ href, onPlainClick, ...rest }: SelectionLinkProps) {
 type ProposalLinkProps = SelectionLinkBaseProps & {
   /** The problem the link opens. */
   proposalId: string
+  /** The tab the problem opens on; the first when left out. */
+  tab?: DetailTab
 }
 
 /**
  * A link that opens a problem in full without leaving the page.
  */
-export function ProposalLink({ proposalId, ...rest }: ProposalLinkProps) {
+export function ProposalLink({ proposalId, tab, ...rest }: ProposalLinkProps) {
   // A function which opens a problem in full over the pool
   const { openProposal } = useSelectionWorkspace()
 
   return (
     <SelectionLink
-      href={proposalHref(proposalId)}
-      onPlainClick={() => openProposal(proposalId)}
+      href={proposalHref({ proposalId, tab })}
+      onPlainClick={() => openProposal({ proposalId, tab })}
       {...rest}
     />
   )

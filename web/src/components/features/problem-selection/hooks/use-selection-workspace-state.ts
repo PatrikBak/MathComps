@@ -57,7 +57,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   // The problem open in full, and the ways in and out of it
   const { openProposalId, openProposal, closeProposal } = useOpenProposal()
 
-  // The selection with its proposals looked up by id, rebuilt only when a new read lands
+  // The selection with its lookups by proposal, rebuilt only when a new read lands
   const selection = useMemo(() => (data === undefined ? null : indexSelection(data)), [data])
 
   // Everything the parts share, held steady while none of it moves

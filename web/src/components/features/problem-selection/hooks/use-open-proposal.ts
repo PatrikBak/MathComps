@@ -8,7 +8,7 @@ import { dataAttribute } from '@/components/shared/utils/dom-utils'
 import { pushQuery } from '@/components/shared/utils/url-utils'
 import { OPEN_ID_ATTRIBUTE, useFocusReturn } from '@/hooks/use-focus-return'
 
-import { OPEN_PROPOSAL_PARAM, proposalQuery } from '../model/selection-routes'
+import { OPEN_PROPOSAL_PARAM, type ProposalPage, proposalQuery } from '../model/selection-routes'
 
 /** The attribute stamping a problem's id on its page's heading, which focus moves to as the problem opens. */
 export const PROPOSAL_HEADING_ATTRIBUTE = dataAttribute('data-proposal-heading')
@@ -19,8 +19,8 @@ export const PROPOSAL_HEADING_ATTRIBUTE = dataAttribute('data-proposal-heading')
 export type UseOpenProposalResult = {
   /** The problem open in full, by id; null while the pool shows. */
   openProposalId: string | null
-  /** Opens a problem in full; the one already open stays as it is. */
-  openProposal: (proposalId: string) => void
+  /** Opens a problem in full, on the tab asked for or else the first; the one already open stays as it is. */
+  openProposal: (page: ProposalPage) => void
   /** Goes back to the pool; the pool already showing stays as it is. */
   closeProposal: () => void
 }
@@ -156,15 +156,15 @@ export function useOpenProposal(): UseOpenProposalResult {
   })
 
   // A function which opens a problem
-  const openProposal = useCallback((proposalId: string) => {
+  const openProposal = useCallback((page: ProposalPage) => {
     // The asked-for problem open already, which another step in history would only repeat
-    if (addressedProposalId() === proposalId) return
+    if (addressedProposalId() === page.proposalId) return
 
     // The pool's spot kept by the problem's link, while the pool is what is painted
-    if (isPoolPaintedRef.current) poolSpotRef.current = poolSpotAt(proposalId)
+    if (isPoolPaintedRef.current) poolSpotRef.current = poolSpotAt(page.proposalId)
 
     // The problem's address, as a new step in history
-    pushQuery(proposalQuery(proposalId))
+    pushQuery(proposalQuery(page))
   }, [])
 
   // A function which goes back to the pool

@@ -100,3 +100,26 @@ export function parseMember<T extends string>(
   // Keep it only when it's an exact member of the set
   return allowed.includes(value as T) ? (value as T) : null
 }
+
+/**
+ * Splits a list into groups by a key, each group keeping the list's order. Map.groupBy does the same, but no
+ * browser older than Safari 17.4 has it and nothing here polyfills it.
+ *
+ * @param items - The list to split.
+ * @param keyOf - A function naming the group an item goes in.
+ *
+ * @returns Every group under its key, in the order the keys first appear.
+ */
+export function groupBy<TItem, TKey>(
+  items: readonly TItem[],
+  keyOf: (item: TItem) => TKey
+): Map<TKey, TItem[]> {
+  // Each item at the end of its group
+  return items.reduce((groups, item) => {
+    // The group the item goes in
+    const key = keyOf(item)
+
+    // The item added to it
+    return groups.set(key, [...(groups.get(key) ?? []), item])
+  }, new Map<TKey, TItem[]>())
+}

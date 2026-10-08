@@ -2,7 +2,7 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
 
-import type { DefenseTarget } from '../model/defense-target'
+import { type DefenseTarget, toWireTarget } from '../model/defense-target'
 import type { DefenseSession, DefenseSessionList } from '../model/defense-types'
 
 /** The root every defense query key hangs off, so one call can match them all. */
@@ -40,7 +40,7 @@ export function myDefensesQueryKey(userId: string | null, locale: string): Query
 }
 
 /**
- * The key every conversation list about one competition problem hangs off.
+ * The key every conversation list about one archive problem hangs off.
  *
  * The full key below adds the user, and {@link forgetCompetitionDefenseLists} matches on this much alone, so
  * both of them follow whatever this says.
@@ -51,7 +51,7 @@ export function myDefensesQueryKey(userId: string | null, locale: string): Query
  */
 function problemSessionsKeyPrefix(problemId: string): QueryKey {
   // The problem, under the sessions root every defense list hangs off
-  return [...DEFENSE_QUERY_KEY, 'sessions', 'competition', problemId] as const
+  return [...DEFENSE_QUERY_KEY, 'sessions', 'problem', problemId] as const
 }
 
 /**
@@ -66,25 +66,29 @@ function problemSessionsKeyPrefix(problemId: string): QueryKey {
  * @returns The query key.
  */
 export function defenseSessionsQueryKey(target: DefenseTarget, userId: string | null): QueryKey {
-  switch (target.kind) {
+  // The target as the API names it, which the sessions are listed under
+  const wireTarget = toWireTarget(target)
+
+  // Each kind of target keys its sessions its own way
+  switch (wireTarget.kind) {
     // One key per user and handout environment
     case 'handout':
       return [
         ...DEFENSE_QUERY_KEY,
         'sessions',
         'handout',
-        target.environment.handoutContentId,
-        target.environment.environmentId,
+        wireTarget.handoutContentId,
+        wireTarget.environmentId,
         userId,
       ] as const
 
-    // One key per user and competition problem
-    case 'competition':
-      return [...problemSessionsKeyPrefix(target.problemId), userId] as const
+    // One key per user and archive problem
+    case 'problem':
+      return [...problemSessionsKeyPrefix(wireTarget.problemId), userId] as const
 
     // Every target is handled above
     default:
-      return assertNever(target)
+      return assertNever(wireTarget)
   }
 }
 

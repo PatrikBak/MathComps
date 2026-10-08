@@ -21,8 +21,8 @@ type ProposalCardProps = {
 }
 
 /**
- * A problem as a card: its number and working name, linking to it in full, what it is filed under, the statement
- * in full, and the hints and the solution side by side.
+ * A problem as a card: its number and working name, linking to it in full, what it is filed under and how much
+ * it has been talked about, the statement in full, and the hints and the solution side by side.
  */
 export function ProposalCard({ proposal, language }: ProposalCardProps) {
   return (
@@ -43,8 +43,8 @@ export function ProposalCard({ proposal, language }: ProposalCardProps) {
           </ProposalLink>
         </div>
 
-        {/* Filing line */}
-        <ProposalFiling proposal={proposal} />
+        {/* Filing line, with the conversation and comment counts */}
+        <ProposalFiling proposal={proposal} showCounts />
       </header>
 
       {/* The statement, always open */}

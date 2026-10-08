@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { namesTheSameItems, namesTheSameItemsInOrder } from '../collection-utils'
+import { groupBy, namesTheSameItems, namesTheSameItemsInOrder } from '../collection-utils'
 
 describe('namesTheSameItems', () => {
   /** Two empty lists name nothing, which is the same nothing. */
@@ -48,5 +48,21 @@ describe('namesTheSameItemsInOrder', () => {
   it('fails on a repeat that lengthens one side', () => {
     // Compare a list repeating an item against one naming it once
     expect(namesTheSameItemsInOrder(['alpha', 'alpha'], ['alpha'])).toBe(false)
+  })
+})
+
+describe('groupBy', () => {
+  it('files each item under its key, keeping the order the list had', () => {
+    // Words grouped by their first letter
+    const groups = groupBy(
+      ['apple', 'banana', 'avocado', 'blueberry', 'apricot'],
+      (word) => word[0]
+    )
+
+    // Each group in the list's order, the groups in the order their keys first appeared
+    expect([...groups]).toEqual([
+      ['a', ['apple', 'avocado', 'apricot']],
+      ['b', ['banana', 'blueberry']],
+    ])
   })
 })

@@ -53,18 +53,22 @@ export function listSessions(
   apiCall: ApiCaller,
   target: DefenseTarget
 ): Promise<ApiResult<DefenseSessionList>> {
-  // Each arm has its own route, since one names a problem and the other a handout environment
+  // The target as the API names it, which settles which route lists its sessions
+  const wireTarget = toWireTarget(target)
+
+  // The target's sessions, read from its route
   return apiCall<DefenseSessionList>(() => {
-    switch (target.kind) {
-      // A competition problem is an archive problem, so its own id locates it
-      case 'competition':
-        return getProblemDefenseSessionsUrl(target.problemId)
+    // The route for the kind of target the sessions are held against
+    switch (wireTarget.kind) {
+      // An archive problem is located by its own id
+      case 'problem':
+        return getProblemDefenseSessionsUrl(wireTarget.problemId)
       // A handout environment takes the two content ids that locate it
       case 'handout':
-        return getDefenseSessionsUrl(target.environment)
+        return getDefenseSessionsUrl(wireTarget)
       // Every target is handled above
       default:
-        return assertNever(target)
+        return assertNever(wireTarget)
     }
   })
 }

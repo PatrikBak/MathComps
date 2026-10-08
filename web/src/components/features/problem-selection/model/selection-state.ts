@@ -1,28 +1,37 @@
+import { groupBy } from '@/components/shared/utils/collection-utils'
 import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
-import type { Proposal, ProposalText, SelectionData } from './selection-types'
+import type { Proposal, ProposalText, ReviewConversation, SelectionData } from './selection-types'
 
 /**
- * The selection with its proposals looked up by id.
+ * The selection as read, with its proposals and their conversations looked up by proposal id.
  */
 export type SelectionIndex = {
   /** Every proposal, by id. */
   proposalsById: ReadonlyMap<string, Proposal>
+  /** Every conversation about each proposal, by the proposal's id, newest first. */
+  conversationsByProposal: ReadonlyMap<string, ReviewConversation[]>
 }
 
 /**
- * The selection as it was read, with the lookup by proposal built.
+ * The selection as it was read, with the lookups by proposal built.
  *
  * @param data - The selection as it was read.
  *
- * @returns The selection with its lookup.
+ * @returns The selection with its lookups.
  */
 export function indexSelection(data: SelectionData): SelectionIndex {
   // Every proposal under its id
   const proposalsById = new Map(data.proposals.map((proposal) => [proposal.id, proposal]))
 
-  // The proposals, looked up by id
-  return { proposalsById }
+  // The conversations under the proposal each was about, keeping the read's newest-first order
+  const conversationsByProposal = groupBy(
+    data.conversations,
+    (conversation) => conversation.proposalId
+  )
+
+  // The lookups by proposal
+  return { proposalsById, conversationsByProposal }
 }
 
 /**

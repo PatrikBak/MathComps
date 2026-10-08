@@ -125,6 +125,20 @@ export type HostedBackendOptions = {
 }
 
 /**
+ * The fake's memory, as a spec reads it back once the fake is installed.
+ */
+export type HostedBackend = {
+  /**
+   * Every conversation held against one problem, most recently opened first.
+   *
+   * @param problemId - The problem.
+   *
+   * @returns The conversations, as each one stands now.
+   */
+  sessionsAbout: (problemId: string) => DefenseSession[]
+}
+
+/**
  * What the page's own clock reads, which a spec holding it still has moved on from the runner's.
  *
  * Every instant stamped while a call is being answered has to come from here. A turn stamped off the
@@ -241,12 +255,14 @@ type TurnRequestBody = {
  * @param page - The page to intercept requests on.
  * @param initial - Which state the student is in when the page opens.
  * @param options - What to vary about the student outside the state they are in.
+ *
+ * @returns The fake's memory, for a spec whose other stubs answer out of it.
  */
 export async function installHostedBackend(
   page: Page,
   initial: HostedState,
   options: HostedBackendOptions = {}
-): Promise<void> {
+): Promise<HostedBackend> {
   // What this page's backend holds, which its calls read and write
   const state: FakeState = {
     view: buildView(initial),
@@ -682,9 +698,9 @@ export async function installHostedBackend(
     // Newest first, which is the order the rows are read in
     transcriptsOf(state, body.target.problemId).unshift(session)
 
-    // Answered with the conversation as it now stands
+    // Answered with the conversation as it now stands, as created
     await route.fulfill({
-      status: 200,
+      status: 201,
       contentType: 'application/json',
       body: JSON.stringify(session),
     })
@@ -740,4 +756,10 @@ export async function installHostedBackend(
       body: JSON.stringify(session),
     })
   })
+
+  // A function which reads every conversation held against one problem out of what this page's backend holds
+  const sessionsAbout = (problemId: string) => transcriptsOf(state, problemId)
+
+  // The memory, as a spec reads it back
+  return { sessionsAbout }
 }
