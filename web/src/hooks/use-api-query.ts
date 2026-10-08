@@ -1,7 +1,7 @@
 'use client'
 
-import type { QueryFunctionContext, QueryKey, UseQueryOptions } from '@tanstack/react-query'
-import { useQuery } from '@tanstack/react-query'
+import type { QueryKey, SkipToken, UseQueryOptions } from '@tanstack/react-query'
+import { skipToken, useQuery } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
 import type { ApiCaller, ApiState } from '@/hooks/use-api'
@@ -24,8 +24,11 @@ type ApiQueryOptions<TData> = Omit<
   /**
    * Reads the data through the caller, which is ready by the time this runs and already carries React
    * Query's abort signal, so a read the reader has moved on from is dropped rather than waited out.
+   *
+   * Or {@link skipToken} while there is nothing to read yet, which holds the read shut. Picking between
+   * the skip and the read in one expression narrows a nullable input inside the read.
    */
-  fetch: (apiCall: ApiCaller) => Promise<ApiResult<TData>>
+  fetch: ((apiCall: ApiCaller) => Promise<ApiResult<TData>>) | SkipToken
   /**
    * Whatever else has to be true before the read is worth making.
    *
@@ -79,7 +82,8 @@ type UseApiQueryResult<TData> = {
 
 /**
  * The React Query options for reading an endpoint through an API client: the caller narrowed and bound to
- * the abort signal, the {@link ApiResult} unwrapped, and the read held shut until there is a caller.
+ * the abort signal, the {@link ApiResult} unwrapped, and the read held shut until there is a caller and
+ * something to read.
  *
  * A plain function rather than a hook, so a prefetch hands the very same options to `prefetchQuery` that
  * {@link useApiQuery} reads with, and both land on one key.
@@ -97,20 +101,26 @@ export function apiQueryOptions<TData>(
   // The ready caller, or null while it is still loading or nobody is signed in
   const apiCall = apiCallOf(api)
 
-  // The read, held shut until there is a caller and until whatever else the call site asked for is true
+  // The read, held shut until there is a caller and something to read, and until whatever else the call
+  // site asked for is true
   return {
     ...queryOptions,
-    // The data, or throwing the backend failure. The gate below keeps this from running without a
-    // caller, and readyApiCall is the one assertion that says so if it ever does
-    queryFn: async ({ signal }: QueryFunctionContext<QueryKey>) =>
-      unwrap(await fetchData(abortableCall(readyApiCall(api), signal))),
-    enabled: enabled && apiCall !== null,
-  }
+    // Nothing to run for a skipped read, otherwise the data or throwing the backend failure. The gate
+    // below keeps the read from running without a caller, and readyApiCall is the one assertion that says
+    // so if it ever does
+    queryFn:
+      fetchData === skipToken
+        ? skipToken
+        : async ({ signal }) => unwrap(await fetchData(abortableCall(readyApiCall(api), signal))),
+    // Shut on a skipped read as well. React Query shuts one by itself, but this flag is also what a retry
+    // or a prefetch asks before reading, and either would run the skipped read
+    enabled: enabled && apiCall !== null && fetchData !== skipToken,
+  } satisfies UseQueryOptions<TData, Error, TData, QueryKey>
 }
 
 /**
  * An authenticated React Query read: it waits for the API client, unwraps the result, and stays disabled
- * until there is a caller to make the call with.
+ * until there is a caller to make the call with and something to read.
  *
  * A caller that also prefetches builds its options with {@link apiQueryOptions} and reads them itself.
  *

@@ -1,7 +1,8 @@
+import { skipToken } from '@tanstack/react-query'
+
 import type { UserIdentity } from '@/components/features/admin/model/user-identity'
 import type { DefenseSessionTarget } from '@/components/features/defense/model/defense-types'
 import { useApiQuery } from '@/hooks/use-api-query'
-import { BackendApiError } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
@@ -53,19 +54,13 @@ export function useStudentConversations(
   // The conversations and the grading
   const { data, uiState } = useApiQuery({
     queryKey: studentConversationsQueryKey(user.id, target),
-    fetch: (apiCall) => {
-      // The gate below keeps this from running with nothing known, so reaching here is a bug
-      if (studentProblem === null) {
-        throw new BackendApiError({ message: 'No student is open', errorCode: 'SERVER_ERROR' })
-      }
-
-      // The student's conversations about the problem
-      return fetchStudentConversations(apiCall, user.id, target)
-    },
+    // Nothing while nobody is known, then the student's conversations about the problem
+    fetch:
+      studentProblem === null
+        ? skipToken
+        : (apiCall) => fetchStudentConversations(apiCall, user.id, target),
     // The list is an admin's own read, so it is made as them
     requireAuth: true,
-    // Nothing is read while nobody is known
-    enabled: studentProblem !== null,
     ...cachePolicy.userData,
   })
 
