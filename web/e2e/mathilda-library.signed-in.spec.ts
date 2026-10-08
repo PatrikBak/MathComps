@@ -14,7 +14,11 @@ import {
   transcriptOf,
   userMenuCopy,
 } from './support/competitions'
-import { COMPETITION_SLUG, installHostedBackend } from './support/hosted-backend'
+import {
+  COMPETITION_SLUG,
+  installHostedBackend,
+  UPCOMING_COMPETITION_SLUG,
+} from './support/hosted-backend'
 import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
@@ -213,5 +217,44 @@ test.describe("the student's own list of conversations", () => {
     // And offers nothing that could rewrite what was argued
     await expect(library.getByRole('button', { name: chatCopy.newDefense })).toHaveCount(0)
     await expect(library.getByRole('button', { name: chatCopy.deleteSession })).toHaveCount(0)
+  })
+
+  test('opens a conversation held before its competition opened, without an entry', async ({
+    page,
+  }) => {
+    // One of the accounts that prepare competitions, who holds no entry anywhere
+    await installHostedBackend(page, 'prepares-competitions')
+
+    // Into the area of the competition nobody else can be in yet
+    await page.goto(areaPath(UPCOMING_COMPETITION_SLUG))
+
+    // A conversation about its first problem
+    await page
+      .getByRole('button', { name: areaCopy.startDefense })
+      .first()
+      .click({ timeout: SETTLE_TIMEOUT_MS })
+    await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
+
+    // What they argue, which is what the conversation is saved under
+    await sendTurn(page, 'Every residue class is hit, so the bound is tight')
+    await expect(transcriptOf(page)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Out of the competition, back to where the list is reached from
+    await page.goto(LIST_PATH)
+
+    // Their list, on which the conversation is the most recent row
+    const library = await openLibrary(page)
+    const row = library.getByRole('button').filter({ hasText: SEASON_YEARS }).first()
+
+    // Which the list offers to drop, nobody grading what was argued before anybody could enter
+    await expect(
+      row.locator('..').getByRole('button', { name: chatCopy.deleteSession })
+    ).toBeVisible()
+
+    // And which opens on what was argued, with no entry to wait for
+    await row.click()
+    await expect(transcriptOf(page)).toContainText('Every residue class is hit', {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
   })
 })

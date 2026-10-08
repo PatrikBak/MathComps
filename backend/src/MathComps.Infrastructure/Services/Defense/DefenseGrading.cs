@@ -4,16 +4,18 @@ using MathComps.Domain.Taxonomy;
 namespace MathComps.Infrastructure.Services.Defense;
 
 /// <summary>
-/// What the database holds about the round a conversation was argued under, and whether the student is graded
-/// on it.
+/// What the database holds about the round a conversation was argued under and when the conversation started, and
+/// whether the student is graded on it.
 /// </summary>
 /// <param name="Round">The round the conversation was argued under, or null for a handout conversation, which
 /// was argued under no round at all.</param>
-public sealed record DefenseGrading(DefenseProblemRound? Round)
+/// <param name="StartedAt"><inheritdoc cref="DefenseSession.CreatedAt" path="/summary"/></param>
+public sealed record DefenseGrading(DefenseProblemRound? Round, DateTimeOffset StartedAt)
 {
     /// <summary>
-    /// Whether the student is graded on what they argued. A handout, a proposal and the practice group each
-    /// grade nobody; everything else was argued under a round somebody was grading.
+    /// Whether the student is graded on what they argued. A handout, a proposal, the practice group and a
+    /// conversation started before its group opened each grade nobody; everything else was argued under a round
+    /// somebody was grading.
     /// </summary>
     public bool IsGraded => Round switch
     {
@@ -27,6 +29,10 @@ public sealed record DefenseGrading(DefenseProblemRound? Round)
         // The practice group, which never closes and grades nobody.
         { IsHosted: true, GroupClosesAt: null } => false,
 
+        // Started before its group opened. Only a competition preparer can argue a problem or enter a round that
+        // early, and nobody grades a preparer's run.
+        { GroupOpensAt: { } opensAt } when StartedAt < opensAt => false,
+
         // A round somebody was grading, whether or not it still belongs to the group that ran it.
         _ => true,
     };
@@ -37,8 +43,10 @@ public sealed record DefenseGrading(DefenseProblemRound? Round)
 /// </summary>
 /// <param name="CompetitionPath"><inheritdoc cref="Competition.Path" path="/summary"/></param>
 /// <param name="IsHosted">Whether the site itself runs the round the problem was set in.</param>
+/// <param name="GroupOpensAt">When the group the round belongs to starts taking entries. Null on a round the site
+/// does not host, which belongs to no group at all.</param>
 /// <param name="GroupClosesAt">When the group the round belongs to stops taking entries. Null for the practice
 /// group, which never closes, and null again on a round the site does not host, which belongs to no group at
 /// all.</param>
 public sealed record DefenseProblemRound(
-    string CompetitionPath, bool IsHosted, DateTimeOffset? GroupClosesAt);
+    string CompetitionPath, bool IsHosted, DateTimeOffset? GroupOpensAt, DateTimeOffset? GroupClosesAt);

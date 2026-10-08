@@ -1070,6 +1070,98 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
+    /// A reviewer's conversation about a proposal stays the proposal's while the problem sits in a paper whose group
+    /// has not opened: the selection still holds the problem, so the conversation goes by the proposal's number and
+    /// working name, and grades nobody.
+    /// </summary>
+    [Fact]
+    public Task A_reviewers_conversation_stays_the_proposals_while_its_paper_has_not_opened() =>
+        RunTestAsync(async service =>
+    {
+        // The owner reviews the proposals, which takes the grant
+        await GrantOwnerPrepareCompetitionsAsync();
+
+        // The owner's conversation about the problem while it sits in the pool
+        var session = await service.StartAsync(
+            _ownerId, ProblemRequest(_proposedProblemId, "my defense"));
+
+        // A board then takes the problem into a paper whose group opens tomorrow
+        await MoveProposalIntoPaperAsync(DateTimeOffset.UtcNow.AddDays(1));
+
+        // Listing the owner's conversations
+        var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
+
+        // Which still names it by the proposal filing its problem
+        Assert.Equal(
+            new NamedProposalTarget(_proposedProblemId, "mathcomps-proposals-1", 21, "Proposal 21"),
+            listed.Target);
+
+        // And reports it as nobody's to grade
+        Assert.False(listed.IsGraded);
+
+        // So the owner can drop it
+        await service.DeleteAsync(_ownerId, session.Id);
+
+        // Which leaves nothing behind
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+    });
+
+    /// <summary>
+    /// Once the paper's group opens, a reviewer's conversation about the proposal goes by the competition that set
+    /// it, as everything else about the problem does. It was argued before anybody could enter, so it still grades
+    /// nobody and stays the reviewer's to rewind and delete.
+    /// </summary>
+    [Fact]
+    public Task A_reviewers_conversation_goes_by_its_competition_once_its_paper_opens() =>
+        RunTestAsync(async service =>
+    {
+        // The owner reviews the proposals, which takes the grant
+        await GrantOwnerPrepareCompetitionsAsync();
+
+        // The owner's conversation about the problem while it sits in the pool
+        var session = await service.StartAsync(
+            _ownerId, ProblemRequest(_proposedProblemId, "my defense"));
+
+        // When the paper's group opened
+        var opensAt = DateTimeOffset.UtcNow.AddDays(-1);
+
+        // A board took the problem into that paper
+        await MoveProposalIntoPaperAsync(opensAt);
+
+        // And the conversation dates from before the opening, as one held in the pool does
+        await QueryAsync(async context =>
+        {
+            // The owner's conversation
+            var held = await context.DefenseSessions.SingleAsync(candidate => candidate.Id == session.Id);
+
+            // Started a day before the group opened
+            held.CreatedAt = opensAt.AddDays(-1);
+
+            // Commit the date
+            await context.SaveChangesAsync();
+        });
+
+        // Listing the owner's conversations
+        var listed = Assert.Single(await service.ListAllAsync(_ownerId, Language.EN));
+
+        // Which names the problem by its competition now
+        var target = Assert.IsType<NamedProblemTarget>(listed.Target);
+        Assert.Equal(_proposedProblemId, target.ProblemId);
+
+        // And still reports it as nobody's to grade
+        Assert.False(listed.IsGraded);
+
+        // So the owner can rewind it to the examiner's opener
+        await service.RewindAsync(_ownerId, session.Id, keepThroughSequence: 0);
+
+        // And drop it altogether
+        await service.DeleteAsync(_ownerId, session.Id);
+
+        // Which leaves nothing behind
+        Assert.Equal(0, await QueryValueAsync(context => context.DefenseSessions.CountAsync()));
+    });
+
+    /// <summary>
     /// A practice round grades nobody, so what the student argued in it protects nothing and stays theirs to take
     /// back: both the rewind and the delete go through, and the listing says so before either is pressed.
     /// </summary>
@@ -1988,6 +2080,49 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         context.UserGrants.Add(new UserGrant { UserId = _ownerId, Capability = UserCapability.PrepareCompetitions });
 
         // Commit the grant
+        await context.SaveChangesAsync();
+    });
+
+    /// <summary>
+    /// Moves the proposed problem into a paper of a fresh graded group, the way finalizing a board moves a proposal
+    /// into a competition's round. The proposal filing it stays.
+    /// </summary>
+    /// <param name="opensAt">When the paper's group opens.</param>
+    /// <returns>A task that completes once the move is committed.</returns>
+    private Task MoveProposalIntoPaperAsync(DateTimeOffset opensAt) => QueryAsync(async context =>
+    {
+        // The group the paper runs in, closing a month after it opens
+        var group = new HostedGroup
+        {
+            Id = Guid.CreateVersion7(),
+            Slug = "mc-paper",
+            OpensAt = opensAt,
+            ClosesAt = opensAt.AddMonths(1),
+            ClockMinutes = 180,
+            AllowsReentry = false,
+            ProblemCount = 1,
+        };
+        context.HostedGroups.Add(group);
+
+        // The paper's round, embargoed until the group closes
+        var round = new Round
+        {
+            Id = Guid.CreateVersion7(),
+            CompetitionId = CompetitionTreeSeed.Chain(context, "mathcomps-advanced-october").Id,
+            SeasonId = (await context.Seasons.SingleAsync()).Id,
+            Date = new DateOnly(2026, 11, 1),
+            VisibleSince = group.ClosesAt,
+            HostedGroupId = group.Id,
+        };
+        context.Rounds.Add(round);
+
+        // The proposed problem
+        var problem = await context.Problems.SingleAsync(candidate => candidate.Id == _proposedProblemId);
+
+        // Taken into the paper's round
+        problem.RoundId = round.Id;
+
+        // Commit the move
         await context.SaveChangesAsync();
     });
 

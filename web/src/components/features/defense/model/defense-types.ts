@@ -180,8 +180,8 @@ export type NamedProblemTarget = {
 }
 
 /**
- * A proposal a conversation was held against: a problem parked among the proposals, named by what the
- * reviewers quote it by, since no competition has set it.
+ * A proposal a conversation was held against: a problem the selection still holds, named by what the
+ * reviewers quote it by.
  */
 export type NamedProposalTarget = {
   /** The discriminant. */

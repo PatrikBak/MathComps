@@ -424,7 +424,10 @@ function libraryItemsOf(
     lastActivityAt: session.turns.at(-1)?.createdAt ?? new Date(0).toISOString(),
     lastStudentMessage:
       session.turns.findLast((turn) => turn.role === 'candidate')?.content ?? null,
-    isGraded: !isPracticeGroup(group),
+    // Graded unless its group grades nobody or it began before the group opened
+    isGraded:
+      !isPracticeGroup(group) &&
+      Date.parse(session.turns[0]?.createdAt ?? group.opensAt) >= Date.parse(group.opensAt),
   }))
 }
 

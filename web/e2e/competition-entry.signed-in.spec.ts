@@ -1,6 +1,11 @@
 import { BACKEND_ORIGIN } from './support/backend-routes'
 import { areaCopy, areaPath, LIST_PATH, showRoundHolding } from './support/competitions'
-import { COMPETITION_SLUG, installHostedBackend, PROBLEM_COUNT } from './support/hosted-backend'
+import {
+  COMPETITION_SLUG,
+  installHostedBackend,
+  PROBLEM_COUNT,
+  UPCOMING_COMPETITION_SLUG,
+} from './support/hosted-backend'
 import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
@@ -8,9 +13,6 @@ const SETTLE_TIMEOUT_MS = 15_000
 
 /** A competition no state ever holds an entry on, so the guard has something to turn away. */
 const UNENTERED_COMPETITION_SLUG = 'open-advanced'
-
-/** A competition of the group that has not opened yet, which nobody ordinary can enter or read. */
-const UPCOMING_COMPETITION_SLUG = 'upcoming-intermediate'
 
 /** A competition of the group that has not opened yet, announced before anybody picked its problems. */
 const UNFILLED_COMPETITION_SLUG = 'upcoming-advanced'
