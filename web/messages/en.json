@@ -614,6 +614,7 @@
     "deleteSession": "Remove from history",
     "deleteSessionMessage": "This conversation will be permanently removed.",
     "deleteSessionTitle": "Remove this conversation?",
+    "editedSince": "The problem has been edited since. This is the statement as it stood then.",
     "feedbackAuthReason": "send feedback",
     "feedbackCommentLabel": "Anything you'd add?",
     "feedbackError": "The change couldn't be saved.",
@@ -1255,7 +1256,6 @@
       "placeholder": "What do you think of it, and where does it fit?"
     },
     "conversations": {
-      "editedSince": "The problem has been edited since. This is the statement as it stood then.",
       "empty": "Nobody has talked to Mathilda about this problem yet.",
       "messages": "{count, plural, one {# message} other {# messages}}",
       "olderStatement": "older statement",

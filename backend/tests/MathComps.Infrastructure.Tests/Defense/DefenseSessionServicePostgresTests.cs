@@ -177,7 +177,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         services.AddSingleton<IExaminerConfigSnapshotProvider, ExaminerConfigSnapshotProvider>();
 
         // Stands in for the site's own content the examiner is served from.
-        services.AddSingleton<IDefenseContentResolver>(_ => _content);
+        services.AddSingleton<IDefenseContentResolver<DefenseTarget>>(_ => _content);
 
         // Serializes a user's concurrent turns.
         services.AddSingleton<IDefenseUserTurnGate>(_gate);
@@ -555,6 +555,91 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
 
         // Along with what the student said in their own words
         Assert.Equal("she just told me", report.Comment);
+    });
+
+    /// <summary>
+    /// A conversation comes back under the statement it was started on, and is flagged once what it defends no
+    /// longer has that statement in any language. Listing and continuing each weigh that on their own, so both are read.
+    /// </summary>
+    [Fact]
+    public Task A_conversation_carries_its_statement_and_says_when_no_language_still_has_it() =>
+        RunTestAsync(async service =>
+    {
+        // The environment every conversation here defends
+        var target = new HandoutEnvironmentTarget("handout-1", "prob-1");
+
+        // A conversation, started on the statement the problem has
+        var started = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // The problem written in another language besides
+        _content.CurrentStatements = new Dictionary<Language, string>
+        {
+            [Language.EN] = "the statement in another language",
+            [Language.SK] = FakeDefenseContentResolver.Statement,
+        };
+
+        // The conversation, read back
+        var current = Assert.Single((await service.ListAsync(_ownerId, target)).Sessions);
+
+        // Under the statement it was started on
+        Assert.Equal(FakeDefenseContentResolver.Statement, current.Statement);
+
+        // Which a language still has
+        Assert.False(current.HasOlderStatement);
+
+        // The problem revised since, so no language has it any more
+        _content.CurrentStatements = new Dictionary<Language, string>
+        {
+            [Language.EN] = "the statement in another language",
+            [Language.SK] = "the revised statement",
+        };
+
+        // The conversation, read back again
+        var listed = Assert.Single((await service.ListAsync(_ownerId, target)).Sessions);
+
+        // Still under the statement it was started on
+        Assert.Equal(FakeDefenseContentResolver.Statement, listed.Statement);
+
+        // Now said to be argued against an older one
+        Assert.True(listed.HasOlderStatement);
+
+        // The conversation, taken one turn further
+        var continued = await service.ContinueAsync(_ownerId, started.Id, "my next point");
+
+        // Said to be argued against an older one there too
+        Assert.True(continued.HasOlderStatement);
+    });
+
+    /// <summary>
+    /// A turn whose problem's statements cannot be read is refused before anything is written, so the message the
+    /// student sends again after the error lands once.
+    /// </summary>
+    [Fact]
+    public Task Continue_saves_nothing_when_the_statements_cannot_be_read() => RunTestAsync(async service =>
+    {
+        // A conversation, its first exchange in
+        var started = await service.StartAsync(_ownerId, Request("prob-1", "my defense"));
+
+        // The source of the problem's statements, unreadable from here on
+        _content.StatementsFail = true;
+
+        // The next turn, refused
+        await Assert.ThrowsAsync<HttpRequestException>(
+            () => service.ContinueAsync(_ownerId, started.Id, "my next point"));
+
+        // The conversation's turns, as stored
+        var turnCount = await QueryValueAsync(context =>
+            context.DefenseTurns.CountAsync(turn => turn.SessionId == started.Id));
+
+        // Still the opener, the first message and the reply to it
+        Assert.Equal(3, turnCount);
+
+        // The user's spend rows
+        var spendCount = await QueryValueAsync(context =>
+            context.DefenseSpends.CountAsync(spend => spend.UserId == _ownerId));
+
+        // The start's alone, the refused turn having cost nothing
+        Assert.Equal(1, spendCount);
     });
 
     /// <summary>
@@ -1837,10 +1922,10 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     };
 
     /// <summary>
-    /// A test double for <see cref="IDefenseContentResolver"/> standing in for the site's own content: every
+    /// A test double for <see cref="IDefenseContentResolver{TTarget}"/> standing in for the site's own content: every
     /// target resolves to the same fixed problem, except the environments a test withholds.
     /// </summary>
-    private sealed class FakeDefenseContentResolver : IDefenseContentResolver
+    private sealed class FakeDefenseContentResolver : IDefenseContentResolver<DefenseTarget>
     {
         /// <summary>
         /// The statement every resolved problem carries.
@@ -1857,6 +1942,17 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         /// </summary>
         public HashSet<string> UnknownEnvironmentIds { get; } = new(StringComparer.Ordinal);
 
+        /// <summary>
+        /// The statements every target has now by language, which a test changes to stand in for an edit.
+        /// </summary>
+        public IReadOnlyDictionary<Language, string> CurrentStatements { get; set; } =
+            new Dictionary<Language, string> { [Language.SK] = Statement };
+
+        /// <summary>
+        /// Whether reading the statements fails, standing in for a source that cannot be reached.
+        /// </summary>
+        public bool StatementsFail { get; set; }
+
         /// <inheritdoc/>
         public Task<DefenseProblemContent?> ResolveAsync(
             DefenseTarget target, Language language, CancellationToken cancellationToken)
@@ -1870,6 +1966,15 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             return Task.FromResult<DefenseProblemContent?>(
                 new DefenseProblemContent(Statement, Reference, []));
         }
+
+        /// <inheritdoc/>
+        public Task<IReadOnlyDictionary<Language, string>> ResolveStatementsAsync(
+            DefenseTarget target, CancellationToken cancellationToken) =>
+            // The same statements whatever was asked for, unless the source cannot be reached
+            StatementsFail
+                ? Task.FromException<IReadOnlyDictionary<Language, string>>(
+                    new HttpRequestException("the source cannot be reached"))
+                : Task.FromResult(CurrentStatements);
     }
 
     /// <summary>

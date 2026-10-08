@@ -2,6 +2,7 @@ import { MAX_MARK } from '@/components/features/admin/grades/model/grade-types'
 import type {
   DefenseSession,
   DefenseSessionListItem,
+  DefenseSessionTarget,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
 import {
@@ -17,6 +18,7 @@ import type {
   HostedCompetitionsView,
 } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { MINUTE_MS } from '@/components/shared/utils/time-units'
+import type { PartialLocalizedString } from '@/i18n/i18n'
 
 import {
   HINTS,
@@ -33,6 +35,24 @@ import { CLOCK_MINUTES, PROBLEMS_PER_COMPETITION } from './hosted-backend-world'
  */
 
 /**
+ * A conversation as the fake keeps it: everything the backend stores of it, short of whether its statement is
+ * still one the problem has, which every read weighs again.
+ */
+export type HeldSession = Omit<DefenseSession, 'hasOlderStatement' | 'target'> & {
+  /** The problem it is about. */
+  target: Extract<DefenseSessionTarget, { kind: 'problem' }>
+}
+
+/**
+ * A function which reads a problem's statement in each language it is written in, as it stands now.
+ *
+ * @param problemId - The problem.
+ *
+ * @returns The problem's statements; none for a problem the lookup does not know.
+ */
+export type StatementLookup = (problemId: string) => PartialLocalizedString
+
+/**
  * Everything one page's fake backend currently holds.
  *
  * One of these per installed fake, so two tests running side by side never write over each other and a
@@ -43,8 +63,10 @@ export type FakeState = {
   view: HostedCompetitionsView
   /** Whether the student has what an entry needs of them. */
   readiness: EntryReadiness
+  /** Reads the statements of every problem no competition here sets, which the test owning them keeps current. */
+  statementsOutside: StatementLookup
   /** Each problem's conversations, most recently opened first, by problem id. */
-  transcripts: Map<string, DefenseSession[]>
+  transcripts: Map<string, HeldSession[]>
   /** What the student left about each solution, by problem id, for the ones they have said anything about. */
   assessments: Map<string, string>
   /**
@@ -100,7 +122,7 @@ export function storedTurn(
  *
  * @returns The conversations, most recently opened first.
  */
-export function transcriptsOf(state: FakeState, problemId: string): DefenseSession[] {
+export function transcriptsOf(state: FakeState, problemId: string): HeldSession[] {
   // What is already there
   const existing = state.transcripts.get(problemId)
 
@@ -110,13 +132,53 @@ export function transcriptsOf(state: FakeState, problemId: string): DefenseSessi
   }
 
   // One nobody has argued about yet starts with nothing
-  const opened: DefenseSession[] = []
+  const opened: HeldSession[] = []
 
   // Which is what it holds from here
   state.transcripts.set(problemId, opened)
 
   // And what this ask and every later one reads
   return opened
+}
+
+/**
+ * Reads a problem's statement in each language it is written in, as it stands now: a competition's problem as
+ * its set states it, any other through the lookup the test owning it handed the fake.
+ *
+ * @param state - The fake's memory.
+ * @param problemId - The problem.
+ *
+ * @returns The problem's statements.
+ */
+export function statementsOf(state: FakeState, problemId: string): PartialLocalizedString {
+  // The statement set at the problem's place, in whichever competition sets it
+  const setStatement = state.view.groups
+    .flatMap((group) => group.competitions)
+    .flatMap((competition) =>
+      STATEMENTS.slice(0, PROBLEMS_PER_COMPETITION).filter(
+        (_statement, index) => problemIdOf(competition.slug.en, index + 1) === problemId
+      )
+    )[0]
+
+  // That one, or the test's word for a problem no competition sets
+  return setStatement ?? state.statementsOutside(problemId)
+}
+
+/**
+ * A held conversation as the backend serves it, saying whether the problem it is about still has the statement
+ * it was argued against in any language.
+ *
+ * @param state - The fake's memory.
+ * @param session - The conversation.
+ *
+ * @returns The conversation, as read now.
+ */
+export function servedSession(state: FakeState, session: HeldSession): DefenseSession {
+  // Every statement the problem has now
+  const statements = Object.values(statementsOf(state, session.target.problemId))
+
+  // The conversation, said to be argued against an older one once its own is among none of them
+  return { ...session, hasOlderStatement: !statements.includes(session.statement) }
 }
 
 /**
@@ -358,7 +420,7 @@ function libraryItemsOf(
         number: position,
       },
     },
-    statement: STATEMENTS[position - 1]?.en ?? '',
+    statement: session.statement,
     lastActivityAt: session.turns.at(-1)?.createdAt ?? new Date(0).toISOString(),
     lastStudentMessage:
       session.turns.findLast((turn) => turn.role === 'candidate')?.content ?? null,
@@ -449,11 +511,12 @@ export function seedStraddlingDefense(
   // A number no conversation before it took
   state.minted++
 
-  // The one conversation that problem opens with
+  // The one conversation that problem opens with, argued in English against the statement the set has
   state.transcripts.set(problemId, [
     {
       id: `session-${state.minted}`,
       target: { kind: 'problem', problemId },
+      statement: STATEMENTS[0]!.en,
       turns,
       feedback: null,
       reports: [],

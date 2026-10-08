@@ -36,6 +36,7 @@ import { DefenseFeedbackDialogs } from './DefenseFeedbackDialogs'
 import { DefenseFeedbackPrompt } from './DefenseFeedbackPrompt'
 import { DefenseHistoryMenu } from './DefenseHistoryMenu'
 import { DefenseTranscript } from './DefenseTranscript'
+import { EditedSinceNote } from './EditedSinceNote'
 import { ProblemBand } from './ProblemBand'
 
 /**
@@ -226,6 +227,10 @@ function DefenseConversationForTarget({
   // Whether this is a blank conversation opened beside ones already saved
   const isFreshBesideSaved = currentSessionId === null && turns.length === 0 && sessions.length > 0
 
+  // The open conversation as the history holds it. Absent while a fresh one is unsaved, and until the history
+  // read after its first turn lands, when the problem's own statement is the one it was started on anyway
+  const openSession = sessions.find((session) => session.id === currentSessionId)
+
   // The localized label for each turn's author
   const roleLabels: Record<TurnRole, string> = {
     examiner: MATHILDA_NAME,
@@ -289,8 +294,11 @@ function DefenseConversationForTarget({
         </div>
       </div>
 
-      {/* Re-readable problem statement */}
-      <ProblemBand statement={problem.statement} height="shared" />
+      {/* The note that the problem has been edited since the open conversation started */}
+      {openSession?.hasOlderStatement === true && <EditedSinceNote />}
+
+      {/* Re-readable problem statement, as the open conversation is argued against it */}
+      <ProblemBand statement={openSession?.statement ?? problem.statement} height="shared" />
 
       {/* The conversation so far */}
       <DefenseTranscript

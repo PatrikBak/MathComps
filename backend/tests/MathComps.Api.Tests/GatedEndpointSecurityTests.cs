@@ -62,7 +62,7 @@ public class GatedEndpointSecurityTests
     /// Maps the API's routes without running it.
     /// </summary>
     /// <remarks>
-    /// Building a route reads which of its handler's parameters are services, so every interface the
+    /// Building a route reads which of its handler's parameters are services, so every non-generic interface the
     /// infrastructure declares is registered, each with a factory nothing ever calls.
     /// </remarks>
     /// <returns>Every route the API maps.</returns>
@@ -74,8 +74,10 @@ public class GatedEndpointSecurityTests
         // The health check among the routes needs its own services
         builder.Services.AddHealthChecks();
 
-        // Every interface the infrastructure declares, standing in for the real services
-        foreach (var service in typeof(MathCompsDbContext).Assembly.GetTypes().Where(type => type.IsInterface))
+        // Every non-generic interface the infrastructure declares, standing in for the real services. A generic one
+        // takes no factory, and no handler asks for one
+        foreach (var service in typeof(MathCompsDbContext).Assembly.GetTypes()
+                     .Where(type => type is { IsInterface: true, IsGenericTypeDefinition: false }))
             builder.Services.AddScoped(service, _ => throw new NotSupportedException());
 
         // The bare host

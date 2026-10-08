@@ -117,6 +117,10 @@ export type DefenseSession = {
   id: string
   /** What this defense is about, as the API says it. */
   target: DefenseSessionTarget
+  /** The problem statement as it stood when the session was started. */
+  statement: string
+  /** Whether it is argued against a statement its target no longer has in any language. */
+  hasOlderStatement: boolean
   /** The conversation so far, oldest first. */
   turns: StoredTurn[]
   /** What the student said about the conversation; null until they say anything. */

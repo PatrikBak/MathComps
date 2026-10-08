@@ -12,9 +12,10 @@ using Microsoft.Extensions.Options;
 namespace MathComps.Infrastructure.Services.Defense.Content;
 
 /// <summary>
-/// An <see cref="IHandoutDefenseContentResolver"/> reading the blobs the handout build publishes to object
-/// storage, one per handout per language. A handout's blob is cached for its configured window, so an edited
-/// problem reaches new defenses without a deploy while a run of defenses against one handout costs a single read.
+/// An <see cref="IDefenseContentResolver{TTarget}"/> for handout environments, reading the blobs the handout build
+/// publishes to object storage, one per handout per language. A handout's blob is cached for its configured window, so
+/// an edited problem reaches new defenses without a deploy while a run of defenses against one handout costs a single
+/// read. A handout, language or environment nothing is published for resolves to nothing.
 /// </summary>
 /// <param name="objectReader">Reads the published blobs.</param>
 /// <param name="cache">The in-memory cache.</param>
@@ -23,7 +24,7 @@ namespace MathComps.Infrastructure.Services.Defense.Content;
 public sealed class HandoutDefenseContentResolver(
     IObjectReader objectReader, IMemoryCache cache, IOptions<DefenseContentOptions> options,
     ILogger<HandoutDefenseContentResolver> logger)
-    : IHandoutDefenseContentResolver
+    : IDefenseContentResolver<HandoutEnvironmentTarget>
 {
     /// <summary>
     /// How long a cached handout is served before the next lookup reads it again.
@@ -40,6 +41,24 @@ public sealed class HandoutDefenseContentResolver(
 
         // The environment being defended, absent when neither the handout nor the environment is published
         return variant.GetValueOrDefault(target.EnvironmentId);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyDictionary<Language, string>> ResolveStatementsAsync(
+        HandoutEnvironmentTarget target, CancellationToken cancellationToken)
+    {
+        // Every language there is
+        var languages = Enum.GetValues<Language>();
+
+        // The environment in every language, absent from each one it isn't published in
+        var contents = await Task.WhenAll(
+            languages.Select(language => ResolveAsync(target, language, cancellationToken)));
+
+        // The statement in each language it is published in
+        return languages
+            .Zip(contents)
+            .Where(published => published.Second is not null)
+            .ToDictionary(published => published.First, published => published.Second!.Statement);
     }
 
     /// <summary>

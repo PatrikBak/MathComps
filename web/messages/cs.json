@@ -614,6 +614,7 @@
     "deleteSession": "Odebrat z historie",
     "deleteSessionMessage": "Tato konverzace se trvale odstraní.",
     "deleteSessionTitle": "Odebrat tuto konverzaci?",
+    "editedSince": "Úloha byla od té doby upravena. Toto je zadání, jak tehdy znělo.",
     "feedbackAuthReason": "odesílání zpětné vazby",
     "feedbackCommentLabel": "Chceš něco dodat?",
     "feedbackError": "Změnu se nepodařilo uložit.",
@@ -1255,7 +1256,6 @@
       "placeholder": "Co si o úloze myslíš a kam se hodí?"
     },
     "conversations": {
-      "editedSince": "Úloha byla od té doby upravena. Toto je zadání, jak tehdy znělo.",
       "empty": "O této úloze s Mathildou zatím nikdo nemluvil.",
       "messages": "{count, plural, one {# zpráva} few {# zprávy} other {# zpráv}}",
       "olderStatement": "starší zadání",
