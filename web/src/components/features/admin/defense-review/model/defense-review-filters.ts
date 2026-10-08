@@ -178,8 +178,9 @@ export function encodeProblemKey(target: NamedDefenseTarget): string {
     case 'handout':
       return handoutProblemKey(target.handoutContentId, target.environmentId)
 
-    // An archive problem, which one slug addresses
+    // An archive problem or a proposal, which one slug addresses
     case 'problem':
+    case 'proposal':
       return archiveProblemKey(target.slug)
 
     // An arm nothing here knows

@@ -180,10 +180,27 @@ export type NamedProblemTarget = {
 }
 
 /**
+ * A proposal a conversation was held against: a problem parked among the proposals, named by what the
+ * reviewers quote it by, since no competition has set it.
+ */
+export type NamedProposalTarget = {
+  /** The discriminant. */
+  kind: 'proposal'
+  /** The problem being defended, which is also the proposal's id. */
+  problemId: string
+  /** URL-safe identifier, unique across the archive. */
+  slug: string
+  /** The number the reviewers quote it by, unique across every proposal. */
+  number: number
+  /** The working name, never shown to a student. */
+  title: string
+}
+
+/**
  * What a conversation was held against, as a surface reading conversations back names it. Exactly one arm
  * applies to any one conversation.
  */
-export type NamedDefenseTarget = NamedHandoutTarget | NamedProblemTarget
+export type NamedDefenseTarget = NamedHandoutTarget | NamedProblemTarget | NamedProposalTarget
 
 /**
  * One of a user's defenses as it appears in their cross-problem list: a summary of what it was about, when it

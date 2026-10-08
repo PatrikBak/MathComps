@@ -1,7 +1,9 @@
 import { describeUser } from '@/components/features/admin/model/user-identity'
 import type {
+  NamedDefenseTarget,
   NamedHandoutTarget,
   NamedProblemTarget,
+  NamedProposalTarget,
 } from '@/components/features/defense/model/defense-types'
 import {
   describeHandoutProblem,
@@ -9,6 +11,7 @@ import {
 } from '@/components/features/handouts/handout-problem-label'
 import { describeProblemRef } from '@/components/features/problems/problem-ref-label'
 import type { FacetOption } from '@/components/shared/components/facets/model/facet-types'
+import { assertNever } from '@/components/shared/utils/assert-never'
 
 import { encodeProblemKey } from './defense-review-filters'
 import {
@@ -49,6 +52,12 @@ export function toStudentFacetOptions(
  * headings a reader cannot tell apart, all of them saying the same thing.
  */
 const DELETED_HANDOUT_SECTION_KEY = 'deletedHandout'
+
+/**
+ * The section holding every proposal. The reviewers quote a proposal by its number alone, wherever it is
+ * parked, so the proposals file under nothing finer than one heading.
+ */
+const PROPOSALS_SECTION_KEY = 'proposals'
 
 /**
  * Sits in front of a section's own address, so a handout's content id and a competition's path can't land on
@@ -157,6 +166,27 @@ function readArchiveProblem(target: NamedProblemTarget, problemWord: string): Pr
 }
 
 /**
+ * Reads a proposal as the facet holds it: by the number and the working name the reviewers quote it by.
+ *
+ * @param target - The proposal.
+ * @param sectionLabel - What heads the section every proposal files under.
+ *
+ * @returns The proposal as the facet reads it.
+ */
+function readProposal(target: NamedProposalTarget, sectionLabel: string): ProblemFacetEntry {
+  // The proposal as the reviewers quote it
+  const displayName = `#${target.number} ${target.title}`
+
+  // The proposal as the facet holds it
+  return {
+    sectionKey: PROPOSALS_SECTION_KEY,
+    sectionLabel,
+    displayName,
+    fullName: `${displayName} (${sectionLabel})`,
+  }
+}
+
+/**
  * Turns the problems into facet options, grouped under whatever holds them.
  *
  * A handout problem is named here, since the site's handout content is read on the client and the backend can
@@ -168,24 +198,37 @@ function readArchiveProblem(target: NamedProblemTarget, problemWord: string): Pr
  * @param problems - The problems, as the backend counted them.
  * @param labeller - How to name the handout ones.
  * @param problemWord - What this surface calls a problem, e.g. "Problem".
+ * @param proposalsLabel - What heads the section the proposals file under, e.g. "Problem selection".
  *
  * @returns The options and their section headings, as described by {@link DefenseReviewProblemFacet}.
  */
 export function toProblemFacet(
   problems: DefenseReviewProblemOption[],
   labeller: HandoutProblemLabeller,
-  problemWord: string
+  problemWord: string,
+  proposalsLabel: string
 ): DefenseReviewProblemFacet {
   // What to call each section, filled in as the problems name what they file under
   const sectionLabels: Record<string, string> = {}
 
+  // A function which reads a problem as the facet holds it, the way its own kind is named
+  const readProblem = (target: NamedDefenseTarget): ProblemFacetEntry => {
+    switch (target.kind) {
+      case 'handout':
+        return readHandoutProblem(target, labeller)
+      case 'problem':
+        return readArchiveProblem(target, problemWord)
+      case 'proposal':
+        return readProposal(target, proposalsLabel)
+      default:
+        return assertNever(target)
+    }
+  }
+
   // One option per problem, each carrying the section it files under
   const options = problems.map((option) => {
     // The problem as the facet reads it, whichever kind of problem it is
-    const entry =
-      option.target.kind === 'handout'
-        ? readHandoutProblem(option.target, labeller)
-        : readArchiveProblem(option.target, problemWord)
+    const entry = readProblem(option.target)
 
     // What that section is called
     sectionLabels[entry.sectionKey] = entry.sectionLabel

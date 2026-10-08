@@ -275,6 +275,11 @@ public class DefenseSessionService(
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
+        // The deleted proposals, which the filter below reads. Held as their own value so the expression tree
+        // captures a set rather than the context around it, which the analyzer reads as disposed by the time the
+        // tree runs.
+        var deletedProposals = dbContext.Proposals.Where(proposal => proposal.DeletedAt != null);
+
         // The user's sessions, most recently active first, each with the columns of both target arms, the round
         // it was argued under, its statement, last activity, and the student's most recent message.
         var rows = await dbContext.DefenseSessions
@@ -283,6 +288,10 @@ public class DefenseSessionService(
             // A session whose handout environment was dropped keeps its own row, and there is nothing left to
             // name it by, so it is left out rather than failing the whole list.
             .Where(session => session.EnvironmentTarget != null || session.ProblemTarget != null)
+            // A session about a deleted proposal is left out too, the proposal being gone from everywhere the
+            // reviewers read it.
+            .Where(session => session.ProblemTarget == null
+                || !deletedProposals.Any(proposal => proposal.ProblemId == session.ProblemTarget.ProblemId))
             .OrderByDescending(session => session.Turns.Max(turn => turn.CreatedAt))
             // A tie goes to the session started later: ids are time-ordered v7 Guids.
             .ThenByDescending(session => session.Id)
@@ -313,12 +322,16 @@ public class DefenseSessionService(
                     .FirstOrDefault()))
             .ToListAsync(cancellationToken);
 
+        // The proposals among the sessions' problems.
+        var proposals = await NamedDefenseTargets.LoadProposalsAsync(
+            dbContext, rows.Select(row => row.Target), cancellationToken);
+
         // Name each one.
         return
         [
             .. rows.Select(row => new DefenseSessionListItemDto(
                 row.Id,
-                NamedDefenseTargets.Build(localization, language, row.Target),
+                NamedDefenseTargets.Build(localization, language, row.Target, proposals),
                 row.Statement,
                 row.LastActivityAt,
                 row.LastStudentMessage,

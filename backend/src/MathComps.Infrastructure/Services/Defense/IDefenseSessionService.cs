@@ -55,10 +55,11 @@ public interface IDefenseSessionService
         Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Lists all of a user's sessions, most recently active first, each summarized to its problem, statement,
+    /// Lists a user's sessions, most recently active first, each summarized to its problem, statement,
     /// last activity, most recent student message, and whether the student is graded on it. A competition
     /// conversation is among them: only the student who held it is ever shown it, and the entry that let them
-    /// hold it is what entitles them to its problems for as long as the embargo runs.
+    /// hold it is what entitles them to its problems for as long as the embargo runs. A conversation about a
+    /// deleted proposal is not.
     /// </summary>
     /// <param name="userId">The user whose sessions to list.</param>
     /// <param name="language">The language to name a competition problem in.</param>

@@ -8,13 +8,15 @@ namespace MathComps.Domain.Contracts.Defense;
 /// applies to any one conversation.
 /// </summary>
 /// <remarks>
-/// The handout arm carries only ids, while the problem arm carries names alongside them, because the two are
-/// named from different places: handout content is read on the reader's own side, while the taxonomy is not,
-/// and a competition still under embargo is absent from everything the reader's side could name it from.
+/// The handout arm carries only ids, while the problem and proposal arms carry names alongside them, because the
+/// kinds are named from different places: handout content is read on the reader's own side, while the taxonomy
+/// is not, the proposals reach it only as part of the selection, and a competition still under embargo is
+/// absent from everything the reader's side could name it from.
 /// </remarks>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(NamedHandoutTarget), typeDiscriminator: "handout")]
 [JsonDerivedType(typeof(NamedProblemTarget), typeDiscriminator: "problem")]
+[JsonDerivedType(typeof(NamedProposalTarget), typeDiscriminator: "proposal")]
 public abstract record NamedDefenseTarget;
 
 /// <inheritdoc cref="HandoutEnvironmentTarget" path="/summary"/>
@@ -33,3 +35,13 @@ public sealed record NamedHandoutTarget(string HandoutContentId, string Environm
 /// <param name="Source"><inheritdoc cref="ProblemSource" path="/summary"/></param>
 public sealed record NamedProblemTarget(
     Guid ProblemId, string CompetitionSlug, string Slug, ProblemSource Source) : NamedDefenseTarget;
+
+/// <summary>
+/// The proposal a conversation was held against: a problem parked among the proposals, named by what the
+/// reviewers quote it by, since no competition has set it.
+/// </summary>
+/// <param name="ProblemId"><inheritdoc cref="ProblemTarget.ProblemId" path="/summary"/></param>
+/// <param name="Slug"><inheritdoc cref="EfCoreEntities.Problem.Slug" path="/summary"/></param>
+/// <param name="Number"><inheritdoc cref="EfCoreEntities.Proposal.Number" path="/summary"/></param>
+/// <param name="Title"><inheritdoc cref="EfCoreEntities.Proposal.Title" path="/summary"/></param>
+public sealed record NamedProposalTarget(Guid ProblemId, string Slug, int Number, string Title) : NamedDefenseTarget;

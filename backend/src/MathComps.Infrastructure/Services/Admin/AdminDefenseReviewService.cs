@@ -150,6 +150,10 @@ public class AdminDefenseReviewService(
                     session.Feedback != null))
             .ToListAsync(cancellationToken);
 
+        // The proposals among the page's problems.
+        var proposals = await NamedDefenseTargets.LoadProposalsAsync(
+            dbContext, page.Select(row => row.Target), cancellationToken);
+
         // Put the page back in order, which the join above is under no obligation to have kept: most recently
         // spoken to first, ties broken by id. The id is compared as the ordinal text of its canonical form, which
         // is the order the database cut the page by, since Postgres compares a uuid as its sixteen bytes and that
@@ -160,7 +164,7 @@ public class AdminDefenseReviewService(
             .ThenBy(row => row.Id.ToString(), StringComparer.Ordinal)
             .Select(row => new AdminDefenseConversationDto(
                 row.Id,
-                NamedDefenseTargets.Build(localization, language, row.Target),
+                NamedDefenseTargets.Build(localization, language, row.Target, proposals),
                 row.User,
                 row.LastStudentMessage,
                 row.StudentMessageCount,
@@ -262,10 +266,14 @@ public class AdminDefenseReviewService(
             .Select(row => new AdminDefenseProblemOptionDto(
                 new NamedHandoutTarget(row.HandoutContentId, row.EnvironmentId), row.ConversationCount));
 
+        // The proposals among the archive problems.
+        var proposals = await NamedDefenseTargets.LoadProposalsAsync(
+            dbContext, archiveRows.Select(row => row.Target), cancellationToken);
+
         // The archive problems, each named where it comes from.
         var archiveProblems = archiveRows
             .Select(row => new AdminDefenseProblemOptionDto(
-                NamedDefenseTargets.Build(localization, language, row.Target), row.ConversationCount));
+                NamedDefenseTargets.Build(localization, language, row.Target, proposals), row.ConversationCount));
 
         // Both kinds in one list, the busiest first, ties broken by whatever addresses the problem so that two
         // with the same count keep one order between reads.
@@ -392,6 +400,9 @@ public class AdminDefenseReviewService(
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new DefenseSessionNotFoundException();
 
+        // The proposal the conversation's problem is, if it is one.
+        var proposals = await NamedDefenseTargets.LoadProposalsAsync(dbContext, [loaded.Target], cancellationToken);
+
         // Read the blob as json without committing to a shape for it, which is the whole point of storing it the
         // way it was written. Cloning detaches the element, so the document itself is done with here.
         using var examinerConfig = JsonDocument.Parse(loaded.ExaminerConfig);
@@ -399,7 +410,7 @@ public class AdminDefenseReviewService(
         // Hand it back with the settings parsed into the response rather than double-encoded into it.
         return new AdminDefenseDetailDto(
             loaded.Id,
-            NamedDefenseTargets.Build(localization, language, loaded.Target),
+            NamedDefenseTargets.Build(localization, language, loaded.Target, proposals),
             loaded.User,
             loaded.ProblemStatement,
             loaded.ProblemReference,

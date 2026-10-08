@@ -35,6 +35,11 @@ const LABELLER: HandoutProblemLabeller = {
 }
 
 /**
+ * What heads the section the proposals file under.
+ */
+const PROPOSALS = 'Problem selection'
+
+/**
  * Two problems held against two handouts that have both since gone from the site.
  */
 const OUTLIVED_PROBLEMS: DefenseReviewProblemOption[] = [
@@ -87,7 +92,7 @@ const ARCHIVE_PROBLEMS: DefenseReviewProblemOption[] = [2026, 2027].map((startYe
 describe('toProblemFacet', () => {
   it('collapses the handouts that are gone into one section', () => {
     // Two removed handouts, which nothing on this side can tell apart beyond their content ids
-    const facet = toProblemFacet(OUTLIVED_PROBLEMS, LABELLER, 'Problem')
+    const facet = toProblemFacet(OUTLIVED_PROBLEMS, LABELLER, 'Problem', PROPOSALS)
 
     // One heading rather than a run of identical ones, since two of them read as the same section twice
     expect(Object.values(facet.sectionLabels)).toEqual(['Deleted handout'])
@@ -95,7 +100,7 @@ describe('toProblemFacet', () => {
 
   it('files the problems outliving their handouts under the one section that names them', () => {
     // The same two problems, as the facet lists them
-    const facet = toProblemFacet(OUTLIVED_PROBLEMS, LABELLER, 'Problem')
+    const facet = toProblemFacet(OUTLIVED_PROBLEMS, LABELLER, 'Problem', PROPOSALS)
 
     // Both land in the section the headings name, rather than in one apiece that nothing renders
     expect(new Set(facet.options.map((option) => option.groupKey))).toEqual(
@@ -107,7 +112,7 @@ describe('toProblemFacet', () => {
 describe('toProblemFacet, over the archive', () => {
   it('heads a competition with the season it ran in, so two runs of it read apart', () => {
     // The same competition run in two seasons, which its own name is the same for
-    const facet = toProblemFacet(ARCHIVE_PROBLEMS, LABELLER, 'Problem')
+    const facet = toProblemFacet(ARCHIVE_PROBLEMS, LABELLER, 'Problem', PROPOSALS)
 
     // Each season heads its own section, rather than both runs filing under one
     expect(Object.values(facet.sectionLabels).sort()).toEqual([
@@ -118,10 +123,44 @@ describe('toProblemFacet, over the archive', () => {
 
   it('names the option by the problem alone, the competition being what the heading says', () => {
     // The problems as the facet lists them
-    const facet = toProblemFacet(ARCHIVE_PROBLEMS, LABELLER, 'Problem')
+    const facet = toProblemFacet(ARCHIVE_PROBLEMS, LABELLER, 'Problem', PROPOSALS)
 
     // Which reads as the problem's own place in its competition
     expect(facet.options.map((option) => option.displayName)).toEqual(['Problem 2', 'Problem 2'])
+  })
+})
+
+describe('toProblemFacet, over the proposals', () => {
+  it('files every proposal under one section, each by its number and working name', () => {
+    // Two proposals, parked wherever, which the reviewers quote by number alone
+    const proposals: DefenseReviewProblemOption[] = [
+      {
+        target: {
+          kind: 'proposal',
+          problemId: 'p-21',
+          slug: 'p-21',
+          number: 21,
+          title: 'Two circles',
+        },
+        conversationCount: 2,
+      },
+      {
+        target: { kind: 'proposal', problemId: 'p-4', slug: 'p-4', number: 4, title: 'A sum' },
+        conversationCount: 1,
+      },
+    ]
+
+    // The proposals as the facet lists them
+    const facet = toProblemFacet(proposals, LABELLER, 'Problem', PROPOSALS)
+
+    // One section, headed the way the selection itself is
+    expect(Object.values(facet.sectionLabels)).toEqual([PROPOSALS])
+
+    // Each option named the way the selection names it
+    expect(facet.options.map((option) => option.displayName)).toEqual([
+      '#21 Two circles',
+      '#4 A sum',
+    ])
   })
 })
 

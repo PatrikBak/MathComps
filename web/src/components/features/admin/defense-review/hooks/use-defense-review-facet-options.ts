@@ -91,6 +91,9 @@ export function useDefenseReviewFacetOptions(
   // Profile copy
   const tProfile = useTranslations('profile')
 
+  // Page titles
+  const tPages = useTranslations('pages')
+
   // The active locale
   const locale = useLocale() as Locale
 
@@ -120,8 +123,13 @@ export function useDefenseReviewFacetOptions(
     () =>
       options === null
         ? { options: [], sectionLabels: {} }
-        : toProblemFacet(options.problems, labeller, tHandouts('environments.problem')),
-    [options, labeller, tHandouts]
+        : toProblemFacet(
+            options.problems,
+            labeller,
+            tHandouts('environments.problem'),
+            tPages('problemSelection.title')
+          ),
+    [options, labeller, tHandouts, tPages]
   )
 
   // The options themselves

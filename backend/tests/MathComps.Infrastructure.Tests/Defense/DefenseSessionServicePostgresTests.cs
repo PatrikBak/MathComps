@@ -320,12 +320,12 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             Slug = "mathcomps-proposals-1",
         });
 
-        // The proposal filing it in the pool.
+        // The proposal filing it in the pool, quoted by a number the problem's own row doesn't share.
         context.Proposals.Add(new Proposal
         {
             ProblemId = _proposedProblemId,
-            Number = 1,
-            Title = "Proposal 1",
+            Number = 21,
+            Title = "Proposal 21",
             Area = ProposalArea.Algebra,
             Recommended = [],
         });
@@ -773,6 +773,109 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
+    /// A conversation about a proposal is listed beside the competition ones, named by the number and the working
+    /// name the reviewers quote it by, since no competition has set it.
+    /// </summary>
+    [Fact]
+    public Task ListAll_names_a_proposals_conversation_by_its_number_and_title() => RunTestAsync(async service =>
+    {
+        // The owner reviews the proposals, which takes the grant
+        await GrantOwnerPrepareCompetitionsAsync();
+
+        // The owner's conversation about a problem parked among the proposals
+        var proposal = await service.StartAsync(_ownerId, ProblemRequest(_proposedProblemId, "my defense"));
+
+        // And one about the hosted problem the seeded entry lets them argue
+        var competition = await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
+
+        // Listing the owner's conversations
+        var sessions = await service.ListAllAsync(_ownerId, Language.EN);
+
+        // Which holds both, the later one first
+        Assert.Equal([competition.Id, proposal.Id], sessions.Select(session => session.Id));
+
+        // The competition one is still named by its competition
+        Assert.IsType<NamedProblemTarget>(sessions[0].Target);
+
+        // And the proposal one by the proposal filing its problem
+        Assert.Equal(
+            new NamedProposalTarget(_proposedProblemId, "mathcomps-proposals-1", 21, "Proposal 21"),
+            sessions[1].Target);
+    });
+
+    /// <summary>
+    /// A problem a paper took keeps the proposal that filed it, yet in a competition's round it goes by that
+    /// competition. The working name is the reviewers' own, so a student arguing the problem under an entry sees it
+    /// named like any competition problem.
+    /// </summary>
+    [Fact]
+    public Task ListAll_names_a_problem_a_paper_took_by_its_competition() => RunTestAsync(async service =>
+    {
+        // The hosted problem came from the proposals, whose row stays once a paper takes the problem
+        await QueryAsync(async context =>
+        {
+            // The proposal filing the hosted problem
+            context.Proposals.Add(new Proposal
+            {
+                ProblemId = _problemId,
+                Number = 22,
+                Title = "Proposal 22",
+                Area = ProposalArea.Algebra,
+                Recommended = [],
+            });
+
+            // Commit the proposal
+            await context.SaveChangesAsync();
+        });
+
+        // The student's conversation about the hosted problem, under the seeded entry
+        await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
+
+        // Listing the student's conversations
+        var sessions = await service.ListAllAsync(_ownerId, Language.EN);
+
+        // Which names the problem by its competition rather than by the proposal
+        Assert.IsType<NamedProblemTarget>(Assert.Single(sessions).Target);
+    });
+
+    /// <summary>
+    /// A conversation about a proposal leaves the list once the proposal is deleted, while the owner's other
+    /// conversations stay.
+    /// </summary>
+    [Fact]
+    public Task ListAll_leaves_out_a_conversation_about_a_deleted_proposal() => RunTestAsync(async service =>
+    {
+        // The owner reviews the proposals, which takes the grant
+        await GrantOwnerPrepareCompetitionsAsync();
+
+        // The owner's conversation about a problem parked among the proposals
+        await service.StartAsync(_ownerId, ProblemRequest(_proposedProblemId, "my defense"));
+
+        // And one about the hosted problem the seeded entry lets them argue
+        var competition = await service.StartAsync(_ownerId, ProblemRequest(_problemId, "my defense"));
+
+        // The proposal deleted afterwards
+        await QueryAsync(async context =>
+        {
+            // The proposal filing the problem
+            var proposal = await context.Proposals.SingleAsync(
+                candidate => candidate.ProblemId == _proposedProblemId);
+
+            // Deleted, as the selection deletes one
+            proposal.DeletedAt = DateTimeOffset.UtcNow;
+
+            // Commit the deletion
+            await context.SaveChangesAsync();
+        });
+
+        // Listing the owner's conversations
+        var sessions = await service.ListAllAsync(_ownerId, Language.EN);
+
+        // Which holds the competition one alone
+        Assert.Equal([competition.Id], sessions.Select(session => session.Id));
+    });
+
+    /// <summary>
     /// A session rewound to the examiner's opener has no student message left, which the listing reports as none.
     /// </summary>
     [Fact]
@@ -946,15 +1049,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     public Task A_proposals_conversation_can_be_rewound_and_deleted() => RunTestAsync(async service =>
     {
         // The owner reviews the proposals, which takes the grant
-        await QueryAsync(async context =>
-        {
-            // The owner's grant
-            context.UserGrants.Add(
-                new UserGrant { UserId = _ownerId, Capability = UserCapability.PrepareCompetitions });
-
-            // Commit the grant
-            await context.SaveChangesAsync();
-        });
+        await GrantOwnerPrepareCompetitionsAsync();
 
         // Argue a problem parked among the proposals, which needs no entry
         var session = await service.StartAsync(
@@ -1880,6 +1975,19 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
         });
 
         // Commit the seeded spend
+        await context.SaveChangesAsync();
+    });
+
+    /// <summary>
+    /// Makes the owner a reviewer of the proposals, which takes the grant to prepare the competitions.
+    /// </summary>
+    /// <returns>A task that completes once the grant is written.</returns>
+    private Task GrantOwnerPrepareCompetitionsAsync() => QueryAsync(async context =>
+    {
+        // The owner's grant
+        context.UserGrants.Add(new UserGrant { UserId = _ownerId, Capability = UserCapability.PrepareCompetitions });
+
+        // Commit the grant
         await context.SaveChangesAsync();
     });
 

@@ -10,6 +10,7 @@ import type {
 import type { HandoutProblemRefEmphasis } from '@/components/features/handouts/HandoutProblemRefLabel'
 import { HandoutProblemRefLink } from '@/components/features/handouts/HandoutProblemRefLink'
 import { useHandoutProblemLabel } from '@/components/features/handouts/use-handout-problem-label'
+import { assertNever } from '@/components/shared/utils/assert-never'
 
 /**
  * Props for the {@link DefenseTargetRef} component.
@@ -48,18 +49,26 @@ function HandoutTargetLink({ target, emphasis }: HandoutTargetLinkProps) {
 
 /**
  * Which problem a conversation was held against, as its own row: a link for a handout problem, the plain line
- * for an archive one.
+ * for an archive one or a proposal.
  */
 export function DefenseTargetRef({ target, emphasis }: DefenseTargetRefProps) {
-  // The handout arm is the only one anything on the site can send the reader to
-  if (target.kind === 'handout') {
-    return <HandoutTargetLink target={target} emphasis={emphasis} />
-  }
+  // Point at the problem the way its kind is reached
+  switch (target.kind) {
+    // The handout arm is the only one anything on the site can send the reader to
+    case 'handout':
+      return <HandoutTargetLink target={target} emphasis={emphasis} />
 
-  // The rest read as the line alone, on a row of their own so they sit where the link's would
-  return (
-    <span className="flex min-w-0 items-baseline gap-2">
-      <DefenseTargetLabel target={target} emphasis={emphasis} />
-    </span>
-  )
+    // The rest read as the line alone, on a row of their own so they sit where the link's would
+    case 'problem':
+    case 'proposal':
+      return (
+        <span className="flex min-w-0 items-baseline gap-2">
+          <DefenseTargetLabel target={target} emphasis={emphasis} />
+        </span>
+      )
+
+    // An arm nothing here knows
+    default:
+      return assertNever(target)
+  }
 }

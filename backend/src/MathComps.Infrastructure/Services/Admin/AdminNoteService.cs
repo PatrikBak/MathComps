@@ -293,11 +293,15 @@ public class AdminNoteService(
                 note.Turn == null ? null : note.Turn.Sequence))
             .ToListAsync(cancellationToken);
 
+        // The proposals among the page's problems.
+        var proposals = await NamedDefenseTargets.LoadProposalsAsync(
+            dbContext, rows.Select(row => row.Target), cancellationToken);
+
         // Each note with its conversation's problem named, which takes the taxonomy the database knows nothing of.
         var items = rows
             .Select(row => new AdminNoteFeedItemDto(
                 row.Note,
-                NamedDefenseTargets.Build(localization, language, row.Target),
+                NamedDefenseTargets.Build(localization, language, row.Target, proposals),
                 row.User,
                 row.TurnSequence))
             .ToList();

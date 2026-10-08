@@ -8,6 +8,7 @@ import { HandoutProblemRefLabel } from '@/components/features/handouts/HandoutPr
 import { useHandoutProblemLabel } from '@/components/features/handouts/use-handout-problem-label'
 import { useIsCurrentHandout } from '@/components/features/handouts/use-is-current-handout'
 import { competitionAreaHref } from '@/components/features/hosted-competitions/services/hosted-competition-routes'
+import { proposalHref } from '@/components/features/problem-selection/model/selection-routes'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { assertNever } from '@/components/shared/utils/assert-never'
@@ -18,6 +19,7 @@ import type {
   DefenseSessionListItem,
   NamedHandoutTarget,
   NamedProblemTarget,
+  NamedProposalTarget,
 } from '../model/defense-types'
 import { DefenseTargetLabel } from './DefenseTargetLabel'
 
@@ -60,6 +62,14 @@ type HandoutDefenseRowProps = MathildaDefenseRowProps & {
 type CompetitionDefenseRowProps = MathildaDefenseRowProps & {
   /** The competition problem the defense was about. */
   target: NamedProblemTarget
+}
+
+/**
+ * Props for the {@link ProposalDefenseRow} component.
+ */
+type ProposalDefenseRowProps = MathildaDefenseRowProps & {
+  /** The proposal the defense was about. */
+  target: NamedProposalTarget
 }
 
 /**
@@ -284,8 +294,41 @@ function CompetitionDefenseRow({
 }
 
 /**
- * One row in the list of a user's defenses. The two kinds of problem are named from different places and
- * read in different places, so each wears its own row over the shared one.
+ * A row for a defense about a proposal: named on the way in, since only the problem selection reads the
+ * proposals and this list opens on any page, and jumping to the proposal opened in the problem selection.
+ */
+function ProposalDefenseRow({
+  defense,
+  target,
+  openRef,
+  onOpen,
+  onDelete,
+  onClose,
+}: ProposalDefenseRowProps) {
+  // Problem-selection copy
+  const tSelection = useTranslations('problemSelection')
+
+  return (
+    <DefenseRowShell
+      defense={defense}
+      openRef={openRef}
+      onOpen={onOpen}
+      onDelete={onDelete}
+      label={<DefenseTargetLabel target={target} emphasis="strong" />}
+      jump={
+        <RowJump
+          href={proposalHref({ proposalId: target.problemId, tab: undefined })}
+          label={tSelection('goToSelection')}
+          onClick={onClose}
+        />
+      }
+    />
+  )
+}
+
+/**
+ * One row in the list of a user's defenses. Each kind of problem is named from a different place and read in
+ * a different place, so each wears its own row over the shared one.
  */
 export function MathildaDefenseRow(props: MathildaDefenseRowProps) {
   // The target the defense was held against, which decides which row this is
@@ -300,6 +343,10 @@ export function MathildaDefenseRow(props: MathildaDefenseRowProps) {
     // A competition problem
     case 'problem':
       return <CompetitionDefenseRow {...props} target={target} />
+
+    // A proposal
+    case 'proposal':
+      return <ProposalDefenseRow {...props} target={target} />
 
     // Every target is handled above
     default:

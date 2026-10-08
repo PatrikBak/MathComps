@@ -61,7 +61,8 @@ function HandoutTarget({ target, emphasis }: HandoutTargetProps) {
  * An archive problem's parts carry different weights. Which problem it was is the half that tells two of
  * these apart, so it holds its width while the competition's own name wraps or gives way as the room runs
  * out. The problem is coloured the way the handout pages colour a problem, so a line naming an archive
- * problem and one naming a handout problem read as the same kind of thing.
+ * problem and one naming a handout problem read as the same kind of thing. A proposal reads the same way, its
+ * number standing where the problem would and its working name where the competition would.
  *
  * It brings no row of its own so that a caller can set the text size and put whatever else belongs on the
  * line beside it.
@@ -70,7 +71,10 @@ export function DefenseTargetLabel({ target, emphasis }: DefenseTargetLabelProps
   // Handout-surface copy
   const tHandouts = useTranslations('handouts')
 
-  // Name it per kind, since the two are named from different places
+  // Page titles
+  const tPages = useTranslations('pages')
+
+  // Name it per kind, since each is named from a different place
   switch (target.kind) {
     // A handout problem, named from content the reader's own side holds
     case 'handout':
@@ -98,6 +102,25 @@ export function DefenseTargetLabel({ target, emphasis }: DefenseTargetLabelProps
         </>
       )
     }
+
+    // A proposal, which arrives already named by what the reviewers quote it by
+    case 'proposal':
+      return (
+        <>
+          {/* Where the proposals are read, which the line drops narrow */}
+          <span className="hidden truncate text-muted/70 sm:inline">
+            {tPages('problemSelection.title')}
+          </span>
+
+          {/* Its working name */}
+          <span className={cn('min-w-0', ARCHIVE_EMPHASIS_CLASS[emphasis])}>{target.title}</span>
+
+          {/* Its number */}
+          <span className={cn('shrink-0 tabular-nums', ENVIRONMENT_TEXT_COLOR.problem)}>
+            {`#${target.number}`}
+          </span>
+        </>
+      )
 
     // An arm nothing here knows
     default:

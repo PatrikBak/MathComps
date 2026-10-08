@@ -1277,6 +1277,7 @@
       "unwritten": "no {languages}",
       "used": "used in a round"
     },
+    "goToSelection": "Open in the problem selection",
     "language": {
       "label": "Language",
       "unwritten": "Not written yet"
