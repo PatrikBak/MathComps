@@ -1,7 +1,7 @@
+import { skipToken } from '@tanstack/react-query'
 import { useLocale } from 'next-intl'
 
 import { useApiQuery } from '@/hooks/use-api-query'
-import { BackendApiError } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
@@ -37,19 +37,11 @@ export function useConversationDetail(sessionId: string | null): UseConversation
   // The conversation itself
   const { data: detail, uiState } = useApiQuery({
     queryKey: conversationDetailQueryKey(sessionId ?? NO_CONVERSATION, locale),
-    fetch: (apiCall) => {
-      // The gate below keeps this from running with nothing open, so reaching here is a bug
-      if (sessionId === null) {
-        throw new BackendApiError({ message: 'No conversation is open', errorCode: 'SERVER_ERROR' })
-      }
-
-      // The transcript and everything read alongside it
-      return fetchConversationDetail(apiCall, sessionId)
-    },
+    // Nothing while no conversation is open, then the transcript and everything read alongside it
+    fetch:
+      sessionId === null ? skipToken : (apiCall) => fetchConversationDetail(apiCall, sessionId),
     // The transcript is an admin's own read, so it is made as them
     requireAuth: true,
-    // Nothing is read while no conversation is open
-    enabled: sessionId !== null,
     ...cachePolicy.userData,
   })
 

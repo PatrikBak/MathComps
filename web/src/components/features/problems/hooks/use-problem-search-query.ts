@@ -205,41 +205,40 @@ export function useSingleProblem(
   // The cache the library's own options are parked in
   const queryClient = useQueryClient()
 
+  // A function which reads the problem a slug names, syncing it into the global store
+  const readProblem = async (slug: string) => {
+    // Narrow to the ready caller
+    const apiCall = readyApiCall(api)
+
+    // Fetch the problem details from the server, asking for the library's options only when the
+    // reader arrived here cold rather than clicking through an archive that already holds them
+    const data = unwrap(
+      await getProblemBySlug(apiCall, slug, shouldAskForBaseOptions(queryClient, locale))
+    )
+
+    // The library's options parked, so a reader arriving on a link has the search bar the archive
+    // would have given them
+    if (data.baseOptions) {
+      queryClient.setQueryData(problemQueryKeys.baseOptions(locale), data.baseOptions)
+    }
+
+    // Sync to global store
+    upsertProblem(data.problem)
+
+    // Deconstruct the result to remove the problem
+    const { problem: _, ...rest } = data
+
+    // Return just the rest of the result (problem will be in the global store)
+    return rest
+  }
+
   // Construct the React Query
   const query = useQuery({
     queryKey: problemQueryKeys.single(locale, problemSlug, userId),
-    queryFn: async () => {
-      // Guard against missing slug (should be prevented by enabled flag, but provides safety)
-      if (!problemSlug) {
-        throw new Error('Problem slug is required')
-      }
-
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
-
-      // Fetch the problem details from the server, asking for the library's options only when the
-      // reader arrived here cold rather than clicking through an archive that already holds them
-      const data = unwrap(
-        await getProblemBySlug(apiCall, problemSlug, shouldAskForBaseOptions(queryClient, locale))
-      )
-
-      // The library's options parked, so a reader arriving on a link has the search bar the archive
-      // would have given them
-      if (data.baseOptions) {
-        queryClient.setQueryData(problemQueryKeys.baseOptions(locale), data.baseOptions)
-      }
-
-      // Sync to global store
-      upsertProblem(data.problem)
-
-      // Deconstruct the result to remove the problem
-      const { problem: _, ...rest } = data
-
-      // Return just the rest of the result (problem will be in the global store)
-      return rest
-    },
-    // Only run the query when enabled and we have a valid slug
-    enabled: enabled && problemSlug !== null && api.state === 'ready',
+    // Nothing while no problem is singled out, then the problem the slug names
+    queryFn: problemSlug === null ? skipToken : () => readProblem(problemSlug),
+    // Only run the query when enabled and the API client is ready
+    enabled: enabled && api.state === 'ready',
   })
 
   // Reduce the raw flags to the one state that describes this fetch
@@ -278,64 +277,71 @@ function useProblemSearchInfinite(
   // The cache the library's own options are parked in
   const queryClient = useQueryClient()
 
+  // A function which reads one page of the problems a set of filters asks for, syncing them into the
+  // global store
+  const readPage = async (
+    searchFilters: SearchFiltersState,
+    pageParam: number,
+    signal: AbortSignal
+  ) => {
+    // Narrow to the ready caller
+    const apiCall = readyApiCall(api)
+
+    // Whether this search is the one to carry the library's options back. Only a first page can:
+    // the archive counts them once per search and says nothing of them on the pages behind it.
+    const askForBaseOptions = pageParam === 1 && shouldAskForBaseOptions(queryClient, locale)
+
+    // Fetch the page of problems from the server with abort support for request cancellation
+    const data = unwrap(
+      await searchProblems(
+        apiCall,
+        searchFilters,
+        DEFAULT_PAGE_SIZE,
+        pageParam,
+        askForBaseOptions,
+        signal
+      )
+    )
+
+    // The library's options, lifted off the page they rode in on
+    const { baseOptions, ...page } = data
+
+    // An answer asked for the library's options and carrying none leaves the search bar nothing to
+    // draw, so it is refused here rather than rendered as a page that never finishes loading
+    if (askForBaseOptions && !baseOptions) {
+      throw new Error('The archive answered the first search without the library options')
+    }
+
+    // The library's options parked for every later search to read, when this answer carried them
+    if (baseOptions) {
+      queryClient.setQueryData(problemQueryKeys.baseOptions(locale), baseOptions)
+    }
+
+    // Sync to global store
+    upsertProblems(page.problems.items)
+
+    // Separate the problems from the rest of the data so we can
+    // just return the slugs (problems have been added to the global store)
+    const { items: problems, ...rest } = page.problems
+
+    // On the result, replace the problems with slugs
+    return {
+      ...page,
+      problems: {
+        ...rest,
+        slugs: problems.map((problem) => problem.slug),
+      },
+    }
+  }
+
   // Construct the React Query
   const query = useInfiniteQuery({
     queryKey: problemQueryKeys.search(locale, filters, userId),
-    queryFn: async ({ pageParam, signal }: { pageParam: number; signal: AbortSignal }) => {
-      // Guard against missing filters (should be prevented by enabled flag, but provides safety)
-      if (!filters) {
-        throw new Error('Filters are required for search')
-      }
-
-      // Narrow to the ready caller
-      const apiCall = readyApiCall(api)
-
-      // Whether this search is the one to carry the library's options back. Only a first page can:
-      // the archive counts them once per search and says nothing of them on the pages behind it.
-      const askForBaseOptions = pageParam === 1 && shouldAskForBaseOptions(queryClient, locale)
-
-      // Fetch the page of problems from the server with abort support for request cancellation
-      const data = unwrap(
-        await searchProblems(
-          apiCall,
-          filters,
-          DEFAULT_PAGE_SIZE,
-          pageParam,
-          askForBaseOptions,
-          signal
-        )
-      )
-
-      // The library's options, lifted off the page they rode in on
-      const { baseOptions, ...page } = data
-
-      // An answer asked for the library's options and carrying none leaves the search bar nothing to
-      // draw, so it is refused here rather than rendered as a page that never finishes loading
-      if (askForBaseOptions && !baseOptions) {
-        throw new Error('The archive answered the first search without the library options')
-      }
-
-      // The library's options parked for every later search to read, when this answer carried them
-      if (baseOptions) {
-        queryClient.setQueryData(problemQueryKeys.baseOptions(locale), baseOptions)
-      }
-
-      // Sync to global store
-      upsertProblems(page.problems.items)
-
-      // Separate the problems from the rest of the data so we can
-      // just return the slugs (problems have been added to the global store)
-      const { items: problems, ...rest } = page.problems
-
-      // On the result, replace the problems with slugs
-      return {
-        ...page,
-        problems: {
-          ...rest,
-          slugs: problems.map((problem) => problem.slug),
-        },
-      }
-    },
+    // Nothing until there are filters, then the page of problems they ask for
+    queryFn:
+      filters === null
+        ? skipToken
+        : ({ pageParam, signal }) => readPage(filters, pageParam, signal),
     // Start with page 1 (server uses 1-based pagination)
     initialPageParam: 1,
 
@@ -348,8 +354,8 @@ function useProblemSearchInfinite(
       return page * pageSize < totalCount ? page + 1 : undefined
     },
 
-    // Only run if filters are provided and enabled
-    enabled: enabled && filters !== null && api.state === 'ready',
+    // Only run when enabled and the API client is ready
+    enabled: enabled && api.state === 'ready',
   })
 
   // Reduce the raw flags to the one state that describes this fetch

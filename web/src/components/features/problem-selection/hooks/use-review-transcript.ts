@@ -1,7 +1,8 @@
 'use client'
 
+import { skipToken } from '@tanstack/react-query'
+
 import { useApiQuery } from '@/hooks/use-api-query'
-import { BackendApiError } from '@/lib/api/api-error'
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
@@ -34,19 +35,11 @@ export function useReviewTranscript(conversationId: string | null): UseReviewTra
   // The transcript itself
   const { data: transcript, uiState } = useApiQuery<ReviewTranscript>({
     queryKey,
-    fetch: (apiCall) => {
-      // The gate below keeps this from running with nothing open, so reaching here is a bug
-      if (conversationId === null) {
-        throw new BackendApiError({ message: 'No conversation is open', errorCode: 'SERVER_ERROR' })
-      }
-
-      // The statement and the turns
-      return getTranscript(apiCall, conversationId)
-    },
+    // Nothing while no conversation is open, then the statement and the turns
+    fetch:
+      conversationId === null ? skipToken : (apiCall) => getTranscript(apiCall, conversationId),
     // The selection is never public, so neither is anything said about its problems
     requireAuth: true,
-    // Nothing is read while no conversation is open
-    enabled: conversationId !== null,
     // A conversation can still be going on, so a copy counts as fresh only briefly
     ...cachePolicy.userData,
   })
