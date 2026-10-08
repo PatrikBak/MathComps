@@ -6,14 +6,33 @@ import { useCategoryName } from '../hooks/use-category-name'
 import type { HostedCompetitionCategory } from '../model/hosted-competition-types'
 
 /**
- * The colour each level carries wherever it appears.
+ * The ink each level carries wherever it appears, on its tint or on none.
  *
  * A hue per level, kept clear of the ones already spoken for: violet for what is live, blue for a link.
  */
-const CATEGORY_BADGE_CLASS: Record<HostedCompetitionCategory, string> = {
-  elementary: 'bg-emerald-400/10 text-emerald-200',
-  intermediate: 'bg-amber-400/10 text-amber-200',
-  advanced: 'bg-rose-400/10 text-rose-200',
+const CATEGORY_TEXT_CLASS: Record<HostedCompetitionCategory, string> = {
+  elementary: 'text-emerald-200',
+  intermediate: 'text-amber-200',
+  advanced: 'text-rose-200',
+}
+
+/**
+ * The ink a label carries for a level: the level's hue, or the page's own for something outside the levels.
+ *
+ * @param category - The level; null for none.
+ *
+ * @returns The text class.
+ */
+export function categoryTextClass(category: HostedCompetitionCategory | null): string {
+  // The page's own text colour outside the levels, else the level's hue
+  return category === null ? 'text-foreground' : CATEGORY_TEXT_CLASS[category]
+}
+
+/** The tint behind a level's name, in the level's hue. */
+const CATEGORY_TINT_CLASS: Record<HostedCompetitionCategory, string> = {
+  elementary: 'bg-emerald-400/10',
+  intermediate: 'bg-amber-400/10',
+  advanced: 'bg-rose-400/10',
 }
 
 /** How large a badge is drawn. */
@@ -47,7 +66,8 @@ export function CategoryBadge({ category, size = 'regular' }: CategoryBadgeProps
       className={cn(
         'inline-flex rounded-md font-semibold',
         SIZE_CLASS[size],
-        CATEGORY_BADGE_CLASS[category]
+        CATEGORY_TINT_CLASS[category],
+        CATEGORY_TEXT_CLASS[category]
       )}
     >
       {categoryName(category)}

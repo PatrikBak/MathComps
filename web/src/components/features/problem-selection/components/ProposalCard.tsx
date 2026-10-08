@@ -1,6 +1,7 @@
 'use client'
 
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
+import { cn } from '@/components/shared/utils/css-utils'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import type { Locale } from '@/i18n/i18n'
 
@@ -21,12 +22,19 @@ type ProposalCardProps = {
 }
 
 /**
- * A problem as a card: its number and working name, linking to it in full, what it is filed under and how much
- * it has been talked about, the statement in full, and the hints and the solution side by side.
+ * A problem as a card: its number and working name, linking to it in full, what it is filed under, where it sits
+ * and how much it has been talked about, the statement in full, and the hints and the solution side by side.
  */
 export function ProposalCard({ proposal, language }: ProposalCardProps) {
   return (
-    <SurfacePanel as="article" radius="xl">
+    <SurfacePanel
+      as="article"
+      radius="xl"
+      className={cn(
+        // A set-aside problem, dimmed
+        proposal.isSetAside && 'opacity-70'
+      )}
+    >
       {/* Header */}
       <header className="space-y-1.5 border-b border-foreground/10 px-4 py-3">
         {/* Identity: number and working name, a link opening the problem in full */}

@@ -1252,6 +1252,17 @@
       "geometry": "Geometrie",
       "numberTheory": "Teorie čísel"
     },
+    "board": {
+      "draft": "Rozpracovaná",
+      "empty": "Prázdné",
+      "finalized": "Uzavřená",
+      "fold": "Sbalit sestavu",
+      "label": "Sestava",
+      "missingLanguages": "Bez zadání nebo řešení: {languages}",
+      "none": "Zatím tu není žádná sestava.",
+      "progress": "{filled} z {total}",
+      "unfold": "Rozbalit sestavu"
+    },
     "comments": {
       "placeholder": "Co si o úloze myslíš a kam se hodí?"
     },
@@ -1277,14 +1288,27 @@
       "unwritten": "bez {languages}",
       "used": "použitá v kole"
     },
+    "filters": {
+      "any": "Libovolné",
+      "area": "Oblast",
+      "category": "Kategorie",
+      "notSelected": "Nevybrané",
+      "setAside": "Odložené {count}"
+    },
     "goToSelection": "Otevřít ve výběru úloh",
     "language": {
       "label": "Jazyk",
       "unwritten": "V tomto jazyce zatím není"
     },
     "pool": {
+      "empty": "Těmto filtrům neodpovídá žádná úloha.",
       "emptyPool": "Zatím tu nejsou žádné úlohy.",
-      "loading": "Načítám úlohy"
+      "emptySetAside": "Nic není odložené.",
+      "emptySetAsideFiltered": "Těmto filtrům neodpovídá žádná odložená úloha.",
+      "loading": "Načítám úlohy",
+      "search": "Hledat úlohy",
+      "searchPlaceholder": "Číslo, název nebo text",
+      "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}"
     },
     "text": {
       "fallback": "Zatím chybí {missing}, zobrazuje se {shown}.",
@@ -1427,6 +1451,7 @@
     "filters": {
       "apply": "Použít filtry",
       "clear": "Vymazat",
+      "clearFilters": "Zrušit filtry",
       "clearSearch": "Vymazat vyhledávání v {name}",
       "close": "Zavřít filtry",
       "closePopover": "Zavřít výběr",

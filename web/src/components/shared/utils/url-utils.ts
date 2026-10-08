@@ -132,6 +132,29 @@ export function pushQuery(query: string): void {
 }
 
 /**
+ * The address's query with one writer's parameters set to what it says now, for an address several writers share.
+ * Every parameter the writer doesn't own stays as it stands.
+ *
+ * @param query - What the writer says now, as a query string without its `?`.
+ * @param ownedParams - Every parameter the writer owns; one the query leaves out is left out of the result.
+ *
+ * @returns The query to put on the address, without its `?`.
+ */
+export function mergeOwnedParams(query: string, ownedParams: readonly string[]): string {
+  // The query as it stands
+  const merged = new URLSearchParams(window.location.search)
+
+  // Without the writer's own parameters
+  ownedParams.forEach((param) => merged.delete(param))
+
+  // The writer's parameters, as it says them now
+  new URLSearchParams(query).forEach((value, param) => merged.append(param, value))
+
+  // The query to put on the address
+  return merged.toString()
+}
+
+/**
  * The path the reader is on with a query string on it, in place of whatever query and fragment the address had.
  *
  * @param query - The query string, without its `?`; an empty one leaves the address bare.

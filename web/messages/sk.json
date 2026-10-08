@@ -1252,6 +1252,17 @@
       "geometry": "Geometria",
       "numberTheory": "Teória čísel"
     },
+    "board": {
+      "draft": "Rozpracovaná",
+      "empty": "Prázdne",
+      "finalized": "Uzavretá",
+      "fold": "Zbaliť zostavu",
+      "label": "Zostava",
+      "missingLanguages": "Bez zadania alebo riešenia: {languages}",
+      "none": "Zatiaľ tu nie je žiadna zostava.",
+      "progress": "{filled} z {total}",
+      "unfold": "Rozbaliť zostavu"
+    },
     "comments": {
       "placeholder": "Čo si o úlohe myslíš a kam sa hodí?"
     },
@@ -1277,14 +1288,27 @@
       "unwritten": "bez {languages}",
       "used": "použitá v kole"
     },
+    "filters": {
+      "any": "Ľubovoľné",
+      "area": "Oblasť",
+      "category": "Kategória",
+      "notSelected": "Nevybrané",
+      "setAside": "Odložené {count}"
+    },
     "goToSelection": "Otvoriť vo výbere úloh",
     "language": {
       "label": "Jazyk",
       "unwritten": "V tomto jazyku zatiaľ nie je"
     },
     "pool": {
+      "empty": "Týmto filtrom nezodpovedá žiadna úloha.",
       "emptyPool": "Zatiaľ tu nie sú žiadne úlohy.",
-      "loading": "Načítavam úlohy"
+      "emptySetAside": "Nič nie je odložené.",
+      "emptySetAsideFiltered": "Týmto filtrom nezodpovedá žiadna odložená úloha.",
+      "loading": "Načítavam úlohy",
+      "search": "Hľadať úlohy",
+      "searchPlaceholder": "Číslo, názov alebo text",
+      "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}"
     },
     "text": {
       "fallback": "Zatiaľ chýba {missing}, zobrazuje sa {shown}.",
@@ -1427,6 +1451,7 @@
     "filters": {
       "apply": "Použiť filtre",
       "clear": "Vymazať",
+      "clearFilters": "Zrušiť filtre",
       "clearSearch": "Vymazať vyhľadávanie v {name}",
       "close": "Zavrieť filtre",
       "closePopover": "Zavrieť výber",

@@ -5,10 +5,15 @@ import { useSearchParams } from 'next/navigation'
 import { useCallback, useRef } from 'react'
 
 import { dataAttribute } from '@/components/shared/utils/dom-utils'
-import { pushQuery } from '@/components/shared/utils/url-utils'
+import { mergeOwnedParams, pushQuery } from '@/components/shared/utils/url-utils'
 import { OPEN_ID_ATTRIBUTE, useFocusReturn } from '@/hooks/use-focus-return'
 
-import { OPEN_PROPOSAL_PARAM, type ProposalPage, proposalQuery } from '../model/selection-routes'
+import {
+  OPEN_PROPOSAL_PARAM,
+  PROPOSAL_PARAMS,
+  type ProposalPage,
+  proposalQuery,
+} from '../model/selection-routes'
 
 /** The attribute stamping a problem's id on its page's heading, which focus moves to as the problem opens. */
 export const PROPOSAL_HEADING_ATTRIBUTE = dataAttribute('data-proposal-heading')
@@ -98,8 +103,9 @@ function poolScrollFor({ scrollY, anchor }: PoolSpot): number {
 
 /**
  * The problem open in full, carried in the address so a link to it can be shared. Moving in and out goes through
- * {@link pushQuery}, so the browser's back button steps between the problem and the pool. A problem starts at
- * the top with focus on its name, and the pool comes back where it was left with focus on the problem's link.
+ * {@link pushQuery}, so the browser's back button steps between the problem and the pool. Only the problem's own
+ * parameters change, so the pool's filter rides along. A problem starts at the top with focus on its name, and the
+ * pool comes back where it was left with focus on the problem's link.
  *
  * @returns The open problem and the ways in and out of it.
  */
@@ -164,7 +170,7 @@ export function useOpenProposal(): UseOpenProposalResult {
     if (isPoolPaintedRef.current) poolSpotRef.current = poolSpotAt(page.proposalId)
 
     // The problem's address, as a new step in history
-    pushQuery(proposalQuery(page))
+    pushQuery(mergeOwnedParams(proposalQuery(page), PROPOSAL_PARAMS))
   }, [])
 
   // A function which goes back to the pool
@@ -173,7 +179,7 @@ export function useOpenProposal(): UseOpenProposalResult {
     if (addressedProposalId() === null) return
 
     // The pool's address, as a new step in history
-    pushQuery('')
+    pushQuery(mergeOwnedParams('', PROPOSAL_PARAMS))
   }, [])
 
   // The open problem and the ways in and out of it

@@ -15,7 +15,13 @@ import type { Locale } from '@/i18n/i18n'
 
 import { useDetailTabCounts } from '../hooks/use-detail-tab-counts'
 import { PROPOSAL_HEADING_ATTRIBUTE } from '../hooks/use-open-proposal'
-import { DETAIL_TABS, type DetailTab, detailTabOf, proposalQuery } from '../model/selection-routes'
+import {
+  DETAIL_TABS,
+  type DetailTab,
+  detailTabOf,
+  PROPOSAL_PARAMS,
+  proposalQuery,
+} from '../model/selection-routes'
 import { hasSolution, resolveText, unwrittenLanguages } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
 import { LanguageSwitch } from './LanguageSwitch'
@@ -109,8 +115,9 @@ function ProposalDetailBody({ proposal, poolLanguage }: ProposalDetailBodyProps)
   // The tab showing, the addressed one at first
   const [tab, setTab] = useState<DetailTab>(addressedTab)
 
-  // Keep the address naming the tab on screen, so a link copied from it opens the same one
-  useAddressSync(proposalQuery({ proposalId: proposal.id, tab }))
+  // Keep the address naming the tab on screen, so a link copied from it opens the same one, every other
+  // parameter left as it stands
+  useAddressSync(proposalQuery({ proposalId: proposal.id, tab }), PROPOSAL_PARAMS)
 
   // How many conversations and comments the problem carries
   const counts = useDetailTabCounts(proposal.id)
@@ -183,7 +190,7 @@ function ProposalDetailBody({ proposal, poolLanguage }: ProposalDetailBodyProps)
         )}
       </header>
 
-      {/* What it is filed under, and the language it is read in */}
+      {/* What it is filed under and where it sits, and the language it is read in */}
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <ProposalFiling proposal={proposal} showCounts={false} />
         <LanguageSwitch

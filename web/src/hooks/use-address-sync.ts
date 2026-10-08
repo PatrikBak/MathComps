@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 
-import { replaceQuery } from '@/components/shared/utils/url-utils'
+import { mergeOwnedParams, replaceQuery } from '@/components/shared/utils/url-utils'
 
 /**
  * Keeps the address bar saying what a screen is showing, so a reload lands back where the reader was and what they
@@ -13,8 +13,10 @@ import { replaceQuery } from '@/components/shared/utils/url-utils'
  *
  * @param query - What the screen is showing, as the query string the address should carry, without its leading
  * question mark. The same screen must always make the same string, or an unchanged one is written again.
+ * @param ownedParams - The parameters the screen owns, for an address it shares with another writer: a write
+ * replaces those alone, leaving the rest as they stand. Left out, the screen owns the whole query.
  */
-export function useAddressSync(query: string): void {
+export function useAddressSync(query: string, ownedParams?: readonly string[]): void {
   // What the address already says, starting at what the page loaded on, so the first say, which is always the
   // address the reader is already looking at, leaves it as it was
   const publishedRef = useRef(query)
@@ -27,7 +29,7 @@ export function useAddressSync(query: string): void {
     // What the address now stands at
     publishedRef.current = query
 
-    // Onto the address, leaving the page where it stands
-    replaceQuery(query)
-  }, [query])
+    // Onto the address, leaving the page where it stands and any other writer's parameters as they are
+    replaceQuery(ownedParams === undefined ? query : mergeOwnedParams(query, ownedParams))
+  }, [query, ownedParams])
 }

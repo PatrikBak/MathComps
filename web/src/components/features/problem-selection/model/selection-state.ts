@@ -1,12 +1,20 @@
 import { groupBy } from '@/components/shared/utils/collection-utils'
 import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
-import type { Proposal, ProposalText, ReviewConversation, SelectionData } from './selection-types'
+import type {
+  Board,
+  Paper,
+  Proposal,
+  ProposalText,
+  ReviewConversation,
+  SelectionData,
+} from './selection-types'
 
 /**
- * The selection as read, with its proposals and their conversations looked up by proposal id.
+ * The selection as read: its boards as they came, and its proposals and their conversations looked up by
+ * proposal id.
  */
-export type SelectionIndex = {
+export type SelectionIndex = Pick<SelectionData, 'boards'> & {
   /** Every proposal, by id. */
   proposalsById: ReadonlyMap<string, Proposal>
   /** Every conversation about each proposal, by the proposal's id, newest first. */
@@ -30,8 +38,78 @@ export function indexSelection(data: SelectionData): SelectionIndex {
     (conversation) => conversation.proposalId
   )
 
-  // The lookups by proposal
-  return { proposalsById, conversationsByProposal }
+  // The boards as they came, with the lookups beside them
+  return { boards: data.boards, proposalsById, conversationsByProposal }
+}
+
+/**
+ * The board to put on screen: the one kept there while the selection still holds it, else the first draft, else
+ * the first board there is.
+ *
+ * @param boards - Every board.
+ * @param keptBoardId - The board kept on screen, by id; null while none has been shown.
+ *
+ * @returns The board; null when the selection holds none.
+ */
+export function pickActiveBoard(
+  boards: readonly Board[],
+  keptBoardId: string | null
+): Board | null {
+  // The board kept on screen, else the first one still being drafted, else the first one there is
+  return (
+    boards.find((board) => board.id === keptBoardId) ??
+    boards.find((board) => board.finalization === null) ??
+    boards[0] ??
+    null
+  )
+}
+
+/**
+ * The short label a slot goes by: the paper's initial and the slot's number, like E2.
+ *
+ * @param paperName - The name of the paper holding the slot.
+ * @param index - The slot's position, from zero.
+ *
+ * @returns The label.
+ */
+export function slotLabel(paperName: string, index: number): string {
+  // The paper's initial in capitals, then the slot counted from one
+  return `${paperName.charAt(0).toUpperCase()}${index + 1}`
+}
+
+/**
+ * Where one slot sits within its paper.
+ */
+export type SlotPosition = {
+  /** The paper holding the slot. */
+  paper: Paper
+  /** The slot's position in the paper, from zero. */
+  index: number
+}
+
+/**
+ * One slot a proposal fills, with the board and the paper holding it.
+ */
+export type Placement = SlotPosition & {
+  /** The board holding the slot. */
+  board: Board
+}
+
+/**
+ * Every slot the proposal fills, across every board.
+ *
+ * @param boards - Every board.
+ * @param proposalId - The proposal.
+ *
+ * @returns Its placements, in board order.
+ */
+export function placementsOf(boards: readonly Board[], proposalId: string): Placement[] {
+  // Every slot holding the proposal, on any paper of any board
+  return boards.flatMap((board) =>
+    board.papers.flatMap((paper) =>
+      paper.slots.flatMap((slot, index) => (slot === proposalId ? [{ board, paper, index }] : []))
+    )
+  )
 }
 
 /**
