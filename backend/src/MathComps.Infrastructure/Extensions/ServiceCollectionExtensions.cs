@@ -3,6 +3,7 @@ using System.ClientModel.Primitives;
 using System.Net.Http.Headers;
 using Clerk.BackendAPI;
 using MathComps.Domain.Contracts.Competitions;
+using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Options;
@@ -466,9 +467,9 @@ public static class ServiceCollectionExtensions
         services.AddMemoryCache();
 
         // Resolves what the examiner is told, from whichever source the defense's target names.
-        services.TryAddSingleton<IHandoutDefenseContentResolver, HandoutDefenseContentResolver>();
-        services.TryAddSingleton<IProblemDefenseContentResolver, ProblemDefenseContentResolver>();
-        services.TryAddSingleton<IDefenseContentResolver, DefenseContentResolver>();
+        services.TryAddSingleton<IDefenseContentResolver<HandoutEnvironmentTarget>, HandoutDefenseContentResolver>();
+        services.TryAddSingleton<IDefenseContentResolver<ProblemTarget>, ProblemDefenseContentResolver>();
+        services.TryAddSingleton<IDefenseContentResolver<DefenseTarget>, DefenseContentResolver>();
 
         // Serializes a user's concurrent turns; shared process-wide, so a singleton.
         services.TryAddSingleton<IDefenseUserTurnGate, DefenseUserTurnGate>();

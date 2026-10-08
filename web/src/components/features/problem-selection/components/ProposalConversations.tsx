@@ -4,6 +4,7 @@ import { History, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { DefenseTranscript } from '@/components/features/defense/components/DefenseTranscript'
+import { EditedSinceNote } from '@/components/features/defense/components/EditedSinceNote'
 import { ProblemBand } from '@/components/features/defense/components/ProblemBand'
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
@@ -157,12 +158,7 @@ function ConversationModal({ conversation, authorName, onClose }: ConversationMo
           </div>
 
           {/* The note that the problem has changed since */}
-          {conversation.hasOlderStatement && (
-            <p className="flex items-center gap-1.5 border-b border-foreground/10 px-5 py-2 text-xs text-warning">
-              <History size={12} />
-              {t('editedSince')}
-            </p>
-          )}
+          {conversation.hasOlderStatement && <EditedSinceNote />}
 
           {/* The statement it was argued against and what was said, once they have arrived */}
           {transcript === null ? (

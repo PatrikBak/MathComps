@@ -7,13 +7,17 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Services.Defense.Content;
 
 /// <summary>
-/// An <see cref="IProblemDefenseContentResolver"/> reading a problem's texts straight from the database. Nothing
-/// is cached: a problem is read once per conversation opened, and an embargoed one must never be served from a
-/// cache that outlives an edit made while its competition is still running.
+/// An <see cref="IDefenseContentResolver{TTarget}"/> for archive problems, reading a problem's texts straight from the
+/// database. Nothing is cached: a problem is read once per conversation opened, and an embargoed one must never be
+/// served from a cache that outlives an edit made while its competition is still running.
 /// </summary>
+/// <remarks>
+/// A problem resolves to content only in a language holding both its statement and its solution, while a statement
+/// with no solution beside it still counts among the statements it has.
+/// </remarks>
 /// <param name="dbContextFactory">Creates the contexts the lookups run on.</param>
 public sealed class ProblemDefenseContentResolver(IDbContextFactory<MathCompsDbContext> dbContextFactory)
-    : IProblemDefenseContentResolver
+    : IDefenseContentResolver<ProblemTarget>
 {
     /// <inheritdoc/>
     public async Task<DefenseProblemContent?> ResolveAsync(
@@ -49,5 +53,22 @@ public sealed class ProblemDefenseContentResolver(IDbContextFactory<MathCompsDbC
 
         // Everything the examiner reads about the problem.
         return new DefenseProblemContent(statement, reference, hints);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyDictionary<Language, string>> ResolveStatementsAsync(
+        ProblemTarget target, CancellationToken cancellationToken)
+    {
+        // A fresh context for this lookup.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // The problem's statement in every language it is written in, each read the way a defense reads one, and
+        // only where the row holds one.
+        return await dbContext.ProblemTexts
+            .AsNoTracking()
+            .Where(text => text.ProblemId == target.ProblemId
+                && text.DocumentType == DocumentType.Statement
+                && (text.MarkdownText ?? text.RawText) != null)
+            .ToDictionaryAsync(text => text.Language, text => (text.MarkdownText ?? text.RawText)!, cancellationToken);
     }
 }

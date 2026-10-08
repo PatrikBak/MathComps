@@ -6,7 +6,7 @@ import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import messages from '../messages/en.json'
 import { answerJson, BACKEND_ORIGIN } from './support/backend-routes'
-import { SELECTION_PATH, sendTurn, transcriptOf } from './support/competitions'
+import { chatCopy, SELECTION_PATH, sendTurn, transcriptOf } from './support/competitions'
 import { installHostedBackend } from './support/hosted-backend'
 import { SCRIPTED_REPLIES } from './support/hosted-backend-content'
 import {
@@ -27,6 +27,7 @@ import {
   RECENT,
   rememberedSelection,
   REVIEWER,
+  REVISION,
   selectionCopy,
   SETTLE_TIMEOUT_MS,
   stubSelection,
@@ -221,9 +222,7 @@ test.describe('what reviewers said about a problem', () => {
     await expect(page.getByRole('dialog')).toContainText(`Part 1 of problem ${OPENED.number}.`)
 
     // Unmarked, that statement being the one the problem has now
-    await expect(page.getByRole('dialog')).not.toContainText(
-      selectionCopy.conversations.editedSince
-    )
+    await expect(page.getByRole('dialog')).not.toContainText(chatCopy.editedSince)
 
     // Read once, as it opened
     expect(reads).toBe(1)
@@ -254,7 +253,7 @@ test.describe('what reviewers said about a problem', () => {
     await rows.nth(1).click()
 
     // Saying the problem has changed since
-    await expect(page.getByRole('dialog')).toContainText(selectionCopy.conversations.editedSince)
+    await expect(page.getByRole('dialog')).toContainText(chatCopy.editedSince)
 
     // Under the statement as it stood then
     await expect(page.getByRole('dialog')).toContainText(EARLIER_STATEMENT, {
@@ -341,6 +340,80 @@ test.describe('what reviewers said about a problem', () => {
     await expect(conversationRows(page)).toContainText(
       selectionText('conversations.messages', { count: 3 })
     )
+  })
+
+  test('continues a conversation with Mathilda under the statement it was argued against, saying the problem has been revised since', async ({
+    page,
+  }) => {
+    // The backend the chat talks to, which keeps what is said to Mathilda
+    const chat = await installHostedBackend(page, 'ready')
+
+    // A reviewer whose selection holds a pool of problems, read again as the test says
+    const answerSelectionWith = await stubSelection(page, 'selection', rememberedSelection(chat))
+
+    // A problem solved in English, which the site is read in
+    await page.goto(`${SELECTION_PATH}?problem=${BILINGUAL.id}`)
+
+    // Its page
+    await expect(headingOf(page, BILINGUAL)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The button opening a conversation with Mathilda
+    const mathilda = page.getByRole('button', { name: MATHILDA_NAME, exact: true })
+
+    // A conversation with her, opened
+    await mathilda.click()
+
+    // An argument put to her
+    await sendTurn(page, ARGUED)
+
+    // Her reply
+    await expect(transcriptOf(page)).toContainText(SCRIPTED_REPLIES[0]!, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The problem read again, once the conversation has been saved
+    await page.reload()
+
+    // The chat, opened again
+    await mathilda.click()
+
+    // On the conversation, continued
+    await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Saying nothing changed, its statement being the one the problem has
+    await expect(page.getByRole('dialog')).not.toContainText(chatCopy.editedSince)
+
+    // The problem's author revising its English statement meanwhile
+    answerSelectionWith('revisedInEnglish')
+
+    // The problem read again
+    await page.reload()
+
+    // In its revised statement
+    await expect(page.getByRole('article').getByText(REVISION)).toBeVisible({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The chat, opened again
+    await mathilda.click()
+
+    // On the conversation, continued
+    await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Saying the problem has been revised since
+    await expect(page.getByRole('dialog')).toContainText(chatCopy.editedSince)
+
+    // Under the statement Mathilda argues, which the revision is not part of
+    await expect(page.getByRole('dialog')).not.toContainText(REVISION)
+
+    // A fresh conversation, started beside it
+    await page.getByRole('button', { name: chatCopy.newDefense }).click()
+
+    // Under the statement as revised
+    await expect(page.getByRole('dialog')).toContainText(REVISION)
+
+    // Unmarked, its statement being the one the problem has now
+    await expect(page.getByRole('dialog')).not.toContainText(chatCopy.editedSince)
   })
 
   test("writes a comment into a problem's discussion, and counts it on the problem's card", async ({

@@ -614,6 +614,7 @@
     "deleteSession": "Odstrániť z histórie",
     "deleteSessionMessage": "Táto konverzácia sa natrvalo odstráni.",
     "deleteSessionTitle": "Odstrániť túto konverzáciu?",
+    "editedSince": "Úloha bola odvtedy upravená. Toto je zadanie, ako vtedy znelo.",
     "feedbackAuthReason": "odosielanie spätnej väzby",
     "feedbackCommentLabel": "Chceš niečo dodať?",
     "feedbackError": "Zmenu sa nepodarilo uložiť.",
@@ -1255,7 +1256,6 @@
       "placeholder": "Čo si o úlohe myslíš a kam sa hodí?"
     },
     "conversations": {
-      "editedSince": "Úloha bola odvtedy upravená. Toto je zadanie, ako vtedy znelo.",
       "empty": "O tejto úlohe sa s Mathildou zatiaľ nikto nerozprával.",
       "messages": "{count, plural, one {# správa} few {# správy} other {# správ}}",
       "olderStatement": "staršie zadanie",

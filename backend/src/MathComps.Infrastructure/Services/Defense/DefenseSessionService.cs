@@ -33,7 +33,7 @@ namespace MathComps.Infrastructure.Services.Defense;
 public class DefenseSessionService(
     IOptions<DefenseLimits> limits,
     IDefenseTargetGuard targetGuard,
-    IDefenseContentResolver contentResolver,
+    IDefenseContentResolver<DefenseTarget> contentResolver,
     IExaminerConfigSnapshotProvider examinerConfigSnapshotProvider,
     IDefenseUserTurnGate turnGate,
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
@@ -127,8 +127,8 @@ public class DefenseSessionService(
         // Persist the session, its turns, its target, and the spend row in one write.
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        // Hand back the full conversation.
-        return ToSessionDto(session, start.Request.Target);
+        // Hand back the full conversation, argued against the statement the problem has this instant.
+        return ToSessionDto(session, start.Request.Target, hasOlderStatement: false);
     }
 
     /// <inheritdoc/>
@@ -195,6 +195,14 @@ public class DefenseSessionService(
         if (!loaded.HoldsHostedEntry)
             await EnsureUnderSpendCeilingAsync(dbContext, userId, cancellationToken);
 
+        // What the session defends, from the columns naming it.
+        var target = DefenseTargets.FromColumns(
+            session.TargetKind, loaded.HandoutContentId, loaded.EnvironmentId, loaded.ProblemId);
+
+        // Every statement the target has now, in any language. Read before the turn is written, so a source that
+        // cannot be read leaves nothing saved.
+        var statements = await contentResolver.ResolveStatementsAsync(target, cancellationToken);
+
         // When the student sent the message, or the stamp of a reply in this same conversation that landed while it
         // waited, if that is later: the message goes in below that reply, and the stamps keep to turn order.
         var stampedAt = session.Turns.Select(turn => turn.CreatedAt).Append(sentAt).Max();
@@ -209,24 +217,24 @@ public class DefenseSessionService(
         // Persist the appended turns and the spend row in one write.
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        // Hand back the grown conversation.
-        return ToSessionDto(
-            session,
-            DefenseTargets.FromColumns(
-                session.TargetKind, loaded.HandoutContentId, loaded.EnvironmentId, loaded.ProblemId));
+        // Hand back the grown conversation, flagged when no language still has its statement.
+        return ToSessionDto(session, target, !statements.Values.Contains(session.ProblemStatement));
     }
 
     /// <inheritdoc/>
     public async Task<DefenseSessionListDto> ListAsync(
         Guid userId, DefenseTarget target, CancellationToken cancellationToken = default)
     {
+        // Every statement the target has now, in any language.
+        var statements = (await contentResolver.ResolveStatementsAsync(target, cancellationToken)).Values.ToList();
+
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // The user's sessions against this target, most recently active first: each conversation in order,
-        // the student's answer for it, and what they hold against its replies. Every session in this list defends
-        // the target the caller named, so it rides into each one. Split, so the turns and the reports don't
-        // multiply out.
+        // The user's sessions against this target, most recently active first: each conversation in order, the
+        // statement it is argued against and whether any language still has it, the student's answer for it, and
+        // what they hold against its replies. Every session in this list defends the target the caller named, so it
+        // rides into each one. Split, so the turns and the reports don't multiply out.
         var sessions = await dbContext.DefenseSessions
             .AsNoTracking()
             .AsSplitQuery()
@@ -238,6 +246,8 @@ public class DefenseSessionService(
             .Select(session => new DefenseSessionDto(
                 session.Id,
                 target,
+                session.ProblemStatement,
+                !statements.Contains(session.ProblemStatement),
                 session.Turns
                     .OrderBy(turn => turn.Sequence)
                     .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))
@@ -678,15 +688,20 @@ public class DefenseSessionService(
     }
 
     /// <summary>
-    /// Projects a session to its client shape: its turns in order, what the student said about the conversation,
-    /// and what they hold against its replies.
+    /// Projects a session to its client shape: the statement it is argued against, its turns in order, what the
+    /// student said about the conversation, and what they hold against its replies.
     /// </summary>
     /// <param name="session">The session to project.</param>
     /// <param name="target">What the session defends.</param>
+    /// <param name="hasOlderStatement">
+    /// <inheritdoc cref="DefenseSessionDto" path="/param[@name='HasOlderStatement']"/></param>
     /// <returns>The session's client shape.</returns>
-    private static DefenseSessionDto ToSessionDto(DefenseSession session, DefenseTarget target) =>
+    private static DefenseSessionDto ToSessionDto(
+        DefenseSession session, DefenseTarget target, bool hasOlderStatement) =>
         new(session.Id,
             target,
+            session.ProblemStatement,
+            hasOlderStatement,
             ToTurnDtos(session.Turns),
             ToFeedbackDto(session.Feedback),
             ToReportDtos(session.Reports));

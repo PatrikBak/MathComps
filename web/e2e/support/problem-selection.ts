@@ -156,6 +156,18 @@ const LATER_SELECTION = SELECTION.map((proposal) => {
 })
 
 /**
+ * {@link BILINGUAL} as its author revised it in English, with a paragraph added at the end, its Slovak statement
+ * left as it was.
+ */
+const BILINGUAL_REVISED: Proposal = {
+  ...BILINGUAL,
+  texts: {
+    ...BILINGUAL.texts,
+    en: { ...BILINGUAL.texts.en!, statement: `${statementOf(BILINGUAL.number)}\n\n${REVISION}` },
+  },
+}
+
+/**
  * The address a link to {@link OPENED} carries. The parameter is written out rather than imported, since links
  * already shared carry this exact name.
  */
@@ -289,8 +301,7 @@ export function rememberedSelection(chat: HostedBackend | null): SelectionMemory
  * @returns The conversations, in no particular order.
  */
 function heldConversations(memory: SelectionMemory, proposals: Proposal[]): HeldConversation[] {
-  // Each conversation held through the chat, by a reviewer with no username as the ambient profile has it, and
-  // against the problem's English statement, which no test revises while a chat is open
+  // Each conversation held through the chat, by a reviewer with no username as the ambient profile has it
   const chatted = proposals.flatMap((proposal) =>
     (memory.chat?.sessionsAbout(proposal.id) ?? []).map(
       (session): HeldConversation => ({
@@ -299,7 +310,7 @@ function heldConversations(memory: SelectionMemory, proposals: Proposal[]): Held
         author: null,
         // Started on Mathilda's greeting, which every conversation opens with
         startedAt: session.turns[0]!.createdAt,
-        transcript: { savedStatement: proposal.texts.en?.statement ?? '', turns: session.turns },
+        transcript: { savedStatement: session.statement, turns: session.turns },
       })
     )
   )
@@ -356,6 +367,8 @@ type SelectionReply =
   | 'selection'
   /** With every problem as a later read finds them, and the conversations about them. */
   | 'later'
+  /** With every problem in the selection, one of them revised in English, and the conversations about them. */
+  | 'revisedInEnglish'
   /** Refused with the code an account that does not prepare competitions earns. */
   | 'forbidden'
   /** Refused for good with no code at all, as an address the backend does not serve is. */
@@ -379,6 +392,10 @@ function proposalsHeldAt(reply: SelectionReply): Proposal[] {
     // Every problem as a later read finds them, one revised and another set aside
     case 'later':
       return LATER_SELECTION
+
+    // Every problem as first read, but for the one revised in English
+    case 'revisedInEnglish':
+      return SELECTION.map((proposal) => (proposal === BILINGUAL ? BILINGUAL_REVISED : proposal))
 
     // Every reply is handled above
     default:
@@ -415,7 +432,8 @@ type CountsRequestBody = {
 
 /**
  * Stands in for the selection's backend: the selection's read, with a reply the test can change midway, the
- * conversations it lists read out in full, and each problem's discussion with its count.
+ * conversations it lists read out in full, and each problem's discussion with its count. The chat in its memory,
+ * where there is one, reads the problems' statements from the same reply.
  *
  * @param page - The page to answer the selection's calls on.
  * @param firstReply - How the reads are answered until the test says otherwise.
@@ -431,6 +449,19 @@ export async function stubSelection(
   // How every read is answered right now
   let reply = firstReply
 
+  // The chat reading each problem's statements as the reply holds them right now, so a revision reaches it too
+  memory.chat?.statementsFrom((problemId) => {
+    // The problem, absent where the selection does not hold it
+    const proposal = proposalsHeldAt(reply).find((candidate) => candidate.id === problemId)
+
+    // The problem's statement in each language it is written in
+    return Object.fromEntries(
+      Object.entries(proposal?.texts ?? {}).flatMap(([locale, text]) =>
+        text === undefined ? [] : [[locale, text.statement]]
+      )
+    )
+  })
+
   // Stand in for the read
   await page.route(SELECTION_ENDPOINT, async (route) => {
     // Answered the way the test last asked for
@@ -438,6 +469,7 @@ export async function stubSelection(
       // Every problem the reply holds, with the conversations held about them
       case 'selection':
       case 'later':
+      case 'revisedInEnglish':
         return answerJson(route, 200, selectionOf(memory, proposalsHeldAt(reply)))
 
       // Refused, in the shape the backend writes an authorization failure as

@@ -12,9 +12,10 @@ using static Microsoft.Extensions.Options.Options;
 namespace MathComps.Infrastructure.Tests.Defense;
 
 /// <summary>
-/// Unit tests for <see cref="HandoutDefenseContentResolver"/>: the object key a target maps to, that a cached handout
-/// is served without reading storage again, and what an absent or unreadable blob resolves to. Storage is faked, so
-/// no network is involved. Expiry itself is <see cref="MemoryCache"/>'s job and is not retested here.
+/// Unit tests for <see cref="HandoutDefenseContentResolver"/>: the object key a target maps to, the statements every
+/// language's blob gives, that a cached handout is served without reading storage again, and what an absent or
+/// unreadable blob resolves to. Storage is faked, so no network is involved. Expiry itself is
+/// <see cref="MemoryCache"/>'s job and is not retested here.
 /// </summary>
 public sealed class HandoutDefenseContentResolverTests
 {
@@ -64,6 +65,27 @@ public sealed class HandoutDefenseContentResolverTests
         // Czech resolves; English, which nothing was published for, does not
         Assert.NotNull(await resolver.ResolveAsync(_target, Language.CS, CancellationToken.None));
         Assert.Null(await resolver.ResolveAsync(_target, Language.EN, CancellationToken.None));
+    }
+
+    /// <summary>
+    /// An environment's statements come from every language's blob, and a language nothing is published in adds
+    /// none.
+    /// </summary>
+    [Fact]
+    public async Task Statements_come_from_every_language_published()
+    {
+        // The handout published in Slovak and English, each blob stating the environment its own way
+        var reader = new FakeObjectReader();
+        reader.Put("handouts/defense/handout-1.sk.json", OneEnvironmentBlob.Replace("the statement", "zadanie"));
+        reader.Put("handouts/defense/handout-1.en.json", OneEnvironmentBlob);
+
+        // The environment's statements
+        var statements = await Resolver(reader).ResolveStatementsAsync(_target, CancellationToken.None);
+
+        // Each under the language it is published in, Czech adding none
+        Assert.Equal(
+            new Dictionary<Language, string> { [Language.SK] = "zadanie", [Language.EN] = "the statement" },
+            statements);
     }
 
     /// <summary>

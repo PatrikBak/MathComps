@@ -2,13 +2,13 @@ import type { Page, Route } from '@playwright/test'
 
 import type {
   DefenseCopy,
-  DefenseSession,
   DefenseSessionList,
   MathildaConsent,
 } from '@/components/features/defense/model/defense-types'
 import { derivePhase } from '@/components/features/hosted-competitions/model/hosted-competition-state'
 import type { SpentEntry } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
+import { SUPPORTED_LOCALES } from '@/i18n/i18n'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
 import { BACKEND_ORIGIN } from './backend-routes'
@@ -21,10 +21,14 @@ import {
   type FakeState,
   forgetSession,
   groupOf,
+  type HeldSession,
   isGroupTakingEntries,
   isSolutionOpen,
   problemIdOf,
   seedStraddlingDefense,
+  servedSession,
+  type StatementLookup,
+  statementsOf,
   storedTurn,
   transcriptsOf,
   withFinalMarks,
@@ -125,7 +129,7 @@ export type HostedBackendOptions = {
 }
 
 /**
- * The fake's memory, as a spec reads it back once the fake is installed.
+ * The fake's memory, as a spec reads it back and tells it about once the fake is installed.
  */
 export type HostedBackend = {
   /**
@@ -135,7 +139,15 @@ export type HostedBackend = {
    *
    * @returns The conversations, as each one stands now.
    */
-  sessionsAbout: (problemId: string) => DefenseSession[]
+  sessionsAbout: (problemId: string) => HeldSession[]
+
+  /**
+   * Reads the statements of every problem no competition here sets through the lookup given from then on, which
+   * the test owning those problems keeps current.
+   *
+   * @param lookup - The lookup.
+   */
+  statementsFrom: (lookup: StatementLookup) => void
 }
 
 /**
@@ -267,6 +279,8 @@ export async function installHostedBackend(
   const state: FakeState = {
     view: buildView(initial),
     readiness: buildReadiness(initial),
+    // No problem outside the competitions, until a test says otherwise
+    statementsOutside: () => ({}),
     transcripts: new Map(),
     assessments: new Map(),
     handoutSession: HANDOUT_SESSION,
@@ -553,7 +567,7 @@ export async function installHostedBackend(
 
     // Answered from memory, opening an empty transcript for a problem nobody has argued about
     return answer(page, route, {
-      sessions: transcriptsOf(state, problemId),
+      sessions: transcriptsOf(state, problemId).map((session) => servedSession(state, session)),
       limits: LIMITS,
     } satisfies DefenseSessionList)
   })
@@ -671,6 +685,28 @@ export async function installHostedBackend(
     // What is being argued, and the turn opening the argument
     const body = route.request().postDataJSON() as StartRequestBody
 
+    // The language the call is localized to, which the conversation is argued in
+    const language = SUPPORTED_LOCALES.find(
+      (locale) => locale === route.request().headers()['accept-language']
+    )
+
+    // The problem's statement in the call's language, which the conversation is argued against for good
+    const statement =
+      language === undefined ? undefined : statementsOf(state, body.target.problemId)[language]
+
+    // A problem not stated in the call's language has nothing to argue
+    if (statement === undefined) {
+      // Answered as the backend answers it
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ errorCode: 'DefenseContentNotFound' }),
+      })
+
+      // Nothing was opened
+      return
+    }
+
     // When the turn reached the backend. The greeting belongs to the same instant: it is what the
     // conversation was opened on, so it cannot be stamped after the turn that asked for it.
     const receivedAt = await pageNow(page)
@@ -682,9 +718,10 @@ export async function installHostedBackend(
     state.minted++
 
     // Opened on the examiner's line, then the student's turn, then her reply to it
-    const session: DefenseSession = {
+    const session: HeldSession = {
       id: `session-${state.minted}`,
       target: { kind: 'problem', problemId: body.target.problemId },
+      statement,
       turns: [
         storedTurn(state, 'examiner', OPENER, receivedAt),
         storedTurn(state, 'candidate', body.content, receivedAt + 1),
@@ -702,7 +739,7 @@ export async function installHostedBackend(
     await route.fulfill({
       status: 201,
       contentType: 'application/json',
-      body: JSON.stringify(session),
+      body: JSON.stringify(servedSession(state, session)),
     })
   })
 
@@ -753,13 +790,19 @@ export async function installHostedBackend(
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify(session),
+      body: JSON.stringify(servedSession(state, session)),
     })
   })
 
   // A function which reads every conversation held against one problem out of what this page's backend holds
   const sessionsAbout = (problemId: string) => transcriptsOf(state, problemId)
 
-  // The memory, as a spec reads it back
-  return { sessionsAbout }
+  // A function which hands the fake the test's word on the problems no competition here sets
+  const statementsFrom = (lookup: StatementLookup) => {
+    // Read through the lookup from here on
+    state.statementsOutside = lookup
+  }
+
+  // The memory, as a spec reads it back and tells it about
+  return { sessionsAbout, statementsFrom }
 }

@@ -121,6 +121,9 @@ class FakeBackend implements DefenseConversationServices {
       const session: DefenseSession = {
         id: `session-${(this.sessionCount += 1)}`,
         target: toWireTarget(request.target),
+        // Argued against the problem's statement, which nothing here revises
+        statement: SAMPLE_PROBLEM.statement,
+        hasOlderStatement: false,
         turns: [
           ...this.stampTurns([{ id: null, createdAt: null, role: 'examiner', content: OPENER }]),
           ...newTurns,
