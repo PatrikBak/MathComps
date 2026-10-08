@@ -159,11 +159,25 @@ export function transcriptOf(page: Page): Locator {
 /**
  * Opens the chat on a problem's most recent conversation.
  *
- * @param page - The page it is being opened on.
+ * @param within - The page it is being opened on, or the one problem on it whose conversation to open.
  */
-export async function openExistingDefense(page: Page): Promise<void> {
+export async function openExistingDefense(within: Page | Locator): Promise<void> {
   // The row of the conversation it opens, addressed by the conversation's own id
-  await page.locator('[data-defense-session-id]').first().click()
+  await within.locator('[data-defense-session-id]').first().click()
+}
+
+/**
+ * Closes the open chat and waits until it is gone, so a chat opened next is a new one rather than this one
+ * coming back mid-exit.
+ *
+ * @param page - The page the chat is open on.
+ */
+export async function closeChat(page: Page): Promise<void> {
+  // The keyboard path, which is how a student leaves without reaching for the mouse
+  await page.keyboard.press('Escape')
+
+  // All the way out
+  await expect(page.getByRole('dialog')).toHaveCount(0)
 }
 
 /**

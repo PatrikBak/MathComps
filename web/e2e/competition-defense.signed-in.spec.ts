@@ -4,6 +4,7 @@ import {
   areaCopy,
   areaPath,
   chatCopy,
+  closeChat,
   holdClock,
   LIST_PATH,
   openExistingDefense,
@@ -12,11 +13,14 @@ import {
 } from './support/competitions'
 import {
   COMPETITION_SLUG,
+  gateSessionReads,
   installHostedBackend,
   LIMITS,
   OPENER,
   PROBLEM_COUNT,
+  SESSION_LIST_ADDRESS,
 } from './support/hosted-backend'
+import { SCRIPTED_REPLIES } from './support/hosted-backend-content'
 import { expect, test } from './support/test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
@@ -153,7 +157,7 @@ test.describe('the conversation inside a competition', () => {
     let isHistoryReachable = false
 
     // Registered after the backend standing in behind it, which is what puts this one first
-    await page.route(`${BACKEND_ORIGIN}/defense/sessions/problems/*`, async (route) => {
+    await page.route(SESSION_LIST_ADDRESS, async (route) => {
       // Anything the outage is not about goes on to the backend behind this
       if (isHistoryReachable) {
         await route.fallback()
@@ -194,6 +198,59 @@ test.describe('the conversation inside a competition', () => {
 
     // And it is theirs to carry on with
     await expect(page.locator('textarea')).toBeEditable({ timeout: SETTLE_TIMEOUT_MS })
+  })
+
+  test('opens a conversation just held from its row, closed before the list of them was read again', async ({
+    page,
+  }) => {
+    // A student inside a competition
+    await installHostedBackend(page, 'running')
+
+    // What every read of a problem's conversations waits at
+    const history = await gateSessionReads(page)
+
+    // Open its area
+    await page.goto(areaPath(COMPETITION_SLUG))
+
+    // A problem nothing has been said about yet
+    const problem = page.getByRole('article').nth(1)
+
+    // The read the chat opens with
+    const firstRead = page.waitForResponse(SESSION_LIST_ADDRESS)
+
+    // A conversation about it, started
+    await problem.getByRole('button', { name: areaCopy.startDefense }).click({
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // Once the chat has found none held yet
+    await firstRead
+
+    // Every read from here on held, so the one the reply sets off is still in flight when the chat closes
+    const release = history.hold()
+
+    // What the student argues
+    const turn = 'The residues pair up, so every move has an answer.'
+
+    // Written and sent
+    await sendTurn(page, turn)
+
+    // And answered
+    await expect(transcriptOf(page)).toContainText(SCRIPTED_REPLIES[0]!, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // The chat, closed straight away
+    await closeChat(page)
+
+    // And the conversation opened again from where the problem now lists it
+    await openExistingDefense(problem)
+
+    // The list of conversations read at last
+    release()
+
+    // Carrying on the one just held
+    await expect(transcriptOf(page)).toContainText(turn, { timeout: SETTLE_TIMEOUT_MS })
   })
 
   test('keeps a half-written turn through a reload', async ({ page }) => {

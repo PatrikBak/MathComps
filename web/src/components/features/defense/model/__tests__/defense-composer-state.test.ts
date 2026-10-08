@@ -1,19 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
 import type { DefenseComposerInput } from '../defense-composer-state'
-import {
-  resolveComposerState,
-  resolveConsentStatus,
-  resolveHistoryStatus,
-} from '../defense-composer-state'
+import { resolveComposerState, resolveConsentStatus } from '../defense-composer-state'
 
 describe('resolveComposerState', () => {
   /** A signed-in reader whose conversation is settled and has room left in it. */
   const READY: DefenseComposerInput = {
     isAuthSettled: true,
     isSignedIn: true,
-    historyStatus: 'read',
-    isResumeSettled: true,
+    history: 'inHand',
+    opening: 'decided',
     consentStatus: 'given',
     isThinking: false,
     messagesLeft: 12,
@@ -151,31 +147,30 @@ describe('resolveComposerState', () => {
   })
 
   it('waits while the conversation the reader asked to carry on is still being opened', () => {
-    // A turn taken before the named conversation is open would open a second one beside it
-    expect(resolveComposerState({ ...READY, isResumeSettled: false })).toEqual({
+    // A turn taken before the saved conversation is open would open a second one beside it
+    expect(resolveComposerState({ ...READY, opening: 'waiting' })).toEqual({
       kind: 'loading',
     })
   })
 
   it('says so when the defense history behind the conversation could not be read', () => {
-    expect(resolveComposerState({ ...READY, historyStatus: 'unavailable' })).toEqual({
+    expect(resolveComposerState({ ...READY, history: 'unreadable' })).toEqual({
       kind: 'conversationUnavailable',
     })
   })
 
-  it('says the history could not be read rather than waiting on the resume it would have settled', () => {
-    // Waiting here is a spinner nothing ends: the read that settles the opening is the one that just
-    // failed, so nothing further is coming on its own
-    expect(
-      resolveComposerState({ ...READY, historyStatus: 'unavailable', isResumeSettled: false })
-    ).toEqual({ kind: 'conversationUnavailable' })
+  it('says so when the conversation being opened can no longer be learned', () => {
+    // Waiting here is a spinner nothing ends: the read that would have said which conversation it is gave up
+    expect(resolveComposerState({ ...READY, opening: 'unreachable' })).toEqual({
+      kind: 'conversationUnavailable',
+    })
   })
 
   it('asks for an account ahead of admitting it could not read the history', () => {
     // Nobody is signed in for the read to have been about, and no conversation of theirs was ever asked for
-    expect(
-      resolveComposerState({ ...READY, isSignedIn: false, historyStatus: 'unavailable' })
-    ).toEqual({ kind: 'signInRequired' })
+    expect(resolveComposerState({ ...READY, isSignedIn: false, history: 'unreadable' })).toEqual({
+      kind: 'signInRequired',
+    })
   })
 
   it('admits it could not read the history ahead of asking for the acknowledgement', () => {
@@ -185,7 +180,7 @@ describe('resolveComposerState', () => {
       resolveComposerState({
         ...READY,
         consentStatus: 'missing',
-        historyStatus: 'unavailable',
+        history: 'unreadable',
         messagesLeft: null,
       })
     ).toEqual({ kind: 'conversationUnavailable' })
@@ -193,9 +188,7 @@ describe('resolveComposerState', () => {
 
   it('opens without saying how much room is left while the history is still coming', () => {
     // The warning is a number, so a composer with no number to show simply does not show one
-    expect(
-      resolveComposerState({ ...READY, historyStatus: 'loading', messagesLeft: null })
-    ).toEqual({
+    expect(resolveComposerState({ ...READY, history: 'awaited', messagesLeft: null })).toEqual({
       kind: 'open',
       messagesLeft: null,
     })
@@ -230,30 +223,5 @@ describe('resolveConsentStatus', () => {
 
   it('waits while nothing has come back and nothing has failed', () => {
     expect(resolveConsentStatus({ data: undefined, isError: false })).toBe('loading')
-  })
-})
-
-describe('resolveHistoryStatus', () => {
-  /** The caps a defense here is held to. */
-  const LIMITS = {
-    maxCandidateChars: 4000,
-    maxFeedbackCommentChars: 2000,
-    maxMessagesPerDefense: 50,
-  }
-
-  it('reads the history off the answer that carries it', () => {
-    expect(resolveHistoryStatus({ limits: LIMITS, isError: false })).toBe('read')
-  })
-
-  it('keeps the answer it has through a read that failed after it', () => {
-    expect(resolveHistoryStatus({ limits: LIMITS, isError: true })).toBe('read')
-  })
-
-  it('says it could not be read when the failure is all there is', () => {
-    expect(resolveHistoryStatus({ limits: null, isError: true })).toBe('unavailable')
-  })
-
-  it('waits while nothing has come back and nothing has failed', () => {
-    expect(resolveHistoryStatus({ limits: null, isError: false })).toBe('loading')
   })
 })
