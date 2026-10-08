@@ -1,34 +1,27 @@
 import type { Locator, Page } from '@playwright/test'
 
-import type {
-  Proposal,
-  SelectionData,
-} from '@/components/features/problem-selection/model/selection-types'
-import { assertNever } from '@/components/shared/utils/assert-never'
-import type { AppErrorCode } from '@/lib/api/api-error-codes'
-
-import messages from '../messages/en.json'
 import { BACKEND_ORIGIN, returnToTab } from './support/backend-routes'
 import { actionsCopy, areaCopy, SELECTION_PATH } from './support/competitions'
+import {
+  BILINGUAL,
+  cardOf,
+  headingOf,
+  HINT,
+  LANDING_WINDOW_MS,
+  ON_OFFER_COUNT,
+  OPENED,
+  OPENED_ADDRESS,
+  REVISION,
+  SELECTION_ENDPOINT,
+  selectionCopy,
+  SET_ASIDE,
+  SETTLE_TIMEOUT_MS,
+  SLOVAK_STATEMENT,
+  stubSelection,
+  UNWRITTEN,
+  USED,
+} from './support/problem-selection'
 import { expect, test } from './support/test'
-
-/** How long the fake backend has to answer before a wait is called a failure. */
-const SETTLE_TIMEOUT_MS = 15_000
-
-/** How long a read gets to go out before a test is willing to say none did. */
-const LANDING_WINDOW_MS = 1_000
-
-/** Where the backend answers the selection's read. */
-const SELECTION_ENDPOINT = `${BACKEND_ORIGIN}/problem-selection`
-
-/** The copy the selection reads under. */
-const selectionCopy = messages.problemSelection
-
-/**
- * How many paragraphs an English statement runs to, enough that a problem's own page scrolls well past
- * {@link POOL_SPOT} on any machine, CI's runner included.
- */
-const STATEMENT_PARAGRAPHS = 48
 
 /** Where the pool is left when a problem is opened from it, in pixels from the top. */
 const POOL_SPOT = 400
@@ -42,205 +35,8 @@ const PROBLEM_SPOT = 300
 /** Where a problem's link stands in the view as it is followed, in pixels below the view's top. */
 const LINK_SPOT = 200
 
-/** {@link BILINGUAL}'s statement in Slovak. */
-const SLOVAK_STATEMENT = 'Na tabuli sú čísla od jeden do sto a dvaja hráči ich striedavo zotierajú.'
-
-/** {@link BILINGUAL}'s hint, in English. */
-const HINT = 'Pair the numbers up.'
-
-/** The paragraph an author adds to a problem's statement in revising it. */
-const REVISION = 'Revised: the two numbers left must also differ by more than one.'
-
 /** An id the selection holds no problem under, as a link to one taken out of it carries. */
 const UNHELD_ID = '00000000-0000-4000-8000-999999999999'
-
-/**
- * A problem's statement, {@link STATEMENT_PARAGRAPHS} paragraphs of the same erasing game.
- *
- * @param number - The number of the problem it states.
- *
- * @returns The statement as markdown.
- */
-function statementOf(number: number): string {
-  // Paragraph after paragraph of the same game, each saying which problem it belongs to
-  return Array.from(
-    { length: STATEMENT_PARAGRAPHS },
-    (_unused, index) =>
-      `Part ${index + 1} of problem ${number}. A board holds the numbers from one to a hundred, and two ` +
-      'players take turns erasing one of them until only two are left, the first player winning when ' +
-      'those two are coprime.'
-  ).join('\n\n')
-}
-
-/**
- * One problem in the selection, written in English alone and on offer, as most proposals start out.
- *
- * @param number - The number it is quoted by.
- * @param distinction - What sets the problem apart from one on offer in English alone.
- *
- * @returns The problem.
- */
-function proposalNumbered(number: number, distinction: Partial<Proposal> = {}): Proposal {
-  // The problem, its id built from its number so every problem gets its own, and whatever sets it apart laid on top
-  return {
-    id: `00000000-0000-4000-8000-${String(number).padStart(12, '0')}`,
-    number,
-    title: `Erasing game ${number}`,
-    area: 'combinatorics',
-    recommended: ['intermediate'],
-    texts: { en: { statement: statementOf(number), solution: null, hints: [] } },
-    isSetAside: false,
-    isUsed: false,
-    ...distinction,
-  }
-}
-
-/** A problem on offer, partway down the pool. */
-const OPENED = proposalNumbered(4)
-
-/** A problem written in Slovak as well, solved and hinted in English alone. */
-const BILINGUAL = proposalNumbered(2, {
-  texts: {
-    en: {
-      statement: statementOf(2),
-      solution: 'The first player pairs every number with its neighbour.',
-      hints: [HINT],
-    },
-    sk: { statement: SLOVAK_STATEMENT, solution: null, hints: [] },
-  },
-})
-
-/** A problem proposed before anybody wrote its statement, in any language. */
-const UNWRITTEN = proposalNumbered(9, { texts: {} })
-
-/** The pool's first problem. */
-const FIRST = proposalNumbered(1)
-
-/** The problem the reviewers have set aside. */
-const SET_ASIDE = proposalNumbered(3, { isSetAside: true })
-
-/** The problem a round has taken. */
-const USED = proposalNumbered(7, { isUsed: true })
-
-/** Every problem the selection holds, lowest number first, {@link SET_ASIDE} and {@link USED} among them. */
-const SELECTION: Proposal[] = [
-  FIRST,
-  BILINGUAL,
-  SET_ASIDE,
-  OPENED,
-  proposalNumbered(5),
-  proposalNumbered(6),
-  USED,
-  proposalNumbered(8),
-  UNWRITTEN,
-]
-
-/** How many problems the pool offers: every one in the selection neither set aside nor taken by a round. */
-const ON_OFFER_COUNT = 7
-
-/** {@link OPENED} as its author revised it, with a paragraph added at the end. */
-const REVISED = proposalNumbered(OPENED.number, {
-  texts: {
-    en: { statement: `${statementOf(OPENED.number)}\n\n${REVISION}`, solution: null, hints: [] },
-  },
-})
-
-/**
- * The selection as a later read brings it: {@link REVISED} in place of {@link OPENED}, and {@link FIRST} set aside.
- */
-const LATER_SELECTION = SELECTION.map((proposal) => {
-  // The problem its author revised meanwhile
-  if (proposal === OPENED) return REVISED
-
-  // The problem another reviewer set aside meanwhile
-  if (proposal === FIRST) return { ...FIRST, isSetAside: true }
-
-  // Every other problem as it was
-  return proposal
-})
-
-/**
- * The address a link to {@link OPENED} carries. The parameter is written out rather than imported, since links
- * already shared carry this exact name.
- */
-const OPENED_ADDRESS = `${SELECTION_PATH}?problem=${OPENED.id}`
-
-/**
- * How the backend answers the selection's read.
- */
-type SelectionReply =
-  /** With every problem in the selection. */
-  | 'selection'
-  /** With every problem as a later read finds them. */
-  | 'later'
-  /** Refused with the code an account that does not prepare competitions earns. */
-  | 'forbidden'
-  /** Refused for good with no code at all, as an address the backend does not serve is. */
-  | 'failure'
-
-/**
- * A function which answers every read of the selection from then on with the reply given.
- *
- * @param reply - How every read is answered from then on.
- */
-type AnswerSelectionWith = (reply: SelectionReply) => void
-
-/**
- * Stands in for the selection's read, with a reply the test can change midway.
- *
- * @param page - The page to answer the selection's read on.
- * @param firstReply - How the reads are answered until the test says otherwise.
- *
- * @returns A function which changes how the reads are answered from then on.
- */
-async function stubSelection(page: Page, firstReply: SelectionReply): Promise<AnswerSelectionWith> {
-  // How every read is answered right now
-  let reply = firstReply
-
-  // Stand in for the read
-  await page.route(SELECTION_ENDPOINT, async (route) => {
-    // Answered the way the test last asked for
-    switch (reply) {
-      // Every problem, lowest number first
-      case 'selection':
-        return route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ proposals: SELECTION } satisfies SelectionData),
-        })
-
-      // Every problem, one of them revised and another set aside
-      case 'later':
-        return route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ proposals: LATER_SELECTION } satisfies SelectionData),
-        })
-
-      // Refused, in the shape the backend writes an authorization failure as
-      case 'forbidden':
-        return route.fulfill({
-          status: 403,
-          contentType: 'application/problem+json',
-          body: JSON.stringify({ status: 403, errorCode: 'Forbidden' satisfies AppErrorCode }),
-        })
-
-      // Refused, with nothing to say why
-      case 'failure':
-        return route.fulfill({ status: 404 })
-
-      // Every reply is handled above
-      default:
-        return assertNever(reply)
-    }
-  })
-
-  // The way to change the reply
-  return (nextReply) => {
-    // Every read from here on answered this way
-    reply = nextReply
-  }
-}
 
 /**
  * How far down the window is scrolled.
@@ -309,7 +105,7 @@ async function scrollWindowTo(page: Page, top: number): Promise<void> {
  * @param page - The page.
  */
 async function twoFramesLater(page: Page): Promise<void> {
-  // Two frames, one after the other
+  // Waited out inside the page
   await page.evaluate(
     () =>
       new Promise<void>((resolve) => {
@@ -320,8 +116,8 @@ async function twoFramesLater(page: Page): Promise<void> {
 }
 
 /**
- * Slows the page's processor down sixfold, as a slow phone runs it, where the page catches up on what is out of
- * sight late enough for a reader's next step to come first.
+ * Slows the page's processor down as a slow phone runs it, so the work the page puts off for what is out of
+ * sight is still pending when the reader's next step comes.
  *
  * @param page - The page.
  */
@@ -340,7 +136,7 @@ async function slowDown(page: Page): Promise<void> {
  * @param page - The page.
  * @param name - The link's accessible name, or a part of it.
  */
-async function clickInPlace(page: Page, name: string): Promise<void> {
+export async function clickInPlace(page: Page, name: string): Promise<void> {
   // A plain click, fired on the link itself
   await page.getByRole('link', { name }).evaluate((element: HTMLElement) => element.click())
 }
@@ -359,32 +155,6 @@ async function clickTwiceAtOnce(link: Locator): Promise<void> {
     // And the second, before anything has rendered
     element.click()
   })
-}
-
-/**
- * A problem's card in the pool.
- *
- * @param page - The page.
- * @param proposal - The problem.
- *
- * @returns The card.
- */
-function cardOf(page: Page, proposal: Proposal) {
-  // The pool's only card naming the problem
-  return page.getByRole('article').filter({ hasText: proposal.title })
-}
-
-/**
- * A problem's heading, which only its own page shows.
- *
- * @param page - The page.
- * @param proposal - The problem.
- *
- * @returns The heading.
- */
-function headingOf(page: Page, proposal: Proposal) {
-  // The page's only second-level heading naming the problem
-  return page.getByRole('heading', { level: 2, name: proposal.title })
 }
 
 /**

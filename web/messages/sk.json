@@ -1251,11 +1251,27 @@
       "geometry": "Geometria",
       "numberTheory": "Teória čísel"
     },
+    "comments": {
+      "placeholder": "Čo si o úlohe myslíš a kam sa hodí?"
+    },
+    "conversations": {
+      "editedSince": "Úloha bola odvtedy upravená. Toto je zadanie, ako vtedy znelo.",
+      "empty": "O tejto úlohe sa s Mathildou zatiaľ nikto nerozprával.",
+      "messages": "{count, plural, one {# správa} few {# správy} other {# správ}}",
+      "olderStatement": "staršie zadanie",
+      "participants": "{author} a Mathilda",
+      "transcriptFailed": "Rozhovor sa nepodarilo načítať."
+    },
     "detail": {
       "backToPool": "Zásobník",
-      "notInPool": "Táto úloha nie je v zásobníku."
+      "commentsTab": "Komentáre",
+      "conversationsTab": "Konverzácie",
+      "notInPool": "Táto úloha nie je v zásobníku.",
+      "tabsLabel": "O tejto úlohe"
     },
     "filing": {
+      "comments": "{count, plural, one {# komentár} few {# komentáre} other {# komentárov}}",
+      "conversations": "{count, plural, one {# konverzácia s Mathildou} few {# konverzácie s Mathildou} other {# konverzácií s Mathildou}}",
       "noSolution": "bez riešenia: {languages}",
       "setAside": "odložená",
       "unwritten": "bez {languages}",

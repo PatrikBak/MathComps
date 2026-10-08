@@ -29,9 +29,19 @@ type CompetitionDefenseTarget = {
 }
 
 /**
- * What a defense is held against: a handout's environment, or a competition's problem.
+ * A defense held against a problem proposed for the competitions' papers.
  */
-export type DefenseTarget = HandoutDefenseTarget | CompetitionDefenseTarget
+type ProposalDefenseTarget = {
+  /** The discriminant. */
+  kind: 'proposal'
+  /** The problem's id. */
+  problemId: string
+}
+
+/**
+ * What a defense is held against: a handout's environment, a competition's problem, or a proposed one.
+ */
+export type DefenseTarget = HandoutDefenseTarget | CompetitionDefenseTarget | ProposalDefenseTarget
 
 /**
  * Which competition a conversation was held in, read off what it was held against.
@@ -69,8 +79,9 @@ export function toWireTarget(target: DefenseTarget): DefenseSessionTarget {
     case 'handout':
       return { kind: 'handout', ...target.environment }
 
-    // A competition problem is an archive problem, so it travels as its own id
+    // A competition's problem and a proposed one are both archive problems, so each travels as its own id
     case 'competition':
+    case 'proposal':
       return { kind: 'problem', problemId: target.problemId }
 
     // Every target is handled above
@@ -128,6 +139,10 @@ export function isSubjectReachable(target: DefenseTarget, locale: Locale): boole
     case 'competition':
       return true
 
+    // A proposed problem is offered only in a language it is solved in, so the selection has already answered
+    case 'proposal':
+      return true
+
     // Every target is handled above
     default:
       return assertNever(target)
@@ -156,8 +171,9 @@ export function defenseDraftStorageKey(target: DefenseTarget): string | null {
         target.problemId,
       ].join(':')
 
-    // A handout problem can be reopened whenever, so its draft lives only as long as the chat does
+    // A handout problem and a proposed one can be reopened whenever, so a draft lives only as long as the chat
     case 'handout':
+    case 'proposal':
       return null
 
     // Every target is handled above

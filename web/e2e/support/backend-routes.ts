@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Page, Route } from '@playwright/test'
 
 import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
 import type { DefenseCopy } from '@/components/features/defense/model/defense-types'
@@ -61,6 +61,34 @@ export type SearchCall = {
   query: FilterQuery
   /** Whether a reader rode along with it, which is the only thing that can make a filter theirs. */
   isAuthenticated: boolean
+}
+
+/**
+ * Answers a call with a JSON body.
+ *
+ * @param route - The call.
+ * @param status - The status it is answered with.
+ * @param body - What it is answered with.
+ */
+export function answerJson(route: Route, status: number, body: unknown): Promise<void> {
+  // The body, as the backend writes one
+  return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) })
+}
+
+/**
+ * Refuses a call in the shape the backend writes a refusal as.
+ *
+ * @param route - The call.
+ * @param status - The status it is refused with.
+ * @param errorCode - The code saying why.
+ */
+export function refuse(route: Route, status: number, errorCode: AppErrorCode): Promise<void> {
+  // The status and the code, as a problem document
+  return route.fulfill({
+    status,
+    contentType: 'application/problem+json',
+    body: JSON.stringify({ status, errorCode }),
+  })
 }
 
 /**

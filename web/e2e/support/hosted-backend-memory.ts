@@ -43,7 +43,7 @@ export type FakeState = {
   view: HostedCompetitionsView
   /** Whether the student has what an entry needs of them. */
   readiness: EntryReadiness
-  /** Each problem's conversations, most recently active first, by problem id. */
+  /** Each problem's conversations, most recently opened first, by problem id. */
   transcripts: Map<string, DefenseSession[]>
   /** What the student left about each solution, by problem id, for the ones they have said anything about. */
   assessments: Map<string, string>
@@ -98,7 +98,7 @@ export function storedTurn(
  * @param state - The fake's memory.
  * @param problemId - Which problem's conversations.
  *
- * @returns The conversations, most recently active first.
+ * @returns The conversations, most recently opened first.
  */
 export function transcriptsOf(state: FakeState, problemId: string): DefenseSession[] {
   // What is already there

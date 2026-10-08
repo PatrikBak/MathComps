@@ -1,7 +1,7 @@
 /**
  * The kind of target a comment thread belongs to.
  */
-export type CommentTargetType = 'Handout' | 'Problem' | 'News' | 'HostedGrade'
+export type CommentTargetType = 'Handout' | 'Problem' | 'News' | 'HostedGrade' | 'Proposal'
 
 /**
  * What a comment thread hangs off: the kind of thing, and which one.
@@ -10,8 +10,9 @@ export type CommentTarget = {
   /** The type of target. */
   targetType: CommentTargetType
   /**
-   * Permanent identifier of the target: a nanoid for handouts and news, a slug for problems, and
-   * `{problemId}:{userId}` for one student's grade on one problem.
+   * Permanent identifier of the target: a nanoid for handouts and news, a slug for problems,
+   * `{problemId}:{userId}` for one student's grade on one problem, and the proposal's id for a proposal in the
+   * problem selection.
    */
   targetId: string
 }

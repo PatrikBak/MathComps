@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 
 import { indexReports } from '@/components/features/defense/model/defense-conversation-model'
 import type { DefenseTurnReport } from '@/components/features/defense/model/defense-types'
+import { groupBy } from '@/components/shared/utils/collection-utils'
 
 import type { AdminConversation, DefenseTurnAttempt } from '../model/admin-conversation'
 import { resolveTurnDurationsMs } from '../model/turn-durations'
@@ -35,15 +36,9 @@ export function useAdminTranscript(conversation: AdminConversation): UseAdminTra
   // Which reply's drafts are being read; null while none are
   const [draftsTurnId, setDraftsTurnId] = useState<string | null>(null)
 
-  // The drafts kept per reply, hand-folded rather than through Map.groupBy, which no browser older than
-  // Safari 17.4 has and nothing here polyfills
+  // The drafts kept per reply
   const attemptsByTurn = useMemo(
-    () =>
-      conversation.attempts.reduce(
-        (groups, attempt) =>
-          groups.set(attempt.turnId, [...(groups.get(attempt.turnId) ?? []), attempt]),
-        new Map<string, DefenseTurnAttempt[]>()
-      ),
+    () => groupBy(conversation.attempts, (attempt) => attempt.turnId),
     [conversation.attempts]
   )
 

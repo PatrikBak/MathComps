@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { invalidateCompetitionProblems } from '@/components/features/hosted-competitions/hooks/hosted-competition-cache'
+import { invalidateSelection } from '@/components/features/problem-selection/hooks/selection-cache'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { apiCallOf, useApi } from '@/hooks/use-api'
 import { useApiQuery } from '@/hooks/use-api-query'
@@ -151,9 +152,25 @@ export function useDefenseConversation(
           // The defense surface's own lists, per problem and across all of them
           invalidateDefenseLists(queryClient)
 
-          // A competition problem also sits in the competition area's list, which no defense query reaches
-          if (problem.target.kind === 'competition') {
-            invalidateCompetitionProblems(queryClient)
+          // Refresh whatever else lists the problem's conversations, which no defense query reaches
+          switch (problem.target.kind) {
+            // A competition's problem sits in the competition area's list, which carries its conversations
+            case 'competition':
+              invalidateCompetitionProblems(queryClient)
+              break
+
+            // A proposed problem sits in the selection, which carries every reviewer's conversations
+            case 'proposal':
+              invalidateSelection(queryClient)
+              break
+
+            // A handout's conversations live in the defense lists alone
+            case 'handout':
+              break
+
+            // Every target is handled above
+            default:
+              assertNever(problem.target)
           }
         },
       })

@@ -1251,11 +1251,27 @@
       "geometry": "Geometry",
       "numberTheory": "Number theory"
     },
+    "comments": {
+      "placeholder": "What do you think of it, and where does it fit?"
+    },
+    "conversations": {
+      "editedSince": "The problem has been edited since. This is the statement as it stood then.",
+      "empty": "Nobody has talked to Mathilda about this problem yet.",
+      "messages": "{count, plural, one {# message} other {# messages}}",
+      "olderStatement": "older statement",
+      "participants": "{author} and Mathilda",
+      "transcriptFailed": "The conversation could not be loaded."
+    },
     "detail": {
       "backToPool": "Pool",
-      "notInPool": "This problem is not in the pool."
+      "commentsTab": "Comments",
+      "conversationsTab": "Conversations",
+      "notInPool": "This problem is not in the pool.",
+      "tabsLabel": "About this problem"
     },
     "filing": {
+      "comments": "{count, plural, one {# comment} other {# comments}}",
+      "conversations": "{count, plural, one {# conversation with Mathilda} other {# conversations with Mathilda}}",
       "noSolution": "no solution in {languages}",
       "setAside": "set aside",
       "unwritten": "no {languages}",

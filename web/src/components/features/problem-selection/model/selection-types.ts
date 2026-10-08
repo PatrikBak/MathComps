@@ -1,3 +1,4 @@
+import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { Locale } from '@/i18n/i18n'
 
@@ -42,9 +43,40 @@ export type Proposal = {
 }
 
 /**
+ * A summary of one reviewer's conversation with Mathilda about a proposal, whose full text is a
+ * {@link ReviewTranscript}.
+ */
+export type ReviewConversation = {
+  /** Identity of the conversation. */
+  id: string
+  /** The proposal it was about. */
+  proposalId: string
+  /** The username of whoever held it, null without one or for a deleted account. */
+  author: string | null
+  /** When it started, as an ISO-8601 string. */
+  startedAt: string
+  /** How many messages were said in it. */
+  messageCount: number
+  /** Whether it was argued against a statement the proposal no longer has in any language. */
+  hasOlderStatement: boolean
+}
+
+/**
+ * Everything said in one conversation with Mathilda about a proposal.
+ */
+export type ReviewTranscript = {
+  /** The statement as it stood when the conversation started. */
+  savedStatement: string
+  /** Everything said, in order. */
+  turns: StoredTurn[]
+}
+
+/**
  * Everything the selection reads, which arrives in one go.
  */
 export type SelectionData = {
   /** Every proposal still in the selection, the set-aside and used ones included, lowest number first. */
   proposals: Proposal[]
+  /** Every conversation about a proposal still in the selection, newest first. */
+  conversations: ReviewConversation[]
 }
