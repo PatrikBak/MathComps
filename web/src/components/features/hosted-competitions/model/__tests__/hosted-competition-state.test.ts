@@ -501,12 +501,25 @@ describe('roundToShow', () => {
     windowGroup('later', 40, 53),
   ]
 
-  it('shows the latest round to have opened', () => {
+  it('shows the round taking entries', () => {
     // The open one, not the one that finished before it nor the one still to come
     expect(roundToShow(ROUNDS, NOW)?.id).toBe('open')
+  })
 
-    // And a finished round, once it is the latest to have opened
-    expect(roundToShow(ROUNDS.slice(0, 1), NOW)?.id).toBe('finished')
+  it('shows the next round between two rounds, not the one just finished', () => {
+    // The finished one and two still to come, nothing taking entries in between
+    const between = [ROUNDS[0], windowGroup('sooner', 10, 23), ROUNDS[2]]
+
+    // The sooner of the two coming
+    expect(roundToShow(between, NOW)?.id).toBe('sooner')
+  })
+
+  it('shows the latest round once every round is over', () => {
+    // Two finished rounds and nothing announced
+    const over = [windowGroup('earlier', -60, -46), ROUNDS[0]]
+
+    // The later of them
+    expect(roundToShow(over, NOW)?.id).toBe('finished')
   })
 
   it('shows a round the reader is sitting over a later one', () => {
@@ -520,14 +533,6 @@ describe('roundToShow', () => {
 
     // The reader is taken to their running clock
     expect(roundToShow([sitting, special], NOW)?.id).toBe('sitting')
-  })
-
-  it('shows the first round to come before any has opened', () => {
-    // Two announced rounds
-    const announced = [windowGroup('sooner', 10, 23), windowGroup('later', 40, 53)]
-
-    // The sooner of them
-    expect(roundToShow(announced, NOW)?.id).toBe('sooner')
   })
 })
 
