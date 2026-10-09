@@ -60,6 +60,15 @@ export const HINTS_PARAM = 'hints'
 export const RESULTS_PARAM = 'results'
 
 /**
+ * The query parameter naming the round the reader picked on the board, by the round's slug, so that a link can
+ * open the board on a round other than the one it opens on by itself.
+ *
+ * Only a pick puts it on the address, so a link without it leaves the round to the board and follows the
+ * calendar. Inert where no graded round answers to it.
+ */
+export const ROUND_PARAM = 'round'
+
+/**
  * The query parameter naming which problem's conversation with the graders is open, so that a link can lead a
  * student straight into the thread about one of their marks.
  *

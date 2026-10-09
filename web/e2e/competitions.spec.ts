@@ -1,5 +1,5 @@
 import { BACKEND_ORIGIN } from './support/backend-routes'
-import { areaCopy, areaPath, authCopy, LIST_PATH } from './support/competitions'
+import { areaCopy, areaPath, authCopy, LIST_PATH, showRoundHolding } from './support/competitions'
 import { installHostedBackend, PROBLEM_COUNT, problemIdOf } from './support/hosted-backend'
 import { expect, test } from './support/test'
 
@@ -114,6 +114,36 @@ test.describe('the competitions list', () => {
     await expect
       .poll(() => new URL(page.url()).searchParams.get('returnUrl'), { timeout: SETTLE_TIMEOUT_MS })
       .toBe(link)
+  })
+
+  test('names a picked round on the address, and a link carrying it opens there', async ({
+    page,
+  }) => {
+    // The competitions surface, read without a session
+    await installHostedBackend(page, 'first-entry')
+
+    // Open the list, which opens on a round taking entries
+    await page.goto(LIST_PATH)
+
+    // The row of a competition in the round that closed three weeks ago
+    const row = page.locator('[data-competition-slug="past-21-intermediate"]')
+
+    // Its round, picked
+    await showRoundHolding(page, row)
+
+    // Which the address now names
+    await expect(page).toHaveURL(/\?round=past-21$/)
+
+    // That address, opened afresh
+    await page.goto(page.url())
+
+    // The tab of the round holding the row, once the list has drawn it again
+    const tabId = await row
+      .locator('xpath=ancestor::*[@role="tabpanel"][1]')
+      .getAttribute('aria-labelledby', { timeout: SETTLE_TIMEOUT_MS })
+
+    // Picked, rather than the round taking entries
+    await expect(page.locator(`[id="${tabId}"]`)).toHaveAttribute('aria-selected', 'true')
   })
 
   test('says the list failed to load rather than that nothing is scheduled', async ({ page }) => {
