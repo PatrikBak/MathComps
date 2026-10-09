@@ -153,7 +153,6 @@ public sealed class GlobalExceptionHandler(
         CannotLikeOwnCommentException => (StatusCodes.Status409Conflict, ApiErrorCode.CannotLikeOwnComment),
         SelectionBoardOpenedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionBoardOpened),
         SelectionProposalUsedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionProposalUsed),
-        SelectionPaperFinalizedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionPaperFinalized),
         SelectionBoardFinalizedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionBoardFinalized),
         ProblemSlugTakenException => (StatusCodes.Status409Conflict, ApiErrorCode.ProblemSlugTaken),
 

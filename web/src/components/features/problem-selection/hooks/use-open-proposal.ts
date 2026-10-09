@@ -2,7 +2,7 @@
 
 import { useIsomorphicEffect, usePrevious, useWindowEvent } from '@mantine/hooks'
 import { useSearchParams } from 'next/navigation'
-import { useCallback, useRef } from 'react'
+import { type RefObject, useCallback, useRef } from 'react'
 
 import { dataAttribute } from '@/components/shared/utils/dom-utils'
 import { mergeOwnedParams, pushQuery } from '@/components/shared/utils/url-utils'
@@ -28,6 +28,8 @@ export type UseOpenProposalResult = {
   openProposal: (page: ProposalPage) => void
   /** Goes back to the pool; the pool already showing stays as it is. */
   closeProposal: () => void
+  /** The pool's line counting its problems. */
+  poolCountRef: RefObject<HTMLParagraphElement | null>
 }
 
 /**
@@ -105,9 +107,10 @@ function poolScrollFor({ scrollY, anchor }: PoolSpot): number {
  * The problem open in full, carried in the address so a link to it can be shared. Moving in and out goes through
  * {@link pushQuery}, so the browser's back button steps between the problem and the pool. Only the problem's own
  * parameters change, so the pool's filter rides along. A problem starts at the top with focus on its name, and the
- * pool comes back where it was left with focus on the problem's link.
+ * pool comes back where it was left with focus on the problem's link, or on its count line once the problem has
+ * left the pool.
  *
- * @returns The open problem and the ways in and out of it.
+ * @returns The open problem, the ways in and out of it, and the pool's count line.
  */
 export function useOpenProposal(): UseOpenProposalResult {
   // The problem open in full
@@ -124,6 +127,9 @@ export function useOpenProposal(): UseOpenProposalResult {
 
   // A function which puts focus back on the link of the problem last open
   const returnFocus = useFocusReturn(openProposalId)
+
+  // The pool's line counting its problems
+  const poolCountRef = useRef<HTMLParagraphElement>(null)
 
   // Place whichever of a problem and the pool takes the screen before the switch is painted, and move focus onto it
   useIsomorphicEffect(() => {
@@ -149,8 +155,8 @@ export function useOpenProposal(): UseOpenProposalResult {
       // The pool where it was left, jumped to since the page scrolls smoothly
       window.scrollTo({ top: poolScrollFor(poolSpotRef.current), behavior: 'instant' })
 
-      // Focus back on the link of the problem just closed
-      returnFocus()
+      // Focus back on the link of the problem just closed, or on the count line once the problem has left the pool
+      if (!returnFocus()) poolCountRef.current?.focus({ preventScroll: true })
     }
   }, [openProposalId, previousOpenId, returnFocus])
 
@@ -182,6 +188,6 @@ export function useOpenProposal(): UseOpenProposalResult {
     pushQuery(mergeOwnedParams('', PROPOSAL_PARAMS))
   }, [])
 
-  // The open problem and the ways in and out of it
-  return { openProposalId, openProposal, closeProposal }
+  // The open problem, the ways in and out of it, and the count line
+  return { openProposalId, openProposal, closeProposal, poolCountRef }
 }

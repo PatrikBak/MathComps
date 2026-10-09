@@ -1,3 +1,4 @@
+import { gateReads } from './support/answer-gate'
 import { BACKEND_ORIGIN } from './support/backend-routes'
 import {
   actionsCopy,
@@ -13,7 +14,6 @@ import {
 } from './support/competitions'
 import {
   COMPETITION_SLUG,
-  gateSessionReads,
   installHostedBackend,
   LIMITS,
   OPENER,
@@ -207,7 +207,7 @@ test.describe('the conversation inside a competition', () => {
     await installHostedBackend(page, 'running')
 
     // What every read of a problem's conversations waits at
-    const history = await gateSessionReads(page)
+    const history = await gateReads(page, SESSION_LIST_ADDRESS)
 
     // Open its area
     await page.goto(areaPath(COMPETITION_SLUG))

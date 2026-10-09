@@ -25,6 +25,7 @@ import {
 import { hasSolution, resolveText, unwrittenLanguages } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
 import { LanguageSwitch } from './LanguageSwitch'
+import { PlaceControl } from './PlaceControl'
 import { ProposalConversations } from './ProposalConversations'
 import { ProposalFiling } from './ProposalFiling'
 import { ProposalStatement } from './ProposalStatement'
@@ -177,17 +178,21 @@ function ProposalDetailBody({ proposal, poolLanguage }: ProposalDetailBodyProps)
           {proposal.title}
         </h2>
 
-        {/* A conversation with Mathilda, where she has a solution in the site's language */}
-        {siteText !== undefined && hasSolution(siteText) && (
-          <div className="flex shrink-0 items-center">
+        {/* The actions, taking no room when there are none */}
+        <div className="flex shrink-0 items-center gap-1.5 empty:hidden">
+          {/* A conversation with Mathilda, where she has a solution in the site's language */}
+          {siteText !== undefined && hasSolution(siteText) && (
             <DefenseChatTrigger
               problem={{
                 target: { kind: 'proposal', problemId: proposal.id },
                 statement: siteText.statement,
               }}
             />
-          </div>
-        )}
+          )}
+
+          {/* Placing the problem */}
+          <PlaceControl proposal={proposal} />
+        </div>
       </header>
 
       {/* What it is filed under and where it sits, and the language it is read in */}

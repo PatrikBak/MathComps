@@ -8,15 +8,15 @@ import type { HostedCompetitionCategory } from '@/components/features/hosted-com
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 
-import { type Placement, slotLabel, type SlotPosition } from '../model/selection-state'
+import { type BoardSlot, slotLabel, type SlotPosition } from '../model/selection-state'
 
 /**
  * The look of a mark warning about a problem, in the theme's warning colour, which no category wears.
  */
 export const WARNING_MARK_CLASS = 'rounded-md bg-warning/10 text-warning'
 
-/** How a slot's square stands: empty, or holding a problem. */
-type SlotSquareState = 'empty' | 'filled'
+/** How a slot's square stands: empty, holding a problem, or picked out from the rest. */
+export type SlotSquareState = 'empty' | 'filled' | 'highlighted'
 
 /**
  * The look of a slot's square for how it stands, a filled one in its paper's colour.
@@ -26,7 +26,7 @@ type SlotSquareState = 'empty' | 'filled'
  *
  * @returns The classes.
  */
-function slotSquareClass(
+export function slotSquareClass(
   state: SlotSquareState,
   category: HostedCompetitionCategory | null
 ): string {
@@ -40,6 +40,10 @@ function slotSquareClass(
     case 'filled':
       return cn('bg-foreground/[0.06]', categoryTextClass(category))
 
+    // The brand's fill
+    case 'highlighted':
+      return 'bg-brand/50 text-brand-foreground'
+
     // Every state is handled above
     default:
       return assertNever(state)
@@ -50,7 +54,7 @@ function slotSquareClass(
  * Props for the {@link SlotNumber} component.
  */
 type SlotNumberProps = SlotPosition & {
-  /** How the slot stands. */
+  /** How the slot stands, highlighted while it waits for a problem from the pool. */
   state: SlotSquareState
 }
 
@@ -93,7 +97,7 @@ export function RecommendedMarks({ categories }: RecommendedMarksProps) {
  */
 type PlacementMarkProps = {
   /** Where the proposal sits. */
-  placement: Placement
+  placement: BoardSlot
 }
 
 /**

@@ -48,7 +48,6 @@ export const BACKEND_ERROR_CODES = [
   'SelectionTargetNotFound',
   'SelectionBoardOpened',
   'SelectionProposalUsed',
-  'SelectionPaperFinalized',
   'SelectionBoardFinalized',
   'SelectionProblemIncomplete',
   'SelectionFinalizeBlocked',

@@ -1,11 +1,10 @@
 import type { Page } from '@playwright/test'
-import { createTranslator } from 'next-intl'
 
 import type { UserProfile } from '@/components/features/profile/model/profile-types'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import messages from '../messages/en.json'
-import type { AnswerGate } from './support/answer-gate'
+import { type AnswerGate, gateReads } from './support/answer-gate'
 import { answerJson, BACKEND_ORIGIN } from './support/backend-routes'
 import {
   actionsCopy,
@@ -15,11 +14,7 @@ import {
   sendTurn,
   transcriptOf,
 } from './support/competitions'
-import {
-  gateSessionReads,
-  installHostedBackend,
-  SESSION_LIST_ADDRESS,
-} from './support/hosted-backend'
+import { installHostedBackend, SESSION_LIST_ADDRESS } from './support/hosted-backend'
 import { SCRIPTED_REPLIES } from './support/hosted-backend-content'
 import {
   ARGUED,
@@ -41,13 +36,11 @@ import {
   REVIEWER,
   REVISION,
   selectionCopy,
+  selectionText,
   SETTLE_TIMEOUT_MS,
   stubSelection,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
-
-/** A function which fills the selection's copy with counts and names, the way the page does. */
-const selectionText = createTranslator({ locale: 'en', messages, namespace: 'problemSelection' })
 
 /** What a reviewer writes into {@link OPENED}'s discussion while a test watches. */
 const NEW_COMMENT = 'Too long for the elementary paper as it stands.'
@@ -80,7 +73,7 @@ async function openMathildaOnBilingual(page: Page): Promise<AnswerGate> {
   await stubSelection(page, 'selection', rememberedSelection(chat))
 
   // What every read of a problem's conversations waits at
-  const history = await gateSessionReads(page)
+  const history = await gateReads(page, SESSION_LIST_ADDRESS)
 
   // The problem, solved in English
   await page.goto(`${SELECTION_PATH}?problem=${BILINGUAL.id}`)

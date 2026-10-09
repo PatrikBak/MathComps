@@ -293,10 +293,9 @@
     "ProblemSlugTaken": "Another problem already uses the address a problem gets in this spot.",
     "ProfileValueInvalid": "That value cannot be used.",
     "RateLimited": "You're doing that too fast. Please wait a moment and try again.",
-    "SelectionBoardFinalized": "This selection has already gone into a competition.",
+    "SelectionBoardFinalized": "This selection has already gone into a competition, so its problems can't change.",
     "SelectionBoardOpened": "These competitions have already started, so their problems can't change.",
     "SelectionFinalizeBlocked": "This selection can't go into that competition yet. Fill every slot and check it matches the categories.",
-    "SelectionPaperFinalized": "This competition's problems are already picked. You can swap a problem for another one, but you can't remove it.",
     "SelectionProblemIncomplete": "Every problem in a competition needs a statement and a solution in every language.",
     "SelectionProposalUsed": "Another competition already has this problem.",
     "SelectionTargetNotFound": "This is no longer part of the selection. Refresh and try again.",
@@ -1253,14 +1252,21 @@
       "numberTheory": "Number theory"
     },
     "board": {
+      "backToPool": "Back to the pool",
       "draft": "Draft",
       "empty": "Empty",
       "finalized": "Finalized",
       "fold": "Fold the board",
+      "keep": "Keep it",
       "label": "Board",
       "missingLanguages": "No statement or solution in {languages}",
+      "moveDown": "Move down",
+      "moveUp": "Move up",
       "none": "No board yet.",
+      "pickFromPool": "Now pick a problem from the pool",
       "progress": "{filled} of {total}",
+      "replace": "Replace",
+      "status": "In the {cycle} rounds, which open on {date}.",
       "unfold": "Unfold the board"
     },
     "comments": {
@@ -1300,6 +1306,17 @@
       "label": "Language",
       "unwritten": "Not written yet"
     },
+    "picking": {
+      "stop": "Stop picking",
+      "target": "Picking for {board}, {paper} problem {position}."
+    },
+    "place": {
+      "alreadyIn": "In {slot}",
+      "label": "Place",
+      "putIn": "Put in {slot}",
+      "slotEmpty": "{slot}: empty",
+      "slotFilled": "{slot}: #{number} {title}"
+    },
     "pool": {
       "empty": "No problem matches these filters.",
       "emptyPool": "No problems here yet.",
@@ -1313,6 +1330,13 @@
     "text": {
       "fallback": "Not in {missing} yet, showing {shown}.",
       "none": "No text yet."
+    },
+    "writes": {
+      "authReason": "change the selection",
+      "clearFailed": "The slot could not be emptied.",
+      "moveFailed": "The problem could not be moved.",
+      "placeFailed": "The problem could not be placed.",
+      "refreshFailed": "Saved, but the page could not refresh."
     }
   },
   "profile": {

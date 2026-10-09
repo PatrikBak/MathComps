@@ -1,3 +1,5 @@
+import type { Page } from '@playwright/test'
+
 /**
  * A gate a fake backend's answers wait at. It stands open until a test holds it, which lets the test catch the
  * page with a request still in flight.
@@ -36,4 +38,33 @@ export function createAnswerGate(): AnswerGate {
 
   // The gate
   return { passed, hold }
+}
+
+/**
+ * Puts a gate in front of every read of one address, so a test can keep a read in flight across whatever it does
+ * next. Each read waits at the gate, then goes on to whatever answers the address.
+ *
+ * Installed after the fake answering the address, since the route registered last is the one Playwright tries
+ * first.
+ *
+ * @param page - The page to intercept requests on.
+ * @param address - The address the reads go to, as Playwright matches a route.
+ *
+ * @returns The gate, open until the test holds it.
+ */
+export async function gateReads(page: Page, address: string): Promise<AnswerGate> {
+  // What every read waits at
+  const gate = createAnswerGate()
+
+  // Each read, held for as long as the gate is
+  await page.route(address, async (route) => {
+    // Waiting until the gate is open
+    await gate.passed()
+
+    // Then answered by the fake behind this
+    await route.fallback()
+  })
+
+  // The gate, for the test to hold and release
+  return gate
 }

@@ -45,6 +45,8 @@ export const buttonVariants = cva(
     'transition-all duration-200 active:scale-[0.98] motion-reduce:active:scale-100',
     FOCUS_RING_CLASS,
     'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
+    // Unavailable by its ARIA state alone, a button keeps the focus and the pointer, so its title can say why
+    'aria-disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:active:scale-100',
   ],
   {
     variants: {
@@ -116,15 +118,23 @@ export function Button({
   disabled,
   children,
   type = 'button',
+  onClick,
+  'aria-disabled': ariaDisabled,
   ...rest
 }: ButtonProps) {
   // Translations for the shared action labels
   const tActions = useTranslations('ui.actions')
 
+  // Whether the button is unavailable by its ARIA state alone
+  const isAriaDisabled = ariaDisabled === true || ariaDisabled === 'true'
+
   return (
     <button
       type={type}
       disabled={disabled || loading}
+      aria-disabled={ariaDisabled}
+      // A button unavailable by its ARIA state takes no press, a form's submission included
+      onClick={isAriaDisabled ? (event) => event.preventDefault() : onClick}
       // Paired with the live region below, which is what actually speaks the state
       aria-busy={loading || undefined}
       className={cn(

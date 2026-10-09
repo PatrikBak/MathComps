@@ -1,14 +1,11 @@
 import type { Locator, Page } from '@playwright/test'
-import { createTranslator } from 'next-intl'
 
-import type { Board } from '@/components/features/problem-selection/model/selection-types'
-
-import messages from '../messages/en.json'
 import { facetsCopy } from './support/archive-filters'
 import { areaCopy, SELECTION_PATH } from './support/competitions'
 import {
   ALGEBRA,
   BILINGUAL,
+  boardPanel,
   cardOf,
   DRAFT_BOARD,
   FINALIZED_BOARD,
@@ -19,21 +16,21 @@ import {
   LATER_DRAFT,
   ON_OFFER_COUNT,
   OPENED,
+  openPool,
+  pickBoard,
+  placementOf,
+  problemCount,
   READY,
   REVISION,
   selectionCopy,
+  selectionText,
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
+  slotOf,
   stubSelection,
   USED,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
-
-/** A function which fills the selection's copy with counts and names, the way the page does. */
-const selectionText = createTranslator({ locale: 'en', messages, namespace: 'problemSelection' })
-
-/** A function which declines a counted noun with the number in front of it, the way the page does. */
-const pluralText = createTranslator({ locale: 'en', messages, namespace: 'plurals' })
 
 /** Any note saying which languages a round would refuse a slot's problem in, whichever languages it names. */
 const MISSING_LANGUAGES_NOTE = new RegExp(
@@ -42,50 +39,6 @@ const MISSING_LANGUAGES_NOTE = new RegExp(
 
 /** A phone's screen, narrow enough that the board folds into a bar above the pool. */
 const PHONE_VIEWPORT = { width: 390, height: 844 }
-
-/**
- * The board panel beside the pool.
- *
- * @param page - The page.
- *
- * @returns The panel.
- */
-function boardPanel(page: Page): Locator {
-  // The page's only region named as the board
-  return page.getByRole('region', { name: selectionCopy.board.label })
-}
-
-/**
- * One slot on the board on screen.
- *
- * @param page - The page.
- * @param label - The slot's short label, like E1.
- *
- * @returns The slot's row.
- */
-function slotOf(page: Page, label: string): Locator {
-  // The board's only row carrying the label
-  return boardPanel(page)
-    .getByRole('listitem')
-    .filter({ has: page.getByText(label, { exact: true }) })
-}
-
-/**
- * The mark on a problem's filing line naming one slot it fills.
- *
- * @param scope - Where the filing line is, a card or a problem's own page.
- * @param board - The board holding the slot.
- * @param label - The slot's short label, like E1.
- *
- * @returns The mark.
- */
-function placementOf(scope: Locator, board: Board, label: string): Locator {
-  // The mark naming the board, narrowed to the one naming the slot as well
-  return scope
-    .locator('span')
-    .filter({ has: scope.page().getByText(board.name, { exact: true }) })
-    .filter({ has: scope.page().getByText(label, { exact: true }) })
-}
 
 /**
  * One of the pool's yes-or-no filters.
@@ -101,19 +54,6 @@ function pillOf(page: Page, name: string): Locator {
 }
 
 /**
- * The pool's line counting the problems that made it through.
- *
- * @param page - The page.
- * @param count - How many problems the line counts.
- *
- * @returns The line.
- */
-function problemCount(page: Page, count: number): Locator {
-  // The line counting that many problems, declined for the number
-  return page.getByText(pluralText('problems', { count }), { exact: true })
-}
-
-/**
  * The address's query parameters as they stand.
  *
  * @param page - The page.
@@ -123,39 +63,6 @@ function problemCount(page: Page, count: number): Locator {
 function addressParams(page: Page): URLSearchParams {
   // Read off the address the page is on
   return new URL(page.url()).searchParams
-}
-
-/**
- * Opens the pool and waits until every card is drawn.
- *
- * @param page - The page.
- */
-async function openPool(page: Page): Promise<void> {
-  // The pool
-  await page.goto(SELECTION_PATH)
-
-  // Once every card is drawn
-  await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT, {
-    timeout: SETTLE_TIMEOUT_MS,
-  })
-}
-
-/**
- * Puts another board on screen through the menu of boards.
- *
- * @param page - The page.
- * @param from - The board on screen.
- * @param to - The board to put on screen.
- */
-async function pickBoard(page: Page, from: Board, to: Board): Promise<void> {
-  // The menu of boards, opened from the board on screen
-  await boardPanel(page).getByRole('button', { name: from.name }).click()
-
-  // The other board, picked
-  await page.getByRole('menuitemcheckbox', { name: to.name }).click()
-
-  // On screen
-  await expect(boardPanel(page).getByRole('button', { name: to.name })).toBeVisible()
 }
 
 /**

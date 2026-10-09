@@ -14,7 +14,6 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { SUPPORTED_LOCALES } from '@/i18n/i18n'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
-import { type AnswerGate, createAnswerGate } from './answer-gate'
 import { BACKEND_ORIGIN } from './backend-routes'
 import { HANDOUT_SESSION, LIMITS, OPENER, SCRIPTED_REPLIES } from './hosted-backend-content'
 import {
@@ -835,32 +834,4 @@ export async function installHostedBackend(
 
   // The memory, as a spec reads it back and tells it about
   return { sessionsAbout, statementsFrom }
-}
-
-/**
- * Puts a gate in front of every read of the conversations held against a problem, so a test can keep a
- * refresh of that list in flight across whatever it does next.
- *
- * Installed after {@link installHostedBackend}, since the route registered last is the one Playwright tries
- * first.
- *
- * @param page - The page to intercept requests on.
- *
- * @returns The gate, open until the test holds it.
- */
-export async function gateSessionReads(page: Page): Promise<AnswerGate> {
-  // What every read waits at
-  const gate = createAnswerGate()
-
-  // Each read, held for as long as the gate is
-  await page.route(SESSION_LIST_ADDRESS, async (route) => {
-    // Waiting until the gate is open
-    await gate.passed()
-
-    // Then answered by the fake behind this
-    await route.fallback()
-  })
-
-  // The gate, for the test to hold and release
-  return gate
 }

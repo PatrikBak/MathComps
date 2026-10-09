@@ -4,17 +4,15 @@ using MathComps.Infrastructure.Services.Problems;
 namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
-/// Fills the boards' slots from the pool, and finalizes a board into the rounds of a hosted group. A draft board is
-/// the selection's own; a finalized one is its group's rounds, so every change to it moves real problems, and it
-/// accepts no change once the group opens. Every change runs after every one before it has finished.
+/// Fills a draft board's slots from the pool, and finalizes it into the rounds of a hosted group. A finalized board
+/// is its group's rounds, which every change here refuses to touch. Every change runs after every one before it has
+/// finished.
 /// </summary>
 public interface ISelectionBoardService
 {
     /// <summary>
-    /// Puts a proposal into a slot. On a draft, a proposal already elsewhere on the board trades places with
-    /// whatever held the slot, and one from the pool sends that problem back to it. On a finalized board the
-    /// proposal takes the slot's round and number, and the problem there takes the proposal's place, so every
-    /// round keeps its count; a proposal coming from the pool leaves every draft it stood on.
+    /// Puts a proposal into a draft's slot. A proposal already elsewhere on the board trades places with whatever
+    /// held the slot, and one from the pool sends that problem back to it.
     /// </summary>
     /// <param name="slot">The slot the proposal goes into.</param>
     /// <param name="proposalId">The proposal.</param>
@@ -24,15 +22,8 @@ public interface ISelectionBoardService
     /// Thrown when the slot or a live proposal is not there.
     /// </exception>
     /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
-    /// <exception cref="SelectionProposalUsedException">
-    /// Thrown when a paper outside this board has taken the proposal.
-    /// </exception>
-    /// <exception cref="SelectionProblemIncompleteException">
-    /// Thrown when a proposal entering a finalized board's round is not written in every language.
-    /// </exception>
-    /// <exception cref="ProblemSlugTakenException">
-    /// Thrown on a finalized board when a problem outside the trade carries a slug it would write.
-    /// </exception>
+    /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
+    /// <exception cref="SelectionProposalUsedException">Thrown when a paper has taken the proposal.</exception>
     Task PlaceAsync(SlotAddress slot, Guid proposalId, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -43,13 +34,11 @@ public interface ISelectionBoardService
     /// <returns>A task that completes once the change is saved.</returns>
     /// <exception cref="SelectionTargetNotFoundException">Thrown when the slot is not there.</exception>
     /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
-    /// <exception cref="SelectionPaperFinalizedException">
-    /// Thrown when the board is finalized, since a round never stands part-filled.
-    /// </exception>
+    /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
     Task ClearSlotAsync(SlotAddress slot, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Trades a slot with its neighbour in the same paper.
+    /// Trades a draft's slot with its neighbour in the same paper.
     /// </summary>
     /// <param name="slot">The slot.</param>
     /// <param name="direction"><inheritdoc cref="SlotDirection" path="/summary"/></param>
@@ -57,9 +46,7 @@ public interface ISelectionBoardService
     /// <returns>A task that completes once the change is saved.</returns>
     /// <exception cref="SelectionTargetNotFoundException">Thrown when either slot is not there.</exception>
     /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
-    /// <exception cref="ProblemSlugTakenException">
-    /// Thrown on a finalized board when a problem outside the trade carries a slug it would write.
-    /// </exception>
+    /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
     Task MoveSlotAsync(SlotAddress slot, SlotDirection direction, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -95,12 +82,7 @@ public interface ISelectionBoardService
 public sealed class SelectionBoardOpenedException() : Exception("This board's competitions have opened");
 
 /// <summary>
-/// Thrown when a finalized paper is asked to stand part-filled.
-/// </summary>
-public sealed class SelectionPaperFinalizedException() : Exception("This paper is finalized");
-
-/// <summary>
-/// Thrown when a board already finalized into a group is finalized again.
+/// Thrown when a board already finalized into a group is changed, or finalized again.
 /// </summary>
 public sealed class SelectionBoardFinalizedException() : Exception("This board is already finalized");
 

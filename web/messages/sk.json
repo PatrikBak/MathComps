@@ -293,10 +293,9 @@
     "ProblemSlugTaken": "Adresu, ktorú úloha na tomto mieste dostane, už používa iná úloha.",
     "ProfileValueInvalid": "Túto hodnotu nemožno použiť.",
     "RateLimited": "Príliš veľa požiadaviek. Chvíľu počkaj a skús to znova.",
-    "SelectionBoardFinalized": "Tento výber už bol do súťaže uzavretý.",
+    "SelectionBoardFinalized": "Tento výber už bol do súťaže uzavretý, takže jeho úlohy sa už nedajú meniť.",
     "SelectionBoardOpened": "Tieto súťaže sa už začali, takže ich úlohy sa už nedajú meniť.",
     "SelectionFinalizeBlocked": "Výber sa do tejto súťaže zatiaľ nedá uzavrieť. Obsaď všetky miesta a skontroluj, či sedí na jej kategórie.",
-    "SelectionPaperFinalized": "Úlohy tejto súťaže sú už vybrané. Úlohu môžeš vymeniť za inú, ale nie odobrať.",
     "SelectionProblemIncomplete": "Každá úloha v súťaži potrebuje zadanie aj riešenie vo všetkých jazykoch.",
     "SelectionProposalUsed": "Túto úlohu už má iná súťaž.",
     "SelectionTargetNotFound": "Toto už vo výbere nie je. Obnov stránku a skús to znova.",
@@ -1253,14 +1252,21 @@
       "numberTheory": "Teória čísel"
     },
     "board": {
+      "backToPool": "Späť do zásobníka",
       "draft": "Rozpracovaná",
       "empty": "Prázdne",
       "finalized": "Uzavretá",
       "fold": "Zbaliť zostavu",
+      "keep": "Ponechať",
       "label": "Zostava",
       "missingLanguages": "Bez zadania alebo riešenia: {languages}",
+      "moveDown": "Posunúť nadol",
+      "moveUp": "Posunúť nahor",
       "none": "Zatiaľ tu nie je žiadna zostava.",
+      "pickFromPool": "Teraz vyber úlohu zo zásobníka",
       "progress": "{filled} z {total}",
+      "replace": "Vymeniť",
+      "status": "Kolá: {cycle}, otvárajú sa {date}.",
       "unfold": "Rozbaliť zostavu"
     },
     "comments": {
@@ -1300,6 +1306,17 @@
       "label": "Jazyk",
       "unwritten": "V tomto jazyku zatiaľ nie je"
     },
+    "picking": {
+      "stop": "Prestať vyberať",
+      "target": "Vyberáš do zostavy {board}: {paper}, úloha {position}."
+    },
+    "place": {
+      "alreadyIn": "Zaradené do {slot}",
+      "label": "Zaradiť",
+      "putIn": "Zaradiť do {slot}",
+      "slotEmpty": "{slot}: prázdne",
+      "slotFilled": "{slot}: #{number} {title}"
+    },
     "pool": {
       "empty": "Týmto filtrom nezodpovedá žiadna úloha.",
       "emptyPool": "Zatiaľ tu nie sú žiadne úlohy.",
@@ -1313,6 +1330,13 @@
     "text": {
       "fallback": "Zatiaľ chýba {missing}, zobrazuje sa {shown}.",
       "none": "Zatiaľ bez textu."
+    },
+    "writes": {
+      "authReason": "úpravu výberu úloh",
+      "clearFailed": "Miesto sa nepodarilo uvoľniť.",
+      "moveFailed": "Úlohu sa nepodarilo posunúť.",
+      "placeFailed": "Úlohu sa nepodarilo zaradiť.",
+      "refreshFailed": "Uložené, ale stránku sa nepodarilo obnoviť."
     }
   },
   "profile": {
