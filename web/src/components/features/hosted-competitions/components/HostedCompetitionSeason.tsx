@@ -2,7 +2,6 @@
 
 import { ChevronDown } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useState } from 'react'
 
 import { buttonVariants } from '@/components/shared/components/Button'
 import {
@@ -13,12 +12,14 @@ import {
 } from '@/components/shared/components/DropdownMenu'
 import { Tabs } from '@/components/shared/components/Tabs'
 import { cn } from '@/components/shared/utils/css-utils'
+import { useAddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 import type { Locale } from '@/i18n/i18n'
 
 import { usePreloadCompetitionResults } from '../hooks/use-competition-results'
 import type { SchoolYearRun } from '../model/hosted-competition-state'
 import { derivePhase, roundToShow, schoolYearName } from '../model/hosted-competition-state'
 import type { PendingEntry } from '../model/hosted-competition-types'
+import { ROUND_PARAM } from '../services/hosted-competition-routes'
 import { HostedCompetitionGroupPanel } from './HostedCompetitionGroupPanel'
 
 /**
@@ -41,7 +42,8 @@ type HostedCompetitionSeasonProps = {
  * The graded rounds of one school year as tabs, in the order they run, over the round picked in full.
  *
  * It opens on the round the reader most likely came for, and earlier school years are a menu away at the
- * end of the strip, the menu showing only once there is more than one year.
+ * end of the strip, the menu showing only once there is more than one year. A round the reader picks, by its
+ * tab or by its year, goes on the address under {@link ROUND_PARAM}, and an address naming one opens on it.
  */
 export function HostedCompetitionSeason({
   years,
@@ -56,26 +58,18 @@ export function HostedCompetitionSeason({
   // The language the rounds are named in
   const locale = useLocale() as Locale
 
-  // The school year and the round the reader picked, or null while they have picked none
-  const [pickedYear, setPickedYear] = useState<number | null>(null)
-  const [pickedRoundId, setPickedRoundId] = useState<string | null>(null)
+  // Which round the reader picked, as the address names it
+  const pickedRound = useAddressedDisclosure(ROUND_PARAM)
 
-  // The round the board opens on, across every year
-  const defaultRound = roundToShow(
-    years.toReversed().flatMap((year) => year.groups),
-    now
-  )
+  // Every graded round, in the order they run
+  const rounds = years.toReversed().flatMap((year) => year.groups)
 
-  // The year showing: the one picked, else the one holding that round, else the newest
-  const shownYear =
-    years.find((year) => year.startYear === pickedYear) ??
-    years.find((year) => defaultRound !== undefined && year.groups.includes(defaultRound)) ??
-    years[0]
-
-  // The round showing: the one picked while it is in this year, else the one this year opens on
+  // The round showing: the one picked, else the one the board opens on
   const shownRound =
-    shownYear?.groups.find((group) => group.id === pickedRoundId) ??
-    roundToShow(shownYear?.groups ?? [], now)
+    rounds.find((group) => group.slug === pickedRound.openedValue) ?? roundToShow(rounds, now)
+
+  // The school year holding the round showing
+  const shownYear = years.find((year) => year.groups.some((group) => group === shownRound))
 
   // The shown round's results, read early once it has closed, so a press finds the table there
   usePreloadCompetitionResults(
@@ -85,21 +79,23 @@ export function HostedCompetitionSeason({
   )
 
   // Nothing graded announced yet, so there is nothing to lay out
-  if (shownYear === undefined) {
+  if (shownRound === undefined || shownYear === undefined) {
     return null
   }
 
   /**
-   * Moves to another school year, which opens on the round it would open on by itself.
+   * Moves to another school year, on the round it would open on by itself.
    *
-   * @param startYear - The calendar year the school year starts in.
+   * @param year - The school year.
    */
-  function pickYear(startYear: number) {
-    // The year
-    setPickedYear(startYear)
+  function pickYear(year: SchoolYearRun) {
+    // The round that year opens on
+    const round = roundToShow(year.groups, now)
 
-    // And no round picked inside it yet
-    setPickedRoundId(null)
+    // That round, picked
+    if (round !== undefined) {
+      pickedRound.open(round.slug)
+    }
   }
 
   return (
@@ -107,10 +103,10 @@ export function HostedCompetitionSeason({
     <Tabs
       key={shownYear.startYear}
       ariaLabel={t('rounds')}
-      selectedId={shownRound?.id ?? ''}
-      onSelect={setPickedRoundId}
+      selectedId={shownRound.slug}
+      onSelect={pickedRound.open}
       items={shownYear.groups.map((group) => ({
-        id: group.id,
+        id: group.slug,
         label: group.name[locale],
         count: null,
         isHighlighted: derivePhase(group, now) === 'open',
@@ -144,7 +140,7 @@ export function HostedCompetitionSeason({
                 <DropdownMenuCheckboxItem
                   key={year.startYear}
                   checked={year === shownYear}
-                  onCheckedChange={() => pickYear(year.startYear)}
+                  onCheckedChange={() => pickYear(year)}
                   className="tabular-nums"
                 >
                   {schoolYearName(year.startYear)}
