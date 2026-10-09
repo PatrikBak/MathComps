@@ -6,7 +6,10 @@ import type {
   MathildaConsent,
 } from '@/components/features/defense/model/defense-types'
 import { derivePhase } from '@/components/features/hosted-competitions/model/hosted-competition-state'
-import type { SpentEntry } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import type {
+  CompetitionResults,
+  SpentEntry,
+} from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { SUPPORTED_LOCALES } from '@/i18n/i18n'
 import type { AppErrorCode } from '@/lib/api/api-error-codes'
@@ -493,6 +496,28 @@ export async function installHostedBackend(
 
         // Answered with the set, marked where the marks are out
         await answer(page, route, hasMarks ? withFinalMarks(problems) : problems)
+
+        // Nothing else this read needs
+        return
+      }
+
+      // Everybody's rows, which the backend keeps back until the group has closed
+      case 'results': {
+        // A group that has not closed yet, or never will
+        if (group === undefined || derivePhase(group, await pageNow(page)) !== 'closed') {
+          // Answered as the backend answers it
+          await route.fulfill({
+            status: 422,
+            contentType: 'application/json',
+            body: JSON.stringify({ errorCode: 'HostedResultsNotOut' }),
+          })
+
+          // Nothing to read
+          return
+        }
+
+        // The results, with nobody's row in them
+        await answer(page, route, { rows: [] } satisfies CompetitionResults)
 
         // Nothing else this read needs
         return
