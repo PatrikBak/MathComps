@@ -7,8 +7,10 @@ import { type ReactNode, useState } from 'react'
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { Modal } from '@/components/shared/components/Modal'
+import { ProseLink } from '@/components/shared/components/ProseLink'
 import type { AddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 import { useAddressedDisclosure } from '@/hooks/use-addressed-disclosure'
+import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import type { Locale } from '@/i18n/i18n'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
@@ -25,6 +27,7 @@ import { CategoryBadge } from './CategoryBadge'
 import { CompetitionProblemPanel } from './CompetitionProblemPanel'
 import { CompetitionResultsModal } from './CompetitionResults'
 import { CompetitionStandingStrip } from './CompetitionStandingStrip'
+import { ReaderPrompt } from './EntryGate'
 import { FinishEntryDialog } from './FinishEntryDialog'
 import { RulesList } from './RulesList'
 
@@ -61,6 +64,9 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
 
   // Which competition's results are open, this one's or another category's picked inside them
   const openedResults = useAddressedDisclosure(RESULTS_PARAM)
+
+  // The way to an account, which comes back to this competition
+  const { getLoginUrl } = useLoginRedirect()
 
   // The solution's disclosure, closing the hints as it opens, so the set never has both open at once
   const solutionDisclosure: AddressedDisclosure = {
@@ -146,6 +152,16 @@ export function CompetitionArea({ competitionSlug }: CompetitionAreaProps) {
         >
           <RulesList />
         </Modal>
+      )}
+
+      {/* The way to an account, for a reader who has none. Pulled up into the strip's bottom spacing,
+          which is sized for the gap down to the problems */}
+      {readerKey === null && (
+        <ReaderPrompt className="-mt-4 mb-5">
+          {t.rich('areaSignedOut', {
+            link: (chunks) => <ProseLink href={getLoginUrl()}>{chunks}</ProseLink>,
+          })}
+        </ReaderPrompt>
       )}
 
       {/* How the conversations behave, said on the practice run */}

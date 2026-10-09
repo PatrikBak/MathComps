@@ -420,6 +420,7 @@
     "areaNotPublic": "That competition's problems have not been made public.",
     "areaNotStarted": "You have not started this competition yet.",
     "areaProblemsFailed": "The problems could not be loaded.",
+    "areaSignedOut": "You can see your own scores and conversations once you <link>sign in</link>.",
     "areaUnknown": "No competition goes by that name.",
     "backToCompetitions": "Back to Mathilding",
     "categories": {
