@@ -37,9 +37,11 @@ function isSelectionWrite(mutation: Mutation): boolean {
 export type SelectionWrite<TVariables> = {
   /**
    * Fires the write, saying true, or drops the press, saying false, while another write to the selection is still
-   * out. The selection shows what the write does at once, and puts things back if the server refuses.
+   * out. The selection shows what the write does at once where that can be worked out ahead of the server, and
+   * puts things back if the server refuses. A function handed along runs once the server has answered, taken or
+   * refused, and the selection has been read again.
    */
-  mutate: (variables: TVariables) => boolean
+  mutate: (variables: TVariables, onSettled?: () => void) => boolean
   /** What this control's write still out was fired with, the read after it included; null while none is. */
   pendingVariables: TVariables | null
 }
@@ -63,15 +65,15 @@ type SelectionWriteConfig<TVariables> = Pick<
   OptimisticMutationConfig<void, TVariables, EditSnapshot | undefined>,
   'apiFn' | 'errorMessage'
 > & {
-  /** The selection as the write leaves it, shown before the server answers. */
-  edit: (data: SelectionData, variables: TVariables) => SelectionData
+  /** The selection as the write leaves it, shown before the server answers; null for a write that waits for it. */
+  edit: ((data: SelectionData, variables: TVariables) => SelectionData) | null
 }
 
 /**
- * One write to the selection: shown ahead of the server, put back on a refusal, and followed by a read of the
- * whole selection, which the write is not over until it lands. A press made while any write to the selection is
- * still out is dropped, since what it names can have changed by the time that write lands. A write the server
- * took whose read then fails is still reported as saved.
+ * One write to the selection: shown ahead of the server where it can be, put back on a refusal, and followed by a
+ * read of the whole selection, which the write is not over until it lands. A press made while any write to the
+ * selection is still out is dropped, since what it names can have changed by the time that write lands. A write the
+ * server took whose read then fails is still reported as saved.
  *
  * @template TVariables - What the write is fired with.
  *
@@ -97,8 +99,11 @@ export function useSelectionWrite<TVariables>({
   const mutation = useOptimisticMutation<void, TVariables, EditSnapshot | undefined>({
     apiFn,
     scope: SELECTION_WRITE_SCOPE,
-    // What the write does, shown at the press
+    // What the write does, shown at the press where it can be
     onMutate: (variables) => {
+      // A write whose outcome only the server knows shows nothing ahead of it
+      if (edit === null) return undefined
+
       // Any read still out would land the selection from before the write over what is shown. Cancelling it puts
       // the selection back at once, so the edit lands within the press, before anything that press redraws
       void queryClient.cancelQueries({ queryKey })
@@ -149,12 +154,12 @@ export function useSelectionWrite<TVariables>({
   })
 
   // A function which fires the write, unless another write to the selection is still out
-  const mutate = (variables: TVariables) => {
-    // A press made while a write is out is dropped, the slots it names being free to change before that one lands
+  const mutate = (variables: TVariables, onSettled?: () => void) => {
+    // A press made while a write is out is dropped, what it names being free to change before that one lands
     if (queryClient.isMutating({ predicate: isSelectionWrite }) > 0) return false
 
     // The write itself
-    mutation.mutate(variables)
+    mutation.mutate(variables, { onSettled })
 
     // The write fired
     return true

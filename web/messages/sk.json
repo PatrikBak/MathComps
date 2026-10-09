@@ -295,7 +295,7 @@
     "RateLimited": "Príliš veľa požiadaviek. Chvíľu počkaj a skús to znova.",
     "SelectionBoardFinalized": "Tento výber už bol do súťaže uzavretý, takže jeho úlohy sa už nedajú meniť.",
     "SelectionBoardOpened": "Tieto súťaže sa už začali, takže ich úlohy sa už nedajú meniť.",
-    "SelectionFinalizeBlocked": "Výber sa do tejto súťaže zatiaľ nedá uzavrieť. Obsaď všetky miesta a skontroluj, či sedí na jej kategórie.",
+    "SelectionFinalizeBlocked": "Výber sa do tejto súťaže nedá uzavrieť. Všetky miesta musia byť obsadené a sedieť na jej kategórie a súťaž musí ešte čakať na úlohy.",
     "SelectionProblemIncomplete": "Každá úloha v súťaži potrebuje zadanie aj riešenie vo všetkých jazykoch.",
     "SelectionProposalUsed": "Túto úlohu už má iná súťaž.",
     "SelectionTargetNotFound": "Toto už vo výbere nie je. Obnov stránku a skús to znova.",
@@ -1246,6 +1246,15 @@
       "forbidden": "Výber úloh je pre tých, ktorí vyberajú úlohy do súťaží.",
       "signIn": "Výber úloh uvidíš po <link>prihlásení</link>."
     },
+    "actions": {
+      "bringBack": "Vrátiť do zásobníka",
+      "deleteMessage": "Úloha natrvalo zmizne z výberu a uvoľní každé miesto, ktoré obsadzuje.",
+      "deleteMessageWithAttached": "Úloha natrvalo zmizne z výberu a s ňou aj {attached}. Uvoľní sa každé miesto, ktoré obsadzuje.",
+      "deleteTitle": "Zmazať úlohu #{number}?",
+      "moreFor": "Ďalšie možnosti pre #{number}",
+      "recommendedFor": "Odporúčaná pre",
+      "setAside": "Odložiť"
+    },
     "areas": {
       "algebra": "Algebra",
       "combinatorics": "Kombinatorika",
@@ -1256,6 +1265,8 @@
       "backToPool": "Späť do zásobníka",
       "draft": "Rozpracovaná",
       "empty": "Prázdne",
+      "emptyCount": "{count, plural, one {Jedno miesto je prázdne.} few {# miesta sú prázdne.} other {# miest je prázdnych.}}",
+      "finalize": "Uzavrieť",
       "finalized": "Uzavretá",
       "fold": "Zbaliť zostavu",
       "keep": "Ponechať",
@@ -1263,9 +1274,11 @@
       "missingLanguages": "Bez zadania alebo riešenia: {languages}",
       "moveDown": "Posunúť nadol",
       "moveUp": "Posunúť nahor",
+      "needsLanguages": "potrebuje zadanie alebo riešenie v {languages}",
       "none": "Zatiaľ tu nie je žiadna zostava.",
       "pickFromPool": "Teraz vyber úlohu zo zásobníka",
       "progress": "{filled} z {total}",
+      "ready": "Všetky miesta sú obsadené a každá úloha má zadanie aj riešenie vo všetkých troch jazykoch.",
       "replace": "Vymeniť",
       "status": "Kolá: {cycle}, otvárajú sa {date}.",
       "unfold": "Rozbaliť zostavu"
@@ -1302,6 +1315,17 @@
       "notSelected": "Nevybrané",
       "setAside": "Odložené {count}"
     },
+    "finalize": {
+      "confirm": "Uzavrieť",
+      "intro": "Kolá, ktoré vyberieš, dostanú úlohy z tejto zostavy: každá sada pôjde do kola svojej kategórie. Úlohy zmiznú zo zásobníka. Ak niektorú z nich má aj iná rozpracovaná zostava, jej miesto sa tam uvoľní.",
+      "legend": "Vyber kolá",
+      "noCycles": "Žiadne prázdne kolá nečakajú na úlohy.",
+      "noPaper": "kategória {category} nemá sadu",
+      "noRound": "sada {paper} nemá kolo",
+      "opens": "otvára sa {date}",
+      "title": "Uzavrieť zostavu: {board}",
+      "wrongSize": "sada {paper} má {slots, plural, one {# miesto} few {# miesta} other {# miest}}, kolo má {count, plural, one {# úlohu} few {# úlohy} other {# úloh}}"
+    },
     "goToSelection": "Otvoriť vo výbere úloh",
     "language": {
       "label": "Jazyk",
@@ -1335,9 +1359,13 @@
     "writes": {
       "authReason": "úpravu výberu úloh",
       "clearFailed": "Miesto sa nepodarilo uvoľniť.",
+      "deleteFailed": "Úlohu sa nepodarilo zmazať.",
+      "finalizeFailed": "Zostavu sa nepodarilo uzavrieť.",
       "moveFailed": "Úlohu sa nepodarilo posunúť.",
       "placeFailed": "Úlohu sa nepodarilo zaradiť.",
-      "refreshFailed": "Uložené, ale stránku sa nepodarilo obnoviť."
+      "recommendFailed": "Odporúčanie sa nepodarilo zmeniť.",
+      "refreshFailed": "Uložené, ale stránku sa nepodarilo obnoviť.",
+      "setAsideFailed": "Úlohu sa nepodarilo odložiť alebo vrátiť."
     }
   },
   "profile": {

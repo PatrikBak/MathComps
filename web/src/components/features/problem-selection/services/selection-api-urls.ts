@@ -8,6 +8,18 @@ import type { SlotAddress } from '../model/selection-types'
 const SELECTION_PATH = '/problem-selection'
 
 /**
+ * The path of one board.
+ *
+ * @param boardId - The board.
+ *
+ * @returns The path, below the API's base.
+ */
+function boardPath(boardId: string): string {
+  // The board under the selection
+  return `${SELECTION_PATH}/boards/${encodeURIComponent(boardId)}`
+}
+
+/**
  * The path of one slot.
  *
  * @param slot - The slot.
@@ -15,11 +27,20 @@ const SELECTION_PATH = '/problem-selection'
  * @returns The path, below the API's base.
  */
 function slotPath(slot: SlotAddress): string {
-  // The board under the selection
-  const board = `${SELECTION_PATH}/boards/${encodeURIComponent(slot.boardId)}`
+  // The paper within the board, and the position within that
+  return `${boardPath(slot.boardId)}/papers/${encodeURIComponent(slot.paperId)}/slots/${slot.index}`
+}
 
-  // The paper within it, and the position within that
-  return `${board}/papers/${encodeURIComponent(slot.paperId)}/slots/${slot.index}`
+/**
+ * The path of one proposal.
+ *
+ * @param proposalId - The proposal.
+ *
+ * @returns The path, below the API's base.
+ */
+function proposalPath(proposalId: string): string {
+  // The proposal under the selection
+  return `${SELECTION_PATH}/proposals/${encodeURIComponent(proposalId)}`
 }
 
 /**
@@ -66,4 +87,52 @@ export function getSlotUrl(slot: SlotAddress): string {
 export function getSlotMoveUrl(slot: SlotAddress): string {
   // The move endpoint for the slot
   return buildApiUrl(`${slotPath(slot)}/move`)
+}
+
+/**
+ * Builds the API URL for finalizing a board into a cycle's rounds.
+ *
+ * @param boardId - The board.
+ *
+ * @returns The API URL.
+ */
+export function getFinalizationUrl(boardId: string): string {
+  // The finalization endpoint for the board
+  return buildApiUrl(`${boardPath(boardId)}/finalization`)
+}
+
+/**
+ * Builds the API URL for deleting a proposal.
+ *
+ * @param proposalId - The proposal.
+ *
+ * @returns The API URL.
+ */
+export function getProposalUrl(proposalId: string): string {
+  // The proposal's own endpoint
+  return buildApiUrl(proposalPath(proposalId))
+}
+
+/**
+ * Builds the API URL for setting a proposal aside or bringing it back.
+ *
+ * @param proposalId - The proposal.
+ *
+ * @returns The API URL.
+ */
+export function getSetAsideUrl(proposalId: string): string {
+  // The set-aside endpoint for the proposal
+  return buildApiUrl(`${proposalPath(proposalId)}/set-aside`)
+}
+
+/**
+ * Builds the API URL for recommending a proposal for a category or taking it back.
+ *
+ * @param proposalId - The proposal.
+ *
+ * @returns The API URL.
+ */
+export function getRecommendedUrl(proposalId: string): string {
+  // The recommendation endpoint for the proposal
+  return buildApiUrl(`${proposalPath(proposalId)}/recommended`)
 }

@@ -295,7 +295,7 @@
     "RateLimited": "You're doing that too fast. Please wait a moment and try again.",
     "SelectionBoardFinalized": "This selection has already gone into a competition, so its problems can't change.",
     "SelectionBoardOpened": "These competitions have already started, so their problems can't change.",
-    "SelectionFinalizeBlocked": "This selection can't go into that competition yet. Fill every slot and check it matches the categories.",
+    "SelectionFinalizeBlocked": "This selection can't go into that competition. Every slot has to be filled and match its categories, and the competition has to still be waiting for problems.",
     "SelectionProblemIncomplete": "Every problem in a competition needs a statement and a solution in every language.",
     "SelectionProposalUsed": "Another competition already has this problem.",
     "SelectionTargetNotFound": "This is no longer part of the selection. Refresh and try again.",
@@ -1246,6 +1246,15 @@
       "forbidden": "The problem selection is for the people picking the competitions' problems.",
       "signIn": "<link>Sign in</link> to see the problem selection."
     },
+    "actions": {
+      "bringBack": "Bring back to the pool",
+      "deleteMessage": "It leaves the selection for good, and any slot holding it empties.",
+      "deleteMessageWithAttached": "It leaves the selection for good with its {attached}, and any slot holding it empties.",
+      "deleteTitle": "Delete #{number}?",
+      "moreFor": "More for #{number}",
+      "recommendedFor": "Recommended for",
+      "setAside": "Set aside"
+    },
     "areas": {
       "algebra": "Algebra",
       "combinatorics": "Combinatorics",
@@ -1256,6 +1265,8 @@
       "backToPool": "Back to the pool",
       "draft": "Draft",
       "empty": "Empty",
+      "emptyCount": "{count, plural, one {One slot is empty.} other {# slots are empty.}}",
+      "finalize": "Finalize",
       "finalized": "Finalized",
       "fold": "Fold the board",
       "keep": "Keep it",
@@ -1263,9 +1274,11 @@
       "missingLanguages": "No statement or solution in {languages}",
       "moveDown": "Move down",
       "moveUp": "Move up",
+      "needsLanguages": "needs a statement or a solution in {languages}",
       "none": "No board yet.",
       "pickFromPool": "Now pick a problem from the pool",
       "progress": "{filled} of {total}",
+      "ready": "Every slot is filled, and every problem has a statement and a solution in all three languages.",
       "replace": "Replace",
       "status": "In the {cycle} rounds, which open on {date}.",
       "unfold": "Unfold the board"
@@ -1302,6 +1315,17 @@
       "notSelected": "Not selected",
       "setAside": "Set aside {count}"
     },
+    "finalize": {
+      "confirm": "Finalize",
+      "intro": "Each paper fills the round of its category in the cycle you pick. The problems leave the pool, and any other draft board holding one of them gets that slot back empty.",
+      "legend": "Fill the rounds of",
+      "noCycles": "No cycle has empty rounds waiting.",
+      "noPaper": "no paper for the {category} round",
+      "noRound": "no round for {paper}",
+      "opens": "opens {date}",
+      "title": "Finalize {board}",
+      "wrongSize": "{paper} has {slots, plural, one {# slot} other {# slots}}, a round takes {count, plural, one {# problem} other {# problems}}"
+    },
     "goToSelection": "Open in the problem selection",
     "language": {
       "label": "Language",
@@ -1335,9 +1359,13 @@
     "writes": {
       "authReason": "change the selection",
       "clearFailed": "The slot could not be emptied.",
+      "deleteFailed": "The problem could not be deleted.",
+      "finalizeFailed": "The board could not be finalized.",
       "moveFailed": "The problem could not be moved.",
       "placeFailed": "The problem could not be placed.",
-      "refreshFailed": "Saved, but the page could not refresh."
+      "recommendFailed": "The recommendation could not be changed.",
+      "refreshFailed": "Saved, but the page could not refresh.",
+      "setAsideFailed": "The problem could not be set aside or brought back."
     }
   },
   "profile": {

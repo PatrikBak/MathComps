@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { type RefObject, useCallback, useRef } from 'react'
 
 import { dataAttribute } from '@/components/shared/utils/dom-utils'
-import { mergeOwnedParams, pushQuery } from '@/components/shared/utils/url-utils'
+import { mergeOwnedParams, pushQuery, replaceQuery } from '@/components/shared/utils/url-utils'
 import { OPEN_ID_ATTRIBUTE, useFocusReturn } from '@/hooks/use-focus-return'
 
 import {
@@ -28,6 +28,8 @@ export type UseOpenProposalResult = {
   openProposal: (page: ProposalPage) => void
   /** Goes back to the pool; the pool already showing stays as it is. */
   closeProposal: () => void
+  /** Goes back to the pool from a problem that is gone, leaving the pool no step behind it that leads there. */
+  leaveProposal: () => void
   /** The pool's line counting its problems. */
   poolCountRef: RefObject<HTMLParagraphElement | null>
 }
@@ -105,10 +107,12 @@ function poolScrollFor({ scrollY, anchor }: PoolSpot): number {
 
 /**
  * The problem open in full, carried in the address so a link to it can be shared. Moving in and out goes through
- * {@link pushQuery}, so the browser's back button steps between the problem and the pool. Only the problem's own
- * parameters change, so the pool's filter rides along. A problem starts at the top with focus on its name, and the
- * pool comes back where it was left with focus on the problem's link, or on its count line once the problem has
- * left the pool.
+ * {@link pushQuery}, so the browser's back button steps between the problem and the pool. Leaving a problem that is
+ * gone steps back to the pool it was just opened from, so Back from the pool never lands on the same pool. A gone
+ * problem reached any other way, through history included, has its step taken over by the pool through
+ * {@link replaceQuery}, which can never step off the page. Only the problem's own parameters change, so the pool's
+ * filter rides along. A problem starts at the top with focus on its name, and the pool comes back where it was left
+ * with focus on the problem's link, or on its count line once the problem has left the pool.
  *
  * @returns The open problem, the ways in and out of it, and the pool's count line.
  */
@@ -121,6 +125,16 @@ export function useOpenProposal(): UseOpenProposalResult {
 
   // Whether the page shows the pool, as of the last switch committed
   const isPoolPaintedRef = useRef(openProposalId === null)
+
+  // The problem last opened from the pool, whose step in history comes right after the pool's; null when the last
+  // one opened came from another problem's page, or once a step through history has been taken since
+  const openedOverPoolRef = useRef<string | null>(null)
+
+  // Every step through history, which lands on a step openedOverPoolRef can't vouch for
+  useWindowEvent('popstate', () => {
+    // No problem known to sit right after the pool
+    openedOverPoolRef.current = null
+  })
 
   // The problem open on the previous render; undefined on the first
   const previousOpenId = usePrevious(openProposalId)
@@ -175,6 +189,9 @@ export function useOpenProposal(): UseOpenProposalResult {
     // The pool's spot kept by the problem's link, while the pool is what is painted
     if (isPoolPaintedRef.current) poolSpotRef.current = poolSpotAt(page.proposalId)
 
+    // The problem, if it is opened from the pool
+    openedOverPoolRef.current = isPoolPaintedRef.current ? page.proposalId : null
+
     // The problem's address, as a new step in history
     pushQuery(mergeOwnedParams(proposalQuery(page), PROPOSAL_PARAMS))
   }, [])
@@ -188,6 +205,20 @@ export function useOpenProposal(): UseOpenProposalResult {
     pushQuery(mergeOwnedParams('', PROPOSAL_PARAMS))
   }, [])
 
+  // A function which goes back to the pool from a problem that is gone
+  const leaveProposal = useCallback(() => {
+    // Opened from the pool, whose step is the one right before it
+    if (openedOverPoolRef.current === addressedProposalId()) {
+      // Back a step to the pool, the gone problem's step left ahead of it
+      window.history.back()
+    }
+    // Reached any other way
+    else {
+      // The problem's step taken over by the pool
+      replaceQuery(mergeOwnedParams('', PROPOSAL_PARAMS))
+    }
+  }, [])
+
   // The open problem, the ways in and out of it, and the count line
-  return { openProposalId, openProposal, closeProposal, poolCountRef }
+  return { openProposalId, openProposal, closeProposal, leaveProposal, poolCountRef }
 }

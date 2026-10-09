@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { afterClearing, afterMove, afterPlacement } from '../selection-edits'
+import {
+  afterClearing,
+  afterDeletion,
+  afterMove,
+  afterPlacement,
+  afterRecommendation,
+  afterSetAside,
+} from '../selection-edits'
 import type { Board, Proposal, SelectionData } from '../selection-types'
 
 /**
@@ -52,7 +59,7 @@ function board(id: string, slots: (string | null)[]): Board {
  */
 function selection(boards: Board[], proposals: Proposal[]): SelectionData {
   // The boards and the proposals, every other part of the selection empty
-  return { proposals, boards, conversations: [] }
+  return { proposals, boards, cycles: [], conversations: [] }
 }
 
 /**
@@ -200,6 +207,58 @@ describe('afterMove', () => {
   })
 })
 
+describe('afterDeletion', () => {
+  it('takes the problem out of the selection and off every draft', () => {
+    // a sits on two drafts
+    const before = selection(
+      [board('draft', ['a', 'b']), board('other', ['a'])],
+      [proposal('a'), proposal('b')]
+    )
+
+    // a is deleted
+    const after = afterDeletion(before, 'a')
+
+    // Both of a's slots stand empty
+    expect(slotsOf(after, 'draft')).toEqual([null, 'b'])
+    expect(slotsOf(after, 'other')).toEqual([null])
+
+    // And only b is left in the selection
+    expect(after.proposals.map((item) => item.id)).toEqual(['b'])
+  })
+})
+
+describe('afterRecommendation', () => {
+  it('keeps the categories in the order they run whichever one is switched on', () => {
+    // a, recommended for advanced alone
+    const before = selection([], [{ ...proposal('a'), recommended: ['advanced'] }])
+
+    // Elementary goes on
+    const after = afterRecommendation(before, {
+      proposalId: 'a',
+      category: 'elementary',
+      isRecommended: true,
+    })
+
+    // Elementary comes first, as the categories run
+    expect(after.proposals[0]?.recommended).toEqual(['elementary', 'advanced'])
+  })
+
+  it('takes one category back and keeps the rest', () => {
+    // a, recommended for elementary and advanced
+    const before = selection([], [{ ...proposal('a'), recommended: ['elementary', 'advanced'] }])
+
+    // Elementary goes off
+    const after = afterRecommendation(before, {
+      proposalId: 'a',
+      category: 'elementary',
+      isRecommended: false,
+    })
+
+    // Only advanced is left
+    expect(after.proposals[0]?.recommended).toEqual(['advanced'])
+  })
+})
+
 describe('every edit', () => {
   it('leaves the selection it is handed as it was, which a refused write puts back', () => {
     // A draft, and a problem waiting in the pool
@@ -211,20 +270,35 @@ describe('every edit', () => {
     // A copy to hold it against
     const untouched = structuredClone(before)
 
-    // Every edit run over it
+    // a moved into the empty slot
     afterPlacement(before, {
       slot: { boardId: 'draft', paperId: 'draft-e', index: 2 },
       proposalId: 'a',
     })
+
+    // The pool problem put where b stands
     afterPlacement(before, {
       slot: { boardId: 'draft', paperId: 'draft-e', index: 1 },
       proposalId: 'new',
     })
+
+    // The first slot emptied
     afterClearing(before, { boardId: 'draft', paperId: 'draft-e', index: 0 })
+
+    // The first slot moved down
     afterMove(before, {
       slot: { boardId: 'draft', paperId: 'draft-e', index: 0 },
       direction: 'down',
     })
+
+    // a set aside
+    afterSetAside(before, { proposalId: 'a', isSetAside: true })
+
+    // a recommended for elementary
+    afterRecommendation(before, { proposalId: 'a', category: 'elementary', isRecommended: true })
+
+    // b deleted
+    afterDeletion(before, 'b')
 
     // It is as it was
     expect(before).toEqual(untouched)

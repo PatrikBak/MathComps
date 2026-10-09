@@ -7,6 +7,7 @@ import type { Locale } from '@/i18n/i18n'
 
 import type { Proposal } from '../model/selection-types'
 import { PlaceControl } from './PlaceControl'
+import { ProposalActionsMenu } from './ProposalActionsMenu'
 import { ProposalFiling } from './ProposalFiling'
 import { ProposalStatement } from './ProposalStatement'
 import { ProposalSurfaces } from './ProposalSurfaces'
@@ -52,7 +53,7 @@ export function ProposalCard({ proposal, language }: ProposalCardProps) {
     >
       {/* Header */}
       <header className="space-y-1.5 border-b border-foreground/10 px-4 py-3">
-        {/* Identity: number and working name, a link opening the problem in full, then the way to place it */}
+        {/* Identity: number and working name, a link opening the problem in full, then what can be done to it */}
         <div className="flex items-start gap-3">
           <ProposalLink
             proposalId={proposal.id}
@@ -65,8 +66,11 @@ export function ProposalCard({ proposal, language }: ProposalCardProps) {
             <span className="font-medium">{proposal.title}</span>
           </ProposalLink>
 
-          {/* Placing the problem */}
-          <PlaceControl proposal={proposal} />
+          {/* Placing the problem, and the rarer actions */}
+          <div className="flex shrink-0 items-center gap-1">
+            <PlaceControl proposal={proposal} />
+            <ProposalActionsMenu proposal={proposal} />
+          </div>
         </div>
 
         {/* Filing line, with the conversation and comment counts */}

@@ -295,7 +295,7 @@
     "RateLimited": "Příliš mnoho požadavků. Chvíli počkej a zkus to znovu.",
     "SelectionBoardFinalized": "Tento výběr už byl do soutěže uzavřen, takže jeho úlohy už nejde měnit.",
     "SelectionBoardOpened": "Tyto soutěže už začaly, takže jejich úlohy už nejde měnit.",
-    "SelectionFinalizeBlocked": "Výběr do této soutěže zatím nejde uzavřít. Obsaď všechna místa a zkontroluj, že sedí na její kategorie.",
+    "SelectionFinalizeBlocked": "Výběr do této soutěže nejde uzavřít. Všechna místa musí být obsazená a sedět na její kategorie a soutěž musí ještě čekat na úlohy.",
     "SelectionProblemIncomplete": "Každá úloha v soutěži potřebuje zadání i řešení ve všech jazycích.",
     "SelectionProposalUsed": "Tuto úlohu už má jiná soutěž.",
     "SelectionTargetNotFound": "Tohle už ve výběru není. Obnov stránku a zkus to znovu.",
@@ -1246,6 +1246,15 @@
       "forbidden": "Výběr úloh je pro ty, kdo vybírají úlohy do soutěží.",
       "signIn": "Výběr úloh uvidíš po <link>přihlášení</link>."
     },
+    "actions": {
+      "bringBack": "Vrátit do zásobníku",
+      "deleteMessage": "Úloha natrvalo zmizí z výběru a uvolní každé místo, které obsazuje.",
+      "deleteMessageWithAttached": "Úloha natrvalo zmizí z výběru a s ní i {attached}. Uvolní se každé místo, které obsazuje.",
+      "deleteTitle": "Smazat úlohu #{number}?",
+      "moreFor": "Další možnosti pro #{number}",
+      "recommendedFor": "Doporučená pro",
+      "setAside": "Odložit"
+    },
     "areas": {
       "algebra": "Algebra",
       "combinatorics": "Kombinatorika",
@@ -1256,6 +1265,8 @@
       "backToPool": "Zpět do zásobníku",
       "draft": "Rozpracovaná",
       "empty": "Prázdné",
+      "emptyCount": "{count, plural, one {Jedno místo je prázdné.} few {# místa jsou prázdná.} other {# míst je prázdných.}}",
+      "finalize": "Uzavřít",
       "finalized": "Uzavřená",
       "fold": "Sbalit sestavu",
       "keep": "Ponechat",
@@ -1263,9 +1274,11 @@
       "missingLanguages": "Bez zadání nebo řešení: {languages}",
       "moveDown": "Posunout dolů",
       "moveUp": "Posunout nahoru",
+      "needsLanguages": "potřebuje zadání nebo řešení v {languages}",
       "none": "Zatím tu není žádná sestava.",
       "pickFromPool": "Teď vyber úlohu ze zásobníku",
       "progress": "{filled} z {total}",
+      "ready": "Všechna místa jsou obsazená a každá úloha má zadání i řešení ve všech třech jazycích.",
       "replace": "Vyměnit",
       "status": "Kola: {cycle}, otevírají se {date}.",
       "unfold": "Rozbalit sestavu"
@@ -1302,6 +1315,17 @@
       "notSelected": "Nevybrané",
       "setAside": "Odložené {count}"
     },
+    "finalize": {
+      "confirm": "Uzavřít",
+      "intro": "Kola, která vybereš, dostanou úlohy z této sestavy: každá sada půjde do kola své kategorie. Úlohy zmizí ze zásobníku. Pokud některou z nich má i jiná rozpracovaná sestava, její místo se tam uvolní.",
+      "legend": "Vyber kola",
+      "noCycles": "Žádná prázdná kola nečekají na úlohy.",
+      "noPaper": "kategorie {category} nemá sadu",
+      "noRound": "sada {paper} nemá kolo",
+      "opens": "otevírá se {date}",
+      "title": "Uzavřít sestavu: {board}",
+      "wrongSize": "sada {paper} má {slots, plural, one {# místo} few {# místa} other {# míst}}, kolo má {count, plural, one {# úlohu} few {# úlohy} other {# úloh}}"
+    },
     "goToSelection": "Otevřít ve výběru úloh",
     "language": {
       "label": "Jazyk",
@@ -1335,9 +1359,13 @@
     "writes": {
       "authReason": "úpravu výběru úloh",
       "clearFailed": "Místo se nepodařilo uvolnit.",
+      "deleteFailed": "Úlohu se nepodařilo smazat.",
+      "finalizeFailed": "Sestavu se nepodařilo uzavřít.",
       "moveFailed": "Úlohu se nepodařilo posunout.",
       "placeFailed": "Úlohu se nepodařilo zařadit.",
-      "refreshFailed": "Uloženo, ale stránku se nepodařilo obnovit."
+      "recommendFailed": "Doporučení se nepodařilo změnit.",
+      "refreshFailed": "Uloženo, ale stránku se nepodařilo obnovit.",
+      "setAsideFailed": "Úlohu se nepodařilo odložit nebo vrátit."
     }
   },
   "profile": {

@@ -1,9 +1,14 @@
+import { HOSTED_COMPETITION_CATEGORIES } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+
 import type {
   Board,
   MoveWrite,
   Paper,
   PlacementWrite,
+  Proposal,
+  RecommendationWrite,
   SelectionData,
+  SetAsideWrite,
   SlotAddress,
   SlotDirection,
 } from './selection-types'
@@ -51,6 +56,29 @@ function editBoard(
   return {
     ...data,
     boards: data.boards.map((board) => (board.id === boardId ? edit(board) : board)),
+  }
+}
+
+/**
+ * One proposal of the selection replaced, every other one left as it was.
+ *
+ * @param data - The selection.
+ * @param proposalId - The proposal.
+ * @param edit - The proposal as it stands afterwards.
+ *
+ * @returns The selection with that proposal replaced.
+ */
+function editProposal(
+  data: SelectionData,
+  proposalId: string,
+  edit: (proposal: Proposal) => Proposal
+): SelectionData {
+  // The selection with the proposal of that id swapped for its edit
+  return {
+    ...data,
+    proposals: data.proposals.map((proposal) =>
+      proposal.id === proposalId ? edit(proposal) : proposal
+    ),
   }
 }
 
@@ -136,4 +164,68 @@ export function afterMove(data: SelectionData, { slot, direction }: MoveWrite): 
       return { ...paper, slots }
     }),
   }))
+}
+
+/**
+ * The selection once a proposal is set aside or brought back. It keeps every slot it holds.
+ *
+ * @param data - The selection.
+ * @param change - The proposal and whether it is set aside afterwards.
+ *
+ * @returns The selection as the change leaves it.
+ */
+export function afterSetAside(
+  data: SelectionData,
+  { proposalId, isSetAside }: SetAsideWrite
+): SelectionData {
+  // The proposal set aside or brought back, as asked
+  return editProposal(data, proposalId, (proposal) => ({ ...proposal, isSetAside }))
+}
+
+/**
+ * The selection once a proposal is recommended for one category, or the recommendation is taken back.
+ *
+ * @param data - The selection.
+ * @param change - The proposal, the category and whether it is recommended for it afterwards.
+ *
+ * @returns The selection as the change leaves it, the categories kept in the order they run.
+ */
+export function afterRecommendation(
+  data: SelectionData,
+  { proposalId, category, isRecommended }: RecommendationWrite
+): SelectionData {
+  // The proposal recommended for each category standing afterwards, in the order the categories run
+  return editProposal(data, proposalId, (proposal) => ({
+    ...proposal,
+    recommended: HOSTED_COMPETITION_CATEGORIES.filter((candidate) =>
+      candidate === category ? isRecommended : proposal.recommended.includes(candidate)
+    ),
+  }))
+}
+
+/**
+ * The selection once a proposal is deleted: it and its conversations leave the selection, and every slot holding
+ * it empties. Only a draft's slot can hold it, since a round never holds a proposal that can be deleted.
+ *
+ * @param data - The selection.
+ * @param proposalId - The proposal.
+ *
+ * @returns The selection as the delete leaves it.
+ */
+export function afterDeletion(data: SelectionData, proposalId: string): SelectionData {
+  // Every proposal but the deleted one
+  const proposals = data.proposals.filter((proposal) => proposal.id !== proposalId)
+
+  // Every board, each slot holding the deleted proposal emptied
+  const boards = data.boards.map((board) =>
+    mapSlots(board, (_paper, held) => (held === proposalId ? null : held))
+  )
+
+  // Every conversation but the ones about the deleted proposal
+  const conversations = data.conversations.filter(
+    (conversation) => conversation.proposalId !== proposalId
+  )
+
+  // The selection without the deleted proposal, the cycles as they were
+  return { proposals, boards, cycles: data.cycles, conversations }
 }

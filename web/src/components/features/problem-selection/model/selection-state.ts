@@ -1,8 +1,10 @@
+import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { groupBy } from '@/components/shared/utils/collection-utils'
 import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 import type {
   Board,
+  Cycle,
   Paper,
   Proposal,
   ProposalText,
@@ -12,10 +14,10 @@ import type {
 } from './selection-types'
 
 /**
- * The selection as read: its boards as they came, and its proposals and their conversations looked up by
- * proposal id.
+ * The selection as read: its boards and cycles as they came, and its proposals and their conversations looked up
+ * by proposal id.
  */
-export type SelectionIndex = Pick<SelectionData, 'boards'> & {
+export type SelectionIndex = Pick<SelectionData, 'boards' | 'cycles'> & {
   /** Every proposal, by id. */
   proposalsById: ReadonlyMap<string, Proposal>
   /** Every conversation about each proposal, by the proposal's id, newest first. */
@@ -39,8 +41,8 @@ export function indexSelection(data: SelectionData): SelectionIndex {
     (conversation) => conversation.proposalId
   )
 
-  // The boards as they came, with the lookups beside them
-  return { boards: data.boards, proposalsById, conversationsByProposal }
+  // The boards and cycles as they came, with the lookups beside them
+  return { boards: data.boards, cycles: data.cycles, proposalsById, conversationsByProposal }
 }
 
 /**
@@ -226,4 +228,111 @@ export function unreadyLanguages(proposal: Proposal): Locale[] {
     // A language falls short without a statement, or without a solution to go with it
     return text === undefined || !hasSolution(text)
   })
+}
+
+/**
+ * One slotted proposal a round would refuse, with the languages it falls short in.
+ */
+type UnreadyProposal = {
+  /** The proposal. */
+  proposal: Proposal
+  /** The languages it lacks a statement or a solution in. */
+  languages: Locale[]
+}
+
+/**
+ * What stands between a board and finalizing it, whichever cycle it goes into.
+ */
+export type FinalizeBlockers = {
+  /** How many slots stand empty. */
+  emptySlots: number
+  /** Each slotted proposal a round would refuse. */
+  unready: UnreadyProposal[]
+}
+
+/**
+ * What stops the board from being finalized, whichever cycle it goes into.
+ *
+ * @param board - The board.
+ * @param proposals - Every proposal, by id.
+ *
+ * @returns The blockers, every one of them clear on a full board of ready proposals.
+ */
+export function finalizeBlockers(
+  board: Board,
+  proposals: ReadonlyMap<string, Proposal>
+): FinalizeBlockers {
+  // Every slot across every paper
+  const slots = board.papers.flatMap((paper) => paper.slots)
+
+  // The slotted proposals, which a board never holds twice
+  const slotted = slots.flatMap((slot) => (slot === null ? [] : (proposals.get(slot) ?? [])))
+
+  // How many slots are empty, and every slotted proposal falling short in some language
+  return {
+    emptySlots: slots.filter((slot) => slot === null).length,
+    unready: slotted.flatMap((proposal) => {
+      // The languages the proposal falls short in
+      const languages = unreadyLanguages(proposal)
+
+      // Ready in every language, or listed with the ones it lacks
+      return languages.length === 0 ? [] : [{ proposal, languages }]
+    }),
+  }
+}
+
+/**
+ * What keeps a board's papers from pairing up with a cycle's rounds, one paper to each round of its category,
+ * each paper as long as the rounds are.
+ */
+export type CycleMisfit = {
+  /** Papers no round of the cycle is left for: no category, one the cycle lacks, or one an earlier paper took. */
+  unmatched: Paper[]
+  /** Papers whose slot count differs from the problem count the cycle's rounds take. */
+  wrongSize: Paper[]
+  /** The categories of the cycle's rounds no paper fills. */
+  uncovered: HostedCompetitionCategory[]
+}
+
+/**
+ * What keeps a board's papers from pairing up with one cycle's rounds, whatever their slots hold.
+ *
+ * @param board - The board.
+ * @param cycle - The cycle.
+ *
+ * @returns The misfits, every list empty once the papers fit the rounds.
+ */
+export function cycleMisfit(board: Board, cycle: Cycle): CycleMisfit {
+  // The papers left without a round, a round going to the first paper of its category and no other
+  const unmatched = board.papers.filter(
+    (paper, index) =>
+      paper.category === null ||
+      !cycle.categories.includes(paper.category) ||
+      board.papers.findIndex((other) => other.category === paper.category) !== index
+  )
+
+  // The papers of the wrong length, every round of the cycle taking the same number of problems
+  const wrongSize = board.papers.filter((paper) => paper.slots.length !== cycle.problemCount)
+
+  // The categories of the rounds no paper stands for
+  const uncovered = cycle.categories.filter(
+    (category) => !board.papers.some((paper) => paper.category === category)
+  )
+
+  // Everything in the way
+  return { unmatched, wrongSize, uncovered }
+}
+
+/**
+ * Whether nothing keeps a board's papers from pairing up with a cycle's rounds.
+ *
+ * @param misfit - Where a board's papers miss a cycle's rounds, as {@link cycleMisfit} found it.
+ *
+ * @returns True once the papers pair up with the rounds.
+ */
+export function fitsCycle(misfit: CycleMisfit): boolean {
+  // Every paper with a round and the right length, and every round with a paper
+  return (
+    misfit.unmatched.length === 0 && misfit.wrongSize.length === 0 && misfit.uncovered.length === 0
+  )
 }

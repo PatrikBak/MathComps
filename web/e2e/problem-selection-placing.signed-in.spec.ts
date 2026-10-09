@@ -1,9 +1,9 @@
-import type { Locator, Page, Request, Response } from '@playwright/test'
+import type { Locator, Page, Response } from '@playwright/test'
 
 import type { Board } from '@/components/features/problem-selection/model/selection-types'
 
 import messages from '../messages/en.json'
-import { createAnswerGate, gateReads } from './support/answer-gate'
+import { createAnswerGate } from './support/answer-gate'
 import { recordNotices } from './support/backend-routes'
 import { SELECTION_PATH } from './support/competitions'
 import {
@@ -16,6 +16,7 @@ import {
   FULL_DRAFT,
   FULL_DRAFT_FINALIZED,
   headingOf,
+  holdReads,
   isSlotWrite,
   LATER_DRAFT,
   ON_OFFER_COUNT,
@@ -26,12 +27,14 @@ import {
   placementOf,
   problemCount,
   READY,
+  recordWrites,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
   slotOf,
+  statusLine,
   stubSelection,
   UNWRITTEN,
   USED,
@@ -133,65 +136,6 @@ function waitingBanner(page: Page, board: Board, paper: string, position: number
 }
 
 /**
- * The line naming the rounds a finalized board went into, and the day they open.
- *
- * @param page - The page.
- * @param board - The finalized board.
- *
- * @returns The line.
- */
-function statusLine(page: Page, board: Board): Locator {
-  // The day its rounds open, as the page writes it in the site's time zone
-  const date = new Intl.DateTimeFormat('en', {
-    day: 'numeric',
-    month: 'long',
-    timeZone: 'Europe/Bratislava',
-  }).format(new Date(board.finalization!.opensAt))
-
-  // The line naming the rounds and the day
-  return boardPanel(page).getByText(
-    selectionText('board.status', { cycle: board.finalization!.cycleName, date })
-  )
-}
-
-/**
- * Records every write the page sends to a board's slots.
- *
- * @param page - The page.
- *
- * @returns The writes sent so far, oldest first.
- */
-function recordSlotWrites(page: Page): () => Request[] {
-  // Every write that went out, in order
-  const writes: Request[] = []
-
-  // Each request the page sends
-  page.on('request', (request) => {
-    // A slot's address on the selection's backend
-    if (isSlotWrite(new URL(request.url()))) writes.push(request)
-  })
-
-  // A snapshot on each read
-  return () => [...writes]
-}
-
-/**
- * Holds every read of the selection from now on until the test lets them through, so what the page shows meanwhile
- * is its own doing rather than a read's.
- *
- * @param page - The page.
- *
- * @returns A function which lets the held reads, and every later one, through.
- */
-async function holdReads(page: Page): Promise<() => void> {
-  // The gate every read waits at
-  const gate = await gateReads(page, SELECTION_ENDPOINT)
-
-  // Shut from here on, handing back the way to open it
-  return gate.hold()
-}
-
-/**
  * Waits for the backend's answer to the next write the page sends to a board's slots.
  *
  * @param page - The page.
@@ -224,8 +168,8 @@ test.describe('placing a problem from the pool', () => {
     // A reviewer whose first draft holds a problem in its first elementary slot
     await stubSelection(page, 'selection')
 
-    // Every write the page sends
-    const writes = recordSlotWrites(page)
+    // Every write the page sends to a board's slots
+    const writes = recordWrites(page, isSlotWrite)
 
     // The pool
     await openPool(page)
@@ -918,8 +862,8 @@ test.describe('presses while a write is out', () => {
     // A reviewer whose first draft holds a problem in its first elementary slot and its second intermediate one
     await stubSelection(page, 'selection')
 
-    // Every write the page sends
-    const writes = recordSlotWrites(page)
+    // Every write the page sends to a board's slots
+    const writes = recordWrites(page, isSlotWrite)
 
     // The pool
     await openPool(page)

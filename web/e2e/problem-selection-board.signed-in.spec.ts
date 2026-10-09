@@ -108,12 +108,15 @@ test.describe('the board being filled', () => {
       'Advanced',
     ])
 
-    // Every slot of every paper
-    await expect(boardPanel(page).getByRole('listitem')).toHaveCount(9)
+    // Every slot of every paper, each paper's slots a numbered list
+    await expect(boardPanel(page).locator('ol').getByRole('listitem')).toHaveCount(9)
 
     // The ones holding nothing, saying so
     await expect(
-      boardPanel(page).getByRole('listitem').filter({ hasText: selectionCopy.board.empty })
+      boardPanel(page)
+        .locator('ol')
+        .getByRole('listitem')
+        .filter({ hasText: selectionCopy.board.empty })
     ).toHaveCount(7)
 
     // The first elementary slot holding its problem
