@@ -15,6 +15,7 @@ import { Tabs } from '@/components/shared/components/Tabs'
 import { cn } from '@/components/shared/utils/css-utils'
 import type { Locale } from '@/i18n/i18n'
 
+import { usePreloadCompetitionResults } from '../hooks/use-competition-results'
 import type { SchoolYearRun } from '../model/hosted-competition-state'
 import { derivePhase, roundToShow, schoolYearName } from '../model/hosted-competition-state'
 import type { PendingEntry } from '../model/hosted-competition-types'
@@ -71,16 +72,22 @@ export function HostedCompetitionSeason({
     years.find((year) => defaultRound !== undefined && year.groups.includes(defaultRound)) ??
     years[0]
 
+  // The round showing: the one picked while it is in this year, else the one this year opens on
+  const shownRound =
+    shownYear?.groups.find((group) => group.id === pickedRoundId) ??
+    roundToShow(shownYear?.groups ?? [], now)
+
+  // The shown round's results, read early once it has closed, so a press finds the table there
+  usePreloadCompetitionResults(
+    shownRound !== undefined && derivePhase(shownRound, now) === 'closed'
+      ? shownRound.competitions.map((competition) => competition.slug[locale])
+      : []
+  )
+
   // Nothing graded announced yet, so there is nothing to lay out
   if (shownYear === undefined) {
     return null
   }
-
-  // The round showing: the one picked while it is in this year, else the one this year opens on
-  const shownRoundId =
-    shownYear.groups.find((group) => group.id === pickedRoundId)?.id ??
-    roundToShow(shownYear.groups, now)?.id ??
-    ''
 
   /**
    * Moves to another school year, which opens on the round it would open on by itself.
@@ -100,7 +107,7 @@ export function HostedCompetitionSeason({
     <Tabs
       key={shownYear.startYear}
       ariaLabel={t('rounds')}
-      selectedId={shownRoundId}
+      selectedId={shownRound?.id ?? ''}
       onSelect={setPickedRoundId}
       items={shownYear.groups.map((group) => ({
         id: group.id,

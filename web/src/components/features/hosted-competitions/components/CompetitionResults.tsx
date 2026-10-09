@@ -106,8 +106,11 @@ function CompetitionResultsDialog({
   // The language the group and its slugs are read in
   const locale = useLocale() as Locale
 
-  // The competition's results
-  const { results, uiState } = useCompetitionResults(competition.slug[locale])
+  // The competition's results, with the rest of the group's read alongside
+  const { results, uiState } = useCompetitionResults(
+    competition.slug[locale],
+    group.competitions.map((candidate) => candidate.slug[locale])
+  )
 
   return (
     <Modal
