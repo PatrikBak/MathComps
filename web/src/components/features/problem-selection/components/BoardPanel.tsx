@@ -2,7 +2,7 @@
 
 import { ArrowDown, ArrowLeftRight, ArrowUp, ChevronDown, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
-import { type ReactNode, type Ref, useId } from 'react'
+import { type ReactNode, type Ref, useId, useState } from 'react'
 
 import { categoryTextClass } from '@/components/features/hosted-competitions/components/CategoryBadge'
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
@@ -22,15 +22,16 @@ import { useBoardFocusKeeper } from '../hooks/use-board-focus-keeper'
 import { useBoardSlot } from '../hooks/use-board-slot'
 import { usePaperMoves, type UsePaperMovesResult } from '../hooks/use-paper-moves'
 import { useSlotWrites } from '../hooks/use-slot-writes'
-import type { BoardSlot } from '../model/selection-state'
+import { type BoardSlot, finalizeBlockers } from '../model/selection-state'
 import type { Board, Paper } from '../model/selection-types'
 import { SlotNumber, WARNING_MARK_CLASS } from './CategoryMarks'
+import { FinalizeDialog } from './FinalizeDialog'
 import { ProposalLink } from './SelectionLinks'
-import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
+import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
- * The board being filled: its papers, slot by slot. A placement made from the pool or from a single problem
- * shows up here at once.
+ * The board being filled: its papers, slot by slot, and what stands between it and the rounds. A placement
+ * made from the pool or from a single problem shows up here at once.
  */
 export function BoardPanel() {
   // Board copy
@@ -48,6 +49,9 @@ export function BoardPanel() {
     selection?.boards ?? [],
     selection?.activeBoard ?? null
   )
+
+  // The board the finalize dialog asks about, by id; null while the dialog is closed
+  const [finalizingBoardId, setFinalizingBoardId] = useState<string | null>(null)
 
   // Only a stand-in until the boards arrive
   if (selection === null) {
@@ -74,6 +78,12 @@ export function BoardPanel() {
 
   // A function which folds the papers away, or unfolds them
   const toggleFold = () => setIsUnfolded((unfolded) => !unfolded)
+
+  // A function which opens the finalize dialog for the board on screen
+  const openFinalize = () => setFinalizingBoardId(activeBoard.id)
+
+  // A function which closes the finalize dialog
+  const closeFinalize = () => setFinalizingBoardId(null)
 
   return (
     <SurfacePanel as="section" radius="xl" aria-label={t('label')}>
@@ -136,16 +146,24 @@ export function BoardPanel() {
       {/* The status line, for a finalized board, shown folded or not */}
       <BoardStatus board={activeBoard} ref={statusRef} />
 
-      {/* The papers, hidden on a narrow screen until unfolded */}
+      {/* The papers and what stands between them and the rounds, hidden on a narrow screen until unfolded */}
       <div className={cn(!isUnfolded && 'hidden', 'lg:block')}>
         {/* Every paper, slot by slot */}
         {activeBoard.papers.map((paper) => (
           <PaperSlots key={paper.id} board={activeBoard} paper={paper} />
         ))}
 
-        {/* Room under the last paper */}
-        <div className="h-3" />
+        {/* The footer, with the way to finalize a draft */}
+        <BoardFooter board={activeBoard} onFinalize={openFinalize} />
       </div>
+
+      {/* Which rounds the board fills */}
+      <FinalizeDialog
+        board={activeBoard}
+        isOpen={finalizingBoardId === activeBoard.id}
+        onClose={closeFinalize}
+        focusAfterFinalizeRef={statusRef}
+      />
     </SurfacePanel>
   )
 }
@@ -450,5 +468,79 @@ function SlotAction({
     >
       {children}
     </Button>
+  )
+}
+
+/**
+ * Props for the {@link BoardFooter} component.
+ */
+type BoardFooterProps = {
+  /** The board on screen. */
+  board: Board
+  /** Opens the finalize dialog. */
+  onFinalize: () => void
+}
+
+/**
+ * What stands between a draft board and the rounds, and the way to send it there.
+ */
+function BoardFooter({ board, onFinalize }: BoardFooterProps) {
+  // Board copy
+  const t = useTranslations('problemSelection.board')
+
+  // Every proposal, by id
+  const { proposalsById } = useLoadedSelection()
+
+  // Whether any write to the selection is still out
+  const { isWriting } = useSelectionWorkspace()
+
+  // The id of the list of what still has to happen, which describes the press
+  const blockersId = useId()
+
+  // A finalized board has nothing left to finalize, leaving the footer a bare gap
+  if (board.finalization !== null) return <div className="h-3" />
+
+  // What stops the board going
+  const blockers = finalizeBlockers(board, proposalsById)
+
+  // Whether the board can go, with no slot empty and every problem ready
+  const isReady = blockers.emptySlots === 0 && blockers.unready.length === 0
+
+  return (
+    <div className="mt-3 space-y-3 border-t border-foreground/10 px-4 py-3">
+      {/* What still has to happen, if anything */}
+      <ul id={blockersId} className="space-y-1.5 text-xs text-muted">
+        {isReady && <li>{t('ready')}</li>}
+        {blockers.emptySlots > 0 && <li>{t('emptyCount', { count: blockers.emptySlots })}</li>}
+        {blockers.unready.map(({ proposal, languages }) => (
+          <li key={proposal.id} className="flex gap-1.5">
+            {/* The problem's number, opening it in full */}
+            <ProposalLink
+              proposalId={proposal.id}
+              className="text-link hover:text-link-hover"
+              plain
+            >
+              {`#${proposal.number}`}
+            </ProposalLink>
+
+            {/* What the problem still needs */}
+            <span>{t('needsLanguages', { languages: localeCodeList(languages) })}</span>
+          </li>
+        ))}
+      </ul>
+
+      {/* The press opening the finalize dialog, unavailable by its ARIA state alone, so the focus a closing
+          dialog hands back to it still lands once a refusal has left the board unable to go */}
+      <Button
+        variant="primary"
+        size="sm"
+        fullWidth
+        aria-disabled={!isReady || isWriting}
+        aria-describedby={blockersId}
+        onClick={onFinalize}
+      >
+        {t('finalize')}
+      </Button>
+    </div>
   )
 }

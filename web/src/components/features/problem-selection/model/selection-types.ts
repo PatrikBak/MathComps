@@ -85,6 +85,23 @@ export type Board = {
 }
 
 /**
+ * A batch of rounds that open together, one for each of its categories, all still empty, so a board can be
+ * finalized into them.
+ */
+export type Cycle = {
+  /** Identity of the cycle. */
+  id: string
+  /** What it is called, in the language the site is read in. */
+  name: string
+  /** When its rounds open, as an ISO-8601 string. */
+  opensAt: string
+  /** The categories of its rounds, one paper's worth each. */
+  categories: HostedCompetitionCategory[]
+  /** How many problems each of its rounds takes. */
+  problemCount: number
+}
+
+/**
  * One slot, addressed from outside its board.
  */
 export type SlotAddress = {
@@ -117,6 +134,38 @@ export type MoveWrite = {
   slot: SlotAddress
   /** Which neighbour the slot trades with. */
   direction: SlotDirection
+}
+
+/**
+ * A proposal being set aside or brought back.
+ */
+export type SetAsideWrite = {
+  /** The proposal. */
+  proposalId: string
+  /** Whether the proposal is set aside afterwards. */
+  isSetAside: boolean
+}
+
+/**
+ * A proposal's recommendation for one category switching on or off.
+ */
+export type RecommendationWrite = {
+  /** The proposal. */
+  proposalId: string
+  /** The category. */
+  category: HostedCompetitionCategory
+  /** Whether the proposal is recommended for the category afterwards. */
+  isRecommended: boolean
+}
+
+/**
+ * A board going into a cycle's rounds.
+ */
+export type FinalizationWrite = {
+  /** The board. */
+  boardId: string
+  /** The cycle whose rounds take the board's papers. */
+  cycleId: string
 }
 
 /**
@@ -156,6 +205,8 @@ export type SelectionData = {
   proposals: Proposal[]
   /** Every board still in the selection, oldest first. */
   boards: Board[]
+  /** The cycles a board can be finalized into, soonest first. */
+  cycles: Cycle[]
   /** Every conversation about a proposal still in the selection, newest first. */
   conversations: ReviewConversation[]
 }

@@ -77,7 +77,8 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
   })
 
   // The problem open in full, and the ways in and out of it
-  const { openProposalId, openProposal, closeProposal, poolCountRef } = useOpenProposal()
+  const { openProposalId, openProposal, closeProposal, leaveProposal, poolCountRef } =
+    useOpenProposal()
 
   // What the pool is narrowed to, and the ways of changing it
   const poolFilters = usePoolFilters()
@@ -106,6 +107,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       openProposalId,
       openProposal,
       closeProposal,
+      leaveProposal,
       poolCountRef,
       poolFilters,
       waitingSlot,
@@ -121,6 +123,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       openProposalId,
       openProposal,
       closeProposal,
+      leaveProposal,
       poolCountRef,
       poolFilters,
       waitingSlot,

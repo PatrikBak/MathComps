@@ -26,6 +26,7 @@ import { hasSolution, resolveText, unwrittenLanguages } from '../model/selection
 import type { Proposal } from '../model/selection-types'
 import { LanguageSwitch } from './LanguageSwitch'
 import { PlaceControl } from './PlaceControl'
+import { ProposalActionsMenu } from './ProposalActionsMenu'
 import { ProposalConversations } from './ProposalConversations'
 import { ProposalFiling } from './ProposalFiling'
 import { ProposalStatement } from './ProposalStatement'
@@ -51,8 +52,8 @@ export function ProposalDetail({ proposalId, poolLanguage }: ProposalDetailProps
   // Problem page copy
   const t = useTranslations('problemSelection.detail')
 
-  // The selection
-  const { selection } = useSelectionWorkspace()
+  // The selection, and the way back to the pool once the problem is gone
+  const { selection, leaveProposal } = useSelectionWorkspace()
 
   // The selection still on its way
   if (selection === null) {
@@ -78,6 +79,7 @@ export function ProposalDetail({ proposalId, poolLanguage }: ProposalDetailProps
       key={proposal.id}
       proposal={proposal}
       poolLanguage={poolLanguage}
+      onDeleted={leaveProposal}
     />
   )
 }
@@ -88,6 +90,8 @@ export function ProposalDetail({ proposalId, poolLanguage }: ProposalDetailProps
 type ProposalDetailBodyProps = Pick<ProposalDetailProps, 'poolLanguage'> & {
   /** The problem. */
   proposal: Proposal
+  /** Runs once the reader confirms the problem's delete. */
+  onDeleted: () => void
 }
 
 /**
@@ -98,7 +102,7 @@ type DetailTabContent = Omit<TabItem<DetailTab>, 'id'>
 /**
  * The problem's page once it has loaded.
  */
-function ProposalDetailBody({ proposal, poolLanguage }: ProposalDetailBodyProps) {
+function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetailBodyProps) {
   // Problem page copy
   const t = useTranslations('problemSelection.detail')
 
@@ -178,8 +182,8 @@ function ProposalDetailBody({ proposal, poolLanguage }: ProposalDetailBodyProps)
           {proposal.title}
         </h2>
 
-        {/* The actions, taking no room when there are none */}
-        <div className="flex shrink-0 items-center gap-1.5 empty:hidden">
+        {/* The actions */}
+        <div className="flex shrink-0 items-center gap-1.5">
           {/* A conversation with Mathilda, where she has a solution in the site's language */}
           {siteText !== undefined && hasSolution(siteText) && (
             <DefenseChatTrigger
@@ -192,6 +196,9 @@ function ProposalDetailBody({ proposal, poolLanguage }: ProposalDetailBodyProps)
 
           {/* Placing the problem */}
           <PlaceControl proposal={proposal} />
+
+          {/* The rarer things done to the problem */}
+          <ProposalActionsMenu proposal={proposal} onDeleted={onDeleted} />
         </div>
       </header>
 

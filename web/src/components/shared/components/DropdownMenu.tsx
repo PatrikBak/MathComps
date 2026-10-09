@@ -59,10 +59,13 @@ export const FLOATING_PANEL_MOTION_CLASS = cn(
 )
 
 /** Root component that manages open/close state of the dropdown. */
-const DropdownMenu = DropdownMenuPrimitive.Root
+export const DropdownMenu = DropdownMenuPrimitive.Root
 
 /** Button (or custom element via `asChild`) that toggles the dropdown. */
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+
+/** Rows that belong together, named as one by the label its `aria-labelledby` points at. */
+export const DropdownMenuGroup = DropdownMenuPrimitive.Group
 
 /**
  * Positioned content panel rendered inside a portal.
@@ -76,7 +79,7 @@ const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
  * menu switches the page's pointer events off while it is open, so a press outside one lands on the root
  * element instead, and its trigger gets focus back unringed like after any other pointer close.
  */
-const DropdownMenuContent = React.forwardRef<
+export const DropdownMenuContent = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & FloatingPanelContentProps
 >(({ className, sideOffset = 4, opensOver = 'page', onCloseAutoFocus, ...props }, ref) => {
@@ -137,21 +140,36 @@ const DropdownMenuContent = React.forwardRef<
 })
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
 
+/** What a row does to what it acts on: an ordinary action, or one that destroys something. */
+type DropdownMenuItemVariant = 'default' | 'danger'
+
+/** The ink of each {@link DropdownMenuItemVariant}, held under the focus highlight. */
+const ITEM_VARIANT_CLASS: Record<DropdownMenuItemVariant, string> = {
+  default: 'focus:text-foreground',
+  danger: 'text-error focus:text-error',
+}
+
+/**
+ * What a row takes on top of its Radix props.
+ */
+type DropdownMenuItemProps = {
+  /** What the row does to what it acts on. */
+  variant?: DropdownMenuItemVariant
+}
+
 /**
  * A single selectable row inside the dropdown.
  * Includes focus highlight, disabled styling, and pointer cursor by default.
  */
-const DropdownMenuItem = React.forwardRef<
+export const DropdownMenuItem = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
-    inset?: boolean
-  }
->(({ className, inset, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & DropdownMenuItemProps
+>(({ className, variant = 'default', ...props }, ref) => (
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-foreground/5 focus:text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-      inset && 'pl-8',
+      'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-foreground/5 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      ITEM_VARIANT_CLASS[variant],
       className
     )}
     {...props}
@@ -163,7 +181,7 @@ DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
  * A toggleable row inside the dropdown — renders a check mark when `checked` is true.
  * Carries proper `role="menuitemcheckbox"` + `aria-checked` semantics via Radix.
  */
-const DropdownMenuCheckboxItem = React.forwardRef<
+export const DropdownMenuCheckboxItem = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.CheckboxItem>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
 >(({ className, children, ...props }, ref) => (
@@ -186,7 +204,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
 DropdownMenuCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName
 
 /** Horizontal divider between groups of menu items. */
-const DropdownMenuSeparator = React.forwardRef<
+export const DropdownMenuSeparator = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
 >(({ className, ...props }, ref) => (
@@ -197,12 +215,3 @@ const DropdownMenuSeparator = React.forwardRef<
   />
 ))
 DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
-
-export {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-}

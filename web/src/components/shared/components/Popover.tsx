@@ -10,16 +10,16 @@ import {
 } from './DropdownMenu'
 
 /** Root component that manages open/close state of the popover. */
-const Popover = PopoverPrimitive.Root
+export const Popover = PopoverPrimitive.Root
 
 /** Button (or custom element via `asChild`) that toggles the popover. */
-const PopoverTrigger = PopoverPrimitive.Trigger
+export const PopoverTrigger = PopoverPrimitive.Trigger
 
 /**
  * Positioned content panel rendered inside a portal.
  * Provides the house panel chrome, its motion, and the padding its rows sit in.
  */
-const PopoverContent = React.forwardRef<
+export const PopoverContent = React.forwardRef<
   React.ComponentRef<typeof PopoverPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & FloatingPanelContentProps
 >(({ className, align = 'start', sideOffset = 4, opensOver = 'page', ...props }, ref) => (
@@ -45,7 +45,7 @@ PopoverContent.displayName = PopoverPrimitive.Content.displayName
  * A selectable row inside the popover — a plain button styled like a menu item.
  * Without a menu's roving focus, it highlights on hover rather than on focus.
  */
-const PopoverItem = React.forwardRef<
+export const PopoverItem = React.forwardRef<
   React.ComponentRef<'button'>,
   React.ComponentPropsWithoutRef<'button'>
 >(({ className, type = 'button', ...props }, ref) => (
@@ -64,12 +64,10 @@ const PopoverItem = React.forwardRef<
 PopoverItem.displayName = 'PopoverItem'
 
 /** Horizontal divider between groups of popover items. */
-const PopoverSeparator = React.forwardRef<
+export const PopoverSeparator = React.forwardRef<
   React.ComponentRef<'div'>,
   React.ComponentPropsWithoutRef<'div'>
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={cn('-mx-1 my-1 h-px bg-foreground/10', className)} {...props} />
 ))
 PopoverSeparator.displayName = 'PopoverSeparator'
-
-export { Popover, PopoverContent, PopoverItem, PopoverSeparator, PopoverTrigger }

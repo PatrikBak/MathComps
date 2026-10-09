@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Locator, Page, Request, Route } from '@playwright/test'
 import { createTranslator } from 'next-intl'
 
 import type {
@@ -10,6 +10,7 @@ import type { StoredTurn } from '@/components/features/defense/model/defense-typ
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type {
   Board,
+  Cycle,
   Paper,
   Proposal,
   ReviewConversation,
@@ -20,17 +21,21 @@ import { assertNever } from '@/components/shared/utils/assert-never'
 import { DAY_MS } from '@/components/shared/utils/time-units'
 
 import messages from '../../messages/en.json'
+import { gateReads } from './answer-gate'
 import { answerJson, BACKEND_ORIGIN, refuse } from './backend-routes'
 import { SELECTION_PATH } from './competitions'
 import type { HostedBackend } from './hosted-backend'
+import { FINALIZATION_PATH, finalizationWrite } from './selection-finalization'
+import { PROPOSAL_WRITE_PATH, proposalWrite } from './selection-proposal-writes'
+import { SLOT_WRITE_PATH, slotWrite } from './selection-slot-writes'
 import {
   hasOpened,
+  type HeldCycle,
   type HeldSelection,
-  SLOT_WRITE_PATH,
-  SLOT_WRITE_REFUSALS,
-  slotWrite,
-  SlotWriteRefused,
-} from './selection-slot-writes'
+  SELECTION_WRITE_REFUSALS,
+  SelectionWriteRefused,
+  takesBoard,
+} from './selection-writes'
 import { expect } from './test'
 
 /** How long the fake backend has to answer before a wait is called a failure. */
@@ -56,7 +61,7 @@ export const selectionText = createTranslator({
 })
 
 /** A function which declines a counted noun with the number in front of it, the way the page does. */
-const pluralText = createTranslator({ locale: 'en', messages, namespace: 'plurals' })
+export const pluralText = createTranslator({ locale: 'en', messages, namespace: 'plurals' })
 
 /**
  * How many paragraphs an English statement runs to, enough that a problem's own page scrolls well past any
@@ -162,6 +167,12 @@ function textsInEveryLanguage(number: number): Proposal['texts'] {
 /** A problem written and solved in every language, which no round would refuse. */
 export const READY = proposalNumbered(5, { texts: textsInEveryLanguage(5) })
 
+/** {@link READY} once its Czech solution has been taken away, which a round would refuse. */
+const READY_WITHOUT_CZECH_SOLUTION: Proposal = {
+  ...READY,
+  texts: { ...READY.texts, cs: { ...READY.texts.cs!, solution: null } },
+}
+
 /** The pool's one geometry problem, recommended for the advanced category alone. */
 export const GEOMETRY = proposalNumbered(6, { area: 'geometry', recommended: ['advanced'] })
 
@@ -216,15 +227,78 @@ function paperOf(
 }
 
 /**
- * A board finalized into October's rounds, the oldest one, which open in a week whenever the test runs. Its
- * paper's slots are what the round took, so {@link USED} is there and no slot stands empty, the way the backend
- * reads a finalized board off its rounds.
+ * A cycle whose rounds open the given number of days after the test runs.
+ *
+ * @param index - Which of the fake's cycles it is, which its id is built from.
+ * @param name - What it is called.
+ * @param days - How many days from now its rounds open.
+ * @param categories - The categories of its rounds.
+ * @param problemCount - How many problems each of its rounds takes.
+ *
+ * @returns The cycle, its rounds still empty.
+ */
+function cycleOf(
+  index: number,
+  name: string,
+  days: number,
+  categories: HostedCompetitionCategory[],
+  problemCount: number
+): HeldCycle {
+  // The cycle, its id built from its index so every cycle gets its own
+  return {
+    id: `00000000-0000-4000-8000-e${String(index).padStart(11, '0')}`,
+    name,
+    opensAt: new Date(Date.now() + days * DAY_MS).toISOString(),
+    categories,
+    problemCount,
+    isFilled: false,
+  }
+}
+
+/** October's cycle, one elementary round of one problem opening in a week, which {@link FINALIZED_BOARD} filled. */
+const OCTOBER: HeldCycle = { ...cycleOf(1, 'October', 7, ['elementary'], 1), isFilled: true }
+
+/** November's cycle, one elementary round of one problem opening in five weeks, which {@link FULL_DRAFT} fits. */
+export const NOVEMBER = cycleOf(2, 'November', 35, ['elementary'], 1)
+
+/**
+ * December's cycle, a round in every category, three problems each, opening in nine weeks, which
+ * {@link DRAFT_BOARD} fits.
+ */
+export const DECEMBER = cycleOf(3, 'December', 63, ['elementary', 'intermediate', 'advanced'], 3)
+
+/** Every cycle the backend holds in most replies, soonest first. */
+const CYCLES: HeldCycle[] = [OCTOBER, NOVEMBER, DECEMBER]
+
+/**
+ * Winter's cycle, one elementary round of one problem opening in seven weeks, which {@link FULL_DRAFT} fits as well
+ * as it fits {@link NOVEMBER}.
+ */
+export const WINTER = cycleOf(4, 'Winter', 49, ['elementary'], 1)
+
+/**
+ * {@link CYCLES} with one of them filled, a board or an import having put problems into its rounds.
+ *
+ * @param cycle - The cycle filled.
+ *
+ * @returns The cycles.
+ */
+function withFilled(cycle: HeldCycle): HeldCycle[] {
+  // That cycle filled, every other one as it was
+  return CYCLES.map((candidate) =>
+    candidate.id === cycle.id ? { ...candidate, isFilled: true } : candidate
+  )
+}
+
+/**
+ * A board finalized into {@link OCTOBER}'s rounds, the oldest one. Its paper's slots are what the round took, so
+ * {@link USED} is there and no slot stands empty, the way the backend reads a finalized board off its rounds.
  */
 export const FINALIZED_BOARD: Board = {
   id: '00000000-0000-4000-8000-b00000000001',
   name: 'October 2026',
   papers: [paperOf(1, 'Elementary', 'elementary', [USED])],
-  finalization: { cycleName: 'October', opensAt: new Date(Date.now() + 7 * DAY_MS).toISOString() },
+  finalization: { cycleName: OCTOBER.name, opensAt: OCTOBER.opensAt },
 }
 
 /** The first draft: {@link FIRST} in E1, {@link READY} in I2, and the advanced paper still empty. */
@@ -266,21 +340,24 @@ export const FULL_DRAFT: Board = {
 }
 
 /**
- * {@link FULL_DRAFT} finalized into November's rounds, which open in five weeks whenever the test runs, its slot
- * now the round's problem.
+ * {@link FULL_DRAFT} finalized into {@link NOVEMBER}'s rounds, its slot now the round's problem.
  */
 export const FULL_DRAFT_FINALIZED: Board = {
   ...FULL_DRAFT,
-  finalization: {
-    cycleName: 'November',
-    opensAt: new Date(Date.now() + 35 * DAY_MS).toISOString(),
-  },
+  finalization: { cycleName: NOVEMBER.name, opensAt: NOVEMBER.opensAt },
 }
 
-/** {@link FULL_DRAFT} finalized into November's rounds, which have opened since. */
+/** {@link NOVEMBER} once {@link FULL_DRAFT} has filled it and its rounds have opened since. */
+const NOVEMBER_OPENED: HeldCycle = {
+  ...NOVEMBER,
+  opensAt: new Date(Date.now() - DAY_MS).toISOString(),
+  isFilled: true,
+}
+
+/** {@link FULL_DRAFT} finalized into {@link NOVEMBER}'s rounds, which have opened since. */
 const FULL_DRAFT_OPENED: Board = {
   ...FULL_DRAFT,
-  finalization: { cycleName: 'November', opensAt: new Date(Date.now() - DAY_MS).toISOString() },
+  finalization: { cycleName: NOVEMBER_OPENED.name, opensAt: NOVEMBER_OPENED.opensAt },
 }
 
 /** {@link LATER_DRAFT} once {@link FULL_DRAFT}'s round has taken {@link READY}, which leaves every draft it stood on. */
@@ -480,19 +557,17 @@ function heldConversations(memory: SelectionMemory, proposals: Proposal[]): Held
 }
 
 /**
- * The selection as the backend reads it: the problems, the boards, and every conversation held about the problems
- * in the shape the list of them takes.
+ * The selection as the backend reads it: the problems, the boards, the cycles a board can go into, and every
+ * conversation held about the problems in the shape the list of them takes.
  *
  * @param memory - What the backend keeps.
- * @param proposals - Every problem the selection holds.
- * @param boards - Every board the selection holds, oldest first.
+ * @param readable - The problems, the boards and the cycles the read shows.
  *
  * @returns The selection.
  */
 function selectionOf(
   memory: SelectionMemory,
-  proposals: Proposal[],
-  boards: Board[]
+  { proposals, boards, cycles }: ReadableSelection
 ): SelectionData {
   // Each conversation listed, with how much was said and whether the statement it was argued against is
   // gone from the problem in every language
@@ -513,10 +588,11 @@ function selectionOf(
     })
   )
 
-  // The problems, the boards, and the conversations newest first
+  // The problems, the boards, the cycles, and the conversations newest first
   return {
     proposals,
     boards,
+    cycles,
     conversations: conversations.sort((first, second) =>
       second.startedAt.localeCompare(first.startedAt)
     ),
@@ -533,6 +609,30 @@ function selectionOf(
 export function isSlotWrite(url: URL): boolean {
   // The backend's, and shaped like a slot's
   return url.origin === BACKEND_ORIGIN && SLOT_WRITE_PATH.test(url.pathname)
+}
+
+/**
+ * Whether an address is one a proposal write goes to.
+ *
+ * @param url - The address.
+ *
+ * @returns True for a proposal's own address or its set-aside or recommended address, on the backend.
+ */
+export function isProposalWrite(url: URL): boolean {
+  // The backend's, and shaped like a proposal's
+  return url.origin === BACKEND_ORIGIN && PROPOSAL_WRITE_PATH.test(url.pathname)
+}
+
+/**
+ * Whether an address is one a finalization goes to.
+ *
+ * @param url - The address.
+ *
+ * @returns True for a board's finalization address, on the backend.
+ */
+export function isFinalization(url: URL): boolean {
+  // The backend's, and shaped like a board's finalization
+  return url.origin === BACKEND_ORIGIN && FINALIZATION_PATH.test(url.pathname)
 }
 
 /**
@@ -554,6 +654,14 @@ type SelectionReply =
    * they hold out of the selection.
    */
   | 'fullDraftOpened'
+  /** As {@link FULL_DRAFT} first reads, but for {@link READY}'s Czech solution, taken away meanwhile. */
+  | 'fullDraftIncomplete'
+  /** As {@link FULL_DRAFT} first reads, but for {@link NOVEMBER}'s rounds, which an import filled meanwhile. */
+  | 'novemberFilled'
+  /** As {@link FULL_DRAFT} first reads, with {@link WINTER} on offer too. */
+  | 'winterOnOffer'
+  /** With every problem in the selection but {@link OPENED}, which another reviewer deleted meanwhile. */
+  | 'openedDeleted'
   /** Refused with the code an account that does not prepare competitions earns. */
   | 'forbidden'
   /** Refused for good with no code at all, as an address the backend does not serve is. */
@@ -568,15 +676,15 @@ type SelectionReply =
  */
 function selectionHeldAt(reply: SelectionReply): HeldSelection {
   switch (reply) {
-    // Every problem and board as first read, which a refusal or a failure of the read leaves as it stands
+    // Every problem, board and cycle as first read, which a refusal or a failure of the read leaves as it stands
     case 'selection':
     case 'forbidden':
     case 'failure':
-      return { proposals: SELECTION, boards: BOARDS }
+      return { proposals: SELECTION, boards: BOARDS, cycles: CYCLES }
 
     // Every problem as a later read finds them, one revised and another set aside
     case 'later':
-      return { proposals: LATER_SELECTION, boards: BOARDS }
+      return { proposals: LATER_SELECTION, boards: BOARDS, cycles: CYCLES }
 
     // Every problem as first read, but for the one revised in English
     case 'revisedInEnglish':
@@ -585,11 +693,37 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
           proposal === BILINGUAL ? BILINGUAL_REVISED : proposal
         ),
         boards: BOARDS,
+        cycles: CYCLES,
       }
 
     // Every problem as first read, and the full draft ahead of the later one
     case 'fullDraft':
-      return { proposals: SELECTION, boards: [FULL_DRAFT, LATER_DRAFT] }
+      return { proposals: SELECTION, boards: [FULL_DRAFT, LATER_DRAFT], cycles: CYCLES }
+
+    // The full draft as first read, its ready problem lacking a Czech solution since
+    case 'fullDraftIncomplete':
+      return {
+        ...selectionHeldAt('fullDraft'),
+        proposals: SELECTION.map((proposal) =>
+          proposal === READY ? READY_WITHOUT_CZECH_SOLUTION : proposal
+        ),
+      }
+
+    // The full draft as first read, the cycle it fits filled since
+    case 'novemberFilled':
+      return { ...selectionHeldAt('fullDraft'), cycles: withFilled(NOVEMBER) }
+
+    // The full draft as first read, a second cycle it fits on offer
+    case 'winterOnOffer':
+      return { ...selectionHeldAt('fullDraft'), cycles: [OCTOBER, NOVEMBER, WINTER, DECEMBER] }
+
+    // Every problem as first read but the deleted one, which no board held
+    case 'openedDeleted':
+      return {
+        proposals: SELECTION.filter((proposal) => proposal !== OPENED),
+        boards: BOARDS,
+        cycles: CYCLES,
+      }
 
     // The full draft finalized, its round having taken the ready problem, which has left the later draft
     case 'fullDraftFinalized':
@@ -598,6 +732,7 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
           proposal === READY ? { ...READY, isUsed: true } : proposal
         ),
         boards: [FULL_DRAFT_FINALIZED, LATER_DRAFT_WITHOUT_READY],
+        cycles: withFilled(NOVEMBER),
       }
 
     // The full draft finalized and its rounds opened, though the read leaves the board and the ready problem out
@@ -605,6 +740,7 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
       return {
         ...selectionHeldAt('fullDraftFinalized'),
         boards: [FULL_DRAFT_OPENED, LATER_DRAFT_WITHOUT_READY],
+        cycles: CYCLES.map((cycle) => (cycle.id === NOVEMBER.id ? NOVEMBER_OPENED : cycle)),
       }
 
     // Every reply is handled above
@@ -614,14 +750,19 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
 }
 
 /**
- * The selection as its read has it: every board but the opened ones, and every problem but those standing on an
- * opened board, whose rounds are what students now sit.
+ * What the read shows of the selection the backend holds.
+ */
+type ReadableSelection = Pick<SelectionData, 'proposals' | 'boards' | 'cycles'>
+
+/**
+ * The selection as its read has it: every board but the opened ones, every problem but those standing on an
+ * opened board, whose rounds are what students now sit, and every cycle still taking a board.
  *
  * @param held - What the backend holds.
  *
- * @returns The problems and the boards the read answers with.
+ * @returns The problems, the boards and the cycles the read answers with.
  */
-function readableSelection(held: HeldSelection): Pick<SelectionData, 'proposals' | 'boards'> {
+function readableSelection(held: HeldSelection): ReadableSelection {
   // The boards whose rounds are yet to open
   const boards = held.boards.filter((board) => !hasOpened(board))
 
@@ -633,14 +774,25 @@ function readableSelection(held: HeldSelection): Pick<SelectionData, 'proposals'
   // The problems anywhere else
   const proposals = held.proposals.filter((proposal) => !inOpenedRounds.has(proposal.id))
 
-  // The two, as the read has them
-  return { proposals, boards }
+  // The cycles still taking a board, in the shape the read sends them
+  const cycles = held.cycles.filter(takesBoard).map(
+    ({ id, name, opensAt, categories, problemCount }): Cycle => ({
+      id,
+      name,
+      opensAt,
+      categories,
+      problemCount,
+    })
+  )
+
+  // The problems, the boards and the cycles, as the read has them
+  return { proposals, boards, cycles }
 }
 
 /**
  * A function which has the backend hold what a reply says, as other reviewers would have left it, and answer
- * every read of the selection with that reply from then on. The test's own slot writes so far are undone with it,
- * while the comments written stay.
+ * every read of the selection with that reply from then on. The test's own writes to the selection so far are undone
+ * with it, while the comments written stay.
  *
  * @param reply - How every read is answered from then on.
  */
@@ -667,10 +819,10 @@ type CountsRequestBody = {
 }
 
 /**
- * Stands in for the selection's backend: the selection's read, with a reply the test can change midway, the
- * writes to the boards' slots, which change what later reads find, the conversations it lists read out in full,
- * and each problem's discussion with its count. The chat in its memory, where there is one, reads the problems'
- * statements from what the backend holds.
+ * Stands in for the selection's backend: the selection's read, with a reply the test can change midway, the writes
+ * to the boards' slots and the proposals and the finalizations, which change what later reads find, the
+ * conversations it lists read out in full, and each problem's discussion with its count. The chat in its memory,
+ * where there is one, reads the problems' statements from what the backend holds.
  *
  * @param page - The page to answer the selection's calls on.
  * @param firstReply - How the reads are answered until the test says otherwise.
@@ -686,7 +838,7 @@ export async function stubSelection(
   // How every read is answered right now
   let reply = firstReply
 
-  // The problems and boards the backend holds right now, which the writes change
+  // What the backend holds right now, which the writes change
   let stored = selectionHeldAt(firstReply)
 
   // The chat reading each problem's statements as the backend holds them right now, so a revision reaches it too
@@ -708,20 +860,19 @@ export async function stubSelection(
   await page.route(SELECTION_ENDPOINT, async (route) => {
     // Answered the way the test last asked for
     switch (reply) {
-      // Every problem and board the backend holds that the read shows, with the conversations held about the
-      // problems
+      // Every problem, board and cycle the backend holds that the read shows, with the conversations held about
+      // the problems
       case 'selection':
       case 'later':
       case 'revisedInEnglish':
       case 'fullDraft':
       case 'fullDraftFinalized':
-      case 'fullDraftOpened': {
-        // What the read shows
-        const { proposals, boards } = readableSelection(stored)
-
-        // Answered with it
-        return answerJson(route, 200, selectionOf(memory, proposals, boards))
-      }
+      case 'fullDraftOpened':
+      case 'fullDraftIncomplete':
+      case 'novemberFilled':
+      case 'winterOnOffer':
+      case 'openedDeleted':
+        return answerJson(route, 200, selectionOf(memory, readableSelection(stored)))
 
       // Refused, in the shape the backend writes an authorization failure as
       case 'forbidden':
@@ -850,6 +1001,23 @@ export async function stubSelection(
     return answerJson(route, 200, counts)
   })
 
+  // A function which saves a write as the backend does, answering it with nothing to say or with the refusal
+  const answerWrite = async (route: Route, write: (held: HeldSelection) => HeldSelection) => {
+    try {
+      // What the backend holds once the write is saved
+      stored = write(stored)
+
+      // Saved, with nothing to say
+      return await route.fulfill({ status: 204 })
+    } catch (error) {
+      // Anything but a refusal is the fake's own failure
+      if (!(error instanceof SelectionWriteRefused)) throw error
+
+      // Refused, with the status and the code the backend refuses it with
+      return await refuse(route, SELECTION_WRITE_REFUSALS[error.code], error.code)
+    }
+  }
+
   // A write to one slot: a placement, an emptying, or a trade with a neighbour
   await page.route(isSlotWrite, async (route) => {
     // The call as it went out
@@ -862,19 +1030,39 @@ export async function stubSelection(
     // The slot, addressed as the backend reads it
     const slot = { boardId, paperId, index: Number(index) }
 
-    try {
-      // What the backend holds once the write is saved
-      stored = slotWrite(stored, request.method(), move !== undefined, slot, request.postData())
+    // Saved or refused
+    return answerWrite(route, (held) =>
+      slotWrite(held, request.method(), move !== undefined, slot, request.postData())
+    )
+  })
 
-      // Saved, with nothing to say
-      return await route.fulfill({ status: 204 })
-    } catch (error) {
-      // Anything but a refusal is the fake's own failure
-      if (!(error instanceof SlotWriteRefused)) throw error
+  // A write to one proposal: a set-aside, a recommendation, or a delete
+  await page.route(isProposalWrite, async (route) => {
+    // The call as it went out
+    const request = route.request()
 
-      // Refused, with the status and the code the backend refuses it with
-      return await refuse(route, SLOT_WRITE_REFUSALS[error.code], error.code)
-    }
+    // The proposal it names, and which change
+    const [, proposalId = '', change] =
+      PROPOSAL_WRITE_PATH.exec(new URL(request.url()).pathname) ?? []
+
+    // Saved or refused
+    return answerWrite(route, (held) =>
+      proposalWrite(held, request.method(), change, proposalId, request.postData())
+    )
+  })
+
+  // A board finalized into a cycle's rounds
+  await page.route(isFinalization, async (route) => {
+    // The call as it went out
+    const request = route.request()
+
+    // The board it names
+    const [, boardId = ''] = FINALIZATION_PATH.exec(new URL(request.url()).pathname) ?? []
+
+    // Saved or refused
+    return answerWrite(route, (held) =>
+      finalizationWrite(held, request.method(), boardId, request.postData())
+    )
   })
 
   // The way to change the reply
@@ -1001,4 +1189,64 @@ export async function pickBoard(page: Page, from: Board, to: Board): Promise<voi
 
   // On screen
   await expect(boardPanel(page).getByRole('button', { name: to.name })).toBeVisible()
+}
+
+/**
+ * The line naming the rounds a finalized board went into, and the day they open.
+ *
+ * @param page - The page.
+ * @param board - The finalized board.
+ *
+ * @returns The line.
+ */
+export function statusLine(page: Page, board: Board): Locator {
+  // The day its rounds open, as the page writes it in the site's time zone
+  const date = new Intl.DateTimeFormat('en', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'Europe/Bratislava',
+  }).format(new Date(board.finalization!.opensAt))
+
+  // The line naming the rounds and the day
+  return boardPanel(page).getByText(
+    selectionText('board.status', { cycle: board.finalization!.cycleName, date })
+  )
+}
+
+/**
+ * Records every write of one kind the page sends to the selection's backend.
+ *
+ * @param page - The page.
+ * @param isWrite - Whether an address is one the writes recorded go to.
+ *
+ * @returns The writes sent so far, oldest first.
+ */
+export function recordWrites(page: Page, isWrite: (url: URL) => boolean): () => Request[] {
+  // Every write that went out, in order
+  const writes: Request[] = []
+
+  // Each request the page sends
+  page.on('request', (request) => {
+    // One of the writes recorded
+    if (isWrite(new URL(request.url()))) writes.push(request)
+  })
+
+  // A snapshot on each read
+  return () => [...writes]
+}
+
+/**
+ * Holds every read of the selection from now on until the test lets them through, so what the page shows meanwhile
+ * is its own doing rather than a read's.
+ *
+ * @param page - The page.
+ *
+ * @returns A function which lets the held reads, and every later one, through.
+ */
+export async function holdReads(page: Page): Promise<() => void> {
+  // The gate every read waits at
+  const gate = await gateReads(page, SELECTION_ENDPOINT)
+
+  // Shut from here on, handing back the way to open it
+  return gate.hold()
 }

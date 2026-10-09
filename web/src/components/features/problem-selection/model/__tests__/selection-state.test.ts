@@ -1,7 +1,30 @@
 import { describe, expect, it } from 'vitest'
 
-import { pickActiveBoard, resolveText, unreadyLanguages } from '../selection-state'
-import type { Board, Proposal } from '../selection-types'
+import { cycleMisfit, pickActiveBoard, resolveText, unreadyLanguages } from '../selection-state'
+import type { Board, Cycle, Paper, Proposal } from '../selection-types'
+
+/** The October cycle: one round per category, four problems each. */
+const OCTOBER: Cycle = {
+  id: 'october',
+  name: 'October',
+  opensAt: '2026-10-18T22:00:00Z',
+  categories: ['elementary', 'intermediate', 'advanced'],
+  problemCount: 4,
+}
+
+/**
+ * A paper of the given category and length.
+ *
+ * @param name - What it is called.
+ * @param category - The category it fills, or null for none.
+ * @param length - How many slots it has.
+ *
+ * @returns The paper, every slot empty.
+ */
+function paper(name: string, category: Paper['category'], length = 4): Paper {
+  // Its name doubling as its id, with nothing in any slot
+  return { id: name, name, category, slots: Array.from({ length }, () => null) }
+}
 
 /**
  * A board holding no papers.
@@ -17,7 +40,7 @@ function board(id: string, isFinalized = false): Board {
     id,
     name: id,
     papers: [],
-    finalization: isFinalized ? { cycleName: 'October', opensAt: '2026-10-18T22:00:00Z' } : null,
+    finalization: isFinalized ? { cycleName: 'October', opensAt: OCTOBER.opensAt } : null,
   }
 }
 
@@ -41,6 +64,65 @@ function proposal(texts: Proposal['texts']): Proposal {
     isUsed: false,
   }
 }
+
+describe('cycleMisfit', () => {
+  it('names a paper no round is left for, and the round no paper fills', () => {
+    // A second elementary paper, and a paper outside the categories
+    const second = paper('E2', 'elementary')
+    const school = paper('School', null)
+
+    // What keeps a board of E, E2 and School from pairing up with October's rounds
+    const misfit = cycleMisfit(
+      { ...board('board'), papers: [paper('E', 'elementary'), second, school] },
+      OCTOBER
+    )
+
+    // The second elementary paper and the school paper have no round
+    expect(misfit.unmatched).toEqual([second, school])
+
+    // And no paper stands for the intermediate round or the advanced one
+    expect(misfit.uncovered).toEqual(['intermediate', 'advanced'])
+  })
+
+  it('names a paper of a category the cycle runs no round in', () => {
+    // An intermediate paper, and a cycle with no intermediate round
+    const intermediate = paper('I', 'intermediate')
+    const twoRounds: Cycle = { ...OCTOBER, categories: ['elementary', 'advanced'] }
+
+    // What keeps a board of E, I and A from pairing up with the two rounds
+    const misfit = cycleMisfit(
+      {
+        ...board('board'),
+        papers: [paper('E', 'elementary'), intermediate, paper('A', 'advanced')],
+      },
+      twoRounds
+    )
+
+    // The intermediate paper has no round
+    expect(misfit.unmatched).toEqual([intermediate])
+
+    // And both rounds have their paper
+    expect(misfit.uncovered).toEqual([])
+  })
+
+  it('names a paper whose length differs from what the rounds take', () => {
+    // Advanced has five slots where every round takes four
+    const long = paper('A', 'advanced', 5)
+
+    // What keeps a board of E, I and the long A from pairing up with October's rounds
+    const misfit = cycleMisfit(
+      { ...board('board'), papers: [paper('E', 'elementary'), paper('I', 'intermediate'), long] },
+      OCTOBER
+    )
+
+    // The advanced paper is named for its length
+    expect(misfit.wrongSize).toEqual([long])
+
+    // And nothing else stands in the way
+    expect(misfit.unmatched).toEqual([])
+    expect(misfit.uncovered).toEqual([])
+  })
+})
 
 describe('unreadyLanguages', () => {
   it('counts a language with a statement but no solution as one a round refuses', () => {

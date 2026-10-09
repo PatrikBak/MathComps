@@ -1,68 +1,22 @@
 import type {
   Board,
   Paper,
-  Proposal,
   SlotAddress,
   SlotDirection,
 } from '@/components/features/problem-selection/model/selection-types'
-import type { AppErrorCode } from '@/lib/api/api-error-codes'
 
-/**
- * Every refusal a slot write's own checks give, past the sign-in, the grant and the rate limit, each against the
- * status the backend answers it with.
- */
-export const SLOT_WRITE_REFUSALS = {
-  MalformedRequest: 400,
-  SelectionTargetNotFound: 404,
-  SelectionBoardOpened: 409,
-  SelectionBoardFinalized: 409,
-  SelectionProposalUsed: 409,
-} as const satisfies Partial<Record<AppErrorCode, number>>
-
-/** The code a refused slot write carries. */
-type SlotWriteRefusal = keyof typeof SLOT_WRITE_REFUSALS
-
-/**
- * Thrown when the backend refuses a slot write, carrying the code it refuses it with.
- */
-export class SlotWriteRefused extends Error {
-  /**
-   * @param code - Why the write was refused.
-   */
-  constructor(readonly code: SlotWriteRefusal) {
-    // The code doubles as the message, which only a failing test's output shows
-    super(code)
-  }
-}
-
-/**
- * Everything the backend holds about the boards and their problems, which the read answers out of and every
- * write changes.
- */
-export type HeldSelection = {
-  /** Every live proposal, the ones in the rounds of an opened board included. */
-  proposals: Proposal[]
-  /** Every board, oldest first, the opened ones included. */
-  boards: Board[]
-}
-
-/**
- * Whether a board's rounds have opened, which the read leaves out and every write refuses.
- *
- * @param board - The board.
- *
- * @returns True for a finalized board whose rounds' opening has passed.
- */
-export function hasOpened(board: Board): boolean {
-  // Finalized, into rounds already open
-  return board.finalization !== null && Date.parse(board.finalization.opensAt) <= Date.now()
-}
+import {
+  draftBoard,
+  GUID,
+  type HeldSelection,
+  isGuid,
+  liveProposal,
+  readFields,
+  refuseWith,
+} from './selection-writes'
 
 /** How far a move takes a slot: up is the slot before it, down the slot after. */
 const MOVE_OFFSET: Record<SlotDirection, number> = { up: -1, down: 1 }
-
-/** The shape of an id the backend's routes take, any other answering as a path it does not serve. */
-const GUID = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
 
 /**
  * The path of a slot write: the board, the paper and the slot's index, and a trailing move for a trade with a
@@ -88,16 +42,6 @@ type DraftSlot = {
 }
 
 /**
- * Refuses the write.
- *
- * @param code - Why.
- */
-function refuseWith(code: SlotWriteRefusal): never {
-  // Answered by the route with the code's status
-  throw new SlotWriteRefused(code)
-}
-
-/**
  * The board and the paper a slot names, refused the way the backend refuses them before any write.
  *
  * @param held - What the backend holds.
@@ -106,16 +50,8 @@ function refuseWith(code: SlotWriteRefusal): never {
  * @returns The slot's board and paper.
  */
 function draftSlot(held: HeldSelection, slot: SlotAddress): DraftSlot {
-  // The board, which has to exist
-  const board =
-    held.boards.find((candidate) => candidate.id === slot.boardId) ??
-    refuseWith('SelectionTargetNotFound')
-
-  // Its rounds, once open, being what students sit
-  if (hasOpened(board)) refuseWith('SelectionBoardOpened')
-
-  // And a draft, a finalized board's slots being its rounds, which take no change
-  if (board.finalization !== null) refuseWith('SelectionBoardFinalized')
+  // The board, which has to be a draft
+  const board = draftBoard(held, slot.boardId)
 
   // The paper, one of this board's own
   const paper =
@@ -201,35 +137,6 @@ function withBoard(held: HeldSelection, board: Board): HeldSelection {
 }
 
 /**
- * Reads the request body of a JSON write, refusing what the backend cannot read.
- *
- * @param body - The body as it went out; null when there was none.
- *
- * @returns The body's fields, by name.
- */
-function readFields(body: string | null): Record<string, unknown> {
-  // A write with nothing to read
-  if (body === null) refuseWith('MalformedRequest')
-
-  // The body, parsed
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(body)
-  } catch {
-    // Anything but JSON
-    refuseWith('MalformedRequest')
-  }
-
-  // Anything but an object has no fields to bind
-  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-    refuseWith('MalformedRequest')
-  }
-
-  // The fields
-  return parsed as Record<string, unknown>
-}
-
-/**
  * Reads which proposal a placement names, refusing a body that names none, as the backend does.
  *
  * @param body - The body as it went out; null when there was none.
@@ -241,9 +148,7 @@ function readPlacement(body: string | null): string {
   const { proposalId } = readFields(body)
 
   // Missing, null, or not an id, none of which names a proposal
-  if (typeof proposalId !== 'string' || !new RegExp(`^${GUID}$`).test(proposalId)) {
-    refuseWith('MalformedRequest')
-  }
+  if (!isGuid(proposalId)) refuseWith('MalformedRequest')
 
   // The proposal's id
   return proposalId
@@ -286,9 +191,7 @@ function place(held: HeldSelection, slot: SlotAddress, proposalId: string): Held
   const { board } = draftSlot(held, slot)
 
   // The proposal, which has to be live
-  const proposal =
-    held.proposals.find((candidate) => candidate.id === proposalId) ??
-    refuseWith('SelectionTargetNotFound')
+  const proposal = liveProposal(held, proposalId)
 
   // A draft takes only what is still in the pool
   if (proposal.isUsed) refuseWith('SelectionProposalUsed')
