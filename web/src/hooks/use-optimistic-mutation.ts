@@ -49,13 +49,14 @@ export type OptimisticMutationConfig<TData, TVariables, TContext> = {
   onError?: (error: unknown, variables: TVariables, context: TContext | undefined) => void
   /**
    * Called after the mutation settles (success or error). Useful for cleanup or refetching regardless of outcome.
+   * The mutation stays pending until a promise it returns settles.
    */
   onSettled?: (
     data: TData | undefined,
     error: unknown,
     variables: TVariables,
     context: TContext | undefined
-  ) => void
+  ) => Promise<unknown> | void
   /**
    * Shows a login prompt toast with this reason when the user is unauthenticated.
    */

@@ -17,9 +17,10 @@ export const OPEN_ID_ATTRIBUTE = dataAttribute('data-open-id')
  * the item the reader ended on can be a long way from where they were reading.
  *
  * @param openId - The item open; null while none is.
- * @returns A function which puts focus back, to be run once whatever showed the item has finished leaving.
+ * @returns A function which puts focus back, saying whether the page still showed the item to put it on, to be
+ * run once whatever showed the item has finished leaving.
  */
-export function useFocusReturn(openId: string | null): () => void {
+export function useFocusReturn(openId: string | null): () => boolean {
   // The item the reader ended on, held past the point nothing is open so its element can still be found once
   // whatever showed it has finished leaving
   const lastOpenIdRef = useRef<string | null>(null)
@@ -33,11 +34,15 @@ export function useFocusReturn(openId: string | null): () => void {
     const id = lastOpenIdRef.current
 
     // Nowhere to go back to if nothing was ever open
-    if (id === null) return
+    if (id === null) return false
 
     // Whichever element stands for the item last open, if the page still shows one
-    document
-      .querySelector<HTMLElement>(OPEN_ID_ATTRIBUTE.selectorFor(id))
-      ?.focus({ preventScroll: true })
+    const target = document.querySelector<HTMLElement>(OPEN_ID_ATTRIBUTE.selectorFor(id))
+
+    // Focused there, the page staying where it was
+    target?.focus({ preventScroll: true })
+
+    // Whether there was one
+    return target !== null
   }, [])
 }

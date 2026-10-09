@@ -85,6 +85,41 @@ export type Board = {
 }
 
 /**
+ * One slot, addressed from outside its board.
+ */
+export type SlotAddress = {
+  /** The board holding it. */
+  boardId: string
+  /** The paper holding it. */
+  paperId: string
+  /** Its position in the paper, from zero. */
+  index: number
+}
+
+/** Which neighbour a slot trades with when it moves: the one above it, or the one below. */
+export type SlotDirection = 'up' | 'down'
+
+/**
+ * A proposal going into a slot.
+ */
+export type PlacementWrite = {
+  /** Where the proposal goes. */
+  slot: SlotAddress
+  /** The proposal. */
+  proposalId: string
+}
+
+/**
+ * A slot trading places with its neighbour.
+ */
+export type MoveWrite = {
+  /** The slot. */
+  slot: SlotAddress
+  /** Which neighbour the slot trades with. */
+  direction: SlotDirection
+}
+
+/**
  * A summary of one reviewer's conversation with Mathilda about a proposal, whose full text is a
  * {@link ReviewTranscript}.
  */

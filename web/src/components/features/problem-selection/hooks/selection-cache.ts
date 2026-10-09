@@ -9,9 +9,9 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query'
 const SELECTION_QUERY_KEY = ['problem-selection'] as const
 
 /**
- * The key the reader's selection is cached under. It names the reader because the read is theirs: the token
- * rides in a header the cache never sees, and another account signing in on the same page must not be handed
- * the first one's answer.
+ * The key the reader's selection is cached under, which the read and every write to it share. It names the
+ * reader because the read is theirs: the token rides in a header the cache never sees, and another account
+ * signing in on the same page must not be handed the first one's answer.
  *
  * @returns The key, naming nobody until sign-in has settled who the reader is.
  */
@@ -46,11 +46,14 @@ export function useTranscriptQueryKey(conversationId: string | null): QueryKey {
 }
 
 /**
- * Refreshes every cached copy of the selection, whoever it was read as.
+ * Refreshes every cached copy of the selection, whoever it was read as. Every write changes something every
+ * reader's copy shows.
  *
  * @param queryClient - The cache to refresh.
+ *
+ * @returns A promise settling once the copies on screen have been read again.
  */
-export function invalidateSelection(queryClient: QueryClient): void {
+export function invalidateSelection(queryClient: QueryClient): Promise<void> {
   // Every copy under the shared prefix, whichever reader its key names
-  void queryClient.invalidateQueries({ queryKey: SELECTION_QUERY_KEY })
+  return queryClient.invalidateQueries({ queryKey: SELECTION_QUERY_KEY })
 }

@@ -11,7 +11,7 @@ namespace MathComps.Infrastructure.Services.Selection;
 /// <summary>
 /// Implements <see cref="ISelectionBoardService"/> over the database, each change one write through
 /// <see cref="SelectionRules.RunWriteAsync"/>. A draft's slots are its <see cref="SelectionSlot"/> rows; a
-/// finalized board's are its group's rounds, changed through <see cref="ProblemPositions"/>.
+/// finalized board's are its group's rounds, which none of these changes reaches.
 /// </summary>
 /// <param name="dbContextFactory">Creates the context each change runs on.</param>
 public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> dbContextFactory)
@@ -22,8 +22,8 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         // The placement, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
-            // The board, which has to be one still taking changes
-            var board = await ReadEditableBoardAsync(dbContext, slot.BoardId, cancellationToken);
+            // The board, which has to be a draft
+            var board = await ReadDraftAsync(dbContext, slot.BoardId, cancellationToken);
 
             // The paper holding the slot
             var paper = PaperOf(board, slot);
@@ -31,13 +31,24 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
             // The proposal going in
             var proposal = await SelectionRules.ReadProposalAsync(dbContext, proposalId, cancellationToken);
 
-            // A finalized board's slot is a position in a round
-            if (board.HostedGroupId is { } groupId)
-                await PlaceInRoundAsync(dbContext, groupId, paper, slot.Index, proposal.Problem, cancellationToken);
+            // A draft takes only what is still in the pool
+            if (!SelectionRules.IsInPool(proposal.Problem.Round.Competition.Path))
+                throw new SelectionProposalUsedException();
 
-            // A draft's is a slot row
-            else
-                PlaceOnDraft(dbContext, board, paper, slot.Index, proposal.Problem);
+            // Where on this board the problem already stands, if anywhere
+            var source = board.Papers
+                .SelectMany(candidate => candidate.Slots)
+                .FirstOrDefault(candidate => candidate.ProblemId == proposal.ProblemId);
+
+            // What stands in the slot now, read before anything moves
+            var occupant = ProblemIdAt(paper, slot.Index);
+
+            // The problem takes the slot
+            SetSlot(dbContext, paper, slot.Index, proposal.ProblemId);
+
+            // The problem's old slot on the board, if any and if not the same one, takes what stood in the new one
+            if (source is not null && (source.PaperId != paper.Id || source.Position != slot.Index))
+                SetSlot(dbContext, source.Paper, source.Position, occupant);
         }, cancellationToken);
 
     /// <inheritdoc/>
@@ -45,15 +56,11 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         // The clearing, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
-            // The board, which has to be one still taking changes
-            var board = await ReadEditableBoardAsync(dbContext, slot.BoardId, cancellationToken);
+            // The board, which has to be a draft
+            var board = await ReadDraftAsync(dbContext, slot.BoardId, cancellationToken);
 
             // The paper holding the slot
             var paper = PaperOf(board, slot);
-
-            // A round never stands part-filled, so a finalized paper keeps every slot
-            if (board.HostedGroupId is not null)
-                throw new SelectionPaperFinalizedException();
 
             // The slot emptied, its problem back in the pool
             SetSlot(dbContext, paper, slot.Index, null);
@@ -65,8 +72,8 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         // The trade, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
-            // The board, which has to be one still taking changes
-            var board = await ReadEditableBoardAsync(dbContext, slot.BoardId, cancellationToken);
+            // The board, which has to be a draft
+            var board = await ReadDraftAsync(dbContext, slot.BoardId, cancellationToken);
 
             // The paper holding the slot
             var paper = PaperOf(board, slot);
@@ -83,28 +90,13 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
             if (neighbour < 0 || neighbour >= paper.SlotCount)
                 throw new SelectionTargetNotFoundException();
 
-            // A finalized board's two slots are two problems of one round, which trade numbers
-            if (board.HostedGroupId is { } groupId)
-            {
-                // The round the paper became
-                var round = await ReadRoundOfAsync(dbContext, groupId, paper, cancellationToken);
+            // What stands in each of the two slots, read before either changes
+            var here = ProblemIdAt(paper, slot.Index);
+            var there = ProblemIdAt(paper, neighbour);
 
-                // The two problems trading
-                await ExchangeAsync(
-                    dbContext, ProblemAt(round, slot.Index), ProblemAt(round, neighbour), cancellationToken);
-            }
-
-            // A draft's are two slots, which trade what they hold
-            else
-            {
-                // What stands in each of the two slots, read before either changes
-                var here = ProblemIdAt(paper, slot.Index);
-                var there = ProblemIdAt(paper, neighbour);
-
-                // Each slot takes what the other held
-                SetSlot(dbContext, paper, slot.Index, there);
-                SetSlot(dbContext, paper, neighbour, here);
-            }
+            // Each slot takes what the other held
+            SetSlot(dbContext, paper, slot.Index, there);
+            SetSlot(dbContext, paper, neighbour, here);
         }, cancellationToken);
 
     /// <inheritdoc/>
@@ -112,12 +104,8 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         // The finalize, as one selection write
         SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
         {
-            // The board, which has to be one still taking changes
-            var board = await ReadEditableBoardAsync(dbContext, boardId, cancellationToken);
-
-            // A finalized board already has its rounds
-            if (board.HostedGroupId is not null)
-                throw new SelectionBoardFinalizedException();
+            // The board, which has to be a draft
+            var board = await ReadDraftAsync(dbContext, boardId, cancellationToken);
 
             // The group taking the papers
             var group = await dbContext.HostedGroups
@@ -181,7 +169,7 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         }, cancellationToken);
 
     /// <summary>
-    /// Reads a board with its papers and their slot rows, tracked, refusing one whose group has opened.
+    /// Reads a draft board with its papers and their slot rows, tracked.
     /// </summary>
     /// <param name="dbContext">The write's context.</param>
     /// <param name="boardId">The board.</param>
@@ -189,7 +177,8 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
     /// <returns>The board.</returns>
     /// <exception cref="SelectionTargetNotFoundException">Thrown when no board has the id.</exception>
     /// <exception cref="SelectionBoardOpenedException">Thrown when the board's group has opened.</exception>
-    private static async Task<SelectionBoard> ReadEditableBoardAsync(
+    /// <exception cref="SelectionBoardFinalizedException">Thrown when the board is finalized.</exception>
+    private static async Task<SelectionBoard> ReadDraftAsync(
         MathCompsDbContext dbContext, Guid boardId, CancellationToken cancellationToken)
     {
         // The board with everything on it, and the group it was finalized into
@@ -203,7 +192,11 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         if (board.HostedGroup is { } group && group.OpensAt <= DateTimeOffset.UtcNow)
             throw new SelectionBoardOpenedException();
 
-        // A board still taking changes
+        // A finalized board's slots are its group's rounds, which take no change
+        if (board.HostedGroupId is not null)
+            throw new SelectionBoardFinalizedException();
+
+        // A draft
         return board;
     }
 
@@ -223,111 +216,6 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
             .Include(round => round.Problems)
             .Where(round => round.HostedGroupId == groupId)
             .ToListAsync(cancellationToken);
-
-    /// <summary>
-    /// Reads the round a finalized paper became, which is its group's round of the paper's category.
-    /// </summary>
-    /// <param name="dbContext">The write's context.</param>
-    /// <param name="groupId">The group the paper's board was finalized into.</param>
-    /// <param name="paper">The paper.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The round, tracked, with its competition, season and problems.</returns>
-    /// <exception cref="SelectionTargetNotFoundException">
-    /// Thrown when the group runs no round in the paper's category.
-    /// </exception>
-    private static async Task<Round> ReadRoundOfAsync(
-        MathCompsDbContext dbContext, Guid groupId, SelectionPaper paper, CancellationToken cancellationToken) =>
-        // The one round of the group in the paper's category, the one finalize paired the paper with
-        (await ReadRoundsAsync(dbContext, groupId, cancellationToken))
-            .SingleOrDefault(round => HostedTaxonomy.CategoryOf(round.Competition.Path) == paper.Category)
-        ?? throw new SelectionTargetNotFoundException();
-
-    /// <summary>
-    /// Puts a problem into a finalized paper's slot, trading positions with the problem standing there. A newcomer
-    /// from the pool sends that problem to the newcomer's place in the pool; one already on the board sends it to
-    /// the newcomer's old slot.
-    /// </summary>
-    /// <param name="dbContext">The write's context.</param>
-    /// <param name="groupId">The group the paper's board was finalized into.</param>
-    /// <param name="paper">The paper.</param>
-    /// <param name="index">The slot, from zero.</param>
-    /// <param name="newcomer">The problem going in, with its round and that round's competition and season.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>A task that completes once the problems have traded.</returns>
-    /// <exception cref="SelectionProposalUsedException">
-    /// Thrown when the newcomer stands in neither the pool nor the board's rounds.
-    /// </exception>
-    private static async Task PlaceInRoundAsync(
-        MathCompsDbContext dbContext, Guid groupId, SelectionPaper paper, int index, Problem newcomer,
-        CancellationToken cancellationToken)
-    {
-        // The round the paper became
-        var round = await ReadRoundOfAsync(dbContext, groupId, paper, cancellationToken);
-
-        // The problem standing in the slot
-        var occupant = ProblemAt(round, index);
-
-        // The newcomer already stands in the slot, so nothing moves
-        if (occupant.Id == newcomer.Id)
-            return;
-
-        // One of this board's own problems trades places within the board
-        if (newcomer.Round.HostedGroupId == groupId)
-        {
-            // The newcomer and the occupant trade positions
-            await ExchangeAsync(dbContext, newcomer, occupant, cancellationToken);
-
-            // Done, both problems staying on the board
-            return;
-        }
-
-        // Anything else that is not in the pool belongs to some other paper
-        if (!SelectionRules.IsInPool(newcomer.Round.Competition.Path))
-            throw new SelectionProposalUsedException();
-
-        // A pool problem only goes into a round that can carry it
-        await EnsureCompleteAsync(dbContext, [newcomer.Id], cancellationToken);
-
-        // The newcomer takes the slot, the occupant going back to the pool with its conversations
-        await ExchangeAsync(dbContext, newcomer, occupant, cancellationToken);
-
-        // The newcomer leaves every draft it stood on, a paper having taken it
-        await SelectionRules.RemoveSlotsAsync(dbContext, [newcomer.Id], cancellationToken);
-    }
-
-    /// <summary>
-    /// Puts a pool problem into a draft's slot. One already elsewhere on the board trades places with whatever
-    /// held the slot, so a problem never stands on one board twice; one coming from the pool sends the slot's old
-    /// problem back to it.
-    /// </summary>
-    /// <param name="dbContext">The write's context.</param>
-    /// <param name="board">The board, with its papers and slot rows.</param>
-    /// <param name="paper">The paper holding the slot.</param>
-    /// <param name="index">The slot, from zero.</param>
-    /// <param name="problem">The problem going in, with its round's competition.</param>
-    /// <exception cref="SelectionProposalUsedException">Thrown when the problem is not in the pool.</exception>
-    private static void PlaceOnDraft(
-        MathCompsDbContext dbContext, SelectionBoard board, SelectionPaper paper, int index, Problem problem)
-    {
-        // A draft takes only what is still in the pool
-        if (!SelectionRules.IsInPool(problem.Round.Competition.Path))
-            throw new SelectionProposalUsedException();
-
-        // Where on this board the problem already stands, if anywhere
-        var source = board.Papers
-            .SelectMany(candidate => candidate.Slots)
-            .FirstOrDefault(slot => slot.ProblemId == problem.Id);
-
-        // What stands in the slot now, read before anything moves
-        var occupant = ProblemIdAt(paper, index);
-
-        // The problem takes the slot
-        SetSlot(dbContext, paper, index, problem.Id);
-
-        // The problem's old slot on the board, if any and if not the same one, takes what stood in the new one
-        if (source is not null && (source.PaperId != paper.Id || source.Position != index))
-            SetSlot(dbContext, source.Paper, source.Position, occupant);
-    }
 
     /// <summary>
     /// Puts a problem into a draft's slot, or empties it.
@@ -363,24 +251,6 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         else
             dbContext.SelectionSlots.Add(
                 new SelectionSlot { PaperId = paper.Id, Position = index, ProblemId = problemId.Value });
-    }
-
-    /// <summary>
-    /// Trades two problems' positions.
-    /// </summary>
-    /// <param name="dbContext">The write's context, tracking both problems.</param>
-    /// <param name="first">The first problem, with its round and that round's competition and season.</param>
-    /// <param name="second">The second problem, with its round and that round's competition and season.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>A task that completes once the two have traded.</returns>
-    private static async Task ExchangeAsync(
-        MathCompsDbContext dbContext, Problem first, Problem second, CancellationToken cancellationToken)
-    {
-        // What the trade writes, refused when a slug it needs is taken
-        var exchange = await ProblemPositions.PlanExchangeAsync(dbContext, first, second, cancellationToken);
-
-        // The trade itself
-        await ProblemPositions.ExchangeAsync(dbContext, first, second, exchange, cancellationToken);
     }
 
     /// <summary>
@@ -470,16 +340,6 @@ public sealed class SelectionBoardService(IDbContextFactory<MathCompsDbContext> 
         // The paper holding the slot
         return paper;
     }
-
-    /// <summary>
-    /// Finds the problem a full round holds at a slot.
-    /// </summary>
-    /// <param name="round">The round, with its problems.</param>
-    /// <param name="index">The slot, from zero.</param>
-    /// <returns>The problem.</returns>
-    private static Problem ProblemAt(Round round, int index) =>
-        // A finalized round is full, so the number is held
-        round.Problems.Single(problem => problem.Number == index + 1);
 
     /// <summary>
     /// Reads what stands in a draft's slot.

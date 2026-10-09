@@ -1,7 +1,8 @@
 'use client'
 
-import { ChevronDown } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { ArrowDown, ArrowLeftRight, ArrowUp, ChevronDown, X } from 'lucide-react'
+import { useFormatter, useTranslations } from 'next-intl'
+import { type ReactNode, type Ref, useId } from 'react'
 
 import { categoryTextClass } from '@/components/features/hosted-competitions/components/CategoryBadge'
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
@@ -17,15 +18,19 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { useKeyedState } from '@/hooks/use-keyed-state'
 import { localeCodeList } from '@/i18n/i18n'
 
+import { useBoardFocusKeeper } from '../hooks/use-board-focus-keeper'
 import { useBoardSlot } from '../hooks/use-board-slot'
-import type { SlotPosition } from '../model/selection-state'
-import type { Paper } from '../model/selection-types'
+import { usePaperMoves, type UsePaperMovesResult } from '../hooks/use-paper-moves'
+import { useSlotWrites } from '../hooks/use-slot-writes'
+import type { BoardSlot } from '../model/selection-state'
+import type { Board, Paper } from '../model/selection-types'
 import { SlotNumber, WARNING_MARK_CLASS } from './CategoryMarks'
 import { ProposalLink } from './SelectionLinks'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
- * The board being filled: its papers, slot by slot.
+ * The board being filled: its papers, slot by slot. A placement made from the pool or from a single problem
+ * shows up here at once.
  */
 export function BoardPanel() {
   // Board copy
@@ -37,6 +42,12 @@ export function BoardPanel() {
   // Whether the papers show below the header on a narrow screen, where they fold away by default and again
   // whenever the open problem changes, closing included, so the problem a slot opens is what the screen shows
   const [isUnfolded, setIsUnfolded] = useKeyedState(openProposalId, false)
+
+  // Where the focus goes when a read changes the board on screen under it
+  const { menuRef, statusRef } = useBoardFocusKeeper(
+    selection?.boards ?? [],
+    selection?.activeBoard ?? null
+  )
 
   // Only a stand-in until the boards arrive
   if (selection === null) {
@@ -71,6 +82,7 @@ export function BoardPanel() {
         {/* The board on screen, and the switch to any other */}
         <DropdownMenu>
           <DropdownMenuTrigger
+            ref={menuRef}
             className={cn(
               'inline-flex min-w-0 items-center gap-1.5 rounded-md text-base font-semibold text-foreground',
               FOCUS_RING_CLASS
@@ -121,11 +133,14 @@ export function BoardPanel() {
         </Button>
       </div>
 
+      {/* The status line, for a finalized board, shown folded or not */}
+      <BoardStatus board={activeBoard} ref={statusRef} />
+
       {/* The papers, hidden on a narrow screen until unfolded */}
       <div className={cn(!isUnfolded && 'hidden', 'lg:block')}>
         {/* Every paper, slot by slot */}
         {activeBoard.papers.map((paper) => (
-          <PaperSlots key={paper.id} paper={paper} />
+          <PaperSlots key={paper.id} board={activeBoard} paper={paper} />
         ))}
 
         {/* Room under the last paper */}
@@ -136,9 +151,52 @@ export function BoardPanel() {
 }
 
 /**
+ * Props for the {@link BoardStatus} component.
+ */
+type BoardStatusProps = {
+  /** The board on screen. */
+  board: Board
+  /** Handle onto the line. */
+  ref: Ref<HTMLParagraphElement>
+}
+
+/**
+ * The rounds a finalized board went into, and the day they open, in one line.
+ */
+function BoardStatus({ board, ref }: BoardStatusProps) {
+  // Board copy
+  const t = useTranslations('problemSelection.board')
+
+  // Dates in the reader's language
+  const format = useFormatter()
+
+  // A draft says nothing beyond its stage
+  if (board.finalization === null) return null
+
+  // The day the board's rounds open
+  const opens = format.dateTime(new Date(board.finalization.opensAt), {
+    day: 'numeric',
+    month: 'long',
+  })
+
+  return (
+    <p
+      ref={ref}
+      // Focused when a read finalizes the board under a control it takes away
+      tabIndex={-1}
+      className="px-4 pt-3 text-xs text-muted focus:outline-none"
+    >
+      {t('status', { cycle: board.finalization.cycleName, date: opens })}
+    </p>
+  )
+}
+
+/**
  * Props for the {@link PaperSlots} component.
  */
 type PaperSlotsProps = {
+  /** The board holding the paper. */
+  board: Board
   /** The paper. */
   paper: Paper
 }
@@ -146,7 +204,10 @@ type PaperSlotsProps = {
 /**
  * One paper, slot by slot.
  */
-function PaperSlots({ paper }: PaperSlotsProps) {
+function PaperSlots({ board, paper }: PaperSlotsProps) {
+  // The moves along the paper
+  const moves = usePaperMoves({ board, paper })
+
   // How many of the paper's slots hold a problem
   const filled = paper.slots.filter((slot) => slot !== null).length
 
@@ -161,9 +222,9 @@ function PaperSlots({ paper }: PaperSlotsProps) {
       </div>
 
       {/* Every slot */}
-      <ol>
-        {paper.slots.map((proposalId, index) => (
-          <SlotRow key={index} paper={paper} index={index} proposalId={proposalId} />
+      <ol ref={moves.listRef}>
+        {paper.slots.map((_proposalId, index) => (
+          <SlotRow key={index} board={board} paper={paper} index={index} moves={moves} />
         ))}
       </ol>
     </div>
@@ -173,22 +234,81 @@ function PaperSlots({ paper }: PaperSlotsProps) {
 /**
  * Props for the {@link SlotRow} component.
  */
-type SlotRowProps = SlotPosition & {
-  /** The problem in the slot, by id; null when the slot stands empty. */
-  proposalId: string | null
+type SlotRowProps = BoardSlot & {
+  /** The moves along the slot's paper. */
+  moves: UsePaperMovesResult
 }
 
 /**
- * One slot: empty, or holding a problem that opens in full.
+ * One slot. A draft's stands empty and waits to be picked, or holds a problem that can be moved, replaced or sent
+ * back. A finalized board's only shows what its round holds.
  */
-function SlotRow({ paper, index, proposalId }: SlotRowProps) {
+function SlotRow({ moves, ...slot }: SlotRowProps) {
   // Board copy
   const t = useTranslations('problemSelection.board')
 
-  // The slot's problem, and the languages a round would refuse it in
-  const { proposal, missingLanguages } = useBoardSlot(proposalId)
+  // The board, the paper and the position
+  const { board, paper, index } = slot
 
-  // An empty slot
+  // The slot's problem, and whether it waits for another from the pool
+  const { proposal, missingLanguages, isWaiting, toggleWaiting } = useBoardSlot(slot)
+
+  // The slot's writes, whether each is available now, and the buttons a moved problem's focus follows it onto
+  const {
+    isClearing,
+    moveUpRef,
+    moveDownRef,
+    canClear,
+    canMoveUp,
+    canMoveDown,
+    moveUp,
+    moveDown,
+    clear,
+  } = useSlotWrites(slot, moves)
+
+  // The id of what comes next while an empty slot waits, which describes its button
+  const hintId = useId()
+
+  // Whether the slot takes changes, which a finalized board's never does
+  const isDraft = board.finalization === null
+
+  // An empty slot on a draft is one button: pick it, then pick a problem from the pool
+  if (proposal === undefined && isDraft) {
+    return (
+      <li>
+        <button
+          type="button"
+          // A slot emptied by its own Back to the pool takes the focus the pressed button had
+          autoFocus={isClearing}
+          aria-pressed={isWaiting}
+          aria-describedby={isWaiting ? hintId : undefined}
+          onClick={toggleWaiting}
+          className={cn(
+            'flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left text-sm transition-colors',
+            FOCUS_RING_CLASS,
+            isWaiting
+              ? 'bg-brand/15 text-foreground'
+              : 'text-muted hover:bg-foreground/[0.04] hover:text-foreground'
+          )}
+        >
+          {/* The slot's short label */}
+          <SlotNumber paper={paper} index={index} state={isWaiting ? 'highlighted' : 'empty'} />
+
+          {/* What the slot holds, which names the button whether it waits or not */}
+          <span className={cn(isWaiting && 'sr-only')}>{t('empty')}</span>
+
+          {/* What comes next while the slot waits, read out as the button's description */}
+          {isWaiting && (
+            <span id={hintId} aria-hidden="true">
+              {t('pickFromPool')}
+            </span>
+          )}
+        </button>
+      </li>
+    )
+  }
+
+  // An empty slot on a finalized board, which only says so
   if (proposal === undefined) {
     return (
       <li className="flex items-center gap-3 px-2 py-1.5 text-sm text-muted">
@@ -205,9 +325,15 @@ function SlotRow({ paper, index, proposalId }: SlotRowProps) {
       : undefined
 
   return (
-    <li className="flex items-center gap-3 rounded-lg px-2 py-1.5">
+    <li
+      className={cn(
+        'group flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors',
+        isWaiting && 'bg-brand/15',
+        !isWaiting && isDraft && 'hover:bg-foreground/[0.04] focus-within:bg-foreground/[0.04]'
+      )}
+    >
       {/* The slot's short label */}
-      <SlotNumber paper={paper} index={index} state="filled" />
+      <SlotNumber paper={paper} index={index} state={isWaiting ? 'highlighted' : 'filled'} />
 
       {/* The problem, opening it in full */}
       <ProposalLink
@@ -221,19 +347,108 @@ function SlotRow({ paper, index, proposalId }: SlotRowProps) {
 
       {/* The languages a round would refuse the problem in, which block finalizing */}
       {missingLabel !== undefined && (
-        <span
-          title={missingLabel}
-          className={cn(WARNING_MARK_CLASS, 'shrink-0 px-1 text-[10px] font-semibold')}
-        >
+        <>
           {/* The bare codes, which on their own say nothing about what they mark */}
-          <span aria-hidden="true" className="uppercase">
+          <span
+            aria-hidden="true"
+            title={missingLabel}
+            className={cn(WARNING_MARK_CLASS, 'shrink-0 px-1 text-[10px] font-semibold uppercase')}
+          >
             {missingLanguages.join(' ')}
           </span>
 
-          {/* What the codes mean, for a reader that gets neither them nor the hover */}
+          {/* What the codes mean, for a reader that gets neither them nor the hover, whatever holds the focus */}
           <span className="sr-only">{missingLabel}</span>
-        </span>
+        </>
+      )}
+
+      {/* What can be done with a draft's slot: always in reach of the keyboard and a screen reader, shown on
+          hover and focus, and always shown on a device without hover. A slot whose own emptying was refused
+          comes back holding its problem, the action pressed taking the focus again */}
+      {isDraft && (
+        <div
+          className={cn(
+            'flex shrink-0 items-center sr-only',
+            'group-hover:not-sr-only group-focus-within:not-sr-only [@media(hover:none)]:not-sr-only'
+          )}
+        >
+          {/* Having the slot wait for a replacement, or keeping its problem after all */}
+          <SlotAction label={isWaiting ? t('keep') : t('replace')} onClick={toggleWaiting}>
+            <ArrowLeftRight size={14} />
+          </SlotAction>
+
+          {/* Trading with the slot above, where there is one */}
+          <SlotAction ref={moveUpRef} label={t('moveUp')} disabled={!canMoveUp} onClick={moveUp}>
+            <ArrowUp size={14} />
+          </SlotAction>
+
+          {/* Trading with the slot below, where there is one */}
+          <SlotAction
+            ref={moveDownRef}
+            label={t('moveDown')}
+            disabled={!canMoveDown}
+            onClick={moveDown}
+          >
+            <ArrowDown size={14} />
+          </SlotAction>
+
+          {/* Sending the problem back to the pool */}
+          <SlotAction
+            label={t('backToPool')}
+            disabled={!canClear}
+            autoFocus={isClearing}
+            onClick={clear}
+          >
+            <X size={14} />
+          </SlotAction>
+        </div>
       )}
     </li>
+  )
+}
+
+/**
+ * Props for the {@link SlotAction} component.
+ */
+type SlotActionProps = {
+  /** Handle onto the action's button. */
+  ref?: Ref<HTMLButtonElement>
+  /** What the action does, in words. */
+  label: string
+  /** Whether the action is unavailable. */
+  disabled?: boolean
+  /** Whether the action takes the focus as it appears. */
+  autoFocus?: boolean
+  /** Runs the action. */
+  onClick: () => void
+  /** The icon. */
+  children: ReactNode
+}
+
+/**
+ * One small icon action on a filled slot, named by its title.
+ */
+function SlotAction({
+  ref,
+  label,
+  disabled = false,
+  autoFocus = false,
+  onClick,
+  children,
+}: SlotActionProps) {
+  return (
+    <Button
+      ref={ref}
+      variant="ghost"
+      size="icon"
+      className="size-7"
+      title={label}
+      autoFocus={autoFocus}
+      // Unavailable by its ARIA state alone, which keeps the focus on it through the press that makes it so
+      aria-disabled={disabled}
+      onClick={onClick}
+    >
+      {children}
+    </Button>
   )
 }

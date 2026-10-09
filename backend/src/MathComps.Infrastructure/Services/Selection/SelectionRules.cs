@@ -47,7 +47,7 @@ internal static class SelectionRules
 
     /// <summary>
     /// Reads a proposal that has not been deleted, tracked, with its problem, the problem's round, and that round's
-    /// competition and season.
+    /// competition.
     /// </summary>
     /// <param name="dbContext">The write's context.</param>
     /// <param name="proposalId">The proposal, which is its problem's id.</param>
@@ -59,7 +59,6 @@ internal static class SelectionRules
         // The proposal, refused like one that is not there once it has been deleted
         await dbContext.Proposals
             .Include(proposal => proposal.Problem.Round.Competition)
-            .Include(proposal => proposal.Problem.Round.Season)
             .Where(proposal => proposal.ProblemId == proposalId && proposal.DeletedAt == null)
             .FirstOrDefaultAsync(cancellationToken)
         ?? throw new SelectionTargetNotFoundException();

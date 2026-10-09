@@ -8,6 +8,7 @@ import type {
   ProposalText,
   ReviewConversation,
   SelectionData,
+  SlotAddress,
 } from './selection-types'
 
 /**
@@ -65,6 +66,18 @@ export function pickActiveBoard(
 }
 
 /**
+ * The letter a paper goes by in its slots' short labels: its name's initial, in capitals.
+ *
+ * @param paperName - The paper's name.
+ *
+ * @returns The initial.
+ */
+export function paperInitial(paperName: string): string {
+  // The name's first letter, in capitals
+  return paperName.charAt(0).toUpperCase()
+}
+
+/**
  * The short label a slot goes by: the paper's initial and the slot's number, like E2.
  *
  * @param paperName - The name of the paper holding the slot.
@@ -74,7 +87,24 @@ export function pickActiveBoard(
  */
 export function slotLabel(paperName: string, index: number): string {
   // The paper's initial in capitals, then the slot counted from one
-  return `${paperName.charAt(0).toUpperCase()}${index + 1}`
+  return `${paperInitial(paperName)}${index + 1}`
+}
+
+/**
+ * Whether two addresses name the same slot.
+ *
+ * @param first - One address.
+ * @param second - The other address.
+ *
+ * @returns True when the board, the paper and the position all match.
+ */
+export function sameSlot(first: SlotAddress, second: SlotAddress): boolean {
+  // The same board, the same paper within it, the same position within that
+  return (
+    first.boardId === second.boardId &&
+    first.paperId === second.paperId &&
+    first.index === second.index
+  )
 }
 
 /**
@@ -88,9 +118,9 @@ export type SlotPosition = {
 }
 
 /**
- * One slot a proposal fills, with the board and the paper holding it.
+ * One slot on a board, with the board and the paper holding it.
  */
-export type Placement = SlotPosition & {
+export type BoardSlot = SlotPosition & {
   /** The board holding the slot. */
   board: Board
 }
@@ -103,7 +133,7 @@ export type Placement = SlotPosition & {
  *
  * @returns Its placements, in board order.
  */
-export function placementsOf(boards: readonly Board[], proposalId: string): Placement[] {
+export function placementsOf(boards: readonly Board[], proposalId: string): BoardSlot[] {
   // Every slot holding the proposal, on any paper of any board
   return boards.flatMap((board) =>
     board.papers.flatMap((paper) =>

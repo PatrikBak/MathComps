@@ -14,7 +14,7 @@ namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
 /// Covers <see cref="SelectionBoardService"/>: filling a draft's slots, finalizing a board into a hosted group's
-/// rounds, and changing a finalized board, where every change moves real problems.
+/// rounds, and refusing every change to a finalized board.
 /// </summary>
 /// <remarks>
 /// The seed is sixteen proposals, the October and November groups not yet open with empty rounds, a September
@@ -387,128 +387,26 @@ public class SelectionBoardServicePostgresTests(PostgresContainerFixture fixture
     });
 
     /// <summary>
-    /// A pool problem put onto a finalized paper takes the slot's round and number, and the problem there goes
-    /// back to the pool in its place, so the round keeps its count. The newcomer leaves every draft it stood on.
+    /// A finalized board's slots are its group's rounds, so it takes no placing, moving or emptying.
     /// </summary>
     [Fact]
-    public Task A_pool_problem_placed_on_a_finalized_paper_swaps_into_the_round() => RunTestAsync(async service =>
+    public Task A_finalized_board_takes_no_change() => RunTestAsync(async service =>
     {
         // The October board finalized
         await service.FinalizeAsync(_octoberBoardId, _octoberId);
 
-        // Problem 13 onto the second elementary slot, which problem 2 holds
-        await service.PlaceAsync(
-            await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 1), _proposals[13]);
+        // Its first elementary slot
+        var slot = await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 0);
 
-        // Problem 13 holds it now
-        Assert.Equal(
-            ("mathcomps-elementary-october", 2, "76-mathcomps-elementary-october-2"),
-            await PositionOfAsync(_proposals[13]));
+        // Problem 13 put there, refused
+        await Assert.ThrowsAsync<SelectionBoardFinalizedException>(() => service.PlaceAsync(slot, _proposals[13]));
 
-        // And problem 2 sits where problem 13 was parked
-        Assert.Equal(
-            ("mathcomps-proposals", 13, "76-mathcomps-proposals-13"),
-            await PositionOfAsync(_proposals[2]));
+        // The slot moved down, refused
+        await Assert.ThrowsAsync<SelectionBoardFinalizedException>(
+            () => service.MoveSlotAsync(slot, SlotDirection.Down));
 
-        // Problem 13 left the spare board
-        Assert.Equal(
-            [null, null, null, null],
-            await DraftSlotsAsync(_spareBoardId, HostedCompetitionCategory.Elementary));
-    });
-
-    /// <summary>
-    /// A problem going into a finalized paper has to be one the round can serve, the same as at finalize.
-    /// </summary>
-    [Fact]
-    public Task A_finalized_paper_refuses_a_problem_missing_a_language() => RunTestAsync(async service =>
-    {
-        // The October board finalized
-        await service.FinalizeAsync(_octoberBoardId, _octoberId);
-
-        // Problem 15, written in English alone, onto the second elementary slot, which problem 2 holds
-        await Assert.ThrowsAsync<SelectionProblemIncompleteException>(async () => await service.PlaceAsync(
-            await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 1), _proposals[15]));
-
-        // Problem 2 still holds it
-        Assert.Equal(2, (await PositionOfAsync(_proposals[2])).Number);
-    });
-
-    /// <summary>
-    /// A problem sitting in another group's round belongs to that group's paper, so a finalized board cannot
-    /// take it: the trade would rearrange a paper this board does not hold.
-    /// </summary>
-    [Fact]
-    public Task A_finalized_paper_refuses_a_problem_of_another_paper() => RunTestAsync(async service =>
-    {
-        // The October board finalized
-        await service.FinalizeAsync(_octoberBoardId, _octoberId);
-
-        // Problem 16, sitting in a September round, onto a slot
-        await Assert.ThrowsAsync<SelectionProposalUsedException>(async () => await service.PlaceAsync(
-            await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 0), _proposals[16]));
-
-        // It stays where it was
-        Assert.Equal("mathcomps-elementary-september", (await PositionOfAsync(_proposals[16])).Path);
-    });
-
-    /// <summary>
-    /// One of the board's own problems placed on another of its slots trades rounds and numbers with the problem
-    /// there, which is how a problem changes papers after finalize.
-    /// </summary>
-    [Fact]
-    public Task A_finalized_boards_own_problem_trades_places_across_papers() => RunTestAsync(async service =>
-    {
-        // The October board finalized
-        await service.FinalizeAsync(_octoberBoardId, _octoberId);
-
-        // Problem 5, first in intermediate, onto the first elementary slot
-        await service.PlaceAsync(
-            await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 0), _proposals[5]);
-
-        // Each sits where the other was
-        Assert.Equal(
-            ("mathcomps-elementary-october", 1, "76-mathcomps-elementary-october-1"),
-            await PositionOfAsync(_proposals[5]));
-        Assert.Equal(
-            ("mathcomps-intermediate-october", 1, "76-mathcomps-intermediate-october-1"),
-            await PositionOfAsync(_proposals[1]));
-    });
-
-    /// <summary>
-    /// A move on a finalized paper trades the two problems' numbers in the round of the paper's category, each
-    /// taking the slug its new number calls for. A slug left behind would still answer for the old position.
-    /// </summary>
-    [Fact]
-    public Task A_move_on_a_finalized_paper_trades_the_problems_numbers() => RunTestAsync(async service =>
-    {
-        // The October board finalized
-        await service.FinalizeAsync(_octoberBoardId, _octoberId);
-
-        // The third advanced slot one down
-        await service.MoveSlotAsync(
-            await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Advanced, 2), SlotDirection.Down);
-
-        // Problems 11 and 12 traded numbers and slugs in the advanced round
-        Assert.Equal(
-            ("mathcomps-advanced-october", 4, "76-mathcomps-advanced-october-4"),
-            await PositionOfAsync(_proposals[11]));
-        Assert.Equal(
-            ("mathcomps-advanced-october", 3, "76-mathcomps-advanced-october-3"),
-            await PositionOfAsync(_proposals[12]));
-    });
-
-    /// <summary>
-    /// A round never stands part-filled, so a finalized paper's slot cannot be emptied.
-    /// </summary>
-    [Fact]
-    public Task A_finalized_paper_keeps_every_slot() => RunTestAsync(async service =>
-    {
-        // The October board finalized
-        await service.FinalizeAsync(_octoberBoardId, _octoberId);
-
-        // Emptying the October board's first elementary slot, refused
-        await Assert.ThrowsAsync<SelectionPaperFinalizedException>(async () => await service.ClearSlotAsync(
-            await SlotAsync(_octoberBoardId, HostedCompetitionCategory.Elementary, 0)));
+        // The slot emptied, refused
+        await Assert.ThrowsAsync<SelectionBoardFinalizedException>(() => service.ClearSlotAsync(slot));
     });
 
     /// <summary>

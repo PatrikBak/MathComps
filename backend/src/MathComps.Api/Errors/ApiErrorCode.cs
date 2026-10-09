@@ -236,12 +236,7 @@ public enum ApiErrorCode
     SelectionProposalUsed,
 
     /// <summary>
-    /// A finalized paper was asked to stand part-filled.
-    /// </summary>
-    SelectionPaperFinalized,
-
-    /// <summary>
-    /// A board already finalized into a cycle was finalized again.
+    /// A board already finalized into a cycle was changed, or finalized again.
     /// </summary>
     SelectionBoardFinalized,
 
