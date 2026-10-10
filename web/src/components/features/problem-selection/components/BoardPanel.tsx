@@ -491,8 +491,8 @@ function BoardFooter({ board, onFinalize }: BoardFooterProps) {
   // Every proposal, by id
   const { proposalsById } = useLoadedSelection()
 
-  // Whether any write to the selection is still out
-  const { isWriting } = useSelectionWorkspace()
+  // Whether a write changing the slots is still out
+  const { isChangingSlots } = useSelectionWorkspace()
 
   // The id of the list of what still has to happen, which describes the press
   const blockersId = useId()
@@ -535,7 +535,7 @@ function BoardFooter({ board, onFinalize }: BoardFooterProps) {
         variant="primary"
         size="sm"
         fullWidth
-        aria-disabled={!isReady || isWriting}
+        aria-disabled={!isReady || isChangingSlots}
         aria-describedby={blockersId}
         onClick={onFinalize}
       >

@@ -14,7 +14,7 @@ import { useSelectionQueryKey } from './selection-cache'
 import { useBoardPicking, type UseBoardPickingResult } from './use-board-picking'
 import { useOpenProposal, type UseOpenProposalResult } from './use-open-proposal'
 import { usePoolFilters, type UsePoolFiltersResult } from './use-pool-filters'
-import { useIsSelectionWriting } from './use-selection-write'
+import { useIsChangingSlots, useIsSelectionWriting } from './use-selection-write'
 
 /**
  * How often the selection is read again while the page is in view, so it keeps up with the other reviewers.
@@ -30,15 +30,15 @@ export type LoadedSelection = SelectionIndex & {
 }
 
 /**
- * What every part of the selection shares: the read, whether a write to it is out, the problem open in full, what
- * the pool is narrowed to, and the slot waiting for a problem with the ways to move it.
+ * What every part of the selection shares: the read, whether a write changing its slots is out, the problem open
+ * in full, what the pool is narrowed to, and the slot waiting for a problem with the ways to move it.
  */
 export type SelectionWorkspace = UseOpenProposalResult &
   Omit<UseBoardPickingResult, 'activeBoard'> & {
     /** How far the read of the selection has got. */
     uiState: QueryUiState
-    /** Whether any write to the selection is still out, the read after it included. */
-    isWriting: boolean
+    /** Whether a write changing what the slots hold is still out, any read it waits for included. */
+    isChangingSlots: boolean
     /** Reads the selection again after the read gave up. */
     retry: () => void
     /** The selection; null until its read lands. */
@@ -97,11 +97,14 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
     [index, activeBoard]
   )
 
+  // Whether a write changing the slots is still out
+  const isChangingSlots = useIsChangingSlots()
+
   // Everything the parts share, held steady while none of it moves
   return useMemo(
     () => ({
       uiState,
-      isWriting,
+      isChangingSlots,
       retry,
       selection,
       openProposalId,
@@ -117,7 +120,7 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
     }),
     [
       uiState,
-      isWriting,
+      isChangingSlots,
       retry,
       selection,
       openProposalId,

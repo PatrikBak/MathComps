@@ -1,6 +1,7 @@
 import { useCallbackRef } from '@mantine/hooks'
 import {
   type MutateOptions,
+  type MutationKey,
   type MutationScope,
   useMutation,
   type UseMutationResult,
@@ -79,6 +80,10 @@ export type OptimisticMutationConfig<TData, TVariables, TContext> = {
    * issued and the last one stored disagreeing. Left off, calls run concurrently.
    */
   scope?: MutationScope
+  /**
+   * The key the mutation is filed under, by which a count of the mutations still out can be narrowed.
+   */
+  mutationKey?: MutationKey
 }
 
 /**
@@ -147,6 +152,9 @@ export function useOptimisticMutation<TData = unknown, TVariables = void, TConte
 
     // Whether the caller's calls queue behind each other
     scope: config.scope,
+
+    // What the caller's calls are filed under
+    mutationKey: config.mutationKey,
 
     // Run the caller's optimistic update
     onMutate: config.onMutate,

@@ -43,8 +43,8 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
   // Copy for the selection's writes
   const tWrites = useTranslations('problemSelection.writes')
 
-  // The slot waiting for a problem, and whether any write to the selection is still out
-  const { waitingSlot, isWriting } = useSelectionWorkspace()
+  // The slot waiting for a problem, and whether a write changing the slots is still out
+  const { waitingSlot, isChangingSlots } = useSelectionWorkspace()
 
   // The board on screen, and every proposal by id
   const { activeBoard, proposalsById } = useLoadedSelection()
@@ -53,6 +53,7 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
   const place = useSelectionWrite<PlacementWrite>({
     apiFn: placeProposal,
     edit: afterPlacement,
+    changesSlots: true,
     errorMessage: tWrites('placeFailed'),
   })
 
@@ -85,7 +86,7 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
         variant="primary"
         shape="pill"
         // Unavailable by its ARIA state alone, so a reader tabbing through still hears where the problem stands
-        aria-disabled={isThere || isWriting}
+        aria-disabled={isThere || isChangingSlots}
         onClick={putInWaitingSlot}
       >
         {isThere
@@ -99,13 +100,15 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
     <DropdownMenu>
       <DropdownMenuTrigger
         asChild
-        // A press landing while a write is out, like the second half of a double click on Put in, opens nothing
+        // A press landing while a write changing the slots is out opens nothing, like the second half of a double
+        // click on Put in
         onPointerDown={(event) => {
-          if (isWriting) event.preventDefault()
+          if (isChangingSlots) event.preventDefault()
         }}
         // Nor does a key that would open it
         onKeyDown={(event) => {
-          if (isWriting && ['Enter', ' ', 'ArrowDown'].includes(event.key)) event.preventDefault()
+          if (isChangingSlots && ['Enter', ' ', 'ArrowDown'].includes(event.key))
+            event.preventDefault()
         }}
       >
         <Button
@@ -114,8 +117,9 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
           variant="outline"
           shape="pill"
           className="gap-1"
-          // Unavailable while a write is out, by its ARIA state alone, so it keeps its place in the Tab order
-          aria-disabled={isWriting}
+          // Unavailable while a write changing the slots is out, by its ARIA state alone, so it keeps its place in
+          // the Tab order
+          aria-disabled={isChangingSlots}
         >
           {t('label')}
           <ChevronDown size={14} />
@@ -177,10 +181,10 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
                     aria-label={label}
                     // Typing finds a slot by its name, the one a screen reader reads out
                     textValue={label}
-                    disabled={isWriting}
+                    disabled={isChangingSlots}
                     // The problem's own slot takes nothing, yet stays in reach of the arrow keys, which say where
                     // the problem stands
-                    aria-disabled={isOwnSlot || isWriting || undefined}
+                    aria-disabled={isOwnSlot || isChangingSlots || undefined}
                     onKeyDown={(event) => gridKeys.moveFocus(event, paperIndex, index)}
                     onSelect={(event) => {
                       // The problem's own slot places nothing, so the grid stays open
