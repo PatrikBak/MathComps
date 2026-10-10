@@ -18,6 +18,7 @@ import {
   OPENED,
   openPool,
   pickBoard,
+  pickState,
   placementOf,
   problemCount,
   READY,
@@ -446,13 +447,7 @@ test.describe('narrowing the pool', () => {
     await openPool(page)
 
     // Only the problems the board on screen does not hold
-    await pillOf(page, selectionCopy.filters.notSelected).click()
-
-    // Pressed
-    await expect(pillOf(page, selectionCopy.filters.notSelected)).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    )
+    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
 
     // Without the two the first draft holds
     await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT - 2)
@@ -471,6 +466,15 @@ test.describe('narrowing the pool', () => {
 
     // As many in all as before, each draft holding two of the pool's problems
     await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT - 2)
+
+    // Turned round to what the later draft holds
+    await pickState(page, selectionCopy.filters.notSelected, selectionCopy.filters.selected)
+
+    // Its two problems alone
+    await expect(page.getByRole('article')).toHaveCount(2)
+
+    // The geometry problem among them
+    await expect(cardOf(page, GEOMETRY)).toBeVisible()
   })
 
   test('shows the set-aside problems in place of the live ones, dimmed and counted', async ({
@@ -566,7 +570,7 @@ test.describe('the filter in the address', () => {
     await openPool(page)
 
     // Narrowed to what the board on screen does not hold
-    await pillOf(page, selectionCopy.filters.notSelected).click()
+    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
 
     // A problem, opened
     await cardOf(page, OPENED).getByRole('link', { name: OPENED.title }).click()
@@ -580,11 +584,8 @@ test.describe('the filter in the address', () => {
     // The pool, still leaving out what the first draft holds
     await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT - 2)
 
-    // With "Not selected" still pressed
-    await expect(pillOf(page, selectionCopy.filters.notSelected)).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    )
+    // With "Not selected" still picked
+    await expect(pillOf(page, selectionCopy.filters.notSelected)).toBeVisible()
 
     // Reloaded
     await page.reload()
@@ -594,11 +595,8 @@ test.describe('the filter in the address', () => {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // "Not selected" let go
-    await expect(pillOf(page, selectionCopy.filters.notSelected)).toHaveAttribute(
-      'aria-pressed',
-      'false'
-    )
+    // "Not selected" let go, the pill naming its facet again
+    await expect(pillOf(page, selectionCopy.filters.state)).toBeVisible()
   })
 
   test('keeps the filter in the address while a problem is open, and brings the pool back narrowed', async ({

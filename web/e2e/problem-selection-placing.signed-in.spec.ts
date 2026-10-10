@@ -24,6 +24,7 @@ import {
   OPENED_ADDRESS,
   openPool,
   pickBoard,
+  pickState,
   placementOf,
   problemCount,
   READY,
@@ -337,7 +338,7 @@ test.describe('placing a problem from the pool', () => {
     await openPool(page)
 
     // Showing only the problems the board on screen does not hold
-    await page.getByRole('button', { name: selectionCopy.filters.notSelected, exact: true }).click()
+    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
 
     // A problem put through the grid on its card into a slot holding the next problem by number
     await placeThroughGrid(cardOf(page, OPENED), 'I2')
@@ -391,7 +392,7 @@ test.describe('placing a problem from the pool', () => {
     await openPool(page)
 
     // Showing only the problems the board on screen does not hold
-    await page.getByRole('button', { name: selectionCopy.filters.notSelected, exact: true }).click()
+    await pickState(page, selectionCopy.filters.state, selectionCopy.filters.notSelected)
 
     // A problem opened from its card
     await cardOf(page, OPENED).getByRole('link', { name: OPENED.title }).click()

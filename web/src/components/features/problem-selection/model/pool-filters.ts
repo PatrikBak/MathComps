@@ -7,6 +7,12 @@ import { normalizeForSearch } from '@/components/shared/utils/string-utils'
 
 import { type Board, type Proposal, PROPOSAL_AREAS, type ProposalArea } from './selection-types'
 
+/** Every answer to whether the board on screen holds a problem. */
+export const BOARD_MEMBERSHIPS = ['selected', 'notSelected'] as const
+
+/** Whether the board on screen holds a problem in one of its slots. */
+export type BoardMembership = (typeof BOARD_MEMBERSHIPS)[number]
+
 /**
  * What the pool is narrowed to.
  */
@@ -17,8 +23,8 @@ export type PoolFilter = {
   categories: HostedCompetitionCategory[]
   /** The areas a problem must belong to one of; empty for any. */
   areas: ProposalArea[]
-  /** Whether only problems the board on screen does not hold show. */
-  isOffBoardOnly: boolean
+  /** Whether the board on screen must hold a problem or must not; null for any. */
+  membership: BoardMembership | null
   /** Whether the pool shows the set-aside problems instead of the live ones. */
   isShowingSetAside: boolean
 }
@@ -28,7 +34,7 @@ export const OPEN_POOL_FILTER: PoolFilter = {
   query: '',
   categories: [],
   areas: [],
-  isOffBoardOnly: false,
+  membership: null,
   isShowingSetAside: false,
 }
 
@@ -45,7 +51,7 @@ export function countActiveFilters(filter: PoolFilter): number {
     filter.query.trim() !== '',
     filter.categories.length > 0,
     filter.areas.length > 0,
-    filter.isOffBoardOnly,
+    filter.membership !== null,
     filter.isShowingSetAside,
   ].filter(Boolean).length
 }
@@ -53,7 +59,7 @@ export function countActiveFilters(filter: PoolFilter): number {
 /**
  * The facet whose own filter a count leaves out; null where every filter applies.
  */
-type OwnFacet = 'categories' | 'areas' | null
+type OwnFacet = 'categories' | 'areas' | 'membership' | null
 
 /**
  * What a filter lets through of the pool, with the counts beside each facet's options.
@@ -65,6 +71,8 @@ export type PoolMatches = {
   categoryCounts: Record<HostedCompetitionCategory, number>
   /** How many problems belong to each area, under every filter but the areas' own. */
   areaCounts: Record<ProposalArea, number>
+  /** How many problems the board on screen holds and how many it doesn't, under every other filter. */
+  membershipCounts: Record<BoardMembership, number>
   /** How many of the pool's problems are set aside, whatever the filters say. */
   setAsideCount: number
 }
@@ -89,6 +97,10 @@ export function matchPool(
   // The problems on the board on screen
   const onBoard = new Set(activeBoard?.papers.flatMap((paper) => paper.slots) ?? [])
 
+  // A function which says whether the board on screen holds a problem
+  const membershipOf = (proposal: Proposal): BoardMembership =>
+    onBoard.has(proposal.id) ? 'selected' : 'notSelected'
+
   // The search text, folded for matching
   const searchTerm = normalizeForSearch(filter.query.trim())
 
@@ -111,6 +123,10 @@ export function matchPool(
 
     // A problem in one of the areas picked, or any problem while none is picked
     areas: (proposal) => filter.areas.length === 0 || filter.areas.includes(proposal.area),
+
+    // A problem on the board or off it as picked, or any problem while neither is picked
+    membership: (proposal) =>
+      filter.membership === null || membershipOf(proposal) === filter.membership,
   }
 
   // A function which says whether a problem passes every filter but the one facet named
@@ -119,7 +135,6 @@ export function matchPool(
     entriesOf(facetFilters).every(
       ([facet, letsThrough]) => facet === ownFacet || letsThrough(proposal)
     ) &&
-    (!filter.isOffBoardOnly || !onBoard.has(proposal.id)) &&
     (searchTerm === '' || answersSearch(proposal))
 
   // What every filter lets through, lowest number first
@@ -154,11 +169,18 @@ export function matchPool(
     (proposal, area) => proposal.area === area
   )
 
+  // The problems on the board and off it, counted under every other filter
+  const membershipCounts = countByOption(
+    'membership',
+    BOARD_MEMBERSHIPS,
+    (proposal, membership) => membershipOf(proposal) === membership
+  )
+
   // How many of the pool's problems are set aside, whatever the filters say
   const setAsideCount = pool.filter((proposal) => proposal.isSetAside).length
 
   // What the filter lets through, and the counts beside its options
-  return { shown, categoryCounts, areaCounts, setAsideCount }
+  return { shown, categoryCounts, areaCounts, membershipCounts, setAsideCount }
 }
 
 /**
