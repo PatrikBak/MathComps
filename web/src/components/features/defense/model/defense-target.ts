@@ -175,7 +175,7 @@ export function isSubjectReachable(target: DefenseTarget, locale: Locale): boole
 }
 
 /**
- * Names where a target's unsent composer text is kept.
+ * Names where, under {@link DEFENSE_DRAFT_STORAGE_PREFIX}, a target's unsent composer text is kept.
  *
  * Keyed by the problem rather than the conversation, so a draft survives starting a fresh conversation
  * about the same problem, and by the reader on top of that, a browser being a thing students share.

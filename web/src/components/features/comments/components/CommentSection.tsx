@@ -15,6 +15,7 @@ import { hasValidContent } from '@/components/shared/components/rich-math-editor
 import { toggleSetItem } from '@/components/shared/utils/collection-utils'
 import { cn } from '@/components/shared/utils/css-utils'
 import { useIsMobile } from '@/hooks/use-breakpoint'
+import { usePersistentDraft } from '@/hooks/use-persistent-draft'
 import { isAwaitingAnswer } from '@/lib/query-ui-state'
 
 import { useCreateComment } from '../hooks/use-create-comment'
@@ -24,6 +25,7 @@ import { usePendingCommentLike } from '../hooks/use-pending-comment-like'
 import { usePendingCommentTarget } from '../hooks/use-pending-comment-target'
 import { useToggleCommentLike } from '../hooks/use-toggle-comment-like'
 import { useUpdateComment } from '../hooks/use-update-comment'
+import { commentDraftStorageKey } from '../model/comment-drafts'
 import type { CommentTarget } from '../services/comment-api-types'
 import { convertToCommentData, countAllComments, shouldHideComment } from '../utils/comment-utils'
 import { type CommentData, CommentItem } from './CommentItem'
@@ -114,14 +116,20 @@ export function CommentSection({
     [savePendingTarget, target]
   )
 
-  // The draft of a new top-level comment
-  const [commentInputText, setCommentInputText] = useState('')
+  // The draft of a new top-level comment, kept for the reader until it is sent
+  const [commentInputText, setCommentInputText] = usePersistentDraft(
+    commentDraftStorageKey(userId ?? null, target, null),
+    ''
+  )
 
   // The ID of the comment that is being replied to (null if none)
   const [replyCommentId, setReplyCommentId] = useState<string | null>(null)
 
-  // The draft of the open reply
-  const [replyInputText, setReplyInputText] = useState('')
+  // The draft of the open reply, kept for the reader under the comment it answers until it is sent or cancelled
+  const [replyInputText, setReplyInputText] = usePersistentDraft(
+    replyCommentId === null ? null : commentDraftStorageKey(userId ?? null, target, replyCommentId),
+    ''
+  )
 
   // The IDs of comments whose replies are collapsed
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set())
@@ -131,52 +139,46 @@ export function CommentSection({
     // Nothing to send in a draft with no text in it
     if (!hasValidContent(commentInputText)) return
 
-    // Post the comment
-    await createRootComment(
-      {
-        target,
-        content: commentInputText.trim(),
-        parentCommentId: null,
-      },
-      {
-        // Clear input only after successful creation
-        onSuccess: () => setCommentInputText(''),
-      }
-    )
-  }, [commentInputText, createRootComment, target])
+    // Post the comment, which comes back as nothing when it never went out
+    const created = await createRootComment({
+      target,
+      content: commentInputText.trim(),
+      parentCommentId: null,
+    })
+
+    // Unsent, so the draft stays
+    if (created === undefined) return
+
+    // Sent, so the draft goes, whether or not the thread is still on screen
+    setCommentInputText('')
+  }, [commentInputText, createRootComment, setCommentInputText, target])
 
   // A function which posts the open reply
   const handleSubmitReply = useCallback(async () => {
     // Nothing to send without an open reply holding some text
     if (!hasValidContent(replyInputText) || replyCommentId === null) return
 
-    // Post the reply
-    await createReply(
-      {
-        target,
-        content: replyInputText.trim(),
-        parentCommentId: replyCommentId,
-      },
-      {
-        // Clear reply state only after successful creation
-        onSuccess: () => {
-          // Close the reply
-          setReplyCommentId(null)
+    // Post the reply, which comes back as nothing when it never went out
+    const created = await createReply({
+      target,
+      content: replyInputText.trim(),
+      parentCommentId: replyCommentId,
+    })
 
-          // Drop the reply draft
-          setReplyInputText('')
-        },
-      }
-    )
-  }, [replyInputText, replyCommentId, createReply, target])
+    // Unsent, so the reply stays open on its draft
+    if (created === undefined) return
 
-  // A function which opens an empty reply under a comment
+    // Sent, so the reply closes
+    setReplyCommentId(null)
+
+    // The reply's draft goes too, whether or not the thread is still on screen
+    setReplyInputText('')
+  }, [replyInputText, replyCommentId, createReply, setReplyInputText, target])
+
+  // A function which opens a reply under a comment, on whatever was written in it before
   const handleOpenReply = useCallback((commentId: string) => {
     // Open the reply under the comment
     setReplyCommentId(commentId)
-
-    // Start the reply draft empty
-    setReplyInputText('')
   }, [])
 
   // A function which closes the reply and drops its draft
@@ -186,7 +188,7 @@ export function CommentSection({
 
     // Drop the reply draft
     setReplyInputText('')
-  }, [])
+  }, [setReplyInputText])
 
   // A function which saves a comment's new text
   const handleEditComment = useCallback(
@@ -316,6 +318,7 @@ export function CommentSection({
       collapsedIds,
       replyCommentId,
       replyInputText,
+      setReplyInputText,
       isCreatingReplyComment,
       handleToggleCollapse,
       handleOpenReply,

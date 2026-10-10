@@ -42,7 +42,12 @@ export const PENDING_COMMENT_TARGET_STORAGE_KEY = 'pending-comment-target'
 
 /**
  * Prefix under which a competition problem's unsent composer text is kept, so a half-written solution
- * survives closing the chat or reloading the page. The rest of the key names the problem; see
- * {@link defenseDraftStorageKey}.
+ * survives closing the chat or reloading the page.
  */
 export const DEFENSE_DRAFT_STORAGE_PREFIX = 'defense-draft'
+
+/**
+ * Prefix under which a comment written but not yet sent is kept, so leaving the thread or reloading the page never
+ * costs it.
+ */
+export const COMMENT_DRAFT_STORAGE_PREFIX = 'comment-draft'

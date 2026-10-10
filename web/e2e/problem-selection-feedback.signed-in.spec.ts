@@ -1,11 +1,10 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page, Request } from '@playwright/test'
 
-import type { UserProfile } from '@/components/features/profile/model/profile-types'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import messages from '../messages/en.json'
 import { type AnswerGate, gateReads } from './support/answer-gate'
-import { answerJson, BACKEND_ORIGIN } from './support/backend-routes'
+import { BACKEND_ORIGIN } from './support/backend-routes'
 import {
   actionsCopy,
   chatCopy,
@@ -30,7 +29,6 @@ import {
   OPENED,
   OPENED_ADDRESS,
   OPENED_COMMENT,
-  READER_NAME,
   RECENT,
   rememberedSelection,
   REVIEWER,
@@ -38,12 +36,92 @@ import {
   selectionCopy,
   selectionText,
   SETTLE_TIMEOUT_MS,
+  stubNamedReader,
   stubSelection,
 } from './support/problem-selection'
 import { expect, test } from './support/test'
 
 /** What a reviewer writes into {@link OPENED}'s discussion while a test watches. */
 const NEW_COMMENT = 'Too long for the elementary paper as it stands.'
+
+/** A reply a reviewer is part-way through in {@link OPENED}'s discussion. */
+const REPLY_DRAFT = 'Agreed, though the bound wants a line of proof.'
+
+/** What the discussion's copy says. */
+const commentsCopy = messages.comments
+
+/**
+ * The box a new comment in a problem's discussion is written in.
+ *
+ * @param page - The page.
+ *
+ * @returns The box.
+ */
+function newCommentBox(page: Page) {
+  // Named by what it says before anything is written in it
+  return page.getByPlaceholder(selectionCopy.comments.placeholder)
+}
+
+/**
+ * The box the open reply is written in.
+ *
+ * @param page - The page.
+ *
+ * @returns The box.
+ */
+function replyBox(page: Page) {
+  // Named by what it says before anything is written in it
+  return page.getByPlaceholder(commentsCopy.replyPlaceholder)
+}
+
+/**
+ * Whether a call sends a comment or a reply into a discussion.
+ *
+ * @param request - The call.
+ *
+ * @returns Whether it sends one.
+ */
+function isCommentSend(request: Request): boolean {
+  // A write to the discussions' own address, which the comment counts' address only starts with
+  return request.method() === 'POST' && new URL(request.url()).pathname.endsWith('/comments')
+}
+
+/**
+ * Sends what a box holds and goes back to the pool before the backend answers, letting the answer through only once
+ * the discussion is off screen.
+ *
+ * @param page - The page.
+ * @param box - The box holding what is sent.
+ * @param discussion - The gate in front of every call into the discussion.
+ */
+async function sendThenLeave(page: Page, box: Locator, discussion: AnswerGate): Promise<void> {
+  // Every answer from the discussion held from here
+  const release = discussion.hold()
+
+  // The send, once it goes out
+  const sent = page.waitForRequest(isCommentSend)
+
+  // The answer to it, once it lands
+  const answered = page.waitForResponse((response) => isCommentSend(response.request()))
+
+  // Sent from the keyboard
+  await box.press('Meta+Enter')
+
+  // Out, and waiting on its answer
+  await sent
+
+  // Back to the pool by the link on the problem's page
+  await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
+
+  // The discussion gone from the screen
+  await expect(box).toHaveCount(0)
+
+  // The answer let through
+  release()
+
+  // And landed
+  await answered
+}
 
 /**
  * The rows of the conversations listed under a problem, one per conversation.
@@ -705,15 +783,7 @@ test.describe('what reviewers said about a problem', () => {
     page,
   }) => {
     // A reviewer with a username, which the discussion asks for before it takes a comment
-    await page.route(`${BACKEND_ORIGIN}/users/me/profile`, (route) =>
-      answerJson(route, 200, {
-        graduationYear: null,
-        hasLeftHighSchool: true,
-        countryCode: null,
-        email: null,
-        username: READER_NAME,
-      } satisfies UserProfile)
-    )
+    await stubNamedReader(page)
 
     // Whose selection holds a pool of problems, one of them discussed
     await stubSelection(page, 'selection')
@@ -744,5 +814,137 @@ test.describe('what reviewers said about a problem', () => {
         name: selectionText('filing.comments', { count: 2 }),
       })
     ).toBeVisible()
+  })
+
+  test('keeps a comment and a reply left unsent while the reviewer is away from the problem', async ({
+    page,
+  }) => {
+    // A reviewer with a username, which the discussion asks for before it takes a comment
+    await stubNamedReader(page)
+
+    // Whose selection holds a pool of problems, one of them discussed
+    await stubSelection(page, 'selection')
+
+    // The problem's discussion
+    await page.goto(`${OPENED_ADDRESS}&tab=comments`)
+
+    // With what was said in it so far
+    await expect(page.getByRole('tabpanel')).toContainText(OPENED_COMMENT.content, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // A comment, written
+    await newCommentBox(page).fill(NEW_COMMENT)
+
+    // A reply, opened under the comment already there
+    await page.getByRole('tabpanel').getByRole('button', { name: commentsCopy.reply }).click()
+
+    // And written
+    await replyBox(page).fill(REPLY_DRAFT)
+
+    // Back to the pool by the link on the problem's page
+    await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
+
+    // The problem's discussion again, by the count on its card
+    await cardOf(page, OPENED)
+      .getByRole('link', { name: selectionText('filing.comments', { count: 1 }) })
+      .click()
+
+    // The comment as it was left
+    await expect(newCommentBox(page)).toHaveValue(NEW_COMMENT)
+
+    // The reply, opened again under the same comment
+    await page.getByRole('tabpanel').getByRole('button', { name: commentsCopy.reply }).click()
+
+    // As it was left too
+    await expect(replyBox(page)).toHaveValue(REPLY_DRAFT)
+
+    // Cancelled from the keyboard
+    await replyBox(page).press('Escape')
+
+    // The page read afresh
+    await page.reload()
+
+    // The comment still as it was left
+    await expect(newCommentBox(page)).toHaveValue(NEW_COMMENT, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The reply, opened again
+    await page.getByRole('tabpanel').getByRole('button', { name: commentsCopy.reply }).click()
+
+    // Empty, since it was cancelled
+    await expect(replyBox(page)).toHaveValue('')
+
+    // Closed again, which brings the comment's box back into sight
+    await replyBox(page).press('Escape')
+
+    // The comment, sent from the keyboard
+    await newCommentBox(page).press('Meta+Enter')
+
+    // Gone from its box
+    await expect(newCommentBox(page)).toHaveValue('')
+
+    // The page read afresh once more
+    await page.reload()
+
+    // With nothing coming back into the box, since it was sent
+    await expect(newCommentBox(page)).toHaveValue('', { timeout: SETTLE_TIMEOUT_MS })
+  })
+
+  test('keeps nothing of a reply and a comment sent just as the reviewer left the problem', async ({
+    page,
+  }) => {
+    // A reviewer with a username, which the discussion asks for before it takes a comment
+    await stubNamedReader(page)
+
+    // Whose selection holds a pool of problems, one of them discussed
+    await stubSelection(page, 'selection')
+
+    // Every call into a discussion, which the test holds while the reviewer leaves
+    const discussion = await gateReads(page, `${BACKEND_ORIGIN}/comments*`)
+
+    // The problem's discussion
+    await page.goto(`${OPENED_ADDRESS}&tab=comments`)
+
+    // With what was said in it so far
+    await expect(page.getByRole('tabpanel')).toContainText(OPENED_COMMENT.content, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // A reply, opened under the comment already there
+    await page.getByRole('tabpanel').getByRole('button', { name: commentsCopy.reply }).click()
+
+    // Written
+    await replyBox(page).fill(REPLY_DRAFT)
+
+    // And sent on the way out
+    await sendThenLeave(page, replyBox(page), discussion)
+
+    // The problem's discussion again
+    await page.goto(`${OPENED_ADDRESS}&tab=comments`)
+
+    // A reply opened under the comment already there, which the discussion lists before the one just sent
+    await page
+      .getByRole('tabpanel')
+      .getByRole('button', { name: commentsCopy.reply })
+      .first()
+      .click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Empty, since what was written in it went out
+    await expect(replyBox(page)).toHaveValue('')
+
+    // Closed, which brings the comment's box back into sight
+    await replyBox(page).press('Escape')
+
+    // A comment, written
+    await newCommentBox(page).fill(NEW_COMMENT)
+
+    // And sent on the way out
+    await sendThenLeave(page, newCommentBox(page), discussion)
+
+    // The problem's discussion again
+    await page.goto(`${OPENED_ADDRESS}&tab=comments`)
+
+    // Its box empty, since what was written in it went out
+    await expect(newCommentBox(page)).toHaveValue('', { timeout: SETTLE_TIMEOUT_MS })
   })
 })
