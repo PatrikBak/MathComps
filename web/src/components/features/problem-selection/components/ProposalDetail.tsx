@@ -150,7 +150,6 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
         <div className="pt-4">
           <CommentSection
             variant="inline"
-            showLikes={false}
             newCommentPlaceholder={tComments('placeholder')}
             showEmptyText={false}
             target={{ targetType: 'Proposal', targetId: proposal.id }}

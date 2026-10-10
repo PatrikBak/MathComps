@@ -12,7 +12,7 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// and every comment in it, is refused as though it did not exist: <see cref="CommentTargetNotFoundException"/>
 /// for a target, <see cref="CommentNotFoundException"/> for a comment. Handouts, news and the problems the archive
 /// serves are open to anybody, and no other problem has a thread. A grade conversation is open to admins, and to
-/// the student it is with once their group has closed, while the grade is final. A proposal's discussion is open
+/// the student it is with while the grade is final and their group has closed. A proposal's discussion is open
 /// only to the accounts preparing the competitions, and to nobody once the proposal is deleted. A version an edit
 /// has replaced is refused with
 /// <see cref="CommentNotFoundException"/> too.
@@ -29,8 +29,8 @@ public interface ICommentService
     Task<ImmutableList<CommentDto>> GetCommentsAsync(CommentTarget target, CommentViewer? viewer);
 
     /// <summary>
-    /// Creates a new comment or reply. A reply whose parent sits in another thread is refused as though the
-    /// parent did not exist, and an author with no username to sign it with is refused with
+    /// Creates a new comment or reply. A reply whose parent sits in another thread or is deleted is refused as
+    /// though the parent did not exist, and an author with no username to sign it with is refused with
     /// <see cref="CommentProfileIncompleteException"/>. A message in a grade conversation is queued to be mailed to
     /// the other side of it, a grader's only while the student can see the conversation.
     /// </summary>
@@ -61,8 +61,8 @@ public interface ICommentService
     Task DeleteCommentAsync(Guid commentId, CommentViewer viewer);
 
     /// <summary>
-    /// Toggles a like on a comment. Creates a like if it doesn't exist, removes it if it does. A comment in a
-    /// grade conversation or a proposal's discussion takes no likes and is refused as though it did not exist.
+    /// Toggles a like on a comment. Creates a like if it doesn't exist, removes it if it does. A deleted comment,
+    /// and any comment in a grade conversation, takes no likes and is refused as though it did not exist.
     /// </summary>
     /// <param name="commentId">The ID of the comment to like/unlike.</param>
     /// <param name="viewer">The user toggling the like.</param>

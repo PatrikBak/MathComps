@@ -12,6 +12,7 @@ using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Ai;
 using MathComps.Infrastructure.Services.Clerk;
 using MathComps.Infrastructure.Services.Comments;
+using MathComps.Infrastructure.Services.Comments.Kinds;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Content;
@@ -207,6 +208,13 @@ public static class ServiceCollectionExtensions
         services.TryAddScoped<IUserManager, UserManager>();
         services.TryAddScoped<IUserProblemService, UserProblemService>();
         services.TryAddScoped<IUserListService, UserListService>();
+
+        // Comments, with one kind of thread per target type deciding who reaches its threads
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, ProblemThreadKind>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, HandoutThreadKind>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, NewsThreadKind>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, HostedGradeThreadKind>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, ProposalThreadKind>());
         services.TryAddScoped<ICommentService, CommentService>();
 
         // The list service resolves problem slugs, so make sure the lookup is available
