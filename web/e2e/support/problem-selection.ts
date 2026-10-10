@@ -1212,6 +1212,25 @@ export async function pickBoard(page: Page, from: Board, to: Board): Promise<voi
 }
 
 /**
+ * Narrows the pool to the problems the board on screen holds, or to those it doesn't, through the State pill, and
+ * closes it again.
+ *
+ * @param page - The page.
+ * @param from - What the pill reads now: its own name, or the option picked.
+ * @param to - The option to pick.
+ */
+export async function pickState(page: Page, from: string, to: string): Promise<void> {
+  // The State pill, opened
+  await page.getByRole('button', { name: from, exact: true }).click()
+
+  // The option, picked whatever count it carries
+  await page.getByRole('radio', { name: new RegExp(`^${to} \\(`) }).check()
+
+  // The pill, closed again
+  await page.keyboard.press('Escape')
+}
+
+/**
  * The line naming the rounds a finalized board went into, and the day they open.
  *
  * @param page - The page.

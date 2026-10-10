@@ -1313,7 +1313,9 @@
       "area": "Oblasť",
       "category": "Kategória",
       "notSelected": "Nevybrané",
-      "setAside": "Odložené {count}"
+      "selected": "Vybrané",
+      "setAside": "Odložené {count}",
+      "state": "Stav"
     },
     "finalize": {
       "confirm": "Uzavrieť",

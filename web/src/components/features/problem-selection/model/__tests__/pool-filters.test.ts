@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { matchPool, OPEN_POOL_FILTER } from '../pool-filters'
-import type { Proposal } from '../selection-types'
+import type { Board, Proposal } from '../selection-types'
 
 /**
  * A live proposal in the pool, numbered and named after its number unless told otherwise.
@@ -122,6 +122,48 @@ describe('matchPool', () => {
 
     // Only the live problem shows
     expect(live.shown.map((shown) => shown.number)).toEqual([2])
+  })
+
+  it('shows the problems the board on screen holds, or those it does not, counting both under the other filters', () => {
+    // Problems 1 and 2 in geometry, 3 in algebra
+    const proposals = [
+      proposal(1, { area: 'geometry' }),
+      proposal(2, { area: 'geometry' }),
+      proposal(3),
+    ]
+
+    // A board whose one paper holds problems 1 and 3 and an empty slot
+    const board: Board = {
+      id: 'october',
+      name: 'October',
+      papers: [{ id: 'e', name: 'E', category: 'elementary', slots: ['p1', null, 'p3'] }],
+      finalization: null,
+    }
+
+    // The pool narrowed to what the board holds
+    const selected = matchPool(proposals, { ...OPEN_POOL_FILTER, membership: 'selected' }, board)
+
+    // Problems 1 and 3
+    expect(selected.shown.map((shown) => shown.number)).toEqual([1, 3])
+
+    // Both answers still counted over the whole pool, their own filter left out
+    expect(selected.membershipCounts).toEqual({ selected: 2, notSelected: 1 })
+
+    // The pool narrowed to what the board does not hold
+    const notSelected = matchPool(
+      proposals,
+      { ...OPEN_POOL_FILTER, membership: 'notSelected' },
+      board
+    )
+
+    // Problem 2 alone
+    expect(notSelected.shown.map((shown) => shown.number)).toEqual([2])
+
+    // The pool narrowed to geometry, on the board or off it
+    const geometry = matchPool(proposals, { ...OPEN_POOL_FILTER, areas: ['geometry'] }, board)
+
+    // Only the two geometry problems counted
+    expect(geometry.membershipCounts).toEqual({ selected: 1, notSelected: 1 })
   })
 
   it('finds a problem by its number, its name or a statement in any language, whatever the case', () => {

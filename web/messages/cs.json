@@ -1313,7 +1313,9 @@
       "area": "Oblast",
       "category": "Kategorie",
       "notSelected": "Nevybrané",
-      "setAside": "Odložené {count}"
+      "selected": "Vybrané",
+      "setAside": "Odložené {count}",
+      "state": "Stav"
     },
     "finalize": {
       "confirm": "Uzavřít",

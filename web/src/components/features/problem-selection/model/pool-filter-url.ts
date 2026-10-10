@@ -24,10 +24,10 @@ export const POOL_FILTER_PARAMS = [
 ] as const
 
 /**
- * What the address carries of the pool's filter: all of it but {@link PoolFilter.isOffBoardOnly}, which follows the
+ * What the address carries of the pool's filter: all of it but {@link PoolFilter.membership}, which follows the
  * board on screen and so means nothing in a link.
  */
-export type AddressedPoolFilter = Omit<PoolFilter, 'isOffBoardOnly'>
+export type AddressedPoolFilter = Omit<PoolFilter, 'membership'>
 
 /**
  * Writes the address's part of the pool's filter into query parameters, so a reload comes back to it and the address

@@ -9,10 +9,11 @@ import {
   FacetTogglePill,
 } from '@/components/shared/components/facets/components/FacetBarControls'
 import { MultiSelectFacet } from '@/components/shared/components/facets/components/MultiSelectFacet'
+import type { FacetSelectionMode } from '@/components/shared/components/facets/model/facet-types'
 
 import { useAreaName } from '../hooks/use-area-name'
 import type { UsePoolFiltersResult } from '../hooks/use-pool-filters'
-import type { PoolMatches } from '../model/pool-filters'
+import { BOARD_MEMBERSHIPS, type BoardMembership, type PoolMatches } from '../model/pool-filters'
 import { PROPOSAL_AREAS } from '../model/selection-types'
 
 /**
@@ -26,8 +27,8 @@ type PoolFilterBarProps = {
 }
 
 /**
- * The row of filters over the pool: a pill per yes-or-no filter, and a pill dropdown per facet whose options
- * carry their counts.
+ * The row of filters over the pool: a pill dropdown per facet whose options carry their counts, and a pill for
+ * the set-aside problems.
  */
 export function PoolFilterBar({ filters, matches }: PoolFilterBarProps) {
   // Filter copy
@@ -39,18 +40,27 @@ export function PoolFilterBar({ filters, matches }: PoolFilterBarProps) {
   // What each area is called
   const areaName = useAreaName()
 
+  // What each board membership is called
+  const membershipNames: Record<BoardMembership, string> = {
+    selected: t('selected'),
+    notSelected: t('notSelected'),
+  }
+
   // The filter as it stands, the ways of changing it, and how many of its fields narrow
   const { filter, setField, clearAll, activeCount } = filters
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Only what the board on screen doesn't hold */}
-      <FacetTogglePill
-        isOn={filter.isOffBoardOnly}
-        onToggle={() => setField('isOffBoardOnly', !filter.isOffBoardOnly)}
-      >
-        {t('notSelected')}
-      </FacetTogglePill>
+      {/* Whether the board on screen holds a problem */}
+      <PoolFacet
+        title={t('state')}
+        values={BOARD_MEMBERSHIPS}
+        nameOf={(membership) => membershipNames[membership]}
+        counts={matches?.membershipCounts}
+        selected={filter.membership === null ? [] : [filter.membership]}
+        onChange={(memberships) => setField('membership', memberships.at(-1) ?? null)}
+        selectionMode="single"
+      />
 
       {/* Which categories a problem is recommended for */}
       <PoolFacet
@@ -106,6 +116,8 @@ type PoolFacetProps<TValue extends string> = {
   selected: TValue[]
   /** Changes the values picked. */
   onChange: (selected: TValue[]) => void
+  /** How many values may be picked at once. */
+  selectionMode?: FacetSelectionMode
 }
 
 /**
@@ -118,6 +130,7 @@ function PoolFacet<TValue extends string>({
   counts,
   selected,
   onChange,
+  selectionMode,
 }: PoolFacetProps<TValue>) {
   // Filter copy
   const t = useTranslations('problemSelection.filters')
@@ -134,6 +147,7 @@ function PoolFacet<TValue extends string>({
       }))}
       selected={selected}
       onChange={(picked) => onChange(values.filter((value) => picked.includes(value)))}
+      selectionMode={selectionMode}
       showSearch={false}
     />
   )

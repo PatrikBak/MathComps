@@ -1313,7 +1313,9 @@
       "area": "Area",
       "category": "Category",
       "notSelected": "Not selected",
-      "setAside": "Set aside {count}"
+      "selected": "Selected",
+      "setAside": "Set aside {count}",
+      "state": "State"
     },
     "finalize": {
       "confirm": "Finalize",

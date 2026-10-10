@@ -28,10 +28,10 @@ export type UsePoolFiltersResult = {
 }
 
 /**
- * Holds what the pool is narrowed to. All of it but {@link PoolFilter.isOffBoardOnly} is carried in the address
+ * Holds what the pool is narrowed to. All of it but {@link PoolFilter.membership} is carried in the address
  * beside the problem open over the pool, so a reload or a shared link comes back to the same pool, and a step back
  * or forward through history takes the pool to the filter that step's address holds, while the pool is hidden
- * behind a problem as well. {@link PoolFilter.isOffBoardOnly} lasts until a reload, through every step in history.
+ * behind a problem as well. {@link PoolFilter.membership} lasts until a reload, through every step in history.
  *
  * @returns The filter, the ways to change it, and how much of it narrows.
  */
@@ -45,8 +45,7 @@ export function usePoolFilters(): UsePoolFiltersResult {
   // The address carrying the filter as far as it can, every other parameter left as it stands
   useAddressSync(toPoolFilterQuery(filter), POOL_FILTER_PARAMS)
 
-  // A function which takes the pool to the filter the address holds, keeping whether the board's own problems
-  // are left out
+  // A function which takes the pool to the filter the address holds, keeping the board membership picked
   const followAddress = useCallback(
     () =>
       setFilter((previous) => ({
