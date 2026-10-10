@@ -17,6 +17,7 @@ import type {
   ReviewTranscript,
   SelectionData,
 } from '@/components/features/problem-selection/model/selection-types'
+import type { UserProfile } from '@/components/features/profile/model/profile-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { DAY_MS } from '@/components/shared/utils/time-units'
 
@@ -423,7 +424,26 @@ export const EARLIER_STATEMENT =
 export const ARGUED_EARLIER = 'Erasing the odd numbers first leaves only even ones.'
 
 /** The username of the reviewer a test signs in as, where one is needed to sign a comment. */
-export const READER_NAME = 'Rita'
+const READER_NAME = 'Rita'
+
+/**
+ * Gives the signed-in reviewer the username {@link READER_NAME}, which a discussion asks for before it takes a
+ * comment.
+ *
+ * @param page - The page to answer the reviewer's profile on.
+ */
+export async function stubNamedReader(page: Page): Promise<void> {
+  // The reviewer's profile, carrying the username
+  await page.route(`${BACKEND_ORIGIN}/users/me/profile`, (route) =>
+    answerJson(route, 200, {
+      graduationYear: null,
+      hasLeftHighSchool: true,
+      countryCode: null,
+      email: null,
+      username: READER_NAME,
+    } satisfies UserProfile)
+  )
+}
 
 /**
  * One thing said in a conversation with Mathilda.
