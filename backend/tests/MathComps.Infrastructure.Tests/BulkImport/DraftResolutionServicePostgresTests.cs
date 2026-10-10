@@ -487,9 +487,9 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     {
         // Replay the image problem's statement verbatim, sized off the same on-disk figure.
         var problem = new DraftProblemContent(
-            2, HasSidecar: true, Authors: [], SolutionLink: null, Tags: null,
+            2, HasSidecar: true, Authors: [], SolutionLink: null, Tags: null, Proposal: null,
             Texts: [Original(Language.SK, ImageStatement)], Images: ["fig.svg"]);
-        var preview = await service.PreviewAsync(SeededTarget(), [problem], _imageFolder);
+        var preview = await service.PreviewAsync(SeededTarget(), visibleSince: null, [problem], _imageFolder);
 
         // The reproduced body matches the stored one, so the re-import is unchanged.
         Assert.Equal(DraftTextAction.UnchangedOriginal, ResolutionFor(preview, DocumentType.Statement).Action);
@@ -891,12 +891,266 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
         await context.SaveChangesAsync();
     });
 
+    /// <summary>
+    /// A problem new to the pool with no proposal block is refused. Nothing would file it, and the selection reads
+    /// only filed problems, so no reviewer would ever see it.
+    /// </summary>
+    [Fact]
+    public Task A_new_pool_problem_without_a_proposal_is_refused() => RunTestAsync(async service =>
+    {
+        // A pick at a free place, its pN.yaml carrying no block.
+        var preview = await PreviewPoolAsync(service, Pick(8, number: null));
+
+        // The pick is refused.
+        Assert.Equal(new PoolProblemWithoutProposal(PoolSlug(8)), Assert.Single(preview.ProposalConflicts));
+    });
+
+    /// <summary>
+    /// A proposal block outside the pool is refused, since only a problem in the pool is filed under a proposal.
+    /// </summary>
+    [Fact]
+    public Task A_proposal_outside_the_pool_is_refused() => RunTestAsync(async service =>
+    {
+        // Problem 3 of the seeded CSMO round, carrying a block.
+        var preview = await PreviewAsync(service, Pick(3, number: 14));
+
+        // The block is refused.
+        Assert.Equal(new ProposalOutsidePool("74-csmo-a-iii-3"), Assert.Single(preview.ProposalConflicts));
+    });
+
+    /// <summary>
+    /// A number stays taken once the reviewers delete its proposal. The deleted row keeps it, so a pick naming it
+    /// would collide with a problem the pool no longer shows.
+    /// </summary>
+    [Fact]
+    public Task A_number_a_deleted_proposal_holds_is_refused() => RunTestAsync(async service =>
+    {
+        // The pool, its place 1 holding proposal #21, deleted.
+        await SeedPoolProblemAsync(place: 1, number: 21, deletedAt: DateTimeOffset.UtcNow);
+
+        // A pick naming #21 at a free place.
+        var preview = await PreviewPoolAsync(service, Pick(8, number: 21));
+
+        // The pick is refused, naming the problem holding the number.
+        Assert.Equal(new ProposalNumberTaken(PoolSlug(8), 21, PoolSlug(1)), Assert.Single(preview.ProposalConflicts));
+    });
+
+    /// <summary>
+    /// A number stays taken once its problem leaves the pool. Finalizing moves a problem into a round of its
+    /// competition and keeps its proposal, so a pick naming that number would collide with a problem the pool no
+    /// longer shows.
+    /// </summary>
+    [Fact]
+    public Task A_number_a_finalized_problem_holds_is_refused() => RunTestAsync(async service =>
+    {
+        // Proposal #21, its problem already moved into a round of the October competitions.
+        var holderId = Guid.Empty;
+        await QueryAsync(async context =>
+        {
+            // The October group, one round per category.
+            var october = SelectionSeed.NewGroup(
+                context, SelectionSeed.NewSeason(context), "october", DateTimeOffset.UtcNow.AddDays(10));
+
+            // Proposal #21, standing first in its first round.
+            holderId = SelectionSeed.NewProposal(context, october.Rounds.First(), number: 21, position: 1);
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
+
+        // The slug the holder of #21 goes by in its round.
+        var holderSlug = await QueryValueAsync(context =>
+            context.Problems.Where(problem => problem.Id == holderId).Select(problem => problem.Slug).SingleAsync());
+
+        // A pick naming #21 at a free place of the pool.
+        var preview = await PreviewPoolAsync(service, Pick(8, number: 21));
+
+        // The pick is refused, naming the problem holding the number.
+        Assert.Equal(new ProposalNumberTaken(PoolSlug(8), 21, holderSlug), Assert.Single(preview.ProposalConflicts));
+    });
+
+    /// <summary>
+    /// A place holding a proposal the reviewers deleted is refused. The import would rewrite its texts and leave it
+    /// deleted, so the draft would go on carrying a problem nobody sees.
+    /// </summary>
+    [Fact]
+    public Task A_place_holding_a_deleted_proposal_is_refused() => RunTestAsync(async service =>
+    {
+        // The pool, its place 8 holding proposal #14, deleted.
+        await SeedPoolProblemAsync(place: 8, number: 14, deletedAt: DateTimeOffset.UtcNow);
+
+        // A pick naming #14 at place 8.
+        var preview = await PreviewPoolAsync(service, Pick(8, number: 14));
+
+        // The pick is refused.
+        Assert.Equal(new ProposalDeleted(PoolSlug(8), 14), Assert.Single(preview.ProposalConflicts));
+    });
+
+    /// <summary>
+    /// A place holding another proposal than the block names is refused, since the draft describes a different
+    /// problem than the one it would rewrite.
+    /// </summary>
+    [Fact]
+    public Task A_place_holding_another_proposal_is_refused() => RunTestAsync(async service =>
+    {
+        // The pool, its place 8 holding proposal #14.
+        await SeedPoolProblemAsync(place: 8, number: 14);
+
+        // A pick naming #19 at place 8.
+        var preview = await PreviewPoolAsync(service, Pick(8, number: 19));
+
+        // The pick is refused.
+        Assert.Equal(new PlaceHoldsAnotherProposal(PoolSlug(8), 14, 19), Assert.Single(preview.ProposalConflicts));
+    });
+
+    /// <summary>
+    /// A place holding a problem no proposal files is refused, block or not. Such a problem isn't one of the pool's,
+    /// so nothing says the draft describes it.
+    /// </summary>
+    [Fact]
+    public Task A_place_holding_an_unfiled_problem_is_refused() => RunTestAsync(async service =>
+    {
+        // The pool, its place 8 holding a problem nothing files.
+        await SeedPoolProblemAsync(place: 8, number: null);
+
+        // A pick naming #14 at place 8.
+        var filed = await PreviewPoolAsync(service, Pick(8, number: 14));
+
+        // A pick at place 8 with no block.
+        var bare = await PreviewPoolAsync(service, Pick(8, number: null));
+
+        // Both are refused.
+        Assert.Equal(new PlaceHoldsNoProposal(PoolSlug(8)), Assert.Single(filed.ProposalConflicts));
+        Assert.Equal(new PlaceHoldsNoProposal(PoolSlug(8)), Assert.Single(bare.ProposalConflicts));
+    });
+
+    /// <summary>
+    /// A draft for the pool naming any embargo but the one every round of the pool carries is refused. Leaving it
+    /// out would open the pool's round, and another instant would move its lock.
+    /// </summary>
+    [Fact]
+    public Task A_pool_draft_moving_its_embargo_is_refused() => RunTestAsync(async service =>
+    {
+        // A draft naming no embargo at all.
+        var open = await service.PreviewAsync(PoolTarget(), visibleSince: null, [Pick(8, number: 14)], _imageFolder);
+
+        // A draft naming a competition's closing instant.
+        var moved = await service.PreviewAsync(
+            PoolTarget(), new DateTimeOffset(2026, 10, 19, 22, 0, 0, TimeSpan.Zero), [Pick(8, number: 14)],
+            _imageFolder);
+
+        // Both are refused.
+        Assert.True(open.MovesProposalsEmbargo);
+        Assert.True(moved.MovesProposalsEmbargo);
+    });
+
+    /// <summary>
+    /// A new pick at a free place under a free number, beside a re-import of a pick at its own place under its own
+    /// number, files cleanly. These are the drafts that fill the pool, so none of its checks may fire on them.
+    /// A re-import with no block files cleanly too, since leaving the block out leaves the proposal as it is.
+    /// </summary>
+    [Fact]
+    public Task A_new_pick_and_a_reimport_file_cleanly() => RunTestAsync(async service =>
+    {
+        // The pool, its place 8 holding proposal #14.
+        await SeedPoolProblemAsync(place: 8, number: 14);
+
+        // #14 again at its place, and #19 at the next one, under the pool's embargo.
+        var preview = await PreviewPoolAsync(service, Pick(8, number: 14), Pick(9, number: 19));
+
+        // #14 again with no block.
+        var bare = await PreviewPoolAsync(service, Pick(8, number: null));
+
+        // Nothing is refused.
+        Assert.Empty(preview.ProposalConflicts);
+        Assert.False(preview.MovesProposalsEmbargo);
+        Assert.Empty(bare.ProposalConflicts);
+    });
+
+    /// <summary>
+    /// Seeds the pool's round in the 2026 season, holding one problem at the given place under the slug the import
+    /// gives it, filed by a proposal when a number is given.
+    /// </summary>
+    /// <param name="place">The problem's place, its number in the round.</param>
+    /// <param name="number">The number of the proposal filing the problem, or null when nothing files it.</param>
+    /// <param name="deletedAt"><inheritdoc cref="Proposal.DeletedAt" path="/summary"/></param>
+    /// <returns>A task representing the seeding.</returns>
+    private Task SeedPoolProblemAsync(int place, int? number, DateTimeOffset? deletedAt = null) =>
+        QueryAsync(async context =>
+        {
+            // The pool's round in its season.
+            var round = SelectionSeed.NewProposalsRound(context, SelectionSeed.NewSeason(context));
+
+            // The problem at the place.
+            var problem = new Problem
+            {
+                Id = Guid.NewGuid(),
+                RoundId = round.Id,
+                Number = place,
+                Slug = PoolSlug(place),
+            };
+            context.Problems.Add(problem);
+
+            // The proposal filing the problem, when a number is given.
+            if (number is { } filed)
+                context.Proposals.Add(new Proposal
+                {
+                    ProblemId = problem.Id,
+                    Number = filed,
+                    Title = $"Proposal {filed}",
+                    Area = ProposalArea.Algebra,
+                    Recommended = [],
+                    DeletedAt = deletedAt,
+                });
+
+            // Persist the seed.
+            await context.SaveChangesAsync();
+        });
 
     /// <summary>
     /// Builds a draft target for the seeded csmo-a-iii · 2024 round.
     /// </summary>
     /// <returns>The configured target.</returns>
     private static DraftTarget SeededTarget() => new("csmo-a-iii", 2024);
+
+    /// <summary>
+    /// Builds a draft target for the 2026 round of the pool.
+    /// </summary>
+    /// <returns>The configured target.</returns>
+    private static DraftTarget PoolTarget() => new(HostedTaxonomy.ProposalsPath, 2026);
+
+    /// <summary>
+    /// Builds the slug the import gives a place in the 2026 round of the pool, whose edition is 76.
+    /// </summary>
+    /// <param name="place">The place, a problem's number in the round.</param>
+    /// <returns>The slug.</returns>
+    private static string PoolSlug(int place) => $"76-mathcomps-proposals-{place}";
+
+    /// <summary>
+    /// Previews a draft for the 2026 round of the pool, under <see cref="HostedTaxonomy.ProposalsVisibleSince"/>.
+    /// </summary>
+    /// <param name="service">The resolution service under test.</param>
+    /// <param name="problems">The draft's problems.</param>
+    /// <returns>The DB preview.</returns>
+    private Task<DraftDbPreview> PreviewPoolAsync(
+        IDraftResolutionService service, params DraftProblemContent[] problems) =>
+        service.PreviewAsync(PoolTarget(), HostedTaxonomy.ProposalsVisibleSince, problems, _imageFolder);
+
+    /// <summary>
+    /// Builds a pick: a problem whose one text is an English original, carrying a <c>proposal:</c> block naming the
+    /// given number, or none.
+    /// </summary>
+    /// <param name="order">The pick's place.</param>
+    /// <param name="number">
+    /// The number its <c>proposal:</c> block names, or null for a <c>pN.yaml</c> with no block.
+    /// </param>
+    /// <returns>The configured problem content.</returns>
+    private static DraftProblemContent Pick(int order, int? number) =>
+        new(order, HasSidecar: true, Authors: [], SolutionLink: null, Tags: null,
+            Proposal: number is { } filed
+                ? new DraftProposal(filed, $"Proposal {filed}", ProposalArea.Algebra, [])
+                : null,
+            Texts: [Original(Language.EN)], Images: []);
 
     /// <summary>
     /// Previews a single-problem draft against the seeded round, with no on-disk images.
@@ -916,7 +1170,7 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     /// <returns>The DB preview.</returns>
     private Task<DraftDbPreview> PreviewAsync(
         IDraftResolutionService service, DraftTarget target, DraftProblemContent problem) =>
-        service.PreviewAsync(target, [problem], _imageFolder);
+        service.PreviewAsync(target, visibleSince: null, [problem], _imageFolder);
 
     /// <summary>
     /// Builds a draft problem from its order and text variants, carrying no images and (by default) a metadata
@@ -936,7 +1190,8 @@ public class DraftResolutionServicePostgresTests(PostgresContainerFixture fixtur
     /// <param name="texts">The problem's text variants (original plus any translations).</param>
     /// <returns>The configured problem content.</returns>
     private static DraftProblemContent Problem(int order, bool hasSidecar, params DraftTextContent[] texts) =>
-        new(order, hasSidecar, Authors: [], SolutionLink: null, Tags: null, Texts: [.. texts], Images: []);
+        new(order, hasSidecar, Authors: [], SolutionLink: null, Tags: null, Proposal: null, Texts: [.. texts],
+            Images: []);
 
     /// <summary>
     /// Builds an original text variant. The body defaults to one that differs from the seeded body, so an original

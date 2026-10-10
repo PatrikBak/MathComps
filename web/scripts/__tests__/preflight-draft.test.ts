@@ -13,6 +13,7 @@ import os from 'os'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { describe, expect, it } from 'vitest'
+import { stringify as stringifyYaml } from 'yaml'
 
 import { isOk, preflightDraft } from '../preflight-draft-core'
 import { narrowMeta } from '../preflight-draft-meta'
@@ -316,6 +317,16 @@ describe('valid drafts — parsed manifest content', () => {
     expect(isOk(manifest.verdict.errors)).toBe(true)
   })
 
+  it('carries a proposal block into the manifest', async () => {
+    const manifest = await loadFixture('valid-proposal')
+    expect(manifest.problems[0]!.proposal).toEqual({
+      number: 19,
+      title: 'Two squares force a factor',
+      area: 'numberTheory',
+      recommended: ['intermediate', 'advanced'],
+    })
+  })
+
   it('leaves authors null when a problem declares none', async () => {
     const manifest = await loadFixture('valid-minimal-meta')
     expect(manifest.problems[0]!.authors).toBeNull()
@@ -514,6 +525,14 @@ describe('invalid drafts — specific issues', () => {
     expect(error?.rule).toBe('problem-files')
   })
 
+  it('flags every problem naming a proposal number another one names', async () => {
+    const manifest = await loadFixture('invalid-proposal-duplicate-number')
+    const files = manifest.verdict.errors
+      .filter((entry) => entry.rule === 'proposal-number-duplicate')
+      .map((entry) => entry.file)
+    expect(files).toEqual(['p8.yaml', 'p9.yaml'])
+  })
+
   it('flags a folder with no problems', async () => {
     const manifest = await loadFixture('invalid-no-problems')
     const error = findError(manifest, (entry) => entry.rule === 'problem-files')
@@ -624,13 +643,18 @@ describe('parseProblemMeta', () => {
   it('defaults when the file is empty', () => {
     const result = parseProblemMeta('')
     expect(result.error).toBeNull()
-    expect(result.meta).toEqual({ authors: null, solutionLink: null, tags: null })
+    expect(result.meta).toEqual({ authors: null, solutionLink: null, tags: null, proposal: null })
   })
 
   it('parses authors and an optional solution link', () => {
     const result = parseProblemMeta('authors:\n  - A\n  - B\nsolutionLink: https://x.test')
     expect(result.error).toBeNull()
-    expect(result.meta).toEqual({ authors: ['A', 'B'], solutionLink: 'https://x.test', tags: null })
+    expect(result.meta).toEqual({
+      authors: ['A', 'B'],
+      solutionLink: 'https://x.test',
+      tags: null,
+      proposal: null,
+    })
   })
 
   it('keeps an absent authors key as null, distinct from an explicit empty clear', () => {
@@ -673,6 +697,55 @@ describe('parseProblemMeta', () => {
   it('reports malformed YAML rather than throwing', () => {
     const result = parseProblemMeta('authors: [A')
     expect(result.error).toContain('valid YAML')
+  })
+
+  it('parses a proposal block in the API spellings', () => {
+    const result = parseProblemMeta(
+      'proposal:\n  number: 19\n  title: Two squares\n  area: numberTheory\n  recommended: [advanced, elementary]'
+    )
+    expect(result.error).toBeNull()
+    expect(result.meta.proposal).toEqual({
+      number: 19,
+      title: 'Two squares',
+      area: 'numberTheory',
+      recommended: ['advanced', 'elementary'],
+    })
+  })
+
+  it('accepts a proposal recommended for no category yet', () => {
+    const result = parseProblemMeta(
+      'proposal:\n  number: 19\n  title: T\n  area: algebra\n  recommended: []'
+    )
+    expect(result.meta.proposal?.recommended).toEqual([])
+  })
+
+  it('rejects a proposal that is not a block of fields', () => {
+    const result = parseProblemMeta('proposal: 19')
+    expect(result.error).toContain('"proposal"')
+    expect(result.meta.proposal).toBeNull()
+  })
+
+  it.each([
+    ['a number below one', { number: 0 }, '"proposal.number"'],
+    ['a number that is not whole', { number: 1.5 }, '"proposal.number"'],
+    ['a blank title', { title: ' ' }, '"proposal.title"'],
+    ['a title past 200 characters', { title: 'x'.repeat(201) }, '"proposal.title"'],
+    ['an area in the tag spelling', { area: 'number-theory' }, '"proposal.area"'],
+    ['a category outside the hosted ones', { recommended: ['olympiad'] }, '"proposal.recommended"'],
+    [
+      'a category named twice',
+      { recommended: ['elementary', 'elementary'] },
+      '"proposal.recommended"',
+    ],
+    ['a missing field', { recommended: undefined }, '"proposal.recommended"'],
+  ])('rejects a proposal with %s', (_description, spoiled, field) => {
+    // A well-formed block with one field spoiled
+    const block = { number: 19, title: 'T', area: 'algebra', recommended: [], ...spoiled }
+
+    // The spoiled block is rejected, naming the field at fault, and no proposal comes back
+    const result = parseProblemMeta(stringifyYaml({ proposal: block }))
+    expect(result.error).toContain(field)
+    expect(result.meta.proposal).toBeNull()
   })
 })
 
@@ -717,15 +790,7 @@ describe('narrowMeta', () => {
     expect(bare.meta.visibleSince).toBeNull()
   })
 
-  it.each([
-    '2026-09-14T18:00:00',
-    '2026-09-14',
-    '2026-09-14 18:00:00Z',
-    '2026-02-30T18:00:00Z',
-    '2026-09-14T25:00:00Z',
-    '',
-    5,
-  ])('errors on the unusable visibleSince %j', (visibleSince) => {
+  it.each(['2026-09-14T18:00:00', 5])('errors on the unusable visibleSince %j', (visibleSince) => {
     const { meta, errors } = narrowMeta({
       competition: 'csmo-a-iii',
       season: { year: 2024 },

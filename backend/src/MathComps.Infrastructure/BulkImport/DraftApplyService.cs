@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using MathComps.Domain.Taxonomy;
@@ -13,8 +14,8 @@ namespace MathComps.Infrastructure.BulkImport;
 /// EF Core implementation of <see cref="IDraftApplyService"/>. Spins up one tracking
 /// <see cref="MathCompsDbContext"/>, raises the competition node and season the draft's path names through the
 /// <see cref="ICompetitionTreeWriter"/>, uploads images through the <see cref="ITrackedFileUploader"/> (which skips
-/// ones already on remote storage) and rewrites their refs, then inserts or overwrites the problems and saves once
-/// at the end.
+/// ones already on remote storage) and rewrites their refs, then inserts or overwrites the problems and the proposals
+/// filing them, and saves once at the end.
 /// </summary>
 /// <param name="dbContextFactory">Factory for the tracking write context.</param>
 /// <param name="tree">Raises the competition node and the season the draft names.</param>
@@ -252,7 +253,8 @@ public class DraftApplyService(
     }
 
     /// <summary>
-    /// Inserts a brand-new problem and all of its texts and authors.
+    /// Inserts a brand-new problem with its texts, authors and tags, and the proposal filing it when the draft carries
+    /// a block.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="problem">The draft problem content.</param>
@@ -328,11 +330,23 @@ public class DraftApplyService(
         if (problem.Tags is { } tagSlugs)
             foreach (var tag in await ResolveTagsAsync(context, DistinctCanonicalSlugs(tagSlugs), tagsCache))
                 await context.ProblemTags.AddAsync(NewProblemTag(newProblem.Id, tag.Id));
+
+        // File the problem in the pool when the draft says how, the categories in the order they run.
+        if (problem.Proposal is { } proposal)
+            await context.Proposals.AddAsync(new Proposal
+            {
+                ProblemId = newProblem.Id,
+                Number = proposal.Number,
+                Title = proposal.Title,
+                Area = proposal.Area,
+                Recommended = SelectionRules.InCategoryOrder(proposal.Recommended),
+            });
     }
 
     /// <summary>
     /// Reconciles an existing problem with the draft: refreshes its solution link when the draft carries one,
-    /// upserts each text by <c>(document type, language)</c>, and reconciles its authors.
+    /// upserts each text by <c>(document type, language)</c>, reconciles its authors and tags, and refreshes the
+    /// title and area of the proposal filing it when the draft carries a block.
     /// </summary>
     /// <param name="context">The write context.</param>
     /// <param name="existing">The tracked existing problem, with texts and authors loaded.</param>
@@ -351,7 +365,7 @@ public class DraftApplyService(
         IDictionary<string, Tag> tagsCache,
         ImmutableArray<AppliedText>.Builder appliedTexts)
     {
-        // The solution link is the only language-invariant field a re-import may change. A null link means the
+        // The solution link is the only field on the problem row a re-import may change. A null link means the
         // draft omitted the key — leave the stored link untouched, matching the authors/tags reconcilers.
         var linkChanged = false;
         if (problem.SolutionLink is { } solutionLink && existing.SolutionLink != solutionLink)
@@ -385,8 +399,42 @@ public class DraftApplyService(
         // Bring the tag set into line with the draft (skipped entirely when the draft omits a tags key).
         var tagsChanged = await ReconcileTagsAsync(context, existing, problem.Tags, tagsCache);
 
-        // Updated only if the link, some text, the author set, or the tag set moved.
-        return linkChanged || textsChanged || authorsChanged || tagsChanged;
+        // Bring the proposal's title and area into line with the draft (skipped entirely when it carries no block).
+        var proposalChanged = await RefreshProposalAsync(context, existing.Id, problem.Proposal);
+
+        // Updated only if the link, some text, the author set, the tag set, or the proposal moved.
+        return linkChanged || textsChanged || authorsChanged || tagsChanged || proposalChanged;
+    }
+
+    /// <summary>
+    /// Writes the draft's title and area over those of the proposal filing an existing problem. Every other field
+    /// stays: <see cref="Proposal.Number"/> is fixed, and the categories, the set-aside mark and the deletion belong to
+    /// the reviewers once the problem is in the pool.
+    /// </summary>
+    /// <param name="context">The write context.</param>
+    /// <param name="problemId">The existing problem's id.</param>
+    /// <param name="proposal">The draft's block, or null when it carries none.</param>
+    /// <returns>Whether the title or the area changed.</returns>
+    private static async Task<bool> RefreshProposalAsync(
+        MathCompsDbContext context, Guid problemId, DraftProposal? proposal)
+    {
+        // A draft without a block leaves the proposal as it stands.
+        if (proposal is null)
+            return false;
+
+        // The proposal filing the problem, which validation saw before the run.
+        var stored = await context.Proposals.SingleAsync(candidate => candidate.ProblemId == problemId);
+
+        // Already filed under the draft's title and area.
+        if (stored.Title == proposal.Title && stored.Area == proposal.Area)
+            return false;
+
+        // Take the draft's title and area.
+        stored.Title = proposal.Title;
+        stored.Area = proposal.Area;
+
+        // The proposal moved.
+        return true;
     }
 
     /// <summary>

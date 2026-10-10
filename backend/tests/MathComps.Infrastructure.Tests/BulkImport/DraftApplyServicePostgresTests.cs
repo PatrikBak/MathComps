@@ -1,5 +1,6 @@
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using System.Collections.Immutable;
+using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Extensions;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using static Microsoft.Extensions.Options.Options;
 using MathComps.Domain.Tagging;
 using MathComps.Domain.Localization;
+using MathComps.Domain.Taxonomy;
 
 namespace MathComps.Infrastructure.Tests.BulkImport;
 
@@ -484,7 +486,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // Import the image problem.
         var problem = new DraftProblemContent(
-            1, true, ["Author"], null, null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
+            1, true, ["Author"], null, null, Proposal: null,
+            [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
         await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
 
         // Re-import the very same draft.
@@ -509,7 +512,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // Re-import the identical text, now carrying a solution link.
         var withLink = new DraftProblemContent(
-            1, true, ["Jaromír Šimša"], "https://example.com/sol", null, [Original(Language.SK, "same")], Images: []);
+            1, true, ["Jaromír Šimša"], "https://example.com/sol", null, Proposal: null,
+            [Original(Language.SK, "same")], Images: []);
         var second = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
 
         // The link moved, so the problem counts as updated while its text reports unchanged.
@@ -527,7 +531,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     {
         // Import the problem carrying a solution link.
         var withLink = new DraftProblemContent(
-            1, true, ["Jaromír Šimša"], "https://example.com/sol", null, [Original(Language.SK, "same")], Images: []);
+            1, true, ["Jaromír Šimša"], "https://example.com/sol", null, Proposal: null,
+            [Original(Language.SK, "same")], Images: []);
         await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [withLink], Path.GetTempPath());
 
         // Re-import the identical text with no solutionLink key at all.
@@ -617,7 +622,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // Import a problem whose statement references that image.
         var statement = "see ![fig](images/incircle.svg)";
         var problem = new DraftProblemContent(
-            1, true, ["Author"], null, null, [Original(Language.SK, statement)], ["incircle.svg"]);
+            1, true, ["Author"], null, null, Proposal: null, [Original(Language.SK, statement)], ["incircle.svg"]);
         var result = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
 
         // One image was uploaded, under the slug-based problems/ key.
@@ -653,7 +658,7 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // Import a problem whose statement references that image.
         var statement = "see ![fig](images/incircle.png)";
         var problem = new DraftProblemContent(
-            1, true, ["Author"], null, null, [Original(Language.SK, statement)], ["incircle.png"]);
+            1, true, ["Author"], null, null, Proposal: null, [Original(Language.SK, statement)], ["incircle.png"]);
         var result = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
 
         // One image uploaded, under the slug-based key.
@@ -686,7 +691,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
 
         // The image problem the draft holds.
         var problem = new DraftProblemContent(
-            1, true, ["Author"], null, null, [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
+            1, true, ["Author"], null, null, Proposal: null,
+            [Original(Language.SK, "see ![f](images/fig.svg)")], ["fig.svg"]);
 
         // Import it.
         var first = await ApplyOpenAsync(service, CsmoTarget(), RoundDate, [problem], folder);
@@ -1449,7 +1455,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         // What the dry run says the import would renumber.
         var predicted = ImmutableArray<SortOrderChange>.Empty;
         await QueryAsync<IDraftResolutionService>(async (_, resolution) =>
-            predicted = (await resolution.PreviewAsync(target, problems, Path.GetTempPath())).SortOrderChanges);
+            predicted = (await resolution.PreviewAsync(target, visibleSince: null, problems, Path.GetTempPath()))
+                .SortOrderChanges);
 
         // The dry run has something to predict, or the comparison below would pass on two empty sets.
         Assert.NotEmpty(predicted);
@@ -1461,6 +1468,97 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal(
             predicted.OrderBy(change => change.Path),
             result.SortOrderChanges.OrderBy(change => change.Path));
+    });
+
+    /// <summary>
+    /// A pick written in English alone goes into the pool. Its problem lands with the English text as the original.
+    /// Its proposal is filed under the block's number, title, area and categories, the categories in the order they
+    /// run, live and not set aside.
+    /// </summary>
+    [Fact]
+    public Task An_english_only_pick_enters_the_pool_with_its_proposal() => RunTestAsync(async service =>
+    {
+        // #14 at place 8, recommended for the advanced and the elementary papers.
+        var pick = Pick(8, new DraftProposal(
+            14, "Chameleons", ProposalArea.Combinatorics,
+            [HostedCompetitionCategory.Advanced, HostedCompetitionCategory.Elementary]));
+
+        // Import it.
+        await ApplyPoolAsync(service, pick);
+
+        // Read back what landed.
+        await QueryAsync(async context =>
+        {
+            // The problem sits at its place.
+            var problem = await context.Problems.SingleAsync();
+            Assert.Equal("76-mathcomps-proposals-8", problem.Slug);
+
+            // Its statement and solution are both English, both the original.
+            var texts = await context.ProblemTexts.Where(text => text.ProblemId == problem.Id).ToListAsync();
+            Assert.Equal(2, texts.Count);
+            Assert.All(texts, text => Assert.Equal((Language.EN, true), (text.Language, text.IsOriginal)));
+
+            // The proposal filing it carries the block, its categories in the order they run.
+            var proposal = await context.Proposals.SingleAsync();
+            Assert.Equal(problem.Id, proposal.ProblemId);
+            Assert.Equal(14, proposal.Number);
+            Assert.Equal("Chameleons", proposal.Title);
+            Assert.Equal(ProposalArea.Combinatorics, proposal.Area);
+            Assert.Equal(
+                [HostedCompetitionCategory.Elementary, HostedCompetitionCategory.Advanced], proposal.Recommended);
+
+            // It enters the pool live, for every reviewer to see.
+            Assert.False(proposal.IsSetAside);
+            Assert.Null(proposal.DeletedAt);
+        });
+    });
+
+    /// <summary>
+    /// A re-import refreshes the proposal's title and area and leaves the rest to the reviewers: the categories they
+    /// changed and their set-aside mark survive a draft still naming the categories it first came with.
+    /// </summary>
+    [Fact]
+    public Task A_reimport_refreshes_only_the_title_and_area() => RunTestAsync(async service =>
+    {
+        // Import #14 at place 8, recommended for the elementary paper.
+        await ApplyPoolAsync(service, Pick(8, new DraftProposal(
+            14, "Chameleons", ProposalArea.Combinatorics, [HostedCompetitionCategory.Elementary])));
+
+        // The reviewers recommend it for the advanced paper instead, and set it aside.
+        await QueryAsync(async context =>
+        {
+            // The pick's proposal.
+            var proposal = await context.Proposals.SingleAsync();
+
+            // Recommended for the advanced paper instead.
+            proposal.Recommended = [HostedCompetitionCategory.Advanced];
+
+            // Set aside.
+            proposal.IsSetAside = true;
+
+            // Persist their changes.
+            await context.SaveChangesAsync();
+        });
+
+        // Re-import it under a new title and area, the block still naming the elementary paper.
+        var second = await ApplyPoolAsync(service, Pick(8, new DraftProposal(
+            14, "Chameleons on the island", ProposalArea.Algebra, [HostedCompetitionCategory.Elementary])));
+
+        // The proposal moved, so the problem counts as updated.
+        Assert.Equal(1, second.ProblemsUpdated);
+
+        // Read back the proposal.
+        await QueryAsync(async context =>
+        {
+            // The title and the area are the draft's.
+            var proposal = await context.Proposals.SingleAsync();
+            Assert.Equal("Chameleons on the island", proposal.Title);
+            Assert.Equal(ProposalArea.Algebra, proposal.Area);
+
+            // The categories and the set-aside mark are still the reviewers'.
+            Assert.Equal([HostedCompetitionCategory.Advanced], proposal.Recommended);
+            Assert.True(proposal.IsSetAside);
+        });
     });
 
     /// <summary>
@@ -1553,6 +1651,28 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
         service.ApplyAsync(target, date, visibleSince: null, problems, draftFolder);
 
     /// <summary>
+    /// Applies a draft for the 2026 round of the pool, under <see cref="HostedTaxonomy.ProposalsVisibleSince"/>.
+    /// </summary>
+    /// <param name="service">The service under test.</param>
+    /// <param name="problems"><inheritdoc cref="IDraftApplyService.ApplyAsync" path="/param[@name='problems']"/></param>
+    /// <returns><inheritdoc cref="IDraftApplyService.ApplyAsync" path="/returns"/></returns>
+    private static Task<DraftApplyResult> ApplyPoolAsync(
+        IDraftApplyService service, params DraftProblemContent[] problems) =>
+        service.ApplyAsync(
+            new DraftTarget(HostedTaxonomy.ProposalsPath, 2026), new DateOnly(2026, 9, 14),
+            HostedTaxonomy.ProposalsVisibleSince, problems, Path.GetTempPath());
+
+    /// <summary>
+    /// Builds a pick: a problem written in English alone, with a statement and a solution.
+    /// </summary>
+    /// <param name="order">The pick's place.</param>
+    /// <param name="proposal">The <c>proposal:</c> block the pick's <c>pN.yaml</c> carries.</param>
+    /// <returns>The configured problem content.</returns>
+    private static DraftProblemContent Pick(int order, DraftProposal proposal) =>
+        new(order, HasSidecar: true, Authors: [], SolutionLink: null, Tags: null, proposal,
+            Texts: [Original(Language.EN, "statement", "solution")], Images: []);
+
+    /// <summary>
     /// Builds a draft problem with a single author and no images.
     /// </summary>
     /// <param name="order">The problem's 1-based order.</param>
@@ -1570,7 +1690,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// <returns>The configured problem content.</returns>
     private static DraftProblemContent ProblemBy(
         int order, ImmutableArray<string>? authors, params DraftTextContent[] texts) =>
-        new(order, HasSidecar: true, authors, SolutionLink: null, Tags: null, Texts: [.. texts], Images: []);
+        new(order, HasSidecar: true, authors, SolutionLink: null, Tags: null, Proposal: null,
+            Texts: [.. texts], Images: []);
 
     /// <summary>
     /// Builds a draft problem carrying the given tags and a single author.
@@ -1581,7 +1702,8 @@ public class DraftApplyServicePostgresTests(PostgresContainerFixture fixture)
     /// <returns>The configured problem content.</returns>
     private static DraftProblemContent ProblemWithTags(
         int order, ImmutableArray<string>? tags, params DraftTextContent[] texts) =>
-        new(order, HasSidecar: true, ["Jaromír Šimša"], SolutionLink: null, Tags: tags, Texts: [.. texts], Images: []);
+        new(order, HasSidecar: true, ["Jaromír Šimša"], SolutionLink: null, Tags: tags, Proposal: null,
+            Texts: [.. texts], Images: []);
 
     /// <summary>
     /// Builds an original text variant.

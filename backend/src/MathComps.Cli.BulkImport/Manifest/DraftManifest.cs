@@ -1,6 +1,8 @@
 using System.Collections.Immutable;
+using System.Globalization;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
+using MathComps.Infrastructure.BulkImport;
 
 namespace MathComps.Cli.BulkImport.Manifest;
 
@@ -49,6 +51,16 @@ public record ManifestMeta(
     /// The draft's folder-level metadata file name, used to attribute file-level issues to it.
     /// </summary>
     public const string FileName = "_meta.yaml";
+
+    /// <summary>
+    /// <see cref="VisibleSince"/> as an instant in UTC, whatever offset the draft wrote it in, since a stored instant
+    /// carries no offset; null when the round opens as soon as it lands.
+    /// </summary>
+    public DateTimeOffset? VisibleSinceUtc => VisibleSince is null
+        ? null
+        : DateTimeOffset
+            .Parse(VisibleSince, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind)
+            .ToUniversalTime();
 }
 
 /// <summary>
@@ -97,6 +109,7 @@ public record ManifestText(
 /// Tag slugs to assign, or null when the <c>pN.yaml</c> omits a <c>tags:</c> key. Null leaves existing tags untouched;
 /// an empty array clears them; a populated array replaces them — so omit is distinct from clear.
 /// </param>
+/// <param name="Proposal"><inheritdoc cref="DraftProblemContent.Proposal" path="/summary"/></param>
 /// <param name="Texts">The language variants — the original first, then translations.</param>
 /// <param name="Images">Basenames of every image referenced across the texts (flat, under <c>images/</c>).</param>
 public record ManifestProblem(
@@ -105,8 +118,24 @@ public record ManifestProblem(
     ImmutableArray<string>? Authors,
     string? SolutionLink,
     ImmutableArray<string>? Tags,
+    DraftProposal? Proposal,
     ImmutableArray<ManifestText> Texts,
-    ImmutableArray<string> Images);
+    ImmutableArray<string> Images)
+{
+    /// <summary>
+    /// The problem in the shape the import previews and writes, every field carried across as the preflight read it.
+    /// </summary>
+    public DraftProblemContent Content => new(
+        Order,
+        HasSidecar,
+        Authors,
+        SolutionLink,
+        Tags,
+        Proposal,
+        [.. Texts.Select(text => new DraftTextContent(
+            text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown, text.Hints))],
+        Images);
+}
 
 /// <summary>
 /// The pass/fail decision and its supporting issues. Pass/fail is derived: a run passes only when nothing in

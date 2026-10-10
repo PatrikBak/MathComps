@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 
@@ -23,9 +24,8 @@ public record DraftTextContent(
     ImmutableArray<string> Hints);
 
 /// <summary>
-/// Everything needed to write one draft problem: its position and language-invariant facts (authors, solution
-/// link, the shared image basenames) plus every language variant's content. A small Infrastructure contract,
-/// independent of the preflight manifest shape.
+/// Everything needed to write one draft problem: its position and language-invariant facts plus every language
+/// variant's content.
 /// </summary>
 /// <param name="Order">1-based position within the round, taken from the filenames.</param>
 /// <param name="HasSidecar">
@@ -44,6 +44,10 @@ public record DraftTextContent(
 /// Tag slugs to assign, or null when the draft omits a <c>tags:</c> key. Null leaves existing tags untouched; an
 /// empty array clears them; a populated array replaces them.
 /// </param>
+/// <param name="Proposal">
+/// What the problem is filed under in the pool, or null when the draft carries no <c>proposal:</c> block. Null
+/// leaves a stored proposal untouched.
+/// </param>
 /// <param name="Texts">The language variants this problem imports — the original plus any translations.</param>
 /// <param name="Images">Basenames of every image referenced across the texts (flat, under <c>images/</c>).</param>
 public record DraftProblemContent(
@@ -52,5 +56,19 @@ public record DraftProblemContent(
     ImmutableArray<string>? Authors,
     string? SolutionLink,
     ImmutableArray<string>? Tags,
+    DraftProposal? Proposal,
     ImmutableArray<DraftTextContent> Texts,
     ImmutableArray<string> Images);
+
+/// <summary>
+/// What a draft files a pool problem under: the fields its <see cref="Proposal"/> row is written from.
+/// </summary>
+/// <param name="Number"><inheritdoc cref="Proposal.Number" path="/summary"/></param>
+/// <param name="Title"><inheritdoc cref="Proposal.Title" path="/summary"/></param>
+/// <param name="Area"><inheritdoc cref="Proposal.Area" path="/summary"/></param>
+/// <param name="Recommended">The categories the problem is recommended for, in any order.</param>
+public record DraftProposal(
+    int Number,
+    string Title,
+    ProposalArea Area,
+    ImmutableArray<HostedCompetitionCategory> Recommended);

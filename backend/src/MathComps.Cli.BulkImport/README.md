@@ -12,9 +12,9 @@ The draft format lives in [the draft format reference](../../../web/scripts/PREF
 - **Figures** — every referenced image must size cleanly, the same read `apply` performs on import.
 - **Tag slugs** — every slug in a `pN.yaml` must be in the approved vocabulary, which the preflight cannot see.
 - **Registry** — every competition on the path must be registered in the shared taxonomy and carry both names in all three locales, and the last one must be a leaf.
-- **DB preview** — what each problem would create, overwrite, or leave unchanged, compared by content so a no-op re-import isn't flagged. It also carries the checks needing a database: round contiguity, the `pN.yaml` a new problem must have, a second original, a stored taxonomy node the registry can't place, and the problem count a hosted round's group announced.
+- **DB preview** — what each problem would create, overwrite, or leave unchanged, compared by content so a no-op re-import isn't flagged. It also carries the checks needing a database: round contiguity, the `pN.yaml` a new problem must have, a second original, a stored taxonomy node the registry can't place, the problem count a hosted round's group announced, and [the pool's own checks](#filling-the-pool).
 
-`apply` upserts what the draft describes: the taxonomy and its sort order, the round, the problems, their texts, authors and tags. Figures upload to R2 as each problem is written, and their refs are rewritten to the `media:` keys the site resolves. Only texts that actually changed are rewritten.
+`apply` upserts what the draft describes: the taxonomy and its sort order, the round, the problems, their texts, authors and tags, and a pool problem's proposal. Figures upload to R2 as each problem is written, and their refs are rewritten to the `media:` keys the site resolves. Only texts that actually changed are rewritten.
 
 A run that would change a defended problem's statement or solution is refused, since those defenses would then read back text nobody argued about. `--allow-restating` downgrades it to a warning, which is what a typo fix wants. The flag covers every folder the run matched, so a batch takes it all at once.
 
@@ -81,6 +81,18 @@ A `visibleSince` in `_meta.yaml` holds a round back until the instant it names, 
 On a round a hosted group runs, the embargo stops being the draft's to move: `apply` refuses unless the draft's `visibleSince` equals the instant already stored on the round. Declaring the group stamps that instant from its `closesAt`, but the check reads the stored value, not the manifest. `validate` does not see this at all, so the refusal lands on the import.
 
 The embargo hides the problems, not their figures. Those go to public storage the moment `apply` runs, keyed by the problem's slug and the figure's filename (`problems/75-csmo-a-iii-1-incircle`), so anyone guessing both can fetch a figure early. Everything else stays withheld until the round opens.
+
+## Filling the pool
+
+A draft for `mathcomps-proposals` fills the pool the problem selection picks from. A pool draft is written in English: `language: en`. It carries `visibleSince: 9999-01-01T00:00:00Z`, the instant every round of the pool is held back by, and `validate` refuses any other (`proposals-embargo`). Each `pN.yaml` carries a `proposal:` block, whose format is in [the draft format reference](../../../web/scripts/PREFLIGHT_README.md#a-problem-of-the-pool).
+
+The import finds a pool problem by its place, the `N` of `pN`, so a pool problem keeps the place it first took. `validate` refuses a draft that clashes with what the pool holds:
+
+- a new problem with no block (`missing-proposal`), or a block outside the pool (`proposal-outside-pool`);
+- a number another problem's proposal holds, even one finalized into a round or deleted (`proposal-number-taken`);
+- a place holding a deleted proposal (`proposal-deleted`), another proposal (`proposal-place-taken`), or a problem no proposal files (`proposal-place-unfiled`).
+
+`apply` writes the proposal with its problem. A re-import refreshes its title and area. The categories, setting it aside and deleting it are the reviewers' after that.
 
 ## Setup
 

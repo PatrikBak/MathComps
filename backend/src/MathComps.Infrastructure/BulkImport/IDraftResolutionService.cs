@@ -1,3 +1,5 @@
+using MathComps.Domain.EfCoreEntities;
+
 namespace MathComps.Infrastructure.BulkImport;
 
 /// <summary>
@@ -17,11 +19,15 @@ public interface IDraftResolutionService
     /// is told apart from a real overwrite. Reads only — no rows are inserted or updated.
     /// </summary>
     /// <param name="target">The taxonomy and season the draft resolves against.</param>
+    /// <param name="visibleSince"><inheritdoc cref="Round.VisibleSince" path="/summary"/></param>
     /// <param name="problems">
     /// The draft's problems — their positions (to derive candidate slugs), text variants, and image basenames.
     /// </param>
     /// <param name="draftFolder">The draft folder the image refs resolve against, to size the would-be bodies.</param>
     /// <returns>Which entities exist versus would be created, and the per-text resolutions for colliding slugs.</returns>
     Task<DraftDbPreview> PreviewAsync(
-        DraftTarget target, IReadOnlyList<DraftProblemContent> problems, string draftFolder);
+        DraftTarget target,
+        DateTimeOffset? visibleSince,
+        IReadOnlyList<DraftProblemContent> problems,
+        string draftFolder);
 }

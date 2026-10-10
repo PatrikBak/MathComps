@@ -10,6 +10,15 @@ import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
 import { parse as parseYaml } from 'yaml'
 
+import { HOSTED_COMPETITION_CATEGORIES } from '../src/components/features/hosted-competitions/model/hosted-competition-types'
+import {
+  PROPOSAL_AREAS,
+  PROPOSAL_TITLE_MAX_LENGTH,
+} from '../src/components/features/problem-selection/model/selection-types'
+import { assertNever } from '../src/components/shared/utils/assert-never'
+import { parseMember } from '../src/components/shared/utils/collection-utils'
+import type { ManifestProposal } from './preflight-draft-types'
+
 /** Subfolder holding the draft's image assets. */
 export const IMAGES_DIRNAME = 'images'
 
@@ -43,7 +52,28 @@ type ProblemMeta = {
   solutionLink: string | null
   /** Tag slugs, or `null` when no `tags:` key is present — kept distinct from `[]` (an explicit clear). */
   tags: string[] | null
+  /** What the problem is filed under in the pool, or `null` when no `proposal:` block is present. */
+  proposal: ManifestProposal | null
 }
+
+/** A `proposal:` block that is well-formed. */
+type ProposalParsed = {
+  /** Marks the block as well-formed. */
+  kind: 'parsed'
+  /** The block's fields. */
+  proposal: ManifestProposal
+}
+
+/** A `proposal:` block that is malformed. */
+type ProposalRejected = {
+  /** Marks the block as malformed. */
+  kind: 'rejected'
+  /** The first thing wrong with the block. */
+  error: string
+}
+
+/** A `proposal:` block's parse outcome. */
+type ProposalParse = ProposalParsed | ProposalRejected
 
 /** A problem-metadata parse outcome — values plus the first structural error, if any. */
 type ProblemMetaParse = {
@@ -84,7 +114,12 @@ type SentinelSplit = {
 }
 
 /** Metadata values for a problem whose `pN.yaml` declares none. */
-const EMPTY_PROBLEM_META: ProblemMeta = { authors: null, solutionLink: null, tags: null }
+const EMPTY_PROBLEM_META: ProblemMeta = {
+  authors: null,
+  solutionLink: null,
+  tags: null,
+  proposal: null,
+}
 
 /** A processor used only to parse markdown into an mdast tree for image discovery. */
 const imageRefProcessor = unified().use(remarkParse)
@@ -191,7 +226,7 @@ export function parseProblemMeta(yamlText: string): ProblemMetaParse {
     // Reject a non-string link, keeping the authors parsed so far
     if (typeof rawLink !== 'string') {
       return {
-        meta: { authors, solutionLink: null, tags: null },
+        meta: { authors, solutionLink: null, tags: null, proposal: null },
         error: 'metadata "solutionLink" must be a string',
       }
     }
@@ -205,15 +240,107 @@ export function parseProblemMeta(yamlText: string): ProblemMetaParse {
     // Reject a non-list or non-string entries, keeping the fields parsed so far
     if (!Array.isArray(rawTags) || !rawTags.every((tag) => typeof tag === 'string')) {
       return {
-        meta: { authors, solutionLink, tags: null },
+        meta: { authors, solutionLink, tags: null, proposal: null },
         error: 'metadata "tags" must be a list of strings',
       }
     }
     tags = rawTags
   }
 
+  // proposal is an optional block; an absent key stays null (leave a stored proposal untouched)
+  const rawProposal = parsed.proposal
+  let proposal: ManifestProposal | null = null
+  if (rawProposal !== undefined && rawProposal !== null) {
+    // Narrow the block
+    const narrowed = narrowProposal(rawProposal)
+
+    // The outcome decides whether the block is kept
+    switch (narrowed.kind) {
+      case 'rejected':
+        // Reject a malformed block, keeping the fields parsed so far
+        return { meta: { authors, solutionLink, tags, proposal: null }, error: narrowed.error }
+      case 'parsed':
+        // Adopt a well-formed block
+        proposal = narrowed.proposal
+        break
+      default:
+        return assertNever(narrowed)
+    }
+  }
+
   // Every field is well-formed
-  return { meta: { authors, solutionLink, tags }, error: null }
+  return { meta: { authors, solutionLink, tags, proposal }, error: null }
+}
+
+/**
+ * Narrows a `proposal:` block, which files a problem in the pool. Every field is required, the area is one of
+ * {@link PROPOSAL_AREAS} and each category one of {@link HOSTED_COMPETITION_CATEGORIES}.
+ *
+ * @param raw - The block's parsed YAML value.
+ *
+ * @returns The block, or the first thing wrong with it.
+ */
+function narrowProposal(raw: unknown): ProposalParse {
+  // The block has to be a mapping of its fields
+  if (!isRecord(raw)) {
+    return {
+      kind: 'rejected',
+      error: 'metadata "proposal" must be a mapping of number, title, area and recommended',
+    }
+  }
+
+  // The block's fields
+  const { number, title, area, recommended } = raw
+
+  // The number is a positive whole number
+  if (typeof number !== 'number' || !Number.isInteger(number) || number < 1) {
+    return { kind: 'rejected', error: 'metadata "proposal.number" must be a positive whole number' }
+  }
+
+  // The title is a string with something in it, short enough for a proposal to hold
+  if (
+    typeof title !== 'string' ||
+    title.trim() === '' ||
+    title.length > PROPOSAL_TITLE_MAX_LENGTH
+  ) {
+    return {
+      kind: 'rejected',
+      error: `metadata "proposal.title" must be a non-blank string of at most ${PROPOSAL_TITLE_MAX_LENGTH} characters`,
+    }
+  }
+
+  // The area, when it is one a proposal can be filed under
+  const filedArea = parseMember(area, PROPOSAL_AREAS)
+
+  // An area outside the set is refused
+  if (filedArea === null) {
+    return {
+      kind: 'rejected',
+      error: `metadata "proposal.area" must be one of ${PROPOSAL_AREAS.join(', ')}`,
+    }
+  }
+
+  // Each category the list names, read as one a hosted competition runs at, or null when there is no list
+  const categories = Array.isArray(recommended)
+    ? recommended.map((category) => parseMember(category, HOSTED_COMPETITION_CATEGORIES))
+    : null
+
+  // Every entry of the list a hosted category, none named twice
+  if (
+    categories === null ||
+    !categories.every((category) => category !== null) ||
+    new Set(categories).size !== categories.length
+  ) {
+    return {
+      kind: 'rejected',
+      error:
+        'metadata "proposal.recommended" must be a list of distinct categories from ' +
+        HOSTED_COMPETITION_CATEGORIES.join(', '),
+    }
+  }
+
+  // A well-formed block
+  return { kind: 'parsed', proposal: { number, title, area: filedArea, recommended: categories } }
 }
 
 /**

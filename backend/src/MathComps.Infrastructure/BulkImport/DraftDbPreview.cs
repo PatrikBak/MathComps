@@ -134,6 +134,56 @@ public record DefendedProblemRestatement(
 public record HostedGroupCountDisagreement(int RoundWouldHold, int GroupAnnounces);
 
 /// <summary>
+/// One reason a draft problem can't be filed in the pool the way the draft says. Every one refuses the import.
+/// </summary>
+/// <param name="Slug">The would-be problem slug, which names the problem's place in its round.</param>
+public abstract record ProposalConflict(string Slug);
+
+/// <summary>
+/// A <c>proposal:</c> block on a problem outside <see cref="HostedTaxonomy.ProposalsPath"/>, where nothing is filed.
+/// </summary>
+/// <param name="Slug"><inheritdoc cref="ProposalConflict.Slug" path="/summary"/></param>
+public record ProposalOutsidePool(string Slug) : ProposalConflict(Slug);
+
+/// <summary>
+/// A problem new to the pool with no <c>proposal:</c> block. It would land in the pool's round unfiled, so no
+/// reviewer would ever see it.
+/// </summary>
+/// <param name="Slug"><inheritdoc cref="ProposalConflict.Slug" path="/summary"/></param>
+public record PoolProblemWithoutProposal(string Slug) : ProposalConflict(Slug);
+
+/// <summary>
+/// A block naming a number another problem's proposal already holds, wherever that problem sits now, a deleted
+/// proposal included.
+/// </summary>
+/// <param name="Slug"><inheritdoc cref="ProposalConflict.Slug" path="/summary"/></param>
+/// <param name="Number">The number the block names.</param>
+/// <param name="HolderSlug">The slug of the problem whose proposal holds the number.</param>
+public record ProposalNumberTaken(string Slug, int Number, string HolderSlug) : ProposalConflict(Slug);
+
+/// <summary>
+/// A place holding a proposal the reviewers deleted. The import would rewrite its texts and leave it deleted.
+/// </summary>
+/// <param name="Slug"><inheritdoc cref="ProposalConflict.Slug" path="/summary"/></param>
+/// <param name="Number">The deleted proposal's number.</param>
+public record ProposalDeleted(string Slug, int Number) : ProposalConflict(Slug);
+
+/// <summary>
+/// A place holding a proposal under a different number than the block names, so the draft describes another problem
+/// than the one it would rewrite.
+/// </summary>
+/// <param name="Slug"><inheritdoc cref="ProposalConflict.Slug" path="/summary"/></param>
+/// <param name="StoredNumber">The number of the proposal at the place.</param>
+/// <param name="DraftNumber">The number the block names.</param>
+public record PlaceHoldsAnotherProposal(string Slug, int StoredNumber, int DraftNumber) : ProposalConflict(Slug);
+
+/// <summary>
+/// A place in the pool's round holding a problem no proposal files, which the pool doesn't count as its own.
+/// </summary>
+/// <param name="Slug"><inheritdoc cref="ProposalConflict.Slug" path="/summary"/></param>
+public record PlaceHoldsNoProposal(string Slug) : ProposalConflict(Slug);
+
+/// <summary>
 /// A read-only snapshot of how a draft would land in the database: which taxonomy entities already exist versus
 /// would need creating, and — for every text variant whose problem slug already exists — what the import would do
 /// to it given that text's language and originality. Produced by querying only — no rows written.
@@ -166,6 +216,13 @@ public record HostedGroupCountDisagreement(int RoundWouldHold, int GroupAnnounce
 /// How the round's post-import problem count would differ from what its group announces — null when the counts
 /// agree, and null for a round no group runs.
 /// </param>
+/// <param name="MovesProposalsEmbargo">
+/// Whether a draft for a round under <see cref="HostedTaxonomy.ProposalsPath"/> names an embargo other than
+/// <see cref="HostedTaxonomy.ProposalsVisibleSince"/>, or none. False for every other round.
+/// </param>
+/// <param name="ProposalConflicts">
+/// Every reason a draft problem can't be filed in the pool the way the draft says — empty in the normal case.
+/// </param>
 public record DraftDbPreview(
     ImmutableArray<EntityResolution> Entities,
     ImmutableArray<ProblemTextResolution> TextResolutions,
@@ -173,4 +230,6 @@ public record DraftDbPreview(
     ImmutableArray<SortOrderChange> SortOrderChanges,
     ImmutableArray<TaxonomyOrphan> Orphans,
     ImmutableArray<DefendedProblemRestatement> DefendedProblemRestatements,
-    HostedGroupCountDisagreement? HostedGroupCountDisagreement);
+    HostedGroupCountDisagreement? HostedGroupCountDisagreement,
+    bool MovesProposalsEmbargo,
+    ImmutableArray<ProposalConflict> ProposalConflicts);

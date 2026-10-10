@@ -34,6 +34,14 @@ public static class HostedTaxonomy
     public const string ProposalsPath = $"{RootSlug}-proposals";
 
     /// <summary>
+    /// The embargo every round under <see cref="ProposalsPath"/> carries, far enough ahead that it never opens.
+    /// </summary>
+    /// <remarks>
+    /// The archive leaves the proposals out whatever their rounds say, so this is the second lock on them.
+    /// </remarks>
+    public static readonly DateTimeOffset ProposalsVisibleSince = new(9999, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+    /// <summary>
     /// The level each category node stands for, keyed by that node's slug. A node outside this map is outside
     /// the levels, which is what the practice one is.
     /// </summary>

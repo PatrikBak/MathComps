@@ -96,6 +96,20 @@ tags: # approved tag slugs; usually written by the Tagging CLI, hand-editable
 
 `solutionLink` follows the same omit-leaves-untouched rule: an **absent** key keeps the stored link, a value sets it. Being a scalar it has no empty-list analogue, so a re-import never clears a link — that's done directly in the DB.
 
+### A problem of the pool
+
+In a draft for `mathcomps-proposals`, the pool the problem selection picks from, a `proposal:` block files each problem:
+
+```yaml
+proposal:
+  number: 14 # the number reviewers quote it by, unique across the pool
+  title: Chameleons on the island # working name, at most 200 characters, never shown to a student
+  area: combinatorics # algebra | combinatorics | geometry | numberTheory
+  recommended: [intermediate] # elementary | intermediate | advanced, may be empty
+```
+
+Every field is required, spelled as the API spells it. Two problems of one draft naming the same number are refused (`proposal-number-duplicate`). The first import writes the whole block. A re-import refreshes the title and the area, and leaves the categories to the reviewers. Leaving the block out of a re-import leaves the proposal untouched, like any absent key. Everything the block can clash with in the database is checked by the [bulk-import CLI](../../backend/src/MathComps.Cli.BulkImport/README.md#filling-the-pool).
+
 ## Images
 
 Put assets in `images/` and reference them with a **bare** ref:

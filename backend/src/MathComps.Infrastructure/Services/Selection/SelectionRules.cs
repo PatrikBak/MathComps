@@ -1,3 +1,4 @@
+using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
@@ -119,4 +120,19 @@ internal static class SelectionRules
         DateTimeOffset opensAt, DateTimeOffset? closesAt, IReadOnlyCollection<int> problemsHeld, DateTimeOffset now) =>
         // Not yet open, closing at some point, with rounds that are all still empty
         opensAt > now && closesAt is not null && problemsHeld.Count > 0 && problemsHeld.All(held => held == 0);
+
+    /// <summary>
+    /// The categories a proposal is recommended for, each once and in the order the categories run, which is the order
+    /// <see cref="Proposal.Recommended"/> keeps them in.
+    /// </summary>
+    /// <param name="categories">The categories a proposal is recommended for, in any order.</param>
+    /// <returns>The same categories in the order they run.</returns>
+    public static List<HostedCompetitionCategory> InCategoryOrder(IEnumerable<HostedCompetitionCategory> categories)
+    {
+        // The categories named, each once
+        var named = categories.ToHashSet();
+
+        // Every one of them, in the order the categories run
+        return [.. Enum.GetValues<HostedCompetitionCategory>().Where(named.Contains)];
+    }
 }
