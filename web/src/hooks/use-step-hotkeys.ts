@@ -1,18 +1,11 @@
 import { type HotkeyItem, useHotkeys } from '@mantine/hooks'
 
+import { countOpenDialogs } from '@/components/shared/utils/dom-utils'
+
 import type { UseSteppedSelectionResult } from './use-stepped-selection'
 
 /** The keys that walk a list, one forward and one back. */
 export const STEP_KEYS = { next: 'j', previous: 'k' } as const
-
-/**
- * How many dialogs currently stand over the page, counted off the document itself.
- * @returns The number of dialogs on screen.
- */
-function countOpenDialogs(): number {
-  // Every dialog on screen, which is what each one announces itself as
-  return document.querySelectorAll('[role="dialog"]').length
-}
 
 /**
  * Walks a list from the keyboard, with the item open or with none open yet, so a session of reading through it
