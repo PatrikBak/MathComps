@@ -15,7 +15,7 @@ type UseWaitingSlotPlacementResult = {
   placeButtonRef: RefObject<HTMLButtonElement | null>
   /**
    * Puts the problem into the waiting slot and lets the slot go, the focus landing on the Place button. A press
-   * dropped for a write still out leaves the slot waiting.
+   * dropped for another write changing the slots still out leaves the slot waiting.
    */
   putInWaitingSlot: () => void
 }
@@ -47,7 +47,7 @@ export function useWaitingSlotPlacement(
     // No slot waiting, so nowhere to put the problem
     if (waitingSlot === null) return
 
-    // The placement itself, which a write still out turns away
+    // The placement itself, which another write changing the slots still out turns away
     if (!place.mutate({ slot: waitingSlot, proposalId })) return
 
     // And the waiting slot let go at once, the board showing the problem in it ahead of the server, and the

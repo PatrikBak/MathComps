@@ -22,7 +22,7 @@ type ProblemMove = MoveWrite & {
  * Return type for {@link usePaperMoves}.
  */
 export type UsePaperMovesResult = {
-  /** The paper's move still out, the read after it included; null while none is. */
+  /** The paper's move still out, any read it waits for included; null while none is. */
   pendingMove: ProblemMove | null
   /** The paper's list of slots. */
   listRef: RefObject<HTMLOListElement | null>
@@ -46,6 +46,7 @@ export function usePaperMoves({ board, paper }: Omit<BoardSlot, 'index'>): UsePa
   const moving = useSelectionWrite<ProblemMove>({
     apiFn: moveSlot,
     edit: afterMove,
+    changesSlots: true,
     errorMessage: t('moveFailed'),
   })
 
@@ -63,7 +64,7 @@ export function usePaperMoves({ board, paper }: Omit<BoardSlot, 'index'>): UsePa
     // The slot, addressed from outside the board
     const slot: SlotAddress = { boardId: board.id, paperId: paper.id, index }
 
-    // The trade itself, which a write still out turns away
+    // The trade itself, which another write changing the slots still out turns away
     if (!moving.mutate({ slot, direction, proposalId })) return
 
     // The slot on the other side of the trade

@@ -54,8 +54,8 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
   // Deleting the problem, behind a question
   const deletion = useProposalDeleteConfirmation(proposal, onDeleted)
 
-  // Whether any write to the selection is still out, which would drop a press made meanwhile
-  const { isWriting } = useSelectionWorkspace()
+  // Whether a write changing the slots is still out, which would drop a delete made meanwhile
+  const { isChangingSlots } = useSelectionWorkspace()
 
   // Lists in the reader's language
   const format = useFormatter()
@@ -81,8 +81,7 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-48">
-          {/* The categories the problem is recommended for, each switched on its own and the menu kept open,
-              every row unavailable while a write is out */}
+          {/* The categories the problem is recommended for, each switched on its own and the menu kept open */}
           <DropdownMenuGroup aria-labelledby={recommendedId}>
             <p id={recommendedId} className="px-2 pt-1.5 pb-1 text-xs font-semibold text-muted">
               {t('recommendedFor')}
@@ -91,7 +90,6 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
               <DropdownMenuCheckboxItem
                 key={category}
                 checked={proposal.recommended.includes(category)}
-                disabled={isWriting}
                 onSelect={(event) => event.preventDefault()}
                 onCheckedChange={(isChecked) =>
                   recommend.mutate({
@@ -111,7 +109,6 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                disabled={isWriting}
                 onSelect={() =>
                   setAside.mutate({ proposalId: proposal.id, isSetAside: !proposal.isSetAside })
                 }
@@ -119,7 +116,7 @@ export function ProposalActionsMenu({ proposal, onDeleted }: ProposalActionsMenu
                 {proposal.isSetAside ? t('bringBack') : t('setAside')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="danger" disabled={isWriting} onSelect={deletion.ask}>
+              <DropdownMenuItem variant="danger" disabled={isChangingSlots} onSelect={deletion.ask}>
                 {tActions('delete')}
               </DropdownMenuItem>
             </>

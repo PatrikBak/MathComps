@@ -19,6 +19,7 @@ export function useFinalizeBoard(): SelectionWrite<FinalizationWrite> {
   return useSelectionWrite<FinalizationWrite>({
     apiFn: finalizeBoard,
     edit: null,
+    changesSlots: true,
     errorMessage: t('finalizeFailed'),
   })
 }

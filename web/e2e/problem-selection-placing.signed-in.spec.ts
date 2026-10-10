@@ -855,8 +855,8 @@ test.describe("moving and emptying a draft's slots", () => {
   })
 })
 
-test.describe('presses while a write is out', () => {
-  test('drops every press made while another write is still out, the slot they would fill left waiting', async ({
+test.describe('presses while a write changing the slots is out', () => {
+  test('drops every press on the slots while a write to them is out, the slot they would fill left waiting', async ({
     page,
   }) => {
     // A reviewer whose first draft holds a problem in its first elementary slot and its second intermediate one

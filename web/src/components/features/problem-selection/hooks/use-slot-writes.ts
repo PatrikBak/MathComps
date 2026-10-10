@@ -21,11 +21,11 @@ type UseSlotWritesResult = {
   moveUpRef: RefObject<HTMLButtonElement | null>
   /** The slot's Move down button, which takes the focus while a problem moving down stands in the slot. */
   moveDownRef: RefObject<HTMLButtonElement | null>
-  /** Whether the slot can send its problem back to the pool now: no write is out. */
+  /** Whether the slot can send its problem back to the pool now: no write changing the slots is out. */
   canClear: boolean
-  /** Whether the slot can trade with the one above it now: there is one, and no write is out. */
+  /** Whether the slot can trade with the one above it now: there is one, and no write changing the slots is out. */
   canMoveUp: boolean
-  /** Whether the slot can trade with the one below it now: there is one, and no write is out. */
+  /** Whether the slot can trade with the one below it now: there is one, and no write changing the slots is out. */
   canMoveDown: boolean
   /** Trades the slot with the one above it. */
   moveUp: () => void
@@ -37,7 +37,7 @@ type UseSlotWritesResult = {
 
 /**
  * The writes a draft's slot fires: trading places with a neighbour, and sending its problem back to the pool.
- * None is available while any write to the selection is out, since a slot named then can hold another problem by
+ * None is available while a write changing the slots is out, since a slot named then can hold another problem by
  * the time the write lands. While its paper's move is out, a focus on the paper follows the problem moved, onto
  * the button moving it on the same way in whichever slot shows it, so pressing it again carries the problem
  * further.
@@ -95,23 +95,24 @@ export function useSlotWrites(
   const clearing = useSelectionWrite<SlotAddress>({
     apiFn: clearSlot,
     edit: afterClearing,
+    changesSlots: true,
     errorMessage: t('clearFailed'),
   })
 
   // A function which empties the slot, its problem going back to the pool
   const clear = () => clearing.mutate({ boardId: board.id, paperId: paper.id, index })
 
-  // Whether any write to the selection is still out
-  const { isWriting } = useSelectionWorkspace()
+  // Whether a write changing the slots is still out
+  const { isChangingSlots } = useSelectionWorkspace()
 
-  // Whether the slot can send its problem back: no write is out
-  const canClear = !isWriting
+  // Whether the slot can send its problem back: no write changing the slots is out
+  const canClear = !isChangingSlots
 
-  // Whether the slot can trade upwards: a slot sits above it, and no write is out
-  const canMoveUp = !isWriting && index > 0
+  // Whether the slot can trade upwards: a slot sits above it, and no write changing the slots is out
+  const canMoveUp = !isChangingSlots && index > 0
 
-  // Whether the slot can trade downwards: a slot sits below it, and no write is out
-  const canMoveDown = !isWriting && index < paper.slots.length - 1
+  // Whether the slot can trade downwards: a slot sits below it, and no write changing the slots is out
+  const canMoveDown = !isChangingSlots && index < paper.slots.length - 1
 
   // Whether the slot's own emptying is still out
   const isClearing = clearing.pendingVariables !== null

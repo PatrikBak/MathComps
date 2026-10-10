@@ -58,7 +58,7 @@ export function useProposalDeleteConfirmation(
 
   // A function which deletes the problem once the reader confirms
   const confirm = () => {
-    // The delete itself, unless the press is dropped behind another write still out
+    // The delete itself, unless the press is dropped behind another write changing the slots still out
     if (!remove.mutate(proposal.id)) return
 
     // And the caller told at once, the problem having left every view already

@@ -167,6 +167,50 @@ async function confirmFinalize(dialog: Locator): Promise<void> {
   await dialog.getByRole('button', { name: selectionCopy.finalize.confirm }).click()
 }
 
+/**
+ * Records every write to a problem and every read of the selection from now on, in the order they go out.
+ *
+ * @param page - The page.
+ *
+ * @returns A function which hands back what has gone out so far: each write as what it sent, each read as 'read'.
+ */
+function recordTraffic(page: Page): () => unknown[] {
+  // Every write to a problem and every read of the selection
+  const requests = recordWrites(
+    page,
+    (url) => isProposalWrite(url) || url.href === SELECTION_ENDPOINT
+  )
+
+  // A function which names each, a read by the word and a write by what it sent
+  return () =>
+    requests().map((request) => (request.method() === 'GET' ? 'read' : request.postDataJSON()))
+}
+
+/**
+ * Holds the backend's answer to every write to a problem from now on, until the test lets them through, so what
+ * the page does meanwhile is its own doing.
+ *
+ * @param page - The page.
+ *
+ * @returns A function which lets the held answers, and every later one, through.
+ */
+async function holdProposalWrites(page: Page): Promise<() => void> {
+  // The gate every answer waits at
+  const gate = createAnswerGate()
+
+  // Every write to a problem held at it, then answered by the fake behind
+  await page.route(isProposalWrite, async (route) => {
+    // Waiting until the gate is open
+    await gate.passed()
+
+    // Then answered
+    await route.fallback()
+  })
+
+  // Shut from here on, handing back the way to open it
+  return gate.hold()
+}
+
 test.describe('recommending a problem for a category', () => {
   test("switches one category at a time from a card's menu, which stays open, and keeps it once read again", async ({
     page,
@@ -224,63 +268,171 @@ test.describe('recommending a problem for a category', () => {
     await expect(actionsButton(cardOf(page, GEOMETRY), GEOMETRY)).toBeFocused()
   })
 
-  test('holds every row of the menu while a write is out, so a second switch waits rather than vanishing', async ({
+  test('takes a second switch made while the first is out, and reads the selection once, after both', async ({
     page,
   }) => {
     // A reviewer whose geometry problem is recommended for the advanced category alone
     await stubSelection(page, 'selection')
 
-    // Every write the page sends to a problem
-    const writes = recordWrites(page, isProposalWrite)
-
     // The pool
     await openPool(page)
 
-    // Every read held from here, so the first write stays out
-    const releaseReads = await holdReads(page)
+    // What goes out from here
+    const traffic = recordTraffic(page)
+
+    // The backend's answers held from here
+    const release = await holdProposalWrites(page)
 
     // The menu on the problem's card
     await actionsButton(cardOf(page, GEOMETRY), GEOMETRY).click()
 
-    // The elementary category, switched on
-    await page.getByRole('menuitemcheckbox', { name: categoryCopy.elementary }).click()
+    // The elementary category
+    const elementary = page.getByRole('menuitemcheckbox', { name: categoryCopy.elementary })
 
-    // The intermediate one
-    const intermediate = page.getByRole('menuitemcheckbox', { name: categoryCopy.intermediate })
+    // Switched on
+    await elementary.click()
 
-    // Unavailable while the elementary write is out
-    await expect(intermediate).toHaveAttribute('aria-disabled', 'true')
+    // Checked at once
+    await expect(elementary).toBeChecked()
 
-    // And the rows setting it aside and deleting it too
-    await expect(
-      page.getByRole('menuitem', { name: selectionCopy.actions.setAside, exact: true })
-    ).toHaveAttribute('aria-disabled', 'true')
+    // Deleting the problem still available while that write is out
     await expect(
       page.getByRole('menuitem', { name: messages.ui.actions.delete, exact: true })
-    ).toHaveAttribute('aria-disabled', 'true')
+    ).not.toHaveAttribute('aria-disabled', 'true')
 
-    // The read after the write, let through
-    releaseReads()
+    // The intermediate category
+    const intermediate = page.getByRole('menuitemcheckbox', { name: categoryCopy.intermediate })
 
-    // Available again once the write is over
-    await expect(intermediate).not.toHaveAttribute('aria-disabled', 'true')
-
-    // Switched on in its turn
+    // Switched on before the first write is answered
     await intermediate.click()
 
     // Checked beside the first
     await expect(intermediate).toBeChecked()
-    await expect(
-      page.getByRole('menuitemcheckbox', { name: categoryCopy.elementary })
-    ).toBeChecked()
+    await expect(elementary).toBeChecked()
 
-    // Both switches sent, one after the other
+    // The answer to the first read from here
+    const firstRead = page.waitForResponse(SELECTION_ENDPOINT)
+
+    // The answers let through
+    release()
+
+    // Once that read has landed
+    await firstRead
+
+    // Both switches sent one after the other before it, the selection read only after the second
+    expect(traffic()).toEqual([
+      { category: 'elementary', isRecommended: true },
+      { category: 'intermediate', isRecommended: true },
+      'read',
+    ])
+
+    // Both still checked
+    await expect(intermediate).toBeChecked()
+    await expect(elementary).toBeChecked()
+  })
+
+  test('reads the selection at once after a refused switch, though a second one waits behind it', async ({
+    page,
+  }) => {
+    // A reviewer with a problem on offer, recommended for the intermediate category alone
+    const answerSelectionWith = await stubSelection(page, 'selection')
+
+    // The pool
+    await openPool(page)
+
+    // What goes out from here
+    const traffic = recordTraffic(page)
+
+    // Another reviewer deleting the problem, which the page has not read
+    answerSelectionWith('openedDeleted')
+
+    // The backend's answers held from here
+    const release = await holdProposalWrites(page)
+
+    // The menu on the problem's card
+    await actionsButton(cardOf(page, OPENED), OPENED).click()
+
+    // The elementary category
+    const elementary = page.getByRole('menuitemcheckbox', { name: categoryCopy.elementary })
+
+    // Switched on
+    await elementary.click()
+
+    // Checked at once
+    await expect(elementary).toBeChecked()
+
+    // The advanced category
+    const advanced = page.getByRole('menuitemcheckbox', { name: categoryCopy.advanced })
+
+    // Switched on before the first write is answered
+    await advanced.click()
+
+    // Checked at once
+    await expect(advanced).toBeChecked()
+
+    // The answers let through, each refusing the switch it answers
+    release()
+
+    // The selection read after the first refusal, ahead of the second switch, and again after that one
     await expect
-      .poll(() => writes().map((write) => write.postDataJSON()))
+      .poll(traffic)
       .toEqual([
         { category: 'elementary', isRecommended: true },
-        { category: 'intermediate', isRecommended: true },
+        'read',
+        { category: 'advanced', isRecommended: true },
+        'read',
       ])
+  })
+
+  test('lets the read after a refused write land, though a switch is made while it is out', async ({
+    page,
+  }) => {
+    // A reviewer whose first draft is full and ready to be finalized
+    const answerSelectionWith = await stubSelection(page, 'fullDraft')
+
+    // The pool
+    await openPool(page)
+
+    // Another reviewer finalizing it, which the page has not read yet
+    answerSelectionWith('fullDraftFinalized')
+
+    // Every read held from here, so the read after the refusal stays out
+    const releaseReads = await holdReads(page)
+
+    // The backend's answers to writes to a problem held for good, so a switch never gets as far as its own read
+    await holdProposalWrites(page)
+
+    // The read after the refusal, once it goes out
+    const refusalRead = page.waitForRequest(SELECTION_ENDPOINT)
+
+    // The board's elementary slot, hovered so its actions show
+    await slotOf(page, 'E1').hover()
+
+    // Its problem sent back to the pool all the same, which the backend refuses
+    await slotOf(page, 'E1')
+      .getByRole('button', { name: selectionCopy.board.backToPool, exact: true })
+      .click()
+
+    // Once that read is out
+    await refusalRead
+
+    // The menu on the geometry problem's card
+    await actionsButton(cardOf(page, GEOMETRY), GEOMETRY).click()
+
+    // Its elementary category
+    const elementary = page.getByRole('menuitemcheckbox', { name: categoryCopy.elementary })
+
+    // Switched on meanwhile
+    await elementary.click()
+
+    // Checked at once
+    await expect(elementary).toBeChecked()
+
+    // The read after the refusal, let through
+    releaseReads()
+
+    // Landed, the board shown finalized
+    await expect(statusLine(page, FULL_DRAFT_FINALIZED)).toBeVisible()
   })
 })
 

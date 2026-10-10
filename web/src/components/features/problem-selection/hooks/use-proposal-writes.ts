@@ -20,6 +20,7 @@ export function useSetAside(): SelectionWrite<SetAsideWrite> {
   return useSelectionWrite<SetAsideWrite>({
     apiFn: setAside,
     edit: afterSetAside,
+    changesSlots: false,
     errorMessage: t('setAsideFailed'),
   })
 }
@@ -37,6 +38,7 @@ export function useRecommend(): SelectionWrite<RecommendationWrite> {
   return useSelectionWrite<RecommendationWrite>({
     apiFn: setRecommended,
     edit: afterRecommendation,
+    changesSlots: false,
     errorMessage: t('recommendFailed'),
   })
 }
@@ -54,6 +56,7 @@ export function useDeleteProposal(): SelectionWrite<string> {
   return useSelectionWrite<string>({
     apiFn: deleteProposal,
     edit: afterDeletion,
+    changesSlots: true,
     errorMessage: t('deleteFailed'),
   })
 }
