@@ -1,5 +1,6 @@
 'use client'
 
+import { useHotkeys } from '@mantine/hooks'
 import { ArrowLeft } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -9,6 +10,7 @@ import { DefenseChatTrigger } from '@/components/features/defense/components/Def
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { type TabItem, Tabs } from '@/components/shared/components/Tabs'
 import { cn } from '@/components/shared/utils/css-utils'
+import { countOpenDialogs, isInArrowKeyWidget } from '@/components/shared/utils/dom-utils'
 import { useAddressSync } from '@/hooks/use-address-sync'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 import type { Locale } from '@/i18n/i18n'
@@ -33,6 +35,9 @@ import { ProposalStatement } from './ProposalStatement'
 import { ProposalSurfaces } from './ProposalSurfaces'
 import { PoolLink } from './SelectionLinks'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
+
+/** The key going back to the pool from a problem. */
+const BACK_TO_POOL_KEY = 'ArrowLeft'
 
 /**
  * Props for the {@link ProposalDetail} component.
@@ -234,14 +239,44 @@ function ProposalDetailBody({ proposal, poolLanguage, onDeleted }: ProposalDetai
 }
 
 /**
- * The way back to the pool.
+ * The way back to the pool, by the link or by {@link BACK_TO_POOL_KEY}. The key goes back only while it is the
+ * page's: never once something on the page has acted on it, while a dialog stands over the page, or from inside a
+ * widget the arrow keys already move within. Typing in a field keeps it too, since the hotkeys never fire there.
  */
 function BackToPool() {
   // Problem page copy
   const t = useTranslations('problemSelection.detail')
 
+  // A function which goes back to the pool
+  const { closeProposal } = useSelectionWorkspace()
+
+  // The key going back to the pool
+  useHotkeys([
+    [
+      BACK_TO_POOL_KEY,
+      (event) => {
+        // A key something on the page already acted on, a dialog over the page, or a widget the arrows move
+        // within keeps the key
+        if (event.defaultPrevented || countOpenDialogs() > 0 || isInArrowKeyWidget(event.target)) {
+          return
+        }
+
+        // The key claimed for the page
+        event.preventDefault()
+
+        // Back to the pool
+        closeProposal()
+      },
+      // Claimed only once it is the page's, so a widget that keeps the key still gets it untouched
+      { preventDefault: false },
+    ],
+  ])
+
   return (
-    <PoolLink className="inline-flex items-center gap-1.5 text-sm">
+    <PoolLink
+      aria-keyshortcuts={BACK_TO_POOL_KEY}
+      className="inline-flex items-center gap-1.5 text-sm"
+    >
       <ArrowLeft size={15} />
       {t('backToPool')}
     </PoolLink>

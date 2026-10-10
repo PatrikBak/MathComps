@@ -1,7 +1,9 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { OPEN_PROPOSAL_PARAM } from '@/components/features/problem-selection/model/selection-routes'
+
 import { BACKEND_ORIGIN, returnToTab } from './support/backend-routes'
-import { actionsCopy, areaCopy, SELECTION_PATH } from './support/competitions'
+import { actionsCopy, areaCopy, editorCopy, SELECTION_PATH } from './support/competitions'
 import {
   BILINGUAL,
   cardOf,
@@ -14,9 +16,11 @@ import {
   REVISION,
   SELECTION_ENDPOINT,
   selectionCopy,
+  selectionText,
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
   SLOVAK_STATEMENT,
+  stubNamedReader,
   stubSelection,
   UNWRITTEN,
   USED,
@@ -37,6 +41,25 @@ const LINK_SPOT = 200
 
 /** An id the selection holds no problem under, as a link to one taken out of it carries. */
 const UNHELD_ID = '00000000-0000-4000-8000-999999999999'
+
+/** A comment a reviewer is partway through writing. */
+const COMMENT_DRAFT = 'Fine for the intermediate paper'
+
+/**
+ * The problem the address names this instant, read off the page itself, since a step the page pushes onto
+ * history reaches Playwright's own copy of the address only later.
+ *
+ * @param page - The page.
+ *
+ * @returns The problem's id, or null while the address names none.
+ */
+function openProblemId(page: Page): Promise<string | null> {
+  // Read off the page's own address
+  return page.evaluate(
+    (param) => new URLSearchParams(window.location.search).get(param),
+    OPEN_PROPOSAL_PARAM
+  )
+}
 
 /**
  * How far down the window is scrolled.
@@ -360,6 +383,110 @@ test.describe("the selection's address and history", () => {
 
     // Focus on the problem's name again, a step in history moving focus too
     await expect(headingOf(page, OPENED)).toBeFocused()
+  })
+
+  test('goes back to the pool by the left arrow, unless the comment editor, the tabs or a dialog has the key', async ({
+    page,
+  }) => {
+    // A reviewer with a username, which the discussion asks for before it takes a comment
+    await stubNamedReader(page)
+
+    // Whose selection holds a pool of problems
+    await stubSelection(page, 'selection')
+
+    // A problem's discussion
+    await page.goto(`${OPENED_ADDRESS}&tab=comments`)
+
+    // The discussion's editor
+    const editor = page.getByRole('tabpanel').locator('textarea')
+
+    // A comment being written in it
+    await editor.fill(COMMENT_DRAFT, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The left arrow, moving the caret back a letter
+    await editor.press('ArrowLeft')
+
+    // The problem still open
+    expect(await openProblemId(page)).toBe(OPENED.id)
+
+    // The editor's button opening its emoji picker
+    const emojiButton = page
+      .getByRole('tabpanel')
+      .getByRole('button', { name: editorCopy.emojiPicker.title })
+
+    // The picker, opened
+    await emojiButton.click()
+
+    // One of its emoji
+    const emoji = page.locator('button.epr-emoji').first()
+
+    // The left arrow on it, which the picker takes for its own
+    await emoji.press('ArrowLeft', { timeout: SETTLE_TIMEOUT_MS })
+
+    // The problem still open
+    expect(await openProblemId(page)).toBe(OPENED.id)
+
+    // The picker, put away by its button
+    await emojiButton.click()
+
+    // Gone
+    await expect(emoji).toHaveCount(0)
+
+    // The left arrow on the discussion's tab
+    await page.getByRole('tab', { name: selectionCopy.detail.commentsTab }).press('ArrowLeft')
+
+    // Moving onto the conversations
+    await expect(
+      page
+        .getByRole('tablist', { name: selectionCopy.detail.tabsLabel })
+        .getByRole('tab', { selected: true })
+    ).toContainText(selectionCopy.detail.conversationsTab)
+
+    // The problem still open
+    expect(await openProblemId(page)).toBe(OPENED.id)
+
+    // The problem's menu, opened
+    await page
+      .getByRole('button', { name: selectionText('actions.moreFor', { number: OPENED.number }) })
+      .click()
+
+    // Its delete, picked
+    await page.getByRole('menuitem', { name: actionsCopy.delete, exact: true }).click()
+
+    // The question asked before the problem is deleted
+    const question = page.getByRole('dialog', {
+      name: selectionText('actions.deleteTitle', { number: OPENED.number }),
+    })
+
+    // On screen, holding the focus
+    await expect(question).toBeFocused()
+
+    // The left arrow, while the question waits on an answer
+    await page.keyboard.press('ArrowLeft')
+
+    // The problem still open
+    expect(await openProblemId(page)).toBe(OPENED.id)
+
+    // And the question with it
+    await expect(question).toHaveCount(1)
+
+    // The question, put away
+    await question.getByRole('button', { name: actionsCopy.cancel }).click()
+
+    // Gone
+    await expect(question).toHaveCount(0)
+
+    // Focus on the problem's name, since closing the question now and then hands it to the menu instead
+    await headingOf(page, OPENED).focus()
+
+    // The left arrow once more, with nothing left to keep it
+    await page.keyboard.press('ArrowLeft')
+
+    // Under the pool's own address
+    await expect(page).toHaveURL(SELECTION_PATH)
+
+    // The pool again
+    await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT)
   })
 
   test('keeps a problem where it was scrolled to when the selection is read again', async ({

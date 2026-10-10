@@ -105,3 +105,44 @@ export function dataAttribute<TName extends `data-${string}`>(name: TName): Data
   // The ways to stamp the attribute and to find by it
   return { stamp, selectorFor, anySelector }
 }
+
+/** The ARIA roles of the widgets whose own items the arrow keys move between. */
+const ARROW_KEY_WIDGET_ROLES = [
+  'combobox',
+  'grid',
+  'listbox',
+  'menu',
+  'menubar',
+  'radiogroup',
+  'slider',
+  'tablist',
+  'toolbar',
+  'tree',
+  'treegrid',
+]
+
+/** The selector matching any widget the arrow keys move within. */
+const ARROW_KEY_WIDGET_SELECTOR = ARROW_KEY_WIDGET_ROLES.map((role) => `[role="${role}"]`).join()
+
+/**
+ * How many dialogs currently stand over the page, counted off the document itself.
+ *
+ * @returns The number of dialogs on screen.
+ */
+export function countOpenDialogs(): number {
+  // Every dialog on screen, which is what each one announces itself as
+  return document.querySelectorAll('[role="dialog"]').length
+}
+
+/**
+ * Whether a target sits in a widget that moves between its own items by the arrow keys, such as a tab list, a
+ * radio group or an open menu.
+ *
+ * @param target - Where an event landed.
+ *
+ * @returns Whether the target sits in such a widget.
+ */
+export function isInArrowKeyWidget(target: EventTarget | null): boolean {
+  // An element inside one of the widgets, or the widget itself
+  return target instanceof Element && target.closest(ARROW_KEY_WIDGET_SELECTOR) !== null
+}
