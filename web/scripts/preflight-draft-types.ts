@@ -3,6 +3,8 @@
  * run's issues.
  */
 
+import type { HostedCompetitionCategory } from '../src/components/features/hosted-competitions/model/hosted-competition-types'
+import type { ProposalArea } from '../src/components/features/problem-selection/model/selection-types'
 import type { Locale } from '../src/i18n/i18n'
 
 /** The parts of a problem body an issue can sit in: the two halves, or one of the author's hints. */
@@ -52,6 +54,18 @@ export type ManifestText = {
   hints: string[]
 }
 
+/** What a problem of the pool is filed under, from the `proposal:` block of its `pN.yaml`. */
+export type ManifestProposal = {
+  /** The number the reviewers quote it by, unique across the pool and never changed. */
+  number: number
+  /** Working name, never shown to a student. */
+  title: string
+  /** The area it is filed under. */
+  area: ProposalArea
+  /** The categories it is recommended for, in any order. */
+  recommended: HostedCompetitionCategory[]
+}
+
 /** One problem's normalized content. */
 export type ManifestProblem = {
   /** 1-based position within the round, taken from the `pN.yaml` / `pN.<lang>.md` filenames. */
@@ -74,6 +88,11 @@ export type ManifestProblem = {
    * existing tags untouched) rather than defaulting to `[]` (clear) — omit and clear stay distinct.
    */
   tags: string[] | null
+  /**
+   * What the problem is filed under in the pool, or `null` when the `pN.yaml` carries no `proposal:` block. An absent
+   * block leaves a stored proposal untouched.
+   */
+  proposal: ManifestProposal | null
   /** Language variants — the original first, then translations in supported-locale order. */
   texts: ManifestText[]
   /** Basenames of every image referenced across this problem's texts (flat, under `images/`). */

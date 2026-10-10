@@ -1,6 +1,7 @@
 using MathComps.Cli.BulkImport.Commands;
 using MathComps.Cli.BulkImport.Manifest;
 using MathComps.Cli.BulkImport.Preflight;
+using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.BulkImport;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Shared.Extensions;
@@ -85,20 +86,11 @@ public class DraftValidationPipeline(
 
             // Carry each problem's full content — the preview reproduces the bodies the import would store, so it
             // needs the markdown and images, not just the shape.
-            var problems = manifest.Problems
-                .Select(problem => new DraftProblemContent(
-                    problem.Order,
-                    problem.HasSidecar,
-                    problem.Authors,
-                    problem.SolutionLink,
-                    problem.Tags,
-                    [.. problem.Texts.Select(text => new DraftTextContent(
-                        text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown, text.Hints))],
-                    problem.Images))
-                .ToList();
+            var problems = manifest.Problems.Select(problem => problem.Content).ToList();
 
             // Run the read-only preview.
-            var preview = await resolution.PreviewAsync(target, problems, Path.GetFullPath(folder));
+            var preview = await resolution.PreviewAsync(
+                target, manifest.Meta.VisibleSinceUtc, problems, Path.GetFullPath(folder));
 
             // Keep only the per-half resolutions worth flagging.
             var previewIssues = preview.TextResolutions
@@ -148,6 +140,17 @@ public class DraftValidationPipeline(
                     + "back text nobody argued about. Pass --allow-restating if the rewrite is intended.",
                     allowRestating ? VerdictSeverity.Warning : VerdictSeverity.Error));
             }
+
+            // A draft for the proposals naming any other embargo, or none, would open the pool's round or move its lock.
+            if (preview.MovesProposalsEmbargo)
+                previewIssues.Add(new VerdictError(
+                    ManifestMeta.FileName, Half: null, Line: null, Col: null, "proposals-embargo",
+                    $"a draft for {HostedTaxonomy.ProposalsPath} must carry visibleSince: "
+                    + $"{HostedTaxonomy.ProposalsVisibleSince.UtcDateTime:s}Z, the instant holding the pool back",
+                    VerdictSeverity.Error));
+
+            // One blocking issue per reason the pool refuses a draft problem.
+            previewIssues.AddRange(preview.ProposalConflicts.Select(RefusalFor));
 
             // Hand back the preview and the issues it surfaced.
             return (preview, previewIssues);
@@ -204,6 +207,53 @@ public class DraftValidationPipeline(
             // Unhandled cases.
             _ => throw new ArgumentOutOfRangeException(nameof(resolution), resolution.Action, null)
         };
+    }
+
+    /// <summary>
+    /// Turns one reason the pool refuses a draft problem into the issue blocking the import.
+    /// </summary>
+    /// <param name="conflict">What the pool refuses about the problem.</param>
+    /// <returns>The blocking issue.</returns>
+    private static VerdictError RefusalFor(ProposalConflict conflict)
+    {
+        // The problem the refusal is about.
+        var slug = conflict.Slug;
+
+        // The rule and the message naming what is refused and how to get past it.
+        var (rule, message) = conflict switch
+        {
+            ProposalOutsidePool => ("proposal-outside-pool",
+                $"problem '{slug}' carries a proposal block, but only a draft for {HostedTaxonomy.ProposalsPath} "
+                + "files problems in the pool — drop the block"),
+
+            PoolProblemWithoutProposal => ("missing-proposal",
+                $"problem '{slug}' would enter the pool with no proposal block read from its pN.yaml, so no "
+                + "reviewer would ever see it — add the block, or fix the error that kept the pN.yaml from being "
+                + "read"),
+
+            ProposalNumberTaken taken => ("proposal-number-taken",
+                $"problem '{slug}' names proposal #{taken.Number}, which problem '{taken.HolderSlug}' already holds "
+                + "— a proposal keeps its number for good, in a round or deleted"),
+
+            ProposalDeleted deleted => ("proposal-deleted",
+                $"problem '{slug}' is proposal #{deleted.Number}, which the reviewers deleted — drop it from the "
+                + "draft, or clear its deleted_at in the database to bring it back"),
+
+            PlaceHoldsAnotherProposal another => ("proposal-place-taken",
+                $"problem '{slug}' is proposal #{another.StoredNumber}, but the draft names #{another.DraftNumber} "
+                + "for it — a pool problem keeps the place it first took"),
+
+            PlaceHoldsNoProposal => ("proposal-place-unfiled",
+                $"problem '{slug}' sits in the pool's round with no proposal filing it, so the draft can't be "
+                + "matched to it — file it in the database first, or give the problem another place"),
+
+            // Unhandled cases.
+            _ => throw new ArgumentOutOfRangeException(nameof(conflict), conflict, "Unknown proposal conflict.")
+        };
+
+        // A blocking issue, attributed to the folder like everything else the database surfaces.
+        return new VerdictError(
+            ManifestMeta.FileName, Half: null, Line: null, Col: null, rule, message, VerdictSeverity.Error);
     }
 }
 

@@ -34,11 +34,11 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
             var proposal = await SelectionRules.ReadProposalAsync(dbContext, proposalId, cancellationToken);
 
             // Every category recommended after the switch, in the order the categories run
-            proposal.Recommended =
-            [
-                .. Enum.GetValues<HostedCompetitionCategory>().Where(candidate =>
-                    candidate == category ? isRecommended : proposal.Recommended.Contains(candidate)),
-            ];
+            proposal.Recommended = SelectionRules.InCategoryOrder(isRecommended
+                // The stored categories with this one added
+                ? proposal.Recommended.Append(category)
+                // The stored categories without this one
+                : proposal.Recommended.Where(candidate => candidate != category));
         }, cancellationToken);
 
     /// <inheritdoc/>

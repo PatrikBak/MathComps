@@ -4,6 +4,7 @@
  * malformed field. Pure — no filesystem access.
  */
 
+import { isCalendarDate, isInstantWithOffset } from '../src/components/shared/utils/date-utils'
 import type { Locale } from '../src/i18n/i18n'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '../src/i18n/i18n'
 import { isRecord } from './preflight-draft-parse'
@@ -138,14 +139,8 @@ function narrowSeason(value: unknown, errors: VerdictError[]): Season {
  * @returns The date string, or `''` when missing or malformed.
  */
 function narrowDate(value: unknown, errors: VerdictError[]): string {
-  // A `YYYY-MM-DD` string that round-trips to the same calendar date is valid
-  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    // Parse as UTC midnight
-    const parsed = new Date(`${value}T00:00:00Z`)
-
-    // Accept only when it round-trips — rejects rolled-over dates like 2026-13-01
-    if (!Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(value)) return value
-  }
+  // A real calendar day is valid
+  if (typeof value === 'string' && isCalendarDate(value)) return value
 
   // Missing, wrong shape, or not a real date
   errors.push(metaIssue('date is required and must be a valid YYYY-MM-DD date'))
@@ -153,8 +148,8 @@ function narrowDate(value: unknown, errors: VerdictError[]): string {
 }
 
 /**
- * Reads the optional `visibleSince` field, recording an error and returning `null` when it is present but not an
- * ISO-8601 instant carrying an explicit offset. An offset is demanded rather than assumed because the value
+ * Reads the optional `visibleSince` field, recording an error and returning `null` when it is present but not a
+ * real instant carrying an explicit offset ({@link isInstantWithOffset}). An offset is demanded rather than assumed because the value
  * embargoes a round: a bare wall-clock time would open it at whatever the importing machine happens to think the
  * zone is, which is the one thing an embargo must not depend on.
  *
@@ -167,26 +162,13 @@ function narrowVisibleSince(value: unknown, errors: VerdictError[]): string | nu
   // Absent is the ordinary case: the round is open from the moment it lands
   if (value === undefined || value === null) return null
 
-  // An instant with an explicit `Z` or `±HH:MM` offset, down to optional fractional seconds
-  const shape = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/
-
-  // A well-shaped string is the only thing worth reading a real instant out of
-  if (typeof value === 'string' && shape.test(value)) {
-    // The instant itself, which rejects an impossible hour or month
-    const instant = new Date(value)
-
-    // The calendar day it names, parsed on its own: a real day round-trips, while Feb 30th silently rolls over
-    const [calendarDay] = value.split('T')
-    const day = new Date(`${calendarDay}T00:00:00Z`)
-
-    // Both have to hold: a parsable instant naming a day that exists
-    if (!Number.isNaN(instant.getTime()) && day.toISOString().startsWith(calendarDay)) return value
-  }
+  // An instant carrying its own offset is valid
+  if (typeof value === 'string' && isInstantWithOffset(value)) return value
 
   // Present but unusable
   errors.push(
     metaIssue(
-      'visibleSince must be an ISO-8601 instant with an explicit offset (e.g. 2026-09-14T18:00:00Z), or be omitted'
+      'visibleSince must be a real ISO-8601 instant with an explicit offset (e.g. 2026-09-14T18:00:00Z), or be omitted'
     )
   )
   return null

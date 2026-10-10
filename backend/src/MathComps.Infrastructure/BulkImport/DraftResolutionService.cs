@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Selection;
 
 namespace MathComps.Infrastructure.BulkImport;
 
@@ -14,7 +15,8 @@ namespace MathComps.Infrastructure.BulkImport;
 /// probe; for the problem halves it loads the existing texts' <c>(document type, language, is-original, markdown)</c>
 /// for the slugs that already exist, reproduces the markdown the import would write (the same image-ref rewrite),
 /// then classifies each half in memory — including spotting a re-import that changes nothing. It also loads the
-/// round's full set of problem orders to check that the import would leave a round outside the proposals contiguous.
+/// round's full set of problem orders to check that the import would leave a round outside the proposals contiguous,
+/// and for a round of the proposals reads the proposals already filed at the draft's places and under its numbers.
 /// </summary>
 /// <param name="dbContextFactory">Factory for creating read-only database contexts.</param>
 /// <param name="metadata">The registry, source of the structural sort orders the preview reconciles against.</param>
@@ -24,7 +26,10 @@ public class DraftResolutionService(
 {
     /// <inheritdoc/>
     public async Task<DraftDbPreview> PreviewAsync(
-        DraftTarget target, IReadOnlyList<DraftProblemContent> problems, string draftFolder)
+        DraftTarget target,
+        DateTimeOffset? visibleSince,
+        IReadOnlyList<DraftProblemContent> problems,
+        string draftFolder)
     {
         // Read-only context; nothing here writes.
         await using var context = await dbContextFactory.CreateDbContextAsync();
@@ -93,8 +98,11 @@ public class DraftResolutionService(
         // The highest of them, zero for an empty round.
         var highestOrder = postImportOrders.Count == 0 ? 0 : postImportOrders.Max();
 
+        // Whether the draft lands in the pool, a round of the proposals.
+        var isProposalsRound = SelectionRules.IsInPool(target.CompetitionPath);
+
         // The gaps in 1..N the import would leave, which only a round outside the proposals reports.
-        var missingProblemOrders = TaxonomySlugs.IsAtOrUnder(target.CompetitionPath, HostedTaxonomy.ProposalsPath)
+        var missingProblemOrders = isProposalsRound
             // None for a round of the proposals, whose numbering may run with gaps.
             ? []
             // Anywhere else the numbers are what a reader quotes, so a gap is a problem missing.
@@ -111,12 +119,74 @@ public class DraftResolutionService(
         // How the round's post-import count would sit against its group's promise, null whenever nothing is amiss.
         var countDisagreement = await PreviewHostedCountAsync(context, target, postImportOrders.Count);
 
-        // Hand back the create-vs-reuse picture, the per-text resolutions for colliding slugs, the round's gaps,
-        // the sort-order reconciliation apply would perform, the rewrites landing on defended problems, and the
-        // promise the round would break.
+        // Whether a draft for the proposals names any embargo but the pool's instant, none included.
+        var movesProposalsEmbargo = isProposalsRound && visibleSince != HostedTaxonomy.ProposalsVisibleSince;
+
+        // Every reason a draft problem can't be filed in the pool the way the draft says.
+        var proposalConflicts = await PreviewProposalConflictsAsync(
+            context, isProposalsRound, problems, slugByOrder, candidateSlugs, existingTextsBySlug.Keys.ToHashSet());
+
+        // Hand back everything the preview found.
         return new DraftDbPreview(
             resolutions, textResolutions, missingProblemOrders, sortOrderChanges, orphans, defendedRestatements,
-            countDisagreement);
+            countDisagreement, movesProposalsEmbargo, proposalConflicts);
+    }
+
+    /// <summary>
+    /// Finds every reason a draft problem can't be filed in the pool the way the draft says. Outside the proposals that
+    /// is any problem carrying a <c>proposal:</c> block; inside them, see <see cref="ClassifyProposal"/>.
+    /// </summary>
+    /// <param name="context">The read-only context.</param>
+    /// <param name="isProposalsRound">Whether the draft lands in a round of the proposals.</param>
+    /// <param name="problems">The draft's problems.</param>
+    /// <param name="slugByOrder">Each draft problem's would-be slug, keyed by its order.</param>
+    /// <param name="draftSlugs">Every draft problem's would-be slug.</param>
+    /// <param name="takenSlugs">The would-be slugs a problem already holds.</param>
+    /// <returns>One conflict per thing refused, empty when the draft files cleanly.</returns>
+    private static async Task<ImmutableArray<ProposalConflict>> PreviewProposalConflictsAsync(
+        MathCompsDbContext context,
+        bool isProposalsRound,
+        IReadOnlyList<DraftProblemContent> problems,
+        IReadOnlyDictionary<int, string> slugByOrder,
+        IReadOnlyList<string> draftSlugs,
+        IReadOnlySet<string> takenSlugs)
+    {
+        // Outside the proposals nothing is filed, so a block there has nowhere to go.
+        if (!isProposalsRound)
+            return
+            [
+                .. problems
+                    .Where(problem => problem.Proposal is not null)
+                    .Select(problem => new ProposalOutsidePool(slugByOrder[problem.Order]))
+            ];
+
+        // The proposals filing the problems already at the draft's places, keyed by the place's slug.
+        var storedBySlug = await context.Proposals.AsNoTracking()
+            .Where(proposal => draftSlugs.Contains(proposal.Problem.Slug))
+            .Select(proposal => new StoredProposal(proposal.Problem.Slug, proposal.Number, proposal.DeletedAt != null))
+            .ToDictionaryAsync(stored => stored.Slug);
+
+        // The proposals holding the numbers the draft's blocks name, wherever their problems sit, keyed by number.
+        var numbers = problems.Select(problem => problem.Proposal?.Number).OfType<int>().ToList();
+        var holderByNumber = await context.Proposals.AsNoTracking()
+            .Where(proposal => numbers.Contains(proposal.Number))
+            .Select(proposal => new StoredProposal(proposal.Problem.Slug, proposal.Number, proposal.DeletedAt != null))
+            .ToDictionaryAsync(stored => stored.Number);
+
+        // Classify each draft problem against what its place and its number already hold.
+        return
+        [
+            .. problems.SelectMany(problem =>
+            {
+                // The place the problem lands on.
+                var slug = slugByOrder[problem.Order];
+
+                // Its conflicts, if any.
+                return ClassifyProposal(
+                    slug, problem.Proposal, takenSlugs.Contains(slug), storedBySlug.GetValueOrDefault(slug),
+                    holderByNumber);
+            })
+        ];
     }
 
     /// <summary>
@@ -235,6 +305,47 @@ public class DraftResolutionService(
 
         // The reconciliation preview.
         return (changes.ToImmutable(), orphans.ToImmutable());
+    }
+
+    /// <summary>
+    /// Decides what keeps one problem of a draft for the proposals out of the pool. A problem new to the pool enters
+    /// it only through its block. A taken place keeps the problem already there, which has to be a live proposal under
+    /// the block's number. And no other problem's proposal may hold the block's number.
+    /// </summary>
+    /// <param name="slug">The would-be problem slug, naming its place.</param>
+    /// <param name="proposal">The draft's block, or null when it carries none.</param>
+    /// <param name="isPlaceTaken">Whether a problem already holds the place.</param>
+    /// <param name="stored">The proposal filing the problem at the place, or null when none does.</param>
+    /// <param name="holderByNumber">The proposals holding the numbers the draft names, keyed by number.</param>
+    /// <returns>The problem's conflicts, empty when it files cleanly.</returns>
+    private static IEnumerable<ProposalConflict> ClassifyProposal(
+        string slug,
+        DraftProposal? proposal,
+        bool isPlaceTaken,
+        StoredProposal? stored,
+        IReadOnlyDictionary<int, StoredProposal> holderByNumber)
+    {
+        // A new problem on a free place, with no block to file it in the pool.
+        if (!isPlaceTaken && proposal is null)
+            yield return new PoolProblemWithoutProposal(slug);
+
+        // A taken place whose problem no proposal files.
+        if (isPlaceTaken && stored is null)
+            yield return new PlaceHoldsNoProposal(slug);
+
+        // A taken place whose proposal the reviewers deleted.
+        if (stored is { IsDeleted: true })
+            yield return new ProposalDeleted(slug, stored.Number);
+
+        // A taken place whose live proposal goes by another number than the block's.
+        if (stored is { IsDeleted: false } && proposal is not null && proposal.Number != stored.Number)
+            yield return new PlaceHoldsAnotherProposal(slug, stored.Number, proposal.Number);
+
+        // Another problem's proposal holding the block's number.
+        if (proposal is not null
+            && holderByNumber.TryGetValue(proposal.Number, out var holder)
+            && holder.Slug != slug)
+            yield return new ProposalNumberTaken(slug, proposal.Number, holder.Slug);
     }
 
     /// <summary>
@@ -403,6 +514,14 @@ public class DraftResolutionService(
     /// </returns>
     private static ResolutionAction ToAction(bool exists) =>
         exists ? ResolutionAction.Reuse : ResolutionAction.Create;
+
+    /// <summary>
+    /// A stored proposal reduced to what the pool's checks read.
+    /// </summary>
+    /// <param name="Slug">The slug of the problem it files, naming that problem's place.</param>
+    /// <param name="Number"><inheritdoc cref="Proposal.Number" path="/summary"/></param>
+    /// <param name="IsDeleted">Whether the reviewers deleted it.</param>
+    private record StoredProposal(string Slug, int Number, bool IsDeleted);
 
     /// <summary>
     /// An existing problem reduced to the slug and the texts the preview classifies against.

@@ -14,7 +14,8 @@ public interface IDraftApplyService
     /// Writes the draft. Upserts the taxonomy the competition path addresses — every competition down the chain, the
     /// season, and the round — creating what's missing, reusing what exists, sourcing structural fields from the
     /// registry; uploads each problem's images and rewrites their markdown refs; then inserts net-new
-    /// <see cref="Problem"/> rows and overwrites existing <see cref="ProblemText"/> rows in place.
+    /// <see cref="Problem"/> rows and overwrites existing <see cref="ProblemText"/> rows in place, filing a problem the
+    /// draft describes as a proposal in the pool through its <see cref="Proposal"/> row.
     /// Partial failure is tolerated: orphaned uploads and half-written problems are reconciled by a re-run, so
     /// there's no wrapping transaction.
     /// </summary>

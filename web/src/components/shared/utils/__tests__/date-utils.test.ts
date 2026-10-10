@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { coversWholeLocalDays, formatMonthAndYear } from '../date-utils'
+import {
+  coversWholeLocalDays,
+  formatMonthAndYear,
+  isCalendarDate,
+  isInstantWithOffset,
+} from '../date-utils'
 
 describe('formatMonthAndYear', () => {
   it('names the month in the language it is read in', () => {
@@ -52,5 +57,46 @@ describe('coversWholeLocalDays', () => {
 
     // Which is a different span, and one a bare date pair would say a day too many of
     expect(coversWholeLocalDays(opensAt, closesAtMidnight, 'Europe/Bratislava')).toBe(false)
+  })
+})
+
+describe('isCalendarDate', () => {
+  it('accepts a leap day', () => {
+    // 2024 is a leap year, so February runs to the 29th
+    expect(isCalendarDate('2024-02-29')).toBe(true)
+  })
+
+  it.each(['2026-02-30', '2024-13-01', '2026-9-14', 'not-a-date'])('refuses %j', (value) => {
+    // A day that rolls over, a month that doesn't exist, a month missing its leading zero, no date at all
+    expect(isCalendarDate(value)).toBe(false)
+  })
+})
+
+describe('isInstantWithOffset', () => {
+  it.each([
+    '2026-09-14T18:00:00Z',
+    '2026-09-14T18:00:00.123+02:00',
+    '2026-09-14T18:00:00-14:00',
+    '9999-01-01T00:00:00Z',
+  ])('accepts %j', (value) => {
+    // Zulu, fractional seconds under an offset, the widest offset, the last year
+    expect(isInstantWithOffset(value)).toBe(true)
+  })
+
+  it.each([
+    '2026-09-14T18:00:00',
+    '2026-09-14',
+    '2026-09-14 18:00:00Z',
+    '2026-02-30T18:00:00Z',
+    '2026-09-14T25:00:00Z',
+    '2026-09-14T24:00:00Z',
+    '2026-09-14T18:00:00+15:00',
+    '9999-12-31T23:00:00-01:00',
+    '0000-01-01T00:00:00Z',
+    '',
+  ])('refuses %j', (value) => {
+    // No offset, no time, a space for the T, a day that rolls over, an hour past the day, the midnight that ends a
+    // day, an offset wider than any zone's, years past either end once read in UTC, and nothing
+    expect(isInstantWithOffset(value)).toBe(false)
   })
 })

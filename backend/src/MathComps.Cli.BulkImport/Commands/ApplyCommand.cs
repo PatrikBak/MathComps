@@ -9,7 +9,7 @@ namespace MathComps.Cli.BulkImport.Commands;
 /// <summary>
 /// The import command for the bulk-import pipeline: it runs the same <see cref="DraftValidationPipeline"/> the
 /// dry-run does, and only when that comes back clean does it perform the real changes — upload images, rewrite
-/// refs, and upsert the taxonomy and <c>Problem</c> / <c>ProblemText</c> / author rows. Running the validation
+/// refs, and upsert the taxonomy, the problems and everything the draft attaches to them. Running the validation
 /// first is what makes a green <c>validate</c> all but guarantee a green <c>apply</c>: it's the very same check.
 /// </summary>
 /// <param name="pipeline">The shared read-only validation pipeline.</param>
@@ -86,33 +86,14 @@ public class ApplyCommand(DraftValidationPipeline pipeline, IDraftApplyService a
         // The folder date is a validated YYYY-MM-DD; parse it for the round.
         var date = DateOnly.ParseExact(meta.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-        // The embargo instant, when the folder names one; absent means the round opens as soon as it lands.
-        // Read as UTC whatever offset the folder wrote it in, for the reason HostedGroupService.DeclareAsync
-        // spells out.
-        var visibleSince = meta.VisibleSince is null
-            ? (DateTimeOffset?)null
-            : DateTimeOffset
-                .Parse(meta.VisibleSince, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind)
-                .ToUniversalTime();
-
-        // Each problem's full content — authors, link, per-language bodies, images.
-        var problems = outcome.Manifest.Problems
-            .Select(problem => new DraftProblemContent(
-                problem.Order,
-                problem.HasSidecar,
-                problem.Authors,
-                problem.SolutionLink,
-                problem.Tags,
-                [.. problem.Texts.Select(text => new DraftTextContent(
-                    text.Language, text.Original, text.StatementMarkdown, text.SolutionMarkdown, text.Hints))],
-                problem.Images))
-            .ToList();
+        // Each problem's full content, in the shape the import writes.
+        var problems = outcome.Manifest.Problems.Select(problem => problem.Content).ToList();
 
         // The image refs resolve against the draft folder; use its absolute path.
         var folderPath = Path.GetFullPath(folder);
 
         // Validation passed — perform the import.
-        var appliedOutcome = await apply.ApplyAsync(target, date, visibleSince, problems, folderPath);
+        var appliedOutcome = await apply.ApplyAsync(target, date, meta.VisibleSinceUtc, problems, folderPath);
 
         // Pair the apply outcome with the warning-only issues the run proceeded past.
         var result = new ApplyResult(appliedOutcome, outcome.Result.Issues);

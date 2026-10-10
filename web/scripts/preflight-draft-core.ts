@@ -9,6 +9,7 @@ import path from 'path'
 import { parse as parseYaml } from 'yaml'
 
 import { validateMarkdown } from '../src/components/shared/components/rich-math-editor/utils/markdown-pipeline'
+import { groupBy } from '../src/components/shared/utils/collection-utils'
 import type { Locale } from '../src/i18n/i18n'
 import { SUPPORTED_LOCALES } from '../src/i18n/i18n'
 import type { MetaResult } from './preflight-draft-meta'
@@ -29,6 +30,7 @@ import {
 import type {
   DraftManifest,
   ManifestProblem,
+  ManifestProposal,
   ManifestText,
   ProblemHalf,
   VerdictError,
@@ -80,6 +82,9 @@ export async function preflightDraft(folderPath: string): Promise<DraftManifest>
 
   // Image files referenced by nobody are advisory leftovers, not failures
   collectOrphanImageWarnings(folderPath, problems, errors)
+
+  // A number names one proposal, so no two problems of the draft may share one
+  collectDuplicateProposalNumbers(problems, errors)
 
   // Hand back the taxonomy, problems, and the issues
   return { meta: metaResult.meta, problems, verdict: { errors } }
@@ -261,6 +266,7 @@ async function parseProblem(
   let authors: string[] | null = null
   let solutionLink: string | null = null
   let tags: string[] | null = null
+  let proposal: ManifestProposal | null = null
   if (group.metaFile !== null) {
     // Parse the sidecar
     const { meta, error } = parseProblemMeta(
@@ -276,6 +282,7 @@ async function parseProblem(
     authors = meta.authors
     solutionLink = meta.solutionLink
     tags = meta.tags
+    proposal = meta.proposal
   }
 
   // Parse each body into a text variant, dropping ones whose language token is unknown
@@ -361,6 +368,7 @@ async function parseProblem(
     authors,
     solutionLink,
     tags,
+    proposal,
     texts,
     images,
   }
@@ -611,6 +619,40 @@ function collectOrphanImageWarnings(
         severity: 'warning',
       })
     })
+}
+
+/**
+ * Flags every problem whose `proposal:` block names a number another problem of the draft names too. When both
+ * problems are new, nothing stored holds that number yet, so only the draft itself shows the clash.
+ *
+ * @param problems - The draft's parsed problems.
+ * @param errors - Accumulator the duplicates are pushed onto.
+ */
+function collectDuplicateProposalNumbers(
+  problems: ManifestProblem[],
+  errors: VerdictError[]
+): void {
+  // The draft's problems grouped by the number their block names, those without a block under null
+  const byNumber = groupBy(problems, (problem) => problem.proposal?.number ?? null)
+
+  // Each number more than one problem names, with the problems naming it
+  const sharing = Array.from(byNumber).filter(
+    ([number, group]) => number !== null && group.length > 1
+  )
+
+  // Flag each problem sharing a number on its own pN.yaml
+  sharing.forEach(([number, group]) =>
+    group.forEach((problem) =>
+      errors.push(
+        problemIssue(
+          `p${problem.order}.yaml`,
+          null,
+          'proposal-number-duplicate',
+          `proposal #${number} is named by more than one problem of the draft; every proposal needs its own number`
+        )
+      )
+    )
+  )
 }
 
 /**

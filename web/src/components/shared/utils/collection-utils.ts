@@ -83,19 +83,16 @@ export function namesTheSameItemsInOrder<T>(left: readonly T[], right: readonly 
 
 /**
  * Narrows a raw value to a member of an allowed set, or null when it matches none. Handy for trusting
- * an external string (a URL query, a stored value) as a literal-union member before using it.
+ * an external value as a literal-union member before using it.
  *
- * @param value - The raw value to check; a missing value never matches.
+ * @param value - The raw value to check; anything but a string never matches.
  * @param allowed - The permitted members.
  *
  * @returns The value typed as a member when it's in the set, otherwise null.
  */
-export function parseMember<T extends string>(
-  value: string | null | undefined,
-  allowed: readonly T[]
-): T | null {
-  // A missing value matches nothing
-  if (value === null || value === undefined) return null
+export function parseMember<T extends string>(value: unknown, allowed: readonly T[]): T | null {
+  // Anything but a string matches nothing
+  if (typeof value !== 'string') return null
 
   // Keep it only when it's an exact member of the set
   return allowed.includes(value as T) ? (value as T) : null

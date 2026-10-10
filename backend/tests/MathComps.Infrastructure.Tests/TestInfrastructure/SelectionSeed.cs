@@ -66,7 +66,7 @@ public static class SelectionSeed
             CompetitionId = CompetitionTreeSeed.Chain(context, HostedTaxonomy.ProposalsPath).Id,
             SeasonId = season.Id,
             Date = new DateOnly(SeasonYear, 9, 1),
-            VisibleSince = DateTimeOffset.MaxValue,
+            VisibleSince = HostedTaxonomy.ProposalsVisibleSince,
         };
         context.Rounds.Add(round);
 

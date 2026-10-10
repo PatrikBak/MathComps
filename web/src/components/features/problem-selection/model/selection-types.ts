@@ -8,6 +8,9 @@ export const PROPOSAL_AREAS = ['algebra', 'combinatorics', 'geometry', 'numberTh
 /** One area a proposal is filed under. */
 export type ProposalArea = (typeof PROPOSAL_AREAS)[number]
 
+/** The longest working title a proposal holds, in characters. */
+export const PROPOSAL_TITLE_MAX_LENGTH = 200
+
 /** The language most proposals are authored in. */
 export const PROPOSAL_AUTHORING_LANGUAGE = 'en' as const satisfies Locale
 
