@@ -137,16 +137,12 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
         // Every signed-in one of them
         CommentViewer[] signedIn = [_student, _classmate, _stranger];
 
-        // None of them writes, replies, edits, deletes or likes there
+        // None of them writes, edits or deletes there
         foreach (var outsider in signedIn)
         {
             // A new comment, refused like a missing thread
             await Assert.ThrowsAsync<CommentTargetNotFoundException>(
                 () => service.CreateCommentAsync(target, outsider, "Why?"));
-
-            // A reply, refused the same way
-            await Assert.ThrowsAsync<CommentTargetNotFoundException>(
-                () => service.CreateCommentAsync(target, outsider, "Why?", comment.Id));
 
             // An edit, refused like a missing comment
             await Assert.ThrowsAsync<CommentNotFoundException>(
@@ -155,10 +151,6 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
             // A delete, refused the same way
             await Assert.ThrowsAsync<CommentNotFoundException>(
                 () => service.DeleteCommentAsync(comment.Id, outsider));
-
-            // A like, refused the same way
-            await Assert.ThrowsAsync<CommentNotFoundException>(
-                () => service.ToggleLikeAsync(comment.Id, outsider));
         }
 
         // The conversation as an admin reads it

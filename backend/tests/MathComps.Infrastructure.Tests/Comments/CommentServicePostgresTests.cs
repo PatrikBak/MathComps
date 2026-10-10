@@ -100,16 +100,33 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         services.AddUserServices();
 
     /// <summary>
-    /// A handout nobody has commented on reads as an empty thread, though no row stands for it yet.
+    /// A handout or news article nobody has commented on reads as an empty thread, and reading it mints no row for
+    /// it, which only its first comment does. Reading runs for every visitor of every page, so a read that minted
+    /// would write a row for any content id anybody sends.
     /// </summary>
     [Fact]
     public Task GetCommentsAsync_ReturnsEmptyListWhenNoComments() => RunTestAsync(async commentService =>
     {
-        // The untouched handout's thread, as the first user reads it
-        var thread = await commentService.GetCommentsAsync(_handoutThread, _user1);
+        // A news article nothing seeds
+        var newsThread = new CommentTarget(CommentTargetType.News, "unseeded-news");
 
-        // Nothing in it
-        Assert.Empty(thread);
+        // The untouched handout's thread, as the first user reads it
+        var handoutComments = await commentService.GetCommentsAsync(_handoutThread, _user1);
+
+        // The untouched article's thread
+        var newsComments = await commentService.GetCommentsAsync(newsThread, _user1);
+
+        // Nothing in either
+        Assert.Empty(handoutComments);
+        Assert.Empty(newsComments);
+
+        // No row minted for the handout
+        Assert.False(await QueryValueAsync(context =>
+            context.Handouts.AnyAsync(handout => handout.ContentId == HandoutId)));
+
+        // Nor for the article
+        Assert.False(await QueryValueAsync(context =>
+            context.NewsArticles.AnyAsync(news => news.ContentId == newsThread.TargetId)));
     });
 
     /// <summary>
@@ -619,33 +636,73 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Counts come back per news article, and only for articles that have comments.
+    /// Counts come back per news article or handout, and only for those that have comments. Each type counts through
+    /// a query of its own.
+    /// </summary>
+    /// <param name="targetType">The type of the targets counted.</param>
+    [Theory]
+    [InlineData(CommentTargetType.News)]
+    [InlineData(CommentTargetType.Handout)]
+    public Task GetCommentCountsAsync_CountsEachTarget(CommentTargetType targetType) =>
+        RunTestAsync(async commentService =>
+        {
+            // Three targets' content ids
+            var id1 = "target-1";
+            var id2 = "target-2";
+            var id3 = "target-3";
+
+            // Two comments on the first target
+            await commentService.CreateCommentAsync(new CommentTarget(targetType, id1), _user1, "c1");
+            await commentService.CreateCommentAsync(new CommentTarget(targetType, id1), _user2, "c2");
+
+            // One comment on the second target
+            await commentService.CreateCommentAsync(new CommentTarget(targetType, id2), _user1, "c3");
+
+            // The counts for all three, read signed out
+            var counts = await commentService.GetCommentCountsAsync(targetType, [id1, id2, id3], null);
+
+            // Each commented target's count
+            Assert.Equal(2, counts[id1]);
+            Assert.Equal(1, counts[id2]);
+
+            // The uncommented target left out
+            Assert.Equal(2, counts.Count);
+            Assert.False(counts.ContainsKey(id3));
+        });
+
+    /// <summary>
+    /// A deleted comment takes no like, refused like a comment that is not there, so a page left open since the
+    /// delete can't hang a like on the blanked stub.
     /// </summary>
     [Fact]
-    public Task GetCommentCountsAsync_CountsEachNewsArticle() => RunTestAsync(async commentService =>
+    public Task ToggleLikeAsync_RefusesADeletedComment() => RunTestAsync(async commentService =>
     {
-        // Three news articles' content ids
-        var id1 = "news-1";
-        var id2 = "news-2";
-        var id3 = "news-3";
+        // The first user's comment
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Soon gone");
 
-        // Two comments on the first article
-        await commentService.CreateCommentAsync(new CommentTarget(CommentTargetType.News, id1), _user1, "c1");
-        await commentService.CreateCommentAsync(new CommentTarget(CommentTargetType.News, id1), _user2, "c2");
+        // The author deletes it
+        await commentService.DeleteCommentAsync(comment.Id, _user1);
 
-        // One comment on the second article
-        await commentService.CreateCommentAsync(new CommentTarget(CommentTargetType.News, id2), _user1, "c3");
+        // The second user likes it, refused
+        await Assert.ThrowsAsync<CommentNotFoundException>(() => commentService.ToggleLikeAsync(comment.Id, _user2));
+    });
 
-        // The counts for all three, read signed out
-        var counts = await commentService.GetCommentCountsAsync(CommentTargetType.News, [id1, id2, id3], null);
+    /// <summary>
+    /// A deleted comment takes no reply, refused like a comment that is not there, so a page left open since the
+    /// delete can't hang a reply under the blanked stub.
+    /// </summary>
+    [Fact]
+    public Task CreateCommentAsync_RefusesAReplyToADeletedComment() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Soon gone");
 
-        // Each commented article's count
-        Assert.Equal(2, counts[id1]);
-        Assert.Equal(1, counts[id2]);
+        // The author deletes it
+        await commentService.DeleteCommentAsync(comment.Id, _user1);
 
-        // The uncommented article left out
-        Assert.Equal(2, counts.Count);
-        Assert.False(counts.ContainsKey(id3));
+        // The second user replies to it, refused
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => commentService.CreateCommentAsync(_handoutThread, _user2, "Too late", comment.Id));
     });
 
     /// <summary>

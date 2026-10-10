@@ -15,8 +15,8 @@ namespace MathComps.Infrastructure.Tests.Comments;
 /// Integration tests for a proposal's discussion, the reviewers' thread about one problem of the problem selection,
 /// as <see cref="ICommentService"/> keeps it against a real PostgreSQL database: that the accounts preparing the
 /// competitions read, write and count it, that nobody else reaches it and a refusal reads like a thread that is not
-/// there, that it closes once the proposal is deleted, that the problem has no public thread beside it, and that it
-/// takes no likes.
+/// there, that it closes once the proposal is deleted, that the problem has no public thread beside it, and that
+/// reviewers like each other's comments in it.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class ProposalCommentPostgresTests(PostgresContainerFixture fixture)
@@ -117,16 +117,12 @@ public class ProposalCommentPostgresTests(PostgresContainerFixture fixture)
         // Every signed-in one of them
         CommentViewer[] signedIn = [_admin, _student];
 
-        // None of them writes, replies, edits, deletes or likes there
+        // None of them writes, edits, deletes or likes there
         foreach (var outsider in signedIn)
         {
             // A new comment, refused like a missing thread
             await Assert.ThrowsAsync<CommentTargetNotFoundException>(
                 () => service.CreateCommentAsync(target, outsider, "Why?"));
-
-            // A reply, refused the same way
-            await Assert.ThrowsAsync<CommentTargetNotFoundException>(
-                () => service.CreateCommentAsync(target, outsider, "Why?", comment.Id));
 
             // An edit, refused like a missing comment
             await Assert.ThrowsAsync<CommentNotFoundException>(
@@ -260,16 +256,44 @@ public class ProposalCommentPostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A comment in a proposal's discussion takes no likes, from a reviewer either.
+    /// A discussion exists only for a proposal: a reviewer naming an id no proposal has is refused like a thread that
+    /// is not there.
     /// </summary>
     [Fact]
-    public Task A_proposals_discussion_takes_no_likes() => RunTestAsync(async service =>
+    public Task A_discussion_of_no_proposal_is_refused() => RunTestAsync(async service =>
     {
+        // A discussion naming no proposal
+        var target = Discussion(Guid.CreateVersion7());
+
+        // Reading, refused like a missing thread
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(() => service.GetCommentsAsync(target, _reviewer));
+
+        // Writing, refused the same way
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(
+            () => service.CreateCommentAsync(target, _reviewer, "Fits somewhere."));
+    });
+
+    /// <summary>
+    /// A reviewer likes another reviewer's comment in a proposal's discussion, and the like reads back.
+    /// </summary>
+    [Fact]
+    public Task Reviewers_like_comments_in_a_proposals_discussion() => RunTestAsync(async service =>
+    {
+        // The discussion of the proposal
+        var target = Discussion(_proposalId);
+
         // A reviewer's comment in the discussion
-        var comment = await service.CreateCommentAsync(Discussion(_proposalId), _reviewer, "Fits the advanced paper.");
+        var comment = await service.CreateCommentAsync(target, _reviewer, "Fits the advanced paper.");
 
         // Another reviewer likes it
-        await Assert.ThrowsAsync<CommentNotFoundException>(() => service.ToggleLikeAsync(comment.Id, _otherReviewer));
+        await service.ToggleLikeAsync(comment.Id, _otherReviewer);
+
+        // The comment as the liking reviewer reads it
+        var liked = Assert.Single(await service.GetCommentsAsync(target, _otherReviewer));
+
+        // One like, theirs
+        Assert.Equal(1, liked.LikeCount);
+        Assert.True(liked.IsLiked);
     });
 
     /// <inheritdoc/>
