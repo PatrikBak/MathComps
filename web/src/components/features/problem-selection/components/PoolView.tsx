@@ -80,7 +80,11 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
             value={filters.filter.query}
             onChange={(event) => filters.setField('query', event.target.value)}
             placeholder={t('searchPlaceholder')}
-            className="form-input pl-9"
+            // Drawn as light and as tall as the facet pills below, since it sits on the page itself
+            className={cn(
+              'form-input border-foreground/10 bg-foreground/[0.03] py-1.5 pl-9 placeholder:text-muted',
+              'hover:border-foreground/25 hover:bg-foreground/[0.07] focus-visible:border-focus/70'
+            )}
           />
         </label>
 
