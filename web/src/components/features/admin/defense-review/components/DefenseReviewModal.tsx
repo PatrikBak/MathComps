@@ -9,6 +9,7 @@ import { Button } from '@/components/shared/components/Button'
 import { ActionLabel } from '../../conversation/components/ActionLabel'
 import { ConversationDialog } from '../../conversation/components/ConversationDialog'
 import { useConversationDetail } from '../../conversation/hooks/use-conversation-detail'
+import { useStudentConversations } from '../../conversation/hooks/use-student-conversations'
 import type { UseDefenseReviewSelectionResult } from '../hooks/use-defense-review-selection'
 import { NEXT_UNREAD_KEY } from '../model/defense-review-stepping'
 
@@ -39,12 +40,16 @@ export function DefenseReviewModal({
   // The conversation opened from the queue, which names the student and the problem
   const { detail: opened } = useConversationDetail(selection.openId)
 
+  // Every conversation the student held about the problem, and their grading
+  const conversationList = useStudentConversations(
+    opened === null ? null : { user: opened.user, target: toSessionTarget(opened.target) }
+  )
+
   return (
     <ConversationDialog
       selection={selection}
-      studentProblem={
-        opened === null ? null : { user: opened.user, target: toSessionTarget(opened.target) }
-      }
+      student={opened?.user ?? null}
+      conversationList={conversationList}
       itemsAreConversations
       stepActions={
         // Past everything already read

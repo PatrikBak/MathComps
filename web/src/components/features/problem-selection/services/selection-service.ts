@@ -6,13 +6,11 @@ import type {
   MoveWrite,
   PlacementWrite,
   RecommendationWrite,
-  ReviewTranscript,
   SelectionData,
   SetAsideWrite,
   SlotAddress,
 } from '../model/selection-types'
 import {
-  getConversationUrl,
   getFinalizationUrl,
   getProposalUrl,
   getRecommendedUrl,
@@ -35,21 +33,6 @@ import {
  */
 export function getSelection(apiCall: ApiCaller): Promise<ApiResult<SelectionData>> {
   return apiCall<SelectionData>(() => getSelectionUrl())
-}
-
-/**
- * Reads everything said in one conversation about a proposal.
- *
- * @param apiCall - The authenticated API caller.
- * @param conversationId - The conversation.
- *
- * @returns The conversation's statement and turns, or an error.
- */
-export function getTranscript(
-  apiCall: ApiCaller,
-  conversationId: string
-): Promise<ApiResult<ReviewTranscript>> {
-  return apiCall<ReviewTranscript>(() => getConversationUrl(conversationId))
 }
 
 /**

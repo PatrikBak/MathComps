@@ -8,8 +8,8 @@ import type { UseSteppedSelectionResult } from './use-stepped-selection'
 export const STEP_KEYS = { next: 'j', previous: 'k' } as const
 
 /**
- * Walks a list from the keyboard, with the item open or with none open yet, so a session of reading through it
- * never has to begin with a click.
+ * Walks a list from the keyboard, with the item open and, unless the surface turns it off, with none open yet, so a
+ * session of reading through it need not begin with a click.
  *
  * A key only walks while nothing stands over the list's own dialog. That dialog is stepped from happily; anything
  * past it was stacked on top, such as a question waiting on an answer, and walking the list out from under
@@ -17,13 +17,19 @@ export const STEP_KEYS = { next: 'j', previous: 'k' } as const
  *
  * @param selection - The walk the keys move.
  * @param extraShortcuts - Further keys the surface walks the list by, held to the same rule.
+ * @param opensFromTheList - Whether a key opens an item while none is open; false where the list can sit on a tab
+ * out of sight, which a key would otherwise open an item from.
  */
 export function useStepHotkeys(
   selection: UseSteppedSelectionResult,
-  extraShortcuts: HotkeyItem[] = []
+  extraShortcuts: HotkeyItem[] = [],
+  opensFromTheList = true
 ): void {
-  // A test of whether a key is the reader walking the list or a stray press behind something standing over it
-  const canStep = () => countOpenDialogs() <= (selection.openId === null ? 0 : 1)
+  // A test of whether a key is the reader walking the list: an item is open or the list opens one from the keys, and
+  // nothing stands over it
+  const canStep = () =>
+    (selection.openId !== null || opensFromTheList) &&
+    countOpenDialogs() <= (selection.openId === null ? 0 : 1)
 
   // Every key that walks the list, each one heard only while nothing stands in the way
   useHotkeys(

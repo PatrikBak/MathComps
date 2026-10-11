@@ -1291,9 +1291,7 @@
     "conversations": {
       "empty": "O této úloze s Mathildou zatím nikdo nemluvil.",
       "messages": "{count, plural, one {# zpráva} few {# zprávy} other {# zpráv}}",
-      "olderStatement": "starší zadání",
-      "participants": "{author} a Mathilda",
-      "transcriptFailed": "Rozhovor se nepodařilo načíst."
+      "olderStatement": "starší zadání"
     },
     "detail": {
       "backToPool": "Zásobník",

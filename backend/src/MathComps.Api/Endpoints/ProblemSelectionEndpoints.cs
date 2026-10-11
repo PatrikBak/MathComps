@@ -5,10 +5,9 @@ using MathComps.Infrastructure.Services.Selection;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the endpoints of the problem selection: one read returning the whole of it, one returning a conversation
-/// held about a proposal in full, and one write per change a reviewer makes. Every route is gated by the
-/// <see cref="AuthorizationPolicies.PreparesCompetitions"/> policy, since the proposals are problems no student may
-/// see.
+/// Maps the endpoints of the problem selection: one read returning the whole of it, and one write per change a
+/// reviewer makes. Every route is gated by the <see cref="AuthorizationPolicies.PreparesCompetitions"/> policy, since
+/// the proposals are problems no student may see.
 /// </summary>
 public static class ProblemSelectionEndpoints
 {
@@ -45,21 +44,6 @@ public static class ProblemSelectionEndpoints
 
             // Return it
             return Results.Ok(selection);
-        })
-        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
-        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
-
-        // Read everything said in one conversation about a proposal
-        app.MapGet($"{SelectionPath}/conversations/{{conversationId:guid}}", async (
-            Guid conversationId,
-            IProblemSelectionService selectionService,
-            CancellationToken cancellationToken) =>
-        {
-            // The conversation's statement and turns
-            var transcript = await selectionService.GetTranscriptAsync(conversationId, cancellationToken);
-
-            // Return the transcript
-            return Results.Ok(transcript);
         })
         .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);

@@ -28,7 +28,7 @@ type StudentVerdictProps = {
 /**
  * What the student made of the conversation, read back at the end of it.
  *
- * The answers are named with the very keys the student picked from, so the admin reads the same words the
+ * The answers are named with the very keys the student picked from, so the reviewer reads the same words the
  * student chose rather than a second wording of them that could drift. It sits under the transcript because
  * that is where the student themself was asked, and it renders nothing when they said nothing.
  */

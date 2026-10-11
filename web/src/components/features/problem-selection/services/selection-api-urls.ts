@@ -54,18 +54,6 @@ export function getSelectionUrl(): string {
 }
 
 /**
- * Builds the API URL for reading one conversation about a proposal in full.
- *
- * @param conversationId - The conversation.
- *
- * @returns The API URL.
- */
-export function getConversationUrl(conversationId: string): string {
-  // The conversation under the selection
-  return buildApiUrl(`${SELECTION_PATH}/conversations/${encodeURIComponent(conversationId)}`)
-}
-
-/**
  * Builds the API URL for putting a proposal into a slot or emptying it.
  *
  * @param slot - The slot.

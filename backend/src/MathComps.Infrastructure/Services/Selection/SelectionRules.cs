@@ -108,6 +108,21 @@ internal static class SelectionRules
         IsInPool(competitionPath) || groupOpensAt > now;
 
     /// <summary>
+    /// Whether a conversation about a proposal the selection holds is one of the reviewers': its author holds the
+    /// grant to prepare the competitions, and held it when the conversation started. Only such an account reaches a
+    /// problem while the selection holds it, so any other conversation about one was held while the problem sat
+    /// somewhere students reach, or by somebody whose grant has since been revoked.
+    /// </summary>
+    /// <param name="preparerSince">
+    /// When the author was handed the grant to prepare the competitions; null where they don't hold it.
+    /// </param>
+    /// <param name="startedAt">When the conversation started.</param>
+    /// <returns>Whether it is a reviewer's.</returns>
+    public static bool IsReviewersConversation(DateTimeOffset? preparerSince, DateTimeOffset startedAt) =>
+        // Granted by the time it started
+        preparerSince <= startedAt;
+
+    /// <summary>
     /// Whether a hosted group still takes a board: it has not opened, it closes at some point, and it runs rounds
     /// nothing has filled yet. A group that never closes is the practice one, which nobody picks papers for.
     /// </summary>

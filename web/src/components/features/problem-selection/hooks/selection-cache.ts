@@ -24,28 +24,6 @@ export function useSelectionQueryKey(): QueryKey {
 }
 
 /**
- * The prefix every cached transcript sits under, kept apart from the selection's so refreshing the selection
- * leaves a conversation being read alone.
- */
-const TRANSCRIPT_QUERY_KEY = ['problem-selection-transcript'] as const
-
-/**
- * The key one conversation's transcript is cached under, naming the reader for the reason
- * {@link useSelectionQueryKey} gives.
- *
- * @param conversationId - The conversation; null while none is open.
- *
- * @returns The key.
- */
-export function useTranscriptQueryKey(conversationId: string | null): QueryKey {
-  // Who is reading, once sign-in has settled
-  const { userId, isLoaded } = useAuth()
-
-  // The conversation, per reader, naming nobody until sign-in has settled or while nobody is signed in
-  return [...TRANSCRIPT_QUERY_KEY, isLoaded ? (userId ?? null) : null, conversationId] as const
-}
-
-/**
  * Refreshes every cached copy of the selection, whoever it was read as. Every write changes something every
  * reader's copy shows.
  *

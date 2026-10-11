@@ -13,7 +13,7 @@ import {
 
 /**
  * The backend for admin notes on defense conversations: authenticated calls to the .NET API, every one of them
- * behind the admin policy.
+ * open to admins, and all but the feed to the problem selection's reviewers too.
  */
 
 /**

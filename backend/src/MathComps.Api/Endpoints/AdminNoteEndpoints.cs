@@ -1,3 +1,4 @@
+using MathComps.Api.Authorization;
 using MathComps.Api.Constants;
 using MathComps.Domain.Contracts.Admin;
 using MathComps.Infrastructure.Services.Admin;
@@ -7,7 +8,9 @@ namespace MathComps.Api.Endpoints;
 
 /// <summary>
 /// Maps the endpoints for what gets written down while reviewing defense conversations, gated by the
-/// <see cref="AuthorizationPolicies.Admin"/> policy.
+/// <see cref="AuthorizationPolicies.Admin"/> policy. Every one but the feed also lets the problem selection's
+/// reviewers keep notes on the conversations the reviewers held about the proposals, through
+/// <see cref="ConversationReviewerExtensions.RequireConversationReviewer"/>.
 /// </summary>
 public static class AdminNoteEndpoints
 {
@@ -67,7 +70,7 @@ public static class AdminNoteEndpoints
             // Return it at its own address
             return Results.Created($"{NotesPath}/{note.Id}", note);
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireConversationReviewer()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Revise a note
@@ -93,7 +96,7 @@ public static class AdminNoteEndpoints
             // Return it
             return Results.Ok(note);
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireConversationReviewer()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Drop a note
@@ -113,7 +116,7 @@ public static class AdminNoteEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireConversationReviewer()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Settle a note
@@ -128,7 +131,7 @@ public static class AdminNoteEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireConversationReviewer()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Put a note back to standing
@@ -143,7 +146,7 @@ public static class AdminNoteEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireConversationReviewer()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
     }
 }

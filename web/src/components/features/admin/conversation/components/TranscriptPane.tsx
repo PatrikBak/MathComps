@@ -34,7 +34,7 @@ type TranscriptPaneProps = {
 }
 
 /**
- * A conversation as an admin reads it: the problem, re-readable above it, and every turn with Mathilda's
+ * A conversation as a reviewer reads it: the problem, re-readable above it, and every turn with Mathilda's
  * replies numbered, so anything written about one can name it. A turn says how long it took its author wherever
  * that was measured, a reply that kept its drafts opens them, and what the student said about it closes the
  * conversation. Where the student is graded, a line marks where their words stop counting. Nothing in it can be

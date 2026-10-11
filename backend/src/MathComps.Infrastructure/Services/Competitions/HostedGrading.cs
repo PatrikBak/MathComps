@@ -54,7 +54,7 @@ internal static class HostedGrading
         if (lookup?.Entry is not { } entry)
             return null;
 
-        // When the student started preparing the competitions, if they ever did.
+        // When the student started preparing the competitions, if they still do.
         var preparerSince = await grants.GetGrantedAtAsync(
             userId, UserCapability.PrepareCompetitions, cancellationToken);
 

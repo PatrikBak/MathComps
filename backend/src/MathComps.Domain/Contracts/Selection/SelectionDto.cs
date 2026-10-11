@@ -9,7 +9,9 @@ namespace MathComps.Domain.Contracts.Selection;
 /// </param>
 /// <param name="Boards">Every draft board and every finalized one whose cycle has not opened, oldest first.</param>
 /// <param name="Cycles">The cycles a board can be finalized into, soonest first.</param>
-/// <param name="Conversations">Every conversation held about a proposal in the selection, newest first.</param>
+/// <param name="Conversations">
+/// Every conversation a reviewer held about a proposal in the selection, newest first.
+/// </param>
 public record SelectionDto(
     IReadOnlyList<ProposalDto> Proposals,
     IReadOnlyList<SelectionBoardDto> Boards,

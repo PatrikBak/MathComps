@@ -1,6 +1,8 @@
 import type { Locator, Page, Request } from '@playwright/test'
+import { createTranslator } from 'next-intl'
 
 import { MATHILDA_NAME } from '@/constants/mathilda'
+import { STEP_KEYS } from '@/hooks/use-step-hotkeys'
 
 import messages from '../messages/en.json'
 import { type AnswerGate, gateReads } from './support/answer-gate'
@@ -18,11 +20,12 @@ import { SCRIPTED_REPLIES } from './support/hosted-backend-content'
 import {
   ARGUED,
   ARGUED_EARLIER,
+  ARGUED_FIRST,
   BILINGUAL,
   cardOf,
   CONVERSATION_ENDPOINT,
   EARLIER,
-  EARLIER_STATEMENT,
+  FIRST_OF_TWO,
   headingOf,
   LANDING_WINDOW_MS,
   OPENED,
@@ -30,6 +33,7 @@ import {
   OPENED_COMMENT,
   openPool,
   RECENT,
+  REFERENCE,
   rememberedSelection,
   REVIEWER,
   REVISION,
@@ -52,6 +56,13 @@ const REPLY_DRAFT = 'Agreed, though the bound wants a line of proof.'
 
 /** What the discussion's copy says. */
 const commentsCopy = messages.comments
+
+/** A function which fills the conversation dialog's copy with numbers and names, the way the page does. */
+const conversationText = createTranslator({
+  locale: 'en',
+  messages,
+  namespace: 'admin.conversation',
+})
 
 /**
  * The box a new comment in a problem's discussion is written in.
@@ -270,29 +281,35 @@ test.describe('what reviewers said about a problem', () => {
     )
   })
 
-  test('lists every conversation newest first, and reads what was said in one only once it is opened', async ({
+  test('lists every conversation newest first, reads one only once it is opened, and walks them all', async ({
     page,
   }) => {
-    // A reviewer whose selection holds a pool of problems, one of them argued twice
-    await stubSelection(page, 'selection')
+    // What the backend keeps
+    const memory = rememberedSelection(null)
+
+    // The reviewer's first conversation about the problem kept too, so the reviewer holds two
+    memory.conversations.push(FIRST_OF_TWO)
+
+    // A reviewer whose selection holds a pool of problems, one of them argued three times
+    await stubSelection(page, 'selection', memory)
 
     // How many conversations have been read in full
     let reads = 0
 
-    // Every read of a conversation, counted as it goes out
+    // Every read of a conversation, counted as it goes out, the marks opening one makes left out
     page.on('request', (request) => {
       // One more, if it reads a conversation
-      if (request.url().startsWith(CONVERSATION_ENDPOINT)) reads++
+      if (request.method() === 'GET' && request.url().startsWith(CONVERSATION_ENDPOINT)) reads++
     })
 
-    // The problem argued twice
+    // The problem argued three times
     await page.goto(OPENED_ADDRESS)
 
     // The conversation rows
     const rows = conversationRows(page)
 
     // One per conversation
-    await expect(rows).toHaveCount(2, { timeout: SETTLE_TIMEOUT_MS })
+    await expect(rows).toHaveCount(3, { timeout: SETTLE_TIMEOUT_MS })
 
     // The most recent first, held by the reviewer
     await expect(rows.nth(0)).toContainText(REVIEWER)
@@ -302,46 +319,70 @@ test.describe('what reviewers said about a problem', () => {
       selectionText('conversations.messages', { count: RECENT.transcript.turns.length })
     )
 
-    // The earlier one after it, held by a reviewer with no username
-    await expect(rows.nth(1)).toContainText(messages.profile.defaultUser)
+    // The earliest last, held by a reviewer with no username
+    await expect(rows.nth(2)).toContainText(messages.profile.defaultUser)
 
     // With how much was said in it
-    await expect(rows.nth(1)).toContainText(
+    await expect(rows.nth(2)).toContainText(
       selectionText('conversations.messages', { count: EARLIER.transcript.turns.length })
     )
 
     // Time for a read the list set off to go out
     await page.waitForTimeout(LANDING_WINDOW_MS)
 
-    // None did, nothing said in either having been asked for
+    // None did, nothing said in any having been asked for
     expect(reads).toBe(0)
 
     // The most recent one, opened
     await rows.nth(0).click()
 
-    // Named by who talked
-    await expect(
-      page.getByRole('dialog').getByRole('heading', {
-        name: selectionText('conversations.participants', { author: REVIEWER }),
-      })
-    ).toBeVisible()
+    // The dialog, named by who held it
+    const dialog = page.getByRole('dialog', {
+      name: conversationText('dialogTitleFor', { student: REVIEWER }),
+    })
 
     // With what was said
     await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
 
     // Under the statement it was argued against
-    await expect(page.getByRole('dialog')).toContainText(`Part 1 of problem ${OPENED.number}.`)
+    await expect(dialog).toContainText(`Part 1 of problem ${OPENED.number}.`)
 
-    // Unmarked, that statement being the one the problem has now
-    await expect(page.getByRole('dialog')).not.toContainText(chatCopy.editedSince)
+    // Beside the solution it is judged against
+    await expect(dialog).toContainText(REFERENCE)
 
     // Read once, as it opened
     expect(reads).toBe(1)
+
+    // A switch to the reviewer's two conversations about the problem, oldest first, the one open the second
+    await expect(
+      dialog.getByRole('button', { name: conversationText('conversationNumber', { number: 1 }) })
+    ).toHaveAttribute('aria-pressed', 'false')
+    await expect(
+      dialog.getByRole('button', { name: conversationText('conversationNumber', { number: 2 }) })
+    ).toHaveAttribute('aria-pressed', 'true')
+    await expect(
+      dialog.getByRole('button', { name: conversationText('conversationNumber', { number: 3 }) })
+    ).toHaveCount(0)
+
+    // The reviewer's first one, a step along the list
+    await dialog.getByRole('button', { name: conversationText('next') }).click()
+
+    // Saying what she argued then
+    await expect(transcriptOf(page)).toContainText(ARGUED_FIRST)
+
+    // The earliest, a step further
+    await dialog.getByRole('button', { name: conversationText('next') }).click()
+
+    // Named by the reviewer with no username
+    await expect(page.getByRole('dialog')).toHaveAccessibleName(
+      conversationText('dialogTitleFor', { student: messages.profile.defaultUser })
+    )
+
+    // Saying what they argued
+    await expect(transcriptOf(page)).toContainText(ARGUED_EARLIER)
   })
 
-  test('marks a conversation argued against a statement since revised, and shows it under that statement', async ({
-    page,
-  }) => {
+  test('marks a conversation argued against a statement since revised', async ({ page }) => {
     // A reviewer whose selection holds a pool of problems, one of them argued before and after a revision
     await stubSelection(page, 'selection')
 
@@ -359,20 +400,6 @@ test.describe('what reviewers said about a problem', () => {
 
     // The one argued against the statement as it stood before, marked
     await expect(rows.nth(1)).toContainText(selectionCopy.conversations.olderStatement)
-
-    // Opened
-    await rows.nth(1).click()
-
-    // Saying the problem has changed since
-    await expect(page.getByRole('dialog')).toContainText(chatCopy.editedSince)
-
-    // Under the statement as it stood then
-    await expect(page.getByRole('dialog')).toContainText(EARLIER_STATEMENT, {
-      timeout: SETTLE_TIMEOUT_MS,
-    })
-
-    // With what was said against it
-    await expect(transcriptOf(page)).toContainText(ARGUED_EARLIER)
   })
 
   test('says so when a conversation on the list can no longer be read', async ({ page }) => {
@@ -398,10 +425,65 @@ test.describe('what reviewers said about a problem', () => {
     await rows.nth(0).click()
 
     // Said it could not be loaded
-    await expect(page.getByRole('dialog')).toContainText(
-      selectionCopy.conversations.transcriptFailed,
-      { timeout: SETTLE_TIMEOUT_MS }
-    )
+    await expect(page.getByRole('dialog')).toContainText(messages.admin.conversation.detailFailed, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+  })
+
+  test('opens no conversation from the keyboard while the discussion is on screen', async ({
+    page,
+  }) => {
+    // A reviewer whose selection holds a pool of problems, one of them argued twice
+    await stubSelection(page, 'selection')
+
+    // The problem, on its discussion
+    await page.goto(`${OPENED_ADDRESS}&tab=comments`)
+
+    // Its discussion on screen, the conversations behind it
+    await expect(page.getByText(OPENED_COMMENT.content)).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The key that walks the conversations, pressed
+    await page.keyboard.press(STEP_KEYS.next)
+
+    // Time for a conversation to open
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // None did
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+  })
+
+  test('closes a conversation being read once the reviewer who held it has deleted it', async ({
+    page,
+  }) => {
+    // The clock under the test's hand, so the next read comes when the test says
+    await page.clock.install()
+
+    // What the backend keeps, which the test changes midway
+    const memory = rememberedSelection(null)
+
+    // A reviewer whose selection holds a pool of problems, one of them argued twice
+    await stubSelection(page, 'selection', memory)
+
+    // The problem
+    await page.goto(OPENED_ADDRESS)
+
+    // The most recent conversation, opened
+    await conversationRows(page).nth(0).click()
+
+    // Once what was said in it has arrived
+    await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
+
+    // Dropped by the reviewer who held it
+    memory.conversations = memory.conversations.filter((conversation) => conversation !== RECENT)
+
+    // Long enough for the selection to be read again
+    await page.clock.fastForward('00:31')
+
+    // The conversation closed, nothing left in it to read
+    await expect(page.getByRole('dialog')).toHaveCount(0, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The list holding the one left
+    await expect(conversationRows(page)).toHaveCount(1)
   })
 
   test('offers Mathilda only on a problem with a solution, and lists a conversation held with her', async ({

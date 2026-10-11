@@ -15,7 +15,7 @@ import {
   type UseConversationReadMarkingResult,
 } from './use-conversation-read-marking'
 import { useConversationReadState } from './use-conversation-read-state'
-import { type StudentProblem, useStudentConversations } from './use-student-conversations'
+import type { UseStudentConversationsResult } from './use-student-conversations'
 
 /**
  * What {@link useConversationDialog} hands back.
@@ -54,7 +54,8 @@ export type UseConversationDialogResult = {
  * conversation on screen while a change made in it may still be settling.
  *
  * @param openId - Which item of the page's list is open; null while none is.
- * @param studentProblem - The student and problem the open item is about; null while that is unknown.
+ * @param conversationList - Every conversation the student held about the open item's problem, and their grading,
+ * as far as reading them has got.
  * @param itemsAreConversations - Whether each item is itself one of a student's conversations, which the dialog
  * then starts on rather than on the first they held.
  * @param landingNoteId - The note the reader was sent to; null when they came in for the conversation itself.
@@ -64,14 +65,14 @@ export type UseConversationDialogResult = {
  */
 export function useConversationDialog(
   openId: string | null,
-  studentProblem: StudentProblem | null,
+  conversationList: UseStudentConversationsResult,
   itemsAreConversations: boolean,
   landingNoteId: string | null,
   initialTabId: SidePanelId | null,
   onClosed: (() => void) | undefined
 ): UseConversationDialogResult {
   // Every conversation the student held about the problem, and where their grade on it stands
-  const { studentConversations, uiState: listUiState } = useStudentConversations(studentProblem)
+  const { studentConversations, uiState: listUiState } = conversationList
 
   // The conversation the reader switched to, back on the one the item starts on whenever another opens
   const [pickedConversationId, selectConversation] = useKeyedState(

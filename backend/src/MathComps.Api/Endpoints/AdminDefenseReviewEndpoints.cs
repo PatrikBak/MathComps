@@ -1,3 +1,4 @@
+using MathComps.Api.Authorization;
 using MathComps.Api.Constants;
 using MathComps.Domain.Contracts.Admin;
 using MathComps.Domain.Contracts.Defense;
@@ -9,7 +10,9 @@ namespace MathComps.Api.Endpoints;
 /// <summary>
 /// Maps the endpoints for reading every student's defense conversations back and recording which of them a
 /// reviewer has read, gated by the <see cref="AuthorizationPolicies.Admin"/> policy. They read across all
-/// users, which is exactly what the student-facing <c>/defense</c> endpoints refuse to do.
+/// users, which is exactly what the student-facing <c>/defense</c> endpoints refuse to do. The ones on a single
+/// conversation also let the problem selection's reviewers reach the conversations the reviewers held about the
+/// proposals, through <see cref="ConversationReviewerExtensions.RequireConversationReviewer"/>.
 /// </summary>
 public static class AdminDefenseReviewEndpoints
 {
@@ -94,7 +97,7 @@ public static class AdminDefenseReviewEndpoints
             // Return it
             return Results.Ok(detail);
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireConversationReviewer()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // List one student's conversations against one handout environment
@@ -154,7 +157,7 @@ public static class AdminDefenseReviewEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireConversationReviewer()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Mark a whole set read at once. One request rather than one per conversation, since these endpoints are
@@ -206,7 +209,7 @@ public static class AdminDefenseReviewEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireConversationReviewer()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
         // Put a conversation back to unread
@@ -226,7 +229,7 @@ public static class AdminDefenseReviewEndpoints
             // Nothing to return
             return Results.NoContent();
         })
-        .RequireAuthorization(AuthorizationPolicies.Admin)
+        .RequireConversationReviewer()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
     }
 }

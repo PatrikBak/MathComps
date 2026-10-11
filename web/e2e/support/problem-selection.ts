@@ -1,6 +1,7 @@
 import type { Locator, Page, Request, Route } from '@playwright/test'
 import { createTranslator } from 'next-intl'
 
+import type { AdminConversation } from '@/components/features/admin/conversation/model/admin-conversation'
 import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
@@ -11,7 +12,6 @@ import type {
   Paper,
   Proposal,
   ReviewConversation,
-  ReviewTranscript,
   SelectionData,
 } from '@/components/features/problem-selection/model/selection-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
@@ -21,6 +21,7 @@ import messages from '../../messages/en.json'
 import { gateReads } from './answer-gate'
 import { answerJson, BACKEND_ORIGIN, refuse } from './backend-routes'
 import { SELECTION_PATH } from './competitions'
+import { installConversationBackend } from './conversation-backend'
 import type { HostedBackend } from './hosted-backend'
 import { stubSelectionComments, threadKey } from './selection-comments'
 import { FINALIZATION_PATH, finalizationWrite } from './selection-finalization'
@@ -46,7 +47,7 @@ export const LANDING_WINDOW_MS = 1_000
 export const SELECTION_ENDPOINT = `${BACKEND_ORIGIN}/problem-selection`
 
 /** Where the backend answers a read of one conversation in full, short of the conversation's id. */
-export const CONVERSATION_ENDPOINT = `${SELECTION_ENDPOINT}/conversations/`
+export const CONVERSATION_ENDPOINT = `${BACKEND_ORIGIN}/admin/defense/sessions/`
 
 /** The copy the selection reads under. */
 export const selectionCopy = messages.problemSelection
@@ -414,11 +415,18 @@ export const ARGUED =
   'The second player mirrors every move, so the two numbers left are always neighbours.'
 
 /** {@link OPENED}'s statement as it stood before its author revised it into the one the selection holds. */
-export const EARLIER_STATEMENT =
+const EARLIER_STATEMENT =
   'A board holds the numbers from one to fifty, and two players take turns erasing one of them.'
 
 /** What a reviewer with no username argued about {@link EARLIER_STATEMENT}. */
 export const ARGUED_EARLIER = 'Erasing the odd numbers first leaves only even ones.'
+
+/** The solution every conversation about a problem is judged against. */
+export const REFERENCE =
+  'The second player pairs every number with its neighbour and answers inside the pair.'
+
+/** The account of the reviewer holding every conversation with Mathilda the test has through the chat. */
+const CHATTING_REVIEWER_ID = 'user_chatting'
 
 /**
  * One thing said in a conversation with Mathilda.
@@ -441,17 +449,31 @@ function turnOf(
 }
 
 /**
+ * Everything said in one conversation with Mathilda about a problem, and the statement it was said against.
+ */
+type HeldTranscript = {
+  /** The statement as it stood when the conversation started. */
+  savedStatement: string
+  /** Everything said, in order. */
+  turns: StoredTurn[]
+}
+
+/**
  * A conversation a reviewer held with Mathilda about a problem, as the backend keeps it.
  */
-type HeldConversation = Pick<ReviewConversation, 'id' | 'proposalId' | 'author' | 'startedAt'> & {
+type HeldConversation = Pick<
+  ReviewConversation,
+  'id' | 'proposalId' | 'authorId' | 'author' | 'startedAt'
+> & {
   /** The statement it was argued against, and everything said. */
-  transcript: ReviewTranscript
+  transcript: HeldTranscript
 }
 
 /** {@link REVIEWER}'s conversation about {@link OPENED}, argued against the statement it has now. */
 export const RECENT: HeldConversation = {
   id: '00000000-0000-4000-8000-c00000000001',
   proposalId: OPENED.id,
+  authorId: 'user_zuzana',
   author: REVIEWER,
   startedAt: '2026-09-28T10:00:00.000Z',
   transcript: {
@@ -464,10 +486,34 @@ export const RECENT: HeldConversation = {
   },
 }
 
+/** What {@link REVIEWER} argued about {@link OPENED} the first time she talked to Mathilda about it. */
+export const ARGUED_FIRST =
+  'The first player can always answer, so the second never gets the last move.'
+
+/**
+ * {@link REVIEWER}'s first conversation about {@link OPENED}, held between {@link EARLIER} and {@link RECENT}. Left
+ * out of what the backend keeps unless a test adds it, so only that test sees one reviewer holding two.
+ */
+export const FIRST_OF_TWO: HeldConversation = {
+  id: '00000000-0000-4000-8000-c00000000003',
+  proposalId: OPENED.id,
+  authorId: 'user_zuzana',
+  author: REVIEWER,
+  startedAt: '2026-09-20T10:00:00.000Z',
+  transcript: {
+    savedStatement: statementOf(OPENED.number),
+    turns: [
+      turnOf('t-first-1', 'examiner', 'Tell me how you got there.', '2026-09-20T10:00:00.000Z'),
+      turnOf('t-first-2', 'candidate', ARGUED_FIRST, '2026-09-20T10:01:00.000Z'),
+    ],
+  },
+}
+
 /** A conversation about {@link OPENED} held by a reviewer with no username, argued against its earlier statement. */
 export const EARLIER: HeldConversation = {
   id: '00000000-0000-4000-8000-c00000000002',
   proposalId: OPENED.id,
+  authorId: 'user_nameless',
   author: null,
   startedAt: '2026-09-14T09:00:00.000Z',
   transcript: {
@@ -537,6 +583,7 @@ function heldConversations(memory: SelectionMemory, proposals: Proposal[]): Held
       (session): HeldConversation => ({
         id: session.id,
         proposalId: proposal.id,
+        authorId: CHATTING_REVIEWER_ID,
         author: null,
         // Started on Mathilda's greeting, which every conversation opens with
         startedAt: session.turns[0]!.createdAt,
@@ -567,9 +614,10 @@ function selectionOf(
   // Each conversation listed, with how much was said and whether the statement it was argued against is
   // gone from the problem in every language
   const conversations = heldConversations(memory, proposals).map(
-    ({ id, proposalId, author, startedAt, transcript }): ReviewConversation => ({
+    ({ id, proposalId, authorId, author, startedAt, transcript }): ReviewConversation => ({
       id,
       proposalId,
+      authorId,
       author,
       startedAt,
       messageCount: transcript.turns.length,
@@ -591,6 +639,40 @@ function selectionOf(
     conversations: conversations.sort((first, second) =>
       second.startedAt.localeCompare(first.startedAt)
     ),
+  }
+}
+
+/**
+ * One conversation about a problem in full, as the conversation dialog reads it: argued against the statement it
+ * was held on and judged against {@link REFERENCE}, with nothing yet reported, read or written about it.
+ *
+ * @param held - The conversation.
+ * @param proposal - The problem it was about.
+ *
+ * @returns The conversation in full.
+ */
+function conversationInFullOf(held: HeldConversation, proposal: Proposal): AdminConversation {
+  // Everything the dialog reads about it
+  return {
+    id: held.id,
+    target: {
+      kind: 'proposal',
+      problemId: proposal.id,
+      slug: `proposal-${proposal.number}`,
+      number: proposal.number,
+      title: proposal.title,
+    },
+    user: { id: held.authorId, username: held.author, email: null },
+    createdAt: held.startedAt,
+    statement: held.transcript.savedStatement,
+    reference: REFERENCE,
+    turns: held.transcript.turns,
+    attempts: [],
+    reports: [],
+    feedback: null,
+    examinerConfig: {},
+    notes: [],
+    readAt: null,
   }
 }
 
@@ -796,8 +878,8 @@ type AnswerSelectionWith = (reply: SelectionReply) => void
 /**
  * Stands in for the selection's backend: the selection's read, with a reply the test can change midway, the writes
  * to the boards' slots and the proposals and the finalizations, which change what later reads find, the
- * conversations it lists read out in full, and the selection's discussions with their counts. The chat
- * in its memory, where there is one, reads the problems' statements from what the backend holds.
+ * conversations it lists read out in full and marked read, and the selection's discussions with their counts. The
+ * chat in its memory, where there is one, reads the problems' statements from what the backend holds.
  *
  * @param page - The page to answer the selection's calls on.
  * @param firstReply - How the reads are answered until the test says otherwise.
@@ -863,24 +945,21 @@ export async function stubSelection(
     }
   })
 
-  // Everything said in one conversation, which is read only once somebody opens it
-  await page.route(`${CONVERSATION_ENDPOINT}*`, async (route) => {
-    // Which conversation
-    const conversationId = new URL(route.request().url()).pathname.split('/').pop() ?? ''
+  // Each conversation in full, which is read only once somebody opens it, as long as the selection still holds its
+  // problem, and the read marks opening one leaves, nobody graded on any of them
+  await installConversationBackend(
+    page,
+    () => {
+      // The problems the selection holds
+      const { proposals } = readableSelection(stored)
 
-    // Held about a problem the selection still holds
-    const held = heldConversations(memory, readableSelection(stored).proposals).find(
-      (conversation) => conversation.id === conversationId
-    )
-
-    // One the backend no longer holds, or holds about a problem gone from the selection
-    if (held === undefined) {
-      return refuse(route, 404, 'SelectionTargetNotFound')
-    }
-
-    // The statement it was argued against, and what was said
-    return answerJson(route, 200, held.transcript)
-  })
+      // Every conversation about one of them, in full
+      return heldConversations(memory, proposals).map((held) =>
+        conversationInFullOf(held, proposals.find((proposal) => proposal.id === held.proposalId)!)
+      )
+    },
+    () => null
+  )
 
   // The selection's discussions, and their counts
   await stubSelectionComments(page, memory.discussions, () => stored)

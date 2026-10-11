@@ -5,7 +5,7 @@ import type {
 } from '@/components/features/defense/model/defense-types'
 
 /**
- * One note an admin wrote about a conversation.
+ * One note a reviewer wrote about a conversation.
  */
 export type AdminNote = {
   /** Stable identifier. */
@@ -14,9 +14,9 @@ export type AdminNote = {
   sessionId: string
   /** The reply it is against; null when it is against the conversation as a whole. */
   turnId: string | null
-  /** The admin who wrote it. */
+  /** The reviewer who wrote it. */
   author: UserIdentity
-  /** Whether the admin reading it wrote it, which is what decides whether it can be revised or dropped. */
+  /** Whether the reviewer reading it wrote it, which is what decides whether it can be revised or dropped. */
   isOwn: boolean
   /** The note as markdown/math source. */
   content: string

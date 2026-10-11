@@ -1,3 +1,4 @@
+import { useAuth } from '@clerk/nextjs'
 import { skipToken } from '@tanstack/react-query'
 import { useLocale } from 'next-intl'
 
@@ -34,13 +35,20 @@ export function useConversationDetail(sessionId: string | null): UseConversation
   // The language it is read in
   const locale = useLocale()
 
+  // Who reads it, once sign-in has settled
+  const { userId, isLoaded } = useAuth()
+
   // The conversation itself
   const { data: detail, uiState } = useApiQuery({
-    queryKey: conversationDetailQueryKey(sessionId ?? NO_CONVERSATION, locale),
+    queryKey: conversationDetailQueryKey(
+      sessionId ?? NO_CONVERSATION,
+      isLoaded ? (userId ?? null) : null,
+      locale
+    ),
     // Nothing while no conversation is open, then the transcript and everything read alongside it
     fetch:
       sessionId === null ? skipToken : (apiCall) => fetchConversationDetail(apiCall, sessionId),
-    // The transcript is an admin's own read, so it is made as them
+    // The transcript is the reader's own read, so it is made as them
     requireAuth: true,
     ...cachePolicy.userData,
   })
