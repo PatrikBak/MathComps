@@ -13,7 +13,7 @@ namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
 /// Covers <see cref="ProblemSelectionService"/>: the field mapping of the one read, which proposals, boards and
-/// cycles it holds once groups open, and which conversations it reads out in full.
+/// cycles it holds once groups open, and whose conversations it lists.
 /// </summary>
 /// <remarks>
 /// The seed is a pool of three proposals with a draft holding one. The October group has not opened and its
@@ -35,6 +35,16 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     private readonly Guid _goneReviewerId = Guid.CreateVersion7();
 
     /// <summary>
+    /// A student, who never prepared the competitions.
+    /// </summary>
+    private readonly Guid _studentId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// A reviewer preparing the competitions only since yesterday.
+    /// </summary>
+    private readonly Guid _latecomerId = Guid.CreateVersion7();
+
+    /// <summary>
     /// The pool's proposals by their number. The first is filed, set aside, written in two languages and talked
     /// about; the third is deleted.
     /// </summary>
@@ -49,21 +59,6 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// A problem of the opened September group, with a conversation of its own.
     /// </summary>
     private Guid _openedId;
-
-    /// <summary>
-    /// The first proposal's newest conversation, held by the live reviewer about its English statement.
-    /// </summary>
-    private Guid _newestConversationId;
-
-    /// <summary>
-    /// The conversation about the September problem.
-    /// </summary>
-    private Guid _openedConversationId;
-
-    /// <summary>
-    /// A conversation about the deleted third proposal.
-    /// </summary>
-    private Guid _deletedConversationId;
 
     /// <summary>
     /// The October group, which still takes a board.
@@ -265,10 +260,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     });
 
     /// <summary>
-    /// Conversations read newest first, each with how many messages it holds and whether the problem still has the
-    /// statement it was argued against, in any of its languages. The author is their username, and nobody once
-    /// their account is deleted. A deleted account keeps its username, so a read that skipped the check would still
-    /// sign the deleted reviewer's words.
+    /// Conversations read newest first, each with who held it, how many messages it holds and whether the problem
+    /// still has the statement it was argued against, in any of its languages. The author is their username, and
+    /// nobody once their account is deleted. A deleted account keeps its username, so a read that skipped the check
+    /// would still sign the deleted reviewer's words. Only the reviewers' conversations read: the student's, the
+    /// first proposal's newest, is left out, and so is the latecomer's from before they were preparing.
     /// </summary>
     [Fact]
     public Task Conversations_read_with_their_authors_and_whether_their_statement_stands() =>
@@ -284,42 +280,17 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
             // Newest first: the English statement and the Slovak one still stand, the deleted reviewer's is gone
             Assert.Equal(
-                [("Reviewer", 2, false), ("Reviewer", 1, false), (null, 1, true)],
-                conversations.Select(conversation =>
-                    (conversation.Author, conversation.MessageCount, conversation.HasOlderStatement)));
+                [
+                    (_reviewerId, "Reviewer", 2, false),
+                    (_reviewerId, "Reviewer", 1, false),
+                    (_goneReviewerId, null, 1, true),
+                ],
+                conversations.Select(conversation => (
+                    conversation.AuthorId,
+                    conversation.Author,
+                    conversation.MessageCount,
+                    conversation.HasOlderStatement)));
         });
-
-    /// <summary>
-    /// A conversation reads out in full: the statement it was argued against and its turns in the order they were
-    /// said. The turns are stored last first, so a read keeping their stored order would reverse them.
-    /// </summary>
-    [Fact]
-    public Task A_transcript_reads_its_statement_and_its_turns_in_order() => RunTestAsync(async service =>
-    {
-        // The newest conversation in full
-        var transcript = await service.GetTranscriptAsync(_newestConversationId);
-
-        // Its statement, and what was said in order
-        Assert.Equal("Statement 1 in EN", transcript.SavedStatement);
-        Assert.Equal(["First", "Second"], transcript.Turns.Select(turn => turn.Content));
-    });
-
-    /// <summary>
-    /// Only a conversation about a proposal the selection holds reads out: not one about the problem of a group that
-    /// has opened, nor one about a deleted proposal, nor an id naming none. The list leaves the first two out, so the
-    /// transcript must too.
-    /// </summary>
-    [Fact]
-    public Task A_transcript_outside_the_selection_is_refused() => RunTestAsync(async service =>
-    {
-        // The September problem's conversation, the deleted proposal's, and an id naming none
-        Guid[] outside = [_openedConversationId, _deletedConversationId, Guid.CreateVersion7()];
-
-        // Each refused like a missing one
-        foreach (var conversationId in outside)
-            await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
-                () => service.GetTranscriptAsync(conversationId));
-    });
 
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
@@ -331,6 +302,29 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         var gone = HostedSeed.NewUser(_goneReviewerId, "Gone");
         gone.IsDeleted = true;
         context.Users.Add(gone);
+
+        // The live reviewer and the deleted one, preparing the competitions since well before any conversation
+        context.UserGrants.AddRange(
+            new[] { _reviewerId, _goneReviewerId }.Select(reviewerId => new UserGrant
+            {
+                UserId = reviewerId,
+                Capability = UserCapability.PrepareCompetitions,
+                GrantedAt = DateTimeOffset.UtcNow.AddDays(-30),
+            }));
+
+        // The student
+        context.Users.Add(HostedSeed.NewUser(_studentId, "Student"));
+
+        // The latecomer
+        context.Users.Add(HostedSeed.NewUser(_latecomerId, "Latecomer"));
+
+        // The latecomer preparing the competitions since yesterday
+        context.UserGrants.Add(new UserGrant
+        {
+            UserId = _latecomerId,
+            Capability = UserCapability.PrepareCompetitions,
+            GrantedAt = DateTimeOffset.UtcNow.AddDays(-1),
+        });
 
         // The season every round sits in
         var season = SelectionSeed.NewSeason(context);
@@ -375,11 +369,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         SeedFinalizedBoard(context, september);
 
         // A conversation about the September problem
-        _openedConversationId = SeedConversation(context, _openedId, _reviewerId, "Statement", now, "Turn");
-
-        // And one about the deleted proposal
-        _deletedConversationId = SeedConversation(
-            context, _pool[3], _reviewerId, "Statement 3 in EN", now.AddDays(-3), "Turn");
+        SeedConversation(context, _openedId, _reviewerId, "Statement", now, "Turn");
 
         // A draft holding the second proposal in its second slot
         SelectionSeed.NewBoard(context, "Draft", null, _pool[2]);
@@ -390,9 +380,14 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // The first proposal's conversation about its Slovak statement
         SeedConversation(context, _pool[1], _reviewerId, "Statement 1 in SK", now.AddDays(-1).AddHours(-1), "Hi");
 
-        // The first proposal's newest conversation, about its English statement
-        _newestConversationId = SeedConversation(
-            context, _pool[1], _reviewerId, "Statement 1 in EN", now.AddDays(-1), "First", "Second");
+        // The first proposal's newest conversation by a reviewer, about its English statement
+        SeedConversation(context, _pool[1], _reviewerId, "Statement 1 in EN", now.AddDays(-1), "First", "Second");
+
+        // And the student's about it, newer still, held while the problem sat somewhere students reach
+        SeedConversation(context, _pool[1], _studentId, "Statement 1 in EN", now.AddHours(-1), "Mine");
+
+        // And the latecomer's, held before they were preparing
+        SeedConversation(context, _pool[1], _latecomerId, "Statement 1 in EN", now.AddDays(-2).AddHours(1), "Early");
 
         // Written
         await context.SaveChangesAsync();
@@ -455,8 +450,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// <param name="statement">The statement the conversation was argued on.</param>
     /// <param name="createdAt">When the conversation started.</param>
     /// <param name="turns">What was said, in order.</param>
-    /// <returns>The conversation's id.</returns>
-    private static Guid SeedConversation(
+    private static void SeedConversation(
         MathCompsDbContext context, Guid problemId, Guid userId, string statement, DateTimeOffset createdAt,
         params string[] turns)
     {
@@ -476,8 +470,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // What it is about
         context.ProblemDefenses.Add(new ProblemDefense { DefenseSessionId = sessionId, ProblemId = problemId });
 
-        // The session's turns, written last first so the order can't come from how they were stored
-        foreach (var index in Enumerable.Range(0, turns.Length).Reverse())
+        // The session's turns
+        foreach (var index in Enumerable.Range(0, turns.Length))
             context.DefenseTurns.Add(new DefenseTurn
             {
                 SessionId = sessionId,
@@ -486,8 +480,5 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
                 Sequence = index,
                 CreatedAt = createdAt.AddMinutes(index),
             });
-
-        // The id
-        return sessionId;
     }
 }

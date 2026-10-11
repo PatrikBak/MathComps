@@ -15,27 +15,34 @@ export const QUEUE_QUERY_KEY = [...ADMIN_DEFENSE_QUERY_KEY, 'queue'] as const
 /**
  * The key every reading of one conversation hangs off.
  *
- * {@link conversationDetailQueryKey} adds the language, and whatever refreshes or drops one conversation in every
- * language matches on this much alone, so all of them follow whatever this says.
+ * {@link conversationDetailQueryKey} adds the reader and the language, and whatever refreshes or drops one conversation
+ * for every reader in every language matches on this much alone, so all of them follow whatever this says.
  *
  * @param sessionId - The conversation.
  * @returns The key.
  */
 export function conversationDetailKeyPrefix(sessionId: string): QueryKey {
-  // One conversation, whichever language it is read in
+  // One conversation, whoever reads it in whichever language
   return [...ADMIN_DEFENSE_QUERY_KEY, 'detail', sessionId] as const
 }
 
 /**
- * Builds the query key for one conversation read in full.
+ * Builds the query key for one conversation read in full. It names the reader, since the read stamp and which notes
+ * are theirs come back with it, and the token rides in a header the cache never sees.
  *
  * @param sessionId - The conversation.
+ * @param readerId - Who reads it; null until sign-in has settled or while nobody is signed in.
  * @param locale - The language it is read in.
  * @returns The query key.
  */
-export function conversationDetailQueryKey(sessionId: string, locale: string): QueryKey {
-  // The language last, so the prefix still reaches the conversation in every language it was read in
-  return [...conversationDetailKeyPrefix(sessionId), locale] as const
+export function conversationDetailQueryKey(
+  sessionId: string,
+  readerId: string | null,
+  locale: string
+): QueryKey {
+  // The reader and the language after the prefix, so it still reaches the conversation for every reader in every
+  // language
+  return [...conversationDetailKeyPrefix(sessionId), readerId, locale] as const
 }
 
 /**
@@ -65,7 +72,7 @@ export function studentConversationsQueryKey(
  * @param sessionId - The conversation.
  */
 export function invalidateConversationDetail(queryClient: QueryClient, sessionId: string): void {
-  // That one conversation, whichever language it was read in
+  // That one conversation, whoever read it in whichever language
   void queryClient.invalidateQueries({ queryKey: conversationDetailKeyPrefix(sessionId) })
 }
 

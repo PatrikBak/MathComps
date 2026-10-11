@@ -21,7 +21,7 @@ type StudentConversation = {
 }
 
 /**
- * One conversation as an admin reads it back: everything the student saw, everything the examiner was given, the
+ * One conversation as a reviewer reads it back: everything the student saw, everything the examiner was given, the
  * settings it ran on, the drafts behind each reply, what the student made of it, and what has already been
  * written about it.
  */
@@ -44,7 +44,7 @@ export type AdminConversation = StudentConversation & {
   feedback: DefenseFeedback | null
   /** The examiner settings it ran on, as recorded; an empty object for one held before they were recorded. */
   examinerConfig: ExaminerConfigSnapshot
-  /** What has been written about it by admins, newest first. */
+  /** What has been written about it by its reviewers, newest first. */
   notes: AdminNote[]
   /** When it was last read, as it stood before this read; null while it never has been. */
   readAt: string | null

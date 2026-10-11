@@ -1,6 +1,5 @@
 using System.Data;
 using MathComps.Domain.Contracts.Competitions;
-using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
@@ -8,6 +7,7 @@ using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace MathComps.Infrastructure.Services.Selection;
@@ -18,9 +18,11 @@ namespace MathComps.Infrastructure.Services.Selection;
 /// </summary>
 /// <param name="dbContextFactory">Creates the context the read runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
+/// <param name="grants">Reads when each conversation's author started preparing the competitions.</param>
 public sealed class ProblemSelectionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
-    IMetadataLocalizationService localization)
+    IMetadataLocalizationService localization,
+    IUserGrantService grants)
     : IProblemSelectionService
 {
     /// <summary>
@@ -118,6 +120,7 @@ public sealed class ProblemSelectionService(
             .Select(defense => new ReviewConversationDto(
                 defense.DefenseSessionId,
                 defense.ProblemId,
+                defense.DefenseSession.UserId,
                 defense.DefenseSession.User.IsDeleted ? null : defense.DefenseSession.User.Username,
                 defense.DefenseSession.CreatedAt,
                 defense.DefenseSession.Turns.Count,
@@ -150,6 +153,19 @@ public sealed class ProblemSelectionService(
 
         // The groups that have not opened, by id.
         var groupsById = groups.ToDictionary(group => group.Id);
+
+        // When each conversation's author started preparing the competitions, for those who still do.
+        var preparerSince = await grants.GetGrantedAtAsync(
+            [.. conversations.Select(conversation => conversation.AuthorId).Distinct()],
+            UserCapability.PrepareCompetitions,
+            cancellationToken);
+
+        // Only the conversations the reviewers held.
+        var reviewersConversations = conversations
+            .Where(conversation => SelectionRules.IsReviewersConversation(
+                preparerSince.TryGetValue(conversation.AuthorId, out var since) ? since : null,
+                conversation.StartedAt))
+            .ToList();
 
         // The selection.
         return new SelectionDto(
@@ -215,46 +231,7 @@ public sealed class ProblemSelectionService(
                         ],
                         group.ProblemCount)),
             ],
-            conversations);
-    }
-
-    /// <inheritdoc/>
-    public async Task<ReviewTranscriptDto> GetTranscriptAsync(
-        Guid conversationId, CancellationToken cancellationToken = default)
-    {
-        // A fresh context for this read.
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-        // The conversation with everything said in it, and where its problem sits, read only where a proposal that
-        // has not been deleted files the problem.
-        var conversation = await dbContext.ProblemDefenses
-            .AsNoTracking()
-            .Where(defense => defense.DefenseSessionId == conversationId)
-            .Join(
-                dbContext.Proposals.Where(proposal => proposal.DeletedAt == null),
-                defense => defense.ProblemId,
-                proposal => proposal.ProblemId,
-                (defense, proposal) => new
-                {
-                    CompetitionPath = proposal.Problem.Round.Competition.Path,
-                    GroupOpensAt = (DateTimeOffset?)proposal.Problem.Round.HostedGroup!.OpensAt,
-                    Transcript = new ReviewTranscriptDto(
-                        defense.DefenseSession.ProblemStatement,
-                        defense.DefenseSession.Turns
-                            .OrderBy(turn => turn.Sequence)
-                            .Select(turn => new DefenseTurnDto(turn.Id, turn.Role, turn.Content, turn.CreatedAt))
-                            .ToList()),
-                })
-            .FirstOrDefaultAsync(cancellationToken);
-
-        // A conversation about anything but a proposal the selection still holds is one it has no business with.
-        if (conversation is null
-            || !SelectionRules.IsInSelection(
-                conversation.CompetitionPath, conversation.GroupOpensAt, DateTimeOffset.UtcNow))
-            throw new SelectionTargetNotFoundException();
-
-        // What was said.
-        return conversation.Transcript;
+            reviewersConversations);
     }
 
     /// <summary>

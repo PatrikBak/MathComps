@@ -3,7 +3,7 @@ using MathComps.Domain.EfCoreEntities;
 namespace MathComps.Domain.Contracts.Admin;
 
 /// <summary>
-/// One model call an attempt made, and what it billed. Admin-only, like everything else here.
+/// One model call an attempt made, and what it billed. Never for students, like everything else here.
 /// </summary>
 /// <param name="Step"><inheritdoc cref="DefenseAttemptCall.Step" path="/summary"/></param>
 /// <param name="Model"><inheritdoc cref="DefenseAttemptCall.Model" path="/summary"/></param>
@@ -27,7 +27,7 @@ public record AdminDefenseAttemptCallDto(
 /// One reply the examiner drafted on its way to a turn, every guard's verdict on it, and what drafting and judging
 /// it cost.
 /// <para>
-/// This is admin-only and must stay off <see cref="Defense.DefenseTurnDto"/>, which the student's own endpoint
+/// This must stay off <see cref="Defense.DefenseTurnDto"/>, which the student's own endpoint
 /// returns: a rejected draft is the leak or the wrong claim a guard caught, so handing it to the student would give
 /// away precisely what the loop exists to withhold.
 /// </para>

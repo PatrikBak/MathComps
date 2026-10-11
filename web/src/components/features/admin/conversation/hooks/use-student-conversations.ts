@@ -32,7 +32,7 @@ const NO_STUDENT_PROBLEM: StudentProblem = {
 /**
  * What {@link useStudentConversations} hands back.
  */
-type UseStudentConversationsResult = {
+export type UseStudentConversationsResult = {
   /** The student's conversations about the problem and their grading; null until they have been read. */
   studentConversations: StudentConversations | null
   /** The state of the fetch. */

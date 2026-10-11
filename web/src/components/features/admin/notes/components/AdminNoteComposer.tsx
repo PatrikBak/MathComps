@@ -18,7 +18,7 @@ import { NoteChoiceRow } from './NoteChoiceRow'
  * Every failure a note can name, in the order they read.
  *
  * Taken from the list a student's own report is filed on rather than written out again, which is the point: it
- * is what lets what an admin concluded and what the student complained about be counted on one axis, and a
+ * is what lets what a reviewer concluded and what the student complained about be counted on one axis, and a
  * failure added there can't quietly go missing here. The words shown for them differ, since the student's are
  * written in their voice and read wrong on a note of one's own.
  */

@@ -1291,9 +1291,7 @@
     "conversations": {
       "empty": "Nobody has talked to Mathilda about this problem yet.",
       "messages": "{count, plural, one {# message} other {# messages}}",
-      "olderStatement": "older statement",
-      "participants": "{author} and Mathilda",
-      "transcriptFailed": "The conversation could not be loaded."
+      "olderStatement": "older statement"
     },
     "detail": {
       "backToPool": "Pool",

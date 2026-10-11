@@ -1,11 +1,6 @@
 using MathComps.Api.Constants;
-using MathComps.Api.Extensions;
-using MathComps.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace MathComps.Api.Tests;
 
@@ -18,8 +13,27 @@ namespace MathComps.Api.Tests;
 public class GatedEndpointSecurityTests
 {
     /// <summary>
-    /// Every route of a gated area carries the area's policy and a rate limit, and none lets an anonymous caller
-    /// through.
+    /// The admin routes the problem selection's reviewers reach their conversations about the proposals through, by
+    /// method and pattern.
+    /// </summary>
+    private static readonly HashSet<string> _conversationRoutes =
+    [
+        "GET /admin/defense/sessions/{id:guid}",
+        "PUT /admin/defense/sessions/{id:guid}/review",
+        "DELETE /admin/defense/sessions/{id:guid}/review",
+        "PUT /admin/defense/sessions/{id:guid}/review/from/{turnId:guid}",
+        "POST /admin/defense/notes",
+        "PUT /admin/defense/notes/{noteId:guid}",
+        "DELETE /admin/defense/notes/{noteId:guid}",
+        "PUT /admin/defense/notes/{noteId:guid}/resolution",
+        "DELETE /admin/defense/notes/{noteId:guid}/resolution",
+    ];
+
+    /// <summary>
+    /// Every route of a gated area carries the area's policy and no other, and a rate limit, and none lets an
+    /// anonymous caller through. The admin routes the reviewers reach their conversations through carry
+    /// <see cref="AuthorizationPolicies.AdminOrPreparesCompetitions"/> instead, and they alone: a second policy beside
+    /// it would shut the reviewers out.
     /// </summary>
     /// <param name="area">The path every route of the area starts with.</param>
     /// <param name="policy">The policy closing the area.</param>
@@ -29,7 +43,7 @@ public class GatedEndpointSecurityTests
     public void Every_gated_route_requires_its_policy_and_is_rate_limited(string area, string policy)
     {
         // The area's routes as the API maps them
-        var gatedRoutes = MapRoutes()
+        var gatedRoutes = MappedApi.Build().Routes
             .Where(route => route.RoutePattern.RawText?.StartsWith(area, StringComparison.Ordinal) == true)
             .ToList();
 
@@ -42,11 +56,20 @@ public class GatedEndpointSecurityTests
             // The route's name
             var name = route.DisplayName;
 
-            // The area's accounts only
+            // The policy it has to carry: the reviewers' own on their conversation routes, the area's elsewhere
+            var required = _conversationRoutes.Contains(MappedApi.NameOf(route))
+                ? AuthorizationPolicies.AdminOrPreparesCompetitions
+                : policy;
+
+            // Every policy the route carries
+            var policies = route.Metadata.GetOrderedMetadata<IAuthorizeData>()
+                .Select(authorize => authorize.Policy)
+                .ToList();
+
+            // Closed by that one policy alone
             Assert.True(
-                route.Metadata.GetOrderedMetadata<IAuthorizeData>()
-                    .Any(authorize => authorize.Policy == policy),
-                $"{name} does not require the {policy} policy.");
+                policies.Count > 0 && policies.All(carried => carried == required),
+                $"{name} requires {string.Join(", ", policies)} rather than the {required} policy alone.");
 
             // With nothing opening it back up
             Assert.True(route.Metadata.GetMetadata<IAllowAnonymous>() is null, $"{name} allows anonymous callers.");
@@ -56,42 +79,5 @@ public class GatedEndpointSecurityTests
                 route.Metadata.GetMetadata<EnableRateLimitingAttribute>() is not null,
                 $"{name} is not rate-limited.");
         }
-    }
-
-    /// <summary>
-    /// Maps the API's routes without running it.
-    /// </summary>
-    /// <remarks>
-    /// Building a route reads which of its handler's parameters are services, so every non-generic interface the
-    /// infrastructure declares is registered, each with a factory nothing ever calls.
-    /// </remarks>
-    /// <returns>Every route the API maps.</returns>
-    private static List<RouteEndpoint> MapRoutes()
-    {
-        // The builder of a bare host to map the routes onto
-        var builder = WebApplication.CreateBuilder();
-
-        // The health check among the routes needs its own services
-        builder.Services.AddHealthChecks();
-
-        // Every non-generic interface the infrastructure declares, standing in for the real services. A generic one
-        // takes no factory, and no handler asks for one
-        foreach (var service in typeof(MathCompsDbContext).Assembly.GetTypes()
-                     .Where(type => type is { IsInterface: true, IsGenericTypeDefinition: false }))
-            builder.Services.AddScoped(service, _ => throw new NotSupportedException());
-
-        // The bare host
-        var app = builder.Build();
-
-        // With the API's routes mapped onto it
-        app.MapApiEndpoints();
-
-        // Built into routes
-        return
-        [
-            .. ((IEndpointRouteBuilder)app).DataSources
-                .SelectMany(source => source.Endpoints)
-                .OfType<RouteEndpoint>(),
-        ];
     }
 }

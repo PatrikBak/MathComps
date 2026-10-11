@@ -1,4 +1,3 @@
-import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { Locale } from '@/i18n/i18n'
 
@@ -172,14 +171,15 @@ export type FinalizationWrite = {
 }
 
 /**
- * A summary of one reviewer's conversation with Mathilda about a proposal, whose full text is a
- * {@link ReviewTranscript}.
+ * A summary of one reviewer's conversation with Mathilda about a proposal.
  */
 export type ReviewConversation = {
   /** Identity of the conversation. */
   id: string
   /** The proposal it was about. */
   proposalId: string
+  /** The account of whoever held it. */
+  authorId: string
   /** The username of whoever held it, null without one or for a deleted account. */
   author: string | null
   /** When it started, as an ISO-8601 string. */
@@ -188,16 +188,6 @@ export type ReviewConversation = {
   messageCount: number
   /** Whether it was argued against a statement the proposal no longer has in any language. */
   hasOlderStatement: boolean
-}
-
-/**
- * Everything said in one conversation with Mathilda about a proposal.
- */
-export type ReviewTranscript = {
-  /** The statement as it stood when the conversation started. */
-  savedStatement: string
-  /** Everything said, in order. */
-  turns: StoredTurn[]
 }
 
 /**

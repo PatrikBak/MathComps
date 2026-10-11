@@ -537,7 +537,8 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Registers the problem selection: reading all of it, changing what the reviewers record about
-    /// the proposals, and filling and finalizing the boards. Expects the DbContext from
+    /// the proposals, filling and finalizing the boards, and telling the reviewers' conversations about the proposals
+    /// from every other conversation. Expects the DbContext from
     /// <see cref="AddMathCompsDbContext"/>.
     /// </summary>
     /// <param name="services">The service collection to add the selection services to.</param>
@@ -547,8 +548,14 @@ public static class ServiceCollectionExtensions
         // A cycle is named after the node its rounds run under, so bring the metadata registry along.
         services.AddLocalization();
 
+        // The read and the check on a conversation pick out the reviewers' ones by when each author started preparing.
+        services.AddUserGrants();
+
         // The read.
         services.TryAddScoped<IProblemSelectionService, ProblemSelectionService>();
+
+        // Which conversations are the reviewers' ones about the proposals.
+        services.TryAddScoped<IProposalConversations, ProposalConversations>();
 
         // The changes to the proposals.
         services.TryAddScoped<IProposalService, ProposalService>();
@@ -561,7 +568,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds the admin-only services: reading every student's defense conversations back, recording which have
+    /// Adds the admin services: reading every student's defense conversations back, recording which have
     /// been read, keeping the notes written about them, and grading the hosted groups.
     /// </summary>
     /// <param name="services">The service collection to add the admin services to.</param>

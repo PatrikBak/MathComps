@@ -225,7 +225,7 @@ describe('invalidateConversationDetail', () => {
     const queryClient = new QueryClient()
     const written = LANGUAGES.map((locale) => {
       // Where that conversation read in this language lands
-      const key = conversationDetailQueryKey('session', locale)
+      const key = conversationDetailQueryKey('session', 'reader', locale)
 
       // Parked empty, since only whether the matcher reaches it is under test
       queryClient.setQueryData(key, {})
@@ -235,7 +235,7 @@ describe('invalidateConversationDetail', () => {
     })
 
     // A second conversation, which a note about the first says nothing about
-    const untouched = conversationDetailQueryKey('other', 'sk')
+    const untouched = conversationDetailQueryKey('other', 'reader', 'sk')
     queryClient.setQueryData(untouched, {})
 
     // A note written about the first

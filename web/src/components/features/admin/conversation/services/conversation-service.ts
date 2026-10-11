@@ -11,8 +11,8 @@ import {
 } from './conversation-api-urls'
 
 /**
- * The backend for reading defense conversations back as an admin: authenticated calls to the .NET API, every one
- * of them behind the admin policy.
+ * The backend for reading defense conversations back as a reviewer: authenticated calls to the .NET API, every one
+ * of them open to admins, and those on one conversation to the problem selection's reviewers too.
  */
 
 /**

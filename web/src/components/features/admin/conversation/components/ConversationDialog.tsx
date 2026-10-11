@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Mail, MailOpen, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
-import { describeUser } from '@/components/features/admin/model/user-identity'
+import { describeUser, type UserIdentity } from '@/components/features/admin/model/user-identity'
 import { Button } from '@/components/shared/components/Button'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
@@ -15,7 +15,7 @@ import type { UseSteppedSelectionResult } from '@/hooks/use-stepped-selection'
 
 import { useConversationDialog } from '../hooks/use-conversation-dialog'
 import type { SidePanelId } from '../hooks/use-conversation-panels'
-import type { StudentProblem } from '../hooks/use-student-conversations'
+import type { UseStudentConversationsResult } from '../hooks/use-student-conversations'
 import { ActionLabel } from './ActionLabel'
 import { ConversationDialogBody } from './ConversationDialogBody'
 import { DefenseTargetRef } from './DefenseTargetRef'
@@ -26,8 +26,13 @@ import { DefenseTargetRef } from './DefenseTargetRef'
 type ConversationDialogProps = {
   /** Which item of the page's list is open, and every way of moving off it. */
   selection: UseSteppedSelectionResult
-  /** The student and problem the open item is about; null while that is unknown. */
-  studentProblem: StudentProblem | null
+  /** The student the open item is about; null while that is unknown. */
+  student: UserIdentity | null
+  /**
+   * Every conversation the student held about the open item's problem, and their grading, as far as reading them
+   * has got.
+   */
+  conversationList: UseStudentConversationsResult
   /**
    * Whether each item of the list is itself one of a student's conversations, which the dialog then starts on;
    * absent where each is a student's problem, which starts on the first conversation they held about it.
@@ -66,7 +71,8 @@ type ConversationDialogProps = {
  */
 export function ConversationDialog({
   selection,
-  studentProblem,
+  student,
+  conversationList,
   itemsAreConversations = false,
   stepActions,
   landingNoteId = null,
@@ -96,7 +102,7 @@ export function ConversationDialog({
     handleClosed,
   } = useConversationDialog(
     selection.openId,
-    studentProblem,
+    conversationList,
     itemsAreConversations,
     landingNoteId,
     initialTabId,
@@ -104,8 +110,7 @@ export function ConversationDialog({
   )
 
   // The student's name, once whose item is open is known
-  const student =
-    studentProblem === null ? null : describeUser(studentProblem.user, tProfile('defaultUser'))
+  const studentName = student === null ? null : describeUser(student, tProfile('defaultUser'))
 
   return (
     <Modal
@@ -116,7 +121,9 @@ export function ConversationDialog({
       tall
       focusPanelOnOpen
       className="sm:max-w-6xl 2xl:max-w-[102rem]"
-      ariaLabel={student === null ? t('dialogTitle') : t('dialogTitleFor', { student })}
+      ariaLabel={
+        studentName === null ? t('dialogTitle') : t('dialogTitleFor', { student: studentName })
+      }
       onClosed={handleClosed}
     >
       {/* The header: who and what, whether it is read, and the way through the list */}
@@ -128,7 +135,7 @@ export function ConversationDialog({
       >
         {/* Who and what, opted out of the hyphenation the page turns on globally */}
         <div className="w-full min-w-0 hyphens-none sm:w-auto sm:flex-1" aria-live="polite">
-          <p className="truncate font-bold text-foreground">{student ?? '\u00a0'}</p>
+          <p className="truncate font-bold text-foreground">{studentName ?? '\u00a0'}</p>
           <p className="flex items-baseline gap-2 text-xs text-muted">
             {detail === null ? (
               <span>&nbsp;</span>

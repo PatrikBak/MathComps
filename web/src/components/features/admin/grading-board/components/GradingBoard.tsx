@@ -17,6 +17,7 @@ import { useStepHotkeys } from '@/hooks/use-step-hotkeys'
 import type { Locale } from '@/i18n/i18n'
 
 import { ConversationDialog } from '../../conversation/components/ConversationDialog'
+import { useStudentConversations } from '../../conversation/hooks/use-student-conversations'
 import { formatScore, type Grade, pairKey, scoreOf } from '../../grades/model/grade-types'
 import { type ColumnToFinalize, useColumnFinalizing } from '../hooks/use-column-finalizing'
 import { useGradingBoard } from '../hooks/use-grading-board'
@@ -65,6 +66,9 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
 
   // Making a whole column final, once confirmed
   const finalizing = useColumnFinalizing()
+
+  // Every conversation the open pair's student held about its problem, and their grading
+  const conversationList = useStudentConversations(board.studentProblem)
 
   return (
     <div className="mx-auto w-full max-w-4xl">
@@ -132,7 +136,8 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
           {/* The pair being graded */}
           <ConversationDialog
             selection={board.selection}
-            studentProblem={board.studentProblem}
+            student={board.studentProblem?.user ?? null}
+            conversationList={conversationList}
             initialTabId={board.landingTabId}
           />
 

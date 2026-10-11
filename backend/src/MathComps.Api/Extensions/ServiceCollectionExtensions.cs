@@ -1,8 +1,11 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.RateLimiting;
+using MathComps.Api.Authorization;
 using MathComps.Api.Constants;
 using MathComps.Api.Errors;
+using MathComps.Domain.EfCoreEntities;
+using Microsoft.AspNetCore.Authorization;
 using System.Text.RegularExpressions;
 
 namespace MathComps.Api.Extensions;
@@ -105,6 +108,31 @@ public static class ServiceCollectionExtensions
         Array.Clear(bytes, 8, 8);
         // Rebuild the address from the masked prefix and use it as the key
         return new IPAddress(bytes).ToString();
+    }
+
+    /// <summary>
+    /// Adds the authorization policies endpoints require, and what reads a capability off the caller's account.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <returns>The configured service collection for chaining.</returns>
+    public static IServiceCollection AddApiAuthorization(this IServiceCollection services)
+    {
+        // The policies, each by the accounts it lets in
+        services.AddAuthorizationBuilder()
+            .AddPolicy(AuthorizationPolicies.Admin, policy => policy.RequireRole(ClerkClaims.AdminRole))
+            .AddPolicy(AuthorizationPolicies.PreparesCompetitions, policy => policy
+                .RequireAuthenticatedUser()
+                .AddRequirements(new UserCapabilityRequirement(UserCapability.PrepareCompetitions)))
+            .AddPolicy(AuthorizationPolicies.AdminOrPreparesCompetitions, policy => policy
+                .RequireAuthenticatedUser()
+                .AddRequirements(
+                    new UserCapabilityRequirement(UserCapability.PrepareCompetitions, AdmitsAdmins: true)));
+
+        // What reads a capability off the caller's account
+        services.AddScoped<IAuthorizationHandler, UserCapabilityHandler>();
+
+        // Return the services for chaining
+        return services;
     }
 
     /// <summary>

@@ -1,4 +1,3 @@
-using MathComps.Api.Authorization;
 using MathComps.Api.Constants;
 using MathComps.Api.Errors;
 using MathComps.Api.Extensions;
@@ -6,8 +5,6 @@ using MathComps.Api.Workers;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Domain.EfCoreEntities;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -111,14 +108,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // Authorization to secure endpoints, with the policies they require
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy(AuthorizationPolicies.Admin, policy => policy.RequireRole(ClerkClaims.AdminRole))
-    .AddPolicy(AuthorizationPolicies.PreparesCompetitions, policy => policy
-        .RequireAuthenticatedUser()
-        .AddRequirements(new UserCapabilityRequirement(UserCapability.PrepareCompetitions)));
-
-// What reads a capability off the caller's account
-builder.Services.AddScoped<IAuthorizationHandler, UserCapabilityHandler>();
+builder.Services.AddApiAuthorization();
 
 // Basic observability
 builder.Services.AddLogging();
@@ -185,7 +175,7 @@ builder.Services.AddDefenseServices(builder.Configuration);
 // The competitions the site hosts itself
 builder.Services.AddCompetitionServices();
 
-// The admin-only review of defense conversations
+// The admin review of defense conversations
 builder.Services.AddAdminServices();
 
 // The selection the hosted competitions' papers are picked in
