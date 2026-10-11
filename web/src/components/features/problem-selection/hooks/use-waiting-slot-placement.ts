@@ -3,6 +3,8 @@
 import { type RefObject, useRef } from 'react'
 import { flushSync } from 'react-dom'
 
+import { focusForReader } from '@/components/shared/utils/focus-utils'
+
 import { useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
 import type { PlacementWrite } from '../model/selection-types'
 import type { SelectionWrite } from './use-selection-write'
@@ -55,7 +57,7 @@ export function useWaitingSlotPlacement(
     flushSync(stopWaiting)
 
     // The focus moved onto the Place button
-    placeButtonRef.current?.focus()
+    focusForReader(placeButtonRef.current)
   }
 
   // The Place button's handle, and the way to put the problem into the waiting slot

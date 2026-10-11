@@ -2,6 +2,8 @@ import type { MouseEventHandler, RefObject } from 'react'
 import { useState } from 'react'
 import { flushSync } from 'react-dom'
 
+import { focusForReader } from '@/components/shared/utils/focus-utils'
+
 /**
  * Options for the {@link useEditorPreview} hook.
  */
@@ -63,7 +65,7 @@ export function useEditorPreview({
       // The cursor leaves the text the preview covers, which Safari would otherwise go on typing into,
       // for the control itself. There it is still inside the editor, so the keys its surface answers
       // go on reaching it
-      event.currentTarget.focus()
+      focusForReader(event.currentTarget)
 
       // And the rendered text goes up over the textarea
       setIsShown(true)

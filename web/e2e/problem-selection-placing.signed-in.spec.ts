@@ -34,6 +34,7 @@ import {
   selectionText,
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
+  showsFocusRing,
   slotOf,
   statusLine,
   stubSelection,
@@ -346,8 +347,14 @@ test.describe('placing a problem from the pool', () => {
     // Its card gone from the pool
     await expect(cardOf(page, OPENED)).toHaveCount(0)
 
-    // The focus on the title of the problem it replaced, back in the pool where the placed one stood
-    await expect(cardOf(page, READY).getByRole('link', { name: READY.title })).toBeFocused()
+    // The title of the problem it replaced, back in the pool where the placed one stood
+    const readyLink = cardOf(page, READY).getByRole('link', { name: READY.title })
+
+    // The focus on that title
+    await expect(readyLink).toBeFocused()
+
+    // Without a ring, a click having placed the problem
+    expect(await showsFocusRing(readyLink)).toBe(false)
 
     // An empty slot, waiting for a problem
     await slotOf(page, 'E3').getByRole('button').click()

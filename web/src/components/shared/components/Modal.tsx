@@ -92,8 +92,9 @@ export function Modal({
    * click that never touched the keyboard.
    *
    * Releasing the container on the press hands the reading to that press: a click closes the dialog
-   * unringed, Escape still rings. Only the container goes, so a press aimed at a field inside the panel
-   * still carries the caret.
+   * unringed, Escape still rings. That is the rule focusForReader keeps, here kept for the hand-back
+   * HeadlessUI makes with a bare `focus()`. Only the container goes, so a press aimed at a field inside the
+   * panel still carries the caret.
    */
   const releaseContainerFocus = useCallback(() => {
     // Drop the container's focus, and only the container's

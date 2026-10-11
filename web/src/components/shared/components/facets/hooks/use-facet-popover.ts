@@ -20,6 +20,7 @@ import {
   useState,
 } from 'react'
 
+import { focusForReader } from '@/components/shared/utils/focus-utils'
 import { useDeviceCapabilities } from '@/hooks/use-device-capabilities'
 import { useFloatingPanel } from '@/hooks/use-floating-panel'
 
@@ -261,7 +262,7 @@ export function useFacetPopover<T extends FacetOption>(
 
     // Focus is moved rather than restored: Safari never focuses a button on click, so there is
     // nothing to restore to
-    if (trigger instanceof HTMLElement) trigger.focus()
+    if (trigger instanceof HTMLElement) focusForReader(trigger)
   }, [open, refs])
 
   // Where focus lands as the popover opens: on a phone nowhere inside it, and everywhere else the

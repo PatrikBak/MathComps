@@ -2,9 +2,8 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { Check } from 'lucide-react'
 import * as React from 'react'
 
-import { usePointerPressTarget } from '@/hooks/use-pointer-press-target'
-
 import { cn } from '../utils/css-utils'
+import { focusForReader, latestPointerPressTarget } from '../utils/focus-utils'
 
 /**
  * What an anchored panel opens over: the page itself, or a card laid on it.
@@ -83,16 +82,13 @@ export const DropdownMenuContent = React.forwardRef<
   React.ComponentRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & FloatingPanelContentProps
 >(({ className, sideOffset = 4, opensOver = 'page', onCloseAutoFocus, ...props }, ref) => {
-  // Where the user's latest press landed, while it was a pointer's
-  const pressTargetRef = usePointerPressTarget()
-
   // A function which focuses the trigger without a ring once a pointer has closed the menu
   const handleCloseAutoFocus = (event: Event) => {
     // The close handler passed in runs first, and may claim the hand-back
     onCloseAutoFocus?.(event)
 
     // The element the closing press landed on, absent when a key closed the menu
-    const pressTarget = pressTargetRef.current
+    const pressTarget = latestPointerPressTarget()
 
     // A claimed hand-back, or a menu closed from the keyboard, is left to Radix
     if (event.defaultPrevented || !(pressTarget instanceof Node)) return
@@ -115,8 +111,9 @@ export const DropdownMenuContent = React.forwardRef<
     // Claim the hand-back from Radix
     event.preventDefault()
 
-    // Hand the focus back without the ring, and without scrolling to a trigger the page has left behind
-    trigger.focus({ focusVisible: false, preventScroll: true })
+    // Hand the focus back, the pointer's press leaving it unringed, and without scrolling to a trigger the page has
+    // left behind
+    focusForReader(trigger, { preventScroll: true })
   }
 
   // The panel, portalled to the end of the page

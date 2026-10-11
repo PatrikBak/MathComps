@@ -6,6 +6,7 @@ import { type RefObject, useCallback, useMemo, useRef } from 'react'
 
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { dataAttribute, focusShown, shownElement } from '@/components/shared/utils/dom-utils'
+import { focusForReader } from '@/components/shared/utils/focus-utils'
 import { mergeOwnedParams, pushQuery, replaceQuery } from '@/components/shared/utils/url-utils'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 
@@ -159,7 +160,7 @@ function returnFocus(opener: Opener | null, pageId: string): boolean {
   // What the page was opened from, where the screen still shows it
   if (opener?.pageId === pageId && opener.element.getClientRects().length > 0) {
     // Focused there, the screen staying where it was
-    opener.element.focus({ preventScroll: true })
+    focusForReader(opener.element, { preventScroll: true })
 
     // The screen showed it
     return true
@@ -323,7 +324,7 @@ export function useOpenDetail(): UseOpenDetailResult {
     if (isFocusReturned) return
 
     // Focus otherwise on the pool's count line or on the page's heading, which the reader's next Tab goes on from
-    if (openId === null) poolCountRef.current?.focus({ preventScroll: true })
+    if (openId === null) focusForReader(poolCountRef.current, { preventScroll: true })
     else focusShown(DETAIL_HEADING_ATTRIBUTE.selectorFor(openId))
   }, [detail, openId, previousOpenId, previousPaperBeneathId])
 

@@ -7,6 +7,7 @@ import { useCategoryName } from '@/components/features/hosted-competitions/hooks
 import { Button } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
+import { focusForReader } from '@/components/shared/utils/focus-utils'
 
 import { useFinalizeBoard } from '../hooks/use-finalize-board'
 import { useFinalizeChoice } from '../hooks/use-finalize-choice'
@@ -62,7 +63,7 @@ export function FinalizeDialog({
     if (board.finalization === null) return
 
     // The focus goes to the stand-in for the Finalize button
-    focusAfterFinalizeRef.current?.focus()
+    focusForReader(focusAfterFinalizeRef.current)
   }
 
   return (

@@ -1,6 +1,7 @@
 import { useReducedMotion } from '@mantine/hooks'
 import { type CSSProperties, type RefCallback, type RefObject, useEffect, useRef } from 'react'
 
+import { focusForReader } from '@/components/shared/utils/focus-utils'
 import { useScrollFade } from '@/hooks/use-scroll-fade'
 
 /** The scroll affordances a horizontally-scrollable tab strip wires up. */
@@ -49,7 +50,7 @@ export function useTabStripScroll(selectedIndex: number): TabStripScroll {
     if (!activeTab?.parentElement?.contains(document.activeElement)) return
 
     // The tab that held focus is no longer a tab stop, so leaving focus on it would strand it
-    activeTab.focus()
+    focusForReader(activeTab)
   }, [selectedIndex])
 
   // Hand back the refs and the fade mask for the strip to render

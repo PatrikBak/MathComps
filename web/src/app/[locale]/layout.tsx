@@ -12,6 +12,7 @@ import KatexSetup from '@/components/math/KatexSetup'
 import { AuthStoreSync } from '@/components/shared/auth/AuthStoreSync'
 import { JsonLd } from '@/components/shared/components/JsonLd'
 import { OfflineIndicator } from '@/components/shared/components/OfflineIndicator'
+import { PressTracker } from '@/components/shared/components/PressTracker'
 import ProgressBarProvider from '@/components/shared/providers/ProgressBarProvider'
 import { QueryProvider } from '@/components/shared/providers/QueryProvider'
 import { ToastProvider } from '@/components/shared/providers/ToastProvider'
@@ -130,6 +131,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             <QueryProvider>
               <NextIntlClientProvider locale={locale}>
                 <KatexSetup />
+                <PressTracker />
                 <ProgressBarProvider>{children}</ProgressBarProvider>
                 <OfflineIndicator />
               </NextIntlClientProvider>

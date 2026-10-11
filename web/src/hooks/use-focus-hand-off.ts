@@ -2,6 +2,8 @@
 
 import { type RefObject, useLayoutEffect, useRef } from 'react'
 
+import { focusForReader } from '@/components/shared/utils/focus-utils'
+
 import { OPEN_ID_ATTRIBUTE } from './use-focus-return'
 
 /**
@@ -68,7 +70,7 @@ export function useFocusHandOff(fallbackRef: RefObject<HTMLElement | null>): Use
         const target = nextLink ?? fallback
 
         // Focused, the page staying where it was
-        target?.focus({ preventScroll: true })
+        focusForReader(target, { preventScroll: true })
       })
     }
   }, [fallbackRef])
