@@ -1,5 +1,7 @@
 import type { MouseEvent } from 'react'
 
+import { focusForReader } from './focus-utils'
+
 /**
  * Scrolls a textarea just far enough for its caret to be in its view, and not at all where it already is.
  *
@@ -123,7 +125,8 @@ export function shownElement<TElement extends Element>(selector: string): TEleme
 }
 
 /**
- * Puts focus on the first element matching a selector that the page lays out, leaving the page where it stands.
+ * Puts focus for the reader on the first element matching a selector that the page lays out, leaving the page where
+ * it stands.
  *
  * @param selector - The selector.
  * @returns Whether the page showed one.
@@ -133,7 +136,7 @@ export function focusShown(selector: string): boolean {
   const target = shownElement<HTMLElement>(selector)
 
   // Focused there, the page staying where it was
-  target?.focus({ preventScroll: true })
+  focusForReader(target, { preventScroll: true })
 
   // Whether there was one
   return target !== null

@@ -21,6 +21,7 @@ import {
   selectionText,
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
+  showsFocusRing,
   SLOVAK_STATEMENT,
   stubSelection,
   UNWRITTEN,
@@ -363,6 +364,9 @@ test.describe("the selection's address and history", () => {
 
     // Focus back on the problem's link
     await expect(link).toBeFocused()
+
+    // The link ringed, since a key took the reader back
+    expect(await showsFocusRing(link)).toBe(true)
 
     // Back, onto the problem again
     await page.goBack()

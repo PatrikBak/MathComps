@@ -1082,6 +1082,18 @@ export function headingOf(page: Page, proposal: Proposal) {
 }
 
 /**
+ * Whether an element shows the ring a browser draws around focus it lets the reader see.
+ *
+ * @param element - The element.
+ *
+ * @returns Whether it does.
+ */
+export function showsFocusRing(element: Locator): Promise<boolean> {
+  // Read off the element itself
+  return element.evaluate((node) => node.matches(':focus-visible'))
+}
+
+/**
  * The selected tab of a page open over the pool.
  *
  * @param page - The page.

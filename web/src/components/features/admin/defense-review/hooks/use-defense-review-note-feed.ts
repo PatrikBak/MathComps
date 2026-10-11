@@ -1,5 +1,7 @@
 import { type RefObject, useRef, useState } from 'react'
 
+import { focusForReader } from '@/components/shared/utils/focus-utils'
+
 /**
  * What {@link useDefenseReviewNoteFeed} hands back.
  */
@@ -65,7 +67,7 @@ export function useDefenseReviewNoteFeed(
   // A function which settles up once the conversation has gone
   const handleConversationClosed = () => {
     // Opened from a note in the feed, so back to the control the feed was opened from
-    if (landingNoteId !== null) feedButtonRef.current?.focus({ preventScroll: true })
+    if (landingNoteId !== null) focusForReader(feedButtonRef.current, { preventScroll: true })
 
     // Whatever the reader was sent to has been read by now, so the next open is nobody's note
     setLandingNoteId(null)

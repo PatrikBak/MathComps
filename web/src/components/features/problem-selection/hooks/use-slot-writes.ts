@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl'
 import { type RefObject, useEffect, useRef } from 'react'
 
+import { focusForReader } from '@/components/shared/utils/focus-utils'
+
 import { useSelectionWorkspace } from '../components/SelectionWorkspaceProvider'
 import { afterClearing } from '../model/selection-edits'
 import type { BoardSlot } from '../model/selection-state'
@@ -79,7 +81,7 @@ export function useSlotWrites(
     }
 
     // The one moving it on, focused
-    moveButtons[followedDirection].current?.focus()
+    focusForReader(moveButtons[followedDirection].current)
   }, [followedDirection, listRef])
 
   // A function which trades the slot with the one above it

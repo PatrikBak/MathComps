@@ -3,6 +3,8 @@
 import type { RefObject } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
+import { focusForReader } from '@/components/shared/utils/focus-utils'
+
 import type { DefenseSessionListItem } from '../model/defense-types'
 
 /**
@@ -50,7 +52,7 @@ export function useLibrarySelection(): UseLibrarySelectionResult {
     }
 
     // Hand focus to the row that was open, if it is still listed
-    rowToRefocus.current?.focus()
+    focusForReader(rowToRefocus.current)
   }, [inConversation])
 
   // A function which shows a defense's conversation

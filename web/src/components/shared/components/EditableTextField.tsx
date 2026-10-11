@@ -8,6 +8,7 @@ import { z } from 'zod'
 
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { cn } from '@/components/shared/utils/css-utils'
+import { focusForReader } from '@/components/shared/utils/focus-utils'
 
 /**
  * Props for the IconButton component.
@@ -201,7 +202,7 @@ export function EditableTextField({
     setIsEditing(false)
 
     // Focus the container
-    containerRef.current?.focus({ preventScroll: true })
+    focusForReader(containerRef.current, { preventScroll: true })
   }
 
   /**

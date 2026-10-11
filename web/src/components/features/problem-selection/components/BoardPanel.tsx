@@ -15,6 +15,7 @@ import {
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { cn } from '@/components/shared/utils/css-utils'
+import { focusForReader } from '@/components/shared/utils/focus-utils'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import { useKeyedState } from '@/hooks/use-keyed-state'
 import { localeCodeList } from '@/i18n/i18n'
@@ -313,7 +314,7 @@ function SlotRow({ moves, ...slot }: SlotRowProps) {
         <button
           type="button"
           // A slot emptied by its own Back to the pool takes the focus the pressed button had
-          autoFocus={isClearing}
+          ref={isClearing ? focusForReader : undefined}
           aria-pressed={isWaiting}
           aria-describedby={isWaiting ? hintId : undefined}
           onClick={toggleWaiting}
@@ -428,9 +429,9 @@ function SlotRow({ moves, ...slot }: SlotRowProps) {
 
           {/* Sending the problem back to the pool */}
           <SlotAction
+            ref={isClearing ? focusForReader : undefined}
             label={t('backToPool')}
             disabled={!canClear}
-            autoFocus={isClearing}
             onClick={clear}
           >
             <X size={14} />
@@ -451,8 +452,6 @@ type SlotActionProps = {
   label: string
   /** Whether the action is unavailable. */
   disabled?: boolean
-  /** Whether the action takes the focus as it appears. */
-  autoFocus?: boolean
   /** Runs the action. */
   onClick: () => void
   /** The icon. */
@@ -462,14 +461,7 @@ type SlotActionProps = {
 /**
  * One small icon action on a filled slot, named by its title.
  */
-function SlotAction({
-  ref,
-  label,
-  disabled = false,
-  autoFocus = false,
-  onClick,
-  children,
-}: SlotActionProps) {
+function SlotAction({ ref, label, disabled = false, onClick, children }: SlotActionProps) {
   return (
     <Button
       ref={ref}
@@ -477,7 +469,6 @@ function SlotAction({
       size="icon"
       className="size-7"
       title={label}
-      autoFocus={autoFocus}
       // Unavailable by its ARIA state alone, which keeps the focus on it through the press that makes it so
       aria-disabled={disabled}
       onClick={onClick}

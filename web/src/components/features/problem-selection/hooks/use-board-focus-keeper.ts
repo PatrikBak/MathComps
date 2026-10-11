@@ -3,6 +3,8 @@
 import { usePrevious, useWindowEvent } from '@mantine/hooks'
 import { type RefObject, useEffect, useRef } from 'react'
 
+import { focusForReader } from '@/components/shared/utils/focus-utils'
+
 import type { Board } from '../model/selection-types'
 
 /**
@@ -60,7 +62,7 @@ export function useBoardFocusKeeper(
     if (previousBoard.id === activeBoard.id) {
       // Finalized, so the focus goes to the line saying where it went
       if (previousBoard.finalization === null && activeBoard.finalization !== null) {
-        statusRef.current?.focus({ preventScroll: true })
+        focusForReader(statusRef.current, { preventScroll: true })
       }
 
       // Nothing else of the board's changes takes the focus anywhere
@@ -69,7 +71,7 @@ export function useBoardFocusKeeper(
 
     // Another board on screen since the one before left the selection, so the focus goes to the menu of those left
     if (!boards.some((board) => board.id === previousBoard.id)) {
-      menuRef.current?.focus({ preventScroll: true })
+      focusForReader(menuRef.current, { preventScroll: true })
     }
   }, [boards, activeBoard, previousBoard])
 

@@ -7,6 +7,7 @@ import type { ReactNode, RefObject } from 'react'
 import { Button } from '@/components/shared/components/Button'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
 import { cn } from '@/components/shared/utils/css-utils'
+import { focusForReader } from '@/components/shared/utils/focus-utils'
 import { useFocusHandOff } from '@/hooks/use-focus-hand-off'
 import type { Locale } from '@/i18n/i18n'
 
@@ -245,7 +246,7 @@ function WaitingBanner({ countRef }: WaitingBannerProps) {
   // A function which lets the slot go, the focus moving on before the banner leaves with the button
   const letGo = () => {
     // The focus on the line below, the page staying where it was
-    countRef.current?.focus({ preventScroll: true })
+    focusForReader(countRef.current, { preventScroll: true })
 
     // The slot let go, which takes the banner away
     stopWaiting()
