@@ -488,6 +488,35 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// An edited comment keeps its likes. The likes were given to the old version, and a thread counts only the
+    /// likes on the versions it shows, so an edit leaving them behind wipes every like the moment the author fixes a
+    /// typo.
+    /// </summary>
+    [Fact]
+    public Task UpdateCommentAsync_KeepsLikes() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment on the problem
+        var comment = await commentService.CreateCommentAsync(_problemThread, _user1, "Original content");
+
+        // The second user likes the comment
+        await commentService.ToggleLikeAsync(comment.Id, _user2);
+
+        // The author fixes a typo
+        var edited = await commentService.UpdateCommentAsync(comment.Id, _user1, "Fixed content");
+
+        // The thread as the second user reads it
+        var thread = await commentService.GetCommentsAsync(_problemThread, _user2);
+
+        // The edited version stands in the thread
+        var root = Assert.Single(thread);
+        Assert.Equal(edited.Id, root.Id);
+
+        // The edited version still carries the like, marked as the second user's
+        Assert.Equal(1, root.LikeCount);
+        Assert.True(root.IsLiked);
+    });
+
+    /// <summary>
     /// A version an edit replaced is gone for good. A reader whose page still shows it acts on its id, and the
     /// thread never reaches a superseded version: a reply under it would vanish, a second edit would show the
     /// comment twice, and a delete would leave the live version standing.
@@ -669,6 +698,18 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
             Assert.Equal(2, counts.Count);
             Assert.False(counts.ContainsKey(id3));
         });
+
+    /// <summary>
+    /// Problems are never counted in bulk: a count is refused as though the problems were not there, even to a
+    /// signed-out caller, who can reach every public thread.
+    /// </summary>
+    [Fact]
+    public Task GetCommentCountsAsync_RefusesProblems() => RunTestAsync(async commentService =>
+    {
+        // The seeded problem's count, asked for signed out
+        await Assert.ThrowsAsync<CommentTargetNotFoundException>(
+            () => commentService.GetCommentCountsAsync(CommentTargetType.Problem, [ProblemSlug], null));
+    });
 
     /// <summary>
     /// A deleted comment takes no like, refused like a comment that is not there, so a page left open since the

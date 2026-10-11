@@ -89,8 +89,9 @@ public interface ICommentThreadKind
     /// <param name="targetIds">The threads' target ids.</param>
     /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
     /// <returns>The query, each thread's count keyed by its target id, a thread with none left out.</returns>
-    /// <exception cref="CommentTargetNotFoundException">Thrown when the viewer may not reach the threads.</exception>
-    /// <exception cref="ArgumentException">Thrown when this kind is never counted in bulk.</exception>
+    /// <exception cref="CommentTargetNotFoundException">
+    /// Thrown when the viewer may not reach the threads, or when this kind is never counted in bulk.
+    /// </exception>
     Task<IQueryable<KeyValuePair<string, int>>> CountAsync(
         MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer? viewer);
 

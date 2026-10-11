@@ -50,11 +50,15 @@ public static class CommentEndpoints
             HttpContext context,
             ICommentService commentService) =>
         {
+            // A body naming no targets names nothing to count
+            if (request.TargetIds is not { Count: > 0 } targetIds)
+                throw new BadHttpRequestException("A count must name the targets.");
+
             // Who is asking... might be nobody
             var viewer = await GetViewerAsync(userManager, context);
 
             // Each target's active comment count by its id
-            var counts = await commentService.GetCommentCountsAsync(request.TargetType, request.TargetIds, viewer);
+            var counts = await commentService.GetCommentCountsAsync(request.TargetType, targetIds, viewer);
 
             // Return the mapping
             return Results.Ok(counts);
