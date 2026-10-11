@@ -6,7 +6,7 @@ import { STEP_KEYS } from '@/hooks/use-step-hotkeys'
 
 import messages from '../messages/en.json'
 import { type AnswerGate, gateReads } from './support/answer-gate'
-import { BACKEND_ORIGIN } from './support/backend-routes'
+import { BACKEND_ORIGIN, countDialogs } from './support/backend-routes'
 import {
   actionsCopy,
   chatCopy,
@@ -279,6 +279,112 @@ test.describe('what reviewers said about a problem', () => {
       selectionCopy.detail.conversationsTab,
       { timeout: SETTLE_TIMEOUT_MS }
     )
+  })
+
+  test('opens the conversation a link names, the address following every move to another and letting it go on close', async ({
+    page,
+  }) => {
+    // What the backend keeps
+    const memory = rememberedSelection(null)
+
+    // The reviewer's first conversation about the problem kept too, so the most recent one has a next
+    memory.conversations.push(FIRST_OF_TWO)
+
+    // A reviewer whose selection holds a pool of problems, one of them argued three times
+    await stubSelection(page, 'selection', memory)
+
+    // A link to the problem's most recent conversation, as a colleague would paste it
+    await page.goto(`${OPENED_ADDRESS}&conversation=${RECENT.id}`)
+
+    // The conversation open over the problem, named by who held it
+    const dialog = page.getByRole('dialog', {
+      name: conversationText('dialogTitleFor', { student: REVIEWER }),
+    })
+
+    // Saying what was argued in it
+    await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The next one along
+    await dialog.getByRole('button', { name: conversationText('next') }).click()
+
+    // Saying what the reviewer argued then
+    await expect(transcriptOf(page)).toContainText(ARGUED_FIRST)
+
+    // Named in the address in its place
+    await expect(page).toHaveURL(`${OPENED_ADDRESS}&conversation=${FIRST_OF_TWO.id}`)
+
+    // The most recent one again, by its number on the switch between the reviewer's conversations
+    await dialog
+      .getByRole('button', { name: conversationText('conversationNumber', { number: 2 }) })
+      .click()
+
+    // Saying what was argued in it
+    await expect(transcriptOf(page)).toContainText(ARGUED)
+
+    // Named in the address again
+    await expect(page).toHaveURL(`${OPENED_ADDRESS}&conversation=${RECENT.id}`)
+
+    // Closed
+    await dialog.getByRole('button', { name: actionsCopy.close }).click()
+
+    // Which leaves the problem's own address
+    await expect(page).toHaveURL(OPENED_ADDRESS)
+
+    // With the problem still on screen under it
+    await expect(headingOf(page, OPENED)).toBeVisible()
+  })
+
+  test('opens nothing for a link naming a conversation the problem does not list, and lets it go', async ({
+    page,
+  }) => {
+    // Every dialog the page puts up, from the first document on
+    const dialogs = await countDialogs(page)
+
+    // A reviewer whose selection holds a pool of problems, one of them argued twice
+    await stubSelection(page, 'selection')
+
+    // A link to the reviewer's first conversation, which the backend doesn't keep
+    await page.goto(`${OPENED_ADDRESS}&conversation=${FIRST_OF_TWO.id}`)
+
+    // The problem's conversations, listed
+    await expect(conversationRows(page)).toHaveCount(2, { timeout: SETTLE_TIMEOUT_MS })
+
+    // The address, the conversation dropped
+    await expect(page).toHaveURL(OPENED_ADDRESS)
+
+    // And no dialog, not even for a moment
+    expect(dialogs()).toBe(0)
+  })
+
+  test('names a conversation opened from its row in the address without a step of its own', async ({
+    page,
+  }) => {
+    // A reviewer whose selection holds a pool of problems, one of them argued twice
+    await stubSelection(page, 'selection')
+
+    // The pool, every card drawn
+    await openPool(page)
+
+    // A problem, opened by its name
+    await cardOf(page, OPENED).getByRole('link', { name: OPENED.title }).click()
+
+    // Its most recent conversation, opened from its row
+    await conversationRows(page).nth(0).click()
+
+    // Named in the address, so a link copied now opens it
+    await expect(page).toHaveURL(`${OPENED_ADDRESS}&conversation=${RECENT.id}`)
+
+    // Back
+    await page.goBack()
+
+    // Onto the pool, leaving the problem and its conversation together
+    await expect(page).toHaveURL(SELECTION_PATH)
+
+    // Forward
+    await page.goForward()
+
+    // Onto the conversation again
+    await expect(transcriptOf(page)).toContainText(ARGUED, { timeout: SETTLE_TIMEOUT_MS })
   })
 
   test('lists every conversation newest first, reads one only once it is opened, and walks them all', async ({

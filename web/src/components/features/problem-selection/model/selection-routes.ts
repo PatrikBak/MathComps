@@ -11,8 +11,19 @@ export const OPEN_PAPER_PARAM = 'paper'
 /** The query parameter naming the tab a page opens on. */
 const DETAIL_TAB_PARAM = 'tab'
 
+/** The query parameter naming the conversation open over a problem's page. */
+export const OPEN_CONVERSATION_PARAM = 'conversation'
+
+/** Every query parameter the conversation open over a problem's page owns. */
+export const CONVERSATION_PARAMS = [OPEN_CONVERSATION_PARAM] as const
+
 /** Every query parameter the page open over the pool owns. */
-export const DETAIL_PARAMS = [OPEN_PROPOSAL_PARAM, OPEN_PAPER_PARAM, DETAIL_TAB_PARAM] as const
+export const DETAIL_PARAMS = [
+  OPEN_PROPOSAL_PARAM,
+  OPEN_PAPER_PARAM,
+  DETAIL_TAB_PARAM,
+  OPEN_CONVERSATION_PARAM,
+] as const
 
 /** The tabs of a problem's page, the first being the one a problem opens on by default. */
 export const PROPOSAL_TABS = ['conversations', 'comments'] as const
@@ -59,9 +70,10 @@ const SUBJECT_PARAMS: Record<DetailPage['kind'], string> = {
 /**
  * Every query parameter each kind of page writes itself. A problem's leaves the paper it was opened over as it
  * stands, so a problem opened while the address names a paper opens over that paper. A paper's owns them all.
+ * Each kind also owns the conversation open over a problem, so a page opens with none.
  */
 export const PAGE_PARAMS: Record<DetailPage['kind'], readonly string[]> = {
-  proposal: [OPEN_PROPOSAL_PARAM, DETAIL_TAB_PARAM],
+  proposal: [OPEN_PROPOSAL_PARAM, DETAIL_TAB_PARAM, OPEN_CONVERSATION_PARAM],
   paper: DETAIL_PARAMS,
 }
 

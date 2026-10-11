@@ -21,6 +21,27 @@ import { ConversationDialogBody } from './ConversationDialogBody'
 import { DefenseTargetRef } from './DefenseTargetRef'
 
 /**
+ * What each item of the dialog's list is: a student's problem; one of their conversations, the list staying on it
+ * while the switch shows their others; or one of their conversations in a list holding all their others too, which
+ * the switch then opens as the item.
+ */
+type ListItems = 'problems' | 'conversations' | 'everyConversation'
+
+/** Whether each kind of item is itself one of a student's conversations, which the dialog then starts on. */
+const ITEMS_ARE_CONVERSATIONS: Record<ListItems, boolean> = {
+  problems: false,
+  conversations: true,
+  everyConversation: true,
+}
+
+/** Whether picking a conversation on the switch opens it as the list's item, by each kind of item. */
+const SWITCH_OPENS_ITEM: Record<ListItems, boolean> = {
+  problems: false,
+  conversations: false,
+  everyConversation: true,
+}
+
+/**
  * Props for the {@link ConversationDialog} component.
  */
 type ConversationDialogProps = {
@@ -34,10 +55,10 @@ type ConversationDialogProps = {
    */
   conversationList: UseStudentConversationsResult
   /**
-   * Whether each item of the list is itself one of a student's conversations, which the dialog then starts on;
-   * absent where each is a student's problem, which starts on the first conversation they held about it.
+   * What each item of the list is; absent where each is a student's problem, which starts on the first
+   * conversation they held about it.
    */
-  itemsAreConversations?: boolean
+  items?: ListItems
   /** Further ways through the list, standing after the step forward. */
   stepActions?: ReactNode
   /** The note the reader was sent to; null when they came in for the conversation itself. */
@@ -73,7 +94,7 @@ export function ConversationDialog({
   selection,
   student,
   conversationList,
-  itemsAreConversations = false,
+  items = 'problems',
   stepActions,
   landingNoteId = null,
   initialTabId = null,
@@ -103,7 +124,7 @@ export function ConversationDialog({
   } = useConversationDialog(
     selection.openId,
     conversationList,
-    itemsAreConversations,
+    ITEMS_ARE_CONVERSATIONS[items],
     landingNoteId,
     initialTabId,
     onClosed
@@ -111,6 +132,10 @@ export function ConversationDialog({
 
   // The student's name, once whose item is open is known
   const studentName = student === null ? null : describeUser(student, tProfile('defaultUser'))
+
+  // A function which shows another of the student's conversations: as the list's item where the switch opens
+  // items, or else within the item open
+  const showConversation = SWITCH_OPENS_ITEM[items] ? selection.open : selectConversation
 
   return (
     <Modal
@@ -233,7 +258,7 @@ export function ConversationDialog({
           noteTurnId={noteTurnId}
           onNoteTurnIdChange={setNoteTurnId}
           landingNoteId={landingNoteId}
-          onSelectConversation={selectConversation}
+          onSelectConversation={showConversation}
           onChangeGrade={changeGrade}
         />
       )}
