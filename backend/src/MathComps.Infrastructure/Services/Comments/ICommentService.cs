@@ -43,8 +43,8 @@ public interface ICommentService
 
     /// <summary>
     /// Edits a comment by writing a new version of it. The new version stays in the thread the comment was
-    /// written in and keeps its replies, its posting time and any mail still owed about it, and queues none of its
-    /// own. A deleted comment is refused as though it did not exist.
+    /// written in and keeps its replies, its likes, its posting time and any mail still owed about it, and queues
+    /// none of its own. A deleted comment is refused as though it did not exist.
     /// </summary>
     /// <param name="commentId">The ID of the comment to update.</param>
     /// <param name="viewer">The user making the edit (must be the author).</param>
@@ -69,9 +69,8 @@ public interface ICommentService
 
     /// <summary>
     /// Counts the active comments on each of several targets of one type. Only handouts, news articles, proposals
-    /// and papers are counted in bulk: grade conversations are refused like targets that are not there, and so are
-    /// proposals and papers to anybody but the accounts preparing the competitions. Any other type throws
-    /// <see cref="ArgumentException"/>.
+    /// and papers are counted in bulk: problems and grade conversations are refused like targets that are not
+    /// there, and so are proposals and papers to anybody but the accounts preparing the competitions.
     /// </summary>
     /// <param name="targetType">The type of the targets.</param>
     /// <param name="targetIds">The ids of the targets.</param>

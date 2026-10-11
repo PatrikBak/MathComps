@@ -181,7 +181,7 @@ public class CommentService(
             ?? throw new CommentProfileIncompleteException();
 
         // The kind of thread the target names
-        var kind = KindOf(target.TargetType);
+        var kind = KindOf(target.TargetType, target.TargetId);
 
         // The thread the target names
         var anchor = await kind.ResolveAsync(dbContext, target);
@@ -288,6 +288,22 @@ public class CommentService(
         foreach (var reply in replies)
             reply.ParentCommentId = newComment.Id;
 
+        // The likes on the old version
+        var likes = await dbContext.CommentLikes
+            .Where(like => like.CommentId == existingComment.Id)
+            .ToListAsync();
+
+        // Each like taken off the old version
+        dbContext.CommentLikes.RemoveRange(likes);
+
+        // The same likes given to the new version, since a thread counts only the likes on the versions it shows
+        dbContext.CommentLikes.AddRange(likes.Select(like => new CommentLike
+        {
+            UserId = like.UserId,
+            CommentId = newComment.Id,
+            CreatedAt = like.CreatedAt
+        }));
+
         // Whatever else hangs off the comment in its kind of thread follows it onto the new version
         await kind.OnEditedAsync(dbContext, existingComment.Id, newComment.Id);
 
@@ -389,7 +405,7 @@ public class CommentService(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         // Each requested target's active-comment count, by its id, as its kind of thread counts it
-        var query = await KindOf(targetType).CountAsync(dbContext, targetIds, viewer);
+        var query = await KindOf(targetType, string.Join(", ", targetIds)).CountAsync(dbContext, targetIds, viewer);
 
         // Each target's count, by its id
         var counts = await query.ToDictionaryAsync(pair => pair.Key, pair => pair.Value);
@@ -412,7 +428,7 @@ public class CommentService(
     private async Task EnsureOpenAsync(MathCompsDbContext dbContext, CommentTarget target, CommentViewer? viewer)
     {
         // A thread the viewer may not reach, refused like one that is not there
-        if (!await KindOf(target.TargetType).IsOpenAsync(dbContext, target, viewer))
+        if (!await KindOf(target.TargetType, target.TargetId).IsOpenAsync(dbContext, target, viewer))
             throw new CommentTargetNotFoundException(target.TargetType, target.TargetId);
     }
 
@@ -478,7 +494,7 @@ public class CommentService(
     {
         // The JOIN and WHERE picking out the target's thread, with the values the WHERE compares against
         var (joinFragment, whereFragment, parameters) =
-            await KindOf(target.TargetType).SelectAsync(dbContext, target);
+            await KindOf(target.TargetType, target.TargetId).SelectAsync(dbContext, target);
 
         // The thread's SQL, which skips a replaced version and keeps a deleted comment so the replies under it
         // stay reachable. Each comment is walked back through its earlier versions to the first one, whose time
@@ -529,14 +545,16 @@ public class CommentService(
     }
 
     /// <summary>
-    /// The kind of thread a target type names.
+    /// The kind of thread a target type names, refusing a value outside the enum like a target that is not there.
     /// </summary>
     /// <param name="targetType">The target type.</param>
+    /// <param name="targetId"><inheritdoc cref="CommentTargetNotFoundException" path="/param[@name='targetId']"/></param>
     /// <returns>The kind serving it.</returns>
-    private ICommentThreadKind KindOf(CommentTargetType targetType) =>
+    /// <exception cref="CommentTargetNotFoundException">Thrown when no kind serves the target type.</exception>
+    private ICommentThreadKind KindOf(CommentTargetType targetType, string targetId) =>
         // Every target type has its kind, so only a value outside the enum goes without one
         _kinds.FirstOrDefault(kind => kind.TargetType == targetType)
-        ?? throw new ArgumentOutOfRangeException(nameof(targetType), targetType, "Invalid comment target type");
+        ?? throw new CommentTargetNotFoundException(targetType, targetId);
 
     /// <summary>
     /// Takes the kinds of thread, refusing a set that leaves a target type without a kind or gives it two, so no

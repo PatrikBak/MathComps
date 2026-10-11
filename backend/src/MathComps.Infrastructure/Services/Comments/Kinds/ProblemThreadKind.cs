@@ -36,8 +36,8 @@ public class ProblemThreadKind : PublicCommentThreadKind<ProblemAnchor>
     /// <inheritdoc />
     public override Task<IQueryable<KeyValuePair<string, int>>> CountAsync(
         MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer? viewer) =>
-        // A problem's thread, with no bulk count
-        throw new ArgumentException("Unsupported target type for bulk counts");
+        // Never counted in bulk, refused like targets that are not there
+        throw new CommentTargetNotFoundException(TargetType, string.Join(", ", targetIds));
 
     /// <inheritdoc />
     protected override async Task<ProblemAnchor> ResolveAsync(MathCompsDbContext dbContext, CommentTarget target) =>
