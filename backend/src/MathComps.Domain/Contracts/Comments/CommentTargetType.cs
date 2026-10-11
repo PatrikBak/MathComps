@@ -29,5 +29,10 @@ public enum CommentTargetType
     /// <summary>
     /// The reviewers' discussion of a proposal in the problem selection, identified by the proposal's id.
     /// </summary>
-    Proposal
+    Proposal,
+
+    /// <summary>
+    /// The reviewers' discussion of one paper on a board of the problem selection, identified by the paper's id.
+    /// </summary>
+    SelectionPaper
 }

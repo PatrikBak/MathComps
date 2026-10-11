@@ -4,7 +4,7 @@ import { useDisclosure } from '@mantine/hooks'
 import { useTranslations } from 'next-intl'
 
 import type { Proposal } from '../model/selection-types'
-import { useDetailTabCounts } from './use-detail-tab-counts'
+import { useProposalTabCounts } from './use-proposal-tab-counts'
 import { useDeleteProposal } from './use-proposal-writes'
 
 /**
@@ -38,19 +38,16 @@ export function useProposalDeleteConfirmation(
   // Counted nouns, which decline with the number in front of them
   const tPlurals = useTranslations('plurals')
 
-  // Filing-line copy
-  const tFiling = useTranslations('problemSelection.filing')
-
   // Whether the delete is waiting to be confirmed
   const [isConfirming, { open: ask, close: dismiss }] = useDisclosure(false)
 
   // How many conversations and comments the problem carries
-  const counts = useDetailTabCounts(proposal.id)
+  const counts = useProposalTabCounts(proposal.id)
 
   // What goes with the problem when it is deleted, each kind counted in words
   const attached = [
     counts.conversations > 0 && tPlurals('conversations', { count: counts.conversations }),
-    counts.comments > 0 && tFiling('comments', { count: counts.comments }),
+    counts.comments > 0 && tPlurals('comments', { count: counts.comments }),
   ].filter((part) => part !== false)
 
   // Deleting the problem

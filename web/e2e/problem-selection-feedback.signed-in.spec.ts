@@ -25,20 +25,23 @@ import {
   EARLIER_STATEMENT,
   headingOf,
   LANDING_WINDOW_MS,
-  ON_OFFER_COUNT,
   OPENED,
   OPENED_ADDRESS,
   OPENED_COMMENT,
+  openPool,
   RECENT,
   rememberedSelection,
   REVIEWER,
   REVISION,
+  selectedTab,
   selectionCopy,
   selectionText,
+  sendComment,
   SETTLE_TIMEOUT_MS,
-  stubNamedReader,
   stubSelection,
+  tabRowOn,
 } from './support/problem-selection'
+import { stubNamedReader } from './support/selection-comments'
 import { expect, test } from './support/test'
 
 /** What a reviewer writes into {@link OPENED}'s discussion while a test watches. */
@@ -170,51 +173,47 @@ async function openMathildaOnBilingual(page: Page): Promise<AnswerGate> {
 }
 
 test.describe('what reviewers said about a problem', () => {
-  test('counts the conversations and comments on each card, the comment count opening its tab', async ({
+  test('counts the conversations and comments on each card, the comments row opening its tab and taking the focus back', async ({
     page,
   }) => {
     // A reviewer whose selection holds a pool of problems, one of them argued and discussed
     await stubSelection(page, 'selection')
 
-    // The pool
-    await page.goto(SELECTION_PATH)
-
-    // Once every card is drawn
-    await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT, {
-      timeout: SETTLE_TIMEOUT_MS,
-    })
+    // The pool, every card drawn
+    await openPool(page)
 
     // The conversations held with Mathilda about a problem, counted on its card
-    await expect(
-      cardOf(page, OPENED).getByRole('link', {
-        name: selectionText('filing.conversations', { count: 2 }),
-      })
-    ).toBeVisible()
+    await expect(tabRowOn(cardOf(page, OPENED), 'conversations', 2)).toBeVisible()
 
-    // The card's count of the comments under it
-    const commentCount = cardOf(page, OPENED).getByRole('link', {
-      name: selectionText('filing.comments', { count: 1 }),
-    })
+    // The card's row for the comments under it, counting them
+    const commentsRow = tabRowOn(cardOf(page, OPENED), 'comments', 1)
 
     // Shown too
-    await expect(commentCount).toBeVisible()
+    await expect(commentsRow).toBeVisible()
 
-    // A problem nobody has said anything about links to its own page alone
-    await expect(cardOf(page, BILINGUAL).getByRole('link')).toHaveCount(1)
+    // A problem nobody has said anything about, its rows counting nothing
+    await expect(tabRowOn(cardOf(page, BILINGUAL), 'conversations', 0)).toBeVisible()
+    await expect(tabRowOn(cardOf(page, BILINGUAL), 'comments', 0)).toBeVisible()
 
-    // The comment count, followed
-    await commentCount.click()
+    // The comments row, followed
+    await commentsRow.click()
 
     // Onto the problem's discussion, named in the address
     await expect(page).toHaveURL(`${OPENED_ADDRESS}&tab=comments`)
 
     // Its tab, the one selected
-    await expect(page.getByRole('tab', { selected: true })).toContainText(
+    await expect(selectedTab(page, selectionCopy.detail.tabsLabel)).toContainText(
       selectionCopy.detail.commentsTab
     )
 
     // With what was said in it
     await expect(page.getByRole('tabpanel')).toContainText(OPENED_COMMENT.content)
+
+    // The left arrow
+    await page.keyboard.press('ArrowLeft')
+
+    // The pool back, focus back on the row the problem was opened from
+    await expect(commentsRow).toBeFocused()
   })
 
   test('opens a problem on its conversations, and names a tab picked in the address without a step of its own', async ({
@@ -223,19 +222,14 @@ test.describe('what reviewers said about a problem', () => {
     // A reviewer whose selection holds a pool of problems
     await stubSelection(page, 'selection')
 
-    // The pool
-    await page.goto(SELECTION_PATH)
-
-    // Once every card is drawn
-    await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT, {
-      timeout: SETTLE_TIMEOUT_MS,
-    })
+    // The pool, every card drawn
+    await openPool(page)
 
     // A problem, opened by its name
     await cardOf(page, OPENED).getByRole('link', { name: OPENED.title }).click()
 
     // On its conversations
-    await expect(page.getByRole('tab', { selected: true })).toContainText(
+    await expect(selectedTab(page, selectionCopy.detail.tabsLabel)).toContainText(
       selectionCopy.detail.conversationsTab
     )
 
@@ -255,7 +249,7 @@ test.describe('what reviewers said about a problem', () => {
     await page.goForward()
 
     // Onto the problem's discussion again
-    await expect(page.getByRole('tab', { selected: true })).toContainText(
+    await expect(selectedTab(page, selectionCopy.detail.tabsLabel)).toContainText(
       selectionCopy.detail.commentsTab
     )
   })
@@ -270,7 +264,7 @@ test.describe('what reviewers said about a problem', () => {
     await page.goto(`${OPENED_ADDRESS}&tab=history`)
 
     // Opened on the conversations
-    await expect(page.getByRole('tab', { selected: true })).toContainText(
+    await expect(selectedTab(page, selectionCopy.detail.tabsLabel)).toContainText(
       selectionCopy.detail.conversationsTab,
       { timeout: SETTLE_TIMEOUT_MS }
     )
@@ -796,11 +790,8 @@ test.describe('what reviewers said about a problem', () => {
       timeout: SETTLE_TIMEOUT_MS,
     })
 
-    // A comment, written
-    await page.getByRole('tabpanel').locator('textarea').fill(NEW_COMMENT)
-
-    // And sent from the keyboard
-    await page.keyboard.press('Meta+Enter')
+    // A comment, sent
+    await sendComment(newCommentBox(page), NEW_COMMENT)
 
     // In the discussion
     await expect(page.getByRole('tabpanel')).toContainText(NEW_COMMENT)
@@ -809,11 +800,7 @@ test.describe('what reviewers said about a problem', () => {
     await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
 
     // The problem's card counting it
-    await expect(
-      cardOf(page, OPENED).getByRole('link', {
-        name: selectionText('filing.comments', { count: 2 }),
-      })
-    ).toBeVisible()
+    await expect(tabRowOn(cardOf(page, OPENED), 'comments', 2)).toBeVisible()
   })
 
   test('keeps a comment and a reply left unsent while the reviewer is away from the problem', async ({
@@ -845,10 +832,8 @@ test.describe('what reviewers said about a problem', () => {
     // Back to the pool by the link on the problem's page
     await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
 
-    // The problem's discussion again, by the count on its card
-    await cardOf(page, OPENED)
-      .getByRole('link', { name: selectionText('filing.comments', { count: 1 }) })
-      .click()
+    // The problem's discussion again, by the comments row on its card
+    await tabRowOn(cardOf(page, OPENED), 'comments', 1).click()
 
     // The comment as it was left
     await expect(newCommentBox(page)).toHaveValue(NEW_COMMENT)

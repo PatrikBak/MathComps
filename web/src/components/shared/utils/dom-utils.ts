@@ -106,6 +106,39 @@ export function dataAttribute<TName extends `data-${string}`>(name: TName): Data
   return { stamp, selectorFor, anySelector }
 }
 
+/**
+ * The first element matching a selector that the page lays out, passing over any inside a hidden part of the page,
+ * which can take neither focus nor a place on screen.
+ *
+ * @param selector - The selector.
+ * @returns The element, or null when the page shows none.
+ */
+export function shownElement<TElement extends Element>(selector: string): TElement | null {
+  // The matches in document order, the first one given a box on screen
+  return (
+    [...document.querySelectorAll<TElement>(selector)].find(
+      (element) => element.getClientRects().length > 0
+    ) ?? null
+  )
+}
+
+/**
+ * Puts focus on the first element matching a selector that the page lays out, leaving the page where it stands.
+ *
+ * @param selector - The selector.
+ * @returns Whether the page showed one.
+ */
+export function focusShown(selector: string): boolean {
+  // The element, where the page shows one
+  const target = shownElement<HTMLElement>(selector)
+
+  // Focused there, the page staying where it was
+  target?.focus({ preventScroll: true })
+
+  // Whether there was one
+  return target !== null
+}
+
 /** The ARIA roles of the widgets whose own items the arrow keys move between. */
 const ARROW_KEY_WIDGET_ROLES = [
   'combobox',

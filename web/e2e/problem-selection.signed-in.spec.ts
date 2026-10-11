@@ -5,6 +5,7 @@ import { OPEN_PROPOSAL_PARAM } from '@/components/features/problem-selection/mod
 import { BACKEND_ORIGIN, returnToTab } from './support/backend-routes'
 import { actionsCopy, areaCopy, editorCopy, SELECTION_PATH } from './support/competitions'
 import {
+  addressedParam,
   BILINGUAL,
   cardOf,
   headingOf,
@@ -14,17 +15,18 @@ import {
   OPENED,
   OPENED_ADDRESS,
   REVISION,
+  selectedTab,
   SELECTION_ENDPOINT,
   selectionCopy,
   selectionText,
   SET_ASIDE,
   SETTLE_TIMEOUT_MS,
   SLOVAK_STATEMENT,
-  stubNamedReader,
   stubSelection,
   UNWRITTEN,
   USED,
 } from './support/problem-selection'
+import { stubNamedReader } from './support/selection-comments'
 import { expect, test } from './support/test'
 
 /** Where the pool is left when a problem is opened from it, in pixels from the top. */
@@ -44,22 +46,6 @@ const UNHELD_ID = '00000000-0000-4000-8000-999999999999'
 
 /** A comment a reviewer is partway through writing. */
 const COMMENT_DRAFT = 'Fine for the intermediate paper'
-
-/**
- * The problem the address names this instant, read off the page itself, since a step the page pushes onto
- * history reaches Playwright's own copy of the address only later.
- *
- * @param page - The page.
- *
- * @returns The problem's id, or null while the address names none.
- */
-function openProblemId(page: Page): Promise<string | null> {
-  // Read off the page's own address
-  return page.evaluate(
-    (param) => new URLSearchParams(window.location.search).get(param),
-    OPEN_PROPOSAL_PARAM
-  )
-}
 
 /**
  * How far down the window is scrolled.
@@ -407,7 +393,7 @@ test.describe("the selection's address and history", () => {
     await editor.press('ArrowLeft')
 
     // The problem still open
-    expect(await openProblemId(page)).toBe(OPENED.id)
+    expect(await addressedParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
 
     // The editor's button opening its emoji picker
     const emojiButton = page
@@ -424,7 +410,7 @@ test.describe("the selection's address and history", () => {
     await emoji.press('ArrowLeft', { timeout: SETTLE_TIMEOUT_MS })
 
     // The problem still open
-    expect(await openProblemId(page)).toBe(OPENED.id)
+    expect(await addressedParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
 
     // The picker, put away by its button
     await emojiButton.click()
@@ -436,14 +422,12 @@ test.describe("the selection's address and history", () => {
     await page.getByRole('tab', { name: selectionCopy.detail.commentsTab }).press('ArrowLeft')
 
     // Moving onto the conversations
-    await expect(
-      page
-        .getByRole('tablist', { name: selectionCopy.detail.tabsLabel })
-        .getByRole('tab', { selected: true })
-    ).toContainText(selectionCopy.detail.conversationsTab)
+    await expect(selectedTab(page, selectionCopy.detail.tabsLabel)).toContainText(
+      selectionCopy.detail.conversationsTab
+    )
 
     // The problem still open
-    expect(await openProblemId(page)).toBe(OPENED.id)
+    expect(await addressedParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
 
     // The problem's menu, opened
     await page
@@ -465,7 +449,7 @@ test.describe("the selection's address and history", () => {
     await page.keyboard.press('ArrowLeft')
 
     // The problem still open
-    expect(await openProblemId(page)).toBe(OPENED.id)
+    expect(await addressedParam(page, OPEN_PROPOSAL_PARAM)).toBe(OPENED.id)
 
     // And the question with it
     await expect(question).toHaveCount(1)

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { cycleMisfit, pickActiveBoard, resolveText, unreadyLanguages } from '../selection-state'
+import {
+  cycleMisfit,
+  pickActiveBoard,
+  resolveText,
+  unreadyLanguages,
+  unwrittenAcross,
+} from '../selection-state'
 import type { Board, Cycle, Paper, Proposal } from '../selection-types'
 
 /** The October cycle: one round per category, four problems each. */
@@ -152,6 +158,33 @@ describe('unreadyLanguages', () => {
 
     // English falls short
     expect(unready).toEqual(['en'])
+  })
+})
+
+describe('unwrittenAcross', () => {
+  it('rules out only the languages none of the proposals is written in', () => {
+    // One proposal in English and Slovak, another in English alone
+    const proposals = [
+      proposal({
+        en: { statement: 'en', solution: null, hints: [] },
+        sk: { statement: 'sk', solution: null, hints: [] },
+      }),
+      proposal({ en: { statement: 'en', solution: null, hints: [] } }),
+    ]
+
+    // The languages neither is written in
+    const unwritten = unwrittenAcross(proposals)
+
+    // Czech alone, since Slovak has one of them
+    expect(unwritten).toEqual(['cs'])
+  })
+
+  it('rules out no language for an empty set, though no proposal is written in any', () => {
+    // The languages an empty paper rules out
+    const unwritten = unwrittenAcross([])
+
+    // None
+    expect(unwritten).toEqual([])
   })
 })
 

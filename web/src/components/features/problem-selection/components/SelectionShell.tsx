@@ -14,15 +14,17 @@ import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import type { Locale } from '@/i18n/i18n'
 import { errorCodeOf } from '@/lib/api/api-error'
 
+import type { OpenDetail } from '../model/selection-routes'
 import { PROPOSAL_AUTHORING_LANGUAGE } from '../model/selection-types'
 import { BoardPanel } from './BoardPanel'
+import { PaperDetail } from './PaperDetail'
 import { PoolView } from './PoolView'
 import { ProposalDetail } from './ProposalDetail'
 import { SelectionWorkspaceProvider, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
- * The selection's frame: the pool or a single problem on the left, the board being filled on the right. On a
- * narrow screen the board folds into a bar above the content.
+ * The selection's frame: the pool, a single problem or a single paper on the left, the board being filled on the
+ * right. On a narrow screen the board folds into a bar above the content.
  */
 export function SelectionShell() {
   // The page's own name and description
@@ -52,7 +54,7 @@ export function SelectionShell() {
             <BoardPanel />
           </aside>
 
-          {/* The pool, or the problem open over it */}
+          {/* The pool, or the page open over it */}
           <div className="min-w-0 lg:order-1">
             <SelectionContent />
           </div>
@@ -165,24 +167,88 @@ function SelectionNotice({ children }: SelectionNoticeProps) {
 }
 
 /**
- * The pool, or the problem open over it. The pool stays mounted while hidden, so its cards come back without being
- * built again. A problem opens in the language the pool is read in, where it is written in it.
+ * The pool, or the page open over it. The pool stays mounted while hidden, so its cards come back without being
+ * built again. A page opens in the pool's language where what it shows is written in that language. A paper's page
+ * opens in the language last picked for it, if any.
  */
 function SelectionContent() {
-  // The problem open in full, if any
-  const { openProposalId } = useSelectionWorkspace()
+  // The page open in full, if any
+  const { detail } = useSelectionWorkspace()
 
   // The language the pool is read in
   const [poolLanguage, setPoolLanguage] = useState<Locale>(PROPOSAL_AUTHORING_LANGUAGE)
 
+  // The language last picked for each paper, by the paper's id
+  const [paperLanguages, setPaperLanguages] = useState<ReadonlyMap<string, Locale>>(new Map())
+
+  // A function which keeps the language picked for a paper
+  const keepPaperLanguage = (paperId: string, language: Locale) =>
+    setPaperLanguages((current) => new Map(current).set(paperId, language))
+
   return (
     <>
-      <Activity mode={openProposalId === null ? 'visible' : 'hidden'}>
+      <Activity mode={detail === null ? 'visible' : 'hidden'}>
         <PoolView language={poolLanguage} onLanguageChange={setPoolLanguage} />
       </Activity>
-      {openProposalId !== null && (
-        <ProposalDetail proposalId={openProposalId} poolLanguage={poolLanguage} />
+      {detail !== null && (
+        <DetailView
+          detail={detail}
+          poolLanguage={poolLanguage}
+          paperLanguages={paperLanguages}
+          onPaperLanguageChange={keepPaperLanguage}
+        />
       )}
     </>
   )
+}
+
+/**
+ * Props for the {@link DetailView} component.
+ */
+type DetailViewProps = {
+  /** The page open over the pool. */
+  detail: OpenDetail
+  /** The language the pool is read in. */
+  poolLanguage: Locale
+  /** The language last picked for each paper, by the paper's id. */
+  paperLanguages: ReadonlyMap<string, Locale>
+  /** Keeps the language picked for a paper. */
+  onPaperLanguageChange: (paperId: string, language: Locale) => void
+}
+
+/**
+ * The page open over the pool, a problem's or a paper's, once the selection holding its subject has arrived.
+ */
+function DetailView({
+  detail,
+  poolLanguage,
+  paperLanguages,
+  onPaperLanguageChange,
+}: DetailViewProps) {
+  // The selection, if its read has landed
+  const { selection } = useSelectionWorkspace()
+
+  // The selection still on its way
+  if (selection === null) {
+    return <div className="h-96 animate-pulse rounded-xl bg-surface/25" aria-hidden />
+  }
+
+  // A problem's page or a paper's, by the kind of page open
+  switch (detail.kind) {
+    case 'proposal':
+      return <ProposalDetail proposalId={detail.id} poolLanguage={poolLanguage} />
+    case 'paper':
+      return (
+        <PaperDetail
+          paperId={detail.id}
+          poolLanguage={poolLanguage}
+          keptLanguage={paperLanguages.get(detail.id)}
+          onLanguageChange={(language) => onPaperLanguageChange(detail.id, language)}
+        />
+      )
+
+    // Every kind is handled above
+    default:
+      return assertNever(detail)
+  }
 }

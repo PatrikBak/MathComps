@@ -15,18 +15,20 @@ import {
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
 import { cn } from '@/components/shared/utils/css-utils'
+import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import { useKeyedState } from '@/hooks/use-keyed-state'
 import { localeCodeList } from '@/i18n/i18n'
 
 import { useBoardFocusKeeper } from '../hooks/use-board-focus-keeper'
 import { useBoardSlot } from '../hooks/use-board-slot'
+import { usePaperCommentCount } from '../hooks/use-paper-comment-count'
 import { usePaperMoves, type UsePaperMovesResult } from '../hooks/use-paper-moves'
 import { useSlotWrites } from '../hooks/use-slot-writes'
 import { type BoardSlot, finalizeBlockers } from '../model/selection-state'
 import type { Board, Paper } from '../model/selection-types'
 import { SlotNumber, WARNING_MARK_CLASS } from './CategoryMarks'
 import { FinalizeDialog } from './FinalizeDialog'
-import { ProposalLink } from './SelectionLinks'
+import { PaperCommentsLink, PaperLink, ProposalLink } from './SelectionLinks'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
@@ -37,12 +39,12 @@ export function BoardPanel() {
   // Board copy
   const t = useTranslations('problemSelection.board')
 
-  // The selection, the problem open over the pool, and the way to put another board on screen
-  const { selection, openProposalId, selectBoard } = useSelectionWorkspace()
+  // The selection, the page open over the pool, and the way to put another board on screen
+  const { selection, detail, selectBoard } = useSelectionWorkspace()
 
   // Whether the papers show below the header on a narrow screen, where they fold away by default and again
-  // whenever the open problem changes, closing included, so the problem a slot opens is what the screen shows
-  const [isUnfolded, setIsUnfolded] = useKeyedState(openProposalId, false)
+  // whenever the open page changes, closing included, so the page a slot or a paper opens is what the screen shows
+  const [isUnfolded, setIsUnfolded] = useKeyedState(detail?.id ?? null, false)
 
   // Where the focus goes when a read changes the board on screen under it
   const { menuRef, statusRef } = useBoardFocusKeeper(
@@ -220,7 +222,7 @@ type PaperSlotsProps = {
 }
 
 /**
- * One paper, slot by slot.
+ * One paper, slot by slot, under its name opening the paper in full.
  */
 function PaperSlots({ board, paper }: PaperSlotsProps) {
   // The moves along the paper
@@ -229,14 +231,28 @@ function PaperSlots({ board, paper }: PaperSlotsProps) {
   // How many of the paper's slots hold a problem
   const filled = paper.slots.filter((slot) => slot !== null).length
 
+  // How many comments the paper's discussion holds
+  const commentCount = usePaperCommentCount(paper.id)
+
   return (
     <div className="px-2 pt-3">
-      {/* The paper's name in its category's colour, and how full it is */}
-      <div className="flex items-baseline justify-between px-2 pb-1">
+      {/* The paper's name in its category's colour, how much it has been talked about, and how full it is */}
+      <div className="flex items-baseline justify-between gap-2 px-2 pb-1">
         <h3 className={cn('text-sm font-semibold', categoryTextClass(paper.category))}>
-          {paper.name}
+          <PaperLink
+            paperId={paper.id}
+            // Named so the board can come back to it, focus and all, once the paper closes
+            {...OPEN_ID_ATTRIBUTE.stamp(paper.id)}
+            className="rounded-sm underline decoration-current/40 underline-offset-2 hover:decoration-current"
+            plain
+          >
+            {paper.name}
+          </PaperLink>
         </h3>
-        <span className="text-xs tabular-nums text-muted">{`${filled}/${paper.slots.length}`}</span>
+        <div className="flex items-baseline gap-1.5">
+          <PaperCommentsLink paper={paper} count={commentCount} />
+          <span className="text-xs tabular-nums text-muted">{`${filled}/${paper.slots.length}`}</span>
+        </div>
       </div>
 
       {/* Every slot */}

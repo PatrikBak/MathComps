@@ -5,9 +5,9 @@ import { useCommentCount } from '@/components/features/comments/components/Comme
 import { useLoadedSelection } from '../components/SelectionWorkspaceProvider'
 
 /**
- * What {@link useDetailTabCounts} hands back: one count per tab, under the tab's name.
+ * What {@link useProposalTabCounts} hands back: one count per tab, under the tab's name.
  */
-type UseDetailTabCountsResult = {
+type UseProposalTabCountsResult = {
   /** How many conversations reviewers held with Mathilda about the problem. */
   conversations: number
   /** How many comments the problem's discussion holds. */
@@ -22,7 +22,7 @@ type UseDetailTabCountsResult = {
  *
  * @returns The count for each tab.
  */
-export function useDetailTabCounts(proposalId: string): UseDetailTabCountsResult {
+export function useProposalTabCounts(proposalId: string): UseProposalTabCountsResult {
   // Every problem's conversations, by the problem
   const { conversationsByProposal } = useLoadedSelection()
 

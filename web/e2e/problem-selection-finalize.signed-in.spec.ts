@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { detailQuery } from '@/components/features/problem-selection/model/selection-routes'
 import type {
   Board,
   Cycle,
@@ -527,7 +528,7 @@ test.describe('deleting a problem', () => {
     // What goes with the problem, each kind counted, run together as the page's language lists things
     const attached = new Intl.ListFormat('en').format([
       pluralText('conversations', { count: 2 }),
-      selectionText('filing.comments', { count: 1 }),
+      pluralText('comments', { count: 1 }),
     ])
 
     // Named in the question
@@ -627,6 +628,47 @@ test.describe('deleting a problem', () => {
 
     // Onto the gone problem's step, so the delete stepped back to the pool's step right before it
     await expect(page).toHaveURL(new RegExp(`[?&]problem=${OPENED.id}`))
+  })
+
+  test("deletes a problem opened from a paper's page, stepping back to the paper", async ({
+    page,
+  }) => {
+    // A reviewer whose board on screen holds a problem in its elementary paper
+    await stubSelection(page, 'selection')
+
+    // The elementary paper's page
+    await page.goto(
+      `${SELECTION_PATH}?${detailQuery({ kind: 'paper', id: DRAFT_BOARD.papers[0].id, tab: undefined })}`
+    )
+
+    // The problem in its first slot, opened from the paper
+    await page
+      .getByRole('tabpanel')
+      .getByRole('link', { name: FIRST.title })
+      .click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Its page
+    await expect(headingOf(page, FIRST)).toBeVisible()
+
+    // A delete asked for there
+    await pickAction(page, FIRST, messages.ui.actions.delete)
+
+    // Answered with Delete
+    await deleteQuestion(page, FIRST)
+      .getByRole('button', { name: messages.ui.actions.delete })
+      .click()
+
+    // The paper back, without the problem
+    await expect(
+      page.getByRole('heading', { level: 2, name: DRAFT_BOARD.papers[0].name })
+    ).toBeVisible()
+    await expect(page.getByRole('tabpanel').getByRole('link', { name: FIRST.title })).toHaveCount(0)
+
+    // A step forward
+    await page.goForward()
+
+    // Onto the gone problem's step, so the delete stepped back to the paper's step right before it
+    await expect(page).toHaveURL(new RegExp(`[?&]problem=${FIRST.id}`))
   })
 
   test('deletes a problem reached by a link, the pool taking its step', async ({ page }) => {
