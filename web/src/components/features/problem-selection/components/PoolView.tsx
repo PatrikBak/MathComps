@@ -11,10 +11,14 @@ import { useFocusHandOff } from '@/hooks/use-focus-hand-off'
 import type { Locale } from '@/i18n/i18n'
 
 import { countActiveFilters, matchPool } from '../model/pool-filters'
+import type { Proposal } from '../model/selection-types'
 import { SlotNumber } from './CategoryMarks'
 import { LanguageSwitch } from './LanguageSwitch'
+import { PlaceControl } from './PlaceControl'
 import { PoolFilterBar } from './PoolFilterBar'
+import { ProposalActionsMenu } from './ProposalActionsMenu'
 import { ProposalCard } from './ProposalCard'
+import { ProposalFiling } from './ProposalFiling'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
@@ -29,7 +33,8 @@ type PoolViewProps = {
 
 /**
  * The pool: every problem no round has taken, live or set aside, filtered and read statement by statement. Its
- * language switch keeps every language in reach, since a {@link ProposalCard} lacking the one picked shows another the problem has.
+ * language switch keeps every language in reach, since a {@link PoolCard} lacking the one picked shows another the
+ * problem has.
  */
 export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // Pool copy
@@ -128,7 +133,7 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
         <div className="space-y-4">
           {matches.shown.map((proposal) => (
             <PoolEntry key={proposal.id} countRef={countRef}>
-              <ProposalCard proposal={proposal} language={language} />
+              <PoolCard proposal={proposal} language={language} />
             </PoolEntry>
           ))}
         </div>
@@ -157,6 +162,54 @@ function PoolEntry({ countRef, children }: PoolEntryProps) {
   const handOff = useFocusHandOff(countRef)
 
   return <div {...handOff}>{children}</div>
+}
+
+/**
+ * Props for the {@link PoolCard} component.
+ */
+type PoolCardProps = {
+  /** The problem. */
+  proposal: Proposal
+  /** The language the problem is being read in. */
+  language: Locale
+}
+
+/**
+ * A problem's card in the pool, with its filing line and the controls placing it, brightening while a slot waits
+ * for a problem it can go into.
+ */
+function PoolCard({ proposal, language }: PoolCardProps) {
+  // The slot waiting for a problem, if any, and the selection holding it
+  const { waitingSlot, selection } = useSelectionWorkspace()
+
+  // Whether the problem already fills the waiting slot
+  const fillsWaitingSlot =
+    waitingSlot !== null &&
+    selection?.activeBoard?.papers.find((paper) => paper.id === waitingSlot.paperId)?.slots[
+      waitingSlot.index
+    ] === proposal.id
+
+  return (
+    <ProposalCard
+      proposal={proposal}
+      language={language}
+      mark={null}
+      actions={
+        <>
+          <PlaceControl proposal={proposal} />
+          <ProposalActionsMenu proposal={proposal} />
+        </>
+      }
+      details={<ProposalFiling proposal={proposal} />}
+      className={cn(
+        'transition-colors',
+        // A live card's border brightens while a slot waits for a problem, which it can go into
+        waitingSlot !== null && !proposal.isSetAside && !fillsWaitingSlot && 'border-foreground/15',
+        // A set-aside problem, dimmed
+        proposal.isSetAside && 'opacity-70'
+      )}
+    />
+  )
 }
 
 /**

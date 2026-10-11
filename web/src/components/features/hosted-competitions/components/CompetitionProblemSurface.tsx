@@ -9,6 +9,42 @@ import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
 import { cn } from '@/components/shared/utils/css-utils'
 
+/** How a row under a problem is drawn, whatever it opens. */
+export const PROBLEM_ROW_CLASS = cn(
+  'flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5',
+  FOCUS_RING_CLASS
+)
+
+/**
+ * Props for the {@link ProblemRowLabel} component.
+ */
+type ProblemRowLabelProps = {
+  /** What the row is called. */
+  label: string
+  /** The mark on the row, saying what kind of row it is. */
+  icon: LucideIcon
+  /** How many things the row leads to, said once there are any; null where the row counts nothing. */
+  count: number | null
+}
+
+/**
+ * What a row under a problem says: its mark, its name, and how many things it leads to.
+ */
+export function ProblemRowLabel({ label, icon: Icon, count }: ProblemRowLabelProps) {
+  return (
+    <span className="inline-flex items-center gap-2 text-foreground">
+      <Icon size={15} className="text-muted" />
+      {label}
+      {/* A space between the name and the count, so the row's accessible name reads them apart */}{' '}
+      {count !== null && count > 0 && (
+        <span className="rounded-full bg-brand/15 px-1.5 text-xs font-semibold tabular-nums text-brand-light">
+          {count}
+        </span>
+      )}
+    </span>
+  )
+}
+
 /**
  * Props for the {@link CompetitionProblemSurface} component.
  */
@@ -44,7 +80,7 @@ type CompetitionProblemSurfaceProps = {
  */
 export function CompetitionProblemSurface({
   label,
-  icon: Icon,
+  icon,
   position,
   statement,
   isOpen,
@@ -62,24 +98,9 @@ export function CompetitionProblemSurface({
 
   return (
     <>
-      {/* The row, drawn as a conversation row is, down to the icon and the size */}
-      <button
-        type="button"
-        onClick={onOpen}
-        className={cn(
-          'flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5',
-          FOCUS_RING_CLASS
-        )}
-      >
-        <span className="inline-flex items-center gap-2 text-foreground">
-          <Icon size={15} className="text-muted" />
-          {label}
-          {count !== null && count > 0 && (
-            <span className="rounded-full bg-brand/15 px-1.5 text-xs font-semibold tabular-nums text-brand-light">
-              {count}
-            </span>
-          )}
-        </span>
+      {/* The row */}
+      <button type="button" onClick={onOpen} className={PROBLEM_ROW_CLASS}>
+        <ProblemRowLabel label={label} icon={icon} count={count} />
       </button>
 
       {/* Sized to the argument, up to nearly the whole screen: what is read here runs from three lines to

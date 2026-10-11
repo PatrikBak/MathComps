@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
 
-import { dataAttribute } from '@/components/shared/utils/dom-utils'
+import { dataAttribute, focusShown } from '@/components/shared/utils/dom-utils'
 
 /** The attribute naming which item of a list an element stands for, which is where focus comes back to. */
 export const OPEN_ID_ATTRIBUTE = dataAttribute('data-open-id')
@@ -33,16 +33,8 @@ export function useFocusReturn(openId: string | null): () => boolean {
     // The item last open
     const id = lastOpenIdRef.current
 
-    // Nowhere to go back to if nothing was ever open
-    if (id === null) return false
-
-    // Whichever element stands for the item last open, if the page still shows one
-    const target = document.querySelector<HTMLElement>(OPEN_ID_ATTRIBUTE.selectorFor(id))
-
-    // Focused there, the page staying where it was
-    target?.focus({ preventScroll: true })
-
-    // Whether there was one
-    return target !== null
+    // Nowhere to go back to if nothing was ever open, else whichever element stands for the item last open, if
+    // the page still shows one
+    return id !== null && focusShown(OPEN_ID_ATTRIBUTE.selectorFor(id))
   }, [])
 }

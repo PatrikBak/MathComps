@@ -159,6 +159,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>The papers on the selection boards.</summary>
     public DbSet<SelectionPaper> SelectionPapers => Set<SelectionPaper>();
 
+    /// <summary>Join table: the reviewers' comments on the papers.</summary>
+    public DbSet<SelectionPaperComment> SelectionPaperComments => Set<SelectionPaperComment>();
+
     /// <summary>The filled slots of the draft papers.</summary>
     public DbSet<SelectionSlot> SelectionSlots => Set<SelectionSlot>();
 
@@ -1178,6 +1181,33 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion SelectionPaper
+
+        #region SelectionPaperComment
+
+        modelBuilder.Entity<SelectionPaperComment>(entity =>
+        {
+            // The paper and the comment name the link
+            entity.HasKey(link => new { link.PaperId, link.CommentId });
+
+            // The paper discussed, going with it
+            entity.HasOne(link => link.Paper)
+                  .WithMany(paper => paper.Comments)
+                  .HasForeignKey(link => link.PaperId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // The comment, going with it
+            entity.HasOne(link => link.Comment)
+                  .WithMany()
+                  .HasForeignKey(link => link.CommentId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Each comment belongs to at most one paper
+            entity.HasIndex(link => link.CommentId)
+                  .IsUnique()
+                  .HasDatabaseName("ux_selection_paper_comment_comment_id");
+        });
+
+        #endregion SelectionPaperComment
 
         #region SelectionSlot
 

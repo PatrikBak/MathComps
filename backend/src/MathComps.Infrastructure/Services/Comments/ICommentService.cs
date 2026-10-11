@@ -12,10 +12,9 @@ namespace MathComps.Infrastructure.Services.Comments;
 /// and every comment in it, is refused as though it did not exist: <see cref="CommentTargetNotFoundException"/>
 /// for a target, <see cref="CommentNotFoundException"/> for a comment. Handouts, news and the problems the archive
 /// serves are open to anybody, and no other problem has a thread. A grade conversation is open to admins, and to
-/// the student it is with while the grade is final and their group has closed. A proposal's discussion is open
-/// only to the accounts preparing the competitions, and to nobody once the proposal is deleted. A version an edit
-/// has replaced is refused with
-/// <see cref="CommentNotFoundException"/> too.
+/// the student it is with while the grade is final and their group has closed. A proposal's discussion and a
+/// paper's are open only to the accounts preparing the competitions, and a proposal's to nobody once the proposal
+/// is deleted. A version an edit has replaced is refused with <see cref="CommentNotFoundException"/> too.
 /// </remarks>
 public interface ICommentService
 {
@@ -69,9 +68,9 @@ public interface ICommentService
     Task ToggleLikeAsync(Guid commentId, CommentViewer viewer);
 
     /// <summary>
-    /// Counts the active comments on each of several targets of one type. Only handouts, news articles and
-    /// proposals are counted in bulk: grade conversations are refused like targets that are not there, and so are
-    /// proposals to anybody but the accounts preparing the competitions. Any other type throws
+    /// Counts the active comments on each of several targets of one type. Only handouts, news articles, proposals
+    /// and papers are counted in bulk: grade conversations are refused like targets that are not there, and so are
+    /// proposals and papers to anybody but the accounts preparing the competitions. Any other type throws
     /// <see cref="ArgumentException"/>.
     /// </summary>
     /// <param name="targetType">The type of the targets.</param>

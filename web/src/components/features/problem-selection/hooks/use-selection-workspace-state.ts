@@ -12,7 +12,7 @@ import type { Board, SelectionData } from '../model/selection-types'
 import { getSelection } from '../services/selection-service'
 import { useSelectionQueryKey } from './selection-cache'
 import { useBoardPicking, type UseBoardPickingResult } from './use-board-picking'
-import { useOpenProposal, type UseOpenProposalResult } from './use-open-proposal'
+import { useOpenDetail, type UseOpenDetailResult } from './use-open-detail'
 import { usePoolFilters, type UsePoolFiltersResult } from './use-pool-filters'
 import { useIsChangingSlots, useIsSelectionWriting } from './use-selection-write'
 
@@ -30,10 +30,10 @@ export type LoadedSelection = SelectionIndex & {
 }
 
 /**
- * What every part of the selection shares: the read, whether a write changing its slots is out, the problem open
- * in full, what the pool is narrowed to, and the slot waiting for a problem with the ways to move it.
+ * What every part of the selection shares: the read, whether a write changing its slots is out, the page open in
+ * full, what the pool is narrowed to, and the slot waiting for a problem with the ways to move it.
  */
-export type SelectionWorkspace = UseOpenProposalResult &
+export type SelectionWorkspace = UseOpenDetailResult &
   Omit<UseBoardPickingResult, 'activeBoard'> & {
     /** How far the read of the selection has got. */
     uiState: QueryUiState
@@ -48,8 +48,8 @@ export type SelectionWorkspace = UseOpenProposalResult &
   }
 
 /**
- * The selection's shared state, read in one go: every part draws from the same read, so opening a problem
- * never waits on the network.
+ * The selection's shared state, read in one go: every part draws from the same read, so opening a problem or a
+ * paper never waits on the network.
  *
  * @returns The workspace.
  */
@@ -76,14 +76,14 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       isWriting || hasFailedForGood(query.state) ? false : SELECTION_REFRESH_MS,
   })
 
-  // The problem open in full, and the ways in and out of it
-  const { openProposalId, openProposal, closeProposal, leaveProposal, poolCountRef } =
-    useOpenProposal()
+  // The page open in full, and the ways in and out of it
+  const { detail, paperBeneathId, openDetail, closeDetail, leaveDetail, poolCountRef } =
+    useOpenDetail()
 
   // What the pool is narrowed to, and the ways of changing it
   const poolFilters = usePoolFilters()
 
-  // The selection with its lookups by proposal, rebuilt only when a new read lands
+  // The selection with its lookups by paper and by proposal, rebuilt only when a new read lands
   const index = useMemo(() => (data === undefined ? null : indexSelection(data)), [data])
 
   // The board being filled, the slot on it waiting for a problem, and the ways to change both
@@ -107,10 +107,11 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       isChangingSlots,
       retry,
       selection,
-      openProposalId,
-      openProposal,
-      closeProposal,
-      leaveProposal,
+      detail,
+      paperBeneathId,
+      openDetail,
+      closeDetail,
+      leaveDetail,
       poolCountRef,
       poolFilters,
       waitingSlot,
@@ -123,10 +124,11 @@ export function useSelectionWorkspaceState(): SelectionWorkspace {
       isChangingSlots,
       retry,
       selection,
-      openProposalId,
-      openProposal,
-      closeProposal,
-      leaveProposal,
+      detail,
+      paperBeneathId,
+      openDetail,
+      closeDetail,
+      leaveDetail,
       poolCountRef,
       poolFilters,
       waitingSlot,

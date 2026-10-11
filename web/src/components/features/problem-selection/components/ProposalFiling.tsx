@@ -1,6 +1,5 @@
 'use client'
 
-import { MessageSquare, MessagesSquare } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
@@ -9,19 +8,10 @@ import { cn } from '@/components/shared/utils/css-utils'
 import { localeCodeList } from '@/i18n/i18n'
 
 import { useAreaName } from '../hooks/use-area-name'
-import { useDetailTabCounts } from '../hooks/use-detail-tab-counts'
-import type { DetailTab } from '../model/selection-routes'
-import { placementsOf, unreadyLanguages, unwrittenLanguages } from '../model/selection-state'
+import { placementsOf, unreadyLanguages, unwrittenAcross } from '../model/selection-state'
 import type { Proposal } from '../model/selection-types'
 import { PlacementMark, RecommendedMarks, WARNING_MARK_CLASS } from './CategoryMarks'
-import { ProposalLink } from './SelectionLinks'
 import { useLoadedSelection } from './SelectionWorkspaceProvider'
-
-/** The icon in front of each tab's count. */
-const COUNT_ICONS: Record<DetailTab, ReactNode> = {
-  conversations: <MessagesSquare size={13} />,
-  comments: <MessageSquare size={13} />,
-}
 
 /**
  * Props for the {@link ProposalFiling} component.
@@ -29,15 +19,12 @@ const COUNT_ICONS: Record<DetailTab, ReactNode> = {
 type ProposalFilingProps = {
   /** The problem. */
   proposal: Proposal
-  /** Whether the line ends with the problem's conversation and comment counts, each opening its tab. */
-  showCounts: boolean
 }
 
 /**
- * One line saying what a problem is filed under, where it sits, whether it is on offer, what it still lacks and,
- * where asked, how much it has been talked about.
+ * One line saying what a problem is filed under, where it sits, whether it is on offer, and what it still lacks.
  */
-export function ProposalFiling({ proposal, showCounts }: ProposalFilingProps) {
+export function ProposalFiling({ proposal }: ProposalFilingProps) {
   // Filing-line copy
   const t = useTranslations('problemSelection.filing')
 
@@ -51,7 +38,7 @@ export function ProposalFiling({ proposal, showCounts }: ProposalFilingProps) {
   const placements = placementsOf(boards, proposal.id)
 
   // The languages nothing of the problem can be read in
-  const unwritten = unwrittenLanguages(proposal)
+  const unwritten = unwrittenAcross([proposal])
 
   // The languages the problem can be read in but has no solution in
   const unsolved = unreadyLanguages(proposal).filter((language) => !unwritten.includes(language))
@@ -87,14 +74,6 @@ export function ProposalFiling({ proposal, showCounts }: ProposalFilingProps) {
       {unsolved.length > 0 && (
         <FilingWarning>{t('noSolution', { languages: localeCodeList(unsolved) })}</FilingWarning>
       )}
-
-      {/* How much the problem has been talked about, where asked */}
-      {showCounts && (
-        <>
-          <CountLink proposalId={proposal.id} tab="conversations" />
-          <CountLink proposalId={proposal.id} tab="comments" />
-        </>
-      )}
     </div>
   )
 }
@@ -113,44 +92,4 @@ type FilingWarningProps = {
 function FilingWarning({ children }: FilingWarningProps) {
   // The warning, as a mark in the warning colour
   return <span className={cn(WARNING_MARK_CLASS, 'px-1.5 py-0.5 text-xs')}>{children}</span>
-}
-
-/**
- * Props for the {@link CountLink} component.
- */
-type CountLinkProps = {
-  /** The problem whose conversations or comments are counted. */
-  proposalId: string
-  /** The tab the count opens, which is what it counts. */
-  tab: DetailTab
-}
-
-/**
- * How many conversations or comments a problem carries, opening them. Absent while the count is zero.
- */
-function CountLink({ proposalId, tab }: CountLinkProps) {
-  // Filing-line copy
-  const t = useTranslations('problemSelection.filing')
-
-  // How many the tab holds for the problem
-  const count = useDetailTabCounts(proposalId)[tab]
-
-  // Nothing to count, nothing to show
-  if (count === 0) return null
-
-  // The count in words
-  const label = t(tab, { count })
-
-  return (
-    <ProposalLink
-      proposalId={proposalId}
-      tab={tab}
-      title={label}
-      aria-label={label}
-      className="inline-flex items-center gap-1 rounded-md px-1 text-xs tabular-nums"
-    >
-      {COUNT_ICONS[tab]}
-      {count}
-    </ProposalLink>
-  )
 }

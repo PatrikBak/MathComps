@@ -1034,6 +1034,7 @@
     }
   },
   "plurals": {
+    "comments": "{count, plural, =1 {# komentář} =2 {# komentáře} =3 {# komentáře} =4 {# komentáře} other {# komentářů}}",
     "conversations": "{count, plural, =1 {# konverzace} =2 {# konverzace} =3 {# konverzace} =4 {# konverzace} other {# konverzací}}",
     "problems": "{count, plural, =1 {# úloha} =2 {# úlohy} =3 {# úlohy} =4 {# úlohy} other {# úloh}}",
     "replies": "{count, plural, =1 {# odpověď} =2 {# odpovědi} =3 {# odpovědi} =4 {# odpovědi} other {# odpovědí}}",
@@ -1276,6 +1277,7 @@
       "moveUp": "Posunout nahoru",
       "needsLanguages": "potřebuje zadání nebo řešení v {languages}",
       "none": "Zatím tu není žádná sestava.",
+      "paperComments": "{paper}: {count, plural, one {# komentář} few {# komentáře} other {# komentářů}}",
       "pickFromPool": "Teď vyber úlohu ze zásobníku",
       "progress": "{filled} z {total}",
       "ready": "Všechna místa jsou obsazená a každá úloha má zadání i řešení ve všech třech jazycích.",
@@ -1301,8 +1303,6 @@
       "tabsLabel": "O této úloze"
     },
     "filing": {
-      "comments": "{count, plural, one {# komentář} few {# komentáře} other {# komentářů}}",
-      "conversations": "{count, plural, one {# konverzace s Mathildou} few {# konverzace s Mathildou} other {# konverzací s Mathildou}}",
       "noSolution": "bez řešení: {languages}",
       "setAside": "odložená",
       "unwritten": "bez {languages}",
@@ -1332,6 +1332,13 @@
     "language": {
       "label": "Jazyk",
       "unwritten": "V tomto jazyce zatím není"
+    },
+    "paper": {
+      "commentsTab": "Komentáře",
+      "notFound": "Tato sada není na žádné sestavě.",
+      "placeholder": "Co si myslíš o sadě jako celku?",
+      "problemsTab": "Úlohy",
+      "tabsLabel": "O této sadě"
     },
     "picking": {
       "stop": "Přestat vybírat",

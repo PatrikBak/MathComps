@@ -14,10 +14,22 @@ import type {
 } from './selection-types'
 
 /**
- * The selection as read: its boards and cycles as they came, and its proposals and their conversations looked up
- * by proposal id.
+ * A paper, and the board it is on.
+ */
+type PaperOnBoard = {
+  /** The paper. */
+  paper: Paper
+  /** The board holding it. */
+  board: Board
+}
+
+/**
+ * The selection as read: its boards and cycles as they came, its papers looked up by id, and its proposals and
+ * their conversations looked up by proposal id.
  */
 export type SelectionIndex = Pick<SelectionData, 'boards' | 'cycles'> & {
+  /** Every paper on the boards, with the board holding it, by the paper's id. */
+  papersById: ReadonlyMap<string, PaperOnBoard>
   /** Every proposal, by id. */
   proposalsById: ReadonlyMap<string, Proposal>
   /** Every conversation about each proposal, by the proposal's id, newest first. */
@@ -25,13 +37,20 @@ export type SelectionIndex = Pick<SelectionData, 'boards' | 'cycles'> & {
 }
 
 /**
- * The selection as it was read, with the lookups by proposal built.
+ * The selection as it was read, with the lookups by paper and by proposal built.
  *
  * @param data - The selection as it was read.
  *
  * @returns The selection with its lookups.
  */
 export function indexSelection(data: SelectionData): SelectionIndex {
+  // Every paper under its id, beside the board holding it
+  const papersById = new Map(
+    data.boards.flatMap((board) =>
+      board.papers.map((paper) => [paper.id, { paper, board }] as const)
+    )
+  )
+
   // Every proposal under its id
   const proposalsById = new Map(data.proposals.map((proposal) => [proposal.id, proposal]))
 
@@ -42,7 +61,13 @@ export function indexSelection(data: SelectionData): SelectionIndex {
   )
 
   // The boards and cycles as they came, with the lookups beside them
-  return { boards: data.boards, cycles: data.cycles, proposalsById, conversationsByProposal }
+  return {
+    boards: data.boards,
+    cycles: data.cycles,
+    papersById,
+    proposalsById,
+    conversationsByProposal,
+  }
 }
 
 /**
@@ -181,15 +206,21 @@ export function resolveText(proposal: Proposal, language: Locale): ResolvedText 
 }
 
 /**
- * The languages nothing of a proposal can be read in yet.
+ * The languages nothing of a set of proposals can be read in yet.
  *
- * @param proposal - The proposal.
+ * @param proposals - The proposals.
  *
- * @returns Every language with no statement, in the order {@link SUPPORTED_LOCALES} lists them.
+ * @returns Every language none of them has a statement in, in the order {@link SUPPORTED_LOCALES} lists them;
+ * none for an empty set.
  */
-export function unwrittenLanguages(proposal: Proposal): Locale[] {
-  // Every language the proposal has no text in
-  return SUPPORTED_LOCALES.filter((language) => proposal.texts[language] === undefined)
+export function unwrittenAcross(proposals: readonly Proposal[]): Locale[] {
+  // An empty set rules no language out
+  if (proposals.length === 0) return []
+
+  // Every language none of the proposals has a text in
+  return SUPPORTED_LOCALES.filter((language) =>
+    proposals.every((proposal) => proposal.texts[language] === undefined)
+  )
 }
 
 /**

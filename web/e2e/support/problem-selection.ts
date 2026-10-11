@@ -1,13 +1,10 @@
 import type { Locator, Page, Request, Route } from '@playwright/test'
 import { createTranslator } from 'next-intl'
 
-import type {
-  CommentDto,
-  CommentTarget,
-  CommentTargetType,
-} from '@/components/features/comments/services/comment-api-types'
+import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import type { ProposalTab } from '@/components/features/problem-selection/model/selection-routes'
 import type {
   Board,
   Cycle,
@@ -17,7 +14,6 @@ import type {
   ReviewTranscript,
   SelectionData,
 } from '@/components/features/problem-selection/model/selection-types'
-import type { UserProfile } from '@/components/features/profile/model/profile-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { DAY_MS } from '@/components/shared/utils/time-units'
 
@@ -26,6 +22,7 @@ import { gateReads } from './answer-gate'
 import { answerJson, BACKEND_ORIGIN, refuse } from './backend-routes'
 import { SELECTION_PATH } from './competitions'
 import type { HostedBackend } from './hosted-backend'
+import { stubSelectionComments, threadKey } from './selection-comments'
 import { FINALIZATION_PATH, finalizationWrite } from './selection-finalization'
 import { PROPOSAL_WRITE_PATH, proposalWrite } from './selection-proposal-writes'
 import { SLOT_WRITE_PATH, slotWrite } from './selection-slot-writes'
@@ -423,28 +420,6 @@ export const EARLIER_STATEMENT =
 /** What a reviewer with no username argued about {@link EARLIER_STATEMENT}. */
 export const ARGUED_EARLIER = 'Erasing the odd numbers first leaves only even ones.'
 
-/** The username of the reviewer a test signs in as, where one is needed to sign a comment. */
-const READER_NAME = 'Rita'
-
-/**
- * Gives the signed-in reviewer the username {@link READER_NAME}, which a discussion asks for before it takes a
- * comment.
- *
- * @param page - The page to answer the reviewer's profile on.
- */
-export async function stubNamedReader(page: Page): Promise<void> {
-  // The reviewer's profile, carrying the username
-  await page.route(`${BACKEND_ORIGIN}/users/me/profile`, (route) =>
-    answerJson(route, 200, {
-      graduationYear: null,
-      hasLeftHighSchool: true,
-      countryCode: null,
-      email: null,
-      username: READER_NAME,
-    } satisfies UserProfile)
-  )
-}
-
 /**
  * One thing said in a conversation with Mathilda.
  *
@@ -523,7 +498,7 @@ export const OPENED_COMMENT: CommentDto = {
 type SelectionMemory = {
   /** The conversations reviewers held with Mathilda before the test began, as many as are still held. */
   conversations: HeldConversation[]
-  /** Each problem's discussion, by the problem's id, oldest comment first. */
+  /** Each of the selection's discussions, by {@link threadKey}, oldest comment first. */
   discussions: Map<string, CommentDto[]>
   /** The backend the chat with Mathilda talks to, whose conversations are held as well; null where none is. */
   chat: HostedBackend | null
@@ -541,7 +516,7 @@ export function rememberedSelection(chat: HostedBackend | null): SelectionMemory
   // The memory, fresh for each test so nothing one writes reaches the next
   return {
     conversations: [RECENT, EARLIER],
-    discussions: new Map([[OPENED.id, [OPENED_COMMENT]]]),
+    discussions: new Map([[threadKey('Proposal', OPENED.id), [OPENED_COMMENT]]]),
     chat,
   }
 }
@@ -819,30 +794,10 @@ function readableSelection(held: HeldSelection): ReadableSelection {
 type AnswerSelectionWith = (reply: SelectionReply) => void
 
 /**
- * What writing a comment sends, in as much of it as the fake reads.
- */
-type CommentRequestBody = {
-  /** The thread it goes into. */
-  target: CommentTarget
-  /** What it says. */
-  content: string
-}
-
-/**
- * What asking for comment counts sends.
- */
-type CountsRequestBody = {
-  /** The kind of thread counted. */
-  targetType: CommentTargetType
-  /** The threads counted, by their ids. */
-  targetIds: string[]
-}
-
-/**
  * Stands in for the selection's backend: the selection's read, with a reply the test can change midway, the writes
  * to the boards' slots and the proposals and the finalizations, which change what later reads find, the
- * conversations it lists read out in full, and each problem's discussion with its count. The chat in its memory,
- * where there is one, reads the problems' statements from what the backend holds.
+ * conversations it lists read out in full, and the selection's discussions with their counts. The chat
+ * in its memory, where there is one, reads the problems' statements from what the backend holds.
  *
  * @param page - The page to answer the selection's calls on.
  * @param firstReply - How the reads are answered until the test says otherwise.
@@ -927,99 +882,8 @@ export async function stubSelection(
     return answerJson(route, 200, held.transcript)
   })
 
-  // A problem's discussion, and a comment written into it. Any other kind of thread goes to the stubs beneath
-  await page.route(`${BACKEND_ORIGIN}/comments*`, async (route) => {
-    // The call as it went out
-    const request = route.request()
-
-    // Reading a thread, or writing into one
-    switch (request.method()) {
-      // The thread, by the problem it hangs off
-      case 'GET': {
-        // Which thread
-        const query = new URL(request.url()).searchParams
-
-        // Another kind of thread
-        if (query.get('targetType') !== ('Proposal' satisfies CommentTargetType)) {
-          return route.fallback()
-        }
-
-        // The problem it hangs off
-        const proposalId = query.get('targetId') ?? ''
-
-        // A problem the backend does not hold, which here is one no proposal files, has no thread to read. One in
-        // rounds that have opened keeps its thread, though the selection's read leaves it out
-        if (!stored.proposals.some((proposal) => proposal.id === proposalId)) {
-          return refuse(route, 404, 'CommentTargetNotFound')
-        }
-
-        // Every comment in it, oldest first
-        return answerJson(route, 200, memory.discussions.get(proposalId) ?? [])
-      }
-
-      // A comment, written into a thread
-      case 'POST': {
-        // What was written, and where
-        const { target, content } = request.postDataJSON() as CommentRequestBody
-
-        // Another kind of thread
-        if (target.targetType !== 'Proposal') {
-          return route.fallback()
-        }
-
-        // The comment, signed by the reviewer the test signs in as
-        const comment: CommentDto = {
-          id: crypto.randomUUID(),
-          author: { id: 'user_reader', name: READER_NAME, avatarUrl: null },
-          content,
-          createdAt: new Date().toISOString(),
-          editedAt: null,
-          isDeleted: false,
-          likeCount: 0,
-          isLiked: false,
-          replies: [],
-        }
-
-        // At the end of the problem's discussion
-        memory.discussions.set(target.targetId, [
-          ...(memory.discussions.get(target.targetId) ?? []),
-          comment,
-        ])
-
-        // Answered with the comment, as created
-        return answerJson(route, 201, comment)
-      }
-
-      // Any other call, handed on to the stubs beneath
-      default:
-        return route.fallback()
-    }
-  })
-
-  // How many comments each problem's discussion holds
-  await page.route(`${BACKEND_ORIGIN}/comments/counts`, async (route) => {
-    // Which threads are counted
-    const { targetType, targetIds } = route.request().postDataJSON() as CountsRequestBody
-
-    // Another kind of thread, which no stub here counts
-    if (targetType !== 'Proposal') {
-      return route.fallback()
-    }
-
-    // Each problem with anything said under it, the backend leaving out the ones with nothing
-    const counts = Object.fromEntries(
-      targetIds.flatMap((proposalId) => {
-        // How many comments it holds
-        const count = memory.discussions.get(proposalId)?.length ?? 0
-
-        // Kept only where there are any
-        return count === 0 ? [] : [[proposalId, count]]
-      })
-    )
-
-    // The counts, by problem
-    return answerJson(route, 200, counts)
-  })
+  // The selection's discussions, and their counts
+  await stubSelectionComments(page, memory.discussions, () => stored)
 
   // A function which saves a write as the backend does, answering it with nothing to say or with the refusal
   const answerWrite = async (route: Route, write: (held: HeldSelection) => HeldSelection) => {
@@ -1109,6 +973,23 @@ export function cardOf(page: Page, proposal: Proposal) {
 }
 
 /**
+ * The row on a problem's card opening one tab of the problem's page, named after the tab and how much it holds.
+ *
+ * @param card - The card.
+ * @param tab - The tab.
+ * @param count - How much the tab holds, which the row shows once it is above zero.
+ *
+ * @returns The row.
+ */
+export function tabRowOn(card: Locator, tab: ProposalTab, count: number) {
+  // The tab's name
+  const label = selectionCopy.detail[`${tab}Tab`]
+
+  // The card's only link named after the tab, with the count where there is one
+  return card.getByRole('link', { name: count === 0 ? label : `${label} ${count}`, exact: true })
+}
+
+/**
  * A problem's heading, which only its own page shows.
  *
  * @param page - The page.
@@ -1119,6 +1000,51 @@ export function cardOf(page: Page, proposal: Proposal) {
 export function headingOf(page: Page, proposal: Proposal) {
   // The page's only second-level heading naming the problem
   return page.getByRole('heading', { level: 2, name: proposal.title })
+}
+
+/**
+ * The selected tab of a page open over the pool.
+ *
+ * @param page - The page.
+ * @param tabsLabel - What the page's strip of tabs is called.
+ *
+ * @returns The tab.
+ */
+export function selectedTab(page: Page, tabsLabel: string) {
+  // The selected tab of the page's tabs
+  return page.getByRole('tablist', { name: tabsLabel }).getByRole('tab', { selected: true })
+}
+
+/**
+ * One query parameter of the address this instant, read off the page itself, since a step the page pushes onto
+ * history reaches Playwright's own copy of the address only later.
+ *
+ * @param page - The page.
+ * @param param - The parameter.
+ *
+ * @returns Its value, or null while the address has none.
+ */
+export function addressedParam(page: Page, param: string): Promise<string | null> {
+  // Read off the page's own address
+  return page.evaluate((name) => new URLSearchParams(window.location.search).get(name), param)
+}
+
+/**
+ * Writes a comment into a discussion's box and sends it from the keyboard, waiting for the box to empty, which it
+ * does once the comment has been taken.
+ *
+ * @param box - The box a new comment is written in.
+ * @param text - The comment.
+ */
+export async function sendComment(box: Locator, text: string): Promise<void> {
+  // The comment, written
+  await box.fill(text)
+
+  // Sent from the keyboard
+  await box.press('Meta+Enter')
+
+  // Taken
+  await expect(box).toHaveValue('')
 }
 
 /**

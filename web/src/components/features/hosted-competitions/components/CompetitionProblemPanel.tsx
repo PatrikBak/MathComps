@@ -6,11 +6,10 @@ import { useFormatter, useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { DefenseConversation } from '@/components/features/defense/components/DefenseConversation'
-import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
+import { Button } from '@/components/shared/components/Button'
 import { Modal } from '@/components/shared/components/Modal'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { SurfacePanel } from '@/components/shared/components/SurfacePanel'
-import { cn } from '@/components/shared/utils/css-utils'
 import { MATHILDA_NAME } from '@/constants/mathilda'
 import type { AddressedDisclosure } from '@/hooks/use-addressed-disclosure'
 import type { Locale } from '@/i18n/i18n'
@@ -20,6 +19,7 @@ import type { AreaRun } from '../model/hosted-competition-state'
 import type { HostedCompetitionProblem } from '../model/hosted-competition-types'
 import { CompetitionHints } from './CompetitionHints'
 import { GradeComments, ProblemScore } from './CompetitionProblemResult'
+import { PROBLEM_ROW_CLASS, ProblemRowLabel } from './CompetitionProblemSurface'
 import { CompetitionSolution } from './CompetitionSolution'
 import { ProblemSelfAssessmentNote } from './ProblemSelfAssessmentNote'
 
@@ -134,19 +134,17 @@ export function CompetitionProblemPanel({
                 type="button"
                 onClick={() => openDefense(defense.sessionId)}
                 data-defense-session-id={defense.sessionId}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-foreground/5',
-                  FOCUS_RING_CLASS
-                )}
+                className={PROBLEM_ROW_CLASS}
               >
                 {/* When the student opened it */}
-                <span className="inline-flex items-center gap-2 text-foreground">
-                  <MessageSquare size={15} className="text-muted" />
-                  {format.dateTime(new Date(defense.startedAt), {
+                <ProblemRowLabel
+                  label={format.dateTime(new Date(defense.startedAt), {
                     dateStyle: 'short',
                     timeStyle: 'short',
                   })}
-                </span>
+                  icon={MessageSquare}
+                  count={null}
+                />
               </button>
             ))}
 

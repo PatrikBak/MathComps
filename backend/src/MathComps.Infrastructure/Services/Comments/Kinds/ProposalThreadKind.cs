@@ -14,23 +14,17 @@ namespace MathComps.Infrastructure.Services.Comments.Kinds;
 public sealed record ProposalAnchor(Guid ProposalId) : CommentAnchor;
 
 /// <summary>
-/// The reviewers' discussions of the proposals, named by the proposal's id. One is open only to the accounts
-/// preparing the competitions, whichever proposal it is, and goes with its proposal once that is deleted.
+/// The reviewers' discussions of the proposals, named by the proposal's id. One goes with its proposal once that is
+/// deleted.
 /// </summary>
 /// <param name="grants"><inheritdoc cref="IUserGrantService" path="/summary"/></param>
-public class ProposalThreadKind(IUserGrantService grants) : CommentThreadKind<ProposalAnchor>
+public class ProposalThreadKind(IUserGrantService grants) : PreparerCommentThreadKind<ProposalAnchor>(grants)
 {
     /// <inheritdoc />
     public override CommentTargetType TargetType => CommentTargetType.Proposal;
 
     /// <inheritdoc />
     public override bool TakesLikes => true;
-
-    /// <inheritdoc />
-    public override Task<bool> IsOpenAsync(
-        MathCompsDbContext dbContext, CommentTarget target, CommentViewer? viewer) =>
-        // Open to the accounts preparing the competitions, whichever proposal it is
-        IsPreparingCompetitionsAsync(viewer);
 
     /// <inheritdoc />
     public override async Task<CommentThreadSql> SelectAsync(MathCompsDbContext dbContext, CommentTarget target) =>
@@ -41,27 +35,14 @@ public class ProposalThreadKind(IUserGrantService grants) : CommentThreadKind<Pr
             [(await ResolveAsync(dbContext, target)).ProposalId]);
 
     /// <inheritdoc />
-    public override async Task<IQueryable<KeyValuePair<string, int>>> CountAsync(
-        MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer? viewer)
-    {
-        // Counted for the accounts preparing the competitions alone, and refused like targets that are not there to
-        // anybody else
-        if (!await IsPreparingCompetitionsAsync(viewer))
-            throw new CommentTargetNotFoundException(TargetType, string.Join(", ", targetIds));
-
-        // The ids that could name a proposal
-        var proposalIds = targetIds
-            .Select(targetId => Guid.TryParse(targetId, out var proposalId) ? proposalId : (Guid?)null)
-            .OfType<Guid>()
-            .ToList();
-
+    protected override IQueryable<KeyValuePair<string, int>> CountById(
+        MathCompsDbContext dbContext, ImmutableList<Guid> ids) =>
         // Each standing proposal's active comments, keyed by its id
-        return dbContext.ProposalComments
-            .Where(link => proposalIds.Contains(link.ProposalId) && link.Proposal.DeletedAt == null)
+        dbContext.ProposalComments
+            .Where(link => ids.Contains(link.ProposalId) && link.Proposal.DeletedAt == null)
             .Where(link => link.Comment.Status == CommentStatus.Active)
             .GroupBy(link => link.ProposalId)
             .Select(group => new KeyValuePair<string, int>(group.Key.ToString(), group.Count()));
-    }
 
     /// <inheritdoc />
     protected override async Task<ProposalAnchor> ResolveAsync(MathCompsDbContext dbContext, CommentTarget target)
@@ -94,22 +75,7 @@ public class ProposalThreadKind(IUserGrantService grants) : CommentThreadKind<Pr
     }
 
     /// <inheritdoc />
-    protected override Task<bool> IsOpenToAsync(
-        MathCompsDbContext dbContext, ProposalAnchor anchor, CommentViewer? viewer) =>
-        // Open to the accounts preparing the competitions
-        IsPreparingCompetitionsAsync(viewer);
-
-    /// <inheritdoc />
     protected override void Attach(MathCompsDbContext dbContext, ProposalAnchor anchor, Guid commentId) =>
         // A link from the comment to the proposal
         dbContext.ProposalComments.Add(new ProposalComment { ProposalId = anchor.ProposalId, CommentId = commentId });
-
-    /// <summary>
-    /// Whether a viewer is one of the accounts preparing the competitions.
-    /// </summary>
-    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
-    /// <returns>Whether they prepare the competitions.</returns>
-    private async Task<bool> IsPreparingCompetitionsAsync(CommentViewer? viewer) =>
-        // A signed-in account holding the PrepareCompetitions grant
-        viewer is not null && await grants.HasAsync(viewer.UserId, UserCapability.PrepareCompetitions);
 }

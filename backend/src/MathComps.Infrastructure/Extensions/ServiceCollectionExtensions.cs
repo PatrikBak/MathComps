@@ -215,6 +215,7 @@ public static class ServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, NewsThreadKind>());
         services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, HostedGradeThreadKind>());
         services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, ProposalThreadKind>());
+        services.TryAddEnumerable(ServiceDescriptor.Scoped<ICommentThreadKind, SelectionPaperThreadKind>());
         services.TryAddScoped<ICommentService, CommentService>();
 
         // The list service resolves problem slugs, so make sure the lookup is available

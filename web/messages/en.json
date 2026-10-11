@@ -1034,6 +1034,7 @@
     }
   },
   "plurals": {
+    "comments": "{count, plural, =1 {# comment} other {# comments}}",
     "conversations": "{count, plural, =1 {# conversation} other {# conversations}}",
     "problems": "{count, plural, =1 {# problem} other {# problems}}",
     "replies": "{count, plural, =1 {# reply} other {# replies}}",
@@ -1276,6 +1277,7 @@
       "moveUp": "Move up",
       "needsLanguages": "needs a statement or a solution in {languages}",
       "none": "No board yet.",
+      "paperComments": "{paper}: {count, plural, one {# comment} other {# comments}}",
       "pickFromPool": "Now pick a problem from the pool",
       "progress": "{filled} of {total}",
       "ready": "Every slot is filled, and every problem has a statement and a solution in all three languages.",
@@ -1301,8 +1303,6 @@
       "tabsLabel": "About this problem"
     },
     "filing": {
-      "comments": "{count, plural, one {# comment} other {# comments}}",
-      "conversations": "{count, plural, one {# conversation with Mathilda} other {# conversations with Mathilda}}",
       "noSolution": "no solution in {languages}",
       "setAside": "set aside",
       "unwritten": "no {languages}",
@@ -1332,6 +1332,13 @@
     "language": {
       "label": "Language",
       "unwritten": "Not written yet"
+    },
+    "paper": {
+      "commentsTab": "Comments",
+      "notFound": "This paper is on no board.",
+      "placeholder": "What do you think of the paper as a whole?",
+      "problemsTab": "Problems",
+      "tabsLabel": "About this paper"
     },
     "picking": {
       "stop": "Stop picking",

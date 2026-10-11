@@ -50,4 +50,9 @@ public class SelectionPaper
     /// Its filled slots, while the board is a draft.
     /// </summary>
     public ICollection<SelectionSlot> Slots { get; } = [];
+
+    /// <summary>
+    /// The reviewers' comments on it via the join entity.
+    /// </summary>
+    public ICollection<SelectionPaperComment> Comments { get; } = [];
 }

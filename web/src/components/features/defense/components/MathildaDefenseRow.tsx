@@ -8,7 +8,7 @@ import { HandoutProblemRefLabel } from '@/components/features/handouts/HandoutPr
 import { useHandoutProblemLabel } from '@/components/features/handouts/use-handout-problem-label'
 import { useIsCurrentHandout } from '@/components/features/handouts/use-is-current-handout'
 import { competitionAreaHref } from '@/components/features/hosted-competitions/services/hosted-competition-routes'
-import { proposalHref } from '@/components/features/problem-selection/model/selection-routes'
+import { detailHref } from '@/components/features/problem-selection/model/selection-routes'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { assertNever } from '@/components/shared/utils/assert-never'
@@ -317,7 +317,7 @@ function ProposalDefenseRow({
       label={<DefenseTargetLabel target={target} emphasis="strong" />}
       jump={
         <RowJump
-          href={proposalHref({ proposalId: target.problemId, tab: undefined })}
+          href={detailHref({ kind: 'proposal', id: target.problemId, tab: undefined }, null)}
           label={tSelection('goToSelection')}
           onClick={onClose}
         />
