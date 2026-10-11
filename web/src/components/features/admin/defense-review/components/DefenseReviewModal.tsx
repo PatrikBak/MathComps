@@ -50,7 +50,7 @@ export function DefenseReviewModal({
       selection={selection}
       student={opened?.user ?? null}
       conversationList={conversationList}
-      itemsAreConversations
+      items="conversations"
       stepActions={
         // Past everything already read
         <Button

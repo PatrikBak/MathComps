@@ -4,6 +4,7 @@ import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
 import { expectOnlyNotCounting } from './support/admin-conversation'
+import { countDialogs } from './support/backend-routes'
 import { LIST_PATH, showRoundHolding } from './support/competitions'
 import { GROUP_NAME, installGradingBackend } from './support/grading-backend'
 import { installHostedBackend } from './support/hosted-backend'
@@ -88,60 +89,6 @@ function addressOf(page: Page): string {
 
   // Everything past the origin
   return `${address.pathname}${address.search}`
-}
-
-declare global {
-  interface Window {
-    /** Tells the test run that a dialog has reached the page. */
-    reportDialog: () => void
-  }
-}
-
-/**
- * Counts every dialog that reaches the page, however briefly.
- *
- * A dialog opened and closed again before an assertion is reached leaves the page looking as if it never
- * opened, so a check taken afterwards passes either way. Watching for them as they arrive is what tells a
- * link that opened nothing from one that opened a dialog and took it back down.
- *
- * @param page - The page to watch, before it loads anything.
- *
- * @returns How many dialogs have reached the page so far.
- */
-async function countDialogs(page: Page): Promise<() => number> {
-  // Every dialog that reached the page
-  let dialogs = 0
-
-  // The channel the page reports each one through
-  await page.exposeFunction('reportDialog', () => {
-    dialogs += 1
-  })
-
-  // Every document from the next one on, since the one under test is about to load
-  await page.addInitScript(() => {
-    // The dialogs already reported, so one that stays up counts once
-    const reported = new WeakSet<Element>()
-
-    // A function which reports every dialog on the page not reported yet
-    const reportNewDialogs = () => {
-      document.querySelectorAll('[role="dialog"]').forEach((dialog) => {
-        // Already counted
-        if (reported.has(dialog)) return
-
-        // Remembered, so it counts once
-        reported.add(dialog)
-
-        // And counted
-        window.reportDialog()
-      })
-    }
-
-    // The document itself, whose root does not exist yet this early
-    new MutationObserver(reportNewDialogs).observe(document, { childList: true, subtree: true })
-  })
-
-  // Hand back the count on each read
-  return () => dialogs
 }
 
 test.describe('the way into grading', () => {

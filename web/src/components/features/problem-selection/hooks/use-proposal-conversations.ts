@@ -5,9 +5,12 @@ import { useMemo } from 'react'
 
 import type { UseStudentConversationsResult } from '@/components/features/admin/conversation/hooks/use-student-conversations'
 import type { UserIdentity } from '@/components/features/admin/model/user-identity'
+import { useAddressSync } from '@/hooks/use-address-sync'
+import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 import { useSteppedSelection, type UseSteppedSelectionResult } from '@/hooks/use-stepped-selection'
 
 import { useLoadedSelection } from '../components/SelectionWorkspaceProvider'
+import { CONVERSATION_PARAMS, OPEN_CONVERSATION_PARAM } from '../model/selection-routes'
 import type { Proposal, ReviewConversation } from '../model/selection-types'
 
 /**
@@ -27,7 +30,8 @@ type UseProposalConversationsResult = {
 }
 
 /**
- * The conversations reviewers held with Mathilda about one problem, and the one open for reading.
+ * The conversations reviewers held with Mathilda about one problem, and the one open for reading. The address
+ * names the open one, so a link copied from it opens the same conversation.
  *
  * @param proposal - The problem the conversations were about.
  *
@@ -49,15 +53,26 @@ export function useProposalConversations(proposal: Proposal): UseProposalConvers
     [conversations]
   )
 
-  // Which conversation is open, none at first
-  const selection = useSteppedSelection(orderedIds, null)
+  // The conversation the address opened the page on, if any
+  const addressedId = useInitialUrlState((params) => params.get(OPEN_CONVERSATION_PARAM))
 
-  // The open conversation, if it is still among the problem's conversations
+  // Which conversation is open, the addressed one at first
+  const selection = useSteppedSelection(orderedIds, addressedId)
+
+  // The open conversation, if it is among the problem's conversations
   const opened = conversations.find((conversation) => conversation.id === selection.openId) ?? null
 
-  // An open conversation the problem no longer lists, its holder having deleted it, leaves nothing to read,
-  // so it closes
+  // An open conversation the problem doesn't list, its holder having deleted it or the address naming one it
+  // never had, leaves nothing to read, so it closes
   if (selection.openId !== null && opened === null) selection.close()
+
+  // The open conversation, as the address names it
+  const addressedQuery = new URLSearchParams(
+    selection.openId === null ? {} : { [OPEN_CONVERSATION_PARAM]: selection.openId }
+  ).toString()
+
+  // Keep the address naming the open conversation, every other parameter left as it stands
+  useAddressSync(addressedQuery, CONVERSATION_PARAMS)
 
   // Whoever held the open conversation, known by the username alone
   const author: UserIdentity | null =

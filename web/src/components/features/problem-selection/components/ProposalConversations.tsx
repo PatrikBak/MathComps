@@ -81,7 +81,7 @@ export function ProposalConversations({ proposal }: ProposalConversationsProps) 
         selection={selection}
         student={author}
         conversationList={authorsConversations}
-        itemsAreConversations
+        items="everyConversation"
       />
     </>
   )
