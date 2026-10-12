@@ -110,7 +110,7 @@ if [[ "$SUBCOMMAND" == "up" ]]; then
     docker image prune -f --filter 'until=24h'
 
     # The SDK stage's layers, which live in the build cache, out of an image prune's reach
-    docker builder prune -f --keep-storage 10GB
+    docker builder prune -f --reserved-space 10GB
 fi
 
 exit $COMPOSE_STATUS
