@@ -221,7 +221,7 @@ export function partlyReadConversationOf(conversation: ConversationDetail): Conv
 
 /**
  * Checks a dialog shows a conversation {@link wholeConversationOf} built, whole: how long the reply and the
- * follow-up took, the student's report and verdict, and the drafts behind the reply.
+ * follow-up took, the author's report and verdict, and the drafts behind the reply.
  *
  * @param dialog - The dialog the conversation is open in.
  */
@@ -235,8 +235,8 @@ export async function expectWholeConversation(dialog: Locator): Promise<void> {
   // The report's flag on the reply
   await expect(dialog.getByRole('img', { name: messages.defense.reported })).toBeVisible()
 
-  // What the student said, under the conversation
-  await expect(dialog.getByText(messages.conversationReview.studentVerdict)).toBeVisible()
+  // What the author said about Mathilda, under the conversation
+  await expect(dialog.getByText(messages.conversationReview.authorVerdict)).toBeVisible()
 
   // Their verdict on the whole of it
   await expect(dialog.getByText(messages.defense.outcomes.foundTheMistake)).toBeVisible()
@@ -281,6 +281,25 @@ export async function expectOpensAtUnreadLine(dialog: Locator): Promise<void> {
 
   // With the first unread turn under it
   await expect(dialog.getByText(FIRST_UNREAD_TURN_TEXT)).toBeInViewport()
+}
+
+/**
+ * Checks the conversation dialog is open on one author's conversations, by the dialog's own name.
+ *
+ * @param dialog - The dialog.
+ * @param author - The author's name, as the dialog shows it.
+ * @param timeout - How long the name has to turn up in, in milliseconds; absent for the usual wait.
+ */
+export async function expectDialogFor(
+  dialog: Locator,
+  author: string,
+  timeout?: number
+): Promise<void> {
+  // Named after the author
+  await expect(dialog).toHaveAccessibleName(
+    messages.conversationReview.dialogTitleFor.replace('{author}', author),
+    { timeout }
+  )
 }
 
 /**

@@ -2,12 +2,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
 
-import { patchCachedQueueConversation } from '@/components/features/admin/conversation/hooks/conversation-cache'
-import { invalidateNoteFeed } from '@/components/features/admin/notes/hooks/note-cache'
 import type { DefenseReportCategory } from '@/components/features/defense/model/defense-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
+import type { ConversationListSync } from '../model/conversation-list-sync'
 import type { ReviewNote } from '../model/note-types'
 import {
   createReviewNote,
@@ -143,16 +142,21 @@ type UseReviewNotesResult = {
  * Writes what gets noted down about one conversation.
  *
  * The conversation is read back afterwards rather than patched: its notes come down with it, and a note's
- * server-side stamps are not something the client can invent. The queue's row is patched instead.
+ * server-side stamps are not something the client can invent. Whatever the page lists it in is told how far the
+ * write moved its note count.
  *
  * @param sessionId - The conversation being noted on.
+ * @param listSync - The lists the page holds conversations and their notes in.
  * @returns The writes as described by {@link UseReviewNotesResult}.
  */
-export function useReviewNotes(sessionId: string): UseReviewNotesResult {
+export function useReviewNotes(
+  sessionId: string,
+  listSync: ConversationListSync
+): UseReviewNotesResult {
   // Notes copy
   const t = useTranslations('conversationReview.notes')
 
-  // The cache the conversation and its row live in
+  // The cache the conversation lives in
   const queryClient = useQueryClient()
 
   // Every write against the conversation's notes. A failure surfaces as a toast rather than passing quietly,
@@ -192,20 +196,8 @@ export function useReviewNotes(sessionId: string): UseReviewNotesResult {
       // The conversation carries its own notes, so it has to be read again to show what just changed
       invalidateConversationDetail(queryClient, writtenAgainst)
 
-      // The feed reads newest-first across every conversation, which a patch can't keep in order
-      invalidateNoteFeed(queryClient)
-
-      // What the write does to how many notes the queue's row reports
-      const countDelta = noteCountDelta(write)
-
-      // Only a write that moves the count reaches the row
-      if (countDelta !== 0) {
-        // The row's count, moved by what the write added or took away
-        patchCachedQueueConversation(queryClient, writtenAgainst, (conversation) => ({
-          ...conversation,
-          noteCount: conversation.noteCount + countDelta,
-        }))
-      }
+      // Hand the write to the page's lists, with how far it moved the conversation's note count
+      listSync.noteWritten(writtenAgainst, noteCountDelta(write))
     },
     authReason: t('writeFailed'),
     errorMessage: t('writeFailed'),

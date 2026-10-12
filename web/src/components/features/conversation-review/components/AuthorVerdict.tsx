@@ -14,9 +14,9 @@ import type {
 import { entriesOf } from '@/components/shared/utils/collection-utils'
 
 /**
- * Props for the {@link StudentVerdict} component.
+ * Props for the {@link AuthorVerdict} component.
  */
-type StudentVerdictProps = {
+type AuthorVerdictProps = {
   /** What its author said about the conversation as a whole; null when they said nothing. */
   feedback: DefenseFeedback | null
   /** What they hold against individual replies. */
@@ -32,7 +32,7 @@ type StudentVerdictProps = {
  * author chose rather than a second wording of them that could drift. It sits under the transcript because
  * that is where the author themself was asked, and it renders nothing when they said nothing.
  */
-export function StudentVerdict({ feedback, reports, turns }: StudentVerdictProps) {
+export function AuthorVerdict({ feedback, reports, turns }: AuthorVerdictProps) {
   // Shared conversation-dialog copy
   const t = useTranslations('conversationReview')
 
@@ -56,7 +56,7 @@ export function StudentVerdict({ feedback, reports, turns }: StudentVerdictProps
     <section className="mt-4 border-t border-foreground/10 pt-3">
       {/* Section heading */}
       <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-muted">
-        {t('studentVerdict')}
+        {t('authorVerdict')}
       </h3>
 
       {/* How the conversation left them */}
@@ -64,7 +64,7 @@ export function StudentVerdict({ feedback, reports, turns }: StudentVerdictProps
         <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
           <MessageSquareQuote size={13} className="shrink-0 text-muted" aria-hidden="true" />
           <span className="text-foreground">{outcomeLabels.get(feedback.outcome)}</span>
-          <span className="text-muted-foreground">{feedback.comment ?? t('studentNoComment')}</span>
+          <span className="text-muted-foreground">{feedback.comment ?? t('authorNoComment')}</span>
         </p>
       )}
 
@@ -83,7 +83,7 @@ export function StudentVerdict({ feedback, reports, turns }: StudentVerdictProps
           <span className="text-muted-foreground">
             {report.categories.map((category) => categoryLabels.get(category)).join(', ')}
           </span>
-          <span className="text-muted-foreground">{report.comment ?? t('studentNoComment')}</span>
+          <span className="text-muted-foreground">{report.comment ?? t('authorNoComment')}</span>
         </p>
       ))}
     </section>

@@ -4,7 +4,6 @@ import { ArrowDown, ArrowUp, Check, CheckCheck } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
-import { ConversationDialog } from '@/components/features/conversation-review/components/ConversationDialog'
 import { useCategoryName } from '@/components/features/hosted-competitions/hooks/use-category-name'
 import { useEntryWindowLabel } from '@/components/features/hosted-competitions/hooks/use-entry-window-label'
 import { formatScore } from '@/components/features/hosted-competitions/model/hosted-competition-score'
@@ -18,7 +17,7 @@ import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import { useStepHotkeys } from '@/hooks/use-step-hotkeys'
 import type { Locale } from '@/i18n/i18n'
 
-import { useStudentConversations } from '../../conversation/hooks/use-student-conversations'
+import { AdminConversationDialog } from '../../conversation/components/AdminConversationDialog'
 import { type Grade, pairKey, scoreOf } from '../../grades/model/grade-types'
 import { type ColumnToFinalize, useColumnFinalizing } from '../hooks/use-column-finalizing'
 import { useGradingBoard } from '../hooks/use-grading-board'
@@ -67,9 +66,6 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
 
   // Making a whole column final, once confirmed
   const finalizing = useColumnFinalizing()
-
-  // Every conversation the open pair's student held about its problem, and their grading
-  const conversationList = useStudentConversations(board.studentProblem)
 
   return (
     <div className="mx-auto w-full max-w-4xl">
@@ -135,10 +131,9 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
           />
 
           {/* The pair being graded */}
-          <ConversationDialog
+          <AdminConversationDialog
             selection={board.selection}
-            author={board.studentProblem?.user ?? null}
-            conversationList={conversationList}
+            studentProblem={board.studentProblem}
             initialTabId={board.landingTabId}
           />
 

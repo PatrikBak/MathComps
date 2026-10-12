@@ -2,6 +2,7 @@ import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
 import {
+  expectDialogFor,
   expectOnlyNotCounting,
   expectOpensAtUnreadLine,
   expectWholeConversation,
@@ -145,7 +146,7 @@ test.describe('the conversation dialog', () => {
     const next = dialog.getByRole('button', { name: messages.conversationReview.next, exact: true })
 
     // The dialog names the student and where they sit, with nothing behind them to go back to
-    await expect(dialog.getByText('first@students.test', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'first@students.test')
     await expect(dialog.getByText('1 of 3', { exact: true })).toBeVisible()
     await expect(previous).toBeDisabled()
 
@@ -153,21 +154,21 @@ test.describe('the conversation dialog', () => {
     await page.keyboard.press('j')
 
     // Which moves one along
-    await expect(dialog.getByText('second@students.test', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'second@students.test')
     await expect(dialog.getByText('2 of 3', { exact: true })).toBeVisible()
 
     // The button for the next one
     await next.click()
 
     // Which reaches the end, where there is nothing further to go to
-    await expect(dialog.getByText('third@students.test', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'third@students.test')
     await expect(next).toBeDisabled()
 
     // The key for the one before
     await page.keyboard.press('k')
 
     // Which moves back one
-    await expect(dialog.getByText('second@students.test', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'second@students.test')
 
     // Closed
     await dialog.getByRole('button', { name: messages.ui.actions.close }).click()
@@ -217,9 +218,7 @@ test.describe('the conversation dialog', () => {
     await page.goto(`${QUEUE_PATH}?open=session-second%40students.test`)
 
     // Which opens on it
-    await expect(dialog.getByText('second@students.test', { exact: true })).toBeVisible({
-      timeout: SETTLE_TIMEOUT_MS,
-    })
+    await expectDialogFor(dialog, 'second@students.test', SETTLE_TIMEOUT_MS)
     await expect(dialog.getByText('2 of 2', { exact: true })).toBeVisible()
   })
 
@@ -314,7 +313,7 @@ test.describe('the conversation dialog', () => {
     await page.keyboard.press('j')
 
     // The next conversation opens on the notes too
-    await expect(dialog.getByText('second@students.test', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'second@students.test')
     await expect(notesTab).toHaveAttribute('aria-selected', 'true')
   })
 
@@ -422,7 +421,7 @@ test.describe('the conversation dialog', () => {
 
     // The dialog, its grade tab and its conversation tab
     const dialog = page.getByRole('dialog')
-    const gradeTab = dialog.getByRole('tab', { name: messages.admin.grades.tab })
+    const gradeTab = dialog.getByRole('tab', { name: messages.conversationReview.tabs.grade })
     const conversationTab = dialog.getByRole('tab', {
       name: messages.conversationReview.tabs.conversation,
     })

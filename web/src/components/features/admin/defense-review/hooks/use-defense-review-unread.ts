@@ -5,10 +5,8 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import {
-  markedReadState,
-  type ReadStateSnapshot,
-} from '@/components/features/conversation-review/hooks/use-conversation-read-state'
+import { markedReadState } from '@/components/features/conversation-review/hooks/use-conversation-read-state'
+import type { ReadStateSnapshot } from '@/components/features/conversation-review/model/conversation-list-sync'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
 import { patchCachedQueueConversations } from '../../conversation/hooks/conversation-cache'

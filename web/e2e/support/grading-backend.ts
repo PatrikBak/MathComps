@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 
+import type { StudentGrading } from '@/components/features/admin/conversation/model/student-conversations'
 import {
   type Grade,
   type GradeChange,
@@ -9,10 +10,7 @@ import type {
   GradeSummary,
   GradingBoard,
 } from '@/components/features/admin/grading-board/model/grading-types'
-import type {
-  ConversationDetail,
-  StudentGrading,
-} from '@/components/features/conversation-review/model/conversation-detail'
+import type { ConversationDetail } from '@/components/features/conversation-review/model/conversation-detail'
 
 import { createAnswerGate } from './answer-gate'
 import { BACKEND_ORIGIN } from './backend-routes'

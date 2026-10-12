@@ -3,11 +3,12 @@ import type { Locator, Page } from '@playwright/test'
 import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
-import { countDialogs } from './support/backend-routes'
-import { LIST_PATH, showRoundHolding } from './support/competitions'
-import { expectOnlyNotCounting } from './support/conversation-review'
+import { BACKEND_ORIGIN, countDialogs } from './support/backend-routes'
+import { LIST_PATH, showRoundHolding, userMenuCopy } from './support/competitions'
+import { expectDialogFor, expectOnlyNotCounting } from './support/conversation-review'
 import { GROUP_NAME, installGradingBackend } from './support/grading-backend'
 import { installHostedBackend } from './support/hosted-backend'
+import { conversationOf, installQueueBackend } from './support/review-backend'
 import { expect, test } from './support/test'
 
 /** The group whose board each test opens, except the one following the way in from a round's panel. */
@@ -74,6 +75,19 @@ async function openGrade(page: Page, student: string, problemNumber: number): Pr
 
   // The dialog, ready to grade in
   return dialog
+}
+
+/**
+ * Goes over to the review queue from the user menu, on the page already open.
+ *
+ * @param page - The page.
+ */
+async function openQueueFromMenu(page: Page): Promise<void> {
+  // The menu
+  await page.getByRole('button', { name: userMenuCopy.label }).click({ timeout: SETTLE_TIMEOUT_MS })
+
+  // The queue, which the menu offers by its title
+  await page.getByRole('menuitem', { name: messages.admin.defenseReview.title }).click()
 }
 
 /**
@@ -180,7 +194,7 @@ test.describe('the grading board', () => {
     const dialog = await openGrade(page, 'Ada', 1)
 
     // Who and what, and where it sits on the walk
-    await expect(dialog.getByText('Ada', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'Ada')
     await expect(dialog.getByText('Problem 1', { exact: true })).toBeVisible()
     await expect(dialog.getByText('1 of 5', { exact: true })).toBeVisible()
 
@@ -210,7 +224,7 @@ test.describe('the grading board', () => {
       await page.keyboard.press('j')
 
       // Lands on the next pair
-      await expect(dialog.getByText(student, { exact: true })).toBeVisible()
+      await expectDialogFor(dialog, student)
       await expect(dialog.getByText(problem, { exact: true })).toBeVisible()
     }
 
@@ -233,6 +247,59 @@ test.describe('the grading board', () => {
     await expect(
       dialog.getByRole('button', { name: conversationCopy.markUnread, exact: true })
     ).toBeVisible()
+  })
+
+  test('leaves the review queue showing a conversation read on the board as read', async ({
+    page,
+  }) => {
+    // A queue holding Ada's first conversation about her first problem, unread
+    const queue = await installQueueBackend(page, [
+      conversationOf('ada@students.test', '2026-09-21T10:00:00Z', 'ada-p1-1'),
+    ])
+
+    // A backend serving the test group's board, installed second so the dialog reads the board's conversations
+    const backend = await installGradingBackend(page, GROUP_SLUG)
+
+    // The reader's own conversations, which opening the menu reads ahead: none
+    await page.route(`${BACKEND_ORIGIN}/defense/sessions/mine`, (route) =>
+      route.fulfill({ json: [] })
+    )
+
+    // What the queue's card says while the conversation is unread
+    const newMessage = page.getByText('+1 new', { exact: true })
+
+    // The board
+    await page.goto(BOARD_PATH)
+
+    // Over to the queue from the menu, which keeps the page and everything it has read
+    await openQueueFromMenu(page)
+
+    // The conversation, unread on its card
+    await expect(newMessage).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Back on the board
+    await page.goBack()
+
+    // Ada's first problem, which opens on her first conversation
+    await cellOf(page, 'Ada', 1).click({ timeout: SETTLE_TIMEOUT_MS })
+
+    // Recorded as read
+    await expect.poll(() => backend.readMarks()).toEqual(['ada-p1-1'])
+
+    // The dialog closed
+    await page.keyboard.press('Escape')
+
+    // Over to the queue again
+    await openQueueFromMenu(page)
+
+    // The card, back on screen
+    await expect(page.getByText('ada@students.test')).toBeVisible({ timeout: SETTLE_TIMEOUT_MS })
+
+    // The card's unread count gone
+    await expect(newMessage).toHaveCount(0)
+
+    // The queue read from the backend only once, so what the card says is the page's own copy
+    expect(queue.pagesAsked()).toEqual([1])
   })
 
   test('lists a conversation started after the hand-in, marked as not counting', async ({
@@ -282,13 +349,13 @@ test.describe('the grading board', () => {
     await page.keyboard.press('j')
 
     // Onto Bruno
-    await expect(dialog.getByText('Bruno', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'Bruno')
 
     // Another step along the walk
     await page.keyboard.press('j')
 
     // Onto Cyril
-    await expect(dialog.getByText('Cyril', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'Cyril')
 
     // The dialog closed
     await page.keyboard.press('Escape')
@@ -311,7 +378,7 @@ test.describe("the board's address", () => {
     await expect(dialog.getByText('Answer 1 by dora on q1.')).toBeVisible({
       timeout: SETTLE_TIMEOUT_MS,
     })
-    await expect(dialog.getByText('Dora', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'Dora')
 
     // The dialog closed
     await page.keyboard.press('Escape')
@@ -418,7 +485,7 @@ test.describe("the board's address", () => {
     await page.keyboard.press('j')
 
     // Onto Bruno
-    await expect(dialog.getByText('Bruno', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'Bruno')
     await expect.poll(() => addressOf(page)).toBe(`${BOARD_PATH}?student=bruno&problem=p1`)
 
     // And back
@@ -649,13 +716,13 @@ test.describe('a grade', () => {
     await dialog.getByRole('button', { name: NEXT, exact: true }).click()
 
     // Onto Bruno
-    await expect(dialog.getByText('Bruno', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'Bruno')
 
     // Bruno's comment left alone, and stepped on again
     await page.keyboard.press('j')
 
     // Onto Cyril
-    await expect(dialog.getByText('Cyril', { exact: true })).toBeVisible()
+    await expectDialogFor(dialog, 'Cyril')
 
     // Cyril's written
     await comment.fill('Nothing to grade yet.')

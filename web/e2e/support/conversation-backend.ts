@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test'
 
 import type {
-  AuthorConversations,
-  ConversationDetail,
+  StudentConversations,
   StudentGrading,
-} from '@/components/features/conversation-review/model/conversation-detail'
+} from '@/components/features/admin/conversation/model/student-conversations'
+import type { ConversationDetail } from '@/components/features/conversation-review/model/conversation-detail'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
 import { BACKEND_ORIGIN } from './backend-routes'
@@ -162,7 +162,7 @@ export async function installConversationBackend(
         .sort((first, second) => first.createdAt.localeCompare(second.createdAt))
 
       // The list, with the grading where the student is graded, only ever on an archive problem
-      const body: AuthorConversations = {
+      const body: StudentConversations = {
         conversations: held.map((conversation) => ({
           id: conversation.id,
           createdAt: conversation.createdAt,

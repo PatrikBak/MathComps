@@ -3,6 +3,7 @@
 import { History } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
+import { useReviewQueueAndNoteFeedSync } from '@/components/features/admin/conversation/hooks/use-review-queue-and-note-feed-sync'
 import { ConversationDialog } from '@/components/features/conversation-review/components/ConversationDialog'
 import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -39,6 +40,9 @@ export function ProposalConversations({ proposal }: ProposalConversationsProps) 
 
   // Walking the conversations from the keyboard once one is open, the list sitting on a tab that can be out of sight
   useStepHotkeys(selection, [], false)
+
+  // The review queue and the notes feed, which list these conversations too
+  const listSync = useReviewQueueAndNoteFeedSync()
 
   // Nothing to read yet
   if (conversations.length === 0) {
@@ -81,6 +85,7 @@ export function ProposalConversations({ proposal }: ProposalConversationsProps) 
         selection={selection}
         author={author}
         conversationList={authorsConversations}
+        listSync={listSync}
         items="everyConversation"
       />
     </>

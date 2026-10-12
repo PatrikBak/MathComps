@@ -1,8 +1,8 @@
-import type { AuthorConversations } from '@/components/features/conversation-review/model/conversation-detail'
 import type { DefenseSessionTarget } from '@/components/features/defense/model/defense-types'
 import type { ApiCaller } from '@/hooks/use-api'
 import type { ApiResult } from '@/types/api'
 
+import type { StudentConversations } from '../model/student-conversations'
 import { getStudentConversationsUrl } from './conversation-api-urls'
 
 /**
@@ -22,6 +22,6 @@ export function fetchStudentConversations(
   apiCall: ApiCaller,
   userId: string,
   target: DefenseSessionTarget
-): Promise<ApiResult<AuthorConversations>> {
-  return apiCall<AuthorConversations>(() => getStudentConversationsUrl(userId, target))
+): Promise<ApiResult<StudentConversations>> {
+  return apiCall<StudentConversations>(() => getStudentConversationsUrl(userId, target))
 }

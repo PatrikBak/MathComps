@@ -16,6 +16,7 @@ import type { RichMathEditorRef } from '@/components/shared/components/rich-math
 import { useRevealLandingNote } from '../hooks/use-reveal-landing-note'
 import { useReviewNoteEditing } from '../hooks/use-review-note-editing'
 import { useReviewNotes } from '../hooks/use-review-notes'
+import type { ConversationListSync } from '../model/conversation-list-sync'
 import type { ReviewNote } from '../model/note-types'
 import { NoteTargetRow } from './NoteTargetRow'
 import { ReviewNoteCard } from './ReviewNoteCard'
@@ -39,6 +40,8 @@ type NotesPanelProps = {
   composerRef: Ref<RichMathEditorRef>
   /** Points a new note at another reply, or at the conversation as a whole. */
   onTurnIdChange: (turnId: string | null) => void
+  /** The lists the page holds conversations and their notes in. */
+  listSync: ConversationListSync
 }
 
 /**
@@ -62,12 +65,13 @@ export function NotesPanel({
   landingNoteId,
   composerRef,
   onTurnIdChange,
+  listSync,
 }: NotesPanelProps) {
   // Notes copy
   const t = useTranslations('conversationReview.notes')
 
   // The writes themselves
-  const { create, update, remove, setResolved } = useReviewNotes(sessionId)
+  const { create, update, remove, setResolved } = useReviewNotes(sessionId, listSync)
 
   // Which note is being revised, and which is being dropped
   const editing = useReviewNoteEditing(update, remove)

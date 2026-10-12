@@ -89,8 +89,7 @@
         "selfAssessment": "Student's comment"
       },
       "saveFailed": "Couldn't save the grade",
-      "studentSeesOnceFinal": "The student sees this once the competition has closed and the grade is final.",
-      "tab": "Grade"
+      "studentSeesOnceFinal": "The student sees this once the competition has closed and the grade is final."
     },
     "grading": {
       "empty": "Nobody to grade in this group.",
@@ -476,10 +475,10 @@
       "total": "In total",
       "verdicts": {
         "address": "Address",
-        "addressClean": "leaves the student ungendered",
+        "addressClean": "leaves them ungendered",
         "close": "Close",
         "closeClean": "not yet earned",
-        "gendersTheReader": "took the student for a man or a woman",
+        "gendersTheReader": "took them for a man or a woman",
         "language": "Language",
         "languageUnknown": "not named",
         "leak": "Leak",
@@ -489,13 +488,15 @@
         "mathFails": "wrong: {correction}",
         "mathHolds": "every claim holds",
         "route": "Route",
-        "routeClean": "on the student's route",
+        "routeClean": "on their own route",
         "routeUnknown": "not checked",
-        "switchesLanguage": "drifted; the student wrote in {language}",
-        "takesOver": "walked the student onto her own route; the answer she wants: {restatedReferenceStep}",
+        "switchesLanguage": "drifted; they wrote in {language}",
+        "takesOver": "walked them onto her own route; the answer she wants: {restatedReferenceStep}",
         "withholdsClose": "already complete: {established}"
       }
     },
+    "authorNoComment": "No comment",
+    "authorVerdict": "Feedback on Mathilda",
     "config": {
       "fallbackModels": "Fallbacks",
       "fallbackModelsNone": "none",
@@ -577,13 +578,11 @@
       "solution": "Reference solution and hints",
       "statement": "Statement"
     },
-    "student": "Student",
-    "studentNoComment": "No comment",
-    "studentVerdict": "What the student said",
     "tabs": {
       "config": "Settings",
       "conversation": "Conversation",
       "feedback": "Feedback",
+      "grade": "Grade",
       "reference": "Solution"
     },
     "tabsLabel": "Parts of the conversation",

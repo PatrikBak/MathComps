@@ -10,7 +10,7 @@ import { MATHILDA_NAME } from '@/constants/mathilda'
 
 import { useConversationTranscript } from '../hooks/use-conversation-transcript'
 import type { ConversationDetail } from '../model/conversation-detail'
-import { StudentVerdict } from './StudentVerdict'
+import { AuthorVerdict } from './AuthorVerdict'
 import { TurnAttemptsModal } from './TurnAttemptsModal'
 
 /**
@@ -19,11 +19,13 @@ import { TurnAttemptsModal } from './TurnAttemptsModal'
 type TranscriptPaneProps = {
   /** The conversation being read. */
   conversation: ConversationDetail
+  /** The name the conversation's author goes by. */
+  authorName: string
   /** Whatever stands above the problem. */
   aboveStatement: ReactNode
   /** The first turn left to read since the reader's last pass; null while nothing marks one. */
   firstNewTurnId: string | null
-  /** When what the student says stops counting toward a grade; null where nothing stops it. */
+  /** When what the author says stops counting toward a grade; null where nothing stops it. */
   countsUntil: string | null
   /** Picks the conversation up again from one of its turns. */
   onMarkUnreadFrom: (turnId: string) => void
@@ -37,11 +39,12 @@ type TranscriptPaneProps = {
  * A conversation as a reviewer reads it: the problem, re-readable above it, and every turn with Mathilda's
  * replies numbered, so anything written about one can name it. A turn says how long it took its author wherever
  * that was measured, a reply that kept its drafts opens them, and what the conversation's author said about it
- * closes the conversation. Where the author is a graded student, a line marks where their words stop counting.
+ * closes the conversation. Where the author is graded, a line marks where their words stop counting.
  * Nothing in it can be rewound or reported, since those are the author's own.
  */
 export function TranscriptPane({
   conversation,
+  authorName,
   aboveStatement,
   firstNewTurnId,
   countsUntil,
@@ -62,11 +65,11 @@ export function TranscriptPane({
       ? null
       : { turnId: firstNewTurnId, label: t('unreadDivider') }
 
-  // The first turn said after the student's words stopped counting, null where none was
+  // The first turn said after the author's words stopped counting, null where none was
   const firstUncountedTurnId =
     countsUntil === null ? null : findFirstUncountedTurnId(conversation.turns, countsUntil)
 
-  // Where the student's words stop counting, drawn above the first turn past it
+  // Where the author's words stop counting, drawn above the first turn past it
   const countsUntilLine =
     firstUncountedTurnId === null
       ? null
@@ -97,7 +100,7 @@ export function TranscriptPane({
         }}
         turnDurationsMs={turnDurationsMs}
         footer={
-          <StudentVerdict
+          <AuthorVerdict
             feedback={conversation.feedback}
             reports={conversation.reports}
             turns={conversation.turns}
@@ -112,7 +115,11 @@ export function TranscriptPane({
         // A note about one of the examiner's replies can be started from the reply itself
         noteMark={{ label: tNotes('writeOnTurn'), onMark: onStartNote }}
         pointedAtTurnId={pointedAtTurnId}
-        roleLabels={{ examiner: MATHILDA_NAME, candidate: t('student') }}
+        // Whose turn each is: Mathilda's under her name, the author's under theirs
+        roleLabels={{
+          examiner: MATHILDA_NAME,
+          candidate: authorName,
+        }}
         isThinking={false}
         onRewindTurn={null}
         onReportTurn={null}

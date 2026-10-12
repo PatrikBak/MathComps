@@ -89,8 +89,7 @@
         "selfAssessment": "Komentář studenta"
       },
       "saveFailed": "Hodnocení se nepodařilo uložit",
-      "studentSeesOnceFinal": "Student to uvidí, až soutěž skončí a hodnocení bude finální.",
-      "tab": "Hodnocení"
+      "studentSeesOnceFinal": "Student to uvidí, až soutěž skončí a hodnocení bude finální."
     },
     "grading": {
       "empty": "V této skupině není koho hodnotit.",
@@ -479,7 +478,7 @@
         "addressClean": "bez určení pohlaví",
         "close": "Uzavření",
         "closeClean": "zatím není zasloužené",
-        "gendersTheReader": "určila pohlaví studenta",
+        "gendersTheReader": "oslovila v mužském nebo ženském rodě",
         "language": "Jazyk",
         "languageUnknown": "neurčen",
         "leak": "Prozrazení",
@@ -489,13 +488,15 @@
         "mathFails": "chyba: {correction}",
         "mathHolds": "všechna tvrzení platí",
         "route": "Cesta",
-        "routeClean": "na cestě studenta",
+        "routeClean": "na zvolené cestě",
         "routeUnknown": "nekontrolováno",
-        "switchesLanguage": "odchýlila se; student psal jazykem {language}",
-        "takesOver": "odvedla studenta na vlastní cestu; odpověď, kterou chce: {restatedReferenceStep}",
+        "switchesLanguage": "odchýlila se od jazyka konverzace: {language}",
+        "takesOver": "zavedla konverzaci na vlastní cestu; odpověď, kterou chce: {restatedReferenceStep}",
         "withholdsClose": "už je hotové: {established}"
       }
     },
+    "authorNoComment": "Bez komentáře",
+    "authorVerdict": "Zpětná vazba na Mathildu",
     "config": {
       "fallbackModels": "Náhradní modely",
       "fallbackModelsNone": "žádné",
@@ -577,13 +578,11 @@
       "solution": "Referenční řešení a nápovědy",
       "statement": "Zadání"
     },
-    "student": "Student",
-    "studentNoComment": "Bez komentáře",
-    "studentVerdict": "Co řekl student",
     "tabs": {
       "config": "Nastavení",
       "conversation": "Konverzace",
       "feedback": "Zpětná vazba",
+      "grade": "Hodnocení",
       "reference": "Řešení"
     },
     "tabsLabel": "Části konverzace",

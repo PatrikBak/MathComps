@@ -1,9 +1,6 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 
-import { patchCachedQueueConversation } from '@/components/features/admin/conversation/hooks/conversation-cache'
-import type { DefenseReviewConversation } from '@/components/features/admin/defense-review/model/defense-review-types'
 import type { ReadPassBoundary } from '@/components/features/defense/model/defense-conversation-model'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import type { ApiCaller } from '@/hooks/use-api'
@@ -11,6 +8,11 @@ import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { createSettlingWrites } from '@/lib/settling-writes'
 import type { ApiResult } from '@/types/api'
 
+import type {
+  ConversationListSync,
+  ReadStateRow,
+  ReadStateSnapshot,
+} from '../model/conversation-list-sync'
 import {
   setConversationReadState,
   setConversationUnreadFromTurn,
@@ -60,19 +62,7 @@ type ReadStateChange = {
 }
 
 /**
- * What a row said about having been read, kept so a failed write can put it back.
- */
-export type ReadStateSnapshot = {
-  /** When it was last read, as an ISO-8601 string; null while it never had been. */
-  readAt: string | null
-  /** Whether anything in it stood unread. */
-  isUnread: boolean
-  /** How many of its author's messages were new. */
-  unreadStudentMessageCount: number
-}
-
-/**
- * What a mark has written, held in a slot the cache rewrite can fill and the caller can read back out.
+ * What a mark has written, held in a slot the row rewrite can fill and the caller can read back out.
  */
 type WrittenReadState = {
   /** The row as this mark left it; null while it has written nothing. */
@@ -82,14 +72,14 @@ type WrittenReadState = {
 /**
  * Works out what a row says once a mark has been made on it.
  *
- * @param conversation - The row as it stands.
+ * @param row - The row as it stands.
  * @param mark - The move being made on it.
  * @param readAt - The moment a read is recorded as of.
  *
  * @returns The row's read state as the mark leaves it.
  */
 export function markedReadState(
-  conversation: DefenseReviewConversation,
+  row: ReadStateRow,
   mark: ReadMark,
   readAt: string
 ): ReadStateSnapshot {
@@ -103,7 +93,7 @@ export function markedReadState(
       return {
         readAt: null,
         isUnread: true,
-        unreadStudentMessageCount: conversation.studentMessageCount,
+        unreadStudentMessageCount: row.studentMessageCount,
       }
 
     // Read as far as the turn before the one it is picked up from, which is what the boundary names. Taken
@@ -183,16 +173,17 @@ type UseConversationReadStateResult = {
 /**
  * Records which conversations have been read.
  *
- * The review queue's rows are patched in place, for the reason {@link patchCachedQueueConversation} gives.
+ * Every row listing a marked conversation is rewritten straight away, and put back when the server refuses the
+ * mark.
  *
+ * @param listSync - The lists the page holds conversations and their notes in.
  * @returns The marks as described by {@link UseConversationReadStateResult}.
  */
-export function useConversationReadState(): UseConversationReadStateResult {
+export function useConversationReadState(
+  listSync: ConversationListSync
+): UseConversationReadStateResult {
   // Shared conversation-dialog copy
   const t = useTranslations('conversationReview')
-
-  // The cache the rows live in
-  const queryClient = useQueryClient()
 
   // The marks still settling on each conversation, and what its row goes back to when one is refused
   const [settling] = useState(() => createSettlingWrites<ReadStateSnapshot>())
@@ -210,24 +201,24 @@ export function useConversationReadState(): UseConversationReadStateResult {
       // What this mark writes, held so that landing it can make it the state a later failure falls back to
       const written: WrittenReadState = { value: null }
 
-      // Rewrite it to what the reader has already seen happen
-      patchCachedQueueConversation(queryClient, sessionId, (conversation) => {
+      // Rewrite every row listing the conversation to what the reader has already seen happen
+      listSync.patchReadState(sessionId, (row) => {
         // Only the mark that opened the set sees the row as the server last left it, and only off one copy
-        // of it: the conversation is cached once per filtering and language, and copies read at different
-        // moments disagree about how much of it is unread
+        // of it: the conversation can sit in several rows, and rows read at different moments
+        // disagree about how much of it is unread
         if (opensSet) {
           settling.holdBefore(sessionId, {
-            readAt: conversation.readAt,
-            isUnread: conversation.isUnread,
-            unreadStudentMessageCount: conversation.unreadStudentMessageCount,
+            readAt: row.readAt,
+            isUnread: row.isUnread,
+            unreadStudentMessageCount: row.unreadStudentMessageCount,
           })
         }
 
         // What the mark leaves the row saying, computed once so every copy of it says the same thing
-        written.value ??= markedReadState(conversation, mark, new Date().toISOString())
+        written.value ??= markedReadState(row, mark, new Date().toISOString())
 
-        // The row as this mark leaves it
-        return { ...conversation, ...written.value }
+        // The row's read state as this mark leaves it
+        return written.value
       })
 
       // Handed on so this mark's own write is recoverable once it lands
@@ -242,13 +233,8 @@ export function useConversationReadState(): UseConversationReadStateResult {
 
       // Nothing behind it is left to decide what the row says, so it says what actually landed. Which the
       // rewrite on the way out already wrote, except where a mark refused since then skipped its own rollback
-      // or a read of the whole queue landed over it.
-      if (isLastToSettle) {
-        patchCachedQueueConversation(queryClient, sessionId, (conversation) => ({
-          ...conversation,
-          ...written,
-        }))
-      }
+      // or a read of the whole list landed over it.
+      if (isLastToSettle) listSync.patchReadState(sessionId, () => written)
     },
     onError: (_error, { sessionId }) => {
       // What the server still holds, unless a mark behind this one decides
@@ -258,10 +244,7 @@ export function useConversationReadState(): UseConversationReadStateResult {
       if (confirmed === null) return
 
       // Put the row back the way it was
-      patchCachedQueueConversation(queryClient, sessionId, (conversation) => ({
-        ...conversation,
-        ...confirmed.state,
-      }))
+      listSync.patchReadState(sessionId, () => confirmed.state)
     },
     // One mark fewer settling on the conversation, whichever way it went
     onSettled: (_data, _error, { sessionId }) => settling.settle(sessionId),
