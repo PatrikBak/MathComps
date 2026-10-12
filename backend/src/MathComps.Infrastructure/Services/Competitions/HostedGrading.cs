@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using MathComps.Domain.Contracts.Admin;
+using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Users;

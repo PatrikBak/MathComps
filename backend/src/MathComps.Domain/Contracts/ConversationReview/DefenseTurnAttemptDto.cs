@@ -1,0 +1,75 @@
+using MathComps.Domain.EfCoreEntities;
+
+namespace MathComps.Domain.Contracts.ConversationReview;
+
+/// <summary>
+/// One model call an attempt made, and what it billed. Read by reviewers alone, like everything else here.
+/// </summary>
+/// <param name="Step"><inheritdoc cref="DefenseAttemptCall.Step" path="/summary"/></param>
+/// <param name="Model"><inheritdoc cref="DefenseAttemptCall.Model" path="/summary"/></param>
+/// <param name="ReasoningEffort"><inheritdoc cref="DefenseAttemptCall.ReasoningEffort" path="/summary"/></param>
+/// <param name="Cost"><inheritdoc cref="DefenseAttemptCall.Cost" path="/summary"/></param>
+/// <param name="PromptTokens"><inheritdoc cref="DefenseAttemptCall.PromptTokens" path="/summary"/></param>
+/// <param name="CompletionTokens"><inheritdoc cref="DefenseAttemptCall.CompletionTokens" path="/summary"/></param>
+/// <param name="ReasoningTokens"><inheritdoc cref="DefenseAttemptCall.ReasoningTokens" path="/summary"/></param>
+/// <param name="DurationMs"><inheritdoc cref="DefenseAttemptCall.DurationMs" path="/summary"/></param>
+public record DefenseAttemptCallDto(
+    ExaminerStep Step,
+    string Model,
+    string? ReasoningEffort,
+    decimal Cost,
+    int PromptTokens,
+    int CompletionTokens,
+    int ReasoningTokens,
+    int DurationMs);
+
+/// <summary>
+/// One reply the examiner drafted on its way to a turn, every guard's verdict on it, and what drafting and judging
+/// it cost.
+/// <para>
+/// This must stay off <see cref="Defense.DefenseTurnDto"/>, which the defense surface hands a conversation's
+/// author: a rejected draft is the leak or the wrong claim a guard caught, so handing it to the author would give
+/// away precisely what the loop exists to withhold.
+/// </para>
+/// </summary>
+/// <param name="TurnId"><inheritdoc cref="DefenseTurnAttempt.TurnId" path="/summary"/></param>
+/// <param name="AttemptIndex"><inheritdoc cref="DefenseTurnAttempt.AttemptIndex" path="/summary"/></param>
+/// <param name="Reply"><inheritdoc cref="DefenseTurnAttempt.Reply" path="/summary"/></param>
+/// <param name="RevisionNote"><inheritdoc cref="DefenseTurnAttempt.RevisionNote" path="/summary"/></param>
+/// <param name="MathHolds"><inheritdoc cref="DefenseTurnAttempt.MathHolds" path="/summary"/></param>
+/// <param name="MathCorrection"><inheritdoc cref="DefenseTurnAttempt.MathCorrection" path="/summary"/></param>
+/// <param name="Leaks"><inheritdoc cref="DefenseTurnAttempt.Leaks" path="/summary"/></param>
+/// <param name="WhatLeaked"><inheritdoc cref="DefenseTurnAttempt.WhatLeaked" path="/summary"/></param>
+/// <param name="WithholdsClose"><inheritdoc cref="DefenseTurnAttempt.WithholdsClose" path="/summary"/></param>
+/// <param name="Established"><inheritdoc cref="DefenseTurnAttempt.Established" path="/summary"/></param>
+/// <param name="SwitchesLanguage"><inheritdoc cref="DefenseTurnAttempt.SwitchesLanguage" path="/summary"/></param>
+/// <param name="CandidateLanguage"><inheritdoc cref="DefenseTurnAttempt.CandidateLanguage" path="/summary"/></param>
+/// <param name="GendersTheReader"><inheritdoc cref="DefenseTurnAttempt.GendersTheReader" path="/summary"/></param>
+/// <param name="TakesOver"><inheritdoc cref="DefenseTurnAttempt.TakesOver" path="/summary"/></param>
+/// <param name="CandidateWork"><inheritdoc cref="DefenseTurnAttempt.CandidateWork" path="/summary"/></param>
+/// <param name="RestatedReferenceStep">
+/// <inheritdoc cref="DefenseTurnAttempt.RestatedReferenceStep" path="/summary"/>
+/// </param>
+/// <param name="IsSafeFallback"><inheritdoc cref="DefenseTurnAttempt.IsSafeFallback" path="/summary"/></param>
+/// <param name="Calls"><inheritdoc cref="DefenseTurnAttempt.Calls" path="/summary"/></param>
+/// <param name="DurationMs"><inheritdoc cref="DefenseTurnAttempt.DurationMs" path="/summary"/></param>
+public record DefenseTurnAttemptDto(
+    Guid TurnId,
+    int AttemptIndex,
+    string Reply,
+    string RevisionNote,
+    bool MathHolds,
+    string MathCorrection,
+    bool Leaks,
+    string WhatLeaked,
+    bool WithholdsClose,
+    string Established,
+    bool SwitchesLanguage,
+    string CandidateLanguage,
+    bool GendersTheReader,
+    bool TakesOver,
+    string CandidateWork,
+    string RestatedReferenceStep,
+    bool IsSafeFallback,
+    IReadOnlyList<DefenseAttemptCallDto> Calls,
+    int DurationMs);

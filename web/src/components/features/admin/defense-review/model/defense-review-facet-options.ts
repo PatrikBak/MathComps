@@ -1,4 +1,3 @@
-import { describeUser } from '@/components/features/admin/model/user-identity'
 import type {
   NamedDefenseTarget,
   NamedHandoutTarget,
@@ -10,6 +9,7 @@ import {
   type HandoutProblemLabeller,
 } from '@/components/features/handouts/handout-problem-label'
 import { describeProblemRef } from '@/components/features/problems/problem-ref-label'
+import { describeUser } from '@/components/features/profile/model/user-identity'
 import type { FacetOption } from '@/components/shared/components/facets/model/facet-types'
 import { assertNever } from '@/components/shared/utils/assert-never'
 

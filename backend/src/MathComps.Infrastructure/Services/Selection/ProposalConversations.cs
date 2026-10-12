@@ -1,6 +1,6 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Infrastructure.Services.Admin;
+using MathComps.Infrastructure.Services.ConversationReview;
 using MathComps.Infrastructure.Services.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,7 +38,7 @@ public sealed class ProposalConversations(
             .Where(note => note.Id == noteId)
             .Select(note => (Guid?)note.SessionId)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new AdminNoteNotFoundException();
+            ?? throw new ReviewNoteNotFoundException();
 
         // Refused unless that conversation is a reviewer's about a proposal the selection holds.
         await EnsureAsync(dbContext, sessionId, cancellationToken);

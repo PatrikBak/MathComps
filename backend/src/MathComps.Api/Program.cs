@@ -175,7 +175,10 @@ builder.Services.AddDefenseServices(builder.Configuration);
 // The competitions the site hosts itself
 builder.Services.AddCompetitionServices();
 
-// The admin review of defense conversations
+// Reviewing one defense conversation, as an admin or as the problem selection's reviewer
+builder.Services.AddConversationReviewServices();
+
+// The admin's queue of defense conversations, its notes feed and grading
 builder.Services.AddAdminServices();
 
 // The selection the hosted competitions' papers are picked in

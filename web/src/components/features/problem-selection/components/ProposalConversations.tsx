@@ -3,7 +3,7 @@
 import { History } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
-import { ConversationDialog } from '@/components/features/admin/conversation/components/ConversationDialog'
+import { ConversationDialog } from '@/components/features/conversation-review/components/ConversationDialog'
 import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
@@ -79,7 +79,7 @@ export function ProposalConversations({ proposal }: ProposalConversationsProps) 
       {/* The conversation being read */}
       <ConversationDialog
         selection={selection}
-        student={author}
+        author={author}
         conversationList={authorsConversations}
         items="everyConversation"
       />

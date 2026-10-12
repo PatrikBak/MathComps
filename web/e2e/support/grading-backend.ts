@@ -1,9 +1,5 @@
 import type { Page } from '@playwright/test'
 
-import type {
-  AdminConversation,
-  StudentGrading,
-} from '@/components/features/admin/conversation/model/admin-conversation'
 import {
   type Grade,
   type GradeChange,
@@ -13,11 +9,15 @@ import type {
   GradeSummary,
   GradingBoard,
 } from '@/components/features/admin/grading-board/model/grading-types'
+import type {
+  ConversationDetail,
+  StudentGrading,
+} from '@/components/features/conversation-review/model/conversation-detail'
 
-import { wholeConversationOf } from './admin-conversation'
 import { createAnswerGate } from './answer-gate'
 import { BACKEND_ORIGIN } from './backend-routes'
 import { type ConversationBackend, installConversationBackend } from './conversation-backend'
+import { wholeConversationOf } from './conversation-review'
 
 /** The grader every grade the fake writes is stamped by. */
 const GRADER = { id: 'grader', username: 'Grader', email: null }
@@ -180,11 +180,11 @@ function applyAsBackend(grade: Grade | null, change: GradeChange): Grade | null 
  *
  * @returns The conversations, by the pair they belong to.
  */
-function conversationsOf(board: GradingBoard): ReadonlyMap<string, AdminConversation[]> {
+function conversationsOf(board: GradingBoard): ReadonlyMap<string, ConversationDetail[]> {
   // Every entrant on every problem of every competition, each with the conversations it holds
   return new Map(
     board.competitions.flatMap((competition) =>
-      competition.grades.flatMap((summary): [string, AdminConversation[]][] => {
+      competition.grades.flatMap((summary): [string, ConversationDetail[]][] => {
         // The student, as the competition names them
         const user = competition.entrants.find(
           (entrant) => entrant.user.id === summary.userId
@@ -243,7 +243,7 @@ function conversationsOf(board: GradingBoard): ReadonlyMap<string, AdminConversa
  */
 function gradingOf(
   grades: readonly GradeSummary[],
-  held: readonly AdminConversation[],
+  held: readonly ConversationDetail[],
   userId: string,
   problemId: string
 ): StudentGrading | null {

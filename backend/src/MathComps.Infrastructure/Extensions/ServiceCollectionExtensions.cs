@@ -14,6 +14,7 @@ using MathComps.Infrastructure.Services.Clerk;
 using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Comments.Kinds;
 using MathComps.Infrastructure.Services.Competitions;
+using MathComps.Infrastructure.Services.ConversationReview;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Defense.Content;
 using MathComps.Infrastructure.Services.Defense.Engine;
@@ -568,8 +569,26 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds the admin services: reading every student's defense conversations back, recording which have
-    /// been read, keeping the notes written about them, and grading the hosted groups.
+    /// Adds the services reviewing one defense conversation: reading it back, recording how far it has been read,
+    /// and keeping the notes written about it.
+    /// </summary>
+    /// <param name="services">The service collection to add the review services to.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddConversationReviewServices(this IServiceCollection services)
+    {
+        // The service that reads a conversation back and records how far it has been read.
+        services.TryAddScoped<IConversationReviewService, ConversationReviewService>();
+
+        // The service that keeps what gets written down about it.
+        services.TryAddScoped<IReviewNoteService, ReviewNoteService>();
+
+        // Builder pattern
+        return services;
+    }
+
+    /// <summary>
+    /// Adds the admin services: the queue of every student's defense conversations, the feed of the notes written
+    /// across them, and grading the hosted groups.
     /// </summary>
     /// <param name="services">The service collection to add the admin services to.</param>
     /// <returns>The service collection for chaining.</returns>
@@ -582,10 +601,10 @@ public static class ServiceCollectionExtensions
         // their runs.
         services.AddUserGrants();
 
-        // The service that reads every student's conversations back and records which have been read.
+        // The service that reads every student's conversations as a queue.
         services.TryAddScoped<IAdminDefenseReviewService, AdminDefenseReviewService>();
 
-        // The service that keeps what gets written down about them.
+        // The service that reads the notes written across them as one feed.
         services.TryAddScoped<IAdminNoteService, AdminNoteService>();
 
         // The service that grades the hosted groups.

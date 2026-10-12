@@ -3,8 +3,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 
-import type { UserIdentity } from '@/components/features/admin/model/user-identity'
 import { useUserProfile } from '@/components/features/profile/hooks/use-user-profile'
+import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { createSettlingWrites } from '@/lib/settling-writes'
 

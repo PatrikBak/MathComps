@@ -1,4 +1,4 @@
-import type { UserIdentity } from '@/components/features/admin/model/user-identity'
+import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 
 import type { Grade, GradeChange } from './grade-types'
 

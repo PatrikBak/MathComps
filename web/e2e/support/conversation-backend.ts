@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test'
 
 import type {
-  AdminConversation,
-  StudentConversations,
+  AuthorConversations,
+  ConversationDetail,
   StudentGrading,
-} from '@/components/features/admin/conversation/model/admin-conversation'
+} from '@/components/features/conversation-review/model/conversation-detail'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
 import { BACKEND_ORIGIN } from './backend-routes'
@@ -50,7 +50,7 @@ function backendPathOf(url: URL): string {
  * @returns Whether it was held against that problem.
  */
 function isHeldAgainst(
-  conversation: AdminConversation,
+  conversation: ConversationDetail,
   problemId: string | null,
   url: URL
 ): boolean {
@@ -90,7 +90,7 @@ function isHeldAgainst(
  */
 export async function installConversationBackend(
   page: Page,
-  conversations: () => readonly AdminConversation[],
+  conversations: () => readonly ConversationDetail[],
   gradingOf: GradingOf
 ): Promise<ConversationBackend> {
   // Every conversation marked read, in the order the marks arrived
@@ -162,7 +162,7 @@ export async function installConversationBackend(
         .sort((first, second) => first.createdAt.localeCompare(second.createdAt))
 
       // The list, with the grading where the student is graded, only ever on an archive problem
-      const body: StudentConversations = {
+      const body: AuthorConversations = {
         conversations: held.map((conversation) => ({
           id: conversation.id,
           createdAt: conversation.createdAt,

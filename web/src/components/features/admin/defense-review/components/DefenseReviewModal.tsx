@@ -3,12 +3,12 @@
 import { MailPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { ActionLabel } from '@/components/features/conversation-review/components/ActionLabel'
+import { ConversationDialog } from '@/components/features/conversation-review/components/ConversationDialog'
+import { useConversationDetail } from '@/components/features/conversation-review/hooks/use-conversation-detail'
 import { toSessionTarget } from '@/components/features/defense/model/defense-target'
 import { Button } from '@/components/shared/components/Button'
 
-import { ActionLabel } from '../../conversation/components/ActionLabel'
-import { ConversationDialog } from '../../conversation/components/ConversationDialog'
-import { useConversationDetail } from '../../conversation/hooks/use-conversation-detail'
 import { useStudentConversations } from '../../conversation/hooks/use-student-conversations'
 import type { UseDefenseReviewSelectionResult } from '../hooks/use-defense-review-selection'
 import { NEXT_UNREAD_KEY } from '../model/defense-review-stepping'
@@ -48,7 +48,7 @@ export function DefenseReviewModal({
   return (
     <ConversationDialog
       selection={selection}
-      student={opened?.user ?? null}
+      author={opened?.user ?? null}
       conversationList={conversationList}
       items="conversations"
       stepActions={

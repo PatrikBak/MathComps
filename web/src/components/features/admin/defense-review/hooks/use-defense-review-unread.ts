@@ -5,13 +5,13 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
-
-import { patchCachedQueueConversations } from '../../conversation/hooks/conversation-cache'
 import {
   markedReadState,
   type ReadStateSnapshot,
-} from '../../conversation/hooks/use-conversation-read-state'
+} from '@/components/features/conversation-review/hooks/use-conversation-read-state'
+import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
+
+import { patchCachedQueueConversations } from '../../conversation/hooks/conversation-cache'
 import type { DefenseReviewConversation } from '../model/defense-review-types'
 import { setConversationsRead } from '../services/defense-review-service'
 import { invalidateUnreadQueue } from './defense-review-cache'
@@ -66,7 +66,7 @@ export function useDefenseReviewUnread(
   const t = useTranslations('admin.defenseReview')
 
   // Shared conversation-dialog copy
-  const tConversation = useTranslations('admin.conversation')
+  const tConversation = useTranslations('conversationReview')
 
   // The cache the rows live in
   const queryClient = useQueryClient()

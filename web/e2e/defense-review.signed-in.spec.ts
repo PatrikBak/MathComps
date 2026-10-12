@@ -6,7 +6,7 @@ import {
   expectOpensAtUnreadLine,
   expectWholeConversation,
   FIRST_UNREAD_TURN_TEXT,
-} from './support/admin-conversation'
+} from './support/conversation-review'
 import { conversationOf, installQueueBackend } from './support/review-backend'
 import { expect, test } from './support/test'
 
@@ -139,10 +139,10 @@ test.describe('the conversation dialog', () => {
     // The dialog it opens in, and its way along the queue
     const dialog = page.getByRole('dialog')
     const previous = dialog.getByRole('button', {
-      name: messages.admin.conversation.previous,
+      name: messages.conversationReview.previous,
       exact: true,
     })
-    const next = dialog.getByRole('button', { name: messages.admin.conversation.next, exact: true })
+    const next = dialog.getByRole('button', { name: messages.conversationReview.next, exact: true })
 
     // The dialog names the student and where they sit, with nothing behind them to go back to
     await expect(dialog.getByText('first@students.test', { exact: true })).toBeVisible()
@@ -256,7 +256,10 @@ test.describe('the conversation dialog', () => {
     // holds a hidden copy of its name
     const dialog = page.getByRole('dialog')
     const tabs = dialog.getByRole('tab')
-    const tabNames = { ...messages.admin.conversation.tabs, notes: messages.admin.notes.tab }
+    const tabNames = {
+      ...messages.conversationReview.tabs,
+      notes: messages.conversationReview.notes.tab,
+    }
 
     // Narrow, so every part is a tab and the conversation is one of them
     await expect(tabs).toHaveText(
@@ -299,7 +302,7 @@ test.describe('the conversation dialog', () => {
 
     // The dialog and its notes tab
     const dialog = page.getByRole('dialog')
-    const notesTab = dialog.getByRole('tab', { name: messages.admin.notes.tab })
+    const notesTab = dialog.getByRole('tab', { name: messages.conversationReview.notes.tab })
 
     // Turn to the notes
     await notesTab.click()
@@ -349,7 +352,7 @@ test.describe('the conversation dialog', () => {
 
     // The line marking where the student's words stop counting
     const countsUntilLine = dialog.getByRole('separator', {
-      name: messages.admin.conversation.countsUntilDivider,
+      name: messages.conversationReview.countsUntilDivider,
     })
 
     // Both listed oldest first, the later one marked as not counting
@@ -421,7 +424,7 @@ test.describe('the conversation dialog', () => {
     const dialog = page.getByRole('dialog')
     const gradeTab = dialog.getByRole('tab', { name: messages.admin.grades.tab })
     const conversationTab = dialog.getByRole('tab', {
-      name: messages.admin.conversation.tabs.conversation,
+      name: messages.conversationReview.tabs.conversation,
     })
 
     // Turn to the grade, which a graded student has
@@ -471,7 +474,10 @@ test.describe('the conversation dialog', () => {
     const dialog = page.getByRole('dialog')
 
     // What each of its tabs is called
-    const tabNames = { ...messages.admin.conversation.tabs, notes: messages.admin.notes.tab }
+    const tabNames = {
+      ...messages.conversationReview.tabs,
+      notes: messages.conversationReview.notes.tab,
+    }
 
     // The conversation marked as not counting, which says the student is graded
     await expectOnlyNotCounting(dialog, 1, 1)
@@ -512,12 +518,12 @@ test.describe('the conversation dialog', () => {
 
     // The whole conversation marked back to unread, which moves where the next pass starts to its top
     await dialog
-      .getByRole('button', { name: messages.admin.conversation.markUnread, exact: true })
+      .getByRole('button', { name: messages.conversationReview.markUnread, exact: true })
       .click()
 
     // Taken, the toggle offering the way back
     await expect(
-      dialog.getByRole('button', { name: messages.admin.conversation.markRead, exact: true })
+      dialog.getByRole('button', { name: messages.conversationReview.markRead, exact: true })
     ).toBeVisible()
 
     // Wait for the server's answer to the mark

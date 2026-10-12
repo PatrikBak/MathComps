@@ -1,7 +1,7 @@
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
-using MathComps.Infrastructure.Services.Admin;
+using MathComps.Infrastructure.Services.ConversationReview;
 using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -151,7 +151,7 @@ public class ProposalConversationsPostgresTests(PostgresContainerFixture fixture
             () => service.EnsureConversationAsync(Guid.CreateVersion7()));
 
         // And no note
-        await Assert.ThrowsAsync<AdminNoteNotFoundException>(
+        await Assert.ThrowsAsync<ReviewNoteNotFoundException>(
             () => service.EnsureNoteAsync(Guid.CreateVersion7()));
     });
 

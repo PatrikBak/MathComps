@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.Admin;
+using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;

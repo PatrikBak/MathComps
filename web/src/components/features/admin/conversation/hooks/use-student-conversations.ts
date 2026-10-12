@@ -1,12 +1,11 @@
 import { skipToken } from '@tanstack/react-query'
 
-import type { UserIdentity } from '@/components/features/admin/model/user-identity'
+import type { AuthorConversationsResult } from '@/components/features/conversation-review/model/conversation-detail'
 import type { DefenseSessionTarget } from '@/components/features/defense/model/defense-types'
+import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
-import type { QueryUiState } from '@/lib/query-ui-state'
 
-import type { StudentConversations } from '../model/admin-conversation'
 import { fetchStudentConversations } from '../services/conversation-service'
 import { studentConversationsQueryKey } from './conversation-cache'
 
@@ -30,24 +29,14 @@ const NO_STUDENT_PROBLEM: StudentProblem = {
 }
 
 /**
- * What {@link useStudentConversations} hands back.
- */
-export type UseStudentConversationsResult = {
-  /** The student's conversations about the problem and their grading; null until they have been read. */
-  studentConversations: StudentConversations | null
-  /** The state of the fetch. */
-  uiState: QueryUiState
-}
-
-/**
  * Reads every conversation one student held about one problem, and where their grade on it stands.
  *
  * @param studentProblem - The student and problem, or null while they are not known.
- * @returns The conversations as described by {@link UseStudentConversationsResult}.
+ * @returns The conversations as described by {@link AuthorConversationsResult}.
  */
 export function useStudentConversations(
   studentProblem: StudentProblem | null
-): UseStudentConversationsResult {
+): AuthorConversationsResult {
   // The student and problem the cache entry is kept under, the stand-in while neither is known
   const { user, target } = studentProblem ?? NO_STUDENT_PROBLEM
 
@@ -65,5 +54,5 @@ export function useStudentConversations(
   })
 
   // The conversations once they have arrived, and how the fetch is going meanwhile
-  return { studentConversations: data ?? null, uiState }
+  return { authorConversations: data ?? null, uiState }
 }

@@ -3,14 +3,14 @@
 import { ArrowUpRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { describeUser } from '@/components/features/admin/model/user-identity'
+import { ReviewNoteHeader } from '@/components/features/conversation-review/components/ReviewNoteHeader'
+import { ReviewNoteSurface } from '@/components/features/conversation-review/components/ReviewNoteSurface'
 import { DefenseTargetLabel } from '@/components/features/defense/components/DefenseTargetLabel'
+import { describeUser } from '@/components/features/profile/model/user-identity'
 import { Button } from '@/components/shared/components/Button'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 
 import { type AdminNoteFeedItem as FeedItem } from '../model/note-types'
-import { AdminNoteHeader } from './AdminNoteHeader'
-import { AdminNoteSurface } from './AdminNoteSurface'
 
 /**
  * Props for the {@link AdminNoteFeedItem} component.
@@ -35,13 +35,13 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
   const t = useTranslations('admin.defenseReview')
 
   // Notes copy
-  const tNotes = useTranslations('admin.notes')
+  const tNotes = useTranslations('conversationReview.notes')
 
   // Profile copy
   const tProfile = useTranslations('profile')
 
   return (
-    <AdminNoteSurface
+    <ReviewNoteSurface
       noteId={item.note.id}
       isResolved={item.note.resolvedAt !== null}
       isPointedAt={false}
@@ -61,7 +61,7 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
 
           {/* Where in that conversation it hangs, and who wrote it */}
           <div className="mt-1">
-            <AdminNoteHeader
+            <ReviewNoteHeader
               note={item.note}
               turnSequence={item.turnSequence}
               // Said as a phrase rather than bare, since the student's own name already leads the card
@@ -92,6 +92,6 @@ export function AdminNoteFeedItem({ item, onOpenNote }: AdminNoteFeedItemProps) 
           <ArrowUpRight size={14} aria-hidden="true" />
         </Button>
       </div>
-    </AdminNoteSurface>
+    </ReviewNoteSurface>
   )
 }

@@ -1,4 +1,5 @@
-using MathComps.Infrastructure.Services.Admin;
+using MathComps.Infrastructure.Services.ConversationReview;
+
 
 namespace MathComps.Infrastructure.Services.Selection;
 
@@ -25,7 +26,7 @@ public interface IProposalConversations
     /// </summary>
     /// <param name="noteId">The note.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <exception cref="AdminNoteNotFoundException">Thrown when no note has the id.</exception>
+    /// <exception cref="ReviewNoteNotFoundException">Thrown when no note has the id.</exception>
     /// <exception cref="SelectionTargetNotFoundException">
     /// Thrown when the conversation the note stands on is not one the reviewers held about a proposal the selection
     /// still holds.

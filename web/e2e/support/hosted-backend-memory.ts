@@ -1,10 +1,10 @@
-import { MAX_MARK } from '@/components/features/admin/grades/model/grade-types'
 import type {
   DefenseSession,
   DefenseSessionListItem,
   DefenseSessionTarget,
   StoredTurn,
 } from '@/components/features/defense/model/defense-types'
+import { MAX_MARK } from '@/components/features/hosted-competitions/model/hosted-competition-score'
 import {
   entryEndsAt,
   isCompetitionAddressedBy,

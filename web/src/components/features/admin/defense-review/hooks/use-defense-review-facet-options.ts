@@ -80,7 +80,7 @@ export function useDefenseReviewFacetOptions(
   const t = useTranslations('admin.defenseReview')
 
   // Shared conversation-dialog copy
-  const tConversation = useTranslations('admin.conversation')
+  const tConversation = useTranslations('conversationReview')
 
   // Handout-surface copy
   const tHandouts = useTranslations('handouts')

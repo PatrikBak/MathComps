@@ -8,8 +8,8 @@ namespace MathComps.Api.Authorization;
 public static class ConversationReviewerExtensions
 {
     /// <summary>
-    /// Opens an admin route reading or writing against one defense conversation to the reviewers too, for the
-    /// conversations the reviewers held about the proposals alone. The policy and the check on the conversation come
+    /// Opens a route reading or writing against one defense conversation to the reviewers as well as the admins, for
+    /// the conversations the reviewers held about the proposals alone. The policy and the check on the conversation come
     /// together, so a route can't take the one without the other.
     /// </summary>
     /// <param name="builder">The route.</param>

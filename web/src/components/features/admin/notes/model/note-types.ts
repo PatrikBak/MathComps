@@ -1,41 +1,13 @@
-import type { UserIdentity } from '@/components/features/admin/model/user-identity'
-import type {
-  DefenseReportCategory,
-  NamedDefenseTarget,
-} from '@/components/features/defense/model/defense-types'
-
-/**
- * One note a reviewer wrote about a conversation.
- */
-export type AdminNote = {
-  /** Stable identifier. */
-  id: string
-  /** The conversation it is about. */
-  sessionId: string
-  /** The reply it is against; null when it is against the conversation as a whole. */
-  turnId: string | null
-  /** The reviewer who wrote it. */
-  author: UserIdentity
-  /** Whether the reviewer reading it wrote it, which is what decides whether it can be revised or dropped. */
-  isOwn: boolean
-  /** The note as markdown/math source. */
-  content: string
-  /** Which failure it names; null when it names none. */
-  category: DefenseReportCategory | null
-  /** When it was settled, as an ISO-8601 string; null while it still stands. */
-  resolvedAt: string | null
-  /** When it was written, as an ISO-8601 string. */
-  createdAt: string
-  /** When it last changed, as an ISO-8601 string. */
-  updatedAt: string
-}
+import type { ReviewNote } from '@/components/features/conversation-review/model/note-types'
+import type { NamedDefenseTarget } from '@/components/features/defense/model/defense-types'
+import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 
 /**
  * One note in the cross-conversation feed, carrying enough of where it was written to be read on its own.
  */
 export type AdminNoteFeedItem = {
   /** The note. */
-  note: AdminNote
+  note: ReviewNote
   /** The problem its conversation was held against. */
   target: NamedDefenseTarget
   /** Who held that conversation. */

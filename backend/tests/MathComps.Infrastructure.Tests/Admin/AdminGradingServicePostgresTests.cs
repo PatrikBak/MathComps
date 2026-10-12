@@ -314,9 +314,9 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
         // All three, oldest first, each when she started it
         Assert.Equal(
             [
-                new StudentConversationDto(_aliceFirstSessionId, _startedAt.AddMinutes(10)),
-                new StudentConversationDto(_aliceSecondSessionId, _startedAt.AddMinutes(30)),
-                new StudentConversationDto(_aliceLateSessionId, _startedAt.AddMinutes(90)),
+                new AuthorConversationDto(_aliceFirstSessionId, _startedAt.AddMinutes(10)),
+                new AuthorConversationDto(_aliceSecondSessionId, _startedAt.AddMinutes(30)),
+                new AuthorConversationDto(_aliceLateSessionId, _startedAt.AddMinutes(90)),
             ],
             read.Conversations);
 
@@ -1204,7 +1204,7 @@ public class AdminGradingServicePostgresTests(PostgresContainerFixture fixture)
     /// <param name="userId">The student.</param>
     /// <param name="problemId">The problem.</param>
     /// <returns>The conversations and their grading.</returns>
-    private async Task<StudentConversationsDto> ReadConversationsAsync(Guid userId, Guid problemId)
+    private async Task<AuthorConversationsDto> ReadConversationsAsync(Guid userId, Guid problemId)
     {
         // A fresh scope over the same database
         await using var provider = CreateServiceProvider();
