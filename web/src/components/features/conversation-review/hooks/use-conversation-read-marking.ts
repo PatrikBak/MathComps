@@ -196,8 +196,8 @@ export function useConversationReadMarking(
         hasArrived: held?.hasArrived ?? false,
       }
 
-      // Puts back what the move changed, for a write the server turns down. The queue's cached row rolls back on
-      // its own; without this the transcript would go on showing a mark nothing recorded.
+      // Puts back what the move changed, for a write the server turns down. The rows listing the conversation
+      // roll back on their own; without this the transcript would go on showing a mark nothing recorded.
       const restore = () => {
         // Held against the conversation, which is what stepping back onto it reads
         passesRef.current.set(sessionId, settled)

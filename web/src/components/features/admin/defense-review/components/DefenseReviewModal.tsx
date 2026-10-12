@@ -4,12 +4,11 @@ import { MailPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { ActionLabel } from '@/components/features/conversation-review/components/ActionLabel'
-import { ConversationDialog } from '@/components/features/conversation-review/components/ConversationDialog'
 import { useConversationDetail } from '@/components/features/conversation-review/hooks/use-conversation-detail'
 import { toSessionTarget } from '@/components/features/defense/model/defense-target'
 import { Button } from '@/components/shared/components/Button'
 
-import { useStudentConversations } from '../../conversation/hooks/use-student-conversations'
+import { AdminConversationDialog } from '../../conversation/components/AdminConversationDialog'
 import type { UseDefenseReviewSelectionResult } from '../hooks/use-defense-review-selection'
 import { NEXT_UNREAD_KEY } from '../model/defense-review-stepping'
 
@@ -40,16 +39,13 @@ export function DefenseReviewModal({
   // The conversation opened from the queue, which names the student and the problem
   const { detail: opened } = useConversationDetail(selection.openId)
 
-  // Every conversation the student held about the problem, and their grading
-  const conversationList = useStudentConversations(
-    opened === null ? null : { user: opened.user, target: toSessionTarget(opened.target) }
-  )
-
   return (
-    <ConversationDialog
+    <AdminConversationDialog
       selection={selection}
-      author={opened?.user ?? null}
-      conversationList={conversationList}
+      // The student and problem the opened conversation is about, once it has arrived
+      studentProblem={
+        opened === null ? null : { user: opened.user, target: toSessionTarget(opened.target) }
+      }
       items="conversations"
       stepActions={
         // Past everything already read

@@ -16,8 +16,9 @@ import type { UseSteppedSelectionResult } from '@/hooks/use-stepped-selection'
 import { useConversationDialog } from '../hooks/use-conversation-dialog'
 import type { SidePanelId } from '../hooks/use-conversation-panels'
 import type { AuthorConversationsResult } from '../model/conversation-detail'
+import type { ConversationListSync } from '../model/conversation-list-sync'
 import { ActionLabel } from './ActionLabel'
-import { ConversationDialogBody } from './ConversationDialogBody'
+import { ConversationDialogBody, type ConversationGrading } from './ConversationDialogBody'
 import { DefenseTargetRef } from './DefenseTargetRef'
 
 /**
@@ -44,16 +45,20 @@ const SWITCH_OPENS_ITEM: Record<ListItems, boolean> = {
 /**
  * Props for the {@link ConversationDialog} component.
  */
-type ConversationDialogProps = {
+export type ConversationDialogProps = {
   /** Which item of the page's list is open, and every way of moving off it. */
   selection: UseSteppedSelectionResult
   /** Who held the open item's conversations; null while that is unknown. */
   author: UserIdentity | null
-  /**
-   * Every conversation the author held about the open item's problem, and their grading, as far as reading them
-   * has got.
-   */
+  /** Every conversation the author held about the open item's problem, as far as reading them has got. */
   conversationList: AuthorConversationsResult
+  /**
+   * The grade on the open item's problem, known as soon as the author's conversations are; null where nobody
+   * grades the author on it.
+   */
+  grading?: ConversationGrading | null
+  /** The lists the page holds conversations and their notes in. */
+  listSync: ConversationListSync
   /**
    * What each item of the list is; absent where each is an author's problem, which starts on the first
    * conversation they held about it.
@@ -80,8 +85,9 @@ type ConversationDialogProps = {
  * The dialog itself never unmounts while the reader works through the list: stepping from one item to the next
  * swaps what is inside it, so the focus trap never re-runs and the arrow that was just pressed stays under the
  * reader's finger. The header holds its height across that swap by keeping a blank line where each name goes.
- * What is inside waits for both the conversation and the author's list, since the list says whether there is a
- * grade, and a grade tab turning up after the rest would swap out whatever panel the reader was looking at.
+ * What is inside waits for the conversation, its author and their list. The author's name labels their turns,
+ * and the grade is known once the list is: a grade tab turning up after the rest would swap out whatever panel
+ * the reader was looking at.
  *
  * It opens with focus on the panel and on no control at all: the transcript's scroll region takes no focus of its
  * own, and left to itself the dialog lands on the first control in the header, which a reader paging with the
@@ -94,6 +100,8 @@ export function ConversationDialog({
   selection,
   author,
   conversationList,
+  grading = null,
+  listSync,
   items = 'problems',
   stepActions,
   landingNoteId = null,
@@ -112,19 +120,20 @@ export function ConversationDialog({
   // What the dialog shows, and every way of acting on it
   const {
     detail,
-    authorConversations,
+    conversations,
     uiState,
     panels,
     readMarking,
     noteTurnId,
     setNoteTurnId,
     selectConversation,
-    changeGrade,
     handleClosed,
   } = useConversationDialog(
     selection.openId,
     conversationList,
     ITEMS_ARE_CONVERSATIONS[items],
+    grading?.window ?? null,
+    listSync,
     landingNoteId,
     initialTabId,
     onClosed
@@ -237,8 +246,8 @@ export function ConversationDialog({
         </Button>
       </header>
 
-      {/* The conversation, once it and the author's list have arrived */}
-      {detail === null || authorConversations === null ? (
+      {/* The conversation, once it, its author and their list have arrived */}
+      {detail === null || conversations === null || authorName === null ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
           <FetchStatePlaceholder
             uiState={uiState}
@@ -251,7 +260,10 @@ export function ConversationDialog({
       ) : (
         <ConversationDialogBody
           detail={detail}
-          authorConversations={authorConversations}
+          authorName={authorName}
+          conversations={conversations}
+          grading={grading}
+          listSync={listSync}
           panels={panels}
           firstNewTurnId={readMarking.firstNewTurnId}
           onMarkUnreadFrom={readMarking.markUnreadFrom}
@@ -259,7 +271,6 @@ export function ConversationDialog({
           onNoteTurnIdChange={setNoteTurnId}
           landingNoteId={landingNoteId}
           onSelectConversation={showConversation}
-          onChangeGrade={changeGrade}
         />
       )}
     </Modal>

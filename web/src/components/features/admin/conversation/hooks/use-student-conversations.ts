@@ -6,6 +6,7 @@ import type { UserIdentity } from '@/components/features/profile/model/user-iden
 import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy } from '@/lib/query-config'
 
+import type { StudentGrading } from '../model/student-conversations'
 import { fetchStudentConversations } from '../services/conversation-service'
 import { studentConversationsQueryKey } from './conversation-cache'
 
@@ -29,14 +30,24 @@ const NO_STUDENT_PROBLEM: StudentProblem = {
 }
 
 /**
+ * What {@link useStudentConversations} hands back.
+ */
+type UseStudentConversationsResult = {
+  /** The conversations, as far as reading them has got. */
+  conversationList: AuthorConversationsResult
+  /** Where the grade stands; null until the conversations have arrived, and where the student isn't graded. */
+  grading: StudentGrading | null
+}
+
+/**
  * Reads every conversation one student held about one problem, and where their grade on it stands.
  *
  * @param studentProblem - The student and problem, or null while they are not known.
- * @returns The conversations as described by {@link AuthorConversationsResult}.
+ * @returns The conversations and the grading as described by {@link UseStudentConversationsResult}.
  */
 export function useStudentConversations(
   studentProblem: StudentProblem | null
-): AuthorConversationsResult {
+): UseStudentConversationsResult {
   // The student and problem the cache entry is kept under, the stand-in while neither is known
   const { user, target } = studentProblem ?? NO_STUDENT_PROBLEM
 
@@ -54,5 +65,14 @@ export function useStudentConversations(
   })
 
   // The conversations once they have arrived, and how the fetch is going meanwhile
-  return { authorConversations: data ?? null, uiState }
+  const conversationList: AuthorConversationsResult = {
+    conversations: data?.conversations ?? null,
+    uiState,
+  }
+
+  // Where the grade stands, known as soon as the conversations are
+  const grading = data?.grading ?? null
+
+  // The conversations and the grading
+  return { conversationList, grading }
 }

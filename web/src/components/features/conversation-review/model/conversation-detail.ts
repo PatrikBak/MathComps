@@ -1,4 +1,3 @@
-import type { Grade, SelfAssessment } from '@/components/features/admin/grades/model/grade-types'
 import type {
   DefenseFeedback,
   DefenseTurnReport,
@@ -14,7 +13,7 @@ import type { ReviewNote } from './note-types'
 /**
  * One of the conversations somebody held about a problem.
  */
-type AuthorConversation = {
+export type AuthorConversation = {
   /** Stable identifier. */
   id: string
   /** When it was started, as an ISO-8601 string. */
@@ -52,38 +51,24 @@ export type ConversationDetail = AuthorConversation & {
 }
 
 /**
- * Where a student's graded entry stands on one problem.
+ * Which of an author's conversations about a problem a grade on it is read from, and up to when.
  */
-export type StudentGrading = {
-  /** The conversations the entry's window holds, which are the ones the grade is read from. */
+export type CountingWindow = {
+  /** The conversations inside the window of the author's graded entry, which the grade is read from. */
   countingConversationIds: string[]
   /**
-   * When the entry stopped counting: its clock running out, or the student handing it in ahead of that. What they
-   * said after it counts toward nothing, even inside a conversation the grade is read from.
+   * When the author's graded entry stopped counting: its clock running out, or the author handing it in ahead of
+   * that. What they said after it counts toward nothing, even inside a conversation the grade is read from.
    */
   endedAt: string
-  /** The grade; null while nobody has given one. */
-  grade: Grade | null
-  /** What the student said about their own solution; null when they said nothing. */
-  selfAssessment: SelfAssessment | null
-}
-
-/**
- * Every conversation one author held about one problem, and where their grade on it stands.
- */
-export type AuthorConversations = {
-  /** The conversations, oldest first. */
-  conversations: AuthorConversation[]
-  /** Where the grade stands; null unless the author is a student whose entry on the problem is graded. */
-  grading: StudentGrading | null
 }
 
 /**
  * One author's conversations about one problem, as far as reading them has got.
  */
 export type AuthorConversationsResult = {
-  /** The conversations and their grading; null until they have been read. */
-  authorConversations: AuthorConversations | null
+  /** The conversations, oldest first; null until they have been read. */
+  conversations: AuthorConversation[] | null
   /** The state of the read. */
   uiState: QueryUiState
 }

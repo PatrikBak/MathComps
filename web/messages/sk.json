@@ -89,8 +89,7 @@
         "selfAssessment": "Komentár študenta"
       },
       "saveFailed": "Hodnotenie sa nepodarilo uložiť",
-      "studentSeesOnceFinal": "Študent to uvidí, keď sa súťaž skončí a hodnotenie bude finálne.",
-      "tab": "Hodnotenie"
+      "studentSeesOnceFinal": "Študent to uvidí, keď sa súťaž skončí a hodnotenie bude finálne."
     },
     "grading": {
       "empty": "V tejto skupine nie je koho hodnotiť.",
@@ -479,7 +478,7 @@
         "addressClean": "bez určenia pohlavia",
         "close": "Uzavretie",
         "closeClean": "zatiaľ nie je zaslúžené",
-        "gendersTheReader": "určila pohlavie študenta",
+        "gendersTheReader": "oslovila v mužskom alebo ženskom rode",
         "language": "Jazyk",
         "languageUnknown": "neurčený",
         "leak": "Prezradenie",
@@ -489,13 +488,15 @@
         "mathFails": "chyba: {correction}",
         "mathHolds": "všetky tvrdenia platia",
         "route": "Cesta",
-        "routeClean": "na ceste študenta",
+        "routeClean": "na zvolenej ceste",
         "routeUnknown": "nekontrolované",
-        "switchesLanguage": "odchýlila sa; študent písal jazykom {language}",
-        "takesOver": "odviedla študenta na vlastnú cestu; odpoveď, ktorú chce: {restatedReferenceStep}",
+        "switchesLanguage": "odchýlila sa od jazyka konverzácie: {language}",
+        "takesOver": "zaviedla konverzáciu na vlastnú cestu; odpoveď, ktorú chce: {restatedReferenceStep}",
         "withholdsClose": "už je hotové: {established}"
       }
     },
+    "authorNoComment": "Bez komentára",
+    "authorVerdict": "Spätná väzba na Mathildu",
     "config": {
       "fallbackModels": "Náhradné modely",
       "fallbackModelsNone": "žiadne",
@@ -577,13 +578,11 @@
       "solution": "Referenčné riešenie a nápovedy",
       "statement": "Zadanie"
     },
-    "student": "Študent",
-    "studentNoComment": "Bez komentára",
-    "studentVerdict": "Čo povedal študent",
     "tabs": {
       "config": "Nastavenia",
       "conversation": "Konverzácia",
       "feedback": "Spätná väzba",
+      "grade": "Hodnotenie",
       "reference": "Riešenie"
     },
     "tabsLabel": "Časti konverzácie",

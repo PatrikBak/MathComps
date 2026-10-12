@@ -49,15 +49,12 @@ export function ConversationPanes({
   // Shared conversation-dialog copy
   const t = useTranslations('conversationReview')
 
-  // Grades copy
-  const tGrades = useTranslations('admin.grades')
-
   // Notes copy
   const tNotes = useTranslations('conversationReview.notes')
 
   // What each side panel's tab is called
   const sideLabels: Record<SidePanelId, string> = {
-    grade: tGrades('tab'),
+    grade: t('tabs.grade'),
     feedback: t('tabs.feedback'),
     reference: t('tabs.reference'),
     notes: tNotes('tab'),

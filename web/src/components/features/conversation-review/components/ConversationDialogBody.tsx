@@ -1,19 +1,20 @@
 'use client'
 
 import { useFormatter, useTranslations } from 'next-intl'
+import type { ReactNode } from 'react'
 
-import { GradeConversation } from '@/components/features/admin/grades/components/GradeConversation'
-import { GradePanel } from '@/components/features/admin/grades/components/GradePanel'
-import type { UseUpdateGradeResult } from '@/components/features/admin/grades/hooks/use-update-grade'
-import { pairKey } from '@/components/features/admin/grades/model/grade-types'
 import type { NamedDefenseTarget } from '@/components/features/defense/model/defense-types'
 import { Button } from '@/components/shared/components/Button'
-import { assertNever } from '@/components/shared/utils/assert-never'
 import type { ImageContext } from '@/components/shared/utils/media-utils'
 
 import type { SidePanelId, UseConversationPanelsResult } from '../hooks/use-conversation-panels'
 import { useNoteOnReply } from '../hooks/use-note-on-reply'
-import type { AuthorConversations, ConversationDetail } from '../model/conversation-detail'
+import type {
+  AuthorConversation,
+  ConversationDetail,
+  CountingWindow,
+} from '../model/conversation-detail'
+import type { ConversationListSync } from '../model/conversation-list-sync'
 import { ConversationPanes } from './ConversationPanes'
 import { ExaminerConfigPanel } from './ExaminerConfigPanel'
 import { NotesPanel } from './NotesPanel'
@@ -41,26 +42,16 @@ const WRITES_NOTES = {
 } as const satisfies Record<SidePanelId, boolean>
 
 /**
- * Reads the archive problem a conversation is graded on, if it is held against one.
- *
- * @param target - What the conversation was held against.
- * @returns The problem's id; null for a handout environment or a proposal, which nobody is graded on.
+ * A grade on the problem an author's conversations are about: which of them it is read from, and the parts it is
+ * given and talked over in.
  */
-function gradedProblemIdOf(target: NamedDefenseTarget): string | null {
-  switch (target.kind) {
-    // An archive problem, which is what a grade is given on
-    case 'problem':
-      return target.problemId
-
-    // A handout environment or a proposal, which nobody is graded on
-    case 'handout':
-    case 'proposal':
-      return null
-
-    // A target nothing here knows
-    default:
-      return assertNever(target)
-  }
+export type ConversationGrading = {
+  /** Which of the conversations the grade is read from, and up to when. */
+  window: CountingWindow
+  /** Where the grade is given. */
+  gradePanel: ReactNode
+  /** The graders' conversation with the author about the grade. */
+  feedbackPanel: ReactNode
 }
 
 /**
@@ -69,8 +60,14 @@ function gradedProblemIdOf(target: NamedDefenseTarget): string | null {
 type ConversationDialogBodyProps = {
   /** The conversation on screen, as it arrived. */
   detail: ConversationDetail
-  /** Every conversation the author held about the problem, and their grading. */
-  authorConversations: AuthorConversations
+  /** The name the conversation's author goes by. */
+  authorName: string
+  /** Every conversation the author held about the problem, oldest first. */
+  conversations: AuthorConversation[]
+  /** The grade on the problem; null where nobody grades the author on it. */
+  grading: ConversationGrading | null
+  /** The lists the page holds conversations and their notes in. */
+  listSync: ConversationListSync
   /** How much stands on screen at once, and which part the reader is looking at. */
   panels: UseConversationPanelsResult
   /** The first turn left to read since the reader's last pass; null while nothing marks one. */
@@ -85,21 +82,22 @@ type ConversationDialogBodyProps = {
   landingNoteId: string | null
   /** Shows another of the author's conversations about the problem. */
   onSelectConversation: (conversationId: string) => void
-  /** {@link UseUpdateGradeResult.changeGrade}. */
-  onChangeGrade: UseUpdateGradeResult['changeGrade']
 }
 
 /**
  * One conversation as it is read: the exchange itself with the author's other conversations about the problem a
- * switch away, the grade and the graders' conversation with the student about the grade where there is one to
- * give, the solution it is judged against, what has been written about it, and what the examiner was running on.
+ * switch away, the grade and the graders' conversation with the author about it where there is one to give, the
+ * solution it is judged against, what has been written about it, and what the examiner was running on.
  *
- * Where the student is graded, a conversation started outside their entry's window is marked as not counting
- * toward the grade, and one the student kept talking in after the entry ended marks where it did.
+ * Where the author is graded, a conversation started outside their entry's window is marked as not counting
+ * toward the grade, and one the author kept talking in after the entry ended marks where it did.
  */
 export function ConversationDialogBody({
   detail,
-  authorConversations,
+  authorName,
+  conversations,
+  grading,
+  listSync,
   panels,
   firstNewTurnId,
   onMarkUnreadFrom,
@@ -107,7 +105,6 @@ export function ConversationDialogBody({
   onNoteTurnIdChange,
   landingNoteId,
   onSelectConversation,
-  onChangeGrade,
 }: ConversationDialogBodyProps) {
   // Shared conversation-dialog copy
   const t = useTranslations('conversationReview')
@@ -118,23 +115,13 @@ export function ConversationDialogBody({
   // Starting a note from the reply it is about
   const { composerRef, startNoteOn } = useNoteOnReply(panels.selectTab, onNoteTurnIdChange)
 
-  // The author's conversations about the problem, and where their grade on it stands
-  const { conversations, grading } = authorConversations
-
-  // What the conversation was held against
-  const { target } = detail
-
-  // The problem a grade is given on, which only an archive problem is
-  const gradedProblemId = gradedProblemIdOf(target)
+  // Which conversations the grade is read from, and up to when; null where nobody grades the author
+  const countingWindow = grading?.window ?? null
 
   // A function which says whether a conversation counts toward the grade, which every one does where the author
   // isn't graded
   const counts = (conversationId: string) =>
-    grading === null || grading.countingConversationIds.includes(conversationId)
-
-  // The problem the graders' conversation with the student is about, there beside the grade; null where nobody
-  // grades them on this one
-  const studentThreadProblemId = grading === null ? null : gradedProblemId
+    countingWindow === null || countingWindow.countingConversationIds.includes(conversationId)
 
   // Whether the switch says anything: there is another conversation to switch to, or one of them doesn't count
   const showsSwitch =
@@ -185,11 +172,12 @@ export function ConversationDialogBody({
       transcript={
         <TranscriptPane
           conversation={detail}
+          authorName={authorName}
           aboveStatement={conversationSwitch}
           firstNewTurnId={firstNewTurnId}
           // Only a conversation the grade is read from has words that stop counting partway; the switch already
           // says a whole one doesn't count
-          countsUntil={grading !== null && counts(detail.id) ? grading.endedAt : null}
+          countsUntil={countingWindow !== null && counts(detail.id) ? countingWindow.endedAt : null}
           onMarkUnreadFrom={onMarkUnreadFrom}
           onStartNote={startNoteOn}
           // The reply a note is being written against is marked, but only while that is what the reader is
@@ -199,30 +187,8 @@ export function ConversationDialogBody({
       }
       transcriptCount={conversations.length > 1 ? conversations.length : null}
       sidePanels={{
-        grade: {
-          count: null,
-          // Only a graded student on an archive problem has a grade. Tied to the student and problem, so moving to
-          // another saves the comment on the way out.
-          panel: grading !== null && gradedProblemId !== null && (
-            <GradePanel
-              key={pairKey(detail.user.id, gradedProblemId)}
-              grade={grading.grade}
-              selfAssessment={grading.selfAssessment}
-              onChange={(change) => onChangeGrade(detail.user.id, gradedProblemId, change)}
-            />
-          ),
-        },
-        feedback: {
-          count: null,
-          // Tied to the student and problem, so moving to another starts a fresh reply
-          panel: studentThreadProblemId !== null && (
-            <GradeConversation
-              key={pairKey(detail.user.id, studentThreadProblemId)}
-              problemId={studentThreadProblemId}
-              userId={detail.user.id}
-            />
-          ),
-        },
+        grade: { count: null, panel: grading?.gradePanel },
+        feedback: { count: null, panel: grading?.feedbackPanel },
         reference: {
           count: null,
           panel: (
@@ -230,7 +196,7 @@ export function ConversationDialogBody({
               statement={detail.statement}
               reference={detail.reference}
               isSplit={panels.isSplit}
-              imageContext={IMAGE_CONTEXTS[target.kind]}
+              imageContext={IMAGE_CONTEXTS[detail.target.kind]}
             />
           ),
         },
@@ -246,6 +212,7 @@ export function ConversationDialogBody({
               landingNoteId={landingNoteId}
               composerRef={composerRef}
               onTurnIdChange={onNoteTurnIdChange}
+              listSync={listSync}
             />
           ),
         },

@@ -23,7 +23,7 @@ type UseProposalConversationsResult = {
   selection: UseSteppedSelectionResult
   /** Whoever held the open conversation; null while none is open. */
   author: UserIdentity | null
-  /** Every conversation the open one's author held about the problem, oldest first, none of them graded. */
+  /** Every conversation the open one's author held about the problem, oldest first. */
   authorsConversations: AuthorConversationsResult
   /** Names whoever held a conversation. */
   authorName: (conversation: ReviewConversation) => string
@@ -78,18 +78,15 @@ export function useProposalConversations(proposal: Proposal): UseProposalConvers
   const author: UserIdentity | null =
     opened === null ? null : { id: opened.authorId, username: opened.author, email: null }
 
-  // Every conversation the open one's author held about the problem, oldest first, none of them graded
+  // Every conversation the open one's author held about the problem, oldest first
   const authorsConversations: AuthorConversationsResult = {
-    authorConversations:
+    conversations:
       opened === null
         ? null
-        : {
-            conversations: conversations
-              .filter((conversation) => conversation.authorId === opened.authorId)
-              .map((conversation) => ({ id: conversation.id, createdAt: conversation.startedAt }))
-              .reverse(),
-            grading: null,
-          },
+        : conversations
+            .filter((conversation) => conversation.authorId === opened.authorId)
+            .map((conversation) => ({ id: conversation.id, createdAt: conversation.startedAt }))
+            .reverse(),
     // Already in hand with the selection
     uiState: { kind: 'ready' },
   }

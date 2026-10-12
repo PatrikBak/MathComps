@@ -4,10 +4,10 @@
 import { QueryClient } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 
-import type { AuthorConversations } from '@/components/features/conversation-review/model/conversation-detail'
 import type { NamedProblemTarget } from '@/components/features/defense/model/defense-types'
 
 import { studentConversationsQueryKey } from '../../../conversation/hooks/conversation-cache'
+import type { StudentConversations } from '../../../conversation/model/student-conversations'
 import type { GradingBoard } from '../../../grading-board/model/grading-types'
 import type { Grade, PairIds } from '../../model/grade-types'
 import { gradingBoardQueryKey, readCachedGrade, writeCachedGrade } from '../grade-cache'
@@ -77,7 +77,7 @@ function boardOf(name: string, problemId: string): GradingBoard {
  */
 function cacheConversations(queryClient: QueryClient, userId: string): void {
   // One conversation, counted toward a grade nobody has given yet
-  const conversations: AuthorConversations = {
+  const conversations: StudentConversations = {
     conversations: [{ id: `${userId}-1`, createdAt: '2026-09-02T10:00:00Z' }],
     grading: {
       countingConversationIds: [`${userId}-1`],

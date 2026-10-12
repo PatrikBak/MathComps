@@ -1,8 +1,7 @@
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 
-import type { AuthorConversations } from '@/components/features/conversation-review/model/conversation-detail'
-
 import { studentConversationsQueryKey } from '../../conversation/hooks/conversation-cache'
+import type { StudentConversations } from '../../conversation/model/student-conversations'
 import type { GradingBoard } from '../../grading-board/model/grading-types'
 import type { Grade, PairIds } from '../model/grade-types'
 
@@ -44,7 +43,7 @@ function studentConversationsKeyOf(address: PairIds): QueryKey {
  */
 export function readCachedGrade(queryClient: QueryClient, address: PairIds): Grade | null {
   // The student's conversations about the problem, with the grading beside them
-  const cached = queryClient.getQueryData<AuthorConversations>(studentConversationsKeyOf(address))
+  const cached = queryClient.getQueryData<StudentConversations>(studentConversationsKeyOf(address))
 
   // The grade as they hold it, where they are cached and graded
   if (cached?.grading != null) return cached.grading.grade
@@ -75,7 +74,7 @@ export function writeCachedGrade(
   grade: Grade | null
 ): void {
   // The grading beside the student's conversations, where there is one to rewrite
-  queryClient.setQueryData<AuthorConversations>(studentConversationsKeyOf(address), (cached) =>
+  queryClient.setQueryData<StudentConversations>(studentConversationsKeyOf(address), (cached) =>
     // Nothing to rewrite while they aren't cached, or while nobody grades them
     cached?.grading == null ? cached : { ...cached, grading: { ...cached.grading, grade } }
   )

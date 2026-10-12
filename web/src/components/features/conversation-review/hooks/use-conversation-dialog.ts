@@ -1,16 +1,14 @@
-import {
-  useUpdateGrade,
-  type UseUpdateGradeResult,
-} from '@/components/features/admin/grades/hooks/use-update-grade'
 import { useFocusReturn } from '@/hooks/use-focus-return'
 import { useKeyedState } from '@/hooks/use-keyed-state'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
 import type {
-  AuthorConversations,
+  AuthorConversation,
   AuthorConversationsResult,
   ConversationDetail,
+  CountingWindow,
 } from '../model/conversation-detail'
+import type { ConversationListSync } from '../model/conversation-list-sync'
 import { useConversationDetail } from './use-conversation-detail'
 import {
   type SidePanelId,
@@ -32,8 +30,8 @@ export type UseConversationDialogResult = {
    * conversations leaves it up until that one arrives.
    */
   detail: ConversationDetail | null
-  /** Every conversation the author held about the problem, and their grading; null until they have arrived. */
-  authorConversations: AuthorConversations | null
+  /** Every conversation the author held about the problem, oldest first; null until they have arrived. */
+  conversations: AuthorConversation[] | null
   /** How far reading what goes on screen has got. */
   uiState: QueryUiState
   /** How much stands on screen at once, and which part the reader is looking at. */
@@ -46,24 +44,21 @@ export type UseConversationDialogResult = {
   setNoteTurnId: (turnId: string | null) => void
   /** Shows another of the author's conversations about the problem. */
   selectConversation: (conversationId: string) => void
-  /** {@link UseUpdateGradeResult.changeGrade}. */
-  changeGrade: UseUpdateGradeResult['changeGrade']
   /** Wipes the dialog session once the dialog has finished leaving, and hands focus back to the page. */
   handleClosed: () => void
 }
 
 /**
- * Everything the conversation dialog reads and does: which of the author's conversations is on screen, where
- * their grade stands, reading it, and closing.
- *
- * Changes to the grade are made from here rather than from the panel showing it, which comes and goes with the
- * conversation on screen while a change made in it may still be settling.
+ * Everything the conversation dialog reads and does: which of the author's conversations is on screen, reading
+ * it, and closing.
  *
  * @param openId - Which item of the page's list is open; null while none is.
- * @param conversationList - Every conversation the author held about the open item's problem, and their grading,
- * as far as reading them has got.
+ * @param conversationList - Every conversation the author held about the open item's problem, as far as reading
+ * them has got.
  * @param itemsAreConversations - Whether each item is itself one of an author's conversations, which the dialog
  * then starts on rather than on the first they held.
+ * @param countingWindow - Which of the conversations a grade is read from; null where nobody grades the author.
+ * @param listSync - The lists the page holds conversations and their notes in.
  * @param landingNoteId - The note the reader was sent to; null when they came in for the conversation itself.
  * @param initialTabId - The part the dialog's first opening starts on; null for the conversation.
  * @param onClosed - Runs once the dialog has finished leaving, after focus has gone back to the page.
@@ -73,12 +68,14 @@ export function useConversationDialog(
   openId: string | null,
   conversationList: AuthorConversationsResult,
   itemsAreConversations: boolean,
+  countingWindow: CountingWindow | null,
+  listSync: ConversationListSync,
   landingNoteId: string | null,
   initialTabId: SidePanelId | null,
   onClosed: (() => void) | undefined
 ): UseConversationDialogResult {
-  // Every conversation the author held about the problem, and where their grade on it stands
-  const { authorConversations, uiState: listUiState } = conversationList
+  // Every conversation the author held about the problem, and how far reading them has got
+  const { conversations, uiState: listUiState } = conversationList
 
   // The conversation the reader switched to, back on the one the item starts on whenever another opens
   const [pickedConversationId, selectConversation] = useKeyedState(
@@ -87,7 +84,7 @@ export function useConversationDialog(
   )
 
   // The conversation asked for: the one picked, else the author's first; null while neither is known
-  const conversationId = pickedConversationId ?? authorConversations?.conversations[0]?.id ?? null
+  const conversationId = pickedConversationId ?? conversations?.[0]?.id ?? null
 
   // The conversation asked for, read in full
   const { detail: arrived, uiState: detailUiState } = useConversationDetail(conversationId)
@@ -102,17 +99,15 @@ export function useConversationDialog(
   // switch the reader pressed stays under their finger. Dropped once the one asked for fails, so that shows.
   const detail = arrived ?? (detailUiState.kind === 'failed' ? null : lastArrived)
 
-  // Where the grade stands; null unless the student is graded on the problem
-  const grading = authorConversations?.grading ?? null
-
-  // Whether there is a grade to give: the student is graded, and something they said counts toward it
-  const hasGradeToGive = grading !== null && grading.countingConversationIds.length > 0
+  // Whether there is a grade to give: the author is graded, and something they said counts toward it
+  const hasGradeToGive =
+    countingWindow !== null && countingWindow.countingConversationIds.length > 0
 
   // How much of the conversation stands on screen at once, and which part the reader is looking at
   const panels = useConversationPanels(hasGradeToGive, landingNoteId, initialTabId)
 
   // Recording which conversations have been read
-  const { markRead, markUnread, markUnreadFrom } = useConversationReadState()
+  const { markRead, markUnread, markUnreadFrom } = useConversationReadState(listSync)
 
   // Whether the conversation asked for counts as read, and where the last pass through it stopped
   const readMarking = useConversationReadMarking(
@@ -126,11 +121,8 @@ export function useConversationDialog(
   // Which reply a new note will stand against, held here because the transcript marks it too
   const [noteTurnId, setNoteTurnId] = useKeyedState<string | null>(conversationId, null)
 
-  // Changing grades
-  const { changeGrade } = useUpdateGrade()
-
   // How far reading what goes on screen has got: a failed conversation, else the list until it has arrived,
-  // since the list is what names the conversation and says whether there is a grade
+  // since the list is what names the conversation
   const uiState =
     detailUiState.kind === 'failed' || listUiState.kind === 'ready' ? detailUiState : listUiState
 
@@ -155,14 +147,13 @@ export function useConversationDialog(
   // What the dialog shows, and every way of acting on it
   return {
     detail,
-    authorConversations,
+    conversations,
     uiState,
     panels,
     readMarking,
     noteTurnId,
     setNoteTurnId,
     selectConversation,
-    changeGrade,
     handleClosed,
   }
 }

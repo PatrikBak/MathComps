@@ -1,13 +1,11 @@
 import type { Page } from '@playwright/test'
 
+import type { StudentGrading } from '@/components/features/admin/conversation/model/student-conversations'
 import type {
   DefenseReviewConversation,
   DefenseReviewFilterOptions,
 } from '@/components/features/admin/defense-review/model/defense-review-types'
-import type {
-  ConversationDetail,
-  StudentGrading,
-} from '@/components/features/conversation-review/model/conversation-detail'
+import type { ConversationDetail } from '@/components/features/conversation-review/model/conversation-detail'
 import type { PagedList } from '@/lib/api/paged-list'
 
 import { createAnswerGate } from './answer-gate'
