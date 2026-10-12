@@ -1,5 +1,5 @@
 using MathComps.Api.Constants;
-using MathComps.Domain.Contracts.Admin;
+using MathComps.Domain.Contracts.ConversationReview;
 using MathComps.Infrastructure.Services.Selection;
 
 namespace MathComps.Api.Authorization;
@@ -42,7 +42,7 @@ public sealed class ProposalConversationFilter(IProposalConversations proposalCo
 
         // A conversation, named by the route or by a new note's body
         else if ((RouteGuid(httpContext, SessionIdRouteValue)
-                     ?? context.Arguments.OfType<CreateAdminNoteRequest>().FirstOrDefault()?.SessionId)
+                     ?? context.Arguments.OfType<CreateReviewNoteRequest>().FirstOrDefault()?.SessionId)
                  is { } sessionId)
             await proposalConversations.EnsureConversationAsync(sessionId, httpContext.RequestAborted);
 

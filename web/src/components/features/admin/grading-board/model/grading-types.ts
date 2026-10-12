@@ -1,5 +1,5 @@
-import type { UserIdentity } from '@/components/features/admin/model/user-identity'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import type { LocalizedString } from '@/i18n/i18n'
 
 import type { Grade } from '../../grades/model/grade-types'

@@ -1,8 +1,9 @@
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
-import { describeUser } from '@/components/features/admin/model/user-identity'
+import type { SidePanelId } from '@/components/features/conversation-review/hooks/use-conversation-panels'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import { describeUser } from '@/components/features/profile/model/user-identity'
 import { useAddressSync } from '@/hooks/use-address-sync'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
@@ -10,7 +11,6 @@ import { useSteppedSelection, type UseSteppedSelectionResult } from '@/hooks/use
 import { cachePolicy } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
 
-import type { SidePanelId } from '../../conversation/hooks/use-conversation-panels'
 import type { StudentProblem } from '../../conversation/hooks/use-student-conversations'
 import { gradingBoardQueryKey } from '../../grades/hooks/grade-cache'
 import { pairKey, splitPairKey } from '../../grades/model/grade-types'

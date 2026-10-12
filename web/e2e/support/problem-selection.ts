@@ -1,8 +1,8 @@
 import type { Locator, Page, Request, Route } from '@playwright/test'
 import { createTranslator } from 'next-intl'
 
-import type { AdminConversation } from '@/components/features/admin/conversation/model/admin-conversation'
 import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
+import type { ConversationDetail } from '@/components/features/conversation-review/model/conversation-detail'
 import type { StoredTurn } from '@/components/features/defense/model/defense-types'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { ProposalTab } from '@/components/features/problem-selection/model/selection-routes'
@@ -651,7 +651,7 @@ function selectionOf(
  *
  * @returns The conversation in full.
  */
-function conversationInFullOf(held: HeldConversation, proposal: Proposal): AdminConversation {
+function conversationInFullOf(held: HeldConversation, proposal: Proposal): ConversationDetail {
   // Everything the dialog reads about it
   return {
     id: held.id,

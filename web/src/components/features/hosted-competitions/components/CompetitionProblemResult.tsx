@@ -4,11 +4,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import { MessagesSquare } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { formatScore, MAX_MARK } from '@/components/features/admin/grades/model/grade-types'
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
 import { invalidateCompetitionProblems } from '../hooks/hosted-competition-cache'
+import { formatScore, MAX_MARK } from '../model/hosted-competition-score'
 import type { GradeConversation, ProblemResult } from '../model/hosted-competition-types'
 import { CompetitionProblemSurface } from './CompetitionProblemSurface'
 

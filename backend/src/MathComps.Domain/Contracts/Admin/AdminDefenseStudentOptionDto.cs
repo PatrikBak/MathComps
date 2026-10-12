@@ -1,3 +1,5 @@
+using MathComps.Domain.Contracts.Users;
+
 namespace MathComps.Domain.Contracts.Admin;
 
 /// <summary>

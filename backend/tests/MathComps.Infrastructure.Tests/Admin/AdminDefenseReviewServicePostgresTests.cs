@@ -1,316 +1,43 @@
 using MathComps.Domain.Contracts.Admin;
+using MathComps.Domain.Contracts.ConversationReview;
 using MathComps.Domain.Contracts.Defense;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
-using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Options;
-using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Admin;
+using MathComps.Infrastructure.Services.ConversationReview;
 using MathComps.Infrastructure.Services.Defense;
-using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Tests.ConversationReview;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
 using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MsOptions = Microsoft.Extensions.Options.Options;
+using static MathComps.Infrastructure.Tests.ConversationReview.ConversationReviewSeed;
 
 namespace MathComps.Infrastructure.Tests.Admin;
 
 /// <summary>
 /// Integration tests for <see cref="AdminDefenseReviewService"/> against a real PostgreSQL database: that the queue
 /// orders and pages the conversations by when they were last spoken to, that its counts follow the filters, that
-/// whether a conversation counts as unread is derived from its turns rather than stored, that a row and the whole
-/// conversation behind it carry what has been written and said about them, that conversations group by the settings
-/// they ran on, that one held against a proposal goes by the proposal, and that one held against nothing at all
-/// stays out of reach entirely.
+/// whether a conversation counts as unread is derived from its turns rather than stored, that a row carries what has
+/// been written and said about it, that conversations group by the settings they ran on, that one held against a
+/// proposal goes by the proposal, and that one held against nothing at all stays out of reach entirely.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fixture)
-    : PostgresTestBase<IAdminDefenseReviewService>(fixture)
+    : ConversationReviewPostgresTestBase<IAdminDefenseReviewService>(fixture)
 {
-    /// <summary>
-    /// The student who holds most of the seeded conversations.
-    /// </summary>
-    private static readonly Guid _studentId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
-    /// <summary>
-    /// A second student, so filtering by who held a conversation has something to leave out.
-    /// </summary>
-    private static readonly Guid _otherStudentId = Guid.Parse("00000000-0000-0000-0000-000000000002");
-
-    /// <summary>
-    /// The reviewer reading the queue.
-    /// </summary>
-    private static readonly Guid _reviewerId = Guid.Parse("00000000-0000-0000-0000-0000000000f1");
-
-    /// <summary>
-    /// A second reviewer, so one reading a conversation has somebody else's queue to leave alone.
-    /// </summary>
-    private static readonly Guid _otherReviewerId = Guid.Parse("00000000-0000-0000-0000-0000000000f2");
-
-    /// <summary>
-    /// The settings the competition conversation ran on, shared with nothing else so that the grouping by
-    /// version still has exactly one pair to find.
-    /// </summary>
-    private const string ArchiveExaminerConfig =
-        /*lang=json,strict*/ """{"generate":{"model":"gemini-3.6-flash","promptText":"be strict"}}""";
-
-    /// <summary>
-    /// The archive problem one of the conversations was held against.
-    /// </summary>
-    private static readonly Guid _archiveProblemId = Guid.Parse("00000000-0000-0000-0000-0000000000d1");
-
-    /// <summary>
-    /// The conversation held against that problem.
-    /// </summary>
-    private static readonly Guid _archiveSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a5");
-
-    /// <summary>
-    /// The slug addressing the archive problem, which is what the queue is narrowed to it by.
-    /// </summary>
-    private const string ArchiveProblemSlug = "76-mathcomps-advanced-september-2";
-
-    /// <summary>
-    /// The node the archive problem's competition sits at. Registered in the taxonomy, since naming the
-    /// competition is the whole of what this arm adds.
-    /// </summary>
-    private const string ArchiveCompetitionPath = "mathcomps-advanced-september";
-
-    /// <summary>
-    /// The handout environment two of the conversations were held against.
-    /// </summary>
-    private static readonly Guid _sharedEnvironmentId = Guid.Parse("00000000-0000-0000-0000-0000000000e1");
-
-    /// <summary>
-    /// A second handout environment, so the queue names more than one across its conversations.
-    /// </summary>
-    private static readonly Guid _otherEnvironmentId = Guid.Parse("00000000-0000-0000-0000-0000000000e2");
-
-    /// <summary>
-    /// The oldest conversation against the shared environment.
-    /// </summary>
-    private static readonly Guid _oldestSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a1");
-
-    /// <summary>
-    /// The newer conversation against the shared environment, held by the other student.
-    /// </summary>
-    private static readonly Guid _newerSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a2");
-
-    /// <summary>
-    /// The only conversation against the second environment, and the most recently active of them all. Opened long
-    /// before the other two and carried on yesterday, so where it lands says which end of its turns the queue reads.
-    /// </summary>
-    private static readonly Guid _newestSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a3");
-
-    /// <summary>
-    /// A conversation held against nothing at all, which every read is meant to leave out.
-    /// </summary>
-    private static readonly Guid _targetlessSessionId = Guid.Parse("00000000-0000-0000-0000-0000000000a4");
-
-    /// <summary>
-    /// The turn the oldest conversation opens on, which belongs to no other conversation.
-    /// </summary>
-    private static readonly Guid _oldestOpenerId = Guid.Parse("00000000-0000-0000-0000-0000000000b1");
-
-    /// <summary>
-    /// The turn the newest conversation opens on, which nothing in it precedes.
-    /// </summary>
-    private static readonly Guid _newestOpenerId = Guid.Parse("00000000-0000-0000-0000-0000000000b2");
-
-    /// <summary>
-    /// The reply the newest conversation ends on, which a note and the student's report are written against.
-    /// </summary>
-    private static readonly Guid _newestReplyId = Guid.Parse("00000000-0000-0000-0000-0000000000b3");
-
     /// <summary>
     /// What each conversation the queue can return is called when a test writes down what a filter left.
     /// </summary>
     private static readonly Dictionary<Guid, string> _conversationNames = new()
     {
-        [_oldestSessionId] = "oldest",
-        [_newerSessionId] = "newer",
-        [_newestSessionId] = "newest",
-        [_archiveSessionId] = "competition",
+        [OldestSessionId] = "oldest",
+        [NewerSessionId] = "newer",
+        [NewestSessionId] = "newest",
+        [ArchiveSessionId] = "competition",
     };
-
-    /// <summary>
-    /// The handout every seeded environment belongs to.
-    /// </summary>
-    private const string HandoutContentId = "handout-one";
-
-    /// <summary>
-    /// The settings all but one conversation ran on, holding a model so a conversation's snapshot has something
-    /// to read back off it.
-    /// </summary>
-    private const string ExaminerConfig =
-        /*lang=json,strict*/ """{"generate":{"model":"gemini-3.6-flash","promptText":"be fair"}}""";
-
-    /// <summary>
-    /// The same settings written differently, which the database reads as the same json and so the same version.
-    /// </summary>
-    private const string EquivalentExaminerConfig =
-        /*lang=json,strict*/ """{ "generate" : { "promptText" : "be fair", "model" : "gemini-3.6-flash" } }""";
-
-    /// <summary>
-    /// How long every seeded model call took.
-    /// </summary>
-    private const int CallDurationMs = 900;
-
-    /// <summary>
-    /// When the seed was written, which every seeded time is measured back from.
-    /// </summary>
-    private static readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
-
-    /// <summary>
-    /// How long each of the seeded drafts took, in the order they were drafted. Distinct per draft, so a projection
-    /// that carried one draft's time onto the rest would show.
-    /// </summary>
-    private static readonly int[] _attemptDurationsMs = [2_400, 1_600];
-
-    /// <inheritdoc/>
-    protected override void ConfigureServices(IServiceCollection services)
-    {
-        // The bounds the queue cuts its page by, left at their defaults, which hold the whole seed.
-        services.AddPaginationOptions();
-
-        // The reader of who prepares competitions.
-        services.AddUserGrants();
-
-        // The service under test.
-        services.AddScoped<IAdminDefenseReviewService, AdminDefenseReviewService>();
-
-        // Writing notes, which several of the queue's marks are read off.
-        services.AddScoped<IAdminNoteService, AdminNoteService>();
-
-        // The display names an archive problem is named by.
-        services.AddSingleton<IMetadataLocalizationService, MetadataLocalizationService>();
-    }
-
-    /// <inheritdoc/>
-    protected override async Task SeedDataAsync(MathCompsDbContext context)
-    {
-        // Two students, so the queue has more than one person's conversations in it, and two reviewers, so their
-        // read marks have each other to stay out of.
-        context.Users.AddRange(
-            new User { Id = _studentId, ExternalId = "ext-student", Username = "Student" },
-            new User { Id = _otherStudentId, ExternalId = "ext-other", Username = "Other" },
-            new User { Id = _reviewerId, ExternalId = "ext-reviewer", Username = "Reviewer" },
-            new User { Id = _otherReviewerId, ExternalId = "ext-reviewer-2", Username = "Second reviewer" });
-
-        // One handout holding both environments.
-        var handoutId = Guid.CreateVersion7();
-        context.Handouts.Add(new Handout { Id = handoutId, ContentId = HandoutContentId });
-
-        // The two environments the conversations were held against.
-        context.HandoutEnvironments.AddRange(
-            new HandoutEnvironment { Id = _sharedEnvironmentId, HandoutId = handoutId, ContentId = "problem-one" },
-            new HandoutEnvironment { Id = _otherEnvironmentId, HandoutId = handoutId, ContentId = "problem-two" });
-
-        // The competition the archive problem was set in, and the season it ran in.
-        var competitionId = Guid.CreateVersion7();
-        var seasonId = Guid.CreateVersion7();
-        var roundId = Guid.CreateVersion7();
-        context.Competitions.Add(new Competition
-        {
-            Id = competitionId,
-            Slug = "1",
-            Path = ArchiveCompetitionPath,
-            SortPath = ArchiveCompetitionPath,
-            SortOrder = 1,
-        });
-        context.Seasons.Add(new Season { Id = seasonId, StartYear = 2026, EditionNumber = 76 });
-        context.Rounds.Add(new Round
-        {
-            Id = roundId,
-            CompetitionId = competitionId,
-            SeasonId = seasonId,
-            Date = new DateOnly(2026, 9, 28),
-        });
-
-        // And the problem itself, which the queue names by where it comes from rather than by an id.
-        context.Problems.Add(new Problem
-        {
-            Id = _archiveProblemId,
-            RoundId = roundId,
-            Number = 2,
-            Slug = ArchiveProblemSlug,
-        });
-
-        // Five conversations: two against the shared environment, one against the other, one against an
-        // archive problem, and one against nothing.
-        // The one held by the other student runs on the same settings written differently, so the version grouping has
-        // something to prove; the targetless one runs on the settings two others share, so leaving it out of the
-        // grouping is a fact of its own rather than a side effect of it standing alone.
-        context.DefenseSessions.AddRange(
-            NewSession(_oldestSessionId, _studentId, ExaminerConfig, DefenseTargetKind.Handout),
-            NewSession(_newerSessionId, _otherStudentId, EquivalentExaminerConfig, DefenseTargetKind.Handout),
-            NewSession(_newestSessionId, _studentId, examinerConfig: "{}", DefenseTargetKind.Handout),
-            NewSession(_archiveSessionId, _studentId, ArchiveExaminerConfig, DefenseTargetKind.Problem),
-            NewSession(_targetlessSessionId, _studentId, ExaminerConfig, DefenseTargetKind.Handout));
-
-        // Their turns, staggered so the queue has a clear order to put them in. The newest conversation opened
-        // twenty days ago and was carried on yesterday, so when it last moved and when it opened disagree and only
-        // one of the two puts it at the head of the queue.
-        context.DefenseTurns.AddRange(
-            NewTurn(_oldestSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-10), _oldestOpenerId),
-            NewTurn(_oldestSessionId, TranscriptRole.Candidate, "my oldest defense", 1, _now.AddDays(-10)),
-            NewTurn(_newerSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-5)),
-            NewTurn(_newerSessionId, TranscriptRole.Candidate, "my newer defense", 1, _now.AddDays(-5)),
-            NewTurn(_newestSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-20), _newestOpenerId),
-            NewTurn(_newestSessionId, TranscriptRole.Candidate, "my newest defense", 1, _now.AddDays(-1)),
-            NewTurn(_newestSessionId, TranscriptRole.Examiner, "her reply", 2, _now.AddDays(-1), _newestReplyId),
-            NewTurn(_archiveSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-3)),
-            NewTurn(_archiveSessionId, TranscriptRole.Candidate, "my competition defense", 1, _now.AddDays(-3)),
-            NewTurn(_targetlessSessionId, TranscriptRole.Examiner, "the opener", 0, _now.AddDays(-2)),
-            NewTurn(_targetlessSessionId, TranscriptRole.Candidate, "my untargeted defense", 1, _now.AddDays(-2)));
-
-        // The drafts behind the newest conversation's last reply: one the leak-check sent back, and the one that
-        // went out. They hang off that reply alone, so the conversations held before the drafts were kept have
-        // somewhere to read back empty from. Written in the reverse of the order they were drafted, so a read that
-        // takes the database's own order for the run's order has something to get wrong.
-        context.DefenseTurnAttempts.AddRange(
-            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 1, "her reply", _attemptDurationsMs[1]),
-            NewAttempt(_newestSessionId, _newestReplyId, attemptIndex: 0, "her leaky draft", _attemptDurationsMs[0],
-                leaks: true));
-
-        // Which handout problem each of those conversations was held against, the targetless one deliberately
-        // naming nothing.
-        context.HandoutEnvironmentDefenses.AddRange(
-            NewTarget(_oldestSessionId, _sharedEnvironmentId),
-            NewTarget(_newerSessionId, _sharedEnvironmentId),
-            NewTarget(_newestSessionId, _otherEnvironmentId));
-
-        // And the archive problem the competition conversation was held against.
-        context.ProblemDefenses.Add(new ProblemDefense
-        {
-            DefenseSessionId = _archiveSessionId,
-            ProblemId = _archiveProblemId,
-        });
-
-        // What the student made of the newest conversation's last reply, so one of them carries a complaint.
-        context.DefenseTurnReports.Add(new DefenseTurnReport
-        {
-            SessionId = _newestSessionId,
-            TurnId = _newestReplyId,
-            Categories = [DefenseReportCategory.GaveAway],
-            Comment = "she just told me",
-            CreatedAt = _now,
-            UpdatedAt = _now,
-        });
-
-        // And their verdict on a different one, so the complaint and the verdict never sit on the same conversation.
-        context.DefenseSessionFeedbacks.Add(new DefenseSessionFeedback
-        {
-            SessionId = _oldestSessionId,
-            Outcome = DefenseOutcome.FoundTheMistake,
-            Comment = null,
-            CreatedAt = _now,
-            UpdatedAt = _now,
-        });
-
-        // Commit the seed.
-        await context.SaveChangesAsync();
-    }
 
     /// <summary>
     /// The queue reads as one run of conversations, the ones spoken to most recently first, each naming the
@@ -321,11 +48,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Queue_orders_every_conversation_by_recency() => RunTestAsync(async service =>
     {
         // Read the whole queue
-        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
 
         // All four came back, yesterday's leading and the one from ten days ago last
         Assert.Equal(
-            [_newestSessionId, _archiveSessionId, _newerSessionId, _oldestSessionId],
+            [NewestSessionId, ArchiveSessionId, NewerSessionId, OldestSessionId],
             queue.Items.Select(conversation => conversation.Id));
 
         // Counted in the same unit the page is cut in
@@ -353,19 +80,19 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         async service =>
         {
             // Ask for the first page
-            var first = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
+            var first = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
 
             // And then for the rest
-            var second = await service.GetQueueAsync(_reviewerId, NewFilter(), 2, Language.EN);
+            var second = await service.GetQueueAsync(ReviewerId, NewFilter(), 2, Language.EN);
 
             // The first page holds the two most recent, in order
             Assert.Equal(
-                [_newestSessionId, _archiveSessionId],
+                [NewestSessionId, ArchiveSessionId],
                 first.Items.Select(conversation => conversation.Id));
 
             // The second carries on with the rest rather than repeating anything
             Assert.Equal(
-                [_newerSessionId, _oldestSessionId],
+                [NewerSessionId, OldestSessionId],
                 second.Items.Select(conversation => conversation.Id));
 
             // And both report the same total, which is what says a third page would hold nothing
@@ -384,13 +111,13 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Reading_a_conversation_holds_only_until_its_next_message() => RunTestAsync(async service =>
     {
         // The one message the newest conversation holds is unread to begin with
-        Assert.Equal(1, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
+        Assert.Equal(1, (await GetConversationAsync(service, NewestSessionId)).UnreadStudentMessageCount);
 
         // Read it
-        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+        await ReviewAsync(review => review.MarkReadAsync(ReviewerId, NewestSessionId));
 
         // The conversation as it stands after the read
-        var read = await GetConversationAsync(service, _newestSessionId);
+        var read = await GetConversationAsync(service, NewestSessionId);
 
         // Nothing in it is new now, and the read left a stamp behind
         Assert.Equal(0, read.UnreadStudentMessageCount);
@@ -401,30 +128,30 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         {
             // One more turn, later than the stamp the read left
             context.DefenseTurns.Add(NewTurn(
-                _newestSessionId, TranscriptRole.Candidate, "one more thing", 3, DateTimeOffset.UtcNow));
+                NewestSessionId, TranscriptRole.Candidate, "one more thing", 3, DateTimeOffset.UtcNow));
 
             // Commit it
             await context.SaveChangesAsync();
         });
 
         // Which brings it back with exactly the one new message against it
-        Assert.Equal(1, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
+        Assert.Equal(1, (await GetConversationAsync(service, NewestSessionId)).UnreadStudentMessageCount);
 
         // Read it a second time
-        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+        await ReviewAsync(review => review.MarkReadAsync(ReviewerId, NewestSessionId));
 
         // The conversation after the second read
-        var reread = await GetConversationAsync(service, _newestSessionId);
+        var reread = await GetConversationAsync(service, NewestSessionId);
 
         // Which moves the stamp on rather than leaving it where the first pass stopped
         Assert.Equal(0, reread.UnreadStudentMessageCount);
         Assert.True(reread.ReadAt > read.ReadAt);
 
         // Put it back to unread
-        await service.MarkUnreadAsync(_reviewerId, _newestSessionId);
+        await ReviewAsync(review => review.MarkUnreadAsync(ReviewerId, NewestSessionId));
 
         // The conversation after it was put back
-        var unread = await GetConversationAsync(service, _newestSessionId);
+        var unread = await GetConversationAsync(service, NewestSessionId);
 
         // Which makes both of the student's messages new again, and leaves no stamp behind
         Assert.Equal(2, unread.UnreadStudentMessageCount);
@@ -450,24 +177,24 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             // Two more turns
             context.DefenseTurns.AddRange(
                 NewTurn(
-                    _newestSessionId, TranscriptRole.Candidate, "one more thing", 3,
-                    _now.AddHours(-12), followUpId),
+                    NewestSessionId, TranscriptRole.Candidate, "one more thing", 3,
+                    Now.AddHours(-12), followUpId),
                 NewTurn(
-                    _newestSessionId, TranscriptRole.Examiner, "her last word", 4,
-                    _now.AddHours(-6), lastReplyId));
+                    NewestSessionId, TranscriptRole.Examiner, "her last word", 4,
+                    Now.AddHours(-6), lastReplyId));
 
             // Commit them
             await context.SaveChangesAsync();
         });
 
         // Read the whole thing
-        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+        await ReviewAsync(review => review.MarkReadAsync(ReviewerId, NewestSessionId));
 
         // Pick it back up from the student's follow-up
-        await service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, followUpId);
+        await ReviewAsync(review => review.MarkUnreadFromAsync(ReviewerId, NewestSessionId, followUpId));
 
         // The conversation as it stands after that
-        var fromFollowUp = await GetConversationAsync(service, _newestSessionId);
+        var fromFollowUp = await GetConversationAsync(service, NewestSessionId);
 
         // Which leaves the follow-up standing as the one message nobody has read
         Assert.Equal(1, fromFollowUp.UnreadStudentMessageCount);
@@ -476,7 +203,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         // stamp, which carries finer ticks than the column keeps
         var precedingAt = await QueryValueAsync(context =>
             context.DefenseTurns
-                .Where(turn => turn.Id == _newestReplyId)
+                .Where(turn => turn.Id == NewestReplyId)
                 .Select(turn => turn.CreatedAt)
                 .SingleAsync());
 
@@ -485,10 +212,10 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         Assert.Equal(precedingAt, fromFollowUp.ReadAt);
 
         // Pick it up from the reply instead
-        await service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, lastReplyId);
+        await ReviewAsync(review => review.MarkUnreadFromAsync(ReviewerId, NewestSessionId, lastReplyId));
 
         // The conversation as it stands after that
-        var fromLastReply = await GetConversationAsync(service, _newestSessionId);
+        var fromLastReply = await GetConversationAsync(service, NewestSessionId);
 
         // Which moves where the reading stops down to it. Only the reply itself stands unread, and the count says
         // messages, so it comes back empty while the row still says unread: what is left to read is the
@@ -498,10 +225,10 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // The unread queue as the reviewer sees it now
         var unread = await service.GetQueueAsync(
-            _reviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
+            ReviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
 
         // Which agrees with the row, so the reviewer who left it there can still find it
-        Assert.Contains(_newestSessionId, unread.Items.Select(row => row.Id));
+        Assert.Contains(NewestSessionId, unread.Items.Select(row => row.Id));
     });
 
     /// <summary>
@@ -512,13 +239,13 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Picking_a_conversation_up_from_its_opener_leaves_no_stamp() => RunTestAsync(async service =>
     {
         // Read the whole thing
-        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+        await ReviewAsync(review => review.MarkReadAsync(ReviewerId, NewestSessionId));
 
         // Pick it back up from the opener, which nothing precedes
-        await service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, _newestOpenerId);
+        await ReviewAsync(review => review.MarkUnreadFromAsync(ReviewerId, NewestSessionId, NewestOpenerId));
 
         // The conversation as it stands after that
-        var reopened = await GetConversationAsync(service, _newestSessionId);
+        var reopened = await GetConversationAsync(service, NewestSessionId);
 
         // Which makes every message new again and drops the stamp rather than leaving one nothing sits before
         Assert.Equal(1, reopened.UnreadStudentMessageCount);
@@ -534,14 +261,14 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Two_turns_recorded_in_one_moment_are_picked_up_together() => RunTestAsync(async service =>
     {
         // Read the whole thing
-        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+        await ReviewAsync(review => review.MarkReadAsync(ReviewerId, NewestSessionId));
 
         // Pick it up from the reply, which the message before it shares a moment with
-        await service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, _newestReplyId);
+        await ReviewAsync(review => review.MarkUnreadFromAsync(ReviewerId, NewestSessionId, NewestReplyId));
 
         // Both of them stand new, the stamp having landed on the opener before the pair, and the student's own
         // message is the one of the two the count is over
-        Assert.Equal(1, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
+        Assert.Equal(1, (await GetConversationAsync(service, NewestSessionId)).UnreadStudentMessageCount);
     });
 
     /// <summary>
@@ -552,19 +279,19 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Picking_up_from_another_conversations_turn_is_refused() => RunTestAsync(async service =>
     {
         // Read the newest conversation
-        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+        await ReviewAsync(review => review.MarkReadAsync(ReviewerId, NewestSessionId));
 
         // Picking it up from a turn the oldest one holds
-        await Assert.ThrowsAsync<AdminReviewTargetException>(
-            () => service.MarkUnreadFromAsync(_reviewerId, _newestSessionId, _oldestOpenerId));
+        await Assert.ThrowsAsync<ReviewTargetException>(
+            () => ReviewAsync(review => review.MarkUnreadFromAsync(ReviewerId, NewestSessionId, OldestOpenerId)));
 
         // And from a turn nothing was seeded under at all
-        await Assert.ThrowsAsync<AdminReviewTargetException>(
-            () => service.MarkUnreadFromAsync(
-                _reviewerId, _newestSessionId, Guid.Parse("00000000-0000-0000-0000-0000000000bf")));
+        await Assert.ThrowsAsync<ReviewTargetException>(
+            () => ReviewAsync(review => review.MarkUnreadFromAsync(
+                ReviewerId, NewestSessionId, Guid.Parse("00000000-0000-0000-0000-0000000000bf"))));
 
         // Neither of which moved the stamp the conversation already had
-        Assert.Equal(0, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
+        Assert.Equal(0, (await GetConversationAsync(service, NewestSessionId)).UnreadStudentMessageCount);
     });
 
     /// <summary>
@@ -579,11 +306,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Mark the two real conversations read, alongside one that is gone and one named twice
         await service.MarkManyReadAsync(
-            _reviewerId, [_newestSessionId, _oldestSessionId, missingId, _newestSessionId]);
+            ReviewerId, [NewestSessionId, OldestSessionId, missingId, NewestSessionId]);
 
         // Both real ones settled, rather than the missing id refusing the whole set
-        Assert.Equal(0, (await GetConversationAsync(service, _newestSessionId)).UnreadStudentMessageCount);
-        Assert.NotNull((await GetConversationAsync(service, _oldestSessionId)).ReadAt);
+        Assert.Equal(0, (await GetConversationAsync(service, NewestSessionId)).UnreadStudentMessageCount);
+        Assert.NotNull((await GetConversationAsync(service, OldestSessionId)).ReadAt);
     });
 
     /// <summary>
@@ -595,7 +322,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     {
         // Ask for the unread ones with nothing opened yet, so no conversation has a stamp of any kind
         var unread = await service.GetQueueAsync(
-            _reviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
+            ReviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
 
         // All four count as unread
         Assert.Equal(4, unread.TotalCount);
@@ -609,31 +336,31 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task One_reviewers_read_marks_leave_anothers_queue_alone() => RunTestAsync(async service =>
     {
         // One reviewer reads a conversation
-        await service.MarkReadAsync(_reviewerId, _newestSessionId);
+        await ReviewAsync(review => review.MarkReadAsync(ReviewerId, NewestSessionId));
 
         // Their own unread queue
         var read = await service.GetQueueAsync(
-            _reviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
+            ReviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
 
         // Which settles the one they read
         Assert.Equal(3, read.TotalCount);
 
         // The other reviewer's, who has read nothing
         var other = await service.GetQueueAsync(
-            _otherReviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
+            OtherReviewerId, NewFilter() with { Unread = true }, 1, Language.EN);
 
         // Where all four still stand
         Assert.Equal(4, other.TotalCount);
 
         // And the detail carries each reviewer their own stamp
-        Assert.NotNull((await service.GetDetailAsync(_reviewerId, _newestSessionId, Language.EN)).ReadAt);
-        Assert.Null((await service.GetDetailAsync(_otherReviewerId, _newestSessionId, Language.EN)).ReadAt);
+        Assert.NotNull((await ReadDetailAsync(ReviewerId, NewestSessionId)).ReadAt);
+        Assert.Null((await ReadDetailAsync(OtherReviewerId, NewestSessionId)).ReadAt);
 
         // The other reviewer puts it back to unread, which takes only their own stamp, and they never had one
-        await service.MarkUnreadAsync(_otherReviewerId, _newestSessionId);
+        await ReviewAsync(review => review.MarkUnreadAsync(OtherReviewerId, NewestSessionId));
 
         // So the first reviewer's still stands
-        Assert.NotNull((await service.GetDetailAsync(_reviewerId, _newestSessionId, Language.EN)).ReadAt);
+        Assert.NotNull((await ReadDetailAsync(ReviewerId, NewestSessionId)).ReadAt);
     });
 
     /// <summary>
@@ -654,7 +381,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Narrow the queue to the shared version
         var queue = await service.GetQueueAsync(
-            _reviewerId, NewFilter() with { PromptVersion = shared.Version }, 1, Language.EN);
+            ReviewerId, NewFilter() with { PromptVersion = shared.Version }, 1, Language.EN);
 
         // Which leaves exactly the two that ran on it
         Assert.Equal(2, queue.TotalCount);
@@ -669,22 +396,22 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task A_queue_row_reports_what_the_conversation_holds() => RunTestAsync(async service =>
     {
         // Write a note against one of its replies
-        await QueryAsync<IAdminNoteService>((_, notes) => notes.CreateAsync(
-            _reviewerId, _newestSessionId, _newestReplyId, "she gave it away", null));
+        await QueryAsync<IReviewNoteService>((_, notes) => notes.CreateAsync(
+            ReviewerId, NewestSessionId, NewestReplyId, "she gave it away", null));
 
         // Take the conversation past the student's opening message, so an earlier one of theirs can't win
         await QueryAsync(async context =>
         {
             // A second student turn, after the reply the seed left
             context.DefenseTurns.Add(NewTurn(
-                _newestSessionId, TranscriptRole.Candidate, "and here is my fix", 3, _now));
+                NewestSessionId, TranscriptRole.Candidate, "and here is my fix", 3, Now));
 
             // Commit it
             await context.SaveChangesAsync();
         });
 
         // Read the row back
-        var row = await GetConversationAsync(service, _newestSessionId);
+        var row = await GetConversationAsync(service, NewestSessionId);
 
         // It names who held the conversation
         Assert.Equal("Student", row.User.Username);
@@ -703,7 +430,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         Assert.False(row.HasStudentFeedback);
 
         // The conversation carrying the other of the two
-        var answered = await GetConversationAsync(service, _oldestSessionId);
+        var answered = await GetConversationAsync(service, OldestSessionId);
 
         // Reports them the other way round, which is what says the two marks aren't one predicate written twice
         Assert.False(answered.HasStudentReport);
@@ -721,7 +448,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         await QueryAsync(async context =>
         {
             // The student's row
-            var student = await context.Users.SingleAsync(user => user.Id == _studentId);
+            var student = await context.Users.SingleAsync(user => user.Id == StudentId);
 
             // Marked gone the way deletion marks it, which leaves the name standing
             student.IsDeleted = true;
@@ -731,7 +458,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         });
 
         // Read the row back
-        var row = await GetConversationAsync(service, _newestSessionId);
+        var row = await GetConversationAsync(service, NewestSessionId);
 
         // It holds nobody the review can name
         Assert.Null(row.User.Username);
@@ -746,8 +473,8 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task Each_filter_narrows_the_queue_to_what_it_names() => RunTestAsync(async service =>
     {
         // Something written about one of them, so the notes filter has both directions to tell apart
-        await QueryAsync<IAdminNoteService>((_, notes) => notes.CreateAsync(
-            _reviewerId, _newestSessionId, _newestReplyId, "worth a second look", null));
+        await QueryAsync<IReviewNoteService>((_, notes) => notes.CreateAsync(
+            ReviewerId, NewestSessionId, NewestReplyId, "worth a second look", null));
 
         // And that same conversation carried on just now, so the shortest period a filter can name has one
         // conversation to keep and two to drop rather than nothing to say either way about
@@ -755,7 +482,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         {
             // One more turn, stamped as this moment
             context.DefenseTurns.Add(NewTurn(
-                _newestSessionId, TranscriptRole.Candidate, "one more thing", 3, DateTimeOffset.UtcNow));
+                NewestSessionId, TranscriptRole.Candidate, "one more thing", 3, DateTimeOffset.UtcNow));
 
             // Commit it
             await context.SaveChangesAsync();
@@ -769,13 +496,13 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         {
             // The replies the drafts were written for
             var oldestReply = NewTurn(
-                _oldestSessionId, TranscriptRole.Examiner, "a closing reply", 2, _now.AddDays(-10));
+                OldestSessionId, TranscriptRole.Examiner, "a closing reply", 2, Now.AddDays(-10));
             var newerReply = NewTurn(
-                _newerSessionId, TranscriptRole.Examiner, "a careful reply", 2, _now.AddDays(-5));
+                NewerSessionId, TranscriptRole.Examiner, "a careful reply", 2, Now.AddDays(-5));
             var newestReply = NewTurn(
-                _newestSessionId, TranscriptRole.Examiner, "a last reply", 4, DateTimeOffset.UtcNow);
+                NewestSessionId, TranscriptRole.Examiner, "a last reply", 4, DateTimeOffset.UtcNow);
             var competitionReply = NewTurn(
-                _archiveSessionId, TranscriptRole.Examiner, "follow the reference", 2, _now.AddDays(-3));
+                ArchiveSessionId, TranscriptRole.Examiner, "follow the reference", 2, Now.AddDays(-3));
 
             // Each added to its conversation
             context.DefenseTurns.AddRange(oldestReply, newerReply, newestReply, competitionReply);
@@ -783,31 +510,31 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             // The oldest pressed on past a finished proof, in the wrong language and taking the student for a man or
             // a woman, before the draft that went out
             context.DefenseTurnAttempts.AddRange(
-                NewAttempt(_oldestSessionId, oldestReply.Id, attemptIndex: 0, "keep going",
+                NewAttempt(OldestSessionId, oldestReply.Id, attemptIndex: 0, "keep going",
                     withholdsClose: true, switchesLanguage: true, gendersTheReader: true),
-                NewAttempt(_oldestSessionId, oldestReply.Id, attemptIndex: 1, "a closing reply"));
+                NewAttempt(OldestSessionId, oldestReply.Id, attemptIndex: 1, "a closing reply"));
 
             // The newer got a claim wrong in the wrong language, then gave something away, and only then went out
             // clean, so the switched language and the leak never share a draft
             context.DefenseTurnAttempts.AddRange(
-                NewAttempt(_newerSessionId, newerReply.Id, attemptIndex: 0, "a wrong draft",
+                NewAttempt(NewerSessionId, newerReply.Id, attemptIndex: 0, "a wrong draft",
                     mathHolds: false, switchesLanguage: true),
-                NewAttempt(_newerSessionId, newerReply.Id, attemptIndex: 1, "a leaky draft", leaks: true),
-                NewAttempt(_newerSessionId, newerReply.Id, attemptIndex: 2, "a careful reply"));
+                NewAttempt(NewerSessionId, newerReply.Id, attemptIndex: 1, "a leaky draft", leaks: true),
+                NewAttempt(NewerSessionId, newerReply.Id, attemptIndex: 2, "a careful reply"));
 
             // The newest walked the student onto the examiner's own route and took them for a man or a woman, before a
             // clean draft went out
             context.DefenseTurnAttempts.AddRange(
-                NewAttempt(_newestSessionId, newestReply.Id, attemptIndex: 0, "follow my way",
+                NewAttempt(NewestSessionId, newestReply.Id, attemptIndex: 0, "follow my way",
                     gendersTheReader: true, takesOver: true),
-                NewAttempt(_newestSessionId, newestReply.Id, attemptIndex: 1, "a last reply"));
+                NewAttempt(NewestSessionId, newestReply.Id, attemptIndex: 1, "a last reply"));
 
             // The competition one drifted out of the student's language, and its rewrite took over their route and
             // went out anyway once the revisions ran out, so its takeover sits on no draft that was sent back
             context.DefenseTurnAttempts.AddRange(
-                NewAttempt(_archiveSessionId, competitionReply.Id, attemptIndex: 0, "a drifted draft",
+                NewAttempt(ArchiveSessionId, competitionReply.Id, attemptIndex: 0, "a drifted draft",
                     switchesLanguage: true),
-                NewAttempt(_archiveSessionId, competitionReply.Id, attemptIndex: 1, "follow the reference",
+                NewAttempt(ArchiveSessionId, competitionReply.Id, attemptIndex: 1, "follow the reference",
                     takesOver: true));
 
             // Commit them
@@ -820,7 +547,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         (string Description, AdminDefenseQueueFilter Filter, int Count, string Left)[] cases =
         [
             ("one student holds three of the four",
-                NewFilter() with { UserId = _studentId }, 3, "newest, competition, oldest"),
+                NewFilter() with { UserId = StudentId }, 3, "newest, competition, oldest"),
             ("every handout conversation is against the seeded handout",
                 NewFilter() with { HandoutContentId = HandoutContentId }, 3, "newest, newer, oldest"),
             ("a handout nothing was held against leaves nothing",
@@ -866,7 +593,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         foreach (var (description, filter, _, _) in cases)
         {
             // What this one leaves
-            var queue = await service.GetQueueAsync(_reviewerId, filter, 1, Language.EN);
+            var queue = await service.GetQueueAsync(ReviewerId, filter, 1, Language.EN);
 
             // Recorded under its label, by the pager's count and by the conversations on the page
             actual.Add($"{description}: {queue.TotalCount} ({Describe(queue.Items)})");
@@ -877,149 +604,6 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     });
 
     /// <summary>
-    /// The whole conversation reads back with everything the examiner held: the problem and its reference, the
-    /// settings snapshot as readable json rather than a string, the turns in the order they were said, and the
-    /// student's verdict on all of it.
-    /// </summary>
-    [Fact]
-    public Task The_detail_carries_the_whole_conversation_and_what_it_ran_on() => RunTestAsync(async service =>
-    {
-        // Read the conversation the student answered for
-        var detail = await service.GetDetailAsync(_reviewerId, _oldestSessionId, Language.EN);
-
-        // Everything the examiner was working from
-        Assert.Equal("a problem", detail.Statement);
-        Assert.Equal("a reference", detail.Reference);
-
-        // Its settings snapshot reads as json, still holding the model the conversation ran on. Reading a property
-        // off it here is what says the element outlived the document it was parsed out of
-        Assert.Equal(
-            "gemini-3.6-flash",
-            detail.ExaminerConfig.GetProperty("generate").GetProperty("model").GetString());
-
-        // The turns come back in the order they were said, the examiner's opener ahead of the student's answer
-        Assert.Equal(
-            ["the opener", "my oldest defense"],
-            detail.Turns.Select(turn => turn.Content));
-
-        // Along with what the student made of the conversation as a whole
-        Assert.Equal(DefenseOutcome.FoundTheMistake, detail.Feedback?.Outcome);
-    });
-
-    /// <summary>
-    /// The detail carries every draft behind a reply, attributed to the reply it was made for and in the order it was
-    /// drafted, each with the calls that wrote and judged it. The review surface groups them by reply and reads the
-    /// last of a group as the one the student saw, so an attribution or an order that slipped would tell a false
-    /// story about what the examiner did.
-    /// </summary>
-    [Fact]
-    public Task The_detail_carries_every_draft_behind_a_reply() => RunTestAsync(async service =>
-    {
-        // Read the conversation whose last reply took two drafts
-        var detail = await service.GetDetailAsync(_reviewerId, _newestSessionId, Language.EN);
-
-        // Both came back in the order they were drafted
-        Assert.Equal(["her leaky draft", "her reply"], detail.Attempts.Select(attempt => attempt.Reply));
-
-        // Each against the reply it was made for, which is what the surface groups them by
-        Assert.All(detail.Attempts, attempt => Assert.Equal(_newestReplyId, attempt.TurnId));
-
-        // The rejected one carries what the guard caught, the part the student never saw
-        Assert.True(detail.Attempts[0].Leaks);
-        Assert.Equal("the counterexample", detail.Attempts[0].WhatLeaked);
-
-        // And each carries the calls it made, which the turn's single figure can't break down
-        Assert.All(
-            detail.Attempts,
-            attempt => Assert.Equal(
-                [ExaminerStep.Generate, ExaminerStep.LeakCheck],
-                attempt.Calls.Select(call => call.Step).Order()));
-
-        // Along with how long each draft and each of its calls took, the axis a slow reply is traced along
-        Assert.Equal(_attemptDurationsMs, detail.Attempts.Select(attempt => attempt.DurationMs));
-        Assert.All(
-            detail.Attempts.SelectMany(attempt => attempt.Calls),
-            call => Assert.Equal(CallDurationMs, call.DurationMs));
-    });
-
-    /// <summary>
-    /// The detail carries what the student held against a reply, standing against that reply.
-    /// </summary>
-    [Fact]
-    public Task The_detail_carries_what_the_student_reported_on_a_reply() => RunTestAsync(async service =>
-    {
-        // Read the conversation whose last reply the student reported
-        var detail = await service.GetDetailAsync(_reviewerId, _newestSessionId, Language.EN);
-
-        // Its one report
-        var report = Assert.Single(detail.Reports);
-
-        // Standing against the reply
-        Assert.Equal(_newestReplyId, report.TurnId);
-
-        // Saying what they held against it
-        Assert.Equal([DefenseReportCategory.GaveAway], report.Categories);
-
-        // In their own words too
-        Assert.Equal("she just told me", report.Comment);
-    });
-
-    /// <summary>
-    /// A conversation held before the drafts were kept reads back holding none, rather than failing on their absence.
-    /// Every conversation already in the database is one of those, so the empty case is the ordinary one for a while
-    /// yet, and it has to reach the review surface as "nothing to show" rather than as an error.
-    /// </summary>
-    [Fact]
-    public Task The_detail_holds_no_drafts_for_a_conversation_from_before_they_were_kept() =>
-        RunTestAsync(async service =>
-    {
-        // Read a conversation seeded with turns and nothing recorded behind them
-        var detail = await service.GetDetailAsync(_reviewerId, _oldestSessionId, Language.EN);
-
-        // Its turns came back, and it simply holds no drafts
-        Assert.NotEmpty(detail.Turns);
-        Assert.Empty(detail.Attempts);
-    });
-
-    /// <summary>
-    /// The detail carries the notes written about that conversation and no others, newest first, each marked as the
-    /// reading reviewer's own or somebody else's.
-    /// </summary>
-    [Fact]
-    public Task The_detail_carries_only_its_own_notes_newest_first() => RunTestAsync(async service =>
-    {
-        // Two readings of one conversation by different reviewers, and one of another, so a note that belongs
-        // elsewhere has somewhere to leak in from
-        await QueryAsync(async context =>
-        {
-            // The three notes, stamped apart so newest-first has an order to hold
-            context.AdminNotes.AddRange(
-                NewNote(_reviewerId, _newestSessionId, "my earlier reading", _now.AddHours(-2)),
-                NewNote(_otherReviewerId, _newestSessionId, "a second opinion", _now.AddHours(-1)),
-                NewNote(_reviewerId, _newerSessionId, "about a different conversation", _now.AddHours(-3)));
-
-            // Commit them
-            await context.SaveChangesAsync();
-        });
-
-        // Read the conversation the first two were written about
-        var detail = await service.GetDetailAsync(_reviewerId, _newestSessionId, Language.EN);
-
-        // Only its own two come back, the later reading ahead of the earlier
-        Assert.Equal(
-            ["a second opinion", "my earlier reading"],
-            detail.Notes.Select(note => note.Content));
-
-        // Each under whoever wrote it
-        Assert.Equal(
-            ["Second reviewer", "Reviewer"],
-            detail.Notes.Select(note => note.Author.Username));
-
-        // And marked as the reading reviewer's own only where they are the author
-        Assert.Equal([false, true], detail.Notes.Select(note => note.IsOwn));
-    });
-
-    /// <summary>
     /// A conversation held against an archive problem reaches the queue alongside the handout ones, named by the
     /// competition it was set in rather than by an id the reviewer's side has nothing to resolve.
     /// </summary>
@@ -1027,11 +611,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task An_archive_problem_reads_back_named_by_where_it_comes_from() => RunTestAsync(async service =>
     {
         // The whole queue, which holds conversations of both kinds
-        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
 
         // The competition one, which the queue carries as an archive problem rather than a handout one
         var conversation = Assert.Single(
-            queue.Items.Where(candidate => candidate.Id == _archiveSessionId));
+            queue.Items.Where(candidate => candidate.Id == ArchiveSessionId));
 
         // Named by the problem's slug and where the problem comes from
         var target = Assert.IsType<NamedProblemTarget>(conversation.Target);
@@ -1055,36 +639,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     {
         // Narrowed to the one problem out of the archive
         var queue = await service.GetQueueAsync(
-            _reviewerId, NewFilter() with { ProblemSlug = ArchiveProblemSlug }, 1, Language.EN);
+            ReviewerId, NewFilter() with { ProblemSlug = ArchiveProblemSlug }, 1, Language.EN);
 
         // Which leaves the one conversation held against it
-        Assert.Equal([_archiveSessionId], queue.Items.Select(conversation => conversation.Id));
+        Assert.Equal([ArchiveSessionId], queue.Items.Select(conversation => conversation.Id));
     });
-
-    /// <summary>
-    /// Opening a competition conversation names its problem the same way the queue does. The detail builds its
-    /// own projection over the same columns, so the queue naming one is no evidence that the modal does.
-    /// </summary>
-    [Fact]
-    public Task The_detail_of_an_archive_conversation_names_where_its_problem_comes_from() =>
-        RunTestAsync(async service =>
-        {
-            // The competition conversation, read in full
-            var detail = await service.GetDetailAsync(_reviewerId, _archiveSessionId, Language.EN);
-
-            // Which names an archive problem rather than a handout one
-            var target = Assert.IsType<NamedProblemTarget>(detail.Target);
-            Assert.Equal(ArchiveProblemSlug, target.Slug);
-
-            // Which is every competition down to the one that set it, each named in the language asked for
-            Assert.Equal(
-                ["Mathilding", "Advanced", "September"],
-                target.Source.Competition.Select(competition => competition.DisplayName));
-
-            // Along with the season's own year and the problem's place in the competition
-            Assert.Equal(2026, target.Source.StartYear);
-            Assert.Equal(2, target.Source.Number);
-        });
 
     /// <summary>
     /// An archive problem is offered as a filter option beside the handout ones, so the facet reaches both kinds.
@@ -1116,7 +675,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Both students who held one, the one holding three ahead of the one holding one, and neither reviewer
         Assert.Equal(
-            [_studentId, _otherStudentId],
+            [StudentId, OtherStudentId],
             options.Students.Select(option => option.User.Id));
         Assert.Equal([3, 1], options.Students.Select(option => option.ConversationCount));
 
@@ -1146,10 +705,10 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         var target = new HandoutEnvironmentTarget(HandoutContentId, "problem-one");
 
         // Read the student's conversations on it
-        var read = await service.GetStudentConversationsAsync(_studentId, target);
+        var read = await service.GetStudentConversationsAsync(StudentId, target);
 
         // Only their own there, the other student's and the other environment's left out
-        Assert.Equal([_oldestSessionId], read.Conversations.Select(conversation => conversation.Id));
+        Assert.Equal([OldestSessionId], read.Conversations.Select(conversation => conversation.Id));
 
         // Graded by nobody
         Assert.Null(read.Grading);
@@ -1163,15 +722,15 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     public Task A_conversation_held_against_no_environment_stays_out_of_reach() => RunTestAsync(async service =>
     {
         // Read the whole queue, narrowed by nothing
-        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
 
         // The four that name a problem are all of it, though the targetless one moved more recently than two
         Assert.Equal(4, queue.TotalCount);
-        Assert.DoesNotContain(_targetlessSessionId, queue.Items.Select(conversation => conversation.Id));
+        Assert.DoesNotContain(TargetlessSessionId, queue.Items.Select(conversation => conversation.Id));
 
         // And asking for it by name is refused the same way an id nothing was seeded under is
         await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
-            () => service.GetDetailAsync(_reviewerId, _targetlessSessionId, Language.EN));
+            () => ReadDetailAsync(ReviewerId, TargetlessSessionId));
     });
 
     /// <summary>
@@ -1199,10 +758,10 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
             problemId = SelectionSeed.NewProposal(context, round, number: 21, position: 3);
 
             // The conversation
-            context.DefenseSessions.Add(NewSession(sessionId, _studentId, ExaminerConfig, DefenseTargetKind.Problem));
+            context.DefenseSessions.Add(NewSession(sessionId, StudentId, ExaminerConfig, DefenseTargetKind.Problem));
 
             // With the one message the student opened it with
-            context.DefenseTurns.Add(NewTurn(sessionId, TranscriptRole.Candidate, "my proposal defense", 0, _now));
+            context.DefenseTurns.Add(NewTurn(sessionId, TranscriptRole.Candidate, "my proposal defense", 0, Now));
 
             // Held against that problem
             context.ProblemDefenses.Add(new ProblemDefense { DefenseSessionId = sessionId, ProblemId = problemId });
@@ -1212,7 +771,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         });
 
         // Read the whole queue
-        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
 
         // The row of the conversation about the proposal, which names a proposal rather than a competition problem
         var proposal = Assert.IsType<NamedProposalTarget>(
@@ -1229,43 +788,37 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
 
         // Narrow the queue by the proposal's slug
         var narrowed = await service.GetQueueAsync(
-            _reviewerId, NewFilter() with { ProblemSlug = proposal.Slug }, 1, Language.EN);
+            ReviewerId, NewFilter() with { ProblemSlug = proposal.Slug }, 1, Language.EN);
 
         // Which leaves the one conversation held against it
         Assert.Equal([sessionId], narrowed.Items.Select(conversation => conversation.Id));
 
         // Open the conversation in full
-        var detail = await service.GetDetailAsync(_reviewerId, sessionId, Language.EN);
+        var detail = await ReadDetailAsync(ReviewerId, sessionId);
 
         // Which names it the same way again
         Assert.Equal(proposal, detail.Target);
     });
 
     /// <summary>
-    /// A conversation that isn't there can't be read or marked, rather than quietly passing for done.
+    /// Runs one call through the review service, in a scope of its own.
     /// </summary>
-    [Fact]
-    public Task A_missing_conversation_is_refused_by_every_read_and_mark() => RunTestAsync(async service =>
-    {
-        // An id nothing was seeded under
-        var missingId = Guid.Parse("00000000-0000-0000-0000-0000000000ff");
+    /// <param name="call">The call, handed the review service.</param>
+    /// <returns>A task representing the call.</returns>
+    private Task ReviewAsync(Func<IConversationReviewService, Task> call) =>
+        // The review service, resolved over the same database
+        QueryAsync<IConversationReviewService>((_, review) => call(review));
 
-        // Reading it
-        await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
-            () => service.GetDetailAsync(_reviewerId, missingId, Language.EN));
-
-        // Marking it read
-        await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
-            () => service.MarkReadAsync(_reviewerId, missingId));
-
-        // Putting it back to unread
-        await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
-            () => service.MarkUnreadAsync(_reviewerId, missingId));
-
-        // And picking it up from a turn, which is refused for the conversation before the turn is looked at
-        await Assert.ThrowsAsync<DefenseSessionNotFoundException>(
-            () => service.MarkUnreadFromAsync(_reviewerId, missingId, _newestReplyId));
-    });
+    /// <summary>
+    /// Reads one conversation in full through the review service, in a scope of its own.
+    /// </summary>
+    /// <param name="readerId">Whose read stamp to carry back with it.</param>
+    /// <param name="sessionId">The conversation to read.</param>
+    /// <returns>The whole conversation.</returns>
+    private Task<ConversationDetailDto> ReadDetailAsync(Guid readerId, Guid sessionId) =>
+        // The conversation as the review service reads it, in English
+        QueryValueAsync<IConversationReviewService, ConversationDetailDto>(
+            (_, review) => review.GetDetailAsync(readerId, sessionId, Language.EN));
 
     /// <summary>
     /// Names the conversations a filter left, in the order the queue put them, so a mismatch reads as which
@@ -1286,7 +839,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
         IAdminDefenseReviewService service, Guid sessionId)
     {
         // The whole queue, since a row only exists as part of it
-        var queue = await service.GetQueueAsync(_reviewerId, NewFilter(), 1, Language.EN);
+        var queue = await service.GetQueueAsync(ReviewerId, NewFilter(), 1, Language.EN);
 
         // The row under that id
         return queue.Items.Single(conversation => conversation.Id == sessionId);
@@ -1308,152 +861,4 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
     /// <returns>The filter.</returns>
     private static AdminDefenseQueueFilter NewFilter() =>
         new(false, null, false, false, null, null, null, null, null, null, null);
-
-    /// <summary>
-    /// Builds one seeded conversation, held against a handout environment.
-    /// </summary>
-    /// <param name="sessionId">The conversation's identifier.</param>
-    /// <param name="userId">Who held it.</param>
-    /// <param name="examinerConfig">The settings it ran on.</param>
-    /// <param name="targetKind">Which kind of problem it was held against.</param>
-    /// <returns>The conversation, ready to add.</returns>
-    private static DefenseSession NewSession(
-        Guid sessionId, Guid userId, string examinerConfig, DefenseTargetKind targetKind) => new()
-        {
-            Id = sessionId,
-            UserId = userId,
-            TargetKind = targetKind,
-            ProblemStatement = "a problem",
-            ProblemReference = "a reference",
-            ExaminerConfig = examinerConfig,
-            CreatedAt = _now.AddDays(-30),
-        };
-
-    /// <summary>
-    /// Builds the link saying which handout environment a seeded conversation was held against.
-    /// </summary>
-    /// <param name="sessionId">The conversation.</param>
-    /// <param name="handoutEnvironmentId">The handout environment it was held against.</param>
-    /// <returns>The link, ready to add.</returns>
-    private static HandoutEnvironmentDefense NewTarget(Guid sessionId, Guid handoutEnvironmentId) => new()
-    {
-        DefenseSessionId = sessionId,
-        HandoutEnvironmentId = handoutEnvironmentId,
-    };
-
-    /// <summary>
-    /// Builds one note about a conversation as a whole, stamped when the test says rather than now, so a set of them
-    /// has an order that doesn't depend on how fast they were written.
-    /// </summary>
-    /// <param name="authorId">The reviewer who wrote it.</param>
-    /// <param name="sessionId">The conversation it is about.</param>
-    /// <param name="content">What it says.</param>
-    /// <param name="writtenAt">When it was written.</param>
-    /// <returns>The note, ready to add.</returns>
-    private static AdminNote NewNote(
-        Guid authorId, Guid sessionId, string content, DateTimeOffset writtenAt) => new()
-        {
-            AuthorId = authorId,
-            SessionId = sessionId,
-            TurnId = null,
-            Content = content,
-            Category = null,
-            ResolvedAt = null,
-            CreatedAt = writtenAt,
-            UpdatedAt = writtenAt,
-        };
-
-    /// <summary>
-    /// Builds one seeded turn.
-    /// </summary>
-    /// <param name="sessionId">The conversation the turn belongs to.</param>
-    /// <param name="role">Who authored the turn.</param>
-    /// <param name="content">The turn's text.</param>
-    /// <param name="sequence">The turn's position in the conversation.</param>
-    /// <param name="createdAt">When the turn was recorded.</param>
-    /// <param name="turnId">The turn's identifier, minted when the test doesn't need to name it.</param>
-    /// <returns>The turn, ready to add.</returns>
-    private static DefenseTurn NewTurn(
-        Guid sessionId, TranscriptRole role, string content, int sequence, DateTimeOffset createdAt,
-        Guid? turnId = null) => new()
-        {
-            Id = turnId ?? Guid.CreateVersion7(),
-            SessionId = sessionId,
-            Role = role,
-            Content = content,
-            Sequence = sequence,
-            CreatedAt = createdAt,
-        };
-
-    /// <summary>
-    /// Builds one seeded draft, carrying the calls that wrote and judged it.
-    /// </summary>
-    /// <param name="sessionId">The conversation the draft was made in.</param>
-    /// <param name="turnId">The reply it was drafted for.</param>
-    /// <param name="attemptIndex">Its place in that reply's run.</param>
-    /// <param name="reply">The drafted text.</param>
-    /// <param name="durationMs">How long the draft took end to end.</param>
-    /// <param name="mathHolds"><inheritdoc cref="DefenseTurnAttempt.MathHolds" path="/summary"/></param>
-    /// <param name="leaks"><inheritdoc cref="DefenseTurnAttempt.Leaks" path="/summary"/></param>
-    /// <param name="withholdsClose"><inheritdoc cref="DefenseTurnAttempt.WithholdsClose" path="/summary"/></param>
-    /// <param name="switchesLanguage"><inheritdoc cref="DefenseTurnAttempt.SwitchesLanguage" path="/summary"/></param>
-    /// <param name="gendersTheReader"><inheritdoc cref="DefenseTurnAttempt.GendersTheReader" path="/summary"/></param>
-    /// <param name="takesOver"><inheritdoc cref="DefenseTurnAttempt.TakesOver" path="/summary"/></param>
-    /// <returns>The draft, ready to add.</returns>
-    private static DefenseTurnAttempt NewAttempt(
-        Guid sessionId, Guid turnId, int attemptIndex, string reply, int durationMs = 0, bool mathHolds = true,
-        bool leaks = false, bool withholdsClose = false, bool switchesLanguage = false, bool gendersTheReader = false,
-        bool takesOver = false)
-    {
-        // The draft and every verdict passed on it, clean but for the flaws the test names.
-        var attempt = new DefenseTurnAttempt
-        {
-            SessionId = sessionId,
-            TurnId = turnId,
-            AttemptIndex = attemptIndex,
-            Reply = reply,
-            RevisionNote = attemptIndex == 0 ? "" : "REVISION REQUIRED — you gave away the counterexample.",
-            MathHolds = mathHolds,
-            MathCorrection = mathHolds ? "" : "the sum is even",
-            Leaks = leaks,
-            WhatLeaked = leaks ? "the counterexample" : "",
-            WithholdsClose = withholdsClose,
-            Established = withholdsClose ? "the whole proof" : "",
-            SwitchesLanguage = switchesLanguage,
-            CandidateLanguage = "English",
-            GendersTheReader = gendersTheReader,
-            TakesOver = takesOver,
-            CandidateWork = "",
-            RestatedReferenceStep = takesOver ? "the reference's second step" : "",
-            IsSafeFallback = false,
-            CreatedAt = _now,
-            DurationMs = durationMs,
-        };
-
-        // The calls behind it, keyed off the draft's own client-side id.
-        attempt.Calls = [NewCall(attempt.Id, ExaminerStep.Generate), NewCall(attempt.Id, ExaminerStep.LeakCheck)];
-
-        // Hand it back with them attached.
-        return attempt;
-    }
-
-    /// <summary>
-    /// Builds one seeded model call.
-    /// </summary>
-    /// <param name="attemptId">The draft that made it.</param>
-    /// <param name="step">The step it ran.</param>
-    /// <returns>The call, ready to hang off a draft.</returns>
-    private static DefenseAttemptCall NewCall(Guid attemptId, ExaminerStep step) => new()
-    {
-        AttemptId = attemptId,
-        Step = step,
-        Model = "fake/model",
-        ReasoningEffort = "low",
-        Cost = 0.01m,
-        PromptTokens = 100,
-        CompletionTokens = 20,
-        ReasoningTokens = 5,
-        CachedPromptTokens = 0,
-        DurationMs = CallDurationMs,
-    };
 }

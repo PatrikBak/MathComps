@@ -1,4 +1,4 @@
-import type { UserIdentity } from '@/components/features/admin/model/user-identity'
+import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import { assertNever } from '@/components/shared/utils/assert-never'
 
 import { pairKey, scoreOf } from '../../grades/model/grade-types'

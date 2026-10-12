@@ -6,9 +6,9 @@ using MathComps.Domain.Localization;
 namespace MathComps.Infrastructure.Services.Admin;
 
 /// <summary>
-/// Reads every student's defense conversations for review, and records which of them a reviewer has read. Which
-/// conversations it returns is scoped to nobody, since a reviewer reads all of them; only what counts as read is,
-/// because that is the reviewer's own place in the queue rather than a property of the conversation.
+/// Reads every student's defense conversations as the admin's review queue, and marks a whole set of them read at
+/// once. Which conversations it returns is scoped to nobody, since a reviewer reads all of them; only what counts as
+/// read is, because that is the reviewer's own place in the queue rather than a property of the conversation.
 /// </summary>
 public interface IAdminDefenseReviewService
 {
@@ -38,17 +38,6 @@ public interface IAdminDefenseReviewService
         Language language, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Reads one conversation in full, along with the read stamp as it stood before this read.
-    /// </summary>
-    /// <param name="reviewerId">Whose read stamp to carry back with it.</param>
-    /// <param name="sessionId">The conversation to read.</param>
-    /// <param name="language">The language to name its problem in.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    /// <returns>The whole conversation.</returns>
-    Task<AdminDefenseDetailDto> GetDetailAsync(
-        Guid reviewerId, Guid sessionId, Language language, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Reads every conversation one student held against one problem, oldest first. Where somebody grades them on
     /// it, which of the conversations count toward the grade comes along, with where the grade stands and what they
     /// said about their solution.
@@ -57,39 +46,8 @@ public interface IAdminDefenseReviewService
     /// <param name="target">The problem the conversations were held against.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The conversations, and how the student is graded on the problem.</returns>
-    Task<StudentConversationsDto> GetStudentConversationsAsync(
+    Task<AuthorConversationsDto> GetStudentConversationsAsync(
         Guid userId, DefenseTarget target, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Records that a reviewer has read a conversation as of now, replacing any earlier stamp of theirs. Turns
-    /// arriving after this bring it back to be read again.
-    /// </summary>
-    /// <param name="reviewerId">The reviewer who read it.</param>
-    /// <param name="sessionId">The conversation that was read.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    Task MarkReadAsync(Guid reviewerId, Guid sessionId, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Takes back one reviewer's record of having read a conversation, leaving it as though they never had. Having
-    /// not read it already is the same outcome, so asking twice is no different from asking once.
-    /// </summary>
-    /// <param name="reviewerId">The reviewer taking it back.</param>
-    /// <param name="sessionId">The conversation to leave unread.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    Task MarkUnreadAsync(Guid reviewerId, Guid sessionId, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Moves one reviewer's record of having read a conversation to just before one of its turns, leaving that turn
-    /// and everything after it to be read again. A turn is named rather than a moment, so where the record lands is
-    /// the conversation's own to decide. Where it stood before doesn't hold it back: naming a turn it already sits
-    /// past settles everything up to that turn. Naming the earliest turn leaves nothing read.
-    /// </summary>
-    /// <param name="reviewerId">The reviewer moving their record.</param>
-    /// <param name="sessionId">The conversation to move it in.</param>
-    /// <param name="turnId">The turn to leave unread, along with every turn after it.</param>
-    /// <param name="cancellationToken">A token to cancel the work.</param>
-    Task MarkUnreadFromAsync(
-        Guid reviewerId, Guid sessionId, Guid turnId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Stamps a whole set of conversations as read as of now, which is what clearing a backlog is. An id naming
@@ -106,7 +64,3 @@ public interface IAdminDefenseReviewService
         CancellationToken cancellationToken = default);
 }
 
-/// <summary>
-/// Thrown when a reviewer's reading is moved back to a turn the conversation it is about doesn't hold.
-/// </summary>
-public sealed class AdminReviewTargetException() : Exception("The turn to pick up from is not valid");

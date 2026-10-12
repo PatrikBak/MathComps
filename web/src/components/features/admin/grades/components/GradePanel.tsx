@@ -3,20 +3,17 @@
 import { useFormatter, useTranslations } from 'next-intl'
 import { useId } from 'react'
 
-import { describeUser } from '@/components/features/admin/model/user-identity'
+import {
+  formatScore,
+  MAX_MARK,
+} from '@/components/features/hosted-competitions/model/hosted-competition-score'
+import { describeUser } from '@/components/features/profile/model/user-identity'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { cn } from '@/components/shared/utils/css-utils'
 
 import { useGradeComment } from '../hooks/use-grade-comment'
 import { helpClickChange, markClickChange } from '../model/grade-change'
-import {
-  formatScore,
-  type Grade,
-  type GradeChange,
-  MAX_MARK,
-  scoreOf,
-  type SelfAssessment,
-} from '../model/grade-types'
+import { type Grade, type GradeChange, scoreOf, type SelfAssessment } from '../model/grade-types'
 
 /** Every mark a problem can earn, from nothing to full. */
 const MARKS = Array.from({ length: MAX_MARK + 1 }, (_unused, mark) => mark)

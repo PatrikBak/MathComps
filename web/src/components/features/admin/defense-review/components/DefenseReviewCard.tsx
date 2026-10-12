@@ -4,8 +4,8 @@ import { Flag, type LucideIcon, MessageSquareQuote, MessagesSquare, StickyNote }
 import { useFormatter, useTranslations } from 'next-intl'
 import { memo } from 'react'
 
-import { describeUser } from '@/components/features/admin/model/user-identity'
 import { DefenseTargetLabel } from '@/components/features/defense/components/DefenseTargetLabel'
+import { describeUser } from '@/components/features/profile/model/user-identity'
 import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { cn } from '@/components/shared/utils/css-utils'
 import { toPlainTextPreview } from '@/components/shared/utils/string-utils'

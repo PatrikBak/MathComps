@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.Defense;
+using MathComps.Domain.Contracts.Users;
 
 namespace MathComps.Domain.Contracts.Admin;
 

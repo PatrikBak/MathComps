@@ -15,11 +15,7 @@ import type {
   DefenseReviewFilter,
 } from '../../../defense-review/model/defense-review-types'
 import { invalidateNoteFeed, noteFeedQueryKey } from '../../../notes/hooks/note-cache'
-import {
-  conversationDetailQueryKey,
-  invalidateConversationDetail,
-  patchCachedQueueConversations,
-} from '../conversation-cache'
+import { patchCachedQueueConversations } from '../conversation-cache'
 
 /** The languages every cache here is read in. */
 const LANGUAGES = ['sk', 'en']
@@ -216,35 +212,5 @@ describe('invalidateNoteFeed', () => {
 
     // The queue's own rows are patched instead, so nothing here may drag its pages back
     expect(isStale(queryClient, queue)).toBe(false)
-  })
-})
-
-describe('invalidateConversationDetail', () => {
-  it('reaches one conversation in every language and leaves another conversation alone', () => {
-    // One conversation read in both languages
-    const queryClient = new QueryClient()
-    const written = LANGUAGES.map((locale) => {
-      // Where that conversation read in this language lands
-      const key = conversationDetailQueryKey('session', 'reader', locale)
-
-      // Parked empty, since only whether the matcher reaches it is under test
-      queryClient.setQueryData(key, {})
-
-      // The key the case reads back by
-      return key as readonly unknown[]
-    })
-
-    // A second conversation, which a note about the first says nothing about
-    const untouched = conversationDetailQueryKey('other', 'reader', 'sk')
-    queryClient.setQueryData(untouched, {})
-
-    // A note written about the first
-    invalidateConversationDetail(queryClient, 'session')
-
-    // A note written under one reading has to reach the copy read in the other language
-    written.forEach((key) => expect(isStale(queryClient, key)).toBe(true))
-
-    // And reach nothing it says nothing about
-    expect(isStale(queryClient, untouched)).toBe(false)
   })
 })

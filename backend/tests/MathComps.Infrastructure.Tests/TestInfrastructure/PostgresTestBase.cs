@@ -137,6 +137,25 @@ public abstract class PostgresTestBase<TService>(PostgresContainerFixture fixtur
     }
 
     /// <summary>
+    /// Runs a body against a fresh scope over the same database, handing it a context plus a resolved service, and
+    /// hands back what the body produced, so a test can read through a service other than the one under test.
+    /// </summary>
+    /// <typeparam name="TResolved">The companion service to resolve alongside the context.</typeparam>
+    /// <typeparam name="TValue">The value type the body returns.</typeparam>
+    /// <param name="query">The body, handed a fresh context and the resolved service. It may write.</param>
+    /// <returns>The value the body produced.</returns>
+    protected async Task<TValue> QueryValueAsync<TResolved, TValue>(
+        Func<MathCompsDbContext, TResolved, Task<TValue>> query) where TResolved : notnull
+    {
+        // A new provider over the same connection string sees the committed rows.
+        await using var provider = CreateServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<MathCompsDbContext>();
+        var resolved = scope.ServiceProvider.GetRequiredService<TResolved>();
+        return await query(context, resolved);
+    }
+
+    /// <summary>
     /// Reads a single value from a fresh read scope against the same database — for assertions that need one figure
     /// (e.g. a row count or timestamp) read back after the service under test has committed.
     /// </summary>

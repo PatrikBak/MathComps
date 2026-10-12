@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 
-import { formatScore } from '@/components/features/admin/grades/model/grade-types'
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
 import { AppLink } from '@/components/shared/components/AppLink'
 import { Button } from '@/components/shared/components/Button'
@@ -20,6 +19,7 @@ import { useCategoryName } from '../hooks/use-category-name'
 import { useCompetitionResults } from '../hooks/use-competition-results'
 import { useEntryReader } from '../hooks/use-entry-reader'
 import { useHostedCompetitionsView } from '../hooks/use-hosted-competitions-view'
+import { formatScore } from '../model/hosted-competition-score'
 import {
   areResultsComplete,
   findCompetitionInGroup,

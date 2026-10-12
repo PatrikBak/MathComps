@@ -35,10 +35,16 @@ public static class EndpointExtensions
         // Admin-only endpoints, gated by the admin policy
         app.MapAdminEndpoints();
 
-        // Reading every student's defense conversations back for review
+        // Reading one defense conversation back and recording how far it has been read
+        app.MapConversationReviewEndpoints();
+
+        // What gets written down while reviewing a conversation
+        app.MapReviewNoteEndpoints();
+
+        // The admin's queue of every student's defense conversations
         app.MapAdminDefenseReviewEndpoints();
 
-        // What gets written down while reviewing those conversations
+        // The notes written across every conversation, read as one feed
         app.MapAdminNoteEndpoints();
 
         // Grading the hosted groups from the students' defense conversations

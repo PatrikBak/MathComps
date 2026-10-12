@@ -1,19 +1,19 @@
 import type { Page } from '@playwright/test'
 
 import type {
-  AdminConversation,
-  StudentGrading,
-} from '@/components/features/admin/conversation/model/admin-conversation'
-import type {
   DefenseReviewConversation,
   DefenseReviewFilterOptions,
 } from '@/components/features/admin/defense-review/model/defense-review-types'
+import type {
+  ConversationDetail,
+  StudentGrading,
+} from '@/components/features/conversation-review/model/conversation-detail'
 import type { PagedList } from '@/lib/api/paged-list'
 
-import { partlyReadConversationOf, wholeConversationOf } from './admin-conversation'
 import { createAnswerGate } from './answer-gate'
 import { BACKEND_ORIGIN } from './backend-routes'
 import { installConversationBackend } from './conversation-backend'
+import { partlyReadConversationOf, wholeConversationOf } from './conversation-review'
 
 /** How many conversations a page of the queue holds, few enough that a short queue runs onto a second page. */
 const PAGE_SIZE = 2
@@ -114,7 +114,7 @@ export function conversationOf(
  *
  * @returns The conversation in full.
  */
-function detailOf(conversation: DefenseReviewConversation): AdminConversation {
+function detailOf(conversation: DefenseReviewConversation): ConversationDetail {
   // The same conversation, whole, started when it was last spoken in
   return wholeConversationOf({
     id: conversation.id,

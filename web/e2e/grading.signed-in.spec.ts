@@ -3,9 +3,9 @@ import type { Locator, Page } from '@playwright/test'
 import { ROUTES } from '@/i18n/i18n'
 
 import messages from '../messages/en.json'
-import { expectOnlyNotCounting } from './support/admin-conversation'
 import { countDialogs } from './support/backend-routes'
 import { LIST_PATH, showRoundHolding } from './support/competitions'
+import { expectOnlyNotCounting } from './support/conversation-review'
 import { GROUP_NAME, installGradingBackend } from './support/grading-backend'
 import { installHostedBackend } from './support/hosted-backend'
 import { expect, test } from './support/test'
@@ -26,7 +26,7 @@ const copy = messages.admin.grading
 const gradeCopy = messages.admin.grades
 
 /** The copy of the conversation dialog, in English. */
-const conversationCopy = messages.admin.conversation
+const conversationCopy = messages.conversationReview
 
 /** The name of the step forward through the pairs. */
 const NEXT = conversationCopy.next

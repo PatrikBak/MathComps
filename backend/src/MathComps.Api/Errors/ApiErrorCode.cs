@@ -183,27 +183,27 @@ public enum ApiErrorCode
     /// A review note the contract cannot take: no text at all, more text than a note may carry, or a category
     /// outside the ones it names.
     /// </summary>
-    AdminNoteValue,
+    ReviewNoteValue,
 
     /// <summary>
     /// A review note stands against a reply the conversation doesn't hold.
     /// </summary>
-    AdminNoteTarget,
+    ReviewNoteTarget,
 
     /// <summary>
     /// No review note exists under the id.
     /// </summary>
-    AdminNoteNotFound,
+    ReviewNoteNotFound,
 
     /// <summary>
     /// The caller is not the reviewer who wrote the note they tried to revise or drop.
     /// </summary>
-    NotAdminNoteAuthor,
+    NotReviewNoteAuthor,
 
     /// <summary>
     /// A reviewer's reading is moved back to a turn the conversation doesn't hold.
     /// </summary>
-    AdminReviewTarget,
+    ReviewTarget,
 
     /// <summary>
     /// No group the site grades exists under the slug.

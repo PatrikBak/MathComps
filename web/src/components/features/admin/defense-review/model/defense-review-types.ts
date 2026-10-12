@@ -1,5 +1,5 @@
-import type { UserIdentity } from '@/components/features/admin/model/user-identity'
 import type { NamedDefenseTarget } from '@/components/features/defense/model/defense-types'
+import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 
 /**
  * One conversation as the review queue lists it: who held it, what it was against, how it opened, and every mark

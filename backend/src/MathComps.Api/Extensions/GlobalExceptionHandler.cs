@@ -3,6 +3,7 @@ using MathComps.Api.Errors;
 using MathComps.Infrastructure.Services.Admin;
 using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Competitions;
+using MathComps.Infrastructure.Services.ConversationReview;
 using MathComps.Infrastructure.Services.Defense;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Selection;
@@ -82,7 +83,7 @@ public sealed class GlobalExceptionHandler(
         ListNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ListNotFound),
         DefenseSessionNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.DefenseSessionNotFound),
         DefenseContentNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.DefenseContentNotFound),
-        AdminNoteNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.AdminNoteNotFound),
+        ReviewNoteNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.ReviewNoteNotFound),
         HostedCompetitionNotFoundException
             => (StatusCodes.Status404NotFound, ApiErrorCode.HostedCompetitionNotFound),
         HostedProblemNotFoundException => (StatusCodes.Status404NotFound, ApiErrorCode.HostedProblemNotFound),
@@ -132,18 +133,18 @@ public sealed class GlobalExceptionHandler(
         HostedNoteTooLongException => (StatusCodes.Status400BadRequest, ApiErrorCode.HostedNoteTooLong),
 
         // A review note the contract can't take: what it says, or the reply it stands against
-        AdminNoteValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminNoteValue),
-        AdminNoteTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminNoteTarget),
+        ReviewNoteValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.ReviewNoteValue),
+        ReviewNoteTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.ReviewNoteTarget),
 
         // A reviewer's reading moved back to a turn its conversation doesn't hold
-        AdminReviewTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.AdminReviewTarget),
+        ReviewTargetException => (StatusCodes.Status400BadRequest, ApiErrorCode.ReviewTarget),
 
         // A grade change leaving a grade that breaks its rules
         HostedGradeValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.HostedGradeValue),
 
         // Forbidden actions — the caller is known, they're just not allowed
         NotCommentAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotCommentAuthor),
-        NotAdminNoteAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotAdminNoteAuthor),
+        NotReviewNoteAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotReviewNoteAuthor),
         ListAccessDeniedException => (StatusCodes.Status403Forbidden, ApiErrorCode.ListAccessDenied),
         // The student owns the conversation and is refused the rewind or delete all the same
         DefenseGradedSessionImmutableException

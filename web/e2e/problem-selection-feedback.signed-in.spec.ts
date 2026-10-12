@@ -61,7 +61,7 @@ const commentsCopy = messages.comments
 const conversationText = createTranslator({
   locale: 'en',
   messages,
-  namespace: 'admin.conversation',
+  namespace: 'conversationReview',
 })
 
 /**
@@ -298,7 +298,7 @@ test.describe('what reviewers said about a problem', () => {
 
     // The conversation open over the problem, named by who held it
     const dialog = page.getByRole('dialog', {
-      name: conversationText('dialogTitleFor', { student: REVIEWER }),
+      name: conversationText('dialogTitleFor', { author: REVIEWER }),
     })
 
     // Saying what was argued in it
@@ -444,7 +444,7 @@ test.describe('what reviewers said about a problem', () => {
 
     // The dialog, named by who held it
     const dialog = page.getByRole('dialog', {
-      name: conversationText('dialogTitleFor', { student: REVIEWER }),
+      name: conversationText('dialogTitleFor', { author: REVIEWER }),
     })
 
     // With what was said
@@ -481,7 +481,7 @@ test.describe('what reviewers said about a problem', () => {
 
     // Named by the reviewer with no username
     await expect(page.getByRole('dialog')).toHaveAccessibleName(
-      conversationText('dialogTitleFor', { student: messages.profile.defaultUser })
+      conversationText('dialogTitleFor', { author: messages.profile.defaultUser })
     )
 
     // Saying what they argued
@@ -531,7 +531,7 @@ test.describe('what reviewers said about a problem', () => {
     await rows.nth(0).click()
 
     // Said it could not be loaded
-    await expect(page.getByRole('dialog')).toContainText(messages.admin.conversation.detailFailed, {
+    await expect(page.getByRole('dialog')).toContainText(messages.conversationReview.detailFailed, {
       timeout: SETTLE_TIMEOUT_MS,
     })
   })

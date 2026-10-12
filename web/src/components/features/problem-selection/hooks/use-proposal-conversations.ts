@@ -3,8 +3,8 @@
 import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 
-import type { UseStudentConversationsResult } from '@/components/features/admin/conversation/hooks/use-student-conversations'
-import type { UserIdentity } from '@/components/features/admin/model/user-identity'
+import type { AuthorConversationsResult } from '@/components/features/conversation-review/model/conversation-detail'
+import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import { useAddressSync } from '@/hooks/use-address-sync'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 import { useSteppedSelection, type UseSteppedSelectionResult } from '@/hooks/use-stepped-selection'
@@ -24,7 +24,7 @@ type UseProposalConversationsResult = {
   /** Whoever held the open conversation; null while none is open. */
   author: UserIdentity | null
   /** Every conversation the open one's author held about the problem, oldest first, none of them graded. */
-  authorsConversations: UseStudentConversationsResult
+  authorsConversations: AuthorConversationsResult
   /** Names whoever held a conversation. */
   authorName: (conversation: ReviewConversation) => string
 }
@@ -79,8 +79,8 @@ export function useProposalConversations(proposal: Proposal): UseProposalConvers
     opened === null ? null : { id: opened.authorId, username: opened.author, email: null }
 
   // Every conversation the open one's author held about the problem, oldest first, none of them graded
-  const authorsConversations: UseStudentConversationsResult = {
-    studentConversations:
+  const authorsConversations: AuthorConversationsResult = {
+    authorConversations:
       opened === null
         ? null
         : {
