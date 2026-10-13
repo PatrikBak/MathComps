@@ -12,9 +12,9 @@ namespace MathComps.Infrastructure.Tests.Comments;
 
 /// <summary>
 /// Integration tests for a kind of discussion open only to the accounts preparing the competitions, as
-/// <see cref="ICommentService"/> keeps it against a real PostgreSQL database: that those accounts read, write, like
-/// and count it, that nobody else reaches it and a refusal reads like a thread that is not there, and that each
-/// subject keeps its own discussion. A derived class names the kind and seeds two of its subjects.
+/// <see cref="ICommentService"/> keeps it against a real PostgreSQL database: that those accounts read it, write and
+/// react in it and count it, that nobody else reaches it and a refusal reads like a thread that is not there, and
+/// that each subject keeps its own discussion. A derived class names the kind and seeds two of its subjects.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixture)
@@ -62,10 +62,10 @@ public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixt
 
     /// <summary>
     /// A reviewer writes in a discussion and another answers. An edit keeps the answer under the comment, and the
-    /// other reviewer likes the edited comment.
+    /// other reviewer reacts to the edited comment.
     /// </summary>
     [Fact]
-    public Task Reviewers_write_edit_like_and_read_a_discussion() => RunTestAsync(async service =>
+    public Task Reviewers_write_edit_react_and_read_a_discussion() => RunTestAsync(async service =>
     {
         // The discussion of the subject
         var target = Discussion(SubjectId);
@@ -79,8 +79,8 @@ public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixt
         // The first reviewer sharpens the comment
         var edited = await service.UpdateCommentAsync(comment.Id, Reviewer, "Far too easy for the slot.");
 
-        // The second reviewer likes the edited comment
-        await service.ToggleLikeAsync(edited.Id, OtherReviewer);
+        // The second reviewer gives the edited comment a thumbs-up
+        await service.PressReactionAsync(edited.Id, OtherReviewer, CommentReactionKind.ThumbsUp);
 
         // The discussion as the second reviewer reads it
         var thread = await service.GetCommentsAsync(target, OtherReviewer);
@@ -91,9 +91,8 @@ public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixt
         Assert.Equal("Far too easy for the slot.", root.Content);
         Assert.Equal(reply.Id, Assert.Single(root.Replies).Id);
 
-        // The second reviewer's like on the edited comment
-        Assert.Equal(1, root.LikeCount);
-        Assert.True(root.IsLiked);
+        // One thumbs-up on the edited comment
+        Assert.Equal(CommentReactionKind.ThumbsUp, Assert.Single(root.Reactions).Kind);
     });
 
     /// <summary>
@@ -127,7 +126,7 @@ public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixt
         // Every signed-in outsider
         CommentViewer[] signedIn = [_admin, Student];
 
-        // No signed-in outsider writes, edits, deletes or likes in the discussion
+        // No signed-in outsider writes, edits, deletes or reacts in the discussion
         foreach (var outsider in signedIn)
         {
             // A new comment, refused like a missing thread
@@ -141,18 +140,19 @@ public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixt
             // A delete, refused the same way
             await Assert.ThrowsAsync<CommentNotFoundException>(() => service.DeleteCommentAsync(comment.Id, outsider));
 
-            // A like, refused the same way
-            await Assert.ThrowsAsync<CommentNotFoundException>(() => service.ToggleLikeAsync(comment.Id, outsider));
+            // A reaction, refused the same way
+            await Assert.ThrowsAsync<CommentNotFoundException>(
+                () => service.PressReactionAsync(comment.Id, outsider, CommentReactionKind.ThumbsUp));
         }
 
         // The discussion as a reviewer reads it
         var thread = await service.GetCommentsAsync(target, Reviewer);
 
-        // Still the one comment, untouched, with no like on it
+        // Still the one comment, untouched, with no reaction on it
         var root = Assert.Single(thread);
         Assert.Equal(comment.Id, root.Id);
         Assert.False(root.IsDeleted);
-        Assert.Equal(0, root.LikeCount);
+        Assert.Empty(root.Reactions);
     });
 
     /// <summary>

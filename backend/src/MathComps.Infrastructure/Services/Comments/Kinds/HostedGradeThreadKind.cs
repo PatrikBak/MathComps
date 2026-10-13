@@ -29,7 +29,7 @@ public class HostedGradeThreadKind(IUserGrantService grants) : CommentThreadKind
     public override CommentTargetType TargetType => CommentTargetType.HostedGrade;
 
     /// <inheritdoc />
-    public override bool TakesLikes => false;
+    public override bool TakesReactions => false;
 
     /// <inheritdoc />
     public override async Task<bool> IsOpenAsync(

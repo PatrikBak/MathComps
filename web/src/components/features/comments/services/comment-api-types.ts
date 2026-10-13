@@ -36,6 +36,23 @@ type CommentAuthorDto = {
 }
 
 /**
+ * Which reaction a comment gets: 👍 agreeing with it, 👎 disagreeing.
+ */
+export type CommentReactionKind = 'thumbsUp' | 'thumbsDown'
+
+/**
+ * One person's reaction on a comment.
+ */
+export type CommentReactionDto = {
+  /** The presser's id with the sign-in provider. */
+  userId: string
+  /** The presser's username, or null when they have chosen none or their account is deleted. */
+  name: string | null
+  /** Which reaction it is. */
+  kind: CommentReactionKind
+}
+
+/**
  * A single comment with nested replies.
  */
 export type CommentDto = {
@@ -51,10 +68,8 @@ export type CommentDto = {
   editedAt: string | null
   /** Whether the comment was deleted; a deleted one keeps its place in the thread. */
   isDeleted: boolean
-  /** Total number of likes on this comment. */
-  likeCount: number
-  /** Whether the viewing user has liked this comment. False for a signed-out viewer. */
-  isLiked: boolean
+  /** Every reaction on the comment, oldest first. */
+  reactions: CommentReactionDto[]
   /** The comment's replies. */
   replies: CommentDto[]
 }

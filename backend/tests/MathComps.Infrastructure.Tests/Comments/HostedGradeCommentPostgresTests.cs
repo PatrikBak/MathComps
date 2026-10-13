@@ -14,7 +14,7 @@ namespace MathComps.Infrastructure.Tests.Comments;
 /// problem they were graded on, as <see cref="ICommentService"/> keeps it against a real PostgreSQL database: that
 /// admins read and write it, that its student joins once their group has closed, while the grade is final, that
 /// nobody else reaches it and a refusal reads like a thread that is not there, that each conversation keeps to
-/// itself and no reply crosses into another thread, and that it takes no likes and is never counted in bulk.
+/// itself and no reply crosses into another thread, and that it takes no reactions and is never counted in bulk.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
@@ -372,17 +372,18 @@ public class HostedGradeCommentPostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A comment in a grade conversation takes no likes, from an admin either.
+    /// A comment in a grade conversation takes no reactions, from an admin either.
     /// </summary>
     [Fact]
-    public Task A_grade_conversation_takes_no_likes() => RunTestAsync(async service =>
+    public Task A_grade_conversation_takes_no_reactions() => RunTestAsync(async service =>
     {
         // A grader's comment in the conversation
         var comment = await service.CreateCommentAsync(
             GradeConversation(_problemId, _student), _grader, "Two points.");
 
-        // Another grader likes it
-        await Assert.ThrowsAsync<CommentNotFoundException>(() => service.ToggleLikeAsync(comment.Id, _otherGrader));
+        // Another grader gives it a thumbs-up
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => service.PressReactionAsync(comment.Id, _otherGrader, CommentReactionKind.ThumbsUp));
     });
 
     /// <inheritdoc/>

@@ -16,7 +16,7 @@ public abstract class CommentThreadKind<TAnchor> : ICommentThreadKind where TAnc
     public abstract CommentTargetType TargetType { get; }
 
     /// <inheritdoc />
-    public abstract bool TakesLikes { get; }
+    public abstract bool TakesReactions { get; }
 
     /// <inheritdoc />
     public abstract Task<bool> IsOpenAsync(MathCompsDbContext dbContext, CommentTarget target, CommentViewer? viewer);

@@ -21,8 +21,7 @@ type UseFetchCommentsResult = {
 /**
  * Reads one target's comment thread.
  *
- * Who is asking rides in the key, because a signed-in reader's own copy says which comments they have
- * liked.
+ * Who is asking rides in the key, as {@link commentQueryKeys.target} explains.
  *
  * @param target - What the thread hangs off.
  *

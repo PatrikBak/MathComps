@@ -21,12 +21,12 @@ import { isAwaitingAnswer } from '@/lib/query-ui-state'
 import { useCreateComment } from '../hooks/use-create-comment'
 import { useDeleteComment } from '../hooks/use-delete-comment'
 import { useFetchComments } from '../hooks/use-fetch-comments'
-import { usePendingCommentLike } from '../hooks/use-pending-comment-like'
+import { usePendingCommentReaction } from '../hooks/use-pending-comment-reaction'
 import { usePendingCommentTarget } from '../hooks/use-pending-comment-target'
-import { useToggleCommentLike } from '../hooks/use-toggle-comment-like'
+import { usePressCommentReaction } from '../hooks/use-press-comment-reaction'
 import { useUpdateComment } from '../hooks/use-update-comment'
 import { commentDraftStorageKey } from '../model/comment-drafts'
-import type { CommentTarget } from '../services/comment-api-types'
+import type { CommentReactionKind, CommentTarget } from '../services/comment-api-types'
 import { convertToCommentData, countAllComments, shouldHideComment } from '../utils/comment-utils'
 import { type CommentData, CommentItem } from './CommentItem'
 
@@ -45,8 +45,8 @@ type CommentSectionProps = {
   target: CommentTarget
   /** How the section sits on the page. */
   variant?: CommentSectionVariant
-  /** Whether comments show their likes and can be liked. */
-  showLikes?: boolean
+  /** Whether comments show their reactions and can be reacted to. */
+  showReactions?: boolean
   /** What the box for a new comment says before anything is typed in it. */
   newCommentPlaceholder?: string
   /** Whether a thread with no comments says so, and offers a visitor the sign-in button. */
@@ -61,7 +61,7 @@ type CommentSectionProps = {
 export function CommentSection({
   target,
   variant = 'card',
-  showLikes = true,
+  showReactions = true,
   newCommentPlaceholder,
   showEmptyText = true,
   autoFocus = false,
@@ -85,7 +85,10 @@ export function CommentSection({
   const tComments = useTranslations('comments')
 
   // The thread as CommentData, replies nested
-  const comments = React.useMemo(() => commentDtos.map(convertToCommentData), [commentDtos])
+  const comments = React.useMemo(
+    () => commentDtos.map((dto) => convertToCommentData(dto, userId ?? null)),
+    [commentDtos, userId]
+  )
 
   // Whether any comment is there to show
   const hasVisibleComments = comments.some((comment) => !shouldHideComment(comment))
@@ -99,13 +102,18 @@ export function CommentSection({
   // A second create, so the reply editor spins on its own send
   const { mutateAsync: createReply, isPending: isCreatingReplyComment } = useCreateComment()
 
-  // The edit, the delete and the like behind the reader's actions on a comment
+  // The edit behind the reader's edits
   const { mutateAsync: updateComment } = useUpdateComment()
-  const { mutate: deleteComment } = useDeleteComment()
-  const toggleLike = useToggleCommentLike().mutate
 
-  // Handle pending like restoration (if user liked a comment while not logged in)
-  usePendingCommentLike(comments, target)
+  // The delete behind the reader's deletions
+  const { mutate: deleteComment } = useDeleteComment()
+
+  // The press behind the reader's reactions on the thread
+  const pressReaction = usePressCommentReaction(target)
+
+  // Handle pending reaction restoration (if user reacted to a comment while not logged in), once the reader's
+  // name is known to sign it with
+  usePendingCommentReaction({ comments: isIdentityLoaded ? comments : undefined, target })
 
   // The store for the thread to come back to after signing in
   const { savePendingTarget } = usePendingCommentTarget()
@@ -193,6 +201,7 @@ export function CommentSection({
   // A function which saves a comment's new text
   const handleEditComment = useCallback(
     async (commentId: string, newContent: string) => {
+      // Save the comment's new text
       await updateComment({
         commentId,
         target,
@@ -205,6 +214,7 @@ export function CommentSection({
   // A function which deletes a comment
   const handleDeleteComment = useCallback(
     (commentId: string) => {
+      // Delete the comment
       deleteComment({
         commentId,
         target,
@@ -213,16 +223,13 @@ export function CommentSection({
     [deleteComment, target]
   )
 
-  // A function which likes or unlikes a comment
-  const handleLikeComment = useCallback(
-    (commentId: string, isCurrentlyLiked: boolean) => {
-      toggleLike({
-        commentId,
-        target,
-        isCurrentlyLiked,
-      })
+  // A function which presses a reaction on a comment
+  const handleReactToComment = useCallback(
+    (commentId: string, kind: CommentReactionKind) => {
+      // Press the reaction on the comment
+      pressReaction({ commentId, kind })
     },
-    [toggleLike, target]
+    [pressReaction]
   )
 
   // A function which collapses or expands a comment's replies
@@ -256,10 +263,10 @@ export function CommentSection({
           content={comment.content}
           timestamp={comment.timestamp}
           editedAt={comment.editedAt}
-          likes={comment.likes}
-          isLiked={comment.isLiked}
+          reactions={comment.reactions}
+          viewerReaction={comment.viewerReaction}
           isDeleted={comment.isDeleted}
-          showLikes={showLikes}
+          showReactions={showReactions}
           isCollapsed={collapsedIds.has(comment.id)}
           replyCount={replyCount}
           onToggleCollapse={() => handleToggleCollapse(comment.id)}
@@ -270,7 +277,10 @@ export function CommentSection({
               ? undefined
               : () => handleOpenReply(comment.id)
           }
-          onLike={isOwnComment ? undefined : () => handleLikeComment(comment.id, comment.isLiked)}
+          onReact={
+            // Reacting is offered on every comment but the reader's own
+            isOwnComment ? undefined : (kind) => handleReactToComment(comment.id, kind)
+          }
           onEdit={
             // Allow editing only for own comments that are not deleted
             isOwnComment && !comment.isDeleted
@@ -314,7 +324,7 @@ export function CommentSection({
       userId,
       username,
       variant,
-      showLikes,
+      showReactions,
       collapsedIds,
       replyCommentId,
       replyInputText,
@@ -324,7 +334,7 @@ export function CommentSection({
       handleOpenReply,
       handleEditComment,
       handleDeleteComment,
-      handleLikeComment,
+      handleReactToComment,
       handleSubmitReply,
       handleCancelReply,
       tComments,

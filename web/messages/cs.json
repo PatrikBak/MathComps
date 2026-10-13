@@ -115,7 +115,7 @@
     }
   },
   "apiErrors": {
-    "CannotLikeOwnComment": "Nemůžeš dát to se mi líbí vlastnímu komentáři.",
+    "CannotReactToOwnComment": "Na vlastní komentář nemůžeš reagovat.",
     "CommentNotFound": "Tento komentář už neexistuje.",
     "CommentProfileIncomplete": "Před komentováním si v profilu vyber přezdívku.",
     "CommentTargetNotFound": "Obsah, ke kterému komentář patří, už neexistuje.",
@@ -242,7 +242,7 @@
       "addComment": "přidání komentářů",
       "deleteComment": "odstraňování komentářů",
       "editComment": "upravování komentářů",
-      "likeComment": "lajkování komentářů"
+      "reactToComment": "reagování na komentáře"
     },
     "avatarAlt": "Avatar uživatele {author}",
     "cancelDelete": "Zrušit",
@@ -258,17 +258,17 @@
       "addFailed": "Nepodařilo se přidat komentář",
       "deleteFailed": "Nepodařilo se odstranit komentář",
       "editFailed": "Nepodařilo se upravit komentář",
-      "likeFailed": "Nepodařilo se změnit stav lajku"
+      "reactionFailed": "Nepodařilo se změnit reakci"
     },
     "hideReplies": "Skrýt odpovědi",
     "lastEdited": "Naposledy upraveno {date}",
-    "like": "To se mi líbí",
     "loadError": "Nepodařilo se načíst komentáře. Zkus to později.",
     "reply": "Odpovědět",
     "replyPlaceholder": "Napiš odpověď...",
     "show": "Zobrazit",
     "showReplies": "Zobrazit {count}",
-    "unlike": "Zrušit to se mi líbí",
+    "thumbsDown": "Palec dolů",
+    "thumbsUp": "Palec nahoru",
     "writePlaceholder": "Napiš komentář..."
   },
   "common": {
@@ -1037,7 +1037,8 @@
     "conversations": "{count, plural, =1 {# konverzace} =2 {# konverzace} =3 {# konverzace} =4 {# konverzace} other {# konverzací}}",
     "problems": "{count, plural, =1 {# úloha} =2 {# úlohy} =3 {# úlohy} =4 {# úlohy} other {# úloh}}",
     "replies": "{count, plural, =1 {# odpověď} =2 {# odpovědi} =3 {# odpovědi} =4 {# odpovědi} other {# odpovědí}}",
-    "students": "{count, plural, =1 {# student} =2 {# studenti} =3 {# studenti} =4 {# studenti} other {# studentů}}"
+    "students": "{count, plural, =1 {# student} =2 {# studenti} =3 {# studenti} =4 {# studenti} other {# studentů}}",
+    "unnamedUsers": "{count, plural, =1 {# uživatel bez jména} =2 {# uživatelé bez jména} =3 {# uživatelé bez jména} =4 {# uživatelé bez jména} other {# uživatelů bez jména}}"
   },
   "privacy": {
     "lastUpdated": "Poslední aktualizace: 2. září 2026",

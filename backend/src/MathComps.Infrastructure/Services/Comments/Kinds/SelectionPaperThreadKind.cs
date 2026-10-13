@@ -24,7 +24,7 @@ public class SelectionPaperThreadKind(IUserGrantService grants)
     public override CommentTargetType TargetType => CommentTargetType.SelectionPaper;
 
     /// <inheritdoc />
-    public override bool TakesLikes => true;
+    public override bool TakesReactions => true;
 
     /// <inheritdoc />
     public override async Task<CommentThreadSql> SelectAsync(MathCompsDbContext dbContext, CommentTarget target) =>

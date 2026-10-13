@@ -43,7 +43,7 @@ public interface ICommentService
 
     /// <summary>
     /// Edits a comment by writing a new version of it. The new version stays in the thread the comment was
-    /// written in and keeps its replies, its likes, its posting time and any mail still owed about it, and queues
+    /// written in and keeps its replies, its reactions, its posting time and any mail still owed about it, and queues
     /// none of its own. A deleted comment is refused as though it did not exist.
     /// </summary>
     /// <param name="commentId">The ID of the comment to update.</param>
@@ -60,12 +60,15 @@ public interface ICommentService
     Task DeleteCommentAsync(Guid commentId, CommentViewer viewer);
 
     /// <summary>
-    /// Toggles a like on a comment. Creates a like if it doesn't exist, removes it if it does. A deleted comment,
-    /// and any comment in a grade conversation, takes no likes and is refused as though it did not exist.
+    /// Presses one of the reactions on a comment, where the viewer holds at most one. Pressing the one they hold takes
+    /// it back, pressing another swaps to it, and with none held it is given. A deleted comment, and any comment in a
+    /// grade conversation, takes no reactions and is refused as though it did not exist. A press on the viewer's own
+    /// comment is refused with <see cref="CannotReactToOwnCommentException"/>.
     /// </summary>
-    /// <param name="commentId">The ID of the comment to like/unlike.</param>
-    /// <param name="viewer">The user toggling the like.</param>
-    Task ToggleLikeAsync(Guid commentId, CommentViewer viewer);
+    /// <param name="commentId">The ID of the comment reacted to.</param>
+    /// <param name="viewer">The user pressing the reaction.</param>
+    /// <param name="reactionKind">The reaction pressed.</param>
+    Task PressReactionAsync(Guid commentId, CommentViewer viewer, CommentReactionKind reactionKind);
 
     /// <summary>
     /// Counts the active comments on each of several targets of one type. Only handouts, news articles, proposals
@@ -99,9 +102,9 @@ public sealed class CommentTargetNotFoundException(CommentTargetType targetType,
 public sealed class NotCommentAuthorException() : Exception("Only the author can modify this comment");
 
 /// <summary>
-/// Thrown when the caller tries to like their own comment.
+/// Thrown when the caller tries to react to their own comment.
 /// </summary>
-public sealed class CannotLikeOwnCommentException() : Exception("You cannot like your own comment");
+public sealed class CannotReactToOwnCommentException() : Exception("You cannot react to your own comment");
 
 /// <summary>
 /// Thrown when a comment is written from an account with no username to sign it.

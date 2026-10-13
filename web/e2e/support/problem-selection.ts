@@ -20,10 +20,11 @@ import { DAY_MS } from '@/components/shared/utils/time-units'
 import messages from '../../messages/en.json'
 import { gateReads } from './answer-gate'
 import { answerJson, BACKEND_ORIGIN, refuse } from './backend-routes'
+import { threadKey } from './comments'
 import { SELECTION_PATH } from './competitions'
 import { installConversationBackend } from './conversation-backend'
 import type { HostedBackend } from './hosted-backend'
-import { stubSelectionComments, threadKey } from './selection-comments'
+import { stubSelectionComments } from './selection-comments'
 import { FINALIZATION_PATH, finalizationWrite } from './selection-finalization'
 import { PROPOSAL_WRITE_PATH, proposalWrite } from './selection-proposal-writes'
 import { SLOT_WRITE_PATH, slotWrite } from './selection-slot-writes'
@@ -533,8 +534,7 @@ export const OPENED_COMMENT: CommentDto = {
   createdAt: '2026-09-29T08:00:00.000Z',
   editedAt: null,
   isDeleted: false,
-  likeCount: 0,
-  isLiked: false,
+  reactions: [],
   replies: [],
 }
 
@@ -1118,24 +1118,6 @@ export function selectedTab(page: Page, tabsLabel: string) {
 export function addressedParam(page: Page, param: string): Promise<string | null> {
   // Read off the page's own address
   return page.evaluate((name) => new URLSearchParams(window.location.search).get(name), param)
-}
-
-/**
- * Writes a comment into a discussion's box and sends it from the keyboard, waiting for the box to empty, which it
- * does once the comment has been taken.
- *
- * @param box - The box a new comment is written in.
- * @param text - The comment.
- */
-export async function sendComment(box: Locator, text: string): Promise<void> {
-  // The comment, written
-  await box.fill(text)
-
-  // Sent from the keyboard
-  await box.press('Meta+Enter')
-
-  // Taken
-  await expect(box).toHaveValue('')
 }
 
 /**

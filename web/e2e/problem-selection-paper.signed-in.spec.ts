@@ -6,6 +6,7 @@ import {
 } from '@/components/features/problem-selection/model/selection-routes'
 import type { Paper } from '@/components/features/problem-selection/model/selection-types'
 
+import { sendComment, stubNamedReader } from './support/comments'
 import { SELECTION_PATH } from './support/competitions'
 import {
   addressedParam,
@@ -19,12 +20,10 @@ import {
   selectedTab,
   selectionCopy,
   selectionText,
-  sendComment,
   SETTLE_TIMEOUT_MS,
   stubSelection,
   tabRowOn,
 } from './support/problem-selection'
-import { stubNamedReader } from './support/selection-comments'
 import { expect, test } from './support/test'
 
 /** The elementary paper of the board on screen: {@link FIRST} in E1, then two empty slots. */

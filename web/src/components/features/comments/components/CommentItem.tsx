@@ -1,6 +1,15 @@
 'use client'
 
-import { ChevronDown, Heart, Minus, Pencil, Reply, Trash2 } from 'lucide-react'
+import {
+  ChevronDown,
+  type LucideIcon,
+  Minus,
+  Pencil,
+  Reply,
+  ThumbsDown,
+  ThumbsUp,
+  Trash2,
+} from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import React, { useCallback, useState } from 'react'
 
@@ -12,8 +21,16 @@ import { RichMathEditorRenderer } from '@/components/shared/components/rich-math
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
 
+import type { CommentReactionDto, CommentReactionKind } from '../services/comment-api-types'
+
 /** Size of comment avatars in pixels */
 const AVATAR_SIZE = 28
+
+/** Each reaction's icon. */
+const REACTION_ICONS: Record<CommentReactionKind, LucideIcon> = {
+  thumbsUp: ThumbsUp,
+  thumbsDown: ThumbsDown,
+}
 
 /**
  * Data representing a single comment.
@@ -33,10 +50,10 @@ export type CommentData = {
   timestamp: Date
   /** The date and time when the comment was last edited, or null when it never was. */
   editedAt: Date | null
-  /** The total number of likes this comment has received. */
-  likes: number
-  /** Whether the currently authenticated user has liked this comment. */
-  isLiked: boolean
+  /** Every reaction on the comment, oldest first. */
+  reactions: CommentReactionDto[]
+  /** The reaction the reader holds on the comment, or null when they hold none. */
+  viewerReaction: CommentReactionKind | null
   /** Whether the comment has been deleted. */
   isDeleted: boolean
   /** The comment's replies. */
@@ -47,8 +64,8 @@ export type CommentData = {
  * Props for the {@link CommentItem} presentation component.
  */
 type CommentItemProps = Omit<CommentData, 'id' | 'authorId' | 'replies'> & {
-  /** Whether the comment shows its likes. */
-  showLikes: boolean
+  /** Whether the comment shows its reactions. */
+  showReactions: boolean
   /** Whether the comment's replies are collapsed. */
   isCollapsed: boolean
   /** Number of replies beneath the comment at any depth, deleted ones not counted. */
@@ -57,8 +74,8 @@ type CommentItemProps = Omit<CommentData, 'id' | 'authorId' | 'replies'> & {
   onToggleCollapse: () => void
   /** A function which opens a reply to the comment, absent when replying isn't offered. */
   onReply?: () => void
-  /** A function which toggles the viewer's like, absent when the comment can't be liked. */
-  onLike?: () => void
+  /** A function which presses one of the reactions, absent when the comment can't be reacted to. */
+  onReact?: (kind: CommentReactionKind) => void
   /** A function which saves the comment's new content, absent when it can't be edited. */
   onEdit?: (newContent: string) => Promise<void>
   /** A function which deletes the comment, absent when it can't be deleted. */
@@ -78,15 +95,15 @@ export function CommentItem({
   content,
   timestamp,
   editedAt,
-  likes,
-  isLiked,
+  reactions,
+  viewerReaction,
   isDeleted,
-  showLikes,
+  showReactions,
   isCollapsed,
   replyCount,
   onToggleCollapse,
   onReply,
-  onLike,
+  onReact,
   onEdit,
   onDelete,
   replyInputNode,
@@ -267,33 +284,23 @@ export function CommentItem({
             {/* Actions, wrapping as one unit */}
             {!isEditing && !isDeleted && (
               <div className="flex items-center gap-3">
-                {/* Likes */}
-                {showLikes &&
-                  (onLike ? (
-                    // A button where the comment can be liked
-                    <button
-                      onClick={onLike}
-                      className={cn(
-                        'flex items-center gap-1 text-xs transition-colors',
-                        isLiked ? 'text-error' : 'text-muted hover:text-foreground'
-                      )}
-                      title={tComments('like')}
-                    >
-                      <Heart size={14} className={cn(isLiked && 'fill-current')} />
-                      <span>{likes}</span>
-                    </button>
-                  ) : (
-                    // A plain count otherwise
-                    <div
-                      className={cn(
-                        'flex items-center gap-1 text-xs cursor-default',
-                        isLiked ? 'text-error' : 'text-muted'
-                      )}
-                    >
-                      <Heart size={14} className={cn(isLiked && 'fill-current')} />
-                      <span>{likes}</span>
-                    </div>
-                  ))}
+                {/* Reactions */}
+                {showReactions && (
+                  <>
+                    <ReactionControl
+                      kind="thumbsUp"
+                      reactions={reactions}
+                      isPressed={viewerReaction === 'thumbsUp'}
+                      onPress={onReact}
+                    />
+                    <ReactionControl
+                      kind="thumbsDown"
+                      reactions={reactions}
+                      isPressed={viewerReaction === 'thumbsDown'}
+                      onPress={onReact}
+                    />
+                  </>
+                )}
 
                 {/* Reply button */}
                 {onReply && (
@@ -401,6 +408,115 @@ export function CommentItem({
           cancelText={tComments('cancelDelete')}
           variant="danger"
         />
+      )}
+    </div>
+  )
+}
+
+/**
+ * Props for the {@link ReactionControl} component.
+ */
+type ReactionControlProps = {
+  /** Which reaction the control stands for. */
+  kind: CommentReactionKind
+  /** Every reaction on the comment, oldest first. */
+  reactions: CommentReactionDto[]
+  /** Whether the reader holds this reaction. */
+  isPressed: boolean
+  /** A function which presses one of the reactions, absent when the comment can't be reacted to. */
+  onPress: ((kind: CommentReactionKind) => void) | undefined
+}
+
+/**
+ * The control for one kind of reaction on a comment: its icon presses it, and its count lists who gave it, on hover or
+ * on a tap. The icon is inert where the comment can't be reacted to.
+ */
+function ReactionControl({ kind, reactions, isPressed, onPress }: ReactionControlProps) {
+  // Comment copy
+  const tComments = useTranslations('comments')
+
+  // Plural copy
+  const tPlurals = useTranslations('plurals')
+
+  // The reactions of this kind, oldest first
+  const givers = reactions.filter((reaction) => reaction.kind === kind)
+
+  // The names of who gave this reaction, oldest first, leaving out anybody with no name to show
+  const names = givers.flatMap((reaction) => (reaction.name === null ? [] : [reaction.name]))
+
+  // How many gave this reaction with no name to show
+  const unnamedCount = givers.length - names.length
+
+  // The reaction's icon
+  const Icon = REACTION_ICONS[kind]
+
+  // The reaction's name
+  const label = tComments(kind)
+
+  // The icon, filled while the reader holds the reaction
+  const icon = <Icon size={14} className={cn(isPressed && 'fill-current')} />
+
+  // The count, named after its reaction for a screen reader
+  const count = (
+    <>
+      <span className="sr-only">{label} </span>
+      {givers.length}
+    </>
+  )
+
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-2 text-xs tabular-nums',
+        isPressed ? 'text-focus' : 'text-muted'
+      )}
+    >
+      {/* Icon */}
+      {onPress ? (
+        // A button pressing the reaction, where the comment can be reacted to, its tap area padded out to the
+        // count's
+        <button
+          type="button"
+          aria-label={label}
+          aria-pressed={isPressed}
+          title={label}
+          onClick={() => onPress(kind)}
+          className={cn('p-1 -m-1 transition-colors', !isPressed && 'hover:text-foreground')}
+        >
+          {icon}
+        </button>
+      ) : (
+        // The bare icon otherwise
+        icon
+      )}
+
+      {/* Count */}
+      {givers.length > 0 ? (
+        // A button listing who gave the reaction, one per line, the nameless ones counted at the end, its tap area
+        // padded out to the icon's
+        <Tooltip
+          placement="top"
+          content={
+            <ul>
+              {names.map((name) => (
+                <li key={name}>{name}</li>
+              ))}
+              {unnamedCount > 0 && (
+                <li className="text-muted">{tPlurals('unnamedUsers', { count: unnamedCount })}</li>
+              )}
+            </ul>
+          }
+        >
+          <button
+            type="button"
+            className={cn('p-1 -m-1 transition-colors', !isPressed && 'hover:text-foreground')}
+          >
+            {count}
+          </button>
+        </Tooltip>
+      ) : (
+        // A plain zero when nobody has given this reaction
+        <span>{count}</span>
       )}
     </div>
   )

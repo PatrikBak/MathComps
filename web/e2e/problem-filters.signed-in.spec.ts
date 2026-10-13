@@ -1,11 +1,6 @@
-import {
-  errorsCopy,
-  filtersCopy,
-  filtersInUrl,
-  KEPT_FILTER,
-  loginPromptFor,
-} from './support/archive-filters'
+import { errorsCopy, filtersCopy, filtersInUrl, KEPT_FILTER } from './support/archive-filters'
 import { PROBLEMS_PATH, recordNotices, stubProblemSearch } from './support/backend-routes'
+import { loginPromptFor } from './support/session'
 import { expect, test } from './support/test'
 
 /**

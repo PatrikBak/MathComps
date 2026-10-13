@@ -22,9 +22,9 @@ public interface ICommentThreadKind
     CommentTargetType TargetType { get; }
 
     /// <summary>
-    /// Whether a comment in one of this kind's threads can be liked.
+    /// Whether a comment in one of this kind's threads takes reactions.
     /// </summary>
-    bool TakesLikes { get; }
+    bool TakesReactions { get; }
 
     /// <summary>
     /// Whether a viewer may reach the thread a target names, decided before anything is written for it.

@@ -71,6 +71,7 @@ public static class ServiceCollectionExtensions
                     .MapEnum<DocumentType>("document_type")
                     .MapEnum<Language>("language")
                     .MapEnum<CommentStatus>("comment_status")
+                    .MapEnum<CommentReactionKind>("comment_reaction_kind")
                     .MapEnum<TranscriptRole>("transcript_role")
                     .MapEnum<DefenseReportCategory>("defense_report_category")
                     .MapEnum<DefenseOutcome>("defense_outcome")

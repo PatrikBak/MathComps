@@ -22,7 +22,7 @@ public class NewsThreadKind : PublicCommentThreadKind<NewsAnchor>
     public override CommentTargetType TargetType => CommentTargetType.News;
 
     /// <inheritdoc />
-    public override bool TakesLikes => true;
+    public override bool TakesReactions => true;
 
     /// <inheritdoc />
     public override Task<CommentThreadSql> SelectAsync(MathCompsDbContext dbContext, CommentTarget target) =>

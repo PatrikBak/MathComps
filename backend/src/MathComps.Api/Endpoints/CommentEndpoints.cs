@@ -138,18 +138,23 @@ public static class CommentEndpoints
         .RequireAuthorization()
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
 
-        // Toggle like on a comment
-        app.MapPost($"{CommentsPath}/{{id:guid}}/like", async (
+        // Press a reaction on a comment
+        app.MapPost($"{CommentsPath}/{{id:guid}}/reaction", async (
             Guid id,
+            PressCommentReactionRequest request,
             HttpContext context,
             IUserManager userManager,
             ICommentService commentService) =>
         {
+            // A press naming no reaction, or a number no reaction has, names nothing to press
+            if (request.Kind is not { } reactionKind || !Enum.IsDefined(reactionKind))
+                throw new BadHttpRequestException("A press must name one of the reactions.");
+
             // Resolve the caller, faulting when the request has no user behind it
             var viewer = await RequireViewerAsync(userManager, context);
 
-            // Perform toggle
-            await commentService.ToggleLikeAsync(id, viewer);
+            // Press the reaction
+            await commentService.PressReactionAsync(id, viewer, reactionKind);
 
             // No reason to return anything
             return Results.NoContent();

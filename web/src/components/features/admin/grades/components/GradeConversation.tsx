@@ -16,7 +16,7 @@ type GradeConversationProps = {
 
 /**
  * The conversation between the graders and one student about one problem they were graded on: a comment thread
- * any admin writes in, which opens to the student once the competition has closed, while the grade is final. Likes
+ * any admin writes in, which opens to the student once the competition has closed, while the grade is final. Reactions
  * mean nothing between them, so there are none.
  */
 export function GradeConversation({ problemId, userId }: GradeConversationProps) {
@@ -31,7 +31,7 @@ export function GradeConversation({ problemId, userId }: GradeConversationProps)
       {/* The thread, named by the problem and the student like the grade itself */}
       <CommentSection
         variant="inline"
-        showLikes={false}
+        showReactions={false}
         newCommentPlaceholder={t('conversationPlaceholder')}
         showEmptyText={false}
         target={{ targetType: 'HostedGrade', targetId: `${problemId}:${userId}` }}

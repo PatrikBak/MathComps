@@ -24,7 +24,7 @@ public class ProposalThreadKind(IUserGrantService grants) : PreparerCommentThrea
     public override CommentTargetType TargetType => CommentTargetType.Proposal;
 
     /// <inheritdoc />
-    public override bool TakesLikes => true;
+    public override bool TakesReactions => true;
 
     /// <inheritdoc />
     public override async Task<CommentThreadSql> SelectAsync(MathCompsDbContext dbContext, CommentTarget target) =>

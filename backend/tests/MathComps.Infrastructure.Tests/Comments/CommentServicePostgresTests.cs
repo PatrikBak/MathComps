@@ -12,7 +12,7 @@ namespace MathComps.Infrastructure.Tests.Comments;
 
 /// <summary>
 /// Integration tests for the public comment threads as <see cref="ICommentService"/> keeps them against a real
-/// PostgreSQL database: who a comment is signed by, likes, deletion, edits that write a new version and keep its
+/// PostgreSQL database: who a comment is signed by, reactions, deletion, edits that write a new version and keep its
 /// replies, nesting, bulk counts, and a hosted problem, which has no thread.
 /// </summary>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
@@ -25,7 +25,7 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     private static readonly Guid _user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
     /// <summary>
-    /// The id of a second user, who likes, replies and tries the author-only actions.
+    /// The id of a second user, who reacts, replies and tries the author-only actions.
     /// </summary>
     private static readonly Guid _user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
@@ -130,13 +130,16 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A signed-out reader reads a thread like anyone else, with nothing marked as liked by them.
+    /// A signed-out reader reads a thread like anyone else, the reactions on it and who gave them included.
     /// </summary>
     [Fact]
     public Task GetCommentsAsync_AllowsASignedOutReader() => RunTestAsync(async commentService =>
     {
         // The first user comments on the handout
-        await commentService.CreateCommentAsync(_handoutThread, _user1, "Public comment");
+        var created = await commentService.CreateCommentAsync(_handoutThread, _user1, "Public comment");
+
+        // The second user gives it a thumbs-down
+        await commentService.PressReactionAsync(created.Id, _user2, CommentReactionKind.ThumbsDown);
 
         // The thread as a signed-out reader gets it
         var thread = await commentService.GetCommentsAsync(_handoutThread, null);
@@ -145,8 +148,10 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         var comment = Assert.Single(thread);
         Assert.Equal("Public comment", comment.Content);
 
-        // Not marked liked, with no reader to have liked it
-        Assert.False(comment.IsLiked);
+        // With the second user's thumbs-down on it, under their username
+        Assert.Equal(
+            new CommentReactionDto(User2ExternalId, "User 2", CommentReactionKind.ThumbsDown),
+            Assert.Single(comment.Reactions));
     });
 
     /// <summary>
@@ -207,6 +212,31 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// A deleted account stops being named on its reactions too. The reactions are read by a projection of their
+    /// own, apart from the one naming the thread's authors, so withholding the name is asserted for them separately.
+    /// </summary>
+    [Fact]
+    public Task GetCommentsAsync_DoesNotNameADeletedAccountOnItsReactions() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment on the handout
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Reacted to before leaving.");
+
+        // The second user gives it a thumbs-up
+        await commentService.PressReactionAsync(comment.Id, _user2, CommentReactionKind.ThumbsUp);
+
+        // The second user deletes their account, the username left standing
+        await QueryAsync(context => context.Users
+            .Where(user => user.Id == _user2Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(user => user.IsDeleted, true)));
+
+        // The thread as a signed-out reader gets it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, null);
+
+        // The thumbs-up stands, given by nobody in particular
+        Assert.Null(Assert.Single(thread[0].Reactions).Name);
+    });
+
+    /// <summary>
     /// An author with no username is refused, a reply as much as a top-level comment, since a comment nobody can
     /// be named for reads like one from a deleted account. The refusal comes before anything is written, so not
     /// even the row standing for an uncommented handout is minted.
@@ -264,11 +294,10 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         Assert.Equal("User 1", created.Author.Name);
         Assert.Equal(User1AvatarUrl, created.Author.AvatarUrl);
 
-        // Nothing on it yet: no replies, no deletion, no likes
+        // Nothing on it yet: no replies, no deletion, no reactions
         Assert.Empty(created.Replies);
         Assert.False(created.IsDeleted);
-        Assert.Equal(0, created.LikeCount);
-        Assert.False(created.IsLiked);
+        Assert.Empty(created.Reactions);
 
         // The handout's thread as the author reads it
         var thread = await commentService.GetCommentsAsync(_handoutThread, _user1);
@@ -278,59 +307,151 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A like toggles: the first toggle adds the reader's like and the second takes it back, and both the count
-    /// and the reader's own mark follow.
+    /// A first press gives the reader's thumbs-up, signed with who they are, and pressing the same one again takes
+    /// it back.
     /// </summary>
     [Fact]
-    public Task ToggleLikeAsync_AddsAndRemovesLike() => RunTestAsync(async commentService =>
+    public Task PressReactionAsync_AddsAndTakesBackAReaction() => RunTestAsync(async commentService =>
     {
         // The first user's comment on the handout
         var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Test comment");
 
-        // The second user likes the comment
-        await commentService.ToggleLikeAsync(comment.Id, _user2);
+        // The second user gives the comment a thumbs-up
+        await commentService.PressReactionAsync(comment.Id, _user2, CommentReactionKind.ThumbsUp);
 
         // The thread as the second user reads it
-        var liked = await commentService.GetCommentsAsync(_handoutThread, _user2);
+        var pressed = await commentService.GetCommentsAsync(_handoutThread, _user2);
 
-        // One like, marked as the second user's
-        Assert.Equal(1, liked[0].LikeCount);
-        Assert.True(liked[0].IsLiked);
+        // One thumbs-up, the second user's
+        Assert.Equal(
+            new CommentReactionDto(User2ExternalId, "User 2", CommentReactionKind.ThumbsUp),
+            Assert.Single(pressed[0].Reactions));
 
-        // The second user toggles the like again
-        await commentService.ToggleLikeAsync(comment.Id, _user2);
+        // The second user presses the thumbs-up again
+        await commentService.PressReactionAsync(comment.Id, _user2, CommentReactionKind.ThumbsUp);
 
         // The thread as the second user reads it now
-        var unliked = await commentService.GetCommentsAsync(_handoutThread, _user2);
+        var takenBack = await commentService.GetCommentsAsync(_handoutThread, _user2);
 
-        // No likes, none marked as the second user's
-        Assert.Equal(0, unliked[0].LikeCount);
-        Assert.False(unliked[0].IsLiked);
+        // No reactions left
+        Assert.Empty(takenBack[0].Reactions);
     });
 
     /// <summary>
-    /// An author's like on their own comment is refused.
+    /// A reader holds one reaction at most, so pressing the other one swaps to it.
     /// </summary>
     [Fact]
-    public Task ToggleLikeAsync_ThrowsWhenLikingOwnComment() => RunTestAsync(async commentService =>
+    public Task PressReactionAsync_SwapsToTheOtherKind() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment on the handout
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Test comment");
+
+        // The second user gives the comment a thumbs-up
+        await commentService.PressReactionAsync(comment.Id, _user2, CommentReactionKind.ThumbsUp);
+
+        // The second user changes their mind and presses the thumbs-down
+        await commentService.PressReactionAsync(comment.Id, _user2, CommentReactionKind.ThumbsDown);
+
+        // The thread as the second user reads it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user2);
+
+        // The one reaction, now a thumbs-down
+        Assert.Equal(CommentReactionKind.ThumbsDown, Assert.Single(thread[0].Reactions).Kind);
+    });
+
+    /// <summary>
+    /// A press touches only the presser's own reaction, so a reader taking theirs back leaves another reader's
+    /// reaction of the same kind standing.
+    /// </summary>
+    [Fact]
+    public Task PressReactionAsync_LeavesOtherReadersReactionsAlone() => RunTestAsync(async commentService =>
+    {
+        // A third user, who reacts beside the second
+        var user3 = new CommentViewer(Guid.CreateVersion7(), IsAdmin: false);
+
+        // The third user's account
+        await QueryAsync(async context =>
+        {
+            // The third user's row
+            context.Users.Add(NewUser(user3.UserId, "User3"));
+
+            // Save the account
+            await context.SaveChangesAsync();
+        });
+
+        // The first user's comment on the handout
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Test comment");
+
+        // The second user gives the comment a thumbs-up
+        await commentService.PressReactionAsync(comment.Id, _user2, CommentReactionKind.ThumbsUp);
+
+        // The third user gives it a thumbs-up too
+        await commentService.PressReactionAsync(comment.Id, user3, CommentReactionKind.ThumbsUp);
+
+        // The third user takes their thumbs-up back
+        await commentService.PressReactionAsync(comment.Id, user3, CommentReactionKind.ThumbsUp);
+
+        // The thread as the second user reads it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user2);
+
+        // The second user's thumbs-up, still standing on its own
+        Assert.Equal(User2ExternalId, Assert.Single(thread[0].Reactions).UserId);
+    });
+
+    /// <summary>
+    /// A press touches only the comment it is made on, so a reader giving two comments the same reaction holds it on
+    /// both, each listed under its own comment.
+    /// </summary>
+    [Fact]
+    public Task PressReactionAsync_LeavesTheReadersOtherCommentsAlone() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment on the handout
+        var first = await commentService.CreateCommentAsync(_handoutThread, _user1, "First comment");
+
+        // The first user's second comment on the handout
+        var second = await commentService.CreateCommentAsync(_handoutThread, _user1, "Second comment");
+
+        // The second user gives the first comment a thumbs-up
+        await commentService.PressReactionAsync(first.Id, _user2, CommentReactionKind.ThumbsUp);
+
+        // The second user gives the second comment a thumbs-up too
+        await commentService.PressReactionAsync(second.Id, _user2, CommentReactionKind.ThumbsUp);
+
+        // The thread as the second user reads it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user2);
+
+        // A check that a comment holds the second user's thumbs-up and nothing else
+        static void HoldsTheThumbsUp(CommentDto comment) => Assert.Equal(
+            new CommentReactionDto(User2ExternalId, "User 2", CommentReactionKind.ThumbsUp),
+            Assert.Single(comment.Reactions));
+
+        // Each comment holding the second user's thumbs-up alone
+        Assert.Collection(thread, HoldsTheThumbsUp, HoldsTheThumbsUp);
+    });
+
+    /// <summary>
+    /// An author's reaction on their own comment is refused.
+    /// </summary>
+    [Fact]
+    public Task PressReactionAsync_ThrowsWhenReactingToOwnComment() => RunTestAsync(async commentService =>
     {
         // The first user's comment
         var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Test comment");
 
-        // The author likes their own comment
-        await Assert.ThrowsAsync<CannotLikeOwnCommentException>(
-            () => commentService.ToggleLikeAsync(comment.Id, _user1));
+        // The author gives their own comment a thumbs-up
+        await Assert.ThrowsAsync<CannotReactToOwnCommentException>(
+            () => commentService.PressReactionAsync(comment.Id, _user1, CommentReactionKind.ThumbsUp));
     });
 
     /// <summary>
-    /// A like on a comment that does not exist is refused as not found.
+    /// A reaction on a comment that does not exist is refused as not found.
     /// </summary>
     [Fact]
-    public Task ToggleLikeAsync_ThrowsWhenCommentMissing() => RunTestAsync(async commentService =>
+    public Task PressReactionAsync_ThrowsWhenCommentMissing() => RunTestAsync(async commentService =>
     {
-        // The first user likes a comment nobody wrote
+        // The first user reacts to a comment nobody wrote
         await Assert.ThrowsAsync<CommentNotFoundException>(
-            () => commentService.ToggleLikeAsync(Guid.NewGuid(), _user1));
+            () => commentService.PressReactionAsync(Guid.NewGuid(), _user1, CommentReactionKind.ThumbsUp));
     });
 
     /// <summary>
@@ -488,18 +609,19 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// An edited comment keeps its likes. The likes were given to the old version, and a thread counts only the
-    /// likes on the versions it shows, so an edit leaving them behind wipes every like the moment the author fixes a
-    /// typo.
+    /// An edited comment keeps its reactions, each of its own kind. The reactions were given to the old version, and
+    /// a thread lists only the ones on the versions it shows, so an edit leaving them behind wipes every reaction the
+    /// moment the author fixes a typo. The reaction is a thumbs-down, since a copy that dropped the kind would turn a
+    /// thumbs-down into a thumbs-up.
     /// </summary>
     [Fact]
-    public Task UpdateCommentAsync_KeepsLikes() => RunTestAsync(async commentService =>
+    public Task UpdateCommentAsync_KeepsReactions() => RunTestAsync(async commentService =>
     {
         // The first user's comment on the problem
         var comment = await commentService.CreateCommentAsync(_problemThread, _user1, "Original content");
 
-        // The second user likes the comment
-        await commentService.ToggleLikeAsync(comment.Id, _user2);
+        // The second user gives the comment a thumbs-down
+        await commentService.PressReactionAsync(comment.Id, _user2, CommentReactionKind.ThumbsDown);
 
         // The author fixes a typo
         var edited = await commentService.UpdateCommentAsync(comment.Id, _user1, "Fixed content");
@@ -511,9 +633,10 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         var root = Assert.Single(thread);
         Assert.Equal(edited.Id, root.Id);
 
-        // The edited version still carries the like, marked as the second user's
-        Assert.Equal(1, root.LikeCount);
-        Assert.True(root.IsLiked);
+        // The edited version still carries the second user's thumbs-down
+        Assert.Equal(
+            new CommentReactionDto(User2ExternalId, "User 2", CommentReactionKind.ThumbsDown),
+            Assert.Single(root.Reactions));
     });
 
     /// <summary>
@@ -712,11 +835,11 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// A deleted comment takes no like, refused like a comment that is not there, so a page left open since the
-    /// delete can't hang a like on the blanked stub.
+    /// A deleted comment takes no reaction, refused like a comment that is not there, so a page left open since the
+    /// delete can't hang a reaction on the blanked stub.
     /// </summary>
     [Fact]
-    public Task ToggleLikeAsync_RefusesADeletedComment() => RunTestAsync(async commentService =>
+    public Task PressReactionAsync_RefusesADeletedComment() => RunTestAsync(async commentService =>
     {
         // The first user's comment
         var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Soon gone");
@@ -724,8 +847,9 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
         // The author deletes it
         await commentService.DeleteCommentAsync(comment.Id, _user1);
 
-        // The second user likes it, refused
-        await Assert.ThrowsAsync<CommentNotFoundException>(() => commentService.ToggleLikeAsync(comment.Id, _user2));
+        // The second user gives it a thumbs-up, refused
+        await Assert.ThrowsAsync<CommentNotFoundException>(
+            () => commentService.PressReactionAsync(comment.Id, _user2, CommentReactionKind.ThumbsUp));
     });
 
     /// <summary>

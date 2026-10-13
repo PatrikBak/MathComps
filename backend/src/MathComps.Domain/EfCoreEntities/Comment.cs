@@ -61,7 +61,7 @@ public class Comment
     public DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>
-    /// Likes on this comment.
+    /// Reactions on this comment.
     /// </summary>
-    public ICollection<CommentLike> Likes { get; } = [];
+    public ICollection<CommentReaction> Reactions { get; } = [];
 }

@@ -7,6 +7,7 @@ import { STEP_KEYS } from '@/hooks/use-step-hotkeys'
 import messages from '../messages/en.json'
 import { type AnswerGate, gateReads } from './support/answer-gate'
 import { BACKEND_ORIGIN, countDialogs } from './support/backend-routes'
+import { sendComment, stubNamedReader } from './support/comments'
 import {
   actionsCopy,
   chatCopy,
@@ -40,12 +41,10 @@ import {
   selectedTab,
   selectionCopy,
   selectionText,
-  sendComment,
   SETTLE_TIMEOUT_MS,
   stubSelection,
   tabRowOn,
 } from './support/problem-selection'
-import { stubNamedReader } from './support/selection-comments'
 import { expect, test } from './support/test'
 
 /** What a reviewer writes into {@link OPENED}'s discussion while a test watches. */

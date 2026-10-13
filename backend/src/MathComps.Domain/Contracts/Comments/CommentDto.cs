@@ -12,8 +12,7 @@ namespace MathComps.Domain.Contracts.Comments;
 /// <param name="CreatedAt">When the comment was posted, which an edit leaves as it is.</param>
 /// <param name="EditedAt">When the comment was last edited, if applicable.</param>
 /// <param name="IsDeleted">Whether the comment has been soft-deleted.</param>
-/// <param name="LikeCount">Total number of likes on this comment.</param>
-/// <param name="IsLiked">Whether the viewing user has liked this comment. False if there is no user.</param>
+/// <param name="Reactions">Every reaction on the comment, oldest first.</param>
 /// <param name="Replies">Nested reply comments (recursive).</param>
 public record CommentDto(
     Guid Id,
@@ -22,7 +21,6 @@ public record CommentDto(
     DateTimeOffset CreatedAt,
     DateTimeOffset? EditedAt,
     bool IsDeleted,
-    int LikeCount,
-    bool IsLiked,
+    ImmutableList<CommentReactionDto> Reactions,
     ImmutableList<CommentDto> Replies
 );
