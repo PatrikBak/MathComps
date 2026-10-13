@@ -1,6 +1,8 @@
 import { clerk } from '@clerk/testing/playwright'
 import type { Page } from '@playwright/test'
 
+import messages from '../../messages/en.json'
+
 /**
  * Reads a credential a sign-in cannot proceed without.
  *
@@ -108,4 +110,16 @@ export async function dropSessionWithoutNotifying(page: Page): Promise<void> {
   await page.evaluate(() => {
     Object.defineProperty(window.Clerk, 'session', { configurable: true, get: () => null })
   })
+}
+
+/**
+ * The offer to sign in a visitor gets when they try something that needs an account.
+ *
+ * @param reason - What the account is needed for, as the thing they tried puts it.
+ *
+ * @returns The sentence the offer reads.
+ */
+export function loginPromptFor(reason: string): string {
+  // The reason is the only thing that varies between one offer and the next
+  return messages.auth.loginRequired.replace('{reason}', reason)
 }

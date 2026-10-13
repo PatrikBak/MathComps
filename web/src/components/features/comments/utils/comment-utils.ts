@@ -1,5 +1,5 @@
 import type { CommentData } from '../components/CommentItem'
-import type { CommentDto } from '../services/comment-api-types'
+import type { CommentDto, CommentReactionDto } from '../services/comment-api-types'
 
 /**
  * A recursive structure with optional nested replies.
@@ -57,10 +57,12 @@ export function countAllComments(comments: CommentWithReplies[]): number {
  * Converts API CommentDto to the UI's {@link CommentData} format.
  *
  * @param dto - The API CommentDto to convert.
+ * @param viewerId - The reader's id with the sign-in provider, or null when nobody is signed in.
  *
  * @returns The converted {@link CommentData}.
  */
-export function convertToCommentData(dto: CommentDto): CommentData {
+export function convertToCommentData(dto: CommentDto, viewerId: string | null): CommentData {
+  // The comment in the UI's shape, with the reader's own reaction picked out and the replies converted alike
   return {
     id: dto.id,
     authorId: dto.author.id,
@@ -69,11 +71,34 @@ export function convertToCommentData(dto: CommentDto): CommentData {
     content: dto.content,
     timestamp: new Date(dto.createdAt),
     editedAt: dto.editedAt ? new Date(dto.editedAt) : null,
-    likes: dto.likeCount,
-    isLiked: dto.isLiked,
+    reactions: dto.reactions,
+    viewerReaction: dto.reactions.find((reaction) => reaction.userId === viewerId)?.kind ?? null,
     isDeleted: dto.isDeleted,
-    replies: dto.replies.map(convertToCommentData),
+    replies: dto.replies.map((reply) => convertToCommentData(reply, viewerId)),
   }
+}
+
+/**
+ * Applies a press of a reaction to a comment's reactions. Nobody holds more than one, so pressing the one the
+ * presser holds takes it back, and pressing any other swaps to it.
+ *
+ * @param reactions - The comment's reactions, oldest first.
+ * @param press - The reaction pressed, signed by who pressed it.
+ *
+ * @returns The comment's reactions after the press, oldest first.
+ */
+export function pressReaction(
+  reactions: CommentReactionDto[],
+  press: CommentReactionDto
+): CommentReactionDto[] {
+  // The presser's reaction before the press, if they held one
+  const held = reactions.find((reaction) => reaction.userId === press.userId)
+
+  // Everybody else's reactions, which the press leaves alone
+  const others = reactions.filter((reaction) => reaction.userId !== press.userId)
+
+  // The held one pressed again is taken back, any other press lands as the newest
+  return held?.kind === press.kind ? others : [...others, press]
 }
 
 /**
@@ -113,42 +138,43 @@ export function addReplyToComment(
 }
 
 /**
+ * Changes to one comment of a thread: each field replaced as given, the reactions through a function of the current
+ * ones.
+ */
+type CommentUpdates = Partial<Omit<CommentDto, 'reactions'>> & {
+  /** A function turning the comment's current reactions into the new ones. */
+  reactions?: (reactions: CommentReactionDto[]) => CommentReactionDto[]
+}
+
+/**
  * Recursively updates a comment in the tree.
  *
  * @param comments - The current comments array.
  * @param commentId - The ID of the comment to update.
- * @param updates - The updates to apply. Can include a function for `likeCount`.
+ * @param updates - The updates to apply.
  * @returns The updated comments array.
  */
 export function updateCommentInTree(
   comments: CommentDto[],
   commentId: string,
-  updates: Partial<Omit<CommentDto, 'likeCount'>> & {
-    likeCount?: number | ((comment: CommentDto) => number)
-  }
+  updates: CommentUpdates
 ): CommentDto[] {
   // We will recreate each comment
   return comments.map((comment) => {
     // If we found the right comment...
     if (comment.id === commentId) {
-      // Figure out the like count
-      const likeCount =
-        // If we have been passed a like count function
-        typeof updates.likeCount === 'function'
-          ? // Use it
-            updates.likeCount(comment)
-          : // Otherwise use the passed value or the existing value
-            (updates.likeCount ?? comment.likeCount)
+      // The comment's reactions, through the update when one is given
+      const reactions = updates.reactions ? updates.reactions(comment.reactions) : comment.reactions
 
       // Return updated comment
       return {
         ...comment,
         ...updates,
-        likeCount,
+        reactions,
       }
     }
 
-    // If the comment has any replies, we need to recurse down to find the right parent
+    // If the comment has any replies, we need to recurse down to find the right comment
     if (comment.replies.length > 0) {
       return {
         ...comment,
@@ -156,7 +182,7 @@ export function updateCommentInTree(
       }
     }
 
-    // Here the comment has no replies and it is not the parent we are looking for
+    // Here the comment has no replies and it is not the one we are looking for
     return comment
   })
 }

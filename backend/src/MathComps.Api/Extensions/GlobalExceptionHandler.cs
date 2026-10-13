@@ -151,7 +151,7 @@ public sealed class GlobalExceptionHandler(
             => (StatusCodes.Status403Forbidden, ApiErrorCode.DefenseGradedSessionImmutable),
 
         // State conflicts
-        CannotLikeOwnCommentException => (StatusCodes.Status409Conflict, ApiErrorCode.CannotLikeOwnComment),
+        CannotReactToOwnCommentException => (StatusCodes.Status409Conflict, ApiErrorCode.CannotReactToOwnComment),
         SelectionBoardOpenedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionBoardOpened),
         SelectionProposalUsedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionProposalUsed),
         SelectionBoardFinalizedException => (StatusCodes.Status409Conflict, ApiErrorCode.SelectionBoardFinalized),

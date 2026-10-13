@@ -53,14 +53,14 @@ export function getDeleteCommentUrl(commentId: string): string {
 }
 
 /**
- * Builds the API URL for toggling a comment like.
+ * Builds the API URL for pressing a reaction on a comment.
  *
- * @param commentId - The ID of the comment to toggle like for.
+ * @param commentId - The ID of the comment the reaction is pressed on.
  *
- * @returns The API URL for toggling a comment like.
+ * @returns The API URL for pressing a reaction on the comment.
  */
-export function getToggleCommentLikeUrl(commentId: string): string {
-  return buildApiUrl(`${COMMENTS_PATH}/${encodeURIComponent(commentId)}/like`)
+export function getPressCommentReactionUrl(commentId: string): string {
+  return buildApiUrl(`${COMMENTS_PATH}/${encodeURIComponent(commentId)}/reaction`)
 }
 
 /**

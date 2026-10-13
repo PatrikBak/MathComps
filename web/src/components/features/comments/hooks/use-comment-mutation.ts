@@ -44,6 +44,9 @@ type CommentMutationConfig<TData, TVariables extends { target: CommentTarget }> 
   | 'errorMessage'
   | 'onBeforeLoginPrompt'
   | 'onLoginPromptDismiss'
+  | 'onSettled'
+  | 'scope'
+  | 'mutationKey'
 > & {
   /**
    * Optional function to optimistically update the comments cache before the API responds.
@@ -91,6 +94,9 @@ export function useCommentMutation<TData, TVariables extends { target: CommentTa
     errorMessage: config.errorMessage,
     onSuccess: config.onSuccess,
     onLoginPromptDismiss: config.onLoginPromptDismiss,
+    onSettled: config.onSettled,
+    scope: config.scope,
+    mutationKey: config.mutationKey,
 
     // A custom onBeforeLoginPrompt function which handles saving the pending target
     onBeforeLoginPrompt: (variables) => {

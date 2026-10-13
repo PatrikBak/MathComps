@@ -3,6 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { OPEN_PROPOSAL_PARAM } from '@/components/features/problem-selection/model/selection-routes'
 
 import { BACKEND_ORIGIN, returnToTab } from './support/backend-routes'
+import { stubNamedReader } from './support/comments'
 import { actionsCopy, areaCopy, editorCopy, SELECTION_PATH } from './support/competitions'
 import {
   addressedParam,
@@ -27,7 +28,6 @@ import {
   UNWRITTEN,
   USED,
 } from './support/problem-selection'
-import { stubNamedReader } from './support/selection-comments'
 import { expect, test } from './support/test'
 
 /** Where the pool is left when a problem is opened from it, in pixels from the top. */

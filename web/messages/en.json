@@ -115,7 +115,7 @@
     }
   },
   "apiErrors": {
-    "CannotLikeOwnComment": "You can't like your own comment.",
+    "CannotReactToOwnComment": "You can't react to your own comment.",
     "CommentNotFound": "This comment no longer exists.",
     "CommentProfileIncomplete": "Choose a username in your profile before commenting.",
     "CommentTargetNotFound": "The item this comment belongs to no longer exists.",
@@ -242,7 +242,7 @@
       "addComment": "adding comments",
       "deleteComment": "deleting comments",
       "editComment": "editing comments",
-      "likeComment": "liking comments"
+      "reactToComment": "react to comments"
     },
     "avatarAlt": "Avatar of {author}",
     "cancelDelete": "Cancel",
@@ -258,17 +258,17 @@
       "addFailed": "Failed to add comment",
       "deleteFailed": "Failed to delete comment",
       "editFailed": "Failed to edit comment",
-      "likeFailed": "Failed to change like status"
+      "reactionFailed": "Failed to change your reaction"
     },
     "hideReplies": "Hide replies",
     "lastEdited": "Last edited {date}",
-    "like": "Like",
     "loadError": "Failed to load comments. Please try again later.",
     "reply": "Reply",
     "replyPlaceholder": "Write a reply...",
     "show": "Show",
     "showReplies": "Show {count}",
-    "unlike": "Unlike",
+    "thumbsDown": "Thumbs down",
+    "thumbsUp": "Thumbs up",
     "writePlaceholder": "Write a comment..."
   },
   "common": {
@@ -1037,7 +1037,8 @@
     "conversations": "{count, plural, =1 {# conversation} other {# conversations}}",
     "problems": "{count, plural, =1 {# problem} other {# problems}}",
     "replies": "{count, plural, =1 {# reply} other {# replies}}",
-    "students": "{count, plural, =1 {# student} other {# students}}"
+    "students": "{count, plural, =1 {# student} other {# students}}",
+    "unnamedUsers": "{count, plural, =1 {# user without a name} other {# users without a name}}"
   },
   "privacy": {
     "lastUpdated": "Last updated: September 2, 2026",

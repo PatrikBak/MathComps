@@ -8,8 +8,8 @@ using System.Collections.Immutable;
 namespace MathComps.Infrastructure.Services.Comments;
 
 /// <summary>
-/// An <see cref="ICommentService"/> over EF Core, reading a thread with one recursive SQL query and toggling a
-/// like in one statement. Who may reach a thread, and how a comment is stored in one, is up to the
+/// An <see cref="ICommentService"/> over EF Core, reading a thread with one recursive SQL query and pressing a
+/// reaction in one statement. Who may reach a thread, and how a comment is stored in one, is up to the
 /// <see cref="ICommentThreadKind"/> serving its target type.
 /// </summary>
 /// <param name="dbContextFactory">The factory minting a context per operation.</param>
@@ -78,22 +78,24 @@ public class CommentService(
         // The ids of the thread's comments
         var commentIds = flatComments.Select(comment => comment.Id).ToHashSet();
 
-        // Each thread comment's like count, by comment id
-        var likeCounts = await dbContext.CommentLikes
-            .Where(commentLike => commentIds.Contains(commentLike.CommentId))
-            .GroupBy(commentLike => commentLike.CommentId)
-            .Select(group => new { CommentId = group.Key, Count = group.Count() })
-            .ToDictionaryAsync(group => group.CommentId, group => group.Count);
+        // The reactions on the thread's comments, oldest first, each with who gave it
+        var reactionRows = await dbContext.CommentReactions
+            .Where(reaction => commentIds.Contains(reaction.CommentId))
+            .OrderBy(reaction => reaction.CreatedAt)
+            .Select(reaction => new
+            {
+                reaction.CommentId,
+                Reaction = new CommentReactionDto(
+                    reaction.User.ExternalId,
+                    reaction.User.IsDeleted ? null : reaction.User.Username,
+                    reaction.Kind)
+            })
+            .ToListAsync();
 
-        // The thread comments the viewer has liked, when someone signed in is asking
-        var userLikes = viewer is not null
-            // The viewer's likes among the thread's comments
-            ? await dbContext.CommentLikes
-                .Where(commentLike => commentIds.Contains(commentLike.CommentId) && commentLike.UserId == viewer.UserId)
-                .Select(commentLike => commentLike.CommentId)
-                .ToHashSetAsync()
-            // A signed-out caller has liked nothing
-            : [];
+        // Each thread comment's reactions, by comment id
+        var reactions = reactionRows
+            .GroupBy(row => row.CommentId)
+            .ToDictionary(group => group.Key, group => group.Select(row => row.Reaction).ToImmutableList());
 
         // Each comment's direct replies, by the parent's id
         var childrenMap = flatComments
@@ -119,9 +121,6 @@ public class CommentService(
                 row.AuthorName,
                 row.AuthorAvatarUrl);
 
-            // Get the like count of the comment
-            var likeCount = likeCounts.GetValueOrDefault(row.Id, 0);
-
             // Determine if deleted
             var isDeleted = row.Status == CommentStatus.Deleted;
 
@@ -136,8 +135,7 @@ public class CommentService(
                 CreatedAt: row.PostedAt,
                 EditedAt: row.PreviousVersionId.HasValue ? row.CreatedAt : null,
                 IsDeleted: isDeleted,
-                LikeCount: likeCount,
-                IsLiked: userLikes.Contains(row.Id),
+                Reactions: reactions.GetValueOrDefault(row.Id, []),
                 Replies: replies
             );
         }
@@ -233,8 +231,7 @@ public class CommentService(
             CreatedAt: comment.CreatedAt,
             EditedAt: null,
             IsDeleted: false,
-            LikeCount: 0,
-            IsLiked: false,
+            Reactions: [],
             Replies: []
         );
     }
@@ -288,20 +285,21 @@ public class CommentService(
         foreach (var reply in replies)
             reply.ParentCommentId = newComment.Id;
 
-        // The likes on the old version
-        var likes = await dbContext.CommentLikes
-            .Where(like => like.CommentId == existingComment.Id)
+        // The reactions on the old version
+        var reactions = await dbContext.CommentReactions
+            .Where(reaction => reaction.CommentId == existingComment.Id)
             .ToListAsync();
 
-        // Each like taken off the old version
-        dbContext.CommentLikes.RemoveRange(likes);
+        // Each reaction taken off the old version
+        dbContext.CommentReactions.RemoveRange(reactions);
 
-        // The same likes given to the new version, since a thread counts only the likes on the versions it shows
-        dbContext.CommentLikes.AddRange(likes.Select(like => new CommentLike
+        // The same reactions given to the new version, since a thread lists only those on the versions it shows
+        dbContext.CommentReactions.AddRange(reactions.Select(reaction => new CommentReaction
         {
-            UserId = like.UserId,
+            UserId = reaction.UserId,
             CommentId = newComment.Id,
-            CreatedAt = like.CreatedAt
+            Kind = reaction.Kind,
+            CreatedAt = reaction.CreatedAt
         }));
 
         // Whatever else hangs off the comment in its kind of thread follows it onto the new version
@@ -351,7 +349,7 @@ public class CommentService(
     }
 
     /// <inheritdoc />
-    public async Task ToggleLikeAsync(Guid commentId, CommentViewer viewer)
+    public async Task PressReactionAsync(Guid commentId, CommentViewer viewer, CommentReactionKind reactionKind)
     {
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -359,40 +357,45 @@ public class CommentService(
         // The kind of thread the comment was written in, where the viewer may reach it
         var (kind, _) = await ReadOpenThreadAsync(dbContext, commentId, viewer);
 
-        // A comment in a kind of thread that takes no likes is refused like a comment that is not there
-        if (!kind.TakesLikes)
+        // A comment in a kind of thread that takes no reactions is refused like a comment that is not there
+        if (!kind.TakesReactions)
             throw new CommentNotFoundException();
 
         // The comment's author, and whether it stands
-        var liked = await dbContext.Comments
+        var reactedTo = await dbContext.Comments
             .Where(comment => comment.Id == commentId)
             .Select(comment => new { comment.AuthorId, comment.Status })
             .SingleAsync();
 
-        // A deleted comment takes no likes, refused like a comment that is not there
-        if (liked.Status == CommentStatus.Deleted)
+        // A deleted comment takes no reactions, refused like a comment that is not there
+        if (reactedTo.Status == CommentStatus.Deleted)
             throw new CommentNotFoundException();
 
         // If the user is the author, we're sad
-        if (liked.AuthorId == viewer.UserId)
-            throw new CannotLikeOwnCommentException();
+        if (reactedTo.AuthorId == viewer.UserId)
+            throw new CannotReactToOwnCommentException();
 
-        // Toggle the viewer's like in one statement: delete it when there, insert it otherwise
+        // Press the reaction in one statement: the viewer's own of this kind is deleted, their one of another kind
+        // turns into this one, and with none there this one is inserted
         await dbContext.Database.ExecuteSqlInterpolatedAsync($@"
             WITH deleted AS (
-                DELETE FROM comment_likes
+                DELETE FROM comment_reactions
                 WHERE user_id = {viewer.UserId}
                   AND comment_id = {commentId}
+                  AND kind = {reactionKind}
                 RETURNING *
             )
-            INSERT INTO comment_likes (user_id, comment_id, created_at)
-            SELECT {viewer.UserId}, {commentId}, {DateTimeOffset.UtcNow}
+            INSERT INTO comment_reactions (user_id, comment_id, kind, created_at)
+            SELECT {viewer.UserId}, {commentId}, {reactionKind}, {DateTimeOffset.UtcNow}
             WHERE NOT EXISTS (SELECT 1 FROM deleted)
+            ON CONFLICT (user_id, comment_id) DO UPDATE
+            SET kind = excluded.kind, created_at = excluded.created_at
         ");
 
-        // Log the toggle
+        // Log the press
         logger.LogInformation(
-            "Toggled like for user {UserId} on comment {CommentId}",
+            "Pressed {ReactionKind} for user {UserId} on comment {CommentId}",
+            reactionKind,
             viewer.UserId,
             commentId);
     }

@@ -10,7 +10,7 @@ export const commentQueryKeys = {
   /**
    * Query key for comments on a specific target.
    * Includes the user's id so cache is invalidated when user logs in/out
-   * (since whether they liked a comment is user-specific).
+   * (since whether a thread can be read at all is decided per reader).
    */
   target: (target: CommentTarget, userId: string | null) =>
     [...commentQueryKeys.all, target.targetType, target.targetId, userId] as const,

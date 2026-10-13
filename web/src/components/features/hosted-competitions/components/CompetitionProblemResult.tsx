@@ -124,7 +124,7 @@ export function GradeComments({
     >
       <CommentSection
         variant="inline"
-        showLikes={false}
+        showReactions={false}
         showEmptyText={false}
         newCommentPlaceholder={t('commentsPlaceholder')}
         target={{ targetType: 'HostedGrade', targetId: conversation.targetId }}

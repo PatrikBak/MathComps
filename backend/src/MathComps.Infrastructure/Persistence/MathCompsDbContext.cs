@@ -66,8 +66,8 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Comments on content.</summary>
     public DbSet<Comment> Comments => Set<Comment>();
 
-    /// <summary>Likes on comments.</summary>
-    public DbSet<CommentLike> CommentLikes => Set<CommentLike>();
+    /// <summary>Reactions on comments.</summary>
+    public DbSet<CommentReaction> CommentReactions => Set<CommentReaction>();
 
     /// <summary>Join table: comments on problems.</summary>
     public DbSet<ProblemComment> ProblemComments => Set<ProblemComment>();
@@ -661,26 +661,30 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
 
         #endregion Comment
 
-        #region CommentLike
+        #region CommentReaction
 
-        modelBuilder.Entity<CommentLike>(e =>
+        modelBuilder.Entity<CommentReaction>(e =>
         {
-            e.HasKey(cl => new { cl.UserId, cl.CommentId });
+            // One reaction per user per comment
+            e.HasKey(cr => new { cr.UserId, cr.CommentId });
 
-            e.HasOne(cl => cl.User)
+            // The reacting user, whose reactions go with their account
+            e.HasOne(cr => cr.User)
              .WithMany()
-             .HasForeignKey(cl => cl.UserId)
+             .HasForeignKey(cr => cr.UserId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            e.HasOne(cl => cl.Comment)
-             .WithMany(c => c.Likes)
-             .HasForeignKey(cl => cl.CommentId)
+            // The comment reacted to, whose reactions go with it
+            e.HasOne(cr => cr.Comment)
+             .WithMany(c => c.Reactions)
+             .HasForeignKey(cr => cr.CommentId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            e.HasIndex(cl => cl.CommentId).HasDatabaseName("ix_comment_like_comment_id");
+            // A comment's reactions, looked up by its id
+            e.HasIndex(cr => cr.CommentId).HasDatabaseName("ix_comment_reaction_comment_id");
         });
 
-        #endregion CommentLike
+        #endregion CommentReaction
 
         #region ProblemComment
 

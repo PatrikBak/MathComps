@@ -23,7 +23,7 @@ public class ProblemThreadKind : PublicCommentThreadKind<ProblemAnchor>
     public override CommentTargetType TargetType => CommentTargetType.Problem;
 
     /// <inheritdoc />
-    public override bool TakesLikes => true;
+    public override bool TakesReactions => true;
 
     /// <inheritdoc />
     public override async Task<CommentThreadSql> SelectAsync(MathCompsDbContext dbContext, CommentTarget target) =>

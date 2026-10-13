@@ -17,9 +17,9 @@ public enum ApiErrorCode
     NotCommentAuthor,
 
     /// <summary>
-    /// The caller tried to like their own comment.
+    /// The caller tried to react to their own comment.
     /// </summary>
-    CannotLikeOwnComment,
+    CannotReactToOwnComment,
 
     /// <summary>
     /// The content a comment is attached to does not exist.

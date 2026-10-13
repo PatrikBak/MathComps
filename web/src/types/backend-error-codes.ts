@@ -5,7 +5,7 @@
 export const BACKEND_ERROR_CODES = [
   'CommentNotFound',
   'NotCommentAuthor',
-  'CannotLikeOwnComment',
+  'CannotReactToOwnComment',
   'CommentTargetNotFound',
   'CommentProfileIncomplete',
   'ProblemNotFound',

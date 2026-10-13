@@ -144,15 +144,3 @@ export async function recordTreeReadings(page: Page): Promise<() => string[]> {
   // Hand back a snapshot on each read, so a list cannot grow underneath an assertion mid-check
   return () => [...readings]
 }
-
-/**
- * The offer a reader gets when a filter they asked for only means something as their own.
- *
- * @param reason - What the account is needed for, as the control naming the filter puts it.
- *
- * @returns The sentence the offer reads.
- */
-export function loginPromptFor(reason: string): string {
-  // The reason is the only thing that varies between one offer and the next
-  return authCopy.loginRequired.replace('{reason}', reason)
-}

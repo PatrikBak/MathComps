@@ -3,6 +3,7 @@ import type { ApiResult } from '@/types/api'
 
 import type {
   CommentDto,
+  CommentReactionKind,
   CommentTarget,
   CommentTargetType,
   UpdateCommentResult,
@@ -12,7 +13,7 @@ import {
   getCommentsUrl,
   getCreateCommentUrl,
   getDeleteCommentUrl,
-  getToggleCommentLikeUrl,
+  getPressCommentReactionUrl,
   getUpdateCommentUrl,
 } from './comment-api-urls'
 
@@ -121,17 +122,22 @@ export async function deleteComment(
 }
 
 /**
- * Toggles a like on a comment.
+ * Presses a reaction on a comment.
  *
  * @param apiCall - The authenticated API caller function.
- * @param commentId - The ID of the comment to like/unlike.
+ * @param commentId - The ID of the comment reacted to.
+ * @param kind - The reaction pressed.
  * @returns A promise resolving to success or an error.
  */
-export async function toggleCommentLike(
+export async function pressCommentReaction(
   apiCall: ApiCaller,
-  commentId: string
+  commentId: string,
+  kind: CommentReactionKind
 ): Promise<ApiResult<void>> {
-  return apiCall<void>(() => getToggleCommentLikeUrl(commentId), {
+  return apiCall<void>(() => getPressCommentReactionUrl(commentId), {
     method: 'POST',
+    body: JSON.stringify({
+      kind,
+    }),
   })
 }

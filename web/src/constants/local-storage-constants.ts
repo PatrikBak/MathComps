@@ -11,10 +11,10 @@ export const PENDING_PROBLEM_LIKE_STORAGE_KEY = 'pending-problem-like'
 export const PENDING_PROBLEM_MARK_STORAGE_KEY = 'pending-problem-mark'
 
 /**
- * Key used to store the id of a comment that the user attempted to like while unauthenticated.
+ * Key used to store the comment and the reaction the user pressed on it while unauthenticated.
  * Used to restore the action after login.
  */
-export const PENDING_COMMENT_LIKE_STORAGE_KEY = 'pending-comment-like'
+export const PENDING_COMMENT_REACTION_STORAGE_KEY = 'pending-comment-reaction'
 
 /**
  * Key used to store the user's preference for showing technique tags in the problems library.

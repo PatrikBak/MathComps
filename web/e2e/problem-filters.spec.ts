@@ -3,12 +3,11 @@ import {
   filtersCopy,
   filtersInUrl,
   KEPT_FILTER,
-  loginPromptFor,
   signInCopy,
 } from './support/archive-filters'
 import type { SearchCall } from './support/backend-routes'
 import { PROBLEMS_PATH, recordNotices, stubProblemSearch } from './support/backend-routes'
-import { endSessionInPlace, signInTestUser } from './support/session'
+import { endSessionInPlace, loginPromptFor, signInTestUser } from './support/session'
 import { expect, test } from './support/test'
 
 /**

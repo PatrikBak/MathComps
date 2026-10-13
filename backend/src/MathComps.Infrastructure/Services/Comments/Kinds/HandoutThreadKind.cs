@@ -22,7 +22,7 @@ public class HandoutThreadKind : PublicCommentThreadKind<HandoutAnchor>
     public override CommentTargetType TargetType => CommentTargetType.Handout;
 
     /// <inheritdoc />
-    public override bool TakesLikes => true;
+    public override bool TakesReactions => true;
 
     /// <inheritdoc />
     public override Task<CommentThreadSql> SelectAsync(MathCompsDbContext dbContext, CommentTarget target) =>

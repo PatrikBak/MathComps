@@ -26,6 +26,7 @@ namespace MathComps.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "comment_reaction_kind", new[] { "thumbs_down", "thumbs_up" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "comment_status", new[] { "active", "deleted", "superseded" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "defense_outcome", new[] { "confirmed_the_solution", "found_the_mistake", "not_enough_help", "something_else", "was_off" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "defense_report_category", new[] { "gave_away", "missed_the_mistake", "misunderstood", "other", "said_something_wrong", "tone" });
@@ -197,7 +198,7 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("comments", (string)null);
                 });
 
-            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.CommentLike", b =>
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.CommentReaction", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -211,13 +212,17 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<CommentReactionKind>("Kind")
+                        .HasColumnType("comment_reaction_kind")
+                        .HasColumnName("kind");
+
                     b.HasKey("UserId", "CommentId")
-                        .HasName("pk_comment_likes");
+                        .HasName("pk_comment_reactions");
 
                     b.HasIndex("CommentId")
-                        .HasDatabaseName("ix_comment_like_comment_id");
+                        .HasDatabaseName("ix_comment_reaction_comment_id");
 
-                    b.ToTable("comment_likes", (string)null);
+                    b.ToTable("comment_reactions", (string)null);
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Competition", b =>
@@ -2011,21 +2016,21 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("PreviousVersion");
                 });
 
-            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.CommentLike", b =>
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.CommentReaction", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Comment", "Comment")
-                        .WithMany("Likes")
+                        .WithMany("Reactions")
                         .HasForeignKey("CommentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_comment_likes_comments_comment_id");
+                        .HasConstraintName("fk_comment_reactions_comments_comment_id");
 
                     b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_comment_likes_users_user_id");
+                        .HasConstraintName("fk_comment_reactions_users_user_id");
 
                     b.Navigation("Comment");
 
@@ -2734,7 +2739,7 @@ namespace MathComps.Infrastructure.Migrations
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Comment", b =>
                 {
-                    b.Navigation("Likes");
+                    b.Navigation("Reactions");
 
                     b.Navigation("Replies");
                 });
