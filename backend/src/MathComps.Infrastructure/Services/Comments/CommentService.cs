@@ -1,6 +1,7 @@
 using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
@@ -161,6 +162,9 @@ public class CommentService(
     public async Task<CommentDto> CreateCommentAsync(
         CommentTarget target, CommentViewer viewer, string content, Guid? parentCommentId = null)
     {
+        // What the comment says, reduced to the text it carries, refused before anything is written
+        var normalizedContent = NormalizeContent(content);
+
         // A fresh context for this operation.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -198,7 +202,7 @@ public class CommentService(
         {
             AuthorId = viewer.UserId,
             ParentCommentId = parentCommentId,
-            Content = content,
+            Content = normalizedContent,
             Status = CommentStatus.Active,
             CreatedAt = DateTimeOffset.UtcNow
         };
@@ -256,13 +260,16 @@ public class CommentService(
         if (existingComment.Status == CommentStatus.Deleted)
             throw new CommentNotFoundException();
 
+        // What the comment should now say, reduced to the text it carries
+        var normalizedContent = NormalizeContent(content);
+
         // Create new version
         var newComment = new Comment
         {
             AuthorId = viewer.UserId,
             ParentCommentId = existingComment.ParentCommentId,
             PreviousVersionId = existingComment.Id,
-            Content = content,
+            Content = normalizedContent,
             Status = CommentStatus.Active,
             CreatedAt = DateTimeOffset.UtcNow
         };
@@ -583,6 +590,28 @@ public class CommentService(
 
         // The kinds, each type served once
         return allKinds;
+    }
+
+    /// <summary>
+    /// Reduces what a comment says to the text it carries, refusing content that says nothing or says more than a
+    /// comment is allowed to.
+    /// </summary>
+    /// <param name="content">What the comment says, as it was sent.</param>
+    /// <returns>The text it carries.</returns>
+    /// <exception cref="CommentValueException">
+    /// Thrown when the content is blank or longer than <see cref="ICommentService.MaxCommentChars"/> characters.
+    /// </exception>
+    private static string NormalizeContent(string content)
+    {
+        // The content without the whitespace around it, refused when nothing is left
+        var normalizedContent = content.TrimToNull() ?? throw new CommentValueException();
+
+        // Longer than a comment may be
+        if (normalizedContent.Length > ICommentService.MaxCommentChars)
+            throw new CommentValueException();
+
+        // What the comment carries
+        return normalizedContent;
     }
 
     #endregion

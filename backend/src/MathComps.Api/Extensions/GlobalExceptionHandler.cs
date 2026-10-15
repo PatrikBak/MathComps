@@ -128,6 +128,9 @@ public sealed class GlobalExceptionHandler(
         CommentProfileIncompleteException
             => (StatusCodes.Status422UnprocessableEntity, ApiErrorCode.CommentProfileIncomplete),
 
+        // A comment the contract can't take: no words at all, or too many of them
+        CommentValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.CommentValue),
+
         // A note on a student's own solution the contract can't take: no words at all, or too many of them
         HostedNoteEmptyException => (StatusCodes.Status400BadRequest, ApiErrorCode.HostedNoteEmpty),
         HostedNoteTooLongException => (StatusCodes.Status400BadRequest, ApiErrorCode.HostedNoteTooLong),

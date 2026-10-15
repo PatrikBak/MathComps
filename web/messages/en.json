@@ -119,6 +119,7 @@
     "CommentNotFound": "This comment no longer exists.",
     "CommentProfileIncomplete": "Choose a username in your profile before commenting.",
     "CommentTargetNotFound": "The item this comment belongs to no longer exists.",
+    "CommentValue": "That comment isn't valid.",
     "DefenseContentNotFound": "This statement is no longer available.",
     "DefenseFeedbackCommentTooLong": "Your comment is too long.",
     "DefenseFeedbackValue": "That feedback doesn't say anything.",
