@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.Competitions;
+using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Extensions;
@@ -261,10 +262,10 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
     /// <summary>
     /// Conversations read newest first, each with who held it, how many messages it holds and whether the problem
-    /// still has the statement it was argued against, in any of its languages. The author is their username, and
-    /// nobody once their account is deleted. A deleted account keeps its username, so a read that skipped the check
-    /// would still sign the deleted reviewer's words. Only the reviewers' conversations read: the student's, the
-    /// first proposal's newest, is left out, and so is the latecomer's from before they were preparing.
+    /// still has the statement it was argued against, in any of its languages. The author carries their username and
+    /// address, and no username once their account is deleted. A deleted account keeps its username, so a read that
+    /// skipped the check would still sign the deleted reviewer's words. Only the reviewers' conversations read: the
+    /// student's, the first proposal's newest, is left out, and so is the latecomer's from before they were preparing.
     /// </summary>
     [Fact]
     public Task Conversations_read_with_their_authors_and_whether_their_statement_stands() =>
@@ -281,12 +282,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
             // Newest first: the English statement and the Slovak one still stand, the deleted reviewer's is gone
             Assert.Equal(
                 [
-                    (_reviewerId, "Reviewer", 2, false),
-                    (_reviewerId, "Reviewer", 1, false),
-                    (_goneReviewerId, null, 1, true),
+                    (new UserIdentityDto(_reviewerId, "Reviewer", "reviewer@example.com"), 2, false),
+                    (new UserIdentityDto(_reviewerId, "Reviewer", "reviewer@example.com"), 1, false),
+                    (new UserIdentityDto(_goneReviewerId, null, null), 1, true),
                 ],
                 conversations.Select(conversation => (
-                    conversation.AuthorId,
                     conversation.Author,
                     conversation.MessageCount,
                     conversation.HasOlderStatement)));
@@ -298,8 +298,9 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // The reviewer whose account is live
         context.Users.Add(HostedSeed.NewUser(_reviewerId, "Reviewer"));
 
-        // And the one whose account is deleted
+        // And the one whose account is deleted, the way deletion leaves it: the address cleared, the name kept
         var gone = HostedSeed.NewUser(_goneReviewerId, "Gone");
+        gone.Email = null;
         gone.IsDeleted = true;
         context.Users.Add(gone);
 

@@ -1,4 +1,4 @@
-using MathComps.Domain.Contracts.Comments;
+using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
 
 namespace MathComps.Domain.Contracts.Selection;
@@ -8,8 +8,7 @@ namespace MathComps.Domain.Contracts.Selection;
 /// </summary>
 /// <param name="Id">The conversation's identifier.</param>
 /// <param name="ProposalId">The proposal it was about.</param>
-/// <param name="AuthorId"><inheritdoc cref="DefenseSession.UserId" path="/summary"/></param>
-/// <param name="Author"><inheritdoc cref="CommentAuthorDto.Name" path="/summary"/></param>
+/// <param name="Author">The reviewer who held it.</param>
 /// <param name="StartedAt"><inheritdoc cref="DefenseSession.CreatedAt" path="/summary"/></param>
 /// <param name="MessageCount">How many messages were said in it.</param>
 /// <param name="HasOlderStatement">
@@ -18,8 +17,7 @@ namespace MathComps.Domain.Contracts.Selection;
 public record ReviewConversationDto(
     Guid Id,
     Guid ProposalId,
-    Guid AuthorId,
-    string? Author,
+    UserIdentityDto Author,
     DateTimeOffset StartedAt,
     int MessageCount,
     bool HasOlderStatement);

@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 
 import type { AuthorConversationsResult } from '@/components/features/conversation-review/model/conversation-detail'
-import type { UserIdentity } from '@/components/features/profile/model/user-identity'
+import { describeUser, type UserIdentity } from '@/components/features/profile/model/user-identity'
 import { useAddressSync } from '@/hooks/use-address-sync'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
 import { useSteppedSelection, type UseSteppedSelectionResult } from '@/hooks/use-stepped-selection'
@@ -74,9 +74,8 @@ export function useProposalConversations(proposal: Proposal): UseProposalConvers
   // Keep the address naming the open conversation, every other parameter left as it stands
   useAddressSync(addressedQuery, CONVERSATION_PARAMS)
 
-  // Whoever held the open conversation, known by the username alone
-  const author: UserIdentity | null =
-    opened === null ? null : { id: opened.authorId, username: opened.author, email: null }
+  // Whoever held the open conversation
+  const author = opened?.author ?? null
 
   // Every conversation the open one's author held about the problem, oldest first
   const authorsConversations: AuthorConversationsResult = {
@@ -84,7 +83,7 @@ export function useProposalConversations(proposal: Proposal): UseProposalConvers
       opened === null
         ? null
         : conversations
-            .filter((conversation) => conversation.authorId === opened.authorId)
+            .filter((conversation) => conversation.author.id === opened.author.id)
             .map((conversation) => ({ id: conversation.id, createdAt: conversation.startedAt }))
             .reverse(),
     // Already in hand with the selection
@@ -94,9 +93,9 @@ export function useProposalConversations(proposal: Proposal): UseProposalConvers
   // Profile copy
   const tProfile = useTranslations('profile')
 
-  // A function which names whoever held a conversation, the default user's name standing in for none
+  // A function which names whoever held a conversation
   const authorName = (conversation: ReviewConversation) =>
-    conversation.author ?? tProfile('defaultUser')
+    describeUser(conversation.author, tProfile('defaultUser'))
 
   // The conversations, the open one with its author's others, and a way to name each one's author
   return { conversations, selection, author, authorsConversations, authorName }
