@@ -1,12 +1,16 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { useRef } from 'react'
 
 import { CommentSection } from '@/components/features/comments/components/CommentSection'
 import { categoryTextClass } from '@/components/features/hosted-competitions/components/CategoryBadge'
+import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
+import type { TableSort } from '@/components/shared/utils/table-sort'
 import { type Locale, SUPPORTED_LOCALES } from '@/i18n/i18n'
 
 import { usePaperCommentCount } from '../hooks/use-paper-comment-count'
+import { DEFAULT_RATINGS_SORT, type RatingsColumn } from '../model/ratings-order'
 import { PAPER_TABS, type PaperTab } from '../model/selection-routes'
 import { type SlotPosition, unwrittenAcross } from '../model/selection-state'
 import type { Board, Paper, Proposal } from '../model/selection-types'
@@ -15,8 +19,19 @@ import { DetailHeading, DetailMissing, type DetailTabContent, DetailTabs } from 
 import { LanguageSwitch } from './LanguageSwitch'
 import { ProposalBox } from './ProposalBody'
 import { ProposalCard } from './ProposalCard'
+import { RatingsTable } from './RatingsTable'
 import { BackLink } from './SelectionLinks'
 import { useLoadedSelection } from './SelectionWorkspaceProvider'
+
+/**
+ * What a reader last chose on a paper's page, kept for the paper while its page is closed.
+ */
+export type PaperChoices = {
+  /** The language the paper's problems are read in; undefined while none has been picked. */
+  language?: Locale
+  /** How the paper's ratings table orders its rows; undefined while no column has been chosen. */
+  ratingsSort?: TableSort<RatingsColumn>
+}
 
 /**
  * Props for the {@link PaperDetail} component.
@@ -26,22 +41,17 @@ type PaperDetailProps = {
   paperId: string
   /** The language the pool is read in. */
   poolLanguage: Locale
-  /** The language last picked for the paper; undefined while none has been. */
-  keptLanguage: Locale | undefined
-  /** Keeps the language picked for the paper. */
-  onLanguageChange: (language: Locale) => void
+  /** What was last chosen on the paper's page. */
+  choices: PaperChoices
+  /** Keeps a choice made on the paper's page. */
+  onChoice: (choice: PaperChoices) => void
 }
 
 /**
- * One paper in full: its problems in their slots' order, each with its statement, hints and solution, and the
- * reviewers' discussion of the paper as a whole.
+ * One paper in full: its problems in their slots' order, each with its statement, hints and solution, the reviewers'
+ * discussion of the paper as a whole, and a table of its problems' ratings.
  */
-export function PaperDetail({
-  paperId,
-  poolLanguage,
-  keptLanguage,
-  onLanguageChange,
-}: PaperDetailProps) {
+export function PaperDetail({ paperId, poolLanguage, choices, onChoice }: PaperDetailProps) {
   // Paper page copy
   const t = useTranslations('problemSelection.paper')
 
@@ -61,8 +71,8 @@ export function PaperDetail({
       board={place.board}
       paper={place.paper}
       poolLanguage={poolLanguage}
-      keptLanguage={keptLanguage}
-      onLanguageChange={onLanguageChange}
+      choices={choices}
+      onChoice={onChoice}
     />
   )
 }
@@ -80,13 +90,7 @@ type PaperDetailBodyProps = Omit<PaperDetailProps, 'paperId'> & {
 /**
  * The paper's page once it has loaded.
  */
-function PaperDetailBody({
-  board,
-  paper,
-  poolLanguage,
-  keptLanguage,
-  onLanguageChange,
-}: PaperDetailBodyProps) {
+function PaperDetailBody({ board, paper, poolLanguage, choices, onChoice }: PaperDetailBodyProps) {
   // Paper page copy
   const t = useTranslations('problemSelection.paper')
 
@@ -98,21 +102,25 @@ function PaperDetailBody({
     proposalId === null ? undefined : proposalsById.get(proposalId)
   )
 
+  // The problems in the paper's filled slots
+  const proposals = slotProposals.filter((proposal): proposal is Proposal => proposal !== undefined)
+
   // The languages none of the paper's problems is written in
-  const unwritten = unwrittenAcross(
-    slotProposals.filter((proposal): proposal is Proposal => proposal !== undefined)
-  )
+  const unwritten = unwrittenAcross(proposals)
 
   // The language the problems are read in: the one last picked for the paper, else the pool's, or the first one some
   // problem here is written in when none is written in the pool's
   const language =
-    keptLanguage ??
+    choices.language ??
     (unwritten.includes(poolLanguage)
       ? (SUPPORTED_LOCALES.find((candidate) => !unwritten.includes(candidate)) ?? poolLanguage)
       : poolLanguage)
 
   // How many comments the paper's discussion holds
   const commentCount = usePaperCommentCount(paper.id)
+
+  // The ratings panel
+  const ratingsPanelRef = useRef<HTMLDivElement>(null)
 
   // What each tab holds
   const contents: Record<PaperTab, DetailTabContent<PaperTab>> = {
@@ -148,6 +156,34 @@ function PaperDetailBody({
         </div>
       ),
     },
+    ratings: {
+      label: t('ratingsTab'),
+      count: null,
+      panel: (
+        <div
+          ref={ratingsPanelRef}
+          // Takes the focus when a focused row leaves with no row in its place
+          tabIndex={-1}
+          className="pt-4 focus:outline-none"
+        >
+          {/* The problems' ratings, or a line saying the paper holds none */}
+          {proposals.length === 0 ? (
+            // A note saying the paper holds no problem
+            <div className={COMPACT_PANEL_CLASS}>
+              <p className="text-sm text-muted">{t('noProblems')}</p>
+            </div>
+          ) : (
+            // A row for every problem in the paper
+            <RatingsTable
+              proposals={proposals}
+              sort={choices.ratingsSort ?? DEFAULT_RATINGS_SORT}
+              onSort={(ratingsSort) => onChoice({ ratingsSort })}
+              fallbackRef={ratingsPanelRef}
+            />
+          )}
+        </div>
+      ),
+    },
   }
 
   return (
@@ -160,10 +196,14 @@ function PaperDetailBody({
         <DetailHeading subjectId={paper.id} className={categoryTextClass(paper.category)}>
           {paper.name} <span className="ml-1 font-normal text-muted">{board.name}</span>
         </DetailHeading>
-        <LanguageSwitch language={language} onChange={onLanguageChange} unwritten={unwritten} />
+        <LanguageSwitch
+          language={language}
+          onChange={(picked) => onChoice({ language: picked })}
+          unwritten={unwritten}
+        />
       </header>
 
-      {/* The problems and the discussion */}
+      {/* The paper's tabs */}
       <div className="mt-4">
         <DetailTabs
           ariaLabel={t('tabsLabel')}

@@ -1335,9 +1335,11 @@
     },
     "paper": {
       "commentsTab": "Komentáře",
+      "noProblems": "V této sadě zatím není žádná úloha.",
       "notFound": "Tato sada není na žádné sestavě.",
       "placeholder": "Co si myslíš o sadě jako celku?",
       "problemsTab": "Úlohy",
+      "ratingsTab": "Ohodnocení",
       "tabsLabel": "O této sadě"
     },
     "picking": {
@@ -1359,14 +1361,25 @@
       "loading": "Načítám úlohy",
       "search": "Hledat úlohy",
       "searchPlaceholder": "Číslo, název nebo text",
-      "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}"
+      "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}",
+      "views": {
+        "label": "Zobrazit jako",
+        "problems": "Úlohy",
+        "ratings": "Ohodnocení"
+      }
     },
     "ratings": {
       "average": "Průměr",
       "beauty": "Krása",
+      "beautyShort": "K",
       "difficulty": "Náročnost",
+      "difficultyShort": "N",
       "name": "Jméno",
-      "ratedBy": "{count, plural, =1 {Ohodnotil # člověk} =2 {Ohodnotili # lidé} =3 {Ohodnotili # lidé} =4 {Ohodnotili # lidé} other {Ohodnotilo # lidí}}"
+      "number": "Číslo",
+      "problem": "Úloha",
+      "ratedBy": "{count, plural, =1 {Ohodnotil # člověk} =2 {Ohodnotili # lidé} =3 {Ohodnotili # lidé} =4 {Ohodnotili # lidé} other {Ohodnotilo # lidí}}",
+      "raters": "Počet ohodnocení",
+      "tableLabel": "Ohodnocení úloh"
     },
     "text": {
       "fallback": "Zatím chybí {missing}, zobrazuje se {shown}.",

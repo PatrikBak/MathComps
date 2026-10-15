@@ -17,7 +17,7 @@ import { errorCodeOf } from '@/lib/api/api-error'
 import type { OpenDetail } from '../model/selection-routes'
 import { PROPOSAL_AUTHORING_LANGUAGE } from '../model/selection-types'
 import { BoardPanel } from './BoardPanel'
-import { PaperDetail } from './PaperDetail'
+import { type PaperChoices, PaperDetail } from './PaperDetail'
 import { PoolView } from './PoolView'
 import { ProposalDetail } from './ProposalDetail'
 import { SelectionWorkspaceProvider, useSelectionWorkspace } from './SelectionWorkspaceProvider'
@@ -169,7 +169,7 @@ function SelectionNotice({ children }: SelectionNoticeProps) {
 /**
  * The pool, or the page open over it. The pool stays mounted while hidden, so its cards come back without being
  * built again. A page opens in the pool's language where what it shows is written in that language. A paper's page
- * opens in the language last picked for it, if any.
+ * opens in the language last picked for it, if any, with its ratings ordered as they were last left.
  */
 function SelectionContent() {
   // The page open in full, if any
@@ -178,12 +178,14 @@ function SelectionContent() {
   // The language the pool is read in
   const [poolLanguage, setPoolLanguage] = useState<Locale>(PROPOSAL_AUTHORING_LANGUAGE)
 
-  // The language last picked for each paper, by the paper's id
-  const [paperLanguages, setPaperLanguages] = useState<ReadonlyMap<string, Locale>>(new Map())
+  // What was last chosen on each paper's page, by the paper's id
+  const [paperChoices, setPaperChoices] = useState<ReadonlyMap<string, PaperChoices>>(new Map())
 
-  // A function which keeps the language picked for a paper
-  const keepPaperLanguage = (paperId: string, language: Locale) =>
-    setPaperLanguages((current) => new Map(current).set(paperId, language))
+  // A function which keeps a choice made on a paper's page beside the ones made there before
+  const keepPaperChoice = (paperId: string, choice: PaperChoices) =>
+    setPaperChoices((current) =>
+      new Map(current).set(paperId, { ...current.get(paperId), ...choice })
+    )
 
   return (
     <>
@@ -194,8 +196,8 @@ function SelectionContent() {
         <DetailView
           detail={detail}
           poolLanguage={poolLanguage}
-          paperLanguages={paperLanguages}
-          onPaperLanguageChange={keepPaperLanguage}
+          paperChoices={paperChoices}
+          onPaperChoice={keepPaperChoice}
         />
       )}
     </>
@@ -210,21 +212,16 @@ type DetailViewProps = {
   detail: OpenDetail
   /** The language the pool is read in. */
   poolLanguage: Locale
-  /** The language last picked for each paper, by the paper's id. */
-  paperLanguages: ReadonlyMap<string, Locale>
-  /** Keeps the language picked for a paper. */
-  onPaperLanguageChange: (paperId: string, language: Locale) => void
+  /** What was last chosen on each paper's page, by the paper's id. */
+  paperChoices: ReadonlyMap<string, PaperChoices>
+  /** Keeps a choice made on a paper's page, by the paper's id. */
+  onPaperChoice: (paperId: string, choice: PaperChoices) => void
 }
 
 /**
  * The page open over the pool, a problem's or a paper's, once the selection holding its subject has arrived.
  */
-function DetailView({
-  detail,
-  poolLanguage,
-  paperLanguages,
-  onPaperLanguageChange,
-}: DetailViewProps) {
+function DetailView({ detail, poolLanguage, paperChoices, onPaperChoice }: DetailViewProps) {
   // The selection, if its read has landed
   const { selection } = useSelectionWorkspace()
 
@@ -242,8 +239,8 @@ function DetailView({
         <PaperDetail
           paperId={detail.id}
           poolLanguage={poolLanguage}
-          keptLanguage={paperLanguages.get(detail.id)}
-          onLanguageChange={(language) => onPaperLanguageChange(detail.id, language)}
+          choices={paperChoices.get(detail.id) ?? {}}
+          onChoice={(choice) => onPaperChoice(detail.id, choice)}
         />
       )
 

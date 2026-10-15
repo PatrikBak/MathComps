@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import type { SidePanelId } from '@/components/features/conversation-review/hooks/use-conversation-panels'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import { describeUser } from '@/components/features/profile/model/user-identity'
+import type { TableSort } from '@/components/shared/utils/table-sort'
 import { useAddressSync } from '@/hooks/use-address-sync'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { useInitialUrlState } from '@/hooks/use-initial-url-state'
@@ -16,12 +17,10 @@ import { gradingBoardQueryKey } from '../../grades/hooks/grade-cache'
 import { pairKey, splitPairKey } from '../../grades/model/grade-types'
 import {
   type BoardRow,
-  type BoardSort,
   buildRows,
   countProgress,
   type GradingProgress,
   indexGrades,
-  nextSort,
   type SortBy,
   sortRows,
   walkOrder,
@@ -56,9 +55,9 @@ type UseGradingBoardResult = {
   /** The rows of the competition on screen, in the order asked for. */
   rows: BoardRow[]
   /** How the rows are ordered. */
-  sort: BoardSort
-  /** Orders the rows by a column, or turns the current order round. */
-  sortBy: (by: SortBy) => void
+  sort: TableSort<SortBy>
+  /** Orders the rows as asked. */
+  setSort: (sort: TableSort<SortBy>) => void
   /** The grades of the competition on screen, by pair. */
   grades: ReadonlyMap<string, GradeSummary>
   /** How far grading the competition on screen has got. */
@@ -134,7 +133,7 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
   }
 
   // How the rows are ordered, kept across competitions
-  const [sort, setSort] = useState<BoardSort>({ by: 'name', ascending: true })
+  const [sort, setSort] = useState<TableSort<SortBy>>({ by: 'name', ascending: true })
 
   // The competition's grades, by pair
   const grades = useMemo(
@@ -190,9 +189,6 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
       ? null
       : { user: openStudent, target: { kind: 'problem', problemId: open.problemId } }
 
-  // A function which orders the rows by a column
-  const sortBy = (by: SortBy) => setSort((current) => nextSort(current, by))
-
   // The rows in the order asked for
   const rows = sortRows(rowsByName, sort)
 
@@ -212,7 +208,7 @@ export function useGradingBoard(groupSlug: string): UseGradingBoardResult {
     selectCategory,
     rows,
     sort,
-    sortBy,
+    setSort,
     grades,
     progress,
     selection,
