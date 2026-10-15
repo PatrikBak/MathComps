@@ -9,9 +9,9 @@ import { OPEN_ID_ATTRIBUTE } from './use-focus-return'
 /**
  * Return type for {@link useFocusHandOff}, spread onto the item's element.
  */
-type UseFocusHandOffResult = {
+type UseFocusHandOffResult<TElement extends HTMLElement> = {
   /** The item's element. */
-  ref: RefObject<HTMLDivElement | null>
+  ref: RefObject<TElement | null>
   /** Notes the focus arriving in the item, a menu it opens over the page included. */
   onFocus: () => void
   /** Notes the focus leaving the item. */
@@ -29,9 +29,11 @@ type UseFocusHandOffResult = {
  *
  * @returns The item's element and its focus handlers.
  */
-export function useFocusHandOff(fallbackRef: RefObject<HTMLElement | null>): UseFocusHandOffResult {
+export function useFocusHandOff<TElement extends HTMLElement>(
+  fallbackRef: RefObject<HTMLElement | null>
+): UseFocusHandOffResult<TElement> {
   // The item's element
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<TElement>(null)
 
   // Whether the focus is in the item, the menus it opens included
   const holdsFocusRef = useRef(false)
@@ -40,9 +42,6 @@ export function useFocusHandOff(fallbackRef: RefObject<HTMLElement | null>): Use
   useLayoutEffect(() => {
     // The item's element, while it stands
     const item = ref.current
-
-    // What takes the focus when no item stands in its place
-    const fallback = fallbackRef.current
 
     // The hand-off, run as the item goes
     return () => {
@@ -66,8 +65,10 @@ export function useFocusHandOff(fallbackRef: RefObject<HTMLElement | null>): Use
           ? next.querySelector<HTMLElement>(OPEN_ID_ATTRIBUTE.anySelector)
           : null
 
-        // Where the focus goes: that link, or the fallback when no item stands there
-        const target = nextLink ?? fallback
+        // Where the focus goes: that link, or the fallback when no item stands there. The fallback is read only now,
+        // since one wrapping the list gets its element after the items' effects run
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- the fallback is read once the change ends
+        const target = nextLink ?? fallbackRef.current
 
         // Focused, the page staying where it was
         focusForReader(target, { preventScroll: true })

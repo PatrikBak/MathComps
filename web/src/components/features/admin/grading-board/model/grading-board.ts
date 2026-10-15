@@ -1,5 +1,6 @@
 import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import { assertNever } from '@/components/shared/utils/assert-never'
+import type { TableSort } from '@/components/shared/utils/table-sort'
 
 import { pairKey, scoreOf } from '../../grades/model/grade-types'
 import { type GradeSummary, type GradingCompetition } from './grading-types'
@@ -12,20 +13,10 @@ export type SortBy = 'rank' | 'name' | 'total'
 /**
  * Which way each column reads when it is first pressed: places from the first, names from A, totals from the best.
  */
-const STARTS_ASCENDING: Record<SortBy, boolean> = {
+export const STARTS_ASCENDING: Record<SortBy, boolean> = {
   rank: true,
   name: true,
   total: false,
-}
-
-/**
- * How the rows are ordered: which column, and which way round.
- */
-export type BoardSort = {
-  /** The column. */
-  by: SortBy
-  /** Whether the smallest comes first. */
-  ascending: boolean
 }
 
 /**
@@ -190,7 +181,7 @@ function compareStanding(first: BoardRow, second: BoardRow): number {
  *
  * @returns The rows in that order.
  */
-export function sortRows(rows: readonly BoardRow[], sort: BoardSort): BoardRow[] {
+export function sortRows(rows: readonly BoardRow[], sort: TableSort<SortBy>): BoardRow[] {
   // Which way round the column reads
   const direction = sort.ascending ? 1 : -1
 
@@ -235,21 +226,6 @@ function compareByStanding(first: BoardRow, second: BoardRow, direction: number)
 
   // Where they stand, and names where two are level
   return direction * compareStanding(first, second) || first.name.localeCompare(second.name)
-}
-
-/**
- * Works out the order after a column header is pressed.
- *
- * @param current - The order standing.
- * @param by - The column pressed.
- *
- * @returns The column already ordering the rows turned round; another one the way it first reads.
- */
-export function nextSort(current: BoardSort, by: SortBy): BoardSort {
-  // The same column, turned round, or a new one from where it naturally starts
-  return current.by === by
-    ? { by, ascending: !current.ascending }
-    : { by, ascending: STARTS_ASCENDING[by] }
 }
 
 /**

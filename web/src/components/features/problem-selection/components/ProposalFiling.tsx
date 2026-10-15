@@ -12,7 +12,7 @@ import { localeCodeList } from '@/i18n/i18n'
 
 import { useAreaName } from '../hooks/use-area-name'
 import { placementsOf, unreadyLanguages, unwrittenAcross } from '../model/selection-state'
-import type { Proposal, ProposalRating } from '../model/selection-types'
+import { type Proposal, type ProposalRating, RATING_ASPECTS } from '../model/selection-types'
 import { PlacementMark, RecommendedMarks, WARNING_MARK_CLASS } from './CategoryMarks'
 import { RatingBreakdown } from './RatingBreakdown'
 import { useLoadedSelection } from './SelectionWorkspaceProvider'
@@ -106,7 +106,10 @@ function RatingsMark({ ratings }: RatingsMarkProps) {
 
   // The count, opening every reviewer's scores
   return (
-    <Tooltip placement="top" content={<RatingBreakdown ratings={ratings} />}>
+    <Tooltip
+      placement="top"
+      content={<RatingBreakdown ratings={ratings} aspects={RATING_ASPECTS} />}
+    >
       <button
         type="button"
         aria-label={t('ratedBy', { count: ratings.length })}

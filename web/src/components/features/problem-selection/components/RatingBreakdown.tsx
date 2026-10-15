@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from 'next-intl'
 import { describeUser } from '@/components/features/profile/model/user-identity'
 
 import { averageScore } from '../model/selection-state'
-import { type ProposalRating, RATING_ASPECTS } from '../model/selection-types'
+import type { ProposalRating, RatingAspect } from '../model/selection-types'
 
 /** The most decimals an average shows. */
 const AVERAGE_FRACTION_DIGITS = 1
@@ -14,23 +14,25 @@ const AVERAGE_FRACTION_DIGITS = 1
  * Props for the {@link RatingBreakdown} component.
  */
 type RatingBreakdownProps = {
-  /** The problem's ratings, at least one. */
+  /** The problem's ratings, at least one scoring an aspect shown. */
   ratings: readonly ProposalRating[]
+  /** The aspects shown, in the order their columns read. */
+  aspects: readonly RatingAspect[]
 }
 
 /**
- * Who rated a problem and how, as a small table: a row per reviewer with the score they gave each aspect, then the
- * average of each aspect over the reviewers who scored it.
+ * Who rated a problem and how, as a small table: a row per reviewer who scored any aspect shown, with the score they
+ * gave each, then the average of each aspect over the reviewers who scored it.
  */
-export function RatingBreakdown({ ratings }: RatingBreakdownProps) {
+export function RatingBreakdown({ ratings, aspects }: RatingBreakdownProps) {
   // Rating copy
   const t = useTranslations('problemSelection.ratings')
 
   // Profile copy
   const tProfile = useTranslations('profile')
 
-  // Numbers in the reader's language
-  const format = useFormatter()
+  // The ratings scoring an aspect shown
+  const shown = ratings.filter((rating) => aspects.some((aspect) => rating[aspect] !== null))
 
   return (
     <table className="border-collapse text-xs hyphens-none">
@@ -40,7 +42,7 @@ export function RatingBreakdown({ ratings }: RatingBreakdownProps) {
           <th className="pr-3 text-left font-medium">
             <span className="sr-only">{t('name')}</span>
           </th>
-          {RATING_ASPECTS.map((aspect) => (
+          {aspects.map((aspect) => (
             <th key={aspect} className="px-1.5 text-right font-medium">
               {t(aspect)}
             </th>
@@ -50,12 +52,12 @@ export function RatingBreakdown({ ratings }: RatingBreakdownProps) {
 
       {/* A row per reviewer */}
       <tbody>
-        {ratings.map((rating) => (
+        {shown.map((rating) => (
           <tr key={rating.rater.id}>
             <th scope="row" className="pr-3 text-left font-normal">
               {describeUser(rating.rater, tProfile('defaultUser'))}
             </th>
-            {RATING_ASPECTS.map((aspect) => (
+            {aspects.map((aspect) => (
               <td key={aspect} className="px-1.5 text-right tabular-nums">
                 {rating[aspect] ?? <NoScore />}
               </td>
@@ -70,17 +72,13 @@ export function RatingBreakdown({ ratings }: RatingBreakdownProps) {
           <th scope="row" className="pt-0.5 pr-3 text-left font-medium">
             {t('average')}
           </th>
-          {RATING_ASPECTS.map((aspect) => {
+          {aspects.map((aspect) => {
             // The aspect's average, none while nobody has scored it
-            const average = averageScore(ratings, aspect)
+            const average = averageScore(shown, aspect)
 
             return (
               <td key={aspect} className="px-1.5 pt-0.5 text-right font-semibold tabular-nums">
-                {average === null ? (
-                  <NoScore />
-                ) : (
-                  format.number(average, { maximumFractionDigits: AVERAGE_FRACTION_DIGITS })
-                )}
+                {average === null ? <NoScore /> : <AverageScore average={average} />}
               </td>
             )
           })}
@@ -91,9 +89,28 @@ export function RatingBreakdown({ ratings }: RatingBreakdownProps) {
 }
 
 /**
- * The mark standing in for a missing number, a reviewer's score or an average.
+ * Props for the {@link AverageScore} component.
  */
-function NoScore() {
+type AverageScoreProps = {
+  /** The average. */
+  average: number
+}
+
+/**
+ * An average score, in the reader's language and rounded for reading.
+ */
+export function AverageScore({ average }: AverageScoreProps) {
+  // Numbers in the reader's language
+  const format = useFormatter()
+
+  // The average, rounded for reading
+  return format.number(average, { maximumFractionDigits: AVERAGE_FRACTION_DIGITS })
+}
+
+/**
+ * The mark standing in for a missing number.
+ */
+export function NoScore() {
   // A faint dash in the score's place
   return <span className="text-muted/50">–</span>
 }

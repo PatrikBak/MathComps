@@ -1335,9 +1335,11 @@
     },
     "paper": {
       "commentsTab": "Komentáre",
+      "noProblems": "V tejto sade zatiaľ nie je žiadna úloha.",
       "notFound": "Táto sada nie je na žiadnej zostave.",
       "placeholder": "Čo si myslíš o sade ako celku?",
       "problemsTab": "Úlohy",
+      "ratingsTab": "Ohodnotenia",
       "tabsLabel": "O tejto sade"
     },
     "picking": {
@@ -1359,14 +1361,25 @@
       "loading": "Načítavam úlohy",
       "search": "Hľadať úlohy",
       "searchPlaceholder": "Číslo, názov alebo text",
-      "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}"
+      "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}",
+      "views": {
+        "label": "Zobraziť ako",
+        "problems": "Úlohy",
+        "ratings": "Ohodnotenia"
+      }
     },
     "ratings": {
       "average": "Priemer",
       "beauty": "Krása",
+      "beautyShort": "K",
       "difficulty": "Náročnosť",
+      "difficultyShort": "N",
       "name": "Meno",
-      "ratedBy": "{count, plural, =1 {Ohodnotil # človek} =2 {Ohodnotili # ľudia} =3 {Ohodnotili # ľudia} =4 {Ohodnotili # ľudia} other {Ohodnotilo # ľudí}}"
+      "number": "Číslo",
+      "problem": "Úloha",
+      "ratedBy": "{count, plural, =1 {Ohodnotil # človek} =2 {Ohodnotili # ľudia} =3 {Ohodnotili # ľudia} =4 {Ohodnotili # ľudia} other {Ohodnotilo # ľudí}}",
+      "raters": "Počet ohodnotení",
+      "tableLabel": "Ohodnotenia úloh"
     },
     "text": {
       "fallback": "Zatiaľ chýba {missing}, zobrazuje sa {shown}.",

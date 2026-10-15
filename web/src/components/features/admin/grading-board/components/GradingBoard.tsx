@@ -1,8 +1,7 @@
 'use client'
 
-import { ArrowDown, ArrowUp, Check, CheckCheck } from 'lucide-react'
+import { Check, CheckCheck } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import type { ReactNode } from 'react'
 
 import { useCategoryName } from '@/components/features/hosted-competitions/hooks/use-category-name'
 import { useEntryWindowLabel } from '@/components/features/hosted-competitions/hooks/use-entry-window-label'
@@ -10,9 +9,11 @@ import { formatScore } from '@/components/features/hosted-competitions/model/hos
 import { Button, FOCUS_RING_CLASS } from '@/components/shared/components/Button'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
 import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
+import { SortHeader } from '@/components/shared/components/SortHeader'
 import { TruncatedText } from '@/components/shared/components/TruncatedText'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
+import type { TableSort } from '@/components/shared/utils/table-sort'
 import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
 import { useStepHotkeys } from '@/hooks/use-step-hotkeys'
 import type { Locale } from '@/i18n/i18n'
@@ -23,12 +24,11 @@ import { type ColumnToFinalize, useColumnFinalizing } from '../hooks/use-column-
 import { useGradingBoard } from '../hooks/use-grading-board'
 import {
   type BoardRow,
-  type BoardSort,
   type ColumnFinality,
   columnFinality,
-  nextSort,
   rankOf,
   type SortBy,
+  STARTS_ASCENDING,
 } from '../model/grading-board'
 import {
   type GradeSummary,
@@ -125,7 +125,7 @@ export function GradingBoard({ groupSlug }: GradingBoardProps) {
             rows={board.rows}
             grades={board.grades}
             sort={board.sort}
-            onSort={board.sortBy}
+            onSort={board.setSort}
             onOpen={board.selection.open}
             onFinalize={finalizing.ask}
           />
@@ -198,19 +198,9 @@ function GroupSubtitle({ group }: GroupSubtitleProps) {
 }
 
 /**
- * How the rows are ordered, and the way to change it.
- */
-type BoardSortControls = {
-  /** How the rows are ordered. */
-  sort: BoardSort
-  /** Orders the rows by a column, or turns the current order round. */
-  onSort: (by: SortBy) => void
-}
-
-/**
  * Props for the {@link GradingGrid} component.
  */
-type GradingGridProps = BoardSortControls & {
+type GradingGridProps = {
   /** The competition. */
   competition: GradingCompetition
   /** The competition's rows, in the order asked for. */
@@ -221,6 +211,10 @@ type GradingGridProps = BoardSortControls & {
   onOpen: (key: string) => void
   /** Asks to make a problem's column final. */
   onFinalize: (column: ColumnToFinalize) => void
+  /** How the rows are ordered. */
+  sort: TableSort<SortBy>
+  /** Orders the rows as asked. */
+  onSort: (sort: TableSort<SortBy>) => void
 }
 
 /**
@@ -244,38 +238,43 @@ function GradingGrid({
       <table className="w-full border-collapse text-xs hyphens-none sm:text-sm">
         <thead>
           <tr className="text-left text-[10px] uppercase tracking-wide text-muted sm:text-xs">
-            <th className="w-px whitespace-nowrap py-2 pl-5 pr-1 text-right font-medium sm:pl-6">
-              <SortHeader
-                label="#"
-                by="rank"
-                sort={sort}
-                onSort={onSort}
-                ariaLabel={t('rank')}
-                arrowBefore
-              />
-            </th>
-            <th className="w-full whitespace-nowrap py-2 pl-2 pr-2 font-medium sm:px-3">
-              <SortHeader label={t('student')} by="name" sort={sort} onSort={onSort} />
-            </th>
+            <SortHeader
+              label="#"
+              by="rank"
+              sort={sort}
+              startsAscending={STARTS_ASCENDING}
+              onSort={onSort}
+              className="w-px whitespace-nowrap py-2 pl-5 pr-1 text-right font-medium sm:pl-6"
+              ariaLabel={t('rank')}
+              arrowBefore
+            />
+            <SortHeader
+              label={t('student')}
+              by="name"
+              sort={sort}
+              startsAscending={STARTS_ASCENDING}
+              onSort={onSort}
+              className="w-full whitespace-nowrap py-2 pl-2 pr-2 font-medium sm:px-3"
+            />
             {competition.problems.map((problem) => (
               <th key={problem.id} className="w-px px-0.5 py-2 text-center font-medium sm:px-2">
                 {t('problem', { number: problem.number })}
               </th>
             ))}
-            <th className="w-px whitespace-nowrap py-2 pl-2 pr-5 text-center text-sm font-medium normal-case sm:pl-3 sm:pr-6">
-              <SortHeader
-                label={
-                  <abbr title={t('total')} className="no-underline">
-                    Σ
-                  </abbr>
-                }
-                by="total"
-                sort={sort}
-                onSort={onSort}
-                ariaLabel={t('total')}
-                className="normal-case"
-              />
-            </th>
+            <SortHeader
+              label={
+                <abbr title={t('total')} className="no-underline">
+                  Σ
+                </abbr>
+              }
+              by="total"
+              sort={sort}
+              startsAscending={STARTS_ASCENDING}
+              onSort={onSort}
+              className="w-px whitespace-nowrap py-2 pl-2 pr-5 text-center text-sm font-medium normal-case sm:pl-3 sm:pr-6"
+              ariaLabel={t('total')}
+              buttonClassName="normal-case"
+            />
           </tr>
         </thead>
         <tbody>
@@ -374,72 +373,6 @@ function GradingGrid({
         </tfoot>
       </table>
     </div>
-  )
-}
-
-/**
- * Props for the {@link SortHeader} component.
- */
-type SortHeaderProps = BoardSortControls & {
-  /** What the header reads. */
-  label: ReactNode
-  /** The column the header orders the rows by. */
-  by: SortBy
-  /** Whether the direction arrow hangs before the label, which a right-aligned column needs to keep it clear. */
-  arrowBefore?: boolean
-  /** What the header is called, where its label doesn't say it in words. */
-  ariaLabel?: string
-  /** Classes on top of the header's own. */
-  className?: string
-}
-
-/**
- * A column header which orders the rows, lit while it is the one ordering them. Its direction arrow hangs off the
- * label so the label stays over its column. On a header not ordering the rows the arrow is dimmed and points the
- * way a click would order them.
- */
-function SortHeader({
-  label,
-  by,
-  sort,
-  onSort,
-  arrowBefore = false,
-  ariaLabel,
-  className,
-}: SortHeaderProps) {
-  // Whether this header's column is the one ordering the rows
-  const isActive = sort.by === by
-
-  // Which way the arrow points: the order standing, or the one a click would bring
-  const ascending = isActive ? sort.ascending : nextSort(sort, by).ascending
-
-  return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      onClick={() => onSort(by)}
-      aria-pressed={isActive}
-      className={cn(
-        'relative uppercase tracking-wide transition-colors hover:text-foreground',
-        isActive && 'text-foreground',
-        className
-      )}
-    >
-      {label}
-      <span
-        className={cn(
-          'absolute top-1/2 -translate-y-1/2',
-          arrowBefore ? 'right-full mr-0.5' : 'left-full ml-0.5',
-          !isActive && 'opacity-30'
-        )}
-      >
-        {ascending ? (
-          <ArrowUp size={11} strokeWidth={2.5} aria-hidden />
-        ) : (
-          <ArrowDown size={11} strokeWidth={2.5} aria-hidden />
-        )}
-      </span>
-    </button>
   )
 }
 

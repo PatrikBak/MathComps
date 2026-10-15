@@ -2,16 +2,22 @@
 
 import { Search, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import type { ReactNode, RefObject } from 'react'
+import { type ReactNode, type RefObject, useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
+import { SegmentedSwitch } from '@/components/shared/components/SegmentedSwitch'
+import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { focusForReader } from '@/components/shared/utils/focus-utils'
+import type { TableSort } from '@/components/shared/utils/table-sort'
 import { useFocusHandOff } from '@/hooks/use-focus-hand-off'
 import type { Locale } from '@/i18n/i18n'
 
+import { usePoolViewMode } from '../hooks/use-pool-view-mode'
 import { countActiveFilters, matchPool } from '../model/pool-filters'
+import { DEFAULT_RATINGS_SORT, type RatingsColumn } from '../model/ratings-order'
+import { POOL_VIEWS, type PoolViewMode } from '../model/selection-routes'
 import type { Proposal } from '../model/selection-types'
 import { SlotNumber } from './CategoryMarks'
 import { LanguageSwitch } from './LanguageSwitch'
@@ -20,6 +26,7 @@ import { PoolFilterBar } from './PoolFilterBar'
 import { ProposalActionsMenu } from './ProposalActionsMenu'
 import { ProposalCard } from './ProposalCard'
 import { ProposalFiling } from './ProposalFiling'
+import { RatingsTable } from './RatingsTable'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
@@ -33,9 +40,9 @@ type PoolViewProps = {
 }
 
 /**
- * The pool: every problem no round has taken, live or set aside, filtered and read statement by statement. Its
- * language switch keeps every language in reach, since a {@link PoolCard} lacking the one picked shows another the
- * problem has.
+ * The pool: every problem no round has taken, live or set aside, filtered and read statement by statement, or laid
+ * out as a table of their ratings. Its language switch keeps every language in reach, since a {@link PoolCard}
+ * lacking the one picked shows another the problem has.
  */
 export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // Pool copy
@@ -66,10 +73,22 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
         ? t('setAsideCount', { count: matches.shown.length })
         : tPlurals('problems', { count: matches.shown.length })
 
+  // How the pool lays out its problems, and the way to change it
+  const { mode, showMode } = usePoolViewMode()
+
+  // What each way of laying out the problems is called
+  const modeLabels: Record<PoolViewMode, string> = {
+    problems: t('views.problems'),
+    ratings: t('views.ratings'),
+  }
+
   // Why nothing shows: the filters hiding problems, or no problem there to hide, in the view on screen
   const emptyLine = filters.filter.isShowingSetAside
     ? t(isNarrowed ? 'emptySetAsideFiltered' : 'emptySetAside')
     : t(isNarrowed ? 'empty' : 'emptyPool')
+
+  // How the ratings table orders its rows, kept while nothing matches and while the cards show
+  const [ratingsSort, setRatingsSort] = useState(DEFAULT_RATINGS_SORT)
 
   return (
     <div>
@@ -105,16 +124,27 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
       {/* The slot waiting for a problem, kept in view while scrolling */}
       <WaitingBanner countRef={countRef} />
 
-      {/* How many made it through, or a loading line until the pool arrives */}
-      <p
-        ref={countRef}
-        // Takes the focus when whatever held it goes with nothing in its place, so a reader's next Tab goes on to the
-        // problems
-        tabIndex={-1}
-        className="mt-4 mb-3 text-sm text-muted focus:outline-none"
-      >
-        {countLine}
-      </p>
+      {/* How many made it through or a loading line, and the way the problems are laid out */}
+      <div className="mt-4 mb-3 flex items-center justify-between gap-3">
+        <p
+          ref={countRef}
+          // Takes the focus when whatever held it goes with nothing in its place, so a reader's next Tab goes on from
+          // here
+          tabIndex={-1}
+          className="text-sm text-muted focus:outline-none"
+        >
+          {countLine}
+        </p>
+        <SegmentedSwitch
+          value={mode}
+          onChange={showMode}
+          ariaLabel={t('views.label')}
+          options={POOL_VIEWS.map((candidate) => ({
+            value: candidate,
+            label: modeLabels[candidate],
+          }))}
+        />
+      </div>
 
       {/* The problems, or whatever stands in for them */}
       {matches === null ? (
@@ -130,17 +160,78 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
           <p className="text-sm text-muted">{emptyLine}</p>
         </div>
       ) : (
-        // A card for every problem the filters let through
+        // Every problem the filters let through, laid out as asked
+        <PoolProblems
+          mode={mode}
+          proposals={matches.shown}
+          language={language}
+          countRef={countRef}
+          ratingsSort={ratingsSort}
+          onRatingsSort={setRatingsSort}
+        />
+      )}
+    </div>
+  )
+}
+
+/**
+ * Props for the {@link PoolProblems} component.
+ */
+type PoolProblemsProps = {
+  /** How the problems are laid out. */
+  mode: PoolViewMode
+  /** The problems the filters let through, at least one. */
+  proposals: readonly Proposal[]
+  /** The language the problems are read in. */
+  language: Locale
+  /** The line saying how many problems show. */
+  countRef: RefObject<HTMLParagraphElement | null>
+  /** How the ratings table orders its rows. */
+  ratingsSort: TableSort<RatingsColumn>
+  /** Orders the ratings table's rows as asked. */
+  onRatingsSort: (sort: TableSort<RatingsColumn>) => void
+}
+
+/**
+ * The problems the filters let through, as a card each or as a table of their ratings.
+ */
+function PoolProblems({
+  mode,
+  proposals,
+  language,
+  countRef,
+  ratingsSort,
+  onRatingsSort,
+}: PoolProblemsProps) {
+  // The layout asked for
+  switch (mode) {
+    // A card for every problem
+    case 'problems':
+      return (
         <div className="space-y-4">
-          {matches.shown.map((proposal) => (
+          {proposals.map((proposal) => (
             <PoolEntry key={proposal.id} countRef={countRef}>
               <PoolCard proposal={proposal} language={language} />
             </PoolEntry>
           ))}
         </div>
-      )}
-    </div>
-  )
+      )
+
+    // A row for every problem, with its ratings
+    case 'ratings':
+      return (
+        <RatingsTable
+          proposals={proposals}
+          sort={ratingsSort}
+          onSort={onRatingsSort}
+          fallbackRef={countRef}
+        />
+      )
+
+    // Every layout is handled above
+    default:
+      return assertNever(mode)
+  }
 }
 
 /**
@@ -160,7 +251,7 @@ type PoolEntryProps = {
  */
 function PoolEntry({ countRef, children }: PoolEntryProps) {
   // The focus handed on as the card leaves holding it
-  const handOff = useFocusHandOff(countRef)
+  const handOff = useFocusHandOff<HTMLDivElement>(countRef)
 
   return <div {...handOff}>{children}</div>
 }

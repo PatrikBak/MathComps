@@ -11,6 +11,8 @@ import type {
   Cycle,
   Paper,
   Proposal,
+  ProposalRating,
+  RatingScore,
   ReviewConversation,
   SelectionData,
 } from '@/components/features/problem-selection/model/selection-types'
@@ -184,21 +186,34 @@ export const USED = proposalNumbered(7, { isUsed: true, texts: textsInEveryLangu
 export const OTHER_RATER = 'Martin'
 
 /**
+ * A rating {@link OTHER_RATER} gave.
+ *
+ * @param beauty - The beauty given; null for none.
+ * @param difficulty - The difficulty given; null for none.
+ *
+ * @returns The rating.
+ */
+function ratingByOtherRater(
+  beauty: RatingScore | null,
+  difficulty: RatingScore | null
+): ProposalRating {
+  // The rating, from a reviewer who is not the reader
+  return {
+    rater: { id: 'other-rater', username: OTHER_RATER, email: null },
+    isOwn: false,
+    beauty,
+    difficulty,
+  }
+}
+
+/**
  * The pool's one algebra problem, recommended for the elementary category and the intermediate one, rated by
  * {@link OTHER_RATER} on its beauty alone and by {@link READER} on its beauty and its difficulty.
  */
 export const ALGEBRA = proposalNumbered(8, {
   area: 'algebra',
   recommended: ['elementary', 'intermediate'],
-  ratings: [
-    {
-      rater: { id: 'other-rater', username: OTHER_RATER, email: null },
-      isOwn: false,
-      beauty: 4,
-      difficulty: null,
-    },
-    { rater: READER, isOwn: true, beauty: 5, difficulty: 2 },
-  ],
+  ratings: [ratingByOtherRater(4, null), { rater: READER, isOwn: true, beauty: 5, difficulty: 2 }],
 })
 
 /** Every problem the selection holds, lowest number first, {@link SET_ASIDE} and {@link USED} among them. */
@@ -214,8 +229,29 @@ const SELECTION: Proposal[] = [
   UNWRITTEN,
 ]
 
-/** How many problems the pool offers: every one in the selection neither set aside nor taken by a round. */
-export const ON_OFFER_COUNT = 7
+/**
+ * The ratings {@link OTHER_RATER} has given since the selection was first read, besides {@link ALGEBRA}'s, by the
+ * problem rated.
+ */
+const LATER_RATINGS = new Map<Proposal, ProposalRating[]>([
+  [BILINGUAL, [ratingByOtherRater(5, null)]],
+  [GEOMETRY, [ratingByOtherRater(3, 5)]],
+])
+
+/** Every problem the selection holds once {@link OTHER_RATER} has given {@link LATER_RATINGS}. */
+const RATED_SELECTION: Proposal[] = SELECTION.map((proposal) => ({
+  ...proposal,
+  ratings: LATER_RATINGS.get(proposal) ?? proposal.ratings,
+}))
+
+/**
+ * Every problem the pool offers, lowest number first: each one in the selection neither set aside nor taken by a
+ * round.
+ */
+export const ON_OFFER = [FIRST, BILINGUAL, OPENED, READY, GEOMETRY, ALGEBRA, UNWRITTEN]
+
+/** How many problems the pool offers. */
+export const ON_OFFER_COUNT = ON_OFFER.length
 
 /**
  * One paper on a board, its slots naming their problems by id as the backend sends them.
@@ -734,6 +770,11 @@ type SelectionReply =
   | 'later'
   /** With every problem in the selection, one of them revised in English, and the conversations about them. */
   | 'revisedInEnglish'
+  /**
+   * With every problem in the selection, {@link LATER_RATINGS} among their ratings, and the conversations about
+   * them.
+   */
+  | 'rated'
   /** With every problem in the selection, and {@link FULL_DRAFT} ahead of {@link LATER_DRAFT} as the only boards. */
   | 'fullDraft'
   /** With {@link FULL_DRAFT} finalized meanwhile, its round having taken {@link READY}. */
@@ -784,6 +825,10 @@ function selectionHeldAt(reply: SelectionReply): HeldSelection {
         boards: BOARDS,
         cycles: CYCLES,
       }
+
+    // Every problem as first read, but for the ratings given since
+    case 'rated':
+      return { proposals: RATED_SELECTION, boards: BOARDS, cycles: CYCLES }
 
     // Every problem as first read, and the full draft ahead of the later one
     case 'fullDraft':
@@ -934,6 +979,7 @@ export async function stubSelection(
       case 'selection':
       case 'later':
       case 'revisedInEnglish':
+      case 'rated':
       case 'fullDraft':
       case 'fullDraftFinalized':
       case 'fullDraftOpened':

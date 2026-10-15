@@ -1335,9 +1335,11 @@
     },
     "paper": {
       "commentsTab": "Comments",
+      "noProblems": "This paper has no problems yet.",
       "notFound": "This paper is on no board.",
       "placeholder": "What do you think of the paper as a whole?",
       "problemsTab": "Problems",
+      "ratingsTab": "Ratings",
       "tabsLabel": "About this paper"
     },
     "picking": {
@@ -1359,14 +1361,25 @@
       "loading": "Loading the pool",
       "search": "Search the pool",
       "searchPlaceholder": "Number, name or text",
-      "setAsideCount": "{count, plural, one {# problem set aside} other {# problems set aside}}"
+      "setAsideCount": "{count, plural, one {# problem set aside} other {# problems set aside}}",
+      "views": {
+        "label": "Show as",
+        "problems": "Problems",
+        "ratings": "Ratings"
+      }
     },
     "ratings": {
       "average": "Average",
       "beauty": "Beauty",
+      "beautyShort": "B",
       "difficulty": "Difficulty",
+      "difficultyShort": "D",
       "name": "Name",
-      "ratedBy": "{count, plural, =1 {Rated by # person} other {Rated by # people}}"
+      "number": "Number",
+      "problem": "Problem",
+      "ratedBy": "{count, plural, =1 {Rated by # person} other {Rated by # people}}",
+      "raters": "Raters",
+      "tableLabel": "Problem ratings"
     },
     "text": {
       "fallback": "Not in {missing} yet, showing {shown}.",

@@ -9,13 +9,22 @@ export const OPEN_PROPOSAL_PARAM = 'problem'
 export const OPEN_PAPER_PARAM = 'paper'
 
 /** The query parameter naming the tab a page opens on. */
-const DETAIL_TAB_PARAM = 'tab'
+export const DETAIL_TAB_PARAM = 'tab'
 
 /** The query parameter naming the conversation open over a problem's page. */
 export const OPEN_CONVERSATION_PARAM = 'conversation'
 
 /** Every query parameter the conversation open over a problem's page owns. */
 export const CONVERSATION_PARAMS = [OPEN_CONVERSATION_PARAM] as const
+
+/** The query parameter naming how the pool lays out its problems. */
+export const POOL_VIEW_PARAM = 'view'
+
+/** The ways the pool lays out its problems, the first being the one it shows by default. */
+export const POOL_VIEWS = ['problems', 'ratings'] as const
+
+/** One way the pool lays out its problems. */
+export type PoolViewMode = (typeof POOL_VIEWS)[number]
 
 /** Every query parameter the page open over the pool owns. */
 export const DETAIL_PARAMS = [
@@ -32,7 +41,7 @@ export const PROPOSAL_TABS = ['conversations', 'comments'] as const
 export type ProposalTab = (typeof PROPOSAL_TABS)[number]
 
 /** The tabs of a paper's page, the first being the one a paper opens on by default. */
-export const PAPER_TABS = ['problems', 'comments'] as const
+export const PAPER_TABS = ['problems', 'comments', 'ratings'] as const
 
 /** One tab of a paper's page. */
 export type PaperTab = (typeof PAPER_TABS)[number]
