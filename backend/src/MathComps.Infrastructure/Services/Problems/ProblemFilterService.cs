@@ -7,6 +7,7 @@ using MathComps.Infrastructure.Options;
 using MathComps.Infrastructure.Pagination;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Localization;
+using MathComps.Infrastructure.Services.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
@@ -21,21 +22,28 @@ namespace MathComps.Infrastructure.Services.Problems;
 /// counts beside it are separate queries over one filtered set, the page projected to its DTO in the database.
 /// </summary>
 /// <param name="dbContext">Database context for accessing problem entities and related data</param>
+/// <param name="userListService">Service for managing user problem lists</param>
+/// <param name="localization">Service for resolving localized metadata display names</param>
 /// <param name="paginationOptions">Configuration options for pagination limits and defaults</param>
 /// <param name="similarityOptions">Configuration options for similarity scoring thresholds and limits</param>
-/// <param name="localization">Service for resolving localized metadata display names</param>
 public class ProblemFilterService(
     MathCompsDbContext dbContext,
+    IUserListService userListService,
+    IMetadataLocalizationService localization,
     IOptionsSnapshot<PaginationOptions> paginationOptions,
-    IOptionsSnapshot<SimilarityOptions> similarityOptions,
-    IMetadataLocalizationService localization) : IProblemFilterService
+    IOptionsSnapshot<SimilarityOptions> similarityOptions) : IProblemFilterService
 {
     /// <inheritdoc/>
-    public async Task<FilterResult> FilterAsync(ProblemFilterOptions options)
+    public async Task<ProblemFilterResponse> FilterAsync(ProblemFilterOptions options)
     {
         // Convenient deconstruct
         var ((parameters, pageSize, pageNumber, favoritesOnly, includeBaseOptions, listContentId, markStatus),
             userId, language) = options;
+
+        // The name of the list the query narrows to, read first so the run stops at a list the caller can't read
+        var listName = listContentId is null
+            ? null
+            : await userListService.GetReadableListNameAsync(userId, listContentId);
 
         // The page as it will be served, which is how much of the filtered set one request can ask for.
         var bounds = PageBounds.ForRequestedPage(paginationOptions.Value, pageSize, pageNumber);
@@ -233,8 +241,8 @@ public class ProblemFilterService(
             ? await BuildSearchOptionsAsync(textFilteredQuery, parameters, terms, language)
             : null;
 
-        // Return the complete filter result
-        return new FilterResult(pagedResults, baseOptions, updatedOptions);
+        // Return the page and its options, beside the name of any list they narrowed to
+        return new ProblemFilterResponse(new FilterResult(pagedResults, baseOptions, updatedOptions), listName);
     }
 
     /// <summary>
@@ -353,7 +361,7 @@ public class ProblemFilterService(
         // If filtering by a specific user list...
         if (listContentId is not null)
         {
-            // Filter to problems in the specified list (assuming user has access and this has been validated)
+            // Filter to problems in the specified list, which the run has already checked the caller can read
             problems = problems.Where(problem =>
                 problem.UserProblemListItems.Any(item =>
                     item.List.ContentId == listContentId

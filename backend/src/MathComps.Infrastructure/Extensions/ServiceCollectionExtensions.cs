@@ -172,6 +172,9 @@ public static class ServiceCollectionExtensions
         services.TryAddScoped<IProblemFilterService, ProblemFilterService>();
         services.TryAddScoped<IProblemLookupService, ProblemLookupService>();
 
+        // The filter checks the caller can read a list it narrows to, so bring the list service along
+        services.TryAddScoped<IUserListService, UserListService>();
+
         // Builder pattern
         return services;
     }

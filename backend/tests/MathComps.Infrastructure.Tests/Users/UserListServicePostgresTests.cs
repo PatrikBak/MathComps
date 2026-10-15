@@ -1,5 +1,4 @@
 using MathComps.Infrastructure.Tests.TestInfrastructure;
-using MathComps.Domain.Contracts.UserLists;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
@@ -521,87 +520,78 @@ public class UserListServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
-    /// Verifies that CheckListAccessAsync returns HasAccess for the owner.
+    /// The owner reads their own list even while it is not shared.
     /// </summary>
     [Fact]
-    public Task CheckListAccessAsync_OwnerHasAccess() => RunTestAsync(async service =>
+    public Task GetReadableListNameAsync_OwnerReadsPrivateList() => RunTestAsync(async service =>
     {
-        // Arrange — create a private list
+        // A list its owner hasn't shared
         var list = await service.CreateListAsync(_user1Id, "My List");
 
-        // Act
-        var access = await service.CheckListAccessAsync(_user1Id, list.ContentId);
+        // Its owner asks for it
+        var name = await service.GetReadableListNameAsync(_user1Id, list.ContentId);
 
-        // Assert — owner always has access and sees the list name
-        Assert.Equal(ListAccessStatus.HasAccess, access.Status);
-        Assert.Equal("My List", access.ListName);
+        // The owner gets its name
+        Assert.Equal("My List", name);
     });
 
     /// <summary>
-    /// Verifies that CheckListAccessAsync returns HasAccess for a shared list accessed by another user.
+    /// A shared list is readable by a user who doesn't own it.
     /// </summary>
     [Fact]
-    public Task CheckListAccessAsync_SharedListAccessibleByOthers() => RunTestAsync(async service =>
+    public Task GetReadableListNameAsync_SharedListReadableByOthers() => RunTestAsync(async service =>
     {
-        // Arrange — create and share a list
+        // A list its owner has shared
         var list = await service.CreateListAsync(_user1Id, "Shared List");
         await service.SetSharingAsync(_user1Id, list.ContentId, enabled: true);
 
-        // Act — another user checks access
-        var access = await service.CheckListAccessAsync(_user2Id, list.ContentId);
+        // Another user asks for it
+        var name = await service.GetReadableListNameAsync(_user2Id, list.ContentId);
 
-        // Assert — another user can access and sees the list name
-        Assert.Equal(ListAccessStatus.HasAccess, access.Status);
-        Assert.Equal("Shared List", access.ListName);
+        // They get its name
+        Assert.Equal("Shared List", name);
     });
 
     /// <summary>
-    /// Verifies that CheckListAccessAsync returns HasAccess for anonymous access to a shared list.
+    /// A shared list is readable by an anonymous visitor.
     /// </summary>
     [Fact]
-    public Task CheckListAccessAsync_SharedListAccessibleAnonymously() => RunTestAsync(async service =>
+    public Task GetReadableListNameAsync_SharedListReadableAnonymously() => RunTestAsync(async service =>
     {
-        // Arrange — create and share a list
+        // A list its owner has shared
         var list = await service.CreateListAsync(_user1Id, "Shared List");
         await service.SetSharingAsync(_user1Id, list.ContentId, enabled: true);
 
-        // Act — anonymous access (null userId)
-        var access = await service.CheckListAccessAsync(null, list.ContentId);
+        // An anonymous visitor asks for it
+        var name = await service.GetReadableListNameAsync(null, list.ContentId);
 
-        // Assert — anonymous can access and sees the list name
-        Assert.Equal(ListAccessStatus.HasAccess, access.Status);
-        Assert.Equal("Shared List", access.ListName);
+        // They get its name
+        Assert.Equal("Shared List", name);
     });
 
     /// <summary>
-    /// Verifies that CheckListAccessAsync returns NoAccess for a private list accessed by another user.
+    /// Someone else's list that is not shared is refused.
     /// </summary>
     [Fact]
-    public Task CheckListAccessAsync_PrivateListDeniesOthers() => RunTestAsync(async service =>
+    public Task GetReadableListNameAsync_PrivateListDeniesOthers() => RunTestAsync(async service =>
     {
-        // Arrange — create a private list
+        // A list its owner hasn't shared
         var list = await service.CreateListAsync(_user1Id, "Private List");
 
-        // Act — another user checks access
-        var access = await service.CheckListAccessAsync(_user2Id, list.ContentId);
-
-        // Assert — no access, no name
-        Assert.Equal(ListAccessStatus.NoAccess, access.Status);
-        Assert.Null(access.ListName);
+        // Another user asking for it is refused
+        await Assert.ThrowsAsync<ListAccessDeniedException>(
+            () => service.GetReadableListNameAsync(_user2Id, list.ContentId));
     });
 
     /// <summary>
-    /// Verifies that CheckListAccessAsync returns NotFound for a non-existent list.
+    /// A content ID no list goes by is refused as a missing list.
     /// </summary>
     [Fact]
-    public Task CheckListAccessAsync_ReturnsNotFoundForMissingList() => RunTestAsync(async service =>
+    public Task GetReadableListNameAsync_ThrowsWhenListNotFound() => RunTestAsync(async service =>
     {
-        // Act
-        var access = await service.CheckListAccessAsync(_user1Id, "nonexistent");
-
-        // Assert — not found, no name
-        Assert.Equal(ListAccessStatus.NotFound, access.Status);
-        Assert.Null(access.ListName);
+        // Asking for a list nobody has is refused as missing
+        await Assert.ThrowsAsync<ListNotFoundException>(
+            () => service.GetReadableListNameAsync(_user1Id, "nonexistent"));
     });
 
     #endregion Sharing Tests

@@ -1,6 +1,7 @@
 using MathComps.Domain.Contracts.ProblemQuery;
 using MathComps.Domain.Contracts.SearchBar;
 using MathComps.Domain.Localization;
+using MathComps.Infrastructure.Services.Users;
 
 namespace MathComps.Infrastructure.Services.Problems;
 
@@ -15,8 +16,14 @@ public interface IProblemFilterService
     /// refreshed facet options with counts for the search bar.
     /// </summary>
     /// <param name="options">Complete options containing selected filters, sort, paging, and user context.</param>
-    /// <returns>Filtered page of problems and optionally updated facet options.</returns>
-    Task<FilterResult> FilterAsync(ProblemFilterOptions options);
+    /// <returns>
+    /// Filtered page of problems, optionally updated facet options, and the name of the list the query narrows to.
+    /// </returns>
+    /// <exception cref="ListNotFoundException">The query narrows to a list that does not exist.</exception>
+    /// <exception cref="ListAccessDeniedException">The query narrows to someone else's list that is not shared.</exception>
+    /// <exception cref="FavoritesRequireAuthenticationException">The query asks for favorites anonymously.</exception>
+    /// <exception cref="MarkStatusRequiresAuthenticationException">The query asks for a mark status anonymously.</exception>
+    Task<ProblemFilterResponse> FilterAsync(ProblemFilterOptions options);
 
     /// <summary>
     /// Gets all competitions grouped by season with problem counts for the competition browser.

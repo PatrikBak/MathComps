@@ -1,7 +1,6 @@
 using MathComps.Api.Constants;
 using MathComps.Domain.Contracts.Helpers;
 using MathComps.Domain.Contracts.ProblemQuery;
-using MathComps.Domain.Contracts.UserLists;
 using MathComps.Infrastructure.Services.Problems;
 using MathComps.Infrastructure.Services.Users;
 
@@ -26,36 +25,10 @@ public static class ProblemEndpoints
     {
         // The endpoint for doing problem archive filtering
         // Allows anonymous access but provides personalized data if authenticated
-        app.MapPost($"{ProblemsPath}/filter", async (FilterQuery query, HttpContext context, IUserManager userManager, IProblemFilterService problemService, IUserListService userListService) =>
+        app.MapPost($"{ProblemsPath}/filter", async (FilterQuery query, HttpContext context, IUserManager userManager, IProblemFilterService problemService) =>
         {
             // Get user ID (optional)
             var userId = await userManager.GetUserIdAsync(context);
-
-            // Track the list name for the response (populated when filtering by a specific list)
-            string? listName = null;
-
-            // If filtering by a specific list...
-            if (query.ListContentId is not null)
-            {
-                // Check if the user can access the list
-                var accessResult = await userListService.CheckListAccessAsync(userId, query.ListContentId);
-
-                // Capture the accessible list's name, or fail with the mapped error
-                listName = accessResult.Status switch
-                {
-                    // User can access the list — its name rides on the response
-                    ListAccessStatus.HasAccess => accessResult.ListName,
-
-                    // Bad list id
-                    ListAccessStatus.NotFound => throw new ListNotFoundException(query.ListContentId),
-
-                    // User doesn't own this private list
-                    ListAccessStatus.NoAccess => throw new ListAccessDeniedException(query.ListContentId),
-
-                    // The enum is closed; a new member is a bug
-                    _ => throw new InvalidOperationException("Unexpected ListAccessStatus")
-                };
-            }
 
             // Detect language from Accept-Language header
             var language = EndpointHelpers.GetRequestLanguage();
@@ -64,10 +37,7 @@ public static class ProblemEndpoints
             var options = new ProblemFilterOptions(query, userId, language);
 
             // Delegate to service
-            var filterResult = await problemService.FilterAsync(options);
-
-            // Wrap with list metadata for the API response
-            return Results.Ok(new ProblemFilterResponse(filterResult, listName));
+            return Results.Ok(await problemService.FilterAsync(options));
         })
         // Apply search-specific rate limiting
         .RequireRateLimiting(RateLimiterPolicies.SearchRateLimit);
@@ -131,8 +101,8 @@ public static class ProblemEndpoints
                 language
             );
 
-            // Delegate to service
-            var filterResult = await filterService.FilterAsync(filterOptions);
+            // Delegate to service, keeping only the page, since no list narrows a single problem
+            var (filterResult, _) = await filterService.FilterAsync(filterOptions);
 
             // The problem alongside the filters it was fetched under
             return Results.Ok(new SingleProblemResponse(filterResult, lookupResult));

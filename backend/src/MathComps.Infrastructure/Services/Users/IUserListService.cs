@@ -72,12 +72,14 @@ public interface IUserListService
     Task<UserListDto> SetSharingAsync(Guid userId, string contentId, bool enabled);
 
     /// <summary>
-    /// Checks whether a user (or anonymous visitor) can access a list.
+    /// Gets the name of a list the caller can read, which is one they own or one that is shared.
     /// </summary>
     /// <param name="userId">The internal ID of the user, or null for anonymous access.</param>
     /// <param name="contentId">The content ID of the list.</param>
-    /// <returns>The access result indicating whether the list exists and is accessible.</returns>
-    Task<ListAccessResult> CheckListAccessAsync(Guid? userId, string contentId);
+    /// <returns>The list's display name.</returns>
+    /// <exception cref="ListNotFoundException">No list goes by the content ID.</exception>
+    /// <exception cref="ListAccessDeniedException">The list is someone else's and is not shared.</exception>
+    Task<string> GetReadableListNameAsync(Guid? userId, string contentId);
 }
 
 /// <summary>

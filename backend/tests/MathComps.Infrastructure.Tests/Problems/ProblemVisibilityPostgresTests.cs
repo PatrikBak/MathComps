@@ -65,7 +65,7 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
     public Task A_hidden_rounds_problems_are_absent_from_the_page() => RunTestAsync(async service =>
     {
         // Ask the library for everything it holds
-        var result = await service.FilterAsync(EverythingQuery());
+        var (result, _) = await service.FilterAsync(EverythingQuery());
 
         // Only the unstamped and the opened round answer
         Assert.Equal([OpenSlug, OpenedSlug], result.Problems.Items.Select(problem => problem.Slug).Order());
@@ -82,7 +82,7 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
     public Task A_text_search_does_not_find_a_proposal() => RunTestAsync(async service =>
     {
         // Search for a word only the proposal's statement holds
-        var result = await service.FilterAsync(EverythingQuery("kladné"));
+        var (result, _) = await service.FilterAsync(EverythingQuery("kladné"));
 
         // Nothing answers
         Assert.Equal(0, result.Problems.TotalCount);
@@ -96,7 +96,7 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
     public Task No_facet_counts_a_hidden_rounds_problems() => RunTestAsync(async service =>
     {
         // Ask the library for everything it holds, which is the request that builds the base options
-        var result = await service.FilterAsync(EverythingQuery());
+        var (result, _) = await service.FilterAsync(EverythingQuery());
 
         // The base options are built on a first-page request that asks for them
         Assert.NotNull(result.BaseOptions);
@@ -176,7 +176,7 @@ public class ProblemVisibilityPostgresTests(PostgresContainerFixture fixture)
     public Task A_similar_problem_edge_does_not_surface_a_hidden_neighbour() => RunTestAsync(async service =>
     {
         // Ask the library for everything it holds
-        var result = await service.FilterAsync(EverythingQuery());
+        var (result, _) = await service.FilterAsync(EverythingQuery());
 
         // The problem every edge hangs off
         var open = result.Problems.Items.Single(problem => problem.Slug == OpenSlug);
