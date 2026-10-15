@@ -19,6 +19,15 @@ namespace MathComps.Infrastructure.Services.Comments;
 public interface ICommentService
 {
     /// <summary>
+    /// The most characters one comment may carry, counted on its markdown once the whitespace around it is trimmed.
+    /// </summary>
+    /// <remarks>
+    /// The frontend keeps its own copy in <c>comment-limits.ts</c>, to count a comment against it while it is still
+    /// being written, and <c>CommentRuleParityTests</c> is what stops the two drifting.
+    /// </remarks>
+    const int MaxCommentChars = 5_000;
+
+    /// <summary>
     /// Reads a target's thread as a tree of replies. A version an edit has replaced is left out, and a deleted
     /// comment comes back with its content emptied.
     /// </summary>
@@ -28,10 +37,12 @@ public interface ICommentService
     Task<ImmutableList<CommentDto>> GetCommentsAsync(CommentTarget target, CommentViewer? viewer);
 
     /// <summary>
-    /// Creates a new comment or reply. A reply whose parent sits in another thread or is deleted is refused as
-    /// though the parent did not exist, and an author with no username to sign it with is refused with
-    /// <see cref="CommentProfileIncompleteException"/>. A message in a grade conversation is queued to be mailed to
-    /// the other side of it, a grader's only while the student can see the conversation.
+    /// Creates a new comment or reply, stored without the whitespace around it. Content with no text, or with more
+    /// than <see cref="MaxCommentChars"/> characters, is refused with <see cref="CommentValueException"/>. A reply
+    /// whose parent sits in another thread or is deleted is refused as though the parent did not exist, and an author
+    /// with no username to sign it with is refused with <see cref="CommentProfileIncompleteException"/>. A message in
+    /// a grade conversation is queued to be mailed to the other side of it, a grader's only while the student can see
+    /// the conversation.
     /// </summary>
     /// <param name="target">The target of the comment.</param>
     /// <param name="viewer">The user creating the comment.</param>
@@ -42,9 +53,11 @@ public interface ICommentService
         CommentTarget target, CommentViewer viewer, string content, Guid? parentCommentId = null);
 
     /// <summary>
-    /// Edits a comment by writing a new version of it. The new version stays in the thread the comment was
-    /// written in and keeps its replies, its reactions, its posting time and any mail still owed about it, and queues
-    /// none of its own. A deleted comment is refused as though it did not exist.
+    /// Edits a comment by writing a new version of it, stored without the whitespace around it. Content with no text,
+    /// or with more than <see cref="MaxCommentChars"/> characters, is refused with <see cref="CommentValueException"/>.
+    /// The new version stays in the thread the comment was written in and keeps its replies, its reactions, its
+    /// posting time and any mail still owed about it, and queues none of its own. A deleted comment is refused as
+    /// though it did not exist.
     /// </summary>
     /// <param name="commentId">The ID of the comment to update.</param>
     /// <param name="viewer">The user making the edit (must be the author).</param>
@@ -110,3 +123,9 @@ public sealed class CannotReactToOwnCommentException() : Exception("You cannot r
 /// Thrown when a comment is written from an account with no username to sign it.
 /// </summary>
 public sealed class CommentProfileIncompleteException() : Exception("A comment needs a username to sign it");
+
+/// <summary>
+/// Thrown when a comment carries content the contract can't take: no text at all, or more than
+/// <see cref="ICommentService.MaxCommentChars"/> characters.
+/// </summary>
+public sealed class CommentValueException() : Exception("The comment is not valid");

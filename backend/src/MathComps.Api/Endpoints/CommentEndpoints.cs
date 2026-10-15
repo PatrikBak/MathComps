@@ -72,18 +72,22 @@ public static class CommentEndpoints
             IUserManager userManager,
             ICommentService commentService) =>
         {
-            // A comment saying nothing says nothing
-            if (string.IsNullOrWhiteSpace(request.Content))
-                throw new BadHttpRequestException("A comment must say something.");
+            // A body naming no target has nowhere to post the comment
+            if (request.Target is not { } target)
+                throw new BadHttpRequestException("A comment must name its target.");
+
+            // A body carrying no content names nothing to post
+            if (request.Content is not { } content)
+                throw new BadHttpRequestException("A comment must carry its content.");
 
             // Resolve the caller, faulting when the request has no user behind it
             var viewer = await RequireViewerAsync(userManager, context);
 
             // Create comment
             var comment = await commentService.CreateCommentAsync(
-                request.Target,
+                target,
                 viewer,
-                request.Content,
+                content,
                 request.ParentCommentId);
 
             // Return the created comment
@@ -100,9 +104,9 @@ public static class CommentEndpoints
             IUserManager userManager,
             ICommentService commentService) =>
         {
-            // A comment saying nothing says nothing
-            if (string.IsNullOrWhiteSpace(request.Content))
-                throw new BadHttpRequestException("A comment must say something.");
+            // A body carrying no content names nothing to rewrite the comment to
+            if (request.Content is not { } content)
+                throw new BadHttpRequestException("An edit must carry the new content.");
 
             // Resolve the caller, faulting when the request has no user behind it
             var viewer = await RequireViewerAsync(userManager, context);
@@ -111,7 +115,7 @@ public static class CommentEndpoints
             var updatedCommentData = await commentService.UpdateCommentAsync(
                 id,
                 viewer,
-                request.Content);
+                content);
 
             // Return the new version's id and edit time
             return Results.Ok(updatedCommentData);

@@ -1,6 +1,7 @@
 import type { JwtPayload } from '@clerk/types'
 import type { Locator, Page, Request, Route } from '@playwright/test'
 
+import { MAX_CHARACTERS_PER_COMMENT } from '@/components/features/comments/model/comment-limits'
 import type {
   CommentDto,
   CommentReactionKind,
@@ -279,6 +280,21 @@ export function commentBy(page: Page, author: string, content: string): Locator 
 }
 
 /**
+ * Whether the backend refuses what a comment says: no text at all, or more than a comment may carry.
+ *
+ * @param content - What the comment says, as the app sent it.
+ *
+ * @returns `true` when the content is refused.
+ */
+function isRefusedContent(content: string): boolean {
+  // The text it carries, the whitespace around it counting for nothing
+  const carried = content.trim()
+
+  // Nothing at all, or past the ceiling
+  return carried === '' || carried.length > MAX_CHARACTERS_PER_COMMENT
+}
+
+/**
  * Who sent a call, by the session token riding along with it.
  *
  * @param request - The call.
@@ -488,8 +504,8 @@ export async function stubComments<TThread extends CommentTargetType>(
       // Only somebody signed in writes
       if (sender === null) return route.fulfill({ status: 401 })
 
-      // A comment says something
-      if (content.trim() === '') return route.fulfill({ status: 400 })
+      // A comment says something, and no more than a comment may carry
+      if (isRefusedContent(content)) return refuse(route, 400, 'CommentValue')
 
       // Something the backend does not hold takes no comment
       if (!holds(targetType, target.targetId)) return refuse(route, 404, 'CommentTargetNotFound')
@@ -549,8 +565,8 @@ export async function stubComments<TThread extends CommentTargetType>(
       // Only somebody signed in edits
       if (sender === null) return route.fulfill({ status: 401 })
 
-      // A comment says something
-      if (content.trim() === '') return route.fulfill({ status: 400 })
+      // A comment says something, and no more than a comment may carry
+      if (isRefusedContent(content)) return refuse(route, 400, 'CommentValue')
 
       // A version an edit replaced is gone
       if (isSuperseded) return refuse(route, 404, 'CommentNotFound')

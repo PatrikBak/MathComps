@@ -94,6 +94,11 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     private readonly Guid _hostedProblemId = Guid.CreateVersion7();
 
+    /// <summary>
+    /// Content exactly as long as a comment may carry.
+    /// </summary>
+    private static readonly string _longestContent = new('a', ICommentService.MaxCommentChars);
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
         // Register the user services module the test resolves from
@@ -304,6 +309,39 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
 
         // Holding just the new comment
         Assert.Equal(content, Assert.Single(thread).Content);
+    });
+
+    /// <summary>
+    /// A comment has to say something, and no more than <see cref="ICommentService.MaxCommentChars"/> characters of
+    /// it, counted once the whitespace around it is gone. A refusal writes nothing, so not even the row standing for an
+    /// uncommented handout is minted, and the comment that passes is stored trimmed.
+    /// </summary>
+    [Fact]
+    public Task CreateCommentAsync_HoldsTheContentToItsBounds() => RunTestAsync(async commentService =>
+    {
+        // Whitespace is the same as saying nothing
+        await Assert.ThrowsAsync<CommentValueException>(
+            () => commentService.CreateCommentAsync(_handoutThread, _user1, " \n\t "));
+
+        // One character past the ceiling
+        await Assert.ThrowsAsync<CommentValueException>(
+            () => commentService.CreateCommentAsync(_handoutThread, _user1, $"{_longestContent}a"));
+
+        // The handout still has no row standing for it
+        Assert.False(await QueryValueAsync(context =>
+            context.Handouts.AnyAsync(handout => handout.ContentId == HandoutId)));
+
+        // Right at the ceiling, wrapped in whitespace that doesn't count
+        var created = await commentService.CreateCommentAsync(_handoutThread, _user1, $"  {_longestContent}\n");
+
+        // The comment comes back without the whitespace
+        Assert.Equal(_longestContent, created.Content);
+
+        // The comment is stored without the whitespace too
+        Assert.Equal(_longestContent, await QueryValueAsync(context => context.Comments
+            .Where(comment => comment.Id == created.Id)
+            .Select(comment => comment.Content)
+            .SingleAsync()));
     });
 
     /// <summary>
@@ -727,6 +765,43 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
 
         // The comment still deleted
         Assert.True(Assert.Single(thread).IsDeleted);
+    });
+
+    /// <summary>
+    /// An edit is held to the same bounds as a new comment: it has to say something, and no more than
+    /// <see cref="ICommentService.MaxCommentChars"/> characters once the whitespace around it is gone. A refused edit
+    /// leaves the comment as it was, under its own id.
+    /// </summary>
+    [Fact]
+    public Task UpdateCommentAsync_HoldsTheContentToItsBounds() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment
+        var comment = await commentService.CreateCommentAsync(_handoutThread, _user1, "Original content");
+
+        // The author edits the comment down to whitespace
+        await Assert.ThrowsAsync<CommentValueException>(
+            () => commentService.UpdateCommentAsync(comment.Id, _user1, " \n\t "));
+
+        // The author edits the comment one character past the ceiling
+        await Assert.ThrowsAsync<CommentValueException>(
+            () => commentService.UpdateCommentAsync(comment.Id, _user1, $"{_longestContent}a"));
+
+        // The thread as the author reads it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user1);
+
+        // The comment as it was, under its own id
+        var untouched = Assert.Single(thread);
+        Assert.Equal(comment.Id, untouched.Id);
+        Assert.Equal("Original content", untouched.Content);
+
+        // The author edits the comment right up to the ceiling, wrapped in whitespace that doesn't count
+        await commentService.UpdateCommentAsync(comment.Id, _user1, $"  {_longestContent}\n");
+
+        // The thread as the author reads it after the edit
+        var editedThread = await commentService.GetCommentsAsync(_handoutThread, _user1);
+
+        // The new version, stored without the whitespace
+        Assert.Equal(_longestContent, Assert.Single(editedThread).Content);
     });
 
     /// <summary>

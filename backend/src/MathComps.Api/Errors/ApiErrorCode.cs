@@ -32,6 +32,11 @@ public enum ApiErrorCode
     CommentProfileIncomplete,
 
     /// <summary>
+    /// A comment the contract cannot take: no text at all, or more text than a comment may carry.
+    /// </summary>
+    CommentValue,
+
+    /// <summary>
     /// The referenced problem does not exist.
     /// </summary>
     ProblemNotFound,

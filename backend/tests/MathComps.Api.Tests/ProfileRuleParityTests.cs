@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using MathComps.Domain;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Services.Users;
@@ -19,26 +18,16 @@ namespace MathComps.Api.Tests;
 public class ProfileRuleParityTests
 {
     /// <summary>
-    /// Reads one <c>const NAME = value</c> out of a committed frontend module.
+    /// The web's module holding the username rules.
     /// </summary>
-    /// <param name="fileName">The module's file name, under the profile feature folder.</param>
-    /// <param name="name">The constant's name.</param>
-    /// <returns>Everything the constant was assigned, up to the end of its line.</returns>
-    private static string ReadTsConstant(string fileName, string name)
-    {
-        // The module as the frontend ships it
-        var source = File.ReadAllText(
-            RepoPaths.Resolve("web", "src", "components", "features", "profile", fileName));
+    private static string UsernameSchemaPath =>
+        RepoPaths.Resolve("web", "src", "components", "features", "profile", "username-schema.ts");
 
-        // The declaration, whatever it was assigned
-        var match = Regex.Match(source, $"const {name} = (.+)");
-
-        // A rule the frontend no longer declares is drift of the loudest kind
-        Assert.True(match.Success, $"{fileName} declares no {name}.");
-
-        // What it was assigned
-        return match.Groups[1].Value.Trim();
-    }
+    /// <summary>
+    /// The web's module listing the graduation years.
+    /// </summary>
+    private static string GraduationYearPath =>
+        RepoPaths.Resolve("web", "src", "components", "features", "profile", "graduation-year.ts");
 
     /// <summary>
     /// Both ends bound a username's length the same way.
@@ -49,12 +38,12 @@ public class ProfileRuleParityTests
         // The floor a name has to clear
         Assert.Equal(
             UserManager.MinUsernameLength.ToString(),
-            ReadTsConstant("username-schema.ts", "MIN_USERNAME_LENGTH"));
+            WebSource.ReadConstant(UsernameSchemaPath, "MIN_USERNAME_LENGTH"));
 
         // And the ceiling it has to stay under
         Assert.Equal(
             User.MaxUsernameLength.ToString(),
-            ReadTsConstant("username-schema.ts", "MAX_USERNAME_LENGTH"));
+            WebSource.ReadConstant(UsernameSchemaPath, "MAX_USERNAME_LENGTH"));
     }
 
     /// <summary>
@@ -67,7 +56,7 @@ public class ProfileRuleParityTests
         var backendPattern = UserManager.UsernamePattern().ToString();
 
         // The same thing as a JavaScript literal: Unicode property escapes need the u flag to mean anything
-        Assert.Equal($"/{backendPattern}/u", ReadTsConstant("username-schema.ts", "USERNAME_PATTERN"));
+        Assert.Equal($"/{backendPattern}/u", WebSource.ReadConstant(UsernameSchemaPath, "USERNAME_PATTERN"));
     }
 
     /// <summary>
@@ -78,5 +67,5 @@ public class ProfileRuleParityTests
         // The first year the form offers is the first the backend takes
         Assert.Equal(
             SchoolYear.EarliestGraduationYear.ToString(),
-            ReadTsConstant("graduation-year.ts", "EARLIEST_GRADUATION_YEAR"));
+            WebSource.ReadConstant(GraduationYearPath, "EARLIEST_GRADUATION_YEAR"));
 }
