@@ -17,6 +17,9 @@ namespace MathComps.Domain.Contracts.Selection;
 /// </param>
 /// <param name="IsSetAside"><inheritdoc cref="Proposal.IsSetAside" path="/summary"/></param>
 /// <param name="IsUsed">Whether a paper has taken it.</param>
+/// <param name="Ratings">
+/// Every <see cref="ProposalRating"/> it was given, by the raters' usernames, a rater showing none last.
+/// </param>
 public record ProposalDto(
     Guid Id,
     int Number,
@@ -25,4 +28,5 @@ public record ProposalDto(
     IReadOnlyList<HostedCompetitionCategory> Recommended,
     IReadOnlyDictionary<Language, ProposalTextDto> Texts,
     bool IsSetAside,
-    bool IsUsed);
+    bool IsUsed,
+    IReadOnlyList<ProposalRatingDto> Ratings);

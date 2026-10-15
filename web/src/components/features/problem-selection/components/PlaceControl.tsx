@@ -61,7 +61,10 @@ export function PlaceControl({ proposal }: PlaceControlProps) {
   const { placeButtonRef, putInWaitingSlot } = useWaitingSlotPlacement(place, proposal.id)
 
   // Arrow keys moving across the grid, a row per paper of the board on screen
-  const gridKeys = useGridArrowKeys(activeBoard?.papers.map((paper) => paper.slots.length) ?? [])
+  const gridKeys = useGridArrowKeys({
+    rowLengths: activeBoard?.papers.map((paper) => paper.slots.length) ?? [],
+    stepsBetweenRows: true,
+  })
 
   // Only a problem live in the pool can be placed
   if (proposal.isSetAside || proposal.isUsed) return null

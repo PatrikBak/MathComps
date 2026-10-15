@@ -1,10 +1,8 @@
-import { useAuth } from '@clerk/nextjs'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 
-import { useUserProfile } from '@/components/features/profile/hooks/use-user-profile'
-import type { UserIdentity } from '@/components/features/profile/model/user-identity'
+import { useSignedInIdentity } from '@/components/features/profile/hooks/use-signed-in-identity'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 import { createSettlingWrites } from '@/lib/settling-writes'
 
@@ -74,18 +72,8 @@ export function useUpdateGrade(): UseUpdateGradeResult {
   // The cache the grades live in
   const queryClient = useQueryClient()
 
-  // Who is signed in
-  const { userId } = useAuth()
-
-  // Their profile, which carries the name and email they go by
-  const profile = useUserProfile()
-
-  // Who is grading, which the grade names until the server's own answer names them properly
-  const grader: UserIdentity = {
-    id: userId ?? '',
-    username: profile.username,
-    email: profile.email,
-  }
+  // Who is grading, none while signed out
+  const grader = useSignedInIdentity()
 
   // The changes still settling, per grade
   const [settling] = useState(() => createSettlingWrites<Grade | null>())
@@ -103,6 +91,9 @@ export function useUpdateGrade(): UseUpdateGradeResult {
 
     // The grade before the first of those changes, for a refused one to put back
     settling.holdBefore(key, current)
+
+    // No grader to stamp the change with, though a change only ever runs signed in
+    if (grader === null) return
 
     // The grade as the change leaves it, straight away
     writeCachedGrade(

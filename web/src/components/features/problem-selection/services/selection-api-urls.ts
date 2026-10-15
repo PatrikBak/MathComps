@@ -124,3 +124,15 @@ export function getRecommendedUrl(proposalId: string): string {
   // The recommendation endpoint for the proposal
   return buildApiUrl(`${proposalPath(proposalId)}/recommended`)
 }
+
+/**
+ * Builds the API URL for setting the reader's rating of a proposal or taking it back.
+ *
+ * @param proposalId - The proposal.
+ *
+ * @returns The API URL.
+ */
+export function getRatingUrl(proposalId: string): string {
+  // The rating endpoint for the proposal
+  return buildApiUrl(`${proposalPath(proposalId)}/rating`)
+}

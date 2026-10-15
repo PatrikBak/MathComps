@@ -7,7 +7,9 @@ import type {
   Cycle,
   Paper,
   Proposal,
+  ProposalRating,
   ProposalText,
+  RatingAspect,
   ReviewConversation,
   SelectionData,
   SlotAddress,
@@ -259,6 +261,31 @@ export function unreadyLanguages(proposal: Proposal): Locale[] {
     // A language falls short without a statement, or without a solution to go with it
     return text === undefined || !hasSolution(text)
   })
+}
+
+/**
+ * The average score the reviewers gave one aspect of a proposal, counting only those who scored it.
+ *
+ * @param ratings - The proposal's ratings.
+ * @param aspect - The aspect.
+ *
+ * @returns The average, or null while nobody has scored the aspect.
+ */
+export function averageScore(
+  ratings: readonly ProposalRating[],
+  aspect: RatingAspect
+): number | null {
+  // The scores given to the aspect, the reviewers who gave none left out
+  const scores = ratings.flatMap((rating) => {
+    // The score this reviewer gave the aspect, if any
+    const score = rating[aspect]
+
+    // Kept where there is one
+    return score === null ? [] : [score]
+  })
+
+  // The scores' average, none without a score
+  return scores.length === 0 ? null : scores.reduce((sum, score) => sum + score, 0) / scores.length
 }
 
 /**

@@ -1,16 +1,19 @@
 import { HOSTED_COMPETITION_CATEGORIES } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 
-import type {
-  Board,
-  MoveWrite,
-  Paper,
-  PlacementWrite,
-  Proposal,
-  RecommendationWrite,
-  SelectionData,
-  SetAsideWrite,
-  SlotAddress,
-  SlotDirection,
+import {
+  type Board,
+  type MoveWrite,
+  type Paper,
+  type PlacementWrite,
+  type Proposal,
+  RATING_ASPECTS,
+  type RatingWrite,
+  type RecommendationWrite,
+  type SelectionData,
+  type SetAsideWrite,
+  type SlotAddress,
+  type SlotDirection,
 } from './selection-types'
 
 /** How far a move takes a slot: up is the slot before it, down the slot after. */
@@ -201,6 +204,41 @@ export function afterRecommendation(
       candidate === category ? isRecommended : proposal.recommended.includes(candidate)
     ),
   }))
+}
+
+/**
+ * The selection once the reader rates a proposal, or takes their rating back by scoring no aspect.
+ *
+ * @param data - The selection.
+ * @param change - The proposal and the reader's scores afterwards.
+ * @param reader - The reader, named on a first rating.
+ *
+ * @returns The selection as the rating leaves it, every other reviewer's rating as it was.
+ */
+export function afterRating(
+  data: SelectionData,
+  { proposalId, scores }: RatingWrite,
+  reader: UserIdentity
+): SelectionData {
+  // Whether the reader scores any aspect afterwards
+  const isRating = RATING_ASPECTS.some((aspect) => scores[aspect] !== null)
+
+  // The proposal with the reader's rating as the write leaves it
+  return editProposal(data, proposalId, (proposal) => {
+    // Every rating, the reader's rescored where it stands, or dropped where it now scores nothing
+    const kept = proposal.ratings.flatMap((rating) =>
+      !rating.isOwn ? [rating] : isRating ? [{ ...rating, ...scores }] : []
+    )
+
+    // Whether the write gives the reader's first rating of the proposal
+    const isFirst = isRating && !proposal.ratings.some((rating) => rating.isOwn)
+
+    // The proposal with the kept ratings, a first rating joining them at the end
+    return {
+      ...proposal,
+      ratings: isFirst ? [...kept, { rater: reader, isOwn: true, ...scores }] : kept,
+    }
+  })
 }
 
 /**

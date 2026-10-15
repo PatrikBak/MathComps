@@ -5,6 +5,7 @@ import {
   afterDeletion,
   afterMove,
   afterPlacement,
+  afterRating,
   afterRecommendation,
   afterSetAside,
 } from '../selection-edits'
@@ -28,6 +29,7 @@ function proposal(id: string): Proposal {
     texts: {},
     isSetAside: false,
     isUsed: false,
+    ratings: [],
   }
 }
 
@@ -259,12 +261,93 @@ describe('afterRecommendation', () => {
   })
 })
 
+describe('afterRating', () => {
+  // The reader, Rita, as the page knows them under their sign-in's id
+  const reader = { id: 'signed-in-rita', username: 'Rita', email: 'rita@example.com' }
+
+  // The reader's rating as the server reads it back, under the server's id for the reader
+  const ownRating = {
+    rater: { id: 'rita', username: 'Rita', email: 'rita@example.com' },
+    isOwn: true,
+  } as const
+
+  // Another reviewer's rating, which no write of the reader's touches
+  const otherRating = {
+    rater: { id: 'viera', username: 'Viera', email: null },
+    isOwn: false,
+    beauty: 2,
+    difficulty: 3,
+  } as const
+
+  it("rescores the reader's own rating where it stands and leaves every other reviewer's", () => {
+    // a, rated by the reader and then by another reviewer, as the reviewers' names order them
+    const before = selection(
+      [],
+      [{ ...proposal('a'), ratings: [{ ...ownRating, beauty: 4, difficulty: 1 }, otherRating] }]
+    )
+
+    // a rescored, the reader's difficulty left out
+    const after = afterRating(
+      before,
+      { proposalId: 'a', scores: { beauty: 5, difficulty: null } },
+      reader
+    )
+
+    // The reader's rating first still, under the server's id and rescored, the other reviewer's untouched
+    expect(after.proposals[0]?.ratings).toEqual([
+      { ...ownRating, beauty: 5, difficulty: null },
+      otherRating,
+    ])
+  })
+
+  it('takes the rating back once it scores no aspect, and gives a first one', () => {
+    // a, rated by the reader, and b, rated by nobody
+    const before = selection(
+      [],
+      [
+        { ...proposal('a'), ratings: [{ ...ownRating, beauty: 4, difficulty: null }] },
+        proposal('b'),
+      ]
+    )
+
+    // a's rating taken back
+    const takenBack = afterRating(
+      before,
+      { proposalId: 'a', scores: { beauty: null, difficulty: null } },
+      reader
+    )
+
+    // b rated for the first time
+    const after = afterRating(
+      takenBack,
+      { proposalId: 'b', scores: { beauty: null, difficulty: 2 } },
+      reader
+    )
+
+    // a left with no rating, and b with the reader's, named as the page knows the reader
+    expect(after.proposals.map((rated) => rated.ratings)).toEqual([
+      [],
+      [{ rater: reader, isOwn: true, beauty: null, difficulty: 2 }],
+    ])
+  })
+})
+
 describe('every edit', () => {
   it('leaves the selection it is handed as it was, which a refused write puts back', () => {
+    // The reader, who rated a
+    const reader = { id: 'rita', username: 'Rita', email: 'rita@example.com' }
+
     // A draft, and a problem waiting in the pool
     const before = selection(
       [board('draft', ['a', 'b', null])],
-      [proposal('a'), proposal('b'), proposal('new')]
+      [
+        {
+          ...proposal('a'),
+          ratings: [{ rater: reader, isOwn: true, beauty: 4, difficulty: null }],
+        },
+        proposal('b'),
+        proposal('new'),
+      ]
     )
 
     // A copy to hold it against
@@ -296,6 +379,12 @@ describe('every edit', () => {
 
     // a recommended for elementary
     afterRecommendation(before, { proposalId: 'a', category: 'elementary', isRecommended: true })
+
+    // a rated again
+    afterRating(before, { proposalId: 'a', scores: { beauty: 5, difficulty: 2 } }, reader)
+
+    // b rated for the first time
+    afterRating(before, { proposalId: 'b', scores: { beauty: 1, difficulty: null } }, reader)
 
     // b deleted
     afterDeletion(before, 'b')

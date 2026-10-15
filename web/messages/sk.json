@@ -160,6 +160,7 @@
     "ProblemNotFound": "Úloha nebola nájdená.",
     "ProblemSlugTaken": "Adresu, ktorú úloha na tomto mieste dostane, už používa iná úloha.",
     "ProfileValueInvalid": "Túto hodnotu nemožno použiť.",
+    "ProposalRatingValue": "Toto číslo nie je na stupnici.",
     "RateLimited": "Príliš veľa požiadaviek. Chvíľu počkaj a skús to znova.",
     "ReviewNoteNotFound": "Táto poznámka už neexistuje.",
     "ReviewNoteTarget": "Táto odpoveď už neexistuje.",
@@ -1360,6 +1361,13 @@
       "searchPlaceholder": "Číslo, názov alebo text",
       "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}"
     },
+    "ratings": {
+      "average": "Priemer",
+      "beauty": "Krása",
+      "difficulty": "Náročnosť",
+      "name": "Meno",
+      "ratedBy": "{count, plural, =1 {Ohodnotil # človek} =2 {Ohodnotili # ľudia} =3 {Ohodnotili # ľudia} =4 {Ohodnotili # ľudia} other {Ohodnotilo # ľudí}}"
+    },
     "text": {
       "fallback": "Zatiaľ chýba {missing}, zobrazuje sa {shown}.",
       "none": "Zatiaľ bez textu."
@@ -1371,6 +1379,7 @@
       "finalizeFailed": "Zostavu sa nepodarilo uzavrieť.",
       "moveFailed": "Úlohu sa nepodarilo posunúť.",
       "placeFailed": "Úlohu sa nepodarilo zaradiť.",
+      "rateFailed": "Krásu a náročnosť sa nepodarilo uložiť.",
       "recommendFailed": "Odporúčanie sa nepodarilo zmeniť.",
       "refreshFailed": "Uložené, ale stránku sa nepodarilo obnoviť.",
       "setAsideFailed": "Úlohu sa nepodarilo odložiť alebo vrátiť."

@@ -160,6 +160,7 @@
     "ProblemNotFound": "Úloha nebyla nalezena.",
     "ProblemSlugTaken": "Adresu, kterou úloha na tomto místě dostane, už používá jiná úloha.",
     "ProfileValueInvalid": "Tuto hodnotu nelze použít.",
+    "ProposalRatingValue": "Toto číslo není na stupnici.",
     "RateLimited": "Příliš mnoho požadavků. Chvíli počkej a zkus to znovu.",
     "ReviewNoteNotFound": "Tato poznámka už neexistuje.",
     "ReviewNoteTarget": "Tato odpověď už neexistuje.",
@@ -1360,6 +1361,13 @@
       "searchPlaceholder": "Číslo, název nebo text",
       "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}"
     },
+    "ratings": {
+      "average": "Průměr",
+      "beauty": "Krása",
+      "difficulty": "Náročnost",
+      "name": "Jméno",
+      "ratedBy": "{count, plural, =1 {Ohodnotil # člověk} =2 {Ohodnotili # lidé} =3 {Ohodnotili # lidé} =4 {Ohodnotili # lidé} other {Ohodnotilo # lidí}}"
+    },
     "text": {
       "fallback": "Zatím chybí {missing}, zobrazuje se {shown}.",
       "none": "Zatím bez textu."
@@ -1371,6 +1379,7 @@
       "finalizeFailed": "Sestavu se nepodařilo uzavřít.",
       "moveFailed": "Úlohu se nepodařilo posunout.",
       "placeFailed": "Úlohu se nepodařilo zařadit.",
+      "rateFailed": "Krásu a náročnost se nepodařilo uložit.",
       "recommendFailed": "Doporučení se nepodařilo změnit.",
       "refreshFailed": "Uloženo, ale stránku se nepodařilo obnovit.",
       "setAsideFailed": "Úlohu se nepodařilo odložit nebo vrátit."

@@ -12,6 +12,7 @@ import { createAnswerGate } from './support/answer-gate'
 import { recordNotices } from './support/backend-routes'
 import { SELECTION_PATH } from './support/competitions'
 import {
+  actionsButton,
   boardPanel,
   cardOf,
   DECEMBER,
@@ -52,21 +53,6 @@ const refusalCopy = messages.apiErrors
 
 /** What each category is called. */
 const categoryCopy = messages.competitions.categories
-
-/**
- * The button opening a problem's menu of rarer actions.
- *
- * @param scope - Where the button is, a card or a problem's own page.
- * @param proposal - The problem.
- *
- * @returns The button.
- */
-function actionsButton(scope: Locator | Page, proposal: Proposal): Locator {
-  // The only button naming the problem's actions
-  return scope.getByRole('button', {
-    name: selectionText('actions.moreFor', { number: proposal.number }),
-  })
-}
 
 /**
  * Picks one of a problem's rarer actions from its menu, on its card or on its own page, whichever shows.
@@ -488,7 +474,9 @@ test.describe('setting a problem aside', () => {
       ])
   })
 
-  test('offers a problem a round has taken only its categories', async ({ page }) => {
+  test('offers a problem a round has taken only its categories and its rating', async ({
+    page,
+  }) => {
     // A reviewer whose finalized board's round has taken a problem
     await stubSelection(page, 'selection')
 
@@ -503,6 +491,9 @@ test.describe('setting a problem aside', () => {
 
     // Every category to recommend it for
     await expect(page.getByRole('menuitemcheckbox')).toHaveCount(3)
+
+    // Every score of every aspect to rate it with
+    await expect(page.getByRole('menuitemradio')).toHaveCount(10)
 
     // And no way to set it aside or delete it
     await expect(page.getByRole('menuitem')).toHaveCount(0)

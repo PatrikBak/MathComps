@@ -1,4 +1,5 @@
 using MathComps.Domain.Contracts.Competitions;
+using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,6 +41,51 @@ public sealed class ProposalService(IDbContextFactory<MathCompsDbContext> dbCont
                 // The stored categories without this one
                 : proposal.Recommended.Where(candidate => candidate != category));
         }, cancellationToken);
+
+    /// <inheritdoc/>
+    public async Task RateAsync(
+        Guid proposalId, Guid raterId, int? beauty, int? difficulty, CancellationToken cancellationToken = default)
+    {
+        // A score off the scale is no score the rating can hold
+        if (beauty is < ProposalRating.MinScore or > ProposalRating.MaxScore
+            || difficulty is < ProposalRating.MinScore or > ProposalRating.MaxScore)
+            throw new ProposalRatingValueException();
+
+        // The rating, as one selection write
+        await SelectionRules.RunWriteAsync(dbContextFactory, async dbContext =>
+        {
+            // A proposal gone from the selection takes no rating
+            await SelectionRules.ReadProposalAsync(dbContext, proposalId, cancellationToken);
+
+            // The rating the reviewer gave the proposal before, if any
+            var rating = await dbContext.ProposalRatings.FindAsync([proposalId, raterId], cancellationToken);
+
+            // Neither score given takes the rating back
+            if (beauty is null && difficulty is null)
+            {
+                // Gone, where there was one
+                if (rating is not null)
+                    dbContext.ProposalRatings.Remove(rating);
+
+                // Nothing more to write
+                return;
+            }
+
+            // A first rating starts as a row of its own
+            if (rating is null)
+            {
+                // The row, its scores set below
+                rating = new ProposalRating { ProposalId = proposalId, UserId = raterId };
+
+                // Saved with the write
+                dbContext.ProposalRatings.Add(rating);
+            }
+
+            // The scores given now
+            rating.Beauty = beauty;
+            rating.Difficulty = difficulty;
+        }, cancellationToken);
+    }
 
     /// <inheritdoc/>
     public Task DeleteAsync(Guid proposalId, CancellationToken cancellationToken = default) =>

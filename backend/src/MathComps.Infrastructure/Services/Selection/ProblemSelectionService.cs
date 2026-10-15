@@ -38,7 +38,7 @@ public sealed class ProblemSelectionService(
 
     /// <inheritdoc/>
     public async Task<SelectionDto> GetSelectionAsync(
-        Language language, CancellationToken cancellationToken = default)
+        Guid reviewerId, Language language, CancellationToken cancellationToken = default)
     {
         // A fresh context for this read.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -76,9 +76,12 @@ public sealed class ProblemSelectionService(
             .ToListAsync(cancellationToken);
 
         // Every proposal not deleted and outside the groups that have opened, lowest number first, with where its
-        // problem sits and every text it carries.
+        // problem sits, every text it carries and every rating it was given, by the raters' usernames with a rater
+        // showing none last. Split, because the texts and the ratings are two collections off one row: joined in a
+        // single query the database would return every pairing of them, each repeating the text.
         var proposals = await dbContext.Proposals
             .AsNoTracking()
+            .AsSplitQuery()
             .Where(proposal => proposal.DeletedAt == null
                 && (proposal.Problem.Round.HostedGroupId == null || proposal.Problem.Round.HostedGroup!.OpensAt > now))
             .OrderBy(proposal => proposal.Number)
@@ -95,6 +98,16 @@ public sealed class ProblemSelectionService(
                 Texts = proposal.Problem.Texts
                     .Select(text => new ProblemBody(
                         text.DocumentType, text.Language, text.MarkdownText ?? text.RawText))
+                    .ToList(),
+                Ratings = proposal.Ratings
+                    .OrderBy(rating => rating.User.IsDeleted ? null : rating.User.Username)
+                    .ThenBy(rating => rating.UserId)
+                    .Select(rating => new ProposalRatingDto(
+                        new UserIdentityDto(
+                            rating.UserId, rating.User.IsDeleted ? null : rating.User.Username, rating.User.Email),
+                        rating.UserId == reviewerId,
+                        rating.Beauty,
+                        rating.Difficulty))
                     .ToList(),
             })
             .ToListAsync(cancellationToken);
@@ -181,7 +194,8 @@ public sealed class ProblemSelectionService(
                     proposal.Recommended,
                     TextsOf(proposal.Texts),
                     proposal.IsSetAside,
-                    IsUsed: !SelectionRules.IsInPool(proposal.CompetitionPath))),
+                    IsUsed: !SelectionRules.IsInPool(proposal.CompetitionPath),
+                    proposal.Ratings)),
             ],
             [
                 // Drafts, and the boards finalized into a group that has not opened

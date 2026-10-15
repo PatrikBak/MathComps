@@ -145,6 +145,9 @@ public sealed class GlobalExceptionHandler(
         // A grade change leaving a grade that breaks its rules
         HostedGradeValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.HostedGradeValue),
 
+        // A rating holding a score off its scale
+        ProposalRatingValueException => (StatusCodes.Status400BadRequest, ApiErrorCode.ProposalRatingValue),
+
         // Forbidden actions — the caller is known, they're just not allowed
         NotCommentAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotCommentAuthor),
         NotReviewNoteAuthorException => (StatusCodes.Status403Forbidden, ApiErrorCode.NotReviewNoteAuthor),

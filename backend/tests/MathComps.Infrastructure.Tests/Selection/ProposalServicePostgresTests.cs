@@ -26,6 +26,16 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
     /// </summary>
     private Guid _usedId;
 
+    /// <summary>
+    /// A reviewer rating the pooled proposal.
+    /// </summary>
+    private readonly Guid _raterId = Guid.CreateVersion7();
+
+    /// <summary>
+    /// Another reviewer rating the pooled proposal.
+    /// </summary>
+    private readonly Guid _otherRaterId = Guid.CreateVersion7();
+
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
         // The service under test, with the rest of the selection.
@@ -52,6 +62,68 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
 
         // Leaving elementary alone
         Assert.Equal([HostedCompetitionCategory.Elementary], await RecommendedAsync());
+    });
+
+    /// <summary>
+    /// A rating replaces what the reviewer gave before, both scores at once, and leaves every other reviewer's
+    /// rating standing. A write that matched the proposal alone would overwrite the other reviewer's.
+    /// </summary>
+    [Fact]
+    public Task A_rating_replaces_the_raters_own_and_leaves_the_rest() => RunTestAsync(async service =>
+    {
+        // The other reviewer's rating
+        await service.RateAsync(_pooledId, _otherRaterId, beauty: 2, difficulty: 3);
+
+        // The rater's first rating
+        await service.RateAsync(_pooledId, _raterId, beauty: 4, difficulty: 1);
+
+        // Replaced, the difficulty now left out
+        await service.RateAsync(_pooledId, _raterId, beauty: 5, difficulty: null);
+
+        // The rater's as replaced, the other reviewer's as given
+        Assert.Equal([(_otherRaterId, 2, 3), (_raterId, 5, null)], await RatingsAsync());
+    });
+
+    /// <summary>
+    /// Leaving out both scores takes the rating back, its row gone, since a row holding neither is one the database
+    /// refuses.
+    /// </summary>
+    [Fact]
+    public Task Leaving_out_both_scores_takes_the_rating_back() => RunTestAsync(async service =>
+    {
+        // Rated
+        await service.RateAsync(_pooledId, _raterId, beauty: 3, difficulty: 4);
+
+        // Taken back
+        await service.RateAsync(_pooledId, _raterId, beauty: null, difficulty: null);
+
+        // No rating left
+        Assert.Empty(await RatingsAsync());
+    });
+
+    /// <summary>
+    /// A score below one or past five is refused and writes nothing, whichever aspect it scores, while the ends of
+    /// the scale are taken.
+    /// </summary>
+    [Fact]
+    public Task A_score_off_the_scale_is_refused() => RunTestAsync(async service =>
+    {
+        // A beauty below the scale
+        await Assert.ThrowsAsync<ProposalRatingValueException>(
+            () => service.RateAsync(_pooledId, _raterId, beauty: 0, difficulty: 3));
+
+        // A difficulty past the scale
+        await Assert.ThrowsAsync<ProposalRatingValueException>(
+            () => service.RateAsync(_pooledId, _raterId, beauty: 3, difficulty: 6));
+
+        // Nothing written
+        Assert.Empty(await RatingsAsync());
+
+        // The ends of the scale
+        await service.RateAsync(_pooledId, _raterId, beauty: 1, difficulty: 5);
+
+        // The rating at the ends
+        Assert.Equal([(_raterId, 1, 5)], await RatingsAsync());
     });
 
     /// <summary>
@@ -88,8 +160,8 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         await Assert.ThrowsAsync<SelectionProposalUsedException>(() => service.DeleteAsync(_usedId)));
 
     /// <summary>
-    /// A deleted proposal is gone from the selection, so it can't be set aside. A change slipping through would be
-    /// recorded against a proposal the selection no longer shows.
+    /// A deleted proposal is gone from the selection, so it can't be set aside or rated. A change slipping through
+    /// would be recorded against a proposal the selection no longer shows.
     /// </summary>
     [Fact]
     public Task A_deleted_proposal_takes_no_change() => RunTestAsync(async service =>
@@ -100,6 +172,10 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         // Setting the deleted proposal aside, refused
         await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
             () => service.SetAsideAsync(_pooledId, isSetAside: true));
+
+        // And rating it, refused too
+        await Assert.ThrowsAsync<SelectionTargetNotFoundException>(
+            () => service.RateAsync(_pooledId, _raterId, beauty: 3, difficulty: null));
     });
 
     /// <inheritdoc/>
@@ -127,6 +203,9 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
         // A draft board the pooled proposal stands on
         SelectionSeed.NewBoard(context, "Draft", _pooledId);
 
+        // The reviewers rating the pooled proposal
+        context.Users.AddRange(HostedSeed.NewUser(_raterId, "Rater"), HostedSeed.NewUser(_otherRaterId, "Other"));
+
         // Written
         await context.SaveChangesAsync();
     }
@@ -141,4 +220,21 @@ public class ProposalServicePostgresTests(PostgresContainerFixture fixture)
             .Where(proposal => proposal.ProblemId == _pooledId)
             .Select(proposal => proposal.Recommended)
             .SingleAsync());
+
+    /// <summary>
+    /// Reads every rating of the pooled proposal, the other reviewer's first.
+    /// </summary>
+    /// <returns>Each rating's reviewer and scores.</returns>
+    private async Task<List<(Guid, int?, int?)>> RatingsAsync()
+    {
+        // The pooled proposal's ratings, by the reviewers' usernames
+        var ratings = await QueryValueAsync(context => context.ProposalRatings
+            .Where(rating => rating.ProposalId == _pooledId)
+            .OrderBy(rating => rating.User.Username)
+            .Select(rating => new { rating.UserId, rating.Beauty, rating.Difficulty })
+            .ToListAsync());
+
+        // Each as its reviewer and scores
+        return [.. ratings.Select(rating => (rating.UserId, rating.Beauty, rating.Difficulty))];
+    }
 }

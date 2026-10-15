@@ -26,7 +26,7 @@ import { installConversationBackend } from './conversation-backend'
 import type { HostedBackend } from './hosted-backend'
 import { stubSelectionComments } from './selection-comments'
 import { FINALIZATION_PATH, finalizationWrite } from './selection-finalization'
-import { PROPOSAL_WRITE_PATH, proposalWrite } from './selection-proposal-writes'
+import { PROPOSAL_WRITE_PATH, proposalWrite, READER } from './selection-proposal-writes'
 import { SLOT_WRITE_PATH, slotWrite } from './selection-slot-writes'
 import {
   hasOpened,
@@ -116,6 +116,7 @@ function proposalNumbered(number: number, distinction: Partial<Proposal> = {}): 
     texts: { en: { statement: statementOf(number), solution: null, hints: [] } },
     isSetAside: false,
     isUsed: false,
+    ratings: [],
     ...distinction,
   }
 }
@@ -179,10 +180,25 @@ export const GEOMETRY = proposalNumbered(6, { area: 'geometry', recommended: ['a
 /** The problem a round has taken, written and solved in every language as the round needed it. */
 export const USED = proposalNumbered(7, { isUsed: true, texts: textsInEveryLanguage(7) })
 
-/** The pool's one algebra problem, recommended for the elementary category and the intermediate one. */
+/** The username of the reviewer besides the reader who rated {@link ALGEBRA}. */
+export const OTHER_RATER = 'Martin'
+
+/**
+ * The pool's one algebra problem, recommended for the elementary category and the intermediate one, rated by
+ * {@link OTHER_RATER} on its beauty alone and by {@link READER} on its beauty and its difficulty.
+ */
 export const ALGEBRA = proposalNumbered(8, {
   area: 'algebra',
   recommended: ['elementary', 'intermediate'],
+  ratings: [
+    {
+      rater: { id: 'other-rater', username: OTHER_RATER, email: null },
+      isOwn: false,
+      beauty: 4,
+      difficulty: null,
+    },
+    { rater: READER, isOwn: true, beauty: 5, difficulty: 2 },
+  ],
 })
 
 /** Every problem the selection holds, lowest number first, {@link SET_ASIDE} and {@link USED} among them. */
@@ -689,7 +705,7 @@ export function isSlotWrite(url: URL): boolean {
  *
  * @param url - The address.
  *
- * @returns True for a proposal's own address or its set-aside or recommended address, on the backend.
+ * @returns True for an address {@link PROPOSAL_WRITE_PATH} matches, on the backend.
  */
 export function isProposalWrite(url: URL): boolean {
   // The backend's, and shaped like a proposal's
@@ -995,7 +1011,7 @@ export async function stubSelection(
     )
   })
 
-  // A write to one proposal: a set-aside, a recommendation, or a delete
+  // A write to one proposal
   await page.route(isProposalWrite, async (route) => {
     // The call as it went out
     const request = route.request()
@@ -1045,6 +1061,21 @@ export async function stubSelection(
 export function cardOf(page: Page, proposal: Proposal) {
   // The pool's only card naming the problem
   return page.getByRole('article').filter({ hasText: proposal.title })
+}
+
+/**
+ * The button opening a problem's menu of rarer actions.
+ *
+ * @param scope - Where the button is, a card or a problem's own page.
+ * @param proposal - The problem.
+ *
+ * @returns The button.
+ */
+export function actionsButton(scope: Locator | Page, proposal: Proposal): Locator {
+  // The only button naming the problem's actions
+  return scope.getByRole('button', {
+    name: selectionText('actions.moreFor', { number: proposal.number }),
+  })
 }
 
 /**

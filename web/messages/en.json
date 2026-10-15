@@ -160,6 +160,7 @@
     "ProblemNotFound": "Problem not found.",
     "ProblemSlugTaken": "Another problem already uses the address a problem gets in this spot.",
     "ProfileValueInvalid": "That value cannot be used.",
+    "ProposalRatingValue": "That score isn't on the scale.",
     "RateLimited": "You're doing that too fast. Please wait a moment and try again.",
     "ReviewNoteNotFound": "This note no longer exists.",
     "ReviewNoteTarget": "That reply is no longer there.",
@@ -1360,6 +1361,13 @@
       "searchPlaceholder": "Number, name or text",
       "setAsideCount": "{count, plural, one {# problem set aside} other {# problems set aside}}"
     },
+    "ratings": {
+      "average": "Average",
+      "beauty": "Beauty",
+      "difficulty": "Difficulty",
+      "name": "Name",
+      "ratedBy": "{count, plural, =1 {Rated by # person} other {Rated by # people}}"
+    },
     "text": {
       "fallback": "Not in {missing} yet, showing {shown}.",
       "none": "No text yet."
@@ -1371,6 +1379,7 @@
       "finalizeFailed": "The board could not be finalized.",
       "moveFailed": "The problem could not be moved.",
       "placeFailed": "The problem could not be placed.",
+      "rateFailed": "The beauty and difficulty could not be saved.",
       "recommendFailed": "The recommendation could not be changed.",
       "refreshFailed": "Saved, but the page could not refresh.",
       "setAsideFailed": "The problem could not be set aside or brought back."

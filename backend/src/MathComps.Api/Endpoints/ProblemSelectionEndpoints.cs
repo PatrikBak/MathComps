@@ -1,6 +1,7 @@
 using MathComps.Api.Constants;
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Infrastructure.Services.Selection;
+using MathComps.Infrastructure.Services.Users;
 
 namespace MathComps.Api.Endpoints;
 
@@ -35,12 +36,17 @@ public static class ProblemSelectionEndpoints
     {
         // Read the whole selection
         app.MapGet(SelectionPath, async (
+            HttpContext context,
+            IUserManager userManager,
             IProblemSelectionService selectionService,
             CancellationToken cancellationToken) =>
         {
+            // The reviewer reading the selection
+            var reviewerId = await userManager.RequireUserIdAsync(context);
+
             // The selection, its cycles named in the caller's language
             var selection = await selectionService.GetSelectionAsync(
-                EndpointHelpers.GetRequestLanguage(), cancellationToken);
+                reviewerId, EndpointHelpers.GetRequestLanguage(), cancellationToken);
 
             // Return it
             return Results.Ok(selection);
@@ -162,6 +168,28 @@ public static class ProblemSelectionEndpoints
 
             // Change it
             await proposalService.SetRecommendedAsync(proposalId, category, isRecommended, cancellationToken);
+
+            // Nothing to return
+            return Results.NoContent();
+        })
+        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Rate a proposal, or take the rating back
+        app.MapPut($"{ProposalPath}/rating", async (
+            Guid proposalId,
+            SetRatingRequest request,
+            HttpContext context,
+            IUserManager userManager,
+            IProposalService proposalService,
+            CancellationToken cancellationToken) =>
+        {
+            // The caller, whose rating it is
+            var raterId = await userManager.RequireUserIdAsync(context);
+
+            // Change it
+            await proposalService.RateAsync(
+                proposalId, raterId, request.Beauty, request.Difficulty, cancellationToken);
 
             // Nothing to return
             return Results.NoContent();
