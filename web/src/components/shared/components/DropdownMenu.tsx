@@ -67,6 +67,12 @@ export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
 export const DropdownMenuGroup = DropdownMenuPrimitive.Group
 
 /**
+ * {@link DropdownMenuRadioItem}s of which at most one is chosen, the one whose value it holds, named as one by the
+ * label its `aria-labelledby` points at.
+ */
+export const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
+
+/**
  * Positioned content panel rendered inside a portal.
  * Provides the house panel chrome, its motion, and the padding its rows sit in.
  *
@@ -199,6 +205,31 @@ export const DropdownMenuCheckboxItem = React.forwardRef<
   </DropdownMenuPrimitive.CheckboxItem>
 ))
 DropdownMenuCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName
+
+/**
+ * One choice of a {@link DropdownMenuRadioGroup}, filled in the brand's colour while chosen, its size and text style
+ * left to the caller. Carries proper `role="menuitemradio"` + `aria-checked` semantics via Radix.
+ */
+export const DropdownMenuRadioItem = React.forwardRef<
+  React.ComponentRef<typeof DropdownMenuPrimitive.RadioItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.RadioItem
+    ref={ref}
+    className={cn(
+      'relative flex cursor-pointer select-none items-center rounded-md outline-none transition-colors',
+      'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      // Chosen in the brand's fill, the rest faint until focused
+      'data-[state=checked]:bg-brand/40 data-[state=checked]:text-brand-foreground',
+      'data-[state=checked]:focus:bg-brand/55',
+      'data-[state=unchecked]:bg-foreground/5 data-[state=unchecked]:text-muted',
+      'data-[state=unchecked]:focus:bg-foreground/15 data-[state=unchecked]:focus:text-foreground',
+      className
+    )}
+    {...props}
+  />
+))
+DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName
 
 /** Horizontal divider between groups of menu items. */
 export const DropdownMenuSeparator = React.forwardRef<

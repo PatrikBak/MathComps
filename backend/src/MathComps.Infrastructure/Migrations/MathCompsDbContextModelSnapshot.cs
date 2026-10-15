@@ -1538,6 +1538,40 @@ namespace MathComps.Infrastructure.Migrations
                     b.ToTable("proposal_comments", (string)null);
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProposalRating", b =>
+                {
+                    b.Property<Guid>("ProposalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("proposal_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<int?>("Beauty")
+                        .HasColumnType("integer")
+                        .HasColumnName("beauty");
+
+                    b.Property<int?>("Difficulty")
+                        .HasColumnType("integer")
+                        .HasColumnName("difficulty");
+
+                    b.HasKey("ProposalId", "UserId")
+                        .HasName("pk_proposal_ratings");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_proposal_ratings_user_id");
+
+                    b.ToTable("proposal_ratings", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_proposal_rating_beauty_in_range", "\"beauty\" BETWEEN 1 AND 5");
+
+                            t.HasCheckConstraint("ck_proposal_rating_difficulty_in_range", "\"difficulty\" BETWEEN 1 AND 5");
+
+                            t.HasCheckConstraint("ck_proposal_rating_has_a_score", "\"beauty\" IS NOT NULL OR \"difficulty\" IS NOT NULL");
+                        });
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Round", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2593,6 +2627,27 @@ namespace MathComps.Infrastructure.Migrations
                     b.Navigation("Proposal");
                 });
 
+            modelBuilder.Entity("MathComps.Domain.EfCoreEntities.ProposalRating", b =>
+                {
+                    b.HasOne("MathComps.Domain.EfCoreEntities.Proposal", "Proposal")
+                        .WithMany("Ratings")
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_proposal_ratings_proposals_proposal_id");
+
+                    b.HasOne("MathComps.Domain.EfCoreEntities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_proposal_ratings_users_user_id");
+
+                    b.Navigation("Proposal");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Round", b =>
                 {
                     b.HasOne("MathComps.Domain.EfCoreEntities.Competition", "Competition")
@@ -2823,6 +2878,8 @@ namespace MathComps.Infrastructure.Migrations
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Proposal", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Ratings");
                 });
 
             modelBuilder.Entity("MathComps.Domain.EfCoreEntities.Round", b =>

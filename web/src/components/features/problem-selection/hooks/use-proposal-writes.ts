@@ -2,9 +2,16 @@
 
 import { useTranslations } from 'next-intl'
 
-import { afterDeletion, afterRecommendation, afterSetAside } from '../model/selection-edits'
-import type { RecommendationWrite, SetAsideWrite } from '../model/selection-types'
-import { deleteProposal, setAside, setRecommended } from '../services/selection-service'
+import { useSignedInIdentity } from '@/components/features/profile/hooks/use-signed-in-identity'
+
+import {
+  afterDeletion,
+  afterRating,
+  afterRecommendation,
+  afterSetAside,
+} from '../model/selection-edits'
+import type { RatingWrite, RecommendationWrite, SetAsideWrite } from '../model/selection-types'
+import { deleteProposal, setAside, setRating, setRecommended } from '../services/selection-service'
 import { type SelectionWrite, useSelectionWrite } from './use-selection-write'
 
 /**
@@ -40,6 +47,27 @@ export function useRecommend(): SelectionWrite<RecommendationWrite> {
     edit: afterRecommendation,
     changesSlots: false,
     errorMessage: t('recommendFailed'),
+  })
+}
+
+/**
+ * Setting the reader's rating of a proposal, or taking it back.
+ *
+ * @returns The write.
+ */
+export function useRate(): SelectionWrite<RatingWrite> {
+  // Copy for the selection's writes
+  const t = useTranslations('problemSelection.writes')
+
+  // The reader as the page knows them, none while signed out
+  const reader = useSignedInIdentity()
+
+  // Setting the reader's rating or taking it back, shown ahead of the server once the reader is known
+  return useSelectionWrite<RatingWrite>({
+    apiFn: setRating,
+    edit: reader === null ? null : (data, write) => afterRating(data, write, reader),
+    changesSlots: false,
+    errorMessage: t('rateFailed'),
   })
 }
 

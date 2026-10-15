@@ -257,6 +257,11 @@ public enum ApiErrorCode
     SelectionFinalizeBlocked,
 
     /// <summary>
+    /// A rating would hold a score off its scale.
+    /// </summary>
+    ProposalRatingValue,
+
+    /// <summary>
     /// A move would write a slug a problem outside it already carries.
     /// </summary>
     ProblemSlugTaken,

@@ -153,6 +153,9 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
     /// <summary>Join table: the reviewers' comments on the proposals.</summary>
     public DbSet<ProposalComment> ProposalComments => Set<ProposalComment>();
 
+    /// <summary>The reviewers' ratings of the proposals.</summary>
+    public DbSet<ProposalRating> ProposalRatings => Set<ProposalRating>();
+
     /// <summary>The boards papers are selected on.</summary>
     public DbSet<SelectionBoard> SelectionBoards => Set<SelectionBoard>();
 
@@ -1141,6 +1144,47 @@ public class MathCompsDbContext(DbContextOptions<MathCompsDbContext> options) : 
         });
 
         #endregion ProposalComment
+
+        #region ProposalRating
+
+        modelBuilder.Entity<ProposalRating>(e =>
+        {
+            // A reviewer holds one rating per proposal, so the pair is the row
+            e.HasKey(rating => new { rating.ProposalId, rating.UserId });
+
+            // The proposal rated, its ratings going with it
+            e.HasOne(rating => rating.Proposal)
+             .WithMany(proposal => proposal.Ratings)
+             .HasForeignKey(rating => rating.ProposalId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // The reviewer, whose ratings go with their account
+            e.HasOne(rating => rating.User)
+             .WithMany()
+             .HasForeignKey(rating => rating.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // DB-side invariants
+            e.ToTable(t =>
+            {
+                // A beauty on the scale, when there is one
+                t.HasCheckConstraint(
+                    "ck_proposal_rating_beauty_in_range",
+                    $"\"beauty\" BETWEEN {ProposalRating.MinScore} AND {ProposalRating.MaxScore}");
+
+                // A difficulty on the scale, when there is one
+                t.HasCheckConstraint(
+                    "ck_proposal_rating_difficulty_in_range",
+                    $"\"difficulty\" BETWEEN {ProposalRating.MinScore} AND {ProposalRating.MaxScore}");
+
+                // A rating with neither score says nothing, so it should have been dropped
+                t.HasCheckConstraint(
+                    "ck_proposal_rating_has_a_score",
+                    "\"beauty\" IS NOT NULL OR \"difficulty\" IS NOT NULL");
+            });
+        });
+
+        #endregion ProposalRating
 
         #region SelectionBoard
 

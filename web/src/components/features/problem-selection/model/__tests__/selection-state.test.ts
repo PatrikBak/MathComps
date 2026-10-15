@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  averageScore,
   cycleMisfit,
   pickActiveBoard,
   resolveText,
@@ -68,8 +69,29 @@ function proposal(texts: Proposal['texts']): Proposal {
     texts,
     isSetAside: false,
     isUsed: false,
+    ratings: [],
   }
 }
+
+describe('averageScore', () => {
+  it('averages over the reviewers who scored the aspect, and is none while nobody has', () => {
+    // Two reviewers scoring beauty, the second leaving difficulty out
+    const ratings = [
+      { rater: { id: 'a', username: 'A', email: null }, isOwn: true, beauty: 4, difficulty: 2 },
+      { rater: { id: 'b', username: 'B', email: null }, isOwn: false, beauty: 5, difficulty: null },
+    ] as const
+
+    // The averages of beauty, of difficulty, and of beauty over no ratings
+    const averages = [
+      averageScore(ratings, 'beauty'),
+      averageScore(ratings, 'difficulty'),
+      averageScore([], 'beauty'),
+    ]
+
+    // Beauty over both, difficulty over the one who gave it, and nothing over nobody
+    expect(averages).toEqual([4.5, 2, null])
+  })
+})
 
 describe('cycleMisfit', () => {
   it('names a paper no round is left for, and the round no paper fills', () => {

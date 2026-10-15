@@ -61,4 +61,9 @@ public class Proposal
     /// The reviewers' comments on it via the join entity.
     /// </summary>
     public ICollection<ProposalComment> Comments { get; } = [];
+
+    /// <summary>
+    /// The reviewers' ratings of it, one per reviewer who rated it.
+    /// </summary>
+    public ICollection<ProposalRating> Ratings { get; } = [];
 }

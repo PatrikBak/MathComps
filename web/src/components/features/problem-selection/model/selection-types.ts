@@ -14,6 +14,29 @@ export const PROPOSAL_TITLE_MAX_LENGTH = 200
 /** The language most proposals are authored in. */
 export const PROPOSAL_AUTHORING_LANGUAGE = 'en' as const satisfies Locale
 
+/** Every aspect a reviewer rates a proposal on. */
+export const RATING_ASPECTS = ['beauty', 'difficulty'] as const
+
+/** One aspect a reviewer rates a proposal on. */
+export type RatingAspect = (typeof RATING_ASPECTS)[number]
+
+/** Every score on the olympiad scale a rating runs on, lowest first. */
+export const RATING_SCORES = [1, 2, 3, 4, 5] as const
+
+/** One score on the rating scale. */
+export type RatingScore = (typeof RATING_SCORES)[number]
+
+/** A reviewer's score for each aspect, null for an aspect they give none. */
+export type RatingScores = Record<RatingAspect, RatingScore | null>
+
+/** One reviewer's rating of a proposal, which scores at least one aspect. */
+export type ProposalRating = {
+  /** The reviewer who gave it. */
+  rater: UserIdentity
+  /** Whether the reader is the one who gave it. */
+  isOwn: boolean
+} & RatingScores
+
 /**
  * One proposal's text in one language.
  */
@@ -46,6 +69,11 @@ export type Proposal = {
   isSetAside: boolean
   /** Whether a round has taken it out of the pool. */
   isUsed: boolean
+  /**
+   * Every reviewer's rating of it, in the order of the reviewers' names, except the reader's first rating, which sits
+   * last until the selection is read again.
+   */
+  ratings: ProposalRating[]
 }
 
 /**
@@ -159,6 +187,16 @@ export type RecommendationWrite = {
   category: HostedCompetitionCategory
   /** Whether the proposal is recommended for the category afterwards. */
   isRecommended: boolean
+}
+
+/**
+ * The reader's rating of a proposal being set, or taken back where it scores no aspect.
+ */
+export type RatingWrite = {
+  /** The proposal. */
+  proposalId: string
+  /** The reader's scores afterwards. */
+  scores: RatingScores
 }
 
 /**

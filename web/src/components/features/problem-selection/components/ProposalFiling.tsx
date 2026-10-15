@@ -1,16 +1,20 @@
 'use client'
 
+import { Star } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import Chip from '@/components/features/problems/components/Chip'
+import { FOCUS_RING_CLASS } from '@/components/shared/components/Button'
+import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
 import { localeCodeList } from '@/i18n/i18n'
 
 import { useAreaName } from '../hooks/use-area-name'
 import { placementsOf, unreadyLanguages, unwrittenAcross } from '../model/selection-state'
-import type { Proposal } from '../model/selection-types'
+import type { Proposal, ProposalRating } from '../model/selection-types'
 import { PlacementMark, RecommendedMarks, WARNING_MARK_CLASS } from './CategoryMarks'
+import { RatingBreakdown } from './RatingBreakdown'
 import { useLoadedSelection } from './SelectionWorkspaceProvider'
 
 /**
@@ -22,7 +26,8 @@ type ProposalFilingProps = {
 }
 
 /**
- * One line saying what a problem is filed under, where it sits, whether it is on offer, and what it still lacks.
+ * One line saying what a problem is filed under, where it sits, whether it is on offer, what it still lacks, and how
+ * many reviewers rated it.
  */
 export function ProposalFiling({ proposal }: ProposalFilingProps) {
   // Filing-line copy
@@ -74,7 +79,47 @@ export function ProposalFiling({ proposal }: ProposalFilingProps) {
       {unsolved.length > 0 && (
         <FilingWarning>{t('noSolution', { languages: localeCodeList(unsolved) })}</FilingWarning>
       )}
+
+      {/* How many reviewers rated the problem */}
+      <RatingsMark ratings={proposal.ratings} />
     </div>
+  )
+}
+
+/**
+ * Props for the {@link RatingsMark} component.
+ */
+type RatingsMarkProps = {
+  /** The problem's ratings. */
+  ratings: readonly ProposalRating[]
+}
+
+/**
+ * How many reviewers rated a problem, showing who gave what while hovered, focused or pressed. Absent while nobody has.
+ */
+function RatingsMark({ ratings }: RatingsMarkProps) {
+  // Rating copy
+  const t = useTranslations('problemSelection.ratings')
+
+  // Nobody to count, nothing to show
+  if (ratings.length === 0) return null
+
+  // The count, opening every reviewer's scores
+  return (
+    <Tooltip placement="top" content={<RatingBreakdown ratings={ratings} />}>
+      <button
+        type="button"
+        aria-label={t('ratedBy', { count: ratings.length })}
+        className={cn(
+          'inline-flex items-center gap-1 rounded-md bg-foreground/[0.06] px-1.5 py-0.5 text-xs tabular-nums',
+          'text-muted transition-colors hover:text-foreground',
+          FOCUS_RING_CLASS
+        )}
+      >
+        <Star size={12} aria-hidden />
+        {ratings.length}
+      </button>
+    </Tooltip>
   )
 }
 

@@ -5,6 +5,7 @@ import type {
   FinalizationWrite,
   MoveWrite,
   PlacementWrite,
+  RatingWrite,
   RecommendationWrite,
   SelectionData,
   SetAsideWrite,
@@ -13,6 +14,7 @@ import type {
 import {
   getFinalizationUrl,
   getProposalUrl,
+  getRatingUrl,
   getRecommendedUrl,
   getSelectionUrl,
   getSetAsideUrl,
@@ -134,6 +136,24 @@ export function setRecommended(
   return apiCall<void>(() => getRecommendedUrl(proposalId), {
     method: 'PUT',
     body: JSON.stringify({ category, isRecommended }),
+  })
+}
+
+/**
+ * Sets the reader's rating of a proposal, or takes it back.
+ *
+ * @param apiCall - The authenticated API caller.
+ * @param change - The proposal and the reader's scores afterwards.
+ *
+ * @returns Success, or an error.
+ */
+export function setRating(
+  apiCall: ApiCaller,
+  { proposalId, scores }: RatingWrite
+): Promise<ApiResult<void>> {
+  return apiCall<void>(() => getRatingUrl(proposalId), {
+    method: 'PUT',
+    body: JSON.stringify(scores),
   })
 }
 

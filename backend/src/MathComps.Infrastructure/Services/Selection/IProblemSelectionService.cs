@@ -12,8 +12,10 @@ public interface IProblemSelectionService
     /// <summary>
     /// Reads the whole selection at once.
     /// </summary>
+    /// <param name="reviewerId">The reviewer reading it, whose own ratings come back marked as theirs.</param>
     /// <param name="language">The language the cycles are named in.</param>
     /// <param name="cancellationToken">A token to cancel the work.</param>
     /// <returns>The selection.</returns>
-    Task<SelectionDto> GetSelectionAsync(Language language, CancellationToken cancellationToken = default);
+    Task<SelectionDto> GetSelectionAsync(
+        Guid reviewerId, Language language, CancellationToken cancellationToken = default);
 }

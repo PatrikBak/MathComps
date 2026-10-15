@@ -46,8 +46,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     private readonly Guid _latecomerId = Guid.CreateVersion7();
 
     /// <summary>
-    /// The pool's proposals by their number. The first is filed, set aside, written in two languages and talked
-    /// about; the third is deleted.
+    /// The pool's proposals by their number. The first is filed, set aside, written in two languages, talked about
+    /// and rated; the third is deleted.
     /// </summary>
     private readonly Dictionary<int, Guid> _pool = [];
 
@@ -84,7 +84,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task A_proposal_reads_with_its_filing_and_its_texts() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(Language.EN);
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
 
         // The first proposal
         var proposal = selection.Proposals.Single(candidate => candidate.Id == _pool[1]);
@@ -125,7 +125,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task A_draft_reads_its_slots_in_place() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(Language.EN);
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
 
         // The draft
         var board = selection.Boards.Single(candidate => candidate.Finalization is null);
@@ -146,7 +146,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task A_finalized_board_reads_its_slots_off_its_rounds() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(Language.EN);
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
 
         // The November board
         var board = selection.Boards.Single(candidate => candidate.Id == _novemberBoardId);
@@ -173,7 +173,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task An_opened_board_leaves_the_selection_with_its_problems() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(Language.EN);
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
 
         // Two boards left: the November one and the draft
         Assert.Equal(2, selection.Boards.Count);
@@ -193,7 +193,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task A_deleted_proposal_is_gone_from_the_read() => RunTestAsync(async service =>
     {
         // The selection
-        var selection = await service.GetSelectionAsync(Language.EN);
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
 
         // Without the third proposal
         Assert.DoesNotContain(selection.Proposals, proposal => proposal.Id == _pool[3]);
@@ -207,7 +207,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     public Task The_cycles_are_the_groups_still_taking_a_board() => RunTestAsync(async service =>
     {
         // The selection, read in Slovak
-        var selection = await service.GetSelectionAsync(Language.SK);
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.SK);
 
         // October alone
         var cycle = Assert.Single(selection.Cycles);
@@ -254,7 +254,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         });
 
         // The selection
-        var selection = await service.GetSelectionAsync(Language.EN);
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
 
         // So no group takes a board
         Assert.Empty(selection.Cycles);
@@ -272,7 +272,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         RunTestAsync(async service =>
         {
             // The selection
-            var selection = await service.GetSelectionAsync(Language.EN);
+            var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
 
             // The first proposal's conversations
             var conversations = selection.Conversations
@@ -292,6 +292,30 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
                     conversation.HasOlderStatement)));
         });
 
+    /// <summary>
+    /// A proposal reads with every rating it was given, by the reviewers' names, each with who gave it, whether the
+    /// reviewer reading gave it, and the scores as given, a score left out read as none. A rater has no name once
+    /// their account is deleted. A deleted account keeps its username, so a read ordering by it would still file the
+    /// nameless rating under the name it no longer shows.
+    /// </summary>
+    [Fact]
+    public Task Ratings_read_with_their_raters() => RunTestAsync(async service =>
+    {
+        // The selection, as the live reviewer reads it
+        var selection = await service.GetSelectionAsync(_reviewerId, Language.EN);
+
+        // The first proposal's ratings: the reader's own, then the deleted reviewer's, which has no name to go by
+        Assert.Equal(
+            [
+                (new UserIdentityDto(_reviewerId, "Reviewer", "reviewer@example.com"), true, 4, 2),
+                (new UserIdentityDto(_goneReviewerId, null, null), false, 5, null),
+            ],
+            selection.Proposals
+                .Single(proposal => proposal.Id == _pool[1])
+                .Ratings
+                .Select(rating => (rating.Rater, rating.IsOwn, rating.Beauty, rating.Difficulty)));
+    });
+
     /// <inheritdoc/>
     protected override async Task SeedDataAsync(MathCompsDbContext context)
     {
@@ -302,6 +326,7 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         var gone = HostedSeed.NewUser(_goneReviewerId, "Gone");
         gone.Email = null;
         gone.IsDeleted = true;
+        gone.Email = null;
         context.Users.Add(gone);
 
         // The live reviewer and the deleted one, preparing the competitions since well before any conversation
@@ -389,6 +414,23 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
         // And the latecomer's, held before they were preparing
         SeedConversation(context, _pool[1], _latecomerId, "Statement 1 in EN", now.AddDays(-2).AddHours(1), "Early");
+
+        // The live reviewer's rating of the first proposal, both scores given
+        context.ProposalRatings.Add(new ProposalRating
+        {
+            ProposalId = _pool[1],
+            UserId = _reviewerId,
+            Beauty = 4,
+            Difficulty = 2,
+        });
+
+        // And the deleted reviewer's, its beauty alone
+        context.ProposalRatings.Add(new ProposalRating
+        {
+            ProposalId = _pool[1],
+            UserId = _goneReviewerId,
+            Beauty = 5,
+        });
 
         // Written
         await context.SaveChangesAsync();
