@@ -1,4 +1,5 @@
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
+import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import type { Locale } from '@/i18n/i18n'
 
 /** Every area a proposal can be filed under. */
@@ -178,10 +179,8 @@ export type ReviewConversation = {
   id: string
   /** The proposal it was about. */
   proposalId: string
-  /** The account of whoever held it. */
-  authorId: string
-  /** The username of whoever held it, null without one or for a deleted account. */
-  author: string | null
+  /** The reviewer who held it. */
+  author: UserIdentity
   /** When it started, as an ISO-8601 string. */
   startedAt: string
   /** How many messages were said in it. */

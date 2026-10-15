@@ -1,6 +1,7 @@
 using System.Data;
 using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.Contracts.Selection;
+using MathComps.Domain.Contracts.Users;
 using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
@@ -120,8 +121,10 @@ public sealed class ProblemSelectionService(
             .Select(defense => new ReviewConversationDto(
                 defense.DefenseSessionId,
                 defense.ProblemId,
-                defense.DefenseSession.UserId,
-                defense.DefenseSession.User.IsDeleted ? null : defense.DefenseSession.User.Username,
+                new UserIdentityDto(
+                    defense.DefenseSession.UserId,
+                    defense.DefenseSession.User.IsDeleted ? null : defense.DefenseSession.User.Username,
+                    defense.DefenseSession.User.Email),
                 defense.DefenseSession.CreatedAt,
                 defense.DefenseSession.Turns.Count,
                 !defense.Problem.Texts.Any(text => text.DocumentType == DocumentType.Statement
@@ -156,14 +159,14 @@ public sealed class ProblemSelectionService(
 
         // When each conversation's author started preparing the competitions, for those who still do.
         var preparerSince = await grants.GetGrantedAtAsync(
-            [.. conversations.Select(conversation => conversation.AuthorId).Distinct()],
+            [.. conversations.Select(conversation => conversation.Author.Id).Distinct()],
             UserCapability.PrepareCompetitions,
             cancellationToken);
 
         // Only the conversations the reviewers held.
         var reviewersConversations = conversations
             .Where(conversation => SelectionRules.IsReviewersConversation(
-                preparerSince.TryGetValue(conversation.AuthorId, out var since) ? since : null,
+                preparerSince.TryGetValue(conversation.Author.Id, out var since) ? since : null,
                 conversation.StartedAt))
             .ToList();
 

@@ -462,10 +462,7 @@ type HeldTranscript = {
 /**
  * A conversation a reviewer held with Mathilda about a problem, as the backend keeps it.
  */
-type HeldConversation = Pick<
-  ReviewConversation,
-  'id' | 'proposalId' | 'authorId' | 'author' | 'startedAt'
-> & {
+type HeldConversation = Pick<ReviewConversation, 'id' | 'proposalId' | 'author' | 'startedAt'> & {
   /** The statement it was argued against, and everything said. */
   transcript: HeldTranscript
 }
@@ -474,8 +471,7 @@ type HeldConversation = Pick<
 export const RECENT: HeldConversation = {
   id: '00000000-0000-4000-8000-c00000000001',
   proposalId: OPENED.id,
-  authorId: 'user_zuzana',
-  author: REVIEWER,
+  author: { id: 'user_zuzana', username: REVIEWER, email: 'zuzana@example.com' },
   startedAt: '2026-09-28T10:00:00.000Z',
   transcript: {
     savedStatement: statementOf(OPENED.number),
@@ -498,8 +494,7 @@ export const ARGUED_FIRST =
 export const FIRST_OF_TWO: HeldConversation = {
   id: '00000000-0000-4000-8000-c00000000003',
   proposalId: OPENED.id,
-  authorId: 'user_zuzana',
-  author: REVIEWER,
+  author: { id: 'user_zuzana', username: REVIEWER, email: 'zuzana@example.com' },
   startedAt: '2026-09-20T10:00:00.000Z',
   transcript: {
     savedStatement: statementOf(OPENED.number),
@@ -510,12 +505,14 @@ export const FIRST_OF_TWO: HeldConversation = {
   },
 }
 
-/** A conversation about {@link OPENED} held by a reviewer with no username, argued against its earlier statement. */
+/**
+ * A conversation about {@link OPENED} held by a reviewer with neither a username nor an address, argued against its
+ * earlier statement.
+ */
 export const EARLIER: HeldConversation = {
   id: '00000000-0000-4000-8000-c00000000002',
   proposalId: OPENED.id,
-  authorId: 'user_nameless',
-  author: null,
+  author: { id: 'user_nameless', username: null, email: null },
   startedAt: '2026-09-14T09:00:00.000Z',
   transcript: {
     savedStatement: EARLIER_STATEMENT,
@@ -577,14 +574,14 @@ export function rememberedSelection(chat: HostedBackend | null): SelectionMemory
  * @returns The conversations, in no particular order.
  */
 function heldConversations(memory: SelectionMemory, proposals: Proposal[]): HeldConversation[] {
-  // Each conversation held through the chat, by a reviewer with no username as the ambient profile has it
+  // Each conversation held through the chat, by a reviewer with neither a username nor an address, as the ambient
+  // profile has it
   const chatted = proposals.flatMap((proposal) =>
     (memory.chat?.sessionsAbout(proposal.id) ?? []).map(
       (session): HeldConversation => ({
         id: session.id,
         proposalId: proposal.id,
-        authorId: CHATTING_REVIEWER_ID,
-        author: null,
+        author: { id: CHATTING_REVIEWER_ID, username: null, email: null },
         // Started on Mathilda's greeting, which every conversation opens with
         startedAt: session.turns[0]!.createdAt,
         transcript: { savedStatement: session.statement, turns: session.turns },
@@ -614,10 +611,9 @@ function selectionOf(
   // Each conversation listed, with how much was said and whether the statement it was argued against is
   // gone from the problem in every language
   const conversations = heldConversations(memory, proposals).map(
-    ({ id, proposalId, authorId, author, startedAt, transcript }): ReviewConversation => ({
+    ({ id, proposalId, author, startedAt, transcript }): ReviewConversation => ({
       id,
       proposalId,
-      authorId,
       author,
       startedAt,
       messageCount: transcript.turns.length,
@@ -662,7 +658,7 @@ function conversationInFullOf(held: HeldConversation, proposal: Proposal): Conve
       number: proposal.number,
       title: proposal.title,
     },
-    user: { id: held.authorId, username: held.author, email: null },
+    user: held.author,
     createdAt: held.startedAt,
     statement: held.transcript.savedStatement,
     reference: REFERENCE,
