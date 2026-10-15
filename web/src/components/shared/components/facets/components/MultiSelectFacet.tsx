@@ -1,4 +1,3 @@
-import { Radio, RadioGroup } from '@headlessui/react'
 import {
   ArrowDownAZ,
   ArrowDownWideNarrow,
@@ -11,6 +10,7 @@ import { memo, type MouseEvent, type ReactNode, useCallback, useMemo, useRef } f
 
 import { FOCUS_RING_ROW_CLASS } from '@/components/shared/components/Button'
 import { FLOATING_PANEL_FILL_CLASS } from '@/components/shared/components/DropdownMenu'
+import { SegmentedSwitch } from '@/components/shared/components/SegmentedSwitch'
 import { assertNever } from '@/components/shared/utils/assert-never'
 import { cn } from '@/components/shared/utils/css-utils'
 import { isExclusiveSelection } from '@/components/shared/utils/event-utils'
@@ -34,14 +34,15 @@ import {
   toggleOptionSelection,
   toVisibleSections,
 } from '../model/facet-logic'
-import type {
-  FacetGrouping,
-  FacetLogicConfig,
-  FacetLogicMode,
-  FacetOption,
-  FacetSelectionMode,
-  FacetSortMode,
-  VisibleSection,
+import {
+  FACET_LOGIC_MODES,
+  type FacetGrouping,
+  type FacetLogicConfig,
+  type FacetLogicMode,
+  type FacetOption,
+  type FacetSelectionMode,
+  type FacetSortMode,
+  type VisibleSection,
 } from '../model/facet-types'
 import { FacetHeader } from './FacetHeader'
 import { FacetItemCount, FacetItemLabel } from './FacetItem'
@@ -311,17 +312,8 @@ type LogicToggleProps = {
   value: FacetLogicMode
   /** Applies the mode the user picked. */
   onChange: (mode: FacetLogicMode) => void
-  /** Wording for the two modes, when the generic copy doesn't fit the facet. */
+  /** Wording for each mode, when the generic copy doesn't fit the facet. */
   labels?: FacetLogicConfig['labels']
-}
-
-/**
- * The render state a {@link Radio} hands its className. HeadlessUI does not export the
- * full shape, so only the field in use is declared.
- */
-type RadioRenderState = {
-  /** Whether this mode is the one in force. */
-  checked: boolean
 }
 
 /**
@@ -331,12 +323,11 @@ function LogicToggle({ value, onChange, labels }: LogicToggleProps) {
   // Translations for the shared filter controls
   const tFilters = useTranslations('ui.filters')
 
-  // A function which styles one mode, lit up when it is the one in force
-  const modeClass = ({ checked }: RadioRenderState) =>
-    cn(
-      'inline-flex items-center justify-center cursor-pointer px-2 sm:px-2.5 h-6 sm:h-7 rounded-md text-[11px] sm:text-xs font-medium focus:outline-none data-focus:ring-2 data-focus:ring-focus',
-      checked && 'bg-foreground/10 text-foreground'
-    )
+  // What each mode reads, in the facet's own words where it has them
+  const modeLabels: Record<FacetLogicMode, string> = {
+    or: labels?.or ?? tFilters('logicAtLeastOne'),
+    and: labels?.and ?? tFilters('logicAll'),
+  }
 
   return (
     <div
@@ -348,20 +339,14 @@ function LogicToggle({ value, onChange, labels }: LogicToggleProps) {
       {/* What the choice is about */}
       <span className="whitespace-nowrap">{tFilters('logic')}</span>
 
-      {/* The two modes */}
-      <RadioGroup
+      {/* The modes */}
+      <SegmentedSwitch
         value={value}
         onChange={onChange}
-        aria-label={tFilters('selectionLogic')}
-        className="inline-flex items-center gap-0.5 sm:gap-1 rounded-lg border border-foreground/10 p-0.5"
-      >
-        <Radio value="or" className={modeClass}>
-          {labels?.or ?? tFilters('logicAtLeastOne')}
-        </Radio>
-        <Radio value="and" className={modeClass}>
-          {labels?.and ?? tFilters('logicAll')}
-        </Radio>
-      </RadioGroup>
+        ariaLabel={tFilters('selectionLogic')}
+        options={FACET_LOGIC_MODES.map((mode) => ({ value: mode, label: modeLabels[mode] }))}
+        compactOnPhones
+      />
     </div>
   )
 }

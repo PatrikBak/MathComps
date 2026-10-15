@@ -1,9 +1,32 @@
 'use client'
 
 import { Radio, RadioGroup } from '@headlessui/react'
+import { cva } from 'class-variance-authority'
 import type { ReactNode } from 'react'
 
-import { cn } from '@/components/shared/utils/css-utils'
+/**
+ * The look of one option, in the size the switch is set to.
+ */
+const segmentedSwitchOptionVariants = cva(
+  [
+    'inline-flex cursor-pointer items-center rounded-md font-semibold',
+    'text-muted transition-colors hover:text-foreground',
+    'focus:outline-none data-focus:ring-2 data-focus:ring-focus',
+    'data-checked:bg-foreground/10 data-checked:text-foreground',
+    'data-disabled:cursor-not-allowed data-disabled:opacity-35 data-disabled:hover:text-muted',
+  ],
+  {
+    variants: {
+      compactOnPhones: {
+        true: 'h-6 px-2 text-[11px] sm:h-7 sm:px-2.5 sm:text-xs',
+        false: 'h-7 px-2.5 text-xs',
+      },
+    },
+    defaultVariants: {
+      compactOnPhones: false,
+    },
+  }
+)
 
 /**
  * One option of a {@link SegmentedSwitch}.
@@ -29,6 +52,8 @@ type SegmentedSwitchProps<TValue extends string> = {
   ariaLabel: string
   /** The options, in the order they read. */
   options: readonly SegmentedSwitchOption<TValue>[]
+  /** Whether the switch steps down a size below the `sm` breakpoint. */
+  compactOnPhones?: boolean
 }
 
 /**
@@ -40,6 +65,7 @@ export function SegmentedSwitch<TValue extends string>({
   onChange,
   ariaLabel,
   options,
+  compactOnPhones,
 }: SegmentedSwitchProps<TValue>) {
   return (
     <RadioGroup
@@ -54,13 +80,7 @@ export function SegmentedSwitch<TValue extends string>({
           value={option.value}
           disabled={option.unavailableReason !== undefined}
           title={option.unavailableReason}
-          className={cn(
-            'inline-flex h-7 cursor-pointer items-center rounded-md px-2.5 text-xs font-semibold',
-            'text-muted transition-colors hover:text-foreground',
-            'focus:outline-none data-focus:ring-2 data-focus:ring-focus',
-            'data-checked:bg-foreground/10 data-checked:text-foreground',
-            'data-disabled:cursor-not-allowed data-disabled:opacity-35 data-disabled:hover:text-muted'
-          )}
+          className={segmentedSwitchOptionVariants({ compactOnPhones })}
         >
           {option.label}
         </Radio>

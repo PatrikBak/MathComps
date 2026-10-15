@@ -59,10 +59,13 @@ export type VisibleSection<T extends FacetOption = FacetOption> = {
   sectionOptions: T[]
 }
 
+/** The ways a facet can combine its selected values, in the order a facet offers them. */
+export const FACET_LOGIC_MODES = ['or', 'and'] as const
+
 /**
  * Whether the values selected in a facet are combined with OR or with AND.
  */
-export type FacetLogicMode = 'or' | 'and'
+export type FacetLogicMode = (typeof FACET_LOGIC_MODES)[number]
 
 /**
  * How a facet combines its selected values, and how that gets changed.
@@ -72,7 +75,7 @@ export type FacetLogicConfig = {
   mode: FacetLogicMode
   /** Applies the mode the user picked. */
   onChange: (next: FacetLogicMode) => void
-  /** Facet-specific wording for the two modes. */
+  /** Facet-specific wording for each mode. */
   labels?: {
     /** Wording for the OR mode. */
     or: string
