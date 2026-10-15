@@ -237,22 +237,21 @@ public class UserListService(
     }
 
     /// <inheritdoc />
-    public async Task<ListAccessResult> CheckListAccessAsync(Guid? userId, string contentId)
+    public async Task<string> GetReadableListNameAsync(Guid? userId, string contentId)
     {
-        // Check if the list exists and whether the user can access it
+        // Find the list by content ID, whoever owns it
         var list = await dbContext.UserProblemLists
             .Where(list => list.ContentId == contentId)
             .Select(list => new { list.UserId, list.IsShared, list.Name })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync()
+            // It must exist
+            ?? throw new ListNotFoundException(contentId);
 
-        // Non-existent list
-        if (list is null)
-            return new ListAccessResult(ListAccessStatus.NotFound);
+        // Only the owner reads a list that is not shared
+        if (list.UserId != userId && !list.IsShared)
+            throw new ListAccessDeniedException(contentId);
 
-        // Owner always has access, others only if shared
-        var isOwner = userId.HasValue && list.UserId == userId.Value;
-        return isOwner || list.IsShared
-            ? new ListAccessResult(ListAccessStatus.HasAccess, list.Name)
-            : new ListAccessResult(ListAccessStatus.NoAccess);
+        // The readable list's name
+        return list.Name;
     }
 }

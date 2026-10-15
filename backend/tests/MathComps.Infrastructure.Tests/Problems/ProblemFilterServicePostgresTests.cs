@@ -7,6 +7,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
 using MathComps.Infrastructure.Services.Problems;
+using MathComps.Infrastructure.Services.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MathComps.Domain.Localization;
@@ -59,7 +60,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act - execute the filter with no criteria
-        var initialResult = await service.FilterAsync(initialQuery);
+        var (initialResult, _) = await service.FilterAsync(initialQuery);
 
         // Assert - verify we get all problems and all available filter options
         Assert.Equal(7, initialResult.Problems.TotalCount);
@@ -89,7 +90,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
         // The library as nobody in particular sees it, which is what the other answer is held against
-        var asAnonymous = await service.FilterAsync(EverythingQuery());
+        var (asAnonymous, _) = await service.FilterAsync(EverythingQuery());
 
         // The same question narrowed hard by the reader themselves, down to what they liked
         var favorites = EverythingQuery();
@@ -100,7 +101,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         };
 
         // The library as that reader sees it
-        var asOwnFavorites = await service.FilterAsync(favorites);
+        var (asOwnFavorites, _) = await service.FilterAsync(favorites);
 
         // Every one of them was answered with the library's options
         Assert.NotNull(asAnonymous.BaseOptions);
@@ -139,10 +140,10 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         };
 
         // What that query is answered with
-        var narrowedResult = await service.FilterAsync(narrowed);
+        var (narrowedResult, _) = await service.FilterAsync(narrowed);
 
         // And what the library whole is answered with, to hold it against
-        var wholeResult = await service.FilterAsync(EverythingQuery());
+        var (wholeResult, _) = await service.FilterAsync(EverythingQuery());
 
         // Both blocks came back, since the query does leave something out
         Assert.NotNull(narrowedResult.BaseOptions);
@@ -186,7 +187,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act - execute the text search
-        var textSearchResult = await service.FilterAsync(textSearchQuery);
+        var (textSearchResult, _) = await service.FilterAsync(textSearchQuery);
 
         // Assert - verify we get exactly one matching problem
         Assert.Single(textSearchResult.Problems.Items);
@@ -296,10 +297,10 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act - execute all search variations
-        var lowercaseResult = await service.FilterAsync(lowercaseQuery);
-        var uppercaseResult = await service.FilterAsync(uppercaseQuery);
-        var mixedCaseResult = await service.FilterAsync(mixedCaseQuery);
-        var lowerToTitleResult = await service.FilterAsync(lowerToTitleQuery);
+        var (lowercaseResult, _) = await service.FilterAsync(lowercaseQuery);
+        var (uppercaseResult, _) = await service.FilterAsync(uppercaseQuery);
+        var (mixedCaseResult, _) = await service.FilterAsync(mixedCaseQuery);
+        var (lowerToTitleResult, _) = await service.FilterAsync(lowerToTitleQuery);
 
         // Assert - all variations should find their respective problems
         // Test 1: lowercase "stvorstena" → "štvorstena"
@@ -417,8 +418,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
                 Language: Language.SK);
 
             // Act - run both searches
-            var statementResult = await service.FilterAsync(statementQuery);
-            var solutionResult = await service.FilterAsync(solutionQuery);
+            var (statementResult, _) = await service.FilterAsync(statementQuery);
+            var (solutionResult, _) = await service.FilterAsync(solutionQuery);
 
             // Assert - the markdown-only statement is found
             Assert.Contains(statementResult.Problems.Items, problem => problem.Slug == "coalesce-search-1");
@@ -459,7 +460,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act - execute the author filter
-        var authorResult = await service.FilterAsync(authorQuery);
+        var (authorResult, _) = await service.FilterAsync(authorQuery);
 
         // Assert - verify we get all 5 problems by Patrik Bak
         Assert.Equal(5, authorResult.Problems.TotalCount);
@@ -497,7 +498,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act - execute the OR tag filter
-        var tagsOrResult = await service.FilterAsync(tagsOrQuery);
+        var (tagsOrResult, _) = await service.FilterAsync(tagsOrQuery);
 
         // Assert - verify we get problems with either algebra OR number-theory tags
         Assert.Equal(2, tagsOrResult.Problems.TotalCount);
@@ -534,7 +535,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act - execute the AND tag filter
-        var tagsAndResult = await service.FilterAsync(tagsAndQuery);
+        var (tagsAndResult, _) = await service.FilterAsync(tagsAndQuery);
 
         // Assert - verify we get no results since no problems have both tags
         Assert.Empty(tagsAndResult.Problems.Items);
@@ -571,7 +572,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act - execute the complex multi-criteria filter
-        var complexQueryResult = await service.FilterAsync(complexQuery);
+        var (complexQueryResult, _) = await service.FilterAsync(complexQuery);
 
         // Assert - verify we get exactly 2 problems that match both season 75 and geometry tag
         Assert.Equal(2, complexQueryResult.Problems.Items.Count);
@@ -633,8 +634,8 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act - execute both page queries
-        var page1Result = await service.FilterAsync(page1Query);
-        var page2Result = await service.FilterAsync(page2Query);
+        var (page1Result, _) = await service.FilterAsync(page1Query);
+        var (page2Result, _) = await service.FilterAsync(page2Query);
 
         // Assert - verify pagination works correctly with 7 total problems
         Assert.Equal(4, page1Result.Problems.Items.Count);
@@ -670,10 +671,10 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         };
 
         // Its first page, which is the one owed both blocks
-        var firstPage = await service.FilterAsync(narrowed);
+        var (firstPage, _) = await service.FilterAsync(narrowed);
 
         // And the page behind it
-        var laterPage = await service.FilterAsync(narrowed with
+        var (laterPage, _) = await service.FilterAsync(narrowed with
         {
             Query = narrowed.Query with { PageNumber = 2 }
         });
@@ -721,7 +722,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act - execute the query that should return no results
-        var noResultsResult = await service.FilterAsync(noResultsQuery);
+        var (noResultsResult, _) = await service.FilterAsync(noResultsQuery);
 
         // Assert - verify we get an empty result set with zero total count
         Assert.Empty(noResultsResult.Problems.Items);
@@ -763,13 +764,13 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
             UserId: null,
             Language: Language.SK
         );
-        var resultUser1 = await service.FilterAsync(baseQuery with { UserId = user1Id });
+        var (resultUser1, _) = await service.FilterAsync(baseQuery with { UserId = user1Id });
 
         // Act 2: Query as User 2
-        var resultUser2 = await service.FilterAsync(baseQuery with { UserId = user2Id });
+        var (resultUser2, _) = await service.FilterAsync(baseQuery with { UserId = user2Id });
 
         // Act 3: Query as Anonymous
-        var resultAnon = await service.FilterAsync(baseQuery);
+        var (resultAnon, _) = await service.FilterAsync(baseQuery);
 
         // Assert 1: User 1
         var p1User1 = resultUser1.Problems.Items.First(problem => problem.Slug == "75-a-i-1");
@@ -844,17 +845,17 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act 1: Query favorites for User 1 (liked 75-a-i-1 and 75-b-i-1)
-        var resultUser1Favorites = await service.FilterAsync(favoritesQuery with { UserId = user1Id });
+        var (resultUser1Favorites, _) = await service.FilterAsync(favoritesQuery with { UserId = user1Id });
 
         // Act 2: Query favorites for User 2 (liked only 75-b-i-1)
-        var resultUser2Favorites = await service.FilterAsync(favoritesQuery with { UserId = user2Id });
+        var (resultUser2Favorites, _) = await service.FilterAsync(favoritesQuery with { UserId = user2Id });
 
         // Act 3: Query favorites for Anonymous (should throw)
         await Assert.ThrowsAsync<FavoritesRequireAuthenticationException>(() => service.FilterAsync(favoritesQuery));
 
         // Act 4: Query all problems for User 1 (FavoritesOnly = false)
         var allProblemsQuery = favoritesQuery with { Query = favoritesQuery.Query with { FavoritesOnly = false } };
-        var resultUser1All = await service.FilterAsync(allProblemsQuery with { UserId = user1Id });
+        var (resultUser1All, _) = await service.FilterAsync(allProblemsQuery with { UserId = user1Id });
 
         // Assert 1: User 1 favorites - should get 2 problems (75-a-i-1 and 75-b-i-1)
         Assert.Equal(2, resultUser1Favorites.Problems.TotalCount);
@@ -903,7 +904,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(baseQuery);
+        var (result, _) = await service.FilterAsync(baseQuery);
 
         // Assert
         var p1 = result.Problems.Items.First(problem => problem.Slug == "75-a-i-1");
@@ -948,7 +949,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert - verify season labels have correct format with full calendar years
         Assert.NotNull(result.BaseOptions);
@@ -997,7 +998,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(everythingQuery);
+        var (result, _) = await service.FilterAsync(everythingQuery);
 
         // The competitions as the tree they form
         var competitions = result.BaseOptions!.Competitions;
@@ -1053,7 +1054,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         async Task<string[]> MatchedSlugsAsync(string path)
         {
             // Filter by that one selection alone, leaving every other facet open
-            var result = await service.FilterAsync(new ProblemFilterOptions(
+            var (result, _) = await service.FilterAsync(new ProblemFilterOptions(
                 new FilterQuery(
                     new FilterParameters(
                         SearchText: string.Empty,
@@ -1123,7 +1124,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(everythingQuery);
+        var (result, _) = await service.FilterAsync(everythingQuery);
 
         // The CSMO problem, set three levels down in the home round of category A
         var csmoProblem = result.Problems.Items.Single(problem => problem.Slug == "75-a-i-1");
@@ -1298,7 +1299,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert - should return Slovak statement
         Assert.Single(result.Problems.Items);
@@ -1337,7 +1338,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert - should return English translation
         Assert.Single(result.Problems.Items);
@@ -1376,7 +1377,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert - should fall back to Slovak (original) since no English translation exists
         Assert.Single(result.Problems.Items);
@@ -1421,12 +1422,57 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, listName) = await service.FilterAsync(query);
 
         // Assert — only p1 and p2 are in the list
         Assert.Equal(2, result.Problems.TotalCount);
         Assert.Contains(result.Problems.Items, p => p.Slug == "75-a-i-1");
         Assert.Contains(result.Problems.Items, p => p.Slug == "75-b-i-1");
+
+        // The answer names the list it narrowed to
+        Assert.Equal("My Test List", listName);
+    });
+
+    /// <summary>
+    /// A list id no list goes by is refused as missing, where the filter alone would answer with an empty page.
+    /// </summary>
+    [Fact]
+    public Task FilterByMissingListThrows() => RunTestAsync(async service =>
+    {
+        // A signed-in reader
+        var user1Id = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+        // The library narrowed to a list nobody has
+        var query = EverythingQuery();
+        query = query with
+        {
+            UserId = user1Id,
+            Query = query.Query with { ListContentId = "no-such-list" }
+        };
+
+        // The run is refused as naming a missing list
+        await Assert.ThrowsAsync<ListNotFoundException>(() => service.FilterAsync(query));
+    });
+
+    /// <summary>
+    /// Someone else's list that is not shared is refused, where the filter alone would hand over its problems.
+    /// </summary>
+    [Fact]
+    public Task FilterByOthersPrivateListThrows() => RunTestAsync(async service =>
+    {
+        // A reader who owns none of user1's lists
+        var user2Id = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+        // The library narrowed to user1's list, which is not shared
+        var query = EverythingQuery();
+        query = query with
+        {
+            UserId = user2Id,
+            Query = query.Query with { ListContentId = "test-list-1" }
+        };
+
+        // The run is refused as reaching into a list the reader can't read
+        await Assert.ThrowsAsync<ListAccessDeniedException>(() => service.FilterAsync(query));
     });
 
     /// <summary>
@@ -1461,7 +1507,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert
         Assert.Empty(result.Problems.Items);
@@ -1501,7 +1547,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert — only p1 has the geometry tag in the list
         Assert.Single(result.Problems.Items);
@@ -1546,7 +1592,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert
         var p1 = result.Problems.Items.First(p => p.Slug == "75-a-i-1");
@@ -1595,7 +1641,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert — all problems should have empty ListContentIds
         Assert.All(result.Problems.Items, p => Assert.Empty(p.ListContentIds));
@@ -1634,7 +1680,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert — user2 has no items in any list, so all should be empty
         var p1 = result.Problems.Items.First(p => p.Slug == "75-a-i-1");
@@ -1681,9 +1727,9 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var resultUser1 = await service.FilterAsync(baseQuery with { UserId = user1Id });
-        var resultUser2 = await service.FilterAsync(baseQuery with { UserId = user2Id });
-        var resultAnon = await service.FilterAsync(baseQuery);
+        var (resultUser1, _) = await service.FilterAsync(baseQuery with { UserId = user1Id });
+        var (resultUser2, _) = await service.FilterAsync(baseQuery with { UserId = user2Id });
+        var (resultAnon, _) = await service.FilterAsync(baseQuery);
 
         // Assert: User1 — p1 and p3 are marked
         var p1User1 = resultUser1.Problems.Items.First(problem => problem.Slug == "75-a-i-1");
@@ -1737,7 +1783,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert — p1 and p3 are marked by user1
         Assert.Equal(2, result.Problems.TotalCount);
@@ -1778,7 +1824,7 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         );
 
         // Act
-        var result = await service.FilterAsync(query);
+        var (result, _) = await service.FilterAsync(query);
 
         // Assert — 5 out of 7 problems are unmarked (p2, p4, p5, p6, p7)
         Assert.Equal(5, result.Problems.TotalCount);
@@ -2258,10 +2304,10 @@ public class ProblemFilterServicePostgresTests(PostgresContainerFixture fixture)
         };
 
         // Act - run the filter with the out-of-range paging
-        var flooredResult = await service.FilterAsync(flooredQuery);
+        var (flooredResult, _) = await service.FilterAsync(flooredQuery);
 
         // Act - and with the page number past the ceiling
-        var cappedResult = await service.FilterAsync(cappedQuery);
+        var (cappedResult, _) = await service.FilterAsync(cappedQuery);
 
         // Assert - the page size is capped at the configured maximum
         Assert.Equal(100, flooredResult.Problems.PageSize);
