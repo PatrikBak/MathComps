@@ -365,7 +365,7 @@ test.describe("the selection's address and history", () => {
     // Focus back on the problem's link
     await expect(link).toBeFocused()
 
-    // The link ringed, since a key took the reader back
+    // The link ringed, as it was when a key opened the problem
     expect(await showsFocusRing(link)).toBe(true)
 
     // Back, onto the problem again
@@ -373,6 +373,39 @@ test.describe("the selection's address and history", () => {
 
     // Focus on the problem's name again, a step in history moving focus too
     await expect(headingOf(page, OPENED)).toBeFocused()
+  })
+
+  test("brings focus back onto a clicked problem's link without a ring, even by the left arrow", async ({
+    page,
+  }) => {
+    // A reviewer whose selection holds a pool of problems
+    await stubSelection(page, 'selection')
+
+    // The pool
+    await page.goto(SELECTION_PATH)
+
+    // Once every card is drawn
+    await expect(page.getByRole('article')).toHaveCount(ON_OFFER_COUNT, {
+      timeout: SETTLE_TIMEOUT_MS,
+    })
+
+    // A problem's link in the pool
+    const link = cardOf(page, OPENED).getByRole('link', { name: OPENED.title })
+
+    // The problem opened by a click
+    await link.click()
+
+    // Focus on the problem's name
+    await expect(headingOf(page, OPENED)).toBeFocused()
+
+    // Back to the pool by the left arrow
+    await page.keyboard.press('ArrowLeft')
+
+    // Focus back on the problem's link
+    await expect(link).toBeFocused()
+
+    // Without a ring, as it was when the click opened the problem
+    expect(await showsFocusRing(link)).toBe(false)
   })
 
   test('goes back to the pool by the left arrow, unless the comment editor, the tabs or a dialog has the key', async ({

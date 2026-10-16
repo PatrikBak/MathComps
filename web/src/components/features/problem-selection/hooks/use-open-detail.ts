@@ -85,13 +85,23 @@ type PaperSpot = {
 }
 
 /**
+ * The element holding focus as a page opened.
+ */
+type HeldFocus = {
+  /** The element. */
+  element: HTMLElement
+  /** Whether the element showed the focus ring. */
+  isRinged: boolean
+}
+
+/**
  * What a page was opened from, which focus goes back to once the page closes.
  */
 type Opener = {
   /** The subject of the page opened. */
   pageId: string
-  /** The element holding focus as it opened. */
-  element: HTMLElement
+  /** What held focus as the page opened; null where focus sat nowhere. */
+  held: HeldFocus | null
 }
 
 /**
@@ -149,25 +159,30 @@ function spotAt(page: DetailPage): LeftSpot {
 
 /**
  * Puts focus back on what a page just closed was opened from, where the screen still shows it, or else on the page's
- * link, leaving the screen where it stands.
+ * link, leaving the screen where it stands. Focus comes back ringed as it was when the page opened, so a page opened
+ * with a click comes back without a ring however it closes. A page reached through history or the address rings as
+ * the reader's latest press decides.
  *
- * @param opener - What the last page opened was opened from; null for nothing.
+ * @param opener - What the last page opened was opened from; null until a page has opened.
  * @param pageId - The subject of the page just closed.
  *
  * @returns Whether the screen showed either.
  */
 function returnFocus(opener: Opener | null, pageId: string): boolean {
-  // What the page was opened from, where the screen still shows it
-  if (opener?.pageId === pageId && opener.element.getClientRects().length > 0) {
-    // Focused there, the screen staying where it was
-    focusForReader(opener.element, { preventScroll: true })
+  // A page reached through history or the address, focus on its link ringed as the latest press decides
+  if (opener?.pageId !== pageId) return focusShown(OPEN_ID_ATTRIBUTE.selectorFor(pageId))
 
-    // The screen showed it
-    return true
-  }
+  // What the page was opened from, where the screen still shows it, or else the page's link
+  const target =
+    opener.held !== null && opener.held.element.getClientRects().length > 0
+      ? opener.held.element
+      : shownElement<HTMLElement>(OPEN_ID_ATTRIBUTE.selectorFor(pageId))
 
-  // The page's link otherwise
-  return focusShown(OPEN_ID_ATTRIBUTE.selectorFor(pageId))
+  // Focused there, ringed as focus was when the page opened, the screen staying where it was
+  target?.focus({ preventScroll: true, focusVisible: opener.held?.isRinged ?? false })
+
+  // Whether the screen showed either
+  return target !== null
 }
 
 /**
@@ -200,8 +215,8 @@ function scrollFor({ scrollY, anchor }: LeftSpot): number {
  * by the paper it was opened over, or else the pool, through {@link replaceQuery}, which can never step off the
  * page. Only the page's own parameters change, so the pool's filter rides along. A page starts at the top with focus
  * on its heading. The pool comes back where it was left, and so does a paper coming back from a problem opened over
- * it. Focus there goes back to what opened the page just closed, or else to that page's link, and where the screen
- * shows neither, to the pool's count line or the paper's heading.
+ * it. Focus there goes back to what opened the page just closed, or else to that page's link, ringed as it was when
+ * the page opened, and where the screen shows neither, to the pool's count line or the paper's heading.
  *
  * @returns The open page, the ways in and out of it, and the pool's count line.
  */
@@ -230,7 +245,7 @@ export function useOpenDetail(): UseOpenDetailResult {
   // Where a paper's page was last left while it showed; null until one has shown
   const paperSpotRef = useRef<PaperSpot | null>(null)
 
-  // What the last page opened was opened from; null when focus sat nowhere as it opened
+  // What the last page opened was opened from; null until a page has opened
   const openerRef = useRef<Opener | null>(null)
 
   // The page on screen, null for the pool, as of the last switch committed
@@ -351,11 +366,14 @@ export function useOpenDetail(): UseOpenDetailResult {
       // The element holding focus
       const { activeElement } = document
 
-      // What the page is opened from, where something on the page holds focus
-      openerRef.current =
-        activeElement instanceof HTMLElement && activeElement !== document.body
-          ? { pageId: page.id, element: activeElement }
-          : null
+      // What the page is opened from, with whatever on the page holds focus and whether it shows the ring
+      openerRef.current = {
+        pageId: page.id,
+        held:
+          activeElement instanceof HTMLElement && activeElement !== document.body
+            ? { element: activeElement, isRinged: activeElement.matches(':focus-visible') }
+            : null,
+      }
 
       // The page, if its way back leads to the page it is opened from: the pool, or a paper a problem opens over
       openedOverRef.current =
