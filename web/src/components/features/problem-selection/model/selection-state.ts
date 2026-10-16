@@ -18,7 +18,7 @@ import type {
 /**
  * A paper, and the board it is on.
  */
-type PaperOnBoard = {
+export type PaperOnBoard = {
   /** The paper. */
   paper: Paper
   /** The board holding it. */

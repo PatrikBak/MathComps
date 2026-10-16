@@ -19,7 +19,6 @@ import {
   READY,
   selectedTab,
   selectionCopy,
-  selectionText,
   SETTLE_TIMEOUT_MS,
   stubSelection,
   tabRowOn,
@@ -140,9 +139,7 @@ test.describe("a paper's page", () => {
     await expect(elementaryLink(page)).toBeFocused()
   })
 
-  test('takes a comment on its discussion, which the count on the board then opens', async ({
-    page,
-  }) => {
+  test('takes a comment on its discussion', async ({ page }) => {
     // A reviewer with a username, which the discussion asks for before it takes a comment
     await stubNamedReader(page)
 
@@ -166,22 +163,10 @@ test.describe("a paper's page", () => {
     // In the discussion
     await expect(page.getByRole('tabpanel')).toContainText(PAPER_COMMENT)
 
-    // Back to the pool by the link on the paper's page
-    await page.getByRole('link', { name: selectionCopy.detail.backToPool }).click()
-
-    // The paper's count on the board
-    const count = boardPanel(page).getByRole('link', {
-      name: selectionText('board.paperComments', { paper: ELEMENTARY.name, count: 1 }),
-    })
-
-    // Followed
-    await count.click()
-
-    // The paper's discussion again, with the comment in it
-    await expect(selectedTab(page, selectionCopy.paper.tabsLabel)).toContainText(
-      selectionCopy.paper.commentsTab
-    )
-    await expect(page.getByRole('tabpanel')).toContainText(PAPER_COMMENT)
+    // Counted on the discussion's tab
+    await expect(
+      page.getByRole('tab', { name: `${selectionCopy.paper.commentsTab} 1`, exact: true })
+    ).toBeVisible()
   })
 
   test('opens a problem from a row on the paper, then goes back to the paper where it was left', async ({

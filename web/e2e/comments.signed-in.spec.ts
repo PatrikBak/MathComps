@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import { createTranslator } from 'next-intl'
 
 import type { CommentReactionPress } from '@/components/features/comments/hooks/use-press-comment-reaction'
 import type {
@@ -20,10 +21,14 @@ import {
   stubPageThread,
   threadPage,
 } from './support/comments'
+import { editorCopy } from './support/competitions'
 import { expect, test } from './support/test'
 
 /** The copy a thread reads under. */
 const commentsCopy = messages.comments
+
+/** A function which fills counted nouns, the way the page does. */
+const pluralText = createTranslator({ locale: 'en', messages, namespace: 'plurals' })
 
 /** How long the page has to show the thread before a wait is called a failure. */
 const SETTLE_TIMEOUT_MS = 30_000
@@ -42,6 +47,9 @@ const REPLY_TEXT = 'Which induction, though?'
 
 /** What Martin's reply says. */
 const MARTIN_TEXT = 'A parity argument is shorter.'
+
+/** What the reader replies to Martin. */
+const MARTIN_REPLY_TEXT = 'Shorter, but does it cover the odd case?'
 
 /** How long a press gets to go out before a test is willing to say none did. */
 const LANDING_WINDOW_MS = 1_000
@@ -176,6 +184,9 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // The box it is written in
     const replyBox = page.getByPlaceholder(commentsCopy.replyPlaceholder)
 
+    // Holding the cursor
+    await expect(replyBox).toBeFocused()
+
     // Written
     await replyBox.fill(REPLY_TEXT)
 
@@ -187,6 +198,15 @@ test.describe('a comment thread, read by a signed-in reader', () => {
 
     // Which is in the thread
     await expect(page.getByText(REPLY_TEXT)).toBeVisible()
+
+    // A reply, opened under the other comment again
+    await commentBy(page, 'Zuzana', THEIR_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .first()
+      .click()
+
+    // Empty, what was sent gone from it
+    await expect(replyBox).toHaveValue('')
 
     // Each sent where it belongs, the reply naming what it answers
     expect(writes().map((write) => write.kind === 'sent' && write.parentCommentId)).toEqual([
@@ -252,6 +272,130 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     await expect(replyBox).toHaveValue(REPLY_TEXT)
   })
 
+  test('sends a reply once, however the reader replies elsewhere and comes back to it while it is on its way', async ({
+    page,
+  }) => {
+    // Zuzana's comment, which Martin answered
+    const answered = {
+      ...theirComment(),
+      replies: [commentFrom('user_martin', 'Martin', MARTIN_TEXT)],
+    }
+
+    // The thread, and what reaches the backend
+    const writes = await stubPageThread(page, [answered])
+
+    // Every comment sent passing a gate, open to begin with
+    const gate = await gateReads(page, `${BACKEND_ORIGIN}/comments`)
+
+    // Read
+    await openThread(page, THEIR_TEXT)
+
+    // The box a reply is written in
+    const replyBox = page.getByPlaceholder(commentsCopy.replyPlaceholder)
+
+    // The gate, shut, and a function which opens it again
+    const release = gate.hold()
+
+    // A reply to Zuzana, opened under her comment
+    await commentBy(page, 'Zuzana', THEIR_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .first()
+      .click()
+
+    // Written
+    await replyBox.fill(REPLY_TEXT)
+
+    // And sent from the keyboard, to stop at the gate
+    await replyBox.press('Meta+Enter')
+
+    // A reply to Martin, opened under his
+    await commentBy(page, 'Martin', MARTIN_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .click()
+
+    // Written
+    await replyBox.fill(MARTIN_REPLY_TEXT)
+
+    // And sent behind the reply to Zuzana
+    await replyBox.press('Meta+Enter')
+
+    // The reply to Zuzana, opened again while it is still on its way
+    await commentBy(page, 'Zuzana', THEIR_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .first()
+      .click()
+
+    // Holding what was sent
+    await expect(replyBox).toHaveValue(REPLY_TEXT)
+
+    // And sent from the keyboard once more
+    await replyBox.press('Meta+Enter')
+
+    // The gate let open
+    release()
+
+    // The reply to Martin in the thread
+    await expect(page.getByText(MARTIN_REPLY_TEXT)).toBeVisible()
+
+    // And the one to Zuzana
+    await expect(page.getByText(REPLY_TEXT).first()).toBeVisible()
+
+    // Long enough for a second send to have landed, had there been one
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // Each sent once
+    expect(writes().map((write) => write.kind === 'sent' && write.content)).toEqual([
+      REPLY_TEXT,
+      MARTIN_REPLY_TEXT,
+    ])
+  })
+
+  test('hides a reply open under a reply while its thread is folded, and brings it back on its text', async ({
+    page,
+  }) => {
+    // Zuzana's comment, which Martin answered
+    const answered = {
+      ...theirComment(),
+      replies: [commentFrom('user_martin', 'Martin', MARTIN_TEXT)],
+    }
+
+    // The thread
+    await stubPageThread(page, [answered])
+
+    // Read
+    await openThread(page, THEIR_TEXT)
+
+    // A reply, opened under Martin's
+    await commentBy(page, 'Martin', MARTIN_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .click()
+
+    // The box it is written in
+    const replyBox = page.getByPlaceholder(commentsCopy.replyPlaceholder)
+
+    // Half written
+    await replyBox.fill(REPLY_TEXT)
+
+    // Zuzana's replies folded away
+    await page.getByRole('button', { name: commentsCopy.hideReplies }).click()
+
+    // Taking the reply being written with them
+    await expect(replyBox).toHaveCount(0)
+
+    // The box for a new comment still there to write in
+    await expect(page.getByPlaceholder(commentsCopy.writePlaceholder)).toBeVisible()
+
+    // Shown again
+    await page
+      .getByRole('button', {
+        name: `${commentsCopy.show} ${pluralText('replies', { count: 1 })}`,
+      })
+      .click()
+
+    // The reply open again on what was written in it
+    await expect(replyBox).toHaveValue(REPLY_TEXT)
+  })
+
   test("edits the reader's own comment in place, which its author can't react to", async ({
     page,
   }) => {
@@ -300,6 +444,94 @@ test.describe('a comment thread, read by a signed-in reader', () => {
 
     // Saved
     await expect.poll(writes).toEqual([{ kind: 'edited', commentId: own.id, content: EDITED_TEXT }])
+
+    // Long enough for the answer to the save to have landed
+    await page.waitForTimeout(LANDING_WINDOW_MS)
+
+    // No reply opened by the save
+    await expect(page.getByPlaceholder(commentsCopy.replyPlaceholder)).toHaveCount(0)
+  })
+
+  test("keeps a reply open on its text under the reader's own comment through an edit of the comment", async ({
+    page,
+  }) => {
+    // The reader's comment, alone in the thread
+    await stubPageThread(page, [ownComment()])
+
+    // Read
+    await openThread(page, OWN_TEXT)
+
+    // A reply, opened under the reader's comment
+    await commentBy(page, READER_NAME, OWN_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .click()
+
+    // Half written
+    await page.getByPlaceholder(commentsCopy.replyPlaceholder).fill(REPLY_TEXT)
+
+    // The reader's comment, opened for editing
+    await commentBy(page, READER_NAME, OWN_TEXT)
+      .getByRole('button', { name: commentsCopy.edit })
+      .click()
+
+    // The box it is edited in
+    const box = page.getByPlaceholder(commentsCopy.editPlaceholder)
+
+    // Rewritten
+    await box.fill(EDITED_TEXT)
+
+    // And saved from the keyboard, which gives it a new id
+    await box.press('Meta+Enter')
+
+    // Saying what it says now, marked as edited
+    await expect(commentBy(page, READER_NAME, EDITED_TEXT)).toContainText(commentsCopy.edited)
+
+    // The reply still open under the comment, on what was written in it
+    await expect(page.getByPlaceholder(commentsCopy.replyPlaceholder)).toHaveValue(REPLY_TEXT)
+
+    // The page read afresh
+    await page.reload()
+
+    // The reply opened again under the comment as it reads now
+    await commentBy(page, READER_NAME, EDITED_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .click()
+
+    // On the draft kept for the comment's new version
+    await expect(page.getByPlaceholder(commentsCopy.replyPlaceholder)).toHaveValue(REPLY_TEXT)
+  })
+
+  test("unfolds the replies of the reader's own comment once an edit of it is saved", async ({
+    page,
+  }) => {
+    // The reader's comment, which Zuzana answered
+    await stubPageThread(page, [{ ...ownComment(), replies: [theirComment()] }])
+
+    // Read
+    await openThread(page, OWN_TEXT)
+
+    // The comment's replies folded away
+    await page.getByRole('button', { name: commentsCopy.hideReplies }).click()
+
+    // Zuzana's reply out of sight
+    await expect(page.getByText(THEIR_TEXT)).toBeHidden()
+
+    // The reader's comment, opened for editing
+    await commentBy(page, READER_NAME, OWN_TEXT)
+      .getByRole('button', { name: commentsCopy.edit })
+      .click()
+
+    // The box it is edited in
+    const box = page.getByPlaceholder(commentsCopy.editPlaceholder)
+
+    // Rewritten
+    await box.fill(EDITED_TEXT)
+
+    // And saved from the keyboard
+    await box.press('Meta+Enter')
+
+    // The comment's new version showing its replies
+    await expect(page.getByText(THEIR_TEXT)).toBeVisible()
   })
 
   test('keeps an edit open when saving it fails', async ({ page }) => {
@@ -342,6 +574,14 @@ test.describe('a comment thread, read by a signed-in reader', () => {
     // Read
     await openThread(page, OWN_TEXT)
 
+    // A reply, opened under the reader's comment
+    await commentBy(page, READER_NAME, OWN_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .click()
+
+    // The reply's box showing
+    await expect(page.getByPlaceholder(commentsCopy.replyPlaceholder)).toBeVisible()
+
     // The reader's comment, deleted
     await commentBy(page, READER_NAME, OWN_TEXT)
       .getByRole('button', { name: commentsCopy.delete })
@@ -358,6 +598,12 @@ test.describe('a comment thread, read by a signed-in reader', () => {
 
     // With the reply still under it
     await expect(page.getByText(THEIR_TEXT)).toBeVisible()
+
+    // The reply the reader opened, closed
+    await expect(page.getByPlaceholder(commentsCopy.replyPlaceholder)).toHaveCount(0)
+
+    // The box for a new comment still there to write in
+    await expect(page.getByPlaceholder(commentsCopy.writePlaceholder)).toBeVisible()
 
     // Deleted
     await expect.poll(writes).toEqual([{ kind: 'deleted', commentId: own.id }])
@@ -632,6 +878,60 @@ test.describe('a comment thread, read by a signed-in reader', () => {
         pressed: true,
       })
     ).toBeVisible()
+  })
+})
+
+test.describe('a comment thread, read on a phone', () => {
+  // A phone's width, where a reply opens over the whole screen
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  test.beforeEach(async ({ page }) => {
+    // A reader with a username, which a thread asks for before it takes a reply
+    await stubNamedReader(page)
+  })
+
+  test('writes a reply in an editor over the whole screen, which closes once the reply is taken', async ({
+    page,
+  }) => {
+    // Somebody else's comment
+    const answered = theirComment()
+
+    // The thread, and what reaches the backend
+    const writes = await stubPageThread(page, [answered])
+
+    // Read
+    await openThread(page, THEIR_TEXT)
+
+    // A reply, opened under the comment
+    await commentBy(page, 'Zuzana', THEIR_TEXT)
+      .getByRole('button', { name: commentsCopy.reply })
+      .click()
+
+    // The editor it is written in, over the whole screen
+    const expanded = page.getByRole('dialog', { name: editorCopy.expandedEditor })
+
+    // The editor showing its box
+    await expect(expanded.locator('textarea')).toBeVisible()
+
+    // The only box the reply has, none under the comment
+    await expect(page.getByPlaceholder(commentsCopy.replyPlaceholder)).toHaveCount(1)
+
+    // Written
+    await expanded.locator('textarea').fill(REPLY_TEXT)
+
+    // And sent from the keyboard
+    await page.keyboard.press('ControlOrMeta+Enter')
+
+    // Closed once the reply is taken
+    await expect(expanded).toHaveCount(0)
+
+    // Which is in the thread
+    await expect(page.getByText(REPLY_TEXT)).toBeVisible()
+
+    // Sent under the comment it answers
+    expect(writes().map((write) => write.kind === 'sent' && write.parentCommentId)).toEqual([
+      answered.id,
+    ])
   })
 })
 

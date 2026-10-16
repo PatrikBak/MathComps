@@ -541,7 +541,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the problem selection: reading all of it, changing what the reviewers record about
+    /// Registers the problem selection: reading all of it and its discussions, changing what the reviewers record about
     /// the proposals, filling and finalizing the boards, and telling the reviewers' conversations about the proposals
     /// from every other conversation. Expects the DbContext from
     /// <see cref="AddMathCompsDbContext"/>.
@@ -555,6 +555,9 @@ public static class ServiceCollectionExtensions
 
         // The read and the check on a conversation pick out the reviewers' ones by when each author started preparing.
         services.AddUserGrants();
+
+        // The discussions are comment threads, read through the comment service.
+        services.AddUserServices();
 
         // The read.
         services.TryAddScoped<IProblemSelectionService, ProblemSelectionService>();

@@ -44,6 +44,12 @@ public class NewsThreadKind : PublicCommentThreadKind<NewsAnchor>
             .Select(group => new KeyValuePair<string, int>(group.Key, group.Count())));
 
     /// <inheritdoc />
+    public override Task<IQueryable<KeyValuePair<string, Guid>>> LinksAsync(
+        MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer viewer) =>
+        // Never read in bulk, so asking is a bug in the caller
+        throw new NotSupportedException($"{TargetType} threads are never read in bulk.");
+
+    /// <inheritdoc />
     protected override async Task<NewsAnchor> ResolveAsync(MathCompsDbContext dbContext, CommentTarget target) =>
         // The row standing in for the article, minted now if nothing has hung off it yet
         new(await ContentAnchors.EnsureNewsArticleAsync(dbContext, target.TargetId));

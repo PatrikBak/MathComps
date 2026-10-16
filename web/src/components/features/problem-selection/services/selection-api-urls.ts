@@ -54,6 +54,16 @@ export function getSelectionUrl(): string {
 }
 
 /**
+ * Builds the API URL for reading the discussions of everything the selection holds.
+ *
+ * @returns The API URL.
+ */
+export function getDiscussionsUrl(): string {
+  // The discussions under the selection
+  return buildApiUrl(`${SELECTION_PATH}/comments`)
+}
+
+/**
  * Builds the API URL for putting a proposal into a slot or emptying it.
  *
  * @param slot - The slot.

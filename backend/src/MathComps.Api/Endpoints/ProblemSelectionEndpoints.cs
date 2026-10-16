@@ -6,9 +6,10 @@ using MathComps.Infrastructure.Services.Users;
 namespace MathComps.Api.Endpoints;
 
 /// <summary>
-/// Maps the endpoints of the problem selection: one read returning the whole of it, and one write per change a
-/// reviewer makes. Every route is gated by the <see cref="AuthorizationPolicies.PreparesCompetitions"/> policy, since
-/// the proposals are problems no student may see.
+/// Maps the endpoints of the problem selection: one read returning the whole of it, one returning its discussions,
+/// and one write per change a reviewer makes. Every route is gated by the
+/// <see cref="AuthorizationPolicies.PreparesCompetitions"/> policy, since the proposals are problems no student
+/// may see.
 /// </summary>
 public static class ProblemSelectionEndpoints
 {
@@ -50,6 +51,25 @@ public static class ProblemSelectionEndpoints
 
             // Return it
             return Results.Ok(selection);
+        })
+        .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
+        .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);
+
+        // Read every discussion the selection holds
+        app.MapGet($"{SelectionPath}/comments", async (
+            HttpContext context,
+            IUserManager userManager,
+            IProblemSelectionService selectionService,
+            CancellationToken cancellationToken) =>
+        {
+            // The reviewer reading the discussions
+            var viewer = await CommentEndpoints.RequireViewerAsync(userManager, context);
+
+            // The discussions of every proposal and paper the selection holds
+            var discussions = await selectionService.GetDiscussionsAsync(viewer, cancellationToken);
+
+            // Return the discussions
+            return Results.Ok(discussions);
         })
         .RequireAuthorization(AuthorizationPolicies.PreparesCompetitions)
         .RequireRateLimiting(RateLimiterPolicies.ApiRateLimit);

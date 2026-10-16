@@ -4,6 +4,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Infrastructure.Extensions;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Selection;
 using MathComps.Infrastructure.Tests.TestInfrastructure;
@@ -13,13 +14,16 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MathComps.Infrastructure.Tests.Selection;
 
 /// <summary>
-/// Covers <see cref="ProblemSelectionService"/>: the field mapping of the one read, which proposals, boards and
-/// cycles it holds once groups open, and whose conversations it lists.
+/// Covers <see cref="ProblemSelectionService"/>: the field mapping of the selection read, which proposals, boards and
+/// cycles it holds once groups open, whose conversations it lists, and which discussions the discussions read holds.
 /// </summary>
 /// <remarks>
 /// The seed is a pool of three proposals with a draft holding one. The October group has not opened and its
 /// rounds are empty. The November group has not opened either, and has a board finalized into it. The September
 /// group has opened, with a board finalized into it too. Each finalized board's problems sit in its group's rounds.
+/// One problem sits in a December round no group runs any more, the way a corrected manifest leaves one. One comment
+/// stands in the discussion of the first proposal, the first November problem, the September problem, the December
+/// problem, and the first paper of every board.
 /// </remarks>
 /// <param name="fixture">The shared PostgreSQL container fixture.</param>
 public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixture)
@@ -62,6 +66,11 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     private Guid _openedId;
 
     /// <summary>
+    /// A problem of a December round no group runs any more, discussed.
+    /// </summary>
+    private Guid _releasedId;
+
+    /// <summary>
     /// The October group, which still takes a board.
     /// </summary>
     private Guid _octoberId;
@@ -70,6 +79,21 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
     /// The board finalized into the November group.
     /// </summary>
     private Guid _novemberBoardId;
+
+    /// <summary>
+    /// The first paper of the draft, discussed.
+    /// </summary>
+    private Guid _draftPaperId;
+
+    /// <summary>
+    /// The first paper of the board finalized into the November group, discussed.
+    /// </summary>
+    private Guid _novemberPaperId;
+
+    /// <summary>
+    /// The first paper of the board finalized into the opened September group, discussed.
+    /// </summary>
+    private Guid _septemberPaperId;
 
     /// <inheritdoc/>
     protected override void ConfigureServices(IServiceCollection services) =>
@@ -139,7 +163,8 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
     /// <summary>
     /// A finalized board whose group has not opened reads its slots off the group's rounds, in round order, and
-    /// its problems count as used. A finalized board keeps no slot rows, so a read that took its slots from them
+    /// its problems count as used, the only ones: the December problem, outside the proposals in a round no group
+    /// runs, has left the selection. A finalized board keeps no slot rows, so a read that took its slots from them
     /// would show it empty.
     /// </summary>
     [Fact]
@@ -197,6 +222,40 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
         // Without the third proposal
         Assert.DoesNotContain(selection.Proposals, proposal => proposal.Id == _pool[3]);
+    });
+
+    /// <summary>
+    /// The discussions read holds what is said about the proposals still in the selection, a problem the November
+    /// board took among them, and about the papers on its boards: the draft and the one finalized into a group still
+    /// to open. What is said about the opened group's problem, the paper on the board filling that group and the
+    /// December problem, in a round no group runs, stays out, and the second proposal, which nobody discusses, gets
+    /// no entry.
+    /// </summary>
+    [Fact]
+    public Task The_discussions_are_those_of_what_the_selection_holds() => RunTestAsync(async service =>
+    {
+        // The discussions, as the live reviewer reads them
+        var discussions = await service.GetDiscussionsAsync(new CommentViewer(_reviewerId, IsAdmin: false));
+
+        // The first proposal's and the November problem's discussions alone, each holding its one comment
+        Assert.Equivalent(
+            new Dictionary<string, string>
+            {
+                [_pool[1].ToString()] = $"On {_pool[1]}",
+                [_november[0].ToString()] = $"On {_november[0]}",
+            },
+            discussions.Proposals.ToDictionary(thread => thread.Key, thread => Assert.Single(thread.Value).Content),
+            strict: true);
+
+        // The draft paper's and the November paper's discussions alone, each holding its one comment
+        Assert.Equivalent(
+            new Dictionary<string, string>
+            {
+                [_draftPaperId.ToString()] = $"On {_draftPaperId}",
+                [_novemberPaperId.ToString()] = $"On {_novemberPaperId}",
+            },
+            discussions.Papers.ToDictionary(thread => thread.Key, thread => Assert.Single(thread.Value).Content),
+            strict: true);
     });
 
     /// <summary>
@@ -385,20 +444,53 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
         // A board finalized into November
         _novemberBoardId = SeedFinalizedBoard(context, november);
 
+        // The November board's first paper
+        _novemberPaperId = FirstPaperOf(context, _novemberBoardId);
+
         // September, already open
         var september = SelectionSeed.NewGroup(context, season, "september", now.AddDays(-1));
 
         // One problem in September's first round
         _openedId = SelectionSeed.NewProposal(context, september.Rounds.First(), 200, 1);
 
-        // A board finalized into September
-        SeedFinalizedBoard(context, september);
+        // A board finalized into September, and its first paper
+        _septemberPaperId = FirstPaperOf(context, SeedFinalizedBoard(context, september));
 
         // A conversation about the September problem
         SeedConversation(context, _openedId, _reviewerId, "Statement", now, "Turn");
 
-        // A draft holding the second proposal in its second slot
-        SelectionSeed.NewBoard(context, "Draft", null, _pool[2]);
+        // A December round its group let go of
+        var released = new Round
+        {
+            Id = Guid.CreateVersion7(),
+            CompetitionId = CompetitionTreeSeed.Chain(context, SelectionSeed.RoundPaths("december")[0]).Id,
+            SeasonId = season.Id,
+            Date = new DateOnly(2026, 12, 1),
+            VisibleSince = now.AddDays(70),
+        };
+        context.Rounds.Add(released);
+
+        // One problem in the December round
+        _releasedId = SelectionSeed.NewProposal(context, released, 400, 1);
+
+        // A draft holding the second proposal in its second slot, and its first paper
+        _draftPaperId = FirstPaperOf(context, SelectionSeed.NewBoard(context, "Draft", null, _pool[2]).Id);
+
+        // A comment about the first proposal, a November problem, the September problem and the December one
+        foreach (var proposalId in new[] { _pool[1], _november[0], _openedId, _releasedId })
+            context.ProposalComments.Add(new ProposalComment
+            {
+                ProposalId = proposalId,
+                CommentId = SeedComment(context, $"On {proposalId}"),
+            });
+
+        // A comment about the first paper of every board
+        foreach (var paperId in new[] { _draftPaperId, _novemberPaperId, _septemberPaperId })
+            context.SelectionPaperComments.Add(new SelectionPaperComment
+            {
+                PaperId = paperId,
+                CommentId = SeedComment(context, $"On {paperId}"),
+            });
 
         // The first proposal's oldest conversation, by the deleted reviewer about a statement since changed
         SeedConversation(context, _pool[1], _goneReviewerId, "Older statement", now.AddDays(-2), "Old");
@@ -482,6 +574,32 @@ public class ProblemSelectionServicePostgresTests(PostgresContainerFixture fixtu
 
         // The id
         return board.Id;
+    }
+
+    /// <summary>
+    /// The first paper of a board just tracked.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="boardId">The board.</param>
+    /// <returns>The paper's id.</returns>
+    private static Guid FirstPaperOf(MathCompsDbContext context, Guid boardId) =>
+        // The board's paper in the first position
+        context.SelectionPapers.Local.Single(paper => paper.BoardId == boardId && paper.Position == 0).Id;
+
+    /// <summary>
+    /// Tracks a comment by the live reviewer, linked to nothing yet.
+    /// </summary>
+    /// <param name="context">The seeding context.</param>
+    /// <param name="content"><inheritdoc cref="Comment.Content" path="/summary"/></param>
+    /// <returns>The comment's id.</returns>
+    private Guid SeedComment(MathCompsDbContext context, string content)
+    {
+        // The comment, at the top of its discussion
+        var comment = new Comment { AuthorId = _reviewerId, Content = content, CreatedAt = DateTimeOffset.UtcNow };
+        context.Comments.Add(comment);
+
+        // The id
+        return comment.Id;
     }
 
     /// <summary>

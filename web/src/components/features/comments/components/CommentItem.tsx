@@ -16,7 +16,10 @@ import React, { useCallback, useState } from 'react'
 import { MAX_CHARACTERS_PER_COMMENT } from '@/components/features/comments/model/comment-limits'
 import { UserAvatarImage } from '@/components/layout/UserAvatarImage'
 import { ConfirmDialog } from '@/components/shared/components/ConfirmDialog'
-import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
+import {
+  RichMathEditor,
+  type RichMathEditorVariant,
+} from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { RichMathEditorRenderer } from '@/components/shared/components/rich-math-editor/components/RichMathEditorRenderer'
 import { Tooltip } from '@/components/shared/components/Tooltip'
 import { cn } from '@/components/shared/utils/css-utils'
@@ -64,6 +67,8 @@ export type CommentData = {
  * Props for the {@link CommentItem} presentation component.
  */
 type CommentItemProps = Omit<CommentData, 'id' | 'authorId' | 'replies'> & {
+  /** How the comment's edit box is drawn. */
+  variant: RichMathEditorVariant
   /** Whether the comment shows its reactions. */
   showReactions: boolean
   /** Whether the comment's replies are collapsed. */
@@ -90,6 +95,7 @@ type CommentItemProps = Omit<CommentData, 'id' | 'authorId' | 'replies'> & {
  * A comment in a thread, editable in place, with its replies collapsible beneath it.
  */
 export function CommentItem({
+  variant,
   author,
   avatarUrl,
   content,
@@ -343,6 +349,7 @@ export function CommentItem({
             // The editor while editing
             <div className="mb-2">
               <RichMathEditor
+                variant={variant}
                 maxCharacters={MAX_CHARACTERS_PER_COMMENT}
                 value={editText}
                 onChange={setEditText}

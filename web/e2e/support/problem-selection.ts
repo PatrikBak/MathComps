@@ -26,7 +26,7 @@ import { threadKey } from './comments'
 import { SELECTION_PATH } from './competitions'
 import { installConversationBackend } from './conversation-backend'
 import type { HostedBackend } from './hosted-backend'
-import { stubSelectionComments } from './selection-comments'
+import { type AnswerSelectionRead, stubSelectionComments } from './selection-comments'
 import { FINALIZATION_PATH, finalizationWrite } from './selection-finalization'
 import { PROPOSAL_WRITE_PATH, proposalWrite, READER } from './selection-proposal-writes'
 import { SLOT_WRITE_PATH, slotWrite } from './selection-slot-writes'
@@ -970,12 +970,11 @@ export async function stubSelection(
     )
   })
 
-  // Stand in for the read
-  await page.route(SELECTION_ENDPOINT, async (route) => {
+  // A function which answers a read of the selection's the way the test last asked for
+  const answerRead: AnswerSelectionRead = (route, read) => {
     // Answered the way the test last asked for
     switch (reply) {
-      // Every problem, board and cycle the backend holds that the read shows, with the conversations held about
-      // the problems
+      // What the read reads
       case 'selection':
       case 'later':
       case 'revisedInEnglish':
@@ -987,7 +986,7 @@ export async function stubSelection(
       case 'novemberFilled':
       case 'winterOnOffer':
       case 'openedDeleted':
-        return answerJson(route, 200, selectionOf(memory, readableSelection(stored)))
+        return answerJson(route, 200, read())
 
       // Refused, in the shape the backend writes an authorization failure as
       case 'forbidden':
@@ -1001,7 +1000,13 @@ export async function stubSelection(
       default:
         return assertNever(reply)
     }
-  })
+  }
+
+  // Stand in for the read: every problem, board and cycle the backend holds that the read shows, with the
+  // conversations held about the problems
+  await page.route(SELECTION_ENDPOINT, (route) =>
+    answerRead(route, () => selectionOf(memory, readableSelection(stored)))
+  )
 
   // Each conversation in full, which is read only once somebody opens it, as long as the selection still holds its
   // problem, and the read marks opening one leaves, nobody graded on any of them
@@ -1020,7 +1025,13 @@ export async function stubSelection(
   )
 
   // The selection's discussions, and their counts
-  await stubSelectionComments(page, memory.discussions, () => stored)
+  await stubSelectionComments(
+    page,
+    memory.discussions,
+    () => stored,
+    () => readableSelection(stored),
+    answerRead
+  )
 
   // A function which saves a write as the backend does, answering it with nothing to say or with the refusal
   const answerWrite = async (route: Route, write: (held: HeldSelection) => HeldSelection) => {

@@ -186,7 +186,7 @@ public static class CommentEndpoints
     /// <param name="userManager">Resolves an external provider id to the internal user id.</param>
     /// <param name="context">The HTTP context carrying the caller's claims.</param>
     /// <returns>The viewer.</returns>
-    private static async Task<CommentViewer> RequireViewerAsync(IUserManager userManager, HttpContext context) =>
+    internal static async Task<CommentViewer> RequireViewerAsync(IUserManager userManager, HttpContext context) =>
         // The user with their role, who must be there
         await GetViewerAsync(userManager, context) ?? throw new UserNotResolvedException();
 }

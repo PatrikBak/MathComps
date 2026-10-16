@@ -17,6 +17,22 @@ export const commentQueryKeys = {
 }
 
 /**
+ * Mutation keys for writes to comments, every one under {@link commentMutationKeys.all}, so whether any write to a
+ * comment is out can be asked apart from writes to anything else.
+ */
+export const commentMutationKeys = {
+  /** The prefix of every write to a comment. */
+  all: ['commentWrites'] as const,
+
+  /** A new comment or reply. */
+  creates: () => [...commentMutationKeys.all, 'create'] as const,
+
+  /** Every reaction pressed in one thread. */
+  reactions: (target: CommentTarget) =>
+    [...commentMutationKeys.all, 'reaction', target.targetType, target.targetId] as const,
+}
+
+/**
  * Query keys for comment count queries.
  */
 export const commentCountQueryKeys = {

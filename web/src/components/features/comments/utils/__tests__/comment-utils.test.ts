@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import type { CommentReactionDto } from '../../services/comment-api-types'
-import { pressReaction, shouldHideComment } from '../comment-utils'
+import type { CommentDto, CommentReactionDto } from '../../services/comment-api-types'
+import { pressReaction, saysNothingNew, shouldHideComment } from '../comment-utils'
 
 /** Another reader's thumbs-up, there before anybody presses anything. */
 const MARTIN_UP: CommentReactionDto = { userId: 'user_martin', name: 'Martin', kind: 'thumbsUp' }
@@ -11,6 +11,18 @@ const PETO_UP: CommentReactionDto = { userId: 'user_peto', name: 'Peťo', kind: 
 
 /** The presser's thumbs-down. */
 const PETO_DOWN: CommentReactionDto = { userId: 'user_peto', name: 'Peťo', kind: 'thumbsDown' }
+
+/** Zuzana's comment as posted, never edited. */
+const POSTED: CommentDto = {
+  id: 'comment-1',
+  author: { id: 'user_zuzana', name: 'Zuzana', avatarUrl: null },
+  content: 'Too easy for the opener.',
+  createdAt: '2026-10-01T08:00:00.000Z',
+  editedAt: null,
+  isDeleted: false,
+  reactions: [],
+  replies: [],
+}
 
 describe('pressReaction', () => {
   it('takes back the reaction the presser holds when they press it again', () => {
@@ -51,5 +63,52 @@ describe('shouldHideComment', () => {
 
     // Dropped whole
     expect(hidden).toBe(true)
+  })
+})
+
+describe('saysNothingNew', () => {
+  it('treats an edit as news and a deletion after it as none, matching the comment across its new id', () => {
+    // Zuzana's comment as she edited it, saved under a new id
+    const edited = {
+      ...POSTED,
+      id: 'comment-2',
+      content: 'Too easy for the opener, fine for the second slot.',
+      editedAt: '2026-10-02T08:00:00.000Z',
+    }
+
+    // Zuzana's comment as she then deleted it
+    const deleted = { ...edited, content: '', isDeleted: true }
+
+    // The edited comment is news
+    expect(saysNothingNew([POSTED], [edited])).toBe(false)
+
+    // The same comment deleted after its edit is no news
+    expect(saysNothingNew([POSTED], [deleted])).toBe(true)
+  })
+
+  it('treats a deleted comment as news when its author or posting time differs from the one it replaces', () => {
+    // Martin's comment, posted the same moment and deleted
+    const martins = {
+      ...POSTED,
+      id: 'comment-3',
+      author: { id: 'user_martin', name: 'Martin', avatarUrl: null },
+      content: '',
+      isDeleted: true,
+    }
+
+    // Another of Zuzana's, posted a minute later and deleted
+    const hersLater = {
+      ...POSTED,
+      id: 'comment-4',
+      createdAt: '2026-10-01T08:01:00.000Z',
+      content: '',
+      isDeleted: true,
+    }
+
+    // Martin's deleted comment where Zuzana's stood is news
+    expect(saysNothingNew([POSTED], [martins])).toBe(false)
+
+    // Zuzana's later deleted comment where her first stood is news
+    expect(saysNothingNew([POSTED], [hersLater])).toBe(false)
   })
 })

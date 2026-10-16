@@ -23,7 +23,6 @@ import {
   PROPOSAL_TABS,
   type ProposalTab,
 } from '../model/selection-routes'
-import type { Paper } from '../model/selection-types'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /** The key going back from a page open over the pool. */
@@ -47,8 +46,8 @@ type SelectionLinkBaseProps = Omit<ComponentProps<typeof AppLink>, 'href' | 'onC
 type SelectionLinkProps = SelectionLinkBaseProps & {
   /** Where the link goes when the browser follows it. */
   href: ComponentProps<typeof AppLink>['href']
-  /** What a plain click does, in place of following the link. */
-  onPlainClick: () => void
+  /** What a plain click does, in place of following the link, handed the link clicked. */
+  onPlainClick: (link: HTMLAnchorElement) => void
 }
 
 /**
@@ -69,7 +68,7 @@ function SelectionLink({ href, onPlainClick, ...rest }: SelectionLinkProps) {
         event.preventDefault()
 
         // The page acts on the click instead
-        onPlainClick()
+        onPlainClick(event.currentTarget)
       }}
       {...rest}
     />
@@ -88,7 +87,7 @@ type DetailLinkProps = SelectionLinkBaseProps & {
  * A link that opens a page in full over the pool without leaving the page. Clicked or followed, it keeps the paper
  * the address names, as {@link detailHref} does.
  */
-function DetailLink({ page, ...rest }: DetailLinkProps) {
+export function DetailLink({ page, ...rest }: DetailLinkProps) {
   // A function which opens a page in full over the pool
   const { openDetail } = useSelectionWorkspace()
 
@@ -98,7 +97,7 @@ function DetailLink({ page, ...rest }: DetailLinkProps) {
   return (
     <SelectionLink
       href={detailHref(page, paperId)}
-      onPlainClick={() => openDetail(page)}
+      onPlainClick={(link) => openDetail(page, link)}
       {...rest}
     />
   )
@@ -173,7 +172,7 @@ export function BackLink() {
       ? { href: ROUTES.PROBLEM_SELECTION, go: closeDetail, name: t('backToPool') }
       : {
           href: detailHref({ kind: 'paper', id: paperBeneath.id, tab: undefined }, null),
-          go: () => openDetail({ kind: 'paper', id: paperBeneath.id, tab: undefined }),
+          go: () => openDetail({ kind: 'paper', id: paperBeneath.id, tab: undefined }, null),
           name: paperBeneath.name,
         }
 
@@ -209,45 +208,6 @@ export function BackLink() {
       <ArrowLeft size={15} />
       {back.name}
     </SelectionLink>
-  )
-}
-
-/**
- * Props for the {@link PaperCommentsLink} component.
- */
-type PaperCommentsLinkProps = {
-  /** The paper. */
-  paper: Paper
-  /** How many comments the paper's discussion holds. */
-  count: number
-}
-
-/**
- * How many comments a paper's discussion holds, opening the paper on them. Absent while there are none.
- */
-export function PaperCommentsLink({ paper, count }: PaperCommentsLinkProps) {
-  // Board copy
-  const t = useTranslations('problemSelection.board')
-
-  // Nothing to count, nothing to show
-  if (count === 0) return null
-
-  // The count in words, naming the paper so the link says whose comments it opens
-  const label = t('paperComments', { paper: paper.name, count })
-
-  // The icon marking comments
-  const Icon = TAB_ICONS.comments
-
-  return (
-    <DetailLink
-      page={{ kind: 'paper', id: paper.id, tab: 'comments' }}
-      title={label}
-      aria-label={label}
-      className="inline-flex items-center gap-1 rounded-md px-1 text-xs tabular-nums"
-    >
-      <Icon size={13} />
-      {count}
-    </DetailLink>
   )
 }
 

@@ -23,22 +23,15 @@ public abstract class PreparerCommentThreadKind<TAnchor>(IUserGrantService grant
 
     /// <inheritdoc />
     public override async Task<IQueryable<KeyValuePair<string, int>>> CountAsync(
-        MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer? viewer)
-    {
-        // Counted for the accounts preparing the competitions alone, and refused like targets that are not there to
-        // anybody else
-        if (!await IsPreparingCompetitionsAsync(viewer))
-            throw new CommentTargetNotFoundException(TargetType, string.Join(", ", targetIds));
-
-        // The ids that could name a thread
-        var ids = targetIds
-            .Select(targetId => Guid.TryParse(targetId, out var id) ? id : (Guid?)null)
-            .OfType<Guid>()
-            .ToImmutableList();
-
+        MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer? viewer) =>
         // The active comments of each thread the ids name, keyed by its id
-        return CountById(dbContext, ids);
-    }
+        CountById(dbContext, await ReachableIdsAsync(targetIds, viewer));
+
+    /// <inheritdoc />
+    public override async Task<IQueryable<KeyValuePair<string, Guid>>> LinksAsync(
+        MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer viewer) =>
+        // The comments of each thread the ids name, keyed by its id
+        LinksById(dbContext, await ReachableIdsAsync(targetIds, viewer));
 
     /// <inheritdoc />
     protected override Task<bool> IsOpenToAsync(MathCompsDbContext dbContext, TAnchor anchor, CommentViewer? viewer) =>
@@ -53,6 +46,41 @@ public abstract class PreparerCommentThreadKind<TAnchor>(IUserGrantService grant
     /// <returns>The query, each thread's count keyed by its id, a thread with none left out.</returns>
     protected abstract IQueryable<KeyValuePair<string, int>> CountById(
         MathCompsDbContext dbContext, ImmutableList<Guid> ids);
+
+    /// <summary>
+    /// The query linking every comment of several of this kind's threads to the thread it hangs off, for a viewer
+    /// already let in.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="ids">The threads' ids.</param>
+    /// <returns>The query, each comment's id keyed by its thread's id.</returns>
+    protected abstract IQueryable<KeyValuePair<string, Guid>> LinksById(
+        MathCompsDbContext dbContext, ImmutableList<Guid> ids);
+
+    /// <summary>
+    /// The ids naming several of this kind's threads, for the accounts preparing the competitions alone.
+    /// </summary>
+    /// <param name="targetIds">The threads' target ids.</param>
+    /// <param name="viewer">Who is asking; null for a signed-out caller.</param>
+    /// <returns>The ids that could name a thread, an id that is no GUID left out.</returns>
+    /// <exception cref="CommentTargetNotFoundException">
+    /// Thrown when the viewer does not prepare the competitions, as though the threads were not there.
+    /// </exception>
+    private async Task<ImmutableList<Guid>> ReachableIdsAsync(ImmutableList<string> targetIds, CommentViewer? viewer)
+    {
+        // Open to the accounts preparing the competitions alone, and refused like targets that are not there to
+        // anybody else
+        if (!await IsPreparingCompetitionsAsync(viewer))
+            throw new CommentTargetNotFoundException(TargetType, string.Join(", ", targetIds));
+
+        // The ids that could name a thread
+        return
+        [
+            .. targetIds
+                .Select(targetId => Guid.TryParse(targetId, out var id) ? id : (Guid?)null)
+                .OfType<Guid>(),
+        ];
+    }
 
     /// <summary>
     /// Whether a viewer is one of the accounts preparing the competitions.

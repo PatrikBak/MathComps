@@ -103,8 +103,8 @@ type RichMathEditorProps = {
   onCancel?: () => void
   /** Callback that stops the in-flight submit */
   onStop?: () => void
-  /** Whether a phone opens the editor straight into its expanded view, with no inline one under it */
-  autoExpandOnMobile?: boolean
+  /** Whether the editor is its expanded view alone, open from the start, with no inline one under it */
+  expandedOnly?: boolean
   /** Whether the editor is in a loading state (e.g. sending) */
   isLoading?: boolean
   /** What the surface using the editor counts of its own */
@@ -133,7 +133,7 @@ export function RichMathEditor({
   canSend = true,
   onCancel,
   onStop,
-  autoExpandOnMobile = false,
+  expandedOnly = false,
   isLoading = false,
   footerMeta,
   ref,
@@ -160,7 +160,7 @@ export function RichMathEditor({
   ])
 
   // The expanded view
-  const expanded = useExpandedEditor({ text, autoExpandOnMobile, onSend, onCancel })
+  const expanded = useExpandedEditor({ text, expandedOnly, onSend, onCancel })
 
   /**
    * A function which reports focus leaving the inline editor. Focus moving from the text field to a

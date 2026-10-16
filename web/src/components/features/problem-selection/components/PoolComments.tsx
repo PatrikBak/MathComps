@@ -1,0 +1,382 @@
+'use client'
+
+import { useAuth } from '@clerk/nextjs'
+import { ArrowUp } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import type { RefObject } from 'react'
+import { createPortal } from 'react-dom'
+
+import { CommentList } from '@/components/features/comments/components/CommentList'
+import {
+  useCollapsedComments,
+  type UseCollapsedCommentsResult,
+} from '@/components/features/comments/hooks/use-collapsed-comments'
+import { useCommentReply } from '@/components/features/comments/hooks/use-comment-reply'
+import {
+  convertToCommentData,
+  countAllComments,
+} from '@/components/features/comments/utils/comment-utils'
+import { categoryTextClass } from '@/components/features/hosted-competitions/components/CategoryBadge'
+import { Button } from '@/components/shared/components/Button'
+import { FetchStatePlaceholder } from '@/components/shared/components/FetchStatePlaceholder'
+import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
+import { assertNever } from '@/components/shared/utils/assert-never'
+import { cn } from '@/components/shared/utils/css-utils'
+import { focusForReader } from '@/components/shared/utils/focus-utils'
+import { useFocusHandOff } from '@/hooks/use-focus-hand-off'
+import { OPEN_ID_ATTRIBUTE } from '@/hooks/use-focus-return'
+import { useShowFromTop } from '@/hooks/use-show-from-top'
+import type { QueryUiState } from '@/lib/query-ui-state'
+
+import { usePoolThreads } from '../hooks/use-pool-threads'
+import {
+  type DiscussedSubject,
+  discussionTargetOf,
+  type DiscussionThread,
+  threadKeyOf,
+} from '../model/selection-discussions'
+import { PoolSkeleton } from './PoolSkeleton'
+import { ProposalBox } from './ProposalBody'
+import { DetailLink } from './SelectionLinks'
+import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
+
+/**
+ * Props for the {@link PoolComments} component.
+ */
+type PoolCommentsProps = {
+  /** Where the line over the pool says how many comments show, once it is on the page. */
+  countSlot: HTMLElement | null
+}
+
+/**
+ * The reviewers' discussions of everything the selection holds as one list: every top-level comment with its
+ * replies, each under a heading opening its problem or paper on the discussion, every thread {@link usePoolThreads}
+ * gives. Anything new anybody else says while the list is open waits behind a button, so it never moves the list
+ * under the reader. The reader's own writes show at once, and so do others' reactions and deletions. A problem opened
+ * from the list and closed again finds it as it was left. The line over the pool says how many comments the threads
+ * hold, that they are on their way, or that they are not to be had.
+ */
+export function PoolComments({ countSlot }: PoolCommentsProps) {
+  // Pool copy
+  const t = useTranslations('problemSelection.pool')
+
+  // Counted nouns, which decline with the number in front of them
+  const tPlurals = useTranslations('plurals')
+
+  // Every thread, what waits to be shown, and how far the read has got
+  const { threads, uiState, retry, hasNews, showNews } = usePoolThreads()
+
+  // The line over the pool, which takes the focus when whatever held it goes
+  const { poolCountRef: countRef } = useSelectionWorkspace()
+
+  // The list, and the way to show what waited from its top, the focus on the line over the pool
+  const { listRef, showFromTop: showWhatsNew } = useShowFromTop({
+    show: showNews,
+    focusTarget: countRef,
+  })
+
+  // A function which reads the threads again, the focus on the line over the pool before the button leaves
+  const retryRead = () => {
+    // The focus moved on, the page staying where it is
+    focusForReader(countRef.current, { preventScroll: true })
+
+    // Read again
+    retry()
+  }
+
+  // How many comments still stand in the threads shown, or what the read is doing until it lands
+  const countLine =
+    threads !== null
+      ? tPlurals('comments', { count: countAllComments(threads.map((thread) => thread.comment)) })
+      : t(waitingLineKey(uiState))
+
+  // The comment count or the waiting line, drawn in the line over the pool
+  const count = countSlot === null ? null : createPortal(countLine, countSlot)
+
+  // Which comments of the list have their replies folded away
+  const collapsed = useCollapsedComments()
+
+  // The read still to land, or given up before it did
+  if (threads === null) {
+    return (
+      <>
+        {/* That the threads are on their way or not to be had, in the line over the pool */}
+        {count}
+
+        {/* How far the read has got */}
+        <ThreadsPlaceholder uiState={uiState} onRetry={retryRead} />
+      </>
+    )
+  }
+
+  return (
+    // The threads, and what waits over them
+    <div>
+      {/* How many comments show, in the line over the pool */}
+      {count}
+
+      {/* That something waits, said to a screen reader as it arrives */}
+      <p role="status" className="sr-only">
+        {hasNews ? t('showWhatsNew') : ''}
+      </p>
+
+      {/* What arrived since the threads were shown, waiting to be asked for */}
+      {hasNews && <WhatsNewButton onShow={showWhatsNew} countRef={countRef} />}
+
+      {/* Every thread under its heading, or why there are none */}
+      <div ref={listRef} className="scroll-mt-[var(--scroll-offset)]">
+        {threads.length === 0 ? (
+          // Nothing said about anything the selection holds
+          <div className={COMPACT_PANEL_CLASS}>
+            <p className="text-sm text-muted">{t('emptyComments')}</p>
+          </div>
+        ) : (
+          // The threads
+          <div className="space-y-4">
+            {threads.map((thread) => (
+              <PoolThread
+                key={threadKeyOf(thread)}
+                thread={thread}
+                collapsed={collapsed}
+                countRef={countRef}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * What the line over the pool says while no thread shows yet: that the threads are on their way, as they are while
+ * the read is held back or tried again, or that they are not to be had.
+ *
+ * @param uiState - How far the read has got.
+ *
+ * @returns The line's key in the pool's copy.
+ */
+function waitingLineKey(uiState: QueryUiState): 'loadingComments' | 'commentsUnavailable' {
+  // By how far the read has got
+  switch (uiState.kind) {
+    case 'loading':
+    case 'retrying':
+    case 'offline':
+    case 'ready':
+      return 'loadingComments'
+    case 'failed':
+      return 'commentsUnavailable'
+
+    // Every state is handled above
+    default:
+      return assertNever(uiState)
+  }
+}
+
+/**
+ * Props for the {@link ThreadsPlaceholder} component.
+ */
+type ThreadsPlaceholderProps = {
+  /** How far the read has got. */
+  uiState: QueryUiState
+  /** Reads the threads again after the read gave up. */
+  onRetry: () => void
+}
+
+/**
+ * What stands in for the threads until the first read lands: the pool's own placeholder cards while the read is out,
+ * so a list opened cold loads as one, and how the read is faring once it is held back or gives up.
+ */
+function ThreadsPlaceholder({ uiState, onRetry }: ThreadsPlaceholderProps) {
+  // The shared names for doing things to something
+  const tActions = useTranslations('ui.actions')
+
+  // Pool copy
+  const t = useTranslations('problemSelection.pool')
+
+  // By how far the read has got
+  switch (uiState.kind) {
+    // On its way, the pool's own placeholder cards
+    case 'loading':
+      return <PoolSkeleton />
+
+    // Held back, trying again, given up, or in with nothing to show yet
+    case 'offline':
+    case 'retrying':
+    case 'failed':
+    case 'ready':
+      return (
+        <FetchStatePlaceholder
+          uiState={uiState}
+          className={COMPACT_PANEL_CLASS}
+          empty={null}
+          failed={
+            <div className={cn(COMPACT_PANEL_CLASS, 'text-sm text-muted')}>
+              <p>{t('commentsFailed')}</p>
+              <Button size="sm" variant="secondary" onClick={onRetry}>
+                {tActions('retry')}
+              </Button>
+            </div>
+          }
+        />
+      )
+
+    // Every state is handled above
+    default:
+      return assertNever(uiState)
+  }
+}
+
+/**
+ * Props for the {@link WhatsNewButton} component.
+ */
+type WhatsNewButtonProps = {
+  /** Shows what waited. */
+  onShow: () => void
+  /** The line over the pool, which takes the focus when the button leaves holding it with no thread to take it. */
+  countRef: RefObject<HTMLParagraphElement | null>
+}
+
+/**
+ * The button showing what arrived since the threads were shown. It rests just below the header over the list as the
+ * list scrolls, taking no room in it, so nothing moves as it appears. Leaving while it holds the focus, once what
+ * waited is gone again, it hands the focus to the first thread's heading as {@link useFocusHandOff} does.
+ */
+function WhatsNewButton({ onShow, countRef }: WhatsNewButtonProps) {
+  // Pool copy
+  const t = useTranslations('problemSelection.pool')
+
+  // The focus handed on as the button leaves holding it
+  const handOff = useFocusHandOff<HTMLDivElement>(countRef)
+
+  return (
+    // Centred on the list's top edge, clear of the first heading, and 8px below the header once held there: 26px is
+    // those 8px and half the small pill's 36px
+    <div
+      {...handOff}
+      className="sticky-below-header top-[calc(var(--header-height)+26px)] pointer-events-none h-0"
+    >
+      <div className="flex -translate-y-1/2 justify-center">
+        <Button
+          size="sm"
+          variant="outline"
+          shape="pill"
+          onClick={onShow}
+          // Solid over the threads passing under it
+          className="pointer-events-auto border-brand/40 bg-background/95 shadow-lg backdrop-blur"
+        >
+          <ArrowUp size={14} />
+          {t('showWhatsNew')}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Props for the {@link PoolThread} component.
+ */
+type PoolThreadProps = {
+  /** The thread, with what its discussion hangs off. */
+  thread: DiscussionThread<DiscussedSubject>
+  /** Which comments of the tab have their replies folded away. */
+  collapsed: UseCollapsedCommentsResult
+  /** The line over the pool, which takes the focus when the thread leaves holding it with none in its place. */
+  countRef: RefObject<HTMLParagraphElement | null>
+}
+
+/**
+ * One top-level comment with its replies, under a heading naming its problem or paper. It is replied to, edited,
+ * deleted and reacted to in place, the way it is on its problem's or paper's own page, the reply shared with every
+ * other thread in the tab. A thread leaving the list while it holds the focus hands it on as
+ * {@link useFocusHandOff} does.
+ */
+function PoolThread({ thread, collapsed, countRef }: PoolThreadProps) {
+  // The reader, whose comments and reactions are marked as theirs
+  const { userId } = useAuth()
+
+  // The discussion the thread was posted in
+  const target = discussionTargetOf(thread.subject)
+
+  // The thread as the comment components draw it
+  const comments = [convertToCommentData(thread.comment, userId ?? null)]
+
+  // The reply, open in this thread while it is opened under one of its comments
+  const reply = useCommentReply({ target, comments })
+
+  // The focus handed on as the thread leaves holding it
+  const handOff = useFocusHandOff<HTMLDivElement>(countRef)
+
+  return (
+    <div {...handOff}>
+      <ProposalBox as="article">
+        {/* Where the thread was posted */}
+        <ThreadHeading subject={thread.subject} />
+
+        {/* The comment and its replies */}
+        <div className="mt-3">
+          <CommentList
+            target={target}
+            comments={comments}
+            variant="inline"
+            showReactions
+            reply={reply}
+            collapsed={collapsed}
+          />
+        </div>
+      </ProposalBox>
+    </div>
+  )
+}
+
+/**
+ * Props for the {@link ThreadHeading} component.
+ */
+type ThreadHeadingProps = {
+  /** What the thread's discussion hangs off. */
+  subject: DiscussedSubject
+}
+
+/**
+ * A thread's heading: its problem's number and name, or its paper's name in its category's colour with the board's
+ * name, opening that page on its discussion.
+ */
+function ThreadHeading({ subject }: ThreadHeadingProps) {
+  // The heading by what the thread hangs off
+  switch (subject.kind) {
+    case 'proposal':
+      return (
+        <h2 className="text-foreground hyphens-none">
+          <DetailLink
+            page={{ kind: 'proposal', id: subject.proposal.id, tab: 'comments' }}
+            // Named so the list can come back to it, focus and all, once the problem closes
+            {...OPEN_ID_ATTRIBUTE.stamp(subject.proposal.id)}
+            className="hover:text-link"
+            plain
+          >
+            <span className="mr-1 text-sm tabular-nums text-muted">{`#${subject.proposal.number}`}</span>{' '}
+            <span className="font-medium">{subject.proposal.title}</span>
+          </DetailLink>
+        </h2>
+      )
+    case 'paper':
+      return (
+        <h2 className="hyphens-none">
+          <DetailLink
+            page={{ kind: 'paper', id: subject.paper.id, tab: 'comments' }}
+            // Named so the list can come back to it, focus and all, once the paper closes
+            {...OPEN_ID_ATTRIBUTE.stamp(subject.paper.id)}
+            className={cn('hover:underline', categoryTextClass(subject.paper.category))}
+            plain
+          >
+            <span className="font-medium">{subject.paper.name}</span>{' '}
+            <span className="ml-1 text-sm text-muted">{subject.board.name}</span>
+          </DetailLink>
+        </h2>
+      )
+
+    // Every kind is handled above
+    default:
+      return assertNever(subject)
+  }
+}

@@ -1,41 +1,30 @@
 'use client'
 
-import { useAuth } from '@clerk/nextjs'
 import { useTranslations } from 'next-intl'
 import React from 'react'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 
 import { MAX_CHARACTERS_PER_COMMENT } from '@/components/features/comments/model/comment-limits'
 import { UsernameGate } from '@/components/features/profile/components/UsernameGate'
-import { useUserProfile } from '@/components/features/profile/hooks/use-user-profile'
 import { LoginButton } from '@/components/login/LoginButton'
 import { LoadingSpinner } from '@/components/shared/components/LoadingSpinner'
 import { RichMathEditor } from '@/components/shared/components/rich-math-editor/components/RichMathEditor'
 import { hasValidContent } from '@/components/shared/components/rich-math-editor/utils/preprocessors'
-import { toggleSetItem } from '@/components/shared/utils/collection-utils'
 import { cn } from '@/components/shared/utils/css-utils'
-import { useIsMobile } from '@/hooks/use-breakpoint'
 import { usePersistentDraft } from '@/hooks/use-persistent-draft'
 import { isAwaitingAnswer } from '@/lib/query-ui-state'
 
+import { useCollapsedComments } from '../hooks/use-collapsed-comments'
+import { useCommentReader } from '../hooks/use-comment-reader'
+import { useCommentReply } from '../hooks/use-comment-reply'
 import { useCreateComment } from '../hooks/use-create-comment'
-import { useDeleteComment } from '../hooks/use-delete-comment'
 import { useFetchComments } from '../hooks/use-fetch-comments'
 import { usePendingCommentReaction } from '../hooks/use-pending-comment-reaction'
 import { usePendingCommentTarget } from '../hooks/use-pending-comment-target'
-import { usePressCommentReaction } from '../hooks/use-press-comment-reaction'
-import { useUpdateComment } from '../hooks/use-update-comment'
 import { commentDraftStorageKey } from '../model/comment-drafts'
-import type { CommentReactionKind, CommentTarget } from '../services/comment-api-types'
-import { convertToCommentData, countAllComments, shouldHideComment } from '../utils/comment-utils'
-import { type CommentData, CommentItem } from './CommentItem'
-
-/**
- * Visual variants for the {@link CommentSection}.
- * - 'card': a card of its own (background, border, shadow) from the small breakpoint up
- * - 'inline': Minimal styling that blends with the page content
- */
-type CommentSectionVariant = 'card' | 'inline'
+import type { CommentTarget } from '../services/comment-api-types'
+import { convertToCommentData, shouldHideComment } from '../utils/comment-utils'
+import { CommentList, type CommentListVariant } from './CommentList'
 
 /**
  * Props for the {@link CommentSection} component.
@@ -44,7 +33,7 @@ type CommentSectionProps = {
   /** The target entity being commented on. */
   target: CommentTarget
   /** How the section sits on the page. */
-  variant?: CommentSectionVariant
+  variant?: CommentListVariant
   /** Whether comments show their reactions and can be reacted to. */
   showReactions?: boolean
   /** What the box for a new comment says before anything is typed in it. */
@@ -66,17 +55,8 @@ export function CommentSection({
   showEmptyText = true,
   autoFocus = false,
 }: CommentSectionProps) {
-  // The reader, and whether Clerk has settled who they are
-  const { userId, isLoaded: isUserLoaded } = useAuth()
-
-  // The reader's username, null until they choose one, and whether their profile is still loading
-  const { username, isLoading: isUsernameLoading } = useUserProfile()
-
-  // Whether we know who is here and what they are called, since a missing name reads the same as an unread one
-  const isIdentityLoaded = isUserLoaded && !isUsernameLoading
-
-  // Whether the viewport is phone-sized
-  const isMobile = useIsMobile()
+  // The reader, the name they sign comments with, and how much of that is known yet
+  const { userId, isSignInLoaded, username, isIdentityLoaded } = useCommentReader()
 
   // The thread as the server has it, and how far its read got
   const { comments: commentDtos, uiState } = useFetchComments(target)
@@ -99,17 +79,11 @@ export function CommentSection({
   // The create behind a new top-level comment
   const { mutateAsync: createRootComment, isPending: isCreatingRootComment } = useCreateComment()
 
-  // A second create, so the reply editor spins on its own send
-  const { mutateAsync: createReply, isPending: isCreatingReplyComment } = useCreateComment()
+  // The reply open in the thread
+  const reply = useCommentReply({ target, comments })
 
-  // The edit behind the reader's edits
-  const { mutateAsync: updateComment } = useUpdateComment()
-
-  // The delete behind the reader's deletions
-  const { mutate: deleteComment } = useDeleteComment()
-
-  // The press behind the reader's reactions on the thread
-  const pressReaction = usePressCommentReaction(target)
+  // Which comments have their replies folded away, held here so a failed refresh that hides the list forgets none
+  const collapsed = useCollapsedComments()
 
   // Handle pending reaction restoration (if user reacted to a comment while not logged in), once the reader's
   // name is known to sign it with
@@ -130,29 +104,17 @@ export function CommentSection({
     ''
   )
 
-  // The ID of the comment that is being replied to (null if none)
-  const [replyCommentId, setReplyCommentId] = useState<string | null>(null)
-
-  // The draft of the open reply, kept for the reader under the comment it answers until it is sent or cancelled
-  const [replyInputText, setReplyInputText] = usePersistentDraft(
-    replyCommentId === null ? null : commentDraftStorageKey(userId ?? null, target, replyCommentId),
-    ''
-  )
-
-  // The IDs of comments whose replies are collapsed
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set())
-
   // A function which posts the new top-level comment
   const handleSubmitComment = useCallback(async () => {
     // Nothing to send in a draft with no text in it
     if (!hasValidContent(commentInputText)) return
 
-    // Post the comment, which comes back as nothing when it never went out
+    // Post the comment, which comes back as nothing when it never went out or failed, the failure told already
     const created = await createRootComment({
       target,
       content: commentInputText.trim(),
       parentCommentId: null,
-    })
+    }).catch(() => undefined)
 
     // Unsent, so the draft stays
     if (created === undefined) return
@@ -160,186 +122,6 @@ export function CommentSection({
     // Sent, so the draft goes, whether or not the thread is still on screen
     setCommentInputText('')
   }, [commentInputText, createRootComment, setCommentInputText, target])
-
-  // A function which posts the open reply
-  const handleSubmitReply = useCallback(async () => {
-    // Nothing to send without an open reply holding some text
-    if (!hasValidContent(replyInputText) || replyCommentId === null) return
-
-    // Post the reply, which comes back as nothing when it never went out
-    const created = await createReply({
-      target,
-      content: replyInputText.trim(),
-      parentCommentId: replyCommentId,
-    })
-
-    // Unsent, so the reply stays open on its draft
-    if (created === undefined) return
-
-    // Sent, so the reply closes
-    setReplyCommentId(null)
-
-    // The reply's draft goes too, whether or not the thread is still on screen
-    setReplyInputText('')
-  }, [replyInputText, replyCommentId, createReply, setReplyInputText, target])
-
-  // A function which opens a reply under a comment, on whatever was written in it before
-  const handleOpenReply = useCallback((commentId: string) => {
-    // Open the reply under the comment
-    setReplyCommentId(commentId)
-  }, [])
-
-  // A function which closes the reply and drops its draft
-  const handleCancelReply = useCallback(() => {
-    // Close the reply
-    setReplyCommentId(null)
-
-    // Drop the reply draft
-    setReplyInputText('')
-  }, [setReplyInputText])
-
-  // A function which saves a comment's new text
-  const handleEditComment = useCallback(
-    async (commentId: string, newContent: string) => {
-      // Save the comment's new text
-      await updateComment({
-        commentId,
-        target,
-        content: newContent,
-      })
-    },
-    [updateComment, target]
-  )
-
-  // A function which deletes a comment
-  const handleDeleteComment = useCallback(
-    (commentId: string) => {
-      // Delete the comment
-      deleteComment({
-        commentId,
-        target,
-      })
-    },
-    [deleteComment, target]
-  )
-
-  // A function which presses a reaction on a comment
-  const handleReactToComment = useCallback(
-    (commentId: string, kind: CommentReactionKind) => {
-      // Press the reaction on the comment
-      pressReaction({ commentId, kind })
-    },
-    [pressReaction]
-  )
-
-  // A function which collapses or expands a comment's replies
-  const handleToggleCollapse = useCallback((commentId: string) => {
-    setCollapsedIds((previous) => toggleSetItem(previous, commentId))
-  }, [])
-
-  // A function which renders a comment and, under it, its replies
-  const renderSingleComment = useCallback(
-    (comment: CommentData): React.ReactNode => {
-      // A deleted comment with nothing visible under it drops out of the thread
-      if (shouldHideComment(comment)) {
-        return null
-      }
-
-      // The comment's direct replies
-      const replies = comment.replies
-
-      // How many live replies sit under the comment, nested ones included
-      const replyCount = countAllComments(replies)
-
-      // Whether the reader wrote the comment
-      const isOwnComment = isUserLoaded && comment.authorId === userId
-
-      // Render the comment
-      return (
-        <CommentItem
-          key={comment.id}
-          author={comment.author}
-          avatarUrl={comment.avatarUrl}
-          content={comment.content}
-          timestamp={comment.timestamp}
-          editedAt={comment.editedAt}
-          reactions={comment.reactions}
-          viewerReaction={comment.viewerReaction}
-          isDeleted={comment.isDeleted}
-          showReactions={showReactions}
-          isCollapsed={collapsedIds.has(comment.id)}
-          replyCount={replyCount}
-          onToggleCollapse={() => handleToggleCollapse(comment.id)}
-          onReply={
-            // Replying is offered on a comment still standing, once there is somebody to sign it: a signed-in
-            // user with a name
-            comment.isDeleted || !isIdentityLoaded || !userId || !username
-              ? undefined
-              : () => handleOpenReply(comment.id)
-          }
-          onReact={
-            // Reacting is offered on every comment but the reader's own
-            isOwnComment ? undefined : (kind) => handleReactToComment(comment.id, kind)
-          }
-          onEdit={
-            // Allow editing only for own comments that are not deleted
-            isOwnComment && !comment.isDeleted
-              ? (newContent) => handleEditComment(comment.id, newContent)
-              : undefined
-          }
-          onDelete={
-            // Allow deleting only for own comments that are not deleted
-            isOwnComment && !comment.isDeleted ? () => handleDeleteComment(comment.id) : undefined
-          }
-          replyInputNode={
-            // The inline reply editor under the comment being replied to, on desktop; a phone gets the
-            // editor at the bottom
-            replyCommentId === comment.id && !isMobile ? (
-              <RichMathEditor
-                variant={variant}
-                maxCharacters={MAX_CHARACTERS_PER_COMMENT}
-                value={replyInputText}
-                onChange={setReplyInputText}
-                onSend={handleSubmitReply}
-                onCancel={handleCancelReply}
-                placeholder={tComments('replyPlaceholder')}
-                autoFocus
-                isLoading={isCreatingReplyComment}
-              />
-            ) : undefined
-          }
-          repliesNode={
-            <>
-              {/* Replies */}
-              {replies.map((reply) => renderSingleComment(reply))}
-            </>
-          }
-        />
-      )
-    },
-    [
-      isMobile,
-      isUserLoaded,
-      isIdentityLoaded,
-      userId,
-      username,
-      variant,
-      showReactions,
-      collapsedIds,
-      replyCommentId,
-      replyInputText,
-      setReplyInputText,
-      isCreatingReplyComment,
-      handleToggleCollapse,
-      handleOpenReply,
-      handleEditComment,
-      handleDeleteComment,
-      handleReactToComment,
-      handleSubmitReply,
-      handleCancelReply,
-      tComments,
-    ]
-  )
 
   // Show loading state
   if (isAwaitingAnswer(uiState)) {
@@ -378,9 +160,6 @@ export function CommentSection({
   // Whether the new-comment box is there at all, which a visitor on an empty thread goes without
   const showsNewCommentBox = userId || hasVisibleComments
 
-  // Whether a signed-in reader is replying on desktop, with the reply editor under its comment
-  const isReplyingInline = userId && replyCommentId !== null && !isMobile
-
   return (
     <>
       {/* Thread */}
@@ -404,12 +183,19 @@ export function CommentSection({
           >
             {hasVisibleComments ? (
               // The thread
-              comments.map((comment) => renderSingleComment(comment))
+              <CommentList
+                target={target}
+                comments={comments}
+                variant={variant}
+                showReactions={showReactions}
+                reply={reply}
+                collapsed={collapsed}
+              />
             ) : (
               // The note that there are none, with a sign-in button for a visitor
               <div className="py-6 flex flex-col items-center gap-3 text-center text-muted text-sm">
                 <span>{tComments('empty')}</span>
-                {isUserLoaded && !userId && (
+                {isSignInLoaded && !userId && (
                   <LoginButton onBeforeRedirect={handleBeforeLoginRedirect} />
                 )}
               </div>
@@ -426,10 +212,7 @@ export function CommentSection({
                 inline: 'pt-4',
               }[variant],
               // A rule between the list and the box
-              showsList && 'border-t border-foreground/10',
-              // Out of sight while the reply editor sits under its comment. Kept on the page, so the box
-              // doesn't take the cursor again once the reply closes
-              isReplyingInline && 'hidden'
+              showsList && 'border-t border-foreground/10'
             )}
           >
             {!isIdentityLoaded ? (
@@ -461,21 +244,6 @@ export function CommentSection({
           </div>
         )}
       </div>
-
-      {/* Mobile reply editor, outside the thread so no empty padded slot is left under the comment */}
-      {isMobile && replyCommentId !== null && (
-        <RichMathEditor
-          variant={variant}
-          maxCharacters={MAX_CHARACTERS_PER_COMMENT}
-          value={replyInputText}
-          onChange={setReplyInputText}
-          onSend={handleSubmitReply}
-          onCancel={handleCancelReply}
-          placeholder={tComments('replyPlaceholder')}
-          autoExpandOnMobile
-          isLoading={isCreatingReplyComment}
-        />
-      )}
     </>
   )
 }

@@ -969,6 +969,38 @@ public class CommentServicePostgresTests(PostgresContainerFixture fixture)
     });
 
     /// <summary>
+    /// A deleted reply keeps its place under its parent, its text blanked, so the replies under it are still read.
+    /// </summary>
+    [Fact]
+    public Task GetCommentsAsync_KeepsTheRepliesUnderADeletedReply() => RunTestAsync(async commentService =>
+    {
+        // The first user's comment
+        var root = await commentService.CreateCommentAsync(_handoutThread, _user1, "Root");
+
+        // The second user's reply to the first user's comment
+        var reply = await commentService.CreateCommentAsync(_handoutThread, _user2, "Reply", root.Id);
+
+        // The first user's answer to the reply
+        await commentService.CreateCommentAsync(_handoutThread, _user1, "Answer", reply.Id);
+
+        // The second user deletes the reply
+        await commentService.DeleteCommentAsync(reply.Id, _user2);
+
+        // The thread as the first user reads it
+        var thread = await commentService.GetCommentsAsync(_handoutThread, _user1);
+
+        // The reply still under the comment, marked deleted
+        var deletedReply = Assert.Single(Assert.Single(thread).Replies);
+        Assert.True(deletedReply.IsDeleted);
+
+        // The reply's text blanked
+        Assert.Equal(string.Empty, deletedReply.Content);
+
+        // The answer still under the reply
+        Assert.Equal("Answer", Assert.Single(deletedReply.Replies).Content);
+    });
+
+    /// <summary>
     /// A count takes only live comments: a deleted one drops out, and an edited one counts once, its replaced
     /// version being <see cref="CommentStatus.Superseded"/>.
     /// </summary>

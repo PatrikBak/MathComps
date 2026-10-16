@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 namespace MathComps.Infrastructure.Services.Comments;
 
 /// <summary>
-/// An <see cref="ICommentService"/> over EF Core, reading a thread with one recursive SQL query and pressing a
+/// An <see cref="ICommentService"/> over EF Core, reading threads with one recursive SQL query and pressing a
 /// reaction in one statement. Who may reach a thread, and how a comment is stored in one, is up to the
 /// <see cref="ICommentThreadKind"/> serving its target type.
 /// </summary>
@@ -68,85 +68,14 @@ public class CommentService(
         // Only a thread the viewer may reach is read
         await EnsureOpenAsync(dbContext, target, viewer);
 
-        // The query reading the target's thread, replaced versions left out
-        var (sql, parameters) = await BuildCommentsCteAsync(dbContext, target);
+        // The JOIN and WHERE picking out the target's thread
+        var thread = await KindOf(target.TargetType, target.TargetId).SelectAsync(dbContext, target);
 
-        // The thread's comments, flat, each with its author
-        var flatComments = await dbContext.Database
-            .SqlQueryRaw<CommentRow>(sql, parameters)
-            .ToListAsync();
+        // The thread's comments, flat, each with its author, replaced versions left out
+        var flatComments = await ReadRowsAsync(dbContext, thread);
 
-        // The ids of the thread's comments
-        var commentIds = flatComments.Select(comment => comment.Id).ToHashSet();
-
-        // The reactions on the thread's comments, oldest first, each with who gave it
-        var reactionRows = await dbContext.CommentReactions
-            .Where(reaction => commentIds.Contains(reaction.CommentId))
-            .OrderBy(reaction => reaction.CreatedAt)
-            .Select(reaction => new
-            {
-                reaction.CommentId,
-                Reaction = new CommentReactionDto(
-                    reaction.User.ExternalId,
-                    reaction.User.IsDeleted ? null : reaction.User.Username,
-                    reaction.Kind)
-            })
-            .ToListAsync();
-
-        // Each thread comment's reactions, by comment id
-        var reactions = reactionRows
-            .GroupBy(row => row.CommentId)
-            .ToDictionary(group => group.Key, group => group.Select(row => row.Reaction).ToImmutableList());
-
-        // Each comment's direct replies, by the parent's id
-        var childrenMap = flatComments
-            .Where(comment => comment.ParentCommentId != null)
-            .GroupBy(comment => comment.ParentCommentId!.Value)
-            .ToDictionary(group => group.Key, group => group.ToList());
-
-        // A function building a comment with its whole reply subtree nested under it
-        CommentDto BuildDto(CommentRow row)
-        {
-            // Get the children of the comment
-            var children = childrenMap.GetValueOrDefault(row.Id, []);
-
-            // Build chronological replies
-            var replies = children
-                .OrderBy(comment => comment.PostedAt)
-                .Select(BuildDto)
-                .ToImmutableList();
-
-            // The comment's author
-            var author = new CommentAuthorDto(
-                row.AuthorExternalId,
-                row.AuthorName,
-                row.AuthorAvatarUrl);
-
-            // Determine if deleted
-            var isDeleted = row.Status == CommentStatus.Deleted;
-
-            // Strip content if deleted
-            var content = isDeleted ? string.Empty : row.Content;
-
-            // The comment as the thread shows it
-            return new CommentDto(
-                Id: row.Id,
-                Author: author,
-                Content: content,
-                CreatedAt: row.PostedAt,
-                EditedAt: row.PreviousVersionId.HasValue ? row.CreatedAt : null,
-                IsDeleted: isDeleted,
-                Reactions: reactions.GetValueOrDefault(row.Id, []),
-                Replies: replies
-            );
-        }
-
-        // Get the top-level comments, ordered chronologically
-        var topLevel = flatComments
-            .Where(comment => comment.ParentCommentId == null)
-            .OrderBy(comment => comment.PostedAt)
-            .Select(BuildDto)
-            .ToImmutableList();
+        // The thread's top-level comments, each with its replies nested under it
+        var topLevel = await BuildTreesAsync(dbContext, flatComments);
 
         // Log the number of comments fetched
         logger.LogDebug("Fetched {Count} comments for {TargetType}:{TargetId}",
@@ -156,6 +85,46 @@ public class CommentService(
 
         // Return the top-level comments
         return topLevel;
+    }
+
+    /// <inheritdoc />
+    public async Task<ImmutableDictionary<string, ImmutableList<CommentDto>>> GetThreadsAsync(
+        CommentTargetType targetType,
+        ImmutableList<string> targetIds,
+        CommentViewer viewer,
+        CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this operation.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Every comment of the threads asked for, linked to its thread, refused when the viewer may not reach them
+        var linksQuery = await KindOf(targetType, string.Join(", ", targetIds))
+            .LinksAsync(dbContext, targetIds, viewer);
+
+        // The target each linked comment hangs off, by the comment's id
+        var targetOf = await linksQuery.ToDictionaryAsync(link => link.Value, link => link.Key, cancellationToken);
+
+        // Nothing said in any of the threads
+        if (targetOf.Count == 0)
+            return [];
+
+        // The threads' comments, flat, each with its author, replaced versions left out, read from the linked ones
+        var flatComments = await ReadRowsAsync(
+            dbContext, new CommentThreadSql("", "c.id = ANY(@p0)", [targetOf.Keys.ToArray()]), cancellationToken);
+
+        // Every thread's top-level comments, each with its replies nested under it
+        var topLevel = await BuildTreesAsync(dbContext, flatComments, cancellationToken);
+
+        // Log the number of comments fetched
+        logger.LogDebug("Fetched {Count} comments across {TargetCount} {TargetType} threads",
+            flatComments.Count,
+            targetIds.Count,
+            targetType);
+
+        // Each thread's top-level comments by its target, oldest first
+        return topLevel
+            .GroupBy(comment => targetOf[comment.Id])
+            .ToImmutableDictionary(group => group.Key, group => group.ToImmutableList());
     }
 
     /// <inheritdoc />
@@ -494,19 +463,20 @@ public class CommentService(
     }
 
     /// <summary>
-    /// Builds a recursive CTE query for fetching comments on any target type.
+    /// Reads the comments of the threads a JOIN and WHERE pick out, flat, with one recursive query: every top-level
+    /// comment among those they pick, and every reply under it.
     /// </summary>
     /// <param name="dbContext">The operation's database context.</param>
-    /// <param name="target">The target of the comments.</param>
-    /// <returns>The thread's SQL and the values it binds.</returns>
-    private async Task<(string Sql, object[] Parameters)> BuildCommentsCteAsync(
-        MathCompsDbContext dbContext, CommentTarget target)
+    /// <param name="threads">The JOIN and WHERE picking out the threads' comments.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The comments, each with its author, oldest first.</returns>
+    private static Task<List<CommentRow>> ReadRowsAsync(
+        MathCompsDbContext dbContext, CommentThreadSql threads, CancellationToken cancellationToken = default)
     {
-        // The JOIN and WHERE picking out the target's thread, with the values the WHERE compares against
-        var (joinFragment, whereFragment, parameters) =
-            await KindOf(target.TargetType, target.TargetId).SelectAsync(dbContext, target);
+        // The JOIN and WHERE picking out the threads, with the values the WHERE compares against
+        var (joinFragment, whereFragment, parameters) = threads;
 
-        // The thread's SQL, which skips a replaced version and keeps a deleted comment so the replies under it
+        // The threads' SQL, which skips a replaced version and keeps a deleted comment so the replies under it
         // stay reachable. Each comment is walked back through its earlier versions to the first one, whose time
         // is when the comment was posted.
         var sql = $@"
@@ -550,8 +520,95 @@ public class CommentService(
             JOIN users u ON ct.author_id = u.id
             ORDER BY first_version.created_at";
 
-        // Return the query and the values its fragments compare against
-        return (sql, parameters);
+        // The comments, flat
+        return dbContext.Database.SqlQueryRaw<CommentRow>(sql, parameters).ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Builds comments read flat into trees of replies, each comment with its reactions.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="flatComments">The comments, every reply's parent among them.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The top-level comments, oldest first, each carrying its replies, oldest first.</returns>
+    private static async Task<ImmutableList<CommentDto>> BuildTreesAsync(
+        MathCompsDbContext dbContext,
+        IReadOnlyList<CommentRow> flatComments,
+        CancellationToken cancellationToken = default)
+    {
+        // The ids of the comments
+        var commentIds = flatComments.Select(comment => comment.Id).ToHashSet();
+
+        // The reactions on the comments, oldest first, each with who gave it
+        var reactionRows = await dbContext.CommentReactions
+            .Where(reaction => commentIds.Contains(reaction.CommentId))
+            .OrderBy(reaction => reaction.CreatedAt)
+            .Select(reaction => new
+            {
+                reaction.CommentId,
+                Reaction = new CommentReactionDto(
+                    reaction.User.ExternalId,
+                    reaction.User.IsDeleted ? null : reaction.User.Username,
+                    reaction.Kind)
+            })
+            .ToListAsync(cancellationToken);
+
+        // Each comment's reactions, by comment id
+        var reactions = reactionRows
+            .GroupBy(row => row.CommentId)
+            .ToDictionary(group => group.Key, group => group.Select(row => row.Reaction).ToImmutableList());
+
+        // Each comment's direct replies, by the parent's id
+        var childrenMap = flatComments
+            .Where(comment => comment.ParentCommentId != null)
+            .GroupBy(comment => comment.ParentCommentId!.Value)
+            .ToDictionary(group => group.Key, group => group.ToList());
+
+        // A function building a comment with its whole reply subtree nested under it
+        CommentDto BuildDto(CommentRow row)
+        {
+            // Get the children of the comment
+            var children = childrenMap.GetValueOrDefault(row.Id, []);
+
+            // Build chronological replies
+            var replies = children
+                .OrderBy(comment => comment.PostedAt)
+                .Select(BuildDto)
+                .ToImmutableList();
+
+            // The comment's author
+            var author = new CommentAuthorDto(
+                row.AuthorExternalId,
+                row.AuthorName,
+                row.AuthorAvatarUrl);
+
+            // Determine if deleted
+            var isDeleted = row.Status == CommentStatus.Deleted;
+
+            // Strip content if deleted
+            var content = isDeleted ? string.Empty : row.Content;
+
+            // The comment as the thread shows it
+            return new CommentDto(
+                Id: row.Id,
+                Author: author,
+                Content: content,
+                CreatedAt: row.PostedAt,
+                EditedAt: row.PreviousVersionId.HasValue ? row.CreatedAt : null,
+                IsDeleted: isDeleted,
+                Reactions: reactions.GetValueOrDefault(row.Id, []),
+                Replies: replies
+            );
+        }
+
+        // The top-level comments, ordered chronologically
+        return
+        [
+            .. flatComments
+                .Where(comment => comment.ParentCommentId == null)
+                .OrderBy(comment => comment.PostedAt)
+                .Select(BuildDto),
+        ];
     }
 
     /// <summary>

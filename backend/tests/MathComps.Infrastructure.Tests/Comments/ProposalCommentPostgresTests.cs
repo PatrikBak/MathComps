@@ -58,6 +58,12 @@ public class ProposalCommentPostgresTests(PostgresContainerFixture fixture) : Pr
 
         // No entry
         Assert.Empty(counts);
+
+        // The discussions read in bulk, which leave the proposal out too
+        var threads = await service.GetThreadsAsync(TargetType, [SubjectId.ToString()], Reviewer);
+
+        // No entry either
+        Assert.Empty(threads);
     });
 
     /// <summary>

@@ -8,10 +8,12 @@ import type {
   RatingWrite,
   RecommendationWrite,
   SelectionData,
+  SelectionDiscussions,
   SetAsideWrite,
   SlotAddress,
 } from '../model/selection-types'
 import {
+  getDiscussionsUrl,
   getFinalizationUrl,
   getProposalUrl,
   getRatingUrl,
@@ -35,6 +37,18 @@ import {
  */
 export function getSelection(apiCall: ApiCaller): Promise<ApiResult<SelectionData>> {
   return apiCall<SelectionData>(() => getSelectionUrl())
+}
+
+/**
+ * Reads the reviewers' discussion of every proposal and paper the selection holds, leaving out the ones nothing has
+ * been said in.
+ *
+ * @param apiCall - The authenticated API caller.
+ *
+ * @returns The discussions, or an error.
+ */
+export function getDiscussions(apiCall: ApiCaller): Promise<ApiResult<SelectionDiscussions>> {
+  return apiCall<SelectionDiscussions>(() => getDiscussionsUrl())
 }
 
 /**

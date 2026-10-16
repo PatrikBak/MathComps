@@ -1,4 +1,6 @@
+using System.Collections.Immutable;
 using System.Data;
+using MathComps.Domain.Contracts.Comments;
 using MathComps.Domain.Contracts.Competitions;
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.Contracts.Users;
@@ -6,6 +8,7 @@ using MathComps.Domain.EfCoreEntities;
 using MathComps.Domain.Localization;
 using MathComps.Domain.Taxonomy;
 using MathComps.Infrastructure.Persistence;
+using MathComps.Infrastructure.Services.Comments;
 using MathComps.Infrastructure.Services.Competitions;
 using MathComps.Infrastructure.Services.Localization;
 using MathComps.Infrastructure.Services.Users;
@@ -14,16 +17,19 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
-/// Implements <see cref="IProblemSelectionService"/> over the database. The hosted groups that have not opened are
-/// read first, since they decide which finalized boards are still in play.
+/// Implements <see cref="IProblemSelectionService"/> over the database, the discussions through the comment service.
+/// The selection read takes in every hosted group that has not opened, since a finalized board's slots read off its
+/// group's rounds.
 /// </summary>
-/// <param name="dbContextFactory">Creates the context the read runs on.</param>
+/// <param name="dbContextFactory">Creates the context each read runs on.</param>
 /// <param name="localization">The names the taxonomy gives the groups' nodes.</param>
 /// <param name="grants">Reads when each conversation's author started preparing the competitions.</param>
+/// <param name="comments">Reads the discussions of what the selection holds.</param>
 public sealed class ProblemSelectionService(
     IDbContextFactory<MathCompsDbContext> dbContextFactory,
     IMetadataLocalizationService localization,
-    IUserGrantService grants)
+    IUserGrantService grants,
+    ICommentService comments)
     : IProblemSelectionService
 {
     /// <summary>
@@ -82,8 +88,7 @@ public sealed class ProblemSelectionService(
         var proposals = await dbContext.Proposals
             .AsNoTracking()
             .AsSplitQuery()
-            .Where(proposal => proposal.DeletedAt == null
-                && (proposal.Problem.Round.HostedGroupId == null || proposal.Problem.Round.HostedGroup!.OpensAt > now))
+            .WhereSelectionMayHold(now)
             .OrderBy(proposal => proposal.Number)
             .Select(proposal => new
             {
@@ -153,6 +158,7 @@ public sealed class ProblemSelectionService(
                 board.Id,
                 board.Name,
                 board.HostedGroupId,
+                GroupOpensAt = (DateTimeOffset?)board.HostedGroup!.OpensAt,
                 Papers = board.Papers
                     .OrderBy(paper => paper.Position)
                     .Select(paper => new
@@ -200,7 +206,7 @@ public sealed class ProblemSelectionService(
             [
                 // Drafts, and the boards finalized into a group that has not opened
                 .. boards
-                    .Where(board => board.HostedGroupId is null || groupsById.ContainsKey(board.HostedGroupId.Value))
+                    .Where(board => SelectionRules.IsBoardInSelection(board.GroupOpensAt, now))
                     .Select(board => new SelectionBoardDto(
                         board.Id,
                         board.Name,
@@ -249,6 +255,61 @@ public sealed class ProblemSelectionService(
                         group.ProblemCount)),
             ],
             reviewersConversations);
+    }
+
+    /// <inheritdoc/>
+    public async Task<SelectionDiscussionsDto> GetDiscussionsAsync(
+        CommentViewer viewer, CancellationToken cancellationToken = default)
+    {
+        // A fresh context for this read.
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        // One instant for everything the read weighs against a group opening.
+        var now = DateTimeOffset.UtcNow;
+
+        // Every proposal not deleted and outside the groups that have opened, with where its problem sits.
+        var proposals = await dbContext.Proposals
+            .AsNoTracking()
+            .WhereSelectionMayHold(now)
+            .Select(proposal => new
+            {
+                proposal.ProblemId,
+                CompetitionPath = proposal.Problem.Round.Competition.Path,
+                GroupOpensAt = (DateTimeOffset?)proposal.Problem.Round.HostedGroup!.OpensAt,
+            })
+            .ToListAsync(cancellationToken);
+
+        // The proposals the selection still holds, each as the id its discussion goes by.
+        var proposalIds = proposals
+            .Where(proposal => SelectionRules.IsInSelection(proposal.CompetitionPath, proposal.GroupOpensAt, now))
+            .Select(proposal => proposal.ProblemId.ToString())
+            .ToImmutableList();
+
+        // Every paper, with when the group its board was finalized into opens.
+        var papers = await dbContext.SelectionPapers
+            .AsNoTracking()
+            .Select(paper => new { paper.Id, GroupOpensAt = (DateTimeOffset?)paper.Board.HostedGroup!.OpensAt })
+            .ToListAsync(cancellationToken);
+
+        // The papers on a board the selection still holds, each as the id its discussion goes by.
+        var paperIds = papers
+            .Where(paper => SelectionRules.IsBoardInSelection(paper.GroupOpensAt, now))
+            .Select(paper => paper.Id.ToString())
+            .ToImmutableList();
+
+        // The proposals' discussions, by the proposal.
+        var proposalThreads = comments.GetThreadsAsync(
+            CommentTargetType.Proposal, proposalIds, viewer, cancellationToken);
+
+        // The papers' discussions, by the paper.
+        var paperThreads = comments.GetThreadsAsync(
+            CommentTargetType.SelectionPaper, paperIds, viewer, cancellationToken);
+
+        // Wait for both reads, started together since neither needs the other.
+        await Task.WhenAll(proposalThreads, paperThreads);
+
+        // Each kind's discussions, by what they hang off.
+        return new SelectionDiscussionsDto(await proposalThreads, await paperThreads);
     }
 
     /// <summary>

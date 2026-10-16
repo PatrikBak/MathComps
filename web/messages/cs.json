@@ -1279,7 +1279,6 @@
       "moveUp": "Posunout nahoru",
       "needsLanguages": "potřebuje zadání nebo řešení v {languages}",
       "none": "Zatím tu není žádná sestava.",
-      "paperComments": "{paper}: {count, plural, one {# komentář} few {# komentáře} other {# komentářů}}",
       "pickFromPool": "Teď vyber úlohu ze zásobníku",
       "progress": "{filled} z {total}",
       "ready": "Všechna místa jsou obsazená a každá úloha má zadání i řešení ve všech třech jazycích.",
@@ -1354,15 +1353,21 @@
       "slotFilled": "{slot}: #{number} {title}"
     },
     "pool": {
+      "commentsFailed": "Komentáře se nepodařilo načíst.",
+      "commentsUnavailable": "Komentáře nejsou dostupné",
       "empty": "Těmto filtrům neodpovídá žádná úloha.",
+      "emptyComments": "Zatím tu nejsou žádné komentáře.",
       "emptyPool": "Zatím tu nejsou žádné úlohy.",
       "emptySetAside": "Nic není odložené.",
       "emptySetAsideFiltered": "Těmto filtrům neodpovídá žádná odložená úloha.",
       "loading": "Načítám úlohy",
+      "loadingComments": "Načítám komentáře",
       "search": "Hledat úlohy",
       "searchPlaceholder": "Číslo, název nebo text",
       "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}",
+      "showWhatsNew": "Zobrazit, co je nového",
       "views": {
+        "comments": "Komentáře",
         "label": "Zobrazit jako",
         "problems": "Úlohy",
         "ratings": "Ohodnocení"

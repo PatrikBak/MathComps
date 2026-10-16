@@ -45,6 +45,14 @@ public class ProposalThreadKind(IUserGrantService grants) : PreparerCommentThrea
             .Select(group => new KeyValuePair<string, int>(group.Key.ToString(), group.Count()));
 
     /// <inheritdoc />
+    protected override IQueryable<KeyValuePair<string, Guid>> LinksById(
+        MathCompsDbContext dbContext, ImmutableList<Guid> ids) =>
+        // Each standing proposal's comments, keyed by its id
+        dbContext.ProposalComments
+            .Where(link => ids.Contains(link.ProposalId) && link.Proposal.DeletedAt == null)
+            .Select(link => new KeyValuePair<string, Guid>(link.ProposalId.ToString(), link.CommentId));
+
+    /// <inheritdoc />
     protected override async Task<ProposalAnchor> ResolveAsync(MathCompsDbContext dbContext, CommentTarget target)
     {
         // An id that is no GUID names no proposal, refused like a missing thread

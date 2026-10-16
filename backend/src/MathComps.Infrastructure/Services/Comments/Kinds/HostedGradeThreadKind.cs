@@ -60,6 +60,12 @@ public class HostedGradeThreadKind(IUserGrantService grants) : CommentThreadKind
         throw new CommentTargetNotFoundException(TargetType, string.Join(", ", targetIds));
 
     /// <inheritdoc />
+    public override Task<IQueryable<KeyValuePair<string, Guid>>> LinksAsync(
+        MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer viewer) =>
+        // Never read in bulk, so asking is a bug in the caller
+        throw new NotSupportedException($"{TargetType} threads are never read in bulk.");
+
+    /// <inheritdoc />
     public override async Task OnEditedAsync(
         MathCompsDbContext dbContext, Guid previousVersionId, Guid newVersionId)
     {
