@@ -40,6 +40,12 @@ public class ProblemThreadKind : PublicCommentThreadKind<ProblemAnchor>
         throw new CommentTargetNotFoundException(TargetType, string.Join(", ", targetIds));
 
     /// <inheritdoc />
+    public override Task<IQueryable<KeyValuePair<string, Guid>>> LinksAsync(
+        MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer viewer) =>
+        // Never read in bulk, so asking is a bug in the caller
+        throw new NotSupportedException($"{TargetType} threads are never read in bulk.");
+
+    /// <inheritdoc />
     protected override async Task<ProblemAnchor> ResolveAsync(MathCompsDbContext dbContext, CommentTarget target) =>
         // The served problem with the slug, refused like a missing thread when there is none
         new(await dbContext.Problems

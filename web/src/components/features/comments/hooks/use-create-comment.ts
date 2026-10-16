@@ -5,13 +5,13 @@ import { useProblemStore } from '@/stores/problem-store'
 import type { CommentDto, CommentTarget } from '../services/comment-api-types'
 import { createComment } from '../services/comment-service'
 import { addReplyToComment } from '../utils/comment-utils'
-import { commentCountQueryKeys } from './comment-query-keys'
+import { commentCountQueryKeys, commentMutationKeys } from './comment-query-keys'
 import { useCommentMutation } from './use-comment-mutation'
 
 /**
  * Parameters for creating a new comment.
  */
-type CreateCommentParams = {
+export type CreateCommentParams = {
   /** The target to create the comment on. */
   target: CommentTarget
   /** The content of the comment. */
@@ -41,6 +41,9 @@ export function useCreateComment() {
 
     // No optimistic update - we wait for server to return the new comment with ID
     optimisticUpdate: undefined,
+
+    // Filed under the key every new comment and reply shares
+    mutationKey: commentMutationKeys.creates(),
 
     // When the API call is successful, update the cache
     onSuccess: (newComment, { target, parentCommentId }, context) => {

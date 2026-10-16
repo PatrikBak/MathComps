@@ -1,5 +1,6 @@
 using MathComps.Domain.Contracts.Selection;
 using MathComps.Domain.Localization;
+using MathComps.Infrastructure.Services.Comments;
 
 namespace MathComps.Infrastructure.Services.Selection;
 
@@ -18,4 +19,17 @@ public interface IProblemSelectionService
     /// <returns>The selection.</returns>
     Task<SelectionDto> GetSelectionAsync(
         Guid reviewerId, Language language, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reads the reviewers' discussions of everything the selection holds at once: of every proposal still in it,
+    /// and of every paper on a board still in it.
+    /// </summary>
+    /// <param name="viewer">The reviewer reading the discussions.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>The discussions, by what they hang off.</returns>
+    /// <exception cref="CommentTargetNotFoundException">
+    /// Thrown when the viewer does not prepare the competitions, as though the discussions were not there.
+    /// </exception>
+    Task<SelectionDiscussionsDto> GetDiscussionsAsync(
+        CommentViewer viewer, CancellationToken cancellationToken = default);
 }

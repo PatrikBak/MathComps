@@ -14,6 +14,7 @@ import { useLoginRedirect } from '@/hooks/use-login-redirect'
 import type { Locale } from '@/i18n/i18n'
 import { errorCodeOf } from '@/lib/api/api-error'
 
+import { PINNED_ATTRIBUTE } from '../hooks/use-open-detail'
 import type { OpenDetail } from '../model/selection-routes'
 import { PROPOSAL_AUTHORING_LANGUAGE } from '../model/selection-types'
 import { BoardPanel } from './BoardPanel'
@@ -46,6 +47,8 @@ export function SelectionShell() {
           {/* The board, on a wide screen, sticks where it already starts, the page's own 48px top padding
               below the header, and stays inside the window, so a long board scrolls on its own */}
           <aside
+            // Marked as a part that can stay put while the screen scrolls under it
+            {...PINNED_ATTRIBUTE.stamp('board')}
             className={cn(
               'mb-5 lg:sticky lg:top-[calc(var(--header-height)+48px)] lg:order-2 lg:mb-0',
               'lg:max-h-[calc(100dvh-var(--header-height)-64px)] lg:overflow-y-auto'

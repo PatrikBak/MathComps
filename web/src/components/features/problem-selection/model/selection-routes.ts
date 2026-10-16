@@ -17,13 +17,13 @@ export const OPEN_CONVERSATION_PARAM = 'conversation'
 /** Every query parameter the conversation open over a problem's page owns. */
 export const CONVERSATION_PARAMS = [OPEN_CONVERSATION_PARAM] as const
 
-/** The query parameter naming how the pool lays out its problems. */
+/** The query parameter naming how the pool is laid out. */
 export const POOL_VIEW_PARAM = 'view'
 
-/** The ways the pool lays out its problems, the first being the one it shows by default. */
-export const POOL_VIEWS = ['problems', 'ratings'] as const
+/** The ways the pool can be laid out, the first being the one it shows by default. */
+export const POOL_VIEWS = ['problems', 'ratings', 'comments'] as const
 
-/** One way the pool lays out its problems. */
+/** One way the pool can be laid out. */
 export type PoolViewMode = (typeof POOL_VIEWS)[number]
 
 /** Every query parameter the page open over the pool owns. */

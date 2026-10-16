@@ -1,3 +1,4 @@
+import type { CommentDto } from '@/components/features/comments/services/comment-api-types'
 import type { HostedCompetitionCategory } from '@/components/features/hosted-competitions/model/hosted-competition-types'
 import type { UserIdentity } from '@/components/features/profile/model/user-identity'
 import type { Locale } from '@/i18n/i18n'
@@ -239,4 +240,16 @@ export type SelectionData = {
   cycles: Cycle[]
   /** Every conversation about a proposal still in the selection, newest first. */
   conversations: ReviewConversation[]
+}
+
+/**
+ * The reviewers' discussions of everything the selection holds, each kind of subject's by the subject's id. Each
+ * discussion is its top-level comments, oldest first, each carrying its replies, and one nothing has been said in is
+ * left out.
+ */
+export type SelectionDiscussions = {
+  /** The discussions of the proposals still in the selection, by the proposal's id. */
+  proposals: Record<string, CommentDto[]>
+  /** The discussions of the papers on the selection's boards, by the paper's id. */
+  papers: Record<string, CommentDto[]>
 }

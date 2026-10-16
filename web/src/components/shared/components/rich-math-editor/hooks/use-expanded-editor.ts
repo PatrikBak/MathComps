@@ -1,8 +1,6 @@
 import type { KeyboardEventHandler } from 'react'
 import { useState } from 'react'
 
-import { useIsMobile } from '@/hooks/use-breakpoint'
-
 import { useEditorKeyboard } from './use-editor-keyboard'
 import { type UseEditorTextResult } from './use-editor-text'
 
@@ -12,8 +10,8 @@ import { type UseEditorTextResult } from './use-editor-text'
 type UseExpandedEditorOptions = {
   /** The text the expanded view shows and its keys edit. */
   text: UseEditorTextResult
-  /** Whether a phone gets the expanded view alone, with no inline editor under it. */
-  autoExpandOnMobile: boolean
+  /** Whether the editor is its expanded view alone, open from the start, with no inline editor under it. */
+  expandedOnly: boolean
   /** The surface's own send, where it has one. */
   onSend: (() => void) | undefined
   /** The surface's own cancel, where it has one. */
@@ -58,32 +56,12 @@ export type UseExpandedEditorResult = {
  */
 export function useExpandedEditor({
   text,
-  autoExpandOnMobile,
+  expandedOnly: isOnlyEditor,
   onSend,
   onCancel,
 }: UseExpandedEditorOptions): UseExpandedEditorResult {
-  // Whether the viewport is phone-width
-  const isMobile = useIsMobile()
-
-  // Whether the expanded view is the whole editor
-  const isOnlyEditor = autoExpandOnMobile && isMobile
-
-  // Whether the expanded view is open
+  // Whether the expanded view is open, from the start where it is the whole editor
   const [isOpen, setIsOpen] = useState(isOnlyEditor)
-
-  // The last reading of whether the expanded view is the whole editor, to catch the moment it becomes one
-  const [wasOnlyEditor, setWasOnlyEditor] = useState(isOnlyEditor)
-
-  // The whole-editor reading changes, as the phone check settles after mount
-  if (isOnlyEditor !== wasOnlyEditor) {
-    // The reading moves on to this one
-    setWasOnlyEditor(isOnlyEditor)
-
-    // Open once there is nothing else to write in
-    if (isOnlyEditor) {
-      setIsOpen(true)
-    }
-  }
 
   /**
    * A function which opens the expanded view.

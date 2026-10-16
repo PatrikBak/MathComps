@@ -50,6 +50,10 @@ public abstract class CommentThreadKind<TAnchor> : ICommentThreadKind where TAnc
         MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer? viewer);
 
     /// <inheritdoc />
+    public abstract Task<IQueryable<KeyValuePair<string, Guid>>> LinksAsync(
+        MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer viewer);
+
+    /// <inheritdoc />
     Task ICommentThreadKind.OnCreatedAsync(MathCompsDbContext dbContext, CommentAnchor anchor, Comment comment) =>
         // Tracked against the thread as this kind's anchor
         OnCreatedAsync(dbContext, (TAnchor)anchor, comment);

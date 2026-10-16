@@ -2,7 +2,7 @@
 
 import { Search, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { type ReactNode, type RefObject, useState } from 'react'
+import { type ReactNode, type RefObject, useCallback, useState } from 'react'
 
 import { Button } from '@/components/shared/components/Button'
 import { COMPACT_PANEL_CLASS } from '@/components/shared/components/FilterEmptyState'
@@ -22,12 +22,24 @@ import type { Proposal } from '../model/selection-types'
 import { SlotNumber } from './CategoryMarks'
 import { LanguageSwitch } from './LanguageSwitch'
 import { PlaceControl } from './PlaceControl'
+import { PoolComments } from './PoolComments'
 import { PoolFilterBar } from './PoolFilterBar'
+import { PoolSkeleton } from './PoolSkeleton'
 import { ProposalActionsMenu } from './ProposalActionsMenu'
 import { ProposalCard } from './ProposalCard'
 import { ProposalFiling } from './ProposalFiling'
 import { RatingsTable } from './RatingsTable'
 import { useSelectionWorkspace } from './SelectionWorkspaceProvider'
+
+/**
+ * Whether each layout of the pool lists its problems, and so carries the tools that work on them. The discussions
+ * list every thread instead, whatever the filters say.
+ */
+const LISTS_PROBLEMS: Record<PoolViewMode, boolean> = {
+  problems: true,
+  ratings: true,
+  comments: false,
+}
 
 /**
  * Props for the {@link PoolView} component.
@@ -42,7 +54,8 @@ type PoolViewProps = {
 /**
  * The pool: every problem no round has taken, live or set aside, filtered and read statement by statement, or laid
  * out as a table of their ratings. Its language switch keeps every language in reach, since a {@link PoolCard}
- * lacking the one picked shows another the problem has.
+ * lacking the one picked shows another the problem has. The pool also lists every discussion of what the selection
+ * holds.
  */
 export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // Pool copy
@@ -52,34 +65,38 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   const tPlurals = useTranslations('plurals')
 
   // The selection if its read has landed, what the pool is narrowed to with the ways of changing it, and the line
-  // saying how many problems show
+  // saying how many problems or comments show
   const { selection, poolFilters: filters, poolCountRef: countRef } = useSelectionWorkspace()
 
-  // What the filter lets through, against the board on screen; null until the selection arrives
+  // Which layout the pool shows, and the way to change it
+  const { mode, showMode } = usePoolViewMode()
+
+  // What the filter lets through, against the board on screen, while the pool lists its problems; null until the
+  // selection arrives, and over the discussions, which no filter narrows
   const matches =
-    selection === null
-      ? null
-      : matchPool([...selection.proposalsById.values()], filters.filter, selection.activeBoard)
+    selection !== null && LISTS_PROBLEMS[mode]
+      ? matchPool([...selection.proposalsById.values()], filters.filter, selection.activeBoard)
+      : null
 
   // Whether a search, a facet or leaving out what the board holds narrows the view on screen, set aside or live
   const isNarrowed = countActiveFilters({ ...filters.filter, isShowingSetAside: false }) > 0
 
   // That the pool is loading, or how many made it through, counted as the set-aside problems when the list is
-  // all of them
+  // all of them; the discussions count their comments themselves
   const countLine =
-    matches === null
+    selection === null
       ? t('loading')
-      : filters.filter.isShowingSetAside && !isNarrowed
-        ? t('setAsideCount', { count: matches.shown.length })
-        : tPlurals('problems', { count: matches.shown.length })
+      : matches === null
+        ? null
+        : filters.filter.isShowingSetAside && !isNarrowed
+          ? t('setAsideCount', { count: matches.shown.length })
+          : tPlurals('problems', { count: matches.shown.length })
 
-  // How the pool lays out its problems, and the way to change it
-  const { mode, showMode } = usePoolViewMode()
-
-  // What each way of laying out the problems is called
+  // What each of the pool's layouts is called
   const modeLabels: Record<PoolViewMode, string> = {
     problems: t('views.problems'),
     ratings: t('views.ratings'),
+    comments: t('views.comments'),
   }
 
   // Why nothing shows: the filters hiding problems, or no problem there to hide, in the view on screen
@@ -90,51 +107,20 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
   // How the ratings table orders its rows, kept while nothing matches and while the cards show
   const [ratingsSort, setRatingsSort] = useState(DEFAULT_RATINGS_SORT)
 
+  // Where the discussions say how many comments they show, once it is on the page
+  const [commentCountSlot, setCommentCountSlot] = useState<HTMLSpanElement | null>(null)
+
+  // A function which keeps the comment count's place once it is on the page, as it stays while the pool hides
+  // behind a page
+  const keepCommentCountSlot = useCallback((slot: HTMLSpanElement | null) => {
+    // Kept only as it arrives
+    if (slot !== null) setCommentCountSlot(slot)
+  }, [])
+
   return (
     <div>
-      {/* Search and the language statements are read in */}
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="relative min-w-48 flex-1">
-          <span className="sr-only">{t('search')}</span>
-          <Search
-            size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
-          />
-          <input
-            type="search"
-            value={filters.filter.query}
-            onChange={(event) => filters.setField('query', event.target.value)}
-            placeholder={t('searchPlaceholder')}
-            // Drawn as light and as tall as the facet pills below, since it sits on the page itself
-            className={cn(
-              'form-input border-foreground/10 bg-foreground/[0.03] py-1.5 pl-9 placeholder:text-muted',
-              'hover:border-foreground/25 hover:bg-foreground/[0.07] focus-visible:border-focus/70'
-            )}
-          />
-        </label>
-
-        <LanguageSwitch language={language} onChange={onLanguageChange} unwritten={[]} />
-      </div>
-
-      {/* Narrowing the pool down */}
-      <div className="mt-3">
-        <PoolFilterBar filters={filters} matches={matches} />
-      </div>
-
-      {/* The slot waiting for a problem, kept in view while scrolling */}
-      <WaitingBanner countRef={countRef} />
-
-      {/* How many made it through or a loading line, and the way the problems are laid out */}
-      <div className="mt-4 mb-3 flex items-center justify-between gap-3">
-        <p
-          ref={countRef}
-          // Takes the focus when whatever held it goes with nothing in its place, so a reader's next Tab goes on from
-          // here
-          tabIndex={-1}
-          className="text-sm text-muted focus:outline-none"
-        >
-          {countLine}
-        </p>
+      {/* The way between the pool's lists, and over a list of problems the language its statements are read in */}
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <SegmentedSwitch
           value={mode}
           onChange={showMode}
@@ -144,28 +130,72 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
             label: modeLabels[candidate],
           }))}
         />
+        {LISTS_PROBLEMS[mode] && (
+          <LanguageSwitch language={language} onChange={onLanguageChange} unwritten={[]} />
+        )}
       </div>
 
-      {/* The problems, or whatever stands in for them */}
-      {matches === null ? (
+      {/* The tools over a list of problems, which the discussions go without */}
+      {LISTS_PROBLEMS[mode] && (
+        <>
+          {/* Search */}
+          <label className="relative mt-4 block">
+            <span className="sr-only">{t('search')}</span>
+            <Search
+              size={15}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+            />
+            <input
+              type="search"
+              value={filters.filter.query}
+              onChange={(event) => filters.setField('query', event.target.value)}
+              placeholder={t('searchPlaceholder')}
+              // Drawn as light and as tall as the facet pills below, since it sits on the page itself
+              className={cn(
+                'form-input border-foreground/10 bg-foreground/[0.03] py-1.5 pl-9 placeholder:text-muted',
+                'hover:border-foreground/25 hover:bg-foreground/[0.07] focus-visible:border-focus/70'
+              )}
+            />
+          </label>
+
+          {/* Narrowing the pool down */}
+          <div className="mt-3">
+            <PoolFilterBar filters={filters} matches={matches} />
+          </div>
+
+          {/* The slot waiting for a problem, kept in view while scrolling where a problem can be picked for it */}
+          <WaitingBanner countRef={countRef} />
+        </>
+      )}
+
+      {/* How many problems or comments show, or a loading line */}
+      <p
+        ref={countRef}
+        // Takes the focus when whatever held it goes with nothing in its place, so a reader's next Tab goes on from
+        // here
+        tabIndex={-1}
+        className="mt-4 mb-3 text-sm text-muted focus:outline-none"
+      >
+        {countLine}
+        <span
+          // Filled in by the discussions, which count their own comments
+          ref={keepCommentCountSlot}
+        />
+      </p>
+
+      {/* The problems or the discussions, or whatever stands in for them */}
+      {selection === null ? (
         // Placeholder cards while the pool loads
-        <div className="space-y-4" aria-hidden>
-          {[0, 1, 2].map((index) => (
-            <div key={index} className="h-48 animate-pulse rounded-xl bg-surface/25" />
-          ))}
-        </div>
-      ) : matches.shown.length === 0 ? (
-        // A note saying why nothing shows
-        <div className={COMPACT_PANEL_CLASS}>
-          <p className="text-sm text-muted">{emptyLine}</p>
-        </div>
+        <PoolSkeleton />
       ) : (
-        // Every problem the filters let through, laid out as asked
-        <PoolProblems
+        // The layout asked for, handed the problems the filters let through, which the discussions leave unread
+        <PoolLayout
           mode={mode}
-          proposals={matches.shown}
+          proposals={matches?.shown ?? []}
           language={language}
           countRef={countRef}
+          commentCountSlot={commentCountSlot}
+          emptyLine={emptyLine}
           ratingsSort={ratingsSort}
           onRatingsSort={setRatingsSort}
         />
@@ -175,17 +205,21 @@ export function PoolView({ language, onLanguageChange }: PoolViewProps) {
 }
 
 /**
- * Props for the {@link PoolProblems} component.
+ * Props for the {@link PoolLayout} component.
  */
-type PoolProblemsProps = {
-  /** How the problems are laid out. */
+type PoolLayoutProps = {
+  /** Which layout the pool shows. */
   mode: PoolViewMode
-  /** The problems the filters let through, at least one. */
+  /** The problems the filters let through. */
   proposals: readonly Proposal[]
   /** The language the problems are read in. */
   language: Locale
   /** The line saying how many problems show. */
   countRef: RefObject<HTMLParagraphElement | null>
+  /** Where the discussions say how many comments they show, once it is on the page. */
+  commentCountSlot: HTMLElement | null
+  /** Why no problem shows, when none does. */
+  emptyLine: string
   /** How the ratings table orders its rows. */
   ratingsSort: TableSort<RatingsColumn>
   /** Orders the ratings table's rows as asked. */
@@ -193,21 +227,34 @@ type PoolProblemsProps = {
 }
 
 /**
- * The problems the filters let through, as a card each or as a table of their ratings.
+ * The layout asked for: the problems the filters let through, as a card each or as a table of their ratings, or every
+ * discussion of what the selection holds. A layout of problems says when none shows. The discussions say for
+ * themselves when there are none, since the papers' discussions can show with no problem in the pool.
  */
-function PoolProblems({
+function PoolLayout({
   mode,
   proposals,
   language,
   countRef,
+  commentCountSlot,
+  emptyLine,
   ratingsSort,
   onRatingsSort,
-}: PoolProblemsProps) {
+}: PoolLayoutProps) {
+  // A note saying why no problem shows
+  const emptyNote = (
+    <div className={COMPACT_PANEL_CLASS}>
+      <p className="text-sm text-muted">{emptyLine}</p>
+    </div>
+  )
+
   // The layout asked for
   switch (mode) {
-    // A card for every problem
+    // A card for every problem, or the note while none shows
     case 'problems':
-      return (
+      return proposals.length === 0 ? (
+        emptyNote
+      ) : (
         <div className="space-y-4">
           {proposals.map((proposal) => (
             <PoolEntry key={proposal.id} countRef={countRef}>
@@ -217,9 +264,11 @@ function PoolProblems({
         </div>
       )
 
-    // A row for every problem, with its ratings
+    // A row for every problem, with its ratings, or the note while none shows
     case 'ratings':
-      return (
+      return proposals.length === 0 ? (
+        emptyNote
+      ) : (
         <RatingsTable
           proposals={proposals}
           sort={ratingsSort}
@@ -227,6 +276,10 @@ function PoolProblems({
           fallbackRef={countRef}
         />
       )
+
+    // Every discussion of the problems and the papers, newest activity first
+    case 'comments':
+      return <PoolComments countSlot={commentCountSlot} />
 
     // Every layout is handled above
     default:

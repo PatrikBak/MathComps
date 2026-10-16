@@ -22,14 +22,13 @@ import { localeCodeList } from '@/i18n/i18n'
 
 import { useBoardFocusKeeper } from '../hooks/use-board-focus-keeper'
 import { useBoardSlot } from '../hooks/use-board-slot'
-import { usePaperCommentCount } from '../hooks/use-paper-comment-count'
 import { usePaperMoves, type UsePaperMovesResult } from '../hooks/use-paper-moves'
 import { useSlotWrites } from '../hooks/use-slot-writes'
 import { type BoardSlot, finalizeBlockers } from '../model/selection-state'
 import type { Board, Paper } from '../model/selection-types'
 import { SlotNumber, WARNING_MARK_CLASS } from './CategoryMarks'
 import { FinalizeDialog } from './FinalizeDialog'
-import { PaperCommentsLink, PaperLink, ProposalLink } from './SelectionLinks'
+import { PaperLink, ProposalLink } from './SelectionLinks'
 import { useLoadedSelection, useSelectionWorkspace } from './SelectionWorkspaceProvider'
 
 /**
@@ -232,12 +231,9 @@ function PaperSlots({ board, paper }: PaperSlotsProps) {
   // How many of the paper's slots hold a problem
   const filled = paper.slots.filter((slot) => slot !== null).length
 
-  // How many comments the paper's discussion holds
-  const commentCount = usePaperCommentCount(paper.id)
-
   return (
     <div className="px-2 pt-3">
-      {/* The paper's name in its category's colour, how much it has been talked about, and how full it is */}
+      {/* The paper's name in its category's colour, and how full it is */}
       <div className="flex items-baseline justify-between gap-2 px-2 pb-1">
         <h3 className={cn('text-sm font-semibold', categoryTextClass(paper.category))}>
           <PaperLink
@@ -250,10 +246,7 @@ function PaperSlots({ board, paper }: PaperSlotsProps) {
             {paper.name}
           </PaperLink>
         </h3>
-        <div className="flex items-baseline gap-1.5">
-          <PaperCommentsLink paper={paper} count={commentCount} />
-          <span className="text-xs tabular-nums text-muted">{`${filled}/${paper.slots.length}`}</span>
-        </div>
+        <span className="text-xs tabular-nums text-muted">{`${filled}/${paper.slots.length}`}</span>
       </div>
 
       {/* Every slot */}

@@ -36,3 +36,20 @@ export function usePersistentDraft<T>(
   // Whichever pair the caller named somewhere for
   return storageKey === null ? inMemory : [stored, setStored]
 }
+
+/**
+ * Forgets what a {@link usePersistentDraft} kept somewhere, whatever is on screen meanwhile.
+ *
+ * @param storageKey - Where it was kept, or null for a value kept nowhere.
+ */
+export function forgetPersistentDraft(storageKey: string | null): void {
+  // A value kept nowhere has nothing to forget
+  if (storageKey === null) return
+
+  // A browser can refuse storage outright, and a draft is not worth failing anything over
+  try {
+    window.localStorage.removeItem(storageKey)
+  } catch {
+    // Storage refused, so the draft stays where it was kept
+  }
+}

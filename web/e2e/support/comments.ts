@@ -30,8 +30,8 @@ export const READER_ID = 'reader'
 /** The username of the reader a test signs in as. */
 export const READER_NAME = 'Rita'
 
-/** The path every call into a thread starts with. */
-const THREADS_PATH = new URL(`${BACKEND_ORIGIN}/comments`).pathname
+/** The path every call into a thread starts with, and the whole path of a read of one thread. */
+export const THREADS_PATH = new URL(`${BACKEND_ORIGIN}/comments`).pathname
 
 /**
  * The handout whose page the comment specs read a thread on: a short one, closed by its thread. Looked up on
@@ -301,7 +301,7 @@ function isRefusedContent(content: string): boolean {
  *
  * @returns The sender's id with the sign-in provider, or null for a visitor.
  */
-function senderOf(request: Request): string | null {
+export function senderOf(request: Request): string | null {
   // The token, where one rides along
   const token = request.headers().authorization?.replace(/^Bearer /, '')
 
@@ -325,7 +325,7 @@ function senderOf(request: Request): string | null {
  *
  * @returns The comment, replies and reactions included.
  */
-function asSentTo(comment: CommentDto, sender: string | null): CommentDto {
+export function asSentTo(comment: CommentDto, sender: string | null): CommentDto {
   // A function which gives the reader the sender's id, and anybody else their own
   const idOf = (userId: string) => (userId === READER_ID && sender !== null ? sender : userId)
 

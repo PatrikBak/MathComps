@@ -1279,7 +1279,6 @@
       "moveUp": "Posunúť nahor",
       "needsLanguages": "potrebuje zadanie alebo riešenie v {languages}",
       "none": "Zatiaľ tu nie je žiadna zostava.",
-      "paperComments": "{paper}: {count, plural, one {# komentár} few {# komentáre} other {# komentárov}}",
       "pickFromPool": "Teraz vyber úlohu zo zásobníka",
       "progress": "{filled} z {total}",
       "ready": "Všetky miesta sú obsadené a každá úloha má zadanie aj riešenie vo všetkých troch jazykoch.",
@@ -1354,15 +1353,21 @@
       "slotFilled": "{slot}: #{number} {title}"
     },
     "pool": {
+      "commentsFailed": "Komentáre sa nepodarilo načítať.",
+      "commentsUnavailable": "Komentáre nie sú dostupné",
       "empty": "Týmto filtrom nezodpovedá žiadna úloha.",
+      "emptyComments": "Zatiaľ tu nie sú žiadne komentáre.",
       "emptyPool": "Zatiaľ tu nie sú žiadne úlohy.",
       "emptySetAside": "Nič nie je odložené.",
       "emptySetAsideFiltered": "Týmto filtrom nezodpovedá žiadna odložená úloha.",
       "loading": "Načítavam úlohy",
+      "loadingComments": "Načítavam komentáre",
       "search": "Hľadať úlohy",
       "searchPlaceholder": "Číslo, názov alebo text",
       "setAsideCount": "{count, plural, one {# odložená úloha} few {# odložené úlohy} other {# odložených úloh}}",
+      "showWhatsNew": "Zobraziť, čo je nové",
       "views": {
+        "comments": "Komentáre",
         "label": "Zobraziť ako",
         "problems": "Úlohy",
         "ratings": "Ohodnotenia"

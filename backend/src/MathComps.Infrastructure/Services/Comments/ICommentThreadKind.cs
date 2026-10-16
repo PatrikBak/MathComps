@@ -96,6 +96,19 @@ public interface ICommentThreadKind
         MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer? viewer);
 
     /// <summary>
+    /// The query linking every comment of several of this kind's threads to the thread it hangs off, replies and the
+    /// versions an edit replaced included.
+    /// </summary>
+    /// <param name="dbContext">The operation's database context.</param>
+    /// <param name="targetIds">The threads' target ids.</param>
+    /// <param name="viewer">Who is asking.</param>
+    /// <returns>The query, each comment's id keyed by its thread's target id.</returns>
+    /// <exception cref="CommentTargetNotFoundException">Thrown when the viewer may not reach the threads.</exception>
+    /// <exception cref="NotSupportedException">Thrown when this kind is never read in bulk.</exception>
+    Task<IQueryable<KeyValuePair<string, Guid>>> LinksAsync(
+        MathCompsDbContext dbContext, ImmutableList<string> targetIds, CommentViewer viewer);
+
+    /// <summary>
     /// Whatever a new comment owes beyond its own row, saved along with it.
     /// </summary>
     /// <param name="dbContext">The context the comment is being saved through.</param>
@@ -115,9 +128,11 @@ public interface ICommentThreadKind
 }
 
 /// <summary>
-/// The JOIN and WHERE a thread's read query uses to pick out the thread's comments, from <c>comments c</c>.
+/// The JOIN and WHERE a read query uses to pick out the comments of one or more threads, from <c>comments c</c>.
 /// </summary>
-/// <param name="Join">The JOIN reaching the thread's links.</param>
-/// <param name="Where">The condition picking the thread's links, with its values as <c>@p0</c>, <c>@p1</c>, …</param>
+/// <param name="Join">The JOIN reaching the threads' links, empty when the condition needs none.</param>
+/// <param name="Where">
+/// The condition picking the threads' comments, with its values as <c>@p0</c>, <c>@p1</c>, …
+/// </param>
 /// <param name="Parameters">The values the WHERE compares against, in order.</param>
 public sealed record CommentThreadSql(string Join, string Where, object[] Parameters);

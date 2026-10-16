@@ -5,7 +5,7 @@ import type { OptimisticMutationConfig } from '@/hooks/use-optimistic-mutation'
 import { useOptimisticMutation } from '@/hooks/use-optimistic-mutation'
 
 import type { CommentDto, CommentTarget } from '../services/comment-api-types'
-import { commentQueryKeys } from './comment-query-keys'
+import { commentMutationKeys, commentQueryKeys } from './comment-query-keys'
 import { usePendingCommentTarget } from './use-pending-comment-target'
 
 /**
@@ -96,7 +96,8 @@ export function useCommentMutation<TData, TVariables extends { target: CommentTa
     onLoginPromptDismiss: config.onLoginPromptDismiss,
     onSettled: config.onSettled,
     scope: config.scope,
-    mutationKey: config.mutationKey,
+    // Every write to a comment under the one prefix, unless the caller names its own key under it
+    mutationKey: config.mutationKey ?? commentMutationKeys.all,
 
     // A custom onBeforeLoginPrompt function which handles saving the pending target
     onBeforeLoginPrompt: (variables) => {

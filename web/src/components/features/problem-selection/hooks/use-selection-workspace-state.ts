@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react'
 
-import { SECOND_MS } from '@/components/shared/utils/time-units'
 import { useApiQuery } from '@/hooks/use-api-query'
 import { cachePolicy, hasFailedForGood } from '@/lib/query-config'
 import type { QueryUiState } from '@/lib/query-ui-state'
@@ -10,16 +9,11 @@ import type { QueryUiState } from '@/lib/query-ui-state'
 import { indexSelection, type SelectionIndex } from '../model/selection-state'
 import type { Board, SelectionData } from '../model/selection-types'
 import { getSelection } from '../services/selection-service'
-import { useSelectionQueryKey } from './selection-cache'
+import { SELECTION_REFRESH_MS, useSelectionQueryKey } from './selection-cache'
 import { useBoardPicking, type UseBoardPickingResult } from './use-board-picking'
 import { useOpenDetail, type UseOpenDetailResult } from './use-open-detail'
 import { usePoolFilters, type UsePoolFiltersResult } from './use-pool-filters'
 import { useIsChangingSlots, useIsSelectionWriting } from './use-selection-write'
-
-/**
- * How often the selection is read again while the page is in view, so it keeps up with the other reviewers.
- */
-const SELECTION_REFRESH_MS = 30 * SECOND_MS
 
 /**
  * The selection once its read has landed, with the board on screen.

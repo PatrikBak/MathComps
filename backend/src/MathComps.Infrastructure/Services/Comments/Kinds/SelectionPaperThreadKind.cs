@@ -45,6 +45,14 @@ public class SelectionPaperThreadKind(IUserGrantService grants)
             .Select(group => new KeyValuePair<string, int>(group.Key.ToString(), group.Count()));
 
     /// <inheritdoc />
+    protected override IQueryable<KeyValuePair<string, Guid>> LinksById(
+        MathCompsDbContext dbContext, ImmutableList<Guid> ids) =>
+        // Each paper's comments, keyed by its id
+        dbContext.SelectionPaperComments
+            .Where(link => ids.Contains(link.PaperId))
+            .Select(link => new KeyValuePair<string, Guid>(link.PaperId.ToString(), link.CommentId));
+
+    /// <inheritdoc />
     protected override async Task<SelectionPaperAnchor> ResolveAsync(
         MathCompsDbContext dbContext, CommentTarget target)
     {

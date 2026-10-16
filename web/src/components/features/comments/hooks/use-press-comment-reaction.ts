@@ -10,7 +10,7 @@ import { PENDING_COMMENT_REACTION_STORAGE_KEY } from '@/constants/local-storage-
 import type { CommentReactionKind, CommentTarget } from '../services/comment-api-types'
 import { pressCommentReaction } from '../services/comment-service'
 import { pressReaction, updateCommentInTree } from '../utils/comment-utils'
-import { commentQueryKeys } from './comment-query-keys'
+import { commentMutationKeys, commentQueryKeys } from './comment-query-keys'
 import { useCommentMutation } from './use-comment-mutation'
 
 /**
@@ -58,7 +58,7 @@ export function usePressCommentReaction(target: CommentTarget) {
   })
 
   // The key every press into the thread is filed under, naming the thread by its kind and its id
-  const mutationKey = ['commentReaction', target.targetType, target.targetId] as const
+  const mutationKey = commentMutationKeys.reactions(target)
 
   // Reuse the base comment mutation
   const { mutate } = useCommentMutation<void, ThreadReactionPress>({

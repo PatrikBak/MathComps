@@ -54,6 +54,55 @@ export function countAllComments(comments: CommentWithReplies[]): number {
 }
 
 /**
+ * Whether a later copy of a thread says nothing new over an earlier one: the same comments, each saying what it said
+ * or deleted since. A comment is the same while it has the same author and was posted at the same moment, since an
+ * edit saves it under a new id. The moment is compared to the millisecond, however the server rounds a time it has
+ * just written. Who reacted how is left out.
+ *
+ * @param earlier - The thread's comments as they were, each carrying its replies.
+ * @param later - The thread's comments as they are now, each carrying its replies.
+ *
+ * @returns Whether the later copy says nothing new.
+ */
+export function saysNothingNew(
+  earlier: readonly CommentDto[],
+  later: readonly CommentDto[]
+): boolean {
+  // As many comments, each matching the one at its place
+  return (
+    earlier.length === later.length &&
+    earlier.every((comment, index) => {
+      // The comment at the same place in the later copy
+      const now = later[index]
+
+      // The same comment, deleted since or saying what it said, with nothing new in its replies
+      return (
+        now !== undefined &&
+        comment.author.id === now.author.id &&
+        Date.parse(comment.createdAt) === Date.parse(now.createdAt) &&
+        (now.isDeleted || (comment.content === now.content && !comment.isDeleted)) &&
+        saysNothingNew(comment.replies, now.replies)
+      )
+    })
+  )
+}
+
+/**
+ * When the newest comment still standing in a comment's subtree was posted.
+ *
+ * @param comment - The comment, carrying its replies.
+ *
+ * @returns The posting time in milliseconds, or negative infinity for a subtree where nothing stands.
+ */
+export function newestPostOf(comment: CommentDto): number {
+  // When the comment itself was posted, unless it was deleted
+  const own = comment.isDeleted ? Number.NEGATIVE_INFINITY : Date.parse(comment.createdAt)
+
+  // The newest of it and everything under it
+  return Math.max(own, ...comment.replies.map(newestPostOf))
+}
+
+/**
  * Converts API CommentDto to the UI's {@link CommentData} format.
  *
  * @param dto - The API CommentDto to convert.

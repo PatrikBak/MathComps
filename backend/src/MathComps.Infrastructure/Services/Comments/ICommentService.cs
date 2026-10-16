@@ -37,6 +37,24 @@ public interface ICommentService
     Task<ImmutableList<CommentDto>> GetCommentsAsync(CommentTarget target, CommentViewer? viewer);
 
     /// <summary>
+    /// Reads the threads of several targets of one type at once, each as <see cref="GetCommentsAsync"/> reads it.
+    /// Only proposals and papers are read in bulk, and only by the accounts preparing the competitions: anybody else
+    /// is refused like targets that are not there, and every other type throws <see cref="NotSupportedException"/>.
+    /// </summary>
+    /// <param name="targetType">The type of the targets.</param>
+    /// <param name="targetIds">The ids of the targets.</param>
+    /// <param name="viewer">Who is asking.</param>
+    /// <param name="cancellationToken">A token to cancel the work.</param>
+    /// <returns>
+    /// Each target's top-level comments by its id, each carrying its replies, a target with none left out.
+    /// </returns>
+    Task<ImmutableDictionary<string, ImmutableList<CommentDto>>> GetThreadsAsync(
+        CommentTargetType targetType,
+        ImmutableList<string> targetIds,
+        CommentViewer viewer,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Creates a new comment or reply, stored without the whitespace around it. Content with no text, or with more
     /// than <see cref="MaxCommentChars"/> characters, is refused with <see cref="CommentValueException"/>. A reply
     /// whose parent sits in another thread or is deleted is refused as though the parent did not exist, and an author

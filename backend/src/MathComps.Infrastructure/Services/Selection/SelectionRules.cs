@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MathComps.Infrastructure.Services.Selection;
 
 /// <summary>
-/// The rules every part of the problem selection shares: writes run one at a time, and the read and the writes
+/// The rules every part of the problem selection shares: writes run one at a time, and the reads and the writes
 /// agree on which problems are still in the pool and which groups still take a board.
 /// </summary>
 internal static class SelectionRules
@@ -106,6 +106,28 @@ internal static class SelectionRules
     public static bool IsInSelection(string competitionPath, DateTimeOffset? groupOpensAt, DateTimeOffset now) =>
         // Among the proposals, or in a round still to open
         IsInPool(competitionPath) || groupOpensAt > now;
+
+    /// <summary>
+    /// Narrows proposals to the ones the selection may still hold: not deleted, and outside the hosted groups that
+    /// have opened. <see cref="IsInSelection"/> decides the rest on what the query reads.
+    /// </summary>
+    /// <param name="source">The proposals.</param>
+    /// <param name="now">The instant a group's opening is read against.</param>
+    /// <returns>The proposals narrowed.</returns>
+    public static IQueryable<Proposal> WhereSelectionMayHold(this IQueryable<Proposal> source, DateTimeOffset now) =>
+        // Not deleted, in a round of no hosted group or of one still to open
+        source.Where(proposal => proposal.DeletedAt == null
+            && (proposal.Problem.Round.HostedGroupId == null || proposal.Problem.Round.HostedGroup!.OpensAt > now));
+
+    /// <summary>
+    /// Whether a board is still in the selection: a draft, or finalized into a hosted group that has not opened.
+    /// </summary>
+    /// <param name="groupOpensAt">When the hosted group the board was finalized into opens; null for a draft.</param>
+    /// <param name="now">The instant the group's opening is read against.</param>
+    /// <returns>Whether the selection still holds it.</returns>
+    public static bool IsBoardInSelection(DateTimeOffset? groupOpensAt, DateTimeOffset now) =>
+        // A draft, or filling a group still to open
+        groupOpensAt is null || groupOpensAt > now;
 
     /// <summary>
     /// Whether a conversation about a proposal the selection holds is one of the reviewers': its author holds the

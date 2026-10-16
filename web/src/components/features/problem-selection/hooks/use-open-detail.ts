@@ -27,6 +27,12 @@ import {
 export const DETAIL_HEADING_ATTRIBUTE = dataAttribute('data-detail-heading')
 
 /**
+ * The attribute marking a part of the page that can stay put while the screen scrolls under it, named by what it
+ * holds. A link in it keeps no spot on the screen.
+ */
+export const PINNED_ATTRIBUTE = dataAttribute('data-pinned')
+
+/**
  * The page open in full over the pool, a problem's or a paper's, and the ways in and out of it.
  */
 export type UseOpenDetailResult = {
@@ -37,9 +43,10 @@ export type UseOpenDetailResult = {
   /**
    * Opens a page in full, on the tab asked for or else the first; the one already open stays as it is. A problem
    * opened from a paper's page, or from a problem opened over one, opens over that paper. The paper beneath the
-   * problem on screen, opened with no tab asked for, comes back on the tab it was left on.
+   * problem on screen, opened with no tab asked for, comes back on the tab it was left on. The link pressed, where a
+   * link opened it, is what focus and the screen come back to once it closes.
    */
-  openDetail: (page: DetailPage) => void
+  openDetail: (page: DetailPage, link: HTMLElement | null) => void
   /** Goes back to the pool; the pool already showing stays as it is. */
   closeDetail: () => void
   /**
@@ -58,6 +65,8 @@ export type UseOpenDetailResult = {
 type LinkAnchor = {
   /** The subject of the page the link opens. */
   id: string
+  /** The link. */
+  element: HTMLElement
   /** How far below the view's top the link stood, in pixels. */
   top: number
 }
@@ -85,23 +94,13 @@ type PaperSpot = {
 }
 
 /**
- * The element holding focus as a page opened.
+ * What a page was opened from, which focus goes back to as the page closes.
  */
-type HeldFocus = {
-  /** The element. */
+type PageOpener = {
+  /** The link pressed, or else the element holding focus. */
   element: HTMLElement
-  /** Whether the element showed the focus ring. */
+  /** Whether the element held focus showing the ring. */
   isRinged: boolean
-}
-
-/**
- * What a page was opened from, which focus goes back to once the page closes.
- */
-type Opener = {
-  /** The subject of the page opened. */
-  pageId: string
-  /** What held focus as the page opened; null where focus sat nowhere. */
-  held: HeldFocus | null
 }
 
 /**
@@ -126,35 +125,60 @@ function addressedPaperTab(): PaperTab {
 }
 
 /**
- * Where the screen stands this instant, kept by the link to a page where the screen shows one. A paper's only link
- * is on the board, which can stay put while the screen scrolls under it, so leaving for a paper keeps the scroll alone.
+ * Whether a link moves with the screen as it scrolls: laid out, and outside every part of the page marked with
+ * {@link PINNED_ATTRIBUTE}.
+ *
+ * @param link - The link.
+ *
+ * @returns Whether it does.
+ */
+function scrollsWithScreen(link: Element): boolean {
+  // Laid out, and in no part that stays put
+  return link.getClientRects().length > 0 && link.closest(PINNED_ATTRIBUTE.anySelector) === null
+}
+
+/**
+ * The first link to a page that moves with the screen as it scrolls.
+ *
+ * @param id - The subject of the page.
+ *
+ * @returns The link, or null where the screen shows none.
+ */
+function scrollingLinkTo(id: string): HTMLElement | null {
+  // The page's links in document order, the first one moving with the screen
+  return (
+    [...document.querySelectorAll<HTMLElement>(OPEN_ID_ATTRIBUTE.selectorFor(id))].find(
+      scrollsWithScreen
+    ) ?? null
+  )
+}
+
+/**
+ * Where the screen stands this instant, kept by a link to a page that moves with the screen: the page's own link that
+ * was pressed, or else its first on screen. A link that stays put while the screen scrolls under it, as the board's
+ * can, keeps no spot, so a page with no other link on screen keeps the scroll alone.
  *
  * @param page - The page whose link keeps the spot.
+ * @param pressed - The link pressed to open it, if a link was.
  *
  * @returns The spot.
  */
-function spotAt(page: DetailPage): LeftSpot {
+function spotAt(page: DetailPage, pressed: HTMLElement | null): LeftSpot {
   // The scroll, with no link to go by
   const scrolled = { scrollY: window.scrollY, anchor: null }
 
-  // The link the page kind keeps the spot by
-  switch (page.kind) {
-    case 'proposal': {
-      // The problem's link, if the screen shows one
-      const link = shownElement(OPEN_ID_ATTRIBUTE.selectorFor(page.id))
+  // The page's own link pressed, where it moves with the screen, or else its first on screen that does
+  const link =
+    pressed !== null &&
+    pressed.matches(OPEN_ID_ATTRIBUTE.selectorFor(page.id)) &&
+    scrollsWithScreen(pressed)
+      ? pressed
+      : scrollingLinkTo(page.id)
 
-      // The scroll, and where the link stands in the view
-      return link === null
-        ? scrolled
-        : { ...scrolled, anchor: { id: page.id, top: link.getBoundingClientRect().top } }
-    }
-    case 'paper':
-      return scrolled
-
-    // Every kind is handled above
-    default:
-      return assertNever(page)
-  }
+  // The scroll, and where the link stands in the view
+  return link === null
+    ? scrolled
+    : { ...scrolled, anchor: { id: page.id, element: link, top: link.getBoundingClientRect().top } }
 }
 
 /**
@@ -163,23 +187,27 @@ function spotAt(page: DetailPage): LeftSpot {
  * with a click comes back without a ring however it closes. A page reached through history or the address rings as
  * the reader's latest press decides.
  *
- * @param opener - What the last page opened was opened from; null until a page has opened.
+ * @param openers - What each page was opened from, by the page's subject, null where no link opened it and focus sat
+ * nowhere.
  * @param pageId - The subject of the page just closed.
  *
  * @returns Whether the screen showed either.
  */
-function returnFocus(opener: Opener | null, pageId: string): boolean {
+function returnFocus(openers: ReadonlyMap<string, PageOpener | null>, pageId: string): boolean {
   // A page reached through history or the address, focus on its link ringed as the latest press decides
-  if (opener?.pageId !== pageId) return focusShown(OPEN_ID_ATTRIBUTE.selectorFor(pageId))
+  if (!openers.has(pageId)) return focusShown(OPEN_ID_ATTRIBUTE.selectorFor(pageId))
+
+  // What the page was opened from
+  const opener = openers.get(pageId) ?? null
 
   // What the page was opened from, where the screen still shows it, or else the page's link
   const target =
-    opener.held !== null && opener.held.element.getClientRects().length > 0
-      ? opener.held.element
+    opener !== null && opener.element.getClientRects().length > 0
+      ? opener.element
       : shownElement<HTMLElement>(OPEN_ID_ATTRIBUTE.selectorFor(pageId))
 
   // Focused there, ringed as focus was when the page opened, the screen staying where it was
-  target?.focus({ preventScroll: true, focusVisible: opener.held?.isRinged ?? false })
+  target?.focus({ preventScroll: true, focusVisible: opener?.isRinged ?? false })
 
   // Whether the screen showed either
   return target !== null
@@ -197,8 +225,8 @@ function scrollFor({ scrollY, anchor }: LeftSpot): number {
   // No link to go by
   if (anchor === null) return scrollY
 
-  // The link, where the screen still shows it
-  const link = shownElement(OPEN_ID_ATTRIBUTE.selectorFor(anchor.id))
+  // The very link, where the screen still shows it, or else the page's first link on screen moving with it
+  const link = scrollsWithScreen(anchor.element) ? anchor.element : scrollingLinkTo(anchor.id)
 
   // Gone from the screen meanwhile, which leaves the scroll alone to go by
   if (link === null) return scrollY
@@ -245,8 +273,8 @@ export function useOpenDetail(): UseOpenDetailResult {
   // Where a paper's page was last left while it showed; null until one has shown
   const paperSpotRef = useRef<PaperSpot | null>(null)
 
-  // What the last page opened was opened from; null until a page has opened
-  const openerRef = useRef<Opener | null>(null)
+  // What each page was opened from, by the page's subject, so a paper a problem opened over still knows its own
+  const openersRef = useRef(new Map<string, PageOpener | null>())
 
   // The page on screen, null for the pool, as of the last switch committed
   const paintedRef = useRef<OpenDetail | null>(detail)
@@ -333,7 +361,7 @@ export function useOpenDetail(): UseOpenDetailResult {
     const isFocusReturned =
       returnSpot !== null &&
       previousOpenId !== null &&
-      returnFocus(openerRef.current, previousOpenId)
+      returnFocus(openersRef.current, previousOpenId)
 
     // Focus gone back already
     if (isFocusReturned) return
@@ -353,7 +381,7 @@ export function useOpenDetail(): UseOpenDetailResult {
 
   // A function which opens a page
   const openDetail = useCallback(
-    (page: DetailPage) => {
+    (page: DetailPage, link: HTMLElement | null) => {
       // The asked-for page open already, which another step in history would only repeat
       if (addressedDetailId() === page.id) return
 
@@ -361,23 +389,7 @@ export function useOpenDetail(): UseOpenDetailResult {
       const painted = paintedRef.current
 
       // Where the pool or a paper's page stands, kept by the opened page's link
-      saveSpot(spotAt(page))
-
-      // The element holding focus
-      const { activeElement } = document
-
-      // What the page is opened from, with whatever on the page holds focus and whether it shows the ring
-      openerRef.current = {
-        pageId: page.id,
-        held:
-          activeElement instanceof HTMLElement && activeElement !== document.body
-            ? { element: activeElement, isRinged: activeElement.matches(':focus-visible') }
-            : null,
-      }
-
-      // The page, if its way back leads to the page it is opened from: the pool, or a paper a problem opens over
-      openedOverRef.current =
-        painted === null || (painted.kind === 'paper' && page.kind === 'proposal') ? page.id : null
+      saveSpot(spotAt(page, link))
 
       // Where a paper's page was last left
       const paperSpot = paperSpotRef.current
@@ -388,6 +400,32 @@ export function useOpenDetail(): UseOpenDetailResult {
         page.tab === undefined &&
         paperSpot?.paperId === page.id &&
         paperBeneathOf(new URLSearchParams(window.location.search)) === page.id
+
+      // The element holding focus
+      const { activeElement } = document
+
+      // What the page is opened from: the link pressed, or else whatever on the page holds focus
+      const from =
+        link ??
+        (activeElement instanceof HTMLElement && activeElement !== document.body
+          ? activeElement
+          : null)
+
+      // What the page is opened from, kept for it unless it is a paper coming back, which keeps what it was first
+      // opened from. Ringed only where it holds focus showing the ring, so a clicked link a browser never focused
+      // comes back without one
+      if (!isPaperBack) {
+        openersRef.current.set(
+          page.id,
+          from === null
+            ? null
+            : { element: from, isRinged: from === activeElement && from.matches(':focus-visible') }
+        )
+      }
+
+      // The page, if its way back leads to the page it is opened from: the pool, or a paper a problem opens over
+      openedOverRef.current =
+        painted === null || (painted.kind === 'paper' && page.kind === 'proposal') ? page.id : null
 
       // The page, a paper coming back on the tab it was left on
       const opened = isPaperBack ? { ...page, tab: paperSpot.tab } : page

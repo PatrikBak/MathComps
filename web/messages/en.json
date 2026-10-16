@@ -1279,7 +1279,6 @@
       "moveUp": "Move up",
       "needsLanguages": "needs a statement or a solution in {languages}",
       "none": "No board yet.",
-      "paperComments": "{paper}: {count, plural, one {# comment} other {# comments}}",
       "pickFromPool": "Now pick a problem from the pool",
       "progress": "{filled} of {total}",
       "ready": "Every slot is filled, and every problem has a statement and a solution in all three languages.",
@@ -1354,15 +1353,21 @@
       "slotFilled": "{slot}: #{number} {title}"
     },
     "pool": {
+      "commentsFailed": "The comments could not be loaded.",
+      "commentsUnavailable": "Comments unavailable",
       "empty": "No problem matches these filters.",
+      "emptyComments": "No comments here yet.",
       "emptyPool": "No problems here yet.",
       "emptySetAside": "Nothing is set aside.",
       "emptySetAsideFiltered": "No set-aside problem matches these filters.",
       "loading": "Loading the pool",
+      "loadingComments": "Loading comments",
       "search": "Search the pool",
       "searchPlaceholder": "Number, name or text",
       "setAsideCount": "{count, plural, one {# problem set aside} other {# problems set aside}}",
+      "showWhatsNew": "Show what's new",
       "views": {
+        "comments": "Comments",
         "label": "Show as",
         "problems": "Problems",
         "ratings": "Ratings"

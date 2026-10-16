@@ -27,3 +27,42 @@ export function commentDraftStorageKey(
   // A new comment's draft, or one reply's
   return (parentCommentId === null ? threadKey : [...threadKey, 'reply', parentCommentId]).join(':')
 }
+
+/**
+ * Moves the draft of a reply to a comment's new version, which an edit saves under a new id.
+ *
+ * @param readerId - The signed-in reader, or null for a visitor, who has nothing kept.
+ * @param target - The thread the comment is in.
+ * @param fromId - The comment's id before the edit.
+ * @param toId - The comment's id after the edit.
+ */
+export function moveReplyDraft(
+  readerId: string | null,
+  target: CommentTarget,
+  fromId: string,
+  toId: string
+): void {
+  // Where the draft is kept now, and where it goes
+  const from = commentDraftStorageKey(readerId, target, fromId)
+  const to = commentDraftStorageKey(readerId, target, toId)
+
+  // A visitor keeps no draft
+  if (from === null || to === null) return
+
+  // A browser can refuse storage outright, and a draft is not worth failing an edit over
+  try {
+    // The draft, if any was written
+    const draft = window.localStorage.getItem(from)
+
+    // Nothing written, nothing to move
+    if (draft === null) return
+
+    // Keep the draft under the new version
+    window.localStorage.setItem(to, draft)
+
+    // Drop the draft from under the old version
+    window.localStorage.removeItem(from)
+  } catch {
+    // Storage refused, so the draft stays where it was
+  }
+}

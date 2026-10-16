@@ -98,7 +98,7 @@ public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixt
     /// <summary>
     /// Nobody but the accounts preparing the competitions reaches a discussion: not an admin without the grant, not a
     /// student, not anybody signed out. Each refusal is the one a thread or comment that is not there gets, so it
-    /// confirms nothing, and the counts are refused the same way.
+    /// confirms nothing, and the counts and the bulk read, which takes a signed-in viewer, are refused the same way.
     /// </summary>
     [Fact]
     public Task Nobody_without_the_grant_reaches_a_discussion() => RunTestAsync(async service =>
@@ -126,9 +126,13 @@ public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixt
         // Every signed-in outsider
         CommentViewer[] signedIn = [_admin, Student];
 
-        // No signed-in outsider writes, edits, deletes or reacts in the discussion
+        // No signed-in outsider reads the discussion in bulk, writes, edits, deletes or reacts in it
         foreach (var outsider in signedIn)
         {
+            // Reading in bulk, refused like a missing thread
+            await Assert.ThrowsAsync<CommentTargetNotFoundException>(
+                () => service.GetThreadsAsync(TargetType, [SubjectId.ToString()], outsider));
+
             // A new comment, refused like a missing thread
             await Assert.ThrowsAsync<CommentTargetNotFoundException>(
                 () => service.CreateCommentAsync(target, outsider, "Why?"));
@@ -186,6 +190,62 @@ public abstract class PreparerCommentPostgresTests(PostgresContainerFixture fixt
 
         // The edited comment and its reply, under the subject's id as the client spells it
         Assert.Equal(ImmutableDictionary.CreateRange([KeyValuePair.Create(SubjectId.ToString(), 2)]), counts);
+    });
+
+    /// <summary>
+    /// Several discussions read at once come back each as it reads alone: the edited comment with its reply and its
+    /// reaction, a deleted comment emptied, each under its subject's id as the client spells it. An id naming nothing
+    /// and one that is no GUID get no entry. The bulk read starts from the comments linked to the threads asked for,
+    /// where the single read starts from the thread's own link, so a read that started from a replaced version or lost
+    /// a reply would differ from the single one.
+    /// </summary>
+    [Fact]
+    public Task Discussions_read_at_once_read_as_each_reads_alone() => RunTestAsync(async service =>
+    {
+        // The discussions of both subjects
+        var target = Discussion(SubjectId);
+        var otherTarget = Discussion(OtherSubjectId);
+
+        // A comment that is later edited
+        var edited = await service.CreateCommentAsync(target, Reviewer, "Too easy for the slot.");
+
+        // A reply to the comment that is later edited
+        await service.CreateCommentAsync(target, OtherReviewer, "Agreed.", edited.Id);
+
+        // The edit
+        var newVersion = await service.UpdateCommentAsync(edited.Id, Reviewer, "Far too easy for the slot.");
+
+        // A thumbs-up on the edited comment
+        await service.PressReactionAsync(newVersion.Id, OtherReviewer, CommentReactionKind.ThumbsUp);
+
+        // A comment that is later deleted
+        var deleted = await service.CreateCommentAsync(target, OtherReviewer, "Fine as it is.");
+
+        // The delete
+        await service.DeleteCommentAsync(deleted.Id, OtherReviewer);
+
+        // A comment about the other subject
+        await service.CreateCommentAsync(otherTarget, OtherReviewer, "Better in the advanced paper.");
+
+        // Both discussions read alone
+        var alone = await service.GetCommentsAsync(target, Reviewer);
+        var otherAlone = await service.GetCommentsAsync(otherTarget, Reviewer);
+
+        // Both discussions read at once, beside an id naming nothing and one that is no GUID
+        var atOnce = await service.GetThreadsAsync(
+            TargetType,
+            [SubjectId.ToString(), OtherSubjectId.ToString(), Guid.CreateVersion7().ToString(), "not-an-id"],
+            Reviewer);
+
+        // Only the two subjects anything was said about
+        Assert.Equal(new[] { SubjectId.ToString(), OtherSubjectId.ToString() }.Order(), atOnce.Keys.Order());
+
+        // Each discussion as it reads alone
+        Assert.Equivalent(alone, atOnce[SubjectId.ToString()], strict: true);
+        Assert.Equivalent(otherAlone, atOnce[OtherSubjectId.ToString()], strict: true);
+
+        // The subject's top-level comments in the order they read alone
+        Assert.Equal(alone.Select(comment => comment.Id), atOnce[SubjectId.ToString()].Select(comment => comment.Id));
     });
 
     /// <summary>
