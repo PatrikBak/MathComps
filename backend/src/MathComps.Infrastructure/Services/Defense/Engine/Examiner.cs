@@ -376,8 +376,9 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
 
     /// <summary>
     /// Records one call: which step made it, how it was routed, and what it billed. The reasoning level comes off the
-    /// step's settings, so a session's trail can be read against the config snapshot taken when it started; the model
-    /// comes off the reply instead, because a fallback chain means the settings only say which model was asked for.
+    /// step's settings, so a session's trail can be read against the config snapshot taken when it started. A blank
+    /// level is recorded as none, because the call sends no level for it. The model comes off the reply instead,
+    /// because a fallback chain means the settings only say which model was asked for.
     /// </summary>
     /// <typeparam name="TResult">The shape the call's reply was read into.</typeparam>
     /// <param name="stepKind">Which step made the call.</param>
@@ -387,7 +388,12 @@ public class Examiner(ILlmChatCaller chatCaller, IOptions<ExaminerSettings> sett
     /// <returns>The recorded call.</returns>
     private static ExaminerStepCall BuildStepCall<TResult>(
         ExaminerStep stepKind, ChatStepSettings step, ChatCallResult<TResult> result, long elapsedMs) =>
-        new(stepKind, result.ServedModel, step.ReasoningEffort, result.Usage, (int)elapsedMs);
+        new(
+            stepKind,
+            result.ServedModel,
+            string.IsNullOrWhiteSpace(step.ReasoningEffort) ? null : step.ReasoningEffort,
+            result.Usage,
+            (int)elapsedMs);
 
     /// <summary>
     /// Fills a prompt template's <c>{token}</c> placeholders from a value map in a single pass, so a filled-in

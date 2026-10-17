@@ -20,9 +20,9 @@ What ships when the cap runs out depends on the flag. A wrong claim, a leak or a
 
 ### Per-step models
 
-Each step sets its own `Model`, `FallbackModels`, `ReasoningEffort` and `MaxOutputTokens` in `appsettings.examiner.json`, so you tune one without touching the others. `MaxOutputTokens` bounds a runaway generation, and on a thinking model it also sets how deep the step thinks.
+Each step sets its own `Model`, `FallbackModels`, `ReasoningEffort` and `MaxOutputTokens` in `appsettings.examiner.json`, so you tune one without touching the others. `MaxOutputTokens` bounds a runaway generation, and on a budget-based thinking model it also caps how deep the step thinks.
 
-The language check is the only step that runs cheap, at `low` effort: it reads two short pieces of prose and reports what is on their surface. Everything else wants a strong reasoning model.
+Every step runs at `medium` effort.
 
 `FallbackModels` is the chain the provider walks when the primary never answers, which is the one failure the retry cannot cover. Make every hop a different vendor that takes a JSON schema and a system message. A sibling model shares the primary's outage, and a model the provider will not carry a system message to answers with the persona missing and calls it a success.
 

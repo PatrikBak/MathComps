@@ -11,9 +11,9 @@ using MsOptions = Microsoft.Extensions.Options.Options;
 namespace MathComps.Infrastructure.Tests.Ai;
 
 /// <summary>
-/// Tests the parts of <see cref="LlmChatCaller"/> the OpenAI SDK models no field for, all of which fail silently: the
-/// fields patched onto the outgoing request body, and the model read back off the reply. A fake HTTP transport stands
-/// in for the endpoint, so the body is inspected as sent and the reply is canned.
+/// Tests the parts of <see cref="LlmChatCaller"/> that fail silently when dropped or misnamed: the request fields the
+/// endpoint reads (the reasoning level and the fallback chain), and the model read back off the reply. A fake HTTP
+/// transport stands in for the endpoint, so the body is inspected as sent and the reply is canned.
 /// </summary>
 public class LlmChatCallerTests
 {
@@ -40,8 +40,9 @@ public class LlmChatCallerTests
         """;
 
     /// <summary>
-    /// A step's fallback chain reaches the wire as a top-level <c>fallbacks</c> array, in order, alongside the
-    /// reasoning object. A dropped patch still gets a normal reply off the primary, so nothing else would catch it.
+    /// A step's fallback chain reaches the wire as a top-level <c>fallbacks</c> array, in order, and its reasoning
+    /// level as the top-level <c>reasoning_effort</c> string. The endpoint answers off the primary at its default
+    /// effort whether a field is dropped or misnamed, so nothing else would catch either.
     /// </summary>
     [Fact]
     public async Task A_configured_chain_reaches_the_request_body()
@@ -57,8 +58,8 @@ public class LlmChatCallerTests
             .EnumerateArray().Select(entry => entry.GetString()).ToList();
         Assert.Equal(["openai/gpt-5-mini", "anthropic/claude-haiku-4-5"], fallbacks);
 
-        // The reasoning object rode along with it, rather than one field's patch displacing the other.
-        Assert.Equal("high", body.RootElement.GetProperty("reasoning").GetProperty("effort").GetString());
+        // The reasoning level rode along with it, under the name the endpoint reads.
+        Assert.Equal("high", body.RootElement.GetProperty("reasoning_effort").GetString());
     }
 
     /// <summary>
@@ -74,9 +75,11 @@ public class LlmChatCallerTests
         // Send it through the fake transport.
         var (body, _) = await SendAsync(request);
 
-        // Nothing about fallbacks reached the body, while the rest of the patched fields still did.
+        // Nothing about fallbacks reached the body.
         Assert.False(body.RootElement.TryGetProperty("fallbacks", out _));
-        Assert.Equal("low", body.RootElement.GetProperty("reasoning").GetProperty("effort").GetString());
+
+        // The reasoning level still reached the body.
+        Assert.Equal("low", body.RootElement.GetProperty("reasoning_effort").GetString());
     }
 
     /// <summary>
@@ -129,14 +132,14 @@ public class LlmChatCallerTests
             new ApiKeyCredential("test-key"),
             new OpenAIClientOptions
             {
-                Endpoint = new Uri("https://endpoint.test/v3/llm"),
+                Endpoint = new Uri("https://endpoint.test/v3"),
                 Transport = new HttpClientPipelineTransport(httpClient),
             });
 
         // Connection settings with retries off, so one call means one captured request.
         var settings = new LlmSettings
         {
-            BaseUrl = "https://endpoint.test/v3/llm",
+            BaseUrl = "https://endpoint.test/v3",
             ApiKey = "test-key",
             MaxRetries = 0,
             RetryDelay = TimeSpan.Zero,
