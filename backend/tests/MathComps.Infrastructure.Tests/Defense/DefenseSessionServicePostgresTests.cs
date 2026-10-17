@@ -2228,8 +2228,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     {
         /// <inheritdoc/>
         public Task<ExaminerTurnOutcome> NextReplyAsync(
-            string problem, string reference, Transcript transcript, ModelUsageAccumulator turnUsage,
-            CancellationToken cancellationToken)
+            ExaminerInput input, ModelUsageAccumulator turnUsage, CancellationToken cancellationToken)
         {
             // The turn's cost, folded the way the real engine folds each call as it lands.
             turnUsage.Add(new ModelUsage(
@@ -2270,6 +2269,12 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             return Task.FromResult(new ExaminerTurnOutcome(
                 [rejected, revised, fallback], SafeFallback: true, turnUsage.Accrued));
         }
+
+        /// <inheritdoc/>
+        public Task<ExaminerAttempt> CheckReplyAsync(
+            ExaminerInput input, string reply, ModelUsageAccumulator checkUsage, CancellationToken cancellationToken) =>
+            // The session service only ever asks for a turn, so judging a lone reply is never reached
+            throw new NotSupportedException();
     }
 
     /// <summary>
@@ -2283,8 +2288,7 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
     {
         /// <inheritdoc/>
         public Task<ExaminerTurnOutcome> NextReplyAsync(
-            string problem, string reference, Transcript transcript, ModelUsageAccumulator turnUsage,
-            CancellationToken cancellationToken)
+            ExaminerInput input, ModelUsageAccumulator turnUsage, CancellationToken cancellationToken)
         {
             // Run up the turn's cost the way the real engine folds each call as it lands.
             turnUsage.Add(usage);
@@ -2295,5 +2299,11 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             // Then fail before returning a reply, as a cancelled or erroring turn would.
             throw failure();
         }
+
+        /// <inheritdoc/>
+        public Task<ExaminerAttempt> CheckReplyAsync(
+            ExaminerInput input, string reply, ModelUsageAccumulator checkUsage, CancellationToken cancellationToken) =>
+            // The session service only ever asks for a turn, so judging a lone reply is never reached
+            throw new NotSupportedException();
     }
 }

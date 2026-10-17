@@ -6,9 +6,10 @@ namespace MathComps.Infrastructure.Services.Defense.Engine;
 
 /// <summary>
 /// A no-cost fake <see cref="IExaminer"/> that makes no model call: it returns a scripted Socratic probe keyed
-/// by how many candidate turns the conversation holds, with clean guard verdicts and no revisions. It drives the whole
-/// persistence and API path without spending tokens — selected at runtime by the <c>Examiner:UseFake</c> flag. Its
-/// reported usage is configurable so a caller can drive a non-zero spend.
+/// by how many candidate turns the conversation holds, with clean guard verdicts and no revisions, and clears every
+/// reply it is asked to judge. It drives the whole persistence and API path without spending tokens — selected at
+/// runtime by the <c>Examiner:UseFake</c> flag. Its reported usage is configurable so a caller can drive a non-zero
+/// spend.
 /// </summary>
 /// <param name="usage">The spend and tokens each turn reports (zero by default, since nothing is spent).</param>
 public class FakeExaminer(ModelUsage usage = default)
@@ -40,14 +41,13 @@ public class FakeExaminer(ModelUsage usage = default)
 
     /// <inheritdoc/>
     public Task<ExaminerTurnOutcome> NextReplyAsync(
-        string problem, string reference, Transcript transcript, ModelUsageAccumulator turnUsage,
-        CancellationToken cancellationToken = default)
+        ExaminerInput input, ModelUsageAccumulator turnUsage, CancellationToken cancellationToken = default)
     {
         // The examiner replies to the candidate — hold to the same precondition as the real engine.
-        transcript.EnsureAwaitingExaminer();
+        input.Transcript.EnsureAwaitingExaminer();
 
         // Pick the probe by how many candidate turns have been spoken, falling back once the script runs out.
-        var candidateTurns = transcript.Turns.Count(turn => turn.Role == TranscriptRole.Candidate);
+        var candidateTurns = input.Transcript.Turns.Count(turn => turn.Role == TranscriptRole.Candidate);
         var reply = candidateTurns >= 1 && candidateTurns <= _scriptedReplies.Length
             ? _scriptedReplies[candidateTurns - 1]
             : FallbackReply;
@@ -55,8 +55,32 @@ public class FakeExaminer(ModelUsage usage = default)
         // Fold the configured usage in like a real call would, so the accumulator matches the reported outcome.
         turnUsage.Add(usage);
 
-        // The scripted reply with clean guard verdicts.
-        var attempt = new ExaminerAttempt(
+        // The turn, carrying the scripted reply as its one clean attempt.
+        return Task.FromResult(new ExaminerTurnOutcome([CleanAttempt(reply)], SafeFallback: false, usage));
+    }
+
+    /// <inheritdoc/>
+    public Task<ExaminerAttempt> CheckReplyAsync(
+        ExaminerInput input, string reply, ModelUsageAccumulator checkUsage,
+        CancellationToken cancellationToken = default)
+    {
+        // The reply answers the candidate — hold to the same precondition as the real engine.
+        input.Transcript.EnsureAwaitingExaminer();
+
+        // Fold the configured usage in like a real call would.
+        checkUsage.Add(usage);
+
+        // The reply, cleared by every guard.
+        return Task.FromResult(CleanAttempt(reply));
+    }
+
+    /// <summary>
+    /// A reply as an attempt every guard cleared, with no revision and no model call behind it.
+    /// </summary>
+    /// <param name="reply">The reply the attempt carries.</param>
+    /// <returns>The cleared attempt.</returns>
+    private static ExaminerAttempt CleanAttempt(string reply) =>
+        new(
             reply,
             RevisionNote: "",
             new MathCheckResult(true, ""),
@@ -65,8 +89,4 @@ public class FakeExaminer(ModelUsage usage = default)
             new RouteCheckResult("", "", "", false),
             [],
             DurationMs: 0);
-
-        // The turn, carrying that one attempt.
-        return Task.FromResult(new ExaminerTurnOutcome([attempt], SafeFallback: false, usage));
-    }
 }
