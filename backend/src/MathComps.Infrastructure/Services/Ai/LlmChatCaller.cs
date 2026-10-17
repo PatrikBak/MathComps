@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using MathComps.Infrastructure.Options;
 using Microsoft.Extensions.AI;
@@ -13,10 +12,10 @@ namespace MathComps.Infrastructure.Services.Ai;
 
 /// <summary>
 /// Implements <see cref="ILlmChatCaller"/> over an <see cref="OpenAIClient"/> pointed at the configured
-/// OpenAI-compatible endpoint. Derives a model-bound client per call, patches the reasoning level and the fallback
-/// chain onto the raw request body, and retries a configured number of times because the endpoint occasionally hands
-/// back an unusable response, so a retry draws a fresh one. A reply that hit the output-token cap is retried the same
-/// way. Each reply's billed cost is folded into the spend tally as it lands, retries included.
+/// OpenAI-compatible endpoint. Derives a model-bound client per call, sets the reasoning level on the request, patches
+/// the fallback chain onto its raw body, and retries a configured number of times because the endpoint occasionally
+/// hands back an unusable response, so a retry draws a fresh one. A reply that hit the output-token cap is retried the
+/// same way. Each reply's billed cost is folded into the spend tally as it lands, retries included.
 /// </summary>
 /// <remarks>
 /// The retry and the fallback chain cover different failures: a retry re-draws when a reply came back unusable,
@@ -108,18 +107,19 @@ public class LlmChatCaller(
         // The model-bound client for this call, derived from the shared connection.
         var chatClient = openAIClient.GetChatClient(request.Model).AsIChatClient();
 
-        // Whether this call carries a field the SDK has no property for, so the raw request body has to be patched.
-        var hasPatchedFields =
+        // Whether this call carries a reasoning level or a fallback chain, both of which ride in the OpenAI request
+        // options rather than the adapter's own.
+        var needsRawRepresentation =
             !string.IsNullOrWhiteSpace(request.ReasoningEffort) || request.FallbackModels.Count > 0;
 
-        // The per-call options carry the output-token cap and whatever the body is patched with; with neither, the
-        // request uses its default body.
-        var options = request.MaxOutputTokens is null && !hasPatchedFields
+        // The per-call options carry the output-token cap and the OpenAI request options; with neither, the request
+        // uses its default body.
+        var options = request.MaxOutputTokens is null && !needsRawRepresentation
             ? null
             : new ChatOptions
             {
                 MaxOutputTokens = request.MaxOutputTokens,
-                RawRepresentationFactory = hasPatchedFields ? _ => BuildPatchedRepresentation(request) : null,
+                RawRepresentationFactory = needsRawRepresentation ? _ => BuildRawRepresentation(request) : null,
             };
 
         // The two messages: instructions as system, the input the model acts on as user.
@@ -230,30 +230,29 @@ public class LlmChatCaller(
     }
 
     /// <summary>
-    /// Builds the OpenAI request options carrying the endpoint's reasoning control and its fallback chain. The OpenAI
-    /// SDK has a native field for neither, so each is patched as a top-level field straight into the outgoing JSON
-    /// body via the options' JSON patch.
+    /// Builds the OpenAI request options carrying the call's reasoning level and its fallback chain. The level rides in
+    /// the SDK's own reasoning-effort field. The SDK has no field for the chain, so it is patched as a top-level field
+    /// straight into the outgoing JSON body via the options' JSON patch.
     /// </summary>
-    /// <param name="request">The call whose reasoning level and fallback chain are patched in.</param>
-    /// <returns>The OpenAI request options with those fields patched in.</returns>
-    private static ChatCompletionOptions BuildPatchedRepresentation(ChatCallRequest request)
+    /// <param name="request">The call whose reasoning level and fallback chain are set.</param>
+    /// <returns>The OpenAI request options carrying both.</returns>
+    private static ChatCompletionOptions BuildRawRepresentation(ChatCallRequest request)
     {
         // Start from a fresh OpenAI options bag the adapter will fill with the normal chat params.
         var options = new ChatCompletionOptions();
 
-        // Both fields go on through Patch, the SDK's sanctioned hook for ones it doesn't model; SCME0001 marks it
+        // The reasoning level goes out as the top-level "reasoning_effort" string, set only when the step asked for
+        // one. The endpoint drops a field it doesn't know without an error, so under any other name the model would
+        // silently think at its default. OPENAI001 marks the reasoning-effort API experimental, so the suppression is
+        // this narrow.
+#pragma warning disable OPENAI001
+        if (!string.IsNullOrWhiteSpace(request.ReasoningEffort))
+            options.ReasoningEffortLevel = new OpenAI.Chat.ChatReasoningEffortLevel(request.ReasoningEffort);
+#pragma warning restore OPENAI001
+
+        // The chain goes on through Patch, the SDK's sanctioned hook for fields it doesn't model; SCME0001 marks it
         // experimental (its shape may change in a later SDK), so the suppression is scoped to this block.
 #pragma warning disable SCME0001
-
-        // The reasoning level rides in a "reasoning" object, set only when the step asked for one.
-        if (!string.IsNullOrWhiteSpace(request.ReasoningEffort))
-        {
-            // Serialize the reasoning object for this call.
-            var reasoningJson = $$"""{"effort":"{{request.ReasoningEffort}}"}""";
-
-            // Set the reasoning object as the body's top-level field.
-            options.Patch.Set("$.reasoning"u8, Encoding.UTF8.GetBytes(reasoningJson));
-        }
 
         // The fallback chain rides in a "fallbacks" array of model ids, left off entirely when the step has none —
         // an empty array is a claim about routing we have no reason to make.
@@ -262,7 +261,7 @@ public class LlmChatCaller(
 
 #pragma warning restore SCME0001
 
-        // Hand the patched options back to the adapter as this call's raw representation.
+        // Hand the options back to the adapter as this call's raw representation.
         return options;
     }
 }
