@@ -163,13 +163,13 @@ public class ExaminerTurnCommand(IExaminer examiner)
         if (!attempt.MathCheck.Holds)
             yield return $"math-check fails — {attempt.MathCheck.Correction}";
 
+        // An ending before the solution is complete, with what is still owed.
+        if (attempt.MathCheck.ClosesEarly)
+            yield return $"math-check closes early — still owed: {attempt.MathCheck.Owed}";
+
         // A leak, with what was given away.
         if (attempt.LeakCheck.Leaks)
             yield return $"leak-check leaks — {attempt.LeakCheck.WhatLeaked}";
-
-        // A withheld close, with what the candidate had established.
-        if (attempt.LeakCheck.WithholdsClose)
-            yield return $"leak-check withholds the close — {attempt.LeakCheck.Established}";
 
         // A language switch, with the language the candidate wrote in.
         if (attempt.LanguageCheck.SwitchesLanguage)

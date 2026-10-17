@@ -523,11 +523,11 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 NewAttempt(NewerSessionId, newerReply.Id, attemptIndex: 2, "a careful reply"));
 
             // The newest walked the student onto the examiner's own route and took them for a man or a woman, before a
-            // clean draft went out
+            // clean draft went out ending on a finished proof, which withholds nothing
             context.DefenseTurnAttempts.AddRange(
                 NewAttempt(NewestSessionId, newestReply.Id, attemptIndex: 0, "follow my way",
                     gendersTheReader: true, takesOver: true),
-                NewAttempt(NewestSessionId, newestReply.Id, attemptIndex: 1, "a last reply"));
+                NewAttempt(NewestSessionId, newestReply.Id, attemptIndex: 1, "a last reply", closesComplete: true));
 
             // The competition one drifted out of the student's language, and its rewrite took over their route and
             // went out anyway once the revisions ran out, so its takeover sits on no draft that was sent back
@@ -574,7 +574,7 @@ public class AdminDefenseReviewServicePostgresTests(PostgresContainerFixture fix
                 NewFilter() with { CaughtFlaws = [ExaminerFlaw.WrongClaim] }, 1, "newer"),
             ("a leak in two, one of them the seed's own sent-back draft",
                 NewFilter() with { CaughtFlaws = [ExaminerFlaw.Leak] }, 2, "newest, newer"),
-            ("a withheld close in one",
+            ("a withheld close in one, though another's solution was complete too",
                 NewFilter() with { CaughtFlaws = [ExaminerFlaw.WithheldClose] }, 1, "oldest"),
             ("a switched language in three",
                 NewFilter() with { CaughtFlaws = [ExaminerFlaw.LanguageSwitch] }, 3, "competition, newer, oldest"),

@@ -26,9 +26,10 @@ public class ExaminerNotesSettings
     public required string Leak { get; set; }
 
     /// <summary>
-    /// Path to the instruction for a reply that keeps pressing a candidate whose solution is already complete.
+    /// Path to the instruction for a reply that ends the examination before the candidate's solution is complete.
+    /// Carries an <c>{owed}</c> placeholder for what the math-check found no candidate turn argued.
     /// </summary>
-    public required string WithheldClose { get; set; }
+    public required string EarlyClose { get; set; }
 
     /// <summary>
     /// Path to the instruction for a reply that drifted out of the candidate's language.

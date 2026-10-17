@@ -935,6 +935,12 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             Assert.Equal(DraftRevisionNote, attempts[1].RevisionNote);
             Assert.True(attempts[1].Leaks);
 
+            // The completeness verdict behind each draft is saved whole: the ending on a complete solution, the
+            // question on that same solution, and what the fallback's open one still owed
+            Assert.Equal([true, false, false], attempts.Select(attempt => attempt.MathCloses));
+            Assert.Equal([true, true, false], attempts.Select(attempt => attempt.MathComplete));
+            Assert.Equal(["", "", "the whole argument"], attempts.Select(attempt => attempt.MathOwed));
+
             // Which left the last as the fallback, and it alone
             Assert.Equal([false, false, true], attempts.Select(attempt => attempt.IsSafeFallback));
             Assert.Equal(DraftHoldNote, attempts[2].RevisionNote);
@@ -2235,22 +2241,24 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
                 DraftCallCost * 3, PromptTokens: 30, CompletionTokens: 6, ReasoningTokens: 0,
                 CachedPromptTokens: 0));
 
-            // The first draft, sent back for handing over the counterexample.
+            // The first draft, sent back for handing over the counterexample on its way out of a complete solution.
             var rejected = new ExaminerAttempt(
                 "a leaky draft.",
                 RevisionNote: "",
-                new MathCheckResult(true, ""),
-                new LeakCheckResult(true, "the counterexample", false, ""),
+                new MathCheckResult(Holds: true, Correction: "", Closes: true, Owed: "", Complete: true),
+                new LeakCheckResult(Leaks: true, WhatLeaked: "the counterexample"),
                 new LanguageCheckResult(false, "English", false),
                 new RouteCheckResult("", "", "", false),
                 [_draftCall],
                 _draftDurationsMs[0]);
 
-            // The second, written under the note that leak produced and giving the same thing away again.
+            // The second, written under the note that leak produced, giving the same thing away again and asking on
+            // although the math-check finds the solution complete.
             var revised = rejected with
             {
                 Reply = "another leaky draft.",
                 RevisionNote = DraftRevisionNote,
+                MathCheck = rejected.MathCheck with { Closes = false },
                 DurationMs = _draftDurationsMs[1],
             };
 
@@ -2258,8 +2266,9 @@ public class DefenseSessionServicePostgresTests(PostgresContainerFixture fixture
             var fallback = new ExaminerAttempt(
                 "so what makes that step work?",
                 DraftHoldNote,
-                new MathCheckResult(true, ""),
-                new LeakCheckResult(false, "", false, ""),
+                new MathCheckResult(
+                    Holds: true, Correction: "", Closes: false, Owed: "the whole argument", Complete: false),
+                new LeakCheckResult(Leaks: false, WhatLeaked: ""),
                 new LanguageCheckResult(false, "English", false),
                 new RouteCheckResult("", "", "", false),
                 [_draftCall],

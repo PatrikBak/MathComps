@@ -554,6 +554,14 @@ namespace MathComps.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("leaks");
 
+                    b.Property<bool>("MathCloses")
+                        .HasColumnType("boolean")
+                        .HasColumnName("math_closes");
+
+                    b.Property<bool>("MathComplete")
+                        .HasColumnType("boolean")
+                        .HasColumnName("math_complete");
+
                     b.Property<string>("MathCorrection")
                         .IsRequired()
                         .HasColumnType("text")
@@ -562,6 +570,11 @@ namespace MathComps.Infrastructure.Migrations
                     b.Property<bool>("MathHolds")
                         .HasColumnType("boolean")
                         .HasColumnName("math_holds");
+
+                    b.Property<string>("MathOwed")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("math_owed");
 
                     b.Property<string>("Reply")
                         .IsRequired()
@@ -598,10 +611,6 @@ namespace MathComps.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("what_leaked");
-
-                    b.Property<bool>("WithholdsClose")
-                        .HasColumnType("boolean")
-                        .HasColumnName("withholds_close");
 
                     b.HasKey("Id")
                         .HasName("pk_defense_turn_attempts");

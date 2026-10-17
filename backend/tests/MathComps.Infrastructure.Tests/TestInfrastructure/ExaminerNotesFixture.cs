@@ -18,7 +18,7 @@ internal static class ExaminerNotesFixture
         Revision = Note("revision.txt"),
         WrongClaim = Note("wrong-claim.txt"),
         Leak = Note("leak.txt"),
-        WithheldClose = Note("withheld-close.txt"),
+        EarlyClose = Note("early-close.txt"),
         LanguageSwitch = Note("language-switch.txt"),
         GenderedAddress = Note("gendered-address.txt"),
         Route = Note("route.txt"),

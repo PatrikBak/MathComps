@@ -9,20 +9,20 @@ The engine lives in `MathComps.Infrastructure` (`Services/Defense`). Two drivers
 One turn is a loop, not one call.
 
 1. **Generate** writes the reply.
-2. **Math-check** verifies every claim in it against the reference.
-3. **Leak-check** looks for a step handed over unearned, and for a solution already complete that the reply keeps pressing.
+2. **Math-check** verifies every claim in it against the reference. It also says whether the candidate's solution is complete yet and whether the reply ends the conversation. An ending while a step is still owed goes back as an early close. A reply that keeps asking on a solution the check calls complete ships as drafted.
+3. **Leak-check** looks for a step handed over unearned.
 4. **Language-check** says whether the reply drifted out of the language the candidate wrote in, and whether a word in it takes the candidate for a man or a woman.
 5. **Route-check** says whether the question left the candidate's own work to ask for a reference step.
 
 The guards run concurrently on every reply. When one flags it, the reply is regenerated with that flaw named and checked again, up to `Examiner.MaxRevisions` times.
 
-What ships when the cap runs out depends on the flag. A wrong claim, a leak or a withheld close gets a constrained holding reply in place of the flagged draft. A language switch, a guessed gender or a route takeover ships the last draft as it stands, so its challenge still carries the exam forward.
+What ships when the cap runs out depends on the flag. A wrong claim, a leak or an early close gets a constrained holding reply in place of the flagged draft. A language switch, a guessed gender or a route takeover ships the last draft as it stands, so its challenge still carries the exam forward.
 
 ### Per-step models
 
 Each step sets its own `Model`, `FallbackModels`, `ReasoningEffort` and `MaxOutputTokens` in `appsettings.examiner.json`, so you tune one without touching the others. `MaxOutputTokens` bounds a runaway generation, and on a budget-based thinking model it also caps how deep the step thinks.
 
-Every step runs at `medium` effort.
+Every step runs at `medium` effort except the math check, which runs a stronger model at `low`. At `high` a check can take over a minute, and a turn waits for its slowest check.
 
 `FallbackModels` is the chain the provider walks when the primary never answers, which is the one failure the retry cannot cover. Make every hop a different vendor that takes a JSON schema and a system message. A sibling model shares the primary's outage, and a model the provider will not carry a system message to answers with the persona missing and calls it a success.
 

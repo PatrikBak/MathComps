@@ -83,8 +83,9 @@ public class FakeExaminer(ModelUsage usage = default)
         new(
             reply,
             RevisionNote: "",
-            new MathCheckResult(true, ""),
-            new LeakCheckResult(false, "", false, ""),
+            new MathCheckResult(
+                Holds: true, Correction: "", Closes: false, Owed: "the rest of the solution", Complete: false),
+            new LeakCheckResult(Leaks: false, WhatLeaked: ""),
             new LanguageCheckResult(false, "", false),
             new RouteCheckResult("", "", "", false),
             [],

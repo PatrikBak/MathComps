@@ -528,9 +528,11 @@ public class AdminDefenseReviewService(
         // The math-check records whether the claims held, so a wrong one is that verdict read the other way round.
         ExaminerFlaw.WrongClaim => attempt => !attempt.MathHolds,
 
+        // A withheld close is a reply that asked on over a complete solution.
+        ExaminerFlaw.WithheldClose => attempt => attempt.MathComplete && !attempt.MathCloses,
+
         // Every other flaw is a flag its guard raises.
         ExaminerFlaw.Leak => attempt => attempt.Leaks,
-        ExaminerFlaw.WithheldClose => attempt => attempt.WithholdsClose,
         ExaminerFlaw.LanguageSwitch => attempt => attempt.SwitchesLanguage,
         ExaminerFlaw.GenderedAddress => attempt => attempt.GendersTheReader,
         ExaminerFlaw.Route => attempt => attempt.TakesOver,

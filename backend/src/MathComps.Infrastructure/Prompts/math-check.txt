@@ -1,8 +1,12 @@
 Fact-check an examiner for me. Below are a problem and one reference solution. The user message is the conversation so far, ending with the reply she's about to send. Pull out every mathematical claim in that reply and check each one. A false claim from her can't be taken back, so nothing wrong gets through, however small. A claim is something she states as true in her own voice: a challenge ("that's false, because Z"), a concession ("yes, that holds"), a hint stating a fact. A question states nothing, even one quoting the student's claim back at them: "you claim X, are you sure?" is not her claiming X. If the reply states nothing you can check, it holds.
 
-A verdict on the student's solution is a claim too: that their argument is complete, that a case is covered, that nothing is left to prove. Check it like this. List what any complete solution has to establish: the answer, every case and configuration of the problem, and the essential steps of the route the student took. The reference says what must be covered, not which steps get there; a reference step their route never needs isn't missing. For each item find the student's turn that argued it. If an item was never argued in any student turn, the completeness claim is false, however plausible the ending feels and even if the missing piece is easy and true. What counts is who wrote it. Count only what the student wrote themselves; anything that appeared only in the examiner's words, this reply included, isn't theirs.
-
 Judge whether it's correct and nothing else: not tone, not teaching. Vague but not wrong still holds. Flag what's wrong, or so imprecise that it's wrong. The reference is one correct route, not the only one. Use it to check the facts: the final answer, the key quantities, what holds and what doesn't. But judge each claim on its own mathematics. Never flag a claim because it uses a method or step the reference doesn't. Check that route directly, and flag it only if it's really false or doesn't follow.
+
+Then two more questions, whatever the reply says.
+
+Is the student's solution complete yet? List what any complete solution has to establish: the answer, every case and configuration of the problem, and the essential steps of the route the student took. The reference shows what has to be covered. Their route may cover it with other steps, and a reference step their route never needs isn't missing. For each item, find the student turn that argued it. Only what the student wrote counts: anything that appeared only in the examiner's words, this reply included, isn't theirs. An item no student turn argued is still owed, however convincing the solution looks. The exception is a standard fact strictly easier than the problem, used correctly, or a result they cite from earlier material. Neither needs an argument, unless the problem turns on it or they seem to have misunderstood it. Nor does a step she let them use in an earlier turn, telling them the marker decides. If her reply says something about their solution, like that it's complete or a case is covered, that's a claim too, and your list decides whether it holds.
+
+Does her reply end the examination? It does if she says she has nothing more to ask, or leaves the rest to them without asking anything. Answering a question about the statement or the round doesn't end it, and neither does a goodbye to a student who's giving up. Ending isn't a claim, so it never makes Holds false.
 
 PROBLEM:
 {problem}
@@ -13,3 +17,6 @@ REFERENCE SOLUTION (one correct route, for grounding, not the only valid one):
 Return:
 - Holds: true if every claim in the reply is correct, or she makes none you can check.
 - Correction: when a claim is wrong, which one and the correct statement; empty when everything holds.
+- Closes: true if her reply ends the examination.
+- Owed: each item still owed, in a few words, starting with the one their solution depends on most; empty when nothing is.
+- Complete: true if nothing is still owed.

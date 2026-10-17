@@ -47,7 +47,7 @@ public class ExaminerTests
         // A reply cleared by every guard.
         var caller = new Mock<ILlmChatCaller>();
         SetupTextStep(caller, "a reply.");
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
@@ -86,7 +86,7 @@ public class ExaminerTests
         // A reply whose math is bracket-delimited, cleared by every guard.
         var caller = new Mock<ILlmChatCaller>();
         SetupTextStep(caller, @"Why is \(p^2+1\) not divisible by \[q\]?");
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
@@ -113,8 +113,12 @@ public class ExaminerTests
             .ReturnsAsync(Result("revised reply."));
         caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new MathCheckResult(Holds: false, Correction: "the bound is at most 1/2, not strictly less")))
-            .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
+            .ReturnsAsync(Result(CleanMath() with
+            {
+                Holds = false,
+                Correction = "the bound is at most 1/2, not strictly less",
+            }))
+            .ReturnsAsync(Result(CleanMath()));
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
@@ -135,6 +139,37 @@ public class ExaminerTests
     }
 
     /// <summary>
+    /// A reply whose wrong claim survives every revision ships the holding fallback after the cap, like a persistent
+    /// leak: a false claim from the examiner can't be taken back once the candidate has read it.
+    /// </summary>
+    [Fact]
+    public async Task A_persistent_wrong_claim_ships_the_constrained_fallback_after_the_cap()
+    {
+        // A reply whose claim always fails the math-check, however often it's regenerated. Each generate request is
+        // captured.
+        var generateRequests = new List<ChatCallRequest>();
+        var caller = new Mock<ILlmChatCaller>();
+        caller.Setup(mock => mock.CompleteTextAsync(
+                Capture.In(generateRequests), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result("a reply."));
+        SetupStep(caller, CleanMath() with { Holds = false, Correction = "the bound is at most 1/2" });
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // The fallback shipped after the cap, still carrying the failed verdict.
+        Assert.Equal(RevisionCap + 1, outcome.Revisions);
+        Assert.True(outcome.SafeFallback);
+        Assert.False(outcome.Shipped.MathCheck.Holds);
+
+        // It ran under the holding note.
+        Assert.Contains("minimal holding reply", generateRequests[^1].SystemPrompt);
+    }
+
+    /// <summary>
     /// A detected leak regenerates the reply and re-verifies it; a clean re-check stops the loop at one revision, with
     /// the math-check running alongside on every attempt.
     /// </summary>
@@ -144,7 +179,7 @@ public class ExaminerTests
         // A reply the leak-check catches leaking, then clears on the fresh attempt; the math-check stays clean.
         var caller = new Mock<ILlmChatCaller>();
         SetupTextStep(caller, "a reply.");
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(CleanLeak() with { Leaks = true, WhatLeaked = "named the two-corners counterexample" }))
@@ -178,7 +213,7 @@ public class ExaminerTests
         caller.Setup(mock => mock.CompleteTextAsync(
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result("a reply."));
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak() with { Leaks = true, WhatLeaked = "still gives away the counterexample" });
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
@@ -199,90 +234,95 @@ public class ExaminerTests
     }
 
     /// <summary>
-    /// A reply that keeps pressing a candidate whose solution is already complete regenerates with the close
-    /// instruction — the note bars the recap that would write their argument for them — and the loop stops once the
-    /// fresh attempt ends the conversation.
+    /// A reply that ends the examination while a step is still owed regenerates under the early-close note, carrying
+    /// what the math-check found unargued, and the loop stops once the fresh attempt asks on instead.
     /// </summary>
     [Fact]
-    public async Task A_withheld_close_regenerates_until_the_reply_ends_the_conversation()
+    public async Task An_early_close_regenerates_under_a_note_naming_what_is_still_owed()
     {
         // Capture each generate call's request as it lands.
         var generateRequests = new List<ChatCallRequest>();
         var caller = new Mock<ILlmChatCaller>();
         caller.SetupSequence(mock => mock.CompleteTextAsync(
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result("keeps pressing."))
-            .ReturnsAsync(Result("ending reply."));
+            .ReturnsAsync(Result("ending reply."))
+            .ReturnsAsync(Result("a question about the pairing."));
 
-        // The math stays clean; the leak-check flags the first attempt as withholding an earned close, then clears.
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
-        caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
+        // The first attempt ends on a solution still owing a step; the second asks on.
+        caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(CleanLeak() with
-            {
-                WithholdsClose = true,
-                Established = "the full divisor-pairing chain",
-            }))
-            .ReturnsAsync(Result(CleanLeak()));
+            .ReturnsAsync(Result(CleanMath() with { Closes = true, Owed = "why the pairing gives equal counts" }))
+            .ReturnsAsync(Result(CleanMath()));
+        SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
 
-        // It regenerated exactly once and shipped the ending reply with a clean verdict.
+        // It regenerated once and shipped the question with no flag left.
         Assert.Equal(1, outcome.Revisions);
-        Assert.Equal("ending reply.", outcome.Shipped.Reply);
-        Assert.False(outcome.Shipped.LeakCheck.WithholdsClose);
+        Assert.Equal("a question about the pairing.", outcome.Shipped.Reply);
+        Assert.False(outcome.Shipped.MathCheck.ClosesEarly);
 
-        // The regenerate's prompt told the generator to end without recapping, which is what makes an ending safe.
-        Assert.Contains("Do not restate their argument back to them", generateRequests[1].SystemPrompt);
+        // The regenerate's prompt carried the early-close note and what is still owed.
+        Assert.Contains("Still unargued: why the pairing gives equal counts.", generateRequests[1].SystemPrompt);
     }
 
     /// <summary>
-    /// A reply that keeps withholding an earned close burns through the revision cap, then ships the same holding
-    /// fallback every other surviving fault gets — still carrying its withheld-close verdict, so the trace shows the
-    /// conversation never got to end.
+    /// A reply that keeps ending while a step is owed burns through the revision cap and ships the holding fallback,
+    /// like a wrong claim: an ending nobody earned must not reach the candidate.
     /// </summary>
-    /// <remarks>
-    /// It holds rather than ends on purpose: ending is the one move no guard verifies, so it never
-    /// ships from a fallback nothing can reject.
-    /// </remarks>
     [Fact]
-    public async Task A_persistent_withheld_close_ships_the_constrained_fallback_after_the_cap()
+    public async Task A_persistent_early_close_ships_the_constrained_fallback_after_the_cap()
     {
-        // A reply that always withholds the close, no matter how many times it's regenerated; the math-check stays
-        // clean throughout. Each generate call's request is captured as it lands.
+        // A reply that always ends early, however often it's regenerated. Each generate request is captured.
         var generateRequests = new List<ChatCallRequest>();
         var caller = new Mock<ILlmChatCaller>();
         caller.Setup(mock => mock.CompleteTextAsync(
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result("keeps pressing."));
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
-        SetupStep(caller, CleanLeak() with
-        {
-            WithholdsClose = true,
-            Established = "the full divisor-pairing chain",
-        });
+            .ReturnsAsync(Result("ending reply."));
+        SetupStep(caller, CleanMath() with { Closes = true });
+        SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
 
         // Run the turn.
         var outcome = await RunAsync(caller);
 
-        // Generate ran the initial attempt, the capped revisions, and the fallback on top.
-        VerifyTextStepCalled(caller, Times.Exactly(RevisionCap + 2));
-
-        // The fallback shipped, counted like a regeneration and still carrying the withheld-close verdict.
+        // The fallback shipped after the cap, still carrying the early-close verdict.
         Assert.Equal(RevisionCap + 1, outcome.Revisions);
         Assert.True(outcome.SafeFallback);
-        Assert.True(outcome.Shipped.LeakCheck.WithholdsClose);
+        Assert.True(outcome.Shipped.MathCheck.ClosesEarly);
 
-        // And it ran under the holding note, which asserts nothing.
+        // It ran under the holding note.
         Assert.Contains("minimal holding reply", generateRequests[^1].SystemPrompt);
+    }
 
-        // Not under the note that would have it end a conversation no guard checked.
-        Assert.DoesNotContain("end the conversation", generateRequests[^1].SystemPrompt);
+    /// <summary>
+    /// A draft on a solution the math-check calls complete ships as drafted, whether it ends the examination or asks
+    /// on. The question goes out too, because that verdict is wrong often enough that acting on it would end
+    /// conversations on a gap.
+    /// </summary>
+    /// <param name="closes">Whether the draft ends the examination.</param>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task A_draft_on_a_complete_solution_ships_whether_or_not_it_ends(bool closes)
+    {
+        // A draft every guard clears, on a solution the math-check finds complete.
+        var caller = new Mock<ILlmChatCaller>();
+        SetupTextStep(caller, "a reply.");
+        SetupStep(caller, CleanMath() with { Closes = closes, Complete = true, Owed = "" });
+        SetupStep(caller, CleanLeak());
+        SetupStep(caller, CleanLanguage());
+        SetupStep(caller, CleanRoute());
+
+        // Run the turn.
+        var outcome = await RunAsync(caller);
+
+        // The draft shipped as it was.
+        Assert.Equal(0, outcome.Revisions);
     }
 
     /// <summary>
@@ -304,7 +344,7 @@ public class ExaminerTests
 
         // The reference guards stay clean; the language check catches the first attempt in the wrong language, then
         // clears.
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         caller.SetupSequence(mock => mock.CompleteAsync<LanguageCheckResult>(
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
@@ -338,7 +378,7 @@ public class ExaminerTests
         // A reply that always comes back in another language, clean on every other count.
         var caller = new Mock<ILlmChatCaller>();
         SetupTextStep(caller, "eine Frage.");
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage() with { SwitchesLanguage = true, CandidateLanguage = "Slovak" });
         SetupStep(caller, CleanRoute());
@@ -373,7 +413,7 @@ public class ExaminerTests
             .ReturnsAsync(Result("To vychádza pekne, čo ďalej?"));
 
         // The reference guards stay clean; the language check catches the guessed gender once, then clears.
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         caller.SetupSequence(mock => mock.CompleteAsync<LanguageCheckResult>(
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
@@ -408,7 +448,7 @@ public class ExaminerTests
         // A reply that always comes back gendered, clean on every other count.
         var caller = new Mock<ILlmChatCaller>();
         SetupTextStep(caller, "Ukázal si to pekne, čo ďalej?");
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage() with { GendersTheReader = true, CandidateLanguage = "Slovak" });
         SetupStep(caller, CleanRoute());
@@ -444,7 +484,7 @@ public class ExaminerTests
             .ReturnsAsync(Result("read me the ones on your list ending in four."));
 
         // The other guards clear each draft.
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
 
@@ -484,7 +524,7 @@ public class ExaminerTests
         SetupTextStep(caller, "what must hold for the last digit?");
 
         // The other guards clear each draft.
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
 
@@ -522,8 +562,8 @@ public class ExaminerTests
         // The first attempt fails the math-check and leaks; the regenerate clears both.
         caller.SetupSequence(mock => mock.CompleteAsync<MathCheckResult>(
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new MathCheckResult(Holds: false, Correction: "the bound is at most 1/2")))
-            .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
+            .ReturnsAsync(Result(CleanMath() with { Holds = false, Correction = "the bound is at most 1/2" }))
+            .ReturnsAsync(Result(CleanMath()));
         caller.SetupSequence(mock => mock.CompleteAsync<LeakCheckResult>(
                 It.IsAny<ChatCallRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result(CleanLeak() with { Leaks = true, WhatLeaked = "named the two-corners counterexample" }))
@@ -565,7 +605,7 @@ public class ExaminerTests
         caller.Setup(mock => mock.CompleteTextAsync(
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result("a reply."));
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
@@ -618,24 +658,24 @@ public class ExaminerTests
     }
 
     /// <summary>
-    /// Neither do the notes the engine writes itself. The revision note for a withheld close and the fallback note
-    /// both land on exactly the turns that produce a close, and the fallback ships with no guard able to reject it.
+    /// Neither do the notes the engine writes itself. The early-close note lands on a turn that tried to end, and the
+    /// fallback note ships with no guard able to reject it.
     /// </summary>
     [Fact]
     public async Task The_notes_that_land_on_a_close_never_script_the_framing_into_a_reply()
     {
-        // A draft that keeps withholding an earned close, so the run walks the revision notes and then the fallback.
+        // A draft that keeps ending early, so the run walks the revision notes and then the fallback.
         var generateRequests = new List<ChatCallRequest>();
         var caller = new Mock<ILlmChatCaller>();
         caller.Setup(mock => mock.CompleteTextAsync(
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result("keeps pressing."));
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
-        SetupStep(caller, CleanLeak() with { WithholdsClose = true, Established = "the pairing chain" });
+            .ReturnsAsync(Result("ends too soon."));
+        SetupStep(caller, CleanMath() with { Closes = true });
+        SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
 
-        // Run the turn. The throwaway template is the note and nothing else, so each request is one note.
+        // Run the turn.
         await RunAsync(caller);
 
         // Every note the run wrote, the fallback's included.
@@ -658,7 +698,7 @@ public class ExaminerTests
         caller.Setup(mock => mock.CompleteTextAsync(
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result("a question."));
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
@@ -694,7 +734,7 @@ public class ExaminerTests
         caller.Setup(mock => mock.CompleteTextAsync(
                 Capture.In(generateRequests), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result("a question."));
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
@@ -753,7 +793,7 @@ public class ExaminerTests
         // Each call a clean turn makes reports its own cost and token usage.
         var caller = new Mock<ILlmChatCaller>();
         SetupTextStep(caller, "a reply.", cost: 0.01m, promptTokens: 100, completionTokens: 20);
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""), cost: 0.02m, promptTokens: 200, completionTokens: 30);
+        SetupStep(caller, CleanMath(), cost: 0.02m, promptTokens: 200, completionTokens: 30);
         SetupStep(caller, CleanLeak(), cost: 0.03m, promptTokens: 300, completionTokens: 40);
         SetupStep(caller, CleanLanguage(), cost: 0.04m, promptTokens: 400, completionTokens: 50);
         SetupStep(caller, CleanRoute());
@@ -778,7 +818,7 @@ public class ExaminerTests
         // A clean turn, where the caller reports a model other than the configured one as having answered.
         var caller = new Mock<ILlmChatCaller>();
         SetupTextStep(caller, "a reply.");
-        SetupStep(caller, new MathCheckResult(Holds: true, Correction: ""));
+        SetupStep(caller, CleanMath());
         SetupStep(caller, CleanLeak());
         SetupStep(caller, CleanLanguage());
         SetupStep(caller, CleanRoute());
@@ -837,7 +877,7 @@ public class ExaminerTests
         var mathRequests = new List<ChatCallRequest>();
         caller.Setup(mock => mock.CompleteAsync<MathCheckResult>(
                 Capture.In(mathRequests), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result(new MathCheckResult(Holds: true, Correction: "")));
+            .ReturnsAsync(Result(CleanMath()));
         SetupStep(caller, CleanLeak());
         var languageRequests = new List<ChatCallRequest>();
         caller.Setup(mock => mock.CompleteAsync<LanguageCheckResult>(
@@ -977,11 +1017,19 @@ public class ExaminerTests
     }
 
     /// <summary>
+    /// A math-check verdict with nothing flagged: every claim holds, and the reply asks on about a solution that isn't
+    /// complete yet. Each test bends it into the one fault it exercises.
+    /// </summary>
+    /// <returns>The clean verdict.</returns>
+    private static MathCheckResult CleanMath() =>
+        new(Holds: true, Correction: "", Closes: false, Complete: false, Owed: "why the pairing covers every block");
+
+    /// <summary>
     /// A leak-check verdict with nothing flagged, which each test bends into the one fault it exercises.
     /// </summary>
     /// <returns>The clean verdict.</returns>
     private static LeakCheckResult CleanLeak() =>
-        new(Leaks: false, WhatLeaked: "", WithholdsClose: false, Established: "");
+        new(Leaks: false, WhatLeaked: "");
 
     /// <summary>
     /// A language-check verdict on a reply that stayed in the candidate's language.

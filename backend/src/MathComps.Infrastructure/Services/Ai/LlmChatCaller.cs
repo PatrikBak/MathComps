@@ -107,8 +107,8 @@ public class LlmChatCaller(
         // The model-bound client for this call, derived from the shared connection.
         var chatClient = openAIClient.GetChatClient(request.Model).AsIChatClient();
 
-        // Whether this call carries a reasoning level or a fallback chain, both of which ride in the OpenAI request
-        // options rather than the adapter's own.
+        // Whether this call carries a reasoning level or a fallback chain, both of which are set on the OpenAI request
+        // options.
         var needsRawRepresentation =
             !string.IsNullOrWhiteSpace(request.ReasoningEffort) || request.FallbackModels.Count > 0;
 

@@ -40,7 +40,8 @@ public record DefenseAttemptCallDto(
 /// <param name="MathCorrection"><inheritdoc cref="DefenseTurnAttempt.MathCorrection" path="/summary"/></param>
 /// <param name="Leaks"><inheritdoc cref="DefenseTurnAttempt.Leaks" path="/summary"/></param>
 /// <param name="WhatLeaked"><inheritdoc cref="DefenseTurnAttempt.WhatLeaked" path="/summary"/></param>
-/// <param name="WithholdsClose"><inheritdoc cref="DefenseTurnAttempt.WithholdsClose" path="/summary"/></param>
+/// <param name="WithholdsClose">Whether the reply kept demanding more although the candidate's solution was already
+/// complete.</param>
 /// <param name="Established"><inheritdoc cref="DefenseTurnAttempt.Established" path="/summary"/></param>
 /// <param name="SwitchesLanguage"><inheritdoc cref="DefenseTurnAttempt.SwitchesLanguage" path="/summary"/></param>
 /// <param name="CandidateLanguage"><inheritdoc cref="DefenseTurnAttempt.CandidateLanguage" path="/summary"/></param>

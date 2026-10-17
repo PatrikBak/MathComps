@@ -43,7 +43,10 @@ public static class AttemptReport
         // The math-check line: holds, or fails with the correction.
         RenderMathCheck(attempt.MathCheck);
 
-        // The leak-check lines: clean, or what leaked and any close the reply withholds.
+        // The completeness line: whether the solution is done, and whether the reply ended in step with it.
+        RenderCompleteness(attempt.MathCheck);
+
+        // The leak-check line: clean, or a leak with what leaked.
         RenderLeakCheck(attempt.LeakCheck);
 
         // The language-check lines: the candidate's language, or each flag the reply raised against it.
@@ -71,27 +74,54 @@ public static class AttemptReport
     }
 
     /// <summary>
-    /// Renders the leak-check lines: clean when the reply mis-pays nothing, otherwise one for a leak carrying what was
-    /// given away and one for a withheld close carrying what the candidate established.
+    /// Renders the math-check's completeness line: an ending that came before the solution was complete, which is a
+    /// flaw; a reply that kept going after it was, which ships as drafted; otherwise whether the solution is done and
+    /// what it still owes.
+    /// </summary>
+    /// <param name="mathCheck">The math-check verdict.</param>
+    private static void RenderCompleteness(MathCheckResult mathCheck)
+    {
+        // Ended while a step is still owed — surface what.
+        if (mathCheck.ClosesEarly)
+        {
+            AnsiConsole.MarkupLineInterpolated($"[red]Completeness:[/] closes early — still owed: {mathCheck.Owed}");
+            return;
+        }
+
+        // Kept going on a solution that is already complete, which the engine lets through.
+        if (mathCheck.WithholdsClose)
+        {
+            AnsiConsole.MarkupLine("[yellow]Completeness:[/] withholds the close — the solution is complete");
+            return;
+        }
+
+        // Ended on a complete solution.
+        if (mathCheck.Complete)
+        {
+            AnsiConsole.MarkupLine("[green]Completeness:[/] complete, and the reply ends");
+            return;
+        }
+
+        // Still open and the reply goes on — name what is owed.
+        AnsiConsole.MarkupLineInterpolated($"[green]Completeness:[/] still open — owed: {mathCheck.Owed}");
+    }
+
+    /// <summary>
+    /// Renders the leak-check line: clean when the reply hands over nothing unearned, or a leak carrying what was
+    /// given away.
     /// </summary>
     /// <param name="leakCheck">The leak-check verdict on the reply.</param>
     private static void RenderLeakCheck(LeakCheckResult leakCheck)
     {
-        // Clean — nothing given away and no close withheld.
-        if (leakCheck is { Leaks: false, WithholdsClose: false })
+        // Clean — nothing given away.
+        if (!leakCheck.Leaks)
         {
             AnsiConsole.MarkupLine("[green]Leak-check:[/] clean");
             return;
         }
 
         // Leaking — surface what was given away.
-        if (leakCheck.Leaks)
-            AnsiConsole.MarkupLineInterpolated($"[red]Leak-check:[/] leaks — {leakCheck.WhatLeaked}");
-
-        // Withholding the close — surface what the candidate already established.
-        if (leakCheck.WithholdsClose)
-            AnsiConsole.MarkupLineInterpolated(
-                $"[red]Leak-check:[/] withholds the close — {leakCheck.Established}");
+        AnsiConsole.MarkupLineInterpolated($"[red]Leak-check:[/] leaks — {leakCheck.WhatLeaked}");
     }
 
     /// <summary>
@@ -101,19 +131,21 @@ public static class AttemptReport
     /// <param name="languageCheck">The language-check verdict on the reply.</param>
     private static void RenderLanguageCheck(LanguageCheckResult languageCheck)
     {
+        // The language the candidate wrote in.
+        var language = languageCheck.CandidateLanguage;
+
         // Drifted — the reply landed in some other language than the candidate's.
         if (languageCheck.SwitchesLanguage)
-            AnsiConsole.MarkupLineInterpolated(
-                $"[red]Language-check:[/] switched — the candidate wrote in {languageCheck.CandidateLanguage}");
+            AnsiConsole.MarkupLineInterpolated($"[red]Language-check:[/] switched — the candidate wrote in {language}");
 
         // Guessed who it is talking to, in whatever language it landed in.
         if (languageCheck.GendersTheReader)
             AnsiConsole.MarkupLineInterpolated(
-                $"[red]Language-check:[/] genders the reader — the candidate wrote in {languageCheck.CandidateLanguage}");
+                $"[red]Language-check:[/] genders the reader — the candidate wrote in {language}");
 
         // Clear on both counts — name the language it stayed in.
         if (languageCheck is { SwitchesLanguage: false, GendersTheReader: false })
-            AnsiConsole.MarkupLineInterpolated($"[green]Language-check:[/] {languageCheck.CandidateLanguage}");
+            AnsiConsole.MarkupLineInterpolated($"[green]Language-check:[/] {language}");
     }
 
     /// <summary>
